@@ -57,7 +57,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
-            <widget class="QRadioButton" name="radioButton_5">
+            <widget class="QRadioButton" name="diffuse128BT">
              <property name="text">
               <string>Diffuse</string>
              </property>
@@ -67,7 +67,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_6">
+            <widget class="QRadioButton" name="additive128BT">
              <property name="text">
               <string>Additive</string>
              </property>
@@ -115,7 +115,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
-            <widget class="QRadioButton" name="radioButton_10">
+            <widget class="QRadioButton" name="diffuse256BT">
              <property name="text">
               <string>Diffuse</string>
              </property>
@@ -128,7 +128,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_9">
+            <widget class="QRadioButton" name="additive256BT">
              <property name="text">
               <string>Additive</string>
              </property>
@@ -185,7 +185,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_5">
            <item>
-            <widget class="QRadioButton" name="radioButton_13">
+            <widget class="QRadioButton" name="diffuseTrBT">
              <property name="text">
               <string>Diffuse</string>
              </property>
@@ -195,14 +195,14 @@
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_12">
+            <widget class="QRadioButton" name="additiveTrBT">
              <property name="text">
               <string>Additive</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="radioButton_11">
+            <widget class="QRadioButton" name="alphaTrBT">
              <property name="text">
               <string>Alpha</string>
              </property>

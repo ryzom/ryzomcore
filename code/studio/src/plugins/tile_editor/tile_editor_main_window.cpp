@@ -168,6 +168,17 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect( m_ui->actionOpenTileBank, SIGNAL( triggered() ), this, SLOT( open() ) );
 
 	connect( m_ui->orientedCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onOrientedStateChanged( int ) ) );
+
+	connect( m_ui->diffuse128BT, SIGNAL( toggled( bool ) ), this, SLOT( onDiffuseToggled( bool ) ) );
+	connect( m_ui->diffuse256BT, SIGNAL( toggled( bool ) ), this, SLOT( onDiffuseToggled( bool ) ) );
+	connect( m_ui->diffuseTrBT, SIGNAL( toggled( bool ) ), this, SLOT( onDiffuseToggled( bool ) ) );
+	connect( m_ui->additive128BT, SIGNAL( toggled( bool ) ), this, SLOT( onAdditiveToggled( bool ) ) );
+	connect( m_ui->additive256BT, SIGNAL( toggled( bool ) ), this, SLOT( onAdditiveToggled( bool ) ) );
+	connect( m_ui->additiveTrBT, SIGNAL( toggled( bool ) ), this, SLOT( onAdditiveToggled( bool ) ) );
+	connect( m_ui->alphaTrBT, SIGNAL( toggled( bool ) ), this, SLOT( onAlphaToggled( bool ) ) );
+
+	connect( m_ui->tileViewTabWidget, SIGNAL( currentChanged( int ) ), this, SLOT( onTabChanged( int ) ) );
+	
 }
 
 TileEditorMainWindow::~TileEditorMainWindow()
@@ -601,6 +612,43 @@ void TileEditorMainWindow::onOrientedStateChanged( int state )
 		node->setOriented( false );
 }
 
+void TileEditorMainWindow::onDiffuseToggled( bool b )
+{
+	if( !b )
+		return;
+
+	TileItemNode::setDisplayChannel( TileModel::TileDiffuse );
+	updateTab();
+}
+
+void TileEditorMainWindow::onAdditiveToggled( bool b )
+{
+	if( !b )
+		return;
+
+	TileItemNode::setDisplayChannel( TileModel::TileAdditive );
+	updateTab();
+}
+
+void TileEditorMainWindow::onAlphaToggled( bool b )
+{
+	if( !b )
+		return;
+
+	TileItemNode::setDisplayChannel( TileModel::TileAlpha );
+	updateTab();
+}
+
+void TileEditorMainWindow::onTabChanged( int tab )
+{
+	if( tab == -1 )
+		return;
+
+	m_ui->diffuse128BT->setChecked( true );
+	m_ui->diffuse256BT->setChecked( true );
+	m_ui->diffuseTrBT->setChecked( true );
+}
+
 void TileEditorMainWindow::onActionAddTile(int tabId)
 {
 	QModelIndex idx = m_ui->tileSetLV->currentIndex();
@@ -756,6 +804,11 @@ void TileEditorMainWindow::onTileBankLoaded()
 
 	if( m_ui->landLW->count() > 0 )
 		m_ui->landLW->setCurrentRow( 0 );
+}
+
+void TileEditorMainWindow::updateTab()
+{
+	m_ui->tileViewTabWidget->currentWidget()->repaint();
 }
 
 TileModel* TileEditorMainWindow::createTileModel()

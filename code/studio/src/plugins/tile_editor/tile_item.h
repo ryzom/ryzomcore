@@ -115,10 +115,15 @@ public:
 	QString getTileFilename(TileModel::TTileChannel channel);
 	void setId( int id ){ m_tileId = id; }
 	int id() const{ return m_tileId; }
+
+	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
+
 private:
 	int m_tileId;
 	QMap<TileModel::TTileChannel, QString> m_tileFilename;
 	QMap<TileModel::TTileChannel, TileWidget*> m_tileWidget;
+
+	static TileModel::TTileChannel s_displayChannel;
 };
 
 #endif // TILE_ITEM_H

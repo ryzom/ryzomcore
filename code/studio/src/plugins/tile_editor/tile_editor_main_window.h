@@ -72,6 +72,12 @@ private Q_SLOTS:
 
 	void onOrientedStateChanged( int state );
 
+	void onDiffuseToggled( bool b );
+	void onAdditiveToggled( bool b );
+	void onAlphaToggled( bool b );
+
+	void onTabChanged( int tab );
+
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
 
@@ -84,6 +90,8 @@ private:
 	void onTileSetRemoved( const QString &set );
 	void onTileSetRenamed( const QString &oldname, const QString &newname );
 	void onTileBankLoaded();
+
+	void updateTab();
 
 	TileModel* createTileModel();
 	QListView* getListViewByTab( int tab ) const;

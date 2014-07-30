@@ -264,6 +264,8 @@ void TileTypeNode::reindex()
 
 ///////////////////////////////////////////////////
 
+TileModel::TTileChannel TileItemNode::s_displayChannel = TileModel::TileDiffuse;
+
 TileItemNode::TileItemNode(int tileId, TileModel::TTileChannel channel, QString filename, Node *parent) : m_tileId(tileId)
 {
 	m_tileFilename[channel] = filename;
@@ -294,7 +296,7 @@ QString TileItemNode::getTileFilename(TileModel::TTileChannel channel)
 QVariant TileItemNode::data(int column, int role) const
 {	
 	// find some way to know which file/bitmap to display
-	QString tileFilename = m_tileFilename[TileModel::TileDiffuse];
+	QString tileFilename = m_tileFilename[s_displayChannel];
 
 	if(role == TileModel::TilePixmapRole || role == Qt::DecorationRole)
 	{
