@@ -282,6 +282,26 @@ def findFilesNoSubdir(log, dir_where, file_ext):
 				printLog(log, "findFilesNoSubdir: file not dir or file?!" + fileFull)
 	return result
 
+def findFilesNoSubdirFiltered(log, dir_where, file_ext, filter):
+	if len(filter) == 0:
+		return findFilesNoSubdir(log, dir_where, file_ext)
+	result = [ ]
+	files = os.listdir(dir_where)
+	len_file_ext = len(file_ext)
+	for fileName in files:
+		if fileName != ".svn" and fileName != ".." and fileName != "." and fileName != "*.*":
+			fileFull = dir_where + "/" + fileName
+			if os.path.isfile(fileFull):
+				if fileName[-len_file_ext:].lower() == file_ext.lower():
+					fileNameLower = fileName.lower()
+					for filterWord in filter:
+						if filterWord in fileNameLower:
+							result += [ fileName ]
+							break
+			elif not os.path.isdir(fileFull):
+				printLog(log, "findFilesNoSubdir: file not dir or file?!" + fileFull)
+	return result
+
 def findFile(log, dir_where, file_name):
 	files = os.listdir(dir_where)
 	for fileName in files:
@@ -323,11 +343,11 @@ def needUpdateDirByLowercaseTagLog(log, dir_source, ext_source, dir_dest, ext_de
 		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
 		return 0
 
-def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
+def needUpdateDirByTagLogFiltered(log, dir_source, ext_source, dir_dest, ext_dest, filter):
 	updateCount = 0
 	skipCount = 0
 	lenSrcExt = len(ext_source)
-	sourceFiles = findFilesNoSubdir(log, dir_source, ext_source)
+	sourceFiles = findFilesNoSubdirFiltered(log, dir_source, ext_source, filter)
 	destFiles = findFilesNoSubdir(log, dir_dest, ext_dest)
 	for file in sourceFiles:
 		sourceFile = dir_source + "/" + file
@@ -347,6 +367,9 @@ def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
 	else:
 		printLog(log, "SKIP " + str(skipCount) + " / " + str(len(sourceFiles)) + "; DEST " + str(len(destFiles)))
 		return 0
+
+def needUpdateDirByTagLog(log, dir_source, ext_source, dir_dest, ext_dest):
+	needUpdateDirByTagLogFiltered(log, dir_source, ext_source, dir_dest, ext_dest, [ ])
 
 def needUpdateDirNoSubdirFile(log, dir_source, file_dest):
 	if not os.path.isfile(file_dest):

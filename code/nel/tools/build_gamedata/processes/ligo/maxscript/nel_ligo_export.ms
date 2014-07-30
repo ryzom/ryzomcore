@@ -508,8 +508,8 @@ try
 	for curFileName in MaxFilesList do
 	(	
 		-- Free memory and file handles
-		gc ()
-		resetMAXFile #noprompt
+		-- gc ()
+		-- resetMAXFile #noprompt
 		
 
 		tokenArray = filterString (getFilenameFile curFileName) "-"
@@ -622,6 +622,8 @@ try
 				)
 				
 				resetMAXFile #noprompt
+				gc ()
+				resetMAXFile #noprompt
 			)
 			else
 			(
@@ -635,10 +637,10 @@ try
 	for curFileName in MaxFilesList do
 	(
 		-- Free memory and file handles
-		gc ()
+		-- gc ()
 
 		-- Reset 3dsmax
-		resetMAXFile #noprompt
+		-- resetMAXFile #noprompt
 
 		tokenArray = filterString (getFilenameFile curFileName) "-"
 		if (tokenArray.count == 4) and (tokenArray[1] == "zonetransition") then
@@ -852,6 +854,8 @@ try
 				)
 				
 				resetMAXFile #noprompt
+				gc ()
+				resetMAXFile #noprompt
 			)
 			else
 			(
@@ -865,8 +869,8 @@ try
 	for curFileName in MaxFilesList do
 	(
 		-- Free memory and file handles
-		gc ()
-		resetMAXFile #noprompt
+		-- gc ()
+		-- resetMAXFile #noprompt
 
 		tokenArray = filterString (getFilenameFile curFileName) "-"
 		if (tokenArray.count == 2) and (tokenArray[1] == "zonespecial")  then
@@ -970,6 +974,8 @@ try
 					)
 				)
 				
+				resetMAXFile #noprompt
+				gc ()
 				resetMAXFile #noprompt
 			)
 			else
