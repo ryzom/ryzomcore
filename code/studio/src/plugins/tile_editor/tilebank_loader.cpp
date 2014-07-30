@@ -168,6 +168,7 @@ bool TileBankLoader::load( const char *filename, TileModel *model, QList< Land >
 
 	model->setTexturePath( p->bank.getAbsPath().c_str() );
 
+	file.close();
 
-	return false;
+	return true;
 }
