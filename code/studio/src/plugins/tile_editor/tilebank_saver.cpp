@@ -76,7 +76,7 @@ public:
 		for( int i = 0; i < node->childCount(); i++ )
 		{
 			TileItemNode *tin = static_cast< TileItemNode* >( node->child( i ) );
-			for( int j = TileModel::TileDiffuse; j <= TileModel::TileAlpha; j++ )
+			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
 			{
 				QString fn = tin->getTileFilename( TileModel::TTileChannel( j ) );
 

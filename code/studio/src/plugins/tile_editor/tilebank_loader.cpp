@@ -77,7 +77,7 @@ public:
 
 			TileItemNode *tin = new TileItemNode( i, TileModel::TileDiffuse, "" );
 
-			for( int i = TileModel::TileDiffuse; i <= TileModel::TileAlpha; i++ )
+			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
 			{
 				tin->setTileFilename( TileModel::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileModel::TTileChannel( i ) ) ).c_str() );
 			}
@@ -96,7 +96,7 @@ public:
 
 			TileItemNode *tin = new TileItemNode( i, TileModel::TileDiffuse, "" );
 
-			for( int i = TileModel::TileDiffuse; i <= TileModel::TileAlpha; i++ )
+			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
 			{
 				tin->setTileFilename( TileModel::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileModel::TTileChannel( i ) ) ).c_str() );
 			}
