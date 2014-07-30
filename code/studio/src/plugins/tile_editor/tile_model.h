@@ -95,6 +95,9 @@ public:
 
 	void clear();
 
+	void setTexturePath( const QString &path ){ m_texturePath = path; }
+	QString texturePath() const{ return m_texturePath; }
+
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);
 	void selectIndexDisplay(bool selected);	
@@ -109,6 +112,8 @@ private:
 	//QList<TileItem*> m_tiles;
 	//int m_activeEditChannel;
 	Node *rootItem;
+
+	QString m_texturePath;
 };
 
 #endif // TILE_MODEL_H

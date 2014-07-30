@@ -223,6 +223,8 @@ bool TileBankSaver::save( const char *fileName, const TileModel* model, const QL
 	p->addLands( lands );
 	p->addTileSets( model, lands );
 
+	p->bank.setAbsPath( model->texturePath().toUtf8().constData() );
+
 	// Save to file
 	NLMISC::COFile f;
 	bool b = f.open( fileName, false, false, false );

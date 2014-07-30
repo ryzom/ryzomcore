@@ -584,6 +584,7 @@ void TileEditorMainWindow::onChooseTexturePath()
 
 	m_texturePath = path;
 	m_ui->tileBankTexturePathPB->setText( path );
+	m_tileModel->setTexturePath( path );
 }
 
 void TileEditorMainWindow::onOrientedStateChanged( int state )
@@ -742,6 +743,12 @@ void TileEditorMainWindow::onTileBankLoaded()
 	m_ui->listView128->reset();
 	m_ui->listView256->reset();
 	m_ui->listViewTransition->reset();
+
+	QString path = m_tileModel->texturePath();
+	if( path.isEmpty() )
+		m_ui->tileBankTexturePathPB->setText( "..." );
+	else
+		m_ui->tileBankTexturePathPB->setText( path );
 }
 
 TileModel* TileEditorMainWindow::createTileModel()
