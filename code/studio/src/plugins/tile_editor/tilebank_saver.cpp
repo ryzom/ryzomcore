@@ -76,11 +76,11 @@ public:
 		for( int i = 0; i < node->childCount(); i++ )
 		{
 			TileItemNode *tin = static_cast< TileItemNode* >( node->child( i ) );
+			NL3D::CTile *tile = addTileToSet( set, type );
+
 			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
 			{
 				QString fn = tin->getTileFilename( TileModel::TTileChannel( j ) );
-
-				NL3D::CTile *tile = addTileToSet( set, type );
 				tile->setFileName( channelToTBitmap( TileModel::TTileChannel( j ) ) , fn.toUtf8().constData() );
 			}
 		}
