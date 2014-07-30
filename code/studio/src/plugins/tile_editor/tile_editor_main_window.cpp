@@ -749,6 +749,13 @@ void TileEditorMainWindow::onTileBankLoaded()
 		m_ui->tileBankTexturePathPB->setText( "..." );
 	else
 		m_ui->tileBankTexturePathPB->setText( path );
+
+	QModelIndex idx = m_tileModel->index( 0, 0 );
+	if( idx.isValid() )
+		m_ui->tileSetLV->setCurrentIndex( idx );
+
+	if( m_ui->landLW->count() > 0 )
+		m_ui->landLW->setCurrentRow( 0 );
 }
 
 TileModel* TileEditorMainWindow::createTileModel()
