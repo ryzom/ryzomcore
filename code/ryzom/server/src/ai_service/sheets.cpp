@@ -625,7 +625,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 		{
 			std::string	scriptCompStr;
 			scriptCompNode->getArrayValue(scriptCompStr, arrayIndex);
-			
+#ifndef NO_AI_COMP
 			CFightScriptComp* scriptComp;
 			try
 			{
@@ -636,6 +636,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 			{
 				nlwarning("script read error (ignored): %s", ex.what());
 			}
+#endif
 		}
 	}
 	// Creature race
@@ -763,6 +764,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 			string scriptCompStr;
 			s.serial(scriptCompStr);
 			
+#ifndef NO_AI_COMP
 			CFightScriptComp* scriptComp;
 			try
 			{
@@ -773,6 +775,7 @@ void AISHEETS::CCreature::serial(NLMISC::IStream &s)
 			{
 				nlwarning("script read error (ignored): %s", ex.what());
 			}
+#endif
 		}
 	}
 	else
@@ -881,8 +884,14 @@ void AISHEETS::CSheets::init()
 	nlassert(_PlayerGroupIndex!=~0);
 #endif
 	
-	CConfigFile::CVar	*varPtr=IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"));
-	const	std::string	writeFilesDirectoryName=IService::getInstance()->WriteFilesDirectory.toString();
+	packSheets(IService::getInstance()->WriteFilesDirectory.toString());
+	
+	_Initialised=true;
+}
+
+void AISHEETS::CSheets::packSheets(const std::string &writeFilesDirectoryName)
+{
+	CConfigFile::CVar *varPtr = IService::isServiceInitialized() ? IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths")) : NULL;
 	
 	// if config file variable 'GeorgePaths' exists then only do a minimal loadForms otherwise do the full works
 	if (varPtr!=NULL)
@@ -947,8 +956,6 @@ void AISHEETS::CSheets::init()
 		loadForm2("creature",	writeFilesDirectoryName+AISPackedSheetsFilename, _Sheets, true);
 		loadForm2("race_stats",	writeFilesDirectoryName+AISPackedRaceStatsSheetsFilename, _RaceStatsSheets, true);
 	}
-	
-	_Initialised=true;
 }
 
 void AISHEETS::CSheets::release()

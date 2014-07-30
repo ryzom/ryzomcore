@@ -31,16 +31,18 @@
 #include "nel/misc/mutex.h"
 #include "nel/misc/report.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/variable.h"
 
 #include "nel/misc/debug.h"
-
 
 #ifdef NL_OS_WINDOWS
 // these defines is for IsDebuggerPresent(). it'll not compile on windows 95
 // just comment this and the IsDebuggerPresent to compile on windows 95
 #	define _WIN32_WINDOWS	0x0410
-#	define WINVER			0x0400
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define WINVER			0x0400
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #else
 #	define IsDebuggerPresent() false
@@ -56,6 +58,8 @@ using namespace std;
 
 namespace NLMISC
 {
+
+CVariable<bool> StdDisplayerColor("nel", "StdDisplayerColor", "Enable colors in std displayer", true, 0, true);
 
 static const char *LogTypeToString[][8] = {
 	{ "", "ERR", "WRN", "INF", "DBG", "STT", "AST", "UKN" },
@@ -139,9 +143,20 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	bool needSpace = false;
 	//stringstream ss;
 	string str;
+#ifdef NL_OS_UNIX
+	bool colorSet = false;
+#endif
 
 	if (args.LogType != CLog::LOG_NO)
 	{
+#ifdef NL_OS_UNIX
+		if (StdDisplayerColor.get())
+		{
+			if (args.LogType == CLog::LOG_ERROR || args.LogType == CLog::LOG_ASSERT) { str += "\e[0;30m\e[41m"; colorSet = true; } // black text, red background
+			else if (args.LogType == CLog::LOG_WARNING) { str += "\e[0;91m"; colorSet = true; } // bright red text
+			else if (args.LogType == CLog::LOG_DEBUG) { str += "\e[0;34m"; colorSet = true; } // blue text
+		}
+#endif
 		//ss << logTypeToString(args.LogType);
 		str += logTypeToString(args.LogType);
 		needSpace = true;
@@ -217,6 +232,13 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		consoleModeTest = true;
 	}
 #endif // NL_OS_WINDOWS
+
+#ifdef NL_OS_UNIX
+	if (colorSet)
+	{
+		str += "\e[0m";
+	}
+#endif
 
 	// Printf ?
 	if (consoleMode)

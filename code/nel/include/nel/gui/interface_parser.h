@@ -382,6 +382,7 @@ namespace NLGUI
 		bool serializeProcs( xmlNodePtr parentNode ) const;
 		bool serializePointerSettings( xmlNodePtr parentNode ) const;
 		bool serializeKeySettings( xmlNodePtr parentNode ) const;
+		CViewBase* createClass( const std::string &name );
 	};
 
 }

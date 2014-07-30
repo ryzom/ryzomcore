@@ -43,9 +43,11 @@
 #include <vector>
 
 #ifdef _WIN32
-	#define NOMINMAX
-	#include <WinSock2.h>
-	#include <windows.h>
+#	ifndef __MINGW32__
+		#define NOMINMAX
+#	endif
+#	include <WinSock2.h>
+#	include <windows.h>
 #endif
 
 #endif // NL_STDMISC_H

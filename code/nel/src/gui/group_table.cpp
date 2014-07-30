@@ -80,15 +80,15 @@ namespace NLGUI
 			{
 			case Right:
 				return "right";
-				break;
 
 			case Center:
 				return "center";
-				break;
+
+			case Left:
+				return "left";
 			}
 
-			return "left";
-
+			nlassert(false);
 		}
 		else
 		if( name == "valign" )
@@ -97,14 +97,15 @@ namespace NLGUI
 			{
 			case Middle:
 				return "middle";
-				break;
 
 			case Bottom:
 				return "bottom";
-				break;
+
+			case Top:
+				return "top";
 			}
 
-			return "top";
+			nlassert(false);
 		}
 		else
 		if( name == "left_margin" )

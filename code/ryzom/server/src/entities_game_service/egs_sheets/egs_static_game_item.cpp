@@ -1878,6 +1878,7 @@ void CStaticItem::reloadSheet(const CStaticItem &o)
 	const_cast<CStaticItem&>(o).clearPtrs(false);
 }
 
+#ifndef NO_EGS_VARS
 // ***************************************************************************
 float CStaticItem::getBaseWeight() const
 {
@@ -1990,6 +1991,7 @@ float CStaticItem::getBaseWeight() const
 		return 0;
 	}
 }
+#endif
 
 // ***************************************************************************
 void CStaticItem::clearPtrs(bool doDelete)

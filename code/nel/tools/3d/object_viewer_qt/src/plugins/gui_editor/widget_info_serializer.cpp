@@ -63,6 +63,7 @@ namespace GUIEditor
 		f << "\t<header>" << std::endl;
 		f << "\t\t<name>" << info.name << "</name>" << std::endl;
 		f << "\t\t<guiname>" << info.GUIName << "</guiname>" << std::endl;
+		f << "\t\t<classname>" << info.className << "</classname>" << std::endl;
 		f << "\t\t<ancestor>" << info.ancestor << "</ancestor>" << std::endl;
 		f << "\t\t<description>" << info.description << "</description>" << std::endl;
 		

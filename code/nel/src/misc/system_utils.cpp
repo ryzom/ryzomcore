@@ -18,7 +18,9 @@
 #include "nel/misc/system_utils.h"
 
 #ifdef NL_OS_WINDOWS
-	#define NOMINMAX
+	#ifndef NL_COMP_MINGW
+		#define NOMINMAX
+	#endif
 	#include <windows.h>
 
 	#ifdef _WIN32_WINNT_WIN7
@@ -222,7 +224,7 @@ bool CSystemUtils::supportUnicode()
 bool CSystemUtils::isAzertyKeyboard()
 {
 #ifdef NL_OS_WINDOWS
-	uint16 klId = uint16((uint32)GetKeyboardLayout(0) & 0xFFFF);
+	uint16 klId = uint16((uintptr_t)GetKeyboardLayout(0) & 0xFFFF);
 	// 0x040c is French, 0x080c is Belgian
 	if (klId == 0x040c || klId == 0x080c)
 		return true;
@@ -312,7 +314,8 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	char nstr[] = { 0x00 };
+	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, nstr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
 		if (RegSetValueExA(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1) == ERROR_SUCCESS)
 			res = true;

@@ -42,6 +42,7 @@ namespace NLGUI
 
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);
+		~CCtrlTextButton();
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -122,6 +123,9 @@ namespace NLGUI
 			REFLECT_SINT32("wmin", getWMin, setWMin)
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
 		REFLECT_EXPORT_END
+
+		void onRemoved();
+		void onWidgetDeleted( CInterfaceElement *e );
 
 	protected:
 

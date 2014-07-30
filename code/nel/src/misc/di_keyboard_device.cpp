@@ -113,8 +113,8 @@ static const CKeyConv DIToNel[] =
 	{DIK_CONVERT, KeyCONVERT, "CONVERT", false},
 	{DIK_NOCONVERT, KeyNONCONVERT, "NOCONVERT", true},
 	//
-	{DIK_KANA, KeyKANA, false},
-	{DIK_KANJI, KeyKANJI, false},
+	{DIK_KANA, KeyKANA, "KANA", false},
+	{DIK_KANJI, KeyKANJI, "KANJI", false},
 };
 
 
@@ -164,7 +164,7 @@ CDIKeyboard::CDIKeyboard(CWinEventEmitter *we, HWND hwnd)
 		_RepeatPeriod = (uint) (1000.f / (keybSpeed * (27.5f / 31.f) + 2.5f));
 	}
 	// get keyboard layout
-	_KBLayout = ::GetKeyboardLayout(NULL);
+	_KBLayout = ::GetKeyboardLayout(0);
 
 	_RepetitionDisabled.resize(NumKeys);
 	_RepetitionDisabled.clearAll();

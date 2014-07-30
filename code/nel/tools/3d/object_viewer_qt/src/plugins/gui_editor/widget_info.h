@@ -53,6 +53,7 @@ namespace GUIEditor
 	{
 		std::string name;
 		std::string GUIName;
+		std::string className;
 		std::string ancestor;
 		std::string description;
 		bool isAbstract;

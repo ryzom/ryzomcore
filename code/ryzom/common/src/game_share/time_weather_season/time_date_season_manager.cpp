@@ -42,9 +42,22 @@ std::map< NLMISC::CSheetId, CStaticLightCycle > CTimeDateSeasonManager::_StaticL
 void CTimeDateSeasonManager::init( uint32 /* startDay */, float /* startTime */)
 {
 	// load light cycle sheet
-	string lightCycleFile = IService::getInstance()->WriteFilesDirectory;
-	lightCycleFile = lightCycleFile + string("light_cycles.packed_sheets");
-	loadForm( "light_cycle", lightCycleFile, _StaticLightCyclesHours );
+	packSheets(IService::getInstance()->WriteFilesDirectory);
+}
+
+void CTimeDateSeasonManager::packSheets(const std::string &writeDirectory)
+{
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm("light_cycle", writeDirectory + "light_cycles.packed_sheets", _StaticLightCyclesHours, false, false);
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if ( _StaticLightCyclesHours.empty() )
+	{
+		loadForm("light_cycle", writeDirectory + "light_cycles.packed_sheets", _StaticLightCyclesHours, true);
+	}
 }
 
 

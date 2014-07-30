@@ -296,7 +296,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 #endif // NL_OS_UNIX
 
 // ***************************************************************************
-bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_OGL(CDriverGL_init)
 
@@ -2347,7 +2347,7 @@ void CDriverGL::showWindow(bool show)
 
 #elif defined(NL_OS_MAC)
 
-# warning "OpenGL Driver: Missing Mac Implementation for showWindow"
+	// TODO: Missing Mac Implementation for showWindow
 
 #elif defined (NL_OS_UNIX)
 
@@ -2771,7 +2771,7 @@ bool CDriverGL::isActive()
 	res = (IsWindow(_win) != FALSE);
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for isActive (always true if a window is set)"
+	// TODO: Missing Mac Implementation for isActive (always true if a window is set)
 #elif defined (NL_OS_UNIX)
 
 	// check if our window is still active

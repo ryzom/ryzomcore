@@ -645,34 +645,34 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 	<group id="submit_gr" x="30" y="-20" posparent="window" sizeref="wh" w="-30" h="-15" posref="TL TL" >
   
 		<!-- login -->
-		<view type="text" id="txt_log" posref="TL TL" hardtext="uiUsername" fontsize="10" x="0" y="-60"  color="255 255 255 255" />
+		<view type="text" id="txt_log" posref="TL TL" hardtext="uiUsername" fontsize="12" x="0" y="-60"  color="255 255 255 255" />
 
-		<instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BL BL" w="260" h="24" fontsize="12" x="190" y="-4"
+		<instance template="edit_box_log" id="eb_login" posparent="txt_log" posref="BL BL" w="260" h="24" fontsize="12" x="190" y="0"
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_login" reset_focus_on_hide="false"  max_historic="0"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_password:eb|select_all=false"
 		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
     
 		<!-- password -->
-		<view type="text" id="txt_pas" posparent="txt_log" posref="BL TL" hardtext="uiPassword" fontsize="10" x="0" y="-30" color="255 255 255 255" />
+		<view type="text" id="txt_pas" posparent="txt_log" posref="BL TL" hardtext="uiPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
     
-		<instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BL BL" w="260" h="24" fontsize="14" x="190" y="-4"
+		<instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BL BL" w="260" h="24" fontsize="16" x="190" y="0"
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_confirm_password:eb|select_all=false"
 		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
 
 		<!-- confirm password -->
-		<view type="text" id="txt_confirm_pas" posparent="txt_pas" posref="BL TL" hardtext="uiConfirmPassword" fontsize="10" x="0" y="-30" color="255 255 255 255" />
+		<view type="text" id="txt_confirm_pas" posparent="txt_pas" posref="BL TL" hardtext="uiConfirmPassword" fontsize="12" x="0" y="-30" color="255 255 255 255" />
     
-		<instance template="edit_box_log" id="eb_confirm_password" posparent="txt_confirm_pas" posref="BL BL" w="260" h="24" fontsize="14" x="190" y="-4"
+		<instance template="edit_box_log" id="eb_confirm_password" posparent="txt_confirm_pas" posref="BL BL" w="260" h="24" fontsize="16" x="190" y="0"
 		text_ref="BM BM" text_y="-2"
 		on_focus="create_account_rules" on_focus_params="rules_password_conf" reset_focus_on_hide="false"  max_historic="0" entry_type="password"
 		onenter="set_keyboard_focus" params="target=ui:login:create_account:content:submit_gr:eb_email:eb|select_all=false"
 		prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
     
 		<!-- email -->
-		<view type="text" id="txt_email" posparent="txt_confirm_pas" posref="BL TL" hardtext="uiEmail" fontsize="10" x="0" y="-30" color="255 255 255 255" />
+		<view type="text" id="txt_email" posparent="txt_confirm_pas" posref="BL TL" hardtext="uiEmail" fontsize="12" x="0" y="-30" color="255 255 255 255" />
     
 		<instance template="edit_box_log" id="eb_email" posparent="txt_email" posref="BL BL" w="260" h="24" fontsize="12" x="190" y="0"
 		text_ref="BM BM" text_y="-2"
@@ -687,9 +687,9 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 		 col_over="255 255 255 0" onclick_l="create_account_rules" params_l="" tooltip=""
 		/>
 
-		<view type="text" id="txt_accept_cond" posref="BR BL" posparent="accept_cond" hardtext="uiAcceptTermsOfUse1" fontsize="10" x="10" y="-2"  color="255 255 255 255" />
+		<view type="text" id="txt_accept_cond" posref="BR BL" posparent="accept_cond" hardtext="uiAcceptTermsOfUse1" fontsize="10" x="20" y="-2"  color="255 255 255 255" />
 		
-		<ctrl type="text_button" id="terms_launch_url" style="log_url" posref="BR BL" posparent="txt_accept_cond" x="-2" y="0" hardtext="uiAcceptTermsOfUse2" 
+		<ctrl type="text_button" id="terms_launch_url" style="log_url" posref="BR BL" posparent="txt_accept_cond" x="2" y="0" hardtext="uiAcceptTermsOfUse2" 
 		 onclick_l="open_url" params_l="cfg_ConditionsTermsURL"/>
 
 		<!-- ********************** -->
@@ -701,8 +701,8 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 	
 		<group id="erros_txt" posparent="welcome_errors_gr" posref="TL TL" x="8" y="-8" sizeref="w" child_resize_h="true"
 			max_sizeparent="welcome_errors_gr" max_sizeref="h" max_h="-16">
-			<view type="text" id="errors_list" posref="TL TL" x="15" y="-15" fontsize="10" color="255 255 255 255" line_maxw="584"
-				shadow="true" multi_line="true" multi_line_space="10" multi_max_line="100" hardtext="uiCreateAccountWelcome" />
+			<view type="text" id="errors_list" posref="TL TL" x="15" y="-15" fontsize="12" color="255 255 255 255" line_maxw="584"
+				shadow="true" multi_line="true" multi_line_space="20" multi_max_line="100" hardtext="uiCreateAccountWelcome" />
 		</group>
 	
 		<instance template="bk_scroll" id="err_back_scrollbar" active="true" posparent="welcome_errors_gr" posref="TR TL" x="4" w="24" sizeref="h" h="0" />

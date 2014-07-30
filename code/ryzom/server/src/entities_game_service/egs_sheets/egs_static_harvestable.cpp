@@ -31,6 +31,7 @@ const uint8 NbRawMaterials = 10;
 
 const float QuarteringForcedQuantities [6] = { 0, 1.0f, 2.0f, 3.0f, 4.0f, 0.5f };
 
+#ifndef NO_EGS_VARS
 const float *QuarteringQuantityByVariable [NBRMQuantityVariables] =
 {
 	&QuarteringQuantityAverageForCraftHerbivore.get(),
@@ -46,7 +47,7 @@ const float *QuarteringQuantityByVariable [NBRMQuantityVariables] =
 	&QuarteringForcedQuantities[4],
 	&QuarteringForcedQuantities[5]
 };
-
+#endif
 
 CVariable<bool> VerboseQuartering( "egs", "VerboseQuartering", "", false, 0, true );
 

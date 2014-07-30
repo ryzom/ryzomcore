@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef CL_BOT_CHAT_PAGE_RING_SESSIONS_H
-#define CL_BOT_CHAT_PAGE_RING_SSSIONS_H
+#define CL_BOT_CHAT_PAGE_RING_SESSIONS_H
 
 #include "bot_chat_page.h"
 #include "../entity_cl.h"

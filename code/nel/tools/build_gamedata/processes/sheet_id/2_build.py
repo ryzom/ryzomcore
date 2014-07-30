@@ -54,7 +54,7 @@ if MakeSheetId == "":
 else:
 	mkPath(log, LeveldesignDirectory)
 	mkPath(log, LeveldesignWorldDirectory)
-	subprocess.call([ MakeSheetId, "-o" + LeveldesignDirectory + "/game_elem/sheet_id.bin", LeveldesignDirectory + "/game_elem", LeveldesignDirectory + "/game_element", LeveldesignWorldDirectory, DataShardDirectory + "mirror_sheets" ])
+	subprocess.call([ MakeSheetId, "-o" + LeveldesignDirectory + "/game_elem/sheet_id.bin", LeveldesignDirectory + "/game_elem", LeveldesignDirectory + "/game_element", LeveldesignWorldDirectory, DataShardDirectory + "/mirror_sheets" ]) # FIXME: Hardcoded path mirror_sheets
 printLog(log, "")
 
 log.close()

@@ -47,7 +47,7 @@ CContinentContainer::CContinentContainer()
 }
 
 //
-void	CContinentContainer::init(uint gridWidth, uint gridHeight, double primitiveMaxSize, uint nbWorldImages, const string packedSheetsDirectory, double cellSize, bool loadPacsPrims)
+void	CContinentContainer::init(uint gridWidth, uint gridHeight, double primitiveMaxSize, uint nbWorldImages, const string &packedSheetsDirectory, double cellSize, bool loadPacsPrims)
 {
 	_GridWidth = gridWidth;
 	_GridHeight = gridHeight;
@@ -56,9 +56,26 @@ void	CContinentContainer::init(uint gridWidth, uint gridHeight, double primitive
 	_CellSize = cellSize;
 	_LoadPacsPrims = loadPacsPrims;
 
+	buildSheets(packedSheetsDirectory);
+}
+
+//
+void	CContinentContainer::buildSheets(const string &packedSheetsDirectory)
+{
 	std::vector<std::string> filters;
 	filters.push_back("continent");
-	loadForm(filters, packedSheetsDirectory+"continents.packed_sheets", _SheetMap);
+
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (NLNET::IService::isServiceInitialized() && (NLNET::IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm(filters, packedSheetsDirectory+"continents.packed_sheets", _SheetMap, false, false);
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if (_SheetMap.empty())
+	{
+		loadForm(filters, packedSheetsDirectory+"continents.packed_sheets", _SheetMap, true);
+	}
 }
 
 //

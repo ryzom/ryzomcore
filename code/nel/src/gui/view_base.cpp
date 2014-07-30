@@ -47,5 +47,23 @@ namespace NLGUI
 		CInterfaceElement::visit(visitor);
 	}
 
+
+	bool CViewBase::handleEvent( const NLGUI::CEventDescriptor &evnt )
+	{
+		if( evnt.getType() == NLGUI::CEventDescriptor::mouse )
+		{
+			const NLGUI::CEventDescriptorMouse &eventDesc = ( const NLGUI::CEventDescriptorMouse& )evnt;
+			if( eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown )
+			{
+				if( editorMode )
+				{
+					CWidgetManager::getInstance()->setCurrentEditorSelection( getId() );
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 }
 

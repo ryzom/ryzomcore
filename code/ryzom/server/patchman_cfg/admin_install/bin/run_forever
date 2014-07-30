@@ -1,0 +1,30 @@
+#!/bin/sh
+
+while true
+do
+
+if [ "$2" == "" ]
+then
+    echo
+    echo USAGE: $0 sleep_time command_line
+    echo
+    echo example:
+    echo   $0 3 echo hello world
+    echo   waits 3 seconds then displays 'hello world' repeatedly, asking player to hit enter between each line
+    echo
+    break
+fi
+
+sleep $1
+shift
+CMD=$*
+
+while [ "$CMD" != "" ]
+do
+ eval $CMD
+ echo "press enter"
+ read toto
+done
+
+break
+done

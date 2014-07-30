@@ -147,9 +147,9 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 			CVBDrvInfosGL *info = new CVBDrvInfosGL(this, it, &VB);
 			*it= VB.DrvInfos = info;
 
-			// Preferred memory
+			// Preferred memory, AGPVolatile only goes through when ARBMapBufferRange is available
 			CVertexBuffer::TPreferredMemory preferred = VB.getPreferredMemory ();
-			if ((preferred == CVertexBuffer::RAMVolatile) || (preferred == CVertexBuffer::AGPVolatile))
+			if ((preferred == CVertexBuffer::RAMVolatile) || (preferred == CVertexBuffer::AGPVolatile && !_Extensions.ARBMapBufferRange))
 				preferred = CVertexBuffer::RAMPreferred;
 			const uint size = VB.capacity()*VB.getVertexSize();
 			uint preferredMemory = _Extensions.DisableHardwareVertexArrayAGP ? CVertexBuffer::RAMPreferred : preferred;
@@ -159,6 +159,12 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 				info->_VBHard = createVertexBufferHard(size, VB.capacity(), (CVertexBuffer::TPreferredMemory)preferredMemory, &VB);
 				if (info->_VBHard)
 					break;
+
+				if ((CVertexBuffer::TPreferredMemory)preferredMemory == CVertexBuffer::AGPVolatile)
+				{
+					preferredMemory = CVertexBuffer::RAMPreferred;
+					break;
+				}
 				preferredMemory--;
 			}
 
@@ -170,7 +176,7 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 			}
 
 			// Upload the data
-			VB.setLocation ((CVertexBuffer::TLocation)preferredMemory);
+			VB.setLocation(preferredMemory == CVertexBuffer::AGPVolatile ? CVertexBuffer::AGPResident : (CVertexBuffer::TLocation)preferredMemory);
 		}
 	}
 
@@ -740,7 +746,7 @@ bool			CDriverGL::supportVertexBufferHard() const
 bool			CDriverGL::supportVolatileVertexBuffer() const
 {
 	H_AUTO_OGL(CDriverGL_supportVolatileVertexBuffer)
-		return false;
+	return _Extensions.ARBMapBufferRange;
 }
 
 
@@ -769,6 +775,7 @@ IVertexBufferHardGL	*CDriverGL::createVertexBufferHard(uint size, uint numVertic
 	IVertexArrayRange	*vertexArrayRange= NULL;
 	switch(vbType)
 	{
+	case CVertexBuffer::AGPVolatile:
 	case CVertexBuffer::AGPPreferred:
 		vertexArrayRange= _AGPVertexArrayRange;
 		break;
@@ -1809,7 +1816,7 @@ void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 
 #ifndef USE_OPENGLES
 	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
-	if( _CurrentVertexBufferHard==NULL || !_CurrentVertexBufferHard->VBType == IVertexBufferHardGL::NVidiaVB)
+	if( _CurrentVertexBufferHard==NULL || _CurrentVertexBufferHard->VBType != IVertexBufferHardGL::NVidiaVB)
 		return;
 
 	// if we do not activate the same (NB: newVBHard==NULL if not a VBHard).

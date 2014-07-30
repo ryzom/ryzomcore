@@ -197,18 +197,18 @@ namespace NLGUI
 			{
 			case Top:
 				return "T";
-				break;
 
 			case Left:
 				return "L";
-				break;
 
 			case Right:
 				return "R";
-				break;
+
+			case Bottom:
+				return "B";
 			}
 
-			return "B";
+			nlassert(false);
 		}
 		else
 		if( name == "align" )
@@ -217,18 +217,18 @@ namespace NLGUI
 			{
 			case Top:
 				return "T";
-				break;
 
 			case Left:
 				return "L";
-				break;
 
 			case Right:
 				return "R";
-				break;
+
+			case Bottom:
+				return "B";
 			}
 
-			return "B";
+			nlassert(false);
 		}
 		else
 		if( name == "space" )

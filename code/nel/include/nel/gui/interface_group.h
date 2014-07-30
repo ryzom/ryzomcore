@@ -322,6 +322,8 @@ namespace NLGUI
 		// Return the current Depth, with no ZBias applied.
 		float getDepthForZSort() const { return _DepthForZSort; }
 
+		void onWidgetDeleted( CInterfaceElement *e );
+
 	protected:
 
 		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);

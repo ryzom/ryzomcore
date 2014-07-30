@@ -77,7 +77,8 @@ else:
 	cf.write("\n")
 	cf.close()
 	subprocess.call([ SheetsPacker ])
-	copyFileIfNeeded(log, "visual_slot.tab", DataCommonDirectory + "/visual_slot.tab")
+	mkPath(log, ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory)
+	copyFileIfNeeded(log, "visual_slot.tab", ExportBuildDirectory + "/" + VisualSlotTabBuildDirectory + "/visual_slot.tab")
 	os.remove("visual_slot.tab")
 printLog(log, "")
 

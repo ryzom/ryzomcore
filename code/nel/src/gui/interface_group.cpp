@@ -144,11 +144,11 @@ namespace NLGUI
 		clearGroups();
 	//	nlinfo ("%d seconds for clearGroups '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
 	//	initStart = ryzomGetLocalTime ();
-		clearViews();
-	//	nlinfo ("%d seconds for clearViews '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
-	//	initStart = ryzomGetLocalTime ();
 		clearControls();
 	//	nlinfo ("%d seconds for clearControls '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
+	//	initStart = ryzomGetLocalTime ();
+		clearViews();
+	//	nlinfo ("%d seconds for clearViews '%s'", (uint32)(ryzomGetLocalTime ()-initStart)/1000, _Id.c_str());
 		CWidgetManager::getInstance()->removeRefOnGroup (this);
 
 	#ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
@@ -1086,9 +1086,11 @@ namespace NLGUI
 		{
 			if (_Views[i] == child)
 			{
-				if (!dontDelete) delete _Views[i];
+				CViewBase *v = _Views[i];
 				_Views.erase(_Views.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				if (!dontDelete) delete v;
 				return true;
 			}
 		}
@@ -1102,9 +1104,11 @@ namespace NLGUI
 		{
 			if (_Controls[i] == child)
 			{
-				if (!dontDelete) delete _Controls[i];
+				CCtrlBase *c = _Controls[i];
 				_Controls.erase(_Controls.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				if (!dontDelete) delete c;
 				return true;
 			}
 		}
@@ -1118,9 +1122,11 @@ namespace NLGUI
 		{
 			if (_ChildrenGroups[i] == child)
 			{
-				if (!dontDelete) delete _ChildrenGroups[i];
+				CInterfaceGroup *g = _ChildrenGroups[i];
 				_ChildrenGroups.erase(_ChildrenGroups.begin()+i);
 				delEltOrder (child);
+				child->onRemoved();
+				if (!dontDelete) delete g;
 				return true;
 			}
 		}
@@ -2471,4 +2477,16 @@ namespace NLGUI
 		return "IMPLEMENT ME!";
 	}
 
+	void CInterfaceGroup::onWidgetDeleted( CInterfaceElement *e )
+	{
+		for( std::vector< CViewBase* >::iterator itr = _Views.begin(); itr != _Views.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+
+		for( std::vector< CCtrlBase* >::iterator itr = _Controls.begin(); itr != _Controls.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+
+		for( std::vector< CInterfaceGroup* >::iterator itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
+			(*itr)->onWidgetDeleted( e );
+	}
 }
+

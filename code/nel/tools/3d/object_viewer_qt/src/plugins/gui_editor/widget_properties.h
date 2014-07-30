@@ -74,6 +74,9 @@ namespace GUIEditor
 		CWidgetInfoTree *tree;
 		NewPropertyWidget *newPropertyWidget;
 		NewWidgetWidget *newWidgetWidget;
+
+	Q_SIGNALS:
+		void treeChanged();
 	};
 }
 

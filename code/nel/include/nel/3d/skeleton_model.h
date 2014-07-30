@@ -54,7 +54,7 @@ public:
 	// The index of the skin rdrPass
 	uint16		RdrPassIndex;
 	// The texture id of the specular texture. This is the sort Key.
-	uint32		SpecId;
+	uintptr_t	SpecId;
 
 	bool	operator<(const CSkinSpecularRdrPass &o) const
 	{

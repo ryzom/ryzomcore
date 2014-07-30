@@ -54,8 +54,13 @@ if BuildInterface == "":
 else:
 	mkPath(log, ExportBuildDirectory + "/" + InterfaceBuildDirectory)
 	for dir in os.listdir(ExportBuildDirectory + "/" + InterfaceExportDirectory):
-		if (os.path.isdir(ExportBuildDirectory + "/" + InterfaceExportDirectory + "/" + dir)) and dir != ".svn" and dir != "*.*":
-			subprocess.call([ BuildInterface, ExportBuildDirectory + "/" + InterfaceBuildDirectory + "/texture_" + dir + ".tga", ExportBuildDirectory + "/" + InterfaceExportDirectory + "/" + dir ])
+		dirPath = ExportBuildDirectory + "/" + InterfaceExportDirectory + "/" + dir
+		if (os.path.isdir(dirPath)) and dir != ".svn" and dir != "*.*":
+			texturePath = ExportBuildDirectory + "/" + InterfaceBuildDirectory + "/texture_" + dir + ".tga"
+			if needUpdateDirNoSubdirFile(log, dirPath, texturePath):
+				subprocess.call([ BuildInterface, texturePath, dirPath ])
+			else:
+				printLog(log, "SKIP " + texturePath)
 printLog(log, "")
 
 # For each interface directory to compress in one DXTC
@@ -64,7 +69,12 @@ if BuildInterface == "":
 	toolLogFail(log, BuildInterfaceTool, ToolSuffix)
 else:
 	mkPath(log, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory)
-	subprocess.call([ BuildInterface, ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory + "/texture_interfaces_dxtc.tga", ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory ])
+	dirPath = ExportBuildDirectory + "/" + InterfaceDxtcExportDirectory
+	texturePath = ExportBuildDirectory + "/" + InterfaceDxtcBuildDirectory + "/texture_interfaces_dxtc.tga"
+	if needUpdateDirNoSubdirFile(log, dirPath, texturePath):
+		subprocess.call([ BuildInterface, texturePath, dirPath ])
+	else:
+		printLog(log, "SKIP " + texturePath)
 printLog(log, "")
 
 log.close()

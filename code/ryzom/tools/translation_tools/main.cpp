@@ -1574,7 +1574,7 @@ int cleanWordsDiff(int argc, char *argv[])
 {
 	
 	LOG("Cleaning words diffs\n");
-/*
+
 	uint i,l;
 
 	for (l=0; l<Languages.size(); ++l)
@@ -1588,7 +1588,7 @@ int cleanWordsDiff(int argc, char *argv[])
 				cleanComment(diffs[i]);
 		}
 	}
-*/
+
 	return 0;
 }
 

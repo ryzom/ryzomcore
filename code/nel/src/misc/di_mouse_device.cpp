@@ -27,6 +27,12 @@
 	#define new DEBUG_NEW
 #endif
 
+#ifdef NL_COMP_MINGW
+#	undef FIELD_OFFSET
+#	define FIELD_OFFSET(t,f) offsetof(t,f)
+#endif
+
+
 namespace NLMISC
 {
 
@@ -78,7 +84,7 @@ void	    CDIMouse::setMouseMode(TAxis axis, TAxisMode axisMode)
 //======================================================
 CDIMouse::TAxisMode	CDIMouse::getMouseMode(TAxis axis) const
 {
-	nlassert(axis < NumMouseAxis);
+	nlassert((int)axis < (int)NumMouseAxis);
 	return _MouseAxisMode[axis];
 }
 

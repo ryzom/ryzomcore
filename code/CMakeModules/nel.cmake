@@ -118,13 +118,13 @@ MACRO(NL_DEFAULT_PROPS name label)
     ENDIF(NL_LIB_PREFIX)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
 
-  IF(${type} STREQUAL EXECUTABLE AND WIN32)
+  IF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
     SET_TARGET_PROPERTIES(${name} PROPERTIES
       VERSION ${NL_VERSION}
       SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}")
-  ENDIF(${type} STREQUAL EXECUTABLE AND WIN32)
+  ENDIF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
 ENDMACRO(NL_DEFAULT_PROPS)
 
 ###
@@ -323,6 +323,14 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
+  OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
+  
+  OPTION(WITH_SSE2                "With SSE2"                                     ON )
+  OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  
+  IF(NOT MSVC)
+    OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
+  ENDIF(NOT MSVC)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -341,6 +349,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_TOOLS         "Build Ryzom Core Tools"                        ON )
   OPTION(WITH_RYZOM_SERVER        "Build Ryzom Core Services"                     ON )
   OPTION(WITH_RYZOM_SOUND         "Enable Ryzom Core Sound"                       ON )
+  OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
 
   ###
   # Optional support
@@ -612,6 +621,14 @@ MACRO(NL_SETUP_BUILD)
       ENDIF(CLANG)
     ENDIF(WIN32)
 
+    IF(WITH_SSE3)
+      ADD_PLATFORM_FLAGS("-msse3")
+    ENDIF(WITH_SSE3)
+
+    IF(WITH_GCC_FPMATH_BOTH)
+      ADD_PLATFORM_FLAGS("-mfpmath=both")
+    ENDIF(WITH_GCC_FPMATH_BOTH)
+
     IF(APPLE)
       IF(NOT XCODE)
         IF(CMAKE_OSX_ARCHITECTURES)
@@ -873,9 +890,9 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(APPLE)
 
     # Fix "relocation R_X86_64_32 against.." error on x64 platforms
-    IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
+    IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS AND NOT MINGW)
       ADD_PLATFORM_FLAGS("-fPIC")
-    ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
+    ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS AND NOT MINGW)
 
     SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -ftemplate-depth-48")
 
@@ -887,7 +904,7 @@ MACRO(NL_SETUP_BUILD)
       SET(NL_RELEASE_CFLAGS "${NL_RELEASE_CFLAGS} -g")
     ELSE(WITH_SYMBOLS)
       IF(APPLE)
-        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip -Wl,-x ${NL_RELEASE_LINKFLAGS}")
+        SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip ${NL_RELEASE_LINKFLAGS}")
       ELSE(APPLE)
         SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
       ENDIF(APPLE)

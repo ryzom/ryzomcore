@@ -2,6 +2,7 @@
     <header>
         <name>InterfaceGroupWheel</name>
         <guiname>CInterfaceGroupWheel</guiname>
+        <classname>group_wheel</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>

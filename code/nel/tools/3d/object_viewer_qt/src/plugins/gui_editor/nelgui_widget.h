@@ -23,6 +23,8 @@
 
 namespace GUIEditor
 {
+	class CEditorSelectionWatcher;
+
 	/// Qt viewport for the Nel GUI library
 	class NelGUIWidget : public Nel3DWidget
 	{
@@ -35,6 +37,7 @@ namespace GUIEditor
 		bool parse( SProjectFiles &files );
 		void draw();
 		void reset();
+		CEditorSelectionWatcher* getWatcher(){ return watcher; }
 
 Q_SIGNALS:
 		void guiLoadComplete();
@@ -49,6 +52,7 @@ Q_SIGNALS:
 	private:
 		int timerID;
 		bool guiLoaded;
+		CEditorSelectionWatcher *watcher;
 	};
 }
 

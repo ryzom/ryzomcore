@@ -217,7 +217,7 @@ static void BuildCtrlName(LPCDIDEVICEOBJECTINSTANCE lpddoi,
 
 //============================================================================
 // A callback to enumerate the controls of a device
-static BOOL CALLBACK DIEnumDeviceObjectsCallback
+BOOL CALLBACK DIEnumDeviceObjectsCallback
 (
   LPCDIDEVICEOBJECTINSTANCE lpddoi,
   LPVOID pvRef

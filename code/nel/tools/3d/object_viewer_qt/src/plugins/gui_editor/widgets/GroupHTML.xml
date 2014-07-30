@@ -2,6 +2,7 @@
     <header>
         <name>GroupHTML</name>
         <guiname>CGroupHTML</guiname>
+        <classname>html</classname>
         <ancestor>GroupScrollText</ancestor>
         <description></description>
         <abstract>false</abstract>

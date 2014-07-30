@@ -86,7 +86,7 @@ else:
 		tagFile.write(time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())) + "\n")
 		tagFile.close()
 	else:
-		printLog("SKIP *")
+		printLog(log, "SKIP *")
 printLog(log, "")
 
 log.close()

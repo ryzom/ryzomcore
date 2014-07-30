@@ -4094,7 +4094,8 @@ namespace NLGUI
 	void CGroupHTML::requestTerminated(HTRequest * request )
 	{
 		// this callback is being called for every request terminated
-		if( request == _LibWWW->Request ){
+		if (request == _LibWWW->Request)
+		{
 			// set the browser as complete
 			_Browsing = false;
 			updateRefreshButton();

@@ -36,6 +36,7 @@ class CTimeDateSeasonManager
 public:
 	// init RyzomTime, date, weather
 	static void init( uint32 startDay = RYZOM_START_DAY, float startTime = RYZOM_START_HOUR );
+	static void packSheets(const std::string &writeDirectory);
 
 	// tick update => update ryzom time
 	static void tickUpdate();

@@ -1,0 +1,19 @@
+
+# ------------------------------------------------------------------------------
+# SCREEN KEYBINDINGS
+# ------------------------------------------------------------------------------
+
+# Remove some stupid / dangerous key bindings
+bind ^k
+#bind L
+bind ^\
+# Make them better
+bind \\ quit
+bind K kill
+bind I login on
+bind O login off
+
+# patchman
+chdir "/srv/core/patchman/"
+screen -t patchman /bin/sh ./loop_patchman.sh
+

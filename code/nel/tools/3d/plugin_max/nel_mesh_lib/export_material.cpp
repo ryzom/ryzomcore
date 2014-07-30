@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include "export_nel.h"
 #include "../tile_utility/tile_utility.h"
+#include "nel/misc/path.h"
 #include "nel/3d/texture_file.h"
 #include "nel/3d/texture_multi_file.h"
 #include "nel/3d/texture_cube.h"
@@ -1139,9 +1140,9 @@ int CExportNel::getVertMapChannel (Texmap& texmap, Matrix3& channelMatrix, TimeV
 }
 	
 // get the absolute or relative path from a texture filename
-static std::string 	ConvertTexFileName(const char *src, bool _AbsolutePath)
+static std::string 	ConvertTexFileName(const std::string &path, bool _AbsolutePath)
 {
-	// File name, maxlen 256 under windows
+	/*// File name, maxlen 256 under windows
 	char sFileName[512];
 	strcpy (sFileName, src);
 
@@ -1156,7 +1157,15 @@ static std::string 	ConvertTexFileName(const char *src, bool _AbsolutePath)
 		// Make the final path
 		_makepath (sFileName, NULL, NULL, sName, sExt);
 	}
-	return std::string(sFileName);
+	return std::string(sFileName);*/
+	if (_AbsolutePath)
+	{
+		return path;
+	}
+	else
+	{
+		return NLMISC::CFile::getFilename(path);
+	}
 }
 
 // Build a NeL texture corresponding with a max Texmap.
@@ -1243,7 +1252,7 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 			if (l == 1 && !fileName[0].empty())
 			{
 				srcTex = new CTextureFile;
-				static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(fileName[0].c_str(), _AbsolutePath));
+				static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(fileName[0], _AbsolutePath));
 			}
 			else
 			{
@@ -1253,7 +1262,8 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 					if (!fileName[k].empty())
 					{
 						/// set the name of the texture after converting it
-						static_cast<CTextureMultiFile *>(srcTex)->setFileName(k, ConvertTexFileName(fileName[k].c_str(), _AbsolutePath).c_str());
+						std::string convertMultiTex = ConvertTexFileName(fileName[k], _AbsolutePath);
+						static_cast<CTextureMultiFile *>(srcTex)->setFileName(k, convertMultiTex.c_str());
 					}
 				}
 			}
@@ -1261,7 +1271,8 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 		else // standard texture
 		{
 			srcTex = new CTextureFile;
-			static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(pBitmap->GetMapName(), _AbsolutePath));
+			std::string mapName = pBitmap->GetMapName();
+			static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(mapName, _AbsolutePath));
 		}
 
 		// 2) Use this texture 'as it', or duplicate it to create the faces of a cube map
@@ -1361,7 +1372,7 @@ NL3D::CTextureCube *CExportNel::buildTextureCubeFromReflectRefract(Texmap &texma
 			CTextureFile *pT = new CTextureFile();
 			
 			// Set the file name
-			pT->setFileName(ConvertTexFileName(names[i].c_str(), _AbsolutePath));
+			pT->setFileName(ConvertTexFileName(names[i], _AbsolutePath));
 
 			// Set the texture
 			pTextureCube->setTexture(tfNewOrder[i], pT);

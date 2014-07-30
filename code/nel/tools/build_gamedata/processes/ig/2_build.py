@@ -54,34 +54,56 @@ mkPath(log, configDir)
 
 def igElevation(inputIgDir, outputIgDir):
 	printLog(log, ">>> IG Elevation <<<")
-	
-	mkPath(log, inputIgDir)
-	mkPath(log, outputIgDir)
-	mkPath(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory)
-	
-	configFile = configDir + "/ig_elevation.cfg"
-	if os.path.isfile(configFile):
+	needUpdateIg = needUpdateDirByTagLog(log, inputIgDir, ".ig", outputIgDir, ".ig")
+	if needUpdateIg:
+		printLog(log, "DETECT UPDATE IG->Elevated")
+	else:
+		printLog(log, "DETECT SKIP IG->Elevated")
+	needUpdateHeightMap = needUpdateFileDirNoSubdir(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap1, outputIgDir) or needUpdateFileDirNoSubdir(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2, outputIgDir)
+	if needUpdateHeightMap:
+		printLog(log, "DETECT UPDATE HeightMap->Elevated")
+	else:
+		printLog(log, "DETECT SKIP HeightMap->Elevated")
+	needUpdateLand = needUpdateFileDirNoSubdir(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportLand, outputIgDir)
+	if needUpdateLand:
+		printLog(log, "DETECT UPDATE Land->Elevated")
+	else:
+		printLog(log, "DETECT SKIP Land->Elevated")
+	if needUpdateIg or needUpdateHeightMap or needUpdateLand:
+		printLog(log, "DETECT DECIDE UPDATE")
+		mkPath(log, inputIgDir)
+		mkPath(log, outputIgDir)
+		mkPath(log, DatabaseDirectory + "/" + LigoBaseSourceDirectory)
+		
+		configFile = configDir + "/ig_elevation.cfg"
+		if os.path.isfile(configFile):
+			os.remove(configFile)
+		
+		printLog(log, "CONFIG " + configFile)
+		cf = open(configFile, "w")
+		cf.write("// ig_elevation.cfg\n")
+		cf.write("\n")
+		cf.write("InputIGDir = \"" + inputIgDir + "\";\n")
+		cf.write("OutputIGDir = \"" + outputIgDir + "\";\n")
+		cf.write("\n")
+		cf.write("CellSize = 160.0;")
+		cf.write("\n")
+		cf.write("HeightMapFile1 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap1 + "\";\n")
+		cf.write("ZFactor1 = " + LigoExportZFactor1 + ";\n")
+		cf.write("HeightMapFile2 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2 + "\";\n")
+		cf.write("ZFactor2 = " + LigoExportZFactor2 + ";\n")
+		cf.write("\n")
+		cf.write("LandFile = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportLand + "\";\n")
+		cf.write("\n")
+		cf.close()
+		subprocess.call([ IgElevation, configFile ])
 		os.remove(configFile)
-	
-	printLog(log, "CONFIG " + configFile)
-	cf = open(configFile, "w")
-	cf.write("// ig_elevation.cfg\n")
-	cf.write("\n")
-	cf.write("InputIGDir = \"" + inputIgDir + "\";\n")
-	cf.write("OutputIGDir = \"" + outputIgDir + "\";\n")
-	cf.write("\n")
-	cf.write("CellSize = 160.0;")
-	cf.write("\n")
-	cf.write("HeightMapFile1 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap1 + "\";\n")
-	cf.write("ZFactor1 = " + LigoExportZFactor1 + ";\n")
-	cf.write("HeightMapFile2 = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportHeightmap2 + "\";\n")
-	cf.write("ZFactor2 = " + LigoExportZFactor2 + ";\n")
-	cf.write("\n")
-	cf.write("LandFile = \"" + DatabaseDirectory + "/" + LigoBaseSourceDirectory + "/" + LigoExportLand + "\";\n")
-	cf.write("\n")
-	cf.close()
-	subprocess.call([ IgElevation, configFile ])
-	os.remove(configFile)
+		
+		# Copy remaining IG files
+		copyFilesLogless(log, inputIgDir, outputIgDir)
+	else:
+		printLog(log, "DETECT DECIDE SKIP")
+		printLog(log, "SKIP *")
 
 # Build process
 if (ContinentLeveldesignWorldDirectory != "") or (len(IgOtherSourceDirectories) > 0):
@@ -134,7 +156,6 @@ if (ContinentLeveldesignWorldDirectory != "") or (len(IgOtherSourceDirectories) 
 	igElevation(ExportBuildDirectory + "/" + LigoIgLandBuildDirectory, ExportBuildDirectory + "/" + IgElevLandLigoBuildDirectory)
 	
 	igElevation(ExportBuildDirectory + "/" + IgStaticLandExportDirectory, ExportBuildDirectory + "/" + IgElevLandStaticBuildDirectory)
-	
 
 printLog(log, ">>> Merge land IGs <<<")
 mkPath(log, ExportBuildDirectory + "/" + IgTempLandMergeBuildDirectory)
@@ -225,13 +246,16 @@ for igFile in igFilesAll:
 # Write land IGs TXT
 printLog(log, ">>> Write land IGs TXT <<<")
 igTxtFile = ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt"
-printLog(log, "WRITE " + ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt")
-if os.path.isfile(igTxtFile):
-	os.remove(igTxtFile)
-igTxt = open(igTxtFile, "w")
-for igFile in igFilesAll:
-	igTxt.write(igFile + "\n")
-igTxt.close()
+if needUpdateDirNoSubdirFile(log, ExportBuildDirectory + "/" + IgLandBuildDirectory, igTxtFile):
+	printLog(log, "WRITE " + ExportBuildDirectory + "/" + IgLandBuildDirectory + "/" + LandscapeName + "_ig.txt")
+	if os.path.isfile(igTxtFile):
+		os.remove(igTxtFile)
+	igTxt = open(igTxtFile, "w")
+	for igFile in igFilesAll:
+		igTxt.write(igFile + "\n")
+	igTxt.close()
+else:
+	printLog(log, "SKIP *")
 
 # Merge other IGs
 printLog(log, ">>> Merge other IGs <<<") # (not true merge, since not necesserary)

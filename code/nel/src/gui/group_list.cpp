@@ -199,78 +199,78 @@ namespace NLGUI
 		{
 			return toString( _MaxElements );
 		}
-		else
+
 		if( name == "addelt" )
 		{
 			switch( _AddElt )
 			{
 			case Top:
 				return "T";
-				break;
 
 			case Left:
 				return "L";
-				break;
 
 			case Right:
 				return "R";
-				break;
+
+			case Bottom:
+				return "B";
 			}
 
-			return "B";
+			nlassert(false);
 		}
-		else
+
 		if( name == "align" )
 		{
 			switch( _Align )
 			{
 			case Top:
 				return "T";
-				break;
 
 			case Left:
 				return "L";
-				break;
 
 			case Right:
 				return "R";
-				break;
+
+			case Bottom:
+				return "B";
 			}
 
-			return "B";
+			nlassert(false);
 		}
-		else
+
 		if( name == "space" )
 		{
 			return toString( _Space );
 		}
-		else
+
 		if( name == "over" )
 		{
 			return toString( _Over );
 		}
-		else
+
 		if( name == "dynamic_display_size" )
 		{
 			return toString( _DynamicDisplaySize );
 		}
-		else
+
 		if( name == "col_over" )
 		{
 			return toString( _OverColor );
 		}
-		else
+
 		if( name == "hardtext" )
 		{
 			return _HardText;
 		}
-		else
+
 		if( name == "textid" )
 		{
 			return toString( _TextId );
 		}
-		else
-			return CInterfaceGroup::getProperty( name );
+
+		return CInterfaceGroup::getProperty( name );
 	}
 
 	void CGroupList::setProperty( const std::string &name, const std::string &value )
@@ -282,7 +282,7 @@ namespace NLGUI
 				_MaxElements = i;
 			return;
 		}
-		else
+
 		if( name == "addelt" )
 		{
 			if( value == "T" )
@@ -300,7 +300,7 @@ namespace NLGUI
 			setupSizes();
 			return;
 		}
-		else
+
 		if( name == "align" )
 		{
 			if( value == "T" )
@@ -317,7 +317,7 @@ namespace NLGUI
 
 			return;
 		}
-		else
+
 		if( name == "space" )
 		{
 			sint32 i;
@@ -325,7 +325,7 @@ namespace NLGUI
 				_Space = i;
 			return;
 		}
-		else
+
 		if( name == "over" )
 		{
 			bool b;
@@ -333,7 +333,7 @@ namespace NLGUI
 				_Over = b;
 			return;
 		}
-		else
+
 		if( name == "dynamic_display_size" )
 		{
 			bool b;
@@ -341,7 +341,7 @@ namespace NLGUI
 				_DynamicDisplaySize = b;
 			return;
 		}
-		else
+
 		if( name == "col_over" )
 		{
 			CRGBA c;
@@ -349,7 +349,7 @@ namespace NLGUI
 				_OverColor = c;
 			return;
 		}
-		else
+
 		if( name == "hardtext" )
 		{
 			_HardText = value;
@@ -357,7 +357,7 @@ namespace NLGUI
 			onTextChanged();
 			return;
 		}
-		else
+
 		if( name == "textid" )
 		{
 			uint32 i;
@@ -367,8 +367,8 @@ namespace NLGUI
 			onTextChanged();
 			return;
 		}
-		else
-			CInterfaceGroup::setProperty( name, value );
+
+		CInterfaceGroup::setProperty( name, value );
 	}
 
 

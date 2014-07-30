@@ -25,6 +25,7 @@
 
 namespace NLGUI
 {
+	class CEventDescriptor;
 
 	class CViewBase : public CInterfaceElement
 	{
@@ -76,6 +77,9 @@ namespace NLGUI
 
 		// special for mouse over : return true and fill the name of the cursor to display
 		virtual bool getMouseOverShape(std::string &/* texName */, uint8 &/* rot */, NLMISC::CRGBA &/* col */) { return false; }
+		
+		/// Handle all events (implemented by derived classes) (return true to signal event handled)
+		virtual bool handleEvent (const NLGUI::CEventDescriptor &evnt);
 
 	};
 

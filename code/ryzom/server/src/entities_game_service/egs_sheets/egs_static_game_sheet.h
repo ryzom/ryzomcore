@@ -868,10 +868,12 @@ public:
 	/// read the sheet
 	virtual void readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId );
 
+#ifndef NO_EGS_VARS
 	/// select a loot set
 	NLMISC::CSheetId selectRandomLootSet() const;
 
 	const CStaticLootSet *selectRandomCustomLootSet() const;
+#endif
 
 	// return the version of this class, increments this value when the content of this class changed
 	static uint getVersion () { return 1; }

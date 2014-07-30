@@ -23,7 +23,9 @@
 #include "nel/misc/path.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <windowsx.h>
 #	include <winuser.h>
@@ -157,8 +159,10 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				// if the dtor call order is not good.
 				//exit(EXIT_SUCCESS);
 #ifdef NL_OS_WINDOWS
+#ifndef NL_COMP_MINGW
 				// disable the Windows popup telling that the application aborted and disable the dr watson report.
 				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#endif
 #endif
 				// quit without calling atexit or static object dtors.
 				abort();
@@ -232,7 +236,7 @@ TReportResult report (const std::string &title, const std::string &header, const
 
 	// create the edit control
 	HWND edit = CreateWindowW (L"EDIT", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | ES_READONLY | ES_LEFT | ES_MULTILINE, 7, 70, 429, 212, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (edit, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (edit, WM_SETFONT, (WPARAM) font, TRUE);
 
 	// set the edit text limit to lot of :)
 	SendMessage (edit, EM_LIMITTEXT, ~0U, 0);
@@ -246,7 +250,7 @@ TReportResult report (const std::string &title, const std::string &header, const
 	{
 		// create the combo box control
 		checkIgnore = CreateWindowW (L"BUTTON", L"Don't display this report again", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | BS_CHECKBOX, 7, 290, 429, 18, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-		SendMessage (checkIgnore, WM_SETFONT, (LONG) font, TRUE);
+		SendMessage (checkIgnore, WM_SETFONT, (WPARAM) font, TRUE);
 
 		if(ignoreNextTime)
 		{
@@ -256,28 +260,28 @@ TReportResult report (const std::string &title, const std::string &header, const
 
 	// create the debug button control
 	debug = CreateWindowW (L"BUTTON", L"Debug", WS_CHILD | WS_VISIBLE, 7, 315, 75, 25, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (debug, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (debug, WM_SETFONT, (WPARAM) font, TRUE);
 
 	if (debugButton == 0)
 		EnableWindow(debug, FALSE);
 
 	// create the ignore button control
 	ignore = CreateWindowW (L"BUTTON", L"Ignore", WS_CHILD | WS_VISIBLE, 75+7+7, 315, 75, 25, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (ignore, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (ignore, WM_SETFONT, (WPARAM) font, TRUE);
 
 	if (ignoreButton == 0)
 		EnableWindow(ignore, FALSE);
 
 	// create the quit button control
 	quit = CreateWindowW (L"BUTTON", L"Quit", WS_CHILD | WS_VISIBLE, 75+75+7+7+7, 315, 75, 25, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (quit, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (quit, WM_SETFONT, (WPARAM) font, TRUE);
 
 	if (quitButton == 0)
 		EnableWindow(quit, FALSE);
 
 	// create the debug button control
 	sendReport = CreateWindowW (L"BUTTON", L"Don't send the report", WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX, 7, 315+32, 429, 18, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (sendReport, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (sendReport, WM_SETFONT, (WPARAM) font, TRUE);
 
 	string formatedHeader;
 	if (header.empty())
@@ -302,7 +306,7 @@ TReportResult report (const std::string &title, const std::string &header, const
 
 	// create the label control
 	HWND label = CreateWindowW (L"STATIC", (LPCWSTR)uc.c_str(), WS_CHILD | WS_VISIBLE /*| SS_WHITERECT*/, 7, 7, 429, 51, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
-	SendMessage (label, WM_SETFONT, (LONG) font, TRUE);
+	SendMessage (label, WM_SETFONT, (WPARAM) font, TRUE);
 
 
 	DebugDefaultBehavior = debugButton==1;

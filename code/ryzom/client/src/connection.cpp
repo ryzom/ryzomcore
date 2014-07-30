@@ -184,7 +184,7 @@ bool hasPrivilegeEM() { return (UserPrivileges.find(":EM:") != std::string::npos
 bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos); }
 
 
-// Restore the video mode (fullscreen for exemple) after the connection (done in a window)
+// Restore the video mode (fullscreen for example) after the connection (done in a window)
 void connectionRestaureVideoMode ()
 {
 	// Setup full screen if we have to

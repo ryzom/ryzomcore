@@ -977,7 +977,8 @@ void CFarTP::requestReturnToPreviousSession(TSessionId rejectedSessionId)
 void CFarTP::requestReconnection()
 {
 	_ReselectingChar = true;
-	requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false);
+	if (!requestFarTPToSession(TSessionId(std::numeric_limits<uint16>::max()), std::numeric_limits<uint8>::max(), CFarTP::JoinMainland, false))
+		_ReselectingChar = false;
 }
 
 

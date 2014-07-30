@@ -845,8 +845,8 @@ public:
 	/**
 	 *	This is the static function which build a UDriver, the root for all 3D functions.
 	 */
-	static	UDriver			*createDriver(uint windowIcon = 0, bool direct3d = false, emptyProc exitFunc = 0);
-	static	UDriver			*createDriver(uint windowIcon, TDriver driver, emptyProc exitFunc = 0);
+	static	UDriver			*createDriver(uintptr_t windowIcon = 0, bool direct3d = false, emptyProc exitFunc = 0);
+	static	UDriver			*createDriver(uintptr_t windowIcon, TDriver driver, emptyProc exitFunc = 0);
 
 	/**
 	 *	Purge static memory

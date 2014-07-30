@@ -208,6 +208,9 @@ namespace NLGUI
 			case PlayerName:
 				return "playername";
 				break;
+
+			default:
+				break;
 			}
 			
 			return "text";
@@ -496,6 +499,9 @@ namespace NLGUI
 
 		case PlayerName:
 			e = "playername";
+			break;
+
+		default:
 			break;
 		}
 
@@ -1411,7 +1417,8 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::checkCoords()
 	{
-		setupDisplayText();
+		if( !editorMode )
+			setupDisplayText();
 
 		CInterfaceGroup::checkCoords();
 	}
@@ -1530,7 +1537,29 @@ namespace NLGUI
 		_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
 		if(_ViewText == NULL)
+		{
 			nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
+			if( editorMode )
+			{
+				nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
+				_ViewText = dynamic_cast< CViewText* >( CWidgetManager::getInstance()->getParser()->createClass( "text" ) );
+				if( _ViewText != NULL )
+				{
+					_ViewText->setParent( this );
+					_ViewText->setIdRecurse( "edit_text" );
+					_ViewText->setHardText( "sometext" );
+					_ViewText->setPosRef( Hotspot_TL );
+					_ViewText->setParentPosRef( Hotspot_TL );
+					addView( _ViewText );
+					
+					setH( _ViewText->getFontHeight() );
+					setW( _ViewText->getFontWidth() * _ViewText->getText().size() );
+					
+				}
+				else
+					nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
+			}
+		}
 
 		// For MultiLine editbox, clip the end space, else weird when edit space at end of line (nothing happens)
 		if(_ViewText)

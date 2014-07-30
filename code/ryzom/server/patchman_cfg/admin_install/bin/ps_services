@@ -1,0 +1,7 @@
+
+if [ -z $1 ]
+then
+	ps -edf | grep _service | grep -v grep
+else
+	ps -edf | grep _service | grep -v grep | grep $*
+fi

@@ -39,6 +39,9 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CCtrlBase::handleEvent(const NLGUI::CEventDescriptor &event)
 	{
+		if( CViewBase::handleEvent( event ) )
+			return true;
+
 		if (event.getType() == NLGUI::CEventDescriptor::system)
 		{
 			NLGUI::CEventDescriptorSystem &eds = (NLGUI::CEventDescriptorSystem&)event;
@@ -77,6 +80,9 @@ namespace NLGUI
 
 		case TTSpecialWindow:
 			return "special";
+			break;
+
+		default:
 			break;
 		}
 

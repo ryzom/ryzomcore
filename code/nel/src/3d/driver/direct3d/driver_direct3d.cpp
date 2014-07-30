@@ -110,6 +110,10 @@ IDriver* createD3DDriverInstance ()
 
 #else
 
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverD3D;
@@ -119,7 +123,9 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
-
+#ifdef NL_COMP_MINGW
+}
+#endif
 #endif
 
 /*static*/ bool CDriverD3D::_CacheTest[CacheTest_Count] =
@@ -379,7 +385,7 @@ void CDriverD3D::resetRenderVariables()
 	}
 	for (i=0; i<MaxTexture; i++)
 	{
-		if ((uint32)(_TexturePtrStateCache[i].Texture) != 0xcccccccc)
+		if ((uintptr_t)(_TexturePtrStateCache[i].Texture) != 0xcccccccc)
 		{
 			touchRenderVariable (&(_TexturePtrStateCache[i]));
 			// reset texture because it may reference an old render target
@@ -419,7 +425,7 @@ void CDriverD3D::resetRenderVariables()
 
 	for (i=0; i<MaxLight; i++)
 	{
-		if (*(uint32*)(&(_LightCache[i].Light)) != 0xcccccccc)
+		if (*(uintptr_t*)(&(_LightCache[i].Light)) != 0xcccccccc)
 		{
 			_LightCache[i].EnabledTouched = true;
 			touchRenderVariable (&(_LightCache[i]));
@@ -514,7 +520,7 @@ void CDriverD3D::initRenderVariables()
 	for (i=0; i<MaxTexture; i++)
 	{
 		_TexturePtrStateCache[i].StageID = i;
-		*(uint32*)&(_TexturePtrStateCache[i].Texture) = 0xcccccccc;
+		*(uintptr_t*)&(_TexturePtrStateCache[i].Texture) = 0xcccccccc;
 		_TexturePtrStateCache[i].Modified = false;
 	}
 	for (i=0; i<MaxSampler; i++)
@@ -543,7 +549,7 @@ void CDriverD3D::initRenderVariables()
 	for (i=0; i<MaxLight; ++i)
 	{
 		_LightCache[i].LightIndex = uint8(i);
-		*(uint32*)&(_LightCache[i].Light) = 0xcccccccc;
+		*(uintptr_t*)&(_LightCache[i].Light) = 0xcccccccc;
 		_LightCache[i].Modified = false;
 	}
 	_VertexProgramCache.Modified = false;
@@ -1063,7 +1069,7 @@ void CDriverD3D::updateRenderVariablesInternal()
 
 // ***************************************************************************
 
-static void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+void D3DWndProc(CDriverD3D *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	H_AUTO_D3D(D3DWndProc);
 
@@ -1231,7 +1237,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 // ***************************************************************************
 
-bool CDriverD3D::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_D3D(CDriver3D_init );
 
@@ -1464,6 +1470,24 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		return false;
 	}
 
+	#if WITH_PERFHUD
+		// Look for 'NVIDIA PerfHUD' adapter
+		// If it is present, override default settings
+		for (UINT gAdapter=0;gAdapter<_D3D->GetAdapterCount();gAdapter++)
+		{
+			D3DADAPTER_IDENTIFIER9 Identifier;
+			HRESULT Res;
+			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
+			
+			if (strstr(Identifier.Description,"PerfHUD") != 0)
+			{
+				nlinfo ("Setting up with PerfHUD");
+				adapter=gAdapter;
+				_Rasterizer=D3DDEVTYPE_REF;
+				break;
+			}
+		}
+	#endif /* WITH_PERFHUD */
 	// Create the D3D device
 	HRESULT result = _D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_HARDWARE_VERTEXPROCESSING|D3DCREATE_PUREDEVICE, &parameters, &_DeviceInterface);
 	if (result != D3D_OK)
@@ -1487,6 +1511,8 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
+
+	
 //	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
@@ -2635,13 +2661,15 @@ bool CDriverD3D::reset (const GfxMode& mode)
 #ifndef NL_NO_ASM
 		CFpuRestorer fpuRestorer; // fpu control word is changed by "Reset"
 #endif
-		HRESULT hr = _DeviceInterface->Reset (&parameters);
-		if (hr != D3D_OK)
-		{
-			nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
-			// tmp
-			nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
-			return false;
+		if (_Rasterizer!=D3DDEVTYPE_REF) {
+			HRESULT hr = _DeviceInterface->Reset (&parameters);
+			if (hr != D3D_OK)
+			{
+				nlwarning("CDriverD3D::reset: Reset on _DeviceInterface error 0x%x", hr);
+				// tmp
+				nlstopex(("CDriverD3D::reset: Reset on _DeviceInterface"));
+				return false;
+			}
 		}
 	}
 

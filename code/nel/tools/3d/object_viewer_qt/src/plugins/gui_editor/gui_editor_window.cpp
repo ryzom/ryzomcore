@@ -41,6 +41,9 @@
 #include "project_file_serializer.h"
 #include "project_window.h"
 #include "nelgui_widget.h"
+#include "editor_selection_watcher.h"
+#include "editor_message_processor.h"
+#include "add_widget_widget.h"
 
 namespace GUIEditor
 {
@@ -53,11 +56,13 @@ namespace GUIEditor
 	QMainWindow(parent)
 	{
 		m_ui.setupUi(this);
+		messageProcessor = new CEditorMessageProcessor;
 		m_undoStack   = new QUndoStack(this);
 		widgetProps   = new CWidgetProperties;
 		linkList      = new LinkList;
 		procList      = new ProcList;
 		projectWindow = new ProjectWindow;
+		addWidgetWidget = new AddWidgetWidget;
 		connect( projectWindow, SIGNAL( projectFilesChanged() ), this, SLOT( onProjectFilesChanged() ) );
 		viewPort      = new NelGUIWidget;
 		setCentralWidget( viewPort );
@@ -73,6 +78,8 @@ namespace GUIEditor
 		parser.setWidgetInfoTree( widgetInfoTree );
 		parser.parseGUIWidgets();
 		widgetProps->setupWidgetInfo( widgetInfoTree );
+		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
+		messageProcessor->setTree( widgetInfoTree );
 
 		QDockWidget *dock = new QDockWidget( "Widget Hierarchy", this );
 		dock->setAllowedAreas( Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea );
@@ -91,16 +98,22 @@ namespace GUIEditor
 
 		viewPort->init();
 
-		connect( viewPort, SIGNAL( guiLoadComplete() ), hierarchyView, SLOT( onGUILoaded() ) );
-		connect( viewPort, SIGNAL( guiLoadComplete() ), procList, SLOT( onGUILoaded() ) );
-		connect( viewPort, SIGNAL( guiLoadComplete() ), linkList, SLOT( onGUILoaded() ) );
-		connect( hierarchyView, SIGNAL( selectionChanged( std::string& ) ),
-			&browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( viewPort, SIGNAL( guiLoadComplete() ), this, SLOT( onGUILoaded() ) );
+		connect( widgetProps, SIGNAL( treeChanged() ), this, SLOT( onTreeChanged() ) );
+		connect(
+			addWidgetWidget,
+			SIGNAL( adding( const QString&, const QString&, const QString& ) ),
+			messageProcessor,
+			SLOT( onAdd( const QString&, const QString&, const QString& ) )
+			);
 	}
 	
 	GUIEditorWindow::~GUIEditorWindow()
 	{
 		writeSettings();
+
+		delete messageProcessor;
+		messageProcessor = NULL;
 
 		delete widgetProps;
 		widgetProps = NULL;
@@ -116,6 +129,9 @@ namespace GUIEditor
 
 		delete viewPort;
 		viewPort = NULL;
+
+		delete addWidgetWidget;
+		addWidgetWidget = NULL;
 
 		// no deletion needed for these, since dockwidget owns them
 		hierarchyView = NULL;
@@ -262,6 +278,11 @@ namespace GUIEditor
 		if( reply != QMessageBox::Yes )
 			return false;
 
+
+		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+
 		projectFiles.clearAll();
 		projectWindow->clear();
 		hierarchyView->clearHierarchy();
@@ -291,6 +312,30 @@ namespace GUIEditor
 		setCursor( Qt::ArrowCursor );
 	}
 
+	void GUIEditorWindow::onGUILoaded()
+	{
+		hierarchyView->onGUILoaded();
+		procList->onGUILoaded();
+		linkList->onGUILoaded();
+
+		CEditorSelectionWatcher *w = viewPort->getWatcher();
+		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+	}
+
+	void GUIEditorWindow::onAddWidgetClicked()
+	{
+		QString g;
+		hierarchyView->getCurrentGroup( g );
+
+		addWidgetWidget->setCurrentGroup( g );
+		addWidgetWidget->show();
+	}
+
+	void GUIEditorWindow::onTreeChanged()
+	{
+		addWidgetWidget->setupWidgetInfo( widgetInfoTree );
+	}
 
 	void GUIEditorWindow::createMenus()
 	{
@@ -299,6 +344,7 @@ namespace GUIEditor
 		QAction *saveAction = mm->action( Core::Constants::SAVE );
 		QAction *saveAsAction = mm->action( Core::Constants::SAVE_AS );
 		QAction *closeAction = mm->action( Core::Constants::CLOSE );
+		QAction *delAction = mm->action( Core::Constants::DEL );
 
 		//if( newAction != NULL )
 		//	newAction->setEnabled( true );
@@ -308,6 +354,11 @@ namespace GUIEditor
 			saveAsAction->setEnabled( true );
 		if( closeAction != NULL )
 			closeAction->setEnabled( true );
+		if( delAction != NULL )
+		{
+			delAction->setEnabled( true );
+			connect( delAction, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onDelete() ) );
+		}
 
 		QMenu *menu = mm->menu( Core::Constants::M_TOOLS );
 		if( menu != NULL )
@@ -328,6 +379,10 @@ namespace GUIEditor
 
 			a = new QAction( "Project Window", this );
 			connect( a, SIGNAL( triggered( bool ) ), projectWindow, SLOT( show() ) );
+			m->addAction( a );
+
+			a = new QAction( "Add Widget", this );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
 		}
 	}

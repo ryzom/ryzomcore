@@ -108,7 +108,10 @@ IDriver* createGlDriverInstance ()
 #else
 
 #ifdef NL_OS_WINDOWS
-
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverGL;
@@ -118,7 +121,9 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
-
+#ifdef NL_COMP_MINGW
+}
+#endif
 #elif defined (NL_OS_UNIX)
 
 extern "C"
@@ -477,6 +482,11 @@ bool CDriverGL::setupDisplay()
 #ifndef USE_OPENGLES
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
+	}
+	
+	if (_Extensions.ARBFragmentShader)
+	{
+		_ForceNativeFragmentPrograms = false;
 	}
 
 	_VertexProgramEnabled= false;
@@ -2195,7 +2205,7 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 #elif defined(NL_OS_UNIX)
 	if (_win && _Extensions.GLXEXTSwapControl)
 	{
-		res = nglXSwapIntervalEXT(_dpy, _win, interval) == 0;
+		nglXSwapIntervalEXT(_dpy, _win, interval);
 	}
 	else if (_Extensions.GLXSGISwapControl)
 	{
@@ -2513,9 +2523,7 @@ void CDriverGL::retrieveATIDriverVersion()
 		RegCloseKey(parentKey);
 	}
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for ATI version retrieval"
-	nlwarning("OpenGL Driver: Missing Mac Implementation for ATI version retrieval");
-
+	// TODO: Missing Mac Implementation for ATI version retrieval
 #elif defined (NL_OS_UNIX)
 	// TODO for Linux: implement retrieveATIDriverVersion... assuming versions under linux are probably different
 #endif
@@ -2654,7 +2662,7 @@ void CDriverGL::checkTextureOn() const
 bool CDriverGL::supportOcclusionQuery() const
 {
 	H_AUTO_OGL(CDriverGL_supportOcclusionQuery)
-	return _Extensions.NVOcclusionQuery;
+	return _Extensions.NVOcclusionQuery || _Extensions.ARBOcclusionQuery;
 }
 
 // ***************************************************************************
@@ -2685,11 +2693,14 @@ bool CDriverGL::supportFrameBufferObject() const
 IOcclusionQuery *CDriverGL::createOcclusionQuery()
 {
 	H_AUTO_OGL(CDriverGL_createOcclusionQuery)
-	nlassert(_Extensions.NVOcclusionQuery);
+	nlassert(_Extensions.NVOcclusionQuery || _Extensions.ARBOcclusionQuery);
 
 #ifndef USE_OPENGLES
 	GLuint id;
-	nglGenOcclusionQueriesNV(1, &id);
+	if (_Extensions.NVOcclusionQuery)
+		nglGenOcclusionQueriesNV(1, &id);
+	else
+		nglGenQueriesARB(1, &id);
 	if (id == 0) return NULL;
 	COcclusionQueryGL *oqgl = new COcclusionQueryGL;
 	oqgl->Driver = this;
@@ -2716,7 +2727,10 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 	oqgl->Driver = NULL;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
-	nglDeleteOcclusionQueriesNV(1, &id);
+	if (_Extensions.NVOcclusionQuery)
+		nglDeleteOcclusionQueriesNV(1, &id);
+	else
+		nglDeleteQueriesARB(1, &id);
 	_OcclusionQueryList.erase(oqgl->Iterator);
 	if (oqgl == _CurrentOcclusionQuery)
 	{
@@ -2735,7 +2749,10 @@ void COcclusionQueryGL::begin()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == NULL); // only one query at a time
 	nlassert(ID);
-	nglBeginOcclusionQueryNV(ID);
+	if (Driver->_Extensions.NVOcclusionQuery)
+		nglBeginOcclusionQueryNV(ID);
+	else
+		nglBeginQueryARB(GL_SAMPLES_PASSED, ID);
 	Driver->_CurrentOcclusionQuery = this;
 	OcclusionType = NotAvailable;
 	VisibleCount = 0;
@@ -2751,7 +2768,10 @@ void COcclusionQueryGL::end()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
-	nglEndOcclusionQueryNV();
+	if (Driver->_Extensions.NVOcclusionQuery)
+		nglEndOcclusionQueryNV();
+	else
+		nglEndQueryARB(GL_SAMPLES_PASSED);
 	Driver->_CurrentOcclusionQuery = NULL;
 #endif
 }
@@ -2767,15 +2787,25 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (OcclusionType == NotAvailable)
 	{
-		GLuint result;
-		// retrieve result
-		nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_AVAILABLE_NV, &result);
-		if (result != GL_FALSE)
+		if (Driver->_Extensions.NVOcclusionQuery)
 		{
-			nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_NV, &result);
+			GLuint result;
+			// retrieve result
+			nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_AVAILABLE_NV, &result);
+			if (result != GL_FALSE)
+			{
+				nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_NV, &result);
+				OcclusionType = result != 0 ? NotOccluded : Occluded;
+				VisibleCount = (uint) result;
+				// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
+			}
+		}
+		else
+		{
+			GLuint result;
+			nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT, &result);
 			OcclusionType = result != 0 ? NotOccluded : Occluded;
 			VisibleCount = (uint) result;
-			// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
 		}
 	}
 #endif

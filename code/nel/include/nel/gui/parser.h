@@ -27,6 +27,7 @@
 namespace NLGUI
 {
 	class CInterfaceElement;
+	class CViewBase;
 	class CInterfaceGroup;
 	class CInterfaceAnim;
 	class CCtrlSheetSelection;
@@ -86,6 +87,7 @@ namespace NLGUI
 		virtual bool serializeProcs( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializePointerSettings( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeKeySettings( xmlNodePtr parentNode ) const = 0;
+		virtual CViewBase* createClass( const std::string &name ) = 0;
 	};
 }
 

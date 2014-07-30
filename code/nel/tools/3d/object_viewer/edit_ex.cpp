@@ -67,7 +67,9 @@ uint		CEditEx::getUInt() const
 float		CEditEx::getFloat() const
 {
 	nlassert(_Type == FloatType);
-	return (float) ::atof(getString().c_str());
+	float val;
+	NLMISC::fromString(getString(), val);
+	return val;
 }
 
 std::string CEditEx::getString() const

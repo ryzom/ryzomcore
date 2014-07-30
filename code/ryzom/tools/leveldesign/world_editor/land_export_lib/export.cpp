@@ -2402,55 +2402,79 @@ void CExport::transformCMB (const std::string &name, const NLMISC::CMatrix &tran
 			_ExportCB->dispWarning("Can't find " + cmbNoExtension + ".cmb");
 		return;
 	}
-	CIFile inStream;
-	if (inStream.open(cmbName))
+	std::string outFileName = _Options->OutCMBDir +"/" + cmbNoExtension + ".cmb";
+	bool needUpdate = true;
+	if (CFile::fileExists(outFileName))
 	{
-		try
+		uint32 outModification = CFile::getFileModificationDate(outFileName);
+		needUpdate = 
+			CFile::getFileModificationDate(cmbName) > outModification
+			|| (CFile::fileExists(_Options->HeightMapFile) && (CFile::getFileModificationDate(_Options->HeightMapFile) > outModification))
+			|| (CFile::fileExists(_Options->HeightMapFile2) && (CFile::getFileModificationDate(_Options->HeightMapFile2) > outModification))
+			|| (CFile::fileExists(_Options->ContinentFile) && (CFile::getFileModificationDate(_Options->ContinentFile) > outModification))
+			|| (CFile::fileExists(_Options->ZoneRegionFile) && (CFile::getFileModificationDate(_Options->ZoneRegionFile) > outModification));
+	}
+	if (needUpdate)
+	{
+		if (_ExportCB != NULL)
+			_ExportCB->dispInfo("UPDATE " + cmbName);
+		printf("UPDATE %s\n", cmbName.c_str());
+
+		CIFile inStream;
+		if (inStream.open(cmbName))
 		{
-			CCollisionMeshBuild cmb;
-			cmb.serial(inStream);
-			// translate and save
-			cmb.transform (transfo);
-			COFile outStream;
-			std::string outFileName = _Options->OutCMBDir +"/" + cmbNoExtension + ".cmb";
-			if (!outStream.open(outFileName))
+			try
 			{
-				if (_ExportCB != NULL)
-					_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
-			}
-			else
-			{
-				try
+				CCollisionMeshBuild cmb;
+				cmb.serial(inStream);
+				// translate and save
+				cmb.transform (transfo);
+				COFile outStream;
+				if (!outStream.open(outFileName))
 				{
-					cmb.serial(outStream);
-					outStream.close();
-				}
-				catch (const EStream &e)
-				{
-					outStream.close();
 					if (_ExportCB != NULL)
+						_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
+				}
+				else
+				{
+					try
 					{
-						_ExportCB->dispWarning("Error while writing " + outFileName);
-						_ExportCB->dispWarning(e.what());
+						cmb.serial(outStream);
+						outStream.close();
+					}
+					catch (const EStream &e)
+					{
+						outStream.close();
+						if (_ExportCB != NULL)
+						{
+							_ExportCB->dispWarning("Error while writing " + outFileName);
+							_ExportCB->dispWarning(e.what());
+						}
 					}
 				}
+				inStream.close();
 			}
-			inStream.close();
-		}
-		catch (const EStream &e)
-		{
-			inStream.close();
-			if (_ExportCB != NULL)
+			catch (const EStream &e)
 			{
-					_ExportCB->dispWarning("Error while reading " + cmbName);
-				    _ExportCB->dispWarning(e.what());
+				inStream.close();
+				if (_ExportCB != NULL)
+				{
+						_ExportCB->dispWarning("Error while reading " + cmbName);
+						_ExportCB->dispWarning(e.what());
+				}
 			}
+		}
+		else
+		{
+			if (_ExportCB != NULL)
+				_ExportCB->dispWarning("Unable to open " + cmbName);
 		}
 	}
 	else
 	{
 		if (_ExportCB != NULL)
-			_ExportCB->dispWarning("Unable to open " + cmbName);
+			_ExportCB->dispInfo("SKIP " + cmbName);
+		printf("SKIP %s\n", cmbName.c_str());
 	}
 }
 
@@ -2471,98 +2495,122 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 			_ExportCB->dispWarning("Can't find " + igNoExtension + ".cmb");
 		return;
 	}
-	CIFile inStream;
-	if (inStream.open(igName))
+	std::string outFileName = _Options->AdditionnalIGOutDir +"/" + igNoExtension + ".ig";
+	bool needUpdate = true;
+	if (CFile::fileExists(outFileName))
 	{
-		try
+		uint32 outModification = CFile::getFileModificationDate(outFileName);
+		needUpdate = 
+			CFile::getFileModificationDate(igName) > outModification
+			|| (CFile::fileExists(_Options->HeightMapFile) && (CFile::getFileModificationDate(_Options->HeightMapFile) > outModification))
+			|| (CFile::fileExists(_Options->HeightMapFile2) && (CFile::getFileModificationDate(_Options->HeightMapFile2) > outModification))
+			|| (CFile::fileExists(_Options->ContinentFile) && (CFile::getFileModificationDate(_Options->ContinentFile) > outModification))
+			|| (CFile::fileExists(_Options->ZoneRegionFile) && (CFile::getFileModificationDate(_Options->ZoneRegionFile) > outModification));
+	}
+	if (needUpdate)
+	{
+		if (_ExportCB != NULL)
+			_ExportCB->dispInfo("UPDATE " + igName);
+		printf("UPDATE %s\n", igName.c_str());
+
+		CIFile inStream;
+		if (inStream.open(igName))
 		{
-			CInstanceGroup ig, igOut;
-			ig.serial(inStream);
-
-			CVector globalPos;
-			CInstanceGroup::TInstanceArray IA;
-			std::vector<CCluster> Clusters;
-			std::vector<CPortal>  Portals;
-			std::vector<CPointLightNamed> PLN;
-
-			ig.retrieve(globalPos, IA, Clusters, Portals, PLN);
-			bool realTimeSuncontribution = ig.getRealTimeSunContribution();
-
-			uint k;
-			// elevate instance
-			for(k = 0; k < IA.size(); ++k)
+			try
 			{
-				IA[k].Pos = transfo * IA[k].Pos;
-				IA[k].Rot = rotTransfo * IA[k].Rot;
-			}
-			// lights
-			for(k = 0; k < PLN.size(); ++k)
-			{
-				PLN[k].setPosition(transfo * PLN[k].getPosition());
-			}
-			// portals
-			std::vector<CVector> portal;
-			for(k = 0; k < Portals.size(); ++k)
-			{
-				Portals[k].getPoly(portal);
-				for(uint l = 0; l < portal.size(); ++l)
+				CInstanceGroup ig, igOut;
+				ig.serial(inStream);
+
+				CVector globalPos;
+				CInstanceGroup::TInstanceArray IA;
+				std::vector<CCluster> Clusters;
+				std::vector<CPortal>  Portals;
+				std::vector<CPointLightNamed> PLN;
+
+				ig.retrieve(globalPos, IA, Clusters, Portals, PLN);
+				bool realTimeSuncontribution = ig.getRealTimeSunContribution();
+
+				uint k;
+				// elevate instance
+				for(k = 0; k < IA.size(); ++k)
 				{
-					portal[l] = transfo * portal[l];
+					IA[k].Pos = transfo * IA[k].Pos;
+					IA[k].Rot = rotTransfo * IA[k].Rot;
 				}
-				Portals[k].setPoly(portal);
-			}
-
-			// clusters
-			for(k = 0; k < Clusters.size(); ++k)
-			{
-				Clusters[k].applyMatrix (transfo);
-			}
-
-
-
-			igOut.build(globalPos, IA, Clusters, Portals, PLN);
-			igOut.enableRealTimeSunContribution(realTimeSuncontribution);
-
-			COFile outStream;
-			std::string outFileName = _Options->AdditionnalIGOutDir +"/" + igNoExtension + ".ig";
-			if (!outStream.open(outFileName))
-			{
-				if (_ExportCB != NULL)
-					_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
-			}
-			else
-			{
-				try
+				// lights
+				for(k = 0; k < PLN.size(); ++k)
 				{
-					igOut.serial(outStream);
-					outStream.close();
+					PLN[k].setPosition(transfo * PLN[k].getPosition());
 				}
-				catch (const EStream &e)
+				// portals
+				std::vector<CVector> portal;
+				for(k = 0; k < Portals.size(); ++k)
 				{
-					outStream.close();
-					if (_ExportCB != NULL)
+					Portals[k].getPoly(portal);
+					for(uint l = 0; l < portal.size(); ++l)
 					{
-						_ExportCB->dispWarning("Error while writing " + outFileName);
-						_ExportCB->dispWarning(e.what());
+						portal[l] = transfo * portal[l];
+					}
+					Portals[k].setPoly(portal);
+				}
+
+				// clusters
+				for(k = 0; k < Clusters.size(); ++k)
+				{
+					Clusters[k].applyMatrix (transfo);
+				}
+
+
+
+				igOut.build(globalPos, IA, Clusters, Portals, PLN);
+				igOut.enableRealTimeSunContribution(realTimeSuncontribution);
+
+				COFile outStream;
+				if (!outStream.open(outFileName))
+				{
+					if (_ExportCB != NULL)
+						_ExportCB->dispWarning("Couldn't open " + outFileName + "for writing, not exporting");
+				}
+				else
+				{
+					try
+					{
+						igOut.serial(outStream);
+						outStream.close();
+					}
+					catch (const EStream &e)
+					{
+						outStream.close();
+						if (_ExportCB != NULL)
+						{
+							_ExportCB->dispWarning("Error while writing " + outFileName);
+							_ExportCB->dispWarning(e.what());
+						}
 					}
 				}
+				inStream.close();
 			}
-			inStream.close();
-		}
-		catch (const EStream &e)
-		{
-			inStream.close();
-			if (_ExportCB != NULL)
+			catch (const EStream &e)
 			{
-					_ExportCB->dispWarning("Error while reading " + igName);
-				    _ExportCB->dispWarning(e.what());
+				inStream.close();
+				if (_ExportCB != NULL)
+				{
+						_ExportCB->dispWarning("Error while reading " + igName);
+						_ExportCB->dispWarning(e.what());
+				}
 			}
+		}
+		else
+		{
+			if (_ExportCB != NULL)
+				_ExportCB->dispWarning("Unable to open " +  igName);
 		}
 	}
 	else
 	{
 		if (_ExportCB != NULL)
-			_ExportCB->dispWarning("Unable to open " +  igName);
+			_ExportCB->dispInfo("SKIP " + igName);
+		printf("SKIP %s\n", igName.c_str());
 	}
 }
 

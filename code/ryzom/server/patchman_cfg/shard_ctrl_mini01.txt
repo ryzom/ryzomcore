@@ -1,0 +1,116 @@
+//-----------------------------------------------------------------------------
+// The set of mini01 domains
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// mini01 Domain
+//-----------------------------------------------------------------------------
+
+// the mini01 domain -----------------
+
+define domain_mini01
+	domain mini01
+	use shard_mini01_unifier
+	use shard_mini01_mainland01
+// 	use shard_mini01_ring01
+
+	// domain ports
+	cfg ASWebPort="46710";
+	cfg ASPort="46711";
+	cfg AESPort="46712";
+	cfg SUPort = 50505;
+	cfg SUGlobalPort = 50503;
+	cfg L3BSPort = "49950";
+	cfg L3SlaveBSPort = "49951";
+	cfg L3MasterLGSPort = 49992;
+	cfg L3SlaveLGSPort = 49993;
+	cfg LGSBSPort = 49994;
+	cfg L3LGSBSPort = 49995;
+
+	// domain hosts
+	cfg AESHost = "localhost";
+	cfg SUHost = "ep1.mini01.ryzomcore.org";
+	cfg MFSHost = "ep1.mini01.ryzomcore.org";
+	cfg BSHost = "ep1.mini01.ryzomcore.org:49990";
+	cfg SlaveBSHost= "ep1.mini01.ryzomcore.org:49991";
+	cfg MasterLGSHost = "ep1.mini01.ryzomcore.org";
+	cfg SlaveLGSHost = "ep1.mini01.ryzomcore.org";
+	cfg LGSBSHost = "ep1.mini01.ryzomcore.org";
+	cfg DBHost = "localhost"; // FIXME "sql.core.ryzomcore.org";
+	cfgAfter WebSrvHost = "http://ep1.mini01.ryzomcore.org:50000/";
+
+	// initial config files
+	cfgFile ../cfg/00_base.cfg
+	cfgFile ../cfg/01_domain_mini01.cfg
+
+	// shard names and ids
+	cfgAfter Mainlands = {
+	cfgAfter 	"301", "Mainland 01", "(Mainland 01)", "en",
+	cfgAfter };
+	cfgAfter HomeMainlandNames =
+	cfgAfter {
+	cfgAfter 	"301", "Mainland 01", "mla",
+	cfgAfter };
+	cfgAfter RRDVarPath = "../rrd_graphs";
+
+	// addition of extra filters for this domain
+//	cfgAfter NegFiltersDebug+= {"DEFAULT_CB", "NET","ADMIN","MIRROR","CDB_MULTI_IMPULSION"};
+//	cfgAfter NegFiltersInfo+= {"FESTATS", "FETIME", "FERECV", "FESEND: sent SYNC message to client 1", "EIT: Register EId"};
+//	cfgAfter NegFiltersWarning+= {"PIPO_SESSION1", "casino_session_matis01", "invalid damage type 10", "_log_Item_Delete", 
+//	cfgAfter "_log_Item_Money", "_log_Item_Create", "_log_Item_Move", "botChatMissionAdvance> invalid index 0", 
+//	cfgAfter "_MaxRange(0) < _MinRange(1)", "Can't find craft plan sheet 'unknown.unknown'"};
+	cfgAfter DontUseAES=1;
+//	cfgAfter RingAccessLimits="d3:j2:f2:l2:p2";
+	cfgAfter RingRPEnabled=0;
+	cfgAfter DomainName = "mini01";
+	cfgAfter EnableStlAllocatorChecker = 0;
+
+	cfgAfter // start commands for setting up the exchange level caps of different mini01 shards
+//	cfgAfter StartCommands += { "setShardExchangeLimit 101 250" };
+//	cfgAfter StartCommands += { "displayShardExchangeLimits" };
+
+
+// shard unifier -------------------
+
+define shard_mini01_unifier
+	shard unifier
+	cfg ShardId = 300;
+	data data_www
+	use ras
+	use exe_set_std_unifier
+	use bms_master
+	use exe_set_std_lgs_master
+	use exe_set_std_lgs_slave
+	use backup_lgs
+	cfg DBPass = DBNelPass;
+	host ep1.mini01.ryzomcore.org
+
+
+// shard mainland01 ----------------
+
+define shard_mini01_mainland01
+	shard mainland01
+	use exe_set_mini_mainland
+	cfg ShardId = 301;
+	cfg BasePort = 52000;
+	cfg SaveFilesDirectory="mini01_mainland01/";
+	cfg NSHost = "ep1.mini01.ryzomcore.org";
+	cfg FSListenHost = "ep1.mini01.ryzomcore.org";
+	cfgFile ../cfg/02_shard_type_mini_mainland.cfg
+	host ep1.mini01.ryzomcore.org
+
+
+// shard ring01 --------------------
+
+define shard_mini01_ring01
+	shard ring01
+	use exe_set_mini_ring
+	cfg ShardId = 401;
+	cfg BasePort = 52400;
+	cfg SaveFilesDirectory="mini01_ring01/";
+	cfg NSPort = 51100;
+	cfg NSHost = "ep1.mini01.ryzomcore.org" + 51100;
+	cfgFile ../cfg/02_shard_type_std_ring.cfg
+	host ep1.mini01.ryzomcore.org
+

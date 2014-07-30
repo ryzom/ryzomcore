@@ -409,7 +409,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 				}
 				else
 				{
-					nldebug("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'", 
+					nlwarning("Invalid type specified for pblock2 value with name '%s', given type '%u', found '%u'", 
 						sName, (uint32)type, (uint32)paramType);
 				}
 			}
@@ -448,7 +448,7 @@ bool CExportNel::getValueByNameUsingParamBlock2 (Animatable& node, const char* s
 	}
 	else
 	{
-		// nlwarning ("Can't found ParamBlock named %s", sName);
+		// nlwarning ("FAILED Can't find ParamBlock named '%s'", sName);
 		return false;
 	}
 }
@@ -508,13 +508,12 @@ std::string	CExportNel::getName (MtlBase& mtl)
 // --------------------------------------------------
 
 // Get the node name
-std::string	CExportNel::getName (INode& mtl)
+std::string	CExportNel::getName(INode& node)
 {
 	// Return its name
-	TCHAR* name=mtl.GetName();
-	return std::string (name);
+	MCHAR* name = node.GetName();
+	return std::string(name);
 }
-
 
 // --------------------------------------------------
 
@@ -1272,7 +1271,7 @@ void CExportNel::buildCamera(NL3D::CCameraInfo &cameraInfo, INode& node, TimeVal
 				cameraInfo.Fov = genCamera->GetFOV(time);
 
 				if (deleteIt)
-					genCamera->MaybeAutoDelete();
+					genCamera->DeleteThis();
 				genCamera = NULL;
 			}
 		}

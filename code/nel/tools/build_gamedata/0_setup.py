@@ -86,31 +86,31 @@ if not args.noconf:
 	try:
 		ExportBuildDirectory
 	except NameError:
-		ExportBuildDirectory = "W:/export"
+		ExportBuildDirectory = "T:/export"
 	try:
 		InstallDirectory
 	except NameError:
-		InstallDirectory = "W:/install"
+		InstallDirectory = "T:/install"
 	try:
 		ClientDevDirectory
 	except NameError:
-		ClientDevDirectory = "W:/client_dev"
+		ClientDevDirectory = "T:/client_dev"
 	try:
 		ClientPatchDirectory
 	except NameError:
-		ClientPatchDirectory = "W:/client_patch"
+		ClientPatchDirectory = "T:/client_patch"
 	try:
 		ClientInstallDirectory
 	except NameError:
-		ClientInstallDirectory = "W:/client_install"
+		ClientInstallDirectory = "T:/client_install"
 	try:
 		ShardInstallDirectory
 	except NameError:
-		ShardInstallDirectory = "W:/shard"
+		ShardInstallDirectory = "T:/shard"
 	try:
 		WorldEditInstallDirectory
 	except NameError:
-		WorldEditInstallDirectory = "W:/worldedit"
+		WorldEditInstallDirectory = "T:/worldedit"
 	try:
 		LeveldesignDirectory
 	except NameError:
@@ -134,7 +134,7 @@ if not args.noconf:
 	try:
 		DataShardDirectory
 	except NameError:
-		DataShardDirectory = "R:/code/ryzom/common/data_shard"
+		DataShardDirectory = "R:/code/ryzom/server/data_shard"
 	try:
 		DataCommonDirectory
 	except NameError:
@@ -160,6 +160,26 @@ if not args.noconf:
 	except NameError:
 		WindowsExeDllCfgDirectories = [ 'C:/Program Files (x86)/Microsoft Visual Studio 9.0/VC/redist/x86', 'D:/libraries/external/bin', 'R:/build/dev/bin/Release', 'R:/code/ryzom/client', 'R:/code/nel/lib', 'R:/code/ryzom/bin', 'R:/code/ryzom/tools/client/client_config/bin' ]
 	try:
+		LinuxServiceExecutableDirectory
+	except NameError:
+		LinuxServiceExecutableDirectory = "S:/devls_x64/bin"
+	try:
+		LinuxClientExecutableDirectory
+	except NameError:
+		LinuxClientExecutableDirectory = "S:/devl_x64/bin"
+	try:
+		PatchmanCfgAdminDirectory
+	except NameError:
+		PatchmanCfgAdminDirectory = "R:/code/ryzom/server/patchman_cfg/admin_install"
+	try:
+		PatchmanCfgDefaultDirectory
+	except NameError:
+		PatchmanCfgDefaultDirectory = "R:/code/ryzom/server/patchman_cfg/default"
+	try:
+		PatchmanBridgeServerDirectory
+	except NameError:
+		PatchmanBridgeServerDirectory = "T:/bridge_server"
+	try:
 		MaxAvailable
 	except NameError:
 		MaxAvailable = 1
@@ -171,7 +191,11 @@ if not args.noconf:
 		MaxUserDirectory
 	except NameError:
 		import os
-		MaxUserDirectory = os.path.normpath(os.environ["LOCALAPPDATA"] + "/Autodesk/3dsMax/2010 - 32bit/enu")
+		try:
+			MaxUserDirectory = os.path.normpath(os.environ["LOCALAPPDATA"] + "/Autodesk/3dsMax/2010 - 32bit/enu")
+		except KeyError:
+			MaxAvailable = 0
+			MaxUserDirectory = "C:/Users/Kaetemi/AppData/Local/Autodesk/3dsMax/2010 - 32bit/enu"
 	try:
 		MaxExecutable
 	except NameError:
@@ -188,37 +212,42 @@ if not args.noconf:
 	printLog(log, "Use -- if you need to insert an empty value.")
 	printLog(log, "")
 	BuildQuality = int(askVar(log, "Build Quality", str(BuildQuality)))
-	ToolDirectories[0] = askVar(log, "Primary Tool Directory", ToolDirectories[0]).replace("\\", "/")
-	ToolDirectories[1] = askVar(log, "Secondary Tool Directory", ToolDirectories[1]).replace("\\", "/")
+	ToolDirectories[0] = askVar(log, "[IN] Primary Tool Directory", ToolDirectories[0]).replace("\\", "/")
+	ToolDirectories[1] = askVar(log, "[IN] Secondary Tool Directory", ToolDirectories[1]).replace("\\", "/")
 	ToolSuffix = askVar(log, "Tool Suffix", ToolSuffix)
-	ScriptDirectory = askVar(log, "Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
-	WorkspaceDirectory = askVar(log, "Workspace Directory", WorkspaceDirectory).replace("\\", "/")
-	DatabaseDirectory = askVar(log, "Database Directory", DatabaseDirectory).replace("\\", "/")
-	ExportBuildDirectory = askVar(log, "Export Build Directory", ExportBuildDirectory).replace("\\", "/")
-	InstallDirectory = askVar(log, "Install Directory", InstallDirectory).replace("\\", "/")
-	ClientDevDirectory = askVar(log, "Client Dev Directory", ClientDevDirectory).replace("\\", "/")
-	ClientPatchDirectory = askVar(log, "Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
-	ClientInstallDirectory = askVar(log, "Client Install Directory", ClientInstallDirectory).replace("\\", "/")
-	ShardInstallDirectory = askVar(log, "Shard Data Install Directory", ShardInstallDirectory).replace("\\", "/")
-	WorldEditInstallDirectory = askVar(log, "World Edit Data Install Directory", WorldEditInstallDirectory).replace("\\", "/")
-	LeveldesignDirectory = askVar(log, "Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
-	LeveldesignDfnDirectory = askVar(log, "Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
-	LeveldesignWorldDirectory = askVar(log, "Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
-	PrimitivesDirectory = askVar(log, "Primitives Directory", PrimitivesDirectory).replace("\\", "/")
-	GamedevDirectory = askVar(log, "Gamedev Directory", GamedevDirectory).replace("\\", "/")
-	DataShardDirectory = askVar(log, "Data Shard Directory", DataShardDirectory).replace("\\", "/")
-	DataCommonDirectory = askVar(log, "Data Common Directory", DataCommonDirectory).replace("\\", "/")
-	TranslationDirectory = askVar(log, "Translation Directory", TranslationDirectory).replace("\\", "/")
-	LeveldesignDataShardDirectory = askVar(log, "Leveldesign Data Shard Directory", LeveldesignDataShardDirectory).replace("\\", "/")
-	LeveldesignDataCommonDirectory = askVar(log, "Leveldesign Data Common Directory", LeveldesignDataCommonDirectory).replace("\\", "/")
-	WorldEditorFilesDirectory = askVar(log, "World Editor Files Directory", WorldEditorFilesDirectory).replace("\\", "/")
-	WindowsExeDllCfgDirectories[0] = askVar(log, "Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[1] = askVar(log, "Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[2] = askVar(log, "Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[3] = askVar(log, "Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[4] = askVar(log, "Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[5] = askVar(log, "Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
-	WindowsExeDllCfgDirectories[6] = askVar(log, "Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
+	ScriptDirectory = askVar(log, "[IN] Script Directory", os.getcwd().replace("\\", "/")).replace("\\", "/")
+	WorkspaceDirectory = askVar(log, "[IN] Workspace Directory", WorkspaceDirectory).replace("\\", "/")
+	DatabaseDirectory = askVar(log, "[IN] Database Directory", DatabaseDirectory).replace("\\", "/")
+	ExportBuildDirectory = askVar(log, "[OUT] Export Build Directory", ExportBuildDirectory).replace("\\", "/")
+	InstallDirectory = askVar(log, "[OUT] Install Directory", InstallDirectory).replace("\\", "/")
+	ClientDevDirectory = askVar(log, "[OUT] Client Dev Directory", ClientDevDirectory).replace("\\", "/")
+	ClientPatchDirectory = askVar(log, "[OUT] Client Patch Directory", ClientPatchDirectory).replace("\\", "/")
+	ClientInstallDirectory = askVar(log, "[OUT] Client Install Directory", ClientInstallDirectory).replace("\\", "/")
+	ShardInstallDirectory = askVar(log, "[OUT] Shard Data Install Directory", ShardInstallDirectory).replace("\\", "/")
+	WorldEditInstallDirectory = askVar(log, "[OUT] World Edit Data Install Directory", WorldEditInstallDirectory).replace("\\", "/")
+	LeveldesignDirectory = askVar(log, "[IN] Leveldesign Directory", LeveldesignDirectory).replace("\\", "/")
+	LeveldesignDfnDirectory = askVar(log, "[IN] Leveldesign DFN Directory", LeveldesignDfnDirectory).replace("\\", "/")
+	LeveldesignWorldDirectory = askVar(log, "[IN] Leveldesign World Directory", LeveldesignWorldDirectory).replace("\\", "/")
+	PrimitivesDirectory = askVar(log, "[IN] Primitives Directory", PrimitivesDirectory).replace("\\", "/")
+	GamedevDirectory = askVar(log, "[IN] Gamedev Directory", GamedevDirectory).replace("\\", "/")
+	DataShardDirectory = askVar(log, "[IN] Data Shard Directory", DataShardDirectory).replace("\\", "/")
+	DataCommonDirectory = askVar(log, "[IN] Data Common Directory", DataCommonDirectory).replace("\\", "/")
+	TranslationDirectory = askVar(log, "[IN] Translation Directory", TranslationDirectory).replace("\\", "/")
+	LeveldesignDataShardDirectory = askVar(log, "[IN] Leveldesign Data Shard Directory", LeveldesignDataShardDirectory).replace("\\", "/")
+	LeveldesignDataCommonDirectory = askVar(log, "[IN] Leveldesign Data Common Directory", LeveldesignDataCommonDirectory).replace("\\", "/")
+	WorldEditorFilesDirectory = askVar(log, "[IN] World Editor Files Directory", WorldEditorFilesDirectory).replace("\\", "/")
+	WindowsExeDllCfgDirectories[0] = askVar(log, "[IN] Primary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[0]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[1] = askVar(log, "[IN] Secondary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[1]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[2] = askVar(log, "[IN] Tertiary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[2]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[3] = askVar(log, "[IN] Quaternary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[3]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[4] = askVar(log, "[IN] Quinary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[4]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[5] = askVar(log, "[IN] Senary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[5]).replace("\\", "/")
+	WindowsExeDllCfgDirectories[6] = askVar(log, "[IN] Septenary Windows exe/dll/cfg Directory", WindowsExeDllCfgDirectories[6]).replace("\\", "/")
+	LinuxServiceExecutableDirectory = askVar(log, "[IN] Linux Service Executable Directory", LinuxServiceExecutableDirectory).replace("\\", "/")
+	LinuxClientExecutableDirectory = askVar(log, "[IN] Linux Client Executable Directory", LinuxClientExecutableDirectory).replace("\\", "/")
+	PatchmanCfgAdminDirectory = askVar(log, "[IN] Patchman Cfg Admin Directory", PatchmanCfgAdminDirectory).replace("\\", "/")
+	PatchmanCfgDefaultDirectory = askVar(log, "[IN] Patchman Cfg Default Directory", PatchmanCfgDefaultDirectory).replace("\\", "/")
+	PatchmanBridgeServerDirectory = askVar(log, "[OUT] Patchman Bridge Server Patch Directory", PatchmanBridgeServerDirectory).replace("\\", "/")
 	MaxAvailable = int(askVar(log, "3dsMax Available", str(MaxAvailable)))
 	if MaxAvailable:
 		MaxDirectory = askVar(log, "3dsMax Directory", MaxDirectory).replace("\\", "/")
@@ -299,6 +328,11 @@ if not args.noconf:
 	sf.write("DataCommonDirectory = \"" + str(DataCommonDirectory) + "\"\n")
 	sf.write("DataShardDirectory = \"" + str(DataShardDirectory) + "\"\n")
 	sf.write("WindowsExeDllCfgDirectories = " + str(WindowsExeDllCfgDirectories) + "\n")
+	sf.write("LinuxServiceExecutableDirectory = \"" + str(LinuxServiceExecutableDirectory) + "\"\n")
+	sf.write("LinuxClientExecutableDirectory = \"" + str(LinuxClientExecutableDirectory) + "\"\n")
+	sf.write("PatchmanCfgAdminDirectory = \"" + str(PatchmanCfgAdminDirectory) + "\"\n")
+	sf.write("PatchmanCfgDefaultDirectory = \"" + str(PatchmanCfgDefaultDirectory) + "\"\n")
+	sf.write("PatchmanBridgeServerDirectory = \"" + str(PatchmanBridgeServerDirectory) + "\"\n")
 	sf.write("\n")
 	sf.write("# 3dsMax directives\n")
 	sf.write("MaxAvailable = " + str(MaxAvailable) + "\n")

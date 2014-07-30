@@ -2,6 +2,7 @@
     <header>
         <name>GroupModal</name>
         <guiname>CGroupModal</guiname>
+        <classname>modal</classname>
         <ancestor>GroupFrame</ancestor>
         <description></description>
         <abstract>false</abstract>

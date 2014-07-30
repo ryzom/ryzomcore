@@ -56,6 +56,14 @@ CSheets CSheets::_StaticSheets;		// the singleton instance
 bool CSheets::_Initialised=false;	// - set true by constructor
 bool CSheets::_Destroyed=false;		// - set true by destructor
 
+#ifndef NO_EGS_VARS
+static std::string writeDirectory()
+{
+	return IService::getInstance()->WriteFilesDirectory.toString();
+}
+#else
+extern std::string writeDirectory();
+#endif
 
 //---------------------------------------------------
 // scanDirectoriesForFiles : utility routine for init()
@@ -82,7 +90,7 @@ void scanGeorgePaths(bool forceFullRescan=false)
 		NLMISC::CPath::clearMap();
 
 		// rescan 'Paths' directories
-		if ((var = IService::getInstance()->ConfigFile.getVarPtr ("Paths")) != NULL)
+		if (IService::isServiceInitialized() && ((var = IService::getInstance()->ConfigFile.getVarPtr ("Paths")) != NULL))
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
@@ -91,7 +99,7 @@ void scanGeorgePaths(bool forceFullRescan=false)
 		}
 
 		// rescan 'PathsNoRecurse' directories
-		if ((var = IService::getInstance()->ConfigFile.getVarPtr ("PathsNoRecurse")) != NULL)
+		if (IService::isServiceInitialized() && ((var = IService::getInstance()->ConfigFile.getVarPtr ("PathsNoRecurse")) != NULL))
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
@@ -101,7 +109,7 @@ void scanGeorgePaths(bool forceFullRescan=false)
 	}
 
 	// add any paths listed in the 'GeorgeFiles' config file variable
-	if ((var = IService::getInstance()->ConfigFile.getVarPtr ("GeorgePaths")) != NULL)
+	if (IService::isServiceInitialized() && ((var = IService::getInstance()->ConfigFile.getVarPtr ("GeorgePaths")) != NULL))
 	{
 		for (uint i = 0; i < var->size(); i++)
 		{
@@ -123,9 +131,9 @@ template <class C> void loadSheetSet(const char *fileType,const char *sheetFile,
 	sheetMap.clear();
 
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
-		loadForm( fileType, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, false, false);
+		loadForm( fileType, writeDirectory()+sheetFile, sheetMap, false, false);
 	}
 
 	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
@@ -133,7 +141,7 @@ template <class C> void loadSheetSet(const char *fileType,const char *sheetFile,
 	{
 		// if the 'GeorgePaths' variable exists and hasn't already been treated then add new paths to CPath singleton
 		scanGeorgePaths();
-		loadForm( fileType, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, true);
+		loadForm( fileType, writeDirectory()+sheetFile, sheetMap, true);
 	}
 }
 
@@ -148,9 +156,9 @@ template <class C> void loadSheetSet2(const char *fileType,const char *sheetFile
 	sheetMap.clear();
 	
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
-		loadForm2( fileType, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, false, false);
+		loadForm2( fileType, writeDirectory()+sheetFile, sheetMap, false, false);
 	}
 	
 	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
@@ -158,7 +166,7 @@ template <class C> void loadSheetSet2(const char *fileType,const char *sheetFile
 	{
 		// if the 'GeorgePaths' variable exists and hasn't already been treated then add new paths to CPath singleton
 		scanGeorgePaths();
-		loadForm2( fileType, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, true);
+		loadForm2( fileType, writeDirectory()+sheetFile, sheetMap, true);
 	}
 }
 
@@ -172,9 +180,9 @@ template <class T> void loadSheetSet(const vector<string> &fileTypes,const char 
 	sheetMap.clear();
 
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
-		loadForm( fileTypes, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, false, false);
+		loadForm( fileTypes, writeDirectory()+sheetFile, sheetMap, false, false);
 	}
 
 	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
@@ -182,7 +190,7 @@ template <class T> void loadSheetSet(const vector<string> &fileTypes,const char 
 	{
 		// if the 'GeorgePaths' variable exists and hasn't already been treated then add new paths to CPath singleton
 		scanGeorgePaths();
-		loadForm( fileTypes, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, true);
+		loadForm( fileTypes, writeDirectory()+sheetFile, sheetMap, true);
 	}
 }
 
@@ -196,9 +204,9 @@ void loadSheetSetForHashMap(const vector<string> &fileTypes,const char *sheetFil
 	map<CSheetId,T> sheetMap;
 
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
-		loadForm( fileTypes, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, false, false);
+		loadForm( fileTypes, writeDirectory()+sheetFile, sheetMap, false, false);
 	}
 
 	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
@@ -206,7 +214,7 @@ void loadSheetSetForHashMap(const vector<string> &fileTypes,const char *sheetFil
 	{
 		// if the 'GeorgePaths' variable exists and hasn't already been treated then add new paths to CPath singleton
 		scanGeorgePaths();
-		loadForm( fileTypes, IService::getInstance()->WriteFilesDirectory.toString()+sheetFile, sheetMap, true);
+		loadForm( fileTypes, writeDirectory()+sheetFile, sheetMap, true);
 	}
 
 	// Convert map to hash_map
@@ -705,10 +713,14 @@ template <class T> void reloadSheetSet(const vector<string> &fileTypes, T &sheet
 	sheetMap.clear();
 	
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
 		scanGeorgePaths();
 		loadFormNoPackedSheet( fileTypes, sheetMap, wildcardFilter);
+	}
+	else
+	{
+		nlwarning("No GeorgePaths in EGS config");
 	}
 }
 
@@ -719,10 +731,14 @@ template <class T> void reloadSheetSet2(const vector<string> &fileTypes, T &shee
 	sheetMap.clear();
 	
 	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
-	if (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL)
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
 	{
 		scanGeorgePaths();
 		loadFormNoPackedSheet2( fileTypes, sheetMap, wildcardFilter);
+	}
+	else
+	{
+		nlwarning("No GeorgePaths in EGS config");
 	}
 }
 

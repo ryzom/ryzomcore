@@ -2315,7 +2315,17 @@ void	CMirror::init( std::vector<std::string>& dataSetsToLoad,
 	CUnifiedNetwork::getInstance()->addCallbackArray( MirrorCbArray, NB_MIRROR_CALLBACKS );
 
 	// Load the sheets of the datasets
-	loadForm( "dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", _SDataSetSheets );
+	// if the 'GeorgePaths' config file var exists then we try to perform a mini-scan for sheet files
+	if (IService::isServiceInitialized() && (IService::getInstance()->ConfigFile.getVarPtr(std::string("GeorgePaths"))!=NULL))
+	{
+		loadForm("dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", _SDataSetSheets, false, false);
+	}
+
+	// if we haven't succeeded in minimal scan (or 'GeorgePaths' wasn't found in config file) then perform standard scan
+	if (_SDataSetSheets.empty())
+	{
+		loadForm("dataset", IService::getInstance()->WriteFilesDirectory.toString()+"datasets.packed_sheets", _SDataSetSheets, true);
+	}
 
 	// Set the tag
 	nlassert( (tag >= AllTag) && (tag != ExcludedTag) );

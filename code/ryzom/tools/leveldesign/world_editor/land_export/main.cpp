@@ -205,6 +205,7 @@ struct SOptions : public SExportOptions
 			{
 				CIXml xml (true);
 				xml.init (fileIn);
+				ZoneRegionFile = filename;
 				ZoneRegion = new CZoneRegion;
 				ZoneRegion->serial (xml);
 			}
