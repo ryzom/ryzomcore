@@ -728,7 +728,7 @@ void TileEditorMainWindow::onActionDeleteImage( int tabId )
 	}
 
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
-	n->setTileFilename( TileModel::TileDiffuse, "" );
+	n->setTileFilename( TileItemNode::displayChannel(), "" );
 }
 
 void TileEditorMainWindow::onActionReplaceImage( int tabId )
@@ -752,7 +752,7 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 		return;
 	
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
-	n->setTileFilename( TileModel::TileDiffuse, fileName );
+	n->setTileFilename( TileItemNode::displayChannel(), fileName );
 }
 
 void TileEditorMainWindow::onTileSetRemoved( const QString &set )

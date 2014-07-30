@@ -117,6 +117,7 @@ public:
 	int id() const{ return m_tileId; }
 
 	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
+	static TileModel::TTileChannel displayChannel(){ return s_displayChannel; }
 
 private:
 	int m_tileId;
