@@ -293,8 +293,11 @@ void SLightBuild::convertFromMaxLight (INode *node,TimeValue tvTime)
 	for (sint i = 0; i < exclusionList.Count(); ++i)
 	{
 		INode *exclNode = exclusionList[i];
-		string tmp = exclNode->GetName();
-		this->setExclusion.insert(tmp);
+		if (exclNode) // Crashfix // FIXME: Why is this NULL?
+		{
+			string tmp = exclNode->GetName();
+			this->setExclusion.insert(tmp);
+		}
 	}
 #endif // (MAX_RELEASE < 4000)
 
