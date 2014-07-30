@@ -93,6 +93,8 @@ public:
 
 	bool hasTileSet( const QString &name );
 
+	void clear();
+
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);
 	void selectIndexDisplay(bool selected);	

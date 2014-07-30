@@ -33,6 +33,7 @@
 #include "tile_item_delegate.h"
 
 #include "tilebank_saver.h"
+#include "tilebank_loader.h"
 
 #include "land_edit_dialog.h"
 
@@ -159,9 +160,12 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	saveAction->setEnabled( true );
 	QAction *saveAsAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE_AS );
 	saveAsAction->setEnabled( true );
+	QAction *openAction = Core::ICore::instance()->menuManager()->action( Core::Constants::OPEN );
+	openAction->setEnabled( true );
 
 	connect( m_ui->actionSaveTileBank, SIGNAL( triggered() ), this, SLOT( save() ) );
 	connect( m_ui->actionSaveTileBankAs, SIGNAL( triggered() ), this, SLOT( saveAs() ) );
+	connect( m_ui->actionOpenTileBank, SIGNAL( triggered() ), this, SLOT( open() ) );
 
 	connect( m_ui->orientedCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onOrientedStateChanged( int ) ) );
 }
@@ -220,6 +224,30 @@ void TileEditorMainWindow::saveAs()
 								tr( "Saving tilebank" ),
 								tr( "Failed to save tilebank :(" ) );
 	}
+}
+
+void TileEditorMainWindow::open()
+{
+	QString fn = QFileDialog::getOpenFileName( this,
+												tr( "Loading tilebank" ),
+												"",
+												tr( "tilebank files (*.tilebank)" ) );
+
+	if( fn.isEmpty() )
+		return;
+
+	TileBankLoader loader;
+	bool b = loader.load( fn.toUtf8().constData(), m_tileModel, m_lands );
+
+	if( !b )
+	{
+		QMessageBox::critical( this,
+								tr( "Loading tilebank" ),
+								tr( "Failed to load tilebank %1" ).arg( fn ) );
+	}
+
+	// Put the loaded data into the GUI
+	onTileBankLoaded();
 }
 
 void TileEditorMainWindow::onZoomFactor(int level)
@@ -307,7 +335,6 @@ void TileEditorMainWindow::onTileSetAdd()
 		TileSetNode *tileSet = model->createTileSetNode(text);
 		
 		// Retrieve how many rows there currently are and set the current index using that.
-		m_ui->tileSetLV->reset();
 		uint32 rows = model->rowCount();
 		m_ui->tileSetLV->setCurrentIndex(model->index(rows-1, 0));
 	}
@@ -703,6 +730,20 @@ void TileEditorMainWindow::onTileSetRenamed( const QString &oldname, const QStri
 	}
 }
 
+void TileEditorMainWindow::onTileBankLoaded()
+{
+	m_ui->landLW->clear();
+	QListIterator< Land > itr( m_lands );
+	while( itr.hasNext() )
+	{
+		m_ui->landLW->addItem( itr.next().name );
+	}
+
+	m_ui->listView128->reset();
+	m_ui->listView256->reset();
+	m_ui->listViewTransition->reset();
+}
+
 TileModel* TileEditorMainWindow::createTileModel()
 {
 	QStringList headers;
@@ -749,6 +790,8 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 			m_ui->chooseVegetPushButton->setText( vegetSet );
 		else
 			m_ui->chooseVegetPushButton->setText( "..." );
+
+		m_ui->orientedCheckBox->setChecked( newNode->isOriented() );
 	}
 	else
 	{

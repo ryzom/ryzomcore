@@ -161,6 +161,9 @@ public:
 	{
 		return _Name;
 	};
+
+	std::set<std::string> getTileSets() const{ return _TileSet; }
+
 	void setName (const std::string& name);
 	void addTileSet (const std::string& name);
 	void removeTileSet (const std::string& name);

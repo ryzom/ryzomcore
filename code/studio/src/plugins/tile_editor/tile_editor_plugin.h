@@ -93,6 +93,7 @@ public:
 
 	virtual void open()
 	{
+		m_tileEditorMainWindow->open();
 	}
 
 	void save()

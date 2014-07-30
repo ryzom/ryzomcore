@@ -47,6 +47,7 @@ public:
 public Q_SLOTS:
 	void save();
 	void saveAs();
+	void open();
 
 private Q_SLOTS:
 	void onActionAddTile(bool triggered);
@@ -82,6 +83,7 @@ private:
 
 	void onTileSetRemoved( const QString &set );
 	void onTileSetRenamed( const QString &oldname, const QString &newname );
+	void onTileBankLoaded();
 
 	TileModel* createTileModel();
 	QListView* getListViewByTab( int tab ) const;

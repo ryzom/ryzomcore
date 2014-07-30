@@ -55,6 +55,8 @@ public:
 
 	void swapRows( int a, int b );
 
+	void clear();
+
 protected:
 	QList<Node*> m_childItems;
 	QVector<QVariant> m_itemData;

@@ -40,6 +40,7 @@ Node::~Node()
 
 void Node::appendChild(Node *item)
 {
+	item->setParent( this );
 	m_childItems.append(item);
 }
 
@@ -160,6 +161,13 @@ void Node::swapRows( int a, int b )
 	Node *temp = m_childItems[ a ];
 	m_childItems[ a ] = m_childItems[ b ];
 	m_childItems[ b ] = temp;
+}
+
+void Node::clear()
+{
+	qDeleteAll( m_childItems );
+	m_childItems.clear();
+	m_itemData.clear();
 }
 
 ///////////////////////////////////////////////////

@@ -137,7 +137,13 @@ void TileModel::appendRow(const QList<Node*> &items)
 
 void TileModel::appendRow(Node *item)
 {
+	int c = rootItem->childCount();
+	
+	beginInsertRows( QModelIndex(), c, c );
+	
 	rootItem->appendRow(item);
+
+	endInsertRows();
 }
 
 bool TileModel::removeRows( int row, int count, const QModelIndex &parent )
@@ -270,6 +276,15 @@ bool TileModel::hasTileSet( const QString &name )
 	}
 
 	return false;
+}
+
+void TileModel::clear()
+{
+	int c = rootItem->childCount();
+	if( c == 0 )
+		return;
+
+	removeRows( 0, c );
 }
 
 void TileModel::selectFilenameDisplay(bool selected)
