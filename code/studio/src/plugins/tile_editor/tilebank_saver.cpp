@@ -189,6 +189,8 @@ public:
 			setupDisplacementTiles( set, n );
 
 			set->setOriented( n->isOriented() );
+
+			set->setTileVegetableDescFileName( n->vegetSet().toUtf8().constData() );
 		}
 
 		// Add tilesets to lands

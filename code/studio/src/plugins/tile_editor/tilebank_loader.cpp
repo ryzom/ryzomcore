@@ -125,6 +125,8 @@ public:
 		loadTilesDisplacement( set, static_cast< TileTypeNode* >( node->child( 3 ) ) );
 
 		node->setOriented( set->getOriented() );
+
+		node->setVegetSet( set->getTileVegetableDescFileName().c_str() );
 	}
 
 	void loadTileSets( TileModel *model )
