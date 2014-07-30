@@ -63,6 +63,7 @@ class U3dMouseListener;
 class ULight;
 class UAnimationSet;
 class UWaterEnvMap;
+class CRenderTargetManager;
 
 typedef void (*emptyProc)(void);
 
@@ -321,6 +322,8 @@ public:
 	virtual	void			setFontManagerMaxMemory(uint maxMem)=0;
 	/// get cahce information.
 	virtual		std::string getFontManagerCacheInformation() const =0;
+
+	virtual CRenderTargetManager &getRenderTargetManager() =0;
 
 
 	/** Create a new texture file, searching in CPath. NB: by default a textureFile created with this

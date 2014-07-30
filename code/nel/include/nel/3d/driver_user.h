@@ -34,7 +34,7 @@
 #include "nel/3d/vertex_stream_manager.h"
 #include "nel/3d/async_texture_manager.h"
 #include "nel/3d/lod_character_manager.h"
-
+#include "nel/3d/render_target_manager.h"
 
 namespace NL3D
 {
@@ -71,6 +71,7 @@ protected:
 	bool					_WindowInit;
 	CMatrixContext			_CurrentMatrixContext;
 	CFontManager			_FontManager;
+	CRenderTargetManager	_RenderTargetManager;
 	// Components List.
 	typedef	CPtrSet<CTextureUser>		TTextureSet;
 	typedef	CPtrSet<CTextContextUser>	TTextContextSet;
@@ -252,6 +253,8 @@ public:
 	virtual	void			setFontManagerMaxMemory(uint maxMem);
 	/// get cahce information.
 	virtual		std::string getFontManagerCacheInformation() const ;
+
+	virtual CRenderTargetManager &getRenderTargetManager() { return _RenderTargetManager; }
 
 
 	/** Create a new texture file, searching in CPath.

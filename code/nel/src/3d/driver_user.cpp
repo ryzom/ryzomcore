@@ -192,6 +192,7 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	_PBTri.lock (iba);
 	iba.setTri(0, 0, 1, 2);
 
+	_RenderTargetManager.m_Driver = this;
 	_ShapeBank._DriverUser = this;
 
 	NL_SET_IB_NAME(_PBLine, "CDriverUser::_PBLine");
@@ -1357,6 +1358,7 @@ void			CDriverUser::swapBuffers()
 	NL3D_HAUTO_SWAP_DRIVER;
 
 	_Driver->swapBuffers();
+	_RenderTargetManager.cleanup();
 }
 
 // ***************************************************************************

@@ -65,10 +65,12 @@ public:
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver);
-	void releaseTextures();
+	/*void releaseTextures();
 	void initTextures();
 	void setTextures();
-	void verifyTextures();
+	void verifyTextures();*/
+	void getTextures();
+	void recycleTextures();
 
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height);
@@ -116,9 +118,7 @@ private:
 	CFrustum m_Frustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
 
-	NLMISC::CSmartPtr<NL3D::ITexture> m_LeftTex;
 	NL3D::CTextureUser *m_LeftTexU;
-	NLMISC::CSmartPtr<NL3D::ITexture> m_RightTex;
 	NL3D::CTextureUser *m_RightTexU;
 	NL3D::UMaterial m_Mat;
 	NLMISC::CQuadUV m_QuadUV;
