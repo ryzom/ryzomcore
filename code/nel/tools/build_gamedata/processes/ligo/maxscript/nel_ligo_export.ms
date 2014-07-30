@@ -233,6 +233,15 @@ fn exportCollisionsFromZone outputNelDir filename =
 		if (isToBeExportedCollision m) == true then
 			selectmore m
 	)
+	for node in objects where classOf node == XRefObject do
+	(
+		sourceObject = node.GetSourceObject false
+		if (superclassOf sourceObject == GeometryClass) then
+		(
+			if (isToBeExportedCollision node) == true then
+				selectmore node
+		)
+	)
 	
 	-- Export the collision
 	if (NelExportCollision ($selection as array) outputNelDir) == false then
@@ -311,10 +320,10 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 
 	-- Scan all the ig in this project
 	nlerror("Scan all the ig in this project")
-	for node in geometry do
+	for node in objects do
 	(
 		ig = getIg node
-		nlerror("geometry node")
+		nlerror("object node")
 		if ( (ig != undefined) and (ig != "") and ( (igName == "") or (ig == igName) ) ) then
 		(
 			nlerror("Found something with an IG name")
@@ -347,71 +356,6 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 		)
 	)
 
-	for node in lights do
-	(
-		ig = getIg node
-
-		if ( (ig != undefined) and (ig != "") and ( (igName == "") or ( ig == igName) ) ) then
-		(
-			-- Transition ?
-			if ( ig == IgName) then
-			(
-				-- Transform the object
-				node.transform = buildTransitionMatrixObj node.transform transitionZone cellSize
-			)
-
-			-- Found ?
-			found = false
-
-			-- Already found ?
-			for j = 1 to ig_array.count do
-			(
-				if (ig_array[j]==ig) then
-				(								
-					found = true
-				)
-			)
-
-			-- Found ?
-			if (found == false) then
-			(
-				append ig_array ig
-			)
-		)
-	)
-
-	for node in helpers do
-	(
-		ig = getIg node
-		if ( (ig != undefined) and (ig != "") and ( (igName == "") or (ig == igName) ) ) then
-		(
-			-- Transition ?
-			if (ig == IgName) then
-			(
-				-- Transform the object
-				node.transform = buildTransitionMatrixObj node.transform transitionZone cellSize
-			)
-
-			-- Found ?
-			found = false
-			-- Already found ?
-			for j = 1 to ig_array.count do
-			(
-				if (ig_array[j]==ig) then
-				(								
-					found = true
-				)
-			)
-			-- Found ?
-			if (found == false) then
-			(
-				append ig_array ig
-			)
-		)
-	)
-
-
-
 	-- Have some ig ?
 	if (ig_array.count != 0) then
 	(
@@ -429,6 +373,29 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 					-- Select none
 					max select none
 
+					for node in objects where classOf node == XRefObject do
+					(
+						if ((getIg node) == ig_array[ig]) then
+						(
+							sourceObject = node.GetSourceObject false
+							if (classOf sourceObject == XRefObject) then
+							(
+								nlerror("FAIL XREF STILL XREF " + node.name)
+							)
+							else if (superclassOf sourceObject == GeometryClass) then
+							(
+								selectmore node
+							)
+							else if (superclassOf sourceObject == Helper) then
+							(
+								selectmore node
+							)
+							else if (superclassOf sourceObject == Light) then
+							(
+								selectmore node
+							)
+						)
+					)
 					-- Select all node in this ig
 					for node in geometry do
 					(
@@ -528,6 +495,7 @@ try
 				
 				nlerror ("Scanning file "+curFileName+" ...")
 				mergeMaxFile curFileName quiet:true
+				objXRefMgr.UpdateAllRecords()
 
 				-- Unhide category
 				unhidecategory()
@@ -674,6 +642,7 @@ try
 				
 				nlerror ("Scanning file "+curFileName+" ...")
 				mergeMaxFile curFileName quiet:true
+				objXRefMgr.UpdateAllRecords()
 				
 				-- Unhide category
 				unhidecategory()
@@ -888,6 +857,7 @@ try
 				
 				nlerror ("Scanning file "+curFileName+" ...")
 				mergeMaxFile curFileName quiet:true
+				objXRefMgr.UpdateAllRecords()
 
 				-- Unhide category
 				unhidecategory()
