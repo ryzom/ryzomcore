@@ -259,6 +259,8 @@ void TileEditorMainWindow::open()
 
 	// Put the loaded data into the GUI
 	onTileBankLoaded();
+
+	m_fileName = fn;
 }
 
 void TileEditorMainWindow::onZoomFactor(int level)
