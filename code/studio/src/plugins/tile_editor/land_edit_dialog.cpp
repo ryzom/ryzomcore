@@ -20,6 +20,17 @@ void LandEditDialog::getSelectedTileSets( QStringList &l ) const
 	}
 }
 
+void LandEditDialog::setSelectedTileSets( QStringList &l )
+{
+	tilesetLV->clear();
+
+	QStringListIterator itr( l );
+	while( itr.hasNext() )
+	{
+		tilesetLV->addItem( itr.next() );
+	}
+}
+
 void LandEditDialog::setTileSets( const QStringList &l )
 {
 	tilesetCB->clear();

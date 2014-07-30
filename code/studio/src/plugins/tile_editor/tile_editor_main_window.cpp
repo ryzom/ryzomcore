@@ -483,6 +483,7 @@ void TileEditorMainWindow::onLandEdit()
 	Land &l = m_lands[ r ];
 
 	LandEditDialog d;
+	d.setSelectedTileSets( l.tilesets );
 	d.setTileSets( ts );
 	int result = d.exec();
 

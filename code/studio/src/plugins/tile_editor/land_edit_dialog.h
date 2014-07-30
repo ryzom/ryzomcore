@@ -13,6 +13,8 @@ public:
 	~LandEditDialog();
 
 	void getSelectedTileSets( QStringList &l ) const;
+	void setSelectedTileSets( QStringList &l );
+
 	void setTileSets( const QStringList &l );
 
 private:
