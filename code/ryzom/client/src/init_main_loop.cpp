@@ -125,6 +125,8 @@ namespace R2
 	extern bool ReloadUIFlag;
 }
 
+extern bool SetMousePosFirstTime;
+
 extern EGSPD::CSeason::TSeason	ManualSeasonValue;
 UTextureFile			*LoadingBitmap = NULL;
 UTextureFile			*LoadingBitmapFull = NULL;
@@ -1253,6 +1255,7 @@ void initMainLoop()
 //	NLMEMORY::CheckHeap (true);
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
+	SetMousePosFirstTime = true;
 	InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required

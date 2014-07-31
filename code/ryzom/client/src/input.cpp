@@ -30,7 +30,6 @@
 // 3D
 #include "nel/3d/u_driver.h"
 // Misc
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/mouse_smoother.h"
 #include "nel/misc/system_utils.h"
 // Game Share
@@ -54,7 +53,6 @@ extern CActionsManager			Actions;		// Actions Manager.
 ////////////
 // GLOBAL //
 ////////////
-IMouseDevice					*MouseDevice = NULL;
 bool							MouseHardware = false;
 bool							MouseFreeLook = false;
 float							MouseCursorSpeed = 1.f;
@@ -81,93 +79,40 @@ bool	InitMouseWithCursor (bool hardware)
 {
 	Driver->showCursor(false);
 
-	// First init ?
-	if (MouseDevice)
-	{
-		// No.. change soft to hard or hard to soft ?
-		if (hardware ^ MouseHardware)
-		{
-			// Ok, reinit the mouse
-			Driver->enableLowLevelMouse (false, false);
-			MouseDevice = NULL;
-			MouseHardware = false;
-		}
-	}
-
 	// Get the new mouse state
 	MouseHardware = hardware;
 	CViewPointer::setHWMouse( hardware );
 
-	// Reinit ?
-	if (MouseDevice == NULL)
+	// Update mouse information
+	UpdateMouse ();
+
+	if (InitMouseFirstTime)
 	{
-		if (!ClientCfg.DisableDirectInput)
+		InitMouseFirstTime = false;
+	}
+	else
+	{
+		if (!MouseFreeLook)
 		{
-			// mouse capture not taken in account for hardware mouse
-			MouseDevice = Driver->enableLowLevelMouse(true, hardware);
-			if (!MouseDevice)
-				return false;
-		}
-
-		// Update mouse information
-		UpdateMouse ();
-
-		if (InitMouseFirstTime)
-		{
-			InitMouseFirstTime = false;
-		}
-		else
-		{
-			if (!MouseFreeLook)
+			// Get the current mouse position
+			CInterfaceManager *pIm = CInterfaceManager::getInstance();
+			CViewPointer *vp = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+			Driver->showCursor(hardware);
+			if (vp)
 			{
-				// Get the current mouse position
-				if (hardware)
+				float x = (float) vp->getX();
+				float y = (float) vp->getY();
+				// First, hide the hardware mouse
+				uint width = Driver->getWindowWidth();
+				uint height = Driver->getWindowHeight();
+				if (SetMousePosFirstTime)
 				{
-					Driver->showCursor(true);
-
-					CViewPointer *pointer = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-					if (pointer)
-					{
-						float x = (float)pointer->getX()/(float)Driver->getWindowWidth();
-						float y = (float)pointer->getY()/(float)Driver->getWindowHeight();
-
-						if (SetMousePosFirstTime)
-						{
-							SetMousePosFirstTime = false;
-						}
-						else
-						{
-							Driver->setMousePos(x, y);
-							nlwarning("mouse pos %f,%f", x, y);
-						}
-
-					}
-				}
-				else
-				{
-					CInterfaceManager *pIm = CInterfaceManager::getInstance();
-					CViewPointer *vp = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-					Driver->showCursor(false);
 					SetMousePosFirstTime = false;
-					if (vp)
-					{
-						float x = (float) vp->getX();
-						float y = (float) vp->getY();
-						// First, hide the hardware mouse
-						if (MouseDevice)
-						{
-							MouseDevice->setMousePos(x, y);
-						}
-						else
-						{
-							uint width = Driver->getWindowWidth();
-							uint height = Driver->getWindowHeight();
-							if (width != 0 && height != 0)
-							{
-								Driver->setMousePos(x / width, y / height);
-							}
-						}
-					}
+				}
+				else if (width != 0 && height != 0)
+				{
+					nlwarning("mouse pos %u, %u", x, y);
+					Driver->setMousePos(x / width, y / height);
 				}
 			}
 		}
@@ -187,45 +132,6 @@ bool	IsMouseCursorHardware ()
 // Set the mouse mode. Call this method once per frame to update window size
 void	UpdateMouse ()
 {
-	// Freelook ?
-	if (MouseFreeLook)
-	{
-		// Raw mode
-		if (MouseDevice)
-		{
-			MouseDevice->setMessagesMode(IMouseDevice::RawMode);
-			MouseDevice->setMouseAcceleration(ClientCfg.FreeLookAcceleration);
-		}
-		else
-		{
-			// no mouse device implementation on X11 and Cocoa, emulate raw mode
-			Driver->emulateMouseRawMode(true);
-		}
-	}
-	else
-	{
-		// Set the mouse properties
-		if (MouseDevice)
-		{
-			// Get the driver size
-			uint32 width, height;
-			Driver->getWindowSize(width, height);
-
-			MouseDevice->setMessagesMode(IMouseDevice::NormalMode);
-			MouseDevice->setMouseMode(IMouseDevice::XAxis, IMouseDevice::Clamped);
-			MouseDevice->setMouseMode(IMouseDevice::YAxis, IMouseDevice::Clamped);
-			CRect window (0, 0, width, height);
-			MouseDevice->setMouseFrame(window);
-			MouseDevice->setFactors(1.f/std::max((float)width, 1.0f), 1.f/std::max((float)height, 1.0f));
-			MouseDevice->setMouseSpeed(MouseCursorSpeed);
-			MouseDevice->setMouseAcceleration(MouseCursorAcceleration);
-		}
-		else
-		{
-			// no mouse device implementation on X11 and Cocoa, emulate raw mode
-			Driver->emulateMouseRawMode(false);
-		}
-	}
 	if (!Driver->isSystemCursorCaptured())
 	{
 		DownMouseButtons = 0;
@@ -303,19 +209,7 @@ void	SetMouseCursor (bool updatePos)
 
 		if (updatePos)
 		{
-			if (MouseDevice)
-			{
-				MouseDevice->setMousePos((float)ix, (float)iy);
-			}
-			else
-			{
-				Driver->setMousePos(x, y);
-			}
-
-			if (MouseHardware)
-			{
-				Driver->setMousePos(x, y);
-			}
+			Driver->setMousePos(x, y);
 		}
 
 		// Update the interface pointer
@@ -404,25 +298,18 @@ CNiceInputAuto::CNiceInputAuto()
 {
 	if (_Count == 0)
 	{
-
-		Driver->enableLowLevelMouse(false, false); // but ignore direct input (win 32 msg only)
-
-
 		Driver->setCursor("curs_default.tga", CRGBA::White, 0, 0x15, 0x18);
 		Driver->showCursor(true); // keep cursor visible in windowed mode
-		MouseDevice = NULL;
-		Driver->enableLowLevelKeyboard (false);
 	}
-	++ _Count;
+	++_Count;
 }
 
 CNiceInputAuto::~CNiceInputAuto()
 {
-	-- _Count;
+	--_Count;
 	nlassert(_Count >= 0);
 	if (_Count == 0)
 	{
-		InitMouseWithCursor (ClientCfg.HardwareCursor);
-		Driver->enableLowLevelKeyboard (!ClientCfg.DisableDirectInputKeyboard); // the return value has already been tested at startup
+		InitMouseWithCursor(ClientCfg.HardwareCursor);
 	}
 }

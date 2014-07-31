@@ -75,7 +75,6 @@ private Q_SLOTS:
 	void setBackgroundColor();
 
 	void submitEvents(NLMISC::CEventServer &server, bool allWindows) { }
-	void emulateMouseRawMode(bool) { }
 
 protected:
 	virtual void resizeEvent(QResizeEvent *resizeEvent);

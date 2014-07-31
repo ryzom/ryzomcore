@@ -165,7 +165,6 @@ using namespace std;
 // EXTERN //
 ////////////
 extern UDriver					*Driver;
-extern IMouseDevice				*MouseDevice;
 extern UScene					*Scene;
 extern UScene					*SceneRoot;
 extern ULandscape				*Landscape;
@@ -661,7 +660,7 @@ void updateWeather()
 		updateClouds();
 	}
 	#endif
-	
+
 	ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
 
 	// TODO: ZBuffer clear was originally before this, but should not be necessary normally.
@@ -687,7 +686,7 @@ void updateWeather()
 		Driver->setPolygonMode(oldMode);
 	}
 	#endif
-	
+
 	// Update new sky
 	s_SkyMode = NoSky;
 	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
@@ -1397,7 +1396,7 @@ bool mainLoop()
 			MainCam.setPos(mat.getPos());
 			MainCam.setRotQuat(mat.getRot());
 		}
-		if (StereoDisplay) 
+		if (StereoDisplay)
 		{
 			StereoDisplay->updateCamera(0, &MainCam);
 			if (SceneRoot)
@@ -1596,12 +1595,12 @@ bool mainLoop()
 			{
 				// Update water env map (happens when continent changed etc)
 				updateWaterEnvMap();
-				
+
 				// Update weather
 				updateWeather();
 			}
 		}
-		
+
 		uint i = 0;
 		uint bloomStage = 0;
 		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
@@ -1635,13 +1634,13 @@ bool mainLoop()
 
 			// Commit camera changes
 			commitCamera();
-			
+
 			//////////////////////////
 			// RENDER THE FRAME  3D //
 			//////////////////////////
 
 			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
-				
+
 			if (!StereoDisplay || StereoDisplay->wantClear())
 			{
 				if (Render)
@@ -1677,7 +1676,7 @@ bool mainLoop()
 							s_ForceFullDetail.backup();
 							s_ForceFullDetail.set();
 						}
-						
+
 						// Render scene
 						renderScene();
 
@@ -2446,7 +2445,7 @@ bool mainLoop()
 			connectionState = NetMngr.getConnectionState();
 
 			CLuaManager::getInstance().executeLuaScript("game:onFarTpEnd()");
-		} 
+		}
 		///////////////
 		// <- FAR_TP //
 		///////////////
@@ -3184,7 +3183,7 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 		else
 			fromString(args[0], on);
 	}
-	
+
 	CGroupCell::setDebugUICell( on );
 	DebugUIView = on;
 	DebugUICtrl = on;

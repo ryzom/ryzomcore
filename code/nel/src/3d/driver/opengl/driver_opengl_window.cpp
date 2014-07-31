@@ -38,8 +38,6 @@
 #	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
 
-#include "nel/misc/mouse_device.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
 
@@ -255,7 +253,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				unsigned long nitems_return = 0;
 				unsigned long bytes_after_return = 0;
 				long *data = NULL;
-			
+
 				int status = XGetWindowProperty(driver->_dpy, driver->_win, XA_FRAME_EXTENTS, 0, 4, False, XA_CARDINAL, &type_return, &format_return, &nitems_return, &bytes_after_return, (unsigned char**)&data);
 
 				// succeeded to retrieve decoration size
@@ -270,7 +268,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 					driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
 					driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
 				}
-				
+
 				// don't allow negative decoration sizes
 				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
 				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
@@ -939,20 +937,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	/// try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _win, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 #elif defined(NL_OS_MAC)
 
@@ -2469,7 +2453,7 @@ bool CDriverGL::createContext()
 	if (_EglContext == EGL_NO_CONTEXT)
 	{
 		return false;
-	}   
+	}
 
 	// Make the context current
 	if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
