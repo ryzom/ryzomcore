@@ -2401,10 +2401,11 @@ bool CDriverGL::copyTargetToTexture (ITexture *tex,
 bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getRenderTargetSize)
-	if (_TextureTarget)
+	NLMISC::CSmartPtr<ITexture> tex = _TextureTarget ? _TextureTarget : (_RenderTargetFBO ? _RenderTargetFBO : NULL);
+	if (tex)
 	{
-		width = _TextureTarget->getWidth();
-		height = _TextureTarget->getHeight();
+		width = tex->getWidth();
+		height = tex->getHeight();
 	}
 	else
 	{

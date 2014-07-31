@@ -53,6 +53,7 @@ struct CRenderTargetDescInt
 public:
 	uint Width;
 	uint Height;
+	bool Mode2D;
 	NL3D::CTextureUser *TextureUser;
 	NLMISC::CSmartPtr<NL3D::ITexture> TextureInterface;
 	bool InUse;
@@ -71,13 +72,13 @@ CRenderTargetManager::~CRenderTargetManager()
 	cleanup();
 }
 
-NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint height)
+NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint height, bool mode2D)
 {
 	// Find or create a render target, short loop so no real optimization
 	for (std::vector<CRenderTargetDescInt *>::iterator it(m_RenderTargets.begin()), end(m_RenderTargets.end()); it != end; ++it)
 	{
 		CRenderTargetDescInt *desc = *it;
-		if (!desc->InUse && desc->Width == width && desc->Height == height)
+		if (!desc->InUse && desc->Width == width && desc->Height == height && desc->Mode2D == mode2D)
 		{
 			desc->InUse = true;
 			desc->Used = true;
@@ -88,7 +89,9 @@ NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint heigh
 	nldebug("3D: Create new render target (%u x %u)", width, height);
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
 	CRenderTargetDescInt *desc = new CRenderTargetDescInt();
-	desc->TextureInterface = new CTextureBloom(); // LOL
+	CTextureBloom *tex = new CTextureBloom(); // LOL
+	tex->mode2D(mode2D);
+	desc->TextureInterface = tex;
 	desc->TextureInterface->setRenderTarget(true);
 	desc->TextureInterface->setReleasable(false);
 	desc->TextureInterface->resize(width, height);
@@ -100,6 +103,7 @@ NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint heigh
 	nlassert(!drvInternal->isTextureRectangle(desc->TextureInterface)); // Not allowed, we only support NPOT for render targets now.
 	desc->Width = width;
 	desc->Height = height;
+	desc->Mode2D = mode2D;
 	desc->Used = true;
 	desc->InUse = true;
 	m_RenderTargets.push_back(desc);

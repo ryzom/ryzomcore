@@ -64,7 +64,7 @@ public:
 	CRenderTargetManager();
 	~CRenderTargetManager();
 
-	NL3D::CTextureUser *getRenderTarget(uint width, uint height);
+	NL3D::CTextureUser *getRenderTarget(uint width, uint height, bool mode2D = false);
 	void recycleRenderTarget(NL3D::CTextureUser *renderTarget);
 
 	void cleanup();
