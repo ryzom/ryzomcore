@@ -51,9 +51,13 @@ namespace NL3D {
 struct CRenderTargetDescInt
 {
 public:
+	// Options
 	uint Width;
 	uint Height;
 	bool Mode2D;
+	UTexture::TUploadFormat Format;
+	
+	// Data
 	NL3D::CTextureUser *TextureUser;
 	NLMISC::CSmartPtr<NL3D::ITexture> TextureInterface;
 	bool InUse;
@@ -72,13 +76,13 @@ CRenderTargetManager::~CRenderTargetManager()
 	cleanup();
 }
 
-NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint height, bool mode2D)
+NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint height, bool mode2D, UTexture::TUploadFormat format)
 {
 	// Find or create a render target, short loop so no real optimization
 	for (std::vector<CRenderTargetDescInt *>::iterator it(m_RenderTargets.begin()), end(m_RenderTargets.end()); it != end; ++it)
 	{
 		CRenderTargetDescInt *desc = *it;
-		if (!desc->InUse && desc->Width == width && desc->Height == height && desc->Mode2D == mode2D)
+		if (!desc->InUse && desc->Width == width && desc->Height == height && desc->Mode2D == mode2D && desc->Format == format)
 		{
 			desc->InUse = true;
 			desc->Used = true;
@@ -94,6 +98,7 @@ NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint heigh
 	desc->TextureInterface = tex;
 	desc->TextureInterface->setRenderTarget(true);
 	desc->TextureInterface->setReleasable(false);
+	desc->TextureInterface->setUploadFormat((ITexture::TUploadFormat)(uint32)format);
 	desc->TextureInterface->resize(width, height);
 	desc->TextureInterface->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
 	desc->TextureInterface->setWrapS(ITexture::Clamp);
@@ -104,6 +109,7 @@ NL3D::CTextureUser *CRenderTargetManager::getRenderTarget(uint width, uint heigh
 	desc->Width = width;
 	desc->Height = height;
 	desc->Mode2D = mode2D;
+	desc->Format = format;
 	desc->Used = true;
 	desc->InUse = true;
 	m_RenderTargets.push_back(desc);

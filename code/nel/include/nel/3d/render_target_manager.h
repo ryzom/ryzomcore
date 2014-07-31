@@ -36,7 +36,7 @@
 #include <nel/misc/geom_ext.h>
 
 // Project includes
-// ...
+#include <nel/3d/u_texture.h>
 
 namespace NL3D {
 
@@ -64,7 +64,7 @@ public:
 	CRenderTargetManager();
 	~CRenderTargetManager();
 
-	NL3D::CTextureUser *getRenderTarget(uint width, uint height, bool mode2D = false);
+	NL3D::CTextureUser *getRenderTarget(uint width, uint height, bool mode2D = false, UTexture::TUploadFormat format = UTexture::Auto);
 	void recycleRenderTarget(NL3D::CTextureUser *renderTarget);
 
 	void cleanup();
