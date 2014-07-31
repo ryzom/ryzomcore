@@ -753,7 +753,13 @@ bool CInstanceGroup::addToSceneWhenAllShapesLoaded (CScene& scene, IDriver *driv
 		{
 			_Instances[i]->clipUnlinkFromAll();
 			for (j = 0; j < _InstancesInfos[i].Clusters.size(); ++j)
-				_ClusterInstances[_InstancesInfos[i].Clusters[j]]->clipAddChild( _Instances[i] );
+			{
+				uint32 clusterInst = _InstancesInfos[i].Clusters[j];
+				if (clusterInst < _ClusterInstances.size())
+					_ClusterInstances[clusterInst]->clipAddChild( _Instances[i] );
+				else
+					nlwarning("IG: BUG: Cluster infos size %u, indexing %u", (uint32)_ClusterInstances.size(), clusterInst);
+			}
 			// For the first time we have to set all the instances to NOT move (and not be rebinded)
 			_Instances[i]->freeze();
 			_Instances[i]->setClusterSystem (this);
