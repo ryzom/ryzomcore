@@ -2314,10 +2314,15 @@ bool CDriverGL::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 width
 
 		if(tex->isBloomTexture() && supportBloomEffect())
 		{
+			// NOTE: No support for mip map level here!
+
 			uint32 w, h;
 			getWindowSize(w, h);
 
 			getViewport(_OldViewport);
+
+			if (!width) width = tex->getWidth();
+			if (!height) height = tex->getHeight();
 
 			CViewport newVP;
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
@@ -2401,7 +2406,7 @@ bool CDriverGL::copyTargetToTexture (ITexture *tex,
 bool CDriverGL::getRenderTargetSize (uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL_getRenderTargetSize)
-	NLMISC::CSmartPtr<ITexture> tex = _TextureTarget ? _TextureTarget : (_RenderTargetFBO ? _RenderTargetFBO : NULL);
+	NLMISC::CSmartPtr<ITexture> tex = _RenderTargetFBO ? _RenderTargetFBO : (_TextureTarget ? _TextureTarget : NULL);
 	if (tex)
 	{
 		width = tex->getWidth();
