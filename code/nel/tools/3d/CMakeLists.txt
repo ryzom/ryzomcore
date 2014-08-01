@@ -1,40 +1,42 @@
 
 IF(WITH_NEL_TOOLS)
-
+  IF(WITH_3D)
+    SUBDIRS(
+      anim_builder
+      animation_set_builder
+      build_clod_bank
+      build_clodtex
+      build_coarse_mesh
+      build_far_bank
+      build_shadow_skin
+      build_smallbank
+      cluster_viewer
+      file_info
+      ig_add
+      ig_elevation
+      ig_info
+      ig_lighter
+      lightmap_optimizer
+      zone_dependencies
+      zone_ig_lighter
+      zone_lighter
+      zone_welder
+      shapes_exporter
+      shape2obj
+      zone_check_bind
+      zone_dump
+      zviewer)
+  ENDIF()
+    
   SUBDIRS(
-    build_coarse_mesh
-    build_far_bank
-    build_smallbank
-    ig_lighter
-    ig_elevation
-    lightmap_optimizer
-    zone_dependencies
-    zone_ig_lighter 
-    zone_lighter
-    zone_welder
-    animation_set_builder
-    anim_builder
-    build_clod_bank
-    build_clodtex
     build_interface
-    build_shadow_skin
-    cluster_viewer
-    file_info
     get_neighbors
-    ig_add
-    ig_info
-    shapes_exporter
     tga_cut
-    tga_resize
-    shape2obj
-    zone_check_bind
-    zone_dump
-    zviewer)
-
-ENDIF(WITH_NEL_TOOLS)
+    tga_resize)
+ENDIF()
 
 # For tools selection of only max plugins
-IF(WIN32)  
+IF(WIN32 AND WITH_3D)
   IF(MFC_FOUND)
     ADD_SUBDIRECTORY(object_viewer)
     IF(WITH_NEL_MAXPLUGIN)
@@ -44,9 +46,9 @@ IF(WIN32)
       ENDIF(MAXSDK_FOUND)
     ENDIF(WITH_NEL_MAXPLUGIN)
   ENDIF(MFC_FOUND)
-ENDIF(WIN32)
+ENDIF()
 
-IF(WITH_NEL_TOOLS)
+IF(WITH_NEL_TOOLS AND WITH_3D)
   IF(WIN32)
 #    ADD_SUBDIRECTORY(lightmap_optimizer)  
     IF(MFC_FOUND)
@@ -71,5 +73,5 @@ IF(WITH_NEL_TOOLS)
   #crash_log_analyser
   #shapes_exporter
 
-ENDIF(WITH_NEL_TOOLS)
+ENDIF()
 
