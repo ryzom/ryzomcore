@@ -34,6 +34,7 @@ public:
 		TileDiffuse = 0,
 		TileAdditive = 1,
 		TileAlpha = 2,
+		TileChannelCount = 3
 	};
 
 	enum TNodeTileType

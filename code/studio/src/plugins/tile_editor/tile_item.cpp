@@ -264,23 +264,71 @@ void TileTypeNode::reindex()
 
 ///////////////////////////////////////////////////
 
+
+class TileItemNodePvt
+{
+public:
+	
+	bool loadImage( TileModel::TTileChannel channel, const QString &fn )
+	{
+		QPixmap temp;
+		bool b = temp.load( fn );
+
+		if( !b )
+			return false;
+
+		pixmaps[ channel ] = temp;
+		
+		return true;
+	}
+
+	void clearImage( TileModel::TTileChannel channel )
+	{
+		pixmaps[ channel ] = QPixmap();
+	}
+
+	const QPixmap& pixMap( TileModel::TTileChannel channel ) const{
+		return pixmaps[ channel ];
+	}
+
+private:
+	QPixmap pixmaps[ TileModel::TileChannelCount ];
+
+};
+
 TileModel::TTileChannel TileItemNode::s_displayChannel = TileModel::TileDiffuse;
 
 TileItemNode::TileItemNode(int tileId, TileModel::TTileChannel channel, QString filename, Node *parent) : m_tileId(tileId)
 {
-	m_tileFilename[channel] = filename;
 	m_parentItem = parent;
 	//nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toAscii().data());
+
+	pvt = new TileItemNodePvt();
+
+	setTileFilename( channel, filename );
 }
 
 TileItemNode::~TileItemNode()
 {
+	delete pvt;
+	pvt = NULL;
+
 	qDeleteAll(m_childItems);
 }
 
-void TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString filename)
+bool TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString filename)
 {
+	QString fn = filename;
+
+	if( filename.isEmpty() || ( filename == "empty" ) )
+		fn = ":/placeHolder/images/empty_image.png";
+
+	bool b = pvt->loadImage( channel, fn );
+	if( !b )
+		return false;
+
 	m_tileFilename[channel] = filename;
+	return true;
 }
 
 QString TileItemNode::getTileFilename(TileModel::TTileChannel channel)
@@ -295,8 +343,7 @@ QString TileItemNode::getTileFilename(TileModel::TTileChannel channel)
 
 QVariant TileItemNode::data(int column, int role) const
 {	
-	// find some way to know which file/bitmap to display
-	QString tileFilename = m_tileFilename[s_displayChannel];
+	QString tileFilename = m_tileFilename[ TileItemNode::s_displayChannel ];
 
 	if(role == TileModel::TilePixmapRole || role == Qt::DecorationRole)
 	{
@@ -307,17 +354,12 @@ QVariant TileItemNode::data(int column, int role) const
 		// Retrieve the target tile size.
 		uint32 tileSize = TileModel::getTileTypeSize(parent->getTileType());
 
-		if(tileFilename.isEmpty() || tileFilename == "empty")
-			tileFilename = ":/placeHolder/images/empty_image.png";
-
-		QPixmap pixmap;// = new QPixmap();
-		if(!pixmap.load(tileFilename))
-			nlinfo("failed to load %s", tileFilename.toAscii().data());
-
 		if(TileModel::CurrentZoomFactor == TileModel::TileZoom200)
 			tileSize *= 2;
 		else if(TileModel::CurrentZoomFactor == TileModel::TileZoom50)
 			tileSize /= 2;
+
+		QPixmap pixmap = pvt->pixMap( TileItemNode::s_displayChannel );
 
 		pixmap.scaled(tileSize, tileSize);
 
