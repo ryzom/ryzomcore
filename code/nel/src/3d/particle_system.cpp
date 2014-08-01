@@ -422,6 +422,11 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 	NL_PS_FUNC_MAIN(CParticleSystem_step)
 	CHECK_INTEGRITY
 	OwnerModel = &model;
+	if (!_CoordSystemInfo.Matrix)
+	{
+		nlwarning("3D: BUG: CParticleSystem::step -> !_CoordSystemInfo.Matrix");
+		return;
+	}
 	nlassert(_CoordSystemInfo.Matrix); // matrix not set for position of system
 	if (_UserCoordSystemInfo)
 	{
