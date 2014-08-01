@@ -361,7 +361,7 @@ QVariant TileItemNode::data(int column, int role) const
 
 		QPixmap pixmap = pvt->pixMap( TileItemNode::s_displayChannel );
 
-		pixmap.scaled(tileSize, tileSize);
+		pixmap = pixmap.scaled(tileSize, tileSize);
 
 		return pixmap;
 	}
