@@ -123,6 +123,9 @@ public:
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const;
 
+	/// Set the GUI reference
+	virtual void setInterfaceMatrix(const NL3D::CMatrix &matrix);
+
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
 	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const;
 
@@ -134,21 +137,23 @@ public:
 	/// Set the scale of the game in units per meter
 	virtual void setScale(float s);
 
+	/// Calculates internal camera information based on the reference camera
+	void initCamera(uint cid, const NL3D::UCamera *camera);
+	/// Render GUI
+	void renderGUI();
+
+	/// Checks if the device used by this class was actually created
+	bool isDeviceCreated();
 
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
 	static bool isLibraryInUse();
 	static void releaseLibrary();
 
-
-	/// Calculates internal camera information based on the reference camera
-	void initCamera(uint cid, const NL3D::UCamera *camera);
-	/// Checks if the device used by this class was actually created
-	bool isDeviceCreated();
-
 private:
 	CStereoOVRDevicePtr *m_DevicePtr;
 	int m_Stage;
 	int m_SubStage;
+	CViewport m_RegularViewport;
 	CViewport m_LeftViewport;
 	CViewport m_RightViewport;
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
@@ -156,12 +161,13 @@ private:
 	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_OriginalFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
+	CMatrix m_InterfaceCameraMatrix;
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
 	UDriver *m_Driver;
-	NLMISC::CSmartPtr<NL3D::ITexture> m_BarrelTex;
-	NL3D::CTextureUser *m_BarrelTexU;
+	NL3D::CTextureUser *m_SceneTexture;
 	NL3D::UMaterial m_BarrelMat;
+	NL3D::CTextureUser *m_GUITexture;
 	NLMISC::CQuadUV m_BarrelQuadLeft;
 	NLMISC::CQuadUV m_BarrelQuadRight;
 	NLMISC::CRefPtr<CPixelProgramOVR> m_PixelProgram;

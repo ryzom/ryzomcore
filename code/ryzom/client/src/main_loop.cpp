@@ -1386,8 +1386,20 @@ bool mainLoop()
 		MainCam.setRotQuat(View.currentViewQuat());
 		if (StereoHMD)
 		{
+			CMatrix camMatrix;
+			camMatrix.translate(MainCam.getMatrix().getPos());
+			CVector dir = MainCam.getMatrix().getJ();
+			dir.z = 0;
+			dir.normalize();
+			if (dir.y < 0)
+				camMatrix.rotateZ(float(NLMISC::Pi+asin(dir.x)));
+			else
+				camMatrix.rotateZ(float(NLMISC::Pi+NLMISC::Pi-asin(dir.x)));
+
+			StereoHMD->setInterfaceMatrix(camMatrix);
+
 			NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
-			NLMISC::CMatrix camMatrix = MainCam.getMatrix();
+			// NLMISC::CMatrix camMatrix = MainCam.getMatrix();
 			NLMISC::CMatrix hmdMatrix;
 			hmdMatrix.setRot(hmdOrient);
 			NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
@@ -1645,7 +1657,7 @@ bool mainLoop()
 			{
 				if (Render)
 				{
-					if (ClientCfg.Bloom)
+					if (!StereoDisplay && ClientCfg.Bloom) // NO VR BLOOMZ
 					{
 						nlassert(bloomStage == 0);
 						// set bloom parameters before applying bloom effect
@@ -1695,7 +1707,7 @@ bool mainLoop()
 					// Render
 					if (Render)
 					{
-						if (ClientCfg.Bloom && bloomStage == 1)
+						if (!StereoDisplay && ClientCfg.Bloom && bloomStage == 1) // NO VR BLOOMZ
 						{
 							// End the actual bloom effect visible in the scene.
 							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
@@ -1822,7 +1834,7 @@ bool mainLoop()
 
 					// special case in OpenGL : all scene has been display in render target,
 					// now, final texture is display with a quad
-					if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2)
+					if (!StereoDisplay && !ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
