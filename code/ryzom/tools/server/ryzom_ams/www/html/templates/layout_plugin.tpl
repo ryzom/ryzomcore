@@ -3,7 +3,7 @@
 {if isset($hook_info)}
 {foreach from=$hook_info key=arrkey item=element}
 {if $arrkey eq $smarty.get.name}
-{include file=$element.template_path}
+{include file=$element.TemplatePath}
 {/if}
 {/foreach}
 {/if}	
