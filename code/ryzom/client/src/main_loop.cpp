@@ -1407,6 +1407,13 @@ bool mainLoop()
 			NLMISC::CMatrix mat = ((camMatrix * hmdMatrix) * posMatrix);
 			MainCam.setPos(mat.getPos());
 			MainCam.setRotQuat(mat.getRot());
+
+			if (true) // TODO: ClientCfg.Headphone
+			{
+				// NOTE: non-(StereoHMD+Headphone) impl in user_entity.cpp
+				SoundMngr->setListenerPos(mat.getPos()); // TODO: Move ears back ... :)
+				SoundMngr->setListenerOrientation(mat.getJ(), mat.getK());
+			}
 		}
 		if (StereoDisplay)
 		{
