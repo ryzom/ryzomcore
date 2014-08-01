@@ -328,6 +328,12 @@ void CStereoDebugger::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
 	// do nothing
 }
 
+/// Get the original frustum of the camera
+void CStereoDebugger::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
+{
+	// do nothing, as we never modified it
+}
+
 /// Is there a next pass
 bool CStereoDebugger::nextPass()
 {

@@ -400,6 +400,8 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 {
+	m_OriginalFrustum[cid] = camera->getFrustum();
+
 	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
 	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.HScreenSize * 0.5f * 0.5f) / (m_DevicePtr->HMDInfo.EyeToScreenDistance)); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
 	m_LeftFrustum[cid].initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
@@ -425,6 +427,12 @@ void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 void CStereoOVR::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
 {
 	camera->setFrustum(m_ClippingFrustum[cid]);
+}
+
+/// Get the original frustum of the camera
+void CStereoOVR::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
+{
+	camera->setFrustum(m_OriginalFrustum[cid]);
 }
 
 void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)

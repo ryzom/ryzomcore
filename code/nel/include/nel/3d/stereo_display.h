@@ -101,6 +101,8 @@ public:
 	virtual void updateCamera(uint cid, const NL3D::UCamera *camera) = 0;
 	/// Get the frustum to use for clipping
 	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const = 0;
+	/// Get the original frustum of the camera
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// Is there a next pass
 	virtual bool nextPass() = 0;

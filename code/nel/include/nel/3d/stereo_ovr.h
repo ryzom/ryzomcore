@@ -91,6 +91,8 @@ public:
 	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
 	/// Get the frustum to use for clipping
 	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const;
+	/// Get the original frustum of the camera
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const;
 
 	/// Is there a next pass
 	virtual bool nextPass();
@@ -152,6 +154,7 @@ private:
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
+	CFrustum m_OriginalFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
