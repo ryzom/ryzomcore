@@ -700,9 +700,11 @@ void CStereoOVR::renderGUI()
 		mat->setTexture(0, m_GUITexture->getITexture());
 
 		// user options
-		float height = 3.0f;
+		float scale = 1.0f;
 		float distance = 1.5f;
-		float offcenter = 0.75f; //1.5f;
+		float offcenter = 0.75f;
+
+		float height = scale * distance * 2.0f;
 
 		uint32 winw, winh;
 		m_Driver->getWindowSize(winw, winh);
