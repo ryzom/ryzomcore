@@ -664,6 +664,21 @@ void CStereoOVR::renderGUI()
 		mat.rotateZ(float(NLMISC::Pi+NLMISC::Pi-asin(dir.x)));
 	m_Driver->setModelMatrix(mat);*/
 	m_Driver->setModelMatrix(m_InterfaceCameraMatrix);
+
+	{
+		NLMISC::CLine line(NLMISC::CVector(0, 5, 2), NLMISC::CVector(0, 5, 3));
+
+		NL3D::UMaterial mat = m_Driver->createMaterial();
+		mat.setZWrite(false);
+		// mat.setZFunc(UMaterial::always); // Not nice!
+		mat.setDoubleSided(true);
+		mat.setColor(NLMISC::CRGBA::Red);
+		mat.setBlend(false);
+
+		m_Driver->drawLine(line, mat);
+
+		m_Driver->deleteMaterial(mat);
+	}
 	
 	{
 		nlassert(m_GUITexture);
@@ -685,8 +700,9 @@ void CStereoOVR::renderGUI()
 		mat->setTexture(0, m_GUITexture->getITexture());
 
 		// user options
-		float height = 6.0f;
-		float distance = 3.0f;
+		float height = 3.0f;
+		float distance = 1.5f;
+		float offcenter = 0.75f; //1.5f;
 
 		uint32 winw, winh;
 		m_Driver->getWindowSize(winw, winh);
@@ -716,19 +732,20 @@ void CStereoOVR::renderGUI()
 		{
 			CVertexBufferReadWrite vba;
 			vb.lock(vba);
-			float relWidth = width / distance;
+			float radius = distance + offcenter;
+			float relWidth = width / radius;
 			float quadWidth = relWidth / (float)nbQuads;
 			for (uint i = 0; i < nbQuads + 1; ++i)
 			{
 				uint vi0 = i * 2;
 				uint vi1 = vi0 + 1;
 				float lineH = -(relWidth * 0.5f) + quadWidth * (float)i;
-				float lineUV = (float)i / (float)(nbQuads + 1);
-				float left = sin(lineH) * distance;
-				float forward = cos(lineH) * distance;
-				vba.setVertexCoord(vi0, left, forward, bottom);
+				float lineUV = (float)i / (float)(nbQuads);
+				float left = sin(lineH) * radius;
+				float forward = cos(lineH) * radius;
+				vba.setVertexCoord(vi0, left, forward - offcenter, bottom);
 				vba.setTexCoord(vi0, 0, lineUV, 0.0f);
-				vba.setVertexCoord(vi1, left, forward, top);
+				vba.setVertexCoord(vi1, left, forward - offcenter, top);
 				vba.setTexCoord(vi1, 0, lineUV, 1.0f);
 			}
 		}
@@ -763,21 +780,6 @@ void CStereoOVR::renderGUI()
 		// m_Driver->drawQuad(quadUV, umat);
 
 		m_Driver->deleteMaterial(umat);
-	}
-
-	{
-		NLMISC::CLine line(NLMISC::CVector(0, 3, -3), NLMISC::CVector(0, 3, 3));
-
-		NL3D::UMaterial mat = m_Driver->createMaterial();
-		mat.setZWrite(false);
-		// mat.setZFunc(UMaterial::always); // Not nice!
-		mat.setDoubleSided(true);
-		mat.setColor(NLMISC::CRGBA::Red);
-		mat.setBlend(false);
-
-		m_Driver->drawLine(line, mat);
-
-		m_Driver->deleteMaterial(mat);
 	}
 }
 
