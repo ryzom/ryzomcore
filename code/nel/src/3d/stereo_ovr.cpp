@@ -692,6 +692,9 @@ void CStereoOVR::renderGUI()
 		m_Driver->getWindowSize(winw, winh);
 		float width = height * (float)winw / (float)winh;
 
+		float bottom = -(height * 0.5f);
+		float top = (height * 0.5f);
+
 		NLMISC::CQuadUV quadUV;
 		quadUV.V0 = CVector(-(width * 0.5f), distance, -(height * 0.5f));
 		quadUV.V1 = CVector((width * 0.5f), distance, -(height * 0.5f));
@@ -701,8 +704,63 @@ void CStereoOVR::renderGUI()
 		quadUV.Uv1 = CUV(1.f, 0.f);
 		quadUV.Uv2 = CUV(1.f, 1.f);
 		quadUV.Uv3 = CUV(0.f,  1.f);
+		
+		const uint nbQuads = 128;
+		static CVertexBuffer vb;
+		static CIndexBuffer ib;
+		
+		vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
+		vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
+		vb.setNumVertices((nbQuads + 1) * 2);
 
-		m_Driver->drawQuad(quadUV, umat);
+		{
+			CVertexBufferReadWrite vba;
+			vb.lock(vba);
+			float relWidth = width / distance;
+			float quadWidth = relWidth / (float)nbQuads;
+			for (uint i = 0; i < nbQuads + 1; ++i)
+			{
+				uint vi0 = i * 2;
+				uint vi1 = vi0 + 1;
+				float lineH = -(relWidth * 0.5f) + quadWidth * (float)i;
+				float lineUV = (float)i / (float)(nbQuads + 1);
+				float left = sin(lineH) * distance;
+				float forward = cos(lineH) * distance;
+				vba.setVertexCoord(vi0, left, forward, bottom);
+				vba.setTexCoord(vi0, 0, lineUV, 0.0f);
+				vba.setVertexCoord(vi1, left, forward, top);
+				vba.setTexCoord(vi1, 0, lineUV, 1.0f);
+			}
+		}
+
+		ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
+		ib.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
+		ib.setNumIndexes(nbQuads * 6);
+
+		{
+			CIndexBufferReadWrite iba;
+			ib.lock(iba);
+			for (uint i = 0; i < nbQuads; ++i)
+			{
+				uint ti0 = i * 2;
+				uint ti1 = ti0 + 1;
+				uint bl = ti0;
+				uint tl = ti0 + 1;
+				uint br = ti0 + 2;
+				uint tr = ti0 + 3;
+				iba.setTri(ti0 * 3, bl, tl, br);
+				iba.setTri(ti1 * 3, br, tl, tr);
+			}
+		}
+
+		IDriver *driver = static_cast<CDriverUser *>(m_Driver)->getDriver();
+		// m_Driver->setPolygonMode(UDriver::Line);
+		driver->activeVertexBuffer(vb);
+		driver->activeIndexBuffer(ib);
+		driver->renderTriangles(*umat.getObjectPtr(), 0, nbQuads * 2); //renderRawQuads(umat, 0, 128);
+		// m_Driver->setPolygonMode(UDriver::Filled);
+
+		// m_Driver->drawQuad(quadUV, umat);
 
 		m_Driver->deleteMaterial(umat);
 	}
@@ -712,7 +770,7 @@ void CStereoOVR::renderGUI()
 
 		NL3D::UMaterial mat = m_Driver->createMaterial();
 		mat.setZWrite(false);
-		mat.setZFunc(UMaterial::always);
+		// mat.setZFunc(UMaterial::always); // Not nice!
 		mat.setDoubleSided(true);
 		mat.setColor(NLMISC::CRGBA::Red);
 		mat.setBlend(false);
