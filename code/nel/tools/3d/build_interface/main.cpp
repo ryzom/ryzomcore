@@ -113,18 +113,17 @@ void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 // ***************************************************************************
 bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
 {
-	uint32 a, b;
-
 	uint8 *rSrcPix = &pSrc->getPixels()[0];
 	uint8 *rDstPix = &pDst->getPixels()[0];
 
 	uint	wSrc= pSrc->getWidth();
 	uint	hSrc= pSrc->getHeight();
-	for (b = 0; b < hSrc; ++b)
-	for (a = 0; a < wSrc; ++a)
+	for (uint b = 0; b < hSrc; ++b)
+	for (uint a = 0; a < wSrc; ++a)
 	{
 		if (rDstPix[4*((x+a)+(y+b)*pDst->getWidth())+3] != 0)
 			return false;
+
 		// write
 		putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rSrcPix+ 4*(a+b*pSrc->getWidth()), alphaTransfert);
 	}
@@ -135,9 +134,9 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 	// expand on W
 	if(wSrc<wSrc4)
 	{
-		for(a=wSrc;a<wSrc4;a++)
+		for(uint a=wSrc;a<wSrc4;a++)
 		{
-			for(b=0;b<hSrc4;b++)
+			for(uint b=0;b<hSrc4;b++)
 			{
 				putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rDstPix + 4*((x+wSrc-1)+(y+b)*pDst->getWidth()), alphaTransfert);
 			}
@@ -146,9 +145,9 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 	// expand on H
 	if(hSrc<hSrc4)
 	{
-		for(b=hSrc;b<hSrc4;b++)
+		for(uint b=hSrc;b<hSrc4;b++)
 		{
-			for(a=0;a<wSrc4;a++)
+			for(uint a=0;a<wSrc4;a++)
 			{
 				putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rDstPix + 4*((x+a)+(y+hSrc-1)*pDst->getWidth()), alphaTransfert);
 			}
@@ -252,12 +251,12 @@ int main(int nNbArg, char **ppArgs)
 	}
 
 	vector<NLMISC::CBitmap*> AllMaps;
-	sint32 i, j;
+	sint32 j;
 
 	// Load all maps
 	sint32 mapSize = (sint32)AllMapNames.size();
 	AllMaps.resize( mapSize );
-	for( i = 0; i < mapSize; ++i )
+	for(sint i = 0; i < mapSize; ++i )
 	{
 		try
 		{
@@ -275,7 +274,7 @@ int main(int nNbArg, char **ppArgs)
 	}
 
 	// Sort all maps by decreasing size
-	for (i = 0; i < mapSize-1; ++i)
+	for (sint i = 0; i < mapSize-1; ++i)
 	for (j = i+1; j < mapSize; ++j)
 	{
 		NLMISC::CBitmap *pBI = AllMaps[i];
@@ -303,7 +302,7 @@ int main(int nNbArg, char **ppArgs)
 	vector<NLMISC::CUV> UVMin, UVMax;
 	UVMin.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
 	UVMax.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
-	for (i = 0; i < mapSize; ++i)
+	for (sint i = 0; i < mapSize; ++i)
 	{
 		sint32 x, y;
 		while (!tryAllPos(AllMaps[i], &GlobalMask, x, y))
@@ -349,7 +348,7 @@ int main(int nNbArg, char **ppArgs)
 	}
 
 	// Convert UV from pixel to ratio
-	for (i = 0; i < mapSize; ++i)
+	for (sint i = 0; i < mapSize; ++i)
 	{
 		UVMin[i].U = UVMin[i].U / (float)GlobalTexture.getWidth();
 		UVMin[i].V = UVMin[i].V / (float)GlobalTexture.getHeight();
@@ -394,7 +393,7 @@ int main(int nNbArg, char **ppArgs)
 		FILE *f = fopen (fmtName.c_str(), "wt");
 		if (f != NULL)
 		{
-			for (i = 0; i < mapSize; ++i)
+			for (sint i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
 				string fileName= CFile::getFilename(AllMapNames[i]);
@@ -442,6 +441,8 @@ int main(int nNbArg, char **ppArgs)
 				nlwarning("Can't parse %s", bufTmp);
 				continue;
 			}
+
+			sint i;
 			
 			sTGAname = toLower(string(tgaName));
 			string findTGAName;
