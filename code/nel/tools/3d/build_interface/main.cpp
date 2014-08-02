@@ -258,16 +258,24 @@ int main(int nNbArg, char **ppArgs)
 	AllMaps.resize( mapSize );
 	for(sint i = 0; i < mapSize; ++i )
 	{
+		NLMISC::CBitmap *pBtmp = NULL;
+
 		try
 		{
-			NLMISC::CBitmap *pBtmp = new NLMISC::CBitmap;
+			pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
-			inFile.open( AllMapNames[i] );
-			pBtmp->load(inFile);
+			if (!inFile.open( AllMapNames[i] )) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
+
+			uint8 colors = pBtmp->load(inFile);
+
+			if (colors != 32) throw NLMISC::Exception(AllMapNames[i] + " is using " + toString(colors) + " bits colors, only 32 bit supported!");
+
 			AllMaps[i] = pBtmp;
 		}
 		catch (const NLMISC::Exception &e)
 		{
+			if (pBtmp) delete pBtmp;
+
 			outString (string("ERROR :") + e.what());
 			return -1;
 		}
