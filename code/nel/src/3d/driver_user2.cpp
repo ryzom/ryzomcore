@@ -74,6 +74,63 @@ void			CDriverUser::deleteScene(UScene	*scene)
 }
 
 // ***************************************************************************
+
+void CDriverUser::beginDefaultRenderTarget()
+{
+	if (_MatRenderTarget.empty())
+	{
+		_MatRenderTarget.attach(&_MatRenderTargetInt);
+		UMaterial &umat = _MatRenderTarget;
+		CMaterial &mat = _MatRenderTargetInt;
+		umat.initUnlit();
+		umat.setColor(CRGBA::White);
+		umat.setBlend(false);
+		umat.setAlphaTest(false);
+		mat.setBlendFunc(CMaterial::one, CMaterial::zero);
+		mat.setZWrite(false);
+		mat.setZFunc(CMaterial::always);
+		mat.setDoubleSided(true);
+			
+		_RenderTargetQuad.V0 = CVector(0.f, 0.f, 0.5f);
+		_RenderTargetQuad.V1 = CVector(1.f, 0.f, 0.5f);
+		_RenderTargetQuad.V2 = CVector(1.f, 1.f, 0.5f);
+		_RenderTargetQuad.V3 = CVector(0.f, 1.f, 0.5f);
+		_RenderTargetQuad.Uv0 = CUV(0.f, 0.f);
+		_RenderTargetQuad.Uv1 = CUV(1.f, 0.f);
+		_RenderTargetQuad.Uv2 = CUV(1.f, 1.f);
+		_RenderTargetQuad.Uv3 = CUV(0.f, 1.f);
+	}
+
+	nlassert(!_EffectRenderTarget);
+	uint32 winw, winh;
+	getWindowSize(winw, winh);
+	_EffectRenderTarget = getRenderTargetManager().getRenderTarget(winw, winh);
+	setRenderTarget(*_EffectRenderTarget);
+}
+
+// ***************************************************************************
+
+void CDriverUser::endDefaultRenderTarget(UScene *scene)
+{
+	nlassert(_EffectRenderTarget);
+
+	CTextureUser texNull;
+	setRenderTarget(texNull);
+
+	_MatRenderTarget.getObjectPtr()->setTexture(0, _EffectRenderTarget->getITexture());
+
+	UCamera	pCam = scene->getCam();
+	setMatrixMode2D11();
+	drawQuad(_RenderTargetQuad, _MatRenderTarget);
+	setMatrixMode3D(pCam);
+
+	_MatRenderTarget.getObjectPtr()->setTexture(0, NULL);
+
+	getRenderTargetManager().recycleRenderTarget(_EffectRenderTarget);
+	_EffectRenderTarget = NULL;
+}
+
+// ***************************************************************************
 UTextContext	*CDriverUser::createTextContext(const std::string fontFileName, const std::string fontExFileName)
 {
 

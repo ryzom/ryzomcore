@@ -195,6 +195,8 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	_RenderTargetManager.m_Driver = this;
 	_ShapeBank._DriverUser = this;
 
+	_EffectRenderTarget = NULL;
+
 	NL_SET_IB_NAME(_PBLine, "CDriverUser::_PBLine");
 	NL_SET_IB_NAME(_PBTri, "CDriverUser::_PBTri");
 }

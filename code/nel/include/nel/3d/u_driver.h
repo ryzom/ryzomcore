@@ -307,6 +307,16 @@ public:
 	// @}
 
 
+	/// Get the render target manager
+	virtual CRenderTargetManager	&getRenderTargetManager() =0;
+
+	/// Set a texture the size of the window as render target
+	virtual void					beginDefaultRenderTarget() =0;
+
+	/// Draw the render target to the back buffer
+	virtual void					endDefaultRenderTarget(UScene *scene) =0;
+
+
 	/// \name Components gestion for Interface 2D/3D.
 	// @{
 
@@ -319,8 +329,6 @@ public:
 	virtual	void			setFontManagerMaxMemory(uint maxMem)=0;
 	/// get cahce information.
 	virtual		std::string getFontManagerCacheInformation() const =0;
-
-	virtual CRenderTargetManager &getRenderTargetManager() =0;
 
 
 	/** Create a new texture file, searching in CPath. NB: by default a textureFile created with this

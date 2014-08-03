@@ -109,6 +109,11 @@ protected:
 	CMaterial				_MatTextInternal;
 	CMaterial				_MatTextStretchInternal;
 
+	// Default render target for effect pipeline
+	CTextureUser			*_EffectRenderTarget;
+	UMaterial				_MatRenderTarget;
+	CMaterial				_MatRenderTargetInt;
+	NLMISC::CQuadUV			_RenderTargetQuad;
 
 	// StaticInit
 	static	bool			_StaticInit;
@@ -242,6 +247,16 @@ public:
 	// @}
 
 
+	/// Get the render target manager
+	virtual CRenderTargetManager	&getRenderTargetManager() { return _RenderTargetManager; }
+
+	/// Set a texture the size of the window as render target
+	virtual void					beginDefaultRenderTarget();
+
+	/// Draw the render target to the back buffer
+	virtual void					endDefaultRenderTarget(UScene *scene);
+
+
 	/// \name Components gestion for Interface 2D/3D.
 	// @{
 
@@ -253,8 +268,6 @@ public:
 	virtual	void			setFontManagerMaxMemory(uint maxMem);
 	/// get cahce information.
 	virtual		std::string getFontManagerCacheInformation() const ;
-
-	virtual CRenderTargetManager &getRenderTargetManager() { return _RenderTargetManager; }
 
 
 	/** Create a new texture file, searching in CPath.

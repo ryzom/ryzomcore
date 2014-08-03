@@ -48,6 +48,7 @@
 #include <nel/3d/u_material.h>
 #include <nel/3d/u_text_context.h>
 #include <nel/3d/bloom_effect.h>
+#include <nel/3d/fxaa.h>
 #if SBCLIENT_DEV_STEREO
 #	include <nel/3d/stereo_render.h>
 #endif /* #if SBCLIENT_DEV_STEREO */
@@ -153,6 +154,7 @@ static IStereoRender *_StereoRender = NULL;
 #endif /* #if SBCLIENT_DEV_STEREO */
 
 static bool s_EnableBloom = false;
+static CFXAA *s_FXAA = NULL;
 
 //
 // Prototypes
@@ -185,6 +187,7 @@ void cbGraphicsDriver(CConfigFile::CVar &var);
 void cbSquareBloom(CConfigFile::CVar &var);
 void cbDensityBloom(CConfigFile::CVar &var);
 void cbEnableBloom(CConfigFile::CVar &var);
+void cbEnableFXAA(CConfigFile::CVar &var);
 
 //
 // Functions
@@ -377,6 +380,7 @@ void initIngame()
 		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
 		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
 		CConfiguration::setAndCallback("EnableBloom", cbEnableBloom);
+		CConfiguration::setAndCallback("EnableFXAA", cbEnableFXAA);
 		// Init the landscape using the previously created UScene
 		displayLoadingState("Initialize Landscape");
 		initLandscape();
@@ -740,7 +744,19 @@ void loopIngame()
 		else
 		{
 			uint i = 0;
-			uint bloomStage = 0;
+			bool effectRender = false;
+			CTextureUser *effectRenderTarget = NULL;
+			bool haveEffects = Driver->getPolygonMode() == UDriver::Filled
+				&& (s_EnableBloom || s_FXAA);
+			bool defaultRenderTarget = false;
+			if (haveEffects)
+			{
+				if (!StereoDisplay)
+				{
+					Driver->beginDefaultRenderTarget();
+					defaultRenderTarget = true;
+				}
+			}
 			while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 			{
 				++i;
@@ -762,13 +778,7 @@ void loopIngame()
 				
 				if (!StereoDisplay || StereoDisplay->wantClear())
 				{
-
-					/*if (s_EnableBloom)
-					{
-						nlassert(bloomStage == 0);
-						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
-						bloomStage = 1;
-					}*/
+					effectRender = haveEffects;
 
 					// 01. Render Driver (background color)
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
@@ -788,14 +798,14 @@ void loopIngame()
 
 				if (!StereoDisplay || StereoDisplay->wantInterface3D())
 				{
-					/*if (s_EnableBloom && bloomStage == 1)
+					if (effectRender)
 					{
-						// End the actual bloom effect visible in the scene.
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-						CBloomEffect::instance().endBloom();
+						if (s_EnableBloom) CBloomEffect::instance().applyBloom();
+						if (s_FXAA) s_FXAA->applyEffect();
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-						bloomStage = 2;
-					}*/
+						effectRender = false;
+					}
 
 					// 06. Render Interface 3D (player names)
 					// ... 
@@ -803,15 +813,6 @@ void loopIngame()
 
 				if (!StereoDisplay || StereoDisplay->wantInterface2D())
 				{
-					/*if (s_EnableBloom && bloomStage == 2)
-					{
-						// End bloom effect system after drawing the 3d interface (z buffer related).
-						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-						CBloomEffect::instance().endInterfacesDisplayBloom();
-						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-						bloomStage = 0;
-					}*/
-
 					// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
 					updateCompass(); // Update the compass
 					updateRadar(); // Update the radar
@@ -833,6 +834,11 @@ void loopIngame()
 			}
 
 			// 09. Render Buffer
+			if (defaultRenderTarget)
+			{
+				// draw final result to backbuffer
+				Driver->endDefaultRenderTarget(Scene);
+			}
 			Driver->swapBuffers();
 		}
 
@@ -963,6 +969,22 @@ void cbDensityBloom(CConfigFile::CVar &var)
 void cbEnableBloom(CConfigFile::CVar &var)
 {
 	s_EnableBloom = var.asBool();
+}
+
+void cbEnableFXAA(CConfigFile::CVar &var)
+{
+	bool enable = var.asBool();
+	if (enable != (s_FXAA != NULL))
+	{
+		if (enable)
+		{
+			s_FXAA = new CFXAA(Driver);
+		}
+		else
+		{
+			delete s_FXAA;
+		}
+	}
 }
 
 //

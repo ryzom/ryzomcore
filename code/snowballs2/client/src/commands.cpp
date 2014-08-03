@@ -296,7 +296,7 @@ void	initCommands()
     CommandsMaterial.setBlend(true);
 
 #if SBCLIENT_DEV_PIXEL_PROGRAM
-	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::PostProcessing);
+	CommandsMaterial.getObjectPtr()->setShader(NL3D::CMaterial::Program);
 	a_NelLogo = Driver->createTextureFile("nel128.tga");
 	CommandsMaterial.setTexture(dynamic_cast<NL3D::UTexture *>(a_NelLogo));
 	static const char *program_arbfp1 =
@@ -340,7 +340,24 @@ void	initCommands()
 		"mov oC0.xzw, c0.xyyx\n"
 		"texld oC0.y, v0, s0\n";
 	NL3D::IDriver *d = dynamic_cast<NL3D::CDriverUser *>(Driver)->getDriver();
-	if (d->supportPixelProgram(CPixelProgram::fp40))
+	a_DevPixelProgram = new CPixelProgram();
+	// arbfp1
+	{
+		IProgram::CSource *source = new IProgram::CSource();
+		source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+		source->Profile = IProgram::arbfp1;
+		source->setSourcePtr(program_arbfp1);
+		a_DevPixelProgram->addSource(source);
+	}
+	// ps_2_0
+	{
+		IProgram::CSource *source = new IProgram::CSource();
+		source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+		source->Profile = IProgram::ps_2_0;
+		source->setSourcePtr(program_ps_2_0);
+		a_DevPixelProgram->addSource(source);
+	}
+	/*if (d->supportPixelProgram(CPixelProgram::fp40))
 	{
 		nldebug("fp40");
 		a_DevPixelProgram = new CPixelProgram(program_fp40);
@@ -349,14 +366,14 @@ void	initCommands()
 	{
 		nldebug("arbfp1");
 		a_DevPixelProgram = new CPixelProgram(program_arbfp1);
-	}
+	}*/
 	/*else if (d->supportPixelProgram(CPixelProgram::ps_3_0))
 	{
 		nldebug("ps_3_0");
 		a_DevPixelProgram = new CPixelProgram(program_ps_3_0);
 		// Textures do not seem to work with ps_3_0...
 	}*/
-	else if (d->supportPixelProgram(CPixelProgram::ps_2_0))
+	/*else if (d->supportPixelProgram(CPixelProgram::ps_2_0))
 	{
 		nldebug("ps_2_0");
 		a_DevPixelProgram = new CPixelProgram(program_ps_2_0);
@@ -365,7 +382,7 @@ void	initCommands()
 	{
 		nldebug("ps_1_1");
 		a_DevPixelProgram = new CPixelProgram(program_ps_1_1);
-	}
+	}*/
 #endif
 }
 

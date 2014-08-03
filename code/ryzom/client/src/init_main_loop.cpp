@@ -137,9 +137,6 @@ std::string				LoadingBitmapFilename;
 uint64					StartInitTime = 0;
 uint64					StartPlayTime = 0;
 
-UMaterial				EffectMaterial;
-NLMISC::CQuadUV			EffectQuad;
-
 
 // texture for the logos
 std::vector<UTextureFile*> LogoBitmaps;
@@ -571,29 +568,6 @@ void initMainLoop()
 
 		// use this scene for bloom effect
 		CBloomEffect::getInstance().setScene(Scene);
-
-		if (EffectMaterial.empty())
-		{
-			EffectMaterial = Driver->createMaterial();
-			CMaterial *mat = EffectMaterial.getObjectPtr();
-			EffectMaterial.initUnlit();
-			EffectMaterial.setColor(CRGBA::White);
-			EffectMaterial.setBlend(false);
-			EffectMaterial.setAlphaTest (false);
-			mat->setBlendFunc(CMaterial::one, CMaterial::zero);
-			mat->setZWrite(false);
-			mat->setZFunc(CMaterial::always);
-			mat->setDoubleSided(true);
-		}
-	
-		EffectQuad.V0 = CVector(0.f, 0.f, 0.5f);
-		EffectQuad.V1 = CVector(1.f, 0.f, 0.5f);
-		EffectQuad.V2 = CVector(1.f, 1.f, 0.5f);
-		EffectQuad.V3 = CVector(0.f, 1.f, 0.5f);
-		EffectQuad.Uv0 = CUV(0.f, 0.f);
-		EffectQuad.Uv1 = CUV(1.f, 0.f);
-		EffectQuad.Uv2 = CUV(1.f, 1.f);
-		EffectQuad.Uv3 = CUV(0.f, 1.f);
 
 		CLandscapePolyDrawer::getInstance().initLandscapePolyDrawingCallback();
 

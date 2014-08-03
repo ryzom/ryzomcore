@@ -185,9 +185,6 @@ extern std::vector<UTextureFile*> LogoBitmaps;
 extern bool						IsInRingSession;
 extern std::string				UsedFSAddr;
 
-extern UMaterial				EffectMaterial;
-extern NLMISC::CQuadUV			EffectQuad;
-
 // temp
 extern NLMISC::CValueSmoother smoothFPS;
 extern NLMISC::CValueSmoother moreSmoothFPS;
@@ -574,10 +571,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 
 		// init effect render target
-		uint32 winw, winh;
-		Driver->getWindowSize(winw, winh);
-		effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
-		static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
+		Driver->beginDefaultRenderTarget();
 	}
 	if (forceFullDetail)
 	{
@@ -596,22 +590,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		CBloomEffect::getInstance().applyBloom();
 
 		// draw final result to backbuffer
-		CDriverUser *dru = static_cast<CDriverUser *>(Driver);
-
-		CTextureUser texNull;
-		dru->setRenderTarget(texNull);
-
-		EffectMaterial.getObjectPtr()->setTexture(0, effectRenderTarget->getITexture());
-
-		UCamera	pCam = Scene->getCam();
-		Driver->setMatrixMode2D11();
-		Driver->drawQuad(EffectQuad, EffectMaterial);
-		Driver->setMatrixMode3D(pCam);
-
-		EffectMaterial.getObjectPtr()->setTexture(0, NULL);
-
-		Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
-		effectRenderTarget = NULL;
+		Driver->endDefaultRenderTarget(Scene);
 	}
 }
 
@@ -1650,15 +1629,15 @@ bool mainLoop()
 		uint i = 0;
 		bool effectRender = false;
 		CTextureUser *effectRenderTarget = NULL;
-		bool haveEffects = Render && ClientCfg.Bloom;
+		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
+			&& ClientCfg.Bloom;
+		bool defaultRenderTarget = false;
 		if (haveEffects)
 		{
 			if (!StereoDisplay)
 			{
-				uint32 winw, winh;
-				Driver->getWindowSize(winw, winh);
-				effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
-				static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
+				Driver->beginDefaultRenderTarget();
+				defaultRenderTarget = true;
 			}
 			if (ClientCfg.Bloom)
 			{
@@ -2199,25 +2178,10 @@ bool mainLoop()
 			}
 		} /* stereo pass */
 
-		if (effectRenderTarget)
+		if (defaultRenderTarget)
 		{
 			// draw final result to backbuffer
-			CDriverUser *dru = static_cast<CDriverUser *>(Driver);
-
-			CTextureUser texNull;
-			dru->setRenderTarget(texNull);
-
-			EffectMaterial.getObjectPtr()->setTexture(0, effectRenderTarget->getITexture());
-
-			UCamera	pCam = Scene->getCam();
-			Driver->setMatrixMode2D11();
-			Driver->drawQuad(EffectQuad, EffectMaterial);
-			Driver->setMatrixMode3D(pCam);
-
-			EffectMaterial.getObjectPtr()->setTexture(0, NULL);
-
-			Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
-			effectRenderTarget = NULL;
+			Driver->endDefaultRenderTarget(Scene);
 		}
 
 		// Draw to screen.
