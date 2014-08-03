@@ -974,6 +974,9 @@ public:
 													) = 0;
 	// @}
 
+	/// Hack for bloom
+	virtual bool			textureCoordinateAlternativeMode() const = 0;
+
 
 
 	/// \name Render state: Polygon mode

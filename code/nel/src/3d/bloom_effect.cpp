@@ -112,6 +112,9 @@ void CBloomEffect::init()
 	if (!((CDriverUser *)_Driver)->getDriver()->supportBloomEffect())
 		return;
 
+	CDriverUser *dru = static_cast<CDriverUser *>(_Driver);
+	IDriver *drv = dru->getDriver();
+
 	_BlurWidth = 256;
 	_BlurHeight = 256;
 
@@ -218,10 +221,20 @@ void CBloomEffect::init()
 	_BlurQuad.V1 = CVector(1.f,	 -1.f,	0.5f);
 	_BlurQuad.V2 = CVector(1.f,	 1.f,	0.5f);
 	_BlurQuad.V3 = CVector(-1.f, 1.f,	0.5f);
-	_BlurQuad.Uv0 = CUV(0.f, 0.f);
-	_BlurQuad.Uv1 = CUV(1.f, 0.f);
-	_BlurQuad.Uv2 = CUV(1.f, 1.f);
-	_BlurQuad.Uv3 = CUV(0.f, 1.f);
+	if (drv->textureCoordinateAlternativeMode())
+	{
+		_BlurQuad.Uv0 = CUV(0.f, 1.f);
+		_BlurQuad.Uv1 = CUV(1.f, 1.f);
+		_BlurQuad.Uv2 = CUV(1.f, 0.f);
+		_BlurQuad.Uv3 = CUV(0.f, 0.f);
+	}
+	else
+	{
+		_BlurQuad.Uv0 = CUV(0.f, 0.f);
+		_BlurQuad.Uv1 = CUV(1.f, 0.f);
+		_BlurQuad.Uv2 = CUV(1.f, 1.f);
+		_BlurQuad.Uv3 = CUV(0.f, 1.f);
+	}
 
 	_Init = true;
 }
@@ -395,20 +408,30 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 	// set several decal constants in order to obtain in the render target texture a mix of color
 	// of a texel and its neighbored texels on the axe of the pass.
 	float decalL, decal2L, decalR, decal2R;
-	// if(_InitBloomEffect)
-	// {
+	if (drvInternal->textureCoordinateAlternativeMode())
+	{
+		if (horizontalBlur)
+		{
+			decalL = 0.5f;
+			decal2L = -0.5f;
+			decalR = 1.5f;
+			decal2R = 2.5f;
+		}
+		else
+		{
+			decalL = 0.0f;
+			decal2L = -1.0f;
+			decalR = 1.0f;
+			decal2R = 2.0f;
+		}
+	}
+	else
+	{
 		decalL = -0.5f;
 		decal2L = -1.5f;
 		decalR = 0.5f;
 		decal2R = 1.5f;
-	// }
-	// else
-	// {
-	//	decalL = 0.f;
-	//	decal2L = -1.f;
-	//	decalR = 1.f;
-	//	decal2R = 2.f;
-	// }
+	}
 	drvInternal->setUniform2f(IDriver::VertexProgram, 10, (decalR/(float)_BlurWidth)*blurVec.x,		(decalR/(float)_BlurHeight)*blurVec.y);
 	drvInternal->setUniform2f(IDriver::VertexProgram, 11, (decal2R/(float)_BlurWidth)*blurVec.x,		(decal2R/(float)_BlurHeight)*blurVec.y);
 	drvInternal->setUniform2f(IDriver::VertexProgram, 12, (decalL/(float)_BlurWidth)*blurVec.x,		(decalL/(float)_BlurHeight)*blurVec.y);

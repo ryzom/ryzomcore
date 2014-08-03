@@ -944,6 +944,7 @@ public:
 	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
+	virtual bool			textureCoordinateAlternativeMode() const { return true; };
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 
