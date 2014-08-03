@@ -129,6 +129,7 @@ public:
 
 	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileModel::TTileChannel displayChannel(){ return s_displayChannel; }
+	static void setAlphaRot( int rot ){ s_alphaRot = rot; }
 
 	bool hasError() const{ return m_hasError; }
 
@@ -137,6 +138,7 @@ private:
 	QMap<TileModel::TTileChannel, TileWidget*> m_tileWidget;
 
 	static TileModel::TTileChannel s_displayChannel;
+	static int s_alphaRot;
 
 	TileItemNodePvt *pvt;
 

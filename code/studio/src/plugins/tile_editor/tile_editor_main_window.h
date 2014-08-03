@@ -81,6 +81,7 @@ private Q_SLOTS:
 
 	void changeActiveTileSet(const QModelIndex &newIndex, const QModelIndex &oldIndex);
 	void onZoomFactor(int level);
+	void onRotate(int id);
 
 private:
 	void onActionAddTile(int tabId);
@@ -107,6 +108,8 @@ private:
 	QMenu *m_zoomMenu;
 	QActionGroup *m_zoomActionGroup;
 	QSignalMapper *m_zoomSignalMapper;
+	QActionGroup *m_rotateAG;
+	QSignalMapper *m_rotateSM;
 
 	TileItemDelegate *m_tileItemDelegate;
 

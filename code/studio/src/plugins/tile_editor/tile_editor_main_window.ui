@@ -581,6 +581,9 @@
    </property>
   </action>
   <action name="actionRotateTile0">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="tile_editor.qrc">
      <normaloff>:/tileRotation/images/rotation0.png</normaloff>:/tileRotation/images/rotation0.png</iconset>
@@ -617,6 +620,9 @@
    </property>
   </action>
   <action name="actionRotateTile90">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="tile_editor.qrc">
      <normaloff>:/tileRotation/images/rotation90.png</normaloff>:/tileRotation/images/rotation90.png</iconset>
@@ -629,6 +635,9 @@
    </property>
   </action>
   <action name="actionRotateTile180">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="tile_editor.qrc">
      <normaloff>:/tileRotation/images/rotation180.png</normaloff>:/tileRotation/images/rotation180.png</iconset>
@@ -641,6 +650,9 @@
    </property>
   </action>
   <action name="actionRotateTile270">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="tile_editor.qrc">
      <normaloff>:/tileRotation/images/rotation270.png</normaloff>:/tileRotation/images/rotation270.png</iconset>

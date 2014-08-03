@@ -290,6 +290,7 @@ public:
 			m_borderFirst[ i ] = false;
 
 		m_id = -1;
+		m_alphaRot = 0;
 	}
 
 	bool pixmapToCBGRA( QPixmap &pixmap, std::vector< NLMISC::CBGRA >& pixels )
@@ -511,6 +512,9 @@ public:
 
 	const NL3D::CTileBorder &border( TileModel::TTileChannel channel ){ return m_border[ channel ]; }
 
+	int alphaRot() const{ return m_alphaRot; }
+	void setAlphaRot( int rot ){ m_alphaRot = rot; }
+
 private:
 	QPixmap pixmaps[ TileModel::TileChannelCount ];
 	TileModel::TNodeTileType m_type;
@@ -518,9 +522,11 @@ private:
 	int m_id;
 	QString m_lastError;
 	bool m_borderFirst[ TileModel::TileChannelCount ];
+	int m_alphaRot;
 };
 
 TileModel::TTileChannel TileItemNode::s_displayChannel = TileModel::TileDiffuse;
+int TileItemNode::s_alphaRot = 0;
 
 TileItemNode::TileItemNode( TileModel::TNodeTileType type, int tileId, TileModel::TTileChannel channel, QString filename, Node *parent)
 {
@@ -555,6 +561,7 @@ bool TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString file
 		empty = true;
 	}
 
+	pvt->setAlphaRot( s_alphaRot );
 	bool b = pvt->loadImage( channel, fn, empty );
 	m_hasError = !b;
 	if( !b )
@@ -601,7 +608,7 @@ const NL3D::CTileBorder& TileItemNode::border( TileModel::TTileChannel channel )
 
 int TileItemNode::alphaRot() const
 {
-	return 0;
+	return pvt->alphaRot();
 }
 
 QVariant TileItemNode::data(int column, int role) const

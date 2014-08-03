@@ -58,6 +58,23 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	rotateActions.push_back(m_ui->actionRotateTile270);
 	m_rotationMenu->addActions(rotateActions);
 	m_ui->toolBar->addAction(m_rotationMenu->menuAction());
+	m_rotateSM = new QSignalMapper();
+	m_rotateAG = new QActionGroup(this);
+	m_rotateAG->addAction(m_ui->actionRotateTile0);
+	m_rotateAG->addAction(m_ui->actionRotateTile90);
+	m_rotateAG->addAction(m_ui->actionRotateTile180);
+	m_rotateAG->addAction(m_ui->actionRotateTile270);
+	m_ui->actionRotateTile0->setChecked( true );
+
+	connect( m_ui->actionRotateTile0, SIGNAL( triggered() ), m_rotateSM, SLOT( map() ) );
+	connect( m_ui->actionRotateTile90, SIGNAL( triggered() ), m_rotateSM, SLOT( map() ) );
+	connect( m_ui->actionRotateTile180, SIGNAL( triggered() ), m_rotateSM, SLOT( map() ) );
+	connect( m_ui->actionRotateTile270, SIGNAL( triggered() ), m_rotateSM, SLOT( map() ) );
+	m_rotateSM->setMapping( m_ui->actionRotateTile0, 0 );
+	m_rotateSM->setMapping( m_ui->actionRotateTile90, 1 );
+	m_rotateSM->setMapping( m_ui->actionRotateTile180, 2 );
+	m_rotateSM->setMapping( m_ui->actionRotateTile270, 3 );
+	connect( m_rotateSM, SIGNAL( mapped( int ) ), this, SLOT( onRotate( int ) ) );
 
 	// Create the tile zoom menu.
 	m_zoomMenu = new QMenu(tr("Zoom"), m_ui->toolBar);
@@ -186,6 +203,8 @@ TileEditorMainWindow::~TileEditorMainWindow()
 	delete m_ui;
 	delete m_undoStack;
 	delete m_rotationMenu;
+	delete m_rotateSM;
+	delete m_rotateAG;
 		
 	delete m_tileDisplayMenu;
 	delete m_tileEditorMenu;
@@ -313,6 +332,11 @@ void TileEditorMainWindow::onZoomFactor(int level)
 	m_ui->listViewDisplacement->setIconSize(QSize(tileDispScaled, tileDispScaled));
 	m_ui->listViewDisplacement->setCurrentIndex(m_ui->listViewDisplacement->model()->index(0, 0, m_ui->listViewDisplacement->rootIndex()));
 	m_ui->listViewTransition->repaint();
+}
+
+void TileEditorMainWindow::onRotate( int id )
+{
+	TileItemNode::setAlphaRot( id * 90 );
 }
 
 void TileEditorMainWindow::onActionAddTile(bool triggered)
