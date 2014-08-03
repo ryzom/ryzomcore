@@ -656,6 +656,14 @@ void TileEditorMainWindow::onTabChanged( int tab )
 	m_ui->diffuseTrBT->setChecked( true );
 }
 
+TileModel::TNodeTileType tabToType( int tabId )
+{
+	if( tabId >= TileModel::TileNodeTypeCount )
+		return TileModel::TileNodeTypeCount;
+
+	return TileModel::TNodeTileType( tabId );
+}
+
 void TileEditorMainWindow::onActionAddTile(int tabId)
 {
 	QModelIndex idx = m_ui->tileSetLV->currentIndex();
@@ -683,10 +691,27 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	int c = n->childCount();
 
+	TileModel::TNodeTileType type = tabToType( tabId );
+
 	QStringListIterator itr( fileNames );
 	while( itr.hasNext() )
 	{
-		Node *newNode = TileModel::createItemNode( c, TileModel::TileDiffuse, itr.next() );
+		TileItemNode *newNode = TileModel::createItemNode( type, c, TileModel::TileDiffuse, itr.next() );
+		if( newNode->hasError() )
+		{
+			QString error = newNode->getLastError();
+			error += "\nContinue?";
+
+			int reply = QMessageBox::question( this,
+												tr( "Error adding tile" ),
+												error,
+												QMessageBox::Yes, QMessageBox::No );
+			if( reply != QMessageBox::Yes )
+				break;
+			else
+				continue;
+		}
+		
 		n->appendRow( newNode );
 		c++;
 	}

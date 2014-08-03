@@ -109,26 +109,31 @@ class TileItemNodePvt;
 class TileItemNode : public Node
 {
 public:
-	TileItemNode(int tileId, TileModel::TTileChannel channel, QString filename, Node *parent=0);
+	TileItemNode( TileModel::TNodeTileType type, int tileId, TileModel::TTileChannel channel, QString filename, Node *parent=0);
 	virtual ~TileItemNode();
 	QVariant data(int column, int role) const;
 	int columnCount() const;
 	bool setTileFilename(TileModel::TTileChannel channel, QString filename);
 	QString getTileFilename(TileModel::TTileChannel channel);
-	void setId( int id ){ m_tileId = id; }
-	int id() const{ return m_tileId; }
+	void setId( int id );
+	int id() const;
+	QString getLastError() const;
+	bool borderFirst() const;
 
 	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileModel::TTileChannel displayChannel(){ return s_displayChannel; }
 
+	bool hasError() const{ return m_hasError; }
+
 private:
-	int m_tileId;
 	QMap<TileModel::TTileChannel, QString> m_tileFilename;
 	QMap<TileModel::TTileChannel, TileWidget*> m_tileWidget;
 
 	static TileModel::TTileChannel s_displayChannel;
 
 	TileItemNodePvt *pvt;
+
+	bool m_hasError;
 };
 
 #endif // TILE_ITEM_H

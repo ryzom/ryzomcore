@@ -197,7 +197,7 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	// TODO tie this to CTileSet::count from NeL
 	for(int transPos=0; transPos<48; transPos++)
 	{				
-		TileItemNode *transTile= new TileItemNode(transPos, TileDiffuse, QString("empty"));
+		TileItemNode *transTile= new TileItemNode( TileModel::TileTransition, transPos, TileDiffuse, QString("empty"));
 		tileTrans->appendRow(transTile);
 	}
 
@@ -209,7 +209,7 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	// TODO tie this to CTileSet::CountDisplace from NeL
 	for(int dispPos=0; dispPos<16; dispPos++)
 	{
-		TileItemNode *dispTile= new TileItemNode(dispPos, TileDiffuse, QString("empty"));
+		TileItemNode *dispTile= new TileItemNode( TileModel::TileDisplacement, dispPos, TileDiffuse, QString("empty"));
 		tileDisp->appendRow(dispTile);
 	}
 
@@ -219,9 +219,9 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	return tileSet;
 }
 
-Node *TileModel::createItemNode( int id, TTileChannel channel, const QString &fileName )
+TileItemNode *TileModel::createItemNode( TileModel::TNodeTileType type, int id, TTileChannel channel, const QString &fileName )
 {
-	return new TileItemNode( id, channel, fileName );
+	return new TileItemNode( type, id, channel, fileName );
 }
 
 const char *TileModel::getTileTypeName(TileModel::TNodeTileType type)

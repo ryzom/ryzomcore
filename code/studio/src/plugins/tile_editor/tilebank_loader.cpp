@@ -75,7 +75,7 @@ public:
 			int idx = set->getTile128( i );
 			NL3D::CTile *tile = bank.getTile( idx );
 
-			TileItemNode *tin = new TileItemNode( i, TileModel::TileDiffuse, "" );
+			TileItemNode *tin = new TileItemNode( TileModel::Tile128, i, TileModel::TileDiffuse, "" );
 
 			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
 			{
@@ -94,7 +94,7 @@ public:
 			int idx = set->getTile256( i );
 			NL3D::CTile *tile = bank.getTile( idx );
 
-			TileItemNode *tin = new TileItemNode( i, TileModel::TileDiffuse, "" );
+			TileItemNode *tin = new TileItemNode( TileModel::Tile256, i, TileModel::TileDiffuse, "" );
 
 			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
 			{

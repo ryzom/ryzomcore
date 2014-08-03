@@ -23,6 +23,7 @@
 
 class Node;
 class TileSetNode;
+class TileItemNode;
 
 class TileModel : public QAbstractItemModel
 {
@@ -42,7 +43,8 @@ public:
 		Tile128 = 0,
 		Tile256 = 1,
 		TileTransition = 2,
-		TileDisplacement = 3
+		TileDisplacement = 3,
+		TileNodeTypeCount = 4
 	};
 
 	enum TTileItemRole
@@ -85,7 +87,7 @@ public:
 	void swapRows( int a, int b );
 
 	TileSetNode *createTileSetNode(QString tileSetName);
-	static Node *createItemNode( int id, TTileChannel channel, const QString &fileName );
+	static TileItemNode *createItemNode( TileModel::TNodeTileType type, int id, TTileChannel channel, const QString &fileName );
 
 	static const char *getTileTypeName(TNodeTileType type);
 	static uint32 getTileTypeSize(TileModel::TNodeTileType type);
