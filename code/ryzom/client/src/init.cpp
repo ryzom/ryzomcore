@@ -1161,7 +1161,7 @@ void prelogInit()
 		CBloomEffect::getInstance().setDriver(Driver);
 
 		// init bloom effect
-		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		CBloomEffect::getInstance().init();
 		
 		if (StereoDisplay) // VR_CONFIG
 		{

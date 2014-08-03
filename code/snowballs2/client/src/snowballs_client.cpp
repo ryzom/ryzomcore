@@ -373,7 +373,7 @@ void initIngame()
 		// initialize bloom effect
 		CBloomEffect::instance().setDriver(Driver);
 		CBloomEffect::instance().setScene(Scene);
-		CBloomEffect::instance().init(ConfigFile->getVar("OpenGL").asInt() == 1);
+		CBloomEffect::instance().init();
 		CConfiguration::setAndCallback("SquareBloom", cbSquareBloom);
 		CConfiguration::setAndCallback("DensityBloom", cbDensityBloom);
 		CConfiguration::setAndCallback("EnableBloom", cbEnableBloom);
@@ -763,12 +763,12 @@ void loopIngame()
 				if (!StereoDisplay || StereoDisplay->wantClear())
 				{
 
-					if (s_EnableBloom)
+					/*if (s_EnableBloom)
 					{
 						nlassert(bloomStage == 0);
 						CBloomEffect::instance().initBloom(); // start bloom effect (just before the first scene element render)
 						bloomStage = 1;
-					}
+					}*/
 
 					// 01. Render Driver (background color)
 					Driver->clearBuffers(CRGBA(0, 0, 127)); // clear all buffers, if you see this blue there's a problem with scene rendering
@@ -788,14 +788,14 @@ void loopIngame()
 
 				if (!StereoDisplay || StereoDisplay->wantInterface3D())
 				{
-					if (s_EnableBloom && bloomStage == 1)
+					/*if (s_EnableBloom && bloomStage == 1)
 					{
 						// End the actual bloom effect visible in the scene.
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endBloom();
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 2;
-					}
+					}*/
 
 					// 06. Render Interface 3D (player names)
 					// ... 
@@ -803,14 +803,14 @@ void loopIngame()
 
 				if (!StereoDisplay || StereoDisplay->wantInterface2D())
 				{
-					if (s_EnableBloom && bloomStage == 2)
+					/*if (s_EnableBloom && bloomStage == 2)
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
-					}
+					}*/
 
 					// 07. Render Interface 2D (chatboxes etc, optionally does have 3d)
 					updateCompass(); // Update the compass

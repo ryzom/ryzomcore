@@ -31,6 +31,7 @@ namespace NL3D
 
 class UDriver;
 class UScene;
+class CTextureUser;
 
 //-----------------------------------------------------------------------------------------------------------
 //---------------------------------------- CBloomEffect -----------------------------------------------------
@@ -52,19 +53,14 @@ public:
 	// Destructor
 	~CBloomEffect();
 
-	// Called after the Driver initialization to indicate if OpenGL or Direct3D is used.
-	// They are some differences in bloom algorithm depending on this API choice.
-	// If bloom effect is activated and supported, private method init() is called to initialize
-	// textures and materials.
-	// initBloomEffect = false => directx
-	// initBloomEffect = true => opengl
-	void init(bool initBloomEffect);
+	// Called after the Driver initialization.
+	void init();
 
 	// must be called before init
 	void setDriver(UDriver *driver) { _Driver = driver; }
 	UDriver* getDriver() const { return _Driver; }
 
-	// must be called before initBloom
+	// must be called before applyBloom
 	void setScene(UScene *scene) { _Scene = scene; }
 	UScene* getScene() const { return _Scene; }
 
@@ -76,6 +72,9 @@ public:
 	void setDensityBloom(uint8 densityBloom) { _DensityBloom = densityBloom; }
 	uint8 getDensityBloom() const { return _DensityBloom; }
 
+	// Applies bloom to the current render target, if backbuffer is true the final image is rendered to the backbuffer instead of to a render target
+	void applyBloom(bool backbuffer);
+
 	// Called at the beginning of renderAll method in the main loop, if window has been resized,
 	// reinitialize bloom textures according to new window size.
 	// The bloom texture (_InitText attribute) which is used as render target during scene render
@@ -83,11 +82,11 @@ public:
 	// If window size exceeds 256*256 the textures used to apply blur are reinitialized with
 	// 256*256 size. If a dimension is less than 256, the texture is initialized with the nearer
 	// power of 2, lower than this window dimension.
-	void initBloom();
+	// void initBloom();
 
 	// Called at the end of renderAll method in the main loop, recover stretched texture, apply
 	// both blur passes, and the blending operation between initial render target and the blured one.
-	void endBloom();
+	// void endBloom();
 
 	// In OpenGL, the use of FBO implies that Z buffer values of scene render have been stored in
 	// a depth render target. Then, to display 3D interfaces, we must display them in the same FBO,
@@ -95,15 +94,12 @@ public:
 	// This method is called at the end of interfaces display in the main loop, to display final render target
 	// (with added interfaces) in the color frame buffer.
 	// NB : In Direct3D, the final render target is displayed at the end of endBloom call.
-	void endInterfacesDisplayBloom();
+	// void endInterfacesDisplayBloom();
 
 private:
 
-	// Initialize textures and materials.
-	void init();
-
 	// Initialize a bloom texture with new dimensions.
-	void initTexture(NLMISC::CSmartPtr<NL3D::ITexture> & tex, bool isMode2D, uint32 width, uint32 height);
+	// void initTexture(NLMISC::CSmartPtr<NL3D::ITexture> & tex, bool isMode2D, uint32 width, uint32 height);
 
 	// Called in endBloom method to build a blurred texture. Two passes (then two calls)
 	// are necessary : horizontal and vertical.
@@ -130,6 +126,7 @@ private:
 	// density of bloom
 	uint8		_DensityBloom;
 
+/*
 	// render target textures
 	// used to display scene
 	NLMISC::CSmartPtr<NL3D::ITexture>  _InitText;
@@ -140,12 +137,13 @@ private:
 	NLMISC::CSmartPtr<NL3D::ITexture>  _BlurHorizontalTex;
 	// original render target
 	NLMISC::CSmartPtr<NL3D::ITexture>  _OriginalRenderTarget;
+*/
 
 
 	// materials
 	// used to display first texture in doBlur passes.
 	NL3D::UMaterial		_BlurMat;
-	// used to display final render target texture in endInterfacesDisplayBloom call (OpenGL).
+	// used to display final render target texture onto the backbuffer
 	NL3D::UMaterial		_DisplayInitMat;
 	// used to blend initial scene render target texture and blur texture according to a
 	// dest+src - dest*src blend operation.
@@ -158,19 +156,23 @@ private:
 	NLMISC::CQuadUV		_BlurQuad;
 	NLMISC::CQuadUV		_DisplayQuad;
 
-	// openGL or Direct3D?
-	bool				_InitBloomEffect;
-
 	// textures and materials already initialized?
 	bool				_Init;
 
 	// current window dimensions
-	uint32				_WndWidth;
-	uint32				_WndHeight;
+	/*uint32				_WndWidth;
+	uint32				_WndHeight;*/
 
+	// Temporary variables used during applyBloom(...) ->
 	// current blur texture dimensions
 	uint32				_BlurWidth;
 	uint32				_BlurHeight;
+	// used as stretched texture from _InitText, as displayed texture in first blur pass,
+	// and as render target in second blur pass.
+	CTextureUser		*_BlurFinalTex;
+	// used as render target in first blur pass, and as displayed texture on second blur pass.
+	CTextureUser		*_BlurHorizontalTex;
+	// <-
 };
 
 } // NL3D

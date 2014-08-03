@@ -43,6 +43,8 @@
 #include "nel/3d/u_instance_material.h"
 #include "nel/3d/u_cloud_scape.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/render_target_manager.h"
+#include "nel/3d/driver_user.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
@@ -561,13 +563,18 @@ void clearBuffers()
 
 void renderScene(bool forceFullDetail, bool bloom)
 {
+	CTextureUser *effectRenderTarget = NULL;
 	if (bloom)
 	{
 		// set bloom parameters before applying bloom effect
 		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 		// init bloom
-		CBloomEffect::getInstance().initBloom();
+		// CBloomEffect::getInstance().initBloom();
+		uint32 winw, winh;
+		Driver->getWindowSize(winw, winh);
+		effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
+		static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
 	}
 	if (forceFullDetail)
 	{
@@ -583,8 +590,9 @@ void renderScene(bool forceFullDetail, bool bloom)
 	if (bloom)
 	{
 		// apply bloom effect
-		CBloomEffect::getInstance().endBloom();
-		CBloomEffect::getInstance().endInterfacesDisplayBloom();
+		// CBloomEffect::getInstance().endBloom();
+		// CBloomEffect::getInstance().endInterfacesDisplayBloom();
+		CBloomEffect::getInstance().applyBloom(effectRenderTarget != NULL); // TODO
 	}
 }
 
@@ -1622,6 +1630,7 @@ bool mainLoop()
 
 		uint i = 0;
 		uint bloomStage = 0;
+		CTextureUser *effectRenderTarget = NULL;
 		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 		{
 			++i;
@@ -1664,14 +1673,20 @@ bool mainLoop()
 			{
 				if (Render)
 				{
-					if (!StereoDisplay && ClientCfg.Bloom) // NO VR BLOOMZ
+					if (ClientCfg.Bloom && bloomStage == 0)
 					{
-						nlassert(bloomStage == 0);
 						// set bloom parameters before applying bloom effect
 						CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
 						CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 						// start bloom effect (just before the first scene element render)
-						CBloomEffect::instance().initBloom();
+						if (!StereoDisplay) // FIXME: Assumes rendering to render target...!
+						{
+							uint32 winw, winh;
+							Driver->getWindowSize(winw, winh);
+							effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
+							static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
+						}
+						// CBloomEffect::instance().initBloom();
 						bloomStage = 1;
 					}
 				}
@@ -1714,13 +1729,18 @@ bool mainLoop()
 					// Render
 					if (Render)
 					{
-						if (!StereoDisplay && ClientCfg.Bloom && bloomStage == 1) // NO VR BLOOMZ
+						if (ClientCfg.Bloom && bloomStage == 1)
 						{
 							// End the actual bloom effect visible in the scene.
 							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-							CBloomEffect::instance().endBloom();
+							CBloomEffect::instance().applyBloom(effectRenderTarget != NULL);
 							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-							bloomStage = 2;
+							if (effectRenderTarget)
+							{
+								Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
+								effectRenderTarget = NULL;
+							}
+							bloomStage = 0;
 						}
 
 						// for that frame and
@@ -1841,14 +1861,14 @@ bool mainLoop()
 
 					// special case in OpenGL : all scene has been display in render target,
 					// now, final texture is display with a quad
-					if (!StereoDisplay && !ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
+					/*if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
-					}
+					}*/
 				}
 
 				{
