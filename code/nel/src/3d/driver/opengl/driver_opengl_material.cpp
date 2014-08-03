@@ -2087,14 +2087,16 @@ void		CDriverGL::setupCloudPass (uint /* pass */)
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND3_ALPHA_NV, GL_SRC_ALPHA);
 			activateTexEnvColor (1, mat.getColor());
 		}
-		else
+		else if (ATICloudShaderHandle)
 		{
 			// TODO : for now the state is not cached in _CurrentTexEnvSpecial
 			nglBindFragmentShaderATI(ATICloudShaderHandle);
 			glEnable(GL_FRAGMENT_SHADER_ATI);
 			float cst[4] = { 0.f, 0.f, 0.f, mat.getColor().A / 255.f };
 			nglSetFragmentShaderConstantATI(GL_CON_0_ATI, cst);
-			/*
+		}
+		else
+		{
 			_DriverGLStates.activeTextureARB(0);
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_EXT);
 			// Operator.
@@ -2130,7 +2132,6 @@ void		CDriverGL::setupCloudPass (uint /* pass */)
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_EXT, GL_SRC_COLOR);
 			glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, GL_CONSTANT_EXT );
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, GL_SRC_ALPHA);
-			*/
 		}
 #endif
 	}
