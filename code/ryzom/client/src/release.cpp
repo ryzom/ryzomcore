@@ -120,6 +120,7 @@ extern bool userChar;
 extern bool serverReceivedReady;
 extern bool CharNameValidArrived;
 
+extern UMaterial				EffectMaterial;
 
 extern void releaseContextualCursor();
 extern void selectTipsOfTheDay (uint tips);
@@ -585,6 +586,9 @@ void release()
 	// Delete the driver.
 	if(Driver)
 	{
+		if (!EffectMaterial.empty())
+			Driver->deleteMaterial(EffectMaterial);
+
 		// Release the prim
 		PrimFiles.release (*Driver);
 

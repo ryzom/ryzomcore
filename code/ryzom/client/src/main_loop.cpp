@@ -185,6 +185,9 @@ extern std::vector<UTextureFile*> LogoBitmaps;
 extern bool						IsInRingSession;
 extern std::string				UsedFSAddr;
 
+extern UMaterial				EffectMaterial;
+extern NLMISC::CQuadUV			EffectQuad;
+
 // temp
 extern NLMISC::CValueSmoother smoothFPS;
 extern NLMISC::CValueSmoother moreSmoothFPS;
@@ -569,8 +572,8 @@ void renderScene(bool forceFullDetail, bool bloom)
 		// set bloom parameters before applying bloom effect
 		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-		// init bloom
-		// CBloomEffect::getInstance().initBloom();
+
+		// init effect render target
 		uint32 winw, winh;
 		Driver->getWindowSize(winw, winh);
 		effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
@@ -590,9 +593,25 @@ void renderScene(bool forceFullDetail, bool bloom)
 	if (bloom)
 	{
 		// apply bloom effect
-		// CBloomEffect::getInstance().endBloom();
-		// CBloomEffect::getInstance().endInterfacesDisplayBloom();
-		CBloomEffect::getInstance().applyBloom(effectRenderTarget != NULL); // TODO
+		CBloomEffect::getInstance().applyBloom();
+
+		// draw final result to backbuffer
+		CDriverUser *dru = static_cast<CDriverUser *>(Driver);
+
+		CTextureUser texNull;
+		dru->setRenderTarget(texNull);
+
+		EffectMaterial.getObjectPtr()->setTexture(0, effectRenderTarget->getITexture());
+
+		UCamera	pCam = Scene->getCam();
+		Driver->setMatrixMode2D11();
+		Driver->drawQuad(EffectQuad, EffectMaterial);
+		Driver->setMatrixMode3D(pCam);
+
+		EffectMaterial.getObjectPtr()->setTexture(0, NULL);
+
+		Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
+		effectRenderTarget = NULL;
 	}
 }
 
@@ -1629,8 +1648,24 @@ bool mainLoop()
 		}
 
 		uint i = 0;
-		uint bloomStage = 0;
+		bool effectRender = false;
 		CTextureUser *effectRenderTarget = NULL;
+		bool haveEffects = Render && ClientCfg.Bloom;
+		if (haveEffects)
+		{
+			if (!StereoDisplay)
+			{
+				uint32 winw, winh;
+				Driver->getWindowSize(winw, winh);
+				effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
+				static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
+			}
+			if (ClientCfg.Bloom)
+			{
+				CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+				CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+			}
+		}
 		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 		{
 			++i;
@@ -1673,22 +1708,7 @@ bool mainLoop()
 			{
 				if (Render)
 				{
-					if (ClientCfg.Bloom && bloomStage == 0)
-					{
-						// set bloom parameters before applying bloom effect
-						CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
-						CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-						// start bloom effect (just before the first scene element render)
-						if (!StereoDisplay) // FIXME: Assumes rendering to render target...!
-						{
-							uint32 winw, winh;
-							Driver->getWindowSize(winw, winh);
-							effectRenderTarget = Driver->getRenderTargetManager().getRenderTarget(winw, winh);
-							static_cast<CDriverUser *>(Driver)->setRenderTarget(*effectRenderTarget);
-						}
-						// CBloomEffect::instance().initBloom();
-						bloomStage = 1;
-					}
+					effectRender = haveEffects;
 				}
 
 				// Clear buffers
@@ -1729,18 +1749,15 @@ bool mainLoop()
 					// Render
 					if (Render)
 					{
-						if (ClientCfg.Bloom && bloomStage == 1)
+						if (effectRender)
 						{
-							// End the actual bloom effect visible in the scene.
-							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-							CBloomEffect::instance().applyBloom(effectRenderTarget != NULL);
-							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-							if (effectRenderTarget)
+							if (ClientCfg.Bloom)
 							{
-								Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
-								effectRenderTarget = NULL;
+								if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+								CBloomEffect::instance().applyBloom();
+								if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 							}
-							bloomStage = 0;
+							effectRender = false;
 						}
 
 						// for that frame and
@@ -2181,6 +2198,27 @@ bool mainLoop()
 				StereoDisplay->endRenderTarget();
 			}
 		} /* stereo pass */
+
+		if (effectRenderTarget)
+		{
+			// draw final result to backbuffer
+			CDriverUser *dru = static_cast<CDriverUser *>(Driver);
+
+			CTextureUser texNull;
+			dru->setRenderTarget(texNull);
+
+			EffectMaterial.getObjectPtr()->setTexture(0, effectRenderTarget->getITexture());
+
+			UCamera	pCam = Scene->getCam();
+			Driver->setMatrixMode2D11();
+			Driver->drawQuad(EffectQuad, EffectMaterial);
+			Driver->setMatrixMode3D(pCam);
+
+			EffectMaterial.getObjectPtr()->setTexture(0, NULL);
+
+			Driver->getRenderTargetManager().recycleRenderTarget(effectRenderTarget);
+			effectRenderTarget = NULL;
+		}
 
 		// Draw to screen.
 		static CQuat MainCamOri;

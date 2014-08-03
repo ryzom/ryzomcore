@@ -72,8 +72,8 @@ public:
 	void setDensityBloom(uint8 densityBloom) { _DensityBloom = densityBloom; }
 	uint8 getDensityBloom() const { return _DensityBloom; }
 
-	// Applies bloom to the current render target, if backbuffer is true the final image is rendered to the backbuffer instead of to a render target
-	void applyBloom(bool backbuffer);
+	// Applies bloom to the current render target
+	void applyBloom();
 
 	// Called at the beginning of renderAll method in the main loop, if window has been resized,
 	// reinitialize bloom textures according to new window size.
@@ -143,8 +143,6 @@ private:
 	// materials
 	// used to display first texture in doBlur passes.
 	NL3D::UMaterial		_BlurMat;
-	// used to display final render target texture onto the backbuffer
-	NL3D::UMaterial		_DisplayInitMat;
 	// used to blend initial scene render target texture and blur texture according to a
 	// dest+src - dest*src blend operation.
 	NL3D::UMaterial		_DisplayBlurMat;
@@ -154,7 +152,6 @@ private:
 
 	// quads
 	NLMISC::CQuadUV		_BlurQuad;
-	NLMISC::CQuadUV		_DisplayQuad;
 
 	// textures and materials already initialized?
 	bool				_Init;

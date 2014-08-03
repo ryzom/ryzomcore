@@ -83,11 +83,6 @@ CBloomEffect::~CBloomEffect()
 {
 	if (_Init)
 	{
-		if (!_DisplayInitMat.empty())
-		{
-			if (_Driver) _Driver->deleteMaterial(_DisplayInitMat);
-		}
-
 		if (!_DisplayBlurMat.empty())
 		{
 			if (_Driver) _Driver->deleteMaterial(_DisplayBlurMat);
@@ -160,18 +155,6 @@ void CBloomEffect::init()
 	matObject->texEnvArg1RGB(3, CMaterial::Constant, CMaterial::SrcColor);
 	matObject->texEnvArg2RGB(3, CMaterial::Previous, CMaterial::SrcColor);
 
-	// initialize display materials
-	_DisplayInitMat = _Driver->createMaterial();
-	CMaterial * matObjectInit = _DisplayInitMat.getObjectPtr();
-	_DisplayInitMat.initUnlit();
-	_DisplayInitMat.setColor(CRGBA::White);
-	_DisplayInitMat.setBlend(false);
-	_DisplayInitMat.setAlphaTest (false);
-	matObjectInit->setBlendFunc(CMaterial::one, CMaterial::zero);
-	matObjectInit->setZWrite(false);
-	matObjectInit->setZFunc(CMaterial::always);
-	matObjectInit->setDoubleSided(true);
-
 	// initialize linear blur material
 	_DisplayBlurMat = _Driver->createMaterial();
 	CMaterial * matObjectFinal = _DisplayBlurMat.getObjectPtr();
@@ -208,15 +191,6 @@ void CBloomEffect::init()
 	matObjectFinal->texEnvArg1RGB(1, CMaterial::Previous, CMaterial::SrcColor);
 
 	// initialize quads
-	_DisplayQuad.V0 = CVector(0.f, 0.f, 0.5f);
-	_DisplayQuad.V1 = CVector(1.f, 0.f, 0.5f);
-	_DisplayQuad.V2 = CVector(1.f, 1.f, 0.5f);
-	_DisplayQuad.V3 = CVector(0.f, 1.f, 0.5f);
-	_DisplayQuad.Uv0 = CUV(0.f, 0.f);
-	_DisplayQuad.Uv1 = CUV(1.f, 0.f);
-	_DisplayQuad.Uv2 = CUV(1.f, 1.f);
-	_DisplayQuad.Uv3 = CUV(0.f, 1.f);
-
 	_BlurQuad.V0 = CVector(-1.f, -1.f,	0.5f);
 	_BlurQuad.V1 = CVector(1.f,	 -1.f,	0.5f);
 	_BlurQuad.V2 = CVector(1.f,	 1.f,	0.5f);
@@ -241,7 +215,7 @@ void CBloomEffect::init()
 
 //-----------------------------------------------------------------------------------------------------------
 
-void CBloomEffect::applyBloom(bool backbuffer)
+void CBloomEffect::applyBloom()
 {
 	if (!((CDriverUser *)_Driver)->getDriver()->supportBloomEffect())
 		return;
@@ -301,22 +275,7 @@ void CBloomEffect::applyBloom(bool backbuffer)
 	drv->setRenderTarget(renderTarget);
 	applyBlur();
 
-	// draw final result to backbuffer if last effect
-	if (backbuffer)
-	{
-		CTextureUser texNull;
-		dru->setRenderTarget(texNull);
-
-		_DisplayInitMat.getObjectPtr()->setTexture(0, renderTarget);
-
-		UCamera	pCam = _Scene->getCam();
-		_Driver->setMatrixMode2D11();
-		_Driver->drawQuad(_DisplayQuad, _DisplayInitMat);
-		_Driver->setMatrixMode3D(pCam);
-	}
-
 	// cleanup material texture references
-	_DisplayInitMat.getObjectPtr()->setTexture(0, NULL);
 	_DisplayBlurMat.getObjectPtr()->setTexture(0, NULL);
 	_DisplaySquareBlurMat.getObjectPtr()->setTexture(0, NULL);
 	_DisplaySquareBlurMat.getObjectPtr()->setTexture(1, NULL);
