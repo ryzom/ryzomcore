@@ -147,6 +147,23 @@ public:
 };
 
 // ***************************************************************************
+class CDepthStencilFBO : public NLMISC::CRefCount
+{
+public:
+	CDepthStencilFBO(CDriverGL *driver, uint width, uint height);
+	~CDepthStencilFBO();
+
+	uint					Width;
+	uint					Height;
+
+	GLuint					DepthFBOId;
+	GLuint					StencilFBOId;
+
+private:
+	CDriverGL				*m_Driver;
+};
+
+// ***************************************************************************
 class CTextureDrvInfosGL : public ITextureDrvInfos
 {
 public:
@@ -173,12 +190,9 @@ public:
 	GLuint					FBOId;
 
 	// depth stencil FBO id
-	GLuint					DepthFBOId;
-	GLuint					StencilFBOId;
-
-	bool					InitFBO;
 	bool					AttachDepthStencil;
-	bool					UsePackedDepthStencil;
+	NLMISC::CSmartPtr<CDepthStencilFBO>	DepthStencilFBO;
+	bool					InitFBO;
 
 	// The current wrap modes assigned to the texture.
 	ITexture::TWrapMode		WrapS;
@@ -685,6 +699,7 @@ private:
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
 	friend class					CPixelProgamDrvInfosGL;
+	friend class					CDepthStencilFBO;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -880,8 +895,11 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
+	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
 
+	// Share the same backbuffer for FBO render targets with window size
+	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
 
 	// Num lights return by GL_MAX_LIGHTS
 	uint						_MaxDriverLight;

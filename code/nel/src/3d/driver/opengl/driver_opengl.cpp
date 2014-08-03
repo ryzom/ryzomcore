@@ -1032,6 +1032,8 @@ bool CDriverGL::release()
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
+	nlassert(_DepthStencilFBOs.empty());
+
 	_SwapBufferCounter = 0;
 
 	// delete querries
