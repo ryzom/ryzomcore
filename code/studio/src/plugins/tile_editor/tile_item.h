@@ -24,6 +24,11 @@
 
 #include "tile_model.h"
 
+namespace NL3D
+{
+	class CTileBorder;
+}
+
 class TileWidget;
 
 class Node
@@ -118,7 +123,9 @@ public:
 	void setId( int id );
 	int id() const;
 	QString getLastError() const;
-	bool borderFirst() const;
+	bool borderFirst( TileModel::TTileChannel channel ) const;
+	const NL3D::CTileBorder& border( TileModel::TTileChannel channel ) const;
+	int alphaRot() const;
 
 	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileModel::TTileChannel displayChannel(){ return s_displayChannel; }

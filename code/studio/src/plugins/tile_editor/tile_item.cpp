@@ -383,11 +383,6 @@ public:
 		if( error == NL3D::CTileSet::addFirstA128128 )
 			return NL3D::CTileSet::addFirstA128128;
 
-/*
-	enum TError { ok=0, topInterfaceProblem, bottomInterfaceProblem, leftInterfaceProblem,
-		rightInterfaceProblem, addFirstA128128, topBottomNotTheSame, rightLeftNotTheSame,
-		sizeInvalide, errorCount };
-*/
 		static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
 
 		if( error != NL3D::CTileSet::ok )
@@ -484,6 +479,8 @@ public:
 			m_lastError = QObject::tr( "Cannot open file %1" ).arg( fn );
 			return false;
 		}
+
+		m_borderFirst[ channel ] = false;
 		
 		if( !empty )
 		{
@@ -511,6 +508,8 @@ public:
 
 	QString getLastError() const{ return m_lastError; }
 	bool borderFirst( TileModel::TTileChannel channel ) const{ return m_borderFirst[ channel ]; }
+
+	const NL3D::CTileBorder &border( TileModel::TTileChannel channel ){ return m_border[ channel ]; }
 
 private:
 	QPixmap pixmaps[ TileModel::TileChannelCount ];
@@ -590,9 +589,19 @@ QString TileItemNode::getLastError() const
 	return pvt->getLastError();
 }
 
-bool TileItemNode::borderFirst() const
+bool TileItemNode::borderFirst( TileModel::TTileChannel channel ) const
 {
-	return false;
+	return pvt->borderFirst( channel );
+}
+
+const NL3D::CTileBorder& TileItemNode::border( TileModel::TTileChannel channel ) const
+{
+	return pvt->border( channel );
+}
+
+int TileItemNode::alphaRot() const
+{
+	return 0;
 }
 
 QVariant TileItemNode::data(int column, int role) const

@@ -96,19 +96,76 @@ public:
 		}
 	}
 
+	void setupTiles128( NL3D::CTileSet *set, TileTypeNode *node )
+	{
+		TileItemNode *tileNode = NULL;
+		for( int i = 0; i < node->childCount(); i++ )
+		{
+			tileNode = static_cast< TileItemNode* >( node->child( i ) );
+
+			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
+			{
+				TileModel::TTileChannel channel = TileModel::TTileChannel( j );
+				NL3D::CTile::TBitmap bm = channelToTBitmap( channel );
+				const NL3D::CTileBorder &border = tileNode->border( channel );
+
+				if( tileNode->borderFirst( channel ) )
+					set->setBorder( bm, border );
+
+				set->setTile128( i, tileNode->getTileFilename( channel ).toUtf8().constData(), bm, bank );
+			}
+		}
+	}
+
+	void setupTiles256( NL3D::CTileSet *set, TileTypeNode *node )
+	{
+		TileItemNode *tileNode = NULL;
+		for( int i = 0; i < node->childCount(); i++ )
+		{
+			tileNode = static_cast< TileItemNode* >( node->child( i ) );
+
+			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
+			{
+				TileModel::TTileChannel channel = TileModel::TTileChannel( j );
+				NL3D::CTile::TBitmap bm = channelToTBitmap( channel );
+				const NL3D::CTileBorder &border = tileNode->border( channel );
+
+				if( tileNode->borderFirst( channel ) )
+					set->setBorder( bm, border );
+
+				set->setTile256( i, tileNode->getTileFilename( channel ).toUtf8().constData(), bm, bank );
+			}
+		}
+	}
+
 	void setupTransitionTile( NL3D::CTileSet *set, TileItemNode *node, int idx )
 	{
-		NL3D::CTileSetTransition *tr = set->getTransition( idx );
-		int tid = tr->getTile();
-		NL3D::CTile *tile = bank.getTile( tid );
+		TileModel::TTileChannel channel;
+		NL3D::CTile::TBitmap bm;
+		NL3D::CTileSet::TTransition tr;
 
-		if( tile == NULL )
-			return;
-
-		for( int i = TileModel::TileDiffuse; i <= TileModel::TileAlpha; i++ )
+		// Diffuse, Additive
+		for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
 		{
-			QString fn = node->getTileFilename( TileModel::TTileChannel( i ) );
-			tile->setFileName( channelToTBitmap( TileModel::TTileChannel( i ) ), fn.toUtf8().constData() );
+			channel =TileModel::TTileChannel( i );
+			bm = channelToTBitmap( channel );
+			tr = NL3D::CTileSet::TTransition( idx );
+			const NL3D::CTileBorder &border = node->border( channel );
+
+			if( node->borderFirst( channel ) )
+				set->setBorder( bm, border );
+			set->setTileTransition( tr, node->getTileFilename( channel ).toUtf8().constData(), bm, bank, border );
+		}
+
+		// Alpha
+		{
+			channel = TileModel::TileAlpha;
+			bm = channelToTBitmap( channel );
+			tr = NL3D::CTileSet::TTransition( idx );
+			const NL3D::CTileBorder &border = node->border( channel );
+			int rot = node->alphaRot();
+
+			set->setTileTransitionAlpha( tr, node->getTileFilename( channel ).toUtf8().constData(), bank, border, rot );
 		}
 	}
 
@@ -149,6 +206,17 @@ public:
 		setupDisplacementTiles( set, tn );
 	}
 
+	void setupTiles( NL3D::CTileSet *set, TileSetNode *node )
+	{
+		TileTypeNode *tn128 = static_cast< TileTypeNode* >( node->child( 0 ) );
+		TileTypeNode *tn256 = static_cast< TileTypeNode* >( node->child( 1 ) );
+
+		setupTiles128( set, tn128 );
+		setupTiles256( set, tn256 );
+		setupTransitionTiles( set, node );
+		setupDisplacementTiles( set, node );
+	}
+
 	void addLands( const QList< Land > &lands )
 	{
 		QListIterator< Land > itr( lands );
@@ -185,11 +253,8 @@ public:
 			TileSetNode *n = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
 
 			addTilesToSet( set, n );
-			setupTransitionTiles( set, n );
-			setupDisplacementTiles( set, n );
-
+			setupTiles( set, n );
 			set->setOriented( n->isOriented() );
-
 			set->setTileVegetableDescFileName( n->vegetSet().toUtf8().constData() );
 		}
 
