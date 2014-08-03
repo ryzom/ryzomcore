@@ -27,35 +27,35 @@ class TileBankSaverPvt
 public:
 	NL3D::CTileBank bank;
 
-	static NL3D::CTile::TBitmap channelToTBitmap( TileModel::TTileChannel channel )
+	static NL3D::CTile::TBitmap channelToTBitmap( TileConstants::TTileChannel channel )
 	{
 		NL3D::CTile::TBitmap b = NL3D::CTile::bitmapCount;
 
 		switch( channel )
 		{
-		case TileModel::TileDiffuse: b = NL3D::CTile::diffuse; break;
-		case TileModel::TileAdditive: b = NL3D::CTile::additive; break;
-		case TileModel::TileAlpha: b = NL3D::CTile::alpha; break;
+		case TileConstants::TileDiffuse: b = NL3D::CTile::diffuse; break;
+		case TileConstants::TileAdditive: b = NL3D::CTile::additive; break;
+		case TileConstants::TileAlpha: b = NL3D::CTile::alpha; break;
 		}
 
 		return b;
 	}
 
-	NL3D::CTile* addTileToSet( NL3D::CTileSet *set, TileModel::TNodeTileType type )
+	NL3D::CTile* addTileToSet( NL3D::CTileSet *set, TileConstants::TNodeTileType type )
 	{
 		int idx = -1;
 		int bidx = -1;
 
 		switch( type )
 		{
-		case TileModel::Tile128:
+		case TileConstants::Tile128:
 			{
 				set->addTile128( idx, bank );
 				bidx = set->getTile128( idx );
 				break;
 			}
 
-		case TileModel::Tile256:
+		case TileConstants::Tile256:
 			{
 				set->addTile256( idx, bank );
 				bidx = set->getTile256( idx );
@@ -71,24 +71,24 @@ public:
 
 	void addTilesToSet( NL3D::CTileSet *set, TileTypeNode *node )
 	{
-		TileModel::TNodeTileType type = node->getTileType();
+		TileConstants::TNodeTileType type = node->getTileType();
 
 		for( int i = 0; i < node->childCount(); i++ )
 		{
 			TileItemNode *tin = static_cast< TileItemNode* >( node->child( i ) );
 			NL3D::CTile *tile = addTileToSet( set, type );
 
-			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
+			for( int j = TileConstants::TileDiffuse; j < TileConstants::TileAlpha; j++ )
 			{
-				QString fn = tin->getTileFilename( TileModel::TTileChannel( j ) );
-				tile->setFileName( channelToTBitmap( TileModel::TTileChannel( j ) ) , fn.toUtf8().constData() );
+				QString fn = tin->getTileFilename( TileConstants::TTileChannel( j ) );
+				tile->setFileName( channelToTBitmap( TileConstants::TTileChannel( j ) ) , fn.toUtf8().constData() );
 			}
 		}
 	}
 
 	void addTilesToSet( NL3D::CTileSet *set, TileSetNode *node )
 	{
-		for( int i = TileModel::Tile128; i <= TileModel::Tile256; i++ )
+		for( int i = TileConstants::Tile128; i <= TileConstants::Tile256; i++ )
 		{
 			TileTypeNode *tn = static_cast< TileTypeNode* >( node->child( i ) );
 			
@@ -103,9 +103,9 @@ public:
 		{
 			tileNode = static_cast< TileItemNode* >( node->child( i ) );
 
-			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
+			for( int j = TileConstants::TileDiffuse; j < TileConstants::TileAlpha; j++ )
 			{
-				TileModel::TTileChannel channel = TileModel::TTileChannel( j );
+				TileConstants::TTileChannel channel = TileConstants::TTileChannel( j );
 				NL3D::CTile::TBitmap bm = channelToTBitmap( channel );
 				const NL3D::CTileBorder &border = tileNode->border( channel );
 
@@ -124,9 +124,9 @@ public:
 		{
 			tileNode = static_cast< TileItemNode* >( node->child( i ) );
 
-			for( int j = TileModel::TileDiffuse; j < TileModel::TileAlpha; j++ )
+			for( int j = TileConstants::TileDiffuse; j < TileConstants::TileAlpha; j++ )
 			{
-				TileModel::TTileChannel channel = TileModel::TTileChannel( j );
+				TileConstants::TTileChannel channel = TileConstants::TTileChannel( j );
 				NL3D::CTile::TBitmap bm = channelToTBitmap( channel );
 				const NL3D::CTileBorder &border = tileNode->border( channel );
 
@@ -140,14 +140,14 @@ public:
 
 	void setupTransitionTile( NL3D::CTileSet *set, TileItemNode *node, int idx )
 	{
-		TileModel::TTileChannel channel;
+		TileConstants::TTileChannel channel;
 		NL3D::CTile::TBitmap bm;
 		NL3D::CTileSet::TTransition tr;
 
 		// Diffuse, Additive
-		for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
+		for( int i = TileConstants::TileDiffuse; i < TileConstants::TileAlpha; i++ )
 		{
-			channel =TileModel::TTileChannel( i );
+			channel =TileConstants::TTileChannel( i );
 			bm = channelToTBitmap( channel );
 			tr = NL3D::CTileSet::TTransition( idx );
 			const NL3D::CTileBorder &border = node->border( channel );
@@ -159,7 +159,7 @@ public:
 
 		// Alpha
 		{
-			channel = TileModel::TileAlpha;
+			channel = TileConstants::TileAlpha;
 			bm = channelToTBitmap( channel );
 			tr = NL3D::CTileSet::TTransition( idx );
 			const NL3D::CTileBorder &border = node->border( channel );
@@ -187,7 +187,7 @@ public:
 	void setupDisplacementTile( NL3D::CTileSet *set, TileItemNode *node, int idx )
 	{
 		set->setDisplacement( NL3D::CTileSet::TDisplacement( idx ), 
-							node->getTileFilename( TileModel::TileDiffuse ).toUtf8().constData(),
+							node->getTileFilename( TileConstants::TileDiffuse ).toUtf8().constData(),
 							bank );
 	}
 

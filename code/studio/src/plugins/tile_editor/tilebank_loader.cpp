@@ -28,15 +28,15 @@ class TileBankLoaderPvt
 public:
 	NL3D::CTileBank bank;
 
-	static NL3D::CTile::TBitmap channelToTBitmap( TileModel::TTileChannel channel )
+	static NL3D::CTile::TBitmap channelToTBitmap( TileConstants::TTileChannel channel )
 	{
 		NL3D::CTile::TBitmap b = NL3D::CTile::bitmapCount;
 
 		switch( channel )
 		{
-		case TileModel::TileDiffuse: b = NL3D::CTile::diffuse; break;
-		case TileModel::TileAdditive: b = NL3D::CTile::additive; break;
-		case TileModel::TileAlpha: b = NL3D::CTile::alpha; break;
+		case TileConstants::TileDiffuse: b = NL3D::CTile::diffuse; break;
+		case TileConstants::TileAdditive: b = NL3D::CTile::additive; break;
+		case TileConstants::TileAlpha: b = NL3D::CTile::alpha; break;
 		}
 
 		return b;
@@ -75,11 +75,11 @@ public:
 			int idx = set->getTile128( i );
 			NL3D::CTile *tile = bank.getTile( idx );
 
-			TileItemNode *tin = new TileItemNode( TileModel::Tile128, i, TileModel::TileDiffuse, "" );
+			TileItemNode *tin = new TileItemNode( TileConstants::Tile128, i, TileConstants::TileDiffuse, "" );
 
-			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
+			for( int i = TileConstants::TileDiffuse; i < TileConstants::TileAlpha; i++ )
 			{
-				tin->setTileFilename( TileModel::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileModel::TTileChannel( i ) ) ).c_str() );
+				tin->setTileFilename( TileConstants::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileConstants::TTileChannel( i ) ) ).c_str() );
 			}
 
 			node->appendChild( tin );
@@ -94,11 +94,11 @@ public:
 			int idx = set->getTile256( i );
 			NL3D::CTile *tile = bank.getTile( idx );
 
-			TileItemNode *tin = new TileItemNode( TileModel::Tile256, i, TileModel::TileDiffuse, "" );
+			TileItemNode *tin = new TileItemNode( TileConstants::Tile256, i, TileConstants::TileDiffuse, "" );
 
-			for( int i = TileModel::TileDiffuse; i < TileModel::TileAlpha; i++ )
+			for( int i = TileConstants::TileDiffuse; i < TileConstants::TileAlpha; i++ )
 			{
-				tin->setTileFilename( TileModel::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileModel::TTileChannel( i ) ) ).c_str() );
+				tin->setTileFilename( TileConstants::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileConstants::TTileChannel( i ) ) ).c_str() );
 			}
 
 			node->appendChild( tin );
@@ -115,9 +115,9 @@ public:
 
 			TileItemNode *tin = static_cast< TileItemNode* >( node->child( i ) );
 
-			for( int j = TileModel::TileDiffuse; j <= TileModel::TileAlpha; j++ )
+			for( int j = TileConstants::TileDiffuse; j <= TileConstants::TileAlpha; j++ )
 			{
-				tin->setTileFilename( TileModel::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileModel::TTileChannel( i ) ) ).c_str() );
+				tin->setTileFilename( TileConstants::TTileChannel( i ), tile->getRelativeFileName( channelToTBitmap( TileConstants::TTileChannel( i ) ) ).c_str() );
 			}
 		}
 	}
@@ -130,7 +130,7 @@ public:
 			const char *fn = bank.getDisplacementMap( did );
 
 			TileItemNode *tin = static_cast< TileItemNode* >( node->child( i ) );
-			tin->setTileFilename( TileModel::TileDiffuse, fn );
+			tin->setTileFilename( TileConstants::TileDiffuse, fn );
 		}
 	}
 

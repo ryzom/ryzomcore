@@ -95,18 +95,18 @@ class TileTypeNode : public Node
 {
 public:
 
-	TileTypeNode(TileModel::TNodeTileType type, Node *parent=0);
+	TileTypeNode(TileConstants::TNodeTileType type, Node *parent=0);
 	virtual ~TileTypeNode();
 	QVariant data(int column, int role) const;
 	int columnCount() const;
 
-	TileModel::TNodeTileType getTileType();
+	TileConstants::TNodeTileType getTileType();
 
 	bool removeChildren( int position, int count );
 
 private:
 	void reindex();
-	TileModel::TNodeTileType m_nodeTileType;
+	TileConstants::TNodeTileType m_nodeTileType;
 };
 
 class TileItemNodePvt;
@@ -114,30 +114,32 @@ class TileItemNodePvt;
 class TileItemNode : public Node
 {
 public:
-	TileItemNode( TileModel::TNodeTileType type, int tileId, TileModel::TTileChannel channel, QString filename, Node *parent=0);
+	TileItemNode( TileConstants::TNodeTileType type, int tileId, TileConstants::TTileChannel channel, QString filename, Node *parent=0);
 	virtual ~TileItemNode();
 	QVariant data(int column, int role) const;
 	int columnCount() const;
-	bool setTileFilename(TileModel::TTileChannel channel, QString filename);
-	QString getTileFilename(TileModel::TTileChannel channel);
+	bool setTileFilename(TileConstants::TTileChannel channel, QString filename);
+	QString getTileFilename(TileConstants::TTileChannel channel);
 	void setId( int id );
 	int id() const;
 	QString getLastError() const;
-	bool borderFirst( TileModel::TTileChannel channel ) const;
-	const NL3D::CTileBorder& border( TileModel::TTileChannel channel ) const;
+	bool borderFirst( TileConstants::TTileChannel channel ) const;
+	const NL3D::CTileBorder& border( TileConstants::TTileChannel channel ) const;
 	int alphaRot() const;
 
-	static void setDisplayChannel( TileModel::TTileChannel channel ){ s_displayChannel = channel; }
-	static TileModel::TTileChannel displayChannel(){ return s_displayChannel; }
+	static void setDisplayChannel( TileConstants::TTileChannel channel ){ s_displayChannel = channel; }
+	static TileConstants::TTileChannel displayChannel(){ return s_displayChannel; }
 	static void setAlphaRot( int rot ){ s_alphaRot = rot; }
 
 	bool hasError() const{ return m_hasError; }
 
-private:
-	QMap<TileModel::TTileChannel, QString> m_tileFilename;
-	QMap<TileModel::TTileChannel, TileWidget*> m_tileWidget;
+	QVariant pixmap( TileConstants::TTileChannel channel ) const;
 
-	static TileModel::TTileChannel s_displayChannel;
+private:
+	QMap<TileConstants::TTileChannel, QString> m_tileFilename;
+	QMap<TileConstants::TTileChannel, TileWidget*> m_tileWidget;
+
+	static TileConstants::TTileChannel s_displayChannel;
 	static int s_alphaRot;
 
 	TileItemNodePvt *pvt;

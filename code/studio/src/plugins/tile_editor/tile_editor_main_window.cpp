@@ -648,7 +648,7 @@ void TileEditorMainWindow::onDiffuseToggled( bool b )
 	if( !b )
 		return;
 
-	TileItemNode::setDisplayChannel( TileModel::TileDiffuse );
+	TileItemNode::setDisplayChannel( TileConstants::TileDiffuse );
 	updateTab();
 }
 
@@ -657,7 +657,7 @@ void TileEditorMainWindow::onAdditiveToggled( bool b )
 	if( !b )
 		return;
 
-	TileItemNode::setDisplayChannel( TileModel::TileAdditive );
+	TileItemNode::setDisplayChannel( TileConstants::TileAdditive );
 	updateTab();
 }
 
@@ -666,7 +666,7 @@ void TileEditorMainWindow::onAlphaToggled( bool b )
 	if( !b )
 		return;
 
-	TileItemNode::setDisplayChannel( TileModel::TileAlpha );
+	TileItemNode::setDisplayChannel( TileConstants::TileAlpha );
 	updateTab();
 }
 
@@ -680,12 +680,12 @@ void TileEditorMainWindow::onTabChanged( int tab )
 	m_ui->diffuseTrBT->setChecked( true );
 }
 
-TileModel::TNodeTileType tabToType( int tabId )
+TileConstants::TNodeTileType tabToType( int tabId )
 {
-	if( tabId >= TileModel::TileNodeTypeCount )
-		return TileModel::TileNodeTypeCount;
+	if( tabId >= TileConstants::TileNodeTypeCount )
+		return TileConstants::TileNodeTypeCount;
 
-	return TileModel::TNodeTileType( tabId );
+	return TileConstants::TNodeTileType( tabId );
 }
 
 void TileEditorMainWindow::onActionAddTile(int tabId)
@@ -705,6 +705,8 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	if( !idx.isValid() )
 		return;
 
+	int setId = idx.row();
+
 	TileSetNode *tsn = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
 
 	Node *n = tsn->child( tabId );
@@ -715,12 +717,25 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	int c = n->childCount();
 
-	TileModel::TNodeTileType type = tabToType( tabId );
+	TileConstants::TNodeTileType type = tabToType( tabId );
 
 	QStringListIterator itr( fileNames );
 	while( itr.hasNext() )
 	{
-		TileItemNode *newNode = TileModel::createItemNode( type, c, TileModel::TileDiffuse, itr.next() );
+		TileItemNode *newNode = m_tileModel->createItemNode( setId, type, c, TileConstants::TileDiffuse, itr.next() );
+		if( newNode == NULL )
+		{
+			int reply = QMessageBox::question( this,
+												tr( "Error adding tile" ),
+												tr( "Failed to create tile!\nContinue?" ),
+												QMessageBox::Yes, QMessageBox::No );
+			if( reply != QMessageBox::Yes )
+				break;
+			else
+				continue;
+		}
+
+
 		if( newNode->hasError() )
 		{
 			QString error = newNode->getLastError();

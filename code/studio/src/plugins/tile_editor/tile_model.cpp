@@ -16,6 +16,7 @@
 
 #include "tile_model.h"
 #include "tile_item.h"
+#include "tile_bank.h"
 
 #include <QStringList>
 
@@ -35,6 +36,8 @@ TileModel::TileModel(const QStringList &headers, QObject *parent) : QAbstractIte
 	TileModel::CurrentZoomFactor = TileModel::TileZoom100;
 	m_indexDisplay = true;
 	m_fileDisplay = true;
+
+	m_tileBank = new TileBank();
 }
 
 TileModel::~TileModel()
@@ -182,59 +185,74 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 	TileSetNode *tileSet = new TileSetNode(tileSetName);
 			
 	// child for 128x128 tiles
-	TileTypeNode *tile128= new TileTypeNode(Tile128);
+	TileTypeNode *tile128= new TileTypeNode( TileConstants::Tile128);
 	tileSet->appendRow(tile128);
 
 	// child for 256x256 tiles
-	TileTypeNode *tile256= new TileTypeNode(Tile256);
+	TileTypeNode *tile256= new TileTypeNode( TileConstants::Tile256);
 	tileSet->appendRow(tile256);
 
 	// child for transition tiles.
-	TileTypeNode *tileTrans= new TileTypeNode(TileTransition);
+	TileTypeNode *tileTrans= new TileTypeNode( TileConstants::TileTransition);
 	tileSet->appendRow(tileTrans);
 
 	// Add the default transition tiles.
 	// TODO tie this to CTileSet::count from NeL
 	for(int transPos=0; transPos<48; transPos++)
 	{				
-		TileItemNode *transTile= new TileItemNode( TileModel::TileTransition, transPos, TileDiffuse, QString("empty"));
+		TileItemNode *transTile= new TileItemNode( TileConstants::TileTransition, transPos, TileConstants::TileDiffuse, QString("empty"));
 		tileTrans->appendRow(transTile);
 	}
 
 	// child for displacement tiles
-	TileTypeNode *tileDisp= new TileTypeNode(TileDisplacement);
+	TileTypeNode *tileDisp= new TileTypeNode( TileConstants::TileDisplacement);
 	tileSet->appendRow(tileDisp);
 
 	// Add the default displacement tiles.
 	// TODO tie this to CTileSet::CountDisplace from NeL
 	for(int dispPos=0; dispPos<16; dispPos++)
 	{
-		TileItemNode *dispTile= new TileItemNode( TileModel::TileDisplacement, dispPos, TileDiffuse, QString("empty"));
+		TileItemNode *dispTile= new TileItemNode( TileConstants::TileDisplacement, dispPos, TileConstants::TileDiffuse, QString("empty"));
 		tileDisp->appendRow(dispTile);
 	}
 
 	// Append them in the correct order to the tile set.
 	this->appendRow(tileSet);
+	m_tileBank->addTileSet(tileSetName);
 
 	return tileSet;
 }
 
-TileItemNode *TileModel::createItemNode( TileModel::TNodeTileType type, int id, TTileChannel channel, const QString &fileName )
+TileItemNode *TileModel::createItemNode( TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName )
 {
 	return new TileItemNode( type, id, channel, fileName );
 }
 
-const char *TileModel::getTileTypeName(TileModel::TNodeTileType type)
+TileItemNode *TileModel::createItemNode( int idx, TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName )
+{
+	TileItemNode *n = new TileItemNode( type, id, channel, fileName );
+
+	bool b = m_tileBank->addTileToSet( idx, fileName, n->pixmap( channel ), channel, type );
+	if( !b )
+	{
+		delete n;
+		return NULL;
+	}
+
+	return n;
+}
+
+const char *TileModel::getTileTypeName(TileConstants::TNodeTileType type)
 {
 	switch(type)
 	{
-	case Tile128:
+	case TileConstants::Tile128:
 		return "128";
-	case Tile256:
+	case TileConstants::Tile256:
 		return "256";
-	case TileTransition:
+	case TileConstants::TileTransition:
 		return "Transition";
-	case TileDisplacement:
+	case TileConstants::TileDisplacement:
 		return "Displacement";
 	default:
 		break;
@@ -242,17 +260,17 @@ const char *TileModel::getTileTypeName(TileModel::TNodeTileType type)
 	return "UNKNOWN";
 }
 
-uint32 TileModel::getTileTypeSize(TileModel::TNodeTileType type)
+uint32 TileModel::getTileTypeSize(TileConstants::TNodeTileType type)
 {
 	switch(type)
 	{
-	case Tile128:
+	case TileConstants::Tile128:
 		return 128;
-	case Tile256:
+	case TileConstants::Tile256:
 		return 256;
-	case TileTransition:
+	case TileConstants::TileTransition:
 		return 64;
-	case TileDisplacement:
+	case TileConstants::TileDisplacement:
 		return 32;
 	default:
 		break;
@@ -285,6 +303,16 @@ void TileModel::clear()
 		return;
 
 	removeRows( 0, c );
+}
+
+void TileModel::addLand( const QString &name )
+{
+	m_tileBank->addLand( name );
+}
+
+void TileModel::setLandSets( int idx, const QStringList &l )
+{
+	m_tileBank->setLandSets( idx, l );
 }
 
 void TileModel::selectFilenameDisplay(bool selected)

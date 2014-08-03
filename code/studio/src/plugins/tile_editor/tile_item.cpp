@@ -203,7 +203,7 @@ int TileSetNode::columnCount() const
 
 ///////////////////////////////////////////////////
 
-TileTypeNode::TileTypeNode(TileModel::TNodeTileType type, Node *parent) : m_nodeTileType(type)
+TileTypeNode::TileTypeNode(TileConstants::TNodeTileType type, Node *parent) : m_nodeTileType(type)
 {
 	m_parentItem = parent;
 }
@@ -230,7 +230,7 @@ int TileTypeNode::columnCount() const
 	return 1;
 }
 
-TileModel::TNodeTileType TileTypeNode::getTileType()
+TileConstants::TNodeTileType TileTypeNode::getTileType()
 {
 	return m_nodeTileType;
 }
@@ -266,15 +266,15 @@ void TileTypeNode::reindex()
 
 ///////////////////////////////////////////////////
 
-NL3D::CTile::TBitmap channelToTBitmap( TileModel::TTileChannel channel )
+NL3D::CTile::TBitmap channelToTBitmap( TileConstants::TTileChannel channel )
 {
 	NL3D::CTile::TBitmap bm;
 
 	switch( channel )
 	{
-	case TileModel::TileDiffuse: bm = NL3D::CTile::diffuse; break;
-	case TileModel::TileAdditive: bm = NL3D::CTile::additive; break;
-	case TileModel::TileAlpha: bm = NL3D::CTile::alpha; break;
+	case TileConstants::TileDiffuse: bm = NL3D::CTile::diffuse; break;
+	case TileConstants::TileAdditive: bm = NL3D::CTile::additive; break;
+	case TileConstants::TileAlpha: bm = NL3D::CTile::alpha; break;
 	}
 
 	return bm;
@@ -286,7 +286,7 @@ public:
 
 	TileItemNodePvt()
 	{
-		for( int i = 0; i < TileModel::TileChannelCount; i++ )
+		for( int i = 0; i < TileConstants::TileChannelCount; i++ )
 			m_borderFirst[ i ] = false;
 
 		m_id = -1;
@@ -325,33 +325,33 @@ public:
 		return true;
 	}
 
-	int getWidthForType( TileModel::TNodeTileType type, TileModel::TTileChannel channel )
+	int getWidthForType( TileConstants::TNodeTileType type, TileConstants::TTileChannel channel )
 	{
 		int width = -1;
 
 		switch( type )
 		{
-		case TileModel::Tile128: width = 128; break;
-		case TileModel::Tile256: width = 256; break;
-		case TileModel::TileTransition:
+		case TileConstants::Tile128: width = 128; break;
+		case TileConstants::Tile256: width = 256; break;
+		case TileConstants::TileTransition:
 			{
-				if( channel != TileModel::TileAlpha )
+				if( channel != TileConstants::TileAlpha )
 					width = 128;
 				break;
 			}
 
-		case TileModel::TileDisplacement: width = 32; break;
+		case TileConstants::TileDisplacement: width = 32; break;
 		}
 
 		return width;
 	}
 
-	NL3D::CTileSet::TError checkTile( TileModel::TTileChannel channel )
+	NL3D::CTileSet::TError checkTile( TileConstants::TTileChannel channel )
 	{
-		if( m_type == TileModel::TileDisplacement )
+		if( m_type == TileConstants::TileDisplacement )
 			return NL3D::CTileSet::ok;
 
-		if( channel == TileModel::TileAdditive )
+		if( channel == TileConstants::TileAdditive )
 			return NL3D::CTileSet::ok;
 
 		int pixel;
@@ -365,14 +365,14 @@ public:
 
 		switch( m_type )
 		{
-		case TileModel::Tile128:
+		case TileConstants::Tile128:
 			error = set.checkTile128( bm, m_border[ channel ], pixel, component );
 			break;
-		case TileModel::Tile256:
+		case TileConstants::Tile256:
 			error = set.checkTile256( bm, m_border[ channel ], pixel, component );
 			break;
-		case TileModel::TileTransition:
-			if( channel != TileModel::TileAlpha )
+		case TileConstants::TileTransition:
+			if( channel != TileConstants::TileAlpha )
 				error = set.checkTile128( bm, m_border[ channel ], pixel, component );
 			else
 				error = set.checkTileTransition( NL3D::CTileSet::TTransition( m_id ), bm, m_border[ channel ], index, pixel, component );
@@ -394,13 +394,13 @@ public:
 
 			switch( m_type )
 			{
-			case TileModel::Tile128:
-			case TileModel::Tile256:
+			case TileConstants::Tile128:
+			case TileConstants::Tile256:
 				m_lastError += QString( "pixel: %1 component: %2" ).arg( pixel ).arg( comp[ component ] );
 				break;
 
-			case TileModel::TileTransition:
-				if( channel != TileModel::TileAlpha )
+			case TileConstants::TileTransition:
+				if( channel != TileConstants::TileAlpha )
 				{
 					m_lastError += QString( "pixel: %1 component: %2" ).arg( pixel ).arg( comp[ component ] );
 				}
@@ -429,7 +429,7 @@ public:
 		return error;
 	}
 
-	bool checkPixmap( TileModel::TTileChannel channel, QPixmap &pixmap )
+	bool checkPixmap( TileConstants::TTileChannel channel, QPixmap &pixmap )
 	{
 		int w = pixmap.width();
 		int h = pixmap.height();
@@ -470,7 +470,7 @@ public:
 		return true;
 	}
 	
-	bool loadImage( TileModel::TTileChannel channel, const QString &fn, bool empty = false )
+	bool loadImage( TileConstants::TTileChannel channel, const QString &fn, bool empty = false )
 	{
 		QPixmap temp;
 		bool b = temp.load( fn );
@@ -483,52 +483,54 @@ public:
 
 		m_borderFirst[ channel ] = false;
 		
+		/*
 		if( !empty )
 		{
 			if( !checkPixmap( channel, temp ) )
 				return false;
 		}
+		*/
 
 		pixmaps[ channel ] = temp;
 		
 		return true;
 	}
 
-	void clearImage( TileModel::TTileChannel channel )
+	void clearImage( TileConstants::TTileChannel channel )
 	{
 		pixmaps[ channel ] = QPixmap();
 	}
 
-	const QPixmap& pixMap( TileModel::TTileChannel channel ) const{
+	const QPixmap& pixMap( TileConstants::TTileChannel channel ) const{
 		return pixmaps[ channel ];
 	}
 
-	void setType( TileModel::TNodeTileType type ){ m_type = type; }
+	void setType( TileConstants::TNodeTileType type ){ m_type = type; }
 	void setId( int id ){ m_id = id; }
 	int id() const{ return m_id; }
 
 	QString getLastError() const{ return m_lastError; }
-	bool borderFirst( TileModel::TTileChannel channel ) const{ return m_borderFirst[ channel ]; }
+	bool borderFirst( TileConstants::TTileChannel channel ) const{ return m_borderFirst[ channel ]; }
 
-	const NL3D::CTileBorder &border( TileModel::TTileChannel channel ){ return m_border[ channel ]; }
+	const NL3D::CTileBorder &border( TileConstants::TTileChannel channel ){ return m_border[ channel ]; }
 
 	int alphaRot() const{ return m_alphaRot; }
 	void setAlphaRot( int rot ){ m_alphaRot = rot; }
 
 private:
-	QPixmap pixmaps[ TileModel::TileChannelCount ];
-	TileModel::TNodeTileType m_type;
-	NL3D::CTileBorder m_border[ TileModel::TileChannelCount ];
+	QPixmap pixmaps[ TileConstants::TileChannelCount ];
+	TileConstants::TNodeTileType m_type;
+	NL3D::CTileBorder m_border[ TileConstants::TileChannelCount ];
 	int m_id;
 	QString m_lastError;
-	bool m_borderFirst[ TileModel::TileChannelCount ];
+	bool m_borderFirst[ TileConstants::TileChannelCount ];
 	int m_alphaRot;
 };
 
-TileModel::TTileChannel TileItemNode::s_displayChannel = TileModel::TileDiffuse;
+TileConstants::TTileChannel TileItemNode::s_displayChannel = TileConstants::TileDiffuse;
 int TileItemNode::s_alphaRot = 0;
 
-TileItemNode::TileItemNode( TileModel::TNodeTileType type, int tileId, TileModel::TTileChannel channel, QString filename, Node *parent)
+TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, TileConstants::TTileChannel channel, QString filename, Node *parent)
 {
 	m_parentItem = parent;
 	//nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toAscii().data());
@@ -550,7 +552,7 @@ TileItemNode::~TileItemNode()
 	qDeleteAll(m_childItems);
 }
 
-bool TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString filename)
+bool TileItemNode::setTileFilename(TileConstants::TTileChannel channel, QString filename)
 {
 	QString fn = filename;
 	bool empty = false;
@@ -571,9 +573,9 @@ bool TileItemNode::setTileFilename(TileModel::TTileChannel channel, QString file
 	return true;
 }
 
-QString TileItemNode::getTileFilename(TileModel::TTileChannel channel)
+QString TileItemNode::getTileFilename(TileConstants::TTileChannel channel)
 {
-	QMap< TileModel::TTileChannel, QString >::const_iterator itr
+	QMap< TileConstants::TTileChannel, QString >::const_iterator itr
 		= m_tileFilename.find( channel );
 	if( itr == m_tileFilename.end() )
 		return "";
@@ -596,12 +598,12 @@ QString TileItemNode::getLastError() const
 	return pvt->getLastError();
 }
 
-bool TileItemNode::borderFirst( TileModel::TTileChannel channel ) const
+bool TileItemNode::borderFirst( TileConstants::TTileChannel channel ) const
 {
 	return pvt->borderFirst( channel );
 }
 
-const NL3D::CTileBorder& TileItemNode::border( TileModel::TTileChannel channel ) const
+const NL3D::CTileBorder& TileItemNode::border( TileConstants::TTileChannel channel ) const
 {
 	return pvt->border( channel );
 }
@@ -659,3 +661,9 @@ int TileItemNode::columnCount() const
 {
 	return 1;
 }
+
+QVariant TileItemNode::pixmap( TileConstants::TTileChannel channel ) const
+{
+	return pvt->pixMap( channel );
+}
+

@@ -172,6 +172,8 @@ public:
 		return _TileSet.find (name)!=_TileSet.end();
 	}
 
+	void clear(){ _TileSet.clear(); }
+
 	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
 private:
 

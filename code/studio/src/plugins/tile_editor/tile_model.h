@@ -21,32 +21,18 @@
 
 #include <QAbstractListModel>
 
+#include "tile_constants.h"
+
 class Node;
 class TileSetNode;
 class TileItemNode;
+class TileBank;
 
 class TileModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	enum TTileChannel
-	{
-		TileDiffuse = 0,
-		TileAdditive = 1,
-		TileAlpha = 2,
-		TileChannelCount = 3
-	};
-
-	enum TNodeTileType
-	{
-		Tile128 = 0,
-		Tile256 = 1,
-		TileTransition = 2,
-		TileDisplacement = 3,
-		TileNodeTypeCount = 4
-	};
-
 	enum TTileItemRole
 	{
 		TilePixmapRole = Qt::UserRole+1,
@@ -87,10 +73,11 @@ public:
 	void swapRows( int a, int b );
 
 	TileSetNode *createTileSetNode(QString tileSetName);
-	static TileItemNode *createItemNode( TileModel::TNodeTileType type, int id, TTileChannel channel, const QString &fileName );
+	static TileItemNode *createItemNode( TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName );
+	TileItemNode *createItemNode( int idx, TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName );
 
-	static const char *getTileTypeName(TNodeTileType type);
-	static uint32 getTileTypeSize(TileModel::TNodeTileType type);
+	static const char *getTileTypeName(TileConstants::TNodeTileType type);
+	static uint32 getTileTypeSize(TileConstants::TNodeTileType type);
 
 	static TTileZoomFactor CurrentZoomFactor;
 
@@ -100,6 +87,9 @@ public:
 
 	void setTexturePath( const QString &path ){ m_texturePath = path; }
 	QString texturePath() const{ return m_texturePath; }
+
+	void addLand( const QString &name );
+	void setLandSets( int idx, const QStringList &l );
 
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);
@@ -117,6 +107,8 @@ private:
 	Node *rootItem;
 
 	QString m_texturePath;
+
+	TileBank *m_tileBank;
 };
 
 #endif // TILE_MODEL_H
