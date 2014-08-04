@@ -238,13 +238,28 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		eyeViewport.Size.h = (eyeRenderDesc[eye].DistortedViewport.Size.h * m_RenderTargetHeight) / m_DevicePtr->Resolution.h;
 
 		// calculate hfov and ar
-		float combinedTanHalfFovHorizontal = max(fov.LeftTan, fov.RightTan);
+		/*float combinedTanHalfFovHorizontal = max(fov.LeftTan, fov.RightTan);
 		float combinedTanHalfFovVertical = max(fov.UpTan, fov.DownTan);
 		float horizontalFullFovInRadians = 2.0f * atanf (combinedTanHalfFovHorizontal);
 		float aspectRatio = combinedTanHalfFovHorizontal / combinedTanHalfFovVertical;
+		float m_EyeHFov[NL_OVR_EYE_COUNT];
+		float m_EyeAR[NL_OVR_EYE_COUNT];
 		m_EyeHFov[eye] = horizontalFullFovInRadians;
 		m_EyeAR[eye] = aspectRatio;
 		nldebug("OVR: HFOV: %f, AR: %f", horizontalFullFovInRadians, aspectRatio);
+		m_EyeFrustumBase[eye].initPerspective(m_EyeHFov[eye], m_EyeAR[eye], 1.0f, 100.f);
+		nldebug("OVR: FOV: Left: %f, Right: %f, Down: %f, Up: %f", // DOUBLE CHECK
+			m_EyeFrustumBase[eye].Left, m_EyeFrustumBase[eye].Right, m_EyeFrustumBase[eye].Bottom, m_EyeFrustumBase[eye].Top);*/
+		m_EyeFrustumBase[eye].init(
+			-fov.LeftTan, // OVR provides positive values
+			fov.RightTan, // DEBUG: If renders shifted left and right, swap left and right
+			-fov.DownTan,
+			fov.UpTan, // DEBUG: If renders shifted up or down, swap down and up
+			1.0f, // dummy
+			100.f, // dummy
+			true);
+		nldebug("OVR: FOV: Left: %f, Right: %f, Down: %f, Up: %f", 
+			m_EyeFrustumBase[eye].Left, m_EyeFrustumBase[eye].Right, m_EyeFrustumBase[eye].Bottom, m_EyeFrustumBase[eye].Top);
 
 		// get distortion mesh
 		ovrDistortionMesh meshData;
@@ -310,10 +325,10 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	// 2014/08/04 22:28:39 DBG 3040 snowballs_client.exe stereo_ovr_04.cpp 235 NL3D::CStereoOVR::CStereoOVR : OVR: HFOV: 2.339905, AR: 0.916641
 
 	// DEBUG EARLY EXIT
-	nldebug("OVR: Early exit");
+	/*nldebug("OVR: Early exit");
 	ovrHmd_Destroy(m_DevicePtr);
 	m_DevicePtr = NULL;
-	--s_DeviceCounter;
+	--s_DeviceCounter;*/
 }
 
 CStereoOVR::~CStereoOVR()
@@ -510,27 +525,39 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 {
-	/*m_OriginalFrustum[cid] = camera->getFrustum();
+	m_OriginalFrustum[cid] = camera->getFrustum();
 
-	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
-	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.HScreenSize * 0.5f * 0.5f) / (m_DevicePtr->HMDInfo.EyeToScreenDistance)); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
-	m_LeftFrustum[cid].initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
-	m_RightFrustum[cid] = m_LeftFrustum[cid];
-	
-	float viewCenter = m_DevicePtr->HMDInfo.HScreenSize * 0.25f;
-	float eyeProjectionShift = viewCenter - m_DevicePtr->HMDInfo.LensSeparationDistance * 0.5f; // docs say LensSeparationDistance, why not InterpupillaryDistance? related to how the lenses work?
-	float projectionCenterOffset = (eyeProjectionShift / (m_DevicePtr->HMDInfo.HScreenSize * 0.5f)) * (m_LeftFrustum[cid].Right - m_LeftFrustum[cid].Left); // used logic for this one, but it ends up being the same as the one i made up
-	nldebug("OVR: projectionCenterOffset = %f", projectionCenterOffset);
+	/*m_LeftFrustum[cid] = m_OriginalFrustum[cid];
+	m_RightFrustum[cid] = m_OriginalFrustum[cid];
+	m_ClippingFrustum[cid] = m_OriginalFrustum[cid];
+	return;*/
 
-	m_LeftFrustum[cid].Left -= projectionCenterOffset;
-	m_LeftFrustum[cid].Right -= projectionCenterOffset;
-	m_RightFrustum[cid].Left += projectionCenterOffset;
-	m_RightFrustum[cid].Right += projectionCenterOffset;
+	m_LeftFrustum[cid].init(
+		m_EyeFrustumBase[ovrEye_Left].Left * camera->getFrustum().Near, 
+		m_EyeFrustumBase[ovrEye_Left].Right * camera->getFrustum().Near,
+		m_EyeFrustumBase[ovrEye_Left].Bottom * camera->getFrustum().Near,
+		m_EyeFrustumBase[ovrEye_Left].Top * camera->getFrustum().Near,
+		camera->getFrustum().Near,
+		camera->getFrustum().Far,
+		true);
 
-	// TODO: Clipping frustum should also take into account the IPD
-	m_ClippingFrustum[cid] = m_LeftFrustum[cid];
-	m_ClippingFrustum[cid].Left = min(m_LeftFrustum[cid].Left, m_RightFrustum[cid].Left);
-	m_ClippingFrustum[cid].Right = max(m_LeftFrustum[cid].Right, m_RightFrustum[cid].Right);*/
+	m_RightFrustum[cid].init(
+		m_EyeFrustumBase[ovrEye_Right].Left * camera->getFrustum().Near, 
+		m_EyeFrustumBase[ovrEye_Right].Right * camera->getFrustum().Near,
+		m_EyeFrustumBase[ovrEye_Right].Bottom * camera->getFrustum().Near,
+		m_EyeFrustumBase[ovrEye_Right].Top * camera->getFrustum().Near,
+		camera->getFrustum().Near,
+		camera->getFrustum().Far,
+		true);
+
+	m_ClippingFrustum[cid].init(
+		min(m_EyeFrustumBase[ovrEye_Left].Left, m_EyeFrustumBase[ovrEye_Right].Left) * camera->getFrustum().Near, 
+		max(m_EyeFrustumBase[ovrEye_Left].Right, m_EyeFrustumBase[ovrEye_Right].Right) * camera->getFrustum().Near,
+		min(m_EyeFrustumBase[ovrEye_Left].Bottom, m_EyeFrustumBase[ovrEye_Right].Bottom) * camera->getFrustum().Near,
+		max(m_EyeFrustumBase[ovrEye_Left].Top, m_EyeFrustumBase[ovrEye_Right].Top) * camera->getFrustum().Near,
+		camera->getFrustum().Near,
+		camera->getFrustum().Far,
+		true);
 }
 
 /// Get the frustum to use for clipping
@@ -659,8 +686,8 @@ void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 {
 	CMatrix translate;
 	if (m_Stage == 2) { }
-	else if (m_Stage % 2) translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Left] * m_Scale, 0.f, 0.f));
-	else translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Right] * m_Scale, 0.f, 0.f));
+	else if (m_Stage % 2) translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Left] * m_Scale, 0.f, 0.f)); // ok
+	else translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Right] * m_Scale, 0.f, 0.f)); // ok
 	CMatrix mat = m_CameraMatrix[cid] * translate;
 	if (camera->getTransformMode() == NL3D::UTransformable::RotQuat)
 	{
@@ -741,10 +768,15 @@ bool CStereoOVR::beginRenderTarget()
 	// Begin 3D scene render target
 	if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
-		nlassert(!m_SceneTexture);
+		/*nlassert(!m_SceneTexture);
 		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
-		return true;
+		return true;*/
+		/*nldebug("OVR: Begin render target");
+		m_Driver->clearBuffers(CRGBA(64, 64, 128, 128));
+		m_Driver->beginDefaultRenderTarget();
+		m_Driver->clearBuffers(CRGBA(128, 64, 64, 128));
+		return true;*/
 	}
 
 	return false;
@@ -913,6 +945,12 @@ bool CStereoOVR::endRenderTarget()
 	}
 
 	// End 3D scene render target
+	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	{
+		/*nldebug("OVR: End render target");
+		m_Driver->endDefaultRenderTarget(NULL);
+		return true;*/
+	}
 	/*if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
 		nlassert(m_SceneTexture);
@@ -1006,6 +1044,12 @@ bool CStereoOVR::endRenderTarget()
 
 NLMISC::CQuat CStereoOVR::getOrientation() const
 {
+	// broken
+
+	NLMISC::CQuat quat;
+	quat.identity();
+	return quat;
+
 	if (m_OrientationCached)
 		return m_OrientationCache;
 

@@ -163,8 +163,7 @@ private:
 
 	CViewport m_RegularViewport;
 	CViewport m_EyeViewport[NL_OVR_EYE_COUNT];
-	float m_EyeHFov[NL_OVR_EYE_COUNT];
-	float m_EyeAR[NL_OVR_EYE_COUNT];
+	CFrustum m_EyeFrustumBase[NL_OVR_EYE_COUNT];
 	uint m_RenderTargetWidth;
 	uint m_RenderTargetHeight;
 	NLMISC::CVector2f m_EyeUVScaleOffset[NL_OVR_EYE_COUNT][2];

@@ -119,10 +119,20 @@ void CDriverUser::endDefaultRenderTarget(UScene *scene)
 
 	_MatRenderTarget.getObjectPtr()->setTexture(0, _EffectRenderTarget->getITexture());
 
-	UCamera	pCam = scene->getCam();
-	setMatrixMode2D11();
+	UCamera	pCam;
+	if (scene)
+	{
+		pCam = scene->getCam();
+		setMatrixMode2D11();
+	}
+	bool fog = fogEnabled();
+	enableFog(false);
 	drawQuad(_RenderTargetQuad, _MatRenderTarget);
-	setMatrixMode3D(pCam);
+	enableFog(fog);
+	if (scene)
+	{
+		setMatrixMode3D(pCam);
+	}
 
 	_MatRenderTarget.getObjectPtr()->setTexture(0, NULL);
 
