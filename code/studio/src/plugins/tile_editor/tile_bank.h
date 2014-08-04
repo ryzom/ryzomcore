@@ -38,6 +38,9 @@ public:
 
 	void setSurfaceData( int tileSet, unsigned long data );
 	unsigned long getSurfaceData( int tileSet ) const;
+
+	void setTexturePath( const QString &path );
+	QString getTexturePath() const;
 	
 	bool hasError() const{ return m_hasError; }
 	QString getLastError() const{ return m_lastError; }

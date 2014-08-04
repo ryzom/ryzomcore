@@ -85,9 +85,6 @@ public:
 
 	void clear();
 
-	void setTexturePath( const QString &path ){ m_texturePath = path; }
-	QString texturePath() const{ return m_texturePath; }
-
 	void addLand( const QString &name );
 	void removeLand( int idx );
 	void removeTileSet( int idx );
@@ -107,6 +104,9 @@ public:
 	void setSurfaceData( int tileSet, unsigned long data );
 	unsigned long getSurfaceData( int tileSet ) const;
 
+	void setTexturePath( const QString &path );
+	QString getTexturePath() const;
+
 	QString getLastError() const;
 	bool hasError() const;
 
@@ -124,8 +124,6 @@ private:
 	//QList<TileItem*> m_tiles;
 	//int m_activeEditChannel;
 	Node *rootItem;
-
-	QString m_texturePath;
 
 	TileBank *m_tileBank;
 };

@@ -426,6 +426,16 @@ unsigned long TileModel::getSurfaceData( int tileSet ) const
 	return m_tileBank->getSurfaceData( tileSet );
 }
 
+void TileModel::setTexturePath( const QString &path )
+{
+	m_tileBank->setTexturePath( path );
+}
+
+QString TileModel::getTexturePath() const
+{
+	return m_tileBank->getTexturePath();
+}
+
 QString TileModel::getLastError() const{
 	return m_tileBank->getLastError();
 }

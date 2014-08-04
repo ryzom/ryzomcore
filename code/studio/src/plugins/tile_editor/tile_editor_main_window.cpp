@@ -816,7 +816,7 @@ void TileEditorMainWindow::onTileBankLoaded()
 	m_ui->listView256->reset();
 	m_ui->listViewTransition->reset();
 
-	QString path = m_tileModel->texturePath();
+	QString path = m_tileModel->getTexturePath();
 	if( path.isEmpty() )
 		m_ui->tileBankTexturePathPB->setText( "..." );
 	else

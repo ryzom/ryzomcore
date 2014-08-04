@@ -449,4 +449,14 @@ unsigned long TileBank::getSurfaceData( int tileSet ) const
 	return set->SurfaceData;
 }
 
+void TileBank::setTexturePath( const QString &path )
+{
+	m_pvt->m_bank.setAbsPath( path.toUtf8().constData() );
+}
+
+QString TileBank::getTexturePath() const
+{
+	return m_pvt->m_bank.getAbsPath().c_str();
+}
+
 
