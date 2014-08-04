@@ -220,6 +220,9 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	for (uint eye = 0; eye < ovrEye_Count; ++eye)
 	{
 		ovrFovPort &fov = eyeRenderDesc[eye].Fov;
+
+		// store data
+		m_EyeViewAdjustX[eye] = -eyeRenderDesc[eye].ViewAdjust.x;
 		
 		// setup viewport
 		m_EyeViewport[eye].init(
@@ -653,11 +656,11 @@ void CStereoOVR::getCurrentFrustum(uint cid, NL3D::UCamera *camera) const
 }
 
 void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
-{/*
+{
 	CMatrix translate;
 	if (m_Stage == 2) { }
-	else if (m_Stage % 2) translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f));
-	else translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * 0.5f, 0.f, 0.f));
+	else if (m_Stage % 2) translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Left] * m_Scale, 0.f, 0.f));
+	else translate.translate(CVector(m_EyeViewAdjustX[ovrEye_Right] * m_Scale, 0.f, 0.f));
 	CMatrix mat = m_CameraMatrix[cid] * translate;
 	if (camera->getTransformMode() == NL3D::UTransformable::RotQuat)
 	{
@@ -668,7 +671,7 @@ void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 	{
 		// camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
 		camera->setMatrix(mat);
-	}*/
+	}
 }
 
 bool CStereoOVR::wantClear()

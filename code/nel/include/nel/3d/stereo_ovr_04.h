@@ -168,6 +168,7 @@ private:
 	uint m_RenderTargetWidth;
 	uint m_RenderTargetHeight;
 	NLMISC::CVector2f m_EyeUVScaleOffset[NL_OVR_EYE_COUNT][2];
+	float m_EyeViewAdjustX[NL_OVR_EYE_COUNT];
 
 	CVertexBuffer m_VB;
 	CIndexBuffer m_IB;
