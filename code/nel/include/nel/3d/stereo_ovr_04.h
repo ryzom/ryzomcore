@@ -1,13 +1,13 @@
 /**
  * \file stereo_ovr.h
  * \brief CStereoOVR
- * \date 2013-06-25 22:22GMT
+ * \date 2014-08-04 16:21GMT
  * \author Jan Boon (Kaetemi)
  * CStereoOVR
  */
 
 /* 
- * Copyright (C) 2013  by authors
+ * Copyright (C) 2014  by authors
  * 
  * This file is part of NL3D.
  * NL3D is free software: you can redistribute it and/or modify it
@@ -44,7 +44,7 @@
 #ifndef NL3D_STEREO_OVR_H
 #define NL3D_STEREO_OVR_H
 
-#ifdef HAVE_LIBOVR_02
+#ifdef HAVE_LIBOVR
 
 #include <nel/misc/types_nl.h>
 
@@ -66,13 +66,13 @@ class ITexture;
 class CTextureUser;
 class CStereoOVRDevicePtr;
 class CStereoOVRDeviceHandle;
-class CPixelProgramOVR;
+/*class CPixelProgramOVR;*/
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
 
 /**
  * \brief CStereoOVR
- * \date 2013-06-25 22:22GMT
+ * \date 2014-08-04 16:21GMT
  * \author Jan Boon (Kaetemi)
  * CStereoOVR
  */
@@ -165,12 +165,12 @@ private:
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
 	UDriver *m_Driver;
-	NL3D::CTextureUser *m_SceneTexture;
-	NL3D::UMaterial m_BarrelMat;
 	NL3D::CTextureUser *m_GUITexture;
+	/*NL3D::CTextureUser *m_SceneTexture;
+	NL3D::UMaterial m_BarrelMat;
 	NLMISC::CQuadUV m_BarrelQuadLeft;
 	NLMISC::CQuadUV m_BarrelQuadRight;
-	NLMISC::CRefPtr<CPixelProgramOVR> m_PixelProgram;
+	NLMISC::CRefPtr<CPixelProgramOVR> m_PixelProgram;*/
 	NLMISC::CVector m_EyePosition;
 	float m_Scale;
 

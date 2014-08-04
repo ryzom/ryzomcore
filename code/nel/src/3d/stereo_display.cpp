@@ -25,7 +25,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/3d/stereo_display.h>
 
 // STL includes
@@ -35,6 +35,7 @@
 
 // Project includes
 #include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_ovr_04.h>
 #include <nel/3d/stereo_libvr.h>
 #include <nel/3d/stereo_debugger.h>
 
@@ -76,7 +77,7 @@ const char *IStereoDisplay::getLibraryName(CStereoDeviceInfo::TStereoDeviceLibra
 
 void IStereoDisplay::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
-#ifdef HAVE_LIBOVR
+#ifdef HAVE_LIBOVR_02
 	CStereoOVR::listDevices(devicesOut);
 #endif
 #ifdef HAVE_LIBVR
@@ -94,7 +95,7 @@ IStereoDisplay *IStereoDisplay::createDevice(const CStereoDeviceInfo &deviceInfo
 
 void IStereoDisplay::releaseUnusedLibraries()
 {
-#ifdef HAVE_LIBOVR
+#ifdef HAVE_LIBOVR_02
 	if (!CStereoOVR::isLibraryInUse())
 		CStereoOVR::releaseLibrary();
 #endif
@@ -102,7 +103,7 @@ void IStereoDisplay::releaseUnusedLibraries()
 
 void IStereoDisplay::releaseAllLibraries()
 {
-#ifdef HAVE_LIBOVR
+#ifdef HAVE_LIBOVR_02
 	CStereoOVR::releaseLibrary();
 #endif
 }

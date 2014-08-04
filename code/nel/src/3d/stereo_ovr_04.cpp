@@ -1,13 +1,13 @@
 /**
  * \file stereo_ovr.cpp
  * \brief CStereoOVR
- * \date 2013-06-25 22:22GMT
+ * \date 2014-08-04 16:21GMT
  * \author Jan Boon (Kaetemi)
  * CStereoOVR
  */
 
 /* 
- * Copyright (C) 2013  by authors
+ * Copyright (C) 2014  by authors
  * 
  * This file is part of NL3D.
  * NL3D is free software: you can redistribute it and/or modify it
@@ -41,10 +41,10 @@
  * so, delete this exception statement from your version.
  */
 
-#ifdef HAVE_LIBOVR_02
+#ifdef HAVE_LIBOVR
 
 #include "std3d.h"
-#include <nel/3d/stereo_ovr.h>
+#include <nel/3d/stereo_ovr_04.h>
 
 // STL includes
 #include <sstream>
@@ -70,13 +70,13 @@ using namespace std;
 
 namespace NL3D {
 
-extern const char *g_StereoOVR_fp40;
+/*extern const char *g_StereoOVR_fp40;
 extern const char *g_StereoOVR_arbfp1;
 extern const char *g_StereoOVR_ps_2_0;
-extern const char *g_StereoOVR_glsl330f;
+extern const char *g_StereoOVR_glsl330f;*/
 
 namespace {
-
+/*
 class CStereoOVRLog : public OVR::Log
 {
 public:
@@ -143,9 +143,9 @@ public:
 CStereoOVRSystem s_StereoOVRSystem;
 
 sint s_DeviceCounter = 0;
-
+*/
 }
-
+/*
 class CStereoOVRDeviceHandle : public IStereoDeviceFactory
 {
 public:
@@ -169,10 +169,10 @@ public:
 	OVR::SensorFusion SensorFusion;
 	OVR::HMDInfo HMDInfo;
 };
-
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+*/
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
-	++s_DeviceCounter;
+	/*++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
 
 	OVR::DeviceEnumerator<OVR::HMDDevice> dh = handle->DeviceHandle;
@@ -204,12 +204,12 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_Sub
 		m_DevicePtr->SensorFusion.SetYawCorrectionEnabled(true);
 		m_LeftViewport.init(0.f, 0.f, 0.5f, 1.0f);
 		m_RightViewport.init(0.5f, 0.f, 0.5f, 1.0f);
-	}
+	}*/
 }
 
 CStereoOVR::~CStereoOVR()
 {
-	if (!m_BarrelMat.empty())
+	/*if (!m_BarrelMat.empty())
 	{
 		m_BarrelMat.getObjectPtr()->setTexture(0, NULL);
 		m_Driver->deleteMaterial(m_BarrelMat);
@@ -229,9 +229,9 @@ CStereoOVR::~CStereoOVR()
 
 	delete m_DevicePtr;
 	m_DevicePtr = NULL;
-	--s_DeviceCounter;
+	--s_DeviceCounter;*/
 }
-
+/*
 class CPixelProgramOVR : public CPixelProgram
 {
 public:
@@ -318,9 +318,9 @@ private:
 	COVRIndices m_OVRIndices;
 
 };
-
+*/
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
-{
+{/*
 	nlassert(!m_PixelProgram);
 
 	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
@@ -346,7 +346,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelTex->setWrapS(ITexture::Clamp);
 		m_BarrelTex->setWrapT(ITexture::Clamp);
 		drvInternal->setupTexture(*m_BarrelTex);
-		m_BarrelTexU = new CTextureUser(m_BarrelTex);*/
+		m_BarrelTexU = new CTextureUser(m_BarrelTex);* /
 
 		m_BarrelMat = m_Driver->createMaterial();
 		m_BarrelMat.initUnlit();
@@ -386,19 +386,19 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	else
 	{
 		nlwarning("VR: No pixel program support");
-	}
+	}*/
 }
 
 bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 {
-	width = m_DevicePtr->HMDInfo.HResolution;
-	height = m_DevicePtr->HMDInfo.VResolution;
+	/*width = m_DevicePtr->HMDInfo.HResolution;
+	height = m_DevicePtr->HMDInfo.VResolution;*/
 	return true;
 }
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 {
-	m_OriginalFrustum[cid] = camera->getFrustum();
+	/*m_OriginalFrustum[cid] = camera->getFrustum();
 
 	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
 	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.HScreenSize * 0.5f * 0.5f) / (m_DevicePtr->HMDInfo.EyeToScreenDistance)); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
@@ -418,7 +418,7 @@ void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 	// TODO: Clipping frustum should also take into account the IPD
 	m_ClippingFrustum[cid] = m_LeftFrustum[cid];
 	m_ClippingFrustum[cid].Left = min(m_LeftFrustum[cid].Left, m_RightFrustum[cid].Left);
-	m_ClippingFrustum[cid].Right = max(m_LeftFrustum[cid].Right, m_RightFrustum[cid].Right);
+	m_ClippingFrustum[cid].Right = max(m_LeftFrustum[cid].Right, m_RightFrustum[cid].Right);*/
 }
 
 /// Get the frustum to use for clipping
@@ -550,7 +550,7 @@ void CStereoOVR::getCurrentFrustum(uint cid, NL3D::UCamera *camera) const
 }
 
 void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
-{
+{/*
 	CMatrix translate;
 	if (m_Stage == 2) { }
 	else if (m_Stage % 2) translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f));
@@ -565,7 +565,7 @@ void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 	{
 		// camera->setTransformMode(NL3D::UTransformable::DirectMatrix);
 		camera->setMatrix(mat);
-	}
+	}*/
 }
 
 bool CStereoOVR::wantClear()
@@ -633,7 +633,7 @@ bool CStereoOVR::beginRenderTarget()
 	}
 
 	// Begin 3D scene render target
-	if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	/*if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		nlassert(!m_SceneTexture);
 		uint32 width, height;
@@ -641,7 +641,7 @@ bool CStereoOVR::beginRenderTarget()
 		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
 		return true;
-	}
+	}*/
 
 	return false;
 }
@@ -694,7 +694,7 @@ void CStereoOVR::renderGUI()
 		umat.setAlphaTest(false);
 		NL3D::CMaterial *mat = umat.getObjectPtr();
 		mat->setShader(NL3D::CMaterial::Normal);
-		mat->setBlendFunc(CMaterial::one, CMaterial::TBlend::invsrcalpha);
+		mat->setBlendFunc(CMaterial::one, CMaterial::invsrcalpha);
 		mat->setZWrite(false);
 		// mat->setZFunc(CMaterial::always); // Not nice
 		mat->setDoubleSided(true);
@@ -820,7 +820,7 @@ bool CStereoOVR::endRenderTarget()
 	}
 
 	// End 3D scene render target
-	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
+	/*if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
 		nlassert(m_SceneTexture);
 
@@ -906,16 +906,16 @@ bool CStereoOVR::endRenderTarget()
 		m_SceneTexture = NULL;
 
 		return true;
-	}
+	}*/
 
 	return false;
 }
 
 NLMISC::CQuat CStereoOVR::getOrientation() const
 {
-	if (m_OrientationCached)
+	//if (m_OrientationCached)
 		return m_OrientationCache;
-
+/*
 	OVR::Quatf quatovr = m_DevicePtr->SensorFusion.GetPredictedOrientation();
 	NLMISC::CMatrix coordsys;
 	float csys[] = {
@@ -933,61 +933,13 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 	NLMISC::CQuat finalquat = matnel.getRot();
 	m_OrientationCache = finalquat;
 	m_OrientationCached = true;
-	return finalquat;
+	return finalquat;*/
 }
 
 /// Get GUI shift
 void CStereoOVR::getInterface2DShift(uint cid, float &x, float &y, float distance) const
 {
-#if 0
 
-	// todo: take into account m_EyePosition
-
-	NLMISC::CVector vector = CVector(0.f, -distance, 0.f);
-	NLMISC::CQuat rot = getOrientation();
-	rot.invert();
-	NLMISC::CMatrix mat;
-	mat.rotate(rot);
-	//if (m_Stage % 2) mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f));
-	//else mat.translate(CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f));
-	mat.translate(vector);
-	CVector proj = CStereoOVR::getCurrentFrustum(cid).project(mat.getPos());
-
-	NLMISC::CVector ipd;
-	if (m_Stage % 2) ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * -0.5f, 0.f, 0.f);
-	else ipd = CVector(m_DevicePtr->HMDInfo.InterpupillaryDistance * 0.5f, 0.f, 0.f);
-	CVector projipd = CStereoOVR::getCurrentFrustum(cid).project(vector + ipd);
-	CVector projvec = CStereoOVR::getCurrentFrustum(cid).project(vector);
-
-	x = (proj.x + projipd.x - projvec.x - 0.5f);
-	y = (proj.y + projipd.y - projvec.y - 0.5f);
-
-#elif 1
-
-	// Alternative method
-	// todo: take into account m_EyePosition
-
-	NLMISC::CVector vec = CVector(0.f, -distance, 0.f);
-	NLMISC::CVector ipd;
-	if (m_Stage % 2) ipd = CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f);
-	else ipd = CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * 0.5f, 0.f, 0.f);
-	
-
-	NLMISC::CQuat rot = getOrientation();
-	NLMISC::CQuat modrot = NLMISC::CQuat(CVector(0.f, 1.f, 0.f), NLMISC::Pi);
-	rot = rot * modrot;
-	float p = NLMISC::Pi + atan2f(2.0f * ((rot.x * rot.y) + (rot.z * rot.w)), 1.0f - 2.0f * ((rot.y * rot.y) + (rot.w * rot.w)));
-	if (p > NLMISC::Pi) p -= NLMISC::Pi * 2.0f;	
-	float t = -atan2f(2.0f * ((rot.x * rot.w) + (rot.y * rot.z)), 1.0f - 2.0f * ((rot.z * rot.z) + (rot.w * rot.w)));// // asinf(2.0f * ((rot.x * rot.z) - (rot.w * rot.y)));
-	
-	CVector rotshift = CVector(p, 0.f, t) * -distance;
-	
-	CVector proj = CStereoOVR::getCurrentFrustum(cid).project(vec + ipd + rotshift);
-
-	x = (proj.x - 0.5f);
-	y = (proj.y - 0.5f);
-
-#endif
 }
 
 void CStereoOVR::setEyePosition(const NLMISC::CVector &v)
@@ -1008,6 +960,7 @@ void CStereoOVR::setScale(float s)
 
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
+	/*
 	s_StereoOVRSystem.Init();
 	OVR::DeviceEnumerator<OVR::HMDDevice> devices = s_DeviceManager->EnumerateDevices<OVR::HMDDevice>();
 	uint id = 1;
@@ -1033,24 +986,26 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 			++id;
 		}
 
-	} while (devices.Next());
+	} while (devices.Next());*/
 }
 
 bool CStereoOVR::isLibraryInUse()
 {
-	nlassert(s_DeviceCounter >= 0);
-	return s_DeviceCounter > 0;
+	/*nlassert(s_DeviceCounter >= 0);
+	return s_DeviceCounter > 0;*/
+	return false;
 }
 
 void CStereoOVR::releaseLibrary()
 {
-	nlassert(s_DeviceCounter == 0);
-	s_StereoOVRSystem.Release();
+	/*nlassert(s_DeviceCounter == 0);
+	s_StereoOVRSystem.Release();*/
 }
 
 bool CStereoOVR::isDeviceCreated()
 {
-	return m_DevicePtr->HMDDevice != NULL;
+	/*return m_DevicePtr->HMDDevice != NULL;*/
+	return false;
 }
 
 } /* namespace NL3D */

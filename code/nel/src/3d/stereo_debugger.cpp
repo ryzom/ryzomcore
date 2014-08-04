@@ -26,7 +26,7 @@
  */
 
 #if !FINAL_VERSION
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/3d/stereo_debugger.h>
 
 // STL includes
