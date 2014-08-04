@@ -45,6 +45,7 @@
 #include "nel/3d/stereo_hmd.h"
 #include "nel/3d/render_target_manager.h"
 #include "nel/3d/driver_user.h"
+#include "nel/3d/fxaa.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
@@ -1630,7 +1631,7 @@ bool mainLoop()
 		bool effectRender = false;
 		CTextureUser *effectRenderTarget = NULL;
 		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
-			&& ClientCfg.Bloom;
+			&& (ClientCfg.Bloom || FXAA);
 		bool defaultRenderTarget = false;
 		if (haveEffects)
 		{
@@ -1733,6 +1734,7 @@ bool mainLoop()
 							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 							UCamera	pCam = Scene->getCam();
 							Driver->setMatrixMode2D11();
+							if (FXAA) FXAA->applyEffect();
 							if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
 							Driver->setMatrixMode3D(pCam);
 							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());

@@ -389,6 +389,8 @@ CClientConfig::CClientConfig()
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
 
+	FXAA				= true;
+
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
@@ -979,6 +981,9 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+
+	// FXAA
+	READ_BOOL_FV(FXAA)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)

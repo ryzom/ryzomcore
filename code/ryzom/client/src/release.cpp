@@ -497,7 +497,8 @@ void releaseOutGame()
 		// Remove the Actions listener from the Events Server.
 		EventsListener.removeFromServer(CInputHandlerManager::getInstance()->FilteredEventServer);
 
-		// Release Bloom
+		// Release effects
+		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
 
 		// Release Scene, textcontexts, materials, ...
@@ -591,7 +592,8 @@ void release()
 			Driver->deleteTextContext(TextContext);
 		TextContext = NULL;
 
-		// Release Bloom
+		// Release effects
+		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
 
 		// Release Scene, textcontexts, materials, ...

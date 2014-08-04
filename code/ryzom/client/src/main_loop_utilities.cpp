@@ -19,6 +19,7 @@
 
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_cloud_scape.h>
+#include <nel/3d/fxaa.h>
 
 #include "game_share/scenario_entry_points.h"
 
@@ -215,6 +216,22 @@ void updateFromClientCfg()
 			CEntityCL	*ent= EntitiesMngr.entities()[i];
 			if(ent)
 				ent->updateCastShadowMap();
+		}
+	}
+
+	//---------------------------------------------------
+	if (ClientCfg.FXAA != LastClientCfg.FXAA)
+	{
+		if (ClientCfg.FXAA)
+		{
+			nlassert(!FXAA);
+			FXAA = new NL3D::CFXAA(Driver);
+		}
+		else
+		{
+			nlassert(FXAA);
+			delete FXAA;
+			FXAA = NULL;
 		}
 	}
 

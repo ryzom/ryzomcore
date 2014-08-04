@@ -263,6 +263,9 @@ struct CClientConfig
 	float			GlobalWindPower;
 	CVector			GlobalWindDirection;
 
+	// FXAA
+	bool			FXAA;
+
 	// Is bloom effect activated
 	bool			Bloom;
 	bool			SquareBloom;

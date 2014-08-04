@@ -41,6 +41,7 @@
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/u_water_env_map.h"
 #include "nel/3d/material.h"
+#include "nel/3d/fxaa.h"
 // Sound
 #include "nel/sound/u_audio_mixer.h"
 // Client
@@ -565,6 +566,9 @@ void initMainLoop()
 		Scene = Driver->createScene(false);
 		if(Scene == 0)
 			nlerror("initMainLoop : Cannot create a Scene.");
+
+		// create effects
+		if (ClientCfg.FXAA && !FXAA) FXAA = new NL3D::CFXAA(Driver);
 
 		// use this scene for bloom effect
 		CBloomEffect::getInstance().setScene(Scene);
@@ -1575,6 +1579,7 @@ void initBloomConfigUI()
 		if(group)
 			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom"));
 
+		ClientCfg.writeBool("FXAA", false);
 		ClientCfg.writeBool("Bloom", false);
 		ClientCfg.writeBool("SquareBloom", false);
 		ClientCfg.writeInt("DensityBloom", 0);

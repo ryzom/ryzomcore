@@ -1990,6 +1990,7 @@ class CAHInitResLod : public IActionHandler
 		CfgPresetList.push_back(pair<string,bool>("NbMaxSkeletonNotCLod",	false));
 		CfgPresetList.push_back(pair<string,bool>("CharacterFarClip",		true));
 
+		CfgPresetList.push_back(pair<string,bool>("FXAA",					false));
 		CfgPresetList.push_back(pair<string,bool>("Bloom",					false));
 		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
 		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));

@@ -25,21 +25,24 @@ using namespace NLMISC;
 
 // ***************************************************************************
 // Main System
-NL3D::UDriver				*Driver = 0;		// The main 3D Driver
+NL3D::UDriver				*Driver = NULL;		// The main 3D Driver
 NL3D::IStereoDisplay		*StereoDisplay = NULL; // Stereo display
 NL3D::IStereoHMD			*StereoHMD = NULL;	// Head mount display
-CSoundManager				*SoundMngr = 0;		// the sound manager
+CSoundManager				*SoundMngr = NULL;		// the sound manager
 NL3D::UMaterial				GenericMat;	// Generic Material
-NL3D::UTextContext			*TextContext = 0;	// Context for all the text in the client.
+NL3D::UTextContext			*TextContext = NULL;	// Context for all the text in the client.
+
+// Effects
+NL3D::CFXAA					*FXAA = NULL;
 
 // Main 3D Objects
-NL3D::UScene						*Scene = 0;
-NL3D::UScene						*SceneRoot = 0;
-NL3D::UInstanceGroup				*BackgroundIG = 0;
-NL3D::ULandscape					*Landscape = 0;
-NL3D::UCloudScape				    *CloudScape = 0;
+NL3D::UScene						*Scene = NULL;
+NL3D::UScene						*SceneRoot = NULL;
+NL3D::UInstanceGroup				*BackgroundIG = NULL;
+NL3D::ULandscape					*Landscape = NULL;
+NL3D::UCloudScape				    *CloudScape = NULL;
 NL3D::UCamera						MainCam;
-NL3D::UVisualCollisionManager		*CollisionManager = 0;
+NL3D::UVisualCollisionManager		*CollisionManager = NULL;
 #ifdef USE_WATER_ENV_MAP
 	CWaterEnvMapRdr						WaterEnvMapRdr;
 	NL3D::UWaterEnvMap					*WaterEnvMap = NULL;
@@ -58,7 +61,7 @@ NLMISC::CMatrix				InvMainSceneViewMatrix;		// Matrix to transform from camera s
 
 // Misc
 bool						InitCloudScape = true; // tells that the cloud scape must be reinitialized
-CEntityAnimationManager		*EAM = 0;
+CEntityAnimationManager		*EAM = NULL;
 CProgress					ProgressBar;
 TBackground					LoadingBackground = StartBackground;
 string						LoadingMusic;
