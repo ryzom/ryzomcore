@@ -110,8 +110,6 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect(m_ui->tileSetAddTB, SIGNAL(clicked()), this, SLOT(onTileSetAdd()));
 	connect(m_ui->tileSetDeleteTB, SIGNAL(clicked()), this, SLOT(onTileSetDelete()));
 	connect(m_ui->tileSetEditTB, SIGNAL(clicked()), this, SLOT(onTileSetEdit()));
-	connect(m_ui->tileSetUpTB, SIGNAL(clicked()), this, SLOT(onTileSetUp()));
-	connect(m_ui->tileSetDownTB, SIGNAL(clicked()), this, SLOT(onTileSetDown()));
 
 	connect(m_ui->landAddTB, SIGNAL(clicked()), this, SLOT(onLandAdd()));
 	connect(m_ui->landRemoveTB, SIGNAL(clicked()), this, SLOT(onLandRemove()));
@@ -251,7 +249,8 @@ void TileEditorMainWindow::saveAs( const QString &fn )
 	}
 
 	TileBankSaver saver;
-	bool ok = saver.save( fn.toUtf8().constData(), m_tileModel, m_lands );
+	bool ok = true;
+	//saver.save( fn.toUtf8().constData(), m_tileModel, m_lands );
 
 	if( !ok )
 	{
@@ -272,7 +271,8 @@ void TileEditorMainWindow::open()
 		return;
 
 	TileBankLoader loader;
-	bool b = loader.load( fn.toUtf8().constData(), m_tileModel, m_lands );
+	bool b = true;
+	//loader.load( fn.toUtf8().constData(), m_tileModel, m_lands );
 
 	if( !b )
 	{
@@ -398,10 +398,7 @@ void TileEditorMainWindow::onTileSetDelete()
 
 	QString set = reinterpret_cast< TileSetNode* >( idx.internalPointer() )->getTileSetName();
 
-	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
-	bool ok = model->removeRow( idx.row() );
-
-	onTileSetRemoved( set );
+	m_tileModel->removeTileSet( idx.row() );
 }
 
 void TileEditorMainWindow::onTileSetEdit()
@@ -438,46 +435,7 @@ void TileEditorMainWindow::onTileSetEdit()
 	node->setTileSetName( newName );
 	m_ui->tileSetLV->reset();
 
-	onTileSetRenamed( oldName, newName );
-}
-
-void TileEditorMainWindow::onTileSetUp()
-{
-	QModelIndex idx = m_ui->tileSetLV->currentIndex();
-	if( !idx.isValid() )
-		return;
-
-	if( idx.row() == 0 )
-		return;
-
-	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
-	if( model->rowCount() < 2 )
-		return;
-
-	int r = idx.row();
-	model->swapRows( r, r - 1 );
-
-	m_ui->tileSetLV->reset();
-	m_ui->tileSetLV->setCurrentIndex( model->index( r - 1, 0 ) );
-}
-
-void TileEditorMainWindow::onTileSetDown()
-{
-	QModelIndex idx = m_ui->tileSetLV->currentIndex();
-	if( !idx.isValid() )
-		return;
-
-	TileModel *model = static_cast<TileModel*>(m_ui->tileSetLV->model());
-	if( model->rowCount() < idx.row() )
-		return;
-	if( model->rowCount() < 2 )
-		return;
-	
-	int r = idx.row();
-	model->swapRows( r, r + 1 );
-
-	m_ui->tileSetLV->reset();
-	m_ui->tileSetLV->setCurrentIndex( model->index( r + 1, 0 ) );
+	m_tileModel->renameTileSet( idx.row(), newName );
 }
 
 void TileEditorMainWindow::onLandAdd()
@@ -503,9 +461,7 @@ void TileEditorMainWindow::onLandAdd()
 
 	m_ui->landLW->addItem( name );
 	
-	Land l;
-	l.name = name;
-	m_lands.push_back( l );
+	m_tileModel->addLand( name );
 }
 
 void TileEditorMainWindow::onLandRemove()
@@ -526,8 +482,7 @@ void TileEditorMainWindow::onLandRemove()
 
 	delete item;
 
-	QList< Land >::iterator itr = m_lands.begin() + idx;
-	m_lands.erase( itr );
+	m_tileModel->removeLand( idx );
 }
 
 void TileEditorMainWindow::onLandEdit()
@@ -549,10 +504,12 @@ void TileEditorMainWindow::onLandEdit()
 	}
 	
 	int r = m_ui->landLW->currentRow();
-	Land &l = m_lands[ r ];
+
+	QStringList sts;
+	m_tileModel->getLandSets( r, sts );
 
 	LandEditDialog d;
-	d.setSelectedTileSets( l.tilesets );
+	d.setSelectedTileSets( sts );
 	d.setTileSets( ts );
 	int result = d.exec();
 
@@ -560,10 +517,10 @@ void TileEditorMainWindow::onLandEdit()
 		return;
 
 	// Update the tileset of the land
-	ts.clear();
-	d.getSelectedTileSets( ts );
-	l.tilesets.clear();
-	l.tilesets = ts;
+	sts.clear();
+	d.getSelectedTileSets( sts );
+	
+	m_tileModel->setLandSets( r, sts );
 }
 
 void TileEditorMainWindow::onChooseVegetation()
@@ -720,37 +677,26 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	TileConstants::TNodeTileType type = tabToType( tabId );
 
 	QStringListIterator itr( fileNames );
+	QString error;
+
 	while( itr.hasNext() )
 	{
 		TileItemNode *newNode = m_tileModel->createItemNode( setId, type, c, TileConstants::TileDiffuse, itr.next() );
 		if( newNode == NULL )
 		{
+			if( m_tileModel->hasError() )
+				error = m_tileModel->getLastError();
+
 			int reply = QMessageBox::question( this,
 												tr( "Error adding tile" ),
-												tr( "Failed to create tile!\nContinue?" ),
+												error + "\nContinue?",
 												QMessageBox::Yes, QMessageBox::No );
 			if( reply != QMessageBox::Yes )
 				break;
 			else
 				continue;
 		}
-
-
-		if( newNode->hasError() )
-		{
-			QString error = newNode->getLastError();
-			error += "\nContinue?";
-
-			int reply = QMessageBox::question( this,
-												tr( "Error adding tile" ),
-												error,
-												QMessageBox::Yes, QMessageBox::No );
-			if( reply != QMessageBox::Yes )
-				break;
-			else
-				continue;
-		}
-		
+	
 		n->appendRow( newNode );
 		c++;
 	}
@@ -777,12 +723,13 @@ void TileEditorMainWindow::onActionDeleteTile( int tabId )
 		return;
 	}
 
-	int row = idx.row();
+	QModelIndex tsidx = m_ui->tileSetLV->currentIndex();
+	if( !tsidx.isValid() )
+		return;
+	int ts = tsidx.row();
+	int tile = idx.row();
 
-	QModelIndex parent = idx.parent();
-	lv->model()->removeRow( row, parent );
-
-	//lv->reset();
+	m_tileModel->removeTile( ts, tabId, tile );	
 }
 
 void TileEditorMainWindow::onActionDeleteImage( int tabId )
@@ -798,13 +745,25 @@ void TileEditorMainWindow::onActionDeleteImage( int tabId )
 		return;
 	}
 
+	QModelIndex tsidx = m_ui->tileSetLV->currentIndex();
+	if( !tsidx.isValid() )
+		return;
+	int ts = tsidx.row();
+
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
-	n->setTileFilename( TileItemNode::displayChannel(), "" );
+	int tile = n->id();
+
+	m_tileModel->clearImage( ts, tabId, tile, TileItemNode::displayChannel() );
 }
 
 void TileEditorMainWindow::onActionReplaceImage( int tabId )
 {
 	QListView *lv = getListViewByTab( tabId );
+
+	QModelIndex tsidx = m_ui->tileSetLV->currentIndex();
+	if( !tsidx.isValid() )
+		return;
+	int set = tsidx.row();
 	
 	QModelIndex idx = lv->currentIndex();
 	if( !idx.isValid() )
@@ -823,41 +782,22 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 		return;
 	
 	TileItemNode *n = reinterpret_cast< TileItemNode* >( idx.internalPointer() );
-	n->setTileFilename( TileItemNode::displayChannel(), fileName );
-}
+	int tile = n->id();
 
-void TileEditorMainWindow::onTileSetRemoved( const QString &set )
-{
-	int c = m_lands.count();
-	for( int i = 0; i < c; i++ )
+	m_tileModel->replaceImage( set, tabId, tile, TileItemNode::displayChannel(), fileName );
+	if( m_tileModel->hasError() )
 	{
-		Land &land = m_lands[ i ];
-		land.tilesets.removeAll( set );
-	}
-}
-
-void TileEditorMainWindow::onTileSetRenamed( const QString &oldname, const QString &newname )
-{
-	int c = m_lands.count();
-	for( int i = 0; i < c; i++ )
-	{
-		Land &land = m_lands[ i ];
-		int idx = land.tilesets.indexOf( oldname );
-		if( idx < 0 )
-			continue;
-
-		land.tilesets[ idx ] = newname;
+		QString error = m_tileModel->getLastError();
+		QMessageBox::information( this,
+								tr( "Error replacing tile image" ),
+								error );
 	}
 }
 
 void TileEditorMainWindow::onTileBankLoaded()
 {
 	m_ui->landLW->clear();
-	QListIterator< Land > itr( m_lands );
-	while( itr.hasNext() )
-	{
-		m_ui->landLW->addItem( itr.next().name );
-	}
+	// load lands
 
 	m_ui->listView128->reset();
 	m_ui->listView256->reset();

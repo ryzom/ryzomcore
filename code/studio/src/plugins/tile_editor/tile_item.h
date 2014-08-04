@@ -120,18 +120,12 @@ public:
 	int columnCount() const;
 	bool setTileFilename(TileConstants::TTileChannel channel, QString filename);
 	QString getTileFilename(TileConstants::TTileChannel channel);
-	void setId( int id );
-	int id() const;
-	QString getLastError() const;
-	bool borderFirst( TileConstants::TTileChannel channel ) const;
-	const NL3D::CTileBorder& border( TileConstants::TTileChannel channel ) const;
-	int alphaRot() const;
+	void setId( int id ){ m_id = id; }
+	int id() const{ return m_id; }
 
 	static void setDisplayChannel( TileConstants::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileConstants::TTileChannel displayChannel(){ return s_displayChannel; }
 	static void setAlphaRot( int rot ){ s_alphaRot = rot; }
-
-	bool hasError() const{ return m_hasError; }
 
 	QVariant pixmap( TileConstants::TTileChannel channel ) const;
 
@@ -141,6 +135,8 @@ private:
 
 	static TileConstants::TTileChannel s_displayChannel;
 	static int s_alphaRot;
+
+	int m_id;
 
 	TileItemNodePvt *pvt;
 

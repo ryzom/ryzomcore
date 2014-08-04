@@ -25,8 +25,6 @@
 #include <QtGui/QUndoStack>
 #include <QSignalMapper>
 
-#include "land.h"
-
 namespace Ui {
     class TileEditorMainWindow;
 }
@@ -59,8 +57,6 @@ private Q_SLOTS:
 	void onTileSetAdd();
 	void onTileSetDelete();
 	void onTileSetEdit();
-	void onTileSetUp();
-	void onTileSetDown();
 	
 	void onLandAdd();
 	void onLandRemove();
@@ -89,8 +85,6 @@ private:
 	void onActionDeleteImage(int tabId);
 	void onActionReplaceImage(int tabId);
 
-	void onTileSetRemoved( const QString &set );
-	void onTileSetRenamed( const QString &oldname, const QString &newname );
 	void onTileBankLoaded();
 
 	void updateTab();
@@ -127,7 +121,6 @@ private:
 	};
 
 	QString m_fileName;
-	QList< Land > m_lands;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

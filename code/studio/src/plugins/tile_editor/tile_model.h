@@ -89,7 +89,17 @@ public:
 	QString texturePath() const{ return m_texturePath; }
 
 	void addLand( const QString &name );
+	void removeLand( int idx );
+	void removeTileSet( int idx );
+	void renameTileSet( int idx, const QString &newName );
 	void setLandSets( int idx, const QStringList &l );
+	void getLandSets( int idx, QStringList &l );
+	void removeTile( int ts, int type, int tile );
+	bool replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name );
+	void clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel );
+
+	QString getLastError() const;
+	bool hasError() const;
 
 public Q_SLOTS:
 	void selectFilenameDisplay(bool selected);

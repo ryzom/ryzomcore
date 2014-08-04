@@ -18,11 +18,7 @@
 
 #include "tile_item.h"
 
-//#include "tile_widget.h"
-
 #include <nel/misc/debug.h>
-
-#include <nel/3d/tile_bank.h>
 
 Node::Node() : m_parentItem(0)
 {
@@ -266,210 +262,14 @@ void TileTypeNode::reindex()
 
 ///////////////////////////////////////////////////
 
-NL3D::CTile::TBitmap channelToTBitmap( TileConstants::TTileChannel channel )
-{
-	NL3D::CTile::TBitmap bm;
-
-	switch( channel )
-	{
-	case TileConstants::TileDiffuse: bm = NL3D::CTile::diffuse; break;
-	case TileConstants::TileAdditive: bm = NL3D::CTile::additive; break;
-	case TileConstants::TileAlpha: bm = NL3D::CTile::alpha; break;
-	}
-
-	return bm;
-}
-
 class TileItemNodePvt
 {
 public:
 
 	TileItemNodePvt()
 	{
-		for( int i = 0; i < TileConstants::TileChannelCount; i++ )
-			m_borderFirst[ i ] = false;
-
-		m_id = -1;
-		m_alphaRot = 0;
 	}
 
-	bool pixmapToCBGRA( QPixmap &pixmap, std::vector< NLMISC::CBGRA >& pixels )
-	{
-		QImage img = pixmap.toImage();
-		if( img.format() != QImage::Format_ARGB32 )
-			img = img.convertToFormat( QImage::Format_ARGB32 );
-
-		if( img.format() != QImage::Format_ARGB32 )
-			return false;
-
-		int c = img.width() * img.height();
-
-		const unsigned char *data = img.bits();
-		const unsigned int *idata = reinterpret_cast< const unsigned int* >( data );
-
-		NLMISC::CBGRA bgra;
-		pixels.clear();
-
-		int i = 0;
-		while( i < c )
-		{
-			bgra.A = ( idata[ i ] & 0xFF000000 ) >> 24;
-			bgra.R = ( idata[ i ] & 0x00FF0000 ) >> 16;
-			bgra.G = ( idata[ i ] & 0x0000FF00 ) >> 8;
-			bgra.B = ( idata[ i ] & 0x000000FF );
-			pixels.push_back( bgra );
-
-			i++;
-		}
-
-		return true;
-	}
-
-	int getWidthForType( TileConstants::TNodeTileType type, TileConstants::TTileChannel channel )
-	{
-		int width = -1;
-
-		switch( type )
-		{
-		case TileConstants::Tile128: width = 128; break;
-		case TileConstants::Tile256: width = 256; break;
-		case TileConstants::TileTransition:
-			{
-				if( channel != TileConstants::TileAlpha )
-					width = 128;
-				break;
-			}
-
-		case TileConstants::TileDisplacement: width = 32; break;
-		}
-
-		return width;
-	}
-
-	NL3D::CTileSet::TError checkTile( TileConstants::TTileChannel channel )
-	{
-		if( m_type == TileConstants::TileDisplacement )
-			return NL3D::CTileSet::ok;
-
-		if( channel == TileConstants::TileAdditive )
-			return NL3D::CTileSet::ok;
-
-		int pixel;
-		int component;
-		int index;
-
-		NL3D::CTileSet set;	
-		NL3D::CTile::TBitmap bm = channelToTBitmap( channel );
-
-		NL3D::CTileSet::TError error = NL3D::CTileSet::ok;
-
-		switch( m_type )
-		{
-		case TileConstants::Tile128:
-			error = set.checkTile128( bm, m_border[ channel ], pixel, component );
-			break;
-		case TileConstants::Tile256:
-			error = set.checkTile256( bm, m_border[ channel ], pixel, component );
-			break;
-		case TileConstants::TileTransition:
-			if( channel != TileConstants::TileAlpha )
-				error = set.checkTile128( bm, m_border[ channel ], pixel, component );
-			else
-				error = set.checkTileTransition( NL3D::CTileSet::TTransition( m_id ), bm, m_border[ channel ], index, pixel, component );
-			break;
-		}
-
-		if( error == NL3D::CTileSet::ok )
-			return NL3D::CTileSet::ok;
-		if( error == NL3D::CTileSet::addFirstA128128 )
-			return NL3D::CTileSet::addFirstA128128;
-
-		static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
-
-		if( error != NL3D::CTileSet::ok )
-		{
-			m_lastError = "ERROR: ";
-			m_lastError += NL3D::CTileSet::getErrorMessage( error );
-			m_lastError += "\n";
-
-			switch( m_type )
-			{
-			case TileConstants::Tile128:
-			case TileConstants::Tile256:
-				m_lastError += QString( "pixel: %1 component: %2" ).arg( pixel ).arg( comp[ component ] );
-				break;
-
-			case TileConstants::TileTransition:
-				if( channel != TileConstants::TileAlpha )
-				{
-					m_lastError += QString( "pixel: %1 component: %2" ).arg( pixel ).arg( comp[ component ] );
-				}
-				else
-				{
-					if ((error==NL3D::CTileSet::topInterfaceProblem)||(error==NL3D::CTileSet::bottomInterfaceProblem)||
-						(error==NL3D::CTileSet::leftInterfaceProblem)||(error==NL3D::CTileSet::rightInterfaceProblem)||
-						(error==NL3D::CTileSet::topBottomNotTheSame)||(error==NL3D::CTileSet::rightLeftNotTheSame)
-						||(error==NL3D::CTileSet::topInterfaceProblem))
-					{
-						if( index != -1 )
-						{
-							m_lastError += QString( "tile: %1 pixel: %2 component: %3" ).arg( index ).arg( pixel ).arg( comp[ component ] );
-						}
-						else
-						{
-							m_lastError += QString( "incompatible with a 128 tile, pixel: %1 component: %2" ).arg( pixel ).arg( comp[ component ] );
-						}
-					}
-
-				}
-				break;
-			}
-		}
-
-		return error;
-	}
-
-	bool checkPixmap( TileConstants::TTileChannel channel, QPixmap &pixmap )
-	{
-		int w = pixmap.width();
-		int h = pixmap.height();
-
-		if( w != h )
-		{
-			m_lastError = QObject::tr( "Not a square texture." );
-			return false;
-		}
-		
-		int width = getWidthForType( m_type, channel );		
-
-		if( width != -1 )
-		{
-			if( width != w )
-			{
-				m_lastError = QObject::tr( "Not the proper size." );
-				return false;
-			}
-		}
-
-		std::vector< NLMISC::CBGRA > pixels;
-
-		pixmapToCBGRA( pixmap, pixels );
-
-		m_border[ channel ].set( w, h, pixels );
-
-		NL3D::CTileSet::TError error = checkTile( channel );
-		if( error == NL3D::CTileSet::addFirstA128128 )
-		{
-			m_borderFirst[ channel ] = true;
-			return true;
-		}
-
-		if( error != NL3D::CTileSet::ok )
-			return false;
-
-		return true;
-	}
-	
 	bool loadImage( TileConstants::TTileChannel channel, const QString &fn, bool empty = false )
 	{
 		QPixmap temp;
@@ -477,19 +277,8 @@ public:
 
 		if( !b )
 		{
-			m_lastError = QObject::tr( "Cannot open file %1" ).arg( fn );
 			return false;
 		}
-
-		m_borderFirst[ channel ] = false;
-		
-		/*
-		if( !empty )
-		{
-			if( !checkPixmap( channel, temp ) )
-				return false;
-		}
-		*/
 
 		pixmaps[ channel ] = temp;
 		
@@ -505,26 +294,8 @@ public:
 		return pixmaps[ channel ];
 	}
 
-	void setType( TileConstants::TNodeTileType type ){ m_type = type; }
-	void setId( int id ){ m_id = id; }
-	int id() const{ return m_id; }
-
-	QString getLastError() const{ return m_lastError; }
-	bool borderFirst( TileConstants::TTileChannel channel ) const{ return m_borderFirst[ channel ]; }
-
-	const NL3D::CTileBorder &border( TileConstants::TTileChannel channel ){ return m_border[ channel ]; }
-
-	int alphaRot() const{ return m_alphaRot; }
-	void setAlphaRot( int rot ){ m_alphaRot = rot; }
-
 private:
 	QPixmap pixmaps[ TileConstants::TileChannelCount ];
-	TileConstants::TNodeTileType m_type;
-	NL3D::CTileBorder m_border[ TileConstants::TileChannelCount ];
-	int m_id;
-	QString m_lastError;
-	bool m_borderFirst[ TileConstants::TileChannelCount ];
-	int m_alphaRot;
 };
 
 TileConstants::TTileChannel TileItemNode::s_displayChannel = TileConstants::TileDiffuse;
@@ -532,13 +303,11 @@ int TileItemNode::s_alphaRot = 0;
 
 TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, TileConstants::TTileChannel channel, QString filename, Node *parent)
 {
+	m_id = tileId;
 	m_parentItem = parent;
 	//nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toAscii().data());
 
 	pvt = new TileItemNodePvt();
-	pvt->setType( type );
-	pvt->setId( tileId );
-
 	m_hasError = false;
 
 	setTileFilename( channel, filename );
@@ -563,7 +332,6 @@ bool TileItemNode::setTileFilename(TileConstants::TTileChannel channel, QString 
 		empty = true;
 	}
 
-	pvt->setAlphaRot( s_alphaRot );
 	bool b = pvt->loadImage( channel, fn, empty );
 	m_hasError = !b;
 	if( !b )
@@ -581,36 +349,6 @@ QString TileItemNode::getTileFilename(TileConstants::TTileChannel channel)
 		return "";
 
 	return itr.value();
-}
-
-void TileItemNode::setId( int id )
-{
-	pvt->setId( id );
-}
-
-int TileItemNode::id() const
-{
-	return pvt->id();
-}
-
-QString TileItemNode::getLastError() const
-{
-	return pvt->getLastError();
-}
-
-bool TileItemNode::borderFirst( TileConstants::TTileChannel channel ) const
-{
-	return pvt->borderFirst( channel );
-}
-
-const NL3D::CTileBorder& TileItemNode::border( TileConstants::TTileChannel channel ) const
-{
-	return pvt->border( channel );
-}
-
-int TileItemNode::alphaRot() const
-{
-	return pvt->alphaRot();
 }
 
 QVariant TileItemNode::data(int column, int role) const
@@ -647,11 +385,11 @@ QVariant TileItemNode::data(int column, int role) const
 	}
 	else if(role == TileModel::TileIndexRole)
 	{
-		return QVariant("("+QString::number(pvt->id())+")");
+		return QVariant("("+QString::number(m_id)+")");
 	}
 	else if(role == TileModel::TileFilenameIndexRole)
 	{
-		return QVariant(tileFilename + " ("+QString::number(pvt->id())+")");
+		return QVariant(tileFilename + " ("+QString::number(m_id)+")");
 	}
 
 	return QVariant();

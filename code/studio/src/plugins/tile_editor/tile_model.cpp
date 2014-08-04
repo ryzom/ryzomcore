@@ -232,7 +232,7 @@ TileItemNode *TileModel::createItemNode( int idx, TileConstants::TNodeTileType t
 {
 	TileItemNode *n = new TileItemNode( type, id, channel, fileName );
 
-	bool b = m_tileBank->addTileToSet( idx, fileName, n->pixmap( channel ), channel, type );
+	bool b = m_tileBank->addTile( idx, fileName, n->pixmap( channel ), channel, type );
 	if( !b )
 	{
 		delete n;
@@ -310,9 +310,99 @@ void TileModel::addLand( const QString &name )
 	m_tileBank->addLand( name );
 }
 
+void TileModel::removeLand( int idx )
+{
+	m_tileBank->removeLand( idx );
+}
+
 void TileModel::setLandSets( int idx, const QStringList &l )
 {
 	m_tileBank->setLandSets( idx, l );
+}
+
+void TileModel::getLandSets( int idx, QStringList &l )
+{
+	m_tileBank->getLandSets( idx, l );
+}
+
+void TileModel::removeTileSet( int idx )
+{
+	TileSetNode *set = static_cast< TileSetNode* >( rootItem->child( idx ) );
+	if( set == NULL )
+		return;
+
+	removeRow( idx );
+
+	m_tileBank->removeTileSet( idx );
+}
+
+void TileModel::renameTileSet( int idx, const QString &newName )
+{
+	m_tileBank->renameTileSet( idx, newName );
+}
+
+void TileModel::removeTile( int ts, int type, int tile )
+{
+	TileSetNode *set = static_cast< TileSetNode* >( rootItem->child( ts ) );
+	if( set == NULL )
+		return;
+
+	TileTypeNode *typeNode = static_cast< TileTypeNode* >( set->child( type ) );
+	if( typeNode == NULL )
+		return;
+
+	TileItemNode *tileNode = static_cast< TileItemNode* >( typeNode->child( tile ) );
+	if( tileNode == NULL )
+		return;
+
+	QModelIndex tileIdx = createIndex( tile, 0, tileNode );
+	removeRow( tile, tileIdx.parent() );
+
+	m_tileBank->removeTile( ts, type, tile );
+}
+
+bool TileModel::replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name )
+{
+	Node *set = rootItem->child( ts );
+	Node *tn = set->child( type );
+	Node *n = tn->child( tile );
+
+	TileItemNode *tin = static_cast< TileItemNode* >( n );
+	QString old = tin->getTileFilename( channel );
+
+	bool b = tin->setTileFilename( channel, name );
+	if( !b )
+		return false;
+	
+	m_tileBank->replaceImage( ts, type, tile, channel, name, tin->pixmap( channel ) );
+	if( m_tileBank->hasError() )
+	{
+		tin->setTileFilename( channel, old );
+		return false;
+	}
+
+	return true;
+}
+
+void TileModel::clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel )
+{
+	Node *set = rootItem->child( ts );
+	Node *tn = set->child( type );
+	Node *n = tn->child( tile );
+
+	TileItemNode *tin = static_cast< TileItemNode* >( n );
+	tin->setTileFilename( channel, "" );
+
+	m_tileBank->clearImage( ts, type, tile, channel );
+}
+
+QString TileModel::getLastError() const{
+	return m_tileBank->getLastError();
+}
+
+bool TileModel::hasError() const
+{
+	return m_tileBank->hasError();
 }
 
 void TileModel::selectFilenameDisplay(bool selected)
