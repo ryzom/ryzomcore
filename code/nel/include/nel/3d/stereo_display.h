@@ -130,6 +130,7 @@ public:
 	virtual bool endRenderTarget() = 0;
 	
 	static const char *getLibraryName(CStereoDeviceInfo::TStereoDeviceLibrary library);
+	// List all devices. Device creation factories are no longer valid after re-calling this function
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
 	static IStereoDisplay *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static void releaseUnusedLibraries();

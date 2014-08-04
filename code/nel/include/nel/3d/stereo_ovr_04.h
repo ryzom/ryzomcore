@@ -64,8 +64,7 @@ namespace NL3D {
 
 class ITexture;
 class CTextureUser;
-class CStereoOVRDevicePtr;
-class CStereoOVRDeviceHandle;
+class CStereoOVRDeviceFactory;
 /*class CPixelProgramOVR;*/
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
@@ -79,7 +78,7 @@ class CStereoOVRDeviceHandle;
 class CStereoOVR : public IStereoHMD
 {
 public:
-	CStereoOVR(const CStereoOVRDeviceHandle *handle);
+	CStereoOVR(const CStereoOVRDeviceFactory *handle);
 	virtual ~CStereoOVR();
 
 	/// Sets driver and generates necessary render targets
@@ -150,7 +149,7 @@ public:
 	static void releaseLibrary();
 
 private:
-	CStereoOVRDevicePtr *m_DevicePtr;
+	// CStereoOVRDevicePtr *m_DevicePtr;
 	int m_Stage;
 	int m_SubStage;
 	CViewport m_RegularViewport;

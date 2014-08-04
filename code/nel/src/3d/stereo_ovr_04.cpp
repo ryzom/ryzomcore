@@ -70,87 +70,70 @@ using namespace std;
 
 namespace NL3D {
 
-/*extern const char *g_StereoOVR_fp40;
-extern const char *g_StereoOVR_arbfp1;
-extern const char *g_StereoOVR_ps_2_0;
-extern const char *g_StereoOVR_glsl330f;*/
-
 namespace {
-/*
-class CStereoOVRLog : public OVR::Log
-{
-public:
-	CStereoOVRLog(unsigned logMask = OVR::LogMask_All) : OVR::Log(logMask)
-	{
 
-	}
-
-	virtual void LogMessageVarg(OVR::LogMessageType messageType, const char* fmt, va_list argList)
-	{
-		if (NLMISC::INelContext::isContextInitialised())
-		{
-			char buffer[MaxLogBufferMessageSize];
-			FormatLog(buffer, MaxLogBufferMessageSize, messageType, fmt, argList);
-			if (IsDebugMessage(messageType))
-				NLMISC::INelContext::getInstance().getDebugLog()->displayNL("OVR: %s", buffer);
-			else
-				NLMISC::INelContext::getInstance().getInfoLog()->displayNL("OVR: %s", buffer);
-		}
-	}
-};
-
-CStereoOVRLog *s_StereoOVRLog = NULL;
-OVR::Ptr<OVR::DeviceManager> s_DeviceManager;
+#include "stereo_ovr_04_program.h"
 
 class CStereoOVRSystem
 {
 public:
-	~CStereoOVRSystem()
+	CStereoOVRSystem() : m_InitOk(false)
 	{
-		Release();
+
 	}
 
-	void Init()
+	~CStereoOVRSystem()
 	{
-		if (!s_StereoOVRLog)
+		if (m_InitOk)
 		{
-			nldebug("Initialize OVR");
-			s_StereoOVRLog = new CStereoOVRLog();
+			nlwarning("OVR: Not all resources were released before exit");
+			Release();
 		}
-		if (!OVR::System::IsInitialized())
-			OVR::System::Init(s_StereoOVRLog);
-		if (!s_DeviceManager)
-			s_DeviceManager = OVR::DeviceManager::Create();
+	}
+
+	bool Init()
+	{
+		if (!m_InitOk)
+		{
+			nldebug("OVR: Initialize");
+			m_InitOk = ovr_Initialize();
+			nlassert(m_InitOk);
+		}
+
+		return m_InitOk;
 	}
 
 	void Release()
 	{
-		if (s_DeviceManager)
+		if (m_InitOk)
 		{
-			nldebug("Release OVR");
-			s_DeviceManager->Release();
+			nldebug("OVR: Release");
+			ovr_Shutdown();
+			m_InitOk = false;
 		}
-		s_DeviceManager.Clear();
-		if (OVR::System::IsInitialized())
-			OVR::System::Destroy();
-		if (s_StereoOVRLog)
-			nldebug("Release OVR Ok");
-		delete s_StereoOVRLog;
-		s_StereoOVRLog = NULL;
 	}
+
+private:
+	bool m_InitOk;
+
 };
 
 CStereoOVRSystem s_StereoOVRSystem;
 
 sint s_DeviceCounter = 0;
-*/
+uint s_DetectId = 0;
+
 }
-/*
-class CStereoOVRDeviceHandle : public IStereoDeviceFactory
+
+class CStereoOVRDeviceFactory : public IStereoDeviceFactory
 {
 public:
-	// fixme: virtual destructor???
-	OVR::DeviceEnumerator<OVR::HMDDevice> DeviceHandle;
+	uint DeviceIndex;
+	uint DetectId;
+
+	bool DebugDevice;
+	ovrHmdType DebugDeviceType;
+
 	IStereoDisplay *createDevice() const
 	{
 		CStereoOVR *stereo = new CStereoOVR(this);
@@ -161,6 +144,7 @@ public:
 	}
 };
 
+/*
 class CStereoOVRDevicePtr
 {
 public:
@@ -170,7 +154,8 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 */
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	/*++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -958,48 +943,84 @@ void CStereoOVR::setScale(float s)
 	m_Scale = s;
 }
 
+
+
 void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
-	/*
-	s_StereoOVRSystem.Init();
-	OVR::DeviceEnumerator<OVR::HMDDevice> devices = s_DeviceManager->EnumerateDevices<OVR::HMDDevice>();
-	uint id = 1;
-	do
-	{
-		CStereoDeviceInfo deviceInfoOut;
-		OVR::DeviceInfo deviceInfo;
-		if (devices.IsAvailable())
-		{
-			devices.GetDeviceInfo(&deviceInfo);
-			CStereoOVRDeviceHandle *handle = new CStereoOVRDeviceHandle();
-			deviceInfoOut.Factory = static_cast<IStereoDeviceFactory *>(handle);
-			handle->DeviceHandle = devices;
-			deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD; // 1; // OVR::HMDDevice
-			deviceInfoOut.Library = CStereoDeviceInfo::OVR; // "Oculus SDK";
-			deviceInfoOut.Manufacturer = deviceInfo.Manufacturer;
-			deviceInfoOut.ProductName = deviceInfo.ProductName;
-			deviceInfoOut.AllowAuto = true;
-			stringstream ser;
-			ser << id;
-			deviceInfoOut.Serial = ser.str(); // can't get the real serial from the sdk...
-			devicesOut.push_back(deviceInfoOut);
-			++id;
-		}
+	if (!s_StereoOVRSystem.Init())
+		return;
 
-	} while (devices.Next());*/
+	++s_DetectId;
+	uint hmdDetect = ovrHmd_Detect();
+	nldebug("OVR: Detected %u HMDs", hmdDetect);
+
+	for (uint i = 0; i < hmdDetect; ++i)
+	{
+		devicesOut.resize(devicesOut.size() + 1);
+		CStereoDeviceInfo &deviceInfoOut = devicesOut[devicesOut.size() - 1];
+		ovrHmd hmd = ovrHmd_Create(i);
+		CStereoOVRDeviceFactory *factory = new CStereoOVRDeviceFactory();
+		factory->DetectId = s_DetectId;
+		factory->DeviceIndex = i;
+		factory->DebugDevice = false;
+		deviceInfoOut.Factory = factory;
+		deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD;
+		deviceInfoOut.Library = CStereoDeviceInfo::OVR;
+		deviceInfoOut.Manufacturer = hmd->Manufacturer;
+		deviceInfoOut.ProductName = hmd->ProductName;
+		deviceInfoOut.AllowAuto = true;
+		deviceInfoOut.Serial = hmd->SerialNumber;
+		ovrHmd_Destroy(hmd);
+	}
+	
+#if !FINAL_VERSION
+	// Debug DK1
+	{
+		devicesOut.resize(devicesOut.size() + 1);
+		CStereoDeviceInfo &deviceInfoOut = devicesOut[devicesOut.size() - 1];
+		ovrHmd hmd = ovrHmd_CreateDebug(ovrHmd_DK1);
+		CStereoOVRDeviceFactory *factory = new CStereoOVRDeviceFactory();
+		factory->DebugDevice = true;
+		factory->DebugDeviceType = ovrHmd_DK1;
+		deviceInfoOut.Factory = factory;
+		deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD;
+		deviceInfoOut.Library = CStereoDeviceInfo::OVR;
+		deviceInfoOut.Manufacturer = hmd->Manufacturer;
+		deviceInfoOut.ProductName = hmd->ProductName;
+		deviceInfoOut.AllowAuto = false;
+		deviceInfoOut.Serial = "OVR-DK1-DEBUG";
+		ovrHmd_Destroy(hmd);
+	}
+	// Debug DK2
+	{
+		devicesOut.resize(devicesOut.size() + 1);
+		CStereoDeviceInfo &deviceInfoOut = devicesOut[devicesOut.size() - 1];
+		ovrHmd hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
+		CStereoOVRDeviceFactory *factory = new CStereoOVRDeviceFactory();
+		factory->DebugDevice = true;
+		factory->DebugDeviceType = ovrHmd_DK2;
+		deviceInfoOut.Factory = factory;
+		deviceInfoOut.Class = CStereoDeviceInfo::StereoHMD;
+		deviceInfoOut.Library = CStereoDeviceInfo::OVR;
+		deviceInfoOut.Manufacturer = hmd->Manufacturer;
+		deviceInfoOut.ProductName = hmd->ProductName;
+		deviceInfoOut.AllowAuto = false;
+		deviceInfoOut.Serial = "OVR-DK2-DEBUG";
+		ovrHmd_Destroy(hmd);
+	}
+#endif
 }
 
 bool CStereoOVR::isLibraryInUse()
 {
-	/*nlassert(s_DeviceCounter >= 0);
-	return s_DeviceCounter > 0;*/
-	return false;
+	nlassert(s_DeviceCounter >= 0);
+	return s_DeviceCounter > 0;
 }
 
 void CStereoOVR::releaseLibrary()
 {
-	/*nlassert(s_DeviceCounter == 0);
-	s_StereoOVRSystem.Release();*/
+	nlassert(s_DeviceCounter == 0);
+	s_StereoOVRSystem.Release();
 }
 
 bool CStereoOVR::isDeviceCreated()

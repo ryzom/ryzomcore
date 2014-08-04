@@ -616,10 +616,16 @@ void initStereoDisplayDevice()
 		std::vector<NL3D::CStereoDeviceInfo> devices;
 		listStereoDisplayDevices(devices);
 		CStereoDeviceInfo *deviceInfo = NULL;
-		if (ClientCfg.VRDisplayDevice == std::string("Auto")
-			&& devices.begin() != devices.end())
+		if (ClientCfg.VRDisplayDevice == std::string("Auto"))
 		{
-			deviceInfo = &devices[0];
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				if ((*it).AllowAuto)
+				{
+					deviceInfo = &(*it);
+					break;
+				}
+			}
 		}
 		else
 		{
