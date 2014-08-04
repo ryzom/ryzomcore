@@ -148,10 +148,20 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_VP(NULL), 
 		m_QuadUV.V2 = CVector(1.f, 1.f, 0.5f);
 		m_QuadUV.V3 = CVector(0.f, 1.f, 0.5f);
 
-		m_QuadUV.Uv0 = CUV(0.f,  0.f);
-		m_QuadUV.Uv1 = CUV(1.f, 0.f);
-		m_QuadUV.Uv2 = CUV(1.f, 1.f);
-		m_QuadUV.Uv3 = CUV(0.f,  1.f);
+		if (drv->textureCoordinateAlternativeMode())
+		{
+			m_QuadUV.Uv0 = CUV(0.f,  1.f);
+			m_QuadUV.Uv1 = CUV(1.f, 1.f);
+			m_QuadUV.Uv2 = CUV(1.f, 0.f);
+			m_QuadUV.Uv3 = CUV(0.f,  0.f);
+		}
+		else
+		{
+			m_QuadUV.Uv0 = CUV(0.f,  0.f);
+			m_QuadUV.Uv1 = CUV(1.f, 0.f);
+			m_QuadUV.Uv2 = CUV(1.f, 1.f);
+			m_QuadUV.Uv3 = CUV(0.f,  1.f);
+		}
 
 		/*CVertexBuffer &vb = m_VB;
 		vb.clearValueEx();
