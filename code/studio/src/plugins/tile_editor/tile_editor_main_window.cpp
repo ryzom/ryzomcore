@@ -542,8 +542,7 @@ void TileEditorMainWindow::onChooseVegetation()
 	if( vegetSet.isEmpty() )
 		return;
 
-	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
-	node->setVegetSet( vegetSet );
+	m_tileModel->setVegetation( idx.row(), vegetSet );
 
 	m_ui->chooseVegetPushButton->setText( vegetSet );
 }
@@ -560,8 +559,7 @@ void TileEditorMainWindow::onResetVegetation()
 	}
 	m_ui->chooseVegetPushButton->setText( "..." );
 
-	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
-	node->setVegetSet( "" );
+	m_tileModel->setVegetation( idx.row(), "" );	
 }
 
 void TileEditorMainWindow::onChooseTexturePath()
@@ -860,9 +858,9 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 	if( newIndex.isValid() )
 		newNode = reinterpret_cast< TileSetNode* >( newIndex.internalPointer() );
 
-	if( newNode != NULL )
+	if( newIndex.isValid() )
 	{
-		QString vegetSet = newNode->vegetSet();
+		QString vegetSet = m_tileModel->getVegetation( newIndex.row() );
 		
 		if( !vegetSet.isEmpty() )
 			m_ui->chooseVegetPushButton->setText( vegetSet );

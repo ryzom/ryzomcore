@@ -393,3 +393,22 @@ void TileBank::clearImage( int ts, int type, int tile, TileConstants::TTileChann
 }
 
 
+void TileBank::setVegetation( int tileSet, const QString &vegetation )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return;
+
+	set->setTileVegetableDescFileName( vegetation.toUtf8().constData() );
+}
+
+
+QString TileBank::getVegetation( int tileSet ) const
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return "";
+
+	return set->getTileVegetableDescFileName().c_str();
+}
+

@@ -98,6 +98,9 @@ public:
 	bool replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name );
 	void clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel );
 
+	void setVegetation( int tileSet, const QString &vegetation );
+	QString getVegetation( int tileSet ) const;
+
 	QString getLastError() const;
 	bool hasError() const;
 

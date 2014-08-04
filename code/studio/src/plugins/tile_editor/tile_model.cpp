@@ -396,6 +396,16 @@ void TileModel::clearImage( int ts, int type, int tile, TileConstants::TTileChan
 	m_tileBank->clearImage( ts, type, tile, channel );
 }
 
+void TileModel::setVegetation( int tileSet, const QString &vegetation )
+{
+	m_tileBank->setVegetation( tileSet, vegetation );
+}
+
+QString TileModel::getVegetation( int tileSet ) const
+{
+	return m_tileBank->getVegetation( tileSet );
+}
+
 QString TileModel::getLastError() const{
 	return m_tileBank->getLastError();
 }

@@ -29,6 +29,9 @@ public:
 	bool setTile( int tileset, int tile, const QString &name, const QVariant &pixmap, TileConstants::TTileChannel channel, TileConstants::TNodeTileType type );
 	void replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name, const QVariant &pixmap );
 	void clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel );
+
+	void setVegetation( int tileSet, const QString &vegetation );
+	QString getVegetation( int tileSet ) const;
 	
 	bool hasError() const{ return m_hasError; }
 	QString getLastError() const{ return m_lastError; }
