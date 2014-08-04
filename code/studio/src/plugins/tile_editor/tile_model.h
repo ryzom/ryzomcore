@@ -101,6 +101,9 @@ public:
 	void setVegetation( int tileSet, const QString &vegetation );
 	QString getVegetation( int tileSet ) const;
 
+	void setOriented( int tileSet, bool b );
+	bool getOriented( int tileSet ) const;
+
 	QString getLastError() const;
 	bool hasError() const;
 

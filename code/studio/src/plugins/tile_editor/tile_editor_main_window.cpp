@@ -590,12 +590,12 @@ void TileEditorMainWindow::onOrientedStateChanged( int state )
 	if( !idx.isValid() )
 		return;
 
-	TileSetNode *node = reinterpret_cast< TileSetNode* >( idx.internalPointer() );
-	
+	int row = idx.row();
+
 	if( state == Qt::Checked )
-		node->setOriented( true );
+		m_tileModel->setOriented( row, true );
 	else
-		node->setOriented( false );
+		m_tileModel->setOriented( row, false );
 }
 
 void TileEditorMainWindow::onDiffuseToggled( bool b )
@@ -867,7 +867,7 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 		else
 			m_ui->chooseVegetPushButton->setText( "..." );
 
-		m_ui->orientedCheckBox->setChecked( newNode->isOriented() );
+		m_ui->orientedCheckBox->setChecked( m_tileModel->getOriented( newIndex.row() ) );
 	}
 	else
 	{

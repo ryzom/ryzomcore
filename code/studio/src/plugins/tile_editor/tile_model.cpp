@@ -406,6 +406,16 @@ QString TileModel::getVegetation( int tileSet ) const
 	return m_tileBank->getVegetation( tileSet );
 }
 
+void TileModel::setOriented( int tileSet, bool b )
+{
+	m_tileBank->setOriented( tileSet, b );
+}
+
+bool TileModel::getOriented( int tileSet ) const
+{
+	return m_tileBank->getOriented( tileSet );
+}
+
 QString TileModel::getLastError() const{
 	return m_tileBank->getLastError();
 }

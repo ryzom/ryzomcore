@@ -412,3 +412,21 @@ QString TileBank::getVegetation( int tileSet ) const
 	return set->getTileVegetableDescFileName().c_str();
 }
 
+void TileBank::setOriented( int tileSet, bool b )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return;
+
+	set->setOriented( b );
+}
+
+bool TileBank::getOriented( int tileSet ) const
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return false;
+
+	return set->getOriented();
+}
+

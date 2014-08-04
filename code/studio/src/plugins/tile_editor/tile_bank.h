@@ -32,6 +32,9 @@ public:
 
 	void setVegetation( int tileSet, const QString &vegetation );
 	QString getVegetation( int tileSet ) const;
+
+	void setOriented( int tileSet, bool b );
+	bool getOriented( int tileSet ) const;
 	
 	bool hasError() const{ return m_hasError; }
 	QString getLastError() const{ return m_lastError; }

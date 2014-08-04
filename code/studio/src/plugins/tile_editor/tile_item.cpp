@@ -173,7 +173,6 @@ void Node::clear()
 TileSetNode::TileSetNode(QString tileSetName, Node *parent) : m_tileSetName(tileSetName)
 {
 	m_parentItem = parent;
-	m_oriented = false;
 }
 
 TileSetNode::~TileSetNode()
