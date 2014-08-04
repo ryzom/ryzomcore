@@ -188,10 +188,10 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	float nativeWidth = m_DevicePtr->Resolution.w;
 	float nativeHeight = m_DevicePtr->Resolution.h;
 
+	// get render descriptions for default fov
 	ovrEyeRenderDesc eyeRenderDesc[ovrEye_Count];
 	eyeRenderDesc[ovrEye_Left] = ovrHmd_GetRenderDesc(m_DevicePtr, ovrEye_Left, m_DevicePtr->DefaultEyeFov[ovrEye_Left]);
 	eyeRenderDesc[ovrEye_Right] = ovrHmd_GetRenderDesc(m_DevicePtr, ovrEye_Right, m_DevicePtr->DefaultEyeFov[ovrEye_Right]);
-
 	nldebug("OVR: LEFT DistortedViewport: x: %i, y: %i, w: %i, h: %i", eyeRenderDesc[0].DistortedViewport.Pos.x, eyeRenderDesc[0].DistortedViewport.Pos.y, eyeRenderDesc[0].DistortedViewport.Size.w, eyeRenderDesc[0].DistortedViewport.Size.h);
 	nldebug("OVR: LEFT PixelsPerTanAngleAtCenter: x: %f, y: %f ", eyeRenderDesc[0].PixelsPerTanAngleAtCenter.x, eyeRenderDesc[0].PixelsPerTanAngleAtCenter.y);
 	nldebug("OVR: LEFT ViewAdjust: x: %f, y: %f, z: %f ", eyeRenderDesc[0].ViewAdjust.x, eyeRenderDesc[0].ViewAdjust.y, eyeRenderDesc[0].ViewAdjust.z);
@@ -207,10 +207,12 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	// 2014/08/04 19:55:46 DBG 2e18 snowballs_client.exe stereo_ovr_04.cpp 193 NL3D::CStereoOVR::CStereoOVR : OVR: RIGHT PixelsPerTanAngleAtCenter: x: 363.247864, y: 363.247864 
 	// 2014/08/04 19:55:46 DBG 2e18 snowballs_client.exe stereo_ovr_04.cpp 194 NL3D::CStereoOVR::CStereoOVR : OVR: RIGHT ViewAdjust: x: -0.031868, y: 0.000000, z: 0.000000 
 
-    ovrSizei fovTexLeftSize = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Left, eyeRenderDesc[ovrEye_Left].Fov, 1.0f);
-    ovrSizei fovTexRightSize = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Right, eyeRenderDesc[ovrEye_Right].Fov, 1.0f);
-    m_RenderTargetWidth = fovTexLeftSize.w + fovTexRightSize.w;
-    m_RenderTargetHeight = max(fovTexLeftSize.h, fovTexRightSize.h);
+	// find out the recommended render target size
+	ovrSizei fovTextureSize[ovrEye_Count];
+	fovTextureSize[ovrEye_Left] = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Left, eyeRenderDesc[ovrEye_Left].Fov, 1.0f);
+    fovTextureSize[ovrEye_Right] = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Right, eyeRenderDesc[ovrEye_Right].Fov, 1.0f);
+    m_RenderTargetWidth = fovTextureSize[ovrEye_Left].w + fovTextureSize[ovrEye_Right].w;
+    m_RenderTargetHeight = max(fovTextureSize[ovrEye_Left].h, fovTextureSize[ovrEye_Right].h);
 	nldebug("OVR: RenderTarget: w: %u, h: %u", m_RenderTargetWidth, m_RenderTargetHeight);
 	
 	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 213 NL3D::CStereoOVR::CStereoOVR : OVR: RenderTarget: w: 2414, h: 1870 // That looks a bit excessive...
@@ -218,25 +220,91 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	for (uint eye = 0; eye < ovrEye_Count; ++eye)
 	{
 		ovrFovPort &fov = eyeRenderDesc[eye].Fov;
-
+		
+		// setup viewport
 		m_EyeViewport[eye].init(
 			(float)eyeRenderDesc[eye].DistortedViewport.Pos.x / nativeWidth, 
 			(float)eyeRenderDesc[eye].DistortedViewport.Pos.y / nativeHeight, 
 			(float)eyeRenderDesc[eye].DistortedViewport.Size.w / nativeWidth, 
 			(float)eyeRenderDesc[eye].DistortedViewport.Size.h / nativeHeight);
 		nldebug("OVR: EyeViewport: x: %f, y: %f, w: %f, h: %f", m_EyeViewport[eye].getX(), m_EyeViewport[eye].getY(), m_EyeViewport[eye].getWidth(), m_EyeViewport[eye].getHeight());
-		
+		ovrRecti eyeViewport;
+		eyeViewport.Pos.x = (eyeRenderDesc[eye].DistortedViewport.Pos.x * m_RenderTargetWidth) / m_DevicePtr->Resolution.w;
+		eyeViewport.Pos.y = (eyeRenderDesc[eye].DistortedViewport.Pos.y * m_RenderTargetHeight) / m_DevicePtr->Resolution.h;
+		eyeViewport.Size.w = (eyeRenderDesc[eye].DistortedViewport.Size.w * m_RenderTargetWidth) / m_DevicePtr->Resolution.w;
+		eyeViewport.Size.h = (eyeRenderDesc[eye].DistortedViewport.Size.h * m_RenderTargetHeight) / m_DevicePtr->Resolution.h;
+
+		// calculate hfov and ar
 		float combinedTanHalfFovHorizontal = max(fov.LeftTan, fov.RightTan);
 		float combinedTanHalfFovVertical = max(fov.UpTan, fov.DownTan);
 		float horizontalFullFovInRadians = 2.0f * atanf (combinedTanHalfFovHorizontal);
 		float aspectRatio = combinedTanHalfFovHorizontal / combinedTanHalfFovVertical;
 		m_EyeHFov[eye] = horizontalFullFovInRadians;
 		m_EyeAR[eye] = aspectRatio;
-		nldebug("OVR: FOV: %f, AR: %f", horizontalFullFovInRadians, aspectRatio);
+		nldebug("OVR: HFOV: %f, AR: %f", horizontalFullFovInRadians, aspectRatio);
+
+		// get distortion mesh
+		ovrDistortionMesh meshData;
+		ovrHmd_CreateDistortionMesh(m_DevicePtr, (ovrEyeType)eye, fov,
+			ovrDistortionCap_Chromatic | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette, 
+			&meshData);
+		ovrVector2f uvScaleOffset[2];
+
+		// get parameters for programs
+		ovrHmd_GetRenderScaleAndOffset(fov,
+			fovTextureSize[eye], eyeViewport,
+			(ovrVector2f *)uvScaleOffset);
+		m_EyeUVScaleOffset[eye][0] = NLMISC::CVector2f(uvScaleOffset[0].x, uvScaleOffset[0].y);
+		m_EyeUVScaleOffset[eye][1] = NLMISC::CVector2f(uvScaleOffset[1].x, uvScaleOffset[1].y);
+
+		// create distortion mesh vertex buffer
+		m_VB.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::TexCoord1Flag | CVertexBuffer::TexCoord2Flag | CVertexBuffer::PrimaryColorFlag);
+		m_VB.setPreferredMemory(CVertexBuffer::StaticPreferred, false);
+		m_VB.setNumVertices(meshData.VertexCount);
+		{
+			CVertexBufferReadWrite vba;
+			m_VB.lock(vba);
+			for (uint i = 0; i < meshData.VertexCount; ++i)
+			{
+				ovrDistortionVertex &ov = meshData.pVertexData[i];
+				vba.setVertexCoord(i, (ov.ScreenPosNDC.x + 1.0f) * 0.5f, (ov.ScreenPosNDC.y + 1.0f) * 0.5f, 0.5f);
+				vba.setTexCoord(i, 0, ov.TanEyeAnglesR.x, ov.TanEyeAnglesR.y);
+				vba.setTexCoord(i, 1, ov.TanEyeAnglesG.x, ov.TanEyeAnglesG.y);
+				vba.setTexCoord(i, 2, ov.TanEyeAnglesB.x, ov.TanEyeAnglesB.y);
+				NLMISC::CRGBA color;
+				color.R = color.G = color.B = (uint8)(ov.VignetteFactor * 255.99f);
+				color.A = (uint8)(ov.TimeWarpFactor * 255.99f);
+				vba.setColor(i, color);
+			}
+		}
+
+		// create distortion mesh index buffer
+		m_IB.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
+		m_IB.setPreferredMemory(CIndexBuffer::StaticPreferred, false);
+		m_IB.setNumIndexes(meshData.IndexCount);
+		{
+			CIndexBufferReadWrite iba;
+			m_IB.lock(iba);
+			for (uint i = 0; i + 2 < meshData.IndexCount; i += 3)
+			{
+				nlassert(meshData.pIndexData[i] < meshData.VertexCount);
+				nlassert(meshData.pIndexData[i + 1] < meshData.VertexCount);
+				nlassert(meshData.pIndexData[i + 2] < meshData.VertexCount);
+				iba.setTri(i, meshData.pIndexData[i], meshData.pIndexData[i + 1], meshData.pIndexData[i + 2]);
+			}
+		}
+
+		// set tri count
+		m_NbTris = meshData.IndexCount / 3;
+
+		// destroy ovr distortion mesh
+		ovrHmd_DestroyDistortionMesh(&meshData);
 	}
 	
 	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 222 NL3D::CStereoOVR::CStereoOVR : OVR: EyeViewport: x: 0.000000, y: 0.000000, w: 0.500000, h: 1.000000
+	// 2014/08/04 22:28:39 DBG 3040 snowballs_client.exe stereo_ovr_04.cpp 235 NL3D::CStereoOVR::CStereoOVR : OVR: HFOV: 2.339905, AR: 0.916641
 	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 222 NL3D::CStereoOVR::CStereoOVR : OVR: EyeViewport: x: 0.500000, y: 0.000000, w: 0.500000, h: 1.000000
+	// 2014/08/04 22:28:39 DBG 3040 snowballs_client.exe stereo_ovr_04.cpp 235 NL3D::CStereoOVR::CStereoOVR : OVR: HFOV: 2.339905, AR: 0.916641
 
 	// DEBUG EARLY EXIT
 	nldebug("OVR: Early exit");
@@ -247,16 +315,15 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 
 CStereoOVR::~CStereoOVR()
 {
-	/*if (!m_BarrelMat.empty())
+	if (!m_UnlitMat.empty())
 	{
-		m_BarrelMat.getObjectPtr()->setTexture(0, NULL);
-		m_Driver->deleteMaterial(m_BarrelMat);
+		m_Driver->deleteMaterial(m_UnlitMat);
 	}
 
-	delete m_PixelProgram;
-	m_PixelProgram = NULL;
+	m_PP.kill();
+	m_VP.kill();
 
-	m_Driver = NULL;*/
+	m_Driver = NULL;
 
 	if (m_DevicePtr)
 	{
@@ -265,40 +332,73 @@ CStereoOVR::~CStereoOVR()
 		--s_DeviceCounter;
 	}
 }
-/*
-class CPixelProgramOVR : public CPixelProgram
+
+class CVertexProgramOVR : public CVertexProgram
 {
 public:
 	struct COVRIndices
 	{
-		uint LensCenter;
+		/*uint LensCenter;
 		uint ScreenCenter;
 		uint Scale;
 		uint ScaleIn;
-		uint HmdWarpParam;
+		uint HmdWarpParam;*/
 	};
 
-	CPixelProgramOVR()
+	CVertexProgramOVR()
 	{
-		{
+		/*{
 			CSource *source = new CSource();
 			source->Profile = glsl330f;
 			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
 			source->setSourcePtr(g_StereoOVR_glsl330f);
 			addSource(source);
-		}
-		{
-			CSource *source = new CSource();
-			source->Profile = fp40;
-			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
-			source->setSourcePtr(g_StereoOVR_fp40);
-			source->ParamIndices["cLensCenter"] = 0;
-			source->ParamIndices["cScreenCenter"] = 1;
-			source->ParamIndices["cScale"] = 2;
-			source->ParamIndices["cScaleIn"] = 3;
-			source->ParamIndices["cHmdWarpParam"] = 4;
-			addSource(source);
-		}
+		}*/
+	}
+
+	virtual ~CVertexProgramOVR()
+	{
+		
+	}
+
+	virtual void buildInfo()
+	{
+		CVertexProgram::buildInfo();
+
+		/*m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
+		nlassert(m_OVRIndices.LensCenter != ~0);
+		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
+		nlassert(m_OVRIndices.ScreenCenter != ~0);
+		m_OVRIndices.Scale = getUniformIndex("cScale");
+		nlassert(m_OVRIndices.Scale != ~0);
+		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
+		nlassert(m_OVRIndices.ScaleIn != ~0);
+		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
+		nlassert(m_OVRIndices.HmdWarpParam != ~0);*/
+	}
+
+	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }
+
+private:
+	COVRIndices m_OVRIndices;
+
+};
+
+class CPixelProgramOVR : public CPixelProgram
+{
+public:
+	struct COVRIndices
+	{
+		/*uint LensCenter;
+		uint ScreenCenter;
+		uint Scale;
+		uint ScaleIn;
+		uint HmdWarpParam;*/
+	};
+
+	CPixelProgramOVR()
+	{
+		/*
 		{
 			CSource *source = new CSource();
 			source->Profile = arbfp1;
@@ -322,7 +422,7 @@ public:
 			source->ParamIndices["cScaleIn"] = 3;
 			source->ParamIndices["cHmdWarpParam"] = 4;
 			addSource(source);
-		}
+		}*/
 	}
 
 	virtual ~CPixelProgramOVR()
@@ -334,7 +434,7 @@ public:
 	{
 		CPixelProgram::buildInfo();
 
-		m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
+		/*m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
 		nlassert(m_OVRIndices.LensCenter != ~0);
 		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
 		nlassert(m_OVRIndices.ScreenCenter != ~0);
@@ -343,7 +443,7 @@ public:
 		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
 		nlassert(m_OVRIndices.ScaleIn != ~0);
 		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
-		nlassert(m_OVRIndices.HmdWarpParam != ~0);
+		nlassert(m_OVRIndices.HmdWarpParam != ~0);*/
 	}
 
 	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }
@@ -352,83 +452,57 @@ private:
 	COVRIndices m_OVRIndices;
 
 };
-*/
 
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
-{/*
-	nlassert(!m_PixelProgram);
+{
+	nlassert(!m_PP);
+	nlassert(!m_VP);
+	m_Driver = driver;
 
-	NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(driver))->getDriver();
+	CDriverUser *dru = static_cast<CDriverUser *>(driver);
+	IDriver *drv = dru->getDriver();
 
-	if (drvInternal->supportBloomEffect() && drvInternal->supportNonPowerOfTwoTextures())
+	m_UnlitMat = m_Driver->createMaterial();
+	m_UnlitMat.initUnlit();
+	m_UnlitMat.setColor(CRGBA::White);
+	m_UnlitMat.setBlend (false);
+	m_UnlitMat.setAlphaTest (false);
+	NL3D::CMaterial *unlitMat = m_UnlitMat.getObjectPtr();
+	unlitMat->setShader(NL3D::CMaterial::Normal);
+	unlitMat->setBlendFunc(CMaterial::one, CMaterial::zero);
+	unlitMat->setZWrite(false);
+	unlitMat->setZFunc(CMaterial::always);
+	unlitMat->setDoubleSided(true);
+
+	if (drv->supportBloomEffect() && drv->supportNonPowerOfTwoTextures())
 	{
-		m_PixelProgram = new CPixelProgramOVR();
-		if (!drvInternal->compilePixelProgram(m_PixelProgram))
+		m_PP = new CPixelProgramOVR();
+		if (!drv->compilePixelProgram(m_PP))
 		{
-			m_PixelProgram.kill();
+			m_PP.kill();
+			nlwarning("OVR: No pixel program support");
+			return;
+		}
+		m_VP = new CVertexProgramOVR();
+		if (!drv->compileVertexProgram(m_VP))
+		{
+			m_VP.kill();
+			nlwarning("OVR: No vertex program support");
+			m_PP.kill();
+			return;
 		}
 	}
-
-	if (m_PixelProgram)
-	{
-		m_Driver = driver;
-
-		/*m_BarrelTex = new CTextureBloom(); // lol bloom
-		m_BarrelTex->setRenderTarget(true);
-		m_BarrelTex->setReleasable(false);
-		m_BarrelTex->resize(m_DevicePtr->HMDInfo.HResolution, m_DevicePtr->HMDInfo.VResolution);
-		m_BarrelTex->setFilterMode(ITexture::Linear, ITexture::LinearMipMapOff);
-		m_BarrelTex->setWrapS(ITexture::Clamp);
-		m_BarrelTex->setWrapT(ITexture::Clamp);
-		drvInternal->setupTexture(*m_BarrelTex);
-		m_BarrelTexU = new CTextureUser(m_BarrelTex);* /
-
-		m_BarrelMat = m_Driver->createMaterial();
-		m_BarrelMat.initUnlit();
-		m_BarrelMat.setColor(CRGBA::White);
-		m_BarrelMat.setBlend (false);
-		m_BarrelMat.setAlphaTest (false);
-		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
-		barrelMat->setShader(NL3D::CMaterial::Normal);
-		barrelMat->setBlendFunc(CMaterial::one, CMaterial::zero);
-		barrelMat->setZWrite(false);
-		barrelMat->setZFunc(CMaterial::always);
-		barrelMat->setDoubleSided(true);
-		// barrelMat->setTexture(0, m_BarrelTex);
-
-		m_BarrelQuadLeft.V0 = CVector(0.f, 0.f, 0.5f);
-		m_BarrelQuadLeft.V1 = CVector(0.5f, 0.f, 0.5f);
-		m_BarrelQuadLeft.V2 = CVector(0.5f, 1.f, 0.5f);
-		m_BarrelQuadLeft.V3 = CVector(0.f, 1.f, 0.5f);
-
-		m_BarrelQuadRight.V0 = CVector(0.5f, 0.f, 0.5f);
-		m_BarrelQuadRight.V1 = CVector(1.f, 0.f, 0.5f);
-		m_BarrelQuadRight.V2 = CVector(1.f, 1.f, 0.5f);
-		m_BarrelQuadRight.V3 = CVector(0.5f, 1.f, 0.5f);
-		
-		// nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // not allowed
-
-		m_BarrelQuadLeft.Uv0 = CUV(0.f,  0.f);
-		m_BarrelQuadLeft.Uv1 = CUV(0.5f, 0.f);
-		m_BarrelQuadLeft.Uv2 = CUV(0.5f, 1.f);
-		m_BarrelQuadLeft.Uv3 = CUV(0.f,  1.f);
-
-		m_BarrelQuadRight.Uv0 = CUV(0.5f,  0.f);
-		m_BarrelQuadRight.Uv1 = CUV(1.f, 0.f);
-		m_BarrelQuadRight.Uv2 = CUV(1.f, 1.f);
-		m_BarrelQuadRight.Uv3 = CUV(0.5f, 1.f);
-	}
-	else
-	{
-		nlwarning("VR: No pixel program support");
-	}*/
 }
 
 bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 {
-	/*width = m_DevicePtr->HMDInfo.HResolution;
-	height = m_DevicePtr->HMDInfo.VResolution;*/
-	return true;
+	if (m_DevicePtr)
+	{
+		width = m_DevicePtr->Resolution.w;
+		height = m_DevicePtr->Resolution.h;
+		return true;
+	}
+	return false;
 }
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)

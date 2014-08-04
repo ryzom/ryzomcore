@@ -59,6 +59,8 @@
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
 #include <nel/3d/u_material.h>
+#include <nel/3d/index_buffer.h>
+#include <nel/3d/vertex_buffer.h>
 
 struct ovrHmdDesc_;
 typedef const ovrHmdDesc_ *ovrHmd;
@@ -68,7 +70,8 @@ namespace NL3D {
 class ITexture;
 class CTextureUser;
 class CStereoOVRDeviceFactory;
-/*class CPixelProgramOVR;*/
+class CPixelProgramOVR;
+class CVertexProgramOVR;
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
 #define NL_OVR_EYE_COUNT 2
@@ -154,14 +157,22 @@ public:
 
 private:
 	ovrHmd m_DevicePtr;
+
 	int m_Stage;
 	int m_SubStage;
+
 	CViewport m_RegularViewport;
 	CViewport m_EyeViewport[NL_OVR_EYE_COUNT];
 	float m_EyeHFov[NL_OVR_EYE_COUNT];
 	float m_EyeAR[NL_OVR_EYE_COUNT];
 	uint m_RenderTargetWidth;
 	uint m_RenderTargetHeight;
+	NLMISC::CVector2f m_EyeUVScaleOffset[NL_OVR_EYE_COUNT][2];
+
+	CVertexBuffer m_VB;
+	CIndexBuffer m_IB;
+	uint m_NbTris;
+
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];
@@ -170,8 +181,16 @@ private:
 	CMatrix m_InterfaceCameraMatrix;
 	mutable bool m_OrientationCached;
 	mutable NLMISC::CQuat m_OrientationCache;
+
 	UDriver *m_Driver;
-	NL3D::CTextureUser *m_GUITexture;
+
+	CTextureUser *m_GUITexture;
+
+	UMaterial m_UnlitMat;
+	NLMISC::CRefPtr<CVertexProgramOVR> m_VP;
+	NLMISC::CRefPtr<CPixelProgramOVR> m_PP;
+
+
 	/*NL3D::CTextureUser *m_SceneTexture;
 	NL3D::UMaterial m_BarrelMat;
 	NLMISC::CQuadUV m_BarrelQuadLeft;
