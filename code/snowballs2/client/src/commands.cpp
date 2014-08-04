@@ -402,17 +402,6 @@ void	updateCommands()
 	float CommandsBoxHeight = ((float)(sint32)((CommandsNbLines + 1) * CommandsLineHeight * width)) / width;
 	float CommandsBoxBorderX = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * width)) / width;
 	float CommandsBoxBorderY = ((float)(sint32)(SBCLIENT::CommandsBoxBorder * height)) / height;
-	if (StereoHMD)
-	{
-		float xshift, yshift;
-		StereoHMD->getInterface2DShift(0, xshift, yshift, 4.f);
-		// snap to pixels
-		xshift = ((float)(sint32)(xshift * width)) / width;
-		yshift = ((float)(sint32)(yshift * height)) / height;
-		// adjust
-		CommandsBoxX += xshift;
-		CommandsBoxY += yshift;
-	}
 
 	// Display the background
 	Driver->setMatrixMode2D11 ();
