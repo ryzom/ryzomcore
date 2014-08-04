@@ -250,8 +250,7 @@ void TileEditorMainWindow::saveAs( const QString &fn )
 	}
 
 	TileBankSaver saver;
-	bool ok = true;
-	//saver.save( fn.toUtf8().constData(), m_tileModel, m_lands );
+	bool ok = saver.save( fn.toUtf8().constData(), m_tileModel );
 
 	if( !ok )
 	{

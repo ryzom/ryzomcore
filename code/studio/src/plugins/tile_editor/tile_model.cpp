@@ -431,6 +431,11 @@ void TileModel::setTexturePath( const QString &path )
 	m_tileBank->setTexturePath( path );
 }
 
+void TileModel::serial( NLMISC::IStream &f )
+{
+	m_tileBank->serial( f );
+}
+
 QString TileModel::getTexturePath() const
 {
 	return m_tileBank->getTexturePath();

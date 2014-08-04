@@ -7,6 +7,11 @@
 
 #include "tile_constants.h"
 
+namespace NLMISC
+{
+	class IStream;
+}
+
 class TileBankPvt;
 
 class TileBank
@@ -41,6 +46,8 @@ public:
 
 	void setTexturePath( const QString &path );
 	QString getTexturePath() const;
+
+	void serial( NLMISC::IStream &f );
 	
 	bool hasError() const{ return m_hasError; }
 	QString getLastError() const{ return m_lastError; }

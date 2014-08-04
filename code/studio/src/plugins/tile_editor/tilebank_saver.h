@@ -20,10 +20,8 @@
 
 #include <QString>
 #include <QList>
-#include "land.h"
 
 class TileModel;
-
 class TileBankSaverPvt;
 
 class TileBankSaver
@@ -32,7 +30,7 @@ public:
 	TileBankSaver();
 	~TileBankSaver();
 
-	bool save( const char *filename, const TileModel* model, const QList< Land > &lands );
+	bool save( const char *filename, TileModel* model );
 
 private:
 	TileBankSaverPvt *p;

@@ -39,7 +39,7 @@ TileBankSaver::~TileBankSaver()
 	p = NULL;
 }
 
-bool TileBankSaver::save( const char *fileName, const TileModel* model, const QList< Land > &lands )
+bool TileBankSaver::save( const char *fileName, TileModel* model )
 {
 	// Save to file
 	NLMISC::COFile f;
@@ -47,7 +47,7 @@ bool TileBankSaver::save( const char *fileName, const TileModel* model, const QL
 	if( !b )
 		return false;
 
-	//p->bank.serial( f );
+	model->serial( f );
 
 	f.flush();
 	f.close();

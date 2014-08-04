@@ -459,4 +459,9 @@ QString TileBank::getTexturePath() const
 	return m_pvt->m_bank.getAbsPath().c_str();
 }
 
+void TileBank::serial( NLMISC::IStream &f )
+{
+	m_pvt->m_bank.serial( f );
+}
+
 

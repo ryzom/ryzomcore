@@ -23,6 +23,11 @@
 
 #include "tile_constants.h"
 
+namespace NLMISC
+{
+	class IStream;
+}
+
 class Node;
 class TileSetNode;
 class TileItemNode;
@@ -106,6 +111,8 @@ public:
 
 	void setTexturePath( const QString &path );
 	QString getTexturePath() const;
+
+	void serial( NLMISC::IStream &f );
 
 	QString getLastError() const;
 	bool hasError() const;
