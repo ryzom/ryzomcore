@@ -200,7 +200,6 @@ void CFXAA::applyEffect()
 
 	float fwidth = (float)width;
 	float fheight = (float)height;
-	nldebug("%f, %f", fwidth, fheight);
 	float pwidth = 1.0f / fwidth;
 	float pheight = 1.0f / fheight;
 	float hpwidth = pwidth * 0.5f;
@@ -245,10 +244,14 @@ void CFXAA::applyEffect()
 	nlassert(vpok);
 	bool ppok = drv->activePixelProgram(m_PP);
 	nlassert(ppok);
-	drv->setUniform4f(IDriver::PixelProgram, 0, -n / fwidth, -n / fheight, n / fwidth, n / fheight); // fxaaConsoleRcpFrameOpt
-	drv->setUniform4f(IDriver::PixelProgram, 1, -2.0f / fwidth, -2.0f / fheight, 2.0f / fwidth, 2.0f / fheight); // fxaaConsoleRcpFrameOpt2
+	/*drv->setUniform4f(IDriver::PixelProgram, 0, -n / fwidth, -n / fheight, n / fwidth, n / fheight); // fxaaConsoleRcpFrameOpt
+	drv->setUniform4f(IDriver::PixelProgram, 1, -2.0f / fwidth, -2.0f / fheight, 2.0f / fwidth, 2.0f / fheight); // fxaaConsoleRcpFrameOpt2*/
+	drv->setUniform2f(IDriver::PixelProgram, 0, 1.0f / fwidth, 1.0f / fheight); // fxaaQualityRcpFrame
+	drv->setUniform1f(IDriver::PixelProgram, 1, 0.75f); // fxaaQualitySubpix
+	drv->setUniform1f(IDriver::PixelProgram, 2, 0.166f); // fxaaQualityEdgeThreshold
+	drv->setUniform1f(IDriver::PixelProgram, 3, 0.0833f); // fxaaQualityEdgeThresholdMin
 	drv->setUniformMatrix(IDriver::VertexProgram, 0, IDriver::ModelViewProjection, IDriver::Identity);
-	drv->setUniform4f(IDriver::VertexProgram, 9, -hpwidth, -hpheight, hpwidth, hpheight);
+	// drv->setUniform4f(IDriver::VertexProgram, 9, -hpwidth, -hpheight, hpwidth, hpheight);
 
 	// render effect
 	m_Mat.getObjectPtr()->setTexture(0, otherRenderTarget->getITexture());

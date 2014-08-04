@@ -1,8 +1,9 @@
 
-#define FXAA_PS3 1
+#define FXAA_PC 1
 #define FXAA_HLSL_3 1
 #define FXAA_QUALITY__PRESET 12
 #define FXAA_EARLY_EXIT 0
+#define FXAA_GREEN_AS_LUMA 1
 
 #define h4tex2Dlod tex2Dlod
 #define half4 float4
@@ -15,17 +16,36 @@
 void fxaa_pp(
 	// Per fragment parameters
 	float2 pos : TEXCOORD0, 
+#if (FXAA_PS3 == 1)
 	float4 fxaaConsolePosPos : TEXCOORD1, 
+#endif
 	
 	// Fragment program constants
+#if (FXAA_PC == 1)
+	uniform float2 fxaaQualityRcpFrame,
+	uniform float fxaaQualitySubpix,
+	uniform float fxaaQualityEdgeThreshold,
+	uniform float fxaaQualityEdgeThresholdMin,
+#else
 	uniform float4 fxaaConsoleRcpFrameOpt,
 	uniform float4 fxaaConsoleRcpFrameOpt2,
+#endif
 	uniform sampler2D nlTex0 : TEX0, 
 	
 	// Output color
 	out float4 oCol : COLOR
 )
 {
+#if (FXAA_PC == 1)
+	oCol = FxaaPixelShader(
+		pos, 
+		nlTex0,
+		fxaaQualityRcpFrame,
+		fxaaQualitySubpix,
+		fxaaQualityEdgeThreshold,
+		fxaaQualityEdgeThresholdMin
+		);
+#else
 	oCol = FxaaPixelShader(
 		pos, 
 		fxaaConsolePosPos, 
@@ -33,6 +53,7 @@ void fxaa_pp(
 		fxaaConsoleRcpFrameOpt,
 		fxaaConsoleRcpFrameOpt2
 		);
+#endif
 }
 
 /*

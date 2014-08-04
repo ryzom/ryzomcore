@@ -695,7 +695,11 @@ struct FxaaTex { SamplerState smpl; Texture2D tex; };
 #define FxaaTexGreen4(t, p) t.tex.GatherGreen(t.smpl, p)
 #define FxaaTexOffGreen4(t, p, o) t.tex.GatherGreen(t.smpl, p, o)
 #endif
- 
+
+#undef FxaaTexTop
+#define FxaaTexTop(t, p) tex2D(t, p)
+#undef FxaaTexOff
+#define FxaaTexOff(t, p, o, r) tex2D(t, p + (o * r))
  
 /*============================================================================
 GREEN AS LUMA OPTION SUPPORT FUNCTION
@@ -726,7 +730,7 @@ FxaaFloat2 pos,
 // Use noperspective interpolation here (turn off perspective interpolation).
 // {xy__} = upper left of pixel
 // {__zw} = lower right of pixel
-FxaaFloat4 fxaaConsolePosPos,
+//FxaaFloat4 fxaaConsolePosPos,
 //
 // Input color texture.
 // {rgb_} = color in linear or perceptual color space
@@ -738,13 +742,13 @@ FxaaTex tex,
 // For everything but 360, just use the same input here as for "tex".
 // For 360, same texture, just alias with a 2nd sampler.
 // This sampler needs to have an exponent bias of -1.
-FxaaTex fxaaConsole360TexExpBiasNegOne,
+//FxaaTex fxaaConsole360TexExpBiasNegOne,
 //
 // Only used on the optimized 360 version of FXAA Console.
 // For everything but 360, just use the same input here as for "tex".
 // For 360, same texture, just alias with a 3nd sampler.
 // This sampler needs to have an exponent bias of -2.
-FxaaTex fxaaConsole360TexExpBiasNegTwo,
+//FxaaTex fxaaConsole360TexExpBiasNegTwo,
 //
 // Only used on FXAA Quality.
 // This must be from a constant/uniform.
@@ -762,7 +766,7 @@ FxaaFloat2 fxaaQualityRcpFrame,
 // {_y__} = -N/screenHeightInPixels
 // {__z_} = N/screenWidthInPixels
 // {___w} = N/screenHeightInPixels
-FxaaFloat4 fxaaConsoleRcpFrameOpt,
+//FxaaFloat4 fxaaConsoleRcpFrameOpt,
 //
 // Only used on FXAA Console.
 // Not used on 360, but used on PS3 and PC.
@@ -771,7 +775,7 @@ FxaaFloat4 fxaaConsoleRcpFrameOpt,
 // {_y__} = -2.0/screenHeightInPixels
 // {__z_} = 2.0/screenWidthInPixels
 // {___w} = 2.0/screenHeightInPixels
-FxaaFloat4 fxaaConsoleRcpFrameOpt2,
+//FxaaFloat4 fxaaConsoleRcpFrameOpt2,
 //
 // Only used on FXAA Console.
 // Only used on 360 in place of fxaaConsoleRcpFrameOpt2.
@@ -780,7 +784,7 @@ FxaaFloat4 fxaaConsoleRcpFrameOpt2,
 // {_y__} = 8.0/screenHeightInPixels
 // {__z_} = -4.0/screenWidthInPixels
 // {___w} = -4.0/screenHeightInPixels
-FxaaFloat4 fxaaConsole360RcpFrameOpt2,
+//FxaaFloat4 fxaaConsole360RcpFrameOpt2,
 //
 // Only used on FXAA Quality.
 // This used to be the FXAA_QUALITY__SUBPIX define.
@@ -818,7 +822,7 @@ FxaaFloat fxaaQualityEdgeThreshold,
 // will appear very dark in the green channel!
 // Tune by looking at mostly non-green content,
 // then start at zero and increase until aliasing is a problem.
-FxaaFloat fxaaQualityEdgeThresholdMin,
+FxaaFloat fxaaQualityEdgeThresholdMin
 //
 // Only used on FXAA Console.
 // This used to be the FXAA_CONSOLE__EDGE_SHARPNESS define.
@@ -832,7 +836,7 @@ FxaaFloat fxaaQualityEdgeThresholdMin,
 // 8.0 is sharper (default!!!)
 // 4.0 is softer
 // 2.0 is really soft (good only for vector graphics inputs)
-FxaaFloat fxaaConsoleEdgeSharpness,
+//FxaaFloat fxaaConsoleEdgeSharpness,
 //
 // Only used on FXAA Console.
 // This used to be the FXAA_CONSOLE__EDGE_THRESHOLD define.
@@ -846,7 +850,7 @@ FxaaFloat fxaaConsoleEdgeSharpness,
 // Other platforms can use other values.
 // 0.125 leaves less aliasing, but is softer (default!!!)
 // 0.25 leaves more aliasing, and is sharper
-FxaaFloat fxaaConsoleEdgeThreshold,
+//FxaaFloat fxaaConsoleEdgeThreshold,
 //
 // Only used on FXAA Console.
 // This used to be the FXAA_CONSOLE__EDGE_THRESHOLD_MIN define.
@@ -865,14 +869,14 @@ FxaaFloat fxaaConsoleEdgeThreshold,
 // will appear very dark in the green channel!
 // Tune by looking at mostly non-green content,
 // then start at zero and increase until aliasing is a problem.
-FxaaFloat fxaaConsoleEdgeThresholdMin,
+//FxaaFloat fxaaConsoleEdgeThresholdMin,
 //
 // Extra constants for 360 FXAA Console only.
 // Use zeros or anything else for other platforms.
 // These must be in physical constant registers and NOT immedates.
 // Immedates will result in compiler un-optimizing.
 // {xyzw} = float4(1.0, -1.0, 0.25, -0.25)
-FxaaFloat4 fxaaConsole360ConstDir
+//FxaaFloat4 fxaaConsole360ConstDir
 ) {
 /*--------------------------------------------------------------------------*/
 FxaaFloat2 posM;
