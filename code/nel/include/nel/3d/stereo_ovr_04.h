@@ -185,13 +185,14 @@ private:
 	UDriver *m_Driver;
 
 	CTextureUser *m_GUITexture;
+	NL3D::CTextureUser *m_SceneTexture;
 
 	UMaterial m_UnlitMat;
 	NLMISC::CRefPtr<CVertexProgramOVR> m_VP;
 	NLMISC::CRefPtr<CPixelProgramOVR> m_PP;
 
 
-	/*NL3D::CTextureUser *m_SceneTexture;
+	/*
 	NL3D::UMaterial m_BarrelMat;
 	NLMISC::CQuadUV m_BarrelQuadLeft;
 	NLMISC::CQuadUV m_BarrelQuadRight;

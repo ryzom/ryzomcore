@@ -246,7 +246,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		// get distortion mesh
 		ovrDistortionMesh meshData;
 		ovrHmd_CreateDistortionMesh(m_DevicePtr, (ovrEyeType)eye, fov,
-			ovrDistortionCap_Chromatic | ovrDistortionCap_TimeWarp | ovrDistortionCap_Vignette, 
+			ovrDistortionCap_Chromatic /*| ovrDistortionCap_TimeWarp*/ | ovrDistortionCap_Vignette, // I believe the timewarp gimmick screws with parallax
 			&meshData);
 		ovrVector2f uvScaleOffset[2];
 
@@ -273,7 +273,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 				vba.setTexCoord(i, 2, ov.TanEyeAnglesB.x, ov.TanEyeAnglesB.y);
 				NLMISC::CRGBA color;
 				color.R = color.G = color.B = (uint8)(ov.VignetteFactor * 255.99f);
-				color.A = (uint8)(ov.TimeWarpFactor * 255.99f);
+				color.A = 255; // (uint8)(ov.TimeWarpFactor * 255.99f);
 				vba.setColor(i, color);
 			}
 		}
@@ -552,12 +552,6 @@ void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)
 
 bool CStereoOVR::nextPass()
 {
-	// Do not allow weird stuff.
-	uint32 width, height;
-	m_Driver->getWindowSize(width, height);
-	// nlassert(width == m_DevicePtr->HMDInfo.HResolution);
-	// nlassert(height == m_DevicePtr->HMDInfo.VResolution);
-
 	if (m_Driver->getPolygonMode() == UDriver::Filled)
 	{
 		switch (m_Stage) // Previous stage
@@ -742,15 +736,13 @@ bool CStereoOVR::beginRenderTarget()
 	}
 
 	// Begin 3D scene render target
-	/*if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
 		nlassert(!m_SceneTexture);
-		uint32 width, height;
-		m_Driver->getWindowSize(width, height); // Temporary limitation, TODO: scaling!
-		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height);
+		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
 		return true;
-	}*/
+	}
 
 	return false;
 }
@@ -762,17 +754,6 @@ void CStereoOVR::setInterfaceMatrix(const NL3D::CMatrix &matrix)
 
 void CStereoOVR::renderGUI()
 {
-	
-	/*CMatrix mat;
-	mat.translate(m_InterfaceCameraMatrix.getPos());
-	CVector dir = m_InterfaceCameraMatrix.getJ();
-	dir.z = 0;
-	dir.normalize();
-	if (dir.y < 0)
-		mat.rotateZ(float(NLMISC::Pi+asin(dir.x)));
-	else
-		mat.rotateZ(float(NLMISC::Pi+NLMISC::Pi-asin(dir.x)));
-	m_Driver->setModelMatrix(mat);*/
 	m_Driver->setModelMatrix(m_InterfaceCameraMatrix);
 
 	{
@@ -1022,27 +1003,39 @@ bool CStereoOVR::endRenderTarget()
 
 NLMISC::CQuat CStereoOVR::getOrientation() const
 {
-	//if (m_OrientationCached)
+	if (m_OrientationCached)
 		return m_OrientationCache;
-/*
-	OVR::Quatf quatovr = m_DevicePtr->SensorFusion.GetPredictedOrientation();
-	NLMISC::CMatrix coordsys;
-	float csys[] = {
-		1.0f, 0.0f, 0.0f, 0.0f, 
-		0.0f, 0.0f, -1.0f, 0.0f, 
-		0.0f, 1.0f, 0.0f, 0.0f, 
-		0.0f, 0.0f, 0.0f, 1.0f, 
-	};
-	coordsys.set(csys);
-	NLMISC::CMatrix matovr;
-	matovr.setRot(NLMISC::CQuat(quatovr.x, quatovr.y, quatovr.z, quatovr.w));
-	NLMISC::CMatrix matr;
-	matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
-	NLMISC::CMatrix matnel = matr * matovr * coordsys;
-	NLMISC::CQuat finalquat = matnel.getRot();
-	m_OrientationCache = finalquat;
-	m_OrientationCached = true;
-	return finalquat;*/
+
+	ovrTrackingState ts = ovrHmd_GetTrackingState(m_DevicePtr, ovr_GetTimeInSeconds()); // TODO: Predict forward
+	if (ts.StatusFlags & ovrStatus_OrientationTracked)
+	{
+		// get just the orientation
+		ovrQuatf quatovr = ts.HeadPose.ThePose.Orientation;
+		NLMISC::CMatrix coordsys;
+		float csys[] = {
+			1.0f, 0.0f, 0.0f, 0.0f, 
+			0.0f, 0.0f, -1.0f, 0.0f, 
+			0.0f, 1.0f, 0.0f, 0.0f, 
+			0.0f, 0.0f, 0.0f, 1.0f, 
+		};
+		coordsys.set(csys);
+		NLMISC::CMatrix matovr;
+		matovr.setRot(NLMISC::CQuat(quatovr.x, quatovr.y, quatovr.z, quatovr.w));
+		NLMISC::CMatrix matr;
+		matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
+		NLMISC::CMatrix matnel = matr * matovr * coordsys;
+		NLMISC::CQuat finalquat = matnel.getRot();
+		m_OrientationCache = finalquat;
+		m_OrientationCached = true;
+		return finalquat;
+	}
+	else
+	{
+		nlwarning("OVR: No orientation returned");
+		// return old orientation
+		m_OrientationCached = true;
+		return m_OrientationCache;
+	}
 }
 
 /// Get GUI shift
