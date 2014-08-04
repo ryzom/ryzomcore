@@ -60,6 +60,9 @@
 #include <nel/3d/viewport.h>
 #include <nel/3d/u_material.h>
 
+struct ovrHmdDesc_;
+typedef const ovrHmdDesc_ *ovrHmd;
+
 namespace NL3D {
 
 class ITexture;
@@ -68,6 +71,7 @@ class CStereoOVRDeviceFactory;
 /*class CPixelProgramOVR;*/
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
+#define NL_OVR_EYE_COUNT 2
 
 /**
  * \brief CStereoOVR
@@ -78,7 +82,7 @@ class CStereoOVRDeviceFactory;
 class CStereoOVR : public IStereoHMD
 {
 public:
-	CStereoOVR(const CStereoOVRDeviceFactory *handle);
+	CStereoOVR(const CStereoOVRDeviceFactory *factory);
 	virtual ~CStereoOVR();
 
 	/// Sets driver and generates necessary render targets
@@ -149,12 +153,15 @@ public:
 	static void releaseLibrary();
 
 private:
-	// CStereoOVRDevicePtr *m_DevicePtr;
+	ovrHmd m_DevicePtr;
 	int m_Stage;
 	int m_SubStage;
 	CViewport m_RegularViewport;
-	CViewport m_LeftViewport;
-	CViewport m_RightViewport;
+	CViewport m_EyeViewport[NL_OVR_EYE_COUNT];
+	float m_EyeHFov[NL_OVR_EYE_COUNT];
+	float m_EyeAR[NL_OVR_EYE_COUNT];
+	uint m_RenderTargetWidth;
+	uint m_RenderTargetHeight;
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_RightFrustum[NL_STEREO_MAX_USER_CAMERAS];

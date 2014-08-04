@@ -144,52 +144,105 @@ public:
 	}
 };
 
-/*
-class CStereoOVRDevicePtr
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
-public:
-	OVR::Ptr<OVR::HMDDevice> HMDDevice;
-	OVR::Ptr<OVR::SensorDevice> SensorDevice;
-	OVR::SensorFusion SensorFusion;
-	OVR::HMDInfo HMDInfo;
-};
-*/
+	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
-{
-	/*++s_DeviceCounter;
-	m_DevicePtr = new CStereoOVRDevicePtr();
-
-	OVR::DeviceEnumerator<OVR::HMDDevice> dh = handle->DeviceHandle;
-	m_DevicePtr->HMDDevice = dh.CreateDevice();
-
-	if (m_DevicePtr->HMDDevice)
+	if (factory->DetectId != s_DetectId)
 	{
-		m_DevicePtr->HMDDevice->GetDeviceInfo(&m_DevicePtr->HMDInfo);
-		nldebug("OVR: HScreenSize: %f, VScreenSize: %f", m_DevicePtr->HMDInfo.HScreenSize, m_DevicePtr->HMDInfo.VScreenSize);
-		nldebug("OVR: VScreenCenter: %f", m_DevicePtr->HMDInfo.VScreenCenter);
-		nldebug("OVR: EyeToScreenDistance: %f", m_DevicePtr->HMDInfo.EyeToScreenDistance);
-		nldebug("OVR: LensSeparationDistance: %f", m_DevicePtr->HMDInfo.LensSeparationDistance);
-		nldebug("OVR: InterpupillaryDistance: %f", m_DevicePtr->HMDInfo.InterpupillaryDistance);
-		nldebug("OVR: HResolution: %i, VResolution: %i", m_DevicePtr->HMDInfo.HResolution, m_DevicePtr->HMDInfo.VResolution);
-		nldebug("OVR: DistortionK[0]: %f, DistortionK[1]: %f", m_DevicePtr->HMDInfo.DistortionK[0], m_DevicePtr->HMDInfo.DistortionK[1]);
-		nldebug("OVR: DistortionK[2]: %f, DistortionK[3]: %f", m_DevicePtr->HMDInfo.DistortionK[2], m_DevicePtr->HMDInfo.DistortionK[3]);
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 160 NL3D::CStereoOVR::CStereoOVR : OVR: HScreenSize: 0.149760, VScreenSize: 0.093600
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 161 NL3D::CStereoOVR::CStereoOVR : OVR: VScreenCenter: 0.046800
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 162 NL3D::CStereoOVR::CStereoOVR : OVR: EyeToScreenDistance: 0.041000
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 163 NL3D::CStereoOVR::CStereoOVR : OVR: LensSeparationDistance: 0.063500
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 164 NL3D::CStereoOVR::CStereoOVR : OVR: InterpupillaryDistance: 0.064000
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 165 NL3D::CStereoOVR::CStereoOVR : OVR: HResolution: 1280, VResolution: 800
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 166 NL3D::CStereoOVR::CStereoOVR : OVR: DistortionK[0]: 1.000000, DistortionK[1]: 0.220000
-		//2013/06/26 05:31:51 DBG 17a0 snowballs_client.exe stereo_ovr.cpp 167 NL3D::CStereoOVR::CStereoOVR : OVR: DistortionK[2]: 0.240000, DistortionK[3]: 0.000000
-		m_DevicePtr->SensorDevice = m_DevicePtr->HMDDevice->GetSensor();
-		m_DevicePtr->SensorFusion.AttachToSensor(m_DevicePtr->SensorDevice);
-		m_DevicePtr->SensorFusion.SetGravityEnabled(true);
-		m_DevicePtr->SensorFusion.SetPredictionEnabled(true);
-		m_DevicePtr->SensorFusion.SetYawCorrectionEnabled(true);
-		m_LeftViewport.init(0.f, 0.f, 0.5f, 1.0f);
-		m_RightViewport.init(0.5f, 0.f, 0.5f, 1.0f);
-	}*/
+		nlwarning("OVR: Previous device info structures become invalid after listing devices");
+		return;
+	}
+
+	if (factory->DebugDevice) m_DevicePtr = ovrHmd_CreateDebug(factory->DebugDeviceType);
+	else m_DevicePtr = ovrHmd_Create(factory->DeviceIndex);
+
+	if (!m_DevicePtr)
+	{
+		nlwarning("OVR: Device not created");
+		return;
+	}
+
+	++s_DeviceCounter;
+
+	// nldebug("OVR: HScreenSize: %f, VScreenSize: %f", m_DevicePtr->HMDInfo.HScreenSize, m_DevicePtr->HMDInfo.VScreenSize); // No more support for physically non-square pixels?
+	// nldebug("OVR: VScreenCenter: %f", m_DevicePtr->HMDInfo.VScreenCenter);
+	// nldebug("OVR: EyeToScreenDistance: %f", m_DevicePtr->HMDInfo.EyeToScreenDistance);
+	// nldebug("OVR: LensSeparationDistance: %f", m_DevicePtr->HMDInfo.LensSeparationDistance);
+	// nldebug("OVR: InterpupillaryDistance: %f", m_DevicePtr->HMDInfo.InterpupillaryDistance);
+	nldebug("OVR: Resolution.w: %i, Resolution.h: %i", m_DevicePtr->Resolution.w, m_DevicePtr->Resolution.h);
+	// nldebug("OVR: DistortionK[0]: %f, DistortionK[1]: %f", m_DevicePtr->HMDInfo.DistortionK[0], m_DevicePtr->HMDInfo.DistortionK[1]);
+	// nldebug("OVR: DistortionK[2]: %f, DistortionK[3]: %f", m_DevicePtr->HMDInfo.DistortionK[2], m_DevicePtr->HMDInfo.DistortionK[3]);
+
+	if (!ovrHmd_ConfigureTracking(m_DevicePtr, 
+		ovrTrackingCap_Orientation | ovrTrackingCap_MagYawCorrection, // | ovrTrackingCap_Position
+		ovrTrackingCap_Orientation))
+	{
+		nlwarning("OVR: Cannot configure tracking");
+		ovrHmd_Destroy(m_DevicePtr);
+		m_DevicePtr = NULL;
+		--s_DeviceCounter;
+		return;
+	}
+	
+	float nativeWidth = m_DevicePtr->Resolution.w;
+	float nativeHeight = m_DevicePtr->Resolution.h;
+
+	ovrEyeRenderDesc eyeRenderDesc[ovrEye_Count];
+	eyeRenderDesc[ovrEye_Left] = ovrHmd_GetRenderDesc(m_DevicePtr, ovrEye_Left, m_DevicePtr->DefaultEyeFov[ovrEye_Left]);
+	eyeRenderDesc[ovrEye_Right] = ovrHmd_GetRenderDesc(m_DevicePtr, ovrEye_Right, m_DevicePtr->DefaultEyeFov[ovrEye_Right]);
+
+	nldebug("OVR: LEFT DistortedViewport: x: %i, y: %i, w: %i, h: %i", eyeRenderDesc[0].DistortedViewport.Pos.x, eyeRenderDesc[0].DistortedViewport.Pos.y, eyeRenderDesc[0].DistortedViewport.Size.w, eyeRenderDesc[0].DistortedViewport.Size.h);
+	nldebug("OVR: LEFT PixelsPerTanAngleAtCenter: x: %f, y: %f ", eyeRenderDesc[0].PixelsPerTanAngleAtCenter.x, eyeRenderDesc[0].PixelsPerTanAngleAtCenter.y);
+	nldebug("OVR: LEFT ViewAdjust: x: %f, y: %f, z: %f ", eyeRenderDesc[0].ViewAdjust.x, eyeRenderDesc[0].ViewAdjust.y, eyeRenderDesc[0].ViewAdjust.z);
+	nldebug("OVR: RIGHT DistortedViewport: x: %i, y: %i, w: %i, h: %i", eyeRenderDesc[1].DistortedViewport.Pos.x, eyeRenderDesc[1].DistortedViewport.Pos.y, eyeRenderDesc[1].DistortedViewport.Size.w, eyeRenderDesc[1].DistortedViewport.Size.h);
+	nldebug("OVR: RIGHT PixelsPerTanAngleAtCenter: x: %f, y: %f ", eyeRenderDesc[1].PixelsPerTanAngleAtCenter.x, eyeRenderDesc[1].PixelsPerTanAngleAtCenter.y);
+	nldebug("OVR: RIGHT ViewAdjust: x: %f, y: %f, z: %f ", eyeRenderDesc[1].ViewAdjust.x, eyeRenderDesc[1].ViewAdjust.y, eyeRenderDesc[1].ViewAdjust.z);
+
+	// 2014/08/04 19:54:25 DBG  a60 snowballs_client.exe stereo_ovr_04.cpp 171 NL3D::CStereoOVR::CStereoOVR : OVR: Resolution.w: 1280, Resolution.h: 800
+	// 2014/08/04 19:54:25 DBG  a60 snowballs_client.exe stereo_ovr_04.cpp 189 NL3D::CStereoOVR::CStereoOVR : OVR: LEFT DistortedViewport: x: 0, y: 0, w: 640, h: 800
+	// 2014/08/04 19:54:25 DBG  a60 snowballs_client.exe stereo_ovr_04.cpp 190 NL3D::CStereoOVR::CStereoOVR : OVR: LEFT PixelsPerTanAngleAtCenter: x: 363.247864, y: 363.247864 
+	// 2014/08/04 19:54:25 DBG  a60 snowballs_client.exe stereo_ovr_04.cpp 191 NL3D::CStereoOVR::CStereoOVR : OVR: LEFT ViewAdjust: x: 0.031800, y: 0.000000, z: 0.000000 
+	// 2014/08/04 19:55:46 DBG 2e18 snowballs_client.exe stereo_ovr_04.cpp 192 NL3D::CStereoOVR::CStereoOVR : OVR: RIGHT DistortedViewport: x: 640, y: 0, w: 640, h: 800
+	// 2014/08/04 19:55:46 DBG 2e18 snowballs_client.exe stereo_ovr_04.cpp 193 NL3D::CStereoOVR::CStereoOVR : OVR: RIGHT PixelsPerTanAngleAtCenter: x: 363.247864, y: 363.247864 
+	// 2014/08/04 19:55:46 DBG 2e18 snowballs_client.exe stereo_ovr_04.cpp 194 NL3D::CStereoOVR::CStereoOVR : OVR: RIGHT ViewAdjust: x: -0.031868, y: 0.000000, z: 0.000000 
+
+    ovrSizei fovTexLeftSize = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Left, eyeRenderDesc[ovrEye_Left].Fov, 1.0f);
+    ovrSizei fovTexRightSize = ovrHmd_GetFovTextureSize(m_DevicePtr, ovrEye_Right, eyeRenderDesc[ovrEye_Right].Fov, 1.0f);
+    m_RenderTargetWidth = fovTexLeftSize.w + fovTexRightSize.w;
+    m_RenderTargetHeight = max(fovTexLeftSize.h, fovTexRightSize.h);
+	nldebug("OVR: RenderTarget: w: %u, h: %u", m_RenderTargetWidth, m_RenderTargetHeight);
+	
+	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 213 NL3D::CStereoOVR::CStereoOVR : OVR: RenderTarget: w: 2414, h: 1870 // That looks a bit excessive...
+
+	for (uint eye = 0; eye < ovrEye_Count; ++eye)
+	{
+		ovrFovPort &fov = eyeRenderDesc[eye].Fov;
+
+		m_EyeViewport[eye].init(
+			(float)eyeRenderDesc[eye].DistortedViewport.Pos.x / nativeWidth, 
+			(float)eyeRenderDesc[eye].DistortedViewport.Pos.y / nativeHeight, 
+			(float)eyeRenderDesc[eye].DistortedViewport.Size.w / nativeWidth, 
+			(float)eyeRenderDesc[eye].DistortedViewport.Size.h / nativeHeight);
+		nldebug("OVR: EyeViewport: x: %f, y: %f, w: %f, h: %f", m_EyeViewport[eye].getX(), m_EyeViewport[eye].getY(), m_EyeViewport[eye].getWidth(), m_EyeViewport[eye].getHeight());
+		
+		float combinedTanHalfFovHorizontal = max(fov.LeftTan, fov.RightTan);
+		float combinedTanHalfFovVertical = max(fov.UpTan, fov.DownTan);
+		float horizontalFullFovInRadians = 2.0f * atanf (combinedTanHalfFovHorizontal);
+		float aspectRatio = combinedTanHalfFovHorizontal / combinedTanHalfFovVertical;
+		m_EyeHFov[eye] = horizontalFullFovInRadians;
+		m_EyeAR[eye] = aspectRatio;
+		nldebug("OVR: FOV: %f, AR: %f", horizontalFullFovInRadians, aspectRatio);
+	}
+	
+	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 222 NL3D::CStereoOVR::CStereoOVR : OVR: EyeViewport: x: 0.000000, y: 0.000000, w: 0.500000, h: 1.000000
+	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 222 NL3D::CStereoOVR::CStereoOVR : OVR: EyeViewport: x: 0.500000, y: 0.000000, w: 0.500000, h: 1.000000
+
+	// DEBUG EARLY EXIT
+	nldebug("OVR: Early exit");
+	ovrHmd_Destroy(m_DevicePtr);
+	m_DevicePtr = NULL;
+	--s_DeviceCounter;
 }
 
 CStereoOVR::~CStereoOVR()
@@ -203,18 +256,14 @@ CStereoOVR::~CStereoOVR()
 	delete m_PixelProgram;
 	m_PixelProgram = NULL;
 
-	m_Driver = NULL;
+	m_Driver = NULL;*/
 
-	if (m_DevicePtr->SensorDevice)
-		m_DevicePtr->SensorDevice->Release();
-	m_DevicePtr->SensorDevice.Clear();
-	if (m_DevicePtr->HMDDevice)
-		m_DevicePtr->HMDDevice->Release();
-	m_DevicePtr->HMDDevice.Clear();
-
-	delete m_DevicePtr;
-	m_DevicePtr = NULL;
-	--s_DeviceCounter;*/
+	if (m_DevicePtr)
+	{
+		ovrHmd_Destroy(m_DevicePtr);
+		m_DevicePtr = NULL;
+		--s_DeviceCounter;
+	}
 }
 /*
 class CPixelProgramOVR : public CPixelProgram
@@ -304,6 +353,7 @@ private:
 
 };
 */
+
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {/*
 	nlassert(!m_PixelProgram);
@@ -516,8 +566,8 @@ bool CStereoOVR::nextPass()
 const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
 {
 	if (m_Stage == 2) return m_RegularViewport;
-	else if (m_Stage % 2) return m_LeftViewport;
-	else return m_RightViewport;
+	else if (m_Stage % 2) return m_EyeViewport[ovrEye_Left];
+	else return m_EyeViewport[ovrEye_Right];
 }
 
 const NL3D::CFrustum &CStereoOVR::getCurrentFrustum(uint cid) const
@@ -1025,8 +1075,7 @@ void CStereoOVR::releaseLibrary()
 
 bool CStereoOVR::isDeviceCreated()
 {
-	/*return m_DevicePtr->HMDDevice != NULL;*/
-	return false;
+	return m_DevicePtr != NULL;
 }
 
 } /* namespace NL3D */
