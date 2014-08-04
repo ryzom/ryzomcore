@@ -46,6 +46,7 @@ namespace NL3D {
 class ITexture;
 class CTextureUser;
 class CPixelProgram;
+class CVertexProgram;
 
 /**
  * \brief CFXAA
@@ -66,8 +67,9 @@ private:
 	UDriver *m_Driver;
 
 	NL3D::UMaterial m_Mat;
-	NL3D::CVertexBuffer m_VB;
+	// NL3D::CVertexBuffer m_VB;
 	NLMISC::CQuadUV m_QuadUV;
+	CVertexProgram *m_VP;
 	CPixelProgram *m_PP;
 
 	uint m_Width;

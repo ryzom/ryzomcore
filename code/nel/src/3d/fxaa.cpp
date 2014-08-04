@@ -54,7 +54,7 @@ namespace {
 
 } /* anonymous namespace */
 
-CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_Width(~0), m_Height(~0)
+CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_VP(NULL), m_Width(~0), m_Height(~0)
 {
 	nldebug("3D: Create FXAA");
 
@@ -82,14 +82,54 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_Width(~0),
 		}
 		if (!drv->compilePixelProgram(m_PP))
 		{
-			nlwarning("No supported pixel program for FXAA effect");
+			nlwarning("3D: No supported pixel program for FXAA effect");
 
 			delete m_PP;
 			m_PP = NULL;
 		}
+		else
+		{
+			nldebug("3D: FXAA pixel program available");
+		}
 	}
 
-	if (m_PP)
+	if (!m_PP)
+	{
+		return;
+	}
+
+	// create vp
+	{
+		m_VP = new CVertexProgram();
+		// nelvp
+		{
+			IProgram::CSource *source = new IProgram::CSource();
+			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
+			source->Profile = IProgram::nelvp;
+			source->setSourcePtr(a_nelvp);
+			m_VP->addSource(source);
+		}
+		if (!drv->compileVertexProgram(m_VP))
+		{
+			nlwarning("3D: No supported vertex program for FXAA effect");
+
+			delete m_VP;
+			m_VP = NULL;
+			delete m_PP;
+			m_PP = NULL;
+		}
+		else
+		{
+			nldebug("3D: FXAA vertex program available");
+		}
+	}
+
+	if (!m_VP)
+	{
+		return;
+	}
+	
+	// create material and vb
 	{
 		m_Mat = m_Driver->createMaterial();
 		m_Mat.initUnlit();
@@ -113,28 +153,14 @@ CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_Width(~0),
 		m_QuadUV.Uv2 = CUV(1.f, 1.f);
 		m_QuadUV.Uv3 = CUV(0.f,  1.f);
 
-		CVertexBuffer &vb = m_VB;
+		/*CVertexBuffer &vb = m_VB;
 		vb.clearValueEx();
 		vb.addValueEx(CVertexBuffer::Position, CVertexBuffer::Float3);
 		vb.addValueEx(CVertexBuffer::TexCoord0, CVertexBuffer::Float2);
 		vb.addValueEx(CVertexBuffer::TexCoord1, CVertexBuffer::Float4);
 		vb.initEx();
-		vb.setPreferredMemory(CVertexBuffer::AGPPreferred, false);
-		vb.setNumVertices(4);
-		/*CVertexBufferReadWrite vba;
-		vb.lock(vba);
-		vba.setVertexCoord(0, 0.f, 0.f, 0.5f);
-		vba.setVertexCoord(1, 1.f, 0.f, 0.5f);
-		vba.setVertexCoord(2, 1.f, 1.f, 0.5f);
-		vba.setVertexCoord(3, 0.f, 1.f, 0.5f);
-		vba.setTexCoord(0, 0, 0.f, 0.f);
-		vba.setTexCoord(1, 0, 1.f, 0.f);
-		vba.setTexCoord(2, 0, 1.f, 1.f);
-		vba.setTexCoord(3, 0, 0.f, 1.f);*/
-		/*vba.setTexCoord(0, 1, 0.f, 0.f);
-		vba.setTexCoord(1, 1, 1.f, 0.f);
-		vba.setTexCoord(2, 1, 1.f, 1.f);
-		vba.setTexCoord(3, 1, 0.f, 1.f);*/
+		vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
+		vb.setNumVertices(4);*/
 	}
 }
 
@@ -147,6 +173,8 @@ CFXAA::~CFXAA()
 		m_Driver->deleteMaterial(m_Mat);
 	}
 
+	delete m_VP;
+	m_VP = NULL;
 	delete m_PP;
 	m_PP = NULL;
 
@@ -172,6 +200,33 @@ void CFXAA::applyEffect()
 
 	float fwidth = (float)width;
 	float fheight = (float)height;
+	nldebug("%f, %f", fwidth, fheight);
+	float pwidth = 1.0f / fwidth;
+	float pheight = 1.0f / fheight;
+	float hpwidth = pwidth * 0.5f;
+	float hpheight = pheight * 0.5f;
+	float n = 0.5f;
+
+	//if (width != m_Width || height != m_Height)
+	/*{
+		// Build VB
+		m_Width = width;
+		m_Height = height;
+		CVertexBufferReadWrite vba;
+		m_VB.lock(vba);
+		vba.setValueFloat3Ex(CVertexBuffer::Position, 0, 0.f, 0.f, 0.5f); // BL
+		vba.setValueFloat3Ex(CVertexBuffer::Position, 1, 1.f, 0.f, 0.5f); // BR
+		vba.setValueFloat3Ex(CVertexBuffer::Position, 2, 1.f, 1.f, 0.5f); // TR
+		vba.setValueFloat3Ex(CVertexBuffer::Position, 3, 0.f, 1.f, 0.5f); // TL
+		vba.setValueFloat2Ex(CVertexBuffer::TexCoord0, 0, 0.f, 0.f);
+		vba.setValueFloat2Ex(CVertexBuffer::TexCoord0, 1, 1.f, 0.f);
+		vba.setValueFloat2Ex(CVertexBuffer::TexCoord0, 2, 1.f, 1.f);
+		vba.setValueFloat2Ex(CVertexBuffer::TexCoord0, 3, 0.f, 1.f);
+		vba.setValueFloat4Ex(CVertexBuffer::TexCoord1, 0, 0.f - hpwidth, 0.f - hpheight, 0.f + hpwidth, 0.f + hpheight);
+		vba.setValueFloat4Ex(CVertexBuffer::TexCoord1, 1, 1.f - hpwidth, 0.f - hpheight, 1.f + hpwidth, 0.f + hpheight);
+		vba.setValueFloat4Ex(CVertexBuffer::TexCoord1, 2, 1.f - hpwidth, 1.f - hpheight, 1.f + hpwidth, 1.f + hpheight);
+		vba.setValueFloat4Ex(CVertexBuffer::TexCoord1, 3, 0.f - hpwidth, 1.f - hpheight, 0.f + hpwidth, 1.f + hpheight);
+	}*/
 
 	// create render target
 	CTextureUser *otherRenderTarget = m_Driver->getRenderTargetManager().getRenderTarget(width, height, mode2D);
@@ -182,10 +237,29 @@ void CFXAA::applyEffect()
 	drv->swapTextureHandle(*renderTarget, *otherRenderTarget->getITexture());
 	drv->setRenderTarget(renderTarget);
 
+	// debug
+	m_Driver->clearBuffers(CRGBA(128, 128, 128, 128));
+
+	// activate program
+	bool vpok = drv->activeVertexProgram(m_VP);
+	nlassert(vpok);
+	bool ppok = drv->activePixelProgram(m_PP);
+	nlassert(ppok);
+	drv->setUniform4f(IDriver::PixelProgram, 0, -n / fwidth, -n / fheight, n / fwidth, n / fheight); // fxaaConsoleRcpFrameOpt
+	drv->setUniform4f(IDriver::PixelProgram, 1, -2.0f / fwidth, -2.0f / fheight, 2.0f / fwidth, 2.0f / fheight); // fxaaConsoleRcpFrameOpt2
+	drv->setUniformMatrix(IDriver::VertexProgram, 0, IDriver::ModelViewProjection, IDriver::Identity);
+	drv->setUniform4f(IDriver::VertexProgram, 9, -hpwidth, -hpheight, hpwidth, hpheight);
+
 	// render effect
 	m_Mat.getObjectPtr()->setTexture(0, otherRenderTarget->getITexture());
+	/*drv->activeVertexBuffer(m_VB);
+	drv->renderRawQuads(*m_Mat.getObjectPtr(), 0, 1);*/
 	m_Driver->drawQuad(m_QuadUV, m_Mat);
 	m_Mat.getObjectPtr()->setTexture(0, NULL);
+
+	// deactivate program
+	drv->activeVertexProgram(NULL);
+	drv->activePixelProgram(NULL);
 
 	// recycle render target
 	m_Driver->getRenderTargetManager().recycleRenderTarget(otherRenderTarget);

@@ -801,8 +801,11 @@ void loopIngame()
 					if (effectRender)
 					{
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-						if (s_EnableBloom) CBloomEffect::instance().applyBloom();
+						UCamera	pCam = Scene->getCam();
+						Driver->setMatrixMode2D11();
 						if (s_FXAA) s_FXAA->applyEffect();
+						if (s_EnableBloom) CBloomEffect::instance().applyBloom();
+						Driver->setMatrixMode3D(pCam);
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						effectRender = false;
 					}

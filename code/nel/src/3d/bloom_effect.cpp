@@ -264,6 +264,7 @@ void CBloomEffect::applyBloom()
 	CRect rect1(0, 0, width, height);
 	CRect rect2(0, 0, _BlurWidth, _BlurHeight);
 	dru->stretchRect(_Scene, txt1, rect1, txt2, rect2);
+	_Driver->setMatrixMode2D11();
 
 	// horizontal blur pass
 	doBlur(true);
@@ -319,10 +320,7 @@ void CBloomEffect::applyBlur()
 	matObjectFinal->texConstantColor(0, constCoeff);
 
 	// display quad
-	UCamera	pCam = _Scene->getCam();
-	_Driver->setMatrixMode2D11();
 	_Driver->drawQuad(_BlurQuad, displayBlurMat);
-	_Driver->setMatrixMode3D(pCam);
 
 	// disable vertex program
 	drvInternal->activeVertexProgram(NULL);
@@ -404,15 +402,12 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 	matObject->setTexture(3, startTexture);
 
 	// display
-	UCamera	pCam = _Scene->getCam();
-	_Driver->setMatrixMode2D11();
 	_Driver->drawQuad(_BlurQuad, _BlurMat);
 
 	// disable render target and vertex program
 	drvInternal->activeVertexProgram(NULL);
 	CTextureUser cu;
 	((CDriverUser *)_Driver)->setRenderTarget(cu, 0, 0, 0, 0);
-	_Driver->setMatrixMode3D(pCam);
 }
 
 }; // NL3D

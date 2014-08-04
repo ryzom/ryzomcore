@@ -1,0 +1,92 @@
+ps_2_0
+// cgc version 3.1.0013, build date Apr 18 2012
+// command line args: -profile ps_2_0 -O3 -fastmath -fastprecision
+// source file: fxaa_pp.cg
+//vendor NVIDIA Corporation
+//version 3.1.0.13
+//profile ps_2_0
+//program fxaa_pp
+//semantic fxaa_pp.fxaaConsoleRcpFrameOpt
+//semantic fxaa_pp.fxaaConsoleRcpFrameOpt2
+//semantic fxaa_pp.nlTex0 : TEX0
+//var float2 pos : $vin.TEXCOORD0 : TEX0 : 0 : 1
+//var float4 fxaaConsolePosPos : $vin.TEXCOORD1 : TEX1 : 1 : 1
+//var float4 fxaaConsoleRcpFrameOpt :  : c[0] : 2 : 1
+//var float4 fxaaConsoleRcpFrameOpt2 :  : c[1] : 3 : 1
+//var sampler2D nlTex0 : TEX0 : texunit 0 : 4 : 1
+//var float4 oCol : $vout.COLOR : COL : 5 : 1
+//const c[2] = 0.001953125 0.125 2 -2
+//const c[3] = 0.5 0 1
+dcl_2d s0
+def c2, 0.00195313, 0.12500000, 2.00000000, -2.00000000
+def c3, 0.50000000, 0.00000000, 1.00000000, 0
+dcl t1
+dcl t0.xy
+texld r5, t1, s0
+mov r1.y, t1.w
+mov r1.x, t1.z
+mov r2.xy, r1
+mov r0.y, t1.w
+mov r0.x, t1
+mov r1.y, t1
+mov r1.x, t1.z
+texld r1, r1, s0
+texld r0, r0, s0
+texld r6, r2, s0
+add r0.x, r1.w, c2
+add r2.x, -r0, r0.w
+add r1.x, r5.w, r2
+add r2.z, r1.x, -r6.w
+add r2.x, -r5.w, r2
+add r2.x, r6.w, r2
+mov r3.x, r2
+mov r3.y, r2.z
+mov r2.y, r2.z
+mov r1.y, r2.z
+mov r1.x, r2
+mul r1.xy, r3, r1
+add r1.x, r1, r1.y
+rsq r1.x, r1.x
+mul r4.xy, r1.x, r2
+abs r2.x, r4.y
+abs r1.x, r4
+min r1.x, r1, r2
+rcp r1.x, r1.x
+mul r1.xy, r1.x, r4
+mul r1.xy, r1, c2.y
+min r1.xy, r1, c2.z
+max r2.xy, r1, c2.w
+mov r1.y, c1.w
+mov r1.x, c1.z
+mad r3.xy, r2, r1, t0
+mov r1.y, c1.w
+mov r1.x, c1.z
+mad r5.xy, -r2, r1, t0
+mov r1.y, c0.w
+mov r1.x, c0.z
+mad r2.xy, -r4, r1, t0
+mov r1.y, c0.w
+mov r1.x, c0.z
+mad r1.xy, r4, r1, t0
+texld r4, r5, s0
+texld r3, r3, s0
+texld r1, r1, s0
+texld r2, r2, s0
+add r1, r2, r1
+mul r2, r1, c3.x
+add r1, r4, r3
+max r3.x, r0, r6.w
+mad r1, r1, c3.x, r2
+mul r4, r1, c3.x
+max r1.x, r0.w, r5.w
+max r1.x, r1, r3
+add r1.x, -r4.w, r1
+min r3.x, r0.w, r5.w
+min r0.x, r0, r6.w
+min r0.x, r3, r0
+add r0.x, r4.w, -r0
+cmp r1.x, r1, c3.y, c3.z
+cmp r0.x, r0, c3.y, c3.z
+add_pp_sat r0.x, r0, r1
+cmp r0, -r0.x, r4, r2
+mov oC0, r0

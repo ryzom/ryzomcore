@@ -1730,12 +1730,12 @@ bool mainLoop()
 					{
 						if (effectRender)
 						{
-							if (ClientCfg.Bloom)
-							{
-								if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-								CBloomEffect::instance().applyBloom();
-								if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-							}
+							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+							UCamera	pCam = Scene->getCam();
+							Driver->setMatrixMode2D11();
+							if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
+							Driver->setMatrixMode3D(pCam);
+							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 							effectRender = false;
 						}
 
