@@ -237,7 +237,7 @@ void CFXAA::applyEffect()
 	drv->setRenderTarget(renderTarget);
 
 	// debug
-	m_Driver->clearBuffers(CRGBA(128, 128, 128, 128));
+	// m_Driver->clearBuffers(CRGBA(128, 128, 128, 128));
 
 	// activate program
 	bool vpok = drv->activeVertexProgram(m_VP);
