@@ -68,6 +68,7 @@ private Q_SLOTS:
 	void onChooseTexturePath();
 
 	void onOrientedStateChanged( int state );
+	void onSurfaceDataChanged( const QString &text );
 
 	void onDiffuseToggled( bool b );
 	void onAdditiveToggled( bool b );

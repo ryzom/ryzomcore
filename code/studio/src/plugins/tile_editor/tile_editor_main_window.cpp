@@ -183,6 +183,7 @@ TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	connect( m_ui->actionOpenTileBank, SIGNAL( triggered() ), this, SLOT( open() ) );
 
 	connect( m_ui->orientedCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onOrientedStateChanged( int ) ) );
+	connect( m_ui->surfaceDataLineEdit, SIGNAL( textEdited( const QString& ) ), this, SLOT( onSurfaceDataChanged( const QString& ) ) );
 
 	connect( m_ui->diffuse128BT, SIGNAL( toggled( bool ) ), this, SLOT( onDiffuseToggled( bool ) ) );
 	connect( m_ui->diffuse256BT, SIGNAL( toggled( bool ) ), this, SLOT( onDiffuseToggled( bool ) ) );
@@ -598,6 +599,20 @@ void TileEditorMainWindow::onOrientedStateChanged( int state )
 		m_tileModel->setOriented( row, false );
 }
 
+void TileEditorMainWindow::onSurfaceDataChanged( const QString &text )
+{
+	QModelIndex idx = m_ui->tileSetLV->currentIndex();
+	if( !idx.isValid() )
+		return;
+
+	bool ok = false;
+	unsigned long data = text.toUInt( &ok );
+	if( !ok )
+		return;
+
+	m_tileModel->setSurfaceData( idx.row(), data );
+}
+
 void TileEditorMainWindow::onDiffuseToggled( bool b )
 {
 	if( !b )
@@ -868,6 +883,7 @@ void TileEditorMainWindow::changeActiveTileSet(const QModelIndex &newIndex, cons
 			m_ui->chooseVegetPushButton->setText( "..." );
 
 		m_ui->orientedCheckBox->setChecked( m_tileModel->getOriented( newIndex.row() ) );
+		m_ui->surfaceDataLineEdit->setText( QString::number( m_tileModel->getSurfaceData( newIndex.row() ) ) );
 	}
 	else
 	{

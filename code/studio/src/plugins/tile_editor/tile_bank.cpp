@@ -430,3 +430,23 @@ bool TileBank::getOriented( int tileSet ) const
 	return set->getOriented();
 }
 
+
+void TileBank::setSurfaceData( int tileSet, unsigned long data )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return;
+
+	set->SurfaceData = data;
+}
+
+unsigned long TileBank::getSurfaceData( int tileSet ) const
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return 0;
+
+	return set->SurfaceData;
+}
+
+

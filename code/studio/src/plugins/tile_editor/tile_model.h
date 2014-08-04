@@ -104,6 +104,9 @@ public:
 	void setOriented( int tileSet, bool b );
 	bool getOriented( int tileSet ) const;
 
+	void setSurfaceData( int tileSet, unsigned long data );
+	unsigned long getSurfaceData( int tileSet ) const;
+
 	QString getLastError() const;
 	bool hasError() const;
 

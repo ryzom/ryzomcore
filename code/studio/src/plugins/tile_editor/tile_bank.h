@@ -35,6 +35,9 @@ public:
 
 	void setOriented( int tileSet, bool b );
 	bool getOriented( int tileSet ) const;
+
+	void setSurfaceData( int tileSet, unsigned long data );
+	unsigned long getSurfaceData( int tileSet ) const;
 	
 	bool hasError() const{ return m_hasError; }
 	QString getLastError() const{ return m_lastError; }

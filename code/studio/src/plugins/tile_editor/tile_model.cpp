@@ -416,6 +416,16 @@ bool TileModel::getOriented( int tileSet ) const
 	return m_tileBank->getOriented( tileSet );
 }
 
+void TileModel::setSurfaceData( int tileSet, unsigned long data )
+{
+	m_tileBank->setSurfaceData( tileSet, data );
+}
+
+unsigned long TileModel::getSurfaceData( int tileSet ) const
+{
+	return m_tileBank->getSurfaceData( tileSet );
+}
+
 QString TileModel::getLastError() const{
 	return m_tileBank->getLastError();
 }
