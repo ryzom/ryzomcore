@@ -77,7 +77,7 @@ const char *IStereoDisplay::getLibraryName(CStereoDeviceInfo::TStereoDeviceLibra
 
 void IStereoDisplay::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 {
-#ifdef HAVE_LIBOVR_02
+#ifdef HAVE_LIBOVR
 	CStereoOVR::listDevices(devicesOut);
 #endif
 #ifdef HAVE_LIBVR
@@ -95,7 +95,7 @@ IStereoDisplay *IStereoDisplay::createDevice(const CStereoDeviceInfo &deviceInfo
 
 void IStereoDisplay::releaseUnusedLibraries()
 {
-#ifdef HAVE_LIBOVR_02
+#ifdef HAVE_LIBOVR
 	if (!CStereoOVR::isLibraryInUse())
 		CStereoOVR::releaseLibrary();
 #endif
@@ -103,7 +103,7 @@ void IStereoDisplay::releaseUnusedLibraries()
 
 void IStereoDisplay::releaseAllLibraries()
 {
-#ifdef HAVE_LIBOVR_02
+#ifdef HAVE_LIBOVR
 	CStereoOVR::releaseLibrary();
 #endif
 }

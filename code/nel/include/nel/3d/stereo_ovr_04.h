@@ -41,8 +41,8 @@
  * so, delete this exception statement from your version.
  */
 
-#ifndef NL3D_STEREO_OVR_H
-#define NL3D_STEREO_OVR_H
+#ifndef NL3D_STEREO_OVR_04_H
+#define NL3D_STEREO_OVR_04_H
 
 #ifdef HAVE_LIBOVR
 
@@ -180,6 +180,6 @@ private:
 
 #endif /* HAVE_LIBOVR */
 
-#endif /* #ifndef NL3D_STEREO_OVR_H */
+#endif /* #ifndef NL3D_STEREO_OVR_04_H */
 
 /* end of file */
