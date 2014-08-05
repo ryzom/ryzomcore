@@ -75,7 +75,7 @@ void			CDriverUser::deleteScene(UScene	*scene)
 
 // ***************************************************************************
 
-void CDriverUser::beginDefaultRenderTarget()
+void CDriverUser::beginDefaultRenderTarget(uint32 width, uint32 height)
 {
 	if (_MatRenderTarget.empty())
 	{
@@ -102,9 +102,9 @@ void CDriverUser::beginDefaultRenderTarget()
 	}
 
 	nlassert(!_EffectRenderTarget);
-	uint32 winw, winh;
-	getWindowSize(winw, winh);
-	_EffectRenderTarget = getRenderTargetManager().getRenderTarget(winw, winh);
+	if (width == 0 || height == 0)
+		getWindowSize(width, height);
+	_EffectRenderTarget = getRenderTargetManager().getRenderTarget(width, height);
 	setRenderTarget(*_EffectRenderTarget);
 }
 
@@ -123,12 +123,16 @@ void CDriverUser::endDefaultRenderTarget(UScene *scene)
 	if (scene)
 	{
 		pCam = scene->getCam();
-		setMatrixMode2D11();
 	}
+	CViewport oldVp = getViewport();
+	CViewport vp = CViewport();
+	setViewport(vp);
+	setMatrixMode2D11();
 	bool fog = fogEnabled();
 	enableFog(false);
 	drawQuad(_RenderTargetQuad, _MatRenderTarget);
 	enableFog(fog);
+	setViewport(oldVp);
 	if (scene)
 	{
 		setMatrixMode3D(pCam);

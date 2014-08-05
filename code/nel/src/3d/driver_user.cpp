@@ -1948,9 +1948,7 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 
 	bool result = _Driver->setRenderTarget(tex, x, y, width, height, mipmapLevel, cubeFace);
 
-	CViewport currentViewport;
-	_Driver->getViewport(currentViewport);
-	setViewport(currentViewport);
+	setupMatrixContext();
 
 	return result;
 }

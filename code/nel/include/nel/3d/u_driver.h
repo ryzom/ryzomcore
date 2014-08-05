@@ -310,8 +310,8 @@ public:
 	/// Get the render target manager
 	virtual CRenderTargetManager	&getRenderTargetManager() =0;
 
-	/// Set a texture the size of the window as render target
-	virtual void					beginDefaultRenderTarget() =0;
+	/// Set a texture of specified size or of the size of the window as render target
+	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
 
 	/// Draw the render target to the back buffer
 	virtual void					endDefaultRenderTarget(UScene *scene) =0;
