@@ -123,6 +123,7 @@ private:
 
 	QString m_fileName;
 	QString m_lastOpenDir;
+	QString m_lastTileDir;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H

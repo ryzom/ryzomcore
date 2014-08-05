@@ -684,7 +684,9 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", m_lastTileDir , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
+	if( fileNames.empty() )
+		return;
 
 	TileConstants::TNodeTileType type = tabToType( tabId );
 
@@ -719,6 +721,10 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	lv->reset();
 	lv->setRootIndex( rootIdx );
 	lv->setCurrentIndex( lv->model()->index( 0, 0, rootIdx ) );
+
+	QString fn = fileNames[ 0 ].replace( '\\', '/' );
+	int slashIdx = fn.lastIndexOf( '/' );
+	m_lastTileDir = fn.left( slashIdx );
 }
 
 void TileEditorMainWindow::onActionDeleteTile( int tabId )
@@ -787,7 +793,7 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 
 	QString fileName = QFileDialog::getOpenFileName( this,
 														tr( "Select tile image" ),
-														"",
+														m_lastTileDir,
 														tr( "PNG files (*.png)" ) );
 	if( fileName.isEmpty() )
 		return;
@@ -803,6 +809,10 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 								tr( "Error replacing tile image" ),
 								error );
 	}
+
+	QString fn = fileName.replace( '\\', '/' );
+	int slashIdx = fn.lastIndexOf( '/' );
+	m_lastTileDir = fn.left( slashIdx );
 }
 
 void TileEditorMainWindow::onTileBankLoaded()
