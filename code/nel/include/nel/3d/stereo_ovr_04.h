@@ -70,8 +70,6 @@ namespace NL3D {
 class ITexture;
 class CTextureUser;
 class CStereoOVRDeviceFactory;
-class CPixelProgramOVR;
-class CVertexProgramOVR;
 
 #define NL_STEREO_MAX_USER_CAMERAS 8
 #define NL_OVR_EYE_COUNT 2
@@ -188,8 +186,6 @@ private:
 	NL3D::CTextureUser *m_SceneTexture;
 
 	UMaterial m_UnlitMat;
-	NLMISC::CRefPtr<CVertexProgramOVR> m_VP;
-	NLMISC::CRefPtr<CPixelProgramOVR> m_PP;
 
 	/*
 	NL3D::UMaterial m_BarrelMat;

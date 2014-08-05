@@ -144,6 +144,22 @@ public:
 	}
 };
 
+static NLMISC::CVector2f toTex(NLMISC::CVector2f texCoord, NLMISC::CVector2f uvScaleOffset[2])
+{
+	// return(EyeToSourceUVScale * flattened + EyeToSourceUVOffset);
+	NLMISC::CVector2f vec = NLMISC::CVector2f(texCoord.x * uvScaleOffset[0].x, texCoord.y * uvScaleOffset[0].y) + uvScaleOffset[1];
+	// some trial and error voodoo, sorry
+	vec = (vec + NLMISC::CVector2f(1, 1)) * 0.5f;
+	vec.y = 1.0f - vec.y;
+	vec.x = 1.0f - vec.x;
+	vec.x += 0.5f;
+	vec.y *= 2.0f;
+	
+	vec.x = 1.0f - vec.x;
+
+	return vec;
+}
+
 CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
@@ -286,9 +302,15 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 			{
 				ovrDistortionVertex &ov = meshData.pVertexData[i];
 				vba.setVertexCoord(i, (ov.ScreenPosNDC.x + 1.0f) * 0.5f, (ov.ScreenPosNDC.y + 1.0f) * 0.5f, 0.5f);
-				vba.setTexCoord(i, 0, ov.TanEyeAnglesR.x, ov.TanEyeAnglesR.y);
-				vba.setTexCoord(i, 1, ov.TanEyeAnglesG.x, ov.TanEyeAnglesG.y);
-				vba.setTexCoord(i, 2, ov.TanEyeAnglesB.x, ov.TanEyeAnglesB.y);
+				NLMISC::CVector2f texR(ov.TanEyeAnglesR.x, ov.TanEyeAnglesR.y);
+				NLMISC::CVector2f texG(ov.TanEyeAnglesG.x, ov.TanEyeAnglesG.y);
+				NLMISC::CVector2f texB(ov.TanEyeAnglesB.x, ov.TanEyeAnglesB.y);
+				texR = toTex(texR, m_EyeUVScaleOffset[eye]);
+				texG = toTex(texG, m_EyeUVScaleOffset[eye]);
+				texB = toTex(texB, m_EyeUVScaleOffset[eye]);
+				vba.setTexCoord(i, 0, texR.x, texR.y);
+				vba.setTexCoord(i, 1, texG.x, texG.y);
+				vba.setTexCoord(i, 2, texB.x, texB.y);
 				NLMISC::CRGBA color;
 				color.R = color.G = color.B = (uint8)(ov.VignetteFactor * 255.99f);
 				color.A = 255; // (uint8)(ov.TimeWarpFactor * 255.99f);
@@ -338,9 +360,6 @@ CStereoOVR::~CStereoOVR()
 		m_Driver->deleteMaterial(m_UnlitMat);
 	}
 
-	m_PP.kill();
-	m_VP.kill();
-
 	m_Driver = NULL;
 
 	if (m_DevicePtr)
@@ -351,130 +370,8 @@ CStereoOVR::~CStereoOVR()
 	}
 }
 
-class CVertexProgramOVR : public CVertexProgram
-{
-public:
-	struct COVRIndices
-	{
-		/*uint LensCenter;
-		uint ScreenCenter;
-		uint Scale;
-		uint ScaleIn;
-		uint HmdWarpParam;*/
-	};
-
-	CVertexProgramOVR()
-	{
-		/*{
-			CSource *source = new CSource();
-			source->Profile = glsl330f;
-			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
-			source->setSourcePtr(g_StereoOVR_glsl330f);
-			addSource(source);
-		}*/
-	}
-
-	virtual ~CVertexProgramOVR()
-	{
-		
-	}
-
-	virtual void buildInfo()
-	{
-		CVertexProgram::buildInfo();
-
-		/*m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
-		nlassert(m_OVRIndices.LensCenter != ~0);
-		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
-		nlassert(m_OVRIndices.ScreenCenter != ~0);
-		m_OVRIndices.Scale = getUniformIndex("cScale");
-		nlassert(m_OVRIndices.Scale != ~0);
-		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
-		nlassert(m_OVRIndices.ScaleIn != ~0);
-		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
-		nlassert(m_OVRIndices.HmdWarpParam != ~0);*/
-	}
-
-	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }
-
-private:
-	COVRIndices m_OVRIndices;
-
-};
-
-class CPixelProgramOVR : public CPixelProgram
-{
-public:
-	struct COVRIndices
-	{
-		/*uint LensCenter;
-		uint ScreenCenter;
-		uint Scale;
-		uint ScaleIn;
-		uint HmdWarpParam;*/
-	};
-
-	CPixelProgramOVR()
-	{
-		/*
-		{
-			CSource *source = new CSource();
-			source->Profile = arbfp1;
-			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
-			source->setSourcePtr(g_StereoOVR_arbfp1);
-			source->ParamIndices["cLensCenter"] = 0;
-			source->ParamIndices["cScreenCenter"] = 1;
-			source->ParamIndices["cScale"] = 2;
-			source->ParamIndices["cScaleIn"] = 3;
-			source->ParamIndices["cHmdWarpParam"] = 4;
-			addSource(source);
-		}
-		{
-			CSource *source = new CSource();
-			source->Profile = ps_2_0;
-			source->Features.MaterialFlags = CProgramFeatures::TextureStages;
-			source->setSourcePtr(g_StereoOVR_ps_2_0);
-			source->ParamIndices["cLensCenter"] = 0;
-			source->ParamIndices["cScreenCenter"] = 1;
-			source->ParamIndices["cScale"] = 2;
-			source->ParamIndices["cScaleIn"] = 3;
-			source->ParamIndices["cHmdWarpParam"] = 4;
-			addSource(source);
-		}*/
-	}
-
-	virtual ~CPixelProgramOVR()
-	{
-		
-	}
-
-	virtual void buildInfo()
-	{
-		CPixelProgram::buildInfo();
-
-		/*m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
-		nlassert(m_OVRIndices.LensCenter != ~0);
-		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
-		nlassert(m_OVRIndices.ScreenCenter != ~0);
-		m_OVRIndices.Scale = getUniformIndex("cScale");
-		nlassert(m_OVRIndices.Scale != ~0);
-		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
-		nlassert(m_OVRIndices.ScaleIn != ~0);
-		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
-		nlassert(m_OVRIndices.HmdWarpParam != ~0);*/
-	}
-
-	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }
-
-private:
-	COVRIndices m_OVRIndices;
-
-};
-
 void CStereoOVR::setDriver(NL3D::UDriver *driver)
 {
-	nlassert(!m_PP);
-	nlassert(!m_VP);
 	m_Driver = driver;
 
 	CDriverUser *dru = static_cast<CDriverUser *>(driver);
@@ -491,25 +388,28 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	unlitMat->setZWrite(false);
 	unlitMat->setZFunc(CMaterial::always);
 	unlitMat->setDoubleSided(true);
+	
+	unlitMat->texConstantColor(0, NLMISC::CRGBA(255, 0, 0, 0));
+	unlitMat->texConstantColor(1, NLMISC::CRGBA(0, 255, 0, 0));
+	unlitMat->texConstantColor(2, NLMISC::CRGBA(0, 0, 255, 0));
 
-	if (drv->supportBloomEffect() && drv->supportNonPowerOfTwoTextures())
-	{
-		m_PP = new CPixelProgramOVR();
-		if (!drv->compilePixelProgram(m_PP))
-		{
-			m_PP.kill();
-			nlwarning("OVR: No pixel program support");
-			return;
-		}
-		m_VP = new CVertexProgramOVR();
-		if (!drv->compileVertexProgram(m_VP))
-		{
-			m_VP.kill();
-			nlwarning("OVR: No vertex program support");
-			m_PP.kill();
-			return;
-		}
-	}
+	m_UnlitMat.texEnvArg0RGB(0, UMaterial::Texture, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg1RGB(0, UMaterial::Constant, UMaterial::SrcColor);
+	m_UnlitMat.texEnvOpRGB(0, UMaterial::Modulate);
+
+	m_UnlitMat.texEnvArg0RGB(1, UMaterial::Texture, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg1RGB(1, UMaterial::Constant, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg2RGB(1, UMaterial::Previous, UMaterial::SrcColor);
+	m_UnlitMat.texEnvOpRGB(1, UMaterial::Mad);
+
+	m_UnlitMat.texEnvArg0RGB(2, UMaterial::Texture, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg1RGB(2, UMaterial::Constant, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg2RGB(2, UMaterial::Previous, UMaterial::SrcColor);
+	m_UnlitMat.texEnvOpRGB(2, UMaterial::Mad);
+
+	m_UnlitMat.texEnvArg0RGB(3, UMaterial::Previous, UMaterial::SrcColor);
+	m_UnlitMat.texEnvArg1RGB(3, UMaterial::Diffuse, UMaterial::SrcColor);
+	m_UnlitMat.texEnvOpRGB(3, UMaterial::Modulate);
 }
 
 bool CStereoOVR::getScreenResolution(uint &width, uint &height)
@@ -958,6 +858,9 @@ bool CStereoOVR::endRenderTarget()
 		bool fogEnabled = m_Driver->fogEnabled();
 		m_Driver->enableFog(false);
 
+		// must clear everything to black (can we get a mesh to only handle the parts outside of the distortion mesh?)
+		m_Driver->clearRGBABuffer(CRGBA(0, 0, 0, 255));
+
 		CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
 		IDriver *drv = dru->getDriver();
 		
@@ -966,17 +869,13 @@ bool CStereoOVR::endRenderTarget()
 		m_Driver->setViewport(vp);
 		m_Driver->setMatrixMode2D11();
 
-		// DEBUG
 		for (uint eye = 0; eye < ovrEye_Count; ++eye)
 		{
-			NL3D::UMaterial umat = m_Driver->createMaterial();
-			umat.setZWrite(false);
-			// mat.setZFunc(UMaterial::always); // Not nice!
-			umat.setDoubleSided(true);
-			umat.setColor(NLMISC::CRGBA::Red);
-			umat.setBlend(false);
-			CMaterial *mat = umat.getObjectPtr();
+			CMaterial *mat = m_UnlitMat.getObjectPtr();
 			mat->setTexture(0, m_SceneTexture->getITexture());
+			mat->setTexture(1, m_SceneTexture->getITexture());
+			mat->setTexture(2, m_SceneTexture->getITexture());
+			mat->setTexture(3, m_SceneTexture->getITexture());
 			
 			//m_Driver->setPolygonMode(UDriver::Line);
 			drv->activeVertexBuffer(m_VB[eye]);
@@ -984,7 +883,10 @@ bool CStereoOVR::endRenderTarget()
 			drv->renderTriangles(*mat, 0, m_NbTris[eye]);
 			//m_Driver->setPolygonMode(UDriver::Filled);
 
-			m_Driver->deleteMaterial(umat);
+			mat->setTexture(0, NULL);
+			mat->setTexture(1, NULL);
+			mat->setTexture(2, NULL);
+			mat->setTexture(3, NULL);
 		}
 
 		// restore
@@ -996,6 +898,7 @@ bool CStereoOVR::endRenderTarget()
 
 		return true;
 	}
+
 	/*if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
 		nlassert(m_SceneTexture);
