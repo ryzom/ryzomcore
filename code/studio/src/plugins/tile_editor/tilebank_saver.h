@@ -22,7 +22,6 @@
 #include <QList>
 
 class TileModel;
-class TileBankSaverPvt;
 
 class TileBankSaver
 {
@@ -33,7 +32,7 @@ public:
 	bool save( const char *filename, TileModel* model );
 
 private:
-	TileBankSaverPvt *p;
+
 };
 
 #endif

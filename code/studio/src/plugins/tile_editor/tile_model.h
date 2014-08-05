@@ -22,6 +22,7 @@
 #include <QAbstractListModel>
 
 #include "tile_constants.h"
+#include "tile_images.h"
 
 namespace NLMISC
 {
@@ -32,6 +33,7 @@ class Node;
 class TileSetNode;
 class TileItemNode;
 class TileBank;
+class TileModelPvt;
 
 class TileModel : public QAbstractItemModel
 {
@@ -77,8 +79,6 @@ public:
 
 	void swapRows( int a, int b );
 
-	TileSetNode *createTileSetNode(QString tileSetName);
-	static TileItemNode *createItemNode( TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName );
 	TileItemNode *createItemNode( int idx, TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName );
 
 	static const char *getTileTypeName(TileConstants::TNodeTileType type);
@@ -89,13 +89,20 @@ public:
 	bool hasTileSet( const QString &name );
 
 	void clear();
+	void onTBLoaded();
 
 	void addLand( const QString &name );
 	void removeLand( int idx );
+	void getLands( QStringList &l );
+
+	bool addTileSet( const QString &name );
+
 	void removeTileSet( int idx );
 	void renameTileSet( int idx, const QString &newName );
 	void setLandSets( int idx, const QStringList &l );
 	void getLandSets( int idx, QStringList &l );
+
+	bool addTile( int ts, int type, const QString &fileName, TileConstants::TTileChannel channel );
 	void removeTile( int ts, int type, int tile );
 	bool replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name );
 	void clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel );
@@ -122,7 +129,11 @@ public Q_SLOTS:
 	void selectIndexDisplay(bool selected);	
 
 private:
+	TileSetNode *createTileSetNode(QString tileSetName);
 	Node *getItem(const QModelIndex &index) const;
+	void loadTileSets();
+	void loadTileSet( int tileSet );
+	void loadTileTypeNode( int tileSet, int type, const QList< TileImages > &l );
 
 	bool m_fileDisplay;
 	bool m_indexDisplay;
@@ -133,6 +144,7 @@ private:
 	Node *rootItem;
 
 	TileBank *m_tileBank;
+	TileModelPvt *pvt;
 };
 
 #endif // TILE_MODEL_H

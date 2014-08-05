@@ -229,6 +229,16 @@ void TileBank::renameTileSet( int idx, const QString &newName )
 
 }
 
+void TileBank::getTileSets( QStringList &l )
+{
+	int c = m_pvt->m_bank.getTileSetCount();
+	for( int i = 0; i < c; i++ )
+	{
+		NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( i );
+		l.push_back( set->getName().c_str() );
+	}
+}
+
 void TileBank::addLand( const QString &name )
 {
 	m_pvt->m_bank.addLand( name.toUtf8().constData() );
@@ -237,6 +247,18 @@ void TileBank::addLand( const QString &name )
 void TileBank::removeLand( int idx )
 {
 	m_pvt->m_bank.removeLand( idx );
+}
+
+void TileBank::getLands( QStringList &l )
+{
+	l.clear();
+
+	int c = m_pvt->m_bank.getLandCount();
+	for( int i = 0; i < c; i++ )
+	{
+		NL3D::CTileLand *land = m_pvt->m_bank.getLand( i );
+		l.push_back( land->getName().c_str() );
+	}
 }
 
 void TileBank::setLandSets( int idx, const QStringList &l )
@@ -392,6 +414,126 @@ void TileBank::clearImage( int ts, int type, int tile, TileConstants::TTileChann
 	
 }
 
+int TileBank::getTileCount( int tileSet, TileConstants::TNodeTileType type )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return -1;
+
+	int c = 0;
+
+	switch( type )
+	{
+	case TileConstants::Tile128:
+		c = set->getNumTile128();
+		break;
+
+	case TileConstants::Tile256:
+		c = set->getNumTile256();
+		break;
+
+	case TileConstants::TileTransition:
+		c = NL3D::CTileSet::count;
+		break;
+
+	case TileConstants::TileDisplacement:
+		c = NL3D::CTileSet::CountDisplace;
+		break;
+	}
+
+	return c;
+}
+
+int TileBank::getRealTileId( int tileSet, TileConstants::TNodeTileType type, int tileIdInSet )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return -1;
+
+	int tile = -1;
+	
+	switch( type )
+	{
+	case TileConstants::Tile128:
+		tile = set->getTile128( tileIdInSet );
+		break;
+	
+	case TileConstants::Tile256:
+		tile = set->getTile256( tileIdInSet );
+		break;
+	
+	case TileConstants::TileTransition:
+		tile = set->getTransition( tileIdInSet )->getTile();
+		break;
+	
+	case TileConstants::TileDisplacement:
+		tile = set->getDisplacementTile( NL3D::CTileSet::TDisplacement( tileIdInSet ) );
+		break;
+	}
+
+	return tile;
+}
+
+void TileBank::getTileImages( int tileSet, TileConstants::TNodeTileType type, int tileId, TileImages &images )
+{
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return;
+
+	switch( type )
+	{
+	case TileConstants::Tile128:
+	case TileConstants::Tile256:
+	case TileConstants::TileTransition:
+		{
+			NL3D::CTile *t = m_pvt->m_bank.getTile( tileId );
+			if( t == NULL )
+				return;
+
+			images.diffuse = t->getFileName( channelToTBitmap( TileConstants::TileDiffuse ) ).c_str();
+			images.additive = t->getFileName( channelToTBitmap( TileConstants::TileAdditive ) ).c_str();
+			images.alpha = t->getFileName( channelToTBitmap( TileConstants::TileAlpha ) ).c_str();
+		}
+		break;
+	
+	case TileConstants::TileDisplacement:
+		{
+			images.diffuse = m_pvt->m_bank.getDisplacementMap( tileId );
+		}
+		break;
+	}
+
+}
+
+void TileBank::getTileImages( int tileSet, TileConstants::TNodeTileType type, QList< TileImages > &l )
+{
+	l.clear();
+
+	NL3D::CTileSet *set = m_pvt->m_bank.getTileSet( tileSet );
+	if( set == NULL )
+		return;
+
+	int c = getTileCount( tileSet, type );
+
+	TileImages images;
+	
+	for( int i = 0; i < c; i++ )
+	{
+		images.clear();
+
+		int id = getRealTileId( tileSet, type, i );
+		if( id < 0 )
+		{
+			l.push_back( images );
+			continue;
+		}
+
+		getTileImages( tileSet, type, id, images );
+
+		l.push_back( images );
+	}
+
+}
 
 void TileBank::setVegetation( int tileSet, const QString &vegetation )
 {

@@ -312,6 +312,14 @@ TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, TileC
 	setTileFilename( channel, filename );
 }
 
+TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, Node *parent )
+{
+	m_id = tileId;
+	m_parentItem = parent;
+	pvt = new TileItemNodePvt();
+	m_hasError = false;
+}
+
 TileItemNode::~TileItemNode()
 {
 	delete pvt;

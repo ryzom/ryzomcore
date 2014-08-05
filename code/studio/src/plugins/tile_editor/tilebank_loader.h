@@ -17,10 +17,7 @@
 #ifndef TILEBANK_LOADER_H
 #define TILEBANK_LOADER_H
 
-#include "land.h"
-
 class TileModel;
-class TileBankLoaderPvt;
 
 class TileBankLoader
 {
@@ -28,10 +25,9 @@ public:
 	TileBankLoader();
 	~TileBankLoader();
 
-	bool load( const char *filename, TileModel *model, QList< Land > &lands );
+	bool load( const char *filename, TileModel *model );
 
 private:
-	TileBankLoaderPvt *p;
 };
 
 

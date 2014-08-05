@@ -86,6 +86,11 @@ public:
 		_BitmapName[bitmapType]=name;
 	}
 
+	std::string getFileName (TBitmap bitmapType) const
+	{
+		return _BitmapName[bitmapType];
+	}
+
 	/// Get the additional orientation (CCW) for alpha texture.
 	uint8	getRotAlpha ()
 	{

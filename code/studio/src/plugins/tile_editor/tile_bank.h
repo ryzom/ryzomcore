@@ -4,8 +4,10 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QList>
 
 #include "tile_constants.h"
+#include "tile_images.h"
 
 namespace NLMISC
 {
@@ -23,9 +25,11 @@ public:
 	void addTileSet( const QString &name );
 	void removeTileSet( int idx );
 	void renameTileSet( int idx, const QString &newName );
+	void getTileSets( QStringList &l );
 
 	void addLand( const QString &name );
 	void removeLand( int idx );
+	void getLands( QStringList &l );
 	void setLandSets( int idx, const QStringList &l );
 	void getLandSets( int idx, QStringList &l );
 
@@ -34,6 +38,12 @@ public:
 	bool setTile( int tileset, int tile, const QString &name, const QVariant &pixmap, TileConstants::TTileChannel channel, TileConstants::TNodeTileType type );
 	void replaceImage( int ts, int type, int tile, TileConstants::TTileChannel channel, const QString &name, const QVariant &pixmap );
 	void clearImage( int ts, int type, int tile, TileConstants::TTileChannel channel );
+
+
+	int getTileCount( int tileSet, TileConstants::TNodeTileType type );
+	int getRealTileId( int tileSet, TileConstants::TNodeTileType type, int tileIdInSet );
+	void getTileImages( int tileSet, TileConstants::TNodeTileType type, int tileId, TileImages &images );
+	void getTileImages( int tileSet, TileConstants::TNodeTileType type, QList< TileImages > &l );
 
 	void setVegetation( int tileSet, const QString &vegetation );
 	QString getVegetation( int tileSet ) const;

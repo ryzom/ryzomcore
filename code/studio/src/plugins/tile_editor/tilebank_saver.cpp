@@ -22,21 +22,12 @@
 #include "nel/3d/tile_bank.h"
 #include "nel/misc/file.h"
 
-class TileBankSaverPvt
-{
-public:
-
-};
-
 TileBankSaver::TileBankSaver()
 {
-	p = new TileBankSaverPvt();
 }
 
 TileBankSaver::~TileBankSaver()
 {
-	delete p;
-	p = NULL;
 }
 
 bool TileBankSaver::save( const char *fileName, TileModel* model )

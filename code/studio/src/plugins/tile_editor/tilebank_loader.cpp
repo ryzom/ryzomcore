@@ -18,35 +18,23 @@
 #include "tilebank_loader.h"
 
 #include "tile_model.h"
-#include "tile_item.h"
-
-#include "nel/3d/tile_bank.h"
 #include "nel/misc/file.h"
-
-class TileBankLoaderPvt
-{
-public:
-};
-
 
 TileBankLoader::TileBankLoader()
 {
-	p = new TileBankLoaderPvt;
 }
 
 TileBankLoader::~TileBankLoader()
 {
-	delete p;
-	p = NULL;
 }
 
-bool TileBankLoader::load( const char *filename, TileModel *model, QList< Land > &lands )
+bool TileBankLoader::load( const char *filename, TileModel *model )
 {
 	NLMISC::CIFile file;
 	if( !file.open( filename, false ) )
 		return false;
 
-	//p->bank.serial( file );
+	model->serial( file );
 
 	file.close();
 

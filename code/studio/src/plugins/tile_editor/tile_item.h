@@ -107,6 +107,7 @@ class TileItemNode : public Node
 {
 public:
 	TileItemNode( TileConstants::TNodeTileType type, int tileId, TileConstants::TTileChannel channel, QString filename, Node *parent=0);
+	TileItemNode( TileConstants::TNodeTileType type, int tileId, Node *parent=0);
 	virtual ~TileItemNode();
 	QVariant data(int column, int role) const;
 	int columnCount() const;

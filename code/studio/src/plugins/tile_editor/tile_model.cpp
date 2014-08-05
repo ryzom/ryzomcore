@@ -218,14 +218,8 @@ TileSetNode *TileModel::createTileSetNode(QString tileSetName)
 
 	// Append them in the correct order to the tile set.
 	this->appendRow(tileSet);
-	m_tileBank->addTileSet(tileSetName);
-
+	
 	return tileSet;
-}
-
-TileItemNode *TileModel::createItemNode( TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName )
-{
-	return new TileItemNode( type, id, channel, fileName );
 }
 
 TileItemNode *TileModel::createItemNode( int idx, TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName )
@@ -305,6 +299,12 @@ void TileModel::clear()
 	removeRows( 0, c );
 }
 
+void TileModel::onTBLoaded()
+{
+	loadTileSets();
+}
+
+
 void TileModel::addLand( const QString &name )
 {
 	m_tileBank->addLand( name );
@@ -315,6 +315,11 @@ void TileModel::removeLand( int idx )
 	m_tileBank->removeLand( idx );
 }
 
+void TileModel::getLands( QStringList &l )
+{
+	m_tileBank->getLands( l );
+}
+
 void TileModel::setLandSets( int idx, const QStringList &l )
 {
 	m_tileBank->setLandSets( idx, l );
@@ -323,6 +328,15 @@ void TileModel::setLandSets( int idx, const QStringList &l )
 void TileModel::getLandSets( int idx, QStringList &l )
 {
 	m_tileBank->getLandSets( idx, l );
+}
+
+
+bool TileModel::addTileSet( const QString &name )
+{
+	m_tileBank->addTileSet( name );
+	TileSetNode *tsn = createTileSetNode( name );
+
+	return false;
 }
 
 void TileModel::removeTileSet( int idx )
@@ -339,6 +353,35 @@ void TileModel::removeTileSet( int idx )
 void TileModel::renameTileSet( int idx, const QString &newName )
 {
 	m_tileBank->renameTileSet( idx, newName );
+}
+
+bool TileModel::addTile( int ts, int type, const QString &fileName, TileConstants::TTileChannel channel )
+{
+	TileSetNode *tsn = static_cast< TileSetNode* >( rootItem->child( ts ) );
+	if( tsn == NULL )
+		return false;
+
+	TileTypeNode *ttn = static_cast< TileTypeNode* >( tsn->child( type ) );
+	if( ttn == NULL )
+		return false;
+
+	int tile = ttn->childCount();
+
+	TileConstants::TNodeTileType t = TileConstants::TNodeTileType( type );
+
+	TileItemNode *item = new TileItemNode( t, tile, channel, fileName );
+		
+	bool b = m_tileBank->addTile( ts, fileName, item->pixmap( channel ), channel, t );
+	if( !b )
+	{
+		delete item;
+		return false;
+	}
+
+	item->setParent( ttn );
+	ttn->appendRow( item );
+
+	return true;
 }
 
 void TileModel::removeTile( int ts, int type, int tile )
@@ -458,4 +501,73 @@ void TileModel::selectFilenameDisplay(bool selected)
 void TileModel::selectIndexDisplay(bool selected)
 {
 	m_indexDisplay = selected;
+}
+
+void TileModel::loadTileSets()
+{
+	QStringList l;
+	m_tileBank->getTileSets( l );
+
+	// Create tile sets
+	QStringListIterator itr( l );
+	while( itr.hasNext() )
+	{
+		createTileSetNode( itr.next() );
+	}
+
+	// Loads sets
+	int c = rootItem->childCount();
+	for( int i = 0; i < c; i++ )
+	{
+		loadTileSet( i );
+	}
+}
+
+
+void TileModel::loadTileSet( int tileSet )
+{
+	TileSetNode *set = static_cast< TileSetNode* >( rootItem->child( tileSet ) );
+	
+	QList< TileImages > l;
+	//for( int i = TileConstants::Tile128; i < TileConstants::TileNodeTypeCount; i++ )
+	//for( int i = TileConstants::Tile128; i < TileConstants::TileTransition; i++ )
+	for( int i = TileConstants::Tile128; i < TileConstants::TileDisplacement; i++ )
+	{
+		TileConstants::TNodeTileType type = TileConstants::TNodeTileType( i );
+		l.clear();
+		m_tileBank->getTileImages( tileSet, type, l );
+
+		loadTileTypeNode( tileSet, type, l );
+	}
+}
+
+void TileModel::loadTileTypeNode( int tileSet, int type, const QList< TileImages > &l )
+{
+	TileSetNode *set = static_cast< TileSetNode* >( rootItem->child( tileSet ) );
+	TileTypeNode *ttn = static_cast< TileTypeNode* >( set->child( type ) );
+
+	int tile = 0;
+
+	QList< TileImages >::const_iterator itr = l.begin();
+	while( itr != l.end() )
+	{
+		const TileImages &images = *itr;
+
+		TileItemNode *item = NULL;
+
+		if( ( type == TileConstants::Tile128 ) || ( type == TileConstants::Tile256 ) )
+			item = new TileItemNode( TileConstants::TNodeTileType( type ), tile, ttn );
+		else
+			item = static_cast< TileItemNode* >( ttn->child( tile ) );
+
+		item->setTileFilename( TileConstants::TileDiffuse, images.diffuse );
+		item->setTileFilename( TileConstants::TileAdditive, images.additive );
+		item->setTileFilename( TileConstants::TileAlpha, images.alpha );
+
+		if( ( type == TileConstants::Tile128 ) || ( type == TileConstants::Tile256 ) )
+			ttn->appendRow( item );
+
+		++itr;
+		tile++;
+	}
 }

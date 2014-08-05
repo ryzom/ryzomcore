@@ -271,8 +271,7 @@ void TileEditorMainWindow::open()
 		return;
 
 	TileBankLoader loader;
-	bool b = true;
-	//loader.load( fn.toUtf8().constData(), m_tileModel, m_lands );
+	bool b = loader.load( fn.toUtf8().constData(), m_tileModel );
 
 	if( !b )
 	{
@@ -374,7 +373,7 @@ void TileEditorMainWindow::onTileSetAdd()
 		}
 
 		// Create and append the new tile set to the model.
-		TileSetNode *tileSet = model->createTileSetNode(text);
+		m_tileModel->addTileSet( text );
 		
 		// Retrieve how many rows there currently are and set the current index using that.
 		uint32 rows = model->rowCount();
@@ -684,8 +683,6 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 	QString selectedFilter;
 	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Tile Texture", "." , "Images (*.png);;All Files (*.*)", &selectedFilter, options);
 
-	int c = n->childCount();
-
 	TileConstants::TNodeTileType type = tabToType( tabId );
 
 	QStringListIterator itr( fileNames );
@@ -693,8 +690,9 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 
 	while( itr.hasNext() )
 	{
-		TileItemNode *newNode = m_tileModel->createItemNode( setId, type, c, TileConstants::TileDiffuse, itr.next() );
-		if( newNode == NULL )
+		bool b = m_tileModel->addTile( setId, type, itr.next(), TileConstants::TileDiffuse );
+
+		if( !b )
 		{
 			if( m_tileModel->hasError() )
 				error = m_tileModel->getLastError();
@@ -708,9 +706,7 @@ void TileEditorMainWindow::onActionAddTile(int tabId)
 			else
 				continue;
 		}
-	
-		n->appendRow( newNode );
-		c++;
+
 	}
 
 	QModelIndex rootIdx = m_tileModel->index( tabId, 0, m_ui->tileSetLV->currentIndex());
@@ -809,7 +805,15 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 void TileEditorMainWindow::onTileBankLoaded()
 {
 	m_ui->landLW->clear();
-	// load lands
+	QStringList lands;
+	m_tileModel->getLands( lands );
+	QStringListIterator itr( lands );
+	while( itr.hasNext() )
+	{
+		m_ui->landLW->addItem( itr.next() );
+	}
+
+	m_tileModel->onTBLoaded();
 
 	m_ui->listView128->reset();
 	m_ui->listView256->reset();
