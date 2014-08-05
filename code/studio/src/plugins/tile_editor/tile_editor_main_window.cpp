@@ -848,7 +848,15 @@ void TileEditorMainWindow::onTileBankLoaded()
 
 void TileEditorMainWindow::updateTab()
 {
-	m_ui->tileViewTabWidget->currentWidget()->repaint();
+	int idx = m_ui->tileViewTabWidget->currentIndex();
+
+	switch( idx )
+	{
+	case 0: m_ui->listView128->viewport()->repaint(); break;
+	case 1: m_ui->listView256->viewport()->repaint(); break;
+	case 2: m_ui->listViewTransition->viewport()->repaint(); break;
+	case 3: m_ui->listViewDisplacement->viewport()->repaint(); break;
+	}
 }
 
 TileModel* TileEditorMainWindow::createTileModel()
