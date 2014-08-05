@@ -199,6 +199,10 @@ void CFXAA::applyEffect()
 	CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
 	IDriver *drv = dru->getDriver();
 
+	// backup
+	bool fogEnabled = m_Driver->fogEnabled();
+	m_Driver->enableFog(false);
+
 	NL3D::ITexture *renderTarget = drv->getRenderTarget();
 	nlassert(renderTarget);
 	nlassert(renderTarget->isBloomTexture());
@@ -274,6 +278,9 @@ void CFXAA::applyEffect()
 	// deactivate program
 	drv->activeVertexProgram(NULL);
 	drv->activePixelProgram(NULL);
+
+	// restore
+	m_Driver->enableFog(fogEnabled);
 
 	// recycle render target
 	m_Driver->getRenderTargetManager().recycleRenderTarget(otherRenderTarget);

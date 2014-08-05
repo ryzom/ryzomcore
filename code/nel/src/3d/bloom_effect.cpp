@@ -232,6 +232,10 @@ void CBloomEffect::applyBloom()
 	CDriverUser *dru = static_cast<CDriverUser *>(_Driver);
 	IDriver *drv = dru->getDriver();
 
+	// backup
+	bool fogEnabled = _Driver->fogEnabled();
+	_Driver->enableFog(false);
+
 	NL3D::ITexture *renderTarget = drv->getRenderTarget();
 	nlassert(renderTarget);
 	nlassert(renderTarget->isBloomTexture());
@@ -285,6 +289,9 @@ void CBloomEffect::applyBloom()
 	_BlurMat.getObjectPtr()->setTexture(1, NULL);
 	_BlurMat.getObjectPtr()->setTexture(2, NULL);
 	_BlurMat.getObjectPtr()->setTexture(3, NULL);
+
+	// restore
+	_Driver->enableFog(fogEnabled);
 
 	// recycle render targets
 	_Driver->getRenderTargetManager().recycleRenderTarget(_BlurFinalTex);
