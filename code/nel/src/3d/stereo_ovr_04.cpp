@@ -1093,6 +1093,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 		CStereoDeviceInfo &deviceInfoOut = devicesOut[devicesOut.size() - 1];
 		ovrHmd hmd = ovrHmd_CreateDebug(ovrHmd_DK1);
 		CStereoOVRDeviceFactory *factory = new CStereoOVRDeviceFactory();
+		factory->DetectId = s_DetectId;
 		factory->DebugDevice = true;
 		factory->DebugDeviceType = ovrHmd_DK1;
 		deviceInfoOut.Factory = factory;
@@ -1110,6 +1111,7 @@ void CStereoOVR::listDevices(std::vector<CStereoDeviceInfo> &devicesOut)
 		CStereoDeviceInfo &deviceInfoOut = devicesOut[devicesOut.size() - 1];
 		ovrHmd hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
 		CStereoOVRDeviceFactory *factory = new CStereoOVRDeviceFactory();
+		factory->DetectId = s_DetectId;
 		factory->DebugDevice = true;
 		factory->DebugDeviceType = ovrHmd_DK2;
 		deviceInfoOut.Factory = factory;
