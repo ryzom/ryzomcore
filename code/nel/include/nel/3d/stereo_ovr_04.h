@@ -169,9 +169,9 @@ private:
 	NLMISC::CVector2f m_EyeUVScaleOffset[NL_OVR_EYE_COUNT][2];
 	float m_EyeViewAdjustX[NL_OVR_EYE_COUNT];
 
-	CVertexBuffer m_VB;
-	CIndexBuffer m_IB;
-	uint m_NbTris;
+	CVertexBuffer m_VB[NL_OVR_EYE_COUNT];
+	CIndexBuffer m_IB[NL_OVR_EYE_COUNT];
+	uint32 m_NbTris[NL_OVR_EYE_COUNT];
 
 	CFrustum m_ClippingFrustum[NL_STEREO_MAX_USER_CAMERAS];
 	CFrustum m_LeftFrustum[NL_STEREO_MAX_USER_CAMERAS];
@@ -190,7 +190,6 @@ private:
 	UMaterial m_UnlitMat;
 	NLMISC::CRefPtr<CVertexProgramOVR> m_VP;
 	NLMISC::CRefPtr<CPixelProgramOVR> m_PP;
-
 
 	/*
 	NL3D::UMaterial m_BarrelMat;

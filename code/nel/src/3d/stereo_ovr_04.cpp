@@ -144,7 +144,7 @@ public:
 	}
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), /*m_SceneTexture(NULL),*/ m_GUITexture(NULL), /*m_PixelProgram(NULL),*/ m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
 
@@ -276,12 +276,12 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		m_EyeUVScaleOffset[eye][1] = NLMISC::CVector2f(uvScaleOffset[1].x, uvScaleOffset[1].y);
 
 		// create distortion mesh vertex buffer
-		m_VB.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::TexCoord1Flag | CVertexBuffer::TexCoord2Flag | CVertexBuffer::PrimaryColorFlag);
-		m_VB.setPreferredMemory(CVertexBuffer::StaticPreferred, false);
-		m_VB.setNumVertices(meshData.VertexCount);
+		m_VB[eye].setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::TexCoord1Flag | CVertexBuffer::TexCoord2Flag | CVertexBuffer::PrimaryColorFlag);
+		m_VB[eye].setPreferredMemory(CVertexBuffer::StaticPreferred, true);
+		m_VB[eye].setNumVertices(meshData.VertexCount);
 		{
 			CVertexBufferReadWrite vba;
-			m_VB.lock(vba);
+			m_VB[eye].lock(vba);
 			for (uint i = 0; i < meshData.VertexCount; ++i)
 			{
 				ovrDistortionVertex &ov = meshData.pVertexData[i];
@@ -297,12 +297,12 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		}
 
 		// create distortion mesh index buffer
-		m_IB.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
-		m_IB.setPreferredMemory(CIndexBuffer::StaticPreferred, false);
-		m_IB.setNumIndexes(meshData.IndexCount);
+		m_IB[eye].setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
+		m_IB[eye].setPreferredMemory(CIndexBuffer::StaticPreferred, true);
+		m_IB[eye].setNumIndexes(meshData.IndexCount);
 		{
 			CIndexBufferReadWrite iba;
-			m_IB.lock(iba);
+			m_IB[eye].lock(iba);
 			for (uint i = 0; i + 2 < meshData.IndexCount; i += 3)
 			{
 				nlassert(meshData.pIndexData[i] < meshData.VertexCount);
@@ -313,7 +313,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		}
 
 		// set tri count
-		m_NbTris = meshData.IndexCount / 3;
+		m_NbTris[eye] = meshData.IndexCount / 3;
 
 		// destroy ovr distortion mesh
 		ovrHmd_DestroyDistortionMesh(&meshData);
@@ -768,15 +768,13 @@ bool CStereoOVR::beginRenderTarget()
 	// Begin 3D scene render target
 	if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
-		/*nlassert(!m_SceneTexture);
+		nlassert(!m_SceneTexture);
 		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
-		return true;*/
-		/*nldebug("OVR: Begin render target");*/
-		m_Driver->clearBuffers(CRGBA(64, 128, 64, 128));
-		m_Driver->beginDefaultRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
-		m_Driver->clearBuffers(CRGBA(128, 64, 64, 128));
 		return true;
+		/*nldebug("OVR: Begin render target");*/
+		//m_Driver->beginDefaultRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight); // DEBUG
+		//return true;
 	}
 
 	return false;
@@ -947,8 +945,55 @@ bool CStereoOVR::endRenderTarget()
 	// End 3D scene render target
 	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
+		nlassert(m_SceneTexture);
+
 		//nldebug("OVR: End render target");
-		m_Driver->endDefaultRenderTarget(NULL);
+		// m_Driver->endDefaultRenderTarget(NULL); // DEBUG
+
+		// end render target
+		CTextureUser texNull;
+		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(texNull);
+
+		// backup
+		bool fogEnabled = m_Driver->fogEnabled();
+		m_Driver->enableFog(false);
+
+		CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
+		IDriver *drv = dru->getDriver();
+		
+		// set matrix mode
+		CViewport vp;
+		m_Driver->setViewport(vp);
+		m_Driver->setMatrixMode2D11();
+
+		// DEBUG
+		for (uint eye = 0; eye < ovrEye_Count; ++eye)
+		{
+			NL3D::UMaterial umat = m_Driver->createMaterial();
+			umat.setZWrite(false);
+			// mat.setZFunc(UMaterial::always); // Not nice!
+			umat.setDoubleSided(true);
+			umat.setColor(NLMISC::CRGBA::Red);
+			umat.setBlend(false);
+			CMaterial *mat = umat.getObjectPtr();
+			mat->setTexture(0, m_SceneTexture->getITexture());
+			
+			//m_Driver->setPolygonMode(UDriver::Line);
+			drv->activeVertexBuffer(m_VB[eye]);
+			drv->activeIndexBuffer(m_IB[eye]);
+			drv->renderTriangles(*mat, 0, m_NbTris[eye]);
+			//m_Driver->setPolygonMode(UDriver::Filled);
+
+			m_Driver->deleteMaterial(umat);
+		}
+
+		// restore
+		m_Driver->enableFog(fogEnabled);
+
+		// recycle render target
+		m_Driver->getRenderTargetManager().recycleRenderTarget(m_SceneTexture);
+		m_SceneTexture = NULL;
+
 		return true;
 	}
 	/*if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
