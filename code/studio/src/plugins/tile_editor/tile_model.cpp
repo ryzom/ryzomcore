@@ -529,9 +529,7 @@ void TileModel::loadTileSet( int tileSet )
 	TileSetNode *set = static_cast< TileSetNode* >( rootItem->child( tileSet ) );
 	
 	QList< TileImages > l;
-	//for( int i = TileConstants::Tile128; i < TileConstants::TileNodeTypeCount; i++ )
-	//for( int i = TileConstants::Tile128; i < TileConstants::TileTransition; i++ )
-	for( int i = TileConstants::Tile128; i < TileConstants::TileDisplacement; i++ )
+	for( int i = TileConstants::Tile128; i < TileConstants::TileNodeTypeCount; i++ )
 	{
 		TileConstants::TNodeTileType type = TileConstants::TNodeTileType( i );
 		l.clear();
