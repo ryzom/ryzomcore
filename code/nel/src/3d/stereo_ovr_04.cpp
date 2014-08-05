@@ -160,6 +160,11 @@ static NLMISC::CVector2f toTex(NLMISC::CVector2f texCoord, NLMISC::CVector2f uvS
 	return vec;
 }
 
+static float lerp(float f0, float f1, float factor)
+{
+	return (f1 * factor) + (f0 * (1.0f - factor));
+}
+
 CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
@@ -291,6 +296,11 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		m_EyeUVScaleOffset[eye][0] = NLMISC::CVector2f(uvScaleOffset[0].x, uvScaleOffset[0].y);
 		m_EyeUVScaleOffset[eye][1] = NLMISC::CVector2f(uvScaleOffset[1].x, uvScaleOffset[1].y);
 
+		// chroma bugfix
+		float chromaFactor = 1.00f;
+		if (m_DevicePtr->Type == ovrHmd_DK2)
+			chromaFactor = 0.75f;
+
 		// create distortion mesh vertex buffer
 		m_VB[eye].setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::TexCoord1Flag | CVertexBuffer::TexCoord2Flag | CVertexBuffer::PrimaryColorFlag);
 		m_VB[eye].setPreferredMemory(CVertexBuffer::StaticPreferred, true);
@@ -302,9 +312,13 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 			{
 				ovrDistortionVertex &ov = meshData.pVertexData[i];
 				vba.setVertexCoord(i, (ov.ScreenPosNDC.x + 1.0f) * 0.5f, (ov.ScreenPosNDC.y + 1.0f) * 0.5f, 0.5f);
-				NLMISC::CVector2f texR(ov.TanEyeAnglesR.x, ov.TanEyeAnglesR.y);
+				NLMISC::CVector2f texR(
+					lerp(ov.TanEyeAnglesG.x, ov.TanEyeAnglesR.x, chromaFactor), 
+					lerp(ov.TanEyeAnglesG.y, ov.TanEyeAnglesR.y, chromaFactor));
 				NLMISC::CVector2f texG(ov.TanEyeAnglesG.x, ov.TanEyeAnglesG.y);
-				NLMISC::CVector2f texB(ov.TanEyeAnglesB.x, ov.TanEyeAnglesB.y);
+				NLMISC::CVector2f texB(
+					lerp(ov.TanEyeAnglesG.x, ov.TanEyeAnglesB.x, chromaFactor), 
+					lerp(ov.TanEyeAnglesG.y, ov.TanEyeAnglesB.y, chromaFactor));
 				texR = toTex(texR, m_EyeUVScaleOffset[eye]);
 				texG = toTex(texG, m_EyeUVScaleOffset[eye]);
 				texB = toTex(texB, m_EyeUVScaleOffset[eye]);
@@ -345,6 +359,8 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 	// 2014/08/04 22:28:39 DBG 3040 snowballs_client.exe stereo_ovr_04.cpp 235 NL3D::CStereoOVR::CStereoOVR : OVR: HFOV: 2.339905, AR: 0.916641
 	// 2014/08/04 20:22:03 DBG 30e4 snowballs_client.exe stereo_ovr_04.cpp 222 NL3D::CStereoOVR::CStereoOVR : OVR: EyeViewport: x: 0.500000, y: 0.000000, w: 0.500000, h: 1.000000
 	// 2014/08/04 22:28:39 DBG 3040 snowballs_client.exe stereo_ovr_04.cpp 235 NL3D::CStereoOVR::CStereoOVR : OVR: HFOV: 2.339905, AR: 0.916641
+
+	ovrHmd_RecenterPose(m_DevicePtr);
 
 	// DEBUG EARLY EXIT
 	/*nldebug("OVR: Early exit");
@@ -1017,7 +1033,7 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 		NLMISC::CMatrix matovr;
 		matovr.setRot(NLMISC::CQuat(quatovr.x, quatovr.y, quatovr.z, quatovr.w));
 		NLMISC::CMatrix matr;
-		matr.rotateZ(NLMISC::Pi);
+		// matr.rotateZ(NLMISC::Pi); // uncomment when backwards ...
 		matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
 		NLMISC::CMatrix matnel = matr * matovr * coordsys;
 		NLMISC::CQuat finalquat = matnel.getRot();
