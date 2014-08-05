@@ -264,7 +264,7 @@ void TileEditorMainWindow::open()
 {
 	QString fn = QFileDialog::getOpenFileName( this,
 												tr( "Loading tilebank" ),
-												"",
+												m_lastOpenDir,
 												tr( "tilebank files (*.tilebank)" ) );
 
 	if( fn.isEmpty() )
@@ -284,6 +284,9 @@ void TileEditorMainWindow::open()
 	onTileBankLoaded();
 
 	m_fileName = fn;
+
+	int idx = fn.lastIndexOf( '/' );
+	m_lastOpenDir = fn.left( idx );
 }
 
 void TileEditorMainWindow::onZoomFactor(int level)

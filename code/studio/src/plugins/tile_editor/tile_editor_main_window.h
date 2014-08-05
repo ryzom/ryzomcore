@@ -122,6 +122,7 @@ private:
 	};
 
 	QString m_fileName;
+	QString m_lastOpenDir;
 };
 
 #endif // TILE_EDITOR_MAIN_WINDOW_H
