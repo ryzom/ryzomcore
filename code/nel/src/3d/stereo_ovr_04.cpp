@@ -772,11 +772,11 @@ bool CStereoOVR::beginRenderTarget()
 		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
 		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
 		return true;*/
-		/*nldebug("OVR: Begin render target");
-		m_Driver->clearBuffers(CRGBA(64, 64, 128, 128));
-		m_Driver->beginDefaultRenderTarget();
+		/*nldebug("OVR: Begin render target");*/
+		m_Driver->clearBuffers(CRGBA(64, 128, 64, 128));
+		m_Driver->beginDefaultRenderTarget(m_RenderTargetWidth, m_RenderTargetHeight);
 		m_Driver->clearBuffers(CRGBA(128, 64, 64, 128));
-		return true;*/
+		return true;
 	}
 
 	return false;
@@ -947,9 +947,9 @@ bool CStereoOVR::endRenderTarget()
 	// End 3D scene render target
 	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
-		/*nldebug("OVR: End render target");
+		//nldebug("OVR: End render target");
 		m_Driver->endDefaultRenderTarget(NULL);
-		return true;*/
+		return true;
 	}
 	/*if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
@@ -1046,9 +1046,9 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 {
 	// broken
 
-	NLMISC::CQuat quat;
+	/*NLMISC::CQuat quat;
 	quat.identity();
-	return quat;
+	return quat;*/
 
 	if (m_OrientationCached)
 		return m_OrientationCache;
@@ -1069,6 +1069,7 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 		NLMISC::CMatrix matovr;
 		matovr.setRot(NLMISC::CQuat(quatovr.x, quatovr.y, quatovr.z, quatovr.w));
 		NLMISC::CMatrix matr;
+		matr.rotateZ(NLMISC::Pi);
 		matr.rotateX(NLMISC::Pi * 0.5f); // fix this properly... :) (note: removing this allows you to use rift while lying down)
 		NLMISC::CMatrix matnel = matr * matovr * coordsys;
 		NLMISC::CQuat finalquat = matnel.getRot();
