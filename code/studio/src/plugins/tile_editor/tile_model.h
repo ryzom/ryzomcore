@@ -117,6 +117,8 @@ public:
 	void setTexturePath( const QString &path );
 	QString getTexturePath() const;
 
+	void setAlphaRot( int rotation );
+
 	void serial( NLMISC::IStream &f );
 
 	QString getLastError() const;

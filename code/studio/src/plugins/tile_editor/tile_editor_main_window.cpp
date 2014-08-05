@@ -335,7 +335,7 @@ void TileEditorMainWindow::onZoomFactor(int level)
 
 void TileEditorMainWindow::onRotate( int id )
 {
-	TileItemNode::setAlphaRot( id * 90 );
+	m_tileModel->setAlphaRot( id );
 }
 
 void TileEditorMainWindow::onActionAddTile(bool triggered)

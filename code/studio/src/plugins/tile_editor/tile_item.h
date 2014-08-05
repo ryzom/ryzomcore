@@ -117,7 +117,6 @@ public:
 
 	static void setDisplayChannel( TileConstants::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileConstants::TTileChannel displayChannel(){ return s_displayChannel; }
-	static void setAlphaRot( int rot ){ s_alphaRot = rot; }
 
 	QVariant pixmap( TileConstants::TTileChannel channel ) const;
 
@@ -126,7 +125,6 @@ private:
 	QMap<TileConstants::TTileChannel, TileWidget*> m_tileWidget;
 
 	static TileConstants::TTileChannel s_displayChannel;
-	static int s_alphaRot;
 
 	int m_id;
 

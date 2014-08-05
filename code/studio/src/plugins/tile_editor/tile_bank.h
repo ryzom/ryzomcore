@@ -74,6 +74,8 @@ public:
 	void setTexturePath( const QString &path );
 	QString getTexturePath() const;
 
+	void setRotation( int rotation );
+
 	void serial( NLMISC::IStream &f );
 	
 	bool hasError() const{ return m_hasError; }
@@ -93,6 +95,7 @@ private:
 	TileBankPvt *m_pvt;
 	QString m_lastError;
 	bool m_hasError;
+	int m_rotation;
 };
 
 #endif

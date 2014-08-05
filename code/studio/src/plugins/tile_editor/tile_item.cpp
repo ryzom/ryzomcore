@@ -298,7 +298,6 @@ private:
 };
 
 TileConstants::TTileChannel TileItemNode::s_displayChannel = TileConstants::TileDiffuse;
-int TileItemNode::s_alphaRot = 0;
 
 TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, Node *parent )
 {

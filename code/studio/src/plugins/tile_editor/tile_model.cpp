@@ -472,6 +472,11 @@ QString TileModel::getTexturePath() const
 	return m_tileBank->getTexturePath();
 }
 
+void TileModel::setAlphaRot( int rotation )
+{
+	m_tileBank->setRotation( rotation );
+}
+
 QString TileModel::getLastError() const{
 	return m_tileBank->getLastError();
 }

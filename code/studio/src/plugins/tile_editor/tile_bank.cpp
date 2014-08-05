@@ -198,6 +198,7 @@ TileBank::TileBank()
 {
 	m_pvt = new TileBankPvt();
 	resetError();
+	m_rotation = 0;
 }
 
 TileBank::~TileBank()
@@ -378,6 +379,16 @@ bool TileBank::setTile( int tileset, int tile, const QString &name, const QVaria
 	NL3D::CTileBorder border;
 	m_pvt->buildBorder( pm, border );
 
+	if( ( type == TileConstants::TileTransition ) && ( channel == TileConstants::TileAlpha ) )
+	{
+		int rotBits = m_rotation;
+		while( rotBits > 0 )
+		{
+			border.rotate();
+			rotBits--;
+		}
+	}
+
 	QString msg;
 	NL3D::CTileSet::TError error = m_pvt->checkTile( set, tile, type, border, channelToTBitmap( channel ), msg );
 
@@ -387,7 +398,7 @@ bool TileBank::setTile( int tileset, int tile, const QString &name, const QVaria
 		if( error == NL3D::CTileSet::addFirstA128128 )
 			set->setBorder( channelToTBitmap( channel ), border );
 
-		m_pvt->setTile( set, tile, 0 /* rotation */, name, channelToTBitmap( channel ), type, border );
+		m_pvt->setTile( set, tile, m_rotation, name, channelToTBitmap( channel ), type, border );
 
 		return true;
 	}
@@ -616,6 +627,11 @@ void TileBank::setTexturePath( const QString &path )
 QString TileBank::getTexturePath() const
 {
 	return m_pvt->m_bank.getAbsPath().c_str();
+}
+
+void TileBank::setRotation( int rotation )
+{
+	m_rotation = rotation;
 }
 
 void TileBank::serial( NLMISC::IStream &f )
