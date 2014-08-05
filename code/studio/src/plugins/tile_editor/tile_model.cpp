@@ -301,6 +301,7 @@ void TileModel::clear()
 
 void TileModel::onTBLoaded()
 {
+	clear();
 	loadTileSets();
 }
 
