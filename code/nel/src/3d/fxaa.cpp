@@ -245,6 +245,7 @@ void CFXAA::applyEffect()
 	dru->setRenderTarget(texNull);
 	drv->swapTextureHandle(*renderTarget, *otherRenderTarget->getITexture());
 	drv->setRenderTarget(renderTarget);
+	m_Driver->setMatrixMode2D11();
 
 	// debug
 	// m_Driver->clearBuffers(CRGBA(128, 128, 128, 128));

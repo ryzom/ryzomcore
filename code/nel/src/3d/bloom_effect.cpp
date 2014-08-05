@@ -274,6 +274,7 @@ void CBloomEffect::applyBloom()
 
 	// apply blur with a blend operation
 	drv->setRenderTarget(renderTarget);
+	_Driver->setMatrixMode2D11();
 	applyBlur();
 
 	// cleanup material texture references
@@ -356,6 +357,7 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 		nlwarning("setRenderTarget return false with blur texture for bloom effect\n");
 		return;
 	}
+	_Driver->setMatrixMode2D11();
 
 	// initialize vertex program
 	drvInternal->activeVertexProgram(TextureOffsetVertexProgram);
