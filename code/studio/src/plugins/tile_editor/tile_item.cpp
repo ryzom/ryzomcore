@@ -300,24 +300,17 @@ private:
 TileConstants::TTileChannel TileItemNode::s_displayChannel = TileConstants::TileDiffuse;
 int TileItemNode::s_alphaRot = 0;
 
-TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, TileConstants::TTileChannel channel, QString filename, Node *parent)
-{
-	m_id = tileId;
-	m_parentItem = parent;
-	//nlinfo("dispalying tile %d - %s", m_tileId, m_tileFilename[TileModel::TileDiffuse].toAscii().data());
-
-	pvt = new TileItemNodePvt();
-	m_hasError = false;
-
-	setTileFilename( channel, filename );
-}
-
 TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, Node *parent )
 {
 	m_id = tileId;
 	m_parentItem = parent;
 	pvt = new TileItemNodePvt();
 	m_hasError = false;
+
+	for( int i = 0; i < TileConstants::TileChannelCount; i++ )
+	{
+		setTileFilename( TileConstants::TTileChannel( i ), "" );
+	}
 }
 
 TileItemNode::~TileItemNode()

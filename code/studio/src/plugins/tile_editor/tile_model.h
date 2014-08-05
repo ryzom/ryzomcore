@@ -79,8 +79,6 @@ public:
 
 	void swapRows( int a, int b );
 
-	TileItemNode *createItemNode( int idx, TileConstants::TNodeTileType type, int id, TileConstants::TTileChannel channel, const QString &fileName );
-
 	static const char *getTileTypeName(TileConstants::TNodeTileType type);
 	static uint32 getTileTypeSize(TileConstants::TNodeTileType type);
 
