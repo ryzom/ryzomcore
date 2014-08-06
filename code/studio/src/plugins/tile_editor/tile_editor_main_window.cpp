@@ -827,6 +827,8 @@ void TileEditorMainWindow::onActionReplaceImage( int tabId )
 	QString fn = fileName.replace( '\\', '/' );
 	int slashIdx = fn.lastIndexOf( '/' );
 	m_lastTileDir = fn.left( slashIdx );
+
+	updateTab();
 }
 
 void TileEditorMainWindow::onTileBankLoaded()
