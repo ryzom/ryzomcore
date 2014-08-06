@@ -37,12 +37,19 @@
 
 #include "land_edit_dialog.h"
 
+#include <QTimer>
+
 TileEditorMainWindow::TileEditorMainWindow(QWidget *parent)
 	: QMainWindow(parent),
 	m_ui(new Ui::TileEditorMainWindow)
 {
 	m_ui->setupUi(this);
 	m_undoStack = new QUndoStack(this);
+
+	if( !TileItemNode::loadEmptyPixmap() )
+	{
+		QTimer::singleShot( 0, this, SLOT( onEmptyImageLoadFailed() ) );
+	}
 
 	// Retrieve the menu manager
 	Core::ICore *core = Core::ICore::instance();
@@ -339,6 +346,13 @@ void TileEditorMainWindow::onZoomFactor(int level)
 void TileEditorMainWindow::onRotate( int id )
 {
 	m_tileModel->setAlphaRot( id );
+}
+
+void TileEditorMainWindow::onEmptyImageLoadFailed()
+{
+	QMessageBox::critical( this,
+							tr( "Empty image load failed" ),
+							tr( "Couldn't load the image for empty tiles :(" ) );
 }
 
 void TileEditorMainWindow::onActionAddTile(bool triggered)

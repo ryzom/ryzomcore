@@ -271,6 +271,12 @@ public:
 
 	bool loadImage( TileConstants::TTileChannel channel, const QString &fn )
 	{
+		if( fn.isEmpty() )
+		{
+			pixmaps[ channel ] = TileItemNodePvt::emptyPm();
+			return true;
+		}
+
 		QPixmap temp;
 		bool b = temp.load( fn );
 
@@ -284,6 +290,17 @@ public:
 		return true;
 	}
 
+	static bool loadEmptyImage()
+	{
+		bool b = empty.load( ":/placeHolder/images/empty_image.png" );
+		if( !b )
+		{
+			empty = QPixmap();
+		}
+
+		return b;
+	}
+
 	void clearImage( TileConstants::TTileChannel channel )
 	{
 		pixmaps[ channel ] = QPixmap();
@@ -293,10 +310,15 @@ public:
 		return pixmaps[ channel ];
 	}
 
+	static QPixmap& emptyPm(){ return empty; }
+
 private:
 	QPixmap pixmaps[ TileConstants::TileChannelCount ];
+	static QPixmap empty;
+
 };
 
+QPixmap TileItemNodePvt::empty = QPixmap();
 TileConstants::TTileChannel TileItemNode::s_displayChannel = TileConstants::TileDiffuse;
 
 TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, Node *parent )
@@ -321,14 +343,7 @@ TileItemNode::~TileItemNode()
 
 bool TileItemNode::setTileFilename(TileConstants::TTileChannel channel, QString filename)
 {
-	QString fn = filename;
-
-	if( filename.isEmpty() || ( filename == "empty" ) )
-	{
-		fn = ":/placeHolder/images/empty_image.png";
-	}
-
-	bool b = pvt->loadImage( channel, fn );
+	bool b = pvt->loadImage( channel, filename );
 	if( !b )
 		return false;
 
@@ -344,6 +359,11 @@ QString TileItemNode::getTileFilename(TileConstants::TTileChannel channel)
 		return "";
 
 	return itr.value();
+}
+
+bool TileItemNode::loadEmptyPixmap()
+{
+	return TileItemNodePvt::loadEmptyImage();
 }
 
 QVariant TileItemNode::data(int column, int role) const

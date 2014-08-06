@@ -117,6 +117,7 @@ public:
 
 	static void setDisplayChannel( TileConstants::TTileChannel channel ){ s_displayChannel = channel; }
 	static TileConstants::TTileChannel displayChannel(){ return s_displayChannel; }
+	static bool loadEmptyPixmap();
 
 	QVariant pixmap( TileConstants::TTileChannel channel ) const;
 

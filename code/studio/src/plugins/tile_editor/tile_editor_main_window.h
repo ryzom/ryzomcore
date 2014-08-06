@@ -80,6 +80,8 @@ private Q_SLOTS:
 	void onZoomFactor(int level);
 	void onRotate(int id);
 
+	void onEmptyImageLoadFailed();
+
 private:
 	void onActionAddTile(int tabId);
 	void onActionDeleteTile(int tabId);
