@@ -269,7 +269,7 @@ public:
 	{
 	}
 
-	bool loadImage( TileConstants::TTileChannel channel, const QString &fn, bool empty = false )
+	bool loadImage( TileConstants::TTileChannel channel, const QString &fn )
 	{
 		QPixmap temp;
 		bool b = temp.load( fn );
@@ -322,15 +322,13 @@ TileItemNode::~TileItemNode()
 bool TileItemNode::setTileFilename(TileConstants::TTileChannel channel, QString filename)
 {
 	QString fn = filename;
-	bool empty = false;
 
 	if( filename.isEmpty() || ( filename == "empty" ) )
 	{
 		fn = ":/placeHolder/images/empty_image.png";
-		empty = true;
 	}
 
-	bool b = pvt->loadImage( channel, fn, empty );
+	bool b = pvt->loadImage( channel, fn );
 	if( !b )
 		return false;
 
