@@ -72,6 +72,11 @@ public:
 	void getTextures();
 	void recycleTextures();
 
+	/// Attach the driver to the display
+	virtual void attachToDisplay();
+	/// Detach the driver from the display
+	virtual void detachFromDisplay();
+
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height);
 	/// Set latest camera position etcetera

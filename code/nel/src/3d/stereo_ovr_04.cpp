@@ -165,7 +165,7 @@ static float lerp(float f0, float f1, float factor)
 	return (f1 * factor) + (f0 * (1.0f - factor));
 }
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NULL), m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f), m_AttachedDisplay(false)
 {
 	nlctassert(NL_OVR_EYE_COUNT == ovrEye_Count);
 
@@ -371,6 +371,11 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 
 CStereoOVR::~CStereoOVR()
 {
+	if (m_AttachedDisplay)
+	{
+		detachFromDisplay();
+	}
+
 	if (!m_UnlitMat.empty())
 	{
 		m_Driver->deleteMaterial(m_UnlitMat);
@@ -437,6 +442,38 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 		return true;
 	}
 	return false;
+}
+
+void CStereoOVR::attachToDisplay()
+{
+	nldebug("OVR: Attach to display '%s'", m_DevicePtr->DisplayDeviceName);
+
+	if (!m_AttachedDisplay)
+	{
+		m_Driver->getCurrentScreenMode(m_OriginalMode);
+		m_Driver->getWindowPos(m_OriginalWinPosX, m_OriginalWinPosY);
+	}
+
+	UDriver::CMode mode;
+	mode.DisplayDevice = m_DevicePtr->DisplayDeviceName;
+	mode.Windowed = false;
+	mode.Width = m_DevicePtr->Resolution.w;
+	mode.Height = m_DevicePtr->Resolution.h;
+	m_Driver->setMode(mode);
+	m_AttachedDisplay = true;
+}
+
+void CStereoOVR::detachFromDisplay()
+{
+	if (!m_OriginalMode.Windowed)
+	{
+		m_OriginalMode.Windowed = true;
+		m_Driver->setMode(m_OriginalMode);
+		m_OriginalMode.Windowed = false;
+	}
+	m_Driver->setMode(m_OriginalMode);
+	m_Driver->setWindowPos(m_OriginalWinPosX, m_OriginalWinPosY);
+	m_AttachedDisplay = false;
 }
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
@@ -679,6 +716,8 @@ bool CStereoOVR::isSceneFirst()
 	{
 	case 3:
 		return true;
+	case 4:
+		return false;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
@@ -687,6 +726,8 @@ bool CStereoOVR::isSceneLast()
 {
 	switch (m_Stage)
 	{
+	case 3:
+		return false;
 	case 4:
 		return true;
 	}

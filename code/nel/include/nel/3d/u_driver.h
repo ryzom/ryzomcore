@@ -92,6 +92,7 @@ public:
 	/// A Graphic Mode descriptor.
 	struct CMode
 	{
+		std::string			DisplayDevice;
 		bool				Windowed;
 		uint16				Width;
 		uint16				Height;
@@ -108,8 +109,9 @@ public:
 			Frequency = 0;
 			AntiAlias = -1;
 		}
-		CMode(uint16 w, uint16 h, uint8 d, bool windowed= true, uint frequency = 0, sint8 aa = -1)
+		CMode(uint16 w, uint16 h, uint8 d, bool windowed= true, uint frequency = 0, sint8 aa = -1, const std::string &displayDevice = std::string())
 		{
+			DisplayDevice = displayDevice;
 			Windowed = windowed;
 			Width = w;
 			Height = h;

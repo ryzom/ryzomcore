@@ -211,6 +211,16 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	}
 }
 
+void CStereoDebugger::attachToDisplay()
+{
+	
+}
+
+void CStereoDebugger::detachFromDisplay()
+{
+
+}
+
 void CStereoDebugger::getTextures()
 {
 	nlassert(!m_LeftTexU);
@@ -437,12 +447,12 @@ bool CStereoDebugger::wantInterface2D()
 
 bool CStereoDebugger::isSceneFirst()
 {
-	return m_Stage == 1;
+	return m_Stage != 3;
 }
 
 bool CStereoDebugger::isSceneLast()
 {
-	return m_Stage == 2;
+	return m_Stage != 3;
 }
 
 /// Returns true if a new render target was set, always fase if not using render targets

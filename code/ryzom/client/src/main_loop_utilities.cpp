@@ -20,6 +20,7 @@
 #include <nel/3d/u_driver.h>
 #include <nel/3d/u_cloud_scape.h>
 #include <nel/3d/fxaa.h>
+#include <nel/3d/stereo_display.h>
 
 #include "game_share/scenario_entry_points.h"
 
@@ -60,6 +61,8 @@ void updateFromClientCfg()
 		nldebug("Apply VR device change");
 		releaseStereoDisplayDevice();
 		initStereoDisplayDevice();
+		if (StereoDisplay)
+			StereoDisplay->attachToDisplay();
 	}
 
 	// GRAPHICS - GENERAL
@@ -70,8 +73,11 @@ void updateFromClientCfg()
 		(ClientCfg.Depth != LastClientCfg.Depth)		||
 		(ClientCfg.Frequency != LastClientCfg.Frequency))
 	{
-		setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
-									ClientCfg.Windowed, ClientCfg.Frequency));
+		if (!StereoDisplay) // TODO
+		{
+			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
+				ClientCfg.Windowed, ClientCfg.Frequency));
+		}
 	}
 
 	if (ClientCfg.DivideTextureSizeBy2 != LastClientCfg.DivideTextureSizeBy2)

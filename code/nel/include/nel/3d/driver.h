@@ -72,6 +72,7 @@ struct IOcclusionQuery;
 /// A Graphic Mode descriptor.
 struct GfxMode
 {
+	std::string			DisplayDevice;
 	bool				OffScreen;
 	bool				Windowed;
 	uint16				Width;
@@ -90,7 +91,7 @@ struct GfxMode
 		Frequency = 0;
 		AntiAlias = -1;
 	}
-	GfxMode(uint16 w, uint16 h, uint8 d, bool windowed = true, bool offscreen = false, uint frequency = 0, sint8 aa = -1);
+	GfxMode(uint16 w, uint16 h, uint8 d, bool windowed = true, bool offscreen = false, uint frequency = 0, sint8 aa = -1, const std::string &displayDevice = std::string());
 };
 
 // ****************************************************************************

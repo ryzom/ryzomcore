@@ -629,11 +629,8 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 		// clip
 		ClipTrav.traverse();
 
-		if (doTrav)
-		{
-			// animDetail
-			AnimDetailTrav.traverse();
-		}
+		// animDetail
+		AnimDetailTrav.traverse();
 
 		// loadBalance
 		LoadBalancingTrav.traverse();

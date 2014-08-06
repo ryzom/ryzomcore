@@ -1271,9 +1271,61 @@ static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 
 // ***************************************************************************
 
+#if defined(NL_OS_WINDOWS)
+
+struct CMonitorEnumParams
+{
+public:
+	HWND Window;
+	const char *deviceName;
+};
+
+static BOOL CALLBACK monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData)
+{
+	CMonitorEnumParams *p = reinterpret_cast<CMonitorEnumParams *>(dwData);
+
+	MONITORINFOEXA monitorInfo;
+	memset(&monitorInfo, 0, sizeof(monitorInfo));
+	monitorInfo.cbSize = sizeof(monitorInfo);
+	GetMonitorInfoA(hMonitor, &monitorInfo);
+	nldebug("3D: Monitor: '%s'", monitorInfo.szDevice);
+
+	size_t devLen = strlen(monitorInfo.szDevice);
+	size_t targetLen = strlen(p->deviceName);
+
+	nlassert(devLen < 32);
+	size_t minLen = min(devLen, targetLen);
+	if (!memcmp(monitorInfo.szDevice, p->deviceName, minLen))
+	{
+		if (devLen == targetLen
+			|| (devLen < targetLen && (p->deviceName[minLen] == '\\'))
+			|| (devLen > targetLen && (monitorInfo.szDevice[minLen] == '\\')))
+		{
+			nldebug("3D: Remap '%s' to '%s'", p->deviceName, monitorInfo.szDevice);
+			nldebug("Found our monitor at %i, %i", monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top);
+			LONG dwStyle = GetWindowLong(p->Window, GWL_STYLE);
+			SetWindowLong(p->Window, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
+			SetWindowPos(p->Window, NULL, 
+				monitorInfo.rcMonitor.left, 
+				monitorInfo.rcMonitor.top, 
+				monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left, 
+				monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+				SWP_FRAMECHANGED);
+			return FALSE;
+		}
+	}
+	return TRUE; // continue
+};
+
+#endif
+
+// ***************************************************************************
+
 bool CDriverGL::setScreenMode(const GfxMode &mode)
 {
 	H_AUTO_OGL(CDriverGL_setScreenMode)
+
+	nldebug("3D: setScreenMode");
 
 	if (mode.Windowed)
 	{
@@ -1284,13 +1336,16 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		return true;
 	}
 
+	if (!mode.DisplayDevice.empty())
+		restoreScreenMode();
+
 	// save previous screen mode only if switching from windowed to fullscreen
 	if (_CurrentMode.Windowed)
 		saveScreenMode();
 
 	// if switching exactly to the same screen mode, doesn't change it
 	GfxMode previousMode;
-	if (getCurrentScreenMode(previousMode)
+	if (mode.DisplayDevice.empty() && getCurrentScreenMode(previousMode)
 		&& mode.Width == previousMode.Width
 		&& mode.Height == previousMode.Height
 		&& mode.Depth == previousMode.Depth
@@ -1299,7 +1354,9 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 #if defined(NL_OS_WINDOWS)
 
-	DEVMODE devMode;
+	const char *deviceName = mode.DisplayDevice.c_str();
+
+	DEVMODEA devMode;
 	memset(&devMode, 0, sizeof(DEVMODE));
 	devMode.dmSize        = sizeof(DEVMODE);
 	devMode.dmDriverExtra = 0;
@@ -1307,22 +1364,42 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 	devMode.dmPelsWidth   = mode.Width;
 	devMode.dmPelsHeight  = mode.Height;
 
-	if(mode.Depth > 0)
+	if (mode.Depth > 0)
 	{
 		devMode.dmBitsPerPel  = mode.Depth;
 		devMode.dmFields     |= DM_BITSPERPEL;
 	}
 
-	if(mode.Frequency > 0)
+	if (mode.Frequency > 0)
 	{
 		devMode.dmDisplayFrequency  = mode.Frequency;
 		devMode.dmFields           |= DM_DISPLAYFREQUENCY;
 	}
-
-	if (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+	
+	if (deviceName[0])
 	{
-		nlwarning("3D: Fullscreen mode switch failed");
-		return false;
+		// First attempt exclusive fullscreen
+		nldebug("3D: ChangeDisplaySettingsEx");
+		LONG resex;
+		if ((resex = ChangeDisplaySettingsExA(deviceName, &devMode, NULL, CDS_FULLSCREEN, NULL)) != DISP_CHANGE_SUCCESSFUL)
+		{
+			nlwarning("3D: Fullscreen mode switch failed (%i)", (sint)resex);
+			// Workaround, resize to monitor and make borderless
+			CMonitorEnumParams p;
+			p.deviceName = deviceName;
+			p.Window = _win;
+			EnumDisplayMonitors(NULL, NULL, monitorEnumProcFullscreen, (LPARAM)&p);
+			return false; // FIXME: This is a hack, don't process further
+		}
+	}
+	else
+	{
+		nldebug("3D: ChangeDisplaySettings");
+		if (ChangeDisplaySettingsA(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
+		{
+			nlwarning("3D: Fullscreen mode switch failed");
+			return false;
+		}
 	}
 
 #elif defined(NL_OS_MAC)

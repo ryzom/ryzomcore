@@ -31,6 +31,7 @@
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
+#include <nel/3d/stereo_display.h>
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
@@ -217,6 +218,9 @@ void connectionRestaureVideoMode ()
 		setVideoMode(mode);
 	}
 
+	if (StereoDisplay)
+		StereoDisplay->attachToDisplay();
+
 	// And setup hardware mouse if we have to
 	InitMouseWithCursor (ClientCfg.HardwareCursor);
 	SetMouseFreeLook ();
@@ -253,6 +257,9 @@ void	setOutGameFullScreen()
 	// NB: don't setup fullscreen if player wants to play in window
 	if (!ClientCfg.Local && ClientCfg.SelectCharacter == -1)
 	{
+		if (StereoDisplay)
+			StereoDisplay->detachFromDisplay();
+
 		UDriver::CMode currMode;
 		Driver->getCurrentScreenMode(currMode);
 		UDriver::CMode wantedMode;

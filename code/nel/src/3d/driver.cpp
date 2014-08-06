@@ -123,8 +123,9 @@ bool		IDriver::release(void)
 
 
 // ***************************************************************************
-GfxMode::GfxMode(uint16 w, uint16 h, uint8 d, bool windowed, bool offscreen, uint frequency, sint8 aa)
+GfxMode::GfxMode(uint16 w, uint16 h, uint8 d, bool windowed, bool offscreen, uint frequency, sint8 aa, const std::string &displayDevice)
 {
+	DisplayDevice = displayDevice;
 	Windowed = windowed;
 	Width = w;
 	Height = h;

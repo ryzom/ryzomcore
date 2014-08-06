@@ -59,6 +59,7 @@
 #include <nel/3d/frustum.h>
 #include <nel/3d/viewport.h>
 #include <nel/3d/u_material.h>
+#include <nel/3d/u_driver.h>
 #include <nel/3d/index_buffer.h>
 #include <nel/3d/vertex_buffer.h>
 
@@ -88,6 +89,11 @@ public:
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver);
+
+	/// Attach the driver to the display
+	virtual void attachToDisplay();
+	/// Detach the driver from the display
+	virtual void detachFromDisplay();
 
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height);
@@ -193,6 +199,11 @@ private:
 	NL3D::CTextureUser *m_SceneTexture;
 
 	UMaterial m_UnlitMat;
+
+	UDriver::CMode m_OriginalMode;
+	sint32 m_OriginalWinPosX;
+	sint32 m_OriginalWinPosY;
+	bool m_AttachedDisplay;
 
 	/*
 	NL3D::UMaterial m_BarrelMat;

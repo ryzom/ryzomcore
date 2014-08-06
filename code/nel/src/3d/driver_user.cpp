@@ -249,7 +249,7 @@ bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool 
 	NL3D_HAUTO_UI_DRIVER;
 
 	// window init.
-	if (_Driver->setDisplay(wnd, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias), show, resizeable))
+	if (_Driver->setDisplay(wnd, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias, mode.DisplayDevice), show, resizeable))
 	{
 		// Always true
 		nlverify (activate());
@@ -293,7 +293,7 @@ bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool 
 // ***************************************************************************
 bool CDriverUser::setMode(const CMode& mode)
 {
-	return _Driver->setMode(GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias));
+	return _Driver->setMode(GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias, mode.DisplayDevice));
 }
 
 // ----------------------------------------------------------------------------
@@ -319,7 +319,7 @@ bool CDriverUser::getModes(std::vector<CMode> &modes)
 	bool res = _Driver->getModes(vTmp);
 	modes.clear();
 	for (uint i = 0; i < vTmp.size(); ++i)
-		modes.push_back(CMode(vTmp[i].Width, vTmp[i].Height, vTmp[i].Depth, vTmp[i].Windowed, vTmp[i].Frequency, vTmp[i].AntiAlias));
+		modes.push_back(CMode(vTmp[i].Width, vTmp[i].Height, vTmp[i].Depth, vTmp[i].Windowed, vTmp[i].Frequency, vTmp[i].AntiAlias, vTmp[i].DisplayDevice));
 
 	std::sort(modes.begin(), modes.end(), CModeSorter());
 
