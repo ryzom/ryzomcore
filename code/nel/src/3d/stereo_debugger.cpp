@@ -415,6 +415,12 @@ bool CStereoDebugger::wantScene()
 	return m_Stage != 3;
 }
 
+/// The 3D scene end (after multiple wantScene)
+bool CStereoDebugger::wantSceneEffects()
+{
+	return m_Stage != 3;
+}
+
 /// Interface within the 3D scene
 bool CStereoDebugger::wantInterface3D()
 {
@@ -427,6 +433,16 @@ bool CStereoDebugger::wantInterface2D()
 {
 	m_SubStage = 4;
 	return m_Stage == 3;
+}
+
+bool CStereoDebugger::isSceneFirst()
+{
+	return m_Stage == 1;
+}
+
+bool CStereoDebugger::isSceneLast()
+{
+	return m_Stage == 2;
 }
 
 /// Returns true if a new render target was set, always fase if not using render targets

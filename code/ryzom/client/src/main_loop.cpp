@@ -423,9 +423,9 @@ void	beginRenderMainScenePart()
 {
 	Scene->beginPartRender();
 }
-void	endRenderMainScenePart()
+void	endRenderMainScenePart(bool keepTraversals)
 {
-	Scene->endPartRender(true);
+	Scene->endPartRender(!keepTraversals, true, keepTraversals);
 }
 
 void	beginRenderSkyPart()
@@ -462,7 +462,7 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 
 // ***************************************************************************************************************************
 // Render a part of the main scene
-static void renderMainScenePart(UScene::TRenderPart renderPart)
+static void renderMainScenePart(UScene::TRenderPart renderPart, bool wantTraversals, bool keepTraversals)
 {
 	H_AUTO_USE ( RZ_Client_Main_Loop_Render_Main )
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
@@ -474,7 +474,7 @@ static void renderMainScenePart(UScene::TRenderPart renderPart)
 	{
 		MainFogState.setupInDriver (*Driver);
 	}
-	Scene->renderPart(renderPart);
+	Scene->renderPart(renderPart, true, wantTraversals, keepTraversals);
 }
 
 
@@ -580,7 +580,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		s_ForceFullDetail.set();
 	}
 	clearBuffers();
-	renderScene();
+	doRenderScene(true, false);
 	if (forceFullDetail)
 	{
 		s_ForceFullDetail.restore();
@@ -719,9 +719,7 @@ void updateWeather()
 	}
 }
 
-// ***************************************************************************************************************************
-// Render all scenes
-void renderScene()
+void beginRenderScene()
 {
 	// Update Filter Flags
 	Scene->enableElementRender(UScene::FilterAllMeshNoVP, Filter3D[FilterMeshNoVP]);
@@ -743,26 +741,43 @@ void renderScene()
 	beginRenderCanopyPart();
 	beginRenderMainScenePart();
 	beginRenderSkyPart();
+}
+
+void drawRenderScene(bool wantTraversals, bool keepTraversals)
+{
 	// Render part
 	// WARNING: always must begin rendering with at least UScene::RenderOpaque,
 	// else dynamic shadows won't work
 	renderCanopyPart(UScene::RenderOpaque);
-	renderMainScenePart(UScene::RenderOpaque);
+	renderMainScenePart(UScene::RenderOpaque, wantTraversals, keepTraversals);
 
 	// render of polygons on landscape
 	CLandscapePolyDrawer::getInstance().renderLandscapePolyPart();
 
 	if (s_SkyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent));
 	renderCanopyPart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
-	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
+	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare), wantTraversals, keepTraversals);
 	if (s_SkyMode == NewSky) renderSkyPart(UScene::RenderFlare);
+}
+
+void endRenderScene(bool keepTraversals)
+{
 	// End Part Rendering
 	endRenderSkyPart();
-	endRenderMainScenePart();
+	endRenderMainScenePart(keepTraversals);
 	endRenderCanopyPart();
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
+}
+
+// ***************************************************************************************************************************
+// Render all scenes
+void doRenderScene(bool wantTraversals, bool keepTraversals)
+{
+	beginRenderScene();
+	drawRenderScene(wantTraversals, keepTraversals);
+	endRenderScene(keepTraversals);
 }
 
 
@@ -1628,7 +1643,6 @@ bool mainLoop()
 		}
 
 		uint i = 0;
-		bool effectRender = false;
 		CTextureUser *effectRenderTarget = NULL;
 		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
 			&& (ClientCfg.Bloom || FXAA);
@@ -1646,6 +1660,7 @@ bool mainLoop()
 				CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
 			}
 		}
+		bool fullDetail = false;
 		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 		{
 			++i;
@@ -1686,39 +1701,56 @@ bool mainLoop()
 
 			if (!StereoDisplay || StereoDisplay->wantClear())
 			{
-				if (Render)
-				{
-					effectRender = haveEffects;
-				}
-
 				// Clear buffers
 				clearBuffers();
 			}
 
 			if (!StereoDisplay || StereoDisplay->wantScene())
 			{
-				if (!ClientCfg.Light)
+				if (!ClientCfg.Light && Render)
 				{
-					// Render
-					if(Render)
+					if (!StereoDisplay || StereoDisplay->isSceneFirst())
 					{
 						// nb : force full detail if a screenshot is asked
 						// todo : move outside render code
-						bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
-						if (fullDetail)
+						if (!fullDetail)
 						{
-							s_ForceFullDetail.backup();
-							s_ForceFullDetail.set();
+							fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
+							if (fullDetail)
+							{
+								s_ForceFullDetail.backup();
+								s_ForceFullDetail.set();
+							}
 						}
+					}
 
-						// Render scene
-						renderScene();
-
+					// Render scene
+					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
+					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
+					doRenderScene(wantTraversals, keepTraversals);
+					
+					if (!StereoDisplay || StereoDisplay->isSceneLast())
+					{
 						if (fullDetail)
 						{
 							s_ForceFullDetail.restore();
+							fullDetail = false;
 						}
 					}
+				}
+			}
+
+			if (!StereoDisplay || StereoDisplay->wantSceneEffects())
+			{
+				if (!ClientCfg.Light && Render && haveEffects)
+				{
+					if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+					UCamera	pCam = Scene->getCam();
+					Driver->setMatrixMode2D11();
+					if (FXAA) FXAA->applyEffect();
+					if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
+					Driver->setMatrixMode3D(pCam);
+					if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 				}
 			}
 
@@ -1729,18 +1761,6 @@ bool mainLoop()
 					// Render
 					if (Render)
 					{
-						if (effectRender)
-						{
-							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-							UCamera	pCam = Scene->getCam();
-							Driver->setMatrixMode2D11();
-							if (FXAA) FXAA->applyEffect();
-							if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
-							Driver->setMatrixMode3D(pCam);
-							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-							effectRender = false;
-						}
-
 						// for that frame and
 						// tmp : display height grid
 						//static volatile bool displayHeightGrid = true;

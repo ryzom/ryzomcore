@@ -139,7 +139,7 @@ public:
 	 * \param renderPart : The part of the scene that must be rendered
 	 * \param newRender true If scene render is beginning. Otherwise other parts of the scene have already been rendered.
 	 */
-	void				traverse(UScene::TRenderPart renderPart, bool newRender);
+	void				traverse(UScene::TRenderPart renderPart, bool newRender, bool generateShadows);
 	//@}
 
 	/// \name RenderList.

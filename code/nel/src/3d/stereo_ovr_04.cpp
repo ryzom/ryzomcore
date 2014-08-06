@@ -640,6 +640,16 @@ bool CStereoOVR::wantScene()
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
+bool CStereoOVR::wantSceneEffects()
+{
+	switch (m_Stage)
+	{
+	case 4:
+		return true;
+	}
+	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
 bool CStereoOVR::wantInterface3D()
 {
 	switch (m_Stage)
@@ -658,6 +668,26 @@ bool CStereoOVR::wantInterface2D()
 	{
 	case 2:
 		m_SubStage = 4;
+		return true;
+	}
+	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+bool CStereoOVR::isSceneFirst()
+{
+	switch (m_Stage)
+	{
+	case 3:
+		return true;
+	}
+	return m_Driver->getPolygonMode() != UDriver::Filled;
+}
+
+bool CStereoOVR::isSceneLast()
+{
+	switch (m_Stage)
+	{
+	case 4:
 		return true;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;

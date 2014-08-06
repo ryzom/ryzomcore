@@ -93,13 +93,20 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
 
 	/// At the start of a new render target
-	virtual bool wantClear();	
+	virtual bool wantClear();		
 	/// The 3D scene
 	virtual bool wantScene();
+	/// Scene post processing effects
+	virtual bool wantSceneEffects();
 	/// Interface within the 3D scene
 	virtual bool wantInterface3D();	
 	/// 2D Interface
 	virtual bool wantInterface2D();
+
+	/// Is this the first 3D scene of the frame
+	virtual bool isSceneFirst();
+	/// Is this the last 3D scene of the frame
+	virtual bool isSceneLast();
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget();
