@@ -77,7 +77,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../../object_viewer_qt.qrc"/>
+  <include location="../../studio.qrc"/>
   <include location="../core/core.qrc"/>
   <include location="georges_editor.qrc"/>
  </resources>
