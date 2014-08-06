@@ -96,8 +96,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1, 0, 0, 51
- PRODUCTVERSION 3,0,0,0
+ FILEVERSION 0, 9, 1, 0
+ PRODUCTVERSION 0, 9, 1, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -112,17 +112,18 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
+            VALUE "Comments", "Based on Kinetix 3D Studio Max 3.0 plugin sample\0"
             VALUE "Comments", "TECH: cyril.corvazier\0"
-            VALUE "CompanyName", "Nevrax Ltd\0"
-            VALUE "FileDescription", "Standard modifiers (plugin)\0"
-            VALUE "FileVersion", "1, 0, 0, 51\0"
+            VALUE "CompanyName", "Ryzom Core\0"
+            VALUE "FileDescription", "NeL Patch Paint\0"
+            VALUE "FileVersion", "0.9.1\0"
             VALUE "InternalName", "mods\0"
-            VALUE "LegalCopyright", "Copyright © 1998 Nevrax Ltd\0"
+            VALUE "LegalCopyright", "Copyright © 2000 Nevrax Ltd\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "nelpatchpaint.dlm\0"
             VALUE "PrivateBuild", "\0"
-            VALUE "ProductName", "3D Studio MAX\0"
-            VALUE "ProductVersion", "3.0.0.0\0"
+            VALUE "ProductName", "Ryzom Core\0"
+            VALUE "ProductVersion", "0.9.1\0"
             VALUE "SpecialBuild", "\0"
         END
     END
