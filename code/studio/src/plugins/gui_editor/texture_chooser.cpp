@@ -20,7 +20,7 @@
 #include "nel/misc/file.h"
 #include <vector>
 #include <string>
-#include <QPixMap>
+#include <QPixmap>
 #include <QImage>
 #include <QListWidget>
 
