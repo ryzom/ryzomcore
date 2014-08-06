@@ -329,7 +329,7 @@ bool TileBank::addTile( int setIdx, const QString &name, const QVariant &pixmap,
 	switch( type )
 	{
 	case TileConstants::Tile128: set->removeTile128( tile, m_pvt->m_bank ); break;
-	case TileConstants::Tile256: set->removeTile128( tile, m_pvt->m_bank ); break;
+	case TileConstants::Tile256: set->removeTile256( tile, m_pvt->m_bank ); break;
 	}
 
 	return false;
