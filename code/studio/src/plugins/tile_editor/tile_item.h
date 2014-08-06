@@ -130,7 +130,6 @@ private:
 
 	TileItemNodePvt *pvt;
 
-	bool m_hasError;
 };
 
 #endif // TILE_ITEM_H

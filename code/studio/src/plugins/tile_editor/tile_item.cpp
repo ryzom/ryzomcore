@@ -304,7 +304,6 @@ TileItemNode::TileItemNode( TileConstants::TNodeTileType type, int tileId, Node 
 	m_id = tileId;
 	m_parentItem = parent;
 	pvt = new TileItemNodePvt();
-	m_hasError = false;
 
 	for( int i = 0; i < TileConstants::TileChannelCount; i++ )
 	{
@@ -332,7 +331,6 @@ bool TileItemNode::setTileFilename(TileConstants::TTileChannel channel, QString 
 	}
 
 	bool b = pvt->loadImage( channel, fn, empty );
-	m_hasError = !b;
 	if( !b )
 		return false;
 
