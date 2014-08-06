@@ -60,6 +60,7 @@ TARGET_LINK_LIBRARIES(	studio_plugin_world_editor
 						qt_property_browser
 						${QT_LIBRARIES} 
 						${QT_QTOPENGL_LIBRARY}
+						${LIBXML2_LIBRARIES}
 )
 
 NL_DEFAULT_PROPS(studio_plugin_world_editor "Tools: Studio Plugin: World Editor")
