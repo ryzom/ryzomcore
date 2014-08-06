@@ -96,3 +96,5 @@ ADD_DEFINITIONS(-DQT_SHARED)
 NL_DEFAULT_PROPS(qt_property_browser "3rdParty: Qt Property Browser 2.5")
 NL_ADD_RUNTIME_FLAGS(qt_property_browser)
 NL_ADD_LIB_SUFFIX(qt_property_browser)
+
+INSTALL(TARGETS qt_property_browser LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
