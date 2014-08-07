@@ -21,6 +21,7 @@
 /////////////
 #include "stdpch.h"
 // Client
+#include "global.h"
 #include "actions.h"
 #include "input.h"
 #include "interface_v3/interface_manager.h"
@@ -310,6 +311,6 @@ CNiceInputAuto::~CNiceInputAuto()
 	nlassert(_Count >= 0);
 	if (_Count == 0)
 	{
-		InitMouseWithCursor(ClientCfg.HardwareCursor);
+		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
 }

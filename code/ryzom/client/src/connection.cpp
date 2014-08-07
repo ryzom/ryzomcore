@@ -223,7 +223,7 @@ void connectionRestaureVideoMode ()
 	}
 
 	// And setup hardware mouse if we have to
-	InitMouseWithCursor (ClientCfg.HardwareCursor);
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	SetMouseFreeLook ();
 	SetMouseCursor ();
 	SetMouseSpeed (ClientCfg.CursorSpeed);
@@ -278,6 +278,8 @@ void	setOutGameFullScreen()
 		{
 			setVideoMode(wantedMode);
 		}
+
+		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 		/*
 		InitMouseWithCursor (true);
 		Driver->showCursor(false);
@@ -396,7 +398,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		// not initialized at login and remain hardware until here ...
 
 		// Re-initialise the mouse (will be now in hardware mode, if required)
-		//InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+		//InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
 		//SetMouseFreeLook ();
@@ -556,7 +558,7 @@ bool reconnection()
 	{
 		// Re-initialise the mouse (will be now in hardware mode, if required)
 		SetMousePosFirstTime = true;
-		InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+		InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 		// no ui init if character selection is automatic
 		SetMouseFreeLook ();

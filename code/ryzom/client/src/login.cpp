@@ -867,7 +867,7 @@ bool login()
 	SetMouseSpeed (ClientCfg.CursorSpeed);
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
 	SetMousePosFirstTime = true;
-	InitMouseWithCursor (ClientCfg.HardwareCursor);
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 
 //	if (ClientCfg.TestBrowser)
 //	{

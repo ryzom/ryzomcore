@@ -73,6 +73,8 @@ void updateFromClientCfg()
 		if (!StereoDisplayAttached)
 			setVideoMode(UDriver::CMode(ClientCfg.Width, ClientCfg.Height, (uint8)ClientCfg.Depth,
 				ClientCfg.Windowed, ClientCfg.Frequency));
+		// force software cursor when attached
+		InitMouseWithCursor(ClientCfg.HardwareCursor && !StereoDisplayAttached);
 	}
 
 	// GRAPHICS - GENERAL
@@ -292,7 +294,7 @@ void updateFromClientCfg()
 	{
 		if (ClientCfg.HardwareCursor != IsMouseCursorHardware())
 		{
-			InitMouseWithCursor (ClientCfg.HardwareCursor);
+			InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 		}
 	}
 

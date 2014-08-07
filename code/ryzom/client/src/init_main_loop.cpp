@@ -1261,7 +1261,7 @@ void initMainLoop()
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
 	SetMousePosFirstTime = true;
-	InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required
 	// NB nico : done at end of loading
@@ -1504,6 +1504,7 @@ void initWelcomeWindow()
 
 // ***************************************************************************
 
+// NOTE: This feature is not really used anymore, it is a patch transition
 void initHardwareCursor(bool secondCall)
 {
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
