@@ -454,14 +454,30 @@ bool CStereoOVR::attachToDisplay()
 		m_Driver->getWindowPos(m_OriginalWinPosX, m_OriginalWinPosY);
 	}
 
-	UDriver::CMode mode;
-	mode.DisplayDevice = m_DevicePtr->DisplayDeviceName;
-	mode.Windowed = false;
-	mode.Width = m_DevicePtr->Resolution.w;
-	mode.Height = m_DevicePtr->Resolution.h;
-	m_Driver->setMode(mode);
-	m_AttachedDisplay = true;
-	return true;
+#if defined(NL_OS_WINDOWS)
+	if ((m_DevicePtr->HmdCaps & ovrHmdCap_ExtendDesktop) != ovrHmdCap_ExtendDesktop)
+	{
+		nldebug("OVR: Direct Rift");
+		CDriverUser *dru = static_cast<CDriverUser *>(m_Driver);
+		IDriver *drv = dru->getDriver();
+		m_AttachedDisplay = ovrHmd_AttachToWindow(m_DevicePtr, (void *)drv->getDisplay(), NULL, NULL);
+		if (!m_AttachedDisplay)
+			nlwarning("OVR: Direct Rift failed!");
+	}
+	else
+#endif
+	{
+		nldebug("OVR: Extended Rift");
+		UDriver::CMode mode;
+		mode.DisplayDevice = m_DevicePtr->DisplayDeviceName;
+		mode.Windowed = false;
+		mode.Width = m_DevicePtr->Resolution.w;
+		mode.Height = m_DevicePtr->Resolution.h;
+		m_Driver->setMode(mode);
+		m_AttachedDisplay = true;
+	}
+
+	return m_AttachedDisplay;
 }
 
 void CStereoOVR::detachFromDisplay()
