@@ -1304,6 +1304,9 @@ BOOL CALLBACK CDriverGL::monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPREC
 		{
 			nldebug("3D: Remapping '%s' to '%s'", p->DeviceName, monitorInfo.szDevice);
 			nldebug("3D: Found requested monitor at %i, %i", monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top);
+			p->Driver->_CurrentMode.Windowed = false;
+			p->Driver->setWindowStyle(CDriverGL::EWSWindowed);
+			p->Driver->setWindowSize(monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top);
 			LONG dwStyle = GetWindowLong(p->Driver->_win, GWL_STYLE);
 			SetWindowLong(p->Driver->_win, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
 			SetWindowPos(p->Driver->_win, NULL, 
