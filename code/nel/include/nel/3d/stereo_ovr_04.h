@@ -168,6 +168,7 @@ public:
 
 private:
 	ovrHmd m_DevicePtr;
+	bool m_DebugDevice;
 
 	int m_Stage;
 	int m_SubStage;

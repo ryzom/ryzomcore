@@ -175,6 +175,7 @@ CStereoOVR::CStereoOVR(const CStereoOVRDeviceFactory *factory) : m_DevicePtr(NUL
 		return;
 	}
 
+	m_DebugDevice = factory->DebugDevice;
 	if (factory->DebugDevice) m_DevicePtr = ovrHmd_CreateDebug(factory->DebugDeviceType);
 	else m_DevicePtr = ovrHmd_Create(factory->DeviceIndex);
 
@@ -447,6 +448,9 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 bool CStereoOVR::attachToDisplay()
 {
 	nldebug("OVR: Attach to display '%s'", m_DevicePtr->DisplayDeviceName);
+
+	if (m_DebugDevice)
+		return false;
 
 	if (!m_AttachedDisplay)
 	{
@@ -792,7 +796,7 @@ void CStereoOVR::setInterfaceMatrix(const NL3D::CMatrix &matrix)
 void CStereoOVR::renderGUI()
 {
 	m_Driver->setModelMatrix(m_InterfaceCameraMatrix);
-
+/*
 	{
 		NLMISC::CLine line(NLMISC::CVector(0, 5, 2), NLMISC::CVector(0, 5, 3));
 
@@ -807,7 +811,42 @@ void CStereoOVR::renderGUI()
 
 		m_Driver->deleteMaterial(mat);
 	}
-	
+
+	{
+		NL3D::UMaterial mat = m_Driver->createMaterial();
+		mat.setZWrite(false);
+		mat.setZFunc(UMaterial::always); // Not nice!
+		mat.setDoubleSided(true);
+		mat.setBlend(false);
+		NLMISC::CLine line;
+
+		mat.setColor(NLMISC::CRGBA::Red);
+		line = NLMISC::CLine(NLMISC::CVector(0, 3, -3), NLMISC::CVector(0, 3, 3)); // YPos
+		m_Driver->drawLine(line, mat);
+
+		mat.setColor(NLMISC::CRGBA::Green);
+		line = NLMISC::CLine(NLMISC::CVector(3, 0, -3), NLMISC::CVector(3, 0, 3)); // XPos
+		m_Driver->drawLine(line, mat);
+
+		mat.setColor(NLMISC::CRGBA::Magenta);
+		line = NLMISC::CLine(NLMISC::CVector(0, -3, -3), NLMISC::CVector(0, -3, 3)); // YNeg
+		m_Driver->drawLine(line, mat);
+
+		mat.setColor(NLMISC::CRGBA::Cyan);
+		line = NLMISC::CLine(NLMISC::CVector(-3, 0, -3), NLMISC::CVector(-3, 0, 3)); // XNeg
+		m_Driver->drawLine(line, mat);
+
+		mat.setColor(NLMISC::CRGBA::Blue);
+		line = NLMISC::CLine(NLMISC::CVector(0, -3, 3), NLMISC::CVector(0, 3, 3)); // ZPos
+		m_Driver->drawLine(line, mat);
+
+		mat.setColor(NLMISC::CRGBA::Blue);
+		line = NLMISC::CLine(NLMISC::CVector(0, -3, -3), NLMISC::CVector(0, 3, -3)); // ZNeg
+		m_Driver->drawLine(line, mat);
+
+		m_Driver->deleteMaterial(mat);
+	}
+	*/
 	{
 		nlassert(m_GUITexture);
 
@@ -910,6 +949,24 @@ void CStereoOVR::renderGUI()
 		// m_Driver->drawQuad(quadUV, umat);
 
 		m_Driver->deleteMaterial(umat);
+
+		/*{
+			// nldebug("Render GUI lines");
+			NL3D::UMaterial rmat = m_Driver->createMaterial();
+			rmat.setZWrite(false);
+			rmat.setZFunc(UMaterial::always); // Not nice!
+			rmat.setDoubleSided(true);
+			rmat.setColor(NLMISC::CRGBA::Red);
+			rmat.setBlend(false);
+
+			m_Driver->setPolygonMode(UDriver::Line);
+			driver->activeVertexBuffer(vb);
+			driver->activeIndexBuffer(ib);
+			driver->renderTriangles(*rmat.getObjectPtr(), 0, nbQuads * 2);
+			m_Driver->setPolygonMode(UDriver::Filled);
+
+			m_Driver->deleteMaterial(rmat);
+		}*/
 	}
 }
 
@@ -1131,7 +1188,8 @@ NLMISC::CQuat CStereoOVR::getOrientation() const
 	}
 	else
 	{
-		nlwarning("OVR: No orientation returned");
+		if (!m_DebugDevice)
+			nlwarning("OVR: No orientation returned");
 		// return old orientation
 		m_OrientationCached = true;
 		return m_OrientationCache;

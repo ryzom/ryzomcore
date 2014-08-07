@@ -33,6 +33,7 @@
 #include "client_cfg.h"
 #include "bg_downloader_access.h"
 #include "nel/misc/system_utils.h"
+#include "nel/3d/stereo_hmd.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -173,186 +174,252 @@ void CProgress::internalProgress (float value)
 	if (Driver->AsyncListener.isKeyPushed (KeyUP))
 		selectTipsOfTheDay (TipsOfTheDayIndex+1);
 
-	// Font factor
-	float fontFactor = 1;
-	if (Driver->getWindowHeight() > 0)
-		fontFactor = (float)Driver->getWindowHeight() / 600.f;
-	fontFactor *= _FontFactor;
-	// Set 2d view.
-	Driver->setMatrixMode2D11();
-	Driver->clearBuffers (CRGBA(0,0,0,0));
-
-	// Display the loading background.
-	drawLoadingBitmap (value);
-
-	// temporary values for conversions
-	float x, y, width, height;
-
-	for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+	// Create camera for stereo mode
+	bool stereoHMD = StereoHMD && !MainCam.empty() && (MainCam.getTransformMode() == UCamera::RotQuat);
+	CVector oldPos;
+	CQuat oldQuat;
+	if (stereoHMD)
 	{
-		std::vector<string> res;
-		explode(ClientCfg.Logos[i], std::string(":"), res);
-		if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
-		{
-			fromString(res[1], x);
-			fromString(res[2], y);
-			fromString(res[3], width);
-			fromString(res[4], height);
-			Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
-		}
+		MainCam.getPos(oldPos);
+		MainCam.getRotQuat(oldQuat);
+		StereoHMD->setInterfaceMatrix(CMatrix()); // identity
+		NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
+		NLMISC::CMatrix camMatrix;
+		camMatrix.identity();
+		NLMISC::CMatrix hmdMatrix;
+		hmdMatrix.setRot(hmdOrient);
+		NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
+		posMatrix.translate(StereoHMD->getEyePosition());
+		NLMISC::CMatrix mat = ((camMatrix * hmdMatrix) * posMatrix);
+		MainCam.setPos(mat.getPos());
+		MainCam.setRotQuat(mat.getRot());
+		StereoDisplay->updateCamera(0, &MainCam);
 	}
-
-	if (TextContext != NULL)
+	uint i = 0;
+	while ((!stereoHMD && i == 0) || (stereoHMD && StereoDisplay->nextPass()))
 	{
-		// Init the Pen.
-		TextContext->setKeep800x600Ratio(false);
-		TextContext->setColor(CRGBA(255,255,255));
-		TextContext->setFontSize((uint)(12.f * fontFactor));
-		TextContext->setHotSpot(UTextContext::TopRight);
+		++i;
+		if (stereoHMD)
+		{
+			// modify cameras for stereo display
+			const CViewport &vp = StereoDisplay->getCurrentViewport();
+			Driver->setViewport(vp);
+			StereoDisplay->getCurrentMatrix(0, &MainCam);
+			StereoDisplay->getCurrentFrustum(0, &MainCam);
+
+			// begin current pass
+			StereoDisplay->beginRenderTarget();
+
+			nldebug("Cam pos: %f, %f, %f", MainCam.getPos().x, MainCam.getPos().y, MainCam.getPos().z);
+		}
+
+		if (!stereoHMD || StereoDisplay->wantClear())
+		{
+			Driver->clearBuffers(CRGBA(0, 0, 0, 0));
+		}
+
+		if (stereoHMD && StereoDisplay->wantScene())
+		{
+			Driver->setMatrixMode3D(MainCam);
+		}
+
+		if (!stereoHMD || StereoDisplay->wantInterface2D())
+		{
+			nldebug("Draw progress 2D");
+
+			// Font factor
+			float fontFactor = 1;
+			if (Driver->getWindowHeight() > 0)
+				fontFactor = (float)Driver->getWindowHeight() / 600.f;
+			fontFactor *= _FontFactor;
+
+			// Set 2d view.
+			Driver->setMatrixMode2D11();
+
+			// Display the loading background.
+			drawLoadingBitmap(value);
+
+			// temporary values for conversions
+			float x, y, width, height;
+
+			for(uint i = 0; i < ClientCfg.Logos.size(); i++)
+			{
+				std::vector<string> res;
+				explode(ClientCfg.Logos[i], std::string(":"), res);
+				if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+				{
+					fromString(res[1], x);
+					fromString(res[2], y);
+					fromString(res[3], width);
+					fromString(res[4], height);
+					Driver->drawBitmap(x/(float)ClientCfg.Width, y/(float)ClientCfg.Height, width/(float)ClientCfg.Width, height/(float)ClientCfg.Height, *LogoBitmaps[i]);
+				}
+			}
+
+			if (TextContext != NULL)
+			{
+				// Init the Pen.
+				TextContext->setKeep800x600Ratio(false);
+				TextContext->setColor(CRGBA(255,255,255));
+				TextContext->setFontSize((uint)(12.f * fontFactor));
+				TextContext->setHotSpot(UTextContext::TopRight);
 
 #if !FINAL_VERSION
-		// Display the Text.
-		TextContext->printAt(1, 0.98f, _ProgressMessage);
+				// Display the Text.
+				TextContext->printAt(1, 0.98f, _ProgressMessage);
 #else
-		if( ClientCfg.LoadingStringCount > 0 )
-		{
-			TextContext->printAt(1, 0.98f, _ProgressMessage);
-		}
+				if( ClientCfg.LoadingStringCount > 0 )
+				{
+					TextContext->printAt(1, 0.98f, _ProgressMessage);
+				}
 #endif // FINAL_VERSION
 
-		// Display the build version.
-		TextContext->setFontSize((uint)(12.f * fontFactor));
-		TextContext->setHotSpot(UTextContext::TopRight);
-		string str;
+				// Display the build version.
+				TextContext->setFontSize((uint)(12.f * fontFactor));
+				TextContext->setHotSpot(UTextContext::TopRight);
+				string str;
 #if FINAL_VERSION
-		str = "FV ";
+				str = "FV ";
 #else
-		str = "DEV ";
+				str = "DEV ";
 #endif
-		str += RYZOM_VERSION;
-		TextContext->printfAt(1.0f,1.0f, str.c_str());
+				str += RYZOM_VERSION;
+				TextContext->printfAt(1.0f,1.0f, str.c_str());
 
-		// Display the tips of the day.
-		TextContext->setFontSize((uint)(16.f * fontFactor));
-		TextContext->setHotSpot(UTextContext::MiddleTop);
-		ucstring::size_type index = 0;
-		ucstring::size_type end = TipsOfTheDay.find((ucchar)'\n');
-		if (end == string::npos)
-			end = TipsOfTheDay.size();
-		float fY = ClientCfg.TipsY;
-		if (!TipsOfTheDay.empty())
-		{
-			while (index < end)
-			{
-				// Get the line
-				ucstring line = TipsOfTheDay.substr (index, end-index);
-
-				// Draw the line
-				TextContext->printAt(0.5f, fY, line);
-				fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
-
-				index=end+1;
-				end = TipsOfTheDay.find((ucchar)'\n', index);
-				if (end == ucstring::npos)
+				// Display the tips of the day.
+				TextContext->setFontSize((uint)(16.f * fontFactor));
+				TextContext->setHotSpot(UTextContext::MiddleTop);
+				ucstring::size_type index = 0;
+				ucstring::size_type end = TipsOfTheDay.find((ucchar)'\n');
+				if (end == string::npos)
 					end = TipsOfTheDay.size();
-			}
-
-			// More help
-			TextContext->setFontSize((uint)(12.f * fontFactor));
-			/* todo tips of the day uncomment
-			ucstring ucstr = CI18N::get ("uiTipsEnd");
-			TextContext->printAt(0.5f, fY, ucstr); */
-			fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
-			fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
-		}
-
-
-
-		if (!_TPReason.empty())
-		{
-			TextContext->setHotSpot(UTextContext::MiddleMiddle);
-			TextContext->setFontSize((uint)(14.f * fontFactor));
-			TextContext->printAt(0.5f, 0.5f, _TPReason);
-			TextContext->setHotSpot(UTextContext::BottomLeft);
-			TextContext->setColor(NLMISC::CRGBA::White);
-		}
-
-
-
-		if (!_TPCancelText.empty())
-		{
-			if (ClientCfg.Width != 0 && ClientCfg.Height != 0)
-			{
-				TextContext->setFontSize((uint)(15.f * fontFactor));
-				TextContext->setHotSpot(UTextContext::BottomLeft);
-
-				ucstring uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText + ") - " + CI18N::get("uiDelayedTPCancel");
-				UTextContext::CStringInfo info = TextContext->getStringInfo(uc);
-				float stringX = 0.5f - info.StringWidth/(ClientCfg.Width*2);
-				TextContext->printAt(stringX, 7.f / ClientCfg.Height, uc);
-			}
-		}
-
-
-		// Teleport help
-		//fY = ClientCfg.TeleportInfoY;
-		if (!ApplyTextCommands && LoadingContinent && !LoadingContinent->Indoor)
-		{
-			TextContext->setFontSize((uint)(13.f * fontFactor));
-
-			// Print some more info
-			uint32 day = RT.getRyzomDay();
-			str = toString (CI18N::get ("uiTipsTeleport").toUtf8().c_str(),
-				CI18N::get (LoadingContinent->LocalizedName).toUtf8().c_str(),
-				day,
-				(uint)RT.getRyzomTime(),
-				CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).toUtf8().c_str(),
-				CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).toUtf8().c_str());
-			ucstring ucstr;
-			ucstr.fromUtf8 (str);
-			TextContext->setHotSpot(UTextContext::MiddleBottom);
-			TextContext->setColor(CRGBA(186, 179, 163, 255));
-			TextContext->printAt(0.5f, 25/768.f, ucstr);
-		}
-
-		// apply text commands
-		if( ApplyTextCommands )
-		{
-			std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
-			if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
-
-			if( !printfCommands.empty() )
-			{
-				TextContext->setHotSpot(UTextContext::MiddleBottom);
-
-				vector<CClientConfig::SPrintfCommand>::iterator itpc;
-				for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+				float fY = ClientCfg.TipsY;
+				if (!TipsOfTheDay.empty())
 				{
-					float x = 0.5f;//((*itpc).X / 1024.f);
-					float y = ((*itpc).Y / 768.f);
-					TextContext->setColor( (*itpc).Color );
-					TextContext->setFontSize( (uint)(16.f * fontFactor));
-
-					// build the ucstr(s)
-					ucstring ucstr = CI18N::get((*itpc).Text);
-					vector<ucstring> vucstr;
-					ucstring sep("\n");
-					splitUCString(ucstr,sep,vucstr);
-
-					// Letter size
-					UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|"));
-					uint fontHeight = (uint) si.StringHeight + 2; // we add 2 pixels for the gap
-
-					uint i;
-					float newy = y;
-					for( i=0; i<vucstr.size(); ++i )
+					while (index < end)
 					{
-						TextContext->printAt(x,newy, vucstr[i]);
-						newy = nextLine(fontHeight, Driver->getWindowHeight(), newy);
+						// Get the line
+						ucstring line = TipsOfTheDay.substr (index, end-index);
+
+						// Draw the line
+						TextContext->printAt(0.5f, fY, line);
+						fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
+
+						index=end+1;
+						end = TipsOfTheDay.find((ucchar)'\n', index);
+						if (end == ucstring::npos)
+							end = TipsOfTheDay.size();
+					}
+
+					// More help
+					TextContext->setFontSize((uint)(12.f * fontFactor));
+					/* todo tips of the day uncomment
+					ucstring ucstr = CI18N::get ("uiTipsEnd");
+					TextContext->printAt(0.5f, fY, ucstr); */
+					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
+					fY = nextLine (TextContext->getFontSize(), Driver->getWindowHeight(), fY);
+				}
+
+
+
+				if (!_TPReason.empty())
+				{
+					TextContext->setHotSpot(UTextContext::MiddleMiddle);
+					TextContext->setFontSize((uint)(14.f * fontFactor));
+					TextContext->printAt(0.5f, 0.5f, _TPReason);
+					TextContext->setHotSpot(UTextContext::BottomLeft);
+					TextContext->setColor(NLMISC::CRGBA::White);
+				}
+
+
+
+				if (!_TPCancelText.empty())
+				{
+					if (ClientCfg.Width != 0 && ClientCfg.Height != 0)
+					{
+						TextContext->setFontSize((uint)(15.f * fontFactor));
+						TextContext->setHotSpot(UTextContext::BottomLeft);
+
+						ucstring uc = CI18N::get("uiR2EDTPEscapeToInteruptLoading") + " (" + _TPCancelText + ") - " + CI18N::get("uiDelayedTPCancel");
+						UTextContext::CStringInfo info = TextContext->getStringInfo(uc);
+						float stringX = 0.5f - info.StringWidth/(ClientCfg.Width*2);
+						TextContext->printAt(stringX, 7.f / ClientCfg.Height, uc);
+					}
+				}
+
+
+				// Teleport help
+				//fY = ClientCfg.TeleportInfoY;
+				if (!ApplyTextCommands && LoadingContinent && !LoadingContinent->Indoor)
+				{
+					TextContext->setFontSize((uint)(13.f * fontFactor));
+
+					// Print some more info
+					uint32 day = RT.getRyzomDay();
+					str = toString (CI18N::get ("uiTipsTeleport").toUtf8().c_str(),
+						CI18N::get (LoadingContinent->LocalizedName).toUtf8().c_str(),
+						day,
+						(uint)RT.getRyzomTime(),
+						CI18N::get ("uiSeason"+toStringEnum(CRyzomTime::getSeasonByDay(day))).toUtf8().c_str(),
+						CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName).toUtf8().c_str());
+					ucstring ucstr;
+					ucstr.fromUtf8 (str);
+					TextContext->setHotSpot(UTextContext::MiddleBottom);
+					TextContext->setColor(CRGBA(186, 179, 163, 255));
+					TextContext->printAt(0.5f, 25/768.f, ucstr);
+				}
+
+				// apply text commands
+				if( ApplyTextCommands )
+				{
+					std::vector<CClientConfig::SPrintfCommand> printfCommands = ClientCfg.PrintfCommands;
+					if(FreeTrial) printfCommands = ClientCfg.PrintfCommandsFreeTrial;
+
+					if( !printfCommands.empty() )
+					{
+						TextContext->setHotSpot(UTextContext::MiddleBottom);
+
+						vector<CClientConfig::SPrintfCommand>::iterator itpc;
+						for( itpc = printfCommands.begin(); itpc != printfCommands.end(); ++itpc )
+						{
+							float x = 0.5f;//((*itpc).X / 1024.f);
+							float y = ((*itpc).Y / 768.f);
+							TextContext->setColor( (*itpc).Color );
+							TextContext->setFontSize( (uint)(16.f * fontFactor));
+
+							// build the ucstr(s)
+							ucstring ucstr = CI18N::get((*itpc).Text);
+							vector<ucstring> vucstr;
+							ucstring sep("\n");
+							splitUCString(ucstr,sep,vucstr);
+
+							// Letter size
+							UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|"));
+							uint fontHeight = (uint) si.StringHeight + 2; // we add 2 pixels for the gap
+
+							uint i;
+							float newy = y;
+							for( i=0; i<vucstr.size(); ++i )
+							{
+								TextContext->printAt(x,newy, vucstr[i]);
+								newy = nextLine(fontHeight, Driver->getWindowHeight(), newy);
+							}
+						}
 					}
 				}
 			}
 		}
+
+		if (stereoHMD)
+		{
+			StereoDisplay->endRenderTarget();
+		}
+	} /* stereo loop */
+
+	if (stereoHMD)
+	{
+		MainCam.setPos(oldPos);
+		MainCam.setRotQuat(oldQuat);
 	}
 
 	// Clamp
