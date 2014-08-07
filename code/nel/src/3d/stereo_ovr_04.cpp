@@ -465,12 +465,12 @@ void CStereoOVR::attachToDisplay()
 
 void CStereoOVR::detachFromDisplay()
 {
-	if (!m_OriginalMode.Windowed)
+	/*if (!m_OriginalMode.Windowed)
 	{
 		m_OriginalMode.Windowed = true;
 		m_Driver->setMode(m_OriginalMode);
 		m_OriginalMode.Windowed = false;
-	}
+	}*/
 	m_Driver->setMode(m_OriginalMode);
 	m_Driver->setWindowPos(m_OriginalWinPosX, m_OriginalWinPosY);
 	m_AttachedDisplay = false;

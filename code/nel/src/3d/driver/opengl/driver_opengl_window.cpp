@@ -1276,11 +1276,12 @@ static sint modeInfoToFrequency(XF86VidModeModeInfo *info)
 struct CMonitorEnumParams
 {
 public:
-	HWND Window;
-	const char *deviceName;
+	CDriverGL *Driver;
+	const char *DeviceName;
+	bool Success;
 };
 
-static BOOL CALLBACK monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData)
+BOOL CALLBACK CDriverGL::monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData)
 {
 	CMonitorEnumParams *p = reinterpret_cast<CMonitorEnumParams *>(dwData);
 
@@ -1291,29 +1292,36 @@ static BOOL CALLBACK monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPRECT, L
 	nldebug("3D: Monitor: '%s'", monitorInfo.szDevice);
 
 	size_t devLen = strlen(monitorInfo.szDevice);
-	size_t targetLen = strlen(p->deviceName);
+	size_t targetLen = strlen(p->DeviceName);
 
 	nlassert(devLen < 32);
 	size_t minLen = min(devLen, targetLen);
-	if (!memcmp(monitorInfo.szDevice, p->deviceName, minLen))
+	if (!memcmp(monitorInfo.szDevice, p->DeviceName, minLen))
 	{
 		if (devLen == targetLen
-			|| (devLen < targetLen && (p->deviceName[minLen] == '\\'))
+			|| (devLen < targetLen && (p->DeviceName[minLen] == '\\'))
 			|| (devLen > targetLen && (monitorInfo.szDevice[minLen] == '\\')))
 		{
-			nldebug("3D: Remap '%s' to '%s'", p->deviceName, monitorInfo.szDevice);
-			nldebug("Found our monitor at %i, %i", monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top);
-			LONG dwStyle = GetWindowLong(p->Window, GWL_STYLE);
-			SetWindowLong(p->Window, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
-			SetWindowPos(p->Window, NULL, 
+			nldebug("3D: Remapping '%s' to '%s'", p->DeviceName, monitorInfo.szDevice);
+			nldebug("3D: Found requested monitor at %i, %i", monitorInfo.rcMonitor.left, monitorInfo.rcMonitor.top);
+			LONG dwStyle = GetWindowLong(p->Driver->_win, GWL_STYLE);
+			SetWindowLong(p->Driver->_win, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
+			SetWindowPos(p->Driver->_win, NULL, 
 				monitorInfo.rcMonitor.left, 
 				monitorInfo.rcMonitor.top, 
 				monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left, 
 				monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
 				SWP_FRAMECHANGED);
+			p->Driver->_WindowX = monitorInfo.rcMonitor.left;
+			p->Driver->_WindowY = monitorInfo.rcMonitor.top;
+			p->Driver->_CurrentDisplayDevice = std::string(p->DeviceName);
+			p->Driver->_BorderlessFullscreen = true;
+			p->Driver->_CurrentMode.Windowed = false;
+			p->Success = true;
 			return FALSE;
 		}
 	}
+	p->Success = false;
 	return TRUE; // continue
 };
 
@@ -1327,6 +1335,19 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 	nldebug("3D: setScreenMode");
 
+#if defined(NL_OS_WINDOWS)
+	if (_BorderlessFullscreen)
+	{
+		_BorderlessFullscreen = false;
+		LONG dwStyle = GetWindowLong(_win, GWL_STYLE);
+		dwStyle |= WS_OVERLAPPEDWINDOW;
+		if (!_Resizable) dwStyle ^= WS_MAXIMIZEBOX|WS_THICKFRAME;
+		SetWindowLong(_win, GWL_STYLE, dwStyle);
+		SetWindowPos(_win, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+		_CurrentMode.Windowed = true;
+	}
+#endif
+
 	if (mode.Windowed)
 	{
 		// if fullscreen, switch back to desktop screen mode
@@ -1336,7 +1357,7 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 		return true;
 	}
 
-	if (!mode.DisplayDevice.empty())
+	if (_CurrentDisplayDevice != mode.DisplayDevice)
 		restoreScreenMode();
 
 	// save previous screen mode only if switching from windowed to fullscreen
@@ -1345,7 +1366,8 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 
 	// if switching exactly to the same screen mode, doesn't change it
 	GfxMode previousMode;
-	if (mode.DisplayDevice.empty() && getCurrentScreenMode(previousMode)
+	if (_CurrentDisplayDevice == mode.DisplayDevice
+		&& getCurrentScreenMode(previousMode)
 		&& mode.Width == previousMode.Width
 		&& mode.Height == previousMode.Height
 		&& mode.Depth == previousMode.Depth
@@ -1386,10 +1408,10 @@ bool CDriverGL::setScreenMode(const GfxMode &mode)
 			nlwarning("3D: Fullscreen mode switch failed (%i)", (sint)resex);
 			// Workaround, resize to monitor and make borderless
 			CMonitorEnumParams p;
-			p.deviceName = deviceName;
-			p.Window = _win;
+			p.DeviceName = deviceName;
+			p.Driver = this;
 			EnumDisplayMonitors(NULL, NULL, monitorEnumProcFullscreen, (LPARAM)&p);
-			return false; // FIXME: This is a hack, don't process further
+			return p.Success;
 		}
 	}
 	else
@@ -1805,7 +1827,11 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 		dwNewStyle |= WS_VISIBLE;
 
 	if (dwStyle != dwNewStyle)
+	{
 		SetWindowLong(_win, GWL_STYLE, dwNewStyle);
+		if (windowStyle == EWSWindowed)
+			SetWindowPos(_win, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+	}
 
 //	if (windowStyle == EWSMaximized && isVisible && !isMaximized)
 //		ShowWindow(_hWnd, SW_SHOWMAXIMIZED);
@@ -1925,17 +1951,32 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!_DestroyWindow)
 		return true;
 
+#if defined(NL_OS_WINDOWS)
+	// save relative cursor
+	POINT cursorPos;
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+	sint curX = (sint)cursorPos.x * (sint)mode.Width;
+	sint curY = (sint)cursorPos.y * (sint)mode.Height;
+	if (_BorderlessFullscreen)
+		ReleaseCapture();
+#endif
+
 	if (!setScreenMode(mode))
 		return false;
 
-	// when changing window style, it's possible system change window size too
-	setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
+	if (!_BorderlessFullscreen)
+	{
+		// when changing window style, it's possible system change window size too
+		setWindowStyle(mode.Windowed ? EWSWindowed : EWSFullscreen);
 
-	if (!mode.Windowed)
-		_CurrentMode.Depth = mode.Depth;
+		if (!mode.Windowed)
+			_CurrentMode.Depth = mode.Depth;
 
-	setWindowSize(mode.Width, mode.Height);
-	setWindowPos(_WindowX, _WindowY);
+		setWindowSize(mode.Width, mode.Height);
+		setWindowPos(_WindowX, _WindowY);
+	}
 
 	switch (_CurrentMode.Depth)
 	{
@@ -1943,6 +1984,19 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		case 24:
 		case 32: _ColorDepth = ColorDepth32; break;
 	}
+
+#if defined(NL_OS_WINDOWS)
+	// restore relative cursor
+	if (cursorPosOk)
+	{
+		cursorPos.x = curX / (sint)mode.Width;
+		cursorPos.y = curY / (sint)mode.Height;
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+		if (_BorderlessFullscreen)
+			SetCapture(_win);
+	}
+#endif
 
 	// set color depth for custom cursor
 	updateCursor(true);
@@ -2359,7 +2413,19 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #ifdef NL_OS_WINDOWS
 
+	// save relative cursor
+	POINT cursorPos;
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+
 	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+
+	if (cursorPosOk)
+	{
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+	}
 
 #elif defined(NL_OS_MAC)
 	// get the rect (position, size) of the screen with menu bar

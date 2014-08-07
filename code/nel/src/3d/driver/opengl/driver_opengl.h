@@ -996,6 +996,12 @@ private:
 	EWindowStyle			getWindowStyle() const;
 	bool					setWindowStyle(EWindowStyle windowStyle);
 
+#if defined(NL_OS_WINDOWS)
+	static BOOL CALLBACK	monitorEnumProcFullscreen(HMONITOR hMonitor, HDC, LPRECT, LPARAM dwData);
+	bool					_BorderlessFullscreen;
+#endif
+	std::string				_CurrentDisplayDevice;
+
 	// Methods to manage screen resolutions
 	bool					restoreScreenMode();
 	bool					saveScreenMode();
