@@ -211,9 +211,9 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	}
 }
 
-void CStereoDebugger::attachToDisplay()
+bool CStereoDebugger::attachToDisplay()
 {
-	
+	return false;
 }
 
 void CStereoDebugger::detachFromDisplay()

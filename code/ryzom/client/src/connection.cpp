@@ -206,9 +206,13 @@ void connectionRestaureVideoMode ()
 	if (ClientCfg.Width < 800) ClientCfg.Width = 800;
 	if (ClientCfg.Height < 600) ClientCfg.Height = 600;
 
-	if ((ClientCfg.Windowed != mode.Windowed) ||
+	if (StereoDisplay)
+		StereoDisplayAttached = StereoDisplay->attachToDisplay();
+
+	if (!StereoDisplayAttached && (
+		(ClientCfg.Windowed != mode.Windowed) ||
 		(ClientCfg.Width != mode.Width) ||
-		(ClientCfg.Height != mode.Height))
+		(ClientCfg.Height != mode.Height)))
 	{
 		mode.Windowed = ClientCfg.Windowed;
 		mode.Depth    = uint8(ClientCfg.Depth);
@@ -217,9 +221,6 @@ void connectionRestaureVideoMode ()
 		mode.Frequency= ClientCfg.Frequency;
 		setVideoMode(mode);
 	}
-
-	if (StereoDisplay)
-		StereoDisplay->attachToDisplay();
 
 	// And setup hardware mouse if we have to
 	InitMouseWithCursor (ClientCfg.HardwareCursor);
@@ -257,8 +258,9 @@ void	setOutGameFullScreen()
 	// NB: don't setup fullscreen if player wants to play in window
 	if (!ClientCfg.Local && ClientCfg.SelectCharacter == -1)
 	{
-		if (StereoDisplay)
+		if (StereoDisplayAttached)
 			StereoDisplay->detachFromDisplay();
+		StereoDisplayAttached = false;
 
 		UDriver::CMode currMode;
 		Driver->getCurrentScreenMode(currMode);

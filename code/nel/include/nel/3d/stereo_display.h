@@ -95,8 +95,8 @@ public:
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver) = 0;
 
-	/// Attach the driver to the display
-	virtual void attachToDisplay() = 0;
+	/// Attach the driver to the display, return true if attached
+	virtual bool attachToDisplay() = 0;
 	/// Detach the driver from the display
 	virtual void detachFromDisplay() = 0;
 	

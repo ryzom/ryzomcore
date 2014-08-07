@@ -2419,7 +2419,7 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 		&& GetCursorPos(&cursorPos)
 		&& ScreenToClient(_win, &cursorPos);
 
-	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	SetWindowPos(_win, NULL, x, y, 0, 0, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_NOSIZE);
 
 	if (cursorPosOk)
 	{

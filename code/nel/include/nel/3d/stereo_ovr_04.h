@@ -91,7 +91,7 @@ public:
 	virtual void setDriver(NL3D::UDriver *driver);
 
 	/// Attach the driver to the display
-	virtual void attachToDisplay();
+	virtual bool attachToDisplay();
 	/// Detach the driver from the display
 	virtual void detachFromDisplay();
 

@@ -28,6 +28,7 @@ using namespace NLMISC;
 NL3D::UDriver				*Driver = NULL;		// The main 3D Driver
 NL3D::IStereoDisplay		*StereoDisplay = NULL; // Stereo display
 NL3D::IStereoHMD			*StereoHMD = NULL;	// Head mount display
+bool						StereoDisplayAttached = false; // Is stereo display handling the display mode
 CSoundManager				*SoundMngr = NULL;		// the sound manager
 NL3D::UMaterial				GenericMat;	// Generic Material
 NL3D::UTextContext			*TextContext = NULL;	// Context for all the text in the client.

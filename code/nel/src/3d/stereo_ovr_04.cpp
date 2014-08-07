@@ -444,7 +444,7 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 	return false;
 }
 
-void CStereoOVR::attachToDisplay()
+bool CStereoOVR::attachToDisplay()
 {
 	nldebug("OVR: Attach to display '%s'", m_DevicePtr->DisplayDeviceName);
 
@@ -461,6 +461,7 @@ void CStereoOVR::attachToDisplay()
 	mode.Height = m_DevicePtr->Resolution.h;
 	m_Driver->setMode(mode);
 	m_AttachedDisplay = true;
+	return true;
 }
 
 void CStereoOVR::detachFromDisplay()
