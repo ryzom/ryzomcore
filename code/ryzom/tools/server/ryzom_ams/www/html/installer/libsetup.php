@@ -196,6 +196,10 @@
               PRIMARY KEY (`Id`) )
             ENGINE = InnoDB;
             
+            INSERT INTO `plugins` (`Id`, `FileName`, `Name`, `Type`, `Owner`, `Permission`, `Status`, `Weight`, `Info`) VALUES
+(1, '../../ams_lib/plugins/API_key_management', 'API_key_management', 'automatic', '', 'admin', 1, 0, '{\"PluginName\":\"API Key Management\",\"Description\":\"Provides public access to the API''s by generating access tokens.\",\"Version\":\"1.0.0\",\"Type\":\"automatic\",\"TemplatePath\":\"..\\/..\\/..\\/ams_lib\\/plugins\\/API_key_management\\/templates\\/index.tpl\",\"\":null}'),
+(2, '../../ams_lib/plugins/Achievements', 'Achievements', 'Manual', '', 'admin', 1, 0, '{\"PluginName\":\"Achievements\",\"Description\":\"Returns the achivements of a user with respect to the character =.\",\"Version\":\"1.0.0\",\"TemplatePath\":\"..\\/..\\/..\\/ams_lib\\/plugins\\/Achievements\\/templates\\/index.tpl\",\"Type\":\"Manual\",\"\":null}');
+
             
             -- -----------------------------------------------------
             -- Table `" . $cfg['db']['lib']['name'] ."`.`updates`
@@ -1804,4 +1808,3 @@
             print_r($e);
         }
     }        
-
