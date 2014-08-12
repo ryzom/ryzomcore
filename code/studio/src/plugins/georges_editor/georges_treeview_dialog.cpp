@@ -43,6 +43,7 @@
 #include "formitem.h"
 #include "formdelegate.h"
 #include "expandable_headerview.h"
+#include "browser_ctrl.h"
 
 using namespace NLMISC;
 using namespace NLGEORGES;
@@ -76,16 +77,22 @@ namespace GeorgesQt
 
         m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
+		m_browserCtrl = new BrowserCtrl( m_ui.propertiesBrowser );
+
         connect(m_ui.treeView, SIGNAL(customContextMenuRequested(const QPoint&)),
                 this, SLOT(showContextMenu(const QPoint&)));
 		connect(m_ui.treeView, SIGNAL(doubleClicked (QModelIndex)),
 			this, SLOT(doubleClicked (QModelIndex)));
+		connect(m_ui.treeView, SIGNAL(clicked(const QModelIndex&)),
+			m_browserCtrl, SLOT(clicked(const QModelIndex&)));
 		connect(m_header, SIGNAL(headerClicked(int)),
 			this, SLOT(headerClicked(int)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
 	{
+		m_browserCtrl = NULL;
+
 		delete m_form;
 		qDebug() << "DTOR";
 	}
@@ -104,6 +111,7 @@ namespace GeorgesQt
 	void CGeorgesTreeViewDialog::setForm(const CForm *form) 
 	{
 		m_form = (UForm*)form;
+		m_browserCtrl->setForm( (UForm*)form );
 	}
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)

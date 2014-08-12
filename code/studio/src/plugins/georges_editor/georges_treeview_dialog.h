@@ -32,6 +32,8 @@
 
 // Project includes
 
+class BrowserCtrl;
+
 namespace NLGEORGES
 {
 	class UForm;
@@ -112,6 +114,8 @@ namespace GeorgesQt
 		QString m_lastSheetDir;
 
 		bool m_modified;
+
+		BrowserCtrl *m_browserCtrl;
 
 	}; /* CGeorgesTreeViewDialog */
 

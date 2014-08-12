@@ -307,7 +307,7 @@ namespace GeorgesQt
 
                                 // Is a struct ?
                                 if ( (entry.getType () == NLGEORGES::UFormDfn::EntryDfn) || (entry.getType () == NLGEORGES::UFormDfn::EntryVirtualDfn) )
-                                {
+								{
                                         // Is an array of struct ?
                                         if (entry.getArrayFlag ())
                                         {
