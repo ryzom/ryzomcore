@@ -45,8 +45,10 @@
 								<td class="center">{$element.plugin_info->Description}</td>
 								<td class="center">{$element.plugin_type}</td>
 								<td class="center">{$element.plugin_permission}</td>
-								<td><a href="index.php?page=plugins&action=delete_plugin&id={$element.id}"><button class="btn btn-primary btn-large">Delete</button></a>
-                {if ($element.plugin_status) eq "0"}<a href="index.php?page=plugins&action=activate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Activate</button></a>{/if}
+								<td>
+                {if ($element.plugin_status) eq "0"}
+                <a href="index.php?page=plugins&action=delete_plugin&id={$element.id}"><button class="btn btn-primary btn-large">Delete</button></a>
+                <a href="index.php?page=plugins&action=activate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Activate</button></a>{/if}
                 {if ($element.plugin_status) eq "1"}<a href="index.php?page=plugins&action=deactivate_plugin&id={$element.id}"><button class="btn btn-primary btn-large dropdown-toggle">Deactivate</button></a>{/if}</td>
 							</tr>
 							{/foreach}
