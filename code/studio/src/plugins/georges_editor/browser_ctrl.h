@@ -10,6 +10,8 @@ namespace NLGEORGES
 
 class QtTreePropertyBrowser;
 class QModelIndex;
+class QVariant;
+class QtProperty;
 
 class BrowserCtrlPvt;
 
@@ -24,9 +26,15 @@ public:
 public Q_SLOTS:
 	void clicked( const QModelIndex &idx );
 
-private:
-	BrowserCtrlPvt *m_pvt;
+private Q_SLOTS:
+	void onValueChanged( QtProperty *p, const QVariant &value );
 
+private:
+	void enableMgrConnections();
+	void disableMgrConnections();
+
+
+	BrowserCtrlPvt *m_pvt;
 	NLGEORGES::UForm *m_form;
 };
 

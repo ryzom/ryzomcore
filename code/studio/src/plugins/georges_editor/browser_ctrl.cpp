@@ -34,6 +34,7 @@ public:
 	{
 		mgr = new QtVariantPropertyManager();
 		factory = new QtVariantEditorFactory();
+		m_currentNode = NULL;
 	}
 
 	~BrowserCtrlPvt()
@@ -74,12 +75,14 @@ public:
 			setupElement( elm );
 		}
 
+		m_currentNode = st;
 		m_browser->setFactoryForManager( mgr, factory );
 	}
 
 	void clear()
 	{
 		m_browser->clear();
+		m_currentNode = NULL;
 	}
 
 	void setBrowser( QtTreePropertyBrowser *browser )
@@ -87,10 +90,25 @@ public:
 		m_browser = browser;
 	}
 
+	void onValueChanged( QtProperty *p, const QVariant &value )
+	{
+		if( m_currentNode == NULL )
+			return;
+
+		std::string k = p->propertyName().toUtf8().constData();
+		std::string v  = value.toString().toUtf8().constData();
+
+		m_currentNode->setValueByName( v.c_str(), k.c_str() );
+	}
+
+	QtVariantPropertyManager* manager() const{ return mgr; }
+
 private:
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
 	QtTreePropertyBrowser *m_browser;
+
+	NLGEORGES::UFormElm *m_currentNode;
 };
 
 BrowserCtrl::BrowserCtrl( QtTreePropertyBrowser *browser ) :
@@ -108,6 +126,7 @@ BrowserCtrl::~BrowserCtrl()
 
 void BrowserCtrl::clicked( const QModelIndex &idx )
 {
+	disableMgrConnections();
 	m_pvt->clear();
 
 	GeorgesQt::CFormItem *item = static_cast< GeorgesQt::CFormItem* >( idx.internalPointer() );
@@ -126,5 +145,28 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
 	m_pvt->setupForm( st );
 
+	enableMgrConnections();
+
+}
+
+void BrowserCtrl::onValueChanged( QtProperty *p, const QVariant &value )
+{
+	m_pvt->onValueChanged( p, value );
+}
+
+void BrowserCtrl::enableMgrConnections()
+{
+	QtVariantPropertyManager *mgr = m_pvt->manager();
+
+	connect( mgr, SIGNAL( valueChanged( QtProperty*, const QVariant & ) ),
+		this, SLOT( onValueChanged( QtProperty*, const QVariant & ) ) );
+}
+
+void BrowserCtrl::disableMgrConnections()
+{
+	QtVariantPropertyManager *mgr = m_pvt->manager();
+
+	disconnect( mgr, SIGNAL( valueChanged( QtProperty*, const QVariant & ) ),
+		this, SLOT( onValueChanged( QtProperty*, const QVariant & ) ) );
 }
 
