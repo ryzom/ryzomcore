@@ -43,10 +43,27 @@ class Rest_Api {
              // Execute cURL on the session handle
             $response = curl_exec( $session );
             
-             return $response;
+             if ( curl_errno( $session ) ) {
+                // if request is not sent
+                die( 'Couldn\'t send request: ' . curl_error( $session ) );
+                 } else {
+                // check the HTTP status code of the request
+                $resultStatus = curl_getinfo( $session, CURLINFO_HTTP_CODE );
+                 if ( $resultStatus == 200 ) {
+                    // everything went fine return response
+                    return $response;
+                    
+                     } else {
+                    // the request did not complete as expected. common errors are 4xx
+                    // (not found, bad request, etc.) and 5xx (usually concerning
+                    // errors/exceptions in the remote script execution)
+                    die( 'Request failed: HTTP status code: ' . $resultStatus );
+                     } 
+                } 
+            curl_close( $session );
              } 
         else {
             return null;
              } 
         } 
-    } 
+    }
