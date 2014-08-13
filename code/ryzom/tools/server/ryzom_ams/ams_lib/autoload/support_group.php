@@ -305,7 +305,7 @@ class Support_Group{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-	$dbl->insert("support_group", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_Password' => $this->getIMAP_Password());
+	$dbl->insert("support_group", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_Password' => $this->getIMAP_Password()));
     } 
 
     
@@ -327,7 +327,7 @@ class Support_Group{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("`support_group`", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_password' => $this->getIMAP_Password(), "`SGroupId` = $this->getSGroupId()");
+        $dbl->update("`support_group`", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_password' => $this->getIMAP_Password(), "`SGroupId` = $this->getSGroupId()"));
     }
     
     
@@ -337,7 +337,7 @@ class Support_Group{
     */
     public function delete(){
         $dbl = new DBLayer("lib");
-        $dbl->delete("`support_group`", Array('id' => $this->getSGroupId(), "`SGroupId` = :id");
+        $dbl->delete("`support_group`", Array('id' => $this->getSGroupId(), "`SGroupId` = :id"));
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
