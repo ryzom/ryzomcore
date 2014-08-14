@@ -11,10 +11,8 @@
 							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
 						</div>
 					</div>
-					
-					{if isset($smarty.get.success) and $smarty.get.success eq '1'}<div class="alert alert-error"><p>Key added successfully</p></div>{/if}
-					{if isset($smarty.get.success) and $smarty.get.success eq '2'}<div class="alert alert-error"><p>Key deleted successfully</p></div>{/if}
 			<div class="box-content">
+			{if isset($hook_info.Achievements.no_char)}<div class="alert alert-error"><p>{$hook_info.Achievements.no_char}</p></div>{/if}	
 				<div class="row-fluid">
 				{$hook_info.Achievements.char_achievements}							
 			</div>
@@ -49,8 +47,8 @@
 							<label class="control-label">Character:</label>
 							<div class="controls">
 								 <select name="Character">	
-									{foreach from=$hook_info.Achievements.characters item=element}
-									<option value="{$element.char_name}">{$element.char_name}</option>
+									{foreach from=$hook_info.Achievements.Character item=element}
+									<option value="{$element}">{$element}</option>
 									{/foreach}
 								</select>	
 							</div>

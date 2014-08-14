@@ -11,11 +11,13 @@
  * @author shubham meena mentored by Matthew Lagoe 
  */
 
-
-// Global variables to store the data
+// Global variable to store the data which is
+// returned to the templates
 $return_set = array();
-$var_set = array();
 
+// Local variable to store data during
+// functionalities of the hooks
+$var_set = array();
 
 /**
  * Display hook for api key management
@@ -28,7 +30,7 @@ function api_key_management_hook_display()
      } 
 
 /**
- * Hook to validate the posted data
+ * Local Hook to validate the posted data
  */
 function hook_validate( $var )
  {
@@ -70,9 +72,9 @@ function hook_variables()
 
 /**
  * Global Hook to create table of the API_key_management
- * if not created.Contains the sql code
+ * if not created.
+ * Contains the sql code
  */
-
 function api_key_management_hook_create_tb()
  {
     $dbl = new DBLayer( "lib" );
@@ -157,18 +159,25 @@ function api_key_management_hook_load_db()
     
      $db = new DBLayer( 'lib' );
     
-     // returns the regestered keys
-    $sth = $db -> select( 'ams_api_keys', array( 'user' => $_SESSION['user'] ), 'User = :user' );
-     $row = $sth -> fetchAll();
-     $return_set['api_keys'] = $row;
-    
-     // returns the characters with respect to the user id in the ring_tool->characters
-    $db = new DBLayer( 'ring' );
-     $sth = $db -> selectWithParameter( 'char_name', 'characters' , array(), '1' );
-     $row = $sth -> fetchAll();
-     $return_set['characters'] = $row;
-    
-     } 
+     if ( isset( $_SESSION['user'] ) )
+         {
+        // returns the registered keys
+        $sth = $db -> select( 'ams_api_keys', array( 'user' => $_SESSION['user'] ), 'User = :user' );
+         $row = $sth -> fetchAll();
+         $return_set['api_keys'] = $row;
+        
+         // fetch the character from the array to compare
+        $com = array_column( $return_set['api_keys'], 'UserCharacter' );
+        
+         // returns the characters with respect to the user id in the ring_tool->characters
+        $db = new DBLayer( 'ring' );
+         $sth = $db -> selectWithParameter( 'char_name', 'characters' , array(), '1' );
+         $row = $sth -> fetch();
+        
+         // loop through the character list and remove the character if already have an api key
+        $return_set['characters'] = array_diff( $row, $com );
+         } 
+    } 
 
 /**
  * Global Hook to update or delete the data from db
@@ -189,7 +198,6 @@ function api_key_management_hook_update_db()
         header( "Location: index.php?page=layout_plugin&&name=API_key_management&&success=2" );
          exit;
          } 
-    
     } 
 
 /**
@@ -202,5 +210,4 @@ function api_key_management_hook_return_global()
  {
     global $return_set;
      return $return_set;
-    
      }

@@ -48,7 +48,7 @@
 							<div class="controls">
 								 <select name="character_name">
 								 	{foreach from=$hook_info.API_key_management.characters item=element}
-									<option value="{$element.char_name}">{$element.char_name}</option>
+									<option value="{$element}">{$element}</option>
 									{/foreach}
 								</select>	
 							</div>
