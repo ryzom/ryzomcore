@@ -42,34 +42,37 @@ class Sync{
                                 $decode = json_decode($record['query']);
                                 $values = array('username' => $decode[0]);
                                 //make connection with and put into shard db & delete from the lib
-                                $sth = $db->execute("SELECT UId FROM user WHERE Login= :username;", $values);
+                                $sth=$db->selectWithParameter("UId", "user", $values, "Login= :username" );
                                 $result = $sth->fetchAll();
                                 foreach ($result as $UId) {
-                                    $ins_values = array('id' => $UId['UId']);
-                                    $db->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id, 'r2', 'OPEN');", $ins_values);
-                                    $db->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id , 'ryzom_open', 'OPEN');", $ins_values);
+                                    $ins_values = array('UId' => $UId['UId']);
+                                    $ins_values['ClientApplication'] = "r2";
+                                    $ins_values['AccessPrivilege'] = "OPEN";
+                                    $db->insert("permission", $ins_values);
+                                    $ins_values['ClientApplication'] = 'ryzom_open';
+                                    $db->insert("permission",$ins_values);
                                 }
                                 break;
                             case 'change_pass':
                                 $decode = json_decode($record['query']);
-                                $values = array('user' => $decode[0], 'pass' => $decode[1]);
+                                $values = array('Password' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->execute("UPDATE user SET Password = :pass WHERE Login = :user",$values);              
+                                $db->update("user", $values, "Login = $decode[0]");              
                                 break;
                             case 'change_mail':
                                 $decode = json_decode($record['query']);
-                                $values = array('user' => $decode[0], 'mail' => $decode[1]);
+                                $values = array('Email' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->execute("UPDATE user SET Email = :mail WHERE Login = :user",$values);              
+                                $db->update("user", $values, "Login = $decode[0]");              
                                 break;
                             case 'createUser': 
                                 $decode = json_decode($record['query']);
-                                $values = array('login' => $decode[0], 'pass' => $decode[1], 'mail' => $decode[2] );
+                                $values = array('Login' => $decode[0], 'Password' => $decode[1], 'Email' => $decode[2] );
                                 //make connection with and put into shard db & delete from the lib
-                                $db->execute("INSERT INTO user (Login, Password, Email) VALUES (:login, :pass, :mail)",$values);              
+                                $db->insert("user", $values);              
                                 break;
                         }
-                        $dbl->execute("DELETE FROM ams_querycache WHERE SID=:SID",array('SID' => $record['SID']));
+                        $dbl->delete("ams_querycache", array('SID' => $record['SID']), "SID=:SID");
                     }
                     if ($display == true) {
                         print('Syncing completed');

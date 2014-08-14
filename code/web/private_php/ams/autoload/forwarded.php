@@ -55,7 +55,7 @@ class Forwarded{
     */
     public static function isForwarded( $ticket_id) {
         $dbl = new DBLayer("lib");
-        if( $dbl->execute(" SELECT * FROM `forwarded` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id))->rowCount()){
+        if( $dbl->select("`forwarded`", array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id")->rowCount() ){
             return true;
         }else{
             return false;
@@ -90,9 +90,7 @@ class Forwarded{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO `forwarded` (`Group`,`Ticket`) VALUES (:group, :ticket)";
-        $values = Array('group' => $this->getGroup(), 'ticket' => $this->getTicket());
-        $dbl->execute($query, $values);
+        $dbl->insert("`forwarded`", Array('Group' => $this->getGroup(), 'Ticket' => $this->getTicket()));
     }
     
     
@@ -102,9 +100,7 @@ class Forwarded{
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-        $query = "DELETE FROM `forwarded` WHERE `Group` = :group_id and `Ticket` = :ticket_id";
-        $values = array('group_id' => $this->getGroup() ,'ticket_id' => $this->getTicket());
-        $dbl->execute($query, $values);
+        $dbl->delete("`forwarded`", array('group_id' => $this->getGroup() ,'ticket_id' => $this->getTicket(), "`Group` = :group_id and `Ticket` = :ticket_id");
     }
 
 
@@ -115,7 +111,7 @@ class Forwarded{
     */
     public function load( $ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM `forwarded` WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id));
+        $statement = $dbl->select("`forwarded`", Array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id");
         $row = $statement->fetch();
         $this->set($row);
     }
