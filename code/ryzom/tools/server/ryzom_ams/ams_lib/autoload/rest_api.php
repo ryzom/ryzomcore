@@ -20,7 +20,7 @@ class Rest_Api {
      * @param  $host host for the website
      * @return URL response.
      */
-    public function request( $url , $applicationKey, $host )
+    public function request( $url , $applicationKey, $host , $data )
      {
         // Check the referer is the host website
         $referer = $_SERVER['HTTP_REFERER'];
@@ -36,10 +36,13 @@ class Rest_Api {
              // Set the HTTP request authentication headers
             $headers = array( 
                 'AppKey: ' . $applicationKey,
-                 'Timestamp: ' . date( 'Ymd H:i:s', time() )
+                 'Timestamp: ' . date( 'Ymd H:i:s', time() ),
+                 'Accept: application/json',
+                 'Content-Type: application/json'
                  );
              curl_setopt( $session, CURLOPT_HTTPHEADER, $headers );
-            
+             curl_setopt( $session, CURLOPT_CUSTOMREQUEST, "POST" );
+             curl_setopt( $session, CURLOPT_POSTFIELDS, $data );
              // Execute cURL on the session handle
             $response = curl_exec( $session );
             
@@ -66,4 +69,4 @@ class Rest_Api {
             return null;
              } 
         } 
-    }
+    } 
