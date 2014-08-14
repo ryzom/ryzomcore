@@ -186,7 +186,7 @@
             CREATE  TABLE IF NOT EXISTS `" . $cfg['db']['lib']['name'] ."`.`plugins` (
 			  `Id` INT(10) NOT NULL AUTO_INCREMENT,
               `FileName` VARCHAR(255) NOT NULL, 
-  	          `Name` VARCHAR(11) NOT NULL,
+  	          `Name` VARCHAR(56) NOT NULL,
   	          `Type` VARCHAR(12) NOT NULL,
   	          `Owner` VARCHAR(25) NOT NULL,
 	          `Permission` VARCHAR(5) NOT NULL,

@@ -220,7 +220,7 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                 
                  // check for the version for the plugin
                 $db = new DBLayer( "lib" );
-                 $sth = $db -> select( "plugins", array( ':name' => $result['PluginName'] ), "Name = :name" );
+                 $sth = $db -> select( "plugins", array( 'Name' => $result['PluginName'] ), "Name = :Name" );
                  $info = $sth -> fetch();
                  $info['Info'] = json_decode( $info['Info'] );
                 
@@ -237,11 +237,11 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                 // then there MUST be an increment in the Y value.
                 // When there is increment in the X value , Y and Z MUST be 0.
                 // comparing if there is some change
-                if ( !array_intersect( $new_version , $pre_version ) )
+                if ( !array_diff( $new_version , $pre_version ) )
                      {
                     // removing the uploaded file
                     Plugincache :: rrmdir( $tempPath . "/test/" . $fileName );
-                     return '2';
+                     return '2'; //plugin already exists
                      } 
                 else
                      {
