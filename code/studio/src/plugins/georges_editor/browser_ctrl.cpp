@@ -35,6 +35,7 @@ public:
 		mgr = new QtVariantPropertyManager();
 		factory = new QtVariantEditorFactory();
 		m_currentNode = NULL;
+		m_rootNode = NULL;
 	}
 
 	~BrowserCtrlPvt()
@@ -56,9 +57,11 @@ public:
 		{
 			t = getValueType( elm.Element->getType() );			
 
-			NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( elm.Element );
+			std::string formName;
+			elm.Element->getFormName( formName, NULL );
+
 			std::string v;
-			atom->getValue( v, NLGEORGES::UFormElm::NoEval );
+			m_rootNode->getValueByName( v, formName.c_str(), NLGEORGES::UFormElm::NoEval, NULL, 0 );
 			value = v.c_str();
 		}
 
@@ -98,10 +101,13 @@ public:
 		std::string k = p->propertyName().toUtf8().constData();
 		std::string v  = value.toString().toUtf8().constData();
 
-		m_currentNode->setValueByName( v.c_str(), k.c_str() );
+		bool created = false;
+		m_currentNode->setValueByName( v.c_str(), k.c_str(), &created );
 	}
 
 	QtVariantPropertyManager* manager() const{ return mgr; }
+
+	void setRootNode( NLGEORGES::CFormElm *root ){ m_rootNode = root; }
 
 private:
 	QtVariantPropertyManager *mgr;
@@ -109,6 +115,7 @@ private:
 	QtTreePropertyBrowser *m_browser;
 
 	NLGEORGES::UFormElm *m_currentNode;
+	NLGEORGES::CFormElm *m_rootNode;
 };
 
 BrowserCtrl::BrowserCtrl( QtTreePropertyBrowser *browser ) :
@@ -131,6 +138,8 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 
 	GeorgesQt::CFormItem *item = static_cast< GeorgesQt::CFormItem* >( idx.internalPointer() );
 	NLGEORGES::UFormElm &root = m_form->getRootNode();
+	NLGEORGES::CFormElm *rootNode = dynamic_cast< NLGEORGES::CFormElm* >( &root );
+	m_pvt->setRootNode( rootNode );
 	NLGEORGES::UFormElm *node = NULL;
 	bool b = false;
 	
