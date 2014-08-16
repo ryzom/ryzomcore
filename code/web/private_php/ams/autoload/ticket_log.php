@@ -82,9 +82,8 @@ class Ticket_Log{
         global $TICKET_LOGGING;
         if($TICKET_LOGGING){
             $dbl = new DBLayer("lib");
-            $query = "INSERT INTO ticket_log (Timestamp, Query, Ticket, Author) VALUES (now(), :query, :ticket, :author )";
-            $values = Array('ticket' => $ticket_id, 'author' => $author_id, 'query' => json_encode(array($action,$arg)));
-            $dbl->execute($query, $values);
+	    $values = Array('Timestamp'=>now(), 'Query' => json_encode(array($action,$arg)), 'Ticket' => $ticket_id, 'Author' => $author_id);
+            $dbl->insert("ticket_log", $values);
         }
     }
 
@@ -148,7 +147,7 @@ class Ticket_Log{
     */
     public function load_With_TLogId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_log WHERE TLogId=:id", array('id' => $id));
+        $dbl->select("ticket_log", array('id' => $id), "TLogId=:id");
         $row = $statement->fetch();
         $this->set($row);
     }
@@ -159,9 +158,10 @@ class Ticket_Log{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_log SET Timestamp = :timestamp, Query = :query, Author = :author, Ticket = :ticket WHERE TLogId=:id";
-        $values = Array('id' => $this->getTLogId(), 'timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
-        $statement = $dbl->execute($query, $values);
+        
+        $values = Array('timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
+        $dbl->update("ticket_log", $values, "TLogId = $this->getTLogId()");
+        
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

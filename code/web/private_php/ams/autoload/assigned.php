@@ -80,9 +80,9 @@ class Assigned{
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned
         
-        if($user_id == 0 &&  $dbl->execute(" SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id", array('ticket_id' => $ticket_id) )->rowCount() ){
+        if($user_id == 0 &&  $dbl->select("`assigned`", array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id")->rowCount() ){
             return true;
-        }else if( $dbl->execute(" SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id and `User` = :user_id", array('ticket_id' => $ticket_id, 'user_id' => $user_id) )->rowCount()){
+        }else if( $dbl->select("`assigned`", array('ticket_id' => $ticket_id, 'user_id' => $user_id), "`Ticket` = :ticket_id and `User` = :user_id")->rowCount() ){
             return true;
         }else{
             return false;
@@ -115,9 +115,7 @@ class Assigned{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO `assigned` (`User`,`Ticket`) VALUES (:user, :ticket)";
-        $values = Array('user' => $this->getUser(), 'ticket' => $this->getTicket());
-        $dbl->execute($query, $values);
+	$dbl->insert("`assigned`", Array('User' => $this->getUser(), 'Ticket' => $this->getTicket());
     }
     
     
@@ -127,9 +125,7 @@ class Assigned{
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-        $query = "DELETE FROM `assigned` WHERE `User` = :user_id and `Ticket` = :ticket_id";
-        $values = array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket());
-        $dbl->execute($query, $values);
+	$dbl->delete("`assigned`", array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket(), "`User` = :user_id and `Ticket` = :ticket_id"); 
     }
 
     /**
@@ -139,7 +135,7 @@ class Assigned{
     */
     public function load($ticket_id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM `assigned` WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id));
+        $statement = $dbl->select("`assigned`", Array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id");
         $row = $statement->fetch();
         $this->set($row);
     }

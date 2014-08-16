@@ -127,6 +127,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- unselect
 	max select none
+	clearSelection()
 	
 	-- Exported object count
 	exported = 0
@@ -175,6 +176,7 @@ fn runNelMaxExport inputMaxFile =
 			(
 				-- Select none
 				max select none
+				clearSelection()
 				
 				-- Select all node in this ig
 				for node in geometry do

@@ -47,7 +47,7 @@ class Querycache{
     */
     public function load_With_SID( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ams_querycache WHERE SID=:id", array('id' => $id));
+        $statement = $dbl->select("ams_querycache", array('id' => $id), "SID=:id");
         $row = $statement->fetch();
         $this->set($row);
     } 
@@ -58,9 +58,7 @@ class Querycache{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ams_querycache SET type= :t, query = :q, db = :d WHERE SID=:id";
-        $values = Array('id' => $this->getSID(), 't' => $this->getType(), 'q' => $this->getQuery(), 'd' => $this->getDb());
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ams_querycache", Array('type' => $this->getType(), 'query' => $this->getQuery(), 'db' => $this->getDb(), "SID=$this->getSID()" );
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

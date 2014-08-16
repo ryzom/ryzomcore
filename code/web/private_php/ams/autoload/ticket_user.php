@@ -21,10 +21,7 @@ class Ticket_User{
     */
     public static function createTicketUser( $extern_id, $permission) {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_user (Permission, ExternId) VALUES (:perm, :ext_id)";
-        $values = Array('perm' => $permission, 'ext_id' => $extern_id);
-        $dbl->execute($query, $values);
-
+	$dbl->insert("ticket_user",array('Permission' => $permission, 'ExternId' => $extern_id));
     }
     
     
@@ -73,7 +70,7 @@ class Ticket_User{
     */
     public static function getModsAndAdmins() {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->executeWithoutParams("SELECT * FROM `ticket_user` WHERE `Permission` > 1");
+        $statement = $dbl->select("ticket_user", array(null), "`Permission` > 1" );
         $rows = $statement->fetchAll();
         $result = Array();
         foreach($rows as $user){
@@ -93,7 +90,7 @@ class Ticket_User{
     public static function constr_ExternId( $id) {
         $instance = new self();
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_user WHERE ExternId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_user" ,array('id'=>$id) ,"ExternId=:id");
         $row = $statement->fetch();
         $instance->tUserId = $row['TUserId'];
         $instance->permission = $row['Permission'];
@@ -196,7 +193,7 @@ class Ticket_User{
     */
     public function load_With_TUserId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_user WHERE TUserId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_user" ,array('id'=>$id), "TUserId=:id" );
         $row = $statement->fetch();
         $this->tUserId = $row['TUserId'];
         $this->permission = $row['Permission'];
@@ -209,9 +206,7 @@ class Ticket_User{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_user SET Permission = :perm, ExternId = :ext_id WHERE TUserId=:id";
-        $values = Array('id' => $this->tUserId, 'perm' => $this->permission, 'ext_id' => $this->externId);
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ticket_user" ,array('Permission' => $this->permission, 'ExternId' => $this->externId) ,"TUserId=$this->tUserId");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
