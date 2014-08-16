@@ -70,18 +70,45 @@ public:
 		m_browser->addProperty( p );
 	}
 
-	void setupStruct( NLGEORGES::CFormElmStruct *st )
+	void setupArray( NLGEORGES::UFormElm *node )
 	{
+		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( node );
+		uint size = 0;
+		arr->getArraySize( size );
+
+		std::string name;
+		arr->getFormName( name, NULL );
+		QString key = name.c_str();
+		key = key.mid( 1 );
+
+		QtVariantProperty *p = mgr->addProperty( QVariant::Int, key );
+		p->setValue( size );
+		m_browser->addProperty( p );
+
+	}
+
+	void setupStruct( NLGEORGES::UFormElm *node )
+	{
+		NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
+
 		for( int i = 0; i < st->Elements.size(); i++ )
 		{
 			NLGEORGES::CFormElmStruct::CFormElmStructElm &elm = st->Elements[ i ];
-			if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
-				continue;
-
 			setupAtom( elm );
 		}
+	}
 
-		m_currentNode = st;
+	void setupNode( NLGEORGES::UFormElm *node )
+	{
+		if( node->isStruct() )
+			setupStruct( node );
+		else
+		if( node->isArray() )
+			setupArray( node );
+		else
+			return;
+
+		m_currentNode = node;
 		m_browser->setFactoryForManager( mgr, factory );
 	}
 
@@ -96,16 +123,30 @@ public:
 		m_browser = browser;
 	}
 
-	void onValueChanged( QtProperty *p, const QVariant &value )
+	void onStructValueChanged( QtProperty *p, const QVariant &value )
 	{
-		if( m_currentNode == NULL )
-			return;
-
 		std::string k = p->propertyName().toUtf8().constData();
 		std::string v  = value.toString().toUtf8().constData();
 
 		bool created = false;
 		m_currentNode->setValueByName( v.c_str(), k.c_str(), &created );
+	}
+
+	void onArrayValueChanged( QtProperty *p, const QVariant &value )
+	{
+
+	}
+
+	void onValueChanged( QtProperty *p, const QVariant &value )
+	{
+		if( m_currentNode == NULL )
+			return;
+
+		if( m_currentNode->isStruct() )
+			onStructValueChanged( p, value );
+		else
+		if( m_currentNode->isArray() )
+			onArrayValueChanged( p, value );
 	}
 
 	QtVariantPropertyManager* manager() const{ return mgr; }
@@ -151,11 +192,7 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 	if( !b || ( node == NULL ) )
 		return;
 	
-	if( !node->isStruct() )
-		return;
-	
-	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
-	m_pvt->setupStruct( st );
+	m_pvt->setupNode( node );
 
 	enableMgrConnections();
 
