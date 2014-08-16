@@ -94,6 +94,9 @@ public:
 		for( int i = 0; i < st->Elements.size(); i++ )
 		{
 			NLGEORGES::CFormElmStruct::CFormElmStructElm &elm = st->Elements[ i ];
+			if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
+				continue;
+
 			setupAtom( elm );
 		}
 	}
