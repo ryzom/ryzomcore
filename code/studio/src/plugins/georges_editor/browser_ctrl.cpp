@@ -97,6 +97,13 @@ public:
 			if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
 				continue;
 
+			if( elm.Element == NULL )
+			{
+				NLGEORGES::CFormDfn::CEntry &entry = st->FormDfn->getEntry( i );
+				if( entry.getArrayFlag() )
+					continue;				
+			}
+
 			setupAtom( elm );
 		}
 	}
