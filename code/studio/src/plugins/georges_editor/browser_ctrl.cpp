@@ -47,7 +47,7 @@ public:
 		m_browser = NULL;
 	}
 
-	void setupElement( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm )
+	void setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm )
 	{
 		QString key = elm.Name.c_str();
 		QString value = "";
@@ -70,12 +70,15 @@ public:
 		m_browser->addProperty( p );
 	}
 
-	void setupForm( NLGEORGES::CFormElmStruct *st )
+	void setupStruct( NLGEORGES::CFormElmStruct *st )
 	{
 		for( int i = 0; i < st->Elements.size(); i++ )
 		{
 			NLGEORGES::CFormElmStruct::CFormElmStructElm &elm = st->Elements[ i ];
-			setupElement( elm );
+			if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
+				continue;
+
+			setupAtom( elm );
 		}
 
 		m_currentNode = st;
@@ -152,7 +155,7 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 		return;
 	
 	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
-	m_pvt->setupForm( st );
+	m_pvt->setupStruct( st );
 
 	enableMgrConnections();
 
