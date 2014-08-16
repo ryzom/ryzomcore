@@ -102,6 +102,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- Select all collision mesh
 	max select none
+	clearSelection()
 	for m in geometry do
 	(
 		if (isToBeExported m) == true then

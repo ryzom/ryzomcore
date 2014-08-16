@@ -122,6 +122,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- unselect
 	max select none
+	clearSelection()
 	
 	-- Exported object count
 	exported = 0
