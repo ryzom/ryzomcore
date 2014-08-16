@@ -55,6 +55,7 @@ for dir in WaterMapSourceDirectories:
 	destDir = DatabaseDirectory + "/" + dir
 	mkPath(log, destDir)
 	copyFilesExtNoTreeIfNeeded(log, srcDir, destDir, ".tga")
+	copyFilesExtNoTreeIfNeeded(log, srcDir, destDir, ".png")
 printLog(log, "")
 
 log.close()
