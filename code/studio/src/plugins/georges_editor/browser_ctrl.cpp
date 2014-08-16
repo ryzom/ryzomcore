@@ -76,11 +76,7 @@ public:
 		uint size = 0;
 		arr->getArraySize( size );
 
-		std::string name;
-		arr->getFormName( name, NULL );
-		QString key = name.c_str();
-		key = key.mid( 1 );
-
+		QString key = QObject::tr( "Array size" );
 		QtVariantProperty *p = mgr->addProperty( QVariant::Int, key );
 		p->setValue( size );
 		m_browser->addProperty( p );
@@ -144,6 +140,9 @@ public:
 
 	void onArrayValueChanged( QtProperty *p, const QVariant &value )
 	{
+		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( m_currentNode );
+		std::string formName;
+		arr->getFormName( formName, NULL );
 
 	}
 
