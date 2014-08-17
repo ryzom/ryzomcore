@@ -202,7 +202,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 		// Load the form
 		NLGEORGES::UFormLoader *loader = NLGEORGES::UFormLoader::createLoader();
 		//
-		std::string pathName = level_design_world_directory.asString() + "/" + continentName;
+		std::string pathName = CPath::lookup(continentName); // level_design_world_directory.asString() + "/" + continentName;
 		if (pathName.empty())
 		{		
 			nlwarning("Can't find continent form : %s", continentName.c_str());
