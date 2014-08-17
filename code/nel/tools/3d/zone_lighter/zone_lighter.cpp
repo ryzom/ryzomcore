@@ -699,6 +699,12 @@ int main(int argc, char* argv[])
 								if(group->getInstance(instance).DontCastShadow || group->getInstance(instance).DontCastShadowForExterior)
 									continue;
 
+								if (toLower (CFile::getExtension (name)) == "pacs_prim")
+								{
+									nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
+									continue;
+								}
+
 								// PS ?
 								if (toLower (CFile::getExtension (name)) == "ps")
 									continue;
