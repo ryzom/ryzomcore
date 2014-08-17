@@ -69,6 +69,7 @@ if BuildShadowSkinEnabled:
 printLog(log, ">>> Setup build directories <<<")
 mkPath(log, ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory)
+mkPath(log, ExportBuildDirectory + "/" + ShapeOptimizedBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory)
 mkPath(log, ExportBuildDirectory + "/" + ShapeLightmap16BitsBuildDirectory)
 

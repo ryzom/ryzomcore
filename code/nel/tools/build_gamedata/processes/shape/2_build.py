@@ -77,16 +77,19 @@ else:
 # copy lightmap_not_optimized to lightmap
 printLog(log, ">>> Optimize lightmaps <<<")
 loPathLightmapsOriginal = ExportBuildDirectory + "/" + ShapeLightmapNotOptimizedExportDirectory
+loPathShapesOriginal = ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory
 mkPath(log, loPathLightmapsOriginal)
 loPathLightmaps = ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory
-loPathShapes = ExportBuildDirectory + "/" + ShapeClodtexBuildDirectory
+loPathShapes = ExportBuildDirectory + "/" + ShapeOptimizedBuildDirectory
 loPathTags = ExportBuildDirectory + "/" + ShapeTagExportDirectory
 mkPath(log, loPathLightmaps)
 mkPath(log, loPathShapes)
 mkPath(log, loPathTags)
-if needUpdateDirByTagLog(log, loPathLightmapsOriginal, ".txt", loPathLightmaps, ".txt") or needUpdateDirNoSubdir(log, loPathLightmapsOriginal, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathShapes, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathTags, loPathLightmaps):
+if needUpdateDirByTagLog(log, loPathLightmapsOriginal, ".txt", loPathLightmaps, ".txt") or needUpdateDirNoSubdir(log, loPathLightmapsOriginal, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathShapesOriginal, loPathShapes) or needUpdateDirNoSubdir(log, loPathShapes, loPathLightmaps) or needUpdateDirNoSubdir(log, loPathTags, loPathLightmaps):
 	removeFilesRecursive(log, loPathLightmaps)
 	copyFiles(log, loPathLightmapsOriginal, loPathLightmaps)
+	removeFilesRecursive(log, loPathShapes)
+	copyFiles(log, loPathShapesOriginal, loPathShapes)
 	# Optimize lightmaps if any. Additionnaly, output a file indicating which lightmaps are 8 bits
 	# lightmap_optimizer <path_lightmaps> <path_shapes> [path_tags] [path_flag8bit]
 	subprocess.call([ LightmapOptimizer, loPathLightmaps, loPathShapes, loPathTags, ExportBuildDirectory + "/" + ShapeLightmapBuildDirectory + "/list_lm_8bit.txt" ])
