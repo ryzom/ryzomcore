@@ -128,6 +128,10 @@ CIXml::~CIXml ()
 {
 	// Release
 	release ();
+
+#ifdef USE_LOCALE_ATOF
+	if (_Locale) _free_locale((_locale_t)_Locale);
+#endif
 }
 
 // ***************************************************************************
@@ -154,10 +158,6 @@ void CIXml::release ()
 	_ErrorString = "";
 
 	resetPtrTable();
-
-#ifdef USE_LOCALE_ATOF
-	if (_Locale) _free_locale((_locale_t)_Locale);
-#endif
 }
 
 // ***************************************************************************
