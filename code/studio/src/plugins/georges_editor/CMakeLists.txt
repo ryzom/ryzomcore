@@ -16,7 +16,9 @@ SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h
                                   georges_filesystem_model.h
                                   georges_treeview_dialog.h
                                   expandable_headerview.h
-								  browser_ctrl.h)
+								  browser_ctrl.h
+								  browser_ctrl_pvt.h
+								  )
 
 SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui
                                   georges_dirtree_form.ui
