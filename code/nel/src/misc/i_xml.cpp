@@ -157,6 +157,7 @@ void CIXml::release ()
 
 #ifdef USE_LOCALE_ATOF
 	if (_Locale) _free_locale((_locale_t)_Locale);
+	_Locale = NULL;
 #endif
 }
 
