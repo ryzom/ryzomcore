@@ -51,6 +51,7 @@ if ( ! isset( $_GET["page"] ) ) {
         $page = 'login';
          } 
     } else {
+	// if the session exists load page with $_GET requests	
     if ( isset( $_SESSION['user'] ) ) {
         $page = $_GET["page"];
          } else {
@@ -91,6 +92,7 @@ if ( isset( $_POST["function"] ) ) {
      $return = $_GET["action"]();
     } else {
     $filename = 'inc/' . $page . '.php';
+     //check if this  is a file
      if ( is_file( $filename ) ) {
         require_once( $filename );
          $return = $page();
