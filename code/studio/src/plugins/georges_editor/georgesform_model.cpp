@@ -460,6 +460,46 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
 }
 
 
+void CGeorgesFormModel::arrayResized( const QString &name, int size )
+{
+	CFormItem *item = m_rootItem->findItem( name );
+	if( item == NULL )
+		return;
+
+	NLGEORGES::UFormElm *elm = NULL;
+
+	item->form()->getRootNode().getNodeByName( &elm, name.toUtf8().constData() );
+
+	if( elm == NULL )
+		return;
+
+	NLGEORGES::CFormElmArray *celm = dynamic_cast< NLGEORGES::CFormElmArray* >( elm );
+	if( celm == NULL )
+		return;
+
+	item->clearChildren();
+
+	for( int i = 0; i < celm->Elements.size(); i++ )
+	{
+		NLGEORGES::CFormElmArray::CElement &e = celm->Elements[ i ];
+
+		QString formName = name;
+		formName += '[';
+		formName += QString::number( i );
+		formName += ']';
+
+		QString n;
+		if( e.Name.empty() )
+			n = "#" + QString::number( i );
+		else
+			n = e.Name.c_str();
+
+		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form() );
+	}
+
+}
+
+
 
     /******************************************************************************/
 

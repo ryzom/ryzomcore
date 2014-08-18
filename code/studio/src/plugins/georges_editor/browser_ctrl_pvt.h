@@ -31,6 +31,9 @@ public:
 	void setRootNode( NLGEORGES::CFormElm *root ){ m_rootNode = root; }	
 	void setBrowser( QtTreePropertyBrowser *browser ){ m_browser = browser; }
 
+Q_SIGNALS:
+	void arrayResized( const QString &name, int size );
+
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
 	void setupArray( NLGEORGES::UFormElm *node );

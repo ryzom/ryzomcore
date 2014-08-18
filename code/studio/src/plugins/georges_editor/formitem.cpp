@@ -38,7 +38,7 @@ namespace GeorgesQt
 
 	CFormItem::~CFormItem() 
 	{
-		qDeleteAll(childItems);
+		clearChildren();
 	}
 
 	void CFormItem::appendChild(CFormItem *item) 
@@ -212,6 +212,29 @@ namespace GeorgesQt
 			//return QIcon(":/images/struct.ico");
 		}
 		return QIcon();
+	}
+
+	CFormItem* CFormItem::findItem( const QString &formName )
+	{
+		CFormItem *item = NULL;
+
+		if( _FormName.c_str() == formName )
+			return this;
+
+		for( int i = 0; i < childItems.count(); i++ )
+		{
+			item = childItems[ i ]->findItem( formName );
+			if( item != NULL )
+				return item;
+		}
+
+		return item;
+	}
+
+	void CFormItem::clearChildren()
+	{
+		qDeleteAll( childItems );
+		childItems.clear();
 	}
 
 	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr)

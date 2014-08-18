@@ -139,6 +139,52 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( m_currentNode );
 	std::string formName;
 	arr->getFormName( formName, NULL );
+	
+	int newSize = value.toInt();
+	int oldSize = arr->Elements.size();
+
+	if( newSize == oldSize )
+		return;
+
+	if( newSize < oldSize )
+	{
+		for( int i = newSize; i < oldSize; i++ )
+		{
+			delete arr->Elements[ i ].Element;
+		}
+
+		arr->Elements.resize( newSize );
+	}
+	else
+	{
+		arr->Elements.resize( newSize );
+
+
+		const NLGEORGES::CFormDfn *parentDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		uint indexDfn;
+		const NLGEORGES::CType *type;
+		NLGEORGES::UFormDfn::TEntryType entryType;
+		NLGEORGES::CFormElm *node;
+		bool created;
+		bool isArray;
+
+		QString idx;
+
+		for( int i = oldSize; i < newSize; i++ )
+		{
+			idx.clear();
+			idx += "[";
+			idx += QString::number( i );
+			idx += "]";
+
+			bool b;
+			b = arr->createNodeByName( idx.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+		}
+	}
+
+	QString name = formName.c_str();
+	Q_EMIT arrayResized( name, newSize );
 }
 
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )

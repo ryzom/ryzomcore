@@ -72,6 +72,10 @@ namespace GeorgesQt
 
 		QIcon getItemImage(CFormItem *rootItem);
 
+		CFormItem* findItem( const QString &formName );
+
+		void clearChildren();
+
     private:
 		QList<CFormItem*> childItems;
 		QList<QVariant> itemData;

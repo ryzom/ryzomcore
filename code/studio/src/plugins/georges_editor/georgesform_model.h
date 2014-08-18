@@ -74,6 +74,9 @@ namespace GeorgesQt
 		{ 
 			Q_EMIT dataChanged(index, index); 
 		}
+
+		void arrayResized( const QString &name, int size );
+
 	private:
 		void setupModelData();
 		void loadFormData(NLGEORGES::UFormElm *rootElm, CFormItem *parent);

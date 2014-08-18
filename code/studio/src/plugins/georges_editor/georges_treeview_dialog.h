@@ -47,6 +47,7 @@ namespace GeorgesQt
 {
 
 	class CGeorges;
+	class CGeorgesFormModel;
 
 	class CGeorgesTreeViewDialog: public QDockWidget
 	{
@@ -102,6 +103,8 @@ namespace GeorgesQt
 		void filterRows();
 		void headerClicked(int);
 
+		void onArrayResized( const QString &name, int size );
+
 	private:
 		Ui::CGeorgesTreeViewDialog m_ui;
 		ExpandableHeaderView *m_header;
@@ -116,6 +119,7 @@ namespace GeorgesQt
 		bool m_modified;
 
 		BrowserCtrl *m_browserCtrl;
+		CGeorgesFormModel *m_model;
 
 	}; /* CGeorgesTreeViewDialog */
 

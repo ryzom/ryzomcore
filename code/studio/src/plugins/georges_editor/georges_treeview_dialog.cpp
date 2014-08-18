@@ -74,6 +74,7 @@ namespace GeorgesQt
 		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
 		m_form = 0;
+		m_model = NULL;
 
         m_ui.treeView->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -87,11 +88,13 @@ namespace GeorgesQt
 			m_browserCtrl, SLOT(clicked(const QModelIndex&)));
 		connect(m_header, SIGNAL(headerClicked(int)),
 			this, SLOT(headerClicked(int)));
+		connect(m_browserCtrl, SIGNAL(arrayResized(const QString&,int)), this, SLOT(onArrayResized(const QString&,int)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
 	{
 		m_browserCtrl = NULL;
+		m_model = NULL;
 
 		delete m_form;
 		qDebug() << "DTOR";
@@ -265,6 +268,8 @@ namespace GeorgesQt
 
 			setWindowTitle(loadedForm);
 		//		//Modules::mainWin().getTabBar();			
+
+			m_model = model;
 		}
 	}
 
@@ -444,6 +449,23 @@ namespace GeorgesQt
 		//		Q_EMIT changeFile(path);
 
 		//}
+	}
+
+	void CGeorgesTreeViewDialog::onArrayResized( const QString &name, int size )
+	{
+		QModelIndex current = m_ui.treeView->currentIndex();
+		QModelIndex parent = current.parent();
+		int r = current.row();
+		int c = current.column();
+
+		m_model->arrayResized( name, size );
+		m_ui.treeView->reset();
+		m_ui.treeView->expandAll();
+
+		QModelIndex idx = m_model->index( r, c, parent );
+		if( !idx.isValid() )
+			return;
+		m_ui.treeView->setCurrentIndex( idx );
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 

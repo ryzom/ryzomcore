@@ -26,8 +26,12 @@ public:
 public Q_SLOTS:
 	void clicked( const QModelIndex &idx );
 
+Q_SIGNALS:
+	void arrayResized( const QString &name, int size );
+
 private Q_SLOTS:
 	void onValueChanged( QtProperty *p, const QVariant &value );
+	void onArrayResized( const QString &name, int size );
 
 private:
 	void enableMgrConnections();
