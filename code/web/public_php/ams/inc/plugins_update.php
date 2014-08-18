@@ -1,7 +1,7 @@
 <?php
 /**
  * function plugins_update to get
- * plugins updates from the Database using pagination object
+ * plugins updates from the Database using pagination object.
  * 
  * @author shubham meena mentored by Matthew Lagoe 
  */

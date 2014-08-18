@@ -1,10 +1,32 @@
 <?php
+
 /**
- * This function is used in installing plugins
- * It performs validation check for the compressed plugin
- * then extract in plugin folder to get the info
+ * This module contains the function to install plugins
+ * or check if the uploaded file is an update for a plugin.
+ *  
+ * When user uploads a file with .zip extension(neccessary requirement)
+ * steps that should perform: 
+ * --> Check if the file type is .zip.
+ * --> Extract it to a temp folder. 
+ * --> Check for the .info file. If not exists throw error
+ * --> Extract the information from the .info file.
+ * --> Check for the plugin name already exists or not.
+ * --> if Plugin Name exists it compare the version of .info and version of plugin stored in db.
+ * --> if same throw error and if different it checks for UpdateInfo field in .info file.
+ * --> if UpdateInfo not found throw error.
+ * --> if UpdateInfo found add the update to the ryzom_ams_lib.updates table.
+ * --> if it's not an update and plugin with same name already exists throw error.
+ * --> if plugin with same name not present provide option to install plugin 
  * 
- * @author Shubham Meena, mentored by Matthew Lagoe 
+ * @author Shubham Meena, mentored by Matthew Lagoe
+ * 
+ */ 
+
+
+/**
+ * This function is used in installing plugins or adding updates
+ * for previously installed plugins.
+ * 
  */
 function install_plugin() {
     
@@ -165,13 +187,14 @@ function zipExtraction( $target_path, $destination )
  * PluginName = Name of the plugin 
  * Version = version of the plugin
  * Type = type of the plugin
+ * TemplatePath = path to the template
  * Description = Description of the plugin ,it's functionality
  * -----------------------------------------------------------
  * 
  * reads only files with name .info
  * 
  * @param  $fileName file to read
- * @param  $targetPath path to the folder containing .info file
+ * @param  $target_path path to the folder containing .info file
  * @return array containing above information in array(value => key)
  */
 function readPluginFile( $fileName, $target_path )
@@ -190,8 +213,8 @@ function readPluginFile( $fileName, $target_path )
 /**
  * function to check for updates or 
  * if the same plugin already exists
- * also, if the update founds ,check for the update info in the .info file. 
- * Update is saved in the temp direcotry with pluginName_version.zip
+ * also, if the update founds ,check for the UpdateInfo in the .info file. 
+ * Update is saved in the temp directory with pluginName_version.zip
  * 
  * @param  $fileName file which is uploaded in .zip extension
  * @param  $findPath where we have to look for the installed plugins
@@ -286,8 +309,8 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
  * 
  * @param  $pluginId id of the plugin for which update is available
  * @param  $updatePath path of the new update
- * @return boolean if update for a plugin already exists or 
- *                                      if update of same version is uploading
+ * @return boolean True if update already exists else False 
+ *                                      
  */
 function PluginUpdateExists( $pluginId, $updatePath )
  {
