@@ -2,7 +2,7 @@
 
 /**
  * API for loading and interacting with plugins
- *     contains getters and setters
+ * contains getters and setters.
  * 
  * @author shubham meena mentored by Matthew Lagoe 
  */
@@ -14,11 +14,11 @@ class Plugincache {
      private $plugin_status;
      private $plugin_info = array();
      private $update_info = array();
+    
     /**
      * A constructor.
      * Empty constructor
      */
-    
      public function __construct() {
         } 
     
@@ -207,10 +207,12 @@ class Plugincache {
         } 
     
     /**
-     * returns plugin information with respect to the id
+     * Returns plugin information with respect to the id.
      * 
-     * @param id $ plugin id
-     * @return field info for the plugin
+     * @param $id  plugin id.
+     * @param $fieldName string plugin field to return
+     *  
+     * @return info field from the db.
      */
     public static function pluginInfoUsingId( $id, $fieldName )
      {
@@ -221,9 +223,9 @@ class Plugincache {
          } 
     
     /**
-     * function provides list of active plugins
+     * Function provides list of active plugins
      * 
-     * @return $ac_plugins list of active plugins
+     * @return  list of active plugins
      */
     public static function activePlugins()
      {
@@ -235,9 +237,15 @@ class Plugincache {
     
     /**
      * function to load hooks for the active plugins
-     * and return the contents in the hooks in an array
+     * and return the contents get from them.
      * 
-     * @return $content content available in hooks
+     * -->Get the list of active plugins then call the global
+     *    hooks exists in the plugins hook file ($pluginName.php).
+     * -->Collect the contents from the hooks and associate within 
+     *    array with key referenced plugin name. 
+     * -->return the content to use with smarty template loader   
+     * 
+     * @return $content content get from hooks
      */
     public static function loadHooks()
      {

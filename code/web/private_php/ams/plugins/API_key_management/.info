@@ -1,7 +1,7 @@
 PluginName = API Key Management
 Description = Provides public access to the API's by generating access tokens. 
 Version = 1.0.0
-Type = automatic
+Type = Manual
 TemplatePath = ../../../ams_lib/plugins/API_key_management/templates/index.tpl
 
 

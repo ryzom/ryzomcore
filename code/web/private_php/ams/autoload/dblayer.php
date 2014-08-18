@@ -3,13 +3,36 @@
  * Handles the database connections. It uses PDO to connect to the different databases. It will use the argument of the constructor to setup a connection to the database 
  * with the matching entry in the $cfg global variable.
  * 
+ * --> First create an object of dblayer --> $db = new DBLayer('short database name used in config')
+ * 
+ * --> Insert -->  $db->insert( $tb_name, $data )
+ * 				   $tb_name = table name in which we want to insert data
+ * 				   $data = array of data that needs to be inserted in format('fieldname' => $value) where fieldname must be a field in that table. 	
+ * 
+ * --> select -->  $db->select( $tb_name, $data, $where )
+ *                 $tb_name = table name which we want to select
+ * 				   $data = array of data which is then required in WHERE clause in format array('fieldname'=>$value) fieldname must be a field in that table.
+ *				   $where = string in format ('fieldname=:fieldname') where :fieldname takes it's value from $data array. 
+ * 
+ * --> update -->  $db->update( $tb_name, $data, $where )
+ * 				   $tb_name = table name which we want to update
+ * 				   $data = array of data which contains the filelds that need to be updated with their values in the format('fieldname' => $value,...) where fieldname must be a field in that table.
+ * 				   $where = string contains the filename with a value at that field in the format ('fieldname = $value') where fieldname must be a field in that table and $value is value respect to that field.		
+ * 
+ * --> delete -->  $db->delete( $tb_name, $data, $where )
+ * 				   $tb_name = table name where we want to delete.
+ * 				   $data = array of data which is then required in WHERE clause in format array('fieldname'=> $value) where fieldname must be a field in that table.	
+ * 				   $where = string in format ('fieldname=:fieldname') where :fieldname takes it's value from $data array.
+ * 
+ * 
  * @author Daan Janssens, mentored by Matthew Lagoe 
+ * 
  */
 class DBLayer {
     
     private $PDO;
     /**
-     * *< The PDO object, instantiated by the constructor
+     *  The PDO object, instantiated by the constructor
      */
     
     /**
@@ -17,6 +40,7 @@ class DBLayer {
      * Instantiates the PDO object attribute by connecting to the arguments matching database(the db info is stored in the $cfg global var)
      * 
      * @param  $db String, the name of the databases entry in the $cfg global var.
+     * @param  $dbn String, the name of the databases entry in the $cfg global var if $db referenced to an action(install etc).
      */
      function __construct( $db, $dbn = null )
      {
@@ -49,10 +73,10 @@ class DBLayer {
         } 
     
     /**
-     * execute a query that doesn't have any parameters
+     * Execute a query that doesn't have any parameters.
      * 
-     * @param  $query the mysql query
-     * @return returns a PDOStatement object
+     * @param  $query the mysql query.
+     * @return returns a PDOStatement object.
      */
     public function executeWithoutParams( $query ) {
         $statement = $this -> PDO -> prepare( $query );
@@ -61,11 +85,11 @@ class DBLayer {
          } 
     
     /**
-     * execute a query that has parameters
+     * Execute a query that has parameters.
      * 
-     * @param  $query the mysql query
-     * @param  $params the parameters that are being used by the query
-     * @return returns a PDOStatement object
+     * @param  $query the mysql query.
+     * @param  $params the parameters that are being used by the query.
+     * @return returns a PDOStatement object.
      */
     public function execute( $query, $params ) {
         $statement = $this -> PDO -> prepare( $query );
@@ -74,10 +98,10 @@ class DBLayer {
          } 
     
     /**
-     * execute a query (an insertion query) that has parameters and return the id of it's insertion
+     * Insert function which returns id of the inserting field. 
      * 
-     * @param  $query the mysql query
-     * @param  $params the parameters that are being used by the query
+     * @param  $tb_name table name where we want to insert data.
+     * @param  $data the parameters that are being inserted into table.
      * @return returns the id of the last inserted element.
      */
     public function executeReturnId( $tb_name, $data ) {
@@ -104,12 +128,14 @@ class DBLayer {
          } 
     
     /**
-     * Select function using prepared statement
+     * Select function using prepared statement.
+     * For selecting particular fields.
      * 
-     * @param string $tb_name Table Name to Select
-     * @param array $data Associative array
-     * @param string $where where to select
-     * @return statement object
+     * @param string $param field to select, can be multiple fields.
+     * @param string $tb_name Table Name to Select.
+     * @param array $data array of data to be used in WHERE clause in format('fieldname'=>$value). 'fieldname' must be a field in that table.
+     * @param string $where where to select.
+     * @return statement object.
      */
     public function selectWithParameter( $param, $tb_name, $data, $where )
      {
@@ -129,12 +155,13 @@ class DBLayer {
          } 
     
     /**
-     * Select function using prepared statement
+     * Select function using prepared statement.
+     * For selecting all fields in a table.
      * 
-     * @param string $tb_name Table Name to Select
-     * @param array $data Associative array
-     * @param string $where where to select
-     * @return statement object
+     * @param string $tb_name Table Name to Select.
+     * @param array $data array of data to be used with WHERE part in format('fieldname'=>$value,...). 'fieldname' must be a field in that table.
+     * @param string $where where to select in format('fieldname=:fieldname' AND ...).
+     * @return statement object.
      */
     public function select( $tb_name, $data , $where )
      {
@@ -154,12 +181,12 @@ class DBLayer {
          } 
     
     /**
-     * Update function with prepared statement
+     * Update function with prepared statement.
      * 
-     * @param string $tb_name name of the table
-     * @param array $data associative array with values
-     * @param string $where where part
-     * @throws Exception error in updating
+     * @param string $tb_name name of the table on which operation to be performed.
+     * @param array $data array of data in format('fieldname' => $value,...).Here, only those fields must be stored which needs to be updated.
+     * @param string $where where part in format ('fieldname'= $value AND ...). 'fieldname' must be a field in that table.
+     * @throws Exception error in updating.
      */
     public function update( $tb_name, $data, $where )
      {
@@ -190,10 +217,11 @@ class DBLayer {
          }
  
     /**
-     * insert function using prepared statements
+     * insert function using prepared statements.
      * 
-     * @param string $tb_name Name of the table to insert in
-     * @param array $data Associative array of data to insert
+     * @param string $tb_name Name of the table on which operation to be performed.
+     * @param array $data  array of data to insert in format('fieldname' => $value,....). 'fieldname' must be a field in that table.
+     * @throws error in inserting.
      */
     public function insert( $tb_name, $data )
      {
@@ -216,16 +244,17 @@ class DBLayer {
          {
             // for rolling back the changes during transaction
             $this -> PDO -> rollBack();
-             throw new Exception( "error in inseting" );
+             throw new Exception( "error in inserting" );
              } 
         } 
     
     /**
-     * Delete database entery using prepared statement
+     * Delete database entery using prepared statement.
      * 
-     * @param string $tb_name 
-     * @param string $where 
-     * @throws error in deleting
+     * @param string $tb_name table name on which operations to be performed.
+     * @param $data array with values in the format('fieldname'=> $value,...). 'fieldname' must be a field in that table.  
+     * @param string $where condition based on $data array in the format('fieldname=:fieldname' AND ...).
+     * @throws error in deleting.
      */
     public function delete( $tb_name, $data, $where )
      {
