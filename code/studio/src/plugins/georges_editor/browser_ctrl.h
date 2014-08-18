@@ -28,10 +28,12 @@ public Q_SLOTS:
 
 Q_SIGNALS:
 	void arrayResized( const QString &name, int size );
+	void modified();
 
 private Q_SLOTS:
 	void onValueChanged( QtProperty *p, const QVariant &value );
 	void onArrayResized( const QString &name, int size );
+	void onModified();
 
 private:
 	void enableMgrConnections();

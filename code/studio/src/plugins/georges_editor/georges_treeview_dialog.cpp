@@ -89,6 +89,8 @@ namespace GeorgesQt
 		connect(m_header, SIGNAL(headerClicked(int)),
 			this, SLOT(headerClicked(int)));
 		connect(m_browserCtrl, SIGNAL(arrayResized(const QString&,int)), this, SLOT(onArrayResized(const QString&,int)));
+		
+		connect(m_browserCtrl, SIGNAL(modified()), this, SLOT(modifiedFile()));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()

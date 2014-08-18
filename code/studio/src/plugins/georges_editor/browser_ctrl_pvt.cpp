@@ -132,6 +132,8 @@ void BrowserCtrlPvt::onStructValueChanged( QtProperty *p, const QVariant &value 
 
 	bool created = false;
 	m_currentNode->setValueByName( v.c_str(), k.c_str(), &created );
+
+	Q_EMIT modified();
 }
 
 void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
@@ -185,6 +187,7 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 
 	QString name = formName.c_str();
 	Q_EMIT arrayResized( name, newSize );
+	Q_EMIT modified();
 }
 
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )

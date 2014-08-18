@@ -271,10 +271,16 @@ namespace GeorgesQt
 	void GeorgesEditorForm::setModified () 
 	{
 		qDebug() << "setModified";
+		bool saveEnabled = false;
 		if (m_lastActiveDock)
-			m_saveAction->setEnabled(m_lastActiveDock->isModified());
+			saveEnabled = m_lastActiveDock->isModified();
 		else
-			m_saveAction->setEnabled(false);
+			saveEnabled = false;
+		
+		m_saveAction->setEnabled( saveEnabled );
+
+		QAction *saveAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE );
+		saveAction->setEnabled( saveEnabled );
 	}
 
 	void GeorgesEditorForm::focusChanged ( QWidget * old, QWidget * now ) 
