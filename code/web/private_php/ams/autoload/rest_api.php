@@ -5,7 +5,7 @@
  * 
  * Request for the given url using cURL  
  * and send the AccessToken for authentication 
- * to make public access for the user
+ * to make public access for the user.
  * 
  * @author Shubham Meena, mentored by Matthew Lagoe 
  */
@@ -13,12 +13,14 @@
 class Rest_Api {
     
     /**
-     * Makes a request using cURL with authentication headers and returns the response.
+     * Makes a request using cURL with authentication headers , data to post and returns the response.
      * 
      * @param  $url where request is to be sent
      * @param  $applicationKey user generated key
      * @param  $host host for the website
-     * @return URL response.
+     * @param  $data data to send using POST request
+     * 
+     * @return $response  URL response.
      */
     public function request( $url , $applicationKey, $host , $data )
      {
