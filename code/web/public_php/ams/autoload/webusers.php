@@ -53,7 +53,7 @@ class WebUsers extends Users{
        */
        protected function checkUserNameExists($username){
               $dbw = new DBLayer("web");
-              return $dbw->execute("SELECT * FROM ams_user WHERE Login = :name",array('name' => $username))->rowCount();  
+              return $dbw->select("ams_user", array('name' => $username), "Login = :name")->rowCount();  
        }
     
     
@@ -65,7 +65,7 @@ class WebUsers extends Users{
        */
        protected function checkEmailExists($email){
               $dbw = new DBLayer("web");
-              return $dbw->execute("SELECT * FROM ams_user WHERE Email = :email",array('email' => $email))->rowCount();
+              return $dbw->select("ams_user" ,array('email' => $email),"Email = :email")->rowCount();
        }
      
      
@@ -78,7 +78,7 @@ class WebUsers extends Users{
        public static function checkLoginMatch($value,$password){
   
           $dbw = new DBLayer("web");
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:value OR Email=:value", array('value' => $value));
+          $statement = $dbw->select("ams_user", array('value' => $value),"Login=:value OR Email=:value");
           $row = $statement->fetch();
           $salt = substr($row['Password'],0,2);
           $hashed_input_pass = crypt($password, $salt);
@@ -97,7 +97,7 @@ class WebUsers extends Users{
        */
        public static function getId($username){
          $dbw = new DBLayer("web");  
-         $statement = $dbw->execute("SELECT * FROM ams_user WHERE Login=:username", array('username' => $username));
+         $statement = $dbw->select("ams_user", array('username' => $username), "Login=:username");
          $row = $statement->fetch();
          return $row['UId'];
        }
@@ -110,7 +110,7 @@ class WebUsers extends Users{
        */
        public static function getIdFromEmail($email){
           $dbw = new DBLayer("web");  
-          $statement = $dbw->execute("SELECT * FROM ams_user WHERE Email=:email", array('email' => $email));
+          $statement = $dbw->select("ams_user", array('email' => $email), "Email=:email");
           $row = $statement->fetch();
           if(!empty($row)){
               return $row['UId'];
@@ -134,7 +134,7 @@ class WebUsers extends Users{
        public function getUsername(){
           $dbw = new DBLayer("web");
           if(! isset($this->login) || $this->login == ""){
-                $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+                $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
                 $row = $statement->fetch();
                 $this->set($row);
           }
@@ -148,7 +148,7 @@ class WebUsers extends Users{
        public function getEmail(){
           $dbw = new DBLayer("web");
           if(! isset($this->email) || $this->email == ""){
-                 $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+                 $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
                  $row = $statement->fetch();
                  $this->set($row);
           }
@@ -160,7 +160,7 @@ class WebUsers extends Users{
        */
        public function getHashedPass(){
               $dbw = new DBLayer("web");
-              $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+              $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
               $row = $statement->fetch();
               return $row['Password'];
        }
@@ -174,7 +174,7 @@ class WebUsers extends Users{
           $dbw = new DBLayer("web");
           if(! (isset($this->firstname) && isset($this->lastname) && isset($this->gender) && isset($this->country) && isset($this->receiveMail) ) ||
              $this->firstname == "" || $this->lastname == "" || $this->gender == "" || $this->country == "" || $this->receiveMail == ""){
-                $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+                $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
                 $row = $statement->fetch();
                 $this->set($row);
           }
@@ -189,7 +189,7 @@ class WebUsers extends Users{
        public function getReceiveMail(){
               $dbw = new DBLayer("web");
               if(! isset($this->receiveMail) || $this->receiveMail == ""){
-                     $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+                     $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
                      $row = $statement->fetch();
                      $this->set($row);
               }
@@ -203,7 +203,7 @@ class WebUsers extends Users{
        public function getLanguage(){
               $dbw = new DBLayer("web");
               if(! isset($this->language) || $this->language == ""){
-                     $statement = $dbw->execute("SELECT * FROM ams_user WHERE UId=:id", array('id' => $this->uId));
+                     $statement = $dbw->select("ams_user", array('id' => $this->uId), "UId=:id");
                      $row = $statement->fetch();
                      $this->set($row);
               }
@@ -234,11 +234,11 @@ class WebUsers extends Users{
               
               $hashpass = crypt($pass, WebUsers::generateSALT());
               $reply = WebUsers::setAmsPassword($user, $hashpass);
-              $values = Array('user' => $user, 'pass' => $hashpass);
+              $values = Array('pass' => $hashpass);
                try {
                      //make connection with and put into shard db
                      $dbw = new DBLayer("web");
-                     $dbw->execute("UPDATE ams_user SET Password = :pass WHERE Login = :user ",$values);
+                     $dbw->update("ams_user", $values,"Login = $user");
                 }
                 catch (PDOException $e) {
                   //ERROR: the web DB is offline
@@ -256,11 +256,11 @@ class WebUsers extends Users{
        */
        public static function setEmail($user, $mail){
           $reply = WebUsers::setAmsEmail($user, $mail);
-          $values = Array('user' => $user, 'mail' => $mail);
+          $values = Array('Email' => $mail);
            try {
                  //make connection with and put into shard db
                  $dbw = new DBLayer("web");
-                 $dbw->execute("UPDATE ams_user SET Email = :mail WHERE Login = :user ",$values);
+                 $dbw->update("ams_user", $values, "Login = $user");
             }
             catch (PDOException $e) {
               //ERROR: the web DB is offline
@@ -276,11 +276,11 @@ class WebUsers extends Users{
        * @param $receivemail the receivemail setting .
        */
        public static function setReceiveMail($user, $receivemail){
-              $values = Array('user' => $user, 'receivemail' => $receivemail);
+              $values = Array('Receivemail' => $receivemail);
               try {
                     //make connection with and put into shard db
                     $dbw = new DBLayer("web");
-                    $dbw->execute("UPDATE ams_user SET ReceiveMail = :receivemail WHERE UId = :user ",$values);
+                    $dbw->update("ams_user", $values, "UId = $user" );	
               }
               catch (PDOException $e) {
                  //ERROR: the web DB is offline
@@ -295,11 +295,11 @@ class WebUsers extends Users{
        * @param $language the new language value.
        */
       public static function setLanguage($user, $language){
-              $values = Array('user' => $user, 'language' => $language);
+              $values = Array('Language' => $language);
               try {
                     //make connection with and put into shard db
                     $dbw = new DBLayer("web");
-                    $dbw->execute("UPDATE ams_user SET Language = :language WHERE UId = :user ",$values);
+                    $dbw->update("ams_user", $values, "UId = $user");
                }
                catch (PDOException $e) {
                  //ERROR: the web DB is offline
@@ -344,11 +344,11 @@ class WebUsers extends Users{
                  $lang = $DEFAULT_LANGUAGE;
           }
           
-          $values = Array('name' => $name, 'pass' => $pass, 'mail' => $mail, 'lang' => $lang);
+          $values = Array('Login' => $name, 'Password' => $pass, 'Email' => $mail, 'Language' => $lang);
           
           try {
              $dbw = new DBLayer("web");
-             return $dbw->executeReturnId("INSERT INTO ams_user (Login, Password, Email, Language) VALUES (:name, :pass, :mail, :lang)",$values);
+             return $dbw->executeReturnId("ams_user", $values);
           }
           catch (PDOException $e) {
                //ERROR: the web DB is offline

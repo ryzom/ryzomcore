@@ -103,6 +103,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- Select none
 	max select none
+	clearSelection()
 	
 	-- Found it ?
 	find = false

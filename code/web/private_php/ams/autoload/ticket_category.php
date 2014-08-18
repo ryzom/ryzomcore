@@ -16,10 +16,7 @@ class Ticket_Category{
     */
     public static function createTicketCategory( $name) {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_category (Name) VALUES (:name)";
-        $values = Array('name' => $name);
-        $dbl->execute($query, $values);
-
+	$dbl->insert("ticket_category", Array('Name' => $name));
     }
 
 
@@ -40,7 +37,7 @@ class Ticket_Category{
     */
     public static function getAllCategories() {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->executeWithoutParams("SELECT * FROM ticket_category");
+        $statement = $dbl->select("ticket_category", array(null), "1");
         $row = $statement->fetchAll();
         $result = Array();
         foreach($row as $category){
@@ -70,7 +67,7 @@ class Ticket_Category{
     */
     public function load_With_TCategoryId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_category WHERE TCategoryId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_category", array('id' => $id), "TCategoryId=:id");
         $row = $statement->fetch();
         $this->tCategoryId = $row['TCategoryId'];
         $this->name = $row['Name'];
@@ -82,9 +79,7 @@ class Ticket_Category{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_category SET Name = :name WHERE TCategoryId=:id";
-        $values = Array('id' => $this->tCategoryId, 'name' => $this->name);
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ticket_category", Array('Name' => $this->name), "TCategoryId = $this->tCategoryId");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

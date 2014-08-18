@@ -228,6 +228,7 @@ fn exportCollisionsFromZone outputNelDir filename =
 (
 	-- Select all collision mesh
 	max select none
+	clearSelection()
 	for m in geometry do
 	(
 		if (isToBeExportedCollision m) == true then
@@ -311,6 +312,7 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 
 	-- unselect
 	max select none
+	clearSelection()
 
 	-- Exported object count
 	exported = 0
@@ -372,6 +374,7 @@ fn exportInstanceGroupFromZone inputFile outputPath igName transitionZone cellSi
 				(
 					-- Select none
 					max select none
+					clearSelection()
 
 					for node in objects where classOf node == XRefObject do
 					(

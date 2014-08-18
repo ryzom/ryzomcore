@@ -123,9 +123,7 @@ class Ticket_Reply{
     */
     public function create(){
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_reply (Ticket, Content, Author, Timestamp, Hidden) VALUES (:ticket, :content, :author, now(), :hidden)";
-        $values = Array('ticket' => $this->ticket, 'content' => $this->content, 'author' => $this->author, 'hidden' => $this->hidden);
-        $this->tReplyId = $dbl->executeReturnId($query, $values); 
+        $this->tReplyId = $dbl->executeReturnId("ticket_reply", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author,'Timestamp'=>now(), 'Hidden' => $this->hidden)); 
     }
 
     /**
@@ -135,7 +133,7 @@ class Ticket_Reply{
     */
     public function load_With_TReplyId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_reply WHERE TReplyId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_reply", array('id' => $id), "TReplyId=:id");
         $row = $statement->fetch();
         $this->tReplyId = $row['TReplyId'];
         $this->ticket = $row['Ticket'];
@@ -150,9 +148,7 @@ class Ticket_Reply{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket SET Ticket = :ticket, Content = :content, Author = :author, Timestamp = :timestamp, Hidden = :hidden WHERE TReplyId=:id";
-        $values = Array('id' => $this->tReplyId, 'timestamp' => $this->timestamp, 'ticket' => $this->ticket, 'content' => $this->content, 'author' => $this->author, 'hidden' => $this->hidden);
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ticket", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId=$this->tReplyId, ");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

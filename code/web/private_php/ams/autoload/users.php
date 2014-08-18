@@ -289,11 +289,13 @@ class Users{
      public static function createUser($values, $user_id){     
           try {
                //make connection with and put into shard db
-               $values['user_id']= $user_id;
                $dbs = new DBLayer("shard");
-               $dbs->execute("INSERT INTO user (Login, Password, Email) VALUES (:name, :pass, :mail)",$values);
+               $dbs->insert("user", $values);
                $dbr = new DBLayer("ring");
-               $dbr->execute("INSERT INTO ring_users (user_id, user_name, user_type) VALUES (:user_id, :name, 'ut_pioneer')",$values);
+               $valuesRing['user_id'] =$user_id;
+               $valuesRing['user_name'] = $values['Login'];
+               $valuesRing['user_type'] = 'ut_pioneer';
+               $dbr->insert("ring_users", $valuesRing);	
                ticket_user::createTicketUser( $user_id, 1);
                return "ok";
           }
@@ -301,8 +303,8 @@ class Users{
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");  
-                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "createUser",
-                    "query" => json_encode(array($values["name"],$values["pass"],$values["mail"])), "db" => "shard"));
+                    $dbl->insert("ams_querycache", array("type" => "createUser",
+                    "query" => json_encode(array($values["Login"],$values["Password"],$values["Email"])), "db" => "shard"));
                     ticket_user::createTicketUser( $user_id , 1 );
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -323,21 +325,20 @@ class Users{
           try {
                $values = array('username' =>  $pvalues[0]);
                $dbs = new DBLayer("shard");
-               $sth = $dbs->execute("SELECT UId FROM user WHERE Login= :username;", $values);
+               $sth = $dbs->selectWithParameter("UId", "user", $values, "Login= :username");
                $result = $sth->fetchAll();
                foreach ($result as $UId) {
-                   $ins_values = array('id' => $UId['UId']);
-                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id, 'r2', 'OPEN');", $ins_values);
-                   $dbs->execute("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES (:id , 'ryzom_open', 'OPEN');", $ins_values);
+                   $ins_values = array('UId' => $UId['UId'], 'clientApplication' => 'r2', 'AccessPrivilege' => 'OPEN');
+                   $dbs->insert("permission", $ins_values);
+                   $ins_values['clientApplication'] = 'ryzom_open';
+                   $dbs->insert("permission", $ins_values);
                }
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put it in query queue at ams_lib db!
                $dbl = new DBLayer("lib");
-               $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "createPermissions",
-               "query" => json_encode(array($pvalues[0])), "db" => "shard"));
-                    
-            
+               $dbl->insert("ams_querycache", array("type" => "createPermissions",
+               "query" => json_encode(array($pvalues[0])), "db" => "shard"));            
           } 
           return true;
      }
@@ -421,19 +422,19 @@ class Users{
      */
      protected static function setAmsPassword($user, $pass){
           
-           $values = Array('user' => $user, 'pass' => $pass);
+           $values = Array('Password' => $pass);
            
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->execute("UPDATE user SET Password = :pass WHERE Login = :user ",$values);
+               $dbs->update("user", $values, "Login = $user");
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");
-                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "change_pass",
+                    $dbl->insert("ams_querycache", array("type" => "change_pass",
                     "query" => json_encode(array($values["user"],$values["pass"])), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -451,19 +452,19 @@ class Users{
      */
      protected static function setAmsEmail($user, $mail){
           
-           $values = Array('user' => $user, 'mail' => $mail);
+           $values = Array('Email' => $mail);
            
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->execute("UPDATE user SET Email = :mail WHERE Login = :user ",$values);
+               $dbs->update("user", $values, "Login = $user");
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
                     $dbl = new DBLayer("lib");
-                    $dbl->execute("INSERT INTO ams_querycache (type, query, db) VALUES (:type, :query, :db)",array("type" => "change_mail",
+                    $dbl->insert("ams_querycache", array("type" => "change_mail",
                     "query" => json_encode(array($values["user"],$values["mail"])), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
@@ -472,6 +473,3 @@ class Users{
           } 
      }
 }
-
-
-     

@@ -1,0 +1,8 @@
+PluginName = Achievements
+Description = Returns the achivements of a user with respect to the character =.
+Version = 1.0.0
+TemplatePath = ../../../ams_lib/plugins/Achievements/templates/index.tpl
+Type = Manual
+
+
+
