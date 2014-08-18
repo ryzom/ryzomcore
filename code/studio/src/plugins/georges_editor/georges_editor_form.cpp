@@ -144,8 +144,12 @@ namespace GeorgesQt
 	void GeorgesEditorForm::save()
 	{
         m_lastActiveDock->write();
-        m_saveAction->setEnabled(false);
 
+
+        m_saveAction->setEnabled(false);
+		QAction *saveAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE );
+		if( saveAction != NULL )
+			saveAction->setEnabled(false);
 	}
 
 	void GeorgesEditorForm::readSettings()
