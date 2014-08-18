@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_georges_editor</library-name>
+    <name>GeorgesEditor</name>
+    <version>0.4</version>
+    <vendor>aquiles</vendor>
+    <description>Tool to create and edit sheets or forms.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

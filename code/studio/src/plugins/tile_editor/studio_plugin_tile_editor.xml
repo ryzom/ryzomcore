@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_tile_editor</library-name>
+    <name>TileEditor</name>
+    <version>1.0</version>
+    <vendor>Ryzom Core</vendor>
+    <description>Tile bank editing plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

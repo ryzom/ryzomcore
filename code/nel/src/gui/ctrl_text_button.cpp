@@ -151,9 +151,14 @@ namespace NLGUI
 		if( name == "text_posref" )
 		{
 			std::string pr;
+			pr = CInterfaceElement::HotSpotToString( _TextPosRef );
+			return pr;
+		}
+		else
+		if( name == "text_parent_posref" )
+		{
+			std::string pr;
 			pr = CInterfaceElement::HotSpotToString( _TextParentPosRef );
-			pr += " ";
-			pr += CInterfaceElement::HotSpotToString( _TextPosRef );
 			return pr;
 		}
 		else
@@ -324,10 +329,13 @@ namespace NLGUI
 		else
 		if( name == "text_posref" )
 		{
-			THotSpot parent, posref;
-			CInterfaceElement::convertHotSpotCouple( value.c_str(), parent, posref );
-			_TextPosRef = posref;
-			_TextParentPosRef = parent;
+			_TextPosRef = convertHotSpot( value.c_str() );
+			return;
+		}
+		else
+		if( name == "text_parent_posref" )
+		{
+			_TextParentPosRef = convertHotSpot( value.c_str() );
 			return;
 		}
 		else

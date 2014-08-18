@@ -86,7 +86,7 @@ namespace NLGUI
 			break;
 		}
 
-		return "";
+		return "control";
 	}
 
 	CCtrlBase::TToolTipParentType CCtrlBase::stringToToolTipParent( const std::string &str )
@@ -220,28 +220,22 @@ namespace NLGUI
 		else
 		if( name == "tooltip_posref" )
 		{
-			std::string s;
-			if( ( _ToolTipParentPosRef == Hotspot_TTAuto ) && ( _ToolTipPosRef == Hotspot_TTAuto ) )
-				return "auto";
-			else{
-				s = CInterfaceElement::HotSpotToString( _ToolTipParentPosRef );
-				s += " ";
-				s += CInterfaceElement::HotSpotToString( _ToolTipPosRef );
-				return s;
-			}
+			return TooltipHotSpotToString( _ToolTipPosRef );
+		}
+		else
+		if( name == "tooltip_parent_posref" )
+		{
+			return TooltipHotSpotToString( _ToolTipParentPosRef );
 		}
 		else
 		if( name == "tooltip_posref_alt" )
 		{
-			std::string s;
-			if( ( _ToolTipParentPosRefAlt == Hotspot_TTAuto ) && ( _ToolTipPosRefAlt == Hotspot_TTAuto ) )
-				return "auto";
-			else{
-				s = CInterfaceElement::HotSpotToString( _ToolTipParentPosRefAlt );
-				s += " ";
-				s += CInterfaceElement::HotSpotToString( _ToolTipPosRefAlt );
-				return s;
-			}
+			return TooltipHotSpotToString( _ToolTipPosRefAlt );
+		}
+		else
+		if( name == "tooltip_parent_posref_alt" )
+		{
+			return TooltipHotSpotToString( _ToolTipParentPosRefAlt );
 		}
 		else
 		if( name == "instant_help" )
@@ -293,21 +287,65 @@ namespace NLGUI
 		else
 		if( name == "tooltip_posref" )
 		{
-			THotSpot parentHS;
 			THotSpot HS;
-			convertTooltipHotSpot( value.c_str(), parentHS, HS );
-			_ToolTipParentPosRef = parentHS;
+			convertTooltipHotSpot( value.c_str(), HS );
 			_ToolTipPosRef = HS;
+
+			// When auto is set, both of them need to be auto
+			if( _ToolTipPosRef == Hotspot_TTAuto )
+				_ToolTipParentPosRef = Hotspot_TTAuto;
+			else
+			if( _ToolTipParentPosRef == Hotspot_TTAuto )
+				_ToolTipParentPosRef = _ToolTipPosRef;
+
+			return;
+		}
+		else
+		if( name == "tooltip_parent_posref" )
+		{
+			THotSpot HS;
+			convertTooltipHotSpot( value.c_str(), HS );
+			_ToolTipParentPosRef = HS;
+
+			// When auto is set, both of them need to be auto
+			if( _ToolTipParentPosRef == Hotspot_TTAuto )
+				_ToolTipPosRef = Hotspot_TTAuto;
+			else
+			if( _ToolTipPosRef == Hotspot_TTAuto )
+				_ToolTipPosRef = _ToolTipParentPosRef;
+
 			return;
 		}
 		else
 		if( name == "tooltip_posref_alt" )
 		{
-			THotSpot parentHS;
 			THotSpot HS;
-			convertTooltipHotSpot( value.c_str(), parentHS, HS );
-			_ToolTipParentPosRefAlt = parentHS;
+			convertTooltipHotSpot( value.c_str(), HS );
 			_ToolTipPosRefAlt = HS;
+
+			// When auto is set, both of them need to be auto
+			if( _ToolTipPosRefAlt == Hotspot_TTAuto )
+				_ToolTipParentPosRefAlt = Hotspot_TTAuto;
+			else
+			if( _ToolTipParentPosRefAlt == Hotspot_TTAuto )
+				_ToolTipPosRefAlt = _ToolTipParentPosRefAlt;
+
+			return;
+		}
+		else
+		if( name == "tooltip_parent_posref_alt" )
+		{
+			THotSpot HS;
+			convertTooltipHotSpot( value.c_str(), HS );
+			_ToolTipParentPosRefAlt = HS;
+
+			// When auto is set, both of them need to be auto
+			if( _ToolTipParentPosRefAlt == Hotspot_TTAuto )
+				_ToolTipPosRefAlt = Hotspot_TTAuto;
+			else
+			if( _ToolTipPosRefAlt == Hotspot_TTAuto )
+				_ToolTipPosRefAlt = _ToolTipParentPosRefAlt;
+
 			return;
 		}
 		else
@@ -374,6 +412,21 @@ namespace NLGUI
 		}
 	}
 
+	void CCtrlBase::convertTooltipHotSpot(const char *prop, THotSpot &HS )
+	{
+		if(prop)
+		{
+			const char *ptr = (const char*)prop;
+			if(stricmp(ptr, "auto")==0)
+			{
+				HS = Hotspot_TTAuto;
+			}
+			else if(strlen(ptr)==2)
+			{
+				HS = convertHotSpot(ptr);
+			}
+		}
+	}
 
 	std::string CCtrlBase::TooltipHotSpotToString( THotSpot parent, THotSpot child )
 	{
@@ -390,6 +443,20 @@ namespace NLGUI
 			s += CInterfaceElement::HotSpotToString( child );
 		}
 
+		return s;
+	}
+
+	std::string CCtrlBase::TooltipHotSpotToString( THotSpot HS )
+	{
+		std::string s;
+		if( HS == Hotspot_TTAuto )
+		{
+			s = "auto";
+		}
+		else
+		{
+			s = HotSpotToString( HS );
+		}
 		return s;
 	}
 
