@@ -1,8 +1,9 @@
 <?php
 /**
  * This function is used in deleting plugins.
- * 
- * It removes the plugin from the codebase.
+ * It removes the plugin from the codebase as well as
+ * from the Database. When user request to delete a plugin
+ * id of that plugin is sent in $_GET global variable. 
  * 
  * @author Shubham Meena, mentored by Matthew Lagoe 
  */
@@ -27,12 +28,14 @@ function delete_plugin() {
                      {
                     $db -> delete( 'plugins', array( 'id' => $id ), "Id=:id" );
                     
+                    //if result	successfull redirect and show success message
                      header( "Location: index.php?page=plugins&result=2" );
                      exit;
                     
                      } 
                 else
                      {
+					// if result unsuccessfull redirect and show error message 
                     header( "Location: index.php?page=plugins&result=0" );
                      exit;
                      } 
@@ -40,6 +43,7 @@ function delete_plugin() {
             } 
         else
              {
+			// if result unsuccessfull redirect and show error message 	 
             header( "Location: index.php?page=plugins&result=0" );
              exit;
              } 

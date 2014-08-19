@@ -1064,6 +1064,46 @@ namespace NLGUI
 		}
 	}
 
+	bool CViewRenderer::getTexture( NLMISC::CBitmap &bm, const std::string &name )
+	{
+		TTextureMap::const_iterator itr = _TextureMap.find( name );
+		if( itr == _TextureMap.end() )
+			return false;
+
+		sint32 id = itr->second;
+		SImage *si = getSImage( id );
+		NLMISC::CBitmap *src = si->GlobalTexturePtr->Texture->generateDatas();
+
+		if( src->getPixelFormat() != NLMISC::CBitmap::RGBA )
+			return false;
+
+		uint x0 = (uint)( si->UVMin.U * si->GlobalTexturePtr->Width );
+		uint y0 = (uint)( si->UVMin.V * si->GlobalTexturePtr->Height );
+		uint x1 = (uint)( si->UVMax.U * si->GlobalTexturePtr->Width );
+		uint y1 = (uint)( si->UVMax.V * si->GlobalTexturePtr->Height );
+
+		if( x1 == x0 )
+			return false;
+
+		if( y1 == y0 )
+			return false;
+
+		bm.resize( x1 - x0, y1 - y0 );
+		bm.blit( *src, x0, y0, ( x1 - x0 ), ( y1 - y0 ), 0, 0 );
+
+		return true;
+	}
+
+	void CViewRenderer::getTextureNames( std::vector< std::string > &textures )
+	{
+		TTextureMap::const_iterator itr = _TextureMap.begin();
+		while( itr != _TextureMap.end() )
+		{
+			textures.push_back( itr->first );
+			++itr;
+		}
+	}
+
 	/*
 	 * getTextureIdFromName
 	 */

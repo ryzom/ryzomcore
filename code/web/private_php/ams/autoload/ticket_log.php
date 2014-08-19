@@ -143,7 +143,7 @@ class Ticket_Log{
     /**
     * loads the object's attributes.
     * loads the object's attributes by giving a ticket_log entries ID (TLogId).
-    * @param id the id of the ticket_log entry that should be loaded
+    * @param $id the id of the ticket_log entry that should be loaded
     */
     public function load_With_TLogId( $id) {
         $dbl = new DBLayer("lib");

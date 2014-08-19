@@ -86,6 +86,11 @@ public:
 		_BitmapName[bitmapType]=name;
 	}
 
+	std::string getFileName (TBitmap bitmapType) const
+	{
+		return _BitmapName[bitmapType];
+	}
+
 	/// Get the additional orientation (CCW) for alpha texture.
 	uint8	getRotAlpha ()
 	{
@@ -161,6 +166,9 @@ public:
 	{
 		return _Name;
 	};
+
+	std::set<std::string> getTileSets() const{ return _TileSet; }
+
 	void setName (const std::string& name);
 	void addTileSet (const std::string& name);
 	void removeTileSet (const std::string& name);
@@ -168,6 +176,8 @@ public:
 	{
 		return _TileSet.find (name)!=_TileSet.end();
 	}
+
+	void clear(){ _TileSet.clear(); }
 
 	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
 private:

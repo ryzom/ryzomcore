@@ -1,0 +1,84 @@
+<widget>
+    <header>
+        <name>GroupMenu</name>
+        <guiname>CGroupMenu</guiname>
+        <ancestor>GroupModal</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>extends</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>color</name>
+            <type>color</type>
+            <default>255 255 255 255</default>
+        </property>
+        <property>
+            <name>case_mode</name>
+            <type>int</type>
+            <default>2</default>
+        </property>
+        <property>
+            <name>shadow_color</name>
+            <type>color</type>
+            <default>0 0 0 255</default>
+        </property>
+        <property>
+            <name>color_over</name>
+            <type>color</type>
+            <default>255 255 255 255</default>
+        </property>
+        <property>
+            <name>shadow_color_over</name>
+            <type>color</type>
+            <default>0 0 0 255</default>
+        </property>
+        <property>
+            <name>highlight_over</name>
+            <type>color</type>
+            <default>128 0 0 255</default>
+        </property>
+        <property>
+            <name>color_grayed</name>
+            <type>color</type>
+            <default>128 128 128 255</default>
+        </property>
+        <property>
+            <name>shadow_color_grayed</name>
+            <type>color</type>
+            <default>0 0 0 255</default>
+        </property>
+        <property>
+            <name>space</name>
+            <type>int</type>
+            <default>3</default>
+        </property>
+        <property>
+            <name>fontsize</name>
+            <type>int</type>
+            <default>12</default>
+        </property>
+        <property>
+            <name>shadow</name>
+            <type>bool</type>
+            <default>false</default>
+        </property>
+        <property>
+            <name>formatted</name>
+            <type>bool</type>
+            <default>false</default>
+        </property>
+        <property>
+            <name>max_visible_line</name>
+            <type>int</type>
+            <default>0</default>
+        </property>
+
+    
+    </properties>
+</widget>

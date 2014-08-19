@@ -1,0 +1,61 @@
+<widget>
+    <header>
+        <name>GroupList</name>
+        <guiname>CGroupList</guiname>
+        <ancestor>InterfaceGroup</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>maxelements</name>
+            <type>int</type>
+            <default>1024</default>
+        </property>
+        <property>
+            <name>addelt</name>
+            <type>string</type>
+            <default>B</default>
+        </property>
+        <property>
+            <name>align</name>
+            <type>string</type>
+            <default>L</default>
+        </property>
+        <property>
+            <name>space</name>
+            <type>int</type>
+            <default>0</default>
+        </property>
+        <property>
+            <name>over</name>
+            <type>bool</type>
+            <default>false</default>
+        </property>
+        <property>
+            <name>dynamic_display_size</name>
+            <type>bool</type>
+            <default>false</default>
+        </property>
+        <property>
+            <name>col_over</name>
+            <type>color</type>
+            <default>255 255 255 32</default>
+        </property>
+        <property>
+            <name>hardtext</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>textid</name>
+            <type>int</type>
+            <default>0</default>
+        </property>
+
+
+
+
+    </properties>
+</widget>

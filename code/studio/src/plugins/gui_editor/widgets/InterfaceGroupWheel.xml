@@ -1,0 +1,32 @@
+<widget>
+    <header>
+        <name>InterfaceGroupWheel</name>
+        <guiname>CInterfaceGroupWheel</guiname>
+        <ancestor>InterfaceGroup</ancestor>
+        <description></description>
+        <abstract>false</abstract>
+        <icon></icon>
+    </header>
+    <properties>
+        <property>
+            <name>on_wheel_up</name>
+            <type>action</type>
+            <default></default>
+        </property>
+        <property>
+            <name>on_wheel_up_params</name>
+            <type>string</type>
+            <default></default>
+        </property>
+        <property>
+            <name>on_wheel_down</name>
+            <type>action</type>
+            <default></default>
+        </property>
+        <property>
+            <name>on_wheel_down_params</name>
+            <type>string</type>
+            <default></default>
+        </property>
+    </properties>
+</widget>

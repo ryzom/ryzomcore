@@ -286,6 +286,12 @@ namespace NLGUI
 		 */
 		void flush ();
 
+		/// Retrives a texture
+		bool getTexture( NLMISC::CBitmap &bm, const std::string &name );
+
+		/// Retrieve the texture names
+		void getTextureNames( std::vector< std::string > &textures );
+
 		/**
 		 * get a texture file pointer from a string name. O(logN)
 		 * \param id : the id of the texture

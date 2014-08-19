@@ -59,7 +59,6 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
   
   IF(WITH_QT)
     ADD_SUBDIRECTORY(tile_edit_qt)
-    ADD_SUBDIRECTORY(object_viewer_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
   ENDIF(WITH_QT)
   
