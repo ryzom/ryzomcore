@@ -497,6 +497,22 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form() );
 	}
 
+	if( celm->Elements.size() == 0 )
+	{
+		NLGEORGES::CFormElmStruct *ps = dynamic_cast< NLGEORGES::CFormElmStruct* >( celm->getParent() );
+		if( ps != NULL )
+		{
+			const NLGEORGES::CFormDfn *parentDfn;
+			const NLGEORGES::CFormDfn *nodeDfn;
+			uint indexDfn;
+			const NLGEORGES::CType *nodeType;
+			NLGEORGES::CFormElm *node;
+			NLGEORGES::CFormDfn::TEntryType type;
+			bool isArray;
+			
+			ps->deleteNodeByName( item->name().c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray );
+		}
+	}
 }
 
 
