@@ -10,6 +10,11 @@ namespace NLGEORGES
 	class CFormElmStruct;
 }
 
+namespace GeorgesQt
+{
+	class CFormItem;
+}
+
 class QtVariantPropertyManager;
 class QtVariantEditorFactory;
 class QtTreePropertyBrowser;
@@ -24,7 +29,7 @@ public:
 	~BrowserCtrlPvt();
 
 	void clear();
-	void setupNode( NLGEORGES::UFormElm *node );
+	void setupNode( GeorgesQt::CFormItem *node );
 	void onValueChanged( QtProperty *p, const QVariant &value );
 
 	QtVariantPropertyManager* manager() const{ return mgr; }
@@ -37,18 +42,40 @@ Q_SIGNALS:
 
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
-	void setupArray( NLGEORGES::UFormElm *node );
 	void setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm );
+
+	void setupStruct( GeorgesQt::CFormItem *node );
+	void setupArray( GeorgesQt::CFormItem *node );
 
 	void onStructValueChanged( QtProperty *p, const QVariant &value );
 	void onArrayValueChanged( QtProperty *p, const QVariant &value );
+	void createArray();
 	
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
 	QtTreePropertyBrowser *m_browser;
 
-	NLGEORGES::UFormElm *m_currentNode;
+	QString m_currentNodeName;
 	NLGEORGES::CFormElm *m_rootNode;
+
+	struct CurrentNode
+	{
+		CurrentNode()
+		{
+			clear();
+		}
+
+		void clear()
+		{
+			p = NULL;
+			name = "";
+		}
+
+		QString name;
+		NLGEORGES::UFormElm *p;
+	};
+
+	CurrentNode m_currentNode;
 };
 
 #endif

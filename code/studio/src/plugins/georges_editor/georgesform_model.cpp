@@ -283,7 +283,7 @@ namespace GeorgesQt
         NLGEORGES::CForm *formPtr = static_cast<NLGEORGES::CForm*>(m_form);
 
         // Add the new node
-        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form);
+        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, false);
 
         // Can be NULL in virtual DFN
         if (parentDfn)
@@ -418,7 +418,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                                        uint slot)
 {
         // Add the new node
-        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form);
+        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, true);
 
         // The array exist
         if (array)
@@ -451,7 +451,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                         else
                         {
                                 NLGEORGES::CFormElmArray *elmPtr = array->Elements[elm].Element ? static_cast<NLGEORGES::CFormElmArray*>(array->Elements[elm].Element) : NULL;
-                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form);
+                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form, false);
                         }
                 }
         }
@@ -494,7 +494,7 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form() );
+		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
 	}
 
 	if( celm->Elements.size() == 0 )

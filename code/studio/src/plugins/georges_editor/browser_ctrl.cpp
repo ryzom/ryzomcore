@@ -31,18 +31,8 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 	m_pvt->clear();
 
 	GeorgesQt::CFormItem *item = static_cast< GeorgesQt::CFormItem* >( idx.internalPointer() );
-	NLGEORGES::UFormElm &root = m_form->getRootNode();
-	NLGEORGES::CFormElm *rootNode = dynamic_cast< NLGEORGES::CFormElm* >( &root );
-	m_pvt->setRootNode( rootNode );
-	NLGEORGES::UFormElm *node = NULL;
-	bool b = false;
-	
-	b = m_form->getRootNode().getNodeByName( &node, item->formName().c_str() );
-	
-	if( !b || ( node == NULL ) )
-		return;
-	
-	m_pvt->setupNode( node );
+
+	m_pvt->setupNode( item );
 
 	enableMgrConnections();
 
