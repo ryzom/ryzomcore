@@ -177,6 +177,8 @@ void BrowserCtrlPvt::createArray()
 	if( !created )
 		return;
 
+	m_currentNode.p = node;
+
 	NLGEORGES::CFormElmArray *arr = dynamic_cast< NLGEORGES::CFormElmArray* >( node );
 	QString idx = "[0]";
 	arr->createNodeByName( idx.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
@@ -191,8 +193,15 @@ void BrowserCtrlPvt::createArray()
 
 void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 {
+	// Newsize checks hacked in, because setting unsigned value type in QVariant crashes the property browser!
+	int newSize = value.toInt();
+	if( newSize < 0 )
+		return;
+
 	if( m_currentNode.p == NULL )
 	{
+		if( newSize != 1 )
+			return;
 		createArray();
 		return;
 	}
@@ -201,7 +210,6 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	std::string formName;
 	arr->getFormName( formName, NULL );
 	
-	int newSize = value.toInt();
 	int oldSize = arr->Elements.size();
 
 	if( newSize == oldSize )
@@ -247,6 +255,9 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	QString name = formName.c_str();
 	Q_EMIT arrayResized( name, newSize );
 	Q_EMIT modified();
+
+	if( newSize == 0 )
+		m_currentNode.p = NULL;
 }
 
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
