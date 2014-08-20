@@ -34,6 +34,12 @@ namespace GeorgesQt
 {
 	CFormItem::CFormItem()
 	{
+		parentItem = NULL;
+		formElm = NULL;
+		m_form = NULL;
+		_StructId = 0;
+		_Slot = 0;
+		_Type = Null;
 	}
 
 	CFormItem::~CFormItem() 
