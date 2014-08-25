@@ -2797,7 +2797,8 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 
 							// Apply property to database
 							CCDBNodeBranch *slotNode = static_cast<CCDBNodeBranch*>(inventoryNode->getNode( (uint16)itemSlot.getSlotIndex() ));
-							CCDBNodeLeaf *leafNode = safe_cast<CCDBNodeLeaf*>(slotNode->find( string(INVENTORIES::CItemSlot::ItemPropStr[itemSlot.getOneProp().ItemPropId]) ));
+							CCDBNodeLeaf *leafNode = type_cast<CCDBNodeLeaf*>(slotNode->find( string(INVENTORIES::CItemSlot::ItemPropStr[itemSlot.getOneProp().ItemPropId]) ));
+							if (!leafNode) nlwarning("BUG: Inventory slot property missing in database (A) (%s, %i, %s)", slotNode->getFullName().c_str(), (sint)itemSlot.getOneProp().ItemPropId, INVENTORIES::CItemSlot::ItemPropStr[itemSlot.getOneProp().ItemPropId]);
 							SKIP_IF( !leafNode, "Inventory slot property missing in database", continue );
 							leafNode->setPropCheckGC( serverTick, (sint64)itemSlot.getOneProp().ItemPropValue );
 
@@ -2815,7 +2816,8 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 								// Instead of clearing all leaves (by index), we must find and clear only the
 								// properties in TItemPropId, because the actual database leaves may have
 								// less properties, and because we must not clear the leaf INFO_VERSION.
-								CCDBNodeLeaf *leafNode = safe_cast<CCDBNodeLeaf*>(slotNode->find( string(INVENTORIES::CItemSlot::ItemPropStr[i]) ));
+								CCDBNodeLeaf *leafNode = type_cast<CCDBNodeLeaf*>(slotNode->find( string(INVENTORIES::CItemSlot::ItemPropStr[i]) ));
+								if (!leafNode) nlwarning("BUG: Inventory slot property missing in database (B) (%s, %i, %s)", slotNode->getFullName().c_str(), (sint)i, INVENTORIES::CItemSlot::ItemPropStr[i]);
 								SKIP_IF( !leafNode, "Inventory slot property missing in database", continue );
 								leafNode->setPropCheckGC( serverTick, 0 );
 							}
