@@ -6,9 +6,7 @@ IF(WITH_NEL_TOOLS)
 ENDIF(WITH_NEL_TOOLS)
 
 # Max plugins are under the 3d directory as well.
-IF(WITH_3D)
-  ADD_SUBDIRECTORY(3d)
-ENDIF(WITH_3D)
+ADD_SUBDIRECTORY(3d)
 
 # Don't add other subdirectories if only max plugins are selected.
 IF(WITH_NEL_TOOLS)

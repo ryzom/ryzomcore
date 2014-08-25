@@ -199,6 +199,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 	
 	-- unselect
 	max select none
+	clearSelection()
 	
 	-- Exported object count
 	exported = 0

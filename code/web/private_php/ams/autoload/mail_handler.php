@@ -118,12 +118,7 @@ class Mail_Handler{
             $id_user = $recipient;
             $recipient = NULL;
         }
-
-        $query = "INSERT INTO email (Recipient,Subject,Body,Status,Attempts,Sender,UserId,MessageId,TicketId) VALUES (:recipient, :subject, :body, :status, :attempts, :sender, :id_user, :messageId, :ticketId)";
-        $values = array('recipient' => $recipient, 'subject' => $subject, 'body' => $body, 'status' => 'NEW', 'attempts'=> 0, 'sender' => $from,'id_user' => $id_user,  'messageId' => 0, 'ticketId'=> $ticket_id);
-        $db = new DBLayer("lib");
-        $db->execute($query, $values);
-        
+        $db->insert("email", array('Recipient' => $recipient, 'Subject' => $subject, 'Body' => $body, 'Status' => 'NEW', 'Attempts'=> 0, 'Sender' => $from,'UserId' 		=> $id_user,  'MessageId' => 0, 'TicketId'=> $ticket_id));
     }
     
      
@@ -173,7 +168,7 @@ class Mail_Handler{
                 
                 //select all new & failed emails & try to send them
                 //$emails = db_query("select * from email where status = 'NEW' or status = 'FAILED'");
-                $statement = $this->db->executeWithoutParams("select * from email where Status = 'NEW' or Status = 'FAILED'");
+                $statement = $this->db->select("email",array(null), "Status = 'NEW' or Status = 'FAILED'");
                 $emails = $statement->fetchAll();
 
                 foreach($emails as $email) {

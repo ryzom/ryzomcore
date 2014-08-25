@@ -1,0 +1,12 @@
+<RCC>
+  <qresource>
+    <file>images/array.ico</file>
+    <file>images/header.ico</file>
+    <file>images/hold.ico</file>
+    <file>images/root.ico</file>
+    <file>images/struct.ico</file>
+    <file>images/vstruct.ico</file>
+    <file>images/zfee51.ico</file>
+    <file>images/ic_nel_georges_editor.png</file>
+  </qresource>
+</RCC>

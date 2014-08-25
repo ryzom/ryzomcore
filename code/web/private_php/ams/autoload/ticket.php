@@ -27,7 +27,7 @@ class Ticket{
     public static function ticketExists($id) {
         $dbl = new DBLayer("lib");
         //check if ticket exists
-        if(  $dbl->execute(" SELECT * FROM `ticket` WHERE `TId` = :ticket_id", array('ticket_id' => $id) )->rowCount() ){
+        if(  $dbl->select("`ticket`", array('ticket_id' => $id), "`TId` = :ticket_id")->rowCount() ){
             return true;
         }else{
             return false;
@@ -343,9 +343,7 @@ class Ticket{
     */
     public function create(){
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket (Timestamp, Title, Status, Queue, Ticket_Category, Author, Priority) VALUES (now(), :title, :status, :queue, :tcat, :author, :priority)";
-        $values = Array('title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author, 'priority' => $this->priority);
-        $this->tId = $dbl->executeReturnId($query, $values); ;
+        $this->tId = $dbl->executeReturnId("ticket", Array('Timestamp'=>now(), 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority)); 
     }
 
     
@@ -356,7 +354,7 @@ class Ticket{
     */
     public function load_With_TId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket WHERE TId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket", array('id' => $id), "TId=:id");
         $row = $statement->fetch();
         $this->tId = $row['TId'];
         $this->timestamp = $row['Timestamp'];
@@ -374,9 +372,7 @@ class Ticket{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket SET Timestamp = :timestamp, Title = :title, Status = :status, Queue = :queue, Ticket_Category = :tcat, Author = :author, Priority = :priority WHERE TId=:id";
-        $values = Array('id' => $this->tId, 'timestamp' => $this->timestamp, 'title' => $this->title, 'status' => $this->status, 'queue' => $this->queue, 'tcat' => $this->ticket_category, 'author' => $this->author, 'priority' => $this->priority);
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ticket", Array('Timestamp' => $this->timestamp, 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority), "TId=$this->tId");
     }
     
     

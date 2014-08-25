@@ -43,9 +43,7 @@ class Ticket_Content{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $query = "INSERT INTO ticket_content (Content) VALUES (:content)";
-        $values = Array('content' => $this->content);
-        $this->tContentId = $dbl->executeReturnId($query, $values); ;
+    	$this->tContentId = $dbl->executeReturnId("ticket_content", Array('Content' => $this->content));
     }
     
     
@@ -56,7 +54,7 @@ class Ticket_Content{
     */
     public function load_With_TContentId( $id) {
         $dbl = new DBLayer("lib");
-        $statement = $dbl->execute("SELECT * FROM ticket_content WHERE TContentId=:id", array('id' => $id));
+        $statement = $dbl->select("ticket_content", array('id' => $id), "TContentId=:id");
         $row = $statement->fetch();
         $this->tContentId = $row['TContentId'];
         $this->content = $row['Content'];
@@ -67,9 +65,7 @@ class Ticket_Content{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $query = "UPDATE ticket_content SET Content = :content WHERE TContentId=:id";
-        $values = Array('id' => $this->tContentId, 'content' => $this->content);
-        $statement = $dbl->execute($query, $values);
+        $dbl->update("ticket_content", Array('Content' => $this->content), "TContentId = $this->tContentId");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

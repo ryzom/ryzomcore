@@ -197,6 +197,10 @@ IF(WITH_TOOLS)
   ADD_SUBDIRECTORY(tool)
 ENDIF(WITH_TOOLS)
 
+IF(WITH_STUDIO)
+  ADD_SUBDIRECTORY(studio)
+ENDIF(WITH_STUDIO)
+
 # To build the documention, you will have to enable it
 # and then do the equivalent of "make DoxygenDoc".
 IF(BUILD_DOCUMENTATION)

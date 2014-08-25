@@ -2803,9 +2803,13 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 		else
 		{
 			GLuint result;
-			nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT, &result);
-			OcclusionType = result != 0 ? NotOccluded : Occluded;
-			VisibleCount = (uint) result;
+			nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT_AVAILABLE, &result);
+			if (result != GL_FALSE)
+			{
+				nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT, &result);
+				OcclusionType = result != 0 ? NotOccluded : Occluded;
+				VisibleCount = (uint) result;
+			}
 		}
 	}
 #endif

@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_sheet_builder</library-name>
+    <name>SheetBuilder</name>
+    <version>1.0</version>
+    <vendor>kharvd</vendor>
+    <description>make_sheet_id equivalent</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>
