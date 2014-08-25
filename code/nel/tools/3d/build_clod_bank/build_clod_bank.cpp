@@ -62,7 +62,7 @@ int	main(int argc, char *argv[])
 		float	bakeFrameRate= 20;
 		if(argc>=5)
 		{
-			bakeFrameRate= (float)atof(argv[4]);
+			NLMISC::fromString(argv[4], bakeFrameRate);
 			if(bakeFrameRate<=1)
 			{
 				nlwarning("bad bakeFrameRate value, use a default of 20");

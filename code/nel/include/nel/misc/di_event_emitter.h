@@ -34,7 +34,9 @@
 #include "events.h"
 #include "rect.h"
 #include "game_device.h"
-#define NOMINMAX
+#ifndef NL_COMP_MINGW
+#	define NOMINMAX
+#endif
 #include <windows.h>
 #include <dinput.h>
 
@@ -101,7 +103,7 @@ public:
 	  * \param we A windows eventsemitter. Can be NULL. Needed if you want to mix WIN32 events and Direct Input events
 	  *			  (for example, a Direct Input Mouse and a Win32 Keyboard)
 	  */
-	static CDIEventEmitter *create(HINSTANCE hinst, HWND hwnd, CWinEventEmitter *we);
+	static CDIEventEmitter *create(HINSTANCE hinst, HWND hwnd, CWinEventEmitter *we) throw(EDirectInput);
 	~CDIEventEmitter();
 public:
 

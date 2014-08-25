@@ -2269,7 +2269,7 @@ void		CDriverGL::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 
 
 // ***************************************************************************
-uint CDriverGL::getTextureHandle(const ITexture &tex)
+uintptr_t CDriverGL::getTextureHandle(const ITexture &tex)
 {
 	H_AUTO_OGL(CDriverGL_getTextureHandle)
 	// If DrvShare not setuped

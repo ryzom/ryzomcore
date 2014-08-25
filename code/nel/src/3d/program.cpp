@@ -94,7 +94,7 @@ const char *CProgramIndex::Names[NUM_UNIFORMS] =
 
 void IProgram::buildInfo(CSource *source)
 {
-	nlassert(!m_Source);
+	// nlassert(!m_Source); // VALID: When deleting driver and creating new one.
 
 	m_Source = source;
 

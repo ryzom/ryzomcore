@@ -160,6 +160,7 @@ code/build/*
 code/build-2010/*
 build/*
 install/*
+build_vc*
 code/nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile

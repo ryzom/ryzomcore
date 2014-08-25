@@ -2,7 +2,7 @@
 #
 # NeL
 #  Authors: Nevrax and the NeL Community
-#  Version: 0.9.0
+#  Version: 0.9.1
 #
 # Notes:
 #   * Changing install location: add -DCMAKE_INSTALL_PREFIX:PATH=/my/new/path
@@ -48,7 +48,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 9)
-SET(NL_VERSION_PATCH 0)
+SET(NL_VERSION_PATCH 1)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 
 #-----------------------------------------------------------------------------
@@ -130,6 +130,13 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
 ENDIF(FINAL_VERSION)
+
+IF(WITH_SSE2)
+  ADD_DEFINITIONS(-DNL_HAS_SSE2)
+  IF(WITH_SSE3)
+    ADD_DEFINITIONS(-DNL_HAS_SSE3)
+  ENDIF(WITH_SSE3)
+ENDIF(WITH_SSE2)
 
 IF(WITH_QT)
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)

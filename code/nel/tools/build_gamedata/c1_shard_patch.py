@@ -24,8 +24,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # 
 
-import time, sys, os, shutil, subprocess, distutils.dir_util, tarfile
+import time, sys, os, shutil, subprocess, distutils.dir_util, tarfile, argparse
 sys.path.append("configuration")
+
+parser = argparse.ArgumentParser(description='Ryzom Core - Build Gamedata - Shard Patch')
+parser.add_argument('--admininstall', '-ai', action='store_true')
+args = parser.parse_args()
 
 if os.path.isfile("log.log"):
 	os.remove("log.log")
@@ -84,23 +88,24 @@ else:
 	printLog(log, "SKIP " + adminInstallTgz)
 printLog(log, "")
 
-printLog(log, ">>> Create new version <<<")
-newVersion = 1
-vstr = str(newVersion).zfill(6)
-vpath = PatchmanBridgeServerDirectory + "/" + vstr
-while os.path.exists(vpath):
-	newVersion = newVersion + 1
+if not args.admininstall:
+	printLog(log, ">>> Create new version <<<")
+	newVersion = 1
 	vstr = str(newVersion).zfill(6)
 	vpath = PatchmanBridgeServerDirectory + "/" + vstr
-mkPath(log, vpath)
-for dir in archiveDirectories:
-	mkPath(log, ShardInstallDirectory + "/" + dir)
-	tgzPath = vpath + "/" + dir + ".tgz"
-	printLog(log, "WRITE " + tgzPath)
-	tar = tarfile.open(tgzPath, "w:gz")
-	tar.add(ShardInstallDirectory + "/" + dir, arcname = dir)
-	tar.close()
-printLog(log, "")
+	while os.path.exists(vpath):
+		newVersion = newVersion + 1
+		vstr = str(newVersion).zfill(6)
+		vpath = PatchmanBridgeServerDirectory + "/" + vstr
+	mkPath(log, vpath)
+	for dir in archiveDirectories:
+		mkPath(log, ShardInstallDirectory + "/" + dir)
+		tgzPath = vpath + "/" + dir + ".tgz"
+		printLog(log, "WRITE " + tgzPath)
+		tar = tarfile.open(tgzPath, "w:gz")
+		tar.add(ShardInstallDirectory + "/" + dir, arcname = dir)
+		tar.close()
+	printLog(log, "")
 
 log.close()
 if os.path.isfile("c1_shard_patch.log"):

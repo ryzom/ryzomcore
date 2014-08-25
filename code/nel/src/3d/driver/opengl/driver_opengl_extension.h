@@ -58,6 +58,7 @@ struct	CGlExtensions
 	bool	EXTVertexShader;
 	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
+	bool	ARBOcclusionQuery;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
@@ -99,9 +100,11 @@ struct	CGlExtensions
 	bool	ARBTextureCompression;
 	bool	ARBFragmentProgram;
 	bool	ARBVertexBufferObject;
+	bool	ARBMapBufferRange;
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
+	bool	ARBFragmentShader;
 
 	// NV Pixel Programs
 	bool	NVFragmentProgram2;
@@ -167,6 +170,7 @@ public:
 		EXTVertexShader= false;
 		ARBFragmentProgram = false;
 		ARBVertexBufferObject = false;
+		ARBMapBufferRange = false;
 		ARBVertexProgram = false;
 		NVTextureRectangle = false;
 		EXTTextureRectangle = false;
@@ -175,7 +179,9 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
+		ARBFragmentShader = false;
 		NVOcclusionQuery = false;
+		ARBOcclusionQuery = false;
 		FrameBufferObject = false;
 		FrameBufferBlit = false;
 		FrameBufferMultisample = false;
@@ -237,6 +243,7 @@ public:
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
 		result += NVOcclusionQuery ? "NVOcclusionQuery " : "";
+		result += ARBOcclusionQuery ? "ARBOcclusionQuery " : "";
 		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
@@ -262,6 +269,7 @@ public:
 		result += ATIVertexArrayObject ? "ATIVertexArrayObject " : "";
 		result += ATIVertexAttribArrayObject ? "ATIVertexAttribArrayObject " : "";
 		result += ARBVertexBufferObject ? "ARBVertexBufferObject " : "";
+		result += ARBMapBufferRange ? "ARBMapBufferRange " : "";
 		result += ATIMapObjectBuffer ? "ATIMapObjectBuffer " : "";
 
 		result += "\n  FBO:       ";
@@ -654,7 +662,10 @@ extern PFNGLUNMAPBUFFERARBPROC nglUnmapBufferARB;
 extern PFNGLGETBUFFERPARAMETERIVARBPROC nglGetBufferParameterivARB;
 extern PFNGLGETBUFFERPOINTERVARBPROC nglGetBufferPointervARB;
 
-
+// GL_ARB_map_buffer_range
+//==================================
+extern PFNGLMAPBUFFERRANGEPROC nglMapBufferRange;
+extern PFNGLFLUSHMAPPEDBUFFERRANGEPROC nglFlushMappedBufferRange;
 
 // GL_ARB_vertex_program
 //==================================
@@ -731,7 +742,16 @@ extern PFNGLENDOCCLUSIONQUERYNVPROC nglEndOcclusionQueryNV;
 extern PFNGLGETOCCLUSIONQUERYIVNVPROC nglGetOcclusionQueryivNV;
 extern PFNGLGETOCCLUSIONQUERYUIVNVPROC nglGetOcclusionQueryuivNV;
 
-
+// ARB_occlusion_query
+//==================================
+extern PFNGLGENQUERIESPROC nglGenQueriesARB;
+extern PFNGLDELETEQUERIESPROC nglDeleteQueriesARB;
+extern PFNGLISQUERYPROC nglIsQueryARB;
+extern PFNGLBEGINQUERYPROC nglBeginQueryARB;
+extern PFNGLENDQUERYPROC nglEndQueryARB;
+extern PFNGLGETQUERYIVPROC nglGetQueryivARB;
+extern PFNGLGETQUERYOBJECTIVPROC nglGetQueryObjectivARB;
+extern PFNGLGETQUERYOBJECTUIVPROC nglGetQueryObjectuivARB;
 
 #ifdef NL_OS_WINDOWS
 

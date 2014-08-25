@@ -33,6 +33,9 @@ CFixedSizeAllocator::CFixedSizeAllocator(uint numBytesPerBlock, uint numBlockPer
 	_NumChunks = 0;
 	nlassert(numBytesPerBlock > 1);
 	_NumBytesPerBlock = numBytesPerBlock;
+	const uint mask = NL_DEFAULT_MEMORY_ALIGNMENT - 1;
+	_NumBytesPerBlock = (_NumBytesPerBlock + mask) & ~mask;
+	nlassert(_NumBytesPerBlock >= numBytesPerBlock);
 	_NumBlockPerChunk = std::max(numBlockPerChunk, (uint) 3);
 	_NumAlloc = 0;
 }
@@ -67,12 +70,14 @@ void *CFixedSizeAllocator::alloc()
 	return _FreeSpace->unlink();
 }
 
+#define aligned_offsetof(s, m) ((offsetof(s, m) + (NL_DEFAULT_MEMORY_ALIGNMENT - 1)) & ~(NL_DEFAULT_MEMORY_ALIGNMENT - 1))
+
 // *****************************************************************************************************************
 void CFixedSizeAllocator::free(void *block)
 {
 	if (!block) return;
 	/// get the node from the object
-	CNode *node = (CNode *) ((uint8 *) block - offsetof(CNode, Next));
+	CNode *node = (CNode *) ((uint8 *) block - aligned_offsetof(CNode, Next));
 	//
 	nlassert(node->Chunk != NULL);
 	nlassert(node->Chunk->Allocator == this);
@@ -84,7 +89,9 @@ void CFixedSizeAllocator::free(void *block)
 // *****************************************************************************************************************
 uint CFixedSizeAllocator::CChunk::getBlockSizeWithOverhead() const
 {
-	return std::max((uint)(sizeof(CNode) - offsetof(CNode, Next)),(uint)(Allocator->getNumBytesPerBlock())) + offsetof(CNode, Next);
+	nlctassert((sizeof(CNode) % NL_DEFAULT_MEMORY_ALIGNMENT) == 0);
+	return std::max((uint)(sizeof(CNode) - aligned_offsetof(CNode, Next)),
+		(uint)(Allocator->getNumBytesPerBlock())) + aligned_offsetof(CNode, Next);
 }
 
 // *****************************************************************************************************************
@@ -105,7 +112,7 @@ CFixedSizeAllocator::CChunk::~CChunk()
 	nlassert(NumFreeObjs == 0);
 	nlassert(Allocator->_NumChunks > 0);
 	-- (Allocator->_NumChunks);
-	delete[] Mem;
+	aligned_free(Mem); //delete[] Mem;
 }
 
 // *****************************************************************************************************************
@@ -115,7 +122,7 @@ void CFixedSizeAllocator::CChunk::init(CFixedSizeAllocator *alloc)
 	nlassert(alloc != NULL);
 	Allocator = alloc;
 	//
-	Mem = new uint8[getBlockSizeWithOverhead() * alloc->getNumBlockPerChunk()];
+	Mem = (uint8 *)aligned_malloc(getBlockSizeWithOverhead() * alloc->getNumBlockPerChunk(), NL_DEFAULT_MEMORY_ALIGNMENT); // new uint8[getBlockSizeWithOverhead() * alloc->getNumBlockPerChunk()];
 	//
 	getNode(0).Chunk = this;
 	getNode(0).Next = &getNode(1);
@@ -179,7 +186,7 @@ void *CFixedSizeAllocator::CNode::unlink()
 	*Prev = Next;
 	nlassert(Chunk->NumFreeObjs > 0);
 	Chunk->grab(); // tells the containing chunk that a node has been allocated
-	return (void *) &Next;
+	return (void *)((uintptr_t)(this) + aligned_offsetof(CNode, Next)); //(void *) &Next;
 }
 
 // *****************************************************************************************************************

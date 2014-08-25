@@ -21,6 +21,7 @@
 #include "nel/misc/app_context.h"
 #include "../nel_3dsmax_shared/nel_3dsmax_shared.h"
 #include <maxversion.h>
+#include "nel/misc/sheet_id.h"
 
 extern ClassDesc2* GetPO2RPODesc();
 extern ClassDesc* GetRPODesc();
@@ -44,6 +45,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		new NLMISC::CLibraryContext(GetSharedNelContext());
 		nldebug("NeL Export: DllMain");
+		NLMISC::CSheetId::initWithoutSheet();
 	}
 
 	if(fdwReason == DLL_PROCESS_ATTACH)

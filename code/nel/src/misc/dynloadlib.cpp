@@ -57,7 +57,7 @@ void *nlGetSymbolAddress(NL_LIB_HANDLE libHandle, const std::string &procName)
 {
 	void *res = 0;
 #ifdef NL_OS_WINDOWS
-	res = GetProcAddress(libHandle, procName.c_str());
+	res = (void *)GetProcAddress(libHandle, procName.c_str());
 #elif defined(NL_OS_UNIX)
 	res = dlsym(libHandle, procName.c_str());
 #else

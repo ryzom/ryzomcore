@@ -62,7 +62,7 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory)
-	if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag")):
+	if (needUpdateDirByTagLogFiltered(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag", [ "zonematerial", "zonetransition", "zonespecial" ])):
 		printLog(log, "WRITE " + ligoIniPath)
 		ligoIni = open(ligoIniPath, "w")
 		ligoIni.write("[LigoConfig]\n")

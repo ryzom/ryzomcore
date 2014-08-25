@@ -304,7 +304,7 @@ public:
 
 	virtual	bool			isLost() const { return false; } // there's no notion of 'lost device" in OpenGL
 
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
+	virtual bool			init (uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
 
 	virtual void			disableHardwareVertexProgram();
 	virtual void			disableHardwarePixelProgram();
@@ -632,7 +632,7 @@ public:
 
 	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1);
 
-	virtual	uint			getTextureHandle(const ITexture&tex);
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex);
 
 	/// \name Material multipass.
 	/**	NB: setupMaterial() must be called before thoses methods.
@@ -1591,6 +1591,7 @@ private:
 	// @}
 	// misc
 public:
+	friend class COcclusionQueryGL;
 	static GLenum NLCubeFaceToGLCubeFace[6];
 	static CMaterial::CTexEnv	_TexEnvReplace;
 	// occlusion query

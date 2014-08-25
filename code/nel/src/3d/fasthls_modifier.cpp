@@ -109,7 +109,7 @@ CRGBA		CFastHLSModifier::convert(uint H, uint L, uint S)
 	return col;
 }
 
-#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
+#if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 71)
 #	pragma warning( push )
 #	pragma warning( disable : 4799 )
 #endif
@@ -124,7 +124,6 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 	static	uint64	mmBlank	= 0;
 	static	uint64	mmOne	= INT64_CONSTANT(0x00FF00FF00FF00FF);
 	static	uint64	mmGray	= INT64_CONSTANT(0x0080008000800080);
-	static	uint64	mmInterpBufer[4]= {0,0,0,INT64_CONSTANT(0x00FF00FF00FF00FF)};
 
 	/*
 		dLum is actually 0xFFFFFF00 + realDLum
@@ -136,6 +135,8 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 #if defined(NL_OS_WINDOWS) && !defined(NL_NO_ASM)
 	if(CSystemInfo::hasMMX())
 	{
+		static	uint64	mmInterpBufer[4]= {0,0,0,INT64_CONSTANT(0x00FF00FF00FF00FF)};
+
 		__asm
 		{
 			mov			edi, offset mmInterpBufer
@@ -262,7 +263,7 @@ uint16		CFastHLSModifier::applyHLSMod(uint16 colorIn, uint8 dHue, uint dLum, uin
 #pragma managed(pop)
 #endif
 
-#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 71
+#if defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 71)
 #	pragma warning( pop )
 #endif
 

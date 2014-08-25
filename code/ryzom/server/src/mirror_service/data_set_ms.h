@@ -338,7 +338,7 @@ public:
 		// If changing this struct, don't forget to change the places where it is initialized
 		TSharedListRow				Next;
 		T							Value;
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	};
 #else
 	} __attribute__((packed)); 
@@ -409,7 +409,7 @@ void						push_front( const NLMISC::CEntityId& value );
 		// If changing this struct, don't forget to change the places where it is initialized
 		TSharedListRow				Next;
 	        uint64                                  Value;
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	};
 #else
 	} __attribute__((packed)); 

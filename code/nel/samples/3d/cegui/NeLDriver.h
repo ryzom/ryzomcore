@@ -34,8 +34,8 @@ extern uint16 gScreenHeight;
 
 class NeLDriver {
 public:
-	NeLDriver(NL3D::UDriver *driver) { m_Driver=driver; }
-	virtual ~NeLDriver() { ; }
+	NeLDriver(NL3D::UDriver *driver):m_Driver(driver), m_TextContext(NULL), m_Scene(NULL) { }
+	virtual ~NeLDriver() { }
 
 	void init();
 	void update();

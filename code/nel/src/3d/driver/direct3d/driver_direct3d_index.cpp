@@ -46,7 +46,7 @@ CIBDrvInfosD3D::CIBDrvInfosD3D(CDriverD3D *drv, ItIBDrvInfoPtrList it, CIndexBuf
 
 // ***************************************************************************
 
-extern uint indexCount=0;
+uint indexCount=0;
 
 CIBDrvInfosD3D::~CIBDrvInfosD3D()
 {

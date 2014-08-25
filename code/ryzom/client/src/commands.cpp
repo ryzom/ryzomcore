@@ -3921,11 +3921,11 @@ NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 		return false;
 
 	HINSTANCE result = ShellExecute(NULL, "open", args[0].c_str(), NULL,NULL, SW_SHOW);
-	if ((sint32)result > 32)
+	if ((intptr_t)result > 32)
 		return true;
 	else
 	{
-		log.displayNL ("ShellExecute failed %d", (uint32)result);
+		log.displayNL ("ShellExecute failed %d", (uint32)(intptr_t)result);
 		return false;
 	}
 }

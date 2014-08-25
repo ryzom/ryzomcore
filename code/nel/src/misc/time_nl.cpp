@@ -21,7 +21,9 @@
 #include "nel/misc/thread.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #elif defined (NL_OS_UNIX)
 #	include <sys/time.h>

@@ -20,7 +20,9 @@
 #ifdef NL_OS_WINDOWS
 
 #include "nel/misc/path.h"
+#ifndef NL_COMP_MINGW
 #define NOMINMAX
+#endif
 #include <windows.h>
 
 #include <typeinfo>
