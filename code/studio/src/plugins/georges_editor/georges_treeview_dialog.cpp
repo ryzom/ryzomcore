@@ -470,6 +470,19 @@ namespace GeorgesQt
 		m_ui.treeView->setCurrentIndex( idx );
 	}
 
+	void CGeorgesTreeViewDialog::onAppendArray()
+	{
+		QModelIndex idx = m_ui.treeView->currentIndex();
+
+		m_model->appendArray( idx );
+
+		m_ui.treeView->reset();
+		m_ui.treeView->expandAll();
+
+		m_ui.treeView->setCurrentIndex( idx );
+		m_browserCtrl->clicked( idx );
+	}
+
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
 	{
 		Q_EMIT closing();
@@ -523,7 +536,8 @@ namespace GeorgesQt
 		//	}
 			if(item->isArray())
 			{
-                contextMenu.addAction("Append array entry...");
+                QAction *appendAction = contextMenu.addAction("Append array entry...");
+				connect( appendAction, SIGNAL( triggered( bool ) ), this, SLOT( onAppendArray() ) );
 			}
 			else if(item->isArrayMember())
 			{
@@ -558,24 +572,10 @@ namespace GeorgesQt
 		//	else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
 		//		contextMenu.addAction("Revert to parent/default...");
 
-            QAction *selectedItem = contextMenu.exec(QCursor::pos());
+            contextMenu.exec(QCursor::pos());
+			/*
             if(selectedItem)
             {
-                if(selectedItem->text() == "Append array entry...")
-                {
-
-
-                } // Append an array entry...
-                else if(selectedItem->text() == "Delete array entry...")
-                {
-
-                }
-                else if(selectedItem->text() == "Insert after array entry...")
-                {
-
-                }
-
-
 		//		if(selectedItem->text() == "Add parent...")
 		//		{
 		//			// Get the file extension of the form so we can build a dialog pattern.
@@ -624,6 +624,7 @@ namespace GeorgesQt
 		//		}
 
             } // if selected context menu item is valid.
+			*/
 		} // if 'm' model valid.
 
 		//if(structContext)

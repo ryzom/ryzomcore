@@ -515,6 +515,60 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 	}
 }
 
+void CGeorgesFormModel::appendArray( QModelIndex idx )
+{
+	if( !idx.isValid() )
+		return;
+
+	CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+	NLGEORGES::UFormElm *elm = NULL;
+
+	item->form()->getRootNode().getNodeByName( &elm, item->formName().c_str() );
+
+	const NLGEORGES::CFormDfn *parentDfn;
+	const NLGEORGES::CFormDfn *nodeDfn;
+	uint indexDfn;
+	const NLGEORGES::CType *type;
+	NLGEORGES::UFormDfn::TEntryType entryType;
+	NLGEORGES::CFormElm *node;
+	bool created;
+	bool isArray;
+
+	if( elm == NULL )
+	{
+		NLGEORGES::UFormElm *uroot = &item->form()->getRootNode();
+		NLGEORGES::CFormElm *croot = static_cast< NLGEORGES::CFormElm* >( uroot );
+		
+		croot->createNodeByName( item->formName().c_str(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+		
+		if( !created )
+			return;
+
+		elm = node;
+	}
+
+	NLGEORGES::CFormElmArray *celm = dynamic_cast< NLGEORGES::CFormElmArray* >( elm );
+	if( celm == NULL )
+		return;
+
+	unsigned long s = celm->Elements.size();
+	std::string nodeIdx = "[";
+	nodeIdx += QString::number( s ).toUtf8().constData();
+	nodeIdx += "]";
+
+	celm->createNodeByName( nodeIdx.c_str(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+	if( !created )
+		return;
+
+	std::string name = "#";
+	name += QString::number( s ).toUtf8().constData();
+
+	std::string formName;
+	node->getFormName( formName );
+
+	item->add( CFormItem::Form, name.c_str(), s, formName.c_str(), 0, item->form(), false );
+}
+
 
 
     /******************************************************************************/
