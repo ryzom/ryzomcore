@@ -71,7 +71,6 @@ namespace GeorgesQt
 		m_ui.treeView->setHeader(m_header);
 		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		m_ui.treeView->header()->setStretchLastSection(true);
-		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
 		m_form = 0;
 		m_model = NULL;
