@@ -219,6 +219,9 @@ namespace GeorgesQt
 		else
 			return;
 
+		m_ui.logEdit->setPlainText( form->Header.Log.c_str() );
+		m_ui.logEdit->setReadOnly( true );
+
 		UFormElm *root = 0;
 		root = &m_form->getRootNode();
 
