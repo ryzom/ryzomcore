@@ -90,6 +90,7 @@ namespace GeorgesQt
 		connect(m_browserCtrl, SIGNAL(arrayResized(const QString&,int)), this, SLOT(onArrayResized(const QString&,int)));
 		
 		connect(m_browserCtrl, SIGNAL(modified()), this, SLOT(modifiedFile()));
+		connect(m_browserCtrl, SIGNAL(valueChanged(const QString&,const QString&)), this, SLOT(onValueChanged(const QString&,const QString&)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
@@ -470,11 +471,17 @@ namespace GeorgesQt
 		if( !idx.isValid() )
 			return;
 		m_ui.treeView->setCurrentIndex( idx );
+
+		log( name + " resized = " + QString::number( size ) );
 	}
 
 	void CGeorgesTreeViewDialog::onAppendArray()
 	{
 		QModelIndex idx = m_ui.treeView->currentIndex();
+
+		CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+		QString formName = item->formName().c_str();
+		int size = item->childCount();
 
 		m_model->appendArray( idx );
 
@@ -483,6 +490,8 @@ namespace GeorgesQt
 
 		m_ui.treeView->setCurrentIndex( idx );
 		m_browserCtrl->clicked( idx );
+
+		log( formName + " resized = " + QString::number( size + 1 ) );
 	}
 
 	void CGeorgesTreeViewDialog::onDeleteArrayEntry()
@@ -490,11 +499,21 @@ namespace GeorgesQt
 		QModelIndex current = m_ui.treeView->currentIndex();
 		QModelIndex parent = current.parent();
 
+		CFormItem *item = reinterpret_cast< CFormItem* >( current.internalPointer() );
+		QString formName = item->formName().c_str();
+
 		m_model->deleteArrayEntry( current );
 
 		m_ui.treeView->expandAll();
 		m_ui.treeView->setCurrentIndex( parent );
 		m_browserCtrl->clicked( parent );
+
+		log( "deleted " + formName );
+	}
+
+	void CGeorgesTreeViewDialog::onValueChanged( const QString &key, const QString &value )
+	{
+		log( key + " = " + value );
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
@@ -644,6 +663,36 @@ namespace GeorgesQt
 
 		//if(structContext)
 		//	delete structContext;
+	}
+
+	void CGeorgesTreeViewDialog::log( const QString &msg )
+	{
+		QString user = getenv( "USER" );
+		if( user.isEmpty() )
+			user = getenv( "USERNAME" );
+		if( user.isEmpty() )
+			user = "anonymous";
+
+		QTime time = QTime::currentTime();
+		QDate date = QDate::currentDate();
+		
+		QString dateString = date.toString( "ddd MMM dd" );
+		QString timeString = time.toString( "HH:mm:ss" );
+
+		QString logMsg;
+		logMsg += dateString;
+		logMsg += ' ';
+		logMsg += timeString;
+		logMsg += ' ';
+		logMsg += QString::number( date.year() );
+		logMsg += ' ';
+		logMsg += "(";
+		logMsg += user;
+		logMsg += ")";
+		logMsg += ' ';
+		logMsg += msg;
+
+		m_ui.logEdit->appendPlainText( logMsg );
 	}
 
 } /* namespace GeorgesQt */

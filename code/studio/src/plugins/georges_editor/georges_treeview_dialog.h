@@ -106,8 +106,11 @@ namespace GeorgesQt
 		void onArrayResized( const QString &name, int size );
 		void onAppendArray();
 		void onDeleteArrayEntry();
+		void onValueChanged( const QString &key, const QString &value );
 
 	private:
+		void log( const QString &msg );
+
 		Ui::CGeorgesTreeViewDialog m_ui;
 		ExpandableHeaderView *m_header;
 		UForm    *m_form;

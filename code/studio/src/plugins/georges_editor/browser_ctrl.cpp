@@ -17,6 +17,7 @@ QObject( browser )
 
 	connect( m_pvt, SIGNAL( arrayResized( const QString&, int ) ), this, SLOT( onArrayResized( const QString&, int ) ) );
 	connect( m_pvt, SIGNAL( modified() ), this, SLOT( onModified() ) );
+	connect( m_pvt, SIGNAL( valueChanged( const QString&, const QString& ) ), this, SLOT( onValueChanged( const QString&, const QString& ) ) );
 }
 
 BrowserCtrl::~BrowserCtrl()
@@ -41,6 +42,11 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 void BrowserCtrl::onValueChanged( QtProperty *p, const QVariant &value )
 {
 	m_pvt->onValueChanged( p, value );
+}
+
+void BrowserCtrl::onValueChanged( const QString &key, const QString &value )
+{
+	Q_EMIT valueChanged( key, value );
 }
 
 void BrowserCtrl::onArrayResized( const QString &name, int size )

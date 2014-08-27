@@ -29,9 +29,11 @@ public Q_SLOTS:
 Q_SIGNALS:
 	void arrayResized( const QString &name, int size );
 	void modified();
+	void valueChanged( const QString &key, const QString &value );
 
 private Q_SLOTS:
 	void onValueChanged( QtProperty *p, const QVariant &value );
+	void onValueChanged( const QString &key, const QString &value );
 	void onArrayResized( const QString &name, int size );
 	void onModified();
 

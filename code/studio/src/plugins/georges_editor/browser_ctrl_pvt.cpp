@@ -158,7 +158,10 @@ void BrowserCtrlPvt::onStructValueChanged( QtProperty *p, const QVariant &value 
 	bool created = false;
 	m_currentNode.p->setValueByName( v.c_str(), k.c_str(), &created );
 
+	QString key = m_currentNode.name + "." + p->propertyName();
+
 	Q_EMIT modified();
+	Q_EMIT valueChanged( key, value.toString() );
 }
 
 void BrowserCtrlPvt::createArray()

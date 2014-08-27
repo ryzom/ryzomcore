@@ -39,6 +39,7 @@ public:
 Q_SIGNALS:
 	void arrayResized( const QString &name, int size );
 	void modified();
+	void valueChanged( const QString &key, const QString &value );
 
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
