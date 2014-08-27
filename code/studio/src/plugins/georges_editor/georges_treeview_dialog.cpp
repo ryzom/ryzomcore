@@ -516,6 +516,25 @@ namespace GeorgesQt
 		log( key + " = " + value );
 	}
 
+	void CGeorgesTreeViewDialog::onRenameArrayEntry()
+	{
+		QModelIndex idx  = m_ui.treeView->currentIndex();
+
+		CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+		QString newName = QInputDialog::getText( this,
+												tr( "Rename" ),
+												tr( "Enter new name" ),
+												QLineEdit::Normal,
+												item->name().c_str() );
+
+		m_model->renameArrayEntry( idx, newName );
+
+		QString formName = item->formName().c_str();
+
+		log( formName + " renamed = " + newName );
+	}
+
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
 	{
 		Q_EMIT closing();
@@ -576,6 +595,9 @@ namespace GeorgesQt
 			{
 				QAction *deleteAction = contextMenu.addAction("Delete array entry...");
 				connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( onDeleteArrayEntry() ) );
+
+				QAction *renameAction = contextMenu.addAction("Rename");
+				connect( renameAction, SIGNAL( triggered( bool ) ), this, SLOT( onRenameArrayEntry() ) );
 				//contextMenu.addAction("Insert after array entry...");
 			}
 		//	else if(item->getFormElm()->isStruct())

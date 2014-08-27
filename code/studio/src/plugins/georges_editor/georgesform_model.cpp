@@ -614,6 +614,34 @@ void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
 	Q_EMIT endResetModel();
 }
 
+void CGeorgesFormModel::renameArrayEntry( QModelIndex idx, const QString &name )
+{
+	CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+	NLGEORGES::UFormElm *elm;
+
+	item->form()->getRootNode().getNodeByName( &elm, item->formName().c_str() );
+
+	NLGEORGES::CFormElm *celm = dynamic_cast< NLGEORGES::CFormElm* >( elm );
+	if( celm == NULL )
+		return;
+
+	NLGEORGES::UFormElm *uparent = celm->getParent();
+	NLGEORGES::CFormElmArray *cparent = dynamic_cast< NLGEORGES::CFormElmArray* >( uparent );
+	if( cparent == NULL )
+		return;
+
+	int i = 0;
+	for( i = 0; i < cparent->Elements.size(); i++ )
+	{
+		if( cparent->Elements[ i ].Element == celm )
+			break;
+	}
+
+	cparent->Elements[ i ].Name = name.toUtf8().constData();
+	item->setName( name.toUtf8().constData() );
+}
+
     /******************************************************************************/
 
     void CGeorgesFormModel::loadFormHeader() 
