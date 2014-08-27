@@ -492,6 +492,8 @@ namespace GeorgesQt
 		m_browserCtrl->clicked( idx );
 
 		log( formName + " resized = " + QString::number( size + 1 ) );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::onDeleteArrayEntry()
@@ -509,6 +511,8 @@ namespace GeorgesQt
 		m_browserCtrl->clicked( parent );
 
 		log( "deleted " + formName );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::onValueChanged( const QString &key, const QString &value )
@@ -533,6 +537,8 @@ namespace GeorgesQt
 		QString formName = item->formName().c_str();
 
 		log( formName + " renamed = " + newName );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
