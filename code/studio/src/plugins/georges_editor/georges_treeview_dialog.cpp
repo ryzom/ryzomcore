@@ -319,6 +319,8 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::write( ) 
 	{
+		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
+		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
 
 		NLMISC::COFile file;
 		std::string s = NLMISC::CPath::lookup(loadedForm.toAscii().data(), false);
