@@ -77,6 +77,7 @@ namespace GeorgesQt
 
 		void arrayResized( const QString &name, int size );
 		void appendArray( QModelIndex idx );
+		void deleteArrayEntry( QModelIndex idx );
 
 	private:
 		void setupModelData();

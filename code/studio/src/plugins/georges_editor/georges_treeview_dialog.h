@@ -105,6 +105,7 @@ namespace GeorgesQt
 
 		void onArrayResized( const QString &name, int size );
 		void onAppendArray();
+		void onDeleteArrayEntry();
 
 	private:
 		Ui::CGeorgesTreeViewDialog m_ui;

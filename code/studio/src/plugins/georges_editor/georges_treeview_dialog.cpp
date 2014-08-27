@@ -483,6 +483,18 @@ namespace GeorgesQt
 		m_browserCtrl->clicked( idx );
 	}
 
+	void CGeorgesTreeViewDialog::onDeleteArrayEntry()
+	{
+		QModelIndex current = m_ui.treeView->currentIndex();
+		QModelIndex parent = current.parent();
+
+		m_model->deleteArrayEntry( current );
+
+		m_ui.treeView->expandAll();
+		m_ui.treeView->setCurrentIndex( parent );
+		m_browserCtrl->clicked( parent );
+	}
+
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
 	{
 		Q_EMIT closing();
@@ -541,8 +553,9 @@ namespace GeorgesQt
 			}
 			else if(item->isArrayMember())
 			{
-				contextMenu.addAction("Delete array entry...");
-				contextMenu.addAction("Insert after array entry...");
+				QAction *deleteAction = contextMenu.addAction("Delete array entry...");
+				connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( onDeleteArrayEntry() ) );
+				//contextMenu.addAction("Insert after array entry...");
 			}
 		//	else if(item->getFormElm()->isStruct())
 		//	{

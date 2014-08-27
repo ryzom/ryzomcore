@@ -569,7 +569,50 @@ void CGeorgesFormModel::appendArray( QModelIndex idx )
 	item->add( CFormItem::Form, name.c_str(), s, formName.c_str(), 0, item->form(), false );
 }
 
+void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
+{
+	CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+	NLGEORGES::UFormElm &uroot = item->form()->getRootNode();
+	NLGEORGES::CFormElm *root = static_cast< NLGEORGES::CFormElm* >( &item->form()->getRootNode() );
+	NLGEORGES::UFormElm *unode;
+	uroot.getNodeByName( &unode, item->formName().c_str() );
+	NLGEORGES::CFormElm *cnode = static_cast< NLGEORGES::CFormElm* >( unode );
+	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( cnode->getParent() );
 
+	NLGEORGES::CFormElm *elm = arr->Elements[ idx.row() ].Element;
+
+	Q_EMIT beginResetModel();
+
+	std::vector< NLGEORGES::CFormElmArray::CElement >::iterator itr = arr->Elements.begin() + idx.row();
+	arr->Elements.erase( itr );
+
+	delete elm;
+
+	item = item->parent();
+	item->clearChildren();
+
+	NLGEORGES::CFormElmArray *celm = arr;
+	
+	for( int i = 0; i < celm->Elements.size(); i++ )
+	{
+		NLGEORGES::CFormElmArray::CElement &e = celm->Elements[ i ];
+
+		QString formName = item->formName().c_str();
+		formName += '[';
+		formName += QString::number( i );
+		formName += ']';
+
+		QString n;
+		if( e.Name.empty() )
+			n = "#" + QString::number( i );
+		else
+			n = e.Name.c_str();
+
+		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+	}
+
+	Q_EMIT endResetModel();
+}
 
     /******************************************************************************/
 
