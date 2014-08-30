@@ -261,6 +261,10 @@ namespace GeorgesQt
 		{
             nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
 			m_dockedWidgets.last()->close();
+
+			QMessageBox::information( this,
+										tr( "Failed to load form..." ),
+										tr( "Failed to load form '%1'" ).arg( info.fileName() ) );
 		}
 	}
 
