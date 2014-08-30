@@ -42,8 +42,8 @@ public:
 
 public Q_SLOTS:
 	void open();
-	void loadFile(const QString fileName);
-    void loadFile(const QString fileName, bool loadFromDfn);
+	void loadFile(const QString &fileName);
+    void loadFile(const QString &fileName, bool loadFromDfn);
 	void newFile();
 	void save();
 	void settingsChanged();
