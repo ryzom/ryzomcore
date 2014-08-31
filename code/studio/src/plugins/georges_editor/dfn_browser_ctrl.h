@@ -14,6 +14,9 @@ class QtTreePropertyBrowser;
 class QVariant;
 class QtProperty;
 
+class QtEnumPropertyManager;
+class QtEnumEditorFactory;
+
 class DFNBrowserCtrl : public QObject
 {
 	Q_OBJECT
@@ -32,6 +35,9 @@ private:
 
 	QtVariantPropertyManager *m_manager;
 	QtVariantEditorFactory *m_factory;
+
+	QtEnumPropertyManager *m_enumMgr;
+	QtEnumEditorFactory *m_enumFactory;
 };
 
 #endif
