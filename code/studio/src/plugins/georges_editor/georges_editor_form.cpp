@@ -258,6 +258,8 @@ namespace GeorgesQt
             m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
         }
 
+		w->raise();
+
 	}
 
 	void GeorgesEditorForm::closingTreeView()
@@ -320,7 +322,12 @@ namespace GeorgesQt
 	GeorgesDockWidget* GeorgesEditorForm::loadDfnDialog( const QString &fileName )
 	{
 		GeorgesDFNDialog *d = new GeorgesDFNDialog();
-		m_mainDock->addDockWidget( Qt::RightDockWidgetArea, d );
+		bool b = d->load( fileName );
+		if( !b )
+		{
+			delete d;
+			d = NULL;
+		}
 
 		return d;
 	}
@@ -329,7 +336,7 @@ namespace GeorgesQt
 	{
 		QFileInfo info( fileName );
 
-		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog(m_mainDock);
+		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog();
 
 		// Retrieve the form and load the form.
         NLGEORGES::CForm *form;
@@ -350,7 +357,6 @@ namespace GeorgesQt
 			QApplication::processEvents();
 			connect(d, SIGNAL(modified()), 
 				this, SLOT(setModified()));
-			d->raise();
 			connect(d, SIGNAL(changeFile(QString)), 
 				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
 		}
