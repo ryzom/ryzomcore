@@ -207,9 +207,9 @@ namespace GeorgesQt
         // Check to see if the form is already loaded, if it is just raise it.
         if (m_dockedWidgets.size())
 		{
-			Q_FOREACH(CGeorgesTreeViewDialog *wgt, m_dockedWidgets)
+			Q_FOREACH(GeorgesDockWidget *wgt, m_dockedWidgets)
 			{
-				if (info.fileName() == wgt->loadedForm)
+				if (info.fileName() == wgt->fileName())
 				{
 					wgt->raise();
 					return;
@@ -217,16 +217,33 @@ namespace GeorgesQt
 			}
         }
 
+		GeorgesDockWidget *w = NULL;
+
 		if( info.suffix() == "dfn" )
 		{
-			loadDfnDialog( fileName );
+			w = loadDfnDialog( fileName );
+		}
+		else
+		if( info.suffix() == "typ" )
+		{
+			w = loadTypDialog( fileName );
+		}
+		else
+		{
+			w = loadFormDialog( fileName, loadFromDfn );
+		}
+
+		if( w == NULL )
+		{
+			QMessageBox::information( this,
+										tr( "Failed to load file..." ),
+										tr( "Failed to load file '%1'" ).arg( info.fileName() ) );
 			return;
 		}
 
-        CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
-        dock->setUndoStack(UndoStack);
-        m_lastActiveDock = dock;
-        m_dockedWidgets.append(dock);
+        w->setUndoStack(UndoStack);
+        m_lastActiveDock = w;
+        m_dockedWidgets.append(w);
 
         connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
         connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
@@ -241,38 +258,6 @@ namespace GeorgesQt
             m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
         }
 
-        // Retrieve the form and load the form.
-        NLGEORGES::CForm *form;
-        if(loadFromDfn)
-        {
-            // Get the form by DFN name.
-            form = m_dockedWidgets.last()->getFormByDfnName(info.fileName());
-        }
-        else
-        {
-            form = m_dockedWidgets.last()->getFormByName(info.fileName());
-        }
-
-		if (form)
-		{
-			m_dockedWidgets.last()->setForm(form);
-			m_dockedWidgets.last()->loadFormIntoDialog(form);
-			QApplication::processEvents();
-			connect(m_dockedWidgets.last(), SIGNAL(modified()), 
-				this, SLOT(setModified()));
-			m_dockedWidgets.last()->raise();
-			connect(m_dockedWidgets.last(), SIGNAL(changeFile(QString)), 
-				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
-		}
-		else
-		{
-            nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
-			m_dockedWidgets.last()->close();
-
-			QMessageBox::information( this,
-										tr( "Failed to load form..." ),
-										tr( "Failed to load form '%1'" ).arg( info.fileName() ) );
-		}
 	}
 
 	void GeorgesEditorForm::closingTreeView()
@@ -327,11 +312,55 @@ namespace GeorgesQt
 		}
 	}
 
+	GeorgesDockWidget* GeorgesEditorForm::loadTypDialog( const QString &fileName )
+	{
+		return NULL;
+	}
 
-	void GeorgesEditorForm::loadDfnDialog( const QString &fileName )
+	GeorgesDockWidget* GeorgesEditorForm::loadDfnDialog( const QString &fileName )
 	{
 		GeorgesDFNDialog *d = new GeorgesDFNDialog();
 		m_mainDock->addDockWidget( Qt::RightDockWidgetArea, d );
+
+		return d;
+	}
+
+	GeorgesDockWidget* GeorgesEditorForm::loadFormDialog( const QString &fileName, bool loadFromDFN )
+	{
+		QFileInfo info( fileName );
+
+		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog(m_mainDock);
+
+		// Retrieve the form and load the form.
+        NLGEORGES::CForm *form;
+        if(loadFromDFN)
+        {
+            // Get the form by DFN name.
+            form = d->getFormByDfnName(info.fileName());
+        }
+        else
+        {
+            form = d->getFormByName(info.fileName());
+        }
+
+		if (form)
+		{
+			d->setForm(form);
+			d->loadFormIntoDialog(form);
+			QApplication::processEvents();
+			connect(d, SIGNAL(modified()), 
+				this, SLOT(setModified()));
+			d->raise();
+			connect(d, SIGNAL(changeFile(QString)), 
+				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
+		}
+		else
+		{
+			delete d;
+			d = NULL;
+		}
+
+		return d;
 	}
 
 } /* namespace GeorgesQt */

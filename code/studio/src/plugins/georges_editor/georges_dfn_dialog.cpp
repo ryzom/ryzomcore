@@ -3,7 +3,7 @@
 #include <QMessageBox>
 
 GeorgesDFNDialog::GeorgesDFNDialog( QWidget *parent ) :
-QDockWidget( parent )
+GeorgesDockWidget( parent )
 {
 	m_ui.setupUi( this );
 	setupConnections();

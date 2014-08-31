@@ -52,7 +52,7 @@ namespace GeorgesQt
 {
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
-		: QDockWidget(parent),
+		: GeorgesDockWidget(parent),
 		m_header(0),
 		m_modified(false)
 	{
@@ -263,6 +263,7 @@ namespace GeorgesQt
 		if (root) 
 		{
 			loadedForm = m_form->getFilename().c_str();
+			m_fileName = m_form->getFilename().c_str();
 
 			CGeorgesFormModel *model = new CGeorgesFormModel(m_form,deps,comments,parents,m_header->expanded());
 			m_ui.treeView->setModel(model);
