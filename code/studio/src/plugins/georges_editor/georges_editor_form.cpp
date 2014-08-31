@@ -20,6 +20,7 @@
 #include "georges_editor_constants.h"
 #include "georges_dirtree_dialog.h"
 #include "georges_treeview_dialog.h"
+#include "georges_dfn_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/menu_manager.h"
@@ -216,6 +217,12 @@ namespace GeorgesQt
 			}
         }
 
+		if( info.suffix() == "dfn" )
+		{
+			loadDfnDialog( fileName );
+			return;
+		}
+
         CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
         dock->setUndoStack(UndoStack);
         m_lastActiveDock = dock;
@@ -319,4 +326,12 @@ namespace GeorgesQt
 			}
 		}
 	}
+
+
+	void GeorgesEditorForm::loadDfnDialog( const QString &fileName )
+	{
+		GeorgesDFNDialog *d = new GeorgesDFNDialog();
+		m_mainDock->addDockWidget( Qt::RightDockWidgetArea, d );
+	}
+
 } /* namespace GeorgesQt */

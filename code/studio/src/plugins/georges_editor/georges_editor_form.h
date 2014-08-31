@@ -56,6 +56,8 @@ private:
 	void readSettings();
 	void writeSettings();
 
+	void loadDfnDialog(const QString &fileName);
+
 	Ui::GeorgesEditorForm m_ui;
 
 	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
