@@ -16,6 +16,8 @@ class QtProperty;
 
 class QtEnumPropertyManager;
 class QtEnumEditorFactory;
+class FileManager;
+class FileEditFactory;
 
 class DFNBrowserCtrl : public QObject
 {
@@ -38,6 +40,9 @@ private:
 
 	QtEnumPropertyManager *m_enumMgr;
 	QtEnumEditorFactory *m_enumFactory;
+
+	FileManager *m_fileMgr;
+	FileEditFactory *m_fileFactory;
 };
 
 #endif

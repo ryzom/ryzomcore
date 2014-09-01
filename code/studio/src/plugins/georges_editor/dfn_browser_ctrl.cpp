@@ -4,6 +4,8 @@
 #include "3rdparty/qtpropertybrowser/qteditorfactory.h"
 #include "3rdparty/qtpropertybrowser/qtpropertymanager.h"
 
+#include "filepath_property_manager.h"
+
 #include "nel/georges/form_dfn.h"
 
 namespace
@@ -60,6 +62,8 @@ QObject( parent )
 	m_factory = new QtVariantEditorFactory();
 	m_enumMgr = new QtEnumPropertyManager();
 	m_enumFactory = new QtEnumEditorFactory();
+	m_fileMgr = new FileManager();
+	m_fileFactory = new FileEditFactory();
 }
 
 DFNBrowserCtrl::~DFNBrowserCtrl()
@@ -75,6 +79,10 @@ DFNBrowserCtrl::~DFNBrowserCtrl()
 	m_enumMgr = NULL;
 	delete m_enumFactory;
 	m_enumFactory = NULL;
+	delete m_fileMgr;
+	m_fileMgr = NULL;
+	delete m_fileFactory;
+	m_fileFactory = NULL;
 }
 
 void DFNBrowserCtrl::onElementSelected( int idx )
@@ -84,6 +92,7 @@ void DFNBrowserCtrl::onElementSelected( int idx )
 	m_browser->clear();
 	m_browser->setFactoryForManager( m_manager, m_factory );
 	m_browser->setFactoryForManager( m_enumMgr, m_enumFactory );
+	m_browser->setFactoryForManager( m_fileMgr, m_fileFactory );
 
 	QtVariantProperty *p = NULL;
 	QtProperty *prop = NULL;
@@ -111,9 +120,13 @@ void DFNBrowserCtrl::onElementSelected( int idx )
 	m_browser->addProperty( prop );
 
 
-	p = m_manager->addProperty( QVariant::String, "value" );
-	p->setValue( entry.getFilename().c_str() );
-	m_browser->addProperty( p );
+	prop = m_fileMgr->addProperty( "value" );
+	m_fileMgr->setValue( prop, entry.getFilename().c_str() );
+	m_browser->addProperty( prop );
+
+	//p = m_manager->addProperty( QVariant::String, "value" );
+	//p->setValue( entry.getFilename().c_str() );
+	//m_browser->addProperty( p );
 
 	p = m_manager->addProperty( QVariant::String, "default" );
 	p->setValue( entry.getDefault().c_str() );
