@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `description` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`domain_id`),
   UNIQUE KEY `name_idx` (`domain_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `permission` (
   `prim` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`prim`),
   KEY `UIDIndex` (`UId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
   `MOTD` text NOT NULL,
   `prim` int(10) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`prim`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all shards information for login system' AUTO_INCREMENT=31 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all shards information for login system';
 
 -- --------------------------------------------------------
 
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   KEY `Community` (`Community`),
   KEY `Email` (`Email`),
   KEY `GMId` (`GMId`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all users information for login system' AUTO_INCREMENT=5 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all users information for login system';
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
