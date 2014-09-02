@@ -22,6 +22,8 @@ public:
 	{
 		delete ctrl;
 		ctrl = NULL;
+		delete dfn;
+		dfn = NULL;
 	}
 
 	NLGEORGES::CFormDfn *dfn;
