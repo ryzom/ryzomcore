@@ -1,6 +1,9 @@
 #include "georges_typ_dialog.h"
 #include "georges.h"
 
+#include <QInputDialog>
+#include <QMessageBox>
+
 class GeorgesTypDialogPvt
 {
 public:
@@ -55,6 +58,32 @@ void GeorgesTypDialog::write()
 
 void GeorgesTypDialog::onAddClicked()
 {
+	QString label = QInputDialog::getText( this,
+											tr( "Adding new definition" ),
+											tr( "Please specify the label" ) );
+	if( label.isEmpty() )
+		return;
+
+	QList< QTreeWidgetItem* > l = m_ui.tree->findItems( label, Qt::MatchExactly, 0 );
+	if( !l.isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "Failed to add item" ),
+									tr( "You can't add an item with the same label more than once!" ) );
+		return;
+	}
+
+	QTreeWidgetItem *item = new QTreeWidgetItem();
+	item->setFlags( Qt::ItemIsEditable | Qt::ItemIsEnabled );
+	item->setText( 0, label );
+	item->setText( 1, "" );
+	m_ui.tree->addTopLevelItem( item );
+
+	NLGEORGES::CType::CDefinition def;
+	def.Label = label.toUtf8().constData();
+	def.Value = "";
+	m_pvt->typ->Definitions.push_back( def );
+
 }
 
 void GeorgesTypDialog::onRemoveClicked()
