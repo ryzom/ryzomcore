@@ -28,13 +28,14 @@ GeorgesDFNDialog::GeorgesDFNDialog( QWidget *parent ) :
 GeorgesDockWidget( parent )
 {
 	m_ui.setupUi( this );
-	setupConnections();
-
+	
 	m_ui.addButton->setEnabled( false );
 	m_ui.removeButton->setEnabled( false );
 
 	m_pvt = new GeorgesDFNDialogPvt();
 	m_pvt->ctrl->setBrowser( m_ui.browser );
+
+	setupConnections();
 }
 
 GeorgesDFNDialog::~GeorgesDFNDialog()
@@ -74,6 +75,12 @@ bool GeorgesDFNDialog::load( const QString &fileName )
 	return true;
 }
 
+void GeorgesDFNDialog::write()
+{
+	setModified( false );
+	setWindowTitle( windowTitle().remove( "*" ) );
+}
+
 void GeorgesDFNDialog::onAddClicked()
 {
 	QString name = QInputDialog::getText( this,
@@ -110,10 +117,22 @@ void GeorgesDFNDialog::onCurrentRowChanged( int row )
 	m_pvt->ctrl->onElementSelected( row );
 }
 
+void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value )
+{
+	if( !isModified() )
+	{
+		setModified( true );
+		setWindowTitle( windowTitle() + "*" );
+		
+		Q_EMIT modified();
+	}
+}
+
 void GeorgesDFNDialog::setupConnections()
 {
 	connect( m_ui.addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 	connect( m_ui.removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 	connect( m_ui.list, SIGNAL( currentRowChanged( int ) ), this, SLOT( onCurrentRowChanged( int ) ) );
+	connect( m_pvt->ctrl, SIGNAL( valueChanged( const QString&, const QString& ) ), this, SLOT( onValueChanged( const QString&, const QString& ) ) );
 }
 

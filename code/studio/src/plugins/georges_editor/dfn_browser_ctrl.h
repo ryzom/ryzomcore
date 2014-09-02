@@ -31,6 +31,9 @@ public:
 
 	void onElementSelected( int idx );
 
+Q_SIGNALS:
+	void valueChanged( const QString &key, const QString &value );
+
 private Q_SLOTS:
 	void onFileValueChanged( QtProperty *p, const QString &v );
 	void onVariantValueChanged( QtProperty *p, const QVariant &v );

@@ -326,8 +326,10 @@ namespace GeorgesQt
 		if( !b )
 		{
 			delete d;
-			d = NULL;
+			return NULL;
 		}
+
+		connect( d, SIGNAL( modified() ), this, SLOT( setModified() ) );
 
 		return d;
 	}

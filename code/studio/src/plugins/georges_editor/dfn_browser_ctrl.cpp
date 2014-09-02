@@ -19,6 +19,22 @@ namespace
 		ENTRY_DFN_ARRAY
 	};
 
+	QString enumToString( int value )
+	{
+		QString s;
+
+		switch( value )
+		{
+		case ENTRY_TYPE: s = "type"; break;
+		case ENTRY_DFN: s = "dfn"; break;
+		case ENTRY_VIRTUAL_DFN: s = "virtual dfn"; break;
+		case ENTRY_TYPE_ARRAY: s = "type array"; break;
+		case ENTRY_DFN_ARRAY: s = "dfn array"; break;
+		}
+
+		return s;
+	}
+
 	NLGEORGES::UFormDfn::TEntryType enumToEntry( int value )
 	{
 		NLGEORGES::UFormDfn::TEntryType entry = NLGEORGES::UFormDfn::EntryType;
@@ -192,6 +208,10 @@ void DFNBrowserCtrl::onVariantValueChanged( QtProperty *p, const QVariant &v )
 	{
 		entry.setFilenameExt( value.c_str() );
 	}
+	else
+		return;
+
+	Q_EMIT valueChanged( key, v.toString() );
 }
 
 void DFNBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
@@ -202,12 +222,17 @@ void DFNBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
 	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
 	entry.setArrayFlag( isArray );
 	entry.setType( tentry );
+
+	QString value = enumToString( v );
+	Q_EMIT valueChanged( p->propertyName(), value );
 }
 
 void DFNBrowserCtrl::onFileValueChanged( QtProperty *p, const QString &v )
 {
 	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
 	entry.setFilename( v.toUtf8().constData() );
+
+	Q_EMIT valueChanged( p->propertyName(), v );
 }
 
 void DFNBrowserCtrl::connectManagers()

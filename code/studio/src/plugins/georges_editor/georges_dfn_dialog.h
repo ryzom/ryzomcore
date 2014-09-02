@@ -14,12 +14,17 @@ public:
 	~GeorgesDFNDialog();
 
 	bool load( const QString &fileName );
-	void write(){}
+	void write();
+
+Q_SIGNALS:
+	void modified();
 
 private Q_SLOTS:
 	void onAddClicked();
 	void onRemoveClicked();
 	void onCurrentRowChanged( int row );
+
+	void onValueChanged( const QString& key, const QString &value );
 
 private:
 	void setupConnections();
