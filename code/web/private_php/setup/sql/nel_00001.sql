@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.10.1deb1
+-- version 4.2.8
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jul 14, 2014 at 09:58 AM
--- Server version: 5.5.37
--- PHP Version: 5.3.10-1ubuntu3.11
+-- Generation Time: Sep 02, 2014 at 06:12 PM
+-- Server version: 5.5.38-0+wheezy1-log
+-- PHP Version: 5.4.4-14+deb7u14
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `domain` (
-  `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+`domain_id` int(10) unsigned NOT NULL,
   `domain_name` varchar(32) NOT NULL DEFAULT '',
   `status` enum('ds_close','ds_dev','ds_restricted','ds_open') NOT NULL DEFAULT 'ds_dev',
   `patch_version` int(10) unsigned NOT NULL DEFAULT '0',
@@ -38,10 +38,8 @@ CREATE TABLE IF NOT EXISTS `domain` (
   `ring_db_name` varchar(255) NOT NULL DEFAULT '',
   `web_host` varchar(255) NOT NULL DEFAULT '',
   `web_host_php` varchar(255) NOT NULL DEFAULT '',
-  `description` varchar(200) DEFAULT NULL,
-  PRIMARY KEY (`domain_id`),
-  UNIQUE KEY `name_idx` (`domain_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+  `description` varchar(200) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -54,10 +52,8 @@ CREATE TABLE IF NOT EXISTS `permission` (
   `ClientApplication` char(64) NOT NULL DEFAULT 'ryzom',
   `ShardId` int(10) NOT NULL DEFAULT '-1',
   `AccessPrivilege` set('OPEN','DEV','RESTRICTED') NOT NULL DEFAULT 'OPEN',
-  `prim` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`prim`),
-  KEY `UIDIndex` (`UId`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+`prim` int(10) unsigned NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -79,9 +75,8 @@ CREATE TABLE IF NOT EXISTS `shard` (
   `FixedSessionId` int(11) unsigned NOT NULL DEFAULT '0',
   `State` enum('ds_close','ds_dev','ds_restricted','ds_open') NOT NULL DEFAULT 'ds_dev',
   `MOTD` text NOT NULL,
-  `prim` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  PRIMARY KEY (`prim`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all shards information for login system';
+`prim` int(10) unsigned NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='contains all shards information for login system';
 
 -- --------------------------------------------------------
 
@@ -90,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
 --
 
 CREATE TABLE IF NOT EXISTS `user` (
-  `UId` int(10) NOT NULL AUTO_INCREMENT,
+`UId` int(10) NOT NULL,
   `Login` varchar(64) NOT NULL DEFAULT '',
   `Password` varchar(13) DEFAULT NULL,
   `ShardId` int(10) NOT NULL DEFAULT '-1',
@@ -131,17 +126,61 @@ CREATE TABLE IF NOT EXISTS `user` (
   `FromSource` varchar(8) NOT NULL DEFAULT '',
   `ValidMerchantCode` varchar(13) NOT NULL DEFAULT '',
   `PBC` tinyint(1) NOT NULL DEFAULT '0',
-  `ApiKeySeed` varchar(8) DEFAULT NULL,
-  PRIMARY KEY (`UId`),
-  KEY `LoginIndex` (`Login`),
-  KEY `GroupIndex` (`GroupName`),
-  KEY `ToolsGroup` (`ToolsGroup`),
-  KEY `CurrentSubLength` (`CurrentSubLength`),
-  KEY `Community` (`Community`),
-  KEY `Email` (`Email`),
-  KEY `GMId` (`GMId`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='contains all users information for login system';
+  `ApiKeySeed` varchar(8) DEFAULT NULL
+) ENGINE=MyISAM AUTO_INCREMENT=13 DEFAULT CHARSET=utf8 COMMENT='contains all users information for login system';
 
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `domain`
+--
+ALTER TABLE `domain`
+ ADD PRIMARY KEY (`domain_id`), ADD UNIQUE KEY `name_idx` (`domain_name`);
+
+--
+-- Indexes for table `permission`
+--
+ALTER TABLE `permission`
+ ADD PRIMARY KEY (`prim`), ADD KEY `UIDIndex` (`UId`);
+
+--
+-- Indexes for table `shard`
+--
+ALTER TABLE `shard`
+ ADD PRIMARY KEY (`prim`);
+
+--
+-- Indexes for table `user`
+--
+ALTER TABLE `user`
+ ADD PRIMARY KEY (`UId`), ADD UNIQUE KEY `LoginIndex` (`Login`), ADD UNIQUE KEY `EmailIndex` (`Email`), ADD KEY `GroupIndex` (`GroupName`), ADD KEY `ToolsGroup` (`ToolsGroup`), ADD KEY `CurrentSubLength` (`CurrentSubLength`), ADD KEY `Community` (`Community`), ADD KEY `GMId` (`GMId`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `domain`
+--
+ALTER TABLE `domain`
+MODIFY `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `permission`
+--
+ALTER TABLE `permission`
+MODIFY `prim` int(10) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `shard`
+--
+ALTER TABLE `shard`
+MODIFY `prim` int(10) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `user`
+--
+ALTER TABLE `user`
+MODIFY `UId` int(10) NOT NULL AUTO_INCREMENT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
