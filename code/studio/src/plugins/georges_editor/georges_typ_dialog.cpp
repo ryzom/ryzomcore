@@ -4,6 +4,10 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
+#include "nel/misc/file.h"
+#include "nel/misc/o_xml.h"
+#include "nel/misc/path.h"
+
 class GeorgesTypDialogPvt
 {
 public:
@@ -48,12 +52,31 @@ bool GeorgesTypDialog::load( const QString &fileName )
 
 	loadTyp();
 
+	m_fileName = fileName;
+	setWindowTitle( fileName );
+
 	return true;
 }
 
 
 void GeorgesTypDialog::write()
 {
+	std::string path = NLMISC::CPath::lookup( m_fileName.toUtf8().constData(), false );
+
+	NLMISC::COFile file;
+	if( !file.open( path.c_str(), false, true, false ) )
+		return;
+
+	NLMISC::COXml xml;
+	xml.init( &file );
+	
+	m_pvt->typ->write( xml.getDocument() );
+	
+	xml.flush();
+	file.close();
+
+	setModified( false );
+	setWindowTitle( windowTitle().remove( "*" ) );
 }
 
 void GeorgesTypDialog::onAddClicked()
@@ -84,6 +107,7 @@ void GeorgesTypDialog::onAddClicked()
 	def.Value = "";
 	m_pvt->typ->Definitions.push_back( def );
 
+	onModified();
 }
 
 void GeorgesTypDialog::onRemoveClicked()
@@ -105,6 +129,7 @@ void GeorgesTypDialog::onRemoveClicked()
 	std::vector< NLGEORGES::CType::CDefinition >::iterator itr = m_pvt->typ->Definitions.begin() + i;
 	m_pvt->typ->Definitions.erase( itr );
 
+	onModified();
 }
 
 void GeorgesTypDialog::onItemChanged( QTreeWidgetItem *item, int column )
@@ -122,6 +147,19 @@ void GeorgesTypDialog::onItemChanged( QTreeWidgetItem *item, int column )
 		def.Label = item->text( 0 ).toUtf8().constData();
 	else
 		def.Value = item->text( 1 ).toUtf8().constData();
+
+	onModified();
+}
+
+void GeorgesTypDialog::onModified()
+{
+	if( isModified() )
+		return;
+
+	setModified( true );
+	setWindowTitle( windowTitle() + "*" );
+
+	Q_EMIT modified();
 }
 
 void GeorgesTypDialog::setupConnections()

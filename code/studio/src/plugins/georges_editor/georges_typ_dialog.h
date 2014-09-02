@@ -16,11 +16,15 @@ public:
 	bool load( const QString &fileName );
 	void write();
 
+Q_SIGNALS:
+	void modified();
+
 private Q_SLOTS:
 	void onAddClicked();
 	void onRemoveClicked();
 
 	void onItemChanged( QTreeWidgetItem *item, int column );
+	void onModified();
 
 private:
 	void setupConnections();
@@ -29,6 +33,8 @@ private:
 
 	Ui::GeorgesTypDialog m_ui;
 	GeorgesTypDialogPvt *m_pvt;
+
+	QString m_fileName;
 };
 
 

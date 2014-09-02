@@ -324,6 +324,8 @@ namespace GeorgesQt
 			return NULL;
 		}
 
+		connect( d, SIGNAL( modified() ), this, SLOT( setModified() ) );
+
 		return d;
 	}
 
