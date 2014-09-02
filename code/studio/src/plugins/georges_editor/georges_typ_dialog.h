@@ -23,6 +23,7 @@ private Q_SLOTS:
 private:
 	void setupConnections();
 	void log( const QString &msg );
+	void loadTyp();
 
 	Ui::GeorgesTypDialog m_ui;
 	GeorgesTypDialogPvt *m_pvt;
