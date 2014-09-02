@@ -126,6 +126,11 @@ void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value 
 		
 		Q_EMIT modified();
 	}
+
+	if( key == "name" )
+	{
+		m_ui.list->currentItem()->setText( value );
+	}
 }
 
 void GeorgesDFNDialog::setupConnections()
