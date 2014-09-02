@@ -33,8 +33,8 @@ GeorgesDockWidget( parent )
 {
 	m_ui.setupUi( this );
 	
-	m_ui.addButton->setEnabled( false );
-	m_ui.removeButton->setEnabled( false );
+	//m_ui.addButton->setEnabled( false );
+	//m_ui.removeButton->setEnabled( false );
 
 	m_pvt = new GeorgesDFNDialogPvt();
 	m_pvt->ctrl->setBrowser( m_ui.browser );
@@ -119,6 +119,7 @@ void GeorgesDFNDialog::onAddClicked()
 	}
 
 	m_ui.list->addItem( name );
+	m_pvt->dfn->addEntry( name.toUtf8().constData() );
 }
 
 void GeorgesDFNDialog::onRemoveClicked()
@@ -129,6 +130,8 @@ void GeorgesDFNDialog::onRemoveClicked()
 
 	QListWidgetItem *item = m_ui.list->takeItem( row );
 	delete item;
+
+	m_pvt->dfn->removeEntry( row );
 }
 
 void GeorgesDFNDialog::onCurrentRowChanged( int row )

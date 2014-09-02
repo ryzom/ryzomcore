@@ -162,6 +162,10 @@ public:
 		NLMISC::CSmartPtr<CFormDfn>	Parent;
 	};
 
+	void							addEntry( const std::string &name );
+
+	void							removeEntry( uint idx );
+
 	// ** IO functions
 	void							write (xmlDocPtr root, const char *filename);
 
