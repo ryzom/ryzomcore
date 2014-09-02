@@ -123,6 +123,8 @@ void GeorgesDFNDialog::onAddClicked()
 	m_pvt->dfn->addEntry( name.toUtf8().constData() );
 
 	log( "Added " + name );
+
+	onModified();
 }
 
 void GeorgesDFNDialog::onRemoveClicked()
@@ -137,6 +139,8 @@ void GeorgesDFNDialog::onRemoveClicked()
 	delete item;
 
 	m_pvt->dfn->removeEntry( row );
+
+	onModified();
 }
 
 void GeorgesDFNDialog::onCurrentRowChanged( int row )
@@ -149,19 +153,24 @@ void GeorgesDFNDialog::onCurrentRowChanged( int row )
 
 void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value )
 {
-	if( !isModified() )
-	{
-		setModified( true );
-		setWindowTitle( windowTitle() + "*" );
-		
-		Q_EMIT modified();
-	}
+	onModified();
 
 	log( m_ui.list->currentItem()->text() + "." + key + " = " + value );
 
 	if( key == "name" )
 	{
 		m_ui.list->currentItem()->setText( value );
+	}
+}
+
+void GeorgesDFNDialog::onModified()
+{
+	if( !isModified() )
+	{
+		setModified( true );
+		setWindowTitle( windowTitle() + "*" );
+		
+		Q_EMIT modified();
 	}
 }
 
