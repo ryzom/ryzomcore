@@ -21,6 +21,7 @@
 #include "georges_dirtree_dialog.h"
 #include "georges_treeview_dialog.h"
 #include "georges_dfn_dialog.h"
+#include "georges_typ_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/menu_manager.h"
@@ -316,7 +317,8 @@ namespace GeorgesQt
 
 	GeorgesDockWidget* GeorgesEditorForm::loadTypDialog( const QString &fileName )
 	{
-		return NULL;
+		GeorgesTypDialog *d = new GeorgesTypDialog();
+		return d;
 	}
 
 	GeorgesDockWidget* GeorgesEditorForm::loadDfnDialog( const QString &fileName )
