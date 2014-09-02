@@ -27,6 +27,7 @@ private Q_SLOTS:
 	void onValueChanged( const QString& key, const QString &value );
 
 private:
+	void log( const QString &msg );
 	void setupConnections();
 
 	Ui::GeorgesDFNDialog m_ui;

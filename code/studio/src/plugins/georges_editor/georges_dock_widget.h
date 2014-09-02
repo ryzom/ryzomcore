@@ -21,6 +21,9 @@ public:
 	virtual void write() = 0;
 
 protected:
+	QString buildLogMsg( const QString &msg );
+	virtual void log( const QString &msg ) = 0;
+
 	QString m_fileName;
 	bool m_modified;
 	QUndoStack *m_undoStack;

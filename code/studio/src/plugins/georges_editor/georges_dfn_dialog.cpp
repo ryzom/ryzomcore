@@ -83,6 +83,8 @@ void GeorgesDFNDialog::write()
 	setModified( false );
 	setWindowTitle( windowTitle().remove( "*" ) );
 
+	m_pvt->dfn->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+
 	std::string path = NLMISC::CPath::lookup( m_fileName.toUtf8().constData(), false );
 	if( path.empty() )
 		return;
@@ -117,6 +119,8 @@ void GeorgesDFNDialog::onAddClicked()
 
 	m_ui.list->addItem( name );
 	m_pvt->dfn->addEntry( name.toUtf8().constData() );
+
+	log( "Added " + name );
 }
 
 void GeorgesDFNDialog::onRemoveClicked()
@@ -124,6 +128,8 @@ void GeorgesDFNDialog::onRemoveClicked()
 	int row = m_ui.list->currentRow();
 	if( row < 0 )
 		return;
+
+	log( "Removed " + m_ui.list->currentItem()->text() );
 
 	QListWidgetItem *item = m_ui.list->takeItem( row );
 	delete item;
@@ -149,10 +155,18 @@ void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value 
 		Q_EMIT modified();
 	}
 
+	log( m_ui.list->currentItem()->text() + "." + key + " = " + value );
+
 	if( key == "name" )
 	{
 		m_ui.list->currentItem()->setText( value );
 	}
+}
+
+void GeorgesDFNDialog::log( const QString &msg )
+{
+	QString logMsg = buildLogMsg( msg );
+	m_ui.logEdit->appendPlainText( logMsg );
 }
 
 void GeorgesDFNDialog::setupConnections()
