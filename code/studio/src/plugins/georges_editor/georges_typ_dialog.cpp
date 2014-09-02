@@ -78,10 +78,29 @@ void GeorgesTypDialog::onRemoveClicked()
 
 }
 
+void GeorgesTypDialog::onItemChanged( QTreeWidgetItem *item, int column )
+{
+	int i = 0;
+	for( i = 0; i < m_ui.tree->topLevelItemCount(); i++ )
+	{
+		if( item == m_ui.tree->topLevelItem( i ) )
+			break;
+	}
+	
+	NLGEORGES::CType::CDefinition &def = m_pvt->typ->Definitions[ i ];
+	
+	if( i == 0 )
+		def.Label = item->text( 0 ).toUtf8().constData();
+	else
+		def.Value = item->text( 1 ).toUtf8().constData();
+}
+
 void GeorgesTypDialog::setupConnections()
 {
 	connect( m_ui.addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 	connect( m_ui.removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
+
+	connect( m_ui.tree, SIGNAL( itemChanged( QTreeWidgetItem*, int ) ), this, SLOT( onItemChanged( QTreeWidgetItem*, int ) ) );
 }
 
 void GeorgesTypDialog::log( const QString &msg )
@@ -101,6 +120,7 @@ void GeorgesTypDialog::loadTyp()
 		NLGEORGES::CType::CDefinition &def = *itr;
 
 		QTreeWidgetItem *item = new QTreeWidgetItem();
+		item->setFlags( Qt::ItemIsEditable | Qt::ItemIsEnabled );
 		item->setText( 0, def.Label.c_str() );
 		item->setText( 1, def.Value.c_str() );
 		m_ui.tree->addTopLevelItem( item );

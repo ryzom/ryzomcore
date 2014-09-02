@@ -20,6 +20,8 @@ private Q_SLOTS:
 	void onAddClicked();
 	void onRemoveClicked();
 
+	void onItemChanged( QTreeWidgetItem *item, int column );
+
 private:
 	void setupConnections();
 	void log( const QString &msg );
