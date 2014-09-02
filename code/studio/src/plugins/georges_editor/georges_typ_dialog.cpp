@@ -59,6 +59,23 @@ void GeorgesTypDialog::onAddClicked()
 
 void GeorgesTypDialog::onRemoveClicked()
 {
+	QTreeWidgetItem *item = m_ui.tree->currentItem();
+	if( item == NULL )
+		return;
+
+	int i = 0;
+	for( i = 0; i < m_ui.tree->topLevelItemCount(); i++ )
+	{
+		if( item == m_ui.tree->topLevelItem( i ) )
+			break;
+	}
+
+	m_ui.tree->takeTopLevelItem( i );
+	delete item;
+
+	std::vector< NLGEORGES::CType::CDefinition >::iterator itr = m_pvt->typ->Definitions.begin() + i;
+	m_pvt->typ->Definitions.erase( itr );
+
 }
 
 void GeorgesTypDialog::setupConnections()
