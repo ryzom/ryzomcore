@@ -31,6 +31,7 @@ private:
 
 	Ui::GeorgesDFNDialog m_ui;
 	GeorgesDFNDialogPvt *m_pvt;
+	QString m_fileName;
 };
 
 #endif

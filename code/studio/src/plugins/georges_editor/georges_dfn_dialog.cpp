@@ -5,6 +5,10 @@
 #include "georges.h"
 #include "dfn_browser_ctrl.h"
 
+#include "nel/misc/file.h"
+#include "nel/misc/o_xml.h"
+#include "nel/misc/path.h"
+
 class GeorgesDFNDialogPvt
 {
 public:
@@ -72,6 +76,8 @@ bool GeorgesDFNDialog::load( const QString &fileName )
 	m_ui.commentsEdit->setPlainText( cdfn->getComment().c_str() );
 	m_ui.logEdit->setPlainText( cdfn->Header.Log.c_str() );
 
+	m_fileName = fileName;
+
 	return true;
 }
 
@@ -79,6 +85,22 @@ void GeorgesDFNDialog::write()
 {
 	setModified( false );
 	setWindowTitle( windowTitle().remove( "*" ) );
+
+	std::string path = NLMISC::CPath::lookup( m_fileName.toUtf8().constData(), false );
+	if( path.empty() )
+		return;
+
+	NLMISC::COFile file;
+	if( !file.open( path, false, true, false ) )
+		return;
+
+	NLMISC::COXml xml;
+	xml.init( &file );
+
+	m_pvt->dfn->write( xml.getDocument(), path.c_str() );
+
+	xml.flush();
+	file.close();
 }
 
 void GeorgesDFNDialog::onAddClicked()
