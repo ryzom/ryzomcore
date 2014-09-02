@@ -137,9 +137,9 @@
 			<div id="content" class="span10">
 			<!-- content starts -->
 			{/if}
-			
+
 			{if  isset($no_visible_elements) and  $no_visible_elements eq "TRUE"}
-		  	
+
 				    <div class="flags_no_visible_elements">
 				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
 				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
@@ -148,8 +148,8 @@
 			{/if}
 
 			{block name=content}{/block}
-			
-			
+
+
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			</div><!--/#content.span10-->
 			{/if}
@@ -172,7 +172,6 @@
 		</div>
 
 		<footer>
-			<p class="pull-left">&copy; <a href="http://usman.it" target="_blank">Muhammad Usman</a> <?php echo date('Y') ?></p>
 			<p class="pull-right">Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
 		</footer>
 		{/if}
@@ -198,38 +197,38 @@
 		{
 			return document.getElementById(e1);
 			}
-			
+
 		function uploadPlugin()
 		{
 			var fileObject = _("file").files[0];
 			var formdata = new FormData();
 			formdata.append("file",fileObject);
 			var ajax = new XMLHttpRequest();
-			ajax.upload.addEventListener("progress", progressHandler, false);	
+			ajax.upload.addEventListener("progress", progressHandler, false);
 			ajax.addEventListener("load", completeHandler, false);
 			ajax.addEventListener("error", errorHandler, false);
 			ajax.addEventListener("abort", abortHandler, false);
 			ajax.open("POST", "index.php?page=plugin&action=install_plugin");
 			ajax.send(formdata);
 			}
-			
+
 		function progressHandler(event)
 		{
 			var percent = (event.loaded/event.total)*100;
 			_("progressBar").value = Math.round(percent);
-			} 		
-		
+			}
+
 		function completeHandler(event)
 		{
 			_("status").innerHTML = event.target.responseText;
 			_("progressBar").value = 0;
 			}
-		
+
 		function errorHandler(event)
 		{
 			_("status").innerHTML = "upload Failed";
 			}
-			
+
 		function abortHandler(event)
 		{
 			_("status").innerHTML = "upload Aborted";
@@ -238,13 +237,13 @@
 	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-  
+
 	<script>
 	 $(document).ready(function() {
      $("#expDate").datepicker({ dateFormat: 'yy-mm-dd' });
 	 });
     </script>
-		
+
 	<!-- jQuery -->
 	<script src="js/jquery-1.7.2.min.js"></script>
 	<!-- jQuery UI -->
