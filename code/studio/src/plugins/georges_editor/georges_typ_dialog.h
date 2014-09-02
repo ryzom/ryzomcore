@@ -4,6 +4,7 @@
 #include "georges_dock_widget.h"
 #include "ui_georges_typ_dialog.h"
 
+class GeorgesTypDialogPvt;
 
 class GeorgesTypDialog : public GeorgesDockWidget
 {
@@ -12,6 +13,7 @@ public:
 	GeorgesTypDialog( QWidget *parent = NULL );
 	~GeorgesTypDialog();
 
+	bool load( const QString &fileName );
 	void write();
 
 private Q_SLOTS:
@@ -22,8 +24,8 @@ private:
 	void setupConnections();
 	void log( const QString &msg );
 
-
 	Ui::GeorgesTypDialog m_ui;
+	GeorgesTypDialogPvt *m_pvt;
 };
 
 

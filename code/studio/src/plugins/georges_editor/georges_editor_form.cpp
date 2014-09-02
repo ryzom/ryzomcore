@@ -318,6 +318,12 @@ namespace GeorgesQt
 	GeorgesDockWidget* GeorgesEditorForm::loadTypDialog( const QString &fileName )
 	{
 		GeorgesTypDialog *d = new GeorgesTypDialog();
+		if( !d->load( fileName ) )
+		{
+			delete d;
+			return NULL;
+		}
+
 		return d;
 	}
 
