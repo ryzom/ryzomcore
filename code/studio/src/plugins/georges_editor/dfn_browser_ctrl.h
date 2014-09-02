@@ -31,7 +31,15 @@ public:
 
 	void onElementSelected( int idx );
 
+private Q_SLOTS:
+	void onFileValueChanged( QtProperty *p, const QString &v );
+	void onVariantValueChanged( QtProperty *p, const QVariant &v );
+	void onEnumValueChanged( QtProperty *p, int v );
+
 private:
+	void connectManagers();
+	void disconnectManagers();
+
 	QtTreePropertyBrowser *m_browser;
 	NLGEORGES::CFormDfn *m_dfn;
 
@@ -43,6 +51,8 @@ private:
 
 	FileManager *m_fileMgr;
 	FileEditFactory *m_fileFactory;
+
+	int m_idx;
 };
 
 #endif

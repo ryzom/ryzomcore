@@ -19,6 +19,37 @@ namespace
 		ENTRY_DFN_ARRAY
 	};
 
+	NLGEORGES::UFormDfn::TEntryType enumToEntry( int value )
+	{
+		NLGEORGES::UFormDfn::TEntryType entry = NLGEORGES::UFormDfn::EntryType;
+
+		switch( value )
+		{
+		case ENTRY_TYPE: entry = NLGEORGES::UFormDfn::EntryType; break;
+		case ENTRY_DFN: entry = NLGEORGES::UFormDfn::EntryDfn; break;
+		case ENTRY_VIRTUAL_DFN: entry = NLGEORGES::UFormDfn::EntryVirtualDfn; break;
+		case ENTRY_TYPE_ARRAY: entry = NLGEORGES::UFormDfn::EntryType; break;
+		case ENTRY_DFN_ARRAY: entry = NLGEORGES::UFormDfn::EntryDfn; break;
+		}
+
+		return entry;
+	}
+
+	bool enumToArray( int value )
+	{
+		bool isArray = false;
+
+		switch( value )
+		{
+		case ENTRY_TYPE_ARRAY:
+		case ENTRY_DFN_ARRAY:
+			isArray = true;
+			break;
+		}
+
+		return isArray;
+	}
+
 	int entryToEnum( const NLGEORGES::UFormDfn::TEntryType &type, bool isArray )
 	{
 		int id = 0;
@@ -64,6 +95,8 @@ QObject( parent )
 	m_enumFactory = new QtEnumEditorFactory();
 	m_fileMgr = new FileManager();
 	m_fileFactory = new FileEditFactory();
+
+	m_idx = -1;
 }
 
 DFNBrowserCtrl::~DFNBrowserCtrl()
@@ -88,6 +121,9 @@ DFNBrowserCtrl::~DFNBrowserCtrl()
 void DFNBrowserCtrl::onElementSelected( int idx )
 {
 	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( idx );
+	m_idx = idx;
+
+	disconnectManagers();
 
 	m_browser->clear();
 	m_browser->setFactoryForManager( m_manager, m_factory );
@@ -124,10 +160,6 @@ void DFNBrowserCtrl::onElementSelected( int idx )
 	m_fileMgr->setValue( prop, entry.getFilename().c_str() );
 	m_browser->addProperty( prop );
 
-	//p = m_manager->addProperty( QVariant::String, "value" );
-	//p->setValue( entry.getFilename().c_str() );
-	//m_browser->addProperty( p );
-
 	p = m_manager->addProperty( QVariant::String, "default" );
 	p->setValue( entry.getDefault().c_str() );
 	m_browser->addProperty( p );
@@ -135,6 +167,61 @@ void DFNBrowserCtrl::onElementSelected( int idx )
 	p = m_manager->addProperty( QVariant::String, "extension" );
 	p->setValue( entry.getFilenameExt().c_str() );
 	m_browser->addProperty( p );
+
+	connectManagers();
+}
+
+void DFNBrowserCtrl::onVariantValueChanged( QtProperty *p, const QVariant &v )
+{
+	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
+
+	QString key = p->propertyName();
+	std::string value = v.toString().toUtf8().constData();
+
+	if( key == "name" )
+	{
+		entry.setName( value.c_str() );
+	}
+	else
+	if( key == "default" )
+	{
+		entry.setDefault( value.c_str() );
+	}
+	else
+	if( key == "extension" )
+	{
+		entry.setFilenameExt( value.c_str() );
+	}
+}
+
+void DFNBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
+{
+	NLGEORGES::UFormDfn::TEntryType tentry = enumToEntry( v );
+	bool isArray = enumToArray( v );
+
+	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
+	entry.setArrayFlag( isArray );
+	entry.setType( tentry );
+}
+
+void DFNBrowserCtrl::onFileValueChanged( QtProperty *p, const QString &v )
+{
+	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
+	entry.setFilename( v.toUtf8().constData() );
+}
+
+void DFNBrowserCtrl::connectManagers()
+{
+	connect( m_manager, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ), this, SLOT( onVariantValueChanged( QtProperty*, const QVariant& ) ) );
+	connect( m_enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ), this, SLOT( onEnumValueChanged( QtProperty*, int ) ) );
+	connect( m_fileMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ), this, SLOT( onFileValueChanged( QtProperty*, const QString& ) ) );
+}
+
+void DFNBrowserCtrl::disconnectManagers()
+{
+	disconnect( m_manager, SIGNAL( valueChanged( QtProperty*, const QVariant& ) ), this, SLOT( onVariantValueChanged( QtProperty*, const QVariant& ) ) );
+	disconnect( m_enumMgr, SIGNAL( valueChanged( QtProperty*, int ) ), this, SLOT( onEnumValueChanged( QtProperty*, int ) ) );
+	disconnect( m_fileMgr, SIGNAL( valueChanged( QtProperty*, const QString& ) ), this, SLOT( onFileValueChanged( QtProperty*, const QString& ) ) );
 }
 
 

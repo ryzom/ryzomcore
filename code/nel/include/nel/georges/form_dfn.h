@@ -87,6 +87,8 @@ public:
 		// Set as a type
 		void						setType (CFormLoader &loader, const char *filename);
 
+		void						setType (TEntryType type);
+
 		// Set as a dfn
 		void						setDfn (CFormLoader &loader, const char *filename);
 

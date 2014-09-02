@@ -463,6 +463,11 @@ void CFormDfn::CEntry::setType (CFormLoader &loader, const char *filename)
 	Type = loader.loadType (filename);
 }
 
+void CFormDfn::CEntry::setType( TEntryType type )
+{
+	TypeElement = type;
+}
+
 // ***************************************************************************
 
 void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
