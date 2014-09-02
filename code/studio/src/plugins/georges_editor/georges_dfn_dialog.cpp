@@ -33,9 +33,6 @@ GeorgesDockWidget( parent )
 {
 	m_ui.setupUi( this );
 	
-	//m_ui.addButton->setEnabled( false );
-	//m_ui.removeButton->setEnabled( false );
-
 	m_pvt = new GeorgesDFNDialogPvt();
 	m_pvt->ctrl->setBrowser( m_ui.browser );
 
