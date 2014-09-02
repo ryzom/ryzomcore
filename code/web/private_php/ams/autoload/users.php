@@ -6,12 +6,12 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 class Users{
-     
+
      /**
      * checks if entered values before registering are valid.
      * @param $values array with Username,Password, ConfirmPass and Email.
      * @return string Info: Returns a string, if input data is valid then "success" is returned, else an array with errors
-     */ 
+     */
      public function check_Register($values){
           // check values
           if ( isset( $values["Username"] ) and isset( $values["Password"] ) and isset( $values["ConfirmPass"] ) and isset( $values["Email"] ) ){
@@ -44,7 +44,7 @@ class Users{
                }else{
                     $pageElements['USERNAME_ERROR'] = 'FALSE';
                }
-       
+
                if ( $pass != "success" ){
                     $pageElements['PASSWORD_ERROR'] = 'TRUE';
                }else{
@@ -69,13 +69,13 @@ class Users{
           }
 
      }
-     
-    
+
+
      /**
      * checks if entered username is valid.
      * @param $username the username that the user wants to use.
      * @return string Info: Returns a string based on if the username is valid, if valid then "success" is returned
-     */ 
+     */
      public function checkUser( $username )
      {
           if ( isset( $username ) ){
@@ -95,7 +95,7 @@ class Users{
           }
           return "fail";
      }
-         
+
      /**
      * check if username already exists.
      * This is the base function, it should be overwritten by the WebUsers class.
@@ -105,10 +105,10 @@ class Users{
      protected function checkUserNameExists($username){
           //You should overwrite this method with your own version!
           print('this is the base class!');
-          
+
      }
-         
-         
+
+
     /**
      * checks if the password is valid.
      * @param $pass the password willing to be used.
@@ -129,8 +129,8 @@ class Users{
              }
          return "fail";
          }
-         
-         
+
+
     /**
      * checks if the confirmPassword matches the original.
      * @param $pass_result the result of the previous password check.
@@ -152,8 +152,8 @@ class Users{
           }
           return "fail";
      }
-     
-     
+
+
     /**
      * wrapper to check if the email address is valid.
      * @param $email the email address
@@ -185,10 +185,10 @@ class Users{
      protected function checkEmailExists($email){
           //TODO: You should overwrite this method with your own version!
           print('this is the base class!');
-          
+
      }
-         
-         
+
+
      /**
      * check if the emailaddress structure is valid.
      * @param $email the email address
@@ -276,7 +276,7 @@ class Users{
          // done!
         return $salt;
      }
-     
+
 
 
      /**
@@ -286,23 +286,25 @@ class Users{
      * @param $user_id the extern id of the user (the id given by the www/CMS)
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
-     public static function createUser($values, $user_id){     
+     public static function createUser($values, $user_id){
           try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
                $dbs->insert("user", $values);
+               /*
                $dbr = new DBLayer("ring");
                $valuesRing['user_id'] =$user_id;
                $valuesRing['user_name'] = $values['Login'];
                $valuesRing['user_type'] = 'ut_pioneer';
-               $dbr->insert("ring_users", $valuesRing);	
+               $dbr->insert("ring_users", $valuesRing);
+               */
                ticket_user::createTicketUser( $user_id, 1);
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
-                    $dbl = new DBLayer("lib");  
+                    $dbl = new DBLayer("lib");
                     $dbl->insert("ams_querycache", array("type" => "createUser",
                     "query" => json_encode(array($values["Login"],$values["Password"],$values["Email"])), "db" => "shard"));
                     ticket_user::createTicketUser( $user_id , 1 );
@@ -311,17 +313,17 @@ class Users{
                     print_r($e);
                     return "liboffline";
                }
-          } 
+          }
 
      }
-     
+
      /**
      * creates permissions in the shard db for a user.
      * incase the shard is offline it will place it in the ams_querycache.
      * @param $pvalues with username
      */
      public static function createPermissions($pvalues) {
-          
+
           try {
                $values = array('username' =>  $pvalues[0]);
                $dbs = new DBLayer("shard");
@@ -338,12 +340,12 @@ class Users{
                //oh noooz, the shard is offline! Put it in query queue at ams_lib db!
                $dbl = new DBLayer("lib");
                $dbl->insert("ams_querycache", array("type" => "createPermissions",
-               "query" => json_encode(array($pvalues[0])), "db" => "shard"));            
-          } 
+               "query" => json_encode(array($pvalues[0])), "db" => "shard"));
+          }
           return true;
      }
-     
-     
+
+
      /**
      * check if username and password matches.
      * This is the base function, it should be overwritten by the WebUsers class.
@@ -353,7 +355,7 @@ class Users{
      protected static function checkLoginMatch($user,$pass){
           print('This is the base class!');
      }
-     
+
      /**
      * check if the changing of a password is valid.
      * a mod/admin doesn't has to fill in the previous password when he wants to change the password, however for changing his own password he has to fill it in.
@@ -412,7 +414,7 @@ class Users{
                return $pageElements;
           }
      }
-     
+
      /**
      * sets the shards password.
      * in case the shard is offline, the entry will be stored in the ams_querycache.
@@ -421,9 +423,9 @@ class Users{
      * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
      */
      protected static function setAmsPassword($user, $pass){
-          
+
            $values = Array('Password' => $pass);
-           
+
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
@@ -440,9 +442,9 @@ class Users{
                }catch (PDOException $e) {
                     return "liboffline";
                }
-          } 
+          }
      }
-     
+
      /**
      * sets the shards email.
      * in case the shard is offline, the entry will be stored in the ams_querycache.
@@ -451,9 +453,9 @@ class Users{
      * @return ok if it worked, if the lib or shard is offline it will return liboffline or shardoffline.
      */
      protected static function setAmsEmail($user, $mail){
-          
+
            $values = Array('Email' => $mail);
-           
+
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
@@ -470,6 +472,6 @@ class Users{
                }catch (PDOException $e) {
                     return "liboffline";
                }
-          } 
+          }
      }
 }
