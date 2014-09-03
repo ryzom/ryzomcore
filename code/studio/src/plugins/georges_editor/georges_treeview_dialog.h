@@ -112,8 +112,6 @@ namespace GeorgesQt
 		/// Contains a record of the last directory a sheet file dialog was opened for.
 		QString m_lastSheetDir;
 
-		bool m_modified;
-
 		BrowserCtrl *m_browserCtrl;
 		CGeorgesFormModel *m_model;
 

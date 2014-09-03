@@ -53,8 +53,7 @@ namespace GeorgesQt
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
 		: GeorgesDockWidget(parent),
-		m_header(0),
-		m_modified(false)
+		m_header(0)
 	{
 		m_georges = new CGeorges;
 
@@ -373,7 +372,7 @@ namespace GeorgesQt
 		//			//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
                     m_form->write(file);
                     setWindowTitle(windowTitle().remove("*"));
-                    m_modified = false;
+                    setModified( false );
 		//			//if (strcmp (xmlStream.getErrorString (), "") != 0)
 		//			//{
 		//			//	char message[512];
