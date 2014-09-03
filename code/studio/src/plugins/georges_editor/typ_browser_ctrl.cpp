@@ -73,7 +73,7 @@ void TypBrowserCtrl::load()
 	vp->setValue( m_typ->Min.c_str() );
 	m_browser->addProperty( vp );
 
-	vp = m_variantMgr->addProperty( QVariant::String, "Max" );
+	vp = m_variantMgr->addProperty( QVariant::String, "max" );
 	vp->setValue( m_typ->Max.c_str() );
 	m_browser->addProperty( vp );
 
@@ -86,10 +86,40 @@ void TypBrowserCtrl::load()
 
 void TypBrowserCtrl::onVariantValueChanged( QtProperty *p, const QVariant &v )
 {
+	QString n = p->propertyName();
+	if( n == "default" )
+	{
+		m_typ->Default = v.toString().toUtf8().constData();
+	}
+	else
+	if( n == "min" )
+	{
+		m_typ->Min = v.toString().toUtf8().constData();
+	}
+	else
+	if( n == "max" )
+	{
+		m_typ->Max = v.toString().toUtf8().constData();
+	}
+	else
+	if( n == "increment" )
+	{
+		m_typ->Increment = v.toString().toUtf8().constData();
+	}
 }
 
 void TypBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
 {
+	QString n = p->propertyName();
+	if( n == "type" )
+	{
+		m_typ->Type = NLGEORGES::UType::TType( v );
+	}
+	else
+	if( n == "uitype" )
+	{
+		m_typ->UIType = NLGEORGES::CType::TUI( v );
+	}
 }
 
 void TypBrowserCtrl::enableMgrConnections()
