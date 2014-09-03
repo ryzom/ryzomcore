@@ -33,6 +33,7 @@ public:
 
 	bool load( const QString &fileName );
 	void write();
+	void newDocument( const QString &fileName );
 
 Q_SIGNALS:
 	void modified();
@@ -45,6 +46,7 @@ private Q_SLOTS:
 	void onValueChanged( const QString& key, const QString &value );
 
 private:
+	void loadDfn();
 	void onModified();
 	void log( const QString &msg );
 	void setupConnections();

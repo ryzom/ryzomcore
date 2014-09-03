@@ -158,6 +158,17 @@ namespace GeorgesQt
 
 	void GeorgesEditorForm::newDfn()
 	{
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Definition" ),
+															"",
+															"Definition files (*.dfn)" );
+		if( fileName.isEmpty() )
+			return;
+
+		GeorgesDFNDialog *d = new GeorgesDFNDialog();
+		d->newDocument( fileName );
+		addGeorgesWidget( d );
+		setModified();
 	}
 
 	void GeorgesEditorForm::newForm()

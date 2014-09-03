@@ -77,22 +77,8 @@ bool GeorgesDFNDialog::load( const QString &fileName )
 
 	NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
 	m_pvt->dfn = cdfn;
-	m_pvt->ctrl->setDFN( cdfn );
-
-	uint c = m_pvt->dfn->getNumEntry();
-	for( uint i = 0; i < c; i++ )
-	{
-		NLGEORGES::CFormDfn::CEntry &entry = m_pvt->dfn->getEntry( i );
-		m_ui.list->addItem( entry.getName().c_str() );
-	}
-
-	if( c > 0 )
-	{
-		m_ui.list->setCurrentRow( 0 );
-	}
-
-	m_ui.commentsEdit->setPlainText( cdfn->getComment().c_str() );
-	m_ui.logEdit->setPlainText( cdfn->Header.Log.c_str() );
+	
+	loadDfn();
 
 	m_fileName = fileName;
 
@@ -117,6 +103,18 @@ void GeorgesDFNDialog::write()
 
 	xml.flush();
 	file.close();
+}
+
+void GeorgesDFNDialog::newDocument( const QString &fileName )
+{
+	m_fileName = fileName;
+	QFileInfo info( fileName );
+	setWindowTitle( info.fileName() + "*" );
+	setModified( true );
+
+	m_pvt->dfn = new NLGEORGES::CFormDfn();
+
+	loadDfn();
 }
 
 void GeorgesDFNDialog::onAddClicked()
@@ -176,6 +174,26 @@ void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value 
 	{
 		m_ui.list->currentItem()->setText( value );
 	}
+}
+
+void GeorgesDFNDialog::loadDfn()
+{
+	m_pvt->ctrl->setDFN( m_pvt->dfn );
+
+	uint c = m_pvt->dfn->getNumEntry();
+	for( uint i = 0; i < c; i++ )
+	{
+		NLGEORGES::CFormDfn::CEntry &entry = m_pvt->dfn->getEntry( i );
+		m_ui.list->addItem( entry.getName().c_str() );
+	}
+
+	if( c > 0 )
+	{
+		m_ui.list->setCurrentRow( 0 );
+	}
+
+	m_ui.commentsEdit->setPlainText( m_pvt->dfn->getComment().c_str() );
+	m_ui.logEdit->setPlainText( m_pvt->dfn->Header.Log.c_str() );
 }
 
 void GeorgesDFNDialog::onModified()
