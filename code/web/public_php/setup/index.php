@@ -73,7 +73,7 @@ function update_database_structure($continue_r, $con, $file) {
 		} else {
 			if (mysqli_multi_query($con, $sql)) {
 				printalert("success", "Database structure updated using <em>" . $file . "</em>");
-				while (mysqli_next_result($con)) {
+				while (mysqli_more_results($con) && mysqli_next_result($con)) {
 					// no-op
 				}
 			} else {
@@ -169,17 +169,17 @@ function update_database_structure($continue_r, $con, $file) {
 			$continue = false;
 		} else {
 			$cwd = getcwd();
-			$config = str_replace("%privatePhpDirectory%", realpath($cwd . "/" . $_POST["privatePhpDirectory"]), $config);
-			$config = str_replace("%publicPhpDirectory%", realpath($cwd), $config);
-			$config = str_replace("%sqlHostname%", $_POST["sqlHostname"], $config);
-			$config = str_replace("%sqlUsername%", $_POST["sqlUsername"], $config);
-			$config = str_replace("%sqlPassword%", $_POST["sqlPassword"], $config);
-			$config = str_replace("%nelDatabase%", $_POST["nelDatabase"], $config);
-			$config = str_replace("%toolDatabase%", $_POST["toolDatabase"], $config);
-			$config = str_replace("%amsDatabase%", $_POST["amsDatabase"], $config);
-			$config = str_replace("%amsLibDatabase%", $_POST["amsLibDatabase"], $config);
-			$config = str_replace("%amsAdminUsername%", $_POST["amsAdminUsername"], $config);
-			$config = str_replace("%amsAdminPassword%", $_POST["amsAdminPassword"], $config);
+			$config = str_replace("%privatePhpDirectory%", addslashes(realpath($cwd . "/" . $_POST["privatePhpDirectory"])), $config);
+			$config = str_replace("%publicPhpDirectory%", addslashes(realpath($cwd)), $config);
+			$config = str_replace("%sqlHostname%", addslashes($_POST["sqlHostname"]), $config);
+			$config = str_replace("%sqlUsername%", addslashes($_POST["sqlUsername"]), $config);
+			$config = str_replace("%sqlPassword%", addslashes($_POST["sqlPassword"]), $config);
+			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
+			$config = str_replace("%toolDatabase%", addslashes($_POST["toolDatabase"]), $config);
+			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
+			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
+			$config = str_replace("%amsAdminUsername%", addslashes($_POST["amsAdminUsername"]), $config);
+			$config = str_replace("%amsAdminPassword%", addslashes($_POST["amsAdminPassword"]), $config);
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
