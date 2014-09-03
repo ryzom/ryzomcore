@@ -4,15 +4,15 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 class Ticket_Reply{
-    private $tReplyId; /**< The id of the reply */ 
-    private $ticket; /**< the ticket id related to the reply */ 
-    private $content; /**< the content of the reply */ 
-    private $author; /**< The id of the user that made the reply */ 
-    private $timestamp; /**< The timestamp of the reply */ 
-    private $hidden; /**< indicates if reply should be hidden for normal users or not */ 
-    
+    private $tReplyId; /**< The id of the reply */
+    private $ticket; /**< the ticket id related to the reply */
+    private $content; /**< the content of the reply */
+    private $author; /**< The id of the user that made the reply */
+    private $timestamp; /**< The timestamp of the reply */
+    private $hidden; /**< indicates if reply should be hidden for normal users or not */
+
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
-    
+
     /**
     * return constructed element based on TReplyId.
     * @param $id the Id the reply we want to load.
@@ -23,8 +23,8 @@ class Ticket_Reply{
         $instance->setTReplyId($id);
         return $instance;
     }
-    
-    
+
+
     /**
     * return all replies on a specific ticket.
     * @param $ticket_id the id of the ticket of which we want the replies.
@@ -43,12 +43,12 @@ class Ticket_Reply{
                 $instanceAuthor = Ticket_User::constr_TUserId($tReply['Author']);
                 $instanceAuthor->setExternId($tReply['ExternId']);
                 $instanceAuthor->setPermission($tReply['Permission']);
-                
+
                 //load content
                 $instanceContent = new Ticket_Content();
                 $instanceContent->setTContentId($tReply['TContentId']);
                 $instanceContent->setContent($tReply['Content']);
-                
+
                 //load reply and add the author and content object in it.
                 $instanceReply = new self();
                 $instanceReply->setTReplyId($tReply['TReplyId']);
@@ -60,9 +60,9 @@ class Ticket_Reply{
                 $result[] = $instanceReply;
             }
         }
-        return $result; 
+        return $result;
     }
-    
+
     /**
     * creates a new reply on a ticket.
     * Creates a ticket_content entry and links it with a new created ticket_reply, a log entry will be written about this.
@@ -78,19 +78,19 @@ class Ticket_Reply{
         $ticket_content->setContent($content);
         $ticket_content->create();
         $content_id = $ticket_content->getTContentId();
- 
+
         $ticket_reply = new Ticket_Reply();
         $ticket_reply->set(Array('Ticket' => $ticket_id,'Content' => $content_id,'Author' => $author, 'Hidden' => $hidden));
         $ticket_reply->create();
         $reply_id = $ticket_reply->getTReplyId();
-        
+
         if($ticket_creator == $author){
             Ticket::updateTicketStatus( $ticket_id, 1, $author);
         }
- 
+
         Ticket_Log::createLogEntry( $ticket_id, $author, 4, $reply_id);
     }
-    
+
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
 
     /**
@@ -116,14 +116,14 @@ class Ticket_Reply{
             $this->setHidden($values['Hidden']);
         }
     }
-    
+
     /**
     * creates a new 'ticket_reply' entry.
     * this method will use the object's attributes for creating a new 'ticket_reply' entry in the database (the now() function will create the timestamp).
     */
     public function create(){
         $dbl = new DBLayer("lib");
-        $this->tReplyId = $dbl->executeReturnId("ticket_reply", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author,'Timestamp'=>now(), 'Hidden' => $this->hidden)); 
+        $this->tReplyId = $dbl->executeReturnId("ticket_reply", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Hidden' => $this->hidden), array('Timestamp'=>'now()'));
     }
 
     /**
@@ -142,7 +142,7 @@ class Ticket_Reply{
         $this->timestamp = $row['Timestamp'];
         $this->hidden = $row['Hidden'];
     }
-    
+
     /**
     * updates a ticket_reply entry based on the objects attributes.
     */
@@ -150,16 +150,16 @@ class Ticket_Reply{
         $dbl = new DBLayer("lib");
         $dbl->update("ticket", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId=$this->tReplyId, ");
     }
-    
+
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
-     
+
     /**
     * get ticket attribute of the object.
     */
     public function getTicket(){
         return $this->ticket;
     }
-    
+
     /**
     * get content attribute of the object.
     */
@@ -173,7 +173,7 @@ class Ticket_Reply{
     public function getAuthor(){
         return $this->author;
     }
-    
+
     /**
     * get timestamp attribute of the object.
     * The output format is defined by the Helpers class function, outputTime().
@@ -181,23 +181,23 @@ class Ticket_Reply{
     public function getTimestamp(){
         return Helpers::outputTime($this->timestamp);
     }
-    
+
     /**
     * get tReplyId attribute of the object.
     */
     public function getTReplyId(){
         return $this->tReplyId;
     }
-   
+
     /**
     * get hidden attribute of the object.
     */
     public function getHidden(){
         return $this->hidden;
-    } 
-    
+    }
+
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
-     
+
     /**
     * set ticket attribute of the object.
     * @param $t integer id of the ticket
@@ -205,7 +205,7 @@ class Ticket_Reply{
     public function setTicket($t){
         $this->ticket = $t;
     }
-   
+
     /**
     * set content attribute of the object.
     * @param $c integer id of the ticket_content entry
@@ -213,7 +213,7 @@ class Ticket_Reply{
     public function setContent($c){
         $this->content = $c;
     }
-    
+
     /**
     * set author attribute of the object.
     * @param $a integer id of the user
@@ -221,7 +221,7 @@ class Ticket_Reply{
     public function setAuthor($a){
         $this->author =  $a;
     }
-    
+
     /**
     * set timestamp attribute of the object.
     * @param $t timestamp of the reply
@@ -229,7 +229,7 @@ class Ticket_Reply{
     public function setTimestamp($t){
         $this->timestamp = $t;
     }
-    
+
     /**
     * set tReplyId attribute of the object.
     * @param $i integer id of the ticket_reply
@@ -237,7 +237,7 @@ class Ticket_Reply{
     public function setTReplyId($i){
         $this->tReplyId = $i;
     }
-        
+
     /**
     * set hidden attribute of the object.
     * @param $h should be 0 or 1

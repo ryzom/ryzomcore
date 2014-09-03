@@ -2,7 +2,7 @@
 /**
 * Class that handles the logging. The logging will be used when a ticket is created, a reply is added, if someone views a ticket,
 * if someone assigns a ticket to him or if someone forwards a ticket. This class provides functions to get retrieve those logs and also make them.
-* 
+*
 *-the Action IDs being used are:
 * -# User X Created ticket
 * -# Admin X created ticket for arg
@@ -18,13 +18,13 @@
 */
 
 class Ticket_Log{
-    
-    private $tLogId; /**< The id of the log entry */ 
-    private $timestamp; /**< The timestamp of the log entry */ 
-    private $query; /**< The query (json encoded array containing action id & argument) */ 
-    private $author; /**< author of the log */ 
-    private $ticket; /**< the id of the ticket related to the log entry */ 
-    
+
+    private $tLogId; /**< The id of the log entry */
+    private $timestamp; /**< The timestamp of the log entry */
+    private $query; /**< The query (json encoded array containing action id & argument) */
+    private $author; /**< author of the log */
+    private $ticket; /**< the id of the ticket related to the log entry */
+
     /****************************************
      *Action ID's:
      * 1: User X Created Ticket
@@ -38,10 +38,10 @@ class Ticket_Log{
      * 9: unassigned to the ticket
      *
      ****************************************/
-    
-    
+
+
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
-    
+
     /**
     * return all log entries related to a ticket.
     * @param $ticket_id the id of the ticket of which we want all related log entries returned.
@@ -65,10 +65,10 @@ class Ticket_Log{
             $instanceLog->setQuery($log['Query']);
             $result[] = $instanceLog;
         }
-        return $result; 
+        return $result;
     }
-    
-    
+
+
     /**
     * create a new log entry.
     * It will check if the $TICKET_LOGGING global var is true, this var is used to turn logging on and off. In case it's on, the log message will be stored.
@@ -82,8 +82,8 @@ class Ticket_Log{
         global $TICKET_LOGGING;
         if($TICKET_LOGGING){
             $dbl = new DBLayer("lib");
-	    $values = Array('Timestamp'=>now(), 'Query' => json_encode(array($action,$arg)), 'Ticket' => $ticket_id, 'Author' => $author_id);
-            $dbl->insert("ticket_log", $values);
+	    $values = Array('Query' => json_encode(array($action,$arg)), 'Ticket' => $ticket_id, 'Author' => $author_id);
+            $dbl->insert("ticket_log", $values, array('Timestamp'=>'now()'));
         }
     }
 
@@ -98,7 +98,7 @@ class Ticket_Log{
         $instance->setTLogId($id);
         return $instance;
     }
-    
+
     /**
     * return all log entries related to a ticket.
     * @param $ticket_id the id of the ticket of which we want all related log entries returned.
@@ -115,19 +115,19 @@ class Ticket_Log{
             $instance->set($log);
             $result[] = $instance;
         }
-        return $result; 
+        return $result;
     }
-     
-    
+
+
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-     
+
     /**
     * A constructor.
     * Empty constructor
     */
     public function __construct() {
     }
-    
+
     /**
     * sets the object's attributes.
     * @param $values should be an array.
@@ -138,7 +138,7 @@ class Ticket_Log{
         $this->setQuery($values['Query']);
         $this->setTicket($values['Ticket']);
         $this->setAuthor($values['Author']);
-    } 
+    }
 
     /**
     * loads the object's attributes.
@@ -151,56 +151,56 @@ class Ticket_Log{
         $row = $statement->fetch();
         $this->set($row);
     }
-    
-    
+
+
     /**
     * update attributes of the object to the DB.
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        
+
         $values = Array('timestamp' => $this->getTimestamp(), 'query' => $this->getQuery(), 'author' => $this->getAuthor(), 'ticket' => $this->getTicket() );
         $dbl->update("ticket_log", $values, "TLogId = $this->getTLogId()");
-        
+
     }
-    
+
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
-    
+
     /**
     * get tLogId attribute of the object.
     */
     public function getTLogId(){
         return $this->tLogId;
     }
-    
+
     /**
     * get timestamp attribute of the object.
     */
     public function getTimestamp(){
         return Helpers::outputTime($this->timestamp);
     }
-    
+
     /**
     * get query attribute of the object.
     */
     public function getQuery(){
         return $this->query;
     }
-    
+
     /**
     * get author attribute of the object.
     */
     public function getAuthor(){
         return $this->author;
     }
-   
+
     /**
     * get ticket attribute of the object.
     */
     public function getTicket(){
         return $this->ticket;
     }
-    
+
     /**
     * get the action id out of the query by decoding it.
     */
@@ -208,7 +208,7 @@ class Ticket_Log{
         $decodedQuery = json_decode($this->query);
         return $decodedQuery[0];
     }
-    
+
     /**
     * get the argument out of the query by decoding it.
     */
@@ -216,7 +216,7 @@ class Ticket_Log{
         $decodedQuery = json_decode($this->query);
         return $decodedQuery[1];
     }
-    
+
     /**
     * get the action text(string) array.
     * this is being read from the language .ini files.
@@ -229,9 +229,9 @@ class Ticket_Log{
            }
         return $result;
     }
-    
+
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
-     
+
     /**
     * set tLogId attribute of the object.
     * @param $id integer id of the log entry
@@ -239,7 +239,7 @@ class Ticket_Log{
     public function setTLogId($id){
         $this->tLogId = $id;
     }
-    
+
     /**
     * set timestamp attribute of the object.
     * @param $t timestamp of the log entry
@@ -247,7 +247,7 @@ class Ticket_Log{
     public function setTimestamp($t){
         $this->timestamp = $t;
     }
-    
+
     /**
     * set query attribute of the object.
     * @param $q the encoded query
@@ -255,7 +255,7 @@ class Ticket_Log{
     public function setQuery($q){
         $this->query = $q;
     }
-    
+
     /**
     * set author attribute of the object.
     * @param $a integer id of the user who created the log entry
@@ -263,7 +263,7 @@ class Ticket_Log{
     public function setAuthor($a){
         $this->author = $a;
     }
-    
+
     /**
     * set ticket attribute of the object.
     * @param $t integer id of ticket of which the log entry is related to.
@@ -271,6 +271,6 @@ class Ticket_Log{
     public function setTicket($t){
         $this->ticket = $t;
     }
-   
-    
+
+
 }

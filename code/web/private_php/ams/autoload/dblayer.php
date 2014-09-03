@@ -240,30 +240,26 @@ class DBLayer {
 	* @param array $data array of data to insert in format('fieldname' => $value,....). 'fieldname' must be a field in that table.
 	* @throws error in inserting.
 	*/
-	public function insert( $tb_name, $data ) {
+	public function insert($tb_name, $data, $datafunc = array()) {
 		$this->useDb();
-		$field_values = ':' . implode( ',:', array_keys( $data ) );
-		$field_options = implode( ',', array_keys( $data ) );
+		$field_options = implode(',', array_merge(array_keys($data), array_keys($datafunc)));
+		$field_values = implode(',', array_merge(array(':' . implode(',:', array_keys($data))), array_values($datafunc)));
 		try {
-			$sth = $this -> PDO -> prepare( "INSERT INTO $tb_name ($field_options) VALUE ($field_values)" );
-			foreach ( $data as $key => $value )
-			{
-
-				$sth -> bindValue( ":$key", $value );
-				}
-			$this -> PDO -> beginTransaction();
+			$sth = $this->PDO->prepare("INSERT INTO $tb_name ($field_options) VALUE ($field_values)");
+			foreach ($data as $key => $value) {
+				$sth->bindValue(":$key", $value);
+			}
+			$this->PDO->beginTransaction();
 			// execution
-			$sth -> execute();
-			$this -> PDO -> commit();
-
-			}
-		catch ( Exception $e )
-		{
-			// for rolling back the changes during transaction
-			$this -> PDO -> rollBack();
-			throw new Exception( "error in inserting" );
-			}
+			$sth->execute();
+			$this->PDO->commit();
 		}
+		catch (Exception $e) {
+			// for rolling back the changes during transaction
+			$this->PDO->rollBack();
+			throw $e; // new Exception("error in inserting");
+		}
+	}
 
 	/**
 	* Delete database entery using prepared statement.
