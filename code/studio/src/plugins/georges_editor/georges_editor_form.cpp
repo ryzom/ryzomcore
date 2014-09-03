@@ -209,7 +209,12 @@ namespace GeorgesQt
 	{
 		std::string path = NLMISC::CPath::lookup( fileName.toUtf8().constData(), false );
 		if( path.empty() )
+		{
+			QMessageBox::information( this,
+									tr( "Failed to load file..." ),
+									tr( "Failed to load file '%1': File doesn't exist!" ).arg( fileName ) );
 			return;
+		}
 
 		QFileInfo info( path.c_str() );
 
@@ -246,7 +251,7 @@ namespace GeorgesQt
 		{
 			QMessageBox::information( this,
 										tr( "Failed to load file..." ),
-										tr( "Failed to load file '%1'" ).arg( info.fileName() ) );
+										tr( "Failed to load file '%1': Not a typ, dfn, or form file!" ).arg( info.fileName() ) );
 			return;
 		}
 
