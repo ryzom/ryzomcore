@@ -1,5 +1,6 @@
 #include "georges_typ_dialog.h"
 #include "georges.h"
+#include "typ_browser_ctrl.h"
 
 #include <QInputDialog>
 #include <QMessageBox>
@@ -14,16 +15,20 @@ public:
 	GeorgesTypDialogPvt()
 	{
 		typ = NULL;
+		ctrl = new TypBrowserCtrl();
 	}
 
 	~GeorgesTypDialogPvt()
 	{
 		delete typ;
 		typ = NULL;
+		delete ctrl;
+		ctrl = NULL;
 	}
 
 
 	NLGEORGES::CType *typ;
+	TypBrowserCtrl *ctrl;
 };
 
 GeorgesTypDialog::GeorgesTypDialog( QWidget *parent ) :
@@ -31,6 +36,8 @@ GeorgesDockWidget( parent )
 {
 	m_ui.setupUi( this );
 	m_pvt = new GeorgesTypDialogPvt();
+	m_pvt->ctrl->setBrowser( m_ui.browser );
+
 	setupConnections();
 }
 
@@ -195,6 +202,7 @@ void GeorgesTypDialog::loadTyp()
 		++itr;
 	}
 
-
+	m_pvt->ctrl->setTyp( m_pvt->typ );
+	m_pvt->ctrl->load();
 }
 
