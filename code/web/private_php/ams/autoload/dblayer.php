@@ -223,7 +223,7 @@ class DBLayer {
 	*/
 	public function insert($tb_name, $data, $datafunc = array()) {
 		$this->useDb();
-		$field_options = implode(',', array_merge(array_keys($data), array_keys($datafunc)));
+		$field_options = '`'.implode('`,`', array_merge(array_keys($data), array_keys($datafunc))).'`';
 		$field_values = implode(',', array_merge(array(':' . implode(',:', array_keys($data))), array_values($datafunc)));
 		try {
 			$sth = $this->PDO->prepare("INSERT INTO $tb_name ($field_options) VALUE ($field_values)");

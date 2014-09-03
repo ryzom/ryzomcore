@@ -337,7 +337,7 @@ class Support_Group{
     */
     public function delete(){
         $dbl = new DBLayer("lib");
-        $dbl->delete("`support_group`", Array('id' => $this->getSGroupId(), "`SGroupId` = :id"));
+        $dbl->delete("`support_group`", Array('id' => $this->getSGroupId()), "`SGroupId` = :id");
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
