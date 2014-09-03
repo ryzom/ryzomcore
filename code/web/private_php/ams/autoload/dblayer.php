@@ -29,11 +29,14 @@
  *
  */
 
-//$PDOCache = array();
+$PDOCache = array();
 
 class DBLayer {
 
 	private $PDO;
+	private $host;
+	private $dbname;
+
 	/**
 	* The PDO object, instantiated by the constructor
 	*/
@@ -47,30 +50,41 @@ class DBLayer {
 	*/
 	function __construct($db, $dbn = null)
 	{
-		/*global $PDOCache;
-		if (isset($PDOCache[$db])) {
-			$this->PDO = $PDOCache[$db];
-		} else {*/
-			global $cfg;
+		global $cfg;
+		$this->host = $cfg['db'][$db]['host'];
+		$this->dbname = $cfg['db'][$db]['name'];
+		global $PDOCache;
+		if (isset($PDOCache[$this->host])) {
+			$this->PDO = $PDOCache[$this->host]['pdo'];
+		} else {
 			$dsn = "mysql:";
 			$dsn .= "host=" . $cfg['db'][$db]['host'] . ";";
-			$dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";";
+			// $dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";";
 			$dsn .= "port=" . $cfg['db'][$db]['port'] . ";";
-			//$dsn .= "charset=utf8;";
 
 			$opt = array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-				PDO::ATTR_PERSISTENT => false
+				PDO::ATTR_PERSISTENT => true
 			);
 			$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
-			//$PDOCache[$db] = $this->PDO;
-		/*}*/
+			$PDOCache[$this->host] = array();
+			$PDOCache[$this->host]['pdo'] = $this->PDO;
+			$PDOCache[$this->host]['use'] = $this->dbname;
+			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+		}
 	}
 
 	function __destruct() {
-		//$this->PDO->query('KILL;');
 		$this->PDO = NULL;
+	}
+
+	function useDb() {
+		global $PDOCache;
+		if ($PDOCache[$this->host]['use'] != $this->dbname) {
+			$PDOCache[$this->host]['use'] = $this->dbname;
+			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+		}
 	}
 
 	/**
@@ -80,6 +94,7 @@ class DBLayer {
 	* @return returns a PDOStatement object.
 	*/
 	public function executeWithoutParams($query) {
+		$this->useDb();
 		$statement = $this->PDO->prepare($query);
 		$statement->execute();
 		return $statement;
@@ -93,6 +108,7 @@ class DBLayer {
 	* @return returns a PDOStatement object.
 	*/
 	public function execute( $query, $params ) {
+		$this->useDb();
 		$statement = $this -> PDO -> prepare( $query );
 		$statement -> execute( $params );
 		return $statement;
@@ -106,6 +122,7 @@ class DBLayer {
 	* @return returns the id of the last inserted element.
 	*/
 	public function executeReturnId( $tb_name, $data ) {
+		$this->useDb();
 		$field_values = ':' . implode( ',:', array_keys( $data ) );
 		$field_options = implode( ',', array_keys( $data ) );
 		try {
@@ -138,8 +155,8 @@ class DBLayer {
 	* @param string $where where to select.
 	* @return statement object.
 	*/
-	public function selectWithParameter( $param, $tb_name, $data, $where )
-	{
+	public function selectWithParameter( $param, $tb_name, $data, $where ) {
+		$this->useDb();
 		try {
 			$sth = $this -> PDO -> prepare( "SELECT $param FROM $tb_name WHERE $where" );
 			$this -> PDO -> beginTransaction();
@@ -163,8 +180,8 @@ class DBLayer {
 	* @param string $where where to select in format('fieldname=:fieldname' AND ...).
 	* @return statement object.
 	*/
-	public function select( $tb_name, $data , $where )
-	{
+	public function select( $tb_name, $data , $where ) {
+		$this->useDb();
 		try {
 			$sth = $this -> PDO -> prepare( "SELECT * FROM $tb_name WHERE $where" );
 			$this -> PDO -> beginTransaction();
@@ -188,8 +205,8 @@ class DBLayer {
 	* @param string $where where part in format ('fieldname'= $value AND ...). 'fieldname' must be a field in that table.
 	* @throws Exception error in updating.
 	*/
-	public function update( $tb_name, $data, $where )
-	{
+	public function update( $tb_name, $data, $where ) {
+		$this->useDb();
 		$field_option_values = null;
 		foreach ( $data as $key => $value )
 		{
@@ -223,8 +240,8 @@ class DBLayer {
 	* @param array $data array of data to insert in format('fieldname' => $value,....). 'fieldname' must be a field in that table.
 	* @throws error in inserting.
 	*/
-	public function insert( $tb_name, $data )
-	{
+	public function insert( $tb_name, $data ) {
+		$this->useDb();
 		$field_values = ':' . implode( ',:', array_keys( $data ) );
 		$field_options = implode( ',', array_keys( $data ) );
 		try {
@@ -256,19 +273,17 @@ class DBLayer {
 	* @param string $where condition based on $data array in the format('fieldname=:fieldname' AND ...).
 	* @throws error in deleting.
 	*/
-	public function delete( $tb_name, $data, $where )
-	{
+	public function delete( $tb_name, $data, $where ) {
+		$this->useDb();
 		try {
 			$sth = $this -> PDO -> prepare( "DELETE FROM $tb_name WHERE $where" );
 			$this -> PDO -> beginTransaction();
 			$sth -> execute( $data );
 			$this -> PDO -> commit();
-			}
-		catch ( Exception $e )
-		{
+		}
+		catch (Exception $e) {
 			$this -> PDO -> rollBack();
 			throw new Exception( "error in deleting" );
-			}
-
 		}
 	}
+}
