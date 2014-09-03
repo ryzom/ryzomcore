@@ -46,19 +46,19 @@ height: 16px;
 padding: 0 5px;
 font-family: Arial, sans-serif;
 color: white !important;
-text-shadow: 0 1px 
+text-shadow: 0 1px
 hsla(0, 0%, 0%, 0.25);
 border-width: 1px;
 border-style: solid;
 border-radius: 10px;
 -webkit-border-radius: 10px;
 -moz-border-radius: 10px;
--webkit-box-shadow: 0 1px 1px 
-hsla(0, 0%, 0%, 0.08), inset 0 1px 
+-webkit-box-shadow: 0 1px 1px
+hsla(0, 0%, 0%, 0.08), inset 0 1px
 hsla(0, 100%, 100%, 0.3);
 -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08), inset 0 1px rgba(255, 255, 255, 0.3);
-box-shadow: 0 1px 1px 
-hsla(0, 0%, 0%, 0.08), inset 0 1px 
+box-shadow: 0 1px 1px
+hsla(0, 0%, 0%, 0.08), inset 0 1px
 hsla(0, 100%, 100%, 0.3);
 }
 
@@ -128,7 +128,7 @@ border: 1px solid #DEDEDE;
 border-radius:3px;
 -webkit-border-radius:3px;
 -moz-border-radius:3px;
-margin-top: 10px; 
+margin-top: 10px;
 margin-bottom: 10px ;
 box-shadow: 0 0 10px rgba(189, 189, 189, 0.4);
 -webkit-box-shadow: 0 0 10px rgba(189, 189, 189, 0.4);
@@ -145,7 +145,7 @@ border-radius:3px 3px 0 0;
 height:12px;
 min-height:12px;
 margin-bottom: 0;
-cursor:move;
+/*cursor:move;*/
 font-weight:bold;
 font-size:16px;
 background: -moz-linear-gradient(top,  rgba(255,255,255,0) 0%, rgba(0,0,0,0.1) 100%);
@@ -343,7 +343,7 @@ margin-right:-2px;
 margin-left:-2px;
 }
 .brand{
-font-family: 'Shojumaru', cursive, Arial, serif; 
+font-family: 'Shojumaru', cursive, Arial, serif;
 letter-spacing:2px;
 text-shadow:1px 1px 5px rgba(0, 0, 0, 0.5);
 width:166px;
@@ -368,7 +368,7 @@ margin-bottom:0;
 }
 @media (min-width: 768px) and (max-width: 979px) {
 .box-icon{
-	display:none;	
+	display:none;
 }
 .box-header h2{
 	font-size:13px !important;
@@ -389,8 +389,8 @@ margin-left:10px;
 border-radius:0 0 10px 10px;
 -webkit-border-radius:0 0 10px 10px;
 -moz-border-radius:0 0 10px 10px;
-padding-top:5px; 
-padding-bottom:5px; 
+padding-top:5px;
+padding-bottom:5px;
 }
 div.dataTables_length select {
 width: 50px;

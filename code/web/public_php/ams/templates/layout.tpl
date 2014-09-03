@@ -18,7 +18,7 @@
 	<meta name="author" content="Daan Janssens & Matthew Lagoe">
 
 	<!-- The styles -->
-	<link id="bs-css" href="css/bootstrap-cerulean.css" rel="stylesheet">
+	<link id="bs-css" href="css/bootstrap-classic.css" rel="stylesheet">
 	<style type="text/css">
 	  body {
 		padding-bottom: 40px;
@@ -70,7 +70,7 @@
 				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore_166_62.png"></a>
 
 				<!-- theme selector starts -->
-				<div class="btn-group pull-right theme-container">
+				<!--<div class="btn-group pull-right theme-container">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 						<i class="icon-tint"></i><span class="hidden-phone"> Change Theme / Skin</span>
 						<span class="caret"></span>
@@ -86,7 +86,7 @@
 						<li><a data-value="spacelab" href="#"><i class="icon-blank"></i> Spacelab</a></li>
 						<li><a data-value="united" href="#"><i class="icon-blank"></i> United</a></li>
 					</ul>
-				</div>
+				</div>-->
 				<!-- theme selector ends -->
 				<!-- user dropdown starts -->
 				{if isset($username)}
@@ -312,7 +312,7 @@
 	<!-- history.js for cross-browser state change on ajax -->
 	<script src="js/jquery.history.js"></script>
 	<!-- application script for Charisma demo -->
-	<script src="js/charisma.js"></script>
+	<!-- <script src="js/charisma.js"></script> -->
 	<!-- help script for page help -->
 	<script src="js/help.js"></script>
 

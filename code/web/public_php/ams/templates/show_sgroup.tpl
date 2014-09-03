@@ -3,10 +3,6 @@
     <div class="box span9">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-list"></i>{$groupsname} List</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
@@ -17,9 +13,9 @@
 				    <th>ID</th>
 				    <th>Name</th>
 				    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<th>Action</th>{/if}
-		
+
 			    </tr>
-		    </thead>   
+		    </thead>
 		    <tbody>
 			{foreach from=$userlist item=user}
 			  <tr>
@@ -28,29 +24,25 @@
 				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><i class="icon-trash icon-white"></i> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
-	  
+
 		    </tbody>
-	    </table>            
+	    </table>
 	    </div>
 	</div>
     </div><!--/span-->
-    
+
     {if isset($isAdmin) && $isAdmin eq 'TRUE'}
     <div class="box span3">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-plus-sign"></i> Add User</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
-		
+
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
-		    
+
 		<legend style="margin:0">Add user to '{$groupsname}'</legend>
-		
+
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">username</label>
 		    <div class="controls">
@@ -63,17 +55,17 @@
 		    </select>
 		    </div>
 		</div>
-		
+
 		<input type="hidden" name="function" value="add_user_to_sgroup">
 		<input type="hidden" name="target_id" value="{$target_id}">
-		    
+
 		<div class="control-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Add</button>
 		    </div>
 		</div>
-		
+
 		{if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "SUCCESS"}
 		<div class="alert alert-success">
 			{$add_to_group_success}
@@ -96,26 +88,22 @@
 		</div>
 		{/if}
 		</form>
-		
-	    </div>                   
+
+	    </div>
         </div>
 
     </div><!--/span-->
 	<div class="box span3">
 	<div class="box-header well" data-original-title="">
             <h2><i class="icon-pencil"></i> Modify Email Settings</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
 	 <div class="box-content">
             <div class="row-fluid">
-		
+
 		<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
-		    
+
 		<legend style="margin:0">Mail settings of '{$groupsname}'</legend>
-		
+
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">Group Email</label>
 		    <div class="controls">
@@ -124,7 +112,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Mail Server</label>
 		    <div class="controls">
@@ -133,7 +121,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Username</label>
 		    <div class="controls">
@@ -142,7 +130,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group" style="display: inline-block; ">
 		    <label class="control-label">IMAP Password</label>
 		    <div class="controls">
@@ -151,17 +139,17 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<input type="hidden" name="function" value="modify_email_of_sgroup">
 		<input type="hidden" name="target_id" value="{$target_id}">
-		    
+
 		<div class="control-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Update</button>
 		    </div>
 		</div>
-		
+
 		{if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "SUCCESS"}
 		<div class="alert alert-success">
 			{$modify_mail_of_group_success}
@@ -175,14 +163,14 @@
 			{$no_password_given}
 		</div>
 		{/if}
-		
+
 		</form>
 	    </div>
 	 </div>
-</div>	 
+</div>
 
     {/if}
 </div><!--/row-->
 
 {/block}
-	
+

@@ -1,13 +1,8 @@
 {block name=content}
-<div class="row-fluid">		
+<div class="row-fluid">
 				<div class="box span12">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> Members</h2>
-						<div class="box-icon">
-							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
-							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-						</div>
 					</div>
 					<div class="box-content">
 						<table class="table table-striped table-bordered">
@@ -19,7 +14,7 @@
 								  <th>Permission</th>
 								  <th>Action</th>
 							  </tr>
-						  </thead>   
+						  </thead>
 						  <tbody>
 							{foreach from=$userlist item=element}
 							<tr>
@@ -53,14 +48,14 @@
 										{/if}
 										<li class="divider"></li>
 									</ul>
-									 
+
 								      </div>
 									{/if}
 								</td>
-								
+
 							</tr>
 							{/foreach}
-					
+
 						  </tbody>
 					  </table>
 					  <div style="width: 300px; margin:0px auto;">
@@ -74,7 +69,7 @@
 					  </div>
 					</div>
 				</div><!--/span-->
-			
+
 			</div><!--/row-->
 {/block}
 

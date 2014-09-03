@@ -1,15 +1,9 @@
 {block name=content}
-	
+
 	<div class="row-fluid">
 		<div class="box span12">
 			<div class="box-header well">
 				<h2><i class="icon-info-sign"></i>{$ip_title}</h2>
-				<div class="box-icon">
-					<a href="#" class="btn btn-round" onclick="javascript:show_help('intro');return false;"><i class="icon-info-sign"></i></a>
-					<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
-					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-				</div>
 			</div>
 			<div class="box-content">
 				<center>
@@ -22,7 +16,7 @@
 				<input type="button" value="Upload" onclick="uploadPlugin()"></br>
 				<h3 id="status"></h3>
 				 {if isset($smarty.get.result) and $smarty.get.result eq "0"}<p>{$ip_file_nfnd}</p>{/if}
-				 {if isset($smarty.get.result) and $smarty.get.result eq "2"}<p>{$ip_info_nfound}</p>{/if}	
+				 {if isset($smarty.get.result) and $smarty.get.result eq "2"}<p>{$ip_info_nfound}</p>{/if}
 				</div>
 				{$ip_message}
 				</center>
@@ -31,6 +25,6 @@
 		</div>
 	</div>
 		</div><!--/span-->
-			
+
 			</div><!--/row-->
 {/block}

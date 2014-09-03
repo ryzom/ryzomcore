@@ -3,10 +3,6 @@
     <div class="box span12">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-tag"></i> Log of Ticket #{$ticket_id}</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
@@ -18,7 +14,7 @@
 				    <th>Timestamp</th>
 				    <th>Query</th>
 			    </tr>
-		    </thead>   
+		    </thead>
 		    <tbody>
 			  {foreach from=$ticket_logs item=log}
 			  <tr>
@@ -27,12 +23,11 @@
 				<td>{$log.query}</td>
 			  </tr>
 			  {/foreach}
-	  
+
 		    </tbody>
-	    </table>            
+	    </table>
 	    </div>
 	</div>
     </div><!--/span-->
 </div><!--/row-->
 {/block}
-	

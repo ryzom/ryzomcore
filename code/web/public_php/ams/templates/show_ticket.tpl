@@ -3,22 +3,18 @@
     <div class="box span9">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-tag"></i>{$t_title} #{$ticket_tId} </h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
                 <legend>{$title}: {$ticket_title} </legend>
-		
-		
+
+
 		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
 		<table class="table table-bordered table-condensed ">
 			<tr>
 			    <td><strong>Original Submitted: </strong>{$ticket_timestamp}</td>
 			    <td><strong>Last Updated: </strong>{$ticket_lastupdate}</td>
-			    <td><strong>Status: </strong>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
+			    <td><strong>Status: </strong>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td>
 		      </tr>
 			<tr>
 			    <td><strong>Category: </strong>{$ticket_category}</td>
@@ -31,16 +27,16 @@
 					<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
 				    {/if}
 				</span>
-			    </td>                  
+			    </td>
 			</tr>
 			<tr>
 			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
 			    <td></td>
-			    <td></td> 
+			    <td></td>
 		      </tr>
 		</table>
-		
-		
+
+
 		<table class="table table-bordered" >
 		    <tbody>
 			{foreach from=$ticket_replies item=reply}
@@ -58,7 +54,7 @@
 			    </td>
 			</tr>
 			{/foreach}
-			
+
 			{if $ticket_status eq 3}
 			<tr>
 			    <td>
@@ -66,7 +62,7 @@
 			    </td>
 			</tr>
 			{/if}
-			
+
 			<tr>
 			    <td>
 				<form id="reply" class="form-vertical" method="post" action="index.php">
@@ -99,7 +95,7 @@
 					    {foreach from=$statusList key=k item=v}
 						    <option value="{$k}">{$v}</option>
 					    {/foreach}
-					</select>	
+					</select>
 				    </div>
 				</div>
 				<div class="control-group"  style="display: inline-block; margin-left:10px;"">
@@ -109,7 +105,7 @@
 					    {foreach from=$ticket_priorities key=k item=v}
 						    <option value="{$k}" {if $k eq $ticket_priority}selected="selected"{/if}>{$v}</option>
 					    {/foreach}
-					</select>	
+					</select>
 				    </div>
 				</div>
 				{/if}
@@ -126,25 +122,21 @@
 			</tr>
 		    </tbody>
 		</table>
-	    </div>                   
+	    </div>
         </div>
     </div><!--/span-->
-    
-    
-    
+
+
+
     <div class="box span3">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-th"></i>Actions</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
-		
+
 		{if isset($isMod) and $isMod eq "TRUE"}
-		
+
 		 <legend style="margin-bottom:9px;">Ticket Assigning</legend>
 		 {if $ticket_assignedTo eq 0}
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
@@ -159,7 +151,7 @@
 			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><i class="icon-remove icon-white"></i> Remove Assign</button>
 		    </form>
 		{/if}
-				    
+
 		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_ASSIGNED"}
 		<div class="alert alert-success">
 			{$success_assigned}
@@ -181,10 +173,10 @@
 			{$ticket_not_assigned}
 		</div>
 		{/if}
-		
-		<legend style="margin-bottom:9px;">Forward to Group</legend>		    
+
+		<legend style="margin-bottom:9px;">Forward to Group</legend>
 		<form id="forward" class="form-vertical" method="post" action="" style="margin-bottom:9px;" >
-		
+
 		<div class="control-group">
 		    <div class="controls" >
 			<select name="group">
@@ -192,7 +184,7 @@
 			    {foreach from=$sGroups key=k item=v}
 				    <option value="{$k}">{$v}</option>
 			    {/foreach}
-			</select>	
+			</select>
 		    </div>
 		</div>
 		<input type="hidden" name="ticket_id" value="{$ticket_tId}">
@@ -228,9 +220,9 @@
 			<li class="divider"></li>
 		    </ul>
 		</div>
-            </div>                   
+            </div>
         </div>
     </div>
 </div><!--/row-->
 {/block}
-	
+

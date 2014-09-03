@@ -5,10 +5,6 @@
     <div class="box span9">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-list"></i> List</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
@@ -22,7 +18,7 @@
 				    <th>Email</th>
 				    {if isset($isAdmin) && $isAdmin eq 'TRUE'}<th>Action</th>{/if}
 			    </tr>
-		    </thead>   
+		    </thead>
 		    <tbody>
 			{foreach from=$grouplist item=group}
 			  <tr>
@@ -33,9 +29,9 @@
 				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=sgroup_list&delete={$group.sGroupId}"><i class="icon-trash icon-white"></i> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
-	  
+
 		    </tbody>
-	    </table>            
+	    </table>
 	    </div>
 	</div>
     </div><!--/span-->
@@ -43,18 +39,14 @@
     <div class="box span3">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-plus-sign"></i> Add</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
         </div>
         <div class="box-content">
             <div class="row-fluid">
-		
+
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=sgroup_list">
-		    
+
 		<legend>Add  a support group</legend>
-		
+
 		<div class="control-group">
 		    <label class="control-label">Group name</label>
 		    <div class="controls">
@@ -63,7 +55,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group">
 		    <label class="control-label">Group Tag</label>
 		    <div class="controls">
@@ -72,7 +64,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group">
 		    <label class="control-label">Group EmailAddress</label>
 		    <div class="controls">
@@ -81,7 +73,7 @@
 			</div>
 		    </div>
 		</div>
-				
+
 		<div class="control-group">
 		    <label class="control-label">IMAP MailServer IP</label>
 		    <div class="controls">
@@ -90,7 +82,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group">
 		    <label class="control-label">IMAP Username</label>
 		    <div class="controls">
@@ -99,7 +91,7 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<div class="control-group">
 		    <label class="control-label">IMAP Password</label>
 		    <div class="controls">
@@ -108,16 +100,16 @@
 			</div>
 		    </div>
 		</div>
-		
+
 		<input type="hidden" name="function" value="add_sgroup">
-		
+
 		<div class="control-group">
 		    <label class="control-label"></label>
 		    <div class="controls">
 			<button type="submit" class="btn btn-primary" >Add</button>
 		    </div>
 		</div>
-		
+
 		{if isset($RESULT_OF_ADDING) and $RESULT_OF_ADDING eq "SUCCESS"}
 		<div class="alert alert-success">
 			{$group_success}
@@ -136,11 +128,11 @@
 		</div>
 		{/if}
 		</form>
-		
-	    </div>                   
+
+	    </div>
         </div>
     </div><!--/span-->
     {/if}
 </div><!--/row-->
 {/block}
-	
+
