@@ -18,6 +18,7 @@
 #define GEORGES_TREEVIEWER_DIALOG_H
 
 #include "ui_georges_treeview_form.h"
+#include "georges_dock_widget.h"
 #include "expandable_headerview.h"
 
 // Qt includes
@@ -49,16 +50,13 @@ namespace GeorgesQt
 	class CGeorges;
 	class CGeorgesFormModel;
 
-	class CGeorgesTreeViewDialog: public QDockWidget
+	class CGeorgesTreeViewDialog: public GeorgesDockWidget
 	{
 		Q_OBJECT
 
 	public:
 		CGeorgesTreeViewDialog(QWidget *parent = 0);
 		~CGeorgesTreeViewDialog();
-
-		bool isModified() {return m_modified;}
-		void setModified(bool m) {m_modified = m;}
 
 		NLGEORGES::CForm* getFormByName(const QString formName);
 		NLGEORGES::CForm* getFormByDfnName(const QString dfnName);
@@ -71,15 +69,11 @@ namespace GeorgesQt
 
 		void addParentForm(QString parentFormNm);
 
+		bool load( const QString &fileName );
 		void write (  );
+		bool newDocument( const QString &fileName, const QString &dfn );
 
 		QTabWidget* tabWidget() { return m_ui.treeViewTabWidget; }
-
-		void setUndoStack(QUndoStack *stack) {
-			m_undoStack = stack;
-		}
-
-
 
 		QString loadedForm;
 
@@ -104,19 +98,21 @@ namespace GeorgesQt
 		void headerClicked(int);
 
 		void onArrayResized( const QString &name, int size );
+		void onAppendArray();
+		void onDeleteArrayEntry();
+		void onValueChanged( const QString &key, const QString &value );
+		void onRenameArrayEntry();
 
 	private:
+		void log( const QString &msg );
+
 		Ui::CGeorgesTreeViewDialog m_ui;
 		ExpandableHeaderView *m_header;
 		UForm    *m_form;
 		CGeorges *m_georges;
 
-		QUndoStack *m_undoStack;
-
 		/// Contains a record of the last directory a sheet file dialog was opened for.
 		QString m_lastSheetDir;
-
-		bool m_modified;
 
 		BrowserCtrl *m_browserCtrl;
 		CGeorgesFormModel *m_model;

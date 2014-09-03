@@ -16,52 +16,54 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BROWSER_CTRL_H
-#define BROWSER_CTRL_H
+#ifndef TYP_BROWSER_CTRL
+#define TYP_BROWSER_CTRL
 
 #include <QObject>
 
-namespace NLGEORGES
-{
-	class UForm;
-}
-
+class QtVariantPropertyManager;
+class QtVariantEditorFactory;
 class QtTreePropertyBrowser;
-class QModelIndex;
+class QtEnumPropertyManager;
+class QtEnumEditorFactory;
 class QVariant;
 class QtProperty;
 
-class BrowserCtrlPvt;
+namespace NLGEORGES
+{
+	class CType;
+}
 
-class BrowserCtrl : public QObject
+class TypBrowserCtrl : public QObject
 {
 	Q_OBJECT
 public:
-	BrowserCtrl( QtTreePropertyBrowser *browser );
-	~BrowserCtrl();
-	void setForm( NLGEORGES::UForm *form ){ m_form = form; }
+	TypBrowserCtrl( QObject *parent = NULL );
+	~TypBrowserCtrl();
 
-public Q_SLOTS:
-	void clicked( const QModelIndex &idx );
+	void load();
+
+	void setTyp( NLGEORGES::CType *typ ){ m_typ = typ; }
+	void setBrowser( QtTreePropertyBrowser *browser ){ m_browser = browser; }
 
 Q_SIGNALS:
-	void arrayResized( const QString &name, int size );
-	void modified();
-	void valueChanged( const QString &key, const QString &value );
+	void modified( const QString &k, const QString &v );
 
 private Q_SLOTS:
-	void onValueChanged( QtProperty *p, const QVariant &value );
-	void onValueChanged( const QString &key, const QString &value );
-	void onArrayResized( const QString &name, int size );
-	void onModified();
+	void onVariantValueChanged( QtProperty *p, const QVariant &v );
+	void onEnumValueChanged( QtProperty *p, int v );
 
 private:
 	void enableMgrConnections();
-	void disableMgrConnections();
 
+	NLGEORGES::CType *m_typ;
+	QtTreePropertyBrowser *m_browser;
 
-	BrowserCtrlPvt *m_pvt;
-	NLGEORGES::UForm *m_form;
+	QtVariantPropertyManager *m_variantMgr;
+	QtVariantEditorFactory *m_variantFactory;
+	QtEnumPropertyManager *m_enumMgr;
+	QtEnumEditorFactory *m_enumFactory;
+
 };
 
 #endif

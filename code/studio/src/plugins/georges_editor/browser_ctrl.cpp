@@ -1,3 +1,22 @@
+// Ryzom Core Studio - Georges Editor Plugin
+//
+// Copyright (C) 2014 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 #include "browser_ctrl.h"
 #include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
 #include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
@@ -17,6 +36,7 @@ QObject( browser )
 
 	connect( m_pvt, SIGNAL( arrayResized( const QString&, int ) ), this, SLOT( onArrayResized( const QString&, int ) ) );
 	connect( m_pvt, SIGNAL( modified() ), this, SLOT( onModified() ) );
+	connect( m_pvt, SIGNAL( valueChanged( const QString&, const QString& ) ), this, SLOT( onValueChanged( const QString&, const QString& ) ) );
 }
 
 BrowserCtrl::~BrowserCtrl()
@@ -31,18 +51,8 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 	m_pvt->clear();
 
 	GeorgesQt::CFormItem *item = static_cast< GeorgesQt::CFormItem* >( idx.internalPointer() );
-	NLGEORGES::UFormElm &root = m_form->getRootNode();
-	NLGEORGES::CFormElm *rootNode = dynamic_cast< NLGEORGES::CFormElm* >( &root );
-	m_pvt->setRootNode( rootNode );
-	NLGEORGES::UFormElm *node = NULL;
-	bool b = false;
-	
-	b = m_form->getRootNode().getNodeByName( &node, item->formName().c_str() );
-	
-	if( !b || ( node == NULL ) )
-		return;
-	
-	m_pvt->setupNode( node );
+
+	m_pvt->setupNode( item );
 
 	enableMgrConnections();
 
@@ -51,6 +61,11 @@ void BrowserCtrl::clicked( const QModelIndex &idx )
 void BrowserCtrl::onValueChanged( QtProperty *p, const QVariant &value )
 {
 	m_pvt->onValueChanged( p, value );
+}
+
+void BrowserCtrl::onValueChanged( const QString &key, const QString &value )
+{
+	Q_EMIT valueChanged( key, value );
 }
 
 void BrowserCtrl::onArrayResized( const QString &name, int size )

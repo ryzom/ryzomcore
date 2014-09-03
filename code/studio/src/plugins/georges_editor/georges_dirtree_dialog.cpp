@@ -74,7 +74,7 @@ void CGeorgesDirTreeDialog::fileSelected(QModelIndex index)
 {
 	if (index.isValid() && !m_dirModel->isDir(index))
 	{
-		Q_EMIT selectedForm(m_dirModel->fileName(index));
+		Q_EMIT fileSelected(m_dirModel->fileName(index));
 	}
 }
 

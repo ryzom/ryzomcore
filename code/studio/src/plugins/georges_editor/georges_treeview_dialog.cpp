@@ -52,9 +52,8 @@ namespace GeorgesQt
 {
 
 	CGeorgesTreeViewDialog::CGeorgesTreeViewDialog(QWidget *parent /*= 0*/)
-		: QDockWidget(parent),
-		m_header(0),
-		m_modified(false)
+		: GeorgesDockWidget(parent),
+		m_header(0)
 	{
 		m_georges = new CGeorges;
 
@@ -71,7 +70,6 @@ namespace GeorgesQt
 		m_ui.treeView->setHeader(m_header);
 		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
 		m_ui.treeView->header()->setStretchLastSection(true);
-		m_ui.treeViewTabWidget->setTabEnabled (2,false);
 
 		m_form = 0;
 		m_model = NULL;
@@ -91,6 +89,7 @@ namespace GeorgesQt
 		connect(m_browserCtrl, SIGNAL(arrayResized(const QString&,int)), this, SLOT(onArrayResized(const QString&,int)));
 		
 		connect(m_browserCtrl, SIGNAL(modified()), this, SLOT(modifiedFile()));
+		connect(m_browserCtrl, SIGNAL(valueChanged(const QString&,const QString&)), this, SLOT(onValueChanged(const QString&,const QString&)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
@@ -121,11 +120,7 @@ namespace GeorgesQt
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
-		if(NLMISC::CPath::exists(formName.toAscii().data()))
-		{
-		    //NLGEORGES::CForm *form = dynamic_cast<NLGEORGES::CForm*>(m_georges->loadForm(formName.toAscii().data()));
-		    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
-		}
+	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
 		//else
 		//{
 		//	CForm *form = 0;
@@ -160,36 +155,30 @@ namespace GeorgesQt
 		//	}
 		//	return form;
 		//}
-		nlinfo("File '%s' does not exist!", formName.toAscii().data());
 		return 0;
 	}
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByDfnName(const QString dfnName)
     {
-		if(NLMISC::CPath::exists(dfnName.toAscii().data()))
+		// Create a new form object.
+		NLGEORGES::CForm *form = new NLGEORGES::CForm();
+		m_form = form;
+
+		// Retrieve a copy of the root definition.
+		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
+
+		// Next we'll use the root node to build a new form.
+		NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+		fes->build(formDfn);
+
+		// And then initialize the held elements;
+		for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
 		{
-		    // Create a new form object.
-		    NLGEORGES::CForm *form = new NLGEORGES::CForm();
-		    m_form = form;
-
-		    // Retrieve a copy of the root definition.
-		    NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
-
-		    // Next we'll use the root node to build a new form.
-		    NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+		    fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
 		    fes->build(formDfn);
-
-		    // And then initialize the held elements;
-		    for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
-		    {
-		        fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
-		        fes->build(formDfn);
-		    }
-
-		    return form;
 		}
-		nlinfo("File '%s' does not exist!", dfnName.toAscii().data());
-		return NULL;
+
+		return form;
     }
 
     NLGEORGES::CFormElm *CGeorgesTreeViewDialog::getRootNode(uint slot)
@@ -219,6 +208,9 @@ namespace GeorgesQt
 			m_form = form;
 		else
 			return;
+
+		m_ui.logEdit->setPlainText( form->Header.Log.c_str() );
+		m_ui.logEdit->setReadOnly( true );
 
 		UFormElm *root = 0;
 		root = &m_form->getRootNode();
@@ -260,6 +252,7 @@ namespace GeorgesQt
 		if (root) 
 		{
 			loadedForm = m_form->getFilename().c_str();
+			m_fileName = m_form->getFilename().c_str();
 
 			CGeorgesFormModel *model = new CGeorgesFormModel(m_form,deps,comments,parents,m_header->expanded());
 			m_ui.treeView->setModel(model);
@@ -267,9 +260,6 @@ namespace GeorgesQt
 
 			connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
 				this, SLOT(modifiedFile()));
-
-			setWindowTitle(loadedForm);
-		//		//Modules::mainWin().getTabBar();			
 
 			m_model = model;
 		}
@@ -306,19 +296,42 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::modifiedFile( ) 
 	{
-		if (!m_modified) 
+		if (!isModified()) 
 		{
-			m_modified = true;
+			setModified( true );
 			setWindowTitle(windowTitle() + "*");
 		}
 		Q_EMIT modified();
 	}
 
-	void CGeorgesTreeViewDialog::write( ) 
+	bool CGeorgesTreeViewDialog::load( const QString &fileName )
 	{
 
+		// Retrieve the form and load the form.
+        NLGEORGES::CForm *form = getFormByName(fileName);
+
+		if( form == NULL )
+			return false;
+
+		setForm(form);
+		loadFormIntoDialog(form);
+		QApplication::processEvents();
+
+		m_fileName = fileName;
+
+		QFileInfo info( fileName );
+		setWindowTitle( info.fileName() );
+
+		return true;
+	}
+
+	void CGeorgesTreeViewDialog::write( ) 
+	{
+		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
+		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+
 		NLMISC::COFile file;
-		std::string s = NLMISC::CPath::lookup(loadedForm.toAscii().data(), false);
+		std::string s = m_fileName.toUtf8().constData();
 		if(file.open (s))
 		{
 		    try
@@ -367,7 +380,7 @@ namespace GeorgesQt
 		//			//((CForm*)(UForm*)Form)->write (xmlStream.getDocument (), lpszPathName, theApp.Georges4CVS);
                     m_form->write(file);
                     setWindowTitle(windowTitle().remove("*"));
-                    m_modified = false;
+                    setModified( false );
 		//			//if (strcmp (xmlStream.getErrorString (), "") != 0)
 		//			//{
 		//			//	char message[512];
@@ -391,6 +404,26 @@ namespace GeorgesQt
 		{
 		    nlerror("Can't open the file %s for writing.", s.c_str());
 		}
+	}
+
+	bool CGeorgesTreeViewDialog::newDocument( const QString &fileName, const QString &dfn )
+	{
+        NLGEORGES::CForm *form = getFormByDfnName(dfn);
+
+		if( form == NULL )
+			return false;
+
+		setForm(form);
+		loadFormIntoDialog(form);
+		QApplication::processEvents();
+
+		m_fileName = fileName;
+
+		QFileInfo info( fileName );
+		setWindowTitle( info.fileName() + "*" );
+		setModified( true );
+
+		return true;
 	}
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
@@ -468,6 +501,76 @@ namespace GeorgesQt
 		if( !idx.isValid() )
 			return;
 		m_ui.treeView->setCurrentIndex( idx );
+
+		log( name + " resized = " + QString::number( size ) );
+
+		modifiedFile();
+	}
+
+	void CGeorgesTreeViewDialog::onAppendArray()
+	{
+		QModelIndex idx = m_ui.treeView->currentIndex();
+
+		CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+		QString formName = item->formName().c_str();
+		int size = item->childCount();
+
+		m_model->appendArray( idx );
+
+		m_ui.treeView->reset();
+		m_ui.treeView->expandAll();
+
+		m_ui.treeView->setCurrentIndex( idx );
+		m_browserCtrl->clicked( idx );
+
+		log( formName + " resized = " + QString::number( size + 1 ) );
+
+		modifiedFile();
+	}
+
+	void CGeorgesTreeViewDialog::onDeleteArrayEntry()
+	{
+		QModelIndex current = m_ui.treeView->currentIndex();
+		QModelIndex parent = current.parent();
+
+		CFormItem *item = reinterpret_cast< CFormItem* >( current.internalPointer() );
+		QString formName = item->formName().c_str();
+
+		m_model->deleteArrayEntry( current );
+
+		m_ui.treeView->expandAll();
+		m_ui.treeView->setCurrentIndex( parent );
+		m_browserCtrl->clicked( parent );
+
+		log( "deleted " + formName );
+
+		modifiedFile();
+	}
+
+	void CGeorgesTreeViewDialog::onValueChanged( const QString &key, const QString &value )
+	{
+		log( key + " = " + value );
+	}
+
+	void CGeorgesTreeViewDialog::onRenameArrayEntry()
+	{
+		QModelIndex idx  = m_ui.treeView->currentIndex();
+
+		CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+		QString newName = QInputDialog::getText( this,
+												tr( "Rename" ),
+												tr( "Enter new name" ),
+												QLineEdit::Normal,
+												item->name().c_str() );
+
+		m_model->renameArrayEntry( idx, newName );
+
+		QString formName = item->formName().c_str();
+
+		log( formName + " renamed = " + newName );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
@@ -523,12 +626,17 @@ namespace GeorgesQt
 		//	}
 			if(item->isArray())
 			{
-                contextMenu.addAction("Append array entry...");
+                QAction *appendAction = contextMenu.addAction("Append array entry...");
+				connect( appendAction, SIGNAL( triggered( bool ) ), this, SLOT( onAppendArray() ) );
 			}
 			else if(item->isArrayMember())
 			{
-				contextMenu.addAction("Delete array entry...");
-				contextMenu.addAction("Insert after array entry...");
+				QAction *deleteAction = contextMenu.addAction("Delete array entry...");
+				connect( deleteAction, SIGNAL( triggered( bool ) ), this, SLOT( onDeleteArrayEntry() ) );
+
+				QAction *renameAction = contextMenu.addAction("Rename");
+				connect( renameAction, SIGNAL( triggered( bool ) ), this, SLOT( onRenameArrayEntry() ) );
+				//contextMenu.addAction("Insert after array entry...");
 			}
 		//	else if(item->getFormElm()->isStruct())
 		//	{
@@ -558,24 +666,10 @@ namespace GeorgesQt
 		//	else if(item->getFormElm()->isAtom() && item->valueFrom() == NLGEORGES::UFormElm::ValueForm)
 		//		contextMenu.addAction("Revert to parent/default...");
 
-            QAction *selectedItem = contextMenu.exec(QCursor::pos());
+            contextMenu.exec(QCursor::pos());
+			/*
             if(selectedItem)
             {
-                if(selectedItem->text() == "Append array entry...")
-                {
-
-
-                } // Append an array entry...
-                else if(selectedItem->text() == "Delete array entry...")
-                {
-
-                }
-                else if(selectedItem->text() == "Insert after array entry...")
-                {
-
-                }
-
-
 		//		if(selectedItem->text() == "Add parent...")
 		//		{
 		//			// Get the file extension of the form so we can build a dialog pattern.
@@ -624,10 +718,18 @@ namespace GeorgesQt
 		//		}
 
             } // if selected context menu item is valid.
+			*/
 		} // if 'm' model valid.
 
 		//if(structContext)
 		//	delete structContext;
+	}
+
+	void CGeorgesTreeViewDialog::log( const QString &msg )
+	{
+		QString logMsg = buildLogMsg( msg );
+
+		m_ui.logEdit->appendPlainText( logMsg );
 	}
 
 } /* namespace GeorgesQt */

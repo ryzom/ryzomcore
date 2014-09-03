@@ -1,7 +1,28 @@
+// Ryzom Core Studio - Georges Editor Plugin
+//
+// Copyright (C) 2014 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "browser_ctrl_pvt.h"
 #include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
 #include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
 #include <QVariant>
+#include "formitem.h"
+
+#include "nel/georges/form.h"
 
 namespace
 {
@@ -26,6 +47,12 @@ namespace
 		return t;
 	}
 
+	NLGEORGES::UFormElm* getGeorgesNode( GeorgesQt::CFormItem *item )
+	{
+		NLGEORGES::UFormElm *n = NULL;
+		item->form()->getRootNode().getNodeByName( &n, item->formName().c_str() );
+		return n;
+	}
 }
 
 
@@ -34,7 +61,6 @@ QObject( parent )
 {
 	mgr = new QtVariantPropertyManager();
 	factory = new QtVariantEditorFactory();
-	m_currentNode = NULL;
 	m_rootNode = NULL;
 }
 
@@ -70,19 +96,6 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &el
 	m_browser->addProperty( p );
 }
 
-void BrowserCtrlPvt::setupArray( NLGEORGES::UFormElm *node )
-{
-	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( node );
-	uint size = 0;
-	arr->getArraySize( size );
-
-	QString key = QObject::tr( "Array size" );
-	QtVariantProperty *p = mgr->addProperty( QVariant::Int, key );
-	p->setValue( size );
-	m_browser->addProperty( p );
-
-}
-
 void BrowserCtrlPvt::setupStruct( NLGEORGES::UFormElm *node )
 {
 	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
@@ -104,24 +117,54 @@ void BrowserCtrlPvt::setupStruct( NLGEORGES::UFormElm *node )
 	}
 }
 
-void BrowserCtrlPvt::setupNode( NLGEORGES::UFormElm *node )
+void BrowserCtrlPvt::setupStruct( GeorgesQt::CFormItem *node )
 {
-	if( node->isStruct() )
-		setupStruct( node );
-	else
+	NLGEORGES::UFormElm *n = getGeorgesNode( node );
+	if( n == NULL )
+		return;
+
+	m_currentNode.p = n;
+
+	setupStruct( n );
+}
+
+void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
+{
+	NLGEORGES::UFormElm *n = getGeorgesNode( node );
+	uint size = 0;
+
+	if( n != NULL )
+	{
+		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( n );
+		arr->getArraySize( size );
+		m_currentNode.p = n;
+	}
+
+	QString key = QObject::tr( "Array size" );
+	QtVariantProperty *p = mgr->addProperty( QVariant::Int, key );
+	p->setValue( size );
+	m_browser->addProperty( p );
+}
+
+void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
+{
+	m_currentNode.clear();
+	m_currentNode.name = node->formName().c_str();
+	
+	m_rootNode = dynamic_cast< NLGEORGES::CFormElm* >( &(node->form()->getRootNode()) );
+
 	if( node->isArray() )
 		setupArray( node );
 	else
-		return;
+		setupStruct( node );
 
-	m_currentNode = node;
 	m_browser->setFactoryForManager( mgr, factory );
 }
 
 void BrowserCtrlPvt::clear()
 {
 	m_browser->clear();
-	m_currentNode = NULL;
+	m_currentNode.clear();
 }
 
 
@@ -131,18 +174,63 @@ void BrowserCtrlPvt::onStructValueChanged( QtProperty *p, const QVariant &value 
 	std::string v  = value.toString().toUtf8().constData();
 
 	bool created = false;
-	m_currentNode->setValueByName( v.c_str(), k.c_str(), &created );
+	m_currentNode.p->setValueByName( v.c_str(), k.c_str(), &created );
+
+	QString key = m_currentNode.name + "." + p->propertyName();
 
 	Q_EMIT modified();
+	Q_EMIT valueChanged( key, value.toString() );
+}
+
+void BrowserCtrlPvt::createArray()
+{
+	const NLGEORGES::CFormDfn *parentDfn;
+	const NLGEORGES::CFormDfn *nodeDfn;
+	uint indexDfn;
+	const NLGEORGES::CType *type;
+	NLGEORGES::UFormDfn::TEntryType entryType;
+	NLGEORGES::CFormElm *node;
+	bool created;
+	bool isArray;
+
+	m_rootNode->createNodeByName( m_currentNode.name.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+
+	if( !created )
+		return;
+
+	m_currentNode.p = node;
+
+	NLGEORGES::CFormElmArray *arr = dynamic_cast< NLGEORGES::CFormElmArray* >( node );
+	QString idx = "[0]";
+	arr->createNodeByName( idx.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+	
+	std::string formName;
+	arr->getFormName( formName, NULL );
+
+	Q_EMIT arrayResized( formName.c_str(), 1 );
+	Q_EMIT modified();
+
 }
 
 void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 {
-	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( m_currentNode );
+	// Newsize checks hacked in, because setting unsigned value type in QVariant crashes the property browser!
+	int newSize = value.toInt();
+	if( newSize < 0 )
+		return;
+
+	if( m_currentNode.p == NULL )
+	{
+		if( newSize != 1 )
+			return;
+		createArray();
+		return;
+	}
+
+	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( m_currentNode.p );
 	std::string formName;
 	arr->getFormName( formName, NULL );
 	
-	int newSize = value.toInt();
 	int oldSize = arr->Elements.size();
 
 	if( newSize == oldSize )
@@ -188,17 +276,26 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	QString name = formName.c_str();
 	Q_EMIT arrayResized( name, newSize );
 	Q_EMIT modified();
+
+	if( newSize == 0 )
+		m_currentNode.p = NULL;
 }
 
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 {
-	if( m_currentNode == NULL )
-		return;
+	if( m_currentNode.p == NULL )
+	{
+		if( m_currentNode.name.isEmpty() )
+			return;
 
-	if( m_currentNode->isStruct() )
+		onArrayValueChanged( p, value );
+		return;
+	}
+
+	if( m_currentNode.p->isStruct() )
 		onStructValueChanged( p, value );
 	else
-	if( m_currentNode->isArray() )
+	if( m_currentNode.p->isArray() )
 		onArrayValueChanged( p, value );
 }
 

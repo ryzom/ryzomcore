@@ -87,6 +87,8 @@ public:
 		// Set as a type
 		void						setType (CFormLoader &loader, const char *filename);
 
+		void						setType (TEntryType type);
+
 		// Set as a dfn
 		void						setDfn (CFormLoader &loader, const char *filename);
 
@@ -159,6 +161,10 @@ public:
 		// The parent smart
 		NLMISC::CSmartPtr<CFormDfn>	Parent;
 	};
+
+	void							addEntry( const std::string &name );
+
+	void							removeEntry( uint idx );
 
 	// ** IO functions
 	void							write (xmlDocPtr root, const char *filename);
