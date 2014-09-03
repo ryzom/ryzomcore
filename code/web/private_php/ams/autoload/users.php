@@ -466,12 +466,13 @@ class Users{
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->update("user", $values, "Login = $user");
+               $dbs->update("user", $values, "Login = '$user'");
                return "ok";
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put in query queue at ams_lib db!
                try {
+               error_log($e);
                     $dbl = new DBLayer("lib");
                     $dbl->insert("ams_querycache", array("type" => "change_mail",
                     "query" => json_encode(array($user,$mail)), "db" => "shard"));

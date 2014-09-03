@@ -53,6 +53,7 @@ function add_user(){
           $pageElements['prevConfirmPass'] = $_POST["ConfirmPass"];
           $pageElements['prevEmail'] = $_POST["Email"];
           $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+          $pageElements['do'] = "add_user";
           helpers :: loadtemplate( 'settings', $pageElements);
           throw new SystemExit();
      }else{

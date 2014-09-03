@@ -116,13 +116,13 @@
 								</div>
 						</div>
 
-						<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}error{/if}">
+						<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE" and isset($do)}error{/if}">
 						<label class="control-label">Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
 									<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="Email" {if isset($prevEmail)}value="{$prevEmail}"{/if}>
-									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
+									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE" and isset($do)}<span class="help-inline">{$EMAIL}</span>{/if}
 							    </div>
 							</div>
 						</div>
