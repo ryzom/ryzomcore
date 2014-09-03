@@ -32,7 +32,7 @@ function add_user(){
           if(Helpers::check_if_game_client()){
                //if registering ingame then we have to set the header and dont need to reload the template.
                header('Location: email_sent.php');
-               exit;
+               throw new SystemExit();
           }
           $pageElements = settings();
           $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
@@ -44,7 +44,7 @@ function add_user(){
             $pageElements['no_visible_elements'] = 'TRUE';
             helpers :: loadtemplate( 'register_feedback', $pageElements);
           }
-          exit;
+          throw new SystemExit();
      }elseif (isset($_GET['page']) && $_GET['page']=="settings"){
           $pageElements = array_merge(settings(), $result);
           // pass error and reload template accordingly
@@ -54,7 +54,7 @@ function add_user(){
           $pageElements['prevEmail'] = $_POST["Email"];
           $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
           helpers :: loadtemplate( 'settings', $pageElements);
-          exit;
+          throw new SystemExit();
      }else{
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -64,7 +64,7 @@ function add_user(){
           $result['no_visible_elements'] = 'TRUE';
           $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
-          exit;
+          throw new SystemExit();
      }
 }
 
@@ -92,7 +92,7 @@ function write_user($newUser){
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db
       print_r($e);
-      exit;
+      throw new SystemExit();
      }
      
      return $result;
