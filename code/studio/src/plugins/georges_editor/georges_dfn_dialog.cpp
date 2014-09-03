@@ -72,7 +72,8 @@ bool GeorgesDFNDialog::load( const QString &fileName )
 	if( udfn == NULL )
 		return false;
 
-	setWindowTitle( fileName );
+	QFileInfo info( fileName );
+	setWindowTitle( info.fileName() );
 
 	NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
 	m_pvt->dfn = cdfn;
@@ -105,18 +106,14 @@ void GeorgesDFNDialog::write()
 
 	m_pvt->dfn->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
 
-	std::string path = NLMISC::CPath::lookup( m_fileName.toUtf8().constData(), false );
-	if( path.empty() )
-		return;
-
 	NLMISC::COFile file;
-	if( !file.open( path, false, true, false ) )
+	if( !file.open( m_fileName.toUtf8().constData(), false, true, false ) )
 		return;
 
 	NLMISC::COXml xml;
 	xml.init( &file );
 
-	m_pvt->dfn->write( xml.getDocument(), path.c_str() );
+	m_pvt->dfn->write( xml.getDocument(), m_fileName.toUtf8().constData() );
 
 	xml.flush();
 	file.close();

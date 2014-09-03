@@ -36,6 +36,7 @@ public:
 
 	QString fileName() const{ return m_fileName; }
 
+	virtual bool load( const QString &fileName ) = 0;
 	virtual void write() = 0;
 
 protected:

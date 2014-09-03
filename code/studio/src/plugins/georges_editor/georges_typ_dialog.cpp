@@ -78,7 +78,9 @@ bool GeorgesTypDialog::load( const QString &fileName )
 	loadTyp();
 
 	m_fileName = fileName;
-	setWindowTitle( fileName );
+
+	QFileInfo info( fileName );
+	setWindowTitle( info.fileName() );
 
 	return true;
 }
@@ -86,10 +88,8 @@ bool GeorgesTypDialog::load( const QString &fileName )
 
 void GeorgesTypDialog::write()
 {
-	std::string path = NLMISC::CPath::lookup( m_fileName.toUtf8().constData(), false );
-
 	NLMISC::COFile file;
-	if( !file.open( path.c_str(), false, true, false ) )
+	if( !file.open( m_fileName.toUtf8().constData(), false, true, false ) )
 		return;
 
 	NLMISC::COXml xml;

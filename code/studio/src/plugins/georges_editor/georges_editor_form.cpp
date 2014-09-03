@@ -29,6 +29,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Qt includes
 #include <QSettings>
@@ -205,20 +206,19 @@ namespace GeorgesQt
 	}
 
     void GeorgesEditorForm::loadFile(const QString &fileName)
-    {
-        loadFile(fileName, false);
-    }
-
-    void GeorgesEditorForm::loadFile(const QString &fileName, bool loadFromDfn)
 	{
-		QFileInfo info(fileName);
+		std::string path = NLMISC::CPath::lookup( fileName.toUtf8().constData(), false );
+		if( path.empty() )
+			return;
+
+		QFileInfo info( path.c_str() );
 
         // Check to see if the form is already loaded, if it is just raise it.
         if (m_dockedWidgets.size())
 		{
 			Q_FOREACH(GeorgesDockWidget *wgt, m_dockedWidgets)
 			{
-				if (info.fileName() == wgt->fileName())
+				if ( QString( path.c_str() ) == wgt->fileName())
 				{
 					wgt->raise();
 					return;
@@ -230,16 +230,16 @@ namespace GeorgesQt
 
 		if( info.suffix() == "dfn" )
 		{
-			w = loadDfnDialog( fileName );
+			w = loadDfnDialog( path.c_str() );
 		}
 		else
 		if( info.suffix() == "typ" )
 		{
-			w = loadTypDialog( fileName );
+			w = loadTypDialog( path.c_str() );
 		}
 		else
 		{
-			w = loadFormDialog( fileName, loadFromDfn );
+			w = loadFormDialog( path.c_str() );
 		}
 
 		if( w == NULL )
@@ -352,39 +352,17 @@ namespace GeorgesQt
 		return d;
 	}
 
-	GeorgesDockWidget* GeorgesEditorForm::loadFormDialog( const QString &fileName, bool loadFromDFN )
+	GeorgesDockWidget* GeorgesEditorForm::loadFormDialog( const QString &fileName )
 	{
-		QFileInfo info( fileName );
-
 		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog();
-
-		// Retrieve the form and load the form.
-        NLGEORGES::CForm *form;
-        if(loadFromDFN)
-        {
-            // Get the form by DFN name.
-            form = d->getFormByDfnName(info.fileName());
-        }
-        else
-        {
-            form = d->getFormByName(info.fileName());
-        }
-
-		if (form)
-		{
-			d->setForm(form);
-			d->loadFormIntoDialog(form);
-			QApplication::processEvents();
-			connect(d, SIGNAL(modified()), 
-				this, SLOT(setModified()));
-			connect(d, SIGNAL(changeFile(QString)), 
-				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
-		}
-		else
+		if( !d->load( fileName ) )
 		{
 			delete d;
-			d = NULL;
+			return NULL;
 		}
+
+		connect(d, SIGNAL(modified()), this, SLOT(setModified()));
+		connect(d, SIGNAL(changeFile(QString)), m_georgesDirTreeDialog, SLOT(changeFile(QString)));
 
 		return d;
 	}

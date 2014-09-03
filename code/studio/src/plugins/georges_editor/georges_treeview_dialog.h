@@ -69,6 +69,7 @@ namespace GeorgesQt
 
 		void addParentForm(QString parentFormNm);
 
+		bool load( const QString &fileName );
 		void write (  );
 
 		QTabWidget* tabWidget() { return m_ui.treeViewTabWidget; }

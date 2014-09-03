@@ -120,11 +120,7 @@ namespace GeorgesQt
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
-		if(NLMISC::CPath::exists(formName.toAscii().data()))
-		{
-		    //NLGEORGES::CForm *form = dynamic_cast<NLGEORGES::CForm*>(m_georges->loadForm(formName.toAscii().data()));
-		    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
-		}
+	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
 		//else
 		//{
 		//	CForm *form = 0;
@@ -159,7 +155,6 @@ namespace GeorgesQt
 		//	}
 		//	return form;
 		//}
-		nlinfo("File '%s' does not exist!", formName.toAscii().data());
 		return 0;
 	}
 
@@ -271,9 +266,6 @@ namespace GeorgesQt
 			connect(model, SIGNAL(dataChanged(const QModelIndex, const QModelIndex)),
 				this, SLOT(modifiedFile()));
 
-			setWindowTitle(loadedForm);
-		//		//Modules::mainWin().getTabBar();			
-
 			m_model = model;
 		}
 	}
@@ -317,13 +309,44 @@ namespace GeorgesQt
 		Q_EMIT modified();
 	}
 
+	bool CGeorgesTreeViewDialog::load( const QString &fileName )
+	{
+		bool loadFromDFN = false;
+
+		// Retrieve the form and load the form.
+        NLGEORGES::CForm *form;
+        if(loadFromDFN)
+        {
+            // Get the form by DFN name.
+            form = getFormByDfnName(fileName);
+        }
+        else
+        {
+            form = getFormByName(fileName);
+        }
+
+		if( form == NULL )
+			return false;
+
+		setForm(form);
+		loadFormIntoDialog(form);
+		QApplication::processEvents();
+
+		m_fileName = fileName;
+
+		QFileInfo info( fileName );
+		setWindowTitle( info.fileName() );
+
+		return true;
+	}
+
 	void CGeorgesTreeViewDialog::write( ) 
 	{
 		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
 		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
 
 		NLMISC::COFile file;
-		std::string s = NLMISC::CPath::lookup(loadedForm.toAscii().data(), false);
+		std::string s = m_fileName.toUtf8().constData();
 		if(file.open (s))
 		{
 		    try

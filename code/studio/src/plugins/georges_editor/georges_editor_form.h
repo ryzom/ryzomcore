@@ -45,7 +45,6 @@ public:
 public Q_SLOTS:
 	void open();
 	void loadFile(const QString &fileName);
-    void loadFile(const QString &fileName, bool loadFromDfn);
 	
 	void newTyp();
 	void newDfn();
@@ -64,7 +63,7 @@ private:
 
 	GeorgesDockWidget* loadTypDialog(const QString &fileName);
 	GeorgesDockWidget* loadDfnDialog(const QString &fileName);
-	GeorgesDockWidget* loadFormDialog(const QString &fileName, bool loadFromDFN );
+	GeorgesDockWidget* loadFormDialog(const QString &fileName);
 
 	Ui::GeorgesEditorForm m_ui;
 
