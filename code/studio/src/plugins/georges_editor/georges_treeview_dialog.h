@@ -71,6 +71,7 @@ namespace GeorgesQt
 
 		bool load( const QString &fileName );
 		void write (  );
+		bool newDocument( const QString &fileName, const QString &dfn );
 
 		QTabWidget* tabWidget() { return m_ui.treeViewTabWidget; }
 

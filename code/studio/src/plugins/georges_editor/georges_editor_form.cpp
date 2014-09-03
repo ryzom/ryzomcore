@@ -173,6 +173,39 @@ namespace GeorgesQt
 
 	void GeorgesEditorForm::newForm()
 	{
+		QString dfnFileName = QFileDialog::getOpenFileName( this, 
+															tr( "New Form" ),
+															"",
+															"Definition files (*.dfn)" );
+		if( dfnFileName.isEmpty() )
+			return;
+
+		QFileInfo dfnInfo( dfnFileName );
+		QString baseName = dfnInfo.baseName();
+		QString filter;
+		filter += baseName;
+		filter += " files (*.";
+		filter += baseName;
+		filter += ")";
+
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Form" ),
+															"",
+															filter );
+		if( fileName.isEmpty() )
+			return;
+
+		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog();
+		if( !d->newDocument( fileName, dfnFileName ) )
+		{
+			QMessageBox::information( this,
+										tr( "Failed to create new form" ),
+										tr( "Failed to create new form!" ) );
+			return;
+		}
+
+		addGeorgesWidget( d );
+		setModified();
 	}
 
 	void GeorgesEditorForm::save()

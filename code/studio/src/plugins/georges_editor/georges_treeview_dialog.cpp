@@ -160,30 +160,25 @@ namespace GeorgesQt
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByDfnName(const QString dfnName)
     {
-		if(NLMISC::CPath::exists(dfnName.toAscii().data()))
+		// Create a new form object.
+		NLGEORGES::CForm *form = new NLGEORGES::CForm();
+		m_form = form;
+
+		// Retrieve a copy of the root definition.
+		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
+
+		// Next we'll use the root node to build a new form.
+		NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+		fes->build(formDfn);
+
+		// And then initialize the held elements;
+		for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
 		{
-		    // Create a new form object.
-		    NLGEORGES::CForm *form = new NLGEORGES::CForm();
-		    m_form = form;
-
-		    // Retrieve a copy of the root definition.
-		    NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
-
-		    // Next we'll use the root node to build a new form.
-		    NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
+		    fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
 		    fes->build(formDfn);
-
-		    // And then initialize the held elements;
-		    for(uint i = 0; i<NLGEORGES::CForm::HeldElementCount; i++)
-		    {
-		        fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(i+1));
-		        fes->build(formDfn);
-		    }
-
-		    return form;
 		}
-		nlinfo("File '%s' does not exist!", dfnName.toAscii().data());
-		return NULL;
+
+		return form;
     }
 
     NLGEORGES::CFormElm *CGeorgesTreeViewDialog::getRootNode(uint slot)
@@ -311,19 +306,9 @@ namespace GeorgesQt
 
 	bool CGeorgesTreeViewDialog::load( const QString &fileName )
 	{
-		bool loadFromDFN = false;
 
 		// Retrieve the form and load the form.
-        NLGEORGES::CForm *form;
-        if(loadFromDFN)
-        {
-            // Get the form by DFN name.
-            form = getFormByDfnName(fileName);
-        }
-        else
-        {
-            form = getFormByName(fileName);
-        }
+        NLGEORGES::CForm *form = getFormByName(fileName);
 
 		if( form == NULL )
 			return false;
@@ -419,6 +404,26 @@ namespace GeorgesQt
 		{
 		    nlerror("Can't open the file %s for writing.", s.c_str());
 		}
+	}
+
+	bool CGeorgesTreeViewDialog::newDocument( const QString &fileName, const QString &dfn )
+	{
+        NLGEORGES::CForm *form = getFormByDfnName(dfn);
+
+		if( form == NULL )
+			return false;
+
+		setForm(form);
+		loadFormIntoDialog(form);
+		QApplication::processEvents();
+
+		m_fileName = fileName;
+
+		QFileInfo info( fileName );
+		setWindowTitle( info.fileName() + "*" );
+		setModified( true );
+
+		return true;
 	}
 
 	void CGeorgesTreeViewDialog::doubleClicked ( const QModelIndex & index ) 
