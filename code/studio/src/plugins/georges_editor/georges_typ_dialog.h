@@ -33,6 +33,7 @@ public:
 
 	bool load( const QString &fileName );
 	void write();
+	void newDocument( const QString &fileName );
 
 Q_SIGNALS:
 	void modified();

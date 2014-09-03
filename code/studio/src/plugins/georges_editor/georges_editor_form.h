@@ -61,6 +61,8 @@ private:
 	void readSettings();
 	void writeSettings();
 
+	void addGeorgesWidget( GeorgesDockWidget *w );
+
 	GeorgesDockWidget* loadTypDialog(const QString &fileName);
 	GeorgesDockWidget* loadDfnDialog(const QString &fileName);
 	GeorgesDockWidget* loadFormDialog(const QString &fileName);

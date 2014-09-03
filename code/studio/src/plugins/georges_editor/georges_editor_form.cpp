@@ -142,6 +142,18 @@ namespace GeorgesQt
 
 	void GeorgesEditorForm::newTyp()
 	{
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Type" ),
+															"",
+															"Type files (*.typ)" );
+		if( fileName.isEmpty() )
+			return;
+
+		
+		GeorgesTypDialog *d = new GeorgesTypDialog();
+		d->newDocument( fileName );
+		addGeorgesWidget( d );
+		setModified();
 	}
 
 	void GeorgesEditorForm::newDfn()
@@ -188,6 +200,28 @@ namespace GeorgesQt
 
 		settings->endGroup();
 		settings->sync();
+	}
+
+	void GeorgesEditorForm::addGeorgesWidget( GeorgesDockWidget *w )
+	{
+		w->setUndoStack(UndoStack);
+        m_lastActiveDock = w;
+        m_dockedWidgets.append(w);
+
+        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
+        connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
+
+        // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
+        if(m_dockedWidgets.size() > 1)
+        {
+			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
+		}
+        else
+        {
+            m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
+        }
+
+		w->raise();
 	}
 
 	void GeorgesEditorForm::settingsChanged()
@@ -255,25 +289,7 @@ namespace GeorgesQt
 			return;
 		}
 
-        w->setUndoStack(UndoStack);
-        m_lastActiveDock = w;
-        m_dockedWidgets.append(w);
-
-        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
-        connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
-
-        // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
-        if(m_dockedWidgets.size() > 1)
-        {
-			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
-		}
-        else
-        {
-            m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
-        }
-
-		w->raise();
-
+		addGeorgesWidget( w );
 	}
 
 	void GeorgesEditorForm::closingTreeView()

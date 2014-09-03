@@ -105,6 +105,18 @@ void GeorgesTypDialog::write()
 	setWindowTitle( windowTitle().remove( "*" ) );
 }
 
+void GeorgesTypDialog::newDocument( const QString &fileName )
+{
+	m_pvt->typ = new NLGEORGES::CType();
+	m_fileName = fileName;
+
+	QFileInfo info( fileName );
+	setWindowTitle( info.fileName() + "*" );
+	setModified( true );
+
+	loadTyp();
+}
+
 void GeorgesTypDialog::onAddClicked()
 {
 	QString label = QInputDialog::getText( this,
