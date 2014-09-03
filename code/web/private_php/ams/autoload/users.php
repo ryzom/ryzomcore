@@ -437,7 +437,7 @@ class Users{
                try {
                     $dbl = new DBLayer("lib");
                     $dbl->insert("ams_querycache", array("type" => "change_pass",
-                    "query" => json_encode(array($values["user"],$values["pass"])), "db" => "shard"));
+                    "query" => json_encode(array($user,$pass)), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
                     return "liboffline";
@@ -467,7 +467,7 @@ class Users{
                try {
                     $dbl = new DBLayer("lib");
                     $dbl->insert("ams_querycache", array("type" => "change_mail",
-                    "query" => json_encode(array($values["user"],$values["mail"])), "db" => "shard"));
+                    "query" => json_encode(array($user,$mail)), "db" => "shard"));
                     return "shardoffline";
                }catch (PDOException $e) {
                     return "liboffline";
