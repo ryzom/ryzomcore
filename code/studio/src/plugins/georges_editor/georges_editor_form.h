@@ -46,7 +46,11 @@ public Q_SLOTS:
 	void open();
 	void loadFile(const QString &fileName);
     void loadFile(const QString &fileName, bool loadFromDfn);
-	void newFile();
+	
+	void newTyp();
+	void newDfn();
+	void newForm();
+
 	void save();
 	void settingsChanged();
 	void closingTreeView();
@@ -67,7 +71,9 @@ private:
 	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
 	QToolBar *m_fileToolBar;
 	QAction *m_openAction;
-	QAction *m_newAction;
+	QAction *m_newTypAction;
+	QAction *m_newDfnAction;
+	QAction *m_newFormAction;
 	QAction *m_saveAction;
 
 	QString m_leveldesignPath;

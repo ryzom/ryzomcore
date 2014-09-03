@@ -70,11 +70,20 @@ namespace GeorgesQt
 		Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 		m_openAction = menuManager->action(Core::Constants::OPEN);
 
-		m_newAction = new QAction(tr("&New..."), this);
-		m_newAction->setIcon(QIcon(Core::Constants::ICON_NEW));
-		m_newAction->setShortcut(QKeySequence::New);
-		m_newAction->setStatusTip(tr("Create a new file"));
-		connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+		m_newTypAction = new QAction(tr("New Type"), this );
+		m_newTypAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newTypAction->setStatusTip(tr("Create a new type file"));
+		connect( m_newTypAction, SIGNAL(triggered()), this, SLOT(newTyp()));
+
+		m_newDfnAction = new QAction(tr("New DFN"), this );
+		m_newDfnAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newDfnAction->setStatusTip(tr("Create a new definition file"));
+		connect( m_newDfnAction, SIGNAL(triggered()), this, SLOT(newDfn()));
+
+		m_newFormAction = new QAction(tr("New Form"), this );
+		m_newFormAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newFormAction->setStatusTip(tr("Create a new form file"));
+		connect( m_newFormAction, SIGNAL(triggered()), this, SLOT(newForm()));
 
 		m_saveAction = new QAction(tr("&Save..."), this);
 		m_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -83,8 +92,10 @@ namespace GeorgesQt
 		connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
 
 		m_fileToolBar = addToolBar(tr("&File"));
+		m_fileToolBar->addAction(m_newTypAction);
+		m_fileToolBar->addAction(m_newDfnAction);
+		m_fileToolBar->addAction(m_newFormAction);
 		m_fileToolBar->addAction(m_openAction);
-		m_fileToolBar->addAction(m_newAction);
 		m_fileToolBar->addAction(m_saveAction);
 
 		m_saveAction->setEnabled(false);
@@ -128,19 +139,16 @@ namespace GeorgesQt
 			loadFile(fileName);
 	}
 
-    void GeorgesEditorForm::newFile()
+	void GeorgesEditorForm::newTyp()
 	{
-        // Assume it is a form, for now. We'll have to retrieve the DFN we'll be using as a base.
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Select Base Form Definition"), m_lastSheetDir, "Form Definition (*.dfn)");
-        if(!fileName.isNull())
-        {
-            // Use the file loader to create the new form.
-            loadFile(fileName, true);
+	}
 
-            // Save the folder we just opened for future dialogs.
-            QFileInfo pathInfo( fileName );
-            m_lastSheetDir = pathInfo.absolutePath();
-        }
+	void GeorgesEditorForm::newDfn()
+	{
+	}
+
+	void GeorgesEditorForm::newForm()
+	{
 	}
 
 	void GeorgesEditorForm::save()
