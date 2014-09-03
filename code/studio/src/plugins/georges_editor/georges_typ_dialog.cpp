@@ -77,6 +77,7 @@ void GeorgesTypDialog::write()
 	NLMISC::COXml xml;
 	xml.init( &file );
 	
+	m_pvt->typ->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
 	m_pvt->typ->write( xml.getDocument() );
 	
 	xml.flush();
@@ -114,6 +115,8 @@ void GeorgesTypDialog::onAddClicked()
 	def.Value = "";
 	m_pvt->typ->Definitions.push_back( def );
 
+	log( "Added definition " + label );
+
 	onModified();
 }
 
@@ -130,11 +133,15 @@ void GeorgesTypDialog::onRemoveClicked()
 			break;
 	}
 
+	QString definition = item->text( 0 );
+
 	m_ui.tree->takeTopLevelItem( i );
 	delete item;
 
 	std::vector< NLGEORGES::CType::CDefinition >::iterator itr = m_pvt->typ->Definitions.begin() + i;
 	m_pvt->typ->Definitions.erase( itr );
+
+	log( "Removed definition" + definition );
 
 	onModified();
 }
@@ -149,11 +156,24 @@ void GeorgesTypDialog::onItemChanged( QTreeWidgetItem *item, int column )
 	}
 	
 	NLGEORGES::CType::CDefinition &def = m_pvt->typ->Definitions[ i ];
+
+	QString logMsg;
+	logMsg = "Changed definition" + QString( def.Label.c_str() );
 	
 	if( i == 0 )
+	{
+		logMsg += ".label = ";
+		logMsg += item->text( 0 );
 		def.Label = item->text( 0 ).toUtf8().constData();
+	}
 	else
+	{
+		logMsg += ".value = ";
+		logMsg += item->text( 1 );
 		def.Value = item->text( 1 ).toUtf8().constData();
+	}
+
+	log( logMsg );
 
 	onModified();
 }
@@ -171,6 +191,7 @@ void GeorgesTypDialog::onModified()
 
 void GeorgesTypDialog::onModified( const QString &k, const QString &v )
 {
+	log( "Changed " + k + " = " + v );
 	onModified();
 }
 
