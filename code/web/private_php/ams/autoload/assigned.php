@@ -125,7 +125,7 @@ class Assigned{
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-	$dbl->delete("`assigned`", array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket(), "`User` = :user_id and `Ticket` = :ticket_id"));
+	$dbl->delete("`assigned`", array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket()), "`User` = :user_id and `Ticket` = :ticket_id");
     }
 
     /**
