@@ -88,7 +88,7 @@
 								<div class="controls">
 									<div class="input-prepend">
 									<span style="margin-left:5px;" class="add-on"><i class="icon-user"></i></span>
-										<input type="text" value="Username" placeholder="Username" name="Username" id="Username" class="input-xlarge">
+										<input type="text" placeholder="Username" name="Username" id="Username" class="input-xlarge">
 									</div>
 								</div>
 						</div>
@@ -118,7 +118,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
-									<input type="text" value="Email" placeholder="Email" name="Email" id="Email" class="input-xlarge">
+									<input type="text" placeholder="Email" name="Email" id="Email" class="input-xlarge">
 							    </div>
 							</div>
 						</div>
