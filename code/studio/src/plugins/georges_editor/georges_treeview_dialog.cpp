@@ -310,9 +310,9 @@ namespace GeorgesQt
 
 	void CGeorgesTreeViewDialog::modifiedFile( ) 
 	{
-		if (!m_modified) 
+		if (!isModified()) 
 		{
-			m_modified = true;
+			setModified( true );
 			setWindowTitle(windowTitle() + "*");
 		}
 		Q_EMIT modified();
@@ -476,6 +476,8 @@ namespace GeorgesQt
 		m_ui.treeView->setCurrentIndex( idx );
 
 		log( name + " resized = " + QString::number( size ) );
+
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::onAppendArray()
