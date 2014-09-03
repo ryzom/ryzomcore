@@ -1,6 +1,7 @@
 {block name=content}
 	<div class="row-fluid sortable ui-sortable">
-		<div class="box span4">
+		<div class="box col-md-4">
+		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Change Password</h2>
 			</div>
@@ -71,10 +72,12 @@
 					</form>
 				</div>
 			</div>
+			</div>
 		</div><!--/span-->
 
 		{if $permission != '1'}
-		<div class="box span4">
+		<div class="box col-md-4">
+		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Add User</h2>
 			</div>
@@ -151,10 +154,12 @@
 					</form>
 				</div>
 			</div>
+			</div>
 		</div><!--/span-->
 		{/if}
 
-		<div class="box span4">
+		<div class="box col-md-4">
+		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Change Email</h2>
 			</div>
@@ -198,10 +203,11 @@
 					</form>
 				</div>
 			</div>
+			</div>
 		</div>
 
-		<div class="box span4">
-
+		<div class="box col-md-4">
+		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-envelope"></i> Ticket updates</h2>
 			</div>
@@ -234,9 +240,11 @@
 					</form>
 				</div>
 			</div>
+			</div>
 		</div><!--/span-->
 
-		<div class="box span4">
+		<div class="box col-md-4">
+		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Change Info</h2>
 			</div>
@@ -276,21 +284,21 @@
 							</div>
 						</div>
 
-						<div class="control-group">
+						<div class="control-group gender-list">
 							<label class="control-label">Gender</label>
 							<div class="controls">
 								<label class="radio">
-								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 0}checked{/if}"><input style="opacity: 0;" name="Gender" id="optionsRadios0" value="0" {if isset($Gender) and $Gender eq 0}checked=""{/if} type="radio"></span></div>
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 0}checked{/if}"><input name="Gender" id="optionsRadios0" value="0" {if isset($Gender) and $Gender eq 0}checked=""{/if} type="radio"></span></div>
 								      Secret
 								</label>
 								<div style="clear:both"></div>
 								<label class="radio">
-									<div id="uniform-optionsRadios1" class="radio"><span class="{if isset($Gender) and $Gender eq 1}checked{/if}"><input style="opacity: 0;" name="Gender" id="optionsRadios1" value="1" {if isset($Gender) and $Gender eq 1}checked=""{/if} type="radio"></span></div>
+									<div id="uniform-optionsRadios1" class="radio"><span class="{if isset($Gender) and $Gender eq 1}checked{/if}"><input name="Gender" id="optionsRadios1" value="1" {if isset($Gender) and $Gender eq 1}checked=""{/if} type="radio"></span></div>
 									Male
 								</label>
 								<div style="clear:both"></div>
 								<label class="radio">
-								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 2}checked{/if}"><input style="opacity: 0;" name="Gender" id="optionsRadios2" value="2" {if isset($Gender) and $Gender eq 2}checked=""{/if} type="radio"></span></div>
+								      <div id="uniform-optionsRadios2" class="radio"><span class="{if isset($Gender) and $Gender eq 2}checked{/if}"><input name="Gender" id="optionsRadios2" value="2" {if isset($Gender) and $Gender eq 2}checked=""{/if} type="radio"></span></div>
 								      Female
 								</label>
 							</div>
@@ -312,6 +320,7 @@
 						</div>
 					</form>
 				</div>
+			</div>
 			</div>
 		</div><!--/span-->
 	</div><!--/row-->

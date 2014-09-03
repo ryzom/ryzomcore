@@ -1,7 +1,8 @@
 {block name=content}
 
 	<div class="row-fluid">
-		<div class="box span12">
+		<div class="box col-md-12">
+		<div class="box-inner">
 			<div class="box-header well">
 				<h2><i class="icon-info-sign"></i>{$ip_title}</h2>
 			</div>
@@ -22,6 +23,7 @@
 				</center>
 				<div class="clearfix"></div>
 			</div>
+		</div>
 		</div>
 	</div>
 		</div><!--/span-->

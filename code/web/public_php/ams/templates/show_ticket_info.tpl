@@ -1,6 +1,7 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
+    <div class="box col-md-9">
+	<div class="box-inner">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-tag"></i> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> </h2>
         </div>
@@ -74,9 +75,11 @@
 		</div>
 	    </div>
         </div>
+		</div>
     </div><!--/span-->
 
-    <div class="box span3">
+    <div class="box col-md-3">
+	<div class="box-inner">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-th"></i>Actions</h2>
         </div>
@@ -96,6 +99,7 @@
 		</div>
             </div>
         </div>
+		</div>
     </div>
 </div><!--/row-->
 {/block}

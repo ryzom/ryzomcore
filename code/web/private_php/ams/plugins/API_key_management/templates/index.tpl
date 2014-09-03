@@ -2,7 +2,8 @@
 
 {if isset($smarty.get.plugin_action) and $smarty.get.plugin_action eq 'generate_key'}
 <div class="row-fluid">	
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> API KEY management</h2>
 						<div class="box-icon">
@@ -11,7 +12,7 @@
 							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
 						</div>
 					</div>
-					<div class="box span4">
+					<div class="box col-md-4">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Generate Access Key</h2>
 				<div class="box-icon">
@@ -75,10 +76,12 @@
 			</div>
 		</div><!--/span-->
 				</div><!--/span-->
+				</div><!--/span-->
 			</div><!--/row-->
 {else}
 <div class="row-fluid">	
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> API KEY management</h2>
 						<div class="box-icon">
@@ -127,6 +130,7 @@
 					  </table>		                   
 			</div>
 		</div><!--/span-->
+				</div><!--/span-->
 				</div><!--/span-->
 			</div><!--/row-->
 			{/if}

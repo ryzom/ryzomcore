@@ -1,7 +1,8 @@
 {block name=content}
 
 	<div class="row-fluid">
-		<div class="box span12">
+		<div class="box col-md-12">
+		<div class="box-inner">
 			<div class="box-header well">
 				<h2><i class="icon-info-sign"></i>{$syncing_title}</h2>
 			</div>
@@ -27,10 +28,12 @@
 				</center>
 				<div class="clearfix"></div>
 			</div>
+			</div>
 		</div>
 	</div>
 			<div class="row-fluid sortable">
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> {$members}</h2>
 					</div>
@@ -63,6 +66,7 @@
 								<li><a href="index.php?page=syncing&pagenum={$lastPage}">&raquo;</a></li>
 							</ul>
 						</div>
+					</div>
 					</div>
 				</div><!--/span-->
 

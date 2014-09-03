@@ -1,6 +1,7 @@
 {block name=content}
 <div class="row-fluid">
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> Members</h2>
 					</div>
@@ -67,6 +68,7 @@
 							<li><a href="index.php?page=userlist&pagenum={$lastPage}">&raquo;</a></li>
 						</ul>
 					  </div>
+					</div>
 					</div>
 				</div><!--/span-->
 

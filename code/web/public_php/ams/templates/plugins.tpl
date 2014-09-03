@@ -1,6 +1,7 @@
 {block name=content}
 <div class="row-fluid">
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title>
 						<h2><i class="icon-user"></i> {$plugin_title}</h2>
 					</div>
@@ -34,7 +35,7 @@
 						  <tbody>
 							{foreach from=$plug item=element}
 							<tr>
-								<td><input type="checkbox" name ="{$element.id}"{if ($element.plugin_status) eq "1"}checked{/if}/></td>
+								<td>{if ($element.plugin_status) eq "1"}<i class="glyphicon glyphicon-ok green"></i>{else}<i class="glyphicon glyphicon-remove red"></i>{/if}</td>
 								<td class="center">{$element.plugin_name}</td>
 								<td class="center">{$element.plugin_info->Version}</td>
 								<td class="center">{$element.plugin_info->Description}</td>
@@ -59,6 +60,7 @@
 							<li><a href="index.php?page=plugins&pagenum={$lastPage}">&raquo;</a></li>
 						</ul>
 					  </div>
+					</div>
 					</div>
 
 				</div><!--/span-->

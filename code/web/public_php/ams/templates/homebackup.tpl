@@ -110,7 +110,8 @@
 			</div>
 
 			<div class="row-fluid">
-				<div class="box span12">
+				<div class="box col-md-12">
+				<div class="box-inner">
 					<div class="box-header well">
 						<h2><i class="icon-info-sign"></i> Introduction</h2>
 					</div>
@@ -122,12 +123,14 @@
 						<div class="clearfix"></div>
 					</div>
 				</div>
+				</div>
 			</div>
 
 			<div class="row-fluid sortable ui-sortable">
 
 
-				<div class="box span4">
+				<div class="box col-md-4">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-user"></i> Member Activity</h2>
 						<div class="box-icon">
@@ -173,9 +176,11 @@
 							</ul>
 						</div>
 					</div>
+					</div>
 				</div><!--/span-->
 
-				<div class="box span8">
+				<div class="box col-md-8">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list-alt"></i> Realtime Traffic</h2>
 						<div class="box-icon">
@@ -188,11 +193,13 @@
 							<p class="clearfix">You can update a chart periodically to get a real-time effect by using a timer to insert the new data in the plot and redraw it.</p>
 							<p>Time between updates: <input id="updateInterval" value="" style="text-align: right; width:5em" type="text"> milliseconds</p>
 					</div>
+					</div>
 				</div><!--/span-->
 			</div><!--/row-->
 
 			<div class="row-fluid sortable ui-sortable">
-				<div class="box span4">
+				<div class="box col-md-4">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list"></i> Buttons</h2>
 						<div class="box-icon">
@@ -235,9 +242,11 @@
 							<button class="btn btn-mini btn-inverse">Mini button</button>
 						</p>
 					</div>
+					</div>
 				</div><!--/span-->
 
-				<div class="box span4">
+				<div class="box col-md-4">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list"></i> Buttons</h2>
 						<div class="box-icon">
@@ -275,9 +284,11 @@
 						</div>
 
 					</div>
+					</div>
 				</div><!--/span-->
 
-				<div class="box span4">
+				<div class="box col-md-4">
+				<div class="box-inner">
 					<div class="box-header well" data-original-title="">
 						<h2><i class="icon-list"></i> Weekly Stat</h2>
 						<div class="box-icon">
@@ -345,6 +356,7 @@
 							</a>
 						  </li>
 						</ul>
+					</div>
 					</div>
 				</div><!--/span-->
 			</div><!--/row-->

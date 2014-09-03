@@ -1,6 +1,7 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span12">
+    <div class="box col-md-12">
+	<div class="box-inner">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-user"></i> Show Reply</h2>
         </div>
@@ -23,6 +24,7 @@
 		</table>
 	    </div>
         </div>
+		</div>
     </div><!--/span-->
 </div><!--/row-->
 {/block}

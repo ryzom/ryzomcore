@@ -1,6 +1,7 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span8">
+    <div class="box col-md-12">
+	<div class="box-inner">
         <div class="box-header well" data-original-title="">
             <h2><i class="icon-th"></i> Create a new Ticket</h2>
         </div>
@@ -49,6 +50,7 @@
                 </form>
             </div>
         </div>
+		</div>
     </div><!--/span-->
 </div><!--/row-->
 {/block}
