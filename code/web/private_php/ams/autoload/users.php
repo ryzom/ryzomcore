@@ -202,7 +202,7 @@ class Users{
      * @param $email the email address
      * @return true or false
      */
-     public function validEmail( $email ){
+     public static function validEmail( $email ){
           $isValid = true;
           $atIndex = strrpos( $email, "@" );
           if ( is_bool( $atIndex ) && !$atIndex ){

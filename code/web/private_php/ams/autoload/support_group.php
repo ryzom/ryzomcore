@@ -327,7 +327,7 @@ class Support_Group{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("`support_group`", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_password' => $this->getIMAP_Password(), "`SGroupId` = $this->getSGroupId()"));
+        $dbl->update("`support_group`", Array('Name' => $this->getName(), 'Tag' => $this->getTag(), 'GroupEmail' => $this->getGroupEmail(), 'IMAP_MailServer' => $this->getIMAP_MailServer(), 'IMAP_Username' => $this->getIMAP_Username(), 'IMAP_password' => $this->getIMAP_Password()), "`SGroupId` = ".$this->getSGroupId());
     }
     
     
