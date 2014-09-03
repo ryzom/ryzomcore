@@ -358,7 +358,7 @@ CREATE TABLE IF NOT EXISTS `sessions` (
   KEY `owner_idx` (`owner`),
   KEY `folder_idx` (`folder_id`),
   KEY `state_type_idx` (`state`,`session_type`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=303 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC AUTO_INCREMENT=1001 ;
 
 -- --------------------------------------------------------
 

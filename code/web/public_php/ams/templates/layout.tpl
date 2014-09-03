@@ -18,31 +18,23 @@
 	<meta name="author" content="Daan Janssens & Matthew Lagoe">
 
 	<!-- The styles -->
-	<link id="bs-css" href="css/bootstrap-cerulean.css" rel="stylesheet">
-	<style type="text/css">
-	  body {
-		padding-bottom: 40px;
-	  }
-	  .sidebar-nav {
-		padding: 9px 0;
-	  }
-	</style>
-	<link href="css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="css/charisma-app.css" rel="stylesheet">
-	<link href="css/jquery-ui-1.8.21.custom.css" rel="stylesheet">
-	<link href='css/fullcalendar.css' rel='stylesheet'>
-	<link href='css/fullcalendar.print.css' rel='stylesheet'  media='print'>
-	<link href='css/chosen.css' rel='stylesheet'>
-	<link href='css/uniform.default.css' rel='stylesheet'>
-	<link href='css/colorbox.css' rel='stylesheet'>
-	<link href='css/jquery.cleditor.css' rel='stylesheet'>
-	<link href='css/jquery.noty.css' rel='stylesheet'>
-	<link href='css/noty_theme_default.css' rel='stylesheet'>
-	<link href='css/elfinder.min.css' rel='stylesheet'>
-	<link href='css/elfinder.theme.css' rel='stylesheet'>
-	<link href='css/jquery.iphone.toggle.css' rel='stylesheet'>
-	<link href='css/opa-icons.css' rel='stylesheet'>
-	<link href='css/uploadify.css' rel='stylesheet'>
+	<link id="bs-css" href="css/bootstrap-classic.css" rel="stylesheet">
+    <link id="bs-css" href="css/bootstrap-cerulean.min.css" rel="stylesheet">
+
+    <link href="css/charisma-app.css" rel="stylesheet">
+    <link href='bower_components/fullcalendar/dist/fullcalendar.css' rel='stylesheet'>
+    <link href='bower_components/fullcalendar/dist/fullcalendar.print.css' rel='stylesheet' media='print'>
+    <link href='bower_components/chosen/chosen.min.css' rel='stylesheet'>
+    <link href='bower_components/colorbox/example3/colorbox.css' rel='stylesheet'>
+    <link href='bower_components/responsive-tables/responsive-tables.css' rel='stylesheet'>
+    <link href='bower_components/bootstrap-tour/build/css/bootstrap-tour.min.css' rel='stylesheet'>
+    <link href='css/jquery.noty.css' rel='stylesheet'>
+    <link href='css/noty_theme_default.css' rel='stylesheet'>
+    <link href='css/elfinder.min.css' rel='stylesheet'>
+    <link href='css/elfinder.theme.css' rel='stylesheet'>
+    <link href='css/jquery.iphone.toggle.css' rel='stylesheet'>
+    <link href='css/uploadify.css' rel='stylesheet'>
+    <link href='css/animate.min.css' rel='stylesheet'>
 
 	<!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
@@ -68,9 +60,13 @@
 					<span class="icon-bar"></span>
 				</a>
 				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore_166_62.png"></a>
+				<div class="flags_logged_in">
+				      <img onclick="reloadPageWithLanguage('en');" src="img/en.png">
+				      <img onclick="reloadPageWithLanguage('fr');" src="img/fr.png">
+				</div>
 
 				<!-- theme selector starts -->
-				<div class="btn-group pull-right theme-container">
+				<!--<div class="btn-group pull-right theme-container">
 					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
 						<i class="icon-tint"></i><span class="hidden-phone"> Change Theme / Skin</span>
 						<span class="caret"></span>
@@ -86,7 +82,7 @@
 						<li><a data-value="spacelab" href="#"><i class="icon-blank"></i> Spacelab</a></li>
 						<li><a data-value="united" href="#"><i class="icon-blank"></i> United</a></li>
 					</ul>
-				</div>
+				</div>-->
 				<!-- theme selector ends -->
 				<!-- user dropdown starts -->
 				{if isset($username)}
@@ -101,12 +97,6 @@
 					</ul>
 				</div>
 				{/if}
-				<div class="btn-group pull-right">
-				    <div class="flags">
-				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
-				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
-				    </div>
-				</div>
 				<!-- user dropdown ends -->
 			</div>
 		</div>
@@ -121,7 +111,6 @@
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
 					</ul>
-					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
 					<!--<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>--!>
 				</div><!--/.well -->
 			</div><!--/span-->
@@ -137,9 +126,9 @@
 			<div id="content" class="span10">
 			<!-- content starts -->
 			{/if}
-			
+
 			{if  isset($no_visible_elements) and  $no_visible_elements eq "TRUE"}
-		  	
+
 				    <div class="flags_no_visible_elements">
 				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
 				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
@@ -148,8 +137,8 @@
 			{/if}
 
 			{block name=content}{/block}
-			
-			
+
+
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}
 			</div><!--/#content.span10-->
 			{/if}
@@ -172,7 +161,6 @@
 		</div>
 
 		<footer>
-			<p class="pull-left">&copy; <a href="http://usman.it" target="_blank">Muhammad Usman</a> <?php echo date('Y') ?></p>
 			<p class="pull-right">Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
 		</footer>
 		{/if}
@@ -198,38 +186,38 @@
 		{
 			return document.getElementById(e1);
 			}
-			
+
 		function uploadPlugin()
 		{
 			var fileObject = _("file").files[0];
 			var formdata = new FormData();
 			formdata.append("file",fileObject);
 			var ajax = new XMLHttpRequest();
-			ajax.upload.addEventListener("progress", progressHandler, false);	
+			ajax.upload.addEventListener("progress", progressHandler, false);
 			ajax.addEventListener("load", completeHandler, false);
 			ajax.addEventListener("error", errorHandler, false);
 			ajax.addEventListener("abort", abortHandler, false);
 			ajax.open("POST", "index.php?page=plugin&action=install_plugin");
 			ajax.send(formdata);
 			}
-			
+
 		function progressHandler(event)
 		{
 			var percent = (event.loaded/event.total)*100;
 			_("progressBar").value = Math.round(percent);
-			} 		
-		
+			}
+
 		function completeHandler(event)
 		{
 			_("status").innerHTML = event.target.responseText;
 			_("progressBar").value = 0;
 			}
-		
+
 		function errorHandler(event)
 		{
 			_("status").innerHTML = "upload Failed";
 			}
-			
+
 		function abortHandler(event)
 		{
 			_("status").innerHTML = "upload Aborted";
@@ -238,13 +226,13 @@
 	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
 	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-  
+
 	<script>
 	 $(document).ready(function() {
      $("#expDate").datepicker({ dateFormat: 'yy-mm-dd' });
 	 });
     </script>
-		
+
 	<!-- jQuery -->
 	<script src="js/jquery-1.7.2.min.js"></script>
 	<!-- jQuery UI -->
@@ -313,7 +301,7 @@
 	<!-- history.js for cross-browser state change on ajax -->
 	<script src="js/jquery.history.js"></script>
 	<!-- application script for Charisma demo -->
-	<script src="js/charisma.js"></script>
+	<!-- <script src="js/charisma.js"></script> -->
 	<!-- help script for page help -->
 	<script src="js/help.js"></script>
 

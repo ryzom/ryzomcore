@@ -58,7 +58,7 @@ function change_mail(){
                             }
                         }
                         helpers :: loadtemplate( 'settings', $result);
-                        exit;
+                        throw new SystemExit();
                          
                     }else{
 			$result['EMAIL'] = $reply;
@@ -71,32 +71,33 @@ function change_mail(){
                                 $result['isMod'] = "TRUE";
                             }
                         }
+                        $result['CEMAIL_ERROR'] = true;
                         helpers :: loadtemplate( 'settings', $result);
-                        exit;
+                        throw new SystemExit();
                     }
                     
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
-                    exit;
+                    throw new SystemExit();
                 }
         
             }else{
-                //ERROR: The form was not filled in correclty
+                //ERROR: The form was not filled in correctly
 		header("Location: index.php?page=settings");
-		exit;
+		throw new SystemExit();
             }    
         }else{
             //ERROR: user is not logged in
 	    header("Location: index.php");
-	    exit;
+	    throw new SystemExit();
         }
                   
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
          print_r($e);
-         exit;
+         throw new SystemExit();
     }
     
 }

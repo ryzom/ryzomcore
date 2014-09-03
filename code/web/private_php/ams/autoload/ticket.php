@@ -6,19 +6,19 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 class Ticket{
-    
-    private $tId; /**< The id of ticket */ 
-    private $timestamp; /**< Timestamp of the ticket */ 
-    private $title; /**< Title of the ticket */ 
-    private $status; /**< Status of the ticket (0 = waiting on user reply, 1 = waiting on support, (2= not used atm), 3 = closed */ 
-    private $queue; /**< (not in use atm) */ 
-    private $ticket_category; /**< the id of the category belonging to the ticket */ 
-    private $author; /**< The ticket_users id */ 
-    private $priority; /**< The priority of the ticket where 0 = low, 3= supadupahigh */ 
-    
+
+    private $tId; /**< The id of ticket */
+    private $timestamp; /**< Timestamp of the ticket */
+    private $title; /**< Title of the ticket */
+    private $status; /**< Status of the ticket (0 = waiting on user reply, 1 = waiting on support, (2= not used atm), 3 = closed */
+    private $queue; /**< (not in use atm) */
+    private $ticket_category; /**< the id of the category belonging to the ticket */
+    private $author; /**< The ticket_users id */
+    private $priority; /**< The priority of the ticket where 0 = low, 3= supadupahigh */
+
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
-    
-    
+
+
     /**
     * check if a ticket exists.
     * @param $id the id of the ticket to be checked.
@@ -31,10 +31,10 @@ class Ticket{
             return true;
         }else{
             return false;
-        } 
+        }
     }
-    
-    
+
+
     /**
     * return an array of the possible statuses
     * @return an array containing the string values that represent the different statuses.
@@ -51,8 +51,8 @@ class Ticket{
     public static function getPriorityArray() {
         return Array("Low","Normal","High","Super Dupa High");
     }
-    
-    
+
+
     /**
     * return an entire ticket.
     * returns the ticket object and an array of all replies to that ticket.
@@ -64,10 +64,10 @@ class Ticket{
         $ticket = new Ticket();
         $ticket->load_With_TId($id);
         $reply_array = Ticket_Reply::getRepliesOfTicket($id, $view_as_admin);
-        return Array('ticket_obj' => $ticket,'reply_array' => $reply_array); 
+        return Array('ticket_obj' => $ticket,'reply_array' => $reply_array);
     }
-    
-    
+
+
     /**
     * return all tickets of a specific user.
     * an array of all tickets created by a specific user are returned by this function.
@@ -90,11 +90,11 @@ class Ticket{
             $instance->setAuthor($ticket['Author']);
             $result[] = $instance;
         }
-        return $result; 
+        return $result;
     }
-    
-    
-    
+
+
+
     /**
     * function that creates a new ticket.
     * A new ticket will be created, in case the extra_info != 0 and the http request came from ingame, then a ticket_info page will be created.
@@ -117,13 +117,13 @@ class Ticket{
         $ticket->set($values);
         $ticket->create();
         $ticket_id = $ticket->getTId();
-        
+
         //if ingame then add an extra info
         if(Helpers::check_if_game_client() && $extra_info != 0){
             $extra_info['Ticket'] = $ticket_id;
             Ticket_Info::create_Ticket_Info($extra_info);
         }
-        
+
         //write a log entry
         if ( $author == $real_author){
             Ticket_Log::createLogEntry( $ticket_id, $author, 1);
@@ -131,18 +131,18 @@ class Ticket{
             Ticket_Log::createLogEntry( $ticket_id, $real_author, 2, $author);
         }
         Ticket_Reply::createReply($content, $author, $ticket_id, 0, $author);
-        
+
         //forwards the ticket directly after creation to the supposed support group
         if($for_support_group){
             Ticket::forwardTicket(0, $ticket_id, $for_support_group);
         }
-        
+
         //send email that new ticket has been created
         Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "NEW", $ticket->getForwardedGroupId());
         return $ticket_id;
-        
+
     }
-        
+
 
     /**
     * updates the ticket's status.
@@ -152,7 +152,7 @@ class Ticket{
     * @param $author the user (id) that performed the update status action
     */
     public static function updateTicketStatus( $ticket_id, $newStatus, $author) {
-        
+
         $ticket = new Ticket();
         $ticket->load_With_TId($ticket_id);
         if ($ticket->getStatus() != $newStatus){
@@ -160,10 +160,10 @@ class Ticket{
             Ticket_Log::createLogEntry( $ticket_id, $author, 5, $newStatus);
         }
         $ticket->update();
-        
+
     }
-    
-    
+
+
     /**
     * updates the ticket's status & priority.
     * A log entry about this will be created only if the newStatus is different from the current status and also when the newPriority is different from the current priority.
@@ -174,7 +174,7 @@ class Ticket{
     * @param $author the user (id) that performed the update
     */
     public static function updateTicketStatusAndPriority( $ticket_id, $newStatus, $newPriority, $author) {
-        
+
         $ticket = new Ticket();
         $ticket->load_With_TId($ticket_id);
         if ($ticket->getStatus() != $newStatus){
@@ -186,10 +186,10 @@ class Ticket{
             Ticket_Log::createLogEntry( $ticket_id, $author, 6, $newPriority);
         }
         $ticket->update();
-        
+
     }
-    
-    
+
+
     /**
     * return the latest reply of a ticket
     * @param $ticket_id the id of the ticket.
@@ -202,8 +202,8 @@ class Ticket{
         $reply->set($statement->fetch());
         return $reply;
     }
-    
-    
+
+
     /**
     * create a new reply for a ticket.
     * A reply will only be added if the content isn't empty and if the ticket isn't closed.
@@ -222,13 +222,13 @@ class Ticket{
             //if status is not closed
             if($ticket->getStatus() != 3){
                 Ticket_Reply::createReply($content, $author, $ticket_id, $hidden, $ticket->getAuthor());
-                
+
                 //notify ticket author that a new reply is added!
                 if($ticket->getAuthor() != $author){
                     Mail_Handler::send_ticketing_mail($ticket->getAuthor(), $ticket, $content, "REPLY", $ticket->getForwardedGroupId());
                 }
-                
-                
+
+
             }else{
                 //TODO: Show error message that ticket is closed
             }
@@ -236,8 +236,8 @@ class Ticket{
             //TODO: Show error content is empty
         }
     }
-    
-    
+
+
     /**
     * assign a ticket to a user.
     * Checks if the ticket exists, if so then it will try to assign the user to it, a log entry will be written about this.
@@ -254,8 +254,8 @@ class Ticket{
             return "TICKET_NOT_EXISTING";
         }
     }
-    
-    
+
+
     /**
     * unassign a ticket of a user.
     * Checks if the ticket exists, if so then it will try to unassign the user of it, a log entry will be written about this.
@@ -272,8 +272,8 @@ class Ticket{
             return "TICKET_NOT_EXISTING";
         }
     }
-    
-    
+
+
     /**
     * forward a ticket to a specific support group.
     * Checks if the ticket exists, if so then it will try to forward the ticket to the support group specified, a log entry will be written about this.
@@ -288,7 +288,7 @@ class Ticket{
             if(isset($group_id) && $group_id != ""){
                 //forward the ticket
                 $returnvalue = Forwarded::forwardTicket($group_id, $ticket_id);
-                
+
                 if($user_id != 0){
                     //unassign the ticket incase the ticket is assined to yourself
                     self::unAssignTicket($user_id, $ticket_id);
@@ -303,12 +303,12 @@ class Ticket{
             return "TICKET_NOT_EXISTING";
         }
     }
-    
-    
-    
-    
+
+
+
+
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-    
+
     /**
     * A constructor.
     * Empty constructor
@@ -335,18 +335,18 @@ class Ticket{
         $this->author = $values['Author'];
         $this->priority = $values['Priority'];
     }
-    
-    
+
+
     /**
     * creates a new 'ticket' entry.
     * this method will use the object's attributes for creating a new 'ticket' entry in the database.
     */
     public function create(){
         $dbl = new DBLayer("lib");
-        $this->tId = $dbl->executeReturnId("ticket", Array('Timestamp'=>now(), 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority)); 
+        $this->tId = $dbl->executeReturnId("ticket", Array('Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority), array('Timestamp'=>'now()'));
     }
 
-    
+
     /**
     * loads the object's attributes.
     * loads the object's attributes by giving a TId (ticket id).
@@ -365,8 +365,8 @@ class Ticket{
         $this->author = $row['Author'];
         $this->priority = $row['Priority'];
     }
-    
-    
+
+
     /**
     * update the objects attributes to the db.
     */
@@ -374,8 +374,8 @@ class Ticket{
         $dbl = new DBLayer("lib");
         $dbl->update("ticket", Array('Timestamp' => $this->timestamp, 'Title' => $this->title, 'Status' => $this->status, 'Queue' => $this->queue, 'Ticket_Category' => $this->ticket_category, 'Author' => $this->author, 'Priority' => $this->priority), "TId=$this->tId");
     }
-    
-    
+
+
     /**
     * check if a ticket has a ticket_info page or not.
     * @return true or false
@@ -383,38 +383,38 @@ class Ticket{
     public function hasInfo(){
         return Ticket_Info::TicketHasInfo($this->getTId());
     }
-    
-    
+
+
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
-    
+
     /**
     * get tId attribute of the object.
     */
     public function getTId(){
         return $this->tId;
     }
-    
+
     /**
     * get timestamp attribute of the object in the format defined in the outputTime function of the Helperclass.
     */
     public function getTimestamp(){
         return Helpers::outputTime($this->timestamp);
     }
-    
+
     /**
     * get title attribute of the object.
     */
     public function getTitle(){
         return $this->title;
     }
-    
+
     /**
     * get status attribute of the object.
     */
     public function getStatus(){
         return $this->status;
     }
-    
+
     /**
     * get status attribute of the object in the form of text (string).
     */
@@ -422,43 +422,43 @@ class Ticket{
         $statusArray = Ticket::getStatusArray();
         return $statusArray[$this->getStatus()];
     }
-    
+
     /**
     * get category attribute of the object in the form of text (string).
     */
     public function getCategoryName(){
         $category = Ticket_Category::constr_TCategoryId($this->getTicket_Category());
-        return $category->getName();  
+        return $category->getName();
     }
-    
+
     /**
     * get queue attribute of the object.
     */
     public function getQueue(){
         return $this->queue;
     }
-    
+
     /**
     * get ticket_category attribute of the object (int).
     */
     public function getTicket_Category(){
         return $this->ticket_category;
     }
-    
+
     /**
     * get author attribute of the object (int).
     */
     public function getAuthor(){
         return $this->author;
     }
-    
+
     /**
     * get priority attribute of the object (int).
     */
     public function getPriority(){
         return $this->priority;
     }
-    
+
     /**
     * get priority attribute of the object in the form of text (string).
     */
@@ -466,7 +466,7 @@ class Ticket{
         $priorityArray = Ticket::getPriorityArray();
         return $priorityArray[$this->getPriority()];
     }
-    
+
     /**
     * get the user assigned to the ticket.
     * or return 0 in case not assigned.
@@ -479,7 +479,7 @@ class Ticket{
             return $user_id;
         }
     }
-    
+
     /**
     * get the name of the support group to whom the ticket is forwarded
     * or return 0 in case not forwarded.
@@ -492,7 +492,7 @@ class Ticket{
             return Support_Group::getGroup($group_id)->getName();
         }
     }
-    
+
     /**
     * get the id of the support group to whom the ticket is forwarded
     * or return 0 in case not forwarded.
@@ -506,7 +506,7 @@ class Ticket{
         }
     }
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
-    
+
     /**
     * set tId attribute of the object.
     * @param $id integer id of the ticket
@@ -514,7 +514,7 @@ class Ticket{
     public function setTId($id){
         $this->tId = $id;
     }
-    
+
     /**
     * set timestamp attribute of the object.
     * @param $ts timestamp of the ticket
@@ -522,7 +522,7 @@ class Ticket{
     public function setTimestamp($ts){
         $this->timestamp = $ts;
     }
-    
+
     /**
     * set title attribute of the object.
     * @param $t title of the ticket
@@ -530,7 +530,7 @@ class Ticket{
     public function setTitle($t){
         $this->title = $t;
     }
-    
+
     /**
     * set status attribute of the object.
     * @param $s status of the ticket(int)
@@ -538,7 +538,7 @@ class Ticket{
     public function setStatus($s){
         $this->status = $s;
     }
-    
+
     /**
     * set queue attribute of the object.
     * @param $q queue of the ticket
@@ -546,7 +546,7 @@ class Ticket{
     public function setQueue($q){
         $this->queue = $q;
     }
-    
+
     /**
     * set ticket_category attribute of the object.
     * @param $tc ticket_category id of the ticket(int)
@@ -554,7 +554,7 @@ class Ticket{
     public function setTicket_Category($tc){
         $this->ticket_category = $tc;
     }
-    
+
     /**
     * set author attribute of the object.
     * @param $a author of the ticket
@@ -562,7 +562,7 @@ class Ticket{
     public function setAuthor($a){
         $this->author = $a;
     }
-    
+
     /**
     * set priority attribute of the object.
     * @param $p priority of the ticket
@@ -570,5 +570,5 @@ class Ticket{
     public function setPriority($p){
         $this->priority = $p;
     }
-    
+
 }

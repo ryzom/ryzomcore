@@ -14,7 +14,7 @@ function login(){
 
 		//check if the filtered sent POST data returns a match with the DB
 		$result = WebUsers::checkLoginMatch($login_value, $password);
-		
+
 		if( $result != "fail"){
 			//handle successful login
 			$_SESSION['user'] = $result['Login'];
@@ -22,37 +22,38 @@ function login(){
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
-			
+
 			$GETString = "";
 			foreach($_GET as $key => $value){
 				$GETString = $GETString . $key . '=' . $value . "&";
-			}		
+			}
 			if($GETString != ""){
 				$GETString = '?'.$GETString;
 			}
 
 
 			//go back to the index page.
+                header("Cache-Control: max-age=1");
 			if (Helpers::check_if_game_client()) {
 				header( 'Location: '. $INGAME_WEBPATH . $GETString);
 			}else{
 				header( 'Location: '. $WEBPATH . $GETString);
 			}
-			exit;
+			throw new SystemExit();
 		}else{
 			//handle login failure
 			$result = Array();
 			$result['login_error'] = 'TRUE';
 			$result['no_visible_elements'] = 'TRUE';
 			helpers :: loadtemplate( 'login', $result);
-			exit;
-		}	
-		
-		
+			throw new SystemExit();
+		}
+
+
 	}catch (PDOException $e) {
 	     //go to error page or something, because can't access website db
 	     print_r($e);
-	     exit;
+	     throw new SystemExit();
 	}
-	
+
 }

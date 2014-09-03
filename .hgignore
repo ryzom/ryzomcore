@@ -248,3 +248,5 @@ code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
 code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
 code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
 code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
+code/web/public_php/config.php
+code/web/public_php/is_installed

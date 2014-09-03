@@ -15,6 +15,8 @@ function add_user(){
      //check if the POST variables are valid, before actual registering
      $result = $webUser->check_Register($params);
 
+     global $SITEBASE;
+     require_once($SITEBASE . '/inc/settings.php');
      // if all are good then create user
      if ( $result == "success"){
           $edit = array(
@@ -30,22 +32,30 @@ function add_user(){
           if(Helpers::check_if_game_client()){
                //if registering ingame then we have to set the header and dont need to reload the template.
                header('Location: email_sent.php');
-               exit;
+               throw new SystemExit();
           }
-          $pageElements['status'] = $status;
-          $pageElements['no_visible_elements'] = 'TRUE';
-	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
-          helpers :: loadtemplate( 'register_feedback', $pageElements);
-          exit;
-     }elseif ($_POST['page']=="settings"){
+          $pageElements = settings();
+          $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
+          $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+          $pageElements['SUCCESS_ADD'] = $status;
+          if (isset($_GET['page']) && $_GET['page']=="settings"){
+            helpers :: loadtemplate( 'settings', $pageElements);
+          }else{
+            $pageElements['no_visible_elements'] = 'TRUE';
+            helpers :: loadtemplate( 'register_feedback', $pageElements);
+          }
+          throw new SystemExit();
+     }elseif (isset($_GET['page']) && $_GET['page']=="settings"){
+          $pageElements = array_merge(settings(), $result);
           // pass error and reload template accordingly
-          $result['prevUsername'] = $_POST["Username"];
-          $result['prevPassword'] = $_POST["Password"];
-          $result['prevConfirmPass'] = $_POST["ConfirmPass"];
-          $result['prevEmail'] = $_POST["Email"];
-          $result['no_visible_elements'] = 'TRUE';
-          helpers :: loadtemplate( 'settings', $result);
-          exit;
+          $pageElements['prevUsername'] = $_POST["Username"];
+          $pageElements['prevPassword'] = $_POST["Password"];
+          $pageElements['prevConfirmPass'] = $_POST["ConfirmPass"];
+          $pageElements['prevEmail'] = $_POST["Email"];
+          $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+          $pageElements['do'] = "add_user";
+          helpers :: loadtemplate( 'settings', $pageElements);
+          throw new SystemExit();
      }else{
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -55,7 +65,7 @@ function add_user(){
           $result['no_visible_elements'] = 'TRUE';
           $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
-          exit;
+          throw new SystemExit();
      }
 }
 
@@ -83,7 +93,7 @@ function write_user($newUser){
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db
       print_r($e);
-      exit;
+      throw new SystemExit();
      }
      
      return $result;

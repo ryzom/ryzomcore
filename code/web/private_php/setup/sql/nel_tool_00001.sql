@@ -36,14 +36,14 @@ CREATE TABLE IF NOT EXISTS `neltool_annotations` (
   PRIMARY KEY (`annotation_id`),
   UNIQUE KEY `annotation_shard_id` (`annotation_shard_id`),
   UNIQUE KEY `annotation_domain_id` (`annotation_domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `neltool_annotations`
 --
 
 INSERT INTO `neltool_annotations` (`annotation_id`, `annotation_domain_id`, `annotation_shard_id`, `annotation_data`, `annotation_user_name`, `annotation_date`) VALUES
-(12, NULL, 106, 'Welcome to the Shard Admin Website!', 'vl', 1272378352);
+(1, NULL, 106, 'Welcome to the Shard Admin Website!', 'vl', 1272378352);
 
 -- --------------------------------------------------------
 
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS `neltool_domains` (
   `domain_mfs_web` text,
   `domain_cs_sql_string` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -143,7 +143,7 @@ CREATE TABLE IF NOT EXISTS `neltool_groups` (
   `group_default_domain_id` tinyint(3) unsigned DEFAULT NULL,
   `group_default_shard_id` smallint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`group_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=12 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;
 
 --
 -- Dumping data for table `neltool_groups`
@@ -370,7 +370,7 @@ CREATE TABLE IF NOT EXISTS `neltool_group_domains` (
   `group_domain_domain_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`group_domain_id`),
   KEY `group_domain_group_id` (`group_domain_group_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=97 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -386,7 +386,7 @@ CREATE TABLE IF NOT EXISTS `neltool_group_shards` (
   PRIMARY KEY (`group_shard_id`),
   KEY `group_shard_group_id` (`group_shard_group_id`),
   KEY `group_shard_domain_id` (`group_shard_domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1532 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `neltool_group_shards`
@@ -408,7 +408,7 @@ CREATE TABLE IF NOT EXISTS `neltool_locks` (
   PRIMARY KEY (`lock_id`),
   UNIQUE KEY `lock_shard_id` (`lock_shard_id`),
   UNIQUE KEY `lock_domain_id` (`lock_domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -422,7 +422,7 @@ CREATE TABLE IF NOT EXISTS `neltool_logs` (
   `logs_date` int(11) NOT NULL DEFAULT '0',
   `logs_data` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`logs_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=83 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -523,7 +523,7 @@ CREATE TABLE IF NOT EXISTS `neltool_restart_sequences` (
   `restart_sequence_date_end` int(11) DEFAULT NULL,
   `restart_sequence_timer` int(11) unsigned DEFAULT '0',
   PRIMARY KEY (`restart_sequence_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -540,7 +540,7 @@ CREATE TABLE IF NOT EXISTS `neltool_shards` (
   `shard_restart` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`shard_id`),
   KEY `shard_domain_id` (`shard_domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=403 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -561,7 +561,7 @@ CREATE TABLE IF NOT EXISTS `neltool_stats_hd_datas` (
   PRIMARY KEY (`hd_id`),
   KEY `hd_domain_id` (`hd_domain_id`),
   KEY `hd_server` (`hd_server`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -595,14 +595,14 @@ CREATE TABLE IF NOT EXISTS `neltool_users` (
   UNIQUE KEY `user_login` (`user_name`),
   KEY `user_group_id` (`user_group_id`),
   KEY `user_active` (`user_active`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=34 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
 --
 -- Dumping data for table `neltool_users`
 --
 
 INSERT INTO `neltool_users` (`user_id`, `user_name`, `user_password`, `user_group_id`, `user_created`, `user_active`, `user_logged_last`, `user_logged_count`, `user_menu_style`) VALUES
-(33, 'guest', '084e0343a0486ff05530df6c705c8bb4', 1, 1405357395, 1, 0, 0, 0);
+(1, 'guest', '084e0343a0486ff05530df6c705c8bb4', 1, 1405357395, 1, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -617,7 +617,7 @@ CREATE TABLE IF NOT EXISTS `neltool_user_applications` (
   PRIMARY KEY (`user_application_id`),
   KEY `user_application_user_id` (`user_application_user_id`),
   KEY `user_application_application_id` (`user_application_application_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=22 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -631,7 +631,7 @@ CREATE TABLE IF NOT EXISTS `neltool_user_domains` (
   `user_domain_domain_id` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_domain_id`),
   KEY `user_domain_user_id` (`user_domain_user_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=20 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -647,7 +647,7 @@ CREATE TABLE IF NOT EXISTS `neltool_user_shards` (
   PRIMARY KEY (`user_shard_id`),
   KEY `user_shard_user_id` (`user_shard_user_id`),
   KEY `user_shard_domain_id` (`user_shard_domain_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=166 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

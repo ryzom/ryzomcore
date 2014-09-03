@@ -5,16 +5,16 @@
 -- HeidiSQL version:             7.0.0.4053
 -- Date/time:                    2013-02-12 16:14:54
 -- --------------------------------------------------------
- 
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET NAMES utf8 */;
 /*!40014 SET FOREIGN_KEY_CHECKS=0 */;
- 
+
 -- Dumping database structure for webig
-CREATE DATABASE IF NOT EXISTS `webig` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
-USE `webig`;
- 
- 
+-- CREATE DATABASE IF NOT EXISTS `webig` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
+-- USE `webig`;
+
+
 -- Dumping structure for table webig.players
 CREATE TABLE IF NOT EXISTS `players` (
   `id` INT(32) NOT NULL AUTO_INCREMENT,
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `players` (
   `dev_shard` tinyint(4) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
- 
+
 -- Dumping structure for table webig.accounts
 CREATE TABLE IF NOT EXISTS `accounts` (
   `uid` INT(10) DEFAULT NULL,

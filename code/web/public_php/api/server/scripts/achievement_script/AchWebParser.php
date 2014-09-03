@@ -10,7 +10,7 @@
 	$MY_PATH = dirname(__FILE__);
 
 	if(file_exists("parser.stop")) {
-		exit(0);
+		die();
 	}
 
 	require_once("class/mySQL_class.php");
@@ -58,7 +58,7 @@
 	require_once("class/Stats_class.php");
 
 	$atom_insert = array();
-	
+
 	$_CACHE = new ValueCache();
 
 	//new generator for API xml files.
@@ -109,7 +109,7 @@
 	$stop_time = $microstop[0] + $microstop[1];
 
 	#$log->logf("Expired time: ".($stop_time - $start_time));
-	
+
 	#foreach($chars as $cid) {
 		#STEP 1: load and register atoms
 
@@ -149,7 +149,7 @@
 		#$log->logf("Expired time: ".($stop_time - $start_time));
 
 		#$log->logi("Driving data... ",false);
-		
+
 		#STEP 2: drive data
 		$_CACHE->setChar($cdata);
 		$res = $DBc->sendSQL("SELECT sum(at_value) as anz FROM ach_task,ach_player_task WHERE at_id=apt_task AND apt_player='".$cdata['cid']."'","ARRAY");
@@ -266,7 +266,7 @@ for($dtrun=0;$dtrun<2;$dtrun++) {
 		#$log->logf("Expired time: ".($stop_time - $start_time));
 
 		#$log->logi("Clearing atom data [PASS ".$dtrun."]... ",false);
-		
+
 		//clear atom state for completed objectives
 		#$DBc->sendSQL("DELETE FROM ach_player_atom WHERE EXISTS (SELECT * FROM ach_player_objective,ach_atom WHERE atom_id=apa_atom AND apa_player='".$cdata['cid']."' AND atom_objective=apo_objective)");
 
@@ -357,8 +357,8 @@ for($dtrun=0;$dtrun<2;$dtrun++) {
 	if(sizeof($DBc->longQuery) > 0) {
 		$log->logf("Longer queries: ".var_export($DBc->longQuery,true));
 	}
-	
+
 	#$log->logf("Run complete; exiting...");
 	$log->close();
-	exit(0);
+	die();
 ?>
