@@ -17,7 +17,7 @@
 								<div class="controls">
 								    <div class="input-prepend">
 									<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
-										<input type="password" class="input-xlarge" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
+										<input type="password" class="setup-width" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
 										{if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}<span class="help-inline">The password is incorrect</span>{/if}
 								    </div>
 								</div>
@@ -29,7 +29,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-tag"></i></span>
-									<input type="password" class="input-xlarge" id="NewPass" name="NewPass" placeholder="Your new password"  {if isset($prevNewPass)}value="{$prevNewPass}"{/if}>
+									<input type="password" class="setup-width" id="NewPass" name="NewPass" placeholder="Your new password"  {if isset($prevNewPass)}value="{$prevNewPass}"{/if}>
 									{if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$newpass_error_message}</span>{/if}
 							   </div>
 							</div>
@@ -41,7 +41,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-tags"></i></span>
-									<input type="password" class="input-xlarge" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password"  {if isset($prevConfirmNewPass)}value="{$prevConfirmNewPass}"{/if}>
+									<input type="password" class="setup-width" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password"  {if isset($prevConfirmNewPass)}value="{$prevConfirmNewPass}"{/if}>
 									{if isset($CNEWPASSWORD_ERROR) and $CNEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$confirmnewpass_error_message}</span>{/if}
 							    </div>
 							</div>
@@ -91,7 +91,7 @@
 								<div class="controls">
 									<div class="input-prepend">
 									<span style="margin-left:5px;" class="add-on"><i class="icon-user"></i></span>
-										<input type="text" placeholder="Username" name="Username" id="Username" class="input-xlarge" {if isset($prevUsername)}value="{$prevUsername}"{/if}>
+										<input type="text" placeholder="Username" name="Username" id="Username" class="setup-width" {if isset($prevUsername)}value="{$prevUsername}"{/if}>
 										{if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}<span class="help-inline">{$USERNAME}</span>{/if}
 									</div>
 								</div>
@@ -102,7 +102,7 @@
 								<div class="controls">
 								    <div class="input-prepend">
 										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
-										<input type="password" placeholder="Password" name="Password" id="Password" class="input-xlarge">
+										<input type="password" placeholder="Password" name="Password" id="Password" class="setup-width">
 										{if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$PASSWORD}</span>{/if}
 									 </div>
 								</div>
@@ -113,7 +113,7 @@
 								<div class="controls">
 								    <div class="input-prepend">
 										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
-										<input type="password" placeholder="Confirm Password" name="ConfirmPass" id="ConfirmPass" class="input-xlarge">
+										<input type="password" placeholder="Confirm Password" name="ConfirmPass" id="ConfirmPass" class="setup-width">
 										{if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$CPASSWORD}</span>{/if}
 									 </div>
 								</div>
@@ -124,7 +124,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
-									<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="Email" {if isset($prevEmail)}value="{$prevEmail}"{/if}>
+									<input type="text" class="setup-width" id="Email" name="Email" placeholder="Email" {if isset($prevEmail)}value="{$prevEmail}"{/if}>
 									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE" and isset($do)}<span class="help-inline">{$EMAIL}</span>{/if}
 							    </div>
 							</div>
@@ -172,7 +172,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-envelope"></i></span>
-									<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
+									<input type="text" class="setup-width" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
 									{if isset($CEMAIL_ERROR) and $CEMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
 
 							    </div>
@@ -258,7 +258,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
-									<input type="text" class="input-xlarge" id="FirstName" name="FirstName" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
+									<input type="text" class="setup-width" id="FirstName" name="FirstName" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
 								</div>
 							</div>
 						</div>
@@ -268,7 +268,7 @@
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
-									<input type="text" class="input-xlarge" id="LastName" name="LastName" placeholder="Your lastname" {if isset($LastName) and $LastName neq ""}value="{$LastName}"{/if}>
+									<input type="text" class="setup-width" id="LastName" name="LastName" placeholder="Your lastname" {if isset($LastName) and $LastName neq ""}value="{$LastName}"{/if}>
 								</div>
 							</div>
 						</div>
