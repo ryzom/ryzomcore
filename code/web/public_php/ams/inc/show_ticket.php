@@ -10,13 +10,13 @@
 function show_ticket(){
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
-        
+
         $result['user_id'] = unserialize($_SESSION['ticket_user'])->getTUserId();
-        $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT); 
+        $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
-        
-        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'] ))){    
+
+        if(Ticket_User::isMod(unserialize($_SESSION['ticket_user'] ))){
             if(isset($_POST['action'])){
                 switch($_POST['action']){
                     case "forward":
@@ -32,18 +32,18 @@ function show_ticket(){
                         $ticket_id = filter_var($_POST['ticket_id'], FILTER_SANITIZE_NUMBER_INT);
                         $result['ACTION_RESULT'] = Ticket::unAssignTicket($result['user_id'], $ticket_id);
                         break;
-               
+
                 }
             }
-        }      
+        }
 
         if(($target_ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId())  || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) )){
-            
+
             $show_as_admin = false;
             if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $show_as_admin = true;
             }
-            
+
             $entire_ticket = Ticket::getEntireTicket( $result['ticket_id'],$show_as_admin);
             Ticket_Log::createLogEntry($result['ticket_id'],unserialize($_SESSION['ticket_user'])->getTUserId(), 3);
             $result['ticket_tId'] = $entire_ticket['ticket_obj']->getTId();
@@ -78,16 +78,18 @@ function show_ticket(){
             global $INGAME_WEBPATH;
             $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
-            
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
-}        
+}

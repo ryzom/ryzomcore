@@ -51,7 +51,7 @@ class JoinShardCb extends CRingSessionManagerWeb
 	function getShardsResult($userId, $resultStr)
 	{
 		global $getShardListCallback;
-		
+
 		$onlineShardsBySessionId = array();
 		$resultArray = split(';', $resultStr);
 		foreach ($resultArray as $shardInfo)
@@ -63,7 +63,7 @@ class JoinShardCb extends CRingSessionManagerWeb
 		$getShardListCallback($onlineShardsBySessionId);
 	}
 }
-	
+
 // External use
 $FSHostLuaMode = false;
 $FSHostResultStr = 0;
@@ -123,7 +123,7 @@ function joinShardFromId( $userId, $domainId, $destSessionId )
 	$addr = split(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
-	
+
 	// request join to the session manager
 	$joinShard = new JoinShardCb;
 	$res = "";
@@ -132,14 +132,14 @@ function joinShardFromId( $userId, $domainId, $destSessionId )
 	$charId = ($userId<<4) + $charSlot;
 	echo "Requesting teleportation of $charId/$userId to shard session ".$destSessionId."...<br>";
 	$joinShard->joinSession($charId, $destSessionId, $domainInfo["domain_name"]);
-	
+
 	// wait the the return message
 	if ($joinShard->waitCallback() == false)
 	{
 		// Note: the answer is a joinSessionResult message
 		echo "No response from server, joinShard failed<br>";
 	}
-	exit;
+	die();
 }
 
 /**
@@ -151,7 +151,7 @@ function getShardList($userId, $domainId)
 	$addr = split(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
-	
+
 	// request get to the session manager
 	$joinShard = new JoinShardCb;
 	$res = "";
@@ -160,13 +160,13 @@ function getShardList($userId, $domainId)
 	$charId = ($userId<<4)+15;
 	echo "Retrieving online shards for $charId...<br>";
 	$joinShard->getShards($charId);
-	
+
 	// wait the the return message
 	if ($joinShard->waitCallback() == false)
 	{
 		echo "No response from server, getShards failed<br>";
 	}
-	exit;
+	die();
 }
 
 /**
@@ -182,7 +182,7 @@ function displayAllShards(&$onlineShardsBySessionId)
 		echo "Invalid cookie !";
 		die();
 	}
-	
+
 	// List all shards of the domain, including offline ones
 	global $DBName, $DBHost, $DBUserName, $DBPassword;
 	$link = mysqli_connect($DBHost, $DBUserName, $DBPassword) or die("Can't connect to nel database");
@@ -208,10 +208,10 @@ function displayAllShards(&$onlineShardsBySessionId)
 			echo "<input type='submit' name='button' value='Teleport' />";
 		echo "</form><br>";
 	}
-	
+
 	//echo "<input type='submit' name='button' value='Teleport' />";
 	//echo "</form></font>";
-	exit;
+	die();
 }
 
 
@@ -226,19 +226,19 @@ function joinMainland($userId, $domainId)
 	$addr = split(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
-	
+
 	// request get to the session manager
 	$joinsShard = new JoinShardCb;
 	$res = "";
 	$joinsShard->connect($RSMHost, $RSMPort, $res);
 
 	// set the shard Id to allow any character (by using the special value '15')
-	$charId = ($userId<<4)+15; 
+	$charId = ($userId<<4)+15;
 	global $FSHostLuaMode, $verbose;
 	if ($FSHostLuaMode && $verbose)
 		echo "Joining a mainland shard for $charId...<br>";
 	$joinsShard->joinMainland($charId, $domainInfo["domain_name"]);
-	
+
 	// wait the the return message
 	if ($joinsShard->waitCallback() == false)
 	{

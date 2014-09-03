@@ -121,14 +121,14 @@ if(!function_exists('_i')){
 	function _i($img, $alt=''){
 		if (substr($img, strlen($img)-4) == '.tga') // img from client texture : ig only
 			return $img;
-		
+
 		if (is_file(RYAPI_PATH.'/data/icons/'.$img.'.png'))
 			$img = RYAPI_URL.'/data/icons/'.$img.'.png';
 		else if (is_file(RYAPP_PATH.'/data/icons/'.$img.'.png'))
 			$img = RYAPP_URL.'/data/icons/'.$img.'.png';
 		else
 			$img = 'view_remove';
-		
+
 		if ($alt)
 			return '<img src="'.$img.'" title="'.$alt.'" alt="'.utf8_decode($alt).'" />';
 		else
@@ -272,30 +272,30 @@ function ryzom_absolute_time($timestamp) {
 
 
 /***
- * 
+ *
  * Ryzom utilities
- * 
- * 
+ *
+ *
  * ***/
 
 function ryzom_generate_password($length=8, $level=2, $oneofeach=false) {
 	$validchars[1] = "0123456789abcdfghjkmnpqrstvwxyz";
 	$validchars[2] = "0123456789abcdfghjkmnpqrstvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	$validchars[3] = "0123456789_!@#$%&*()-=+/abcdfghjkmnpqrstvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_!@#$%&*()-=+/";
-	
+
 	$password  = "";
 	$counter   = 0;
-	
+
 	while ($counter < $length) {
 		$actChar = substr($validchars[$level], rand(0, strlen($validchars[$level])-1), 1);
-		
+
 		// if $oneofeach then All character must be different (slower)
 		if (!$oneofeach || !strstr($password, $actChar)) {
 			$password .= $actChar;
 			$counter++;
 		}
 	}
-	
+
 	return $password;
 }
 
@@ -304,7 +304,7 @@ function file_get_contents_cached($fn, $cache_time=300) {
 	global $ryzom_bench_text;
 
 	$lfn = 'tmp/'.strtr($fn, ':/.?&=', '____________');
-	
+
     // get the new file from internet every $cache_time (default=5min)
 	if (file_exists($lfn) && filesize($lfn) > 0 && time() < filemtime($lfn) + $cache_time) {
 		$content = file_get_contents($lfn);
@@ -328,10 +328,10 @@ function ryzom_redirect($url, $group='', $extra_lua='') {
 				$lua .= 'getUI("ui:interface:'.$group.':content:html"):browse("'.str_replace('&', '&amp;', $url).'")';
 		}
 		echo '<lua>'.$lua.'</lua>';
-		exit();
+		die();
 	} else {
 		header('Location: '.$url);
-		exit();
+		die();
 	}
 }
 
@@ -357,12 +357,12 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 		$bt1 = explode('[', $bt[$level]);
 	else
 		$bt1 = array('');
-	
+
 	if (isset($bt[$level+1]))
 		$bt2 = explode('[', $bt[$level+1]);
 	else
 		$bt2 = array('');
-	
+
 	$c = '';
 	if ($value !== pNULL) {
 		$c .= '<font color="#FFFFFF">'.$var.' : </font>';
@@ -381,8 +381,8 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
  *
  * Lua tools
  *
- * ***/ 
- 
+ * ***/
+
  class ryLua {
 
 	static private $lua = array();
@@ -390,7 +390,7 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 	static private $indent;
 	static private $indentend;
 	static private $linkTargetId = 0;
-	
+
 	static function add($code, $indent=NULL) {
 		if ($indent !== NULL)
 			self::$indent += $indent;
@@ -398,7 +398,7 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 		$a = $tabs.str_replace("\n", "\n    ".$tabs, $code);
 		self::$lua[] = $a;
 	}
-	
+
 	static function addEnd($code, $indent=NULL) {
 		if ($indent !== NULL)
 			self::$indentend += $indent;
@@ -406,8 +406,8 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 		$a = $tabs.str_replace("\n", "\n    ".$tabs, $code);
 		self::$luaend[] = $a;
 	}
-	
-	
+
+
 	static function get($ig) {
 		ryLogger::getInstance()->addPrint(implode("\n", self::$lua), '#FF00FF');
 		$ret =  ($ig)?"<lua>\n".implode("\n", self::$lua)."\n</lua>":'';
@@ -421,16 +421,16 @@ function p($var, $value=pNULL, $color='#FFFF00', $level=0) {
 		self::$luaend = array();
 		return $ret;
 	}
-	
+
 	static function text($text) {
 		return str_replace('"', '\"', $text);
 	}
-	
+
 	static function url($base_params=null, $add_params=array()) {
 		return str_replace('&', '&amp;', _url($base_params, $add_params));
 	}
-	
-	
+
+
 	function openLink($text, $target='webig', $base_params=array(), $add_params=array(), $urllua='', $runlua='')
 	{
 		$url = self::url($base_params, $add_params);
@@ -448,7 +448,7 @@ END;
 			return '<a href="ah:lua&openLink'.$id.'()">'.$text.'</a>';
 		return $text;
 	}
-	
+
 	static function link($id, $luacode, $text) {
 		$lua = <<<END
 function runLua{$id}()
@@ -460,7 +460,7 @@ END;
 			return '<a href="ah:lua&runLua'.$id.'()">'.$text.'</a>';
 		return $text;
 	}
-	
+
 }
 
 ?>

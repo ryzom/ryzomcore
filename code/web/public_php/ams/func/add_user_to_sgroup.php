@@ -9,7 +9,7 @@ function add_user_to_sgroup(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     if(WebUsers::isLoggedIn()){
-        
+
         //check if the that executed the task is an admin.
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
             $name = filter_var($_POST['Name'],FILTER_SANITIZE_STRING);
@@ -24,7 +24,7 @@ function add_user_to_sgroup(){
                     //return error message.
                     $result['RESULT_OF_ADDING'] = "NOT_MOD_OR_ADMIN";
                 }
-            
+
             }else{
                 $result['RESULT_OF_ADDING'] = "USER_NOT_EXISTING";
             }
@@ -36,22 +36,26 @@ function add_user_to_sgroup(){
             //$result= array_merge($result, show_sgroup());
             //helpers :: loadtemplate( 'show_sgroup', $result);
             if (Helpers::check_if_game_client()) {
+                header("Cache-Control: max-age=1");
                 header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=".$id);
             }else{
+                header("Cache-Control: max-age=1");
                 header("Location: ".$WEBPATH."?page=show_sgroup&id=".$id);
             }
-            exit;
-            
+            throw new SystemExit();
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
 
 }

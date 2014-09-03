@@ -46,32 +46,32 @@ if ( isset( $_GET['search'] ) && isset( $_GET['format'] ) )
      {
         // getting the headers when the request is sent
         $header = getallheaders();
-        
+
          // this block is to get the posted data
         $fp = fopen( 'php://input', 'r' );
          $rawData = stream_get_contents( $fp );
          $userd = json_decode( $rawData, true );
-        
+
          // authenticate the user using data we get from server
         appAuthenticateRest( $user, $userd );
-        
+
          // create a ryzom user object whose achievements we have to send in response
         $_USER = new RyzomUser( $user );
-        
+
          require_once( "include/ach_render_web.php" );
          $c .= ach_render();
          $response = $c;
          // sending the response
         echo( $response );
-         exit;
-        
-         } 
-    } 
+         die();
+
+         }
+    }
 else
      {
     echo 'Invalid response';
-     exit;
-     } 
+     die();
+     }
 
 
 
@@ -100,10 +100,10 @@ $_USER = new RyzomUser( $user );
 
 if ( $_USER -> isIG() ) {
     require_once( "include/ach_render_ig.php" );
-    } 
+    }
 else {
     require_once( "include/ach_render_web.php" );
-    } 
+    }
 
 // require_once("fb/facebook.php");
 
@@ -115,15 +115,15 @@ if ( !$_USER -> isIG() ) {
      * 'secret' => $_CONF['fb_secret'],
      * 'cookie' => true
      * ));
-     * 
+     *
      * #code taken from facebook tutorial
-     * 
+     *
      * // Get the url to redirect for login to facebook
      * // and request permission to write on the user's wall.
      * $login_url = $facebook->getLoginUrl(
      * array('scope' => 'publish_stream')
      * );
-     * 
+     *
      * // If not authenticated, redirect to the facebook login dialog.
      * // The $login_url will take care of redirecting back to us
      * // after successful login.
@@ -136,21 +136,21 @@ if ( !$_USER -> isIG() ) {
      * $DBc->sqlQuery("INSERT INTO ach_fb_token (aft_player,aft_token,aft_date,aft_allow) VALUES ('".$_USER->getID()."','".$DBc->sqlEscape($facebook->getAccessToken())."','".time()."','1') ON DUPLICATE KEY UPDATE aft_token='".$DBc->sqlEscape($facebook->getAccessToken())."', aft_date='".time()."'");
      * }
      */
-    
-    
-    } 
+
+
+    }
 
 if ( !$_USER -> isIG && $_CONF['enable_webig'] == false ) {
     $c .= ach_render_forbidden( false );
-    
-    } 
+
+    }
 elseif ( $_USER -> isIG && $_CONF['enable_offgame'] == false ) {
     $c .= ach_render_forbidden( true );
-    
-    } 
+
+    }
 else {
     $c .= ach_render();
-    } 
+    }
 
 
 echo ryzom_app_render( strtoupper( get_translation( 'ach_app_name', $_USER -> getLang() ) ), $c, $_USER -> isIG() );

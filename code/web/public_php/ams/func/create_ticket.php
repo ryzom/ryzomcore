@@ -10,12 +10,12 @@ function create_ticket(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     if(WebUsers::isLoggedIn() && isset($_SESSION['ticket_user'])){
-        
+
         if(isset($_POST['target_id'])){
-            
+
             //if target_id is the same as session id or is admin
             if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']))  ){
-                
+
                 $category = filter_var($_POST['Category'], FILTER_SANITIZE_NUMBER_INT);
                 $title = filter_var($_POST['Title'], FILTER_SANITIZE_STRING);
                 $content = filter_var($_POST['Content'], FILTER_SANITIZE_STRING);
@@ -31,37 +31,43 @@ function create_ticket(){
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
                     //redirect to the new ticket.
                     if (Helpers::check_if_game_client()) {
+                header("Cache-Control: max-age=1");
                         header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }else{
+                header("Cache-Control: max-age=1");
                         header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }
-                    exit;
-                    
+                    throw new SystemExit();
+
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
                     print_r($e);
-                    exit;
+                    throw new SystemExit();
+                header("Cache-Control: max-age=1");
                     header("Location: index.php");
-                    exit;
+                    throw new SystemExit();
                 }
-                
+
             }else{
                 //ERROR: permission denied!
                 $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
                 header("Location: index.php?page=error");
-                exit;
+                throw new SystemExit();
             }
-    
+
         }else{
             //ERROR: The form was not filled in correclty
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=create_ticket");
-            exit;
-        }    
+            throw new SystemExit();
+        }
     }else{
         //ERROR: user is not logged in
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
-    }                
-    
+        throw new SystemExit();
+    }
+
 }
 

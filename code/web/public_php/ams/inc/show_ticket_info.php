@@ -6,18 +6,18 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function show_ticket_info(){
-   
+
     //if logged in
     if(WebUsers::isLoggedIn() && isset($_GET['id'])){
-        
+
         $result['ticket_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
         $target_ticket = new Ticket();
         $target_ticket->load_With_TId($result['ticket_id']);
-        
+
         if( $target_ticket->hasInfo() && (($target_ticket->getAuthor() ==   unserialize($_SESSION['ticket_user'])->getTUserId())  || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) ))){
             $result['ticket_title'] = $target_ticket->getTitle();
             $result['ticket_author'] = $target_ticket->getAuthor();
-            
+
             $ticket_info = new Ticket_Info();
             $ticket_info->load_With_Ticket($result['ticket_id']);
             $result['shard_id'] = $ticket_info->getShardId();
@@ -38,23 +38,25 @@ function show_ticket_info(){
             $result['user_id'] = $ticket_info->getUser_Id();
             global $IMAGELOC_WEBPATH;
             $result['IMAGELOC_WEBPATH'] = $IMAGELOC_WEBPATH;
-            
+
             if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
                 $result['isMod'] = "TRUE";
             }
             global $INGAME_WEBPATH;
             $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
-            
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
-    }    
+        throw new SystemExit();
+    }
 }

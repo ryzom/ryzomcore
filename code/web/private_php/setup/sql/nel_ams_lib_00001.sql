@@ -33,13 +33,6 @@ CREATE TABLE IF NOT EXISTS `ams_querycache` (
   `db` varchar(80) NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `ams_querycache`
---
-
-INSERT INTO `ams_querycache` (`SID`, `type`, `query`, `db`) VALUES
-(1, 'createUser', '["admin","WyId5UERpuB4U","localhost@localhost"]', 'shard');
-
 -- --------------------------------------------------------
 
 --
@@ -297,13 +290,6 @@ CREATE TABLE IF NOT EXISTS `ticket_user` (
   `Permission` int(3) NOT NULL DEFAULT '1',
   `ExternId` int(10) unsigned NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `ticket_user`
---
-
-INSERT INTO `ticket_user` (`TUserId`, `Permission`, `ExternId`) VALUES
-(1, 3, 1);
 
 -- --------------------------------------------------------
 
