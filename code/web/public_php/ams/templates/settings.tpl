@@ -73,7 +73,7 @@
 			</div>
 		</div><!--/span-->
 
-
+		{if $permission != '1'}
 		<div class="box span4">
 			<div class="box-header well" data-original-title="">
 				<h2><i class="icon-th"></i> Add User</h2>
@@ -148,7 +148,7 @@
 				</div>
 			</div>
 		</div><!--/span-->
-
+		{/if}
 
 		<div class="box span4">
 			<div class="box-header well" data-original-title="">
