@@ -36,6 +36,11 @@ class Helpers {
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 5;
 
+		if (function_exists('apc_cache_info')) {
+			// production
+			$smarty->compile_check = false;
+		}
+
          // needed by smarty.
         helpers :: create_folders ();
          global $FORCE_INGAME;
