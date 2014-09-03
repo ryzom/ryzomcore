@@ -29,7 +29,7 @@
  *
  */
 
-$PDOCache = array();
+//$PDOCache = array();
 
 class DBLayer {
 
@@ -47,23 +47,30 @@ class DBLayer {
 	*/
 	function __construct($db, $dbn = null)
 	{
-		global $PDOCache;
+		/*global $PDOCache;
 		if (isset($PDOCache[$db])) {
 			$this->PDO = $PDOCache[$db];
-		} else {
+		} else {*/
 			global $cfg;
 			$dsn = "mysql:";
 			$dsn .= "host=" . $cfg['db'][$db]['host'] . ";";
 			$dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";";
 			$dsn .= "port=" . $cfg['db'][$db]['port'] . ";";
+			//$dsn .= "charset=utf8;";
 
 			$opt = array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+				PDO::ATTR_PERSISTENT => false
 			);
 			$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
-			$PDOCache[$db] = $this->PDO;
-		}
+			//$PDOCache[$db] = $this->PDO;
+		/*}*/
+	}
+
+	function __destruct() {
+		//$this->PDO->query('KILL;');
+		$this->PDO = NULL;
 	}
 
 	/**
