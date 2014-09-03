@@ -286,9 +286,11 @@ class Users{
      * @param $user_id the extern id of the user (the id given by the www/CMS)
      * @return ok if it's get correctly added to the shard, else return lib offline and put in libDB, if libDB is also offline return liboffline.
      */
-     public static function createUser($values, $user_id){
+     public static function createUser($values, $user_id) {
+          ticket_user::createTicketUser($user_id, 1);
           try {
                //make connection with and put into shard db
+               $values["UId"] = $user_id;
                $dbs = new DBLayer("shard");
                $dbs->insert("user", $values);
                /*
@@ -298,7 +300,6 @@ class Users{
                $valuesRing['user_type'] = 'ut_pioneer';
                $dbr->insert("ring_users", $valuesRing);
                */
-               ticket_user::createTicketUser( $user_id, 1);
                return "ok";
           }
           catch (PDOException $e) {
@@ -306,15 +307,13 @@ class Users{
                try {
                     $dbl = new DBLayer("lib");
                     $dbl->insert("ams_querycache", array("type" => "createUser",
-                    "query" => json_encode(array($values["Login"],$values["Password"],$values["Email"])), "db" => "shard"));
-                    ticket_user::createTicketUser( $user_id , 1 );
+                    "query" => json_encode(array($values["Login"], $values["Password"], $values["Email"])), "db" => "shard"));
                     return "shardoffline";
-               }catch (PDOException $e) {
+               } catch (PDOException $e) {
                     print_r($e);
                     return "liboffline";
                }
           }
-
      }
 
      /**
