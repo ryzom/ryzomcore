@@ -25,8 +25,16 @@ class Users{
                $cpass = "";
                $email = "";
           }
+          
+          if ( helpers :: check_if_game_client() or isset($FORCE_INGAME) ) {
+            if ( isset( $_POST["TaC"] )) {
+                $tac="success";
+            }
+          } else {
+            $tac="success";
+          }
 
-          if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and (  isset( $_POST["TaC"] ) ) ){
+          if ( ( $user == "success" ) and ( $pass == "success" ) and ( $cpass == "success" ) and ( $email == "success" ) and ($tac=="success") ){
                return "success";
           }else{
                global $TOS_URL;

@@ -71,6 +71,7 @@ function change_mail(){
                                 $result['isMod'] = "TRUE";
                             }
                         }
+                        $result['CEMAIL_ERROR'] = true;
                         helpers :: loadtemplate( 'settings', $result);
                         exit;
                     }
@@ -83,7 +84,7 @@ function change_mail(){
                 }
         
             }else{
-                //ERROR: The form was not filled in correclty
+                //ERROR: The form was not filled in correctly
 		header("Location: index.php?page=settings");
 		exit;
             }    

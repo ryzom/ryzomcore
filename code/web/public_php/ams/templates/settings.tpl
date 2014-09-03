@@ -83,56 +83,60 @@
 					<form id="addUser" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Add User</legend>
 
-						<div class="control-group">
+						<div class="control-group {if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}error{/if}">
 							<label class="control-label">Username</label>
 								<div class="controls">
 									<div class="input-prepend">
 									<span style="margin-left:5px;" class="add-on"><i class="icon-user"></i></span>
-										<input type="text" placeholder="Username" name="Username" id="Username" class="input-xlarge">
+										<input type="text" placeholder="Username" name="Username" id="Username" class="input-xlarge" {if isset($prevUsername)}value="{$prevUsername}"{/if}>
+										{if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}<span class="help-inline">{$USERNAME}</span>{/if}
 									</div>
 								</div>
 						</div>
 
-						<div class="control-group ">
+						<div class="control-group {if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}error{/if}">
 							<label class="control-label">Password</label>
 								<div class="controls">
 								    <div class="input-prepend">
 										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
 										<input type="password" placeholder="Password" name="Password" id="Password" class="input-xlarge">
+										{if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$PASSWORD}</span>{/if}
 									 </div>
 								</div>
 						</div>
 
-						<div class="control-group ">
+						<div class="control-group {if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}error{/if}">
 							<label class="control-label">Confirm Password</label>
 								<div class="controls">
 								    <div class="input-prepend">
 										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
 										<input type="password" placeholder="Confirm Password" name="ConfirmPass" id="ConfirmPass" class="input-xlarge">
+										{if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$CPASSWORD}</span>{/if}
 									 </div>
 								</div>
 						</div>
 
-						<div class="control-group ">
+						<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}error{/if}">
 						<label class="control-label">Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
-									<input type="text" placeholder="Email" name="Email" id="Email" class="input-xlarge">
+									<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="Email" {if isset($prevEmail)}value="{$prevEmail}"{/if}>
+									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
 							    </div>
 							</div>
 						</div>
 
 
-						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "OK"}
+						{if isset($SUCCESS_ADD) and $SUCCESS_ADD eq "ok"}
 						<div class="alert alert-success">
-							The user is created!
+							The user has been created!
 						</div>
 						{/if}
 
-						{if isset($SUCCESS_PASS) and $SUCCESS_PASS eq "SHARDOFF"}
+						{if isset($SUCCESS_ADD) and $SUCCESS_ADD eq "shardoffline"}
 						<div class="alert alert-warning">
-							The user can't be created.
+							The user is created, though the shard seems offline, it may take some time to see the change on the shard.
 						</div>
 						{/if}
 
@@ -158,13 +162,13 @@
 				<div class="row-fluid">
 					<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Email</legend>
-						<div class="control-group {if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}error{/if}">
+						<div class="control-group {if isset($CEMAIL_ERROR) and $CEMAIL_ERROR eq "TRUE"}error{/if}">
 						<label class="control-label">New Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
 								<span class="add-on" style="margin-left:5px;"><i class="icon-envelope"></i></span>
 									<input type="text" class="input-xlarge" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
-									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
+									{if isset($CEMAIL_ERROR) and $CEMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
 
 							    </div>
 							</div>

@@ -15,6 +15,8 @@ function add_user(){
      //check if the POST variables are valid, before actual registering
      $result = $webUser->check_Register($params);
 
+     global $SITEBASE;
+     require_once($SITEBASE . '/inc/settings.php');
      // if all are good then create user
      if ( $result == "success"){
           $edit = array(
@@ -32,19 +34,26 @@ function add_user(){
                header('Location: email_sent.php');
                exit;
           }
-          $pageElements['status'] = $status;
-          $pageElements['no_visible_elements'] = 'TRUE';
-	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
-          helpers :: loadtemplate( 'register_feedback', $pageElements);
+          $pageElements = settings();
+          $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
+          $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+          $pageElements['SUCCESS_ADD'] = $status;
+          if (isset($_GET['page']) && $_GET['page']=="settings"){
+            helpers :: loadtemplate( 'settings', $pageElements);
+          }else{
+            $pageElements['no_visible_elements'] = 'TRUE';
+            helpers :: loadtemplate( 'register_feedback', $pageElements);
+          }
           exit;
-     }elseif ($_POST['page']=="settings"){
+     }elseif (isset($_GET['page']) && $_GET['page']=="settings"){
+          $pageElements = array_merge(settings(), $result);
           // pass error and reload template accordingly
-          $result['prevUsername'] = $_POST["Username"];
-          $result['prevPassword'] = $_POST["Password"];
-          $result['prevConfirmPass'] = $_POST["ConfirmPass"];
-          $result['prevEmail'] = $_POST["Email"];
-          $result['no_visible_elements'] = 'TRUE';
-          helpers :: loadtemplate( 'settings', $result);
+          $pageElements['prevUsername'] = $_POST["Username"];
+          $pageElements['prevPassword'] = $_POST["Password"];
+          $pageElements['prevConfirmPass'] = $_POST["ConfirmPass"];
+          $pageElements['prevEmail'] = $_POST["Email"];
+          $pageElements['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
+          helpers :: loadtemplate( 'settings', $pageElements);
           exit;
      }else{
           // pass error and reload template accordingly
