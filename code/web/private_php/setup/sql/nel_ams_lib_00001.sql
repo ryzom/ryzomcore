@@ -119,8 +119,8 @@ CREATE TABLE IF NOT EXISTS `plugins` (
 --
 
 INSERT INTO `plugins` (`Id`, `FileName`, `Name`, `Type`, `Owner`, `Permission`, `Status`, `Weight`, `Info`) VALUES
-(1, 'API_key_management', 'API_key_management', 'automatic', '', 'admin', 0, 0, '{"PluginName":"API Key Management","Description":"Provides public access to the API''s by generating access tokens.","Version":"1.0.0","Type":"automatic","TemplatePath":"..\\/..\\/..\\/private_php/ams\\/plugins\\/API_key_management\\/templates\\/index.tpl","":null}'),
-(2, 'Achievements', 'Achievements', 'Manual', '', 'admin', 0, 0, '{"PluginName":"Achievements","Description":"Returns the achivements of a user with respect to the character =.","Version":"1.0.0","TemplatePath":"..\\/..\\/..\\/private_php/ams\\/plugins\\/Achievements\\/templates\\/index.tpl","Type":"Manual","":null}');
+(1, 'API_key_management', 'API_key_management', 'automatic', '', 'admin', 0, 0, '{"PluginName":"API Key Management","Description":"Provides public access to the API''s by generating access tokens.","Version":"1.0.0","Type":"automatic","TemplatePath":"..\\/..\\/..\\/private_php\\/ams\\/plugins\\/API_key_management\\/templates\\/index.tpl","":null}'),
+(2, 'Achievements', 'Achievements', 'Manual', '', 'admin', 0, 0, '{"PluginName":"Achievements","Description":"Returns the achivements of a user with respect to the character =.","Version":"1.0.0","TemplatePath":"..\\/..\\/..\\/private_php\\/ams\\/plugins\\/Achievements\\/templates\\/index.tpl","Type":"Manual","":null}');
 
 -- --------------------------------------------------------
 

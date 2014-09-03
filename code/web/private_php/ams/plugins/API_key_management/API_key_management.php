@@ -157,12 +157,12 @@ function api_key_management_hook_load_db()
     global $var_set;
      global $return_set;
 
-     $db = new DBLayer( 'lib' );
+     $dbl = new DBLayer("lib");
 
      if ( isset( $_SESSION['user'] ) )
          {
         // returns the registered keys
-        $sth = $db -> select( 'ams_api_keys', array( 'user' => $_SESSION['user'] ), 'User = :user' );
+        $sth = $dbl -> select( 'ams_api_keys', array( 'user' => $_SESSION['user'] ), 'User = :user' );
          $row = $sth -> fetchAll();
          $return_set['api_keys'] = $row;
 
@@ -170,12 +170,16 @@ function api_key_management_hook_load_db()
         $com = array_column( $return_set['api_keys'], 'UserCharacter' );
 
          // returns the characters with respect to the user id in the ring_tool->characters
-        $db = new DBLayer( 'ring' );
-         $sth = $db -> selectWithParameter( 'char_name', 'characters' , array(), '1' );
-         $row = $sth -> fetch();
+         try {
+            $dbl = new DBLayer( 'ring' );
+            $sth = $dbl -> selectWithParameter( 'char_name', 'characters' , array(), '1' );
+            $row = $sth -> fetch();
 
-         // loop through the character list and remove the character if already have an api key
-        $return_set['characters'] = array_diff( $row, $com );
+            // loop through the character list and remove the character if already have an api key
+            $return_set['characters'] = array_diff( $row, $com );
+         }catch( PDOException $e ) {
+            error_log($e->getMessage());
+}
          }
     }
 
