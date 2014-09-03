@@ -60,6 +60,10 @@
 					<span class="icon-bar"></span>
 				</a>
 				<a class="brand" href="index.php"> <img alt="Ryzom Core Logo" src="img/ryzomcore_166_62.png"></a>
+				<div class="flags_logged_in">
+				      <img onclick="reloadPageWithLanguage('en');" src="img/en.png">
+				      <img onclick="reloadPageWithLanguage('fr');" src="img/fr.png">
+				</div>
 
 				<!-- theme selector starts -->
 				<!--<div class="btn-group pull-right theme-container">
@@ -93,12 +97,6 @@
 					</ul>
 				</div>
 				{/if}
-				<div class="btn-group pull-right">
-				    <div class="flags">
-				      <img src="img/en.png" onclick="reloadPageWithLanguage('en');"/>
-				      <img src="img/fr.png" onclick="reloadPageWithLanguage('fr');"/>
-				    </div>
-				</div>
 				<!-- user dropdown ends -->
 			</div>
 		</div>
@@ -113,7 +111,6 @@
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						{block name=menu}{/block}
 					</ul>
-					<label id="for-is-ajax" class="hidden-tablet" for="is-ajax"><input id="is-ajax" type="checkbox"> Ajax on menu</label>
 					<!--<label id="for-is-ajax" class="hidden-tablet" for="is-ajax" style="visibility:hidden;"><div id="uniform-is-ajax" class="checker"><span class="checked"><input style="opacity: 0;" id="is-ajax" type="checkbox"></span></div> Ajax on menu</label>--!>
 				</div><!--/.well -->
 			</div><!--/span-->

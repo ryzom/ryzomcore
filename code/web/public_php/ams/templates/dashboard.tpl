@@ -4,25 +4,25 @@
 	<div class="sortable row-fluid ui-sortable">
 		<a data-original-title="{$nrAssignedWaiting} Assigned to you and waiting for support!" data-rel="tooltip" class="well span3 top-block"
 		   href="index.php?page=show_queue&get=create&userid={$user_id}&groupid=1&what=waiting_for_support&how=assigned&who=user">
-			<span class="icon32 icon-blue icon-alert"></span>
+			<span class="glyphicon glyphicon-exclamation-sign lg-icon red"></span>
 			<div>Tickets Waiting for Direct Action</div>
 			<span class="notification red">{$nrAssignedWaiting}</span>
 		</a>
 
 		<a data-original-title="{$nrToDo} Tickets Todo." data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_queue&get=todo">
-			<span class="icon32 icon-blue icon-tag"></span>
+			<span class="glyphicon glyphicon-edit lg-icon yellow"></span>
 			<div>Tickets Todo</div>
 			<span class="notification red">{$nrToDo}</span>
 		</a>
 
 		<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_ticket&id={$newestTicketId}">
-			<span class="icon32 icon-blue icon-flag"></span>
+			<span class="glyphicon glyphicon-flag lg-icon green"></span>
 			<div>Newest Ticket</div>
 			<span class="notification blue">{$newestTicketTitle}</span>
 		</a>
 
 		<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_queue&get=all">
-			<span class="icon32 icon-blue icon-archive"></span>
+			<span class="glyphicon glyphicon-briefcase lg-icon blue"></span>
 			<div>Total amount of Tickets</div>
 			<span class="notification blue">{$nrTotalTickets}</span>
 		</a>

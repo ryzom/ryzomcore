@@ -25,7 +25,7 @@
 				<div class="clearfix"></div>
 
 				<div class="input-prepend">
-				<label for="remember" class="remember"><div class="checker" id="uniform-remember"><span><input type="checkbox" id="remember" style="opacity: 0;"></span></div>Remember me</label>
+				<label for="remember" class="remember "><div class="checkbox" id="uniform-remember"><span><input type="checkbox" id="remember" ></span></div>Remember me</label>
 				</div>
 				<div class="clearfix"></div>
 			

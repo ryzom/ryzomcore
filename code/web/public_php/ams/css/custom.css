@@ -8,6 +8,7 @@
 	
 .top-block {
     background-color: white;
+	border-radius: 5px;
 }	
 	
 .row-fluid [class*="span"] {
@@ -102,4 +103,23 @@ margin-top: 10px;
 .gender-list {
 	margin-left: 22px;
 	margin-bottom: -20px;
+}
+
+.lg-icon {
+    font-size: 20px;
+	margin: 5px;
+}
+
+.sidebar-nav {
+    padding-top: 5px;
+}
+
+.sidebar-nav .nav-header{
+	color:#666;
+}
+
+.flags_logged_in{
+  display: inline;
+  position:absolute;
+  margin:7px;
 }
