@@ -9,7 +9,7 @@ function add_user_to_sgroup(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     if(WebUsers::isLoggedIn()){
-        
+
         //check if the that executed the task is an admin.
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
             $name = filter_var($_POST['Name'],FILTER_SANITIZE_STRING);
@@ -24,7 +24,7 @@ function add_user_to_sgroup(){
                     //return error message.
                     $result['RESULT_OF_ADDING'] = "NOT_MOD_OR_ADMIN";
                 }
-            
+
             }else{
                 $result['RESULT_OF_ADDING'] = "USER_NOT_EXISTING";
             }
@@ -40,18 +40,18 @@ function add_user_to_sgroup(){
             }else{
                 header("Location: ".$WEBPATH."?page=show_sgroup&id=".$id);
             }
-            exit;
-            
+            die();
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            exit;
+            die();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        exit;
+        die();
     }
 
 }

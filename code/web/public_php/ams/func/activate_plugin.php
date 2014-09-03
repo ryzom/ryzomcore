@@ -4,14 +4,14 @@
  * This can be done by providing id using $_GET global variable of the plugin which
  * we want to activate. After getting id we update the respective plugin with status
  * activate which here means '1' .
- * 
- * @author Shubham Meena, mentored by Matthew Lagoe 
+ *
+ * @author Shubham Meena, mentored by Matthew Lagoe
  */
 function activate_plugin() {
-    
+
     // if logged in
     if ( WebUsers :: isLoggedIn() ) {
-        
+
         if ( isset( $_GET['id'] ) )
              {
             // id of plugin to activate
@@ -22,20 +22,20 @@ function activate_plugin() {
              {
 				 // if result is successfull it redirects and shows success message
                 header( "Location: index.php?page=plugins&result=3" );
-                 exit;
-                 } 
+                 die();
+                 }
             else
                  {
-				//if result is unsuccessfull it redirects and throws error 	 
+				//if result is unsuccessfull it redirects and throws error
                 header( "Location: index.php?page=plugins&result=4" );
-                 exit;
-                 } 
-            } 
+                 die();
+                 }
+            }
         else
              {
 			//if $_GET variable is not set it redirects and shows error
             header( "Location: index.php?page=plugins&result=4" );
-             exit;
-             } 
-        } 
+             die();
+             }
+        }
     }

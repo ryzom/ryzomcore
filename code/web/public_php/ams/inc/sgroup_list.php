@@ -8,10 +8,10 @@
 function sgroup_list(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
-    //if logged in 
+    //if logged in
     if(WebUsers::isLoggedIn()){
         if(Ticket_User::isMod(unserialize($_SESSION['ticket_user']))){
-            
+
             //if delete GET var is set and user is admin, then delete the groups entry.
             if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
@@ -21,7 +21,7 @@ function sgroup_list(){
                 }else{
                     header("Location: ".$WEBPATH."?page=sgroup_list");
                 }
-                exit;             
+                die();
             }
             if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $result['isAdmin'] = "TRUE";
@@ -34,12 +34,12 @@ function sgroup_list(){
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            exit;
+            die();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        exit;
+        die();
     }
-    
+
 }

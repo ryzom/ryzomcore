@@ -15,7 +15,7 @@ function show_sgroup(){
             if( isset($_GET['id'])){
                 //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
-                
+
                 //if the $_GET['delete'] var is set and the user executing is an admin, an entry will be deleted out of the support group.
                 if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
@@ -25,14 +25,14 @@ function show_sgroup(){
                     }else{
                         header("Location: ".$WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
                     }
-                    exit;
-                    
+                    die();
+
                 }
-                
+
                 if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $result['isAdmin'] = "TRUE";
                 }
-                
+
                 $group = Support_Group::getGroup($result['target_id']);
                 $result['groupsname'] = $group->getName();
                 $result['groupemail'] = $group->getGroupEmail();
@@ -58,26 +58,26 @@ function show_sgroup(){
                 }
 
                 return $result;
-                
-            
+
+
             }else{
-                
+
                 //ERROR: No page specified!
                 $_SESSION['error_code'] = "404";
                 header("Location: ams?page=error");
-                exit;
+                die();
             }
-                
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            exit;
+            die();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        exit;
+        die();
     }
-    
+
 }

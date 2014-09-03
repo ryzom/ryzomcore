@@ -7,14 +7,14 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function change_info(){
-    
+
  try{
 	//if logged in
         if(WebUsers::isLoggedIn()){
-            
+
             if(isset($_POST['target_id'])){
-		
-                // check if the user who executed this function is the person of whom the information is or if it's a mod/admin. 
+
+                // check if the user who executed this function is the person of whom the information is or if it's a mod/admin.
                 if(  ($_POST['target_id'] == $_SESSION['id']) || Ticket_User::isMod(unserialize($_SESSION['ticket_user']) ) ){
                     if($_POST['target_id'] == $_SESSION['id']){
 			//if the info is of the executing user himself
@@ -24,21 +24,21 @@ function change_info(){
 			$webUser = new WebUsers($_POST['target_id']);
                         $target_username = $webUser->getUsername();
                     }
-                    
+
                     $webUser = new WebUsers($_POST['target_id']);
                     //use current info to check for changes
                     $current_info = $webUser->getInfo();
-		        
+
 		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_STRING);
 		    $current_info['LastName'] = filter_var($current_info['LastName'], FILTER_SANITIZE_STRING);
 		    $current_info['Country'] = filter_var($current_info['Country'], FILTER_SANITIZE_STRING);
 		    $current_info['Gender'] = filter_var($current_info['Gender'], FILTER_SANITIZE_NUMBER_INT);
-		
-                    
+
+
                     $updated = false;
                     $values = Array();
                     $values['user'] = $target_username;
-		    
+
 		    //make the query that will update the data.
                     $query = "UPDATE ams_user SET ";
                     if(($_POST['FirstName'] != "") && ($_POST['FirstName'] != $current_info['FirstName'])){
@@ -72,7 +72,7 @@ function change_info(){
 			}
                         $updated = true;
                         $values['gender'] = filter_var($_POST['Gender'], FILTER_SANITIZE_NUMBER_INT);
-		    } 
+		    }
                     //finish the query!
                     $query = $query . "WHERE Login = :user";
 
@@ -80,7 +80,7 @@ function change_info(){
                     if($updated){
                         //execute the query in the web DB.
                         $dbw = new DBLayer("web");
-                        $dbw->execute($query,$values);  
+                        $dbw->execute($query,$values);
                     }
 
 		    //reload the settings inc function before recalling the settings template.
@@ -97,29 +97,29 @@ function change_info(){
 		    global $INGAME_WEBPATH;
                     $result['ingame_webpath'] = $INGAME_WEBPATH;
                     helpers :: loadtemplate( 'settings', $result);
-                    exit;
-                    
+                    die();
+
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
-                    exit;
+                    die();
                 }
-        
+
             }else{
                 //ERROR: The form was not filled in correclty
 		header("Location: index.php?page=settings");
-		exit;
-            }    
+		die();
+            }
         }else{
             //ERROR: user is not logged in
 	    header("Location: index.php");
-	    exit;
+	    die();
         }
-                  
+
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
          print_r($e);
-         exit;
-    }   
+         die();
+    }
 }

@@ -7,11 +7,11 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function change_password(){
-	
+
     try{
         //if logged in
         if(WebUsers::isLoggedIn()){
-            
+
             if(isset($_POST['target_id'])){
                 $adminChangesOther = false;
                 //if target_id is the same as session id or is admin
@@ -27,7 +27,7 @@ function change_password(){
                         $adminChangesOther = true;
                         $_POST["CurrentPass"] = "dummypass";
                     }
-                    
+
                     $webUser = new WebUsers($_POST['target_id']);
                     $params = Array( 'user' => $target_username, 'CurrentPass' => $_POST["CurrentPass"], 'NewPass' => $_POST["NewPass"], 'ConfirmNewPass' => $_POST["ConfirmNewPass"], 'adminChangesOther' => $adminChangesOther);
                     $result = $webUser->check_change_password($params);
@@ -47,10 +47,10 @@ function change_password(){
                         $succresult['username'] = $_SESSION['user'];
                         $succresult['target_id'] = $_POST['target_id'];
                         helpers :: loadtemplate( 'settings', $succresult);
-                        exit;
-                         
+                        die();
+
                     }else{
-			
+
                         $result['prevCurrentPass'] = filter_var($_POST["CurrentPass"], FILTER_SANITIZE_STRING);
                         $result['prevNewPass'] = filter_var($_POST["NewPass"], FILTER_SANITIZE_STRING);
                         $result['prevConfirmNewPass'] = filter_var($_POST["ConfirmNewPass"], FILTER_SANITIZE_STRING);
@@ -62,35 +62,35 @@ function change_password(){
                         global $SITEBASE;
                         require_once($SITEBASE . '/inc/settings.php');
                         $settings = settings();
-                        
+
                         $result = array_merge($result,$settings);
                         helpers :: loadtemplate( 'settings', $result);
-                        exit;
+                        die();
                     }
-                    
+
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
-                    exit;
+                    die();
                 }
-        
+
             }else{
                 //ERROR: The form was not filled in correclty
 		header("Location: index.php?page=settings");
-		exit;
-            }    
+		die();
+            }
         }else{
             //ERROR: user is not logged in
 	    header("Location: index.php");
-	    exit;
+	    die();
         }
-                  
+
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
          print_r($e);
-         exit;
+         die();
     }
-    
+
 }
 

@@ -11,7 +11,7 @@ function add_user(){
      global $INGAME_WEBPATH;
      $params = Array('Username' =>  $_POST["Username"], 'Password' =>  $_POST["Password"], 'ConfirmPass' =>  $_POST["ConfirmPass"], 'Email' =>  $_POST["Email"]);
      $webUser = new WebUsers();
-     
+
      //check if the POST variables are valid, before actual registering
      $result = $webUser->check_Register($params);
 
@@ -30,14 +30,14 @@ function add_user(){
           if(Helpers::check_if_game_client()){
                //if registering ingame then we have to set the header and dont need to reload the template.
                header('Location: email_sent.php');
-               exit;
+               die();
           }
           $pageElements['status'] = $status;
           $pageElements['no_visible_elements'] = 'TRUE';
 	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register_feedback', $pageElements);
-          exit;
-     }elseif ($_POST['page']=="settings"){
+          die();
+     }elseif (isset($_POST['page']) && $_POST['page']=="settings"){
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
           $result['prevPassword'] = $_POST["Password"];
@@ -45,7 +45,7 @@ function add_user(){
           $result['prevEmail'] = $_POST["Email"];
           $result['no_visible_elements'] = 'TRUE';
           helpers :: loadtemplate( 'settings', $result);
-          exit;
+          die();
      }else{
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -55,37 +55,35 @@ function add_user(){
           $result['no_visible_elements'] = 'TRUE';
           $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
-          exit;
+          die();
      }
 }
 
 //use the valid userdata to create the new user.
 function write_user($newUser){
-              
+
      //create salt here, because we want it to be the same on the web/server
      $hashpass = crypt($newUser["pass"], WebUsers::generateSALT());
-     
+
      $params = array(
     	  'Login' => $newUser["name"],
           'Password' => $hashpass,
-          'Email' => $newUser["mail"]      
+          'Email' => $newUser["mail"]
      );
      try{
           //make new webuser
           $user_id = WebUsers::createWebuser($params['Login'], $params['Password'], $params['Email']);
-               
+
           //Create the user on the shard + in case shard is offline put copy of query in query db
           //returns: ok, shardoffline or liboffline
           $result = WebUsers::createUser($params, $user_id);
           Users::createPermissions(array($newUser["name"]));
-    
-          
+
+
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db
       print_r($e);
-      exit;
+      die();
      }
-     
-     return $result;
 
 }

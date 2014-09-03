@@ -5,7 +5,7 @@ function reset_password(){
     $email = filter_var($_GET["email"], FILTER_SANITIZE_EMAIL);
     $user = filter_var($_GET["user"], FILTER_SANITIZE_STRING);
     $key = filter_var($_GET["key"], FILTER_SANITIZE_STRING);
-    
+
     $password = filter_var($_POST['NewPass'], FILTER_SANITIZE_STRING);
     $confirmpass = filter_var($_POST['ConfirmNewPass'], FILTER_SANITIZE_STRING);
 
@@ -24,12 +24,12 @@ function reset_password(){
             }
             $result['no_visible_elements'] = 'TRUE';
             helpers :: loadtemplate( 'reset_success', $result);
-            exit;
-        }    
+            die();
+        }
         $GETString = "";
         foreach($_GET as $key => $value){
                 $GETString = $GETString . $key . '=' . $value . "&";
-        }		
+        }
         if($GETString != ""){
                 $GETString = '?'.$GETString;
         }
@@ -38,7 +38,7 @@ function reset_password(){
         $result['prevConfirmNewPass'] = $confirmpass;
         $result['no_visible_elements'] = 'TRUE';
         helpers :: loadtemplate( 'reset_password', $result);
-        exit;
-    
+        die();
+
     }
 }

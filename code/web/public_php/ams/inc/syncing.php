@@ -6,19 +6,19 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function syncing(){
-    
+
     if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
-        
+
         //return a paginated version of all unsynced changes.
         $pagination = new Pagination("SELECT * FROM ams_querycache","lib",5,"Querycache");
         $pageResult['liblist'] = Gui_Elements::make_table($pagination->getElements() , Array("getSID","getType"), Array("id","type"));
         $pageResult['links'] = $pagination->getLinks(5);
         $pageResult['lastPage'] = $pagination->getLast();
         $pageResult['currentPage'] = $pagination->getCurrent();
-        
+
         global $INGAME_WEBPATH;
         $pageResult['ingame_webpath'] = $INGAME_WEBPATH;
-        
+
         //check if shard is online
         try{
             $dbs = new DBLayer("shard");
@@ -31,6 +31,6 @@ function syncing(){
         //ERROR: No access!
         $_SESSION['error_code'] = "403";
         header("Location: index.php?page=error");
-        exit;
+        die();
     }
 }

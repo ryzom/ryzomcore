@@ -13,7 +13,7 @@ function settings(){
                     //ERROR: No access!
                     $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
-                    exit;
+                    die();
                 }else{
                     $webUser = new Webusers($_GET['id']);
                     $result = $webUser->getInfo();
@@ -47,7 +47,7 @@ function settings(){
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        exit;
+        die();
     }
 }
 
