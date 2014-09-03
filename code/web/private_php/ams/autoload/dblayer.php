@@ -121,10 +121,10 @@ class DBLayer {
 	* @param $data the parameters that are being inserted into table.
 	* @return returns the id of the last inserted element.
 	*/
-	public function executeReturnId( $tb_name, $data ) {
+	public function executeReturnId( $tb_name, $data, $datafunc = array() ) {
 		$this->useDb();
-		$field_values = ':' . implode( ',:', array_keys( $data ) );
-		$field_options = implode( ',', array_keys( $data ) );
+		$field_options = implode(',', array_merge(array_keys($data), array_keys($datafunc)));
+		$field_values = implode(',', array_merge(array(':' . implode(',:', array_keys($data))), array_values($datafunc)));
 		try {
 			$sth = $this -> PDO -> prepare( "INSERT INTO $tb_name ($field_options) VALUE ($field_values)" );
 			foreach ( $data as $key => $value )
