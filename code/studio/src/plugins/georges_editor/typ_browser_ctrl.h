@@ -28,6 +28,9 @@ public:
 	void setTyp( NLGEORGES::CType *typ ){ m_typ = typ; }
 	void setBrowser( QtTreePropertyBrowser *browser ){ m_browser = browser; }
 
+Q_SIGNALS:
+	void modified( const QString &k, const QString &v );
+
 private Q_SLOTS:
 	void onVariantValueChanged( QtProperty *p, const QVariant &v );
 	void onEnumValueChanged( QtProperty *p, int v );

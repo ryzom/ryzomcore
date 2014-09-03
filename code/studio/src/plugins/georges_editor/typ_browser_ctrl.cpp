@@ -7,6 +7,43 @@
 
 #include "nel/georges/type.h"
 
+namespace
+{
+	QString typeToString( int v )
+	{
+		QString s;
+
+		switch( v )
+		{
+		case NLGEORGES::UType::UnsignedInt: s = "UnsignedInt"; break;
+		case NLGEORGES::UType::SignedInt: s = "SignedInt"; break;
+		case NLGEORGES::UType::Double: s = "Double"; break;
+		case NLGEORGES::UType::String: s = "String"; break;
+		case NLGEORGES::UType::Color: s = "Color"; break;
+		}
+
+		return s;
+	}
+
+	QString uitypeToString( int v )
+	{
+		QString s;
+
+		switch( v )
+		{
+		case NLGEORGES::CType::Edit: s = "Edit"; break;
+		case NLGEORGES::CType::EditSpin: s = "EditSpin"; break;
+		case NLGEORGES::CType::NonEditableCombo: s = "NonEditableCombo"; break;
+		case NLGEORGES::CType::FileBrowser: s = "FileBrowser"; break;
+		case NLGEORGES::CType::BigEdit: s = "BigEdit"; break;
+		case NLGEORGES::CType::ColorEdit: s = "ColorEdit"; break;
+		case NLGEORGES::CType::IconWidget: s = "IconWidget"; break;
+		}
+
+		return s;
+	}
+}
+
 TypBrowserCtrl::TypBrowserCtrl( QObject *parent ) :
 QObject( parent )
 {
@@ -106,20 +143,32 @@ void TypBrowserCtrl::onVariantValueChanged( QtProperty *p, const QVariant &v )
 	{
 		m_typ->Increment = v.toString().toUtf8().constData();
 	}
+	else
+		return;
+
+	Q_EMIT modified( n, v.toString().toUtf8().constData() );
 }
 
 void TypBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
 {
 	QString n = p->propertyName();
+	QString value;
+
 	if( n == "type" )
 	{
 		m_typ->Type = NLGEORGES::UType::TType( v );
+		value = typeToString( v );
 	}
 	else
 	if( n == "uitype" )
 	{
 		m_typ->UIType = NLGEORGES::CType::TUI( v );
+		value = uitypeToString( v );
 	}
+	else
+		return;
+
+	Q_EMIT modified( n, value );
 }
 
 void TypBrowserCtrl::enableMgrConnections()

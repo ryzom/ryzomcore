@@ -169,12 +169,18 @@ void GeorgesTypDialog::onModified()
 	Q_EMIT modified();
 }
 
+void GeorgesTypDialog::onModified( const QString &k, const QString &v )
+{
+	onModified();
+}
+
 void GeorgesTypDialog::setupConnections()
 {
 	connect( m_ui.addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
 	connect( m_ui.removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 
 	connect( m_ui.tree, SIGNAL( itemChanged( QTreeWidgetItem*, int ) ), this, SLOT( onItemChanged( QTreeWidgetItem*, int ) ) );
+	connect( m_pvt->ctrl, SIGNAL( modified( const QString&, const QString& ) ), this, SLOT( onModified( const QString&, const QString& ) ) );
 }
 
 void GeorgesTypDialog::log( const QString &msg )
