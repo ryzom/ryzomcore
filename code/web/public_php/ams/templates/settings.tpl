@@ -66,7 +66,7 @@
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
-								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Change Password</button>
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Change Password</button>
 							</div>
 						</div>
 					</form>
@@ -148,7 +148,7 @@
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
-								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Create User</button>
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Create User</button>
 							</div>
 						</div>
 					</form>
@@ -197,7 +197,7 @@
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
-								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Change Email</button>
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Change Email</button>
 							</div>
 						</div>
 					</form>
@@ -234,7 +234,7 @@
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
-								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Change Updates</button>
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Change Updates</button>
 							</div>
 						</div>
 					</form>
@@ -315,7 +315,7 @@
 						<div class="control-group">
 							<label class="control-label"></label>
 							<div class="controls">
-								<button type="submit" class="btn btn-primary" style="margin-left:5px; margin-top:10px;">Change Info</button>
+								<button type="submit" class="btn btn-primary" style="margin-left:5px;">Change Info</button>
 							</div>
 						</div>
 					</form>
