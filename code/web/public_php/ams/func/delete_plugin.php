@@ -30,14 +30,14 @@ function delete_plugin() {
 
                     //if result	successfull redirect and show success message
                      header( "Location: index.php?page=plugins&result=2" );
-                     die();
+                     throw new SystemExit();
 
                      }
                 else
                      {
 					// if result unsuccessfull redirect and show error message
                     header( "Location: index.php?page=plugins&result=0" );
-                     die();
+                     throw new SystemExit();
                      }
                 }
             }
@@ -45,7 +45,7 @@ function delete_plugin() {
              {
 			// if result unsuccessfull redirect and show error message
             header( "Location: index.php?page=plugins&result=0" );
-             die();
+             throw new SystemExit();
              }
         }
     }

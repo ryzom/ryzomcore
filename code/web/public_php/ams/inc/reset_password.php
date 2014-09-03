@@ -26,6 +26,6 @@ function reset_password(){
         global $WEBPATH;
         $_SESSION['error_code'] = "403";
         header("Location: ".$WEBPATH."?page=error");
-        die();
+        throw new SystemExit();
     }
 }

@@ -23,13 +23,13 @@ function deactivate_plugin() {
              {
 				// if result is successfull it redirects and shows success message
                 header( "Location: index.php?page=plugins&result=5" );
-                 die();
+                 throw new SystemExit();
                  }
             else
                  {
 				// if result is unsuccessfull it redirects and shows success message
                 header( "Location: index.php?page=plugins&result=6" );
-                 die();
+                 throw new SystemExit();
 
                  }
             }
@@ -37,7 +37,7 @@ function deactivate_plugin() {
              {
 			//if $_GET variable is not set it redirects and shows error
             header( "Location: index.php?page=plugins&result=6" );
-             die();
+             throw new SystemExit();
              }
         }
     }

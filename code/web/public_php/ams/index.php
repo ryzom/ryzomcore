@@ -14,10 +14,14 @@
 // load required pages and turn error reporting on/off
 error_reporting( E_ALL );
 ini_set( 'display_errors', 'on' );
+
+class SystemExit extends Exception {}
+try {
+
 if (!file_exists( '../is_installed')) {
 	header("Cache-Control: max-age=1");
 	header('Location: ../setup', true, 303);
-	die();
+	throw new SystemExit();
 }
 
 require( '../config.php' );
@@ -129,3 +133,6 @@ foreach( $hook_content as $key => $value )
 
 // load the template with the variables in the $return array
 helpers :: loadTemplate( $page , $return );
+
+}
+catch (SystemExit $e) { /* do nothing */ }

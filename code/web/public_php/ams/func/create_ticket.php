@@ -35,32 +35,32 @@ function create_ticket(){
                     }else{
                         header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }
-                    die();
+                    throw new SystemExit();
 
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
                     print_r($e);
-                    die();
+                    throw new SystemExit();
                     header("Location: index.php");
-                    die();
+                    throw new SystemExit();
                 }
 
             }else{
                 //ERROR: permission denied!
                 $_SESSION['error_code'] = "403";
                 header("Location: index.php?page=error");
-                die();
+                throw new SystemExit();
             }
 
         }else{
             //ERROR: The form was not filled in correclty
             header("Location: index.php?page=create_ticket");
-            die();
+            throw new SystemExit();
         }
     }else{
         //ERROR: user is not logged in
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 }

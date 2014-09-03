@@ -18,7 +18,7 @@ function createticket(){
                 //ERROR: No access!
                 $_SESSION['error_code'] = "403";
                 header("Location: index.php?page=error");
-                die();
+                throw new SystemExit();
 
             }else{
                 //if user_id is given, then set it as the target_id
@@ -48,7 +48,7 @@ function createticket(){
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 }

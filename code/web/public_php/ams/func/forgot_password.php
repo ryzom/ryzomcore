@@ -11,7 +11,7 @@ function forgot_password(){
             $result['EMAIL_ERROR'] = 'TRUE';
             $result['no_visible_elements'] = 'TRUE';
             helpers :: loadtemplate( 'forgot_password', $result);
-            die();
+            throw new SystemExit();
         }
         $webUser = new WebUsers($target_id);
         $target_username = $webUser->getUsername();
@@ -44,7 +44,7 @@ function forgot_password(){
         $result['prevEmail'] = $email;
         $result['no_visible_elements'] = 'TRUE';
         helpers :: loadtemplate( 'forgot_password', $result);
-        die();
+        throw new SystemExit();
 
 
 }

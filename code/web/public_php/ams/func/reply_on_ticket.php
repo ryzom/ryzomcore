@@ -46,25 +46,25 @@ function reply_on_ticket(){
                 }else{
                     header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
                 }
-                die();
+                throw new SystemExit();
 
             }catch (PDOException $e) {
                 //ERROR: LIB DB is not online!
                 print_r($e);
                 //header("Location: index.php");
-                die();
+                throw new SystemExit();
             }
 
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            die();
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 }

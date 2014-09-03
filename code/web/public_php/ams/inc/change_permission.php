@@ -27,7 +27,7 @@ function change_permission(){
                 }else{
                     header("Location: ".$WEBPATH."?page=show_user&id=".$user_id);
                 }
-                die();
+                throw new SystemExit();
 
 
             }else{
@@ -37,21 +37,21 @@ function change_permission(){
                 }else{
                     header("Location: ".$WEBPATH."?page=show_user&id=".$user_id);
                 }
-                die();
+                throw new SystemExit();
             }
 
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            die();
+            throw new SystemExit();
 
         }
 
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 

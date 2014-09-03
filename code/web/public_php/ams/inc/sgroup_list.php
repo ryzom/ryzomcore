@@ -21,7 +21,7 @@ function sgroup_list(){
                 }else{
                     header("Location: ".$WEBPATH."?page=sgroup_list");
                 }
-                die();
+                throw new SystemExit();
             }
             if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $result['isAdmin'] = "TRUE";
@@ -34,12 +34,12 @@ function sgroup_list(){
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            die();
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 }

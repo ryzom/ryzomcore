@@ -24,7 +24,7 @@ function reset_password(){
             }
             $result['no_visible_elements'] = 'TRUE';
             helpers :: loadtemplate( 'reset_success', $result);
-            die();
+            throw new SystemExit();
         }
         $GETString = "";
         foreach($_GET as $key => $value){
@@ -38,7 +38,7 @@ function reset_password(){
         $result['prevConfirmNewPass'] = $confirmpass;
         $result['no_visible_elements'] = 'TRUE';
         helpers :: loadtemplate( 'reset_password', $result);
-        die();
+        throw new SystemExit();
 
     }
 }

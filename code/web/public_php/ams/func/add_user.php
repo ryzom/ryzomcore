@@ -30,13 +30,13 @@ function add_user(){
           if(Helpers::check_if_game_client()){
                //if registering ingame then we have to set the header and dont need to reload the template.
                header('Location: email_sent.php');
-               die();
+               throw new SystemExit();
           }
           $pageElements['status'] = $status;
           $pageElements['no_visible_elements'] = 'TRUE';
 	  $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register_feedback', $pageElements);
-          die();
+          throw new SystemExit();
      }elseif (isset($_POST['page']) && $_POST['page']=="settings"){
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -45,7 +45,7 @@ function add_user(){
           $result['prevEmail'] = $_POST["Email"];
           $result['no_visible_elements'] = 'TRUE';
           helpers :: loadtemplate( 'settings', $result);
-          die();
+          throw new SystemExit();
      }else{
           // pass error and reload template accordingly
           $result['prevUsername'] = $_POST["Username"];
@@ -55,7 +55,7 @@ function add_user(){
           $result['no_visible_elements'] = 'TRUE';
           $pageElements['ingame_webpath'] = $INGAME_WEBPATH;
           helpers :: loadtemplate( 'register', $result);
-          die();
+          throw new SystemExit();
      }
 }
 
@@ -83,7 +83,7 @@ function write_user($newUser){
      }catch (PDOException $e) {
       //go to error page or something, because can't access website db
       print_r($e);
-      die();
+      throw new SystemExit();
      }
 
 }

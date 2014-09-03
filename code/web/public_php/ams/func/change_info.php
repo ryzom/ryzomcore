@@ -97,29 +97,29 @@ function change_info(){
 		    global $INGAME_WEBPATH;
                     $result['ingame_webpath'] = $INGAME_WEBPATH;
                     helpers :: loadtemplate( 'settings', $result);
-                    die();
+                    throw new SystemExit();
 
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
                     header("Location: index.php?page=error");
-                    die();
+                    throw new SystemExit();
                 }
 
             }else{
                 //ERROR: The form was not filled in correclty
 		header("Location: index.php?page=settings");
-		die();
+		throw new SystemExit();
             }
         }else{
             //ERROR: user is not logged in
 	    header("Location: index.php");
-	    die();
+	    throw new SystemExit();
         }
 
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
          print_r($e);
-         die();
+         throw new SystemExit();
     }
 }

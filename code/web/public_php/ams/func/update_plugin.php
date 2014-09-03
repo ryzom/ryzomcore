@@ -31,7 +31,7 @@ function update_plugin() {
 
              // if update is installed succesffully redirect to show success message
              header( "Location: index.php?page=plugins&result=8" );
-             die();
+             throw new SystemExit();
 
              }
         }

@@ -59,17 +59,17 @@ function install_plugin() {
              if ( $x == '1' )
              {
                 echo "update found";
-                 die();
+                 throw new SystemExit();
                  }
             else if ( $x == '2' )
              {
                 echo "Plugin already exists with same name .";
-                 die();
+                 throw new SystemExit();
                  }
             else if ( $x == '3' )
              {
                 echo "Update info is not present in the update";
-                 die();
+                 throw new SystemExit();
                  }
 
 
@@ -80,18 +80,18 @@ function install_plugin() {
                      {
                     if ( move_uploaded_file( $fileTmpLoc, $temp_path . "/" . $fileName ) ) {
                         echo "$fileName upload is complete.</br>" . "<button type='submit' class='btn btn-primary' style='margin-left:5px; margin-top:10px;' name='install_plugin'>Install Plugin</button></br>";
-                         die();
+                         throw new SystemExit();
                          }
                     else
                          {
                         echo "Error in uploading file.";
-                         die();
+                         throw new SystemExit();
                          }
                     }
                 else
                      {
                     echo "Please select a file with .zip extension to upload.";
-                     die();
+                     throw new SystemExit();
                      }
                 }
             else
@@ -126,28 +126,28 @@ function install_plugin() {
 
                          // if everything is successfull redirecting to the plugin template
                         header( "Location: index.php?page=plugins&result=1" );
-                         die();
+                         throw new SystemExit();
                          }
                     else
                          {
                         // file .info not exists
                         rmdir( $target_path );
                          header( "Location: index.php?page=install_plugin&result=2" );
-                         die();
+                         throw new SystemExit();
                          }
 
                     } else
                      {
                     // extraction failed
                     header( "Location: index.php?page=install_plugin&result=0" );
-                     die();
+                     throw new SystemExit();
                      }
                 }
             }
         else
              {
             echo "Please Browse for a file before clicking the upload button";
-             die();
+             throw new SystemExit();
              }
         }
     }
@@ -279,7 +279,7 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                         if ( pluginUpdateExists( $info['Id'], $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip" ) )
                              {
                             echo "Update already exists";
-                             die();
+                             throw new SystemExit();
                              }
                         else {
                             // removing the preivous update
@@ -294,7 +294,7 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                                  $update['UpdateInfo'] = json_encode( $result );
                                  $dbr -> insert( "updates", $update );
                                  header( "Location: index.php?page=plugins&result=7" );
-                                 die();
+                                 throw new SystemExit();
                                  }
                             }
                         }

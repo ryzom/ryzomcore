@@ -25,7 +25,7 @@ function show_sgroup(){
                     }else{
                         header("Location: ".$WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
                     }
-                    die();
+                    throw new SystemExit();
 
                 }
 
@@ -65,19 +65,19 @@ function show_sgroup(){
                 //ERROR: No page specified!
                 $_SESSION['error_code'] = "404";
                 header("Location: ams?page=error");
-                die();
+                throw new SystemExit();
             }
 
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
             header("Location: index.php?page=error");
-            die();
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
-        die();
+        throw new SystemExit();
     }
 
 }

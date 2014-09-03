@@ -22,20 +22,20 @@ function activate_plugin() {
              {
 				 // if result is successfull it redirects and shows success message
                 header( "Location: index.php?page=plugins&result=3" );
-                 die();
+                 throw new SystemExit();
                  }
             else
                  {
 				//if result is unsuccessfull it redirects and throws error
                 header( "Location: index.php?page=plugins&result=4" );
-                 die();
+                 throw new SystemExit();
                  }
             }
         else
              {
 			//if $_GET variable is not set it redirects and shows error
             header( "Location: index.php?page=plugins&result=4" );
-             die();
+             throw new SystemExit();
              }
         }
     }

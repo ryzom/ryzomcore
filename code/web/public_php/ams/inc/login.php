@@ -22,7 +22,7 @@ function login() {
 			} else {
 				header('Location: ' . $WEBPATH);
 			}
-			die();
+			throw new SystemExit();
 		}
 	}
 	$pageElements['ingame_webpath'] = $INGAME_WEBPATH;
