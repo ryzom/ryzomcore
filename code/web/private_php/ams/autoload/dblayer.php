@@ -130,14 +130,10 @@ class DBLayer {
 			foreach ($data as $key => $value) {
 				$sth->bindValue( ":$key", $value );
 			}
-			$this->PDO->beginTransaction();
 			$sth->execute();
 			$lastId = $this->PDO->lastInsertId();
-			$this->PDO->commit();
 		}
 		catch (Exception $e) {
-			// for rolling back the changes during transaction
-			$this->PDO->rollBack();
 			throw $e; // new Exception( "error in inseting" );
 		}
 		return $lastId;
