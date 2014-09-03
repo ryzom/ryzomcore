@@ -121,24 +121,23 @@ class DBLayer {
 	* @param $data the parameters that are being inserted into table.
 	* @return returns the id of the last inserted element.
 	*/
-	public function executeReturnId( $tb_name, $data, $datafunc = array() ) {
+	public function executeReturnId($tb_name, $data, $datafunc = array()) {
 		$this->useDb();
 		$field_options = implode(',', array_merge(array_keys($data), array_keys($datafunc)));
 		$field_values = implode(',', array_merge(array(':' . implode(',:', array_keys($data))), array_values($datafunc)));
 		try {
 			$sth = $this -> PDO -> prepare( "INSERT INTO $tb_name ($field_options) VALUE ($field_values)" );
-			foreach ( $data as $key => $value )
-			{
-				$sth -> bindValue( ":$key", $value );
-				}
-			$this -> PDO -> beginTransaction();
-			$sth -> execute();
-			$lastId = $this -> PDO -> lastInsertId();
-			$this -> PDO -> commit();
+			foreach ($data as $key => $value) {
+				$sth->bindValue( ":$key", $value );
+			}
+			$this->PDO->beginTransaction();
+			$sth->execute();
+			$lastId = $this->PDO->lastInsertId();
+			$this->PDO->commit();
 		}
-		catch ( Exception $e ) {
+		catch (Exception $e) {
 			// for rolling back the changes during transaction
-			// $this -> PDO -> rollBack();
+			$this->PDO->rollBack();
 			throw $e; // new Exception( "error in inseting" );
 		}
 		return $lastId;
@@ -157,10 +156,10 @@ class DBLayer {
 	public function selectWithParameter( $param, $tb_name, $data, $where ) {
 		$this->useDb();
 		try {
-			$sth = $this->PDO->prepare( "SELECT $param FROM $tb_name WHERE $where" );
-			$sth->execute( $data );
+			$sth = $this->PDO->prepare("SELECT $param FROM $tb_name WHERE $where");
+			$sth->execute($data);
 		}
-		catch ( Exception $e ) {
+		catch (Exception $e) {
 			throw $e; // new Exception( "error selection" );
 			return false;
 		}
@@ -197,25 +196,22 @@ class DBLayer {
 	* @param string $where where part in format ('fieldname'= $value AND ...). 'fieldname' must be a field in that table.
 	* @throws Exception error in updating.
 	*/
-	public function update( $tb_name, $data, $where ) {
+	public function update($tb_name, $data, $where) {
 		$this->useDb();
 		$field_option_values = null;
 		foreach ( $data as $key => $value ) {
 			$field_option_values .= ",$key" . '=:' . $key;
 		}
-		$field_option_values = ltrim( $field_option_values, ',' );
+		$field_option_values = ltrim($field_option_values, ',');
 		try {
-			$sth = $this -> PDO -> prepare( "UPDATE $tb_name SET $field_option_values WHERE $where " );
+			$sth = $this->PDO->prepare("UPDATE $tb_name SET $field_option_values WHERE $where ");
 
-			foreach ( $data as $key => $value ) {
-				$sth -> bindValue( ":$key", $value );
+			foreach ($data as $key => $value) {
+				$sth->bindValue(":$key", $value);
 			}
-			$this -> PDO -> beginTransaction();
-			$sth -> execute();
-			$this -> PDO -> commit();
-			}
-		catch ( Exception $e ) {
-			$this->PDO->rollBack();
+			$sth->execute();
+		}
+		catch (Exception $e) {
 			throw $e; // new Exception( 'error in updating' );
 			return false;
 		}
@@ -238,14 +234,9 @@ class DBLayer {
 			foreach ($data as $key => $value) {
 				$sth->bindValue(":$key", $value);
 			}
-			$this->PDO->beginTransaction();
-			// execution
 			$sth->execute();
-			$this->PDO->commit();
 		}
 		catch (Exception $e) {
-			// for rolling back the changes during transaction
-			$this->PDO->rollBack();
 			throw $e; // new Exception("error in inserting");
 		}
 	}
@@ -261,13 +252,10 @@ class DBLayer {
 	public function delete( $tb_name, $data, $where ) {
 		$this->useDb();
 		try {
-			$sth = $this->PDO->prepare( "DELETE FROM $tb_name WHERE $where" );
-			$this->PDO->beginTransaction();
-			$sth->execute( $data );
-			$this->PDO->commit();
+			$sth = $this->PDO->prepare("DELETE FROM $tb_name WHERE $where");
+			$sth->execute($data);
 		}
 		catch (Exception $e) {
-			$this->PDO->rollBack();
 			throw $e; // new Exception( "error in deleting" );
 		}
 	}
