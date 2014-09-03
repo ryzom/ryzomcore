@@ -16,6 +16,7 @@ function sgroup_list(){
             if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                 $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                 $result['delete'] = Support_Group::deleteSupportGroup( $delete_id);
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=sgroup_list");
                 }else{
@@ -33,11 +34,13 @@ function sgroup_list(){
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
             throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

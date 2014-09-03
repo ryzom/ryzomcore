@@ -22,12 +22,15 @@ function deactivate_plugin() {
              if ( $result )
              {
 				// if result is successfull it redirects and shows success message
+                header("Cache-Control: max-age=1");
                 header( "Location: index.php?page=plugins&result=5" );
+
                  throw new SystemExit();
                  }
             else
                  {
 				// if result is unsuccessfull it redirects and shows success message
+                header("Cache-Control: max-age=1");
                 header( "Location: index.php?page=plugins&result=6" );
                  throw new SystemExit();
 
@@ -36,6 +39,7 @@ function deactivate_plugin() {
         else
              {
 			//if $_GET variable is not set it redirects and shows error
+                header("Cache-Control: max-age=1");
             header( "Location: index.php?page=plugins&result=6" );
              throw new SystemExit();
              }

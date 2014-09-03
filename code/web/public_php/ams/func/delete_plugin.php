@@ -29,6 +29,7 @@ function delete_plugin() {
                     $db -> delete( 'plugins', array( 'id' => $id ), "Id=:id" );
 
                     //if result	successfull redirect and show success message
+                header("Cache-Control: max-age=1");
                      header( "Location: index.php?page=plugins&result=2" );
                      throw new SystemExit();
 
@@ -36,6 +37,7 @@ function delete_plugin() {
                 else
                      {
 					// if result unsuccessfull redirect and show error message
+                header("Cache-Control: max-age=1");
                     header( "Location: index.php?page=plugins&result=0" );
                      throw new SystemExit();
                      }
@@ -44,6 +46,7 @@ function delete_plugin() {
         else
              {
 			// if result unsuccessfull redirect and show error message
+                header("Cache-Control: max-age=1");
             header( "Location: index.php?page=plugins&result=0" );
              throw new SystemExit();
              }

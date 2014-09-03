@@ -78,17 +78,20 @@ function change_mail(){
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
                     header("Location: index.php?page=error");
                     throw new SystemExit();
                 }
 
             }else{
                 //ERROR: The form was not filled in correclty
+                header("Cache-Control: max-age=1");
 		header("Location: index.php?page=settings");
 		throw new SystemExit();
             }
         }else{
             //ERROR: user is not logged in
+                header("Cache-Control: max-age=1");
 	    header("Location: index.php");
 	    throw new SystemExit();
         }

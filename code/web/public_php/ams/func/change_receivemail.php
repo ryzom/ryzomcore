@@ -23,8 +23,10 @@ function change_receivemail(){
 			    WebUsers::setReceiveMail($user_id, $receiveMail);
 			}
 			if (Helpers::check_if_game_client()) {
+                header("Cache-Control: max-age=1");
 				header("Location: ".$INGAME_WEBPATH."?page=settings&id=".$user_id);
 			}else{
+                header("Cache-Control: max-age=1");
 				header("Location: ".$WEBPATH."?page=settings&id=".$user_id);
 			}
 			throw new SystemExit();
@@ -32,17 +34,20 @@ function change_receivemail(){
                 }else{
                     //ERROR: permission denied!
 		    $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
                     header("Location: index.php?page=error");
                     throw new SystemExit();
                 }
 
             }else{
                 //ERROR: The form was not filled in correclty
+                header("Cache-Control: max-age=1");
 		header("Location: index.php?page=settings");
 		throw new SystemExit();
             }
         }else{
             //ERROR: user is not logged in
+                header("Cache-Control: max-age=1");
 	    header("Location: index.php");
 	    throw new SystemExit();
         }

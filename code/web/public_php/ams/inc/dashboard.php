@@ -29,6 +29,7 @@ function dashboard(){
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
             throw new SystemExit();
 
@@ -36,6 +37,7 @@ function dashboard(){
 
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

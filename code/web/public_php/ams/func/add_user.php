@@ -29,6 +29,7 @@ function add_user(){
           $status = write_user( $edit );
           if(Helpers::check_if_game_client()){
                //if registering ingame then we have to set the header and dont need to reload the template.
+                header("Cache-Control: max-age=1");
                header('Location: email_sent.php');
                throw new SystemExit();
           }

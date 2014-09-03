@@ -17,6 +17,7 @@ function login() {
 			$_SESSION['id'] = WebUsers::getId($result['name']);
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			//go back to the index page.
+                header("Cache-Control: max-age=1");
 			if (Helpers::check_if_game_client()) {
 				header('Location: ' . $INGAME_WEBPATH);
 			} else {

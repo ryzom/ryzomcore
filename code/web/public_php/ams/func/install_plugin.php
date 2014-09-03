@@ -125,6 +125,7 @@ function install_plugin() {
                          $dbr -> insert( "plugins", $install_result );
 
                          // if everything is successfull redirecting to the plugin template
+                header("Cache-Control: max-age=1");
                         header( "Location: index.php?page=plugins&result=1" );
                          throw new SystemExit();
                          }
@@ -132,6 +133,7 @@ function install_plugin() {
                          {
                         // file .info not exists
                         rmdir( $target_path );
+                header("Cache-Control: max-age=1");
                          header( "Location: index.php?page=install_plugin&result=2" );
                          throw new SystemExit();
                          }
@@ -139,6 +141,7 @@ function install_plugin() {
                     } else
                      {
                     // extraction failed
+                header("Cache-Control: max-age=1");
                     header( "Location: index.php?page=install_plugin&result=0" );
                      throw new SystemExit();
                      }
@@ -293,6 +296,7 @@ function checkForUpdate( $fileName, $findPath, $tempFile, $tempPath )
                                  $update['UpdatePath'] = $tempPath . "/" . trim( $fileName, ".zip" ) . "_" . $result['Version'] . ".zip";
                                  $update['UpdateInfo'] = json_encode( $result );
                                  $dbr -> insert( "updates", $update );
+                header("Cache-Control: max-age=1");
                                  header( "Location: index.php?page=plugins&result=7" );
                                  throw new SystemExit();
                                  }

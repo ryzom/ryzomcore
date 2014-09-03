@@ -25,6 +25,7 @@ function reset_password(){
     }else{
         global $WEBPATH;
         $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
         header("Location: ".$WEBPATH."?page=error");
         throw new SystemExit();
     }

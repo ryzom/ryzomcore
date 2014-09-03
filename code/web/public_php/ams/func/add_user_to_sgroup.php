@@ -36,8 +36,10 @@ function add_user_to_sgroup(){
             //$result= array_merge($result, show_sgroup());
             //helpers :: loadtemplate( 'show_sgroup', $result);
             if (Helpers::check_if_game_client()) {
+                header("Cache-Control: max-age=1");
                 header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=".$id);
             }else{
+                header("Cache-Control: max-age=1");
                 header("Location: ".$WEBPATH."?page=show_sgroup&id=".$id);
             }
             throw new SystemExit();
@@ -45,11 +47,13 @@ function add_user_to_sgroup(){
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
             throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

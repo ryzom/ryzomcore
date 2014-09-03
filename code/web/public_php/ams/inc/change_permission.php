@@ -22,6 +22,7 @@ function change_permission(){
 
                 //execute change.
                 Ticket_User::change_permission(Ticket_User::constr_ExternId($user_id)->getTUserId(), $value);
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=show_user&id=".$user_id);
                 }else{
@@ -32,6 +33,7 @@ function change_permission(){
 
             }else{
                 //ERROR: GET PARAMS not given or trying to change admin
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=show_user&id=".$user_id);
                 }else{
@@ -43,6 +45,7 @@ function change_permission(){
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
             throw new SystemExit();
 
@@ -50,6 +53,7 @@ function change_permission(){
 
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

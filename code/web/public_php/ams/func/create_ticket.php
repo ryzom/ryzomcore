@@ -31,8 +31,10 @@ function create_ticket(){
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
                     //redirect to the new ticket.
                     if (Helpers::check_if_game_client()) {
+                header("Cache-Control: max-age=1");
                         header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }else{
+                header("Cache-Control: max-age=1");
                         header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }
                     throw new SystemExit();
@@ -41,6 +43,7 @@ function create_ticket(){
                     //ERROR: LIB DB is not online!
                     print_r($e);
                     throw new SystemExit();
+                header("Cache-Control: max-age=1");
                     header("Location: index.php");
                     throw new SystemExit();
                 }
@@ -48,17 +51,20 @@ function create_ticket(){
             }else{
                 //ERROR: permission denied!
                 $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
                 header("Location: index.php?page=error");
                 throw new SystemExit();
             }
 
         }else{
             //ERROR: The form was not filled in correclty
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=create_ticket");
             throw new SystemExit();
         }
     }else{
         //ERROR: user is not logged in
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

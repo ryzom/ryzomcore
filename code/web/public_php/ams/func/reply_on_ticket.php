@@ -41,6 +41,7 @@ function reply_on_ticket(){
                     $newPriority = filter_var($_POST['ChangePriority'], FILTER_SANITIZE_NUMBER_INT);
                     Ticket::updateTicketStatusAndPriority($ticket_id,$newStatus, $newPriority, $author);
                 }
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
                 }else{
@@ -58,11 +59,13 @@ function reply_on_ticket(){
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
             throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

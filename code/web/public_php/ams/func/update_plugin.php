@@ -30,6 +30,7 @@ function update_plugin() {
             $db -> delete( "updates", array( 'id' => $row['s.no'] ), "s.no=:id" );
 
              // if update is installed succesffully redirect to show success message
+                header("Cache-Control: max-age=1");
              header( "Location: index.php?page=plugins&result=8" );
              throw new SystemExit();
 

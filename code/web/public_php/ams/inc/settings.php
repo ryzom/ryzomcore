@@ -12,6 +12,7 @@ function settings(){
                 if(($_GET['id'] != $_SESSION['id']) && (!Ticket_User::isMod(unserialize($_SESSION['ticket_user']))) ){
                     //ERROR: No access!
                     $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
                     header("Location: index.php?page=error");
                     throw new SystemExit();
                 }else{
@@ -47,6 +48,7 @@ function settings(){
     }else{
         //ERROR: not logged in!
         header("Location: index.php");
+                header("Cache-Control: max-age=1");
         throw new SystemExit();
     }
 }
