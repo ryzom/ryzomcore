@@ -423,6 +423,8 @@ namespace GeorgesQt
 		setWindowTitle( info.fileName() + "*" );
 		setModified( true );
 
+		log( "Created" );
+
 		return true;
 	}
 

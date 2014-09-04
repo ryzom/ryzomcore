@@ -115,6 +115,8 @@ void GeorgesDFNDialog::newDocument( const QString &fileName )
 	m_pvt->dfn = new NLGEORGES::CFormDfn();
 
 	loadDfn();
+
+	log( "Created" );
 }
 
 void GeorgesDFNDialog::onAddClicked()

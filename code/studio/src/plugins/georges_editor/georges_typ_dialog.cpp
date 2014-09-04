@@ -115,6 +115,8 @@ void GeorgesTypDialog::newDocument( const QString &fileName )
 	setModified( true );
 
 	loadTyp();
+
+	log( "Created" );
 }
 
 void GeorgesTypDialog::onAddClicked()
