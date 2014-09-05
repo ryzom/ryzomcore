@@ -4,8 +4,7 @@
 * This small piece of php code calls the syncdata() function of Sync class.
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
-
-require( '../libinclude.php' );
-require( '../../www/config.php' );
-
+error_log('test2');
+require( '../../config.php' );
+require_once( $AMS_LIB . '/libinclude.php' );
 Sync::syncdata();

@@ -18,14 +18,15 @@ class Sync{
     if (function_exists('pcntl_fork')) {
         $pid = pcntl_fork();
     }
-    $pidfile = '/tmp/ams_cron_pid';
+    global $AMS_TMPDIR;
+    $pidfile = $AMS_TMPDIR.'/ams_cron_pid';
     
-        if(isset($pid)) {
+        if(isset($pid) and function_exists('pcntl_fork') ) {
         // We're the main process.
         } else {
             if(!file_exists($pidfile)) {
                 $pid = getmypid();
-                $file = fopen($pidfile, 'w');
+                $file = fopen($pidfile, 'w+');
                     
                 fwrite($file, $pid);
                 fclose($file);
@@ -57,13 +58,13 @@ class Sync{
                                 $decode = json_decode($record['query']);
                                 $values = array('Password' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = $decode[0]");              
+                                $db->update("user", $values, "Login = '$decode[0]'");              
                                 break;
                             case 'change_mail':
                                 $decode = json_decode($record['query']);
                                 $values = array('Email' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = $decode[0]");              
+                                $db->update("user", $values, "Login = '$decode[0]'");              
                                 break;
                             case 'createUser': 
                                 $decode = json_decode($record['query']);

@@ -5,8 +5,8 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 
-require( '../libinclude.php' );
-require( '../../www/config.php' );
+require( '../../config.php' );
+require_once( $AMS_LIB . '/libinclude.php' );;
 
 $mail_handler = new Mail_Handler();
 $mail_handler->cron();
