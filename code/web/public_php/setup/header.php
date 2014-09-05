@@ -112,6 +112,8 @@ function update_database_structure($continue_r, $con, $file) {
 
 <?php
 
+$continue = true;
+
 // Change to root directory
 if (!chdir("../")) {
 	printalert("danger", "Cannot change to public PHP root directory");

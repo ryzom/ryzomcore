@@ -1,30 +1,32 @@
 <?php
 
+	require_once('../config.php');
+
 	define('NELTOOL_LOADED', true);
 
 	// database information for nel tool
-	define('NELTOOL_DBHOST','localhost');
-	define('NELTOOL_DBUSER','shard');
-	define('NELTOOL_DBPASS','');
-	define('NELTOOL_DBNAME','nel_tool');
+	define('NELTOOL_DBHOST', $cfg['db']['tool']['host']);
+	define('NELTOOL_DBUSER', $cfg['db']['tool']['user']);
+	define('NELTOOL_DBPASS', $cfg['db']['tool']['pass']);
+	define('NELTOOL_DBNAME', $cfg['db']['tool']['name']);
 
 	// site paths definitions
-	define('NELTOOL_SITEBASE',$_SERVER['PHP_SELF']);
-	define('NELTOOL_SYSTEMBASE',dirname( dirname(__FILE__) ) . '/admin/');
+	define('NELTOOL_SITEBASE', $_SERVER['PHP_SELF']);
+	define('NELTOOL_SYSTEMBASE', dirname( dirname(__FILE__) ) . '/admin/');
 	define('NELTOOL_LOGBASE', NELTOOL_SYSTEMBASE .'/logs/');
 	define('NELTOOL_IMGBASE', NELTOOL_SYSTEMBASE .'/imgs/');
 
-    define('NELTOOL_RRDTOOL',       '/usr/bin/rrdtool');
-    define('NELTOOL_RRDSYSBASE',    NELTOOL_SYSTEMBASE . 'graphs_output/');
-    define('NELTOOL_RRDWEBBASE',    NELTOOL_SITEBASE . 'graphs_output/');
+    define('NELTOOL_RRDTOOL', '/usr/bin/rrdtool');
+    define('NELTOOL_RRDSYSBASE', NELTOOL_SYSTEMBASE . 'graphs_output/');
+    define('NELTOOL_RRDWEBBASE', NELTOOL_SITEBASE . 'graphs_output/');
 
-	define('NELTOOL_SITETITLE', 'Ryzom Admin');
+	define('NELTOOL_SITETITLE', 'Ryzom Core Admin');
 	define('NELTOOL_SESSIONID', 'sid');
 
 	define('NELTOOL_DEBUG', true);
 
 	// SQL table names
-	define('NELDB_PREFIX',						'neltool_');
+	define('NELDB_PREFIX', 'neltool_');
 
 	// for later use
 	// the config table will gather some of the settings
@@ -60,9 +62,9 @@
 	define('NELDB_RESTART_SEQUENCE_TABLE',		NELDB_PREFIX .'restart_sequences');
 
 	define('VIEW_DELAY', 0);
-	define('HARDWARE_REFRESH',	600);
-    define('LOCK_TIMEOUT',      1800);
-    define('BG_IMG',            'imgs/bg_live.png');
+	define('HARDWARE_REFRESH', 600);
+    define('LOCK_TIMEOUT', 1800);
+    define('BG_IMG', 'imgs/bg_live.png');
 
 	$nel_user_group_levels	= array(array(	'level_id'		=>	0,
 											'level_name'	=>	'Normal'),
@@ -70,6 +72,6 @@
 											'level_name'	=>	'Administrator'),
 									);
 
-	$restart_notification_emails = array('vl@ryzom.com');
+	$restart_notification_emails = array('support@ryzomcore.org');
 
 ?>

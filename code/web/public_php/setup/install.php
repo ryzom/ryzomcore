@@ -24,7 +24,6 @@ include('header.php');
 			</div>
 
 <?php
-	$continue = true;
 
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
 	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
@@ -173,7 +172,41 @@ include('header.php');
 	}
 
 	if ($roleService) {
-		// TODO: Create the default admin user
+		// Create the default shard admin user
+		if (!chdir("admin/")) {
+			printalert("danger", "Cannot change to admin tools directory");
+			$continue = false;
+		}
+		if ($continue) {
+			try {
+				require_once('common.php');
+			} catch (Exception $e) {
+				printalert("danger", "Failed to include NeL <em>admin/common.php</em>");
+				$continue = false;
+			}
+		}
+		if ($continue) {
+			try {
+				require_once('functions_tool_administration.php');
+			} catch (Exception $e) {
+				printalert("danger", "Failed to include NeL <em>admin/functions_tool_administration.php</em>");
+				$continue = false;
+			}
+		}
+		if ($continue) {
+			$adminGroup = 1;
+			$result = tool_admin_users_add($_POST["toolsAdminUsername"], $_POST["toolsAdminPassword"], (string)$adminGroup, (string)1);
+			if ($result == "") {
+				printalert("success", "Added shard admin to NeL tools database");
+			} else {
+				printalert("danger", "Failed to add shard admin to NeL tools database<br>" . htmlentities($result));
+				$continue = false;
+			}
+		}
+		if (!chdir("../")) {
+			printalert("danger", "Cannot change to public PHP root directory");
+			$continue = false;
+		}
 	}
 
 	if ($roleSupport) {
