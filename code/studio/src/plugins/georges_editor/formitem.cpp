@@ -40,7 +40,7 @@ namespace GeorgesQt
 		_StructId = 0;
 		_Slot = 0;
 		_Type = Null;
-		_Array = false;
+		_TType = TYPE_ATOM;
 	}
 
 	CFormItem::~CFormItem() 
@@ -113,7 +113,10 @@ namespace GeorgesQt
 
 	bool CFormItem::isArray()
 	{
-		return _Array;
+		if( _TType == TYPE_ARRAY )
+			return true;
+		else
+			return false;
 	}
 
 	bool CFormItem::isArrayMember()
@@ -122,6 +125,30 @@ namespace GeorgesQt
 			return false;
 
 		return parentItem->isArray();
+	}
+
+	bool CFormItem::isStruct()
+	{
+		if( _TType == TYPE_STRUCT )
+			return true;
+		else
+			return false;
+	}
+
+	bool CFormItem::isVStruct()
+	{
+		if( _TType == TYPE_VSTRUCT )
+			return true;
+		else
+			return false;
+	}
+
+	bool CFormItem::isAtom()
+	{
+		if( _TType == TYPE_ATOM )
+			return true;
+		else
+			return false;
 	}
 
 	QIcon CFormItem::getItemImage(CFormItem *rootItem)
@@ -211,7 +238,7 @@ namespace GeorgesQt
 		childItems.clear();
 	}
 
-	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, bool isArray)
+	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, TType itemType )
     {
 		CFormItem *newNode = new CFormItem();
         newNode->_Type = type;
@@ -221,7 +248,7 @@ namespace GeorgesQt
         newNode->_FormName = formName;
         newNode->_Slot  = slot;		
 		newNode->m_form = formPtr;
-		newNode->_Array = isArray;
+		newNode->_TType = itemType;
 
         appendChild(newNode);
         return newNode;

@@ -146,6 +146,7 @@ void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
 	m_browser->addProperty( p );
 }
 
+
 void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 {
 	m_currentNode.clear();
@@ -156,6 +157,7 @@ void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 	if( node->isArray() )
 		setupArray( node );
 	else
+	if( node->isStruct() )
 		setupStruct( node );
 
 	m_browser->setFactoryForManager( mgr, factory );

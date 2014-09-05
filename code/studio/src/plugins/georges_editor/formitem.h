@@ -41,12 +41,20 @@ namespace GeorgesQt
                 Form,           // This node is a form
         };
 
+		enum TType
+		{
+			TYPE_ARRAY,
+			TYPE_STRUCT,
+			TYPE_VSTRUCT,
+			TYPE_ATOM
+		};
+
 		CFormItem();
 		~CFormItem();
 
 		void appendChild(CFormItem *child);
 
-        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, bool isArray );
+        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, TType itemType );
 
 		CFormItem *child(int row);
 		int childCount() const;
@@ -69,6 +77,9 @@ namespace GeorgesQt
 		bool isEditable(int column);
 		bool isArray();
 		bool isArrayMember();
+		bool isStruct();
+		bool isVStruct();
+		bool isAtom();
 
 		QIcon getItemImage(CFormItem *rootItem);
 
@@ -95,7 +106,7 @@ namespace GeorgesQt
         std::string                                                     _FormName;
         TSub                                                            _Type;
         uint                                                            _Slot;
-		bool															_Array;
+		TType															_TType;
 
 	}; // CFormItem
 

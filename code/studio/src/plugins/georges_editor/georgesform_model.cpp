@@ -277,13 +277,20 @@ namespace GeorgesQt
                                              const char *name,
                                              uint structId,
                                              const char *formName,
-                                             uint slot)
+                                             uint slot,
+											 bool isVirtual)
 {
         // The form pointer
         NLGEORGES::CForm *formPtr = static_cast<NLGEORGES::CForm*>(m_form);
 
         // Add the new node
-        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, false);
+		CFormItem::TType ttype;
+		if( isVirtual )
+			ttype = CFormItem::TYPE_VSTRUCT;
+		else
+			ttype = CFormItem::TYPE_STRUCT;
+
+        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, ttype );
 
         // Can be NULL in virtual DFN
         if (parentDfn)
@@ -367,7 +374,10 @@ namespace GeorgesQt
                                                 NLGEORGES::CFormDfn *tmpDfn = vStruct ?
                                                             ((NLGEORGES::CFormDfn*)vStruct->FormDfn) : entry.getDfnPtr();
                                                 // Add the new struct
-                                                addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot);
+												if( entry.getType() == NLGEORGES::UFormDfn::EntryVirtualDfn )
+													addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot, true);
+												else
+													addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot);
                                         }
                                 }
                                 // Array of type ?
@@ -418,7 +428,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                                        uint slot)
 {
         // Add the new node
-        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, true);
+		CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, CFormItem::TYPE_ARRAY );
 
         // The array exist
         if (array)
@@ -451,12 +461,20 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                         else
                         {
                                 NLGEORGES::CFormElmArray *elmPtr = array->Elements[elm].Element ? static_cast<NLGEORGES::CFormElmArray*>(array->Elements[elm].Element) : NULL;
-                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form, false);
+								addAtom( newNode, elmPtr, rootDfn, formArrayName, elm, formArrayElmName );
                         }
                 }
         }
 
         return newNode;
+}
+
+
+CFormItem *CGeorgesFormModel::addAtom(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName)
+{
+	CFormItem *item = parent->add( CFormItem::Form, name, id, formName, 0, m_form, CFormItem::TYPE_ATOM );
+
+	return item;
 }
 
 
