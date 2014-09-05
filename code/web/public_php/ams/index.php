@@ -37,7 +37,7 @@ if ( isset( $_GET["cron"] ) ) {
     }
 
 // Always try to sync on page load, ie "lazy" cron
-Sync :: syncdata( true );
+Sync :: syncdata( false );
 
 // Decide what page to load
 if ( ! isset( $_GET["page"] ) ) {
