@@ -436,7 +436,7 @@ class Users{
            try {
                //make connection with and put into shard db
                $dbs = new DBLayer("shard");
-               $dbs->update("user", $values, "Login = $user");
+               $dbs->update("user", $values, "Login = '$user'");
                return "ok";
           }
           catch (PDOException $e) {

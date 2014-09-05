@@ -234,11 +234,11 @@ class WebUsers extends Users{
               
               $hashpass = crypt($pass, WebUsers::generateSALT());
               $reply = WebUsers::setAmsPassword($user, $hashpass);
-              $values = Array('pass' => $hashpass);
+              $values = Array('Password' => $hashpass);
                try {
                      //make connection with and put into shard db
                      $dbw = new DBLayer("web");
-                     $dbw->update("ams_user", $values,"Login = $user");
+                     $dbw->update("ams_user", $values,"Login = '$user'");
                 }
                 catch (PDOException $e) {
                   //ERROR: the web DB is offline

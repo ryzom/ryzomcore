@@ -22,19 +22,20 @@ class Helpers {
          global $SITEBASE;
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
+         global $AMS_CACHEDIR;
          // define('SMARTY_SPL_AUTOLOAD',1);
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
          spl_autoload_register( '__autoload' );
 
          $smarty = new Smarty;
          $smarty -> setCompileDir( $SITEBASE . '/templates_c/' );
-         $smarty -> setCacheDir( $SITEBASE . '/cache/' );
+         $smarty -> setCacheDir( $AMS_CACHEDIR );
          $smarty -> setConfigDir( $SITEBASE . '/configs/' );
          // turn smarty debugging on/off
         $smarty -> debugging = false;
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
-         $smarty -> cache_lifetime = 5;
+         $smarty -> cache_lifetime = 300;
 
 		if (function_exists('apc_cache_info')) {
 			// production

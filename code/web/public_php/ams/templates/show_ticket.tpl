@@ -42,7 +42,7 @@
 			<tr>
 			    <td><a href="{$FILE_WEB_PATH}{$array['Path']}">{$array['Filename']}</a></td>
 			    <td>{$array['Timestamp']}</td>
-			    <td>{$array['Filesize']} Bytes</td>
+			    <td>{$array['Filesize']}</td>
 				<td>{if $permission > 1}
 					<a href="{$BASE_WEBPATH}index.php?page=show_user&id={$array['Uploader']}">{$array['Username']}</a>
 					{else}
@@ -136,17 +136,19 @@
 				$(document).ready( function () {
 
 					$('#file_upload').uploadify({
-					'formData' : {'PHPSESSID': '{/literal}{$sessionid}{literal}'},
+					'formData' : {'PHPSESSID': '{/literal}{nocache}{$sessionid}{/nocache}{literal}'},
 					'auto' : true,
 					'multi' : true,
 					'method' : 'post',
 					'swf': 'misc/uploadify.swf',
-					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal}
+					'displayData': 'percentage',
+					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal},
+					'removeCompleted' : false
 					});
-
 				});
 				</script>
 				{/literal} 
+				<div id="filesUploaded"></div>
 				<div class="control-group">
 				    <label class="control-label"></label>
 				    <div class="controls">
