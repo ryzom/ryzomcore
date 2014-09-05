@@ -158,7 +158,7 @@
 		</div>
 
 		<footer>
-			<p class="pull-right">Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
+			<p class="pull-right">AMS 0.9.0 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>
 		</footer>
 		{/if}
 	</div><!--/.fluid-container-->
