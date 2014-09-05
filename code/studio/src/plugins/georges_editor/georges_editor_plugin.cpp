@@ -94,6 +94,11 @@ void GeorgesEditorContext::open()
 	m_georgesEditorForm->open();
 }
 
+void GeorgesEditorContext::save()
+{
+	m_georgesEditorForm->save();
+}
+
 QWidget *GeorgesEditorContext::widget()
 {
 	return m_georgesEditorForm;

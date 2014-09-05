@@ -34,6 +34,13 @@ namespace GeorgesQt
 {
 	CFormItem::CFormItem()
 	{
+		parentItem = NULL;
+		formElm = NULL;
+		m_form = NULL;
+		_StructId = 0;
+		_Slot = 0;
+		_Type = Null;
+		_Array = false;
 	}
 
 	CFormItem::~CFormItem() 
@@ -106,48 +113,15 @@ namespace GeorgesQt
 
 	bool CFormItem::isArray()
 	{
-		// If it wasn't a root node then lets check the node type.
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *node;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool array;
-		bool parentVDfnArray;
-		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
-		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn,
-                   &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
-
-		if(array && node)
-			return true;
-
-		return false;
+		return _Array;
 	}
 
 	bool CFormItem::isArrayMember()
 	{
-		CFormItem *parent = this->parent();
+		if( parentItem == NULL )
+			return false;
 
-		// If it wasn't a root node then lets check the node type.
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *parentNode;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool array;
-		bool parentVDfnArray;
-		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
-		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (parent->formName ().c_str (), &parentDfn, indexDfn,
-                   &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
-
-		if(array && parentNode)
-			return true;
-
-		return false;
+		return parentItem->isArray();
 	}
 
 	QIcon CFormItem::getItemImage(CFormItem *rootItem)
@@ -237,7 +211,7 @@ namespace GeorgesQt
 		childItems.clear();
 	}
 
-	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr)
+	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, bool isArray)
     {
 		CFormItem *newNode = new CFormItem();
         newNode->_Type = type;
@@ -247,6 +221,7 @@ namespace GeorgesQt
         newNode->_FormName = formName;
         newNode->_Slot  = slot;		
 		newNode->m_form = formPtr;
+		newNode->_Array = isArray;
 
         appendChild(newNode);
         return newNode;

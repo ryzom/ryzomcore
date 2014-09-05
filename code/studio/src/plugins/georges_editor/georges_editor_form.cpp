@@ -20,6 +20,8 @@
 #include "georges_editor_constants.h"
 #include "georges_dirtree_dialog.h"
 #include "georges_treeview_dialog.h"
+#include "georges_dfn_dialog.h"
+#include "georges_typ_dialog.h"
 
 #include "../core/icore.h"
 #include "../core/menu_manager.h"
@@ -27,6 +29,7 @@
 
 // NeL includes
 #include <nel/misc/debug.h>
+#include <nel/misc/path.h>
 
 // Qt includes
 #include <QSettings>
@@ -68,11 +71,20 @@ namespace GeorgesQt
 		Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
 		m_openAction = menuManager->action(Core::Constants::OPEN);
 
-		m_newAction = new QAction(tr("&New..."), this);
-		m_newAction->setIcon(QIcon(Core::Constants::ICON_NEW));
-		m_newAction->setShortcut(QKeySequence::New);
-		m_newAction->setStatusTip(tr("Create a new file"));
-		connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFile()));
+		m_newTypAction = new QAction(tr("New Type"), this );
+		m_newTypAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newTypAction->setStatusTip(tr("Create a new type file"));
+		connect( m_newTypAction, SIGNAL(triggered()), this, SLOT(newTyp()));
+
+		m_newDfnAction = new QAction(tr("New DFN"), this );
+		m_newDfnAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newDfnAction->setStatusTip(tr("Create a new definition file"));
+		connect( m_newDfnAction, SIGNAL(triggered()), this, SLOT(newDfn()));
+
+		m_newFormAction = new QAction(tr("New Form"), this );
+		m_newFormAction->setIcon(QIcon(Core::Constants::ICON_NEW));
+		m_newFormAction->setStatusTip(tr("Create a new form file"));
+		connect( m_newFormAction, SIGNAL(triggered()), this, SLOT(newForm()));
 
 		m_saveAction = new QAction(tr("&Save..."), this);
 		m_saveAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -81,8 +93,10 @@ namespace GeorgesQt
 		connect(m_saveAction, SIGNAL(triggered()), this, SLOT(save()));
 
 		m_fileToolBar = addToolBar(tr("&File"));
+		m_fileToolBar->addAction(m_newTypAction);
+		m_fileToolBar->addAction(m_newDfnAction);
+		m_fileToolBar->addAction(m_newFormAction);
 		m_fileToolBar->addAction(m_openAction);
-		m_fileToolBar->addAction(m_newAction);
 		m_fileToolBar->addAction(m_saveAction);
 
 		m_saveAction->setEnabled(false);
@@ -103,8 +117,8 @@ namespace GeorgesQt
 
 		connect(Core::ICore::instance(), SIGNAL(changeSettings()),
 			this, SLOT(settingsChanged()));
-		connect(m_georgesDirTreeDialog, SIGNAL(selectedForm(const QString)), 
-			this, SLOT(loadFile(const QString)));
+		connect(m_georgesDirTreeDialog, SIGNAL(fileSelected(const QString&)), 
+			this, SLOT(loadFile(const QString&)));
 		connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)),
 			this, SLOT(focusChanged(QWidget*, QWidget*)));
 	}
@@ -126,26 +140,83 @@ namespace GeorgesQt
 			loadFile(fileName);
 	}
 
-    void GeorgesEditorForm::newFile()
+	void GeorgesEditorForm::newTyp()
 	{
-        // Assume it is a form, for now. We'll have to retrieve the DFN we'll be using as a base.
-        QString fileName = QFileDialog::getOpenFileName(this, tr("Select Base Form Definition"), m_lastSheetDir, "Form Definition (*.dfn)");
-        if(!fileName.isNull())
-        {
-            // Use the file loader to create the new form.
-            loadFile(fileName, true);
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Type" ),
+															"",
+															"Type files (*.typ)" );
+		if( fileName.isEmpty() )
+			return;
 
-            // Save the folder we just opened for future dialogs.
-            QFileInfo pathInfo( fileName );
-            m_lastSheetDir = pathInfo.absolutePath();
-        }
+		
+		GeorgesTypDialog *d = new GeorgesTypDialog();
+		d->newDocument( fileName );
+		addGeorgesWidget( d );
+		setModified();
+	}
+
+	void GeorgesEditorForm::newDfn()
+	{
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Definition" ),
+															"",
+															"Definition files (*.dfn)" );
+		if( fileName.isEmpty() )
+			return;
+
+		GeorgesDFNDialog *d = new GeorgesDFNDialog();
+		d->newDocument( fileName );
+		addGeorgesWidget( d );
+		setModified();
+	}
+
+	void GeorgesEditorForm::newForm()
+	{
+		QString dfnFileName = QFileDialog::getOpenFileName( this, 
+															tr( "New Form" ),
+															"",
+															"Definition files (*.dfn)" );
+		if( dfnFileName.isEmpty() )
+			return;
+
+		QFileInfo dfnInfo( dfnFileName );
+		QString baseName = dfnInfo.baseName();
+		QString filter;
+		filter += baseName;
+		filter += " files (*.";
+		filter += baseName;
+		filter += ")";
+
+		QString fileName = QFileDialog::getSaveFileName( this, 
+															tr( "New Form" ),
+															"",
+															filter );
+		if( fileName.isEmpty() )
+			return;
+
+		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog();
+		if( !d->newDocument( fileName, dfnFileName ) )
+		{
+			QMessageBox::information( this,
+										tr( "Failed to create new form" ),
+										tr( "Failed to create new form!" ) );
+			return;
+		}
+
+		addGeorgesWidget( d );
+		setModified();
 	}
 
 	void GeorgesEditorForm::save()
 	{
         m_lastActiveDock->write();
-        m_saveAction->setEnabled(false);
 
+
+        m_saveAction->setEnabled(false);
+		QAction *saveAction = Core::ICore::instance()->menuManager()->action( Core::Constants::SAVE );
+		if( saveAction != NULL )
+			saveAction->setEnabled(false);
 	}
 
 	void GeorgesEditorForm::readSettings()
@@ -175,6 +246,28 @@ namespace GeorgesQt
 		settings->sync();
 	}
 
+	void GeorgesEditorForm::addGeorgesWidget( GeorgesDockWidget *w )
+	{
+		w->setUndoStack(UndoStack);
+        m_lastActiveDock = w;
+        m_dockedWidgets.append(w);
+
+        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
+        connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
+
+        // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
+        if(m_dockedWidgets.size() > 1)
+        {
+			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
+		}
+        else
+        {
+            m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
+        }
+
+		w->raise();
+	}
+
 	void GeorgesEditorForm::settingsChanged()
 	{
 		QSettings *settings = Core::ICore::instance()->settings();
@@ -190,21 +283,25 @@ namespace GeorgesQt
 		}
 	}
 
-    void GeorgesEditorForm::loadFile(const QString fileName)
-    {
-        loadFile(fileName, false);
-    }
-
-    void GeorgesEditorForm::loadFile(const QString fileName, bool loadFromDfn)
+    void GeorgesEditorForm::loadFile(const QString &fileName)
 	{
-		QFileInfo info(fileName);
+		std::string path = NLMISC::CPath::lookup( fileName.toUtf8().constData(), false );
+		if( path.empty() )
+		{
+			QMessageBox::information( this,
+									tr( "Failed to load file..." ),
+									tr( "Failed to load file '%1': File doesn't exist!" ).arg( fileName ) );
+			return;
+		}
+
+		QFileInfo info( path.c_str() );
 
         // Check to see if the form is already loaded, if it is just raise it.
         if (m_dockedWidgets.size())
 		{
-			Q_FOREACH(CGeorgesTreeViewDialog *wgt, m_dockedWidgets)
+			Q_FOREACH(GeorgesDockWidget *wgt, m_dockedWidgets)
 			{
-				if (info.fileName() == wgt->loadedForm)
+				if ( QString( path.c_str() ) == wgt->fileName())
 				{
 					wgt->raise();
 					return;
@@ -212,52 +309,31 @@ namespace GeorgesQt
 			}
         }
 
-        CGeorgesTreeViewDialog *dock = new CGeorgesTreeViewDialog(m_mainDock);
-        dock->setUndoStack(UndoStack);
-        m_lastActiveDock = dock;
-        m_dockedWidgets.append(dock);
+		GeorgesDockWidget *w = NULL;
 
-        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
-        connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
-
-        // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
-        if(m_dockedWidgets.size() > 1)
-        {
-			m_mainDock->tabifyDockWidget(m_dockedWidgets.at(m_dockedWidgets.size() - 2), m_dockedWidgets.last());
-		}
-        else
-        {
-            m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
-        }
-
-        // Retrieve the form and load the form.
-        NLGEORGES::CForm *form;
-        if(loadFromDfn)
-        {
-            // Get the form by DFN name.
-            form = m_dockedWidgets.last()->getFormByDfnName(info.fileName());
-        }
-        else
-        {
-            form = m_dockedWidgets.last()->getFormByName(info.fileName());
-        }
-
-		if (form)
+		if( info.suffix() == "dfn" )
 		{
-			m_dockedWidgets.last()->setForm(form);
-			m_dockedWidgets.last()->loadFormIntoDialog(form);
-			QApplication::processEvents();
-			connect(m_dockedWidgets.last(), SIGNAL(modified()), 
-				this, SLOT(setModified()));
-			m_dockedWidgets.last()->raise();
-			connect(m_dockedWidgets.last(), SIGNAL(changeFile(QString)), 
-				m_georgesDirTreeDialog, SLOT(changeFile(QString)));
+			w = loadDfnDialog( path.c_str() );
+		}
+		else
+		if( info.suffix() == "typ" )
+		{
+			w = loadTypDialog( path.c_str() );
 		}
 		else
 		{
-            nlwarning("Failed to load form: %s", info.fileName().toUtf8().constData());
-			m_dockedWidgets.last()->close();
+			w = loadFormDialog( path.c_str() );
 		}
+
+		if( w == NULL )
+		{
+			QMessageBox::information( this,
+										tr( "Failed to load file..." ),
+										tr( "Failed to load file '%1': Not a typ, dfn, or form file!" ).arg( info.fileName() ) );
+			return;
+		}
+
+		addGeorgesWidget( w );
 	}
 
 	void GeorgesEditorForm::closingTreeView()
@@ -311,4 +387,49 @@ namespace GeorgesQt
 			}
 		}
 	}
+
+	GeorgesDockWidget* GeorgesEditorForm::loadTypDialog( const QString &fileName )
+	{
+		GeorgesTypDialog *d = new GeorgesTypDialog();
+		if( !d->load( fileName ) )
+		{
+			delete d;
+			return NULL;
+		}
+
+		connect( d, SIGNAL( modified() ), this, SLOT( setModified() ) );
+
+		return d;
+	}
+
+	GeorgesDockWidget* GeorgesEditorForm::loadDfnDialog( const QString &fileName )
+	{
+		GeorgesDFNDialog *d = new GeorgesDFNDialog();
+		bool b = d->load( fileName );
+		if( !b )
+		{
+			delete d;
+			return NULL;
+		}
+
+		connect( d, SIGNAL( modified() ), this, SLOT( setModified() ) );
+
+		return d;
+	}
+
+	GeorgesDockWidget* GeorgesEditorForm::loadFormDialog( const QString &fileName )
+	{
+		CGeorgesTreeViewDialog *d = new CGeorgesTreeViewDialog();
+		if( !d->load( fileName ) )
+		{
+			delete d;
+			return NULL;
+		}
+
+		connect(d, SIGNAL(modified()), this, SLOT(setModified()));
+		connect(d, SIGNAL(changeFile(QString)), m_georgesDirTreeDialog, SLOT(changeFile(QString)));
+
+		return d;
+	}
+
 } /* namespace GeorgesQt */

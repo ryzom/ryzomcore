@@ -46,7 +46,7 @@ namespace GeorgesQt
 
 		void appendChild(CFormItem *child);
 
-        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr);
+        CFormItem *add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, bool isArray );
 
 		CFormItem *child(int row);
 		int childCount() const;
@@ -76,6 +76,13 @@ namespace GeorgesQt
 
 		void clearChildren();
 
+		bool rootItem() const{
+			if( parentItem == NULL )
+				return true;
+			else
+				return false;
+		}
+
     private:
 		QList<CFormItem*> childItems;
 		QList<QVariant> itemData;
@@ -88,6 +95,7 @@ namespace GeorgesQt
         std::string                                                     _FormName;
         TSub                                                            _Type;
         uint                                                            _Slot;
+		bool															_Array;
 
 	}; // CFormItem
 

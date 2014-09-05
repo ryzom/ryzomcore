@@ -283,7 +283,7 @@ namespace GeorgesQt
         NLGEORGES::CForm *formPtr = static_cast<NLGEORGES::CForm*>(m_form);
 
         // Add the new node
-        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form);
+        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, false);
 
         // Can be NULL in virtual DFN
         if (parentDfn)
@@ -418,7 +418,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                                        uint slot)
 {
         // Add the new node
-        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form);
+        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, true);
 
         // The array exist
         if (array)
@@ -451,7 +451,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                         else
                         {
                                 NLGEORGES::CFormElmArray *elmPtr = array->Elements[elm].Element ? static_cast<NLGEORGES::CFormElmArray*>(array->Elements[elm].Element) : NULL;
-                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form);
+                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form, false);
                         }
                 }
         }
@@ -494,12 +494,153 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form() );
+		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
 	}
 
+	if( celm->Elements.size() == 0 )
+	{
+		NLGEORGES::CFormElmStruct *ps = dynamic_cast< NLGEORGES::CFormElmStruct* >( celm->getParent() );
+		if( ps != NULL )
+		{
+			const NLGEORGES::CFormDfn *parentDfn;
+			const NLGEORGES::CFormDfn *nodeDfn;
+			uint indexDfn;
+			const NLGEORGES::CType *nodeType;
+			NLGEORGES::CFormElm *node;
+			NLGEORGES::CFormDfn::TEntryType type;
+			bool isArray;
+			
+			ps->deleteNodeByName( item->name().c_str(), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, isArray );
+		}
+	}
 }
 
+void CGeorgesFormModel::appendArray( QModelIndex idx )
+{
+	if( !idx.isValid() )
+		return;
 
+	CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+	NLGEORGES::UFormElm *elm = NULL;
+
+	item->form()->getRootNode().getNodeByName( &elm, item->formName().c_str() );
+
+	const NLGEORGES::CFormDfn *parentDfn;
+	const NLGEORGES::CFormDfn *nodeDfn;
+	uint indexDfn;
+	const NLGEORGES::CType *type;
+	NLGEORGES::UFormDfn::TEntryType entryType;
+	NLGEORGES::CFormElm *node;
+	bool created;
+	bool isArray;
+
+	if( elm == NULL )
+	{
+		NLGEORGES::UFormElm *uroot = &item->form()->getRootNode();
+		NLGEORGES::CFormElm *croot = static_cast< NLGEORGES::CFormElm* >( uroot );
+		
+		croot->createNodeByName( item->formName().c_str(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+		
+		if( !created )
+			return;
+
+		elm = node;
+	}
+
+	NLGEORGES::CFormElmArray *celm = dynamic_cast< NLGEORGES::CFormElmArray* >( elm );
+	if( celm == NULL )
+		return;
+
+	unsigned long s = celm->Elements.size();
+	std::string nodeIdx = "[";
+	nodeIdx += QString::number( s ).toUtf8().constData();
+	nodeIdx += "]";
+
+	celm->createNodeByName( nodeIdx.c_str(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+	if( !created )
+		return;
+
+	std::string name = "#";
+	name += QString::number( s ).toUtf8().constData();
+
+	std::string formName;
+	node->getFormName( formName );
+
+	item->add( CFormItem::Form, name.c_str(), s, formName.c_str(), 0, item->form(), false );
+}
+
+void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
+{
+	CFormItem *item = reinterpret_cast< CFormItem* >( idx.internalPointer() );
+	NLGEORGES::UFormElm &uroot = item->form()->getRootNode();
+	NLGEORGES::CFormElm *root = static_cast< NLGEORGES::CFormElm* >( &item->form()->getRootNode() );
+	NLGEORGES::UFormElm *unode;
+	uroot.getNodeByName( &unode, item->formName().c_str() );
+	NLGEORGES::CFormElm *cnode = static_cast< NLGEORGES::CFormElm* >( unode );
+	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( cnode->getParent() );
+
+	NLGEORGES::CFormElm *elm = arr->Elements[ idx.row() ].Element;
+
+	Q_EMIT beginResetModel();
+
+	std::vector< NLGEORGES::CFormElmArray::CElement >::iterator itr = arr->Elements.begin() + idx.row();
+	arr->Elements.erase( itr );
+
+	delete elm;
+
+	item = item->parent();
+	item->clearChildren();
+
+	NLGEORGES::CFormElmArray *celm = arr;
+	
+	for( int i = 0; i < celm->Elements.size(); i++ )
+	{
+		NLGEORGES::CFormElmArray::CElement &e = celm->Elements[ i ];
+
+		QString formName = item->formName().c_str();
+		formName += '[';
+		formName += QString::number( i );
+		formName += ']';
+
+		QString n;
+		if( e.Name.empty() )
+			n = "#" + QString::number( i );
+		else
+			n = e.Name.c_str();
+
+		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+	}
+
+	Q_EMIT endResetModel();
+}
+
+void CGeorgesFormModel::renameArrayEntry( QModelIndex idx, const QString &name )
+{
+	CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+	NLGEORGES::UFormElm *elm;
+
+	item->form()->getRootNode().getNodeByName( &elm, item->formName().c_str() );
+
+	NLGEORGES::CFormElm *celm = dynamic_cast< NLGEORGES::CFormElm* >( elm );
+	if( celm == NULL )
+		return;
+
+	NLGEORGES::UFormElm *uparent = celm->getParent();
+	NLGEORGES::CFormElmArray *cparent = dynamic_cast< NLGEORGES::CFormElmArray* >( uparent );
+	if( cparent == NULL )
+		return;
+
+	int i = 0;
+	for( i = 0; i < cparent->Elements.size(); i++ )
+	{
+		if( cparent->Elements[ i ].Element == celm )
+			break;
+	}
+
+	cparent->Elements[ i ].Name = name.toUtf8().constData();
+	item->setName( name.toUtf8().constData() );
+}
 
     /******************************************************************************/
 

@@ -49,7 +49,7 @@ private:
 	QString m_ldPath;
 
 Q_SIGNALS:
-	void selectedForm(const QString);
+	void fileSelected(const QString&);
 
 private Q_SLOTS:
 	void fileSelected(QModelIndex index);

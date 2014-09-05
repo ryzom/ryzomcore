@@ -16,52 +16,45 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef BROWSER_CTRL_H
-#define BROWSER_CTRL_H
+#ifndef GEORGES_DFN_DIALOG
+#define GEORGES_DFN_DIALOG
 
-#include <QObject>
+#include "georges_dock_widget.h"
+#include "ui_georges_dfn_dialog.h"
 
-namespace NLGEORGES
-{
-	class UForm;
-}
+class GeorgesDFNDialogPvt;
 
-class QtTreePropertyBrowser;
-class QModelIndex;
-class QVariant;
-class QtProperty;
-
-class BrowserCtrlPvt;
-
-class BrowserCtrl : public QObject
+class GeorgesDFNDialog : public GeorgesDockWidget
 {
 	Q_OBJECT
 public:
-	BrowserCtrl( QtTreePropertyBrowser *browser );
-	~BrowserCtrl();
-	void setForm( NLGEORGES::UForm *form ){ m_form = form; }
+	GeorgesDFNDialog( QWidget *parent = NULL );
+	~GeorgesDFNDialog();
 
-public Q_SLOTS:
-	void clicked( const QModelIndex &idx );
+	bool load( const QString &fileName );
+	void write();
+	void newDocument( const QString &fileName );
 
 Q_SIGNALS:
-	void arrayResized( const QString &name, int size );
 	void modified();
-	void valueChanged( const QString &key, const QString &value );
 
 private Q_SLOTS:
-	void onValueChanged( QtProperty *p, const QVariant &value );
-	void onValueChanged( const QString &key, const QString &value );
-	void onArrayResized( const QString &name, int size );
-	void onModified();
+	void onAddClicked();
+	void onRemoveClicked();
+	void onCurrentRowChanged( int row );
+
+	void onValueChanged( const QString& key, const QString &value );
 
 private:
-	void enableMgrConnections();
-	void disableMgrConnections();
+	void loadDfn();
+	void onModified();
+	void log( const QString &msg );
+	void setupConnections();
 
-
-	BrowserCtrlPvt *m_pvt;
-	NLGEORGES::UForm *m_form;
+	Ui::GeorgesDFNDialog m_ui;
+	GeorgesDFNDialogPvt *m_pvt;
+	QString m_fileName;
 };
 
 #endif
+
