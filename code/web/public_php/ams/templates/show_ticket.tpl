@@ -42,7 +42,7 @@
 			<tr>
 			    <td><a href="{$FILE_WEB_PATH}{$array['Path']}">{$array['Filename']}</a></td>
 			    <td>{$array['Timestamp']}</td>
-			    <td>{$array['Filesize']} Bytes</td>
+			    <td>{$array['Filesize']}</td>
 				<td>{if $permission > 1}
 					<a href="{$BASE_WEBPATH}index.php?page=show_user&id={$array['Uploader']}">{$array['Username']}</a>
 					{else}

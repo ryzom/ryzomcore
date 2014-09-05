@@ -216,6 +216,18 @@ class Ticket{
         foreach ($fetchall as &$value) {
             $webUser = new WebUsers($value['Uploader']);
             $fetchall[$base]['Username'] = $webUser->getUsername();
+            
+            $bytes = $fetchall[$base]['Filesize'];
+            $precision = 2;
+            $units = array('B', 'KB', 'MB', 'GB', 'TB');
+         
+            $bytes = max($bytes, 0);
+            $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+            $pow = min($pow, count($units) - 1);
+         
+            $bytes /= pow(1024, $pow);
+            
+            $fetchall[$base]['Filesize'] = round($bytes, $precision) . ' ' . $units[$pow];;
             $base++;
         }
         return $fetchall;
