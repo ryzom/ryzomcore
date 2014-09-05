@@ -123,3 +123,4 @@ $FORCE_INGAME = false;
 
 //file storage path (must be a publicly accessible url for 
 $FILE_STORAGE_PATH = $PUBLIC_PHP_PATH."\\ams\\files\\";
+$FILE_WEB_PATH = $BASE_WEBPATH."files/";
