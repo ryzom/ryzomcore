@@ -13,7 +13,7 @@ class Sync{
      * This is done because the shard could have been offline and we want changes made on the website (which is still online) to eventually hit the shard.
      * These changes are: createPermissions, createUser, change_pass, change_mail
      */
-    static public function syncdata ($display = true) {
+    static public function syncdata ($display = false) {
     
     if (function_exists('pcntl_fork')) {
         $pid = pcntl_fork();
