@@ -203,7 +203,24 @@ class Ticket{
         return $reply;
     }
 
-
+    /**
+    * return the attachments list
+    * @param $ticket_id the id of the ticket.
+    * @return a ticket_reply object.
+    */
+    public static function getAttachments( $ticket_id) {
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->select("`ticket_attachments`",array('ticket_TId' => $ticket_id), "`ticket_TId` =:ticket_TId ORDER BY Timestamp DESC");
+        $fetchall = $statement->fetchall();
+        $base = 0;
+        foreach ($fetchall as &$value) {
+            $webUser = new WebUsers($value['Uploader']);
+            $fetchall[$base]['Username'] = $webUser->getUsername();
+            $base++;
+        }
+        return $fetchall;
+    }
+    
     /**
     * create a new reply for a ticket.
     * A reply will only be added if the content isn't empty and if the ticket isn't closed.
@@ -571,4 +588,33 @@ class Ticket{
         $this->priority = $p;
     }
 
+    /**
+    * function that creates a ticket Attachment.
+    */
+    public static function add_Attachment($TId,$filename,$author,$tempFile){
+
+        global $FILE_STORAGE_PATH;
+        $length = 20;
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        $targetFile = $FILE_STORAGE_PATH . $randomString . "/" . $filename;
+        
+        $ticket = new Ticket();
+        $ticket->load_With_TId($TId);
+    
+        //create the attachment!
+        $dbl = new DBLayer("lib");
+        $dbl->insert("`ticket_attachments`", Array('ticket_TId' => $TId, 'Filename' => $filename, 'Filesize' => filesize($tempFile), 'Uploader' => $author, 'Path' => $randomString . "/" . $filename));
+        mkdir($FILE_STORAGE_PATH . $randomString);
+        move_uploaded_file($tempFile,$targetFile);
+        
+        //write a log entry
+        Ticket_Log::createLogEntry( $TId, $author, 10);
+
+        return true;
+    }
+    
 }

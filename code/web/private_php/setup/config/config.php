@@ -121,8 +121,9 @@ $INGAME_LAYOUT = "basic";
 //forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
 
-//file storage path (must be a publicly accessible url for
-$FILE_STORAGE_PATH = "/files/";
+//file storage path (must be a publicly accessible url for 
+$FILE_STORAGE_PATH = $PUBLIC_PHP_PATH . '/ams/files/';
+$FILE_WEB_PATH = $BASE_WEBPATH . 'files/';
 
 // Setup password
 $NEL_SETUP_PASSWORD = '%nelSetupPassword%';
