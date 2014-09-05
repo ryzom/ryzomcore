@@ -494,7 +494,8 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+		NLGEORGES::CFormElmStruct *s = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
+		addStruct( item, s, s->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
 	}
 
 	if( celm->Elements.size() == 0 )
@@ -566,7 +567,8 @@ void CGeorgesFormModel::appendArray( QModelIndex idx )
 	std::string formName;
 	node->getFormName( formName );
 
-	item->add( CFormItem::Form, name.c_str(), s, formName.c_str(), 0, item->form(), false );
+	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
+	addStruct( item, st, st->FormDfn, name.c_str(), s, formName.c_str(), 0 );
 }
 
 void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
