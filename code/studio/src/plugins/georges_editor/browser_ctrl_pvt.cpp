@@ -26,7 +26,6 @@
 
 namespace
 {
-
 	QVariant::Type getValueType( const NLGEORGES::UType *typ )
 	{
 		QVariant::Type t = QVariant::String;
@@ -42,6 +41,55 @@ namespace
 		case NLGEORGES::UType::Double: t = QVariant::Double; break;
 		case NLGEORGES::UType::Color: t = QVariant::Color; break;
 		case NLGEORGES::UType::String: t = QVariant::String; break;
+		}
+
+		return t;
+	}
+
+	QVariant::Type getValueTypeFromDfn( NLGEORGES::CFormElmStruct *st, int idx )
+	{
+		NLGEORGES::CFormDfn *cdfn = st->FormDfn;
+		NLGEORGES::CFormDfn::CEntry entry = cdfn->getEntry( idx );
+		return getValueType( entry.getTypePtr() );
+	}
+
+
+	QVariant::Type getValueTypeFromDfn( NLGEORGES::CFormElmAtom *atom )
+	{
+		QVariant::Type t = QVariant::String;
+
+		NLGEORGES::CFormElm *cparent = static_cast< NLGEORGES::CFormElm* >( atom->getParent() );
+		
+		if( cparent->isArray() )
+		{
+			NLGEORGES::CFormElmStruct *aparent = static_cast< NLGEORGES::CFormElmStruct* >( cparent->getParent() );
+			NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( aparent->getStructDfn() );
+
+			int idx = -1;
+			for( idx = 0; idx < aparent->Elements.size(); idx++ )
+			{
+				if( aparent->Elements[ idx ].Element == cparent )
+					break;
+			}
+
+			NLGEORGES::CFormDfn::CEntry entry = cdfn->getEntry( idx );
+			return getValueType( entry.getTypePtr() );
+		}
+		else
+		if( cparent->isStruct() )
+		{
+			NLGEORGES::CFormElmStruct *sparent = static_cast< NLGEORGES::CFormElmStruct* >( cparent );
+			NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( cparent->getStructDfn() );
+
+			int idx = -1;
+			for( idx = 0; idx < sparent->Elements.size(); idx++ )
+			{
+				if( sparent->Elements[ idx ].Element == atom )
+					break;
+			}
+
+			NLGEORGES::CFormDfn::CEntry entry = cdfn->getEntry( idx );
+			return getValueType( entry.getTypePtr() );
 		}
 
 		return t;
@@ -73,8 +121,19 @@ BrowserCtrlPvt::~BrowserCtrlPvt()
 	m_browser = NULL;
 }
 
-void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm )
+void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
 {
+	NLGEORGES::CFormElmStruct::CFormElmStructElm &elm = st->Elements[ idx ];
+	if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
+			return;
+	
+	if( elm.Element == NULL )
+	{
+		NLGEORGES::CFormDfn::CEntry &entry = st->FormDfn->getEntry( idx );
+		if( entry.getArrayFlag() )
+			return;
+	}	
+
 	QString key = elm.Name.c_str();
 	QString value = "";
 	QVariant::Type t = QVariant::String;
@@ -90,6 +149,10 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &el
 		m_rootNode->getValueByName( v, formName.c_str(), NLGEORGES::UFormElm::NoEval, NULL, 0 );
 		value = v.c_str();
 	}
+	else
+	{
+		t = getValueTypeFromDfn( st, idx );
+	}
 
 	QtVariantProperty *p = mgr->addProperty( t, key );
 	p->setValue( value );
@@ -102,18 +165,7 @@ void BrowserCtrlPvt::setupStruct( NLGEORGES::UFormElm *node )
 
 	for( int i = 0; i < st->Elements.size(); i++ )
 	{
-		NLGEORGES::CFormElmStruct::CFormElmStructElm &elm = st->Elements[ i ];
-		if( ( elm.Element != NULL ) && !elm.Element->isAtom() )
-			continue;
-
-		if( elm.Element == NULL )
-		{
-			NLGEORGES::CFormDfn::CEntry &entry = st->FormDfn->getEntry( i );
-			if( entry.getArrayFlag() )
-				continue;				
-		}
-
-		setupAtom( elm );
+		setupAtom( st, i );
 	}
 }
 
@@ -161,6 +213,10 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 	if( t != NULL )
 	{
 		tt = getValueType( t );
+	}
+	else
+	{
+		tt = getValueTypeFromDfn( atom );
 	}
 
 	QtVariantProperty *p = mgr->addProperty( tt, "value" );

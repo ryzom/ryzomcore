@@ -61,7 +61,7 @@ Q_SIGNALS:
 
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
-	void setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm );
+	void setupAtom( NLGEORGES::CFormElmStruct *st, int idx );
 
 	void setupStruct( GeorgesQt::CFormItem *node );
 	void setupArray( GeorgesQt::CFormItem *node );
