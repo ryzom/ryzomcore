@@ -6,8 +6,6 @@ $id = $_POST['PHPSESSID'];
 session_id($id);
 session_start();
 
-global $FILE_STORAGE_PATH;
-
     // Set permission
     if ( isset( $_SESSION['ticket_user'] ) ) {
         $return['permission'] = unserialize( $_SESSION['ticket_user'] ) -> getPermission();
@@ -27,10 +25,9 @@ global $FILE_STORAGE_PATH;
 
             if (!empty($_FILES)) {
                 $tempFile = $_FILES['Filedata']['tmp_name'];
-                $targetFile = $FILE_STORAGE_PATH . $_FILES['Filedata']['name'];
                 
                 $fileParts = pathinfo($_FILES['Filedata']['name']);
-                move_uploaded_file($tempFile,$targetFile);
+                Ticket::add_Attachment($_GET['id'],$_FILES['Filedata']['name'],$_SESSION['id'],$tempFile);
             }
         }
     }

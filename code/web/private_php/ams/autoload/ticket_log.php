@@ -13,6 +13,7 @@
 * -# assigned to the ticket
 * -# forwarded ticket to support group arg
 * -# unassigned to the ticket
+* -# added attachment to the ticket
 *
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
@@ -36,6 +37,7 @@ class Ticket_Log{
      * 7: assigned to the ticket
      * 8: Forwarded ticket to support group arg
      * 9: unassigned to the ticket
+     *10: added attachment to the ticket
      *
      ****************************************/
 

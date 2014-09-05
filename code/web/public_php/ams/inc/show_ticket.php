@@ -64,6 +64,10 @@ function show_ticket(){
             $result['ticket_assignedTo'] = Assigned::getUserAssignedToTicket($result['ticket_tId']);
             $result['ticket_replies'] = Gui_Elements::make_table($entire_ticket['reply_array'], Array("getTReplyId","getContent()->getContent","getTimestamp","getAuthor()->getExternId","getAuthor()->getPermission","getHidden"), Array("tReplyId","replyContent","timestamp","authorExtern","permission","hidden"));
             $i = 0;
+            global $FILE_WEB_PATH;
+            $result['FILE_WEB_PATH'] = $FILE_WEB_PATH;
+            global $BASE_WEBPATH;
+            $result['BASE_WEBPATH'] = $BASE_WEBPATH;
             foreach( $result['ticket_replies'] as $reply){
                 $webReplyUser = new WebUsers($reply['authorExtern']);
                 $result['ticket_replies'][$i]['author'] = $webReplyUser->getUsername();
@@ -77,6 +81,8 @@ function show_ticket(){
             $result['hasInfo'] = $target_ticket->hasInfo();
             global $INGAME_WEBPATH;
             $result['ingame_webpath'] = $INGAME_WEBPATH;
+            //get attachments
+            $result['ticket_attachments'] = Ticket::getAttachments($result['ticket_id']);
             return $result;
 
         }else{

@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS `ticket_attachments` (
   `Filename` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
   `Timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `Filesize` int(10) NOT NULL,
-  `Uploader` int(10) unsigned NOT NULL
+  `Uploader` int(10) unsigned NOT NULL,
+  `Path` VARCHAR(128) NOT NULL 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
