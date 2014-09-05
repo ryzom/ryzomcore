@@ -121,3 +121,5 @@ $INGAME_LAYOUT = "basic";
 //forces to load the ingame templates if set to true
 $FORCE_INGAME = false;
 
+//file storage path (must be a publicly accessible url for 
+$FILE_STORAGE_PATH = "/files/";
