@@ -478,6 +478,31 @@ CFormItem *CGeorgesFormModel::addAtom(CFormItem *parent, NLGEORGES::CFormElm *el
 }
 
 
+CFormItem *CGeorgesFormModel::addItem(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName)
+{
+	CFormItem *item = NULL;
+
+	if( elm->isAtom() )
+		item = addAtom(parent, elm, dfn, name, id, formName );
+	else
+	if( elm->isStruct() || elm->isVirtualStruct() )
+	{
+		NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( elm );
+		if( st->isVirtualStruct() )
+			item = addStruct(parent, st, st->FormDfn, name, id, formName, 0, true);
+		else
+			item = addStruct(parent, st, st->FormDfn, name, id, formName, 0, false);
+	}
+	else
+	if( elm->isArray() )
+	{
+		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( elm );
+		item = addArray(parent, arr, arr->FormDfn, name, id, formName, 0 );
+	}
+
+	return item;
+}
+
 void CGeorgesFormModel::arrayResized( const QString &name, int size )
 {
 	CFormItem *item = m_rootItem->findItem( name );
@@ -512,8 +537,9 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		else
 			n = e.Name.c_str();
 
-		NLGEORGES::CFormElmStruct *s = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
-		addStruct( item, s, s->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
+		NLGEORGES::UFormDfn *udfn = e.Element->getStructDfn();
+		NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+		addItem( item, e.Element, cdfn, n.toUtf8().constData(), i, formName.toUtf8().constData() );
 	}
 
 	if( celm->Elements.size() == 0 )
@@ -585,8 +611,8 @@ void CGeorgesFormModel::appendArray( QModelIndex idx )
 	std::string formName;
 	node->getFormName( formName );
 
-	NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( node );
-	addStruct( item, st, st->FormDfn, name.c_str(), s, formName.c_str(), 0 );
+	NLGEORGES::CFormDfn *cdfn = const_cast< NLGEORGES::CFormDfn* >( nodeDfn );
+	addItem( item, node, cdfn, name.c_str(), s, formName.c_str() );
 }
 
 void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
@@ -628,8 +654,11 @@ void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
 		else
 			n = e.Name.c_str();
 
-		NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
-		addStruct( item, st, st->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
+		NLGEORGES::UFormDfn *udfn = e.Element->getStructDfn();
+		NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+		addItem( item, e.Element, cdfn, n.toUtf8().constData(), i, formName.toUtf8().constData() );
+		//NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
+		//addStruct( item, st, st->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
 	}
 
 	Q_EMIT endResetModel();

@@ -72,6 +72,8 @@ namespace GeorgesQt
 
 		CFormItem *addAtom(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName);
 
+		CFormItem *addItem(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName);
+
 		void emitDataChanged(const QModelIndex &index)
 		{ 
 			Q_EMIT dataChanged(index, index); 
