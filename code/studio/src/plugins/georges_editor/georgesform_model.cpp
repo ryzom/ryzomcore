@@ -610,7 +610,8 @@ void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+		NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
+		addStruct( item, st, st->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
 	}
 
 	Q_EMIT endResetModel();
