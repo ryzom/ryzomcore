@@ -29,7 +29,7 @@
     <link href='css/jquery.iphone.toggle.css' rel='stylesheet'>
     <link href='css/uploadify.css' rel='stylesheet'>
     <link href='css/animate.min.css' rel='stylesheet'>
-	
+
 	<!-- jQuery -->
     <script src="js/jquery.min.js"></script>
 
@@ -158,7 +158,7 @@
 		</div>
 
 		<footer>
-			{if $permission > 1}<p class="pull-right">AMS 0.9.0 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
+			{if $permission > 1}<p class="pull-right">AMS 0.9.1 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
 		</footer>
 		{/if}
 	</div><!--/.fluid-container-->
@@ -303,6 +303,6 @@
 	<script src="js/help.js"></script>
 	<!-- application script for Charisma demo -->
 	<script src="js/custom.js"></script>
-	
+
 </body>
 </html>
