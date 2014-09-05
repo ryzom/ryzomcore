@@ -9,24 +9,34 @@ try {
 $pageTitle = "Authenticate";
 include('header.php');
 
+require_once('config.php');
+
 ?>
 			<div style="margin-left: auto; margin-right: auto; max-width: 512px;">
 
-<?php /*var_dump($_POST);*/ if ($_POST) { ?>
+<?php /*var_dump($_POST);*/ $showForm = true; if ($_POST) { ?>
+
+<?php if ($_POST['nelSetupPassword'] == $NEL_SETUP_PASSWORD) { ?>
 
 <?php
 
-// TODO
 $_SESSION['nelSetupAuthenticated'] = 1;
 
 printalert("success", "You are now authenticated");
+$showForm = false;
 
 ?>
 				<p>
 					<a class="btn btn-primary" href="index.php">Continue</a>
 				</p>
 
-<?php } else { ?>
+<?php } else {
+
+printalert("danger", "Invalid password");
+
+} ?>
+
+<?php } if ($showForm) { ?>
 
 				<form class="form" role="form" method="POST" action="" enctype="application/x-www-form-urlencoded">
 					<div class="input-group">

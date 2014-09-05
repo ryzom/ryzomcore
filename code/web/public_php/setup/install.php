@@ -80,6 +80,11 @@ include('header.php');
 		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]);
 	}
 
+	if ($roleDomain) {
+		// Create Ring database
+		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]);
+	}
+
 	if ($con) {
 		mysqli_close($con);
 		printalert("info", "Disconnected from the Service SQL server");
@@ -167,6 +172,10 @@ include('header.php');
 		$continue = upgrade_domain_databases($continue);
 	}
 
+	if ($roleService) {
+		// TODO: Create the default admin user
+	}
+
 	if ($roleSupport) {
 		// Load AMS Library
 		if ($continue) {
@@ -198,6 +207,10 @@ include('header.php');
 				$continue = false;
 			}
 		}
+	}
+
+	if ($roleDomain) {
+		// TODO: Register the domain with the nel database etc
 	}
 
 	if ($continue && $roleService) {
@@ -423,7 +436,7 @@ include('header.php');
 				</div>
 				<div id="panelDomain" class="panel panel-default hide">
 					<div class="panel-heading">
-						<h2 class="panel-title">Domain</h2>
+						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">

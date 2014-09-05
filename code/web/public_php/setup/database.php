@@ -102,6 +102,15 @@ function upgrade_support_databases($continue_r) {
 function upgrade_domain_databases($continue_r) {
 	$continue = $continue_r;
 
+	$con = null;
+	$con = connect_database($continue, "ring");
+	$continue = ($con != null);
+	if ($continue && get_db_version("ring") < 1) {
+		$continue = update_database_structure($continue, $con, "ring_domain_00001.sql");
+		$continue = set_db_version($continue, "ring", 1);
+	}
+	disconnect_database($con, "ring");
+
 	return $continue;
 }
 
