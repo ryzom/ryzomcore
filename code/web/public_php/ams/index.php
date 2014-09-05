@@ -18,7 +18,7 @@ ini_set( 'display_errors', 'on' );
 class SystemExit extends Exception {}
 try {
 
-if (!file_exists( '../config.php')) {
+if (!file_exists('../role_support')) {
 	header("Cache-Control: max-age=1");
 	header('Location: ../setup', true, 303);
 	throw new SystemExit();

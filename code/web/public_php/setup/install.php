@@ -75,11 +75,14 @@ include('header.php');
 	if ($roleService) {
 		// Create NeL database
 		$continue = create_use_database($continue, $con, $_POST["nelDatabase"]);
-		$continue = update_database_structure($continue, $con, "nel_00001.sql");
 
 		// Create NeL Tools database
 		$continue = create_use_database($continue, $con, $_POST["toolDatabase"]);
-		$continue = update_database_structure($continue, $con, "nel_tool_00001.sql");
+	}
+
+	if ($roleDomain) {
+		// Create Ring database
+		$continue = create_use_database($continue, $con, $_POST["domainDatabase"]);
 	}
 
 	if ($con) {
@@ -101,12 +104,9 @@ include('header.php');
 
 		// Create AMS database
 		$continue = create_use_database($continue, $con, $_POST["amsDatabase"]);
-		$continue = update_database_structure($continue, $con, "nel_ams_00001.sql");
 
 		// Create AMS Library database
 		$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]);
-		$continue = update_database_structure($continue, $con, "nel_ams_lib_00001.sql");
-		$continue = update_database_structure($continue, $con, "nel_ams_lib_00002.sql");
 
 		if ($con) {
 			mysqli_close($con);
@@ -158,6 +158,24 @@ include('header.php');
 		}
 	}
 
+	require_once('database.php');
+
+	if ($roleSupport) {
+		$continue = upgrade_support_databases($continue);
+	}
+
+	if ($roleService) {
+		$continue = upgrade_service_databases($continue);
+	}
+
+	if ($roleDomain) {
+		$continue = upgrade_domain_databases($continue);
+	}
+
+	if ($roleService) {
+		// TODO: Create the default admin user
+	}
+
 	if ($roleSupport) {
 		// Load AMS Library
 		if ($continue) {
@@ -191,7 +209,11 @@ include('header.php');
 		}
 	}
 
-	if ($continue && $roleSupport) {
+	if ($roleDomain) {
+		// TODO: Register the domain with the nel database etc
+	}
+
+	if ($continue && $roleService) {
 		if (file_put_contents("role_service", "1")) {
 			printalert("success", "Service role successfully installed");
 		} else {
@@ -414,7 +436,7 @@ include('header.php');
 				</div>
 				<div id="panelDomain" class="panel panel-default hide">
 					<div class="panel-heading">
-						<h2 class="panel-title">Domain</h2>
+						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
 						<div class="form-group">
