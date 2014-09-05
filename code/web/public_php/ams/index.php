@@ -28,6 +28,7 @@ require( '../config.php' );
 require_once( $AMS_LIB . '/libinclude.php' );
 session_start();
 
+
 // Running Cron
 if ( isset( $_GET["cron"] ) ) {
     if ( $_GET["cron"] == "true" ) {

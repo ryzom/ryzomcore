@@ -79,6 +79,9 @@ class Helpers {
 		 foreach ( $variables['ams_content'] as $key => $value){
 			 $smarty -> assign( $key, $value);
 			 }
+             
+        $id = session_id();    
+        $smarty -> assign( "sessionid", $id );
 
         // smarty inheritance for loading the matching wrapper layout (with the matching menu bar)
         if ( isset( $vars['permission'] ) && $vars['permission'] == 3 ) {

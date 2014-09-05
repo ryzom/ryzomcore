@@ -112,6 +112,25 @@
 				{/if}
 				<input type="hidden" name="function" value="reply_on_ticket">
 				<input type="hidden" name="ticket_id" value="{$ticket_id}">
+				
+                <h3>Upload Attachment</h3>
+                <input data-no-uniform="true" type="file" name="file_upload" id="file_upload">
+				{literal} 
+				<script language='JavaScript'>
+				$(document).ready( function () {
+
+					$('#file_upload').uploadify({
+					'formData' : {'PHPSESSID': '{/literal}{$sessionid}{literal}'},
+					'auto' : true,
+					'multi' : true,
+					'method' : 'post',
+					'swf': 'misc/uploadify.swf',
+					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal}
+					});
+
+				});
+				</script>
+				{/literal} 
 				<div class="control-group">
 				    <label class="control-label"></label>
 				    <div class="controls">
