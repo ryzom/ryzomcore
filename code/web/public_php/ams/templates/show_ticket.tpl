@@ -136,7 +136,7 @@
 				$(document).ready( function () {
 
 					$('#file_upload').uploadify({
-					'formData' : {'PHPSESSID': '{/literal}{$sessionid}{literal}'},
+					'formData' : {'PHPSESSID': '{/literal}{nocache}{$sessionid}{/nocache}{literal}'},
 					'auto' : true,
 					'multi' : true,
 					'method' : 'post',
