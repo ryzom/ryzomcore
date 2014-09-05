@@ -30,11 +30,27 @@
 				</span>
 			    </td>
 			</tr>
+		</table>
+		<table class="table table-bordered table-condensed ">
 			<tr>
-			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
-			    <td></td>
-			    <td></td>
+			    <td><strong>Filename: </strong></td>
+			    <td><strong>Uploaded: </strong></td>
+			    <td><strong>Filesize: </strong></td>
+				<td><strong>Uploaded by: </strong></td>
 		      </tr>
+			{foreach from=$ticket_attachments item=array}
+			<tr>
+			    <td><a href="{$FILE_WEB_PATH}{$array['Path']}">{$array['Filename']}</a></td>
+			    <td>{$array['Timestamp']}</td>
+			    <td>{$array['Filesize']}</td>
+				<td>{if $permission > 1}
+					<a href="{$BASE_WEBPATH}index.php?page=show_user&id={$array['Uploader']}">{$array['Username']}</a>
+					{else}
+					{$array['Username']}
+					{/if}
+					</td>
+		    </tr>
+			{/foreach}
 		</table>
 
 
@@ -112,6 +128,27 @@
 				{/if}
 				<input type="hidden" name="function" value="reply_on_ticket">
 				<input type="hidden" name="ticket_id" value="{$ticket_id}">
+				
+                <h3>Upload Attachment</h3>
+                <input data-no-uniform="true" type="file" name="file_upload" id="file_upload">
+				{literal} 
+				<script language='JavaScript'>
+				$(document).ready( function () {
+
+					$('#file_upload').uploadify({
+					'formData' : {'PHPSESSID': '{/literal}{nocache}{$sessionid}{/nocache}{literal}'},
+					'auto' : true,
+					'multi' : true,
+					'method' : 'post',
+					'swf': 'misc/uploadify.swf',
+					'displayData': 'percentage',
+					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal},
+					'removeCompleted' : false
+					});
+				});
+				</script>
+				{/literal} 
+				<div id="filesUploaded"></div>
 				<div class="control-group">
 				    <label class="control-label"></label>
 				    <div class="controls">

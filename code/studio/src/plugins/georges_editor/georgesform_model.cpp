@@ -613,6 +613,7 @@ void CGeorgesFormModel::appendArray( QModelIndex idx )
 
 	NLGEORGES::CFormDfn *cdfn = const_cast< NLGEORGES::CFormDfn* >( nodeDfn );
 	addItem( item, node, cdfn, name.c_str(), s, formName.c_str() );
+	
 }
 
 void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
@@ -657,8 +658,6 @@ void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
 		NLGEORGES::UFormDfn *udfn = e.Element->getStructDfn();
 		NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
 		addItem( item, e.Element, cdfn, n.toUtf8().constData(), i, formName.toUtf8().constData() );
-		//NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( e.Element );
-		//addStruct( item, st, st->FormDfn, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0 );
 	}
 
 	Q_EMIT endResetModel();

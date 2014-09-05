@@ -18,7 +18,7 @@ ini_set( 'display_errors', 'on' );
 class SystemExit extends Exception {}
 try {
 
-if (!file_exists( '../is_installed')) {
+if (!file_exists('../role_support')) {
 	header("Cache-Control: max-age=1");
 	header('Location: ../setup', true, 303);
 	throw new SystemExit();
@@ -27,6 +27,7 @@ if (!file_exists( '../is_installed')) {
 require( '../config.php' );
 require_once( $AMS_LIB . '/libinclude.php' );
 session_start();
+
 
 // Running Cron
 if ( isset( $_GET["cron"] ) ) {
@@ -52,7 +53,7 @@ if ( ! isset( $_GET["page"] ) ) {
         $page = 'login';
          }
     } else {
-	// if the session exists load page with $_GET requests	
+	// if the session exists load page with $_GET requests
     if ( isset( $_SESSION['user'] ) ) {
         $page = $_GET["page"];
          } else {

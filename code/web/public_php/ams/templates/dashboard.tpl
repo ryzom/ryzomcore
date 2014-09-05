@@ -15,10 +15,10 @@
 			<span class="notification red">{$nrToDo}</span>
 		</a>
 
-		<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_ticket&id={$newestTicketId}">
+		<a data-original-title="By {$newestTicketAuthor}" data-rel="tooltip" class="well span3 top-block" {if $newestTicketId != null}href="index.php?page=show_ticket&id={$newestTicketId}"{/if}>
 			<span class="glyphicon glyphicon-flag lg-icon green"></span>
 			<div>Newest Ticket</div>
-			<span class="notification blue">{$newestTicketTitle}</span>
+			<span class="notification blue">{if $newestTicketId != null}{$newestTicketTitle}{else}No Tickets!{/if}</span>
 		</a>
 
 		<a data-original-title="{$nrTotalTickets} tickets in total" data-rel="tooltip" class="well span3 top-block" href="index.php?page=show_queue&get=all">

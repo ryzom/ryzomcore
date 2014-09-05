@@ -15,7 +15,7 @@
 					<script>
 						function sync(){
 							xmlhttp=new XMLHttpRequest();
-							xmlhttp.open("POST","../../../ams_lib/cron/sync_cron.php",true);
+							xmlhttp.open("POST","cron/sync_cron.php",true);
 							xmlhttp.send();
 						}
 					</script>

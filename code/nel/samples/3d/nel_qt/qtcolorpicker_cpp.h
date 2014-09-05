@@ -543,14 +543,17 @@ ColorPickerPopup::ColorPickerPopup(int width, bool withColorDialog,
     setMouseTracking(true);
     cols = width;
 
-    if (withColorDialog) {
-	moreButton = new ColorPickerButton(this);
-	moreButton->setFixedWidth(24);
-	moreButton->setFixedHeight(21);
-	moreButton->setFrameRect(QRect(2, 2, 20, 17));
-	connect(moreButton, SIGNAL(clicked()), SLOT(getColorFromDialog()));
-    } else {
-	moreButton = 0;
+    if (withColorDialog)
+	{
+		moreButton = new ColorPickerButton(this);
+		moreButton->setFixedWidth(24);
+		moreButton->setFixedHeight(21);
+		moreButton->setFrameRect(QRect(2, 2, 20, 17));
+		connect(moreButton, SIGNAL(clicked()), SLOT(getColorFromDialog()));
+    }
+	else
+	{
+		moreButton = 0;
     }
 
     eventLoop = 0;
@@ -1059,15 +1062,20 @@ void ColorPickerButton::mouseReleaseEvent(QMouseEvent *)
 void ColorPickerButton::keyPressEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Up
-	|| e->key() == Qt::Key_Down
-	|| e->key() == Qt::Key_Left
-	|| e->key() == Qt::Key_Right) {
-	qApp->sendEvent(parent(), e);
-    } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return) {
-	setFrameShadow(Sunken);
-	update();
-    } else {
-	QFrame::keyPressEvent(e);
+		|| e->key() == Qt::Key_Down
+		|| e->key() == Qt::Key_Left
+		|| e->key() == Qt::Key_Right)
+	{
+		qApp->sendEvent(parent(), e);
+    }
+	else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return)
+	{
+		setFrameShadow(Sunken);
+		update();
+    }
+	else
+	{
+		QFrame::keyPressEvent(e);
     }
 }
 
@@ -1077,16 +1085,21 @@ void ColorPickerButton::keyPressEvent(QKeyEvent *e)
 void ColorPickerButton::keyReleaseEvent(QKeyEvent *e)
 {
     if (e->key() == Qt::Key_Up
-	|| e->key() == Qt::Key_Down
-	|| e->key() == Qt::Key_Left
-	|| e->key() == Qt::Key_Right) {
-	qApp->sendEvent(parent(), e);
-    } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return) {
-	setFrameShadow(Raised);
-	repaint();
-	emit clicked();
-    } else {
-	QFrame::keyReleaseEvent(e);
+		|| e->key() == Qt::Key_Down
+		|| e->key() == Qt::Key_Left
+		|| e->key() == Qt::Key_Right)
+	{
+		qApp->sendEvent(parent(), e);
+    }
+	else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Space || e->key() == Qt::Key_Return)
+	{
+		setFrameShadow(Raised);
+		repaint();
+		emit clicked();
+    }
+	else
+	{
+		QFrame::keyReleaseEvent(e);
     }
 
 }
