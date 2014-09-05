@@ -454,6 +454,7 @@ public:
 
 	// Set the value, the elt been used
 	void						setValue (const char *value);
+	std::string					getValue() const;
 
 private:
 	// The value

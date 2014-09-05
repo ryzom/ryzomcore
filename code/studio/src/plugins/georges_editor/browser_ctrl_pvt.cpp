@@ -146,6 +146,29 @@ void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
 	m_browser->addProperty( p );
 }
 
+void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
+{
+	NLGEORGES::UFormElm *n = getGeorgesNode( node );
+
+	if( n == NULL )
+		return;
+
+	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( n );
+	std::string v = atom->getValue();
+	
+	const NLGEORGES::CType *t = atom->getType();
+	QVariant::Type tt = QVariant::String;
+	if( t != NULL )
+	{
+		tt = getValueType( t );
+	}
+
+	QtVariantProperty *p = mgr->addProperty( tt, "value" );
+	p->setValue( v.c_str() );
+	m_browser->addProperty( p );
+
+	m_currentNode.p = n;
+}
 
 void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 {
@@ -159,6 +182,9 @@ void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 	else
 	if( node->isStruct() )
 		setupStruct( node );
+	else
+	if( node->isAtom() )
+		setupAtom( node );
 
 	m_browser->setFactoryForManager( mgr, factory );
 }
@@ -283,6 +309,15 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 		m_currentNode.p = NULL;
 }
 
+void BrowserCtrlPvt::onAtomValueChanged( QtProperty *p, const QVariant &value )
+{
+	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( m_currentNode.p );
+	atom->setValue( value.toString().toUtf8() );
+
+	Q_EMIT modified();
+	Q_EMIT valueChanged( m_currentNode.name, value.toString() );
+}
+
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 {
 	if( m_currentNode.p == NULL )
@@ -299,6 +334,9 @@ void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 	else
 	if( m_currentNode.p->isArray() )
 		onArrayValueChanged( p, value );
+	else
+	if( m_currentNode.p->isAtom() )
+		onAtomValueChanged( p, value );
 }
 
 
