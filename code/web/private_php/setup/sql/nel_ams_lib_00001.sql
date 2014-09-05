@@ -304,33 +304,6 @@ CREATE TABLE IF NOT EXISTS `updates` (
   `UpdateInfo` text CHARACTER SET utf8 COLLATE utf8_unicode_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- -----------------------------------------------------
--- Table `nel_ams_lib`.`ticket_attachments`
--- -----------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `nel_ams_lib`.`ticket_attachments` (
-  `idticket_attachments` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ticket_TId` INT(10) UNSIGNED NOT NULL,
-  `Filename` VARCHAR(45) NOT NULL,
-  `Timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `Filesize` INT(10) NOT NULL,
-  `Uploader` INT(10) UNSIGNED NOT NULL,
-  PRIMARY KEY (`idticket_attachments`),
-  UNIQUE INDEX `idticket_attachments_UNIQUE` (`idticket_attachments` ASC),
-  INDEX `fk_ticket_attachments_ticket1_idx` (`ticket_TId` ASC),
-  INDEX `fk_ticket_attachments_ticket_user1_idx` (`Uploader` ASC),
-  CONSTRAINT `fk_ticket_attachments_ticket1`
-    FOREIGN KEY (`ticket_TId`)
-    REFERENCES `nel_ams_lib`.`ticket` (`TId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ticket_attachments_ticket_user1`
-    FOREIGN KEY (`Uploader`)
-    REFERENCES `nel_ams_lib`.`ticket_user` (`TUserId`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
 --
 -- Indexes for dumped tables
 --

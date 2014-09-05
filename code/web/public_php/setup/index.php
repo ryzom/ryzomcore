@@ -160,6 +160,7 @@ function update_database_structure($continue_r, $con, $file) {
 	// Create AMS Library database
 	$continue = create_use_database($continue, $con, $_POST["amsLibDatabase"]);
 	$continue = update_database_structure($continue, $con, "nel_ams_lib_00001.sql");
+    $continue = update_database_structure($continue, $con, "nel_ams_lib_00002.sql");
 
 	// Write config.php
 	if ($continue) {
