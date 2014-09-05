@@ -28,7 +28,13 @@ session_start();
                 
                 $fileParts = pathinfo($_FILES['Filedata']['name']);
                 Ticket::add_Attachment($_GET['id'],$_FILES['Filedata']['name'],$_SESSION['id'],$tempFile);
+                echo "Uploaded :".$_FILES['Filedata']['name'];
+            } else {
+                echo "Upload Failed!";
             }
+            echo "Upload Failed!";
         }
+        echo "Upload Failed!";
     }
+    echo "Upload Failed!";
 ?>

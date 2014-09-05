@@ -141,12 +141,14 @@
 					'multi' : true,
 					'method' : 'post',
 					'swf': 'misc/uploadify.swf',
-					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal}
+					'displayData': 'percentage',
+					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal},
+					'removeCompleted' : false
 					});
-
 				});
 				</script>
 				{/literal} 
+				<div id="filesUploaded"></div>
 				<div class="control-group">
 				    <label class="control-label"></label>
 				    <div class="controls">
