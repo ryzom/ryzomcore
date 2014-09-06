@@ -1,3 +1,4 @@
+SetHandler default-handler
 Options -Indexes
 Options -ExecCGI
 DirectoryIndex disabled
