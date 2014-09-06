@@ -10,11 +10,12 @@
                 <form id="changePassword" class="form-vertical" method="post" action="index.php?page=createticket&id={$target_id}">
                     <legend>New ticket</legend>
 
-                    <div class="control-group">
+                    <div class="control-group {if isset($TITLE_ERROR) and $TITLE_ERROR eq "TRUE"}error{/if}">
                         <label class="control-label">Title</label>
                         <div class="controls">
                             <div class="input-prepend">
-                                <input type="text" class="span8" id="Title" name="Title">
+                                <input type="text" class="span8" id="Title" name="Title" {if isset($Title)}value='{$Title}'{/if}>
+								{if isset($TITLE_ERROR) and $TITLE_ERROR eq "TRUE"}<span class="help-inline">{$TITLE_ERROR_MESSAGE}</span>{/if}
                             </div>
                         </div>
                     </div>
@@ -30,12 +31,13 @@
                         </div>
                     </div>
 
-                    <div class="control-group">
+                    <div class="control-group {if isset($CONTENT_ERROR) and $CONTENT_ERROR eq "TRUE"}error{/if}">
                         <label class="control-label">Description</label>
                         <div class="controls">
                             <div class="input-prepend">
-				    <textarea rows="12" class="span12" id="Content" name="Content"></textarea>
-                            </div>
+							<textarea rows="12" class="span12" id="Content" name="Content">{if isset($Content)}{$Content}{/if}</textarea>
+                            {if isset($CONTENT_ERROR) and $CONTENT_ERROR eq "TRUE"}<span class="help-inline">{$CONTENT_ERROR_MESSAGE}</span>{/if}
+							</div>
                         </div>
                     </div>
 

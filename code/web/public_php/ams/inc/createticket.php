@@ -44,11 +44,12 @@ function createticket(){
         $result['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
         global $INGAME_WEBPATH;
         $result['ingame_webpath'] = $INGAME_WEBPATH;
+        $result['TITLE_ERROR'] = $INGAME_WEBPATH;
         return $result;
 
     }else{
         //ERROR: not logged in!
-                header("Cache-Control: max-age=1");
+        header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }
