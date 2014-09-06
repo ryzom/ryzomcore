@@ -96,6 +96,7 @@ $AMS_LIB = $PRIVATE_PHP_PATH . '/ams';
 $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $AMS_PLUGINS = $AMS_LIB . '/plugins';
+$AMS_TMPDIR = $AMS_LIB . '/tmp';
 // Here your inc and func resides
 $SITEBASE = $PUBLIC_PHP_PATH  . '/ams/' ;
 
