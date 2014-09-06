@@ -7,6 +7,11 @@
 */
 class Sync{
     
+    const OS_UNKNOWN = 1;
+    const OS_WIN = 2;
+    const OS_LINUX = 3;
+    const OS_OSX = 4;
+    
     /**
      * performs the actions listed in the querycache.
      * All entries in the querycache will be read and performed depending on their type.
@@ -24,10 +29,10 @@ class Sync{
         if(isset($pid) and function_exists('pcntl_fork') ) {
         // We're the main process.
         } else {
-            if(!file_exists($pidfile)) {
-                $pid = getmypid();
+            $pid = getmypid();
+            if(!file_exists($pidfile) or (file_exists($pidfile) && Sync::check_pid(file_get_contents($pid)))) {
                 $file = fopen($pidfile, 'w+');
-                if (!$file)
+                if (!$file) {
                     echo $pidfile.' is not writeable.';
                     error_log($pidfile.' is not writeable.');
                     throw new SystemExit();
@@ -92,6 +97,34 @@ class Sync{
                 unlink($pidfile);
             }
 
+        }
+    }
+    
+    public static function check_pid($pid){
+    
+        $OS = Sync::getOS();
+    
+        if ($OS == 2) {
+            $processes = explode( "\n", shell_exec( "tasklist.exe" ));
+            foreach( $processes as $process )
+            {
+                 if( strpos( "Image Name", $process ) === 0
+                   || strpos( "===", $process ) === 0 )
+                      continue;
+                 $matches = false;
+                 preg_match( "/(.*?)\s+(\d+).*$/", $process, $matches );
+                 $pid = $matches[ 2 ];
+            }
+        } else {
+            return file_exists( "/proc/$pid" );
+        } 
+    }
+    static public function getOS() {
+        switch (true) {
+            case stristr(PHP_OS, 'DAR'): return self::OS_OSX;
+            case stristr(PHP_OS, 'WIN'): return self::OS_WIN;
+            case stristr(PHP_OS, 'LINUX'): return self::OS_LINUX;
+            default : return self::OS_UNKNOWN;
         }
     }
 }
