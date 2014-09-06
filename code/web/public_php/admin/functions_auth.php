@@ -1,8 +1,8 @@
 <?php
 
 	/*
-	* THIS FILE SHOULD ONLY INCLUDE AUTHENTIFICATION RELATED FUNCTIONS
-	*/
+	 * THIS FILE SHOULD ONLY INCLUDE AUTHENTIFICATION RELATED FUNCTIONS
+	 */
 
 	function nt_auth_set_logging_count($user_id)
 	{
@@ -47,7 +47,7 @@
 		return null;
 	}
 
-	function nt_auth_check_login($user,$passwd)
+	function nt_auth_check_login($user, $passwd)
 	{
 		global $db;
 
@@ -71,14 +71,15 @@
 	{
 		global $tpl;
 
-		$tpl->assign('tool_login_title','Login');
+		$tpl->assign('tool_login_title', 'Login');
 		$tpl->display('index_login.tpl');
 	}
 
 	function nt_auth_start_session()
 	{
 		global $NEL_SETUP_SESSION;
-		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION)) {
+		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION))
+		{
 			return;
 		}
 
@@ -87,7 +88,7 @@
 		session_start();
 
 		header("Expires: Mon, 01 May 2000 06:00:00 GMT");
-		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Last-Modified: ". gmdate("D, d M Y H:i:s") ." GMT");
 		header("Cache-Control: no-store, no-cache, must-revalidate");
 		header("Cache-Control: post-check=0, pre-check=0", false);
 		header("Pragma: no-cache");
@@ -96,7 +97,8 @@
 	function nt_auth_stop_session()
 	{
 		global $NEL_SETUP_SESSION;
-		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION)) {
+		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION))
+		{
 			return;
 		}
 
@@ -108,7 +110,7 @@
 		}
 	}
 
-	function nt_auth_set_session_var($name,$value)
+	function nt_auth_set_session_var($name, $value)
 	{
 		global $NELTOOL;
 
