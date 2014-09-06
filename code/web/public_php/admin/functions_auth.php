@@ -1,8 +1,8 @@
 <?php
 
 	/*
-	 * THIS FILE SHOULD ONLY INCLUDE AUTHENTIFICATION RELATED FUNCTIONS
-	 */
+	* THIS FILE SHOULD ONLY INCLUDE AUTHENTIFICATION RELATED FUNCTIONS
+	*/
 
 	function nt_auth_set_logging_count($user_id)
 	{
@@ -75,49 +75,59 @@
 		$tpl->display('index_login.tpl');
 	}
 
-   function nt_auth_start_session()
+	function nt_auth_start_session()
 	{
+		global $NEL_SETUP_SESSION;
+		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION)) {
+			return;
+		}
+
 		session_name(NELTOOL_SESSIONID);
 		session_cache_limiter('nocache');
 		session_start();
 
-        header("Expires: Mon, 01 May 2000 06:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
+		header("Expires: Mon, 01 May 2000 06:00:00 GMT");
+		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+		header("Cache-Control: no-store, no-cache, must-revalidate");
+		header("Cache-Control: post-check=0, pre-check=0", false);
+		header("Pragma: no-cache");
 	}
 
-    function nt_auth_stop_session()
+	function nt_auth_stop_session()
+	{
+		global $NEL_SETUP_SESSION;
+		if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION)) {
+			return;
+		}
+
+		global $NELTOOL;
+
+		foreach($NELTOOL['SESSION_VARS'] as $key => $val)
+		{
+			unset($NELTOOL['SESSION_VARS'][$key]);
+		}
+	}
+
+	function nt_auth_set_session_var($name,$value)
 	{
 		global $NELTOOL;
 
-	    foreach($NELTOOL['SESSION_VARS'] as $key => $val)
-	    {
-	      unset($NELTOOL['SESSION_VARS'][$key]);
-	    }
-	}
-
-    function nt_auth_set_session_var($name,$value)
-	{
-        global $NELTOOL;
-
-        $NELTOOL['SESSION_VARS'][$name] = $value;
+		$NELTOOL['SESSION_VARS'][$name] = $value;
 	}
 
 	function nt_auth_get_session_var($name)
 	{
-        global $NELTOOL;
+		global $NELTOOL;
 
-        if (isset($NELTOOL['SESSION_VARS'][$name])) return $NELTOOL['SESSION_VARS'][$name];
-        return null;
+		if (isset($NELTOOL['SESSION_VARS'][$name])) return $NELTOOL['SESSION_VARS'][$name];
+		return null;
 	}
 
-    function nt_auth_unset_session_var($name)
+	function nt_auth_unset_session_var($name)
 	{
-        global $NELTOOL;
+		global $NELTOOL;
 
-        unset($NELTOOL['SESSION_VARS'][$name]);
+		unset($NELTOOL['SESSION_VARS'][$name]);
 	}
 
 ?>
