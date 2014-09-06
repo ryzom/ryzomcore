@@ -1,0 +1,6 @@
+Options -Indexes
+Options -ExecCGI
+<Files *.*>
+	ForceType application/octet-stream
+	Header set Content-Disposition attachment
+</Files>

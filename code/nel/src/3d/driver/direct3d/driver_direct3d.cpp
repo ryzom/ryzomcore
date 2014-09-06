@@ -1511,8 +1511,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
-
-	
 //	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
@@ -2661,7 +2659,8 @@ bool CDriverD3D::reset (const GfxMode& mode)
 #ifndef NL_NO_ASM
 		CFpuRestorer fpuRestorer; // fpu control word is changed by "Reset"
 #endif
-		if (_Rasterizer!=D3DDEVTYPE_REF) {
+		if (_Rasterizer!=D3DDEVTYPE_REF)
+		{
 			HRESULT hr = _DeviceInterface->Reset (&parameters);
 			if (hr != D3D_OK)
 			{

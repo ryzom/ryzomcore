@@ -595,14 +595,7 @@ CREATE TABLE IF NOT EXISTS `neltool_users` (
   UNIQUE KEY `user_login` (`user_name`),
   KEY `user_group_id` (`user_group_id`),
   KEY `user_active` (`user_active`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
-
---
--- Dumping data for table `neltool_users`
---
-
-INSERT INTO `neltool_users` (`user_id`, `user_name`, `user_password`, `user_group_id`, `user_created`, `user_active`, `user_logged_last`, `user_logged_count`, `user_menu_style`) VALUES
-(1, 'guest', '084e0343a0486ff05530df6c705c8bb4', 1, 1405357395, 1, 0, 0, 0);
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 

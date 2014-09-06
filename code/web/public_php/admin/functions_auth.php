@@ -8,7 +8,7 @@
 	{
 		global $db;
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_logged_count=user_logged_count+1,user_logged_last=". time() ." WHERE user_id=". $user_id;
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_logged_count=user_logged_count+1,user_logged_last=". time() ." WHERE user_id=". (int)$user_id;
 		$db->sql_query($sql);
 	}
 
@@ -18,7 +18,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." LEFT JOIN ". NELDB_GROUP_TABLE ." ON (user_group_id=group_id) WHERE user_id=". $nelid;
+		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." LEFT JOIN ". NELDB_GROUP_TABLE ." ON (user_group_id=group_id) WHERE user_id=". (int)$nelid;
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -34,7 +34,7 @@
 	{
 		global $db;
 
-		$sql = "SELECT user_name FROM ". NELDB_USER_TABLE ." WHERE user_id=". $group_id;
+		$sql = "SELECT user_name FROM ". NELDB_USER_TABLE ." WHERE user_id=". (int)$group_id;
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -53,7 +53,7 @@
 
 		$data = null;
 
-		$user = trim($user);
+		$user = $db->sql_escape_string(trim($user));
 		$passwd = md5(trim($passwd));
 
 		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." LEFT JOIN ". NELDB_GROUP_TABLE ." ON (user_group_id=group_id) WHERE user_name='". $user ."' AND user_password='". $passwd ."' AND user_active=1 AND group_active=1";
