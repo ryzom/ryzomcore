@@ -16,7 +16,11 @@ class Mail_Handler{
     */    
     private function mail_fork() {   
         //Start a new child process and return the process id!
-        $pid = pcntl_fork();
+        if (function_exists('pcntl_fork')) {
+            $pid = pcntl_fork();
+        } else {
+            $pid = getmypid ();
+        }
         return $pid;
         
     }
