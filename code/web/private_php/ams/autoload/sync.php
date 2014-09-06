@@ -27,7 +27,11 @@ class Sync{
             if(!file_exists($pidfile)) {
                 $pid = getmypid();
                 $file = fopen($pidfile, 'w+');
-                    
+                if (!$file)
+                    echo $pidfile.' is not writeable.';
+                    error_log($pidfile.' is not writeable.');
+                    throw new SystemExit();
+                }
                 fwrite($file, $pid);
                 fclose($file);
 
