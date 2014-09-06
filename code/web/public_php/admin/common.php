@@ -8,6 +8,9 @@
 
 	require_once('config.php');
 
+	if (isset($NEL_SETUP_SESSION) && ($NEL_SETUP_SESSION))
+		define('NELTOOL_NO_USER_NEEDED', true);
+
 	require_once(NELTOOL_SYSTEMBASE .'functions_common.php');
 	require_once(NELTOOL_SYSTEMBASE .'functions_auth.php');
 
@@ -139,11 +142,11 @@
 		{
 			$default_user_application_id	= 0;
 			if (isset( $nel_user['user_default_application_id']) &&($nel_user['user_default_application_id'] > 0)) {
-                $default_user_application_id	= $nel_user['user_default_application_id']; 
+                $default_user_application_id	= $nel_user['user_default_application_id'];
 			}elseif (isset( $nel_user['group_default_application_id']) &&($nel_user['group_default_application_id'] > 0)) {
                 $default_user_application_id	= $nel_user['group_default_application_id'];
             }
-            
+
 			if ($default_user_application_id > 0)
 			{
 				nt_common_add_debug("default application : user:". $nel_user['user_default_application_id'] ." group:". $nel_user['group_default_application_id']);
