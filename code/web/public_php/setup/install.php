@@ -133,8 +133,6 @@ include('header.php');
 			$config = str_replace("%amsSqlPassword%", addslashes($_POST["amsSqlPassword"]), $config);
 			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
-			$config = str_replace("%amsAdminUsername%", addslashes($_POST["amsAdminUsername"]), $config);
-			$config = str_replace("%amsAdminPassword%", addslashes($_POST["amsAdminPassword"]), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
