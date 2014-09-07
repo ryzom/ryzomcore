@@ -27,6 +27,7 @@ function api_key_management_hook_display()
     global $return_set;
      // to display plugin name in menu bar
     $return_set['menu_display'] = 'API Key Management';
+    $return_set['icon'] = 'icon-download-alt';
      }
 
 /**

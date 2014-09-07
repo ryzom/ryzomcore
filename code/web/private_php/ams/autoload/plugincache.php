@@ -261,8 +261,13 @@ class Plugincache {
             $arr = get_defined_functions();
 
             foreach ($arr['user'] as $key => $value) {
-                if (stristr( $value, $plugin_name) == true) {
-                    $content['hook_info'][$plugin_name] = call_user_func($value);
+                switch (strtolower($value)) {
+                    case strtolower($plugin_name).'_hook_display':
+                    case strtolower($plugin_name).'_hook_call_rest':
+                    case strtolower($plugin_name).'_hook_get_db':
+                    case strtolower($plugin_name).'_hook_return_global':
+                        $content['hook_info'][$plugin_name] = call_user_func($value);
+                        break;
                 }
             }
             // path for the template
