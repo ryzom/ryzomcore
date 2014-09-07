@@ -3,7 +3,7 @@
 
 <div class="row-fluid">
 	<div class="span12 center login-header">
-		<a href="?"><img src="img/mainlogo.png"/></a> 
+		<a href="?"><img src="img/mainlogo.png"/></a>
 	</div><!--/span-->
 </div><!--/row-->
 
@@ -28,14 +28,14 @@
 				<label for="remember" class="remember "><div class="checkbox" id="uniform-remember"><span><input type="checkbox" id="remember" ></span></div>Remember me</label>
 				</div>
 				<div class="clearfix"></div>
-			
+
 				<p class="center span5">
 				<input type="hidden" name="function" value="login">
 				<button class="btn btn-primary" type="submit">Login</button>
 				</p>
 			</fieldset>
 		</form>
-		
+
 		{if isset($login_error) and $login_error eq "TRUE"}
 		<div class="alert alert-error">
 			<button type="button" class="close" data-dismiss="alert">×</button>
@@ -43,7 +43,7 @@
 		</div>
 		{/if}
 		<div class="alert alert-info">
-		{$login_register_message} <a href="?page=register">{$login_here}</a>.<br/> {$login_forgot_password_message} <a href="?page=forgot_password">{$login_here}</a>
+		<a href="?page=register">{$login_register_message}</a>.<br><a href="?page=forgot_password">{$login_forgot_password_message}</a>
 		</div>
 	</div><!--/span-->
 </div>
