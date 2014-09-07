@@ -83,8 +83,9 @@ function create_use_database($continue_r, $con, $database) {
 }
 function update_database_structure($continue_r, $con, $file) {
 	$continue = $continue_r;
+	global $privatePhpDirectory;
 	if ($continue) {
-		$sql = file_get_contents($_POST["privatePhpDirectory"] . "/setup/sql/" . $file);
+		$sql = file_get_contents($privatePhpDirectory . "/setup/sql/" . $file);
 		if (!$sql) {
 			printalert("danger", "Cannot read <em>" . $file . "</em>");
 			$continue = false;
