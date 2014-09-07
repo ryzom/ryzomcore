@@ -17,7 +17,7 @@
 
 // Global variable to store the data which is
 // returned to the templates
-$return_set = array();
+$achievements_return_set = array();
 
 // Local variable to store data during
 // functionalities of the hooks
@@ -28,10 +28,10 @@ $var_set = array();
  */
 function achievements_hook_display()
  {
-    global $return_set;
+    global $achievements_return_set;
      // to display plugin name in menu bar
-    $return_set['menu_display'] = 'Achievements';
-    $return_set['icon'] = 'icon-certificate';
+    $achievements_return_set['menu_display'] = 'Achievements';
+    $achievements_return_set['icon'] = 'icon-certificate';
      } 
 
 /**
@@ -98,7 +98,7 @@ function hook_get_player_stat( $data )
  */
 function hook_variable_set()
  {
-    global $return_set;
+    global $achievements_return_set;
      global $var_set;
      if ( isset( $_POST['Character'] ) && !empty( $_POST['Character'] ) )
          {
@@ -133,7 +133,7 @@ function hook_variable_set()
          } 
     else
          {
-        $return_set['no_char'] = "Please Generate key for a character before requesting for achievements";
+        $achievements_return_set['no_char'] = "Please Generate key for a character before requesting for achievements";
          } 
     } 
 
@@ -147,13 +147,13 @@ function hook_variable_set()
  * appkey --> app key for authentication
  * host --> host from which request have been sent
  * 
- * @return $return_set global array returns the template data
+ * @return $achievements_return_set global array returns the template data
  */
 function achievements_hook_call_rest()
  {
     // defined the variables
     global $var_set;
-     global $return_set;
+     global $achievements_return_set;
     
      if ( isset( $_POST['get_data'] ) )
          {
@@ -162,7 +162,7 @@ function achievements_hook_call_rest()
         $rest_api = new Rest_Api();
          $ach_data = $rest_api -> request( $var_set['url'], $var_set['app_key'], $var_set['host'], $var_set['items'] );
          // here we store the response we get from the server
-        $return_set['char_achievements'] = $ach_data ;
+        $achievements_return_set['char_achievements'] = $ach_data ;
          } 
     } 
 
@@ -171,11 +171,11 @@ function achievements_hook_call_rest()
  * the content to use in the smarty templates extracted from 
  * the database
  * 
- * @return $return_set global array returns the template data
+ * @return $achievements_return_set global array returns the template data
  */
 function achievements_hook_get_db()
  {
-    global $return_set;
+    global $achievements_return_set;
     
      if ( isset( $_SESSION['user'] ) )
          {
@@ -184,7 +184,7 @@ function achievements_hook_get_db()
          // getting content for selecting characters
         $sth = $db -> selectWithParameter( 'UserCharacter', 'ams_api_keys', array( 'User' => $_SESSION['user'] ) , 'User = :User' );
          $row = $sth -> fetch();
-         $return_set['Character'] = $row;
+         $achievements_return_set['Character'] = $row;
          } 
     } 
 
@@ -192,10 +192,10 @@ function achievements_hook_get_db()
  * Global Hook to return global variables which contains
  * the content to use in the smarty templates
  * 
- * @return $return_set global array returns the template data
+ * @return $achievements_return_set global array returns the template data
  */
 function achievements_hook_return_global()
  {
-    global $return_set;
-     return $return_set;
+    global $achievements_return_set;
+     return $achievements_return_set;
      }

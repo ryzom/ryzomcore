@@ -17,7 +17,7 @@
 
 // Global variable to store the data which is
 // returned to the templates
-$return_set = array();
+$domain_management_return_set = array();
 
 // Local variable to store data during
 // functionalities of the hooks
@@ -28,10 +28,10 @@ $var_set = array();
  */
 function domain_management_hook_display()
  {
-    global $return_set;
+    global $domain_management_return_set;
      // to display plugin name in menu bar
-    $return_set['admin_menu_display'] = 'Domain Management';
-    $return_set['icon'] = 'icon-edit';
+    $domain_management_return_set['admin_menu_display'] = 'Domain Management';
+    $domain_management_return_set['icon'] = 'icon-edit';
      } 
 
 /**
@@ -98,7 +98,7 @@ function domain_management_get_player_stat( $data )
  */
 function domain_management_variable_set()
  {
-    global $return_set;
+    global $domain_management_return_set;
      global $var_set;
      if ( isset( $_POST['Character'] ) && !empty( $_POST['Character'] ) )
          {
@@ -133,7 +133,7 @@ function domain_management_variable_set()
          } 
     else
          {
-        $return_set['no_char'] = "Please Generate key for a character before requesting for domain_management";
+        $domain_management_return_set['no_char'] = "Please Generate key for a character before requesting for domain_management";
          } 
     } 
 
@@ -147,23 +147,16 @@ function domain_management_variable_set()
  * appkey --> app key for authentication
  * host --> host from which request have been sent
  * 
- * @return $return_set global array returns the template data
+ * @return $domain_management_return_set global array returns the template data
  */
 function domain_management_hook_call_rest()
  {
-    // defined the variables
-    global $var_set;
-     global $return_set;
+
+    global $domain_management_return_set;
+    global $WEBPATH;
     
-     if ( isset( $_POST['get_data'] ) )
-         {
-        domain_management_variable_set();
-         // here we make the REST connection
-        $rest_api = new Rest_Api();
-         $ach_data = $rest_api -> request( $var_set['url'], $var_set['app_key'], $var_set['host'], $var_set['items'] );
-         // here we store the response we get from the server
-        $return_set['char_domain_management'] = $ach_data ;
-         } 
+    $domain_management_return_set['path'] = $WEBPATH;
+
     } 
 
 /**
@@ -171,31 +164,42 @@ function domain_management_hook_call_rest()
  * the content to use in the smarty templates extracted from 
  * the database
  * 
- * @return $return_set global array returns the template data
+ * @return $domain_management_return_set global array returns the template data
  */
 function domain_management_hook_get_db()
  {
-    global $return_set;
+    global $domain_management_return_set;
     
-     if ( isset( $_SESSION['user'] ) )
-         {
-        $db = new DBLayer( 'lib' );
+        $db = new DBLayer( 'shard' );
         
-         // getting content for selecting characters
-        $sth = $db -> selectWithParameter( 'UserCharacter', 'ams_api_keys', array( 'User' => $_SESSION['user'] ) , 'User = :User' );
-         $row = $sth -> fetch();
-         $return_set['Character'] = $row;
-         } 
+        //get all domains
+        $statement = $db->executeWithoutParams("SELECT * FROM domain");
+        $rows = $statement->fetchAll();   
+        $domain_management_return_set['domains'] = $rows;
+
+        if (isset($_GET['edit_domain'])){
+        //get permissions
+        $statement = $db->executeWithoutParams("SELECT * FROM `permission` WHERE `ClientApplication` = '".$rows[$_GET['edit_domain']-1]['domain_name']."'");
+        $rows = $statement->fetchAll();   
+        $domain_management_return_set['permissions'] = $rows;
+        
+        //get all users
+        $pagination = new Pagination(WebUsers::getAllUsersQuery(),"web",10,"WebUsers");
+        $domain_management_return_set['userlist'] = Gui_Elements::make_table($pagination->getElements() , Array("getUId","getUsername","getEmail"), Array("id","username","email"));
+        
+        }
+        
+        return $rows;
     } 
 
 /**
  * Global Hook to return global variables which contains
  * the content to use in the smarty templates
  * 
- * @return $return_set global array returns the template data
+ * @return $domain_management_return_set global array returns the template data
  */
 function domain_management_hook_return_global()
  {
-    global $return_set;
-     return $return_set;
+    global $domain_management_return_set;
+     return $domain_management_return_set;
      }

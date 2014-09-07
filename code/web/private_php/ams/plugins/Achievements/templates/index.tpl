@@ -1,5 +1,4 @@
 {block name=content}
-
 {if isset($smarty.get.plugin_action) and $smarty.get.plugin_action eq 'get_achievements'}
 <div class="row-fluid">	
 	<div class="box col-md-12">
