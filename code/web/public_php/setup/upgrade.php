@@ -81,12 +81,12 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 
 	// Create config_user.php if it doesn't exist yet
 	if ($continue && !file_exists("config_user.php")) {
-		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
-		if (!$config) {
+		$configUser = file_get_contents($PRIVATE_PHP_PATH . "/setup/config/config_user.php");
+		if (!$configUser) {
 			printalert("danger", "Cannot read <em>config_user.php</em>");
 			$continue = false;
 		} else {
-			if (file_put_contents("config_user.php", $config)) {
+			if (file_put_contents("config_user.php", $configUser)) {
 				printalert("success", "Copied <em>config_user.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");

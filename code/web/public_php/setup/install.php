@@ -152,11 +152,11 @@ include('header.php');
 
 	if ($continue) {
 		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
-		if (!$config) {
+		if (!$configUser) {
 			printalert("danger", "Cannot read <em>config_user.php</em>");
 			$continue = false;
 		} else {
-			if (file_put_contents("config_user.php", $config)) {
+			if (file_put_contents("config_user.php", $configUser)) {
 				printalert("success", "Copied <em>config_user.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");
