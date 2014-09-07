@@ -136,8 +136,28 @@ include('header.php');
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
+			$cryptKeyLength = 16;
+			$cryptKey = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
+			$cryptKeyIMAP = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
+			$config = str_replace("%cryptKey%", addslashes($cryptKey), $config);
+			$config = str_replace("%cryptKeyIMAP%", addslashes($cryptKeyIMAP), $config);
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
+			} else {
+				printalert("danger", "Cannot write to <em>config.php</em>");
+				$continue = false;
+			}
+		}
+	}
+
+	if ($continue) {
+		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
+		if (!$config) {
+			printalert("danger", "Cannot read <em>config_user.php</em>");
+			$continue = false;
+		} else {
+			if (file_put_contents("config_user.php", $config)) {
+				printalert("success", "Copied <em>config_user.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");
 				$continue = false;

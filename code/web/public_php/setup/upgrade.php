@@ -10,6 +10,10 @@ $pageTitle = "Upgrade";
 include('header.php');
 
 require_once('config.php');
+require_once('setup/version.php');
+if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
+	$NEL_SETUP_VERSION_CONFIGURED = 1;
+}
 
 ?>
 
@@ -19,6 +23,24 @@ require_once('config.php');
 
 <?php
 
+	// NOTE: If a config upgrade requires new information, modify the
+	// upgrade confirmation form at the bottom of this script.
+
+	require_once('database.php');
+
+	if (file_exists("role_support")) {
+		$continue = upgrade_support_databases($continue);
+	}
+
+	if (file_exists("role_service")) {
+		$continue = upgrade_service_databases($continue);
+	}
+
+	if (file_exists("role_domain")) {
+		$continue = upgrade_domain_databases($continue);
+	}
+
+	// Rewrite config.php
 	if ($continue) {
 		$config = file_get_contents($PRIVATE_PHP_PATH . "/setup/config/config.php");
 		if (!$config) {
@@ -39,8 +61,15 @@ require_once('config.php');
 			$config = str_replace("%amsDatabase%", addslashes($cfg['db']['web']['name']), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($cfg['db']['lib']['name']), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($NEL_SETUP_PASSWORD), $config);
-			// $config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config); // TODO
 			$config = str_replace("%nelDomainName%", addslashes($NEL_DOMAIN_NAME), $config);
+			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
+			$config = str_replace("%cryptKey%", addslashes($cfg['crypt']['key']), $config);
+			$config = str_replace("%cryptKeyIMAP%", addslashes($SUPPORT_GROUP_IMAP_CRYPTKEY), $config);
+			if ($NEL_SETUP_VERSION_CONFIGURED < 2) {
+				$config = str_replace("%domainDatabase%", "mini01", $config);
+			} else {
+				$config = str_replace("%domainDatabase%", addslashes($cfg['db']['ring']['name']), $config);
+			}
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
@@ -50,18 +79,24 @@ require_once('config.php');
 		}
 	}
 
-	require_once('database.php');
-
-	if (file_exists("role_support")) {
-		$continue = upgrade_support_databases($continue);
+	// Create config_user.php if it doesn't exist yet
+	if ($continue && !file_exists("config_user.php")) {
+		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
+		if (!$config) {
+			printalert("danger", "Cannot read <em>config_user.php</em>");
+			$continue = false;
+		} else {
+			if (file_put_contents("config_user.php", $config)) {
+				printalert("success", "Copied <em>config_user.php</em>");
+			} else {
+				printalert("danger", "Cannot write to <em>config.php</em>");
+				$continue = false;
+			}
+		}
 	}
 
-	if (file_exists("role_service")) {
-		$continue = upgrade_service_databases($continue);
-	}
-
-	if (file_exists("role_domain")) {
-		$continue = upgrade_domain_databases($continue);
+	if ($continue) {
+		printalert("success", "Upgrade complete");
 	}
 
 ?>
@@ -70,7 +105,7 @@ require_once('config.php');
 					<a class="btn btn-primary" href="index.php">Continue</a>
 				</p>
 
-<?php } else { ?>
+<?php } else { // NOTE: This is where you may also ask for new configuration fields ?>
 
 				<div class="panel panel-danger">
 					<div class="panel-heading"><span class="glyphicon glyphicon-hdd"></span> Backup</div>

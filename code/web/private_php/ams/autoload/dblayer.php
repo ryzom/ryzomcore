@@ -48,8 +48,11 @@ class DBLayer {
 	* @param $db String, the name of the databases entry in the $cfg global var.
 	* @param $dbn String, the name of the databases entry in the $cfg global var if $db referenced to an action(install etc).
 	*/
-	function __construct($db, $dbn = null)
-	{
+	function __construct($db, $dbn = null) {
+		if ($db == "ring" && $dbn == null) {
+			throw new Exception("Domain database access from AMS must have database name specified");
+		}
+
 		global $cfg;
 		// $this->host = $cfg['db'][$db]['host'];
 		// $this->dbname = $cfg['db'][$db]['name'];
