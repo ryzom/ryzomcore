@@ -15,10 +15,12 @@ $db_ring_domain = 1;
 function set_db_version($continue_r, $name, $version) {
 	$continue = $continue_r;
 
-	if (file_put_contents("db_version_" . $name, (string)$version)) {
-	} else {
-		printalert("danger", "Failed to set database version");
-		$continue = false;
+	if ($continue) {
+		if (file_put_contents("db_version_" . $name, (string)$version)) {
+		} else {
+			printalert("danger", "Failed to set database version");
+			$continue = false;
+		}
 	}
 
 	return $continue;
