@@ -223,7 +223,7 @@
 			$RingWebHost = $domainInfo['web_host'];
 			$RingWebHostPHP = $domainInfo['web_host_php'];
 
-			$LSaddr = split(":", $domainInfo['login_address']);
+			$LSaddr = explode(":", $domainInfo['login_address']);
 
 			// ask for a session cookie to the login service
 			$login = new LoginCb;
