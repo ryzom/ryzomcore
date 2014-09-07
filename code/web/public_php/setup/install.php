@@ -507,6 +507,7 @@ include('header.php');
 								<!-- IMPORTANT: This setup must NEVER be modified to configure the domains, it is not it's responsibility. -->
 								<p>It is required to use separate virtual hosts for multiple domains, in order to allow domain-specific script to run at different versions.</p>
 								<p>It is recommended, when planning to use multiple domains, to use a separate virtual host for each web service role.</p>
+								<p>There can be multiple instances of the domain role, there can only be one support and one service role setup.</p>
 							</div>
 						</div>
 						<div class="form-group">
