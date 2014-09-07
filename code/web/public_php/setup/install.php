@@ -361,7 +361,7 @@ include('header.php');
 							<div class="col-sm-offset-3 col-sm-8">
 								<div class="checkbox">
 									<label>
-										<input id="roleDomain" name="roleDomain" type="checkbox" onclick="checkDomain();" disabled> Domain <small>(Ring Database, ...) <em>TODO</em></small>
+										<input id="roleDomain" name="roleDomain" type="checkbox" onclick="checkDomain();" checked> Domain <small>(Ring Database, ...)</small>
 									</label>
 								</div>
 							</div>
@@ -497,6 +497,18 @@ include('header.php');
 						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
+						<div class="panel panel-danger">
+							<div class="panel-heading"><span class="glyphicon glyphicon-info-sign"></span> Database Only</div>
+							<div class="panel-body">
+								<p>The setup script is intended only for installation and upgrade of the domain specific database.</p>
+								<p>This will only configure the database for a single domain. It will not register the domain in the domain configuration.</p>
+								<p>The domain must be manually configured in the databases according to the procedure for configuring your server park with patchman, as it depends on several values defined within the patchman configuration.</p>
+								<!-- NOTE: For future implementation, it would be practical to configure the nel database directly from the patchman configuration script, as this has all the required values ready. -->
+								<!-- IMPORTANT: This setup must NEVER be modified to configure the domains, it is not it's responsibility. -->
+								<p>It is required to use separate virtual hosts for multiple domains, in order to allow domain-specific script to run at different versions.</p>
+								<p>It is recommended, when planning to use multiple domains, to use a separate virtual host for each web service role.</p>
+							</div>
+						</div>
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">
