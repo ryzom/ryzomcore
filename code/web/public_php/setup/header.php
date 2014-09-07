@@ -2,6 +2,7 @@
 
 $NEL_SETUP_SESSION = true;
 if (file_exists( '../config.php')) {
+	session_start();
 	if ((!isset($_SESSION['nelSetupAuthenticated'])) || $_SESSION['nelSetupAuthenticated'] != 1) {
 		if (basename($_SERVER["SCRIPT_NAME"]) != "auth.php") {
 			header("Cache-Control: max-age=1");
