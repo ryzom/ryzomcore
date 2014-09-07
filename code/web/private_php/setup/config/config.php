@@ -137,7 +137,7 @@ $NEL_SETUP_PASSWORD = '%nelSetupPassword%';
 $NEL_DOMAIN_NAME = '%nelDomainName%';
 
 // Currently configured setup version
-$NEL_SETUP_VERSION_CONFIGURED = %nelSetupVersion%;
+$NEL_SETUP_VERSION_CONFIGURED = '%nelSetupVersion%';
 
 // Get installed version
 require_once('setup/version.php');
