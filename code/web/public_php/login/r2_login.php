@@ -176,7 +176,6 @@
 			// if we need to create missing ring info
 			if ($AutoCreateRingInfo)
 			{
-				////////////// Temporary code alpha 0 only /////////////////////////////////////
 				// check if the ring user exist, and create it if not
 				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
 				mysqli_select_db ($ringDb, $domainInfo['ring_db_name']) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
@@ -190,17 +189,6 @@
 					$query = "INSERT INTO ring_users SET user_id = '$id', user_name = '$login', user_type='ut_pioneer'";
 					$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
 				}
-
-//				// check that there is a character record (deprecated)
-//				$query = "SELECT user_id FROM characters where user_id = '".$id."'";
-//				$result = mysqli_query ($ringDb, $query) or die("Query ".$query." failed");
-//				if (mysqli_num_rows($result) == 0)
-//				{
-//					// no characters record, build a default one
-//					$charId = ($id * 16);
-//					$query = "INSERT INTO characters SET char_id='".$charId."', char_name='".$_GET["login"]."_default', user_id = '".$id."'";
-//					$result = mysqli_query ($ringDb, $query) or die("Query ".$query." failed");
-//				}
 			}
 
 //			// check domain status
@@ -324,7 +312,7 @@
 					$extended = $row["ExtendedPrivilege"];
 
 					// add the default permission
-					$query = "INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('$id', 'r2', '$accessPriv')";
+					$query = "INSERT INTO permission (UId, DomainId, AccessPrivilege) VALUES ('$id', '$domainId', '$accessPriv')";
 					$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 					$res = false;
@@ -338,40 +326,6 @@
 			else
 			{
 				$reason = errorMsg(2001, $login, 'checkUserValidity');
-				// Check if this is not an unconfirmed account
-				/*
-				$query = "SELECT GamePassword, Email, Language FROM signup_data WHERE login='$login'";
-				$result = mysqli_query($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
-
-				if (mysqli_num_rows($result) == 0)
-				{
-					$reason = errorMsg(2001, $login, 'checkUserValidity');
-					$res = false;
-				}
-				else
-				{
-					// Check password to avoid revealing email address to third-party
-					$passwordMatchedRow = false;
-					while ($row = mysqli_fetch_assoc($result))
-					{
-						$salt = substr($row['GamePassword'],0,2);
-						if (($cp && $row['GamePassword'] == $password) || (!$cp && $row['GamePassword'] == crypt($password, $salt)))
-						{
-							$passwordMatchedRow = $row;
-							break;
-						}
-					}
-					if ($passwordMatchedRow !== false)
-					{
-						if ($lang == 'unknown')
-							setMsgLanguage($passwordMatchedRow['Language']);
-						$reason = errorMsg(2002, $passwordMatchedRow['Email']);
-					}
-					else
-						$reason = errorMsg(2004, 'db signup_data');
-					$res = false;
-				}
-				*/
 			}
 		}
 		else
@@ -385,14 +339,14 @@
 				// check if the user can use this application
 
 				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
-				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
+				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId'";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 				if (mysqli_num_rows ($result) == 0)
 				{
 					if ($AcceptUnknownUser)
 					{
 						// add default permission
-						$query = "INSERT INTO permission (UId, ClientApplication, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$clientApplication', -1, '$domainStatus')";
+						$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '$domainStatus')";
 						$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 						$reason = errorMsg(3010);
@@ -416,7 +370,7 @@
 						if ($AcceptUnknownUser)
 						{
 							// set an additionnal privilege for this player
-							$query = "UPDATE permission set AccessPrivilege='".$permission['AccessPrivilege'].",$accessPriv' WHERE prim=".$permission['prim'];
+							$query = "UPDATE permission set AccessPrivilege='".$permission['AccessPrivilege'].",$accessPriv' WHERE PermissionId=".$permission['PermissionId'];
 							$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 							$reason = errorMsg(3012, $accessPriv);

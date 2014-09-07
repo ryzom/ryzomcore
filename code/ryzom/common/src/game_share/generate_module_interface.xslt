@@ -28,9 +28,7 @@
 #ifndef <xsl:value-of select="@header_tag"/>
 #define <xsl:value-of select="@header_tag"/>
 #include "nel/misc/types_nl.h"
-#ifdef NL_COMP_VC8
-  #include &lt;memory&gt;
-#endif
+#include &lt;memory&gt;
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/string_conversion.h"
 #include "nel/net/message.h"
@@ -45,7 +43,7 @@
 </xsl:if>
 <xsl:if test="//class/database">
 #include "nel/misc/string_common.h"
-#include "game_share/mysql_wrapper.h"
+#include "server_share/mysql_wrapper.h"
 </xsl:if>
 <xsl:if test="//class/message">
 #include "game_share/synchronised_message.h"

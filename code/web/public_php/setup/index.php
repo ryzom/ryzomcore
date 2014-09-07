@@ -24,9 +24,9 @@ include('header.php');
 						<a class="btn btn-default" style="width: 100%;" href="domain.php"><span class="glyphicon glyphicon-globe"></span> Add Domain</a>
 					</p>-->
 
-					<p>
+					<!--<p>
 						<a class="btn btn-default" style="width: 100%;" href="upgrade.php"><span class="glyphicon glyphicon-tower"></span> Add Shard</a>
-					</p>
+					</p>-->
 
 <?php } ?>
 
