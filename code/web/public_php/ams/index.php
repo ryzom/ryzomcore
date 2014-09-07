@@ -20,11 +20,18 @@ try {
 
 if (!file_exists('../role_support')) {
 	header("Cache-Control: max-age=1");
-	header('Location: ../setup', true, 303);
+	header('Location: ../setup?reason=no_role_support&from=ams', true, 303);
 	throw new SystemExit();
 }
 
 require( '../config.php' );
+
+if ($NEL_SETUP_VERSION_CONFIGURED < $NEL_SETUP_VERSION) {
+	header("Cache-Control: max-age=1");
+	header('Location: ../setup?reason=upgrade&from=ams', true, 303);
+	throw new SystemExit();
+}
+
 require_once( $AMS_LIB . '/libinclude.php' );
 session_start();
 
