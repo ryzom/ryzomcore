@@ -61,6 +61,10 @@ function upgrade_service_databases($continue_r) {
 		$continue = update_database_structure($continue, $con, "nel_00002.sql");
 		$continue = set_db_version($continue, "shard", 2);
 	}
+	if ($continue && get_db_version("shard") < 3) {
+		$continue = update_database_structure($continue, $con, "nel_00003.sql");
+		$continue = set_db_version($continue, "shard", 3);
+	}
 	disconnect_database($con, "shard");
 
 	$con = null;
