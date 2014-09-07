@@ -6,12 +6,12 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 class Sync{
-    
+
     const OS_UNKNOWN = 1;
     const OS_WIN = 2;
     const OS_LINUX = 3;
     const OS_OSX = 4;
-    
+
     /**
      * performs the actions listed in the querycache.
      * All entries in the querycache will be read and performed depending on their type.
@@ -19,13 +19,13 @@ class Sync{
      * These changes are: createPermissions, createUser, change_pass, change_mail
      */
     static public function syncdata ($display = false) {
-    
+
     if (function_exists('pcntl_fork')) {
         $pid = pcntl_fork();
     }
     global $AMS_TMPDIR;
     $pidfile = $AMS_TMPDIR.'/ams_cron_pid';
-    
+
         if(isset($pid) and function_exists('pcntl_fork') ) {
         // We're the main process.
         } else {
@@ -43,9 +43,9 @@ class Sync{
                 try {
                     $dbl = new DBLayer("lib");
                     $statement = $dbl->executeWithoutParams("SELECT * FROM ams_querycache");
-                    $rows = $statement->fetchAll();           
+                    $rows = $statement->fetchAll();
                     foreach ($rows as $record) {
-                        
+
                         $db = new DBLayer($record['db']);
                         switch($record['type']) {
                             case 'createPermissions':
@@ -54,32 +54,32 @@ class Sync{
                                 //make connection with and put into shard db & delete from the lib
                                 $sth=$db->selectWithParameter("UId", "user", $values, "Login= :username" );
                                 $result = $sth->fetchAll();
-                                foreach ($result as $UId) {
+                                /*foreach ($result as $UId) {
                                     $ins_values = array('UId' => $UId['UId']);
                                     $ins_values['ClientApplication'] = "r2";
                                     $ins_values['AccessPrivilege'] = "OPEN";
                                     $db->insert("permission", $ins_values);
                                     $ins_values['ClientApplication'] = 'ryzom_open';
                                     $db->insert("permission",$ins_values);
-                                }
+                                }*/ // FIXME: GARBAGE
                                 break;
                             case 'change_pass':
                                 $decode = json_decode($record['query']);
                                 $values = array('Password' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = '$decode[0]'");              
+                                $db->update("user", $values, "Login = '$decode[0]'");
                                 break;
                             case 'change_mail':
                                 $decode = json_decode($record['query']);
                                 $values = array('Email' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = '$decode[0]'");              
+                                $db->update("user", $values, "Login = '$decode[0]'");
                                 break;
-                            case 'createUser': 
+                            case 'createUser':
                                 $decode = json_decode($record['query']);
                                 $values = array('Login' => $decode[0], 'Password' => $decode[1], 'Email' => $decode[2] );
                                 //make connection with and put into shard db & delete from the lib
-                                $db->insert("user", $values);              
+                                $db->insert("user", $values);
                                 break;
                         }
                         $dbl->delete("ams_querycache", array('SID' => $record['SID']), "SID=:SID");
@@ -99,11 +99,11 @@ class Sync{
 
         }
     }
-    
+
     public static function check_pid($pid){
-    
+
         $OS = Sync::getOS();
-    
+
         if ($OS == 2) {
             $processes = explode( "\n", shell_exec( "tasklist.exe" ));
             foreach( $processes as $process )
@@ -117,7 +117,7 @@ class Sync{
             }
         } else {
             return file_exists( "/proc/$pid" );
-        } 
+        }
     }
     static public function getOS() {
         switch (true) {

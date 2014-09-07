@@ -1,18 +1,3 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
@@ -107,7 +92,7 @@ namespace RSMGR
 			_PrevPtr(NULL)
 		{
 			_Ptr = objectPtr;
-			
+
 			linkPtr();
 		}
 
@@ -247,7 +232,7 @@ namespace RSMGR
 			_PrevPtr(NULL)
 		{
 			_Ptr = objectPtr;
-			
+
 			linkPtr();
 		}
 
@@ -556,7 +541,7 @@ namespace RSMGR
 		time_t					_ReleaseDate;
 
 		/// The linked list of pointer on this object
-		CNelUserPtr		*_PtrList;			
+		CNelUserPtr		*_PtrList;
 
 		// Try to load the specified object from the memory cache, return NULL if the object is not in the cache
 		static CNelUser *loadFromCache(uint32 objectId, bool unrelease);
@@ -583,7 +568,7 @@ namespace RSMGR
 		}
 
 	public:
-	
+
 		/** Return the object identifier (witch is unique)
 		 *	You can only call this method on a persistent instance.
 		 *	(because transient instance can have invalid id)
@@ -632,11 +617,11 @@ namespace RSMGR
 	{
 	protected:
 		// 
-		uint32	_Prim;
+		uint32	_PermissionId;
 		// 
 		uint32	_UserId;
 		// 
-		std::string	_DomainName;
+		uint32	_DomainId;
 		// 
 		uint32	_ShardId;
 		// 
@@ -662,25 +647,21 @@ namespace RSMGR
 
 		}
 			// 
-		const std::string &getDomainName() const
+		uint32 getDomainId() const
 		{
-			return _DomainName;
+			return _DomainId;
 		}
 
-
-
-		void setDomainName(const std::string &value)
+		void setDomainId(uint32 value)
 		{
 
-			if (_DomainName != value)
+			if (_DomainId != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
 					setPersistentState(NOPE::os_dirty);
 
+				_DomainId = value;
 
-				_DomainName = value;
-
-				
 			}
 
 		}
@@ -729,9 +710,9 @@ namespace RSMGR
 	
 		bool operator == (const CNelPermission &other) const
 		{
-			return _Prim == other._Prim
+			return _PermissionId == other._PermissionId
 				&& _UserId == other._UserId
-				&& _DomainName == other._DomainName
+				&& _DomainId == other._DomainId
 				&& _ShardId == other._ShardId
 				&& _AccessPriv == other._AccessPriv;
 		}
@@ -742,7 +723,7 @@ namespace RSMGR
 		CNelPermission()
 			: _PtrList(NULL),
 			_ObjectState(NOPE::os_transient),
-			_Prim(NOPE::INVALID_OBJECT_ID)
+			_PermissionId(NOPE::INVALID_OBJECT_ID)
 		{
 
 			// register the cache for this class (if not already done)
@@ -825,7 +806,7 @@ namespace RSMGR
 		time_t					_ReleaseDate;
 
 		/// The linked list of pointer on this object
-		CNelPermissionPtr		*_PtrList;			
+		CNelPermissionPtr		*_PtrList;
 
 		// Try to load the specified object from the memory cache, return NULL if the object is not in the cache
 		static CNelPermission *loadFromCache(uint32 objectId, bool unrelease);
@@ -852,7 +833,7 @@ namespace RSMGR
 		}
 
 	public:
-	
+
 		/** Return the object identifier (witch is unique)
 		 *	You can only call this method on a persistent instance.
 		 *	(because transient instance can have invalid id)
@@ -860,7 +841,7 @@ namespace RSMGR
 		uint32 getObjectId() const
 		{
 
-			return _Prim;
+			return _PermissionId;
 		}
 
 		/** Set the object unique ID.
@@ -874,8 +855,8 @@ namespace RSMGR
 			// can only be set when in transient state
 			nlassert(getPersistentState() == NOPE::os_transient);
 			// can only be set once
-			nlassert(_Prim == NOPE::INVALID_OBJECT_ID);
-			_Prim = objectId;
+			nlassert(_PermissionId == NOPE::INVALID_OBJECT_ID);
+			_PermissionId = objectId;
 		}
 
 		/** Return the current persistent state of the object.*/

@@ -28,6 +28,13 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 
 	require_once('database.php');
 
+	if ($continue) {
+		if (!extension_loaded('mcrypt')) {
+			printalert("danger", "The mcrypt extension is missing. Please check your PHP configuration");
+			$continue = false;
+		}
+	}
+
 	if (file_exists("role_support")) {
 		$continue = upgrade_support_databases($continue);
 	}

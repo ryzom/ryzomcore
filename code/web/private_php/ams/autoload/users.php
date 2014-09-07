@@ -25,7 +25,7 @@ class Users{
                $cpass = "";
                $email = "";
           }
-          
+
           if ( helpers :: check_if_game_client() or isset($FORCE_INGAME) ) {
             if ( isset( $_POST["TaC"] )) {
                 $tac="success";
@@ -336,12 +336,12 @@ class Users{
                $dbs = new DBLayer("shard");
                $sth = $dbs->selectWithParameter("UId", "user", $values, "Login= :username");
                $result = $sth->fetchAll();
-               foreach ($result as $UId) {
+               /*foreach ($result as $UId) {
                    $ins_values = array('UId' => $UId['UId'], 'clientApplication' => 'r2', 'AccessPrivilege' => 'OPEN');
                    $dbs->insert("permission", $ins_values);
                    $ins_values['clientApplication'] = 'ryzom_open';
                    $dbs->insert("permission", $ins_values);
-               }
+               }*/ // FIXME: GARBAGE
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put it in query queue at ams_lib db!

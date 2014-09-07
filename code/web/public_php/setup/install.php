@@ -34,6 +34,13 @@ include('header.php');
 		$continue = false;
 	}
 
+	if ($continue) {
+		if (!extension_loaded('mcrypt')) {
+			printalert("danger", "The mcrypt extension is missing. Please check your PHP configuration");
+			$continue = false;
+		}
+	}
+
 	// Validate basics
 	if ($continue) {
 		if (file_exists($_POST["privatePhpDirectory"])) {
