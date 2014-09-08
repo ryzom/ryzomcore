@@ -39,7 +39,7 @@ class Helpers {
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 300;
 
-		$smarty->setPluginsDir($AMS_PLUGINS);
+		$smarty->addPluginsDir($AMS_PLUGINS);
 
 		if (function_exists('apc_cache_info')) {
 			// production
