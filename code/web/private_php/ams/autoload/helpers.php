@@ -23,6 +23,8 @@ class Helpers {
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
          global $AMS_CACHEDIR;
+	global $AMS_PLUGINS;
+
          // define('SMARTY_SPL_AUTOLOAD',1);
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
          spl_autoload_register( '__autoload' );
@@ -37,8 +39,12 @@ class Helpers {
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 300;
 
+		$smarty->setPluginsDir($AMS_PLUGINS);
+
 		if (function_exists('apc_cache_info')) {
 			// production
+			$smarty->caching = true;
+			$smarty->setCachingType("apc"); 
 			$smarty->compile_check = false;
 		}
 
