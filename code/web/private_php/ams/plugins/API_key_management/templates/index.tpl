@@ -48,9 +48,11 @@
 							<label class="control-label">Character:</label>
 							<div class="controls">
 								 <select name="character_name">
+								 {if isset($hook_info.API_key_management.characters)}
 								 	{foreach from=$hook_info.API_key_management.characters item=element}
 									<option value="{$element}">{$element}</option>
 									{/foreach}
+								 {/if}
 								</select>	
 							</div>
 						</div>
@@ -95,7 +97,7 @@
 			{if isset($hook_info.API_key_management['gen_key_validate']) and $hook_info.API_key_management['gen_key_validate'] eq 'false' }<div class="alert alert-error"><p>Please enter all the fields</p></div>{/if}
 					{if isset($smarty.get.success) and $smarty.get.success eq '1'}<div class="alert alert-error"><p>Key added successfully</p></div>{/if}
 					{if isset($smarty.get.success) and $smarty.get.success eq '2'}<div class="alert alert-error"><p>Key deleted successfully</p></div>{/if}
-					<center>
+					<br /><center>
 						<a href="index.php?page=layout_plugin&&name=API_key_management&&plugin_action=generate_key"><button class="btn btn-primary btn-large dropdown-toggle">Generate key</button></a>
 						</center>
 			<div class="box-content">
@@ -114,6 +116,7 @@
 							  </tr>
 						  </thead>   
 						  						  <tbody>
+							{if isset($hook_info.API_key_management.api_keys)}
 							{foreach from=$hook_info.API_key_management.api_keys item=element}
 							<tr>
 								<td class="center">{$element.FrName}</td>
@@ -124,6 +127,7 @@
 								<td><a href="index.php?page=layout_plugin&&name={$arrkey}&&delete_id={$element.SNo}"><button class="btn btn-primary btn-large">Delete</button></a>
                 			</tr>
 							{/foreach}
+							{/if}
 					
 						  </tbody>
 							
