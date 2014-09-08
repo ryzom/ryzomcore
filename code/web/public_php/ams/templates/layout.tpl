@@ -137,7 +137,7 @@
 			{if isset($hook_info)}
 				<div class="row-fluid">
 					{foreach from=$hook_info key=arrkey item=element}
-						{if $smarty.get.page eq 'layout_plugin'}
+						{if isset($smarty.get.page) and $smarty.get.page eq 'layout_plugin'}
 							{include file=$element['TemplatePath']}
 						{/if}
 					{/foreach}	
