@@ -179,7 +179,7 @@ function domain_management_hook_get_db()
 
         if (isset($_GET['edit_domain'])){
         //get permissions
-        $statement = $db->executeWithoutParams("SELECT * FROM `permission` WHERE `ClientApplication` = '".$rows[$_GET['edit_domain']-1]['domain_name']."'");
+        $statement = $db->executeWithoutParams("SELECT * FROM `permission` WHERE `DomainId` = '".$rows[$_GET['edit_domain']-1]['domain_name']."'");
         $rows = $statement->fetchAll();   
         $domain_management_return_set['permissions'] = $rows;
         

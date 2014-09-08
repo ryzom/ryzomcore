@@ -196,11 +196,11 @@
 		    <tbody>
 					{foreach from=$hook_info['Domain_Management']['domains'] item=array}
 					<tr>
-						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['domain_id']}</a></td>
+						<td>{$array['domain_id']}</td>
 						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['domain_name']}</a></td>
-						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['status']}</a></td>
-						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['patch_version']}</a></td>
-						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['description']|truncate}</a></td>	
+						<td>{$array['status']}</td>
+						<td>{$array['patch_version']}</td>
+						<td>{$array['description']|truncate}</td>	
 					</tr>
 					{/foreach}
 	</tbody>
