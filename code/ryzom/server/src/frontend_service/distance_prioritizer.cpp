@@ -915,7 +915,7 @@ inline void		CDistancePrioritizer::serialSlotHeader( CClientHost& client, CEntit
 				timestampDelta = 15;
 			timestampDelta |= 0x10; // 'timestampIsThere bit': first bit is bit 5 (high to low order)
 		}
-		else if ( seenEntityId.getType() >= RYZOMID::object )
+		else if ( seenEntityId.getType() > RYZOMID::creature_end )
 		{
 			// For non-players/non-bots types (e.g. bags), set the timestamp delta if entity is being spawned to the client
 			//if ( _VisualPropertyTreeRoot->B->B->getSHEETnode()->BranchHasPayload ) // assumes this is done after arbitrateDiscreetProperties() // CHANGED BEN
