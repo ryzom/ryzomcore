@@ -143,6 +143,7 @@ include('header.php');
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
+			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
 			$cryptKeyLength = 16;
 			$cryptKey = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
 			$cryptKeyIMAP = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));

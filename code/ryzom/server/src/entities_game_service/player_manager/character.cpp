@@ -16324,13 +16324,7 @@ void CCharacter::sendEmote( const NLMISC::CEntityId& id, MBEHAV::EBehaviour beha
 	}
 
 	CEntityId targetId = getTarget();
-	if ( targetId.getType() != RYZOMID::npc &&
-		 targetId.getType() != RYZOMID::player &&
-		 targetId.getType() != RYZOMID::creature &&
-		 targetId.getType() != RYZOMID::mount &&
-		 targetId.getType() != RYZOMID::pack_animal &&
-		 targetId.getType() != RYZOMID::flora
-		)
+	if (targetId.getType() > creature_end)
 		targetId = CEntityId::Unknown;
 
 	TDataSetRow targetRow = TheDataset.getDataSetRow( targetId );

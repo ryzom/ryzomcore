@@ -30,12 +30,17 @@ namespace RYZOMID
 	{
 		// warning: respect separation with creature /object, it's used in front-end vision prioritizer
 		// creature part (include player)
-		player = 0,
-		npc,				//1
-		creature,			//2
-		mount,				//3
-		pack_animal,		//4
-		flora,				//5
+		creature_begin = 0,
+			player = creature_begin,
+			bot_ai_begin,
+				npc = bot_begin,	//1
+				creature,			//2
+				mount,				//3
+				pack_animal,		//4
+				flora,				//5
+			bot_ai_end = flora,
+		creature_end = bot_end,
+
 		// objects part
 		object,				// 6
 		building,			// 7
