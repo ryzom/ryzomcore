@@ -606,13 +606,15 @@ class Ticket{
     public static function add_Attachment($TId,$filename,$author,$tempFile){
 
         global $FILE_STORAGE_PATH;
-        $length = 20;
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+        $length = mt_rand(20, 25);
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$-_.+!*\'(),';
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
             $randomString .= $characters[rand(0, strlen($characters) - 1)];
         }
         $targetFile = $FILE_STORAGE_PATH . $randomString . "/" . $filename;
+        
+        if(file_exists($targetFile)) { return self::add_Attachment($TId,$filename,$author,$tempFile); }
         
         $ticket = new Ticket();
         $ticket->load_With_TId($TId);
