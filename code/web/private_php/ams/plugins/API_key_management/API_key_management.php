@@ -13,7 +13,7 @@
 
 // Global variable to store the data which is
 // returned to the templates
-$return_set = array();
+$API_key_management_return_set = array();
 
 // Local variable to store data during
 // functionalities of the hooks
@@ -24,10 +24,10 @@ $var_set = array();
  */
 function api_key_management_hook_display()
  {
-    global $return_set;
+    global $API_key_management_return_set;
      // to display plugin name in menu bar
-    $return_set['menu_display'] = 'API Key Management';
-    $return_set['icon'] = 'icon-download-alt';
+    $API_key_management_return_set['menu_display'] = 'API Key Management';
+    $API_key_management_return_set['icon'] = 'icon-download-alt';
      }
 
 /**
@@ -51,7 +51,7 @@ function hook_validate( $var )
 function hook_variables()
  {
     global $var_set;
-     global $return_set;
+     global $API_key_management_return_set;
 
      if ( hook_validate( $_POST['expDate'] ) && hook_validate( $_POST['sp_name'] ) && hook_validate( $_POST['api_type'] )
              && hook_validate( $_POST['character_name'] ) )
@@ -63,11 +63,11 @@ function hook_variables()
          $var_set['User'] = $_SESSION['user'];
          $var_set['AddedOn'] = date( "Y-m-d H:i:s" );
          $var_set['Items'] = '';
-         $return_set['gen_key_validate'] = 'true';
+         $API_key_management_return_set['gen_key_validate'] = 'true';
          }
     else
          {
-        $return_set['gen_key_validate'] = 'false';
+        $API_key_management_return_set['gen_key_validate'] = 'false';
          }
     }
 
@@ -121,7 +121,7 @@ function api_key_management_hook_activate()
 function api_key_management_hook_store_db()
  {
     global $var_set;
-     global $return_set;
+     global $API_key_management_return_set;
 
      // if the form been submited move forward
     if ( @hook_validate( $_POST['gen_key'] ) ) {
@@ -130,7 +130,7 @@ function api_key_management_hook_store_db()
         hook_variables();
 
          // if validation successfull move forward
-        if ( $return_set['gen_key_validate'] == 'true' && $_GET['plugin_action'] == 'generate_key' )
+        if ( $API_key_management_return_set['gen_key_validate'] == 'true' && $_GET['plugin_action'] == 'generate_key' )
          {
             // this part generated the access token
             include 'generate_key.php';
@@ -156,7 +156,7 @@ function api_key_management_hook_store_db()
 function api_key_management_hook_load_db()
  {
     global $var_set;
-     global $return_set;
+     global $API_key_management_return_set;
 
      $dbl = new DBLayer("lib");
 
@@ -165,10 +165,10 @@ function api_key_management_hook_load_db()
         // returns the registered keys
         $sth = $dbl -> select( 'ams_api_keys', array( 'user' => $_SESSION['user'] ), 'User = :user' );
          $row = $sth -> fetchAll();
-         $return_set['api_keys'] = $row;
+         $API_key_management_return_set['api_keys'] = $row;
 
          // fetch the character from the array to compare
-        $com = array_column( $return_set['api_keys'], 'UserCharacter' );
+        $com = array_column( $API_key_management_return_set['api_keys'], 'UserCharacter' );
 
          // returns the characters with respect to the user id in the ring_tool->characters
          try {
@@ -177,7 +177,7 @@ function api_key_management_hook_load_db()
             $row = $sth -> fetch();
 
             // loop through the character list and remove the character if already have an api key
-            $return_set['characters'] = array_diff( $row, $com );
+            $API_key_management_return_set['characters'] = array_diff( $row, $com );
          }catch( PDOException $e ) {
             error_log($e->getMessage());
 }
@@ -190,7 +190,7 @@ function api_key_management_hook_load_db()
 function api_key_management_hook_update_db()
  {
     global $var_set;
-     global $return_set;
+     global $API_key_management_return_set;
 
      $db = new DBLayer( 'lib' );
      if ( isset( $_GET['delete_id'] ) )
@@ -209,10 +209,10 @@ function api_key_management_hook_update_db()
  * Global Hook to return global variables which contains
  * the content to use in the smarty templates
  *
- * @return $return_set global array returns the template data
+ * @return $API_key_management_return_set global array returns the template data
  */
 function api_key_management_hook_return_global()
  {
-    global $return_set;
-     return $return_set;
+    global $API_key_management_return_set;
+     return $API_key_management_return_set;
      }
