@@ -648,7 +648,7 @@ namespace RSMGR
 			userAccessPriv.clear();
 			CSString query;
 			query << "SELECT AccessPrivilege FROM permission";
-			query << " WHERE UId = " << userId << " AND DomainId = " << DomainId;
+			query << " WHERE UId = " << userId << " AND DomainId = (SELECT domain_id FROM domain WHERE domain_name = '" << DomainName << "')";
 
 			if (!_NelDb.query(query))
 			{

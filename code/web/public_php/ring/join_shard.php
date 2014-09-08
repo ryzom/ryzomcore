@@ -53,10 +53,10 @@ class JoinShardCb extends CRingSessionManagerWeb
 		global $getShardListCallback;
 
 		$onlineShardsBySessionId = array();
-		$resultArray = split(';', $resultStr);
+		$resultArray = explode(';', $resultStr);
 		foreach ($resultArray as $shardInfo)
 		{
-			$shardAttr = split(',', $shardInfo);
+			$shardAttr = explode(',', $shardInfo);
 			if (isset($shardAttr[1]))
 				$onlineShardsBySessionId[$shardAttr[0]] = $shardAttr[1];
 		}
@@ -120,7 +120,7 @@ function joinShardFromIdPost( $destSessionId )
 function joinShardFromId( $userId, $domainId, $destSessionId )
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -148,7 +148,7 @@ function joinShardFromId( $userId, $domainId, $destSessionId )
 function getShardList($userId, $domainId)
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -223,7 +223,7 @@ function displayAllShards(&$onlineShardsBySessionId)
 function joinMainland($userId, $domainId)
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
