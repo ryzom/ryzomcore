@@ -134,6 +134,15 @@
 			{/if}
 
 			{block name=content}{/block}
+			{if isset($hook_info)}
+				<div class="row-fluid">
+					{foreach from=$hook_info key=arrkey item=element}
+						{if $arrkey eq $smarty.get.name}
+							{include file=$element['TemplatePath']}
+						{/if}
+					{/foreach}	
+				</div>
+			{/if}
 
 
 			{if ! isset($no_visible_elements) or  $no_visible_elements eq "FALSE"}

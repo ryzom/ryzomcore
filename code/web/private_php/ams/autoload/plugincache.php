@@ -266,6 +266,7 @@ class Plugincache {
                     case strtolower($plugin_name).'_hook_call_rest':
                     case strtolower($plugin_name).'_hook_get_db':
                     case strtolower($plugin_name).'_hook_return_global':
+                    case strtolower($plugin_name).'_hook_activate':
                         $content['hook_info'][$plugin_name] = call_user_func($value);
                         break;
                 }

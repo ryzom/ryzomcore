@@ -76,7 +76,7 @@ function hook_variables()
  * if not created.
  * Contains the sql code
  */
-function api_key_management_hook_create_tb()
+function api_key_management_hook_activate()
  {
     $dbl = new DBLayer( "lib" );
      $sql = "
