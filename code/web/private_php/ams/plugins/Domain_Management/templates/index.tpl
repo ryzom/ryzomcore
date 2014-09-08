@@ -2,11 +2,11 @@
 
 {if $permission eq 3}
 	{if isset($smarty.get.edit_domain)}
-	<div class="row-fluid sortable ui-sortable">
-		<div class="box col-md-9">
+<div class="row-fluid sortable ui-sortable">
+	<div class="box col-md-9">
 		<div class="box-inner">
 			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-list"></i> {$hook_info['Domain_Management']['domains']['0']['domain_name']}</h2>
+				<h2><i class="icon-list"></i> Domain: {$hook_info['Domain_Management']['domains']['0']['domain_name']}</h2>
 			</div>
 			<div class="box-content">
 				<div class="row-fluid">
@@ -196,6 +196,17 @@
 
 	</div><!--/row-->
 	{else}
+	
+	<div class="row-fluid">
+<div class="box col-md-12">
+<div class="box-inner">
+<div class="box-header well" data-original-title="">
+<h2>
+<i class="icon-user"></i>
+Domains
+</h2>
+</div>
+<div class="box-content">
 	<table class="table table-striped table-bordered">
 					<thead>
 						<tr>
@@ -220,6 +231,11 @@
 				{/if}
 		</tbody>
 	 </table>
+		 </div>
+		 </div>
+	</div>
+
+	</div><!--/row-->
 	{/if}	
 {/if}	
 {/block}
