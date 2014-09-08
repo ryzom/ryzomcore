@@ -34,7 +34,7 @@ class Helpers {
          $smarty -> setCacheDir( $AMS_CACHEDIR );
          $smarty -> setConfigDir( $SITEBASE . '/configs/' );
          // turn smarty debugging on/off
-        $smarty -> debugging = false;
+        $smarty -> debugging = true;
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 300;

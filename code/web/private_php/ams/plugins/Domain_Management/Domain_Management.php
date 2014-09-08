@@ -76,10 +76,14 @@ function domain_management_hook_get_db()
 
         if (isset($_GET['edit_domain'])){
         //get permissions
-        $statement = $db->executeWithoutParams("SELECT * FROM `permission` WHERE `DomainId` = '".$rows[$_GET['edit_domain']-1]['domain_name']."'");
+        $statement = $db->executeWithoutParams("SELECT * FROM `domain` WHERE `domain_id` = '".$_GET['edit_domain']."'");
+        $rows = $statement->fetchAll();   
+        $domain_management_return_set['domains'] = $rows;
+        
+        $statement = $db->executeWithoutParams("SELECT * FROM `permission` WHERE `DomainId` = '".$_GET['edit_domain']."'");
         $rows = $statement->fetchAll();   
         $domain_management_return_set['permissions'] = $rows;
-        
+                
         //get all users
         $pagination = new Pagination(WebUsers::getAllUsersQuery(),"web",10,"WebUsers");
         $domain_management_return_set['userlist'] = Gui_Elements::make_table($pagination->getElements() , Array("getUId","getUsername","getEmail"), Array("id","username","email"));
