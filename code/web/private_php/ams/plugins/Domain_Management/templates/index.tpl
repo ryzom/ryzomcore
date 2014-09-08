@@ -194,7 +194,8 @@
 					</tr>
 				</thead>
 		    <tbody>
-					{foreach from=$hook_info['Domain_Management']['domains'] item=array}
+			{if isset($hook_info['Domain_Management']['domains'][0])}
+				{foreach from=$hook_info['Domain_Management']['domains'] item=array}
 					<tr>
 						<td>{$array['domain_id']}</td>
 						<td><a href="{$hook_info['Domain_Management']['path']}?page=layout_plugin&name=Domain_Management&edit_domain={$array['domain_id']}">{$array['domain_name']}</a></td>
@@ -202,7 +203,8 @@
 						<td>{$array['patch_version']}</td>
 						<td>{$array['description']|truncate}</td>	
 					</tr>
-					{/foreach}
+				{/foreach}
+			{/if}
 	</tbody>
  </table>
 {/if}		
