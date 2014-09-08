@@ -54,14 +54,6 @@ public:
 	// Release the service
 	void release ();
 
-	void addTestClient(const std::string & clientId);
-
-	void removeTestClient(const std::string & clientId);
-
-	void listTestClient() const;
-
-	void runTestClientLuaScript(const std::string & clientId, const std::string & cmd);
-	
 
 	static R2::CDynamicScenarioService & instance()  { return (CDynamicScenarioService&)*IService::getInstance(); }
 
