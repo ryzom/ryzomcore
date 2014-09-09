@@ -101,6 +101,7 @@ namespace
 		item->form()->getRootNode().getNodeByName( &n, item->formName().c_str() );
 		return n;
 	}
+
 }
 
 
@@ -119,6 +120,19 @@ BrowserCtrlPvt::~BrowserCtrlPvt()
 	delete factory;
 	factory = NULL;
 	m_browser = NULL;
+}
+
+NLGEORGES::UFormElm* BrowserCtrlPvt::getNode( const QString &name )
+{
+	NLGEORGES::UFormElm *node = NULL;
+	m_rootNode->getNodeByName( &node, name.toUtf8().constData(), NULL, true );
+
+	return node;
+}
+
+NLGEORGES::UFormElm* BrowserCtrlPvt::getCurrentNode()
+{
+	return getNode( m_currentNode.name );
 }
 
 void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
@@ -178,8 +192,6 @@ void BrowserCtrlPvt::setupStruct( GeorgesQt::CFormItem *node )
 	if( n == NULL )
 		return;
 
-	m_currentNode.p = n;
-
 	setupStruct( n );
 }
 
@@ -188,8 +200,6 @@ void BrowserCtrlPvt::setupVStruct( GeorgesQt::CFormItem *node )
 	NLGEORGES::UFormElm *n = getGeorgesNode( node );
 	if( n == NULL )
 		return;
-
-	m_currentNode.p = n;
 
 	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( n );
 
@@ -209,7 +219,6 @@ void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
 	{
 		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( n );
 		arr->getArraySize( size );
-		m_currentNode.p = n;
 	}
 
 	QString key = QObject::tr( "Array size" );
@@ -242,15 +251,14 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 	QtVariantProperty *p = mgr->addProperty( tt, "value" );
 	p->setValue( v.c_str() );
 	m_browser->addProperty( p );
-
-	m_currentNode.p = n;
 }
 
 void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 {
 	m_currentNode.clear();
 	m_currentNode.name = node->formName().c_str();
-	
+	m_currentNode.type = node->type();
+
 	m_rootNode = dynamic_cast< NLGEORGES::CFormElm* >( &(node->form()->getRootNode()) );
 
 	if( node->isArray() )
@@ -280,8 +288,10 @@ void BrowserCtrlPvt::onStructValueChanged( QtProperty *p, const QVariant &value 
 	std::string k = p->propertyName().toUtf8().constData();
 	std::string v  = value.toString().toUtf8().constData();
 
+	NLGEORGES::UFormElm *node = getCurrentNode();
+
 	bool created = false;
-	m_currentNode.p->setValueByName( v.c_str(), k.c_str(), &created );
+	node->setValueByName( v.c_str(), k.c_str(), &created );
 
 	QString key = m_currentNode.name + "." + p->propertyName();
 
@@ -297,7 +307,7 @@ void BrowserCtrlPvt::onVStructValueChanged( QtProperty *p, const QVariant &value
 		return;
 	}
 
-	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( m_currentNode.p );
+	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( getCurrentNode() );
 	vs->DfnFilename = value.toString().toUtf8().constData();
 
 	QString key = m_currentNode.name + "." + p->propertyName();
@@ -323,8 +333,6 @@ void BrowserCtrlPvt::createArray()
 	if( !created )
 		return;
 
-	m_currentNode.p = node;
-
 	NLGEORGES::CFormElmArray *arr = dynamic_cast< NLGEORGES::CFormElmArray* >( node );
 	QString idx = "[0]";
 	arr->createNodeByName( idx.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
@@ -344,7 +352,10 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	if( newSize < 0 )
 		return;
 
-	if( m_currentNode.p == NULL )
+	
+	NLGEORGES::UFormElm *node = getCurrentNode();
+
+	if( node == NULL )
 	{
 		if( newSize != 1 )
 			return;
@@ -352,7 +363,7 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 		return;
 	}
 
-	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( m_currentNode.p );
+	NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( node );
 	std::string formName;
 	arr->getFormName( formName, NULL );
 	
@@ -401,14 +412,11 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 	QString name = formName.c_str();
 	Q_EMIT arrayResized( name, newSize );
 	Q_EMIT modified();
-
-	if( newSize == 0 )
-		m_currentNode.p = NULL;
 }
 
 void BrowserCtrlPvt::onAtomValueChanged( QtProperty *p, const QVariant &value )
 {
-	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( m_currentNode.p );
+	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( getCurrentNode() );
 	atom->setValue( value.toString().toUtf8() );
 
 	Q_EMIT modified();
@@ -417,25 +425,16 @@ void BrowserCtrlPvt::onAtomValueChanged( QtProperty *p, const QVariant &value )
 
 void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 {
-	if( m_currentNode.p == NULL )
-	{
-		if( m_currentNode.name.isEmpty() )
-			return;
-
-		onArrayValueChanged( p, value );
-		return;
-	}
-
-	if( m_currentNode.p->isVirtualStruct() )
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_VSTRUCT )
 		onVStructValueChanged( p, value );
 	else
-	if( m_currentNode.p->isStruct() )
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_STRUCT )
 		onStructValueChanged( p, value );
 	else
-	if( m_currentNode.p->isArray() )
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_ARRAY )
 		onArrayValueChanged( p, value );
 	else
-	if( m_currentNode.p->isAtom() )
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_ATOM )
 		onAtomValueChanged( p, value );
 }
 

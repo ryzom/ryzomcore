@@ -61,6 +61,9 @@ Q_SIGNALS:
 	void vstructChanged( const QString &name );
 
 private:
+	NLGEORGES::UFormElm* getNode( const QString &name );
+	NLGEORGES::UFormElm* getCurrentNode();
+
 	void setupStruct( NLGEORGES::UFormElm *node );
 	void setupAtom( NLGEORGES::CFormElmStruct *st, int idx );
 
@@ -91,12 +94,12 @@ private:
 
 		void clear()
 		{
-			p = NULL;
+			type = -1;
 			name = "";
 		}
 
 		QString name;
-		NLGEORGES::UFormElm *p;
+		int type;
 	};
 
 	CurrentNode m_currentNode;

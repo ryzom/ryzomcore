@@ -81,6 +81,8 @@ namespace GeorgesQt
 		bool isVStruct();
 		bool isAtom();
 
+		TType type() const{ return _TType; }
+
 		QIcon getItemImage(CFormItem *rootItem);
 
 		CFormItem* findItem( const QString &formName );
