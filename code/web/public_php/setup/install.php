@@ -9,6 +9,8 @@ try {
 $pageTitle = "Install";
 include('header.php');
 
+require_once('setup/version.php');
+
 ?>
 
 <?php if (file_exists('config.php')) { ?>
