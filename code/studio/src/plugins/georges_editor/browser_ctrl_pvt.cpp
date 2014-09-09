@@ -198,16 +198,16 @@ void BrowserCtrlPvt::setupStruct( GeorgesQt::CFormItem *node )
 void BrowserCtrlPvt::setupVStruct( GeorgesQt::CFormItem *node )
 {
 	NLGEORGES::UFormElm *n = getGeorgesNode( node );
-	if( n == NULL )
-		return;
-
-	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( n );
 
 	QtVariantProperty *p = mgr->addProperty( QVariant::String, "Dfn filename" );
-	mgr->setValue( p, vs->DfnFilename.c_str() );
 	m_browser->addProperty( p );
 
-	setupStruct( n );
+	if( n != NULL )
+	{
+		NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( n );
+		mgr->setValue( p, vs->DfnFilename.c_str() );
+		setupStruct( n );
+	}
 }
 
 void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
@@ -308,6 +308,25 @@ void BrowserCtrlPvt::onVStructValueChanged( QtProperty *p, const QVariant &value
 	}
 
 	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( getCurrentNode() );
+	if( vs == NULL )
+	{
+		const NLGEORGES::CFormDfn *parentDfn;
+		const NLGEORGES::CFormDfn *nodeDfn;
+		uint indexDfn;
+		const NLGEORGES::CType *type;
+		NLGEORGES::UFormDfn::TEntryType entryType;
+		NLGEORGES::CFormElm *node;
+		bool created;
+		bool isArray;
+
+		m_rootNode->createNodeByName( m_currentNode.name.toUtf8().constData(), &parentDfn, indexDfn, &nodeDfn, &type, &node, entryType, isArray, created );
+
+		if( !created )
+			return;
+
+		vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( node );
+	}
+
 	vs->DfnFilename = value.toString().toUtf8().constData();
 
 	QString key = m_currentNode.name + "." + p->propertyName();
