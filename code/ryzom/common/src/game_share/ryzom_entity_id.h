@@ -33,13 +33,13 @@ namespace RYZOMID
 		creature_begin = 0,
 			player = creature_begin,
 			bot_ai_begin,
-				npc = bot_begin,	//1
+				npc = bot_ai_begin,	//1
 				creature,			//2
 				mount,				//3
 				pack_animal,		//4
 				flora,				//5
 			bot_ai_end = flora,
-		creature_end = bot_end,
+		creature_end = bot_ai_end,
 
 		// objects part
 		object,				// 6
