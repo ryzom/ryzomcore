@@ -62,9 +62,9 @@ NLMISC::CVariable<string>	SpaLaunchAESCmdLine("spa","SpaLaunchAESCmdLine","Comma
 // some handy utils
 //-----------------------------------------------------------------------------
 
-static NLMISC::CSString defaultAdminExecutorServiceCfgFileName()
+static NLMISC::CSString defaultAdminExecutorServiceCfgFileName(const NLMISC::CSString& domainName)
 {
-	return NLMISC::CPath::standardizePath(DeploymentRootDirectory)+"admin_executor_service_default.cfg";
+	return NLMISC::CPath::standardizePath(DeploymentRootDirectory)+"admin_executor_service_default."+domainName+".cfg";
 }
 
 static NLMISC::CSString defaultScreenCfgFileName()
@@ -572,7 +572,7 @@ void CServerPatchApplier::cbDeploymentConfigurationSynchronised(NLNET::IModulePr
 
 		// setup the base for the admin_executor_service config file
 		CSString adminExecutorConfig;
-		adminExecutorConfig.readFromFile(defaultAdminExecutorServiceCfgFileName());
+		adminExecutorConfig.readFromFile(defaultAdminExecutorServiceCfgFileName(*dit));
 		adminExecutorConfig+="\n\nShardName=\""+*dit+"\";\n";
 		CSString aesRegisteredServices;
 		CSString aesAddRegisteredServices;
