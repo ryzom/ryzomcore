@@ -16324,7 +16324,7 @@ void CCharacter::sendEmote( const NLMISC::CEntityId& id, MBEHAV::EBehaviour beha
 	}
 
 	CEntityId targetId = getTarget();
-	if (targetId.getType() > creature_end)
+	if (targetId.getType() > RYZOMID::creature_end)
 		targetId = CEntityId::Unknown;
 
 	TDataSetRow targetRow = TheDataset.getDataSetRow( targetId );
