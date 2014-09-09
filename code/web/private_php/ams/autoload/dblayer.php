@@ -29,13 +29,13 @@
  *
  */
 
-// $PDOCache = array();
+$PDOCache = array();
 
 class DBLayer {
 
 	private $PDO;
-	// private $host;
-	// private $dbname;
+	private $host;
+	private $dbname;
 
 	/**
 	* The PDO object, instantiated by the constructor
@@ -54,12 +54,15 @@ class DBLayer {
 		}
 
 		global $cfg;
-		// $this->host = $cfg['db'][$db]['host'];
-		// $this->dbname = $cfg['db'][$db]['name'];
-		/*global $PDOCache;
+		$this->host = $cfg['db'][$db]['host'];
+		$this->dbname = $cfg['db'][$db]['name'];
+		global $PDOCache;
 		if (isset($PDOCache[$this->host])) {
+			if (isset($PDOCache[$this->host]['exception'])) {
+				throw $PDOCache[$this->host]['exception'];
+			}
 			$this->PDO = $PDOCache[$this->host]['pdo'];
-		} else {*/
+		} else {
 			$dsn = "mysql:";
 			$dsn .= "host=" . $cfg['db'][$db]['host'] . ";";
 			$dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";"; // Comment this out when using the cache
@@ -68,14 +71,21 @@ class DBLayer {
 			$opt = array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-				PDO::ATTR_PERSISTENT => true
+				PDO::ATTR_PERSISTENT => true,
+				PDO::ATTR_TIMEOUT => 5
 			);
-			$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
-		/*	$PDOCache[$this->host] = array();
+			$PDOCache[$this->host] = array();
+			try {
+				$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
+			} catch (Exception $e) {
+				$PDOCache[$this->host]['exception'] = $e;
+				throw $e;
+				return;
+			}
 			$PDOCache[$this->host]['pdo'] = $this->PDO;
 			$PDOCache[$this->host]['use'] = $this->dbname;
-		*/	//$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
-		/*}*/
+			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+		}
 	}
 
 	function __destruct() {
@@ -83,11 +93,11 @@ class DBLayer {
 	}
 
 	function useDb() {
-		/*global $PDOCache;
+		global $PDOCache;
 		if ($PDOCache[$this->host]['use'] != $this->dbname) {
 			$PDOCache[$this->host]['use'] = $this->dbname;
 			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
-		}*/
+		}
 	}
 
 	/**
