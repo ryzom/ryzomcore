@@ -2936,7 +2936,7 @@ void	CNetworkConnection::initTicks()
 	_CurrentClientTick = 0;
 	_CurrentServerTick = 0;
 	_MsPerTick = 100;
-	_LCT = 1000;
+	_LCT = LCT;
 }
 
 void	CNetworkConnection::reinit()
