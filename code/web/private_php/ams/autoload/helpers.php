@@ -43,9 +43,9 @@ class Helpers {
 
 		if (function_exists('apc_cache_info')) {
 			// production
-			$smarty->caching = true;
-			$smarty->setCachingType("apc"); 
-			$smarty->compile_check = false;
+			//$smarty->caching = true;
+			//$smarty->setCachingType("apc"); 
+			//$smarty->compile_check = false;
 		}
 
          // needed by smarty.
