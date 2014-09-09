@@ -18,7 +18,7 @@
 				<label class="control-label">New Password</label>
 					<div class="controls">
 					    <div class="input-prepend">
-						<span class="add-on" style="margin-left:5px;"><i class="icon-tag"></i></span>
+						<span class="add-on" style="margin-left:5px;"><span class="icon-tag"></span></span>
 							<input type="password" class="input-xlarge" id="NewPass" name="NewPass" placeholder="Your new password"  {if isset($prevNewPass)}value="{$prevNewPass}"{/if}>
 							{if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}<br/><span class="help-inline">{$newpass_error_message}</span>{/if}
 					   </div>
@@ -30,7 +30,7 @@
 				<label class="control-label">Confirm New Password</label>
 					<div class="controls">
 					    <div class="input-prepend">
-						<span class="add-on" style="margin-left:5px;"><i class="icon-tags"></i></span>
+						<span class="add-on" style="margin-left:5px;"><span class="icon-tags"></span></span>
 							<input type="password" class="input-xlarge" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password"  {if isset($prevConfirmNewPass)}value="{$prevConfirmNewPass}"{/if}>
 							{if isset($CNEWPASSWORD_ERROR) and $CNEWPASSWORD_ERROR eq "TRUE"}<br/><span class="help-inline">{$confirmnewpass_error_message}</span>{/if}
 					    </div>

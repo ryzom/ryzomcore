@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid">
 				<div class="box col-md-12">
-				<div class="box-inner">
-					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> {$up_title}</h2>
+				<div class="panel panel-default">
+					<div class="panel-heading" data-original-title>
+						<span class="icon-user"></span> {$up_title}
 					</div>
-					<div class="box-content">
+					<div class="panel-body">
 						<center><p>{$up_info}</p></center>
 						<table class="table table-striped table-bordered">
 						  <thead>

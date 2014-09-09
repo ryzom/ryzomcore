@@ -2,11 +2,11 @@
 
 	<div class="row-fluid">
 		<div class="box col-md-12">
-		<div class="box-inner">
-			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i>{$ip_title}</h2>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<span class="icon-info-sign"></span>{$ip_title}
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<center>
 				<p>{$ip_support}</p>
 				<div class="alert alert-error">

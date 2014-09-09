@@ -1,9 +1,9 @@
 {block name=content}
 <div class="row-fluid">
 				<div class="box col-md-12">
-				<div class="box-inner">
-					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> {$plugin_title}</h2>
+				<div class="panel panel-default">
+					<div class="panel-heading" data-original-title>
+						<span class="icon-user"></span> {$plugin_title}
 					</div>
 					{if isset($smarty.get.result) and $smarty.get.result eq "1"}<div class="alert alert-error"><p>{$ip_success}</p></div>{/if}
 					{if isset($smarty.get.result) and $smarty.get.result eq "0"}<div class="alert alert-error"><p>{$dp_error}</p></div>{/if}
@@ -14,7 +14,7 @@
 					{if isset($smarty.get.result) and $smarty.get.result eq "6"}<div class="alert alert-error"><p>{$dc_error}</p></div>{/if}
 					{if isset($smarty.get.result) and $smarty.get.result eq "7"}<div class="alert alert-error"><p>{$up_success}</p></div>{/if}
 					{if isset($smarty.get.result) and $smarty.get.result eq "8"}<div class="alert alert-error"><p>{$up_install_success}</p></div>{/if}
-					<div class="box-content">
+					<div class="panel-body">
 						<center><p>{$plugin_info}</p></center>
 						<center>
 						<a href="index.php?page=install_plugin"><button class="btn btn-primary btn-large dropdown-toggle">Install New Plugin</button></a>
@@ -35,7 +35,7 @@
 						  <tbody>
 							{foreach from=$plug item=element}
 							<tr>
-								<td>{if ($element.plugin_status) eq "1"}<i class="glyphicon glyphicon-ok green"></i>{else}<i class="glyphicon glyphicon-remove red"></i>{/if}</td>
+								<td>{if ($element.plugin_status) eq "1"}<span class="glyphicon glyphicon-ok green"></span>{else}<span class="glyphicon glyphicon-remove red"></span>{/if}</td>
 								<td class="center">{$element.plugin_name}</td>
 								<td class="center">{$element.plugin_info->Version}</td>
 								<td class="center">{$element.plugin_info->Description}</td>

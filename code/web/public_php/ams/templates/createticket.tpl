@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-12">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i> Create a new Ticket</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span> Create a new Ticket
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <form id="changePassword" class="form-vertical" method="post" action="index.php?page=createticket&id={$target_id}">
                     <legend>New ticket</legend>

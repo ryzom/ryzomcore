@@ -126,3 +126,10 @@ margin-top: 10px;
 .setup-width {
 	width:75%;
 }
+
+.js-masonry {
+	padding-left: -1;
+	padding-right: -1;
+	margin-left: -1;
+	margin-right: -1;
+}

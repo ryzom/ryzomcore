@@ -15,12 +15,12 @@
 		<form method="post" action="index.php{if isset($getstring)}{$getstring}{/if}" class="form-horizontal">
 			<fieldset>
 				<div data-rel="tooltip" class="input-prepend" data-original-title="Username/Email">
-					<span class="add-on"><i class="icon-user"></i></span><input type="text" value="" id="LoginValue" name="LoginValue" class="input-large span10" placeholder="Username or Email">
+					<span class="add-on"><span class="icon-user"></span></span><input type="text" value="" id="LoginValue" name="LoginValue" class="input-large span10" placeholder="Username or Email">
 				</div>
 				<div class="clearfix"></div>
 
 				<div data-rel="tooltip" class="input-prepend" data-original-title="Password">
-					<span class="add-on"><i class="icon-lock"></i></span><input type="password" value="" id="Password" name="Password" class="input-large span10" placeholder="Password">
+					<span class="add-on"><span class="icon-lock"></span></span><input type="password" value="" id="Password" name="Password" class="input-large span10" placeholder="Password">
 				</div>
 				<div class="clearfix"></div>
 

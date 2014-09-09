@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i>{$t_title} #{$ticket_tId} </h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span>{$t_title} #{$ticket_tId} 
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>{$title}: {$ticket_title} </legend>
 
@@ -62,9 +62,9 @@
 				<p>
 				    <span class="label label-info"> {$reply.timestamp}</span>
 				    {if $reply.permission eq '1'}
-				    <span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-success"><strong><span class="icon-user icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {else if $reply.permission gt '1'}
-				    <span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-warning"><strong><span class="icon-star icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {/if}
 				</p>
 				<p><pre{if $reply.permission gt '1'} {if $reply.hidden eq 0} style="background-color:rgb(248, 200, 200);"{else if $reply.hidden eq 1}style="background-color:rgb(207, 254, 255);"{/if}{/if}> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>
@@ -168,11 +168,11 @@
 
 
     <div class="box col-md-3">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span>Actions
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
 
 		{if isset($isMod) and $isMod eq "TRUE"}
@@ -182,13 +182,13 @@
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="assignTicket">
-			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><i class="icon-flag icon-white"></i> Assign Ticket</button>
+			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><span class="icon-flag icon-white"></span> Assign Ticket</button>
 		    </form>
 		{else if $ticket_assignedTo eq $user_id}
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="unAssignTicket">
-			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><i class="icon-remove icon-white"></i> Remove Assign</button>
+			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><span class="icon-remove icon-white"></span> Remove Assign</button>
 		    </form>
 		{/if}
 

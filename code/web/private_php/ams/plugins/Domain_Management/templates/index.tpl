@@ -4,11 +4,11 @@
 	{if isset($smarty.get.edit_domain)}
 <div class="row-fluid sortable ui-sortable">
 	<div class="box col-md-9">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-list"></i> Domain: {$hook_info['Domain_Management']['domains']['0']['domain_name']}</h2>
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-list"></span> Domain: {$hook_info['Domain_Management']['domains']['0']['domain_name']}
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<legend>Users with permissions in domain </legend>
 			<table class="table table-striped table-bordered bootstrap-datatable datatable">
@@ -40,7 +40,7 @@
 					</td>
 					<td class="center">
 						<div class="btn-group" style="display: inline-block;">
-							<a class="btn btn-info" href="index.php?page=settings&id={$element.id}"><i class=" icon-pencil icon-white"></i> Edit User Permissions</a>
+							<a class="btn btn-info" href="index.php?page=settings&id={$element.id}"><span class=" icon-pencil icon-white"></span> Edit User Permissions</a>
 						</div>
 					</td>
 				  </tr>
@@ -53,11 +53,11 @@
 		</div><!--/span-->
 
 		<div class="box col-md-3">
-		<div class="box-inner">
-		<div class="box-header well" data-original-title="">
-				<h2><i class="icon-pencil"></i> Modify Domain Settings</h2>
+		<div class="panel panel-default">
+		<div class="panel-heading" data-original-title="">
+				<span class="icon-pencil"></span> Modify Domain Settings
 			</div>
-		 <div class="box-content">
+		 <div class="panel-body">
 				<div class="row-fluid">
 
 			<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id=">
@@ -199,14 +199,14 @@
 	
 	<div class="row-fluid">
 <div class="box col-md-12">
-<div class="box-inner">
-<div class="box-header well" data-original-title="">
-<h2>
-<i class="icon-user"></i>
+<div class="panel panel-default">
+<div class="panel-heading" data-original-title="">
+
+<span class="icon-user"></span>
 Domains
-</h2>
+
 </div>
-<div class="box-content">
+<div class="panel-body">
 	<table class="table table-striped table-bordered">
 					<thead>
 						<tr>

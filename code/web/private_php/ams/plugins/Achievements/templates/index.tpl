@@ -2,11 +2,11 @@
 {if isset($smarty.get.plugin_action) and $smarty.get.plugin_action eq 'get_achievements'}
 <div class="row-fluid">	
 	<div class="box col-md-12">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title>
-				<h2><i class="icon-user"></i> Achievements</h2>
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title>
+				<span class="icon-user"></span> Achievements
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 			{if isset($hook_info.Achievements.no_char)}<div class="alert alert-error"><p>{$hook_info.Achievements.no_char}</p></div>{/if}	
 				<div class="row-fluid">
 				{$hook_info.Achievements.char_achievements}							
@@ -18,11 +18,11 @@
 {else}
 <div class="row-fluid">	
 			<div class="box col-md-4">
-				<div class="box-inner">
-					<div class="box-header well" data-original-title="">
-						<h2><i class="icon-th"></i> Select your Character</h2>
+				<div class="panel panel-default">
+					<div class="panel-heading" data-original-title="">
+						<span class="icon-th"></span> Select your Character
 					</div>
-					<div class="box-content">
+					<div class="panel-body">
 						<div class="row-fluid">
 							<form id="generateKey" class="form-vertical" method="post" action="index.php?page=layout_plugin&&name={$arrkey}&&plugin_action=get_achievements">
 							<div class="control-group">

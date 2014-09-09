@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> Ticket Queue {$queue_view}</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span> Ticket Queue {$queue_view}
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>Tickets</legend>
 
@@ -44,7 +44,7 @@
 		    </select>
 		    </span>
 		    <input type="hidden" name="action" value="create_queue">
-		    <button type="submit" class="btn btn-primary" style="bottom:4px; position:relative;"  ><i class="icon-tag icon-white"></i> View</button>
+		    <button type="submit" class="btn btn-primary" style="bottom:4px; position:relative;"  ><span class="icon-tag icon-white"></span> View</button>
 		    </form>
 
 
@@ -94,7 +94,7 @@
 				<td>{if $ticket.assignedText neq ""} <a href="index.php?page=show_user&id={$ticket.assigned}">{$ticket.assignedText} {else}<i> {$not_assigned}</i> {/if}</td>
 				<td class="center"><span title="{$ticket.timestamp_elapsed}" data-rel="tooltip"  data-placement="right">{$ticket.timestamp}</span></td>
 				<td class="center">{$ticket.category}</td>
-				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>
+				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="icon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
 				<td class="center">
 
 				    {if $ticket.forwardedGroupName eq "0"}
@@ -109,13 +109,13 @@
 					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="assignTicket">
-					    <button type="submit" class="btn btn-primary" ><i class="icon-flag icon-white"></i> Assign Ticket</button>
+					    <button type="submit" class="btn btn-primary" ><span class="icon-flag icon-white"></span> Assign Ticket</button>
 					</form>
 				    {else if $ticket.assigned eq $user_id}
 					<form id="assign_ticket" class="form-vertical" method="post" action="{$getURL}" style="margin:0px 0px 0px;">
 					    <input type="hidden" name="ticket_id" value="{$ticket.tId}">
 					    <input type="hidden" name="action" value="unAssignTicket">
-					    <button type="submit" class="btn btn-warning" ><i class="icon-remove icon-white"></i> Remove Assign</button>
+					    <button type="submit" class="btn btn-warning" ><span class="icon-remove icon-white"></span> Remove Assign</button>
 					</form>
 				    {/if}
 				</td>
@@ -140,11 +140,11 @@
     </div><!--/span-->
 
     <div class="box col-md-3">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span>Actions
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
     		<div class="btn-group">
                 <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
