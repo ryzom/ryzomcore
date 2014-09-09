@@ -132,6 +132,9 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
 		NLGEORGES::CFormDfn::CEntry &entry = st->FormDfn->getEntry( idx );
 		if( entry.getArrayFlag() )
 			return;
+
+		if( entry.getType() == NLGEORGES::UFormDfn::EntryVirtualDfn )
+			return;
 	}	
 
 	QString key = elm.Name.c_str();
