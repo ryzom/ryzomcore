@@ -238,6 +238,13 @@ namespace GeorgesQt
 		childItems.clear();
 	}
 
+	void CFormItem::removeChild( int idx )
+	{
+		CFormItem *item = childItems[ idx ];
+		childItems.removeAt( idx );
+		delete item;
+	}
+
 	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, TType itemType )
     {
 		CFormItem *newNode = new CFormItem();

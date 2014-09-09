@@ -87,6 +87,8 @@ namespace GeorgesQt
 
 		void clearChildren();
 
+		void removeChild( int idx );
+
 		bool rootItem() const{
 			if( parentItem == NULL )
 				return true;

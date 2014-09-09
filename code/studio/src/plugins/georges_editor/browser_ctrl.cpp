@@ -37,6 +37,7 @@ QObject( browser )
 	connect( m_pvt, SIGNAL( arrayResized( const QString&, int ) ), this, SLOT( onArrayResized( const QString&, int ) ) );
 	connect( m_pvt, SIGNAL( modified() ), this, SLOT( onModified() ) );
 	connect( m_pvt, SIGNAL( valueChanged( const QString&, const QString& ) ), this, SLOT( onValueChanged( const QString&, const QString& ) ) );
+	connect( m_pvt, SIGNAL( vstructChanged( const QString& ) ), this, SLOT( onVStructChanged( const QString& ) ) );
 }
 
 BrowserCtrl::~BrowserCtrl()
@@ -76,6 +77,11 @@ void BrowserCtrl::onArrayResized( const QString &name, int size )
 void BrowserCtrl::onModified()
 {
 	Q_EMIT modified();
+}
+
+void BrowserCtrl::onVStructChanged( const QString &name )
+{
+	Q_EMIT vstructChanged( name );
 }
 
 void BrowserCtrl::enableMgrConnections()

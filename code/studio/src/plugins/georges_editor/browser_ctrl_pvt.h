@@ -58,16 +58,19 @@ Q_SIGNALS:
 	void arrayResized( const QString &name, int size );
 	void modified();
 	void valueChanged( const QString &key, const QString &value );
+	void vstructChanged( const QString &name );
 
 private:
 	void setupStruct( NLGEORGES::UFormElm *node );
 	void setupAtom( NLGEORGES::CFormElmStruct *st, int idx );
 
 	void setupStruct( GeorgesQt::CFormItem *node );
+	void setupVStruct( GeorgesQt::CFormItem *node );
 	void setupArray( GeorgesQt::CFormItem *node );
 	void setupAtom( GeorgesQt::CFormItem *node );
 
 	void onStructValueChanged( QtProperty *p, const QVariant &value );
+	void onVStructValueChanged( QtProperty *p, const QVariant &value );
 	void onArrayValueChanged( QtProperty *p, const QVariant &value );
 	void onAtomValueChanged( QtProperty *p, const QVariant &value );
 	void createArray();

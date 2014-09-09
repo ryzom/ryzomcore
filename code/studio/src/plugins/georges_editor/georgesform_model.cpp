@@ -45,6 +45,8 @@
 #include "georges_editor_form.h"
 #include "actions.h"
 
+#include "georges.h"
+
 using namespace NLGEORGES;
 
 namespace GeorgesQt 
@@ -689,6 +691,42 @@ void CGeorgesFormModel::renameArrayEntry( QModelIndex idx, const QString &name )
 
 	cparent->Elements[ i ].Name = name.toUtf8().constData();
 	item->setName( name.toUtf8().constData() );
+}
+
+void CGeorgesFormModel::changeVStructDfn( QModelIndex idx )
+{
+	CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+	QString vstruct = item->formName().c_str();
+
+	NLGEORGES::UFormElm *uelm = NULL;
+	m_form->getRootNode().getNodeByName( &uelm, vstruct.toUtf8().constData() );
+
+	if( uelm == NULL )
+		return;
+
+	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( uelm );
+
+	CGeorges g;
+	NLGEORGES::UFormDfn *udfn = g.loadFormDfn( vs->DfnFilename );
+	if( udfn == NULL )
+		return;
+
+	NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+	vs->build( cdfn );
+
+
+	beginResetModel();
+	
+	CFormItem *parent = item->parent();
+	int row = idx.row();
+	QString name = item->name().c_str();
+	QString formName = item->formName().c_str();
+	parent->removeChild( row );
+	
+	addItem( parent, vs, cdfn, name.toUtf8().constData(), row, formName.toUtf8().constData() );
+
+	endResetModel();
 }
 
     /******************************************************************************/

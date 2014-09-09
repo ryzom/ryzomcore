@@ -101,6 +101,7 @@ namespace GeorgesQt
 		void onAppendArray();
 		void onDeleteArrayEntry();
 		void onValueChanged( const QString &key, const QString &value );
+		void onVStructChanged( const QString &name );
 		void onRenameArrayEntry();
 
 	private:

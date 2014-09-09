@@ -83,6 +83,7 @@ namespace GeorgesQt
 		void appendArray( QModelIndex idx );
 		void deleteArrayEntry( QModelIndex idx );
 		void renameArrayEntry( QModelIndex idx, const QString &name );
+		void changeVStructDfn( QModelIndex idx );
 
 	private:
 		void setupModelData();
