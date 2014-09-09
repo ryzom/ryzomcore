@@ -30,7 +30,7 @@ class Sync{
         // We're the main process.
         } else {
             $pid = getmypid();
-            if(!file_exists($pidfile) or (file_exists($pidfile) && Sync::check_pid(file_get_contents($pid)))) {
+            if(Sync::check_for_pid(@file_get_contents($pidfile))) {
                 $file = fopen($pidfile, 'w+');
                 if (!$file) {
                     echo $pidfile.' is not writeable.';
@@ -100,7 +100,7 @@ class Sync{
         }
     }
 
-    public static function check_pid($pid){
+    public static function check_for_pid($pid){
 
         $OS = Sync::getOS();
 
@@ -113,10 +113,12 @@ class Sync{
                       continue;
                  $matches = false;
                  preg_match( "/(.*?)\s+(\d+).*$/", $process, $matches );
-                 $pid = $matches[ 2 ];
+                 if ($pid = $matches[ 2 ]) {
+                    return true;
+                 }
             }
         } else {
-            return file_exists( "/proc/$pid" );
+            return file_exists( "/proc/".$pid );
         }
     }
     static public function getOS() {
