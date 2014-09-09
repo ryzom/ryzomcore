@@ -65,21 +65,22 @@ class DBLayer {
 		} else {
 			$dsn = "mysql:";
 			$dsn .= "host=" . $cfg['db'][$db]['host'] . ";";
-			$dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";"; // Comment this out when using the cache
+			// $dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";"; // Comment this out when using the cache
 			$dsn .= "port=" . $cfg['db'][$db]['port'] . ";";
 
 			$opt = array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-				PDO::ATTR_PERSISTENT => true,
+				// PDO::ATTR_PERSISTENT => true,
 				PDO::ATTR_TIMEOUT => 5
 			);
 			$PDOCache[$this->host] = array();
 			try {
 				$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
-			} catch (Exception $e) {
-				$PDOCache[$this->host]['exception'] = $e;
-				throw $e;
+			} catch (PDOException $e) {
+				$exception = new PDOException("Failed to connect to the '" . $db . "' database server", $e->getCode());
+				$PDOCache[$this->host]['exception'] = $exception;
+				throw $exception;
 				return;
 			}
 			$PDOCache[$this->host]['pdo'] = $this->PDO;
