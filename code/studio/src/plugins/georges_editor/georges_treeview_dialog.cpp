@@ -599,12 +599,6 @@ namespace GeorgesQt
 		modifiedFile();
 	}
 
-	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
-	{
-		Q_EMIT closing();
-		deleteLater();
-	}
-
 	void CGeorgesTreeViewDialog::checkVisibility(bool visible) {
 		// this prevents invisible docks from getting tab focus
 		qDebug() << "checkVisibility" << visible;

@@ -29,6 +29,11 @@ GeorgesDockWidget::~GeorgesDockWidget()
 {
 }
 
+void GeorgesDockWidget::closeEvent( QCloseEvent *e )
+{
+	Q_EMIT closing( this );
+}
+
 QString GeorgesDockWidget::buildLogMsg( const QString &msg )
 {
 	QString user = getenv( "USER" );

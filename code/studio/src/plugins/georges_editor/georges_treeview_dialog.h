@@ -77,13 +77,9 @@ namespace GeorgesQt
 
 		QString loadedForm;
 
-	protected:
-		void closeEvent(QCloseEvent *event);
-
 	Q_SIGNALS:
 		void changeFile(QString);
 		void modified();
-		void closing();
 
 	public Q_SLOTS:
 		void setForm(const CForm*);

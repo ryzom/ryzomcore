@@ -252,7 +252,7 @@ namespace GeorgesQt
         m_lastActiveDock = w;
         m_dockedWidgets.append(w);
 
-        connect(m_dockedWidgets.last(), SIGNAL(closing()), this, SLOT(closingTreeView()));
+		connect( w, SIGNAL( closing( GeorgesDockWidget* ) ), this, SLOT( dialogClosing( GeorgesDockWidget* ) ) );
         connect(m_dockedWidgets.last(), SIGNAL(visibilityChanged(bool)), m_dockedWidgets.last(), SLOT(checkVisibility(bool)));
 
         // If there is more than one form open - tabify the new form. If this is the first form open add it to the dock.
@@ -337,12 +337,16 @@ namespace GeorgesQt
 		addGeorgesWidget( w );
 	}
 
-	void GeorgesEditorForm::closingTreeView()
+	void GeorgesEditorForm::dialogClosing( GeorgesDockWidget *d )
 	{
-		//qDebug() << "closingTreeView";
-		m_dockedWidgets.removeAll(qobject_cast<CGeorgesTreeViewDialog*>(sender()));
-		if (qobject_cast<CGeorgesTreeViewDialog*>(sender()) == m_lastActiveDock)
-			m_lastActiveDock = 0;
+		m_dockedWidgets.removeAll( d );
+		
+		if( m_dockedWidgets.size() == 0 )
+			m_lastActiveDock = NULL;
+		else
+			m_lastActiveDock = m_dockedWidgets.last();
+
+		delete d;
 	}
 
 	void GeorgesEditorForm::setModified () 
