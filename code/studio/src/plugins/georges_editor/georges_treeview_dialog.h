@@ -103,6 +103,7 @@ namespace GeorgesQt
 		void onValueChanged( const QString &key, const QString &value );
 		void onVStructChanged( const QString &name );
 		void onRenameArrayEntry();
+		void onCommentsEdited();
 
 	private:
 		void log( const QString &msg );

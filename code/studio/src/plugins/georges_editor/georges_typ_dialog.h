@@ -45,6 +45,7 @@ private Q_SLOTS:
 	void onItemChanged( QTreeWidgetItem *item, int column );
 	void onModified();
 	void onModified( const QString &k, const QString &v );
+	void onCommentsEdited();
 
 private:
 	void setupConnections();

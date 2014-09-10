@@ -323,6 +323,8 @@ namespace GeorgesQt
 		QFileInfo info( fileName );
 		setWindowTitle( info.fileName() );
 
+		connect(m_ui.commentEdit, SIGNAL(textChanged()), this, SLOT(onCommentsEdited()));
+
 		return true;
 	}
 
@@ -330,6 +332,7 @@ namespace GeorgesQt
 	{
 		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
 		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+		form->Header.Comments = m_ui.commentEdit->toPlainText().toUtf8().constData();
 
 		NLMISC::COFile file;
 		std::string s = m_fileName.toUtf8().constData();
@@ -589,6 +592,11 @@ namespace GeorgesQt
 		m_ui.treeView->expandAll();
 		m_ui.treeView->setCurrentIndex( idx );
 		m_browserCtrl->clicked( idx );
+	}
+
+	void CGeorgesTreeViewDialog::onCommentsEdited()
+	{
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 

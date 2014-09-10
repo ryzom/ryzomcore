@@ -44,6 +44,7 @@ private Q_SLOTS:
 	void onCurrentRowChanged( int row );
 
 	void onValueChanged( const QString& key, const QString &value );
+	void onCommentsEdited();
 
 private:
 	void loadDfn();
