@@ -53,8 +53,6 @@ private:
 
 	Ui::GeorgesTypDialog m_ui;
 	GeorgesTypDialogPvt *m_pvt;
-
-	QString m_fileName;
 };
 
 
