@@ -102,6 +102,55 @@ namespace
 		return n;
 	}
 
+	// Get the data from a string, and pack it into a QVariant properly
+	// Needed for some special values, like color
+	// which are represented differently in Nel and Qt
+	QVariant stringToVariant( const QString &value, QVariant::Type type )
+	{
+		QVariant v;
+
+		if( type == QVariant::Color )
+		{
+			QStringList l = value.split( ',' );
+			if( l.size() != 3 )
+				v = "";
+			else
+			{
+				QColor c;
+				c.setRed( l[ 0 ].toInt() );
+				c.setGreen( l[ 1 ].toInt() );
+				c.setBlue( l[ 2 ].toInt() );
+				v = c;
+			}
+
+		}
+		else
+			v = value;
+
+		return v;
+	}
+
+	// The inverse function of stringToVariant
+	// Unpacks the data from a QVariant properly
+	QString variantToString( const QVariant &value )
+	{
+		QString v;
+
+		if( value.type() == QVariant::Color )
+		{
+			QColor c = value.value< QColor >();
+			v += QString::number( c.red() );
+			v += ',';
+			v += QString::number( c.green() );
+			v += ',';
+			v += QString::number( c.blue() );
+		}
+		else
+			v = value.toString();
+
+		return v;
+	}
+
 }
 
 
@@ -155,23 +204,31 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
 	QString value = "";
 	QVariant::Type t = QVariant::String;
 
+	// If the atom exists, get the value from it
+	// Otherwise just get the type so we can set up the proper editor
 	if( elm.Element != NULL )
 	{
-		t = getValueType( elm.Element->getType() );			
+		// Check if there's a type, if not get it from the Dfn
+		const NLGEORGES::CType *type = elm.Element->getType();
+		if( type != NULL )
+			t = getValueType( elm.Element->getType() );			
+		else
+			t = getValueTypeFromDfn( st, idx );
 
 		std::string formName;
 		elm.Element->getFormName( formName, NULL );
 
 		std::string v;
 		m_rootNode->getValueByName( v, formName.c_str(), NLGEORGES::UFormElm::NoEval, NULL, 0 );
-		value = v.c_str();
+		value = stringToVariant( v.c_str(), t ).toString();
 	}
 	else
 	{
 		t = getValueTypeFromDfn( st, idx );
 	}
 
-	QtVariantProperty *p = mgr->addProperty( t, key );
+	QtVariantProperty *p = addProperty( t, key );
+
 	p->setValue( value );
 	m_browser->addProperty( p );
 }
@@ -248,7 +305,7 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 		tt = getValueTypeFromDfn( atom );
 	}
 
-	QtVariantProperty *p = mgr->addProperty( tt, "value" );
+	QtVariantProperty *p = addProperty( tt, "value" );
 	p->setValue( v.c_str() );
 	m_browser->addProperty( p );
 }
@@ -286,7 +343,8 @@ void BrowserCtrlPvt::clear()
 void BrowserCtrlPvt::onStructValueChanged( QtProperty *p, const QVariant &value )
 {
 	std::string k = p->propertyName().toUtf8().constData();
-	std::string v  = value.toString().toUtf8().constData();
+	std::string v;
+	v = variantToString( value ).toUtf8().constData();
 
 	NLGEORGES::UFormElm *node = getCurrentNode();
 
@@ -457,4 +515,24 @@ void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 		onAtomValueChanged( p, value );
 }
 
+QtVariantProperty* BrowserCtrlPvt::addProperty( QVariant::Type type, const QString &name )
+{
+	QtVariantProperty *p = mgr->addProperty( type, name );
+	
+	// Remove the color sub-properties, so they don't get triggered on value change
+	if( type == QVariant::Color )
+	{
+		QList< QtProperty* > sp = p->subProperties();
+		QListIterator< QtProperty* > itr( sp );
+		while( itr.hasNext() )
+		{
+			QtProperty *prop = itr.next();
+			p->removeSubProperty( prop );
+			delete prop;
+		}
+		sp.clear();
+	}
+
+	return p;
+}
 

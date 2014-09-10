@@ -38,6 +38,7 @@ class QtVariantEditorFactory;
 class QtTreePropertyBrowser;
 class QVariant;
 class QtProperty;
+class QtVariantProperty;
 
 class BrowserCtrlPvt : public QObject
 {
@@ -77,6 +78,8 @@ private:
 	void onArrayValueChanged( QtProperty *p, const QVariant &value );
 	void onAtomValueChanged( QtProperty *p, const QVariant &value );
 	void createArray();
+
+	QtVariantProperty* addProperty( QVariant::Type type, const QString &name );
 	
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
