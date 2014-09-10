@@ -265,6 +265,7 @@ namespace GeorgesQt
             m_mainDock->addDockWidget(Qt::RightDockWidgetArea, m_dockedWidgets.last());
         }
 
+		QCoreApplication::processEvents();
 		w->raise();
 	}
 
