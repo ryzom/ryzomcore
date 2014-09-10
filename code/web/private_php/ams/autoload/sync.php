@@ -106,14 +106,14 @@ class Sync{
 
         if ($OS == 2) {
             $processes = explode( "\n", shell_exec( "tasklist.exe" ));
-            foreach( $processes as $process )
+            foreach( $processes as $key => $value )
             {
-                 if( strpos( "Image Name", $process ) === 0
-                   || strpos( "===", $process ) === 0 )
+                 if( empty($value) != '1' && strpos( "Image Name", $value ) === 0
+                   || empty($value) != '1' && strpos( "===", $value ) === 0 )
                       continue;
                  $matches = false;
-                 preg_match( "/(.*?)\s+(\d+).*$/", $process, $matches );
-                 if ($pid = $matches[ 2 ]) {
+                 preg_match( "/(.*?)\s+(\d+).*$/", $value, $matches );
+                 if (isset($matches[ 2 ]) && $pid = $matches[ 2 ]) {
                     return true;
                  }
             }
