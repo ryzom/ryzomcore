@@ -1688,29 +1688,30 @@ void	CActionPhraseFaber::updateItemResult()
 			craftSuccessModifier = nodeCSM->getValue32();
 		}
 		// With the faber plan skill
-		sint		success= pPM->getCraftPhraseSuccessRate(pPM->getPhrase(phraseSlot), _ExecuteFromItemPlanBrick->getSkill(), minLevel);
+		sint		success= pPM->getCraftPhraseSuccessRate(pPM->getPhrase(phraseSlot), _ExecuteFromItemPlanBrick->getSkill(), minLevel, 0);
+		sint		bonus = pPM->getCraftPhraseSuccessRate(pPM->getPhrase(phraseSlot), _ExecuteFromItemPlanBrick->getSkill(), minLevel, (sint) craftSuccessModifier) - success;
 		string		successStr;
-		if( craftSuccessModifier == 0 )
+		if( bonus == 0 )
 		{
 			successStr = toString("@{FFFF}") + toString(success);
 		}
 		else
-		if( craftSuccessModifier > 0 ) // bonus
+		if( bonus > 0 ) // bonus
 		{
-			successStr = "@{0F0F}" + toString(success+craftSuccessModifier)
+			successStr = "@{0F0F}" + toString(success + bonus)
 							+ "@{FFFF}("
 							+ toString( success )
 							+ "@{0F0F} + "
-							+ toString( craftSuccessModifier )
+							+ toString( bonus )
 							+ "@{FFFF})";
 		}
 		else
 		{
-			successStr = "@{E42F}" + toString(success+craftSuccessModifier)
+			successStr = "@{E42F}" + toString(success + bonus)
 				+ "@{FFFF}("
 				+ toString( success )
 				+ "@{E42F} - "
-				+ toString( craftSuccessModifier )
+				+ toString( abs(bonus) )
 				+ "@{FFFF})";
 		}
 		strFindReplace(text, "%success", successStr );

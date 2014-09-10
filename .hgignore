@@ -257,3 +257,6 @@ code/web/public_php/db_version_tool
 code/web/public_php/db_version_web
 code/web/public_php/role_service
 code/web/public_php/role_support
+code/web/public_php/role_domain
+code/web/public_php/db_version_ring
+code/web/public_php/config_user.php

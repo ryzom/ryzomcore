@@ -19,7 +19,7 @@
 			<label class="control-label">{$email_tag}</label>
 				<div class="controls">
 				    <div class="input-prepend">
-					<span class="add-on"><i class="icon-envelope"></i></span>
+					<span class="add-on"><span class="icon-envelope"></span></span>
 						<input type="text" class="input-xlarge" id="Email" name="Email" placeholder="{$email_default}" {if isset($prevEmail)}value="{$prevEmail}"{/if} rel="popover" data-content="{$email_tooltip}" data-original-title="{$email_default}">
 					</div>
 				</div>

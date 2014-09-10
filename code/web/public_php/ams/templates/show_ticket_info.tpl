@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> </h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span> <a href="index.php?page=show_ticket&id={$ticket_id}">[#{$ticket_id}] {$ticket_title}</a> 
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>Additional Info </legend>
 		<div style=" padding-left:10%;padding-right:10%;">
@@ -79,11 +79,11 @@
     </div><!--/span-->
 
     <div class="box col-md-3">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span>Actions
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
 
 		<legend style="margin-bottom:9px;">Actions</legend>

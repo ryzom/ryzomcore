@@ -29,13 +29,13 @@
  *
  */
 
-// $PDOCache = array();
+$PDOCache = array();
 
 class DBLayer {
 
 	private $PDO;
-	// private $host;
-	// private $dbname;
+	private $host;
+	private $dbname;
 
 	/**
 	* The PDO object, instantiated by the constructor
@@ -48,31 +48,45 @@ class DBLayer {
 	* @param $db String, the name of the databases entry in the $cfg global var.
 	* @param $dbn String, the name of the databases entry in the $cfg global var if $db referenced to an action(install etc).
 	*/
-	function __construct($db, $dbn = null)
-	{
+	function __construct($db, $dbn = null) {
+		if ($db == "ring" && $dbn == null) {
+			throw new Exception("Domain database access from AMS must have database name specified");
+		}
+
 		global $cfg;
-		// $this->host = $cfg['db'][$db]['host'];
-		// $this->dbname = $cfg['db'][$db]['name'];
-		/*global $PDOCache;
+		$this->host = $cfg['db'][$db]['host'];
+		$this->dbname = $cfg['db'][$db]['name'];
+		global $PDOCache;
 		if (isset($PDOCache[$this->host])) {
+			if (isset($PDOCache[$this->host]['exception'])) {
+				throw $PDOCache[$this->host]['exception'];
+			}
 			$this->PDO = $PDOCache[$this->host]['pdo'];
-		} else {*/
+		} else {
 			$dsn = "mysql:";
 			$dsn .= "host=" . $cfg['db'][$db]['host'] . ";";
-			$dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";"; // Comment this out when using the cache
+			// $dsn .= "dbname=" . $cfg['db'][$db]['name'] . ";"; // Comment this out when using the cache
 			$dsn .= "port=" . $cfg['db'][$db]['port'] . ";";
 
 			$opt = array(
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 				PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-				PDO::ATTR_PERSISTENT => true
+				// PDO::ATTR_PERSISTENT => true,
+				PDO::ATTR_TIMEOUT => 5
 			);
-			$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
-		/*	$PDOCache[$this->host] = array();
+			$PDOCache[$this->host] = array();
+			try {
+				$this->PDO = new PDO($dsn, $cfg['db'][$db]['user'], $cfg['db'][$db]['pass'], $opt);
+			} catch (PDOException $e) {
+				$exception = new PDOException("Failed to connect to the '" . $db . "' database server", $e->getCode());
+				$PDOCache[$this->host]['exception'] = $exception;
+				throw $exception;
+				return;
+			}
 			$PDOCache[$this->host]['pdo'] = $this->PDO;
 			$PDOCache[$this->host]['use'] = $this->dbname;
-		*/	//$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
-		/*}*/
+			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+		}
 	}
 
 	function __destruct() {
@@ -80,11 +94,11 @@ class DBLayer {
 	}
 
 	function useDb() {
-		/*global $PDOCache;
+		global $PDOCache;
 		if ($PDOCache[$this->host]['use'] != $this->dbname) {
 			$PDOCache[$this->host]['use'] = $this->dbname;
 			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
-		}*/
+		}
 	}
 
 	/**
@@ -201,7 +215,6 @@ class DBLayer {
 		$field_option_values = ltrim($field_option_values, ',');
 		try {
 			$sth = $this->PDO->prepare("UPDATE $tb_name SET $field_option_values WHERE $where ");
-            error_log("UPDATE $tb_name SET $field_option_values WHERE $where ");
 
 			foreach ($data as $key => $value) {
 				$sth->bindValue(":$key", $value);

@@ -16,7 +16,9 @@
 
 	function validateCookie(&$userId, &$domainId, &$charId)
 	{
-		global $DBHost, $RingDBUserName, $RingDBPassword, $RingDBName, $AcceptUnknownUser;
+		$domainInfo = getDomainInfo($domainId);
+		
+		global $DBHost, $RingDBUserName, $RingDBPassword, $AcceptUnknownUser;
 		
 		if (!isset($_COOKIE["ryzomId"]))
 		{
@@ -41,7 +43,7 @@
 
 		// check the cookie in the database		
 		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
-		mysqli_select_db($link, $RingDBName) or die ("Can't access to the table dbname:$RingDBName");
+		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
 
 		$cookie = mysqli_real_escape_string($link, $cookie);
 		$query = "SELECT user_id, current_status, current_domain_id FROM ring_users where cookie='$cookie'";

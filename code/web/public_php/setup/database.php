@@ -1,12 +1,26 @@
 <?php
 
+// Service
+$db_nel = 3;
+$db_nel_tool = 1;
+
+// Support
+$db_nel_ams = 1;
+$db_nel_ams_lib = 4;
+
+// Domain
+$db_ring_domain = 1;
+
+
 function set_db_version($continue_r, $name, $version) {
 	$continue = $continue_r;
 
-	if (file_put_contents("db_version_" . $name, (string)$version)) {
-	} else {
-		printalert("danger", "Failed to set database version");
-		$continue = false;
+	if ($continue) {
+		if (file_put_contents("db_version_" . $name, (string)$version)) {
+		} else {
+			printalert("danger", "Failed to set database version");
+			$continue = false;
+		}
 	}
 
 	return $continue;
@@ -53,18 +67,24 @@ function upgrade_service_databases($continue_r) {
 	$con = null;
 	$con = connect_database($continue, "shard");
 	$continue = ($con != null);
-	if ($continue && get_db_version("shard") < 1) {
-		$continue = update_database_structure($continue, $con, "nel_00001.sql");
-		$continue = set_db_version($continue, "shard", 1);
+	global $db_nel;
+	for ($i = 1; $i <= $db_nel; $i++) {
+		if ($continue && get_db_version("shard") < $i) {
+			$continue = update_database_structure($continue, $con, "nel_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
+			$continue = set_db_version($continue, "shard", $i);
+		}
 	}
 	disconnect_database($con, "shard");
 
 	$con = null;
 	$con = connect_database($continue, "tool");
 	$continue = ($con != null);
-	if ($continue && get_db_version("tool") < 1) {
-		$continue = update_database_structure($continue, $con, "nel_tool_00001.sql");
-		$continue = set_db_version($continue, "tool", 1);
+	global $db_nel_tool;
+	for ($i = 1; $i <= $db_nel_tool; $i++) {
+		if ($continue && get_db_version("tool") < $i) {
+			$continue = update_database_structure($continue, $con, "nel_tool_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
+			$continue = set_db_version($continue, "tool", $i);
+		}
 	}
 	disconnect_database($con, "tool");
 
@@ -77,22 +97,24 @@ function upgrade_support_databases($continue_r) {
 	$con = null;
 	$con = connect_database($continue, "web");
 	$continue = ($con != null);
-	if ($continue && get_db_version("web") < 1) {
-		$continue = update_database_structure($continue, $con, "nel_ams_00001.sql");
-		$continue = set_db_version($continue, "web", 1);
+	global $db_nel_ams;
+	for ($i = 1; $i <= $db_nel_ams; $i++) {
+		if ($continue && get_db_version("web") < $i) {
+			$continue = update_database_structure($continue, $con, "nel_ams_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
+			$continue = set_db_version($continue, "web", $i);
+		}
 	}
 	disconnect_database($con, "web");
 
 	$con = null;
 	$con = connect_database($continue, "lib");
 	$continue = ($con != null);
-	if ($continue && get_db_version("lib") < 1) {
-		$continue = update_database_structure($continue, $con, "nel_ams_lib_00001.sql");
-		$continue = set_db_version($continue, "lib", 1);
-	}
-	if ($continue && get_db_version("lib") < 2) {
-		$continue = update_database_structure($continue, $con, "nel_ams_lib_00002.sql");
-		$continue = set_db_version($continue, "lib", 2);
+	global $db_nel_ams_lib;
+	for ($i = 1; $i <= $db_nel_ams_lib; $i++) {
+		if ($continue && get_db_version("lib") < $i) {
+			$continue = update_database_structure($continue, $con, "nel_ams_lib_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
+			$continue = set_db_version($continue, "lib", $i);
+		}
 	}
 	disconnect_database($con, "lib");
 
@@ -105,9 +127,12 @@ function upgrade_domain_databases($continue_r) {
 	$con = null;
 	$con = connect_database($continue, "ring");
 	$continue = ($con != null);
-	if ($continue && get_db_version("ring") < 1) {
-		$continue = update_database_structure($continue, $con, "ring_domain_00001.sql");
-		$continue = set_db_version($continue, "ring", 1);
+	global $db_ring_domain;
+	for ($i = 1; $i <= $db_ring_domain; $i++) {
+		if ($continue && get_db_version("ring") < $i) {
+			$continue = update_database_structure($continue, $con, "ring_domain_" . str_pad($i, 5, "0", STR_PAD_LEFT) . ".sql");
+			$continue = set_db_version($continue, "ring", $i);
+		}
 	}
 	disconnect_database($con, "ring");
 

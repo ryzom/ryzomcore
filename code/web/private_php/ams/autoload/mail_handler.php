@@ -16,7 +16,11 @@ class Mail_Handler{
     */    
     private function mail_fork() {   
         //Start a new child process and return the process id!
-        $pid = pcntl_fork();
+        if (function_exists('pcntl_fork')) {
+            $pid = pcntl_fork();
+        } else {
+            $pid = getmypid ();
+        }
         return $pid;
         
     }
@@ -118,6 +122,7 @@ class Mail_Handler{
             $id_user = $recipient;
             $recipient = NULL;
         }
+        $db = new DBLayer($db);
         $db->insert("email", array('Recipient' => $recipient, 'Subject' => $subject, 'Body' => $body, 'Status' => 'NEW', 'Attempts'=> 0, 'Sender' => $from,'UserId' 		=> $id_user,  'MessageId' => 0, 'TicketId'=> $ticket_id));
     }
     

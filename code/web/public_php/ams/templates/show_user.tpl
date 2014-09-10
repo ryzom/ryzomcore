@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-user"></i> Profile of {$target_name}</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-user"></span> Profile of {$target_name}
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>Info</legend>
 		<table class="table table-striped" >
@@ -59,11 +59,11 @@
     </div><!--/span-->
 
     <div class="box col-md-3">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span>Actions
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
 		<div class="btn-group">
                 <button class="btn btn-primary btn-large dropdown-toggle" data-toggle="dropdown">Actions<span class="caret"></span></button>
@@ -96,11 +96,11 @@
 
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> Tickets of {$target_name}</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span> Tickets of {$target_name}
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>Tickets</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
@@ -121,7 +121,7 @@
 				<td class="center"><i>{$ticket.timestamp}</i></td>
 				<td class="center">{$ticket.category}</td>
 
-				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <i class="icon-exclamation-sign icon-white"></i>{/if} {$ticket.statusText}</span></td>
+				<td class="center"><span class="label {if $ticket.status eq 0}label-success{else if $ticket.status eq 1}label-warning{else if $ticket.status eq 2}label-important{/if}">{if $ticket.status eq 0} <span class="icon-exclamation-sign icon-white"></span>{/if} {$ticket.statusText}</span></td>
 			  </tr>
 			  {/foreach}
 

@@ -1,11 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
     <div class="box col-md-9">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-list"></i>{$groupsname} List</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-list"></span>{$groupsname} List
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>{$groupsname} Support Group Members</legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
@@ -22,7 +22,7 @@
 			  <tr>
 				<td>{$user.tUserId}</td>
 				<td><a href ="index.php?page=show_user&id={$user.tUserId}">{$user.name}</a></td>
-				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><i class="icon-trash icon-white"></i> Delete</a></td>{/if}
+				{if isset($isAdmin) && $isAdmin eq 'TRUE'}<td class="center"><a class="btn btn-danger" href="index.php?page=show_sgroup&id={$target_id}&delete={$user.tUserId}"><span class="icon-trash icon-white"></span> Delete</a></td>{/if}
 			  </tr>
 			  {/foreach}
 
@@ -35,11 +35,11 @@
 
     {if isset($isAdmin) && $isAdmin eq 'TRUE'}
     <div class="box col-md-3">
-	<div class="box-inner">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-plus-sign"></i> Add User</h2>
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-plus-sign"></span> Add User
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
 
 		<form id="addSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">
@@ -97,11 +97,11 @@
 	</div>
     </div><!--/span-->
 	<div class="box col-md-3">
-	<div class="box-inner">
-	<div class="box-header well" data-original-title="">
-            <h2><i class="icon-pencil"></i> Modify Email Settings</h2>
+	<div class="panel panel-default">
+	<div class="panel-heading" data-original-title="">
+            <span class="icon-pencil"></span> Modify Email Settings
         </div>
-	 <div class="box-content">
+	 <div class="panel-body">
             <div class="row-fluid">
 
 		<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id={$target_id}">

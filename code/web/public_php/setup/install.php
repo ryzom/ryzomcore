@@ -9,6 +9,8 @@ try {
 $pageTitle = "Install";
 include('header.php');
 
+require_once('setup/version.php');
+
 ?>
 
 <?php if (file_exists('config.php')) { ?>
@@ -24,7 +26,6 @@ include('header.php');
 			</div>
 
 <?php
-	$continue = true;
 
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
 	$roleSupport = isset($_POST["roleSupport"]) && $_POST["roleSupport"] == "on";
@@ -33,6 +34,13 @@ include('header.php');
 	if (!$roleService && !$roleSupport && !$roleDomain) {
 		printalert("danger", "No server roles selected");
 		$continue = false;
+	}
+
+	if ($continue) {
+		if (!extension_loaded('mcrypt')) {
+			printalert("danger", "The mcrypt extension is missing. Please check your PHP configuration");
+			$continue = false;
+		}
 	}
 
 	// Validate basics
@@ -134,13 +142,32 @@ include('header.php');
 			$config = str_replace("%amsSqlPassword%", addslashes($_POST["amsSqlPassword"]), $config);
 			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
 			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
-			$config = str_replace("%amsAdminUsername%", addslashes($_POST["amsAdminUsername"]), $config);
-			$config = str_replace("%amsAdminPassword%", addslashes($_POST["amsAdminPassword"]), $config);
 			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
 			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
 			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
+			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
+			$cryptKeyLength = 16;
+			$cryptKey = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
+			$cryptKeyIMAP = str_replace("=", "", base64_encode(mcrypt_create_iv(ceil(0.75 * $cryptKeyLength), MCRYPT_DEV_URANDOM)));
+			$config = str_replace("%cryptKey%", addslashes($cryptKey), $config);
+			$config = str_replace("%cryptKeyIMAP%", addslashes($cryptKeyIMAP), $config);
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
+			} else {
+				printalert("danger", "Cannot write to <em>config.php</em>");
+				$continue = false;
+			}
+		}
+	}
+
+	if ($continue) {
+		$configUser = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config_user.php");
+		if (!$configUser) {
+			printalert("danger", "Cannot read <em>config_user.php</em>");
+			$continue = false;
+		} else {
+			if (file_put_contents("config_user.php", $configUser)) {
+				printalert("success", "Copied <em>config_user.php</em>");
 			} else {
 				printalert("danger", "Cannot write to <em>config.php</em>");
 				$continue = false;
@@ -173,7 +200,41 @@ include('header.php');
 	}
 
 	if ($roleService) {
-		// TODO: Create the default admin user
+		// Create the default shard admin user
+		if (!chdir("admin/")) {
+			printalert("danger", "Cannot change to admin tools directory");
+			$continue = false;
+		}
+		if ($continue) {
+			try {
+				require_once('common.php');
+			} catch (Exception $e) {
+				printalert("danger", "Failed to include NeL <em>admin/common.php</em>");
+				$continue = false;
+			}
+		}
+		if ($continue) {
+			try {
+				require_once('functions_tool_administration.php');
+			} catch (Exception $e) {
+				printalert("danger", "Failed to include NeL <em>admin/functions_tool_administration.php</em>");
+				$continue = false;
+			}
+		}
+		if ($continue) {
+			$adminGroup = 1;
+			$result = tool_admin_users_add($_POST["toolsAdminUsername"], $_POST["toolsAdminPassword"], (string)$adminGroup, (string)1);
+			if ($result == "") {
+				printalert("success", "Added shard admin to NeL tools database");
+			} else {
+				printalert("danger", "Failed to add shard admin to NeL tools database<br>" . htmlentities($result));
+				$continue = false;
+			}
+		}
+		if (!chdir("../")) {
+			printalert("danger", "Cannot change to public PHP root directory");
+			$continue = false;
+		}
 	}
 
 	if ($roleSupport) {
@@ -303,7 +364,7 @@ include('header.php');
 							<div class="col-sm-offset-3 col-sm-8">
 								<div class="checkbox">
 									<label>
-										<input id="roleDomain" name="roleDomain" type="checkbox" onclick="checkDomain();" disabled> Domain <small>(Ring Database, ...) <em>TODO</em></small>
+										<input id="roleDomain" name="roleDomain" type="checkbox" onclick="checkDomain();" checked> Domain <small>(Ring Database, ...)</small>
 									</label>
 								</div>
 							</div>
@@ -439,6 +500,19 @@ include('header.php');
 						<h2 class="panel-title">Domain <small>(Multiple domains require separate installations, as they may run different versions)</small></h2>
 					</div>
 					<div class="panel-body">
+						<div class="panel panel-danger">
+							<div class="panel-heading"><span class="glyphicon glyphicon-info-sign"></span> Database Only</div>
+							<div class="panel-body">
+								<p>The setup script is intended only for installation and upgrade of the domain specific database.</p>
+								<p>This will only configure the database for a single domain. It will not register the domain in the domain configuration.</p>
+								<p>The domain must be manually configured in the databases according to the procedure for configuring your server park with patchman, as it depends on several values defined within the patchman configuration.</p>
+								<!-- NOTE: For future implementation, it would be practical to configure the nel database directly from the patchman configuration script, as this has all the required values ready. -->
+								<!-- IMPORTANT: This setup must NEVER be modified to configure the domains, it is not it's responsibility. -->
+								<p>It is required to use separate virtual hosts for multiple domains, in order to allow domain-specific script to run at different versions.</p>
+								<p>It is recommended, when planning to use multiple domains, to use a separate virtual host for each web service role.</p>
+								<p>There can be multiple instances of the domain role, there can only be one support and one service role setup.</p>
+							</div>
+						</div>
 						<div class="form-group">
 							<label for="nelDomainName" class="col-sm-3 control-label">Name</label>
 							<div class="col-sm-6">

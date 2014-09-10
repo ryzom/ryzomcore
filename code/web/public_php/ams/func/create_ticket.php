@@ -9,8 +9,36 @@ function create_ticket(){
     //if logged in
     global $INGAME_WEBPATH;
     global $WEBPATH;
+    $return = array();
+    $error = false;
     if(WebUsers::isLoggedIn() && isset($_SESSION['ticket_user'])){
+    
+        if(strlen (preg_replace('/\s\s+/', ' ', $_POST['Title']) )<2){
+            $return = array_merge ( $_POST, $return);
+            $return['no_visible_elements'] = 'FALSE';
+            $catArray = Ticket_Category::getAllCategories();
+            $return['permission'] = unserialize( $_SESSION['ticket_user'] ) -> getPermission();
+            $return['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
+            $return['TITLE_ERROR_MESSAGE'] = "Title must not be blank!";
+            $return['TITLE_ERROR'] = true;
+            $error = true;
+        }        
+        if(strlen (preg_replace('/\s\s+/', ' ', $_POST['Content']) )<2){
+            $return = array_merge ( $_POST, $return);
+            $return['no_visible_elements'] = 'FALSE';
+            $catArray = Ticket_Category::getAllCategories();
+            $return['permission'] = unserialize( $_SESSION['ticket_user'] ) -> getPermission();
+            $return['category'] = Gui_Elements::make_table_with_key_is_id($catArray, Array("getName"), "getTCategoryId" );
+            $return['CONTENT_ERROR_MESSAGE'] = "Content must not be blank!";
+            $return['CONTENT_ERROR'] = true;
+            $error = true;
 
+        }
+
+        if ($error) {
+            helpers :: loadTemplate( 'createticket' , $return );
+            throw new SystemExit();
+        }
         if(isset($_POST['target_id'])){
 
             //if target_id is the same as session id or is admin
@@ -31,19 +59,19 @@ function create_ticket(){
                     $ticket_id = Ticket::create_Ticket($title, $content, $category, $author, unserialize($_SESSION['ticket_user'])->getTUserId(),0, $_POST);
                     //redirect to the new ticket.
                     if (Helpers::check_if_game_client()) {
-                header("Cache-Control: max-age=1");
+                        header("Cache-Control: max-age=1");
                         header("Location: ".$INGAME_WEBPATH."?page=show_ticket&id=".$ticket_id);
                     }else{
-                header("Cache-Control: max-age=1");
+                        header("Cache-Control: max-age=1");
                         header("Location: ".$WEBPATH."?page=show_ticket&id=".$ticket_id);
+                        throw new SystemExit();
                     }
-                    throw new SystemExit();
-
+                   
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
                     print_r($e);
                     throw new SystemExit();
-                header("Cache-Control: max-age=1");
+                    header("Cache-Control: max-age=1");
                     header("Location: index.php");
                     throw new SystemExit();
                 }
@@ -58,13 +86,13 @@ function create_ticket(){
 
         }else{
             //ERROR: The form was not filled in correclty
-                header("Cache-Control: max-age=1");
-            header("Location: index.php?page=create_ticket");
+            header("Cache-Control: max-age=1");
+            header("Location: index.php?page=createticket");
             throw new SystemExit();
         }
     }else{
         //ERROR: user is not logged in
-                header("Cache-Control: max-age=1");
+        header("Cache-Control: max-age=1");
         header("Location: index.php");
         throw new SystemExit();
     }

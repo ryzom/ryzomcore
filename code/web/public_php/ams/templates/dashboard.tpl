@@ -32,11 +32,11 @@
 
 	<div class="row-fluid">
 		<div class="box col-md-12">
-		<div class="box-inner">
-			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i> {$home_title}</h2>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<span class="icon-info-sign"></span> {$home_title}
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<p><strong>{$home_info}</strong></p>
 				<p>This is the GSOC project of Daan Janssens mentored by Matthew Lagoe.</p>
 				<p>The features as admin covered in this project are:</p>

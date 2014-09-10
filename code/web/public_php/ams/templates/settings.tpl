@@ -1,11 +1,11 @@
 {block name=content}
-	<div class="row-fluid sortable ui-sortable">
-		<div class="box col-md-4">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-th"></i> Change Password</h2>
+	<div class="row-fluid js-masonry" data-masonry-options='{ "itemSelector": ".js-masonry-item", "transitionDuration": 0 }'>
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-th"></span> Change Password
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<form id="changePassword" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Password</legend>
@@ -16,7 +16,7 @@
 							<label class="control-label">Current Password</label>
 								<div class="controls">
 								    <div class="input-prepend">
-									<span class="add-on" style="margin-left:5px;"><i class="icon-lock"></i></span>
+									<span class="add-on" style="margin-left:5px;"><span class="icon-lock"></span></span>
 										<input type="password" class="setup-width" id="CurrentPass" name="CurrentPass" placeholder="Your current password" {if isset($prevCurrentPass)}value="{$prevCurrentPass}"{/if}>
 										{if isset($MATCH_ERROR) and $MATCH_ERROR eq "TRUE"}<span class="help-inline">The password is incorrect</span>{/if}
 								    </div>
@@ -28,7 +28,7 @@
 						<label class="control-label">New Password</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-tag"></i></span>
+								<span class="add-on" style="margin-left:5px;"><span class="icon-tag"></span></span>
 									<input type="password" class="setup-width" id="NewPass" name="NewPass" placeholder="Your new password"  {if isset($prevNewPass)}value="{$prevNewPass}"{/if}>
 									{if isset($NEWPASSWORD_ERROR) and $NEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$newpass_error_message}</span>{/if}
 							   </div>
@@ -40,7 +40,7 @@
 						<label class="control-label">Confirm New Password</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-tags"></i></span>
+								<span class="add-on" style="margin-left:5px;"><span class="icon-tags"></span></span>
 									<input type="password" class="setup-width" id="ConfirmNewPass" name="ConfirmNewPass" placeholder="Re-enter the new password"  {if isset($prevConfirmNewPass)}value="{$prevConfirmNewPass}"{/if}>
 									{if isset($CNEWPASSWORD_ERROR) and $CNEWPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$confirmnewpass_error_message}</span>{/if}
 							    </div>
@@ -76,12 +76,12 @@
 		</div><!--/span-->
 
 		{if $permission != '1'}
-		<div class="box col-md-4">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-th"></i> Add User</h2>
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-th"></span> Add User
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<form id="addUser" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Add User</legend>
@@ -90,7 +90,7 @@
 							<label class="control-label">Username</label>
 								<div class="controls">
 									<div class="input-prepend">
-									<span style="margin-left:5px;" class="add-on"><i class="icon-user"></i></span>
+									<span style="margin-left:5px;" class="add-on"><span class="icon-user"></span></span>
 										<input type="text" placeholder="Username" name="Username" id="Username" class="setup-width" {if isset($prevUsername)}value="{$prevUsername}"{/if}>
 										{if isset($USERNAME_ERROR) and $USERNAME_ERROR eq "TRUE"}<span class="help-inline">{$USERNAME}</span>{/if}
 									</div>
@@ -101,7 +101,7 @@
 							<label class="control-label">Password</label>
 								<div class="controls">
 								    <div class="input-prepend">
-										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
+										<span style="margin-left:5px;" class="add-on"><span class="icon-lock"></span></span>
 										<input type="password" placeholder="Password" name="Password" id="Password" class="setup-width">
 										{if isset($PASSWORD_ERROR) and $PASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$PASSWORD}</span>{/if}
 									 </div>
@@ -112,7 +112,7 @@
 							<label class="control-label">Confirm Password</label>
 								<div class="controls">
 								    <div class="input-prepend">
-										<span style="margin-left:5px;" class="add-on"><i class="icon-lock"></i></span>
+										<span style="margin-left:5px;" class="add-on"><span class="icon-lock"></span></span>
 										<input type="password" placeholder="Confirm Password" name="ConfirmPass" id="ConfirmPass" class="setup-width">
 										{if isset($CPASSWORD_ERROR) and $CPASSWORD_ERROR eq "TRUE"}<span class="help-inline">{$CPASSWORD}</span>{/if}
 									 </div>
@@ -123,7 +123,7 @@
 						<label class="control-label">Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span style="margin-left:5px;" class="add-on"><i class="icon-envelope"></i></span>
+								<span style="margin-left:5px;" class="add-on"><span class="icon-envelope"></span></span>
 									<input type="text" class="setup-width" id="Email" name="Email" placeholder="Email" {if isset($prevEmail)}value="{$prevEmail}"{/if}>
 									{if isset($EMAIL_ERROR) and $EMAIL_ERROR eq "TRUE" and isset($do)}<span class="help-inline">{$EMAIL}</span>{/if}
 							    </div>
@@ -158,12 +158,12 @@
 		</div><!--/span-->
 		{/if}
 
-		<div class="box col-md-4">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-th"></i> Change Email</h2>
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-th"></span> Change Email
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Email</legend>
@@ -171,7 +171,7 @@
 						<label class="control-label">New Email</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-envelope"></i></span>
+								<span class="add-on" style="margin-left:5px;"><span class="icon-envelope"></span></span>
 									<input type="text" class="setup-width" id="NewEmail" name="NewEmail" placeholder="Your new email" {if isset($prevNewEmail)}value="{$prevNewEmail}"{else if isset($current_mail)}value="{$current_mail}"{/if}>
 									{if isset($CEMAIL_ERROR) and $CEMAIL_ERROR eq "TRUE"}<span class="help-inline">{$EMAIL}</span>{/if}
 
@@ -206,14 +206,14 @@
 			</div>
 		</div>
 
-		<div class="box col-md-4">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-envelope"></i> Ticket updates</h2>
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-envelope"></span> Ticket updates
 			</div>
 
 
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<form id="changeReceiveMail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Ticket-Update Mail Settings</legend>
@@ -243,12 +243,12 @@
 			</div>
 		</div><!--/span-->
 
-		<div class="box col-md-4">
-		<div class="box-inner">
-			<div class="box-header well" data-original-title="">
-				<h2><i class="icon-th"></i> Change Info</h2>
+		<div class="col-sm-4 js-masonry-item">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-th"></span> Change Info
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<div class="row-fluid">
 					<form id="changeEmail" class="form-vertical" method="post" action="index.php?page=settings&id={$target_id}">
 						<legend>Change Info</legend>
@@ -257,7 +257,7 @@
 						<label class="control-label">Firstname</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
+								<span class="add-on" style="margin-left:5px;"><span class="icon-user"></span></span>
 									<input type="text" class="setup-width" id="FirstName" name="FirstName" placeholder="Your firstname" {if isset($FirstName) and $FirstName neq ""}value="{$FirstName}"{/if}>
 								</div>
 							</div>
@@ -267,7 +267,7 @@
 						<label class="control-label">Lastname</label>
 							<div class="controls">
 							    <div class="input-prepend">
-								<span class="add-on" style="margin-left:5px;"><i class="icon-user"></i></span>
+								<span class="add-on" style="margin-left:5px;"><span class="icon-user"></span></span>
 									<input type="text" class="setup-width" id="LastName" name="LastName" placeholder="Your lastname" {if isset($LastName) and $LastName neq ""}value="{$LastName}"{/if}>
 								</div>
 							</div>
@@ -325,7 +325,7 @@
 		</div><!--/span-->
 	</div><!--/row-->
 
-
+	<script src="js/masonry.pkgd.min.js"></script>
 
 {/block}
 

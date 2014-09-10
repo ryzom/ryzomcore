@@ -60,10 +60,10 @@ class Support_Group{
     * @return a string that specifies if it was a success or not (SUCCESS, SIZE_ERROR, NAME_TAKEN or TAG_TAKEN )
     */
     public static function createSupportGroup( $name, $tag, $groupemail, $imap_mailserver, $imap_username, $imap_password) {
-        error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
+        //error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
         if(strlen($name) <= 21 && strlen($name) >= 4 &&strlen($tag) <= 8  && strlen($tag) >= 2 ){
             $notExists = self::supportGroup_EntryNotExists($name, $tag);
-            error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
+            //error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
             if ( $notExists == "SUCCESS" ){
                 $sGroup = new self();
                 $values = array('Name' => $name, 'Tag' => $tag, 'GroupEmail' => $groupemail, 'IMAP_MailServer' => $imap_mailserver, 'IMAP_Username' => $imap_username, 'IMAP_Password' => $imap_password);
@@ -80,14 +80,14 @@ class Support_Group{
                 $sGroup->setIMAP_Password($enc_password);
                 $sGroup->create();
                 
-                error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
+                //error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
             }else{
-            error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
+            //error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
                 //return NAME_TAKEN  or TAG_TAKEN
                 return $notExists;
             }
         }else{
-        error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
+        //error_log( "Error at line " . __LINE__ . " in file " . __FILE__);
             //RETURN ERROR that indicates SIZE
             return "SIZE_ERROR";
         } 

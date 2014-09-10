@@ -251,6 +251,10 @@ class sql_db
 			return false;
 		}
 	}
+	function sql_escape_string($str)
+	{
+		return mysqli_real_escape_string($this->db_connect_id, $str);
+	}
 	function sql_error($query_id = 0)
 	{
 		$result["message"] = mysqli_error($this->db_connect_id);
