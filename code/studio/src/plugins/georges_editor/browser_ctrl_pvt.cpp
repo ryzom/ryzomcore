@@ -323,7 +323,7 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 		tt = getValueTypeFromDfn( atom );
 	}
 
-	if( tt = QVariant::Type( FILEBROWSER ) )
+	if( tt == QVariant::Type( FILEBROWSER ) )
 		addFileProperty( "value", v.c_str() );
 	else
 		addVariantProperty( tt, "value", v.c_str() );
