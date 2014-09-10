@@ -1428,7 +1428,7 @@ sint				CSPhraseManager::getPhraseSuccessRate(const CSPhraseCom &phrase)
 }
 
 // ***************************************************************************
-sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel)
+sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel, sint successModifier)
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
 
@@ -1437,6 +1437,9 @@ sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SK
 
 	// take skill value of the skill
 	sint	skillValue= pSM->getBestSkillValue(skill);
+
+	// apply success rate modifier from server
+	skillValue += successModifier;
 
 	// return the sr according to this skill
 	return getPhraseSuccessRate(STCraft, phrase, skillValue, minMpLevel);
