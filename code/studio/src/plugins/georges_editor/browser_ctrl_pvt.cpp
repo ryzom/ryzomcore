@@ -227,10 +227,7 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
 		t = getValueTypeFromDfn( st, idx );
 	}
 
-	QtVariantProperty *p = addProperty( t, key );
-
-	p->setValue( value );
-	m_browser->addProperty( p );
+	QtVariantProperty *p = addVariantProperty( t, key, value );
 }
 
 void BrowserCtrlPvt::setupStruct( NLGEORGES::UFormElm *node )
@@ -256,8 +253,8 @@ void BrowserCtrlPvt::setupVStruct( GeorgesQt::CFormItem *node )
 {
 	NLGEORGES::UFormElm *n = getGeorgesNode( node );
 
-	QtVariantProperty *p = mgr->addProperty( QVariant::String, "Dfn filename" );
-	m_browser->addProperty( p );
+	QtVariantProperty *p;
+	p = addVariantProperty( QVariant::String, "Dfn filename", QVariant() );
 
 	if( n != NULL )
 	{
@@ -279,9 +276,7 @@ void BrowserCtrlPvt::setupArray( GeorgesQt::CFormItem *node )
 	}
 
 	QString key = QObject::tr( "Array size" );
-	QtVariantProperty *p = mgr->addProperty( QVariant::Int, key );
-	p->setValue( size );
-	m_browser->addProperty( p );
+	QtVariantProperty *p = addVariantProperty( QVariant::Int, key, size );
 }
 
 void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
@@ -305,9 +300,7 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 		tt = getValueTypeFromDfn( atom );
 	}
 
-	QtVariantProperty *p = addProperty( tt, "value" );
-	p->setValue( v.c_str() );
-	m_browser->addProperty( p );
+	QtVariantProperty *p = addVariantProperty( tt, "value", v.c_str() );
 }
 
 void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
@@ -515,9 +508,9 @@ void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 		onAtomValueChanged( p, value );
 }
 
-QtVariantProperty* BrowserCtrlPvt::addProperty( QVariant::Type type, const QString &name )
+QtVariantProperty* BrowserCtrlPvt::addVariantProperty( QVariant::Type type, const QString &key, const QVariant &value )
 {
-	QtVariantProperty *p = mgr->addProperty( type, name );
+	QtVariantProperty *p = mgr->addProperty( type, key );
 	
 	// Remove the color sub-properties, so they don't get triggered on value change
 	if( type == QVariant::Color )
@@ -532,6 +525,9 @@ QtVariantProperty* BrowserCtrlPvt::addProperty( QVariant::Type type, const QStri
 		}
 		sp.clear();
 	}
+
+	p->setValue( value );
+	m_browser->addProperty( p );
 
 	return p;
 }

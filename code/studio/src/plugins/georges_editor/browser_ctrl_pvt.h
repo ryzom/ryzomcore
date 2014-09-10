@@ -79,7 +79,7 @@ private:
 	void onAtomValueChanged( QtProperty *p, const QVariant &value );
 	void createArray();
 
-	QtVariantProperty* addProperty( QVariant::Type type, const QString &name );
+	QtVariantProperty* addVariantProperty( QVariant::Type type, const QString &key, const QVariant &value );
 	
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
