@@ -53,6 +53,7 @@ Q_SIGNALS:
 private Q_SLOTS:
 	void onValueChanged( QtProperty *p, const QVariant &value );
 	void onValueChanged( const QString &key, const QString &value );
+	void onFileValueChanged( QtProperty *p, const QString &value );
 	void onArrayResized( const QString &name, int size );
 	void onModified();
 	void onVStructChanged( const QString &name );

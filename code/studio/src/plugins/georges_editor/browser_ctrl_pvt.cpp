@@ -24,15 +24,31 @@
 
 #include "nel/georges/form.h"
 
+#include "filepath_property_manager.h"
 namespace
 {
+	const unsigned int FILEBROWSER = 9000000;
+
 	QVariant::Type getValueType( const NLGEORGES::UType *typ )
 	{
 		QVariant::Type t = QVariant::String;
 
+		bool file = false;
+
 		NLGEORGES::UType::TType ttyp = NLGEORGES::UType::String;
 		if( typ != NULL )
+		{
 			ttyp = typ->getType();
+			
+			const NLGEORGES::CType *ctyp = static_cast< const NLGEORGES::CType* >( typ );
+			if(ctyp->UIType == NLGEORGES::CType::FileBrowser )
+			{
+				file = true;
+			}
+		}
+
+		if( file )
+			return QVariant::Type( FILEBROWSER );
 
 		switch( ttyp )
 		{
@@ -159,6 +175,8 @@ QObject( parent )
 {
 	mgr = new QtVariantPropertyManager();
 	factory = new QtVariantEditorFactory();
+	m_fileMgr = new FileManager( this );
+	m_fileFactory = new FileEditFactory( this );
 	m_rootNode = NULL;
 }
 
@@ -168,6 +186,8 @@ BrowserCtrlPvt::~BrowserCtrlPvt()
 	mgr = NULL;
 	delete factory;
 	factory = NULL;
+	m_fileMgr = NULL;
+	m_fileFactory = NULL;
 	m_browser = NULL;
 }
 
@@ -227,7 +247,10 @@ void BrowserCtrlPvt::setupAtom( NLGEORGES::CFormElmStruct *st, int idx )
 		t = getValueTypeFromDfn( st, idx );
 	}
 
-	QtVariantProperty *p = addVariantProperty( t, key, value );
+	if( t == QVariant::Type( FILEBROWSER ) )
+		addFileProperty( key, value );
+	else
+		addVariantProperty( t, key, value );
 }
 
 void BrowserCtrlPvt::setupStruct( NLGEORGES::UFormElm *node )
@@ -253,13 +276,13 @@ void BrowserCtrlPvt::setupVStruct( GeorgesQt::CFormItem *node )
 {
 	NLGEORGES::UFormElm *n = getGeorgesNode( node );
 
-	QtVariantProperty *p;
-	p = addVariantProperty( QVariant::String, "Dfn filename", QVariant() );
+	QtProperty *p = NULL;
+	p = addFileProperty( "Dfn filename", "" );
 
 	if( n != NULL )
 	{
 		NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( n );
-		mgr->setValue( p, vs->DfnFilename.c_str() );
+		m_fileMgr->setValue( p, vs->DfnFilename.c_str() );
 		setupStruct( n );
 	}
 }
@@ -300,7 +323,10 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 		tt = getValueTypeFromDfn( atom );
 	}
 
-	QtVariantProperty *p = addVariantProperty( tt, "value", v.c_str() );
+	if( tt = QVariant::Type( FILEBROWSER ) )
+		addFileProperty( "value", v.c_str() );
+	else
+		addVariantProperty( tt, "value", v.c_str() );
 }
 
 void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
@@ -324,6 +350,7 @@ void BrowserCtrlPvt::setupNode( GeorgesQt::CFormItem *node )
 		setupAtom( node );
 
 	m_browser->setFactoryForManager( mgr, factory );
+	m_browser->setFactoryForManager( m_fileMgr, m_fileFactory );
 }
 
 void BrowserCtrlPvt::clear()
@@ -508,6 +535,28 @@ void BrowserCtrlPvt::onValueChanged( QtProperty *p, const QVariant &value )
 		onAtomValueChanged( p, value );
 }
 
+void BrowserCtrlPvt::onFileValueChanged( QtProperty *p, const QString &value )
+{
+	QString v = value;
+	QFileInfo info( value );
+	if( !info.exists() )
+		return;
+
+	v = info.fileName();
+	blockSignals( true );
+	m_fileMgr->setValue( p, v );
+	blockSignals( false );
+
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_VSTRUCT )
+		onVStructValueChanged( p, v );
+	else
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_STRUCT )
+		onStructValueChanged( p, v );
+	else
+	if( m_currentNode.type == GeorgesQt::CFormItem::TYPE_ATOM )
+		onAtomValueChanged( p, v );
+}
+
 QtVariantProperty* BrowserCtrlPvt::addVariantProperty( QVariant::Type type, const QString &key, const QVariant &value )
 {
 	QtVariantProperty *p = mgr->addProperty( type, key );
@@ -531,4 +580,16 @@ QtVariantProperty* BrowserCtrlPvt::addVariantProperty( QVariant::Type type, cons
 
 	return p;
 }
+
+QtProperty* BrowserCtrlPvt::addFileProperty( const QString &key, const QString &value )
+{
+	QtProperty *p = m_fileMgr->addProperty( key );
+
+	m_fileMgr->setValue( p, value );
+	m_browser->addProperty( p );
+
+	return p;
+}
+
+
 

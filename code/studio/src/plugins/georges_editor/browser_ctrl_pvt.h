@@ -40,6 +40,9 @@ class QVariant;
 class QtProperty;
 class QtVariantProperty;
 
+class FileManager;
+class FileEditFactory;
+
 class BrowserCtrlPvt : public QObject
 {
 	Q_OBJECT
@@ -50,8 +53,10 @@ public:
 	void clear();
 	void setupNode( GeorgesQt::CFormItem *node );
 	void onValueChanged( QtProperty *p, const QVariant &value );
+	void onFileValueChanged( QtProperty *p, const QString &value );
 
 	QtVariantPropertyManager* manager() const{ return mgr; }
+	FileManager* fileManager() const{ return m_fileMgr; }
 	void setRootNode( NLGEORGES::CFormElm *root ){ m_rootNode = root; }	
 	void setBrowser( QtTreePropertyBrowser *browser ){ m_browser = browser; }
 
@@ -80,10 +85,14 @@ private:
 	void createArray();
 
 	QtVariantProperty* addVariantProperty( QVariant::Type type, const QString &key, const QVariant &value );
+	QtProperty *addFileProperty( const QString &key, const QString &value );
 	
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
 	QtTreePropertyBrowser *m_browser;
+
+	FileManager *m_fileMgr;
+	FileEditFactory *m_fileFactory;
 
 	QString m_currentNodeName;
 	NLGEORGES::CFormElm *m_rootNode;
