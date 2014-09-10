@@ -71,11 +71,6 @@ $cfg['mail']['host'] = "ryzomcore.org";
 $SUPPORT_GROUP_IMAP_CRYPTKEY = '%cryptKeyIMAP%';
 $TICKET_MAILING_SUPPORT = false;
 
-//You have to create this dir at first!
-//The incoming emails will be backed up here and the log file keeps track of the mail_cron job.
-$MAIL_DIR = "/home/username/mail";
-$MAIL_LOG_PATH = "/home/username/mail/cron_mail.log";
-
 //terms of service url location
 $TOS_URL ="http://www.gnu.org/licenses/agpl-3.0.html";
 
@@ -101,6 +96,11 @@ $AMS_TRANS = $AMS_LIB . '/translations';
 $AMS_CACHEDIR = $AMS_LIB . '/cache';
 $AMS_PLUGINS = $AMS_LIB . '/plugins';
 $AMS_TMPDIR = $AMS_LIB . '/tmp';
+
+//The incoming emails will be backed up here and the log file keeps track of the mail_cron job.
+$MAIL_DIR = $AMS_LIB."/mail";
+$MAIL_LOG_PATH = $AMS_LIB."/mail/mail.log";
+
 // Here your inc and func resides
 $SITEBASE = $PUBLIC_PHP_PATH  . '/ams/' ;
 

@@ -122,6 +122,7 @@ class Mail_Handler{
             $id_user = $recipient;
             $recipient = NULL;
         }
+        $db = new DBLayer($db);
         $db->insert("email", array('Recipient' => $recipient, 'Subject' => $subject, 'Body' => $body, 'Status' => 'NEW', 'Attempts'=> 0, 'Sender' => $from,'UserId' 		=> $id_user,  'MessageId' => 0, 'TicketId'=> $ticket_id));
     }
     
