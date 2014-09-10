@@ -77,13 +77,9 @@ namespace GeorgesQt
 
 		QString loadedForm;
 
-	protected:
-		void closeEvent(QCloseEvent *event);
-
 	Q_SIGNALS:
 		void changeFile(QString);
 		void modified();
-		void closing();
 
 	public Q_SLOTS:
 		void setForm(const CForm*);
@@ -101,7 +97,9 @@ namespace GeorgesQt
 		void onAppendArray();
 		void onDeleteArrayEntry();
 		void onValueChanged( const QString &key, const QString &value );
+		void onVStructChanged( const QString &name );
 		void onRenameArrayEntry();
+		void onCommentsEdited();
 
 	private:
 		void log( const QString &msg );

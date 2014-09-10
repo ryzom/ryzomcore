@@ -52,7 +52,7 @@ public Q_SLOTS:
 
 	void save();
 	void settingsChanged();
-	void closingTreeView();
+	void dialogClosing( GeorgesDockWidget *d );
 	void setModified();
 
 	void focusChanged(QWidget *old, QWidget *now);

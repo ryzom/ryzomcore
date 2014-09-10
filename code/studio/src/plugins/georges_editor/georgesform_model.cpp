@@ -45,6 +45,8 @@
 #include "georges_editor_form.h"
 #include "actions.h"
 
+#include "georges.h"
+
 using namespace NLGEORGES;
 
 namespace GeorgesQt 
@@ -277,13 +279,20 @@ namespace GeorgesQt
                                              const char *name,
                                              uint structId,
                                              const char *formName,
-                                             uint slot)
+                                             uint slot,
+											 bool isVirtual)
 {
         // The form pointer
         NLGEORGES::CForm *formPtr = static_cast<NLGEORGES::CForm*>(m_form);
 
         // Add the new node
-        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, false);
+		CFormItem::TType ttype;
+		if( isVirtual )
+			ttype = CFormItem::TYPE_VSTRUCT;
+		else
+			ttype = CFormItem::TYPE_STRUCT;
+
+        CFormItem *newNode = parent->add(CFormItem::Form, name, structId, formName, slot, m_form, ttype );
 
         // Can be NULL in virtual DFN
         if (parentDfn)
@@ -367,7 +376,10 @@ namespace GeorgesQt
                                                 NLGEORGES::CFormDfn *tmpDfn = vStruct ?
                                                             ((NLGEORGES::CFormDfn*)vStruct->FormDfn) : entry.getDfnPtr();
                                                 // Add the new struct
-                                                addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot);
+												if( entry.getType() == NLGEORGES::UFormDfn::EntryVirtualDfn )
+													addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot, true);
+												else
+													addStruct (newNode, nextForm, tmpDfn, entry.getName().c_str(), elm, entryName.c_str(), slot);
                                         }
                                 }
                                 // Array of type ?
@@ -418,7 +430,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                                        uint slot)
 {
         // Add the new node
-        CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, true);
+		CFormItem *newNode = parent->add (CFormItem::Form, name, structId, formName, slot, m_form, CFormItem::TYPE_ARRAY );
 
         // The array exist
         if (array)
@@ -451,7 +463,7 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
                         else
                         {
                                 NLGEORGES::CFormElmArray *elmPtr = array->Elements[elm].Element ? static_cast<NLGEORGES::CFormElmArray*>(array->Elements[elm].Element) : NULL;
-                                newNode->add (CFormItem::Form, formArrayName, elm, formArrayElmName, slot, m_form, false);
+								addAtom( newNode, elmPtr, rootDfn, formArrayName, elm, formArrayElmName );
                         }
                 }
         }
@@ -459,6 +471,39 @@ CFormItem *CGeorgesFormModel::addArray(CFormItem *parent,
         return newNode;
 }
 
+
+CFormItem *CGeorgesFormModel::addAtom(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName)
+{
+	CFormItem *item = parent->add( CFormItem::Form, name, id, formName, 0, m_form, CFormItem::TYPE_ATOM );
+
+	return item;
+}
+
+
+CFormItem *CGeorgesFormModel::addItem(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName)
+{
+	CFormItem *item = NULL;
+
+	if( elm->isAtom() )
+		item = addAtom(parent, elm, dfn, name, id, formName );
+	else
+	if( elm->isStruct() || elm->isVirtualStruct() )
+	{
+		NLGEORGES::CFormElmStruct *st = static_cast< NLGEORGES::CFormElmStruct* >( elm );
+		if( st->isVirtualStruct() )
+			item = addStruct(parent, st, st->FormDfn, name, id, formName, 0, true);
+		else
+			item = addStruct(parent, st, st->FormDfn, name, id, formName, 0, false);
+	}
+	else
+	if( elm->isArray() )
+	{
+		NLGEORGES::CFormElmArray *arr = static_cast< NLGEORGES::CFormElmArray* >( elm );
+		item = addArray(parent, arr, arr->FormDfn, name, id, formName, 0 );
+	}
+
+	return item;
+}
 
 void CGeorgesFormModel::arrayResized( const QString &name, int size )
 {
@@ -494,7 +539,9 @@ void CGeorgesFormModel::arrayResized( const QString &name, int size )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+		NLGEORGES::UFormDfn *udfn = e.Element->getStructDfn();
+		NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+		addItem( item, e.Element, cdfn, n.toUtf8().constData(), i, formName.toUtf8().constData() );
 	}
 
 	if( celm->Elements.size() == 0 )
@@ -566,7 +613,9 @@ void CGeorgesFormModel::appendArray( QModelIndex idx )
 	std::string formName;
 	node->getFormName( formName );
 
-	item->add( CFormItem::Form, name.c_str(), s, formName.c_str(), 0, item->form(), false );
+	NLGEORGES::CFormDfn *cdfn = const_cast< NLGEORGES::CFormDfn* >( nodeDfn );
+	addItem( item, node, cdfn, name.c_str(), s, formName.c_str() );
+	
 }
 
 void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
@@ -608,7 +657,9 @@ void CGeorgesFormModel::deleteArrayEntry( QModelIndex idx )
 		else
 			n = e.Name.c_str();
 
-		item->add( CFormItem::Form, n.toUtf8().constData(), i, formName.toUtf8().constData(), 0, item->form(), false );
+		NLGEORGES::UFormDfn *udfn = e.Element->getStructDfn();
+		NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+		addItem( item, e.Element, cdfn, n.toUtf8().constData(), i, formName.toUtf8().constData() );
 	}
 
 	Q_EMIT endResetModel();
@@ -640,6 +691,42 @@ void CGeorgesFormModel::renameArrayEntry( QModelIndex idx, const QString &name )
 
 	cparent->Elements[ i ].Name = name.toUtf8().constData();
 	item->setName( name.toUtf8().constData() );
+}
+
+void CGeorgesFormModel::changeVStructDfn( QModelIndex idx )
+{
+	CFormItem *item = static_cast< CFormItem* >( idx.internalPointer() );
+
+	QString vstruct = item->formName().c_str();
+
+	NLGEORGES::UFormElm *uelm = NULL;
+	m_form->getRootNode().getNodeByName( &uelm, vstruct.toUtf8().constData() );
+
+	if( uelm == NULL )
+		return;
+
+	NLGEORGES::CFormElmVirtualStruct *vs = static_cast< NLGEORGES::CFormElmVirtualStruct* >( uelm );
+
+	CGeorges g;
+	NLGEORGES::UFormDfn *udfn = g.loadFormDfn( vs->DfnFilename );
+	if( udfn == NULL )
+		return;
+
+	NLGEORGES::CFormDfn *cdfn = static_cast< NLGEORGES::CFormDfn* >( udfn );
+	vs->build( cdfn );
+
+
+	beginResetModel();
+	
+	CFormItem *parent = item->parent();
+	int row = idx.row();
+	QString name = item->name().c_str();
+	QString formName = item->formName().c_str();
+	parent->removeChild( row );
+	
+	addItem( parent, vs, cdfn, name.toUtf8().constData(), row, formName.toUtf8().constData() );
+
+	endResetModel();
 }
 
     /******************************************************************************/

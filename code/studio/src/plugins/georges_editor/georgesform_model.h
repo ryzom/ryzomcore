@@ -65,10 +65,14 @@ namespace GeorgesQt
         NLGEORGES::UFormElm *getRootForm() { return m_rootElm; }
 
         CFormItem *addStruct (CFormItem *parent, NLGEORGES::CFormElmStruct *_struct, NLGEORGES::CFormDfn *parentDfn,
-                              const char *name, uint structId, const char *formName, uint slot);
+                              const char *name, uint structId, const char *formName, uint slot, bool isVirtual = false );
 
         CFormItem *addArray(CFormItem *parent, NLGEORGES::CFormElmArray *array, NLGEORGES::CFormDfn *rootDfn,
                             const char *name, uint structId, const char *formName, uint slot);
+
+		CFormItem *addAtom(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName);
+
+		CFormItem *addItem(CFormItem *parent, NLGEORGES::CFormElm *elm, NLGEORGES::CFormDfn *dfn, const char *name, uint id, const char *formName);
 
 		void emitDataChanged(const QModelIndex &index)
 		{ 
@@ -79,6 +83,7 @@ namespace GeorgesQt
 		void appendArray( QModelIndex idx );
 		void deleteArrayEntry( QModelIndex idx );
 		void renameArrayEntry( QModelIndex idx, const QString &name );
+		void changeVStructDfn( QModelIndex idx );
 
 	private:
 		void setupModelData();

@@ -26,6 +26,8 @@
 
 #include "nel/georges/form_dfn.h"
 
+#include <QFileInfo>
+
 namespace
 {
 	enum EntryEnum
@@ -248,7 +250,15 @@ void DFNBrowserCtrl::onEnumValueChanged( QtProperty *p, int v )
 void DFNBrowserCtrl::onFileValueChanged( QtProperty *p, const QString &v )
 {
 	NLGEORGES::CFormDfn::CEntry &entry = m_dfn->getEntry( m_idx );
-	entry.setFilename( v.toUtf8().constData() );
+	QFileInfo info( v );
+	if( !info.exists() )
+		return;
+
+	entry.setFilename( info.fileName().toUtf8().constData() );
+
+	blockSignals( true );
+	m_fileMgr->setValue( p, info.fileName() );
+	blockSignals( false );
 
 	Q_EMIT valueChanged( p->propertyName(), v );
 }

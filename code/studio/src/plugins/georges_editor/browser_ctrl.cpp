@@ -20,6 +20,7 @@
 #include "browser_ctrl.h"
 #include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
 #include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
+#include "filepath_property_manager.h"
 #include <QModelIndex>
 
 #include "nel/georges/form.h"
@@ -37,6 +38,7 @@ QObject( browser )
 	connect( m_pvt, SIGNAL( arrayResized( const QString&, int ) ), this, SLOT( onArrayResized( const QString&, int ) ) );
 	connect( m_pvt, SIGNAL( modified() ), this, SLOT( onModified() ) );
 	connect( m_pvt, SIGNAL( valueChanged( const QString&, const QString& ) ), this, SLOT( onValueChanged( const QString&, const QString& ) ) );
+	connect( m_pvt, SIGNAL( vstructChanged( const QString& ) ), this, SLOT( onVStructChanged( const QString& ) ) );
 }
 
 BrowserCtrl::~BrowserCtrl()
@@ -68,6 +70,11 @@ void BrowserCtrl::onValueChanged( const QString &key, const QString &value )
 	Q_EMIT valueChanged( key, value );
 }
 
+void BrowserCtrl::onFileValueChanged( QtProperty *p, const QString &value )
+{
+	m_pvt->onFileValueChanged( p, value );
+}
+
 void BrowserCtrl::onArrayResized( const QString &name, int size )
 {
 	Q_EMIT arrayResized( name, size );
@@ -78,19 +85,30 @@ void BrowserCtrl::onModified()
 	Q_EMIT modified();
 }
 
+void BrowserCtrl::onVStructChanged( const QString &name )
+{
+	Q_EMIT vstructChanged( name );
+}
+
 void BrowserCtrl::enableMgrConnections()
 {
 	QtVariantPropertyManager *mgr = m_pvt->manager();
+	FileManager *fileMgr = m_pvt->fileManager();
 
 	connect( mgr, SIGNAL( valueChanged( QtProperty*, const QVariant & ) ),
 		this, SLOT( onValueChanged( QtProperty*, const QVariant & ) ) );
+	connect( fileMgr, SIGNAL( valueChanged( QtProperty*, const QString & ) ),
+		this, SLOT( onFileValueChanged( QtProperty*, const QString & ) ) );
 }
 
 void BrowserCtrl::disableMgrConnections()
 {
 	QtVariantPropertyManager *mgr = m_pvt->manager();
+	FileManager *fileMgr = m_pvt->fileManager();
 
 	disconnect( mgr, SIGNAL( valueChanged( QtProperty*, const QVariant & ) ),
 		this, SLOT( onValueChanged( QtProperty*, const QVariant & ) ) );
+	disconnect( fileMgr, SIGNAL( valueChanged( QtProperty*, const QString & ) ),
+		this, SLOT( onFileValueChanged( QtProperty*, const QString & ) ) );
 }
 
