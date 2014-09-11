@@ -67,6 +67,8 @@ function domain_management_hook_get_db()
  {
     global $domain_management_return_set;
     
+    try {
+    
         $db = new DBLayer( 'shard' );
         
         //get all domains
@@ -91,6 +93,10 @@ function domain_management_hook_get_db()
         }
         
         return $rows;
+        
+        } catch (Exception $e) {
+        return null;
+        }
     } 
 
 /**
