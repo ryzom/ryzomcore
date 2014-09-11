@@ -134,8 +134,9 @@ inline uint readPackedBitCount(CBitMemStream & f)
 	{
 		uint64 bitCount;
 		f.serial(bitCount, 4);
-		nlinfo("PACKED: %u bits", (uint32)(bitCount << 2));
-		return bitCount << 2;
+		uint bits = (bitCount << 2) + 4;
+		nlinfo("PACKED: %u bits", (uint32)(bits));
+		return bits;
 	}
 	else
 	{

@@ -556,11 +556,11 @@ inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, ui
 	if (next)
 	{
 		bits += 4;
-		test = next;
+		// test = next;
 	}
 	else
 	{
-		test = next & 0xF;
+		// test = next & 0xF;
 	}
 	if (bits + 5 > 64) // 1 bit isPacked, 4 bits bitCount
 	{
@@ -573,6 +573,7 @@ inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, ui
 	{
 		uint64 isPacked = 1;
 		uint64 bitCount = bits >> 2;
+		bits += 4;
 		s.serialAndLog2( isPacked, 1 );
 		s.serialAndLog2( bitCount, 4 );
 		s.serialAndLog2( value, bits );
