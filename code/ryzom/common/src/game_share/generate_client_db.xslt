@@ -688,7 +688,8 @@ void <xsl:call-template name="makeFullClassName"/>::init(ICDBStructNode *parent<
 				<xsl:when test="$leafType = 'S63'">		<xsl:text>sint64</xsl:text>	</xsl:when>
 				<xsl:when test="$leafType = 'S64'">		<xsl:text>sint64</xsl:text>	</xsl:when>
 
-				<xsl:when test="$leafType = 'TEXT'">	<xsl:text>ucstring</xsl:text>		</xsl:when>
+				<xsl:when test="$leafType = 'TEXT'">	<xsl:text>ucstring</xsl:text>	</xsl:when>
+				<xsl:when test="$leafType = 'PACKED'">	<xsl:text>uint64</xsl:text>		</xsl:when>
 				<xsl:otherwise>	<xsl:message terminate="yes">Unsupported leaf type <xsl:value-of select="$leafType"/></xsl:message></xsl:otherwise>
 			</xsl:choose>
 		</xsl:if>

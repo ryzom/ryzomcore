@@ -79,6 +79,9 @@ void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBac
 		// IF it is a TEXT.
 		if(!strcmp(type, "TEXT"))
 			_Type = ICDBNode::TEXT;
+		// IF it is a PACKED.
+		else if (!strcmp(type, "PACKED"))
+			_Type = ICDBNode::PACKED;
 		// ELSE type unknown.
 		else
 		{
@@ -123,6 +126,24 @@ void CCDBNodeLeaf::write( CTextId& id, FILE * f)
 	fprintf(f,"%"NL_I64"d\t%s\n",_Property,id.toString().c_str());
 } // write //
 
+inline uint readPackedBitCount(CBitMemStream & f)
+{
+	uint64 isPacked;
+	f.serial(isPacked, 1);
+	if (isPacked)
+	{
+		uint64 bitCount;
+		f.serial(bitCount, 4);
+		nlinfo("PACKED: %u bits", (uint32)(bitCount << 2));
+		return bitCount << 2;
+	}
+	else
+	{
+		nlinfo("PACKED: Not packed");
+		return 64;
+	}
+}
+
 //-----------------------------------------------
 //	readDelta
 //-----------------------------------------------
@@ -136,6 +157,8 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 		uint bits;
 		if (_Type == TEXT)
 			bits = 32;
+		else if (_Type == PACKED)
+			bits = readPackedBitCount(f);
 		else if (_Type <= I64)
 			bits = _Type;
 		else
@@ -154,7 +177,7 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 		_Property = (sint64)recvd;
 
 		// if signed
-		if (! ((_Type == TEXT) || (_Type <= I64)))
+		if (! ((_Type == TEXT) || (_Type == PACKED) || (_Type <= I64)))
 		{
 			// extend bit sign
 			sint64 mask = (((sint64)1)<<bits)-(sint64)1;

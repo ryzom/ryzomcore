@@ -924,15 +924,7 @@
     <branch name=""
             count="1024">
       <leaf name="BRICKS"
-            type="I64" />
-    </branch>
-  </branch>
-  <branch name="FABER_PLANS"
-          bank="PLR">
-    <branch name=""
-            count="64">
-      <leaf name="KNOWN"
-            type="I64" />
+            type="PACKED" />
     </branch>
   </branch>
   <branch name="MISSIONS"

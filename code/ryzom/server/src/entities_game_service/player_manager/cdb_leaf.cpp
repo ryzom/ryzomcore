@@ -79,6 +79,9 @@ void CCDBStructNodeLeaf::init( xmlNodePtr node, NLMISC::IProgressCallback &progr
 		// IF it is a TEXT.
 		if(!strcmp(type, "TEXT"))
 			_Type = ICDBStructNode::TEXT;
+		// IF it is a PACKED.
+		else if(!strcmp(type, "PACKED"))
+			_Type = ICDBStructNode::PACKED;
 		// ELSE type unknown.
 		else
 		{

@@ -517,6 +517,68 @@ bool	CCDBSynchronised::writePermanentDelta( NLMISC::CBitMemStream& s )
 	return true;
 }
 
+inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, uint &bits )
+{
+	// fast count of max bit
+	uint32 next = (uint32)(value >> 32);
+	uint32 test;
+	bits = 0;
+	if (next) // 64bit
+	{
+		bits += 32;
+		test = next;
+	}
+	else
+	{
+		test = (uint32)(value & 0xFFFFFFFF);
+	}
+	next >>= 16;
+	if (next)
+	{
+		bits += 16;
+		test = next;
+	}
+	else
+	{
+		test = next & 0xFFFF;
+	}
+	next >>= 8;
+	if (next)
+	{
+		bits += 8;
+		test = next;
+	}
+	else
+	{
+		test = next & 0xFF;
+	}
+	next >>= 4;
+	if (next)
+	{
+		bits += 4;
+		test = next;
+	}
+	else
+	{
+		test = next & 0xF;
+	}
+	if (bits + 5 > 64) // 1 bit isPacked, 4 bits bitCount
+	{
+		uint64 isPacked = 0;
+		s.serialAndLog2( isPacked, 1 );
+		s.serialAndLog2( value, 64 );
+		bitsize += 65;
+	}
+	else
+	{
+		uint64 isPacked = 1;
+		uint64 bitCount = bits >> 2;
+		s.serialAndLog2( isPacked, 1 );
+		s.serialAndLog2( bitCount, 4 );
+		s.serialAndLog2( value, bits );
+		bitsize += (bits + 5);
+	}
+}
 
 /*
  * Push one change to the stream
@@ -539,6 +601,13 @@ void	CCDBSynchronised::pushDelta( CBitMemStream& s, CCDBStructNodeLeaf *node, ui
 			bitsize += 32;
 			if ( VerboseDatabase )
 				nldebug( "CDB: Pushing value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+		}
+		else if ( node->type() == ICDBStructNode::PACKED )
+		{
+			uint bits;
+			pushPackedValue( s, value, bitsize, bits );
+			if ( VerboseDatabase )
+				nldebug( "CDB: Pushing value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{
@@ -573,6 +642,13 @@ void	CCDBSynchronised::pushDeltaPermanent( NLMISC::CBitMemStream& s, CCDBStructN
 			bitsize += 32;
 			if ( VerboseDatabase )
 				nldebug( "CDB: Pushing permanent value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+		}
+		else if ( node->type() == ICDBStructNode::PACKED )
+		{
+			uint bits;
+			pushPackedValue( s, value, bitsize, bits );
+			if ( VerboseDatabase )
+				nldebug( "CDB: Pushing permanent value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{
