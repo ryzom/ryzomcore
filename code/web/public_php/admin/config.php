@@ -11,8 +11,8 @@
 	define('NELTOOL_DBNAME', $cfg['db']['tool']['name']);
 
 	// site paths definitions
-	define('NELTOOL_SITEBASE', $_SERVER['PHP_SELF']);
-	define('NELTOOL_SYSTEMBASE', dirname( dirname(__FILE__) ) . '/admin/');
+	define('NELTOOL_SITEBASE',  dirname($_SERVER['PHP_SELF']) .'/');
+	define('NELTOOL_SYSTEMBASE', dirname(__FILE__) .'/');
 	define('NELTOOL_LOGBASE', NELTOOL_SYSTEMBASE .'/logs/');
 	define('NELTOOL_IMGBASE', NELTOOL_SYSTEMBASE .'/imgs/');
 
