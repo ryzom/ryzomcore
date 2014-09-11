@@ -440,21 +440,23 @@ public:
 
 	// From UFormElm
 	bool						isAtom () const;
-	bool						getValue (std::string &resultname, TEval evaluate) const;
-	bool						getValue (sint8 &resultname, TEval evaluate) const;
-	bool						getValue (uint8 &resultname, TEval evaluate) const;
-	bool						getValue (sint16 &resultname, TEval evaluate) const;
-	bool						getValue (uint16 &resultname, TEval evaluate) const;
-	bool						getValue (sint32 &resultname, TEval evaluate) const;
-	bool						getValue (uint32 &resultname, TEval evaluate) const;
-	bool						getValue (float &resultname, TEval evaluate) const;
-	bool						getValue (double &resultname, TEval evaluate) const;
-	bool						getValue (bool &resultname, TEval evaluate) const;
-	bool						getValue (NLMISC::CRGBA &resultname, TEval evaluate) const;
+	bool						getValue (std::string &result, TEval evaluate) const;
+	bool						getValue (sint8 &result, TEval evaluate) const;
+	bool						getValue (uint8 &result, TEval evaluate) const;
+	bool						getValue (sint16 &result, TEval evaluate) const;
+	bool						getValue (uint16 &result, TEval evaluate) const;
+	bool						getValue (sint32 &result, TEval evaluate) const;
+	bool						getValue (uint32 &result, TEval evaluate) const;
+	bool						getValue (float &result, TEval evaluate) const;
+	bool						getValue (double &result, TEval evaluate) const;
+	bool						getValue (bool &result, TEval evaluate) const;
+	bool						getValue (NLMISC::CRGBA &result, TEval evaluate) const;
 
 	// Set the value, the elt been used
 	void						setValue (const char *value);
-	std::string					getValue() const;
+
+	// Get the raw value. Does not care about any parent or default values
+	void						getValue (std::string &result) const;
 
 private:
 	// The value
