@@ -128,21 +128,11 @@ void CCDBNodeLeaf::write( CTextId& id, FILE * f)
 
 inline uint readPackedBitCount(CBitMemStream & f)
 {
-	uint64 isPacked;
-	f.serial(isPacked, 1);
-	if (isPacked)
-	{
-		uint64 bitCount;
-		f.serial(bitCount, 4);
-		uint bits = (bitCount << 2) + 4;
-		nlinfo("PACKED: %u bits", (uint32)(bits));
-		return bits;
-	}
-	else
-	{
-		nlinfo("PACKED: Not packed");
-		return 64;
-	}
+	uint64 nibbleCount;
+	f.serial(nibbleCount, 4);
+	uint bits = (nibbleCount << 2);
+	nlinfo("PACKED: %u bits", (uint32)(bits));
+	return bits;
 }
 
 //-----------------------------------------------

@@ -526,59 +526,45 @@ inline void pushPackedValue( CBitMemStream& s, uint64 value, uint32& bitsize, ui
 	if (next) // 64bit
 	{
 		bits += 32;
-		test = next;
+		test = next; // 32 msb
 	}
 	else
 	{
-		test = (uint32)(value & 0xFFFFFFFF);
+		test = (uint32)(value & 0xFFFFFFFF); // 32 lsb
 	}
-	next >>= 16;
+	next = (test >> 16);
 	if (next)
 	{
 		bits += 16;
-		test = next;
+		test = next; // 16 msb
 	}
 	else
 	{
-		test = next & 0xFFFF;
+		test = (test & 0xFFFF); // 16 lsb
 	}
-	next >>= 8;
+	next = (test >> 8);
 	if (next)
 	{
 		bits += 8;
-		test = next;
+		test = next; // 8 msb
 	}
 	else
 	{
-		test = next & 0xFF;
+		test = (test & 0xFF); // 8 lsb
 	}
-	next >>= 4;
+	next = (test >> 4);
 	if (next)
 	{
+		bits += 8;
+	}
+	else if (test & 0xF)
+	{
 		bits += 4;
-		// test = next;
 	}
-	else
-	{
-		// test = next & 0xF;
-	}
-	if (bits + 5 > 64) // 1 bit isPacked, 4 bits bitCount
-	{
-		uint64 isPacked = 0;
-		s.serialAndLog2( isPacked, 1 );
-		s.serialAndLog2( value, 64 );
-		bitsize += 65;
-	}
-	else
-	{
-		uint64 isPacked = 1;
-		uint64 bitCount = bits >> 2;
-		bits += 4;
-		s.serialAndLog2( isPacked, 1 );
-		s.serialAndLog2( bitCount, 4 );
-		s.serialAndLog2( value, bits );
-		bitsize += (bits + 5);
-	}
+	uint64 nibbleCount = (bits >> 2);
+	s.serialAndLog2( nibbleCount, 4 );
+	s.serialAndLog2( value, bits );
+	bitsize += (4 + bits);
 }
 
 /*
