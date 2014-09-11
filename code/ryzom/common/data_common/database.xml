@@ -1512,6 +1512,8 @@
             type="I5" />
       <leaf name="DESPAWN"
             type="I7" />
+      <leaf name="NAME"
+            type="TEXT" />
     </branch>
   </branch>
   <branch name="DEBUG_INFO"
