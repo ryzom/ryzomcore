@@ -98,7 +98,7 @@
         <item row="0" column="0">
          <widget class="QPlainTextEdit" name="commentsEdit">
           <property name="textInteractionFlags">
-           <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+           <set>Qt::TextEditorInteraction</set>
           </property>
          </widget>
         </item>

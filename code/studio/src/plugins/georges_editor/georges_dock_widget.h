@@ -25,6 +25,7 @@ class QUndoStack;
 
 class GeorgesDockWidget : public QDockWidget
 {
+	Q_OBJECT
 public:
 	GeorgesDockWidget( QWidget *parent = NULL );
 	~GeorgesDockWidget();
@@ -38,6 +39,12 @@ public:
 
 	virtual bool load( const QString &fileName ) = 0;
 	virtual void write() = 0;
+
+protected:
+	void closeEvent( QCloseEvent *e );
+
+Q_SIGNALS:
+	void closing( GeorgesDockWidget *d );
 
 protected:
 	QString buildLogMsg( const QString &msg );

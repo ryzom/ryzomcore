@@ -23,6 +23,7 @@ SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h
 								  filepath_property_manager.h
 								  typ_browser_ctrl.h
 								  georges_typ_dialog.h
+								  georges_dock_widget.h
 								  )
 
 SET(OVQT_PLUG_GEORGES_EDITOR_UIS  georges_editor_form.ui

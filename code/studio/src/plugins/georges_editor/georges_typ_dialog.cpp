@@ -82,6 +82,8 @@ bool GeorgesTypDialog::load( const QString &fileName )
 	QFileInfo info( fileName );
 	setWindowTitle( info.fileName() );
 
+	connect( m_ui.commentEdit, SIGNAL( textChanged() ), this, SLOT( onCommentsEdited() ) );
+
 	return true;
 }
 
@@ -96,6 +98,7 @@ void GeorgesTypDialog::write()
 	xml.init( &file );
 	
 	m_pvt->typ->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+	m_pvt->typ->Header.Comments = m_ui.commentEdit->toPlainText().toUtf8().constData();
 	m_pvt->typ->write( xml.getDocument() );
 	
 	xml.flush();
@@ -115,6 +118,8 @@ void GeorgesTypDialog::newDocument( const QString &fileName )
 	setModified( true );
 
 	loadTyp();
+
+	log( "Created" );
 }
 
 void GeorgesTypDialog::onAddClicked()
@@ -222,6 +227,11 @@ void GeorgesTypDialog::onModified()
 void GeorgesTypDialog::onModified( const QString &k, const QString &v )
 {
 	log( "Changed " + k + " = " + v );
+	onModified();
+}
+
+void GeorgesTypDialog::onCommentsEdited()
+{
 	onModified();
 }
 

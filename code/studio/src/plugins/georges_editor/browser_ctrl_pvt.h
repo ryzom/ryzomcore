@@ -38,6 +38,10 @@ class QtVariantEditorFactory;
 class QtTreePropertyBrowser;
 class QVariant;
 class QtProperty;
+class QtVariantProperty;
+
+class FileManager;
+class FileEditFactory;
 
 class BrowserCtrlPvt : public QObject
 {
@@ -49,8 +53,10 @@ public:
 	void clear();
 	void setupNode( GeorgesQt::CFormItem *node );
 	void onValueChanged( QtProperty *p, const QVariant &value );
+	void onFileValueChanged( QtProperty *p, const QString &value );
 
 	QtVariantPropertyManager* manager() const{ return mgr; }
+	FileManager* fileManager() const{ return m_fileMgr; }
 	void setRootNode( NLGEORGES::CFormElm *root ){ m_rootNode = root; }	
 	void setBrowser( QtTreePropertyBrowser *browser ){ m_browser = browser; }
 
@@ -58,21 +64,35 @@ Q_SIGNALS:
 	void arrayResized( const QString &name, int size );
 	void modified();
 	void valueChanged( const QString &key, const QString &value );
+	void vstructChanged( const QString &name );
 
 private:
+	NLGEORGES::UFormElm* getNode( const QString &name );
+	NLGEORGES::UFormElm* getCurrentNode();
+
 	void setupStruct( NLGEORGES::UFormElm *node );
-	void setupAtom( NLGEORGES::CFormElmStruct::CFormElmStructElm &elm );
+	void setupAtom( NLGEORGES::CFormElmStruct *st, int idx );
 
 	void setupStruct( GeorgesQt::CFormItem *node );
+	void setupVStruct( GeorgesQt::CFormItem *node );
 	void setupArray( GeorgesQt::CFormItem *node );
+	void setupAtom( GeorgesQt::CFormItem *node );
 
 	void onStructValueChanged( QtProperty *p, const QVariant &value );
+	void onVStructValueChanged( QtProperty *p, const QVariant &value );
 	void onArrayValueChanged( QtProperty *p, const QVariant &value );
+	void onAtomValueChanged( QtProperty *p, const QVariant &value );
 	void createArray();
+
+	QtVariantProperty* addVariantProperty( QVariant::Type type, const QString &key, const QVariant &value );
+	QtProperty *addFileProperty( const QString &key, const QString &value );
 	
 	QtVariantPropertyManager *mgr;
 	QtVariantEditorFactory *factory;
 	QtTreePropertyBrowser *m_browser;
+
+	FileManager *m_fileMgr;
+	FileEditFactory *m_fileFactory;
 
 	QString m_currentNodeName;
 	NLGEORGES::CFormElm *m_rootNode;
@@ -86,12 +106,12 @@ private:
 
 		void clear()
 		{
-			p = NULL;
+			type = -1;
 			name = "";
 		}
 
 		QString name;
-		NLGEORGES::UFormElm *p;
+		int type;
 	};
 
 	CurrentNode m_currentNode;
