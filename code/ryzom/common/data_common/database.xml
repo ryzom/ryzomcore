@@ -1513,7 +1513,7 @@
       <leaf name="DESPAWN"
             type="I7" />
       <leaf name="NAME"
-            type="TEXT" />
+            type="I32" />
     </branch>
   </branch>
   <branch name="DEBUG_INFO"
