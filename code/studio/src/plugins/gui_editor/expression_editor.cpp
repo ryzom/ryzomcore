@@ -23,6 +23,9 @@
 #include <QMenu>
 #include <qevent.h>
 
+#include "expression_node.h"
+#include "expression_link.h"
+
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
 QWidget( parent )
 {
@@ -68,7 +71,7 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 
 void ExpressionEditor::onAddRect()
 {
-	QGraphicsRectItem *item = new QGraphicsRectItem( 0, 0, 100, 100 );
+	QGraphicsItem *item = new ExpressionNode();
 	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	m_scene->addItem( item );
 }
@@ -93,10 +96,9 @@ void ExpressionEditor::onLinkItems()
 	QGraphicsItem *from = l[ 0 ];
 	QGraphicsItem *to = l[ 1 ];
 
-	QGraphicsLineItem *line = new QGraphicsLineItem();
-	line->setLine( QLineF( from->pos(), to->pos() ) );
-	line->setPen( QPen( Qt::darkRed, 1.0 ) );
-	m_scene->addItem( line );
+	ExpressionLink *link = new ExpressionLink();
+	link->link( from, to );
+	m_scene->addItem( link );
 }
 
 
