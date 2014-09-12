@@ -1,24 +1,21 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span9">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i>{$t_title} #{$ticket_tId} </h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
+    <div class="box col-md-9">
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span>{$t_title} #{$ticket_tId} 
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>{$title}: {$ticket_title} </legend>
-		
-		
+
+
 		<form id="changeTicket" class="form-vertical" method="post" action="index.php">
 		<table class="table table-bordered table-condensed ">
 			<tr>
 			    <td><strong>Original Submitted: </strong>{$ticket_timestamp}</td>
 			    <td><strong>Last Updated: </strong>{$ticket_lastupdate}</td>
-			    <td><strong>Status: </strong>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td> 
+			    <td><strong>Status: </strong>{if $ticket_status neq 3}<span class="label label-success">Open</span>{/if} <span class="label {if $ticket_status eq 0}label-success{else if $ticket_status eq 1}label-warning{else if $ticket_status eq 2}label-important{/if}"><strong>{$ticket_statustext}</strong></span></td>
 		      </tr>
 			<tr>
 			    <td><strong>Category: </strong>{$ticket_category}</td>
@@ -31,16 +28,32 @@
 					<a href="index.php?page=show_sgroup&id={$ticket_forwardedGroupId}"><font color="white">{$ticket_forwardedGroupName}</font></a>
 				    {/if}
 				</span>
-			    </td>                  
+			    </td>
 			</tr>
-			<tr>
-			    <td><strong>Assigned To: </strong>{if $ticket_assignedTo neq ""} <a href="index.php?page=show_user&id={$ticket_assignedTo}">{$ticket_assignedToText}</a> {else}<i> {$not_assigned}</i> {/if}</td>
-			    <td></td>
-			    <td></td> 
-		      </tr>
 		</table>
-		
-		
+		<table class="table table-bordered table-condensed ">
+			<tr>
+			    <td><strong>Filename: </strong></td>
+			    <td><strong>Uploaded: </strong></td>
+			    <td><strong>Filesize: </strong></td>
+				<td><strong>Uploaded by: </strong></td>
+		      </tr>
+			{foreach from=$ticket_attachments item=array}
+			<tr>
+			    <td><a href="{$FILE_WEB_PATH}{$array['Path']}">{$array['Filename']}</a></td>
+			    <td>{$array['Timestamp']}</td>
+			    <td>{$array['Filesize']}</td>
+				<td>{if $permission > 1}
+					<a href="{$BASE_WEBPATH}index.php?page=show_user&id={$array['Uploader']}">{$array['Username']}</a>
+					{else}
+					{$array['Username']}
+					{/if}
+					</td>
+		    </tr>
+			{/foreach}
+		</table>
+
+
 		<table class="table table-bordered" >
 		    <tbody>
 			{foreach from=$ticket_replies item=reply}
@@ -49,16 +62,16 @@
 				<p>
 				    <span class="label label-info"> {$reply.timestamp}</span>
 				    {if $reply.permission eq '1'}
-				    <span class="label label-success"><strong><i class="icon-user icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-success"><strong><span class="icon-user icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {else if $reply.permission gt '1'}
-				    <span class="label label-warning"><strong><i class="icon-star icon-white"></i>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
+				    <span class="label label-warning"><strong><span class="icon-star icon-white"></span>{if isset($isMod) and $isMod eq "TRUE"} <a href="index.php?page=show_user&id={$reply.authorExtern}"><font color="white"> {$reply.author}</font>{else} {$reply.author} {/if}</a></strong></span>
 				    {/if}
 				</p>
 				<p><pre{if $reply.permission gt '1'} {if $reply.hidden eq 0} style="background-color:rgb(248, 200, 200);"{else if $reply.hidden eq 1}style="background-color:rgb(207, 254, 255);"{/if}{/if}> {if $reply.hidden eq 1}<i>{/if}{$reply.replyContent}{if $reply.hidden eq 1}</i>{/if}</pre></p>
 			    </td>
 			</tr>
 			{/foreach}
-			
+
 			{if $ticket_status eq 3}
 			<tr>
 			    <td>
@@ -66,7 +79,7 @@
 			    </td>
 			</tr>
 			{/if}
-			
+
 			<tr>
 			    <td>
 				<form id="reply" class="form-vertical" method="post" action="index.php">
@@ -99,7 +112,7 @@
 					    {foreach from=$statusList key=k item=v}
 						    <option value="{$k}">{$v}</option>
 					    {/foreach}
-					</select>	
+					</select>
 				    </div>
 				</div>
 				<div class="control-group"  style="display: inline-block; margin-left:10px;"">
@@ -109,12 +122,33 @@
 					    {foreach from=$ticket_priorities key=k item=v}
 						    <option value="{$k}" {if $k eq $ticket_priority}selected="selected"{/if}>{$v}</option>
 					    {/foreach}
-					</select>	
+					</select>
 				    </div>
 				</div>
 				{/if}
 				<input type="hidden" name="function" value="reply_on_ticket">
 				<input type="hidden" name="ticket_id" value="{$ticket_id}">
+				
+                <h3>Upload Attachment</h3>
+                <input data-no-uniform="true" type="file" name="file_upload" id="file_upload">
+				{literal} 
+				<script language='JavaScript'>
+				$(document).ready( function () {
+
+					$('#file_upload').uploadify({
+					'formData' : {'PHPSESSID': '{/literal}{nocache}{$sessionid}{/nocache}{literal}'},
+					'auto' : true,
+					'multi' : true,
+					'method' : 'post',
+					'swf': 'misc/uploadify.swf',
+					'displayData': 'percentage',
+					'uploader': 'func/upload.php?id='+{/literal}{$ticket_id}{literal},
+					'removeCompleted' : false
+					});
+				});
+				</script>
+				{/literal} 
+				<div id="filesUploaded"></div>
 				<div class="control-group">
 				    <label class="control-label"></label>
 				    <div class="controls">
@@ -126,40 +160,38 @@
 			</tr>
 		    </tbody>
 		</table>
-	    </div>                   
+	    </div>
         </div>
+		</div>
     </div><!--/span-->
-    
-    
-    
-    <div class="box span3">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-th"></i>Actions</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
+
+
+
+    <div class="box col-md-3">
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-th"></span>Actions
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
-		
+
 		{if isset($isMod) and $isMod eq "TRUE"}
-		
+
 		 <legend style="margin-bottom:9px;">Ticket Assigning</legend>
 		 {if $ticket_assignedTo eq 0}
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="assignTicket">
-			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><i class="icon-flag icon-white"></i> Assign Ticket</button>
+			<button type="submit" class="btn btn-primary" style="margin-bottom:9px;><span class="icon-flag icon-white"></span> Assign Ticket</button>
 		    </form>
 		{else if $ticket_assignedTo eq $user_id}
 		    <form id="assign_ticket" class="form-vertical" method="post" action="" style="margin:0px 0px 0px;">
 			<input type="hidden" name="ticket_id" value="{$ticket_tId}">
 			<input type="hidden" name="action" value="unAssignTicket">
-			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><i class="icon-remove icon-white"></i> Remove Assign</button>
+			<button type="submit" class="btn btn-warning" style="margin-bottom:9px;><span class="icon-remove icon-white"></span> Remove Assign</button>
 		    </form>
 		{/if}
-				    
+
 		{if isset($ACTION_RESULT) and $ACTION_RESULT eq "SUCCESS_ASSIGNED"}
 		<div class="alert alert-success">
 			{$success_assigned}
@@ -181,10 +213,10 @@
 			{$ticket_not_assigned}
 		</div>
 		{/if}
-		
-		<legend style="margin-bottom:9px;">Forward to Group</legend>		    
+
+		<legend style="margin-bottom:9px;">Forward to Group</legend>
 		<form id="forward" class="form-vertical" method="post" action="" style="margin-bottom:9px;" >
-		
+
 		<div class="control-group">
 		    <div class="controls" >
 			<select name="group">
@@ -192,7 +224,7 @@
 			    {foreach from=$sGroups key=k item=v}
 				    <option value="{$k}">{$v}</option>
 			    {/foreach}
-			</select>	
+			</select>
 		    </div>
 		</div>
 		<input type="hidden" name="ticket_id" value="{$ticket_tId}">
@@ -228,9 +260,10 @@
 			<li class="divider"></li>
 		    </ul>
 		</div>
-            </div>                   
+            </div>
         </div>
+		</div>
     </div>
 </div><!--/row-->
 {/block}
-	
+

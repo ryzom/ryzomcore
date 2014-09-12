@@ -1,68 +1,60 @@
 {block name=content}
-	
+
 	<div class="row-fluid">
-		<div class="box span12">
-			<div class="box-header well">
-				<h2><i class="icon-info-sign"></i>{$syncing_title}</h2>
-				<div class="box-icon">
-					<a href="#" class="btn btn-round" onclick="javascript:show_help('intro');return false;"><i class="icon-info-sign"></i></a>
-					<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
-					<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-					<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-				</div>
+		<div class="box col-md-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<span class="icon-info-sign"></span>{$syncing_title}
 			</div>
-			<div class="box-content">
+			<div class="panel-body">
 				<center>
 				<p>{$syncing_info}</p>
 				{if $shard eq "online"}
 				<div class="alert alert-success">
-					<i class="icon-refresh icon-white"></i>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
+					<span class="icon-refresh icon-white"></span>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
 					<script>
 						function sync(){
 							xmlhttp=new XMLHttpRequest();
-							xmlhttp.open("POST","../../../ams_lib/cron/sync_cron.php",true);
+							xmlhttp.open("POST","cron/sync_cron.php",true);
 							xmlhttp.send();
 						}
 					</script>
 				</div>
 				{else}
 				<div class="alert alert-error">
-					<strong><i class="icon-refresh icon-white"></i></strong> {$shard_offline}
+					<strong><span class="icon-refresh icon-white"></span></strong> {$shard_offline}
 				</div>
 				{/if}
 				</center>
 				<div class="clearfix"></div>
 			</div>
+			</div>
 		</div>
 	</div>
-			<div class="row-fluid sortable">		
-				<div class="box span12">
-					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> {$members}</h2>
-						<div class="box-icon">
-							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
-							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-						</div>
+			<div class="row-fluid sortable">
+				<div class="box col-md-12">
+				<div class="panel panel-default">
+					<div class="panel-heading" data-original-title>
+						<span class="icon-user"></span> {$members}
 					</div>
-					<div class="box-content">
+					<div class="panel-body">
 						<table class="table table-striped table-bordered">
 						  <thead>
 							  <tr>
 								  <th>{$id}</th>
 								  <th>{$type}</th>
 							  </tr>
-						  </thead>   
+						  </thead>
 						  <tbody>
 							{foreach from=$liblist item=element}
 							<tr>
 								<td>{$element.id}</td>
 								<td class="center">{$element.type}</td>
-								
-								
+
+
 							</tr>
 							{/foreach}
-					
+
 						  </tbody>
 					  </table>
 						<div style="width: 300px; margin:0px auto;">
@@ -75,8 +67,9 @@
 							</ul>
 						</div>
 					</div>
+					</div>
 				</div><!--/span-->
-			
+
 			</div><!--/row-->
 {/block}
 

@@ -1,18 +1,3 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as
-// published by the Free Software Foundation, either version 3 of the
-// License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
@@ -99,7 +84,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CNelUserPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -107,7 +92,7 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_UserId != NOPE::INVALID_OBJECT_ID 
+		if (_UserId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
@@ -318,7 +303,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return (uint32)_ObjectCache.size();
+			return _ObjectCache.size();
 		}
 
 		// default return value
@@ -336,7 +321,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += (uint32)first->second.size();
+			nbReleased += first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -424,7 +409,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -578,7 +563,7 @@ namespace RSMGR
 		{
 			nlwarning("ERROR : someone try to delete this object, but there are still ptr on it !");
 			CNelPermissionPtr *ptr = _PtrList;
-			do 
+			do
 			{
 				nlwarning("  Pointer created from '%s', line %u", ptr->_FileName, ptr->_LineNum);
 				ptr = _PtrList->getNextPtr();
@@ -586,16 +571,16 @@ namespace RSMGR
 			nlstop;
 		}
 		// remove object from cache map
-		if (_Prim != NOPE::INVALID_OBJECT_ID 
+		if (_PermissionId != NOPE::INVALID_OBJECT_ID
 			&& _ObjectState != NOPE::os_removed
 			&& _ObjectState != NOPE::os_transient)
 		{
-			nldebug("NOPE: clearing CNelPermission @%p from cache with id %u", this, static_cast<uint32>(_Prim));
-			nlverify(_ObjectCache.erase(_Prim) == 1);
+			nldebug("NOPE: clearing CNelPermission @%p from cache with id %u", this, static_cast<uint32>(_PermissionId));
+			nlverify(_ObjectCache.erase(_PermissionId) == 1);
 		}
 		else if (_ObjectState != NOPE::os_transient)
 		{
-			nlassert(_ObjectCache.find(_Prim) == _ObjectCache.end());
+			nlassert(_ObjectCache.find(_PermissionId) == _ObjectCache.end());
 		}
 		if (_ObjectState == NOPE::os_released)
 		{
@@ -626,18 +611,18 @@ namespace RSMGR
 	{
 		nlassert(getPersistentState() == NOPE::os_transient);
 
-		nlassert(_Prim != 0);
+		nlassert(_PermissionId != 0);
 		std::string qs;
 		qs = "INSERT INTO permission (";
 		
-		qs += "prim, UId, ClientApplication, ShardId, AccessPrivilege";
+		qs += "PermissionId, UId, DomainId, ShardId, AccessPrivilege";
 		qs += ") VALUES (";
 		
-		qs += "'"+MSW::escapeString(NLMISC::toString(_Prim), connection)+"'";
+		qs += "'"+MSW::escapeString(NLMISC::toString(_PermissionId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
-		qs += "'"+MSW::escapeString(NLMISC::toString(_DomainName), connection)+"'";
+		qs += "'"+MSW::escapeString(NLMISC::toString(_DomainId), connection)+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_ShardId), connection)+"'";
 		qs += ", ";
@@ -670,17 +655,17 @@ namespace RSMGR
 		std::string qs;
 		qs = "UPDATE permission SET ";
 		
-		qs += "prim = '"+MSW::escapeString(NLMISC::toString(_Prim), connection)+"'";
+		qs += "PermissionId = '"+MSW::escapeString(NLMISC::toString(_PermissionId), connection)+"'";
 		qs += ", ";
 		qs += "UId = '"+MSW::escapeString(NLMISC::toString(_UserId), connection)+"'";
 		qs += ", ";
-		qs += "ClientApplication = '"+MSW::escapeString(NLMISC::toString(_DomainName), connection)+"'";
+		qs += "DomainId = '"+MSW::escapeString(NLMISC::toString(_DomainId), connection)+"'";
 		qs += ", ";
 		qs += "ShardId = '"+MSW::escapeString(NLMISC::toString(_ShardId), connection)+"'";
 		qs += ", ";
 		qs += "AccessPrivilege = '"+MSW::escapeString(NLMISC::toString(_AccessPriv), connection)+"'";
 
-		qs += " WHERE prim = '"+NLMISC::toString(_Prim)+"'";
+		qs += " WHERE PermissionId = '"+NLMISC::toString(_PermissionId)+"'";
 	
 
 		if (connection.query(qs))
@@ -702,7 +687,7 @@ namespace RSMGR
 		std::string qs;
 		qs = "DELETE FROM permission ";
 		
-		qs += " WHERE prim = '"+NLMISC::toString(_Prim)+"'";
+		qs += " WHERE PermissionId = '"+NLMISC::toString(_PermissionId)+"'";
 	
 
 		if (connection.query(qs))
@@ -736,7 +721,7 @@ namespace RSMGR
 		std::string qs;
 		qs = "DELETE FROM permission ";
 		
-		qs += " WHERE prim = '"+NLMISC::toString(id)+"'";
+		qs += " WHERE PermissionId = '"+NLMISC::toString(id)+"'";
 	
 
 		if (connection.query(qs))
@@ -796,7 +781,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return (uint32)_ObjectCache.size();
+			return _ObjectCache.size();
 		}
 
 		// default return value
@@ -814,7 +799,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += (uint32)first->second.size();
+			nbReleased += first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -902,7 +887,7 @@ namespace RSMGR
 		if(_ObjectState == NOPE::os_released && state == NOPE::os_removed)
 		{
 			// a release object gets removed (e.g. by remove by id)
-		
+
 			// delete the object
 			delete this;
 
@@ -912,12 +897,12 @@ namespace RSMGR
 
 		if (_ObjectState == NOPE::os_transient && state != NOPE::os_transient)
 		{
-			nldebug("NOPE: inserting CNelPermission @%p in cache with id %u", this, static_cast<uint32>(_Prim));
-			nlverify(_ObjectCache.insert(std::make_pair(_Prim, this)).second);
+			nldebug("NOPE: inserting CNelPermission @%p in cache with id %u", this, static_cast<uint32>(_PermissionId));
+			nlverify(_ObjectCache.insert(std::make_pair(_PermissionId, this)).second);
 		}
 
 		if (_ObjectState != NOPE::os_transient)
-			nlassert(_ObjectCache.find(_Prim) != _ObjectCache.end());
+			nlassert(_ObjectCache.find(_PermissionId) != _ObjectCache.end());
 
 		_ObjectState = state;
 
@@ -928,8 +913,8 @@ namespace RSMGR
 		}
 		else if (state == NOPE::os_removed)
 		{
-			nldebug("NOPE: erasing CNelPermission @%p in cache with id %u", this, static_cast<uint32>(_Prim));
-			nlverify(_ObjectCache.erase(_Prim) == 1);
+			nldebug("NOPE: erasing CNelPermission @%p in cache with id %u", this, static_cast<uint32>(_PermissionId));
+			nlverify(_ObjectCache.erase(_PermissionId) == 1);
 		}
 	}
 
@@ -945,11 +930,11 @@ namespace RSMGR
 		std::string qs;
 		qs = "SELECT ";
 		
-		qs += "prim, UId, ClientApplication, ShardId, AccessPrivilege";
+		qs += "PermissionId, UId, DomainId, ShardId, AccessPrivilege";
 
 		qs += " FROM permission";
 		
-		qs += " WHERE prim = '"+NLMISC::toString(id)+"'";
+		qs += " WHERE PermissionId = '"+NLMISC::toString(id)+"'";
 	CNelPermissionPtr ret;
 		if (!connection.query(qs))
 		{
@@ -965,9 +950,9 @@ namespace RSMGR
 			// ok, we have an object
 			result->fetchRow();
 
-			result->getField(0, ret->_Prim);
+			result->getField(0, ret->_PermissionId);
 			result->getField(1, ret->_UserId);
-			result->getField(2, ret->_DomainName);
+			result->getField(2, ret->_DomainId);
 			result->getField(3, ret->_ShardId);
 			result->getField(4, ret->_AccessPriv);
 

@@ -101,7 +101,7 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 					$c .=  '<div style="text-align: center"><strong style="color: #FF5555">'._t($user['message']).'</strong></div><br />';
 				$c .= ryzom_render_login_form($name, false);
 				echo ryzom_app_render(_t('app_'.APP_NAME), $c);
-				exit;
+				die();
 			}
 			return false;
 		}
@@ -118,7 +118,7 @@ function ryzom_app_authenticate(&$user, $ask_login=true, $welcome_message='', $w
 		$user['id'] = ryzom_get_user_id($cid, $user['char_name'], $user['creation_date'], $user);
 
 	$user['gender'] = ryzom_get_user_gender($user['id']);
-	
+
 	$user['ig'] = $ig;
 	$user['lang'] = $_SESSION['lang'];
 	if (!isset($user['groups']))

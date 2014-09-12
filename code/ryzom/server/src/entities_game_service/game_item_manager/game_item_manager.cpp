@@ -845,9 +845,9 @@ void CGameItemManager::buildNpcSpecificItems()
 //-----------------------------------------------
 // createItem :
 //-----------------------------------------------
-NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
+NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality>")
 {
-	if( args.size() < 3 )
+	if( args.size() < 2 )
 	{
 		return false;
 	}
@@ -859,9 +859,9 @@ NLMISC_COMMAND(createItem,"create a new item","<sheet id><quality><owner id>")
 	uint16 quality;
 	NLMISC::fromString(args[1], quality);
 
-	uint32 ownerIdTmp;
-	NLMISC::fromString(args[2], ownerIdTmp);
-	CEntityId ownerId(RYZOMID::object,ownerIdTmp);	
+	//uint32 ownerIdTmp;
+	//NLMISC::fromString(args[2], ownerIdTmp);
+	//CEntityId ownerId(RYZOMID::object,ownerIdTmp);	
 
 //	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, ownerId, -1, true,true );
 	CGameItemPtr item = GameItemManager.createItem( sheetId, quality, true, true );

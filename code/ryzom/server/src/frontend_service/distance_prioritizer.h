@@ -227,7 +227,7 @@ public:
 			{
 				outbox.serialBitAndLog( BranchHasPayload );
 				if ( a() ) a()->fillDiscreetProperties( outbox );
-				if ( a() ) b()->fillDiscreetProperties( outbox );
+				if ( b() ) b()->fillDiscreetProperties( outbox );
 			}
 		}
 		else

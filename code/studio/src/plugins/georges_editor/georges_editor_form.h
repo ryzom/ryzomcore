@@ -23,6 +23,8 @@
 // Qt includes
 #include <QtGui/QUndoStack>
 
+class GeorgesDockWidget;
+
 namespace GeorgesQt
 {
 
@@ -42,12 +44,15 @@ public:
 
 public Q_SLOTS:
 	void open();
-	void loadFile(const QString fileName);
-    void loadFile(const QString fileName, bool loadFromDfn);
-	void newFile();
+	void loadFile(const QString &fileName);
+	
+	void newTyp();
+	void newDfn();
+	void newForm();
+
 	void save();
 	void settingsChanged();
-	void closingTreeView();
+	void dialogClosing( GeorgesDockWidget *d );
 	void setModified();
 
 	void focusChanged(QWidget *old, QWidget *now);
@@ -56,12 +61,20 @@ private:
 	void readSettings();
 	void writeSettings();
 
+	void addGeorgesWidget( GeorgesDockWidget *w );
+
+	GeorgesDockWidget* loadTypDialog(const QString &fileName);
+	GeorgesDockWidget* loadDfnDialog(const QString &fileName);
+	GeorgesDockWidget* loadFormDialog(const QString &fileName);
+
 	Ui::GeorgesEditorForm m_ui;
 
 	CGeorgesDirTreeDialog *m_georgesDirTreeDialog;
 	QToolBar *m_fileToolBar;
 	QAction *m_openAction;
-	QAction *m_newAction;
+	QAction *m_newTypAction;
+	QAction *m_newDfnAction;
+	QAction *m_newFormAction;
 	QAction *m_saveAction;
 
 	QString m_leveldesignPath;
@@ -69,10 +82,10 @@ private:
 	QMainWindow *m_mainDock;
 		
     /// Contains a list of all of the open forms.
-	QList<CGeorgesTreeViewDialog*> m_dockedWidgets;
+	QList<GeorgesDockWidget*> m_dockedWidgets;
 
     /// Contains a pointer to the last known focal change for active documents.
-	CGeorgesTreeViewDialog *m_lastActiveDock;
+	GeorgesDockWidget *m_lastActiveDock;
 
     /// Contains a record of the last directory a sheet file dialog was opened for.
     QString m_lastSheetDir;

@@ -826,7 +826,7 @@ private:
 	void									flushSSSModelRequests();
 	// common vb for water display
 	CVertexBuffer	 _WaterVB;
-	
+
 	bool			_RequestParticlesAnimate;
 
 };

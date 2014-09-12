@@ -34,6 +34,13 @@ namespace GeorgesQt
 {
 	CFormItem::CFormItem()
 	{
+		parentItem = NULL;
+		formElm = NULL;
+		m_form = NULL;
+		_StructId = 0;
+		_Slot = 0;
+		_Type = Null;
+		_TType = TYPE_ATOM;
 	}
 
 	CFormItem::~CFormItem() 
@@ -106,48 +113,42 @@ namespace GeorgesQt
 
 	bool CFormItem::isArray()
 	{
-		// If it wasn't a root node then lets check the node type.
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *node;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool array;
-		bool parentVDfnArray;
-		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
-		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (_FormName.c_str(), &parentDfn, indexDfn,
-                   &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
-
-		if(array && node)
+		if( _TType == TYPE_ARRAY )
 			return true;
-
-		return false;
+		else
+			return false;
 	}
 
 	bool CFormItem::isArrayMember()
 	{
-		CFormItem *parent = this->parent();
+		if( parentItem == NULL )
+			return false;
 
-		// If it wasn't a root node then lets check the node type.
-		const NLGEORGES::CFormDfn *parentDfn;
-		uint indexDfn;
-		const NLGEORGES::CFormDfn *nodeDfn;
-		const NLGEORGES::CType *nodeType;
-		NLGEORGES::CFormElm *parentNode;
-		NLGEORGES::UFormDfn::TEntryType type;
-		bool array;
-		bool parentVDfnArray;
-		NLGEORGES::CForm *form = static_cast<CForm*>(m_form);
-		NLGEORGES::CFormElm *elm = static_cast<CFormElm*>(&form->getRootNode());
-		nlverify ( elm->getNodeByName (parent->formName ().c_str (), &parentDfn, indexDfn,
-                   &nodeDfn, &nodeType, &parentNode, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+		return parentItem->isArray();
+	}
 
-		if(array && parentNode)
+	bool CFormItem::isStruct()
+	{
+		if( _TType == TYPE_STRUCT )
 			return true;
+		else
+			return false;
+	}
 
-		return false;
+	bool CFormItem::isVStruct()
+	{
+		if( _TType == TYPE_VSTRUCT )
+			return true;
+		else
+			return false;
+	}
+
+	bool CFormItem::isAtom()
+	{
+		if( _TType == TYPE_ATOM )
+			return true;
+		else
+			return false;
 	}
 
 	QIcon CFormItem::getItemImage(CFormItem *rootItem)
@@ -237,7 +238,14 @@ namespace GeorgesQt
 		childItems.clear();
 	}
 
-	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr)
+	void CFormItem::removeChild( int idx )
+	{
+		CFormItem *item = childItems[ idx ];
+		childItems.removeAt( idx );
+		delete item;
+	}
+
+	CFormItem *CFormItem::add (TSub type, const char *name, uint structId, const char *formName, uint slot, NLGEORGES::UForm *formPtr, TType itemType )
     {
 		CFormItem *newNode = new CFormItem();
         newNode->_Type = type;
@@ -247,6 +255,7 @@ namespace GeorgesQt
         newNode->_FormName = formName;
         newNode->_Slot  = slot;		
 		newNode->m_form = formPtr;
+		newNode->_TType = itemType;
 
         appendChild(newNode);
         return newNode;

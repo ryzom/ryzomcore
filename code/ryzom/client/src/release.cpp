@@ -666,7 +666,7 @@ void release()
 
 
 #if FINAL_VERSION
-	// openURL ("http://ryzom.com/exit/");
+	// openURL ("http://www.ryzomcore.org/exit/");
 #endif
 
 }// release //

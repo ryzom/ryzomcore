@@ -47,7 +47,7 @@
 	}
 
 	$_USER = new RUser();
-	
+
 
 	//create database connection
 	$DBc = new mySQL($_CONF['mysql_error']);
@@ -106,8 +106,8 @@
 		print_cat($iter3);
 		echo "</category>";
 	}
-	
+
 	echo "</ryzom_achievements>";
 
-	exit(0);
+	die();
 ?>

@@ -11,48 +11,52 @@ function change_permission(){
     global $WEBPATH;
     //if logged in
     if(WebUsers::isLoggedIn()){
-       
+
         //check if user who executed this function is an admin
         if(ticket_user::isAdmin(unserialize($_SESSION['ticket_user']))){
-            
+
             //in case the $_GET['value'] is smaller than 4 and the user whoes permission is being changed is different from the admin(id 1)
             if(isset($_GET['user_id']) && isset($_GET['value']) && $_GET['user_id'] != 1 && $_GET['value'] < 4 ){
                 $user_id = filter_var($_GET['user_id'], FILTER_SANITIZE_NUMBER_INT);
                 $value = filter_var($_GET['value'], FILTER_SANITIZE_NUMBER_INT);
-                
+
                 //execute change.
                 Ticket_User::change_permission(Ticket_User::constr_ExternId($user_id)->getTUserId(), $value);
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=show_user&id=".$user_id);
                 }else{
                     header("Location: ".$WEBPATH."?page=show_user&id=".$user_id);
                 }
-                exit;
-              
-                
+                throw new SystemExit();
+
+
             }else{
                 //ERROR: GET PARAMS not given or trying to change admin
+                header("Cache-Control: max-age=1");
                 if (Helpers::check_if_game_client()) {
                     header("Location: ".$INGAME_WEBPATH."?page=show_user&id=".$user_id);
                 }else{
                     header("Location: ".$WEBPATH."?page=show_user&id=".$user_id);
                 }
-                exit;
+                throw new SystemExit();
             }
-        
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
-     
+            throw new SystemExit();
+
         }
-    
+
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
-    
-    
+
+
 }

@@ -6,12 +6,12 @@
 */
 class Assigned{
 
-    private $user; /**< The id of the user being assigned */ 
-    private $ticket; /**< The id of the ticket being assigned */ 
-    
-    
+    private $user; /**< The id of the user being assigned */
+    private $ticket; /**< The id of the ticket being assigned */
+
+
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
-    
+
     /**
     * Assigns a ticket to a user or returns an error message.
     * It will first check if the ticket isn't already assigned, if not, it will create a new 'assigned' entry.
@@ -30,10 +30,10 @@ class Assigned{
         }else{
             return "ALREADY_ASSIGNED";
         }
-      
+
     }
-    
-    
+
+
     /**
     * Unassign a ticket being coupled to a user or return an error message.
     * It will first check if the ticket is assigned, if this is indeed the case it will delete the 'assigned' entry.
@@ -52,9 +52,9 @@ class Assigned{
         }else{
             return "NOT_ASSIGNED";
         }
-      
+
     }
-    
+
     /**
     * Get the (external) id of the user assigned to a ticket
     * @param $ticket_id the Id of the ticket that's being queried
@@ -65,11 +65,11 @@ class Assigned{
         $statement = $dbl->execute("SELECT ticket_user.ExternId FROM `assigned` JOIN `ticket_user` ON assigned.User = ticket_user.TUserId WHERE `Ticket` = :ticket_id", Array('ticket_id' => $ticket_id));
         $user_id = $statement->fetch();
         return $user_id['ExternId'];
-        
-        
-      
+
+
+
     }
-    
+
     /**
     * Check if a ticket is already assigned (in case the user_id param is used, it will check if it's assigned to that user)
     * @param $ticket_id the Id of the ticket that's being queried
@@ -79,26 +79,26 @@ class Assigned{
     public static function isAssigned( $ticket_id, $user_id = 0) {
         $dbl = new DBLayer("lib");
         //check if ticket is already assigned
-        
+
         if($user_id == 0 &&  $dbl->select("`assigned`", array('ticket_id' => $ticket_id), "`Ticket` = :ticket_id")->rowCount() ){
             return true;
         }else if( $dbl->select("`assigned`", array('ticket_id' => $ticket_id, 'user_id' => $user_id), "`Ticket` = :ticket_id and `User` = :user_id")->rowCount() ){
             return true;
         }else{
             return false;
-        } 
+        }
     }
-    
+
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-    
+
     /**
     * A constructor.
     * Empty constructor
     */
     public function __construct() {
     }
-    
-    
+
+
     /**
     * sets the object's attributes.
     * @param $values should be an array of the form array('User' => user_id, 'Ticket' => ticket_id).
@@ -107,25 +107,25 @@ class Assigned{
         $this->setUser($values['User']);
         $this->setTicket($values['Ticket']);
     }
-    
-    
+
+
     /**
     * creates a new 'assigned' entry.
     * this method will use the object's attributes for creating a new 'assigned' entry in the database.
     */
     public function create() {
         $dbl = new DBLayer("lib");
-	$dbl->insert("`assigned`", Array('User' => $this->getUser(), 'Ticket' => $this->getTicket());
+	$dbl->insert("`assigned`", Array('User' => $this->getUser(), 'Ticket' => $this->getTicket()));
     }
-    
-    
+
+
     /**
     * deletes an existing 'assigned' entry.
     * this method will use the object's attributes for deleting an existing 'assigned' entry in the database.
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-	$dbl->delete("`assigned`", array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket(), "`User` = :user_id and `Ticket` = :ticket_id"); 
+	$dbl->delete("`assigned`", array('user_id' => $this->getUser() ,'ticket_id' => $this->getTicket()), "`User` = :user_id and `Ticket` = :ticket_id");
     }
 
     /**
@@ -139,25 +139,25 @@ class Assigned{
         $row = $statement->fetch();
         $this->set($row);
     }
-    
+
 
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
-    
+
     /**
     * get user attribute of the object.
     */
     public function getUser(){
         return $this->user;
     }
-    
-    
+
+
     /**
     * get ticket attribute of the object.
     */
     public function getTicket(){
         return $this->ticket;
     }
-    
+
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
 
     /**
@@ -167,7 +167,7 @@ class Assigned{
     public function setUser($u){
         $this->user = $u;
     }
-    
+
     /**
     * set ticket attribute of the object.
     * @param $t integer id of the ticket
@@ -175,6 +175,6 @@ class Assigned{
     public function setTicket($t){
         $this->ticket = $t;
     }
-   
-    
+
+
 }

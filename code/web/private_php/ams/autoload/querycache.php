@@ -58,7 +58,7 @@ class Querycache{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ams_querycache", Array('type' => $this->getType(), 'query' => $this->getQuery(), 'db' => $this->getDb(), "SID=$this->getSID()" );
+        $dbl->update("ams_querycache", Array('type' => $this->getType(), 'query' => $this->getQuery(), 'db' => $this->getDb(), "SID=$this->getSID()" ));
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
