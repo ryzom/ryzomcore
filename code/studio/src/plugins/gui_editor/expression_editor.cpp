@@ -26,6 +26,8 @@
 #include "expression_node.h"
 #include "expression_link.h"
 
+#include <QMessageBox>
+
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
 QWidget( parent )
 {
@@ -112,6 +114,14 @@ void ExpressionEditor::onLinkItems()
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
 	ExpressionNode *from = static_cast< ExpressionNode* >( l[ 0 ] );
 	ExpressionNode *to = static_cast< ExpressionNode* >( l[ 1 ] );
+
+	if( ( from->link() != NULL ) || ( to->link() != NULL ) )
+	{
+		QMessageBox::information( this,
+									tr( "Failed to link nodes" ),
+									tr( "Unfortunately those nodes are already linked." ) );
+		return;
+	}
 
 	ExpressionLink *link = new ExpressionLink();
 	link->link( from, to );
