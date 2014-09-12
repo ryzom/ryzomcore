@@ -46,6 +46,8 @@
 #include "add_widget_widget.h"
 #include "texture_chooser.h"
 
+#include "expression_editor.h"
+
 namespace GUIEditor
 {
 	QString _lastDir;
@@ -72,6 +74,7 @@ namespace GUIEditor
 		widgetInfoTree = new CWidgetInfoTree;
 
 		tc = new TextureChooser();
+		ee = new ExpressionEditor();
 
 		createMenus();
 		readSettings();
@@ -120,6 +123,8 @@ namespace GUIEditor
 
 		delete tc;
 		tc = NULL;
+		delete ee;
+		ee = NULL;
 
 		delete messageProcessor;
 		messageProcessor = NULL;
@@ -365,6 +370,11 @@ namespace GUIEditor
 		tc->exec();
 	}
 
+	void GUIEditorWindow::onEEClicked()
+	{
+		ee->show();
+	}
+
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
@@ -413,6 +423,10 @@ namespace GUIEditor
 
 			a = new QAction( "Texture Chooser", this );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onTCClicked() ) );
+			m->addAction( a );
+
+			a = new QAction( "Expression Editor", this );
+			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onEEClicked() ) );
 			m->addAction( a );
 
 			menu = m;
