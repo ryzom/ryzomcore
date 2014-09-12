@@ -23,7 +23,6 @@
 #include "ui_expression_editor.h"
 
 class QGraphicsScene;
-class QGraphicsItem;
 
 class ExpressionEditor : public QWidget
 {
@@ -44,7 +43,7 @@ private:
 	Ui::ExpressionEditor m_ui;
 	QGraphicsScene *m_scene;
 
-	QGraphicsItem *m_selection;
+	bool m_hasSelection;
 };
 
 #endif

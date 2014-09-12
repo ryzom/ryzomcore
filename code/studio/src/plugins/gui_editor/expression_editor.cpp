@@ -28,7 +28,7 @@ QWidget( parent )
 {
 	m_ui.setupUi( this );
 
-	m_selection = NULL;
+	m_hasSelection = false;
 
 	m_scene = new QGraphicsScene( this );
 	m_ui.view->setScene( m_scene );
@@ -51,7 +51,7 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	a = menu.addAction( "Add rect" );
 	connect( a, SIGNAL( triggered() ), this, SLOT( onAddRect() ) );
 
-	if( m_selection != NULL )
+	if( m_hasSelection )
 	{
 		a = menu.addAction( "Remove" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onDeleteSelection() ) );
@@ -69,19 +69,19 @@ void ExpressionEditor::onAddRect()
 
 void ExpressionEditor::onDeleteSelection()
 {
-	m_scene->removeItem( m_selection );
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+	QListIterator< QGraphicsItem* > itr( l );
+	while( itr.hasNext() )
+		m_scene->removeItem( itr.next() );
 }
 
 void ExpressionEditor::onSelectionChanged()
 {
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
 	if( l.isEmpty() )
-	{
-		m_selection = NULL;
-		return;
-	}
-
-	m_selection = l[ 0 ];
+		m_hasSelection = false;
+	else
+		m_hasSelection = true;
 }
 
 
