@@ -7,10 +7,10 @@
 * @author Daan Janssens, mentored by Matthew Lagoe
 */
 function dashboard(){
-    
+
       //if logged in
     if(WebUsers::isLoggedIn()){
-       
+
         //is Mod
         if(ticket_user::isMod(unserialize($_SESSION['ticket_user']))){
             //return useful information about the status of the ticket system.
@@ -25,20 +25,22 @@ function dashboard(){
             global $INGAME_WEBPATH;
             $result['ingame_webpath'] = $INGAME_WEBPATH;
             return $result;
-        
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
-     
+            throw new SystemExit();
+
         }
-    
+
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
-    
-    
+
+
 }

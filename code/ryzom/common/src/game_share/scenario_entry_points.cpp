@@ -56,23 +56,8 @@ CScenarioEntryPoints::CScenarioEntryPoints()
 
 void CScenarioEntryPoints::init()
 {
-	CConfigFile cf;
-
-	cf.load("IslandScreenshots.cfg", true);
-
-	// get the scenario entry points file
-	CConfigFile::CVar * ciFile = cf.getVarPtr("CompleteIslandsFile");
-	if(ciFile)
-	{
-		_CompleteIslandsFilename = ciFile->asString();
-	}
-
-	// get the scenario entry points file
-	CConfigFile::CVar * epFile = cf.getVarPtr("EntryPointsFile");
-	if(epFile)
-	{
-		_EntryPointsFilename = epFile->asString();
-	}
+	_CompleteIslandsFilename = "r2_islands.xml";
+	_EntryPointsFilename = "r2_entry_points.txt";
 }
 //-----------------------------------------------------------------------------
 

@@ -15,24 +15,25 @@ function show_sgroup(){
             if( isset($_GET['id'])){
                 //['target_id'] holds the id of the group!
                 $result['target_id'] = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
-                
+
                 //if the $_GET['delete'] var is set and the user executing is an admin, an entry will be deleted out of the support group.
                 if(isset($_GET['delete']) && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $delete_id = filter_var($_GET['delete'], FILTER_SANITIZE_NUMBER_INT);
                     $result['delete'] = Support_Group::deleteUserOfSupportGroup( $delete_id, $result['target_id']  );
+                header("Cache-Control: max-age=1");
                     if (Helpers::check_if_game_client()) {
                         header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
                     }else{
                         header("Location: ".$WEBPATH."?page=show_sgroup&id=" . $result['target_id']);
                     }
-                    exit;
-                    
+                    throw new SystemExit();
+
                 }
-                
+
                 if(Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
                     $result['isAdmin'] = "TRUE";
                 }
-                
+
                 $group = Support_Group::getGroup($result['target_id']);
                 $result['groupsname'] = $group->getName();
                 $result['groupemail'] = $group->getGroupEmail();
@@ -58,26 +59,29 @@ function show_sgroup(){
                 }
 
                 return $result;
-                
-            
+
+
             }else{
-                
+
                 //ERROR: No page specified!
                 $_SESSION['error_code'] = "404";
+                header("Cache-Control: max-age=1");
                 header("Location: ams?page=error");
-                exit;
+                throw new SystemExit();
             }
-                
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
-    
+
 }

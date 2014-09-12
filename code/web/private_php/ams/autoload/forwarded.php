@@ -3,16 +3,16 @@
 * Handles the forwarding of a ticket to a support_group. This is being used to transfer tickets to different groups (eg Developers, Website-Team, SupportGroup etc..)
 * The idea is that someone can easily forward a ticket to a group and by doing that, the moderators that are in that group will receive the ticket in their todo queue.
 * @author Daan Janssens, mentored by Matthew Lagoe
-* 
+*
 */
 class Forwarded{
-    
-    private $group; /**< The id of the group to which the ticket is being forwarded */ 
-    private $ticket; /**< The id of the ticket being forwarded */ 
-    
+
+    private $group; /**< The id of the group to which the ticket is being forwarded */
+    private $ticket; /**< The id of the ticket being forwarded */
+
     ////////////////////////////////////////////Functions////////////////////////////////////////////////////
-    
-    
+
+
     /**
     * Forward a ticket to a group, also removes the previous group where it was forwarded to.
     * It will first check if the ticket is already forwarded, if that's the case, it will delete that entry.
@@ -32,10 +32,10 @@ class Forwarded{
         $forward->set(array('Group' => $group_id, 'Ticket' => $ticket_id));
         $forward->create();
         return "SUCCESS_FORWARDED";
-      
+
     }
-    
-    
+
+
     /**
     * get the id of the group a ticket is forwarded to.
     * @param $ticket_id the id of the ticket.
@@ -46,8 +46,8 @@ class Forwarded{
         $forw->load($ticket_id);
         return $forw->getGroup();
     }
-    
-    
+
+
     /**
     * check if the ticket is forwarded
     * @param $ticket_id the id of the ticket.
@@ -59,21 +59,21 @@ class Forwarded{
             return true;
         }else{
             return false;
-        } 
-        
+        }
+
     }
-    
+
     ////////////////////////////////////////////Methods////////////////////////////////////////////////////
-     
-     
+
+
     /**
     * A constructor.
     * Empty constructor
     */
     public function __construct() {
     }
-    
-   
+
+
     /**
     * sets the object's attributes.
     * @param $values should be an array of the form array('Group' => group_id, 'Ticket' => ticket_id).
@@ -82,8 +82,8 @@ class Forwarded{
         $this->setGroup($values['Group']);
         $this->setTicket($values['Ticket']);
     }
-    
-    
+
+
     /**
     * creates a new 'forwarded' entry.
     * this method will use the object's attributes for creating a new 'forwarded' entry in the database.
@@ -92,15 +92,15 @@ class Forwarded{
         $dbl = new DBLayer("lib");
         $dbl->insert("`forwarded`", Array('Group' => $this->getGroup(), 'Ticket' => $this->getTicket()));
     }
-    
-    
+
+
     /**
     * deletes an existing 'forwarded' entry.
     * this method will use the object's attributes for deleting an existing 'forwarded' entry in the database.
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-        $dbl->delete("`forwarded`", array('group_id' => $this->getGroup() ,'ticket_id' => $this->getTicket(), "`Group` = :group_id and `Ticket` = :ticket_id");
+        $dbl->delete("`forwarded`", array('group_id' => $this->getGroup() ,'ticket_id' => $this->getTicket(), "`Group` = :group_id and `Ticket` = :ticket_id"));
     }
 
 
@@ -115,24 +115,24 @@ class Forwarded{
         $row = $statement->fetch();
         $this->set($row);
     }
-    
+
 
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////
-     
+
     /**
     * get group attribute of the object.
     */
     public function getGroup(){
         return $this->group;
     }
-    
+
     /**
     * get ticket attribute of the object.
     */
     public function getTicket(){
         return $this->ticket;
     }
-    
+
     ////////////////////////////////////////////Setters////////////////////////////////////////////////////
 
     /**
@@ -142,7 +142,7 @@ class Forwarded{
     public function setGroup($g){
         $this->group = $g;
     }
-    
+
     /**
     * set ticket attribute of the object.
     * @param $t integer id of the ticket
@@ -150,6 +150,6 @@ class Forwarded{
     public function setTicket($t){
         $this->ticket = $t;
     }
-   
-    
+
+
 }

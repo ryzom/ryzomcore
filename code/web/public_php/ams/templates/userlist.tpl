@@ -1,15 +1,11 @@
 {block name=content}
-<div class="row-fluid">		
-				<div class="box span12">
-					<div class="box-header well" data-original-title>
-						<h2><i class="icon-user"></i> Members</h2>
-						<div class="box-icon">
-							<a href="#" class="btn btn-setting btn-round"><i class="icon-cog"></i></a>
-							<a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-							<a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-						</div>
+<div class="row-fluid">
+				<div class="box col-md-12">
+				<div class="panel panel-default">
+					<div class="panel-heading" data-original-title>
+						<span class="icon-user"></span> Members
 					</div>
-					<div class="box-content">
+					<div class="panel-body">
 						<table class="table table-striped table-bordered">
 						  <thead>
 							  <tr>
@@ -19,7 +15,7 @@
 								  <th>Permission</th>
 								  <th>Action</th>
 							  </tr>
-						  </thead>   
+						  </thead>
 						  <tbody>
 							{foreach from=$userlist item=element}
 							<tr>
@@ -31,14 +27,14 @@
 								{if $element.permission eq 3}<td class="center"><span class="label label-important">Admin</span></td>{/if}
 								<td class="center">
 									<div class="btn-group" style="display: inline-block;">
-										<a class="btn btn-primary" href="index.php?page=show_user&id={$element.id}"><i class=" icon-eye-open icon-white"></i> Show User</a>
+										<a class="btn btn-primary" href="index.php?page=show_user&id={$element.id}"><span class=" icon-eye-open icon-white"></span> Show User</a>
 									</div>
 									<div class="btn-group" style="display: inline-block;">
-										<a class="btn btn-info" href="index.php?page=settings&id={$element.id}"><i class=" icon-pencil icon-white"></i> Edit User</a>
+										<a class="btn btn-info" href="index.php?page=settings&id={$element.id}"><span class=" icon-pencil icon-white"></span> Edit User</a>
 									</div>
 									{if isset($isAdmin) and $isAdmin eq 'TRUE' and $element.id neq 1}
 									<div class="btn-group" style="display: inline-block;">
-									<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><i class=" icon-star icon-white"></i> Change Role<span class="caret"></span></button>
+									<button class="btn btn-primary dropdown-toggle" data-toggle="dropdown"><span class=" icon-star icon-white"></span> Change Role<span class="caret"></span></button>
 									<ul class="dropdown-menu">
 									    <li class="divider"></li>
 										{if $element.permission eq 1}
@@ -53,14 +49,14 @@
 										{/if}
 										<li class="divider"></li>
 									</ul>
-									 
+
 								      </div>
 									{/if}
 								</td>
-								
+
 							</tr>
 							{/foreach}
-					
+
 						  </tbody>
 					  </table>
 					  <div style="width: 300px; margin:0px auto;">
@@ -73,8 +69,9 @@
 						</ul>
 					  </div>
 					</div>
+					</div>
 				</div><!--/span-->
-			
+
 			</div><!--/row-->
 {/block}
 

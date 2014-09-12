@@ -86,6 +86,8 @@ public:
 
 	virtual void open();
 
+	void save();
+
 	virtual QUndoStack *undoStack();
 
 	virtual QWidget *widget();

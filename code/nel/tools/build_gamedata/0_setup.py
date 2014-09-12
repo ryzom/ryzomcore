@@ -8,7 +8,7 @@
 # Run all setup processes
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -266,7 +266,7 @@ if not args.noconf:
 	sf.write("# Site configuration.\n")
 	sf.write("# \n")
 	sf.write("# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>\n")
-	sf.write("# Copyright (C) 2010  Winch Gate Property Limited\n")
+	sf.write("# Copyright (C) 2009-2014  by authors\n")
 	sf.write("# \n")
 	sf.write("# This program is free software: you can redistribute it and/or modify\n")
 	sf.write("# it under the terms of the GNU Affero General Public License as\n")

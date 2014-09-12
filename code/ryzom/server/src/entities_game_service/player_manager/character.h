@@ -115,7 +115,6 @@ class CMissionEvent;
 class CMissionSolo;
 class CCharacterVersionAdapter;
 class CCharacterEncyclopedia;
-class CCharacterAchievements;
 class CCharacterGameEvent;
 class CCharacterRespawnPoints;
 class CCharacterShoppingList;
@@ -443,10 +442,8 @@ private:
 	static const std::string	&contactListActionToString(TConctactListAction e);
 
 	NL_INSTANCE_COUNTER_DECL(CCharacter);
+
 public:
-
-	void mobKill(TDataSetRow creatureRowId);
-
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -3504,8 +3501,6 @@ private:
 	bool							_RespawnMainLandInTown;
 
 	CCharacterEncyclopedia			*_EncycloChar;
-
-	CCharacterAchievements			*_AchievementsChar;
 
 	CCharacterGameEvent				*_GameEvent;
 

@@ -3056,6 +3056,13 @@ void CFormElmAtom::setValue (const char *value)
 
 // ***************************************************************************
 
+void CFormElmAtom::getValue (std::string &result) const
+{
+	result = Value;
+}
+
+// ***************************************************************************
+
 void CFormElmAtom::getFormName (std::string &result, const CFormElm *child) const
 {
 	// Must be NULL

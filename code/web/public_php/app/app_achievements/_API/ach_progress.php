@@ -34,8 +34,8 @@
 	}
 	echo "</open>";
 	echo "</objectives>";
-		
+
 	echo "</ryzom_progress>";
 
-	exit(0);
+	die();
 ?>

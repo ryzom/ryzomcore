@@ -147,7 +147,6 @@ namespace NLMISC
 		bool DebugNeedAssert;
 		bool NoAssert;
 		bool AlreadyCreateSharedAmongThreads;
-
 	};
 
 	/** This class implements the context interface for the a library module.
@@ -184,6 +183,7 @@ namespace NLMISC
 		virtual void setNoAssert(bool noAssert);
 		virtual bool getAlreadyCreateSharedAmongThreads();
 		virtual void setAlreadyCreateSharedAmongThreads(bool b);
+
 	private:
 		/// Pointer to the application context.
 		INelContext		*_ApplicationContext;

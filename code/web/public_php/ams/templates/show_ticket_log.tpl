@@ -1,14 +1,11 @@
 {block name=content}
 <div class="row-fluid sortable ui-sortable">
-    <div class="box span12">
-        <div class="box-header well" data-original-title="">
-            <h2><i class="icon-tag"></i> Log of Ticket #{$ticket_id}</h2>
-            <div class="box-icon">
-                <a href="#" class="btn btn-minimize btn-round"><i class="icon-chevron-up"></i></a>
-                <a href="#" class="btn btn-close btn-round"><i class="icon-remove"></i></a>
-            </div>
+    <div class="box col-md-12">
+	<div class="panel panel-default">
+        <div class="panel-heading" data-original-title="">
+            <span class="icon-tag"></span> Log of Ticket #{$ticket_id}
         </div>
-        <div class="box-content">
+        <div class="panel-body">
             <div class="row-fluid">
                 <legend>Title: <a href="index.php?page=show_ticket&id={$ticket_id}">{$ticket_title}</a></legend>
 		<table class="table table-striped table-bordered bootstrap-datatable datatable">
@@ -18,7 +15,7 @@
 				    <th>Timestamp</th>
 				    <th>Query</th>
 			    </tr>
-		    </thead>   
+		    </thead>
 		    <tbody>
 			  {foreach from=$ticket_logs item=log}
 			  <tr>
@@ -27,12 +24,12 @@
 				<td>{$log.query}</td>
 			  </tr>
 			  {/foreach}
-	  
+
 		    </tbody>
-	    </table>            
+	    </table>
 	    </div>
+	</div>
 	</div>
     </div><!--/span-->
 </div><!--/row-->
 {/block}
-	

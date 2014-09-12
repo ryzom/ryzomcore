@@ -75,7 +75,7 @@ INelContext::~INelContext()
 
 
 
-void	INelContext::contextReady()
+void INelContext::contextReady()
 {
 	// Register the NeL Context
 	// This assert doesn't work for Linux due to ELF symbol relocation

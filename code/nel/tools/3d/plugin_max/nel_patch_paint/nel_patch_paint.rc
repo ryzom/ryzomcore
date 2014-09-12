@@ -96,8 +96,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 9, 1, 0
- PRODUCTVERSION 0, 9, 1, 0
+ FILEVERSION 0, 10, 0, 0
+ PRODUCTVERSION 0, 10, 0, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -116,14 +116,14 @@ BEGIN
             VALUE "Comments", "TECH: cyril.corvazier\0"
             VALUE "CompanyName", "Ryzom Core\0"
             VALUE "FileDescription", "NeL Patch Paint\0"
-            VALUE "FileVersion", "0.9.1\0"
+            VALUE "FileVersion", "0.10.0\0"
             VALUE "InternalName", "mods\0"
             VALUE "LegalCopyright", "Copyright © 2000 Nevrax Ltd\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "nelpatchpaint.dlm\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Ryzom Core\0"
-            VALUE "ProductVersion", "0.9.1\0"
+            VALUE "ProductVersion", "0.10.0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

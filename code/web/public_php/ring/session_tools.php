@@ -107,14 +107,14 @@ function inviteOwnerInSession($charId, $domainId, $sessionId)
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 	
-	global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $RingDBName, /*$SessionId,*/ $SessionToolsResult;
+	global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, /*$SessionId,*/ $SessionToolsResult;
 	global $DBHost, $RingDBUserName, $RingDBPassword;
 
 	$SessionId = $sessionId;
 	$DomainId = $domainId;
 
 	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword) or die("Can't connect to ring database");
-	mysqli_select_db($link, $RingDBName) or die ("Can't access to the db dbname:$RingDBName");
+	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db dbname:" . $domainInfo['ring_db_name']);
 
 	$sessionId = (int) $sessionId;
 	$query = "select session_type from sessions where session_id=".$sessionId;
@@ -146,7 +146,7 @@ class StartSessionCb extends CRingSessionManagerWeb
 {
 	function invokeResult($userId, $resultCode, $resultString)
 	{
-		global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $RingDBName, $SessionId, $DomainId, $SessionToolsResult;
+		global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $SessionId, $DomainId, $SessionToolsResult;
 		
 		if ($resultCode != 0)
 		{
@@ -170,7 +170,7 @@ class InviteOwnerCb extends CRingSessionManagerWeb
 {
 	function invokeResult($userId, $resultCode, $resultString)
 	{
-		global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $RingDBName, $SessionId, $DomainId, $SessionToolsResult;
+		global $rsmProxy, $rsmSkel, $userId, $charId, $callbackClient, $SessionId, $DomainId, $SessionToolsResult;
 		
 		// jump back to main page
 		echo "<h1>The session ".$SessionId." have been started</h1>";

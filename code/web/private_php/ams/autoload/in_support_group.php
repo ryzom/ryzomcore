@@ -54,7 +54,7 @@ class In_Support_Group{
     */
     public function create() {
         $dbl = new DBLayer("lib");
-        $dbl->insert("`in_support_group`", Array('User' => $this->user, 'Group' => $this->group);
+        $dbl->insert("`in_support_group`", Array('User' => $this->user, 'Group' => $this->group));
     }
     
     
@@ -64,7 +64,7 @@ class In_Support_Group{
     */
     public function delete() {
         $dbl = new DBLayer("lib");
-        $dbl->delete("`in_support_group`", array('user_id' => $this->getUser() ,'group_id' => $this->getGroup(), "`User` = :user_id and `Group` = :group_id");
+        $dbl->delete("`in_support_group`", array('user_id' => $this->getUser() ,'group_id' => $this->getGroup()), "`User` = :user_id and `Group` = :group_id");
     }
 
     /*

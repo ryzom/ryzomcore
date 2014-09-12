@@ -1,0 +1,20 @@
+SetHandler none
+SetHandler default-handler
+Options -ExecCGI
+<IfModule mod_php5.c>
+	php_flag engine off
+</IfModule>
+RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
+Options -Indexes
+DirectoryIndex disabled
+<Files *>
+	SetHandler none
+	SetHandler default-handler
+	Options -ExecCGI
+	<IfModule mod_php5.c>
+		php_flag engine off
+	</IfModule>
+	RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
+	ForceType application/octet-stream
+	Header set Content-Disposition attachment
+</Files>

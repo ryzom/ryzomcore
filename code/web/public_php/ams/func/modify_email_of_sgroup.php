@@ -10,7 +10,7 @@ function modify_email_of_sgroup(){
     global $INGAME_WEBPATH;
     global $WEBPATH;
     if(WebUsers::isLoggedIn()){
-        
+
         //check if user is an admin
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user'])) &&  isset($_POST['target_id'])){
 
@@ -18,11 +18,11 @@ function modify_email_of_sgroup(){
             $group = Support_Group::getGroup($sgroupid);
             $groupemail = filter_var($_POST['GroupEmail'],FILTER_SANITIZE_STRING);
             if(Users::validEmail($groupemail) || $groupemail == ""){
-                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_STRING);              
+                $password = filter_var($_POST['IMAP_Password'],FILTER_SANITIZE_STRING);
                 $group->setGroupEmail($groupemail);
                 $group->setIMAP_MailServer(filter_var($_POST['IMAP_MailServer'],FILTER_SANITIZE_STRING));
                 $group->setIMAP_Username(filter_var($_POST['IMAP_Username'],FILTER_SANITIZE_STRING));
-                
+
                 //encrypt password!
                 global $cfg;
                 $crypter = new MyCrypt($cfg['crypt']);
@@ -36,7 +36,7 @@ function modify_email_of_sgroup(){
             }else{
                 $result['RESULT_OF_MODIFYING'] = "EMAIL_NOT_VALID";
             }
-             
+
             $result['permission'] = unserialize($_SESSION['ticket_user'])->getPermission();
             $result['no_visible_elements'] = 'FALSE';
             $result['username'] = $_SESSION['user'];
@@ -44,23 +44,26 @@ function modify_email_of_sgroup(){
             //require_once($SITEBASE . 'inc/show_sgroup.php');
             //$result= array_merge($result, show_sgroup());
             //helpers :: loadtemplate( 'show_sgroup', $result);
+                header("Cache-Control: max-age=1");
             if (Helpers::check_if_game_client()) {
                 header("Location: ".$INGAME_WEBPATH."?page=show_sgroup&id=".$sgroupid);
             }else{
                 header("Location: ".$WEBPATH."?page=show_sgroup&id=".$sgroupid);
             }
-            exit;
-            
+            throw new SystemExit();
+
         }else{
             //ERROR: No access!
             $_SESSION['error_code'] = "403";
+                header("Cache-Control: max-age=1");
             header("Location: index.php?page=error");
-            exit;
+            throw new SystemExit();
         }
     }else{
         //ERROR: not logged in!
+                header("Cache-Control: max-age=1");
         header("Location: index.php");
-        exit;
+        throw new SystemExit();
     }
 
 }
