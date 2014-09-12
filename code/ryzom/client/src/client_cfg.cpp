@@ -433,11 +433,11 @@ CClientConfig::CClientConfig()
 	PatchVersion.clear();
 	PatchServer.clear();
 
-	WebIgMainDomain = "shard.ryzomcore.org";
+	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
-	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
+	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
 
 
 	///////////////

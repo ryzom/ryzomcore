@@ -1084,7 +1084,7 @@ void initShardDisplay()
 	for (uint fff = 0; fff < 20; ++fff)
 	{
 		CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-					32*fff%46546, "32.32.32.32", "http://www.ryzomcore.org" );
+					32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
 		Shards.push_back(s);
 	}*/
 
@@ -1211,7 +1211,7 @@ void onlogin(bool vanishScreen = true)
 //		for (uint fff = 0; fff < 20; ++fff)
 //		{
 //			CShard s (	toString("%05d",fff), fff%3, fff+32, toString("%s%d","pipo",fff),
-//						32*fff%46546, "32.32.32.32", "http://www.ryzomcore.org" );
+//						32*fff%46546, "32.32.32.32", "http://www.ryzom.com" );
 //			Shards.push_back(s);
 //		}*/
 //
