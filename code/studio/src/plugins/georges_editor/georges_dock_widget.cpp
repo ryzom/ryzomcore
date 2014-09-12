@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "georges_dock_widget.h"
+#include <QMessageBox>
 
 GeorgesDockWidget::GeorgesDockWidget( QWidget *parent ) :
 QDockWidget( parent )
@@ -27,6 +28,31 @@ QDockWidget( parent )
 
 GeorgesDockWidget::~GeorgesDockWidget()
 {
+}
+
+void GeorgesDockWidget::closeEvent( QCloseEvent *e )
+{
+	if( isModified() )
+	{
+		QString title = windowTitle();
+		title.remove( '*' );
+
+		int reply = QMessageBox::question( this,
+											tr( "Closing dialog" ),
+											title + tr( " has been modified.\nWould you like to save the changes?" ),
+											QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel );
+
+		if( reply == QMessageBox::Cancel )
+		{
+			e->ignore();
+			return;
+		}
+
+		if( reply == QMessageBox::Yes )
+			write();
+	}
+
+	Q_EMIT closing( this );
 }
 
 QString GeorgesDockWidget::buildLogMsg( const QString &msg )

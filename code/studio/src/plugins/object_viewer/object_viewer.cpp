@@ -115,7 +115,7 @@ void CObjectViewer::init( NL3D::UDriver *driver )
 
 	// create the text context
 	nlassert(!_TextContext);
-	_TextContext = _Driver->createTextContext(_FontName);
+	_TextContext = _Driver->createTextContext(NLMISC::CPath::lookup(_FontName));
 	nlassert(_TextContext);
 
 	NL3D::CBloomEffect::instance().setDriver(_Driver);

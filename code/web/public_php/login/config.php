@@ -21,7 +21,6 @@ $DBName         = $cfg['db']['shard']['name'];
 
 $RingDBUserName = $cfg['db']['ring']['user'];
 $RingDBPassword = $cfg['db']['ring']['pass'];
-$RingDBName     = $cfg['db']['ring']['name'];
 
 // If true, the server will add automatically unknown user in the database
 // (in nel.user, nel.permission, ring.ring_user and ring.characters

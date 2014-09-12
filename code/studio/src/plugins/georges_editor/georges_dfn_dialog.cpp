@@ -82,6 +82,8 @@ bool GeorgesDFNDialog::load( const QString &fileName )
 
 	m_fileName = fileName;
 
+	connect(m_ui.commentsEdit, SIGNAL(textChanged()), this, SLOT(onCommentsEdited()));
+
 	return true;
 }
 
@@ -91,6 +93,7 @@ void GeorgesDFNDialog::write()
 	setWindowTitle( windowTitle().remove( "*" ) );
 
 	m_pvt->dfn->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+	m_pvt->dfn->Header.Comments = m_ui.commentsEdit->toPlainText().toUtf8().constData();
 
 	NLMISC::COFile file;
 	if( !file.open( m_fileName.toUtf8().constData(), false, true, false ) )
@@ -115,6 +118,8 @@ void GeorgesDFNDialog::newDocument( const QString &fileName )
 	m_pvt->dfn = new NLGEORGES::CFormDfn();
 
 	loadDfn();
+
+	log( "Created" );
 }
 
 void GeorgesDFNDialog::onAddClicked()
@@ -174,6 +179,11 @@ void GeorgesDFNDialog::onValueChanged( const QString &key, const QString &value 
 	{
 		m_ui.list->currentItem()->setText( value );
 	}
+}
+
+void GeorgesDFNDialog::onCommentsEdited()
+{
+	onModified();
 }
 
 void GeorgesDFNDialog::loadDfn()

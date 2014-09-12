@@ -90,6 +90,7 @@ namespace GeorgesQt
 		
 		connect(m_browserCtrl, SIGNAL(modified()), this, SLOT(modifiedFile()));
 		connect(m_browserCtrl, SIGNAL(valueChanged(const QString&,const QString&)), this, SLOT(onValueChanged(const QString&,const QString&)));
+		connect(m_browserCtrl, SIGNAL(vstructChanged(const QString&)), this, SLOT( onVStructChanged(const QString&)));
 	}
 
 	CGeorgesTreeViewDialog::~CGeorgesTreeViewDialog()
@@ -322,6 +323,8 @@ namespace GeorgesQt
 		QFileInfo info( fileName );
 		setWindowTitle( info.fileName() );
 
+		connect(m_ui.commentEdit, SIGNAL(textChanged()), this, SLOT(onCommentsEdited()));
+
 		return true;
 	}
 
@@ -329,6 +332,7 @@ namespace GeorgesQt
 	{
 		NLGEORGES::CForm *form = static_cast< NLGEORGES::CForm* >( m_form );
 		form->Header.Log = m_ui.logEdit->toPlainText().toUtf8().constData();
+		form->Header.Comments = m_ui.commentEdit->toPlainText().toUtf8().constData();
 
 		NLMISC::COFile file;
 		std::string s = m_fileName.toUtf8().constData();
@@ -422,6 +426,8 @@ namespace GeorgesQt
 		QFileInfo info( fileName );
 		setWindowTitle( info.fileName() + "*" );
 		setModified( true );
+
+		log( "Created" );
 
 		return true;
 	}
@@ -573,10 +579,24 @@ namespace GeorgesQt
 		modifiedFile();
 	}
 
-	void CGeorgesTreeViewDialog::closeEvent(QCloseEvent *event) 
+	void CGeorgesTreeViewDialog::onVStructChanged( const QString &name )
 	{
-		Q_EMIT closing();
-		deleteLater();
+		QModelIndex idx = m_ui.treeView->currentIndex();
+		QModelIndex parent = idx.parent();
+		int row = idx.row();
+
+		m_model->changeVStructDfn( idx );
+
+		idx = m_model->index( row, 0, parent );
+
+		m_ui.treeView->expandAll();
+		m_ui.treeView->setCurrentIndex( idx );
+		m_browserCtrl->clicked( idx );
+	}
+
+	void CGeorgesTreeViewDialog::onCommentsEdited()
+	{
+		modifiedFile();
 	}
 
 	void CGeorgesTreeViewDialog::checkVisibility(bool visible) {

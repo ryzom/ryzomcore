@@ -44,6 +44,7 @@ private Q_SLOTS:
 	void onCurrentRowChanged( int row );
 
 	void onValueChanged( const QString& key, const QString &value );
+	void onCommentsEdited();
 
 private:
 	void loadDfn();
@@ -53,7 +54,6 @@ private:
 
 	Ui::GeorgesDFNDialog m_ui;
 	GeorgesDFNDialogPvt *m_pvt;
-	QString m_fileName;
 };
 
 #endif

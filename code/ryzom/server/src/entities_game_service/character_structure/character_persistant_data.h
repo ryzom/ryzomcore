@@ -73,7 +73,7 @@ public:
 	//std::vector< CCharacterSentence * >	_MemorizedSentencesSpecial;
 	
 	/// inventory of known bricks (map Id to Latency end date)
-	std::map< NLMISC::CSheetId, CKnownBrickInfo >		_KnownBricks;
+	//std::map< NLMISC::CSheetId, CKnownBrickInfo >		_KnownBricks;
 
 	/// the known faber plans for that player (directly the reflect of the database)
 //	std::vector<uint64>									_KnownFaberPlans;

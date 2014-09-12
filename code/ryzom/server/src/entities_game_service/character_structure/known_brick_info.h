@@ -18,7 +18,7 @@
 
 #ifndef RY_KNOWN_BRICK_INFO_H
 #define RY_KNOWN_BRICK_INFO_H
-
+/*
 // ---------------------------------------------------------------------------
 class CStaticGameBrick;
 
@@ -44,6 +44,6 @@ struct CKnownBrickInfo
 		// and the Form is set while setting the databse in the setDatabase() method
 	}
 };
-
+*/
 #endif // RY_KNOWN_BRICK_INFO_H
 /* known_brick_info.h */
