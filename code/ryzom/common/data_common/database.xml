@@ -195,7 +195,8 @@
     <branch name="CONTEXT_MENU"
             atom="1">
       <leaf name="PROGRAMMES"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- options for missions in the context menu -->
       <branch name="MISSIONS_OPTIONS">
         <branch name=""
