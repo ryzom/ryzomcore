@@ -328,11 +328,11 @@ CClientConfig::CClientConfig()
 
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
+	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
 	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://www.ryzom.com/profile";
+	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
 	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
+	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
@@ -433,11 +433,11 @@ CClientConfig::CClientConfig()
 	PatchVersion.clear();
 	PatchServer.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
+	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
-	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
