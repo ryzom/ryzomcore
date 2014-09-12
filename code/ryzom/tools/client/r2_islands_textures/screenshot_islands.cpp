@@ -109,6 +109,7 @@ void CScreenshotIslands::init()
 		}
 	}
 	CPath::remapExtension("dds", "tga", true);
+	CPath::remapExtension("dds", "png", true);
 
 	// get the scenario entry points file
 	CConfigFile::CVar * epFile = cf.getVarPtr("CompleteIslandsFile");
