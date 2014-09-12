@@ -48,7 +48,7 @@
 
 
 // Server share
-#include "server_share/bmp4image.h"
+#include "game_share/bmp4image.h"
 #include "server_share/continent_container.h"
 
 
