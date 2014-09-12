@@ -26,7 +26,6 @@
 
 #include "character_structure/pact_class.h"
 #include "character_structure/character_sentence.h"
-#include "character_structure/known_brick_info.h"
 #include "game_item_manager/game_item.h"
 
 /**
