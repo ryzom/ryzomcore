@@ -85,11 +85,6 @@ void CEventEmitterMulti::submitEvents(CEventServer &server, bool allWindows)
 }
 
 ///============================================================
-void CEventEmitterMulti::emulateMouseRawMode(bool enable)
-{
-}
-
-///============================================================
 IEventEmitter *CEventEmitterMulti::getEmitter(uint index)
 {
 	nlassert(index < _Emitters.size());

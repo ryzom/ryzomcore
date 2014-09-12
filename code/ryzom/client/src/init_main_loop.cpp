@@ -40,6 +40,8 @@
 #include "nel/3d/u_cloud_scape.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/u_water_env_map.h"
+#include "nel/3d/material.h"
+#include "nel/3d/fxaa.h"
 // Sound
 #include "nel/sound/u_audio_mixer.h"
 // Client
@@ -124,6 +126,8 @@ namespace R2
 {
 	extern bool ReloadUIFlag;
 }
+
+extern bool SetMousePosFirstTime;
 
 extern EGSPD::CSeason::TSeason	ManualSeasonValue;
 UTextureFile			*LoadingBitmap = NULL;
@@ -562,6 +566,9 @@ void initMainLoop()
 		Scene = Driver->createScene(false);
 		if(Scene == 0)
 			nlerror("initMainLoop : Cannot create a Scene.");
+
+		// create effects
+		if (ClientCfg.FXAA && !FXAA) FXAA = new NL3D::CFXAA(Driver);
 
 		// use this scene for bloom effect
 		CBloomEffect::getInstance().setScene(Scene);
@@ -1253,7 +1260,8 @@ void initMainLoop()
 //	NLMEMORY::CheckHeap (true);
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
-	InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+	SetMousePosFirstTime = true;
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required
 	// NB nico : done at end of loading
@@ -1496,6 +1504,7 @@ void initWelcomeWindow()
 
 // ***************************************************************************
 
+// NOTE: This feature is not really used anymore, it is a patch transition
 void initHardwareCursor(bool secondCall)
 {
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
@@ -1571,6 +1580,7 @@ void initBloomConfigUI()
 		if(group)
 			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom"));
 
+		ClientCfg.writeBool("FXAA", false);
 		ClientCfg.writeBool("Bloom", false);
 		ClientCfg.writeBool("SquareBloom", false);
 		ClientCfg.writeInt("DensityBloom", 0);

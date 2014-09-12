@@ -192,7 +192,10 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	_PBTri.lock (iba);
 	iba.setTri(0, 0, 1, 2);
 
+	_RenderTargetManager.m_Driver = this;
 	_ShapeBank._DriverUser = this;
+
+	_EffectRenderTarget = NULL;
 
 	NL_SET_IB_NAME(_PBLine, "CDriverUser::_PBLine");
 	NL_SET_IB_NAME(_PBTri, "CDriverUser::_PBTri");
@@ -246,7 +249,7 @@ bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool 
 	NL3D_HAUTO_UI_DRIVER;
 
 	// window init.
-	if (_Driver->setDisplay(wnd, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias), show, resizeable))
+	if (_Driver->setDisplay(wnd, GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias, mode.DisplayDevice), show, resizeable))
 	{
 		// Always true
 		nlverify (activate());
@@ -290,7 +293,7 @@ bool			CDriverUser::setDisplay(nlWindow wnd, const CMode &mode, bool show, bool 
 // ***************************************************************************
 bool CDriverUser::setMode(const CMode& mode)
 {
-	return _Driver->setMode(GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias));
+	return _Driver->setMode(GfxMode(mode.Width, mode.Height, mode.Depth, mode.Windowed, false, mode.Frequency, mode.AntiAlias, mode.DisplayDevice));
 }
 
 // ----------------------------------------------------------------------------
@@ -316,7 +319,7 @@ bool CDriverUser::getModes(std::vector<CMode> &modes)
 	bool res = _Driver->getModes(vTmp);
 	modes.clear();
 	for (uint i = 0; i < vTmp.size(); ++i)
-		modes.push_back(CMode(vTmp[i].Width, vTmp[i].Height, vTmp[i].Depth, vTmp[i].Windowed, vTmp[i].Frequency, vTmp[i].AntiAlias));
+		modes.push_back(CMode(vTmp[i].Width, vTmp[i].Height, vTmp[i].Depth, vTmp[i].Windowed, vTmp[i].Frequency, vTmp[i].AntiAlias, vTmp[i].DisplayDevice));
 
 	std::sort(modes.begin(), modes.end(), CModeSorter());
 
@@ -1357,6 +1360,7 @@ void			CDriverUser::swapBuffers()
 	NL3D_HAUTO_SWAP_DRIVER;
 
 	_Driver->swapBuffers();
+	_RenderTargetManager.cleanup();
 }
 
 // ***************************************************************************
@@ -1609,36 +1613,6 @@ bool			CDriverUser::fillBuffer (CBitmap &bitmap)
 // ***************************************************************************
 // ***************************************************************************
 
-NLMISC::IMouseDevice			*CDriverUser::enableLowLevelMouse(bool enable, bool exclusive)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelMouse(enable, exclusive);
-}
-NLMISC::IKeyboardDevice			*CDriverUser::enableLowLevelKeyboard(bool enable)
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->enableLowLevelKeyboard(enable);
-}
-
-void CDriverUser::emulateMouseRawMode(bool enable)
-{
-	_Driver->getEventEmitter()->emulateMouseRawMode(enable);
-}
-
-uint CDriverUser::getDoubleClickDelay(bool hardwareMouse)
-{
-	NL3D_HAUTO_UI_DRIVER;
-	return _Driver->getDoubleClickDelay(hardwareMouse);
-}
-
-NLMISC::IInputDeviceManager		*CDriverUser::getLowLevelInputDeviceManager()
-{
-	NL3D_HAUTO_UI_DRIVER;
-
-	return _Driver->getLowLevelInputDeviceManager();
-}
 void			CDriverUser::showCursor (bool b)
 {
 	NL3D_HAUTO_UI_DRIVER;
@@ -1974,9 +1948,7 @@ bool CDriverUser::setRenderTarget(class UTexture & uTex, uint32 x, uint32 y, uin
 
 	bool result = _Driver->setRenderTarget(tex, x, y, width, height, mipmapLevel, cubeFace);
 
-	CViewport currentViewport;
-	_Driver->getViewport(currentViewport);
-	setViewport(currentViewport);
+	setupMatrixContext();
 
 	return result;
 }
