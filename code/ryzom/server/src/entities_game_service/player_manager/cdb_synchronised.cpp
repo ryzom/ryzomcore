@@ -582,26 +582,42 @@ void	CCDBSynchronised::pushDelta( CBitMemStream& s, CCDBStructNodeLeaf *node, ui
 		value = (uint64)_DataContainer.getValue64( index );
 		//_DataContainer.archiveCurrentValue( index );
 
-		if ( node->type() == ICDBStructNode::TEXT )
+		if ( node->nullable() && value == 0 )
 		{
-			s.serialAndLog2( value, 32 );
-			bitsize += 32;
-			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
-		}
-		else if ( node->type() == ICDBStructNode::PACKED )
-		{
-			uint bits;
-			pushPackedValue( s, value, bitsize, bits );
-			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
+			uint64 isNull = 1;
+			s.serialAndLog2( isNull, 1 );
+			bitsize += 1;
 		}
 		else
 		{
-			s.serialAndLog2( value, (uint)node->type() );
-			bitsize += (uint32)node->type();
-			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %"NL_I64"d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+			if ( node->nullable() )
+			{
+				uint64 isNull = 0;
+				s.serialAndLog2( isNull, 1 );
+				bitsize += 1;
+			}
+
+			if ( node->type() == ICDBStructNode::TEXT )
+			{
+				s.serialAndLog2( value, 32 );
+				bitsize += 32;
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+			}
+			else if ( node->type() == ICDBStructNode::PACKED )
+			{
+				uint bits;
+				pushPackedValue( s, value, bitsize, bits );
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %"NL_I64"d (PACKED %u bits) for index %d prop %s", (sint64)value, bits, index, node->buildTextId().toString().c_str() );
+			}
+			else
+			{
+				s.serialAndLog2( value, (uint)node->type() );
+				bitsize += (uint32)node->type();
+				if ( VerboseDatabase )
+					nldebug( "CDB: Pushing value %"NL_I64"d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+			}
 		}
 	}
 	else

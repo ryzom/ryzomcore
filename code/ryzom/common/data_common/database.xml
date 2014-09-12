@@ -1,4 +1,8 @@
 <database_description>
+  <!-- 2014-09-12: Now possible to use nullable="1" in leafs. This will
+  add 1 additional bit to the field, which will be the only bit sent
+  when the value of the field is 0. Use only for fields which are 
+  updated less frequently and which are often reset. -KAE -->
   <!-- Define bank superclass -->
   <bank_superclass>
     <bank name="PLR"
@@ -108,6 +112,7 @@
             bank="PLR">
       <leaf name="SHEET"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <leaf name="RUN"
             type="I32" />
@@ -149,7 +154,8 @@
       <branch name=""
               count="64">
         <leaf name="TICK_RANGE"
-              type="I64" />
+              type="I64"
+              nullable="1" />
         <!-- 32b for start tick and 32b for end tick -->
       </branch>
     </branch>
@@ -195,7 +201,8 @@
         <branch name=""
                 count="8">
           <leaf name="TITLE"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
           <leaf name="PLAYER_GIFT_NEEDED"
                 type="I1" />
@@ -207,13 +214,16 @@
       </branch>
       <!-- A NPC may offer to view a webpage -->
       <leaf name="WEB_PAGE_TITLE"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- a text ID of 0 means there's no WebPage -->
       <leaf name="WEB_PAGE_URL"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- the URL text ID of the web page -->
       <leaf name="OUTPOST"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <!-- outpost this bot give access to (sheet id inside) -->
       <!-- Mission rings -->
@@ -221,10 +231,12 @@
         <branch name=""
                 count="4">
           <leaf name="TITLE"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
           <leaf name="ID"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <!-- the id of the action if selected -->
         </branch>
       </branch>
@@ -275,18 +287,23 @@
               type="I2" />
         <leaf name="ICON"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <!-- sheet id of a .mission_icon sheet -->
         <leaf name="TITLE"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <leaf name="DETAIL_TEXT"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- begin date in tick -->
         <leaf name="BEGIN_DATE"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- end date in tick -->
         <leaf name="END_DATE"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- true if the step are "OR" -->
         <leaf name="OR_STEPS"
               type="I1" />
@@ -294,9 +311,11 @@
           <branch name=""
                   count="20">
             <leaf name="TEXT"
-                  type="I32" />
+                  type="I32"
+                  nullable="1" />
             <leaf name="NPC_ALIAS"
-                  type="I32" />
+                  type="I32"
+                  nullable="1" />
           </branch>
         </branch>
         <!-- Targets -->
@@ -304,11 +323,14 @@
                 count="8"
                 atom="1">
           <leaf name="TITLE"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <leaf name="X"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <leaf name="Y"
-                type="I32" />
+                type="I32"
+                nullable="1" />
         </branch>
         <!-- Indicate if the mission is finished (0-not 1-success 2-failed) -->
         <leaf name="FINISHED"
@@ -324,7 +346,8 @@
           <branch name=""
                   count="30">
             <leaf name="TEXT"
-                  type="I32" />
+                  type="I32"
+                  nullable="1" />
           </branch>
         </branch>
       </branch>
@@ -370,6 +393,7 @@
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"
               type="I10" />
@@ -382,7 +406,8 @@
               type="I16" />
         <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"
               type="I8" />
@@ -402,6 +427,7 @@
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"
               type="I10" />
@@ -414,7 +440,8 @@
               type="I16" />
         <!-- weight. see DB_WEIGHT_SCALE-->
         <leaf name="NAMEID"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"
               type="I8" />
@@ -549,6 +576,7 @@
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"
               type="I12" />
@@ -563,7 +591,8 @@
               type="I16" />
         <!-- weight. see DB_WEIGHT_SCALE-->
         <leaf name="NAMEID"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"
               type="I8" />
@@ -591,6 +620,7 @@
         <!-- Common Item Data -->
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"
               type="I10" />
@@ -602,7 +632,8 @@
               type="I16" />
         <!-- weight. see DB_WEIGHT_SCALE-->
         <leaf name="NAMEID"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"
               type="I8" />
@@ -692,11 +723,13 @@
               count="12">
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="DISABLED"
               type="I1" />
         <leaf name="DISABLED_TIME"
-              type="I32" />
+              type="I32"
+              nullable="1" />
       </branch>
     </branch>
     <branch name="MALUS">
@@ -704,11 +737,13 @@
               count="12">
         <leaf name="SHEET"
               type="I32"
+              nullable="1"
               cppType="NLMISC::CSheetId" />
         <leaf name="DISABLED"
               type="I1" />
         <leaf name="DISABLED_TIME"
-              type="I32" />
+              type="I32"
+              nullable="1" />
       </branch>
     </branch>
   </branch>
@@ -717,10 +752,12 @@
     <branch name=""
             count="12">
       <leaf name="FAMILY"
-            type="I16" />
+            type="I16"
+            nullable="1" />
       <!-- Disable consumablel family -->
       <leaf name="DISABLE_TIME"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- End date of diable time in tick -->
     </branch>
   </branch>
@@ -729,16 +766,20 @@
           bank="PLR">
     <!-- intro for player gift -->
     <leaf name="PLAYER_GIFT"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- intro for guild creation -->
     <leaf name="CREATE_GUILD"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- intro for trade window (pacts, action, item, or skills ..)-->
     <leaf name="TRADE"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- intro for choose mission -->
     <leaf name="CHOOSE_MISSION"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- intro before the reward of the mission -->
     <!-- <leaf name="MISSION_END_REWARD" type="I32"/> -->
     <!-- text of the mission end -->
@@ -749,19 +790,23 @@
     <branch name="DM_CHOICE"
             count="3">
       <leaf name="TITLE"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <branch name=""
               count="8">
         <leaf name="TEXT"
-              type="I32" />
+              type="I32"
+              nullable="1" />
       </branch>
     </branch>
     <!-- title of dynamic mission -->
     <leaf name="DM_TITLE"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- description of dynamic mission -->
     <leaf name="DM_DESCRIPTION"
-          type="I32" />
+          type="I32"
+          nullable="1" />
     <!-- the rolemaster type on 2 bits -->
     <leaf name="ROLEMASTER_TYPE"
           type="I2" />
@@ -785,9 +830,11 @@
                         if high order bit == 1 : low order bits = entry in the LIFT_ICONS::TLiftIcon enum
                         -->
       <leaf name="ICON"
-            type="I64" />
+            type="I64"
+            nullable="1" />
       <leaf name="NAME"
-            type="I32" />
+            type="I32"
+            nullable="1" />
     </branch>
   </branch>
   <branch name="CHOOSE_MISSIONS"
@@ -805,12 +852,15 @@
             count="8">
       <leaf name="ICON"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <!-- sheet id of a .mission_icon sheet -->
       <leaf name="TEXT"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <leaf name="DETAIL_TEXT"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <leaf name="PREREQ_STATE"
             type="I8" />
       <!-- game_share/mission_desc.h/TPreReqState -->
@@ -854,6 +904,7 @@
       <!-- Common Item Data -->
       <leaf name="SHEET"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <leaf name="QUALITY"
             type="I10" />
@@ -866,7 +917,8 @@
             type="I16" />
       <!-- weight. see DB_WEIGHT_SCALE-->
       <leaf name="NAMEID"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- 0 or special name of item -->
       <leaf name="INFO_VERSION"
             type="I8" />
@@ -887,6 +939,7 @@
       <!-- For rrp curency, specify the rrp level -->
       <leaf name="MONEY_SHEET"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <!-- For item curency, specify the item sheet -->
       <leaf name="BASE_SKILL"
@@ -904,7 +957,8 @@
       <leaf name="RESALE_TIME_LEFT"
             type="I16" />
       <leaf name="VENDOR_NAMEID"
-            type="TEXT" />
+            type="TEXT"
+            nullable="1" />
       <!-- name id of player vendor -->
       <leaf name="FACTION_POINT_PRICE"
             type="I32" />
@@ -924,7 +978,8 @@
     <branch name=""
             count="1024">
       <leaf name="BRICKS"
-            type="PACKED" />
+            type="PACKED"
+            nullable="1" />
     </branch>
   </branch>
   <branch name="MISSIONS"
@@ -936,18 +991,23 @@
             type="I2" />
       <leaf name="ICON"
             type="I32"
+            nullable="1"
             cppType="NLMISC::CSheetId" />
       <!-- sheet id of a .mission_icon sheet -->
       <leaf name="TITLE"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <leaf name="DETAIL_TEXT"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- begin date in tick -->
       <leaf name="BEGIN_DATE"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- end date in tick -->
       <leaf name="END_DATE"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- true if the step are "OR" -->
       <leaf name="OR_STEPS"
             type="I1" />
@@ -955,9 +1015,11 @@
         <branch name=""
                 count="20">
           <leaf name="TEXT"
-                type="I32" />
+                type="I32"
+                nullable="1" />
           <leaf name="NPC_ALIAS"
-                type="I32" />
+                type="I32"
+                nullable="1" />
         </branch>
       </branch>
       <!-- Targets -->
@@ -965,11 +1027,14 @@
               count="8"
               atom="1">
         <leaf name="TITLE"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <leaf name="X"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <leaf name="Y"
-              type="I32" />
+              type="I32"
+              nullable="1" />
       </branch>
       <!-- Indicate if the mission is finished (0-not 1-success 2-failed) -->
       <leaf name="FINISHED"
@@ -985,7 +1050,8 @@
         <branch name=""
                 count="30">
           <leaf name="TEXT"
-                type="I32" />
+                type="I32"
+                nullable="1" />
         </branch>
       </branch>
     </branch>
@@ -999,6 +1065,7 @@
     <!-- If not a phrase in the speel book, give the associated brick sheet id -->
     <leaf name="SHEET"
           type="I32"
+          nullable="1"
           cppType="NLMISC::CSheetId" />
     <!-- When the NEXT_COUNTER reach the one on client, reset -->
     <leaf name="NEXT_COUNTER"
@@ -1025,7 +1092,8 @@
               type="I16" />
         <!-- Entity name -->
         <leaf name="TARGET_NAME"
-              type="TEXT" />
+              type="TEXT"
+              nullable="1" />
         <!-- Entity State -->
         <leaf name="TARGET_HP"
               type="I7" />
@@ -1093,7 +1161,8 @@
       <branch name=""
               count="256">
         <leaf name="NAME"
-              type="TEXT" />
+              type="TEXT"
+              nullable="1" />
         <!-- player name -->
         <leaf name="GRADE"
               type="I3" />
@@ -1103,7 +1172,8 @@
               cppType="TCharConnectionState" />
         <!-- enum TCharConnectionState -->
         <leaf name="ENTER_DATE"
-              type="I32" />
+              type="I32"
+              nullable="1" />
         <!-- tick when player entered the guild-->
       </branch>
     </branch>
@@ -1241,6 +1311,7 @@
                   count="16">
             <leaf name="SHEET"
                   type="I32"
+                  nullable="1"
                   cppType="NLMISC::CSheetId" />
           </branch>
         </branch>
@@ -1254,6 +1325,7 @@
             <!-- Spawned -->
             <leaf name="SHEET"
                   type="I32"
+                  nullable="1"
                   cppType="NLMISC::CSheetId" />
           </branch>
           <branch name="T"
@@ -1261,6 +1333,7 @@
             <!-- Training -->
             <leaf name="SHEET"
                   type="I32"
+                  nullable="1"
                   cppType="NLMISC::CSheetId" />
             <leaf name="SPAWN"
                   type="I4" />
@@ -1277,6 +1350,7 @@
                   count="4">
             <leaf name="SHEET"
                   type="I32"
+                  nullable="1"
                   cppType="NLMISC::CSheetId" />
           </branch>
         </branch>
@@ -1505,7 +1579,8 @@
       <leaf name="DESPAWN"
             type="I7" />
       <leaf name="NAME"
-            type="I32" />
+            type="I32"
+            nullable="1" />
     </branch>
   </branch>
   <branch name="DEBUG_INFO"
@@ -1616,10 +1691,12 @@
             count="8"
             atom="1">
       <leaf name="NAME"
-            type="I32" />
+            type="I32"
+            nullable="1" />
       <!-- channel not available if anme is 0 -->
       <leaf name="ID"
-            type="I64" />
+            type="I64"
+            nullable="1" />
       <!-- unique ID of channel (eid) -->
       <leaf name="WRITE_RIGHT"
             type="I1" />
