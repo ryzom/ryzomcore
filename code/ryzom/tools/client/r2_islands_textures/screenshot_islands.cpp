@@ -85,7 +85,7 @@ CScreenshotIslands::CScreenshotIslands()
 void CScreenshotIslands::init()
 {
 	// Create a driver
-	driver = UDriver::createDriver();
+	driver = UDriver::createDriver(0, true);
 	nlassert(driver);
 
 	sceneMaterial = driver->createMaterial();
@@ -99,8 +99,6 @@ void CScreenshotIslands::init()
 	CConfigFile cf;
 	cf.load("island_screenshots.cfg");
 
-	CPath::remapExtension("dds", "tga", true);
-
 	// get the value of searchPaths
 	CConfigFile::CVar * searchPaths = cf.getVarPtr("SearchPaths");
 	if(searchPaths)
@@ -110,6 +108,7 @@ void CScreenshotIslands::init()
  			CPath::addSearchPath(searchPaths->asString(i).c_str(), true, false);
 		}
 	}
+	CPath::remapExtension("dds", "tga", true);
 
 	// get the scenario entry points file
 	CConfigFile::CVar * epFile = cf.getVarPtr("CompleteIslandsFile");
@@ -1348,11 +1347,13 @@ void CScreenshotIslands::buildIslandsTextures()
 	int maxLoop = 6;
 
 	// Create the window with config file values
-	driver->setDisplay(UDriver::CMode(1024, 768, 32, false));
+	driver->setDisplay(UDriver::CMode(512, 512, 32, true));
 
 	// Create a scene
 	UScene	* scene = driver->createScene(true);
 	scene->animate(CTime::ticksToSecond(CTime::getPerformanceTime()));
+	scene->setMaxSkeletonsInNotCLodForm(1000000);
+	scene->setPolygonBalancingMode(UScene::PolygonBalancingOff);
 	
 	// Create a camera
 	UCamera camera = scene->getCam();
@@ -1360,6 +1361,7 @@ void CScreenshotIslands::buildIslandsTextures()
 
 	// Create and load landscape
 	ULandscape * landscape = scene->createLandscape();
+	landscape->setThreshold(0.0005);
 	if(_InverseZTest)
 	{
 		landscape->setZFunc(UMaterial::greaterequal);
@@ -1394,6 +1396,7 @@ void CScreenshotIslands::buildIslandsTextures()
 			string coarseMeshWithoutExt = CFile::getFilenameWithoutExtension(coarseMeshFile);
 			string coarseMeshExt = CFile::getExtension(coarseMeshFile);
 			coarseMeshFile = coarseMeshWithoutExt + seasonSuffix + "." + coarseMeshExt;
+			nldebug("Coarse mesh texture: '%s'", coarseMeshFile.c_str());
 			scene->setCoarseMeshManagerTexture(coarseMeshFile.c_str()); 
 
 			// Load the landscape	
@@ -1468,6 +1471,7 @@ void CScreenshotIslands::buildIslandsTextures()
 								}
 							}
 						}
+						scene->animate(CTime::ticksToSecond(CTime::getPerformanceTime()));
 						
 						// Clear all buffers
 						driver->clearBuffers(_BackColor);
@@ -1535,17 +1539,36 @@ void CScreenshotIslands::buildIslandsTextures()
 							CIFile proxFS(proxFileName.c_str());
 							proxBitmap.load(proxFS);
 
+							
 							// resize proximity bitmap
 							CBitmap tempBitmap;
 							int newWidth = islandBitmap.getWidth();
 							int newHeight = islandBitmap.getHeight();
 							tempBitmap.resize(newWidth, newHeight, islandBitmap.PixelFormat);
 							// blit src bitmap
-							tempBitmap.blit(proxBitmap, 0, 0, newWidth, newHeight, 0, 0);
+							//tempBitmap.blit(proxBitmap, 0, 0, newWidth, newHeight, 0, 0);
+							{
+								const uint8 *prox = &(proxBitmap.getPixels(0)[0]);
+								uint8 *temp = &(tempBitmap.getPixels(0)[0]);
+								for (uint y = 0; y < newHeight; ++y)
+									for (uint x = 0; x < newWidth; ++x)
+								{
+									uint ys = (y * proxBitmap.getHeight()) / newHeight;
+									uint xs = (x * proxBitmap.getWidth()) / newWidth;
+									uint addr = ((y * newWidth) + x) * 4;
+									uint addrs = ((ys * proxBitmap.getWidth()) + xs) * 4;
+									temp[addr] = prox[addrs];
+									temp[addr+1] = prox[addrs+1];
+									temp[addr+2] = prox[addrs+2];
+									temp[addr+3] = prox[addrs+3];
+								}
+							}
 
 							// swap them
 							proxBitmap.resize(newWidth, newHeight, proxBitmap.PixelFormat);
 							proxBitmap.swap(tempBitmap);
+							
+							//proxBitmap.resample(newWidth, newHeight);
 
 
 							// create final bitmap
@@ -2081,7 +2104,7 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 			{
 				zoneBuffer[offset]= InteriorValue;
 
-				if(offset-zoneWidth>0 && zoneBuffer[offset-zoneWidth]==(TBufferEntry)~0u)
+				if(offset>zoneWidth && zoneBuffer[offset-zoneWidth]==(TBufferEntry)~0u)
 				{
 					zoneBuffer[offset-zoneWidth] = ValueBorder;
 				}
