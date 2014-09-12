@@ -28,7 +28,7 @@ QWidget( parent )
 {
 	m_ui.setupUi( this );
 
-	m_hasSelection = false;
+	m_selectionCount = 0;
 
 	m_scene = new QGraphicsScene( this );
 	m_ui.view->setScene( m_scene );
@@ -51,10 +51,16 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	a = menu.addAction( "Add rect" );
 	connect( a, SIGNAL( triggered() ), this, SLOT( onAddRect() ) );
 
-	if( m_hasSelection )
+	if( m_selectionCount > 0 )
 	{
 		a = menu.addAction( "Remove" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onDeleteSelection() ) );
+
+		if( m_selectionCount == 2 )
+		{
+			a = menu.addAction( "Link" );
+			connect( a, SIGNAL( triggered() ), this, SLOT( onLinkItems() ) );
+		}
 	}
 
 	menu.exec( e->globalPos() );
@@ -78,11 +84,19 @@ void ExpressionEditor::onDeleteSelection()
 void ExpressionEditor::onSelectionChanged()
 {
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
-	if( l.isEmpty() )
-		m_hasSelection = false;
-	else
-		m_hasSelection = true;
+	m_selectionCount = l.count();
 }
 
+void ExpressionEditor::onLinkItems()
+{
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+	QGraphicsItem *from = l[ 0 ];
+	QGraphicsItem *to = l[ 1 ];
+
+	QGraphicsLineItem *line = new QGraphicsLineItem();
+	line->setLine( QLineF( from->pos(), to->pos() ) );
+	line->setPen( QPen( Qt::darkRed, 1.0 ) );
+	m_scene->addItem( line );
+}
 
 

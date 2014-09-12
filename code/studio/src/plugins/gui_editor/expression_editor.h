@@ -38,12 +38,14 @@ private Q_SLOTS:
 	void onAddRect();
 	void onDeleteSelection();
 	void onSelectionChanged();
+	void onLinkItems();
 
 private:
+
 	Ui::ExpressionEditor m_ui;
 	QGraphicsScene *m_scene;
 
-	bool m_hasSelection;
+	int m_selectionCount;
 };
 
 #endif
