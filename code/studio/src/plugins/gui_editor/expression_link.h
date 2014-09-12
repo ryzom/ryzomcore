@@ -21,22 +21,24 @@
 
 #include <QGraphicsItem>
 
+class ExpressionNode;
+
 class ExpressionLink : public QGraphicsLineItem
 {
 public:
 	ExpressionLink( QGraphicsItem *parent = NULL );
 	~ExpressionLink();
 
-	void link( QGraphicsItem *from, QGraphicsItem *to ){ 
-		m_from = from;
-		m_to = to;
-	}
+	void link( ExpressionNode *from, ExpressionNode *to );
+	void unlink();
+
+	void nodeMoved();
 
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
 private:
-	QGraphicsItem *m_from;
-	QGraphicsItem *m_to;
+	ExpressionNode *m_from;
+	ExpressionNode *m_to;
 
 };
 

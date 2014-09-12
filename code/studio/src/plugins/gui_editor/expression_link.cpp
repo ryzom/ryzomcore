@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "expression_link.h"
+#include "expression_node.h"
 #include <QGraphicsItem>
 #include <QPen>
 
@@ -25,17 +26,38 @@ QGraphicsLineItem( parent )
 {
 	m_from = NULL;
 	m_to = NULL;
+
+	setFlags( QGraphicsItem::ItemIsSelectable );
 }
 
 ExpressionLink::~ExpressionLink()
 {
+	unlink();
+}
+
+void ExpressionLink::link( ExpressionNode *from, ExpressionNode *to )
+{
+	m_from = from;
+	m_to = to;
+	m_from->setLink( this );
+	m_to->setLink( this );
+
+	nodeMoved();
+}
+
+void ExpressionLink::unlink()
+{
+	m_from->setLink( NULL );
+	m_to->setLink( NULL );
+}
+
+void ExpressionLink::nodeMoved()
+{
+	setLine( QLineF( m_from->pos(), m_to->pos() ) );
 }
 
 void ExpressionLink::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-	if( m_from != NULL )
-		setLine( QLineF( m_from->pos(), m_to->pos() ) );
-
 	setPen( QPen( Qt::darkRed ) );
 
 	QGraphicsLineItem::paint( painter, option, widget );

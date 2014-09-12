@@ -22,6 +22,8 @@
 
 #include <QGraphicsItem>
 
+class ExpressionLink;
+
 class ExpressionNode : public QGraphicsItem
 {
 public:
@@ -30,6 +32,15 @@ public:
 
 	QRectF boundingRect() const;
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+
+	void setLink( ExpressionLink *link ){ m_link = link; }
+	ExpressionLink* link() const{ return m_link; }
+
+protected:
+	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
+
+private:
+	ExpressionLink *m_link;
 
 };
 

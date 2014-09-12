@@ -18,12 +18,14 @@
 
 
 #include "expression_node.h"
+#include "expression_link.h"
 #include <QPainter>
 #include <QStyleOption>
 
 ExpressionNode::ExpressionNode( QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
+	m_link = NULL;
 }
 
 ExpressionNode::~ExpressionNode()
@@ -47,4 +49,14 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 
 	painter->drawRect( boundingRect() );
 }
+
+
+void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
+{
+	if( m_link != NULL )
+		m_link->nodeMoved();
+
+	QGraphicsItem::mouseMoveEvent( e );
+}
+
 

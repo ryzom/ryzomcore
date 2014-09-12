@@ -81,7 +81,24 @@ void ExpressionEditor::onDeleteSelection()
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
 	QListIterator< QGraphicsItem* > itr( l );
 	while( itr.hasNext() )
-		m_scene->removeItem( itr.next() );
+	{
+		QGraphicsItem *item = itr.next();
+
+		ExpressionNode *node = dynamic_cast< ExpressionNode* >( item );
+		if( node != NULL )		
+		{
+			ExpressionLink *link = node->link();
+			if( link != NULL )
+			{
+				link->unlink();
+				m_scene->removeItem( link );
+				delete link;
+			}
+		}
+
+		m_scene->removeItem( item );
+		delete item;
+	}
 }
 
 void ExpressionEditor::onSelectionChanged()
@@ -93,11 +110,12 @@ void ExpressionEditor::onSelectionChanged()
 void ExpressionEditor::onLinkItems()
 {
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
-	QGraphicsItem *from = l[ 0 ];
-	QGraphicsItem *to = l[ 1 ];
+	ExpressionNode *from = static_cast< ExpressionNode* >( l[ 0 ] );
+	ExpressionNode *to = static_cast< ExpressionNode* >( l[ 1 ] );
 
 	ExpressionLink *link = new ExpressionLink();
 	link->link( from, to );
+
 	m_scene->addItem( link );
 }
 
