@@ -8977,26 +8977,14 @@ inline void _getProp(const CCDBSynchronised &db, ICDBStructNode *node, NLMISC::C
 			return _DESPAWN;
 		}
 	
-		void setNAME(CCDBSynchronised &dbGroup, ucstring value, bool forceSending = false)
+		void setNAME(CCDBSynchronised &dbGroup, uint32 value, bool forceSending = false)
 		{
 			
 
 			_setProp(dbGroup, _NAME, value, forceSending);
 		}
 
-		ucstring getNAME(const CCDBSynchronised &dbGroup)
-		{
-			ucstring value;
-			_getProp(dbGroup, _NAME, value);
-
-			return value;
-		}
-		
-		void setNAME(CCDBSynchronised &dbGroup, uint32 stringId, bool forceSending = false)
-		{
-			_setProp(dbGroup, _NAME, stringId, forceSending);
-		}
-		uint32 getNAME_id(const CCDBSynchronised &dbGroup)
+		uint32 getNAME(const CCDBSynchronised &dbGroup)
 		{
 			uint32 value;
 			_getProp(dbGroup, _NAME, value);
