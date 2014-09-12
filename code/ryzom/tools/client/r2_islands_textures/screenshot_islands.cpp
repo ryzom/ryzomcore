@@ -97,7 +97,7 @@ void CScreenshotIslands::init()
 
 	// load and parse the configfile
 	CConfigFile cf;
-	cf.load("IslandScreenshots.cfg");
+	cf.load("island_screenshots.cfg");
 
 	CPath::remapExtension("dds", "tga", true);
 
