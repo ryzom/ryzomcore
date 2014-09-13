@@ -153,8 +153,12 @@ bool						UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
 #define	ENTITY_TEXTURE_NORMAL_LEVEL		1
 #define	ENTITY_TEXTURE_HIGH_LEVEL		0
 // Size in MB of the cache for entity texturing.
-#define	ENTITY_TEXTURE_NORMAL_MEMORY	10
-#define	ENTITY_TEXTURE_HIGH_MEMORY		40
+#define	ENTITY_TEXTURE_NORMAL_MEMORY	40
+#define	ENTITY_TEXTURE_HIGH_MEMORY		160
+// Size in KB of max upload per frame
+#define ENTITY_TEXTURE_LOW_MAXUP		64
+#define ENTITY_TEXTURE_NORMAL_MAXUP		128
+#define ENTITY_TEXTURE_HIGH_MAXUP		256
 
 // Don't Modify, set true for debug purpose only
 const bool	DBG_DisablePreloadShape= false;
@@ -885,8 +889,10 @@ void initMainLoop()
 				{
 					// setup "v2 texture" (or 512*512)
 					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_HIGH_LEVEL);
-					// Allow a big cache for them (should be on 128 Mo card only)
+					// Allow a big cache for them (should be on 512 Mo card only)
 					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_HIGH_MEMORY*1024*1024);
+					// Allow high upload
+					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_HIGH_MAXUP*1024);
 				}
 				else
 				{
@@ -894,6 +900,8 @@ void initMainLoop()
 					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_NORMAL_LEVEL);
 					// Allow a big cache for them
 					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+					// Allow normal upload
+					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_NORMAL_MAXUP*1024);
 				}
 			}
 			else
@@ -904,6 +912,8 @@ void initMainLoop()
 				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL-1, ENTITY_TEXTURE_NORMAL_LEVEL-1);
 				// Allow a big cache for them
 				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+				// Allow low upload
+				Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_LOW_MAXUP*1024);
 			}
 		}
 
