@@ -23,7 +23,7 @@ class Helpers {
          global $AMS_TRANS;
          global $INGAME_LAYOUT;
          global $AMS_CACHEDIR;
-	global $AMS_PLUGINS;
+        global $AMS_PLUGINS;
 
          // define('SMARTY_SPL_AUTOLOAD',1);
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
@@ -34,7 +34,7 @@ class Helpers {
          $smarty -> setCacheDir( $AMS_CACHEDIR );
          $smarty -> setConfigDir( $SITEBASE . '/configs/' );
          // turn smarty debugging on/off
-        $smarty -> debugging = false;
+        $smarty -> debugging = true;
          // caching must be disabled for multi-language support
         $smarty -> caching = false;
          $smarty -> cache_lifetime = 300;
@@ -89,6 +89,14 @@ class Helpers {
              
         $id = session_id();    
         $smarty -> assign( "sessionid", $id );
+        
+        $dbl = new DBLayer("lib");
+        $statement = $dbl->executeWithoutParams("SELECT * FROM settings");
+        $rows = $statement->fetchAll();
+            
+        foreach ($rows as &$value) {
+            $smarty -> assign( $value['Setting'], $value['Value'] );
+        }
 
         // smarty inheritance for loading the matching wrapper layout (with the matching menu bar)
         if ( isset( $vars['permission'] ) && $vars['permission'] == 3 ) {
