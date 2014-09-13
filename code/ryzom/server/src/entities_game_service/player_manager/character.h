@@ -2623,13 +2623,13 @@ public:
 	CGameItemPtr createItemInInventoryFreeSlot(INVENTORIES::TInventory invId, uint16 obtainedQuality, uint32 quantity, const NLMISC::CSheetId & obtainedItem, const NLMISC::CEntityId & creatorId = NLMISC::CEntityId::Unknown, const std::string * phraseId = NULL);
 
 	/// action on an item in the temp inventory (move it to bag)
-	void itemTempInventoryToBag(uint32 scrSlot);
+	void itemTempInventoryToBag(uint32 scrSlot, bool sendCloseTempImpulsion = true);
 
 	/// clear temp inventory
 	void clearTempInventory();
 
 	/// get all items in temp inventory
-	void getAllTempInventoryItems();
+	void getAllTempInventoryItems(bool sendCloseTempImpulsion = true);
 
 	/// return true if temp inventory is empty
 	bool tempInventoryEmpty();
