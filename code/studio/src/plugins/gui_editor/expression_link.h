@@ -29,7 +29,7 @@ public:
 	ExpressionLink( QGraphicsItem *parent = NULL );
 	~ExpressionLink();
 
-	void link( ExpressionNode *from, ExpressionNode *to );
+	void link( ExpressionNode *from, ExpressionNode *to, int fromSlot, int toSlot );
 	void unlink();
 
 	void nodeMoved();
@@ -40,6 +40,8 @@ private:
 	ExpressionNode *m_from;
 	ExpressionNode *m_to;
 
+	int m_fromSlot;
+	int m_toSlot;
 };
 
 #endif

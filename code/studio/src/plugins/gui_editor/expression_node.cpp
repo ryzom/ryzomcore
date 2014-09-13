@@ -98,12 +98,13 @@ private:
 ExpressionNode::ExpressionNode( QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
-	m_link = NULL;
-	
 	m_w = 100;
 	m_h = 100;
 
 	createSlots();
+
+	for( int i = 0; i < 4; i++ )
+		m_links.push_back( NULL );
 }
 
 ExpressionNode::~ExpressionNode()
@@ -168,10 +169,26 @@ QPointF ExpressionNode::slotPos( int slot ) const
 	return mp;
 }
 
+void ExpressionNode::setLink( ExpressionLink *link, int slot )
+{
+	m_links[ slot ] = link;
+}
+
+ExpressionLink* ExpressionNode::link( int slot ) const
+{
+	return m_links[ slot ];
+}
+
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 {
-	if( m_link != NULL )
-		m_link->nodeMoved();
+	for( int i = 0; i < 4; i++ )
+	{
+		ExpressionLink *link = m_links[ i ];
+		if( link == NULL )
+			continue;
+
+		link->nodeMoved();
+	}
 
 	QGraphicsItem::mouseMoveEvent( e );
 }

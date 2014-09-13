@@ -35,20 +35,23 @@ ExpressionLink::~ExpressionLink()
 	unlink();
 }
 
-void ExpressionLink::link( ExpressionNode *from, ExpressionNode *to )
+void ExpressionLink::link( ExpressionNode *from, ExpressionNode *to, int fromSlot, int toSlot )
 {
 	m_from = from;
 	m_to = to;
-	m_from->setLink( this );
-	m_to->setLink( this );
+	m_from->setLink( this, fromSlot );
+	m_to->setLink( this, toSlot );
+
+	m_fromSlot = fromSlot;
+	m_toSlot = toSlot;
 
 	nodeMoved();
 }
 
 void ExpressionLink::unlink()
 {
-	m_from->setLink( NULL );
-	m_to->setLink( NULL );
+	m_from->setLink( NULL, m_fromSlot );
+	m_to->setLink( NULL, m_toSlot );
 }
 
 void ExpressionLink::nodeMoved()

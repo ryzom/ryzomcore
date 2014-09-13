@@ -87,12 +87,18 @@ void ExpressionEditor::onDeleteSelection()
 		ExpressionNode *node = dynamic_cast< ExpressionNode* >( item );
 		if( node != NULL )		
 		{
-			ExpressionLink *link = node->link();
-			if( link != NULL )
+			ExpressionLink *link = NULL;
+
+			int c = node->slotCount();
+			for( int i = 0; i < c; i++ )
 			{
-				link->unlink();
-				m_scene->removeItem( link );
-				delete link;
+				link = node->link( i );
+				if( link != NULL )
+				{
+					link->unlink();
+					m_scene->removeItem( link );
+					delete link;
+				}
 			}
 		}
 
@@ -113,7 +119,7 @@ void ExpressionEditor::onLinkItems()
 	ExpressionNode *from = static_cast< ExpressionNode* >( l[ 0 ] );
 	ExpressionNode *to = static_cast< ExpressionNode* >( l[ 1 ] );
 
-	if( ( from->link() != NULL ) || ( to->link() != NULL ) )
+	if( ( from->link( 0 ) != NULL ) || ( to->link( 0 ) != NULL ) )
 	{
 		QMessageBox::information( this,
 									tr( "Failed to link nodes" ),
@@ -122,7 +128,7 @@ void ExpressionEditor::onLinkItems()
 	}
 
 	ExpressionLink *link = new ExpressionLink();
-	link->link( from, to );
+	link->link( from, to, 0, 0 );
 
 	m_scene->addItem( link );
 }

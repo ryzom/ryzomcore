@@ -35,10 +35,12 @@ public:
 	QRectF boundingRect() const;
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
-	void setLink( ExpressionLink *link ){ m_link = link; }
-	ExpressionLink* link() const{ return m_link; }
+	void setLink( ExpressionLink *link, int slot );
+	ExpressionLink* link( int slot ) const;
 
 	QPointF slotPos( int slot ) const;
+
+	int slotCount() const{ return m_slots.count(); }
 
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
@@ -47,12 +49,11 @@ private:
 	void createSlots();
 	void paintSlots( QPainter *painter );
 
-	ExpressionLink *m_link;
-
 	qreal m_w;
 	qreal m_h;
 
 	QList< NodeSlot* > m_slots;
+	QList< ExpressionLink* > m_links;
 };
 
 #endif
