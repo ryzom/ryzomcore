@@ -24,9 +24,23 @@
 
 struct NodeSlotInfo
 {
+	// top-left
 	QPoint tl;
+
+	// text top-left
 	QPoint ttl;
+
+	// The text displayed
 	QString text;
+
+	// text width
+	qreal tw;
+
+	// text height
+	qreal th;
+
+	// width-height of the box
+	qreal wh;
 };
 
 class NodeSlot
@@ -38,9 +52,9 @@ public:
 		m_ttl = info.ttl;
 		m_text = info.text;
 
-		m_tw = 25.0;
-		m_th = 12.0;
-		m_wh = 10.0;
+		m_tw = info.tw;
+		m_th = info.th;
+		m_wh = info.wh;
 	}
 
 	~NodeSlot()
@@ -177,12 +191,17 @@ void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 void ExpressionNode::createSlots()
 {
 	// First create the "Out" slot
-	qreal x = 0.0;
-	qreal y = m_h * 0.5;
-	qreal tx = 10;
-	qreal ty = m_h * 0.5 - 2;
 
 	NodeSlotInfo info;
+	info.tw = 25.0;
+	info.th = 12.0;
+	info.wh = 10.0;
+
+	qreal x = 0.0;
+	qreal y = m_h * 0.5;
+	qreal tx = info.wh;
+	qreal ty = m_h * 0.5 - 2;
+
 	info.tl = QPoint( x, y );
 	info.ttl = QPoint( tx, ty );
 	info.text = "Out";
@@ -192,9 +211,9 @@ void ExpressionNode::createSlots()
 	// Then the rest of them
 	for( int i = 0; i < 3; i++ )
 	{
-		x = m_w - 10;
+		x = m_w - info.wh;
 		y = 30 + i * 20.0;
-		tx = x - 5 - 25.0;
+		tx = x - 5 - info.tw;
 		ty = y - 2;
 
 		info.tl = QPoint( x, y );
