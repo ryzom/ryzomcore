@@ -39,15 +39,40 @@ QRectF ExpressionNode::boundingRect() const
 
 void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
+	QBrush br;
+	QPen p;
+	QColor c;
+
+	QRectF rect = boundingRect();
+	QRectF header = rect;
+	header.setHeight( header.height() * 0.2 );
+
+	// Draw filled rectangle, header
+	c.setRed( 44 );
+	c.setGreen( 169 );
+	c.setBlue( 232 );
+	br.setColor( c );
+	br.setStyle( Qt::SolidPattern );
+	p.setColor( c );
+	painter->setPen( p );
+	painter->fillRect( header, br );
+
+	// Draw header text
+	p.setColor( Qt::black );
+	painter->setPen( p );
+	painter->drawText( header, Qt::AlignCenter, "Something" );
+
+
 	if( option->state & QStyle::State_Selected )
 	{
-		QPen outline;
-		outline.setStyle( Qt::DotLine );
-		painter->setPen( outline );
-
+		p.setStyle( Qt::DotLine );
+		p.setColor( Qt::red );
 	}
 
-	painter->drawRect( boundingRect() );
+	// Draw outline of the entire thing + header
+	painter->setPen( p );
+	painter->drawRect( rect );
+	painter->drawRect( header );
 }
 
 
