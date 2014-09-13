@@ -58,7 +58,10 @@ void ExpressionLink::nodeMoved()
 
 void ExpressionLink::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
 {
-	setPen( QPen( Qt::black ) );
+	QPen p;
+	p.setColor( Qt::black );
+	p.setWidth( 5 );
+	setPen( p );
 
 	QGraphicsLineItem::paint( painter, option, widget );
 }

@@ -40,6 +40,8 @@ protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
 private:
+	void paintConnections( QPainter *painter );
+
 	ExpressionLink *m_link;
 
 };

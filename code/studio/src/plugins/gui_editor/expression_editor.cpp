@@ -38,8 +38,6 @@ QWidget( parent )
 	m_scene = new QGraphicsScene( this );
 	m_ui.view->setScene( m_scene );
 
-	m_scene->addSimpleText( "Hello" );
-
 	connect( m_scene, SIGNAL( selectionChanged() ), this, SLOT( onSelectionChanged() ) );
 }
 
