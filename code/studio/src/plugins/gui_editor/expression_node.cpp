@@ -48,13 +48,7 @@ class NodeSlot
 public:
 	NodeSlot( const NodeSlotInfo &info )
 	{
-		m_tl = info.tl;
-		m_ttl = info.ttl;
-		m_text = info.text;
-
-		m_tw = info.tw;
-		m_th = info.th;
-		m_wh = info.wh;
+		m_info = info;
 	}
 
 	~NodeSlot()
@@ -63,8 +57,8 @@ public:
 
 	QPointF pos() const{
 		QPointF p;		
-		p.setX( m_tl.x() + m_wh / 2.0 );
-		p.setY( m_tl.y() + m_wh / 2.0 );
+		p.setX( m_info.tl.x() + m_info.wh / 2.0 );
+		p.setY( m_info.tl.y() + m_info.wh / 2.0 );
 
 		return p;
 	}
@@ -82,27 +76,21 @@ public:
 		QRectF box;
 		QRectF tbox;
 		
-		box.setTopLeft( m_tl );
-		box.setHeight( m_wh );
-		box.setWidth( m_wh );
+		box.setTopLeft( m_info.tl );
+		box.setHeight( m_info.wh );
+		box.setWidth( m_info.wh );
 
 		painter->fillRect( box, boxBrush );
 
-		tbox.setTopLeft( m_ttl );
-		tbox.setHeight( m_th );
-		tbox.setWidth( m_tw );
+		tbox.setTopLeft( m_info.ttl );
+		tbox.setHeight( m_info.th );
+		tbox.setWidth( m_info.tw );
 
-		painter->drawText( tbox, Qt::AlignRight, m_text );
+		painter->drawText( tbox, Qt::AlignRight, m_info.text );
 	}
 
 private:
-	QPoint m_tl;
-	QPoint m_ttl;
-	QString m_text;
-
-	qreal m_th;
-	qreal m_tw;
-	qreal m_wh;
+	NodeSlotInfo m_info;
 };
 
 
