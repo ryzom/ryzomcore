@@ -57,7 +57,7 @@ CScenarioEntryPoints::CScenarioEntryPoints()
 void CScenarioEntryPoints::init()
 {
 	_CompleteIslandsFilename = "r2_islands.xml";
-	_EntryPointsFilename = "r2_entry_points.txt";
+	_EntryPointsFilename = "ring_map_entry_ponts.txt";
 }
 //-----------------------------------------------------------------------------
 
