@@ -22,16 +22,21 @@
 #include <QPainter>
 #include <QStyleOption>
 
-
+struct NodeSlotInfo
+{
+	QPoint tl;
+	QPoint ttl;
+	QString text;
+};
 
 class NodeSlot
 {
 public:
-	NodeSlot( const QPoint &tl, const QPoint &ttl, const QString &text )
+	NodeSlot( const NodeSlotInfo &info )
 	{
-		m_tl = tl;
-		m_ttl = ttl;
-		m_text = text;
+		m_tl = info.tl;
+		m_ttl = info.ttl;
+		m_text = info.text;
 
 		m_tw = 25.0;
 		m_th = 12.0;
@@ -176,7 +181,13 @@ void ExpressionNode::createSlots()
 	qreal y = m_h * 0.5;
 	qreal tx = 10;
 	qreal ty = m_h * 0.5 - 2;
-	m_slots.push_back( new NodeSlot( QPoint( x, y ), QPoint( tx, ty ), "Out" ) );
+
+	NodeSlotInfo info;
+	info.tl = QPoint( x, y );
+	info.ttl = QPoint( tx, ty );
+	info.text = "Out";
+
+	m_slots.push_back( new NodeSlot( info ) );
 
 	// Then the rest of them
 	for( int i = 0; i < 3; i++ )
@@ -186,7 +197,11 @@ void ExpressionNode::createSlots()
 		tx = x - 5 - 25.0;
 		ty = y - 2;
 
-		m_slots.push_back( new NodeSlot( QPoint( x, y ), QPoint( tx, ty ), QString( 'A' + i ) ) );
+		info.tl = QPoint( x, y );
+		info.ttl = QPoint( tx, ty );
+		info.text = QString( 'A' + i );
+
+		m_slots.push_back( new NodeSlot( info ) );
 	}
 }
 
