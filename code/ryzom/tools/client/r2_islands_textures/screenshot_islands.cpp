@@ -590,7 +590,7 @@ void CScreenshotIslands::buildScreenshots()
 //-------------------------------------------------------------------------------------------------
 void CScreenshotIslands::writeProximityBufferToTgaFile(const std::string& fileName,const TBuffer& buffer,uint32 scanWidth,uint32 scanHeight)
 {
-	uint	imageWidth = (scanWidth+15)&~15;
+	uint	imageWidth = (scanWidth); // (scanWidth+15)&~15;
 	uint	imageHeight = (scanHeight);
 
 	CTGAImageGrey tgaImage;
