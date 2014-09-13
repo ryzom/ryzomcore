@@ -21,8 +21,10 @@
 #define EXPRESSION_NODE
 
 #include <QGraphicsItem>
+#include <QList>
 
 class ExpressionLink;
+class NodeSlot;
 
 class ExpressionNode : public QGraphicsItem
 {
@@ -36,14 +38,21 @@ public:
 	void setLink( ExpressionLink *link ){ m_link = link; }
 	ExpressionLink* link() const{ return m_link; }
 
+	QPointF slotPos( int slot ) const;
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
 private:
-	void paintConnections( QPainter *painter );
+	void createSlots();
+	void paintSlots( QPainter *painter );
 
 	ExpressionLink *m_link;
 
+	qreal m_w;
+	qreal m_h;
+
+	QList< NodeSlot* > m_slots;
 };
 
 #endif

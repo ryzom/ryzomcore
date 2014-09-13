@@ -53,7 +53,7 @@ void ExpressionLink::unlink()
 
 void ExpressionLink::nodeMoved()
 {
-	setLine( QLineF( m_from->pos(), m_to->pos() ) );
+	setLine( QLineF( m_from->slotPos( 0 ), m_to->slotPos( 0 ) ) );
 }
 
 void ExpressionLink::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )

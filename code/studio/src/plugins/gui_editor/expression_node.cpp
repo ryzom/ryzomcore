@@ -22,19 +22,92 @@
 #include <QPainter>
 #include <QStyleOption>
 
+
+
+class NodeSlot
+{
+public:
+	NodeSlot( const QPoint &tl, const QPoint &ttl, const QString &text )
+	{
+		m_tl = tl;
+		m_ttl = ttl;
+		m_text = text;
+
+		m_tw = 25.0;
+		m_th = 12.0;
+		m_wh = 10.0;
+	}
+
+	~NodeSlot()
+	{
+	}
+
+	QPointF pos() const{
+		QPointF p;		
+		p.setX( m_tl.x() + m_wh / 2.0 );
+		p.setY( m_tl.y() + m_wh / 2.0 );
+
+		return p;
+	}
+
+	void paint( QPainter *painter )
+	{
+		QBrush boxBrush;
+		QPen p;
+		
+		boxBrush.setColor( Qt::black );
+		boxBrush.setStyle( Qt::SolidPattern );
+		p.setColor( Qt::black );
+		painter->setPen( p );
+
+		QRectF box;
+		QRectF tbox;
+		
+		box.setTopLeft( m_tl );
+		box.setHeight( m_wh );
+		box.setWidth( m_wh );
+
+		painter->fillRect( box, boxBrush );
+
+		tbox.setTopLeft( m_ttl );
+		tbox.setHeight( m_th );
+		tbox.setWidth( m_tw );
+
+		painter->drawText( tbox, Qt::AlignRight, m_text );
+	}
+
+private:
+	QPoint m_tl;
+	QPoint m_ttl;
+	QString m_text;
+
+	qreal m_th;
+	qreal m_tw;
+	qreal m_wh;
+};
+
+
+
 ExpressionNode::ExpressionNode( QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
 	m_link = NULL;
+	
+	m_w = 100;
+	m_h = 100;
+
+	createSlots();
 }
 
 ExpressionNode::~ExpressionNode()
 {
+	qDeleteAll( m_slots );
+	m_slots.clear();
 }
 
 QRectF ExpressionNode::boundingRect() const
 {
-	return QRectF( 0, 0, 100, 100 );
+	return QRectF( 0, 0, m_w, m_h );
 }
 
 void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )
@@ -74,9 +147,19 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 	painter->drawRect( rect );
 	painter->drawRect( header );
 
-	paintConnections( painter );
+	paintSlots( painter );
 }
 
+
+QPointF ExpressionNode::slotPos( int slot ) const
+{
+	const NodeSlot *s = m_slots[ slot ];
+	QPointF sp = s->pos();
+	QPointF mp = pos();
+
+	mp += sp;
+	return mp;
+}
 
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 {
@@ -86,54 +169,33 @@ void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 	QGraphicsItem::mouseMoveEvent( e );
 }
 
-void ExpressionNode::paintConnections( QPainter *painter )
+void ExpressionNode::createSlots()
 {
-	QRectF rect = boundingRect();
-	QBrush boxBrush;
-	QPen p;
+	// First create the "Out" slot
+	qreal x = 0.0;
+	qreal y = m_h * 0.5;
+	qreal tx = 10;
+	qreal ty = m_h * 0.5 - 2;
+	m_slots.push_back( new NodeSlot( QPoint( x, y ), QPoint( tx, ty ), "Out" ) );
 
-	boxBrush.setColor( Qt::black );
-	boxBrush.setStyle( Qt::SolidPattern );
-	p.setColor( Qt::black );
-
-	QRectF box = rect;
-	QRectF tbox = rect;
-	qreal wh = 10.0;
-	qreal tw = 25.0;
-	qreal th = 12.0;
-
-	box.setTopLeft( QPoint( 0, rect.height() * 0.5 ) );
-	box.setHeight( wh );
-	box.setWidth( wh );
-
-	painter->fillRect( box, boxBrush );
-
-	tbox.setTopLeft( QPoint( 15, rect.height() * 0.50 ) );
-	tbox.setHeight( th );
-	tbox.setWidth( tw );
-	painter->setPen( p );
-	painter->drawText( tbox, Qt::AlignCenter, "Out" );
-
-
+	// Then the rest of them
 	for( int i = 0; i < 3; i++ )
 	{
-		qreal x = rect.width() - wh;
-		qreal y = 30 + i * 20;
-		qreal tx = x - 5 - tw;
-		qreal ty = y - 2;
-		
-		box.setTopLeft( QPoint( x, y ) );
-		box.setHeight( wh );
-		box.setWidth( wh );
+		x = m_w - 10;
+		y = 30 + i * 20.0;
+		tx = x - 5 - 25.0;
+		ty = y - 2;
 
-		painter->fillRect( box, boxBrush );
+		m_slots.push_back( new NodeSlot( QPoint( x, y ), QPoint( tx, ty ), QString( 'A' + i ) ) );
+	}
+}
 
-		tbox.setTopLeft( QPoint( tx, ty ) );
-		tbox.setHeight( th );
-		tbox.setWidth( tw );
-
-		QString text = 'A' + i;
-		painter->drawText( tbox, Qt::AlignRight, text );
+void ExpressionNode::paintSlots( QPainter *painter )
+{
+	for( int i = 0; i < 4; i++ )
+	{
+		NodeSlot *slot = m_slots[ i ];
+		slot->paint( painter );
 	}
 }
 
