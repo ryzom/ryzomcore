@@ -30,7 +30,7 @@ class NodeSlot;
 class ExpressionNode : public QGraphicsItem
 {
 public:
-	ExpressionNode( QGraphicsItem *parent = NULL );
+	ExpressionNode( int nodes = 3, QGraphicsItem *parent = NULL );
 	~ExpressionNode();
 
 	QRectF boundingRect() const;

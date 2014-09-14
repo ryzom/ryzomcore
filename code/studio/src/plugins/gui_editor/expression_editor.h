@@ -35,11 +35,13 @@ protected:
 	void contextMenuEvent( QContextMenuEvent *e );
 
 private Q_SLOTS:
-	void onAddRect();
 	void onDeleteSelection();
 	void onSelectionChanged();
 	void onLinkItems();
 	void onUnLinkItems();
+	void onAddNode1();
+	void onAddNode2();
+	void onAddNode3();
 
 private:
 

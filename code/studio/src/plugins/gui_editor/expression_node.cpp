@@ -97,16 +97,19 @@ private:
 
 
 
-ExpressionNode::ExpressionNode( QGraphicsItem *parent ) :
+ExpressionNode::ExpressionNode( int nodes, QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
 	m_w = 100;
 	m_h = 100;
 
-	createSlots();
+	// Out nodes
+	m_links.push_back( NULL );
 
-	for( int i = 0; i < 4; i++ )
+	for( int i = 0; i < nodes; i++ )
 		m_links.push_back( NULL );
+
+	createSlots();
 }
 
 ExpressionNode::~ExpressionNode()
@@ -208,7 +211,7 @@ ExpressionLink* ExpressionNode::link( int slot ) const
 
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 {
-	for( int i = 0; i < 4; i++ )
+	for( int i = 0; i < m_links.count(); i++ )
 	{
 		ExpressionLink *link = m_links[ i ];
 		if( link == NULL )
@@ -222,8 +225,9 @@ void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 
 void ExpressionNode::createSlots()
 {
-	// First create the "Out" slot
+	int nodes = m_links.count();
 
+	// First create the "Out" slot
 	NodeSlotInfo info;
 	info.tw = 25.0;
 	info.th = 12.0;
@@ -239,9 +243,10 @@ void ExpressionNode::createSlots()
 	info.text = "Out";
 
 	m_slots.push_back( new NodeSlot( info ) );
+	nodes--;
 
 	// Then the rest of them
-	for( int i = 0; i < 3; i++ )
+	for( int i = 0; i < nodes; i++ )
 	{
 		x = m_w - info.wh;
 		y = 30 + i * 20.0;
@@ -258,7 +263,7 @@ void ExpressionNode::createSlots()
 
 void ExpressionNode::paintSlots( QPainter *painter )
 {
-	for( int i = 0; i < 4; i++ )
+	for( int i = 0; i < m_slots.count(); i++ )
 	{
 		NodeSlot *slot = m_slots[ i ];
 		slot->paint( painter );

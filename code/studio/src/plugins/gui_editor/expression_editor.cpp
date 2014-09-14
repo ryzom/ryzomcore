@@ -52,8 +52,15 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	QMenu menu;
 
 	QAction *a = NULL;
-	a = menu.addAction( "Add rect" );
-	connect( a, SIGNAL( triggered() ), this, SLOT( onAddRect() ) );
+	QMenu *mm = menu.addMenu( "Add node" );
+	a = mm->addAction( "1 slot" );
+	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode1() ) );
+
+	a = mm->addAction( "2 slots" );
+	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode2() ) );
+
+	a = mm->addAction( "3 slots" );
+	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode3() ) );
 
 	if( m_selectionCount > 0 )
 	{
@@ -71,13 +78,6 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	}
 
 	menu.exec( e->globalPos() );
-}
-
-void ExpressionEditor::onAddRect()
-{
-	QGraphicsItem *item = new ExpressionNode();
-	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
-	m_scene->addItem( item );
 }
 
 void ExpressionEditor::onDeleteSelection()
@@ -167,4 +167,25 @@ void ExpressionEditor::onUnLinkItems()
 	}
 }
 
+
+void ExpressionEditor::onAddNode1()
+{
+	QGraphicsItem *item = new ExpressionNode( 1 );
+	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	m_scene->addItem( item );
+}
+
+void ExpressionEditor::onAddNode2()
+{
+	QGraphicsItem *item = new ExpressionNode( 2 );
+	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	m_scene->addItem( item );
+}
+
+void ExpressionEditor::onAddNode3()
+{
+	QGraphicsItem *item = new ExpressionNode( 3 );
+	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	m_scene->addItem( item );
+}
 
