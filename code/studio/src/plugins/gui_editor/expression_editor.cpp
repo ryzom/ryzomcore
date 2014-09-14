@@ -141,7 +141,7 @@ void ExpressionEditor::onLinkItems()
 	}
 
 	ExprLinkDlg d;
-	d.load( froml, tol );
+	d.load( froml, tol, from->name(), to->name() );
 	int result = d.exec();
 	if( result == QDialog::Rejected )
 		return;

@@ -49,6 +49,8 @@ public:
 
 	void clearLinks();
 
+	QString name() const{ return m_name; }
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 

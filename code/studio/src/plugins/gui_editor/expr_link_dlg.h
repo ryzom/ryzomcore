@@ -32,7 +32,7 @@ public:
 	ExprLinkDlg( QWidget *parent = NULL );
 	~ExprLinkDlg();
 
-	void load( const QList< SlotInfo > &a, const QList< SlotInfo > &b );
+	void load( const QList< SlotInfo > &a, const QList< SlotInfo > &b, const QString &aname, const QString &bname );
 
 	int getSlotA() const;
 	int getSlotB() const;

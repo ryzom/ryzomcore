@@ -33,7 +33,7 @@ ExprLinkDlg::~ExprLinkDlg()
 {
 }
 
-void ExprLinkDlg::load( const QList< SlotInfo > &a, const QList< SlotInfo > &b )
+void ExprLinkDlg::load( const QList< SlotInfo > &a, const QList< SlotInfo > &b, const QString &aname, const QString &bname )
 {
 	QListIterator< SlotInfo > itra( a );
 	QListIterator< SlotInfo > itrb( b );
@@ -60,6 +60,8 @@ void ExprLinkDlg::load( const QList< SlotInfo > &a, const QList< SlotInfo > &b )
 		m_ui.list2->addItem( item );
 	}
 
+	m_ui.groupBox1->setTitle( aname );
+	m_ui.groupBox2->setTitle( bname );
 }
 
 int ExprLinkDlg::getSlotA() const
