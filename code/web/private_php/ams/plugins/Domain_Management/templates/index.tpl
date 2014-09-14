@@ -52,13 +52,13 @@
 		</div>
 		</div><!--/span-->
 
-		<div class="box col-md-3">
+	<div class="box col-md-3">
 		<div class="panel panel-default">
-		<div class="panel-heading" data-original-title="">
+			<div class="panel-heading" data-original-title="">
 				<span class="icon-pencil"></span> Modify Domain Settings
 			</div>
-		 <div class="panel-body">
-				<div class="row-fluid">
+		<div class="panel-body">
+			<div class="row-fluid">
 
 			<form id="modifyDomain" class="form-vertical" method="post" action="index.php?page=layout_plugin&name=Domain_Management&edit_domain={$hook_info['Domain_Management']['domains']['0']['domain_id']}&ModifyDomain=1">
 
@@ -80,21 +80,19 @@
 						<input type="text" id="domain_name" name="domain_name" value="{$hook_info['Domain_Management']['domains']['0']['domain_name']}">
 					</div>
 				</div>
-			</div>
+			</div>		
 			
 			<div class="control-group" style="display: inline-block; ">
-				<label class="control-label">Domain Status</label>		
-				<div class="controls">
-					<div class="input-prepend">
-						<select id="status" multiple class="form-control"  form="modifyDomain">
+					<label class="control-label">Domain Status</label>
+					<div class="controls">
+						<select class="form-control" name="status">
 							<option value="ds_close" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_close"}selected{/if}>ds_close</option>
 							<option value="ds_dev" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_dev"}selected{/if}>ds_dev</option>
 							<option value="ds_restricted" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_restricted"}selected{/if}>ds_restricted</option>
 							<option value="ds_open" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_open"}selected{/if}>ds_open</option>
 						</select>
 					</div>
-				</div>
-			</div>
+				</div>	
 			
 			<div class="control-group" style="display: inline-block; ">
 				<label class="control-label">Patch Version</label>
@@ -196,6 +194,61 @@
 		 </div>
 	</div>
 
+	<div class="box col-md-9">
+	</div>
+	
+	<div class="box col-md-3">
+		<div class="panel panel-default">
+			<div class="panel-heading" data-original-title="">
+				<span class="icon-pencil"></span> Permission Settings
+			</div>
+		<div class="panel-body">
+			<div class="row-fluid">
+
+			<form id="multiselectForm" method="post" class="form-horizontal" action="test.php?page=layout_plugin&name=Domain_Management&edit_domain={$hook_info['Domain_Management']['domains']['0']['domain_id']}&ModifyPermission=1">
+				<div class="form-group">
+					<label class="col-lg-3 control-label">Gender</label>
+					<div class="col-lg-5">
+						<select class="form-control" name="gender">
+							<option value="male">Male</option>
+							<option value="female">Female</option>
+							<option value="other">Other</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-lg-3 control-label">Browser</label>
+					<div class="col-lg-5">
+						<select class="form-control" name="browsers" multiple>
+							<option value="chrome">Google Chrome</option>
+							<option value="firefox">Firefox</option>
+							<option value="ie">IE</option>
+							<option value="safari">Safari</option>
+							<option value="opera">Opera</option>
+							<option value="other">Other</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<div class="col-lg-5 col-lg-offset-3">
+						<button type="submit" class="btn btn-default">Validate</button>
+					</div>
+				</div>
+			</form>
+
+				{if isset($RESULT_OF_MODIFYING) and $RESULT_OF_MODIFYING eq "SUCCESS"}
+				<div class="alert alert-success">
+					{$modify_mail_of_group_success}
+				</div>
+				{/if}
+
+				
+			</div>
+		 </div>
+	</div>
+	
 	</div><!--/row-->
 	{else}
 	

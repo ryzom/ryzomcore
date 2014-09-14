@@ -71,7 +71,7 @@ function domain_management_hook_get_db()
         try {
 
             $dbs = new DBLayer( 'shard' );
-            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.$_GET['edit_domain']);
+            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'status' => $_POST['status'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.$_GET['edit_domain']);
 
             }
         catch ( Exception $e ) {
@@ -123,3 +123,15 @@ function domain_management_hook_return_global()
     global $domain_management_return_set;
      return $domain_management_return_set;
      }
+
+     
+function api_key_management_hook_activate()
+ {
+    $dbl = new DBLayer( "lib" );
+     $sql = "INSERT INTO `settings` (Setting) 
+            SELECT 'Domain_Auto_Add' FROM DUAL
+            WHERE NOT EXISTS 
+            (SELECT Setting FROM settings WHERE Setting='Domain_Auto_Add');";
+
+     $dbl -> executeWithoutParams( $sql );
+     }     

@@ -18,6 +18,8 @@ class Helpers {
      */
     public static function loadTemplate( $template, $vars = array (), $returnHTML = false )
      {
+     error_log(print_r($_GET,true));
+     error_log(print_r($_POST,true));
         global $AMS_LIB;
          global $SITEBASE;
          global $AMS_TRANS;
