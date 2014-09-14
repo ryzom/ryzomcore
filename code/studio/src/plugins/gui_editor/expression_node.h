@@ -30,7 +30,7 @@ class NodeSlot;
 class ExpressionNode : public QGraphicsItem
 {
 public:
-	ExpressionNode( int slotCount = 3, QGraphicsItem *parent = NULL );
+	ExpressionNode( const QString &name, int slotCount = 3, QGraphicsItem *parent = NULL );
 	~ExpressionNode();
 
 	QRectF boundingRect() const;
@@ -62,6 +62,8 @@ private:
 
 	QList< NodeSlot* > m_slots;
 	QList< ExpressionLink* > m_links;
+
+	QString m_name;
 };
 
 #endif

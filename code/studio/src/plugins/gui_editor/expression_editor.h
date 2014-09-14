@@ -50,6 +50,7 @@ private:
 	QGraphicsScene *m_scene;
 
 	int m_selectionCount;
+	int m_nodeCount;
 };
 
 #endif

@@ -97,12 +97,14 @@ private:
 
 
 
-ExpressionNode::ExpressionNode( int slotCount, QGraphicsItem *parent ) :
+ExpressionNode::ExpressionNode( const QString &name, int slotCount, QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
 	m_w = 100;
 	m_h = 100;
 	m_hh = 20.0;
+
+	m_name = name;
 
 	if( slotCount > 3 )
 		m_h = m_h + 20.0 * ( slotCount - 3 );
@@ -147,7 +149,7 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 	// Draw header text
 	p.setColor( Qt::black );
 	painter->setPen( p );
-	painter->drawText( header, Qt::AlignCenter, "Something" );
+	painter->drawText( header, Qt::AlignCenter, m_name );
 
 	if( option->state & QStyle::State_Selected )
 	{

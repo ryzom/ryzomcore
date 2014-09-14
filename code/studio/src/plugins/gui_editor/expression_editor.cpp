@@ -40,6 +40,8 @@ QWidget( parent )
 	m_ui.view->setScene( m_scene );
 
 	connect( m_scene, SIGNAL( selectionChanged() ), this, SLOT( onSelectionChanged() ) );
+
+	m_nodeCount = 0;
 }
 
 ExpressionEditor::~ExpressionEditor()
@@ -169,7 +171,12 @@ void ExpressionEditor::onUnLinkItems()
 
 void ExpressionEditor::addNode( int slotCount )
 {
-	QGraphicsItem *item = new ExpressionNode( slotCount );
+	QString name;
+	name = "node #";
+	name += QString::number( m_nodeCount );
+	m_nodeCount++;
+
+	QGraphicsItem *item = new ExpressionNode( name, slotCount );
 	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	m_scene->addItem( item );
 }
