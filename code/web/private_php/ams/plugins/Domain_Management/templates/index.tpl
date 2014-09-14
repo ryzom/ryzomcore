@@ -60,7 +60,7 @@
 		 <div class="panel-body">
 				<div class="row-fluid">
 
-			<form id="modifyMailSGroup" class="form-vertical" method="post" action="index.php?page=show_sgroup&id=">
+			<form id="modifyDomain" class="form-vertical" method="post" action="index.php?page=layout_plugin&name=Domain_Management&edit_domain={$hook_info['Domain_Management']['domains']['0']['domain_id']}&ModifyDomain=1">
 
 			<legend style="margin:0"> Domain Settings of '{$hook_info['Domain_Management']['domains']['0']['domain_name']}'</legend>
 
@@ -85,12 +85,14 @@
 			<div class="control-group" style="display: inline-block; ">
 				<label class="control-label">Domain Status</label>		
 				<div class="controls">
-					<select id="status" multiple class="form-control" data-rel="chosen">
-						<option {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_close"}selected{/if}>ds_close</option>
-						<option {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_dev"}selected{/if}>ds_dev</option>
-						<option {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_restricted"}selected{/if}>ds_restricted</option>
-						<option {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_open"}selected{/if}>ds_open</option>
-					</select>
+					<div class="input-prepend">
+						<select id="status" multiple class="form-control"  form="modifyDomain">
+							<option value="ds_close" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_close"}selected{/if}>ds_close</option>
+							<option value="ds_dev" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_dev"}selected{/if}>ds_dev</option>
+							<option value="ds_restricted" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_restricted"}selected{/if}>ds_restricted</option>
+							<option value="ds_open" {if {$hook_info['Domain_Management']['domains']['0']['status']} eq "ds_open"}selected{/if}>ds_open</option>
+						</select>
+					</div>
 				</div>
 			</div>
 			
