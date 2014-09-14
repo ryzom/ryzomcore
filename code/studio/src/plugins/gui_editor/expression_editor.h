@@ -39,6 +39,7 @@ private Q_SLOTS:
 	void onSelectionChanged();
 	void onLinkItems();
 	void onUnLinkItems();
+	void addNode( int slotCount );
 	void onAddNode1();
 	void onAddNode2();
 	void onAddNode3();

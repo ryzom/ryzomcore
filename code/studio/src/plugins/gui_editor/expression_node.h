@@ -30,7 +30,7 @@ class NodeSlot;
 class ExpressionNode : public QGraphicsItem
 {
 public:
-	ExpressionNode( int nodes = 3, QGraphicsItem *parent = NULL );
+	ExpressionNode( int slotCount = 3, QGraphicsItem *parent = NULL );
 	~ExpressionNode();
 
 	QRectF boundingRect() const;
@@ -53,7 +53,7 @@ protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
 private:
-	void createSlots();
+	void createSlots( int count = 3 );
 	void paintSlots( QPainter *painter );
 
 	qreal m_w;

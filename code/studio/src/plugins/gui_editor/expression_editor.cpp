@@ -167,25 +167,25 @@ void ExpressionEditor::onUnLinkItems()
 	}
 }
 
+void ExpressionEditor::addNode( int slotCount )
+{
+	QGraphicsItem *item = new ExpressionNode( slotCount );
+	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	m_scene->addItem( item );
+}
 
 void ExpressionEditor::onAddNode1()
 {
-	QGraphicsItem *item = new ExpressionNode( 1 );
-	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
-	m_scene->addItem( item );
+	addNode( 1 );
 }
 
 void ExpressionEditor::onAddNode2()
 {
-	QGraphicsItem *item = new ExpressionNode( 2 );
-	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
-	m_scene->addItem( item );
+	addNode( 2 );
 }
 
 void ExpressionEditor::onAddNode3()
 {
-	QGraphicsItem *item = new ExpressionNode( 3 );
-	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
-	m_scene->addItem( item );
+	addNode( 3 );
 }
 
