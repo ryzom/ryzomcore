@@ -432,6 +432,7 @@ if not args.noverify:
 	findTool(log, ToolDirectories, TgaCutTool, ToolSuffix)
 	findTool(log, ToolDirectories, PatchGenTool, ToolSuffix)
 	findTool(log, ToolDirectories, TranslationToolsTool, ToolSuffix)
+	findTool(log, ToolDirectories, BuildWorldPackedColTool, ToolSuffix)
 
 log.close()
 if os.path.isfile("0_setup.log"):
