@@ -24,7 +24,7 @@
 
 class QGraphicsScene;
 
-class ExpressionEditor : public QWidget
+class ExpressionEditor : public QMainWindow
 {
 	Q_OBJECT
 public:
@@ -39,10 +39,11 @@ private Q_SLOTS:
 	void onSelectionChanged();
 	void onLinkItems();
 	void onUnLinkItems();
-	void addNode( int slotCount );
+	void addNode( const QString &name, int slotCount );
 	void onAddNode1();
 	void onAddNode2();
 	void onAddNode3();
+	void onItemDblClicked( QTreeWidgetItem *item );
 
 private:
 

@@ -30,16 +30,17 @@
 #include <QMessageBox>
 
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
-QWidget( parent )
+QMainWindow( parent )
 {
 	m_ui.setupUi( this );
-
+	
 	m_selectionCount = 0;
 
 	m_scene = new QGraphicsScene( this );
 	m_ui.view->setScene( m_scene );
 
 	connect( m_scene, SIGNAL( selectionChanged() ), this, SLOT( onSelectionChanged() ) );
+	connect( m_ui.tree, SIGNAL( itemDoubleClicked( QTreeWidgetItem*, int ) ), this, SLOT( onItemDblClicked( QTreeWidgetItem* ) ) );
 
 	m_nodeCount = 0;
 }
@@ -169,30 +170,37 @@ void ExpressionEditor::onUnLinkItems()
 	}
 }
 
-void ExpressionEditor::addNode( int slotCount )
+void ExpressionEditor::addNode( const QString &name, int slotCount )
 {
-	QString name;
-	name = "node #";
-	name += QString::number( m_nodeCount );
+	QString n = name;
+	n += " #";
+	n += QString::number( m_nodeCount );
 	m_nodeCount++;
 
-	QGraphicsItem *item = new ExpressionNode( name, slotCount );
+	QGraphicsItem *item = new ExpressionNode( n, slotCount );
 	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	m_scene->addItem( item );
 }
 
 void ExpressionEditor::onAddNode1()
 {
-	addNode( 1 );
+	addNode( "node", 1 );
 }
 
 void ExpressionEditor::onAddNode2()
 {
-	addNode( 2 );
+	addNode( "node", 2 );
 }
 
 void ExpressionEditor::onAddNode3()
 {
-	addNode( 3 );
+	addNode( "node", 3 );
 }
+
+void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
+{
+	QString name = item->text( 0 );
+	addNode( name, 3 );
+}
+
 
