@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
-# \file 3_install.py
-# \brief Install pz
+# \file 1_export.py
+# \brief Export cartographer
 # \date 2014-09-13 13:32GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install pz
+# Export cartographer
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2014  Jan BOON
@@ -38,20 +38,11 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install pz")
+printLog(log, "--- Export cartographer")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-installPath = InstallDirectory + "/" + PackedZoneInstallDirectory
-mkPath(log, installPath)
-
-printLog(log, ">>> Install pz <<<")
-mkPath(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory, installPath, ".island_hm")
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory, installPath, ".packed_island")
-
-printLog(log, "")
 log.close()
 
 

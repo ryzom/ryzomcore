@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # 
-# \file 3_install.py
-# \brief Install pz
+# \file 2_build.py
+# \brief Build cartographer
 # \date 2014-09-13 13:32GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
-# Install pz
+# Build cartographer
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 # Copyright (C) 2014  Jan BOON
@@ -38,20 +38,24 @@ from directories import *
 
 printLog(log, "")
 printLog(log, "-------")
-printLog(log, "--- Install pz")
+printLog(log, "--- Build cartographer")
 printLog(log, "-------")
 printLog(log, time.strftime("%Y-%m-%d %H:%MGMT", time.gmtime(time.time())))
 printLog(log, "")
 
-installPath = InstallDirectory + "/" + PackedZoneInstallDirectory
-mkPath(log, installPath)
+# Find tools
+R2IslandsTextures = findTool(log, ToolDirectories, R2IslandsTexturesTool, ToolSuffix)
 
-printLog(log, ">>> Install pz <<<")
-mkPath(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory)
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory, installPath, ".island_hm")
-copyFilesExtNoTreeIfNeeded(log, ExportBuildDirectory + "/" + PackedZoneBuildDirectory, installPath, ".packed_island")
-
+if R2IslandsTextures == "":
+	toolLogFail(log, R2IslandsTexturesTool, ToolSuffix)
+else:
+	printLog(log, ">>> Copy island_screenshots.cfg <<<")
+	cfgPath = ActiveProjectDirectory + "/generated/island_screenshots.cfg"
+	shutil.copy(cfgPath, "island_screenshots.cfg")
+	printLog(log, ">>> Build cartographer <<<")
+	subprocess.call([ R2IslandsTextures ])
 printLog(log, "")
+
 log.close()
 
 

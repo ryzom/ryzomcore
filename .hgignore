@@ -261,3 +261,4 @@ code/web/public_php/role_domain
 code/web/public_php/db_version_ring
 code/web/public_php/config_user.php
 code/nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
+code/nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
