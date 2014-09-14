@@ -44,6 +44,7 @@ private Q_SLOTS:
 	void onAddNode2();
 	void onAddNode3();
 	void onItemDblClicked( QTreeWidgetItem *item );
+	void onChangeSlotCount();
 
 private:
 

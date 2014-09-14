@@ -115,9 +115,7 @@ QGraphicsItem( parent )
 ExpressionNode::~ExpressionNode()
 {
 	clearLinks();
-
-	qDeleteAll( m_slots );
-	m_slots.clear();
+	clearSlots();
 }
 
 QRectF ExpressionNode::boundingRect() const
@@ -174,6 +172,28 @@ QPointF ExpressionNode::slotPos( int slot ) const
 
 	mp += sp;
 	return mp;
+}
+
+void ExpressionNode::changeSlotCount( int count )
+{
+	clearSlots();
+	clearLinks();
+	m_links.clear();
+
+	if( count <= 3 )
+		m_h = 100.0;
+	else
+		m_h = 100.0 + 20.0 * ( count - 3 );
+
+	createSlots( count );
+
+	update();
+}
+
+void ExpressionNode::clearSlots()
+{
+	qDeleteAll( m_slots );
+	m_slots.clear();
 }
 
 bool ExpressionNode::slotEmpty( int slot ) const

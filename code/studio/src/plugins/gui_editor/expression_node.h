@@ -42,6 +42,8 @@ public:
 	QPointF slotPos( int slot ) const;
 
 	int slotCount() const{ return m_slots.count(); }
+	void changeSlotCount( int count );
+	void clearSlots();
 
 	bool slotEmpty( int slot ) const;
 

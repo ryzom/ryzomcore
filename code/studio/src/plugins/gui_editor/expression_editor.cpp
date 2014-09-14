@@ -28,6 +28,7 @@
 #include "expr_link_dlg.h"
 
 #include <QMessageBox>
+#include <QInputDialog>
 
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
 QMainWindow( parent )
@@ -70,6 +71,12 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 		a = menu.addAction( "Remove" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onDeleteSelection() ) );
 
+		if( m_selectionCount == 1 )
+		{
+			a = menu.addAction( "Change slot count" );
+			connect( a, SIGNAL( triggered() ), this, SLOT( onChangeSlotCount() ) );
+		}
+		else
 		if( m_selectionCount == 2 )
 		{
 			a = menu.addAction( "Link" );
@@ -203,4 +210,22 @@ void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
 	addNode( name, 3 );
 }
 
+void ExpressionEditor::onChangeSlotCount()
+{
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+	ExpressionNode *node = static_cast< ExpressionNode* >( l[ 0 ] );
+	int oldc = node->slotCount();
+
+	int c = QInputDialog::getInt( this,
+								tr( "Change slot count" ),
+								tr( "Enter new slot count" ),
+								oldc,
+								1,
+								26 );
+
+	if( oldc == c )
+		return;
+
+	node->changeSlotCount( c );
+}
 
