@@ -39,6 +39,7 @@ private Q_SLOTS:
 	void onDeleteSelection();
 	void onSelectionChanged();
 	void onLinkItems();
+	void onUnLinkItems();
 
 private:
 

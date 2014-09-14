@@ -65,6 +65,9 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 			a = menu.addAction( "Link" );
 			connect( a, SIGNAL( triggered() ), this, SLOT( onLinkItems() ) );
 		}
+
+		a = menu.addAction( "Unlink" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onUnLinkItems() ) );
 	}
 
 	menu.exec( e->globalPos() );
@@ -148,6 +151,20 @@ void ExpressionEditor::onLinkItems()
 	link->link( from, to, slotA, slotB );
 
 	m_scene->addItem( link );
+}
+
+void ExpressionEditor::onUnLinkItems()
+{
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+
+	for( int i = 0; i < l.count(); i++ )
+	{
+		ExpressionNode *node = dynamic_cast< ExpressionNode* >( l[ i ] );
+		if( node == NULL )
+			continue;
+
+		node->clearLinks();
+	}
 }
 
 

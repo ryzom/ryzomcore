@@ -58,6 +58,8 @@ void ExpressionLink::unlink()
 
 	m_from = NULL;
 	m_to = NULL;
+
+	delete this;
 }
 
 void ExpressionLink::nodeMoved()

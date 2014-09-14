@@ -47,13 +47,14 @@ public:
 
 	void getSlots( QList< SlotInfo > &l );
 
+	void clearLinks();
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
 private:
 	void createSlots();
 	void paintSlots( QPainter *painter );
-	void clearLinks();
 
 	qreal m_w;
 	qreal m_h;
