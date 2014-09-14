@@ -77,6 +77,29 @@ function domain_management_hook_get_db()
         catch ( Exception $e ) {
             return null;
              }
+        }     
+        
+        if ( isset( $_GET['ModifyPermission'] ) && $_GET['ModifyPermission'] = '1' && isset($_POST['user'])) {
+        try {
+        
+            $dbl = new DBLayer("lib");
+        
+            $statement = $dbl->execute("SELECT * FROM `settings` WHERE `Setting` = :setting", Array('setting' => 'Domain_Auto_Add'));
+            $json = $statement->fetch();
+            $json = json_decode($json['Value'],true);
+            
+            $json[$_GET['edit_domain']]['1'] = $_POST['user'];
+            $json[$_GET['edit_domain']]['2'] = $_POST['moderator'];
+            $json[$_GET['edit_domain']]['3'] = $_POST['admin'];   
+            
+            $update = json_encode($json);
+
+            $dbl->update("settings", Array( 'Value' => $update),"`Setting` = 'Domain_Auto_Add'");
+
+            }
+        catch ( Exception $e ) {
+            return null;
+             }
         }
 
     try {
@@ -102,6 +125,14 @@ function domain_management_hook_get_db()
             $pagination = new Pagination( WebUsers :: getAllUsersQuery(), "web", 10, "WebUsers" );
              $domain_management_return_set['userlist'] = Gui_Elements :: make_table( $pagination -> getElements() , Array( "getUId", "getUsername", "getEmail" ), Array( "id", "username", "email" ) );
 
+            $dbl = new DBLayer("lib");
+        
+            $statement = $dbl->execute("SELECT * FROM `settings` WHERE `Setting` = :setting", Array('setting' => 'Domain_Auto_Add'));
+            $json = $statement->fetch();
+            $json = json_decode($json['Value'],true);
+            
+            $domain_management_return_set['Domain_Auto_Add'] = $json[$_GET['edit_domain']];
+                         
              }
 
         return $rows;

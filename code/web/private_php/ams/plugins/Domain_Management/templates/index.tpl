@@ -205,35 +205,58 @@
 		<div class="panel-body">
 			<div class="row-fluid">
 
-			<form id="multiselectForm" method="post" class="form-horizontal" action="test.php?page=layout_plugin&name=Domain_Management&edit_domain={$hook_info['Domain_Management']['domains']['0']['domain_id']}&ModifyPermission=1">
-				<div class="form-group">
-					<label class="col-lg-3 control-label">Gender</label>
-					<div class="col-lg-5">
-						<select class="form-control" name="gender">
-							<option value="male">Male</option>
-							<option value="female">Female</option>
-							<option value="other">Other</option>
+			<form id="multiselectForm" method="post" class="form-vertical col-md-12" action="index.php?page=layout_plugin&name=Domain_Management&edit_domain={$hook_info['Domain_Management']['domains']['0']['domain_id']}&ModifyPermission=1">
+			
+			<legend style="margin:0"> Permission Settings of '{$hook_info['Domain_Management']['domains']['0']['domain_name']}'</legend>
+			<div class="control-group " >
+				<div class="col-md-6"><label class="control-label">User:</label></div>
+				<div class="controls">
+						<div class="col-md-6">
+						<select class="form-control" name="user">
+							<option value="NONE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['1']} eq "NONE"}selected{/if}>NONE</option>
+							<option value="CLOSE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['1']} eq "CLOSE"}selected{/if}>CLOSE</option>
+							<option value="DEV" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['1']} eq "DEV"}selected{/if}>DEV</option>
+							<option value="RESTRICTED" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['1']} eq "RESTRICTED"}selected{/if}>RESTRICTED</option>
+							<option value="OPEN" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['1']} eq "OPEN"}selected{/if}>OPEN</option>
 						</select>
+						</div>
 					</div>
 				</div>
-
-				<div class="form-group">
-					<label class="col-lg-3 control-label">Browser</label>
-					<div class="col-lg-5">
-						<select class="form-control" name="browsers" multiple>
-							<option value="chrome">Google Chrome</option>
-							<option value="firefox">Firefox</option>
-							<option value="ie">IE</option>
-							<option value="safari">Safari</option>
-							<option value="opera">Opera</option>
-							<option value="other">Other</option>
+				<div class="clearfix"></div>
+			<div class="control-group " >
+				<div class="col-md-6"><label class="control-label">Moderator:</label></div>
+				<div class="controls">
+				<div class="col-md-6">
+						<select class="form-control" name="moderator">
+							<option value="NONE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['2']} eq "NONE"}selected{/if}>NONE</option>
+							<option value="CLOSE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['2']} eq "CLOSE"}selected{/if}>CLOSE</option>
+							<option value="DEV" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['2']} eq "DEV"}selected{/if}>DEV</option>
+							<option value="RESTRICTED" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['2']} eq "RESTRICTED"}selected{/if}>RESTRICTED</option>
+							<option value="OPEN" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['2']} eq "OPEN"}selected{/if}>OPEN</option>
 						</select>
 					</div>
+					</div>
 				</div>
-
-				<div class="form-group">
-					<div class="col-lg-5 col-lg-offset-3">
-						<button type="submit" class="btn btn-default">Validate</button>
+				<div class="clearfix"></div>
+			<div class="control-group " >
+				<div class="col-md-6"><label class="control-label">Admin:</label></div>
+				<div class="controls">
+				<div class="col-md-6">
+						<select class="form-control" name="admin">
+							<option value="NONE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['3']} eq "NONE"}selected{/if}>NONE</option>
+							<option value="CLOSE" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['3']} eq "CLOSE"}selected{/if}>CLOSE</option>
+							<option value="DEV" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['3']} eq "DEV"}selected{/if}>DEV</option>
+							<option value="RESTRICTED" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['3']} eq "RESTRICTED"}selected{/if}>RESTRICTED</option>
+							<option value="OPEN" {if {$hook_info['Domain_Management']['Domain_Auto_Add']['3']} eq "OPEN"}selected{/if}>OPEN</option>
+						</select>
+					</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+				<div class="control-group">
+					<label class="control-label"></label>
+					<div class="controls">
+						<button type="submit" class="btn btn-primary" >Update</button>
 					</div>
 				</div>
 			</form>
