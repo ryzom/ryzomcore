@@ -56,8 +56,9 @@ private:
 	void createSlots( int count = 3 );
 	void paintSlots( QPainter *painter );
 
-	qreal m_w;
-	qreal m_h;
+	qreal m_w; // node width
+	qreal m_h; // node height
+	qreal m_hh; // header height
 
 	QList< NodeSlot* > m_slots;
 	QList< ExpressionLink* > m_links;

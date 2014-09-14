@@ -102,6 +102,10 @@ QGraphicsItem( parent )
 {
 	m_w = 100;
 	m_h = 100;
+	m_hh = 20.0;
+
+	if( slotCount > 3 )
+		m_h = m_h + 20.0 * ( slotCount - 3 );
 
 	createSlots( slotCount );
 }
@@ -128,7 +132,7 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 
 	QRectF rect = boundingRect();
 	QRectF header = rect;
-	header.setHeight( header.height() * 0.2 );
+	header.setHeight( m_hh );
 
 	// Draw filled rectangle, header
 	c.setRed( 44 );
