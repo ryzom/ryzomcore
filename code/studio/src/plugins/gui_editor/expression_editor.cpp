@@ -25,6 +25,7 @@
 
 #include "expression_node.h"
 #include "expression_link.h"
+#include "expr_link_dlg.h"
 
 #include <QMessageBox>
 
@@ -119,16 +120,32 @@ void ExpressionEditor::onLinkItems()
 	ExpressionNode *from = static_cast< ExpressionNode* >( l[ 0 ] );
 	ExpressionNode *to = static_cast< ExpressionNode* >( l[ 1 ] );
 
-	if( ( from->link( 0 ) != NULL ) || ( to->link( 0 ) != NULL ) )
+	QList< SlotInfo > froml;
+	QList< SlotInfo > tol;
+
+	from->getSlots( froml );
+	to->getSlots( tol );
+
+	// If there are no free slots, or both "Out" slots are taken we can't link
+	if( froml.isEmpty() || tol.isEmpty() || ( !from->slotEmpty( 0 ) && !to->slotEmpty( 0 ) ) )
 	{
 		QMessageBox::information( this,
 									tr( "Failed to link nodes" ),
-									tr( "Unfortunately those nodes are already linked." ) );
+									tr( "Unfortunately those nodes are full." ) );
 		return;
 	}
 
+	ExprLinkDlg d;
+	d.load( froml, tol );
+	int result = d.exec();
+	if( result == QDialog::Rejected )
+		return;
+
+	int slotA = d.getSlotA();
+	int slotB = d.getSlotB();
+
 	ExpressionLink *link = new ExpressionLink();
-	link->link( from, to, 0, 0 );
+	link->link( from, to, slotA, slotB );
 
 	m_scene->addItem( link );
 }

@@ -17,49 +17,32 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef EXPRESSION_NODE
-#define EXPRESSION_NODE
+#ifndef EXPR_LINK_DLG
+#define EXPR_LINK_DLG
 
-#include <QGraphicsItem>
+#include <QDialog>
 #include <QList>
+#include "ui_expr_link_dlg.h"
 #include "expr_slot_info.h"
 
-class ExpressionLink;
-class NodeSlot;
-
-class ExpressionNode : public QGraphicsItem
+class ExprLinkDlg : public QDialog
 {
+	Q_OBJECT
 public:
-	ExpressionNode( QGraphicsItem *parent = NULL );
-	~ExpressionNode();
+	ExprLinkDlg( QWidget *parent = NULL );
+	~ExprLinkDlg();
 
-	QRectF boundingRect() const;
-	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
+	void load( const QList< SlotInfo > &a, const QList< SlotInfo > &b );
 
-	void setLink( ExpressionLink *link, int slot );
-	ExpressionLink* link( int slot ) const;
+	int getSlotA() const;
+	int getSlotB() const;
 
-	QPointF slotPos( int slot ) const;
-
-	int slotCount() const{ return m_slots.count(); }
-
-	bool slotEmpty( int slot ) const;
-
-	void getSlots( QList< SlotInfo > &l );
-
-protected:
-	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
+private Q_SLOTS:
+	void onOKClicked();
+	void onCancelClicked();
 
 private:
-	void createSlots();
-	void paintSlots( QPainter *painter );
-	void clearLinks();
-
-	qreal m_w;
-	qreal m_h;
-
-	QList< NodeSlot* > m_slots;
-	QList< ExpressionLink* > m_links;
+	Ui::ExprLinkDialog m_ui;
 };
 
 #endif

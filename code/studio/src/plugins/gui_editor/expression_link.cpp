@@ -50,13 +50,19 @@ void ExpressionLink::link( ExpressionNode *from, ExpressionNode *to, int fromSlo
 
 void ExpressionLink::unlink()
 {
+	if( m_from == NULL )
+		return;
+
 	m_from->setLink( NULL, m_fromSlot );
 	m_to->setLink( NULL, m_toSlot );
+
+	m_from = NULL;
+	m_to = NULL;
 }
 
 void ExpressionLink::nodeMoved()
 {
-	setLine( QLineF( m_from->slotPos( 0 ), m_to->slotPos( 0 ) ) );
+	setLine( QLineF( m_from->slotPos( m_fromSlot ), m_to->slotPos( m_toSlot ) ) );
 }
 
 void ExpressionLink::paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget )

@@ -35,6 +35,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	action_property_manager.h
 	texture_property_manager.h
 	expression_editor.h
+	expr_link_dlg.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -53,6 +54,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	action_list.ui
 	texture_chooser.ui
 	expression_editor.ui
+	expr_link_dlg.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)

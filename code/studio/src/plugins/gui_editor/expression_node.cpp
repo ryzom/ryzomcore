@@ -89,6 +89,8 @@ public:
 		painter->drawText( tbox, Qt::AlignRight, m_info.text );
 	}
 
+	QString text() const{ return m_info.text; }
+
 private:
 	NodeSlotInfo m_info;
 };
@@ -109,6 +111,8 @@ QGraphicsItem( parent )
 
 ExpressionNode::~ExpressionNode()
 {
+	clearLinks();
+
 	qDeleteAll( m_slots );
 	m_slots.clear();
 }
@@ -167,6 +171,29 @@ QPointF ExpressionNode::slotPos( int slot ) const
 
 	mp += sp;
 	return mp;
+}
+
+bool ExpressionNode::slotEmpty( int slot ) const
+{
+	if( m_links[ 0 ] == NULL )
+		return true;
+	else
+		return false;
+}
+
+void ExpressionNode::getSlots( QList< SlotInfo > &l )
+{
+	SlotInfo info;
+
+	for( int i = 0; i < m_slots.count(); i++ )
+	{
+		if( m_links[ i ] != NULL )
+			continue;
+
+		info.name = m_slots[ i ]->text();
+		info.slot = i;
+		l.push_back( info );
+	}
 }
 
 void ExpressionNode::setLink( ExpressionLink *link, int slot )
@@ -238,4 +265,16 @@ void ExpressionNode::paintSlots( QPainter *painter )
 	}
 }
 
+
+void ExpressionNode::clearLinks()
+{
+	for( int i = 0; i < m_links.count(); i++ )
+	{
+		ExpressionLink *link = m_links[ i ];
+		if( link == NULL )
+			continue;
+
+		link->unlink();
+	}
+}
 
