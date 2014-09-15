@@ -581,7 +581,7 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 	}
 	if (item.getValueByName(s, "Basics.FameForGuardAttack") && !s.empty())
 	{
-		double tmp;
+		float tmp;
 		sscanf(s.c_str(), "%f", &tmp);
 		_FameForGuardAttack = (sint32)tmp;
 	}
