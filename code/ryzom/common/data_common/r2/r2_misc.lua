@@ -28,12 +28,26 @@ function forEach(table, fn)
     end
 end
 
+
+------------------------------------------------------------------------------------------------------------
+-- whatever
+table.setn = function(table, n)
+	assert(table)
+	local mt = getmetatable(table)
+	if mt ~= nil then
+		if mt.__next ~= nil then
+			table.Size = n
+		end
+	end
+end
+
 ------------------------------------------------------------------------------------------------------------
 -- extension to table library : remove all content of a table without deleting the table object
 function table.clear(tbl)
 	while next(tbl) do
-		table.remove(tbl, next(tbl))
+		tbl[next(tbl)] = nil
 	end
+	table.setn(tbl, 0)
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -177,12 +191,12 @@ end
 -------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strifyXml(str)
-	strxml = string.gsub(str, ">", "&gt;")
+	local strxml = string.gsub(tostring(str), ">", "&gt;")
 	strxml = string.gsub(strxml, "<", "&lt;")
 	strxml = string.gsub(strxml, "&", "&amp;")
 	strxml = string.gsub(strxml, "'", "&apos;")
 	strxml = string.gsub(strxml, '"', "&quot;")
-	return [["]] .. tostring(strxml) .. [["]]
+	return [["]] .. strxml .. [["]]
 end	
 
 ------------------------------------------------------------------------------------------------------------
@@ -261,23 +275,34 @@ end
 
 
 
-assert(table.getn ~= nil) -- default lib should have been opened
+-- assert(table.getn ~= nil) -- default lib should have been opened
 
-if oldTableGetnFunction == nil then
-	oldTableGetnFunction = table.getn
-end
+--if oldTableGetnFunction == nil then
+--	oldTableGetnFunction = table.getn
+--end
+--
+--table.getn = function(table)
+--	assert(table)
+--	local mt = getmetatable(table)
+--	if mt ~= nil then
+--		if mt.__next ~= nil then
+--			return table.Size 
+--		end
+--	end
+--	return oldTableGetnFunction(table)
+--end
+
 
 table.getn = function(table)
 	assert(table)
 	local mt = getmetatable(table)
 	if mt ~= nil then
 		if mt.__next ~= nil then
-			return table.Size 
+			return table.Size
 		end
 	end
-	return oldTableGetnFunction(table)
+	return #table
 end
-
 
 
 
