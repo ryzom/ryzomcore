@@ -1931,6 +1931,7 @@ void CLuaIHMRyzom::rawDebugInfo(const std::string &dbg)
 		#endif
 		pIM->displaySystemInfo( LuaHelperStuff::formatLuaErrorSysInfo(dbg));
 	}
+	nldebug("LUA: '%s'", dbg.c_str());
 }
 
 

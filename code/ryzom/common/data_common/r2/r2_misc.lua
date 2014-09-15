@@ -32,9 +32,8 @@ end
 -- extension to table library : remove all content of a table without deleting the table object
 function table.clear(tbl)
 	while next(tbl) do
-		tbl[next(tbl)] = nil
+		table.remove(tbl, next(tbl))
 	end
-	table.setn(tbl, 0)
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -173,6 +172,17 @@ end
 -- enclose a string by double quotes
 function strify(str) 
 	return [["]] .. tostring(str) .. [["]]
+end	
+		
+-------------------------------------------------------------------------------------------------
+-- enclose a string by double quotes
+function strifyXml(str)
+	strxml = string.gsub(str, ">", "&gt;")
+	strxml = string.gsub(strxml, "<", "&lt;")
+	strxml = string.gsub(strxml, "&", "&amp;")
+	strxml = string.gsub(strxml, "'", "&apos;")
+	strxml = string.gsub(strxml, '"', "&quot;")
+	return [["]] .. tostring(strxml) .. [["]]
 end	
 
 ------------------------------------------------------------------------------------------------------------
