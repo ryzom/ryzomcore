@@ -1030,6 +1030,7 @@ end
 --------------------
 --------------------
 function r2:updateAnimBarActions(...)
+	local arg = {...}
 	-- forward to the real anim bar
 	r2.ui.AnimBar:updateActions(arg)
 end
