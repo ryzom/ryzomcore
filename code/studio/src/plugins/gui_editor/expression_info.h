@@ -25,9 +25,16 @@
 struct ExpressionInfo
 {
 	QString name;
+	bool value;
 	QString category;
 	bool variable;
 	QStringList slotNames;
+
+	ExpressionInfo()
+	{
+		value = false;
+		variable = false;
+	}
 };
 
 #endif

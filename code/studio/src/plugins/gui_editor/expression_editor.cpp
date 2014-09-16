@@ -101,6 +101,12 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 					a = menu.addAction( "Change slot count" );
 					connect( a, SIGNAL( triggered() ), this, SLOT( onChangeSlotCount() ) );
 				}
+
+				if( node->isValue() )
+				{
+					a = menu.addAction( "Change value" );
+					connect( a, SIGNAL( triggered() ), this, SLOT( onChangeValue() ) );
+				}
 			}
 		}
 		else
@@ -219,6 +225,11 @@ void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
 	node->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	node->setSlotNames( info->slotNames );
 	node->setVariable( info->variable );
+	node->setIsValue( info->value );
+	if( node->isValue() )
+	{
+		node->setValue( "Value" );
+	}
 	m_scene->addItem( node );
 }
 
@@ -239,6 +250,28 @@ void ExpressionEditor::onChangeSlotCount()
 		return;
 
 	node->changeSlotCount( c );
+}
+
+void ExpressionEditor::onChangeValue()
+{
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+	ExpressionNode *node = static_cast< ExpressionNode* >( l[ 0 ] );
+
+	QString oldValue = node->getValue();
+
+	QString newValue = QInputDialog::getText( this,
+										tr( "Change value" ),
+										tr( "Enter new value" ),
+										QLineEdit::Normal,
+										oldValue );
+
+	if( newValue.isEmpty() )
+		return;
+	if( newValue == oldValue )
+		return;
+
+	node->setValue( newValue );
+	node->update();
 }
 
 void ExpressionEditor::addExpression( const ExpressionInfo *info )

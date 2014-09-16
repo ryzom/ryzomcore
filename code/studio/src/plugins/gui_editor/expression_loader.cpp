@@ -37,6 +37,20 @@ public:
 		return true;
 	}
 
+	bool parseValue()
+	{
+		QString text = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
+		if( reader.hasError() )
+			return false;
+
+		if( text.toLower() == "true" )
+			m_info->value = true;
+		else
+			m_info->value = false;
+
+		return true;
+	}
+
 	bool parseCategory()
 	{
 		QString text = reader.readElementText( QXmlStreamReader::ErrorOnUnexpectedElement );
@@ -135,6 +149,9 @@ public:
 
 				if( name == "name" )
 					error = !parseName();
+				else
+				if( name == "value" )
+					error = !parseValue();
 				else
 				if( name == "category" )
 					error = !parseCategory();

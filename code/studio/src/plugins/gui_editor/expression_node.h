@@ -58,6 +58,12 @@ public:
 	void setVariable( bool b ){ m_variable = b; }
 	bool variable() const{ return m_variable; }
 
+	void setValue( const QString &value ){ m_value = value; }
+	QString getValue() const{ return m_value; }
+
+	bool isValue() const{ return m_isValue; }
+	void setIsValue( bool b ){ m_isValue = b; }
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
@@ -75,6 +81,9 @@ private:
 	QString m_name;
 
 	bool m_variable;
+
+	QString m_value;
+	bool m_isValue;
 };
 
 #endif

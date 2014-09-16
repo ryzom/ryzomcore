@@ -106,6 +106,7 @@ QGraphicsItem( parent )
 	m_hh = 20.0;
 
 	m_variable = false;
+	m_isValue = false;
 
 	m_name = name;
 
@@ -151,6 +152,20 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 	p.setColor( Qt::black );
 	painter->setPen( p );
 	painter->drawText( header, Qt::AlignCenter, m_name );
+
+	// Draw value if applicable
+	if( m_isValue )
+	{
+		QRectF vbox;
+		vbox.setTopLeft( QPoint( 0.0, 20.0 ) );
+		vbox.setWidth( header.width() );
+		vbox.setHeight( header.height() );
+		QPen vpen;
+		vpen.setColor( Qt::red );
+		painter->setPen( vpen );
+		painter->drawText( vbox, Qt::AlignCenter, m_value );
+		painter->setPen( p );
+	}
 
 	if( option->state & QStyle::State_Selected )
 	{
