@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `shard` (
 CREATE TABLE IF NOT EXISTS `user` (
 `UId` int(10) NOT NULL,
   `Login` varchar(64) NOT NULL DEFAULT '',
-  `Password` varchar(106) DEFAULT NULL,
+  `Password` varchar(13) DEFAULT NULL,
   `ShardId` int(10) NOT NULL DEFAULT '-1',
   `State` enum('Offline','Online') NOT NULL DEFAULT 'Offline',
   `Privilege` varchar(255) NOT NULL DEFAULT '',
