@@ -58,7 +58,7 @@ public:
 	void setVariable( bool b ){ m_variable = b; }
 	bool variable() const{ return m_variable; }
 
-	void setValue( const QString &value ){ m_value = value; }
+	void setValue( const QString &value );
 	QString getValue() const{ return m_value; }
 
 	bool isValue() const{ return m_isValue; }

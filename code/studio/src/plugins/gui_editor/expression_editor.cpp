@@ -271,7 +271,6 @@ void ExpressionEditor::onChangeValue()
 		return;
 
 	node->setValue( newValue );
-	node->update();
 }
 
 void ExpressionEditor::addExpression( const ExpressionInfo *info )

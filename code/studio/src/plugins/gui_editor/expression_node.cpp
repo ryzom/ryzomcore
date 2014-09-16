@@ -257,6 +257,19 @@ void ExpressionNode::setSlotNames( const QList< QString > &l )
 	}
 }
 
+void ExpressionNode::setValue( const QString &value )
+{
+	m_value = value;
+
+	int c = m_value.count();
+	if( c < 15 )
+		m_w = 100.0;
+	else
+		m_w = m_w + ( 100.0 / 15.0 ) * ( c - 15.0 );
+
+	update();
+}
+
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 {
 	for( int i = 0; i < m_links.count(); i++ )
