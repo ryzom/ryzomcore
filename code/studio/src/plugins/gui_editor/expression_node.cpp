@@ -105,6 +105,8 @@ QGraphicsItem( parent )
 	m_h = 100;
 	m_hh = 20.0;
 
+	m_variable = false;
+
 	m_name = name;
 
 	if( slotCount > 3 )

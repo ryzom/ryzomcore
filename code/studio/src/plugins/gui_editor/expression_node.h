@@ -55,6 +55,9 @@ public:
 
 	void setSlotNames( const QList< QString > &l );
 
+	void setVariable( bool b ){ m_variable = b; }
+	bool variable() const{ return m_variable; }
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 
@@ -70,6 +73,8 @@ private:
 	QList< ExpressionLink* > m_links;
 
 	QString m_name;
+
+	bool m_variable;
 };
 
 #endif

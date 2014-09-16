@@ -84,15 +84,6 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	QMenu menu;
 
 	QAction *a = NULL;
-	QMenu *mm = menu.addMenu( "Add node" );
-	a = mm->addAction( "1 slot" );
-	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode1() ) );
-
-	a = mm->addAction( "2 slots" );
-	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode2() ) );
-
-	a = mm->addAction( "3 slots" );
-	connect( a, SIGNAL( triggered() ), this, SLOT( onAddNode3() ) );
 
 	if( m_selectionCount > 0 )
 	{
@@ -101,8 +92,16 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 
 		if( m_selectionCount == 1 )
 		{
-			a = menu.addAction( "Change slot count" );
-			connect( a, SIGNAL( triggered() ), this, SLOT( onChangeSlotCount() ) );
+			QList< QGraphicsItem* > l = m_scene->selectedItems();
+			ExpressionNode *node = dynamic_cast< ExpressionNode* >( l[ 0 ] );
+			if( node != NULL )
+			{
+				if( node->variable() )
+				{
+					a = menu.addAction( "Change slot count" );
+					connect( a, SIGNAL( triggered() ), this, SLOT( onChangeSlotCount() ) );
+				}
+			}
 		}
 		else
 		if( m_selectionCount == 2 )
@@ -219,6 +218,7 @@ void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
 	ExpressionNode *node = new ExpressionNode( n, info->slotNames.count() );
 	node->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	node->setSlotNames( info->slotNames );
+	node->setVariable( info->variable );
 	m_scene->addItem( node );
 }
 
