@@ -53,6 +53,8 @@ public:
 
 	QString name() const{ return m_name; }
 
+	void setSlotNames( const QList< QString > &l );
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 

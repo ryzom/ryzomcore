@@ -205,37 +205,21 @@ void ExpressionEditor::onUnLinkItems()
 	}
 }
 
-void ExpressionEditor::addNode( const QString &name, int slotCount )
+void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
 {
+	QString name = item->text( 0 );
+
+	const ExpressionInfo *info = m_pvt->store.getInfo( name );
+
 	QString n = name;
 	n += " #";
 	n += QString::number( m_nodeCount );
 	m_nodeCount++;
 
-	QGraphicsItem *item = new ExpressionNode( n, slotCount );
-	item->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
-	m_scene->addItem( item );
-}
-
-void ExpressionEditor::onAddNode1()
-{
-	addNode( "node", 1 );
-}
-
-void ExpressionEditor::onAddNode2()
-{
-	addNode( "node", 2 );
-}
-
-void ExpressionEditor::onAddNode3()
-{
-	addNode( "node", 3 );
-}
-
-void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
-{
-	QString name = item->text( 0 );
-	addNode( name, 3 );
+	ExpressionNode *node = new ExpressionNode( n, info->slotNames.count() );
+	node->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	node->setSlotNames( info->slotNames );
+	m_scene->addItem( node );
 }
 
 void ExpressionEditor::onChangeSlotCount()

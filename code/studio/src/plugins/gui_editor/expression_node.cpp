@@ -90,6 +90,7 @@ public:
 	}
 
 	QString text() const{ return m_info.text; }
+	void setText( const QString &text ){ m_info.text = text; }
 
 private:
 	NodeSlotInfo m_info;
@@ -227,6 +228,16 @@ void ExpressionNode::setLink( ExpressionLink *link, int slot )
 ExpressionLink* ExpressionNode::link( int slot ) const
 {
 	return m_links[ slot ];
+}
+
+void ExpressionNode::setSlotNames( const QList< QString > &l )
+{
+	int c = l.count();
+	for( int i = 0; i < c; i++ )
+	{
+		// "Out" slot is at position 0, so set the names with an offset of 1
+		m_slots[ i + 1 ]->setText( l[ i ] );
+	}
 }
 
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )

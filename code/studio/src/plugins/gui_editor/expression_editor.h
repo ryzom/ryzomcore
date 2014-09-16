@@ -23,6 +23,7 @@
 #include "ui_expression_editor.h"
 
 class QGraphicsScene;
+class QGraphicsItem;
 class ExpressionEditorPvt;
 class ExpressionInfo;
 
@@ -43,10 +44,6 @@ private Q_SLOTS:
 	void onSelectionChanged();
 	void onLinkItems();
 	void onUnLinkItems();
-	void addNode( const QString &name, int slotCount );
-	void onAddNode1();
-	void onAddNode2();
-	void onAddNode3();
 	void onItemDblClicked( QTreeWidgetItem *item );
 	void onChangeSlotCount();
 
