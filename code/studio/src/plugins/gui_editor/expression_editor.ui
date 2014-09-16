@@ -44,56 +44,6 @@
          <string>Expressions</string>
         </property>
        </column>
-       <item>
-        <property name="text">
-         <string>Logical</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>and</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>or</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Mathematical</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>add</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>sub</string>
-         </property>
-        </item>
-       </item>
-       <item>
-        <property name="text">
-         <string>Value</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>integer</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>string</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>boolean</string>
-         </property>
-        </item>
-       </item>
       </widget>
      </item>
     </layout>

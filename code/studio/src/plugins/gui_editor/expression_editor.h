@@ -23,6 +23,8 @@
 #include "ui_expression_editor.h"
 
 class QGraphicsScene;
+class ExpressionEditorPvt;
+class ExpressionInfo;
 
 class ExpressionEditor : public QMainWindow
 {
@@ -30,6 +32,8 @@ class ExpressionEditor : public QMainWindow
 public:
 	ExpressionEditor( QWidget *parent = NULL );
 	~ExpressionEditor();
+
+	void load();
 
 protected:
 	void contextMenuEvent( QContextMenuEvent *e );
@@ -47,12 +51,16 @@ private Q_SLOTS:
 	void onChangeSlotCount();
 
 private:
+	void addExpression( const ExpressionInfo *info );
+	QTreeWidgetItem* findTopLevelItem( const QString &text );
 
 	Ui::ExpressionEditor m_ui;
 	QGraphicsScene *m_scene;
 
 	int m_selectionCount;
 	int m_nodeCount;
+
+	ExpressionEditorPvt *m_pvt;
 };
 
 #endif

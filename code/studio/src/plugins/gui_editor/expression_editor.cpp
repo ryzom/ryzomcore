@@ -26,14 +26,24 @@
 #include "expression_node.h"
 #include "expression_link.h"
 #include "expr_link_dlg.h"
+#include "expression_store.h"
+#include "expression_info.h"
 
 #include <QMessageBox>
 #include <QInputDialog>
+
+class ExpressionEditorPvt
+{
+public:
+	ExpressionStore store;
+};
 
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
 QMainWindow( parent )
 {
 	m_ui.setupUi( this );
+
+	m_pvt = new ExpressionEditorPvt();
 	
 	m_selectionCount = 0;
 
@@ -48,7 +58,25 @@ QMainWindow( parent )
 
 ExpressionEditor::~ExpressionEditor()
 {
+	delete m_pvt;
+	m_pvt = NULL;
 	m_scene = NULL;
+}
+
+void ExpressionEditor::load()
+{
+	m_pvt->store.load();
+
+	QList< const ExpressionInfo* > l;
+	m_pvt->store.getExpressions( l );
+
+	QListIterator< const ExpressionInfo* > itr( l );
+	while( itr.hasNext() )
+	{
+		addExpression( itr.next() );
+	}
+
+	l.clear();
 }
 
 void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
@@ -227,5 +255,33 @@ void ExpressionEditor::onChangeSlotCount()
 		return;
 
 	node->changeSlotCount( c );
+}
+
+void ExpressionEditor::addExpression( const ExpressionInfo *info )
+{
+	QTreeWidgetItem *item = findTopLevelItem( info->category );
+	if( item == NULL )
+	{
+		item = new QTreeWidgetItem();
+		item->setText( 0, info->category );
+		m_ui.tree->addTopLevelItem( item );
+	}
+
+	QTreeWidgetItem *citem = new QTreeWidgetItem();
+	citem->setText( 0, info->name );
+	item->addChild( citem );
+}
+
+QTreeWidgetItem* ExpressionEditor::findTopLevelItem( const QString &text )
+{
+	int c = m_ui.tree->topLevelItemCount();
+	for( int i = 0; i < c; i++ )
+	{
+		QTreeWidgetItem *item = m_ui.tree->topLevelItem( i );
+		if( item->text( 0 ) == text )
+			return item;
+	}
+
+	return NULL;
 }
 

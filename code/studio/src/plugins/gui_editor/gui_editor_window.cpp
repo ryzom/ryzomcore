@@ -75,6 +75,7 @@ namespace GUIEditor
 
 		tc = new TextureChooser();
 		ee = new ExpressionEditor();
+		ee->load();
 
 		createMenus();
 		readSettings();
