@@ -239,7 +239,6 @@ void ExpressionEditor::onItemDblClicked( QTreeWidgetItem *item )
 	m_nodeCount++;
 
 	ExpressionNode *node = new ExpressionNode( n, info->slotNames.count() );
-	node->setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
 	node->setSlotNames( info->slotNames );
 	node->setVariable( info->variable );
 	node->setIsValue( info->value );

@@ -101,6 +101,8 @@ private:
 ExpressionNode::ExpressionNode( const QString &name, int slotCount, QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
+	setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+
 	m_w = 100;
 	m_h = 100;
 	m_hh = 20.0;
