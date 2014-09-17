@@ -26,8 +26,6 @@ QGraphicsLineItem( parent )
 {
 	m_from = NULL;
 	m_to = NULL;
-
-	setFlags( QGraphicsItem::ItemIsSelectable );
 }
 
 ExpressionLink::~ExpressionLink()
