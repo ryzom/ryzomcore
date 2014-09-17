@@ -68,9 +68,10 @@ public:
 	QString build() const;
 
 protected:
-	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
+	QVariant itemChange( GraphicsItemChange change, const QVariant &value );
 
 private:
+	void onNodeMove();
 	void createSlots( int count = 3 );
 	void paintSlots( QPainter *painter );
 

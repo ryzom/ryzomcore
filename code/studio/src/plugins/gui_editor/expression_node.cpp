@@ -101,7 +101,7 @@ private:
 ExpressionNode::ExpressionNode( const QString &name, int slotCount, QGraphicsItem *parent ) :
 QGraphicsItem( parent )
 {
-	setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable );
+	setFlags( QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsScenePositionChanges );
 
 	m_w = 100;
 	m_h = 100;
@@ -323,7 +323,17 @@ QString ExpressionNode::build() const
 	return result;
 }
 
-void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
+QVariant ExpressionNode::itemChange( GraphicsItemChange change, const QVariant &value )
+{
+	if( change == ItemScenePositionHasChanged )
+	{
+		onNodeMove();
+	}
+
+	return QGraphicsItem::itemChange( change, value );
+}
+
+void ExpressionNode::onNodeMove()
 {
 	for( int i = 0; i < m_links.count(); i++ )
 	{
@@ -333,8 +343,6 @@ void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 
 		link->nodeMoved();
 	}
-
-	QGraphicsItem::mouseMoveEvent( e );
 }
 
 void ExpressionNode::createSlots( int count)
