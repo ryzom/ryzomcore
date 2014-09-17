@@ -132,6 +132,9 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	{
 		a = menu.addAction( "Build expression" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onBuildExpression() ) );
+
+		a = menu.addAction( "Save" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onSave() ) );
 	}
 
 	menu.exec( e->globalPos() );
@@ -313,6 +316,16 @@ void ExpressionEditor::onBuildExpression()
 	QMessageBox::information( this,
 								tr( "Building expression" ),
 								tr( "The result is\n" ) + result  );
+}
+
+void ExpressionEditor::onSave()
+{
+	if( m_pvt->m_root != NULL )
+	{
+		m_result = m_pvt->m_root->build();
+	}
+
+	hide();
 }
 
 

@@ -35,6 +35,7 @@ public:
 	~ExpressionEditor();
 
 	void load();
+	QString result() const{ return m_result; }
 
 protected:
 	void contextMenuEvent( QContextMenuEvent *e );
@@ -49,6 +50,7 @@ private Q_SLOTS:
 	void onChangeValue();
 	void onSetRoot();
 	void onBuildExpression();
+	void onSave();
 
 private:
 	void addExpression( const ExpressionInfo *info );
@@ -61,6 +63,7 @@ private:
 	int m_nodeCount;
 
 	ExpressionEditorPvt *m_pvt;
+	QString m_result;
 };
 
 #endif
