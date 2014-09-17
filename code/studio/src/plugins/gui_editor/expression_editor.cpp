@@ -140,6 +140,13 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 	menu.exec( e->globalPos() );
 }
 
+void ExpressionEditor::closeEvent( QCloseEvent *e )
+{
+	QMainWindow::closeEvent( e );
+
+	Q_EMIT closing();
+}
+
 void ExpressionEditor::onDeleteSelection()
 {
 	QList< QGraphicsItem* > l = m_scene->selectedItems();
@@ -324,7 +331,7 @@ void ExpressionEditor::onSave()
 		m_result = m_pvt->m_root->build();
 	}
 
-	hide();
+	close();
 }
 
 

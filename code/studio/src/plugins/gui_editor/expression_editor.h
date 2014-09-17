@@ -37,8 +37,12 @@ public:
 	void load();
 	QString result() const{ return m_result; }
 
+Q_SIGNALS:
+	void closing();
+
 protected:
 	void contextMenuEvent( QContextMenuEvent *e );
+	void closeEvent( QCloseEvent *e );
 
 private Q_SLOTS:
 	void onDeleteSelection();

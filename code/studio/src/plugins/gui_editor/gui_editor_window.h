@@ -29,7 +29,6 @@ class QtTreePropertyBrowser;
 class QMenu;
 
 class TextureChooser;
-class ExpressionEditor;
 
 namespace GUIEditor
 {
@@ -69,8 +68,6 @@ private Q_SLOTS:
 		void onAddWidgetClicked();
 		void onTreeChanged();
 		void onTCClicked();
-		void onEEClicked();
-
 
 protected:
 		void hideEvent( QHideEvent *evnt );
@@ -105,7 +102,6 @@ private:
 		QMenu *menu;
 
 		TextureChooser *tc;
-		ExpressionEditor *ee;
 	};
 
 }
