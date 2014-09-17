@@ -107,6 +107,7 @@ QGraphicsItem( parent )
 
 	m_variable = false;
 	m_isValue = false;
+	m_isRoot = false;
 
 	m_name = name;
 
@@ -139,9 +140,18 @@ void ExpressionNode::paint( QPainter *painter, const QStyleOptionGraphicsItem *o
 	header.setHeight( m_hh );
 
 	// Draw filled rectangle, header
-	c.setRed( 44 );
-	c.setGreen( 169 );
-	c.setBlue( 232 );
+	if( !m_isRoot )
+	{
+		c.setRed( 44 );
+		c.setGreen( 169 );
+		c.setBlue( 232 );
+	}
+	else
+	{
+		c.setRed( 255 );
+		c.setGreen( 0 );
+		c.setBlue( 0 );
+	}
 	br.setColor( c );
 	br.setStyle( Qt::SolidPattern );
 	p.setColor( c );
@@ -267,6 +277,12 @@ void ExpressionNode::setValue( const QString &value )
 	else
 		m_w = m_w + ( 100.0 / 15.0 ) * ( c - 15.0 );
 
+	update();
+}
+
+void ExpressionNode::setRoot( bool b )
+{
+	m_isRoot = b;
 	update();
 }
 

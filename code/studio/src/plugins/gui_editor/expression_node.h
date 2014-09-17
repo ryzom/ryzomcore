@@ -63,6 +63,7 @@ public:
 
 	bool isValue() const{ return m_isValue; }
 	void setIsValue( bool b ){ m_isValue = b; }
+	void setRoot( bool b );
 
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
@@ -84,6 +85,7 @@ private:
 
 	QString m_value;
 	bool m_isValue;
+	bool m_isRoot;
 };
 
 #endif

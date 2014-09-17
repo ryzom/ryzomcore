@@ -47,6 +47,7 @@ private Q_SLOTS:
 	void onItemDblClicked( QTreeWidgetItem *item );
 	void onChangeSlotCount();
 	void onChangeValue();
+	void onSetRoot();
 
 private:
 	void addExpression( const ExpressionInfo *info );

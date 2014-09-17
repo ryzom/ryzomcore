@@ -35,7 +35,14 @@
 class ExpressionEditorPvt
 {
 public:
+
+	ExpressionEditorPvt()
+	{
+		m_root = NULL;
+	}
+
 	ExpressionStore store;
+	ExpressionNode *m_root;
 };
 
 ExpressionEditor::ExpressionEditor( QWidget *parent ) :
@@ -101,12 +108,15 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 					a = menu.addAction( "Change slot count" );
 					connect( a, SIGNAL( triggered() ), this, SLOT( onChangeSlotCount() ) );
 				}
-
+				else
 				if( node->isValue() )
 				{
 					a = menu.addAction( "Change value" );
 					connect( a, SIGNAL( triggered() ), this, SLOT( onChangeValue() ) );
 				}
+
+				a = menu.addAction( "Set as root" );
+				connect( a, SIGNAL( triggered() ), this, SLOT( onSetRoot() ) );
 			}
 		}
 		else
@@ -272,6 +282,19 @@ void ExpressionEditor::onChangeValue()
 
 	node->setValue( newValue );
 }
+
+void ExpressionEditor::onSetRoot()
+{
+	QList< QGraphicsItem* > l = m_scene->selectedItems();
+	ExpressionNode *node = static_cast< ExpressionNode* >( l[ 0 ] );
+
+	if( m_pvt->m_root != NULL )
+		m_pvt->m_root->setRoot( false );
+
+	m_pvt->m_root = node;
+	node->setRoot( true );
+}
+
 
 void ExpressionEditor::addExpression( const ExpressionInfo *info )
 {
