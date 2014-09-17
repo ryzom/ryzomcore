@@ -89,7 +89,6 @@ void ExpressionEditor::load()
 void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 {	
 	QMenu menu;
-
 	QAction *a = NULL;
 
 	if( m_selectionCount > 0 )
@@ -128,6 +127,11 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 
 		a = menu.addAction( "Unlink" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onUnLinkItems() ) );
+	}
+	else
+	{
+		a = menu.addAction( "Build expression" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onBuildExpression() ) );
 	}
 
 	menu.exec( e->globalPos() );
@@ -293,6 +297,22 @@ void ExpressionEditor::onSetRoot()
 
 	m_pvt->m_root = node;
 	node->setRoot( true );
+}
+
+void ExpressionEditor::onBuildExpression()
+{
+	if( m_pvt->m_root == NULL )
+	{
+		QMessageBox::information( this,
+									tr( "Building expression" ),
+									tr( "Failed to build expression: You must set a root node." ) );
+		return;
+	}
+
+	QString result = m_pvt->m_root->build();
+	QMessageBox::information( this,
+								tr( "Building expression" ),
+								tr( "The result is\n" ) + result  );
 }
 
 

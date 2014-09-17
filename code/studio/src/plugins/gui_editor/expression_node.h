@@ -65,6 +65,8 @@ public:
 	void setIsValue( bool b ){ m_isValue = b; }
 	void setRoot( bool b );
 
+	QString build() const;
+
 protected:
 	void mouseMoveEvent( QGraphicsSceneMouseEvent *e );
 

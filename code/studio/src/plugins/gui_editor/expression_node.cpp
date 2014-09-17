@@ -286,6 +286,41 @@ void ExpressionNode::setRoot( bool b )
 	update();
 }
 
+QString ExpressionNode::build() const
+{
+	QString result;
+
+	if( isValue() )
+		return m_value;
+
+	QStringList l = m_name.split( ' ' );
+	result = l[ 0 ];
+	result += "( ";
+
+	int c = m_links.count();
+	for( int i = 1; i < c; i++ )
+	{
+		ExpressionLink *link = m_links[ i ];
+		if( link == NULL )
+			continue;
+
+		ExpressionNode *node = NULL;
+
+		if( link->from() == this )
+			node = link->to();
+		else
+			node = link->from();
+
+		result += node->build();
+
+		if( i != ( c - 1 ) )
+			result += ", ";
+	}
+
+	result += " )";
+	return result;
+}
+
 void ExpressionNode::mouseMoveEvent( QGraphicsSceneMouseEvent *e )
 {
 	for( int i = 0; i < m_links.count(); i++ )

@@ -36,6 +36,9 @@ public:
 
 	void paint( QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget );
 
+	ExpressionNode* from() const{ return m_from; }
+	ExpressionNode* to() const{ return m_to; }
+
 private:
 	ExpressionNode *m_from;
 	ExpressionNode *m_to;

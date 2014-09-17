@@ -48,6 +48,7 @@ private Q_SLOTS:
 	void onChangeSlotCount();
 	void onChangeValue();
 	void onSetRoot();
+	void onBuildExpression();
 
 private:
 	void addExpression( const ExpressionInfo *info );
