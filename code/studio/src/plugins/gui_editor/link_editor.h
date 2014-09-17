@@ -23,6 +23,8 @@
 
 namespace GUIEditor
 {
+	class LinkEditorPvt;
+
 	class LinkEditor : public QWidget, public Ui::LinkEditor
 	{
 		Q_OBJECT
@@ -35,12 +37,16 @@ namespace GUIEditor
 
 	Q_SIGNALS:
 		void okClicked();
-
+		
 	private Q_SLOTS:
 		void onOKButtonClicked();
+		void onTextEditContextMenu( const QPoint &pos );
+		void onEE();
+		void onEEClosing();
 
 	private:
 		uint32 currentLinkId;
+		LinkEditorPvt *m_pvt;
 	};
 }
 
