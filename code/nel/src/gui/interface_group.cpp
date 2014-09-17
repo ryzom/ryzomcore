@@ -1639,6 +1639,32 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	CInterfaceElement* CInterfaceGroup::takeElement( CInterfaceElement *e )
+	{
+		bool ok = false;
+
+		if( e->isGroup() )
+		{
+			ok = delGroup( static_cast< CInterfaceGroup* >( e ), true );
+		}
+		else
+		if( e->isCtrl() )
+		{
+			ok = delCtrl( static_cast< CCtrlBase* >( e ), true );
+		}
+		else
+		if( e->isView() )
+		{
+			ok = delView( static_cast< CViewBase* >( e ), true );
+		}
+
+		if( ok )
+			return e;
+		else
+			return NULL;
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	bool CInterfaceGroup::isWindowUnder (sint32 x, sint32 y)
 	{
 		return ((x >= _XReal) &&
