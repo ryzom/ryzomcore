@@ -135,6 +135,9 @@ void ExpressionEditor::contextMenuEvent( QContextMenuEvent *e )
 
 		a = menu.addAction( "Save" );
 		connect( a, SIGNAL( triggered() ), this, SLOT( onSave() ) );
+
+		a = menu.addAction( "Clear" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onClear() ) );
 	}
 
 	menu.exec( e->globalPos() );
@@ -332,6 +335,15 @@ void ExpressionEditor::onSave()
 	}
 
 	close();
+}
+
+void ExpressionEditor::onClear()
+{
+	m_scene->clear();
+	m_pvt->m_root = NULL;
+	m_nodeCount = 0;
+	m_selectionCount = 0;
+	m_result = "";
 }
 
 
