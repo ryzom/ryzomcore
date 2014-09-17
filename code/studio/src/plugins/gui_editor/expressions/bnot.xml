@@ -1,0 +1,8 @@
+<expression>
+<category>Bits</category>
+<name>bnot</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+</slots>
+</expression>
