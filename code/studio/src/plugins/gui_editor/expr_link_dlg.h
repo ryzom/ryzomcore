@@ -1,4 +1,4 @@
-// Ryzom Core Studio - Georges Editor Plugin
+// Ryzom Core Studio - GUI Editor Plugin
 //
 // Copyright (C) 2014 Laszlo Kis-Adam
 // Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
