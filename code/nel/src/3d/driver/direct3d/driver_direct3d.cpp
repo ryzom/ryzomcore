@@ -25,8 +25,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
@@ -1478,7 +1476,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 			D3DADAPTER_IDENTIFIER9 Identifier;
 			HRESULT Res;
 			Res = _D3D->GetAdapterIdentifier(gAdapter,0,&Identifier);
-			
+
 			if (strstr(Identifier.Description,"PerfHUD") != 0)
 			{
 				nlinfo ("Setting up with PerfHUD");
@@ -1511,6 +1509,7 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
+	
 //	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
 
 	// Check some caps
@@ -1636,20 +1635,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 
 	// Setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	// Try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _HWnd, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 	// Init some variables
 	_ForceDXTCCompression = false;
@@ -2009,13 +1994,6 @@ bool CDriverD3D::swapBuffers()
 
 	// todo hulud volatile
 	//_DeviceInterface->SetStreamSource(0, _VolatileVertexBufferRAM[1]->VertexBuffer, 0, 12);
-
-	// Is direct input running ?
-	if (_EventEmitter.getNumEmitters() > 1)
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
 
 	// End now
 	if (!endScene())

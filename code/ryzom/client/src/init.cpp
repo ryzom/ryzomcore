@@ -616,10 +616,16 @@ void initStereoDisplayDevice()
 		std::vector<NL3D::CStereoDeviceInfo> devices;
 		listStereoDisplayDevices(devices);
 		CStereoDeviceInfo *deviceInfo = NULL;
-		if (ClientCfg.VRDisplayDevice == std::string("Auto")
-			&& devices.begin() != devices.end())
+		if (ClientCfg.VRDisplayDevice == std::string("Auto"))
 		{
-			deviceInfo = &devices[0];
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				if ((*it).AllowAuto)
+				{
+					deviceInfo = &(*it);
+					break;
+				}
+			}
 		}
 		else
 		{
@@ -1069,34 +1075,6 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 
-		// Test mouse & keyboard low-level mode, if DisableDirectInput not set.
-		// In case of failure, exit the client.
-		// In case of success, set it back to normal mode, to provide for the user
-		// the ability to manually set the firewall's permissions when the client connects.
-		// The low-level mode will actually be set when "launching" (after loading).
-		if (!ClientCfg.DisableDirectInput)
-		{
-			// Test mouse and set back to normal mode
-			if (!Driver->enableLowLevelMouse (true, ClientCfg.HardwareCursor))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_mouse").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelMouse (false, ClientCfg.HardwareCursor);
-
-			// Test keyboard and set back to normal mode
-			// NB : keyboard will be initialized later now
-			/*if (!Driver->enableLowLevelKeyboard (true))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_keyboard").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelKeyboard (false);
-			*/
-		}
-
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
 		for ( uint i=0; i<3; i++)
@@ -1189,7 +1167,7 @@ void prelogInit()
 		CBloomEffect::getInstance().setDriver(Driver);
 
 		// init bloom effect
-		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		CBloomEffect::getInstance().init();
 		
 		if (StereoDisplay) // VR_CONFIG
 		{

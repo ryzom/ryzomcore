@@ -21,8 +21,6 @@
 #include "nel/3d/index_buffer.h"
 #include "nel/3d/texture_bump.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -648,7 +646,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 		// Must separate texture setup and texture activation in 2 "for"...
 		// because setupTexture() may disable all stage.
 
-		if (matShader == CMaterial::Normal 
+		if (matShader == CMaterial::Normal
 			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{
@@ -670,7 +668,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	// Don't do it also for Specular because the EnvFunction and the TexGen may be special.
 	{
 		H_AUTO_D3D(CDriverD3D_setupMaterial_normalShaderActivateTextures)
-		if (matShader == CMaterial::Normal 
+		if (matShader == CMaterial::Normal
 			|| ((matShader == CMaterial::Program) && (_PixelProgramUser->features().MaterialFlags & CProgramFeatures::TextureStages))
 			)
 		{

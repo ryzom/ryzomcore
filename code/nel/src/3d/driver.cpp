@@ -32,7 +32,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6d; // gpu program interface
+const uint32 IDriver::InterfaceVersion = 0x6e; // gpu program interface
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
@@ -123,8 +123,9 @@ bool		IDriver::release(void)
 
 
 // ***************************************************************************
-GfxMode::GfxMode(uint16 w, uint16 h, uint8 d, bool windowed, bool offscreen, uint frequency, sint8 aa)
+GfxMode::GfxMode(uint16 w, uint16 h, uint8 d, bool windowed, bool offscreen, uint frequency, sint8 aa, const std::string &displayDevice)
 {
+	DisplayDevice = displayDevice;
 	Windowed = windowed;
 	Width = w;
 	Height = h;

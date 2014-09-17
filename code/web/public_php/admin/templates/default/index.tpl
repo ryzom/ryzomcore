@@ -1,4 +1,3 @@
-
 {include file="page_header.tpl"}
 
 {literal}

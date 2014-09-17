@@ -214,7 +214,7 @@ class DBLayer {
 		}
 		$field_option_values = ltrim($field_option_values, ',');
 		try {
-			$sth = $this->PDO->prepare("UPDATE $tb_name SET $field_option_values WHERE $where ");
+			$sth = $this->PDO->prepare("UPDATE `$tb_name` SET $field_option_values WHERE $where ");
 
 			foreach ($data as $key => $value) {
 				$sth->bindValue(":$key", $value);

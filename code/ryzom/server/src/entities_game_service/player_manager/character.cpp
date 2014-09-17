@@ -147,8 +147,6 @@
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
 
-#include "player_manager/character_achievements.h"
-
 ///////////
 // USING //
 ///////////
@@ -604,7 +602,6 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_CurrentParrySkill = BarehandCombatSkill;
 
 	_EncycloChar = new CCharacterEncyclopedia(*this);
-	_AchievementsChar = new CCharacterAchievements(*this);
 	_GameEvent = new CCharacterGameEvent(*this);
 	_RespawnPoints = new CCharacterRespawnPoints(*this);
 	_PlayerRoom = new CPlayerRoomInterface;
@@ -1535,8 +1532,6 @@ uint32 CCharacter::tickUpdate()
 	{
 		nextUpdate = 8;
 	}
-
-	//_AchievementsPlayer->tickUpdate();
 
 	return nextUpdate;
 } // tickUpdate //
@@ -2797,7 +2792,6 @@ CCharacter::~CCharacter()
 	_BarUpdateTimer.reset();
 
 	delete _EncycloChar;
-	delete _AchievementsChar;
 	delete _GameEvent;
 	delete _RespawnPoints;
 	delete _PlayerRoom;
@@ -2814,11 +2808,6 @@ CCharacter::~CCharacter()
 //	NLMEMORY::StatisticsReport( "egs_memory_report.csv", false );
 } // destructor //
 
-
-void CCharacter::mobKill(TDataSetRow creatureRowId)
-{
-	_AchievementsChar->mobKill(creatureRowId);
-}
 
 //---------------------------------------------------
 // prepareToLoad: method called before applying a pdr save record
@@ -13138,7 +13127,6 @@ void CCharacter::setPlaces(const std::vector<const CPlace*> & places)
 	for ( uint i = 0; i < size; i++ )
 	{
 		_Places[i] = places[i]->getId();
-		_AchievementsChar->inPlace(places[i]);
 	}
 }
 
@@ -14179,7 +14167,7 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 	BOMB_IF(isRecursing,"CCharacter::sendCloseTempInventoryImpulsion is recursing!",return);		// **** Temp Fix 2/4 **** //
 	isRecursing= true;																				// **** Temp Fix 3/4 **** //
 
-	getAllTempInventoryItems();
+	getAllTempInventoryItems(false);
 
 	CMessage msgout( "IMPULSION_ID" );
 	msgout.serial( _Id );
@@ -14200,11 +14188,6 @@ void CCharacter::sendCloseTempInventoryImpulsion()
 //-----------------------------------------------
 void CCharacter::setFameValuePlayer(uint32 factionIndex, sint32 playerFame, sint32 fameMax, uint16 fameTrend)
 {
-	if (playerFame != NO_FAME)
-	{
-		_AchievementsChar->fameValue(factionIndex, playerFame);
-	}
-
 	uint32 firstTribeFameIndex = CStaticFames::getInstance().getFirstTribeFameIndex();
 	uint32 firstTribeDbIndex = CStaticFames::getInstance().getDatabaseIndex( firstTribeFameIndex );
 	uint32 fameIndexInDatabase = CStaticFames::getInstance().getDatabaseIndex( factionIndex );

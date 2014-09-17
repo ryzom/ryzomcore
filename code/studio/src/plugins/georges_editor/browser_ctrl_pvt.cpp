@@ -310,7 +310,8 @@ void BrowserCtrlPvt::setupAtom( GeorgesQt::CFormItem *node )
 		return;
 
 	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( n );
-	std::string v = atom->getValue();
+	std::string v;
+	atom->getValue( v );
 	
 	const NLGEORGES::CType *t = atom->getType();
 	QVariant::Type tt = QVariant::String;

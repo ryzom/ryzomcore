@@ -111,6 +111,7 @@ int main(int argc, char* argv[])
 		CPath::addSearchPath(builderConfig.SearchPaths[k], true, false);
 	}
 	CPath::remapExtension("dds", "tga", true);
+	CPath::remapExtension("dds", "png", true);
 	//
 	R2::CScenarioEntryPoints &sep = R2::CScenarioEntryPoints::getInstance();
 	try

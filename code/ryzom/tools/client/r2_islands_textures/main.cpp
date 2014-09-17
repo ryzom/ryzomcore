@@ -1,4 +1,4 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,15 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdmisc.h"
-#include "nel/misc/game_device.h"
+#include <nel/3d/u_driver.h>
+#include "screenshot_islands.h"
 
-#ifdef DEBUG_NEW
-	#define new DEBUG_NEW
-#endif
+using namespace NLMISC;
+using namespace R2;
 
-namespace NLMISC {
+int main(int argc, char **argv)
+{
+	CScreenshotIslands screenshotIslands = CScreenshotIslands::getInstance();
+	screenshotIslands.buildScreenshots();
 
-
-
-} // NLMISC
+	return 0;
+}

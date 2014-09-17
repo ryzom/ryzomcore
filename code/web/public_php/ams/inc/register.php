@@ -5,6 +5,7 @@
 */
 function register(){
     global $TOS_URL;
+    
     $pageElements['TOS_URL'] = $TOS_URL;
     return $pageElements;
 }

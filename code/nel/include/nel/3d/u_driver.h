@@ -35,9 +35,6 @@
 
 namespace NLMISC
 {
-	struct IMouseDevice;
-	struct IKeyboardDevice;
-	struct IInputDeviceManager;
 	class CLog;
 }
 
@@ -63,6 +60,7 @@ class U3dMouseListener;
 class ULight;
 class UAnimationSet;
 class UWaterEnvMap;
+class CRenderTargetManager;
 
 typedef void (*emptyProc)(void);
 
@@ -94,6 +92,7 @@ public:
 	/// A Graphic Mode descriptor.
 	struct CMode
 	{
+		std::string			DisplayDevice;
 		bool				Windowed;
 		uint16				Width;
 		uint16				Height;
@@ -110,8 +109,9 @@ public:
 			Frequency = 0;
 			AntiAlias = -1;
 		}
-		CMode(uint16 w, uint16 h, uint8 d, bool windowed= true, uint frequency = 0, sint8 aa = -1)
+		CMode(uint16 w, uint16 h, uint8 d, bool windowed= true, uint frequency = 0, sint8 aa = -1, const std::string &displayDevice = std::string())
 		{
+			DisplayDevice = displayDevice;
 			Windowed = windowed;
 			Width = w;
 			Height = h;
@@ -307,6 +307,16 @@ public:
 	/// Delete a AnimationSet. NB: actually, this animation set is internally deleted only when no more UPlayList use it.
 	virtual	void				deleteAnimationSet(UAnimationSet *animationSet) =0;
 	// @}
+
+
+	/// Get the render target manager
+	virtual CRenderTargetManager	&getRenderTargetManager() =0;
+
+	/// Set a texture of specified size or of the size of the window as render target
+	virtual void					beginDefaultRenderTarget(uint32 width = 0, uint32 height = 0) =0;
+
+	/// Draw the render target to the back buffer
+	virtual void					endDefaultRenderTarget(UScene *scene) =0;
 
 
 	/// \name Components gestion for Interface 2D/3D.
@@ -556,36 +566,6 @@ public:
 
 	/// \name Mouse / Keyboard / Gamedevices
 	// @{
-		/** Enable / disable  low level mouse. This allow to take advantage of some options (speed of the mouse, automatic wrapping)
-		  * It returns a interface to these parameters when it is supported, or NULL otherwise
-		  * The interface pointer is valid as long as the low level mouse is enabled.
-		  * A call to disable the mouse returns NULL, and restore the default mouse behaviour
-		  * NB : - In this mode the mouse cursor isn't drawn.
-		  *      - Calls to showCursor have no effects
-		  *      - Calls to setCapture have no effects
-		  */
-		virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool hardware) = 0;
-
-		/** Enable / disable  a low level keyboard.
-		  * This returns a interface to some parameters when it is supported, or NULL otherwise.
-		  * The interface pointer is valid as long as the low level keyboard is enabled.
-		  * A call to disable the keyboard returns NULL, and restore the default keyboard behaviour.
-		  */
-		virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable) = 0;
-
-		/** Check whether there is a low level device manager available, and get its interface. Return NULL if not available.
-		  * From this interface you can deal with mouse and keyboard as above, but you can also manage game devices (joysticks, joypads ...)
-		  */
-		virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager() = 0;
-
-		/**
-		 * wrapper for IEventEmitter::emulateMouseRawMode()
-		 */
-		virtual void emulateMouseRawMode(bool enable) = 0;
-
-		// get delay used for mouse double click
-		virtual uint	getDoubleClickDelay(bool hardwareMouse) = 0;
-
 		/** show cursor if b is true, or hide it if b is false
 		  * NB: This has no effects if a low level mouse is used.
 		  */

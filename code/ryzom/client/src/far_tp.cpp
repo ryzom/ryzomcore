@@ -1132,7 +1132,7 @@ void CFarTP::disconnectFromPreviousShard()
 	*/
 	NetMngr.reinit();
 
-	if( !isReselectingChar() )
+	if (isIngame() && !isReselectingChar())
 	{
 		nlinfo("FarTP: calling EntitiesMngr.reinit()");
 		EntitiesMngr.reinit();

@@ -353,28 +353,31 @@ void	CScene::beginPartRender()
 
 
 // ***************************************************************************
-void	CScene::endPartRender()
+void	CScene::endPartRender(bool keepTrav)
 {
 	nlassert(_IsRendering);
-
-	// Delete model deleted during the rendering
 	_IsRendering = false;
-	uint i;
-	for (i=0; i<_ToDelete.size(); i++)
-		deleteModel (_ToDelete[i]);
-	_ToDelete.clear ();
 
-	// Special for SkeletonSpawnScript animation. create models spawned now
-	flushSSSModelRequests();
+	if (!keepTrav)
+	{
+		// Delete model deleted during the rendering
+		uint i;
+		for (i=0; i<_ToDelete.size(); i++)
+			deleteModel (_ToDelete[i]);
+		_ToDelete.clear ();
 
-	// Particle system handling (remove the resources of those which are too far, as their clusters may not have been parsed).
-	// Note that only a few of them are tested at each call
-	_ParticleSystemManager.refreshModels(ClipTrav.WorldFrustumPyramid, ClipTrav.CamPos);
+		// Special for SkeletonSpawnScript animation. create models spawned now
+		flushSSSModelRequests();
 
-	// Waiting Instance handling
-	double deltaT = _DeltaSystemTimeBetweenRender;
-	clamp (deltaT, 0.01, 0.1);
-	updateWaitingInstances(deltaT);
+		// Particle system handling (remove the resources of those which are too far, as their clusters may not have been parsed).
+		// Note that only a few of them are tested at each call
+		_ParticleSystemManager.refreshModels(ClipTrav.WorldFrustumPyramid, ClipTrav.CamPos);
+
+		// Waiting Instance handling
+		double deltaT = _DeltaSystemTimeBetweenRender;
+		clamp (deltaT, 0.01, 0.1);
+		updateWaitingInstances(deltaT);
+	}
 
 	// Reset profiling
 	_NextRenderProfile= false;
@@ -555,7 +558,7 @@ void	CScene::endPartRender()
 
 
 // ***************************************************************************
-void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass)
+void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, bool keepTrav)
 {
 	nlassert(_IsRendering);
 
@@ -569,24 +572,30 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass)
 	// if first part to be rendered, do the start stuff
 	if (_RenderedPart == UScene::RenderNothing)
 	{
-		// update water envmap
-		//updateWaterEnvmap();
 		RenderTrav.clearWaterModelList();
-		_FirstFlare = NULL;
 
-		double fNewGlobalSystemTime = NLMISC::CTime::ticksToSecond(NLMISC::CTime::getPerformanceTime());
-		if(_GlobalSystemTime==0)
-			_DeltaSystemTimeBetweenRender= 0.020;
-		else
-			_DeltaSystemTimeBetweenRender= fNewGlobalSystemTime - _GlobalSystemTime;
-		_GlobalSystemTime = fNewGlobalSystemTime;
+		if (doTrav)
+		{
+			// update water envmap
+			//updateWaterEnvmap();
+			_FirstFlare = NULL;
+
+			double fNewGlobalSystemTime = NLMISC::CTime::ticksToSecond(NLMISC::CTime::getPerformanceTime());
+			if(_GlobalSystemTime==0)
+				_DeltaSystemTimeBetweenRender= 0.020;
+			else
+				_DeltaSystemTimeBetweenRender= fNewGlobalSystemTime - _GlobalSystemTime;
+			_GlobalSystemTime = fNewGlobalSystemTime;
+		}
 		//
 		++ _NumRender;
 		//
 		nlassert(CurrentCamera);
 
+
 		// update models.
 		updateModels();
+
 
 		// Use the camera to setup Clip / Render pass.
 		float left, right, bottom, top, znear, zfar;
@@ -609,49 +618,67 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass)
 		// **** For all render traversals, traverse them (except the Hrc one), in ascending order.
 		if( doHrcPass )
 			HrcTrav.traverse();
+		else
+			HrcTrav._MovingObjects.clear();
 
 		// Set Cam World Matrix for all trav that need it
 		ClipTrav.setCamMatrix(CurrentCamera->getWorldMatrix());
 		RenderTrav.setCamMatrix (CurrentCamera->getWorldMatrix());
 		LoadBalancingTrav.setCamMatrix (CurrentCamera->getWorldMatrix());
 
-
 		// clip
 		ClipTrav.traverse();
+
 		// animDetail
 		AnimDetailTrav.traverse();
+
 		// loadBalance
 		LoadBalancingTrav.traverse();
-		//
-		if (_RequestParticlesAnimate)
+
+		if (doTrav)
 		{
-			_ParticleSystemManager.processAnimate(_EllapsedTime); // deals with permanently animated particle systems
-			_RequestParticlesAnimate = false;
+			//
+			if (_RequestParticlesAnimate)
+			{
+				_ParticleSystemManager.processAnimate(_EllapsedTime); // deals with permanently animated particle systems
+				_RequestParticlesAnimate = false;
+			}
 		}
+
 		// Light
 		LightTrav.traverse();
 	}
 
 	// render
-	RenderTrav.traverse(rp, _RenderedPart == UScene::RenderNothing);
-	// Always must clear shadow caster (if render did not work because of IDriver::isLost())
-	RenderTrav.getShadowMapManager().clearAllShadowCasters();
+	RenderTrav.traverse(rp, (_RenderedPart == UScene::RenderNothing), doTrav);
+	if (!keepTrav)
+	{
+		// Always must clear shadow caster (if render did not work because of IDriver::isLost())
+		RenderTrav.getShadowMapManager().clearAllShadowCasters();
+	}
 
 	// render flare
 	if (rp & UScene::RenderFlare)
 	{
-		if (_FirstFlare)
+		if (doTrav)
 		{
-			IDriver *drv = getDriver();
-			CFlareModel::updateOcclusionQueryBegin(drv);
-			CFlareModel	*currFlare = _FirstFlare;
-			do
+			if (_FirstFlare)
 			{
-				currFlare->updateOcclusionQuery(drv);
-				currFlare = currFlare->Next;
+				IDriver *drv = getDriver();
+				CFlareModel::updateOcclusionQueryBegin(drv);
+				CFlareModel	*currFlare = _FirstFlare;
+				do
+				{
+					currFlare->updateOcclusionQuery(drv);
+					currFlare = currFlare->Next;
+				}
+				while(currFlare);
+				CFlareModel::updateOcclusionQueryEnd(drv);
 			}
-			while(currFlare);
-			CFlareModel::updateOcclusionQueryEnd(drv);
+		}
+		else
+		{
+			_FirstFlare = NULL;
 		}
 	}
 	_RenderedPart = (UScene::TRenderPart) (_RenderedPart | rp);
