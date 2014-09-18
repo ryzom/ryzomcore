@@ -170,6 +170,85 @@ private:
     Q_DISABLE_COPY(QtVariantEditorFactory)
 };
 
+class QtVariantPropertyManagerPrivate
+{
+    QtVariantPropertyManager *q_ptr;
+    Q_DECLARE_PUBLIC(QtVariantPropertyManager)
+public:
+    QtVariantPropertyManagerPrivate();
+
+    bool m_creatingProperty;
+    bool m_creatingSubProperties;
+    bool m_destroyingSubProperties;
+    int m_propertyType;
+
+    void slotValueChanged(QtProperty *property, int val);
+    void slotRangeChanged(QtProperty *property, int min, int max);
+    void slotSingleStepChanged(QtProperty *property, int step);
+    void slotValueChanged(QtProperty *property, double val);
+    void slotRangeChanged(QtProperty *property, double min, double max);
+    void slotSingleStepChanged(QtProperty *property, double step);
+    void slotDecimalsChanged(QtProperty *property, int prec);
+    void slotValueChanged(QtProperty *property, bool val);
+    void slotValueChanged(QtProperty *property, const QString &val);
+    void slotRegExpChanged(QtProperty *property, const QRegExp &regExp);
+    void slotValueChanged(QtProperty *property, const QDate &val);
+    void slotRangeChanged(QtProperty *property, const QDate &min, const QDate &max);
+    void slotValueChanged(QtProperty *property, const QTime &val);
+    void slotValueChanged(QtProperty *property, const QDateTime &val);
+    void slotValueChanged(QtProperty *property, const QKeySequence &val);
+    void slotValueChanged(QtProperty *property, const QChar &val);
+    void slotValueChanged(QtProperty *property, const QLocale &val);
+    void slotValueChanged(QtProperty *property, const QPoint &val);
+    void slotValueChanged(QtProperty *property, const QPointF &val);
+    void slotValueChanged(QtProperty *property, const QSize &val);
+    void slotRangeChanged(QtProperty *property, const QSize &min, const QSize &max);
+    void slotValueChanged(QtProperty *property, const QSizeF &val);
+    void slotRangeChanged(QtProperty *property, const QSizeF &min, const QSizeF &max);
+    void slotValueChanged(QtProperty *property, const QRect &val);
+    void slotConstraintChanged(QtProperty *property, const QRect &val);
+    void slotValueChanged(QtProperty *property, const QRectF &val);
+    void slotConstraintChanged(QtProperty *property, const QRectF &val);
+    void slotValueChanged(QtProperty *property, const QColor &val);
+    void slotEnumChanged(QtProperty *property, int val);
+    void slotEnumNamesChanged(QtProperty *property, const QStringList &enumNames);
+    void slotEnumIconsChanged(QtProperty *property, const QMap<int, QIcon> &enumIcons);
+    void slotValueChanged(QtProperty *property, const QSizePolicy &val);
+    void slotValueChanged(QtProperty *property, const QFont &val);
+    void slotValueChanged(QtProperty *property, const QCursor &val);
+    void slotFlagChanged(QtProperty *property, int val);
+    void slotFlagNamesChanged(QtProperty *property, const QStringList &flagNames);
+    void slotPropertyInserted(QtProperty *property, QtProperty *parent, QtProperty *after);
+    void slotPropertyRemoved(QtProperty *property, QtProperty *parent);
+
+    void valueChanged(QtProperty *property, const QVariant &val);
+
+    int internalPropertyToType(QtProperty *property) const;
+    QtVariantProperty *createSubProperty(QtVariantProperty *parent, QtVariantProperty *after,
+            QtProperty *internal);
+    void removeSubProperty(QtVariantProperty *property);
+
+    QMap<int, QtAbstractPropertyManager *> m_typeToPropertyManager;
+    QMap<int, QMap<QString, int> > m_typeToAttributeToAttributeType;
+
+    QMap<const QtProperty *, QPair<QtVariantProperty *, int> > m_propertyToType;
+
+    QMap<int, int> m_typeToValueType;
+
+
+    QMap<QtProperty *, QtVariantProperty *> m_internalToProperty;
+
+    const QString m_constraintAttribute;
+    const QString m_singleStepAttribute;
+    const QString m_decimalsAttribute;
+    const QString m_enumIconsAttribute;
+    const QString m_enumNamesAttribute;
+    const QString m_flagNamesAttribute;
+    const QString m_maximumAttribute;
+    const QString m_minimumAttribute;
+    const QString m_regExpAttribute;
+};
+
 QT_END_NAMESPACE
 
 Q_DECLARE_METATYPE(QIcon)

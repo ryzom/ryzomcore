@@ -90,6 +90,19 @@
 
 #include <QWidget>
 #include <QSet>
+#include <QLabel>
+#include <QGroupBox>
+#include <QGridLayout>
+#include <QFrame>
+#include <QMap>
+#include <QToolButton>
+#include <QSpinBox>
+#include <QSlider>
+#include <QScrollBar>
+#include <QDateEdit>
+#include <QTimeEdit>
+#include <QComboBox>
+#include <QLineEdit>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -372,6 +385,40 @@ private:
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDestroyed(QtProperty *))
     Q_PRIVATE_SLOT(d_func(), void slotPropertyDataChanged(QtProperty *))
 
+};
+
+class QtAbstractPropertyBrowserPrivate
+{
+    QtAbstractPropertyBrowser *q_ptr;
+    Q_DECLARE_PUBLIC(QtAbstractPropertyBrowser)
+public:
+    QtAbstractPropertyBrowserPrivate();
+
+    void insertSubTree(QtProperty *property,
+            QtProperty *parentProperty);
+    void removeSubTree(QtProperty *property,
+            QtProperty *parentProperty);
+    void createBrowserIndexes(QtProperty *property, QtProperty *parentProperty, QtProperty *afterProperty);
+    void removeBrowserIndexes(QtProperty *property, QtProperty *parentProperty);
+    QtBrowserItem *createBrowserIndex(QtProperty *property, QtBrowserItem *parentIndex, QtBrowserItem *afterIndex);
+    void removeBrowserIndex(QtBrowserItem *index);
+    void clearIndex(QtBrowserItem *index);
+
+    void slotPropertyInserted(QtProperty *property,
+            QtProperty *parentProperty, QtProperty *afterProperty);
+    void slotPropertyRemoved(QtProperty *property, QtProperty *parentProperty);
+    void slotPropertyDestroyed(QtProperty *property);
+    void slotPropertyDataChanged(QtProperty *property);
+
+    QList<QtProperty *> m_subItems;
+    QMap<QtAbstractPropertyManager *, QList<QtProperty *> > m_managerToProperties;
+    QMap<QtProperty *, QList<QtProperty *> > m_propertyToParents;
+
+    QMap<QtProperty *, QtBrowserItem *> m_topLevelPropertyToIndex;
+    QList<QtBrowserItem *> m_topLevelIndexes;
+    QMap<QtProperty *, QList<QtBrowserItem *> > m_propertyToIndexes;
+
+    QtBrowserItem *m_currentItem;
 };
 
 #if QT_VERSION >= 0x040400
