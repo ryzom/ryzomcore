@@ -19,7 +19,7 @@
 #ifndef GENERAL_SETTINGS_PAGE_H
 #define GENERAL_SETTINGS_PAGE_H
 
-#include <QtCore/QObject>
+#include <QObject>
 
 #include "ioptions_page.h"
 

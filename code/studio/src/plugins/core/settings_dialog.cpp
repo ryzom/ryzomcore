@@ -21,8 +21,8 @@
 #include "ioptions_page.h"
 
 // Qt includes
-#include <QtGui/QHeaderView>
-#include <QtGui/QPushButton>
+#include <QHeaderView>
+#include <QPushButton>
 
 struct PageData
 {

@@ -19,9 +19,9 @@
 #ifndef IPLUGIN_H
 #define IPLUGIN_H
 
-#include <QtCore/QtPlugin>
-#include <QtCore/QString>
-#include <QtCore/QStringList>
+#include <QtPlugin>
+#include <QString>
+#include <QStringList>
 
 #include "iplugin_manager.h"
 
@@ -99,6 +99,7 @@ public:
 
 }; //namespace ExtensionSystem
 
-Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, "dev.ryzom.com.ObjectViewerQt.IPlugin/0.9.2")
+#define NL_STUDIO_IPLUGIN_IID "org.ryzomcore.Studio.IPlugin/0.10.0"
+Q_DECLARE_INTERFACE(ExtensionSystem::IPlugin, NL_STUDIO_IPLUGIN_IID)
 
 #endif // IPLUGIN_H

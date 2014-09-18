@@ -19,7 +19,7 @@
 #ifndef IPLUGINSPEC_H
 #define IPLUGINSPEC_H
 
-#include <QtCore/QString>
+#include <QString>
 
 namespace ExtensionSystem
 {

@@ -21,10 +21,10 @@
 
 #include "iplugin_spec.h"
 
-#include <QtCore/QList>
-#include <QtCore/QObject>
-#include <QtCore/QStringList>
-#include <QtCore/QSettings>
+#include <QList>
+#include <QObject>
+#include <QStringList>
+#include <QSettings>
 
 namespace ExtensionSystem
 {

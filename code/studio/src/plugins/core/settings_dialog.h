@@ -22,7 +22,7 @@
 #include "../core/ui_settings_dialog.h"
 
 // Qt includes
-#include <QtCore/QList>
+#include <QList>
 
 // Project includes
 #include "../../extension_system/iplugin_manager.h"

@@ -20,8 +20,8 @@
 
 #include "ui_plugin_view_dialog.h"
 
-#include <QtCore/QMap>
-#include <QtCore/QStringList>
+#include <QMap>
+#include <QStringList>
 
 namespace ExtensionSystem
 {
