@@ -27,6 +27,7 @@
 #include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
+#include "nel/3d/fxaa.h"
 #include "nel/3d/fasthls_modifier.h"
 #include "nel/3d/particle_system_manager.h"
 #include "nel/3d/particle_system.h"
@@ -661,7 +662,7 @@ void release()
 	delete &CLuaManager::getInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
-	
+
 
 
 
