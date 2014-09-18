@@ -26,9 +26,10 @@
 #endif
 
 // Qt includes
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtCore/QMap>
 #include <QtCore/qdebug.h>
+#include <QStyleFactory>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -36,6 +37,7 @@
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
+#include <nel/misc/sheet_id.h>
 
 // Project includes
 #include "nel_qt_config.h"
@@ -178,15 +180,39 @@ sint main(int argc, char **argv)
 	hr = hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	bool coInitOk = (hr == S_OK) || (hr == S_FALSE);
 #endif
+
+	CSheetId::initWithoutSheet();
+
 	QApplication app(argc, const_cast<char **>(argv));
+
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    QPalette palette = app.palette();
+    palette.setColor(QPalette::Window, QColor(64, 64, 64));
+    palette.setColor(QPalette::WindowText, Qt::white);
+    palette.setColor(QPalette::Base, QColor(48, 48, 48));
+    palette.setColor(QPalette::AlternateBase, QColor(64, 64, 64));
+    palette.setColor(QPalette::ToolTipBase, Qt::white);
+    palette.setColor(QPalette::ToolTipText, Qt::white);
+    palette.setColor(QPalette::Text, Qt::white);
+    palette.setColor(QPalette::Button, QColor(64, 64, 64));
+    palette.setColor(QPalette::ButtonText, Qt::white);
+    palette.setColor(QPalette::BrightText, Qt::red);
+    palette.setColor(QPalette::Highlight, QColor(64, 128, 96));
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    app.setPalette(palette);
+
 	QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
+
 	NLQT::CMainWindow mainWin(customSizeHints);
 	mainWin.resize(800, 600);
 	mainWin.show(); // calls isVisible(true)
+
 	int result = app.exec();
+
 #ifdef NL_OS_WINDOWS
 	if (coInitOk) CoUninitialize();
 #endif
+
 	return result;
 }
 

@@ -1,0 +1,27 @@
+
+FILE(GLOB SRCS *.cpp)
+FILE(GLOB HDRS *.h)
+FILE(GLOB RESOURCES *.qrc)
+
+SET(CMAKE_AUTOMOC ON)
+
+QT5_ADD_RESOURCES(RESOURCE_ADDED ${RESOURCES})
+
+ADD_EXECUTABLE(nl_sample_qt WIN32 ${SRC}
+	${SRCS}
+	${HDRS}
+	${RESOURCE_ADDED}
+	)
+
+TARGET_LINK_LIBRARIES(nl_sample_qt
+	nelmisc
+	nel3d
+	nelsound
+	Qt5::Widgets)
+
+NL_DEFAULT_PROPS(nl_sample_qt "NeL, Samples, 3D: Qt")
+NL_ADD_RUNTIME_FLAGS(nl_sample_qt)
+
+qt5_use_modules(nl_sample_qt Widgets)
+
+INSTALL(TARGETS nl_sample_qt RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samples3d)

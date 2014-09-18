@@ -20,7 +20,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QVBoxLayout>
+#include <QVBoxLayout>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -173,7 +173,7 @@ void CCommandLog::returnPressed()
 	if (text.isEmpty())
 		return;
 
-	std::string cmd = text.toAscii().data();
+	std::string cmd = text.toLocal8Bit().data();
 	ICommand::execute(cmd, InfoLog());
 
 	m_CommandInput->clear();

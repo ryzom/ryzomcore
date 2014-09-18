@@ -20,9 +20,9 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QUndoStack>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QUndoStack>
 
 // NeL includes
 // #include <nel/misc/debug.h>
