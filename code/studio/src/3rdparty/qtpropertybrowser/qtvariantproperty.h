@@ -1,62 +1,18 @@
 /****************************************************************************
 **
-** This file is part of a Qt Solutions component.
-** 
-** Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
-** 
-** Contact:  Qt Software Information (qt-info@nokia.com)
-** 
-** Commercial Usage  
-** Licensees holding valid Qt Commercial licenses may use this file in
-** accordance with the Qt Solutions Commercial License Agreement provided
-** with the Software or, alternatively, in accordance with the terms
-** contained in a written agreement between you and Nokia.
-** 
-** GNU Lesser General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU Lesser General Public License version 2.1 requirements
-** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
-** 
-** In addition, as a special exception, Nokia gives you certain
-** additional rights. These rights are described in the Nokia Qt LGPL
-** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
-** package.
-** 
-** GNU General Public License Usage 
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3.0 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.  Please review the following information to
-** ensure the GNU General Public License version 3.0 requirements will be
-** met: http://www.gnu.org/copyleft/gpl.html.
-** 
-** Please note Third Party Software included with Qt Solutions may impose
-** additional restrictions and it is the user's responsibility to ensure
-** that they have met the licensing requirements of the GPL, LGPL, or Qt
-** Solutions Commercial license and the relevant license of the Third
-** Party Software they are using.
-** 
-** If you are unsure which license is appropriate for your use, please
-** contact the sales department at qt-sales@nokia.com.
-** 
-****************************************************************************/
-
-/****************************************************************************
-**
-** Copyright (C) 2009 Nokia Corporation and/or its subsidiary(-ies).
-** Contact: Qt Software Information (qt-info@nokia.com)
+** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).
+** Contact: http://www.qt-project.org/legal
 **
 ** This file is part of the tools applications of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:LGPL$
-** No Commercial Usage
-** This file contains pre-release code and may not be distributed.
-** You may use this file in accordance with the terms and conditions
-** contained in the either Technology Preview License Agreement or the
-** Beta Release License Agreement.
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and Digia.  For licensing terms and
+** conditions see http://qt.digia.com/licensing.  For further information
+** use the contact form at http://qt.digia.com/contact-us.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
@@ -66,10 +22,9 @@
 ** ensure the GNU Lesser General Public License version 2.1 requirements
 ** will be met: http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
 **
-** In addition, as a special exception, Nokia gives you certain
-** additional rights. These rights are described in the Nokia Qt LGPL
-** Exception version 1.0, included in the file LGPL_EXCEPTION.txt in this
-** package.
+** In addition, as a special exception, Digia gives you certain additional
+** rights.  These rights are described in the Digia Qt LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
 **
 ** GNU General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU
@@ -79,8 +34,7 @@
 ** ensure the GNU General Public License version 3.0 requirements will be
 ** met: http://www.gnu.org/copyleft/gpl.html.
 **
-** If you are unsure which license is appropriate for your use, please
-** contact the sales department at qt-sales@nokia.com.
+**
 ** $QT_END_LICENSE$
 **
 ****************************************************************************/
@@ -89,19 +43,16 @@
 #define QTVARIANTPROPERTY_H
 
 #include "qtpropertybrowser.h"
-#include <QtCore/QVariant>
-#include <QtGui/QIcon>
+#include <QVariant>
+#include <QIcon>
 
-#if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
-#endif
 
 typedef QMap<int, QIcon> QtIconMap;
 
 class QtVariantPropertyManager;
-class QtVariantPropertyPrivate;
 
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantProperty : public QtProperty
+class QtVariantProperty : public QtProperty
 {
 public:
     ~QtVariantProperty();
@@ -116,12 +67,10 @@ protected:
     QtVariantProperty(QtVariantPropertyManager *manager);
 private:
     friend class QtVariantPropertyManager;
-    QtVariantPropertyPrivate *d_ptr;
+    QScopedPointer<class QtVariantPropertyPrivate> d_ptr;
 };
 
-class QtVariantPropertyManagerPrivate;
-
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantPropertyManager : public QtAbstractPropertyManager
+class QtVariantPropertyManager : public QtAbstractPropertyManager
 {
     Q_OBJECT
 public:
@@ -162,7 +111,7 @@ protected:
     virtual void uninitializeProperty(QtProperty *property);
     virtual QtProperty *createProperty();
 private:
-    QtVariantPropertyManagerPrivate *d_ptr;
+    QScopedPointer<class QtVariantPropertyManagerPrivate> d_ptr;
     Q_PRIVATE_SLOT(d_func(), void slotValueChanged(QtProperty *, int))
     Q_PRIVATE_SLOT(d_func(), void slotRangeChanged(QtProperty *, int, int))
     Q_PRIVATE_SLOT(d_func(), void slotSingleStepChanged(QtProperty *, int))
@@ -204,9 +153,7 @@ private:
     Q_DISABLE_COPY(QtVariantPropertyManager)
 };
 
-class QtVariantEditorFactoryPrivate;
-
-class QT_QTPROPERTYBROWSER_EXPORT QtVariantEditorFactory : public QtAbstractEditorFactory<QtVariantPropertyManager>
+class QtVariantEditorFactory : public QtAbstractEditorFactory<QtVariantPropertyManager>
 {
     Q_OBJECT
 public:
@@ -218,14 +165,12 @@ protected:
                 QWidget *parent);
     void disconnectPropertyManager(QtVariantPropertyManager *manager);
 private:
-    QtVariantEditorFactoryPrivate *d_ptr;
+    QScopedPointer<class QtVariantEditorFactoryPrivate> d_ptr;
     Q_DECLARE_PRIVATE(QtVariantEditorFactory)
     Q_DISABLE_COPY(QtVariantEditorFactory)
 };
 
-#if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
 
 Q_DECLARE_METATYPE(QIcon)
 Q_DECLARE_METATYPE(QtIconMap)

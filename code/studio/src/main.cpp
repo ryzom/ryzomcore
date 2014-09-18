@@ -35,11 +35,11 @@
 #include <QtCore/QLibraryInfo>
 #include <QtCore/QLocale>
 #include <QtCore/QSettings>
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QApplication>
 //#include <QtGui/QSplashScreen>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
 
 #include "settings_dialog.h"
 #include "splash_screen.h"
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
 	}
-	QApplication::setGraphicsSystem("raster");
+
 #ifdef NL_OS_WINDOWS
 	QApplication app(__argc, __argv);
 #else // NL_OS_WINDOWS
