@@ -44,7 +44,6 @@
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
 #include "add_widget_widget.h"
-#include "texture_chooser.h"
 
 namespace GUIEditor
 {
@@ -70,8 +69,6 @@ namespace GUIEditor
 		setCentralWidget( GUICtrl->getViewPort() );
 
 		widgetInfoTree = new CWidgetInfoTree;
-
-		tc = new TextureChooser();
 
 		createMenus();
 		readSettings();
@@ -117,9 +114,6 @@ namespace GUIEditor
 		writeSettings();
 
 		removeMenus();
-
-		delete tc;
-		tc = NULL;
 
 		delete messageProcessor;
 		messageProcessor = NULL;
@@ -359,12 +353,6 @@ namespace GUIEditor
 		GUICtrl->show();
 	}
 
-	void GUIEditorWindow::onTCClicked()
-	{
-		tc->load();
-		tc->exec();
-	}
-
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
@@ -409,10 +397,6 @@ namespace GUIEditor
 
 			a = new QAction( "Add Widget", this );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
-			m->addAction( a );
-
-			a = new QAction( "Texture Chooser", this );
-			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onTCClicked() ) );
 			m->addAction( a );
 
 			menu = m;
