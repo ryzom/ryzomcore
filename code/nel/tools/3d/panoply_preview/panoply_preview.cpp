@@ -66,10 +66,10 @@ public:
 			if (!Process)
 			{
 				SettingsMutex.leave();
-				nlSleep(100);
+				nlSleep(10); // TODO: Should wait on an event signal...
 				continue;
 			}
-			nldebug("Update color modifier");
+			// nldebug("Update color modifier");
 			m_ColorModifier.Hue = Hue;
 			m_ColorModifier.Lightness = Lightness;
 			m_ColorModifier.Saturation = Saturation;
@@ -88,7 +88,7 @@ public:
 			{
 				nldebug("Bitmaps not ready");
 				BitmapMutex.leave();
-				nlSleep(100);
+				nlSleep(500);
 				continue;
 			}
 			float retDeltaHue;
@@ -97,7 +97,7 @@ public:
 
 			PanoplyPreview->displayBitmap(DestBitmap);
 
-			nlSleep(100);
+			nlSleep(10); // TODO: Should wait on an event signal...
 		}
 	}
 
@@ -168,7 +168,7 @@ void CPanoplyPreview::paintEvent(QPaintEvent* e)
 
 void CPanoplyPreview::displayBitmap(const CBitmap &bitmap) // Called from thread!
 {
-	nldebug("received bitmap");
+	// nldebug("received bitmap");
 
 	m_ColorThread->BitmapMutex.enter();
 	m_ImageMutex.enter();
@@ -206,7 +206,7 @@ void CPanoplyPreview::displayBitmap(const CBitmap &bitmap) // Called from thread
 
 void CPanoplyPreview::tSlotBitmap()
 {
-	nldebug("display bitmap");
+	// nldebug("display bitmap");
 
 	m_ImageMutex.enter();
 
@@ -238,7 +238,7 @@ void CPanoplyPreview::maskEdited(const QString &text)
 
 void CPanoplyPreview::goPushed(bool)
 {
-	nldebug("push bitmaps");
+	// nldebug("push bitmaps");
 	m_ColorThread->SettingsMutex.enter();
 	m_ColorThread->BitmapMutex.enter();
 	m_ColorThread->BitmapsOk = false;
@@ -278,7 +278,7 @@ void CPanoplyPreview::goPushed(bool)
 
 	m_ColorThread->BitmapMutex.leave();
 	m_ColorThread->SettingsMutex.leave();
-	nldebug("done pushing butmaps");
+	// nldebug("done pushing butmaps");
 }
 
 void CPanoplyPreview::hueChanged(int value)
@@ -391,6 +391,7 @@ void CPanoplyPreview::createDockWindows(CMainWindow *mainWindow)
 			colorFile->setText("W:\\database\\stuff\\fyros\\agents\\_textures\\actors\\fy_hof_armor00_arm01_c1.png");
 			groupLayout->addWidget(colorFile, 0, 1);
 
+			m_ColorFile = colorFile->text();
 			connect(colorFile, SIGNAL(textEdited(const QString &)), this, SLOT(colorEdited(const QString &)));
 
 			QLabel *maskLabel = new QLabel(groupBox);
@@ -401,6 +402,7 @@ void CPanoplyPreview::createDockWindows(CMainWindow *mainWindow)
 			maskFile->setText("W:\\database\\stuff\\fyros\\agents\\_textures\\actors\\mask\\fy_hof_armor00_arm01_c1_skin.png");
 			groupLayout->addWidget(maskFile, 1, 1);
 
+			m_MaskFile = maskFile->text();
 			connect(maskFile, SIGNAL(textEdited(const QString &)), this, SLOT(maskEdited(const QString &)));
 
 			QPushButton *go = new QPushButton(groupBox);
