@@ -92,6 +92,7 @@ public:
 				continue;
 			}
 			float retDeltaHue;
+			DestBitmap = ColorBitmap;
 			m_ColorModifier.convertBitmap(DestBitmap, ColorBitmap, MaskBitmap, retDeltaHue);
 			BitmapMutex.leave();
 
@@ -266,7 +267,6 @@ void CPanoplyPreview::goPushed(bool)
 				m_ColorThread->MaskBitmap.convertToType(NLMISC::CBitmap::RGBA);
 		}
 		{
-			m_ColorThread->DestBitmap = m_ColorThread->ColorBitmap;
 			m_ColorThread->BitmapsOk = true;
 			m_ColorThread->Process = true;
 		}
