@@ -66,14 +66,16 @@ CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *p
 	m_AboutAct(NULL)
 {
 	setObjectName("CMainWindow");
+	setWindowTitle(tr("NeL Panoply Preview"));
 
-	m_PanoplyPreview = new CPanoplyPreview(this);
-    setCentralWidget(m_PanoplyPreview);
-	
 	createActions();
 	createMenus();
 	createToolBars();
 	createStatusBar();
+
+	m_PanoplyPreview = new CPanoplyPreview(this);
+    setCentralWidget(m_PanoplyPreview);
+	
 	createDockWindows();
 }
 
@@ -94,8 +96,6 @@ void CMainWindow::createActions()
 void CMainWindow::createMenus()
 {
 	m_WidgetsMenu = menuBar()->addMenu(QString::null);
-	
-	menuBar()->addSeparator();
 	
 	m_HelpMenu = menuBar()->addMenu(QString::null);
 	m_HelpMenu->addAction(m_AboutAct);
@@ -119,14 +119,13 @@ void CMainWindow::createDockWindows()
 	// CommandLog (Console)
 	{
 		m_CommandLogDock = new QDockWidget(this);
+		m_CommandLogDock->setWindowTitle(tr("Console"));
 		m_CommandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
 		m_CommandLog = new CCommandLog(m_CommandLogDock);
 		m_CommandLogDock->setWidget(m_CommandLog);
 		addDockWidget(Qt::BottomDockWidgetArea, m_CommandLogDock);
 		m_WidgetsMenu->addAction(m_CommandLogDock->toggleViewAction());
 	}
-
-	m_CommandLogDock->setWindowTitle(tr("Command Log"));
 }
 
 void CMainWindow::about()

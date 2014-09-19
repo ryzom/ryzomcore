@@ -24,6 +24,7 @@
 #include <QWidget>
 #include <QTextEdit>
 #include <QLineEdit>
+#include <QSlider>
 
 // NeL includes
 #include <nel/misc/log.h>
@@ -31,7 +32,14 @@
 
 // Project includes
 
+namespace NLMISC {
+	class CBitmap;
+	class IThread;
+}
+
 namespace NLTOOLS {
+	class CMainWindow;
+	class CColorThread;
 
 /**
  * CPanoplyPreview
@@ -44,21 +52,56 @@ class CPanoplyPreview : public QWidget
 	Q_OBJECT
 	
 public:
-	CPanoplyPreview(QWidget *parent);
+	CPanoplyPreview(CMainWindow *parent);
 	virtual ~CPanoplyPreview();
 
-//private slots:
-	// ...
+	void displayBitmap(const NLMISC::CBitmap &bitmap); // Called from thread!
+
+private slots:
+	void colorEdited(const QString &text);
+	void maskEdited(const QString &text);
+	void goPushed();
+
+	void hueChanged(int value);
+	void lightnessChanged(int value);
+	void saturationChanged(int value);
+	void luminosityChanged(int value);
+	void contrastChanged(int value);
+
+private:
+	void createDockWindows(CMainWindow *mainWindow);
 
 private:
 	QTextEdit *m_DisplayerOutput;
 	QLineEdit *m_CommandInput;
+
+	NLMISC::IThread *m_Thread;
+	CColorThread *m_ColorThread;
 
 private:
 	CPanoplyPreview(const CPanoplyPreview &);
 	CPanoplyPreview &operator=(const CPanoplyPreview &);
 	
 }; /* class CPanoplyPreview */
+
+class CSliderTextEdit : public QSlider
+{
+	Q_OBJECT
+	
+public:
+	CSliderTextEdit(QWidget *parent, QLineEdit *lineEdit, float scale);
+	virtual ~CSliderTextEdit();
+
+private slots:
+	void lineEditTextEdited(const QString &text);
+	void sliderValueChanged(int value);
+
+private:
+	QLineEdit *m_LineEdit;
+	bool m_Updating;
+	float m_Scale;
+
+};
 
 } /* namespace NLTOOLS */
 

@@ -56,6 +56,8 @@ public:
 	CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *parent = 0, Qt::WindowFlags flags = 0);
 	virtual ~CMainWindow();
 
+	inline QMenu *widgetsMenu() { return m_WidgetsMenu; }
+
 private slots:
 	void about();
 

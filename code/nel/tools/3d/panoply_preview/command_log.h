@@ -50,8 +50,12 @@ public:
 protected:
 	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
 
+signals:
+	void tSigDisplay(const QColor &c, const QString &text);
+
 private slots:
 	void returnPressed();
+	void tSlotDisplay(const QColor &c, const QString &text);
 
 private:
 	QTextEdit *m_DisplayerOutput;
