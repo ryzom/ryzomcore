@@ -29,6 +29,7 @@
 #include <QScrollArea>
 #include <QPushButton>
 #include <QLabel>
+#include <QPainter>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -37,6 +38,7 @@
 #include <nel/misc/thread.h>
 #include <nel/misc/mutex.h>
 #include <nel/misc/bitmap.h>
+#include <nel/misc/file.h>
 
 // Project includes
 #include "main_window.h"
@@ -72,7 +74,8 @@ public:
 			m_ColorModifier.Lightness = Lightness;
 			m_ColorModifier.Saturation = Saturation;
 			m_ColorModifier.Luminosity = Luminosity;
-			m_ColorModifier.Saturation = Saturation;
+			m_ColorModifier.Contrast = Contrast;
+			Process = false;
 			SettingsMutex.leave();
 
 			BitmapMutex.enter();
@@ -81,7 +84,7 @@ public:
 				BitmapMutex.leave();
 				return;
 			}
-			if (!m_BitmapsOk)
+			if (!BitmapsOk)
 			{
 				nldebug("Bitmaps not ready");
 				BitmapMutex.leave();
@@ -98,13 +101,12 @@ public:
 		}
 	}
 
-	CColorThread() : m_BitmapsOk(false), Hue(0), Lightness(0), Saturation(0), Luminosity(0), Contrast(0), Process(false), Running(true) { }
+	CColorThread() : PanoplyPreview(NULL), BitmapsOk(false), Hue(0), Lightness(0), Saturation(0), Luminosity(0), Contrast(0), Process(false), Running(true) { }
 	virtual ~CColorThread() { }
 	virtual void getName (std::string &result) const { result = "CColorThread"; }
 
 private:
 	CColorModifier m_ColorModifier;
-	bool m_BitmapsOk;
 
 public:
 	CPanoplyPreview *PanoplyPreview;
@@ -112,6 +114,7 @@ public:
 	NLMISC::CMutex BitmapMutex;
 	NLMISC::CBitmap ColorBitmap;
 	NLMISC::CBitmap MaskBitmap;
+	bool BitmapsOk;
 	NLMISC::CBitmap DestBitmap;
 
 	NLMISC::CMutex SettingsMutex;
@@ -129,19 +132,15 @@ public:
 
 CPanoplyPreview::CPanoplyPreview(CMainWindow *parent) : QWidget(parent)
 {
-	m_DisplayerOutput = new QTextEdit();
-	m_DisplayerOutput->setReadOnly(true);
-	m_DisplayerOutput->setFocusPolicy(Qt::NoFocus);
-	m_CommandInput = new QLineEdit();
-
-	QVBoxLayout *layout = new QVBoxLayout();
-	layout->addWidget(m_DisplayerOutput);
-	layout->addWidget(m_CommandInput);
-	setLayout(layout);
-
-	// connect(m_CommandInput, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
+	connect(this, SIGNAL(tSigBitmap()), this, SLOT(tSlotBitmap()));
 
 	createDockWindows(parent);
+
+	m_Image = new QImage(512, 512, QImage::Format_RGB32);
+	m_Pixmap = new QPixmap(512, 512);
+
+	setMinimumWidth(512);
+	setMinimumHeight(512);
 
 	m_ColorThread = new CColorThread();
 	m_ColorThread->PanoplyPreview = this;
@@ -151,34 +150,135 @@ CPanoplyPreview::CPanoplyPreview(CMainWindow *parent) : QWidget(parent)
 
 CPanoplyPreview::~CPanoplyPreview()
 {
-	m_ColorThread->BitmapMutex.enter();
 	m_ColorThread->SettingsMutex.enter();
+	m_ColorThread->BitmapMutex.enter();
 	m_ColorThread->Running = false;
-	m_ColorThread->SettingsMutex.leave();
 	m_ColorThread->BitmapMutex.leave();
+	m_ColorThread->SettingsMutex.leave();
 	m_Thread->wait();
 	delete m_Thread;
 	delete m_ColorThread;
 }
 
+void CPanoplyPreview::paintEvent(QPaintEvent* e)
+{
+	QPainter painter(this);
+	painter.drawPixmap(0, 0, *m_Pixmap);
+}
+
 void CPanoplyPreview::displayBitmap(const CBitmap &bitmap) // Called from thread!
 {
-	nldebug("display bitmap!");
+	nldebug("received bitmap");
+
+	m_ColorThread->BitmapMutex.enter();
+	m_ImageMutex.enter();
+
+	const char *buffer = (const char *)&bitmap.getPixels()[0];
+
+	if (bitmap.getWidth() != m_Image->width() || bitmap.getHeight() != m_Image->height())
+	{
+		QImage *image = m_Image;
+		m_Image = new QImage(bitmap.getWidth(), bitmap.getHeight(), QImage::Format_RGB32);
+		delete image;
+	}
+	
+	for (uint32 y = 0; y < bitmap.getHeight(); ++y)
+	{
+		uint8 *dst = (uint8 *)m_Image->scanLine(y);
+		const uint8 *src = (const uint8 *)&buffer[y * bitmap.getWidth() * sizeof(uint32)];
+		for (uint32 x = 0; x < bitmap.getWidth(); ++x)
+		{
+			uint32 xb = x * 4;
+			dst[xb + 0] = src[xb + 2];
+			dst[xb + 1] = src[xb + 1];
+			dst[xb + 2] = src[xb + 0];
+			dst[xb + 3] = src[xb + 3];
+		}
+
+		//memcpy(m_Image->scanLine(y), &buffer[y * bitmap.getWidth() * sizeof(uint32)], sizeof(uint32) * bitmap.getWidth());
+	}
+
+	m_ImageMutex.leave();
+	m_ColorThread->BitmapMutex.leave();
+
+	tSigBitmap();
+}
+
+void CPanoplyPreview::tSlotBitmap()
+{
+	nldebug("display bitmap");
+
+	m_ImageMutex.enter();
+
+	if (m_Image->width() != m_Pixmap->width()
+		|| m_Image->height() != m_Pixmap->height())
+	{
+		QPixmap *pixmap = m_Pixmap;
+		m_Pixmap = new QPixmap(m_Image->width(), m_Image->height());
+		setMinimumWidth(m_Pixmap->width());
+		setMinimumHeight(m_Pixmap->height());
+		delete pixmap;
+	}
+	m_Pixmap->convertFromImage(*m_Image);
+	repaint();
+
+	m_ImageMutex.leave();
+	
 }
 
 void CPanoplyPreview::colorEdited(const QString &text)
 {
-	
+	m_ColorFile = text;
 }
 
 void CPanoplyPreview::maskEdited(const QString &text)
 {
-	
+	m_MaskFile = text;
 }
 
-void CPanoplyPreview::goPushed()
+void CPanoplyPreview::goPushed(bool)
 {
-	
+	nldebug("push bitmaps");
+	m_ColorThread->SettingsMutex.enter();
+	m_ColorThread->BitmapMutex.enter();
+	m_ColorThread->BitmapsOk = false;
+
+	try
+	{
+		{
+			NLMISC::CIFile is;
+			if (!is.open(m_ColorFile.toLocal8Bit().data()))
+				throw NLMISC::Exception("Cannot open file '%s'", m_ColorFile.toLocal8Bit().data());
+			uint32 depth = m_ColorThread->ColorBitmap.load(is);
+			if (depth == 0 || m_ColorThread->ColorBitmap.getPixels().empty())
+				throw NLMISC::Exception("Failed to load bitmap '%s'", m_ColorFile.toLocal8Bit().data());
+			if (m_ColorThread->ColorBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
+				m_ColorThread->ColorBitmap.convertToType(NLMISC::CBitmap::RGBA);
+		}
+		{
+			NLMISC::CIFile is;
+			if (!is.open(m_MaskFile.toLocal8Bit().data()))
+				throw NLMISC::Exception("Cannot open file '%s'", m_MaskFile.toLocal8Bit().data());
+			uint32 depth = m_ColorThread->MaskBitmap.load(is);
+			if (depth == 0 || m_ColorThread->MaskBitmap.getPixels().empty())
+				throw NLMISC::Exception("Failed to load bitmap '%s'", m_MaskFile.toLocal8Bit().data());
+			if (m_ColorThread->MaskBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
+				m_ColorThread->MaskBitmap.convertToType(NLMISC::CBitmap::RGBA);
+		}
+		{
+			m_ColorThread->DestBitmap = m_ColorThread->ColorBitmap;
+			m_ColorThread->BitmapsOk = true;
+			m_ColorThread->Process = true;
+		}
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		nlwarning("Exception: '%s'", e.what());
+	}
+
+	m_ColorThread->BitmapMutex.leave();
+	m_ColorThread->SettingsMutex.leave();
+	nldebug("done pushing butmaps");
 }
 
 void CPanoplyPreview::hueChanged(int value)
@@ -288,18 +388,26 @@ void CPanoplyPreview::createDockWindows(CMainWindow *mainWindow)
 			groupLayout->addWidget(colorLabel, 0, 0);
 
 			QLineEdit *colorFile = new QLineEdit(groupBox);
+			colorFile->setText("W:\\database\\stuff\\fyros\\agents\\_textures\\actors\\fy_hof_armor00_arm01_c1.png");
 			groupLayout->addWidget(colorFile, 0, 1);
+
+			connect(colorFile, SIGNAL(textEdited(const QString &)), this, SLOT(colorEdited(const QString &)));
 
 			QLabel *maskLabel = new QLabel(groupBox);
 			maskLabel->setText(tr("Mask: "));
 			groupLayout->addWidget(maskLabel, 1, 0);
 
 			QLineEdit *maskFile = new QLineEdit(groupBox);
+			maskFile->setText("W:\\database\\stuff\\fyros\\agents\\_textures\\actors\\mask\\fy_hof_armor00_arm01_c1_skin.png");
 			groupLayout->addWidget(maskFile, 1, 1);
+
+			connect(maskFile, SIGNAL(textEdited(const QString &)), this, SLOT(maskEdited(const QString &)));
 
 			QPushButton *go = new QPushButton(groupBox);
 			go->setText(tr("Go"));
 			groupLayout->addWidget(go, 2, 0, 1, 2);
+
+			connect(go, SIGNAL(clicked(bool)), this, SLOT(goPushed(bool)));
 
 			groupBox->setLayout(groupLayout);
 			vboxLayout->addWidget(groupBox);

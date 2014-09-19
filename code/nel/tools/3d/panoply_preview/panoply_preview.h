@@ -25,6 +25,8 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QSlider>
+#include <QImage>
+#include <QPixmap>
 
 // NeL includes
 #include <nel/misc/log.h>
@@ -57,10 +59,18 @@ public:
 
 	void displayBitmap(const NLMISC::CBitmap &bitmap); // Called from thread!
 
+protected:
+	virtual void paintEvent(QPaintEvent *e);
+
+signals:
+	void tSigBitmap();
+
 private slots:
+	void tSlotBitmap();
+
 	void colorEdited(const QString &text);
 	void maskEdited(const QString &text);
-	void goPushed();
+	void goPushed(bool);
 
 	void hueChanged(int value);
 	void lightnessChanged(int value);
@@ -72,11 +82,16 @@ private:
 	void createDockWindows(CMainWindow *mainWindow);
 
 private:
-	QTextEdit *m_DisplayerOutput;
-	QLineEdit *m_CommandInput;
-
 	NLMISC::IThread *m_Thread;
 	CColorThread *m_ColorThread;
+
+	QString m_ColorFile;
+	QString m_MaskFile;
+
+	QImage *m_Image;
+	QPixmap *m_Pixmap;
+
+	NLMISC::CMutex m_ImageMutex;
 
 private:
 	CPanoplyPreview(const CPanoplyPreview &);
