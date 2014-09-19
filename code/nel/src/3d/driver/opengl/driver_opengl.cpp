@@ -234,10 +234,6 @@ CDriverGL::CDriverGL()
 	_CursorScale = 1.f;
 	_MouseCaptured = false;
 
-#if defined(NL_OS_WINDOWS)
-	_BorderlessFullscreen = false;
-#endif
-
 	_NeedToRestaureGammaRamp = false;
 
 	_win = EmptyWindow;

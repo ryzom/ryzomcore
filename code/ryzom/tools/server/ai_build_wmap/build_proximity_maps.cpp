@@ -27,7 +27,7 @@
 #include "nel/misc/file.h"
 
 // Game share
-#include "server_share/bmp4image.h"
+#include "game_share/bmp4image.h"
 
 // AI share
 #include "ai_share/world_map.h"
