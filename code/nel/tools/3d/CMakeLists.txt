@@ -61,6 +61,10 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
     ADD_SUBDIRECTORY(tile_edit_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
   ENDIF(WITH_QT)
+
+  IF(WITH_QT5)
+    ADD_SUBDIRECTORY(panoply_preview)
+  ENDIF()
   
   IF(SQUISH_FOUND)
     ADD_SUBDIRECTORY(s3tc_compressor_lib)
