@@ -43,7 +43,7 @@ namespace NL3D
 }
 
 /// Nel 3D interface to Qt
-class CORE_EXPORT Nel3DWidget : public QGLWidget
+class CORE_EXPORT Nel3DWidget : public NEL3DWIDGET
 {
 	Q_OBJECT
 public:
