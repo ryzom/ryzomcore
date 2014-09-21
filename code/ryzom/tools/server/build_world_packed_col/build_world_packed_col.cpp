@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
 			catch(const EStream &)
 			{
 				mustRebuild = true; // damaged file or bad version ? -> force rebuild
-				delete packedIsland; // remove whatever was serialized
+				// delete packedIsland; // remove whatever was serialized // NOPE. smart pointer
 				packedIsland = new CPackedWorldHolder;				
 			}
 		}
