@@ -233,6 +233,9 @@ namespace NLGUI
 
 		virtual void setActive (bool state);
 
+		void setXReal( sint32 x ){ _XReal = x; }
+		void setYReal( sint32 y ){ _YReal = y; }
+
 		void setX (sint32 x) { _X = x; }
 		void setXAndInvalidateCoords (sint32 x) { _X = x; invalidateCoords(); }
 

@@ -79,6 +79,9 @@ namespace NLGUI
 		bool delElement (const std::string &id, bool noWarning=false);
 		bool delElement (CInterfaceElement *pIE, bool noWarning=false);
 
+		// Take the element from the group, but don't delete it!
+		CInterfaceElement* takeElement( CInterfaceElement *e );
+
 		uint getNumGroup() const { return (uint)_ChildrenGroups.size(); }
 		CInterfaceGroup *getGroup(uint index) const;
 

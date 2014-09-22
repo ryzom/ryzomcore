@@ -2738,8 +2738,17 @@ CPrimitiveContext::CPrimitiveContext():
 }
 
 
+static bool LIGORegistered = false;
+
+
 void Register ()
 {
+    if( LIGORegistered )
+    {
+        nlinfo( "LIGO classes have already been registered." );
+        return;
+    }
+
 	NLMISC_REGISTER_CLASS(CPropertyString);
 	NLMISC_REGISTER_CLASS(CPropertyStringArray);
 	NLMISC_REGISTER_CLASS(CPropertyColor);
@@ -2748,6 +2757,8 @@ void Register ()
 	NLMISC_REGISTER_CLASS(CPrimPath);
 	NLMISC_REGISTER_CLASS(CPrimZone);
 	NLMISC_REGISTER_CLASS(CPrimAlias);
+
+    LIGORegistered = true;
 }
 
 // ***************************************************************************

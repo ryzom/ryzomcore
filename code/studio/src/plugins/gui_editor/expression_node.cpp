@@ -297,9 +297,16 @@ QString ExpressionNode::build() const
 
 	QStringList l = m_name.split( ' ' );
 	result = l[ 0 ];
-	result += "( ";
 
 	int c = m_links.count();
+	if( c == 1 )
+	{
+		result += "()";
+		return result;
+	}
+
+	result += "( ";
+
 	for( int i = 1; i < c; i++ )
 	{
 		ExpressionLink *link = m_links[ i ];
