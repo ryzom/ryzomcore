@@ -86,9 +86,7 @@ WorldEditorContext::WorldEditorContext(QObject *parent)
 	: IContext(parent),
 	  m_worldEditorWindow(0)
 {
-	m_worldEditorWindow = new WorldEditorWindow();
-
-    QSettings *settings = Core::ICore::instance()->settings();
+	QSettings *settings = Core::ICore::instance()->settings();
     settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
     m_ligoConfig.CellSize = settings->value(Constants::WORLD_EDITOR_CELL_SIZE, "160").toFloat();
     m_ligoConfig.Snap = settings->value(Constants::WORLD_EDITOR_SNAP, "1").toFloat();
@@ -115,6 +113,7 @@ WorldEditorContext::WorldEditorContext(QObject *parent)
     // TODO: get file names! from settings
     m_ligoConfig.readPrimitiveClass("world_editor_primitive_configuration.xml", true);
 
+	m_worldEditorWindow = new WorldEditorWindow();
 }
 
 QUndoStack *WorldEditorContext::undoStack()
