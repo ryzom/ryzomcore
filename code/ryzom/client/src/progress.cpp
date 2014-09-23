@@ -225,7 +225,7 @@ void CProgress::internalProgress (float value)
 
 		if (!stereoHMD || StereoDisplay->wantInterface2D())
 		{
-			nldebug("Draw progress 2D");
+			// nldebug("Draw progress 2D");
 
 			// Font factor
 			float fontFactor = 1;
