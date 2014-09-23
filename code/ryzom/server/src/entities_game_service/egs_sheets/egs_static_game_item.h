@@ -812,13 +812,13 @@ public:
 public:
 
 	/// Constructor
-	CStaticItem() { init(); }
+	CStaticItem() { init(false); }
 
 	/// copy constructor
 	CStaticItem( const CStaticItem& itm );
 
 	/// init method
-	void init();
+	void init(bool doDelete = true);
 
 	/// destructor
 	virtual ~CStaticItem();
