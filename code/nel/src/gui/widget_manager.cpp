@@ -2313,7 +2313,9 @@ namespace NLGUI
 				getCapturePointerLeft() != getCapturePointerRight() )
 				handled|= getCapturePointerRight()->handleEvent(evnt);
 
-			if( _CapturedView != NULL )
+			if( _CapturedView != NULL &&
+				_CapturedView != getCapturePointerLeft() &&
+				_CapturedView != getCapturePointerRight() )
 				_CapturedView->handleEvent( evnt );
 
 			CInterfaceGroup *ptr = getWindowUnder (eventDesc.getX(), eventDesc.getY());
