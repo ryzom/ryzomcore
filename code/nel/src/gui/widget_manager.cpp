@@ -34,7 +34,6 @@
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
-#include "nel/gui/widget_addition_watcher.h"
 #include "nel/misc/events.h"
 
 namespace NLGUI
@@ -2669,6 +2668,8 @@ namespace NLGUI
 
 			if( g == NULL )
 				g = tw;
+
+			std::string oldid = e->getId();
 			
 			e->setParent( g );
 			e->setIdRecurse( e->getShortId() );
@@ -2677,6 +2678,8 @@ namespace NLGUI
 			g->addElement( e );
 
 			draggedElement = NULL;
+
+			onWidgetMoved( oldid, e->getId() );
 		}
 	}
 	
@@ -3364,36 +3367,46 @@ namespace NLGUI
 		selectionWatchers.erase( itr );
 	}
 
-	void CWidgetManager::notifyAdditionWatchers( const std::string &widgetName )
+	void CWidgetManager::onWidgetAdded( const std::string &id )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr = additionWatchers.begin();
-		while( itr != additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
 		{
-			(*itr)->widgetAdded( widgetName );
+			(*itr)->onWidgetAdded( id );
 			++itr;
 		}
 	}
 
-	void CWidgetManager::registerAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::onWidgetMoved( const std::string &oldid, const std::string &newid )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr 
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// already exists
-		if( itr != additionWatchers.end() )
-			return;
-
-		additionWatchers.push_back( watcher );
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
+		{
+			(*itr)->onWidgetMoved( oldid, newid );
+			++itr;
+		}
 	}
 
-	void CWidgetManager::unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::registerWidgetWatcher( IWidgetWatcher *watcher )
 	{
-		std::vector< IWidgetAdditionWatcher* >::iterator itr
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// doesn't exist
-		if( itr == additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr 
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// already exists
+		if( itr != widgetWatchers.end() )
 			return;
 
-		additionWatchers.erase( itr );
+		widgetWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterWidgetWatcher( IWidgetWatcher *watcher )
+	{
+		std::vector< IWidgetWatcher* >::iterator itr
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// doesn't exist
+		if( itr == widgetWatchers.end() )
+			return;
+
+		widgetWatchers.erase( itr );
 	}
 
 	CInterfaceElement* CWidgetManager::addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName )
@@ -3426,7 +3439,7 @@ namespace NLGUI
 		else
 			g->addView( v );
 
-		notifyAdditionWatchers( v->getId() );
+		onWidgetAdded( v->getId() );
 		
 		return v;
 	}

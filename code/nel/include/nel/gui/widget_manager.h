@@ -75,6 +75,16 @@ namespace NLGUI
 			virtual void process() = 0;
 		};
 
+		// Interface for event handlers that can be called when widgets are added or moved
+		class IWidgetWatcher
+		{
+		public:
+			IWidgetWatcher(){}
+			virtual ~IWidgetWatcher(){}
+			virtual void onWidgetAdded( const std::string &name ) = 0;
+			virtual void onWidgetMoved( const std::string &oldid, const std::string &newid ) = 0;
+		};
+
 		/// Frame render times
 		struct SInterfaceTimes
 		{
@@ -498,10 +508,12 @@ namespace NLGUI
 		void notifySelectionWatchers();
 		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
 		void unregisterSelectionWatcher( IEditorSelectionWatcher *watcher );
-		
-		void notifyAdditionWatchers( const std::string &widgetName );
-		void registerAdditionWatcher( IWidgetAdditionWatcher *watcher );
-		void unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher );
+
+
+		void onWidgetAdded( const std::string &id );
+		void onWidgetMoved( const std::string &oldid, const std::string &newid );
+		void registerWidgetWatcher( IWidgetWatcher *watcher );
+		void unregisterWidgetWatcher( IWidgetWatcher *watcher );
 
 		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
 				
@@ -594,7 +606,7 @@ namespace NLGUI
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 		std::vector< IEditorSelectionWatcher* > selectionWatchers;
-		std::vector< IWidgetAdditionWatcher* > additionWatchers;
+		std::vector< IWidgetWatcher* > widgetWatchers;
 		
 
 		std::string currentEditorSelection;

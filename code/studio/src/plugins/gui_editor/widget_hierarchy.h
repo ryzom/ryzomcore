@@ -44,6 +44,7 @@ namespace GUIEditor
 
 		void onWidgetDeleted( const std::string &id );
 		void onWidgetAdded( const std::string &id );
+		void onWidgetMoved( const std::string &oldid, const std::string &newid );
 
 		void getCurrentGroup( QString &g );
 
