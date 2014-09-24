@@ -1037,8 +1037,6 @@ namespace NLGUI
 		setCapturePointerRight(NULL);
 		_CapturedView = NULL;
 
-		_OrphanElements.clear();
-		
 		resetColorProps();
 		resetAlphaRolloverSpeedProps();
 		resetGlobalAlphasProps();
@@ -2041,15 +2039,6 @@ namespace NLGUI
 						}
 					}
 
-					std::vector< NLMISC::CRefPtr< CInterfaceElement > >::iterator oeitr = _OrphanElements.begin();
-					while( oeitr != _OrphanElements.end() )
-					{
-						CInterfaceElement *e = *oeitr;
-						CViewBase *v = dynamic_cast< CViewBase* >( e );
-						v->draw();
-						++oeitr;
-					}
-
 					if( draggedElement != NULL )
 					{
 						CInterfaceElement *e = draggedElement;
@@ -2411,44 +2400,20 @@ namespace NLGUI
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
 
-					if( CInterfaceElement::getEditorMode() )
+					// Take the top most control.
+					uint nMaxDepth = 0;
+					const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+					for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
 					{
-						std::vector< NLMISC::CRefPtr< CInterfaceElement > >::reverse_iterator itr = _OrphanElements.rbegin();
-						while( itr != _OrphanElements.rend() )
+						CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+						if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
 						{
-							CInterfaceElement *e = *itr;
-
-							int x = getPointer()->getXReal();
-							int y = getPointer()->getYReal();
-
-							if( e->isIn( x, y ) )
+							uint d = ctrl->getDepth( pNewCurrentWnd );
+							if (d > nMaxDepth)
 							{
-								_CapturedView = static_cast< CViewBase* >( e );
+								nMaxDepth = d;
+								setCapturePointerLeft( ctrl );
 								captured = true;
-								break;
-							}
-
-							++itr;
-						}
-					}
-
-					if( !captured )
-					{
-						// Take the top most control.
-						uint nMaxDepth = 0;
-						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
-						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
-						{
-							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
-							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
-							{
-								uint d = ctrl->getDepth( pNewCurrentWnd );
-								if (d > nMaxDepth)
-								{
-									nMaxDepth = d;
-									setCapturePointerLeft( ctrl );
-									captured = true;
-								}
 							}
 						}
 					}
@@ -2690,7 +2655,7 @@ namespace NLGUI
 
 		e->setParent( NULL );
 		draggedElement = e;
-
+				
 		return true;
 	}
 
@@ -2700,20 +2665,16 @@ namespace NLGUI
 		{
 			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
 			CInterfaceElement *e = draggedElement;
+			CInterfaceGroup *tw = getTopWindow();
+
+			if( g == NULL )
+				g = tw;
 			
 			e->setParent( g );
 			e->setIdRecurse( e->getShortId() );
 			e->setParentPos( g );
 			e->setParentSize( g );
-
-			if( g != NULL )
-			{
-				g->addElement( e );
-			}
-			else
-				_OrphanElements.push_back( draggedElement );
-
-			checkCoords();
+			g->addElement( e );
 
 			draggedElement = NULL;
 		}
@@ -3513,8 +3474,6 @@ namespace NLGUI
 
 	CWidgetManager::~CWidgetManager()
 	{
-		_OrphanElements.clear();
-
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
 			delete _MasterGroups[i].Group;

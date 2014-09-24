@@ -533,7 +533,6 @@ namespace NLGUI
 		NLMISC::CRefPtr< CViewBase > _CapturedView;
 
 		NLMISC::CRefPtr< CInterfaceElement > draggedElement; // the element that we're currently dragging
-		std::vector< NLMISC::CRefPtr< CInterfaceElement > > _OrphanElements; // elements that were dragged out of their parents
 
 		bool startDragging();
 		void stopDragging();
