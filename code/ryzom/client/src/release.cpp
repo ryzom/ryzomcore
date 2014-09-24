@@ -25,6 +25,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/async_file_manager.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/fxaa.h"
@@ -644,6 +645,7 @@ void release()
 	R2::CObjectSerializer::releaseInstance();
 	NLMISC::CBigFile::getInstance().removeAll();
 	NLMISC::CBigFile::releaseInstance();
+	NLMISC::CStreamedPackageManager::releaseInstance();
 	NL3D::CFastHLSModifier::releaseInstance();
 	CLandscapePolyDrawer::releaseInstance();
 	NL3D::CParticleSystemShape::releaseInstance();

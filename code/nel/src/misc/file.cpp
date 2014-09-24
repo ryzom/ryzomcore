@@ -213,7 +213,7 @@ bool		CIFile::open(const std::string &path, bool text)
 			_BigFileOffset = 0;
 			_AlwaysOpened = false;
 			std::string filePath;
-			if (CStreamedPackageManager::getInstance().getFile (filePath, path))
+			if (CStreamedPackageManager::getInstance().getFile (filePath, path.substr(pos+1)))
 			{
 				_F = fopen (filePath.c_str(), mode);
 				if (_F != NULL)

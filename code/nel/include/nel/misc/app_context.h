@@ -230,17 +230,19 @@ namespace NLMISC
 	private:
 
 #define NLMISC_SAFE_RELEASABLE_SINGLETON_DECL(className) \
-	NLMISC_SAFE_SINGLETON_DECL(className); \
-	\
-	void className::releaseInstance() \
-	{ \
-		if (_Instance) \
+		NLMISC_SAFE_SINGLETON_DECL(className); \
+		\
+	public: \
+		static void className::releaseInstance() \
 		{ \
-			NLMISC::INelContext::getInstance().releaseSingletonPointer(#className, _Instance); \
-			delete _Instance; \
-			_Instance = NULL; \
+			if (_Instance) \
+			{ \
+				NLMISC::INelContext::getInstance().releaseSingletonPointer(#className, _Instance); \
+				delete _Instance; \
+				_Instance = NULL; \
+			} \
 		} \
-	} \
+	private:
 
 
 	/** The same as above, but generate a getInstance method that

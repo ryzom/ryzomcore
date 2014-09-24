@@ -28,6 +28,7 @@
 #include "nel/misc/thread.h"
 #include "nel/misc/big_file.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 
 #include "nel/net/tcp_sock.h"
 #include "nel/3d/u_driver.h"
@@ -1614,6 +1615,7 @@ void initPatch()
 		CBGDownloaderAccess::getInstance().startTask(taskDesc, string(), true /* showDownloader */); // no command line since bg downloader should already be started
 		// release lock on bnp, so that they can be written
 		NLMISC::CBigFile::getInstance().removeAll();
+		NLMISC::CStreamedPackageManager::getInstance().unloadAll();
 	}
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_PATCHING);
 

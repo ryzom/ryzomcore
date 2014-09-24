@@ -1736,7 +1736,8 @@ void CFileContainer::memoryCompress()
 	while (it != _Files.end())
 	{
 		string sTmp = SSMpath.get(it->second.idPath);
-		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && !it->second.Remapped)
+		nldebug("A: %s", sTmp.c_str());
+		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && (sTmp.find("snp@") == string::npos) && !it->second.Remapped)
 		{
 			// This is a file included in a bigfile (so the name is in the bigfile manager)
 		}
@@ -1759,7 +1760,8 @@ void CFileContainer::memoryCompress()
 	{
 		CFileEntry &rFE = it->second;
 		string sTmp = SSMpath.get(rFE.idPath);
-		if (sTmp.find("@") == string::npos || sTmp.find("@@") != string::npos || rFE.Remapped)
+		nldebug("B: %s", sTmp.c_str());
+		if ((sTmp.find("@") == string::npos) || (sTmp.find("@@") != string::npos) || (sTmp.find("snp@") != string::npos) || rFE.Remapped)
 		{
 			strcpy(_AllFileNames+nSize, rFE.Name.c_str());
 			_MCFiles[nNb].Name = _AllFileNames+nSize;
@@ -1784,8 +1786,12 @@ void CFileContainer::memoryCompress()
 		it++;
 	}
 
+	nldebug("Passed");
+
 	contReset(_Files);
 	_MemoryCompressed = true;
+
+	nldebug("Done");
 }
 
 void CPath::memoryUncompress()
@@ -2054,7 +2060,7 @@ uint32	CFile::getFileSize (const std::string &filename)
 		if (pos > 3 && filename[pos-3] == 's' && filename[pos-2] == 'n' && filename[pos-1] == 'p')
 		{
 			uint32 fs = 0;
-			CStreamedPackageManager::getInstance().getFileSize (fs, filename);
+			CStreamedPackageManager::getInstance().getFileSize (fs, filename.substr(pos+1));
 			return fs;
 		}
 		else

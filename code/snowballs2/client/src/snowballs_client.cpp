@@ -1433,6 +1433,7 @@ public:
 		NLMISC::CAsyncFileManager::terminate();
 		NL3D::CParticleSystemManager::release();
 		NLMISC::CBigFile::releaseInstance();
+		NLMISC::CStreamedPackageManager::releaseInstance();
 		NLMISC::CClassRegistry::release();
 		delete &NLMISC::CObjectArenaAllocator::getDefaultAllocator();
 		cf_delete_buffer(_CfBufferState); _CfBufferState = NULL;

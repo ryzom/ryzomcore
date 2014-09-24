@@ -295,7 +295,7 @@ void CScreenshotIslands::searchIslandsBorders()
 		zonelFiles.clear();
 
 		string bnpFileName = itCont->first + ".bnp";
-		CBigFile::getInstance().list(bnpFileName.c_str(), filenames);
+		CBigFile::getInstance().list(bnpFileName.c_str(), filenames); // FIXME FIXME NOT READING FROM BNP!
 
 		for(uint i=0; i<filenames.size(); i++)
 		{
