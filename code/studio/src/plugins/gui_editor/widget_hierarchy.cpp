@@ -285,7 +285,24 @@ namespace GUIEditor
 		item->setData( 0, Qt::DisplayRole, id );
 		item->setSelected( true );
 		newParent->addChild( item );
-		newParent->setExpanded( true );
+		
+
+		selectItem( item );
+	}
+
+	void WidgetHierarchy::selectItem( QTreeWidgetItem *item )
+	{
+		widgetHT->collapseAll();
+
+		QTreeWidgetItem *currItem = item;
+		while( currItem != NULL )
+		{
+			currItem->setExpanded( true );
+			currItem = currItem->parent();
+		}
+
+		widgetHT->setCurrentItem( item );
+		item->setSelected( true );
 	}
 
 	void WidgetHierarchy::getCurrentGroup( QString &g )
@@ -345,18 +362,11 @@ namespace GUIEditor
 		if( widgetHT->currentItem() != NULL )
 			widgetHT->currentItem()->setSelected( false );
 
-		// expand the tree items, so that we can see the selected item
-		QTreeWidgetItem *item = itr->second;
-		QTreeWidgetItem *currItem = item;
-		while( currItem != NULL )
-		{
-			currItem->setExpanded( true );
-			currItem = currItem->parent();
-		}
+		widgetHT->collapseAll();
 
 		// select the current item
-		item->setSelected( true );
-		widgetHT->setCurrentItem( item );
+		QTreeWidgetItem *item = itr->second;
+		selectItem( item );
 		currentSelection = newSelection;
 	}
 
@@ -364,6 +374,8 @@ namespace GUIEditor
 	{
 		if( item->parent() == NULL )
 			return;
+
+		selectItem( item );
 		
 		std::string n = item->text( 0 ).toUtf8().constData();
 		currentSelection = makeFullName( item, n );

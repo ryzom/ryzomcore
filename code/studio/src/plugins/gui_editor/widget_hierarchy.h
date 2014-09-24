@@ -52,6 +52,7 @@ namespace GUIEditor
 		void buildHierarchy( QTreeWidgetItem *parent, NLGUI::CInterfaceGroup *group );
 		QTreeWidgetItem* findItem( const std::string &id );
 		QTreeWidgetItem* findParent( const std::string &id );
+		void selectItem( QTreeWidgetItem *item );
 
 	public Q_SLOTS:
 		void onGUILoaded();
