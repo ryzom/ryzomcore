@@ -1,4 +1,4 @@
-SUBDIRS(bnp_make disp_sheet_id extract_filename lock make_sheet_id xml_packer)
+SUBDIRS(bnp_make snp_make disp_sheet_id extract_filename lock make_sheet_id xml_packer)
 
 IF(WITH_QT)
   ADD_SUBDIRECTORY(words_dic_qt)
