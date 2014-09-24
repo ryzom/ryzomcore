@@ -182,6 +182,27 @@ namespace GUIEditor
 		}
 	}
 
+	QTreeWidgetItem* WidgetHierarchy::findItem( const std::string &id )
+	{
+		std::map< std::string, QTreeWidgetItem* >::iterator itr
+			= widgetHierarchyMap.find( id );
+		if( itr == widgetHierarchyMap.end() )
+			return NULL;
+		else
+			return itr->second;
+	}
+
+	QTreeWidgetItem* WidgetHierarchy::findParent( const std::string &id )
+	{
+		// Get the parent's name
+		std::string::size_type p = id.find_last_of( ':' );
+		if( p == std::string::npos )
+			return NULL;
+		std::string parentId = id.substr( 0, p );
+
+		return findItem( parentId );
+	}
+
 	void WidgetHierarchy::onWidgetDeleted( const std::string &id )
 	{
 		std::map< std::string, QTreeWidgetItem* >::iterator itr
@@ -238,6 +259,33 @@ namespace GUIEditor
 
 	void WidgetHierarchy::onWidgetMoved( const std::string &oldid, const std::string &newid )
 	{
+		QTreeWidgetItem *newParent = NULL;
+		QTreeWidgetItem *item = NULL;
+		QString id;
+
+		newParent = findParent( newid );
+		item = findItem( oldid );
+
+		if( ( newParent == NULL ) || ( item == NULL ) )
+			return;
+
+		// Remove old item
+		QTreeWidgetItem *p = item->parent();
+		if( p != NULL )
+			p->setExpanded( false );
+		id = item->data( 0, Qt::DisplayRole ).toString();
+		delete item;
+		item = NULL;
+
+		// Remove reference to old item
+		widgetHierarchyMap.erase( oldid );
+
+		// Add new item
+		item = new QTreeWidgetItem();
+		item->setData( 0, Qt::DisplayRole, id );
+		item->setSelected( true );
+		newParent->addChild( item );
+		newParent->setExpanded( true );
 	}
 
 	void WidgetHierarchy::getCurrentGroup( QString &g )
