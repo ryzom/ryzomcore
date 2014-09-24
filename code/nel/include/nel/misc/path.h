@@ -74,6 +74,9 @@ public:
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
 	void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+	
+	/** Sale but for .snp (Streamed NeL Package) */
+	void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
 	void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
@@ -370,6 +373,9 @@ public:
 
 	/** Same as AddSearchPath but with a big file "c:/test.nbf" all files name contained in the big file will be included  (the extention (Nel Big File) is used to know that it's a big file) */
 	static void			addSearchBigFile (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
+
+	/** Same but Streamed Package */
+	static void			addSearchStreamedPackage (const std::string &filename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);
 
 	/** Same as AddSearchPath but with a xml pack file "c:/test.xml_pack" all files name contained in the xml pack will be included   */
 	static void			addSearchXmlpackFile (const std::string &sXmlpackFilename, bool recurse, bool alternative, class NLMISC::IProgressCallback *progressCallBack = NULL);

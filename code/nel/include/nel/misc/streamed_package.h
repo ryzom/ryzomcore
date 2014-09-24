@@ -17,6 +17,7 @@
 #ifndef NLMISC_STREAMED_PACKAGE_H
 #define NLMISC_STREAMED_PACKAGE_H
 
+#include <nel/misc/types_nl.h>
 #include <nel/misc/sha1.h>
 
 namespace NLMISC {

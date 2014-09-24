@@ -23,6 +23,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/xml_pack.h"
+#include "nel/misc/streamed_package_manager.h"
 
 #ifndef NL_OS_WINDOWS
 #include <errno.h>
@@ -201,6 +202,39 @@ bool		CIFile::open(const std::string &path, bool text)
 			{
 				bool	dummy;
 				_F = CXMLPack::getInstance().getFile (path, _FileSize, _BigFileOffset, dummy, _AlwaysOpened);
+			}
+		}
+		else if (pos > 3 && path[pos-3] == 's' && path[pos-2] == 'n' && path[pos-1] == 'p')
+		{
+			nldebug("Opening a streamed package file");
+
+			_IsInXMLPackFile = false;
+			_IsInBigFile = false;
+			_BigFileOffset = 0;
+			_AlwaysOpened = false;
+			std::string filePath;
+			if (CStreamedPackageManager::getInstance().getFile (filePath, path))
+			{
+				_F = fopen (filePath.c_str(), mode);
+				if (_F != NULL)
+				{
+					_FileSize=CFile::getFileSize(_F);
+					if (_FileSize == 0)
+					{
+						nlwarning("FILE: Size of file '%s' is 0", path.c_str());
+						fclose(_F);
+						_F = NULL;
+					}
+				}
+				else
+				{
+					nlwarning("Failed to open file '%s', error %u : %s", path.c_str(), errno, strerror(errno));
+					_FileSize = 0;
+				}
+			}
+			else
+			{
+				nlerror("File '%s' not in streamed package", path.c_str());
 			}
 		}
 		else

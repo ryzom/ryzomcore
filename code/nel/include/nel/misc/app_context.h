@@ -229,6 +229,20 @@ namespace NLMISC
 		} \
 	private:
 
+#define NLMISC_SAFE_RELEASABLE_SINGLETON_DECL(className) \
+	NLMISC_SAFE_SINGLETON_DECL(className); \
+	\
+	void className::releaseInstance() \
+	{ \
+		if (_Instance) \
+		{ \
+			NLMISC::INelContext::getInstance().releaseSingletonPointer(#className, _Instance); \
+			delete _Instance; \
+			_Instance = NULL; \
+		} \
+	} \
+
+
 	/** The same as above, but generate a getInstance method that
 	 *	return a pointer instead of a reference
 	 */
@@ -296,5 +310,6 @@ void initNelLibrary(CLibrary &lib);
 
 } // namespace NLMISC
 
+#include <nel/misc/debug.h>
 
 #endif //APP_CONTEXT_H
