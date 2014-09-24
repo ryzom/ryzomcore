@@ -1036,6 +1036,8 @@ namespace NLGUI
 		setCapturePointerLeft(NULL);
 		setCapturePointerRight(NULL);
 		_CapturedView = NULL;
+
+		_OrphanElements.clear();
 		
 		resetColorProps();
 		resetAlphaRolloverSpeedProps();
@@ -2039,6 +2041,15 @@ namespace NLGUI
 						}
 					}
 
+					std::vector< NLMISC::CRefPtr< CInterfaceElement > >::iterator oeitr = _OrphanElements.begin();
+					while( oeitr != _OrphanElements.end() )
+					{
+						CInterfaceElement *e = *oeitr;
+						CViewBase *v = dynamic_cast< CViewBase* >( e );
+						v->draw();
+						++oeitr;
+					}
+
 					if( draggedElement != NULL )
 					{
 						CInterfaceElement *e = draggedElement;
@@ -2657,7 +2668,11 @@ namespace NLGUI
 
 	void CWidgetManager::stopDragging()
 	{
-		draggedElement = NULL;
+		if( draggedElement != NULL )
+		{
+			_OrphanElements.push_back( draggedElement );
+			draggedElement = NULL;
+		}
 	}
 	
 	// ------------------------------------------------------------------------------------------------
@@ -3454,6 +3469,8 @@ namespace NLGUI
 
 	CWidgetManager::~CWidgetManager()
 	{
+		_OrphanElements.clear();
+
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
 		{
 			delete _MasterGroups[i].Group;
