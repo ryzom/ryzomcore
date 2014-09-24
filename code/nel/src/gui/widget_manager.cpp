@@ -2673,7 +2673,24 @@ namespace NLGUI
 	{
 		if( draggedElement != NULL )
 		{
-			_OrphanElements.push_back( draggedElement );
+			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
+
+			if( g != NULL )
+			{
+				CInterfaceElement *e = draggedElement;
+				e->setName( "=MARKED=" );
+				e->setParent( g );
+				e->setIdRecurse( e->getShortId() );
+				g->addElement( e );
+
+				e->setParentPos( g );
+				e->setParentSize( g );
+
+				checkCoords();
+			}
+			else
+				_OrphanElements.push_back( draggedElement );
+
 			draggedElement = NULL;
 		}
 	}

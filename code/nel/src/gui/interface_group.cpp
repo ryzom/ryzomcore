@@ -912,6 +912,31 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::addElement (CInterfaceElement *child, sint eltOrder /*= -1*/)
+	{
+		if (!child)
+		{
+			nlwarning("<CInterfaceGroup::addView> : tried to add a NULL view");
+			return;
+		}
+
+		if( child->isGroup() )
+		{
+			addGroup( static_cast< CInterfaceGroup* >( child ), eltOrder );
+		}
+		else
+		if( child->isCtrl() )
+		{
+			addCtrl( static_cast< CCtrlBase* >( child ), eltOrder );
+		}
+		else
+		if( child->isView() )
+		{
+			addView( static_cast< CViewBase* >( child ), eltOrder );
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::addView (CViewBase *child, sint eltOrder /*= -1*/)
 	{
 		if (!child)
@@ -1312,6 +1337,11 @@ namespace NLGUI
 			for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 			{
 				CViewBase *pVB = *ite;
+				if( pVB->getName() == "=MARKED=" )
+				{
+					nlinfo( "=MARKED=" );
+				}
+
 				if (pVB->getActive())
 					pVB->draw();
 			}

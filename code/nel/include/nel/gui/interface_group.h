@@ -57,6 +57,7 @@ namespace NLGUI
 		CInterfaceElement* findFromShortId(const std::string &id);
 
 		/// Dynamic creation
+		virtual void addElement (CInterfaceElement *child, sint eltOrder = -1 );
 		virtual void addView  (CViewBase *child , sint eltOrder = -1);
 		virtual void addCtrl  (CCtrlBase *child, sint eltOrder = -1);
 		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
