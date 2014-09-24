@@ -1736,7 +1736,6 @@ void CFileContainer::memoryCompress()
 	while (it != _Files.end())
 	{
 		string sTmp = SSMpath.get(it->second.idPath);
-		nldebug("A: %s", sTmp.c_str());
 		if ((sTmp.find("@@") == string::npos) && (sTmp.find('@') != string::npos) && (sTmp.find("snp@") == string::npos) && !it->second.Remapped)
 		{
 			// This is a file included in a bigfile (so the name is in the bigfile manager)
@@ -1760,7 +1759,6 @@ void CFileContainer::memoryCompress()
 	{
 		CFileEntry &rFE = it->second;
 		string sTmp = SSMpath.get(rFE.idPath);
-		nldebug("B: %s", sTmp.c_str());
 		if ((sTmp.find("@") == string::npos) || (sTmp.find("@@") != string::npos) || (sTmp.find("snp@") != string::npos) || rFE.Remapped)
 		{
 			strcpy(_AllFileNames+nSize, rFE.Name.c_str());
@@ -1786,12 +1784,8 @@ void CFileContainer::memoryCompress()
 		it++;
 	}
 
-	nldebug("Passed");
-
 	contReset(_Files);
 	_MemoryCompressed = true;
-
-	nldebug("Done");
 }
 
 void CPath::memoryUncompress()
