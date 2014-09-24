@@ -2410,20 +2410,45 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
-					// Take the top most control.
-					uint nMaxDepth = 0;
-					const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
-					for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+
+					if( CInterfaceElement::getEditorMode() )
 					{
-						CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
-						if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+						std::vector< NLMISC::CRefPtr< CInterfaceElement > >::reverse_iterator itr = _OrphanElements.rbegin();
+						while( itr != _OrphanElements.rend() )
 						{
-							uint d = ctrl->getDepth( pNewCurrentWnd );
-							if (d > nMaxDepth)
+							CInterfaceElement *e = *itr;
+
+							int x = getPointer()->getXReal();
+							int y = getPointer()->getYReal();
+
+							if( e->isIn( x, y ) )
 							{
-								nMaxDepth = d;
-								setCapturePointerLeft( ctrl );
+								_CapturedView = static_cast< CViewBase* >( e );
 								captured = true;
+								break;
+							}
+
+							++itr;
+						}
+					}
+
+					if( !captured )
+					{
+						// Take the top most control.
+						uint nMaxDepth = 0;
+						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+						{
+							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+							{
+								uint d = ctrl->getDepth( pNewCurrentWnd );
+								if (d > nMaxDepth)
+								{
+									nMaxDepth = d;
+									setCapturePointerLeft( ctrl );
+									captured = true;
+								}
 							}
 						}
 					}
@@ -2674,22 +2699,21 @@ namespace NLGUI
 		if( draggedElement != NULL )
 		{
 			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
+			CInterfaceElement *e = draggedElement;
+			
+			e->setParent( g );
+			e->setIdRecurse( e->getShortId() );
+			e->setParentPos( g );
+			e->setParentSize( g );
 
 			if( g != NULL )
 			{
-				CInterfaceElement *e = draggedElement;
-				e->setName( "=MARKED=" );
-				e->setParent( g );
-				e->setIdRecurse( e->getShortId() );
 				g->addElement( e );
-
-				e->setParentPos( g );
-				e->setParentSize( g );
-
-				checkCoords();
 			}
 			else
 				_OrphanElements.push_back( draggedElement );
+
+			checkCoords();
 
 			draggedElement = NULL;
 		}
