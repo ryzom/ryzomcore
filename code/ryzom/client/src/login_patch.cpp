@@ -1176,9 +1176,31 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 			std::string unpackTo = category.getUnpackTo();
 
-			if (unpackTo.substr(0, 2) == "./")
+			if (unpackTo == "0")
+			{
+				nlwarning("BUG: unpackTo == '0'");
+				unpackTo = ClientRootPath;
+				category.setUnpackTo(unpackTo);
+			}
+			else if (unpackTo.substr(0, 2) == "./")
 			{
 				unpackTo = ClientRootPath + unpackTo.substr(2);
+				category.setUnpackTo(unpackTo);
+			}
+		}
+	}
+	else
+	{
+		for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
+		{
+			CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
+
+			std::string unpackTo = category.getUnpackTo();
+
+			if (unpackTo == "0")
+			{
+				nlwarning("BUG: unpackTo == '0'");
+				unpackTo = "./";
 				category.setUnpackTo(unpackTo);
 			}
 		}
@@ -1884,29 +1906,36 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 			if (out != NULL)
 			{
 				nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
-				uint8 *ptr = new uint8[rBNPFile.Size];
+				if (rBNPFile.Size)
+				{
+					uint8 *ptr = new uint8[rBNPFile.Size];
 
-				if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
-				{
-					fclose(out);
-					return false;
-				}
+					if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
+					{
+						fclose(out);
+						return false;
+					}
 
-				bool writeError = fwrite (ptr, rBNPFile.Size, 1, out) != 1;
-				if (writeError)
-				{
-					nlwarning("errno = %d", errno);
+					bool writeError = fwrite (ptr, rBNPFile.Size, 1, out) != 1;
+					if (writeError)
+					{
+						nlwarning("errno = %d", errno);
+					}
+					bool diskFull = ferror(out) && errno == 28 /* ENOSPC*/;
+					fclose (out);
+					delete [] ptr;
+					if (diskFull)
+					{
+						throw NLMISC::EDiskFullError(filename);
+					}
+					if (writeError)
+					{
+						throw NLMISC::EWriteError(filename);
+					}
 				}
-				bool diskFull = ferror(out) && errno == 28 /* ENOSPC*/;
-				fclose (out);
-				delete [] ptr;
-				if (diskFull)
+				else
 				{
-					throw NLMISC::EDiskFullError(filename);
-				}
-				if (writeError)
-				{
-					throw NLMISC::EWriteError(filename);
+					fclose (out);
 				}
 			}
 		}

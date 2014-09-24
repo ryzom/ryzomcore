@@ -330,13 +330,16 @@ void unpack (const string &dirName)
 		if (out != NULL)
 		{
 			nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
-			uint8 *ptr = new uint8[rBNPFile.Size];
-			if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
-				nlwarning("%s read error", filename.c_str());
-			if (fwrite (ptr, rBNPFile.Size, 1, out) != 1)
-				nlwarning("%s write error", filename.c_str());
+			if (rBNPFile.Size)
+			{
+				uint8 *ptr = new uint8[rBNPFile.Size];
+				if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
+					nlwarning("%s read error", filename.c_str());
+				if (fwrite (ptr, rBNPFile.Size, 1, out) != 1)
+					nlwarning("%s write error", filename.c_str());
+				delete [] ptr;
+			}
 			fclose (out);
-			delete [] ptr;
 		}
 	}
 	fclose (bnp);
