@@ -206,7 +206,7 @@ bool		CIFile::open(const std::string &path, bool text)
 		}
 		else if (pos > 3 && path[pos-3] == 's' && path[pos-2] == 'n' && path[pos-1] == 'p')
 		{
-			nldebug("Opening a streamed package file");
+			// nldebug("Opening a streamed package file");
 
 			_IsInXMLPackFile = false;
 			_IsInBigFile = false;

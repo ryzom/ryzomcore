@@ -95,7 +95,7 @@ void CStreamedPackageManager::unloadAll()
 
 bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &fileName)
 {
-	nldebug("Get file path for streamed file '%s'", fileName.c_str());
+	// nldebug("Get file path for streamed file '%s'", fileName.c_str());
 
 	TEntries::iterator it = m_Entries.find(fileName);
 	if (it == m_Entries.end())
