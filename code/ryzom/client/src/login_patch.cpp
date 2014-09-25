@@ -1176,31 +1176,9 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 			std::string unpackTo = category.getUnpackTo();
 
-			if (unpackTo == "0")
-			{
-				nlwarning("BUG: unpackTo == '0'");
-				unpackTo = ClientRootPath;
-				category.setUnpackTo(unpackTo);
-			}
-			else if (unpackTo.substr(0, 2) == "./")
+			if (unpackTo.substr(0, 2) == "./")
 			{
 				unpackTo = ClientRootPath + unpackTo.substr(2);
-				category.setUnpackTo(unpackTo);
-			}
-		}
-	}
-	else
-	{
-		for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
-		{
-			CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
-
-			std::string unpackTo = category.getUnpackTo();
-
-			if (unpackTo == "0")
-			{
-				nlwarning("BUG: unpackTo == '0'");
-				unpackTo = "./";
 				category.setUnpackTo(unpackTo);
 			}
 		}

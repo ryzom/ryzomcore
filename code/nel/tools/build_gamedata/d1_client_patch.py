@@ -91,6 +91,9 @@ else:
 					inCategories = 1
 					cfg.write("\t<_Categories>\n")
 					for category in InstallClientData:
+						packExt = ".bnp"
+						if (category["StreamedPackages"]):
+							packExt = ".snp"
 						cfg.write("\t\t<_Category>\n")
 						cfg.write("\t\t\t<_Name type=\"STRING\" value=\"" + category["Name"] + "\"/>\n")
 						if category["UnpackTo"] != None:
@@ -104,7 +107,7 @@ else:
 							if (len(package[1]) > 0):
 								cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[1][0] + "\"/>\n")
 							else:
-								cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[0] + ".bnp\"/>\n")
+								cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + package[0] + packExt + "\"/>\n")
 						for ref in category["Refs"]:
 							cfg.write("\t\t\t<_Files type=\"STRING\" value=\"" + ref + "_.ref\"/>\n")
 						cfg.write("\t\t</_Category>\n")
