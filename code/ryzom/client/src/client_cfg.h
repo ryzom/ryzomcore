@@ -360,6 +360,10 @@ struct CClientConfig
 	std::vector<string>			DataPath;
 	/// Data Path no recurse.
 	std::vector<string>			DataPathNoRecurse;
+	/// Streamed package path
+	std::string					StreamedPackagePath;
+	/// Streamed package hosts
+	std::vector<string>			StreamedPackageHosts; // TODO: From 'domain' SQL table
 	/// Update packed sheet Path.
 	std::vector<string>			UpdatePackedSheetPath;
 	/// True if we want the packed sheet to be updated if needed

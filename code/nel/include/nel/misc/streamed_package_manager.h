@@ -31,7 +31,6 @@ public:
 	CStreamedPackageManager();
 	~CStreamedPackageManager();
 
-	/// Loads a package into the package manager
 	/// package: ex. /games/nel/data/characters_maps_hr.snp
 	bool loadPackage(const std::string &package);
 
@@ -49,9 +48,20 @@ public:
 	/// Get file size
 	bool getFileSize(uint32 &fileSize, const std::string &fileName);
 
+public:
+	/// Set storage path (ex. stream/)
+	std::string Path;
+
+	/// Loads a package into the package manager (ex. http://patch.live.polyverse.org/stream/)
+	typedef std::vector<std::string> THosts;
+	THosts Hosts;
+
 private:
-	std::map<std::string, CStreamedPackage> m_Packages;
-	std::map<std::string, const CStreamedPackage::CEntry *> m_Entries;
+	typedef std::map<std::string, CStreamedPackage> TPackages;
+	TPackages m_Packages;
+
+	typedef std::map<std::string, const CStreamedPackage::CEntry *> TEntries;
+	TEntries m_Entries;
 	
 }; /* class CStreamedPackageManager */
 

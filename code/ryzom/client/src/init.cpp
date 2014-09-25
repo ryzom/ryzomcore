@@ -34,6 +34,7 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/streamed_package_manager.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -664,6 +665,14 @@ void initStereoDisplayDevice()
 	IStereoDisplay::releaseUnusedLibraries();
 }
 
+void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
+{
+	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
+	spm.Path = replaceApplicationDirToken(ClientCfg.StreamedPackagePath);
+	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
+		spm.Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
+}
+
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -848,6 +857,7 @@ void prelogInit()
 		CPath::remapExtension ("png", "tga", true);
 		FPU_CHECKER_ONCE
 
+		initStreamedPackageManager(ProgressBar);
 		addPreDataPaths(ProgressBar);
 
 		FPU_CHECKER_ONCE

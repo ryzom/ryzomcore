@@ -342,7 +342,7 @@ void CFileContainer::remapExtension (const string &ext1, const string &ext2, boo
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): can't remap empty extension", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
 
-	if (ext1lwr == "bnp" || ext2lwr == "bnp")
+	if (ext1lwr == "bnp" || ext2lwr == "bnp" || ext1lwr == "snp" || ext2lwr == "snp")
 	{
 		nlwarning ("PATH: CPath::remapExtension(%s, %s, %d): you can't remap a big file", ext1lwr.c_str(), ext2lwr.c_str(), substitute);
 	}
@@ -1445,6 +1445,18 @@ void CFileContainer::addSearchStreamedPackage (const string &filename, bool recu
 			std::string filePackageName = packname + "@" + (*it);
 			nldebug("Insert '%s'", filePackageName.c_str());
 			insertFileInMap((*it), filePackageName, false, CFile::getExtension(*it));
+
+			// Remapped extensions
+			std::string ext = CFile::getExtension(*it);
+			for (uint j = 0; j < _Extensions.size (); j++)
+			{
+				if (_Extensions[j].first == ext)
+				{
+					// Need to remap
+					insertFileInMap(CFile::getFilenameWithoutExtension(*it) + "." + _Extensions[j].second,
+						filePackageName, true, _Extensions[j].first);
+				}
+			}
 		}
 	}
 }

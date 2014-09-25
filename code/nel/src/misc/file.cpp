@@ -234,6 +234,7 @@ bool		CIFile::open(const std::string &path, bool text)
 			}
 			else
 			{
+				// TEMPORARY ERROR
 				nlerror("File '%s' not in streamed package", path.c_str());
 			}
 		}

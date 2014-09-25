@@ -97,7 +97,7 @@ else:
 							if category["UnpackTo"] != "":
 								cfg.write("\t\t\t<_UnpackTo type=\"STRING\" value=\"./" + category["UnpackTo"] + "/\"/>\n")
 							else:
-								cfg.write("\t\t\t<_UnpackTo type=\"SINT32\" value=\"./\"/>\n")
+								cfg.write("\t\t\t<_UnpackTo type=\"STRING\" value=\"./\"/>\n")
 						cfg.write("\t\t\t<_IsOptional type=\"SINT32\" value=\"" + str(category["IsOptional"]) + "\"/>\n")
 						cfg.write("\t\t\t<_IsIncremental type=\"SINT32\" value=\"" + str(category["IsIncremental"]) + "\"/>\n")
 						for package in category["Packages"]:
@@ -148,7 +148,7 @@ else:
 					os.chdir(cwDir)
 				else:
 					printLog(log, "BNP " + targetBnp)
-					subprocess.call([ BnpMake, "/p", sourcePath, targetPath, targetBnp ] + package[1])
+					subprocess.call([ BnpMake, "/p", sourcePath, targetPath ] + package[1])
 			else:
 				printLog(log, "SKIP " + targetBnp)
 	printLog(log, "")
