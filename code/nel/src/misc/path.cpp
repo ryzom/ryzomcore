@@ -1443,7 +1443,7 @@ void CFileContainer::addSearchStreamedPackage (const string &filename, bool recu
 		{
 			// Add the file to the lookup
 			std::string filePackageName = packname + "@" + (*it);
-			nldebug("Insert '%s'", filePackageName.c_str());
+			// nldebug("Insert '%s'", filePackageName.c_str());
 			insertFileInMap((*it), filePackageName, false, CFile::getExtension(*it));
 
 			// Remapped extensions

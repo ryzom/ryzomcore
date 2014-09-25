@@ -75,7 +75,7 @@ bool CStreamedPackageManager::loadPackage(const std::string &package)
 
 void CStreamedPackageManager::list(std::vector<std::string> &fileNames, const std::string &package)
 {
-	nldebug("List package '%s'", package.c_str());
+	// nldebug("List package '%s'", package.c_str());
 
 	std::map<std::string, CStreamedPackage>::iterator it = m_Packages.find(package);
 	CStreamedPackage &p = it->second;
