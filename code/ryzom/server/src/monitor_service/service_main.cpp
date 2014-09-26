@@ -20,7 +20,7 @@
 
 #include "game_share/tick_event_handler.h"
 #include "game_share/ryzom_version.h"
-#include "game_share/ccrypt.h"
+#include "game_share/crypt.h"
 #include "nel/misc/time_nl.h"
 
 #include "client.h"
