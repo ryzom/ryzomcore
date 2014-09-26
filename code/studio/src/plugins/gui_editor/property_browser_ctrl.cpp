@@ -518,13 +518,12 @@ namespace GUIEditor
 			return;
 		std::string type = itr->second;
 
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e == NULL )
+			return;
 
 		if( type == "button_type" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v;
 			v = NelButtonType::toString( value );
 			if( v.empty() )
@@ -535,10 +534,6 @@ namespace GUIEditor
 		else
 		if( type == "text_justification" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v;
 			v = NelTxtJustification::toString( value );
 			if( v.empty() )
@@ -549,10 +544,6 @@ namespace GUIEditor
 		else
 		if( type == "posref" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelPosRef::toString( value );
 			if( v.empty() )
 				return;
@@ -562,10 +553,6 @@ namespace GUIEditor
 		else
 		if( type == "posreftt" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelPosRefTT::toString( value );
 			if( v.empty() )
 				return;
@@ -612,10 +599,6 @@ namespace GUIEditor
 		else
 		if( type == "tooltip_parent" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelTTParent::toString( value );
 			if( v.empty() )
 				return;
@@ -625,10 +608,6 @@ namespace GUIEditor
 		else
 		if( type == "bitmap_align" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelBMAlign::toString( value );
 			if( v.empty() )
 				return;
@@ -637,13 +616,9 @@ namespace GUIEditor
 		}
 
 
-		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-		if( e != NULL )
-		{
-			CInterfaceGroup *g = e->getParent();
-			if( g != NULL )
-				g->updateCoords();
-		}
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 
 	}
 
