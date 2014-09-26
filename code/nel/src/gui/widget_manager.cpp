@@ -2539,6 +2539,12 @@ namespace NLGUI
 			{
 				if ( getCapturePointerLeft() != NULL)
 				{
+					if( !handled )
+					{
+						CCtrlBase *c = getCapturePointerLeft();
+						c->handleEvent( evnt );
+					}
+
 					setCapturePointerLeft(NULL);
 					handled = true;
 				}

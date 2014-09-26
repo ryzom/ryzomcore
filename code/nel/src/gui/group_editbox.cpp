@@ -1320,6 +1320,16 @@ namespace NLGUI
 				}
 			}
 
+			// if click, and not frozen, then get the focus
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
+			{
+				_SelectingText = false;
+				if (_SelectCursorPos == _CursorPos)
+					_CurrSelection = NULL;
+				
+				return true;
+			}
+
 			if (!isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
@@ -1329,6 +1339,7 @@ namespace NLGUI
 				_SelectingText = true;
 				stopParentBlink();
 				CWidgetManager::getInstance()->setCaptureKeyboard (this);
+				CWidgetManager::getInstance()->setCapturePointerLeft (this);
 				// set the right cursor position
 				uint newCurPos;
 				bool cursorAtPreviousLineEnd;
@@ -1353,16 +1364,6 @@ namespace NLGUI
 				_SelectCursorPos = newCurPos;
 				_SelectCursorPos -= (sint32)_Prompt.length();
 				_SelectCursorPos = std::max(_SelectCursorPos, sint32(0));
-				return true;
-			}
-
-			// if click, and not frozen, then get the focus
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
-			{
-				_SelectingText = false;
-				if (_SelectCursorPos == _CursorPos)
-					_CurrSelection = NULL;
-				
 				return true;
 			}
 
