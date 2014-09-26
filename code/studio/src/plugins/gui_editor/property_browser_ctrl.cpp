@@ -493,6 +493,10 @@ namespace GUIEditor
 		if( e == NULL )
 			return;
 		e->setProperty( propName.toUtf8().constData(), propValue.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 		
 		
 		// Make sure the changes are applied
@@ -631,6 +635,16 @@ namespace GUIEditor
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+
+
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e != NULL )
+		{
+			CInterfaceGroup *g = e->getParent();
+			if( g != NULL )
+				g->updateCoords();
+		}
+
 	}
 
 
@@ -643,6 +657,10 @@ namespace GUIEditor
 			return;
 		
 		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 	}
 
 	void CPropBrowserCtrl::onTexturePropertyChanged( QtProperty *p, const QString &v )
@@ -654,6 +672,10 @@ namespace GUIEditor
 			return;
 		
 		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
