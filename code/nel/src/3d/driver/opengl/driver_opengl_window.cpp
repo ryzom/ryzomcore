@@ -1851,6 +1851,9 @@ bool CDriverGL::setMode(const GfxMode& mode)
 #if defined(NL_OS_WINDOWS)
 	// save relative cursor
 	POINT cursorPos;
+	cursorPos.x = 0;
+	cursorPos.y = 0;
+
 	BOOL cursorPosOk = isSystemCursorInClientArea()
 		&& GetCursorPos(&cursorPos)
 		&& ScreenToClient(_win, &cursorPos);
