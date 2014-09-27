@@ -23,6 +23,7 @@
 #include "nel/gui/group_container_base.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_factory.h"
 #include "nel/misc/i18n.h"
 
 using namespace std;
@@ -904,7 +905,7 @@ namespace NLGUI
 
 		if( _ViewText == NULL )
 		{
-			CViewBase *v = CWidgetManager::getInstance()->getParser()->createClass( "text" );
+			CViewBase *v = CInterfaceFactory::createClass( "text" );
 			nlassert( v != NULL );
 			_ViewText = dynamic_cast< CViewText* >( v );
 			_ViewText->setId( _Id + "_text" );
