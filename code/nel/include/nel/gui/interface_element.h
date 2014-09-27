@@ -510,6 +510,14 @@ namespace NLGUI
 		/// so other widgets in the group can check if it belongs to them
 		virtual void onWidgetDeleted( CInterfaceElement *e ){}
 
+		/// Move the element by x in the X direction and y in the Y direction
+		//  Uses real coordinates
+		virtual void moveBy( sint32 x, sint32 y )
+		{
+			_XReal += x;
+			_YReal += y;
+		}
+
 	protected:
 
 		bool editorSelected;

@@ -863,10 +863,6 @@ namespace NLGUI
 			if(getFrozen() && getFrozenHalfTone())
 				_ViewText->setAlpha(_ViewText->getAlpha()>>2);
 
-			// When dragging the button, the text needs to move too
-			if( CInterfaceElement::editorMode )
-				_ViewText->updateCoords();
-
 			_ViewText->draw();
 		}
 	}
@@ -1016,6 +1012,14 @@ namespace NLGUI
 
 	void CCtrlTextButton::onWidgetDeleted( CInterfaceElement *e )
 	{
+	}
+
+	void CCtrlTextButton::moveBy( sint32 x, sint32 y )
+	{
+		CInterfaceElement::moveBy( x, y );
+
+		if( _ViewText != NULL )
+			_ViewText->updateCoords();
 	}
 }
 

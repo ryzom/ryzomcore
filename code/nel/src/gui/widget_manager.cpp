@@ -2633,9 +2633,7 @@ namespace NLGUI
 				sint32 dx = newX - oldX;
 				sint32 dy = newY - oldY;
 
-				draggedElement->setXReal( draggedElement->getXReal() + dx );
-				draggedElement->setYReal( draggedElement->getYReal() + dy );
-				draggedElement->invalidateCoords();
+				draggedElement->moveBy( dx, dy );
 			}
 		}
 
