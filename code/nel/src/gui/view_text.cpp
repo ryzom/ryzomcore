@@ -1814,9 +1814,18 @@ namespace NLGUI
 		if (_AutoClamp)
 		{
 			CViewBase::updateCoords ();
-			if (_Parent)
+
+			// If there's no parent, try the parent of the parent element.
+			// Since we will be under the same group
+			CInterfaceGroup *parent = _Parent;
+			if( parent == NULL )
 			{
-				CInterfaceGroup *parent = _Parent;
+				if( _ParentElm != NULL )
+					parent = _ParentElm->getParent();
+			}
+
+			if (parent)
+			{
 				// avoid resizing parents to compute the limiter
 				while (parent && (parent->getResizeFromChildW() || parent->isGroupList() ))
 				{

@@ -66,8 +66,6 @@ namespace NLGUI
 	{
 		if( _ViewText != NULL )
 		{
-			if( _Parent != NULL )
-				_Parent->delView( _ViewText, true );
 			delete _ViewText;
 			_ViewText = NULL;
 		}
@@ -569,6 +567,7 @@ namespace NLGUI
 			((CViewTextID*)_ViewText)->parseTextIdOptions(cur);
 		// Same RenderLayer as us.
 		_ViewText->setRenderLayer(getRenderLayer());
+		_ViewText->setParentElm(this);
 		// Parse the hardText (if not text id)
 		if(!_IsViewTextId)
 		{
@@ -863,6 +862,12 @@ namespace NLGUI
 			}
 			if(getFrozen() && getFrozenHalfTone())
 				_ViewText->setAlpha(_ViewText->getAlpha()>>2);
+
+			// When dragging the button, the text needs to move too
+			if( CInterfaceElement::editorMode )
+				_ViewText->updateCoords();
+
+			_ViewText->draw();
 		}
 	}
 
@@ -872,6 +877,8 @@ namespace NLGUI
 	{
 		// Should have been setuped with addCtrl
 		nlassert(_Setuped);
+
+		_ViewText->updateCoords();
 
 		// Compute Size according to bitmap and Text.
 		if (!(_SizeRef & 1))
@@ -910,15 +917,13 @@ namespace NLGUI
 		}
 
 		// setup the viewText and add to parent
-		_ViewText->setParent (getParent());
+		_ViewText->setParentElm (this);
 		_ViewText->setParentPos (this);
 		_ViewText->setParentPosRef (_TextParentPosRef);
 		_ViewText->setPosRef (_TextPosRef);
 		_ViewText->setActive(_Active);
 		_ViewText->setX(_TextX);
 		_ViewText->setY(_TextY);
-
-		getParent()->addView(_ViewText);
 	}
 
 	// ***************************************************************************
@@ -1007,17 +1012,10 @@ namespace NLGUI
 	// ***************************************************************************
 	void CCtrlTextButton::onRemoved()
 	{
-		if( _ViewText != NULL )
-		{
-			if( _Parent != NULL )
-				_Parent->delView( _ViewText, true );
-		}
 	}
 
 	void CCtrlTextButton::onWidgetDeleted( CInterfaceElement *e )
 	{
-		if( e == _ViewText )
-			_ViewText = NULL;
 	}
 }
 

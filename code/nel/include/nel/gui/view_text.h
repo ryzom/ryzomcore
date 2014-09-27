@@ -202,7 +202,11 @@ namespace NLGUI
 		REFLECT_EXPORT_END
 
 
-			virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f);
+
+		// Sets the parent element
+		// See the comment at the field
+		void setParentElm( CInterfaceElement *parent ){ _ParentElm = parent; }
 
 	protected:
 		std::string _HardtextFormat;
@@ -379,6 +383,9 @@ namespace NLGUI
 		/// Dynamic tooltips
 		std::vector<CCtrlToolTip*>	_Tooltips;
 
+		// Parent element is the element where this text belongs to
+		// For example: text button
+		CInterfaceElement *_ParentElm;
 
 	private:
 		void setup ();
