@@ -279,13 +279,15 @@ namespace GUIEditor
 
 		// Remove reference to old item
 		widgetHierarchyMap.erase( oldid );
-
+		
 		// Add new item
 		item = new QTreeWidgetItem();
 		item->setData( 0, Qt::DisplayRole, id );
 		item->setSelected( true );
 		newParent->addChild( item );
-		
+
+		// Add reference to new item
+		widgetHierarchyMap[ newid ] = item;
 
 		selectItem( item );
 	}
