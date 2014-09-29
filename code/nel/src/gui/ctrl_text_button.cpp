@@ -875,7 +875,8 @@ namespace NLGUI
 		// Should have been setuped with addCtrl
 		nlassert(_Setuped);
 
-		_ViewText->updateCoords();
+		if( _Name == "==MARKED==" )
+			bool marked = true;
 
 		// Compute Size according to bitmap and Text.
 		if (!(_SizeRef & 1))
@@ -890,6 +891,8 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
+
+		_ViewText->updateCoords();
 	}
 
 	// ***************************************************************************
