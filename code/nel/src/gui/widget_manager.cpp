@@ -2683,6 +2683,8 @@ namespace NLGUI
 			e->setParentSize( g );
 			g->addElement( e );
 
+			//e->setName( "==MARKED==" );
+
 			draggedElement = NULL;
 
 			onWidgetMoved( oldid, e->getId() );

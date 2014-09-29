@@ -226,13 +226,13 @@ namespace NLGUI
 		else
 		if( name == "posref" )
 		{
-			convertHotSpot( value.c_str() );
+			_PosRef = convertHotSpot( value.c_str() );
 			return;
 		}
 		else
 		if( name == "parentposref" )
 		{
-			convertHotSpot( value.c_str() );
+			_ParentPosRef = convertHotSpot( value.c_str() );
 		}
 		else
 		if( name == "sizeref" )
