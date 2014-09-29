@@ -2683,7 +2683,8 @@ namespace NLGUI
 			e->setParentSize( g );
 			g->addElement( e );
 
-			e->setName( "==MARKED==" );
+			e->alignTo( g );
+			//e->setName( "==MARKED==" );
 
 			draggedElement = NULL;
 

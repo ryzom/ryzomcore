@@ -1594,6 +1594,97 @@ namespace NLGUI
 		}
 	}
 
+	void CInterfaceElement::getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const
+	{
+		x = _XReal;
+		y = _YReal;
+
+		if( ( hs & Hotspot_Mx ) != 0 )
+			y += _HReal / 2;
+		else
+		if( ( hs & Hotspot_Tx ) != 0 )
+			y += _HReal;
+
+
+		if( ( hs & Hotspot_xM ) != 0 )
+			x += _WReal / 2;
+		else
+		if( ( hs & Hotspot_xR ) != 0 )
+			x += _WReal;
+	}
+
+	void CInterfaceElement::getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs )
+	{
+		/// Iterate over the following hotspots, calculate the distance and store the closest
+
+
+		static THotSpot hslist[] =
+		{
+			Hotspot_BL,
+			Hotspot_BR,
+			Hotspot_MM,
+			Hotspot_TL,
+			Hotspot_TR
+		};
+
+		int c = sizeof( hslist ) / sizeof( THotSpot );
+
+		int x,y,ox,oy,vx,vy;
+		float d;
+		float closestd = 9999999.0f;
+		THotSpot closestHS = Hotspot_TR;
+
+		for( int i = 0; i < c; i++ )
+		{
+			other->getHSCoords( hslist[ i ], ox, oy );
+			getHSCoords( hslist[ i ], x, y );
+
+			// Make a vector between the two hotspots
+			vx = x - ox;
+			vy = y - oy;
+
+			// Calculate length
+			d = sqrt( pow( vx, 2.0f ) + pow( vy, 2.0f ) );
+
+			// If these hotspots are the closest, store the hotspot
+			if( d < closestd )
+			{
+				closestd = d;
+				closestHS = hslist[ i ];
+			}
+		}
+
+		hs = closestHS;
+	}
+
+	void CInterfaceElement::alignTo( CInterfaceElement *other )
+	{
+		if( other == this )
+			return;
+
+		// Check which hotspot is the closest
+		THotSpot hs;
+		other->getClosestHotSpot( this, hs );
+
+		// Get the hotspot coordinates
+		sint32 x, y, ox, oy;
+		getHSCoords( hs, x, y );
+		other->getHSCoords( hs, ox, oy );
+
+		// Calculate the difference between the hotspot we found and our current position,
+		sint32 dx = ox - x;
+		sint32 dy = oy - y;
+
+		// This difference is our offset, so we remain in the same position
+		setX( -1 * dx );
+		setY( -1 * dy );
+
+		setPosRef( hs );
+		setParentPosRef( hs );
+
+		invalidateCoords();
+	}
+
 	CStringMapper* CStringShared::_UIStringMapper = NULL;
 
 

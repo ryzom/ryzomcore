@@ -518,6 +518,15 @@ namespace NLGUI
 			_YReal += y;
 		}
 
+		/// Retrieves the coordinates of the specified hotspot
+		void getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const;
+
+		/// Tells which hotspot is the closest to the specified element
+		void getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs );
+
+		/// Aligns the element to the other element specified
+		void alignTo( CInterfaceElement *other );
+
 	protected:
 
 		bool editorSelected;
