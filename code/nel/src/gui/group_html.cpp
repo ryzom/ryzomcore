@@ -1289,16 +1289,19 @@ namespace NLGUI
 							string name;
 							ucstring ucValue;
 							uint size = 120;
+							uint maxlength = 1024;
 							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
 								name = value[MY_HTML_INPUT_NAME];
 							if (present[MY_HTML_INPUT_SIZE] && value[MY_HTML_INPUT_SIZE])
 								fromString(value[MY_HTML_INPUT_SIZE], size);
 							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
 								ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
+							if (present[MY_HTML_INPUT_MAXLENGTH] && value[MY_HTML_INPUT_MAXLENGTH])
+								fromString(value[MY_HTML_INPUT_MAXLENGTH], maxlength);
 
 							string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
 							// Add the editbox
-							CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue);
+							CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
 							if (textArea)
 							{
 								// Add the text area to the form
@@ -1553,12 +1556,15 @@ namespace NLGUI
 					_TextAreaRow = 1;
 					_TextAreaCols = 10;
 					_TextAreaContent = "";
-					if (present[HTML_TEXTAREA_NAME] && value[HTML_TEXTAREA_NAME])
-						_TextAreaName = value[HTML_TEXTAREA_NAME];
-					if (present[HTML_TEXTAREA_ROWS] && value[HTML_TEXTAREA_ROWS])
-						fromString(value[HTML_TEXTAREA_ROWS], _TextAreaRow);
-					if (present[HTML_TEXTAREA_COLS] && value[HTML_TEXTAREA_COLS])
-						fromString(value[HTML_TEXTAREA_COLS], _TextAreaCols);
+					_TextAreaMaxLength = 1024;
+					if (present[MY_HTML_TEXTAREA_NAME] && value[MY_HTML_TEXTAREA_NAME])
+						_TextAreaName = value[MY_HTML_TEXTAREA_NAME];
+					if (present[MY_HTML_TEXTAREA_ROWS] && value[MY_HTML_TEXTAREA_ROWS])
+						fromString(value[MY_HTML_TEXTAREA_ROWS], _TextAreaRow);
+					if (present[MY_HTML_TEXTAREA_COLS] && value[MY_HTML_TEXTAREA_COLS])
+						fromString(value[MY_HTML_TEXTAREA_COLS], _TextAreaCols);
+					if (present[MY_HTML_TEXTAREA_MAXLENGTH] && value[MY_HTML_TEXTAREA_MAXLENGTH])
+						fromString(value[MY_HTML_TEXTAREA_MAXLENGTH], _TextAreaMaxLength);
 
 					_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
 					_TextArea = true;
@@ -1680,7 +1686,7 @@ namespace NLGUI
 	// 				nlinfo("textarea name '%s'", _TextAreaName.c_str());
 	// 				nlinfo("textarea %d %d", _TextAreaRow, _TextAreaCols);
 	// 				nlinfo("textarea content '%s'", _TextAreaContent.toUtf8().c_str());
-					CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent);
+					CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
 					if (textArea)
 					{
 						// Add the text area to the form
@@ -3258,7 +3264,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint /* rows */, uint cols, bool multiLine, const ucstring &content)
+	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint /* rows */, uint cols, bool multiLine, const ucstring &content, uint maxlength)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3280,7 +3286,8 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
-			templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", "1024"));
+			if (maxlength > 0)
+				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 
