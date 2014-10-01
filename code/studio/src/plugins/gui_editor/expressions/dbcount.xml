@@ -1,0 +1,8 @@
+<expression>
+<category>Database</category>
+<name>dbcount</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+</slots>
+</expression>

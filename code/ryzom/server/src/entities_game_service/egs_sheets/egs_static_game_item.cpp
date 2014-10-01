@@ -237,24 +237,12 @@ void SItemSpecialEffects::serial(class NLMISC::IStream &f)
 //--------------------------------------------------------------
 //						init()  
 //--------------------------------------------------------------
-void CStaticItem::init()
+void CStaticItem::init(bool doDelete)
 {
 	Family			= ITEMFAMILY::UNDEFINED;
 	Type			= ITEM_TYPE::UNDEFINED;
 	
-	Armor			= NULL;
-	MeleeWeapon		= NULL;
-	RangeWeapon		= NULL;
-	Ammo			= NULL;
-	Shield			= NULL;
-	TamingTool		= NULL;
-	Mp				= NULL;
-	GuildOption		= NULL;
-	Cosmetics		= NULL;
-	ItemServiceData	= NULL;
-	ConsumableItem	= NULL;
-	XpCatalyser		= NULL;
-	CommandTicket	= NULL;
+	clearPtrs(doDelete);
 
 	Skill			= SKILLS::unknown;
 	MinSkill		= 0;
@@ -287,9 +275,45 @@ void CStaticItem::init()
 	RequiredCharacQualityFactor = 0.0f;
 	RequiredCharacQualityOffset = 0;
 
-	ItemSpecialEffects = NULL;
 } // init //
 
+
+// ***************************************************************************
+void CStaticItem::clearPtrs(bool doDelete)
+{
+	if (doDelete)
+	{
+		delete Armor;
+		delete MeleeWeapon;
+		delete RangeWeapon;
+		delete Ammo;
+		delete Shield;
+		delete TamingTool;
+		delete Mp;
+		delete GuildOption;
+		delete Cosmetics;
+		delete ItemServiceData;
+		delete ConsumableItem;
+		delete XpCatalyser;
+		delete CommandTicket;
+		delete ItemSpecialEffects;
+	}
+
+	Armor			= NULL;
+	MeleeWeapon		= NULL;
+	RangeWeapon		= NULL;
+	Ammo			= NULL;
+	Shield			= NULL;
+	TamingTool		= NULL;
+	Mp				= NULL;
+	GuildOption		= NULL;
+	Cosmetics		= NULL;
+	ItemServiceData	= NULL;
+	ConsumableItem	= NULL;
+	XpCatalyser		= NULL;
+	CommandTicket	= NULL;
+	ItemSpecialEffects = NULL;
+}
 
 
 //--------------------------------------------------------------
@@ -297,6 +321,8 @@ void CStaticItem::init()
 //--------------------------------------------------------------
 CStaticItem::CStaticItem( const CStaticItem& itm )
 {
+	clearPtrs(false);
+
 	*this = itm;
 	if(itm.Armor)
 	{
@@ -1443,6 +1469,9 @@ void CStaticItem::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, 
 	if (form == NULL)
 		return;
 
+	// Clear pointers to previous data
+	clearPtrs(true);
+
 	// Get the root node, always exist
     UFormElm &root = form->getRootNode ();
 
@@ -1992,37 +2021,6 @@ float CStaticItem::getBaseWeight() const
 	}
 }
 #endif
-
-// ***************************************************************************
-void CStaticItem::clearPtrs(bool doDelete)
-{
-	if(doDelete)
-	{
-		if (Ammo != NULL )	delete Ammo;
-		if (Armor != NULL )	delete Armor;
-		if (MeleeWeapon != NULL )	delete MeleeWeapon;
-		if (RangeWeapon != NULL )	delete RangeWeapon;
-		if (Cosmetics != NULL )	delete Cosmetics;
-		if (Mp != NULL )	delete Mp;
-		if (GuildOption != NULL )	delete GuildOption;
-		if (Shield != NULL )	delete Shield;
-		if (TamingTool != NULL)	delete TamingTool;
-		if (ItemServiceData != NULL)	delete ItemServiceData;
-		if (CommandTicket != NULL)	delete CommandTicket;
-	}
-
-	Ammo = NULL;
-	Armor = NULL;
-	MeleeWeapon = NULL;
-	RangeWeapon = NULL;
-	Cosmetics = NULL;
-	Mp = NULL;
-	GuildOption = NULL;
-	Shield = NULL;
-	TamingTool = NULL;
-	ItemServiceData = NULL;
-	CommandTicket = NULL;
-}
 
 
 uint32 CStaticItem::getMaxStackSize() const

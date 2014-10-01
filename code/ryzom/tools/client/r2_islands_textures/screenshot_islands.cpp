@@ -1784,6 +1784,7 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 
 
 	// keep more filled eighth of circle
+	nlassert(!sortedHLS.empty()); // If it crashes here, you may be missing .zonel's.
 	itHLS = sortedHLS.begin();
 	uint h, s, v;
 	RGB2HSV(*itHLS, h, s, v);

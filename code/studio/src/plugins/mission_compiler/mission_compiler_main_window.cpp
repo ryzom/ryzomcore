@@ -484,6 +484,11 @@ void MissionCompilerMainWindow::saveConfig() {
 	settings->sync();
 }
 
+void MissionCompilerMainWindow::onActivated()
+{
+    NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
+}
+
 void MissionCompilerMainWindow::handleChangedSettings()
 {
 	QStringList servers;
