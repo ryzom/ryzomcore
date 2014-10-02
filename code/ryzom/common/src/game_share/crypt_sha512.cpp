@@ -11,18 +11,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
+#include <nel/misc/types_nl.h>
 
 /* public domain sha512 implementation based on fips180-3 */
 /* >=2^64 bits messages are not supported (about 2000 peta bytes) */
 
 struct sha512 {
-  uint64_t len;     /* processed message length */
-  uint64_t h[8];    /* hash state */
+  uint64 len;     /* processed message length */
+  uint64 h[8];    /* hash state */
   uint8_t buf[128]; /* message block buffer */
 };
 
-static uint64_t ror(uint64_t n, int k) { return (n >> k) | (n << (64-k)); }
+static uint64 ror(uint64 n, int k) { return (n >> k) | (n << (64-k)); }
 #define Ch(x,y,z)  (z ^ (x & (y ^ z)))
 #define Maj(x,y,z) ((x & y) | (z & (x | y)))
 #define S0(x)      (ror(x,28) ^ ror(x,34) ^ ror(x,39))
@@ -30,7 +30,7 @@ static uint64_t ror(uint64_t n, int k) { return (n >> k) | (n << (64-k)); }
 #define R0(x)      (ror(x,1) ^ ror(x,8) ^ (x>>7))
 #define R1(x)      (ror(x,19) ^ ror(x,61) ^ (x>>6))
 
-static const uint64_t K[80] = {
+static const uint64 K[80] = {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL,
   0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,
   0xd807aa98a3030242ULL, 0x12835b0145706fbeULL, 0x243185be4ee4b28cULL, 0x550c7dc3d5ffb4e2ULL,
@@ -55,17 +55,17 @@ static const uint64_t K[80] = {
 
 static void processblock(struct sha512 *s, const uint8_t *buf)
 {
-  uint64_t W[80], t1, t2, a, b, c, d, e, f, g, h;
+  uint64 W[80], t1, t2, a, b, c, d, e, f, g, h;
   int i;
 
   for (i = 0; i < 16; i++) {
-    W[i] = (uint64_t)buf[8*i]<<56;
-    W[i] |= (uint64_t)buf[8*i+1]<<48;
-    W[i] |= (uint64_t)buf[8*i+2]<<40;
-    W[i] |= (uint64_t)buf[8*i+3]<<32;
-    W[i] |= (uint64_t)buf[8*i+4]<<24;
-    W[i] |= (uint64_t)buf[8*i+5]<<16;
-    W[i] |= (uint64_t)buf[8*i+6]<<8;
+    W[i] = (uint64)buf[8*i]<<56;
+    W[i] |= (uint64)buf[8*i+1]<<48;
+    W[i] |= (uint64)buf[8*i+2]<<40;
+    W[i] |= (uint64)buf[8*i+3]<<32;
+    W[i] |= (uint64)buf[8*i+4]<<24;
+    W[i] |= (uint64)buf[8*i+5]<<16;
+    W[i] |= (uint64)buf[8*i+6]<<8;
     W[i] |= buf[8*i+7];
   }
   for (; i < 80; i++)
