@@ -159,7 +159,8 @@ namespace NLGUI
 		sint32 TxId_B_HighLight;
 		sint32 TxId_BR_HighLight;
 
-		sint32	HeaderH;
+		sint32 HeaderH;
+		sint32 InsetT; // Offset height of top texture
 	};
 
 	// ***************************************************************************

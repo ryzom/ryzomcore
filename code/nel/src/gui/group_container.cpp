@@ -2373,7 +2373,7 @@ namespace NLGUI
 		{
 			setMaxH(_PopupMaxH);
 			// _W is given by scripter-man
-			newH = pLayer->H_T;
+			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 		else
 		{
@@ -2382,7 +2382,7 @@ namespace NLGUI
 				_W = _Parent->getW();
 			}
 			setMaxH (16384); // No scrollbar for container of layer > 0
-			newH = pLayer->H_T;
+			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 
 		if (_Opened)
@@ -2396,11 +2396,11 @@ namespace NLGUI
 				_HeaderOpened->setY (- newH);
 				_HeaderOpened->setW (_W-(pLayer->W_L+pLayer->W_R));
 				_HeaderOpened->updateCoords();
-				newH += max (_HeaderOpened->getHReal(), pLayer->getValSInt32 ("header_h"));
+				newH += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 			}
 			else
 			{
-				newH += pLayer->getValSInt32 ("header_h");
+				newH += pLayer->HeaderH;
 			}
 
 			newH -= (sint32) _ContentYOffset;
@@ -2448,12 +2448,12 @@ namespace NLGUI
 			if (_LayerSetup == 0)
 			{
 				// zeH is the height to substract to total height of the container to obtain height of the list
-				sint32 zeH = pLayer->H_T + pLayer->H_B_Open + pLayer->H_EM_Open;
+				sint32 zeH = (pLayer->H_T - pLayer->InsetT) + pLayer->H_B_Open + pLayer->H_EM_Open;
 
 				if (_HeaderOpened != NULL)
-					zeH += max (_HeaderOpened->getHReal(), pLayer->getValSInt32 ("header_h"));
+					zeH += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 				else
-					zeH += pLayer->getValSInt32 ("header_h");
+					zeH += pLayer->HeaderH;
 
 				if (_Content != NULL)
 					zeH += _Content->getHReal();
@@ -2513,11 +2513,11 @@ namespace NLGUI
 				_HeaderClosed->setY (-newH);
 				_HeaderClosed->setW (_W-(pLayer->W_L+pLayer->W_R));
 				_HeaderClosed->updateCoords();
-				newH += max (_HeaderClosed->getHReal(), pLayer->getValSInt32 ("header_h"));
+				newH += max (_HeaderClosed->getHReal(), pLayer->HeaderH);
 			}
 			else
 			{
-				newH += pLayer->getValSInt32 ("header_h");
+				newH += pLayer->HeaderH;
 			}
 			newH += pLayer->H_B;
 
@@ -2731,7 +2731,7 @@ namespace NLGUI
 		// h is the size of what is on top of the child list
 		sint32 x, y, w, h;
 
-		h = pLayer->H_T + pLayer->H_B_Open;
+		h = (pLayer->H_T - pLayer->InsetT) + pLayer->H_B_Open;
 
 		if (_Opened)
 		{

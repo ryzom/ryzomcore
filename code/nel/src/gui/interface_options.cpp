@@ -281,6 +281,7 @@ namespace NLGUI
 
 		//
 		HeaderH = getValSInt32("header_h");
+		InsetT = getValSInt32("inset_t");
 
 		return true;
 	}
