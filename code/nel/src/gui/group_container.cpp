@@ -2856,7 +2856,7 @@ namespace NLGUI
 				else
 					rVR.drawRotFlipBitmapTiled (rl, x, y+pLayer->H_BL, pLayer->W_L, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_L, pLayer->Tile_L-1, col);
 				// Right
-				if (pLayer->Tile_T == 0) // Tiling ?
+				if (pLayer->Tile_R == 0) // Tiling ?
 					rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_R, y+pLayer->H_BR, pLayer->W_R, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_R, col);
 				else
 					rVR.drawRotFlipBitmapTiled (rl, x+w-pLayer->W_R, y+pLayer->H_BR, pLayer->W_R, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_R, pLayer->Tile_R-1, col);
