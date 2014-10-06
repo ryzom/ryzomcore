@@ -7,11 +7,13 @@
  * in the salt and rounds= setting must contain a valid iteration count,
  * on error "*" is returned.
  */
+
+#include <nel/misc/types_nl.h>
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <nel/misc/types_nl.h>
 
 /* public domain sha512 implementation based on fips180-3 */
 /* >=2^64 bits messages are not supported (about 2000 peta bytes) */
@@ -19,7 +21,7 @@
 struct sha512 {
   uint64 len;     /* processed message length */
   uint64 h[8];    /* hash state */
-  uint8_t buf[128]; /* message block buffer */
+  uint8 buf[128]; /* message block buffer */
 };
 
 static uint64 ror(uint64 n, int k) { return (n >> k) | (n << (64-k)); }
@@ -53,7 +55,7 @@ static const uint64 K[80] = {
   0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
 };
 
-static void processblock(struct sha512 *s, const uint8_t *buf)
+static void processblock(struct sha512 *s, const uint8 *buf)
 {
   uint64 W[80], t1, t2, a, b, c, d, e, f, g, h;
   int i;
@@ -136,7 +138,7 @@ static void sha512_init(struct sha512 *s)
   s->h[7] = 0x5be0cd19137e2179ULL;
 }
 
-static void sha512_sum(struct sha512 *s, uint8_t *md)
+static void sha512_sum(struct sha512 *s, uint8 *md)
 {
   int i;
 
@@ -155,7 +157,7 @@ static void sha512_sum(struct sha512 *s, uint8_t *md)
 
 static void sha512_update(struct sha512 *s, const void *m, unsigned long len)
 {
-  const uint8_t *p = (uint8_t *)m;
+  const uint8 *p = (uint8 *)m;
   unsigned r = s->len % 128;
 
   s->len += len;
