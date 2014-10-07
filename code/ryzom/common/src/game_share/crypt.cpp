@@ -18,16 +18,15 @@
 
 #include "crypt.h"
 
-char * rz_crypt(register const char *key, register const char *setting);
+char * rz_crypt(register const char *key, register const char *setting, char *buf);
 char *__crypt_sha512(const char *key, const char *setting, char *output);
 
 
 // Crypts password using salt
 std::string	CCrypt::crypt(const std::string& password, const std::string& salt)
 {
-	std::string		result = ::rz_crypt(password.c_str(), salt.c_str());
-
-	return result;
+	char buf[128];
+	return ::rz_crypt(password.c_str(), salt.c_str(), buf);
 }
 
 
@@ -506,7 +505,7 @@ static char	cryptresult[1+4+4+11+1];	/* encrypted result */
  * Return a pointer to static data consisting of the "setting"
  * followed by an encryption produced by the "key" and "setting".
  */
-char * rz_crypt(register const char *key, register const char *setting) {
+char * rz_crypt(register const char *key, register const char *setting, char *buf) {
 	register char *encp;
 	register long i;
 	register int t;
@@ -521,10 +520,9 @@ char * rz_crypt(register const char *key, register const char *setting) {
 	return buff;
 #endif
 
-    static char buf[128];
-    if (key[0] == '$' && key[1] == '6') {
-      return __crypt_sha512(key, setting, buf);
-    }
+	if (setting[0] == '$' && setting[1] == '6') {
+		return __crypt_sha512(key, setting, buf);
+	}
 
 	for (i = 0; i < 8; i++) {
 		if ((t = 2*(unsigned char)(*key)) != 0)

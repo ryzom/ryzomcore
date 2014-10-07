@@ -365,9 +365,11 @@ char *__crypt_sha512(const char *key, const char *setting, char *output)
   char *p, *q;
 
   p = sha512crypt(key, setting, output);
+
   /* self test and stack cleanup */
   q = sha512crypt(testkey, testsetting, testbuf);
-  if (!p || q != testbuf || memcmp(testbuf, testhash, sizeof testhash))
+  if (!p || q != testbuf || memcmp(testbuf, testhash, sizeof(testhash)))
     return "*";
+
   return p;
 }
