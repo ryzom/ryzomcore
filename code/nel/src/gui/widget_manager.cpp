@@ -2408,14 +2408,17 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
-					for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
+					if( CInterfaceElement::getEditorMode() )
 					{
-						CInterfaceGroup *g = _GroupsUnderPointer[ i ];
-						if( ( g != NULL ) && ( g->isInGroup( pNewCurrentWnd ) ) )
+						for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
 						{
-							_CapturedView = g;
-							captured = true;
-							break;
+							CInterfaceGroup *g = _GroupsUnderPointer[ i ];
+							if( ( g != NULL ) && ( g->isInGroup( pNewCurrentWnd ) ) )
+							{
+								_CapturedView = g;
+								captured = true;
+								break;
+							}
 						}
 					}
 
