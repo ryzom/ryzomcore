@@ -2731,7 +2731,8 @@ namespace NLGUI
 		// h is the size of what is on top of the child list
 		sint32 x, y, w, h;
 
-		h = (pLayer->H_T - pLayer->InsetT) + pLayer->H_B_Open;
+		bool bHasChild = (_List->getNbElement() > 0);
+		h = (pLayer->H_T - pLayer->InsetT) + (((!_Opened) || (!bHasChild)) ? pLayer->H_B : pLayer->H_B_Open);
 
 		if (_Opened)
 		{
@@ -2749,7 +2750,6 @@ namespace NLGUI
 		{
 			h = _HReal;
 		}
-		bool bHasChild = (_List->getNbElement() > 0);
 
 		x = _XReal;
 		y = _YReal+_HReal-h;
@@ -2767,7 +2767,7 @@ namespace NLGUI
 			// Top Right
 			rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_TR, y+h-pLayer->H_TR, pLayer->W_TR, pLayer->H_TR, 0, false, pLayer->TxId_TR, col);
 
-			if ((!_Opened) || (_Opened && !bHasChild))
+			if ((!_Opened) || (!bHasChild))
 			{ // Not opened
 				// Left
 				if (pLayer->Tile_L == 0) // Tiling ?
@@ -2817,9 +2817,9 @@ namespace NLGUI
 				rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_BR_Open, y, pLayer->W_BR_Open, pLayer->H_BR_Open, 0, false, pLayer->TxId_BR_Open, col);
 				// Content
 				if (pLayer->Tile_Blank == 0) // Tiling ?
-					rVR.drawRotFlipBitmap (rl, x+pLayer->W_L, y+pLayer->H_B, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, col);
+					rVR.drawRotFlipBitmap (rl, x+pLayer->W_L, y+pLayer->H_B_Open, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, col);
 				else
-					rVR.drawRotFlipBitmapTiled (rl, x+pLayer->W_L, y+pLayer->H_B, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, pLayer->Tile_Blank-1, col);
+					rVR.drawRotFlipBitmapTiled (rl, x+pLayer->W_L, y+pLayer->H_B_Open, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, pLayer->Tile_Blank-1, col);
 				// ScrollBar Placement
 				if (pLayer->Tile_M_Open == 0)  // Tiling ?
 					rVR.drawRotFlipBitmap (rl, x, _YReal+pLayer->H_EL_Open, pLayer->W_M_Open, _HReal-h-pLayer->H_EL_Open, 0, false, pLayer->TxId_M_Open, col);
@@ -2848,7 +2848,7 @@ namespace NLGUI
 			// Top Right
 			rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_TR, y+h-pLayer->H_TR, pLayer->W_TR, pLayer->H_TR, 0, false, pLayer->TxId_TR, col);
 
-			if ((!_Opened) || (_Opened && !bHasChild))
+			if ((!_Opened) || (!bHasChild))
 			{
 				// Left
 				if (pLayer->Tile_L == 0) // Tiling ?
