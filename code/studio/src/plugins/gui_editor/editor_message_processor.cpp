@@ -130,5 +130,10 @@ namespace GUIEditor
 		e->setActive( false );
 		e->setActive( true );
 	}
+
+	void CEditorMessageProcessor::onSetGroupSelection( bool b )
+	{
+		CWidgetManager::getInstance()->setGroupSelection( b );
+	}
 }
 

@@ -399,6 +399,16 @@ namespace GUIEditor
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
 
+			
+			// ----------------------------------------------------------------------------------			
+			m->addSeparator();
+
+			a = new QAction( "Select groups", this );
+			a->setCheckable( true );
+			a->setChecked( false );
+			connect( a, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onSetGroupSelection( bool ) ) );
+			m->addAction( a );
+
 			menu = m;
 		}
 	}

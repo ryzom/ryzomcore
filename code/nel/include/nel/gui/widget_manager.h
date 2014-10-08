@@ -516,6 +516,8 @@ namespace NLGUI
 		void unregisterWidgetWatcher( IWidgetWatcher *watcher );
 
 		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
+
+		void setGroupSelection( bool b ){ groupSelection = b; }
 				
 	private:
 		CWidgetManager();
@@ -610,6 +612,7 @@ namespace NLGUI
 		
 
 		std::string currentEditorSelection;
+		bool groupSelection;
 	};
 
 }
