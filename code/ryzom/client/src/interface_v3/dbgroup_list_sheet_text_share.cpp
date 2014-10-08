@@ -121,6 +121,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::init(CDBGroupListSheetText *p
 	text->setFontSize(compoList->getTextTemplate().getFontSize());
 	text->setColor(compoList->getTextTemplate().getColor());
 	text->setShadow(compoList->getTextTemplate().getShadow());
+	text->setShadowOutline(compoList->getTextTemplate().getShadowOutline());
 	text->setMultiLine(false);
 	text->setModulateGlobalColor(compoList->getTextTemplate().getModulateGlobalColor());
 	// Add it to the scrolled list.
@@ -139,6 +140,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::init(CDBGroupListSheetText *p
 	text->setFontSize(compoList->getTextTemplate().getFontSize());
 	text->setColor(compoList->getTextTemplate().getColor());
 	text->setShadow(compoList->getTextTemplate().getShadow());
+	text->setShadowOutline(compoList->getTextTemplate().getShadowOutline());
 	text->setMultiLine(false);
 	text->setModulateGlobalColor(compoList->getTextTemplate().getModulateGlobalColor());
 	// Add it to the scrolled list.

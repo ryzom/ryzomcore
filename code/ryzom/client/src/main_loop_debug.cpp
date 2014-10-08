@@ -80,6 +80,7 @@ void displayDebug()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color
@@ -470,6 +471,7 @@ void displayDebug()
 
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 }// displayDebug //
 
 // ********************************************************************
@@ -491,6 +493,7 @@ void displayDebugFps()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color
@@ -533,6 +536,7 @@ void displayDebugUIUnderMouse()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 
@@ -707,6 +711,7 @@ void displayHelp()
 
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.HelpFontSize);
 	// Set the text color
@@ -763,6 +768,7 @@ void displayHelp()
 
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 }// displayHelp //
 
 // ********************************************************************
