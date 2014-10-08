@@ -2400,21 +2400,34 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
-
-					// Take the top most control.
-					uint nMaxDepth = 0;
-					const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
-					for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+					for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
 					{
-						CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
-						if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+						CInterfaceGroup *g = _GroupsUnderPointer[ i ];
+						if( ( g != NULL ) && ( g->isInGroup( pNewCurrentWnd ) ) )
 						{
-							uint d = ctrl->getDepth( pNewCurrentWnd );
-							if (d > nMaxDepth)
+							_CapturedView = g;
+							captured = true;
+							break;
+						}
+					}
+
+					if( !captured )
+					{
+						// Take the top most control.
+						uint nMaxDepth = 0;
+						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+						{
+							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
 							{
-								nMaxDepth = d;
-								setCapturePointerLeft( ctrl );
-								captured = true;
+								uint d = ctrl->getDepth( pNewCurrentWnd );
+								if (d > nMaxDepth)
+								{
+									nMaxDepth = d;
+									setCapturePointerLeft( ctrl );
+									captured = true;
+								}
 							}
 						}
 					}
