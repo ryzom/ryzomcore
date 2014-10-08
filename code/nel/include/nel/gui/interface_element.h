@@ -508,7 +508,7 @@ namespace NLGUI
 
 		/// Called when the widget is deleted,
 		/// so other widgets in the group can check if it belongs to them
-		virtual void onWidgetDeleted( CInterfaceElement *e ){}
+		virtual void onWidgetDeleted( CInterfaceElement *e );
 
 		/// Move the element by x in the X direction and y in the Y direction
 		//  Uses real coordinates

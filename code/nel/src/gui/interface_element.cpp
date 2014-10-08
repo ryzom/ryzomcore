@@ -1685,6 +1685,14 @@ namespace NLGUI
 		invalidateCoords();
 	}
 
+	void CInterfaceElement::onWidgetDeleted( CInterfaceElement *e )
+	{
+		if( e == getParentPos() )
+			setParentPos( NULL );
+		if( e == getParentSize() )
+			setParentSize( NULL );
+	}
+
 	CStringMapper* CStringShared::_UIStringMapper = NULL;
 
 
