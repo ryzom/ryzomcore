@@ -328,6 +328,8 @@ namespace NLGUI
 
 		void onWidgetDeleted( CInterfaceElement *e );
 
+		void moveBy( sint32 x, sint32 y );
+
 	protected:
 
 		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);

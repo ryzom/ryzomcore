@@ -2544,5 +2544,16 @@ namespace NLGUI
 		for( std::vector< CInterfaceGroup* >::iterator itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
 			(*itr)->onWidgetDeleted( e );
 	}
+
+	void CInterfaceGroup::moveBy( sint32 x, sint32 y )
+	{
+		CInterfaceElement::moveBy( x, y );
+
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+			v->updateCoords();
+		}
+	}
 }
 
