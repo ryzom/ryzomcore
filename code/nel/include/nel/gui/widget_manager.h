@@ -518,6 +518,7 @@ namespace NLGUI
 		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
 
 		void setGroupSelection( bool b ){ groupSelection = b; }
+		bool unGroupSelection();
 				
 	private:
 		CWidgetManager();

@@ -2555,5 +2555,45 @@ namespace NLGUI
 			v->updateCoords();
 		}
 	}
+
+	bool CInterfaceGroup::explode()
+	{
+		CInterfaceGroup *p = getParent();
+		if( p == NULL )
+			return false;
+
+		std::string oldId;
+
+		// Reparent children
+		for( sint32 i = 0; i < _EltOrder.size(); i++ )
+		{
+			CInterfaceElement *e = _EltOrder[ i ];
+
+			oldId = e->getId();
+
+			e->setParent( p );
+			
+			if( e->getParentPos() == this )
+				e->setParentPos( p );
+
+			if( e->getParentSize() == this )
+				e->setParentSize( p );
+
+			if( e->getParentPos() == p )
+				e->alignTo( p );
+
+			p->addElement( e );
+			e->setIdRecurse( e->getShortId() );
+
+			CWidgetManager::getInstance()->onWidgetMoved( oldId, e->getId() );
+		}
+
+		_EltOrder.clear();
+		_Views.clear();
+		_Controls.clear();
+		_ChildrenGroups.clear();
+
+		return true;
+	}
 }
 

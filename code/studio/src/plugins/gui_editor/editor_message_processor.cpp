@@ -135,5 +135,17 @@ namespace GUIEditor
 	{
 		CWidgetManager::getInstance()->setGroupSelection( b );
 	}
+
+	void CEditorMessageProcessor::onUngroup()
+	{
+		bool ok = CWidgetManager::getInstance()->unGroupSelection();
+
+		if( !ok )
+		{
+			QMessageBox::critical( NULL,
+									tr( "Ungrouping widgets" ),
+									tr( "Couldn't ungroup widgets." ) );
+		}
+	}
 }
 

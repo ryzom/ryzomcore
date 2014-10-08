@@ -3477,6 +3477,40 @@ namespace NLGUI
 		return v;
 	}
 
+	bool CWidgetManager::unGroupSelection()
+	{
+		if( currentEditorSelection.empty() )
+			return false;
+
+		// Does the element exist?
+		CInterfaceElement *e = getElementFromId( currentEditorSelection );
+		if( e == NULL )
+			return false;
+
+		// Is the element a group?
+		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
+		if( g == NULL )
+			return false;
+
+		// Can't blow up a root group :(
+		CInterfaceGroup *p = g->getParent();
+		if( p == NULL )
+			return false;
+
+		// KABOOM!
+		bool ok = g->explode();
+		if( !ok )
+			return false;
+
+		p->delElement( g );
+
+		setCurrentEditorSelection( "" );
+
+		p->updateCoords();
+
+		return true;
+	}
+
 
 	CWidgetManager::CWidgetManager()
 	{
