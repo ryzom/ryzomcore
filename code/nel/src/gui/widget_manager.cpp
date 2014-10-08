@@ -2302,6 +2302,14 @@ namespace NLGUI
 		eventDesc.setX( _Pointer->getX() );
 		eventDesc.setY( _Pointer->getY() );
 
+		if( CInterfaceElement::getEditorMode() )
+		{
+			// Let's pretend we've handled the event... or actually we have!
+			if( ( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown ) ||
+				( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup ) )
+				return true;
+		}
+
 		if( isMouseHandlingEnabled() )
 		{
 			// First thing to do : Capture handling
