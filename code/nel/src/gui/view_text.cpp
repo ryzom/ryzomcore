@@ -62,6 +62,7 @@ namespace NLGUI
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
 		_Color = CRGBA(255,255,255,255);
 		_Shadow = false;
+		_ShadowOutline = false;
 		_ShadowColor = CRGBA(0,0,0,255);
 
 		_MultiLine = false;
@@ -111,7 +112,7 @@ namespace NLGUI
 	///constructor
 	// ***************************************************************************
 	CViewText::	CViewText (const std::string& id, const std::string Text, sint FontSize,
-							NLMISC::CRGBA Color, bool Shadow)
+							NLMISC::CRGBA Color, bool Shadow, bool ShadowOutline)
 							:CViewBase(TCtorParam())
 	{
 		_Id = id;
@@ -120,6 +121,7 @@ namespace NLGUI
 		_FontSize = FontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
 		_Color = Color;
 		_Shadow = Shadow;
+		_ShadowOutline = ShadowOutline;
 		setText(Text);
 		computeFontSize ();
 	}
@@ -159,6 +161,7 @@ namespace NLGUI
 		_FontSize = vt._FontSize;
 		_Color = vt._Color;
 		_Shadow = vt._Shadow;
+		_ShadowOutline = vt._ShadowOutline;
 		_ShadowColor = vt._ShadowColor;
 
 		_MultiLine = false;
@@ -223,6 +226,11 @@ namespace NLGUI
 		if( name == "shadow" )
 		{
 			return toString( _Shadow );
+		}
+		else
+		if( name == "shadow_outline" )
+		{
+			return toString( _ShadowOutline );
 		}
 		else
 		if( name == "shadow_color" )
@@ -357,6 +365,14 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_Shadow = b;
+			return true;
+		}
+		else
+		if( name == "shadow_outline" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ShadowOutline = b;
 			return true;
 		}
 		else
@@ -520,6 +536,7 @@ namespace NLGUI
 			).c_str() );
 
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line", BAD_CAST toString( _MultiLine ).c_str() );
 
@@ -603,6 +620,11 @@ namespace NLGUI
 		_Shadow = false;
 		if (prop)
 			_Shadow = convertBool(prop);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"shadow_outline" );
+		_ShadowOutline = false;
+		if (prop)
+			_ShadowOutline = convertBool(prop);
 
 		prop= (char*) xmlGetProp( cur, (xmlChar*)"shadow_color" );
 		_ShadowColor = CRGBA(0,0,0,255);
@@ -864,6 +886,7 @@ namespace NLGUI
 
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
+			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
 			TextContext->setFontSize (_FontSize);
 
@@ -978,6 +1001,7 @@ namespace NLGUI
 
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
+			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
 			TextContext->setFontSize (_FontSize);
 
@@ -1142,6 +1166,14 @@ namespace NLGUI
 	void CViewText::setShadow (bool bShadow)
 	{
 		_Shadow = bShadow;
+		computeFontSize ();
+		invalidateContent();
+	}
+
+	// ***************************************************************************
+	void CViewText::setShadowOutline (bool bShadowOutline)
+	{
+		_ShadowOutline = bShadowOutline;
 		computeFontSize ();
 		invalidateContent();
 	}
@@ -1647,6 +1679,7 @@ namespace NLGUI
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
+		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
 
 		// default state
@@ -1958,6 +1991,7 @@ namespace NLGUI
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
+		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 		height = getFontHeight();
@@ -2089,6 +2123,7 @@ namespace NLGUI
 		// setup the text context
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
+		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
 		 // find the line where the character is
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -2363,6 +2398,7 @@ namespace NLGUI
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
+		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
 
 		TCharPos linePos = 0;
@@ -2447,6 +2483,7 @@ namespace NLGUI
 			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
+			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setFontSize (_FontSize);
 
 			// Current position in text
@@ -2498,12 +2535,13 @@ namespace NLGUI
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
+		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
 
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext
-		_FontHeight = (uint) si.StringHeight + (_Shadow?1:0);
-		_FontLegHeight = (uint) si.StringLine + (_Shadow?1:0);
+		_FontHeight = (uint) si.StringHeight + (_Shadow?(_ShadowOutline?2:1):0);
+		_FontLegHeight = (uint) si.StringLine + (_Shadow?(_ShadowOutline?2:1):0);
 
 		// Space width
 		si = TextContext->getStringInfo(ucstring(" "));
@@ -2960,6 +2998,7 @@ namespace NLGUI
 		f.serial(_SpaceWidth);
 		f.serial(_Color);
 		f.serial(_Shadow);
+		f.serial(_ShadowOutline);
 		f.serialEnum(_CaseMode);
 		f.serial(_ShadowColor);
 		f.serial(_LineMaxW);

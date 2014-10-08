@@ -1186,6 +1186,7 @@ namespace NLGUI
 					vtDst->setColor (vtSrc->getColor());
 					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
 					vtDst->setShadow(vtSrc->getShadow());
+					vtDst->setShadowOutline(vtSrc->getShadowOutline());
 					vtDst->setShadowColor(vtSrc->getShadowColor());
 					vtDst->setCaseMode(vtSrc->getCaseMode());
 					vtDst->setUnderlined(vtSrc->getUnderlined());

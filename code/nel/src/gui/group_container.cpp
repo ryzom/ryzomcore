@@ -3713,6 +3713,7 @@ namespace NLGUI
 			_TitleOpened->setParentPosRef (Hotspot_TL);
 			_TitleOpened->setPosRef (Hotspot_TL);
 			_TitleOpened->setShadow (true);
+			_TitleOpened->setShadowOutline (false);
 			_TitleOpened->setColor (CRGBA(255,255,255,255));
 			_TitleOpened->setModulateGlobalColor(getModulateGlobalColor());
 			_TitleOpened->setOverExtendViewText(_TitleOverExtendViewText);
@@ -3764,6 +3765,7 @@ namespace NLGUI
 			_TitleClosed->setParentPosRef (Hotspot_TL);
 			_TitleClosed->setPosRef (Hotspot_TL);
 			_TitleClosed->setShadow (true);
+			_TitleClosed->setShadowOutline (false);
 			_TitleClosed->setColor (CRGBA(255,255,255,255));
 			_TitleClosed->setModulateGlobalColor(getModulateGlobalColor());
 			_TitleClosed->setOverExtendViewText(_TitleOverExtendViewText);

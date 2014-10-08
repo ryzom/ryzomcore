@@ -1203,6 +1203,7 @@ namespace NLGUI
 		pV->setColor (_GroupMenu->_Color);
 		pV->setFontSize (_GroupMenu->_FontSize);
 		pV->setShadow (_GroupMenu->_Shadow);
+		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
 		pV->setChecked(checked);
 		pV->setModulateGlobalColor(_GroupMenu->_ModulateGlobalColor);
@@ -1282,6 +1283,7 @@ namespace NLGUI
 		pV->setColor (_GroupMenu->_Color);
 		pV->setFontSize (_GroupMenu->_FontSize);
 		pV->setShadow (_GroupMenu->_Shadow);
+		pV->setShadowOutline (_GroupMenu->_ShadowOutline);
 		pV->setCheckable(checkable);
 		pV->setChecked(checked);
 		pV->setModulateGlobalColor(_GroupMenu->_ModulateGlobalColor);
@@ -1922,6 +1924,7 @@ namespace NLGUI
 		_HighLightOver.set(128, 0, 0, 255);
 		_FontSize = 12;
 		_Shadow = false;
+		_ShadowOutline = false;
 		_ResizeFromChildH = _ResizeFromChildW = true;
 		_DisplayFrame = false;
 		_RootMenu = NULL;
@@ -1996,6 +1999,11 @@ namespace NLGUI
 		if( name == "shadow" )
 		{
 			return toString( _Shadow );
+		}
+		else
+		if( name == "shadow_outline" )
+		{
+			return toString( _ShadowOutline );
 		}
 		else
 		if( name == "formatted" )
@@ -2110,6 +2118,14 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "shadow_outline" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_ShadowOutline = b;
+			return;
+		}
+		else
 		if( name == "formatted" )
 		{
 			bool b;
@@ -2152,6 +2168,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "space", BAD_CAST toString( _Space ).c_str() );
 		xmlSetProp( node, BAD_CAST "fontsize", BAD_CAST toString( _FontSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
+		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "formatted", BAD_CAST toString( _Formatted ).c_str() );
 		
 		if( _RootMenu == NULL )
@@ -2197,6 +2214,7 @@ namespace NLGUI
 				_Color = gm->_Color;
 				_ShadowColor = gm->_ShadowColor;
 				_Shadow = gm->_Shadow;
+				_ShadowOutline = gm->_ShadowOutline;
 				_FontSize = gm->_FontSize;
 				_ColorOver = gm->_ColorOver;
 				_ShadowColorOver = gm->_ShadowColorOver;
@@ -2265,6 +2283,10 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( in,  (xmlChar*)"shadow" );
 		if (prop)
 			_Shadow = convertBool(prop);
+
+		prop = (char*) xmlGetProp( in,  (xmlChar*)"shadow_outline" );
+		if (prop)
+			_ShadowOutline = convertBool(prop);
 
 		prop = (char*) xmlGetProp( in,  (xmlChar*)"formatted" );
 		if (prop)
