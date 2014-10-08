@@ -3003,18 +3003,16 @@ namespace NLGUI
 				col.A = nInverted;
 			else
 				col.A = max(_HighLightedAlpha, nInverted);
-			sint32 hw, hh; // size of highlight texture
-			rVR.getTextureSizeFromId(pLayer->TxId_TL_HighLight, hw, hh);
 			// corners
-			rVR.drawRotFlipBitmap (_RenderLayer, x, y + h - hh, hw, hh, 0, false, pLayer->TxId_TL_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, y + h - hh, hw, hh, 0, false, pLayer->TxId_TR_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal, hw, hh, 0, false, pLayer->TxId_BL_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, _YReal, hw, hh, 0, false, pLayer->TxId_BR_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, y + h - pLayer->H_T_HighLight, pLayer->W_TL_HighLight, pLayer->H_TL_HighLight, 0, false, pLayer->TxId_TL_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_TR_HighLight, y + h - pLayer->H_T_HighLight, pLayer->W_TR_HighLight, pLayer->H_TR_HighLight, 0, false, pLayer->TxId_TR_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal, pLayer->W_BL_HighLight, pLayer->H_BL_HighLight, 0, false, pLayer->TxId_BL_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_BR_HighLight, _YReal, pLayer->W_BR_HighLight, pLayer->H_BR_HighLight, 0, false, pLayer->TxId_BR_HighLight, col);
 			// border
-			rVR.drawRotFlipBitmap (_RenderLayer, x + hw, y + h - hh, _WReal - 2 * hw, hh, 0, false, pLayer->TxId_T_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + hw, _YReal, _WReal - 2 * hw, hh, 0, false, pLayer->TxId_B_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal + hh, hw, _HReal - 2 * hh, 0, false, pLayer->TxId_L_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, _YReal + hh, hw, _HReal - 2 * hh, 0, false, pLayer->TxId_R_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + pLayer->W_TL_HighLight, y + h - pLayer->H_T_HighLight, _WReal - pLayer->W_TL_HighLight - pLayer->W_TR_HighLight, pLayer->H_T_HighLight, 0, false, pLayer->TxId_T_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + pLayer->W_BL_HighLight, _YReal, _WReal - pLayer->W_BL_HighLight - pLayer->W_BR_HighLight, pLayer->H_B_HighLight, 0, false, pLayer->TxId_B_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal + pLayer->H_B_HighLight, pLayer->W_L_HighLight, _HReal - pLayer->H_T_HighLight - pLayer->H_B_HighLight, 0, false, pLayer->TxId_L_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_R_HighLight, _YReal + pLayer->H_B_HighLight, pLayer->W_R_HighLight, _HReal - pLayer->H_T_HighLight - pLayer->H_B_HighLight, 0, false, pLayer->TxId_R_HighLight, col);
 		}
 
 

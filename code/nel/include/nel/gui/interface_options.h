@@ -150,14 +150,14 @@ namespace NLGUI
 		sint32 TxId_E_Open,	 W_E_Open,  H_E_Open;
 		sint32 TxId_M_Open,	 W_M_Open,  H_M_Open;
 
-		sint32 TxId_TL_HighLight;
-		sint32 TxId_T_HighLight;
-		sint32 TxId_TR_HighLight;
-		sint32 TxId_L_HighLight;
-		sint32 TxId_R_HighLight;
-		sint32 TxId_BL_HighLight;
-		sint32 TxId_B_HighLight;
-		sint32 TxId_BR_HighLight;
+		sint32 TxId_TL_HighLight,	W_TL_HighLight, H_TL_HighLight;
+		sint32 TxId_T_HighLight,	W_T_HighLight,  H_T_HighLight;
+		sint32 TxId_TR_HighLight,	W_TR_HighLight, H_TR_HighLight;
+		sint32 TxId_L_HighLight,	W_L_HighLight,  H_L_HighLight;
+		sint32 TxId_R_HighLight,	W_R_HighLight,  H_R_HighLight;
+		sint32 TxId_BL_HighLight,	W_BL_HighLight, H_BL_HighLight;
+		sint32 TxId_B_HighLight,	W_B_HighLight,  H_B_HighLight;
+		sint32 TxId_BR_HighLight,	W_BR_HighLight, H_BR_HighLight;
 
 		sint32 HeaderH;
 		sint32 InsetT; // Offset height of top texture
