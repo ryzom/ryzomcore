@@ -269,21 +269,16 @@ namespace GUIEditor
 		if( ( newParent == NULL ) || ( item == NULL ) )
 			return;
 
-		// Remove old item
+		// Remove item from old parent
 		QTreeWidgetItem *p = item->parent();
 		if( p != NULL )
 			p->setExpanded( false );
-		id = item->data( 0, Qt::DisplayRole ).toString();
-		delete item;
-		item = NULL;
+		p->removeChild( item );
 
 		// Remove reference to old item
 		widgetHierarchyMap.erase( oldid );
 		
-		// Add new item
-		item = new QTreeWidgetItem();
-		item->setData( 0, Qt::DisplayRole, id );
-		item->setSelected( true );
+		// Add item to new parent
 		newParent->addChild( item );
 
 		// Add reference to new item
