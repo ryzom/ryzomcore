@@ -2571,16 +2571,15 @@ namespace NLGUI
 
 			oldId = e->getId();
 
+			e->setW( e->getWReal() );
+			e->setH( e->getHReal() );
+			e->setSizeRef( "" );
+
 			e->setParent( p );
 			
-			if( e->getParentPos() == this )
-				e->setParentPos( p );
-
-			if( e->getParentSize() == this )
-				e->setParentSize( p );
-
-			if( e->getParentPos() == p )
-				e->alignTo( p );
+			e->setParentPos( p );
+			e->setParentSize( p );
+			e->alignTo( p );
 
 			p->addElement( e );
 			e->setIdRecurse( e->getShortId() );
