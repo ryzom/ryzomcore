@@ -2475,6 +2475,11 @@ namespace NLGUI
 					// handle the capture
 					_CapturedView->handleEvent( evnt );
 				}
+				else
+				{
+					if( CInterfaceElement::getEditorMode() )
+						setCurrentEditorSelection( "" );
+				}
 			}
 
 			// Manage RightClick
