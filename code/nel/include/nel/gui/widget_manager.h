@@ -524,7 +524,8 @@ namespace NLGUI
 
 		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
 
-		void setGroupSelection( bool b ){ groupSelection = b; }
+		void setGroupSelection( bool b ){ _GroupSelection = b; }
+		bool groupSelection();
 		bool unGroupSelection();
 		void setMultiSelection( bool b ){ multiSelection = b; }
 				
@@ -620,8 +621,9 @@ namespace NLGUI
 		std::vector< IWidgetWatcher* > widgetWatchers;
 		
 		std::vector< std::string > editorSelection;
-		bool groupSelection;
+		bool _GroupSelection;
 		bool multiSelection;
+		uint32 _WidgetCount;
 	};
 
 }

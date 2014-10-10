@@ -399,6 +399,10 @@ namespace GUIEditor
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
 			m->addAction( a );
 
+			a = new QAction( "Group", this );
+			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onGroup() ) );
+			m->addAction( a );
+
 			a = new QAction( "Ungroup", this );
 			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onUngroup() ) );
 			m->addAction( a );

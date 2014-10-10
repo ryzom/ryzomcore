@@ -141,6 +141,11 @@ namespace GUIEditor
 		CWidgetManager::getInstance()->setGroupSelection( b );
 	}
 
+	void CEditorMessageProcessor::onGroup()
+	{
+		CWidgetManager::getInstance()->groupSelection();
+	}
+
 	void CEditorMessageProcessor::onUngroup()
 	{
 		bool ok = CWidgetManager::getInstance()->unGroupSelection();

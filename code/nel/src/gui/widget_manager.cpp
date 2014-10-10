@@ -2408,7 +2408,7 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
-					if( CInterfaceElement::getEditorMode() && groupSelection )
+					if( CInterfaceElement::getEditorMode() && _GroupSelection )
 					{
 						for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
 						{
@@ -3510,6 +3510,64 @@ namespace NLGUI
 		return v;
 	}
 
+	bool CWidgetManager::groupSelection()
+	{
+		std::vector< CInterfaceElement* > elms;
+
+		// Resolve the widget names
+		for( int i = 0; i < editorSelection.size(); i++ )
+		{
+			CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
+			if( e != NULL )
+				elms.push_back( e );
+		}
+
+		editorSelection.clear();
+
+		if( elms.empty() )
+			return false;
+
+		// Create the group as the subgroup of the top window
+		CInterfaceGroup *g = static_cast< CInterfaceGroup* >( getParser()->createClass( "interface_group" ) );
+		getTopWindow()->addGroup( g );
+		g->setParent( getTopWindow() );
+		g->setIdRecurse( std::string( "group" ) + NLMISC::toString( _WidgetCount ) );
+		_WidgetCount++;
+		onWidgetAdded( g->getId() );
+
+		std::string oldId;
+
+		// Reparent the widgets to the new group
+		for( int i = 0; i < elms.size(); i++ )
+		{
+			CInterfaceElement *e = elms[ i ];
+			oldId = e->getId();
+			CInterfaceGroup *p = e->getParent();
+			if( p != NULL )
+				p->takeElement( e );
+
+			g->addElement( e );
+			e->setParent( g );
+			e->setParentPos( g );
+			e->setParentSize( g );
+			e->setIdRecurse( e->getShortId() );	
+
+			onWidgetMoved( oldId, e->getId() );
+		}
+		elms.clear();
+
+		// Make sure widgets aren't clipped because the group isn't big enough
+		g->spanElements();
+		// Make sure widgets are aligned
+		g->alignElements();
+		// Align the new group to the top window
+		g->alignTo( getTopWindow() );
+		
+		g->setActive( true );
+		
+		return true;
+	}
+
 	bool CWidgetManager::unGroupSelection()
 	{
 		if( editorSelection.size() != 1 )
@@ -3582,8 +3640,9 @@ namespace NLGUI
 
 		setScreenWH( 0, 0 );
 
-		groupSelection = false;
+		_GroupSelection = false;
 		multiSelection = false;
+		_WidgetCount = 0;
 	}
 
 	CWidgetManager::~CWidgetManager()

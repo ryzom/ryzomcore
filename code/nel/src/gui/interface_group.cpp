@@ -2594,5 +2594,51 @@ namespace NLGUI
 
 		return true;
 	}
+
+	void CInterfaceGroup::spanElements()
+	{
+		sint32 minx = std::numeric_limits< sint32 >::max();
+		sint32 miny = std::numeric_limits< sint32 >::max();
+		sint32 maxx = std::numeric_limits< sint32 >::min();
+		sint32 maxy = std::numeric_limits< sint32 >::min();
+
+		sint32 tlx,tly,brx,bry;
+
+		// Find the min and max coordinates of the elements
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+
+			v->getHSCoords( Hotspot_TL, tlx, tly );
+			v->getHSCoords( Hotspot_BR, brx, bry );
+
+			if( tlx < minx )
+				minx = tlx;
+			if( brx > maxx )
+				maxx = brx;
+			if( bry < miny )
+				miny = bry;
+			if( tly > maxy )
+				maxy = tly;
+		}
+
+		// Set the position and the width and height based on these coords
+		setW( maxx - minx );
+		setH( maxy - miny );
+		_WReal = getW();
+		_HReal = getH();
+		_XReal = minx;
+		_YReal = miny;
+	}
+
+	void CInterfaceGroup::alignElements()
+	{
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+			v->alignTo( this );
+		}
+	}
+
 }
 

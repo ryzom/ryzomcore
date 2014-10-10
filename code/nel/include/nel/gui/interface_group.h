@@ -333,6 +333,12 @@ namespace NLGUI
 		// Blows up the group, moves it's children to it's parent
 		bool explode();
 
+		/// Adjusts the group's size so that all elements are fully inside the borders
+		void spanElements();
+
+		/// Aligns the elements - used for forming groups
+		void alignElements();
+
 	protected:
 
 		void makeNewClip (sint32 &oldClipX, sint32 &oldClipY, sint32 &oldClipW, sint32 &oldClipH);
