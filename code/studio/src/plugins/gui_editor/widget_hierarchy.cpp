@@ -304,14 +304,15 @@ namespace GUIEditor
 
 	void WidgetHierarchy::getCurrentGroup( QString &g )
 	{
-		std::string s = CWidgetManager::getInstance()->getCurrentEditorSelection();
-		if( s.empty() )
+		std::vector< std::string > selection;
+		CWidgetManager::getInstance()->getEditorSelection( selection );
+		if( selection.size() != 1 )
 		{
 			g = "";
 			return;
 		}
 
-		NLGUI::CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( s );
+		NLGUI::CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( selection[ 0 ] );
 		if( e == NULL )
 		{
 			g = "";
@@ -342,8 +343,16 @@ namespace GUIEditor
 		currentSelection.clear();
 	}
 
-	void WidgetHierarchy::onSelectionChanged( std::string &newSelection )
+	void WidgetHierarchy::onSelectionChanged()
 	{
+		std::vector< std::string > selection;
+		CWidgetManager::getInstance()->getEditorSelection( selection );
+
+		if( selection.size() != 1 )
+			return;
+
+		std::string newSelection = selection[ 0 ];
+
 		if( newSelection == currentSelection )
 			return;
 
@@ -376,6 +385,6 @@ namespace GUIEditor
 		
 		std::string n = item->text( 0 ).toUtf8().constData();
 		currentSelection = makeFullName( item, n );
-		CWidgetManager::getInstance()->setCurrentEditorSelection( currentSelection );
+		CWidgetManager::getInstance()->selectWidget( currentSelection );
 	}
 }

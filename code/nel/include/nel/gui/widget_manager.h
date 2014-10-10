@@ -503,8 +503,15 @@ namespace NLGUI
 
 		IParser* getParser() const{ return parser; }
 
-		std::string& getCurrentEditorSelection(){ return currentEditorSelection; }
-		void setCurrentEditorSelection( const std::string &name );
+		/// Retrieves the Id of the currently selected widgets
+		void getEditorSelection( std::vector< std::string > &selection );
+
+		/// Adds the widget with the specified Id to the selected widgets
+		void selectWidget( const std::string &name );
+
+		/// Clears the selection
+		void clearEditorSelection();
+
 		void notifySelectionWatchers();
 		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
 		void unregisterSelectionWatcher( IEditorSelectionWatcher *watcher );
@@ -519,6 +526,7 @@ namespace NLGUI
 
 		void setGroupSelection( bool b ){ groupSelection = b; }
 		bool unGroupSelection();
+		void setMultiSelection( bool b ){ multiSelection = b; }
 				
 	private:
 		CWidgetManager();
@@ -611,9 +619,9 @@ namespace NLGUI
 		std::vector< IEditorSelectionWatcher* > selectionWatchers;
 		std::vector< IWidgetWatcher* > widgetWatchers;
 		
-
-		std::string currentEditorSelection;
+		std::vector< std::string > editorSelection;
 		bool groupSelection;
+		bool multiSelection;
 	};
 
 }

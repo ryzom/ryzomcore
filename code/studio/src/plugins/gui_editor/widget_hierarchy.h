@@ -56,7 +56,7 @@ namespace GUIEditor
 
 	public Q_SLOTS:
 		void onGUILoaded();
-		void onSelectionChanged( std::string &newSelection );
+		void onSelectionChanged();
 
 	private Q_SLOTS:
 		void onItemDblClicked( QTreeWidgetItem *item );

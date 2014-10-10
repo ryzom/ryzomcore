@@ -2077,9 +2077,9 @@ namespace NLGUI
 
 		if( CInterfaceElement::getEditorMode() )
 		{
-			if( !currentEditorSelection.empty() )
+			for( int i = 0; i < editorSelection.size(); i++ )
 			{
-				CInterfaceElement *e = getElementFromId( currentEditorSelection );
+				CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
 				if( e != NULL )
 					e->drawHighlight();
 			}
@@ -2478,7 +2478,7 @@ namespace NLGUI
 				else
 				{
 					if( CInterfaceElement::getEditorMode() )
-						setCurrentEditorSelection( "" );
+						clearEditorSelection();
 				}
 			}
 
@@ -3349,25 +3349,53 @@ namespace NLGUI
 		}
 	}
 
-
-	void CWidgetManager::setCurrentEditorSelection( const std::string &name )
+	void CWidgetManager::getEditorSelection( std::vector< std::string > &selection )
 	{
+		selection.clear();
+		for( int i = 0; i < editorSelection.size(); i++ )
+			selection.push_back( editorSelection[ i ] );
+	}
+
+	void CWidgetManager::selectWidget( const std::string &name )
+	{
+		std::vector< std::string >::iterator itr 
+			= std::find( editorSelection.begin(), editorSelection.end(), name );
+
 		CInterfaceElement *e = getElementFromId( name );
-		if( e != NULL )
+		
+		if( itr != editorSelection.end() )
 		{
-			if( !currentEditorSelection.empty() )
+			// If multiselection is on unselect if already selected
+			if( multiSelection )
 			{
-				CInterfaceElement *prev = getElementFromId( currentEditorSelection );
-				if( prev != NULL )
-					prev->setEditorSelected( false );
+				editorSelection.erase( itr );
+				if( e != NULL )
+					e->setEditorSelected( false );
 			}
-			e->setEditorSelected( true );
 		}
 		else
-		if( !name.empty() )
-			return;
-		
-		currentEditorSelection = name;
+		{
+			// Select if not yet selected
+			if( e != NULL )
+			{
+				// If multiselection is off, we can only have 1 widget selected
+				if( !multiSelection )
+				{
+					editorSelection.clear();
+				}
+
+				e->setEditorSelected( true );
+				editorSelection.push_back( name );
+			}
+				
+		}
+
+		notifySelectionWatchers();
+	}
+
+	void CWidgetManager::clearEditorSelection()
+	{
+		editorSelection.clear();
 		notifySelectionWatchers();
 	}
 
@@ -3376,7 +3404,7 @@ namespace NLGUI
 		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
 		while( itr != selectionWatchers.end() )
 		{
-			(*itr)->selectionChanged( currentEditorSelection );
+			(*itr)->selectionChanged();	
 			++itr;
 		}
 	}
@@ -3484,11 +3512,11 @@ namespace NLGUI
 
 	bool CWidgetManager::unGroupSelection()
 	{
-		if( currentEditorSelection.empty() )
+		if( editorSelection.size() != 1 )
 			return false;
 
 		// Does the element exist?
-		CInterfaceElement *e = getElementFromId( currentEditorSelection );
+		CInterfaceElement *e = getElementFromId( editorSelection[ 0 ] );
 		if( e == NULL )
 			return false;
 
@@ -3509,7 +3537,7 @@ namespace NLGUI
 
 		p->delElement( g );
 
-		setCurrentEditorSelection( "" );
+		clearEditorSelection();
 
 		p->updateCoords();
 
@@ -3554,8 +3582,8 @@ namespace NLGUI
 
 		setScreenWH( 0, 0 );
 
-		currentEditorSelection = "";
 		groupSelection = false;
+		multiSelection = false;
 	}
 
 	CWidgetManager::~CWidgetManager()
@@ -3569,6 +3597,8 @@ namespace NLGUI
 		curContextHelp = NULL;
 
 		CStringShared::deleteStringMapper();
+
+		editorSelection.clear();
 	}
 
 }

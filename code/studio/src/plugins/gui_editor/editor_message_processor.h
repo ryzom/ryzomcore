@@ -40,6 +40,7 @@ namespace GUIEditor
 		void onAdd( const QString &parentGroup, const QString &widgetType, const QString &name );
 		void onSetGroupSelection( bool b );
 		void onUngroup();
+		void onSetMultiSelection( bool b );
 
 	private:
 		CWidgetInfoTree *tree;

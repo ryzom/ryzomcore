@@ -436,7 +436,7 @@ namespace GUIEditor
 		browser->clear();
 	}
 
-	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
+	void CPropBrowserCtrl::onSelectionChanged()
 	{
 		if( browser == NULL )
 			return;
@@ -444,14 +444,20 @@ namespace GUIEditor
 		disablePropertyWatchers();
 		browser->clear();
 
-		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
+		std::vector< std::string > selection;
+		CWidgetManager::getInstance()->getEditorSelection( selection );
+
+		if( selection.size() != 1 )
+			return;
+
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( selection[ 0 ] );
 		if( e == NULL )
 		{
 			enablePropertyWatchers();
 			return;
 		}
 
-		currentElement = id;
+		currentElement = selection[ 0 ];
 
         std::string n = e->getClassName();
 

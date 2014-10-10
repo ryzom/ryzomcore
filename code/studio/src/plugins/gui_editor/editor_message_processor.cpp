@@ -25,35 +25,40 @@ namespace GUIEditor
 {
 	void CEditorMessageProcessor::onDelete()
 	{
-		std::string selection = CWidgetManager::getInstance()->getCurrentEditorSelection();
+		std::vector< std::string > selection;
+
+		CWidgetManager::getInstance()->getEditorSelection( selection );
 		if( selection.empty() )
 			return;
 
 		QMessageBox::StandardButton r =
 			QMessageBox::question( NULL, 
 									tr( "Deleting widget" ),
-									tr( "Are you sure you want to delete %1?" ).arg( selection.c_str() ),
+									tr( "Are you sure you want to delete these?" ),
 									QMessageBox::Yes | QMessageBox::No );
 		if( r != QMessageBox::Yes )
 			return;
 
-		CInterfaceElement *e =
-			CWidgetManager::getInstance()->getElementFromId( selection );
-		if( e == NULL )
-			return;
-
-		CInterfaceElement *p = e->getParent();
-		if( p == NULL )
-			return;
-		
-		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( p );
-		if( g == NULL )
-			return;
-
-		if( g->delElement( e ) )
+		for( int i = 0; i < selection.size(); i++ )
 		{
-			CWidgetManager::getInstance()->setCurrentEditorSelection( "" );
+			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( selection[ i ] );
+			if( e == NULL )
+				continue;
+
+			CInterfaceElement *p = e->getParent();
+			if( p == NULL )
+				continue;
+
+			CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( p );
+			if( g == NULL )
+				continue;
+
+			g->delElement( e );
+
 		}
+
+	
+		CWidgetManager::getInstance()->clearEditorSelection();
 	}
 
 	void CEditorMessageProcessor::onAdd( const QString &parentGroup, const QString &widgetType, const QString &name )
@@ -146,6 +151,11 @@ namespace GUIEditor
 									tr( "Ungrouping widgets" ),
 									tr( "Couldn't ungroup widgets." ) );
 		}
+	}
+
+	void CEditorMessageProcessor::onSetMultiSelection( bool b )
+	{
+		CWidgetManager::getInstance()->setMultiSelection( b );
 	}
 }
 
