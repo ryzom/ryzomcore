@@ -528,6 +528,8 @@ namespace NLGUI
 		bool groupSelection();
 		bool unGroupSelection();
 		void setMultiSelection( bool b ){ multiSelection = b; }
+
+		bool createNewGUI( const std::string &project, const std::string &window );
 				
 	private:
 		CWidgetManager();

@@ -114,11 +114,29 @@ namespace GUIEditor
 		if( e != NULL )
 			e->setActive( true );
 
-		timerID = startTimer( 200 );
-		guiLoaded = true;
-		Q_EMIT guiLoadComplete();
+		onGUILoaded();
 
-		CWidgetManager::getInstance()->registerSelectionWatcher( watcher );
+		return true;
+	}
+
+	bool NelGUICtrl::createNewGUI( const std::string &project, const std::string &window )
+	{
+		reset();
+		bool ok = CWidgetManager::getInstance()->createNewGUI( project, window );
+		if( !ok )
+			return false;
+
+		std::string mg = std::string( "ui:" ) + project;
+		std::string ag = mg + ":" + window;
+
+		CWidgetManager::getInstance()->updateAllLocalisedElements();
+		CWidgetManager::getInstance()->activateMasterGroup( mg, true );
+		
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( ag );
+		if( e != NULL )
+			e->setActive( true );
+
+		onGUILoaded();
 
 		return true;
 	}
@@ -158,6 +176,15 @@ namespace GUIEditor
 				w->clear();
 			}
 		}
+	}
+
+	void NelGUICtrl::onGUILoaded()
+	{
+		timerID = startTimer( 200 );
+		guiLoaded = true;
+		Q_EMIT guiLoadComplete();
+
+		CWidgetManager::getInstance()->registerSelectionWatcher( watcher );
 	}
 
 	void NelGUICtrl::show()

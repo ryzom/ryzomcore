@@ -35,6 +35,7 @@
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
 #include "nel/misc/events.h"
+#include "nel/gui/root_group.h"
 
 namespace NLGUI
 {
@@ -1041,6 +1042,8 @@ namespace NLGUI
 		resetGlobalAlphasProps();
 
 		activeAnims.clear();
+
+		editorSelection.clear();
 	}
 
 
@@ -3599,6 +3602,48 @@ namespace NLGUI
 		clearEditorSelection();
 
 		p->updateCoords();
+
+		return true;
+	}
+
+
+	bool CWidgetManager::createNewGUI( const std::string &project, const std::string &window )
+	{
+		reset();
+
+		for( int i = 0; i < _MasterGroups.size(); i++ )
+			delete _MasterGroups[i].Group;
+		_MasterGroups.clear();
+
+		// First create the master group
+		CRootGroup *root = new CRootGroup( CViewBase::TCtorParam() );
+
+		SMasterGroup mg;
+		mg.Group = root;
+		
+		root->setIdRecurse( project );
+		root->setW( 1024 );
+		root->setH( 768 );
+		root->setActive( true );
+
+		// Create the first / main window
+		CInterfaceGroup *wnd = new CInterfaceGroup( CViewBase::TCtorParam() );
+		wnd->setW( 1024 );
+		wnd->setH( 768 );
+		wnd->setParent( root );
+		wnd->setParentPos( root );
+		wnd->setParentSize( root );
+		wnd->setPosRef( Hotspot_MM );
+		wnd->setParentPosRef( Hotspot_MM );
+		wnd->setIdRecurse( window );
+		wnd->setActive( true );
+
+		// Add the window
+		root->addElement( wnd );
+		mg.addWindow( wnd, wnd->getPriority() );
+		_MasterGroups.push_back( mg );
+
+		_Pointer = new CViewPointer( CViewBase::TCtorParam() );
 
 		return true;
 	}

@@ -207,6 +207,21 @@ namespace GUIEditor
 			return;
 
 		close();
+
+		std::string proj = d.getProjectName().toUtf8().constData();
+		std::string wnd = d.getWindowName().toUtf8().constData();
+
+		bool b = GUICtrl->createNewGUI( proj, wnd );
+		if( !b )
+		{
+			QMessageBox::information( this,
+										tr( "Creating new GUI project" ),
+										tr( "Failed to create new GUI project :(" ) );
+			reset();
+		}
+
+		std::string mg = std::string( "ui:" ) + proj;
+		hierarchyView->buildHierarchy( mg );
 	}
 
 	void GUIEditorWindow::save()
@@ -279,6 +294,20 @@ namespace GUIEditor
 
 	}
 
+	void GUIEditorWindow::reset()
+	{
+		projectFiles.clearAll();
+		projectWindow->clear();
+		hierarchyView->clearHierarchy();
+		GUICtrl->reset();
+		browserCtrl.clear();
+		linkList->clear();
+		procList->clear();
+		currentProject = "";
+		currentProjectFile = "";
+		projectParser.clear();
+	}
+
 	bool GUIEditorWindow::close()
 	{
 		if( currentProject.isEmpty() )
@@ -296,16 +325,7 @@ namespace GUIEditor
 		disconnect( w, SIGNAL( sgnSelectionChanged() ), hierarchyView, SLOT( onSelectionChanged() ) );
 		disconnect( w, SIGNAL( sgnSelectionChanged() ), &browserCtrl, SLOT( onSelectionChanged() ) );
 
-		projectFiles.clearAll();
-		projectWindow->clear();
-		hierarchyView->clearHierarchy();
-		GUICtrl->reset();
-		browserCtrl.clear();
-		linkList->clear();
-		procList->clear();
-		currentProject = "";
-		currentProjectFile = "";
-		projectParser.clear();
+		reset();
 
 		return true;
 	}

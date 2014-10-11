@@ -43,6 +43,7 @@ namespace GUIEditor
 
 		void init();
 		bool parse( SProjectFiles &files );
+		bool createNewGUI( const std::string &project, const std::string &window );
 		void draw();
 		void reset();
 		CEditorSelectionWatcher* getWatcher(){ return watcher; }
@@ -61,6 +62,8 @@ Q_SIGNALS:
 		void timerEvent( QTimerEvent *evnt );
 
 	private:
+		void onGUILoaded();
+
 		int timerID;
 		bool guiLoaded;
 		CEditorSelectionWatcher *watcher;
