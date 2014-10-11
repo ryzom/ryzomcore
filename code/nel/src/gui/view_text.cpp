@@ -28,8 +28,6 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/view_pointer_base.h"
 
-#include <limits>
-
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;

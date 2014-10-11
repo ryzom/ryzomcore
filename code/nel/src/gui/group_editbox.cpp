@@ -28,7 +28,6 @@
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
 #include "nel/gui/interface_factory.h"
-#include <limits>
 
 using namespace std;
 using namespace NLMISC;
