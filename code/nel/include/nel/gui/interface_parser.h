@@ -353,7 +353,15 @@ namespace NLGUI
 		std::map< std::string, std::string > pointerSettings;
 		std::map< std::string, std::map< std::string, std::string > > keySettings;
 
+		std::string _WorkDir;
+
 	public:
+		/// Sets the working directory, where files should be looked for
+		void setWorkDir( const std::string &workdir ){ _WorkDir = workdir; }
+
+		/// Looks up a file in either the working directory or using CPath::lookup
+		std::string lookup( const std::string &file );
+
 		void initLUA();
 		void uninitLUA();
 		bool isLuaInitialized() const{ return luaInitialized; }

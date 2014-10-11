@@ -187,6 +187,12 @@ namespace GUIEditor
 		}
 	}
 
+	void NelGUICtrl::setWorkDir( const QString &dir )
+	{
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		parser->setWorkDir( std::string( dir.toUtf8().constData() ) );
+	}
+
 	QWidget* NelGUICtrl::getViewPort()
 	{
 		return w;

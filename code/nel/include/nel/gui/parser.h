@@ -88,6 +88,7 @@ namespace NLGUI
 		virtual bool serializePointerSettings( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeKeySettings( xmlNodePtr parentNode ) const = 0;
 		virtual CViewBase* createClass( const std::string &name ) = 0;
+		virtual void setWorkDir( const std::string &workdir ) = 0;
 	};
 }
 

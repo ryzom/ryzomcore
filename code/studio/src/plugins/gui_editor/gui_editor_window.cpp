@@ -181,6 +181,8 @@ namespace GUIEditor
 		currentProject = projectFiles.projectName.c_str();
 		currentProjectFile = fileName;
 		projectWindow->setupFiles( projectFiles );
+		GUICtrl->setWorkDir( _lastDir );
+
 		if( GUICtrl->parse( projectFiles ) )
 		{
 			hierarchyView->buildHierarchy( projectFiles.masterGroup );

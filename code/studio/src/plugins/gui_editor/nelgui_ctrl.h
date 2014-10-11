@@ -52,6 +52,8 @@ namespace GUIEditor
 		void show();
 		void hide();
 
+		void setWorkDir( const QString &dir );
+
 Q_SIGNALS:
 		void guiLoadComplete();
 

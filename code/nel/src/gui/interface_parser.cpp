@@ -233,6 +233,22 @@ namespace NLGUI
 		destStream.seek(0, NLMISC::IStream::begin);
 	}
 
+	std::string CInterfaceParser::lookup( const std::string &file )
+	{
+		std::string filename;
+		
+		if( editorMode && !_WorkDir.empty() )
+		{
+			std::string wdpath = CPath::standardizePath( _WorkDir ) + file;
+			if( CFile::fileExists( wdpath ) )
+				filename = wdpath;
+		}
+		if( filename.empty() )
+			filename = CPath::lookup( file );
+
+		return filename;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings, bool reload, bool isFilename, bool checkInData)
 	{
@@ -270,7 +286,7 @@ namespace NLGUI
 			{
 				//get the first file document pointer
 				firstFileName = *it;
-				string filename = CPath::lookup(firstFileName);
+				string filename = lookup( firstFileName );
 				bool isInData = false;
 				string::size_type pos = filename.find ("@");
 				if (pos != string::npos)
@@ -283,7 +299,7 @@ namespace NLGUI
 						isInData = true;
 				}
 
-				if ((needCheck && !isInData) || !file.open (CPath::lookup(firstFileName)))
+				if ((needCheck && !isInData) || !file.open (lookup(firstFileName)))
 				{
 					// todo hulud interface syntax error
 					nlwarning ("could not open file %s, skipping xml parsing",firstFileName.c_str());
@@ -331,7 +347,7 @@ namespace NLGUI
 				{
 					saveParseResult = true;
 					std::string archive = CPath::lookup(nextFileName + "_compressed", false, false);
-					std::string current = CPath::lookup(nextFileName, false, false);
+					std::string current = lookup(nextFileName);
 					if (!archive.empty() && !current.empty())
 					{
 						if (CFile::getFileModificationDate(current) <= CFile::getFileModificationDate(archive))
@@ -351,7 +367,7 @@ namespace NLGUI
 				{
 					if (isFilename)
 					{
-						if (!file.open(CPath::lookup(nextFileName, false, false)))
+						if (!file.open(lookup(nextFileName)))
 						{
 							// todo hulud interface syntax error
 							nlwarning ("could not open file %s, skipping xml parsing",nextFileName.c_str());
