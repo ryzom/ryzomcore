@@ -44,6 +44,7 @@
 #include "editor_selection_watcher.h"
 #include "editor_message_processor.h"
 #include "add_widget_widget.h"
+#include "new_gui_dlg.h"
 
 namespace GUIEditor
 {
@@ -199,6 +200,13 @@ namespace GUIEditor
 
 	void GUIEditorWindow::newDocument()
 	{
+		NewGUIDlg d;
+		int result = d.exec();
+		
+		if( result == QDialog::Rejected )
+			return;
+
+		close();
 	}
 
 	void GUIEditorWindow::save()
@@ -358,14 +366,14 @@ namespace GUIEditor
 	void GUIEditorWindow::createMenus()
 	{
 		Core::MenuManager *mm = Core::ICore::instance()->menuManager();
-		//QAction *newAction = mm->action( Core::Constants::NEW );
+		QAction *newAction = mm->action( Core::Constants::NEW );
 		QAction *saveAction = mm->action( Core::Constants::SAVE );
 		QAction *saveAsAction = mm->action( Core::Constants::SAVE_AS );
 		QAction *closeAction = mm->action( Core::Constants::CLOSE );
 		QAction *delAction = mm->action( Core::Constants::DEL );
 
-		//if( newAction != NULL )
-		//	newAction->setEnabled( true );
+		if( newAction != NULL )
+			newAction->setEnabled( true );
 		if( saveAction != NULL )
 			saveAction->setEnabled( true );
 		if( saveAsAction != NULL )
