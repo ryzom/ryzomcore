@@ -27,6 +27,7 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
+#include "nel/gui/interface_factory.h"
 #include <limits>
 
 using namespace std;
@@ -1543,7 +1544,7 @@ namespace NLGUI
 			if( editorMode )
 			{
 				nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
-				_ViewText = dynamic_cast< CViewText* >( CWidgetManager::getInstance()->getParser()->createClass( "text" ) );
+				_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
 				if( _ViewText != NULL )
 				{
 					_ViewText->setParent( this );

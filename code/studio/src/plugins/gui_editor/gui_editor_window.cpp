@@ -283,8 +283,8 @@ namespace GUIEditor
 
 
 		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
-		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
-		disconnect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged() ), hierarchyView, SLOT( onSelectionChanged() ) );
+		disconnect( w, SIGNAL( sgnSelectionChanged() ), &browserCtrl, SLOT( onSelectionChanged() ) );
 
 		projectFiles.clearAll();
 		projectWindow->clear();
@@ -322,8 +322,8 @@ namespace GUIEditor
 		linkList->onGUILoaded();
 
 		CEditorSelectionWatcher *w = GUICtrl->getWatcher();
-		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), hierarchyView, SLOT( onSelectionChanged( std::string& ) ) );
-		connect( w, SIGNAL( sgnSelectionChanged( std::string& ) ), &browserCtrl, SLOT( onSelectionChanged( std::string& ) ) );
+		connect( w, SIGNAL( sgnSelectionChanged() ), hierarchyView, SLOT( onSelectionChanged() ) );
+		connect( w, SIGNAL( sgnSelectionChanged() ), &browserCtrl, SLOT( onSelectionChanged() ) );
 	}
 
 	void GUIEditorWindow::onAddWidgetClicked()
@@ -397,6 +397,30 @@ namespace GUIEditor
 
 			a = new QAction( "Add Widget", this );
 			connect( a, SIGNAL( triggered( bool ) ), this, SLOT( onAddWidgetClicked() ) );
+			m->addAction( a );
+
+			a = new QAction( "Group", this );
+			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onGroup() ) );
+			m->addAction( a );
+
+			a = new QAction( "Ungroup", this );
+			connect( a, SIGNAL( triggered() ), messageProcessor, SLOT( onUngroup() ) );
+			m->addAction( a );
+
+			
+			// ----------------------------------------------------------------------------------			
+			m->addSeparator();
+
+			a = new QAction( "Select groups", this );
+			a->setCheckable( true );
+			a->setChecked( false );
+			connect( a, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onSetGroupSelection( bool ) ) );
+			m->addAction( a );
+
+			a = new QAction( "Multiselect", this );
+			a->setCheckable( true );
+			a->setChecked( false );
+			connect( a, SIGNAL( triggered( bool ) ), messageProcessor, SLOT( onSetMultiSelection( bool ) ) );
 			m->addAction( a );
 
 			menu = m;

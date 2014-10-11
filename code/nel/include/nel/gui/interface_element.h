@@ -508,7 +508,24 @@ namespace NLGUI
 
 		/// Called when the widget is deleted,
 		/// so other widgets in the group can check if it belongs to them
-		virtual void onWidgetDeleted( CInterfaceElement *e ){}
+		virtual void onWidgetDeleted( CInterfaceElement *e );
+
+		/// Move the element by x in the X direction and y in the Y direction
+		//  Uses real coordinates
+		virtual void moveBy( sint32 x, sint32 y )
+		{
+			_XReal += x;
+			_YReal += y;
+		}
+
+		/// Retrieves the coordinates of the specified hotspot
+		void getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const;
+
+		/// Tells which hotspot is the closest to the specified element
+		void getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs );
+
+		/// Aligns the element to the other element specified
+		void alignTo( CInterfaceElement *other );
 
 	protected:
 

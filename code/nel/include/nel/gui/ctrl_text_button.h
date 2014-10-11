@@ -126,6 +126,7 @@ namespace NLGUI
 
 		void onRemoved();
 		void onWidgetDeleted( CInterfaceElement *e );
+		void moveBy( sint32 x, sint32 y );
 
 	protected:
 

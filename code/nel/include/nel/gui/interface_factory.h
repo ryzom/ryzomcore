@@ -14,19 +14,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef WIDGET_ADD_WATCHER
-#define WIDGET_ADD_WATCHER
+#ifndef IFACE_FACTORY
+#define IFACE_FACTORY
 
 #include <string>
 
 namespace NLGUI
 {
-	class IWidgetAdditionWatcher
+	class CViewBase;
+
+	/// Simple interface element ( widget ) factory
+	class CInterfaceFactory
 	{
 	public:
-		virtual void widgetAdded( const std::string &name ) = 0;
+		static CViewBase* createClass( const std::string &name );
 	};
 }
 
-#endif
 
+#endif

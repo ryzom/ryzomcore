@@ -14,23 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "nel/gui/editor_selection_watcher.h"
-#include <QObject>
+#include "nel/gui/interface_factory.h"
+#include "nel/gui/view_base.h"
+#include "nel/misc/factory.h"
 
-namespace GUIEditor
+namespace NLGUI
 {
-	/// Watches the Editor selection, and emits a signal when it changes
-	class CEditorSelectionWatcher : public QObject, public NLGUI::IEditorSelectionWatcher
+	CViewBase* CInterfaceFactory::createClass( const std::string &name )
 	{
-		Q_OBJECT
-
-	public:
-		CEditorSelectionWatcher() : QObject( NULL ){}
-
-		void selectionChanged();
-
-	Q_SIGNALS:
-		void sgnSelectionChanged();
-	};
+		return NLMISC_GET_FACTORY( CViewBase, std::string ).createObject( std::string( name ) , CViewBase::TCtorParam() );
+	}
 }
+
 
