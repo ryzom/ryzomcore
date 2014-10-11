@@ -1789,6 +1789,7 @@ void CEditor::waitScenarioScreen()
 		if (!waitScreen)
 		{
 			TextContext->setShaded(true);
+			TextContext->setShadeOutline(false);
 			TextContext->setFontSize(40);
 			TextContext->setColor(CRGBA::White);
 

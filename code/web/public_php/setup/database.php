@@ -1,11 +1,11 @@
 <?php
 
 // Service
-$db_nel = 3;
+$db_nel = 4;
 $db_nel_tool = 2;
 
 // Support
-$db_nel_ams = 1;
+$db_nel_ams = 2;
 $db_nel_ams_lib = 6;
 
 // Domain

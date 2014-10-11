@@ -48,7 +48,7 @@ namespace NLGUI
 
 		/// Constructor
 		CViewText (const std::string& id, const std::string Text="", sint FontSize=12,
-					NLMISC::CRGBA Color=NLMISC::CRGBA(255,255,255), bool Shadow=false);
+					NLMISC::CRGBA Color=NLMISC::CRGBA(255,255,255), bool Shadow=false, bool ShadowOutline=false);
 
 		virtual ~CViewText();
 
@@ -83,6 +83,7 @@ namespace NLGUI
 		void setFontSize (sint nFontSize);
 		void setColor (const NLMISC::CRGBA &color);
 		void setShadow (bool bShadow);
+		void setShadowOutline (bool bShadowOutline);
 		void setShadowColor (const NLMISC::CRGBA &color);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
 		void setMultiLine (bool bMultiLine);
@@ -102,6 +103,7 @@ namespace NLGUI
 		sint			getFontSize() const;
 		NLMISC::CRGBA	getColor()			{ return _Color; }
 		bool			getShadow()			{ return _Shadow; }
+		bool			getShadowOutline()	{ return _ShadowOutline; }
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
 		bool			getMultiLine() const		{ return _MultiLine; }
@@ -229,6 +231,7 @@ namespace NLGUI
 		NLMISC::CRGBA _Color;
 		/// the shadow mode
 		bool	_Shadow;
+		bool	_ShadowOutline;
 		/// the case mode
 		TCaseMode	_CaseMode;
 		/// the text shadow color

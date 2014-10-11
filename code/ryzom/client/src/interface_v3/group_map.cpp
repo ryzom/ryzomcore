@@ -2333,6 +2333,7 @@ void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 
 			pNewText->setColor(CRGBA(255,255,255,255));
 			pNewText->setShadow(true);
+			pNewText->setShadowOutline(false);
 			pNewText->setShadowColor(CRGBA(0,0,0,255));
 			pNewText->setModulateGlobalColor(false);
 			pNewText->Type = rCLM.Type;

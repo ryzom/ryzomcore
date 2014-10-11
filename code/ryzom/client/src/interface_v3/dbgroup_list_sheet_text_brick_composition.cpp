@@ -95,6 +95,7 @@ void CDBGroupListSheetTextBrickComposition::CSheetChildBrick::init(CDBGroupListS
 	text->setFontSize(compoList->getTextTemplate().getFontSize());
 	text->setColor(compoList->getTextTemplate().getColor());
 	text->setShadow(compoList->getTextTemplate().getShadow());
+	text->setShadowOutline(compoList->getTextTemplate().getShadowOutline());
 	text->setMultiLine(false);
 	text->setModulateGlobalColor(compoList->getTextTemplate().getModulateGlobalColor());
 

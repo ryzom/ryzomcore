@@ -381,6 +381,7 @@ namespace NLGUI
 
 		bool					_CloseSubMenuUsingPopModal;
 		bool					_Shadow;
+		bool					_ShadowOutline;
 		bool					_Formatted;
 		uint8					_Space;
 		sint32					_FontSize;
