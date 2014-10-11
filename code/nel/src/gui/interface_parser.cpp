@@ -37,6 +37,7 @@
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_manager.h"
+#include "nel/gui/root_group.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -112,86 +113,6 @@ namespace NLGUI
 		}
 		return node;
 	}
-
-
-
-	// ----------------------------------------------------------------------------
-	// CRootGroup
-	// ----------------------------------------------------------------------------
-
-	class CRootGroup : public CInterfaceGroup
-	{
-	public:
-		CRootGroup(const TCtorParam &param)
-			: CInterfaceGroup(param)
-		{ }
-
-		/// Destructor
-		virtual ~CRootGroup() { }
-
-		virtual CInterfaceElement* getElement (const std::string &id)
-		{
-			if (_Id == id)
-			return this;
-
-			if (id.substr(0, _Id.size()) != _Id)
-				return NULL;
-
-			vector<CViewBase*>::const_iterator itv;
-			for (itv = _Views.begin(); itv != _Views.end(); itv++)
-			{
-				CViewBase *pVB = *itv;
-				if (pVB->getId() == id)
-					return pVB;
-			}
-
-			vector<CCtrlBase*>::const_iterator itc;
-			for (itc = _Controls.begin(); itc != _Controls.end(); itc++)
-			{
-				CCtrlBase* ctrl = *itc;
-				if (ctrl->getId() == id)
-					return ctrl;
-			}
-
-			// Accelerate
-			string sTmp = id;
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			string::size_type pos = sTmp.find(':');
-			if (pos != string::npos)
-				sTmp = sTmp.substr(0,pos);
-
-			map<string,CInterfaceGroup*>::iterator it = _Accel.find(sTmp);
-			if (it != _Accel.end())
-			{
-				CInterfaceGroup *pIG = it->second;
-				return pIG->getElement(id);
-			}
-			return NULL;
-		}
-
-		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1)
-		{
-			string sTmp = child->getId();
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			_Accel.insert(pair<string,CInterfaceGroup*>(sTmp, child));
-			CInterfaceGroup::addGroup(child,eltOrder);
-		}
-
-		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false)
-		{
-			string sTmp = child->getId();
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			map<string,CInterfaceGroup*>::iterator it = _Accel.find(sTmp);
-			if (it != _Accel.end())
-			{
-				_Accel.erase(it);
-			}
-			return CInterfaceGroup::delGroup(child,dontDelete);
-		}
-
-	private:
-		map<string,CInterfaceGroup*> _Accel;
-	};
 
 	// ----------------------------------------------------------------------------
 	// CInterfaceParser
