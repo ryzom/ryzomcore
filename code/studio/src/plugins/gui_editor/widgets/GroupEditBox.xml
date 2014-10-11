@@ -2,6 +2,7 @@
     <header>
         <name>GroupEditBox</name>
         <guiname>CGroupEditBox</guiname>
+		<classname>edit_box</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>

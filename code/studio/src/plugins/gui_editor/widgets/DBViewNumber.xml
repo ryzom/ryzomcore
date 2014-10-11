@@ -2,6 +2,7 @@
     <header>
         <name>DBViewNumber</name>
         <guiname>CDBViewNumber</guiname>
+		<classname>text_number</classname>
         <ancestor>ViewText</ancestor>
         <description></description>
         <abstract>false</abstract>
