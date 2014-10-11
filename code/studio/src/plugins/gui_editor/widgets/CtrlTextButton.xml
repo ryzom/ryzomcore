@@ -2,6 +2,7 @@
     <header>
         <name>CtrlTextButton</name>
         <guiname>CCtrlTextButton</guiname>
+		<classname>text_button</classname>
         <ancestor>CtrlBaseButton</ancestor>
         <description></description>
         <abstract>false</abstract>
