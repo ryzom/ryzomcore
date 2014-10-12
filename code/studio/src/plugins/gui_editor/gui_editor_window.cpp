@@ -210,6 +210,9 @@ namespace GUIEditor
 
 		std::string proj = d.getProjectName().toUtf8().constData();
 		std::string wnd = d.getWindowName().toUtf8().constData();
+		std::string mg = std::string( "ui:" ) + proj;
+		std::string dir = d.getProjectDirectory().toUtf8().constData();
+		std::string uiFile = "ui_" + proj + ".xml";
 
 		bool b = GUICtrl->createNewGUI( proj, wnd );
 		if( !b )
@@ -220,8 +223,41 @@ namespace GUIEditor
 			reset();
 		}
 
-		std::string mg = std::string( "ui:" ) + proj;
 		hierarchyView->buildHierarchy( mg );
+
+		projectFiles.projectName = proj;
+		projectFiles.masterGroup = mg;
+		projectFiles.activeGroup = std::string( "ui:" ) + proj + ":" + wnd;
+		projectFiles.version = NEW;
+		projectFiles.guiFiles.push_back( uiFile );
+		projectWindow->setupFiles( projectFiles );
+
+		currentProject = proj.c_str();
+		currentProjectFile = std::string( dir + "/" + proj + ".xml" ).c_str();
+
+
+		// Save the project file
+		CProjectFileSerializer serializer;
+		serializer.setFile( currentProjectFile.toUtf8().constData() );
+		if( !serializer.serialize( projectFiles ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
+
+		// Save the GUI file
+		WidgetSerializer widgetSerializer;
+		widgetSerializer.setFile( dir + "/" + uiFile );
+		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
+		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 	}
 
 	void GUIEditorWindow::save()

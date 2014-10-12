@@ -31,10 +31,12 @@ public:
 
 	QString getProjectName() const;
 	QString getWindowName() const;
+	QString getProjectDirectory() const;
 
 private Q_SLOTS:
 	void onOKClicked();
 	void onCancelClicked();
+	void onProjectDirTBClicked();
 
 private:
 	Ui::NewGUIDialog m_ui;

@@ -18,6 +18,7 @@
 
 #include "new_gui_dlg.h"
 #include <QMessageBox>
+#include <QFileDialog>
 
 NewGUIDlg::NewGUIDlg( QWidget *parent ) :
 QDialog( parent )
@@ -26,6 +27,7 @@ QDialog( parent )
 
 	connect( m_ui.okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
 	connect( m_ui.cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+	connect( m_ui.projectDirTB, SIGNAL( clicked( bool ) ), this, SLOT( onProjectDirTBClicked() ) );
 
 }
 
@@ -41,6 +43,11 @@ QString NewGUIDlg::getProjectName() const
 QString NewGUIDlg::getWindowName() const
 {
 	return m_ui.windowEdit->text();
+}
+
+QString NewGUIDlg::getProjectDirectory() const
+{
+	return m_ui.projectDirEdit->text();
 }
 
 void NewGUIDlg::onOKClicked()
@@ -61,12 +68,31 @@ void NewGUIDlg::onOKClicked()
 		return;
 	}
 
+	if( m_ui.projectDirEdit->text().isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "New project" ),
+									tr( "You must specify a project directory!" ) );
+		return;
+	}
+
 	accept();
 }
 
 void NewGUIDlg::onCancelClicked()
 {
 	reject();
+}
+
+void NewGUIDlg::onProjectDirTBClicked()
+{
+	QString dir = QFileDialog::getExistingDirectory( this,
+													tr( "Specify project directory" ),
+													"." );
+	if( dir.isEmpty() )
+		return;
+
+	m_ui.projectDirEdit->setText( dir );
 }
 
 

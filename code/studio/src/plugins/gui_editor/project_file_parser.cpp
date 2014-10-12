@@ -16,6 +16,7 @@
 
 
 #include "project_file_parser.h"
+#include "nel/misc/debug.h"
 
 namespace GUIEditor
 {
@@ -208,7 +209,9 @@ namespace GUIEditor
 			reader.readNext();
 		}
 		if( files.mapFiles.empty() )
-			return false;
+		{
+			nlinfo( "No map file(s) specified in project file." );
+		}
 
 		return true;
 	}
