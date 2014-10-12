@@ -499,6 +499,29 @@ namespace NLGUI
 			}
 		}
 
+		// Get the parent table
+		if (getParent ())
+		{
+			CGroupTable *table = static_cast<CGroupTable*> (getParent ());
+			if (table->Border) {
+				CRGBA lighter = blend(table->BorderColor, CRGBA::White, 0.5f);
+
+				CRGBA borderColorTL;
+				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorTL.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorTL.A) >> 8);
+
+				CRGBA borderColorBR;
+				borderColorBR.modulateFromColor (table->BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorBR.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorBR.A) >> 8);
+
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, 1, 0, false, rVR.getBlankTextureId(), borderColorTL );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), borderColorBR );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+_HReal-1, _WReal, 1, 0, false, rVR.getBlankTextureId(), borderColorBR );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-1, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), borderColorTL );
+			}
+		}
+
 		CInterfaceGroup::draw ();
 	}
 
@@ -1178,10 +1201,10 @@ namespace NLGUI
 		if (gr == NULL)
 			CurrentAlpha = 255;
 
-		if (!_Columns.empty() && !_Rows.empty() && BgColor.A)
+		if (!_Columns.empty() && !_Rows.empty())
 		{
 			sint32 border = Border + CellSpacing;
-			if (border)
+			if (border && BgColor.A)
 			{
 				CRGBA finalColor;
 				finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
@@ -1232,6 +1255,29 @@ namespace NLGUI
 					}
 				}
 			}
+
+			if (Border) {
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+
+				CRGBA borderColorTL;
+				CRGBA lighter = blend(BorderColor, CRGBA::White, 0.5f);
+				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorTL.A = CurrentAlpha;
+
+				CRGBA borderColorBR;
+				borderColorBR.modulateFromColor (BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorBR.A = CurrentAlpha;
+
+				// beveled table border
+				for (sint32 i=0; i<Border; i++){
+					// bottom, left, top, right
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+i, _WReal-i*2, 1, 0, false, rVR.getBlankTextureId(), borderColorBR);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+i, 1, _HReal-i*2, 0, false, rVR.getBlankTextureId(), borderColorTL);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+_HReal-i-1, _WReal-i*2, 1, 0, false, rVR.getBlankTextureId(), borderColorTL);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-i-1, _YReal+i, 1, _HReal-i*2, 0, false, rVR.getBlankTextureId(), borderColorBR);
+				}
+			}
+
 		}
 
 		CInterfaceGroup::draw ();
