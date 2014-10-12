@@ -937,10 +937,10 @@ namespace NLGUI
 						}
 					}
 
-					cell->setX(currentX);
-					cell->setW(_Columns[column].Width);
+					cell->setX(currentX - CellPadding);
+					cell->setW(_Columns[column].Width + CellPadding*2);
 
-					cell->Group->setX(alignmentX+cell->LeftMargin);
+					cell->Group->setX(alignmentX + cell->LeftMargin + CellPadding);
 					cell->Group->setW(_Columns[column].Width - widthReduceX);
 					cell->Group->CInterfaceElement::updateCoords();
 
@@ -989,9 +989,9 @@ namespace NLGUI
 						}
 					}
 
-					cell->setY(currentY);
-					cell->setH (_Rows[row].Height);
-					cell->Group->setY(-alignmentY);
+					cell->setY(currentY + CellPadding);
+					cell->setH (_Rows[row].Height + 2*CellPadding);
+					cell->Group->setY(-(alignmentY + CellPadding));
 				}
 
 				// Resize the table
@@ -1179,7 +1179,7 @@ namespace NLGUI
 
 		if (!_Columns.empty() && !_Rows.empty() && BgColor.A)
 		{
-			sint32 border = Border + CellSpacing + CellPadding;
+			sint32 border = Border + CellSpacing;
 			if (border)
 			{
 				CRGBA finalColor;
@@ -1197,20 +1197,20 @@ namespace NLGUI
 				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-border, _YReal+border, border, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
 
 				// Draw the inside borders
-				sint32 insideWidth = 2*CellPadding + CellSpacing;
+				sint32 insideWidth = CellSpacing;
 				if (insideWidth)
 				{
 					// Draw the inside verticals
 					uint i;
-					sint32 x = _XReal + _Columns[0].Width + border;
+					sint32 x = _XReal + border + _Columns[0].Width + 2*CellPadding;
 					for (i=1; i<_Columns.size(); i++)
 					{
 						rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal+border, insideWidth, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
-						x += _Columns[i].Width + insideWidth;
+						x += _Columns[i].Width + 2*CellPadding + insideWidth;
 					}
 
 					// Draw the inside horizontals
-					sint32 y = _YReal + _HReal - border - _Rows[0].Height;
+					sint32 y = _YReal + _HReal - border - _Rows[0].Height - 2*CellPadding;
 					if (_Rows[0].Height != 0)
 					{
 						y -= insideWidth;
@@ -1223,10 +1223,10 @@ namespace NLGUI
 						{
 							for (j=0; j<_Columns.size(); j++)
 							{
-								rVR.drawRotFlipBitmap (_RenderLayer, x, y, _Columns[j].Width, insideWidth, 0, false, rVR.getBlankTextureId(), finalColor);
-								x += _Columns[j].Width + insideWidth;
+								rVR.drawRotFlipBitmap (_RenderLayer, x, y, _Columns[j].Width + 2*CellPadding, insideWidth, 0, false, rVR.getBlankTextureId(), finalColor);
+								x += _Columns[j].Width + 2*CellPadding + insideWidth;
 							}
-							y -= _Rows[i].Height+ insideWidth;
+							y -= _Rows[i].Height + insideWidth + 2*CellPadding;
 						}
 					}
 				}
