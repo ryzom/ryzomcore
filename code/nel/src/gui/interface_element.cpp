@@ -147,7 +147,9 @@ namespace NLGUI
 		}
 		if( name == "posparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
+			std::string pp;
+			getPosParent( pp );
+			return pp;
 		}
 		else
 		if( name == "sizeparent" )
