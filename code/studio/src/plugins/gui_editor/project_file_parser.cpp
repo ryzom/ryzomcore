@@ -63,7 +63,7 @@ namespace GUIEditor
 	unsigned long CProjectFileParser::getProjectVersion() const
 	{
 		if( !loaded )
-			return OLD;
+			return SProjectFiles::OLD;
 
 		return files.version;
 	}
@@ -71,7 +71,7 @@ namespace GUIEditor
 	void CProjectFileParser::clear()
 	{
 		files.projectName = "";
-		files.version = OLD;
+		files.version = SProjectFiles::OLD;
 		files.activeGroup = "";
 		files.guiFiles.clear();
 		files.mapFiles.clear();

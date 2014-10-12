@@ -212,6 +212,7 @@ namespace GUIEditor
 		std::string wnd = d.getWindowName().toUtf8().constData();
 		std::string mg = std::string( "ui:" ) + proj;
 		std::string dir = d.getProjectDirectory().toUtf8().constData();
+		_lastDir = dir.c_str();
 		std::string uiFile = "ui_" + proj + ".xml";
 
 		bool b = GUICtrl->createNewGUI( proj, wnd );
@@ -228,7 +229,7 @@ namespace GUIEditor
 		projectFiles.projectName = proj;
 		projectFiles.masterGroup = mg;
 		projectFiles.activeGroup = std::string( "ui:" ) + proj + ":" + wnd;
-		projectFiles.version = NEW;
+		projectFiles.version = SProjectFiles::NEW;
 		projectFiles.guiFiles.push_back( uiFile );
 		projectWindow->setupFiles( projectFiles );
 
@@ -278,8 +279,23 @@ namespace GUIEditor
 		// Can't save old projects any further, since the widgets are in multiple files in them
 		// using templates, styles and whatnot. There's no way to restore the original XML structure
 		// after it's loaded
-		if( projectParser.getProjectVersion() == OLD )
+		if( projectFiles.version == SProjectFiles::OLD )
 			return;
+
+		std::string f = _lastDir.toUtf8().constData();
+		f += "/";
+		f += projectFiles.guiFiles[ 0 ];
+
+		WidgetSerializer widgetSerializer;
+		widgetSerializer.setFile( f );
+		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
+		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
+		{
+			QMessageBox::critical( this,
+							tr( "Failed to save project" ),
+							tr( "There was an error while trying to save the project." ) );
+			return;
+		}
 	}
 
 	void GUIEditorWindow::saveAs()
@@ -292,42 +308,22 @@ namespace GUIEditor
 
 		if( dir.isEmpty() )
 			return;
+		_lastDir = dir;
 
-		projectFiles.guiFiles.clear();
-		projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
-		projectFiles.version = NEW;
-
-		QString newFile =
-			dir + "/" + projectFiles.projectName.c_str() + ".xml";
-
-		CProjectFileSerializer serializer;
-		serializer.setFile( newFile.toUtf8().constData() );
-		if( !serializer.serialize( projectFiles ) )
+		if( projectFiles.version == SProjectFiles::OLD )
 		{
-			QMessageBox::critical( this,
-							tr( "Failed to save project" ),
-							tr( "There was an error while trying to save the project." ) );
-			return;
+			projectFiles.guiFiles.clear();
+			projectFiles.guiFiles.push_back( "ui_" + projectFiles.projectName + ".xml"  );
+			projectFiles.version = SProjectFiles::NEW;
+
 		}
 
-		std::string guiFile =
-			std::string( dir.toUtf8().constData() ) + "/" + "ui_" + projectFiles.projectName + ".xml";
+		currentProjectFile = _lastDir;
+		currentProjectFile += "/";
+		currentProjectFile += projectFiles.projectName.c_str();
+		currentProjectFile += ".xml";
 
-		WidgetSerializer widgetSerializer;
-		widgetSerializer.setFile( guiFile );
-		widgetSerializer.setActiveGroup( projectFiles.activeGroup );
-		if( !widgetSerializer.serialize( projectFiles.masterGroup ) )
-		{
-			QMessageBox::critical( this,
-							tr( "Failed to save project" ),
-							tr( "There was an error while trying to save the project." ) );
-			return;
-		}
-
-		QMessageBox::information( this,
-						tr( "Save successful" ),
-						tr( "Project saved successfully!" ) );
-
+		save();
 	}
 
 	void GUIEditorWindow::reset()
