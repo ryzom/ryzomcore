@@ -559,6 +559,7 @@ namespace NLGUI
 		TableRatio = 0.f;
 		ForceWidthMin = 0;
 		Border=0;
+		BorderColor = CRGBA(127, 127, 127, 255);
 		CellPadding=0;
 		CellSpacing=0;
 		ContinuousUpdate = false;
@@ -1243,6 +1244,11 @@ namespace NLGUI
 			return toString( Border );
 		}
 		else
+		if( name == "bordercolor" )
+		{
+			return toString( BorderColor );
+		}
+		else
 		if( name == "cellpadding" )
 		{
 			return toString( CellPadding );
@@ -1276,6 +1282,14 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				Border = i;
+			return;
+		}
+		else
+		if( name == "bordercolor" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				BorderColor = c;
 			return;
 		}
 		else
@@ -1321,6 +1335,7 @@ namespace NLGUI
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
 		xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border ).c_str() );
+		xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( BorderColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellpadding", BAD_CAST toString( CellPadding ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellspacing", BAD_CAST toString( CellSpacing ).c_str() );
 		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
@@ -1343,6 +1358,12 @@ namespace NLGUI
 		if (ptr)
 		{
 			fromString((const char*)ptr, Border);
+		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"bordercolor" );
+		if (ptr)
+		{
+			BorderColor = convertColor((const char*)ptr);
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"cellpadding" );

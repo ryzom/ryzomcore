@@ -142,6 +142,7 @@ namespace NLGUI
 
 		// Table borders
 		sint32	Border;
+		NLMISC::CRGBA BorderColor;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 

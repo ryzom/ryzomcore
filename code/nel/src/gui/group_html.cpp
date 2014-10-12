@@ -1453,6 +1453,8 @@ namespace NLGUI
 						getPercentage (table->ForceWidthMin, table->TableRatio, value[MY_HTML_TABLE_WIDTH]);
 					if (present[MY_HTML_TABLE_BORDER] && value[MY_HTML_TABLE_BORDER])
 						fromString(value[MY_HTML_TABLE_BORDER], table->Border);
+					if (present[MY_HTML_TABLE_BORDERCOLOR] && value[MY_HTML_TABLE_BORDERCOLOR])
+						table->BorderColor = getColor (value[MY_HTML_TABLE_BORDERCOLOR]);
 					if (present[MY_HTML_TABLE_CELLSPACING] && value[MY_HTML_TABLE_CELLSPACING])
 						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
