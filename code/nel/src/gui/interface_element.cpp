@@ -294,8 +294,10 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "w", BAD_CAST toString( _W ).c_str() );
 		xmlNewProp( node, BAD_CAST "h", BAD_CAST toString( _H ).c_str() );
 		xmlNewProp( node, BAD_CAST "posref", BAD_CAST HotSpotCoupleToString( _ParentPosRef, _PosRef ).c_str() );
-		xmlNewProp( node, BAD_CAST "posparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this ).c_str() );
+		
+		std::string pp;
+		getPosParent( pp );
+		xmlNewProp( node, BAD_CAST "posparent", BAD_CAST pp.c_str() );
 		xmlNewProp( node, BAD_CAST "sizeref", BAD_CAST getSizeRefAsString().c_str() );
 		xmlNewProp( node, BAD_CAST "sizeparent",
 			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this ).c_str() );
@@ -1539,6 +1541,36 @@ namespace NLGUI
 				idParent = "ui:";
 			CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, idParent + Id );
 		}
+	}
+
+	void CInterfaceElement::getPosParent( std::string &id ) const
+	{
+
+		// If there's no pos parent set, then the parent group is the pos parent
+		if( getParentPos() == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If pos parent and parent are the same then ofc the parent group is the pos parent...
+		CInterfaceElement *p = getParent();
+		if( getParentPos() == p )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If parent is in the same group, use the short id
+		p = getParentPos();
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full id
+		id = p->getId();
 	}
 
 	void CInterfaceElement::setSizeParent( const std::string &id )
