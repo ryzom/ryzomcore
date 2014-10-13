@@ -89,20 +89,8 @@ namespace GUIEditor
 		reset();
 		IParser *parser = CWidgetManager::getInstance()->getParser();
 
-		std::vector< std::string >::iterator itr;
-		for( itr = files.mapFiles.begin(); itr != files.mapFiles.end(); ++itr )
-		{
-			std::string &file = *itr;
-			std::string::size_type i = file.find_last_of( '.' );
-			std::string mapFile = file.substr( 0, i );
-			mapFile.append( ".txt" );
-
-			if( !CViewRenderer::getInstance()->loadTextures( file, mapFile, false ) )
-			{
-				CViewRenderer::getInstance()->reset();
-				return false;
-			}
-		}
+		if( !loadMapFiles( files.mapFiles ) )
+			return false;
 
 		if( !parser->parseInterface( files.guiFiles, false ) )
 			return false;
@@ -115,6 +103,26 @@ namespace GUIEditor
 			e->setActive( true );
 
 		onGUILoaded();
+
+		return true;
+	}
+
+	bool NelGUICtrl::loadMapFiles( const std::vector< std::string > &v )
+	{
+		std::vector< std::string >::const_iterator itr;
+		for( itr = v.begin(); itr != v.end(); ++itr )
+		{
+			const std::string &file = *itr;
+			std::string::size_type i = file.find_last_of( '.' );
+			std::string mapFile = file.substr( 0, i );
+			mapFile.append( ".txt" );
+
+			if( !CViewRenderer::getInstance()->loadTextures( file, mapFile, false ) )
+			{
+				CViewRenderer::getInstance()->reset();
+				return false;
+			}
+		}
 
 		return true;
 	}

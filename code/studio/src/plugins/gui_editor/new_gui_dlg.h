@@ -20,6 +20,7 @@
 #define NEW_GUI_DLG_H
 
 #include "ui_new_gui_dlg.h"
+#include <QList>
 
 class NewGUIDlg : public QDialog
 {
@@ -32,11 +33,14 @@ public:
 	QString getProjectName() const;
 	QString getWindowName() const;
 	QString getProjectDirectory() const;
+	void getMapList( QList< QString > &l );
 
 private Q_SLOTS:
 	void onOKClicked();
 	void onCancelClicked();
 	void onProjectDirTBClicked();
+	void onAddClicked();
+	void onRemoveClicked();
 
 private:
 	Ui::NewGUIDialog m_ui;

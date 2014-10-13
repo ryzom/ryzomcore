@@ -43,6 +43,7 @@ namespace GUIEditor
 
 		void init();
 		bool parse( SProjectFiles &files );
+		bool loadMapFiles( const std::vector< std::string > &v );
 		bool createNewGUI( const std::string &project, const std::string &window );
 		void draw();
 		void reset();

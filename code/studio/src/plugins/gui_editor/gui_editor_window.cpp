@@ -215,6 +215,9 @@ namespace GUIEditor
 		_lastDir = dir.c_str();
 		std::string uiFile = "ui_" + proj + ".xml";
 
+		QList< QString > mapList;
+		d.getMapList( mapList );
+
 		bool b = GUICtrl->createNewGUI( proj, wnd );
 		if( !b )
 		{
@@ -222,6 +225,7 @@ namespace GUIEditor
 										tr( "Creating new GUI project" ),
 										tr( "Failed to create new GUI project :(" ) );
 			reset();
+			return;
 		}
 
 		hierarchyView->buildHierarchy( mg );
@@ -231,6 +235,22 @@ namespace GUIEditor
 		projectFiles.activeGroup = std::string( "ui:" ) + proj + ":" + wnd;
 		projectFiles.version = SProjectFiles::NEW;
 		projectFiles.guiFiles.push_back( uiFile );
+
+		for( int i = 0; i < mapList.size(); i++ )
+		{
+			projectFiles.mapFiles.push_back( mapList[ i ].toUtf8().constData() );
+		}
+
+		b = GUICtrl->loadMapFiles( projectFiles.mapFiles );
+		if( !b )
+		{
+			QMessageBox::information( this,
+										tr( "Creating new GUI project" ),
+										tr( "Failed to create new GUI project: Couldn't load map files. " ) );
+			reset();
+			return;
+		}
+		
 		projectWindow->setupFiles( projectFiles );
 
 		currentProject = proj.c_str();

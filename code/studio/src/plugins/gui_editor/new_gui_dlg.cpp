@@ -28,6 +28,8 @@ QDialog( parent )
 	connect( m_ui.okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
 	connect( m_ui.cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 	connect( m_ui.projectDirTB, SIGNAL( clicked( bool ) ), this, SLOT( onProjectDirTBClicked() ) );
+	connect( m_ui.addButton, SIGNAL( clicked( bool ) ), this, SLOT( onAddClicked() ) );
+	connect( m_ui.removeButton, SIGNAL( clicked( bool ) ), this, SLOT( onRemoveClicked() ) );
 
 }
 
@@ -48,6 +50,16 @@ QString NewGUIDlg::getWindowName() const
 QString NewGUIDlg::getProjectDirectory() const
 {
 	return m_ui.projectDirEdit->text();
+}
+
+void NewGUIDlg::getMapList( QList< QString > &l )
+{
+	l.clear();
+
+	for( int i = 0; i < m_ui.mapList->count(); i++ )
+	{
+		l.push_back( m_ui.mapList->item( i )->text() );
+	}
 }
 
 void NewGUIDlg::onOKClicked()
@@ -94,5 +106,30 @@ void NewGUIDlg::onProjectDirTBClicked()
 
 	m_ui.projectDirEdit->setText( dir );
 }
+
+void NewGUIDlg::onAddClicked()
+{
+	if( m_ui.mapEdit->text().isEmpty() )
+		return;
+
+	QList< QListWidgetItem* > l = m_ui.mapList->findItems( m_ui.mapEdit->text(), Qt::MatchContains );
+	if( !l.isEmpty() )
+	{
+		return;
+	}
+
+	m_ui.mapList->addItem( m_ui.mapEdit->text() );
+	m_ui.mapEdit->clear();
+}
+
+void NewGUIDlg::onRemoveClicked()
+{
+	QListWidgetItem *item = m_ui.mapList->currentItem();
+	if( item == NULL )
+		return;
+
+	delete item;
+}
+
 
 
