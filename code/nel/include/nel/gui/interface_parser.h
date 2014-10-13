@@ -28,6 +28,7 @@
 #include "nel/gui/proc.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/link_data.h"
+#include "nel/gui/variable_data.h"
 
 namespace NLGUI
 {
@@ -98,20 +99,6 @@ namespace NLGUI
 		{
 		public:
 			virtual void setupOptions() = 0;
-		};
-
-
-		struct VariableData
-		{
-			std::string entry;
-			std::string type;
-			std::string value;
-			uint32 size;
-
-			VariableData()
-			{
-				size = 0;
-			}
 		};
 
 		CInterfaceParser();
@@ -386,6 +373,7 @@ namespace NLGUI
 
 		void setEditorMode( bool b ){ editorMode = b; }
 
+		void setVariable( const VariableData &v );
 		bool serializeVariables( xmlNodePtr parentNode ) const;
 		bool serializeProcs( xmlNodePtr parentNode ) const;
 		bool serializePointerSettings( xmlNodePtr parentNode ) const;

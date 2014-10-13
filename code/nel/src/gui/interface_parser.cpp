@@ -2951,6 +2951,34 @@ namespace NLGUI
 		itr->second = linkData;
 	}
 
+	void CInterfaceParser::setVariable( const VariableData &v )
+	{
+		CInterfaceProperty prop;
+		const std::string &type = v.type;
+		const std::string &value = v.value;
+		const std::string &entry = v.entry;
+
+		if( type == "sint64" )
+			prop.readSInt64( value.c_str(), entry );
+		else
+		if( type == "sint32" )
+			prop.readSInt32( value.c_str(), entry );
+		else
+		if( type == "float" || type == "double" )
+			prop.readDouble( value.c_str(), entry );
+		else
+		if( type == "bool" )
+			prop.readBool( value.c_str(), entry );
+		else
+		if( type == "rgba" )
+			prop.readRGBA( value.c_str(), entry );
+		else
+		if( type == "hotspot" )
+			prop.readHotSpot( value.c_str(), entry );
+
+		variableCache[ entry ] = v;
+	}
+
 
 	bool CInterfaceParser::serializeVariables( xmlNodePtr parentNode ) const
 	{

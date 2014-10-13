@@ -3645,6 +3645,26 @@ namespace NLGUI
 
 		_Pointer = new CViewPointer( CViewBase::TCtorParam() );
 
+		IParser *parser = getParser();
+
+
+		// Set base color to white		
+		VariableData v;
+		v.type = "sint32";
+		v.value = "255";
+		
+		v.entry = "UI:SAVE:COLOR:R";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:G";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:B";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:A";
+		parser->setVariable( v );
+			
 		return true;
 	}
 
