@@ -58,6 +58,7 @@ namespace GUIEditor
 		projectFiles.projectName = files.projectName;
 		projectFiles.masterGroup = files.masterGroup;
 		projectFiles.activeGroup = files.activeGroup;
+		projectFiles.version = files.version;
 	}
 
 	unsigned long CProjectFileParser::getProjectVersion() const
