@@ -154,7 +154,9 @@ namespace NLGUI
 		else
 		if( name == "sizeparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
+			std::string sp;
+			getSizeParent( sp );
+			return sp;
 		}
 		else
 		if( name == "global_color" )
@@ -301,8 +303,8 @@ namespace NLGUI
 		getPosParent( pp );
 		xmlNewProp( node, BAD_CAST "posparent", BAD_CAST pp.c_str() );
 		xmlNewProp( node, BAD_CAST "sizeref", BAD_CAST getSizeRefAsString().c_str() );
-		xmlNewProp( node, BAD_CAST "sizeparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this ).c_str() );
+		getSizeParent( pp );
+		xmlNewProp( node, BAD_CAST "sizeparent", BAD_CAST pp.c_str() );
 
 		xmlNewProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 		xmlNewProp( node, BAD_CAST "render_layer", BAD_CAST toString( _RenderLayer ).c_str() );
@@ -1596,6 +1598,35 @@ namespace NLGUI
 				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
 			}
 		}
+	}
+
+	void CInterfaceElement::getSizeParent( std::string &id ) const
+	{
+		CInterfaceElement *p = getParentSize();
+
+		// If there's no parent set then the size parent is the parent
+		if( p == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is the same as the group parent, then the size parent is the parent ofc
+		if( p == getParent() )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is in the parent group, use the short Id
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full Id
+		id = p->getId();
 	}
 
 	void CInterfaceElement::registerDeletionWatcher( IDeletionWatcher *watcher )
