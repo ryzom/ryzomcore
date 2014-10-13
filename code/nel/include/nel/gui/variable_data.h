@@ -1,4 +1,4 @@
-// Object Viewer Qt GUI Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,49 +14,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef VARIABLE_DATA_H
+#define VARIABLE_DATA_H
 
-#ifndef PROJECT_FILES_H
-#define PROJECT_FILES_H
+#include "nel/misc/types_nl.h"
 
-#include <vector>
-#include <string>
-
-namespace GUIEditor
+namespace NLGUI
 {
-	struct SProjectFiles
+	struct VariableData
 	{
-	public:
-
-		enum ProjectVersion
+		std::string entry;
+		std::string type;
+		std::string value;
+		uint32 size;
+		
+		VariableData()
 		{
-			OLD = 0,
-			NEW = 1,
-			MAX_PROJECTFILE_VERSION
-		};
-
-		std::string projectName;
-		unsigned long version;
-		std::string masterGroup;
-		std::string activeGroup;
-		std::vector< std::string > guiFiles;
-		std::vector< std::string > mapFiles;
-
-		void clearFiles()
-		{
-			guiFiles.clear();
-			mapFiles.clear();
-		}
-
-		void clearAll()
-		{
-			clearFiles();
-			projectName = "";
-			masterGroup = "";
-			activeGroup = "";
+			size = 0;
 		}
 	};
+
 }
 
-#endif
 
+#endif
 

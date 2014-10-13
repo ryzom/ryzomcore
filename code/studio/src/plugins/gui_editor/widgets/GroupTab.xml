@@ -2,6 +2,7 @@
     <header>
         <name>GroupTab</name>
         <guiname>CGroupTab</guiname>
+		<classname>tab</classname>
         <ancestor>InterfaceGroup</ancestor>
         <description></description>
         <abstract>false</abstract>

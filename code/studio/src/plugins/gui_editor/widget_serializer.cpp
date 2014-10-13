@@ -93,8 +93,6 @@ namespace GUIEditor
 			return false;
 		}
 
-		ag->setActive( false );
-
 		if( mg->serializeSubGroups( root ) == NULL )
 		{
 			ag->setActive( true );
@@ -102,8 +100,6 @@ namespace GUIEditor
 			out.close();
 			return false;
 		}
-
-		ag->setActive( true );
 
 		if( !mg->serializeLinks( root ) )
 		{

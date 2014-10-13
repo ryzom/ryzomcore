@@ -147,12 +147,16 @@ namespace NLGUI
 		}
 		if( name == "posparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
+			std::string pp;
+			getPosParent( pp );
+			return pp;
 		}
 		else
 		if( name == "sizeparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
+			std::string sp;
+			getSizeParent( sp );
+			return sp;
 		}
 		else
 		if( name == "global_color" )
@@ -294,11 +298,13 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "w", BAD_CAST toString( _W ).c_str() );
 		xmlNewProp( node, BAD_CAST "h", BAD_CAST toString( _H ).c_str() );
 		xmlNewProp( node, BAD_CAST "posref", BAD_CAST HotSpotCoupleToString( _ParentPosRef, _PosRef ).c_str() );
-		xmlNewProp( node, BAD_CAST "posparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this ).c_str() );
+		
+		std::string pp;
+		getPosParent( pp );
+		xmlNewProp( node, BAD_CAST "posparent", BAD_CAST pp.c_str() );
 		xmlNewProp( node, BAD_CAST "sizeref", BAD_CAST getSizeRefAsString().c_str() );
-		xmlNewProp( node, BAD_CAST "sizeparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this ).c_str() );
+		getSizeParent( pp );
+		xmlNewProp( node, BAD_CAST "sizeparent", BAD_CAST pp.c_str() );
 
 		xmlNewProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 		xmlNewProp( node, BAD_CAST "render_layer", BAD_CAST toString( _RenderLayer ).c_str() );
@@ -1528,40 +1534,128 @@ namespace NLGUI
 
 	void CInterfaceElement::setPosParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			std::string idParent;
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, idParent + Id );
+			setParentPos( getParent() );
+			return;
 		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
+		}
+		else
+		{
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
+		}
+
+		if( pp != NULL )
+			setParentPos( pp );
+
+	}
+
+	void CInterfaceElement::getPosParent( std::string &id ) const
+	{
+
+		// If there's no pos parent set, then the parent group is the pos parent
+		if( getParentPos() == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If pos parent and parent are the same then ofc the parent group is the pos parent...
+		CInterfaceElement *p = getParent();
+		if( getParentPos() == p )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If parent is in the same group, use the short id
+		p = getParentPos();
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full id
+		id = p->getId();
 	}
 
 	void CInterfaceElement::setSizeParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-		std::string idParent;
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
+			setParentSize( getParent() );
+			return;
+		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
 		}
 		else
 		{
-			if( _Parent != NULL )
-			{
-				idParent = _Parent->getId();
-				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
-			}
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
 		}
+
+		if( pp != NULL )
+			setParentSize( pp );
+	}
+
+	void CInterfaceElement::getSizeParent( std::string &id ) const
+	{
+		CInterfaceElement *p = getParentSize();
+
+		// If there's no parent set then the size parent is the parent
+		if( p == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is the same as the group parent, then the size parent is the parent ofc
+		if( p == getParent() )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is in the parent group, use the short Id
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full Id
+		id = p->getId();
 	}
 
 	void CInterfaceElement::registerDeletionWatcher( IDeletionWatcher *watcher )

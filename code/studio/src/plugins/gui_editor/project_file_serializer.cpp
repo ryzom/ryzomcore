@@ -25,7 +25,7 @@ namespace GUIEditor
 		if( fileName.empty() )
 			return false;
 
-		if( project.version >= MAX_PROJECTFILE_VERSION )
+		if( project.version >= SProjectFiles::MAX_PROJECTFILE_VERSION )
 			return false;
 
 		out.open( fileName.c_str() );

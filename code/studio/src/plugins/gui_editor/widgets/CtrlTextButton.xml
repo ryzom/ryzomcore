@@ -2,6 +2,7 @@
     <header>
         <name>CtrlTextButton</name>
         <guiname>CCtrlTextButton</guiname>
+		<classname>text_button</classname>
         <ancestor>CtrlBaseButton</ancestor>
         <description></description>
         <abstract>false</abstract>
@@ -11,22 +12,22 @@
         <property>
             <name>tx_normal</name>
             <type>string</type>
-            <default></default>
+            <default>but</default>
         </property>
         <property>
             <name>tx_pushed</name>
             <type>string</type>
-            <default></default>
+            <default>but</default>
         </property>
         <property>
             <name>tx_over</name>
             <type>string</type>
-            <default></default>
+            <default>but_over</default>
         </property>
         <property>
             <name>hardtext</name>
             <type>string</type>
-            <default></default>
+            <default>push me</default>
         </property>
         <property>
             <name>wmargin</name>
@@ -156,7 +157,7 @@
         <property>
             <name>line_maxw</name>
             <type>int</type>
-            <default>0</default>
+            <default>100</default>
         </property>
         <property>
             <name>multi_line_space</name>

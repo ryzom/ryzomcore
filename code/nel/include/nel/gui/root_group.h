@@ -1,4 +1,4 @@
-// Object Viewer Qt GUI Editor plugin <http://dev.ryzom.com/projects/ryzom/>
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -15,48 +15,32 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef PROJECT_FILES_H
-#define PROJECT_FILES_H
+#ifndef ROOT_GROUP_H
+#define ROOT_GROUP_H
 
-#include <vector>
 #include <string>
+#include <map>
 
-namespace GUIEditor
+#include "nel/gui/interface_group.h"
+
+namespace NLGUI
 {
-	struct SProjectFiles
+
+	class CRootGroup : public CInterfaceGroup
 	{
 	public:
+		CRootGroup(const TCtorParam &param);
+		virtual ~CRootGroup();
 
-		enum ProjectVersion
-		{
-			OLD = 0,
-			NEW = 1,
-			MAX_PROJECTFILE_VERSION
-		};
+		virtual CInterfaceElement* getElement (const std::string &id);
+		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
+		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false);
 
-		std::string projectName;
-		unsigned long version;
-		std::string masterGroup;
-		std::string activeGroup;
-		std::vector< std::string > guiFiles;
-		std::vector< std::string > mapFiles;
-
-		void clearFiles()
-		{
-			guiFiles.clear();
-			mapFiles.clear();
-		}
-
-		void clearAll()
-		{
-			clearFiles();
-			projectName = "";
-			masterGroup = "";
-			activeGroup = "";
-		}
+	private:
+		std::map< std::string, CInterfaceGroup* > _Accel;
 	};
+
 }
 
 #endif
-
 
