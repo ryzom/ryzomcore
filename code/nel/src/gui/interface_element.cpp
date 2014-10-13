@@ -1534,17 +1534,36 @@ namespace NLGUI
 
 	void CInterfaceElement::setPosParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			std::string idParent;
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, idParent + Id );
+			setParentPos( getParent() );
+			return;
 		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
+		}
+		else
+		{
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
+		}
+
+		if( pp != NULL )
+			setParentPos( pp );
+
 	}
 
 	void CInterfaceElement::getPosParent( std::string &id ) const
@@ -1579,25 +1598,35 @@ namespace NLGUI
 
 	void CInterfaceElement::setSizeParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-		std::string idParent;
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
+			setParentSize( getParent() );
+			return;
+		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
 		}
 		else
 		{
-			if( _Parent != NULL )
-			{
-				idParent = _Parent->getId();
-				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
-			}
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
 		}
+
+		if( pp != NULL )
+			setParentSize( pp );
 	}
 
 	void CInterfaceElement::getSizeParent( std::string &id ) const
