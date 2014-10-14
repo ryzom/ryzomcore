@@ -2547,8 +2547,8 @@ namespace NLGUI
 
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext
-		_FontHeight = (uint) si.StringHeight + (_Shadow?(_ShadowOutline?2:1):0);
-		_FontLegHeight = (uint) si.StringLine + (_Shadow?(_ShadowOutline?2:1):0);
+		_FontHeight = (uint) si.StringHeight; // + (_Shadow?(_ShadowOutline?2:1):0);
+		_FontLegHeight = (uint) si.StringLine; // + (_Shadow?(_ShadowOutline?2:1):0);
 
 		// Space width
 		si = TextContext->getStringInfo(ucstring(" "));
