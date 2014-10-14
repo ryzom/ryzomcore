@@ -2834,7 +2834,8 @@ namespace NLGUI
 				pTooltip->setId(_Id+"_tt"+toString(i));
 				pTooltip->setAvoidResizeParent(avoidResizeParent());
 				pTooltip->setRenderLayer(getRenderLayer());
-				pTooltip->setDefaultContextHelp(CI18N::get(tempTooltips[i].toString()));
+				bool isI18N = tempTooltips[i].size() >= 2 && tempTooltips[i][0] == 'u' && tempTooltips[i][1] == 'i';
+				pTooltip->setDefaultContextHelp(isI18N ? CI18N::get(tempTooltips[i].toString()) : tempTooltips[i]);
 				pTooltip->setParentPos(this);
 				pTooltip->setParentPosRef(Hotspot_BR);
 				pTooltip->setPosRef(Hotspot_BR);
