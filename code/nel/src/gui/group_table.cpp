@@ -49,7 +49,7 @@ namespace NLGUI
 		TableColumnIndex = 0;
 		Group = new CInterfaceGroup(CViewBase::TCtorParam());
 		Align = Left;
-		VAlign = Top;
+		VAlign = Middle;
 		LeftMargin = 0;
 		NoWrap = false;
 		IgnoreMaxWidth = false;
@@ -620,8 +620,8 @@ namespace NLGUI
 		ForceWidthMin = 0;
 		Border=0;
 		BorderColor = CRGBA(32, 32, 32, 255);
-		CellPadding=0;
-		CellSpacing=0;
+		CellPadding=1;
+		CellSpacing=2;
 		ContinuousUpdate = false;
 	}
 

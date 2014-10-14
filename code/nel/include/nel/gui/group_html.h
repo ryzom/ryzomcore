@@ -528,7 +528,7 @@ namespace NLGUI
 			CCellParams () : BgColor(0,0,0,0)
 			{
 				Align = CGroupCell::Left;
-				VAlign = CGroupCell::Top;
+				VAlign = CGroupCell::Middle;
 				LeftMargin = 0;
 				NoWrap = false;
 			}
