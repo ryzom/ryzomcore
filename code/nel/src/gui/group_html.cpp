@@ -1519,11 +1519,19 @@ namespace NLGUI
 									}
 								}
 							}
+
+							if (present[MY_HTML_TD_COLSPAN] && value[MY_HTML_TD_COLSPAN])
+								fromString(value[MY_HTML_TD_COLSPAN], _Cells.back()->ColSpan);
+							if (present[MY_HTML_TD_ROWSPAN] && value[MY_HTML_TD_ROWSPAN])
+								fromString(value[MY_HTML_TD_ROWSPAN], _Cells.back()->RowSpan);
+
 							_Cells.back()->BgColor = _CellParams.back().BgColor;
 							_Cells.back()->Align = _CellParams.back().Align;
 							_Cells.back()->VAlign = _CellParams.back().VAlign;
 							_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
 							_Cells.back()->NoWrap = _CellParams.back().NoWrap;
+							_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
+							_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
 
 							float temp;
 							if (present[MY_HTML_TD_WIDTH] && value[MY_HTML_TD_WIDTH])

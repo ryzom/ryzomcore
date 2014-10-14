@@ -44,6 +44,8 @@ namespace NLGUI
 		TableRatio = 0.f;
 		WidthWanted = 0;
 		Height = 0;
+		ColSpan = 1;
+		RowSpan = 1;
 		Group = new CInterfaceGroup(CViewBase::TCtorParam());
 		Align = Left;
 		VAlign = Top;
@@ -250,6 +252,22 @@ namespace NLGUI
 			return;
 		}
 		else
+		if (name == "colspan" )
+		{
+			sint32 i;
+			if (fromString( value, i ) )
+				ColSpan = std::max(1, i);
+			return;
+		}
+		else
+		if (name == "rowspan" )
+		{
+			sint32 i;
+			if (fromString( value, i ) )
+				RowSpan = std::max(1, i);
+			return;
+		}
+		else
 			CInterfaceGroup::setProperty( name, value );
 	}
 
@@ -310,6 +328,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "ignore_max_width", BAD_CAST toString( IgnoreMaxWidth ).c_str() );
 		xmlSetProp( node, BAD_CAST "ignore_min_width", BAD_CAST toString( IgnoreMinWidth ).c_str() );
 		xmlSetProp( node, BAD_CAST "add_child_w", BAD_CAST toString( AddChildW ).c_str() );
+		xmlSetProp( node, BAD_CAST "colspan", BAD_CAST toString( ColSpan ).c_str() );
+		xmlSetProp( node, BAD_CAST "rowspan", BAD_CAST toString( RowSpan ).c_str() );
 
 		return node;
 	}
@@ -421,6 +441,22 @@ namespace NLGUI
 		if (ptr)
 		{
 			AddChildW = convertBool(ptr);
+		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"colspan" );
+		if (ptr)
+		{
+			sint32 i;
+			if (fromString((const char*)ptr, i))
+				ColSpan = std::max(1, i);
+		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"rowspan" );
+		if (ptr)
+		{
+			sint32 i;
+			if (fromString((const char*)ptr, i))
+				RowSpan = std::max(1, i);
 		}
 
 		return true;

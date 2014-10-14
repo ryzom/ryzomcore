@@ -78,6 +78,8 @@ namespace NLGUI
 		// The Width you want in pixel. This is the <td width="100"> parameter
 		sint32	WidthWanted;
 
+		sint32 ColSpan;
+		sint32 RowSpan;
 
 		// The min height of the cell
 		sint32	Height;
