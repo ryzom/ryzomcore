@@ -80,6 +80,7 @@ namespace NLGUI
 
 		sint32 ColSpan;
 		sint32 RowSpan;
+		sint32 TableColumnIndex;
 
 		// The min height of the cell
 		sint32	Height;
@@ -194,13 +195,14 @@ namespace NLGUI
 				WidthMax = 0;
 				WidthWanted = 0;
 				TableRatio = 0;
-				Height = 0;
+				RowSpan = 1;
 			}
 			sint32	Width;
 			sint32	Height;
 			sint32	WidthWanted;
 			sint32	WidthMax;
 			float	TableRatio;
+			sint32	RowSpan;
 		};
 
 		// Table row
