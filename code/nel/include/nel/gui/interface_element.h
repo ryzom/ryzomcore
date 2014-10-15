@@ -491,8 +491,10 @@ namespace NLGUI
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
 
+		void parsePosParent( const std::string &id );
 		void setPosParent( const std::string &id );
 		void getPosParent( std::string &id ) const;
+		void parseSizeParent( const std::string &id );
 		void setSizeParent( const std::string &id );
 		void getSizeParent( std::string &id ) const;
 		

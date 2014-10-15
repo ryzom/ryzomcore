@@ -388,13 +388,13 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"posparent" );
 		if (ptr)
 		{
-			setPosParent( std::string( (const char*)ptr ) );
+			parsePosParent( (const char*)ptr );
 		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"sizeparent" );
 		if (ptr)
 		{
-			setSizeParent( std::string( (const char*)ptr ) );
+			parseSizeParent( (const char*)ptr );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");
@@ -1532,6 +1532,26 @@ namespace NLGUI
 		return false;
 	}
 
+	void CInterfaceElement::parsePosParent( const std::string &id )
+	{
+		CInterfaceElement *p = getParent();
+
+		if( ( id == "parent" ) || ( id.empty() ) )
+		{
+			setParentPos( p );
+			return;
+		}
+
+		std::string ppId;
+
+		if( p != NULL )
+			ppId = p->getId() + ":" + id;
+		else
+			ppId = std::string( "ui:" ) + id;
+
+		CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, ppId );
+	}
+
 	void CInterfaceElement::setPosParent( const std::string &id )
 	{
 		// Parent or empty id simply means the group parent
@@ -1594,6 +1614,26 @@ namespace NLGUI
 
 		// Otherwise use the full id
 		id = p->getId();
+	}
+
+	void CInterfaceElement::parseSizeParent( const std::string &id )
+	{
+		CInterfaceElement *p = getParent();
+
+		if( ( id == "parent" ) || ( id.empty() ) )
+		{
+			setParentSize( p );
+			return;
+		}
+
+		std::string spId;
+
+		if( p != NULL )
+			spId = p->getId() + ":" + id;
+		else
+			spId = std::string( "ui:" ) + id;
+
+		CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, spId );
 	}
 
 	void CInterfaceElement::setSizeParent( const std::string &id )
