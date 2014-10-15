@@ -713,9 +713,6 @@ namespace GUIEditor
 		{
 			std::string j = element->getProperty( prop.propName );
 
-			if( j.empty() )
-				return;
-
 			QtProperty *pp = textureMgr->addProperty( prop.propName.c_str() );
 			if( pp == NULL )
 				return;
