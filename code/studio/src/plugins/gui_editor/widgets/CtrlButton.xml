@@ -12,17 +12,17 @@
         <property>
             <name>tx_normal</name>
             <type>string</type>
-            <default></default>
+            <default>tp_quit.tga</default>
         </property>
         <property>
             <name>tx_pushed</name>
             <type>string</type>
-            <default></default>
+            <default>tp_quit.tga</default>
         </property>
         <property>
             <name>tx_over</name>
             <type>string</type>
-            <default></default>
+            <default>tp_quit.tga</default>
         </property>
         <property>
             <name>scale</name>
