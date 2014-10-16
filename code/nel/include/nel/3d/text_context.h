@@ -147,12 +147,21 @@ public:
 			CRGBA bkup = rCS.Color;
 			rCS.Color = _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2D(*_Driver, x+_ShadeExtent, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
 			if (_ShadeOutline)
 			{
-				rCS.render2D(*_Driver, x-_ShadeExtent, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
-				rCS.render2D(*_Driver, x-_ShadeExtent, z+_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
-				rCS.render2D(*_Driver, x+_ShadeExtent, z+_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
+				float rext = _ShadeExtent * 0.7071f;
+				rCS.render2D(*_Driver, x+rext, z-rext, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-rext, z-rext, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-rext, z+rext, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x+rext, z+rext, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x+_ShadeExtent, z, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x-_ShadeExtent, z, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
+				rCS.render2D(*_Driver, x, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
+			}
+			else
+			{
+				rCS.render2D(*_Driver, x+_ShadeExtent, z-_ShadeExtent, _HotSpot, _ScaleX, _ScaleZ);
 			}
 			rCS.Color= bkup;
 		}
@@ -171,12 +180,21 @@ public:
 			CRGBA	bkup = rCS.Color;
 			rCS.Color= _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtent, z-_ShadeExtent, xmin, ymin, xmax, ymax);
 			if (_ShadeOutline)
 			{
-				rCS.render2DClip(*_Driver, rdrBuffer, x-_ShadeExtent, z-_ShadeExtent, xmin, ymin, xmax, ymax);
-				rCS.render2DClip(*_Driver, rdrBuffer, x-_ShadeExtent, z+_ShadeExtent, xmin, ymin, xmax, ymax);
-				rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtent, z+_ShadeExtent, xmin, ymin, xmax, ymax);
+				float rext = _ShadeExtent * 0.7071f;
+				rCS.render2DClip(*_Driver, rdrBuffer, x+rext, z-rext, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-rext, z-rext, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-rext, z+rext, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x+rext, z+rext, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtent, z, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x-_ShadeExtent, z, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x, z+_ShadeExtent, xmin, ymin, xmax, ymax);
+				rCS.render2DClip(*_Driver, rdrBuffer, x, z-_ShadeExtent, xmin, ymin, xmax, ymax);
+			}
+			else
+			{
+				rCS.render2DClip(*_Driver, rdrBuffer, x+_ShadeExtent, z-_ShadeExtent, xmin, ymin, xmax, ymax);
 			}
 			rCS.Color= bkup;
 		}
@@ -195,12 +213,21 @@ public:
 			CRGBA	bkup = rCS.Color;
 			rCS.Color= _ShadeColor;
 			rCS.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtent, y-_ShadeExtent, depth, xmin, ymin, xmax, ymax);
 			if (_ShadeOutline)
 			{
-				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-_ShadeExtent, y-_ShadeExtent, depth, xmin, ymin, xmax, ymax);
-				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-_ShadeExtent, y+_ShadeExtent, depth, xmin, ymin, xmax, ymax);
-				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtent, y+_ShadeExtent, depth, xmin, ymin, xmax, ymax);
+				float rext = _ShadeExtent * 0.7071f;
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+rext, y-rext, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-rext, y-rext, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-rext, y+rext, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+rext, y+rext, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtent, y, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x-_ShadeExtent, y, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x, y+_ShadeExtent, depth, xmin, ymin, xmax, ymax);
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x, y-_ShadeExtent, depth, xmin, ymin, xmax, ymax);
+			}
+			else
+			{
+				rCS.render2DUnProjected (*_Driver, renderBuffer, frustum, scaleMatrix, x+_ShadeExtent, y-_ShadeExtent, depth, xmin, ymin, xmax, ymax);
 			}
 			rCS.Color= bkup;
 		}
@@ -221,12 +248,21 @@ public:
 			CRGBA	bkup = _TempString.Color;
 			_TempString.Color = _ShadeColor;
 			_TempString.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			_TempString.render2D(*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
 			if (_ShadeOutline)
 			{
-				_TempString.render2D(*_Driver,x-_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-				_TempString.render2D(*_Driver,x-_ShadeExtent,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-				_TempString.render2D(*_Driver,x+_ShadeExtent,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+				float rext = _ShadeExtent * 0.7071f;
+				_TempString.render2D(*_Driver,x+rext,z-rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rext,z-rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rext,z+rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+rext,z+rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+_ShadeExtent,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-_ShadeExtent,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+			}
+			else
+			{
+				_TempString.render2D(*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
 			}
 			_TempString.Color = bkup;
 		}
@@ -251,12 +287,21 @@ public:
 			CRGBA	bkup = _TempString.Color;
 			_TempString.Color = _ShadeColor;
 			_TempString.Color.A = (uint8)((uint(bkup.A) * uint(_ShadeColor.A)+1)>>8);
-			_TempString.render2D(*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
 			if (_ShadeOutline)
 			{
-				_TempString.render2D(*_Driver,x-_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-				_TempString.render2D(*_Driver,x-_ShadeExtent,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
-				_TempString.render2D(*_Driver,x+_ShadeExtent,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+				float rext = _ShadeExtent * 0.7071f;
+				_TempString.render2D(*_Driver,x+rext,z-rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rext,z-rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-rext,z+rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+rext,z+rext,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x+_ShadeExtent,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x-_ShadeExtent,z,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z+_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+				_TempString.render2D(*_Driver,x,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
+			}
+			else
+			{
+				_TempString.render2D(*_Driver,x+_ShadeExtent,z-_ShadeExtent,_HotSpot,_ScaleX,_ScaleZ);
 			}
 			_TempString.Color = bkup;
 		}
