@@ -1336,6 +1336,11 @@ namespace NLGUI
 			// if click, and not frozen, then get the focus
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Frozen)
 			{
+				if( getEditorMode() )
+				{
+					return CViewBase::handleEvent( event );
+				}
+
 				_SelectingText = true;
 				stopParentBlink();
 				CWidgetManager::getInstance()->setCaptureKeyboard (this);
