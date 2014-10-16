@@ -1013,6 +1013,7 @@ bool mainLoop()
 	SetMouseCursor ();
 	// Set the cursor.
 	ContextCur.context("STAND BY");
+	UserControls.reset();
 
 	// set the default box for keyboard
 	setDefaultChatWindow(PeopleInterraction.ChatGroup.Window);
@@ -2463,6 +2464,7 @@ bool mainLoop()
 				SetMouseCursor ();
 				// Set the cursor.
 				ContextCur.context("STAND BY");
+				UserControls.reset();
 
 				// set the default box for keyboard
 				CChatWindow *defaultChatWindow;

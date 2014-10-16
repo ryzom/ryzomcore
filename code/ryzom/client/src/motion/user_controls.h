@@ -152,6 +152,8 @@ public:
 	/// Constructor
 	CUserControls();
 
+	void reset();
+
 	/// Return the string associated to the motion Mode.
 	std::string modeStr() const;
 	/// Return the motion Mode.
