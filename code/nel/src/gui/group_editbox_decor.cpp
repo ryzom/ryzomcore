@@ -283,6 +283,7 @@ namespace NLGUI
 		if( node == NULL )
 			return NULL;
 
+		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box_decor" );
 		xmlSetProp( node, BAD_CAST "tx_tl", BAD_CAST _Pvt->_Textures[ EBDPrivate::TL ]->getTexture().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_tr", BAD_CAST _Pvt->_Textures[ EBDPrivate::TM ]->getTexture().c_str() );
 		xmlSetProp( node, BAD_CAST "tx_tm", BAD_CAST _Pvt->_Textures[ EBDPrivate::TR ]->getTexture().c_str() );
