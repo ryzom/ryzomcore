@@ -1548,19 +1548,25 @@ namespace NLGUI
 				{
 					_ViewText->setParent( this );
 					_ViewText->setIdRecurse( "edit_text" );
-					_ViewText->setHardText( "sometext" );
+					_ViewText->setHardText( "" );
 					_ViewText->setPosRef( Hotspot_TL );
 					_ViewText->setParentPosRef( Hotspot_TL );
 					addView( _ViewText );
+
+					sint32 w,h;
+					w = std::max( sint32( _ViewText->getFontWidth() * _ViewText->getText().size() ), getW() );
+					h = std::max( sint32(  _ViewText->getFontHeight() ), getH() );
 					
-					setH( _ViewText->getFontHeight() );
-					setW( _ViewText->getFontWidth() * _ViewText->getText().size() );
+					setH( h );
+					setW( w );
 					
 				}
 				else
 					nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
 			}
 		}
+
+		_ViewText->setEditorSelectable( false );
 
 		// For MultiLine editbox, clip the end space, else weird when edit space at end of line (nothing happens)
 		if(_ViewText)

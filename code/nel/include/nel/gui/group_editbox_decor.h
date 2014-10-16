@@ -1,4 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2014  Laszlo Kis-Adam
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -14,32 +15,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef GROUP_EDITBOX_DECOR
+#define GROUP_EDITBOX_DECOR
 
-#include "stdpch.h"
-#include "nel/gui/dbview_bar3.h"
-#include "nel/gui/dbview_number.h"
-#include "nel/gui/dbview_quantity.h"
-#include "nel/gui/view_pointer.h"
-#include "nel/gui/group_editbox_decor.h"
+#include "nel/gui/group_editbox.h"
 
 namespace NLGUI
 {
-	void ifexprufct_forcelink();
-	void force_link_dbgroup_select_number_cpp();
-	void force_link_dbgroup_combo_box_cpp();
-	void force_link_group_wheel_cpp();
-
-	/// Necessary so the linker doesn't drop the code of these classes from the library
-	void LinkHack()
+	/// Decorated CGroupEditBox
+	class CGroupEditBoxDecor : public CGroupEditBox
 	{
-		CDBViewBar3::forceLink();
-		CDBViewNumber::forceLink();
-		CDBViewQuantity::forceLink();
-		CViewPointer::forceLink();
-		ifexprufct_forcelink();
-		force_link_dbgroup_select_number_cpp();
-		force_link_dbgroup_combo_box_cpp();
-		force_link_group_wheel_cpp();
-		CGroupEditBoxDecor::forceLink();
-	}
+	public:
+		DECLARE_UI_CLASS( CGroupEditBoxDecor )
+
+		CGroupEditBoxDecor( const TCtorParam &param );
+		~CGroupEditBoxDecor();
+
+		std::string getProperty( const std::string &name ) const;
+		void setProperty( const std::string &name, const std::string &value );
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		bool parse( xmlNodePtr cur, CInterfaceGroup *parent );
+		void draw();
+		void updateCoords();
+
+		static void forceLink();
+
+	private:
+		class EBDPrivate *_Pvt;
+	};
 }
+
+#endif
+
