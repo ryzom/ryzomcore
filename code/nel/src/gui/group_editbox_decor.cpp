@@ -150,7 +150,6 @@ namespace NLGUI
 			_Textures[ BG ]->setParentPosRef( Hotspot_MM );
 			_Textures[ BG ]->setScale( true );
 			_Textures[ BG ]->setSizeRef( "wh" );
-			_Textures[ BG ]->setRenderLayer( -1 );
 		}
 
 		std::vector< CViewBitmap* > _Textures;
@@ -169,6 +168,13 @@ namespace NLGUI
 	{
 		delete _Pvt;
 		_Pvt = NULL;
+	}
+
+	void CGroupEditBoxDecor::moveBy( sint32 x, sint32 y )
+	{
+		CInterfaceElement::moveBy( x, y );
+
+		_Pvt->updateCoords();
 	}
 
 	std::string CGroupEditBoxDecor::getProperty( const std::string &name ) const
