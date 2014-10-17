@@ -18,6 +18,7 @@
 #include "stdpch.h"
 #include "nel/gui/group_editbox_decor.h"
 #include "nel/gui/view_bitmap.h"
+#include "nel/gui/view_text.h"
 
 namespace NLGUI
 {
@@ -162,6 +163,10 @@ namespace NLGUI
 	{
 		_Pvt = new EBDPrivate();
 		_Pvt->setup( this );
+
+		createViewText();
+		getVT()->setSerializable( false );
+		getVT()->setEditorSelectable( false );
 	}
 
 	CGroupEditBoxDecor::~CGroupEditBoxDecor()
@@ -352,6 +357,9 @@ namespace NLGUI
 
 	void CGroupEditBoxDecor::updateCoords()
 	{
+		sint32 tw = _Pvt->_Textures[ EBDPrivate::L ]->getWReal();
+		getVT()->setX( tw + 1 );
+
 		CGroupEditBox::updateCoords();
 		_Pvt->updateCoords();
 	}
