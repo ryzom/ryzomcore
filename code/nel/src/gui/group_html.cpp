@@ -3153,111 +3153,57 @@ namespace NLGUI
 	void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg)
 	{
 		// In a paragraph ?
-		if (_Paragraph)
+		if (!_Paragraph)
 		{
-			string finalUrl;
+			newParagraph (0);
+			paragraphChange ();
+		}
 
+		string finalUrl;
+
+		// No more text in this text view
+		_CurrentViewLink = NULL;
+
+		// Not added ?
+		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
+
+		//
+		// 1/ try to load the image with the old system (local files in bnp)
+		//
+		string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
+		if (lookupLocalFile (finalUrl, image.c_str(), false))
+		{
+			newImage->setRenderLayer(getRenderLayer()+1);
+			image = finalUrl;
+		}
+		else
+		{
 			//
-			// 1/ try to load the image with the old system (local files in bnp)
+			// 2/ if it doesn't work, try to load the image in cache
 			//
-			string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
-			if (lookupLocalFile (finalUrl, image.c_str(), false))
+			image = localImageName(img);
+			if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
 			{
-				// No more text in this text view
-				_CurrentViewLink = NULL;
-
-				// Not added ?
-				CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-				/* todo link in image
-				if (getA())
-				{
-					newImage->Link = getLink();
-					newImage->setHTMLView (this);
-				}*/
-				newImage->setRenderLayer(getRenderLayer()+1);
-				newImage->setTexture (finalUrl);
-				newImage->setModulateGlobalColor(globalColor);
-
-				/* todo link in image
-				if (getA())
-					getParagraph()->addChildLink(newImage);
-				else*/
-				getParagraph()->addChild(newImage);
-				paragraphChange ();
+				// don't display image that are not power of 2
+				uint32 w, h;
+				CBitmap::loadSize (image, w, h);
+				if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+					image.clear();
 			}
 			else
 			{
 				//
-				// 2/ if it doesn't work, try to load the image in cache
+				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
 				//
-				image = localImageName(img);
-				if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
-				{
-					// No more text in this text view
-					_CurrentViewLink = NULL;
-
-					// Not added ?
-					CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-					/* todo link in image
-					if (getA())
-					{
-					newImage->Link = getLink();
-					newImage->setHTMLView (this);
-					}*/
-
-					// don't display image that are not power of 2
-					uint32 w, h;
-					CBitmap::loadSize (image, w, h);
-					if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-						image.clear();
-
-					newImage->setTexture (image);
-	//				newImage->setTexture (finalUrl);
-					newImage->setModulateGlobalColor(globalColor);
-
-					/* todo link in image
-					if (getA())
-					getParagraph()->addChildLink(newImage);
-					else*/
-					getParagraph()->addChild(newImage);
-					paragraphChange ();
-				}
-				else
-				{
-
-					//
-					// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
-					//
-					image = "web_del.tga";
-					if (lookupLocalFile (finalUrl, image.c_str(), false))
-					{
-						// No more text in this text view
-						_CurrentViewLink = NULL;
-
-						// Not added ?
-						CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-						/* todo link in image
-						if (getA())
-						{
-						newImage->Link = getLink();
-						newImage->setHTMLView (this);
-						}*/
-						newImage->setTexture (image);
-						//				newImage->setTexture (finalUrl);
-						newImage->setModulateGlobalColor(globalColor);
-
-						addImageDownload(img, newImage);
-
-						/* todo link in image
-						if (getA())
-						getParagraph()->addChildLink(newImage);
-						else*/
-						getParagraph()->addChild(newImage);
-						paragraphChange ();
-					}
-				}
+				image = "web_del.tga";
+				addImageDownload(img, newImage);
 			}
 		}
+		newImage->setTexture (image);
+		newImage->setModulateGlobalColor(globalColor);
+
+		getParagraph()->addChild(newImage);
+		paragraphChange ();
 	}
 
 	// ***************************************************************************
