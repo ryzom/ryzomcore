@@ -1681,21 +1681,19 @@ namespace NLGUI
 				break;
 			case HTML_TEXTAREA:
 				{
-					// Add the editbox
-	// 				nlinfo("textarea temp '%s'", _TextAreaTemplate.c_str());
-	// 				nlinfo("textarea name '%s'", _TextAreaName.c_str());
-	// 				nlinfo("textarea %d %d", _TextAreaRow, _TextAreaCols);
-	// 				nlinfo("textarea content '%s'", _TextAreaContent.toUtf8().c_str());
-					CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
-					if (textArea)
-					{
-						// Add the text area to the form
-						CGroupHTML::CForm::CEntry entry;
-						entry.Name = _TextAreaName;
-						entry.TextArea = textArea;
-						_Forms.back().Entries.push_back (entry);
-					}
 					_TextArea = false;
+					if (!(_Forms.empty()))
+					{
+						CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
+						if (textArea)
+						{
+							// Add the text area to the form
+							CGroupHTML::CForm::CEntry entry;
+							entry.Name = _TextAreaName;
+							entry.TextArea = textArea;
+							_Forms.back().Entries.push_back (entry);
+						}
+					}
 				}
 				break;
 			case HTML_TITLE:
