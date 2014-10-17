@@ -345,6 +345,8 @@ namespace NLGUI
 		if( prop )
 			_Pvt->_Textures[ EBDPrivate::BG ]->setTexture( ( const char* )prop );
 
+		getVT()->setIdRecurse( "edit_text" );
+
 		return true;
 	}
 
