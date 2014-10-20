@@ -121,7 +121,7 @@ namespace NLGUI
 		{
 			sint64 i;
 			if( fromString( value, i ) )
-				_Divisor = i;
+				_Modulo = i;
 			return;
 		}
 		else
