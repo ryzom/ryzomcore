@@ -182,6 +182,12 @@ namespace NLGUI
 		_Pvt->updateCoords();
 	}
 
+	void CGroupEditBoxDecor::setIdRecurse( const std::string &newID )
+	{
+		CInterfaceElement::setIdRecurse( newID );
+		_ViewText->setIdRecurse( _ViewText->getShortId() );
+	}
+
 	std::string CGroupEditBoxDecor::getProperty( const std::string &name ) const
 	{
 		if( name == "tx_tl" )

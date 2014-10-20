@@ -33,6 +33,8 @@ namespace NLGUI
 
 		void moveBy( sint32 x, sint32 y );
 
+		void setIdRecurse( const std::string &newID );
+
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
