@@ -249,5 +249,16 @@ namespace NLGUI
 	{
 	}
 
+	sint64 CDBViewNumber::getVal()
+	{
+		if( !_Number.hasValue() )
+			return 0;
+
+		if( _Modulo == 0 )
+			return _Number.getSInt64() / _Divisor;
+		else
+			return ( _Number.getSInt64() / _Divisor ) % _Modulo;
+	}
+
 }
 
