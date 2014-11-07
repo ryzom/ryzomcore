@@ -104,7 +104,8 @@
 			}
 			else
 			{
-				$this->serialUInt32($val->toInt());
+				$intValue = $val->toInt();
+				$this->serialUInt32($intValue);
 				debug(sprintf ("write enum '%s' %d<br>\n", $val->toString(), $this->Pos));
 			}
 		}
