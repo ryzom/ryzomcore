@@ -3,7 +3,7 @@
 while true
 do
 
-if [ "$2" == "" ]
+if [ "$2" = "" ]
 then
     echo
     echo USAGE: $0 sleep_time command_line

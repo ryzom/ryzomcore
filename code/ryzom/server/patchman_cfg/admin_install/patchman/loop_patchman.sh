@@ -10,6 +10,7 @@ do
 	  chmod 775 bin/ps_services 2> /dev/null
 	  chmod 775 bin/run_forever 2> /dev/null
 	  chmod 775 bin/shard 2> /dev/null
+	  chmod 775 bin/domain_* 2> /dev/null
 	  chmod 775 bin/startup 2> /dev/null
 	  chmod 775 bin/*.sh 2> /dev/null
 	  chmod 775 patchman/*_service 2> /dev/null
