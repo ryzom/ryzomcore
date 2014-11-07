@@ -145,6 +145,7 @@
 	{
 		$logFile = new CWwwLog();
 		$logFile->logStr("PHP ERROR/$errno $errmsg ($filename:$linenum)");
+		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(), TRUE));
 		// Never die after an error
 	}
 
