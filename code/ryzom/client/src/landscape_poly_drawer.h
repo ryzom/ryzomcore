@@ -97,7 +97,9 @@ private:
 
 	// renderScene is called in main loop. It can called beginRenderLandscapePolyPart and renderLandscapePolyPart
 	// methods.
-	friend void renderScene();
+	friend void beginRenderScene();
+	friend void drawRenderScene(bool wantTraversals, bool keepTraversals);
+	friend void endRenderScene(bool keepTraversals);
 
 	// Enable stencil test and initialize function and operation of stencil at the beginning of renderScene method,
 	// before opaque render of canopy and main scene parts.

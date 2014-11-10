@@ -880,6 +880,7 @@ void CDBGroupListSheetText::setup()
 		text->setFontSize(_TextTemplate.getFontSize());
 		text->setColor(_TextTemplate.getColor());
 		text->setShadow(_TextTemplate.getShadow());
+		text->setShadowOutline(_TextTemplate.getShadowOutline());
 		text->setLineMaxW(_TextTemplate.getLineMaxW());
 		text->setMultiLine(_TextTemplate.getMultiLine());
 		if(text->getMultiLine())

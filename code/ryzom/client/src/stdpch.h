@@ -55,7 +55,6 @@
 #include <nel/misc/matrix.h>
 #include <nel/misc/md5.h>
 #include <nel/misc/mem_stream.h>
-#include <nel/misc/mouse_device.h>
 #include <nel/misc/path.h>
 #include <nel/misc/polygon.h>
 #include <nel/misc/progress_callback.h>

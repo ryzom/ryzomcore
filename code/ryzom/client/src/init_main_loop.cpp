@@ -40,6 +40,8 @@
 #include "nel/3d/u_cloud_scape.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/u_water_env_map.h"
+#include "nel/3d/material.h"
+#include "nel/3d/fxaa.h"
 // Sound
 #include "nel/sound/u_audio_mixer.h"
 // Client
@@ -125,6 +127,8 @@ namespace R2
 	extern bool ReloadUIFlag;
 }
 
+extern bool SetMousePosFirstTime;
+
 extern EGSPD::CSeason::TSeason	ManualSeasonValue;
 UTextureFile			*LoadingBitmap = NULL;
 UTextureFile			*LoadingBitmapFull = NULL;
@@ -149,8 +153,12 @@ bool						UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
 #define	ENTITY_TEXTURE_NORMAL_LEVEL		1
 #define	ENTITY_TEXTURE_HIGH_LEVEL		0
 // Size in MB of the cache for entity texturing.
-#define	ENTITY_TEXTURE_NORMAL_MEMORY	10
-#define	ENTITY_TEXTURE_HIGH_MEMORY		40
+#define	ENTITY_TEXTURE_NORMAL_MEMORY	40
+#define	ENTITY_TEXTURE_HIGH_MEMORY		160
+// Size in KB of max upload per frame
+#define ENTITY_TEXTURE_LOW_MAXUP		64
+#define ENTITY_TEXTURE_NORMAL_MAXUP		128
+#define ENTITY_TEXTURE_HIGH_MAXUP		256
 
 // Don't Modify, set true for debug purpose only
 const bool	DBG_DisablePreloadShape= false;
@@ -563,6 +571,9 @@ void initMainLoop()
 		if(Scene == 0)
 			nlerror("initMainLoop : Cannot create a Scene.");
 
+		// create effects
+		if (ClientCfg.FXAA && !FXAA) FXAA = new NL3D::CFXAA(Driver);
+
 		// use this scene for bloom effect
 		CBloomEffect::getInstance().setScene(Scene);
 
@@ -878,8 +889,10 @@ void initMainLoop()
 				{
 					// setup "v2 texture" (or 512*512)
 					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_HIGH_LEVEL);
-					// Allow a big cache for them (should be on 128 Mo card only)
+					// Allow a big cache for them (should be on 512 Mo card only)
 					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_HIGH_MEMORY*1024*1024);
+					// Allow high upload
+					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_HIGH_MAXUP*1024);
 				}
 				else
 				{
@@ -887,6 +900,8 @@ void initMainLoop()
 					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_NORMAL_LEVEL);
 					// Allow a big cache for them
 					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+					// Allow normal upload
+					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_NORMAL_MAXUP*1024);
 				}
 			}
 			else
@@ -897,6 +912,8 @@ void initMainLoop()
 				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL-1, ENTITY_TEXTURE_NORMAL_LEVEL-1);
 				// Allow a big cache for them
 				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+				// Allow low upload
+				Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_LOW_MAXUP*1024);
 			}
 		}
 
@@ -1253,7 +1270,8 @@ void initMainLoop()
 //	NLMEMORY::CheckHeap (true);
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
-	InitMouseWithCursor (ClientCfg.HardwareCursor); // the return value of enableLowLevelMouse() has already been tested at startup
+	SetMousePosFirstTime = true;
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required
 	// NB nico : done at end of loading
@@ -1496,6 +1514,7 @@ void initWelcomeWindow()
 
 // ***************************************************************************
 
+// NOTE: This feature is not really used anymore, it is a patch transition
 void initHardwareCursor(bool secondCall)
 {
 	CInterfaceManager * pIM = CInterfaceManager::getInstance();
@@ -1571,6 +1590,7 @@ void initBloomConfigUI()
 		if(group)
 			group->setDefaultContextHelp(CI18N::get("uiFxTooltipBloom"));
 
+		ClientCfg.writeBool("FXAA", false);
 		ClientCfg.writeBool("Bloom", false);
 		ClientCfg.writeBool("SquareBloom", false);
 		ClientCfg.writeInt("DensityBloom", 0);

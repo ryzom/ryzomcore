@@ -541,7 +541,7 @@ Translator.translateEventHandlers = function(context, hlNpc, eventHandlers, rtNp
 		while k do
 			local caller = nil
 			if devMode then
-				caller = function (...) arg[1](arg[2], arg[3], arg[4], arg[5]) return true end
+				caller = function (...) local arg = {...} arg[1](arg[2], arg[3], arg[4], arg[5]) return true end
 		
 			else
 				caller = pcall			
@@ -898,6 +898,7 @@ end
 -- Returns a RtNpcEventHandlerAction if the action is allowed
 --first parameter: action type
 Translator.createAction = function(...)
+	local arg = {...}
 	local debug=config.R2EDExtendedDebug
 	local function header(toto)
 
@@ -2774,6 +2775,7 @@ end
 --third param : GroupsByName
 --then, parameters
 Translator.createEvent = function(...)
+	local arg = {...}
 	local event = r2.newComponent("RtNpcEventHandler")
 	local eventType = arg[1]
 	event.Event = eventType

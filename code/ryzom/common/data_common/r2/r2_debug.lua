@@ -140,7 +140,8 @@ end
 
 function assert(cond)
 	if not cond then
-		rawDebugInfo(colorTag(255, 0, 255) .. "ASSERTION FAILED !! ")
+		-- rawDebugInfo(colorTag(255, 0, 255) .. "ASSERTION FAILED !! ")
+		rawDebugInfo("@{FOFF}ASSERTION FAILED !! ")
 		dumpCallStack(2);
 		error("")
 	end

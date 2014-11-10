@@ -12,7 +12,7 @@ function settings(){
                 if(($_GET['id'] != $_SESSION['id']) && (!Ticket_User::isMod(unserialize($_SESSION['ticket_user']))) ){
                     //ERROR: No access!
                     $_SESSION['error_code'] = "403";
-                header("Cache-Control: max-age=1");
+                    header("Cache-Control: max-age=1");
                     header("Location: index.php?page=error");
                     throw new SystemExit();
                 }else{
@@ -44,6 +44,16 @@ function settings(){
             $result['country_array'] = getCountryArray();
             global $INGAME_WEBPATH;
             $result['ingame_webpath'] = $INGAME_WEBPATH;
+            
+            
+            $dbl = new DBLayer("lib");
+            $statement = $dbl->executeWithoutParams("SELECT * FROM settings");
+            $rows = $statement->fetchAll();
+            
+            foreach ($rows as &$value) {
+                $result[$value['Setting']] = $value['Value'];
+            }
+            
             return $result;
     }else{
         //ERROR: not logged in!

@@ -944,6 +944,7 @@ public:
 	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
+	virtual bool			textureCoordinateAlternativeMode() const { return true; };
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 
@@ -1032,11 +1033,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
 
 	// Lights
 	virtual uint			getMaxLight () const;

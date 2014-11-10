@@ -43,6 +43,9 @@
 #include "nel/3d/u_instance_material.h"
 #include "nel/3d/u_cloud_scape.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/render_target_manager.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/fxaa.h"
 // game share
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
@@ -165,7 +168,6 @@ using namespace std;
 // EXTERN //
 ////////////
 extern UDriver					*Driver;
-extern IMouseDevice				*MouseDevice;
 extern UScene					*Scene;
 extern UScene					*SceneRoot;
 extern ULandscape				*Landscape;
@@ -421,9 +423,9 @@ void	beginRenderMainScenePart()
 {
 	Scene->beginPartRender();
 }
-void	endRenderMainScenePart()
+void	endRenderMainScenePart(bool keepTraversals)
 {
-	Scene->endPartRender(true);
+	Scene->endPartRender(!keepTraversals, true, keepTraversals);
 }
 
 void	beginRenderSkyPart()
@@ -460,7 +462,7 @@ static void renderCanopyPart(UScene::TRenderPart renderPart)
 
 // ***************************************************************************************************************************
 // Render a part of the main scene
-static void renderMainScenePart(UScene::TRenderPart renderPart)
+static void renderMainScenePart(UScene::TRenderPart renderPart, bool wantTraversals, bool keepTraversals)
 {
 	H_AUTO_USE ( RZ_Client_Main_Loop_Render_Main )
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
@@ -472,7 +474,7 @@ static void renderMainScenePart(UScene::TRenderPart renderPart)
 	{
 		MainFogState.setupInDriver (*Driver);
 	}
-	Scene->renderPart(renderPart);
+	Scene->renderPart(renderPart, true, wantTraversals, keepTraversals);
 }
 
 
@@ -562,13 +564,15 @@ void clearBuffers()
 
 void renderScene(bool forceFullDetail, bool bloom)
 {
+	CTextureUser *effectRenderTarget = NULL;
 	if (bloom)
 	{
 		// set bloom parameters before applying bloom effect
 		CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
 		CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-		// init bloom
-		CBloomEffect::getInstance().initBloom();
+
+		// init effect render target
+		Driver->beginDefaultRenderTarget();
 	}
 	if (forceFullDetail)
 	{
@@ -576,7 +580,7 @@ void renderScene(bool forceFullDetail, bool bloom)
 		s_ForceFullDetail.set();
 	}
 	clearBuffers();
-	renderScene();
+	doRenderScene(true, false);
 	if (forceFullDetail)
 	{
 		s_ForceFullDetail.restore();
@@ -584,8 +588,10 @@ void renderScene(bool forceFullDetail, bool bloom)
 	if (bloom)
 	{
 		// apply bloom effect
-		CBloomEffect::getInstance().endBloom();
-		CBloomEffect::getInstance().endInterfacesDisplayBloom();
+		CBloomEffect::getInstance().applyBloom();
+
+		// draw final result to backbuffer
+		Driver->endDefaultRenderTarget(Scene);
 	}
 }
 
@@ -661,7 +667,7 @@ void updateWeather()
 		updateClouds();
 	}
 	#endif
-	
+
 	ContinentMngr.getFogState(MainFog, LightCycleManager.getLightLevel(), LightCycleManager.getLightDesc().DuskRatio, LightCycleManager.getState(), View.viewPos(), MainFogState);
 
 	// TODO: ZBuffer clear was originally before this, but should not be necessary normally.
@@ -687,7 +693,7 @@ void updateWeather()
 		Driver->setPolygonMode(oldMode);
 	}
 	#endif
-	
+
 	// Update new sky
 	s_SkyMode = NoSky;
 	if (ContinentMngr.cur() && !ContinentMngr.cur()->Indoor)
@@ -713,9 +719,7 @@ void updateWeather()
 	}
 }
 
-// ***************************************************************************************************************************
-// Render all scenes
-void renderScene()
+void beginRenderScene()
 {
 	// Update Filter Flags
 	Scene->enableElementRender(UScene::FilterAllMeshNoVP, Filter3D[FilterMeshNoVP]);
@@ -737,26 +741,43 @@ void renderScene()
 	beginRenderCanopyPart();
 	beginRenderMainScenePart();
 	beginRenderSkyPart();
+}
+
+void drawRenderScene(bool wantTraversals, bool keepTraversals)
+{
 	// Render part
 	// WARNING: always must begin rendering with at least UScene::RenderOpaque,
 	// else dynamic shadows won't work
 	renderCanopyPart(UScene::RenderOpaque);
-	renderMainScenePart(UScene::RenderOpaque);
+	renderMainScenePart(UScene::RenderOpaque, wantTraversals, keepTraversals);
 
 	// render of polygons on landscape
 	CLandscapePolyDrawer::getInstance().renderLandscapePolyPart();
 
 	if (s_SkyMode != NoSky) renderSkyPart((UScene::TRenderPart) (UScene::RenderOpaque | UScene::RenderTransparent));
 	renderCanopyPart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
-	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare));
+	renderMainScenePart((UScene::TRenderPart) (UScene::RenderTransparent | UScene::RenderFlare), wantTraversals, keepTraversals);
 	if (s_SkyMode == NewSky) renderSkyPart(UScene::RenderFlare);
+}
+
+void endRenderScene(bool keepTraversals)
+{
 	// End Part Rendering
 	endRenderSkyPart();
-	endRenderMainScenePart();
+	endRenderMainScenePart(keepTraversals);
 	endRenderCanopyPart();
 
 	// reset depth range
 	Driver->setDepthRange(0.f, CANOPY_DEPTH_RANGE_START);
+}
+
+// ***************************************************************************************************************************
+// Render all scenes
+void doRenderScene(bool wantTraversals, bool keepTraversals)
+{
+	beginRenderScene();
+	drawRenderScene(wantTraversals, keepTraversals);
+	endRenderScene(keepTraversals);
 }
 
 
@@ -992,6 +1013,7 @@ bool mainLoop()
 	SetMouseCursor ();
 	// Set the cursor.
 	ContextCur.context("STAND BY");
+	UserControls.reset();
 
 	// set the default box for keyboard
 	setDefaultChatWindow(PeopleInterraction.ChatGroup.Window);
@@ -1387,8 +1409,20 @@ bool mainLoop()
 		MainCam.setRotQuat(View.currentViewQuat());
 		if (StereoHMD)
 		{
+			CMatrix camMatrix;
+			camMatrix.translate(MainCam.getMatrix().getPos());
+			CVector dir = MainCam.getMatrix().getJ();
+			dir.z = 0;
+			dir.normalize();
+			if (dir.y < 0)
+				camMatrix.rotateZ(float(NLMISC::Pi+asin(dir.x)));
+			else
+				camMatrix.rotateZ(float(NLMISC::Pi+NLMISC::Pi-asin(dir.x)));
+
+			StereoHMD->setInterfaceMatrix(camMatrix);
+
 			NLMISC::CQuat hmdOrient = StereoHMD->getOrientation();
-			NLMISC::CMatrix camMatrix = MainCam.getMatrix();
+			// NLMISC::CMatrix camMatrix = MainCam.getMatrix();
 			NLMISC::CMatrix hmdMatrix;
 			hmdMatrix.setRot(hmdOrient);
 			NLMISC::CMatrix posMatrix; // minimal head modeling, will be changed in the future
@@ -1396,8 +1430,15 @@ bool mainLoop()
 			NLMISC::CMatrix mat = ((camMatrix * hmdMatrix) * posMatrix);
 			MainCam.setPos(mat.getPos());
 			MainCam.setRotQuat(mat.getRot());
+
+			if (true) // TODO: ClientCfg.Headphone
+			{
+				// NOTE: non-(StereoHMD+Headphone) impl in user_entity.cpp
+				SoundMngr->setListenerPos(mat.getPos()); // TODO: Move ears back ... :)
+				SoundMngr->setListenerOrientation(mat.getJ(), mat.getK());
+			}
 		}
-		if (StereoDisplay) 
+		if (StereoDisplay)
 		{
 			StereoDisplay->updateCamera(0, &MainCam);
 			if (SceneRoot)
@@ -1596,14 +1637,31 @@ bool mainLoop()
 			{
 				// Update water env map (happens when continent changed etc)
 				updateWaterEnvMap();
-				
+
 				// Update weather
 				updateWeather();
 			}
 		}
-		
+
 		uint i = 0;
-		uint bloomStage = 0;
+		CTextureUser *effectRenderTarget = NULL;
+		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
+			&& (ClientCfg.Bloom || FXAA);
+		bool defaultRenderTarget = false;
+		if (haveEffects)
+		{
+			if (!StereoDisplay)
+			{
+				Driver->beginDefaultRenderTarget();
+				defaultRenderTarget = true;
+			}
+			if (ClientCfg.Bloom)
+			{
+				CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
+				CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
+			}
+		}
+		bool fullDetail = false;
 		while ((!StereoDisplay && i == 0) || (StereoDisplay && StereoDisplay->nextPass()))
 		{
 			++i;
@@ -1635,57 +1693,65 @@ bool mainLoop()
 
 			// Commit camera changes
 			commitCamera();
-			
+
 			//////////////////////////
 			// RENDER THE FRAME  3D //
 			//////////////////////////
 
 			bool stereoRenderTarget = (StereoDisplay != NULL) && StereoDisplay->beginRenderTarget();
-				
+
 			if (!StereoDisplay || StereoDisplay->wantClear())
 			{
-				if (Render)
-				{
-					if (ClientCfg.Bloom)
-					{
-						nlassert(bloomStage == 0);
-						// set bloom parameters before applying bloom effect
-						CBloomEffect::getInstance().setSquareBloom(ClientCfg.SquareBloom);
-						CBloomEffect::getInstance().setDensityBloom((uint8)ClientCfg.DensityBloom);
-						// start bloom effect (just before the first scene element render)
-						CBloomEffect::instance().initBloom();
-						bloomStage = 1;
-					}
-				}
-
 				// Clear buffers
 				clearBuffers();
 			}
 
 			if (!StereoDisplay || StereoDisplay->wantScene())
 			{
-				if (!ClientCfg.Light)
+				if (!ClientCfg.Light && Render)
 				{
-					// Render
-					if(Render)
+					if (!StereoDisplay || StereoDisplay->isSceneFirst())
 					{
 						// nb : force full detail if a screenshot is asked
 						// todo : move outside render code
-						bool fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
-						if (fullDetail)
+						if (!fullDetail)
 						{
-							s_ForceFullDetail.backup();
-							s_ForceFullDetail.set();
+							fullDetail = ScreenshotRequest != ScreenshotRequestNone && ClientCfg.ScreenShotFullDetail;
+							if (fullDetail)
+							{
+								s_ForceFullDetail.backup();
+								s_ForceFullDetail.set();
+							}
 						}
-						
-						// Render scene
-						renderScene();
+					}
 
+					// Render scene
+					bool wantTraversals = !StereoDisplay || StereoDisplay->isSceneFirst();
+					bool keepTraversals = StereoDisplay && !StereoDisplay->isSceneLast();
+					doRenderScene(wantTraversals, keepTraversals);
+					
+					if (!StereoDisplay || StereoDisplay->isSceneLast())
+					{
 						if (fullDetail)
 						{
 							s_ForceFullDetail.restore();
+							fullDetail = false;
 						}
 					}
+				}
+			}
+
+			if (!StereoDisplay || StereoDisplay->wantSceneEffects())
+			{
+				if (!ClientCfg.Light && Render && haveEffects)
+				{
+					if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
+					UCamera	pCam = Scene->getCam();
+					Driver->setMatrixMode2D11();
+					if (FXAA) FXAA->applyEffect();
+					if (ClientCfg.Bloom) CBloomEffect::instance().applyBloom();
+					Driver->setMatrixMode3D(pCam);
+					if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 				}
 			}
 
@@ -1696,15 +1762,6 @@ bool mainLoop()
 					// Render
 					if (Render)
 					{
-						if (ClientCfg.Bloom && bloomStage == 1)
-						{
-							// End the actual bloom effect visible in the scene.
-							if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
-							CBloomEffect::instance().endBloom();
-							if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
-							bloomStage = 2;
-						}
-
 						// for that frame and
 						// tmp : display height grid
 						//static volatile bool displayHeightGrid = true;
@@ -1823,14 +1880,14 @@ bool mainLoop()
 
 					// special case in OpenGL : all scene has been display in render target,
 					// now, final texture is display with a quad
-					if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2)
+					/*if (!ClientCfg.Light && ClientCfg.Bloom && Render && bloomStage == 2) // NO VR BLOOMZ
 					{
 						// End bloom effect system after drawing the 3d interface (z buffer related).
 						if (StereoDisplay) Driver->setViewport(NL3D::CViewport());
 						CBloomEffect::instance().endInterfacesDisplayBloom();
 						if (StereoDisplay) Driver->setViewport(StereoDisplay->getCurrentViewport());
 						bloomStage = 0;
-					}
+					}*/
 				}
 
 				{
@@ -1868,6 +1925,7 @@ bool mainLoop()
 
 						// Create a shadow when displaying a text.
 						TextContext->setShaded(true);
+						TextContext->setShadeOutline(false);
 						// Set the font size.
 						TextContext->setFontSize(10);
 						// Set the text color
@@ -2144,6 +2202,12 @@ bool mainLoop()
 			}
 		} /* stereo pass */
 
+		if (defaultRenderTarget)
+		{
+			// draw final result to backbuffer
+			Driver->endDefaultRenderTarget(Scene);
+		}
+
 		// Draw to screen.
 		static CQuat MainCamOri;
 		if (FirstFrame)
@@ -2400,6 +2464,7 @@ bool mainLoop()
 				SetMouseCursor ();
 				// Set the cursor.
 				ContextCur.context("STAND BY");
+				UserControls.reset();
 
 				// set the default box for keyboard
 				CChatWindow *defaultChatWindow;
@@ -2446,7 +2511,7 @@ bool mainLoop()
 			connectionState = NetMngr.getConnectionState();
 
 			CLuaManager::getInstance().executeLuaScript("game:onFarTpEnd()");
-		} 
+		}
 		///////////////
 		// <- FAR_TP //
 		///////////////
@@ -2524,6 +2589,7 @@ void	displaySpecialTextProgress(const char *text)
 {
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(12);
 	// Set the text color
@@ -3184,7 +3250,7 @@ NLMISC_COMMAND(debugUI, "Debug the ui : show/hide quads of bboxs and hotspots", 
 		else
 			fromString(args[0], on);
 	}
-	
+
 	CGroupCell::setDebugUICell( on );
 	DebugUIView = on;
 	DebugUICtrl = on;

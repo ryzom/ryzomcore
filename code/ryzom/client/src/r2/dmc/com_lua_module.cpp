@@ -238,7 +238,15 @@ void CComLuaModule::initLuaLib()
 	};
 	int initialStackSize = lua_gettop(_LuaState);
 #if LUA_VERSION_NUM >= 502
-	luaL_newlib(_LuaState, methods);
+	// luaL_newlib(_LuaState, methods);
+	// lua_setglobal(_LuaState, R2_LUA_PATH);
+	lua_getglobal(_LuaState, R2_LUA_PATH);
+	if (lua_isnil(_LuaState, -1))
+	{
+	  lua_pop(_LuaState, 1);
+	  lua_newtable(_LuaState);
+	}
+	luaL_setfuncs(_LuaState, methods, 0);
 	lua_setglobal(_LuaState, R2_LUA_PATH);
 #else
 	luaL_openlib(_LuaState, R2_LUA_PATH, methods, 0);

@@ -188,7 +188,7 @@ protected:
 	/// the harvestable Mps (4 per entity)
 	std::vector< CCreatureRawMaterial>	_Mps;
 
-	/// pointer on the harverting character
+	/// pointer on the harvesting character
 	TDataSetRow					_HarvesterRowId;
 
 	/// skill used to harvest this creature

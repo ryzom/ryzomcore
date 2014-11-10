@@ -233,6 +233,9 @@ namespace NLGUI
 
 		virtual void setActive (bool state);
 
+		void setXReal( sint32 x ){ _XReal = x; }
+		void setYReal( sint32 y ){ _YReal = y; }
+
 		void setX (sint32 x) { _X = x; }
 		void setXAndInvalidateCoords (sint32 x) { _X = x; invalidateCoords(); }
 
@@ -488,8 +491,12 @@ namespace NLGUI
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
 
+		void parsePosParent( const std::string &id );
 		void setPosParent( const std::string &id );
+		void getPosParent( std::string &id ) const;
+		void parseSizeParent( const std::string &id );
 		void setSizeParent( const std::string &id );
+		void getSizeParent( std::string &id ) const;
 		
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }
@@ -505,7 +512,24 @@ namespace NLGUI
 
 		/// Called when the widget is deleted,
 		/// so other widgets in the group can check if it belongs to them
-		virtual void onWidgetDeleted( CInterfaceElement *e ){}
+		virtual void onWidgetDeleted( CInterfaceElement *e );
+
+		/// Move the element by x in the X direction and y in the Y direction
+		//  Uses real coordinates
+		virtual void moveBy( sint32 x, sint32 y )
+		{
+			_XReal += x;
+			_YReal += y;
+		}
+
+		/// Retrieves the coordinates of the specified hotspot
+		void getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const;
+
+		/// Tells which hotspot is the closest to the specified element
+		void getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs );
+
+		/// Aligns the element to the other element specified
+		void alignTo( CInterfaceElement *other );
 
 	protected:
 

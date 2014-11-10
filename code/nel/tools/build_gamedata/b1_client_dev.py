@@ -52,6 +52,10 @@ if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	cfg.write("PreDataPath          = {\n")
 	cfg.write("\t\"" + InstallDirectory + "\", \"user\", \"patch\", \"data\", \"examples\" \n")
 	cfg.write("};\n")
+	cfg.write("PatchWanted          = 0;\n")
+	cfg.write("DisplayLuaDebugInfo  = 1;\n")
+	cfg.write("AllowDebugLua        = 1;\n")
+	cfg.write("FullScreen           = 0;\n")
 	printLog(log, "")
 
 printLog(log, ">>> Install data <<<")

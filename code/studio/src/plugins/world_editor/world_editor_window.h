@@ -46,6 +46,7 @@ public:
 	~WorldEditorWindow();
 
 	QUndoStack *undoStack() const;
+    void onActivated();
 	void maybeSave();
 
 Q_SIGNALS:

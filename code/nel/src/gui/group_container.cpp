@@ -2373,7 +2373,7 @@ namespace NLGUI
 		{
 			setMaxH(_PopupMaxH);
 			// _W is given by scripter-man
-			newH = pLayer->H_T;
+			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 		else
 		{
@@ -2382,7 +2382,7 @@ namespace NLGUI
 				_W = _Parent->getW();
 			}
 			setMaxH (16384); // No scrollbar for container of layer > 0
-			newH = pLayer->H_T;
+			newH = (pLayer->H_T - pLayer->InsetT);
 		}
 
 		if (_Opened)
@@ -2396,11 +2396,11 @@ namespace NLGUI
 				_HeaderOpened->setY (- newH);
 				_HeaderOpened->setW (_W-(pLayer->W_L+pLayer->W_R));
 				_HeaderOpened->updateCoords();
-				newH += max (_HeaderOpened->getHReal(), pLayer->getValSInt32 ("header_h"));
+				newH += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 			}
 			else
 			{
-				newH += pLayer->getValSInt32 ("header_h");
+				newH += pLayer->HeaderH;
 			}
 
 			newH -= (sint32) _ContentYOffset;
@@ -2448,12 +2448,12 @@ namespace NLGUI
 			if (_LayerSetup == 0)
 			{
 				// zeH is the height to substract to total height of the container to obtain height of the list
-				sint32 zeH = pLayer->H_T + pLayer->H_B_Open + pLayer->H_EM_Open;
+				sint32 zeH = (pLayer->H_T - pLayer->InsetT) + pLayer->H_B_Open + pLayer->H_EM_Open;
 
 				if (_HeaderOpened != NULL)
-					zeH += max (_HeaderOpened->getHReal(), pLayer->getValSInt32 ("header_h"));
+					zeH += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 				else
-					zeH += pLayer->getValSInt32 ("header_h");
+					zeH += pLayer->HeaderH;
 
 				if (_Content != NULL)
 					zeH += _Content->getHReal();
@@ -2513,11 +2513,11 @@ namespace NLGUI
 				_HeaderClosed->setY (-newH);
 				_HeaderClosed->setW (_W-(pLayer->W_L+pLayer->W_R));
 				_HeaderClosed->updateCoords();
-				newH += max (_HeaderClosed->getHReal(), pLayer->getValSInt32 ("header_h"));
+				newH += max (_HeaderClosed->getHReal(), pLayer->HeaderH);
 			}
 			else
 			{
-				newH += pLayer->getValSInt32 ("header_h");
+				newH += pLayer->HeaderH;
 			}
 			newH += pLayer->H_B;
 
@@ -2731,7 +2731,8 @@ namespace NLGUI
 		// h is the size of what is on top of the child list
 		sint32 x, y, w, h;
 
-		h = pLayer->H_T + pLayer->H_B_Open;
+		bool bHasChild = (_List->getNbElement() > 0);
+		h = (pLayer->H_T - pLayer->InsetT) + (((!_Opened) || (!bHasChild)) ? pLayer->H_B : pLayer->H_B_Open);
 
 		if (_Opened)
 		{
@@ -2749,7 +2750,6 @@ namespace NLGUI
 		{
 			h = _HReal;
 		}
-		bool bHasChild = (_List->getNbElement() > 0);
 
 		x = _XReal;
 		y = _YReal+_HReal-h;
@@ -2767,7 +2767,7 @@ namespace NLGUI
 			// Top Right
 			rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_TR, y+h-pLayer->H_TR, pLayer->W_TR, pLayer->H_TR, 0, false, pLayer->TxId_TR, col);
 
-			if ((!_Opened) || (_Opened && !bHasChild))
+			if ((!_Opened) || (!bHasChild))
 			{ // Not opened
 				// Left
 				if (pLayer->Tile_L == 0) // Tiling ?
@@ -2817,9 +2817,9 @@ namespace NLGUI
 				rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_BR_Open, y, pLayer->W_BR_Open, pLayer->H_BR_Open, 0, false, pLayer->TxId_BR_Open, col);
 				// Content
 				if (pLayer->Tile_Blank == 0) // Tiling ?
-					rVR.drawRotFlipBitmap (rl, x+pLayer->W_L, y+pLayer->H_B, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, col);
+					rVR.drawRotFlipBitmap (rl, x+pLayer->W_L, y+pLayer->H_B_Open, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, col);
 				else
-					rVR.drawRotFlipBitmapTiled (rl, x+pLayer->W_L, y+pLayer->H_B, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, pLayer->Tile_Blank-1, col);
+					rVR.drawRotFlipBitmapTiled (rl, x+pLayer->W_L, y+pLayer->H_B_Open, w-(pLayer->W_R+pLayer->W_L), h-(pLayer->H_B_Open+pLayer->H_T), 0, false, pLayer->TxId_Blank, pLayer->Tile_Blank-1, col);
 				// ScrollBar Placement
 				if (pLayer->Tile_M_Open == 0)  // Tiling ?
 					rVR.drawRotFlipBitmap (rl, x, _YReal+pLayer->H_EL_Open, pLayer->W_M_Open, _HReal-h-pLayer->H_EL_Open, 0, false, pLayer->TxId_M_Open, col);
@@ -2848,7 +2848,7 @@ namespace NLGUI
 			// Top Right
 			rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_TR, y+h-pLayer->H_TR, pLayer->W_TR, pLayer->H_TR, 0, false, pLayer->TxId_TR, col);
 
-			if ((!_Opened) || (_Opened && !bHasChild))
+			if ((!_Opened) || (!bHasChild))
 			{
 				// Left
 				if (pLayer->Tile_L == 0) // Tiling ?
@@ -2856,7 +2856,7 @@ namespace NLGUI
 				else
 					rVR.drawRotFlipBitmapTiled (rl, x, y+pLayer->H_BL, pLayer->W_L, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_L, pLayer->Tile_L-1, col);
 				// Right
-				if (pLayer->Tile_T == 0) // Tiling ?
+				if (pLayer->Tile_R == 0) // Tiling ?
 					rVR.drawRotFlipBitmap (rl, x+w-pLayer->W_R, y+pLayer->H_BR, pLayer->W_R, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_R, col);
 				else
 					rVR.drawRotFlipBitmapTiled (rl, x+w-pLayer->W_R, y+pLayer->H_BR, pLayer->W_R, h-(pLayer->H_BL+pLayer->H_TL), 0, false, pLayer->TxId_R, pLayer->Tile_R-1, col);
@@ -3003,18 +3003,16 @@ namespace NLGUI
 				col.A = nInverted;
 			else
 				col.A = max(_HighLightedAlpha, nInverted);
-			sint32 hw, hh; // size of highlight texture
-			rVR.getTextureSizeFromId(pLayer->TxId_TL_HighLight, hw, hh);
 			// corners
-			rVR.drawRotFlipBitmap (_RenderLayer, x, y + h - hh, hw, hh, 0, false, pLayer->TxId_TL_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, y + h - hh, hw, hh, 0, false, pLayer->TxId_TR_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal, hw, hh, 0, false, pLayer->TxId_BL_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, _YReal, hw, hh, 0, false, pLayer->TxId_BR_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, y + h - pLayer->H_T_HighLight, pLayer->W_TL_HighLight, pLayer->H_TL_HighLight, 0, false, pLayer->TxId_TL_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_TR_HighLight, y + h - pLayer->H_T_HighLight, pLayer->W_TR_HighLight, pLayer->H_TR_HighLight, 0, false, pLayer->TxId_TR_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal, pLayer->W_BL_HighLight, pLayer->H_BL_HighLight, 0, false, pLayer->TxId_BL_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_BR_HighLight, _YReal, pLayer->W_BR_HighLight, pLayer->H_BR_HighLight, 0, false, pLayer->TxId_BR_HighLight, col);
 			// border
-			rVR.drawRotFlipBitmap (_RenderLayer, x + hw, y + h - hh, _WReal - 2 * hw, hh, 0, false, pLayer->TxId_T_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + hw, _YReal, _WReal - 2 * hw, hh, 0, false, pLayer->TxId_B_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal + hh, hw, _HReal - 2 * hh, 0, false, pLayer->TxId_L_HighLight, col);
-			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - hw, _YReal + hh, hw, _HReal - 2 * hh, 0, false, pLayer->TxId_R_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + pLayer->W_TL_HighLight, y + h - pLayer->H_T_HighLight, _WReal - pLayer->W_TL_HighLight - pLayer->W_TR_HighLight, pLayer->H_T_HighLight, 0, false, pLayer->TxId_T_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + pLayer->W_BL_HighLight, _YReal, _WReal - pLayer->W_BL_HighLight - pLayer->W_BR_HighLight, pLayer->H_B_HighLight, 0, false, pLayer->TxId_B_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal + pLayer->H_B_HighLight, pLayer->W_L_HighLight, _HReal - pLayer->H_T_HighLight - pLayer->H_B_HighLight, 0, false, pLayer->TxId_L_HighLight, col);
+			rVR.drawRotFlipBitmap (_RenderLayer, x + _WReal - pLayer->W_R_HighLight, _YReal + pLayer->H_B_HighLight, pLayer->W_R_HighLight, _HReal - pLayer->H_T_HighLight - pLayer->H_B_HighLight, 0, false, pLayer->TxId_R_HighLight, col);
 		}
 
 
@@ -3715,6 +3713,7 @@ namespace NLGUI
 			_TitleOpened->setParentPosRef (Hotspot_TL);
 			_TitleOpened->setPosRef (Hotspot_TL);
 			_TitleOpened->setShadow (true);
+			_TitleOpened->setShadowOutline (false);
 			_TitleOpened->setColor (CRGBA(255,255,255,255));
 			_TitleOpened->setModulateGlobalColor(getModulateGlobalColor());
 			_TitleOpened->setOverExtendViewText(_TitleOverExtendViewText);
@@ -3766,6 +3765,7 @@ namespace NLGUI
 			_TitleClosed->setParentPosRef (Hotspot_TL);
 			_TitleClosed->setPosRef (Hotspot_TL);
 			_TitleClosed->setShadow (true);
+			_TitleClosed->setShadowOutline (false);
 			_TitleClosed->setColor (CRGBA(255,255,255,255));
 			_TitleClosed->setModulateGlobalColor(getModulateGlobalColor());
 			_TitleClosed->setOverExtendViewText(_TitleOverExtendViewText);

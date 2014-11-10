@@ -18,20 +18,49 @@
 #include "link_editor.h"
 #include "nel/gui/interface_group.h"
 #include "nel/gui/widget_manager.h"
+#include "expression_editor.h"
+#include <QMenu>
 
 namespace GUIEditor
 {
+	class LinkEditorPvt
+	{
+	public:
+
+		LinkEditorPvt()
+		{
+			ee = new ExpressionEditor();
+			ee->load();
+		}
+
+		~LinkEditorPvt()
+		{
+			delete ee;
+			ee = NULL;
+		}
+
+		ExpressionEditor *ee;
+	};
+
+
 	LinkEditor::LinkEditor( QWidget *parent ) :
 	QWidget( parent )
 	{
 		setupUi( this );
 		setup();
+
+		m_pvt = new LinkEditorPvt();
+
 		connect( okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKButtonClicked() ) );
 		connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( hide() ) );
+		connect( expressionEdit, SIGNAL( customContextMenuRequested( const QPoint& ) ), this, SLOT( onTextEditContextMenu( const QPoint& ) ) );
+		connect( m_pvt->ee, SIGNAL( closing() ), this, SLOT( onEEClosing() ) );
 	}
 
 	LinkEditor::~LinkEditor()
 	{
+		delete m_pvt;
+		m_pvt = NULL;
 	}
 
 	void LinkEditor::setup()
@@ -88,5 +117,24 @@ namespace GUIEditor
 		Q_EMIT okClicked();
 
 		hide();
+	}
+
+	void LinkEditor::onTextEditContextMenu( const QPoint &pos )
+	{
+		QMenu *menu = expressionEdit->createStandardContextMenu();
+		QAction *a = menu->addAction( "Expression Editor" );
+		connect( a, SIGNAL( triggered() ), this, SLOT( onEE() ) );
+
+		menu->exec( mapToGlobal( pos ) );
+	}
+
+	void LinkEditor::onEE()
+	{
+		m_pvt->ee->show();
+	}
+
+	void LinkEditor::onEEClosing()
+	{
+		expressionEdit->setPlainText( m_pvt->ee->result() );
 	}
 }

@@ -31,6 +31,8 @@ public:
 	void saveConfig();
 	QUndoStack *getUndoStack() { return m_undoStack; }
 
+    void onActivated();
+
 	typedef std::map<std::string, CMission> TMissionContainer;
 
 public Q_SLOTS:

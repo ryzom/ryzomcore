@@ -285,7 +285,7 @@ namespace NLGUI
 		void addImage(const char *image, bool globalColor, bool reloadImg=false);
 
 		// Add a text area in the current paragraph
-		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content);
+		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
 
 		// Add a combo box in the current paragraph
 		CDBGroupComboBox *addComboBox(const std::string &templateName, const char *name);
@@ -528,7 +528,7 @@ namespace NLGUI
 			CCellParams () : BgColor(0,0,0,0)
 			{
 				Align = CGroupCell::Left;
-				VAlign = CGroupCell::Top;
+				VAlign = CGroupCell::Middle;
 				LeftMargin = 0;
 				NoWrap = false;
 			}
@@ -557,6 +557,7 @@ namespace NLGUI
 		std::string		_TextAreaName;
 		uint			_TextAreaRow;
 		uint			_TextAreaCols;
+		uint			_TextAreaMaxLength;
 
 		// current mode is in select option
 		bool			_SelectOption;

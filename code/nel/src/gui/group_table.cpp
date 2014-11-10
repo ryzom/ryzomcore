@@ -44,9 +44,12 @@ namespace NLGUI
 		TableRatio = 0.f;
 		WidthWanted = 0;
 		Height = 0;
+		ColSpan = 1;
+		RowSpan = 1;
+		TableColumnIndex = 0;
 		Group = new CInterfaceGroup(CViewBase::TCtorParam());
 		Align = Left;
-		VAlign = Top;
+		VAlign = Middle;
 		LeftMargin = 0;
 		NoWrap = false;
 		IgnoreMaxWidth = false;
@@ -250,6 +253,22 @@ namespace NLGUI
 			return;
 		}
 		else
+		if (name == "colspan" )
+		{
+			sint32 i;
+			if (fromString( value, i ) )
+				ColSpan = std::max(1, i);
+			return;
+		}
+		else
+		if (name == "rowspan" )
+		{
+			sint32 i;
+			if (fromString( value, i ) )
+				RowSpan = std::max(1, i);
+			return;
+		}
+		else
 			CInterfaceGroup::setProperty( name, value );
 	}
 
@@ -310,6 +329,8 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "ignore_max_width", BAD_CAST toString( IgnoreMaxWidth ).c_str() );
 		xmlSetProp( node, BAD_CAST "ignore_min_width", BAD_CAST toString( IgnoreMinWidth ).c_str() );
 		xmlSetProp( node, BAD_CAST "add_child_w", BAD_CAST toString( AddChildW ).c_str() );
+		xmlSetProp( node, BAD_CAST "colspan", BAD_CAST toString( ColSpan ).c_str() );
+		xmlSetProp( node, BAD_CAST "rowspan", BAD_CAST toString( RowSpan ).c_str() );
 
 		return node;
 	}
@@ -422,6 +443,22 @@ namespace NLGUI
 		{
 			AddChildW = convertBool(ptr);
 		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"colspan" );
+		if (ptr)
+		{
+			sint32 i;
+			if (fromString((const char*)ptr, i))
+				ColSpan = std::max(1, i);
+		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"rowspan" );
+		if (ptr)
+		{
+			sint32 i;
+			if (fromString((const char*)ptr, i))
+				RowSpan = std::max(1, i);
+		}
 
 		return true;
 	}
@@ -499,6 +536,29 @@ namespace NLGUI
 			}
 		}
 
+		// Get the parent table
+		if (getParent ())
+		{
+			CGroupTable *table = static_cast<CGroupTable*> (getParent ());
+			if (table->Border) {
+				CRGBA lighter = blend(table->BorderColor, CRGBA::White, 0.5f);
+
+				CRGBA borderColorTL;
+				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorTL.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorTL.A) >> 8);
+
+				CRGBA borderColorBR;
+				borderColorBR.modulateFromColor (table->BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorBR.A = (uint8) (((uint16) table->CurrentAlpha * (uint16) borderColorBR.A) >> 8);
+
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, 1, 0, false, rVR.getBlankTextureId(), borderColorTL );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), borderColorBR );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+_HReal-1, _WReal, 1, 0, false, rVR.getBlankTextureId(), borderColorBR );
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-1, _YReal, 1, _HReal, 0, false, rVR.getBlankTextureId(), borderColorTL );
+			}
+		}
+
 		CInterfaceGroup::draw ();
 	}
 
@@ -559,8 +619,9 @@ namespace NLGUI
 		TableRatio = 0.f;
 		ForceWidthMin = 0;
 		Border=0;
-		CellPadding=0;
-		CellSpacing=0;
+		BorderColor = CRGBA(32, 32, 32, 255);
+		CellPadding=1;
+		CellSpacing=2;
 		ContinuousUpdate = false;
 	}
 
@@ -692,35 +753,75 @@ namespace NLGUI
 
 					// New cell ?
 					if (cell->NewLine)
+					{
+						while (column < _Columns.size())
+						{
+							if (_Columns[column].RowSpan > 1)
+								_Columns[column].RowSpan--;
+							column++;
+						}
 						column = 0;
+					}
 
 					// Resize the array
 					if (column>=_Columns.size())
 						_Columns.resize(column+1);
 
+					// Handle rowspan from previous row
+					while (_Columns[column].RowSpan > 1)
+					{
+						_Columns[column].RowSpan--;
+						column++;
+						// if previous row had less <TD> elements, then we missing columns
+						if (column>=_Columns.size())
+							_Columns.resize(column+1);
+					}
+
+					// remember column index for later use
+					cell->TableColumnIndex = column;
+
+					// new column, set rowspan from current <TD>
+					_Columns[column].RowSpan = cell->RowSpan;
+					float colspan = 1.f / cell->ColSpan;
+					float rowspan = 1.f / cell->RowSpan;
+
 					// Update sizes
-					if (cellWidth > _Columns[column].Width)
-						_Columns[column].Width = cellWidth;
-					if (cell->WidthMax > _Columns[column].WidthMax)
-						_Columns[column].WidthMax = cell->WidthMax;
-					if (cell->TableRatio > _Columns[column].TableRatio)
-						_Columns[column].TableRatio = cell->TableRatio;
-					if (cell->WidthWanted + additionnalWidth > _Columns[column].WidthWanted)
-						_Columns[column].WidthWanted = cell->WidthWanted + additionnalWidth;
-					if (cell->Height > _Columns[column].Height)
-						_Columns[column].Height = cell->Height;
+					if (cellWidth*colspan > _Columns[column].Width)
+						_Columns[column].Width = cellWidth*colspan;
+					if (cell->WidthMax*colspan > _Columns[column].WidthMax)
+						_Columns[column].WidthMax = cell->WidthMax*colspan;
+					if (cell->TableRatio*colspan > _Columns[column].TableRatio)
+						_Columns[column].TableRatio = cell->TableRatio*colspan;
+					if (cell->WidthWanted*colspan + additionnalWidth > _Columns[column].WidthWanted)
+						_Columns[column].WidthWanted = (sint32)(cell->WidthWanted*colspan) + additionnalWidth;
 
 					if (_Columns[column].WidthWanted + additionnalWidth)
 						_Columns[column].WidthMax = _Columns[column].WidthWanted + additionnalWidth;
 					if (_Columns[column].WidthWanted > _Columns[column].Width)
 						_Columns[column].Width = _Columns[column].WidthWanted;
 
+					if (cell->ColSpan > 1) {
+						// copy this info to all spanned columns, create new columns as needed
+						uint newsize = column + cell->ColSpan - 1;
+						if (newsize >= _Columns.size())
+							_Columns.resize(newsize+1);
+						for(uint span = 0; span < cell->ColSpan -1; span++){
+							column++;
+							_Columns[column].Width = _Columns[column-1].Width;
+							_Columns[column].WidthMax = _Columns[column-1].WidthMax;
+							_Columns[column].TableRatio = _Columns[column-1].TableRatio;
+							_Columns[column].WidthWanted = _Columns[column-1].WidthWanted;
+							_Columns[column].RowSpan = _Columns[column-1].RowSpan;
+						}
+					}
+
 					// Next column
 					column++;
 				}
 
 				// Width of cells and table borders
-				sint32 borderWidth = 2*Border + ((sint32)_Columns.size()+1) * CellSpacing + ((sint32)_Columns.size()*2) * CellPadding;
+				sint32 padding = CellPadding + (Border ? 1 : 0);
+				sint32 borderWidth = 2*Border + ((sint32)_Columns.size()+1) * CellSpacing + ((sint32)_Columns.size()*2) * padding;
 
 				// Get the width
 				sint32 tableWidthMax = ForceWidthMin?ForceWidthMin:_LastParentW; // getWReal();
@@ -802,7 +903,6 @@ namespace NLGUI
 
 					// Some space ?
 					space = finalWidth - tableWidth;
-
 					if (space > 0)
 					{
 						// Then add in wanted Width cells
@@ -892,6 +992,18 @@ namespace NLGUI
 											}
 										}
 									}
+
+									// If there is still space left, then sum up column widths
+									// and add all the remaining space to final column.
+									if (space > 0)
+									{
+										sint32 innerWidth = 0;
+										for(i=0;i<_Columns.size();i++)
+											innerWidth += _Columns[i].Width;
+
+										if (innerWidth > 0 && finalWidth > innerWidth)
+											_Columns[_Columns.size()-1].Width += finalWidth - innerWidth;
+									}
 								}
 							}
 						}
@@ -902,7 +1014,8 @@ namespace NLGUI
 
 				column = 0;
 				sint32 row = 0;
-				sint32 currentX = Border + CellSpacing + CellPadding;
+				sint32 currentX = Border + CellSpacing + padding;
+
 				_Rows.clear ();
 				for (i=0; i<_Cells.size(); i++)
 				{
@@ -911,8 +1024,16 @@ namespace NLGUI
 					if (cell->NewLine)
 					{
 						column = 0;
-						currentX = Border + CellSpacing + CellPadding;
+						currentX = Border + CellSpacing + padding;
+
 						_Rows.push_back(CRow());
+					}
+
+					if (cell->TableColumnIndex > 0)
+					{
+						// we have active rowspan, must add up 'skipped' columns
+						for( ; column<cell->TableColumnIndex; column++)
+							currentX += _Columns[column].Width + padding*2 + CellSpacing;
 					}
 
 					// Set the x and width
@@ -920,16 +1041,24 @@ namespace NLGUI
 					// Check align
 					sint32 alignmentX = 0;
 					sint32 widthReduceX = 0;
-					if (cell->WidthMax < _Columns[column].Width)
+					sint32 columnWidth = _Columns[column].Width;
+					if (cell->ColSpan > 1)
+					{
+						// scan ahead and add up column widths as they might be different
+						for(int j = 1; j<cell->ColSpan; j++)
+							columnWidth += CellSpacing + padding*2 +  _Columns[column+j].Width;
+					}
+
+					if (cell->WidthMax < columnWidth)
 					{
 						switch (cell->Align)
 						{
 						case CGroupCell::Center:
-							alignmentX = (_Columns[column].Width - cell->WidthMax) / 2;
+							alignmentX = (columnWidth - cell->WidthMax) / 2;
 							widthReduceX = alignmentX * 2;
 							break;
 						case CGroupCell::Right:
-							alignmentX = _Columns[column].Width - cell->WidthMax;
+							alignmentX = columnWidth - cell->WidthMax;
 							widthReduceX = alignmentX;
 							break;
 						default:
@@ -937,11 +1066,11 @@ namespace NLGUI
 						}
 					}
 
-					cell->setX(currentX);
-					cell->setW(_Columns[column].Width);
+					cell->setX(currentX - padding);
+					cell->setW(columnWidth + padding*2);
 
-					cell->Group->setX(alignmentX+cell->LeftMargin);
-					cell->Group->setW(_Columns[column].Width - widthReduceX);
+					cell->Group->setX(alignmentX + cell->LeftMargin + padding);
+					cell->Group->setW(columnWidth - widthReduceX);
 					cell->Group->CInterfaceElement::updateCoords();
 
 					// Update coords to get H
@@ -949,16 +1078,17 @@ namespace NLGUI
 					cell->Group->updateCoords();
 
 					// Resize the row array
-					_Rows.back().Height = std::max(cell->Height, std::max(_Rows.back().Height, (sint32)cell->Group->getH()));
+					float rowspan = 1 / cell->RowSpan;
+					_Rows.back().Height = std::max((sint32)(cell->Height*rowspan), std::max(_Rows.back().Height, (sint32)(cell->Group->getH()*rowspan)));
 
 					// Next column
-					currentX += _Columns[column].Width + 2*CellPadding + CellSpacing;
-					column ++;
+					currentX += columnWidth + 2*padding + CellSpacing;
+					column += cell->ColSpan;
 				}
 
 				// Set cell Y
 				row = 0;
-				sint32 currentY = -(Border + CellSpacing + CellPadding);
+				sint32 currentY = -(Border + CellSpacing + padding);
 				for (i=0; i<_Cells.size(); i++)
 				{
 					// New cell ?
@@ -967,37 +1097,45 @@ namespace NLGUI
 					{
 						if (_Rows[row].Height != 0)
 						{
-							currentY -= _Rows[row].Height + 2*CellPadding + CellSpacing;
+							currentY -= _Rows[row].Height + 2*padding + CellSpacing;
 						}
 						row++;
 					}
 
 					// Check align
 					sint32 alignmentY = 0;
-					if ((sint32)cell->Group->getH() < _Rows[row].Height)
+					sint32 rowHeight = _Rows[row].Height;
+					if (cell->RowSpan > 1)
+					{
+						// we need to scan down and add up row heights
+						int k = std::min((sint32)_Rows.size(), row + cell->RowSpan);
+						for(int j=row+1; j<k; j++)
+							rowHeight += CellSpacing + padding*2 + _Rows[j].Height;
+					}
+					if ((sint32)cell->Group->getH() < rowHeight)
 					{
 						switch (cell->VAlign)
 						{
 						case CGroupCell::Middle:
-							alignmentY = (_Rows[row].Height - (sint32)cell->Group->getH()) / 2;
+							alignmentY = (rowHeight - (sint32)cell->Group->getH()) / 2;
 							break;
 						case CGroupCell::Bottom:
-							alignmentY = _Rows[row].Height - (sint32)cell->Group->getH();
+							alignmentY = rowHeight - (sint32)cell->Group->getH();
 							break;
 						default:
 							break;
 						}
 					}
 
-					cell->setY(currentY);
-					cell->setH (_Rows[row].Height);
-					cell->Group->setY(-alignmentY);
+					cell->setY(currentY + padding);
+					cell->setH (rowHeight + 2*padding);
+					cell->Group->setY(-(alignmentY + padding));
 				}
 
 				// Resize the table
 				setW(finalWidth+borderWidth-_LastParentW);
 				if (!_Rows.empty())
-					currentY -= _Rows[row].Height + CellPadding + CellSpacing + Border;
+					currentY -= _Rows[row].Height + padding + CellSpacing + Border;
 				setH(-currentY);
 
 				// All done
@@ -1177,60 +1315,66 @@ namespace NLGUI
 		if (gr == NULL)
 			CurrentAlpha = 255;
 
-		if (!_Columns.empty() && !_Rows.empty() && BgColor.A)
+		if (!_Columns.empty() && !_Rows.empty())
 		{
-			sint32 border = Border + CellSpacing + CellPadding;
-			if (border)
+			sint32 border = Border + CellSpacing;
+			if (border && BgColor.A)
 			{
 				CRGBA finalColor;
 				finalColor.modulateFromColor (BgColor, CWidgetManager::getInstance()->getGlobalColor());
 				finalColor.A = CurrentAlpha;
 
-				// Draw the top and bottom lines
+				// Draw the top line
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, _WReal, border, 0, false, rVR.getBlankTextureId(), finalColor);
 				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal-border+_HReal, _WReal, border, 0, false, rVR.getBlankTextureId(), finalColor);
 
-				// Draw the left and right lines
-				sint32 insideHeight = std::max((sint32)0, (sint32)_HReal - (sint32)2*border);
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+border, border, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
-				rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-border, _YReal+border, border, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
+				// Draw the left line
+				sint32 insideHeight = std::max((sint32)0, (sint32)_HReal - (sint32)border);
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal, border, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
 
 				// Draw the inside borders
-				sint32 insideWidth = 2*CellPadding + CellSpacing;
-				if (insideWidth)
+				if (CellSpacing)
 				{
-					// Draw the inside verticals
 					uint i;
-					sint32 x = _XReal + _Columns[0].Width + border;
-					for (i=1; i<_Columns.size(); i++)
+					sint32 x, y;
+					for (i=0; i<_Cells.size(); i++)
 					{
-						rVR.drawRotFlipBitmap (_RenderLayer, x, _YReal+border, insideWidth, insideHeight, 0, false, rVR.getBlankTextureId(), finalColor);
-						x += _Columns[i].Width + insideWidth;
-					}
+						CGroupCell *cell = _Cells[i];
 
-					// Draw the inside horizontals
-					sint32 y = _YReal + _HReal - border - _Rows[0].Height;
-					if (_Rows[0].Height != 0)
-					{
-						y -= insideWidth;
-					}
-					for (i=1; i<_Rows.size(); i++)
-					{
-						uint j;
-						x = _XReal + border;
-						if (_Rows[i].Height != 0)
-						{
-							for (j=0; j<_Columns.size(); j++)
-							{
-								rVR.drawRotFlipBitmap (_RenderLayer, x, y, _Columns[j].Width, insideWidth, 0, false, rVR.getBlankTextureId(), finalColor);
-								x += _Columns[j].Width + insideWidth;
-							}
-							y -= _Rows[i].Height+ insideWidth;
-						}
+						x = cell->getXReal();
+						y = cell->getYReal() - CellSpacing;
+						// right
+						rVR.drawRotFlipBitmap (_RenderLayer, x + cell->getW(), y, CellSpacing, cell->getH() + CellSpacing, 0, false, rVR.getBlankTextureId(), finalColor);
+						// bottom
+						rVR.drawRotFlipBitmap (_RenderLayer, x, y, cell->getW(), CellSpacing, 0, false, rVR.getBlankTextureId(), finalColor);
 					}
 				}
+
 			}
+			if (Border)
+			{
+				CViewRenderer &rVR = *CViewRenderer::getInstance();
+
+				CRGBA borderColorTL;
+				CRGBA lighter = blend(BorderColor, CRGBA::White, 0.5f);
+				borderColorTL.modulateFromColor (lighter, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorTL.A = CurrentAlpha;
+
+				CRGBA borderColorBR;
+				borderColorBR.modulateFromColor (BorderColor, CWidgetManager::getInstance()->getGlobalColor());
+				borderColorBR.A = CurrentAlpha;
+
+				// beveled table border
+				for (sint32 i=0; i<Border; i++)
+				{
+					// bottom, left, top, right
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+i, _WReal-i*2, 1, 0, false, rVR.getBlankTextureId(), borderColorBR);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+i, 1, _HReal-i*2, 0, false, rVR.getBlankTextureId(), borderColorTL);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+i, _YReal+_HReal-i-1, _WReal-i*2, 1, 0, false, rVR.getBlankTextureId(), borderColorTL);
+					rVR.drawRotFlipBitmap (_RenderLayer, _XReal+_WReal-i-1, _YReal+i, 1, _HReal-i*2, 0, false, rVR.getBlankTextureId(), borderColorBR);
+				}
+			}
+
 		}
 
 		CInterfaceGroup::draw ();
@@ -1241,6 +1385,11 @@ namespace NLGUI
 		if( name == "border" )
 		{
 			return toString( Border );
+		}
+		else
+		if( name == "bordercolor" )
+		{
+			return toString( BorderColor );
 		}
 		else
 		if( name == "cellpadding" )
@@ -1276,6 +1425,14 @@ namespace NLGUI
 			sint32 i;
 			if( fromString( value, i ) )
 				Border = i;
+			return;
+		}
+		else
+		if( name == "bordercolor" )
+		{
+			CRGBA c;
+			if( fromString( value, c ) )
+				BorderColor = c;
 			return;
 		}
 		else
@@ -1321,6 +1478,7 @@ namespace NLGUI
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
 		xmlSetProp( node, BAD_CAST "border", BAD_CAST toString( Border ).c_str() );
+		xmlSetProp( node, BAD_CAST "bordercolor", BAD_CAST toString( BorderColor ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellpadding", BAD_CAST toString( CellPadding ).c_str() );
 		xmlSetProp( node, BAD_CAST "cellspacing", BAD_CAST toString( CellSpacing ).c_str() );
 		xmlSetProp( node, BAD_CAST "bgcolor", BAD_CAST toString( BgColor ).c_str() );
@@ -1343,6 +1501,12 @@ namespace NLGUI
 		if (ptr)
 		{
 			fromString((const char*)ptr, Border);
+		}
+		//
+		ptr = (char*) xmlGetProp( cur, (xmlChar*)"bordercolor" );
+		if (ptr)
+		{
+			BorderColor = convertColor((const char*)ptr);
 		}
 		//
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"cellpadding" );
