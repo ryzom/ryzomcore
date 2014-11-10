@@ -349,13 +349,6 @@ CClientConfig::CClientConfig()
 
 	ForceDeltaTime		= 0;						// Default ForceDeltaTime, disabled by default
 
-#ifdef NL_OS_WINDOWS
-	DisableDirectInput		= false;				// Default DisableDirectInput
-#else
-	DisableDirectInput		= true;					// no direct input on linux
-#endif
-
-	DisableDirectInputKeyboard = true;				// Default DisableDirectInput fort he keyboard only
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 0.85f;
 	CursorSpeed				= 1.f;					// Default CursorSpeed
@@ -395,6 +388,8 @@ CClientConfig::CClientConfig()
 	HDTextureInstalled	= false;
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
+
+	FXAA				= true;
 
 	Bloom				= true;
 	SquareBloom			= true;
@@ -857,8 +852,6 @@ void CClientConfig::setValues()
 
 	////////////
 	// INPUTS //
-	READ_BOOL_FV(DisableDirectInput)
-	READ_BOOL_FV(DisableDirectInputKeyboard)
 	READ_BOOL_FV(HardwareCursor)
 	READ_FLOAT_FV(HardwareCursorScale)
 	READ_FLOAT_FV(CursorSpeed)
@@ -980,6 +973,9 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+
+	// FXAA
+	READ_BOOL_FV(FXAA)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)
@@ -1954,16 +1950,16 @@ void CClientConfig::init(const string &configFileName)
 		size_t endOfLine = contentUtf8.find("\n", pos);
 		contentUtf8.erase(pos, (endOfLine - pos) + 1);
 	}
-	
+
 	// get current location of the root config file (client_default.cfg)
 	std::string defaultConfigLocation;
 	if(!getDefaultConfigLocation(defaultConfigLocation))
 		nlerror("cannot find client_default.cfg");
-	
+
 	// and store it in the RootConfigFilename value in the very first line
-	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") + 
+	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") +
 		defaultConfigLocation + "\";\n");
-	
+
 	// save the updated config file
 	NLMISC::COFile configFile(configFileName, false, true, false);
 	configFile.serialBuffer((uint8*)contentUtf8.c_str(), (uint)contentUtf8.size());
@@ -2191,13 +2187,13 @@ ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
 }
 
 // ***************************************************************************
-bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const 
+bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 {
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
-	
+
 	p_name.clear();
-	
+
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
 	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");

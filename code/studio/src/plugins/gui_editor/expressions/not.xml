@@ -1,0 +1,8 @@
+<expression>
+<category>Logical</category>
+<name>not</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+</slots>
+</expression>

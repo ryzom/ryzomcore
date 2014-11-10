@@ -912,6 +912,31 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CInterfaceGroup::addElement (CInterfaceElement *child, sint eltOrder /*= -1*/)
+	{
+		if (!child)
+		{
+			nlwarning("<CInterfaceGroup::addView> : tried to add a NULL view");
+			return;
+		}
+
+		if( child->isGroup() )
+		{
+			addGroup( static_cast< CInterfaceGroup* >( child ), eltOrder );
+		}
+		else
+		if( child->isCtrl() )
+		{
+			addCtrl( static_cast< CCtrlBase* >( child ), eltOrder );
+		}
+		else
+		if( child->isView() )
+		{
+			addView( static_cast< CViewBase* >( child ), eltOrder );
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::addView (CViewBase *child, sint eltOrder /*= -1*/)
 	{
 		if (!child)
@@ -1312,6 +1337,11 @@ namespace NLGUI
 			for (ite = _EltOrder.begin() ; ite != _EltOrder.end(); ite++)
 			{
 				CViewBase *pVB = *ite;
+				if( pVB->getName() == "=MARKED=" )
+				{
+					nlinfo( "=MARKED=" );
+				}
+
 				if (pVB->getActive())
 					pVB->draw();
 			}
@@ -1636,6 +1666,32 @@ namespace NLGUI
 
 		nlassert(pIE->isView());
 		return delView(static_cast<CViewBase*>(pIE));
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	CInterfaceElement* CInterfaceGroup::takeElement( CInterfaceElement *e )
+	{
+		bool ok = false;
+
+		if( e->isGroup() )
+		{
+			ok = delGroup( static_cast< CInterfaceGroup* >( e ), true );
+		}
+		else
+		if( e->isCtrl() )
+		{
+			ok = delCtrl( static_cast< CCtrlBase* >( e ), true );
+		}
+		else
+		if( e->isView() )
+		{
+			ok = delView( static_cast< CViewBase* >( e ), true );
+		}
+
+		if( ok )
+			return e;
+		else
+			return NULL;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2488,5 +2544,101 @@ namespace NLGUI
 		for( std::vector< CInterfaceGroup* >::iterator itr = _ChildrenGroups.begin(); itr != _ChildrenGroups.end(); ++itr )
 			(*itr)->onWidgetDeleted( e );
 	}
+
+	void CInterfaceGroup::moveBy( sint32 x, sint32 y )
+	{
+		CInterfaceElement::moveBy( x, y );
+
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+			v->updateCoords();
+		}
+	}
+
+	bool CInterfaceGroup::explode()
+	{
+		CInterfaceGroup *p = getParent();
+		if( p == NULL )
+			return false;
+
+		std::string oldId;
+
+		// Reparent children
+		for( sint32 i = 0; i < _EltOrder.size(); i++ )
+		{
+			CInterfaceElement *e = _EltOrder[ i ];
+
+			oldId = e->getId();
+
+			e->setW( e->getWReal() );
+			e->setH( e->getHReal() );
+			e->setSizeRef( "" );
+
+			e->setParent( p );
+			
+			e->setParentPos( p );
+			e->setParentSize( p );
+			e->alignTo( p );
+
+			p->addElement( e );
+			e->setIdRecurse( e->getShortId() );
+
+			CWidgetManager::getInstance()->onWidgetMoved( oldId, e->getId() );
+		}
+
+		_EltOrder.clear();
+		_Views.clear();
+		_Controls.clear();
+		_ChildrenGroups.clear();
+
+		return true;
+	}
+
+	void CInterfaceGroup::spanElements()
+	{
+		sint32 minx = std::numeric_limits< sint32 >::max();
+		sint32 miny = std::numeric_limits< sint32 >::max();
+		sint32 maxx = std::numeric_limits< sint32 >::min();
+		sint32 maxy = std::numeric_limits< sint32 >::min();
+
+		sint32 tlx,tly,brx,bry;
+
+		// Find the min and max coordinates of the elements
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+
+			v->getHSCoords( Hotspot_TL, tlx, tly );
+			v->getHSCoords( Hotspot_BR, brx, bry );
+
+			if( tlx < minx )
+				minx = tlx;
+			if( brx > maxx )
+				maxx = brx;
+			if( bry < miny )
+				miny = bry;
+			if( tly > maxy )
+				maxy = tly;
+		}
+
+		// Set the position and the width and height based on these coords
+		setW( maxx - minx );
+		setH( maxy - miny );
+		_WReal = getW();
+		_HReal = getH();
+		_XReal = minx;
+		_YReal = miny;
+	}
+
+	void CInterfaceGroup::alignElements()
+	{
+		for( int i = 0; i < _EltOrder.size(); i++ )
+		{
+			CViewBase *v = _EltOrder[ i ];
+			v->alignTo( this );
+		}
+	}
+
 }
 

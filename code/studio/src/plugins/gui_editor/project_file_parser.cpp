@@ -16,6 +16,7 @@
 
 
 #include "project_file_parser.h"
+#include "nel/misc/debug.h"
 
 namespace GUIEditor
 {
@@ -57,12 +58,13 @@ namespace GUIEditor
 		projectFiles.projectName = files.projectName;
 		projectFiles.masterGroup = files.masterGroup;
 		projectFiles.activeGroup = files.activeGroup;
+		projectFiles.version = files.version;
 	}
 
 	unsigned long CProjectFileParser::getProjectVersion() const
 	{
 		if( !loaded )
-			return OLD;
+			return SProjectFiles::OLD;
 
 		return files.version;
 	}
@@ -70,7 +72,7 @@ namespace GUIEditor
 	void CProjectFileParser::clear()
 	{
 		files.projectName = "";
-		files.version = OLD;
+		files.version = SProjectFiles::OLD;
 		files.activeGroup = "";
 		files.guiFiles.clear();
 		files.mapFiles.clear();
@@ -208,7 +210,9 @@ namespace GUIEditor
 			reader.readNext();
 		}
 		if( files.mapFiles.empty() )
-			return false;
+		{
+			nlinfo( "No map file(s) specified in project file." );
+		}
 
 		return true;
 	}

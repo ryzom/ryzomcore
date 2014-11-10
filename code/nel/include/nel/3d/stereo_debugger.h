@@ -65,10 +65,17 @@ public:
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver);
-	void releaseTextures();
+	/*void releaseTextures();
 	void initTextures();
 	void setTextures();
-	void verifyTextures();
+	void verifyTextures();*/
+	void getTextures();
+	void recycleTextures();
+
+	/// Attach the driver to the display
+	virtual bool attachToDisplay();
+	/// Detach the driver from the display
+	virtual void detachFromDisplay();
 
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height);
@@ -76,6 +83,8 @@ public:
 	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
 	/// Get the frustum to use for clipping
 	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const;
+	/// Get the original frustum of the camera
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const;
 
 	/// Is there a next pass
 	virtual bool nextPass();
@@ -89,13 +98,20 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
 
 	/// At the start of a new render target
-	virtual bool wantClear();	
+	virtual bool wantClear();		
 	/// The 3D scene
 	virtual bool wantScene();
+	/// Scene post processing effects
+	virtual bool wantSceneEffects();
 	/// Interface within the 3D scene
 	virtual bool wantInterface3D();	
 	/// 2D Interface
 	virtual bool wantInterface2D();
+
+	/// Is this the first 3D scene of the frame
+	virtual bool isSceneFirst();
+	/// Is this the last 3D scene of the frame
+	virtual bool isSceneLast();
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget();
@@ -116,9 +132,7 @@ private:
 	CFrustum m_Frustum[NL_STEREO_MAX_USER_CAMERAS];
 	CMatrix m_CameraMatrix[NL_STEREO_MAX_USER_CAMERAS];
 
-	NLMISC::CSmartPtr<NL3D::ITexture> m_LeftTex;
 	NL3D::CTextureUser *m_LeftTexU;
-	NLMISC::CSmartPtr<NL3D::ITexture> m_RightTex;
 	NL3D::CTextureUser *m_RightTexU;
 	NL3D::UMaterial m_Mat;
 	NLMISC::CQuadUV m_QuadUV;

@@ -30,15 +30,15 @@ define domain_mini01
 
 	// domain hosts
 	cfg AESHost = "localhost";
-	cfg SUHost = "ep1.mini01.ryzomcore.org";
-	cfg MFSHost = "ep1.mini01.ryzomcore.org";
-	cfg BSHost = "ep1.mini01.ryzomcore.org:49990";
-	cfg SlaveBSHost= "ep1.mini01.ryzomcore.org:49991";
-	cfg MasterLGSHost = "ep1.mini01.ryzomcore.org";
-	cfg SlaveLGSHost = "ep1.mini01.ryzomcore.org";
-	cfg LGSBSHost = "ep1.mini01.ryzomcore.org";
-	cfg DBHost = "localhost"; // FIXME "sql.core.ryzomcore.org";
-	cfgAfter WebSrvHost = "http://ep1.mini01.ryzomcore.org:50000/";
+	cfg SUHost = "ep1.mini01.ryzomcore.local";
+	cfg MFSHost = "ep1.mini01.ryzomcore.local";
+	cfg BSHost = "ep1.mini01.ryzomcore.local:49990";
+	cfg SlaveBSHost= "ep1.mini01.ryzomcore.local:49991";
+	cfg MasterLGSHost = "ep1.mini01.ryzomcore.local";
+	cfg SlaveLGSHost = "ep1.mini01.ryzomcore.local";
+	cfg LGSBSHost = "ep1.mini01.ryzomcore.local";
+	cfg DBHost = "ep1.mini01.ryzomcore.local";
+	cfgAfter WebSrvHost = "http://ep1.mini01.ryzomcore.local:50000/";
 
 	// initial config files
 	cfgFile ../cfg/00_base.cfg
@@ -84,7 +84,7 @@ define shard_mini01_unifier
 	use exe_set_std_lgs_slave
 	use backup_lgs
 	cfg DBPass = DBNelPass;
-	host ep1.mini01.ryzomcore.org
+	host ep1.mini01.ryzomcore.local
 
 
 // shard mainland01 ----------------
@@ -95,10 +95,10 @@ define shard_mini01_mainland01
 	cfg ShardId = 301;
 	cfg BasePort = 52000;
 	cfg SaveFilesDirectory="mini01_mainland01/";
-	cfg NSHost = "ep1.mini01.ryzomcore.org";
-	cfg FSListenHost = "ep1.mini01.ryzomcore.org";
+	cfg NSHost = "ep1.mini01.ryzomcore.local";
+	cfg FSListenHost = "ep1.mini01.ryzomcore.local";
 	cfgFile ../cfg/02_shard_type_mini_mainland.cfg
-	host ep1.mini01.ryzomcore.org
+	host ep1.mini01.ryzomcore.local
 
 
 // shard ring01 --------------------
@@ -110,7 +110,7 @@ define shard_mini01_ring01
 	cfg BasePort = 52400;
 	cfg SaveFilesDirectory="mini01_ring01/";
 	cfg NSPort = 51100;
-	cfg NSHost = "ep1.mini01.ryzomcore.org" + 51100;
+	cfg NSHost = "ep1.mini01.ryzomcore.local" + 51100;
 	cfgFile ../cfg/02_shard_type_std_ring.cfg
-	host ep1.mini01.ryzomcore.org
+	host ep1.mini01.ryzomcore.local
 

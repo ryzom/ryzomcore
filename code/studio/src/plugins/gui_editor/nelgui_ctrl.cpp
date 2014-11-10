@@ -89,20 +89,8 @@ namespace GUIEditor
 		reset();
 		IParser *parser = CWidgetManager::getInstance()->getParser();
 
-		std::vector< std::string >::iterator itr;
-		for( itr = files.mapFiles.begin(); itr != files.mapFiles.end(); ++itr )
-		{
-			std::string &file = *itr;
-			std::string::size_type i = file.find_last_of( '.' );
-			std::string mapFile = file.substr( 0, i );
-			mapFile.append( ".txt" );
-
-			if( !CViewRenderer::getInstance()->loadTextures( file, mapFile, false ) )
-			{
-				CViewRenderer::getInstance()->reset();
-				return false;
-			}
-		}
+		if( !loadMapFiles( files.mapFiles ) )
+			return false;
 
 		if( !parser->parseInterface( files.guiFiles, false ) )
 			return false;
@@ -114,11 +102,49 @@ namespace GUIEditor
 		if( e != NULL )
 			e->setActive( true );
 
-		timerID = startTimer( 200 );
-		guiLoaded = true;
-		Q_EMIT guiLoadComplete();
+		onGUILoaded();
 
-		CWidgetManager::getInstance()->registerSelectionWatcher( watcher );
+		return true;
+	}
+
+	bool NelGUICtrl::loadMapFiles( const std::vector< std::string > &v )
+	{
+		std::vector< std::string >::const_iterator itr;
+		for( itr = v.begin(); itr != v.end(); ++itr )
+		{
+			const std::string &file = *itr;
+			std::string::size_type i = file.find_last_of( '.' );
+			std::string mapFile = file.substr( 0, i );
+			mapFile.append( ".txt" );
+
+			if( !CViewRenderer::getInstance()->loadTextures( file, mapFile, false ) )
+			{
+				CViewRenderer::getInstance()->reset();
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool NelGUICtrl::createNewGUI( const std::string &project, const std::string &window )
+	{
+		reset();
+		bool ok = CWidgetManager::getInstance()->createNewGUI( project, window );
+		if( !ok )
+			return false;
+
+		std::string mg = std::string( "ui:" ) + project;
+		std::string ag = mg + ":" + window;
+
+		CWidgetManager::getInstance()->updateAllLocalisedElements();
+		CWidgetManager::getInstance()->activateMasterGroup( mg, true );
+		
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( ag );
+		if( e != NULL )
+			e->setActive( true );
+
+		onGUILoaded();
 
 		return true;
 	}
@@ -160,6 +186,15 @@ namespace GUIEditor
 		}
 	}
 
+	void NelGUICtrl::onGUILoaded()
+	{
+		timerID = startTimer( 200 );
+		guiLoaded = true;
+		Q_EMIT guiLoadComplete();
+
+		CWidgetManager::getInstance()->registerSelectionWatcher( watcher );
+	}
+
 	void NelGUICtrl::show()
 	{
 		if( timerID == 0 )
@@ -185,6 +220,12 @@ namespace GUIEditor
 			eventListener->removeFromServer();
 			listening = false;
 		}
+	}
+
+	void NelGUICtrl::setWorkDir( const QString &dir )
+	{
+		IParser *parser = CWidgetManager::getInstance()->getParser();
+		parser->setWorkDir( std::string( dir.toUtf8().constData() ) );
 	}
 
 	QWidget* NelGUICtrl::getViewPort()

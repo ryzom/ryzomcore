@@ -1509,7 +1509,7 @@ NLMISC_DYNVARIABLE( uint32, RyzomSeason, "Get season number (0=Spring)" )
 
 #ifdef DEPOSIT_MAP_GENERATION
 
-#include "server_share/bmp4image.h"
+#include "game_share/bmp4image.h"
 #include <nel/misc/words_dictionary.h>
 
 typedef std::map< std::string, pair< pair< float, float >, uint > > CSUMap;

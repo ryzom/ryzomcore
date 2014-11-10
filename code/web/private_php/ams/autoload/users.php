@@ -252,8 +252,8 @@ class Users{
      * @param $length the length of the SALT which is by default 2
      * @return a random salt of 2 chars
      */
-     public static function generateSALT( $length = 2 )
-    {
+     public static function generateSALT( $length = 16 )
+     {
          // start with a blank salt
         $salt = "";
          // define possible characters - any character in this string can be
@@ -282,6 +282,10 @@ class Users{
                  }
              }
          // done!
+        if ($length > 2)
+        {
+             $salt = '$6$'.$salt;
+        }
         return $salt;
      }
 
@@ -336,12 +340,32 @@ class Users{
                $dbs = new DBLayer("shard");
                $sth = $dbs->selectWithParameter("UId", "user", $values, "Login= :username");
                $result = $sth->fetchAll();
-               /*foreach ($result as $UId) {
-                   $ins_values = array('UId' => $UId['UId'], 'clientApplication' => 'r2', 'AccessPrivilege' => 'OPEN');
+               $dbl = new DBLayer("lib");
+               
+               $UId = $result['0']['UId'];
+        
+                $statement = $dbl->execute("SELECT * FROM `settings` WHERE `Setting` = :setting", Array('setting' => 'Domain_Auto_Add'));
+                $json = $statement->fetch();
+                $json = json_decode($json['Value'],true);
+                
+                $db = new DBLayer( 'shard' );
+
+                // get all domains
+                $statement = $db -> executeWithoutParams( "SELECT * FROM domain" );
+                $rows = $statement -> fetchAll();
+                
+                //error_log(print_r($rows,true));
+                //error_log(print_r($result,true));
+                //error_log(print_r($json,true));
+               foreach ($json as $key => $value) {
+                    //error_log(print_r($key,true));
+                    //error_log(print_r($value,true));
+                    
+                   $ins_values = array('UId' => $UId, 'DomainId' => $key, 'AccessPrivilege' => $value['1']);
+                   error_log(print_r($ins_values,true));
+                   $dbs = new DBLayer("shard");
                    $dbs->insert("permission", $ins_values);
-                   $ins_values['clientApplication'] = 'ryzom_open';
-                   $dbs->insert("permission", $ins_values);
-               }*/ // FIXME: GARBAGE
+               }
           }
           catch (PDOException $e) {
                //oh noooz, the shard is offline! Put it in query queue at ams_lib db!

@@ -562,8 +562,13 @@ SOURCE_GROUP(Fx\\Particles\\lights FILES
         ps_light.cpp
         ../../include/nel/3d/ps_light.h)
 SOURCE_GROUP(Fx\\2d FILES
+        render_target_manager.cpp
+        ../../include/nel/3d/render_target_manager.h
         bloom_effect.cpp
         ../../include/nel/3d/bloom_effect.h
+        fxaa.cpp
+        fxaa_program.h
+        ../../include/nel/3d/fxaa.h
         deform_2d.cpp
         ../../include/nel/3d/deform_2d.h
         heat_haze.cpp
@@ -700,6 +705,9 @@ SOURCE_GROUP(Stereo FILES
 		stereo_ovr.cpp
 		stereo_ovr_fp.cpp
         ../../include/nel/3d/stereo_ovr.h
+		stereo_ovr_04.cpp
+		stereo_ovr_04_program.h
+        ../../include/nel/3d/stereo_ovr_04.h
 		stereo_libvr.cpp
         ../../include/nel/3d/stereo_libvr.h
 		stereo_debugger.cpp

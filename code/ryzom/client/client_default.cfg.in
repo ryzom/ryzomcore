@@ -205,6 +205,12 @@ Shadows_ps1	= 1;
 Shadows_ps2	= 1;
 Shadows_ps3	= 1;
 
+FXAA		= 1;
+FXAA_ps0	= 0;
+FXAA_ps1	= 1;
+FXAA_ps2	= 1;
+FXAA_ps3	= 1;
+
 Bloom = 0;
 Bloom_ps0	= 0;
 Bloom_ps1	= 1;

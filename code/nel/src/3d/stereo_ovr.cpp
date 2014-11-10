@@ -41,15 +41,16 @@
  * so, delete this exception statement from your version.
  */
 
-#ifdef HAVE_LIBOVR
+#ifdef HAVE_LIBOVR_02
 
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/3d/stereo_ovr.h>
 
 // STL includes
 #include <sstream>
 
 // External includes
+#define OVR_NO_STDINT
 #include <OVR.h>
 
 // NeL includes
@@ -169,7 +170,7 @@ public:
 	OVR::HMDInfo HMDInfo;
 };
 
-CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_BarrelTexU(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
+CStereoOVR::CStereoOVR(const CStereoOVRDeviceHandle *handle) : m_Stage(0), m_SubStage(0), m_OrientationCached(false), m_Driver(NULL), m_SceneTexture(NULL), m_GUITexture(NULL), m_PixelProgram(NULL), m_EyePosition(0.0f, 0.09f, 0.15f), m_Scale(1.0f)
 {
 	++s_DeviceCounter;
 	m_DevicePtr = new CStereoOVRDevicePtr();
@@ -213,9 +214,6 @@ CStereoOVR::~CStereoOVR()
 		m_BarrelMat.getObjectPtr()->setTexture(0, NULL);
 		m_Driver->deleteMaterial(m_BarrelMat);
 	}
-	delete m_BarrelTexU;
-	m_BarrelTexU = NULL;
-	m_BarrelTex = NULL; // CSmartPtr
 
 	delete m_PixelProgram;
 	m_PixelProgram = NULL;
@@ -340,7 +338,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 	{
 		m_Driver = driver;
 
-		m_BarrelTex = new CTextureBloom(); // lol bloom
+		/*m_BarrelTex = new CTextureBloom(); // lol bloom
 		m_BarrelTex->setRenderTarget(true);
 		m_BarrelTex->setReleasable(false);
 		m_BarrelTex->resize(m_DevicePtr->HMDInfo.HResolution, m_DevicePtr->HMDInfo.VResolution);
@@ -348,7 +346,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelTex->setWrapS(ITexture::Clamp);
 		m_BarrelTex->setWrapT(ITexture::Clamp);
 		drvInternal->setupTexture(*m_BarrelTex);
-		m_BarrelTexU = new CTextureUser(m_BarrelTex);
+		m_BarrelTexU = new CTextureUser(m_BarrelTex);*/
 
 		m_BarrelMat = m_Driver->createMaterial();
 		m_BarrelMat.initUnlit();
@@ -361,7 +359,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		barrelMat->setZWrite(false);
 		barrelMat->setZFunc(CMaterial::always);
 		barrelMat->setDoubleSided(true);
-		barrelMat->setTexture(0, m_BarrelTex);
+		// barrelMat->setTexture(0, m_BarrelTex);
 
 		m_BarrelQuadLeft.V0 = CVector(0.f, 0.f, 0.5f);
 		m_BarrelQuadLeft.V1 = CVector(0.5f, 0.f, 0.5f);
@@ -373,7 +371,7 @@ void CStereoOVR::setDriver(NL3D::UDriver *driver)
 		m_BarrelQuadRight.V2 = CVector(1.f, 1.f, 0.5f);
 		m_BarrelQuadRight.V3 = CVector(0.5f, 1.f, 0.5f);
 		
-		nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // not allowed
+		// nlassert(!drvInternal->isTextureRectangle(m_BarrelTex)); // not allowed
 
 		m_BarrelQuadLeft.Uv0 = CUV(0.f,  0.f);
 		m_BarrelQuadLeft.Uv1 = CUV(0.5f, 0.f);
@@ -400,6 +398,8 @@ bool CStereoOVR::getScreenResolution(uint &width, uint &height)
 
 void CStereoOVR::initCamera(uint cid, const NL3D::UCamera *camera)
 {
+	m_OriginalFrustum[cid] = camera->getFrustum();
+
 	float ar = (float)m_DevicePtr->HMDInfo.HResolution / ((float)m_DevicePtr->HMDInfo.VResolution * 2.0f);
 	float fov = 2.0f * atanf((m_DevicePtr->HMDInfo.HScreenSize * 0.5f * 0.5f) / (m_DevicePtr->HMDInfo.EyeToScreenDistance)); //(float)NLMISC::Pi/2.f; // 2.0f * atanf(m_DevicePtr->HMDInfo.VScreenSize / 2.0f * m_DevicePtr->HMDInfo.EyeToScreenDistance);
 	m_LeftFrustum[cid].initPerspective(fov, ar, camera->getFrustum().Near, camera->getFrustum().Far);
@@ -427,6 +427,12 @@ void CStereoOVR::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
 	camera->setFrustum(m_ClippingFrustum[cid]);
 }
 
+/// Get the original frustum of the camera
+void CStereoOVR::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
+{
+	camera->setFrustum(m_OriginalFrustum[cid]);
+}
+
 void CStereoOVR::updateCamera(uint cid, const NL3D::UCamera *camera)
 {
 	if (camera->getFrustum().Near != m_LeftFrustum[cid].Near
@@ -440,53 +446,59 @@ bool CStereoOVR::nextPass()
 	// Do not allow weird stuff.
 	uint32 width, height;
 	m_Driver->getWindowSize(width, height);
-	nlassert(width == m_DevicePtr->HMDInfo.HResolution);
-	nlassert(height == m_DevicePtr->HMDInfo.VResolution);
+	// nlassert(width == m_DevicePtr->HMDInfo.HResolution);
+	// nlassert(height == m_DevicePtr->HMDInfo.VResolution);
 
 	if (m_Driver->getPolygonMode() == UDriver::Filled)
 	{
-		switch (m_Stage)
+		switch (m_Stage) // Previous stage
 		{
 		case 0:
-			++m_Stage;
-			m_SubStage = 0;
-			// stage 1:
-			// (initBloom)
-			// clear buffer
-			// draw scene left
-			return true;
-		case 1:
-			++m_Stage;
+			m_Stage += 2;
 			m_SubStage = 0;
 			// stage 2:
-			// draw scene right
+			// draw interface 2d (onto render target)
 			return true;
 		case 2:
 			++m_Stage;
 			m_SubStage = 0;
 			// stage 3:
-			// (endBloom)
-			// draw interface 3d left
+			// (initBloom)
+			// clear buffer
+			// draw scene left
 			return true;
 		case 3:
 			++m_Stage;
 			m_SubStage = 0;
 			// stage 4:
-			// draw interface 3d right
+			// draw scene right
 			return true;
 		case 4:
 			++m_Stage;
 			m_SubStage = 0;
 			// stage 5:
-			// (endInterfacesDisplayBloom)
-			// draw interface 2d left
+			// (endBloom)
+			// draw interface 3d left
 			return true;
 		case 5:
 			++m_Stage;
 			m_SubStage = 0;
 			// stage 6:
-			// draw interface 2d right
+			// draw interface 3d right
 			return true;
+		/*case 6:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 7:
+			// (endInterfacesDisplayBloom)
+			// draw interface 2d left
+			return true;
+		case 7:
+			++m_Stage;
+			m_SubStage = 0;
+			// stage 8:
+			// draw interface 2d right
+			return true;*/
 		case 6:
 			m_Stage = 0;
 			m_SubStage = 0;
@@ -518,26 +530,30 @@ bool CStereoOVR::nextPass()
 
 const NL3D::CViewport &CStereoOVR::getCurrentViewport() const
 {
-	if (m_Stage % 2) return m_LeftViewport;
+	if (m_Stage == 2) return m_RegularViewport;
+	else if (m_Stage % 2) return m_LeftViewport;
 	else return m_RightViewport;
 }
 
 const NL3D::CFrustum &CStereoOVR::getCurrentFrustum(uint cid) const
 {
-	if (m_Stage % 2) return m_LeftFrustum[cid];
+	if (m_Stage == 2) return m_OriginalFrustum[cid];
+	else if (m_Stage % 2) return m_LeftFrustum[cid];
 	else return m_RightFrustum[cid];
 }
 
 void CStereoOVR::getCurrentFrustum(uint cid, NL3D::UCamera *camera) const
 {
-	if (m_Stage % 2) camera->setFrustum(m_LeftFrustum[cid]);
+	if (m_Stage == 2) camera->setFrustum(m_OriginalFrustum[cid]);
+	else if (m_Stage % 2) camera->setFrustum(m_LeftFrustum[cid]);
 	else camera->setFrustum(m_RightFrustum[cid]);
 }
 
 void CStereoOVR::getCurrentMatrix(uint cid, NL3D::UCamera *camera) const
 {
 	CMatrix translate;
-	if (m_Stage % 2) translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f));
+	if (m_Stage == 2) { }
+	else if (m_Stage % 2) translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * -0.5f, 0.f, 0.f));
 	else translate.translate(CVector((m_DevicePtr->HMDInfo.InterpupillaryDistance * m_Scale) * 0.5f, 0.f, 0.f));
 	CMatrix mat = m_CameraMatrix[cid] * translate;
 	if (camera->getTransformMode() == NL3D::UTransformable::RotQuat)
@@ -556,7 +572,7 @@ bool CStereoOVR::wantClear()
 {
 	switch (m_Stage)
 	{
-	case 1:
+	case 3:
 		m_SubStage = 1;
 		return true;
 	}
@@ -567,8 +583,8 @@ bool CStereoOVR::wantScene()
 {
 	switch (m_Stage)
 	{
-	case 1:
-	case 2:
+	case 3:
+	case 4:
 		m_SubStage = 2;
 		return true;
 	}
@@ -579,8 +595,8 @@ bool CStereoOVR::wantInterface3D()
 {
 	switch (m_Stage)
 	{
-	case 3:
-	case 4:
+	case 5:
+	case 6:
 		m_SubStage = 3;
 		return true;
 	}
@@ -591,26 +607,183 @@ bool CStereoOVR::wantInterface2D()
 {
 	switch (m_Stage)
 	{
-	case 5:
-	case 6:
+	case 2:
 		m_SubStage = 4;
 		return true;
 	}
 	return m_Driver->getPolygonMode() != UDriver::Filled;
 }
 
-
 /// Returns non-NULL if a new render target was set
 bool CStereoOVR::beginRenderTarget()
 {
 	// render target always set before driver clear
 	// nlassert(m_SubStage <= 1);
-	if (m_Driver && m_Stage == 1 && (m_Driver->getPolygonMode() == UDriver::Filled))
+
+	// Set GUI render target
+	if (m_Driver && m_Stage == 2 && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
-		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_BarrelTexU, 0, 0, 0, 0);
+		nlassert(!m_GUITexture);
+		uint32 width, height;
+		m_Driver->getWindowSize(width, height);
+		m_GUITexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height, true, UTexture::RGBA8888);
+		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_GUITexture);
+		m_Driver->clearBuffers(NLMISC::CRGBA(0, 0, 0, 0));
 		return true;
 	}
+
+	// Begin 3D scene render target
+	if (m_Driver && m_Stage == 3 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	{
+		nlassert(!m_SceneTexture);
+		uint32 width, height;
+		m_Driver->getWindowSize(width, height); // Temporary limitation, TODO: scaling!
+		m_SceneTexture = m_Driver->getRenderTargetManager().getRenderTarget(width, height);
+		static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_SceneTexture);
+		return true;
+	}
+
 	return false;
+}
+
+void CStereoOVR::setInterfaceMatrix(const NL3D::CMatrix &matrix)
+{
+	m_InterfaceCameraMatrix = matrix;
+}
+
+void CStereoOVR::renderGUI()
+{
+	
+	/*CMatrix mat;
+	mat.translate(m_InterfaceCameraMatrix.getPos());
+	CVector dir = m_InterfaceCameraMatrix.getJ();
+	dir.z = 0;
+	dir.normalize();
+	if (dir.y < 0)
+		mat.rotateZ(float(NLMISC::Pi+asin(dir.x)));
+	else
+		mat.rotateZ(float(NLMISC::Pi+NLMISC::Pi-asin(dir.x)));
+	m_Driver->setModelMatrix(mat);*/
+	m_Driver->setModelMatrix(m_InterfaceCameraMatrix);
+
+	{
+		NLMISC::CLine line(NLMISC::CVector(0, 5, 2), NLMISC::CVector(0, 5, 3));
+
+		NL3D::UMaterial mat = m_Driver->createMaterial();
+		mat.setZWrite(false);
+		// mat.setZFunc(UMaterial::always); // Not nice!
+		mat.setDoubleSided(true);
+		mat.setColor(NLMISC::CRGBA::Red);
+		mat.setBlend(false);
+
+		m_Driver->drawLine(line, mat);
+
+		m_Driver->deleteMaterial(mat);
+	}
+	
+	{
+		nlassert(m_GUITexture);
+
+		NLMISC::CQuadUV quad;
+
+		NL3D::UMaterial umat = m_Driver->createMaterial();
+		umat.initUnlit();
+		umat.setColor(NLMISC::CRGBA::White);
+		umat.setDoubleSided(true);
+		umat.setBlend(true);
+		umat.setAlphaTest(false);
+		NL3D::CMaterial *mat = umat.getObjectPtr();
+		mat->setShader(NL3D::CMaterial::Normal);
+		mat->setBlendFunc(CMaterial::one, CMaterial::TBlend::invsrcalpha);
+		mat->setZWrite(false);
+		// mat->setZFunc(CMaterial::always); // Not nice
+		mat->setDoubleSided(true);
+		mat->setTexture(0, m_GUITexture->getITexture());
+
+		// user options
+		float scale = 1.0f;
+		float distance = 1.5f;
+		float offcenter = 0.75f;
+
+		float height = scale * distance * 2.0f;
+
+		uint32 winw, winh;
+		m_Driver->getWindowSize(winw, winh);
+		float width = height * (float)winw / (float)winh;
+
+		float bottom = -(height * 0.5f);
+		float top = (height * 0.5f);
+
+		NLMISC::CQuadUV quadUV;
+		quadUV.V0 = CVector(-(width * 0.5f), distance, -(height * 0.5f));
+		quadUV.V1 = CVector((width * 0.5f), distance, -(height * 0.5f));
+		quadUV.V2 = CVector((width * 0.5f), distance, (height * 0.5f));
+		quadUV.V3 = CVector(-(width * 0.5f), distance, (height * 0.5f));
+		quadUV.Uv0 = CUV(0.f,  0.f);
+		quadUV.Uv1 = CUV(1.f, 0.f);
+		quadUV.Uv2 = CUV(1.f, 1.f);
+		quadUV.Uv3 = CUV(0.f,  1.f);
+		
+		const uint nbQuads = 128;
+		static CVertexBuffer vb;
+		static CIndexBuffer ib;
+		
+		vb.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
+		vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
+		vb.setNumVertices((nbQuads + 1) * 2);
+
+		{
+			CVertexBufferReadWrite vba;
+			vb.lock(vba);
+			float radius = distance + offcenter;
+			float relWidth = width / radius;
+			float quadWidth = relWidth / (float)nbQuads;
+			for (uint i = 0; i < nbQuads + 1; ++i)
+			{
+				uint vi0 = i * 2;
+				uint vi1 = vi0 + 1;
+				float lineH = -(relWidth * 0.5f) + quadWidth * (float)i;
+				float lineUV = (float)i / (float)(nbQuads);
+				float left = sin(lineH) * radius;
+				float forward = cos(lineH) * radius;
+				vba.setVertexCoord(vi0, left, forward - offcenter, bottom);
+				vba.setTexCoord(vi0, 0, lineUV, 0.0f);
+				vba.setVertexCoord(vi1, left, forward - offcenter, top);
+				vba.setTexCoord(vi1, 0, lineUV, 1.0f);
+			}
+		}
+
+		ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
+		ib.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
+		ib.setNumIndexes(nbQuads * 6);
+
+		{
+			CIndexBufferReadWrite iba;
+			ib.lock(iba);
+			for (uint i = 0; i < nbQuads; ++i)
+			{
+				uint ti0 = i * 2;
+				uint ti1 = ti0 + 1;
+				uint bl = ti0;
+				uint tl = ti0 + 1;
+				uint br = ti0 + 2;
+				uint tr = ti0 + 3;
+				iba.setTri(ti0 * 3, bl, tl, br);
+				iba.setTri(ti1 * 3, br, tl, tr);
+			}
+		}
+
+		IDriver *driver = static_cast<CDriverUser *>(m_Driver)->getDriver();
+		// m_Driver->setPolygonMode(UDriver::Line);
+		driver->activeVertexBuffer(vb);
+		driver->activeIndexBuffer(ib);
+		driver->renderTriangles(*umat.getObjectPtr(), 0, nbQuads * 2); //renderRawQuads(umat, 0, 128);
+		// m_Driver->setPolygonMode(UDriver::Filled);
+
+		// m_Driver->drawQuad(quadUV, umat);
+
+		m_Driver->deleteMaterial(umat);
+	}
 }
 
 /// Returns true if a render target was fully drawn
@@ -618,10 +791,41 @@ bool CStereoOVR::endRenderTarget()
 {
 	// after rendering of course
 	// nlassert(m_SubStage > 1);
+
+	// End GUI render target
+	if (m_Driver && m_Stage == 2 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	{
+		// End GUI render target
+		nlassert(m_GUITexture);
+		CTextureUser texNull;
+		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(texNull);
+	}
+
+	// End of 3D Interface pass left
+	if (m_Driver && m_Stage == 5 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	{
+		// Render 2D GUI in 3D space, assume existing camera is OK
+		renderGUI();
+	}
+
+	// End of 3D Interface pass right
+	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled))
+	{
+		// Render 2D GUI in 3D space, assume existing camera is OK
+		renderGUI();
+
+		// Recycle render target
+		m_Driver->getRenderTargetManager().recycleRenderTarget(m_GUITexture);
+		m_GUITexture = NULL;
+	}
+
+	// End 3D scene render target
 	if (m_Driver && m_Stage == 6 && (m_Driver->getPolygonMode() == UDriver::Filled)) // set to 4 to turn off distortion of 2d gui
 	{
-		CTextureUser cu;
-		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(cu);
+		nlassert(m_SceneTexture);
+
+		CTextureUser texNull;
+		(static_cast<CDriverUser *>(m_Driver))->setRenderTarget(texNull);
 		bool fogEnabled = m_Driver->fogEnabled();
 		m_Driver->enableFog(false);
 
@@ -632,7 +836,7 @@ bool CStereoOVR::endRenderTarget()
 		m_Driver->getWindowSize(width, height);
 		NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
 		NL3D::CMaterial *barrelMat = m_BarrelMat.getObjectPtr();
-		barrelMat->setTexture(0, m_BarrelTex);
+		barrelMat->setTexture(0, m_SceneTexture->getITexture());
 
 		drvInternal->activePixelProgram(m_PixelProgram);
 
@@ -697,8 +901,13 @@ bool CStereoOVR::endRenderTarget()
 		drvInternal->activePixelProgram(NULL);
 		m_Driver->enableFog(fogEnabled);
 
+		// Recycle render target
+		m_Driver->getRenderTargetManager().recycleRenderTarget(m_SceneTexture);
+		m_SceneTexture = NULL;
+
 		return true;
 	}
+
 	return false;
 }
 

@@ -1289,16 +1289,19 @@ namespace NLGUI
 							string name;
 							ucstring ucValue;
 							uint size = 120;
+							uint maxlength = 1024;
 							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
 								name = value[MY_HTML_INPUT_NAME];
 							if (present[MY_HTML_INPUT_SIZE] && value[MY_HTML_INPUT_SIZE])
 								fromString(value[MY_HTML_INPUT_SIZE], size);
 							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
 								ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
+							if (present[MY_HTML_INPUT_MAXLENGTH] && value[MY_HTML_INPUT_MAXLENGTH])
+								fromString(value[MY_HTML_INPUT_MAXLENGTH], maxlength);
 
 							string textTemplate(!templateName.empty() ? templateName : DefaultFormTextGroup);
 							// Add the editbox
-							CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue);
+							CInterfaceGroup *textArea = addTextArea (textTemplate, name.c_str (), 1, size/12, false, ucValue, maxlength);
 							if (textArea)
 							{
 								// Add the text area to the form
@@ -1450,6 +1453,8 @@ namespace NLGUI
 						getPercentage (table->ForceWidthMin, table->TableRatio, value[MY_HTML_TABLE_WIDTH]);
 					if (present[MY_HTML_TABLE_BORDER] && value[MY_HTML_TABLE_BORDER])
 						fromString(value[MY_HTML_TABLE_BORDER], table->Border);
+					if (present[MY_HTML_TABLE_BORDERCOLOR] && value[MY_HTML_TABLE_BORDERCOLOR])
+						table->BorderColor = getColor (value[MY_HTML_TABLE_BORDERCOLOR]);
 					if (present[MY_HTML_TABLE_CELLSPACING] && value[MY_HTML_TABLE_CELLSPACING])
 						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
@@ -1514,11 +1519,19 @@ namespace NLGUI
 									}
 								}
 							}
+
+							if (present[MY_HTML_TD_COLSPAN] && value[MY_HTML_TD_COLSPAN])
+								fromString(value[MY_HTML_TD_COLSPAN], _Cells.back()->ColSpan);
+							if (present[MY_HTML_TD_ROWSPAN] && value[MY_HTML_TD_ROWSPAN])
+								fromString(value[MY_HTML_TD_ROWSPAN], _Cells.back()->RowSpan);
+
 							_Cells.back()->BgColor = _CellParams.back().BgColor;
 							_Cells.back()->Align = _CellParams.back().Align;
 							_Cells.back()->VAlign = _CellParams.back().VAlign;
 							_Cells.back()->LeftMargin = _CellParams.back().LeftMargin;
 							_Cells.back()->NoWrap = _CellParams.back().NoWrap;
+							_Cells.back()->ColSpan = std::max(1, _Cells.back()->ColSpan);
+							_Cells.back()->RowSpan = std::max(1, _Cells.back()->RowSpan);
 
 							float temp;
 							if (present[MY_HTML_TD_WIDTH] && value[MY_HTML_TD_WIDTH])
@@ -1553,12 +1566,15 @@ namespace NLGUI
 					_TextAreaRow = 1;
 					_TextAreaCols = 10;
 					_TextAreaContent = "";
-					if (present[HTML_TEXTAREA_NAME] && value[HTML_TEXTAREA_NAME])
-						_TextAreaName = value[HTML_TEXTAREA_NAME];
-					if (present[HTML_TEXTAREA_ROWS] && value[HTML_TEXTAREA_ROWS])
-						fromString(value[HTML_TEXTAREA_ROWS], _TextAreaRow);
-					if (present[HTML_TEXTAREA_COLS] && value[HTML_TEXTAREA_COLS])
-						fromString(value[HTML_TEXTAREA_COLS], _TextAreaCols);
+					_TextAreaMaxLength = 1024;
+					if (present[MY_HTML_TEXTAREA_NAME] && value[MY_HTML_TEXTAREA_NAME])
+						_TextAreaName = value[MY_HTML_TEXTAREA_NAME];
+					if (present[MY_HTML_TEXTAREA_ROWS] && value[MY_HTML_TEXTAREA_ROWS])
+						fromString(value[MY_HTML_TEXTAREA_ROWS], _TextAreaRow);
+					if (present[MY_HTML_TEXTAREA_COLS] && value[MY_HTML_TEXTAREA_COLS])
+						fromString(value[MY_HTML_TEXTAREA_COLS], _TextAreaCols);
+					if (present[MY_HTML_TEXTAREA_MAXLENGTH] && value[MY_HTML_TEXTAREA_MAXLENGTH])
+						fromString(value[MY_HTML_TEXTAREA_MAXLENGTH], _TextAreaMaxLength);
 
 					_TextAreaTemplate = !templateName.empty() ? templateName : DefaultFormTextAreaGroup;
 					_TextArea = true;
@@ -1675,21 +1691,19 @@ namespace NLGUI
 				break;
 			case HTML_TEXTAREA:
 				{
-					// Add the editbox
-	// 				nlinfo("textarea temp '%s'", _TextAreaTemplate.c_str());
-	// 				nlinfo("textarea name '%s'", _TextAreaName.c_str());
-	// 				nlinfo("textarea %d %d", _TextAreaRow, _TextAreaCols);
-	// 				nlinfo("textarea content '%s'", _TextAreaContent.toUtf8().c_str());
-					CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent);
-					if (textArea)
-					{
-						// Add the text area to the form
-						CGroupHTML::CForm::CEntry entry;
-						entry.Name = _TextAreaName;
-						entry.TextArea = textArea;
-						_Forms.back().Entries.push_back (entry);
-					}
 					_TextArea = false;
+					if (!(_Forms.empty()))
+					{
+						CInterfaceGroup *textArea = addTextArea (_TextAreaTemplate, _TextAreaName.c_str (), _TextAreaRow, _TextAreaCols, true, _TextAreaContent, _TextAreaMaxLength);
+						if (textArea)
+						{
+							// Add the text area to the form
+							CGroupHTML::CForm::CEntry entry;
+							entry.Name = _TextAreaName;
+							entry.TextArea = textArea;
+							_Forms.back().Entries.push_back (entry);
+						}
+					}
 				}
 				break;
 			case HTML_TITLE:
@@ -3149,116 +3163,62 @@ namespace NLGUI
 	void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg)
 	{
 		// In a paragraph ?
-		if (_Paragraph)
+		if (!_Paragraph)
 		{
-			string finalUrl;
+			newParagraph (0);
+			paragraphChange ();
+		}
 
+		string finalUrl;
+
+		// No more text in this text view
+		_CurrentViewLink = NULL;
+
+		// Not added ?
+		CViewBitmap *newImage = new CViewBitmap (TCtorParam());
+
+		//
+		// 1/ try to load the image with the old system (local files in bnp)
+		//
+		string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
+		if (lookupLocalFile (finalUrl, image.c_str(), false))
+		{
+			newImage->setRenderLayer(getRenderLayer()+1);
+			image = finalUrl;
+		}
+		else
+		{
 			//
-			// 1/ try to load the image with the old system (local files in bnp)
+			// 2/ if it doesn't work, try to load the image in cache
 			//
-			string image = CFile::getPath(img) + CFile::getFilenameWithoutExtension(img) + ".tga";
-			if (lookupLocalFile (finalUrl, image.c_str(), false))
+			image = localImageName(img);
+			if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
 			{
-				// No more text in this text view
-				_CurrentViewLink = NULL;
-
-				// Not added ?
-				CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-				/* todo link in image
-				if (getA())
-				{
-					newImage->Link = getLink();
-					newImage->setHTMLView (this);
-				}*/
-				newImage->setRenderLayer(getRenderLayer()+1);
-				newImage->setTexture (finalUrl);
-				newImage->setModulateGlobalColor(globalColor);
-
-				/* todo link in image
-				if (getA())
-					getParagraph()->addChildLink(newImage);
-				else*/
-				getParagraph()->addChild(newImage);
-				paragraphChange ();
+				// don't display image that are not power of 2
+				uint32 w, h;
+				CBitmap::loadSize (image, w, h);
+				if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+					image.clear();
 			}
 			else
 			{
 				//
-				// 2/ if it doesn't work, try to load the image in cache
+				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
 				//
-				image = localImageName(img);
-				if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
-				{
-					// No more text in this text view
-					_CurrentViewLink = NULL;
-
-					// Not added ?
-					CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-					/* todo link in image
-					if (getA())
-					{
-					newImage->Link = getLink();
-					newImage->setHTMLView (this);
-					}*/
-
-					// don't display image that are not power of 2
-					uint32 w, h;
-					CBitmap::loadSize (image, w, h);
-					if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-						image.clear();
-
-					newImage->setTexture (image);
-	//				newImage->setTexture (finalUrl);
-					newImage->setModulateGlobalColor(globalColor);
-
-					/* todo link in image
-					if (getA())
-					getParagraph()->addChildLink(newImage);
-					else*/
-					getParagraph()->addChild(newImage);
-					paragraphChange ();
-				}
-				else
-				{
-
-					//
-					// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
-					//
-					image = "web_del.tga";
-					if (lookupLocalFile (finalUrl, image.c_str(), false))
-					{
-						// No more text in this text view
-						_CurrentViewLink = NULL;
-
-						// Not added ?
-						CViewBitmap *newImage = new CViewBitmap (TCtorParam());
-						/* todo link in image
-						if (getA())
-						{
-						newImage->Link = getLink();
-						newImage->setHTMLView (this);
-						}*/
-						newImage->setTexture (image);
-						//				newImage->setTexture (finalUrl);
-						newImage->setModulateGlobalColor(globalColor);
-
-						addImageDownload(img, newImage);
-
-						/* todo link in image
-						if (getA())
-						getParagraph()->addChildLink(newImage);
-						else*/
-						getParagraph()->addChild(newImage);
-						paragraphChange ();
-					}
-				}
+				image = "web_del.tga";
+				addImageDownload(img, newImage);
 			}
 		}
+		newImage->setTexture (image);
+		newImage->setModulateGlobalColor(globalColor);
+
+		getParagraph()->addChild(newImage);
+		paragraphChange ();
 	}
 
 	// ***************************************************************************
 
-	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint /* rows */, uint cols, bool multiLine, const ucstring &content)
+	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint /* rows */, uint cols, bool multiLine, const ucstring &content, uint maxlength)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3280,7 +3240,8 @@ namespace NLGUI
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
-			templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", "1024"));
+			if (maxlength > 0)
+				templateParams.push_back (std::pair<std::string,std::string> ("max_num_chars", toString(maxlength)));
 			CInterfaceGroup *textArea = CWidgetManager::getInstance()->getParser()->createGroupInstance (templateName.c_str(),
 				getParagraph()->getId(), templateParams.empty()?NULL:&(templateParams[0]), (uint)templateParams.size());
 

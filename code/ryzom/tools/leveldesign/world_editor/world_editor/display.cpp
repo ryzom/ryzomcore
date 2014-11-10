@@ -309,6 +309,7 @@ void CDisplay::init (CMainFrame *pMF)
 			_TextContext->setFontGenerator(NLMISC::CPath::getWindowsDirectory() + "Fonts\\arial.ttf");
 			_TextContext->setKeep800x600Ratio(true);
 			_TextContext->setShaded(true);
+			_TextContext->setShadeOutline(false);
 			_TextContext->setShadeColor(NLMISC::CRGBA::Black);
 		}
 		catch(...)

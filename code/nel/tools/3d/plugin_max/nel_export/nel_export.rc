@@ -575,8 +575,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 10, 0, 0
- PRODUCTVERSION 0, 10, 0, 0
+ FILEVERSION 0, 11, 0, 0
+ PRODUCTVERSION 0, 11, 0, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -593,14 +593,14 @@ BEGIN
         BEGIN
             VALUE "Comments", "Based on Kinetix 3D Studio Max 3.0 plugin sample\0"
             VALUE "CompanyName", "Ryzom Core\0"
-            VALUE "FileVersion", "0.10.0\0"
+            VALUE "FileVersion", "0.11.0\0"
             VALUE "InternalName", "CNelExport\0"
             VALUE "LegalCopyright", "\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "CNelExport.dlu\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Ryzom Core\0"
-            VALUE "ProductVersion", "0.10.0\0"
+            VALUE "ProductVersion", "0.11.0\0"
             VALUE "SpecialBuild", "\0"
         END
     END

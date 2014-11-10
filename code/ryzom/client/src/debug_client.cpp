@@ -345,6 +345,7 @@ void displayStreamingDebug ()
 		//----------------//
 		// Create a shadow when displaying a text.
 		TextContext->setShaded(true);
+		TextContext->setShadeOutline(false);
 		// Set the font size.
 		TextContext->setFontSize(ClientCfg.DebugFontSize);
 		// Set the text color
@@ -390,6 +391,7 @@ void displayStreamingDebug ()
 
 		// No more shadow when displaying a text.
 		TextContext->setShaded(false);
+		TextContext->setShadeOutline(false);
 	}
 }
 
@@ -567,6 +569,7 @@ void displayNetDebug ()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color

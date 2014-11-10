@@ -73,6 +73,8 @@ using namespace std;
 
 // ***************************************************************************
 
+extern bool SetMousePosFirstTime;
+
 vector<CShard> Shards;
 
 string LoginLogin, LoginPassword, ClientApp, Salt;
@@ -114,7 +116,7 @@ vector<string>	R2PatchURLs;
 #define CTRL_EDITBOX_CREATEACCOUNT_LOGIN			"ui:login:create_account:content:submit_gr:eb_login:eb"
 #define CTRL_EDITBOX_CREATEACCOUNT_PASSWORD			"ui:login:create_account:content:submit_gr:eb_password:eb"
 #define CTRL_EDITBOX_CREATEACCOUNT_CONFIRMPASSWORD	"ui:login:create_account:content:submit_gr:eb_confirm_password:eb"
-#define CTRL_EDITBOX_CREATEACCOUNT_EMAIL			"ui:login:create_account:content:submit_gr:eb_email:eb" 
+#define CTRL_EDITBOX_CREATEACCOUNT_EMAIL			"ui:login:create_account:content:submit_gr:eb_email:eb"
 
 #define UI_VARIABLES_SCREEN_CHECKPASS		0
 #define UI_VARIABLES_SCREEN_SHARDDISP		1
@@ -857,16 +859,15 @@ bool login()
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
-	bool tmpDI = ClientCfg.DisableDirectInput;
-	ClientCfg.DisableDirectInput = true;
+	SetMousePosFirstTime = true;
 	InitMouseWithCursor(false);
 	Driver->showCursor (false);
 	SetMouseFreeLook ();
 	SetMouseCursor (false);
 	SetMouseSpeed (ClientCfg.CursorSpeed);
 	SetMouseAcceleration (ClientCfg.CursorAcceleration);
-	InitMouseWithCursor (ClientCfg.HardwareCursor);
-	ClientCfg.DisableDirectInput = tmpDI;
+	SetMousePosFirstTime = true;
+	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached);
 
 //	if (ClientCfg.TestBrowser)
 //	{
@@ -1989,6 +1990,7 @@ class CAHInitResLod : public IActionHandler
 		CfgPresetList.push_back(pair<string,bool>("NbMaxSkeletonNotCLod",	false));
 		CfgPresetList.push_back(pair<string,bool>("CharacterFarClip",		true));
 
+		CfgPresetList.push_back(pair<string,bool>("FXAA",					false));
 		CfgPresetList.push_back(pair<string,bool>("Bloom",					false));
 		CfgPresetList.push_back(pair<string,bool>("SquareBloom",			false));
 		CfgPresetList.push_back(pair<string,bool>("DensityBloom",			true));
@@ -2410,7 +2412,7 @@ bool initCreateAccount()
 			rulesGr->setActive(false);
 
 		// must be done after hide rules
-		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false"); 
+		CAHManager::getInstance()->runActionHandler("set_keyboard_focus", NULL, "target=" CTRL_EDITBOX_CREATEACCOUNT_LOGIN "|select_all=false");
 	}
 
 

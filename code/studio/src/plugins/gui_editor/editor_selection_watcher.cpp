@@ -18,9 +18,9 @@
 
 namespace GUIEditor
 {
-	void CEditorSelectionWatcher::selectionChanged( std::string &newSelection )
+	void CEditorSelectionWatcher::selectionChanged()
 	{
-		Q_EMIT sgnSelectionChanged( newSelection );
+		Q_EMIT sgnSelectionChanged();
 	}
 }
 

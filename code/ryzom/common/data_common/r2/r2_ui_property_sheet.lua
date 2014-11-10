@@ -47,13 +47,13 @@ function r2:buildEditBox(prop, textRef, entryType, multiLine, maxNumChars, onCha
 		 bg_texture="grey_40.tga"
 		 onchange="lua" onchange_params="getUICaller():setupDisplayText(); getUICaller():find('edit_text'):updateCoords(); getUICaller():getEnclosingContainer().Env.updateSize()"
 		 onenter="lua" on_focus_lost="lua"]] ..
-	[[ id=               ]] .. strify(prop.Name) ..
-	[[ text_ref   =      ]] .. strify(textRef)   ..
-	[[ entry_type =      ]] .. strify(entryType) ..
-	[[ multi_line =      ]] .. strify(multiLine) ..
-	[[ max_num_chars =   ]] .. strify(maxNumChars) ..
-	[[ params = ]] .. strify(onChangeAction) ..
-	[[ on_focus_lost_params = ]] .. strify(onFocusLostAction) ..	
+	[[ id=               ]] .. strifyXml(prop.Name) ..
+	[[ text_ref   =      ]] .. strifyXml(textRef)   ..
+	[[ entry_type =      ]] .. strifyXml(entryType) ..
+	[[ multi_line =      ]] .. strifyXml(multiLine) ..
+	[[ max_num_chars =   ]] .. strifyXml(maxNumChars) ..
+	[[ params = ]] .. strifyXml(onChangeAction) ..
+	[[ on_focus_lost_params = ]] .. strifyXml(onFocusLostAction) ..	
 	"/>"
 	return result
 end
@@ -73,13 +73,13 @@ end
 --		 bg_texture="grey_40.tga"
 --		 onchange="lua" onchange_params="getUICaller():setupDisplayText(); getUICaller():find('edit_text'):updateCoords(); getUICaller():getEnclosingContainer().Env.updateSize()"
 --		 onenter="lua" on_focus_lost="lua"]] ..
---	[[ id=               ]] .. strify(prop.Name) ..
---	[[ text_ref   =      ]] .. strify(textRef)   ..
---	[[ entry_type =      ]] .. strify(entryType) ..
---	[[ multi_line =      ]] .. strify(multiLine) ..
---	[[ max_num_chars =   ]] .. strify(maxNumChars) ..
---	[[ params = ]] .. strify(onChangeAction) ..
---	[[ on_focus_lost_params = ]] .. strify(onChangeAction) ..
+--	[[ id=               ]] .. strifyXml(prop.Name) ..
+--	[[ text_ref   =      ]] .. strifyXml(textRef)   ..
+--	[[ entry_type =      ]] .. strifyXml(entryType) ..
+--	[[ multi_line =      ]] .. strifyXml(multiLine) ..
+--	[[ max_num_chars =   ]] .. strifyXml(maxNumChars) ..
+--	[[ params = ]] .. strifyXml(onChangeAction) ..
+--	[[ on_focus_lost_params = ]] .. strifyXml(onChangeAction) ..
 --	[[ /> 
 --
 --
@@ -1043,7 +1043,7 @@ r2.WidgetStyles.Number =
 			width1 = tmp
 		end
 
-		local part0 = [[<TD width=]] .. strify(width0) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_]] .. prop.Name .. [[" > ]]
+		local part0 = [[<TD width=]] .. strifyXml(width0) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_]] .. prop.Name .. [[" > ]]
 		
 		
 		local tooltipTextId, tooltipTextIdFound = buildPropTooltipName(className, prop.Name)
@@ -1051,7 +1051,7 @@ r2.WidgetStyles.Number =
 							tooltip_parent="win"
 							tooltip_posref="auto"								
 							instant_help="true"
-							tooltip=]] .. strify(tooltipTextId) .. ">"
+							tooltip=]] .. strifyXml(tooltipTextId) .. ">"
 		part0 = part0 .. buildCoverAllButton(prop)
 
 		local color = "255 255 255 255"
@@ -1066,10 +1066,10 @@ r2.WidgetStyles.Number =
 		end	
 
 		part0 = part0 .. [[ <view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true"]] .. 
-						[[ id =        ]] .. strify(prop.Name .. "_Caption") ..
-						[[ hardtext =  ]] .. strify(hardText) ..				
-						[[ color =  ]] .. strify(color) .. 
-						[[ global_color=]] .. strify(globalColor) .. [[ fontsize="12" shadow="true" auto_clamp="true"/> ]]
+						[[ id =        ]] .. strifyXml(prop.Name .. "_Caption") ..
+						[[ hardtext =  ]] .. strifyXml(hardText) ..				
+						[[ color =  ]] .. strifyXml(color) .. 
+						[[ global_color=]] .. strifyXml(globalColor) .. [[ fontsize="12" shadow="true" auto_clamp="true"/> ]]
 		part0 = part0 .. "</group>"
 		part0 = part0 .. "</TD>"
 		
@@ -1086,7 +1086,7 @@ r2.WidgetStyles.Number =
 		--
 		local widgetXml = 
 		string.format([[
-		<group posref="TL TL" x="4" y="3" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="3" id= ]] .. strify(prop.Name) .. ">" .. [[
+		<group posref="TL TL" x="4" y="3" sizeref="w" w="-4" child_resize_h="true" child_resize_hmargin="3" id= ]] .. strifyXml(prop.Name) .. ">" .. [[
 			<view type="bitmap" id="bk" posref="BL BL" scale="true" y="4" sizeref="w" h="2" texture="W_line_hor2.tga" />
 			<ctrl type="scroll" id="c" posparent="bk" posref="MM MM" x="0" y="-1" sizeref="w" h="12"
 								vertical="false" align="L" tracksize="12" 
@@ -1136,14 +1136,14 @@ r2.WidgetStyles.Number =
 		local result = 
 		[[
 		<group type="combo_box" sizeref="w" w="-2" x="2" y="0" child_resize_h="true" child_resize_hmargin="10" linked_to_db="false" posref="TL TL" id=]]
-		.. strify(prop.Name) .. 
+		.. strifyXml(prop.Name) .. 
 		string.format([[ on_change="lua" on_change_params="if getUICaller().parent.Env.Locked ~= true then  r2:requestSetObjectProperty('%s', getUICaller().selection) end"]], prop.Name) ..
 		">"
 		result = result .. [[<instance template="combo_box_def1" />]]
 		--  append enumerated values
 		
 		for k, v in pairs(prop.Enum) do				
-			result = result .. [[<combo_text name="]] .. tostring(v) .. [[" />]]
+			result = result .. [[<combo_text name=]] .. strifyXml(tostring(v)) .. [[ />]]
 		end				
 		result = result .. "</group>"				
 		return result, setter
@@ -1201,10 +1201,10 @@ function r2:createPropertyXmlTable(props, className, posparent, posref, x, y, wi
 		result = result .. value
 	end
 	add([[<group type="table" sizeparent="parent"]] ..
-	   [[ posparent= ]] .. strify(posparent) ..
-		[[ posref=    ]] .. strify(posref) ..
-		[[ x=         ]] .. strify(x) ..
-		[[ y=         ]] .. strify(y) ..
+	   [[ posparent= ]] .. strifyXml(posparent) ..
+		[[ posref=    ]] .. strifyXml(posref) ..
+		[[ x=         ]] .. strifyXml(x) ..
+		[[ y=         ]] .. strifyXml(y) ..
 		[[ id="prop_table" sizeref="w" width="100%" border="0" bgcolor="0 0 0 255"
 		 cellspacing="1"
 		 cellpadding="0"
@@ -1249,18 +1249,18 @@ function r2:createPropertyXmlTable(props, className, posparent, posref, x, y, wi
 
 			local part0
 			if not captionXmlDesc then
-				part0 = [[<TD width=]] .. strify(width0) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_]] .. prop.Name .. [[" > ]]
+				part0 = [[<TD width=]] .. strifyXml(width0) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="80 80 80 127" height="0" align="left" valign="middle" id= "l_]] .. prop.Name .. [[" > ]]
 
 				part0 = part0 .. [[<group id="caption_group" sizeref="w" child_resize_h="true" posref="ML ML"
 									tooltip_parent="win"
 									tooltip_posref="auto"								
 									instant_help="true"
-									tooltip=]] .. strify(tooltipTextId) .. ">"
+									tooltip=]] .. strifyXml(tooltipTextId) .. ">"
 				part0 = part0 .. [[ <view type="text" y="-2" sizeref="w" over_extend_view_text="true" over_extend_parent_rect="true"]] .. 
-								[[ id =        ]] .. strify(prop.Name .. "_Caption") ..
-								[[ hardtext =  ]] .. strify(hardText) ..				
-								[[ color =  ]] .. strify(color) .. 
-								[[ global_color=]] .. strify(globalColor) .. [[ fontsize="12" shadow="true" auto_clamp="true"/> ]]
+								[[ id =        ]] .. strifyXml(prop.Name .. "_Caption") ..
+								[[ hardtext =  ]] .. strifyXml(hardText) ..				
+								[[ color =  ]] .. strifyXml(color) .. 
+								[[ global_color=]] .. strifyXml(globalColor) .. [[ fontsize="12" shadow="true" auto_clamp="true"/> ]]
 				part0 = part0 .. "</group>"
 				part0 = part0 .. "</TD>"
 			else				
@@ -1268,13 +1268,13 @@ function r2:createPropertyXmlTable(props, className, posparent, posref, x, y, wi
 			end
 
 			-- build the widget					
-			local part1 = [[<TD width=]] .. strify(width1) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_]] .. prop.Name .. [[" > ]]
+			local part1 = [[<TD width=]] .. strifyXml(width1) .. [[ ignore_max_width="true" ignore_min_width="true" bgcolor="64 64 64 127" height="0" align="left" valign="middle" id= "r_]] .. prop.Name .. [[" > ]]
 			part1 = part1 .. [[<group id="widget_group" sizeref="w" child_resize_h="true" posref="ML ML"
 							    tooltip_parent="win"
 								tooltip_posref="auto"
 								tooltip_posref_alt="TL TR"
 								instant_help="true"
-								tooltip=]] .. strify(tooltipTextId) .. ">"			                 
+								tooltip=]] .. strifyXml(tooltipTextId) .. ">"			                 
 			part1 = part1 .. widgetXmlDesc .. [[</group></TD>]]			
 
 			if invertWidget then
@@ -1397,15 +1397,15 @@ function r2:buildPropRolloutXml(caption, id, posparent, posref, props, className
 	-- add the rollout bar
 	if not isForm then
 		result = result .. 
-				[[ <instance template="rollout_bar" caption=]] .. strify(caption) .. 
-				[[ color=]] .. strify(color) ..
-				[[ global_color=]] .. strify(globalColor) ..
+				[[ <instance template="rollout_bar" caption=]] .. strifyXml(caption) .. 
+				[[ color=]] .. strifyXml(color) ..
+				[[ global_color=]] .. strifyXml(globalColor) ..
 				[[ content_name="prop_table"/> ]]		
 	else
 		result = result .. 
-				 [[ <instance template="form_bar" caption=]] .. strify(caption) .. 
-				 [[ color=]] .. strify(color) ..
-				 [[ global_color=]] .. strify(globalColor) ..
+				 [[ <instance template="form_bar" caption=]] .. strifyXml(caption) .. 
+				 [[ color=]] .. strifyXml(color) ..
+				 [[ global_color=]] .. strifyXml(globalColor) ..
 		         [[ /> ]]
 	end
 	
@@ -1475,9 +1475,9 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 	if isForm then -- for forms, closing the form is equivalent to clicking on 'cancel'
 	  add(' resizer="true" ')		
       local w = defaulting(class.Width, 500)      
-      add(' pop_min_w=' .. strify(w))
-      add(' pop_max_w=' .. strify(w))      
-      add(' w=' .. strify(w))
+      add(' pop_min_w=' .. strifyXml(w))
+      add(' pop_max_w=' .. strifyXml(w))      
+      add(' w=' .. strifyXml(w))
 		local cancelCode = 
 		[[	local form = getUICaller()
 			if form.Env.Choice == nil then
@@ -1518,7 +1518,7 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 
 
 
-	add([[id=]] .. strify(id) .. [[
+	add([[id=]] .. strifyXml(id) .. [[
 		>]])
 	
 
@@ -1647,7 +1647,7 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 					</group>  <!-- enclosing -->
 				</group> <!-- content -->
 			</group>	
-			<tree node=]] .. strify(id) .. [[ >
+			<tree node=]] .. strifyXml(id) .. [[ >
 			</tree>	
 		]])
 	
