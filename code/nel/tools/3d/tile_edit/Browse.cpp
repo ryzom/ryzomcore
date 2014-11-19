@@ -885,7 +885,7 @@ void Browse::OnChangeVariety()
 void Browse::OnBatchLoad ()
 {
 	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
 
 	if (sFile.DoModal()==IDOK)
 	{
@@ -1365,7 +1365,7 @@ void Browse::OnExportBorder()
 {
 	// Select a file
 	CFileDialog sFile (false, NULL, NULL, OFN_ENABLESIZING,
-		"Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
@@ -1431,7 +1431,7 @@ void Browse::OnImportBorder()
 {
 	// Select a file
 	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
