@@ -463,6 +463,7 @@ bool CDriverGL::unInit()
 	{
 		nlwarning("Can't unregister NLClass");
 	}
+	_Registered = 0;
 
 	// Restaure monitor color parameters
 	if (_NeedToRestaureGammaRamp)
