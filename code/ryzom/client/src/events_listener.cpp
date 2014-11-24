@@ -184,8 +184,8 @@ void CEventsListener::operator()(const CEvent& event)
 			}
 
 			// NOTE: No 0, 0 center mouse message in Windows (lower mouse message rate), but safe to assume any movement messages are requeued relative to our new position
-			// In case free look bugs on other platform, we may need to push in our own message on setMousePos for Windows
-			if (s_MouseFreeLookWaitCenter) // scX == 0 && scY == 0)
+			bool outsideBounds = ((abs(scX) > (drW >> 3)) || (abs(scY) > (drH >> 3)));
+			if (s_MouseFreeLookWaitCenter && !outsideBounds)
 			{
 				// Centered, set last to 0
 				s_MouseFreeLookLastX = 0;
@@ -204,8 +204,7 @@ void CEventsListener::operator()(const CEvent& event)
 			// updateFreeLookPos is called in updateMouseSmoothing per frame
 
 			// Center cursor
-			bool outsideBounds = ((abs(scX) > (drW >> 3)) || (abs(scY) > (drH >> 3)));
-			if (outsideBounds)
+			if (outsideBounds && !s_MouseFreeLookWaitCenter)
 			{
 				s_MouseFreeLookWaitCenter = true;
 				Driver->setMousePos(0.5f, 0.5f);
