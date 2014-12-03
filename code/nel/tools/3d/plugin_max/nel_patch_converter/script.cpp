@@ -338,6 +338,8 @@ get_selected_tile_cf(Value** arg_list, int count)
 				if (tri->rpatch->tileSel[i])
 					array->append(Integer::intern(i+1));
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -383,6 +385,8 @@ get_selected_patch_cf(Value** arg_list, int count)
 				if (tri->patch.patchSel[i])
 					array->append(Integer::intern(i+1));
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -428,6 +432,8 @@ get_selected_vertex_cf(Value** arg_list, int count)
 				if (tri->patch.vertSel[i])
 					array->append(Integer::intern(i+1));
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -617,6 +623,8 @@ set_vertex_count_cf(Value** arg_list, int count)
 		{
 			nRet=tri->patch.numVerts;
 		}
+		if (os.obj != tri)
+			delete tri;
 	}
 
 	return Integer::intern(nRet);
@@ -655,6 +663,8 @@ set_vector_count_cf(Value** arg_list, int count)
 		{
 			nRet=tri->patch.numVecs;
 		}
+		if (os.obj != tri)
+			delete tri;
 	}
 
 	return Integer::intern(nRet);
@@ -702,6 +712,8 @@ set_vertex_pos_cf(Value** arg_list, int count)
 				node->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE); 
 				ip->RedrawViews(ip->GetTime());
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -750,6 +762,8 @@ set_vector_pos_cf(Value** arg_list, int count)
 				node->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE); 
 				ip->RedrawViews(ip->GetTime());
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -792,6 +806,8 @@ get_vertex_pos_cf(Value** arg_list, int count)
 			{
 				vRet=new Point3Value (tri->patch.verts[nVertex].p);
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -834,6 +850,8 @@ get_vector_pos_cf(Value** arg_list, int count)
 			{
 				vRet=new Point3Value (tri->patch.vecs[nVertex].p);
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -877,6 +895,8 @@ get_edge_vect1_cf(Value** arg_list, int count)
 			{
 				nVert=tri->patch.edges[nEdge].vec12;
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -919,6 +939,8 @@ get_edge_vect2_cf(Value** arg_list, int count)
 			{
 				nVert=tri->patch.edges[nEdge].vec21;
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -961,6 +983,8 @@ get_edge_vert1_cf(Value** arg_list, int count)
 			{
 				nVert=tri->patch.edges[nEdge].v1;
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -1004,6 +1028,8 @@ get_edge_vert2_cf(Value** arg_list, int count)
 			{
 				nVert=tri->patch.edges[nEdge].v2;
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -1050,6 +1076,8 @@ get_sel_edge_cf(Value** arg_list, int count)
 					array->append(Integer::intern(i+1));
 					//array->data[j++]=;
 			}
+			if (os.obj != tri)
+				delete tri;
 		}
 	}
 
@@ -1158,6 +1186,8 @@ set_tile_steps_cf(Value** arg_list, int count)
 				nTess=5;
 			tri->rpatch->rTess.TileTesselLevel=nTess;
 			tri->rpatch->InvalidateChannels (PART_ALL);
+			if (os.obj != tri)
+				delete tri;
 		}	
 		if (bRet)
 		{
