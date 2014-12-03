@@ -4095,7 +4095,7 @@ DWORD WINAPI myThread (LPVOID vData)
 
 			// Create a Landscape.
 			CLandscapeModel	*TheLand= (CLandscapeModel*)CNELU::Scene->createModel(LandscapeModelId);
-			TheLand->Landscape.setTileNear (1000.f);
+			TheLand->Landscape.setTileNear (10000.f);
 			TheLand->Landscape.TileBank=bank;
 
 			// Enbable automatique lighting
@@ -4192,7 +4192,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			mat.setPos(P);
 			CNELU::Camera->setTransformMode (ITransformable::DirectMatrix);
 			CNELU::Camera->setMatrix (mat);
-			CNELU::Camera->setPerspective( 75.f*(float)Pi/180.f/*vp->GetFOV()*/, 1.33f, 0.1f, 1000.f);
+			CNELU::Camera->setPerspective( 75.f*(float)Pi/180.f/*vp->GetFOV()*/, 1.33f, 0.1f, 10000.f);
 
 			// Resize the sym vector
 			symVector.resize (pData->VectMesh.size());
