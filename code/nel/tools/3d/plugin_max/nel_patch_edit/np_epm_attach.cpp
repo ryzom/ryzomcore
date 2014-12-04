@@ -37,7 +37,6 @@ int EditPatchMod::DoAttach(INode *node, PatchMesh *attPatch, RPatchMesh *rattPat
 		nodes.DisposeTemporary();
 		return 0;
 	}
-	patchData->BeginEdit(ip->GetTime());
 
 	// If the mesh isn't yet cached, this will cause it to get cached.
 	RPatchMesh *rpatch;
@@ -49,6 +48,7 @@ int EditPatchMod::DoAttach(INode *node, PatchMesh *attPatch, RPatchMesh *rattPat
 	}
 	patchData->RecordTopologyTags(patch);
 	RecordTopologyTags();
+	patchData->BeginEdit(ip->GetTime());
 
 	// Transform the shape for attachment:
 	// If reorienting, just translate to align pivots
