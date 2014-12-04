@@ -145,7 +145,7 @@ std::vector<CZoneSymmetrisation> symVector;
 
 // Painter modes
 enum TModePaint { ModeTile, ModeColor, ModeDisplace};
-enum TModeMouse { ModePaint, ModeSelect, ModePick, ModeFill, ModeGetState };
+enum TModeMouse { ModePaint, ModeSelect, ModePick, ModeFill, ModeGetState, ModeResetPatch };
 
 /*-------------------------------------------------------------------*/
 
@@ -2585,6 +2585,13 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 		// Set mode
 		modeSelect=ModeGetState;
 
+	// Mode reset zone
+	if (AsyncListener.isKeyDown ((TKey)PainterKeys[ResetPatch]))
+	{
+		// Set mode
+		modeSelect=ModeResetPatch;
+	}
+
 	// Mode picking
 	if (AsyncListener.isKeyDown ((TKey)PainterKeys[Fill0]))
 	{
@@ -2891,6 +2898,8 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 		SetCursor (bankCont->HFill);
 	else if (pData->pobj->TileTrick)
 		SetCursor (bankCont->HTrick);
+	else if (modeSelect==ModeResetPatch)
+		SetCursor (LoadCursor (NULL, IDC_NO));
 	else
 		SetCursor (LoadCursor (NULL, IDC_ARROW));
 
@@ -3140,8 +3149,29 @@ private:
 								_FillTile.fillColor (mesh1, patch, _VectMesh, maxToNel (color1), (uint16)(256.f*opa1), PaintColor);
 
 							else if (nModeTexture==ModeDisplace)
-								// Fill this patch with the current color
+								// Fill this patch with the current displace
 								_FillTile.fillDisplace (mesh1, patch, _VectMesh, bank);
+						}
+						else if (modeSelect==ModeResetPatch)
+						{
+							int np = _VectMesh[mesh1].PMesh->numPatches;
+							for (int pp = 0; pp < np; ++pp)
+							{
+								// Fill default tile
+								_FillTile.fillTile (mesh1, pp, _VectMesh, -1, 0, 0, true, bank);
+
+								// Fill default color
+								_FillTile.fillColor (mesh1, pp, _VectMesh, CRGBA(255, 255, 255), 256, PaintColor);
+
+								// Backup current displace, fill default, restore
+								int bkdt = _Pobj->DisplaceTile;
+								int bkdts = _Pobj->DisplaceTileSet;
+								_Pobj->DisplaceTile = 0;
+								_Pobj->DisplaceTileSet = -1;
+								_FillTile.fillDisplace (mesh1, pp, _VectMesh, bank);
+								_Pobj->DisplaceTile = bkdt;
+								_Pobj->DisplaceTileSet = bkdts;
+							}
 						}
 					}
 				}
