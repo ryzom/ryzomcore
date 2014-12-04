@@ -33,13 +33,19 @@ undo off
 				normal = (cross (end - begin) (ref - begin))
 				normal = (normalize normal)
 					
-				rotnormal = (normal * (rotateZMatrix -90))
+				rotnormal = (point3 0 0 0)
 				if (normal.z > 0.9) then
 				(
-					-- print "x normal"
+					--print "x normal"
 					rotnormal = (normal * (rotateXMatrix -90))
 				)
-				-- print rotnormal
+				else
+				(
+					normal.z = 0
+					normal = (normalize normal)
+					rotnormal = (normal * (rotateZMatrix -90))
+				)
+				--print rotnormal
 				
 				-- print normal
 				-- print rotnormal
@@ -104,5 +110,15 @@ undo off
 			maxOps.CollapseNode cnode off
 			max select none
 		)
+	)
+)
+
+max select none
+clearselection()
+undo off
+(
+	for cnode in nodes do
+	(
+		selectmore cnode
 	)
 )
