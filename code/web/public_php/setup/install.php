@@ -42,6 +42,20 @@ require_once('setup/version.php');
 			$continue = false;
 		}
 	}
+    
+	if ($continue) {
+		try {
+            if (!in_array("mysql",PDO::getAvailableDrivers(),TRUE))
+            {
+                throw new PDOException ("Cannot work without a proper database setting up");
+            }
+        }
+        catch (PDOException $pdoEx)
+        {
+            printalert("danger", "PHP PDO seems to be missing the mysql driver");
+			$continue = false;
+        }
+	}    
 
 	// Validate basics
 	if ($continue) {
