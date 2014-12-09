@@ -3043,7 +3043,7 @@ private:
 	// Callback on mouse events
 	virtual void operator ()(const CEvent& event)
 	{
-		if (event==EventDestroyWindowId)
+		if (event==EventDestroyWindowId || event==EventCloseWindowId)
 		{
 			WindowActive=false;
 		}
@@ -4287,6 +4287,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			CNELU::EventServer.addListener (EventMouseUpId, &listener);
 			CNELU::EventServer.addListener (EventMouseDblClkId, &listener);
 			CNELU::EventServer.addListener (EventDestroyWindowId, &listener);
+			CNELU::EventServer.addListener (EventCloseWindowId, &listener);
 			CNELU::EventServer.addListener (EventKeyDownId, &listener);
 
 			// Camera position
@@ -4356,6 +4357,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			CNELU::EventServer.removeListener (EventMouseDblClkId, &listener);
 			CNELU::EventServer.removeListener (EventKeyDownId, &listener);
 			CNELU::EventServer.removeListener (EventDestroyWindowId, &listener);
+			CNELU::EventServer.removeListener (EventCloseWindowId, &listener);
 
 			// End.
 			//========
