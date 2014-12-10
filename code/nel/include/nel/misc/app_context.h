@@ -233,7 +233,7 @@ namespace NLMISC
 		NLMISC_SAFE_SINGLETON_DECL(className); \
 		\
 	public: \
-		static void className::releaseInstance() \
+		static void releaseInstance() \
 		{ \
 			if (_Instance) \
 			{ \
