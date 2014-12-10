@@ -78,6 +78,9 @@ namespace NLGUI
 		// The Width you want in pixel. This is the <td width="100"> parameter
 		sint32	WidthWanted;
 
+		sint32 ColSpan;
+		sint32 RowSpan;
+		sint32 TableColumnIndex;
 
 		// The min height of the cell
 		sint32	Height;
@@ -142,6 +145,7 @@ namespace NLGUI
 
 		// Table borders
 		sint32	Border;
+		NLMISC::CRGBA BorderColor;
 		sint32	CellPadding;
 		sint32	CellSpacing;
 
@@ -191,13 +195,14 @@ namespace NLGUI
 				WidthMax = 0;
 				WidthWanted = 0;
 				TableRatio = 0;
-				Height = 0;
+				RowSpan = 1;
 			}
 			sint32	Width;
 			sint32	Height;
 			sint32	WidthWanted;
 			sint32	WidthMax;
 			float	TableRatio;
+			sint32	RowSpan;
 		};
 
 		// Table row

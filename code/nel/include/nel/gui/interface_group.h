@@ -57,6 +57,7 @@ namespace NLGUI
 		CInterfaceElement* findFromShortId(const std::string &id);
 
 		/// Dynamic creation
+		virtual void addElement (CInterfaceElement *child, sint eltOrder = -1 );
 		virtual void addView  (CViewBase *child , sint eltOrder = -1);
 		virtual void addCtrl  (CCtrlBase *child, sint eltOrder = -1);
 		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
@@ -326,6 +327,17 @@ namespace NLGUI
 		float getDepthForZSort() const { return _DepthForZSort; }
 
 		void onWidgetDeleted( CInterfaceElement *e );
+
+		void moveBy( sint32 x, sint32 y );
+
+		// Blows up the group, moves it's children to it's parent
+		bool explode();
+
+		/// Adjusts the group's size so that all elements are fully inside the borders
+		void spanElements();
+
+		/// Aligns the elements - used for forming groups
+		void alignElements();
 
 	protected:
 

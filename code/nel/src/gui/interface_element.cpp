@@ -147,12 +147,16 @@ namespace NLGUI
 		}
 		if( name == "posparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this );
+			std::string pp;
+			getPosParent( pp );
+			return pp;
 		}
 		else
 		if( name == "sizeparent" )
 		{
-			return CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this );
+			std::string sp;
+			getSizeParent( sp );
+			return sp;
 		}
 		else
 		if( name == "global_color" )
@@ -226,13 +230,13 @@ namespace NLGUI
 		else
 		if( name == "posref" )
 		{
-			convertHotSpot( value.c_str() );
+			_PosRef = convertHotSpot( value.c_str() );
 			return;
 		}
 		else
 		if( name == "parentposref" )
 		{
-			convertHotSpot( value.c_str() );
+			_ParentPosRef = convertHotSpot( value.c_str() );
 		}
 		else
 		if( name == "sizeref" )
@@ -294,11 +298,13 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "w", BAD_CAST toString( _W ).c_str() );
 		xmlNewProp( node, BAD_CAST "h", BAD_CAST toString( _H ).c_str() );
 		xmlNewProp( node, BAD_CAST "posref", BAD_CAST HotSpotCoupleToString( _ParentPosRef, _PosRef ).c_str() );
-		xmlNewProp( node, BAD_CAST "posparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentPosAssociation( (CInterfaceElement*)this ).c_str() );
+		
+		std::string pp;
+		getPosParent( pp );
+		xmlNewProp( node, BAD_CAST "posparent", BAD_CAST pp.c_str() );
 		xmlNewProp( node, BAD_CAST "sizeref", BAD_CAST getSizeRefAsString().c_str() );
-		xmlNewProp( node, BAD_CAST "sizeparent",
-			BAD_CAST CWidgetManager::getInstance()->getParser()->getParentSizeAssociation( (CInterfaceElement*)this ).c_str() );
+		getSizeParent( pp );
+		xmlNewProp( node, BAD_CAST "sizeparent", BAD_CAST pp.c_str() );
 
 		xmlNewProp( node, BAD_CAST "global_color", BAD_CAST toString( _ModulateGlobalColor ).c_str() );
 		xmlNewProp( node, BAD_CAST "render_layer", BAD_CAST toString( _RenderLayer ).c_str() );
@@ -382,13 +388,13 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"posparent" );
 		if (ptr)
 		{
-			setPosParent( std::string( (const char*)ptr ) );
+			parsePosParent( (const char*)ptr );
 		}
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"sizeparent" );
 		if (ptr)
 		{
-			setSizeParent( std::string( (const char*)ptr ) );
+			parseSizeParent( (const char*)ptr );
 		}
 
 		ptr = (char*) xmlGetProp (cur, (xmlChar*)"sizeref");
@@ -1526,42 +1532,170 @@ namespace NLGUI
 		return false;
 	}
 
+	void CInterfaceElement::parsePosParent( const std::string &id )
+	{
+		CInterfaceElement *p = getParent();
+
+		if( ( id == "parent" ) || ( id.empty() ) )
+		{
+			setParentPos( p );
+			return;
+		}
+
+		std::string ppId;
+
+		if( p != NULL )
+			ppId = p->getId() + ":" + id;
+		else
+			ppId = std::string( "ui:" ) + id;
+
+		CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, ppId );
+	}
+
 	void CInterfaceElement::setPosParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			std::string idParent;
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentPositionAssociation( this, idParent + Id );
+			setParentPos( getParent() );
+			return;
 		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
+		}
+		else
+		{
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
+		}
+
+		if( pp != NULL )
+			setParentPos( pp );
+
+	}
+
+	void CInterfaceElement::getPosParent( std::string &id ) const
+	{
+
+		// If there's no pos parent set, then the parent group is the pos parent
+		if( getParentPos() == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If pos parent and parent are the same then ofc the parent group is the pos parent...
+		CInterfaceElement *p = getParent();
+		if( getParentPos() == p )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If parent is in the same group, use the short id
+		p = getParentPos();
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full id
+		id = p->getId();
+	}
+
+	void CInterfaceElement::parseSizeParent( const std::string &id )
+	{
+		CInterfaceElement *p = getParent();
+
+		if( ( id == "parent" ) || ( id.empty() ) )
+		{
+			setParentSize( p );
+			return;
+		}
+
+		std::string spId;
+
+		if( p != NULL )
+			spId = p->getId() + ":" + id;
+		else
+			spId = std::string( "ui:" ) + id;
+
+		CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, spId );
 	}
 
 	void CInterfaceElement::setSizeParent( const std::string &id )
 	{
-		std::string Id = stripId( id );
-		std::string idParent;
-
-		if( Id != "parent" )
+		// Parent or empty id simply means the group parent
+		if( ( id == "parent" ) || ( id.empty() ) )
 		{
-			if( _Parent != NULL )
-				idParent = _Parent->getId() + ":";
-			else
-				idParent = "ui:";
-			CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent + Id );
+			setParentSize( getParent() );
+			return;
+		}
+
+		CInterfaceElement *pp = NULL;
+
+		// Check if it's a short Id
+		std::string::size_type idx = id.find( "ui:" );
+		if( idx == std::string::npos )
+		{
+			// If it is, find the widget in the parent group and set as posparent
+			CInterfaceGroup *p = getParent();
+			if( p != NULL )
+			{
+				pp = p->findFromShortId( id );
+			}
 		}
 		else
 		{
-			if( _Parent != NULL )
-			{
-				idParent = _Parent->getId();
-				CWidgetManager::getInstance()->getParser()->addParentSizeAssociation( this, idParent );
-			}
+			// If it is not, find using the widgetmanager
+			// TODO: refactor, shouldn't use a singleton
+			pp = CWidgetManager::getInstance()->getElementFromId( id );
 		}
+
+		if( pp != NULL )
+			setParentSize( pp );
+	}
+
+	void CInterfaceElement::getSizeParent( std::string &id ) const
+	{
+		CInterfaceElement *p = getParentSize();
+
+		// If there's no parent set then the size parent is the parent
+		if( p == NULL )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is the same as the group parent, then the size parent is the parent ofc
+		if( p == getParent() )
+		{
+			id = "parent";
+			return;
+		}
+
+		// If the size parent is in the parent group, use the short Id
+		if( p->isInGroup( getParent() ) )
+		{
+			id = p->getShortId();
+			return;
+		}
+
+		// Otherwise use the full Id
+		id = p->getId();
 	}
 
 	void CInterfaceElement::registerDeletionWatcher( IDeletionWatcher *watcher )
@@ -1592,6 +1726,105 @@ namespace NLGUI
 			(*itr)->onDeleted( _Id );
 			++itr;
 		}
+	}
+
+	void CInterfaceElement::getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const
+	{
+		x = _XReal;
+		y = _YReal;
+
+		if( ( hs & Hotspot_Mx ) != 0 )
+			y += _HReal / 2;
+		else
+		if( ( hs & Hotspot_Tx ) != 0 )
+			y += _HReal;
+
+
+		if( ( hs & Hotspot_xM ) != 0 )
+			x += _WReal / 2;
+		else
+		if( ( hs & Hotspot_xR ) != 0 )
+			x += _WReal;
+	}
+
+	void CInterfaceElement::getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs )
+	{
+		/// Iterate over the following hotspots, calculate the distance and store the closest
+
+
+		static THotSpot hslist[] =
+		{
+			Hotspot_BL,
+			Hotspot_BR,
+			Hotspot_MM,
+			Hotspot_TL,
+			Hotspot_TR
+		};
+
+		int c = sizeof( hslist ) / sizeof( THotSpot );
+
+		int x,y,ox,oy,vx,vy;
+		float d;
+		float closestd = 9999999.0f;
+		THotSpot closestHS = Hotspot_TR;
+
+		for( int i = 0; i < c; i++ )
+		{
+			other->getHSCoords( hslist[ i ], ox, oy );
+			getHSCoords( hslist[ i ], x, y );
+
+			// Make a vector between the two hotspots
+			vx = x - ox;
+			vy = y - oy;
+
+			// Calculate length
+			d = sqrt( pow( vx, 2.0f ) + pow( vy, 2.0f ) );
+
+			// If these hotspots are the closest, store the hotspot
+			if( d < closestd )
+			{
+				closestd = d;
+				closestHS = hslist[ i ];
+			}
+		}
+
+		hs = closestHS;
+	}
+
+	void CInterfaceElement::alignTo( CInterfaceElement *other )
+	{
+		if( other == this )
+			return;
+
+		// Check which hotspot is the closest
+		THotSpot hs;
+		other->getClosestHotSpot( this, hs );
+
+		// Get the hotspot coordinates
+		sint32 x, y, ox, oy;
+		getHSCoords( hs, x, y );
+		other->getHSCoords( hs, ox, oy );
+
+		// Calculate the difference between the hotspot we found and our current position,
+		sint32 dx = ox - x;
+		sint32 dy = oy - y;
+
+		// This difference is our offset, so we remain in the same position
+		setX( -1 * dx );
+		setY( -1 * dy );
+
+		setPosRef( hs );
+		setParentPosRef( hs );
+
+		invalidateCoords();
+	}
+
+	void CInterfaceElement::onWidgetDeleted( CInterfaceElement *e )
+	{
+		if( e == getParentPos() )
+			setParentPos( NULL );
+		if( e == getParentSize() )
+			setParentSize( NULL );
 	}
 
 	CStringMapper* CStringShared::_UIStringMapper = NULL;

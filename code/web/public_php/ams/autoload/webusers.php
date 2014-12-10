@@ -80,7 +80,14 @@ class WebUsers extends Users{
           $dbw = new DBLayer("web");
           $statement = $dbw->select("ams_user", array('value' => $value),"Login=:value OR Email=:value");
           $row = $statement->fetch();
-          $salt = substr($row['Password'],0,2);
+          if ($row['Password'][0] == '$')
+          {
+              $salt = substr($row['Password'], 0, 19);
+          }
+          else
+          {
+              $salt = substr($row['Password'], 0, 2);
+          }
           $hashed_input_pass = crypt($password, $salt);
           if($hashed_input_pass == $row['Password']){
                 return $row;

@@ -252,8 +252,8 @@ class Users{
      * @param $length the length of the SALT which is by default 2
      * @return a random salt of 2 chars
      */
-     public static function generateSALT( $length = 2 )
-    {
+     public static function generateSALT( $length = 16 )
+     {
          // start with a blank salt
         $salt = "";
          // define possible characters - any character in this string can be
@@ -282,6 +282,10 @@ class Users{
                  }
              }
          // done!
+        if ($length > 2)
+        {
+             $salt = '$6$'.$salt;
+        }
         return $salt;
      }
 

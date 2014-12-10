@@ -14,18 +14,32 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef WIDGET_ADD_WATCHER
-#define WIDGET_ADD_WATCHER
+
+#ifndef ROOT_GROUP_H
+#define ROOT_GROUP_H
 
 #include <string>
+#include <map>
+
+#include "nel/gui/interface_group.h"
 
 namespace NLGUI
 {
-	class IWidgetAdditionWatcher
+
+	class CRootGroup : public CInterfaceGroup
 	{
 	public:
-		virtual void widgetAdded( const std::string &name ) = 0;
+		CRootGroup(const TCtorParam &param);
+		virtual ~CRootGroup();
+
+		virtual CInterfaceElement* getElement (const std::string &id);
+		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1);
+		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false);
+
+	private:
+		std::map< std::string, CInterfaceGroup* > _Accel;
 	};
+
 }
 
 #endif

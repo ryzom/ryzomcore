@@ -807,6 +807,7 @@ void CTestGroundFX::displayFXBoxes() const
 	Driver->setFrustum(fr);
 	TextContext->setColor(CRGBA::Green);
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 	TextContext->setFontSize(12);
 	//
 	float size = 0.4f;

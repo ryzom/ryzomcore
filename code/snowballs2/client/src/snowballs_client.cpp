@@ -327,6 +327,7 @@ void initCore()
 				ConfigFile->getVar("ScreenFull").asInt()==0));
 		TextContext = Driver->createTextContext(CPath::lookup(ConfigFile->getVar("FontName").asString()));
 		TextContext->setShaded(true);
+		TextContext->setShadeOutline(false);
 		TextContext->setKeep800x600Ratio(false);
 		// You can't call displayLoadingState() before init the loading state system
 		displayLoadingState("Initialize Loading");

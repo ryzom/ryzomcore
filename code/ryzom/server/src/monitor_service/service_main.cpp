@@ -392,7 +392,15 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 						{
 							if (strlen(row[0]) > 2)
 							{
-								std::string salt = std::string(row[0], row[0] + 2);								
+								std::string salt;
+								if (row[0][0] == '$')
+								{
+									salt = std::string(row[0], row[0] + 19);
+								}
+								else
+								{
+									salt = std::string(row[0], row[0] + 2);
+								}
 								std::string cryptedVersion = CCrypt::crypt(password, salt);
 								if (cryptedVersion == row[0])
 								{

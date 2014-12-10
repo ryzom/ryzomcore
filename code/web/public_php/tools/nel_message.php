@@ -86,9 +86,10 @@
 			}
 			else
 			{
-				$this->serialUInt32(strlen($val));
+				$valLen = strlen($val);
+				$this->serialUInt32($valLen);
 				$this->Buffer .= $val;
-				$this->Pos += strlen($val);
+				$this->Pos += $valLen;
 				debug(sprintf ("write string '%s' %d<br>\n", $val, $this->Pos));
 			}
 		}
@@ -103,7 +104,8 @@
 			}
 			else
 			{
-				$this->serialUInt32($val->toInt());
+				$intValue = $val->toInt();
+				$this->serialUInt32($intValue);
 				debug(sprintf ("write enum '%s' %d<br>\n", $val->toString(), $this->Pos));
 			}
 		}

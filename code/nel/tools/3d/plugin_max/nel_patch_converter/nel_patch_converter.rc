@@ -85,8 +85,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 10, 0, 0
- PRODUCTVERSION 0, 10, 0, 0
+ FILEVERSION 0, 11, 0, 0
+ PRODUCTVERSION 0, 11, 0, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -103,12 +103,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://www.ryzomcore.org/"
             VALUE "FileDescription", "PatchMesh to RykolPatchMesh"
-            VALUE "FileVersion", "0.10.0"
+            VALUE "FileVersion", "0.11.0"
             VALUE "InternalName", "PatchMesh to RykolPatchMesh"
             VALUE "LegalCopyright", "Copyright, 2000 Nevrax Ltd."
             VALUE "OriginalFilename", "nel_convert_patch.dlm"
             VALUE "ProductName", "NeL Patch Converter"
-            VALUE "ProductVersion", "0.10.0"
+            VALUE "ProductVersion", "0.11.0"
         END
     END
     BLOCK "VarFileInfo"

@@ -157,6 +157,7 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	CViewText *vt = new CViewText(CViewText::TCtorParam());
 	// get parameters from config.xml
 	vt->setShadow(isTextShadowed());
+	vt->setShadowOutline(false);
 	vt->setFontSize(getTextFontSize());
 	vt->setMultiLine(true);
 	vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);

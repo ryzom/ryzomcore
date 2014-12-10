@@ -1,5 +1,7 @@
-// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Ryzom Core Studio - GUI Editor Plugin
+//
+// Copyright (C) 2014 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,27 +16,35 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef	_READPIC_H_
-#define	_READPIC_H_
+#ifndef NEW_GUI_DLG_H
+#define NEW_GUI_DLG_H
 
-#ifdef _MSC_VER
-#pragma warning(disable:4786)
+#include "ui_new_gui_dlg.h"
+#include <QList>
+
+class NewGUIDlg : public QDialog
+{
+	Q_OBJECT
+
+public:
+	NewGUIDlg( QWidget *parent = NULL );
+	~NewGUIDlg();
+
+	QString getProjectName() const;
+	QString getWindowName() const;
+	QString getProjectDirectory() const;
+	void getMapList( QList< QString > &l );
+
+private Q_SLOTS:
+	void onOKClicked();
+	void onCancelClicked();
+	void onProjectDirTBClicked();
+	void onAddClicked();
+	void onRemoveClicked();
+
+private:
+	Ui::NewGUIDialog m_ui;
+};
+
 #endif
 
-
-#include <string>
-#include <vector>
-
-#include <nel/misc/types_nl.h>
-#include <nel/misc/rgba.h>
-
-//============================================================
-// API.
-//============================================================
-
-
-bool	PIC_LoadPic(std::string Path, std::vector<NLMISC::CBGRA> &Tampon, uint &Width, uint &Height);
-
-
-
-#endif

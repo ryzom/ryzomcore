@@ -174,6 +174,10 @@ void CUserControls::init()
 
 }// init //
 
+void CUserControls::reset()
+{
+	init();
+}
 
 //-----------------------------------------------
 // needReleaseForward :

@@ -125,8 +125,8 @@ IDC_DROPPER_CURSOR      CURSOR  DISCARDABLE     "dropcurs.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 10, 0, 0
- PRODUCTVERSION 0, 10, 0, 0
+ FILEVERSION 0, 11, 0, 0
+ PRODUCTVERSION 0, 11, 0, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -145,13 +145,13 @@ BEGIN
             VALUE "Comments", "TECH: \0"
             VALUE "CompanyName", "Ryzom Core\0"
             VALUE "FileDescription", "Vertex Tree Paint\0"
-            VALUE "FileVersion", "0.10.0\0"
+            VALUE "FileVersion", "0.11.0\0"
             VALUE "InternalName", "VertexTreePaint\0"
             VALUE "LegalCopyright", "Copyright © 2000 Nevrax Ltd. Copyright © 1998 Autodesk Inc.\0"
             VALUE "LegalTrademarks", "The following are registered trademarks of Autodesk, Inc.: 3D Studio MAX.  The following are trademarks of Autodesk, Inc.: Kinetix, Kinetix(logo), BIPED, Physique, Character Studio, MAX DWG, DWG Unplugged, Heidi, FLI, FLC, DXF.\0"
             VALUE "OriginalFilename", "nel_vertex_tree_paint.dlm\0"
             VALUE "ProductName", "Ryzom Core\0"
-            VALUE "ProductVersion", "0.10.0\0"
+            VALUE "ProductVersion", "0.11.0\0"
         END
     END
     BLOCK "VarFileInfo"

@@ -2,6 +2,7 @@
     <header>
         <name>CtrlColPick</name>
         <guiname>CCtrlColPick</guiname>
+		<classname>colpick</classname>
         <ancestor>CtrlBase</ancestor>
         <description></description>
         <abstract>false</abstract>

@@ -34,8 +34,8 @@
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/reflect_register.h"
 #include "nel/gui/editor_selection_watcher.h"
-#include "nel/gui/widget_addition_watcher.h"
 #include "nel/misc/events.h"
+#include "nel/gui/root_group.h"
 
 namespace NLGUI
 {
@@ -1036,12 +1036,14 @@ namespace NLGUI
 		setCapturePointerLeft(NULL);
 		setCapturePointerRight(NULL);
 		_CapturedView = NULL;
-		
+
 		resetColorProps();
 		resetAlphaRolloverSpeedProps();
 		resetGlobalAlphasProps();
 
 		activeAnims.clear();
+
+		editorSelection.clear();
 	}
 
 
@@ -1186,6 +1188,7 @@ namespace NLGUI
 					vtDst->setColor (vtSrc->getColor());
 					vtDst->setModulateGlobalColor(vtSrc->getModulateGlobalColor());
 					vtDst->setShadow(vtSrc->getShadow());
+					vtDst->setShadowOutline(vtSrc->getShadowOutline());
 					vtDst->setShadowColor(vtSrc->getShadowColor());
 					vtDst->setCaseMode(vtSrc->getCaseMode());
 					vtDst->setUnderlined(vtSrc->getUnderlined());
@@ -2078,9 +2081,9 @@ namespace NLGUI
 
 		if( CInterfaceElement::getEditorMode() )
 		{
-			if( !currentEditorSelection.empty() )
+			for( int i = 0; i < editorSelection.size(); i++ )
 			{
-				CInterfaceElement *e = getElementFromId( currentEditorSelection );
+				CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
 				if( e != NULL )
 					e->drawHighlight();
 			}
@@ -2303,6 +2306,14 @@ namespace NLGUI
 		eventDesc.setX( _Pointer->getX() );
 		eventDesc.setY( _Pointer->getY() );
 
+		if( CInterfaceElement::getEditorMode() )
+		{
+			// Let's pretend we've handled the event... or actually we have!
+			if( ( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown ) ||
+				( eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup ) )
+				return true;
+		}
+
 		if( isMouseHandlingEnabled() )
 		{
 			// First thing to do : Capture handling
@@ -2401,20 +2412,37 @@ namespace NLGUI
 				// This may happen when alt-tab has been used => the sheet is dragged but the left button is up
 				if (!CCtrlDraggable::getDraggedSheet())
 				{
-					// Take the top most control.
-					uint nMaxDepth = 0;
-					const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
-					for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+					if( CInterfaceElement::getEditorMode() && _GroupSelection )
 					{
-						CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
-						if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+						for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
 						{
-							uint d = ctrl->getDepth( pNewCurrentWnd );
-							if (d > nMaxDepth)
+							CInterfaceGroup *g = _GroupsUnderPointer[ i ];
+							if( ( g != NULL ) && ( g->isInGroup( pNewCurrentWnd ) ) )
 							{
-								nMaxDepth = d;
-								setCapturePointerLeft( ctrl );
+								_CapturedView = g;
 								captured = true;
+								break;
+							}
+						}
+					}
+
+					if( !captured )
+					{
+						// Take the top most control.
+						uint nMaxDepth = 0;
+						const std::vector< CCtrlBase* >& _CtrlsUnderPointer = getCtrlsUnderPointer();
+						for (sint32 i = (sint32)_CtrlsUnderPointer.size()-1; i >= 0; i--)
+						{
+							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
+							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
+							{
+								uint d = ctrl->getDepth( pNewCurrentWnd );
+								if (d > nMaxDepth)
+								{
+									nMaxDepth = d;
+									setCapturePointerLeft( ctrl );
+									captured = true;
+								}
 							}
 						}
 					}
@@ -2450,6 +2478,11 @@ namespace NLGUI
 
 					// handle the capture
 					_CapturedView->handleEvent( evnt );
+				}
+				else
+				{
+					if( CInterfaceElement::getEditorMode() )
+						clearEditorSelection();
 				}
 			}
 
@@ -2539,6 +2572,12 @@ namespace NLGUI
 			{
 				if ( getCapturePointerLeft() != NULL)
 				{
+					if( !handled )
+					{
+						CCtrlBase *c = getCapturePointerLeft();
+						c->handleEvent( evnt );
+					}
+
 					setCapturePointerLeft(NULL);
 					handled = true;
 				}
@@ -2624,9 +2663,10 @@ namespace NLGUI
 			else
 			if( draggedElement != NULL )
 			{
-				draggedElement->setXReal( newX );
-				draggedElement->setYReal( newY );
-				draggedElement->invalidateCoords();
+				sint32 dx = newX - oldX;
+				sint32 dy = newY - oldY;
+
+				draggedElement->moveBy( dx, dy );
 			}
 		}
 
@@ -2653,13 +2693,36 @@ namespace NLGUI
 
 		e->setParent( NULL );
 		draggedElement = e;
-
+				
 		return true;
 	}
 
 	void CWidgetManager::stopDragging()
 	{
-		draggedElement = NULL;
+		if( draggedElement != NULL )
+		{
+			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
+			CInterfaceElement *e = draggedElement;
+			CInterfaceGroup *tw = getTopWindow();
+
+			if( g == NULL )
+				g = tw;
+
+			std::string oldid = e->getId();
+			
+			e->setParent( g );
+			e->setIdRecurse( e->getShortId() );
+			e->setParentPos( g );
+			e->setParentSize( g );
+			g->addElement( e );
+
+			e->alignTo( g );
+			//e->setName( "==MARKED==" );
+
+			draggedElement = NULL;
+
+			onWidgetMoved( oldid, e->getId() );
+		}
 	}
 	
 	// ------------------------------------------------------------------------------------------------
@@ -3290,25 +3353,53 @@ namespace NLGUI
 		}
 	}
 
-
-	void CWidgetManager::setCurrentEditorSelection( const std::string &name )
+	void CWidgetManager::getEditorSelection( std::vector< std::string > &selection )
 	{
+		selection.clear();
+		for( int i = 0; i < editorSelection.size(); i++ )
+			selection.push_back( editorSelection[ i ] );
+	}
+
+	void CWidgetManager::selectWidget( const std::string &name )
+	{
+		std::vector< std::string >::iterator itr 
+			= std::find( editorSelection.begin(), editorSelection.end(), name );
+
 		CInterfaceElement *e = getElementFromId( name );
-		if( e != NULL )
+		
+		if( itr != editorSelection.end() )
 		{
-			if( !currentEditorSelection.empty() )
+			// If multiselection is on unselect if already selected
+			if( multiSelection )
 			{
-				CInterfaceElement *prev = getElementFromId( currentEditorSelection );
-				if( prev != NULL )
-					prev->setEditorSelected( false );
+				editorSelection.erase( itr );
+				if( e != NULL )
+					e->setEditorSelected( false );
 			}
-			e->setEditorSelected( true );
 		}
 		else
-		if( !name.empty() )
-			return;
-		
-		currentEditorSelection = name;
+		{
+			// Select if not yet selected
+			if( e != NULL )
+			{
+				// If multiselection is off, we can only have 1 widget selected
+				if( !multiSelection )
+				{
+					editorSelection.clear();
+				}
+
+				e->setEditorSelected( true );
+				editorSelection.push_back( name );
+			}
+				
+		}
+
+		notifySelectionWatchers();
+	}
+
+	void CWidgetManager::clearEditorSelection()
+	{
+		editorSelection.clear();
 		notifySelectionWatchers();
 	}
 
@@ -3317,7 +3408,7 @@ namespace NLGUI
 		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
 		while( itr != selectionWatchers.end() )
 		{
-			(*itr)->selectionChanged( currentEditorSelection );
+			(*itr)->selectionChanged();	
 			++itr;
 		}
 	}
@@ -3346,36 +3437,46 @@ namespace NLGUI
 		selectionWatchers.erase( itr );
 	}
 
-	void CWidgetManager::notifyAdditionWatchers( const std::string &widgetName )
+	void CWidgetManager::onWidgetAdded( const std::string &id )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr = additionWatchers.begin();
-		while( itr != additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
 		{
-			(*itr)->widgetAdded( widgetName );
+			(*itr)->onWidgetAdded( id );
 			++itr;
 		}
 	}
 
-	void CWidgetManager::registerAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::onWidgetMoved( const std::string &oldid, const std::string &newid )
 	{
-		std::vector< IWidgetAdditionWatcher* >::const_iterator itr 
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// already exists
-		if( itr != additionWatchers.end() )
-			return;
-
-		additionWatchers.push_back( watcher );
+		std::vector< IWidgetWatcher* >::const_iterator itr = widgetWatchers.begin();
+		while( itr != widgetWatchers.end() )
+		{
+			(*itr)->onWidgetMoved( oldid, newid );
+			++itr;
+		}
 	}
 
-	void CWidgetManager::unregisterAdditionWatcher( IWidgetAdditionWatcher *watcher )
+	void CWidgetManager::registerWidgetWatcher( IWidgetWatcher *watcher )
 	{
-		std::vector< IWidgetAdditionWatcher* >::iterator itr
-			= std::find( additionWatchers.begin(), additionWatchers.end(), watcher );
-		// doesn't exist
-		if( itr == additionWatchers.end() )
+		std::vector< IWidgetWatcher* >::const_iterator itr 
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// already exists
+		if( itr != widgetWatchers.end() )
 			return;
 
-		additionWatchers.erase( itr );
+		widgetWatchers.push_back( watcher );
+	}
+
+	void CWidgetManager::unregisterWidgetWatcher( IWidgetWatcher *watcher )
+	{
+		std::vector< IWidgetWatcher* >::iterator itr
+			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
+		// doesn't exist
+		if( itr == widgetWatchers.end() )
+			return;
+
+		widgetWatchers.erase( itr );
 	}
 
 	CInterfaceElement* CWidgetManager::addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName )
@@ -3408,9 +3509,163 @@ namespace NLGUI
 		else
 			g->addView( v );
 
-		notifyAdditionWatchers( v->getId() );
+		onWidgetAdded( v->getId() );
 		
 		return v;
+	}
+
+	bool CWidgetManager::groupSelection()
+	{
+		std::vector< CInterfaceElement* > elms;
+
+		// Resolve the widget names
+		for( int i = 0; i < editorSelection.size(); i++ )
+		{
+			CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
+			if( e != NULL )
+				elms.push_back( e );
+		}
+
+		editorSelection.clear();
+
+		if( elms.empty() )
+			return false;
+
+		// Create the group as the subgroup of the top window
+		CInterfaceGroup *g = static_cast< CInterfaceGroup* >( getParser()->createClass( "interface_group" ) );
+		getTopWindow()->addGroup( g );
+		g->setParent( getTopWindow() );
+		g->setIdRecurse( std::string( "group" ) + NLMISC::toString( _WidgetCount ) );
+		_WidgetCount++;
+		onWidgetAdded( g->getId() );
+
+		std::string oldId;
+
+		// Reparent the widgets to the new group
+		for( int i = 0; i < elms.size(); i++ )
+		{
+			CInterfaceElement *e = elms[ i ];
+			oldId = e->getId();
+			CInterfaceGroup *p = e->getParent();
+			if( p != NULL )
+				p->takeElement( e );
+
+			g->addElement( e );
+			e->setParent( g );
+			e->setParentPos( g );
+			e->setParentSize( g );
+			e->setIdRecurse( e->getShortId() );	
+
+			onWidgetMoved( oldId, e->getId() );
+		}
+		elms.clear();
+
+		// Make sure widgets aren't clipped because the group isn't big enough
+		g->spanElements();
+		// Make sure widgets are aligned
+		g->alignElements();
+		// Align the new group to the top window
+		g->alignTo( getTopWindow() );
+		
+		g->setActive( true );
+		
+		return true;
+	}
+
+	bool CWidgetManager::unGroupSelection()
+	{
+		if( editorSelection.size() != 1 )
+			return false;
+
+		// Does the element exist?
+		CInterfaceElement *e = getElementFromId( editorSelection[ 0 ] );
+		if( e == NULL )
+			return false;
+
+		// Is the element a group?
+		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
+		if( g == NULL )
+			return false;
+
+		// Can't blow up a root group :(
+		CInterfaceGroup *p = g->getParent();
+		if( p == NULL )
+			return false;
+
+		// KABOOM!
+		bool ok = g->explode();
+		if( !ok )
+			return false;
+
+		p->delElement( g );
+
+		clearEditorSelection();
+
+		p->updateCoords();
+
+		return true;
+	}
+
+
+	bool CWidgetManager::createNewGUI( const std::string &project, const std::string &window )
+	{
+		reset();
+
+		for( int i = 0; i < _MasterGroups.size(); i++ )
+			delete _MasterGroups[i].Group;
+		_MasterGroups.clear();
+
+		// First create the master group
+		CRootGroup *root = new CRootGroup( CViewBase::TCtorParam() );
+
+		SMasterGroup mg;
+		mg.Group = root;
+		
+		root->setIdRecurse( project );
+		root->setW( 1024 );
+		root->setH( 768 );
+		root->setActive( true );
+
+		// Create the first / main window
+		CInterfaceGroup *wnd = new CInterfaceGroup( CViewBase::TCtorParam() );
+		wnd->setW( 1024 );
+		wnd->setH( 768 );
+		wnd->setParent( root );
+		wnd->setParentPos( root );
+		wnd->setParentSize( root );
+		wnd->setPosRef( Hotspot_MM );
+		wnd->setParentPosRef( Hotspot_MM );
+		wnd->setIdRecurse( window );
+		wnd->setActive( true );
+
+		// Add the window
+		root->addElement( wnd );
+		mg.addWindow( wnd, wnd->getPriority() );
+		_MasterGroups.push_back( mg );
+
+		_Pointer = new CViewPointer( CViewBase::TCtorParam() );
+
+		IParser *parser = getParser();
+
+
+		// Set base color to white		
+		VariableData v;
+		v.type = "sint32";
+		v.value = "255";
+		
+		v.entry = "UI:SAVE:COLOR:R";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:G";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:B";
+		parser->setVariable( v );
+
+		v.entry = "UI:SAVE:COLOR:A";
+		parser->setVariable( v );
+			
+		return true;
 	}
 
 
@@ -3451,7 +3706,9 @@ namespace NLGUI
 
 		setScreenWH( 0, 0 );
 
-		currentEditorSelection = "";
+		_GroupSelection = false;
+		multiSelection = false;
+		_WidgetCount = 0;
 	}
 
 	CWidgetManager::~CWidgetManager()
@@ -3465,6 +3722,8 @@ namespace NLGUI
 		curContextHelp = NULL;
 
 		CStringShared::deleteStringMapper();
+
+		editorSelection.clear();
 	}
 
 }

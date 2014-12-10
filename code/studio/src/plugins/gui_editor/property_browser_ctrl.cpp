@@ -436,7 +436,7 @@ namespace GUIEditor
 		browser->clear();
 	}
 
-	void CPropBrowserCtrl::onSelectionChanged( std::string &id )
+	void CPropBrowserCtrl::onSelectionChanged()
 	{
 		if( browser == NULL )
 			return;
@@ -444,14 +444,20 @@ namespace GUIEditor
 		disablePropertyWatchers();
 		browser->clear();
 
-		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( id );
+		std::vector< std::string > selection;
+		CWidgetManager::getInstance()->getEditorSelection( selection );
+
+		if( selection.size() != 1 )
+			return;
+
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( selection[ 0 ] );
 		if( e == NULL )
 		{
 			enablePropertyWatchers();
 			return;
 		}
 
-		currentElement = id;
+		currentElement = selection[ 0 ];
 
         std::string n = e->getClassName();
 
@@ -493,6 +499,10 @@ namespace GUIEditor
 		if( e == NULL )
 			return;
 		e->setProperty( propName.toUtf8().constData(), propValue.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 		
 		
 		// Make sure the changes are applied
@@ -514,13 +524,12 @@ namespace GUIEditor
 			return;
 		std::string type = itr->second;
 
+		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
+		if( e == NULL )
+			return;
 
 		if( type == "button_type" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v;
 			v = NelButtonType::toString( value );
 			if( v.empty() )
@@ -531,10 +540,6 @@ namespace GUIEditor
 		else
 		if( type == "text_justification" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v;
 			v = NelTxtJustification::toString( value );
 			if( v.empty() )
@@ -545,10 +550,6 @@ namespace GUIEditor
 		else
 		if( type == "posref" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelPosRef::toString( value );
 			if( v.empty() )
 				return;
@@ -558,10 +559,6 @@ namespace GUIEditor
 		else
 		if( type == "posreftt" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelPosRefTT::toString( value );
 			if( v.empty() )
 				return;
@@ -608,10 +605,6 @@ namespace GUIEditor
 		else
 		if( type == "tooltip_parent" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelTTParent::toString( value );
 			if( v.empty() )
 				return;
@@ -621,16 +614,18 @@ namespace GUIEditor
 		else
 		if( type == "bitmap_align" )
 		{
-			CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId( currentElement );
-			if( e == NULL )
-				return;
-
 			std::string v = NelBMAlign::toString( value );
 			if( v.empty() )
 				return;
 
 			e->setProperty( propName.toUtf8().constData(), v );
 		}
+
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
+
 	}
 
 
@@ -643,6 +638,10 @@ namespace GUIEditor
 			return;
 		
 		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 	}
 
 	void CPropBrowserCtrl::onTexturePropertyChanged( QtProperty *p, const QString &v )
@@ -654,6 +653,10 @@ namespace GUIEditor
 			return;
 		
 		e->setProperty( propName.toUtf8().constData(), v.toUtf8().constData() );
+
+		CInterfaceGroup *g = e->getParent();
+		if( g != NULL )
+			g->updateCoords();
 	}
 
 	void CPropBrowserCtrl::enablePropertyWatchers()
@@ -710,9 +713,6 @@ namespace GUIEditor
 		{
 			std::string j = element->getProperty( prop.propName );
 
-			if( j.empty() )
-				return;
-
 			QtProperty *pp = textureMgr->addProperty( prop.propName.c_str() );
 			if( pp == NULL )
 				return;
@@ -724,9 +724,6 @@ namespace GUIEditor
 		if( prop.propType == "action" )
 		{
 			std::string j = element->getProperty( prop.propName );
-
-			if( j.empty() )
-				return;
 
 			QtProperty *pp = actionMgr->addProperty( prop.propName.c_str() );
 			if( pp == NULL )

@@ -70,6 +70,7 @@ protected:
 		void showEvent( QShowEvent *evnt );
 
 private:
+		void reset();
 		void createMenus();
 		void removeMenus();
 
