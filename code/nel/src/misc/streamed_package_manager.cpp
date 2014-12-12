@@ -254,7 +254,8 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 
 		{
 			COFile outStream(unpackPath);
-			outStream.serialBuffer(&outBuffer[0], (uint)fileSize);
+			if (fileSize)
+				outStream.serialBuffer(&outBuffer[0], (uint)fileSize);
 		}
 
 		if (!CFile::moveFile(filePath.c_str(), unpackPath.c_str()))
