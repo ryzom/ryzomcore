@@ -27,6 +27,7 @@
 #include <nel/misc/streamed_package_manager.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
+#include <nel/misc/sha1.h>
 
 namespace NLMISC {
 
@@ -240,6 +241,15 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 				nlwarning("Failed to decode lzma file '%s'", downloadPath.c_str());
 				return false;
 			}
+		}
+
+		CHashKey outHash = outBuffer.size() ? getSHA1(&outBuffer[0], outBuffer.size()) : CHashKey();
+		if (!(outHash == entry->Hash))
+		{
+			std::string wantHashS = entry->Hash.toString();
+			std::string outHashS = outHash.toString();
+			nlwarning("Invalid SHA1 hash for file '%s', download has hash '%s'", wantHashS.c_str(), outHashS.c_str());
+			return false;
 		}
 
 		{
