@@ -63,6 +63,8 @@ public:
 	NLMISC::CRGBA	 computeFogColor(const CClientDate &date, float weatherLevel) const;
 	float			 getWaterEnvMapCameraHeight() const { return _WaterEnvMapCameraHeight; }
 	uint8			 getWaterEnvMapAlpha() const { return _WaterEnvMapAlpha; }
+	bool overrideSunDirection() const;
+	NLMISC::CVector calculateSunDirection() const;
 private:
 	std::vector<CSkyObject> _Objects; // all the object in the sky
 	std::vector<NLMISC::CBitmap *>	_Bitmaps; // all the bitmaps for the color lookups
@@ -80,6 +82,8 @@ private:
 	NLMISC::CBitmap			*_FogColor;
 	float					_WaterEnvMapCameraHeight;
 	uint8					_WaterEnvMapAlpha;
+	sint					_SunSource;
+	float					_SunClipZ;
 };
 
 

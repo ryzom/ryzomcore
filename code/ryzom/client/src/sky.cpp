@@ -48,6 +48,8 @@ CSky::CSky()
 	_FogColor = NULL;
 	_WaterEnvMapCameraHeight = 0.f;
 	_WaterEnvMapAlpha = 255;
+	_SunSource = -1;
+	_SunClipZ = -1.0f;
 }
 
 // *************************************************************************************************
@@ -217,6 +219,39 @@ void CSky::init(UDriver *drv, const CSkySheet &sheet, bool forceFallbackVersion 
 	_NumHourInDay = numHourInDay;
 	_WaterEnvMapCameraHeight = sheet.WaterEnvMapCameraHeight;
 	_WaterEnvMapAlpha= sheet.WaterEnvMapAlpha;
+	//
+	// Find sun source
+	std::string sunSource = NLMISC::toLower(sheet.SunSource);
+	_SunSource = -1;
+	if (sunSource.size())
+	{
+		uint numObjects = (uint)_Objects.size();
+		for (uint k = 0; k < numObjects; ++k)
+		{
+			if (NLMISC::toLower(_Objects[k].Name) == sunSource)
+			{
+				nldebug("Found sun source: '%s'", sunSource.c_str());
+				_SunSource = k;
+			}
+		}
+	}
+	_SunClipZ = sheet.SunClipZ;
+}
+
+// *************************************************************************************************
+bool CSky::overrideSunDirection() const
+{
+	return (_SunSource >= 0)
+		&& (_Objects[_SunSource].Instance.getLastClippedState());
+}
+
+// *************************************************************************************************
+NLMISC::CVector CSky::calculateSunDirection() const
+{
+	CVector sunPos = _Objects[_SunSource].Instance.getLastWorldMatrixComputed().getPos();
+	CVector baseDir = (-sunPos).normed();
+	baseDir.z = std::max(_SunClipZ, baseDir.z);
+	return baseDir.normed();
 }
 
 // *************************************************************************************************

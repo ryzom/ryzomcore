@@ -24,6 +24,7 @@ CSkySheet::CSkySheet()
 	Type = SKY;
 	WaterEnvMapCameraHeight = 0.f;
 	WaterEnvMapAlpha = 255;
+	SunClipZ = -1.0f;
 }
 
 // *****************************************************************************************************
@@ -53,6 +54,8 @@ void CSkySheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix
 	item.getValueByName(FogColorBitmap, (prefix + "FogColorBitmap").c_str());
 	item.getValueByName(WaterEnvMapCameraHeight, (prefix + "WaterEnvMapCameraHeight").c_str());
 	item.getValueByName(WaterEnvMapAlpha, (prefix + "WaterEnvMapAlpha").c_str());
+	item.getValueByName(SunSource, (prefix + "SunSource").c_str());
+	item.getValueByName(SunClipZ, (prefix + "SunClipZ").c_str());
 }
 
 // *****************************************************************************************************
@@ -67,6 +70,8 @@ void CSkySheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 	f.serial(FogColorBitmap);
 	f.serial(WaterEnvMapCameraHeight);
 	f.serial(WaterEnvMapAlpha);
+	f.serial(SunSource);
+	f.serial(SunClipZ);
 }
 
 // *****************************************************************************************************
