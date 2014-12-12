@@ -411,7 +411,7 @@ static void initWeather()
 {
 	WeatherManager.init();
 	// Load description of light cycles for each season.
-	loadWorldLightCycle();
+	loadWorldLightCycle(CSheetId::Unknown); // FIXME
 	// Load global weather function parameters
 	loadWeatherFunctionParams();
 	//

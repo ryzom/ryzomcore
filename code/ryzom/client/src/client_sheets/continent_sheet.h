@@ -62,8 +62,11 @@ public:
 	/// LandscapeIG filename.
 	std::string		LandscapeIG;
 
-	// New Sky system : gives name of the sky sheet per season. If present, this bypass the SkyDay & SkyNight fields
+	/// New Sky system : gives name of the sky sheet per season. If present, this bypass the SkyDay & SkyNight fields
 	std::string		SkySheet[EGSPD::CSeason::Invalid];
+
+	/// Light Cycle sheet
+	std::string		LightCycle;
 
 	/// SkyDay filename.
 	std::string		SkyDay;

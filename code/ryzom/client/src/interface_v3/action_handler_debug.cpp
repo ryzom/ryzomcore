@@ -442,7 +442,7 @@ class CAHReloadSeason: public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		// reload all parameters for weather
-		loadWorldLightCycle();
+		loadWorldLightCycle(CSheetId::Unknown); // FIXME
 		loadWeatherFunctionParams();
 		WeatherManager.init();
 		ContinentMngr.reloadWeather();
