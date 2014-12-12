@@ -231,12 +231,15 @@ bool CStreamedPackageManager::getFile(std::string &filePath, const std::string &
 		// allocate the output buffer :(
 		std::vector<uint8> outBuffer;
 		outBuffer.resize(fileSize);
-		// decompress the file in memory
-		ret = LzmaDecode(&state, (unsigned char *)pos, (SizeT)(inBuffer.size() - (pos - &inBuffer[0])), &inProcessed, (unsigned char*)&outBuffer[0], (SizeT)fileSize, &outProcessed);
-		if (ret != 0 || outProcessed != fileSize)
+		if (fileSize)
 		{
-			nlwarning("Failed to decode lzma file '%s'", downloadPath.c_str());
-			return false;
+			// decompress the file in memory
+			ret = LzmaDecode(&state, (unsigned char *)pos, (SizeT)(inBuffer.size() - (pos - &inBuffer[0])), &inProcessed, (unsigned char*)&outBuffer[0], (SizeT)fileSize, &outProcessed);
+			if (ret != 0 || outProcessed != fileSize)
+			{
+				nlwarning("Failed to decode lzma file '%s'", downloadPath.c_str());
+				return false;
+			}
 		}
 
 		{
