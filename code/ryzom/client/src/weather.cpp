@@ -87,14 +87,9 @@ void buildLightCycleDesc(CLightCycleDesc &dest,EGSPD::CSeason::TSeason season)
 	else dest.DuskRatio = 0.5f;
 }
 
-void loadWorldLightCycle(CSheetId lightCycle)
+void loadWorldLightCycle()
 {
-	nldebug("Load light cycle '%s'", lightCycle.toString().c_str());
-
-	if (lightCycle == CSheetId::Unknown)
-		lightCycle = CSheetId("ryzom.light_cycle");
-
-	CEntitySheet *sheet = SheetMngr.get(lightCycle);
+	CEntitySheet *sheet = SheetMngr.get(CSheetId("ryzom.light_cycle"));
 	nlassert(sheet);
 	if (sheet->type() != CEntitySheet::LIGHT_CYCLE)
 	{

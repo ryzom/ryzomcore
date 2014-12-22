@@ -300,9 +300,6 @@ void CContinentParameters::build(const NLGEORGES::UFormElm &item)
 		if(readSeason<EGSPD::CSeason::Invalid)
 			ForceDisplayedSeason[season]= readSeason;
 	}
-
-	// Read light cycle
-	item.getValueByName(LightCycle, "LightCycle");
 }
 
 
@@ -396,8 +393,6 @@ void CContinentParameters::serial(class NLMISC::IStream &f) throw(NLMISC::EStrea
 		f.serial(SkySheet[i]);
 		f.serialEnum(ForceDisplayedSeason[i]);
 	}
-	//
-	f.serial(LightCycle);
 }
 
 //=========================================================================

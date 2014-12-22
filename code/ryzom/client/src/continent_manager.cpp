@@ -587,7 +587,7 @@ void CContinentManager::reloadWeather()
 
 	WeatherManager.init();
 	// Load description of light cycles for each season.
-	loadWorldLightCycle(CSheetId::Unknown); //FIXME
+	loadWorldLightCycle();
 	// Load global weather function parameters
 	loadWeatherFunctionParams();
 

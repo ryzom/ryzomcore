@@ -421,11 +421,6 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 		progress.pushCropedValues (0, 1.f/3.f);
 
 		{
-			H_AUTO(InitRZWorldLightCycle)
-			loadWorldLightCycle(CSheetId(LightCycle));
-		}
-
-		{
 			H_AUTO(InitRZWorldIndoor)
 			if (!ClientCfg.Light)
 			{

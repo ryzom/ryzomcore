@@ -20,7 +20,6 @@
 #define CL_WORLD_LIGHT_CYCLE_H
 
 
-#include <nel/misc/sheet_id.h>
 #include "game_share/season.h"
 
 struct CLightCycleDesc;
@@ -48,7 +47,7 @@ extern EGSPD::CSeason::TSeason   StartupSeason;
 extern CWeatherFunctionParamsSheet  *WeatherFunctionParams;
 
 // load the world light cycle from a sheet
-void loadWorldLightCycle(NLMISC::CSheetId lightCycleSheet);
+void loadWorldLightCycle();
 
 // load the weather function params
 void loadWeatherFunctionParams();
