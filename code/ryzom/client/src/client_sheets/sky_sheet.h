@@ -39,9 +39,6 @@ public:
 	// Water env map (computed from sky scene)
 	float		WaterEnvMapCameraHeight;
 	uint8		WaterEnvMapAlpha;
-	// Sun direction override
-	std::string	SunSource;
-	float		SunClipZ;
 public:
 	// ctor
 	CSkySheet();

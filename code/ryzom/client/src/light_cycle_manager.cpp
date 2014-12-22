@@ -477,15 +477,7 @@ void CLightCycleManager::setDirLight(const CDirLightSetup &setup0, const CDirLig
 	scene.setSunAmbient  (resultSetup.Ambiant);
 	scene.setSunDiffuse  (resultSetup.Diffuse);
 	scene.setSunSpecular (resultSetup.Specular);
-	CSky &sky = ContinentMngr.cur()->CurrentSky;
-	if (sky.overrideSunDirection())
-	{
-		scene.setSunDirection(sky.calculateSunDirection());
-	}
-	else
-	{
-		scene.setSunDirection(resultSetup.Direction);
-	}
+	scene.setSunDirection(resultSetup.Direction);
 }
 
 //-----------------------------------------------
