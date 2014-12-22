@@ -868,15 +868,6 @@ namespace NLGUI
 		}
 	}
 
-	// ***************************************************************************
-	void CCtrlTextButton::checkCoords()
-	{
-		if( _ViewText != NULL )
-			_ViewText->checkCoords();
-
-		CCtrlBaseButton::checkCoords();
-	}
-
 
 	// ***************************************************************************
 	void CCtrlTextButton::updateCoords()
