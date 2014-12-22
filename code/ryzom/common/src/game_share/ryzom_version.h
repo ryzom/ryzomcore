@@ -17,7 +17,10 @@
 #ifndef RYZOM_VERSION_H
 #define RYZOM_VERSION_H
 
-#define RYZOM_VERSION	"2.1.0 (compatibility/v0.11.1)"
+#define RYZOM_VERSION	"2.1.0 (ryzom" \
+	"/" \
+	"v0.11.2" \
+	")"
 
 #endif // RYZOM_VERSION_H
 
