@@ -4821,9 +4821,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		for( uint32 i = 0; i < inventory->getSlotCount(); ++ i)
 		{
 			const CGameItemPtr itemPtr = inventory->getItem(i);
-			if( itemPtr != NULL )
+			if ( itemPtr != NULL )
 			{
-				if( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() == quality) )
+				if ( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() == quality) )
 				{
 					numberItem += itemPtr->getStackSize();
 				}
@@ -4841,9 +4841,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		for( uint32 i = 0; i < inventory->getSlotCount(); ++ i)
 		{
 			const CGameItemPtr itemPtr = inventory->getItem(i);
-			if( itemPtr != NULL )
+			if ( itemPtr != NULL )
 			{
-				if( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() == quality) )
+				if ( (itemPtr->getSheetId() == sheetId) && (itemPtr->quality() == quality) )
 				{
 					numberItem -= inventory->deleteStackItem(i, quantity);
 					if(numberItem == 0)
@@ -5053,7 +5053,8 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			}
 			CSheetId creatureSheetId(command_args[2]);
 			CCreature *creature = CreatureManager.getCreature(target);
-			if (creature == NULL ||  creatureSheetId == CSheetId::Unknown || creatureSheetId != creature->getType())
+
+			if (creature == NULL || creatureSheetId == CSheetId::Unknown || creatureSheetId != creature->getType())
 			{
 				if (send_url)
 					c->sendUrl(web_app_url+"&player_eid="+c->getId().toString()+"&event=failed&desc=bad_sheet", getSalt());
@@ -5686,7 +5687,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 			{
 
 				CEntityBase *entityBase = PlayerManager.getCharacterByName (CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), value));
-				if (entityBase == 0)
+				if (entityBase == NULL)
 				{
 					// try to find the bot name
 					vector<TAIAlias> aliases;
@@ -5711,7 +5712,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 					}
 
 				}
-				if (entityBase != 0)
+				if (entityBase != NULL)
 				{
 					x = entityBase->getState().X + sint32 (cos (entityBase->getState ().Heading) * 2000);
 					y = entityBase->getState().Y + sint32 (sin (entityBase->getState ().Heading) * 2000);

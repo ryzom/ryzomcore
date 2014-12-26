@@ -42,14 +42,14 @@
 
 
 
- 
+
 /**
  * CChatManager
  * \author Stephane Coutelas
  * \author Nevrax France
  * \date 2002
  */
-class CChatManager 
+class CChatManager
 {
 public :
 
@@ -72,7 +72,7 @@ public :
 	 */
 	void init( /*const std::string& staticDBFileName, const std::string& dynDBFileName*/ );
 
-	/** A service has gone down 
+	/** A service has gone down
 	 */
 	void onServiceDown(const std::string &serviceShortName);
 
@@ -80,7 +80,7 @@ public :
 	 * Reset ChatLog management
 	 */
 	void	resetChatLog();
-	
+
 	/**
 	 * Check if the client is already registered in the chat manager.
 	 */
@@ -102,7 +102,7 @@ public :
 	 * \param id is the client character id
 	 */
 	CChatClient& getClient( const TDataSetRow& id ); //throw (EChatClient);
-	
+
 	/**
 	 * Return a reference on the static database
 	 */
@@ -195,7 +195,7 @@ public :
 	void chat2( const TDataSetRow& sender, const std::string &phraseId );
 
 
-	
+
 	/**
 	 * Transmit a chat message
 	 * \param sender is the id of the talking char
@@ -334,7 +334,7 @@ public :
 
 
 private :
-	
+
 	typedef std::map< TDataSetRow, CChatClient*>	TClientInfoCont;
 	/// client infos
 	TClientInfoCont	_Clients;
@@ -377,7 +377,7 @@ protected:
 	friend void cbNpcTellEx( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 	friend void cbDynChatServiceChat( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
 	friend void cbDynChatServiceTell( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId );
-	
+
 public:
 	/**
 	 * Send a chat message
@@ -389,7 +389,7 @@ public:
 	 * \param senderName Can be used to replace the sender name with a specific string
 	 */
 	void sendChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const TDataSetRow &sender = TDataSetRow(), TChanID chanID = NLMISC::CEntityId::Unknown, const ucstring &senderName = ucstring());
-	
+
 
 	/**
 	 * Send a far chat message
