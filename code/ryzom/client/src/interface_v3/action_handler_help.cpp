@@ -3613,7 +3613,7 @@ public:
 		uint8 index;
 		fromString(Params, index);
 		--index; // Param is 1-based so subtract 1
-		if ( index >= MAX_INVENTORY_ANIMAL)
+		if (index >= MAX_INVENTORY_ANIMAL)
 		{
 			return;
 		}

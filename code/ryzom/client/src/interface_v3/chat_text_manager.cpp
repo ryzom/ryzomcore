@@ -47,7 +47,6 @@ CChatTextManager::~CChatTextManager()
 	_TextShadowed = NULL;
 	delete _ShowTimestamps;
 	_ShowTimestamps = NULL;
-
 }
 //=================================================================================
 uint CChatTextManager::getTextFontSize() const
@@ -96,6 +95,7 @@ bool CChatTextManager::showTimestamps() const
 	}
 	return _ShowTimestamps->getValueBool();
 }
+
 //=================================================================================
 static CInterfaceGroup *parseCommandTag(ucstring &line)
 {
@@ -186,7 +186,6 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 			msg = cur_time + msg;
 		}
 		
-
 		vt->setTextFormatTaged(msg);
 		vt->setColor(NLMISC::CRGBA::White);
 	}

@@ -1509,9 +1509,6 @@ bool CDriverD3D::setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool r
 		}
 	}
 
-	
-//	_D3D->CreateDevice (adapter, _Rasterizer, _HWnd, D3DCREATE_SOFTWARE_VERTEXPROCESSING, &parameters, &_DeviceInterface);
-
 	// Check some caps
 	D3DCAPS9 caps;
 	if (_DeviceInterface->GetDeviceCaps(&caps) == D3D_OK)

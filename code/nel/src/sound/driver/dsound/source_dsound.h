@@ -80,7 +80,7 @@ enum TSourceDSoundEndState
 class CSourceDSound : public ISource
 {
 	friend class CSoundDriverDSound;
-	
+
 public:
 	/// Constructor
 	CSourceDSound(uint sourcename = 0);
@@ -446,7 +446,7 @@ private:
 	
 	// Set the 'used' state of the source. Managed by the driver.
 	void					setUsed(bool v) { _IsUsed = v; }
-	
+
 	// Return the 'used' state of the source
 	bool					isUsed() { return _IsUsed; }
 */

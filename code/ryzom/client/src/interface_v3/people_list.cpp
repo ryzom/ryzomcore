@@ -895,7 +895,7 @@ class CHandlerContactEntry : public IActionHandler
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
 		if (!pCaller || !pCaller->getParent()) return;
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pCaller->getParent()->getEnclosingContainer() );
-		
+
 		// title gives the name of the player
 		ucstring playerName = gc->getUCTitle();
 

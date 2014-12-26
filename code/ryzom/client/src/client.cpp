@@ -26,7 +26,6 @@
 #include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
-#include <windows.h>
 #include <shellapi.h>
 #else
 #include <csignal>

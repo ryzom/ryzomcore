@@ -30,8 +30,8 @@
 ///////////
 // CLASS //
 class CCombo;
-class CActionsManager;
 class CAction;
+class CActionsManager;
 
 /**
  * The goal of CCombo is to gather together Inputs that will validate an Action.

@@ -759,7 +759,7 @@ void prelogInit()
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-		
+
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -949,7 +949,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-		
+
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -1077,7 +1077,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for ( uint i=0; i<3; i++)
+		for (uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;

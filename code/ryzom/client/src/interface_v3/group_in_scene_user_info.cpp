@@ -198,7 +198,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 	ucstring theTribeName;
 	ucstring entityName = entity->getDisplayName();
 	ucstring entityTitle = entity->getTitle();
-	
+
 	// For some NPC's the name is empty and only a title is given,
 	// in that case, treat the title as the name.
 	if (entityName.empty())
@@ -652,7 +652,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				if (pPlayer == NULL)
 					needPvPLogo = false;
 
-
 				if (pPlayer != NULL && needPvPLogo)
 				{
 					if (pvpFactionLogo) 
@@ -756,7 +755,6 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 				view = leftGroup->getView ("win_jauge_bot");
 				if (view)
 					leftGroup->delView (view);
-
 			}
 
 			// Delete remaining strings
@@ -771,8 +769,7 @@ CGroupInSceneUserInfo *CGroupInSceneUserInfo::build (CEntityCL *entity)
 			CViewBase *win_mid = leftGroup->getView ("win_mid");
 			if (win_mid)
 			{
-				win_mid->setH (win_mid->getH() - spaceBar/2 );
-
+				win_mid->setH (win_mid->getH() - spaceBar/2);
 			}
 
 			// Set player name
@@ -963,7 +960,7 @@ void CGroupInSceneUserInfo::updateDynamicData ()
 
 		if (pPlayer != NULL)
 			if (pPlayer->isAFK())
-				entityName += CI18N::get("uiAFK");				
+				entityName += CI18N::get("uiAFK");
 		_Name->setText(entityName);
 
 		// Title color get the PVP color

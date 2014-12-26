@@ -3982,5 +3982,3 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 	ucstr = str;
 	return true;;
 }
-
-

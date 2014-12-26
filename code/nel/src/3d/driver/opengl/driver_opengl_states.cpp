@@ -767,7 +767,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 		{
 			glDisable(GL_TEXTURE_2D);
 		}
-		else if(oldTexMode == TextureRect)
+		else if (oldTexMode == TextureRect)
 		{
 #ifndef USE_OPENGLES
 			if(_TextureRectangleSupported)
@@ -780,7 +780,7 @@ void			CDriverGLStates::setTextureMode(TTextureMode texMode)
 				glDisable(GL_TEXTURE_2D);
 			}
 		}
-		else if(oldTexMode == TextureCubeMap)
+		else if (oldTexMode == TextureCubeMap)
 		{
 			if(_TextureCubeMapSupported)
 			{
