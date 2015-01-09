@@ -2207,7 +2207,7 @@ namespace NLGUI
 		}
 
 		// Manage complex "Enter"
-		if (eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN)
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN && !eventDesc.getKeyCtrl() )
 		{
 			// If the  top window has Enter AH
 			CInterfaceGroup	*tw= getTopWindow();
