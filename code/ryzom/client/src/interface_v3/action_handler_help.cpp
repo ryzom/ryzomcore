@@ -1117,6 +1117,11 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 		fromString(getParam (sParams, "form"), form);
 
 		string submit_button = getParam (sParams, "submit_button");
+		string type = getParam (sParams, "submit_button_type");
+		string value = getParam (sParams, "submit_button_value");
+
+		sint32 x = pCaller->getEventX();
+		sint32 y = pCaller->getEventY();
 
 		CInterfaceElement *element = CWidgetManager::getInstance()->getElementFromId(container);
 		{
@@ -1125,7 +1130,7 @@ class CHandlerHTMLSubmitForm : public IActionHandler
 			if (groupHtml)
 			{
 				// Submit the form the url
-				groupHtml->submitForm (form, submit_button.c_str ());
+				groupHtml->submitForm (form, type.c_str(), submit_button.c_str(), value.c_str(), x, y);
 			}
 		}
 	}

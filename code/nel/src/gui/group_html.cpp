@@ -1217,7 +1217,7 @@ namespace NLGUI
 								normal = value[MY_HTML_INPUT_SRC];
 
 							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name;
+							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
@@ -1241,7 +1241,15 @@ namespace NLGUI
 								text = value[MY_HTML_INPUT_VALUE];
 
 							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name;
+							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
+							if (text.size() > 0)
+							{
+								// escape AH param separator
+								string tmp = text;
+								while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
+									;
+								param = param + "|submit_button_value=" + tmp;
+							}
 
 							// Add the ctrl button
 							if (!_Paragraph)
@@ -3638,14 +3646,18 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::submitForm (uint formId, const char *submitButtonName)
+	void CGroupHTML::submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y)
 	{
 		// Form id valid ?
 		if (formId < _Forms.size())
 		{
 			_PostNextTime = true;
 			_PostFormId = formId;
+			_PostFormSubmitType = submitButtonType;
 			_PostFormSubmitButton = submitButtonName;
+			_PostFormSubmitValue = submitButtonValue;
+			_PostFormSubmitX = x;
+			_PostFormSubmitY = y;
 		}
 	}
 
@@ -3918,9 +3930,22 @@ namespace NLGUI
 						}
 					}
 
-					// Add the button coordinates
-					HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=0").c_str());
-					HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=0").c_str());
+					if (_PostFormSubmitType == "image")
+					{
+						// Add the button coordinates
+						if (_PostFormSubmitButton.find_first_of("[") == string::npos)
+						{
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=" + NLMISC::toString(_PostFormSubmitX)).c_str());
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=" + NLMISC::toString(_PostFormSubmitY)).c_str());
+						}
+						else
+						{
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitX)).c_str());
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitY)).c_str());
+						}
+					}
+					else
+						HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + _PostFormSubmitValue).c_str());
 
 					// Add custom params
 					addHTTPPostParams(formfields, _TrustedDomain);
