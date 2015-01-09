@@ -999,7 +999,8 @@ namespace NLGUI
 			break;
 			// OTHER
 			default:
-				if ((rEDK.getChar() == KeyRETURN) && !_WantReturn)
+				bool isKeyRETURN = !rEDK.getKeyCtrl() && rEDK.getChar() == KeyRETURN;
+				if (isKeyRETURN && !_WantReturn)
 				{
 					// update historic.
 					if(_MaxHistoric)
@@ -1030,9 +1031,9 @@ namespace NLGUI
 					// If the char is not alphanumeric -> return.
 					//		if(!isalnum(ec.Char))
 					//			return
-					if( (rEDK.getChar()>=32) || (rEDK.getChar() == KeyRETURN) )
+					if( (rEDK.getChar()>=32) || isKeyRETURN )
 					{
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							ucstring	copyStr= _InputString;
 							if ((uint) std::count(copyStr.begin(), copyStr.end(), '\n') >= _MaxNumReturn)
@@ -1049,7 +1050,7 @@ namespace NLGUI
 							cutSelection();
 						}
 
-						ucchar c = (rEDK.getChar() == KeyRETURN)?'\n':rEDK.getChar();
+						ucchar c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
 						switch(_EntryType)
 						{
@@ -1128,7 +1129,7 @@ namespace NLGUI
 							++ _CursorPos;
 							triggerOnChangeAH();
 						}
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 						}
