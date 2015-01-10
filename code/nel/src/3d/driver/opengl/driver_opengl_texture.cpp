@@ -164,7 +164,7 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 
 		// generate IDs
 		nglGenFramebuffersEXT(1, &FBOId);
-		
+
 		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
 
 		// initialize FBO

@@ -627,8 +627,8 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
 	{
-		if (!createWindow(mode))
-			return false;
+		if (!createWindow(mode)) return false;
+
 		HWND tmpHWND = _win;
 		int width = mode.Width;
 		int height = mode.Height;
