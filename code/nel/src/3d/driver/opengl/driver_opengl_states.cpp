@@ -155,11 +155,7 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	for(stage=0;stage<nbStages; stage++)
 	{
 		// disable texturing.
-#ifdef USE_OPENGLES
-		glActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 
 		glDisable(GL_TEXTURE_2D);
 
@@ -188,13 +184,8 @@ void			CDriverGLStates::forceDefaults(uint nbStages)
 	}
 
 	// ActiveTexture current texture to 0.
-#ifdef USE_OPENGLES
-	glActiveTexture(GL_TEXTURE0);
-	glClientActiveTexture(GL_TEXTURE0);
-#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB);
 	nglClientActiveTextureARB(GL_TEXTURE0_ARB);
-#endif
 
 	_CurrentActiveTextureARB= 0;
 	_CurrentClientActiveTextureARB= 0;
@@ -622,11 +613,7 @@ void CDriverGLStates::updateDepthRange()
 
 	float delta = _ZBias * (_DepthRangeFar - _DepthRangeNear);
 
-#ifdef USE_OPENGLES
-	glDepthRangef(delta + _DepthRangeNear, delta + _DepthRangeFar);
-#else
 	glDepthRange(delta + _DepthRangeNear, delta + _DepthRangeFar);
-#endif
 }
 
 // ***************************************************************************
@@ -835,11 +822,7 @@ void			CDriverGLStates::activeTextureARB(uint stage)
 
 	if( _CurrentActiveTextureARB != stage )
 	{
-#ifdef USE_OPENGLES
-		glActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 
 		_CurrentActiveTextureARB= stage;
 	}
@@ -850,11 +833,7 @@ void			CDriverGLStates::forceActiveTextureARB(uint stage)
 {
 	H_AUTO_OGL(CDriverGLStates_forceActiveTextureARB);
 
-#ifdef USE_OPENGLES
-	glActiveTexture(GL_TEXTURE0+stage);
-#else
 	nglActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 
 	_CurrentActiveTextureARB= stage;
 }
@@ -958,11 +937,7 @@ void			CDriverGLStates::clientActiveTextureARB(uint stage)
 
 	if( _CurrentClientActiveTextureARB != stage )
 	{
-#ifdef USE_OPENGLES
-		glClientActiveTexture(GL_TEXTURE0+stage);
-#else
 		nglClientActiveTextureARB(GL_TEXTURE0_ARB+stage);
-#endif
 		_CurrentClientActiveTextureARB= stage;
 	}
 }
@@ -1121,11 +1096,7 @@ void CDriverGLStates::forceBindARBVertexBuffer(uint objectID)
 {
 	H_AUTO_OGL(CDriverGLStates_forceBindARBVertexBuffer)
 
-#ifdef USE_OPENGLES
-	glBindBuffer(GL_ARRAY_BUFFER, objectID);
-#else
 	nglBindBufferARB(GL_ARRAY_BUFFER_ARB, objectID);
-#endif
 
 	_CurrARBVertexBuffer = objectID;
 }

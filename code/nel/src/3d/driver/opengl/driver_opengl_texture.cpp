@@ -256,12 +256,8 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 #endif
 
 		// check status
-		GLenum status;
-#ifdef USE_OPENGLES
-		status = (GLenum) nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
-#else
-		status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-#endif
+		GLenum status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
 		switch(status) {
 #ifdef GL_FRAMEBUFFER_COMPLETE_EXT
 			case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -361,11 +357,8 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 		// clean up resources if allocation failed
 		if (!InitFBO)
 		{
-#ifdef USE_OPENGLES
-			nglDeleteFramebuffersOES(1, &FBOId);
-#else
 			nglDeleteFramebuffersEXT(1, &FBOId);
-#endif
+
 			if (AttachDepthStencil)
 			{
 				DepthStencilFBO = NULL;
@@ -385,22 +378,14 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 		if(initFrameBufferObject(tex))
 		{
 			glBindTexture(TextureMode, 0);
-#ifdef USE_OPENGLES
-			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
-#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
-#endif
 		}
 		else
 			return false;
 	}
 	else
 	{
-#ifdef USE_OPENGLES
-		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-#else
 		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
 	}
 
 	return true;
@@ -508,11 +493,7 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 		break;
 	}
 
-#ifdef USE_OPENGLES
-	return GL_RGBA;
-#else
 	return GL_RGBA8;
-#endif
 }
 
 // ***************************************************************************
@@ -521,11 +502,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	H_AUTO_OGL(getGlSrcTextureFormat)
 
 	// Is destination format is alpha or lumiance ?
-#ifdef USE_OPENGLES
-	if ((glfmt==GL_ALPHA)||(glfmt==GL_LUMINANCE_ALPHA)||(glfmt==GL_LUMINANCE))
-#else
 	if ((glfmt==GL_ALPHA8)||(glfmt==GL_LUMINANCE8_ALPHA8)||(glfmt==GL_LUMINANCE8))
-#endif
 	{
 		switch(tex.getPixelFormat())
 		{
@@ -578,19 +555,9 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 	H_AUTO_OGL(CDriverGL_computeMipMapMemoryUsage)
 	switch(glfmt)
 	{
-#ifdef GL_RGBA8
 	case GL_RGBA8:		return w*h* 4;
-#endif
-#ifdef GL_RGBA
-	case GL_RGBA:		return w*h* 4;
-#endif
 	// Well this is ugly, but simple :). GeForce 888 is stored as 32 bits.
-#ifdef GL_RGB8
 	case GL_RGB8:		return w*h* 4;
-#endif
-#ifdef GL_RGB
-	case GL_RGB:		return w*h* 4;
-#endif
 #ifdef GL_RGBA4
 	case GL_RGBA4:		return w*h* 2;
 #endif
@@ -600,24 +567,9 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 #ifdef GL_RGB5
 	case GL_RGB5:		return w*h* 2;
 #endif
-#ifdef GL_LUMINANCE8
 	case GL_LUMINANCE8:	return w*h* 1;
-#endif
-#ifdef GL_LUMINANCE
-	case GL_LUMINANCE:	return w*h* 1;
-#endif
-#ifdef GL_ALPHA8
 	case GL_ALPHA8:		return w*h* 1;
-#endif
-#ifdef GL_ALPHA
-	case GL_ALPHA:		return w*h* 1;
-#endif
-#ifdef GL_LUMINANCE8_ALPHA8
 	case GL_LUMINANCE8_ALPHA8:	return w*h* 2;
-#endif
-#ifdef GL_LUMINANCE_ALPHA
-	case GL_LUMINANCE_ALPHA:	return w*h* 2;
-#endif
 #ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:	return w*h /2;
 #endif
