@@ -1419,7 +1419,6 @@ void *CVertexBufferHardARB::lock()
 				if (_Driver->getStaticMemoryToVRAM())
 					nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STATIC_DRAW_ARB);
 				else
-					glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 					nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_DYNAMIC_DRAW_ARB);
 			break;
 			// case CVertexBuffer::AGPPreferred:
