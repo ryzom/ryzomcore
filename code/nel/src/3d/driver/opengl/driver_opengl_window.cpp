@@ -633,6 +633,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 		int width = mode.Width;
 		int height = mode.Height;
 
+#ifdef USE_OPENGLES
+		// TODO: implement for OpenGL ES 1.x
+#else
 		// resize the window
 		RECT rc;
 		SetRect (&rc, 0, 0, width, height);
@@ -910,6 +913,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_hDC = NULL;
 			return false;
 		}
+#endif
 	}
 	else
 	{

@@ -93,19 +93,6 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 	{
 		_Driver->_TextureUsed[TextureUsedIdx] = NULL;
 	}
-
-#ifdef USE_OPENGLES
-	if (InitFBO)
-	{
-		nglDeleteFramebuffersOES(1, &FBOId);
-		if(AttachDepthStencil)
-		{
-			nglDeleteRenderbuffersOES(1, &DepthFBOId);
-			if(!UsePackedDepthStencil)
-				nglDeleteRenderbuffersOES(1, &StencilFBOId);
-		}
-	}
-#endif
 }
 
 CDepthStencilFBO::CDepthStencilFBO(CDriverGL *driver, uint width, uint height)
@@ -175,53 +162,6 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 			AttachDepthStencil = !((CTextureBloom*)tex)->isMode2D();
 		}
 
-#ifdef USE_OPENGLES
-		// generate IDs
-		nglGenFramebuffersOES(1, &FBOId);
-		if(AttachDepthStencil)
-		{
-			nglGenRenderbuffersOES(1, &DepthFBOId);
-			if(UsePackedDepthStencil)
-				StencilFBOId = DepthFBOId;
-			else
-				nglGenRenderbuffersOES(1, &StencilFBOId);
-		}
-
-		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
-
-		// initialize FBO
-		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
-		nglFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, TextureMode, ID, 0);
-
-		// attach depth/stencil render to FBO
-		// note: for some still unkown reason it's impossible to add
-		// a stencil buffer as shown in the respective docs (see
-		// opengl.org extension registry). Until a safe approach to add
-		// them is found, there will be no attached stencil for the time
-		// being, aside of using packed depth+stencil buffers.
-		if(AttachDepthStencil)
-		{
-			if(UsePackedDepthStencil)
-			{
-				//nldebug("3D: using packed depth stencil");
-				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, StencilFBOId);
-				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH24_STENCIL8_OES, tex->getWidth(), tex->getHeight());
-			}
-			else
-			{
-				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, DepthFBOId);
-				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT24_OES, tex->getWidth(), tex->getHeight());
-				/*
-				nglBindRenderbufferEXT(GL_RENDERBUFFER_OES, StencilFBOId);
-				nglRenderbufferStorageEXT(GL_RENDERBUFFER_OES, GL_STENCIL_INDEX8_EXT, tex->getWidth(), tex->getHeight());
-				*/
-			}
-			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, DepthFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, StencilFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-		}
-#else
 		// generate IDs
 		nglGenFramebuffersEXT(1, &FBOId);
 		
@@ -253,7 +193,6 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->StencilFBOId);
 			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 		}
-#endif
 
 		// check status
 		GLenum status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);

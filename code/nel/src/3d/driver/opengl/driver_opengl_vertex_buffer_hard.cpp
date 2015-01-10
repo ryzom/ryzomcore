@@ -1225,7 +1225,8 @@ IVertexBufferHardGL *CVertexArrayRangeARB::createVBHardGL(uint size, CVertexBuff
 	{
 		case CVertexBuffer::AGPVolatile:
 #ifdef USE_OPENGLES
-			glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STREAM_DRAW);
+			// TODO: GL_STREAM_DRAW doesn't exist in OpenGL ES 1.x
+			glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 #else
 			nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STREAM_DRAW_ARB);
 #endif
@@ -1408,7 +1409,8 @@ void *CVertexBufferHardARB::lock()
 		{
 			case CVertexBuffer::AGPVolatile:
 #ifdef USE_OPENGLES
-				glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STREAM_DRAW);
+				// TODO: GL_STREAM_DRAW doesn't exist in OpenGL ES 1.x
+				glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
 #else
 				nglBufferDataARB(GL_ARRAY_BUFFER_ARB, size, NULL, GL_STREAM_DRAW_ARB);
 #endif
