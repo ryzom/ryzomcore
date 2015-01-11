@@ -664,6 +664,7 @@ void addSearchPaths(IProgressCallback &progress)
 
 		CPath::loadRemappedFiles("remap_files.csv");
 	}
+
 	for (uint i = 0; i < ClientCfg.DataPathNoRecurse.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
@@ -673,6 +674,17 @@ void addSearchPaths(IProgressCallback &progress)
 
 		progress.popCropedValues ();
 	}
+
+	// add in last position, a specific possibly read only directory
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = getAppBundlePath() + "/Contents/Resources/data";
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = std::string(RYZOM_SHARE_PREFIX) + "/data";
+#endif
+
+	if (!defaultDirectory.empty()) CPath::addSearchPath(defaultDirectory, true, false);
 }
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
