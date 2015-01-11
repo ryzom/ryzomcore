@@ -689,7 +689,7 @@ void addSearchPaths(IProgressCallback &progress)
 		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
 		{
 			// don't prepend default directory if path is absolute
-			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
+			if (!ClientCfg.DataPath[i].empty() && ClientCfg.DataPath[i][0] != '/')
 			{
 				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
 				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
