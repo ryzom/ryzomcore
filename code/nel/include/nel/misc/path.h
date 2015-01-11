@@ -343,7 +343,7 @@ public:
 	/** Adds a search path.
      * The path is a directory "c:/temp" all files in the directory will be included (and recursively if asked)
 	 *
-	 * Alternative directories are not pre-cached (instead of non Alternative files) and will used when a file is not found in the standard directories.
+	 * Alternative directories are not pre-cached (instead of non Alternative files) and will be used when a file is not found in the standard directories.
 	 * For example, local data will be in the cached directories and server repository files will be in the Alternative files. If a new file is not
 	 * found in the local data, we'll try to find it on the repository.
 	 *
