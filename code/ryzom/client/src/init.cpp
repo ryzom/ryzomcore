@@ -675,22 +675,39 @@ void addSearchPaths(IProgressCallback &progress)
 		progress.popCropedValues ();
 	}
 
-	// add in last position, a specific possibly read only directory
 	std::string defaultDirectory;
 
 #ifdef NL_OS_MAC
-	defaultDirectory = getAppBundlePath() + "/Contents/Resources/data";
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
 #elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
-	defaultDirectory = std::string(RYZOM_SHARE_PREFIX) + "/data";
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
 #endif
 
-	if (!defaultDirectory.empty()) CPath::addSearchPath(defaultDirectory, true, false);
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.DataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
 }
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
 {
 	NLMISC::TTime initPaths = ryzomGetLocalTime ();
-	H_AUTO(InitRZAddSearchPaths)
+
+	H_AUTO(InitRZAddSearchPaths);
+
 	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
@@ -700,7 +717,34 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 		progress.popCropedValues ();
 	}
+
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
+
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#endif
+
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.PreDataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)

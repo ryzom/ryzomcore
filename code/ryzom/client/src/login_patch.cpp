@@ -26,6 +26,10 @@
 	#include <unistd.h>
 #endif
 
+#ifdef NL_OS_MAC
+	#include "app_bundle_utils.h"
+#endif
+
 #include <memory>
 #include <errno.h>
 
@@ -209,21 +213,16 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 {
 	ClientRootPath = CPath::standardizePath(clientRootPath);
 	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
-	ReadableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
+	
+	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
 
-	std::string writableTest = ReadableClientDataPath + "writableTest";
-
-	// if succeeded to create a delete a temporary file in data directory
-	if (CFile::createEmptyFile(writableTest) && CFile::deleteFile(writableTest))
-	{
-		// use it to patch data files
-		WritableClientDataPath = ReadableClientDataPath;
-	}
-	else
-	{
-		// use system user profile to patch data files
-		WritableClientDataPath = CPath::standardizePath(CPath::getApplicationDirectory("Ryzom") + "data");
-	}
+#ifdef NL_OS_MAC
+	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	ReadableClientDataPath = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX) + "/data");
+#else
+	ReadableClientDataPath = WritableClientDataPath;
+#endif
 }
 
 // ****************************************************************************
