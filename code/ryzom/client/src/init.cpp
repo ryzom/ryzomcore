@@ -554,27 +554,6 @@ void checkDriverDepth ()
 	}
 }
 
-static std::string replaceApplicationDirToken(const std::string &dir)
-{
-
-#ifdef NL_OS_MAC
-	// if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
-	if (!CFile::isExists("client_default.cfg") && dir.size()>0 && dir[0]!='/')
-	{
-		return getAppBundlePath() + "/Contents/Resources/" + dir;
-	}
-#else
-	static const std::string token = "<ApplicationDir>";
-	std::string::size_type pos = dir.find(token);
-	if (pos != std::string::npos)
-		return dir.substr(0, pos) + getAppBundlePath() + dir.substr(pos + token.length());
-#endif
-
-//	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
-
-	return dir;
-}
-
 void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 {
 	bool cache = VRDeviceCache.empty();
@@ -678,7 +657,7 @@ void addSearchPaths(IProgressCallback &progress)
 			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
 			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPath[i]), true, false, &progress);
+			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
 
 			progress.popCropedValues ();
 		}
@@ -690,12 +669,11 @@ void addSearchPaths(IProgressCallback &progress)
 		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPathNoRecurse[i]), false, false, &progress);
+		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
 
 		progress.popCropedValues ();
 	}
 }
-
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
 {
@@ -706,7 +684,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.PreDataPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
 
 		progress.popCropedValues ();
 	}
@@ -719,7 +697,7 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
 		progress.popCropedValues();
 	}
 }
