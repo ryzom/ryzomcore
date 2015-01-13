@@ -39,8 +39,8 @@ namespace NLQT
 		;
 	}
 
-	CQtDisplayer::~CQtDisplayer() {
-		;
+	CQtDisplayer::~CQtDisplayer()
+	{
 	}
 
 	void CQtDisplayer::setParam (QPlainTextEdit *dlgDebug, bool eraseLastLog)
@@ -59,7 +59,8 @@ namespace NLQT
 
 		QTextCharFormat format;
 
-		if (args.Date != 0 && !_Raw) {
+		if (args.Date != 0 && !_Raw)
+		{
 			str += dateToHumanString(args.Date);
 			needSpace = true;
 		}
@@ -76,27 +77,31 @@ namespace NLQT
 		}
 
 		// Write thread identifier
-		/*if ( args.ThreadId != 0 && !_Raw) {
-		if (needSpace) { str += " "; needSpace = false; }
-		str += NLMISC::toString(args.ThreadId);
-		needSpace = true;
+		/*if ( args.ThreadId != 0 && !_Raw)
+		{
+			if (needSpace) { str += " "; needSpace = false; }
+			str += NLMISC::toString(args.ThreadId);
+			needSpace = true;
 		}*/
-		/*if (!args.ProcessName.empty() && !_Raw) {
-		if (needSpace) { str += " "; needSpace = false; }
-		str += args.ProcessName;
-		needSpace = true;
+		/*if (!args.ProcessName.empty() && !_Raw)
+		{
+			if (needSpace) { str += " "; needSpace = false; }
+			str += args.ProcessName;
+			needSpace = true;
 		}*/
 
-		//if (args.FileName != NULL && !_Raw) {
+		//if (args.FileName != NULL && !_Raw)
+		//{
 		//	if (needSpace) { str += " "; needSpace = false; }
 		//	str += NLMISC::CFile::getFilename(args.FileName);
 		//	needSpace = true;
 		//}
 
-		/*if (args.Line != -1 && !_Raw) {
-		if (needSpace) { str += " "; needSpace = false; }
-		str += NLMISC::toString(args.Line);
-		needSpace = true;
+		/*if (args.Line != -1 && !_Raw)
+		{
+			if (needSpace) { str += " "; needSpace = false; }
+			str += NLMISC::toString(args.Line);
+			needSpace = true;
 		}*/
 
 		if (args.FuncName != NULL && !_Raw) 

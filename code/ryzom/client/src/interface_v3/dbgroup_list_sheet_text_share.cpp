@@ -175,7 +175,6 @@ void CDBGroupListSheetTextShare::CSheetChildShare::init(CDBGroupListSheetText *p
 	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false);
 	nlassert(pNL != NULL);
 	CurrentWanted.link ( sTmp.c_str() );
-
 }
 
 

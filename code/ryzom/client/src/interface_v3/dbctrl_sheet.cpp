@@ -1741,7 +1741,6 @@ void CDBCtrlSheet::resetCharBitmaps()
 	_CharBitmaps.clear();
 }
 
-
 // ***************************************************************************
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
