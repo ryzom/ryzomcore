@@ -2144,6 +2144,8 @@ void appendLightmapLog (COFile &outputLog, const char *lightmapName, const vecto
 bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshBaseBuild *pZeMeshBaseBuild, INode& ZeNode, 
 							TimeValue tvTime, uint firstMaterial, bool outputLightmapLog)
 {
+	nldebug("Calculate LM: '%s'", ZeNode.GetName());
+
 	DWORD t = timeGetTime();
 
 	uint32 i, j;
