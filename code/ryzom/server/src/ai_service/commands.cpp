@@ -1970,9 +1970,13 @@ NLMISC_COMMAND(displayVision3x3,"display 3x3 cell vision centred on a given coor
 		}
 	}
 
+	double dx, dy;
+	NLMISC::fromString(args[1], dx);
+	NLMISC::fromString(args[2], dy);
+
 	CAICoord x, y;
-	NLMISC::fromString(args[1], x);
-	NLMISC::fromString(args[2], y);
+	x = dx;
+	y = dy;
 	log.displayNL("3x3 Vision around (%.3f,%.3f)", x.asDouble(), y.asDouble());
 
 	uint32 botCount=0;
