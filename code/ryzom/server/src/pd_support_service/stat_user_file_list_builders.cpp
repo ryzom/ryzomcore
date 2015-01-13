@@ -522,7 +522,7 @@ FILE_LIST_BUILDER(NewestFile,"remove all but the latest file for each account (a
 		uint32 accountId= accountIds[i];
 		uint32& bestTime= bestTimes[accountId];
 		uint32 timeStamp= fdc[i].FileTimeStamp;
-		if (bestTime!=timeStamp || bestTime==~0u)
+		if (bestTime!=timeStamp || bestTime==std::numeric_limits<uint32>::max())
 		{
 			fdc.removeFile(i);
 			continue;

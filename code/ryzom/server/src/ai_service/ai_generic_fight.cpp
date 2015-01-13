@@ -571,7 +571,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 				ennemy=entity;
 			}
 		}
-		entity->_ChooseLastTime=~0;
+		entity->_ChooseLastTime = std::numeric_limits<uint32>::max();
 	}
 	
 	if (fleeEnnemy==NULL && !spawnBot->getUnreachableTarget().isNULL())

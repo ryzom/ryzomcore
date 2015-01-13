@@ -105,7 +105,7 @@ uint32	CUsedContinent::getInstanceForContinent(const std::string &continentName)
 	if (it != _Continents.end())
 		return it->ContinentInstance;
 	else
-		return ~0;
+		return std::numeric_limits<uint32>::max();
 }
 
 uint32	CUsedContinent::getInstanceForContinent(CONTINENT::TContinent continentEnum) const
@@ -115,7 +115,7 @@ uint32	CUsedContinent::getInstanceForContinent(CONTINENT::TContinent continentEn
 	if (it != _Continents.end())
 		return it->ContinentInstance;
 	else
-		return ~0;
+		return std::numeric_limits<uint32>::max();
 }
 
 const std::string &CUsedContinent::getContinentForInstance(uint32 instanceNumber) const

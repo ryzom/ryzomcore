@@ -577,7 +577,7 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 	CUsedContinent &uc = CUsedContinent::instance();
 
 	const	uint32 in = uc.getInstanceForContinent(args[0]);
-	if (in == ~0)
+	if (in == std::numeric_limits<uint32>::max())
 	{
 		nlwarning("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str());
 		nlassert(in != ~0);

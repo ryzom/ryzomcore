@@ -47,7 +47,7 @@ public:
 	virtual void description ()
 	{
 		className ("CPetSpawnMsg");
-		property ("AIInstanceId", PropUInt32, (uint32)~0, AIInstanceId);
+		property ("AIInstanceId", PropUInt32, std::numeric_limits<uint32>::max(), AIInstanceId);
 		property ("SpawnMode", PropUInt16, (uint16)NEAR_PLAYER, SpawnMode);
 		property ("CharacterMirrorRow",	PropDataSetRow,	TDataSetRow(), CharacterMirrorRow);
 		property ("PetSheetId", PropSheetId, NLMISC::CSheetId::Unknown, PetSheetId);

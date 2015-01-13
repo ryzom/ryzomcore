@@ -237,8 +237,8 @@ CProximityZone::CProximityZone(uint32 scanWidth,uint32 scanHeight,sint32 xOffset
 
 	_MaxOffset	= scanWidth * scanHeight -1;
 
-	_XMin = ~0u;
-	_YMin = ~0u;
+	_XMin = std::numeric_limits<uint32>::max();
+	_YMin = std::numeric_limits<uint32>::max();
 	_XMax = 0;
 	_YMax = 0;
 }
@@ -386,7 +386,7 @@ void CProximityMapBuffer::load(const std::string& name)
 				}
 			}
 			// setup the next pixel in the output buffers...
-			_Buffer[y*_ScanWidth+x]= (isAccessible? 0: (TBufferEntry)~0u);
+			_Buffer[y*_ScanWidth+x]= (isAccessible? 0: (TBufferEntry)std::numeric_limits<uint16>::max());
 		}
 	}
 }
@@ -471,7 +471,7 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 	uint32 zoneWidth= zone.getZoneWidth();
 	uint32 zoneHeight= zone.getZoneHeight();
 	zoneBuffer.clear();
-	zoneBuffer.resize(zoneWidth*zoneHeight,(TBufferEntry)~0u);
+	zoneBuffer.resize(zoneWidth*zoneHeight,(TBufferEntry)std::numeric_limits<uint16>::max());
 
 	// setup the buffer's accessible points and prime vects[0] with the set of accessible points in the zone buffer
 	for (uint32 i=0;i<zone.getOffsets().size();++i)
