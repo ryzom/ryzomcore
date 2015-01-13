@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include <list>
+#include <limits>
 
 #include "nel/misc/debug.h"
 #include "nel/misc/config_file.h"

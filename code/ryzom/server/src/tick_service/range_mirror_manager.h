@@ -28,6 +28,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <limits>
 
 namespace NLNET
 {

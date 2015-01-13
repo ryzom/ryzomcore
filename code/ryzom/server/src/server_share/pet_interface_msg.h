@@ -25,6 +25,7 @@
 #include "game_share/synchronised_message.h"
 #include "game_share/mirror.h"
 
+#include <limits>
 
 // Pet interface message class for AIS / EGS communication
 
