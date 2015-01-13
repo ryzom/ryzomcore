@@ -194,6 +194,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 	tagThisFile = false
 	
 	-- Unhide category
+	unhidelayers()
 	unhidecategory()
 	
 	-- Unhide

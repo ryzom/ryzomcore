@@ -16,6 +16,16 @@ nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
 
+-- Unhide layers
+fn unhidelayers = 
+(
+	for i = 0 to (LayerManager.count - 1) do
+	(
+		layer = (LayerManager.getLayer i)
+		layer.ishidden = false
+	)
+)
+
 -- Unhide category
 fn unhidecategory =
 (
@@ -260,6 +270,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 	tagThisFile = false
 	
 	-- Unhide category
+	unhidelayers()
 	unhidecategory()
 	
 	-- Unhide
