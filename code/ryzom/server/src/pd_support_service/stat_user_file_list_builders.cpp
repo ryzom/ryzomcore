@@ -20,6 +20,7 @@
 //-------------------------------------------------------------------------------------------------
 
 #include <time.h>
+#include <limits>
 #include "game_share/utils.h"
 #include "stat_file_list_builder_factory.h"
 #include "stat_globals.h"
