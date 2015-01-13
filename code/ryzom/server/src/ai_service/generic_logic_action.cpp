@@ -1412,8 +1412,7 @@ public:
 		if ((str[0]<='9' && str[0]>='0')||(str[0]=='-'))	//	its a number
 		{
 			var.Type = constant;
-			double val = atof(str.c_str());
-			var.Value = float(val);
+			NLMISC::fromString(str, var.Value);
 			return	true;
 		}
 

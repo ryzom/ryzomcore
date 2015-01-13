@@ -176,7 +176,10 @@ void CSoundAnimation::load()
 				throw NLMISC::Exception("Invalid sound animation marker");
 			}
 
-			marker->setTime((float) atof(time));
+			float val;
+			NLMISC::fromString(time, val);
+
+			marker->setTime(val);
 			xmlFree ((void*)time);
 
 

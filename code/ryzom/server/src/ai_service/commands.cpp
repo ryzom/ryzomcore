@@ -229,8 +229,9 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 		return true;
 	}
 	
-	double x = atof(args[3].c_str());
-	double y = atof(args[4].c_str());
+	double x, y;
+	NLMISC::fromString(args[3], x);
+	NLMISC::fromString(args[4], y);
 
 	double dispersionRadius = 10.;
 	if (args.size()>5)
@@ -1970,8 +1971,8 @@ NLMISC_COMMAND(displayVision3x3,"display 3x3 cell vision centred on a given coor
 	}
 
 	CAICoord x, y;
-	x=atof(args[1].c_str());
-	y=atof(args[2].c_str());
+	NLMISC::fromString(args[1], x);
+	NLMISC::fromString(args[2], y);
 	log.displayNL("3x3 Vision around (%.3f,%.3f)", x.asDouble(), y.asDouble());
 
 	uint32 botCount=0;

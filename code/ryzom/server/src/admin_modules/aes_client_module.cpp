@@ -259,7 +259,7 @@ namespace ADMIN
 						gs.HighRezTimeStamp = timer;
 						IVariable *var = dynamic_cast<IVariable*>(ICommand::getCommand(gvi.VarName));
 						if (var != NULL)
-							gs.SampleValue = atof(var->toString().c_str());
+							NLMISC::fromString(var->toString(), gs.SampleValue);
 					}
 				}
 			}
@@ -305,7 +305,11 @@ namespace ADMIN
 							// no sample collected yet, just ask a new one
 							IVariable *var = dynamic_cast<IVariable*>(ICommand::getCommand(gvi.VarName));
 							if (var != NULL)
-								gd.setValue(atof(var->toString().c_str()));
+							{
+								float val;
+								NLMISC::fromString(var->toString(), val);
+								gd.setValue(val);
+							}
 						}
 						else
 						{
