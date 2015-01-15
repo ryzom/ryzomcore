@@ -478,7 +478,7 @@ void CPeopleList::displayLocalPlayerTell(const ucstring &receiver, uint index, c
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	gl->addChild(getChatTextMngr().createMsgText(finalMsg, prop.getRGBA()));
-	CInterfaceManager::getInstance()->log(finalMsg);
+	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 
 	// if the group is closed, make it blink
 	if (!gc->isOpen())
@@ -946,7 +946,7 @@ class CHandlerContactEntry : public IActionHandler
 				ucstring s = CI18N::get("youTellPlayer");
 				strFindReplace(s, "%name", pWin->getFreeTellerName(str));
 				strFindReplace(final, CI18N::get("youTell"), s);
-				CInterfaceManager::getInstance()->log(final);
+				CInterfaceManager::getInstance()->log(final, CChatGroup::groupTypeToString(CChatGroup::tell));
 			}
 		}
 	}

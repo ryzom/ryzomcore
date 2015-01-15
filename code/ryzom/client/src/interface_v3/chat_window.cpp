@@ -483,7 +483,7 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstrin
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
-	CInterfaceManager::getInstance()->log(finalMsg);
+	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 }
 
 void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
