@@ -110,10 +110,6 @@ void					UDriver::purgeMemory()
 
 
 // ***************************************************************************
-bool	CDriverUser::_StaticInit= false;
-
-
-// ***************************************************************************
 CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFunc)
 {
 	// The enum of IDriver and UDriver MUST be the same!!!
@@ -122,16 +118,7 @@ CDriverUser::CDriverUser (uintptr_t windowIcon, TDriver driver, emptyProc exitFu
 	nlassert((uint)IDriver::iconCount == (uint)UDriver::iconCount);
 
 
-	// Static Initialisation.
-	if(!_StaticInit)
-	{
-		_StaticInit= true;
-		// Register basic serial.
-		NL3D::registerSerial3d();
-
-		// Register basic csene.
-		CScene::registerBasics();
-	}
+	NL3D::init3d();
 
 	_Driver = NULL;
 
