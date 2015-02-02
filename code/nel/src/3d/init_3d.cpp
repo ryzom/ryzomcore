@@ -19,18 +19,36 @@
 
 #include "nel/3d/init_3d.h"
 #include <cfloat>
+#include "nel/3d/scene.h"
+#include "nel/3d/register_3d.h"
+
+namespace
+{
+static bool _Initialized = false;
+}
 
 namespace NL3D
 {
 
 void init3d ()
 {
+
+	if( _Initialized )
+		return;
+
 	// Init for windows
 #ifdef NL_OS_WINDOWS
 	// Enable FPU exceptions
 
 	// Enable divid by zero and  overflow exception
-	_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
+	//_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
+
+	NL3D::registerSerial3d();
+	CScene::registerBasics();
+
+	_Initialized = true;
+
+
 #endif // NL_OS_WINDOWS
 }
 
