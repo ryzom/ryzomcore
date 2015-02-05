@@ -170,7 +170,8 @@ void SettingsDialog::onPrimitivesBClicked()
 
 void SettingsDialog::onLigoBClicked()
 {
-	QString p = QFileDialog::getExistingDirectory( this, tr( "LIGO directory" ), "" );
+    QString p;
+    p = QFileDialog::getOpenFileName( this, tr( "LIGO config file" ), "" );
 	ligoLE->setText( p );
 }
 
