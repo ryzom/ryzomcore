@@ -42,14 +42,12 @@ void init3d ()
 
 	// Enable divid by zero and  overflow exception
 	//_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
+#endif // NL_OS_WINDOWS
 
 	NL3D::registerSerial3d();
 	CScene::registerBasics();
 
 	_Initialized = true;
-
-
-#endif // NL_OS_WINDOWS
 }
 
 } // NL3D
