@@ -112,3 +112,9 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/studio_plugin_gui_editor.xml DESTINATION ${OVQT_PLUGIN_SPECS_DIR} COMPONENT tools3d)
+
+FILE(GLOB widgets "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.xml")
+FILE(GLOB expressions "${CMAKE_CURRENT_SOURCE_DIR}/expressions/*.xml")
+
+INSTALL(FILES ${widgets} DESTINATION "${OVQT_DATA_DIR}/widgets" COMPONENT tools3d)
+INSTALL(FILES ${expressions} DESTINATION "${OVQT_DATA_DIR}/expressions" COMPONENT tools3d)
