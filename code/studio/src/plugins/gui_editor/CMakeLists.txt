@@ -4,6 +4,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}
   ${QT_INCLUDES}
   ${LUA_INCLUDE_DIR})
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/gui_editor_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/gui_editor_config.h)
+
 FILE(GLOB SRC *.cpp *.h)
 
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
