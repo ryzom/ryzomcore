@@ -17,9 +17,11 @@
 // Project includes
 #include "world_editor_settings_page.h"
 #include "world_editor_constants.h"
+#include "../core/icore.h"
 
 // Qt includes
 #include <QtGui/QWidget>
+#include <QSettings>
 
 // NeL includes
 
@@ -61,11 +63,31 @@ QWidget *WorldEditorSettingsPage::createPage(QWidget *parent)
 {
 	m_currentPage = new QWidget(parent);
 	m_ui.setupUi(m_currentPage);
+	readSettings();
+
 	return m_currentPage;
+}
+
+void WorldEditorSettingsPage::readSettings()
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	bool b = false;
+
+	b = settings->value( Constants::WORLD_EDITOR_USE_OPENGL, true ).toBool();
+	m_ui.glCB->setChecked( b );
+
+	settings->endGroup();
 }
 
 void WorldEditorSettingsPage::apply()
 {
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	bool b = false;
+	b = m_ui.glCB->isChecked();
+	settings->setValue( Constants::WORLD_EDITOR_USE_OPENGL, b );
+	settings->endGroup();
 }
 
 } /* namespace WorldEditor */
