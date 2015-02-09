@@ -11,7 +11,7 @@ FILE(GLOB STUDIO_SRC extension_system/*.h
 
 SET(STUDIO_HDR   extension_system/iplugin_manager.h 
 						extension_system/plugin_manager.h
-						settings_dialog.h
+						startup_settings_dlg.h
 						splash_screen.h
 						pm_watcher.h )
 
@@ -22,7 +22,7 @@ SET(STUDIO_TS    translations/object_viewer_qt_en.ts
 						translations/object_viewer_qt_de.ts
 						translations/object_viewer_qt_ru.ts)
 						
-SET(STUDIO_PLUGIN_UIS settings_dialog.ui )
+SET(STUDIO_PLUGIN_UIS startup_settings_dlg.ui )
 
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
