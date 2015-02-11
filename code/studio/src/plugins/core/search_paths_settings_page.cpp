@@ -28,6 +28,10 @@
 #include <QtGui/QWidget>
 #include <QtGui/QFileDialog>
 
+#if !defined NL_OS_WINDOWS
+#include "core_config.h"
+#endif
+
 namespace Core
 {
 
@@ -117,6 +121,10 @@ void SearchPathsSettingsPage::applySearchPaths()
 
 	for (int i = 1; i < remapExt.size(); i += 2)
 		NLMISC::CPath::remapExtension(remapExt.at(i - 1).toUtf8().constData(), remapExt.at(i).toUtf8().constData(), true);
+
+#if !defined NL_OS_WINDOWS
+    NLMISC::CPath::addSearchPath(std::string(STUDIO_DATA_DIR), false, false);
+#endif
 
 	Q_FOREACH(QString path, paths)
 	{
