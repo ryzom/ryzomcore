@@ -25,6 +25,8 @@ extern "C"
 #include "WWWInit.h"
 }
 
+#include "nel/misc/rgba.h"
+
 namespace NLGUI
 {
 	class CCtrlBaseButton;

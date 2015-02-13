@@ -2544,6 +2544,57 @@ bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
 	return false;
 }
 
+std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory )
+{
+	if( relativePath.empty() )
+		return "";
+	if( directory.empty() )
+		return "";
+
+#ifdef NL_OS_WINDOWS
+	// Windows network address. Eg.: \\someshare\path
+	if( ( relativePath[ 0 ] == '\\' ) && ( relativePath[ 1 ] == '\\' ) )
+		return relativePath;
+
+	// Normal Windows absolute path. Eg.: C:\something
+	//
+	if( isalpha( relativePath[ 0 ] ) && ( relativePath[ 1 ] == ':' ) && ( ( relativePath[ 2 ] == '\\' ) || ( relativePath[ 2 ] == '/' ) ) )
+		return relativePath;
+#else
+	// Unix filesystem absolute path
+	if( relativePath[ 0 ] == '/' )
+		return relativePath;
+
+#endif
+
+	// Add a slash to the directory if necessary.
+	// If the relative path starts with dots we need a slash.
+	// If the relative path starts with a slash we don't.
+	// If it starts with neither, we need a slash.
+	bool needSlash = true;
+	char c = relativePath[ 0 ];
+	if( ( c == '\\' ) || ( c == '/' ) )
+		needSlash = false;
+	
+	bool hasSlash = false;
+	std::string npath = directory;
+	c = npath[ npath.size() - 1 ];
+	if( ( c == '\\' ) || ( c == '/' ) )
+		hasSlash = true;
+
+	if( needSlash && !hasSlash )
+		npath += '/';
+	else
+	if( hasSlash && !needSlash )
+		npath.resize( npath.size() - 1 );
+	
+	// Now build the new absolute path
+	npath += relativePath;
+	npath = standardizePath( npath, false );
+
+	return npath;
+}
+
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS

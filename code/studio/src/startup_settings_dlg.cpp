@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "settings_dialog.h"
+#include "startup_settings_dlg.h"
 #include <QFileDialog>
 #include <QSettings>
 #include <QStringList>
@@ -32,7 +32,7 @@ int findListItem( QListWidget *l, const QString &s )
 	return -1;
 }
 
-SettingsDialog::SettingsDialog( QDialog *parent ) :
+StartupSettingsDlg::StartupSettingsDlg( QDialog *parent ) :
 QDialog( parent )
 {
 	setupUi( this );
@@ -40,11 +40,11 @@ QDialog( parent )
 	settings = NULL;
 }
 
-SettingsDialog::~SettingsDialog()
+StartupSettingsDlg::~StartupSettingsDlg()
 {
 }
 
-void SettingsDialog::load()
+void StartupSettingsDlg::load()
 {
 	pluginsLE->setText( settings->value( "PluginPath" ).toString() );
 
@@ -82,7 +82,7 @@ void SettingsDialog::load()
 	settings->endGroup();
 }
 
-void SettingsDialog::saveSearchPaths()
+void StartupSettingsDlg::saveSearchPaths()
 {
 	QStringList l;
 	for( int i = 0; i < searchLW->count(); i++ )
@@ -93,7 +93,7 @@ void SettingsDialog::saveSearchPaths()
 	settings->setValue( "SearchPaths", l );
 }
 
-void SettingsDialog::saveRecursivePaths()
+void StartupSettingsDlg::saveRecursivePaths()
 {
 	QStringList l;
 	for( int i = 0; i < recursiveLW->count(); i++ )
@@ -104,7 +104,7 @@ void SettingsDialog::saveRecursivePaths()
 	settings->setValue( "RecursiveSearchPathes", l );
 }
 
-void SettingsDialog::save()
+void StartupSettingsDlg::save()
 {
 	settings->setValue( "PluginPath", pluginsLE->text() );
 
@@ -123,59 +123,59 @@ void SettingsDialog::save()
 	settings->sync();
 }
 
-void SettingsDialog::accept()
+void StartupSettingsDlg::accept()
 {
 	save();
 	QDialog::accept();
 }
 
-void SettingsDialog::reject()
+void StartupSettingsDlg::reject()
 {
 	QDialog::reject();
 }
 
-void SettingsDialog::onOKClicked()
+void StartupSettingsDlg::onOKClicked()
 {
 	accept();
 }
 
-void SettingsDialog::onCancelClicked()
+void StartupSettingsDlg::onCancelClicked()
 {
 	reject();
 }
 
-void SettingsDialog::onPluginBClicked()
+void StartupSettingsDlg::onPluginBClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Plugins directory" ), "" );
 	pluginsLE->setText( p );
 }
 
-void SettingsDialog::onSheetsBClicked()
+void StartupSettingsDlg::onSheetsBClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Sheets directory" ), "" );
 	sheetsLE->setText( p );
 }
 
-void SettingsDialog::onAssetsBClicked()
+void StartupSettingsDlg::onAssetsBClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Assets directory" ), "" );
 	assetsLE->setText( p );
 }
 
-void SettingsDialog::onPrimitivesBClicked()
+void StartupSettingsDlg::onPrimitivesBClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Primitives directory" ), "" );
 	primitivesLE->setText( p );
 }
 
-void SettingsDialog::onLigoBClicked()
+void StartupSettingsDlg::onLigoBClicked()
 {
     QString p;
     p = QFileDialog::getOpenFileName( this, tr( "LIGO config file" ), "" );
 	ligoLE->setText( p );
 }
 
-void SettingsDialog::onPathAddClicked()
+void StartupSettingsDlg::onPathAddClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Search path" ), "" );
 	if( p.isEmpty() )
@@ -187,7 +187,7 @@ void SettingsDialog::onPathAddClicked()
 	searchLW->addItem( p );
 }
 
-void SettingsDialog::onPathRemoveClicked()
+void StartupSettingsDlg::onPathRemoveClicked()
 {
 	QListWidgetItem *i = searchLW->currentItem();
 	if( i == NULL )
@@ -196,7 +196,7 @@ void SettingsDialog::onPathRemoveClicked()
 	delete i;
 }
 
-void SettingsDialog::onRecursiveAddClicked()
+void StartupSettingsDlg::onRecursiveAddClicked()
 {
 	QString p = QFileDialog::getExistingDirectory( this, tr( "Recursive search path" ), "" );
 	if( p.isEmpty() )
@@ -208,7 +208,7 @@ void SettingsDialog::onRecursiveAddClicked()
 	recursiveLW->addItem( p );
 }
 
-void SettingsDialog::onRecursiveRemoveClicked()
+void StartupSettingsDlg::onRecursiveRemoveClicked()
 {
 	QListWidgetItem *i = recursiveLW->currentItem();
 	if( i == NULL )
@@ -218,7 +218,7 @@ void SettingsDialog::onRecursiveRemoveClicked()
 }
 
 
-void SettingsDialog::setupConnections()
+void StartupSettingsDlg::setupConnections()
 {
 	connect( bb, SIGNAL( accepted() ), this, SLOT( onOKClicked() ) );
 	connect( bb, SIGNAL( rejected() ), this, SLOT( onCancelClicked() ) );
