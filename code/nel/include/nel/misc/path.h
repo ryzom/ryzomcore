@@ -507,6 +507,13 @@ public:
 	 */
 	static bool makePathRelative (const char *basePath, std::string &relativePath);
 
+	/** Make path absolute
+	* \param relativePath - The relative path
+	* \param directory - the directory to which the path is relative to
+	* returns the absolute path, or empty if something went wrong.
+	*/
+	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory );
+
 	/** If File in this list is added more than one in an addSearchPath, it doesn't launch a warning.
 	 */
 	static void addIgnoredDoubleFile(const std::string &ignoredFile);

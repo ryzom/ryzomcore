@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SETTINGS_DIALOG_H
-#define SETTINGS_DIALOG_H
+#ifndef STARTUP_SETTINGS_DIALOG_H
+#define STARTUP_SETTINGS_DIALOG_H
 
-#include "ui_settings_dialog.h"
+#include "ui_startup_settings_dlg.h"
 
 class QSettings;
 
-class SettingsDialog : public QDialog, public Ui::SettingsDialog
+class StartupSettingsDlg : public QDialog, public Ui::StartupSettingsDlg
 {
 	Q_OBJECT
 public:
-	SettingsDialog( QDialog *parent = NULL );
-	~SettingsDialog();
+	StartupSettingsDlg( QDialog *parent = NULL );
+	~StartupSettingsDlg();
 
 	void setSettings( QSettings *s ){ settings = s; }
 
