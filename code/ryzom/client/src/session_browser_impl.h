@@ -21,7 +21,6 @@
 #include "session_browser.h"
 #include "game_share/ring_session_manager_itf.h"
 #include "nel/gui/lua_helper.h"
-using namespace NLGUI;
 #include "far_tp.h"
 
 class CSessionBrowserImpl : public CSessionBrowser,

@@ -21,7 +21,7 @@
 extern "C"
 {
 
-	/* Library Includes */
+/* Library Includes */
 #include "wwwsys.h"
 #include "WWWUtil.h"
 #include "WWWCore.h"
@@ -41,8 +41,9 @@ using namespace NLMISC;
 extern "C"
 {
 
-	/* Final states have negative value */
-typedef enum _FileState {
+/* Final states have negative value */
+typedef enum _FileState
+{
 	FS_RETRY		= -4,
 	FS_ERROR		= -3,
 	FS_NO_DATA		= -2,
@@ -57,26 +58,29 @@ typedef enum _FileState {
 } FileState;
 
 /* This is the context structure for the this module */
-typedef struct _file_info {
-	FileState	state;		  /* Current state of the connection */
-	char *		local;		/* Local representation of file name */
-	struct stat		stat_info;	      /* Contains actual file chosen */
+typedef struct _file_info
+{
+	FileState	state;			/* Current state of the connection */
+	char *		local;			/* Local representation of file name */
+	struct stat		stat_info;	/* Contains actual file chosen */
 	HTNet *		net;
 	HTTimer *	timer;
 } file_info;
 
-struct _HTStream {
+struct _HTStream
+{
 	const HTStreamClass *	isa;
 };
 
-struct _HTInputStream {
+struct _HTInputStream
+{
 	const HTInputStreamClass *	isa;
 	HTChannel *			ch;
 	HTHost *			host;
-	char *			write;			/* Last byte written */
-	char *			read;			   /* Last byte read */
+	char *			write;						/* Last byte written */
+	char *			read;						/* Last byte read */
 	int				b_read;
-	char			data [INPUT_BUFFER_SIZE];	   /* buffer */
+	char			data [INPUT_BUFFER_SIZE];	/* buffer */
 };
 
 PRIVATE int FileCleanup (HTRequest *req, int status)
@@ -96,7 +100,7 @@ PRIVATE int FileCleanup (HTRequest *req, int status)
 	}
 
 	/*
-	**  Remove if we have registered a timer function as a callback
+	** Remove if we have registered a timer function as a callback
 	*/
 	if (file->timer)
 	{
@@ -123,10 +127,8 @@ PUBLIC int HTLoadNeLFile (SOCKET soc, HTRequest * request)
 	HTNet * net = HTRequest_net(request);
 	HTParentAnchor * anchor = HTRequest_anchor(request);
 
-	HTTRACE(PROT_TRACE, "HTLoadFile.. Looking for `%s\'\n" _
-				HTAnchor_physical(anchor));
-	if ((file = (file_info *) HT_CALLOC(1, sizeof(file_info))) == NULL)
-	HT_OUTOFMEM((char*)"HTLoadFILE");
+	HTTRACE(PROT_TRACE, "HTLoadFile.. Looking for `%s\'\n" _ HTAnchor_physical(anchor));
+	if ((file = (file_info *) HT_CALLOC(1, sizeof(file_info))) == NULL) HT_OUTOFMEM("HTLoadFILE");
 	file->state = FS_BEGIN;
 	file->net = net;
 	HTNet_setContext(net, file);
@@ -139,8 +141,8 @@ PUBLIC int HTLoadNeLFile (SOCKET soc, HTRequest * request)
 PRIVATE int ReturnEvent (HTTimer * timer, void * param, HTEventType /* type */)
 {
 	file_info * file = (file_info *) param;
-	if (timer != file->timer)
-	HTDEBUGBREAK((char*)"File timer %p not in sync\n" _ timer);
+	if (timer != file->timer) HTDEBUGBREAK("File timer %p not in sync\n" _ timer);
+
 	HTTRACE(PROT_TRACE, "HTLoadFile.. Continuing %p with timer %p\n" _ file _ timer);
 
 	/*
@@ -163,7 +165,7 @@ PUBLIC int HTNeLFileOpen (HTNet * net, char * local, HTLocalMode /* mode */)
 
 	if (!fp->open (local))
 	{
-		HTRequest_addSystemError(request, ERR_FATAL, errno, NO, (char*)"CIFile::open");
+		HTRequest_addSystemError(request, ERR_FATAL, errno, NO, "CIFile::open");
 		return HT_ERROR;
 	}
 
@@ -186,7 +188,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 	{
 		/* Interrupted */
 		HTRequest_addError(request, ERR_FATAL, NO, HTERR_INTERRUPTED,
-			NULL, 0, (char*)"HTLoadFile");
+			NULL, 0, "HTLoadFile");
 		FileCleanup(request, HT_INTERRUPTED);
 		return HT_OK;
 	}
@@ -202,7 +204,7 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 		/* We only support safe (GET, HEAD, etc) methods for the moment */
 		if (!HTMethod_isSafe(HTRequest_method(request))) {
 		HTRequest_addError(request, ERR_FATAL, NO, HTERR_NOT_ALLOWED,
-				   NULL, 0, (char*)"HTLoadFile");
+				   NULL, 0, "HTLoadFile");
 		file->state = FS_ERROR;
 		break;
 		}
@@ -234,166 +236,188 @@ PRIVATE int FileEvent (SOCKET /* soc */, void * pVoid, HTEventType type)
 
 		/* Create a new host object and link it to the net object */
 		{
-		HTHost * host = NULL;
-		if ((host = HTHost_new((char*)"localhost", 0)) == NULL) return HT_ERROR;
-		HTNet_setHost(net, host);
-		if (HTHost_addNet(host, net) == HT_PENDING) {
-			HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
-			/* move to the hack state */
-			file->state = FS_PENDING;
-			return HT_OK;
-		}
+			HTHost * host = NULL;
+			if ((host = HTHost_new("localhost", 0)) == NULL) return HT_ERROR;
+			HTNet_setHost(net, host);
+			if (HTHost_addNet(host, net) == HT_PENDING)
+			{
+				HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
+				/* move to the hack state */
+				file->state = FS_PENDING;
+				return HT_OK;
+			}
 		}
 		file->state = FS_DO_CN;
 		break;
 
 	case FS_PENDING:
 		{
-		HTHost * host = NULL;
-		if ((host = HTHost_new((char*)"localhost", 0)) == NULL) return HT_ERROR;
-		HTNet_setHost(net, host);
-		if (HTHost_addNet(host, net) == HT_PENDING) {
-			HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
-			file->state = FS_PENDING;
-			return HT_OK;
-		}
+			HTHost * host = NULL;
+			if ((host = HTHost_new((char*)"localhost", 0)) == NULL) return HT_ERROR;
+			HTNet_setHost(net, host);
+			if (HTHost_addNet(host, net) == HT_PENDING)
+			{
+				HTTRACE(PROT_TRACE, "HTLoadFile.. Pending...\n");
+				file->state = FS_PENDING;
+				return HT_OK;
+			}
 		}
 		file->state = FS_DO_CN;
 		break;
 
 	case FS_DO_CN:
 		if (HTRequest_negotiation(request) &&
-		HTMethod_isSafe(HTRequest_method(request))) {
+		HTMethod_isSafe(HTRequest_method(request)))
+		{
+			HTAnchor_setPhysical(anchor, file->local);
+			HTTRACE(PROT_TRACE, "Load File... Found `%s\'\n" _ file->local);
+		}
+		else
+		{
+			if (HT_STAT(file->local, &file->stat_info) == -1)
+			{
+				HTTRACE(PROT_TRACE, "Load File... Not found `%s\'\n" _ file->local);
+				HTRequest_addError(request, ERR_FATAL, NO, HTERR_NOT_FOUND, NULL, 0, "HTLoadFile");
+				file->state = FS_ERROR;
+				break;
+			}
+		}
 
-		HTAnchor_setPhysical(anchor, file->local);
-		HTTRACE(PROT_TRACE, "Load File... Found `%s\'\n" _ file->local);
-
-		} else {
-		if (HT_STAT(file->local, &file->stat_info) == -1) {
-			HTTRACE(PROT_TRACE, "Load File... Not found `%s\'\n" _ file->local);
-			HTRequest_addError(request, ERR_FATAL, NO, HTERR_NOT_FOUND,
-					   NULL, 0, (char*)"HTLoadFile");
-			file->state = FS_ERROR;
+		if (((file->stat_info.st_mode) & S_IFMT) == S_IFDIR)
+		{
+			if (HTRequest_method(request) == METHOD_GET)
+			{
+				file->state = FS_PARSE_DIR;
+			}
+			else
+			{
+				HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT, NULL, 0, "HTLoadFile");
+				file->state = FS_NO_DATA;
+			}
 			break;
 		}
-		}
-
-		if (((file->stat_info.st_mode) & S_IFMT) == S_IFDIR) {
-		if (HTRequest_method(request) == METHOD_GET)
-			file->state = FS_PARSE_DIR;
-		else {
-			HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT,
-					   NULL, 0, (char*)"HTLoadFile");
-			file->state = FS_NO_DATA;
-		}
-		break;
-		}
 
 		{
-		BOOL editable = FALSE;
-		HTBind_getAnchorBindings(anchor);
-		if (editable) HTAnchor_appendAllow(anchor, METHOD_PUT);
+			BOOL editable = FALSE;
+			HTBind_getAnchorBindings(anchor);
+			if (editable) HTAnchor_appendAllow(anchor, METHOD_PUT);
 
-		/* Set the file size */
-		CIFile nelFile;
-		if (nelFile.open (file->local))
-		{
-			file->stat_info.st_size = nelFile.getFileSize();
-		}
-		nelFile.close();
+			/* Set the file size */
+			CIFile nelFile;
+			if (nelFile.open (file->local))
+			{
+				file->stat_info.st_size = nelFile.getFileSize();
+			}
+			nelFile.close();
 
-		if (file->stat_info.st_size)
-			HTAnchor_setLength(anchor, file->stat_info.st_size);
+			if (file->stat_info.st_size)
+				HTAnchor_setLength(anchor, file->stat_info.st_size);
 
-		/* Set the file last modified time stamp */
-		if (file->stat_info.st_mtime > 0)
-			HTAnchor_setLastModified(anchor, file->stat_info.st_mtime);
+			/* Set the file last modified time stamp */
+			if (file->stat_info.st_mtime > 0)
+				HTAnchor_setLastModified(anchor, file->stat_info.st_mtime);
 
-		/* Check to see if we can edit it */
-		if (!editable && !file->stat_info.st_size) {
-			HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT,
-					   NULL, 0, (char*)"HTLoadFile");
-			file->state = FS_NO_DATA;
-		} else {
-			file->state = (HTRequest_method(request)==METHOD_GET) ?
-			FS_NEED_OPEN_FILE : FS_GOT_DATA;
-		}
+			/* Check to see if we can edit it */
+			if (!editable && !file->stat_info.st_size)
+			{
+				HTRequest_addError(request, ERR_INFO, NO, HTERR_NO_CONTENT, NULL, 0, "HTLoadFile");
+				file->state = FS_NO_DATA;
+			}
+			else
+			{
+				file->state = (HTRequest_method(request)==METHOD_GET) ? FS_NEED_OPEN_FILE : FS_GOT_DATA;
+			}
 		}
 		break;
 
 	  case FS_NEED_OPEN_FILE:
 		status = HTNeLFileOpen(net, file->local, HT_FB_RDONLY);
-		if (status == HT_OK) {
+		if (status == HT_OK)
 		{
-			HTStream * rstream = HTStreamStack(HTAnchor_format(anchor),
-							   HTRequest_outputFormat(request),
-							   HTRequest_outputStream(request),
-							   request, YES);
-			HTNet_setReadStream(net, rstream);
-			HTRequest_setOutputConnected(request, YES);
-		}
+			{
+				HTStream * rstream = HTStreamStack(HTAnchor_format(anchor),
+					HTRequest_outputFormat(request),
+					HTRequest_outputStream(request),
+					request, YES);
+				HTNet_setReadStream(net, rstream);
+				HTRequest_setOutputConnected(request, YES);
+			}
 
+			{
+				HTOutputStream * output = HTNet_getOutput(net, NULL, 0);
+				HTRequest_setInputStream(request, (HTStream *) output);
+			}
+
+			if (HTRequest_isSource(request) && !HTRequest_destinationsReady(request)) return HT_OK;
+
+			HTRequest_addError(request, ERR_INFO, NO, HTERR_OK, NULL, 0, "HTLoadFile");
+			file->state = FS_NEED_BODY;
+
+			if (HTEvent_isCallbacksRegistered())
+			{
+				if (!HTRequest_preemptive(request))
+				{
+					if (!HTNet_preemptive(net))
+					{
+						HTTRACE(PROT_TRACE, "HTLoadFile.. Returning\n");
+						HTHost_register(HTNet_host(net), net, HTEvent_READ);
+					}
+					else if (!file->timer)
+					{
+						HTTRACE(PROT_TRACE, "HTLoadFile.. Returning\n");
+						file->timer = HTTimer_new(NULL, ReturnEvent, file, 1, YES, NO);
+					}
+					return HT_OK;
+				}
+			}
+		}
+		else if (status == HT_WOULD_BLOCK || status == HT_PENDING)
 		{
-			HTOutputStream * output = HTNet_getOutput(net, NULL, 0);
-			HTRequest_setInputStream(request, (HTStream *) output);
-		}
-
-		if (HTRequest_isSource(request) && !HTRequest_destinationsReady(request))
 			return HT_OK;
-		HTRequest_addError(request, ERR_INFO, NO, HTERR_OK, NULL, 0,
-				   (char*)"HTLoadFile");
-		file->state = FS_NEED_BODY;
-
-		if (HTEvent_isCallbacksRegistered()) {
-			if (!HTRequest_preemptive(request)) {
-			if (!HTNet_preemptive(net)) {
-				HTTRACE(PROT_TRACE, "HTLoadFile.. Returning\n");
-				HTHost_register(HTNet_host(net), net, HTEvent_READ);
-			} else if (!file->timer) {
-				HTTRACE(PROT_TRACE, "HTLoadFile.. Returning\n");
-				file->timer =
-				HTTimer_new(NULL, ReturnEvent, file, 1, YES, NO);
-			}
-			return HT_OK;
-			}
 		}
-		} else if (status == HT_WOULD_BLOCK || status == HT_PENDING)
-		return HT_OK;
-		else {
-		HTRequest_addError(request, ERR_INFO, NO, HTERR_INTERNAL,
-				   NULL, 0, (char*)"HTLoadFile");
-		file->state = FS_ERROR;		       /* Error or interrupt */
+		else
+		{
+			HTRequest_addError(request, ERR_INFO, NO, HTERR_INTERNAL, NULL, 0, "HTLoadFile");
+			file->state = FS_ERROR;		       /* Error or interrupt */
 		}
 		break;
 
-	  case FS_NEED_BODY:
+	case FS_NEED_BODY:
 		status = HTHost_read(HTNet_host(net), net);
 		if (status == HT_WOULD_BLOCK)
-		return HT_OK;
-		else if (status == HT_LOADED || status == HT_CLOSED) {
-		file->state = FS_GOT_DATA;
-		} else {
-		HTRequest_addError(request, ERR_INFO, NO, HTERR_FORBIDDEN,
-				   NULL, 0, (char*)"HTLoadFile");
-		file->state = FS_ERROR;
+		{
+			return HT_OK;
+		}
+		else if (status == HT_LOADED || status == HT_CLOSED)
+		{
+			file->state = FS_GOT_DATA;
+		}
+		else
+		{
+			HTRequest_addError(request, ERR_INFO, NO, HTERR_FORBIDDEN, NULL, 0, "HTLoadFile");
+			file->state = FS_ERROR;
 		}
 		break;
 
 	  case FS_TRY_FTP:
 		{
-		char *url = HTAnchor_physical(anchor);
-		HTAnchor *anchor;
-		char *newname = NULL;
-		StrAllocCopy(newname, "ftp:");
-		if (!strncmp(url, "file:", 5))
-			StrAllocCat(newname, url+5);
-		else
-			StrAllocCat(newname, url);
-		anchor = HTAnchor_findAddress(newname);
-		HTRequest_setAnchor(request, anchor);
-		HT_FREE(newname);
-		FileCleanup(request, HT_IGNORE);
-		return HTLoad(request, YES);
+			char *url = HTAnchor_physical(anchor);
+			HTAnchor *anchor;
+			char *newname = NULL;
+			StrAllocCopy(newname, "ftp:");
+			if (!strncmp(url, "file:", 5))
+			{
+				StrAllocCat(newname, url+5);
+			}
+			else
+			{
+				StrAllocCat(newname, url);
+			}
+			anchor = HTAnchor_findAddress(newname);
+			HTRequest_setAnchor(request, anchor);
+			HT_FREE(newname);
+			FileCleanup(request, HT_IGNORE);
+			return HTLoad(request, YES);
 		}
 		break;
 
@@ -461,7 +485,8 @@ PRIVATE int HTNeLReader_read (HTInputStream * me)
 		{
 			HTAlertCallback * cbf = HTAlert_find(HT_PROG_READ);
 			HTNet_addBytesRead(net, me->b_read);
-			if (cbf) {
+			if (cbf)
+			{
 				int tr = HTNet_bytesRead(net);
 				(*cbf)(net->request, HT_PROG_READ, HT_MSG_NULL, NULL, &tr, NULL);
 			}
@@ -472,18 +497,28 @@ PRIVATE int HTNeLReader_read (HTInputStream * me)
 
 		/* Now push the data down the stream */
 		if ((status = (*net->readStream->isa->put_block)
-			(net->readStream, me->data, me->b_read)) != HT_OK) {
-			if (status == HT_WOULD_BLOCK) {
+			(net->readStream, me->data, me->b_read)) != HT_OK)
+		{
+			if (status == HT_WOULD_BLOCK)
+			{
 				HTTRACE(PROT_TRACE, "ANSI read... Target WOULD BLOCK\n");
 				return HT_WOULD_BLOCK;
-			} else if (status == HT_PAUSE) {
+			}
+			else if (status == HT_PAUSE)
+			{
 				HTTRACE(PROT_TRACE, "ANSI read... Target PAUSED\n");
 				return HT_PAUSE;
-			} else if (status > 0) {	      /* Stream specific return code */
+			}
+			else if (status > 0)
+			{
+				/* Stream specific return code */
 				HTTRACE(PROT_TRACE, "ANSI read... Target returns %d\n" _ status);
 				me->write = me->data + me->b_read;
 				return status;
-			} else {				     /* We have a real error */
+			}
+			else
+			{
+				/* We have a real error */
 				HTTRACE(PROT_TRACE, "ANSI read... Target ERROR\n");
 				return status;
 			}
@@ -506,13 +541,15 @@ PRIVATE int HTNeLReader_close (HTInputStream * me)
 	HTNet * net = HTHost_getReadNet(me->host);
 
 
-	if (net && net->readStream) {
-	if ((status = (*net->readStream->isa->_free)(net->readStream))==HT_WOULD_BLOCK)
-		return HT_WOULD_BLOCK;
-	net->readStream = NULL;
+	if (net && net->readStream)
+	{
+		if ((status = (*net->readStream->isa->_free)(net->readStream))==HT_WOULD_BLOCK) return HT_WOULD_BLOCK;
+		net->readStream = NULL;
 	}
+
 	HTTRACE(STREAM_TRACE, "Socket read. FREEING....\n");
 	HT_FREE(me);
+
 	return status;
 }
 
@@ -540,7 +577,8 @@ PRIVATE int HTNeLReader_free (HTInputStream * me)
 	}
 
 	HTNet * net = HTHost_getReadNet(me->host);
-	if (net && net->readStream) {
+	if (net && net->readStream)
+	{
 		int status = (*net->readStream->isa->_free)(net->readStream);
 		if (status == HT_OK) net->readStream = NULL;
 		return status;
@@ -551,7 +589,8 @@ PRIVATE int HTNeLReader_free (HTInputStream * me)
 PRIVATE int HTNeLReader_abort (HTInputStream * me, HTList * /* e */)
 {
 	HTNet * net = HTHost_getReadNet(me->host);
-	if (net && net->readStream) {
+	if (net && net->readStream)
+	{
 		int status = (*net->readStream->isa->abort)(net->readStream, NULL);
 		if (status != HT_IGNORE) net->readStream = NULL;
 	}
@@ -560,7 +599,7 @@ PRIVATE int HTNeLReader_abort (HTInputStream * me, HTList * /* e */)
 
 PRIVATE const HTInputStreamClass HTNeLReader =
 {
-	(char*)"SocketReader",
+	"SocketReader",
 	HTNeLReader_flush,
 	HTNeLReader_free,
 	HTNeLReader_abort,
@@ -569,20 +608,20 @@ PRIVATE const HTInputStreamClass HTNeLReader =
 	HTNeLReader_consumed
 };
 
-PUBLIC HTInputStream * HTNeLReader_new (HTHost * host, HTChannel * ch,
-					 void * /* param */, int /* mode */)
+PUBLIC HTInputStream * HTNeLReader_new (HTHost * host, HTChannel * ch, void * /* param */, int /* mode */)
 {
-	if (host && ch) {
-	HTInputStream * me = HTChannel_input(ch);
-	if (me == NULL) {
-		if ((me=(HTInputStream *) HT_CALLOC(1, sizeof(HTInputStream))) == NULL)
-		HT_OUTOFMEM((char*)"HTNeLReader_new");
-		me->isa = &HTNeLReader;
-		me->ch = ch;
-		me->host = host;
-		HTTRACE(STREAM_TRACE, "Reader...... Created reader stream %p\n" _ me);
-	}
-	return me;
+	if (host && ch)
+	{
+		HTInputStream * me = HTChannel_input(ch);
+		if (me == NULL)
+		{
+			if ((me=(HTInputStream *) HT_CALLOC(1, sizeof(HTInputStream))) == NULL) HT_OUTOFMEM("HTNeLReader_new");
+			me->isa = &HTNeLReader;
+			me->ch = ch;
+			me->host = host;
+			HTTRACE(STREAM_TRACE, "Reader...... Created reader stream %p\n" _ me);
+		}
+		return me;
 	}
 	return NULL;
 }
