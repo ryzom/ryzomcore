@@ -48,7 +48,7 @@ extern sint64	DT64;		// Diff time with current and last frame in ms.
 extern float	DT;			// Diff time with current and last frame in sec.
 extern TTime	TSend;		// Next Time to send motions.
 extern TTime	DTSend;		// Delta of time to generate the next time to send motions.
-                                 extern double	TimeInSec;	// Time for the current frame in second.
+extern double	TimeInSec;	// Time for the current frame in second.
 extern double	FirstTimeInSec;	// Game local origin time
 
 

@@ -31,8 +31,6 @@ namespace NLMISC
 
 class CCocoaEventEmitter : public IEventEmitter
 {
-	bool             _emulateRawMode;
-	bool             _setToEmulateRawMode;
 	bool             _eventLoop;
 	NL3D::IDriver*   _driver;
 	CocoaOpenGLView* _glView;
@@ -42,8 +40,6 @@ class CCocoaEventEmitter : public IEventEmitter
 
 public:
 	CCocoaEventEmitter() :
-		_emulateRawMode(false),
-		_setToEmulateRawMode(false),
 		_driver(NULL),
 		_glView(nil),
 		_server(NULL) { }

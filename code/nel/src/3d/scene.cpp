@@ -158,7 +158,7 @@ CScene::CScene(bool bSmallScene) : LightTrav(bSmallScene)
 
 	_MaxSkeletonsInNotCLodForm= 20;
 
-	_FilterRenderFlags= std::numeric_limits<uint32>::max();
+	_FilterRenderFlags = std::numeric_limits<uint32>::max();
 
 	_NextRenderProfile= false;
 
@@ -592,10 +592,8 @@ void	CScene::renderPart(UScene::TRenderPart rp, bool	doHrcPass, bool doTrav, boo
 		//
 		nlassert(CurrentCamera);
 
-
 		// update models.
 		updateModels();
-
 
 		// Use the camera to setup Clip / Render pass.
 		float left, right, bottom, top, znear, zfar;

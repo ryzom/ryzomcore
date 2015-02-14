@@ -601,7 +601,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					if (pos == ucstring::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = newmsg.find(ucstring("}"));;
+						pos = newmsg.find(ucstring("}"));
 						prefix += " ";
 					}
 					

@@ -969,8 +969,6 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
 				}
 			}
-
-
 		}
 		else
 		{
@@ -1052,8 +1050,6 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
 				}
 			}
-
-
 		}
 
 		switch(type)

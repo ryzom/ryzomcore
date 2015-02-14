@@ -392,7 +392,6 @@ bool	CMeshVPWindTree::begin(IDriver *driver, CScene *scene, CMeshBaseInstance *m
 	sint	numPls= renderTrav->getNumVPLights()-1;
 	clamp(numPls, 0, CRenderTrav::MaxVPLight-1);
 
-
 	// Enable normalize only if requested by user. Because lighting don't manage correct "scale lighting"
 	uint	idVP= (SpecularLighting?2:0) + (driver->isForceNormalize()?1:0) ;
 	// correct VP id for correct unmber of pls.
@@ -523,7 +522,7 @@ void	CMeshVPWindTree::beginMBRInstance(IDriver *driver, CScene *scene, CMeshBase
 	idVP = numPls*4 + idVP;
 
 	// re-activate VP if idVP different from last setup
-	if(idVP != _LastMBRIdVP)
+	if (idVP != _LastMBRIdVP)
 	{
 		_LastMBRIdVP= idVP;
 		driver->activeVertexProgram(_VertexProgram[_LastMBRIdVP]);

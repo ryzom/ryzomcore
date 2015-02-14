@@ -5293,9 +5293,7 @@ void  CEditor::onTestModeDisconnected(TSessionId sessionId, uint32 lastAct, TSce
 	//H_AUTO(R2_CEditor_onTestModeDisconnected)
 	CHECK_EDITOR
 	_DMC->CDynamicMapClient::onTestModeDisconnected(sessionId, lastAct, sessionType);
-
 }
-
 
 // *********************************************************************************************************
 void CEditor::nodeInserted(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& key, CObject* value)
@@ -6611,7 +6609,7 @@ NLMISC::CVectorD getVectorD(const CObject *obj)
 CObject *buildVector(const NLMISC::CVectorD &vector, const std::string &instanceId /*= ""*/)
 {
 	CObject *table;
-	if (instanceId.empty() )
+	if (instanceId.empty())
 	{
 		table = getEditor().getDMC().newComponent("Position");
 		table->set("x", vector.x);

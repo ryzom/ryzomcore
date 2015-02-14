@@ -371,6 +371,9 @@ void displayDebug()
 	// Current GameCycle
 	TextContext->printfAt(1.f, line, "Ms per Cycle : %d", NetMngr.getMsPerTick());
 	line += lineStep;
+	// Smoothed Client Date
+	TextContext->printfAt(1.f, line, "Smoothed Client Date : %u %f", SmoothedClientDate.Day, SmoothedClientDate.Hour);
+	line += lineStep;
 	// Packet Loss
 	TextContext->printfAt(1.f, line, "Packet Loss : %.1f %%", NetMngr.getMeanPacketLoss()*100.0f);
 	line += lineStep;

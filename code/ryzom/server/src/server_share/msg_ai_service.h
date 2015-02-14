@@ -88,7 +88,7 @@ public:
 	virtual void description ()
 	{
 		className ("CUserEventMsg");
-		property ("InstanceNumber", PropUInt32, uint32(~0), InstanceNumber);
+		property ("InstanceNumber", PropUInt32, std::numeric_limits<uint32>::max(), InstanceNumber);
 		property ("GrpAlias", PropUInt32, uint32(0xffffffff), GrpAlias);
 		property ("EventId", PropUInt8, uint8(0xff), EventId);
 		propertyCont ("Params", PropString, Params);
@@ -133,7 +133,7 @@ public:
 	virtual void description ()
 	{
 		className ("CSetEscortTeamId");
-		property ("InstanceNumber", PropUInt32, uint32(~0), InstanceNumber);
+		property ("InstanceNumber", PropUInt32, std::numeric_limits<uint32>::max(), InstanceNumber);
 		propertyCont ("Groups", PropUInt32, Groups);
 		property ("TeamId", PropUInt16, CTEAM::InvalidTeamId, TeamId);
 	}

@@ -26,6 +26,10 @@
 	#include <unistd.h>
 #endif
 
+#ifdef NL_OS_MAC
+	#include "app_bundle_utils.h"
+#endif
+
 #include <memory>
 #include <errno.h>
 
@@ -207,9 +211,18 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 // ****************************************************************************
 void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 {
-	ClientRootPath = clientRootPath;
-	ClientPatchPath = ClientRootPath + "unpack/";
-	ClientDataPath = ClientRootPath + "data/";
+	ClientRootPath = CPath::standardizePath(clientRootPath);
+	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
+	
+	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
+
+#ifdef NL_OS_MAC
+	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	ReadableClientDataPath = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX) + "/data");
+#else
+	ReadableClientDataPath = WritableClientDataPath;
+#endif
 }
 
 // ****************************************************************************
@@ -253,7 +266,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 		DisplayedServerPath = ServerPath;
 
 	NLMISC::CFile::createDirectory(ClientPatchPath);
-	NLMISC::CFile::createDirectory(ClientDataPath);
+	NLMISC::CFile::createDirectory(WritableClientDataPath);
 
 
 	// try to read the version file from the server (that will replace the version number)
@@ -787,7 +800,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 			if (!result)
 			{
-//:TODO: handle exception?
+				// TODO: handle exception?
 				string err = toString("Error unpacking %s", rFilename.c_str());
 
 				if (useBatchFile)
@@ -913,7 +926,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			throw NLMISC::EWriteError(UpdateBatchFilename.c_str());
 		}
 	}
-
 }
 
 // ****************************************************************************
@@ -1616,9 +1628,25 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 	// Only look in data path if the file should not be unpack (otherwise it should only remains in the "unpack" directory)
 	if (!needUnpack)
 	{
-		if (sFilePath.empty() && NLMISC::CFile::fileExists(ClientDataPath + rFilename))		sFilePath = ClientDataPath + rFilename;
+		if (sFilePath.empty())
+		{
+			if (NLMISC::CFile::fileExists(WritableClientDataPath + rFilename))
+			{
+				// if file exists in writable directory, use it
+				sFilePath = WritableClientDataPath + rFilename;
+			}
+			else if (NLMISC::CFile::fileExists(ReadableClientDataPath + rFilename))
+			{
+				// if file exists in readable directory, use it
+				sFilePath = ReadableClientDataPath + rFilename;
+			}
+		}
 	}
-	if (sFilePath.empty() && NLMISC::CFile::fileExists(ClientPatchPath + rFilename))		sFilePath = ClientPatchPath + rFilename;
+
+	if (sFilePath.empty() && NLMISC::CFile::fileExists(ClientPatchPath + rFilename))
+	{
+		sFilePath = ClientPatchPath + rFilename;
+	}
 
 // following lines removed by Sadge to ensure that the correct file is patched
 //	string sFilePath = CPath::lookup(rFilename, false, false);
@@ -2039,7 +2067,8 @@ uint CPatchManager::applyScanDataResult()
 	if(ScanDataThread)
 		return 0;
 
-	uint	numError= 0;
+	uint numError= 0;
+
 	{
 		TSyncDataScanState::CAccessor	ac(&DataScanState);
 		CDataScanState	&val= ac.value();
@@ -2057,7 +2086,8 @@ uint CPatchManager::applyScanDataResult()
 			// get file path
 			// following lines added by Sadge to ensure that the correct file gets patched
 			string sFilePath;
-			if (NLMISC::CFile::fileExists(ClientDataPath + ftp.FileName))	sFilePath = ClientDataPath + ftp.FileName;
+			if (NLMISC::CFile::fileExists(WritableClientDataPath + ftp.FileName)) sFilePath = WritableClientDataPath + ftp.FileName;
+			if (sFilePath.empty() && NLMISC::CFile::fileExists(ReadableClientDataPath + ftp.FileName)) sFilePath = ReadableClientDataPath + ftp.FileName;
 			if (sFilePath.empty() && NLMISC::CFile::fileExists(ClientPatchPath + ftp.FileName))	sFilePath = ClientPatchPath + ftp.FileName;
 
 // following lines removed by Sadge to ensure that the correct file gets patched
@@ -2768,15 +2798,31 @@ public:
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
-	// Source File Name
+
+	// Source File Name (in writable or readable directory)
 	string SourceName;
+
+	// Destination File Name (in writable directory)
+	string DestinationName;
+
 	if (rFTP.ExtractPath.empty())
 	{
+		DestinationName = pPM->WritableClientDataPath + rFTP.FileName;
+
 		if (rFTP.LocalFileExists)
 		{
 			// following lines added by Sadge to ensure that the correct file gets patched
 			SourceName.clear();
-			if (NLMISC::CFile::fileExists(pPM->ClientDataPath + rFTP.FileName))		SourceName = pPM->ClientDataPath + rFTP.FileName;
+
+			if (NLMISC::CFile::fileExists(pPM->WritableClientDataPath + rFTP.FileName))
+			{
+				SourceName = pPM->WritableClientDataPath + rFTP.FileName;
+			}
+			else if (NLMISC::CFile::fileExists(pPM->ReadableClientDataPath + rFTP.FileName))
+			{
+				SourceName = pPM->ReadableClientDataPath + rFTP.FileName;
+			}
+
 			// version from previous download
 			if (SourceName.empty())	throw Exception (std::string("ERROR: Failed to find file: ")+rFTP.FileName);
 
@@ -2788,12 +2834,13 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			// note : if file was background downloaded, we have :
 			// rFTP.LocalFileExists = false
 			// rFTP.SrcFileName = "unpack/filename.bnp.tmp"
-			SourceName = pPM->ClientDataPath + rFTP.FileName;
+			SourceName = DestinationName;
 		}
 	}
 	else
 	{
 		SourceName = pPM->ClientPatchPath + rFTP.FileName;
+		DestinationName = SourceName;
 	}
 
 	if (rFTP.LocalFileToDelete)
@@ -2838,7 +2885,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 		for (uint i=0; i<rFTP.PatcheSizes.size(); ++i)
 			totalPatchSize += rFTP.PatcheSizes[i];
 	}
-	else
+	else if (!rFTP.PatcheSizes.empty())
 	{
 		totalPatchSize = rFTP.PatcheSizes.back();
 	}
@@ -2930,11 +2977,11 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (_CommitPatch)
 			{
-				pPM->renameFile(OutFilename+".tmp", SourceName);
+				pPM->renameFile(OutFilename+".tmp", DestinationName);
 			}
 		}
 	}
-	if (usePatchFile && !rFTP.Patches.empty())
+	if (usePatchFile)
 	{
 		uint32 currentPatchedSize = 0;
 		for (uint32 j = 0; j < rFTP.Patches.size(); ++j)
@@ -2987,21 +3034,14 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				SourceNameXD = SourceNameXD.substr(0, SourceNameXD.rfind('.'));
 				SourceNameXD += "_.ref";
 
-				std::string refPath;
-				if (_CommitPatch)
-				{
-					refPath = pPM->ClientDataPath;
-				}
-				else
+				if (!_CommitPatch)
 				{
 					// works
-					refPath = pPM->ClientPatchPath;
 					std::string tmpRefFile = SourceNameXD + ".tmp";
 					if (!NLMISC::CFile::fileExists(pPM->ClientPatchPath + tmpRefFile))
 					{
 						// Not found in the patch directory -> version in data directory should be good, or would have been
 						// detected by the check thread else.
-						refPath = pPM->ClientDataPath;
 					}
 					else
 					{
@@ -3018,7 +3058,14 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				//			if (SourceNameXDFull.empty())
 				//				SourceNameXDFull = pPM->ClientDataPath + SourceNameXD;
 				//			SourceNameXD = SourceNameXDFull;
-				SourceNameXD = pPM->ClientDataPath + SourceNameXD;
+				if (CFile::fileExists(pPM->WritableClientDataPath + SourceNameXD))
+				{
+					SourceNameXD = pPM->WritableClientDataPath + SourceNameXD;
+				}
+				else if (CFile::fileExists(pPM->ReadableClientDataPath + SourceNameXD))
+				{
+					SourceNameXD = pPM->ReadableClientDataPath + SourceNameXD;
+				}
 			}
 
 			PatchName = pPM->ClientPatchPath + PatchName;
@@ -3042,7 +3089,8 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			PatchSizeProgress += rFTP.PatcheSizes[j];
 			currentPatchedSize += rFTP.PatcheSizes[j];
 		}
-		if (tmpSourceName != SourceName)
+
+		if (tmpSourceName != DestinationName)
 		{
 			pPM->deleteFile(SourceName, false, false); // File can exists if bad BNP loading
 			if (!_CommitPatch)
@@ -3052,7 +3100,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			}
 			else
 			{
-				pPM->renameFile(tmpSourceName, SourceName);
+				pPM->renameFile(tmpSourceName, DestinationName);
 			}
 		}
 	}
@@ -3060,9 +3108,10 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 	{
 		PatchSizeProgress += totalPatchSize;
 	}
+
 	// If all patches applied with success so file size should be ok
 	// We just have to change file date to match the last patch applied
-	pPM->applyDate(SourceName, rFTP.LastFileDate);
+	pPM->applyDate(DestinationName, rFTP.LastFileDate);
 	//progress.progress(1.f);
 }
 

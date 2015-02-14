@@ -520,7 +520,7 @@ CCameraBackup setupCameraForScreenshot(UScene &scene, uint left, uint right, uin
 	// Build a viewport
 	CViewport viewport;
 	NL3D::UDriver *Driver = CViewRenderer::getInstance()->getDriver();
-	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(),(float)(bottom-top)/Driver->getWindowHeight());
+	viewport.init (0, 0, (float)(right-left)/Driver->getWindowWidth(), (float)(bottom-top)/Driver->getWindowHeight());
 
 	// Activate all this
 	scene.getCam().setFrustum (frustumPart);

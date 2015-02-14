@@ -858,6 +858,8 @@ string getname (dirent *de)
 void CPath::getPathContent (const string &path, bool recurse, bool wantDir, bool wantFile, vector<string> &result, class IProgressCallback *progressCallBack, bool showEverything)
 {
 	getInstance()->_FileContainer.getPathContent(path, recurse, wantDir, wantFile, result, progressCallBack, showEverything);
+
+	sort(result.begin(), result.end());
 }
 
 void CFileContainer::getPathContent (const string &path, bool recurse, bool wantDir, bool wantFile, vector<string> &result, class IProgressCallback *progressCallBack, bool showEverything)
@@ -960,8 +962,6 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 			progressCallBack->popCropedValues ();
 		}
 	}
-
-	sort(result.begin(), result.end());
 }
 
 void CPath::removeAllAlternativeSearchPath ()

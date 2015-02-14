@@ -518,7 +518,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 				html->browse("home");
 		}
 	}
-*/	
+*/
 }// updateVisualPropertyName //
 
 //-----------------------------------------------

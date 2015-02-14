@@ -2465,9 +2465,17 @@ NLMISC_COMMAND(setDefaultStart,"Set the default start point for all continents",
 
 	CVectorD	startPoint;
 
-	startPoint.x = atof(args[0].c_str());
-	startPoint.y = atof(args[1].c_str());
-	startPoint.z = (args.size() < 3 ? 0.0 : atof(args[2].c_str()));
+	NLMISC::fromString(args[0], startPoint.x);
+	NLMISC::fromString(args[1], startPoint.y);
+
+	if (args.size() > 2)
+	{
+		NLMISC::fromString(args[2], startPoint.z);
+	}
+	else
+	{
+		startPoint.z = 0.0;
+	}
 
 	DefaultStartPoint = startPoint;
 
@@ -2921,13 +2929,15 @@ NLMISC_COMMAND(testPacsMove, "test a pacs move", "<continent> <x> <y> <dx> <dy>"
 	if (args.size() != 5)
 		return false;
 
-	CPacsCruncher	pc;
+	CPacsCruncher pc;
 
-	string		name = args[0];
-	double		x = atof(args[1].c_str());
-	double		y = atof(args[2].c_str());
-	double		dx = atof(args[3].c_str());
-	double		dy = atof(args[4].c_str());
+	string name = args[0];
+
+	double x, y, dx, dy;
+	NLMISC::fromString(args[1], x);
+	NLMISC::fromString(args[2], y);
+	NLMISC::fromString(args[3], dx);
+	NLMISC::fromString(args[4], dy);
 
 	pc.init(name);
 

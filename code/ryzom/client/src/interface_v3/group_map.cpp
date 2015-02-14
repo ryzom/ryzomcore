@@ -3213,7 +3213,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
 		ig->setActive(false);
-		
+
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 		if (!gc) return;
 		// Retrieve ComboBox to get the position(ordered landmark type) of the selected item

@@ -403,7 +403,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 	// Must setup textures each frame. (need to test if touched).
 	// Must separate texture setup and texture activation in 2 "for"...
 	// because setupTexture() may disable all stage.
-	if (matShader != CMaterial::Water 
+	if (matShader != CMaterial::Water
 		&& ((matShader != CMaterial::Program) || (_LastSetuppedPP->features().MaterialFlags & CProgramFeatures::TextureStages))
 		)
 	{
