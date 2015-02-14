@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdpch.h"
 #include "nel/misc/singleton.h"
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"

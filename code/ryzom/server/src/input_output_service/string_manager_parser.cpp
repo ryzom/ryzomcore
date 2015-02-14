@@ -650,7 +650,7 @@ bool CStringManager::parseBlock(const ucstring &block, CPhrase &phrase)
 					&& (first - clause.String.begin()) == (sint) clause.Replacements[repCount].InsertPlace)
 				{
 					// check parameter type
-					char *subst;
+					const char *subst;
 					uint paramIndex = clause.Replacements[repCount].ParamIndex;
 
 					TParamId &paramId = phrase.Params[paramIndex]->ParamId;

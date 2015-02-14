@@ -714,9 +714,12 @@ void CBotNpc::sendVPA()	// alternate VPA
 
 void CBotNpc::sendVisualProperties()	// VisualPropertyA, B, C
 {
-	CMirrors::setVisualPropertyA( getSpawn()->dataSetRow(), _VisualPropertyA );
-	CMirrors::setVisualPropertyB( getSpawn()->dataSetRow(), _VisualPropertyB );
-	CMirrors::setVisualPropertyC( getSpawn()->dataSetRow(), _VisualPropertyC );
+	if (getSpawn())
+	{
+		CMirrors::setVisualPropertyA( getSpawn()->dataSetRow(), _VisualPropertyA );
+		CMirrors::setVisualPropertyB( getSpawn()->dataSetRow(), _VisualPropertyB );
+		CMirrors::setVisualPropertyC( getSpawn()->dataSetRow(), _VisualPropertyC );
+	}
 }
 
 bool CBotNpc::reSpawn(bool sendMessage)

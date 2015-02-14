@@ -302,7 +302,7 @@ private:
 	/// Read the description of the highest client version file found
 	void				readClientVersionAndDescFile();
 
-	void		setRWAccess (const std::string &filename);
+	void		setRWAccess (const std::string &filename, bool bThrowException=true);
 
 	std::string deleteFile (const std::string &filename, bool bThrowException=true, bool bWarning=true);
 

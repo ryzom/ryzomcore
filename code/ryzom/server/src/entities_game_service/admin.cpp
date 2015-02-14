@@ -420,7 +420,7 @@ bool getAIInstanceFromGroupName(string& groupName, uint32& instanceNumber)
 	{
 		string continent = groupName.substr(0, groupName.find('@'));
 		uint32 nr = CUsedContinent::instance().getInstanceForContinent(continent);
-		if (nr == ~0)
+		if (nr == INVALID_AI_INSTANCE)
 		{
 			return false;
 		}

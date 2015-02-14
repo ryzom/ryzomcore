@@ -834,7 +834,7 @@ sint CComLuaModule::luaRequestEraseNode(lua_State* state)
 	if (args>2) { luaL_checknumber(state, 3); }
 
 	std::string instanceId(lua_tostring(state, 1));
-	std::string attrName = "";
+	std::string attrName;
 	sint position = -1;
 	if (args>1){ attrName = lua_tostring(state, 2);}
 	if (args>2){ position = static_cast<sint>(lua_tonumber(state, 3));}
@@ -1255,7 +1255,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 			lua_pushnil(state);
 			while (lua_next(state, -2) != 0)
 			{
-				std::string key = "";
+				std::string key;
 				if ( lua_type(state, -2) == LUA_TSTRING)
 				{
 					key = lua_tostring(state, -2);
@@ -1285,7 +1285,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 CObject* CComLuaModule::loadLocal(const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }
@@ -1347,7 +1347,7 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }
