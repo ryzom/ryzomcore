@@ -1068,12 +1068,12 @@ float CPatchManager::getCurrentFileProgress() const
 }
 
 // ****************************************************************************
-void CPatchManager::setRWAccess (const string &filename)
+void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 {
 	ucstring s = CI18N::get("uiSetAttrib") + " " + filename;
 	setState(true, s);
 
-	if (!NLMISC::CFile::setRWAccess(filename))
+	if (!NLMISC::CFile::setRWAccess(filename) && bThrowException)
 	{
 		s = CI18N::get("uiAttribErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
@@ -1351,7 +1351,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		// create the local file
 		if (NLMISC::CFile::fileExists(dest))
 		{
-			setRWAccess(dest);
+			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
 		FILE *fp = fopen (dest.c_str(), "wb");
@@ -1492,7 +1492,7 @@ void CPatchManager::decompressFile (const string &filename)
 	}
 
 	string dest = filename.substr(0, filename.size ()-4);
-	setRWAccess(dest);
+	setRWAccess(dest, false);
 	//if(isVerboseLog()) nlinfo("Calling fopen('%s','wb')", dest.c_str());
 	FILE *fp = fopen (dest.c_str(), "wb");
 	if (fp == NULL)
@@ -1566,7 +1566,7 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 	{
 //		_utimbuf utb;
 //		utb.actime = utb.modtime = nDate;
-		setRWAccess(sFilename);
+		setRWAccess(sFilename, false);
 		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
 						" -> " + toString(nDate);
 		setState(true,s);
