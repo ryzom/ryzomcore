@@ -1499,7 +1499,7 @@ void cf_setVar (NLMISC::CConfigFile::CVar &Var, cf_value Val)
 			switch (Val.Type)
 			{
 			case NLMISC::CConfigFile::CVar::T_REAL:		Var.IntValues.push_back ((int)Val.Real); break;
-			case NLMISC::CConfigFile::CVar::T_STRING:	int val = 0; NLMISC::fromString(Val.String, val); Var.IntValues.push_back(val); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	{ int val = 0; NLMISC::fromString(Val.String, val); Var.IntValues.push_back(val); break; }
 			default: break;
 			}
 			break;
@@ -1507,7 +1507,7 @@ void cf_setVar (NLMISC::CConfigFile::CVar &Var, cf_value Val)
 			switch (Val.Type)
 			{
 			case NLMISC::CConfigFile::CVar::T_INT:		Var.RealValues.push_back ((double)Val.Int); break;
-			case NLMISC::CConfigFile::CVar::T_STRING:	double val = 0.0; NLMISC::fromString(Val.String, val); Var.RealValues.push_back(val); break;
+			case NLMISC::CConfigFile::CVar::T_STRING:	{ double val = 0.0; NLMISC::fromString(Val.String, val); Var.RealValues.push_back(val); break; }
 			default: break;
 			}
 			break;
