@@ -6,6 +6,9 @@ IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
+# Declare CMAKE_CONFIGURATION_TYPES before PROJECT
+SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+
 ###
 # Helper macro that generates .pc and installs it.
 # Argument: name - the name of the .pc package, e.g. "nel-pacs.pc"
@@ -383,8 +386,6 @@ MACRO(NL_SETUP_BUILD)
   # None                  = NL_RELEASE
   # Debug                 = NL_DEBUG
   # Release               = NL_RELEASE
-
-  SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
   IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     SET(NL_BUILD_MODE "NL_DEBUG")

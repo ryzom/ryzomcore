@@ -2925,7 +2925,7 @@ void CInterfaceManager::initEmotes()
 	CSkillManager		*pSM = CSkillManager::getInstance();
 
 	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
-	string	previousMind = "";
+	string	previousMind;
 	CGroupSubMenu *pFirstMenu = 0;
 
 	for (list<CEmoteEntry>::const_iterator it = entries.begin(); it != entries.end(); it++)

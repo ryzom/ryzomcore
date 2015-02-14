@@ -4109,7 +4109,7 @@ void	CNetManagerMulti::init( const std::string& cookie, const std::string& addr 
 
 //
 uint32					ShardId = 0;
-std::string				WebServer = "";
+std::string				WebServer;
 
 
 

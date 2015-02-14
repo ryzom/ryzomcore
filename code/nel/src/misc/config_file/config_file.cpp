@@ -85,8 +85,12 @@ double CConfigFile::CVar::asDouble (int index) const
 		if (index >= (int)IntValues.size () || index < 0) throw EBadSize (Name, (int)IntValues.size (), index);
 		return (double)IntValues[index];
 	case T_STRING:
+	{
 		if (index >= (int)StrValues.size () || index < 0) throw EBadSize (Name, (int)StrValues.size (), index);
-		return atof(StrValues[index].c_str());
+		double val;
+		NLMISC::fromString(StrValues[index], val);
+		return val;
+	}
 	default:
 		if (index >= (int)RealValues.size () || index < 0) throw EBadSize (Name, (int)RealValues.size (), index);
 		return RealValues[index];

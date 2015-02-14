@@ -2337,7 +2337,7 @@ YY_RULE_SETUP
 				if (!cf_Ignore)
 				{
 					cflval.Val.Type = T_REAL;
-					cflval.Val.Real = atof (yytext);
+					NLMISC::fromString(yytext, cflval.Val.Real);
 					DEBUG_PRINTF("lex: real '%s' '%f\n", yytext, cflval.Val.Real);
 					return REAL;
 				}
