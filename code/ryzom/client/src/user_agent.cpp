@@ -21,7 +21,7 @@
 
 #include "game_share/ryzom_version.h"
 
-#ifdef HAVE_REVISION_H
+#if defined(RYZOM_COMPATIBILITY_VERSION) && defined(HAVE_REVISION_H)
 #include "revision.h"
 #endif
 
@@ -46,14 +46,25 @@
 
 std::string getUserAgent()
 {
+	return getUserAgentName() + "/" + getUserAgentVersion();
+}
+
+std::string getUserAgentName()
+{
+	return "Ryzom";
+}
+
+std::string getUserAgentVersion()
+{
 	static std::string s_userAgent;
 
 	if (s_userAgent.empty())
 	{
 		char buffer[256];
 
-#ifdef REVISION
-		sprintf(buffer, "%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
+#if defined(REVISION) && defined(RYZOM_COMPATIBILITY_VERSION)
+		// we don't need RYZOM_VERSION if we already have a numeric form a.b.c, we just need to append revision to it
+		sprintf(buffer, "%s.%s-%s-%s", RYZOM_COMPATIBILITY_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
 #else
 		sprintf(buffer, "%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
 #endif
