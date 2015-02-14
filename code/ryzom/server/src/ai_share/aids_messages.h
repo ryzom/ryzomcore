@@ -101,12 +101,12 @@ public:
 	{
 	}
 	
-	CMsgAIFeedback(std::string message) 
+	CMsgAIFeedback(const std::string &message)
 	{
 		Message=message;
 	}
 
-	CMsgAIFeedback(char *msgStr) 
+	CMsgAIFeedback(const char *msgStr)
 	{
 		Message=std::string(msgStr);
 	}

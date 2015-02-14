@@ -573,7 +573,7 @@ namespace ADMIN
 						time_t t = now;
 						fprintf(fp, "AESReportDate=%s", ::ctime(&t));
 
-						fprintf(fp, "NBService=%u\n", _ServiceStates.size());
+						fprintf(fp, "NBService=%u\n", (uint)_ServiceStates.size());
 						// output state of each service
 						TServiceStates::iterator first(_ServiceStates.begin()), last(_ServiceStates.end());
 						for (; first != last; ++first)
