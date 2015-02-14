@@ -456,7 +456,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 			else
 			{
 				// must not have so much brick type, else must change code!
-				nlassert(brickType<32);
+				// nlassert(brickType<32);
 
 				// Ok set the bit associated
 				_BrickTypeBitField|= 1<<brickType;
