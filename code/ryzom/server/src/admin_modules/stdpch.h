@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef AI_SHARE_STDPCH_H
-#define AI_SHARE_STDPCH_H
+#ifndef ADMIN_MODULES_STDPCH_H
+#define ADMIN_MODULES_STDPCH_H
 
 #include <time.h>
 #include <memory>
