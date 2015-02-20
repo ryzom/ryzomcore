@@ -18,23 +18,32 @@
 
 
 #include "rcerror_widget.h"
+#include "rcerror_socket.h"
+#include "rcerror_data.h"
 #include <QTimer>
 #include <QTextStream>
 #include <QFile>
+#include <QMessageBox>
 
 RCErrorWidget::RCErrorWidget( QWidget *parent ) :
 QWidget( parent )
 {
 	m_ui.setupUi( this );
+
+	m_socket = new RCErrorSocket( this );
+
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
 	connect( m_ui.sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
 	connect( m_ui.canceButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 	connect( m_ui.emailCB, SIGNAL( stateChanged( int ) ), this, SLOT( onCBClicked() ) );
+
+	connect( m_socket, SIGNAL( reportSent() ), this, SLOT( onReportSent() ) );
 }
 
 RCErrorWidget::~RCErrorWidget()
 {
+	m_socket = NULL;
 }
 
 void RCErrorWidget::onLoad()
@@ -53,7 +62,14 @@ void RCErrorWidget::onLoad()
 
 void RCErrorWidget::onSendClicked()
 {
-	close();
+	m_ui.sendButton->setEnabled( false );
+
+	RCErrorData data;
+	data.description = m_ui.descriptionEdit->toPlainText();
+	data.report = m_ui.reportEdit->toPlainText();
+	data.email = m_ui.emailEdit->text();
+
+	m_socket->sendReport( data );
 }
 
 void RCErrorWidget::onCancelClicked()
@@ -66,5 +82,12 @@ void RCErrorWidget::onCBClicked()
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
 
+void RCErrorWidget::onReportSent()
+{
+	QMessageBox::information( this,
+								tr( "Report sent" ),
+								tr( "The report has been sent." ) );
 
+	close();
+}
 

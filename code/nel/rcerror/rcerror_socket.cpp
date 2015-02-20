@@ -17,4 +17,50 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "rcerror_socket.h"
+#include <QNetworkAccessManager>
+#include <QUrl>
+#include <QNetworkRequest>
+
+namespace
+{
+	static const char *BUG_URL = "http://192.168.2.67/dfighter/r.php";
+}
+
+class RCErrorSocketPvt
+{
+public:
+	QNetworkAccessManager mgr;
+};
+
+RCErrorSocket::RCErrorSocket( QObject *parent ) :
+QObject( parent )
+{
+	m_pvt = new RCErrorSocketPvt();
+
+	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished() ) );
+}
+
+RCErrorSocket::~RCErrorSocket()
+{
+	delete m_pvt;
+}
+
+void RCErrorSocket::sendReport( const RCErrorData &data )
+{
+	QUrl params;
+	params.addQueryItem( "report", data.report );
+	params.addQueryItem( "descr", data.description );
+	params.addQueryItem( "email", data.email );
+
+	QUrl url( BUG_URL );
+	QNetworkRequest request( url );
+	request.setRawHeader( "Connection", "close" );
+
+	m_pvt->mgr.post( request, params.encodedQuery() );
+}
+
+void RCErrorSocket::onFinished()
+{
+	Q_EMIT reportSent();
+}
 

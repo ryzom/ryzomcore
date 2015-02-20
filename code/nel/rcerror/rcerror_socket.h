@@ -19,5 +19,31 @@
 
 #ifndef RCERROR_SOCKET
 #define RCERROR_SOCKET
+
+#include <QObject>
+#include "rcerror_data.h"
+
+class RCErrorSocketPvt;
+
+class RCErrorSocket : public QObject
+{
+	Q_OBJECT
+
+public:	
+	RCErrorSocket( QObject *parent );
+	~RCErrorSocket();
+
+	void sendReport( const RCErrorData &data );
+
+Q_SIGNALS:
+	void reportSent();
+
+private Q_SLOTS:
+	void onFinished();
+
+private:
+	RCErrorSocketPvt *m_pvt;
+};
+
 #endif
 

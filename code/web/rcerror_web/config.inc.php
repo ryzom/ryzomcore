@@ -1,3 +1,5 @@
+<?php
+
 // Ryzom Core MMORPG framework - Error Reporter
 //
 // Copyright (C) 2015 Laszlo Kis-Adam
@@ -16,37 +18,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#ifndef RCERROR_WIDGET
-#define RCERROR_WIDGET
-
-
-#include "ui_rcerror_widget.h"
-
-class RCErrorSocket;
-
-class RCErrorWidget : public QWidget
+class BugReportConfig
 {
-	Q_OBJECT
-public:
-	RCErrorWidget( QWidget *parent = NULL );
-	~RCErrorWidget();
+	static public $dbhost = "localhost";
+	static public $dbport = "3306";
+	static public $dbdb = "bugs";
+	static public $dbuser = "bugs";
+	static public $dbpw = "bugs";
+}
 
-	void setFileName( const char *fn ){ m_fileName = fn; }
-
-private Q_SLOTS:
-	void onLoad();
-	void onSendClicked();
-	void onCancelClicked();
-	void onCBClicked();
-	
-	void onReportSent();
-
-private:
-	Ui::RCErrorWidget m_ui;
-	QString m_fileName;
-	RCErrorSocket *m_socket;
-};
-
-#endif
-
+?>
