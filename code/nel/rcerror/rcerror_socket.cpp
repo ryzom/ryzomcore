@@ -23,7 +23,7 @@
 
 namespace
 {
-	static const char *BUG_URL = "http://192.168.2.67/dfighter/r.php";
+	static const char *BUG_URL = "http://192.168.2.66/dfighter/r.php";
 }
 
 class RCErrorSocketPvt
