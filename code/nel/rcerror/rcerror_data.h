@@ -20,7 +20,7 @@
 #ifndef RCERROR_DATA
 #define RCERROR_DATA
 
-#include <QString.h>
+#include <QString>
 
 
 struct RCErrorData
