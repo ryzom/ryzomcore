@@ -76,7 +76,11 @@ TReportResult report (const std::string &title, const std::string &header, const
 		f << body;
 		f.close();
 
+#ifdef NL_OS_WINDOWS
+		NLMISC::launchProgram( "rcerror.exe", fname );
+#else
 		NLMISC::launchProgram( "rcerror", fname );
+#endif
 	}
 
 	NLMISC::CFile::deleteFile( fname );
