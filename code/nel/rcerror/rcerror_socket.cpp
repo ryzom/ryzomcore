@@ -20,6 +20,7 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
+#include <QNetworkReply>
 
 namespace
 {
@@ -37,7 +38,7 @@ QObject( parent )
 {
 	m_pvt = new RCErrorSocketPvt();
 
-	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished() ) );
+	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished( QNetworkReply* ) ) );
 }
 
 RCErrorSocket::~RCErrorSocket()
@@ -59,8 +60,11 @@ void RCErrorSocket::sendReport( const RCErrorData &data )
 	m_pvt->mgr.post( request, params.encodedQuery() );
 }
 
-void RCErrorSocket::onFinished()
+void RCErrorSocket::onFinished( QNetworkReply *reply )
 {
-	Q_EMIT reportSent();
+	if( reply->error() != QNetworkReply::NoError )
+		Q_EMIT reportFailed();
+	else
+		Q_EMIT reportSent();
 }
 

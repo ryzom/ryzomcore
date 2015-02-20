@@ -39,6 +39,7 @@ QWidget( parent )
 	connect( m_ui.emailCB, SIGNAL( stateChanged( int ) ), this, SLOT( onCBClicked() ) );
 
 	connect( m_socket, SIGNAL( reportSent() ), this, SLOT( onReportSent() ) );
+	connect( m_socket, SIGNAL( reportFailed() ), this, SLOT( onReportFailed() ) );
 }
 
 RCErrorWidget::~RCErrorWidget()
@@ -97,3 +98,13 @@ void RCErrorWidget::onReportSent()
 	close();
 }
 
+void RCErrorWidget::onReportFailed()
+{
+	QApplication::setOverrideCursor( Qt::ArrowCursor );
+
+	QMessageBox::information( this,
+								tr( "Report failed" ),
+								tr( "Failed to send the report..." ) );
+
+	close();
+}
