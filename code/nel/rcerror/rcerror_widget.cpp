@@ -66,6 +66,7 @@ void RCErrorWidget::onLoad()
 void RCErrorWidget::onSendClicked()
 {
 	m_ui.sendButton->setEnabled( false );
+	QApplication::setOverrideCursor( Qt::WaitCursor );
 
 	RCErrorData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
@@ -87,6 +88,8 @@ void RCErrorWidget::onCBClicked()
 
 void RCErrorWidget::onReportSent()
 {
+	QApplication::setOverrideCursor( Qt::ArrowCursor );
+
 	QMessageBox::information( this,
 								tr( "Report sent" ),
 								tr( "The report has been sent." ) );
