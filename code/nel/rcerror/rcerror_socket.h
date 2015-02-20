@@ -24,6 +24,7 @@
 #include "rcerror_data.h"
 
 class RCErrorSocketPvt;
+class QNetworkReply;
 
 class RCErrorSocket : public QObject
 {
@@ -37,9 +38,10 @@ public:
 
 Q_SIGNALS:
 	void reportSent();
+	void reportFailed();
 
 private Q_SLOTS:
-	void onFinished();
+	void onFinished( QNetworkReply *reply );
 
 private:
 	RCErrorSocketPvt *m_pvt;

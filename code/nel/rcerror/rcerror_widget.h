@@ -41,6 +41,7 @@ private Q_SLOTS:
 	void onCBClicked();
 	
 	void onReportSent();
+	void onReportFailed();
 
 private:
 	Ui::RCErrorWidget m_ui;
