@@ -17,7 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#define CURL_STATICLIB 1
 #include <curl/curl.h>
 
 #include "nel/misc/types_nl.h"

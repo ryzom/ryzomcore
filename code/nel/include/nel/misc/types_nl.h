@@ -54,6 +54,9 @@
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
 #		if _MSC_VER >= 1700
+#			define NL_COMP_VC12
+#			define NL_COMP_VC_VERSION 120
+#		elif _MSC_VER >= 1700
 #			define NL_COMP_VC11
 #			define NL_COMP_VC_VERSION 110
 #		elif _MSC_VER >= 1600
@@ -414,7 +417,7 @@ extern void operator delete[](void *p) throw();
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
-#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION == 110)
+#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 120)
 #	include <hash_map>
 #	include <hash_set>
 #	define CHashMap ::std::hash_map
