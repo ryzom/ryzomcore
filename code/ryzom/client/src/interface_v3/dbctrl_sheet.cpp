@@ -333,29 +333,29 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::strlwr(prop) == "item")
+		if (NLMISC::strlwr(prop.str()) == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::strlwr(prop) == "pact")
+		else if (NLMISC::strlwr(prop.str()) == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::strlwr(prop) == "skill")
+		else if (NLMISC::strlwr(prop.str()) == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::strlwr(prop) == "auto")
+		else if (NLMISC::strlwr(prop.str()) == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::strlwr(prop) == "macro")
+		else if (NLMISC::strlwr(prop.str()) == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::strlwr(prop) == "guild_flag")
+		else if (NLMISC::strlwr(prop.str()) == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::strlwr(prop) == "mission")
+		else if (NLMISC::strlwr(prop.str()) == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::strlwr(prop) == "sbrick")
+		else if (NLMISC::strlwr(prop.str()) == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::strlwr(prop) == "sphraseid")
+		else if (NLMISC::strlwr(prop.str()) == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::strlwr(prop) == "sphrase")
+		else if (NLMISC::strlwr(prop.str()) == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::strlwr(prop) == "elevator_destination")
+		else if (NLMISC::strlwr(prop.str()) == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::strlwr(prop) == "outpost_building")
+		else if (NLMISC::strlwr(prop.str()) == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
