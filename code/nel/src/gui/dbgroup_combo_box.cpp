@@ -268,7 +268,7 @@ namespace NLGUI
 	void	CDBGroupComboBox::addText(const ucstring &text)
 	{
 		dirt();
-		_Texts.push_back(make_pair(_Texts.size(), text));
+		_Texts.push_back(make_pair((uint)_Texts.size(), text));
 		_Textures.push_back(std::string());
 	}
 
@@ -330,7 +330,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	const uint		&CDBGroupComboBox::getTextId(uint i) const
+	uint CDBGroupComboBox::getTextId(uint i) const
 	{
 		static	uint	null = 0;
 		if(i<_Texts.size())

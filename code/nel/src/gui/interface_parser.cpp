@@ -1771,7 +1771,7 @@ namespace NLGUI
 		{
 			CInterfaceExprValue res;
 
-			if (CInterfaceExpr::eval(ptrVal2, res))
+			if (CInterfaceExpr::eval(ptrVal2.str(), res))
 			{
 				if (!res.toString())
 				{

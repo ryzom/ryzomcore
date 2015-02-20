@@ -74,7 +74,7 @@ namespace NLGUI
 		}
 
 		//
-		if (!CInterfaceLink::splitLinkTargets (ptr, parentGroup, _Targets))
+		if (!CInterfaceLink::splitLinkTargets (ptr.str(), parentGroup, _Targets))
 		{
 			nlwarning ("no target for track");
 			return false;
