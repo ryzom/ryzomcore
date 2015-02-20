@@ -25,25 +25,8 @@ int main( int argc, char **argv )
 {
 	QApplication app( argc, argv );
 
-#if 0
-
-	if( argc < 2 )
-	{
-		QMessageBox::information( NULL,
-									QObject::tr( "Error" ), 
-									QObject::tr( "Need to specify a path to the error report." ) );
-		return 1;
-	}
-#endif
-
 	RCErrorWidget w;
-
-#if 0
-	w.setFileName( argv[ 1 ] );
-#else
-	w.setFileName( "log.log" );
-#endif
-
+	w.setFileName( "rcerrorlog.txt" );
 	w.show();
 
 	return app.exec();

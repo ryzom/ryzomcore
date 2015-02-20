@@ -52,7 +52,10 @@ void RCErrorWidget::onLoad()
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
 	if( !b )
 	{
-		return;
+		QMessageBox::information( this,
+									tr( "No log file found" ),
+									tr( "There was no log file found, therefore nothing to report. Exiting..." ) );
+		close();
 	}
 
 	QTextStream ss( &f );
