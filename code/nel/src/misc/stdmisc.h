@@ -43,8 +43,10 @@
 #include <vector>
 
 #ifdef _WIN32
-#	ifndef __MINGW32__
-		#define NOMINMAX
+#	define _WIN32_WINDOWS 0x0410
+#	ifndef NL_COMP_MINGW
+#		define WINVER 0x0400
+#		define NOMINMAX
 #	endif
 #	include <WinSock2.h>
 #	include <windows.h>

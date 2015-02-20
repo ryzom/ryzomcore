@@ -18,16 +18,7 @@
 
 #include "nel/misc/types_nl.h"
 
-#ifdef NL_OS_WINDOWS
-// these defines is for IsDebuggerPresent(). it'll not compile on windows 95
-// just comment this and the IsDebuggerPresent to compile on windows 95
-#	define _WIN32_WINDOWS	0x0410
-#	ifndef NL_COMP_MINGW
-#		define WINVER			0x0400
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
-#else
+#ifndef NL_OS_WINDOWS
 #	define IsDebuggerPresent() false
 #endif
 

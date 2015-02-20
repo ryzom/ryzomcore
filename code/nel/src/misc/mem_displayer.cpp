@@ -103,7 +103,7 @@ static string getFuncInfo (DWORD_TYPE funcAddr, DWORD_TYPE stackAddr)
 		if (stop==0 && (parse[i] == ',' || parse[i] == ')'))
 		{
 			char tmp[32];
-			sprintf (tmp, "=0x%p", *((ULONG*)(stackAddr) + 2 + pos++));
+			sprintf(tmp, "=0x%p", *((DWORD_TYPE*)(stackAddr) + 2 + pos++));
 			str += tmp;
 		}
 		str += parse[i];

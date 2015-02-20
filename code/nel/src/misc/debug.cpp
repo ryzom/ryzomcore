@@ -19,12 +19,6 @@
 #include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
-#	define _WIN32_WINDOWS	0x0410
-#	ifndef NL_COMP_MINGW
-#	define WINVER			0x0400
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <direct.h>
 #	include <tchar.h>
 #	include <imagehlp.h>
