@@ -64,10 +64,7 @@ void report ()
 
 TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
-	std::string fname;
-
-	time_t s = time( NULL );
-	fname = std::string( "log_" ) + toString( s ) + ".txt";
+	std::string fname = "rcerrorlog.txt";
 
 	std::ofstream f;
 	f.open( fname.c_str() );
@@ -82,9 +79,6 @@ TReportResult report (const std::string &title, const std::string &header, const
 		NLMISC::launchProgram( "rcerror", fname );
 #endif
 	}
-
-	NLMISC::CFile::deleteFile( fname );
-	
 
 #ifdef NL_OS_WINDOWS
 #ifndef NL_COMP_MINGW
