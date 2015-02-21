@@ -1,5 +1,7 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Ryzom Core MMORPG framework - Error Reporter
+//
+// Copyright (C) 2015 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,22 +16,38 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_REPORT_H
-#define NL_REPORT_H
 
-#include "types_nl.h"
+#ifndef RCERROR_WIDGET
+#define RCERROR_WIDGET
 
-namespace NLMISC {
 
-/// Prepares the error report, writes it to disk and launches the error reporter
-void report ( const std::string &body );
+#include "ui_rcerror_widget.h"
 
-/** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
- */
-void setReportEmailFunction (void *emailFunction);
+class RCErrorSocket;
 
-} // NLMISC
+class RCErrorWidget : public QWidget
+{
+	Q_OBJECT
+public:
+	RCErrorWidget( QWidget *parent = NULL );
+	~RCErrorWidget();
 
-#endif // NL_REPORT_H
+	void setFileName( const char *fn ){ m_fileName = fn; }
 
-/* End of report.h */
+private Q_SLOTS:
+	void onLoad();
+	void onSendClicked();
+	void onCancelClicked();
+	void onCBClicked();
+	
+	void onReportSent();
+	void onReportFailed();
+
+private:
+	Ui::RCErrorWidget m_ui;
+	QString m_fileName;
+	RCErrorSocket *m_socket;
+};
+
+#endif
+

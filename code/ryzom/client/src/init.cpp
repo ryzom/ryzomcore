@@ -142,7 +142,6 @@ using namespace std;
 // Ligo primitive class
 CLigoConfig				LigoConfig;
 
-CMsgBoxDisplayer		MsgBoxError;
 CClientChatManager		ChatMngr;
 
 bool					LastScreenSaverEnabled = false;
