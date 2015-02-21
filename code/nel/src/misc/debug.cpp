@@ -1193,13 +1193,7 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		INelContext::getInstance().setAssertLog(new CLog (CLog::LOG_ASSERT));
 
 		sd = new CStdDisplayer ("DEFAULT_SD");
-
-#ifdef NL_OS_WINDOWS
-		if (TrapCrashInDebugger || !IsDebuggerPresent ())
-		{
-			DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
-		}
-#endif
+        DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
 
 #if LOG_IN_FILE
 		if (logInFile)

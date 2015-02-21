@@ -52,16 +52,6 @@ void setReportEmailFunction (void *emailFunction)
 	EmailFunction = (TEmailFunction)emailFunction;
 }
 
-#ifndef NL_OS_WINDOWS
-
-// GNU/Linux, do nothing
-
-void report ()
-{
-}
-
-#else
-
 TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
 	std::string fname = "rcerrorlog.txt";
@@ -91,8 +81,6 @@ TReportResult report (const std::string &title, const std::string &header, const
 
 	return ReportQuit;
 }
-
-#endif
 
 
 } // NLMISC
