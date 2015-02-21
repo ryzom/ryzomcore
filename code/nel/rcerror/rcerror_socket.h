@@ -1,5 +1,7 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Ryzom Core MMORPG framework - Error Reporter
+//
+// Copyright (C) 2015 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,22 +16,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_REPORT_H
-#define NL_REPORT_H
 
-#include "types_nl.h"
+#ifndef RCERROR_SOCKET
+#define RCERROR_SOCKET
 
-namespace NLMISC {
+#include <QObject>
+#include "rcerror_data.h"
 
-/// Prepares the error report, writes it to disk and launches the error reporter
-void report ( const std::string &body );
+class RCErrorSocketPvt;
+class QNetworkReply;
 
-/** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
- */
-void setReportEmailFunction (void *emailFunction);
+class RCErrorSocket : public QObject
+{
+	Q_OBJECT
 
-} // NLMISC
+public:	
+	RCErrorSocket( QObject *parent );
+	~RCErrorSocket();
 
-#endif // NL_REPORT_H
+	void sendReport( const RCErrorData &data );
 
-/* End of report.h */
+Q_SIGNALS:
+	void reportSent();
+	void reportFailed();
+
+private Q_SLOTS:
+	void onFinished( QNetworkReply *reply );
+
+private:
+	RCErrorSocketPvt *m_pvt;
+};
+
+#endif
+

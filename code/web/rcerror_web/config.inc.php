@@ -1,5 +1,9 @@
-// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+<?php
+
+// Ryzom Core MMORPG framework - Error Reporter
+//
+// Copyright (C) 2015 Laszlo Kis-Adam
+// Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,22 +18,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_REPORT_H
-#define NL_REPORT_H
+class BugReportConfig
+{
+	static public $dbhost = "localhost";
+	static public $dbport = "3306";
+	static public $dbdb = "bugs";
+	static public $dbuser = "bugs";
+	static public $dbpw = "bugs";
+}
 
-#include "types_nl.h"
-
-namespace NLMISC {
-
-/// Prepares the error report, writes it to disk and launches the error reporter
-void report ( const std::string &body );
-
-/** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
- */
-void setReportEmailFunction (void *emailFunction);
-
-} // NLMISC
-
-#endif // NL_REPORT_H
-
-/* End of report.h */
+?>
