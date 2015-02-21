@@ -553,7 +553,7 @@ public:
 				// yoyo: allow only to send the crash report once. Because users usually click ignore,
 				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 				bool i = false;
-				report (progname+shortExc, "", subject, _Reason, true, 1, true, 1, !isCrashAlreadyReported(), i, NL_CRASH_DUMP_FILE);
+				report ( _Reason );
 
 				// no more sent mail for crash
 				setCrashAlreadyReported(true);

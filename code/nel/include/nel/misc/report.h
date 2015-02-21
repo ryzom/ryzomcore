@@ -21,21 +21,8 @@
 
 namespace NLMISC {
 
-/** Display a custom message box.
- *
- * \param title set the title of the report. If empty, it'll display "NeL report".
- * \param header message displayed before the edit text box. If empty, it displays the default message.
- * \param body message displayed in the edit text box. This string will be sent by email.
- * \param debugButton 0 for disabling it, 1 for enable with default behaviors (generate a breakpoint), 2 for enable with no behavior
- *
- *
- *
- * \return the button clicked or error
- */
-
-enum TReportResult { ReportDebug, ReportIgnore, ReportQuit, ReportError };
-
-TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const std::string &attachedFile = "");
+/// Prepares the error report, writes it to disk and launches the error reporter
+void report ( const std::string &body );
 
 /** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
  */
