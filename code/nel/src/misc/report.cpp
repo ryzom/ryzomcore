@@ -22,7 +22,22 @@
 #include "nel/misc/report.h"
 #include "nel/misc/path.h"
 
+#ifdef NL_OS_WINDOWS
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
+#	include <windows.h>
+#	include <windowsx.h>
+#	include <winuser.h>
+#endif // NL_OS_WINDOWS
+
+#define NL_NO_DEBUG_FILES 1
+
 using namespace std;
+
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
 
 namespace NLMISC
 {
@@ -37,7 +52,7 @@ void setReportEmailFunction (void *emailFunction)
 	EmailFunction = (TEmailFunction)emailFunction;
 }
 
-void report ( const std::string &body )
+TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
 	std::string fname = "rcerrorlog.txt";
 
@@ -63,6 +78,8 @@ void report ( const std::string &body )
 #endif
 				// quit without calling atexit or static object dtors.
 				abort();
+
+	return ReportQuit;
 }
 
 
