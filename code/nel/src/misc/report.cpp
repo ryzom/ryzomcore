@@ -92,18 +92,21 @@ static bool CanSendMailReport= false;
 
 static bool DebugDefaultBehavior, QuitDefaultBehavior;
 
+static std::string URL = "FILL_IN_CRASH_REPORT_HOSTNAME_HERE";
+
 static void doSendReport()
 {
 	std::string filename;
 
-	// Unfortunately Qt 4.8.5 on Windows messes up arguments.
-	// As a workaround the report filename is hardcoded for now.
-	//
-	//filename = "report_";
-	//filename += NLMISC::toString( time( NULL ) );
-	//filename += ".txt";
+	filename = "report_";
+	filename += NLMISC::toString( time( NULL ) );
+	filename += ".txt";
 
-	filename = "rcerrorlog.txt";
+	std::string params;
+	params = "-log ";
+	params += filename;
+	params += " -host ";
+	params += URL;
 
 	std::ofstream f;
 	f.open( filename.c_str() );
@@ -115,9 +118,9 @@ static void doSendReport()
 	f.close();
 
 #ifdef NL_OS_WINDOWS
-	NLMISC::launchProgram( "crash_report.exe", filename );
+	NLMISC::launchProgram( "crash_report.exe", params );
 #else
-	NLMISC::launchProgram( "crash_report", filename );
+	NLMISC::launchProgram( "crash_report", params );
 #endif
 
 }

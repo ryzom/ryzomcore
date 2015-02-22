@@ -22,6 +22,8 @@
 
 
 #include "ui_crash_report_widget.h"
+#include <vector>
+#include <string>
 
 class CCrashReportSocket;
 
@@ -34,6 +36,8 @@ public:
 
 	void setFileName( const char *fn ){ m_fileName = fn; }
 
+	void setup( const std::vector< std::pair< std::string, std::string > > &params );
+	
 private Q_SLOTS:
 	void onLoad();
 	void onSendClicked();
@@ -44,6 +48,9 @@ private Q_SLOTS:
 	void onReportFailed();
 
 private:
+	bool checkSettings();
+
+
 	Ui::CrashReportWidget m_ui;
 	QString m_fileName;
 	CCrashReportSocket *m_socket;

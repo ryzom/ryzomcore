@@ -21,12 +21,71 @@
 #include <QApplication>
 #include <QMessageBox>
 
+#include <stack>
+#include <vector>
+#include <string>
+
+class CCmdLineParser
+{
+public:
+	static void parse( int argc, char **argv, std::vector< std::pair< std::string, std::string > > &v )
+	{
+		std::stack< std::string > stack;
+		std::string key;		
+		std::string value;
+
+		for( int i = argc - 1 ; i >= 0; i-- )
+		{
+			stack.push( std::string( argv[ i ] ) );
+		}
+
+		while( !stack.empty() )
+		{
+			key = stack.top();
+			stack.pop();
+
+			// If not a real parameter ( they start with '-' ), discard.
+			if( key[ 0 ] != '-' )
+				continue;
+
+			// Remove the '-'
+			key = key.substr( 1 );
+
+			// No more parameters
+			if( stack.empty() )
+			{
+				v.push_back( std::make_pair( key, "" ) );
+				break;
+			}
+
+			 value = stack.top();
+
+			 // If next parameter is a key, process it in the next iteration
+			 if( value[ 0 ] == '-' )
+			 {
+				 v.push_back( std::make_pair( key, "" ) );
+				 continue;
+			 }
+			 // Otherwise store the pair
+			 else
+			 {
+				 v.push_back( std::make_pair( key, value ) );
+				 stack.pop();
+			 }
+		}
+	}
+};
+
 int main( int argc, char **argv )
 {
 	QApplication app( argc, argv );
 
+	std::vector< std::pair< std::string, std::string > > params;
+
+	CCmdLineParser::parse( argc, argv, params );
+
 	CCrashReportWidget w;
-	w.setFileName( "rcerrorlog.txt" );
+	w.setup( params );
 	w.show();
 
 	return app.exec();

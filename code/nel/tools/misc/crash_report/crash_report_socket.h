@@ -34,6 +34,9 @@ public:
 	CCrashReportSocket( QObject *parent );
 	~CCrashReportSocket();
 
+	void setURL( const char *URL ){ m_url = URL; }
+	QString url() const{ return m_url; }
+
 	void sendReport( const SCrashReportData &data );
 
 Q_SIGNALS:
@@ -45,6 +48,7 @@ private Q_SLOTS:
 
 private:
 	CCrashReportSocketPvt *m_pvt;
+	QString m_url;
 };
 
 #endif

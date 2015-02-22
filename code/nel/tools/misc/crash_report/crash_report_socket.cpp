@@ -22,11 +22,6 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 
-namespace
-{
-	static const char *BUG_URL = "http://192.168.2.66/dfighter/r.php";
-}
-
 class CCrashReportSocketPvt
 {
 public:
@@ -53,7 +48,7 @@ void CCrashReportSocket::sendReport( const SCrashReportData &data )
 	params.addQueryItem( "descr", data.description );
 	params.addQueryItem( "email", data.email );
 
-	QUrl url( BUG_URL );
+	QUrl url( m_url );
 	QNetworkRequest request( url );
 	request.setRawHeader( "Connection", "close" );
 

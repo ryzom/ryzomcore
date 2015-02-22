@@ -47,8 +47,39 @@ CCrashReportWidget::~CCrashReportWidget()
 	m_socket = NULL;
 }
 
+void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::string > > &params )
+{
+	for( int i = 0; i < params.size(); i++ )
+	{
+		const std::pair< std::string, std::string > &p = params[ i ];
+		const std::string &k = p.first;
+		const std::string &v = p.second;
+
+		if( k == "log" )
+		{
+			m_fileName = v.c_str();
+		}
+		else
+		if( k == "host" )
+		{
+			m_socket->setURL( v.c_str() );
+		}
+		else
+		if( k == "title" )
+		{
+			setWindowTitle( v.c_str() );
+		}
+	}
+}
+
 void CCrashReportWidget::onLoad()
 {
+	if( !checkSettings() )
+	{
+		close();
+		return;
+	}
+
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
 	if( !b )
@@ -57,6 +88,7 @@ void CCrashReportWidget::onLoad()
 									tr( "No log file found" ),
 									tr( "There was no log file found, therefore nothing to report. Exiting..." ) );
 		close();
+		return;
 	}
 
 	QTextStream ss( &f );
@@ -108,3 +140,25 @@ void CCrashReportWidget::onReportFailed()
 
 	close();
 }
+
+bool CCrashReportWidget::checkSettings()
+{
+	if( m_fileName.isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "No log file specified." ),
+									tr( "No log file specified. Exiting..." ) );
+		return false;
+	}
+
+	if( m_socket->url().isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "No host specified." ),
+									tr( "No host specified. Exiting..." ) );
+		return false;
+	}
+
+	return true;
+}
+
