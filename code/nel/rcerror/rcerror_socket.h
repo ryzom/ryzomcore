@@ -1,4 +1,4 @@
-// Ryzom Core MMORPG framework - Error Reporter
+// Nel MMORPG framework - Error Reporter
 //
 // Copyright (C) 2015 Laszlo Kis-Adam
 // Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
