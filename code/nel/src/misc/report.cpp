@@ -92,6 +92,36 @@ static bool CanSendMailReport= false;
 
 static bool DebugDefaultBehavior, QuitDefaultBehavior;
 
+static void doSendReport()
+{
+	std::string filename;
+
+	// Unfortunately Qt 4.8.5 on Windows messes up arguments.
+	// As a workaround the report filename is hardcoded for now.
+	//
+	//filename = "report_";
+	//filename += NLMISC::toString( time( NULL ) );
+	//filename += ".txt";
+
+	filename = "rcerrorlog.txt";
+
+	std::ofstream f;
+	f.open( filename.c_str() );
+	if( !f.good() )
+		return;
+
+	f << Body;
+
+	f.close();
+
+#ifdef NL_OS_WINDOWS
+	NLMISC::launchProgram( "rcerror.exe", filename );
+#else
+	NLMISC::launchProgram( "rcerror", filename );
+#endif
+
+}
+
 static void sendEmail()
 {
 	if (CanSendMailReport && SendMessage(sendReport, BM_GETCHECK, 0, 0) != BST_CHECKED)
@@ -133,7 +163,7 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if ((HWND) lParam == debug)
 		{
-			sendEmail();
+			doSendReport();
 			NeedExit = true;
 			Result = ReportDebug;
 			if (DebugDefaultBehavior)
@@ -143,13 +173,13 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if ((HWND) lParam == ignore)
 		{
-			sendEmail();
+			doSendReport();
 			NeedExit = true;
 			Result = ReportIgnore;
 		}
 		else if ((HWND) lParam == quit)
 		{
-			sendEmail();
+			doSendReport();
 			NeedExit = true;
 			Result = ReportQuit;
 
@@ -191,7 +221,7 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		if (wParam == 27)
 		{
 			// ESC -> ignore
-			sendEmail();
+			doSendReport();
 			NeedExit = true;
 			Result = ReportIgnore;
 		}
