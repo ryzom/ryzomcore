@@ -49,7 +49,7 @@ private Q_SLOTS:
 
 private:
 	bool checkSettings();
-
+	void removeAndQuit();
 
 	Ui::CrashReportWidget m_ui;
 	QString m_fileName;

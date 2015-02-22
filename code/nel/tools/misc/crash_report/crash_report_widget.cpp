@@ -24,6 +24,7 @@
 #include <QTextStream>
 #include <QFile>
 #include <QMessageBox>
+#include <QFile>
 
 CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
@@ -111,7 +112,7 @@ void CCrashReportWidget::onSendClicked()
 
 void CCrashReportWidget::onCancelClicked()
 {
-	close();
+	removeAndQuit();
 }
 
 void CCrashReportWidget::onCBClicked()
@@ -127,7 +128,7 @@ void CCrashReportWidget::onReportSent()
 								tr( "Report sent" ),
 								tr( "The report has been sent." ) );
 
-	close();
+	removeAndQuit();
 }
 
 void CCrashReportWidget::onReportFailed()
@@ -138,7 +139,7 @@ void CCrashReportWidget::onReportFailed()
 								tr( "Report failed" ),
 								tr( "Failed to send the report..." ) );
 
-	close();
+	removeAndQuit();
 }
 
 bool CCrashReportWidget::checkSettings()
@@ -160,5 +161,11 @@ bool CCrashReportWidget::checkSettings()
 	}
 
 	return true;
+}
+
+void CCrashReportWidget::removeAndQuit()
+{
+	QFile::remove( m_fileName );
+	close();
 }
 
