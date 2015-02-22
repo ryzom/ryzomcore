@@ -529,6 +529,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 //                           in release "<Msg>"
 void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *message)
 {
+#ifdef NL_OS_WINDOWS
 
 	bool needSpace = false;
 //	stringstream ss;
@@ -719,6 +720,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		}
 */	}
 
+#endif
 }
 
 
