@@ -25,6 +25,9 @@ QDialog( parent )
 {
 	m_ui.setupUi( this );
 
+	// Login texture map - temporaty measure until we add default textures for widgets to use
+	m_ui.mapList->addItem( "texture_interfaces_v3_login.tga" );
+
 	connect( m_ui.okButton, SIGNAL( clicked( bool ) ), this, SLOT( onOKClicked() ) );
 	connect( m_ui.cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 	connect( m_ui.projectDirTB, SIGNAL( clicked( bool ) ), this, SLOT( onProjectDirTBClicked() ) );

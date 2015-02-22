@@ -283,6 +283,10 @@ namespace NLGUI
 
 		sint32	_ViewTextDeltaX;
 
+		CViewText* getVT() const{ return _ViewText; }
+
+		void createViewText();
+
 	private:
 		void setupDisplayText();
 		void makeTopWindow();
