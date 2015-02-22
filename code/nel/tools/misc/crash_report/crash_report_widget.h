@@ -21,16 +21,16 @@
 #define RCERROR_WIDGET
 
 
-#include "ui_rcerror_widget.h"
+#include "ui_crash_report_widget.h"
 
-class CRCErrorSocket;
+class CCrashReportSocket;
 
-class CRCErrorWidget : public QWidget
+class CCrashReportWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	CRCErrorWidget( QWidget *parent = NULL );
-	~CRCErrorWidget();
+	CCrashReportWidget( QWidget *parent = NULL );
+	~CCrashReportWidget();
 
 	void setFileName( const char *fn ){ m_fileName = fn; }
 
@@ -44,9 +44,9 @@ private Q_SLOTS:
 	void onReportFailed();
 
 private:
-	Ui::RCErrorWidget m_ui;
+	Ui::CrashReportWidget m_ui;
 	QString m_fileName;
-	CRCErrorSocket *m_socket;
+	CCrashReportSocket *m_socket;
 };
 
 #endif

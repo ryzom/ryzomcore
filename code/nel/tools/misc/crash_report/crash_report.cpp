@@ -17,7 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "rcerror_widget.h"
+#include "crash_report_widget.h"
 #include <QApplication>
 #include <QMessageBox>
 
@@ -25,7 +25,7 @@ int main( int argc, char **argv )
 {
 	QApplication app( argc, argv );
 
-	CRCErrorWidget w;
+	CCrashReportWidget w;
 	w.setFileName( "rcerrorlog.txt" );
 	w.show();
 

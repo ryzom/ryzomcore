@@ -115,9 +115,9 @@ static void doSendReport()
 	f.close();
 
 #ifdef NL_OS_WINDOWS
-	NLMISC::launchProgram( "rcerror.exe", filename );
+	NLMISC::launchProgram( "crash_report.exe", filename );
 #else
-	NLMISC::launchProgram( "rcerror", filename );
+	NLMISC::launchProgram( "crash_report", filename );
 #endif
 
 }

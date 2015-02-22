@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "rcerror_socket.h"
+#include "crash_report_socket.h"
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
@@ -27,26 +27,26 @@ namespace
 	static const char *BUG_URL = "http://192.168.2.66/dfighter/r.php";
 }
 
-class CRCErrorSocketPvt
+class CCrashReportSocketPvt
 {
 public:
 	QNetworkAccessManager mgr;
 };
 
-CRCErrorSocket::CRCErrorSocket( QObject *parent ) :
+CCrashReportSocket::CCrashReportSocket( QObject *parent ) :
 QObject( parent )
 {
-	m_pvt = new CRCErrorSocketPvt();
+	m_pvt = new CCrashReportSocketPvt();
 
 	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished( QNetworkReply* ) ) );
 }
 
-CRCErrorSocket::~CRCErrorSocket()
+CCrashReportSocket::~CCrashReportSocket()
 {
 	delete m_pvt;
 }
 
-void CRCErrorSocket::sendReport( const SRCErrorData &data )
+void CCrashReportSocket::sendReport( const SCrashReportData &data )
 {
 	QUrl params;
 	params.addQueryItem( "report", data.report );
@@ -60,7 +60,7 @@ void CRCErrorSocket::sendReport( const SRCErrorData &data )
 	m_pvt->mgr.post( request, params.encodedQuery() );
 }
 
-void CRCErrorSocket::onFinished( QNetworkReply *reply )
+void CCrashReportSocket::onFinished( QNetworkReply *reply )
 {
 	if( reply->error() != QNetworkReply::NoError )
 		Q_EMIT reportFailed();

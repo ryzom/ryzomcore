@@ -21,20 +21,20 @@
 #define RCERROR_SOCKET
 
 #include <QObject>
-#include "rcerror_data.h"
+#include "crash_report_data.h"
 
-class CRCErrorSocketPvt;
+class CCrashReportSocketPvt;
 class QNetworkReply;
 
-class CRCErrorSocket : public QObject
+class CCrashReportSocket : public QObject
 {
 	Q_OBJECT
 
 public:	
-	CRCErrorSocket( QObject *parent );
-	~CRCErrorSocket();
+	CCrashReportSocket( QObject *parent );
+	~CCrashReportSocket();
 
-	void sendReport( const SRCErrorData &data );
+	void sendReport( const SCrashReportData &data );
 
 Q_SIGNALS:
 	void reportSent();
@@ -44,7 +44,7 @@ private Q_SLOTS:
 	void onFinished( QNetworkReply *reply );
 
 private:
-	CRCErrorSocketPvt *m_pvt;
+	CCrashReportSocketPvt *m_pvt;
 };
 
 #endif

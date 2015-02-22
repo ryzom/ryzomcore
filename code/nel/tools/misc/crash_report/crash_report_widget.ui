@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RCErrorWidget</class>
- <widget class="QWidget" name="RCErrorWidget">
+ <class>CrashReportWidget</class>
+ <widget class="QWidget" name="CrashReportWidget">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>

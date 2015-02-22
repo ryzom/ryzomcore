@@ -17,20 +17,20 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "rcerror_widget.h"
-#include "rcerror_socket.h"
-#include "rcerror_data.h"
+#include "crash_report_widget.h"
+#include "crash_report_socket.h"
+#include "crash_report_data.h"
 #include <QTimer>
 #include <QTextStream>
 #include <QFile>
 #include <QMessageBox>
 
-CRCErrorWidget::CRCErrorWidget( QWidget *parent ) :
+CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
 {
 	m_ui.setupUi( this );
 
-	m_socket = new CRCErrorSocket( this );
+	m_socket = new CCrashReportSocket( this );
 
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
@@ -42,12 +42,12 @@ QWidget( parent )
 	connect( m_socket, SIGNAL( reportFailed() ), this, SLOT( onReportFailed() ) );
 }
 
-CRCErrorWidget::~CRCErrorWidget()
+CCrashReportWidget::~CCrashReportWidget()
 {
 	m_socket = NULL;
 }
 
-void CRCErrorWidget::onLoad()
+void CCrashReportWidget::onLoad()
 {
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
@@ -64,12 +64,12 @@ void CRCErrorWidget::onLoad()
 	f.close();
 }
 
-void CRCErrorWidget::onSendClicked()
+void CCrashReportWidget::onSendClicked()
 {
 	m_ui.sendButton->setEnabled( false );
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
-	SRCErrorData data;
+	SCrashReportData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
 	data.report = m_ui.reportEdit->toPlainText();
 	data.email = m_ui.emailEdit->text();
@@ -77,17 +77,17 @@ void CRCErrorWidget::onSendClicked()
 	m_socket->sendReport( data );
 }
 
-void CRCErrorWidget::onCancelClicked()
+void CCrashReportWidget::onCancelClicked()
 {
 	close();
 }
 
-void CRCErrorWidget::onCBClicked()
+void CCrashReportWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
 
-void CRCErrorWidget::onReportSent()
+void CCrashReportWidget::onReportSent()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
@@ -98,7 +98,7 @@ void CRCErrorWidget::onReportSent()
 	close();
 }
 
-void CRCErrorWidget::onReportFailed()
+void CCrashReportWidget::onReportFailed()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
