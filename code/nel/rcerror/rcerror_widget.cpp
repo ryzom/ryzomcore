@@ -25,12 +25,12 @@
 #include <QFile>
 #include <QMessageBox>
 
-RCErrorWidget::RCErrorWidget( QWidget *parent ) :
+CRCErrorWidget::CRCErrorWidget( QWidget *parent ) :
 QWidget( parent )
 {
 	m_ui.setupUi( this );
 
-	m_socket = new RCErrorSocket( this );
+	m_socket = new CRCErrorSocket( this );
 
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
@@ -42,12 +42,12 @@ QWidget( parent )
 	connect( m_socket, SIGNAL( reportFailed() ), this, SLOT( onReportFailed() ) );
 }
 
-RCErrorWidget::~RCErrorWidget()
+CRCErrorWidget::~CRCErrorWidget()
 {
 	m_socket = NULL;
 }
 
-void RCErrorWidget::onLoad()
+void CRCErrorWidget::onLoad()
 {
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
@@ -64,12 +64,12 @@ void RCErrorWidget::onLoad()
 	f.close();
 }
 
-void RCErrorWidget::onSendClicked()
+void CRCErrorWidget::onSendClicked()
 {
 	m_ui.sendButton->setEnabled( false );
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
-	RCErrorData data;
+	SRCErrorData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
 	data.report = m_ui.reportEdit->toPlainText();
 	data.email = m_ui.emailEdit->text();
@@ -77,17 +77,17 @@ void RCErrorWidget::onSendClicked()
 	m_socket->sendReport( data );
 }
 
-void RCErrorWidget::onCancelClicked()
+void CRCErrorWidget::onCancelClicked()
 {
 	close();
 }
 
-void RCErrorWidget::onCBClicked()
+void CRCErrorWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
 
-void RCErrorWidget::onReportSent()
+void CRCErrorWidget::onReportSent()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
@@ -98,7 +98,7 @@ void RCErrorWidget::onReportSent()
 	close();
 }
 
-void RCErrorWidget::onReportFailed()
+void CRCErrorWidget::onReportFailed()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 

@@ -23,14 +23,14 @@
 
 #include "ui_rcerror_widget.h"
 
-class RCErrorSocket;
+class CRCErrorSocket;
 
-class RCErrorWidget : public QWidget
+class CRCErrorWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	RCErrorWidget( QWidget *parent = NULL );
-	~RCErrorWidget();
+	CRCErrorWidget( QWidget *parent = NULL );
+	~CRCErrorWidget();
 
 	void setFileName( const char *fn ){ m_fileName = fn; }
 
@@ -46,7 +46,7 @@ private Q_SLOTS:
 private:
 	Ui::RCErrorWidget m_ui;
 	QString m_fileName;
-	RCErrorSocket *m_socket;
+	CRCErrorSocket *m_socket;
 };
 
 #endif

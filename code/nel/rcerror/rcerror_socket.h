@@ -23,18 +23,18 @@
 #include <QObject>
 #include "rcerror_data.h"
 
-class RCErrorSocketPvt;
+class CRCErrorSocketPvt;
 class QNetworkReply;
 
-class RCErrorSocket : public QObject
+class CRCErrorSocket : public QObject
 {
 	Q_OBJECT
 
 public:	
-	RCErrorSocket( QObject *parent );
-	~RCErrorSocket();
+	CRCErrorSocket( QObject *parent );
+	~CRCErrorSocket();
 
-	void sendReport( const RCErrorData &data );
+	void sendReport( const SRCErrorData &data );
 
 Q_SIGNALS:
 	void reportSent();
@@ -44,7 +44,7 @@ private Q_SLOTS:
 	void onFinished( QNetworkReply *reply );
 
 private:
-	RCErrorSocketPvt *m_pvt;
+	CRCErrorSocketPvt *m_pvt;
 };
 
 #endif

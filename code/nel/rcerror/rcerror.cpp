@@ -25,7 +25,7 @@ int main( int argc, char **argv )
 {
 	QApplication app( argc, argv );
 
-	RCErrorWidget w;
+	CRCErrorWidget w;
 	w.setFileName( "rcerrorlog.txt" );
 	w.show();
 

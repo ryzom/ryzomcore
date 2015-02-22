@@ -27,26 +27,26 @@ namespace
 	static const char *BUG_URL = "http://192.168.2.66/dfighter/r.php";
 }
 
-class RCErrorSocketPvt
+class CRCErrorSocketPvt
 {
 public:
 	QNetworkAccessManager mgr;
 };
 
-RCErrorSocket::RCErrorSocket( QObject *parent ) :
+CRCErrorSocket::CRCErrorSocket( QObject *parent ) :
 QObject( parent )
 {
-	m_pvt = new RCErrorSocketPvt();
+	m_pvt = new CRCErrorSocketPvt();
 
 	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished( QNetworkReply* ) ) );
 }
 
-RCErrorSocket::~RCErrorSocket()
+CRCErrorSocket::~CRCErrorSocket()
 {
 	delete m_pvt;
 }
 
-void RCErrorSocket::sendReport( const RCErrorData &data )
+void CRCErrorSocket::sendReport( const SRCErrorData &data )
 {
 	QUrl params;
 	params.addQueryItem( "report", data.report );
@@ -60,7 +60,7 @@ void RCErrorSocket::sendReport( const RCErrorData &data )
 	m_pvt->mgr.post( request, params.encodedQuery() );
 }
 
-void RCErrorSocket::onFinished( QNetworkReply *reply )
+void CRCErrorSocket::onFinished( QNetworkReply *reply )
 {
 	if( reply->error() != QNetworkReply::NoError )
 		Q_EMIT reportFailed();

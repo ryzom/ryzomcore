@@ -23,7 +23,7 @@
 #include <QString>
 
 
-struct RCErrorData
+struct SRCErrorData
 {
 	QString description;
 	QString report;
