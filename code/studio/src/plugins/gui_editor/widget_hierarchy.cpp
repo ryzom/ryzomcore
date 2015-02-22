@@ -166,6 +166,9 @@ namespace GUIEditor
 		std::vector< CCtrlBase* >::const_iterator citr;
 		for( citr = controls.begin(); citr != controls.end(); ++citr )
 		{
+			if( !(*citr)->isEditorSelectable() )
+				continue;
+
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
 			subItem->setText( 0, makeNodeName( (*citr)->getId() ).c_str() );
 			widgetHierarchyMap[ (*citr)->getId() ] = subItem;
@@ -176,6 +179,9 @@ namespace GUIEditor
 		std::vector< CViewBase* >::const_iterator vitr;
 		for( vitr = views.begin(); vitr != views.end(); ++vitr )
 		{
+			if( !(*vitr)->isEditorSelectable() )
+				continue;
+
 			QTreeWidgetItem *subItem = new QTreeWidgetItem( item );
 			subItem->setText( 0, makeNodeName( (*vitr)->getId() ).c_str() );
 			widgetHierarchyMap[ (*vitr)->getId() ] = subItem;
