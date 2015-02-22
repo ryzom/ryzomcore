@@ -1337,6 +1337,11 @@ namespace NLGUI
 			// if click, and not frozen, then get the focus
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Frozen)
 			{
+				if( getEditorMode() )
+				{
+					return CViewBase::handleEvent( event );
+				}
+
 				_SelectingText = true;
 				stopParentBlink();
 				CWidgetManager::getInstance()->setCaptureKeyboard (this);
@@ -1533,35 +1538,44 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+
+	void CGroupEditBox::createViewText()
+	{
+		nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
+		nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
+		_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
+		if( _ViewText == NULL )
+		{
+			nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
+			return;
+		}
+
+		_ViewText->setParent( this );
+		_ViewText->setIdRecurse( "edit_text" );
+		_ViewText->setHardText( "" );
+		_ViewText->setPosRef( Hotspot_ML );
+		_ViewText->setParentPosRef( Hotspot_ML );
+		addView( _ViewText );
+
+		sint32 w,h;
+		w = std::max( sint32( _ViewText->getFontWidth() * _ViewText->getText().size() ), getW() );
+		h = std::max( sint32(  _ViewText->getFontHeight() ), getH() );
+					
+		setH( h );
+		setW( w );
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setup()
 	{
 		// bind to the controls
-		_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
+		if( _ViewText == NULL )
+			_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
 		if(_ViewText == NULL)
-		{
-			nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
-			if( editorMode )
-			{
-				nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
-				_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
-				if( _ViewText != NULL )
-				{
-					_ViewText->setParent( this );
-					_ViewText->setIdRecurse( "edit_text" );
-					_ViewText->setHardText( "sometext" );
-					_ViewText->setPosRef( Hotspot_TL );
-					_ViewText->setParentPosRef( Hotspot_TL );
-					addView( _ViewText );
-					
-					setH( _ViewText->getFontHeight() );
-					setW( _ViewText->getFontWidth() * _ViewText->getText().size() );
-					
-				}
-				else
-					nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
-			}
-		}
+			createViewText();
+
+		_ViewText->setEditorSelectable( false );
 
 		// For MultiLine editbox, clip the end space, else weird when edit space at end of line (nothing happens)
 		if(_ViewText)
