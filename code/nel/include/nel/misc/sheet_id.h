@@ -248,8 +248,7 @@ private :
 class CSheetIdHashMapTraits
 {
 public:
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	inline size_t operator() ( const CSheetId& sheetId ) const
 	{
 		return sheetId.asInt() >> 5;

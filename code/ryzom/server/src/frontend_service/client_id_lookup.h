@@ -114,10 +114,9 @@ private:
 
 	typedef std::vector<TClientId> TEntityIndexToClient;
 
-	class CIdHash
+	struct CIdHash
 	{
-	public:
-
+		enum { bucket_size = 4, min_buckets = 8, };
 		size_t	operator () ( NLMISC::CEntityId id ) const { return (uint32)id.getShortId(); }
 	};
 

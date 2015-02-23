@@ -53,8 +53,7 @@ class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 	// hasher for the identifier
 	struct THashDBStringLeaf
 	{
-		static const size_t bucket_size = 4;
-		static const size_t min_buckets = 8;
+		enum { bucket_size = 4, min_buckets = 8, };
 		size_t operator()(const TBDStringLeaf &stringLeaf) const
 		{
 			return ((size_t)stringLeaf.ClientDB>>4) ^ ((size_t)stringLeaf.Node>>4);

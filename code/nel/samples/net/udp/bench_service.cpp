@@ -98,8 +98,7 @@ struct CClient
 
 struct TInetAddressHash
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 
 	inline bool operator() (const NLNET::CInetAddress &x1, const NLNET::CInetAddress &x2) const
 	{
