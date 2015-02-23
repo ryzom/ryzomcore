@@ -83,6 +83,7 @@ using namespace std;
 #define LOG_IN_FILE NEL_LOG_IN_FILE
 
 // If true, debug system will trap crash even if the application is in debugger
+//static const bool TrapCrashInDebugger = false;
 static const bool TrapCrashInDebugger = true;
 
 #ifdef DEBUG_NEW
@@ -553,7 +554,7 @@ public:
 				// yoyo: allow only to send the crash report once. Because users usually click ignore,
 				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 				bool i = false;
-				report ( _Reason );
+				report (progname+shortExc, "", subject, _Reason, true, 1, true, 1, !isCrashAlreadyReported(), i, NL_CRASH_DUMP_FILE);
 
 				// no more sent mail for crash
 				setCrashAlreadyReported(true);
@@ -1193,7 +1194,13 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		INelContext::getInstance().setAssertLog(new CLog (CLog::LOG_ASSERT));
 
 		sd = new CStdDisplayer ("DEFAULT_SD");
-        DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
+
+#ifdef NL_OS_WINDOWS
+		if (TrapCrashInDebugger || !IsDebuggerPresent ())
+#endif
+		{
+			DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
+		}
 
 #if LOG_IN_FILE
 		if (logInFile)

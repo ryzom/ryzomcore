@@ -1,4 +1,4 @@
-// Ryzom Core MMORPG framework - Error Reporter
+// Nel MMORPG framework - Error Reporter
 //
 // Copyright (C) 2015 Laszlo Kis-Adam
 // Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
@@ -16,51 +16,46 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "rcerror_socket.h"
+#include "crash_report_socket.h"
 #include <QNetworkAccessManager>
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 
-namespace
-{
-	static const char *BUG_URL = "http://192.168.2.66/dfighter/r.php";
-}
-
-class RCErrorSocketPvt
+class CCrashReportSocketPvt
 {
 public:
 	QNetworkAccessManager mgr;
 };
 
-RCErrorSocket::RCErrorSocket( QObject *parent ) :
+CCrashReportSocket::CCrashReportSocket( QObject *parent ) :
 QObject( parent )
 {
-	m_pvt = new RCErrorSocketPvt();
+	m_pvt = new CCrashReportSocketPvt();
 
 	connect( &m_pvt->mgr, SIGNAL( finished( QNetworkReply* ) ), this, SLOT( onFinished( QNetworkReply* ) ) );
 }
 
-RCErrorSocket::~RCErrorSocket()
+CCrashReportSocket::~CCrashReportSocket()
 {
 	delete m_pvt;
 }
 
-void RCErrorSocket::sendReport( const RCErrorData &data )
+void CCrashReportSocket::sendReport( const SCrashReportData &data )
 {
 	QUrl params;
 	params.addQueryItem( "report", data.report );
 	params.addQueryItem( "descr", data.description );
 	params.addQueryItem( "email", data.email );
 
-	QUrl url( BUG_URL );
+	QUrl url( m_url );
 	QNetworkRequest request( url );
 	request.setRawHeader( "Connection", "close" );
 
 	m_pvt->mgr.post( request, params.encodedQuery() );
 }
 
-void RCErrorSocket::onFinished( QNetworkReply *reply )
+void CCrashReportSocket::onFinished( QNetworkReply *reply )
 {
 	if( reply->error() != QNetworkReply::NoError )
 		Q_EMIT reportFailed();

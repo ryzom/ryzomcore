@@ -17,37 +17,17 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#ifndef RCERROR_WIDGET
-#define RCERROR_WIDGET
+#ifndef RCERROR_DATA
+#define RCERROR_DATA
+
+#include <QString>
 
 
-#include "ui_rcerror_widget.h"
-
-class RCErrorSocket;
-
-class RCErrorWidget : public QWidget
+struct SCrashReportData
 {
-	Q_OBJECT
-public:
-	RCErrorWidget( QWidget *parent = NULL );
-	~RCErrorWidget();
-
-	void setFileName( const char *fn ){ m_fileName = fn; }
-
-private Q_SLOTS:
-	void onLoad();
-	void onSendClicked();
-	void onCancelClicked();
-	void onCBClicked();
-	
-	void onReportSent();
-	void onReportFailed();
-
-private:
-	Ui::RCErrorWidget m_ui;
-	QString m_fileName;
-	RCErrorSocket *m_socket;
+	QString description;
+	QString report;
+	QString email;
 };
 
 #endif
-

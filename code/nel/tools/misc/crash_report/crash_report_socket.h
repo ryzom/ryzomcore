@@ -1,4 +1,4 @@
-// Ryzom Core MMORPG framework - Error Reporter
+// Nel MMORPG framework - Error Reporter
 //
 // Copyright (C) 2015 Laszlo Kis-Adam
 // Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
@@ -17,17 +17,39 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "rcerror_widget.h"
-#include <QApplication>
-#include <QMessageBox>
+#ifndef RCERROR_SOCKET
+#define RCERROR_SOCKET
 
-int main( int argc, char **argv )
+#include <QObject>
+#include "crash_report_data.h"
+
+class CCrashReportSocketPvt;
+class QNetworkReply;
+
+class CCrashReportSocket : public QObject
 {
-	QApplication app( argc, argv );
+	Q_OBJECT
 
-	RCErrorWidget w;
-	w.setFileName( "rcerrorlog.txt" );
-	w.show();
+public:	
+	CCrashReportSocket( QObject *parent );
+	~CCrashReportSocket();
 
-	return app.exec();
-}
+	void setURL( const char *URL ){ m_url = URL; }
+	QString url() const{ return m_url; }
+
+	void sendReport( const SCrashReportData &data );
+
+Q_SIGNALS:
+	void reportSent();
+	void reportFailed();
+
+private Q_SLOTS:
+	void onFinished( QNetworkReply *reply );
+
+private:
+	CCrashReportSocketPvt *m_pvt;
+	QString m_url;
+};
+
+#endif
+

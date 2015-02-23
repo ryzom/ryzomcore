@@ -1,4 +1,4 @@
-// Ryzom Core MMORPG framework - Error Reporter
+// Nel MMORPG framework - Error Reporter
 //
 // Copyright (C) 2015 Laszlo Kis-Adam
 // Copyright (C) 2010 Ryzom Core <http://ryzomcore.org/>
@@ -17,20 +17,21 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#include "rcerror_widget.h"
-#include "rcerror_socket.h"
-#include "rcerror_data.h"
+#include "crash_report_widget.h"
+#include "crash_report_socket.h"
+#include "crash_report_data.h"
 #include <QTimer>
 #include <QTextStream>
 #include <QFile>
 #include <QMessageBox>
+#include <QFile>
 
-RCErrorWidget::RCErrorWidget( QWidget *parent ) :
+CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
 {
 	m_ui.setupUi( this );
 
-	m_socket = new RCErrorSocket( this );
+	m_socket = new CCrashReportSocket( this );
 
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
@@ -42,13 +43,44 @@ QWidget( parent )
 	connect( m_socket, SIGNAL( reportFailed() ), this, SLOT( onReportFailed() ) );
 }
 
-RCErrorWidget::~RCErrorWidget()
+CCrashReportWidget::~CCrashReportWidget()
 {
 	m_socket = NULL;
 }
 
-void RCErrorWidget::onLoad()
+void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::string > > &params )
 {
+	for( int i = 0; i < params.size(); i++ )
+	{
+		const std::pair< std::string, std::string > &p = params[ i ];
+		const std::string &k = p.first;
+		const std::string &v = p.second;
+
+		if( k == "log" )
+		{
+			m_fileName = v.c_str();
+		}
+		else
+		if( k == "host" )
+		{
+			m_socket->setURL( v.c_str() );
+		}
+		else
+		if( k == "title" )
+		{
+			setWindowTitle( v.c_str() );
+		}
+	}
+}
+
+void CCrashReportWidget::onLoad()
+{
+	if( !checkSettings() )
+	{
+		close();
+		return;
+	}
+
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
 	if( !b )
@@ -57,6 +89,7 @@ void RCErrorWidget::onLoad()
 									tr( "No log file found" ),
 									tr( "There was no log file found, therefore nothing to report. Exiting..." ) );
 		close();
+		return;
 	}
 
 	QTextStream ss( &f );
@@ -64,12 +97,12 @@ void RCErrorWidget::onLoad()
 	f.close();
 }
 
-void RCErrorWidget::onSendClicked()
+void CCrashReportWidget::onSendClicked()
 {
 	m_ui.sendButton->setEnabled( false );
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
-	RCErrorData data;
+	SCrashReportData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
 	data.report = m_ui.reportEdit->toPlainText();
 	data.email = m_ui.emailEdit->text();
@@ -77,17 +110,17 @@ void RCErrorWidget::onSendClicked()
 	m_socket->sendReport( data );
 }
 
-void RCErrorWidget::onCancelClicked()
+void CCrashReportWidget::onCancelClicked()
 {
-	close();
+	removeAndQuit();
 }
 
-void RCErrorWidget::onCBClicked()
+void CCrashReportWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
 
-void RCErrorWidget::onReportSent()
+void CCrashReportWidget::onReportSent()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
@@ -95,10 +128,10 @@ void RCErrorWidget::onReportSent()
 								tr( "Report sent" ),
 								tr( "The report has been sent." ) );
 
-	close();
+	removeAndQuit();
 }
 
-void RCErrorWidget::onReportFailed()
+void CCrashReportWidget::onReportFailed()
 {
 	QApplication::setOverrideCursor( Qt::ArrowCursor );
 
@@ -106,5 +139,33 @@ void RCErrorWidget::onReportFailed()
 								tr( "Report failed" ),
 								tr( "Failed to send the report..." ) );
 
+	removeAndQuit();
+}
+
+bool CCrashReportWidget::checkSettings()
+{
+	if( m_fileName.isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "No log file specified." ),
+									tr( "No log file specified. Exiting..." ) );
+		return false;
+	}
+
+	if( m_socket->url().isEmpty() )
+	{
+		QMessageBox::information( this,
+									tr( "No host specified." ),
+									tr( "No host specified. Exiting..." ) );
+		return false;
+	}
+
+	return true;
+}
+
+void CCrashReportWidget::removeAndQuit()
+{
+	QFile::remove( m_fileName );
 	close();
 }
+
