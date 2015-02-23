@@ -16,6 +16,8 @@
 
 #include "stdmisc.h"
 
+#include <stringstream>
+
 #include "nel/misc/common.h"
 #include "nel/misc/ucstring.h"
 
@@ -42,125 +44,126 @@ using namespace std;
 namespace NLMISC
 {
 
-#ifdef NL_OS_WINDOWS
-static HWND sendReport=NULL;
-#endif
-
-//old doesn't work on visual c++ 7.1 due to default parameter typedef bool (*TEmailFunction) (const std::string &smtpServer, const std::string &from, const std::string &to, const std::string &subject, const std::string &body, const std::string &attachedFile = "", bool onlyCheck = false);
-typedef bool (*TEmailFunction) (const std::string &smtpServer, const std::string &from, const std::string &to, const std::string &subject, const std::string &body, const std::string &attachedFile, bool onlyCheck);
-
-#define DELETE_OBJECT(a) if((a)!=NULL) { DeleteObject (a); a = NULL; }
-
-static TEmailFunction EmailFunction = NULL;
-
-void setReportEmailFunction (void *emailFunction)
+void setReportEmailFunction(void *emailFunction)
 {
-	EmailFunction = (TEmailFunction)emailFunction;
-
-#ifdef NL_OS_WINDOWS
-	if (sendReport)
-		EnableWindow(sendReport, FALSE);
-#endif
+	// DEPRECATED
+	// no-op
 }
 
-static string Body;
-static std::string URL = "FILL_IN_CRASH_REPORT_HOSTNAME_HERE";
+// Contents of crash report
+static string ReportBody;
+// Host url for crash report
+static std::string ReportPostUrl = "";
+// Title for the crash report window
+static std::string ReportWindowTitle = "";
 
+void setReportPostUrl(const std::string &postUrl)
+{
+	ReportPostUrl = postUrl;
+}
 
+// Launch the crash report application
 static void doSendReport()
 {
     std::string filename;
 
-    filename = "report_";
+    filename = /*getLogDirectory() + */ "report_"; // FIXME: Should use log directory
     filename += NLMISC::toString( int( time( NULL ) ) );
     filename += ".txt";
 
-    std::string params;
-    params = "-log ";
-    params += filename;
-    params += " -host ";
-    params += URL;
+    std::stringstream params;
+    params << "-log ";
+    params << filename; // FIXME: Escape the filepath with quotes
+    if (!ReportPostUrl.empty())
+    {
+		params << " -host ";
+		params << ReportPostUrl;
+	}
+    if (!ReportWindowTitle.empty())
+    {
+		params << " -title ";
+		params << ReportWindowTitle; // FIXME: Escape the title with quotes and test
+	}
 
     std::ofstream f;
     f.open( filename.c_str() );
     if( !f.good() )
         return;
 
-    f << Body;
+    f << ReportBody;
 
     f.close();
 
 #ifdef NL_OS_WINDOWS
-    NLMISC::launchProgram( "crash_report.exe", params );
+    NLMISC::launchProgram( "crash_report.exe", params.str() );
 #else
-    NLMISC::launchProgram( "crash_report", params );
+    NLMISC::launchProgram( "crash_report", params.str() );
 #endif
 
     // Added because NLSMIC::launcProgram needs time to launch
     nlSleep( 2 * 1000 );
-
+    
 }
 
-#ifndef NL_OS_WINDOWS
+#if defined(FINAL_VERSION) || !defined(NL_OS_WINDOWS)
 
-// GNU/Linux, do nothing
-
-TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
+// For FINAL_VERSION, simply launch the crash report and exit the application
+TReportResult report(const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
-    Body = addSlashR( body );
+	ReportWindowTitle = title;
+	ReportBody = addSlashR(body);
 
-    doSendReport();
+	doSendReport();
 
-    return ReportQuit;
+#	if 1 // TODO: This behaviour is used in the old report code when Quitting the application is the default crash report behaviour. Needs testing.
+#		ifdef NL_OS_WINDOWS
+#		ifndef NL_COMP_MINGW
+	// disable the Windows popup telling that the application aborted and disable the dr watson report.
+	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#		endif
+#		endif
+	// quit without calling atexit or static object dtors.
+	abort();
+#	endif
+
+	return ReportQuit;
 }
 
 #else
 
-// Windows specific version
+// Windows specific version for DEV builds, first shows a dialog box for debugging
 
-static string Subject;
-static string AttachedFile;
+static HWND sendReport=NULL;
+#define DELETE_OBJECT(a) if((a)!=NULL) { DeleteObject (a); a = NULL; }
 
-static HWND checkIgnore=NULL;
-static HWND debug=NULL;
-static HWND ignore=NULL;
-static HWND quit=NULL;
-static HWND dialog=NULL;
+static HWND checkIgnore = NULL;
+static HWND debug = NULL;
+static HWND ignore = NULL;
+static HWND quit = NULL;
+static HWND dialog = NULL;
 
 static bool NeedExit;
 static TReportResult Result;
 static bool IgnoreNextTime;
-static bool CanSendMailReport= false;
+static bool CanSendMailReport = false;
 
 static bool DebugDefaultBehavior, QuitDefaultBehavior;
 
-static void sendEmail()
+static void maybeSendReport()
 {
 	if (CanSendMailReport && SendMessage(sendReport, BM_GETCHECK, 0, 0) != BST_CHECKED)
 	{
-		bool res = EmailFunction ("", "", "", Subject, Body, AttachedFile, false);
-		if (res)
-		{
-			// EnableWindow(sendReport, FALSE);
-			// MessageBox (dialog, "The email was successfully sent", "email", MB_OK);
+		doSendReport();
 #ifndef NL_NO_DEBUG_FILES
-			CFile::createEmptyFile(getLogDirectory() + "report_sent");
+		CFile::createEmptyFile(getLogDirectory() + "report_sent");
 #endif
-		}
-		else
-		{
-#ifndef NL_NO_DEBUG_FILES
-			CFile::createEmptyFile(getLogDirectory() + "report_failed");
-#endif
-			// MessageBox (dialog, "Failed to send the email", "email", MB_OK | MB_ICONERROR);
-		}
 	}
 	else
 	{
 #ifndef NL_NO_DEBUG_FILES
 		CFile::createEmptyFile(getLogDirectory() + "report_refused");
 #endif
-	}
+-	}
 }
 
 static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -175,7 +178,7 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if ((HWND) lParam == debug)
 		{
-			doSendReport();
+			maybeSendReport();
 			NeedExit = true;
 			Result = ReportDebug;
 			if (DebugDefaultBehavior)
@@ -185,13 +188,13 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 		}
 		else if ((HWND) lParam == ignore)
 		{
-			doSendReport();
+			maybeSendReport();
 			NeedExit = true;
 			Result = ReportIgnore;
 		}
 		else if ((HWND) lParam == quit)
 		{
-			doSendReport();
+			maybeSendReport();
 			NeedExit = true;
 			Result = ReportQuit;
 
@@ -210,43 +213,26 @@ static LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 				abort();
 			}
 		}
-		/*else if ((HWND) lParam == sendReport)
-		{
-			if (EmailFunction != NULL)
-			{
-				bool res = EmailFunction ("", "", "", Subject, Body, AttachedFile, false);
-				if (res)
-				{
-					EnableWindow(sendReport, FALSE);
-					MessageBox (dialog, "The email was successfully sent", "email", MB_OK);
-					CFile::createEmptyFile(getLogDirectory() + "report_sent");
-				}
-				else
-				{
-					MessageBox (dialog, "Failed to send the email", "email", MB_OK | MB_ICONERROR);
-				}
-			}
-		}*/
 	}
 	else if (message == WM_CHAR)
 	{
 		if (wParam == 27)
 		{
 			// ESC -> ignore
-			doSendReport();
+			maybeSendReport();
 			NeedExit = true;
 			Result = ReportIgnore;
 		}
 	}
 
-	return DefWindowProc (hWnd, message, wParam, lParam);
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
+TReportResult report(const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
 	// register the window
 	static bool AlreadyRegister = false;
-	if(!AlreadyRegister)
+	if (!AlreadyRegister)
 	{
 		WNDCLASSW wc;
 		memset (&wc,0,sizeof(wc));
@@ -264,17 +250,14 @@ TReportResult report (const std::string &title, const std::string &header, const
 		AlreadyRegister = true;
 	}
 
-	ucstring formatedTitle = title.empty() ? ucstring("NeL report") : ucstring(title);
-
+	ReportWindowTitle = title.empty() ? "Nel Crash Report" : title;
+	ucstring formatedTitle = ucstring::makeFromUtf8(ReportWindowTitle);
 
 	// create the window
 	dialog = CreateWindowW (L"NLReportWindow", (LPCWSTR)formatedTitle.c_str(), WS_DLGFRAME | WS_CAPTION /*| WS_THICKFRAME*/, CW_USEDEFAULT, CW_USEDEFAULT, 456, 400,  NULL, NULL, GetModuleHandle(NULL), NULL);
 
 	// create the font
 	HFONT font = CreateFont (-12, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Arial");
-
-	Subject = subject;
-	AttachedFile = attachedFile;
 
 	// create the edit control
 	HWND edit = CreateWindowW (L"EDIT", NULL, WS_BORDER | WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL | ES_READONLY | ES_LEFT | ES_MULTILINE, 7, 70, 429, 212, dialog, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(dialog, GWLP_HINSTANCE), NULL);
@@ -283,10 +266,10 @@ TReportResult report (const std::string &title, const std::string &header, const
 	// set the edit text limit to lot of :)
 	SendMessage (edit, EM_LIMITTEXT, ~0U, 0);
 
-	Body = addSlashR (body);
+	ReportBody = addSlashR(body);
 
 	// set the message in the edit text
-	SendMessage (edit, WM_SETTEXT, (WPARAM)0, (LPARAM)Body.c_str());
+	SendMessage (edit, WM_SETTEXT, (WPARAM)0, (LPARAM)ReportBody.c_str());
 
 	if (enableCheckIgnore)
 	{
@@ -336,8 +319,7 @@ TReportResult report (const std::string &title, const std::string &header, const
 	}
 
 	// ace don't do that because it s slow to try to send a mail
-	//CanSendMailReport  = sendReportButton && EmailFunction != NULL && EmailFunction("", "", "", "", "", true);
-	CanSendMailReport  = sendReportButton && EmailFunction != NULL;
+	CanSendMailReport = sendReportButton && !ReportPostUrl.empty();
 
 	if (CanSendMailReport)
 		formatedHeader += " Send report will only email the contents of the box below. Please, send it to help us (it could take few minutes to send the email, be patient).";
