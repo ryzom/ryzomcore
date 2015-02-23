@@ -1197,10 +1197,10 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 
 #ifdef NL_OS_WINDOWS
 		if (TrapCrashInDebugger || !IsDebuggerPresent ())
+#endif
 		{
 			DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
 		}
-#endif
 
 #if LOG_IN_FILE
 		if (logInFile)

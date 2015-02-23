@@ -63,19 +63,61 @@ void setReportEmailFunction (void *emailFunction)
 #endif
 }
 
+static string Body;
+static std::string URL = "FILL_IN_CRASH_REPORT_HOSTNAME_HERE";
+
+
+static void doSendReport()
+{
+    std::string filename;
+
+    filename = "report_";
+    filename += NLMISC::toString( int( time( NULL ) ) );
+    filename += ".txt";
+
+    std::string params;
+    params = "-log ";
+    params += filename;
+    params += " -host ";
+    params += URL;
+
+    std::ofstream f;
+    f.open( filename.c_str() );
+    if( !f.good() )
+        return;
+
+    f << Body;
+
+    f.close();
+
+#ifdef NL_OS_WINDOWS
+    NLMISC::launchProgram( "crash_report.exe", params );
+#else
+    NLMISC::launchProgram( "crash_report", params );
+#endif
+
+    // Added because NLSMIC::launcProgram needs time to launch
+    nlSleep( 2 * 1000 );
+
+}
+
 #ifndef NL_OS_WINDOWS
 
 // GNU/Linux, do nothing
 
-void report ()
+TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
+    Body = addSlashR( body );
+
+    doSendReport();
+
+    return ReportQuit;
 }
 
 #else
 
 // Windows specific version
 
-static string Body;
 static string Subject;
 static string AttachedFile;
 
@@ -91,39 +133,6 @@ static bool IgnoreNextTime;
 static bool CanSendMailReport= false;
 
 static bool DebugDefaultBehavior, QuitDefaultBehavior;
-
-static std::string URL = "FILL_IN_CRASH_REPORT_HOSTNAME_HERE";
-
-static void doSendReport()
-{
-	std::string filename;
-
-	filename = "report_";
-	filename += NLMISC::toString( time( NULL ) );
-	filename += ".txt";
-
-	std::string params;
-	params = "-log ";
-	params += filename;
-	params += " -host ";
-	params += URL;
-
-	std::ofstream f;
-	f.open( filename.c_str() );
-	if( !f.good() )
-		return;
-
-	f << Body;
-
-	f.close();
-
-#ifdef NL_OS_WINDOWS
-	NLMISC::launchProgram( "crash_report.exe", params );
-#else
-	NLMISC::launchProgram( "crash_report", params );
-#endif
-
-}
 
 static void sendEmail()
 {
