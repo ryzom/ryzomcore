@@ -77,6 +77,7 @@ struct CInetAddressHashMapTraits
 		//return x.port();
 		return x.internalIPAddress();
 	}
+	bool operator() (const NLNET::CInetAddress& left, const NLNET::CInetAddress& right) { return left < right; }
 // 	bool operator() (const NLNET::CInetAddress &x1, const NLNET::CInetAddress &x2) const
 // 	{
 // 		return classId1 < classId2;
