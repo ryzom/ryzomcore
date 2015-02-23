@@ -115,7 +115,7 @@ TReportResult report(const std::string &title, const std::string &header, const 
 
 	doSendReport();
 
-#	if 1 // TODO: This behaviour is used in the old report code when Quitting the application is the default crash report behaviour. Needs testing.
+#	if defined(FINAL_VERSION) // TODO: This behaviour is used in the old report code when Quitting the application is the default crash report behaviour. Needs testing.
 #		ifdef NL_OS_WINDOWS
 #		ifndef NL_COMP_MINGW
 	// disable the Windows popup telling that the application aborted and disable the dr watson report.
