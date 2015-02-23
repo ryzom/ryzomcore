@@ -418,7 +418,9 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 				// fail the authentication
 				// Do not send result immediatly to avoid a potential hacker
 				// to try a dictionnary or that dort of things
-				BadLoginClients.insert(std::make_pair(NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS, Clients[i]));
+				BadLoginClients.insert(std::pair<NLMISC::TTime, NLMISC::CRefPtr<CMonitorClient> >(
+					NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS, 
+					(NLMISC::CRefPtr<CMonitorClient>)Clients[i]));
 				Clients[i]->BadLogin =true;
 				return;
 			}
