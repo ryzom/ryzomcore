@@ -494,9 +494,13 @@ struct CColumnIndexHashMapTraits
 	static const size_t min_buckets = 8;
 	CColumnIndexHashMapTraits() { }
 	size_t operator() (const CColumnIndex &id) const
-		{
-			return id.hash();
-		}
+	{
+		return id.hash();
+	}
+	bool operator()(const CColumnIndex &left, const CColumnIndex &right)
+	{
+		return left.hash() < right.hash();
+	}
 };
 
 class CSetMap
