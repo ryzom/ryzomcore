@@ -137,9 +137,10 @@ public:
 	//friend void				CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8 worldImage);
 	friend void				CWorldEntity::removePrimitive();
 
-	class CEntityIdHash
+	struct CEntityIdHash
 	{
-	public:
+		static const size_t bucket_size = 4;
+		static const size_t min_buckets = 8;
 		size_t	operator () ( const NLMISC::CEntityId &id ) const { return (uint32)id.getShortId(); }
 	};
 

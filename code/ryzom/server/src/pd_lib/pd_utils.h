@@ -499,7 +499,7 @@ struct CColumnIndexHashMapTraits
 	}
 	bool operator()(const CColumnIndex &left, const CColumnIndex &right)
 	{
-		return left.hash() < right.hash();
+		return left < right;
 	}
 };
 

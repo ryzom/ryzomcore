@@ -48,9 +48,10 @@ namespace NLNET
 
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
-class CServiceIdHash
+struct CServiceIdHash
 {
-public:
+	static const size_t bucket_size = 4;
+	static const size_t min_buckets = 8;
 	size_t	operator () ( const NLNET::TServiceId &sid ) const { return sid.get(); }
 };
 

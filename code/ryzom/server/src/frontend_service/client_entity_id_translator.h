@@ -89,9 +89,10 @@ public:
 
 private:
 
-	class CHash
+	struct CHash
 	{
-	public:
+		static const size_t bucket_size = 4;
+		static const size_t min_buckets = 8;
 		size_t	operator () ( const TEntityIndex& index ) const { return index.getIndex(); }
 	};
 
