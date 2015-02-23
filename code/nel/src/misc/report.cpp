@@ -110,7 +110,7 @@ static void doSendReport()
 // For FINAL_VERSION, simply launch the crash report and exit the application
 TReportResult report(const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const string &attachedFile)
 {
-	ReportWindowTitle = title;
+	ReportWindowTitle = title.empty() ? "Nel Crash Report" : title;
 	ReportBody = addSlashR(body);
 
 	doSendReport();
