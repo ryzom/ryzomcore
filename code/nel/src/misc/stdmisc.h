@@ -45,6 +45,9 @@
 #ifdef _WIN32
 #	define WIN32_LEAN_AND_MEAN
 #	define _WIN32_WINDOWS 0x0410
+#	ifndef _WIN32_WINNT
+#		define _WIN32_WINNT 0x0400
+#	endif
 #	ifndef NL_COMP_MINGW
 #		define WINVER 0x0400
 #		define NOMINMAX
