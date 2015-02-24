@@ -18,11 +18,12 @@
 #include "nel/misc/system_utils.h"
 
 #ifdef NL_OS_WINDOWS
-	#ifdef _WIN32_WINNT_WIN7
+#	include <ObjBase.h>
+#	ifdef _WIN32_WINNT_WIN7
 		// only supported by Windows 7 Platform SDK
-		#include <ShObjIdl.h>
-		#define TASKBAR_PROGRESS 1
-	#endif
+#		include <ShObjIdl.h>
+#		define TASKBAR_PROGRESS 1
+#	endif
 #endif
 
 #ifdef DEBUG_NEW

@@ -20,7 +20,9 @@
 #include "nel/misc/sstring.h"
 #include "nel/misc/thread.h"
 
-#if defined (NL_OS_UNIX)
+#ifdef NL_OS_WINDOWS
+#	include <MMSystem.h>
+#elif defined (NL_OS_UNIX)
 #	include <sys/time.h>
 #	include <unistd.h>
 #endif

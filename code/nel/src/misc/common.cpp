@@ -20,6 +20,7 @@
 #include "nel/misc/common.h"
 
 #ifdef NL_OS_WINDOWS
+#	include <ShellAPI.h>
 #	include <io.h>
 #	include <tchar.h>
 #elif defined NL_OS_UNIX

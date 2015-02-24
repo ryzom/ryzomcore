@@ -42,7 +42,9 @@
 #include <utility>
 #include <vector>
 
-#ifdef _WIN32
+#include <nel/misc/types_nl.h>
+
+#ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
 #	define _WIN32_WINDOWS 0x0410
 #	ifndef _WIN32_WINNT
@@ -53,7 +55,7 @@
 #		define NOMINMAX
 #	endif
 #	include <WinSock2.h>
-#	include <windows.h>
+#	include <Windows.h>
 #endif
 
 #endif // NL_STDMISC_H
