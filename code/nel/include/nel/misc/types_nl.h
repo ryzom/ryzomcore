@@ -53,7 +53,7 @@
 #	endif
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
-#		if _MSC_VER >= 1700
+#		if _MSC_VER >= 1800
 #			define NL_COMP_VC12
 #			define NL_COMP_VC_VERSION 120
 #		elif _MSC_VER >= 1700
