@@ -18,10 +18,6 @@
 #include "nel/misc/win_displayer.h"
 
 #ifdef NL_OS_WINDOWS
-#ifndef NL_COMP_MINGW
-#	define NOMINMAX
-#endif
-#include <windows.h>
 #include <windowsx.h>
 #include <winuser.h>
 #include <cstring>
