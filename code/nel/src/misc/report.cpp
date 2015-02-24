@@ -16,7 +16,7 @@
 
 #include "stdmisc.h"
 
-#include <stringstream>
+#include <sstream>
 
 #include "nel/misc/common.h"
 #include "nel/misc/ucstring.h"
