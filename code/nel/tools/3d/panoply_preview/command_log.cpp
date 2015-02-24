@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2014  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -32,7 +32,7 @@
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLTOOLS {
 
 CCommandLog::CCommandLog(QWidget *parent) : QWidget(parent)
 {
@@ -47,6 +47,7 @@ CCommandLog::CCommandLog(QWidget *parent) : QWidget(parent)
 	setLayout(layout);
 
 	connect(m_CommandInput, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
+	connect(this, SIGNAL(tSigDisplay(const QColor &, const QString &)), this, SLOT(tSlotDisplay(const QColor &, const QString &)));
 
 	DebugLog->addDisplayer(this);
 	InfoLog->addDisplayer(this);
@@ -66,25 +67,29 @@ CCommandLog::~CCommandLog()
 
 void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 {
+	QColor color;
 	switch (args.LogType)
 	{
 	case CLog::LOG_DEBUG:
-		m_DisplayerOutput->setTextColor(Qt::darkGray);
+		color = Qt::gray;
 		break;
 	case CLog::LOG_STAT:
-		m_DisplayerOutput->setTextColor(Qt::darkGreen);
+		color = Qt::green;
 		break;
 	case CLog::LOG_NO:
 	case CLog::LOG_UNKNOWN:
 	case CLog::LOG_INFO:
-		m_DisplayerOutput->setTextColor(Qt::black);
+		color = Qt::white;
 		break;
 	case CLog::LOG_WARNING:
-		m_DisplayerOutput->setTextColor(Qt::darkBlue);
+		color = Qt::yellow;
 		break;
 	case CLog::LOG_ERROR:
 	case CLog::LOG_ASSERT:
-		m_DisplayerOutput->setTextColor(Qt::darkRed);
+		color = Qt::red;
+		break;
+	default:
+		color = Qt::black;
 		break;
 	}
 
@@ -164,7 +169,13 @@ void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 	}
 	str += pos;
 
-	m_DisplayerOutput->append(str.substr(0, str.size() - 1).c_str());
+	tSigDisplay(color, str.substr(0, str.size() - 1).c_str());
+}
+
+void CCommandLog::tSlotDisplay(const QColor &c, const QString &text)
+{
+	m_DisplayerOutput->setTextColor(c);
+	m_DisplayerOutput->append(text);
 }
 
 void CCommandLog::returnPressed()
@@ -179,6 +190,6 @@ void CCommandLog::returnPressed()
 	m_CommandInput->clear();
 }
 
-} /* namespace NLQT */
+} /* namespace NLTOOLS */
 
 /* end of file */

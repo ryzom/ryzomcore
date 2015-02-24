@@ -22,9 +22,9 @@
 #include "core_global.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QIcon>
+#include <QObject>
+#include <QString>
+#include <QIcon>
 
 QT_BEGIN_NAMESPACE
 class QWidget;

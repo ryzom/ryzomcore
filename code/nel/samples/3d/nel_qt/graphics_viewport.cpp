@@ -20,7 +20,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QAction>
+#include <QAction>
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -92,7 +92,7 @@ void CGraphicsViewport::init(CGraphicsConfig *graphicsConfig)
 	nlassert(m_Driver);
 
 	// initialize the window with config file values
-	m_Driver->setDisplay(winId(), NL3D::UDriver::CMode(width(), height(), 32));
+	m_Driver->setDisplay((nlWindow)winId(), NL3D::UDriver::CMode(width(), height(), 32));
 
 	// register config callbacks
 	connect(m_GraphicsConfig, SIGNAL(onBackgroundColor(NLMISC::CRGBA)), 

@@ -24,9 +24,9 @@
 #include <nel/misc/path.h>
 
 // Qt includes
-#include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
+#include <QSettings>
+#include <QWidget>
+#include <QFileDialog>
 
 #if !defined NL_OS_WINDOWS
 #include "core_config.h"

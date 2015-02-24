@@ -21,7 +21,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 
 // NeL includes
 #include <nel/misc/config_file.h>

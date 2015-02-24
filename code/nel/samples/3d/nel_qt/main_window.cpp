@@ -20,11 +20,20 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QtGui>
-#include <QtGui/QTreeView>
-#include <QtGui/QDirModel>
-#include <QtGui/QUndoStack>
-#include <QtGui/QScrollArea>
+#include <QtGui>
+#include <QTreeView>
+#include <QDirModel>
+#include <QUndoStack>
+#include <QScrollArea>
+#include <QApplication>
+#include <QAction>
+#include <QMenuBar>
+#include <QMenu>
+#include <QDockWidget>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QStyleFactory>
+#include <QMessageBox>
 
 // NeL includes
 // #include <nel/misc/debug.h>
@@ -68,10 +77,6 @@ CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *p
 	m_UndoStack = new QUndoStack(this);
 
 	m_Configuration.init();
-	
-	m_OriginalPalette = QApplication::palette();
-	m_Configuration.setAndCallback("QtStyle", CConfigCallback(this, &CMainWindow::cfcbQtStyle));
-	m_Configuration.setAndCallback("QtPalette", CConfigCallback(this, &CMainWindow::cfcbQtPalette));
 	
 	m_Internationalization.init(&m_Configuration);
 	m_Internationalization.enableCallback(CEmptyCallback(this, &CMainWindow::incbLanguageCode));
@@ -359,18 +364,6 @@ void CMainWindow::recalculateMinimumWidth()
 {
 	if (m_GraphicsConfigScroll) 
 		m_GraphicsConfigScroll->setMinimumWidth(m_GraphicsConfig->minimumSizeHint().width() + m_GraphicsConfigScroll->minimumSizeHint().width());
-}
-
-void CMainWindow::cfcbQtStyle(NLMISC::CConfigFile::CVar &var)
-{
-	QApplication::setStyle(QStyleFactory::create(var.asString().c_str()));
-	recalculateMinimumWidth();
-}
-
-void CMainWindow::cfcbQtPalette(NLMISC::CConfigFile::CVar &var)
-{
-	if (var.asBool()) QApplication::setPalette(QApplication::style()->standardPalette());
-	else QApplication::setPalette(m_OriginalPalette);
 }
 
 void CMainWindow::applyGraphicsConfig()

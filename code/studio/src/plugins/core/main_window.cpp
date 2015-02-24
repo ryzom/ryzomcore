@@ -29,9 +29,14 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtCore/QCoreApplication>
-#include <QtGui/QUndoView>
-#include <QtGui/QtGui>
+#include <QCoreApplication>
+#include <QUndoView>
+#include <QtGui>
+#include <QMessageBox>
+#include <QDockWidget>
+#include <QStatusBar>
+#include <QUndoGroup>
+#include <QUndoStack>
 
 namespace Core
 {

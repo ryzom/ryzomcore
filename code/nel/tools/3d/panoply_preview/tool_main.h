@@ -1,7 +1,5 @@
-// Object Viewer Qt - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
-// Copyright (C) 2011  Dzmitry Kamiahin <dnk-88@tut.by>
-// Parts by Nokia Corporation (qt-info@nokia.com) Copyright (C) 2009.
+// NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+// Copyright (C) 2014  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -16,15 +14,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CORE_GLOBAL_H
-#define CORE_GLOBAL_H
+#ifndef NLTOOLS_MAIN_H
+#define NLTOOLS_MAIN_H
+#include <nel/misc/types_nl.h>
 
-#include <qglobal.h>
+// STL includes
 
-#if defined(CORE_LIBRARY)
-#  define CORE_EXPORT Q_DECL_EXPORT
-#else
-#  define CORE_EXPORT Q_DECL_IMPORT
-#endif
+// NeL includes
 
-#endif // CORE_GLOBAL_H
+// Project includes
+
+namespace NLTOOLS {
+
+} /* namespace NLTOOLS */
+
+#endif /* #ifndef NLTOOLS_MAIN_H */
+
+/* end of file */

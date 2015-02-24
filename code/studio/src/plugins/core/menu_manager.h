@@ -22,12 +22,12 @@
 #include "core_global.h"
 
 // Qt includes
-#include <QtCore/QHash>
-#include <QtCore/QObject>
-#include <QtCore/QList>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QHash>
+#include <QObject>
+#include <QList>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 namespace Core
 {

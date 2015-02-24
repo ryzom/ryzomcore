@@ -86,14 +86,14 @@
 ****************************************************************************/
 
 #include "qtpropertybrowserutils_p.h"
-#include <QtGui/QApplication>
-#include <QtGui/QPainter>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QMouseEvent>
-#include <QtGui/QCheckBox>
-#include <QtGui/QToolButton>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMenu>
+#include <QApplication>
+#include <QPainter>
+#include <QHBoxLayout>
+#include <QMouseEvent>
+#include <QCheckBox>
+#include <QToolButton>
+#include <QLineEdit>
+#include <QMenu>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -102,43 +102,43 @@ QT_BEGIN_NAMESPACE
 QtCursorDatabase::QtCursorDatabase()
 {
     appendCursor(Qt::ArrowCursor, QApplication::translate("QtCursorDatabase", "Arrow", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-arrow.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-arrow.png")));
     appendCursor(Qt::UpArrowCursor, QApplication::translate("QtCursorDatabase", "Up Arrow", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-uparrow.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-uparrow.png")));
     appendCursor(Qt::CrossCursor, QApplication::translate("QtCursorDatabase", "Cross", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-cross.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-cross.png")));
     appendCursor(Qt::WaitCursor, QApplication::translate("QtCursorDatabase", "Wait", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-wait.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-wait.png")));
     appendCursor(Qt::IBeamCursor, QApplication::translate("QtCursorDatabase", "IBeam", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-ibeam.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-ibeam.png")));
     appendCursor(Qt::SizeVerCursor, QApplication::translate("QtCursorDatabase", "Size Vertical", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizev.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizev.png")));
     appendCursor(Qt::SizeHorCursor, QApplication::translate("QtCursorDatabase", "Size Horizontal", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeh.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeh.png")));
     appendCursor(Qt::SizeFDiagCursor, QApplication::translate("QtCursorDatabase", "Size Backslash", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizef.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizef.png")));
     appendCursor(Qt::SizeBDiagCursor, QApplication::translate("QtCursorDatabase", "Size Slash", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeb.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeb.png")));
     appendCursor(Qt::SizeAllCursor, QApplication::translate("QtCursorDatabase", "Size All", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeall.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-sizeall.png")));
     appendCursor(Qt::BlankCursor, QApplication::translate("QtCursorDatabase", "Blank", 0,
-                        QApplication::UnicodeUTF8), QIcon());
+                        -1), QIcon());
     appendCursor(Qt::SplitVCursor, QApplication::translate("QtCursorDatabase", "Split Vertical", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-vsplit.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-vsplit.png")));
     appendCursor(Qt::SplitHCursor, QApplication::translate("QtCursorDatabase", "Split Horizontal", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hsplit.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hsplit.png")));
     appendCursor(Qt::PointingHandCursor, QApplication::translate("QtCursorDatabase", "Pointing Hand", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hand.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-hand.png")));
     appendCursor(Qt::ForbiddenCursor, QApplication::translate("QtCursorDatabase", "Forbidden", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-forbidden.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-forbidden.png")));
     appendCursor(Qt::OpenHandCursor, QApplication::translate("QtCursorDatabase", "Open Hand", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-openhand.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-openhand.png")));
     appendCursor(Qt::ClosedHandCursor, QApplication::translate("QtCursorDatabase", "Closed Hand", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-closedhand.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-closedhand.png")));
     appendCursor(Qt::WhatsThisCursor, QApplication::translate("QtCursorDatabase", "What's This", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-whatsthis.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-whatsthis.png")));
     appendCursor(Qt::BusyCursor, QApplication::translate("QtCursorDatabase", "Busy", 0,
-                        QApplication::UnicodeUTF8), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-busy.png")));
+                        -1), QIcon(QLatin1String(":/trolltech/qtpropertybrowser/images/cursor-busy.png")));
 }
 
 void QtCursorDatabase::appendCursor(Qt::CursorShape shape, const QString &name, const QIcon &icon)
@@ -222,7 +222,7 @@ QIcon QtPropertyBrowserUtils::brushValueIcon(const QBrush &b)
 
 QString QtPropertyBrowserUtils::colorValueText(const QColor &c)
 {
-    return QApplication::translate("QtPropertyBrowserUtils", "[%1, %2, %3] (%4)", 0, QApplication::UnicodeUTF8)
+    return QApplication::translate("QtPropertyBrowserUtils", "[%1, %2, %3] (%4)", 0, -1)
                                   .arg(QString::number(c.red()))
                                   .arg(QString::number(c.green()))
                                   .arg(QString::number(c.blue()))
@@ -252,7 +252,7 @@ QIcon QtPropertyBrowserUtils::fontValueIcon(const QFont &f)
 
 QString QtPropertyBrowserUtils::fontValueText(const QFont &f)
 {
-    return QApplication::translate("QtPropertyBrowserUtils", "[%1, %2]", 0, QApplication::UnicodeUTF8)
+    return QApplication::translate("QtPropertyBrowserUtils", "[%1, %2]", 0, -1)
                                   .arg(f.family())
                                   .arg(f.pointSize());
 }

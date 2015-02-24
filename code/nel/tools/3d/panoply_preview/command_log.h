@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2014  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NLQT_COMMAND_LOG_H
-#define NLQT_COMMAND_LOG_H
+#ifndef NLTOOLS_COMMAND_LOG_H
+#define NLTOOLS_COMMAND_LOG_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
@@ -31,13 +31,13 @@
 
 // Project includes
 
-namespace NLQT {
+namespace NLTOOLS {
 
 /**
  * CCommandLog
  * \brief CCommandLog
  * \date 2010-02-05 20:27GMT
- * \author Jan Boon (Kaetemi)
+ * \author Jan BOON (jan.boon@kaetemi.be)
  */
 class CCommandLog : public QWidget, public NLMISC::IDisplayer
 {
@@ -50,8 +50,12 @@ public:
 protected:
 	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
 
+signals:
+	void tSigDisplay(const QColor &c, const QString &text);
+
 private slots:
 	void returnPressed();
+	void tSlotDisplay(const QColor &c, const QString &text);
 
 private:
 	QTextEdit *m_DisplayerOutput;
@@ -63,8 +67,8 @@ private:
 	
 }; /* class CCommandLog */
 
-} /* namespace NLQT */
+} /* namespace NLTOOLS */
 
-#endif /* #ifndef NLQT_COMMAND_LOG_H */
+#endif /* #ifndef NLTOOLS_COMMAND_LOG_H */
 
 /* end of file */

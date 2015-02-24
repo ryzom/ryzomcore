@@ -27,12 +27,12 @@
 #include "nel/misc/debug.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QObject>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 using namespace Core;
 
@@ -101,4 +101,4 @@ void CorePlugin::addAutoReleasedObject(QObject *obj)
 	m_autoReleaseObjects.prepend(obj);
 }
 
-Q_EXPORT_PLUGIN(CorePlugin)
+// Q_EXPORT_PLUGIN(CorePlugin)

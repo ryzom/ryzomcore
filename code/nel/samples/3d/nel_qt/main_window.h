@@ -21,7 +21,7 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 // NeL includes
 #include <nel/misc/rgba.h>
@@ -105,9 +105,6 @@ private:
 
 	void recalculateMinimumWidth();
 
-	void cfcbQtStyle(NLMISC::CConfigFile::CVar &var);
-	void cfcbQtPalette(NLMISC::CConfigFile::CVar &var);
-
 	void cfcbSoundEnabled(NLMISC::CConfigFile::CVar &var);
 
 	void incbLanguageCode();
@@ -122,8 +119,6 @@ private:
 	CSoundUtilities m_SoundUtilities;
 
 	QUndoStack *m_UndoStack;
-
-	QPalette m_OriginalPalette;
 
 	bool m_IsGraphicsInitialized, m_IsGraphicsEnabled;
 	bool m_IsSoundInitialized, m_IsSoundEnabled;

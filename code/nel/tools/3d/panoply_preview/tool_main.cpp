@@ -1,5 +1,5 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2014  Jan BOON (jan.boon@kaetemi.be)
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/types_nl.h>
-#include "nel_qt.h"
+#include "tool_main.h"
 
 // STL includes
 #include <stdio.h>
@@ -40,13 +40,13 @@
 #include <nel/misc/sheet_id.h>
 
 // Project includes
-#include "nel_qt_config.h"
+#include "tool_config.h"
 #include "main_window.h"
 
 using namespace std;
 using namespace NLMISC;
 
-namespace NLQT {
+namespace NLTOOLS {
 
 namespace {
 
@@ -54,7 +54,7 @@ CFileDisplayer *s_FileDisplayer = NULL;
 
 } /* anonymous namespace */
 
-} /* namespace NLQT */
+} /* namespace NLTOOLS */
 
 void usage()
 {
@@ -107,61 +107,31 @@ QMap<QString, QSize> parseCustomSizeHints(int argc, char **argv)
 
 sint main(int argc, char **argv)
 {
-#if defined(NL_OS_WINDOWS) && !FINAL_VERSION
-	// ensure paths are ok before powering up nel
-	{
-		OutputDebugString("    ********************************    \n");
-		OutputDebugString("    *        DEVELOPER MODE        *    \n");
-		OutputDebugString("    ********************************    \n\n");
-		FILE *f = _tfopen(_T(NLQT_CONFIG_FILE_DEFAULT), _T("r"));
-		if (!f)
-		{
-			OutputDebugString("    ********************************    \n");
-			OutputDebugString("    *  CHANGING WORKING DIRECTORY  *    \n");
-			OutputDebugString("    ********************************    \n\n");
-			char cwd[256];
-			_tgetcwd(cwd, 256);
-			tstring workdir(cwd);
-			workdir += "\\..\\..\\..\\bin\\tools\\";
-			_tchdir(workdir.c_str());
-			f = _tfopen(_T(NLQT_CONFIG_FILE_DEFAULT), _T("r"));
-			if (!f)
-			{
-				OutputDebugString("    ********************************    \n");
-				OutputDebugString("    *    DEFAULT CONFIG MISSING    *    \n");
-				OutputDebugString("    ********************************    \n\n");
-				return EXIT_FAILURE;
-			}
-		}
-		fclose(f);
-	}
-#endif
-
 	// go nel!
 	{
-		// use log.log if NEL_LOG_IN_FILE and NLQT_USE_LOG_LOG defined as 1
-		createDebug(NULL, NLQT_USE_LOG_LOG, false);
+		// use log.log if NEL_LOG_IN_FILE and NLTOOLS_USE_LOG_LOG defined as 1
+		createDebug(NULL, NLTOOLS_USE_LOG_LOG, false);
 
-#if NLQT_USE_LOG
+#if NLTOOLS_USE_LOG
 		// create toverhex_client.log
 		// filedisplayer only deletes the 001 etc
-		if (NLQT_ERASE_LOG && CFile::isExists(NLQT_LOG_FILE))
-			CFile::deleteFile(NLQT_LOG_FILE);
+		if (NLTOOLS_ERASE_LOG && CFile::isExists(NLTOOLS_LOG_FILE))
+			CFile::deleteFile(NLTOOLS_LOG_FILE);
 		// initialize the log file
-		NLQT::s_FileDisplayer = new CFileDisplayer();
-		NLQT::s_FileDisplayer->setParam(NLQT_LOG_FILE, NLQT_ERASE_LOG);
-		DebugLog->addDisplayer(NLQT::s_FileDisplayer);
-		InfoLog->addDisplayer(NLQT::s_FileDisplayer);
-		WarningLog->addDisplayer(NLQT::s_FileDisplayer);
-		AssertLog->addDisplayer(NLQT::s_FileDisplayer);
-		ErrorLog->addDisplayer(NLQT::s_FileDisplayer);
+		NLTOOLS::s_FileDisplayer = new CFileDisplayer();
+		NLTOOLS::s_FileDisplayer->setParam(NLTOOLS_LOG_FILE, NLTOOLS_ERASE_LOG);
+		DebugLog->addDisplayer(NLTOOLS::s_FileDisplayer);
+		InfoLog->addDisplayer(NLTOOLS::s_FileDisplayer);
+		WarningLog->addDisplayer(NLTOOLS::s_FileDisplayer);
+		AssertLog->addDisplayer(NLTOOLS::s_FileDisplayer);
+		ErrorLog->addDisplayer(NLTOOLS::s_FileDisplayer);
 #endif	
 
 		nlinfo("Welcome to NeL!");
 	}
 	
 	// low fragmentation heap (windows)
-#if NLQT_LOW_FRAGMENTATION_HEAP
+#if NLTOOLS_LOW_FRAGMENTATION_HEAP
 	ULONG heapFragValue = 2; // enable low fragmentation heap
 	if (HeapSetInformation(GetProcessHeap(), 
 		HeapCompatibilityInformation, 
@@ -185,25 +155,25 @@ sint main(int argc, char **argv)
 
 	QApplication app(argc, const_cast<char **>(argv));
 
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
-    QPalette palette = app.palette();
-    palette.setColor(QPalette::Window, QColor(64, 64, 64));
-    palette.setColor(QPalette::WindowText, Qt::white);
-    palette.setColor(QPalette::Base, QColor(48, 48, 48));
-    palette.setColor(QPalette::AlternateBase, QColor(64, 64, 64));
-    palette.setColor(QPalette::ToolTipBase, Qt::white);
-    palette.setColor(QPalette::ToolTipText, Qt::white);
-    palette.setColor(QPalette::Text, Qt::white);
-    palette.setColor(QPalette::Button, QColor(64, 64, 64));
-    palette.setColor(QPalette::ButtonText, Qt::white);
-    palette.setColor(QPalette::BrightText, Qt::red);
-    palette.setColor(QPalette::Highlight, QColor(64, 128, 96));
-    palette.setColor(QPalette::HighlightedText, Qt::white);
-    app.setPalette(palette);
+	QApplication::setStyle(QStyleFactory::create("Fusion"));
+	QPalette palette = app.palette();
+	palette.setColor(QPalette::Window, QColor(64, 64, 64));
+	palette.setColor(QPalette::WindowText, Qt::white);
+	palette.setColor(QPalette::Base, QColor(48, 48, 48));
+	palette.setColor(QPalette::AlternateBase, QColor(64, 64, 64));
+	palette.setColor(QPalette::ToolTipBase, Qt::white);
+	palette.setColor(QPalette::ToolTipText, Qt::white);
+	palette.setColor(QPalette::Text, Qt::white);
+	palette.setColor(QPalette::Button, QColor(64, 64, 64));
+	palette.setColor(QPalette::ButtonText, Qt::white);
+	palette.setColor(QPalette::BrightText, Qt::red);
+	palette.setColor(QPalette::Highlight, QColor(64, 128, 96));
+	palette.setColor(QPalette::HighlightedText, Qt::white);
+	app.setPalette(palette);
 
 	QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
 
-	NLQT::CMainWindow mainWin(customSizeHints);
+	NLTOOLS::CMainWindow mainWin(customSizeHints);
 	mainWin.resize(800, 600);
 	mainWin.show(); // calls isVisible(true)
 

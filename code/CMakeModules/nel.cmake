@@ -232,9 +232,9 @@ Remove the CMakeCache.txt file and try again from another folder, e.g.:
 ENDMACRO(CHECK_OUT_OF_SOURCE)
 
 MACRO(NL_SETUP_DEFAULT_OPTIONS)
-  IF(WITH_QT)
+  IF(WITH_QT OR WITH_QT5)
     OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
-  ENDIF(WITH_QT)
+  ENDIF(WITH_QT OR WITH_QT5)
   
   ###
   # Features
@@ -278,7 +278,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   # GUI toolkits
   ###
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
-  OPTION(WITH_QT                  "With QT Support"                               OFF)
+  OPTION(WITH_QT                  "With QT4 Support"                              OFF)
+  OPTION(WITH_QT5                 "With QT5 Support"                              OFF)
 
   IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )

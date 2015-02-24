@@ -23,7 +23,7 @@
 
 #include "nel/misc/app_context.h"
 
-#include <QtCore/QObject>
+#include <QObject>
 
 namespace NLMISC
 {
@@ -41,6 +41,7 @@ namespace Core
 class CorePlugin : public QObject, public ExtensionSystem::IPlugin
 {
 	Q_OBJECT
+	Q_PLUGIN_METADATA(IID NL_STUDIO_IPLUGIN_IID)
 	Q_INTERFACES(ExtensionSystem::IPlugin)
 public:
 

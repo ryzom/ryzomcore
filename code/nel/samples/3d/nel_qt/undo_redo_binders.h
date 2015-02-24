@@ -23,8 +23,8 @@
 // Qt includes
 #include <QtCore/QObject>
 #include <QtCore/QString>
-#include <QtGui/QColor>
-#include <QtGui/QUndoCommand>
+#include <QColor>
+#include <QUndoCommand>
 
 // NeL includes
 
