@@ -57,11 +57,7 @@ class CWinDisplayer : public NLMISC::CWindowDisplayer
 {
 public:
 
-	CWinDisplayer (const char *displayerName = "") : CWindowDisplayer(displayerName), Exit(false)
-	{
-		needSlashR = true;
-		createLabel ("@Clear|CLEAR");
-	}
+	CWinDisplayer(const char *displayerName = "");
 
 	virtual ~CWinDisplayer ();
 
