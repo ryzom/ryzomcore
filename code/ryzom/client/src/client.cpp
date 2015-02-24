@@ -365,6 +365,8 @@ int main(int argc, char **argv)
 
 	createDebug();
 
+	INelContext::getInstance().setWindowedApplication(true);
+
 #ifndef NL_DEBUG
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");

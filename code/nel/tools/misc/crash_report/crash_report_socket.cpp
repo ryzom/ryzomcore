@@ -21,6 +21,9 @@
 #include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#   include <QUrlQuery>
+#endif
 
 class CCrashReportSocketPvt
 {
@@ -43,16 +46,26 @@ CCrashReportSocket::~CCrashReportSocket()
 
 void CCrashReportSocket::sendReport( const SCrashReportData &data )
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	QUrlQuery params;
+#else
 	QUrl params;
+#endif
 	params.addQueryItem( "report", data.report );
 	params.addQueryItem( "descr", data.description );
-	params.addQueryItem( "email", data.email );
+	params.addQueryItem("email", data.email);
 
 	QUrl url( m_url );
 	QNetworkRequest request( url );
 	request.setRawHeader( "Connection", "close" );
 
-	m_pvt->mgr.post( request, params.encodedQuery() );
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+	QByteArray postData = params.query(QUrl::FullyEncoded).toUtf8();
+#else
+	QByteArray postData = params.encodedQuery();
+#endif
+
+	m_pvt->mgr.post(request, postData);
 }
 
 void CCrashReportSocket::onFinished( QNetworkReply *reply )

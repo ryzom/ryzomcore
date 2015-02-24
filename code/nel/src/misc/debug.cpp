@@ -1223,6 +1223,11 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 #endif // LOG_IN_FILE
 		DefaultMemDisplayer = new CMemDisplayer ("DEFAULT_MD");
 
+#ifdef NL_OS_WINDOWS
+		if (GetConsoleWindow() == NULL)
+			INelContext::getInstance().setWindowedApplication(true);
+#endif
+
 		initDebug2(logInFile);
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
