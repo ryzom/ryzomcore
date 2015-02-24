@@ -463,7 +463,11 @@ typedef	uint16	ucchar;
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC
-#	if (NL_COMP_VC_VERSION >= 80)
+#	if (NL_COMP_VC_VERSION >= 120)
+#		define INT64_CONSTANT(c)		(c##LL)
+#		define SINT64_CONSTANT(c)	(c##LL)
+#		define UINT64_CONSTANT(c)	(c##ULL)
+#	elif (NL_COMP_VC_VERSION >= 80)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)
