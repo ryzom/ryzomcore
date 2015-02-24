@@ -350,8 +350,10 @@ void	setCrashAlreadyReported(bool state);
  */
 
 // removed because we always check assert (even in release mode) #if defined (NL_OS_WINDOWS) && defined (NL_DEBUG)
-#if defined (NL_OS_WINDOWS)
-#define NLMISC_BREAKPOINT __debugbreak();
+#if defined(NL_OS_WINDOWS)
+#define NLMISC_BREAKPOINT __debugbreak()
+#elif defined(NL_OS_UNIX) && defined(NL_COMP_GCC)
+#define NLMISC_BREAKPOINT __builtin_trap()
 #else
 #define NLMISC_BREAKPOINT abort()
 #endif

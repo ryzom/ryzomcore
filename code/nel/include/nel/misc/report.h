@@ -21,9 +21,11 @@
 
 namespace NLMISC {
 
+enum TReportResult { ReportDebug, ReportIgnore, ReportQuit, ReportError };
+
 /** Display a custom message box.
  *
- * \param title set the title of the report. If empty, it'll display "NeL report".
+ * \param title set the title of the report. If empty, it'll display "NeL Crash Report" or the default title set by setReportWindowTitle.
  * \param header message displayed before the edit text box. If empty, it displays the default message.
  * \param body message displayed in the edit text box. This string will be sent by email.
  * \param debugButton 0 for disabling it, 1 for enable with default behaviors (generate a breakpoint), 2 for enable with no behavior
@@ -32,14 +34,15 @@ namespace NLMISC {
  *
  * \return the button clicked or error
  */
+TReportResult report(const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const std::string &attachedFile = "");
 
-enum TReportResult { ReportDebug, ReportIgnore, ReportQuit, ReportError };
+/// Set the Url of the web service used to post crash reports to
+void setReportPostUrl(const std::string &postUrl);
 
-TReportResult report (const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const std::string &attachedFile = "");
-
+/// DEPRECATED
 /** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
  */
-void setReportEmailFunction (void *emailFunction);
+void setReportEmailFunction(void *emailFunction);
 
 } // NLMISC
 

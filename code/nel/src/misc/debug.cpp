@@ -78,7 +78,8 @@ using namespace std;
 #define LOG_IN_FILE NEL_LOG_IN_FILE
 
 // If true, debug system will trap crash even if the application is in debugger
-static const bool TrapCrashInDebugger = false;
+//static const bool TrapCrashInDebugger = false;
+static const bool TrapCrashInDebugger = true;
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -1191,10 +1192,10 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 
 #ifdef NL_OS_WINDOWS
 		if (TrapCrashInDebugger || !IsDebuggerPresent ())
+#endif
 		{
 			DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
 		}
-#endif
 
 #if LOG_IN_FILE
 		if (logInFile)
