@@ -26,6 +26,7 @@
 #include <commctrl.h>
 #include <ctime>
 
+#include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
 #include "nel/misc/command.h"
 #include "nel/misc/thread.h"
@@ -41,6 +42,13 @@ namespace NLMISC {
 
 static CHARFORMAT2 CharFormat;
 
+CWinDisplayer::CWinDisplayer(const char *displayerName) : CWindowDisplayer(displayerName), Exit(false)
+{
+	needSlashR = true;
+	createLabel("@Clear|CLEAR");
+
+	INelContext::getInstance().setWindowedApplication(true);
+}
 
 CWinDisplayer::~CWinDisplayer ()
 {
