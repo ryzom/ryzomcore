@@ -23,10 +23,6 @@
 #include "nel/misc/path.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <windowsx.h>
 #	include <winuser.h>
 #endif // NL_OS_WINDOWS

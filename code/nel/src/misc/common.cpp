@@ -20,10 +20,6 @@
 #include "nel/misc/common.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <io.h>
 #	include <tchar.h>
 #elif defined NL_OS_UNIX

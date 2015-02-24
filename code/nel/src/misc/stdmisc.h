@@ -43,6 +43,7 @@
 #include <vector>
 
 #ifdef _WIN32
+#	define WIN32_LEAN_AND_MEAN
 #	define _WIN32_WINDOWS 0x0410
 #	ifndef NL_COMP_MINGW
 #		define WINVER 0x0400

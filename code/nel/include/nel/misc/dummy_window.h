@@ -22,6 +22,18 @@
 
 #ifdef NL_OS_WINDOWS // for win32 os only
 
+#ifndef WIN32_LEAN_AND_MEAN
+#	define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINDOWS
+#	define _WIN32_WINDOWS 0x0410
+#endif
+#ifndef WINVER
+#	define WINVER 0x0400
+#endif
+#ifndef NOMINMAX
+#	define NOMINMAX
+#endif
 #include <windows.h>
 
 

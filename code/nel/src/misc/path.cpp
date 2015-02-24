@@ -25,10 +25,6 @@
 #include "nel/misc/xml_pack.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <sys/types.h>
 #	include <sys/stat.h>
 #	include <direct.h>
