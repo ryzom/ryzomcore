@@ -353,7 +353,7 @@ bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup 
 	if (ptrName)
 	{
 		// Does the action exist ?
-		std::string name = ptrName;
+		std::string name = ptrName.str();
 		if (!ICommand::exists (name) || (CUserCommand::CommandMap.find(name) != CUserCommand::CommandMap.end()))
 		{
 			// Get the action

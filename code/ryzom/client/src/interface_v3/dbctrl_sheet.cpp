@@ -468,7 +468,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"item_slot" );
 	if(prop)
 	{
-		string str= prop;
+		string str= prop.str();
 		_ItemSlot= SLOTTYPE::stringToSlotType(NLMISC::toUpper(str));
 	}
 
