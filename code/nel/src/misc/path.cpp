@@ -1033,6 +1033,9 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		{
 			// find all path and subpath
 			getPathContent (newPath, recurse, true, false, pathsToProcess, progressCallBack);
+
+			// sort files
+			sort(pathsToProcess.begin(), pathsToProcess.end());
 		}
 
 		for (uint p = 0; p < pathsToProcess.size(); p++)
@@ -1078,7 +1081,10 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		// find all files in the path and subpaths
 		getPathContent (newPath, recurse, false, true, filesToProcess, progressCallBack);
 
-		// Progree bar
+		// sort files
+		sort(filesToProcess.begin(), filesToProcess.end());
+
+		// Progress bar
 		if (progressCallBack)
 		{
 			progressCallBack->popCropedValues ();
