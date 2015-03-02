@@ -937,10 +937,10 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 	closedir (dir);
 
 #ifndef NL_OS_WINDOWS
-	BasePathgetPathContent = "";
+	BasePathgetPathContent.clear();
 #endif
 
-	// let s recurse
+	// let's recurse
 	for (uint i = 0; i < recursPath.size (); i++)
 	{
 		// Progress bar
