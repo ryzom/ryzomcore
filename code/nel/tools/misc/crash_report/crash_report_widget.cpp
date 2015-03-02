@@ -27,6 +27,7 @@
 #include <QFile>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QCheckBox>
 
 CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
@@ -85,10 +86,38 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		}
 	}
 
+	if( m_fileName.isEmpty() )
+	{
+		m_ui.reportLabel->hide();
+		m_ui.reportEdit->hide();
+	}
+
+	// When no -host specified no custom entry and email fields
+	if( m_socket->url().isEmpty() )
+	{
+		m_ui.descriptionEdit->hide();
+		m_ui.emailCB->hide();
+		m_ui.emailEdit->hide();
+		m_ui.descrLabel->hide();
+	}
+
 	QHBoxLayout *hbl = new QHBoxLayout( this );
 
 	if( m_developerMode )
 	{
+		if( !m_socket->url().isEmpty() )
+		{
+			m_ui.emailCB->setEnabled( false );
+
+			QCheckBox *cb = new QCheckBox( tr( "Send report" ), this );
+			m_ui.gridLayout->addWidget( cb, 4, 0, 1, 1 );
+
+			m_ui.gridLayout->addWidget( m_ui.emailCB, 5, 0, 1, 1 );
+			m_ui.gridLayout->addWidget( m_ui.emailEdit, 6, 0, 1, 1 );
+
+			connect( cb, SIGNAL( stateChanged( int ) ), this, SLOT( onSendCBClicked() ) );
+		}
+
 		QPushButton *alwaysIgnoreButton = new QPushButton( tr( "Always Ignore" ), this );
 		QPushButton *ignoreButton = new QPushButton( tr( "Ignore" ), this );
 		QPushButton *abortButton = new QPushButton( tr( "Abort" ), this );
@@ -99,7 +128,7 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		hbl->addWidget( abortButton );
 		hbl->addWidget( breakButton );
 
-		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
+		m_ui.gridLayout->addLayout( hbl, 7, 0, 1, 3 );
 
 		connect( alwaysIgnoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onAlwaysIgnoreClicked() ) );
 		connect( ignoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onIgnoreClicked() ) );
@@ -108,15 +137,26 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 	}
 	else
 	{
-		QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
-		connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
-		hbl->addWidget( sendButton );
-
-		if( !m_forceSend )
+		// If -host is specified, offer the send function
+		if( !m_socket->url().isEmpty() )
 		{
-			QPushButton *cancelButton = new QPushButton( tr( "Don't send report" ), this );
-			connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
-			hbl->addWidget( cancelButton );
+			QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
+			connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
+			hbl->addWidget( sendButton );
+
+			if( !m_forceSend )
+			{
+				QPushButton *cancelButton = new QPushButton( tr( "Don't send report" ), this );
+				connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+				hbl->addWidget( cancelButton );
+			}
+		}
+		// Otherwise only offer exit
+		else
+		{
+			QPushButton *exitButton = new QPushButton( tr( "Exit" ), this );
+			connect( exitButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+			hbl->addWidget( exitButton );
 		}
 
 		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
@@ -125,13 +165,8 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 
 void CCrashReportWidget::onLoad()
 {
-	return;
-
-	if( !checkSettings() )
-	{
-		close();
+	if( m_fileName.isEmpty() )
 		return;
-	}
 
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
@@ -169,6 +204,18 @@ void CCrashReportWidget::onCancelClicked()
 void CCrashReportWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
+}
+
+void CCrashReportWidget::onSendCBClicked()
+{
+	bool b = m_ui.emailCB->isEnabled();
+
+	if( b )
+	{
+		m_ui.emailCB->setChecked( false );
+	}
+
+	m_ui.emailCB->setEnabled( !b );
 }
 
 void CCrashReportWidget::onAlwaysIgnoreClicked()
@@ -216,27 +263,6 @@ void CCrashReportWidget::onReportFailed()
 								tr( "Failed to send the report..." ) );
 
 	removeAndQuit();
-}
-
-bool CCrashReportWidget::checkSettings()
-{
-	if( m_fileName.isEmpty() )
-	{
-		QMessageBox::information( this,
-									tr( "No log file specified." ),
-									tr( "No log file specified. Exiting..." ) );
-		return false;
-	}
-
-	if( m_socket->url().isEmpty() )
-	{
-		QMessageBox::information( this,
-									tr( "No host specified." ),
-									tr( "No host specified. Exiting..." ) );
-		return false;
-	}
-
-	return true;
 }
 
 void CCrashReportWidget::removeAndQuit()

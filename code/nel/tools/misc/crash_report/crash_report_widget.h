@@ -49,12 +49,13 @@ public:
 	void setup( const std::vector< std::pair< std::string, std::string > > &params );
 
 	EReturnValue getReturnValue() const{ return m_returnValue; }
-	
+
 private Q_SLOTS:
 	void onLoad();
 	void onSendClicked();
 	void onCancelClicked();
 	void onCBClicked();
+	void onSendCBClicked();
 
 	void onAlwaysIgnoreClicked();
 	void onIgnoreClicked();
@@ -65,7 +66,6 @@ private Q_SLOTS:
 	void onReportFailed();
 
 private:
-	bool checkSettings();
 	void removeAndQuit();
 
 	Ui::CrashReportWidget m_ui;
