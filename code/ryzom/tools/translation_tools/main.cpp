@@ -95,17 +95,6 @@ const std::string	historyDir("history/");
 
 string				diffVersion;
 
-#ifndef NL_OS_WINDOWS
-char* itoa(int val, char *buffer, int base)
-{
-	static char buf[32] = {0};
-	int i = 30;
-	for(; val && i ; --i, val /= base)
-		buf[i] = "0123456789abcdef"[val % base];
-	return &buf[i+1];
-}
-#endif // NL_OS_WINDOWS
-
 #ifdef NL_DEBUG
 # define LOG nldebug
 #else
@@ -970,7 +959,6 @@ public:
 	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context)
 	{
 		ucstring chg;
-		char temp[1024];
 		// check what is changed.
 		if (context.Addition[addIndex].Parameters != context.Reference[refIndex].Parameters)
 			chg += "// Parameter list changed." + nl;
@@ -981,11 +969,11 @@ public:
 			for (uint i=0; i<context.Addition[addIndex].Clauses.size(); ++i)
 			{
 				if (context.Addition[addIndex].Clauses[i].Identifier != context.Reference[refIndex].Clauses[i].Identifier)
-					chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : identifier changed." + nl;
+					chg += ucstring("// Clause ") + toString(i) + " : identifier changed." + nl;
 				else if (context.Addition[addIndex].Clauses[i].Conditions != context.Reference[refIndex].Clauses[i].Conditions)
-					chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : condition changed." + nl;	
+					chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;	
 				else if (context.Addition[addIndex].Clauses[i].Text != context.Reference[refIndex].Clauses[i].Text)
-					chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : text changed." + nl;	
+					chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;	
 			}
 		}
 
@@ -2683,7 +2671,6 @@ void CMakePhraseDiff2::onRemove(uint addIndex, uint refIndex, TPhraseDiffContext
 void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context)
 {
 	ucstring chg;
-	char temp[1024];
 	// check what is changed.
 	if (context.Addition[addIndex].Parameters != context.Reference[refIndex].Parameters)
 		chg += "// Parameter list changed." + nl;
@@ -2694,11 +2681,11 @@ void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContex
 		for (uint i=0; i<context.Addition[addIndex].Clauses.size(); ++i)
 		{
 			if (context.Addition[addIndex].Clauses[i].Identifier != context.Reference[refIndex].Clauses[i].Identifier)
-				chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : identifier changed." + nl;
+				chg += ucstring("// Clause ") + toString(i) + " : identifier changed." + nl;
 			else if (context.Addition[addIndex].Clauses[i].Conditions != context.Reference[refIndex].Clauses[i].Conditions)
-				chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : condition changed." + nl;	
+				chg += ucstring("// Clause ") + toString(i) + " : condition changed." + nl;	
 			else if (context.Addition[addIndex].Clauses[i].Text != context.Reference[refIndex].Clauses[i].Text)
-				chg += ucstring("// Clause ")+itoa(i, temp, 10) + " : text changed." + nl;	
+				chg += ucstring("// Clause ") + toString(i) + " : text changed." + nl;	
 		}
 	}
 
