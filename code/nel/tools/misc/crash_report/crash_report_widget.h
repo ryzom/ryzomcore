@@ -43,6 +43,11 @@ private Q_SLOTS:
 	void onSendClicked();
 	void onCancelClicked();
 	void onCBClicked();
+
+	void onAlwaysIgnoreClicked();
+	void onIgnoreClicked();
+	void onAbortClicked();
+	void onBreakClicked();
 	
 	void onReportSent();
 	void onReportFailed();
@@ -54,6 +59,9 @@ private:
 	Ui::CrashReportWidget m_ui;
 	QString m_fileName;
 	CCrashReportSocket *m_socket;
+	bool m_developerMode;
+	bool m_forceSend;
+
 };
 
 #endif

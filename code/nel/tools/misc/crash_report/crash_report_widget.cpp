@@ -25,18 +25,21 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QFile>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
 {
+	m_developerMode = false;
+	m_forceSend = false;
+
 	m_ui.setupUi( this );
 
 	m_socket = new CCrashReportSocket( this );
 
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
-	connect( m_ui.sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
-	connect( m_ui.canceButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 	connect( m_ui.emailCB, SIGNAL( stateChanged( int ) ), this, SLOT( onCBClicked() ) );
 
 	connect( m_socket, SIGNAL( reportSent() ), this, SLOT( onReportSent() ) );
@@ -70,11 +73,60 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		{
 			setWindowTitle( v.c_str() );
 		}
+		else
+		if( k == "dev" )
+		{
+			m_developerMode = true;
+		}
+		else
+		if( k == "sendreport" )
+		{
+			m_forceSend = true;
+		}
+	}
+
+	QHBoxLayout *hbl = new QHBoxLayout( this );
+
+	if( m_developerMode )
+	{
+		QPushButton *alwaysIgnoreButton = new QPushButton( tr( "Always Ignore" ), this );
+		QPushButton *ignoreButton = new QPushButton( tr( "Ignore" ), this );
+		QPushButton *abortButton = new QPushButton( tr( "Abort" ), this );
+		QPushButton *breakButton = new QPushButton( tr( "Break" ), this );
+
+		hbl->addWidget( alwaysIgnoreButton );
+		hbl->addWidget( ignoreButton );
+		hbl->addWidget( abortButton );
+		hbl->addWidget( breakButton );
+
+		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
+
+		connect( alwaysIgnoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onAlwaysIgnoreClicked() ) );
+		connect( ignoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onIgnoreClicked() ) );
+		connect( abortButton, SIGNAL( clicked( bool ) ), this, SLOT( onAbortClicked() ) );
+		connect( breakButton, SIGNAL( clicked( bool ) ), this, SLOT( onBreakClicked() ) );
+	}
+	else
+	{
+		QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
+		connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
+		hbl->addWidget( sendButton );
+
+		if( !m_forceSend )
+		{
+			QPushButton *cancelButton = new QPushButton( tr( "Don't send report" ), this );
+			connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+			hbl->addWidget( cancelButton );
+		}
+
+		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
 	}
 }
 
 void CCrashReportWidget::onLoad()
 {
+	return;
+
 	if( !checkSettings() )
 	{
 		close();
@@ -99,7 +151,6 @@ void CCrashReportWidget::onLoad()
 
 void CCrashReportWidget::onSendClicked()
 {
-	m_ui.sendButton->setEnabled( false );
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
 	SCrashReportData data;
@@ -119,6 +170,23 @@ void CCrashReportWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
+
+void CCrashReportWidget::onAlwaysIgnoreClicked()
+{
+}
+
+void CCrashReportWidget::onIgnoreClicked()
+{
+}
+
+void CCrashReportWidget::onAbortClicked()
+{
+}
+
+void CCrashReportWidget::onBreakClicked()
+{
+}
+
 
 void CCrashReportWidget::onReportSent()
 {
