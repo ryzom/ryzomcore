@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------
 
 #include <cstdio>
+#include <limits>
 
 #include "game_share/bnp_patch.h"
 #include "nel/misc/path.h"
