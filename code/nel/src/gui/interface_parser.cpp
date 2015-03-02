@@ -796,7 +796,7 @@ namespace NLGUI
 			return false;
 		}
 		sint32 size;
-		fromString(cSize, size);
+		fromString(cSize.str(), size);
 		if (size <= 0)
 		{
 			// todo hulud interface syntax error
