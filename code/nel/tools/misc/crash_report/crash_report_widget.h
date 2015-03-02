@@ -31,12 +31,24 @@ class CCrashReportWidget : public QWidget
 {
 	Q_OBJECT
 public:
+
+	enum EReturnValue
+	{
+		ERET_NULL          = 0,
+		ERET_ALWAYS_IGNORE = 21,
+		ERET_IGNORE        = 22,
+		ERET_ABORT         = 23,
+		ERET_BREAK         = 24
+	};
+
 	CCrashReportWidget( QWidget *parent = NULL );
 	~CCrashReportWidget();
 
 	void setFileName( const char *fn ){ m_fileName = fn; }
 
 	void setup( const std::vector< std::pair< std::string, std::string > > &params );
+
+	EReturnValue getReturnValue() const{ return m_returnValue; }
 	
 private Q_SLOTS:
 	void onLoad();
@@ -62,6 +74,7 @@ private:
 	bool m_developerMode;
 	bool m_forceSend;
 
+	EReturnValue m_returnValue;
 };
 
 #endif

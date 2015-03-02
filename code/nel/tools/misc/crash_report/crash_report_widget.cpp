@@ -173,18 +173,26 @@ void CCrashReportWidget::onCBClicked()
 
 void CCrashReportWidget::onAlwaysIgnoreClicked()
 {
+	m_returnValue = ERET_ALWAYS_IGNORE;
+	close();
 }
 
 void CCrashReportWidget::onIgnoreClicked()
 {
+	m_returnValue = ERET_IGNORE;
+	close();
 }
 
 void CCrashReportWidget::onAbortClicked()
 {
+	m_returnValue = ERET_ABORT;
+	close();
 }
 
 void CCrashReportWidget::onBreakClicked()
 {
+	m_returnValue = ERET_BREAK;
+	close();
 }
 
 
