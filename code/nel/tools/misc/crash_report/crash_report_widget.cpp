@@ -203,7 +203,9 @@ void CCrashReportWidget::onSendClicked()
 	SCrashReportData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
 	data.report = m_ui.reportEdit->toPlainText();
-	data.email = m_ui.emailEdit->text();
+	
+	if( m_ui.emailCB->isChecked() )
+		data.email = m_ui.emailEdit->text();
 
 	m_socket->sendReport( data );
 }
