@@ -34,6 +34,7 @@ QWidget( parent )
 {
 	m_developerMode = false;
 	m_forceSend = false;
+	m_devSendReport = false;
 
 	m_ui.setupUi( this );
 
@@ -63,6 +64,8 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		if( k == "log" )
 		{
 			m_fileName = v.c_str();
+			if( !QFile::exists( m_fileName ) )
+				m_fileName.clear();
 		}
 		else
 		if( k == "host" )
@@ -92,8 +95,8 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		m_ui.reportEdit->hide();
 	}
 
-	// When no -host specified no custom entry and email fields
-	if( m_socket->url().isEmpty() )
+	
+	if( m_socket->url().isEmpty() || m_fileName.isEmpty() )
 	{
 		m_ui.descriptionEdit->hide();
 		m_ui.emailCB->hide();
@@ -105,7 +108,7 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 
 	if( m_developerMode )
 	{
-		if( !m_socket->url().isEmpty() )
+		if( !m_socket->url().isEmpty() && !m_fileName.isEmpty() )
 		{
 			m_ui.emailCB->setEnabled( false );
 
@@ -172,10 +175,7 @@ void CCrashReportWidget::onLoad()
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
 	if( !b )
 	{
-		QMessageBox::information( this,
-									tr( "No log file found" ),
-									tr( "There was no log file found, therefore nothing to report. Exiting..." ) );
-		close();
+		m_fileName.clear();
 		return;
 	}
 
@@ -186,6 +186,18 @@ void CCrashReportWidget::onLoad()
 
 void CCrashReportWidget::onSendClicked()
 {
+	if( m_developerMode && !m_devSendReport )
+	{
+		close();
+		return;
+	}
+
+	if( m_socket->url().isEmpty() || m_fileName.isEmpty() )
+	{
+		close();
+		return;
+	}
+
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
 	SCrashReportData data;
@@ -216,30 +228,32 @@ void CCrashReportWidget::onSendCBClicked()
 	}
 
 	m_ui.emailCB->setEnabled( !b );
+
+	m_devSendReport = !m_devSendReport;
 }
 
 void CCrashReportWidget::onAlwaysIgnoreClicked()
 {
 	m_returnValue = ERET_ALWAYS_IGNORE;
-	close();
+	onSendClicked();
 }
 
 void CCrashReportWidget::onIgnoreClicked()
 {
 	m_returnValue = ERET_IGNORE;
-	close();
+	onSendClicked();
 }
 
 void CCrashReportWidget::onAbortClicked()
 {
 	m_returnValue = ERET_ABORT;
-	close();
+	onSendClicked();
 }
 
 void CCrashReportWidget::onBreakClicked()
 {
 	m_returnValue = ERET_BREAK;
-	close();
+	onSendClicked();
 }
 
 
@@ -267,7 +281,9 @@ void CCrashReportWidget::onReportFailed()
 
 void CCrashReportWidget::removeAndQuit()
 {
-	QFile::remove( m_fileName );
+	if( !m_fileName.isEmpty() )
+		QFile::remove( m_fileName );
+
 	close();
 }
 

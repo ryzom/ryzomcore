@@ -73,6 +73,7 @@ private:
 	CCrashReportSocket *m_socket;
 	bool m_developerMode;
 	bool m_forceSend;
+	bool m_devSendReport;
 
 	EReturnValue m_returnValue;
 };
