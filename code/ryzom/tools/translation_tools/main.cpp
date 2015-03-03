@@ -985,13 +985,11 @@ public:
 		
 		// changed element
 		TPhrase phrase = context.Addition[addIndex];
-//				char temp[1024];
-		sprintf(temp, "// DIFF CHANGED %u ", addIndex);
 		vector<TPhrase>	tempV;
 		tempV.push_back(context.Reference[refIndex]);
 		ucstring tempT = preparePhraseFile(tempV, false); 
 		CI18N::removeCComment(tempT);
-		phrase.Comments = ucstring(temp) + nl + phrase.Comments;
+		phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
 		phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
 		phrase.Comments = phrase.Comments + chg;
 
@@ -2697,13 +2695,11 @@ void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContex
 	
 	// changed element
 	TPhrase phrase = context.Addition[addIndex];
-//				char temp[1024];
-	sprintf(temp, "// DIFF CHANGED");
 	vector<TPhrase>	tempV;
 	tempV.push_back(context.Reference[refIndex]);
 	ucstring tempT = preparePhraseFile(tempV, false); 
 	CI18N::removeCComment(tempT);
-	phrase.Comments = ucstring(temp) + nl + phrase.Comments;
+	phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
 	phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
 	phrase.Comments = phrase.Comments + chg;
 
