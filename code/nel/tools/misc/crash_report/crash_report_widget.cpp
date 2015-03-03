@@ -35,6 +35,7 @@ QWidget( parent )
 	m_developerMode = false;
 	m_forceSend = false;
 	m_devSendReport = false;
+	m_returnValue = ERET_NULL;
 
 	m_ui.setupUi( this );
 
