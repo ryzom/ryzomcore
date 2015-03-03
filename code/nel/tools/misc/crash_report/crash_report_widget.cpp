@@ -141,7 +141,7 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 	else
 	{
 		// If -host is specified, offer the send function
-		if( !m_socket->url().isEmpty() )
+		if( !m_socket->url().isEmpty() && !m_fileName.isEmpty() )
 		{
 			QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
 			connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
