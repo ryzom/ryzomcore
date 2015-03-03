@@ -538,8 +538,6 @@ void checkDriverVersion()
 
 void checkDriverDepth ()
 {
-	nlassert( false );
-
 	// Check desktop is in 32 bit else no window mode allowed.
 	if (ClientCfg.Windowed)
 	{
