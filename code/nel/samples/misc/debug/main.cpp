@@ -18,11 +18,9 @@
 #include <stdlib.h>
 
 // contains all debug features
-#include "nel/misc/debug.h"
+#include <nel/misc/debug.h>
 
-using namespace NLMISC;
-
-int main (int /* argc */, char ** /* argv */)
+int main(int /* argc */, char ** /* argv */)
 {
 	// all debug functions have different behaviors in debug and in release mode.
 	// in general, in debug mode, all debug functions are active, they display
@@ -36,20 +34,23 @@ int main (int /* argc */, char ** /* argv */)
 	// in release mode, this function does nothing by default. you have to add a displayer
 	// manually, or put true in the parameter to say to the function that you want it to
 	// add the default displayers
-	createDebug ();
+	NLMISC::createDebug();
+
+	// enable the crash report tool
+	NLMISC::INelContext::getInstance().setWindowedApplication(true);
 
 	// display debug information, that will be skipped in release mode.
-	nldebug ("nldebug() %d", 1);
+	nldebug("nldebug() %d", 1);
 
 	// display the string
-	nlinfo ("nlinfo() %d", 2);
+	nlinfo("nlinfo() %d", 2);
 
 	// when something not normal, but that the program can manage, occurs, call nlwarning()
-	nlwarning ("nlwarning() %d", 3);
+	nlwarning("nlwarning() %d", 3);
 
 	// nlassert() is like assert but do more powerful things. in release mode, the test is
 	// not executed and nothing will happen. (Press F5 in Visual C++ to continue the execution)
-	nlassert (true == false);
+	nlassert(true == false);
 
 	// in a switch case or when you want that the program never executes a part of code, use stop.
 	// in release, nlstop does nothing. in debug mode,
@@ -61,16 +62,16 @@ int main (int /* argc */, char ** /* argv */)
 	// occurs. (In Visual C++ press F5 to continue)
 	try
 	{
-		nlerror ("nlerror() %d", 4);
+		nlerror("nlerror() %d", 4);
 	}
-	catch(const EFatalError &)
+	catch (const NLMISC::EFatalError &)
 	{
 		// just continue...
-		nlinfo ("nlerror() generated an EFatalError exception, just ignore it");
+		nlinfo("nlerror() generated an EFatalError exception, just ignore it");
 	}
 
 	printf("\nPress <return> to exit\n");
-	getchar ();
+	getchar();
 
 	return EXIT_SUCCESS;
 }
