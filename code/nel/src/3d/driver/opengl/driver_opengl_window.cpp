@@ -603,6 +603,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
+	if (!mode.OffScreen)
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
+
 	_win = EmptyWindow;
 
 	_CurrentMode = mode;
