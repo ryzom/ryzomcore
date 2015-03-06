@@ -19,9 +19,11 @@
 
 // contains all debug features
 #include <nel/misc/debug.h>
+#include <nel/misc/report.h>
 
 void repeatederror()
 {
+	// hit always ignore to surpress this error for the duration of the program
 	nlassert(false && "hit always ignore");
 }
 
@@ -43,6 +45,7 @@ int main(int /* argc */, char ** /* argv */)
 
 	// enable the crash report tool
 	NLMISC::INelContext::getInstance().setWindowedApplication(true);
+	NLMISC::setReportPostUrl("http://ryzomcore.org/crash_report/");
 
 	// display debug information, that will be skipped in release mode.
 	nldebug("nldebug() %d", 1);
@@ -75,6 +78,7 @@ int main(int /* argc */, char ** /* argv */)
 		nlinfo("nlerror() generated an EFatalError exception, just ignore it");
 	}
 
+	// keep repeating the same error
 	for (int i = 0; i < 32; ++i)
 		repeatederror();
 
