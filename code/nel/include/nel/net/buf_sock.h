@@ -50,10 +50,10 @@ public:
 	virtual ~CBufSock();
 
 	/// Sets the application identifier
-	void					setAppId( uint64 id ) { _AppId = id; }
+	void					setAppId( uintptr_t id ) { _AppId = id; }
 
 	/// Returns the application identifier
-	uint64					appId() const { return _AppId; }
+	uintptr_t				appId() const { return _AppId; }
 
 	/// Returns a string with the characteristics of the object
 	std::string				asString() const;
@@ -256,7 +256,7 @@ private:
 	NLMISC::CObjectVector<uint8> _ReadyToSendBuffer;
 	TBlockSize			_RTSBIndex;
 
-	uint64				_AppId;
+	uintptr_t			_AppId;
 
 	// Connected state (from the user's point of view, i.e. changed when the connection/disconnection event is at the front of the receive queue)
 	bool				_ConnectedState;

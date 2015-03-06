@@ -126,7 +126,7 @@ retry:
 
 		// now the user is on the database
 
-		uid = atoi(row[0]);
+		NLMISC::fromString(row[0], uid);
 
 		if(cpassword != row[2])
 		{
@@ -395,11 +395,11 @@ static void cbWSShardChooseShard (CMessage &msgin, const std::string &serviceNam
 		string addr;
 		msgin.serial (addr);
 		msgout.serial (addr);
-		ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ());
+		ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ()); // FIXME: 64-bit
 		return;
 	}
 	msgout.serial(reason);
-	ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ());
+	ClientsServer->send (msgout, (TSockId)cookie.getUserAddr ()); // FIXME: 64-bit
 }
 
 static const TUnifiedCallbackItem WSCallbackArray[] =

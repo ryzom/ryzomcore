@@ -16,6 +16,16 @@ nlErrorStream = openFile nlErrorFilename mode:"a"
 if nlErrorStream == undefined then
 	nlErrorStream = createFile nlErrorFilename
 
+-- Unhide layers
+fn unhidelayers = 
+(
+	for i = 0 to (LayerManager.count - 1) do
+	(
+		layer = (LayerManager.getLayer i)
+		layer.ishidden = false
+	)
+)
+
 -- Unhide category
 fn unhidecategory =
 (
@@ -102,6 +112,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- Select all collision mesh
 	max select none
+	clearSelection()
 	for m in geometry do
 	(
 		if (isToBeExported m) == true then

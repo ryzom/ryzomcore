@@ -519,17 +519,17 @@ namespace NLGUI
 
 		// Read Action handlers
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscroll" );
-		if (prop)	_AHOnScroll = NLMISC::strlwr(prop);
+		if (prop)	_AHOnScroll = NLMISC::strlwr(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"params" );
 		if (prop)	_AHOnScrollParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollend" );
-		if (prop)	_AHOnScrollEnd = NLMISC::strlwr(prop);
+		if (prop)	_AHOnScrollEnd = NLMISC::strlwr(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"end_params" );
 		if (prop)	_AHOnScrollEndParams = string((const char*)prop);
 		//
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onscrollcancel" );
-		if (prop)	_AHOnScrollCancel = NLMISC::strlwr(prop);
+		if (prop)	_AHOnScrollCancel = NLMISC::strlwr(prop.str());
 		prop = (char*) xmlGetProp( node, (xmlChar*)"cancel_params" );
 		if (prop)	_AHOnScrollCancelParams = string((const char*)prop);
 
@@ -538,9 +538,9 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( node, (xmlChar*)"target" );
 		if (prop)
 		{
-			CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(prop));
+			CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(prop.str()));
 			if(group == NULL)
-				group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(this->getId(), prop));
+				group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(this->getId(), prop.str()));
 
 			if(group != NULL)
 				setTarget (group);

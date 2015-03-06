@@ -43,7 +43,6 @@ default_c
 *.so
 *.so.*
 *_debug
-core
 *.pc
 *.gch
 
@@ -144,7 +143,6 @@ external
 external_stlport
 3rdParty
 .svn
-*.lnk
 thumbs.db
 Thumbs.db
 *.tpl.php
@@ -161,6 +159,8 @@ code/build/*
 code/build-2010/*
 build/*
 install/*
+build_vc*
+code/nel/tools/build_gamedata/configuration/buildsite.py
 
 # Linux nel compile
 code/nel/build/nel-config
@@ -203,16 +203,7 @@ code/nel/tools/pacs/build_rbank/build_rbank
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
 code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
 code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
-code/ryzom/tools/server/ryzom_ams/drupal
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
-code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
-code/ryzom/tools/server/ryzom_ams/www/html/templates_c
+
 
 # Linux server compile
 code/ryzom/server/src/entities_game_service/entities_game_service
@@ -224,24 +215,25 @@ code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
 code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
 code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
 code/ryzom/server/src/tick_service/tick_service
-
-# Pipeline garbage and output
-*/generated/*
-code/nel/tools/build_gamedata/configuration/buildsite.py
-code/nel/tools/build_gamedata/configuration/upload.py
-code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
-code/nel/tools/build_gamedata/processes/sheets/item_association.dbg
-code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
-code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
-code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
-
 # WebTT temp dir
 code/ryzom/tools/server/www/webtt/app/tmp
-code\ryzom\tools\server\ryzom_ams\old
 
 # AMS ignore
-code/ryzom/tools/server/ryzom_ams/www/config.php
-code/ryzom/tools/server/ryzom_ams/www/is_installed
+code/web/public_php/ams/is_installed
+code/web/docs/ams/html
+code/web/public_php/ams/templates_c
+code/ryzom/tools/server/ryzom_ams/drupal
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+code/ryzom/tools/server/ryzom_ams/old
+
+
 
 #tools and external dir's
 external
@@ -252,3 +244,21 @@ ryzom_tools*
 #Dumps
 *.dmp
 
+code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
+code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
+code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
+code/web/public_php/config.php
+code/web/public_php/is_installed
+code/web/public_php/ams/files
+code/web/public_php/db_version_lib
+code/web/public_php/db_version_shard
+code/web/public_php/db_version_tool
+code/web/public_php/db_version_web
+code/web/public_php/role_service
+code/web/public_php/role_support
+code/web/public_php/role_domain
+code/web/public_php/db_version_ring
+code/web/public_php/config_user.php
+code/nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
+code/nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg

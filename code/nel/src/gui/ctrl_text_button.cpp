@@ -23,6 +23,7 @@
 #include "nel/gui/group_container_base.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/interface_factory.h"
 #include "nel/misc/i18n.h"
 
 using namespace std;
@@ -60,6 +61,15 @@ namespace NLGUI
 		_TextPosRef = Hotspot_MM;
 		_TextParentPosRef = Hotspot_MM;
 		_ForceTextOver = false;
+	}
+
+	CCtrlTextButton::~CCtrlTextButton()
+	{
+		if( _ViewText != NULL )
+		{
+			delete _ViewText;
+			_ViewText = NULL;
+		}
 	}
 
 	std::string CCtrlTextButton::getProperty( const std::string &name ) const
@@ -113,7 +123,10 @@ namespace NLGUI
 		else
 		if( name == "hardtext" )
 		{
-			return _ViewText->getText().toString();
+			if( _ViewText != NULL )
+				return _ViewText->getText().toString();
+			else
+				return std::string( "" );
 		}
 		else
 		if( name == "text_y" )
@@ -128,15 +141,23 @@ namespace NLGUI
 		else
 		if( name == "text_underlined" )
 		{
-			return toString( _ViewText->getUnderlined() );
+			if( _ViewText != NULL )
+				return toString( _ViewText->getUnderlined() );
+			else
+				return std::string( "" );
 		}
 		else
 		if( name == "text_posref" )
 		{
 			std::string pr;
+			pr = CInterfaceElement::HotSpotToString( _TextPosRef );
+			return pr;
+		}
+		else
+		if( name == "text_parent_posref" )
+		{
+			std::string pr;
 			pr = CInterfaceElement::HotSpotToString( _TextParentPosRef );
-			pr += " ";
-			pr += CInterfaceElement::HotSpotToString( _TextPosRef );
 			return pr;
 		}
 		else
@@ -220,6 +241,11 @@ namespace NLGUI
 			_TextureIdNormal[ 0 ].setTexture( std::string( value + "_l.tga" ).c_str() );
 			_TextureIdNormal[ 1 ].setTexture( std::string( value + "_m.tga" ).c_str() );
 			_TextureIdNormal[ 2 ].setTexture( std::string( value + "_r.tga" ).c_str() );
+			
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			rVR.getTextureSizeFromId(_TextureIdNormal[0], _BmpLeftW, _BmpH);
+			rVR.getTextureSizeFromId(_TextureIdNormal[1], _BmpMiddleW, _BmpH);
+			rVR.getTextureSizeFromId(_TextureIdNormal[2], _BmpRightW, _BmpH);
 			return;
 		}
 		else
@@ -269,7 +295,8 @@ namespace NLGUI
 		else
 		if( name == "hardtext" )
 		{
-			_ViewText->setText( value );
+			if( _ViewText != NULL )
+				_ViewText->setText( value );
 			return;
 		}
 		else
@@ -292,17 +319,22 @@ namespace NLGUI
 		if( name == "text_underlined" )
 		{
 			bool b;
-			if( fromString( value, b ) )
-				_ViewText->setUnderlined( b );
+			if( _ViewText != NULL )
+				if( fromString( value, b ) )
+					_ViewText->setUnderlined( b );
+
 			return;
 		}
 		else
 		if( name == "text_posref" )
 		{
-			THotSpot parent, posref;
-			CInterfaceElement::convertHotSpotCouple( value.c_str(), parent, posref );
-			_TextPosRef = posref;
-			_TextParentPosRef = parent;
+			_TextPosRef = convertHotSpot( value.c_str() );
+			return;
+		}
+		else
+		if( name == "text_parent_posref" )
+		{
+			_TextParentPosRef = convertHotSpot( value.c_str() );
 			return;
 		}
 		else
@@ -536,6 +568,7 @@ namespace NLGUI
 			((CViewTextID*)_ViewText)->parseTextIdOptions(cur);
 		// Same RenderLayer as us.
 		_ViewText->setRenderLayer(getRenderLayer());
+		_ViewText->setParentElm(this);
 		// Parse the hardText (if not text id)
 		if(!_IsViewTextId)
 		{
@@ -766,8 +799,7 @@ namespace NLGUI
 		CCtrlBase *capturePointerLeft = CWidgetManager::getInstance()->getCapturePointerLeft();
 
 		// *** Draw Over
-		if( editorSelected ||
-		    ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
+		if( ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
 		)
 		{
 			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL) )
@@ -803,32 +835,46 @@ namespace NLGUI
 			}
 		}
 		// Setup ViewText color
-		if ( pTxId==_TextureIdNormal || editorMode )
+		if( _ViewText != NULL )
 		{
-			if(_TextHeaderColor)	viewTextColor.A=  _TextColorNormal.A;
-			else					viewTextColor= _TextColorNormal;
-			_ViewText->setColor(viewTextColor);
-			_ViewText->setShadowColor(_TextShadowColorNormal);
-			_ViewText->setModulateGlobalColor(_TextModulateGlobalColorNormal);
+			if ( pTxId==_TextureIdNormal || editorMode )
+			{
+				if(_TextHeaderColor)	viewTextColor.A=  _TextColorNormal.A;
+				else					viewTextColor= _TextColorNormal;
+				_ViewText->setColor(viewTextColor);
+				_ViewText->setShadowColor(_TextShadowColorNormal);
+				_ViewText->setModulateGlobalColor(_TextModulateGlobalColorNormal);
+			}
+			else if ( pTxId==_TextureIdPushed )
+			{
+				if(_TextHeaderColor)	viewTextColor.A=  _TextColorPushed.A;
+				else					viewTextColor= _TextColorPushed;
+				_ViewText->setColor(viewTextColor);
+				_ViewText->setShadowColor(_TextShadowColorPushed);
+				_ViewText->setModulateGlobalColor(_TextModulateGlobalColorPushed);
+			}
+			else if ( pTxId==_TextureIdOver )
+			{
+				if(_TextHeaderColor)	viewTextColor.A=  _TextColorOver.A;
+				else					viewTextColor= _TextColorOver;
+				_ViewText->setColor(viewTextColor);
+				_ViewText->setShadowColor(_TextShadowColorOver);
+				_ViewText->setModulateGlobalColor(_TextModulateGlobalColorOver);
+			}
+			if(getFrozen() && getFrozenHalfTone())
+				_ViewText->setAlpha(_ViewText->getAlpha()>>2);
+
+			_ViewText->draw();
 		}
-		else if ( pTxId==_TextureIdPushed )
-		{
-			if(_TextHeaderColor)	viewTextColor.A=  _TextColorPushed.A;
-			else					viewTextColor= _TextColorPushed;
-			_ViewText->setColor(viewTextColor);
-			_ViewText->setShadowColor(_TextShadowColorPushed);
-			_ViewText->setModulateGlobalColor(_TextModulateGlobalColorPushed);
-		}
-		else if ( pTxId==_TextureIdOver )
-		{
-			if(_TextHeaderColor)	viewTextColor.A=  _TextColorOver.A;
-			else					viewTextColor= _TextColorOver;
-			_ViewText->setColor(viewTextColor);
-			_ViewText->setShadowColor(_TextShadowColorOver);
-			_ViewText->setModulateGlobalColor(_TextModulateGlobalColorOver);
-		}
-		if(getFrozen() && getFrozenHalfTone())
-			_ViewText->setAlpha(_ViewText->getAlpha()>>2);
+	}
+
+	// ***************************************************************************
+	void CCtrlTextButton::checkCoords()
+	{
+		if( _ViewText != NULL )
+			_ViewText->checkCoords();
+
+		CCtrlBaseButton::checkCoords();
 	}
 
 
@@ -837,6 +883,9 @@ namespace NLGUI
 	{
 		// Should have been setuped with addCtrl
 		nlassert(_Setuped);
+
+		if( _Name == "==MARKED==" )
+			bool marked = true;
 
 		// Compute Size according to bitmap and Text.
 		if (!(_SizeRef & 1))
@@ -851,6 +900,8 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
+
+		_ViewText->updateCoords();
 	}
 
 	// ***************************************************************************
@@ -864,16 +915,24 @@ namespace NLGUI
 	{
 		_Setuped= true;
 
+		if( _ViewText == NULL )
+		{
+			CViewBase *v = CInterfaceFactory::createClass( "text" );
+			nlassert( v != NULL );
+			_ViewText = dynamic_cast< CViewText* >( v );
+			_ViewText->setId( _Id + "_text" );
+			_ViewText->setText( ucstring( "text" ) );
+			_ViewText->setSerializable( false );
+		}
+
 		// setup the viewText and add to parent
-		_ViewText->setParent (getParent());
+		_ViewText->setParentElm (this);
 		_ViewText->setParentPos (this);
 		_ViewText->setParentPosRef (_TextParentPosRef);
 		_ViewText->setPosRef (_TextPosRef);
 		_ViewText->setActive(_Active);
 		_ViewText->setX(_TextX);
 		_ViewText->setY(_TextY);
-
-		getParent()->addView(_ViewText);
 	}
 
 	// ***************************************************************************
@@ -960,6 +1019,20 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CCtrlTextButton::onRemoved()
+	{
+	}
 
+	void CCtrlTextButton::onWidgetDeleted( CInterfaceElement *e )
+	{
+	}
+
+	void CCtrlTextButton::moveBy( sint32 x, sint32 y )
+	{
+		CInterfaceElement::moveBy( x, y );
+
+		if( _ViewText != NULL )
+			_ViewText->updateCoords();
+	}
 }
 

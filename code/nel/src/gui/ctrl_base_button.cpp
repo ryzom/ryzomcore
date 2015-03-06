@@ -669,12 +669,6 @@ namespace NLGUI
 				if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 					return false;
 
-				if( editorMode )
-				{
-					CWidgetManager::getInstance()->setCurrentEditorSelection( getId() );
-					return true;
-				}
-
 				if (_LeftDblClickHandled)  // no effect on mouse up after double click has been handled
 				{
 					_LeftDblClickHandled = false;
@@ -707,6 +701,11 @@ namespace NLGUI
 					//pIM->submitEvent ("button_click:"+getId());
 				}
 				*/
+
+				// top-right corner is EventX=0, EventY=0
+				_EventX = eventDesc.getX() - _XReal;
+				_EventY = (_YReal + _HReal) - eventDesc.getY();
+
 				runLeftClickAction();
 				if (CWidgetManager::getInstance()->getCapturePointerLeft() == NULL) return true; // event handler may release cpature from this object (if it is removed for example)
 
@@ -801,7 +800,10 @@ namespace NLGUI
 			return "radio_button";
 			break;
 
+		default:
+			break;
 		}
+
 		return "";
 	}
 

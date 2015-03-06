@@ -70,6 +70,14 @@ namespace NLGUI
 	{
 	public:
 
+		/// Watches CInterfaceElement deletions
+		class IDeletionWatcher
+		{
+		public:
+			IDeletionWatcher(){}
+			virtual ~IDeletionWatcher(){}
+			virtual void onDeleted( const std::string &name ){}
+		};
 
 		enum EStrech
 		{
@@ -109,6 +117,7 @@ namespace NLGUI
 			editorSelected = false;
 
 			serializable = true;
+			_EditorSelectable = true;
 		}
 
 		// dtor
@@ -224,6 +233,9 @@ namespace NLGUI
 		void setParentSize (CInterfaceElement *pIG) { _ParentSize = pIG; }
 
 		virtual void setActive (bool state);
+
+		void setXReal( sint32 x ){ _XReal = x; }
+		void setYReal( sint32 y ){ _YReal = y; }
 
 		void setX (sint32 x) { _X = x; }
 		void setXAndInvalidateCoords (sint32 x) { _X = x; invalidateCoords(); }
@@ -424,6 +436,8 @@ namespace NLGUI
 
 		void drawHotSpot(THotSpot hs, NLMISC::CRGBA col);
 
+		void drawHighlight();
+
 		// Returns 'true' if that element can be downcasted to a view
 		virtual bool isView() const { return false; }
 
@@ -473,19 +487,61 @@ namespace NLGUI
 		bool isInGroup( CInterfaceGroup *group );
 
 		static void setEditorMode( bool b ){ editorMode = b; }
+		static bool getEditorMode(){ return editorMode; }
 
 		void setEditorSelected( bool b ){ editorSelected = b; }
 		bool isEditorSelected() const{ return editorSelected; }
 
+		void parsePosParent( const std::string &id );
 		void setPosParent( const std::string &id );
+		void getPosParent( std::string &id ) const;
+		void parseSizeParent( const std::string &id );
 		void setSizeParent( const std::string &id );
+		void getSizeParent( std::string &id ) const;
 		
 		void setSerializable( bool b ){ serializable = b; }
 		bool IsSerializable() const{ return serializable; }
 
+		/// Called when the widget is removed from it's parent group
+		virtual void onRemoved(){}
+
+		/// Registers a deletion watcher
+		static void registerDeletionWatcher( IDeletionWatcher *watcher );
+
+		/// Unregisters a deletion watcher
+		static void unregisterDeletionWatcher( IDeletionWatcher *watcher );
+
+		/// Called when the widget is deleted,
+		/// so other widgets in the group can check if it belongs to them
+		virtual void onWidgetDeleted( CInterfaceElement *e );
+
+		/// Move the element by x in the X direction and y in the Y direction
+		//  Uses real coordinates
+		virtual void moveBy( sint32 x, sint32 y )
+		{
+			_XReal += x;
+			_YReal += y;
+		}
+
+		/// Retrieves the coordinates of the specified hotspot
+		void getHSCoords( const THotSpot &hs, sint32 &x, sint32 &y ) const;
+
+		/// Tells which hotspot is the closest to the specified element
+		void getClosestHotSpot( const CInterfaceElement *other, THotSpot &hs );
+
+		/// Aligns the element to the other element specified
+		void alignTo( CInterfaceElement *other );
+
+		/// Specifies if the widget can be selected in the editor
+		void setEditorSelectable( bool b ){ _EditorSelectable = b; }
+
+		/// Tells if the widget can be selected in the editor
+		bool isEditorSelectable() const{ return _EditorSelectable; }
+
 	protected:
 
 		bool editorSelected;
+		bool _EditorSelectable;
 
 		static bool editorMode;
 
@@ -543,6 +599,11 @@ namespace NLGUI
 		void parseSizeRef(const char *sizeRefStr, sint32 &sizeref, sint32 &sizeDivW, sint32 &sizeDivH);
 
 	private:
+		/// Notifies the deletion watchers that this interface element is being deleted
+		void notifyDeletionWatchers();
+		
+		static std::vector< IDeletionWatcher* > deletionWatchers;
+
 		//void	snapSize();
 		bool serializable;
 

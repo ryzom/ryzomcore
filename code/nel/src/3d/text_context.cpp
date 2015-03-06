@@ -40,6 +40,7 @@ CTextContext::CTextContext()
 	_ScaleZ = 1.0f;
 
 	_Shaded = false;
+	_ShadeOutline = false;
 	_ShadeExtent = 0.001f;
 	_ShadeColor = NLMISC::CRGBA(0,0,0);
 

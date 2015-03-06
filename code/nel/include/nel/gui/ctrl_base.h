@@ -50,6 +50,8 @@ namespace NLGUI
 			// see interface.txt for meaning of auto
 			_ToolTipParentPosRef= Hotspot_TTAuto;
 			_ToolTipPosRef= Hotspot_TTAuto;
+			_EventX = 0;
+			_EventY = 0;
 			resizer = false;
 		}
 
@@ -68,9 +70,10 @@ namespace NLGUI
 		// special parse
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
+		bool handleEvent (const NLGUI::CEventDescriptor &event);
 
-		/// Handle all events (implemented by derived classes) (return true to signal event handled)
-		virtual bool		handleEvent (const NLGUI::CEventDescriptor &event);
+		sint32 getEventX() { return _EventX; }
+		sint32 getEventY() { return _EventY; }
 
 		virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 
@@ -173,7 +176,9 @@ namespace NLGUI
 		THotSpot			_ToolTipPosRefAlt       : 6;
 	protected:
 		void convertTooltipHotSpot(const char *prop, THotSpot &parentHS, THotSpot &childHS);
+		void convertTooltipHotSpot(const char *prop, THotSpot &HS );
 		static std::string TooltipHotSpotToString( THotSpot parent, THotSpot child );
+		static std::string TooltipHotSpotToString( THotSpot HS );
 
 		void mapAHString( const std::string &key, const std::string &value );
 		std::string getAHString( const std::string &key ) const;
@@ -181,6 +186,9 @@ namespace NLGUI
 		static std::map< std::string, std::map< std::string, std::string > > AHCache;
 
 		bool resizer;
+
+		sint32 _EventX;
+		sint32 _EventY;
 	};
 
 }

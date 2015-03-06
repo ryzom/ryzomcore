@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_gui_editor</library-name>
+    <name>GUI Editor</name>
+    <version>0.0.1</version>
+    <vendor>Ryzom Core</vendor>
+    <description>GUI Editor plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

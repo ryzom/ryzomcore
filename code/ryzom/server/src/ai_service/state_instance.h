@@ -185,7 +185,7 @@ protected:
 	CAITimerExtended _StateTimeout;			
 	/// current state (index into manager's state vector)		
 	CAIState* _state;
-	/// variable set to request a state change (~0 otherwise)
+	/// variable set to request a state change (std::numeric_limits<uint32>::max() otherwise)
 	CAIState* _NextState;
 	
 	/// timer for timing	punctual states

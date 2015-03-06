@@ -24,6 +24,8 @@ NLMISC_REGISTER_OBJECT(CViewBase, CInterfaceGroupWheel, std::string, "group_whee
 namespace NLGUI
 {
 
+	void force_link_group_wheel_cpp() { }
+
 	// *****************************************************************************************************************
 	CInterfaceGroupWheel::CInterfaceGroupWheel(const TCtorParam &param) : CInterfaceGroup(param)
 	{

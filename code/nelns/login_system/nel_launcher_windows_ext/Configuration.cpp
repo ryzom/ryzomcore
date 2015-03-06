@@ -52,7 +52,7 @@ BOOL CConfiguration::Load()
 
 		// Reading the configuration file version
 		GetValue(csBuffer, KEY_VERSION, csValue);
-		m_dVersion	= atof(csValue);
+		NLMISC::fromString(csValue, m_dVersion);
 		nlinfo("Config' version %s", csValue);
 
 		if(m_dVersion < APP.m_dVersion)

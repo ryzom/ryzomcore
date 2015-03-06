@@ -174,6 +174,10 @@ void CUserControls::init()
 
 }// init //
 
+void CUserControls::reset()
+{
+	init();
+}
 
 //-----------------------------------------------
 // needReleaseForward :
@@ -419,7 +423,6 @@ void CUserControls::keyboardRotationCameraLR (bool left, bool right)
 		_RotateCameraLRVelocity = 0;
 }
 
-
 //-----------------------------------------------
 // getMouseAngleMove
 //-----------------------------------------------
@@ -429,13 +432,9 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 	dy = 0.0f;
 
 	// The mouse may still "StandardMove" ie through a CEventMouseMove
-	// This can happens cause DirectInputDisabled, or because of the 
-	// "Rotation Anti-Lag system" which start to rotate before the mouse is hid 
-	// and message mode passed to RawMode
-	// 
-	// On X11 and Cocoa, there is no MouseDevice, do it without.
-
-	extern IMouseDevice				*MouseDevice;
+	// This can happen because of the "Rotation Anti-Lag system" which
+	// start to rotate before the mouse is hid and message mode passed
+	// to updateFreeLookPos
 
 	// if the mouse position changed
 	if( EventsListener.getMousePosX() != _LastFrameMousePosX ||
@@ -446,28 +445,23 @@ void CUserControls::getMouseAngleMove(float &dx, float &dy)
 		float	dmpy= EventsListener.getMousePosY() - _LastFrameMousePosY;
 
 		// simulate mickeys mode if there is a mouse device
-		if (MouseDevice)
-			MouseDevice->convertStdMouseMoveInMickeys(dmpx, dmpy);
-		else
-		{
-			dmpx *= (float)Driver->getWindowWidth();
-			dmpy *= (float)Driver->getWindowHeight();
-		}
+		dmpx *= (float)Driver->getWindowWidth();
+		dmpy *= (float)Driver->getWindowHeight();
 
 		// handle inverted mouse, if enabled
-		if(ClientCfg.FreeLookInverted) dmpy = -dmpy;
-		
+		if (ClientCfg.FreeLookInverted) dmpy = -dmpy;
+
 		// update free look
 		EventsListener.updateFreeLookPos(dmpx, dmpy);
 	}
 
 	// If the mouse move on the axis X, with a CGDMouseMove
-	if(EventsListener.isMouseAngleX())
-		dx = -EventsListener.getMouseAngleX ();
+	if (EventsListener.isMouseAngleX())
+		dx = -EventsListener.getMouseAngleX();
 
 	// If the mouse move on the axis Y, with a CGDMouseMove
-	if(EventsListener.isMouseAngleY())
-		dy = EventsListener.getMouseAngleY ();
+	if (EventsListener.isMouseAngleY())
+		dy = EventsListener.getMouseAngleY();
 }
 
 
@@ -1312,7 +1306,6 @@ void	CUserControls::commonSetView()
 		mount->front(UserEntity->front());
 	}
 }
-
 
 //-----------------------------------------------
 // startFreeLook()

@@ -70,13 +70,16 @@ CPixelProgamDrvInfosGL::CPixelProgamDrvInfosGL (CDriverGL *drv, ItGPUPrgDrvInfoP
 
 bool CDriverGL::supportPixelProgram(CPixelProgram::TProfile profile) const
 {
-	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram_profile)
+	H_AUTO_OGL(CPixelProgamDrvInfosGL_supportPixelProgram_profile);
+
 	switch (profile)
 	{
 	case CPixelProgram::arbfp1:
 		return _Extensions.ARBFragmentProgram;
 	case CPixelProgram::fp40:
 		return _Extensions.NVFragmentProgram2;
+	default:
+		break;
 	}
 	return false;
 }

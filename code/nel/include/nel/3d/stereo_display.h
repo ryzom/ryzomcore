@@ -94,6 +94,11 @@ public:
 
 	/// Sets driver and generates necessary render targets
 	virtual void setDriver(NL3D::UDriver *driver) = 0;
+
+	/// Attach the driver to the display, return true if attached
+	virtual bool attachToDisplay() = 0;
+	/// Detach the driver from the display
+	virtual void detachFromDisplay() = 0;
 	
 	/// Gets the required screen resolution for this device
 	virtual bool getScreenResolution(uint &width, uint &height) = 0;
@@ -101,6 +106,8 @@ public:
 	virtual void updateCamera(uint cid, const NL3D::UCamera *camera) = 0;
 	/// Get the frustum to use for clipping
 	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const = 0;
+	/// Get the original frustum of the camera
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// Is there a next pass
 	virtual bool nextPass() = 0;
@@ -114,13 +121,20 @@ public:
 	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const = 0;
 
 	/// At the start of a new render target
-	virtual bool wantClear() = 0;	
+	virtual bool wantClear() = 0;		
 	/// The 3D scene
 	virtual bool wantScene() = 0;
+	/// Scene post processing effects
+	virtual bool wantSceneEffects() = 0;
 	/// Interface within the 3D scene
 	virtual bool wantInterface3D() = 0;	
 	/// 2D Interface
 	virtual bool wantInterface2D() = 0;
+
+	/// Is this the first 3D scene of the frame
+	virtual bool isSceneFirst() = 0;
+	/// Is this the last 3D scene of the frame
+	virtual bool isSceneLast() = 0;
 
 	/// Returns true if a new render target was set, always fase if not using render targets
 	virtual bool beginRenderTarget() = 0;
@@ -128,6 +142,7 @@ public:
 	virtual bool endRenderTarget() = 0;
 	
 	static const char *getLibraryName(CStereoDeviceInfo::TStereoDeviceLibrary library);
+	// List all devices. Device creation factories are no longer valid after re-calling this function
 	static void listDevices(std::vector<CStereoDeviceInfo> &devicesOut);
 	static IStereoDisplay *createDevice(const CStereoDeviceInfo &deviceInfo);
 	static void releaseUnusedLibraries();

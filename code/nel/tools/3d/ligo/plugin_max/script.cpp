@@ -1739,14 +1739,14 @@ bool MakeSnapShot (NLMISC::CBitmap &snapshot, const NL3D::CTileBank &tileBank, c
 		float posY = config.CellSize * (float)ymin;
 
 		// Use NELU
-		if (CNELU::init (oversampledWidth, oversampledHeight, CViewport(), 32, true, NULL, true))
+		if (CNELU::init (oversampledWidth, oversampledHeight, CViewport(), 32, true, NULL, false, true)) // FIXME: OpenGL not working correctly, offscreen not available in Direct3D
 		{
 			// Setup the camera
 			CNELU::Camera->setTransformMode (ITransformable::DirectMatrix);
 			CMatrix view;
 			view.setPos (CVector (width/2 + posX, height/2 + posY, width));
 			view.setRot (CVector::I, -CVector::K, CVector::J);
-			CNELU::Camera->setFrustum (width, height, 0.1f, 1000.f, false);
+			CNELU::Camera->setFrustum (width, height, 0.1f, 10000.f, false);
 			CNELU::Camera->setMatrix (view);
 
 			// Create a Landscape.
@@ -1766,11 +1766,16 @@ bool MakeSnapShot (NLMISC::CBitmap &snapshot, const NL3D::CTileBank &tileBank, c
 			theLand->enableAdditive (true);
 			theLand->Landscape.setRefineMode (true);
 
+			// theLand->Landscape.setupStaticLight(CRGBA(255, 255, 255), CRGBA(0, 0, 0), 1.0f);
+			// theLand->Landscape.setThreshold(0.0005);
+
 			// Enbable automatique lighting
 	#ifndef NL_DEBUG
-			theLand->Landscape.enableAutomaticLighting (true);
-			theLand->Landscape.setupAutomaticLightDir (CVector (0, 0, -1));
+			// theLand->Landscape.enableAutomaticLighting (true);
+			// theLand->Landscape.setupAutomaticLightDir (CVector (0, 0, -1));
 	#endif // NL_DEBUG
+
+			// theLand->Landscape.updateLightingAll();
 
 			// Clear the backbuffer and the alpha
 			CNELU::clearBuffers(CRGBA(255,0,255,0));
@@ -1851,7 +1856,7 @@ bool MakeSnapShot (NLMISC::CBitmap &snapshot, const NL3D::CTileBank &tileBank, c
 Value* make_snapshot_cf (Value** arg_list, int count)
 {
 	// Make sure we have the correct number of arguments (7)
-	check_arg_count(check_zone_with_template, 7, count);
+	check_arg_count(NeLLigoMakeSnapShot, 7, count);
 
 	// Check to see if the arguments match up to what we expect
 	char *message = "NeLLigoMakeSnapShot [Object] [Snapshot filename] [xMin] [xMax] [yMin] [yMax] [Error in dialog]";
@@ -1903,11 +1908,11 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 			else
 			{
 				// Build a filename
-				char drive[512];
-				char path[512];
-				char name[512];
-				char ext[512];
-				_splitpath (fileName.c_str(), drive, path, name, ext);
+				char drivetga[512];
+				char pathtga[512];
+				char nametga[512];
+				char exttga[512];
+				_splitpath (fileName.c_str(), drivetga, pathtga, nametga, exttga);
 
 				// Build the zone
 				CZone zone;
@@ -1970,7 +1975,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 								{
 									// Build the snap shot filename
 									char outputFilenameSnapShot[512];
-									_makepath (outputFilenameSnapShot, drive, path, name, ".tga");
+									_makepath (outputFilenameSnapShot, drivetga, pathtga, nametga, ".tga");
 
 									// Output the snap shot
 									COFile outputSnapShot;
@@ -2011,10 +2016,10 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 
 										// Write the zone
 										COFile outputLigoZone;
-										_makepath (outputFilenameSnapShot, drive, path, name, ".ligozone");
+										_makepath (outputFilenameSnapShot, drivetga, pathtga, nametga, ".ligozone");
 
 										// Catch exception
-										try
+										/*try
 										{
 											// Open the selected zone file
 											if (outputLigoZone.open (outputFilenameSnapShot))
@@ -2043,7 +2048,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 											char tmp[512];
 											smprintf (tmp, 512, "Error while loading the file %s : %s", fileName, e.what());
 											CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
-										}
+										}*/
 									}
 									else
 									{

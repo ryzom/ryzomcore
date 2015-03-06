@@ -1,0 +1,8 @@
+PluginName = Domain_Management
+Description = Plug-in for Domain Management.
+Version = 1.0.0
+TemplatePath = ../../../private_php/ams/plugins/Domain_Management/templates/index.tpl
+Type = Manual
+
+
+

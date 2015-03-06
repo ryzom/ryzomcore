@@ -33,10 +33,10 @@ extern "C" {
 ** used to make the header, and the header can be found at
 **   http://www.opengl.org/registry/
 **
-** Khronos $Revision: 25923 $ on $Date: 2014-03-17 03:54:56 -0700 (Mon, 17 Mar 2014) $
+** Khronos $Revision: 26290 $ on $Date: 2014-04-16 05:35:38 -0700 (Wed, 16 Apr 2014) $
 */
 
-#define GLX_GLXEXT_VERSION 20140317
+#define GLX_GLXEXT_VERSION 20140416
 
 /* Generated C header for:
  * API: glx
@@ -289,6 +289,23 @@ GLXContext glXImportContextEXT (Display *dpy, GLXContextID contextID);
 void glXFreeContextEXT (Display *dpy, GLXContext context);
 #endif
 #endif /* GLX_EXT_import_context */
+
+#ifndef GLX_EXT_stereo_tree
+#define GLX_EXT_stereo_tree 1
+typedef struct {
+    int type;
+    unsigned long serial;
+    Bool send_event;
+    Display *display;
+    int extension;
+    int evtype;
+    GLXDrawable window;
+    Bool stereo_tree;
+} GLXStereoNotifyEventEXT;
+#define GLX_STEREO_TREE_EXT               0x20F5
+#define GLX_STEREO_NOTIFY_MASK_EXT        0x00000001
+#define GLX_STEREO_NOTIFY_EXT             0x00000000
+#endif /* GLX_EXT_stereo_tree */
 
 #ifndef GLX_EXT_swap_control
 #define GLX_EXT_swap_control 1

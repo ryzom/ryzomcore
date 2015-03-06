@@ -17,8 +17,9 @@
 
 
 #include "stdpch.h"
-#include <nel/net/service.h>
 #include "used_continent.h"
+#include "nel/net/service.h"
+
 
 using namespace std;
 using namespace NLMISC;
@@ -105,7 +106,7 @@ uint32	CUsedContinent::getInstanceForContinent(const std::string &continentName)
 	if (it != _Continents.end())
 		return it->ContinentInstance;
 	else
-		return ~0;
+		return INVALID_AI_INSTANCE;
 }
 
 uint32	CUsedContinent::getInstanceForContinent(CONTINENT::TContinent continentEnum) const
@@ -115,7 +116,7 @@ uint32	CUsedContinent::getInstanceForContinent(CONTINENT::TContinent continentEn
 	if (it != _Continents.end())
 		return it->ContinentInstance;
 	else
-		return ~0;
+		return INVALID_AI_INSTANCE;
 }
 
 const std::string &CUsedContinent::getContinentForInstance(uint32 instanceNumber) const

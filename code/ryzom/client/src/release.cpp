@@ -27,6 +27,7 @@
 #include "nel/misc/system_utils.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
+#include "nel/3d/fxaa.h"
 #include "nel/3d/fasthls_modifier.h"
 #include "nel/3d/particle_system_manager.h"
 #include "nel/3d/particle_system.h"
@@ -120,7 +121,6 @@ extern bool noUserChar;
 extern bool userChar;
 extern bool serverReceivedReady;
 extern bool CharNameValidArrived;
-
 
 extern void releaseContextualCursor();
 extern void selectTipsOfTheDay (uint tips);
@@ -501,7 +501,8 @@ void releaseOutGame()
 		// Remove the Actions listener from the Events Server.
 		EventsListener.removeFromServer(CInputHandlerManager::getInstance()->FilteredEventServer);
 
-		// Release Bloom
+		// Release effects
+		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
 
 		// Release Scene, textcontexts, materials, ...
@@ -519,6 +520,16 @@ void releaseStereoDisplayDevice()
 {
 	if (StereoDisplay)
 	{
+		StereoDisplay->getOriginalFrustum(0, &MainCam);
+		if (SceneRoot)
+		{
+			UCamera cam = SceneRoot->getCam();
+			StereoDisplay->getOriginalFrustum(1, &cam);
+		}
+		nlassert(Driver);
+		Driver->setViewport(NL3D::CViewport());
+		nlassert(Scene);
+		Scene->setViewport(NL3D::CViewport());
 		delete StereoDisplay;
 		StereoDisplay = NULL;
 		StereoHMD = NULL;
@@ -585,7 +596,8 @@ void release()
 			Driver->deleteTextContext(TextContext);
 		TextContext = NULL;
 
-		// Release Bloom
+		// Release effects
+		delete FXAA; FXAA = NULL;
 		CBloomEffect::releaseInstance();
 
 		// Release Scene, textcontexts, materials, ...
@@ -654,12 +666,12 @@ void release()
 	delete &CLuaManager::getInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
-	
+
 
 
 
 #if FINAL_VERSION
-	// openURL ("http://ryzom.com/exit/");
+	// openURL ("http://www.ryzomcore.org/exit/");
 #endif
 
 }// release //

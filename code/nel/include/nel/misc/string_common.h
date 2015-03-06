@@ -264,6 +264,40 @@ inline bool fromString(const std::string &str, bool &val)
 	return true;
 }
 
+inline bool fromString(const char *str, uint32 &val) { if (strstr(str, "-") != NULL) { val = 0; return false; } char *end; unsigned long v; errno = 0; v = strtoul(str, &end, 10); if (errno || v > UINT_MAX || end == str) { val = 0; return false; } else { val = (uint32)v; return true; } }
+inline bool fromString(const char *str, sint32 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > INT_MAX || v < INT_MIN || end == str) { val = 0; return false; } else { val = (sint32)v; return true; } }
+inline bool fromString(const char *str, uint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > UCHAR_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint8)v; return true; } }
+inline bool fromString(const char *str, sint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SCHAR_MAX || v < SCHAR_MIN || end == str) { val = 0; return false; } else { val = (sint8)v; return true; } }
+inline bool fromString(const char *str, uint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > USHRT_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint16)v; return true; } }
+inline bool fromString(const char *str, sint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SHRT_MAX || v < SHRT_MIN || end == str) { val = 0; return false; } else { val = (sint16)v; return true; } }
+inline bool fromString(const char *str, uint64 &val) { bool ret = sscanf(str, "%"NL_I64"u", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const char *str, sint64 &val) { bool ret = sscanf(str, "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const char *str, float &val) { bool ret = sscanf(str, "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
+inline bool fromString(const char *str, double &val) { bool ret = sscanf(str, "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
+
+inline bool fromString(const char *str, bool &val)
+{
+	switch (str[0])
+	{
+	case '1':
+	case 't':
+	case 'y':
+	case 'T':
+	case 'Y':
+		val = true;
+		return true;
+	case '0':
+	case 'f':
+	case 'n':
+	case 'F':
+	case 'N':
+		val = false;
+		return true;
+	}
+
+	return false;
+}
+
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference

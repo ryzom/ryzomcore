@@ -242,11 +242,11 @@ float CItemCraftParameters::getCraftParameterValue( RM_FABER_STAT_TYPE::TRMStatT
 		case RM_FABER_STAT_TYPE::ShockWaveProtection:
 		case RM_FABER_STAT_TYPE::PoisonProtection:
 		case RM_FABER_STAT_TYPE::ElectricityProtection:
-			if (Protection1 == statType)
+			if (Protection1 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection1Factor;
-			else if (Protection2 == statType)
+			else if (Protection2 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection2Factor;
-			else if (Protection3 == statType)
+			else if (Protection3 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection3Factor;
 			else return 0.0f;
 		case RM_FABER_STAT_TYPE::DesertResistance:
@@ -2895,13 +2895,13 @@ uint32 CGameItem::maxDurability() const
 
 			// tools
 			// SHEARS = pick for forage
-			case ITEM_TYPE::SHEARS:			return (uint32)CWeaponCraftParameters::ForageToolDurability;
-			case ITEM_TYPE::AmmoTool:		return (uint32)CWeaponCraftParameters::AmmoCraftingToolDurability;
-			case ITEM_TYPE::ArmorTool:		return (uint32)CWeaponCraftParameters::ArmorCraftingToolDurability;
-			case ITEM_TYPE::JewelryTool:	return (uint32)CWeaponCraftParameters::JewelryCraftingToolDurability;
-			case ITEM_TYPE::MeleeWeaponTool:return (uint32)CWeaponCraftParameters::MeleeWeaponCraftingToolDurability;
-			case ITEM_TYPE::RangeWeaponTool:return (uint32)CWeaponCraftParameters::RangeWeaponCraftingToolDurability;
-			case ITEM_TYPE::ToolMaker:		return (uint32)CWeaponCraftParameters::ToolCraftingToolDurability;
+			case ITEM_TYPE::SHEARS:          d = CWeaponCraftParameters::ForageToolDurability;              break;
+			case ITEM_TYPE::AmmoTool:        d = CWeaponCraftParameters::AmmoCraftingToolDurability;        break;
+			case ITEM_TYPE::ArmorTool:       d = CWeaponCraftParameters::ArmorCraftingToolDurability;       break;
+			case ITEM_TYPE::JewelryTool:     d = CWeaponCraftParameters::JewelryCraftingToolDurability;     break;
+			case ITEM_TYPE::MeleeWeaponTool: d = CWeaponCraftParameters::MeleeWeaponCraftingToolDurability; break;
+			case ITEM_TYPE::RangeWeaponTool: d = CWeaponCraftParameters::RangeWeaponCraftingToolDurability; break;
+			case ITEM_TYPE::ToolMaker:       d = CWeaponCraftParameters::ToolCraftingToolDurability;        break;
 
 			default:
 				return 0;

@@ -518,7 +518,7 @@ void CUserEntity::updateVisualPropertyName(const NLMISC::TGameCycle &gameCycle, 
 				html->browse("home");
 		}
 	}
-*/	
+*/
 }// updateVisualPropertyName //
 
 //-----------------------------------------------
@@ -2384,10 +2384,13 @@ void CUserEntity::updateSound(const TTime &time)
 	if (SoundMngr == 0)
 		return;
 
-	SoundMngr->setListenerPos(pos());
-	const CMatrix &camMat = MainCam.getMatrix();
-	SoundMngr->setListenerOrientation(camMat.getJ(), camMat.getK());
-
+	if (!(StereoHMD && true)) // TODO: ClientCfg.Headphone
+	{
+		// NOTE: StereoHMD+Headphone impl in main_loop.cpp
+		SoundMngr->setListenerPos(pos());
+		const CMatrix &camMat = MainCam.getMatrix();
+		SoundMngr->setListenerOrientation(camMat.getJ(), camMat.getK());
+	}
 
 	if (ClientCfg.Light)
 		return;

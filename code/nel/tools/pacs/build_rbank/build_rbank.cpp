@@ -990,7 +990,7 @@ void	processGlobalRetriever()
 		{
 			if (Verbose)
 				nlinfo("unlink: %s", unlinkstr.c_str());
-			faultyInstances.insert(make_pair<uint, CFaultyInstance>(i, fi));
+			faultyInstances.insert(std::pair<uint, CFaultyInstance>(i, fi));
 		}
 	}
 
@@ -1046,7 +1046,7 @@ void	processGlobalRetriever()
 			{
 				if (Verbose)
 					nlinfo("after fix: unlink: %s", unlinkstr.c_str());
-				faultyInstances.insert(make_pair<uint, CFaultyInstance>(i, fi));
+				faultyInstances.insert(std::pair<uint, CFaultyInstance>(i, fi));
 			}
 		}
 	}

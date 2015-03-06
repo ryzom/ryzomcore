@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Ryzom Core | Setup</title>
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div style="margin-left: auto; margin-right: auto; padding-left: 24px; padding-right: 24px; padding-bottom: 24px; max-width: 1024px;">
+			<div class="page-header">
+				<h1>Ryzom Core <small>Setup</small></h1>
+			</div>
+			<form class="form-horizontal" role="form">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Basics</h2>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<label for="privatePhpDirectory" class="col-sm-3 control-label">Private PHP Directory</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="privatePhpDirectory" name="privatePhpDirectory" value="../private_php/">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="sqlHostname" class="col-sm-3 control-label">SQL Hostname</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="sqlHostname" name="sqlHostname" value="localhost">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="sqlUsername" class="col-sm-3 control-label">SQL Username</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="sqlUsername" name="sqlUsername" value="root">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="sqlPassword" class="col-sm-3 control-label">SQL Password</label>
+							<div class="col-sm-6">
+								<input type="password" class="form-control" id="sqlPassword" name="sqlPassword" value="">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Core</h2>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<label for="nelDatabase" class="col-sm-3 control-label">NeL Database</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="nelDatabase" name="nelDatabase" value="nel">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">Admin</h2>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<label for="toolsDatabase" class="col-sm-3 control-label">NeL Tools Database</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="toolsDatabase" name="toolsDatabase" value="nel_tools">
+							</div>
+						</div>
+					</div>
+					<!-- TODO: Initial admin user -->
+				</div>
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h2 class="panel-title">AMS</h2>
+					</div>
+					<div class="panel-body">
+						<div class="form-group">
+							<label for="amsDatabase" class="col-sm-3 control-label">AMS Database</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="amsDatabase" name="amsDatabase" value="ams">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="amsUserDatabase" class="col-sm-3 control-label">AMS User Database</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="amsUserDatabase" name="amsUserDatabase" value="ams_user">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="amsAdminUsername" class="col-sm-3 control-label">AMS Admin Username</label>
+							<div class="col-sm-6">
+								<input type="text" class="form-control" id="amsAdminUsername" name="amsAdminUsername" value="admin">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="amsAdminPassword" class="col-sm-3 control-label">AMS Admin Password</label>
+							<div class="col-sm-6">
+								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="admin">
+							</div>
+						</div>
+					</div>
+					<!-- TODO: Initial admin user -->
+				</div>
+				<button type="submit" class="btn btn-primary">Configure</button>
+			</form>
+		</div>
+
+		<script src="js/bootstrap.min.js"></script>
+	</body>
+</html>

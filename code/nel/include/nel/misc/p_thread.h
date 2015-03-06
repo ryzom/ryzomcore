@@ -39,9 +39,9 @@ class CPThread : public IThread
 public:
 	enum TThreadState
 	{
-		ThreadStateNone, 
-		ThreadStateRunning, 
-		ThreadStateFinished, 
+		ThreadStateNone,
+		ThreadStateRunning,
+		ThreadStateFinished,
 	};
 
 	/// Constructor

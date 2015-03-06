@@ -231,7 +231,7 @@ bool CFormElm::isAtom () const
 const CType* CFormElm::getType ()
 {
 	warning (false, "getType", "This node is not an atom.");
-	return 0;
+	return NULL;
 }
 
 // ***************************************************************************
@@ -3052,6 +3052,13 @@ void CFormElmAtom::read (xmlNodePtr node, CFormLoader &/* loader */, const CType
 void CFormElmAtom::setValue (const char *value)
 {
 	Value = value;
+}
+
+// ***************************************************************************
+
+void CFormElmAtom::getValue (std::string &result) const
+{
+	result = Value;
 }
 
 // ***************************************************************************

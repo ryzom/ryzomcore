@@ -45,20 +45,20 @@ void CHairSet::init (NLMISC::IProgressCallback &progress)
 		progress.progress ((float)k/(float)numHairItem);
 
 		const CItemSheet *item = SheetMngr.getItem(SLOTTYPE::HEAD_SLOT, k);
-		if( (item) && (!item->getShape().empty()) )
+		if (item && !item->getShape().empty())
 		{
-			std::string itemName = NLMISC::toLower(item->getShape());
-
 			if (item->getShape().find("cheveux", 0) != std::string::npos)
 			{
 				// get race
-				uint16 race = (uint16) itemName[1] | ((uint16) itemName[0] << 8);
-				switch(race)
+				std::string itemName = NLMISC::toLower(item->getShape());
+
+				// fortunately, first character of each race is distinct
+				switch(itemName[0])
 				{
-					case 'ma': _Hairs[Matis].push_back(k); break;
-					case 'tr': _Hairs[Tryker].push_back(k); break;
-					case 'zo': _Hairs[Zorai].push_back(k); break;
-					case 'fy': _Hairs[Fyros].push_back(k); break;
+					case 'm': _Hairs[Matis].push_back(k); break;
+					case 't': _Hairs[Tryker].push_back(k); break;
+					case 'z': _Hairs[Zorai].push_back(k); break;
+					case 'f': _Hairs[Fyros].push_back(k); break;
 				}
 			}
 		}

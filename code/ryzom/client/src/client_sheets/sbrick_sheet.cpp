@@ -312,8 +312,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	BrickRequiredFlags= 0;
 	for(i=0;i<Properties.size();i++)
 	{
-		string text= Properties[i].Text;
-		strlwr(text);
+		string text= NLMISC::toLower(Properties[i].Text);
 
 		// If the property is an opening property
 		const	string	openingProp[]= { "opening_1:", "opening_2:", "opening_3:" };

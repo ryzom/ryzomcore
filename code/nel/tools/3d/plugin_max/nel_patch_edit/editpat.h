@@ -755,6 +755,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		TCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
 		void ActivateSubobjSel(int level, XFormModes& modes );
 		int NeedUseSubselButton() { return 0; }
+		void SelectSubPatch(int index);
 		void SelectSubComponent( HitRecord *hitRec, BOOL selected, BOOL all, BOOL invert );
 		void ClearSelection(int selLevel);
 		void SelectAll(int selLevel);

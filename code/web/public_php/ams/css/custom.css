@@ -1,0 +1,139 @@
+.box-content {
+    background: white;
+}
+
+.box-header {
+    background-color: white;
+}
+	
+.top-block {
+    background-color: white;
+	border-radius: 5px;
+}	
+	
+.row-fluid [class*="span"] {
+    min-height: 28px;
+}	
+	
+.login-header
+{
+	height:190px;
+}
+
+.brand img
+{
+	height:100%;
+	margin-bottom:-18px;
+	margin-top:-15px;
+	width:auto;
+}
+
+#for-is-ajax
+{
+	display:none;
+}
+
+.navbar {
+    border-bottom: 0px;
+}
+
+.flags {
+  display: block;
+  position:relative;
+  left:290px;
+  top:28px;
+}
+
+.flags_no_visible_elements{
+  display: block;
+  position:relative;
+  left:67%;
+  top:210px;
+}
+
+.input-prepend .add-on,
+.input-append .add-on {
+  height: auto;
+}
+
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"],
+.uneditable-input {
+  height: auto;
+}
+
+.btn .caret {
+    margin: 10px;
+}
+
+.btn .caret {
+    border-top-color: #333;
+}
+
+.table-bordered {
+    border-collapse: collapse;
+}
+
+.table {
+margin-top: 10px;
+}
+
+.nav {
+    margin-bottom: 22px;
+}
+
+.radio, .checkbox {
+    display: table-row-group;
+}
+
+.gender-list {
+	margin-left: 22px;
+}
+
+.lg-icon {
+    font-size: 20px;
+	margin: 5px;
+}
+
+.sidebar-nav {
+    padding-top: 5px;
+}
+
+.sidebar-nav .nav-header{
+	color:#666;
+}
+
+.flags_logged_in{
+  display: inline;
+  position:absolute;
+  margin:7px;
+}
+
+.setup-width {
+	width:75%;
+}
+
+.js-masonry {
+	padding-left: -1;
+	padding-right: -1;
+	margin-left: -1;
+	margin-right: -1;
+}
+
+.col-sm-4 {
+    width: 33.333%;
+}

@@ -36,7 +36,7 @@ UnitTest.testLoadAnimationScenarioUi = function()
 			end
 
 			local filename = form.LoadScenario_Name	
-			if  string.find(filename, '\.r2', -3) == nil then
+			if  string.find(filename, '.r2', -3) == nil then
 
 				local ui = r2:getForm("LoadScenario")
 				ui.active = true		
@@ -134,12 +134,12 @@ UnitTest.testLoadScenarioUi = function()
 			local ucName = ucstring()
 			ucName:fromUtf8(form.LoadScenario_Name)
 			local filename = tostring(ucName)	
-			if string.find(filename, '\.r2', -3) == nil then
+			if string.find(filename, '.r2', -3) == nil then
 				messageBox(i18n.get("uiR2EDLoadScenario_InvalidFileName"))
 				return
 			end
 
---			if  string.find(filename, '\.r2', -3) == nil then
+--			if  string.find(filename, '.r2', -3) == nil then
 --				filename = form.Name .. ".r2"
 --			end
 			
@@ -206,7 +206,7 @@ function UnitTest.saveScenario(name, overwrite)
 			messageBox(i18n.get("uiR2EDInvalidName"))
 			return
 		end			
-		if  string.find(name, '\.r2', -3) == nil then
+		if  string.find(name, '.r2', -3) == nil then
 			name = name .. ".r2"
 		end
 		-- update scenario name with the new name
@@ -1103,8 +1103,8 @@ end
 
 
 function t5()
-	local toto = "&ezr_חא'_\\)d //:1' 2 יייא'..)א\/:*?\"<>|א)@4 58ftgsfdg\"\/:*?\"<>|"
-	toto = string.gsub(toto, "[\\\/\:\*\?\"\<\>\|]", "_")
+	local toto = "&ezr_חא'_\\)d //:1' 2 יייא'..)א/:*?\"<>|א)@4 58ftgsfdg\"/:*?\"<>|"
+	toto = string.gsub(toto, "[\\/:*?\"<>|]", "_")
 end
 
 

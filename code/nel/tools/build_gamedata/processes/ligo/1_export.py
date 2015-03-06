@@ -8,7 +8,7 @@
 # Export ligo
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -62,7 +62,7 @@ if LigoExportLand == "" or LigoExportOnePass == 1:
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemCmbExportDirectory)
 	mkPath(log, DatabaseDirectory + "/" + ZoneSourceDirectory[0])
 	mkPath(log, ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory)
-	if (needUpdateDirByTagLog(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag")):
+	if (needUpdateDirByTagLogFiltered(log, DatabaseDirectory + "/" + LigoMaxSourceDirectory, ".max", ExportBuildDirectory + "/" + LigoEcosystemTagExportDirectory, ".max.tag", [ "zonematerial", "zonetransition", "zonespecial" ])):
 		printLog(log, "WRITE " + ligoIniPath)
 		ligoIni = open(ligoIniPath, "w")
 		ligoIni.write("[LigoConfig]\n")

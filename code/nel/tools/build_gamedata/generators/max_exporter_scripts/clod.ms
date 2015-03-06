@@ -49,6 +49,7 @@ fn runNelMaxExport inputMaxFile =
 	tagThisFile = true
 	
 	-- Unhide category
+	unhidelayers()
 	unhidecategory()
 	
 	-- Unhide
@@ -56,6 +57,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- unselect
 	max select none
+	clearSelection()
 	
 	-- Exported object count
 	exported = 0

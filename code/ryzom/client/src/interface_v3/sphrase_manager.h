@@ -338,7 +338,7 @@ public:
 	// Get the Phrase Success Rate %
 	sint				getPhraseSuccessRate(const CSPhraseCom &phrase);
 	// Get the Phrase Success Rate %. Manually gives the Skill to do the comparison (for craft)
-	sint				getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel);
+	sint				getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel, sint successModifier);
 	// Get the Phrase Success Rate %. Manually gives the Skill to do the comparison (for Forage Extraction)
 	sint				getForageExtractionPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill);
 	// return the fmt according to forage terrain specializing

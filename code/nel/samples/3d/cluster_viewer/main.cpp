@@ -38,7 +38,9 @@
 #include "nel/3d/event_mouse_listener.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
@@ -360,7 +362,7 @@ int main()
 					}
 					++itAcc;
 				}
-				if ((vCluster.size() == 0) && (DispCS[0].pIG == pCurIG))
+				if (vCluster.empty() && (DispCS[0].pIG == pCurIG))
 				{
 					vCluster.push_back (pClipTrav->RootCluster);
 				}

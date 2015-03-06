@@ -23,10 +23,12 @@
 #include "nel/misc/types_nl.h"
 #include "nel/gui/proc.h"
 #include "nel/gui/link_data.h"
+#include "nel/gui/variable_data.h"
 
 namespace NLGUI
 {
 	class CInterfaceElement;
+	class CViewBase;
 	class CInterfaceGroup;
 	class CInterfaceAnim;
 	class CCtrlSheetSelection;
@@ -82,10 +84,13 @@ namespace NLGUI
 		virtual void removeLinkData( uint32 id ) = 0;
 		virtual bool getLinkData( uint32 id, SLinkData &linkData ) = 0;
 		virtual void updateLinkData( uint32 id, const SLinkData &linkData ) = 0;
+		virtual void setVariable( const VariableData &v ) = 0;
 		virtual bool serializeVariables( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeProcs( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializePointerSettings( xmlNodePtr parentNode ) const = 0;
 		virtual bool serializeKeySettings( xmlNodePtr parentNode ) const = 0;
+		virtual CViewBase* createClass( const std::string &name ) = 0;
+		virtual void setWorkDir( const std::string &workdir ) = 0;
 	};
 }
 

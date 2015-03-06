@@ -302,7 +302,7 @@ CClientConfig::CClientConfig()
 	Contrast			= 0.f;						// Default Monitor Contrast.
 	Luminosity			= 0.f;						// Default Monitor Luminosity.
 	Gamma				= 0.f;						// Default Monitor Gamma.
-	
+
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
 	VRDisplayDeviceId	= "";
@@ -328,11 +328,11 @@ CClientConfig::CClientConfig()
 
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
+	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
 	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://www.ryzom.com/profile";
+	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
 	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
+	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
@@ -352,13 +352,6 @@ CClientConfig::CClientConfig()
 
 	ForceDeltaTime		= 0;						// Default ForceDeltaTime, disabled by default
 
-#ifdef NL_OS_WINDOWS
-	DisableDirectInput		= false;				// Default DisableDirectInput
-#else
-	DisableDirectInput		= true;					// no direct input on linux
-#endif
-
-	DisableDirectInputKeyboard = true;				// Default DisableDirectInput fort he keyboard only
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 0.85f;
 	CursorSpeed				= 1.f;					// Default CursorSpeed
@@ -399,6 +392,8 @@ CClientConfig::CClientConfig()
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
 
+	FXAA				= true;
+
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
@@ -436,11 +431,11 @@ CClientConfig::CClientConfig()
 	PatchVersion.clear();
 	PatchServer.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
+	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
-	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -849,6 +844,7 @@ void CClientConfig::setValues()
 		if (nlstricmp(varPtr->asString(), "Auto") == 0 || nlstricmp(varPtr->asString(), "0") == 0) ClientCfg.Driver3D = CClientConfig::DrvAuto;
 		else if (nlstricmp(varPtr->asString(), "OpenGL") == 0 || nlstricmp(varPtr->asString(), "1") == 0) ClientCfg.Driver3D = CClientConfig::OpenGL;
 		else if (nlstricmp(varPtr->asString(), "Direct3D") == 0 || nlstricmp(varPtr->asString(), "2") == 0) ClientCfg.Driver3D = CClientConfig::Direct3D;
+		else if (nlstricmp(varPtr->asString(), "OpenGLES") == 0 || nlstricmp(varPtr->asString(), "3") == 0) ClientCfg.Driver3D = CClientConfig::OpenGLES;
 	}
 	else
 		cfgWarning ("Default value used for 'Driver3D' !!!");
@@ -859,8 +855,6 @@ void CClientConfig::setValues()
 
 	////////////
 	// INPUTS //
-	READ_BOOL_FV(DisableDirectInput)
-	READ_BOOL_FV(DisableDirectInputKeyboard)
 	READ_BOOL_FV(HardwareCursor)
 	READ_FLOAT_FV(HardwareCursorScale)
 	READ_FLOAT_FV(CursorSpeed)
@@ -890,7 +884,7 @@ void CClientConfig::setValues()
 	READ_STRING_DEV(ForgetPwdURL)
 	READ_STRING_DEV(FreeTrialURL)
 	READ_STRING_DEV(LoginSupportURL)
-	
+
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
@@ -996,6 +990,9 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
 
+	// FXAA
+	READ_BOOL_FV(FXAA)
+
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)
 	// FoV.
@@ -1080,10 +1077,10 @@ void CClientConfig::setValues()
 
 
 	/////////////////////////
-	// NEW PATCHLET SYSTEM //	
+	// NEW PATCHLET SYSTEM //
 	READ_STRING_FV(PatchletUrl)
 
-	////////////////////////
+	///////////
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
@@ -1734,10 +1731,7 @@ void CClientConfig::setValues()
 	}
 
 	// Initialize the camera distance (after camera dist max)
-	if (!ClientCfg.FPV)
-	{
-		View.cameraDistance(ClientCfg.CameraDistance);
-	}
+	View.setCameraDistanceMaxForPlayer();
 
 	// draw in client light?
 	if(ClientCfg.Light)
@@ -1979,16 +1973,16 @@ void CClientConfig::init(const string &configFileName)
 		size_t endOfLine = contentUtf8.find("\n", pos);
 		contentUtf8.erase(pos, (endOfLine - pos) + 1);
 	}
-	
+
 	// get current location of the root config file (client_default.cfg)
 	std::string defaultConfigLocation;
 	if(!getDefaultConfigLocation(defaultConfigLocation))
 		nlerror("cannot find client_default.cfg");
-	
+
 	// and store it in the RootConfigFilename value in the very first line
-	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") + 
+	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") +
 		defaultConfigLocation + "\";\n");
-	
+
 	// save the updated config file
 	NLMISC::COFile configFile(configFileName, false, true, false);
 	configFile.serialBuffer((uint8*)contentUtf8.c_str(), (uint)contentUtf8.size());
@@ -2216,33 +2210,29 @@ ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
 }
 
 // ***************************************************************************
-bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const 
+bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 {
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
-	
-	p_name = std::string();
-	
+
+	p_name.clear();
+
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = 
-		CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-
+	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
 #elif defined(RYZOM_ETC_PREFIX)
 	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
 	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
-
 #else
 	// some other prefix here :)
-
 #endif // RYZOM_ETC_PREFIX
 
 	// look in the current working directory first
-	if(CFile::isExists(defaultConfigFileName))
+	if (CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
 
 	// if not in working directory, check using prefix path
-	else if(CFile::isExists(defaultConfigPath + defaultConfigFileName))
+	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
 	// if some client_default.cfg was found return true

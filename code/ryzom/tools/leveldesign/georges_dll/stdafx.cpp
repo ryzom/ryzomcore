@@ -19,6 +19,3 @@
 //	stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
-
-
-void foo_std_afx_to_remove_warning() {};

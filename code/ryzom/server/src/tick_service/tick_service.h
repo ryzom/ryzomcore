@@ -113,7 +113,7 @@ public:
 			NbMeasures = 0;
 			Stats.resize( NbTimeMeasureHistoryStats );
 			Stats[MHTSum] = 0;
-			Stats[MHTMin] = ~0;
+			Stats[MHTMin] = std::numeric_limits<T>::max();
 			Stats[MHTMax] = 0;
 		}
 	}

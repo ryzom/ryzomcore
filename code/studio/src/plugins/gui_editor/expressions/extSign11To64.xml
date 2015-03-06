@@ -1,0 +1,8 @@
+<expression>
+<category>Bits</category>
+<name>extSign11To64</name>
+<variable>false</variable>
+<slots>
+<slot>A</slot>
+</slots>
+</expression>

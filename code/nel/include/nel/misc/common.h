@@ -347,7 +347,7 @@ std::string formatThousands(const std::string& s);
 
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory
-bool launchProgram (const std::string &programName, const std::string &arguments);
+bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);

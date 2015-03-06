@@ -839,7 +839,7 @@ public:
 	// ***************************************************************************
 
 	// Mode initialisation, requests
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
+	virtual bool			init (uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
 	virtual bool			setDisplay(nlWindow wnd, const GfxMode& mode, bool show, bool resizeable) throw(EBadDisplay);
 	virtual bool			release();
 	virtual bool			setMode(const GfxMode& mode);
@@ -944,6 +944,7 @@ public:
 	virtual ITexture		*getRenderTarget() const;
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y, uint32 width,
 													uint32 height, uint32 mipmapLevel);
+	virtual bool			textureCoordinateAlternativeMode() const { return true; };
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 	virtual bool			fillBuffer (CBitmap &bitmap);
 
@@ -953,7 +954,7 @@ public:
 	virtual void			setSwapVBLInterval(uint interval);
 	virtual uint			getSwapVBLInterval();
 	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1);
-	virtual	uint			getTextureHandle(const ITexture&tex);
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex);
 
 	// Matrix, viewport and frustum
 	virtual void			setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective = true);
@@ -1032,11 +1033,6 @@ public:
 
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
-
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
 
 	// Lights
 	virtual uint			getMaxLight () const;
@@ -1893,7 +1889,7 @@ public:
 		H_AUTO_D3D(CDriverD3D_setSamplerState);
 		nlassert (_DeviceInterface);
 		nlassert (sampler<MaxSampler);
-		nlassert (samplerState<MaxSamplerState);
+		nlassert ((int)samplerState<(int)MaxSamplerState);
 
 		// Ref on the state
 		CSamplerState &_samplerState = _SamplerStateCache[sampler][samplerState];
@@ -2025,7 +2021,7 @@ public:
 
 		// Remap high matrices indexes
 		type = (D3DTRANSFORMSTATETYPE)remapMatrixIndex (type);
-		nlassert (type<MaxMatrixState);
+		nlassert ((int)type<(int)MaxMatrixState);
 
 		CMatrixState &theMatrix = _MatrixCache[type];
 #ifdef NL_D3D_USE_RENDER_STATE_CACHE

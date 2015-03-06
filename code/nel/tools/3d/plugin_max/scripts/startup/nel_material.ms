@@ -545,7 +545,7 @@ plugin material NelMaterial
 	rollout nelBasicParameters "NeL Basic Parameters" rolledUp:false
 	(
 		Label lblNlbpA "NeL Material" align:#center across:3
-		Label lblNlbpB "http://dev.ryzom.com/" align:#center
+		Label lblNlbpB "http://www.ryzomcore.org/" align:#center
 		CheckBox cbTwoSided "2-Sided" checked:false align:#right
 		
 		group "Standard Lighting"
@@ -595,7 +595,7 @@ plugin material NelMaterial
 					cpSelfIllumColor.visible = bUseSelfIllumColor
 				)
 				else
-				(					
+				(
 					bTwoSided = cbTwoSided.checked
 					cAmbient = cpAmbient.color
 					cDiffuse = cpDiffuse.color
@@ -606,6 +606,9 @@ plugin material NelMaterial
 					cSelfIllumColor = cpSelfIllumColor.color
 					pSelfIllumAmount = spSelfIllumAmount.value
 					bUseSelfIllumColor = cbUseSelfIllumColor.checked
+					
+					spSelfIllumAmount.visible = not cbUseSelfIllumColor.checked
+					cpSelfIllumColor.visible = cbUseSelfIllumColor.checked
 					
 					delegate.twoSided = bTwoSided
 					delegate.ambient = cAmbient
@@ -2211,6 +2214,18 @@ plugin material NelMaterial
 
 	on create do 
 	(
+		-- Load from Standard
+		bTwoSided = delegate.twoSided
+		cAmbient = delegate.ambient
+		cDiffuse = delegate.diffuse
+		pOpacity = delegate.opacity
+		cSpecular = delegate.specular
+		pSpecularLevel = delegate.specularLevel
+		pGlossiness = delegate.glossiness
+		cSelfIllumColor = delegate.selfIllumColor
+		pSelfIllumAmount = delegate.selfIllumAmount
+		bUseSelfIllumColor = delegate.useSelfIllumColor
+		
 		-- Single shader
 		loadShader ShaderSingleTexture
 	)

@@ -92,7 +92,7 @@ CRenderTrav::CRenderTrav()
 
 
 // ***************************************************************************
-void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender)
+void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool generateShadows)
 {
 	#ifdef NL_DEBUG_RENDER_TRAV
 		nlwarning("Render trave begin");
@@ -279,7 +279,8 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender)
 		*/
 
 		// Generate ShadowMaps
-		_ShadowMapManager.renderGenerate(Scene);
+		if (generateShadows)
+			_ShadowMapManager.renderGenerate(Scene);
 
 		// Render the Landscape
 		renderLandscapes();

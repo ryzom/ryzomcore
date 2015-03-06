@@ -26,6 +26,9 @@
 #include <csetjmp>
 extern "C"
 {
+	#ifdef NL_COMP_MINGW
+	#	define HAVE_BOOLEAN
+	#endif
 	#include <jpeglib.h>
 }
 #endif

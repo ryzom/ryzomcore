@@ -81,7 +81,8 @@ const uint32 NB_FAKE_DISC_PROPERTIES_UPDATED_PER_CYCLE=2;
 typedef uint16	TProperty;
 typedef uint8	TPropIndex;
 
-const uint32 NB_PROPERTIES = 256; //number of TProperty elements (if you change this, change the ids of special properties in the Front-end Service!)
+// KAE: Commented because not used
+//const uint32 NB_PROPERTIES = 256; //number of TProperty elements (if you change this, change the ids of special properties in the Front-end Service!)
 
 
 /// Main type for positions/distances. Unit: millimeter

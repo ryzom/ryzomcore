@@ -205,12 +205,12 @@ namespace NLGUI
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		if(prop)
 		{
-			string sTmp = NLMISC::strlwr((const char*)prop);
+			string sTmp = NLMISC::toLower((const char*)prop);
 			_Texture = rVR.createTexture (sTmp, 0, 0, 256, 64, false, false);
 		}
 
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange" );
-		if (prop)	_AHOnChange = NLMISC::strlwr(prop);
+		if (prop)	_AHOnChange = NLMISC::toLower((const char*)prop);
 		prop = (char*) xmlGetProp( node, (xmlChar*)"onchange_params" );
 		if (prop)	_AHOnChangeParams = string((const char*)prop);
 

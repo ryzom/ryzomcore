@@ -467,8 +467,8 @@ CInterfaceManager::CInterfaceManager()
 
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
-	CGroupHTML::options.appName = "Ryzom";
-	CGroupHTML::options.appVersion = getUserAgent();
+	CGroupHTML::options.appName = getUserAgentName();
+	CGroupHTML::options.appVersion = getUserAgentVersion();
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -727,16 +727,6 @@ void CInterfaceManager::initOutGame()
 
 
 	//NLMEMORY::CheckHeap (true);
-	// Initialize the web browser
-	{
-		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
-		if (pGH)
-		{
-			pGH->setActive(true);
-			pGH->browse(ClientCfg.PatchletUrl.c_str());
-		}
-	}
-
 
 	if (ClientCfg.XMLOutGameInterfaceFiles.size()==0)
 	{
@@ -777,6 +767,17 @@ void CInterfaceManager::initOutGame()
 		initActions();
 	}
 	//NLMEMORY::CheckHeap (true);
+
+	// Initialize the web browser
+	{
+		CGroupHTML *pGH = dynamic_cast<CGroupHTML*>( CWidgetManager::getInstance()->getElementFromId(GROUP_BROWSER));
+
+		if (pGH)
+		{
+			pGH->setActive(true);
+			pGH->browse(ClientCfg.PatchletUrl.c_str());
+		}
+	}
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -2683,7 +2684,7 @@ bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
 }
 
 // ***************************************************************************
-void CInterfaceManager::log(const ucstring &str)
+void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 {
 	if (_LogState)
 	{
@@ -2692,7 +2693,7 @@ void CInterfaceManager::log(const ucstring &str)
 		FILE *f = fopen(fileName.c_str(), "at");
 		if (f != NULL)
 		{
-			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " * " + str.toUtf8();
+			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
 			fprintf(f, "%s\n", finalString.c_str());
 		}
 		fclose(f);
@@ -2924,7 +2925,7 @@ void CInterfaceManager::initEmotes()
 	CSkillManager		*pSM = CSkillManager::getInstance();
 
 	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
-	string	previousMind = "";
+	string	previousMind;
 	CGroupSubMenu *pFirstMenu = 0;
 
 	for (list<CEmoteEntry>::const_iterator it = entries.begin(); it != entries.end(); it++)
@@ -3981,5 +3982,3 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 	ucstr = str;
 	return true;;
 }
-
-

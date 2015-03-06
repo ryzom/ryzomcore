@@ -87,7 +87,7 @@ bool CGroupSkills::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	string sTmp;
 	ICDBNode::CTextId textId;
-	
+
 	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";

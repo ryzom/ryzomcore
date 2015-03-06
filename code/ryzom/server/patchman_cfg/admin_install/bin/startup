@@ -4,8 +4,8 @@ cd /srv/core
 rm */*.state */*/*.launch_ctrl */*/*.state
 /bin/bash /srv/core/bin/admin start
 
-# special case for the "ep1.std01.ryzomcore.org" machine - start the admin tool graph sync script
-if [ $(hostname) = "ep1.std01.ryzomcore.org" ]
+# special case for the "ep1.std01.ryzomcore.local" machine - start the admin tool graph sync script
+if [ $(hostname) = "ep1.std01.ryzomcore.local" ]
 	then
 	nohup /bin/sh /srv/core/bin/sync_rrd_graphs.sh &
 fi

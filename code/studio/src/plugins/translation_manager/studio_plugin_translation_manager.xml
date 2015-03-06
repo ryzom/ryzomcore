@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_translation_manager</library-name>
+    <name>TranslationManager</name>
+    <version>0.8</version>
+    <vendor>Ryzom Core</vendor>
+    <description>Translation Manager plugin.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

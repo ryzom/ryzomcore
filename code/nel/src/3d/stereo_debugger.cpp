@@ -26,7 +26,7 @@
  */
 
 #if !FINAL_VERSION
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/3d/stereo_debugger.h>
 
 // STL includes
@@ -42,6 +42,7 @@
 #include <nel/3d/texture_user.h>
 #include <nel/3d/driver_user.h>
 #include <nel/3d/u_texture.h>
+#include <nel/3d/render_target_manager.h>
 
 using namespace std;
 // using namespace NLMISC;
@@ -137,8 +138,6 @@ CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), 
 
 CStereoDebugger::~CStereoDebugger()
 {
-	releaseTextures();
-
 	if (!m_Mat.empty())
 	{
 		m_Driver->deleteMaterial(m_Mat);
@@ -188,8 +187,6 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 
 	if (m_PixelProgram)
 	{
-		initTextures();
-
 		m_Mat = m_Driver->createMaterial();
 		m_Mat.initUnlit();
 		m_Mat.setColor(CRGBA::White);
@@ -201,8 +198,6 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 		mat->setZWrite(false);
 		mat->setZFunc(CMaterial::always);
 		mat->setDoubleSided(true);
-
-		setTextures();		
 
 		m_QuadUV.V0 = CVector(0.f, 0.f, 0.5f);
 		m_QuadUV.V1 = CVector(1.f, 0.f, 0.5f);
@@ -216,6 +211,42 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 	}
 }
 
+bool CStereoDebugger::attachToDisplay()
+{
+	return false;
+}
+
+void CStereoDebugger::detachFromDisplay()
+{
+
+}
+
+void CStereoDebugger::getTextures()
+{
+	nlassert(!m_LeftTexU);
+	nlassert(!m_RightTexU);
+	uint32 width, height;
+	m_Driver->getWindowSize(width, height);
+	m_LeftTexU = m_Driver->getRenderTargetManager().getRenderTarget(width, height);
+	m_RightTexU = m_Driver->getRenderTargetManager().getRenderTarget(width, height);
+	NL3D::CMaterial *mat = m_Mat.getObjectPtr();
+	mat->setTexture(0, m_LeftTexU->getITexture());
+	mat->setTexture(1, m_RightTexU->getITexture());
+}
+
+void CStereoDebugger::recycleTextures()
+{
+	nlassert(m_LeftTexU);
+	nlassert(m_RightTexU);
+	m_Mat.getObjectPtr()->setTexture(0, NULL);
+	m_Mat.getObjectPtr()->setTexture(1, NULL);
+	m_Driver->getRenderTargetManager().recycleRenderTarget(m_LeftTexU);
+	m_Driver->getRenderTargetManager().recycleRenderTarget(m_RightTexU);
+	m_LeftTexU = NULL;
+	m_RightTexU = NULL;
+}
+
+/*
 void CStereoDebugger::releaseTextures()
 {
 	if (!m_Mat.empty())
@@ -233,7 +264,7 @@ void CStereoDebugger::releaseTextures()
 	m_RightTexU = NULL;
 	m_RightTex = NULL; // CSmartPtr
 }
-
+*//*
 void CStereoDebugger::initTextures()
 {
 	uint32 width, height;
@@ -261,15 +292,15 @@ void CStereoDebugger::initTextures()
 	drvInternal->setupTexture(*m_RightTex);
 	m_RightTexU = new CTextureUser(m_RightTex);
 	nlassert(!drvInternal->isTextureRectangle(m_RightTex)); // not allowed
-}
-
+}*/
+/*
 void CStereoDebugger::setTextures()
 {
 	NL3D::CMaterial *mat = m_Mat.getObjectPtr();
 	mat->setTexture(0, m_LeftTex);
 	mat->setTexture(1, m_RightTex);
-}
-
+}*/
+/*
 void CStereoDebugger::verifyTextures()
 {
 	if (m_Driver)
@@ -287,7 +318,7 @@ void CStereoDebugger::verifyTextures()
 			setTextures();
 		}
 	}
-}
+}*/
 
 /// Gets the required screen resolution for this device
 bool CStereoDebugger::getScreenResolution(uint &width, uint &height)
@@ -305,6 +336,12 @@ void CStereoDebugger::updateCamera(uint cid, const NL3D::UCamera *camera)
 void CStereoDebugger::getClippingFrustum(uint cid, NL3D::UCamera *camera) const
 {
 	// do nothing
+}
+
+/// Get the original frustum of the camera
+void CStereoDebugger::getOriginalFrustum(uint cid, NL3D::UCamera *camera) const
+{
+	// do nothing, as we never modified it
 }
 
 /// Is there a next pass
@@ -388,6 +425,12 @@ bool CStereoDebugger::wantScene()
 	return m_Stage != 3;
 }
 
+/// The 3D scene end (after multiple wantScene)
+bool CStereoDebugger::wantSceneEffects()
+{
+	return m_Stage != 3;
+}
+
 /// Interface within the 3D scene
 bool CStereoDebugger::wantInterface3D()
 {
@@ -402,11 +445,22 @@ bool CStereoDebugger::wantInterface2D()
 	return m_Stage == 3;
 }
 
+bool CStereoDebugger::isSceneFirst()
+{
+	return m_Stage != 3;
+}
+
+bool CStereoDebugger::isSceneLast()
+{
+	return m_Stage != 3;
+}
+
 /// Returns true if a new render target was set, always fase if not using render targets
 bool CStereoDebugger::beginRenderTarget()
 {
 	if (m_Stage != 3 && m_Driver && (m_Driver->getPolygonMode() == UDriver::Filled))
 	{
+		if (!m_LeftTexU) getTextures();
 		if (m_Stage % 2) static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_RightTexU, 0, 0, 0, 0);
 		else static_cast<CDriverUser *>(m_Driver)->setRenderTarget(*m_LeftTexU, 0, 0, 0, 0);
 		return true;
@@ -430,14 +484,15 @@ bool CStereoDebugger::endRenderTarget()
 		uint32 width, height;
 		NL3D::IDriver *drvInternal = (static_cast<CDriverUser *>(m_Driver))->getDriver();
 		NL3D::CMaterial *mat = m_Mat.getObjectPtr();
-		mat->setTexture(0, m_LeftTex);
-		mat->setTexture(1, m_RightTex);
+		mat->setTexture(0, m_LeftTexU->getITexture());
+		mat->setTexture(1, m_RightTexU->getITexture());
 		drvInternal->activePixelProgram(m_PixelProgram);
 
 		m_Driver->drawQuad(m_QuadUV, m_Mat);
 
 		drvInternal->activePixelProgram(NULL);
 		m_Driver->enableFog(fogEnabled);
+		recycleTextures();
 
 		return true;
 	}

@@ -483,7 +483,7 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstrin
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
-	CInterfaceManager::getInstance()->log(finalMsg);
+	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 }
 
 void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
@@ -601,10 +601,14 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					if (pos == ucstring::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = newmsg.find(ucstring("}"));;
+						pos = newmsg.find(ucstring("}"));
 						prefix += " ";
 					}
-					newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
+					
+					if (pos == ucstring::npos)
+						newmsg = prefix + newmsg;
+					else
+						newmsg = newmsg.substr(0, pos + 1) + prefix + newmsg.substr(pos + 1);
 
 					// Add dynchannel number and optionally name before text if user channel
 					CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
@@ -615,7 +619,11 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
 						prefix = title.empty() ? ucstring("") : ucstring(" ") + title;
 						pos = newmsg.find(ucstring("] "));
-						newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
+
+						if (pos == ucstring::npos)
+							newmsg = prefix + newmsg;
+						else
+							newmsg = newmsg.substr(0, pos) + prefix + newmsg.substr(pos);
 					}
 				}
 				break;

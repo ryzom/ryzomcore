@@ -37,7 +37,9 @@
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #	include <windowsx.h>
 #endif
@@ -81,7 +83,6 @@
 #include "nel/misc/event_emitter_multi.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/file.h"
 

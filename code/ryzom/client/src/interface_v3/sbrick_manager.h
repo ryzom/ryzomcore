@@ -65,11 +65,15 @@ public:
 	 */
 	CSBrickSheet *getBrick(const NLMISC::CSheetId &id) const
 	{
-		std::map<NLMISC::CSheetId,CSBrickSheet*>::const_iterator it = _Bricks.find(id);
-		if (it == _Bricks.end())
-			return NULL;
-		return it->second;
+		uint32 shid = id.getShortId();
+		CSBrickSheet *result = NULL;
+		if (shid < _BrickVector.size())
+			result = _BrickVector[shid];
+		//if (!result)
+		//	nlwarning("Missing brick '%s'", id.toString().c_str());
+		return result;
 	}
+
 	/**
 	 * \return a sheet id of a brick
 	 */
@@ -142,27 +146,29 @@ protected:
 	/// Constructor
 	CSBrickManager();
 
-	///singleton's instance
+	/// Singleton's instance
 	static CSBrickManager* _Instance;
 
-	//number of families
+	/// Number of families
 	uint _NbFamily;
 
-	//number of bricks in each family
+	/// Number of bricks in each family
 	std::vector<uint> _NbBricksPerFamily;
 
-	///map linking a sheet id to a brick record.
-	std::map<NLMISC::CSheetId,CSBrickSheet*> _Bricks;
+	/// Map linking a sheet id to a brick record.
+	// std::map<NLMISC::CSheetId,CSBrickSheet*> _Bricks;
+	std::vector<CSBrickSheet *> _BrickVector;
 
-	///structure storing all bricks. each entry of the vector represent a family, described by a vector containing all the bricks
-	///of the family
-	std::vector <std::vector<NLMISC::CSheetId> > _SheetsByFamilies;
+	/// Structure storing all bricks. each entry of the vector 
+	/// represent a family, described by a vector containing all 
+	/// the bricks of the family
+	std::vector<std::vector<NLMISC::CSheetId> > _SheetsByFamilies;
 
-	///vector of bit fields describing the known bricks of each family
-	std::vector<NLMISC::CCDBNodeLeaf*>		_FamiliesBits;
+	/// Vector of bit fields describing the known bricks of each family
+	std::vector<NLMISC::CCDBNodeLeaf*> _FamiliesBits;
 
-	/// list of roots only
-	std::vector <NLMISC::CSheetId>	_Roots;
+	/// List of roots only
+	std::vector<NLMISC::CSheetId> _Roots;
 
 	/// Mapper of SkillToBrick
 	NLMISC::CSheetId		_VisualBrickForSkill[SKILLS::NUM_SKILLS];

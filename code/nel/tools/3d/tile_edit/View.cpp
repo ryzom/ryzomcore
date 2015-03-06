@@ -24,7 +24,7 @@
 #include <direct.h>
 //#include "ListGroup.h"
 //#include "ViewPopup.h"
-#include "pic/readpic.h"
+//#include "pic/readpic.h"
 
 using namespace std;
 using namespace NL3D;
@@ -74,6 +74,37 @@ void rotateBuffer (uint &Width, uint &Height, std::vector<NLMISC::CBGRA>& Tampon
 	Height=tmp;
 }
 
+static bool loadPic(const string &path, std::vector<NLMISC::CBGRA> &tampon, uint &width, uint &height)
+{
+	try
+	{
+		NLMISC::CIFile file;
+		if (file.open(path.c_str()))
+		{
+			NLMISC::CBitmap bitmap;
+			bitmap.load(file);
+			width = bitmap.getWidth();
+			height = bitmap.getHeight();
+			tampon.resize(width * height);
+			bitmap.convertToType(NLMISC::CBitmap::RGBA);
+			for (uint y = 0; y < height; ++y)
+			{
+				for (uint x = 0; x < width; ++x)
+				{
+					NLMISC::CRGBA c = bitmap.getPixelColor(x, y, 0);
+					c.R = (c.R * c.A) / 255;
+					c.G = (c.G * c.A) / 255;
+					c.B = (c.B * c.A) / 255;
+					tampon[(y * width) + x] = c;
+				}
+			}
+			return true;
+		}
+	}
+	catch (NLMISC::Exception& ) { }
+	return false;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CTView
 //Attention : windows veut que le buffer image commence du bas vers le haut
@@ -82,7 +113,7 @@ int _LoadBitmap(const std::string& path,LPBITMAPINFO BitmapInfo, std::vector<NLM
 	//vector<NLMISC::CBGRA> Tampon;
 	uint Width;
 	uint Height;
-	if (PIC_LoadPic(path, Tampon, Width, Height))
+	if (loadPic(path, Tampon, Width, Height))
 	{
 		BitmapInfo->bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
 		BitmapInfo->bmiHeader.biWidth=Width;
@@ -207,7 +238,7 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), "Can't load bitmap.", MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
@@ -272,7 +303,7 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), "Can't load bitmap.", MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
@@ -338,7 +369,7 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), "Can't load bitmap.", MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
@@ -451,7 +482,7 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), "Can't load bitmap.", MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
 		}
@@ -1490,7 +1521,7 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			_chdir (LastPath.c_str());
 			CFileDialog load(true, NULL, LastPath.c_str(), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT,
-				"Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+				"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
 			load.m_ofn.lpstrFile = new char[10000]; // buffer contains filenames list
 			load.m_ofn.lpstrFile[0] = 0;
 			// with 10 KB we should be large enough...

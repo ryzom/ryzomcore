@@ -25,8 +25,6 @@
 #include "nel/misc/xml_pack.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#	include <windows.h>
 #	include <sys/types.h>
 #	include <sys/stat.h>
 #	include <direct.h>
@@ -203,6 +201,67 @@ void CFileContainer::getFileListByName(const std::string &extension, const std::
 			{
 				string ext = SSMext.get(first->idExt);
 				if (strstr(first->Name, name.c_str()) != NULL && (ext == extension || extension.empty()))
+				{
+					filenames.push_back(first->Name);
+				}
+			}
+		}
+		// if extension is empty we keep all files
+		else
+		{
+			for (; first != last; ++ first)
+		{
+				filenames.push_back(first->Name);
+			}
+		}
+	}
+}
+
+void CPath::getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames)
+{
+	getInstance()->_FileContainer.getFileListByPath(extension, path, filenames);
+}
+
+void CFileContainer::getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames)
+{
+	if (!_MemoryCompressed)
+	{
+		TFiles::iterator first(_Files.begin()), last(_Files.end());
+
+		if( !path.empty() )
+		{
+			for (; first != last; ++ first)
+			{
+				string ext = SSMext.get(first->second.idExt);
+				string p = SSMpath.get(first->second.idPath);
+				if (p.find(path) != string::npos && (ext == extension || extension.empty()))
+				{
+					filenames.push_back(first->first);
+				}
+			}
+		}
+		// if extension is empty we keep all files
+		else
+		{
+			for (; first != last; ++ first)
+			{
+				filenames.push_back(first->first);
+			}
+		}
+	}
+	else
+	{
+		// compressed memory version
+		std::vector<CFileContainer::CMCFileEntry>::iterator first(_MCFiles.begin()), last(_MCFiles.end());
+
+		if( !path.empty() )
+		{
+			for (; first != last; ++ first)
+			{
+				string ext = SSMext.get(first->idExt);
+				string p = SSMpath.get(first->idPath);
+				
+				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);
 				}
@@ -795,6 +854,8 @@ string getname (dirent *de)
 void CPath::getPathContent (const string &path, bool recurse, bool wantDir, bool wantFile, vector<string> &result, class IProgressCallback *progressCallBack, bool showEverything)
 {
 	getInstance()->_FileContainer.getPathContent(path, recurse, wantDir, wantFile, result, progressCallBack, showEverything);
+
+	sort(result.begin(), result.end());
 }
 
 void CFileContainer::getPathContent (const string &path, bool recurse, bool wantDir, bool wantFile, vector<string> &result, class IProgressCallback *progressCallBack, bool showEverything)
@@ -837,10 +898,10 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 
 		if (isdirectory(de))
 		{
-			// skip CVS and .svn directory
-			if ((!showEverything) && (fn == "CVS" || fn == ".svn"))
+			// skip CVS, .svn and .hg directory
+			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg"))
 			{
-				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS and .svn directory", path.c_str(), recurse, wantDir, wantFile);
+				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS, .svn and .hg directory", path.c_str(), recurse, wantDir, wantFile);
 				continue;
 			}
 
@@ -876,10 +937,10 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 	closedir (dir);
 
 #ifndef NL_OS_WINDOWS
-	BasePathgetPathContent = "";
+	BasePathgetPathContent.clear();
 #endif
 
-	// let s recurse
+	// let's recurse
 	for (uint i = 0; i < recursPath.size (); i++)
 	{
 		// Progress bar
@@ -897,8 +958,6 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 			progressCallBack->popCropedValues ();
 		}
 	}
-
-	sort(result.begin(), result.end());
 }
 
 void CPath::removeAllAlternativeSearchPath ()
@@ -974,6 +1033,9 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		{
 			// find all path and subpath
 			getPathContent (newPath, recurse, true, false, pathsToProcess, progressCallBack);
+
+			// sort files
+			sort(pathsToProcess.begin(), pathsToProcess.end());
 		}
 
 		for (uint p = 0; p < pathsToProcess.size(); p++)
@@ -1019,7 +1081,10 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		// find all files in the path and subpaths
 		getPathContent (newPath, recurse, false, true, filesToProcess, progressCallBack);
 
-		// Progree bar
+		// sort files
+		sort(filesToProcess.begin(), filesToProcess.end());
+
+		// Progress bar
 		if (progressCallBack)
 		{
 			progressCallBack->popCropedValues ();
@@ -2479,6 +2544,57 @@ bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
 	}
 
 	return false;
+}
+
+std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory )
+{
+	if( relativePath.empty() )
+		return "";
+	if( directory.empty() )
+		return "";
+
+#ifdef NL_OS_WINDOWS
+	// Windows network address. Eg.: \\someshare\path
+	if( ( relativePath[ 0 ] == '\\' ) && ( relativePath[ 1 ] == '\\' ) )
+		return relativePath;
+
+	// Normal Windows absolute path. Eg.: C:\something
+	//
+	if( isalpha( relativePath[ 0 ] ) && ( relativePath[ 1 ] == ':' ) && ( ( relativePath[ 2 ] == '\\' ) || ( relativePath[ 2 ] == '/' ) ) )
+		return relativePath;
+#else
+	// Unix filesystem absolute path
+	if( relativePath[ 0 ] == '/' )
+		return relativePath;
+
+#endif
+
+	// Add a slash to the directory if necessary.
+	// If the relative path starts with dots we need a slash.
+	// If the relative path starts with a slash we don't.
+	// If it starts with neither, we need a slash.
+	bool needSlash = true;
+	char c = relativePath[ 0 ];
+	if( ( c == '\\' ) || ( c == '/' ) )
+		needSlash = false;
+	
+	bool hasSlash = false;
+	std::string npath = directory;
+	c = npath[ npath.size() - 1 ];
+	if( ( c == '\\' ) || ( c == '/' ) )
+		hasSlash = true;
+
+	if( needSlash && !hasSlash )
+		npath += '/';
+	else
+	if( hasSlash && !needSlash )
+		npath.resize( npath.size() - 1 );
+	
+	// Now build the new absolute path
+	npath += relativePath;
+	npath = standardizePath( npath, false );
+
+	return npath;
 }
 
 bool CFile::setRWAccess(const std::string &filename)

@@ -47,6 +47,8 @@ namespace NLGUI
 	class CInterfaceOptions;
 	class CInterfaceAnim;
 	class CProcedure;
+	class IEditorSelectionWatcher;
+	class IWidgetAdditionWatcher;
 
 	/**
 	 GUI Widget Manager
@@ -71,6 +73,16 @@ namespace NLGUI
 		public:
 			virtual ~IOnWidgetsDrawnHandler(){};
 			virtual void process() = 0;
+		};
+
+		// Interface for event handlers that can be called when widgets are added or moved
+		class IWidgetWatcher
+		{
+		public:
+			IWidgetWatcher(){}
+			virtual ~IWidgetWatcher(){}
+			virtual void onWidgetAdded( const std::string &name ) = 0;
+			virtual void onWidgetMoved( const std::string &oldid, const std::string &newid ) = 0;
 		};
 
 		/// Frame render times
@@ -330,7 +342,13 @@ namespace NLGUI
 		void drawViews( NL3D::UCamera camera );
 
 		bool handleEvent( const CEventDescriptor &evnt );
-		
+
+		bool handleSystemEvent( const CEventDescriptor &evnt );
+
+		bool handleKeyboardEvent( const CEventDescriptor &evnt );
+
+		bool handleMouseEvent( const CEventDescriptor &evnt );
+
 		bool handleMouseMoveEvent( const CEventDescriptor &eventDesc );
 
 		// Relative move of pointer
@@ -341,6 +359,7 @@ namespace NLGUI
 		/**
 		 * Capture
 		 */
+		CViewBase *getCapturedView(){ return _CapturedView; }
 		CCtrlBase *getCapturePointerLeft() { return _CapturePointerLeft; }
 		CCtrlBase *getCapturePointerRight() { return _CapturePointerRight; }
 		CCtrlBase *getCaptureKeyboard() { return _CaptureKeyboard; }
@@ -484,7 +503,33 @@ namespace NLGUI
 
 		IParser* getParser() const{ return parser; }
 
-		void setCurrentEditorSelection( const std::string &name );
+		/// Retrieves the Id of the currently selected widgets
+		void getEditorSelection( std::vector< std::string > &selection );
+
+		/// Adds the widget with the specified Id to the selected widgets
+		void selectWidget( const std::string &name );
+
+		/// Clears the selection
+		void clearEditorSelection();
+
+		void notifySelectionWatchers();
+		void registerSelectionWatcher( IEditorSelectionWatcher *watcher );
+		void unregisterSelectionWatcher( IEditorSelectionWatcher *watcher );
+
+
+		void onWidgetAdded( const std::string &id );
+		void onWidgetMoved( const std::string &oldid, const std::string &newid );
+		void registerWidgetWatcher( IWidgetWatcher *watcher );
+		void unregisterWidgetWatcher( IWidgetWatcher *watcher );
+
+		CInterfaceElement* addWidgetToGroup( std::string &group, std::string &widgetClass, std::string &widgetName );
+
+		void setGroupSelection( bool b ){ _GroupSelection = b; }
+		bool groupSelection();
+		bool unGroupSelection();
+		void setMultiSelection( bool b ){ multiSelection = b; }
+
+		bool createNewGUI( const std::string &project, const std::string &window );
 				
 	private:
 		CWidgetManager();
@@ -510,6 +555,13 @@ namespace NLGUI
 		NLMISC::CRefPtr<CCtrlBase>	_DefaultCaptureKeyboard;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerLeft;
 		NLMISC::CRefPtr<CCtrlBase>	_CapturePointerRight;
+
+		NLMISC::CRefPtr< CViewBase > _CapturedView;
+
+		NLMISC::CRefPtr< CInterfaceElement > draggedElement; // the element that we're currently dragging
+
+		bool startDragging();
+		void stopDragging();
 
 		// What is under pointer
 		std::vector< CViewBase* > _ViewsUnderPointer;
@@ -567,8 +619,13 @@ namespace NLGUI
 
 		std::vector< INewScreenSizeHandler* > newScreenSizeHandlers;
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
-
-		std::string currentEditorSelection;
+		std::vector< IEditorSelectionWatcher* > selectionWatchers;
+		std::vector< IWidgetWatcher* > widgetWatchers;
+		
+		std::vector< std::string > editorSelection;
+		bool _GroupSelection;
+		bool multiSelection;
+		uint32 _WidgetCount;
 	};
 
 }

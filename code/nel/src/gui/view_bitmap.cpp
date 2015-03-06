@@ -307,8 +307,7 @@ namespace NLGUI
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"texture" );
 		if (prop)
 		{
-			string TxName = (const char *) prop;
-			TxName = strlwr (TxName);
+			string TxName = toLower((const char *) prop);
 			setTexture (TxName);
 			//CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			//CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -450,7 +449,6 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CViewBitmap::setTexture(const std::string & TxName)
 	{
-
 		_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 	}
 

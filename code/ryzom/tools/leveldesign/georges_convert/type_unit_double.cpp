@@ -203,7 +203,7 @@ void CTypeUnitDouble::SetLowLimit( const CStringEx _sxll )
 void CTypeUnitDouble::SetHighLimit( const CStringEx _sxhl )
 {
 	sxhighlimit = _sxhl;
-	dhighlimit = atof( sxhighlimit.c_str() ); 
+	NLMISC::fromString(sxhighlimit, dhighlimit);
 }
 
 }

@@ -73,7 +73,7 @@ pair<string, uint32> CZoneSearch::getZoneName(uint x, uint y, uint cx, uint cy)
 
 	sprintf(name, "%d_%c%c.zonel", zoneY, firstLetter, secondLetter);
 
-	return make_pair<string, uint32>(string(name), distance);
+	return std::pair<string, uint32>(string(name), distance);
 }
 
 

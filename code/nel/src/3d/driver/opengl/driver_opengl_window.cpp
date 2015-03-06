@@ -38,8 +38,6 @@
 #	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
 
-#include "nel/misc/mouse_device.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
 
@@ -255,7 +253,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 				unsigned long nitems_return = 0;
 				unsigned long bytes_after_return = 0;
 				long *data = NULL;
-			
+
 				int status = XGetWindowProperty(driver->_dpy, driver->_win, XA_FRAME_EXTENTS, 0, 4, False, XA_CARDINAL, &type_return, &format_return, &nitems_return, &bytes_after_return, (unsigned char**)&data);
 
 				// succeeded to retrieve decoration size
@@ -270,7 +268,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 					driver->_DecorationWidth = e.xconfigure.x - driver->_WindowX;
 					driver->_DecorationHeight = e.xconfigure.y - driver->_WindowY;
 				}
-				
+
 				// don't allow negative decoration sizes
 				if (driver->_DecorationWidth < 0) driver->_DecorationWidth = 0;
 				if (driver->_DecorationHeight < 0) driver->_DecorationHeight = 0;
@@ -296,7 +294,7 @@ bool GlWndProc(CDriverGL *driver, XEvent &e)
 #endif // NL_OS_UNIX
 
 // ***************************************************************************
-bool CDriverGL::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_OGL(CDriverGL_init)
 
@@ -465,6 +463,7 @@ bool CDriverGL::unInit()
 	{
 		nlwarning("Can't unregister NLClass");
 	}
+	_Registered = 0;
 
 	// Restaure monitor color parameters
 	if (_NeedToRestaureGammaRamp)
@@ -604,6 +603,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
+	if (!mode.OffScreen)
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
+
 	_win = EmptyWindow;
 
 	_CurrentMode = mode;
@@ -628,10 +630,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
 	{
-#if 0
-		if (!createWindow(mode))
-			return false;
+		if (!createWindow(mode)) return false;
 
+		HWND tmpHWND = _win;
+		int width = mode.Width;
+		int height = mode.Height;
+
+#ifdef USE_OPENGLES
+		// TODO: implement for OpenGL ES 1.x
+#else
 		// resize the window
 		RECT rc;
 		SetRect (&rc, 0, 0, width, height);
@@ -939,20 +946,6 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 
 	// setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	/// try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _win, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 #elif defined(NL_OS_MAC)
 
@@ -1452,8 +1445,17 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 #ifdef NL_OS_WINDOWS
 
 	// create the OpenGL window
-	window = CreateWindowW(L"NLClass", L"NeL Window", WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-		CW_USEDEFAULT, CW_USEDEFAULT, mode.Width, mode.Height, HWND_DESKTOP, NULL, GetModuleHandle(NULL), NULL);
+	DWORD dwStyle = WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS;
+	int pos = CW_USEDEFAULT;
+	HWND hwndParent = HWND_DESKTOP;
+	if (mode.OffScreen)
+	{
+		dwStyle &= ~WS_VISIBLE;
+		pos = 0;
+		hwndParent = NULL;
+	}
+	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle, 
+		pos, pos, mode.Width, mode.Height, hwndParent, NULL, GetModuleHandle(NULL), NULL);
 
 	if (window == EmptyWindow)
 	{
@@ -1484,7 +1486,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
-	[NSApp setDelegate:appDelegate];
+	[NSApp setDelegate:(id<NSFileManagerDelegate>)appDelegate];
 
 	// bind the close button of the window to applicationShouldTerminate
 	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];
@@ -1864,6 +1866,19 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	if (!_DestroyWindow)
 		return true;
 
+#if defined(NL_OS_WINDOWS)
+	// save relative cursor
+	POINT cursorPos;
+	cursorPos.x = 0;
+	cursorPos.y = 0;
+
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+	sint curX = (sint)cursorPos.x * (sint)mode.Width;
+	sint curY = (sint)cursorPos.y * (sint)mode.Height;
+#endif
+
 	if (!setScreenMode(mode))
 		return false;
 
@@ -1882,6 +1897,17 @@ bool CDriverGL::setMode(const GfxMode& mode)
 		case 24:
 		case 32: _ColorDepth = ColorDepth32; break;
 	}
+
+#if defined(NL_OS_WINDOWS)
+	// restore relative cursor
+	if (cursorPosOk)
+	{
+		cursorPos.x = curX / (sint)mode.Width;
+		cursorPos.y = curY / (sint)mode.Height;
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+	}
+#endif
 
 	// set color depth for custom cursor
 	updateCursor(true);
@@ -2298,7 +2324,19 @@ void CDriverGL::setWindowPos(sint32 x, sint32 y)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	// save relative cursor
+	POINT cursorPos;
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+
+	SetWindowPos(_win, NULL, x, y, 0, 0, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_NOSIZE);
+
+	if (cursorPosOk)
+	{
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+	}
 
 #elif defined(NL_OS_MAC)
 	// get the rect (position, size) of the screen with menu bar
@@ -2347,7 +2385,7 @@ void CDriverGL::showWindow(bool show)
 
 #elif defined(NL_OS_MAC)
 
-# warning "OpenGL Driver: Missing Mac Implementation for showWindow"
+	// TODO: Missing Mac Implementation for showWindow
 
 #elif defined (NL_OS_UNIX)
 
@@ -2469,7 +2507,7 @@ bool CDriverGL::createContext()
 	if (_EglContext == EGL_NO_CONTEXT)
 	{
 		return false;
-	}   
+	}
 
 	// Make the context current
 	if (!eglMakeCurrent(_EglDisplay, _EglSurface, _EglSurface, _EglContext))
@@ -2771,7 +2809,7 @@ bool CDriverGL::isActive()
 	res = (IsWindow(_win) != FALSE);
 
 #elif defined(NL_OS_MAC)
-# warning "OpenGL Driver: Missing Mac Implementation for isActive (always true if a window is set)"
+	// TODO: Missing Mac Implementation for isActive (always true if a window is set)
 #elif defined (NL_OS_UNIX)
 
 	// check if our window is still active

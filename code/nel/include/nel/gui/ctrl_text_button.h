@@ -42,6 +42,7 @@ namespace NLGUI
 
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);
+		~CCtrlTextButton();
 
 		std::string getProperty( const std::string &name ) const;
 		void setProperty( const std::string &name, const std::string &value );
@@ -50,6 +51,7 @@ namespace NLGUI
 		// Init part
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 
+		virtual void checkCoords();
 		virtual void updateCoords();
 
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
@@ -122,6 +124,10 @@ namespace NLGUI
 			REFLECT_SINT32("wmin", getWMin, setWMin)
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
 		REFLECT_EXPORT_END
+
+		void onRemoved();
+		void onWidgetDeleted( CInterfaceElement *e );
+		void moveBy( sint32 x, sint32 y );
 
 	protected:
 

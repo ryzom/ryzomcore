@@ -161,7 +161,7 @@ void	CWorldEntity::init( const CEntityId& id, const TDataSetRow &index )
 	{
 		_Type = Trigger;
 	}
-	else if ( (id.getType() >= RYZOMID::npc ) || ( id.getType() <= RYZOMID::flora)  )
+	else if ((id.getType() >= RYZOMID::bot_ai_begin) && (id.getType() <= RYZOMID::bot_ai_end))
 	{
 		_Type = AI;
 	}

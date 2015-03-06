@@ -470,7 +470,7 @@ void							CGuildPD::pds__fetch(RY_PDS::CPData &data)
 		TCharacterId	__k;
 		data.serial(__k);
 		CGuildMemberPD*	__o = static_cast<CGuildMemberPD*>(PDSLib.create(tableIndex));
-		_Members.insert(std::make_pair<TCharacterId,CGuildMemberPD*>(__k, __o));
+		_Members.insert(std::pair<TCharacterId,CGuildMemberPD*>(__k, __o));
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);
 		__o->pds__setParentUnnotified(this);

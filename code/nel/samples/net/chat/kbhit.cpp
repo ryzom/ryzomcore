@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifdef __GNUC__
+#include "nel/misc/types_nl.h"
+
+#ifndef NL_OS_WINDOWS
 #include "kbhit.h"
 #include <termios.h>
 #include <unistd.h>   // for read()

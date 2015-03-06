@@ -41,6 +41,21 @@ void warning (bool exception, const char *format, ... );
 
 // ***************************************************************************
 
+void CFormDfn::addEntry( const std::string &name )
+{
+	CEntry entry;
+	entry.setName( name.c_str() );
+	Entries.push_back( entry );
+}
+
+void CFormDfn::removeEntry( uint idx )
+{
+	std::vector< CEntry >::iterator itr = Entries.begin() + idx;
+	Entries.erase( itr );
+}
+
+// ***************************************************************************
+
 void CFormDfn::write (xmlDocPtr doc, const char *filename)
 {
 	// Save filename
@@ -463,6 +478,11 @@ void CFormDfn::CEntry::setType (CFormLoader &loader, const char *filename)
 	Type = loader.loadType (filename);
 }
 
+void CFormDfn::CEntry::setType( TEntryType type )
+{
+	TypeElement = type;
+}
+
 // ***************************************************************************
 
 void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
@@ -687,7 +707,7 @@ bool CFormDfn::getEntryIndexByName (uint &entry, const	std::string &name) const
 		}
 		entryIndex++;
 	}
-	entry=std::numeric_limits<uint>::max();
+	entry = std::numeric_limits<uint>::max();
 	return	false;
 }
 

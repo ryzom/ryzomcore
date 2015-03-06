@@ -96,8 +96,8 @@ public:
 	// render methods
 	virtual	void			render(bool updateWaitingInstances = true, bool restoreMatrixContextAfterRender = true);
 	virtual	void			beginPartRender();
-	virtual	void			renderPart(TRenderPart rp);
-	virtual	void			endPartRender(bool updateWaitingInstances = true, bool restoreMatrixContextAfterRender = true);
+	virtual	void			renderPart(TRenderPart rp, bool doHrcPass = true, bool doTrav = true, bool keepTrav = false);
+	virtual	void			endPartRender(bool updateWaitingInstances = true, bool restoreMatrixContextAfterRender = true, bool keepTrav = true);
 
 	// update async loading whithout a call to render
 	virtual void			updateWaitingInstances(double ellapsedTime);

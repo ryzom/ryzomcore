@@ -60,6 +60,8 @@ inline void CDriverGL::setUniform4fInl(TProgram program, uint index, float f0, f
 			nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, index, f0, f1, f2, f3);
 		}
 		break;
+	default:
+		break;
 	}
 #endif
 }
@@ -99,6 +101,8 @@ inline void CDriverGL::setUniform4fvInl(TProgram program, uint index, size_t num
 				nglProgramEnvParameter4fvARB(GL_FRAGMENT_PROGRAM_ARB, index + k, src + 4 * k);
 			}
 		}
+		break;
+	default:
 		break;
 	}
 #endif
