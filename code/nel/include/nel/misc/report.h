@@ -21,28 +21,38 @@
 
 namespace NLMISC {
 
-enum TReportResult { ReportDebug, ReportIgnore, ReportQuit, ReportError };
+#if FINAL_VERSION
+#define NL_REPORT_SYNCHRONOUS false
+#define NL_REPORT_DEFAULT NLMISC::ReportAbort
+#else
+#define NL_REPORT_SYNCHRONOUS true
+#define NL_REPORT_DEFAULT NLMISC::ReportBreak
+#endif
 
-/** Display a custom message box.
+enum TReportResult
+{
+	// See also crash_report_widget.h EReturnValue
+	ReportAlwaysIgnore = 21,
+	ReportIgnore = 22,
+	ReportAbort = 23,
+	ReportBreak = 24
+};
+
+/** Display a crash report
  *
- * \param title set the title of the report. If empty, it'll display "NeL Crash Report" or the default title set by setReportWindowTitle.
- * \param header message displayed before the edit text box. If empty, it displays the default message.
- * \param body message displayed in the edit text box. This string will be sent by email.
- * \param debugButton 0 for disabling it, 1 for enable with default behaviors (generate a breakpoint), 2 for enable with no behavior
+ * \param title set the title of the report. If empty, it'll display "NeL report"
+ * \param subject extended title of the report
+ * \param body message displayed in the edit text box. This string will be sent to the crash report tool
+ * \param attachment binary file to attach. This is a filename
+ * \param synchronous use system() and wait for the crash tool exit code, passes -dev flag; otherwise return defaultResult immediately
+ * \param sendReport hide 'dont send' button, or auto enable 'send report' checkbox
  *
- *
- *
- * \return the button clicked or error
+ * \return the button clicked or defaultResult
  */
-TReportResult report(const std::string &title, const std::string &header, const std::string &subject, const std::string &body, bool enableCheckIgnore, uint debugButton, bool ignoreButton, sint quitButton, bool sendReportButton, bool &ignoreNextTime, const std::string &attachedFile = "");
+TReportResult report(const std::string &title, const std::string &subject, const std::string &body, const std::string &attachment, bool synchronous, bool sendReport, TReportResult defaultResult);
 
-/// Set the Url of the web service used to post crash reports to
-void setReportPostUrl(const std::string &postUrl);
-
-/// DEPRECATED
-/** call this in the main of your appli to enable email: setReportEmailFunction (sendEmail);
- */
-void setReportEmailFunction(void *emailFunction);
+/// Set the Url of the web service used to post crash reports to. String is copied
+void setReportPostUrl(const char *postUrl);
 
 } // NLMISC
 
