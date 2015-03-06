@@ -22,6 +22,7 @@
 #include "../user_entity.h"
 #include "../entities.h"
 #include "interface_manager.h"
+#include "user_agent.h"
 
 // used for login cookie to be sent to the web server
 #include "../net_manager.h"
@@ -157,7 +158,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		if(!Curl) return;
 		curl_easy_setopt(Curl, CURLOPT_COOKIEFILE, "");
 		curl_easy_setopt(Curl, CURLOPT_NOPROGRESS, 1);
-		curl_easy_setopt(Curl, CURLOPT_USERAGENT, "Ryzom");
+		curl_easy_setopt(Curl, CURLOPT_USERAGENT, getUserAgent().c_str());
 		curl_easy_setopt(Curl, CURLOPT_FOLLOWLOCATION, 1);
 		curl_easy_setopt(Curl, CURLOPT_WRITEFUNCTION, writeDataFromCurl);
 		//nlinfo("ctor CWebigNotificationThread");

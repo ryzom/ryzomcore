@@ -467,8 +467,8 @@ CInterfaceManager::CInterfaceManager()
 
 	CGroupHTML::options.trustedDomains = ClientCfg.WebIgTrustedDomains;
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
-	CGroupHTML::options.appName = "Ryzom";
-	CGroupHTML::options.appVersion = getUserAgent();
+	CGroupHTML::options.appName = getUserAgentName();
+	CGroupHTML::options.appVersion = getUserAgentVersion();
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -2925,7 +2925,7 @@ void CInterfaceManager::initEmotes()
 	CSkillManager		*pSM = CSkillManager::getInstance();
 
 	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
-	string	previousMind = "";
+	string	previousMind;
 	CGroupSubMenu *pFirstMenu = 0;
 
 	for (list<CEmoteEntry>::const_iterator it = entries.begin(); it != entries.end(); it++)

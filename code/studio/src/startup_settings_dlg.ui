@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SettingsDialog</class>
- <widget class="QDialog" name="SettingsDialog">
+ <class>StartupSettingsDlg</class>
+ <widget class="QDialog" name="StartupSettingsDlg">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>

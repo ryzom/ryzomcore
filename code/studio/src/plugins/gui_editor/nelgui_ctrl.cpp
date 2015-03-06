@@ -188,7 +188,7 @@ namespace GUIEditor
 
 	void NelGUICtrl::onGUILoaded()
 	{
-		timerID = startTimer( 200 );
+		timerID = startTimer( 25 );
 		guiLoaded = true;
 		Q_EMIT guiLoadComplete();
 

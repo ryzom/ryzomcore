@@ -1068,12 +1068,12 @@ float CPatchManager::getCurrentFileProgress() const
 }
 
 // ****************************************************************************
-void CPatchManager::setRWAccess (const string &filename)
+void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 {
 	ucstring s = CI18N::get("uiSetAttrib") + " " + filename;
 	setState(true, s);
 
-	if (!NLMISC::CFile::setRWAccess(filename))
+	if (!NLMISC::CFile::setRWAccess(filename) && bThrowException)
 	{
 		s = CI18N::get("uiAttribErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
@@ -1351,7 +1351,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 		// create the local file
 		if (NLMISC::CFile::fileExists(dest))
 		{
-			setRWAccess(dest);
+			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
 		FILE *fp = fopen (dest.c_str(), "wb");
@@ -1492,7 +1492,7 @@ void CPatchManager::decompressFile (const string &filename)
 	}
 
 	string dest = filename.substr(0, filename.size ()-4);
-	setRWAccess(dest);
+	setRWAccess(dest, false);
 	//if(isVerboseLog()) nlinfo("Calling fopen('%s','wb')", dest.c_str());
 	FILE *fp = fopen (dest.c_str(), "wb");
 	if (fp == NULL)
@@ -1566,7 +1566,7 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 	{
 //		_utimbuf utb;
 //		utb.actime = utb.modtime = nDate;
-		setRWAccess(sFilename);
+		setRWAccess(sFilename, false);
 		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
 						" -> " + toString(nDate);
 		setState(true,s);
@@ -3398,6 +3398,7 @@ bool CPatchManager::extract(const std::string& patchPath,
 			ok = true;
 		}
 	}
+
 	if (!ok)
 	{
 		// nothing to extract
@@ -3407,15 +3408,21 @@ bool CPatchManager::extract(const std::string& patchPath,
 	// extract
 	uint nblab = 0;
 	pPM->deleteFile(updateBatchFilename, false, false);
+
 	FILE *fp = fopen (updateBatchFilename.c_str(), "wt");
+
 	if (fp == 0)
 	{
 		string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", updateBatchFilename.c_str(), errno, strerror(errno));
 		throw Exception (err);
 	}
+
+#ifdef NL_OS_WINDOWS
 	fprintf(fp, "@echo off\n");
 	fprintf(fp, "ping 127.0.0.1 -n 7 -w 1000 > nul\n"); // wait
-
+#else
+	// TODO: for Linux and OS X
+#endif
 
 	// Unpack files with category ExtractPath non empty
 	for (uint32 j = 0; j < sourceFilename.size(); ++j)
@@ -3442,21 +3449,32 @@ bool CPatchManager::extract(const std::string& patchPath,
 					string DstPath = CPath::standardizeDosPath(extractPath[j]);
 					string DstName = DstPath + vFilenames[fff];
 					NLMISC::CFile::createDirectoryTree(extractPath[j]);
-					// this file must be moved
 
+					// this file must be moved
+#ifdef NL_OS_WINDOWS
 					fprintf(fp, ":loop%u\n", nblab);
 					fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
 					fprintf(fp, "del %s\n", DstName.c_str());
 					fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
 					fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+#else
+					// TODO: for Linux and OS X
+#endif
+
 					nblab++;
+
 				}
 			}
 		}
 	}
 
 
+#ifdef NL_OS_WINDOWS
 	fprintf(fp, "start %s %%1 %%2 %%3\n", execName.c_str());
+#else
+	// TODO: for Linux and OS X
+#endif
+
 	fclose(fp);
 
 	if (stopFun)

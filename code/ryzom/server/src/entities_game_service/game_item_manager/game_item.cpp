@@ -242,11 +242,11 @@ float CItemCraftParameters::getCraftParameterValue( RM_FABER_STAT_TYPE::TRMStatT
 		case RM_FABER_STAT_TYPE::ShockWaveProtection:
 		case RM_FABER_STAT_TYPE::PoisonProtection:
 		case RM_FABER_STAT_TYPE::ElectricityProtection:
-			if (Protection1 == statType)
+			if (Protection1 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection1Factor;
-			else if (Protection2 == statType)
+			else if (Protection2 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection2Factor;
-			else if (Protection3 == statType)
+			else if (Protection3 == (PROTECTION_TYPE::TProtectionType)statType)
 				return Protection3Factor;
 			else return 0.0f;
 		case RM_FABER_STAT_TYPE::DesertResistance:

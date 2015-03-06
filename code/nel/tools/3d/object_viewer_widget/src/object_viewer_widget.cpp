@@ -185,7 +185,7 @@ namespace NLQT
 
 		NL3D::CBloomEffect::instance().setDriver(_Driver);
 		NL3D::CBloomEffect::instance().setScene(_Scene);
-		NL3D::CBloomEffect::instance().init(!_Direct3D);
+		NL3D::CBloomEffect::instance().init();
 		//NL3D::CBloomEffect::instance().setDensityBloom(Modules::config().getConfigFile().getVar("BloomDensity").asInt());
 		//NL3D::CBloomEffect::instance().setSquareBloom(Modules::config().getConfigFile().getVar("BloomSquare").asBool());
 	}
@@ -366,7 +366,7 @@ namespace NLQT
 		// Render the scene.
 		if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
 		{
-			NL3D::CBloomEffect::instance().initBloom();
+			NL3D::CBloomEffect::instance().init();
 		}
 		_Driver->clearBuffers(_BackgroundColor);
 	}
@@ -378,8 +378,7 @@ namespace NLQT
 
 		if((NL3D::CBloomEffect::instance().getDriver() != NULL) && (_BloomEffect))
 		{
-			NL3D::CBloomEffect::instance().endBloom();
-			NL3D::CBloomEffect::instance().endInterfacesDisplayBloom();
+			NL3D::CBloomEffect::instance().applyBloom();
 		}
 	}
 

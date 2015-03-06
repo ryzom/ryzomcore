@@ -41,7 +41,7 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QInputDialog>
 
-#include "settings_dialog.h"
+#include "startup_settings_dlg.h"
 #include "splash_screen.h"
 #include "pm_watcher.h"
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 	{
 		settings->setValue( "FirstRun", false );
 		
-		SettingsDialog sd;
+		StartupSettingsDlg sd;
 		sd.setSettings( settings );
 		sd.load();
 		sd.exec();

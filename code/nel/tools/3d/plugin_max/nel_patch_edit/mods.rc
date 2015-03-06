@@ -345,12 +345,12 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "modsres.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
     "#include ""windows.h""\r\n"
@@ -359,7 +359,7 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "\0"
@@ -439,7 +439,7 @@ IDB_PATCHSELMASK        BITMAP                  "patselm.bmp"
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_PASTE_NAMEDSET, DIALOG
     BEGIN
@@ -514,8 +514,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 11, 2, 0
- PRODUCTVERSION 0, 11, 2, 0
+ FILEVERSION 0, 11, 3, 0
+ PRODUCTVERSION 0, 11, 3, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -533,13 +533,13 @@ BEGIN
             VALUE "Comments", "Based on Kinetix 3D Studio Max 3.0 plugin sample\0"
             VALUE "CompanyName", "Ryzom Core"
             VALUE "FileDescription", "NeL Patch Edit"
-            VALUE "FileVersion", "0.11.2"
+            VALUE "FileVersion", "0.11.3"
             VALUE "InternalName", "neleditpatch"
             VALUE "LegalCopyright", "Copyright © 2000 Nevrax Ltd. Copyright © 1998 Autodesk Inc."
             VALUE "LegalTrademarks", "The following are registered trademarks of Autodesk, Inc.: 3D Studio MAX.  The following are trademarks of Autodesk, Inc.: Kinetix, Kinetix(logo), BIPED, Physique, Character Studio, MAX DWG, DWG Unplugged, Heidi, FLI, FLC, DXF."
             VALUE "OriginalFilename", "neleditpatch.dlm"
             VALUE "ProductName", "Ryzom Core"
-            VALUE "ProductVersion", "0.11.2"
+            VALUE "ProductVersion", "0.11.3"
         END
     END
     BLOCK "VarFileInfo"
@@ -565,7 +565,7 @@ IDI_ICON3               ICON                    "icon3.ico"
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NORMALMOD        "NormalMod"
     IDS_RB_SKEWMOD          "SkewMod"
@@ -585,7 +585,7 @@ BEGIN
     IDS_RB_VOLSELECT_CLASS  "Vol. Select"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_EDITMESH_CLASS   "Edit Mesh"
     IDS_RB_PARAMETERS       "Parameters"
@@ -594,7 +594,7 @@ BEGIN
     IDS_RB_AMOUNT           "Amount"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_BEND2            "Bend"
     IDS_RB_FROM             "Lower Limit"
@@ -614,7 +614,7 @@ BEGIN
     IDS_RB_DISPLACEMOD      "DisplaceMod"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NODEXFORM        "Linked XForm"
     IDS_RB_NODEXFORM_CLASS  "Linked XForm"
@@ -630,7 +630,7 @@ BEGIN
     IDS_RB_SOT              "Supports Objects of Type"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_BIASL2           "Bias L2"
     IDS_RB_EDITMESHMOD      "EditMeshMod"
@@ -650,7 +650,7 @@ BEGIN
     IDS_RB_SMOOTHMOD        "SmoothMod"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_EXTRUDE          "Extrude"
     IDS_RB_TAPER            "Taper"
@@ -663,7 +663,7 @@ BEGIN
     IDS_RB_APPARATUS        "Gizmo"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_FREQUENCY        "Frequency"
     IDS_RB_MAPMOD           "MapMod"
@@ -683,7 +683,7 @@ BEGIN
     IDS_RB_BIASL1           "Bias L1"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_AMOUNT2          "Amount"
     IDS_RB_CURVITURE        "Curvature"
@@ -697,13 +697,13 @@ BEGIN
     IDS_DB_EXTRUDE          "Extrude"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_RIPPLE           "Ripple"
     IDS_RB_RIPPLE_BINDING   "Ripple Binding"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_DELETEVERT       "Delete Vertex"
     IDS_RB_DELETEFACE       "Delete Face"
@@ -720,7 +720,7 @@ BEGIN
     IDS_RB_EDGEDIVIDE       "Edge Divide"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_EDGETURN         "Edge Turn"
     IDS_RB_DELETEEDGE       "Delete Edge"
@@ -732,36 +732,36 @@ BEGIN
     IDS_PW_LATTICE          "Lattice Map"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_DEFDEFORMATIONS  "MAX STANDARD"
     IDS_RB_DEFEDIT          "MAX EDIT"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_DEFLECTOR_CLASS  "Deflector"
     IDS_RB_HIDEVERT         "Hide Vertices"
     IDS_RB_DEFSURFACE       "MAX SURFACE"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NOISE            "Noise"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_ROTATION2        "Rotation"
     IDS_RB_TWIST            "Twist"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_BENDMOD          "BendMod"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_DISPLACEBINDING  "Displace Binding"
     IDS_RB_SELECTDISPIMAGE  "Select Displacement Image"
@@ -781,7 +781,7 @@ BEGIN
     IDS_RB_TURBULENCE       "Turbulence"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_SKEW_CLASS       "Skew"
     IDS_RB_MATERIAL3_CLASS  "Material"
@@ -800,7 +800,7 @@ BEGIN
     IDS_RB_WAVE_CLASS       "Wave"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_STRENGTH2        "Strength"
     IDS_DS_MOVE             "Move"
@@ -809,7 +809,7 @@ BEGIN
     IDS_RB_ELEMENTSEL       "Element"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NOVERTSTOWELD    "No vertices within weld threshold."
     IDS_RB_CHAOS            "Chaos"
@@ -819,24 +819,24 @@ BEGIN
     IDS_RB_DUPFACEWARNING   "This face already exists."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NONE             "None"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_SCALE            "Scale"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_DS_MOVE2            "Move"
     IDS_DS_SELECT           "Select"
     IDS_DS_CREATE           "Create"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_VERTDELETE       "Delete Vertex"
     IDS_TH_BEZIERCORNER     "Bezier Corner"
@@ -848,7 +848,7 @@ BEGIN
     IDS_TH_NOPATCHESSEL     "No patches selected"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_EDGESUBDIVIDE    "Edge Subdivide"
     IDS_TH_PATCHSUBDIVIDE   "Patch Subdivide"
@@ -863,16 +863,16 @@ BEGIN
     IDS_TH_CONNECT_COINCIDENT "Weld coincident endpoints?"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_BOOLWELDFAILED   "ERROR: Final boolean weld stage failed"
     IDS_TH_COINCIDENTVERTEX "Cannot perform boolean because splines have coincident vertices"
-    IDS_TH_SPLINESMUSTOVERLAP 
+    IDS_TH_SPLINESMUSTOVERLAP
                             "Cannot perform boolean because splines must overlap"
     IDS_TH_SELECTCLOSEDSPLINE "Please select a closed spline"
     IDS_TH_SPLINESELFINTERSECTS "Spline is invalid: Self-intersects"
     IDS_TH_ATTACH           "Attach"
-    IDS_TH_CANHAVEONLYONESHAPE 
+    IDS_TH_CANHAVEONLYONESHAPE
                             "Can only have one shape in modifier for this operation"
     IDS_TH_NOVERTSSEL       "No vertices selected"
     IDS_TH_VERTCHANGE       "Vertex Change"
@@ -885,7 +885,7 @@ BEGIN
     IDS_TH_LINE             "Line"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_MAKEFIRST        "Make First"
     IDS_TH_EDITEDGE         "Edit Edge"
@@ -896,7 +896,7 @@ BEGIN
     IDS_TH_PATCHADD         "Patch Add"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_EDITSPLINE       "Edit Spline"
     IDS_TH_EDITSEGMENT      "Edit Segment"
@@ -907,7 +907,7 @@ BEGIN
     IDS_TH_EDITOBJECT       "Edit Object"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_DETACHSPLINE     "Detach Spline"
     IDS_TH_OUTLINE          "Outline Spline"
@@ -927,9 +927,9 @@ BEGIN
     IDS_TH_INTERSECTION     "Intersection"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
-    IDS_TH_CANHAVEONLYONEPATCH 
+    IDS_TH_CANHAVEONLYONEPATCH
                             "Can only have one patch object in modifier for this operation"
     IDS_TH_DETACHPATCH      "Detach Patch"
     IDS_TH_COPY_SPLINE      "Copy Spline"
@@ -937,7 +937,7 @@ BEGIN
     IDS_TH_SPLINECHANGE     "Spline Change"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_EDITPATCH_CLASS  "NeL Edit"
     IDS_TH_EDITSPLINE_CLASS "Edit Spline"
@@ -957,7 +957,7 @@ BEGIN
     IDS_TH_NOSEGSSEL        "No segments selected"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_DEGREES          "Degrees"
     IDS_TH_AXIS             "Axis"
@@ -968,12 +968,12 @@ BEGIN
     IDS_RB_STARTPOINT       "Start Point"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_MIRRORSPLINE     "Mirror Spline"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_ENDPOINT         "End Point"
     IDS_RB_AFRPOINTS        "Points"
@@ -993,7 +993,7 @@ BEGIN
     IDS_RB_VOFFSET          "V Offset"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_WOFFSET          "W Offset"
     IDS_RB_MAXEDGE1         "Max Edge Length 1"
@@ -1013,14 +1013,14 @@ BEGIN
     IDS_RB_SHOULDRESET      "Do you also want to reset the Unwrap UVW modifier\nto inherit the mapping from the new channel?\n\nChanges made within the UVW modifier will be lost."
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_NUMVERTSELP      "%d Vertices Selected"
     IDS_RB_NUMFACESELP      "%d Faces Selected"
     IDS_RB_NUMEDGESELP      "%d Edges Selected"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_RESETUNWRAPUVWS  "Are you sure you want to reset?\n\nAll changes made within the  Unwrap UVW modifier will be lost."
     IDS_RB_LENGTH           "Length"
@@ -1040,7 +1040,7 @@ BEGIN
     IDS_RB_ZOOMREG          "Zoom Region"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_RB_UVW              "Coordinates"
     IDS_RB_PROP             "Unwrap Options"
@@ -1060,10 +1060,10 @@ BEGIN
     IDS_EM_SHAPE            "Shape"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_ADV_SURF_APPROX_WARNING_TITLE "Surface Approximation Verification"
-    IDS_ADV_SURF_APPROX_WARNING 
+    IDS_ADV_SURF_APPROX_WARNING
                             "You have selected a potentially dangerous setting for the SubDivision limits.  Are you sure you want to do this?"
     IDS_PW_PICK             "Pick Texture"
     IDS_PW_SNAP             "Pixel Snap"
@@ -1079,7 +1079,7 @@ BEGIN
     IDS_PW_FALLOFF          "Falloff type"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_EM_SELBYCOLOR       "Select By Color"
     IDS_EM_VERTEXCOLOR      "Vertex Color"
@@ -1099,7 +1099,7 @@ BEGIN
     IDS_EM_DETACHFACES      "Detach Faces"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_EM_DETACHVERTS      "Detach Verts"
     IDS_EM_INHERIT_MATERIAL "Inherit Material"
@@ -1119,7 +1119,7 @@ BEGIN
     IDS_TH_SPLINE_VERT_COUNT "Vertex Count: %d"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_SELECTION        "Selection"
     IDS_TH_OBJECT_SEL       "Whole Object Selected"
@@ -1139,17 +1139,17 @@ BEGIN
     IDS_TH_CROSS_INSERT     "Cross Insert"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_EM_BEVEL            "Bevel"
     IDS_EM_OUTLINE          "Outline"
-    IDS_ADV_DISP_APPROX_WARNING_TITLE 
+    IDS_ADV_DISP_APPROX_WARNING_TITLE
                             "Displacement Approximation Verification"
-    IDS_ADV_DISP_APPROX_WARNING 
+    IDS_ADV_DISP_APPROX_WARNING
                             "You have selected a potential dangerous setting for the SubDivision limits.  Are you sure you want to do this?"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PW_FALLOFFSPACE     "World Falloff Space"
     IDS_PW_BREAK            "Break Selected Vertices"
@@ -1169,7 +1169,7 @@ BEGIN
     IDS_PW_TEXMAP           "TextureMap"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PW_CHANNEL          "Map Channel"
     IDS_PW_MAP              "Map Channel Type"
@@ -1181,9 +1181,9 @@ BEGIN
     IDS_PW_FALLOFF2         "Falloff"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
-    IDS_TH_CROSS_NOT_IN_THRESHOLD 
+    IDS_TH_CROSS_NOT_IN_THRESHOLD
                             "Crossing lines not within specified threshold"
     IDS_TH_EDGEDELETE       "Delete Edge"
     IDS_TH_NOEDGESSEL       "No edges selected"
@@ -1200,7 +1200,7 @@ BEGIN
     IDS_TH_OPEN             "Open"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_TH_CLOSED           "Closed"
     IDS_EM_ATTACH_LIST      "Attach List"
@@ -1220,7 +1220,7 @@ BEGIN
     IDS_PW_SCALEV           "Scale Vertical"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PW_WELDSELECTED     "Weld Selected"
     IDS_PW_APPLYPLANAR      "Apply Planar"
@@ -1240,7 +1240,7 @@ BEGIN
     IDS_PW_UNHIDEALL        "Unhide All"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PW_FREEZE_SELECTED  "Freeze Selected"
     IDS_PW_UNFREEZEALL      "Unfreeze All"
@@ -1249,7 +1249,7 @@ BEGIN
     IDS_PW_SCALE_UVW        "Scale UVWs"
     IDS_PW_WELD_UVW         "Weld UVWs"
     IDS_PW_LINECOLOR        "Line Color"
-    IDS_RB_UNSUPPORTED_MAP_TYPE 
+    IDS_RB_UNSUPPORTED_MAP_TYPE
                             "The Displace modifier does not support the mapping type that has been selected to acquire."
     IDS_MM_ACQ_MAPPING      "Aquire Mapping"
     IDS_PARAM_CHANGE        "Parameter Change"
@@ -1261,7 +1261,7 @@ BEGIN
     IDS_PW_MOUSE_CONSTRAIN  "SHIFT constrains the mouse to X/Y"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PW_MOUSE_SELECTTV   "Select texture vertices"
     IDS_PW_MOUSE_SELECTTRI  "SHIFT selects triangle faces"

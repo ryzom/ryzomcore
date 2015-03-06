@@ -47,6 +47,15 @@ namespace NLGUI
 			_VolatileValue = NULL;
 		}
 
+		/// Tells if this property has a value
+		bool hasValue() const
+		{
+			if( _VolatileValue != NULL )
+				return true;
+			else
+				return false;
+		}
+
 		NLMISC::CCDBNodeLeaf* getNodePtr() const
 		{
 			return _VolatileValue;
