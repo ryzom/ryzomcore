@@ -12,6 +12,7 @@ ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
 INCLUDE_DIRECTORIES(
 			${LIBXML2_INCLUDE_DIR}
 			${CURL_INCLUDE_DIRS}
+			${ZLIB_INCLUDE_DIR}
 			${CMAKE_SOURCE_DIR}/ryzom/client/src
 )
 
@@ -20,6 +21,7 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 				nelnet
 				ryzom_gameshare
 				ryzom_sevenzip
+				${ZLIB_LIBRARIES}
 				${CURL_LIBRARIES})
 
 IF(APPLE)

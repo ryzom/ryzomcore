@@ -1013,6 +1013,7 @@ bool mainLoop()
 	SetMouseCursor ();
 	// Set the cursor.
 	ContextCur.context("STAND BY");
+	UserControls.reset();
 
 	// set the default box for keyboard
 	setDefaultChatWindow(PeopleInterraction.ChatGroup.Window);
@@ -1924,6 +1925,7 @@ bool mainLoop()
 
 						// Create a shadow when displaying a text.
 						TextContext->setShaded(true);
+						TextContext->setShadeOutline(false);
 						// Set the font size.
 						TextContext->setFontSize(10);
 						// Set the text color
@@ -2462,6 +2464,7 @@ bool mainLoop()
 				SetMouseCursor ();
 				// Set the cursor.
 				ContextCur.context("STAND BY");
+				UserControls.reset();
 
 				// set the default box for keyboard
 				CChatWindow *defaultChatWindow;
@@ -2586,6 +2589,7 @@ void	displaySpecialTextProgress(const char *text)
 {
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(12);
 	// Set the text color

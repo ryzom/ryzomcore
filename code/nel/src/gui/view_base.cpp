@@ -57,7 +57,7 @@ namespace NLGUI
 			{
 				if( editorMode )
 				{
-					CWidgetManager::getInstance()->setCurrentEditorSelection( getId() );
+					CWidgetManager::getInstance()->selectWidget( getId() );
 					return true;
 				}
 			}

@@ -767,7 +767,7 @@ class CMissionActionRecvItem : public IMissionAction
 						freeSlotcount -= invTemp->getUsedSlotCount();
 						maxBulk -= invTemp->getInventoryBulk();
 					}
-					
+
 					if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
 					{
 						fail = false;
@@ -862,7 +862,7 @@ class CMissionActionRecvItem : public IMissionAction
 						}
 						params[2].Int = _Item.getQuality();
 					}
-					
+
 					params[0].SheetId = _SheetId;
 					params[1].Int = _Quantity;
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_ITEM", params);
@@ -1050,7 +1050,7 @@ class CMissionActionRecvNamedItem : public IMissionAction
 				sint16 neededSlotCount = (sint16) ceil( (float)_Quantity / itemTmp->getMaxStackSize() );
 				uint32 neededBulk = _Quantity * itemTmp->getStackBulk();
 				itemTmp.deleteItem();
-				
+
 				bool fail = true;
 				for ( uint i = 0; i < entities.size(); i++ )
 				{
@@ -1067,15 +1067,15 @@ class CMissionActionRecvNamedItem : public IMissionAction
 							freeSlotcount -= invTemp->getUsedSlotCount();
 							maxBulk -= invTemp->getInventoryBulk();
 						}
-						
+
 						if( (neededSlotCount <= freeSlotcount) && ( neededBulk + invBag->getInventoryBulk() <= maxBulk) )
 						{
 							fail = false;
 							break;
 						}
 					}
-					
 				}
+
 				if( fail )
 				{
 					CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( instance->getTemplateId() );
@@ -1274,7 +1274,6 @@ class CMissionActionDestroyItem :
 		// If the "guild" parameter is not set, we destroy the items for the users
 		if (!_Guild)
 		{
-
 			for ( uint i = 0; i < entities.size(); i++ )
 			{
 				CCharacter * user = PlayerManager.getChar( entities[i] );
@@ -1303,7 +1302,6 @@ class CMissionActionDestroyItem :
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_DESTROY_ITEM", params);
 				}
 			}
-
 		}
 		// We destroy the item in the guild
 		else
@@ -1909,7 +1907,6 @@ class CMissionActionRecvMoney : public IMissionAction
 		// If the guild parameter is not set we just divide the money and give it to each entity
 		if (!_Guild)
 		{
-
 			uint amount = _Amount / (uint)entities.size();
 			if ( amount == 0 || _Amount % entities.size() )
 				amount++;
@@ -1924,7 +1921,6 @@ class CMissionActionRecvMoney : public IMissionAction
 					PHRASE_UTILITIES::sendDynamicSystemMessage(user->getEntityRowId(),"MIS_RECV_MONEY",params);
 				}
 			}
-
 		}
 		// Else we give the money to the guild
 		else
@@ -2026,7 +2022,6 @@ class CMissionActionRecvFame : public IMissionAction
 		// If there is no "guild" parameter we give the fame to every user
 		if (!_Guild)
 		{
-
 			for ( uint i = 0; i < entities.size(); i++ )
 			{
 				CEntityId eid = TheDataset.getEntityId(entities[i]);
@@ -2037,12 +2032,10 @@ class CMissionActionRecvFame : public IMissionAction
 				if (character)
 					character->sendEventForMissionAvailabilityCheck();
 			}
-
 		}
 		// Else we just give it to the guild
 		else
 		{
-
 			if (entities.size() == 0)
 				return;
 
@@ -2072,7 +2065,6 @@ class CMissionActionRecvFame : public IMissionAction
 				if (character)
 					character->sendEventForMissionAvailabilityCheck();
 			}
-
 		}
 
 	};

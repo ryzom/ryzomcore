@@ -98,7 +98,7 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (prop)
 	{
 		// get a branch in the database.
-		CCDBNodeBranch *branch= NLGUI::CDBManager::getInstance()->getDbBranch(prop);
+		CCDBNodeBranch *branch = NLGUI::CDBManager::getInstance()->getDbBranch(prop.str());
 		if(!branch)
 		{
 			nlinfo ("Branch not found in the database %s", (const char*)prop);
@@ -880,6 +880,7 @@ void CDBGroupListSheetText::setup()
 		text->setFontSize(_TextTemplate.getFontSize());
 		text->setColor(_TextTemplate.getColor());
 		text->setShadow(_TextTemplate.getShadow());
+		text->setShadowOutline(_TextTemplate.getShadowOutline());
 		text->setLineMaxW(_TextTemplate.getLineMaxW());
 		text->setMultiLine(_TextTemplate.getMultiLine());
 		if(text->getMultiLine())

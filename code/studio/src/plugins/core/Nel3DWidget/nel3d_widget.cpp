@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #include "nel3d_widget.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/text_context.h"
@@ -29,7 +28,7 @@
 #include <QResizeEvent>
 
 Nel3DWidget::Nel3DWidget( QWidget *parent ) :
-QWidget( parent )
+NEL3DWIDGET( parent )
 {
 	driver = NULL;
 	textContext = NULL;

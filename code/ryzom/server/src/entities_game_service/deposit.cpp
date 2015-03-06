@@ -16,6 +16,7 @@
 
 
 #include "stdpch.h"
+#include <functional>
 #include "deposit.h"
 #include "player_manager/character.h"
 #include "player_manager/player_manager.h"

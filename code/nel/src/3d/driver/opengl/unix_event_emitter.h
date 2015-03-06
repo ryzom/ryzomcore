@@ -100,7 +100,6 @@ private:
 	std::map<TKey, bool>	_PressedKeys;
 	XIM						_im;
 	XIC						_ic;
-	bool					_emulateRawMode;
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
 	ucstring				_CopiedString;

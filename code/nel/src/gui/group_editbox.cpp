@@ -27,7 +27,7 @@
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/db_manager.h"
-#include <limits>
+#include "nel/gui/interface_factory.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -999,7 +999,8 @@ namespace NLGUI
 			break;
 			// OTHER
 			default:
-				if ((rEDK.getChar() == KeyRETURN) && !_WantReturn)
+				bool isKeyRETURN = !rEDK.getKeyCtrl() && rEDK.getChar() == KeyRETURN;
+				if (isKeyRETURN && !_WantReturn)
 				{
 					// update historic.
 					if(_MaxHistoric)
@@ -1030,9 +1031,9 @@ namespace NLGUI
 					// If the char is not alphanumeric -> return.
 					//		if(!isalnum(ec.Char))
 					//			return
-					if( (rEDK.getChar()>=32) || (rEDK.getChar() == KeyRETURN) )
+					if( (rEDK.getChar()>=32) || isKeyRETURN )
 					{
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							ucstring	copyStr= _InputString;
 							if ((uint) std::count(copyStr.begin(), copyStr.end(), '\n') >= _MaxNumReturn)
@@ -1049,7 +1050,7 @@ namespace NLGUI
 							cutSelection();
 						}
 
-						ucchar c = (rEDK.getChar() == KeyRETURN)?'\n':rEDK.getChar();
+						ucchar c = isKeyRETURN ? '\n' : rEDK.getChar();
 						if (isFiltered(c)) return;
 						switch(_EntryType)
 						{
@@ -1128,7 +1129,7 @@ namespace NLGUI
 							++ _CursorPos;
 							triggerOnChangeAH();
 						}
-						if (rEDK.getChar() == KeyRETURN)
+						if (isKeyRETURN)
 						{
 							CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 						}
@@ -1320,15 +1321,31 @@ namespace NLGUI
 				}
 			}
 
+			// if click, and not frozen, then get the focus
+			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
+			{
+				_SelectingText = false;
+				if (_SelectCursorPos == _CursorPos)
+					_CurrSelection = NULL;
+				
+				return true;
+			}
+
 			if (!isIn(eventDesc.getX(), eventDesc.getY()))
 				return false;
 
 			// if click, and not frozen, then get the focus
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown && !_Frozen)
 			{
+				if( getEditorMode() )
+				{
+					return CViewBase::handleEvent( event );
+				}
+
 				_SelectingText = true;
 				stopParentBlink();
 				CWidgetManager::getInstance()->setCaptureKeyboard (this);
+				CWidgetManager::getInstance()->setCapturePointerLeft (this);
 				// set the right cursor position
 				uint newCurPos;
 				bool cursorAtPreviousLineEnd;
@@ -1353,16 +1370,6 @@ namespace NLGUI
 				_SelectCursorPos = newCurPos;
 				_SelectCursorPos -= (sint32)_Prompt.length();
 				_SelectCursorPos = std::max(_SelectCursorPos, sint32(0));
-				return true;
-			}
-
-			// if click, and not frozen, then get the focus
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup && !_Frozen)
-			{
-				_SelectingText = false;
-				if (_SelectCursorPos == _CursorPos)
-					_CurrSelection = NULL;
-				
 				return true;
 			}
 
@@ -1531,35 +1538,44 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+
+	void CGroupEditBox::createViewText()
+	{
+		nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
+		nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
+		_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
+		if( _ViewText == NULL )
+		{
+			nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
+			return;
+		}
+
+		_ViewText->setParent( this );
+		_ViewText->setIdRecurse( "edit_text" );
+		_ViewText->setHardText( "" );
+		_ViewText->setPosRef( Hotspot_ML );
+		_ViewText->setParentPosRef( Hotspot_ML );
+		addView( _ViewText );
+
+		sint32 w,h;
+		w = std::max( sint32( _ViewText->getFontWidth() * _ViewText->getText().size() ), getW() );
+		h = std::max( sint32(  _ViewText->getFontHeight() ), getH() );
+					
+		setH( h );
+		setW( w );
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setup()
 	{
 		// bind to the controls
-		_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
+		if( _ViewText == NULL )
+			_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
 		if(_ViewText == NULL)
-		{
-			nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
-			if( editorMode )
-			{
-				nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
-				_ViewText = dynamic_cast< CViewText* >( CWidgetManager::getInstance()->getParser()->createClass( "text" ) );
-				if( _ViewText != NULL )
-				{
-					_ViewText->setParent( this );
-					_ViewText->setIdRecurse( "edit_text" );
-					_ViewText->setHardText( "sometext" );
-					_ViewText->setPosRef( Hotspot_TL );
-					_ViewText->setParentPosRef( Hotspot_TL );
-					addView( _ViewText );
-					
-					setH( _ViewText->getFontHeight() );
-					setW( _ViewText->getFontWidth() * _ViewText->getText().size() );
-					
-				}
-				else
-					nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
-			}
-		}
+			createViewText();
+
+		_ViewText->setEditorSelectable( false );
 
 		// For MultiLine editbox, clip the end space, else weird when edit space at end of line (nothing happens)
 		if(_ViewText)

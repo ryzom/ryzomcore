@@ -28,6 +28,7 @@
 #include "nel/gui/proc.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/link_data.h"
+#include "nel/gui/variable_data.h"
 
 namespace NLGUI
 {
@@ -98,20 +99,6 @@ namespace NLGUI
 		{
 		public:
 			virtual void setupOptions() = 0;
-		};
-
-
-		struct VariableData
-		{
-			std::string entry;
-			std::string type;
-			std::string value;
-			uint32 size;
-
-			VariableData()
-			{
-				size = 0;
-			}
 		};
 
 		CInterfaceParser();
@@ -353,7 +340,15 @@ namespace NLGUI
 		std::map< std::string, std::string > pointerSettings;
 		std::map< std::string, std::map< std::string, std::string > > keySettings;
 
+		std::string _WorkDir;
+
 	public:
+		/// Sets the working directory, where files should be looked for
+		void setWorkDir( const std::string &workdir ){ _WorkDir = workdir; }
+
+		/// Looks up a file in either the working directory or using CPath::lookup
+		std::string lookup( const std::string &file );
+
 		void initLUA();
 		void uninitLUA();
 		bool isLuaInitialized() const{ return luaInitialized; }
@@ -378,6 +373,7 @@ namespace NLGUI
 
 		void setEditorMode( bool b ){ editorMode = b; }
 
+		void setVariable( const VariableData &v );
 		bool serializeVariables( xmlNodePtr parentNode ) const;
 		bool serializeProcs( xmlNodePtr parentNode ) const;
 		bool serializePointerSettings( xmlNodePtr parentNode ) const;

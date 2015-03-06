@@ -51,6 +51,7 @@ namespace NLGUI
 		// Init part
 		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
 
+		virtual void checkCoords();
 		virtual void updateCoords();
 
 		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
@@ -126,6 +127,7 @@ namespace NLGUI
 
 		void onRemoved();
 		void onWidgetDeleted( CInterfaceElement *e );
+		void moveBy( sint32 x, sint32 y );
 
 	protected:
 

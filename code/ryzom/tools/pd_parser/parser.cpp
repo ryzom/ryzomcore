@@ -1189,7 +1189,7 @@ bool	CEnumSimpleValueNode::prolog()
 	uint	i;
 	for (i=0; i<Names.size(); ++i)
 	{
-		CurrentEnumNode->Values.push_back(make_pair<string, uint32>(Names[i], CurrentValue));
+		CurrentEnumNode->Values.push_back(std::pair<string, uint32>(Names[i], CurrentValue));
 	}
 	if (parent != NULL)
 		++(parent->CurrentValue);
@@ -1214,7 +1214,7 @@ bool	CEnumRangeNode::prolog()
 		CurrentValue = 0;
 	}
 
-	CurrentEnumNode->Values.push_back(make_pair<string, uint32>(Name, CurrentValue));
+	CurrentEnumNode->Values.push_back(std::pair<string, uint32>(Name, CurrentValue));
 
 	return true;
 }
@@ -1238,7 +1238,7 @@ bool	CEnumRangeNode::epilog()
 
 	if (!EndRange.empty())
 	{
-		CurrentEnumNode->Values.push_back(make_pair<string, uint32>(EndRange, CurrentValue));
+		CurrentEnumNode->Values.push_back(std::pair<string, uint32>(EndRange, CurrentValue));
 	}
 
 	return true;
@@ -4709,7 +4709,7 @@ void	CLogMsgNode::generateContent()
 		CClassNode	*cnd;
 		if ( (tnd = getTypeNode(type, false)) )
 		{
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, tnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, tnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 
@@ -4723,7 +4723,7 @@ void	CLogMsgNode::generateContent()
 		}
 		else if ( (cnd = getClassNode(type, false)) )
 		{
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, cnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, cnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 
@@ -4739,7 +4739,7 @@ void	CLogMsgNode::generateContent()
 		{
 			CExtLogTypeNode*	extnd = new CExtLogTypeNode();
 			extnd->ExtLogType = "string";
-			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(make_pair<string, CParseNode*>(name, extnd));
+			pair<map<string, CParseNode*>::iterator, bool>	res = params.insert(std::pair<string, CParseNode*>(name, extnd));
 			if (!res.second)
 				error("log parameter '"+name+"' already defined");
 

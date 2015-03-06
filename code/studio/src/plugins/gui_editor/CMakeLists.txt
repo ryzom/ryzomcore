@@ -4,6 +4,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}
   ${QT_INCLUDES}
   ${LUA_INCLUDE_DIR})
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/gui_editor_config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/gui_editor_config.h)
+
 FILE(GLOB SRC *.cpp *.h)
 
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
@@ -36,6 +38,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_HDR
 	texture_property_manager.h
 	expression_editor.h
 	expr_link_dlg.h
+	new_gui_dlg.h
 	)
 	
 SET(OVQT_PLUGIN_GUI_EDITOR_UIS
@@ -55,6 +58,7 @@ SET(OVQT_PLUGIN_GUI_EDITOR_UIS
 	texture_chooser.ui
 	expression_editor.ui
 	expr_link_dlg.ui
+	new_gui_dlg.ui
 	)
 
 SET(QT_USE_QTGUI TRUE)
@@ -110,3 +114,11 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/studio_plugin_gui_editor.xml DESTINATION ${OVQT_PLUGIN_SPECS_DIR} COMPONENT tools3d)
+
+FILE(GLOB widgets "${CMAKE_CURRENT_SOURCE_DIR}/widgets/*.xml")
+FILE(GLOB expressions "${CMAKE_CURRENT_SOURCE_DIR}/expressions/*.xml")
+
+INSTALL(FILES ${widgets} DESTINATION "${OVQT_DATA_DIR}/widgets" COMPONENT tools3d)
+INSTALL(FILES ${expressions} DESTINATION "${OVQT_DATA_DIR}/expressions" COMPONENT tools3d)
+
+INSTALL(DIRECTORY fonts/ DESTINATION ${OVQT_DATA_DIR} COMPONENT data)

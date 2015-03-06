@@ -41,7 +41,7 @@
 
 #include <string>
 
-#include "../../common/src/game_share/ryzom_database_banks.h"
+#include "game_share/ryzom_database_banks.h"
 
 
 ////////////////

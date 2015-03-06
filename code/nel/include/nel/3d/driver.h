@@ -493,7 +493,7 @@ public:
 	 *
 	 * NB: you must setupViewMatrix() BEFORE setupModelMatrix(), or else undefined results.
 	 */
-	virtual void			setupViewMatrix(const CMatrix &mtx)=0;
+	virtual void			setupViewMatrix(const CMatrix &mtx) = 0;
 
 	/** setup the view matrix (inverse of camera matrix).
 	 *	Extended: give a cameraPos (mtx.Pos() is not taken into account but for getViewMatrix()),
@@ -1422,7 +1422,6 @@ protected:
 
 private:
 	bool					_StaticMemoryToVRAM;
-
 };
 
 // --------------------------------------------------

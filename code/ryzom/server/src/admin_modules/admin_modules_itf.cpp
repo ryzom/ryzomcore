@@ -18,6 +18,7 @@
 // WARNING : this is a generated file, don't change it !
 /////////////////////////////////////////////////////////////////
 
+#include "stdpch.h"
 #include "admin_modules_itf.h"
 
 namespace ADMIN

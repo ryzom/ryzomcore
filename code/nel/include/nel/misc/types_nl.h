@@ -53,7 +53,10 @@
 #	endif
 #	ifdef _MSC_VER
 #		define NL_COMP_VC
-#		if _MSC_VER >= 1700
+#		if _MSC_VER >= 1800
+#			define NL_COMP_VC12
+#			define NL_COMP_VC_VERSION 120
+#		elif _MSC_VER >= 1700
 #			define NL_COMP_VC11
 #			define NL_COMP_VC_VERSION 110
 #		elif _MSC_VER >= 1600
@@ -414,6 +417,12 @@ extern void operator delete[](void *p) throw();
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
+#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 120)
+#	include <hash_map>
+#	include <hash_set>
+#	define CHashMap ::std::hash_map
+#	define CHashSet ::std::hash_set
+#	define CHashMultiMap ::std::hash_multimap
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
@@ -454,7 +463,11 @@ typedef	uint16	ucchar;
 
 // To define a 64bits constant; ie: UINT64_CONSTANT(0x123456781234)
 #ifdef NL_COMP_VC
-#	if (NL_COMP_VC_VERSION >= 80)
+#	if (NL_COMP_VC_VERSION >= 120)
+#		define INT64_CONSTANT(c)		(c##LL)
+#		define SINT64_CONSTANT(c)	(c##LL)
+#		define UINT64_CONSTANT(c)	(c##ULL)
+#	elif (NL_COMP_VC_VERSION >= 80)
 #		define INT64_CONSTANT(c)	(c##LL)
 #		define SINT64_CONSTANT(c)	(c##LL)
 #		define UINT64_CONSTANT(c)	(c##LL)

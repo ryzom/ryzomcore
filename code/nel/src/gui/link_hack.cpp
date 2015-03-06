@@ -20,6 +20,7 @@
 #include "nel/gui/dbview_number.h"
 #include "nel/gui/dbview_quantity.h"
 #include "nel/gui/view_pointer.h"
+#include "nel/gui/group_editbox_decor.h"
 
 namespace NLGUI
 {
@@ -39,5 +40,6 @@ namespace NLGUI
 		force_link_dbgroup_select_number_cpp();
 		force_link_dbgroup_combo_box_cpp();
 		force_link_group_wheel_cpp();
+		CGroupEditBoxDecor::forceLink();
 	}
 }

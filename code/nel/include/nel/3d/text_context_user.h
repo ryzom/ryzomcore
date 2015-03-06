@@ -64,19 +64,21 @@ public:
 	/// \name Text look.
 	// @{
 	void setColor(NLMISC::CRGBA color);
-	void setFontSize(uint32 fontSize) ;
-	uint32 getFontSize() const  ;
-	void setHotSpot(THotSpot hotSpot)  ;
-	THotSpot getHotSpot() const ;
-	void setScaleX(float scaleX)  ;
-	void setScaleY(float scaleY)  ;
-	float getScaleX() const ;
-	float getScaleY() const ;
-	void setShaded(bool b) ;
-	bool			getShaded() const  ;
-	void			setShadeExtent(float shext) ;
-	void			setShadeColor (NLMISC::CRGBA sc);
-	NLMISC::CRGBA	getShadeColor () const;
+	void setFontSize(uint32 fontSize);
+	uint32 getFontSize() const;
+	void setHotSpot(THotSpot hotSpot);
+	THotSpot getHotSpot() const;
+	void setScaleX(float scaleX);
+	void setScaleY(float scaleY);
+	float getScaleX() const;
+	float getScaleY() const;
+	void setShaded(bool b);
+	bool getShaded() const;
+	void setShadeOutline(bool b);
+	bool getShadeOutline() const;
+	void setShadeExtent(float shext) ;
+	void setShadeColor (NLMISC::CRGBA sc);
+	NLMISC::CRGBA getShadeColor () const;
 	void setKeep800x600Ratio(bool keep);
 	bool getKeep800x600Ratio() const;
 	// @}

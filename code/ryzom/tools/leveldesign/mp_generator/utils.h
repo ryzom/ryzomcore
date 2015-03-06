@@ -55,17 +55,17 @@ public:
 		 * Display the item as a row of a HTML table.
 		 * If (key!=previousKey) and (name==previousName), the row will not be displayed entirely to save space
 		 *
-		 * \param keyColumn If not ~0, column used for sorting => this column displays only the field matching the key
+		 * \param keyColumn If not std::numeric_limits<uint32>::max(), column used for sorting => this column displays only the field matching the key
 		 * \param key The key used for sorting (see keyColumn)
 		 * \param previousKey Previous key
-		 * \param nameColumn If not ~0, column used for the unique name (column must have exaclty one element)
+		 * \param nameColumn If not std::numeric_limits<uint32>::max(), column used for the unique name (column must have exaclty one element)
 		 * \param previousName Previous name
 		 */
-		std::string		toHTMLRow( uint32 keyColumn=~0, const string& key=string(), const string& previousKey=string(),
-								   uint32 nameColumn=~0, const string& previousName=string() ) const
+		std::string		toHTMLRow( uint32 keyColumn=std::numeric_limits<uint32>::max(), const string& key=string(), const string& previousKey=string(),
+								   uint32 nameColumn=std::numeric_limits<uint32>::max(), const string& previousName=string() ) const
 		{
 			std::string s = "<tr>";
-			bool lightMode = (nameColumn == ~0) ? false : ((key != previousKey) && (Fields[nameColumn][0] == previousName));
+			bool lightMode = (nameColumn == std::numeric_limits<uint32>::max()) ? false : ((key != previousKey) && (Fields[nameColumn][0] == previousName));
 			for ( uint32 c=0; c!=NC; ++c )
 			{
 				s += "<td>";
@@ -86,11 +86,11 @@ public:
 
 
 		///
-		std::string		toCSVLine( char columnSeparator=',', string internalSeparator=" - ", uint32 keyColumn=~0, const string& key=string(), const string& previousKey=string(),
-								   uint32 nameColumn=~0, const string& previousName=string()  ) const
+		std::string		toCSVLine( char columnSeparator=',', string internalSeparator=" - ", uint32 keyColumn=std::numeric_limits<uint32>::max(), const string& key=string(), const string& previousKey=string(),
+								   uint32 nameColumn=std::numeric_limits<uint32>::max(), const string& previousName=string()  ) const
 		{
 			std::string s;
-			bool lightMode = (nameColumn == ~0) ? false : ((key != previousKey) && (Fields[nameColumn][0] == previousName));
+			bool lightMode = (nameColumn == std::numeric_limits<uint32>::max()) ? false : ((key != previousKey) && (Fields[nameColumn][0] == previousName));
 			for ( uint32 c=0; c!=NC; ++c )
 			{
 				if ( c == keyColumn )

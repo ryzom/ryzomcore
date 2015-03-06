@@ -60,7 +60,7 @@ namespace NLGUI
 		void			setText(uint i, const ucstring &text);
 		void			insertText(uint i, const ucstring &text);
 		const ucstring	&getText(uint i) const;
-		const uint		&getTextId(uint i) const;
+		uint			getTextId(uint i) const;
 		uint			getTextPos(uint nId) const;
 		const ucstring	&getTexture(uint i) const;
 		void			removeText(uint nPos);

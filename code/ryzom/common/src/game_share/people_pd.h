@@ -51,6 +51,7 @@ public:
 
 	enum TPeople
 	{
+		Undefined = -1,
 		Humanoid = 0,
 		Playable = 0,
 		Fyros = 0,

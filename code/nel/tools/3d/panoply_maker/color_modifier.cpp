@@ -70,7 +70,6 @@ void CColorModifier::convertBitmap(NLMISC::CBitmap &destBitmap, const NLMISC::CB
 
 			// blend to the destination by using the mask alpha			
 			result.blendFromui(*dest, result, mask->R);
-			
 
 			/// keep alpha from the source			
 			dest->R = result.R;
@@ -78,7 +77,6 @@ void CColorModifier::convertBitmap(NLMISC::CBitmap &destBitmap, const NLMISC::CB
 			dest->B = result.B;
 			dest->A = src->A;
 
-						
 			++ mask;
 			++ src;
 			++ dest;

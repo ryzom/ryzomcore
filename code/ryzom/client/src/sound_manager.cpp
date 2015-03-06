@@ -106,11 +106,11 @@ enum TFilterMapping
 // constructor
 //-----------------------------------------------
 CSoundManager::CSoundManager(IProgressCallback * /* progressCallBack */)
-:	_AudioMixer(NULL), 
+:	_AudioMixer(NULL),
 	_GroupControllerEffects(NULL),
-	_GroupControllerEffectsGame(NULL),  
-	_EnvSoundRoot(NULL), 
-	_Sources(NULL), 
+	_GroupControllerEffectsGame(NULL),
+	_EnvSoundRoot(NULL),
+	_Sources(NULL),
 	_UserEntitySoundLevel(1.0f)
 {
 	_EnableBackgroundMusicAtTime= 0;

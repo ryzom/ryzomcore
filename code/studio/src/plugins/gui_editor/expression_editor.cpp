@@ -176,6 +176,9 @@ void ExpressionEditor::onDeleteSelection()
 			}
 		}
 
+		if( item == m_pvt->m_root )
+			m_pvt->m_root = NULL;
+
 		m_scene->removeItem( item );
 		delete item;
 	}

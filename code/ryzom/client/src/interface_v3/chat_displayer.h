@@ -30,7 +30,6 @@
 #undef LOG_WARNING
 #endif
 
-
 /**
  * class used to display console text commands in the chat window
  * \author Nicolas Brigand

@@ -327,6 +327,7 @@ void initCore()
 				ConfigFile->getVar("ScreenFull").asInt()==0));
 		TextContext = Driver->createTextContext(CPath::lookup(ConfigFile->getVar("FontName").asString()));
 		TextContext->setShaded(true);
+		TextContext->setShadeOutline(false);
 		TextContext->setKeep800x600Ratio(false);
 		// You can't call displayLoadingState() before init the loading state system
 		displayLoadingState("Initialize Loading");
@@ -1263,6 +1264,7 @@ sint main(int argc, char **argv)
 	{
 		// use log.log if NEL_LOG_IN_FILE and SBCLIENT_USE_LOG_LOG defined as 1
 		createDebug(NULL, SBCLIENT_USE_LOG_LOG, false);
+		INelContext::getInstance().setWindowedApplication(true);
 
 	#if SBCLIENT_USE_LOG
 		// create snowballs_client.log

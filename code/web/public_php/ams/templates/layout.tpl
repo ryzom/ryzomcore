@@ -167,7 +167,7 @@
 		</div>
 
 		<footer>
-			{if $permission > 1}<p class="pull-right">AMS 0.10.0 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
+			{if $permission > 1}<p class="pull-right">AMS 0.11.0 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
 		</footer>
 		{/if}
 	</div><!--/.fluid-container-->

@@ -188,7 +188,6 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 			_CurrentState = stateId;	\
 			break;						\
 		}								\
-		
 
 extern std::string LoginLogin, LoginPassword;
 extern bool noUserChar;

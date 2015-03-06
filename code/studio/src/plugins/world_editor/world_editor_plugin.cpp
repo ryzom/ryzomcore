@@ -54,36 +54,6 @@ bool WorldEditorPlugin::initialize(ExtensionSystem::IPluginManager *pluginManage
 
 	WorldEditorSettingsPage *weSettings = new WorldEditorSettingsPage(this);
 	addAutoReleasedObject(weSettings);
-
-	QSettings *settings = Core::ICore::instance()->settings();
-	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
-	m_ligoConfig.CellSize = settings->value(Constants::WORLD_EDITOR_CELL_SIZE, "160").toFloat();
-	m_ligoConfig.Snap = settings->value(Constants::WORLD_EDITOR_SNAP, "1").toFloat();
-	m_ligoConfig.ZoneSnapShotRes = settings->value(Constants::ZONE_SNAPSHOT_RES, "128").toUInt();
-	QString fileName = settings->value(Constants::PRIMITIVE_CLASS_FILENAME, "world_editor_classes.xml").toString();
-	settings->endGroup();
-	try
-	{
-		// Search path of file world_editor_classes.xml
-		std::string ligoPath = NLMISC::CPath::lookup(fileName.toUtf8().constData());
-		// Init LIGO
-		m_ligoConfig.readPrimitiveClass(ligoPath.c_str(), true);
-		NLLIGO::Register();
-		NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
-	}
-	catch (NLMISC::Exception &e)
-	{
-		*errorString = tr("(%1)").arg(e.what());
-		return false;
-	}
-
-	// Reset
-	m_ligoConfig.resetPrimitiveConfiguration ();
-
-	// TODO: get file names! from settings
-	m_ligoConfig.readPrimitiveClass("world_editor_primitive_configuration.xml", true);
-
-
 	addAutoReleasedObject(new WorldEditorContext(this));
 	return true;
 }
@@ -116,12 +86,44 @@ WorldEditorContext::WorldEditorContext(QObject *parent)
 	: IContext(parent),
 	  m_worldEditorWindow(0)
 {
+	QSettings *settings = Core::ICore::instance()->settings();
+    settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+    m_ligoConfig.CellSize = settings->value(Constants::WORLD_EDITOR_CELL_SIZE, "160").toFloat();
+    m_ligoConfig.Snap = settings->value(Constants::WORLD_EDITOR_SNAP, "1").toFloat();
+    m_ligoConfig.ZoneSnapShotRes = settings->value(Constants::ZONE_SNAPSHOT_RES, "128").toUInt();
+    QString fileName = settings->value(Constants::PRIMITIVE_CLASS_FILENAME, "world_editor_classes.xml").toString();
+    settings->endGroup();
+    try
+    {
+        // Search path of file world_editor_classes.xml
+        std::string ligoPath = NLMISC::CPath::lookup(fileName.toUtf8().constData());
+        // Init LIGO
+        m_ligoConfig.readPrimitiveClass(ligoPath.c_str(), true);
+        NLLIGO::Register();
+        NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
+    }
+    catch (NLMISC::Exception &e)
+    {
+        nlinfo( "Error starting LIGO." );
+    }
+
+    // Reset
+    m_ligoConfig.resetPrimitiveConfiguration ();
+
+    // TODO: get file names! from settings
+    m_ligoConfig.readPrimitiveClass("world_editor_primitive_configuration.xml", true);
+
 	m_worldEditorWindow = new WorldEditorWindow();
 }
 
 QUndoStack *WorldEditorContext::undoStack()
 {
 	return m_worldEditorWindow->undoStack();
+}
+
+void WorldEditorContext::onActivated()
+{
+    NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;
 }
 
 void WorldEditorContext::open()

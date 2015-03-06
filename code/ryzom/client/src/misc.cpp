@@ -920,7 +920,7 @@ std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAd
 
 std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest)
 {
-	std::string colorCode = "";
+	std::string colorCode;
 	if (src.size() >= 3)
 	{
 		uint startPos = 0;

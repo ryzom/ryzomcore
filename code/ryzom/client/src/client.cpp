@@ -26,7 +26,6 @@
 #include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
-#include <windows.h>
 #include <shellapi.h>
 #else
 #include <csignal>
@@ -365,6 +364,8 @@ int main(int argc, char **argv)
 	CApplicationContext *appContext = new CApplicationContext;
 
 	createDebug();
+
+	INelContext::getInstance().setWindowedApplication(true);
 
 #ifndef NL_DEBUG
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
