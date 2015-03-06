@@ -32,7 +32,7 @@ RootDir = os.getcwd();
 
 MajorVersion = 0
 MinorVersion = 11
-PatchVersion = 2
+PatchVersion = 3
 Revision = 0
 
 VersionString = str(MajorVersion) + "." + str(MinorVersion) + "." + str(PatchVersion)
