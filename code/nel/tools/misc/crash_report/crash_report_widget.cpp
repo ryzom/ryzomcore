@@ -119,7 +119,9 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 			m_ui.gridLayout->addWidget( m_ui.emailCB, 5, 0, 1, 1 );
 			m_ui.gridLayout->addWidget( m_ui.emailEdit, 6, 0, 1, 1 );
 
-			connect( cb, SIGNAL( stateChanged( int ) ), this, SLOT( onSendCBClicked() ) );
+			connect(cb, SIGNAL(stateChanged(int)), this, SLOT(onSendCBClicked()));
+			if (m_forceSend)
+				cb->setChecked(true);
 		}
 
 		hbl->addStretch();
