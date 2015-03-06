@@ -520,7 +520,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 //                           in release "<Msg>"
 void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *message)
 {
-#ifdef NL_OS_WINDOWS
+//#ifdef NL_OS_WINDOWS
 
 	bool needSpace = false;
 //	stringstream ss;
@@ -679,39 +679,35 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 			// yoyo: allow only to send the crash report once. Because users usually click ignore,
 			// which create noise into list of bugs (once a player crash, it will surely continues to do it).
 			std::string filename = getLogDirectory() + NL_CRASH_DUMP_FILE;
+			
+			TReportResult reportResult = report(args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)),
+				subject, body, filename, NL_REPORT_SYNCHRONOUS, !isCrashAlreadyReported(), NL_REPORT_DEFAULT);
 
-			if  (ReportDebug == report (args.ProcessName + " NeL " + toString(logTypeToString(args.LogType, true)), "", subject, body, true, 2, true, 1, !isCrashAlreadyReported(), IgnoreNextTime, filename.c_str()))
+			switch (reportResult)
 			{
+			case ReportAlwaysIgnore:
+				IgnoreNextTime = true;
+				break;
+			case ReportBreak:
 				INelContext::getInstance().setDebugNeedAssert(true);
+				break;
+			case ReportAbort:
+#		ifdef NL_OS_WINDOWS
+#		ifndef NL_COMP_MINGW
+				// disable the Windows popup telling that the application aborted and disable the dr watson report.
+				_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
+#		endif
+#		endif
+				abort();
+				break;
 			}
 
 			// no more sent mail for crash
 			setCrashAlreadyReported(true);
 		}
+	}
 
-/*		// Check the envvar NEL_IGNORE_ASSERT
-		if (getenv ("NEL_IGNORE_ASSERT") == NULL)
-		{
-			// Ask the user to continue, debug or ignore
-			int result = MessageBox (NULL, ss2.str().c_str (), logTypeToString(args.LogType, true), MB_ABORTRETRYIGNORE | MB_ICONSTOP);
-			if (result == IDABORT)
-			{
-				// Exit the program now
-				exit (EXIT_FAILURE);
-			}
-			else if (result == IDRETRY)
-			{
-				// Give the debugger a try
-				DebugNeedAssert = true;
- 			}
-			else if (result == IDIGNORE)
-			{
-				// Continue, do nothing
-			}
-		}
-*/	}
-
-#endif
+//#endif
 }
 
 
