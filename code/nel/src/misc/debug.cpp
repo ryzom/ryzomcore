@@ -53,6 +53,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/variable.h"
 #include "nel/misc/system_info.h"
+#include "nel/misc/system_utils.h"
 
 #define NL_NO_DEBUG_FILES 1
 
@@ -1223,10 +1224,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 #endif // LOG_IN_FILE
 		DefaultMemDisplayer = new CMemDisplayer ("DEFAULT_MD");
 
-#ifdef NL_OS_WINDOWS
-		if (GetConsoleWindow() == NULL)
+		if (NLMISC::CSystemUtils::detectWindowedApplication())
 			INelContext::getInstance().setWindowedApplication(true);
-#endif
 
 		initDebug2(logInFile);
 

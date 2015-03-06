@@ -355,4 +355,14 @@ uint CSystemUtils::getCurrentColorDepth()
 	return depth;
 }
 
+/// Detect whether the current process is a windowed application. Return true if definitely yes, false if unknown
+bool CSystemUtils::detectWindowedApplication()
+{
+#ifdef NL_OS_WINDOWS
+	if (GetConsoleWindow() == NULL)
+		return true;
+#endif
+	return false;
+}
+
 } // NLMISC
