@@ -122,10 +122,13 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 			connect( cb, SIGNAL( stateChanged( int ) ), this, SLOT( onSendCBClicked() ) );
 		}
 
+		hbl->addStretch();
+
 		QPushButton *alwaysIgnoreButton = new QPushButton( tr( "Always Ignore" ), this );
 		QPushButton *ignoreButton = new QPushButton( tr( "Ignore" ), this );
 		QPushButton *abortButton = new QPushButton( tr( "Abort" ), this );
-		QPushButton *breakButton = new QPushButton( tr( "Break" ), this );
+		QPushButton *breakButton = new QPushButton(tr("Break"), this);
+		breakButton->setAutoDefault(true);
 
 		hbl->addWidget( alwaysIgnoreButton );
 		hbl->addWidget( ignoreButton );
@@ -141,26 +144,30 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 	}
 	else
 	{
+		hbl->addStretch();
+
 		// If -host is specified, offer the send function
 		if( !m_socket->url().isEmpty() && !m_fileName.isEmpty() )
 		{
+			if (!m_forceSend)
+			{
+				QPushButton *cancelButton = new QPushButton(tr("Don't send report"), this);
+				connect(cancelButton, SIGNAL(clicked(bool)), this, SLOT(onCancelClicked()));
+				hbl->addWidget(cancelButton);
+			}
+
 			QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
+			sendButton->setAutoDefault(true);
 			connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
 			hbl->addWidget( sendButton );
-
-			if( !m_forceSend )
-			{
-				QPushButton *cancelButton = new QPushButton( tr( "Don't send report" ), this );
-				connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
-				hbl->addWidget( cancelButton );
-			}
 		}
 		// Otherwise only offer exit
 		else
 		{
 			QPushButton *exitButton = new QPushButton( tr( "Exit" ), this );
 			connect( exitButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
-			hbl->addWidget( exitButton );
+			hbl->addWidget(exitButton);
+			exitButton->setAutoDefault(true);
 		}
 
 		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
