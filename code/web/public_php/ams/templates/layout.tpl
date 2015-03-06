@@ -140,7 +140,7 @@
 						{if isset($smarty.get.page) and $smarty.get.page eq 'layout_plugin' and $smarty.get.name eq $arrkey}
 							{include file=$hook_info[$smarty.get.name]['TemplatePath']}
 						{/if}
-					{/foreach}	
+					{/foreach}
 				</div>
 			{/if}
 
@@ -167,7 +167,7 @@
 		</div>
 
 		<footer>
-			{if $permission > 1}<p class="pull-right">AMS 0.11.0 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
+			{if $permission > 1}<p class="pull-right">AMS 0.11.2 Powered by: <a href="http://usman.it/free-responsive-admin-template">Charisma</a></p>{/if}
 		</footer>
 		{/if}
 	</div><!--/.fluid-container-->
