@@ -78,6 +78,19 @@ public:
 
 int main( int argc, char **argv )
 {
+#ifndef WIN32
+	// Workaround to default -style=gtk+ on recent Cinnamon versions
+	char *currentDesktop = getenv("XDG_CURRENT_DESKTOP");
+	if (currentDesktop)
+	{
+		printf("XDG_CURRENT_DESKTOP: %s\n", currentDesktop);
+		if (!strcmp(currentDesktop, "X-Cinnamon"))
+		{
+			setenv("XDG_CURRENT_DESKTOP", "gnome", 1);
+		}
+	}
+#endif
+
 	QApplication app( argc, argv );
 
 	std::vector< std::pair< std::string, std::string > > params;
