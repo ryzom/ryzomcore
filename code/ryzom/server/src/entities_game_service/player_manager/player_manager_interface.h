@@ -41,9 +41,9 @@ public:
 
 	};
 
-	class CUint32Hash
+	struct CUint32Hash
 	{
-	public:
+		enum { bucket_size = 4, min_buckets = 8, };
 		size_t	operator () ( const uint32 &i ) const { return i; }
 	};
 

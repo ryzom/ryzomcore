@@ -140,6 +140,7 @@ inline void CMatrix::testExpandRot() const
 		self->Scale33= 1;
 	}
 }
+
 inline void CMatrix::testExpandProj() const
 {
 	if(hasProj())

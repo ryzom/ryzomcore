@@ -69,16 +69,15 @@ typedef uint32 TUid;
 /**
  * CInetAddress hash function
  */
-class CInetAddressHashMapTraits
+struct CInetAddressHashMapTraits
 {
-public:
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	inline size_t operator() ( const NLNET::CInetAddress& x ) const
 	{
 		//return x.port();
 		return x.internalIPAddress();
 	}
+	bool operator() (const NLNET::CInetAddress& left, const NLNET::CInetAddress& right) { return left < right; }
 // 	bool operator() (const NLNET::CInetAddress &x1, const NLNET::CInetAddress &x2) const
 // 	{
 // 		return classId1 < classId2;

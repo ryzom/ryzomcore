@@ -142,7 +142,6 @@ using namespace std;
 // Ligo primitive class
 CLigoConfig				LigoConfig;
 
-CMsgBoxDisplayer		MsgBoxError;
 CClientChatManager		ChatMngr;
 
 bool					LastScreenSaverEnabled = false;
@@ -554,27 +553,6 @@ void checkDriverDepth ()
 	}
 }
 
-static std::string replaceApplicationDirToken(const std::string &dir)
-{
-
-#ifdef NL_OS_MAC
-	// if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
-	if (!CFile::isExists("client_default.cfg") && dir.size()>0 && dir[0]!='/')
-	{
-		return getAppBundlePath() + "/Contents/Resources/" + dir;
-	}
-#else
-	static const std::string token = "<ApplicationDir>";
-	std::string::size_type pos = dir.find(token);
-	if (pos != std::string::npos)
-		return dir.substr(0, pos) + getAppBundlePath() + dir.substr(pos + token.length());
-#endif
-
-//	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
-
-	return dir;
-}
-
 void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 {
 	bool cache = VRDeviceCache.empty();
@@ -589,7 +567,7 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 		std::stringstream name;
 		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
 		std::stringstream fullname;
-		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
 		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
 		if (cache)
 		{
@@ -616,10 +594,16 @@ void initStereoDisplayDevice()
 		std::vector<NL3D::CStereoDeviceInfo> devices;
 		listStereoDisplayDevices(devices);
 		CStereoDeviceInfo *deviceInfo = NULL;
-		if (ClientCfg.VRDisplayDevice == std::string("Auto")
-			&& devices.begin() != devices.end())
+		if (ClientCfg.VRDisplayDevice == std::string("Auto"))
 		{
-			deviceInfo = &devices[0];
+			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
+			{
+				if ((*it).AllowAuto)
+				{
+					deviceInfo = &(*it);
+					break;
+				}
+			}
 		}
 		else
 		{
@@ -672,39 +656,94 @@ void addSearchPaths(IProgressCallback &progress)
 			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
 			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPath[i]), true, false, &progress);
+			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
 
 			progress.popCropedValues ();
 		}
 
 		CPath::loadRemappedFiles("remap_files.csv");
 	}
+
 	for (uint i = 0; i < ClientCfg.DataPathNoRecurse.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPathNoRecurse[i]), false, false, &progress);
+		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
 
 		progress.popCropedValues ();
 	}
-}
 
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#endif
+
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.DataPath[i].empty() && ClientCfg.DataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.DataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
+}
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
 {
 	NLMISC::TTime initPaths = ryzomGetLocalTime ();
-	H_AUTO(InitRZAddSearchPaths)
+
+	H_AUTO(InitRZAddSearchPaths);
+
 	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.PreDataPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
 
 		progress.popCropedValues ();
 	}
+
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
+
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#endif
+
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.PreDataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
@@ -713,7 +752,7 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
 		progress.popCropedValues();
 	}
 }
@@ -748,12 +787,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-		
+
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-		
+
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -882,15 +921,14 @@ void prelogInit()
 		UDriver::TDriver driver = UDriver::OpenGl;
 
 #ifdef NL_OS_WINDOWS
-		uint icon = (uint)LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
+		uintptr_t icon = (uintptr_t)LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
 #else
-		uint icon = 0;
+		uintptr_t icon = 0;
 #endif // NL_OS_WINDOWS
 
 		switch(ClientCfg.Driver3D)
 		{
 #ifdef NL_OS_WINDOWS
-
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
@@ -946,7 +984,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-		
+
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -1072,37 +1110,9 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 
-		// Test mouse & keyboard low-level mode, if DisableDirectInput not set.
-		// In case of failure, exit the client.
-		// In case of success, set it back to normal mode, to provide for the user
-		// the ability to manually set the firewall's permissions when the client connects.
-		// The low-level mode will actually be set when "launching" (after loading).
-		if (!ClientCfg.DisableDirectInput)
-		{
-			// Test mouse and set back to normal mode
-			if (!Driver->enableLowLevelMouse (true, ClientCfg.HardwareCursor))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_mouse").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelMouse (false, ClientCfg.HardwareCursor);
-
-			// Test keyboard and set back to normal mode
-			// NB : keyboard will be initialized later now
-			/*if (!Driver->enableLowLevelKeyboard (true))
-			{
-				ExitClientError (CI18N::get ("can_t_initialise_the_keyboard").toUtf8 ().c_str ());
-				// ExitClientError() call exit() so the code after is never called
-				return;
-			}
-			Driver->enableLowLevelKeyboard (false);
-			*/
-		}
-
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for ( uint i=0; i<3; i++)
+		for (uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;
@@ -1192,7 +1202,7 @@ void prelogInit()
 		CBloomEffect::getInstance().setDriver(Driver);
 
 		// init bloom effect
-		CBloomEffect::getInstance().init(driver != UDriver::Direct3d);
+		CBloomEffect::getInstance().init();
 		
 		if (StereoDisplay) // VR_CONFIG
 		{

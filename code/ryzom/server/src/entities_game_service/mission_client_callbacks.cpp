@@ -236,6 +236,7 @@ void cbClientGroupAbandonMission( NLNET::CMessage& msgin, const std::string &ser
 			MISLOG("user:%s cbClientGroupAbandonMission : Invalid team", userId.toString().c_str());
 			return;
 		}
+
 		if ( team->getLeader() != userId )
 		{
 			CCharacter::sendDynamicSystemMessage( user->getEntityRowId(), "REQ_LEADER_TO_ABANDON_MISSION" );

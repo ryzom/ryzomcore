@@ -200,6 +200,10 @@ public:
 	 */
 	void getFileListByName(const std::string &extension, const std::string &name, std::vector<std::string> &filenames);
 
+	/** Create a list of file having the requested string in the path and the requested extension.
+	*/
+	void getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames);
+
 	/** Make a path relative to another if possible, else doesn't change it.
 	 * \param basePath is the base path to be relative to.
 	 * \param relativePath is the path to make relative to basePath.
@@ -339,7 +343,7 @@ public:
 	/** Adds a search path.
      * The path is a directory "c:/temp" all files in the directory will be included (and recursively if asked)
 	 *
-	 * Alternative directories are not pre-cached (instead of non Alternative files) and will used when a file is not found in the standard directories.
+	 * Alternative directories are not pre-cached (instead of non Alternative files) and will be used when a file is not found in the standard directories.
 	 * For example, local data will be in the cached directories and server repository files will be in the Alternative files. If a new file is not
 	 * found in the local data, we'll try to find it on the repository.
 	 *
@@ -492,12 +496,23 @@ public:
 	 */
 	static void getFileListByName(const std::string &extension, const std::string &name, std::vector<std::string> &filenames);
 
+	/** Create a list of file having the requested string in the path and the requested extension
+	*/
+	static void getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames);
+
 	/** Make a path relative to another if possible, else doesn't change it.
 	 * \param basePath is the base path to be relative to.
 	 * \param relativePath is the path to make relative to basePath.
 	 * return true if relativePath as been done relative to basePath, false is relativePath has not been changed.
 	 */
 	static bool makePathRelative (const char *basePath, std::string &relativePath);
+
+	/** Make path absolute
+	* \param relativePath - The relative path
+	* \param directory - the directory to which the path is relative to
+	* returns the absolute path, or empty if something went wrong.
+	*/
+	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory );
 
 	/** If File in this list is added more than one in an addSearchPath, it doesn't launch a warning.
 	 */

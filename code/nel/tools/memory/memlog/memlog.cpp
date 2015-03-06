@@ -69,11 +69,20 @@ int main(int argc, char* argv[])
 					if (fread (&size, sizeof(uint32), 1, file) != 1)
 						break;
 
+#ifdef NL_BIG_ENDIAN
+					NLMISC_BSWAP32(size);
+#endif
+
 					while (1)
 					{
 						uint32 start;
 						if (fread (&start, sizeof(uint32), 1, file) != 1)
 							break;
+
+#ifdef NL_BIG_ENDIAN
+						NLMISC_BSWAP32(start);
+#endif
+
 						string category;
 						if (!readString (category, file))
 							break;

@@ -18,9 +18,6 @@
 #include "nel/misc/win_displayer.h"
 
 #ifdef NL_OS_WINDOWS
-
-#define NOMINMAX
-#include <windows.h>
 #include <windowsx.h>
 #include <winuser.h>
 #include <cstring>
@@ -29,6 +26,7 @@
 #include <commctrl.h>
 #include <ctime>
 
+#include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
 #include "nel/misc/command.h"
 #include "nel/misc/thread.h"
@@ -44,6 +42,13 @@ namespace NLMISC {
 
 static CHARFORMAT2 CharFormat;
 
+CWinDisplayer::CWinDisplayer(const char *displayerName) : CWindowDisplayer(displayerName), Exit(false)
+{
+	needSlashR = true;
+	createLabel("@Clear|CLEAR");
+
+	INelContext::getInstance().setWindowedApplication(true);
+}
 
 CWinDisplayer::~CWinDisplayer ()
 {
@@ -263,7 +268,7 @@ void CWinDisplayer::updateLabels ()
 					{
 						access.value()[i].Hwnd = CreateWindowW (L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_SIMPLE, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
 					}
-					SendMessage ((HWND)access.value()[i].Hwnd, WM_SETFONT, (LONG) _HFont, TRUE);
+					SendMessage ((HWND)access.value()[i].Hwnd, WM_SETFONT, (WPARAM)_HFont, TRUE);
 					needResize = true;
 				}
 
@@ -285,7 +290,7 @@ void CWinDisplayer::updateLabels ()
 					}
 				}
 
-				SendMessage ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LONG) n.c_str());
+				SendMessage ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) n.c_str());
 				access.value()[i].NeedUpdate = false;
 			}
 		}
@@ -422,7 +427,7 @@ void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint 
 		dwStyle |= WS_HSCROLL;
 
 	_HEdit = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, RICHEDIT_CLASSW, L"", dwStyle, 0, _ToolBarHeight, w, h-_ToolBarHeight-_InputEditHeight, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
-	SendMessage (_HEdit, WM_SETFONT, (LONG) _HFont, TRUE);
+	SendMessage (_HEdit, WM_SETFONT, (WPARAM)_HFont, TRUE);
 
 	// set the edit text limit to lot of :)
 	SendMessage (_HEdit, EM_LIMITTEXT, -1, 0);
@@ -436,7 +441,7 @@ void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint 
 	_HInputEdit = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW, RICHEDIT_CLASSW, L"", WS_CHILD | WS_VISIBLE
 		/*| ES_MULTILINE*/ | ES_WANTRETURN | ES_NOHIDESEL | ES_AUTOHSCROLL, 0, h-_InputEditHeight, w, _InputEditHeight,
 		_HWnd, NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
-	SendMessageW (_HInputEdit, WM_SETFONT, (LONG) _HFont, TRUE);
+	SendMessageW (_HInputEdit, WM_SETFONT, (WPARAM)_HFont, TRUE);
 
 	LRESULT dwEvent = SendMessageW(_HInputEdit, EM_GETEVENTMASK, (WPARAM)0, (LPARAM)0);
 	dwEvent |= ENM_MOUSEEVENTS | ENM_KEYEVENTS | ENM_CHANGE;
@@ -486,7 +491,7 @@ void CWinDisplayer::clear ()
 	SendMessageW (_HEdit, EM_SETSEL, 0, nIndex);
 
 	// clear all the text
-	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
+	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
 
 	SendMessageW(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
@@ -535,7 +540,7 @@ void CWinDisplayer::display_main ()
 
 				// store old selection
 				DWORD startSel, endSel;
-				SendMessage (_HEdit, EM_GETSEL, (LONG)&startSel, (LONG)&endSel);
+				SendMessage (_HEdit, EM_GETSEL, (WPARAM)&startSel, (LPARAM)&endSel);
 
 				// find how many lines we have to remove in the current output to add new lines
 
@@ -549,7 +554,7 @@ void CWinDisplayer::display_main ()
 
 					if (nblineremove == _HistorySize)
 					{
-						SendMessage (_HEdit, WM_SETTEXT, 0, (LONG) "");
+						SendMessage (_HEdit, WM_SETTEXT, 0, (LPARAM) "");
 						startSel = endSel = -1;
 					}
 					else
@@ -559,7 +564,7 @@ void CWinDisplayer::display_main ()
 						LRESULT oldIndex2 = SendMessageW (_HEdit, EM_LINEINDEX, nblineremove, 0);
 						//nlassert (oldIndex2 != -1);
 						SendMessageW (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
-						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LONG) "");
+						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
 
 						// update the selection due to the erasing
 						sint dt = (sint)(oldIndex2 - oldIndex1);
@@ -599,7 +604,7 @@ void CWinDisplayer::display_main ()
 					}
 
 					// add the string to the edit control
-					SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LONG) str.c_str());
+					SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) str.c_str());
 				}
 
 				// restore old selection

@@ -162,13 +162,13 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_Ref3DScene = NULL;
 	if (ptr)
 	{
-		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(this->getId(), ptr);
+		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(this->getId(), ptr.str());
 		_Ref3DScene = dynamic_cast<CInterface3DScene*>(pIE);
 	}
 	if (_Ref3DScene != NULL)
 	{
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"curcam" );
-		if (ptr) setCurrentCamera (ptr);
+		if (ptr) setCurrentCamera (ptr.str());
 		return true;
 	}
 
@@ -294,7 +294,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"name"));
 			string animName;
 			if (ptr)
-				animName = strlwr (CFile::getFilenameWithoutExtension(ptr));
+				animName = strlwr (CFile::getFilenameWithoutExtension(ptr.str()));
 
 			if (!animName.empty())
 			{
@@ -340,7 +340,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 
 	// Get the current camera
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"curcam" );
-	if (ptr) setCurrentCamera (ptr);
+	if (ptr) setCurrentCamera(ptr.str());
 
 	return true;
 }

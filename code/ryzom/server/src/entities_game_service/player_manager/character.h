@@ -115,7 +115,6 @@ class CMissionEvent;
 class CMissionSolo;
 class CCharacterVersionAdapter;
 class CCharacterEncyclopedia;
-class CCharacterAchievements;
 class CCharacterGameEvent;
 class CCharacterRespawnPoints;
 class CCharacterShoppingList;
@@ -443,10 +442,8 @@ private:
 	static const std::string	&contactListActionToString(TConctactListAction e);
 
 	NL_INSTANCE_COUNTER_DECL(CCharacter);
+
 public:
-
-	void mobKill(TDataSetRow creatureRowId);
-
 	// Start by declaring methods for persistent load/ save operations
 	// The following macro is defined in persistent_data.h
 	// At time of writing it evaluated to:
@@ -2626,13 +2623,13 @@ public:
 	CGameItemPtr createItemInInventoryFreeSlot(INVENTORIES::TInventory invId, uint16 obtainedQuality, uint32 quantity, const NLMISC::CSheetId & obtainedItem, const NLMISC::CEntityId & creatorId = NLMISC::CEntityId::Unknown, const std::string * phraseId = NULL);
 
 	/// action on an item in the temp inventory (move it to bag)
-	void itemTempInventoryToBag(uint32 scrSlot);
+	void itemTempInventoryToBag(uint32 scrSlot, bool sendCloseTempImpulsion = true);
 
 	/// clear temp inventory
 	void clearTempInventory();
 
 	/// get all items in temp inventory
-	void getAllTempInventoryItems();
+	void getAllTempInventoryItems(bool sendCloseTempImpulsion = true);
 
 	/// return true if temp inventory is empty
 	bool tempInventoryEmpty();
@@ -3504,8 +3501,6 @@ private:
 	bool							_RespawnMainLandInTown;
 
 	CCharacterEncyclopedia			*_EncycloChar;
-
-	CCharacterAchievements			*_AchievementsChar;
 
 	CCharacterGameEvent				*_GameEvent;
 

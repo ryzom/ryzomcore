@@ -75,7 +75,7 @@ INelContext::~INelContext()
 
 
 
-void	INelContext::contextReady()
+void INelContext::contextReady()
 {
 	// Register the NeL Context
 	// This assert doesn't work for Linux due to ELF symbol relocation
@@ -114,6 +114,7 @@ CApplicationContext::CApplicationContext()
 	DebugNeedAssert = false;
 	NoAssert = false;
 	AlreadyCreateSharedAmongThreads = false;
+	WindowedApplication = false;
 
 	contextReady();
 }
@@ -240,6 +241,16 @@ bool CApplicationContext::getAlreadyCreateSharedAmongThreads()
 void CApplicationContext::setAlreadyCreateSharedAmongThreads(bool b)
 {
 	AlreadyCreateSharedAmongThreads = b;
+}
+
+bool CApplicationContext::isWindowedApplication()
+{
+	return WindowedApplication;
+}
+
+void CApplicationContext::setWindowedApplication(bool b)
+{
+	WindowedApplication = b;
 }
 
 CLibraryContext::CLibraryContext(INelContext &applicationContext)
@@ -428,6 +439,16 @@ bool CLibraryContext::getAlreadyCreateSharedAmongThreads()
 void CLibraryContext::setAlreadyCreateSharedAmongThreads(bool b)
 {
 	_ApplicationContext->setAlreadyCreateSharedAmongThreads(b);
+}
+
+bool CLibraryContext::isWindowedApplication()
+{
+	return _ApplicationContext->isWindowedApplication();
+}
+
+void CLibraryContext::setWindowedApplication(bool b)
+{
+	_ApplicationContext->setWindowedApplication(b);
 }
 
 void initNelLibrary(NLMISC::CLibrary &lib)

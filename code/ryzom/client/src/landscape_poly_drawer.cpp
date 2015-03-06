@@ -396,7 +396,6 @@ void CLandscapePolyDrawer::buildShadowVolume(uint poly)
 	// because they are calculated in camera location.
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
 	vb.setNumVertices(2*verticesNb + 2);
-	vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock(vba);
@@ -412,7 +411,6 @@ void CLandscapePolyDrawer::buildShadowVolume(uint poly)
 	int index = 0;
 	ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	ib.setNumIndexes(12*verticesNb);
-	ib.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
 	{
 		CIndexBufferReadWrite iba;
 		ib.lock (iba);

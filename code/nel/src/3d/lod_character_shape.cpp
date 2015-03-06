@@ -354,7 +354,7 @@ void			CLodCharacterShape::buildMesh(const std::string &name, const CLodCharacte
 	const vector<CVector>				&normals= lodBuild.Normals;
 
 	nlassert(numVertices>0);
-	nlassert(triangleIndices.size()>0);
+	nlassert(!triangleIndices.empty());
 	nlassert((triangleIndices.size()%3)==0);
 	nlassert(skinWeights.size() == numVertices);
 	nlassert(uvs.size() == numVertices);

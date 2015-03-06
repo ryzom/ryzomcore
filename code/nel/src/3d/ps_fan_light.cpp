@@ -519,7 +519,6 @@ void CPSFanLight::getVBnIB(CVertexBuffer *&retVb, CIndexBuffer *&retIb)
 		vb.setName("CPSFanLight");
 		ib.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 		ib.setNumIndexes(size * _NbFans * 3);
-		ib.setPreferredMemory(CIndexBuffer::AGPVolatile, false);
 		// pointer on the current index to fill
 		CIndexBufferReadWrite iba;
 		ib.lock (iba);

@@ -17,7 +17,86 @@
 #include "std3d.h"
 #include "nel/3d/vertex_program_parse.h"
 
-
+enum TArguments
+{
+#ifdef NL_LITTLE_ENDIAN
+	ADD  = 1094992928,
+	ARL  = 1095912480,
+	BFC0 = 1111900976,
+	BFC1 = 1111900977,
+	COL0 = 1129270320,
+	COL1 = 1129270321,
+	DP3  = 1146106656,
+	DP4  = 1146106912,
+	DST  = 1146311712,
+	END  = 1162757152,
+	EXP  = 1163415584,
+	EXPP = 1163415632,
+	FOGC = 1179600707,
+	HPOS = 1213222739,
+	LIT  = 1279874080,
+	LOG  = 1280263968,
+	MAD  = 1296122912,
+	MAX  = 1296128032,
+	MIN  = 1296649760,
+	MOV  = 1297045024,
+	MUL  = 1297435680,
+	NRML = 1314016588,
+	OPOS = 1330663251,
+	PSIZ = 1347635546,
+	RCP  = 1380143136,
+	RSQ  = 1381191968,
+	SGE  = 1397179680,
+	SLT  = 1397511200,
+	TEX0 = 1413830704,
+	TEX1 = 1413830705,
+	TEX2 = 1413830706,
+	TEX3 = 1413830707,
+	TEX4 = 1413830708,
+	TEX5 = 1413830709,
+	TEX6 = 1413830710,
+	TEX7 = 1413830711,
+	WGHT = 1464289364,
+#else
+	ADD  = 541344833,
+	ARL  = 541872705,
+	BFC0 = 809715266,
+	BFC1 = 826492482,
+	COL0 = 810307395,
+	COL1 = 827084611,
+	DP3  = 540233796,
+	DP4  = 540299332,
+	DST  = 542397252,
+	END  = 541347397,
+	EXP  = 542136389,
+	EXPP = 1347442757,
+	FOGC = 1128746822,
+	HPOS = 1397706824,
+	LIT  = 542394700,
+	LOG  = 541544268,
+	MAD  = 541344077,
+	MAX  = 542654797,
+	MIN  = 542001485,
+	MOV  = 542527309,
+	MUL  = 541873485,
+	NRML = 1280135758,
+	OPOS = 1397706831,
+	PSIZ = 1514754896,
+	RCP  = 542131026,
+	RSQ  = 542200658,
+	SGE  = 541411155,
+	SLT  = 542395475,
+	TEX0 = 811091284,
+	TEX1 = 827868500,
+	TEX2 = 844645716,
+	TEX3 = 861422932,
+	TEX4 = 878200148,
+	TEX5 = 894977364,
+	TEX6 = 911754580,
+	TEX7 = 928531796,
+	WGHT = 1414022999,
+#endif
+};
 
 //=====================================
 bool CVPParser::parseWriteMask(uint &mask, std::string &errorOutput)
@@ -256,23 +335,23 @@ bool CVPParser::parseInputRegister(CVPOperand &operand, std::string &errorOutput
 			strValue |= ((uint32) *_CurrChar) << (8 * (3 - k));
 			++_CurrChar;
 		}
-		switch (strValue)
+		switch ((TArguments)strValue)
 		{
-			case 'OPOS': operand.Value.InputRegisterValue = CVPOperand::IPosition; break;
-			case 'WGHT': operand.Value.InputRegisterValue = CVPOperand::IWeight; break;
-			case 'NRML': operand.Value.InputRegisterValue = CVPOperand::INormal; break;
-			case 'COL0': operand.Value.InputRegisterValue = CVPOperand::IPrimaryColor; break;
-			case 'COL1': operand.Value.InputRegisterValue = CVPOperand::ISecondaryColor; break;
-			case 'FOGC': operand.Value.InputRegisterValue = CVPOperand::IFogCoord; break;
+			case OPOS: operand.Value.InputRegisterValue = CVPOperand::IPosition; break;
+			case WGHT: operand.Value.InputRegisterValue = CVPOperand::IWeight; break;
+			case NRML: operand.Value.InputRegisterValue = CVPOperand::INormal; break;
+			case COL0: operand.Value.InputRegisterValue = CVPOperand::IPrimaryColor; break;
+			case COL1: operand.Value.InputRegisterValue = CVPOperand::ISecondaryColor; break;
+			case FOGC: operand.Value.InputRegisterValue = CVPOperand::IFogCoord; break;
 			// texture argument
-			case 'TEX0':
-			case 'TEX1':
-			case 'TEX2':
-			case 'TEX3':
-			case 'TEX4':
-			case 'TEX5':
-			case 'TEX6':
-			case 'TEX7':
+			case TEX0:
+			case TEX1:
+			case TEX2:
+			case TEX3:
+			case TEX4:
+			case TEX5:
+			case TEX6:
+			case TEX7:
 				operand.Value.InputRegisterValue = (CVPOperand::EInputRegister) (((CVPOperand::ITex0 + strValue) & 0xff) - '0');
 			break;
 			default:
@@ -384,23 +463,23 @@ bool CVPParser::parseOutputRegister(CVPOperand &operand, std::string &errorOutpu
 		++_CurrChar;
 	}
 	// convert to enum
-	switch(strValue)
+	switch((TArguments)strValue)
 	{
-		case 'HPOS': operand.Value.OutputRegisterValue = CVPOperand::OHPosition; break;
-		case 'COL0': operand.Value.OutputRegisterValue = CVPOperand::OPrimaryColor; break;
-		case 'COL1': operand.Value.OutputRegisterValue = CVPOperand::OSecondaryColor; break;
-		case 'BFC0': operand.Value.OutputRegisterValue = CVPOperand::OBackFacePrimaryColor; break;
-		case 'BFC1': operand.Value.OutputRegisterValue = CVPOperand::OBackFaceSecondaryColor; break;
-		case 'FOGC': operand.Value.OutputRegisterValue = CVPOperand::OFogCoord; break;
-		case 'PSIZ': operand.Value.OutputRegisterValue = CVPOperand::OPointSize; break;
-		case 'TEX0': operand.Value.OutputRegisterValue = CVPOperand::OTex0; break;
-		case 'TEX1': operand.Value.OutputRegisterValue = CVPOperand::OTex1; break;
-		case 'TEX2': operand.Value.OutputRegisterValue = CVPOperand::OTex2; break;
-		case 'TEX3': operand.Value.OutputRegisterValue = CVPOperand::OTex3; break;
-		case 'TEX4': operand.Value.OutputRegisterValue = CVPOperand::OTex4; break;
-		case 'TEX5': operand.Value.OutputRegisterValue = CVPOperand::OTex5; break;
-		case 'TEX6': operand.Value.OutputRegisterValue = CVPOperand::OTex6; break;
-		case 'TEX7': operand.Value.OutputRegisterValue = CVPOperand::OTex7; break;
+		case HPOS: operand.Value.OutputRegisterValue = CVPOperand::OHPosition; break;
+		case COL0: operand.Value.OutputRegisterValue = CVPOperand::OPrimaryColor; break;
+		case COL1: operand.Value.OutputRegisterValue = CVPOperand::OSecondaryColor; break;
+		case BFC0: operand.Value.OutputRegisterValue = CVPOperand::OBackFacePrimaryColor; break;
+		case BFC1: operand.Value.OutputRegisterValue = CVPOperand::OBackFaceSecondaryColor; break;
+		case FOGC: operand.Value.OutputRegisterValue = CVPOperand::OFogCoord; break;
+		case PSIZ: operand.Value.OutputRegisterValue = CVPOperand::OPointSize; break;
+		case TEX0: operand.Value.OutputRegisterValue = CVPOperand::OTex0; break;
+		case TEX1: operand.Value.OutputRegisterValue = CVPOperand::OTex1; break;
+		case TEX2: operand.Value.OutputRegisterValue = CVPOperand::OTex2; break;
+		case TEX3: operand.Value.OutputRegisterValue = CVPOperand::OTex3; break;
+		case TEX4: operand.Value.OutputRegisterValue = CVPOperand::OTex4; break;
+		case TEX5: operand.Value.OutputRegisterValue = CVPOperand::OTex5; break;
+		case TEX6: operand.Value.OutputRegisterValue = CVPOperand::OTex6; break;
+		case TEX7: operand.Value.OutputRegisterValue = CVPOperand::OTex7; break;
 		default:
 			errorOutput = "Can't read index for output register.";
 			return false;
@@ -753,9 +832,9 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 	{
 		instrStr |= (uint32) ' ';
 	}
-	switch (instrStr)
+	switch ((TArguments)instrStr)
 	{
-		case 'ARL ':
+		case ARL:
 			instr.Opcode = CVPInstruction::ARL;
 			if (!parseOp2(instr, errorOutput)) return false;
 			if (!instr.Src1.Swizzle.isScalar())
@@ -764,7 +843,7 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 				return false;
 			}
 		break;
-		case 'RSQ ':
+		case RSQ:
 			instr.Opcode = CVPInstruction::RSQ;
 			if (!parseOp2(instr, errorOutput)) return false;
 			if (!instr.Src1.Swizzle.isScalar())
@@ -773,8 +852,8 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 				return false;
 			}
 		break;
-		case 'EXP ':
-		case 'EXPP':
+		case EXP:
+		case EXPP:
 			instr.Opcode = CVPInstruction::EXPP;
 			if (!parseOp2(instr, errorOutput)) return false;
 			if (!instr.Src1.Swizzle.isScalar())
@@ -789,7 +868,7 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 				return false;
 			}*/
 		break;
-		case 'LOG ':
+		case LOG:
 			instr.Opcode = CVPInstruction::LOG;
 			if (!parseOp2(instr, errorOutput)) return false;
 			if (!instr.Src1.Swizzle.isScalar())
@@ -805,7 +884,7 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 			}
 			*/
 		break;
-		case 'RCP ':
+		case RCP:
 			instr.Opcode = CVPInstruction::RCP;
 			if (!parseOp2(instr, errorOutput)) return false;
 			if (!instr.Src1.Swizzle.isScalar())
@@ -815,60 +894,60 @@ bool CVPParser::parseInstruction(CVPInstruction &instr, std::string &errorOutput
 			}
 		break;
 		/////////////////
-		case 'MOV ':
+		case MOV:
 			instr.Opcode = CVPInstruction::MOV;
 			if (!parseOp2(instr, errorOutput)) return false;
 
 		break;
-		case 'LIT ':
+		case LIT:
 			instr.Opcode = CVPInstruction::LIT;
 			if (!parseOp2(instr, errorOutput)) return false;
 		break;
 		/////////////////
-		case 'MAD ':
+		case MAD:
 			instr.Opcode = CVPInstruction::MAD;
 			if (!parseOp4(instr, errorOutput)) return false;
 		break;
 		/////////////////
-		case 'ADD ':
+		case ADD:
 			instr.Opcode = CVPInstruction::ADD;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
 		/////////////////
-		case 'MUL ':
+		case MUL:
 			instr.Opcode = CVPInstruction::MUL;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'DP3 ':
+		case DP3:
 			instr.Opcode = CVPInstruction::DP3;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'DP4 ':
+		case DP4:
 			instr.Opcode = CVPInstruction::DP4;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'DST ':
+		case DST:
 			instr.Opcode = CVPInstruction::DST;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'MIN ':
+		case MIN:
 			instr.Opcode = CVPInstruction::MIN;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'MAX ':
+		case MAX:
 			instr.Opcode = CVPInstruction::MAX;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'SLT ':
+		case SLT:
 			instr.Opcode = CVPInstruction::SLT;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
-		case 'SGE ':
+		case SGE:
 			instr.Opcode = CVPInstruction::SGE;
 			if (!parseOp3(instr, errorOutput)) return false;
 		break;
 		/////////////////
-		case 'END ':
+		case END:
 			endEncountered = true;
 			return true;
 		break;

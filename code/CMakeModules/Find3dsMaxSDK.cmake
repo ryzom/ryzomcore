@@ -1,46 +1,52 @@
 # - Find DirectInput
 # Find the DirectSound includes and libraries
 #
+#  MAXSDK_DIR         - 3DSMAX SDK root directory
 #  MAXSDK_INCLUDE_DIR - where to find baseinterface.h
 #  MAXSDK_LIBRARIES   - List of libraries when using 3DSMAX.
 #  MAXSDK_FOUND       - True if MAX SDK found.
 
 if(MAXSDK_INCLUDE_DIR)
-    # Already in cache, be silent
-    set(MAXSDK_FIND_QUIETLY TRUE)
+  # Already in cache, be silent
+  SET(MAXSDK_FIND_QUIETLY TRUE)
 endif(MAXSDK_INCLUDE_DIR)
 
-find_path(MAXSDK_INCLUDE_DIR max.h 
+FIND_PATH(MAXSDK_DIR
+  "include/maxversion.h"
+  HINTS
+  "$ENV{MAXSDK_DIR}"
   PATHS
-  "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk/include"
-  "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk/include"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2010 SDK/maxsdk/include"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/include"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/include"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/include"
-) 
-
-find_path(MAXSDK_CS_INCLUDE_DIR bipexp.h
-  PATHS
-  "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk/include/CS"
-  "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk/include/CS"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2010 SDK/maxsdk/include/CS"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/include/CS"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/include/CS"
-  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/include/CS"
+  "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk"
+  "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk"
+  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2010 SDK/maxsdk"
+  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk"
+  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk"
+  "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk"
 )
+
+FIND_PATH(MAXSDK_INCLUDE_DIR
+  max.h
+  HINTS
+  ${MAXSDK_DIR}/include
+)
+
+FIND_PATH(MAXSDK_CS_INCLUDE_DIR bipexp.h
+  HINTS
+  ${MAXSDK_DIR}/include/CS
+)
+
+IF(TARGET_X64)
+  SET(MAXSDK_LIBRARY_DIRS ${MAXSDK_DIR}/x64/lib)
+ELSE(TARGET_X64)
+  SET(MAXSDK_LIBRARY_DIRS ${MAXSDK_DIR}/lib)
+ENDIF(TARGET_X64)
 
 MACRO(FIND_3DS_LIBRARY MYLIBRARY MYLIBRARYNAME)          
   FIND_LIBRARY(${MYLIBRARY}
-               NAMES ${MYLIBRARYNAME}
-               PATHS 
-			   "$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk/lib"
-			   "$ENV{3DSMAX_2011_SDK_PATH}/maxsdk/lib"
-               "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2010 SDK/maxsdk/lib"
-               "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2009 SDK/maxsdk/lib"
-               "$ENV{PROGRAMFILES}/Autodesk/3ds Max 2008 SDK/maxsdk/lib"
-               "$ENV{PROGRAMFILES}/Autodesk/3ds Max 9 SDK/maxsdk/lib"
-               )
+    NAMES ${MYLIBRARYNAME}
+    HINTS
+    ${MAXSDK_LIBRARY_DIRS}
+  )
 ENDMACRO(FIND_3DS_LIBRARY MYLIBRARY MYLIBRARYNAME)
 
 FIND_3DS_LIBRARY(MAXSDK_CORE_LIBRARY core)

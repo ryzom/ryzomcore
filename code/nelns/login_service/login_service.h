@@ -19,7 +19,9 @@
 
 // we have to include windows.h because mysql.h uses it but not include it
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <winsock2.h>
 #	include <windows.h>
 typedef unsigned long ulong;

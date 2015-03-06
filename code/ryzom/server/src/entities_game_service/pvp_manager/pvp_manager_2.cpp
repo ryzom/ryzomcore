@@ -211,13 +211,16 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	result.clear();
 
 	// Add lang channel, should be first.
-	if (!user->getLangChannel().empty()) {
+	if (!user->getLangChannel().empty())
+	{
 		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
 		if (it != _ExtraFactionChannel.end())
 		{
 			result.push_back((*it).second);
 		}
-	} else {
+	}
+	else
+	{
 		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find("en");
 		if (it != _ExtraFactionChannel.end())
 		{

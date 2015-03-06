@@ -58,6 +58,7 @@ struct	CGlExtensions
 	bool	EXTVertexShader;
 	bool	NVTextureShader;
 	bool	NVOcclusionQuery;
+	bool	ARBOcclusionQuery;
 	bool	NVTextureRectangle;
 	bool	EXTTextureRectangle;
 	bool	ARBTextureRectangle;
@@ -103,6 +104,7 @@ struct	CGlExtensions
 	bool	ARBVertexProgram;
 	bool	ARBTextureNonPowerOfTwo;
 	bool	ARBMultisample;
+	bool	ARBFragmentShader;
 
 	// NV Pixel Programs
 	bool	NVFragmentProgram2;
@@ -177,7 +179,9 @@ public:
 		ARBTextureRectangle = false;
 		ARBTextureNonPowerOfTwo = false;
 		ARBMultisample = false;
+		ARBFragmentShader = false;
 		NVOcclusionQuery = false;
+		ARBOcclusionQuery = false;
 		FrameBufferObject = false;
 		FrameBufferBlit = false;
 		FrameBufferMultisample = false;
@@ -239,6 +243,7 @@ public:
 		result += EXTSecondaryColor ? "EXTSecondaryColor " : "";
 		result += EXTBlendColor ? "EXTBlendColor " : "";
 		result += NVOcclusionQuery ? "NVOcclusionQuery " : "";
+		result += ARBOcclusionQuery ? "ARBOcclusionQuery " : "";
 		result += NVStateVARWithoutFlush ? "NVStateVARWithoutFlush " : "";
 		result += ARBMultisample ? "ARBMultisample " : "";
 		result += NVXGPUMemoryInfo ? "NVXGPUMemoryInfo " : "";
@@ -737,7 +742,16 @@ extern PFNGLENDOCCLUSIONQUERYNVPROC nglEndOcclusionQueryNV;
 extern PFNGLGETOCCLUSIONQUERYIVNVPROC nglGetOcclusionQueryivNV;
 extern PFNGLGETOCCLUSIONQUERYUIVNVPROC nglGetOcclusionQueryuivNV;
 
-
+// ARB_occlusion_query
+//==================================
+extern PFNGLGENQUERIESARBPROC nglGenQueriesARB;
+extern PFNGLDELETEQUERIESARBPROC nglDeleteQueriesARB;
+extern PFNGLISQUERYARBPROC nglIsQueryARB;
+extern PFNGLBEGINQUERYARBPROC nglBeginQueryARB;
+extern PFNGLENDQUERYARBPROC nglEndQueryARB;
+extern PFNGLGETQUERYIVARBPROC nglGetQueryivARB;
+extern PFNGLGETQUERYOBJECTIVARBPROC nglGetQueryObjectivARB;
+extern PFNGLGETQUERYOBJECTUIVARBPROC nglGetQueryObjectuivARB;
 
 #ifdef NL_OS_WINDOWS
 

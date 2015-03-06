@@ -57,7 +57,9 @@
 #include "uid_impulsions.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
@@ -1860,7 +1862,7 @@ NLMISC_COMMAND( dumpImpulseStats, "Dump Impulse stat to XML log", "<logfile> [[-
 		if (reverse)
 			comp = -comp;
 
-		result.push_back(std::make_pair<float, CClientHost*>(comp, client));
+		result.push_back(std::pair<float, CClientHost*>(comp, client));
 	}
 
 	if (ucriterion != 0 && !result.empty())

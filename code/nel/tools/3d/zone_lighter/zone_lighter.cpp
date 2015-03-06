@@ -202,7 +202,7 @@ static void loadIGFromContinent(NLMISC::CConfigFile &parameter, std::list<CInsta
 		// Load the form
 		NLGEORGES::UFormLoader *loader = NLGEORGES::UFormLoader::createLoader();
 		//
-		std::string pathName = level_design_world_directory.asString() + "/" + continentName;
+		std::string pathName = CPath::lookup(continentName); // level_design_world_directory.asString() + "/" + continentName;
 		if (pathName.empty())
 		{		
 			nlwarning("Can't find continent form : %s", continentName.c_str());
@@ -698,6 +698,12 @@ int main(int argc, char* argv[])
 								// Skip it?? use the DontCastShadowForExterior flag. See doc of this flag
 								if(group->getInstance(instance).DontCastShadow || group->getInstance(instance).DontCastShadowForExterior)
 									continue;
+
+								if (toLower (CFile::getExtension (name)) == "pacs_prim")
+								{
+									nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
+									continue;
+								}
 
 								// PS ?
 								if (toLower (CFile::getExtension (name)) == "ps")

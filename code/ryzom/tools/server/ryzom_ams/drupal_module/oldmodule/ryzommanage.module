@@ -659,12 +659,12 @@ function createPermissions($values) {
         $sth = $dbh->prepare("SELECT UId FROM user WHERE Login='" . $values[0] . "';");
         $sth->execute();
         $result = $sth->fetchAll();
-        foreach ($result as $UId) {
+        /*foreach ($result as $UId) {
             $statement = $dbh->prepare("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('" . $UId['UId'] . "', 'r2', 'OPEN');");
             $statement->execute($values);
             $statement = $dbh->prepare("INSERT INTO permission (UId, ClientApplication, AccessPrivilege) VALUES ('" . $UId['UId'] . "', 'ryzom_open', 'OPEN');");
             $statement->execute($values);
-        }
+        }*///FIXME: GARBAGE
     }
     catch (PDOException $e) {
         watchdog('ryzommanage', $e->getMessage(), NULL, WATCHDOG_ERROR);

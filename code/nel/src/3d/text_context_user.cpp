@@ -148,6 +148,18 @@ bool CTextContextUser::getShaded() const
 
 	return _TextContext.getShaded();
 }
+void CTextContextUser::setShadeOutline(bool b)
+{
+	H_AUTO2;
+
+	_TextContext.setShadeOutline(b);
+}
+bool CTextContextUser::getShadeOutline() const
+{
+	H_AUTO2;
+
+	return _TextContext.getShadeOutline();
+}
 void CTextContextUser::setShadeExtent(float shext)
 {
 	H_AUTO2;

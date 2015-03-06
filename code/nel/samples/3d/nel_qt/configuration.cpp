@@ -47,7 +47,7 @@ CConfiguration::~CConfiguration()
 void CConfiguration::init()
 {	
 	// verify data
-	nlassert(!m_ConfigCallbacks.size());
+	nlassert(m_ConfigCallbacks.empty());
 	
 	// load config
 	m_ConfigFile.load(NLQT_CONFIG_FILE);

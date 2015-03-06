@@ -8,7 +8,7 @@
 # Tools configuration.
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -91,3 +91,5 @@ AiBuildWmapTool = "ai_build_wmap"
 TgaCutTool = "tga_cut"
 PatchGenTool = "patch_gen"
 TranslationToolsTool = "translation_tools"
+BuildWorldPackedColTool = "build_world_packed_col"
+R2IslandsTexturesTool = "r2_islands_textures"

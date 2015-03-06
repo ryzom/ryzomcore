@@ -218,7 +218,7 @@ public:
 	// Log system (all chat/tell
 	void setLogState(bool state) { _LogState = state; }
 	bool getLogState() const { return _LogState; }
-	void log(const ucstring &str);
+	void log(const ucstring &str, const std::string &cat = "");
 
 	/// Text from here and from server
 

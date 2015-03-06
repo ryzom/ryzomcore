@@ -365,7 +365,7 @@ namespace CHARSYNC
 				for (; first != last; ++first)
 				{
 					// default to no limit
-					uint32 limit=~0u;
+					uint32 limit=std::numeric_limits<uint32>::max();
 
 					// if there's a limit in the limis map then use it instead...
 					if (limitsMap.find(first->first)!=limitsMap.end())

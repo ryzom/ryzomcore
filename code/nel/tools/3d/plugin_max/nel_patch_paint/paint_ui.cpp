@@ -43,6 +43,7 @@ uint PainterKeys[KeyCounter]=
 	Key1,
 	Key2,
 	KeyI,
+	KeyF10,
 };
 
 // Keys
@@ -77,6 +78,7 @@ const char* PainterKeysName[KeyCounter]=
 	"ZoomIn",
 	"ZoomOut",
 	"GetState",
+	"ResetPatch",
 };
 
 // Light settings

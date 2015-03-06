@@ -229,8 +229,9 @@ NLMISC_COMMAND(eventCreateNpcGroup, "create an event npc group", "<aiInstanceId>
 		return true;
 	}
 	
-	double x = atof(args[3].c_str());
-	double y = atof(args[4].c_str());
+	double x, y;
+	NLMISC::fromString(args[3], x);
+	NLMISC::fromString(args[4], y);
 
 	double dispersionRadius = 10.;
 	if (args.size()>5)
@@ -577,10 +578,10 @@ NLMISC_COMMAND(createStaticAIInstance, "Create a new static AIInstance for a giv
 	CUsedContinent &uc = CUsedContinent::instance();
 
 	const	uint32 in = uc.getInstanceForContinent(args[0]);
-	if (in == ~0)
+	if (in == INVALID_AI_INSTANCE)
 	{
 		nlwarning("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str());
-		nlassert(in != ~0);
+		nlassert(in != INVALID_AI_INSTANCE);
 //		nlassertex(in != ~0, ("The continent '%s' is unknow or not active. Can't create instance, FATAL", args[0].c_str()));
 	}
 
@@ -1969,9 +1970,13 @@ NLMISC_COMMAND(displayVision3x3,"display 3x3 cell vision centred on a given coor
 		}
 	}
 
+	double dx, dy;
+	NLMISC::fromString(args[1], dx);
+	NLMISC::fromString(args[2], dy);
+
 	CAICoord x, y;
-	x=atof(args[1].c_str());
-	y=atof(args[2].c_str());
+	x = dx;
+	y = dy;
 	log.displayNL("3x3 Vision around (%.3f,%.3f)", x.asDouble(), y.asDouble());
 
 	uint32 botCount=0;

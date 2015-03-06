@@ -225,7 +225,8 @@ void		CVegetableDensityPage::updateAngleMinFromEditText()
 	// get angles edited.
 	char	stmp[256];
 	AngleMinEdit.GetWindowText(stmp, 256);
-	float	angleMin= (float)atof(stmp);
+	float	angleMin;
+	NLMISC::fromString(stmp, angleMin);
 	NLMISC::clamp(angleMin, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMin= (float)sin(angleMin*NLMISC::Pi/180.f);
@@ -248,7 +249,8 @@ void		CVegetableDensityPage::updateAngleMaxFromEditText()
 	// get angles edited.
 	char	stmp[256];
 	AngleMaxEdit.GetWindowText(stmp, 256);
-	float	angleMax= (float)atof(stmp);
+	float	angleMax;
+	NLMISC::fromString(stmp, angleMax);
 	NLMISC::clamp(angleMax, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMax= (float)sin(angleMax*NLMISC::Pi/180.f);

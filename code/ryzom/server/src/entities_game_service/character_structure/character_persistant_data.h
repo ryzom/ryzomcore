@@ -26,7 +26,6 @@
 
 #include "character_structure/pact_class.h"
 #include "character_structure/character_sentence.h"
-#include "character_structure/known_brick_info.h"
 #include "game_item_manager/game_item.h"
 
 /**
@@ -73,7 +72,7 @@ public:
 	//std::vector< CCharacterSentence * >	_MemorizedSentencesSpecial;
 	
 	/// inventory of known bricks (map Id to Latency end date)
-	std::map< NLMISC::CSheetId, CKnownBrickInfo >		_KnownBricks;
+	//std::map< NLMISC::CSheetId, CKnownBrickInfo >		_KnownBricks;
 
 	/// the known faber plans for that player (directly the reflect of the database)
 //	std::vector<uint64>									_KnownFaberPlans;

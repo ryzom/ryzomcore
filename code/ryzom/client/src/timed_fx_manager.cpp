@@ -829,6 +829,7 @@ void CTimedFXManager::displayFXBoxes(TDebugDisplayMode displayMode) const
 	Driver->setFrustum(fr);
 	TextContext->setColor(CRGBA::Blue);
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 	TextContext->setFontSize(10);
 	//
 	float size = 0.4f;

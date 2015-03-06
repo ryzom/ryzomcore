@@ -8,7 +8,7 @@
 # Setup clodbank
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -74,6 +74,8 @@ cfgOut.write("{\n")
 cfgOut.write("\t\"" + ExportBuildDirectory + "/" + ClodExportDirectory + "\", \n")
 cfgOut.write("\t\"" + ExportBuildDirectory + "/" + SkelExportDirectory + "\", \n")
 cfgOut.write("\t\"" + ExportBuildDirectory + "/" + AnimBuildDirectory + "\", \n")
+cfgOut.write("\t\"" + ExportBuildDirectory + "/" + ShapeOptimizedBuildDirectory + "\", \n")
+cfgOut.write("\t\"" + ExportBuildDirectory + "/" + ShapeWithCoarseMeshBuildDirectory + "\", \n")
 cfgOut.write("};\n")
 cfgOut.write("\n")
 cfgOut.close()

@@ -84,6 +84,31 @@
  *>	Copyright(c) 1994, All Rights Reserved.
  **********************************************************************/
 #include "stdafx.h"
+
+#if MAX_VERSION_MAJOR >= 14
+#	include <maxscript/maxscript.h>
+#	include <maxscript/foundation/3dmath.h>
+#	include <maxscript/foundation/numbers.h>
+#	include <maxscript/maxwrapper/maxclasses.h>
+#	include <maxscript/foundation/streams.h>
+#	include <maxscript/foundation/mxstime.h>
+#	include <maxscript/maxwrapper/mxsobjects.h>
+#	include <maxscript/compiler/parser.h>
+#	include <maxscript/macros/define_instantiation_functions.h>
+#else
+#	include <MaxScrpt/maxscrpt.h>
+#	include <MaxScrpt/3dmath.h>
+//	Various MAX and MXS includes
+#	include <MaxScrpt/Numbers.h>
+#	include <MaxScrpt/MAXclses.h>
+#	include <MaxScrpt/Streams.h>
+#	include <MaxScrpt/MSTime.h>
+#	include <MaxScrpt/MAXObj.h>
+#	include <MaxScrpt/Parser.h>
+//	define the new primitives using macros from SDK
+#	include <MaxScrpt/definsfn.h>
+#endif
+
 #include "editpat.h"
 #include "../nel_patch_lib/vertex_neighborhood.h"
 
@@ -854,4 +879,68 @@ void ResetVert (PatchMesh *patch)
 	}
 	patch->computeInteriors();
 	patch->InvalidateGeomCache ();
+}
+
+def_visible_primitive(turn_patch, "RykolTurnPatch");
+
+Value *turn_patch_cf (Value** arg_list, int count)
+{
+	// Make sure we have the correct number of arguments (2)
+	check_arg_count(RykolTurnPatch, 3, count);
+
+	// Check to see if the arguments match up to what we expect
+	// We want to use 'TurnAllTexturesOn <object to use>'
+	type_check(arg_list[0], MAXNode, "RykolTurnPatch [Node] [Modifier] [Patch]");
+    type_check(arg_list[1], MAXModifier, "RykolTurnPatch [Node] [Modifier] [Patch]"); 
+	type_check(arg_list[2], Integer, "RykolTurnPatch [Node] [Modifier] [Patch]");
+
+	// Get a good interface pointer
+	Interface *ip = MAXScript_interface;
+
+	// Get a INode pointer from the argument passed to us
+	INode *node = arg_list[0]->to_node();
+	nlassert (node);
+
+	// Get a Object pointer
+	ObjectState os = node->EvalWorldState(ip->GetTime()); 
+
+	// ok ?
+	bool bRet=false;
+
+	if (os.obj)
+	{
+		// Get class id
+		if (os.obj->CanConvertToType(RYKOLPATCHOBJ_CLASS_ID)) 
+		{
+			bRet = true;
+			RPO *tri = (RPO *)os.obj->ConvertToType(ip->GetTime(), RYKOLPATCHOBJ_CLASS_ID);
+			if (tri)
+			{
+				Modifier *mod = arg_list[1]->to_modifier();
+				if (mod)
+				{
+					EditPatchMod *epmod = (EditPatchMod *)mod;
+					epmod->ClearSelection(EP_PATCH);
+					epmod->SelectSubPatch(arg_list[2]->to_int() - 1);
+					epmod->DoPatchTurn(true);
+					epmod->ClearSelection(EP_PATCH);
+				}
+				else
+				{
+					bRet = false;
+				}
+			}
+			// Note that the TriObject should only be deleted
+			// if the pointer to it is not equal to the object
+			// pointer that called ConvertToType()
+			if (os.obj != tri)
+				delete tri;
+		
+			// redraw and update
+			node->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE); 
+			ip->RedrawViews(ip->GetTime());
+		}
+	}
+
+	return bRet?&true_value:&false_value;
 }

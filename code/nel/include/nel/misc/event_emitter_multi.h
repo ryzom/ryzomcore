@@ -47,7 +47,6 @@ public:
 	const IEventEmitter *getEmitter(uint index) const;
 	/// From IEventEmitter. This call submitEvents on all the emitters
 	virtual void submitEvents(CEventServer &server, bool allWindows);
-	virtual void emulateMouseRawMode(bool enable);
 
 	virtual bool copyTextToClipboard(const ucstring &text);
 	virtual bool pasteTextFromClipboard(ucstring &text);

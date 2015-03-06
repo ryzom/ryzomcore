@@ -15,7 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#define CURL_STATICLIB 1
 #include <curl/curl.h>
 #include "http_client_curl.h"
 

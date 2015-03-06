@@ -19,10 +19,7 @@
 #include "nel/misc/shared_memory.h"
 #include "nel/misc/debug.h"
 
-#ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#	include <windows.h>
-#else
+#ifndef NL_OS_WINDOWS
 #	include <sys/types.h>
 #	include <sys/ipc.h>
 #	include <sys/shm.h>

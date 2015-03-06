@@ -673,7 +673,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 	}
 
 	// update title when gender changed
-	const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw,_Gender == GSGENDER::female));
+	const ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, _Gender == GSGENDER::female));
 	if (!replacement.empty() || !ClientCfg.DebugStringManager)
 	{
 		// Get extended name

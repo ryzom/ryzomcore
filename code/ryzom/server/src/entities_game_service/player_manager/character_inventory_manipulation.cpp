@@ -1841,7 +1841,7 @@ CGameItemPtr CCharacter::createItemInInventoryFreeSlot(INVENTORIES::TInventory i
 }
 
 // ****************************************************************************
-void CCharacter::itemTempInventoryToBag(uint32 srcSlot)
+void CCharacter::itemTempInventoryToBag(uint32 srcSlot, bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_itemTempInventoryToBag);
 	
@@ -2015,7 +2015,7 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot)
 						CWorldInstances::instance().msgToAIInstance(getInstanceNumber(), msg);
 					}
 					
-					endHarvest();
+					endHarvest(sendCloseTempImpulsion);
 					
 					leaveTempInventoryMode();
 				}
@@ -2108,12 +2108,12 @@ void CCharacter::itemTempInventoryToBag(uint32 srcSlot)
 }
 
 // ****************************************************************************
-void CCharacter::getAllTempInventoryItems()
+void CCharacter::getAllTempInventoryItems(bool sendCloseTempImpulsion)
 {
 	H_AUTO(CCharacter_getAllTempInventoryItems);
 
 	for (uint i = 0 ; i < INVENTORIES::NbTempInvSlots; ++i)
-		itemTempInventoryToBag(i);
+		itemTempInventoryToBag(i, sendCloseTempImpulsion);
 }
 
 // ****************************************************************************

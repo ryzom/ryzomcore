@@ -1058,8 +1058,9 @@ NLMISC_COMMAND(getEffects, "get effects of a spire","<x> <y>" )
 		return false;
 	else
 	{
-		float x = (float)atof(args[0].c_str());
-		float y = (float)atof(args[1].c_str());
+		float x, y;
+		NLMISC::fromString(args[0], x);
+		NLMISC::fromString(args[1], y);
 
 		NLMISC::CVector vec( x, y, 0.0f );
 
@@ -1101,8 +1102,9 @@ NLMISC_COMMAND(buildSpirePos, "build a spire","<Eid> <x> <y>")
 			return true;
 		}
 		
-		float x = (float)atof(args[1].c_str());
-		float y = (float)atof(args[2].c_str());
+		float x, y;
+		NLMISC::fromString(args[1], x);
+		NLMISC::fromString(args[2], y);
 			
 		NLMISC::CVector vec( x, y, 0.0f );
 
@@ -1138,8 +1140,9 @@ NLMISC_COMMAND(destroySpirePos, "destroy a spire","<x> <y>")
 		return false;
 	else
 	{
-		float x = (float)atof(args[0].c_str());
-		float y = (float)atof(args[1].c_str());			
+		float x, y;
+		NLMISC::fromString(args[0], x);
+		NLMISC::fromString(args[1], y);
 
 		NLMISC::CVector vec( x, y, 0.0f );
 
@@ -1178,8 +1181,9 @@ NLMISC_COMMAND(getEffectsPos, "get effects of a spire","<Eid> <x> <y>" )
 			return true;
 		}
 
-		float x = (float)atof(args[1].c_str());
-		float y = (float)atof(args[2].c_str());	
+		float x, y;
+		NLMISC::fromString(args[1], x);
+		NLMISC::fromString(args[2], y);
 
 		NLMISC::CVector vec( x, y, 0.0f );
 
@@ -1265,8 +1269,9 @@ NLMISC_COMMAND(getRegionOwner, "display the faction which currently owns the reg
 		return false;
 	else
 	{
-		float x = (float)atof(args[0].c_str());
-		float y = (float)atof(args[1].c_str());	
+		float x, y;
+		NLMISC::fromString(args[0], x);
+		NLMISC::fromString(args[1], y);
 
 		NLMISC::CVector vec( x, y, 0.0f );
 
@@ -1294,8 +1299,9 @@ NLMISC_COMMAND(getSpireStats, "display the status of spire in region correspondi
 		return false;
 	else
 	{
-		float x = (float)atof(args[0].c_str());
-		float y = (float)atof(args[1].c_str());	
+		float x, y;
+		NLMISC::fromString(args[0], x);
+		NLMISC::fromString(args[1], y);
 
 		NLMISC::CVector vec( x, y, 0.0f );
 

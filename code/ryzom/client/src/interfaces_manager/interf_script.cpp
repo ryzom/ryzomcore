@@ -37,7 +37,11 @@ float getFloat()
 	char delimiter[] = "[] \t";
 	char *ptr = strtok(NULL, delimiter);
 	if(ptr != NULL)
-		return (float) atof(ptr);
+	{
+		float val;
+		NLMISC::fromString(ptr, val);
+		return val;
+	}
 	return 0.f;
 }// getFloat //
 
@@ -94,7 +98,7 @@ std::vector<float> getVectorOfFloat(uint8 nbCol)
 		ptr = strtok(NULL, delimiter);
 		if(ptr != NULL)
 		{
-			val = (float)atof(ptr);
+			NLMISC::fromString(ptr, val);
 			if (val != 0.0f)
 				vect.push_back(val);
 		}

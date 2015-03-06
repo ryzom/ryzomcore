@@ -1112,7 +1112,7 @@
 		<PARAMETER NAME="faction/quantity" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 	</PRIMITIVE>
-	
+
 	<PRIMITIVE CLASS_NAME="talk_to" TYPE="node"  PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="talk_to $npc_name$"/>
 		<!-- talk to param-->
@@ -1126,7 +1126,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="cast $spell$"/>
 						
 		<PARAMETER NAME="action" TYPE="string_array" VISIBLE="true"/>
-		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>		
+		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="forage" TYPE="node" PARENT_CLASS="objective_parent">
@@ -5023,13 +5023,13 @@
 		</PARAMETER>
 		<PARAMETER NAME="entity id" TYPE="string" VISIBLE="true" READ_ONLY="true">
 		</PARAMETER>
-		<PARAMETER NAME= "Sheet"			TYPE="string" READ_ONLY="true" VISIBLE="true">
+		<PARAMETER NAME= "Sheet" TYPE="string" READ_ONLY="true" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="unknown"/>
 		</PARAMETER>
-		<PARAMETER NAME= "HitPoints"		TYPE="string" READ_ONLY="true" VISIBLE="true"> 
+		<PARAMETER NAME= "HitPoints" TYPE="string" READ_ONLY="true" VISIBLE="true"> 
 			<DEFAULT_VALUE VALUE="0"/>
 		</PARAMETER>
-		<PARAMETER NAME= "MaxHitPoints"		TYPE="string" READ_ONLY="true" VISIBLE="true"> 
+		<PARAMETER NAME= "MaxHitPoints" TYPE="string" READ_ONLY="true" VISIBLE="true"> 
 			<DEFAULT_VALUE VALUE="0"/>
 		</PARAMETER>
 		<PARAMETER NAME= "Mode"		TYPE="string" READ_ONLY="true" VISIBLE="true"> 

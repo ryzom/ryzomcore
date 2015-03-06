@@ -1,0 +1,10 @@
+<plugin-spec>
+    <library-name>studio_plugin_disp_sheet_id</library-name>
+    <name>DisplaySheetId</name>
+    <version>1.0</version>
+    <vendor>pemeon</vendor>
+    <description>Display sheet id.</description>
+    <dependencies>
+        <dependency plugin-name="Core" version="0.8"/>
+    </dependencies>
+</plugin-spec>

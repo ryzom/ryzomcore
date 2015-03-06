@@ -18,14 +18,12 @@
 #include "nel/misc/system_utils.h"
 
 #ifdef NL_OS_WINDOWS
-	#define NOMINMAX
-	#include <windows.h>
-
-	#ifdef _WIN32_WINNT_WIN7
+#	include <ObjBase.h>
+#	ifdef _WIN32_WINNT_WIN7
 		// only supported by Windows 7 Platform SDK
-		#include <ShObjIdl.h>
-		#define TASKBAR_PROGRESS 1
-	#endif
+#		include <ShObjIdl.h>
+#		define TASKBAR_PROGRESS 1
+#	endif
 #endif
 
 #ifdef DEBUG_NEW
@@ -222,7 +220,7 @@ bool CSystemUtils::supportUnicode()
 bool CSystemUtils::isAzertyKeyboard()
 {
 #ifdef NL_OS_WINDOWS
-	uint16 klId = uint16((uint32)GetKeyboardLayout(0) & 0xFFFF);
+	uint16 klId = uint16((uintptr_t)GetKeyboardLayout(0) & 0xFFFF);
 	// 0x040c is French, 0x080c is Belgian
 	if (klId == 0x040c || klId == 0x080c)
 		return true;
@@ -312,7 +310,8 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, "", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	char nstr[] = { 0x00 };
+	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, nstr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
 		if (RegSetValueExA(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1) == ERROR_SUCCESS)
 			res = true;
@@ -354,6 +353,16 @@ uint CSystemUtils::getCurrentColorDepth()
 */
 #endif
 	return depth;
+}
+
+/// Detect whether the current process is a windowed application. Return true if definitely yes, false if unknown
+bool CSystemUtils::detectWindowedApplication()
+{
+#ifdef NL_OS_WINDOWS
+	if (GetConsoleWindow() == NULL)
+		return true;
+#endif
+	return false;
 }
 
 } // NLMISC

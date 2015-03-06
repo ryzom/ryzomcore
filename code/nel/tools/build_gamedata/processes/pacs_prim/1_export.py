@@ -6,13 +6,13 @@
 # 
 # \file 1_export.py
 # \brief Export pacs_prim
-# \date 2013-07-24-14-21-GMT
+# \date 2015-01-06-16-31-GMT
 # \author Jan Boon (Kaetemi)
 # Python port of game data build pipeline.
 # Export pacs_prim
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -127,6 +127,13 @@ if MaxAvailable:
 				tagDiff += addTagDiff
 			os.remove(scriptDst)
 	printLog(log, "")
+
+
+
+# Remove bad file from previous script version
+listPath = ExportBuildDirectory + "/" + PacsPrimExportDirectory + "/landscape_col_prim_pacs_list.txt"
+if os.path.isfile(listPath):
+	os.remove(listPath)
 
 
 

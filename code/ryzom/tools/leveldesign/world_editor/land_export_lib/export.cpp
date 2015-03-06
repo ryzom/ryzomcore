@@ -2595,8 +2595,8 @@ void CExport::transformAdditionnalIG (const std::string &name, const NLMISC::CMa
 				inStream.close();
 				if (_ExportCB != NULL)
 				{
-						_ExportCB->dispWarning("Error while reading " + igName);
-						_ExportCB->dispWarning(e.what());
+					_ExportCB->dispWarning("Error while reading " + igName);
+					_ExportCB->dispWarning(e.what());
 				}
 			}
 		}

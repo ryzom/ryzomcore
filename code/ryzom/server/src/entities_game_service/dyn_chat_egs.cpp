@@ -507,7 +507,7 @@ void CDynChatEGS::iosSetHideBubble(TChanID chan, bool hideBubble)
 void CDynChatEGS::iosSetUniversalChannel(TChanID chan, bool universalChannel)
 {
 	CMessage msg("DYN_CHAT:SET_UNIVERSAL_CHANNEL");
-	msg.serial(chan);	
+	msg.serial(chan);
 	msg.serial(universalChannel);
 	sendMessageViaMirror( "IOS", msg);
 }

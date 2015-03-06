@@ -238,7 +238,15 @@ void CComLuaModule::initLuaLib()
 	};
 	int initialStackSize = lua_gettop(_LuaState);
 #if LUA_VERSION_NUM >= 502
-	luaL_newlib(_LuaState, methods);
+	// luaL_newlib(_LuaState, methods);
+	// lua_setglobal(_LuaState, R2_LUA_PATH);
+	lua_getglobal(_LuaState, R2_LUA_PATH);
+	if (lua_isnil(_LuaState, -1))
+	{
+	  lua_pop(_LuaState, 1);
+	  lua_newtable(_LuaState);
+	}
+	luaL_setfuncs(_LuaState, methods, 0);
 	lua_setglobal(_LuaState, R2_LUA_PATH);
 #else
 	luaL_openlib(_LuaState, R2_LUA_PATH, methods, 0);
@@ -826,7 +834,7 @@ sint CComLuaModule::luaRequestEraseNode(lua_State* state)
 	if (args>2) { luaL_checknumber(state, 3); }
 
 	std::string instanceId(lua_tostring(state, 1));
-	std::string attrName = "";
+	std::string attrName;
 	sint position = -1;
 	if (args>1){ attrName = lua_tostring(state, 2);}
 	if (args>2){ position = static_cast<sint>(lua_tonumber(state, 3));}
@@ -1247,7 +1255,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 			lua_pushnil(state);
 			while (lua_next(state, -2) != 0)
 			{
-				std::string key = "";
+				std::string key;
 				if ( lua_type(state, -2) == LUA_TSTRING)
 				{
 					key = lua_tostring(state, -2);
@@ -1277,7 +1285,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 CObject* CComLuaModule::loadLocal(const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }
@@ -1339,7 +1347,7 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
-	std::string name = "";
+	std::string name;
 	for (; first != last; ++first)
 	{
 		if (first->first == "Name" ) { name = first->second; }

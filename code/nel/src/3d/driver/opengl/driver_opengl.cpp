@@ -28,8 +28,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer_hard.h"
@@ -108,7 +106,10 @@ IDriver* createGlDriverInstance ()
 #else
 
 #ifdef NL_OS_WINDOWS
-
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverGL;
@@ -118,7 +119,9 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
-
+#ifdef NL_COMP_MINGW
+}
+#endif
 #elif defined (NL_OS_UNIX)
 
 extern "C"
@@ -427,11 +430,7 @@ bool CDriverGL::setupDisplay()
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-#ifdef USE_OPENGLES
-	glOrthof(0.f,_CurrentMode.Width,_CurrentMode.Height,0.f,-1.0f,1.0f);
-#else
 	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
-#endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 #ifndef USE_OPENGLES
@@ -472,6 +471,11 @@ bool CDriverGL::setupDisplay()
 #ifndef USE_OPENGLES
 		glLightModeli((GLenum)GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
+	}
+
+	if (_Extensions.ARBFragmentShader)
+	{
+		_ForceNativeFragmentPrograms = false;
 	}
 
 	_VertexProgramEnabled= false;
@@ -712,11 +716,7 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-#ifdef USE_OPENGLES
-			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
 			return true;
 		}
 	}
@@ -921,14 +921,6 @@ bool CDriverGL::swapBuffers()
 	}
 #endif
 
-#ifdef NL_OS_WINDOWS
-	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
-#endif
-
 	if (!_WndActive)
 	{
 		if (_AGPVertexArrayRange) _AGPVertexArrayRange->updateLostBuffers();
@@ -1027,6 +1019,8 @@ bool CDriverGL::release()
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
+	nlassert(_DepthStencilFBOs.empty());
+
 	_SwapBufferCounter = 0;
 
 	// delete querries
@@ -1070,7 +1064,7 @@ void CDriverGL::setupViewport (const class CViewport& viewport)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -1125,7 +1119,7 @@ void CDriverGL::setupScissor (const class CScissor& scissor)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the scissor
 	_CurrScissor= scissor;
@@ -1494,7 +1488,7 @@ void			CDriverGL::enableUsedTextureMemorySum (bool enable)
 	H_AUTO_OGL(CDriverGL_enableUsedTextureMemorySum )
 
 	if (enable)
-	{	
+	{
 		nlinfo ("3D: PERFORMANCE INFO: enableUsedTextureMemorySum has been set to true in CDriverGL");
 		_TextureUsed.reserve(512);
 	}
@@ -2171,7 +2165,7 @@ void CDriverGL::flush()
 // ***************************************************************************
 void	CDriverGL::setSwapVBLInterval(uint interval)
 {
-	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
+	H_AUTO_OGL(CDriverGL_setSwapVBLInterval);
 
 	if (!_Initialized)
 		return;
@@ -2647,7 +2641,7 @@ void CDriverGL::checkTextureOn() const
 bool CDriverGL::supportOcclusionQuery() const
 {
 	H_AUTO_OGL(CDriverGL_supportOcclusionQuery)
-	return _Extensions.NVOcclusionQuery;
+	return _Extensions.NVOcclusionQuery || _Extensions.ARBOcclusionQuery;
 }
 
 // ***************************************************************************
@@ -2678,11 +2672,14 @@ bool CDriverGL::supportFrameBufferObject() const
 IOcclusionQuery *CDriverGL::createOcclusionQuery()
 {
 	H_AUTO_OGL(CDriverGL_createOcclusionQuery)
-	nlassert(_Extensions.NVOcclusionQuery);
+	nlassert(_Extensions.NVOcclusionQuery || _Extensions.ARBOcclusionQuery);
 
 #ifndef USE_OPENGLES
 	GLuint id;
-	nglGenOcclusionQueriesNV(1, &id);
+	if (_Extensions.NVOcclusionQuery)
+		nglGenOcclusionQueriesNV(1, &id);
+	else
+		nglGenQueriesARB(1, &id);
 	if (id == 0) return NULL;
 	COcclusionQueryGL *oqgl = new COcclusionQueryGL;
 	oqgl->Driver = this;
@@ -2709,7 +2706,10 @@ void CDriverGL::deleteOcclusionQuery(IOcclusionQuery *oq)
 	oqgl->Driver = NULL;
 	nlassert(oqgl->ID != 0);
 	GLuint id = oqgl->ID;
-	nglDeleteOcclusionQueriesNV(1, &id);
+	if (_Extensions.NVOcclusionQuery)
+		nglDeleteOcclusionQueriesNV(1, &id);
+	else
+		nglDeleteQueriesARB(1, &id);
 	_OcclusionQueryList.erase(oqgl->Iterator);
 	if (oqgl == _CurrentOcclusionQuery)
 	{
@@ -2728,7 +2728,10 @@ void COcclusionQueryGL::begin()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == NULL); // only one query at a time
 	nlassert(ID);
-	nglBeginOcclusionQueryNV(ID);
+	if (Driver->_Extensions.NVOcclusionQuery)
+		nglBeginOcclusionQueryNV(ID);
+	else
+		nglBeginQueryARB(GL_SAMPLES_PASSED, ID);
 	Driver->_CurrentOcclusionQuery = this;
 	OcclusionType = NotAvailable;
 	VisibleCount = 0;
@@ -2744,7 +2747,10 @@ void COcclusionQueryGL::end()
 	nlassert(Driver);
 	nlassert(Driver->_CurrentOcclusionQuery == this); // only one query at a time
 	nlassert(ID);
-	nglEndOcclusionQueryNV();
+	if (Driver->_Extensions.NVOcclusionQuery)
+		nglEndOcclusionQueryNV();
+	else
+		nglEndQueryARB(GL_SAMPLES_PASSED);
 	Driver->_CurrentOcclusionQuery = NULL;
 #endif
 }
@@ -2760,15 +2766,29 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL::getOcclusionType()
 	nlassert(Driver->_CurrentOcclusionQuery != this); // can't query result between a begin/end pair!
 	if (OcclusionType == NotAvailable)
 	{
-		GLuint result;
-		// retrieve result
-		nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_AVAILABLE_NV, &result);
-		if (result != GL_FALSE)
+		if (Driver->_Extensions.NVOcclusionQuery)
 		{
-			nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_NV, &result);
-			OcclusionType = result != 0 ? NotOccluded : Occluded;
-			VisibleCount = (uint) result;
-			// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
+			GLuint result;
+			// retrieve result
+			nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_AVAILABLE_NV, &result);
+			if (result != GL_FALSE)
+			{
+				nglGetOcclusionQueryuivNV(ID, GL_PIXEL_COUNT_NV, &result);
+				OcclusionType = result != 0 ? NotOccluded : Occluded;
+				VisibleCount = (uint) result;
+				// Note : we could return the exact number of pixels that passed the z-test, but this value is not supported by all implementation (Direct3D ...)
+			}
+		}
+		else
+		{
+			GLuint result;
+			nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT_AVAILABLE, &result);
+			if (result != GL_FALSE)
+			{
+				nglGetQueryObjectuivARB(ID, GL_QUERY_RESULT, &result);
+				OcclusionType = result != 0 ? NotOccluded : Occluded;
+				VisibleCount = (uint) result;
+			}
 		}
 	}
 #endif

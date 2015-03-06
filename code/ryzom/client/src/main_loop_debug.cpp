@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#include "stdpch.h"
 #include "main_loop_debug.h"
 
 #include <nel/3d/u_text_context.h>
@@ -80,6 +80,7 @@ void displayDebug()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color
@@ -370,6 +371,9 @@ void displayDebug()
 	// Current GameCycle
 	TextContext->printfAt(1.f, line, "Ms per Cycle : %d", NetMngr.getMsPerTick());
 	line += lineStep;
+	// Smoothed Client Date
+	TextContext->printfAt(1.f, line, "Smoothed Client Date : %u %f", SmoothedClientDate.Day, SmoothedClientDate.Hour);
+	line += lineStep;
 	// Packet Loss
 	TextContext->printfAt(1.f, line, "Packet Loss : %.1f %%", NetMngr.getMeanPacketLoss()*100.0f);
 	line += lineStep;
@@ -470,6 +474,7 @@ void displayDebug()
 
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 }// displayDebug //
 
 // ********************************************************************
@@ -491,6 +496,7 @@ void displayDebugFps()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 	// Set the text color
@@ -533,6 +539,7 @@ void displayDebugUIUnderMouse()
 	//----------------//
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.DebugFontSize);
 
@@ -707,6 +714,7 @@ void displayHelp()
 
 	// Create a shadow when displaying a text.
 	TextContext->setShaded(true);
+	TextContext->setShadeOutline(false);
 	// Set the font size.
 	TextContext->setFontSize(ClientCfg.HelpFontSize);
 	// Set the text color
@@ -763,6 +771,7 @@ void displayHelp()
 
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);
+	TextContext->setShadeOutline(false);
 }// displayHelp //
 
 // ********************************************************************

@@ -49,19 +49,11 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 	}
 	if (url.empty())
 	{
-		// not found ? rely on hardcoded stuff
-		if (nlstricmp(languageCode, "fr") == 0)
-		{
-			url = "http://forums.ryzom.com/forum/showthread.php?t=29130";
-		}
-		else if (nlstricmp(languageCode, "de") == 0)
-		{
-			url = "http://forums.ryzom.com/forum/showthread.php?t=29131";
-		}
-		else
-		{
-			url = "http://forums.ryzom.com/forum/showthread.php?t=29129";
-		}
+		// not found
+		nlwarning("No FAQ url");
 	}
-	openURL(url.c_str());
+	else
+	{
+		openURL(url.c_str());
+	}
 }

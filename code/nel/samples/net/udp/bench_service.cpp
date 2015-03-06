@@ -43,7 +43,9 @@
 #include "receive_task.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
@@ -96,8 +98,7 @@ struct CClient
 
 struct TInetAddressHash
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 
 	inline bool operator() (const NLNET::CInetAddress &x1, const NLNET::CInetAddress &x2) const
 	{

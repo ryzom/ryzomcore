@@ -28,7 +28,9 @@
 #include "messages.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <WinSock2.h>
 #	include <Windows.h>
 typedef unsigned long ulong;
@@ -390,7 +392,15 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 						{
 							if (strlen(row[0]) > 2)
 							{
-								std::string salt = std::string(row[0], row[0] + 2);								
+								std::string salt;
+								if (row[0][0] == '$')
+								{
+									salt = std::string(row[0], row[0] + 19);
+								}
+								else
+								{
+									salt = std::string(row[0], row[0] + 2);
+								}
 								std::string cryptedVersion = CCrypt::crypt(password, salt);
 								if (cryptedVersion == row[0])
 								{
@@ -408,7 +418,9 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 				// fail the authentication
 				// Do not send result immediatly to avoid a potential hacker
 				// to try a dictionnary or that dort of things
-				BadLoginClients.insert(std::make_pair(NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS, Clients[i]));
+				BadLoginClients.insert(std::pair<NLMISC::TTime, NLMISC::CRefPtr<CMonitorClient> >(
+					NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS, 
+					(NLMISC::CRefPtr<CMonitorClient>)Clients[i]));
 				Clients[i]->BadLogin =true;
 				return;
 			}

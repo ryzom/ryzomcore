@@ -474,16 +474,16 @@ void				CSPhraseManager::memorizePhrase(uint32 memoryLine, uint32 memorySlot, ui
 	}
 }
 
-void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
+// ***************************************************************************
+void CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
 {
 	if(memoryLine<0)
 		memoryLine= -1;
-	
-	if(_SelectedMemoryDBalt!=memoryLine)
+
+	if(_SelectedMemoryDB!=memoryLine)
 	{
-		_SelectedMemoryDBalt= memoryLine;
+		_SelectedMemoryDB= memoryLine;
 		// since memory selection changes then must update all the DB and the Ctrl states
-		
 		updateMemoryDBAll();
 		updateAllMemoryCtrlState();
 		updateAllMemoryCtrlRegenTickRange();
@@ -492,14 +492,14 @@ void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
 	}
 }
 
-// ***************************************************************************
-void				CSPhraseManager::selectMemoryLineDB(sint32 memoryLine)
+void CSPhraseManager::selectMemoryLineDBalt(sint32 memoryLine)
 {
 	if(memoryLine<0)
 		memoryLine= -1;
-	if(_SelectedMemoryDB!=memoryLine)
+
+	if(_SelectedMemoryDBalt!=memoryLine)
 	{
-		_SelectedMemoryDB= memoryLine;
+		_SelectedMemoryDBalt= memoryLine;
 		// since memory selection changes then must update all the DB and the Ctrl states
 		updateMemoryDBAll();
 		updateAllMemoryCtrlState();
@@ -573,7 +573,7 @@ void		CSPhraseManager::updateMemoryDBSlot(uint32 memorySlot)
 			_MemoryDbLeaves[memorySlot]->setValue32(0);
 		else
 			_MemoryDbLeaves[memorySlot]->setValue32(slot.Id);
-		
+
 		CMemorySlot		&slotAlt= _Memories[_SelectedMemoryDBalt].Slot[memorySlot];
 
 		if(!slotAlt.isPhrase())
@@ -1126,7 +1126,7 @@ void CSPhraseManager::buildPhraseDesc(ucstring &text, const CSPhraseCom &phrase,
 		uint32	totalActionMalus= 0;
 		CCDBNodeLeaf *actMalus = _TotalMalusEquipLeaf ? &*_TotalMalusEquipLeaf
 			: &*(_TotalMalusEquipLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TOTAL_MALUS_EQUIP", false));
-		
+
 		// root brick must not be Power or aura, because Action malus don't apply to them
 		// (ie leave 0 ActionMalus for Aura or Powers
 		if(actMalus && !rootBrick->isSpecialPower())
@@ -1428,7 +1428,7 @@ sint				CSPhraseManager::getPhraseSuccessRate(const CSPhraseCom &phrase)
 }
 
 // ***************************************************************************
-sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel)
+sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SKILLS::ESkills skill, uint minMpLevel, sint successModifier)
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
 
@@ -1437,6 +1437,9 @@ sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SK
 
 	// take skill value of the skill
 	sint	skillValue= pSM->getBestSkillValue(skill);
+
+	// apply success rate modifier from server
+	skillValue += successModifier;
 
 	// return the sr according to this skill
 	return getPhraseSuccessRate(STCraft, phrase, skillValue, minMpLevel);
@@ -4516,7 +4519,7 @@ uint32 CSPhraseManager::getTotalActionMalus(const CSPhraseCom &phrase) const
 		if (!rootBrick)
 			nlerror("Invalid root sbrick in sphrase_com '%s'", phrase.Name.toUtf8().c_str());
 		else if (actMalus && !rootBrick->isSpecialPower())
-			totalActionMalus = actMalus->getValue32();	
+			totalActionMalus = actMalus->getValue32();
 	}
 	return totalActionMalus;
 }

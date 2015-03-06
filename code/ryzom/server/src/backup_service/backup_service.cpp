@@ -30,7 +30,9 @@
 #include "web_connection.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #endif // NL_OS_WINDOWS
 
@@ -716,7 +718,7 @@ void CBackupService::init()
 		BSIsSlave = true;
 		FileManager.forbidStall();
 		// I'm a slave, try to contact master
-		string	host = MasterBSHost;
+		string	host = MasterBSHost.get();
 		if (host.find (":") == string::npos)
 			host += ":49990";
 

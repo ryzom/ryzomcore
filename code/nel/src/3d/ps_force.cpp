@@ -421,7 +421,6 @@ void CPSGravity::show()
 
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
 	vb.setNumVertices(6);
-	vb.setPreferredMemory(CVertexBuffer::RAMVolatile, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -434,7 +433,6 @@ void CPSGravity::show()
 	}
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes(2*4);
-	pb.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
 	{
 		CIndexBufferReadWrite ibaWrite;
 		pb.lock (ibaWrite);

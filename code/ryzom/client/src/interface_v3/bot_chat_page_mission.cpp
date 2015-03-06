@@ -53,7 +53,6 @@ void CBotChatPageMission::init()
 		NLGUI::CDBManager::getInstance()->addBranchObserver("SERVER:CHOOSE_MISSIONS", &_MissionPagesObs);
 }
 
-
 // ***************************************************************************************
 void CBotChatPageMission::begin()
 {

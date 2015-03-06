@@ -32,15 +32,15 @@ define domain_std01
 
 	// domain hosts
 	cfg AESHost = "localhost";
-	cfg SUHost = "su1.std01.ryzomcore.org";
-	cfg MFSHost = "su1.std01.ryzomcore.org";
-	cfg BSHost = "pd1.std01.ryzomcore.org:49990"; // Backup service host for domain
-	cfg SlaveBSHost= "pd2.std01.ryzomcore.org:49991";
-	cfg MasterLGSHost = "pd3.std01.ryzomcore.org";
-	cfg SlaveLGSHost = "pd4.std01.ryzomcore.org";
-	cfg LGSBSHost = "csr.core.ryzomcore.org"; // Backup service host for log service
-	cfg DBHost = "sql.core.ryzomcore.org";
-	cfgAfter WebSrvHost = "http://su1.std01.ryzomcore.org:50000/";
+	cfg SUHost = "su1.std01.ryzomcore.local";
+	cfg MFSHost = "su1.std01.ryzomcore.local";
+	cfg BSHost = "pd1.std01.ryzomcore.local:49990"; // Backup service host for domain
+	cfg SlaveBSHost= "pd2.std01.ryzomcore.local:49991";
+	cfg MasterLGSHost = "pd3.std01.ryzomcore.local";
+	cfg SlaveLGSHost = "pd4.std01.ryzomcore.local";
+	cfg LGSBSHost = "csr.core.ryzomcore.local"; // Backup service host for log service
+	cfg DBHost = "sql.core.ryzomcore.local";
+	cfgAfter WebSrvHost = "http://su1.std01.ryzomcore.local:50000/";
 
 	// initial config files
 	cfgFile ../cfg/00_base.cfg
@@ -86,11 +86,11 @@ define shard_std01_unifier
 
 define shard_exe_set_std01_ras
 	use ras
-	host ep1.std01.ryzomcore.org
+	host ep1.std01.ryzomcore.local
 	
 define shard_exe_set_std01_unifier
 	use exe_set_std_unifier
-	host su1.std01.ryzomcore.org
+	host su1.std01.ryzomcore.local
 	cfg DBPass = DBNelPass;
 
 
@@ -106,30 +106,30 @@ define shard_std01_mainland01
 	cfg ShardId = 101;
 	cfg BasePort = 51000;
 	cfg SaveFilesDirectory="std01_mainland01/";
-	cfg NSHost = "mla1.std01.ryzomcore.org";
+	cfg NSHost = "mla1.std01.ryzomcore.local";
 	cfgFile ../cfg/02_shard_type_std_mainland.cfg
 
 define shard_exe_set_std01_mainland01_be01
 	use exe_set_std_mainland_be01
-	host mla1.std01.ryzomcore.org
+	host mla1.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland01_be02
 	use exe_set_std_mainland_be02
-	host mla2.std01.ryzomcore.org
+	host mla2.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland01_be03
 	use exe_set_std_mainland_be03
-	host mla3.std01.ryzomcore.org
+	host mla3.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland01_fe01
 	use exe_set_std_mainland_fe
-	host mla4.std01.ryzomcore.org
-	cfg FSListenHost = "mla4.std01.ryzomcore.org";
+	host mla4.std01.ryzomcore.local
+	cfg FSListenHost = "mla4.std01.ryzomcore.local";
 
 define shard_exe_set_std01_mainland01_fe02
 	use exe_set_std_mainland_fe
-	host mla5.std01.ryzomcore.org
-	cfg FSListenHost = "mla5.std01.ryzomcore.org";
+	host mla5.std01.ryzomcore.local
+	cfg FSListenHost = "mla5.std01.ryzomcore.local";
 
 
 // shard mainland02 ----------------
@@ -144,30 +144,30 @@ define shard_std01_mainland02
 	cfg ShardId = 102;
 	cfg BasePort = 51100;
 	cfg SaveFilesDirectory="std01_mainland02/";
-	cfg NSHost = "mlb1.std01.ryzomcore.org";
+	cfg NSHost = "mlb1.std01.ryzomcore.local";
 	cfgFile ../cfg/02_shard_type_std_mainland.cfg
 
 define shard_exe_set_std01_mainland02_be01
 	use exe_set_std_mainland_be01
-	host mlb1.std01.ryzomcore.org
+	host mlb1.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland02_be02
 	use exe_set_std_mainland_be02
-	host mlb2.std01.ryzomcore.org
+	host mlb2.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland02_be03
 	use exe_set_std_mainland_be03
-	host mlb3.std01.ryzomcore.org
+	host mlb3.std01.ryzomcore.local
 
 define shard_exe_set_std01_mainland02_fe01
 	use exe_set_std_mainland_fe
-	host mlb4.std01.ryzomcore.org
-	cfg FSListenHost = "mlb4.std01.ryzomcore.org";
+	host mlb4.std01.ryzomcore.local
+	cfg FSListenHost = "mlb4.std01.ryzomcore.local";
 
 define shard_exe_set_std01_mainland02_fe02
 	use exe_set_std_mainland_fe
-	host mlb5.std01.ryzomcore.org
-	cfg FSListenHost = "mlb5.std01.ryzomcore.org";
+	host mlb5.std01.ryzomcore.local
+	cfg FSListenHost = "mlb5.std01.ryzomcore.local";
 
 
 // shard ring01 --------------------
@@ -179,17 +179,17 @@ define shard_std01_ring01
 	cfg ShardId = 201;
 	cfg BasePort = 51400;
 	cfg SaveFilesDirectory="std01_ring01/";
-	cfg NSHost = "rra1.std01.ryzomcore.org";
+	cfg NSHost = "rra1.std01.ryzomcore.local";
 	cfgFile ../cfg/02_shard_type_std_ring.cfg
 
 define shard_exe_set_std01_ring01_be
 	use exe_set_std_ring_be
-	host rra1.std01.ryzomcore.org
+	host rra1.std01.ryzomcore.local
 
 define shard_exe_set_std01_ring01_fe
 	use exe_set_std_ring_fe
-	host rra2.std01.ryzomcore.org
-	cfg FSListenHost = "rra2.std01.ryzomcore.org";
+	host rra2.std01.ryzomcore.local
+	cfg FSListenHost = "rra2.std01.ryzomcore.local";
 
 
 // shard ring02 --------------------
@@ -201,17 +201,17 @@ define shard_std01_ring02
 	cfg ShardId = 202;
 	cfg BasePort = 51500;
 	cfg SaveFilesDirectory="std01_ring02/";
-	cfg NSHost = "rrb1.std01.ryzomcore.org";
+	cfg NSHost = "rrb1.std01.ryzomcore.local";
 	cfgFile ../cfg/02_shard_type_std_ring.cfg
 
 define shard_exe_set_std01_ring02_be
 	use exe_set_std_ring_be
-	host rrb1.std01.ryzomcore.org
+	host rrb1.std01.ryzomcore.local
 
 define shard_exe_set_std01_ring02_fe
 	use exe_set_std_ring_fe
-	host rrb2.std01.ryzomcore.org
-	cfg FSListenHost = "rrb2.std01.ryzomcore.org";
+	host rrb2.std01.ryzomcore.local
+	cfg FSListenHost = "rrb2.std01.ryzomcore.local";
 
 
 // the std01 backup domain ----------
@@ -260,7 +260,7 @@ define shard_std01_backup_ras
 	shard std01_backup_ras
 	cfg ShardId = 100;
 	use ras
-	host ep1.std01.ryzomcore.org
+	host ep1.std01.ryzomcore.local
 
 
 // the main backup pair ------------
@@ -273,15 +273,15 @@ define shard_std01_backup
 define shard_exe_set_std01_backup_master
 	name bs_master
 	use exe_set_std_backup_master
-	host pd1.std01.ryzomcore.org
+	host pd1.std01.ryzomcore.local
 
 define shard_exe_set_std01_backup_slave
 	name bs_slave
 	// hack to workaround bug in backup service
 //	use exe_set_std_backup_slave
 	use exe_set_std01_backup_slave
-	host pd2.std01.ryzomcore.org
-	cfgAfter MasterBSHost = "pd1.std01.ryzomcore.org:49990";
+	host pd2.std01.ryzomcore.local
+	cfgAfter MasterBSHost = "pd1.std01.ryzomcore.local:49990";
 
 // hack to workaround bug in backup service
 define exe_set_std01_backup_slave
@@ -312,27 +312,27 @@ define shard_std01_lgs
 	cfg L3SlaveLGSPort = 49993;
 	cfg LGSBSPort = 49994;
 	cfg L3LGSBSPort = 49995;
-	cfg MasterLGSHost = "pd3.std01.ryzomcore.org";
-	cfg SlaveLGSHost = "pd4.std01.ryzomcore.org";
-	cfg LGSBSHost = "csr.core.ryzomcore.org";
+	cfg MasterLGSHost = "pd3.std01.ryzomcore.local";
+	cfg SlaveLGSHost = "pd4.std01.ryzomcore.local";
+	cfg LGSBSHost = "csr.core.ryzomcore.local";
 
 define shard_exe_set_std01_lgs_primary
 	name lgs_primary
 	use raes
 	use exe_set_std_lgs_master
-	host pd3.std01.ryzomcore.org
+	host pd3.std01.ryzomcore.local
 	
 define shard_exe_set_std01_lgs_secondary
 	name lgs_secondary
 	use raes
 	use exe_set_std_lgs_slave
-	host pd4.std01.ryzomcore.org
+	host pd4.std01.ryzomcore.local
 
 define shard_exe_set_std01_lgs_bs
 	name lgs_bs
 	use raes
 	use backup_lgs
-	host csr.core.ryzomcore.org
+	host csr.core.ryzomcore.local
 
 
 // the std01 las domain -------------
@@ -365,7 +365,7 @@ define shard_std01_las_ras
 	shard std01_las_ras
 	cfg ShardId = 100;
 	use ras
-	host ep1.std01.ryzomcore.org
+	host ep1.std01.ryzomcore.local
 
 
 // master las ----------------------
@@ -378,7 +378,7 @@ define shard_std01_las_master
 	use las_mainland02
 	use las_ring01
 	use las_ring02
-	host pd3.std01.ryzomcore.org
+	host pd3.std01.ryzomcore.local
 
 define las_mainland01
 	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland01/pds"};
@@ -415,7 +415,7 @@ define shard_std01_las_slave
 	use las_mainland02_slave
 	use las_ring01_slave
 	use las_ring02_slave
-	host pd4.std01.ryzomcore.org
+	host pd4.std01.ryzomcore.local
 
 define las_mainland01_slave
 	cfgAfter StartCommands += {"PDRootDirectory /srv/core/backup01/save_shard_pd/std01_mainland01/pds"};

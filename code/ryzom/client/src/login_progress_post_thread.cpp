@@ -85,7 +85,7 @@ static std::string sizeToHumanStd(uint64 size)
 static std::string getVideoInfoDeviceName()
 {
 	uint64 version;
-	std::string ret = "";
+	std::string ret;
 	bool ok = CSystemInfo::getVideoInfo(ret, version);
 	if (ok)
 	{

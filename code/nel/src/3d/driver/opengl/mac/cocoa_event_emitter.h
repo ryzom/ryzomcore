@@ -20,20 +20,17 @@
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/event_server.h"
 #include "nel/misc/events.h"
-#include "nel/misc/game_device_events.h"
 #include "nel/3d/driver.h"
 #import  "cocoa_opengl_view.h"
 
 #include <Carbon/Carbon.h>
 #import  <Cocoa/Cocoa.h>
 
-namespace NLMISC 
+namespace NLMISC
 {
 
 class CCocoaEventEmitter : public IEventEmitter
 {
-	bool             _emulateRawMode;
-	bool             _setToEmulateRawMode;
 	bool             _eventLoop;
 	NL3D::IDriver*   _driver;
 	CocoaOpenGLView* _glView;
@@ -42,9 +39,7 @@ class CCocoaEventEmitter : public IEventEmitter
 	CEventServer*    _server;
 
 public:
-	CCocoaEventEmitter() : 
-		_emulateRawMode(false), 
-		_setToEmulateRawMode(false),
+	CCocoaEventEmitter() :
 		_driver(NULL),
 		_glView(nil),
 		_server(NULL) { }
@@ -52,7 +47,6 @@ public:
 	void         init(NL3D::IDriver*, CocoaOpenGLView*, bool eventLoop);
 	bool         processMessage(NSEvent* event, CEventServer* server = NULL);
 	virtual void submitEvents(CEventServer& server, bool allWindows);
-	virtual void emulateMouseRawMode(bool enable);
 	bool         handleQuitRequest();
 
 	virtual bool copyTextToClipboard(const ucstring &text);

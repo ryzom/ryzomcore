@@ -17,16 +17,16 @@
 			<property type="std::string"	name="Privilege"		db_col="Privilege"	byref="true"/>
 			<property type="std::string"	name="ExtendedPrivilege" db_col="ExtendedPrivilege"	byref="true"/>
 			<property type="uint32"			name="GMId"				db_col="GMId"/>
-			
+
 		</class>
 
 		<class name="CNelPermission">
 			<!-- activate database code generation -->
 			<database table="permission"/>
 
-			<property type="uint32"			name="Prim"				db_col="prim"	unique_id="true"/>
+			<property type="uint32"			name="PermissionId"		db_col="PermissionId"	unique_id="true"/>
 			<property type="uint32"			name="UserId"			db_col="UId"/>
-			<property type="std::string"	name="DomainName"		db_col="ClientApplication"	byref="true"/>
+			<property type="uint32"			name="DomainId"			db_col="DomainId"/>
 			<property type="uint32"			name="ShardId"			db_col="ShardId"/>
 			<property type="std::string"	name="AccessPriv"		db_col="AccessPrivilege"	byref="true"/>
 
