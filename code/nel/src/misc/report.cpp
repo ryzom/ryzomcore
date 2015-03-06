@@ -16,6 +16,7 @@
 
 #include "stdmisc.h"
 
+#include <stdlib.h>
 #include <sstream>
 
 #include "nel/misc/common.h"

@@ -606,7 +606,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		ListeningPort = servicePort;
 
-		setReportEmailFunction ((void*)sendEmail);
+		// setReportEmailFunction ((void*)sendEmail);
 		// setDefaultEmailParams ("gw.nevrax.com", "", "cado@nevrax.com");
 
 
