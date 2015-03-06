@@ -18,6 +18,7 @@
 #define NELGUI_H
 
 #include <string>
+#include <limits>
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/algo.h"
@@ -30,7 +31,9 @@
 #include "nel/misc/hierarchical_timer.h"
 
 #ifdef NL_OS_WINDOWS
-	#define NOMINMAX
+	#ifndef NL_COMP_MINGW
+	#	define NOMINMAX
+	#endif
 	#include <WinSock2.h>
 	#include <windows.h>
 #endif

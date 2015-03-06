@@ -17,26 +17,8 @@
 #include "stdmisc.h"
 
 #include "nel/misc/types_nl.h"
-#include "nel/misc/debug.h"
-
-#ifdef HAVE_NELCONFIG_H
-#  include "nelconfig.h"
-#endif // HAVE_NELCONFIG_H
-
-#include "nel/misc/log.h"
-#include "nel/misc/displayer.h"
-#include "nel/misc/mem_displayer.h"
-#include "nel/misc/command.h"
-#include "nel/misc/report.h"
-#include "nel/misc/path.h"
-#include "nel/misc/variable.h"
-#include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
-#	define _WIN32_WINDOWS	0x0410
-#	define WINVER			0x0400
-#	define NOMINMAX
-#	include <windows.h>
 #	include <direct.h>
 #	include <tchar.h>
 #	include <imagehlp.h>
@@ -56,6 +38,22 @@
 //#	include <malloc.h>
 #	include <errno.h>
 #endif
+
+#include "nel/misc/debug.h"
+
+#ifdef HAVE_NELCONFIG_H
+#  include "nelconfig.h"
+#endif // HAVE_NELCONFIG_H
+
+#include "nel/misc/log.h"
+#include "nel/misc/displayer.h"
+#include "nel/misc/mem_displayer.h"
+#include "nel/misc/command.h"
+#include "nel/misc/report.h"
+#include "nel/misc/path.h"
+#include "nel/misc/variable.h"
+#include "nel/misc/system_info.h"
+#include "nel/misc/system_utils.h"
 
 #define NL_NO_DEBUG_FILES 1
 
@@ -81,7 +79,8 @@ using namespace std;
 #define LOG_IN_FILE NEL_LOG_IN_FILE
 
 // If true, debug system will trap crash even if the application is in debugger
-static const bool TrapCrashInDebugger = false;
+//static const bool TrapCrashInDebugger = false;
+static const bool TrapCrashInDebugger = true;
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -445,7 +444,7 @@ public:
 
 	EDebug() { _Reason = "Nothing about EDebug"; }
 
-	~EDebug () { }
+	virtual ~EDebug() throw() {}
 
 	EDebug(EXCEPTION_POINTERS * pexp) : m_pexp(pexp) { nlassert(pexp != 0); createWhat(); }
 	EDebug(const EDebug& se) : m_pexp(se.m_pexp) { createWhat(); }
@@ -550,8 +549,8 @@ public:
 			{
 				// yoyo: allow only to send the crash report once. Because users usually click ignore,
 				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
-				bool i = false;
-				report (progname+shortExc, "", subject, _Reason, true, 1, true, 1, !isCrashAlreadyReported(), i, NL_CRASH_DUMP_FILE);
+				report(progname + shortExc, subject, _Reason, NL_CRASH_DUMP_FILE, true, !isCrashAlreadyReported(), ReportAbort);
+				// TODO: Does this need to be synchronous? Why does this not handle the report result?
 
 				// no more sent mail for crash
 				setCrashAlreadyReported(true);
@@ -755,7 +754,7 @@ public:
 
 	HANDLE getProcessHandle()
 	{
-		return CSystemInfo::isNT()?GetCurrentProcess():(HANDLE)GetCurrentProcessId();
+		return CSystemInfo::isNT()?GetCurrentProcess():(HANDLE)(uintptr_t)GetCurrentProcessId();
 	}
 
 	// return true if found
@@ -797,7 +796,7 @@ public:
 		while (findAndErase(rawType, "classvector<char,class char_traits<char>,class allocator<char> >", "string")) ;
 	}
 
-	string getFuncInfo (DWORD funcAddr, DWORD stackAddr)
+	string getFuncInfo (uintptr_t funcAddr, uintptr_t stackAddr)
 	{
 		string str ("NoSymbol");
 
@@ -853,7 +852,7 @@ public:
 
 				if (stop==0 && (parse[i] == ',' || parse[i] == ')'))
 				{
-					ULONG *addr = (ULONG*)(stackAddr) + 2 + pos2++;
+					uintptr_t *addr = (uintptr_t*)(stackAddr) + 2 + pos2++;
 
 					string displayType = type;
 					cleanType (type, displayType);
@@ -882,7 +881,7 @@ public:
 					}
 					else if (type == "char*")
 					{
-						if (!IsBadReadPtr(addr,sizeof(char*)) && *addr != NULL)
+						if (!IsBadReadPtr(addr,sizeof(char*)) && *addr != 0)
 						{
 							if (!IsBadStringPtrA((char*)*addr,32))
 							{
@@ -920,7 +919,7 @@ public:
 					{
 						if (!IsBadReadPtr(addr,sizeof(string*)))
 						{
-							if (*addr != NULL)
+							if (*addr != 0)
 							{
 								if (!IsBadReadPtr((void*)*addr,sizeof(string)))
 									sprintf (tmp, "\"%s\"", ((string*)*addr)->c_str());
@@ -929,9 +928,9 @@ public:
 					}
 					else
 					{
-						if (!IsBadReadPtr(addr,sizeof(ULONG*)))
+						if (!IsBadReadPtr(addr,sizeof(uintptr_t*)))
 						{
-							if(*addr == NULL)
+							if(*addr == 0)
 								sprintf (tmp, "<NULL>");
 							else
 								sprintf (tmp, "0x%p", *addr);
@@ -956,7 +955,7 @@ public:
 			if (disp != 0)
 			{
 				str += " + ";
-				str += toString ((uint32)disp);
+				str += toString ((uintptr_t)disp);
 				str += " bytes";
 			}
 		}
@@ -1166,7 +1165,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		initAcquireTimeMap();
 #endif
 
-#ifdef NL_OS_WINDOWS
+#ifndef NL_COMP_MINGW
+#	ifdef NL_OS_WINDOWS
 //		if (!IsDebuggerPresent ())
 		{
 			// Use an environment variable to share the value among the EXE and its child DLLs
@@ -1180,7 +1180,8 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, _T("1") );
 			}
 		}
-#endif // NL_OS_WINDOWS
+#	endif // NL_OS_WINDOWS
+#endif //!NL_COMP_MINGW
 
 		INelContext::getInstance().setErrorLog(new CLog (CLog::LOG_ERROR));
 		INelContext::getInstance().setWarningLog(new CLog (CLog::LOG_WARNING));
@@ -1192,10 +1193,10 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 
 #ifdef NL_OS_WINDOWS
 		if (TrapCrashInDebugger || !IsDebuggerPresent ())
+#endif
 		{
 			DefaultMsgBoxDisplayer = new CMsgBoxDisplayer ("DEFAULT_MBD");
 		}
-#endif
 
 #if LOG_IN_FILE
 		if (logInFile)
@@ -1222,6 +1223,9 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		}
 #endif // LOG_IN_FILE
 		DefaultMemDisplayer = new CMemDisplayer ("DEFAULT_MD");
+
+		if (NLMISC::CSystemUtils::detectWindowedApplication())
+			INelContext::getInstance().setWindowedApplication(true);
 
 		initDebug2(logInFile);
 

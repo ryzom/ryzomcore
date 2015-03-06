@@ -2871,7 +2871,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(mirror, sint32, MainNbEntities, "Number of online
 	// We can only read the value
 	if ( get )
 	{
-		if ( MirrorInstance->mirrorIsReady() )
+		if ( MirrorInstance && MirrorInstance->mirrorIsReady() )
 		{
 			try
 			{
@@ -2892,7 +2892,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(mirror, sint32, LocalEntities, "Number of online 
 	// We can only read the value
 	if ( get )
 	{
-		if ( MirrorInstance->mirrorIsReady() )
+		if ( MirrorInstance && MirrorInstance->mirrorIsReady() )
 		{
 			try
 			{

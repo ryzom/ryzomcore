@@ -10,6 +10,7 @@ fn runNelMaxExport inputMaxFile =
 	
 	-- Select none
 	max select none
+	clearSelection()
 	
 	-- Select all PACS primitives
 	for i in geometry do

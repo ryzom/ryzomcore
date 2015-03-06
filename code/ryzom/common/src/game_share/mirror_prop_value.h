@@ -1150,7 +1150,7 @@ public:
 	typedef _CMirrorPropValueListIterator<T,CPropLocationClass>		iterator;
 	typedef _CCMirrorPropValueListIterator<T,CPropLocationClass>	const_iterator;
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	friend											iterator; // MSVC
 	friend											const_iterator;
 #else
@@ -1192,7 +1192,7 @@ public:
 		// If changing this struct, don't forget to change the places where it is initialized
 		TSharedListRow				Next;
 		T							Value;
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	};
 #else
 	} __attribute__((packed));
@@ -1237,7 +1237,7 @@ public:
 	typedef _CMirrorPropValueListIterator<NLMISC::CEntityId,CPropLocationClass>		iterator;
 	typedef _CCMirrorPropValueListIterator<NLMISC::CEntityId,CPropLocationClass>	const_iterator;
 
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	friend											iterator; // MSVC
 	friend											const_iterator;
 #else
@@ -1280,7 +1280,7 @@ public:
 		// If changing this struct, don't forget to change the places where it is initialized
 		TSharedListRow				Next;
 		uint64							Value;
-#ifdef NL_OS_WINDOWS
+#ifdef NL_COMP_VC
 	};
 #else
 	} __attribute__((packed));

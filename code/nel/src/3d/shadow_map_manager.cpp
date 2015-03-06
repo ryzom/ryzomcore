@@ -244,7 +244,7 @@ void			CShadowMapManager::addShadowReceiver(CTransform *model)
 void			CShadowMapManager::renderGenerate(CScene *scene)
 {
 	H_AUTO( NL3D_ShadowManager_Generate );
-	
+
 	// Each frame, do a small garbage collector for unused free textures.
 	garbageShadowTextures(scene);
 

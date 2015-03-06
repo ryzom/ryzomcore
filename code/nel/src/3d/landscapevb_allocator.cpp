@@ -611,7 +611,6 @@ void			CLandscapeVBAllocator::setupVBFormatAndVertexProgram(bool withVertexProgr
 			nlverify(_Driver->compileVertexProgram(_VertexProgram[1]));
 		}
 	}
-
 }
 
 

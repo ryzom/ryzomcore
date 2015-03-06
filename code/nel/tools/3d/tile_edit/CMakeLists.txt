@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h PIC/*.cpp PIC/*.h)
+FILE(GLOB SRC *.cpp *.h)
 
 FILE(GLOB SRC2 cpu.cpp DllEntry.cpp Popup.* thread_win32.* TileCtrl.* TileList.* TileView.*)
 LIST(REMOVE_ITEM SRC ${SRC2})

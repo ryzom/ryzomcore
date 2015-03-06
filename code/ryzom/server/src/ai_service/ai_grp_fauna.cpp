@@ -220,7 +220,7 @@ void CSpawnGroupFauna::update()
 	
 	getPersistent().updateStateInstance();
 	
-	if (_CurrentCycle==~0)
+	if (_CurrentCycle==std::numeric_limits<uint32>::max())
 		return;
 	
 	// Respawn
@@ -606,9 +606,9 @@ CGrpFauna::CGrpFauna(CMgrFauna* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MA
 	
 	// state
 	
-	_CurPopulation = ~0u;
+	_CurPopulation = std::numeric_limits<uint32>::max();
 	
-	_CurrentCycle = ~0;
+	_CurrentCycle = std::numeric_limits<sint32>::max();
 	
 	// default values.	
 	setTimer(EAT_TIME, refTimer(EAT_TIME));
@@ -699,9 +699,9 @@ CAliasTreeOwner* CGrpFauna::createChild(IAliasCont* cont, CAIAliasDescriptionNod
 				CAIPlaceXYRFauna *faunaPlace = new CAIPlaceXYRFauna(this, aliasTree);
 				child = faunaPlace;	
 				uint placeIndex = faunaPlace->setupFromOldName(name);
-				nlassert(placeIndex!=~0);				
+				nlassert(placeIndex!=std::numeric_limits<uint>::max());				
 
-				if (placeIndex!=~0)
+				if (placeIndex!=std::numeric_limits<uint>::max())
 					cont->addAliasChild(child, placeIndex);
 				
 				return child;
@@ -769,7 +769,7 @@ bool CGrpFauna::spawn()
 		return false;
 	
 	setStartState(getStartState());	//	stateInstance.
-	return spawnPop(~0);
+	return spawnPop(std::numeric_limits<uint>::max());
 }
 
 bool CGrpFauna::timeAllowSpawn(uint32 popVersion) const
@@ -841,7 +841,7 @@ bool CGrpFauna::spawnPop(uint popVersion)
 	}
 	
 	// check the validity of the input parameter
-	if (popVersion!=~0 && popVersion>=_Populations.size())
+	if (popVersion!=std::numeric_limits<uint>::max() && popVersion>=_Populations.size())
 	{
 		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because idx (%d) >= _Populations.size() (%d)",this->CGroup::getFullName().c_str(),popVersion,_Populations.size());
 		return	false;

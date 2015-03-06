@@ -19,9 +19,7 @@
 #include "nel/misc/log.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
 #	include <process.h>
-#	include <windows.h>
 #else
 #	include <unistd.h>
 #endif

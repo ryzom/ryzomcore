@@ -19,8 +19,6 @@
 #include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
-#	include <windows.h>
 #	include <WinNT.h>
 #	include <tchar.h>
 #	include <intrin.h>
@@ -1484,7 +1482,8 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 											{
 												VS_FIXEDFILEINFO *info;
 												UINT len;
-												if (_VerQueryValue(&buffer[0], "\\", (VOID**)&info, &len))
+												char bslash[] = { '\\', 0x00 };
+												if (_VerQueryValue(&buffer[0], bslash, (VOID**)&info, &len))
 												{
 													driverVersion = (((uint64)info->dwFileVersionMS)<<32)|info->dwFileVersionLS;
 													return true;

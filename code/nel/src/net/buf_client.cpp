@@ -24,7 +24,9 @@
 #include "nel/net/net_log.h"
 
 #ifdef NL_OS_WINDOWS
-#	define NOMINMAX
+#	ifndef NL_COMP_MINGW
+#		define NOMINMAX
+#	endif
 #	include <windows.h>
 #elif defined NL_OS_UNIX
 #	include <netinet/in.h>

@@ -48,9 +48,9 @@ namespace NLNET
 
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
-class CServiceIdHash
+struct CServiceIdHash
 {
-public:
+	enum { bucket_size = 4, min_buckets = 8, };
 	size_t	operator () ( const NLNET::TServiceId &sid ) const { return sid.get(); }
 };
 

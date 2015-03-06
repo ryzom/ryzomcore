@@ -236,6 +236,50 @@ void EditPatchMod::SetSelLevel(DWORD level)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
+void EditPatchMod::SelectSubPatch(int index)
+{
+	if (!ip)
+		return; 
+	TimeValue t = ip->GetTime();
+
+	ip->ClearCurNamedSelSet();
+
+	ModContextList mcList;
+	INodeTab nodes;
+	ip->GetModContexts(mcList, nodes);
+
+	for (int i = 0; i < mcList.Count(); i++)
+	{
+		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
+	
+		if (!patchData)
+			return;
+		
+		RPatchMesh *rpatch;
+		PatchMesh *patch = patchData->TempData(this)->GetPatch(t, rpatch);
+		if (!patch)
+			return;
+		
+		patchData->BeginEdit(t);
+		if (theHold.Holding()) 
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SelectSubComponent"));
+
+		patch->patchSel.Set(index);
+
+		patchData->UpdateChanges(patch, rpatch, FALSE);
+		if (patchData->tempData)
+		{
+			patchData->tempData->Invalidate(PART_SELECT);
+		}
+	}
+	PatchSelChanged();
+		
+	UpdateSelectDisplay();
+	NotifyDependents(FOREVER, PART_SELECT, REFMSG_CHANGE);
+}
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+
 // Select a subcomponent within our object(s).  WARNING! Because the HitRecord list can
 // indicate any of the objects contained within the group of patches being edited, we need
 // to watch for control breaks in the patchData pointer within the HitRecord!

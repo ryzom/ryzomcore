@@ -328,11 +328,11 @@ CClientConfig::CClientConfig()
 
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "http://shard.ryzomcore.org/ams/index.php?page=register";
-	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
+	ConditionsTermsURL	= "http://www.gnu.org/licenses/agpl-3.0.html";
 	EditAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
-	BetaAccountURL		= "http://www.ryzom.com/profile";
+	BetaAccountURL		= "http://shard.ryzomcore.org/ams/index.php?page=settings";
 	ForgetPwdURL		= "http://shard.ryzomcore.org/ams/index.php?page=forgot_password";
-	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
+	FreeTrialURL		= "http://shard.ryzomcore.org/ams/index.php?page=register";
 	LoginSupportURL		= "http://shard.ryzomcore.org/ams/index.php";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
@@ -349,13 +349,6 @@ CClientConfig::CClientConfig()
 
 	ForceDeltaTime		= 0;						// Default ForceDeltaTime, disabled by default
 
-#ifdef NL_OS_WINDOWS
-	DisableDirectInput		= false;				// Default DisableDirectInput
-#else
-	DisableDirectInput		= true;					// no direct input on linux
-#endif
-
-	DisableDirectInputKeyboard = true;				// Default DisableDirectInput fort he keyboard only
 	HardwareCursor			= true;					// Default HardwareCursor
 	HardwareCursorScale     = 0.85f;
 	CursorSpeed				= 1.f;					// Default CursorSpeed
@@ -396,6 +389,8 @@ CClientConfig::CClientConfig()
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
 
+	FXAA				= true;
+
 	Bloom				= true;
 	SquareBloom			= true;
 	DensityBloom		= 255.f;
@@ -433,11 +428,11 @@ CClientConfig::CClientConfig()
 	PatchVersion.clear();
 	PatchServer.clear();
 
-	WebIgMainDomain = "atys.ryzom.com";
+	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
-	RingReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes_ring/index.php";
-	ReleaseNotePath = "http://"+WebIgMainDomain+"/releasenotes/index.php";
+	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
+	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
 
 
 	///////////////
@@ -857,8 +852,6 @@ void CClientConfig::setValues()
 
 	////////////
 	// INPUTS //
-	READ_BOOL_FV(DisableDirectInput)
-	READ_BOOL_FV(DisableDirectInputKeyboard)
 	READ_BOOL_FV(HardwareCursor)
 	READ_FLOAT_FV(HardwareCursorScale)
 	READ_FLOAT_FV(CursorSpeed)
@@ -988,6 +981,9 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(Bloom)
 	READ_BOOL_FV(SquareBloom)
 	READ_FLOAT_FV(DensityBloom)
+
+	// FXAA
+	READ_BOOL_FV(FXAA)
 
 	// ScreenAspectRatio.
 	READ_FLOAT_FV(ScreenAspectRatio)
@@ -1969,16 +1965,16 @@ void CClientConfig::init(const string &configFileName)
 		size_t endOfLine = contentUtf8.find("\n", pos);
 		contentUtf8.erase(pos, (endOfLine - pos) + 1);
 	}
-	
+
 	// get current location of the root config file (client_default.cfg)
 	std::string defaultConfigLocation;
 	if(!getDefaultConfigLocation(defaultConfigLocation))
 		nlerror("cannot find client_default.cfg");
-	
+
 	// and store it in the RootConfigFilename value in the very first line
-	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") + 
+	contentUtf8.insert(0, std::string("RootConfigFilename   = \"") +
 		defaultConfigLocation + "\";\n");
-	
+
 	// save the updated config file
 	NLMISC::COFile configFile(configFileName, false, true, false);
 	configFile.serialBuffer((uint8*)contentUtf8.c_str(), (uint)contentUtf8.size());
@@ -2206,13 +2202,13 @@ ucstring CClientConfig::buildLoadingString( const ucstring& ucstr ) const
 }
 
 // ***************************************************************************
-bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const 
+bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 {
 	std::string defaultConfigFileName = "client_default.cfg";
 	std::string defaultConfigPath;
-	
+
 	p_name.clear();
-	
+
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
 	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");

@@ -18,6 +18,8 @@
 #define CL_USER_AGENT_H
 
 std::string getUserAgent();
+std::string getUserAgentName();
+std::string getUserAgentVersion();
 
 #endif // CL_USER_AGENT_H
 

@@ -147,6 +147,23 @@ public:
 };
 
 // ***************************************************************************
+class CDepthStencilFBO : public NLMISC::CRefCount
+{
+public:
+	CDepthStencilFBO(CDriverGL *driver, uint width, uint height);
+	~CDepthStencilFBO();
+
+	uint					Width;
+	uint					Height;
+
+	GLuint					DepthFBOId;
+	GLuint					StencilFBOId;
+
+private:
+	CDriverGL				*m_Driver;
+};
+
+// ***************************************************************************
 class CTextureDrvInfosGL : public ITextureDrvInfos
 {
 public:
@@ -173,12 +190,9 @@ public:
 	GLuint					FBOId;
 
 	// depth stencil FBO id
-	GLuint					DepthFBOId;
-	GLuint					StencilFBOId;
-
-	bool					InitFBO;
 	bool					AttachDepthStencil;
-	bool					UsePackedDepthStencil;
+	NLMISC::CSmartPtr<CDepthStencilFBO>	DepthStencilFBO;
+	bool					InitFBO;
 
 	// The current wrap modes assigned to the texture.
 	ITexture::TWrapMode		WrapS;
@@ -304,7 +318,7 @@ public:
 
 	virtual	bool			isLost() const { return false; } // there's no notion of 'lost device" in OpenGL
 
-	virtual bool			init (uint windowIcon = 0, emptyProc exitFunc = 0);
+	virtual bool			init (uintptr_t windowIcon = 0, emptyProc exitFunc = 0);
 
 	virtual void			disableHardwareVertexProgram();
 	virtual void			disableHardwarePixelProgram();
@@ -527,14 +541,6 @@ public:
 	// Change default scale for all cursors
 	virtual void			setCursorScale(float scale);
 
-	virtual NLMISC::IMouseDevice			*enableLowLevelMouse(bool enable, bool exclusive);
-
-	virtual NLMISC::IKeyboardDevice			*enableLowLevelKeyboard(bool enable);
-
-	virtual NLMISC::IInputDeviceManager		*getLowLevelInputDeviceManager();
-
-	virtual uint							 getDoubleClickDelay(bool hardwareMouse);
-
 	virtual void			getWindowSize (uint32 &width, uint32 &height);
 
 	virtual void			getWindowPos (sint32 &x, sint32 &y);
@@ -565,6 +571,8 @@ public:
 
 	virtual bool			copyTargetToTexture (ITexture *tex, uint32 offsetx, uint32 offsety, uint32 x, uint32 y,
 													uint32 width, uint32 height, uint32 mipmapLevel);
+
+	virtual bool			textureCoordinateAlternativeMode() const { return false; };
 
 	virtual bool			getRenderTargetSize (uint32 &width, uint32 &height);
 
@@ -632,7 +640,7 @@ public:
 
 	virtual void			swapTextureHandle(ITexture &tex0, ITexture &tex1);
 
-	virtual	uint			getTextureHandle(const ITexture&tex);
+	virtual	uintptr_t		getTextureHandle(const ITexture&tex);
 
 	/// \name Material multipass.
 	/**	NB: setupMaterial() must be called before thoses methods.
@@ -693,6 +701,7 @@ private:
 	friend class					CTextureDrvInfosGL;
 	friend class					CVertexProgamDrvInfosGL;
 	friend class					CPixelProgamDrvInfosGL;
+	friend class					CDepthStencilFBO;
 
 private:
 	// Version of the driver. Not the interface version!! Increment when implementation of the driver change.
@@ -888,8 +897,11 @@ private:
 	// viewport before call to setRenderTarget, if BFO extension is supported
 	CViewport				_OldViewport;
 
+	// Current FBO render target
 	CSmartPtr<ITexture>		_RenderTargetFBO;
 
+	// Share the same backbuffer for FBO render targets with window size
+	std::vector<CDepthStencilFBO *>	_DepthStencilFBOs;
 
 	// Num lights return by GL_MAX_LIGHTS
 	uint						_MaxDriverLight;
@@ -1591,6 +1603,7 @@ private:
 	// @}
 	// misc
 public:
+	friend class COcclusionQueryGL;
 	static GLenum NLCubeFaceToGLCubeFace[6];
 	static CMaterial::CTexEnv	_TexEnvReplace;
 	// occlusion query

@@ -62,7 +62,7 @@ protected:
 	/// Mutex for cross-thread access from XAudio2 callbacks.
 	NLMISC::CMutex _Mutex;
 	/// Unique id for buffer.
-	uint _LastBufferContext;
+	uintptr_t _LastBufferContext;
 	/// Current buffer.
 	void *_ValidBufferContext[_BufferNb];
 public:

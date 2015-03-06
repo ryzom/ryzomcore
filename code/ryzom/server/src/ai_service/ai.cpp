@@ -224,7 +224,7 @@ uint32	CAIS::getEmotNumber(const std::string &name)
 {
 	std::map<std::string, uint32>::iterator it(_EmotNames.find(name));
 	if	(it==_EmotNames.end())
-		return	~0;
+		return	std::numeric_limits<uint32>::max();
 	return it->second;
 }
 
@@ -280,7 +280,7 @@ uint32	CAIS::createAIInstance(const std::string &continentName, uint32 instanceN
 			continue;
 
 		nlwarning("CAIS::createAIInstance: instance number %u is already in use, can't create new instance.", instanceNumber);
-		return	~0;
+		return	std::numeric_limits<uint32>::max();
 	}
 
 	CAIInstance	*aii = _AIInstances.addChild(new CAIInstance(this));

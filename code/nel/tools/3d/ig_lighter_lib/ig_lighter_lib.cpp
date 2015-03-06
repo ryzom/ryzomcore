@@ -167,6 +167,12 @@ void	CIgLighterLib::lightIg(CInstanceLighter &instanceLighter,
 			string name= igIn.getShapeName(i);
 			bool	shapeFound= true;
 
+			if (toLower (CFile::getExtension (name)) == "pacs_prim")
+			{
+				nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", name.c_str());
+				continue;
+			}
+
 			// Try to find the shape in the UseShapeMap.
 			std::map<string, IShape*>::const_iterator iteMap= lightDesc.UserShapeMap.find (name);
 

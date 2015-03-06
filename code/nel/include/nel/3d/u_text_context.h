@@ -175,6 +175,15 @@ public:
 	 */
 	virtual	bool			getShaded () const = 0;
 	/**
+	 * set the shade states
+	 * \param the shade state
+	 */
+	virtual	void			setShadeOutline (bool b) = 0;
+	/**
+	 * \return the shade state
+	 */
+	virtual	bool			getShadeOutline () const = 0;
+	/**
 	 * set the shadow's size
 	 * \param the shade extent
 	 */

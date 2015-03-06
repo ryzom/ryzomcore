@@ -28,7 +28,11 @@
 #	endif
 #elif defined(NL_OS_UNIX)
 #	include <pthread.h> // PThread
-#	include <semaphore.h> // PThread POSIX semaphores
+#	ifdef NL_OS_MAC
+#		include <dispatch/dispatch.h>
+#	else
+#		include <semaphore.h> // PThread POSIX semaphores
+#	endif
 #	include <unistd.h>
 #	define __forceinline
 #	ifdef NL_OS_MAC
@@ -532,8 +536,10 @@ private:
 
 #ifdef NL_OS_WINDOWS
 	TNelRtlCriticalSection	_Cs;
-#elif defined NL_OS_UNIX
-	sem_t			_Sem;
+#elif defined(NL_OS_MAC)
+	dispatch_semaphore_t	_Sem;
+#elif defined(NL_OS_UNIX)
+	sem_t					_Sem;
 #else
 #	error "No fair mutex implementation for this OS"
 #endif

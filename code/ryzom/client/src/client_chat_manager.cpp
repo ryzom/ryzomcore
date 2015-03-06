@@ -969,8 +969,6 @@ void CClientChatManager::buildTellSentence(const ucstring &sender, const ucstrin
 					name = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(name), bWoman);
 				}
 			}
-
-
 		}
 		else
 		{
@@ -1052,8 +1050,6 @@ void CClientChatManager::buildChatSentence(TDataSetIndex /* compressedSenderInde
 					senderName = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(senderName), bWoman);
 				}
 			}
-
-
 		}
 
 		switch(type)
@@ -1208,7 +1204,7 @@ class CHandlerTell : public IActionHandler
 		ucstring s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);
-		CInterfaceManager::getInstance()->log(finalMsg);
+		CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerTell, "tell");

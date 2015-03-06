@@ -27,7 +27,7 @@
 
 #ifdef HAVE_LIBVR
 
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/misc/time_nl.h>
 #include <nel/3d/stereo_libvr.h>
 

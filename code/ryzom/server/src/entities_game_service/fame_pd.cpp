@@ -516,7 +516,7 @@ void							CFameContainerPD::pds__fetch(RY_PDS::CPData &data)
 		if (rowIndex == RY_PDS::INVALID_ROW_INDEX || tableIndex == RY_PDS::INVALID_TABLE_INDEX)	break;
 		NLMISC::CSheetId	__k;
 		data.serial(__k);
-		_Entries.insert(std::make_pair<NLMISC::CSheetId,CFameContainerEntryPD>(__k, CFameContainerEntryPD()));
+		_Entries.insert(std::pair<NLMISC::CSheetId,CFameContainerEntryPD>(__k, CFameContainerEntryPD()));
 		CFameContainerEntryPD*	__o = &(_Entries[__k]);
 		PDSLib.setRowIndex(rowIndex, __o);
 		__o->pds__fetch(data);

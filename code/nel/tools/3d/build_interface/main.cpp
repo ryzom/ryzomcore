@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// lightmap_optimizer
+// ------------------
+// the goal is to regroup lightmap of a level into lightmap with a higher level
+
 #include "nel/misc/common.h"
 #include "nel/misc/file.h"
 #include "nel/misc/bitmap.h"
@@ -26,8 +30,6 @@
 #include <vector>
 #include <string>
 
-#include "nel/misc/tool_logger.h"
-
 // ---------------------------------------------------------------------------
 
 using namespace std;
@@ -37,9 +39,8 @@ using namespace NLMISC;
 //char sExeDir[MAX_PATH];
 std::string sExeDir;
 NLMISC::CApplicationContext _ApplicationContext;
-PIPELINE::CToolLogger ToolLogger;
 
-void outString(const string &sText)
+void outString (const string &sText)
 {
 	std::string sCurDir = CPath::getCurrentPath();
 	CPath::setCurrentPath(sExeDir.c_str());
@@ -112,18 +113,17 @@ void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 // ***************************************************************************
 bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
 {
-	uint32 a, b;
-
 	uint8 *rSrcPix = &pSrc->getPixels()[0];
 	uint8 *rDstPix = &pDst->getPixels()[0];
 
 	uint	wSrc= pSrc->getWidth();
 	uint	hSrc= pSrc->getHeight();
-	for (b = 0; b < hSrc; ++b)
-	for (a = 0; a < wSrc; ++a)
+	for (uint b = 0; b < hSrc; ++b)
+	for (uint a = 0; a < wSrc; ++a)
 	{
 		if (rDstPix[4*((x+a)+(y+b)*pDst->getWidth())+3] != 0)
 			return false;
+
 		// write
 		putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rSrcPix+ 4*(a+b*pSrc->getWidth()), alphaTransfert);
 	}
@@ -134,9 +134,9 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 	// expand on W
 	if(wSrc<wSrc4)
 	{
-		for(a=wSrc;a<wSrc4;a++)
+		for(uint a=wSrc;a<wSrc4;a++)
 		{
-			for(b=0;b<hSrc4;b++)
+			for(uint b=0;b<hSrc4;b++)
 			{
 				putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rDstPix + 4*((x+wSrc-1)+(y+b)*pDst->getWidth()), alphaTransfert);
 			}
@@ -145,9 +145,9 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 	// expand on H
 	if(hSrc<hSrc4)
 	{
-		for(b=hSrc;b<hSrc4;b++)
+		for(uint b=hSrc;b<hSrc4;b++)
 		{
-			for(a=0;a<wSrc4;a++)
+			for(uint a=0;a<wSrc4;a++)
 			{
 				putPixel(rDstPix + 4*((x+a)+(y+b)*pDst->getWidth()), rDstPix + 4*((x+a)+(y+hSrc-1)*pDst->getWidth()), alphaTransfert);
 			}
@@ -195,6 +195,15 @@ int main(int nNbArg, char **ppArgs)
 {
 	//GetCurrentDirectory (MAX_PATH, sExeDir);
 	sExeDir = CPath::getCurrentPath();
+
+	if (nNbArg < 3)
+	{
+		outString ("ERROR : Wrong number of arguments\n");
+		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
+		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
+		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
+		return -1;
+	}
 	
 	// build as a subset of existing interface
 	bool buildSubset = false;
@@ -209,13 +218,7 @@ int main(int nNbArg, char **ppArgs)
 			case 'S':
 			case 's':
 				buildSubset = true;
-				existingUVfilename = string(ppArgs[i] + 2);
-				break;
-			case 'd':
-				ToolLogger.initDepend(string(ppArgs[i] + 2));
-				break;
-			case 'e':
-				ToolLogger.initError(string(ppArgs[i] + 2));
+				existingUVfilename = string( ppArgs[i]+2 );
 				break;
 			default:
 				break;
@@ -225,24 +228,14 @@ int main(int nNbArg, char **ppArgs)
 			inputDirs.push_back(ppArgs[i]);
 	}
 
-	uint iNumDirs =  (uint)inputDirs.size();
-	if (iNumDirs < 2)
+	string fmtName;
+	uint iNumDirs =  (uint)inputDirs.size(); 
+	if( iNumDirs )
 	{
-		outString ("ERROR : Wrong number of arguments\n");
-		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] [-d<depend_log_file>] [-e<error_log_file>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
-		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
-		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
-		return -1;
+		fmtName = inputDirs.front();
+		inputDirs.pop_front();
+		--iNumDirs;
 	}
-
-	std::string tgaName = inputDirs.front();
-	inputDirs.pop_front();
-	--iNumDirs;
-	if (tgaName.rfind('.') == string::npos)
-		tgaName += ".tga";
-	std::string uvName = tgaName.substr(0, tgaName.rfind('.'));
-	uvName += ".txt";
-
 	vector<string> AllMapNames;
 	list<string>::iterator it = inputDirs.begin();
 	list<string>::iterator itEnd = inputDirs.end();
@@ -251,55 +244,45 @@ int main(int nNbArg, char **ppArgs)
 		string sDir = *it++;
 		if( !CFile::isDirectory(sDir) )
 		{
-			outString(string("ERROR : directory ") + sDir + " does not exist\n");
-			ToolLogger.writeError(PIPELINE::ERROR, sDir, "Directory does not exist.");
-			ToolLogger.release();
+			outString (string("ERROR : directory ") + sDir + " does not exist\n");
 			return -1;
 		}
-		ToolLogger.writeDepend(PIPELINE::DIRECTORY, tgaName, sDir);
-		ToolLogger.writeDepend(PIPELINE::DIRECTORY, uvName, sDir);
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
 	}
 
 	vector<NLMISC::CBitmap*> AllMaps;
-	sint32 i, j;
+	sint32 j;
 
 	// Load all maps
-	//sint32 mapSize = (sint32)AllMapNames.size();
-	//AllMaps.resize( mapSize );
-	AllMaps.reserve(AllMapNames.size());
-	for (std::vector<std::string>::size_type i = 0; i < AllMapNames.size(); ++i)
+	sint32 mapSize = (sint32)AllMapNames.size();
+	AllMaps.resize( mapSize );
+	for(sint i = 0; i < mapSize; ++i )
 	{
+		NLMISC::CBitmap *pBtmp = NULL;
+
 		try
 		{
-			ToolLogger.writeDepend(PIPELINE::BUILD, tgaName, AllMapNames[i]); // Write depend before error can occur.
-			ToolLogger.writeDepend(PIPELINE::BUILD, uvName, AllMapNames[i]);
-
-			NLMISC::CBitmap *pBtmp = new NLMISC::CBitmap;
+			pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
-			inFile.open( AllMapNames[i] );
-			pBtmp->load(inFile);
-			AllMaps.push_back(pBtmp);
+			if (!inFile.open( AllMapNames[i] )) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
 
-			if (pBtmp->getWidth() == 0 || pBtmp->getHeight() == 0)
-				ToolLogger.writeError(PIPELINE::WARNING, AllMapNames[i], "Bitmap of width or height 0, corrupt data");
+			uint8 colors = pBtmp->load(inFile);
+
+			if (colors != 32) throw NLMISC::Exception(AllMapNames[i] + " is using " + toString(colors) + " bits colors, only 32 bit supported!");
+
+			AllMaps[i] = pBtmp;
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			// Allow the build process to continue without the bad file.
+			if (pBtmp) delete pBtmp;
 
 			outString (string("ERROR :") + e.what());
-			ToolLogger.writeError(PIPELINE::WARNING, AllMapNames[i], e.what());
-
-			AllMapNames.erase(AllMapNames.begin() + i);
-			--i;
+			return -1;
 		}
-		nlassert(AllMaps.size() == i + 1); // It's a coding error otherwise.
 	}
-	
-	sint32 mapSize = (sint32)AllMapNames.size();
+
 	// Sort all maps by decreasing size
-	for (i = 0; i < mapSize-1; ++i)
+	for (sint i = 0; i < mapSize-1; ++i)
 	for (j = i+1; j < mapSize; ++j)
 	{
 		NLMISC::CBitmap *pBI = AllMaps[i];
@@ -327,7 +310,7 @@ int main(int nNbArg, char **ppArgs)
 	vector<NLMISC::CUV> UVMin, UVMax;
 	UVMin.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
 	UVMax.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
-	for (i = 0; i < mapSize; ++i)
+	for (sint i = 0; i < mapSize; ++i)
 	{
 		sint32 x, y;
 		while (!tryAllPos(AllMaps[i], &GlobalMask, x, y))
@@ -373,7 +356,7 @@ int main(int nNbArg, char **ppArgs)
 	}
 
 	// Convert UV from pixel to ratio
-	for (i = 0; i < mapSize; ++i)
+	for (sint i = 0; i < mapSize; ++i)
 	{
 		UVMin[i].U = UVMin[i].U / (float)GlobalTexture.getWidth();
 		UVMin[i].V = UVMin[i].V / (float)GlobalTexture.getHeight();
@@ -386,10 +369,12 @@ int main(int nNbArg, char **ppArgs)
 	CPath::setCurrentPath(sExeDir.c_str());
 
 	NLMISC::COFile outTga;
-	if (outTga.open(tgaName))
+	if (fmtName.rfind('.') == string::npos)
+		fmtName += ".tga";
+	if (outTga.open(fmtName))
 	{
 		std::string ext;
-		if (toLower(tgaName).find(".png") != string::npos)
+		if (toLower(fmtName).find(".png") != string::npos)
 		{
 			ext = "png";
 			GlobalTexture.writePNG (outTga, 32);
@@ -401,23 +386,22 @@ int main(int nNbArg, char **ppArgs)
 		}
 
 		outTga.close();
-		outString (toString("Writing %s file : %s\n", ext.c_str(), tgaName.c_str()));
+		outString (toString("Writing %s file : %s\n", ext.c_str(), fmtName.c_str()));
 	}
 	else
 	{
-		outString (string("ERROR: Cannot write tga or png file : ") + tgaName + "\n");
-		ToolLogger.writeError(PIPELINE::ERROR, tgaName, "Cannot write tga or png file.");
-		ToolLogger.release();
-		return EXIT_FAILURE;
+		outString (string("ERROR: Cannot write tga file : ") + fmtName + "\n");
 	}
 
 	// Write UV text file
 	if( !buildSubset )
 	{
-		FILE *f = fopen (uvName.c_str(), "wt");
+		fmtName = fmtName.substr(0, fmtName.rfind('.'));
+		fmtName += ".txt";
+		FILE *f = fopen (fmtName.c_str(), "wt");
 		if (f != NULL)
 		{
-			for (i = 0; i < mapSize; ++i)
+			for (sint i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
 				string fileName= CFile::getFilename(AllMapNames[i]);
@@ -425,14 +409,11 @@ int main(int nNbArg, char **ppArgs)
 												UVMax[i].U, UVMax[i].V);
 			}
 			fclose (f);
-			outString (string("Writing UV file : ") + uvName + "\n");
+			outString (string("Writing UV file : ") + fmtName + "\n");
 		}
 		else
 		{
-			outString (string("ERROR: Cannot write UV file : ") + uvName + "\n");
-			ToolLogger.writeError(PIPELINE::ERROR, uvName, "Cannot write UV file.");
-			ToolLogger.release();
-			return EXIT_FAILURE;
+			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
 		}
 	}
 	else // build as a subset
@@ -440,27 +421,21 @@ int main(int nNbArg, char **ppArgs)
 		// Load existing uv file
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
-
-		ToolLogger.writeDepend(PIPELINE::BUILD, tgaName, existingUVfilename); // Write depend before error can occur.
-		ToolLogger.writeDepend(PIPELINE::BUILD, uvName, existingUVfilename);
-
 		if( (filename == "") || (!iFile.open(filename)) )
 		{
 			outString (string("ERROR : could not open file ") + existingUVfilename + "\n");
-			ToolLogger.writeError(PIPELINE::ERROR, existingUVfilename, "Could not open file.");
-			ToolLogger.release();
-			return EXIT_FAILURE;
+			return -1;
 		}
 		
 		// Write subset UV text file
-		FILE *f = fopen (uvName.c_str(), "wt");
+		fmtName = fmtName.substr(0, fmtName.rfind('.'));
+		fmtName += ".txt";
+		FILE *f = fopen (fmtName.c_str(), "wt");
 		if (f == NULL)
 		{
-			outString (string("ERROR: Cannot write UV file : ") + uvName + "\n");
-			ToolLogger.writeError(PIPELINE::ERROR, uvName, "Cannot write UV file.");
-			ToolLogger.release();
+			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
 //			fclose (iFile);
-			return EXIT_FAILURE;
+			return -1;
 		}
 
 		char bufTmp[256], tgaName[256];
@@ -474,12 +449,14 @@ int main(int nNbArg, char **ppArgs)
 				nlwarning("Can't parse %s", bufTmp);
 				continue;
 			}
+
+			sint i;
 			
 			sTGAname = toLower(string(tgaName));
 			string findTGAName;
 			for (i = 0; i < mapSize; ++i)
 			{
-				// get the string without path
+				// get the string whitout path
 				findTGAName = toLower(CFile::getFilename(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;
@@ -499,9 +476,8 @@ int main(int nNbArg, char **ppArgs)
 		}	
 //		fclose (iFile);
 		fclose (f);
-		outString (string("Writing UV file : ") + uvName + "\n");
+		outString (string("Writing UV file : ") + fmtName + "\n");
 	}
 	
-	ToolLogger.release();
-	return EXIT_SUCCESS;
+	return 0;
 }

@@ -157,14 +157,17 @@ namespace NLGUI
 	// ***************************************************************************
 	void CDBViewQuantity::draw ()
 	{
-		// change text
-		sint32	val= _Number.getSInt32();
-		sint32	valMax= _NumberMax.getSInt32();
-		if(_Cache!=val || _CacheMax!=valMax)
+		if( _Number.hasValue() && _NumberMax.hasValue() )
 		{
-			_Cache= val;
-			_CacheMax=valMax;
-			buildTextFromCache();
+			// change text
+			sint32	val= _Number.getSInt32();
+			sint32	valMax= _NumberMax.getSInt32();
+			if(_Cache!=val || _CacheMax!=valMax)
+			{
+				_Cache= val;
+				_CacheMax=valMax;
+				buildTextFromCache();
+			}
 		}
 
 		// parent call

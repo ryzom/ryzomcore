@@ -121,7 +121,7 @@ bool CBufferAL::unlock(uint size)
 	// Error handling
 	if (alGetError() == AL_NO_ERROR)
 		_IsLoaded = true; // ->lock() set it to false
-	
+
 	return _IsLoaded;
 }
 
@@ -162,7 +162,7 @@ bool CBufferAL::fill(const uint8 *src, uint size)
 
 	// Error handling
 	_IsLoaded = (alGetError() == AL_NO_ERROR);
-	
+
 	return _IsLoaded;
 }
 

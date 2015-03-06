@@ -25,7 +25,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
+#include "std3d.h"
 #include <nel/3d/stereo_hmd.h>
 
 // STL includes

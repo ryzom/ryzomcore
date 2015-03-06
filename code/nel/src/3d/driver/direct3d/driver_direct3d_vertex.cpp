@@ -20,8 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -59,7 +57,7 @@ CVBDrvInfosD3D::CVBDrvInfosD3D(CDriverD3D *drv, ItVBDrvInfoPtrList it, CVertexBu
 
 // ***************************************************************************
 
-extern uint vertexCount=0;
+uint vertexCount=0;
 
 CVBDrvInfosD3D::~CVBDrvInfosD3D()
 {
@@ -173,7 +171,7 @@ uint8	*CVBDrvInfosD3D::lock (uint begin, uint end, bool readOnly)
 
 		void *pbData;
 		if (VertexBuffer->Lock ( begin, end-begin, &pbData, readOnly?D3DLOCK_READONLY:0) != D3D_OK)
-			return false;
+			return NULL;
 
 		// Lock Profile?
 		if(driver->_VBHardProfiling /*&& Hardware*/)

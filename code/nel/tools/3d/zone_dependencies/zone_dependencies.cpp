@@ -607,10 +607,14 @@ static void computeIGBBox(const NL3D::CInstanceGroup &ig, CLightingBBox &result,
 			std::string toLoad = it->Name;
 			if (getExt(toLoad).empty()) toLoad += ".shape";
 			shapePathName = NLMISC::CPath::lookup(toLoad, false, false);
-
+			
 			if (shapePathName.empty())
 			{
 				nlwarning("Unable to find shape '%s'", it->Name.c_str());				
+			}
+			else if (toLower (CFile::getExtension (shapePathName)) == "pacs_prim")
+			{
+				nlwarning("EXPORT BUG: Can't read %s (not a shape), should not be part of .ig!", shapePathName.c_str());
 			}
 			else
 			{

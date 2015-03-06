@@ -6,6 +6,9 @@ IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
+# Declare CMAKE_CONFIGURATION_TYPES before PROJECT
+SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+
 ###
 # Helper macro that generates .pc and installs it.
 # Argument: name - the name of the .pc package, e.g. "nel-pacs.pc"
@@ -118,13 +121,13 @@ MACRO(NL_DEFAULT_PROPS name label)
     ENDIF(NL_LIB_PREFIX)
   ENDIF(${type} STREQUAL SHARED_LIBRARY)
 
-  IF(${type} STREQUAL EXECUTABLE AND WIN32)
+  IF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
     SET_TARGET_PROPERTIES(${name} PROPERTIES
       VERSION ${NL_VERSION}
       SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}")
-  ENDIF(${type} STREQUAL EXECUTABLE AND WIN32)
+  ENDIF(${type} STREQUAL EXECUTABLE AND WIN32 AND NOT MINGW)
 ENDMACRO(NL_DEFAULT_PROPS)
 
 ###
@@ -229,6 +232,10 @@ Remove the CMakeCache.txt file and try again from another folder, e.g.:
 ENDMACRO(CHECK_OUT_OF_SOURCE)
 
 MACRO(NL_SETUP_DEFAULT_OPTIONS)
+  IF(WITH_QT)
+    OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
+  ENDIF(WITH_QT)
+  
   ###
   # Features
   ###
@@ -248,6 +255,16 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ELSE(WITH_STATIC)
     OPTION(WITH_STATIC_LIBXML2    "With static libxml2"                           OFF)
   ENDIF(WITH_STATIC)
+  IF (WITH_STATIC)
+    OPTION(WITH_STATIC_CURL       "With static curl"                              ON )
+  ELSE(WITH_STATIC)
+    OPTION(WITH_STATIC_CURL       "With static curl"                              OFF)
+  ENDIF(WITH_STATIC)
+  IF(APPLE)
+    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      ON )
+  ELSE(APPLE)
+    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      OFF)
+  ENDIF(APPLE)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
   IF(WIN32)
     OPTION(WITH_EXTERNAL          "With provided external."                       ON )
@@ -324,6 +341,13 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
+  
+  OPTION(WITH_SSE2                "With SSE2"                                     ON )
+  OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  
+  IF(NOT MSVC)
+    OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
+  ENDIF(NOT MSVC)
 ENDMACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NELNS_DEFAULT_OPTIONS)
@@ -349,6 +373,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
+  OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
@@ -372,8 +397,6 @@ MACRO(NL_SETUP_BUILD)
   # None                  = NL_RELEASE
   # Debug                 = NL_DEBUG
   # Release               = NL_RELEASE
-
-  SET(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
   IF(CMAKE_BUILD_TYPE MATCHES "Debug")
     SET(NL_BUILD_MODE "NL_DEBUG")
@@ -545,9 +568,15 @@ MACRO(NL_SETUP_BUILD)
     # Ignore default include paths
     ADD_PLATFORM_FLAGS("/X")
 
-    IF(MSVC11)
+    IF(MSVC12)
       ADD_PLATFORM_FLAGS("/Gy- /MP")
-      # /Ox is working with VC++ 2010, but custom optimizations don't exist
+      # /Ox is working with VC++ 2013, but custom optimizations don't exist
+      SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
+      # without inlining it's unusable, use custom optimizations again
+      SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
+    ELSEIF(MSVC11)
+      ADD_PLATFORM_FLAGS("/Gy- /MP")
+      # /Ox is working with VC++ 2012, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
@@ -569,9 +598,9 @@ MACRO(NL_SETUP_BUILD)
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 ${DEBUG_CFLAGS}")
-    ELSE(MSVC11)
+    ELSE(MSVC12)
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
-    ENDIF(MSVC11)
+    ENDIF(MSVC12)
 
     ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /Zm1000 /wd4250")
 
@@ -613,6 +642,14 @@ MACRO(NL_SETUP_BUILD)
         ADD_PLATFORM_FLAGS("-nobuiltininc")
       ENDIF(CLANG)
     ENDIF(WIN32)
+
+    IF(WITH_SSE3)
+      ADD_PLATFORM_FLAGS("-msse3")
+    ENDIF(WITH_SSE3)
+
+    IF(WITH_GCC_FPMATH_BOTH)
+      ADD_PLATFORM_FLAGS("-mfpmath=both")
+    ENDIF(WITH_GCC_FPMATH_BOTH)
 
     IF(APPLE)
       IF(NOT XCODE)
@@ -875,9 +912,9 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(APPLE)
 
     # Fix "relocation R_X86_64_32 against.." error on x64 platforms
-    IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
+    IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS AND NOT MINGW)
       ADD_PLATFORM_FLAGS("-fPIC")
-    ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS)
+    ENDIF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS AND NOT MINGW)
 
     SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -ftemplate-depth-48")
 

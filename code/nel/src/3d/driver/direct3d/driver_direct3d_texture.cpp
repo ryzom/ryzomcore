@@ -20,8 +20,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/3d/viewport.h"
 #include "nel/3d/scissor.h"
 #include "nel/3d/u_driver.h"
@@ -1091,7 +1089,7 @@ void CDriverD3D::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 
 // ***************************************************************************
 
-uint CDriverD3D::getTextureHandle(const ITexture &tex)
+uintptr_t CDriverD3D::getTextureHandle(const ITexture &tex)
 {
 	H_AUTO_D3D(CDriverD3D_getTextureHandle)
 	// If DrvShare not setuped
@@ -1104,7 +1102,7 @@ uint CDriverD3D::getTextureHandle(const ITexture &tex)
 	if(!d3dtext)
 		return 0;
 
-	return (uint)(d3dtext->Texture);
+	return (uintptr_t)(d3dtext->Texture);
 }
 
 // ***************************************************************************

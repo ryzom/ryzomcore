@@ -583,7 +583,6 @@ void			CLandscape::setDriver(IDriver *drv)
 		// Does the driver has sufficient requirements for Vegetable???
 		// only if VP supported by GPU, and Only if max vertices allowed.
 		_DriverOkForVegetable = _VertexShaderOk && (_Driver->getMaxVerticesByVertexBufferHard()>=(uint)NL3D_LANDSCAPE_VEGETABLE_MAX_AGP_VERTEX_MAX);
-
 	}
 }
 

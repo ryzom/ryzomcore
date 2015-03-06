@@ -49,19 +49,6 @@ public:
 	 * \param server
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows) = 0;
-
-	/**
-	 * Instruct the event emitter to send CGDMouseMove instead of CEventMouseMove.
-	 * 
-	 * On windows, the mouse device can be set into RawMode. Using this mode, 
-	 * CGDMouseMove events (only containing the raw movement delta) are emitted 
-	 * instead of the normal CEventMouseMove events (containing the mouse position).
-	 *
-	 * On Linux and Mac OS X, there is no MouseDevice implementation, all the 
-	 * events are created by the event emitter. So the event emitter has to 
-	 * emulate the mouse raw mode.
-	 */
-	virtual void emulateMouseRawMode(bool) = 0;
 };
 
 

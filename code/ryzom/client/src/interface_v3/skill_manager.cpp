@@ -159,9 +159,7 @@ void CSkillManager::initInGame()
 	_TrackSkillChange= NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:TRACK_SKILL_CHANGE", true);
 	// Add a branch observer on skill value change
 	NLGUI::CDBManager::getInstance()->addBranchObserver( "SERVER:CHARACTER_INFO:SKILLS", &_SkillChangeObs );
-
 }
-
 
 // ***************************************************************************
 void CSkillManager::uninitInGame()

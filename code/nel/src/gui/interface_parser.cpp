@@ -37,6 +37,7 @@
 #include "nel/gui/lua_helper.h"
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_manager.h"
+#include "nel/gui/root_group.h"
 
 #ifdef LUA_NEVRAX_VERSION
 	#include "lua_ide_dll_nevrax/include/lua_ide_dll/ide_interface.h" // external debugger
@@ -113,86 +114,6 @@ namespace NLGUI
 		return node;
 	}
 
-
-
-	// ----------------------------------------------------------------------------
-	// CRootGroup
-	// ----------------------------------------------------------------------------
-
-	class CRootGroup : public CInterfaceGroup
-	{
-	public:
-		CRootGroup(const TCtorParam &param)
-			: CInterfaceGroup(param)
-		{ }
-
-		/// Destructor
-		virtual ~CRootGroup() { }
-
-		virtual CInterfaceElement* getElement (const std::string &id)
-		{
-			if (_Id == id)
-			return this;
-
-			if (id.substr(0, _Id.size()) != _Id)
-				return NULL;
-
-			vector<CViewBase*>::const_iterator itv;
-			for (itv = _Views.begin(); itv != _Views.end(); itv++)
-			{
-				CViewBase *pVB = *itv;
-				if (pVB->getId() == id)
-					return pVB;
-			}
-
-			vector<CCtrlBase*>::const_iterator itc;
-			for (itc = _Controls.begin(); itc != _Controls.end(); itc++)
-			{
-				CCtrlBase* ctrl = *itc;
-				if (ctrl->getId() == id)
-					return ctrl;
-			}
-
-			// Accelerate
-			string sTmp = id;
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			string::size_type pos = sTmp.find(':');
-			if (pos != string::npos)
-				sTmp = sTmp.substr(0,pos);
-
-			map<string,CInterfaceGroup*>::iterator it = _Accel.find(sTmp);
-			if (it != _Accel.end())
-			{
-				CInterfaceGroup *pIG = it->second;
-				return pIG->getElement(id);
-			}
-			return NULL;
-		}
-
-		virtual void addGroup (CInterfaceGroup *child, sint eltOrder = -1)
-		{
-			string sTmp = child->getId();
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			_Accel.insert(pair<string,CInterfaceGroup*>(sTmp, child));
-			CInterfaceGroup::addGroup(child,eltOrder);
-		}
-
-		virtual bool delGroup (CInterfaceGroup *child, bool dontDelete = false)
-		{
-			string sTmp = child->getId();
-			sTmp = sTmp.substr(_Id.size()+1,sTmp.size());
-			map<string,CInterfaceGroup*>::iterator it = _Accel.find(sTmp);
-			if (it != _Accel.end())
-			{
-				_Accel.erase(it);
-			}
-			return CInterfaceGroup::delGroup(child,dontDelete);
-		}
-
-	private:
-		map<string,CInterfaceGroup*> _Accel;
-	};
-
 	// ----------------------------------------------------------------------------
 	// CInterfaceParser
 	// ----------------------------------------------------------------------------
@@ -233,6 +154,22 @@ namespace NLGUI
 		destStream.seek(0, NLMISC::IStream::begin);
 	}
 
+	std::string CInterfaceParser::lookup( const std::string &file )
+	{
+		std::string filename;
+		
+		if( editorMode && !_WorkDir.empty() )
+		{
+			std::string wdpath = CPath::standardizePath( _WorkDir ) + file;
+			if( CFile::fileExists( wdpath ) )
+				filename = wdpath;
+		}
+		if( filename.empty() )
+			filename = CPath::lookup( file );
+
+		return filename;
+	}
+
 	// ----------------------------------------------------------------------------
 	bool CInterfaceParser::parseInterface (const std::vector<std::string> & strings, bool reload, bool isFilename, bool checkInData)
 	{
@@ -270,7 +207,7 @@ namespace NLGUI
 			{
 				//get the first file document pointer
 				firstFileName = *it;
-				string filename = CPath::lookup(firstFileName);
+				string filename = lookup( firstFileName );
 				bool isInData = false;
 				string::size_type pos = filename.find ("@");
 				if (pos != string::npos)
@@ -283,7 +220,7 @@ namespace NLGUI
 						isInData = true;
 				}
 
-				if ((needCheck && !isInData) || !file.open (CPath::lookup(firstFileName)))
+				if ((needCheck && !isInData) || !file.open (lookup(firstFileName)))
 				{
 					// todo hulud interface syntax error
 					nlwarning ("could not open file %s, skipping xml parsing",firstFileName.c_str());
@@ -331,7 +268,7 @@ namespace NLGUI
 				{
 					saveParseResult = true;
 					std::string archive = CPath::lookup(nextFileName + "_compressed", false, false);
-					std::string current = CPath::lookup(nextFileName, false, false);
+					std::string current = lookup(nextFileName);
 					if (!archive.empty() && !current.empty())
 					{
 						if (CFile::getFileModificationDate(current) <= CFile::getFileModificationDate(archive))
@@ -351,7 +288,7 @@ namespace NLGUI
 				{
 					if (isFilename)
 					{
-						if (!file.open(CPath::lookup(nextFileName, false, false)))
+						if (!file.open(lookup(nextFileName)))
 						{
 							// todo hulud interface syntax error
 							nlwarning ("could not open file %s, skipping xml parsing",nextFileName.c_str());
@@ -647,8 +584,7 @@ namespace NLGUI
 			{
 				if(!parseLUAScript(root))
 				{
-					nlwarning ("could not parse 'lua'");
-					exit( EXIT_FAILURE );
+					nlerror ("could not parse 'lua'");
 				}
 			}
 			else
@@ -728,7 +664,7 @@ namespace NLGUI
 			//if it begins with a #, it is a reference in the instance attribute
 			if (strchr(ptr, '#') != NULL)
 			{
-				string LastProp = ptr;
+				string LastProp = ptr.str();
 				string NewProp ="";
 				string RepProp;
 
@@ -860,7 +796,7 @@ namespace NLGUI
 			return false;
 		}
 		sint32 size;
-		fromString(cSize, size);
+		fromString(cSize.str(), size);
 		if (size <= 0)
 		{
 			// todo hulud interface syntax error
@@ -993,7 +929,7 @@ namespace NLGUI
 			nlwarning("<CInterfaceParser::parseLink> Can't read  the expression for a link node");
 			return false;
 		}
-		std::string expr = ptr;
+		std::string expr = ptr.str();
 
 
 		std::vector<CInterfaceLink::CTargetInfo> targets;
@@ -1183,13 +1119,13 @@ namespace NLGUI
 			nlinfo ("options has no name");
 			return false;
 		}
-		string optionsName = ptr;
+		string optionsName = ptr.str();
 
 		// herit if possible
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"herit" );
 		if (ptr)
 		{
-			string optionsParentName = ptr;
+			string optionsParentName = ptr.str();
 			CInterfaceOptions *io = wm->getOptions( optionsParentName );
 			if( io != NULL )
 				options->copyBasicMap( *io );
@@ -1835,7 +1771,7 @@ namespace NLGUI
 		{
 			CInterfaceExprValue res;
 
-			if (CInterfaceExpr::eval(ptrVal2, res))
+			if (CInterfaceExpr::eval(ptrVal2.str(), res))
 			{
 				if (!res.toString())
 				{
@@ -1871,7 +1807,7 @@ namespace NLGUI
 			nlwarning ("no id in a procedure");
 			return false;
 		}
-		string	procId= ptr;
+		string	procId= ptr.str();
 
 		if (_ProcedureMap.find(procId) != _ProcedureMap.end())
 		{
@@ -2235,7 +2171,7 @@ namespace NLGUI
 			//get the property value
 			ptr = (char*)xmlGetProp( cur, props->name);
 			nlassert(ptr);
-			string	propVal= ptr;
+			string	propVal= ptr.str();
 			string	newPropVal;
 
 			// solve define of this prop
@@ -2392,7 +2328,7 @@ namespace NLGUI
 			nlinfo ("anim has no id");
 			return false;
 		}
-		string animId = ptr;
+		string animId = ptr.str();
 		pAnim = new CInterfaceAnim;
 
 		if (pAnim->parse (cur, parentGroup))
@@ -3013,6 +2949,34 @@ namespace NLGUI
 		if( itr == links.end() )
 			return;
 		itr->second = linkData;
+	}
+
+	void CInterfaceParser::setVariable( const VariableData &v )
+	{
+		CInterfaceProperty prop;
+		const std::string &type = v.type;
+		const std::string &value = v.value;
+		const std::string &entry = v.entry;
+
+		if( type == "sint64" )
+			prop.readSInt64( value.c_str(), entry );
+		else
+		if( type == "sint32" )
+			prop.readSInt32( value.c_str(), entry );
+		else
+		if( type == "float" || type == "double" )
+			prop.readDouble( value.c_str(), entry );
+		else
+		if( type == "bool" )
+			prop.readBool( value.c_str(), entry );
+		else
+		if( type == "rgba" )
+			prop.readRGBA( value.c_str(), entry );
+		else
+		if( type == "hotspot" )
+			prop.readHotSpot( value.c_str(), entry );
+
+		variableCache[ entry ] = v;
 	}
 
 

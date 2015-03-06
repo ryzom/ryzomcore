@@ -25,9 +25,57 @@
 #include <cfloat>
 #include <algorithm>
 #include <limits>
+#include <intrin.h>
 
 // 3rd Party Includes
+#include <basetyps.h>
 #define XAUDIO2_HELPER_FUNCTIONS
+
+#ifdef NL_COMP_MINGW
+#define __in_bcount(x)
+#define __in_bcount_opt(x)
+#define __in_ecount(x)
+#define __in_xcount(x)
+#define __inout_bcount_full(x)
+#define __inout_bcount_opt(x)
+#define __out_bcount(x)
+#define __out_bcount_full(x)
+#define __out_bcount_opt(x)
+#define __out_bcount_part_opt(x,y)
+#define __out_ecount(x)
+#define __out_xcount(x)
+#define __deref_opt_inout_bcount_part_opt(x,y)
+#define __deref_out_bcount(x)
+#define __deref_out_bcount_opt(x)
+#define __out
+#define __in
+#define __inout
+#define __deref_out
+#define __in_opt
+#define __inout_opt
+#define __out_opt
+#define __deref
+#define __deref_inout_opt
+#define __reserved
+#define __XMA2DEFS_INCLUDED__
+#endif  /* NL_COMP_MINGW */
+
+#include <comdecl.h>
+
+#ifdef NL_COMP_MINGW
+#undef DEFINE_CLSID
+#undef DEFINE_IID
+#undef DECLSPEC_UUID_WRAPPER
+#define DEFINE_CLSID(className, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+	class className; \
+	__CRT_UUID_DECL(className, 0x##l, 0x##w1, 0x##w2, 0x##b1, 0x##b2, 0x##b3, 0x##b4, 0x##b5, 0x##b6, 0x##b7, 0x##b8) \
+	EXTERN_C const GUID CLSID_##className
+#define DEFINE_IID(interfaceName, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
+	interface interfaceName; \
+	__CRT_UUID_DECL(interfaceName, 0x##l, 0x##w1, 0x##w2, 0x##b1, 0x##b2, 0x##b3, 0x##b4, 0x##b5, 0x##b6, 0x##b7, 0x##b8) \
+	EXTERN_C const GUID IID_##interfaceName
+#endif /* NL_COMP_MINGW */
+
 #include <xaudio2.h>
 #include <xaudio2fx.h>
 #include <x3daudio.h>

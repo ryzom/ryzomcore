@@ -378,13 +378,13 @@ void CGuildManager::update()
 							// Online status not changed for this member
 							continue;
 						}
-						
+
 						if ( (*it).second.Online != ccs_offline && _GuildMembers[i].Online != ccs_offline)
 						{
 							// Not from offline, or to offline, so don't show anything
 							continue;
 						}
-						
+
 						ucstring msg = (_GuildMembers[i].Online != ccs_offline) ? onlineMessage : offlineMessage;
 						strFindReplace(msg, "%s", _GuildMembers[i].Name);
 						string cat = getStringCategory(msg, msg);
@@ -398,7 +398,6 @@ void CGuildManager::update()
 						bool dummy;
 						PeopleInterraction.ChatInput.Guild.displayMessage(msg, col, 2, &dummy);
 						break;
-
 					}
 				}
 

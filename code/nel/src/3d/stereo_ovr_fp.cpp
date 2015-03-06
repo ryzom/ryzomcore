@@ -21,6 +21,8 @@ limitations under the License.
 
 ************************************************************************************/
 
+#include "std3d.h"
+
 namespace NL3D {
 const char *g_StereoOVR_fp40 = 
 	"!!ARBfp1.0\n"

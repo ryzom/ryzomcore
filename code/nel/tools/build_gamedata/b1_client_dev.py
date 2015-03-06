@@ -8,7 +8,7 @@
 # Install to client dev
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -52,6 +52,10 @@ if not os.path.isfile(ClientDevDirectory + "/client.cfg"):
 	cfg.write("PreDataPath          = {\n")
 	cfg.write("\t\"" + InstallDirectory + "\", \"user\", \"patch\", \"data\", \"examples\" \n")
 	cfg.write("};\n")
+	cfg.write("PatchWanted          = 0;\n")
+	cfg.write("DisplayLuaDebugInfo  = 1;\n")
+	cfg.write("AllowDebugLua        = 1;\n")
+	cfg.write("FullScreen           = 0;\n")
 	printLog(log, "")
 
 printLog(log, ">>> Install data <<<")

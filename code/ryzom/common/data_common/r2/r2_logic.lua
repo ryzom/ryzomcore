@@ -1679,7 +1679,7 @@ Logic.translateChatSequences = function (context, hlComponent, behavior, rtNpcGr
 			event.Name = "activity_sequence_changed"
 			table.insert(context.RtAct.Events, event)
 			
-			local rtInitChatStep = r2.Translator.createAction("code", "oldChatStepVar = -1;\n" .. Logic.chatStepVar .." = 0;\n()setTimer(1, " ..Logic.chatTimerId .. ")\;\n")
+			local rtInitChatStep = r2.Translator.createAction("code", "oldChatStepVar = -1;\n" .. Logic.chatStepVar .." = 0;\n()setTimer(1, " ..Logic.chatTimerId .. ");\n")
 			rtInitChatStep.Name = "init_chat_step"
 			table.insert(context.RtAct.Actions, rtInitChatStep)
 			table.insert(event.ActionsId, rtInitChatStep.Id)

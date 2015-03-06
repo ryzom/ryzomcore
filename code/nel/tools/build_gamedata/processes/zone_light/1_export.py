@@ -8,7 +8,7 @@
 # Export zone_light
 # 
 # NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
-# Copyright (C) 2010  Winch Gate Property Limited
+# Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -55,6 +55,7 @@ for dir in WaterMapSourceDirectories:
 	destDir = DatabaseDirectory + "/" + dir
 	mkPath(log, destDir)
 	copyFilesExtNoTreeIfNeeded(log, srcDir, destDir, ".tga")
+	copyFilesExtNoTreeIfNeeded(log, srcDir, destDir, ".png")
 printLog(log, "")
 
 log.close()
