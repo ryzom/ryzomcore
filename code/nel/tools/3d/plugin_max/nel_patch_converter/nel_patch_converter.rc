@@ -40,7 +40,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_PANEL, DIALOG
     BEGIN
@@ -59,18 +59,18 @@ END
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE 
+1 TEXTINCLUDE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE 
+2 TEXTINCLUDE
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+3 TEXTINCLUDE
 BEGIN
     "\r\n"
     "\0"
@@ -85,8 +85,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0, 11, 0, 0
- PRODUCTVERSION 0, 11, 0, 0
+ FILEVERSION 0, 11, 2, 0
+ PRODUCTVERSION 0, 11, 2, 0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -103,12 +103,12 @@ BEGIN
         BEGIN
             VALUE "Comments", "http://www.ryzomcore.org/"
             VALUE "FileDescription", "PatchMesh to RykolPatchMesh"
-            VALUE "FileVersion", "0.11.0"
+            VALUE "FileVersion", "0.11.2"
             VALUE "InternalName", "PatchMesh to RykolPatchMesh"
             VALUE "LegalCopyright", "Copyright, 2000 Nevrax Ltd."
             VALUE "OriginalFilename", "nel_convert_patch.dlm"
             VALUE "ProductName", "NeL Patch Converter"
-            VALUE "ProductVersion", "0.11.0"
+            VALUE "ProductVersion", "0.11.2"
         END
     END
     BLOCK "VarFileInfo"
@@ -123,7 +123,7 @@ END
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_LIBDESCRIPTION      "Rykol Patchmesh Converter"
     IDS_CATEGORY            "Rykol Tools"
