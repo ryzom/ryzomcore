@@ -20,6 +20,11 @@
 // contains all debug features
 #include <nel/misc/debug.h>
 
+void repeatederror()
+{
+	nlassert(false && "hit always ignore");
+}
+
 int main(int /* argc */, char ** /* argv */)
 {
 	// all debug functions have different behaviors in debug and in release mode.
@@ -69,6 +74,9 @@ int main(int /* argc */, char ** /* argv */)
 		// just continue...
 		nlinfo("nlerror() generated an EFatalError exception, just ignore it");
 	}
+
+	for (int i = 0; i < 32; ++i)
+		repeatederror();
 
 	printf("\nPress <return> to exit\n");
 	getchar();
