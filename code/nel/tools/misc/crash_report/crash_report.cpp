@@ -88,5 +88,11 @@ int main( int argc, char **argv )
 	w.setup( params );
 	w.show();
 
-	return app.exec();
+	int ret = app.exec();
+
+	if( ret != EXIT_SUCCESS )
+		return ret;
+	else
+		return w.getReturnValue();
+	
 }

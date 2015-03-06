@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>407</height>
+    <width>406</width>
+    <height>430</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,40 +18,30 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0" colspan="2">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="descrLabel">
      <property name="text">
       <string>What were you doing when the crash occured?</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QPlainTextEdit" name="descriptionEdit"/>
-   </item>
    <item row="2" column="0" colspan="2">
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="reportLabel">
      <property name="text">
       <string>Contents of the report ( automatically generated )</string>
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QPlainTextEdit" name="reportEdit">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
-     </property>
-    </widget>
+   <item row="1" column="0" colspan="3">
+    <widget class="QPlainTextEdit" name="descriptionEdit"/>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="4" column="0" colspan="3">
     <widget class="QCheckBox" name="emailCB">
      <property name="text">
       <string>Email me if you have further questions, or updates on this issue</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="5" column="0" colspan="3">
     <widget class="QLineEdit" name="emailEdit">
      <property name="enabled">
       <bool>false</bool>
@@ -61,17 +51,13 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="0">
-    <widget class="QPushButton" name="sendButton">
-     <property name="text">
-      <string>Send</string>
+   <item row="3" column="0" colspan="3">
+    <widget class="QPlainTextEdit" name="reportEdit">
+     <property name="enabled">
+      <bool>true</bool>
      </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="QPushButton" name="canceButton">
-     <property name="text">
-      <string>Cancel</string>
+     <property name="textInteractionFlags">
+      <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>

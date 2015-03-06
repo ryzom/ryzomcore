@@ -25,18 +25,24 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QFile>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QCheckBox>
 
 CCrashReportWidget::CCrashReportWidget( QWidget *parent ) :
 QWidget( parent )
 {
+	m_developerMode = false;
+	m_forceSend = false;
+	m_devSendReport = false;
+	m_returnValue = ERET_NULL;
+
 	m_ui.setupUi( this );
 
 	m_socket = new CCrashReportSocket( this );
 
 	QTimer::singleShot( 1, this, SLOT( onLoad() ) );
 
-	connect( m_ui.sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
-	connect( m_ui.canceButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
 	connect( m_ui.emailCB, SIGNAL( stateChanged( int ) ), this, SLOT( onCBClicked() ) );
 
 	connect( m_socket, SIGNAL( reportSent() ), this, SLOT( onReportSent() ) );
@@ -59,6 +65,8 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		if( k == "log" )
 		{
 			m_fileName = v.c_str();
+			if( !QFile::exists( m_fileName ) )
+				m_fileName.clear();
 		}
 		else
 		if( k == "host" )
@@ -70,25 +78,105 @@ void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::
 		{
 			setWindowTitle( v.c_str() );
 		}
+		else
+		if( k == "dev" )
+		{
+			m_developerMode = true;
+		}
+		else
+		if( k == "sendreport" )
+		{
+			m_forceSend = true;
+		}
+	}
+
+	if( m_fileName.isEmpty() )
+	{
+		m_ui.reportLabel->hide();
+		m_ui.reportEdit->hide();
+	}
+
+	
+	if( m_socket->url().isEmpty() || m_fileName.isEmpty() )
+	{
+		m_ui.descriptionEdit->hide();
+		m_ui.emailCB->hide();
+		m_ui.emailEdit->hide();
+		m_ui.descrLabel->hide();
+	}
+
+	QHBoxLayout *hbl = new QHBoxLayout( this );
+
+	if( m_developerMode )
+	{
+		if( !m_socket->url().isEmpty() && !m_fileName.isEmpty() )
+		{
+			m_ui.emailCB->setEnabled( false );
+
+			QCheckBox *cb = new QCheckBox( tr( "Send report" ), this );
+			m_ui.gridLayout->addWidget( cb, 4, 0, 1, 1 );
+
+			m_ui.gridLayout->addWidget( m_ui.emailCB, 5, 0, 1, 1 );
+			m_ui.gridLayout->addWidget( m_ui.emailEdit, 6, 0, 1, 1 );
+
+			connect( cb, SIGNAL( stateChanged( int ) ), this, SLOT( onSendCBClicked() ) );
+		}
+
+		QPushButton *alwaysIgnoreButton = new QPushButton( tr( "Always Ignore" ), this );
+		QPushButton *ignoreButton = new QPushButton( tr( "Ignore" ), this );
+		QPushButton *abortButton = new QPushButton( tr( "Abort" ), this );
+		QPushButton *breakButton = new QPushButton( tr( "Break" ), this );
+
+		hbl->addWidget( alwaysIgnoreButton );
+		hbl->addWidget( ignoreButton );
+		hbl->addWidget( abortButton );
+		hbl->addWidget( breakButton );
+
+		m_ui.gridLayout->addLayout( hbl, 7, 0, 1, 3 );
+
+		connect( alwaysIgnoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onAlwaysIgnoreClicked() ) );
+		connect( ignoreButton, SIGNAL( clicked( bool ) ), this, SLOT( onIgnoreClicked() ) );
+		connect( abortButton, SIGNAL( clicked( bool ) ), this, SLOT( onAbortClicked() ) );
+		connect( breakButton, SIGNAL( clicked( bool ) ), this, SLOT( onBreakClicked() ) );
+	}
+	else
+	{
+		// If -host is specified, offer the send function
+		if( !m_socket->url().isEmpty() && !m_fileName.isEmpty() )
+		{
+			QPushButton *sendButton = new QPushButton( tr( "Send report" ), this );
+			connect( sendButton, SIGNAL( clicked( bool ) ), this, SLOT( onSendClicked() ) );
+			hbl->addWidget( sendButton );
+
+			if( !m_forceSend )
+			{
+				QPushButton *cancelButton = new QPushButton( tr( "Don't send report" ), this );
+				connect( cancelButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+				hbl->addWidget( cancelButton );
+			}
+		}
+		// Otherwise only offer exit
+		else
+		{
+			QPushButton *exitButton = new QPushButton( tr( "Exit" ), this );
+			connect( exitButton, SIGNAL( clicked( bool ) ), this, SLOT( onCancelClicked() ) );
+			hbl->addWidget( exitButton );
+		}
+
+		m_ui.gridLayout->addLayout( hbl, 6, 0, 1, 3 );
 	}
 }
 
 void CCrashReportWidget::onLoad()
 {
-	if( !checkSettings() )
-	{
-		close();
+	if( m_fileName.isEmpty() )
 		return;
-	}
 
 	QFile f( m_fileName );
 	bool b = f.open( QFile::ReadOnly | QFile::Text );
 	if( !b )
 	{
-		QMessageBox::information( this,
-									tr( "No log file found" ),
-									tr( "There was no log file found, therefore nothing to report. Exiting..." ) );
-		close();
+		m_fileName.clear();
 		return;
 	}
 
@@ -99,13 +187,26 @@ void CCrashReportWidget::onLoad()
 
 void CCrashReportWidget::onSendClicked()
 {
-	m_ui.sendButton->setEnabled( false );
+	if( m_developerMode && !m_devSendReport )
+	{
+		close();
+		return;
+	}
+
+	if( m_socket->url().isEmpty() || m_fileName.isEmpty() )
+	{
+		close();
+		return;
+	}
+
 	QApplication::setOverrideCursor( Qt::WaitCursor );
 
 	SCrashReportData data;
 	data.description = m_ui.descriptionEdit->toPlainText();
 	data.report = m_ui.reportEdit->toPlainText();
-	data.email = m_ui.emailEdit->text();
+	
+	if( m_ui.emailCB->isChecked() )
+		data.email = m_ui.emailEdit->text();
 
 	m_socket->sendReport( data );
 }
@@ -119,6 +220,45 @@ void CCrashReportWidget::onCBClicked()
 {
 	m_ui.emailEdit->setEnabled( m_ui.emailCB->isChecked() );
 }
+
+void CCrashReportWidget::onSendCBClicked()
+{
+	bool b = m_ui.emailCB->isEnabled();
+
+	if( b )
+	{
+		m_ui.emailCB->setChecked( false );
+	}
+
+	m_ui.emailCB->setEnabled( !b );
+
+	m_devSendReport = !m_devSendReport;
+}
+
+void CCrashReportWidget::onAlwaysIgnoreClicked()
+{
+	m_returnValue = ERET_ALWAYS_IGNORE;
+	onSendClicked();
+}
+
+void CCrashReportWidget::onIgnoreClicked()
+{
+	m_returnValue = ERET_IGNORE;
+	onSendClicked();
+}
+
+void CCrashReportWidget::onAbortClicked()
+{
+	m_returnValue = ERET_ABORT;
+	onSendClicked();
+}
+
+void CCrashReportWidget::onBreakClicked()
+{
+	m_returnValue = ERET_BREAK;
+	onSendClicked();
+}
+
 
 void CCrashReportWidget::onReportSent()
 {
@@ -142,30 +282,11 @@ void CCrashReportWidget::onReportFailed()
 	removeAndQuit();
 }
 
-bool CCrashReportWidget::checkSettings()
-{
-	if( m_fileName.isEmpty() )
-	{
-		QMessageBox::information( this,
-									tr( "No log file specified." ),
-									tr( "No log file specified. Exiting..." ) );
-		return false;
-	}
-
-	if( m_socket->url().isEmpty() )
-	{
-		QMessageBox::information( this,
-									tr( "No host specified." ),
-									tr( "No host specified. Exiting..." ) );
-		return false;
-	}
-
-	return true;
-}
-
 void CCrashReportWidget::removeAndQuit()
 {
-	QFile::remove( m_fileName );
+	if( !m_fileName.isEmpty() )
+		QFile::remove( m_fileName );
+
 	close();
 }
 
