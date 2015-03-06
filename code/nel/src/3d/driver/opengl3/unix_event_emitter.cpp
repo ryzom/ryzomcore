@@ -36,7 +36,7 @@ static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _emulateRawMode(false), _driver(NULL)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _driver(NULL)
 {
 	_im = 0;
 	_ic = 0;
@@ -155,25 +155,6 @@ void CUnixEventEmitter::submitEvents(CEventServer & server, bool allWindows)
 static Bool isMouseMoveEvent(Display *display, XEvent *event, XPointer arg)
 {
 	return (event->type == MotionNotify);
-}
-
-void CUnixEventEmitter::emulateMouseRawMode(bool enable)
-{
-	_emulateRawMode = enable;
-
-	if (_emulateRawMode)
-	{
-		XWindowAttributes xwa;
-		XGetWindowAttributes(_dpy, _win, &xwa);
-		XWarpPointer(_dpy, None, _win, None, None, None, None,
-			(xwa.width / 2), (xwa.height / 2));
-
-		// remove all outstanding mouse move events, they happened before the mouse
-		// was pulled back to 0.5 / 0.5, so a wrong movement delta would be
-		// reported otherwise
-		XEvent event;
-		while (XCheckIfEvent(_dpy, &event, &isMouseMoveEvent, NULL)) { };
-	}
 }
 
 #ifndef AltMask
@@ -511,33 +492,12 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	{
 		TMouseButton button=getMouseButton (event.xbutton.state);
 
-		// if raw mode should be emulated
-		if (_emulateRawMode)
-		{
-			// when we just wrapped back the pointer to 0.5 / 0.5, ignore event
-			if (event.xbutton.x == xwa.width / 2 && event.xbutton.y == xwa.height / 2)
-				break;
+		// get the relative mouse position
+		float fX = (float) event.xbutton.x / (float) xwa.width;
+		float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
 
-			// post a CGDMouseMove with the movement delta to the event server
-			server->postEvent(
-				new CGDMouseMove(this, NULL /* no mouse device */,
-					event.xbutton.x - (xwa.width / 2),
-					(xwa.height / 2) - event.xbutton.y));
-
-			// move the pointer back to the center of the window
-			XWarpPointer(_dpy, None, _win, None, None, None, None,
-				(xwa.width / 2), (xwa.height / 2));
-		}
-		// if in normal mouse mode
-		else
-		{
-			// get the relative mouse position
-			float fX = (float) event.xbutton.x / (float) xwa.width;
-			float fY = 1.0f - (float) event.xbutton.y / (float) xwa.height;
-
-			// post a normal mouse move event to the event server
-			server->postEvent (new CEventMouseMove (fX, fY, button, this));
-		}
+		// post a normal mouse move event to the event server
+		server->postEvent (new CEventMouseMove (fX, fY, button, this));
 		break;
 	}
 	case KeyPress:

@@ -28,8 +28,6 @@
 #include "nel/3d/light.h"
 #include "nel/3d/index_buffer.h"
 #include "nel/misc/rect.h"
-#include "nel/misc/di_event_emitter.h"
-#include "nel/misc/mouse_device.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer.h"
@@ -87,6 +85,11 @@ IDriver* createGl3DriverInstance ()
 
 #ifdef NL_OS_WINDOWS
 
+#ifdef NL_COMP_MINGW
+extern "C"
+{
+#endif
+
 __declspec(dllexport) IDriver* NL3D_createIDriverInstance ()
 {
 	return new CDriverGL3;
@@ -96,6 +99,10 @@ __declspec(dllexport) uint32 NL3D_interfaceVersion ()
 {
 	return IDriver::InterfaceVersion;
 }
+
+#ifdef NL_COMP_MINGW
+}
+#endif
 
 #elif defined (NL_OS_UNIX)
 
@@ -568,14 +575,6 @@ bool CDriverGL3::swapBuffers()
 
 	++ _SwapBufferCounter;
 
-#ifdef NL_OS_WINDOWS
-	if (_EventEmitter.getNumEmitters() > 1) // is direct input running ?
-	{
-		// flush direct input messages if any
-		NLMISC::safe_cast<NLMISC::CDIEventEmitter *>(_EventEmitter.getEmitter(1))->poll();
-	}
-#endif
-
 	if (!_WndActive)
 	{
 		updateLostBuffers();
@@ -674,6 +673,8 @@ bool CDriverGL3::release()
 	// Call IDriver::release() before, to destroy textures, shaders and VBs...
 	IDriver::release();
 
+	nlassert(_DepthStencilFBOs.empty());
+
 	_SwapBufferCounter = 0;
 
 	// delete querries
@@ -709,7 +710,7 @@ void CDriverGL3::setupViewport (const class CViewport& viewport)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the viewport
 	_CurrViewport = viewport;
@@ -764,7 +765,7 @@ void CDriverGL3::setupScissor (const class CScissor& scissor)
 
 	// Setup gl viewport
 	uint32 clientWidth, clientHeight;
-	getWindowSize(clientWidth, clientHeight);
+	getRenderTargetSize(clientWidth, clientHeight);
 
 	// Backup the scissor
 	_CurrScissor= scissor;
@@ -1658,9 +1659,13 @@ IOcclusionQuery::TOcclusionType COcclusionQueryGL3::getOcclusionType()
 	if (OcclusionType == NotAvailable)
 	{
 		GLuint result;
-		nglGetQueryObjectuiv(ID, GL_QUERY_RESULT, &result);
-		OcclusionType = result != 0 ? NotOccluded : Occluded;
-		VisibleCount = (uint) result;
+		nglGetQueryObjectuiv(ID, GL_QUERY_RESULT_AVAILABLE, &result);
+		if (result != GL_FALSE)
+		{
+			nglGetQueryObjectuiv(ID, GL_QUERY_RESULT, &result);
+			OcclusionType = result != 0 ? NotOccluded : Occluded;
+			VisibleCount = (uint)result;
+		}
 	}
 
 	return OcclusionType;

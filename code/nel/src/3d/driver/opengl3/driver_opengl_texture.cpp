@@ -65,12 +65,9 @@ CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CD
 	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D;
 
 	FBOId = 0;
-	DepthFBOId = 0;
-	StencilFBOId = 0;
 
 	InitFBO = false;
 	AttachDepthStencil = true;
-	UsePackedDepthStencil = drvGl->supportPackedDepthStencil();
 }
 // ***************************************************************************
 CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
@@ -97,6 +94,65 @@ CTextureDrvInfosGL3::~CTextureDrvInfosGL3()
 	}*/
 }
 
+CDepthStencilFBO::CDepthStencilFBO(CDriverGL3 *driver, uint width, uint height)
+{
+	nldebug("3D: Init shared FBO");
+
+	m_Driver = driver;
+	Width = width;
+	Height = height;
+
+	bool packedDepthStencil = driver->supportPackedDepthStencil();
+	/*nglGenRenderbuffersEXT(1, &DepthFBOId);
+	if (packedDepthStencil)
+		StencilFBOId = DepthFBOId;
+	else
+		nglGenRenderbuffersEXT(1, &StencilFBOId);
+
+	if (packedDepthStencil)
+	{
+		//nldebug("3D: using packed depth stencil");
+		nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, StencilFBOId);
+		nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH24_STENCIL8_EXT, width, height);
+
+	}
+	else
+	{
+		nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthFBOId);
+		nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, width, height);
+		*//*
+		nglBindRenderbufferEXT(GL_RENDERBUFFER_EXT, StencilFBOId);
+		nglRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_STENCIL_INDEX8_EXT, width, height);
+		*/
+	/*}*/
+
+	/*nlassert(DepthFBOId);
+	nlassert(StencilFBOId);*/
+
+	driver->_DepthStencilFBOs.push_back(this);
+
+}
+
+CDepthStencilFBO::~CDepthStencilFBO()
+{
+	// driver remove
+	m_Driver->_DepthStencilFBOs.erase(std::find(m_Driver->_DepthStencilFBOs.begin(), m_Driver->_DepthStencilFBOs.end(), this));
+
+	/*if (DepthFBOId)
+	{
+		nldebug("3D: Release shared FBO");
+		nglDeleteRenderbuffersEXT(1, &DepthFBOId);
+		if (StencilFBOId == DepthFBOId)
+			StencilFBOId = 0;
+		DepthFBOId = 0;
+	}
+	if (StencilFBOId)
+	{
+		nglDeleteRenderbuffersEXT(1, &StencilFBOId);
+		StencilFBOId = 0;
+	}*/
+}
+
 // ***************************************************************************
 bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 {
@@ -112,14 +168,6 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 
 		// generate IDs
 		nglGenFramebuffers(1, &FBOId);
-		if (AttachDepthStencil)
-		{
-			nglGenRenderbuffers(1, &DepthFBOId);
-			if (UsePackedDepthStencil)
-				StencilFBOId = DepthFBOId;
-			else
-				nglGenRenderbuffers(1, &StencilFBOId);
-		}
 
 		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
 
@@ -136,26 +184,24 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 		// FIXME GL3
 		if (AttachDepthStencil)
 		{
-			if (UsePackedDepthStencil)
+			for (std::vector<CDepthStencilFBO *>::iterator it(_Driver->_DepthStencilFBOs.begin()), end(_Driver->_DepthStencilFBOs.end()); it != end; ++it)
 			{
-				//nldebug("3D: using packed depth stencil");
-				nglBindRenderbuffer(GL_RENDERBUFFER, StencilFBOId);
-				nglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, tex->getWidth(), tex->getHeight());
+				if ((*it)->Width == tex->getWidth() && (*it)->Height == tex->getHeight())
+				{
+					DepthStencilFBO = (*it);
+					break;
+				}
 			}
-			else
+
+			if (!DepthStencilFBO)
 			{
-				nglBindRenderbuffer(GL_RENDERBUFFER, DepthFBOId);
-				nglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, tex->getWidth(), tex->getHeight());
-				/*
-				nglBindRenderbuffer(GL_RENDERBUFFER, StencilFBOId);
-				nglRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, tex->getWidth(), tex->getHeight());
-				*/
+				DepthStencilFBO = new CDepthStencilFBO(_Driver, tex->getWidth(), tex->getHeight());
 			}
 			nglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-										 GL_RENDERBUFFER, DepthFBOId);
+				GL_RENDERBUFFER, DepthStencilFBO->DepthFBOId);
 			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatus(GL_FRAMEBUFFER));
 			nglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-										 GL_RENDERBUFFER, StencilFBOId);
+				GL_RENDERBUFFER, DepthStencilFBO->StencilFBOId);
 			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatus(GL_FRAMEBUFFER));
 		}
 
@@ -226,10 +272,7 @@ bool CTextureDrvInfosGL3::initFrameBufferObject(ITexture * tex)
 
 			if (AttachDepthStencil)
 			{
-				nglDeleteRenderbuffers(1, &DepthFBOId);
-
-				if (!UsePackedDepthStencil)
-					nglDeleteRenderbuffers(1, &StencilFBOId);
+				DepthStencilFBO = NULL;
 			}
 		}
 
@@ -1490,16 +1533,14 @@ void		CDriverGL3::swapTextureHandle(ITexture &tex0, ITexture &tex1)
 	swap(t0->MinFilter, t1->MinFilter);
 	swap(t0->TextureMode, t1->TextureMode);
 	swap(t0->FBOId, t1->FBOId);
-	swap(t0->DepthFBOId, t1->DepthFBOId);
-	swap(t0->StencilFBOId, t1->StencilFBOId);
+	swap(t0->DepthStencilFBO, t1->DepthStencilFBO);
 	swap(t0->InitFBO, t1->InitFBO);
-	swap(t0->AttachDepthStencil, t1->AttachDepthStencil);
-	swap(t0->UsePackedDepthStencil, t1->UsePackedDepthStencil);
+	// swap(t0->AttachDepthStencil, t1->AttachDepthStencil); ?
 }
 
 
 // ***************************************************************************
-uint CDriverGL3::getTextureHandle(const ITexture &tex)
+uintptr_t CDriverGL3::getTextureHandle(const ITexture &tex)
 {
 	H_AUTO_OGL(CDriverGL3_getTextureHandle)
 	// If DrvShare not setuped
@@ -1549,11 +1590,14 @@ bool CDriverGL3::setRenderTarget (ITexture *tex, uint32 x, uint32 y, uint32 widt
 
 			getViewport(_OldViewport);
 
+			if (!width) width = tex->getWidth();
+			if (!height) height = tex->getHeight();
+
 			CViewport newVP;
 			newVP.init(0, 0, ((float)width/(float)w), ((float)height/(float)h));
 			setupViewport(newVP);
 
-			_RenderTargetFBO = true;
+			_RenderTargetFBO = tex;
 
 			return activeFrameBufferObject(tex);
 		}
@@ -1626,10 +1670,11 @@ bool CDriverGL3::copyTargetToTexture (ITexture *tex,
 bool CDriverGL3::getRenderTargetSize (uint32 &width, uint32 &height)
 {
 	H_AUTO_OGL(CDriverGL3_getRenderTargetSize)
-	if (_TextureTarget)
+	NLMISC::CSmartPtr<ITexture> tex = _RenderTargetFBO ? _RenderTargetFBO : (_TextureTarget ? _TextureTarget : NULL);
+	if (tex)
 	{
-		width = _TextureTarget->getWidth();
-		height = _TextureTarget->getHeight();
+		width = tex->getWidth();
+		height = tex->getHeight();
 	}
 	else
 	{

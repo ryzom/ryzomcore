@@ -38,8 +38,6 @@
 #	define _NET_WM_STATE_ADD	1
 #endif // NL_OS_UNIX
 
-#include "nel/misc/mouse_device.h"
-#include "nel/misc/di_event_emitter.h"
 #include "nel/3d/u_driver.h"
 #include "nel/misc/file.h"
 
@@ -292,7 +290,7 @@ bool GlWndProc(CDriverGL3 *driver, XEvent &e)
 #endif // NL_OS_UNIX
 
 // ***************************************************************************
-bool CDriverGL3::init (uint windowIcon, emptyProc exitFunc)
+bool CDriverGL3::init(uintptr_t windowIcon, emptyProc exitFunc)
 {
 	H_AUTO_OGL(CDriverGL3_init)
 
@@ -457,6 +455,7 @@ bool CDriverGL3::unInit()
 	{
 		nlwarning("Can't unregister NLClass");
 	}
+	_Registered = 0;
 
 	// Restaure monitor color parameters
 	if (_NeedToRestaureGammaRamp)
@@ -596,6 +595,9 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 {
 	H_AUTO_OGL(CDriverGL3_setDisplay)
 
+	if (!mode.OffScreen)
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
+
 	_win = EmptyWindow;
 
 	_CurrentMode = mode;
@@ -621,6 +623,10 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 #if 0
 		if (!createWindow(mode))
 			return false;
+
+		HWND tmpHWND = _win;
+		int width = mode.Width;
+		int height = mode.Height;
 
 		// resize the window
 		RECT rc;
@@ -913,20 +919,6 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 	// setup the event emitter, and try to retrieve a direct input interface
 	_EventEmitter.addEmitter(we, true /*must delete*/); // the main emitter
-
-	/// try to get direct input
-	try
-	{
-		NLMISC::CDIEventEmitter *diee = NLMISC::CDIEventEmitter::create(GetModuleHandle(NULL), _win, we);
-		if (diee)
-		{
-			_EventEmitter.addEmitter(diee, true);
-		}
-	}
-	catch(const EDirectInput &e)
-	{
-		nlinfo(e.what());
-	}
 
 #elif defined(NL_OS_MAC)
 
@@ -1426,8 +1418,17 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 #ifdef NL_OS_WINDOWS
 
 	// create the OpenGL window
-	window = CreateWindowW(L"NLClass", L"NeL Window", WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN|WS_CLIPSIBLINGS,
-		CW_USEDEFAULT, CW_USEDEFAULT, mode.Width, mode.Height, HWND_DESKTOP, NULL, GetModuleHandle(NULL), NULL);
+	DWORD dwStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+	int pos = CW_USEDEFAULT;
+	HWND hwndParent = HWND_DESKTOP;
+	if (mode.OffScreen)
+	{
+		dwStyle &= ~WS_VISIBLE;
+		pos = 0;
+		hwndParent = NULL;
+	}
+	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle,
+		pos, pos, mode.Width, mode.Height, hwndParent, NULL, GetModuleHandle(NULL), NULL);
 
 	if (window == EmptyWindow)
 	{
@@ -1458,7 +1459,7 @@ bool CDriverGL3::createWindow(const GfxMode &mode)
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
-	[NSApp setDelegate:appDelegate];
+	[NSApp setDelegate:(id<NSFileManagerDelegate>)appDelegate];
 
 	// bind the close button of the window to applicationShouldTerminate
 	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];
@@ -1826,6 +1827,19 @@ bool CDriverGL3::setMode(const GfxMode& mode)
 	if (!_DestroyWindow)
 		return true;
 
+#if defined(NL_OS_WINDOWS)
+	// save relative cursor
+	POINT cursorPos;
+	cursorPos.x = 0;
+	cursorPos.y = 0;
+
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+	sint curX = (sint)cursorPos.x * (sint)mode.Width;
+	sint curY = (sint)cursorPos.y * (sint)mode.Height;
+#endif
+
 	if (!setScreenMode(mode))
 		return false;
 
@@ -1844,6 +1858,17 @@ bool CDriverGL3::setMode(const GfxMode& mode)
 		case 24:
 		case 32: _ColorDepth = ColorDepth32; break;
 	}
+
+#if defined(NL_OS_WINDOWS)
+	// restore relative cursor
+	if (cursorPosOk)
+	{
+		cursorPos.x = curX / (sint)mode.Width;
+		cursorPos.y = curY / (sint)mode.Height;
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+	}
+#endif
 
 	// set color depth for custom cursor
 	updateCursor(true);
@@ -2260,7 +2285,19 @@ void CDriverGL3::setWindowPos(sint32 x, sint32 y)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowPos(_win, NULL, x, y, 0, 0, SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	// save relative cursor
+	POINT cursorPos;
+	BOOL cursorPosOk = isSystemCursorInClientArea()
+		&& GetCursorPos(&cursorPos)
+		&& ScreenToClient(_win, &cursorPos);
+
+	SetWindowPos(_win, NULL, x, y, 0, 0, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_NOSIZE);
+
+	if (cursorPosOk)
+	{
+		ClientToScreen(_win, &cursorPos);
+		SetCursorPos(cursorPos.x, cursorPos.y);
+	}
 
 #elif defined(NL_OS_MAC)
 	// get the rect (position, size) of the screen with menu bar

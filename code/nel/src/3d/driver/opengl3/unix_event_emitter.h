@@ -20,7 +20,6 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/event_emitter.h"
 #include "nel/misc/events.h"
-#include "nel/misc/game_device_events.h"
 
 #include "nel/3d/driver.h"
 
@@ -55,11 +54,6 @@ public:
 	 * (should call CEventServer method postEvent())
 	 */
 	virtual void submitEvents(CEventServer & server, bool allWindows);
-
-	/**
-	 * enable or disable mouse raw mode
-	 */
-	virtual void emulateMouseRawMode(bool emulate);
 
 	/**
 	 * process input-related events (mouse and keyboard)
@@ -106,7 +100,6 @@ private:
 	std::map<TKey, bool>	_PressedKeys;
 	XIM						_im;
 	XIC						_ic;
-	bool					_emulateRawMode;
 	NL3D::IDriver*			_driver;
 	CUnixEventServer		_InternalServer;
 	ucstring				_CopiedString;
