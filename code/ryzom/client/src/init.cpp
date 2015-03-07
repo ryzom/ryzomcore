@@ -142,7 +142,6 @@ using namespace std;
 // Ligo primitive class
 CLigoConfig				LigoConfig;
 
-CMsgBoxDisplayer		MsgBoxError;
 CClientChatManager		ChatMngr;
 
 bool					LastScreenSaverEnabled = false;
@@ -568,7 +567,7 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 		std::stringstream name;
 		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
 		std::stringstream fullname;
-		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
 		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
 		if (cache)
 		{

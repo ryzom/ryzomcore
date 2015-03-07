@@ -19,10 +19,6 @@
 #include "nel/misc/system_info.h"
 
 #ifdef NL_OS_WINDOWS
-#	ifndef NL_COMP_MINGW
-#		define NOMINMAX
-#	endif
-#	include <windows.h>
 #	include <WinNT.h>
 #	include <tchar.h>
 #	include <intrin.h>

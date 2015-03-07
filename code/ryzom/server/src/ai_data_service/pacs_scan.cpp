@@ -1651,7 +1651,7 @@ public:
 									first.flags = (topNode.isInWater() ? 1 : 0) + (topNode.isInNogo() ? 2 : 0);
 
 									// push first position
-									stacks[first.flags].insert(make_pair<sint, CWorldPosition>(first.flags, stwp));
+									stacks[first.flags].insert(std::pair<sint, CWorldPosition>(first.flags, stwp));
 
 									while (true)
 									{
@@ -1750,11 +1750,11 @@ public:
 													}
 													if (tmp.getTopologyNode().Id == topNode.Id)
 													{
-														stacks[0].insert(make_pair<sint, CWorldPosition>(ndist, tmp));
+														stacks[0].insert(std::pair<sint, CWorldPosition>(ndist, tmp));
 													}
 													else
 													{
-														stacks[tmpflags+1].insert(make_pair<sint, CWorldPosition>(ndist, tmp));
+														stacks[tmpflags + 1].insert(std::pair<sint, CWorldPosition>(ndist, tmp));
 													}
 												}										
 											}

@@ -556,7 +556,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"map_mode" );
 	if (ptr)
 	{
-		string sTmp = ptr;
+		string sTmp = ptr.str();
 		if (sTmp == "normal")
 			_MapMode = MapMode_Normal;
 		else if (sTmp == "death")

@@ -32,6 +32,7 @@
 #pragma comment(lib, "gthread-1.3.lib")
 #endif
 
+#include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
 #include "nel/misc/command.h"
 #include "nel/misc/thread.h"
@@ -58,6 +59,14 @@ static GtkWidget *hrootbox = NULL, *scrolled_win2 = NULL;
 //
 // Functions
 //
+
+CGtkDisplayer (const char *displayerName) : CWindowDisplayer(displayerName)
+{
+	needSlashR = false;
+	createLabel ("@Clear|CLEAR");
+
+	INelContext::getInstance().setWindowedApplication(true);
+}
 
 CGtkDisplayer::~CGtkDisplayer ()
 {

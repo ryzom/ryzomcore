@@ -1204,7 +1204,7 @@ class CHandlerTell : public IActionHandler
 		ucstring s = CI18N::get("youTellPlayer");
 		strFindReplace(s, "%name", receiver);
 		strFindReplace(finalMsg, CI18N::get("youTell"), s);
-		CInterfaceManager::getInstance()->log(finalMsg);
+		CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerTell, "tell");

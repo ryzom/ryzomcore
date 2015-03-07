@@ -68,6 +68,7 @@ NEL_3DSMAX_SHARED_API NLMISC::INelContext &GetSharedNelContext()
 	{
 		new NLMISC::CApplicationContext();
 		NLMISC::createDebug();
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
 	}
 	return NLMISC::INelContext::getInstance();
 }

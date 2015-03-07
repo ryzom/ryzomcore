@@ -1981,7 +1981,7 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	prop = xmlGetProp (cur, (xmlChar*)"inv_type");
 	if (prop)
 	{
-		InvType = CInventoryManager::invTypeFromString(prop);
+		InvType = CInventoryManager::invTypeFromString(prop.str());
 	}
 	else
 	{
@@ -1990,22 +1990,22 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 	}
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_armor");
-	if (prop) DbFilterArmor = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterArmor = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_weapon");
-	if (prop) DbFilterWeapon = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterWeapon = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_tool");
-	if (prop) DbFilterTool = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterTool = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_mp");
-	if (prop) DbFilterMP = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterMP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_missmp");
-	if (prop) DbFilterMissMP = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterMissMP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	prop = xmlGetProp (cur, (xmlChar*)"filter_tp");
-	if (prop) DbFilterTP = NLGUI::CDBManager::getInstance()->getDbProp(prop);
+	if (prop) DbFilterTP = NLGUI::CDBManager::getInstance()->getDbProp(prop.str());
 
 	return true;
 }
