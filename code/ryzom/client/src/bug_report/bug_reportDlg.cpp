@@ -389,8 +389,8 @@ END_MESSAGE_MAP()
 
 BOOL CBug_reportDlg::OnInitDialog()
 {
-	setReportEmailFunction ((void*)sendEmail);
-	setDefaultEmailParams ("gw.nevrax.com", "", "lecroart@nevrax.com");
+	// setReportEmailFunction ((void*)sendEmail);
+	// setDefaultEmailParams ("gw.nevrax.com", "", "lecroart@nevrax.com");
 
 	CDialog::OnInitDialog();
 
