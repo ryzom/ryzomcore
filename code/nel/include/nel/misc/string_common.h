@@ -20,6 +20,7 @@
 #include "types_nl.h"
 
 #include <cstdio>
+#include <cstring>
 #include <cstdarg>
 #include <errno.h>
 
