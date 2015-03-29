@@ -19,30 +19,9 @@
 
 #include "nel/misc/types_nl.h"
 
-namespace NL3D {
-namespace NLDRIVERGL3 {
-
-// NOTE: It is completely safe to reorder these indices.
-// When changing, update:
-//     - GLSLHeaderUniformBuffer
-//     - s_UniformBufferBindDefine
-//     - s_UniformBufferBindName
-// Always use the defines.
-#define NL_BUILTIN_CAMERA_BIND 0 // Builtin uniform buffer bound by driver, set by camera transformation
-#define NL_BUILTIN_MODEL_BIND 1 // Builtin uniform buffer bound by driver, set by model transformation
-#define NL_BUILTIN_MATERIAL_BIND 2 // Builtin uniform buffer bound by material
-#define NL_USER_ENV_BIND 3 // User-specified uniform buffer bound by user
-#define NL_USER_VERTEX_PROGRAM_BIND 4 // User-specified uniform buffer bound by vertex program
-#define NL_USER_GEOMETRY_PROGRAM_BIND 5 // User-specified uniform buffer bound by geometry program
-#define NL_USER_PIXEL_PROGRAM_BIND 6 // User-specified uniform buffer bound by pixel program
-#define NL_USER_MATERIAL_BIND 7 // User-specified uniform buffer bound by material
-
-extern const char *GLSLHeaderUniformBuffer;
-
-} // NLDRIVERGL3
-} // NL3D
-
 #include "nel/misc/string_mapper.h"
+
+#define NL3D_GL3_UNIFORM_BUFFER_DEBUG 1
 
 namespace NL3D {
 
@@ -107,11 +86,11 @@ public:
 	sint push(const std::string &name, TType type, sint count = 1)
 	{
 		nlassert(count > 0);
-		sint baseAlign = count == 1 
-			? s_TypeAlignment[type] 
+		sint baseAlign = count == 1
+			? s_TypeAlignment[type]
 			: ((s_TypeAlignment[type] + 15) & ~0xF);
 		sint baseOffset = m_Entries.size()
-			? m_Entries.back().Offset + m_Entries.back().stride()
+			? m_Entries.back().Offset + m_Entries.back().size()
 			: 0;
 		sint alignOffset = baseOffset;
 		alignOffset += (baseAlign - 1);
@@ -128,7 +107,7 @@ public:
 	inline const CEntry &get(sint i) const { return m_Entries[i]; }
 	inline size_t size() const { return m_Entries.size(); }
 	inline void clear() { m_Entries.clear(); }
-	
+
 private:
 	static const sint s_TypeAlignment[];
 	static const sint s_TypeSize[];
@@ -138,97 +117,34 @@ private:
 
 };
 
-const sint CUniformBufferFormat::s_TypeAlignment[] = {
-	4, // Float
-	8,
-	16,
-	16,
-	4, // SInt
-	8,
-	16,
-	16,
-	4, // UInt
-	8,
-	16,
-	16,
-	4, // Bool
-	8,
-	16,
-	16,
-	16, // FloatMat2
-	16,
-	16,
-	16, // FloatMat2x3
-	16,
-	16, // FloatMat3x2
-	16,
-	16, // FloatMat4x2
-	16,
-};
-
-const sint CUniformBufferFormat::s_TypeSize[] = {
-	4, // Float
-	8,
-	12,
-	16,
-	4, // SInt
-	8,
-	12,
-	16,
-	4, // UInt
-	8,
-	12,
-	16,
-	4, // Bool
-	8,
-	12,
-	16,
-	16 + 16, // FloatMat2
-	16 + 16 + 16, // FloatMat3
-	16 + 16 + 16 + 16, // FloatMat4
-	16 + 16, // FloatMat2x3
-	16 + 16, // FloatMat2x4
-	16 + 16 + 16, // FloatMat3x2
-	16 + 16 + 16, // FloatMat3x4
-	16 + 16 + 16 + 16, // FloatMat4x2
-	16 + 16 + 16 + 16, // FloatMat4x3
-};
-
-void testUniformBufferFormat()
-{
-	CUniformBufferFormat ubf;
-	sint offset;
-	offset = ubf.push("a", CUniformBufferFormat::Float);
-	nlassert(offset == 0);
-	offset = ubf.push("b", CUniformBufferFormat::FloatVec2);
-	nlassert(offset == 8);
-	offset = ubf.push("c", CUniformBufferFormat::FloatVec3);
-	nlassert(offset == 16);
-	offset = ubf.push("d", CUniformBufferFormat::FloatVec4);
-	nlassert(offset == 32);
-	offset = ubf.push("e", CUniformBufferFormat::FloatVec2);
-	nlassert(offset == 48);
-	offset = ubf.push("g", CUniformBufferFormat::Float);
-	nlassert(offset == 56);
-	offset = ubf.push("h", CUniformBufferFormat::Float, 2);
-	nlassert(offset == 64);
-	offset = ubf.push("i", CUniformBufferFormat::FloatMat2x3);
-	nlassert(offset == 96);
-	offset = ubf.push("j", CUniformBufferFormat::FloatVec3);
-	nlassert(offset == 128);
-	offset = ubf.push("k", CUniformBufferFormat::FloatVec2);
-	nlassert(offset == 144);
-	offset = ubf.push("l", CUniformBufferFormat::Float, 2);
-	nlassert(offset == 160);
-	offset = ubf.push("m", CUniformBufferFormat::FloatVec2);
-	nlassert(offset == 192);
-	offset = ubf.push("n", CUniformBufferFormat::FloatMat3, 2);
-	nlassert(offset == 208);
-	offset = ubf.push("o", CUniformBufferFormat::FloatVec3);
-	nlassert(offset == 304);
-}
+void testUniformBufferFormat(CUniformBufferFormat &ubf);
 
 }
+
+namespace NL3D {
+namespace NLDRIVERGL3 {
+
+// NOTE: It is completely safe to reorder these indices.
+// When changing, update:
+//     - GLSLHeaderUniformBuffer
+//     - s_UniformBufferBindDefine
+//     - s_UniformBufferBindName
+// Always use the defines.
+#define NL_BUILTIN_CAMERA_BINDING 0 // Builtin uniform buffer bound by driver, set by camera transformation
+#define NL_BUILTIN_MODEL_BINDING 1 // Builtin uniform buffer bound by driver, set by model transformation
+#define NL_BUILTIN_MATERIAL_BINDING 2 // Builtin uniform buffer bound by material
+#define NL_USER_ENV_BINDING 3 // User-specified uniform buffer bound by user
+#define NL_USER_VERTEX_PROGRAM_BINDING 4 // User-specified uniform buffer bound by vertex program
+#define NL_USER_GEOMETRY_PROGRAM_BINDING 5 // User-specified uniform buffer bound by geometry program
+#define NL_USER_PIXEL_PROGRAM_BINDING 6 // User-specified uniform buffer bound by pixel program
+#define NL_USER_MATERIAL_BINDING 7 // User-specified uniform buffer bound by material
+
+extern const char *GLSLHeaderUniformBuffer;
+
+void generateUniformBufferGLSL(std::stringstream &ss, const CUniformBufferFormat &ubf, sint binding);
+
+} // NLDRIVERGL3
+} // NL3D
 
 #endif // NL_DRIVER_OPENGL_UNIFORM_BUFFER_H
 

@@ -32,6 +32,7 @@
 #include "nel/misc/dynloadlib.h"
 #include "driver_opengl_vertex_buffer.h"
 #include "driver_glsl_shader_generator.h"
+#include "driver_opengl_uniform_buffer.h"
 
 
 using namespace std;
@@ -149,6 +150,17 @@ GLenum CDriverGL3::NLCubeFaceToGLCubeFace[6] =
 CDriverGL3::CDriverGL3()
 {
 	H_AUTO_OGL(CDriverGL3_CDriverGL)
+
+#if NL3D_GL3_UNIFORM_BUFFER_DEBUG
+	// Test UniformBufferFormat
+	{
+		CUniformBufferFormat ubf;
+		testUniformBufferFormat(ubf);
+		std::stringstream ss;
+		generateUniformBufferGLSL(ss, ubf, NL_BUILTIN_MATERIAL_BINDING);
+		nlinfo("%s", ss.str().c_str());
+	}
+#endif
 
 #if defined(NL_OS_WINDOWS)
 
