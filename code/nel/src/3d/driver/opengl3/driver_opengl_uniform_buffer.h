@@ -95,6 +95,7 @@ public:
 	};
 
 	// Push a variable. Returns the byte offset in uniform buffer
+	// Note: Does not check for duplicate names. However, names must be unique
 	sint push(const std::string &name, TType type, sint count = 1)
 	{
 		nlassert(count > 0);
@@ -173,16 +174,50 @@ const sint CUniformBufferFormat::s_TypeSize[] = {
 	8,
 	12,
 	16,
-	16 + 8, // FloatMat2
-	16 + 16 + 12, // FloatMat3
+	16 + 16, // FloatMat2
+	16 + 16 + 16, // FloatMat3
 	16 + 16 + 16 + 16, // FloatMat4
-	16 + 12, // FloatMat2x3
+	16 + 16, // FloatMat2x3
 	16 + 16, // FloatMat2x4
-	16 + 16 + 8, // FloatMat3x2
+	16 + 16 + 16, // FloatMat3x2
 	16 + 16 + 16, // FloatMat3x4
-	16 + 16 + 16 + 8, // FloatMat4x2
-	16 + 16 + 16 + 12, // FloatMat4x3
+	16 + 16 + 16 + 16, // FloatMat4x2
+	16 + 16 + 16 + 16, // FloatMat4x3
 };
+
+void testUniformBufferFormat()
+{
+	CUniformBufferFormat ubf;
+	sint offset;
+	offset = ubf.push("a", CUniformBufferFormat::Float);
+	nlassert(offset == 0);
+	offset = ubf.push("b", CUniformBufferFormat::FloatVec2);
+	nlassert(offset == 8);
+	offset = ubf.push("c", CUniformBufferFormat::FloatVec3);
+	nlassert(offset == 16);
+	offset = ubf.push("d", CUniformBufferFormat::FloatVec4);
+	nlassert(offset == 32);
+	offset = ubf.push("e", CUniformBufferFormat::FloatVec2);
+	nlassert(offset == 48);
+	offset = ubf.push("g", CUniformBufferFormat::Float);
+	nlassert(offset == 56);
+	offset = ubf.push("h", CUniformBufferFormat::Float, 2);
+	nlassert(offset == 64);
+	offset = ubf.push("i", CUniformBufferFormat::FloatMat2x3);
+	nlassert(offset == 96);
+	offset = ubf.push("j", CUniformBufferFormat::FloatVec3);
+	nlassert(offset == 128);
+	offset = ubf.push("k", CUniformBufferFormat::FloatVec2);
+	nlassert(offset == 144);
+	offset = ubf.push("l", CUniformBufferFormat::Float, 2);
+	nlassert(offset == 160);
+	offset = ubf.push("m", CUniformBufferFormat::FloatVec2);
+	nlassert(offset == 192);
+	offset = ubf.push("n", CUniformBufferFormat::FloatMat3, 2);
+	nlassert(offset == 208);
+	offset = ubf.push("o", CUniformBufferFormat::FloatVec3);
+	nlassert(offset == 304);
+}
 
 }
 
