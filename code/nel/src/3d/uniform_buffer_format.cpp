@@ -128,7 +128,6 @@ void testUniformBufferFormat(CUniformBufferFormat &ubf)
 	offset = ubf.push("h", CUniformBufferFormat::Float, 2);
 	nlassert(offset == 64);
 	offset = ubf.push("i", CUniformBufferFormat::FloatMat2x3);
-	nlinfo("offset: %i", offset);
 	nlassert(offset == 96);
 	offset = ubf.push("j", CUniformBufferFormat::FloatVec3);
 	nlassert(offset == 128);
