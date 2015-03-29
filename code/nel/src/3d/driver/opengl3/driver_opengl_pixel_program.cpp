@@ -552,6 +552,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc, CGlExtensions &glex
 			ss << "float fogFactor = (fogParams.t - z) / (fogParams.t - fogParams.s);" << std::endl;
 			ss << "fogFactor = clamp(fogFactor, 0.0, 1.0);" << std::endl;
 			ss << "vec4 fColor = mix(fogColor, col, fogFactor);" << std::endl;
+			ss << "fColor.a = col.a;" << std::endl;
 			ss << "return fColor;" << std::endl;
 			ss << "}" << std::endl;
 			ss << std::endl;
