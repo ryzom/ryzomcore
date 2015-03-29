@@ -96,14 +96,14 @@ public: // Driver-only
 class IUBDrvInfos : public NLMISC::CRefCount
 {
 protected:
-	IDriver				*_Driver;
+	IDriver				*m_Driver;
 private:
-	ItUBDrvInfoPtrList	_DriverIterator;
+	ItUBDrvInfoPtrList	m_DriverIterator;
 
 public:
 	NLMISC::CRefPtr<CUniformBuffer>	UniformBufferPtr;
 
-	IUBDrvInfos(IDriver	*drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub) { _Driver = drv; _DriverIterator = it; UniformBufferPtr = ub; }
+	IUBDrvInfos(IDriver	*drv, ItUBDrvInfoPtrList it, CUniformBuffer *ub) { m_Driver = drv; m_DriverIterator = it; UniformBufferPtr = ub; }
 
 	virtual ~IUBDrvInfos();
 };
