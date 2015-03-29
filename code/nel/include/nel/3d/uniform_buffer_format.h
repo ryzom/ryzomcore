@@ -99,6 +99,7 @@ public:
 	inline const CEntry &get(sint i) const { return m_Entries[i]; }
 	inline size_t size() const { return m_Entries.size(); }
 	inline void clear() { m_Entries.clear(); m_Hash = 0; }
+	inline size_t hash() const { return m_Hash; }
 
 private:
 	static const sint s_TypeAlignment[];
@@ -113,6 +114,16 @@ private:
 void testUniformBufferFormat(CUniformBufferFormat &ubf);
 
 } /* namespace NL3D */
+
+namespace std {
+	
+template <>
+struct hash<NL3D::CUniformBufferFormat>
+{
+	size_t operator()(const NL3D::CUniformBufferFormat & v) const { return v.hash(); }
+};
+
+} /* namespace std */
 
 #endif /* #ifndef NL_UNIFORM_BUFFER_FORMAT_H */
 
