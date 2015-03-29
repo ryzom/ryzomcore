@@ -89,7 +89,7 @@ void generateUniformBufferGLSL(std::stringstream &ss, const CUniformBufferFormat
 {
 	ss << "layout(std140, binding = " << s_UniformBufferBindDefine[binding] << ") uniform " << s_UniformBufferName[binding] << "\n";
 	ss << "{\n";
-	for (sint i = 0; i < ubf.size(); ++i)
+	for (sint i = 0; i < ubf.count(); ++i)
 	{
 		const CUniformBufferFormat::CEntry &entry = ubf.get(i);
 		ss << "\t" << s_TypeKeyword[entry.Type] << " " << NLMISC::CStringMapper::unmap(entry.Name);

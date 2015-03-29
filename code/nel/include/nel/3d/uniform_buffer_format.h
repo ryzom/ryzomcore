@@ -34,6 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace NL3D {
 
+/* 
+**** IMPORTANT ********************
+**** IF YOU MODIFY THE STRUCTURE OF THIS CLASS, PLEASE INCREMENT IDriver::InterfaceVersion TO INVALIDATE OLD DRIVER DLL
+***********************************
+*/
+
 // Uniform buffer format generation following glsl std140 rules
 class CUniformBufferFormat
 {
@@ -47,9 +53,9 @@ public:
 	enum TType
 	{
 		Float, // float
-		FloatVec2, // CVector2D
-		FloatVec3,
-		FloatVec4, // CVector
+		FloatVec2, // CVector2d
+		FloatVec3, // CVector
+		FloatVec4, // CVectorH
 		SInt, // sint32
 		SIntVec2,
 		SIntVec3,
@@ -90,6 +96,10 @@ public:
 		{
 			return stride() * Count;
 		}
+		inline sint offset(int i) const
+		{
+			return Offset + (stride() * i);
+		}
 	};
 
 	// Push a variable. Returns the byte offset in uniform buffer
@@ -97,9 +107,14 @@ public:
 	sint push(const std::string &name, TType type, sint count = 1);
 
 	inline const CEntry &get(sint i) const { return m_Entries[i]; }
-	inline size_t size() const { return m_Entries.size(); }
+	inline size_t count() const { return m_Entries.size(); } // Return number of entries
 	inline void clear() { m_Entries.clear(); m_Hash = 0; }
+
+	inline sint size() const { return m_Entries.size() ? (m_Entries.back().Offset + m_Entries.back().size()) : 0; } // Return size of format in bytes
 	inline size_t hash() const { return m_Hash; }
+
+	// Get the offset by entry id (counted from 0 in the order of addition to the format) and index of array
+	inline sint offset(sint entry, sint index = 0) const { m_Entries[entry].offset(index); }
 
 private:
 	static const sint s_TypeAlignment[];
