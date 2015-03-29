@@ -192,6 +192,15 @@ CDriverGL3::CDriverGL3()
 	_DefaultCursor = EmptyCursor;
 	_BlankCursor = EmptyCursor;
 
+	// Create change basis matrix matrix
+	{
+		CVector I(1, 0, 0);
+		CVector J(0, 0, -1);
+		CVector K(0, 1, 0);
+		_ChangeBasis.identity();
+		_ChangeBasis.setRot(I, J, K, true);
+	}
+
 	_AlphaBlendedCursorSupported = false;
 	_AlphaBlendedCursorSupportRetrieved = false;
 	_CurrCol = CRGBA::White;

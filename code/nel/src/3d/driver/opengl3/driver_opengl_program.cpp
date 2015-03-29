@@ -538,10 +538,10 @@ void CDriverGL3::setUniformMatrix(TProgram program, uint index, TMatrix matrix, 
 		mat = _ModelViewMatrix;
 		break;
 	case IDriver::Projection:
-		mat = _GLProjMat;
+		mat = _GLProjMat * _ChangeBasis;
 		break;
 	case IDriver::ModelViewProjection:
-		mat = _ModelViewMatrix * _GLProjMat;
+		mat = _GLProjMat * _ChangeBasis * _ModelViewMatrix;
 		break;
 	}
 
@@ -760,7 +760,7 @@ void CDriverGL3::setupUniforms(TProgram program)
 	uint mvpIndex = p->getUniformIndex(CProgramIndex::ModelViewProjection);
 	if (mvpIndex != ~0)
 	{
-		CMatrix mvp = _GLProjMat * _ModelViewMatrix;
+		CMatrix mvp = _GLProjMat * _ChangeBasis * _ModelViewMatrix;
 		setUniform4x4f(program, mvpIndex, mvp);
 	}
 

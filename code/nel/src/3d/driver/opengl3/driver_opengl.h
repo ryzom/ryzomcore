@@ -74,7 +74,6 @@
 #include "unix_event_emitter.h"
 #endif // NL_OS_UNIX
 
-
 // For optimisation consideration, allow 256 lightmaps at max.
 #define	NL3D_DRV_MAX_LIGHTMAP		256
 #define UNSUPPORTED_INDEX_OFFSET_MSG "Unsupported by driver, check IDriver::supportIndexOffset."
@@ -862,6 +861,8 @@ private:
 	// Precision ZBuffer: The Current cameraPosition, to remove from each model Position.
 	CVector					_PZBCameraPos;
 
+	// Change to OpenGL matrix basis for render output. Transparently applied to projection matrix.
+	CMatrix					_ChangeBasis;
 
 	// Current computed (OpenGL basis) ModelView matrix.
 	// NB: This matrix have already substracted the _PZBCameraPos

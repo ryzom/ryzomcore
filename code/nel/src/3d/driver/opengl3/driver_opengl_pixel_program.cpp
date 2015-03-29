@@ -547,7 +547,7 @@ void ppGenerate(std::string &result, const CPPBuiltin &desc, CGlExtensions &glex
 		//case CShaderDesc::Linear:
 			ss << "vec4 applyFog(vec4 col)" << std::endl;
 			ss << "{" << std::endl;
-			ss << "float z = ecPos.z / ecPos.w;" << std::endl;
+			ss << "float z = ecPos.y / ecPos.w;" << std::endl;
 			ss << "z = abs(z);" << std::endl;
 			ss << "float fogFactor = (fogParams.t - z) / (fogParams.t - fogParams.s);" << std::endl;
 			ss << "fogFactor = clamp(fogFactor, 0.0, 1.0);" << std::endl;
