@@ -17,109 +17,11 @@
 #ifndef NL_DRIVER_OPENGL_UNIFORM_BUFFER_H
 #define NL_DRIVER_OPENGL_UNIFORM_BUFFER_H
 
-#include "nel/misc/types_nl.h"
+#include <nel/misc/types_nl.h>
 
-#include "nel/misc/string_mapper.h"
+#include <nel/3d/uniform_buffer_format.h>
 
 #define NL3D_GL3_UNIFORM_BUFFER_DEBUG 1
-
-namespace NL3D {
-
-// Uniform buffer format generation following glsl std140 rules
-class CUniformBufferFormat
-{
-public:
-	// When changing, update
-	//     - s_TypeAlignment
-	//     - s_TypeSize
-	//     - NL3D::NLDRIVERGL3::s_TypeKeyword
-	enum TType
-	{
-		Float, // float
-		FloatVec2, // CVector2D
-		FloatVec3,
-		FloatVec4, // CVector
-		SInt, // sint32
-		SIntVec2,
-		SIntVec3,
-		SIntVec4,
-		UInt, // uint32
-		UIntVec2,
-		UIntVec3,
-		UIntVec4,
-		Bool,
-		BoolVec2,
-		BoolVec3,
-		BoolVec4,
-		FloatMat2,
-		FloatMat3,
-		FloatMat4, // CMatrix
-		FloatMat2x3,
-		FloatMat2x4,
-		FloatMat3x2,
-		FloatMat3x4,
-		FloatMat4x2,
-		FloatMat4x3,
-	};
-
-	struct CEntry
-	{
-		NLMISC::TStringId Name;
-		TType Type;
-		sint Offset;
-		sint Count;
-
-		inline sint stride() const
-		{
-			return Count == 1
-				? s_TypeSize[Type]
-				: ((s_TypeSize[Type] + 15) & ~0xF);
-		}
-		inline sint size() const
-		{
-			return stride() * Count;
-		}
-	};
-
-	// Push a variable. Returns the byte offset in uniform buffer
-	// Note: Does not check for duplicate names. However, names must be unique
-	sint push(const std::string &name, TType type, sint count = 1)
-	{
-		nlassert(count > 0);
-		sint baseAlign = count == 1
-			? s_TypeAlignment[type]
-			: ((s_TypeAlignment[type] + 15) & ~0xF);
-		sint baseOffset = m_Entries.size()
-			? m_Entries.back().Offset + m_Entries.back().size()
-			: 0;
-		sint alignOffset = baseOffset;
-		alignOffset += (baseAlign - 1);
-		alignOffset &= ~(baseAlign - 1); // Note: alignment MUST BE power of 2 for this to work
-		m_Entries.resize(m_Entries.size() + 1);
-		CEntry &entry = m_Entries.back();
-		entry.Name = NLMISC::CStringMapper::map(name);
-		entry.Type = type;
-		entry.Offset = alignOffset;
-		entry.Count = count;
-		return alignOffset;
-	}
-
-	inline const CEntry &get(sint i) const { return m_Entries[i]; }
-	inline size_t size() const { return m_Entries.size(); }
-	inline void clear() { m_Entries.clear(); }
-
-private:
-	static const sint s_TypeAlignment[];
-	static const sint s_TypeSize[];
-
-	typedef std::vector<CEntry> TEntries;
-	TEntries m_Entries;
-
-};
-
-void testUniformBufferFormat(CUniformBufferFormat &ubf);
-
-}
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
