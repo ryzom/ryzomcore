@@ -38,6 +38,8 @@ namespace NL3D {
 class CUniformBufferFormat
 {
 public:
+	CUniformBufferFormat() : m_Hash(0) { }
+
 	// When changing, update
 	//     - s_TypeAlignment
 	//     - s_TypeSize
@@ -96,7 +98,7 @@ public:
 
 	inline const CEntry &get(sint i) const { return m_Entries[i]; }
 	inline size_t size() const { return m_Entries.size(); }
-	inline void clear() { m_Entries.clear(); }
+	inline void clear() { m_Entries.clear(); m_Hash = 0; }
 
 private:
 	static const sint s_TypeAlignment[];
@@ -104,6 +106,7 @@ private:
 
 	typedef std::vector<CEntry> TEntries;
 	TEntries m_Entries;
+	size_t m_Hash;
 
 };
 
