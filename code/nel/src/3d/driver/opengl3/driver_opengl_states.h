@@ -21,10 +21,7 @@
 #include "nel/3d/vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 /**
@@ -170,10 +167,7 @@ private:
 	void			updateDepthRange();
 };
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 

@@ -34,10 +34,7 @@ using namespace std;
 using namespace NLMISC;
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // *************************************************************************************
 CDriverGL3::CCursor::CCursor() : ColorDepth(CDriverGL3::ColorDepth32),
@@ -862,8 +859,5 @@ bool CDriverGL3::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &
 #endif
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

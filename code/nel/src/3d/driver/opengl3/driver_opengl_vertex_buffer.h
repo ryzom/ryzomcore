@@ -20,10 +20,7 @@
 #include "nel/misc/types_nl.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 class CDriverGL3;
 class IVertexBufferGL3;
@@ -118,10 +115,7 @@ private:
 	uint m_VertexObjectId;
 };
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 #endif // NL_DRIVER_OPENGL_VERTEX_BUFFER_H

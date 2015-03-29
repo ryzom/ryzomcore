@@ -42,10 +42,7 @@ using	namespace std;
 #endif
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CDriverGL3 *drvGl, bool isRectangleTexture) : ITextureDrvInfos(drv, it)
@@ -1686,8 +1683,5 @@ bool CDriverGL3::getRenderTargetSize (uint32 &width, uint32 &height)
 
 // ***************************************************************************
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

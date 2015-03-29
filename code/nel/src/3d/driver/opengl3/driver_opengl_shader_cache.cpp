@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#if 0
 
 #include "driver_opengl_shader_cache.h"
 
@@ -60,3 +61,4 @@ namespace NL3D
 	}
 }
 
+#endif

@@ -21,10 +21,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 
@@ -393,9 +390,6 @@ bool CDriverGL3::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQua
 	return true;
 }
 
-#ifdef NL_STATIC
 }
-#endif
-
 }
 

@@ -20,10 +20,7 @@
 #include "nel/3d/light.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 uint	CDriverGL3::getMaxLight () const
@@ -201,8 +198,5 @@ void			CDriverGL3::setupLightMapDynamicLighting(bool enable)
 	}
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

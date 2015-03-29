@@ -23,10 +23,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 static void convBlend(CMaterial::TBlend blend, GLenum& glenum)
 {
@@ -1216,8 +1213,5 @@ void CDriverGL3::endWaterMultiPass()
 	nlassert(_CurrentMaterial->getShader() == CMaterial::Water);
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

@@ -23,10 +23,7 @@
 //#define		NL3D_GLSTATE_DISABLE_CACHE
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 CDriverGLStates3::CDriverGLStates3()
@@ -423,8 +420,5 @@ CDriverGLStates3::TCullMode CDriverGLStates3::getCullMode() const
 	return _CullMode;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

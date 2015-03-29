@@ -20,10 +20,7 @@
 #include "nel/misc/types_nl.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 class CDriverGL3;
 
@@ -119,24 +116,21 @@ inline bool hasFlag(uint32 data, uint32 flag)
 
 } /* anonymous namespace */
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 namespace std {
 
 template <>
-struct hash<NL3D::CVPBuiltin>
+struct hash<NL3D::NLDRIVERGL3::CVPBuiltin>
 {
-	size_t operator()(const NL3D::CVPBuiltin & v) const;
+	size_t operator()(const NL3D::NLDRIVERGL3::CVPBuiltin & v) const;
 };
 
 template <>
-struct hash<NL3D::CPPBuiltin>
+struct hash<NL3D::NLDRIVERGL3::CPPBuiltin>
 {
-	size_t operator()(const NL3D::CPPBuiltin & v) const;
+	size_t operator()(const NL3D::NLDRIVERGL3::CPPBuiltin & v) const;
 };
 
 }

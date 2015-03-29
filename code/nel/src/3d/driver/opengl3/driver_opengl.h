@@ -83,10 +83,7 @@ using NLMISC::CMatrix;
 using NLMISC::CVector;
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 class	CDriverGL3;
 class	IVertexBufferGL3;
@@ -384,7 +381,7 @@ public:
 	static inline void		setupCausticsSecondTex(uint stage);*/
 
 	virtual bool			setupMaterial(CMaterial& mat);
-	void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
+	// void					generateShaderDesc(CShaderDesc &desc, CMaterial &mat);
 	bool					setupBuiltinPrograms();
 	bool					setupBuiltinVertexProgram();
 	bool					setupBuiltinPixelProgram();
@@ -1410,10 +1407,7 @@ private:
 };
 */
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 #endif // NL_DRIVER_OPENGL_H

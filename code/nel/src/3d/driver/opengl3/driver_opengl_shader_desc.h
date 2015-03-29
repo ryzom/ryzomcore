@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#if 0
+
 #ifndef SHADER_DESC
 #define SHADER_DESC
 
@@ -286,3 +288,4 @@ namespace NL3D
 
 #endif
 
+#endif

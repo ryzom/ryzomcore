@@ -28,10 +28,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 namespace /* anonymous */ {
 
@@ -123,15 +120,12 @@ bool operator==(const CPPBuiltin &left, const CPPBuiltin &right)
 	return true;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 namespace std {
 
-size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
+size_t hash<NL3D::NLDRIVERGL3::CPPBuiltin>::operator()(const NL3D::NLDRIVERGL3::CPPBuiltin & v) const
 {
 #if (HAVE_X86_64)
 	uint32 h32;
@@ -141,8 +135,8 @@ size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
 	h32 = NLMISC::wangHash((uint32)v.Shader);
 	h64 = NLMISC::wangHash64(((uint64)v.Flags) | ((uint64)v.TextureActive << 32));
 	h64 = NLMISC::wangHash64(h64 ^ (uint64)v.TexSamplerMode);
-	uint maxTex = NL3D::maxTextures(v.Shader);
-	if (NL3D::useTexEnv(v.Shader))
+	uint maxTex = NL3D::NLDRIVERGL3::maxTextures(v.Shader);
+	if (NL3D::NLDRIVERGL3::useTexEnv(v.Shader))
 		for (uint stage = 0; stage < maxTex; ++stage)
 			h32 = NLMISC::wangHash(h32 ^ (uint32)v.TexEnvMode[stage]);
 
@@ -177,10 +171,7 @@ size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
 }
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 namespace /* anonymous */ {
 
@@ -810,9 +801,6 @@ void CPPBuiltin::checkMaterialStateTouched(CMaterial &mat) // MUST NOT depend on
 	mat.clearTouched(0xFFFFFFFF);
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 

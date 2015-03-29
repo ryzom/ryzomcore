@@ -24,10 +24,7 @@
 #include "driver_opengl_extension_def.h"
 
 namespace	NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 /// The extensions used by NL3D.
@@ -140,10 +137,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen);
 /// This function test and register the extensions for the current GL context.
 bool registerGlExtensions(CGlExtensions &ext);
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 // ***************************************************************************

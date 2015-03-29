@@ -25,10 +25,7 @@ using	namespace std;
 using	namespace NLMISC;
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 // ***************************************************************************
@@ -510,9 +507,6 @@ void CVertexBufferAMDPinned::setupVBInfos(CVertexBufferInfo &vb)
 // ***************************************************************************
 // ***************************************************************************
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 

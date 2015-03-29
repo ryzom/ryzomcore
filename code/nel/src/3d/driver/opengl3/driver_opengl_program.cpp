@@ -20,10 +20,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 const uint16 g_VertexFlags[CVertexBuffer::NumValue] = 
 {
@@ -573,6 +570,7 @@ void CDriverGL3::setUniformFog(TProgram program, uint index)
 	nglProgramUniform4f(id, index, -v[ 2 ], -v[ 6 ], -v[ 10 ], -v[ 4 ]);
 }
 
+/*
 void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 {
 	desc.setShaderType(mat.getShader());
@@ -626,7 +624,7 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 			{
 				/*nldebug("stage fail %i, tex %s, tc0 %s, tci, %s", i, mat.getTexture(i) ? "VALID" : "NO", 
 					desc.hasVBFlags(g_VertexFlags[TexCoord0]) ? "YES" : "NO",
-					desc.hasVBFlags(g_VertexFlags[TexCoord0 + i]) ? "YES" : "NO");*/
+					desc.hasVBFlags(g_VertexFlags[TexCoord0 + i]) ? "YES" : "NO");* /
 			}
 		}
 
@@ -678,8 +676,8 @@ void CDriverGL3::generateShaderDesc(CShaderDesc &desc, CMaterial &mat)
 	
 	}
 
-	desc.setLighting(/*enableLights && mat.isLighted() &&*/ m_VPBuiltinCurrent.Lighting);			
-}
+	desc.setLighting(/*enableLights && mat.isLighted() &&* / m_VPBuiltinCurrent.Lighting);			
+}*/
 
 bool CDriverGL3::setupBuiltinPrograms()
 {
@@ -937,10 +935,7 @@ bool CDriverGL3::initProgramPipeline()
 	return true;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 /* end of file */

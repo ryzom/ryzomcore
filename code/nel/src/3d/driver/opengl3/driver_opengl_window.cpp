@@ -45,10 +45,7 @@ using namespace std;
 using namespace NLMISC;
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 #ifdef NL_OS_WINDOWS
 
@@ -2942,8 +2939,5 @@ bool CDriverGL3::convertBitmapToIcon(const NLMISC::CBitmap &bitmap, std::vector<
 
 #endif
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D

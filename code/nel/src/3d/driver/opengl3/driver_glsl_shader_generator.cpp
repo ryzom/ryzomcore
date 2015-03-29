@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#if 0
+
 #include "stdopengl.h"
 #include "driver_glsl_shader_generator.h"
 
@@ -613,4 +615,4 @@ namespace NL3D
 	}
 }
 
-
+#endif

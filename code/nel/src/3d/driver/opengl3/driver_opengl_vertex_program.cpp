@@ -28,10 +28,7 @@
 #include "driver_opengl_vertex_buffer.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 {
@@ -79,15 +76,12 @@ bool operator==(const CVPBuiltin &left, const CVPBuiltin &right)
 	return true;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 
 namespace std {
 
-size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
+size_t hash<NL3D::NLDRIVERGL3::CVPBuiltin>::operator()(const NL3D::NLDRIVERGL3::CVPBuiltin & v) const
 {
 	uint32 h;
 
@@ -105,10 +99,7 @@ size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
 }
 
 namespace NL3D {
-
-#ifdef NL_STATIC
-	namespace NLDRIVERGL3 {
-#endif
+namespace NLDRIVERGL3 {
 
 namespace /* anonymous */ {
 
@@ -455,9 +446,6 @@ void CDriverGL3::setTexGenModeVP(uint stage, sint mode)
 	}
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
 

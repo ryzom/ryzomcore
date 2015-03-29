@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#if 0
 
 #ifndef OPENGL_SHADER_CACHE
 #define OPENGL_SHADER_CACHE
@@ -48,3 +49,4 @@ namespace NL3D
 
 #endif
 
+#endif

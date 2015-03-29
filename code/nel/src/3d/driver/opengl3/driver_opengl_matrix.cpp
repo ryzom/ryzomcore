@@ -18,10 +18,7 @@
 #include "driver_opengl.h"
 
 namespace NL3D {
-
-#ifdef NL_STATIC
 namespace NLDRIVERGL3 {
-#endif
 
 // ***************************************************************************
 void CDriverGL3::setFrustum(float left, float right, float bottom, float top, float znear, float zfar, bool perspective)
@@ -127,8 +124,5 @@ void CDriverGL3::setupModelMatrix(const CMatrix& mtx)
 	_ModelViewMatrix= _ViewMtx*mat;
 }
 
-#ifdef NL_STATIC
 } // NLDRIVERGL3
-#endif
-
 } // NL3D
