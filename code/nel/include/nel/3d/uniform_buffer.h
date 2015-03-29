@@ -57,6 +57,12 @@ typedef	TUBDrvInfoPtrList::iterator ItUBDrvInfoPtrList;
 ***********************************
 */
 
+#if NL3D_UNIFORM_BUFFER_DEBUG
+#define NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(ub) nlassert(ub->Locked)
+#else
+#define NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(ub) /* ub->Locked doesn't exist when NL3D_UNIFORM_BUFFER_DEBUG is 0 */
+#endif
+
 // Uniform buffer
 class CUniformBuffer : public NLMISC::CRefCount
 {
@@ -67,14 +73,14 @@ public:
 	void *lock();
 	void unlock();
 
-	inline void set(sint offset, float f) { reinterpret_cast<float &>(m_HostMemory[offset]) = f; }
-	inline void set(sint offset, float f0, float f1) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; }
-	inline void set(sint offset, float f0, float f1, float f2) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; }
-	inline void set(sint offset, float f0, float f1, float f2, float f3) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; f[3] = f3; }
-	inline void set(sint offset, NLMISC::CVector2f vec2) { reinterpret_cast<NLMISC::CVector2f &>(m_HostMemory[offset]) = vec2; }
-	inline void set(sint offset, NLMISC::CVector vec3) { reinterpret_cast<NLMISC::CVector &>(m_HostMemory[offset]) = vec3; }
-	inline void set(sint offset, NLMISC::CVectorH vec4) { reinterpret_cast<NLMISC::CVectorH &>(m_HostMemory[offset]) = vec4; }
-	inline void set(sint offset, NLMISC::CMatrix mat4)  { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); mat4.get(f); }
+	inline void set(sint offset, float f) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); reinterpret_cast<float &>(m_HostMemory[offset]) = f; }
+	inline void set(sint offset, float f0, float f1) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; }
+	inline void set(sint offset, float f0, float f1, float f2) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; }
+	inline void set(sint offset, float f0, float f1, float f2, float f3) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; f[3] = f3; }
+	inline void set(sint offset, NLMISC::CVector2f vec2) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); reinterpret_cast<NLMISC::CVector2f &>(m_HostMemory[offset]) = vec2; }
+	inline void set(sint offset, NLMISC::CVector vec3) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); reinterpret_cast<NLMISC::CVector &>(m_HostMemory[offset]) = vec3; }
+	inline void set(sint offset, NLMISC::CVectorH vec4) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); reinterpret_cast<NLMISC::CVectorH &>(m_HostMemory[offset]) = vec4; }
+	inline void set(sint offset, NLMISC::CMatrix mat4)  { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); mat4.get(f); }
 
 private:
 	std::vector<char> m_HostMemory;
