@@ -35,6 +35,11 @@ namespace NL3D {
 
 CUniformBuffer::CUniformBuffer()
 {
+	nlctassert(sizeof(float) == 4);
+	nlctassert(sizeof(NLMISC::CVector2f) == 8);
+	nlctassert(sizeof(NLMISC::CVector) == 12);
+	nlctassert(sizeof(NLMISC::CVectorH) == 16);
+
 	// ...
 }
 

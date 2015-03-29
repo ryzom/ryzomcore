@@ -53,7 +53,7 @@ public:
 	enum TType
 	{
 		Float, // float
-		FloatVec2, // CVector2d
+		FloatVec2, // CVector2f
 		FloatVec3, // CVector
 		FloatVec4, // CVectorH
 		SInt, // sint32

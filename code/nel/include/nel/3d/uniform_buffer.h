@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <nel/misc/types_nl.h>
 #include <nel/misc/smart_ptr.h>
 #include <nel/misc/vector.h>
-#include <nel/misc/vector_2d.h>
+#include <nel/misc/vector_2f.h>
 #include <nel/misc/vector_h.h>
 #include <nel/misc/matrix.h>
 
@@ -71,7 +71,7 @@ public:
 	inline void set(sint offset, float f0, float f1) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; }
 	inline void set(sint offset, float f0, float f1, float f2) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; }
 	inline void set(sint offset, float f0, float f1, float f2, float f3) { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; f[2] = f2; f[3] = f3; }
-	inline void set(sint offset, NLMISC::CVector2d vec2) { reinterpret_cast<NLMISC::CVector2d &>(m_HostMemory[offset]) = vec2; }
+	inline void set(sint offset, NLMISC::CVector2f vec2) { reinterpret_cast<NLMISC::CVector2f &>(m_HostMemory[offset]) = vec2; }
 	inline void set(sint offset, NLMISC::CVector vec3) { reinterpret_cast<NLMISC::CVector &>(m_HostMemory[offset]) = vec3; }
 	inline void set(sint offset, NLMISC::CVectorH vec4) { reinterpret_cast<NLMISC::CVectorH &>(m_HostMemory[offset]) = vec4; }
 	inline void set(sint offset, NLMISC::CMatrix mat4)  { float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); mat4.get(f); }
