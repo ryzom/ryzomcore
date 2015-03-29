@@ -64,6 +64,8 @@ void CFontManager::computeString (const std::string &s,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
+								  bool embolden,
+								  bool oblique,
 								  IDriver *driver,
 								  CComputedString &output,
 								  bool	keep800x600Ratio)
@@ -71,7 +73,7 @@ void CFontManager::computeString (const std::string &s,
 	// static to avoid reallocation
 	static ucstring	ucs;
 	ucs= s;
-	computeString(ucs, fontGen, color, fontSize, driver, output, keep800x600Ratio);
+	computeString(ucs, fontGen, color, fontSize, embolden, oblique, driver, output, keep800x600Ratio);
 }
 
 
@@ -80,6 +82,8 @@ void CFontManager::computeString (const ucstring &s,
 								  CFontGenerator *fontGen,
 								  const NLMISC::CRGBA &color,
 								  uint32 fontSize,
+								  bool embolden,
+								  bool oblique,
 								  IDriver *driver,
 								  CComputedString &output,
 								  bool	keep800x600Ratio)
@@ -147,6 +151,8 @@ void CFontManager::computeString (const ucstring &s,
 			k.Char = s[i];
 			k.FontGenerator = fontGen;
 			k.Size = fontSize;
+			k.Embolden = embolden;
+			k.Oblique = oblique;
 			CTextureFont::SLetterInfo *pLI = pTexFont->getLetterInfo (k);
 			if(pLI != NULL)
 			{
@@ -227,6 +233,8 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 										CFontGenerator *fontGen,
 										const NLMISC::CRGBA &color,
 										uint32 fontSize,
+										bool embolden,
+										bool oblique,
 										IDriver *driver,
 										CComputedString &output,
 										bool keep800x600Ratio	)
@@ -259,6 +267,8 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 		k.Char = s[i];
 		k.FontGenerator = fontGen;
 		k.Size = fontSize;
+		k.Embolden = embolden;
+		k.Oblique = oblique;
 		pLI = pTexFont->getLetterInfo (k);
 		if(pLI != NULL)
 		{
