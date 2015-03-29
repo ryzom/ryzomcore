@@ -580,7 +580,11 @@ struct CEntityIdHashMapTraits
 	size_t operator() (const NLMISC::CEntityId &id ) const
 	{
 		uint64 hash64 = id.getUniqueId();
-		return size_t(hash64) ^ size_t( hash64 >> 32 );
+#if (HAVE_X86_64)
+		return (size_t)hash64;
+#else
+		return (size_t)hash64 ^ (size_t)(hash64 >> 32);
+#endif
 		//return size_t(id.getShortId());
 	}
 	bool operator() (const NLMISC::CEntityId &id1, const NLMISC::CEntityId &id2) const
