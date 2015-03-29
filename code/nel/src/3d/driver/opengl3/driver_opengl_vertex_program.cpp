@@ -89,7 +89,7 @@ namespace std {
 
 size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
 {
-	uint32_t h;
+	uint32 h;
 
 	h = NLMISC::wangHash(((uint32)v.VertexFormat) | (v.Lighting ? (1 << 16) : 0) | (v.Specular ? (1 << 17) : 0) | (v.Fog ? (1 << 18) : 0));
 	if (v.Lighting)
@@ -98,7 +98,7 @@ size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
 	for (sint i = 0; i < NL3D::IDRV_MAT_MAXTEXTURES; ++i)
 		h = NLMISC::wangHash(h ^ v.TexGenMode[i]);
 
-	nlctassert(sizeof(size_t) > sizeof(uint32));
+	nlctassert(sizeof(size_t) >= sizeof(uint32));
 	return (size_t)h;
 }
 

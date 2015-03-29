@@ -133,24 +133,45 @@ namespace std {
 
 size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
 {
-	uint32_t h;
+#if (HAVE_X86_64)
+	uint32 h32;
+	uint64 h64;
+
+	// Material state
+	h32 = NLMISC::wangHash((uint32)v.Shader);
+	h64 = NLMISC::wangHash64(((uint64)v.Flags) | ((uint64)v.TextureActive << 32));
+	h64 = NLMISC::wangHash64(h64 ^ (uint64)v.TexSamplerMode);
+	uint maxTex = NL3D::maxTextures(v.Shader);
+	if (NL3D::useTexEnv(v.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			h32 = NLMISC::wangHash(h32 ^ (uint32)v.TexEnvMode[stage]);
+
+	// Driver state
+	h32 = NLMISC::wangHash(h32 ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0)));
+
+	h64 = h64 ^ h32; // NLMISC::wangHash64(h64 ^ h32);
+	nlctassert(sizeof(size_t) >= sizeof(uint64));
+	return (size_t)h64;
+#else
+	uint32 h;
 
 	// Material state
 	h = NLMISC::wangHash((uint32)v.Shader);
 	h = NLMISC::wangHash(h ^ (uint32)v.Flags);
 	h = NLMISC::wangHash(h ^ (uint32)v.TextureActive);
-	h = NLMISC::wangHash(h ^ (uint32)v.TexSamplerMode);
+	h = NLMISC::wangHash(h ^ (uint32)(v.TexSamplerMode & 0xFFFFFFFF));
+	h = NLMISC::wangHash(h ^ (uint32)(v.TexSamplerMode >> 32));
 	uint maxTex = NL3D::maxTextures(v.Shader);
 	if (NL3D::useTexEnv(v.Shader))
 		for (uint stage = 0; stage < maxTex; ++stage)
 			h = NLMISC::wangHash(h ^ (uint32)v.TexEnvMode[stage]);
 
 	// Driver state
-	h = NLMISC::wangHash(h ^ (uint32)v.VertexFormat);
-	h = NLMISC::wangHash(h ^ (uint32)v.Fog);
+	h = NLMISC::wangHash(h ^ (((uint32)v.VertexFormat) | (v.Fog ? 1 << 16 : 0)));
 
-	nlctassert(sizeof(size_t) > sizeof(uint32));
+	nlctassert(sizeof(size_t) >= sizeof(uint32));
 	return (size_t)h;
+#endif
 }
 
 }
