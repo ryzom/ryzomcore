@@ -23,6 +23,10 @@ namespace NL3D {
 namespace NLDRIVERGL3 {
 
 // NOTE: It is completely safe to reorder these indices.
+// When changing, update:
+//     - GLSLHeaderUniformBuffer
+//     - s_UniformBufferBindDefine
+//     - s_UniformBufferBindName
 // Always use the defines.
 #define NL_BUILTIN_CAMERA_BIND 0 // Builtin uniform buffer bound by driver, set by camera transformation
 #define NL_BUILTIN_MODEL_BIND 1 // Builtin uniform buffer bound by driver, set by model transformation
@@ -46,6 +50,10 @@ namespace NL3D {
 class CUniformBufferFormat
 {
 public:
+	// When changing, update
+	//     - s_TypeAlignment
+	//     - s_TypeSize
+	//     - NL3D::NLDRIVERGL3::s_TypeKeyword
 	enum TType
 	{
 		Float, // float
@@ -82,13 +90,13 @@ public:
 		sint Offset;
 		sint Count;
 
-		inline sint stride()
+		inline sint stride() const
 		{
 			return Count == 1
 				? s_TypeSize[Type]
 				: ((s_TypeSize[Type] + 15) & ~0xF);
 		}
-		inline sint size()
+		inline sint size() const
 		{
 			return stride() * Count;
 		}
@@ -114,11 +122,12 @@ public:
 		entry.Type = type;
 		entry.Offset = alignOffset;
 		entry.Count = count;
-		return baseOffset;
+		return alignOffset;
 	}
 
-	inline const CEntry *get() { return &m_Entries[0]; }
-	inline size_t size() { return m_Entries.size(); }
+	inline const CEntry &get(sint i) const { return m_Entries[i]; }
+	inline size_t size() const { return m_Entries.size(); }
+	inline void clear() { m_Entries.clear(); }
 	
 private:
 	static const sint s_TypeAlignment[];
