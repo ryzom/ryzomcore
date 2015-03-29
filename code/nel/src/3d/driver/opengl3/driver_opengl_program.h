@@ -50,6 +50,7 @@ struct CVPBuiltin
 };
 
 bool operator<(const CVPBuiltin &left, const CVPBuiltin &right);
+bool operator==(const CVPBuiltin &left, const CVPBuiltin &right);
 
 static const uint64 Sampler2D = 0;
 static const uint64 SamplerCube = 1;
@@ -78,6 +79,7 @@ struct CPPBuiltin
 };
 
 bool operator<(const CPPBuiltin &left, const CPPBuiltin &right);
+bool operator==(const CPPBuiltin &left, const CPPBuiltin &right);
 
 enum TAttribOffset
 {
@@ -122,6 +124,22 @@ inline bool hasFlag(uint32 data, uint32 flag)
 #endif
 
 } // NL3D
+
+namespace std {
+
+template <>
+struct hash<NL3D::CVPBuiltin>
+{
+	size_t operator()(const NL3D::CVPBuiltin & v) const;
+};
+
+template <>
+struct hash<NL3D::CPPBuiltin>
+{
+	size_t operator()(const NL3D::CPPBuiltin & v) const;
+};
+
+}
 
 #endif // NL_DRIVER_OPENGL_PROGRAM_H
 

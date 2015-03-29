@@ -35,6 +35,8 @@
 #	endif //XF86VIDMODE
 #endif // NL_OS_UNIX
 
+#include <unordered_set>
+
 #include "nel/misc/matrix.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/rgba.h"
@@ -1302,9 +1304,9 @@ private:
 	NLMISC::CRefPtr<CPixelProgram> m_DriverPixelProgram;
 
 	friend class CPPBuiltin;
-	std::set<CPPBuiltin> m_PPBuiltinCache;
+	std::unordered_set<CPPBuiltin> m_PPBuiltinCache;
 
-	std::set<CVPBuiltin> m_VPBuiltinCache;
+	std::unordered_set<CVPBuiltin> m_VPBuiltinCache;
 	CVPBuiltin m_VPBuiltinCurrent;
 	bool m_VPBuiltinTouched;
 

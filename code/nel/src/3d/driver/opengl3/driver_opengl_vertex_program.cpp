@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#include "nel/misc/wang_hash.h"
+
 #include "nel/3d/vertex_program.h"
 #include "nel/3d/light.h"
 
@@ -53,6 +55,60 @@ bool operator<(const CVPBuiltin &left, const CVPBuiltin &right)
 
 	return false;
 }
+
+bool operator==(const CVPBuiltin &left, const CVPBuiltin &right)
+{
+	if (left.VertexFormat != right.VertexFormat)
+		return false;
+	if (left.Lighting != right.Lighting)
+		return false;
+	if (left.Lighting)
+		for (sint i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+			if (left.LightMode[i] != right.LightMode[i])
+				return false;
+	for (sint i = 0; i < IDRV_MAT_MAXTEXTURES; ++i)
+		if (left.TexGenMode[i] != right.TexGenMode[i])
+			return false;
+	if (left.Specular != right.Specular)
+		return false;
+	if (left.Fog != right.Fog)
+		return false;
+	//	if (left.VertexColorLighted != right.VertexColorLighted)
+	//		return false;
+
+	return true;
+}
+
+#ifdef NL_STATIC
+} // NLDRIVERGL3
+#endif
+
+} // NL3D
+
+namespace std {
+
+size_t hash<NL3D::CVPBuiltin>::operator()(const NL3D::CVPBuiltin & v) const
+{
+	uint32_t h;
+
+	h = NLMISC::wangHash(((uint32)v.VertexFormat) | (v.Lighting ? (1 << 16) : 0) | (v.Specular ? (1 << 17) : 0) | (v.Fog ? (1 << 18) : 0));
+	if (v.Lighting)
+		for (sint i = 0; i < NL_OPENGL3_MAX_LIGHT; ++i)
+			h = NLMISC::wangHash(h ^ v.LightMode[i]);
+	for (sint i = 0; i < NL3D::IDRV_MAT_MAXTEXTURES; ++i)
+		h = NLMISC::wangHash(h ^ v.TexGenMode[i]);
+
+	nlctassert(sizeof(size_t) > sizeof(uint32));
+	return (size_t)h;
+}
+
+}
+
+namespace NL3D {
+
+#ifdef NL_STATIC
+	namespace NLDRIVERGL3 {
+#endif
 
 namespace /* anonymous */ {
 
@@ -316,7 +372,7 @@ void vpGenerate(std::string &result, const CVPBuiltin &desc)
 
 void CDriverGL3::generateBuiltinVertexProgram()
 {
-	std::set<CVPBuiltin>::iterator it = m_VPBuiltinCache.find(m_VPBuiltinCurrent);
+	std::unordered_set<CVPBuiltin>::iterator it = m_VPBuiltinCache.find(m_VPBuiltinCurrent);
 	if (it != m_VPBuiltinCache.end())
 	{
 		m_VPBuiltinCurrent.VertexProgram = it->VertexProgram;

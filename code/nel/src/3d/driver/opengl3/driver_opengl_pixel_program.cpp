@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#include "nel/misc/wang_hash.h"
+
 #include "nel/3d/vertex_program.h"
 #include "nel/3d/light.h"
 
@@ -94,6 +96,70 @@ bool operator<(const CPPBuiltin &left, const CPPBuiltin &right)
 
 	return false;
 }
+
+bool operator==(const CPPBuiltin &left, const CPPBuiltin &right)
+{
+	// Material state
+	if (left.Shader != right.Shader)
+		return false;
+	if (left.Flags != right.Flags)
+		return false;
+	if (left.TextureActive != right.TextureActive)
+		return false;
+	if (left.TexSamplerMode != right.TexSamplerMode)
+		return false;
+	uint maxTex = maxTextures(left.Shader);
+	if (useTexEnv(left.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			if (left.TexEnvMode[stage] != right.TexEnvMode[stage])
+				return false;
+
+	// Driver state
+	if (left.VertexFormat != right.VertexFormat)
+		return false;
+	if (left.Fog != right.Fog)
+		return false;
+
+	return true;
+}
+
+#ifdef NL_STATIC
+} // NLDRIVERGL3
+#endif
+
+} // NL3D
+
+namespace std {
+
+size_t hash<NL3D::CPPBuiltin>::operator()(const NL3D::CPPBuiltin & v) const
+{
+	uint32_t h;
+
+	// Material state
+	h = NLMISC::wangHash((uint32)v.Shader);
+	h = NLMISC::wangHash(h ^ (uint32)v.Flags);
+	h = NLMISC::wangHash(h ^ (uint32)v.TextureActive);
+	h = NLMISC::wangHash(h ^ (uint32)v.TexSamplerMode);
+	uint maxTex = NL3D::maxTextures(v.Shader);
+	if (NL3D::useTexEnv(v.Shader))
+		for (uint stage = 0; stage < maxTex; ++stage)
+			h = NLMISC::wangHash(h ^ (uint32)v.TexEnvMode[stage]);
+
+	// Driver state
+	h = NLMISC::wangHash(h ^ (uint32)v.VertexFormat);
+	h = NLMISC::wangHash(h ^ (uint32)v.Fog);
+
+	nlctassert(sizeof(size_t) > sizeof(uint32));
+	return (size_t)h;
+}
+
+}
+
+namespace NL3D {
+
+#ifdef NL_STATIC
+namespace NLDRIVERGL3 {
+#endif
 
 namespace /* anonymous */ {
 
@@ -568,7 +634,7 @@ void CDriverGL3::generateBuiltinPixelProgram(CMaterial &mat)
 	CMaterialDrvInfosGL3 *matDrv = static_cast<CMaterialDrvInfosGL3 *>((IMaterialDrvInfos *)(mat._MatDrvInfo));
 	nlassert(matDrv);
 
-	std::set<CPPBuiltin>::iterator it = m_PPBuiltinCache.find(matDrv->PPBuiltin);
+	std::unordered_set<CPPBuiltin>::iterator it = m_PPBuiltinCache.find(matDrv->PPBuiltin);
 	if (it != m_PPBuiltinCache.end())
 	{
 		matDrv->PPBuiltin.PixelProgram = it->PixelProgram;
