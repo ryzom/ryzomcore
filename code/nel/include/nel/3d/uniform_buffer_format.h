@@ -110,7 +110,7 @@ public:
 	inline size_t count() const { return m_Entries.size(); } // Return number of entries
 	inline void clear() { m_Entries.clear(); m_Hash = 0; }
 
-	inline sint size() const { return m_Entries.size() ? (m_Entries.back().Offset + m_Entries.back().size()) : 0; } // Return size of format in bytes
+	inline sint size() const { return m_Entries.size() ? (((m_Entries.back().Offset + m_Entries.back().size()) + 15) & ~0xF) : 0; } // Return size of format in bytes
 	inline size_t hash() const { return m_Hash; }
 
 	// Get the offset by entry id (counted from 0 in the order of addition to the format) and index of array
