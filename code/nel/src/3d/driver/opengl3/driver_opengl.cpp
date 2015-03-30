@@ -39,7 +39,7 @@ using namespace std;
 using namespace NLMISC;
 
 
-
+#define NL3D_GL3_FRAME_IN_FLIGHT_DEBUG 0
 
 
 // ***************************************************************************
@@ -313,6 +313,9 @@ CDriverGL3::CDriverGL3()
 	//
 	_CurrentOcclusionQuery = NULL;
 	_SwapBufferCounter = 0;
+	_SwapBufferInFlight = 0;
+	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+		_SwapBufferSync[i] = 0;
 
 	_LightMapDynamicLightEnabled = false;
 	_LightMapDynamicLightDirty= false;
@@ -590,9 +593,38 @@ void CDriverGL3::setColorMask (bool bRed, bool bGreen, bool bBlue, bool bAlpha)
 // --------------------------------------------------
 bool CDriverGL3::swapBuffers()
 {
-	H_AUTO_OGL(CDriverGL3_swapBuffers)
+	H_AUTO_OGL(CDriverGL3_swapBuffers);
 
-	++ _SwapBufferCounter;
+	// Set fence
+	size_t syncI = _SwapBufferCounter % NL3D_GL3_BUFFER_QUEUE_MAX;
+	if (_SwapBufferSync[syncI]) // Wait for oldest fence, if this is still in flight
+	{
+#if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
+		nldebug("Wait for oldest fence");
+#endif
+		GLenum syncR = nglClientWaitSync(_SwapBufferSync[syncI], 0, 1000000000ULL);
+		switch (syncR)
+		{
+		case GL_ALREADY_SIGNALED:
+		case GL_CONDITION_SATISFIED:
+			break;
+		case GL_TIMEOUT_EXPIRED:
+			nlwarning("Timeout expired for glClientWaitSync");
+			break;
+		case GL_WAIT_FAILED:
+			nlwarning("Wait failed for glClientWaitSync");
+			break;
+		default:
+			nlwarning("Unknown glClientWaitSync result");
+		}
+		nglDeleteSync(_SwapBufferSync[syncI]);
+		++_SwapBufferInFlight;
+	}
+	// Fence occurs before the frame swap, because it only is relevant for user supplied buffers. The framebuffer is not our concern
+	_SwapBufferSync[syncI] = nglFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+	nlassert(_SwapBufferSync[syncI]);
+
+	++_SwapBufferCounter;
 
 	if (!_WndActive)
 	{
@@ -658,6 +690,38 @@ bool CDriverGL3::swapBuffers()
 
 	// Check all vertex buffer to see which one are lost
 	updateLostBuffers();
+	
+	// Check in flight buffers, also checks the current one
+	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	{
+		size_t syncJ = (syncI + 1 + i) % NL3D_GL3_BUFFER_QUEUE_MAX;
+		if (_SwapBufferSync[syncJ]) // If there's a frame in flight
+		{
+			GLint status = 0;
+			nglGetSynciv(_SwapBufferSync[syncJ], GL_SYNC_STATUS, 1, NULL, &status);
+			if (status == GL_SIGNALED)
+			{
+				// Frame is no longer in flight
+				nglDeleteSync(_SwapBufferSync[syncJ]);
+				_SwapBufferSync[syncJ] = 0;
+#if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
+				nldebug("Frame %u no longer in flight", (unsigned int)_SwapBufferInFlight);
+#endif
+				++_SwapBufferInFlight;
+				nlassert(_SwapBufferInFlight <= _SwapBufferCounter);
+			}
+			else
+			{
+				// Following frames are still in flight
+				break;
+			}
+		}
+	}
+
+	nlassert(_SwapBufferInFlight <= _SwapBufferCounter);
+#if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
+	nldebug("Swap buffer: %u, in flight: %u", (unsigned int)_SwapBufferCounter, (unsigned int)_SwapBufferInFlight);
+#endif
 
 	return true;
 }
@@ -695,6 +759,15 @@ bool CDriverGL3::release()
 	nlassert(_DepthStencilFBOs.empty());
 
 	_SwapBufferCounter = 0;
+	_SwapBufferInFlight = 0;
+	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	{
+		if (_SwapBufferSync[i])
+		{
+			nglDeleteSync(_SwapBufferSync[i]);
+			_SwapBufferSync[i] = 0;
+		}
+	}
 
 	// delete querries
 	while (!_OcclusionQueryList.empty())

@@ -632,7 +632,7 @@ bool	registerGlExtensions(CGlExtensions &ext)
 	}
 
 	// Check GL_AMD_pinned_memory
-	ext.AMDPinnedMemory = setupAMDPinnedMemory(glext);
+	ext.AMDPinnedMemory = false; // setupAMDPinnedMemory(glext); // TODO: Proper frame sync check
 
 	// Get the maximum fragment texture unites
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &ext.MaxFragmentTextureImageUnits);

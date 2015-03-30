@@ -81,6 +81,9 @@
 using NLMISC::CMatrix;
 using NLMISC::CVector;
 
+#define NL3D_GL3_BUFFER_NOT_IN_FLIGHT (std::numeric_limits<uint64>::max())
+#define NL3D_GL3_BUFFER_QUEUE_MAX (3) // Maximum is three frames behind
+
 namespace NL3D {
 namespace NLDRIVERGL3 {
 
@@ -678,6 +681,7 @@ public:
 	virtual bool			supportPackedDepthStencil() const;
 
 	virtual uint64			getSwapBufferCounter() const { return _SwapBufferCounter; }
+	inline uint64			getSwapBufferInFlight() const { return _SwapBufferInFlight; }
 
 	virtual void			setCullMode(TCullMode cullMode);
 	virtual	TCullMode       getCullMode() const;
@@ -1342,6 +1346,9 @@ protected:
 	// is the window active ,
 	bool					_WndActive;
 	uint64					_SwapBufferCounter;
+private:
+	uint64					_SwapBufferInFlight;
+	GLsync					_SwapBufferSync[NL3D_GL3_BUFFER_QUEUE_MAX];
 public:
 	void incrementResetCounter() { ++_ResetCounter; }
 	bool isWndActive() const { return _WndActive; }

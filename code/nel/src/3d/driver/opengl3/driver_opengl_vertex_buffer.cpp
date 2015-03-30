@@ -51,7 +51,8 @@ IVertexBufferGL3::~IVertexBufferGL3()
 CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb) 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
-	m_VertexObjectId(0)
+	m_VertexObjectId(0), 
+	m_FrameInFlight(NL3D_GL3_BUFFER_NOT_IN_FLIGHT)
 {
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB)
 
@@ -295,6 +296,15 @@ void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
 
 // ***************************************************************************
 
+void CVertexBufferGL3::setFrameInFlight(uint64 swapBufferCounter)
+{
+	H_AUTO_OGL(CVertexBufferGL3_setFrameInFlight);
+
+	m_FrameInFlight = swapBufferCounter;
+}
+
+// ***************************************************************************
+
 void CVertexBufferGL3::invalidate()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_invalidate)
@@ -317,7 +327,8 @@ CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::AMDPinned),
 	m_MemType(preferred),
 	m_VertexPtr(NULL),
-	m_VertexObjectId(0)
+	m_VertexObjectId(0),
+	m_FrameInFlight(NL3D_GL3_BUFFER_NOT_IN_FLIGHT)
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_CVertexBufferAMDPinned)
 
@@ -498,9 +509,18 @@ void CVertexBufferAMDPinned::disable()
 
 void CVertexBufferAMDPinned::setupVBInfos(CVertexBufferInfo &vb)
 {
-	H_AUTO_OGL(CVertexBufferAMDPinned_setupVBInfos)
+	H_AUTO_OGL(CVertexBufferAMDPinned_setupVBInfos);
 
 	vb.VertexObjectId = m_VertexObjectId;
+}
+
+// ***************************************************************************
+
+void CVertexBufferAMDPinned::setFrameInFlight(uint64 swapBufferCounter)
+{
+	H_AUTO_OGL(CVertexBufferAMDPinned_setFrameInFlight);
+
+	m_FrameInFlight = swapBufferCounter;
 }
 
 // ***************************************************************************
