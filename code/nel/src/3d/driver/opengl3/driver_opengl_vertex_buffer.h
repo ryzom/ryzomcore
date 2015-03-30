@@ -130,6 +130,47 @@ private:
 	uint64 m_FrameInFlight;
 };
 
+/*
+// Follows design of D3D::CVolatileVertexBuffer
+// A large buffer from which sequentially is allocated
+// Must have one instance per in-flight frame (count NL3D_GL3_BUFFER_QUEUE_MAX)
+// OR use different strategy; fix the sizes of the volatile storage buffers; and synchronize to next buffer whenever end of buffer is reached
+class CVolatileBufferStorageGL3
+{
+public:
+	CVolatileBufferGL3();
+	~CVolatileBufferGL3();
+
+	// Initialize
+	//  location: Either AGPVolatile or RAMVolatile
+	void init(CVertexBuffer::TLocation location, GLsizei size, GLsizei maxSize, CDriverGL3 *driver);
+	void release();
+
+	// Runtime buffer access, no-blocking lock.
+	void *lock(uint size, uint stride, uint &offset);
+	void unlock();
+
+	void reset();
+
+private:
+	CDriverGL3 *m_Driver;
+	GLuint *m_BufferObjectId;
+	GLsizei m_Size;
+	GLsizei m_MaxSize;
+	GLsizei m_CurrentOffset;
+	bool Locked;
+	CVertexBuffer::TLocation m_Location;
+
+};
+
+// Buffer which makes use of driver provided CVolatileBufferStorageGL3 for storage backing
+class CVolatileBufferGL3 : public IVertexBufferGL3
+{
+	virtual void getBufferObject(GLuint &buffer, GLintptr &offset) const; // Use glBindBufferRange instead of glBindBuffer
+	// Or don't expose this, and expose a bind function targeting the right target...
+};
+*/
+
 } // NLDRIVERGL3
 } // NL3D
 
