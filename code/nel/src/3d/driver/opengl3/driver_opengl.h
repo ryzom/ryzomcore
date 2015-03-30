@@ -82,7 +82,8 @@ using NLMISC::CMatrix;
 using NLMISC::CVector;
 
 #define NL3D_GL3_BUFFER_NOT_IN_FLIGHT (std::numeric_limits<uint64>::max())
-#define NL3D_GL3_BUFFER_QUEUE_MAX (3) // Maximum is three frames behind
+#define NL3D_GL3_FRAME_QUEUE_MAX (2) // Maximum is three frames processing (2 frames backlog + current frame)
+#define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
@@ -266,7 +267,7 @@ public:
 	}
 
 	void		setupVertexBuffer(CVertexBuffer &vb);
-	void		setupVertexBufferHard(IVertexBufferGL3 &vb);
+	// void		setupVertexBufferHard(IVertexBufferGL3 &vb);
 };
 
 
@@ -1348,7 +1349,7 @@ protected:
 	uint64					_SwapBufferCounter;
 private:
 	uint64					_SwapBufferInFlight;
-	GLsync					_SwapBufferSync[NL3D_GL3_BUFFER_QUEUE_MAX];
+	GLsync					_SwapBufferSync[NL3D_GL3_FRAME_QUEUE_MAX];
 public:
 	void incrementResetCounter() { ++_ResetCounter; }
 	bool isWndActive() const { return _WndActive; }

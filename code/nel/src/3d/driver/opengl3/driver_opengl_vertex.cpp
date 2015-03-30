@@ -299,11 +299,17 @@ void CDriverGL3::updateLostBuffers()
 	{
 		for (std::list<CVertexBufferGL3 *>::iterator it = _LostVBList.begin(); it != _LostVBList.end(); ++it)
 		{
-			nlassert((*it)->m_VertexObjectId);
-			GLuint id = (GLuint) (*it)->m_VertexObjectId;
-			nlassert(nglIsBuffer(id));
-			nglDeleteBuffers(1, &id);
-			(*it)->m_VertexObjectId = 0;
+			nlassert((*it)->m_VertexObjectId[0]);
+			for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+			{
+				GLuint id = (*it)->m_VertexObjectId[i];
+				if (id)
+				{
+					nlassert(nglIsBuffer(id));
+					nglDeleteBuffers(1, &id);
+					(*it)->m_VertexObjectId[i] = 0;
+				}
+			}
 			(*it)->VB->setLocation(CVertexBuffer::NotResident);
 		}
 		_LostVBList.clear();
@@ -481,10 +487,11 @@ void		CVertexBufferInfo::setupVertexBuffer(CVertexBuffer &vb)
 	CVertexBufferReadWrite access;
 	uint8 *ptr;
 	CVBDrvInfosGL3 *info= safe_cast<CVBDrvInfosGL3*>((IVBDrvInfos*)vb.DrvInfos);
-	nlassert (info);
+	nlassert(info);
+	nlassert(info->_VBHard);
 
 	ptr = (uint8*)info->_VBHard->getPointer();
-	info->_VBHard->setupVBInfos(*this);
+	VertexObjectId = info->_VBHard->getGLuint();
 
 	// Get value pointer
 	for (i=0; i<CVertexBuffer::NumValue; i++)

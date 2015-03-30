@@ -314,7 +314,7 @@ CDriverGL3::CDriverGL3()
 	_CurrentOcclusionQuery = NULL;
 	_SwapBufferCounter = 0;
 	_SwapBufferInFlight = 0;
-	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
 		_SwapBufferSync[i] = 0;
 
 	_LightMapDynamicLightEnabled = false;
@@ -596,7 +596,7 @@ bool CDriverGL3::swapBuffers()
 	H_AUTO_OGL(CDriverGL3_swapBuffers);
 
 	// Set fence
-	size_t syncI = _SwapBufferCounter % NL3D_GL3_BUFFER_QUEUE_MAX;
+	size_t syncI = _SwapBufferCounter % NL3D_GL3_FRAME_QUEUE_MAX;
 	if (_SwapBufferSync[syncI]) // Wait for oldest fence, if this is still in flight
 	{
 #if NL3D_GL3_FRAME_IN_FLIGHT_DEBUG
@@ -692,9 +692,9 @@ bool CDriverGL3::swapBuffers()
 	updateLostBuffers();
 	
 	// Check in flight buffers, also checks the current one
-	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
 	{
-		size_t syncJ = (syncI + 1 + i) % NL3D_GL3_BUFFER_QUEUE_MAX;
+		size_t syncJ = (syncI + 1 + i) % NL3D_GL3_FRAME_QUEUE_MAX;
 		if (_SwapBufferSync[syncJ]) // If there's a frame in flight
 		{
 			GLint status = 0;
@@ -760,7 +760,7 @@ bool CDriverGL3::release()
 
 	_SwapBufferCounter = 0;
 	_SwapBufferInFlight = 0;
-	for (size_t i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)
 	{
 		if (_SwapBufferSync[i])
 		{

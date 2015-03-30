@@ -48,26 +48,48 @@ IVertexBufferGL3::~IVertexBufferGL3()
 // ***************************************************************************
 // ***************************************************************************
 
-CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb) 
+static inline GLsizei vbgl3BufferForType(CVertexBuffer::TPreferredMemory mem)
+{
+	switch (mem)
+	{
+	case CVertexBuffer::AGPVolatile:
+	case CVertexBuffer::RAMVolatile:
+		return NL3D_GL3_BUFFER_QUEUE_MAX;
+	default: 
+		return 1;
+	}
+}
+
+CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TPreferredMemory preferred, CVertexBuffer *vb)
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
 	m_VertexPtr(NULL),
-	m_VertexObjectId(0), 
-	m_FrameInFlight(NL3D_GL3_BUFFER_NOT_IN_FLIGHT)
+	m_CurrentIndex(0),
+	m_CurrentInFlight(false),
+#if NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG
+	m_ReuseCount(0),
+	m_InvalidateCount(0),
+#endif
+	m_MemType(preferred)
 {
-	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB)
+	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARB);
 
-	// Create id and bind
-	GLuint vertexBufferID;
-	nglGenBuffers(1, &vertexBufferID);
-	drv->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
+	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
+	{
+		m_VertexObjectId[i] = 0;
+		m_FrameInFlight[i] = NL3D_GL3_BUFFER_NOT_IN_FLIGHT;
+	}
+
+	// Create ids
+	GLsizei nbBuff = vbgl3BufferForType(preferred);
+	nglGenBuffers(nbBuff, m_VertexObjectId);
 
 	// Initialize
-	nglBufferData(GL_ARRAY_BUFFER, size, NULL, drv->vertexBufferUsageGL3(preferred));
-	m_VertexObjectId = vertexBufferID;
-	m_MemType = preferred;
-
-	// Unbind
-	drv->_DriverGLStates.forceBindARBVertexBuffer(0);
+	for (GLsizei i = 0; i < nbBuff; ++i)
+	{
+		drv->_DriverGLStates.forceBindARBVertexBuffer(m_VertexObjectId[i]);
+		nglBufferData(GL_ARRAY_BUFFER, size, NULL, drv->vertexBufferUsageGL3(preferred));
+		drv->_DriverGLStates.forceBindARBVertexBuffer(0);
+	}
 }
 
 // ***************************************************************************
@@ -77,16 +99,23 @@ CVertexBufferGL3::~CVertexBufferGL3()
 	H_AUTO_OGL(CVertexBufferGLARB_CVertexBufferGLARBDtor)
 	if (m_Driver && m_VertexObjectId)
 	{
-		if (m_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == m_VertexObjectId)
+		GLsizei nbBuff = vbgl3BufferForType(m_MemType);
+		for (GLsizei i = 0; i < nbBuff; ++i)
 		{
-			m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+			if (m_Driver->_DriverGLStates.getCurrBoundARBVertexBuffer() == m_VertexObjectId[i])
+			{
+				m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+			}
 		}
 	}
-	if (m_VertexObjectId)
+	for (GLsizei i = 0; i < NL3D_GL3_BUFFER_QUEUE_MAX; ++i)
 	{
-		GLuint id = (GLuint)m_VertexObjectId;
-		nlassert(nglIsBuffer(id));
-		nglDeleteBuffers(1, &id);
+		if (m_VertexObjectId[i])
+		{
+			GLuint id = m_VertexObjectId[i];
+			nlassert(nglIsBuffer(id));
+			nglDeleteBuffers(1, &id);
+		}
 	}
 	if (m_Driver)
 	{
@@ -118,28 +147,33 @@ void *CVertexBufferGL3::lock()
 			nlassert(!m_DummyVB.empty());
 			return &m_DummyVB[0];
 		}
-		// recreate a vb
-		GLuint vertexBufferID;
-		
+
+		// Create ids
 		glGetError();
-		nglGenBuffers(1, &vertexBufferID);
+		GLsizei nbBuff = vbgl3BufferForType(m_MemType);
+		nglGenBuffers(nbBuff, m_VertexObjectId);
 
 		if (glGetError() != GL_NO_ERROR)
 		{
 			m_Driver->incrementResetCounter();
 			return &m_DummyVB[0];
 		}
-		m_Driver->_DriverGLStates.forceBindARBVertexBuffer(vertexBufferID);
-		nglBufferData(GL_ARRAY_BUFFER, size, NULL, m_Driver->vertexBufferUsageGL3(m_MemType));
-		if (glGetError() != GL_NO_ERROR)
+
+		for (GLsizei i = 0; i < nbBuff; ++i)
 		{
-			m_Driver->incrementResetCounter();
-			nglDeleteBuffers(1, &vertexBufferID);
-			return &m_DummyVB[0];;
+			m_Driver->_DriverGLStates.forceBindARBVertexBuffer(m_VertexObjectId[i]);
+			nglBufferData(GL_ARRAY_BUFFER, size, NULL, m_Driver->vertexBufferUsageGL3(m_MemType));
+			m_Driver->_DriverGLStates.forceBindARBVertexBuffer(0);
+			if (glGetError() != GL_NO_ERROR)
+			{
+				m_Driver->incrementResetCounter();
+				nglDeleteBuffers(1, &m_VertexObjectId[i]);
+				return &m_DummyVB[0];
+			}
 		}
-		m_VertexObjectId = vertexBufferID;
 		NLMISC::contReset(m_DummyVB); // free vector memory for real
-		nlassert(m_VertexObjectId);
+		nlassert(m_VertexObjectId[m_CurrentIndex]);
+
 		m_Invalid = false;
 		m_Driver->_LostVBList.erase(m_IteratorInLostVBList);
 		// continue to standard mapping code below ..
@@ -149,7 +183,6 @@ void *CVertexBufferGL3::lock()
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
-	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
 
 	// m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	
@@ -165,16 +198,43 @@ void *CVertexBufferGL3::lock()
 	{
 	case CVertexBuffer::AGPVolatile:
 	case CVertexBuffer::RAMVolatile:
-		// NOTE: GL_MAP_INVALIDATE_BUFFER_BIT removes the cost of waiting for synchronization (major performance impact), 
-		// but adds the cost of allocating a new buffer (which hast a much lower performance impact)
-		m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+	{
+		if (m_CurrentInFlight)
+		{
+			++m_CurrentIndex;
+			m_CurrentIndex %= NL3D_GL3_BUFFER_QUEUE_MAX;
+			m_CurrentInFlight = false;
+		}
+		m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId[m_CurrentIndex]);
+		if (m_FrameInFlight[m_CurrentIndex] != NL3D_GL3_BUFFER_NOT_IN_FLIGHT
+			&& m_FrameInFlight[m_CurrentIndex] >= m_Driver->getSwapBufferInFlight())
+		{
+#if NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG
+			++m_InvalidateCount;
+			nldebug("GL: Vertex buffer already in flight (reused: %u, invalidated: %u)", m_ReuseCount, m_InvalidateCount);
+#endif
+			// NOTE: GL_MAP_INVALIDATE_BUFFER_BIT removes the cost of waiting for synchronization (major performance impact), 
+			// but adds the cost of allocating a new buffer (which hast a much lower performance impact)
+			m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+		}
+		else
+		{
+#if NL3D_GL3_VERTEX_BUFFER_INFLIGHT_DEBUG
+			++m_ReuseCount;
+			nldebug("GL: Vertex buffer can be reused (reused: %u, invalidated: %u)", m_ReuseCount, m_InvalidateCount);
+#endif
+			m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+		}
 		break;
+	}
 	case CVertexBuffer::RAMPreferred:
+		m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId[m_CurrentIndex]);
 		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT | GL_MAP_READ_BIT | GL_MAP_PERSISTENT | GL_MAP_COHERENT);
 		// NOTE: Persistent / Coherent is only available in OpenGL 4.4 (2013/2014 hardware with recent drivers)
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
 		break;
 	default:
+		m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId[m_CurrentIndex]);
 		// m_VertexPtr = nglMapBufferRange(GL_ARRAY_BUFFER, 0, size, GL_MAP_WRITE_BIT);
 		m_VertexPtr = nglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 		break;
@@ -183,7 +243,7 @@ void *CVertexBufferGL3::lock()
 	if (!m_VertexPtr)
 	{
 		nglUnmapBuffer(GL_ARRAY_BUFFER);
-		nlassert(nglIsBuffer((GLuint)m_VertexObjectId));
+		nlassert(nglIsBuffer(m_VertexObjectId[m_CurrentIndex]));
 		invalidate();
 		return &m_DummyVB[0];
 	}
@@ -211,13 +271,13 @@ void CVertexBufferGL3::unlock()
 
 	m_VertexPtr = NULL;
 	if (m_Invalid) return;
-	if (!m_VertexObjectId) return;
+	if (!m_VertexObjectId[m_CurrentIndex]) return;
 	TTicks	beforeLock = 0;
 	if (m_Driver->_VBHardProfiling)
 	{
 		beforeLock= CTime::getPerformanceTime();
 	}
-	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId);
+	m_Driver->_DriverGLStates.bindARBVertexBuffer(m_VertexObjectId[m_CurrentIndex]);
 	// double start = CTime::ticksToSecond(CTime::getPerformanceTime());
 	#ifdef NL_DEBUG
 		_Unmapping = true;
@@ -271,7 +331,7 @@ void CVertexBufferGL3::enable()
 	H_AUTO_OGL(CVertexBufferGLARB_enable)
 	if (m_Driver->_CurrentVertexBufferGL != this)
 	{
-		m_Driver->_CurrentVertexBufferGL= this;
+		m_Driver->_CurrentVertexBufferGL = this;
 	}
 }
 
@@ -282,16 +342,17 @@ void CVertexBufferGL3::disable()
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
 	if (m_Driver->_CurrentVertexBufferGL != NULL)
 	{
-		m_Driver->_CurrentVertexBufferGL= NULL;
+		m_Driver->_CurrentVertexBufferGL = NULL;
 	}
 }
 
 // ***************************************************************************
 
-void CVertexBufferGL3::setupVBInfos(CVertexBufferInfo &vb)
+GLuint CVertexBufferGL3::getGLuint()
 {
-	H_AUTO_OGL(CVertexBufferGLARB_setupVBInfos)
-	vb.VertexObjectId = m_VertexObjectId;
+	H_AUTO_OGL(CVertexBufferGLARB_getGLuint);
+
+	return m_VertexObjectId[m_CurrentIndex];
 }
 
 // ***************************************************************************
@@ -300,7 +361,9 @@ void CVertexBufferGL3::setFrameInFlight(uint64 swapBufferCounter)
 {
 	H_AUTO_OGL(CVertexBufferGL3_setFrameInFlight);
 
-	m_FrameInFlight = swapBufferCounter;
+	// Set buffer frame in flight
+	m_FrameInFlight[m_CurrentIndex] = swapBufferCounter;
+	m_CurrentInFlight = true;
 }
 
 // ***************************************************************************
@@ -507,11 +570,11 @@ void CVertexBufferAMDPinned::disable()
 
 // ***************************************************************************
 
-void CVertexBufferAMDPinned::setupVBInfos(CVertexBufferInfo &vb)
+GLuint CVertexBufferAMDPinned::getGLuint()
 {
-	H_AUTO_OGL(CVertexBufferAMDPinned_setupVBInfos);
+	H_AUTO_OGL(CVertexBufferAMDPinned_getGLuint);
 
-	vb.VertexObjectId = m_VertexObjectId;
+	return m_VertexObjectId;
 }
 
 // ***************************************************************************
