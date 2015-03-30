@@ -359,6 +359,13 @@ void dividSize (CBitmap &bitmap)
 	}
 }
 
+const int bayerDiv8[4][4] = {
+	0, 4, 1, 5,
+	6, 2, 7, 3,
+	1, 5, 0, 4,
+	7, 3, 6, 2,
+};
+
 // ***************************************************************************
 int main(int argc, char **argv)
 {
@@ -599,6 +606,26 @@ int main(int argc, char **argv)
 	{
 		dividSize (picSrc);
 		Reduce--;
+	}
+
+	if (algo == TGA16)
+	{
+		// Apply bayer dither
+		CObjectVector<uint8> &rgba = picSrc.getPixels(0);
+		const uint32 w = picSrc.getWidth(0);
+		uint32 x = 0;
+		uint32 y = 0;
+		for (uint32 i = 0; i < rgba.size(); i += 4)
+		{
+			NLMISC::CRGBA &c = reinterpret_cast<NLMISC::CRGBA &>(rgba[i]);
+			c.R = (uint8)std::min(255, (int)c.R + bayerDiv8[x % 4][y % 4]);
+			c.G = (uint8)std::min(255, (int)c.G + bayerDiv8[x % 4][y % 4]);
+			c.B = (uint8)std::min(255, (int)c.B + bayerDiv8[x % 4][y % 4]);
+			++x;
+			x %= w;
+			if (x == 0)
+				++y;
+		}
 	}
 
 	// 8 or 16 bits TGA or PNG ?
