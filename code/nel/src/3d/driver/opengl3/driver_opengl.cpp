@@ -690,6 +690,12 @@ bool CDriverGL3::swapBuffers()
 
 	// Check all vertex buffer to see which one are lost
 	updateLostBuffers();
+
+#if NL3D_GL3_SYNC_IMMEDIATE
+	// Sync on the current buffer
+	nlassert(_SwapBufferSync[syncI]);
+	nglClientWaitSync(_SwapBufferSync[syncI], 0, 1000000000ULL);
+#endif
 	
 	// Check in flight buffers, also checks the current one
 	for (size_t i = 0; i < NL3D_GL3_FRAME_QUEUE_MAX; ++i)

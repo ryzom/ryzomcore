@@ -84,6 +84,7 @@ using NLMISC::CVector;
 #define NL3D_GL3_BUFFER_NOT_IN_FLIGHT (std::numeric_limits<uint64>::max())
 #define NL3D_GL3_FRAME_QUEUE_MAX (2) // Maximum is three frames processing (2 frames backlog + current frame)
 #define NL3D_GL3_BUFFER_QUEUE_MAX (NL3D_GL3_FRAME_QUEUE_MAX + 1) // Additional buffer for current working
+#define NL3D_GL3_SYNC_IMMEDIATE 0 // Don't allow frame processing backlog if set to 1. Reduce input lag. Testing only
 
 namespace NL3D {
 namespace NLDRIVERGL3 {
