@@ -485,7 +485,7 @@ namespace NLGUI
 				string fullstyle = style[1];
 				for (uint j=2; j < style.size(); j++)
 					fullstyle += ":"+style[j];
-				styles[trim(style[0])] = fullstyle;
+				styles[trim(style[0])] = trim(fullstyle);
 			}
 		}
 
@@ -894,7 +894,20 @@ namespace NLGUI
 			switch(element_number)
 			{
 			case HTML_A:
-				_TextColor.push_back(LinkColor);
+			{
+				CStyleParams style;
+				style.FontSize = getFontSize();
+				style.TextColor = LinkColor;
+				style.Underlined = true;
+				style.StrikeThrough = getFontStrikeThrough();
+
+				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
+					getStyleParams(value[HTML_A_STYLE], style);
+
+				_FontSize.push_back(style.FontSize);
+				_TextColor.push_back(style.TextColor);
+				_FontUnderlined.push_back(style.Underlined);
+				_FontStrikeThrough.push_back(style.StrikeThrough);
 				_GlobalColor.push_back(LinkColorGlobalColor);
 				_A.push_back(true);
 
@@ -903,6 +916,7 @@ namespace NLGUI
 				if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
 					_LinkClass.push_back(value[MY_HTML_A_CLASS]);
 
+			}
 				break;
 
 			case HTML_DIV:
@@ -1634,6 +1648,28 @@ namespace NLGUI
 				_Object = true;
 
 				break;
+			case HTML_SPAN:
+				{
+					CStyleParams style;
+					style.TextColor = getTextColor();
+					style.FontSize = getFontSize();
+					style.FontWeight = getFontWeight();
+					style.FontOblique = getFontOblique();
+					style.Underlined = getFontUnderlined();
+					style.StrikeThrough = getFontStrikeThrough();
+
+					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
+						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
+
+					_TextColor.push_back(style.TextColor);
+					_FontSize.push_back(style.FontSize);
+					_FontWeight.push_back(style.FontWeight);
+					_FontOblique.push_back(style.FontOblique);
+					_FontUnderlined.push_back(style.Underlined);
+					_FontStrikeThrough.push_back(style.StrikeThrough);
+				}
+				break;
+
 			case HTML_STYLE:
 				_IgnoreText = true;
 				break;
@@ -1655,7 +1691,10 @@ namespace NLGUI
 				popIfNotEmpty (_FontSize);
 			break;
 			case HTML_A:
+				popIfNotEmpty (_FontSize);
 				popIfNotEmpty (_TextColor);
+				popIfNotEmpty (_FontUnderlined);
+				popIfNotEmpty (_FontStrikeThrough);
 				popIfNotEmpty (_GlobalColor);
 				popIfNotEmpty (_A);
 				popIfNotEmpty (_Link);
@@ -1762,6 +1801,14 @@ namespace NLGUI
 					endParagraph();
 					popIfNotEmpty (_UL);
 				}
+				break;
+			case HTML_SPAN:
+				popIfNotEmpty (_FontSize);
+				popIfNotEmpty (_FontWeight);
+				popIfNotEmpty (_FontOblique);
+				popIfNotEmpty (_TextColor);
+				popIfNotEmpty (_FontUnderlined);
+				popIfNotEmpty (_FontStrikeThrough);
 				break;
 			case HTML_STYLE:
 				_IgnoreText = false;
@@ -3077,6 +3124,7 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
+			bool embolden = getFontWeight() >= 700;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
@@ -3086,6 +3134,10 @@ namespace NLGUI
 				if (!skipLine &&
 					(getTextColor() == _CurrentViewLink->getColor()) &&
 					(getFontSize() == (uint)_CurrentViewLink->getFontSize()) &&
+					(getFontUnderlined() == _CurrentViewLink->getUnderlined()) &&
+					(getFontStrikeThrough() == _CurrentViewLink->getStrikeThrough()) &&
+					(embolden == _CurrentViewLink->getEmbolden()) &&
+					(getFontOblique() == _CurrentViewLink->getOblique()) &&
 					(getLink() == _CurrentViewLink->Link) &&
 					(getGlobalColor() == _CurrentViewLink->getModulateGlobalColor()))
 				{
@@ -3141,12 +3193,15 @@ namespace NLGUI
 						if (!newLink->Link.empty())
 						{
 							newLink->setHTMLView (this);
-							newLink->setUnderlined (true);
 						}
 					}
 					newLink->setText(tmpStr);
 					newLink->setColor(getTextColor());
 					newLink->setFontSize(getFontSize());
+					newLink->setEmbolden(embolden);
+					newLink->setOblique(getFontOblique());
+					newLink->setUnderlined(getFontUnderlined());
+					newLink->setStrikeThrough(getFontStrikeThrough());
 					newLink->setMultiLineSpace((uint)((float)getFontSize()*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(getGlobalColor());
@@ -3422,6 +3477,10 @@ namespace NLGUI
 		_TextColor.clear();
 		_GlobalColor.clear();
 		_FontSize.clear();
+		_FontWeight.clear();
+		_FontOblique.clear();
+		_FontUnderlined.clear();
+		_FontStrikeThrough.clear();
 		_Indent = 0;
 		_LI = false;
 		_UL.clear();
@@ -4589,6 +4648,85 @@ namespace NLGUI
 		}
 
 		return result;
+	}
+
+	// ***************************************************************************
+	// CGroupHTML::CStyleParams style;
+	// style.FontSize;    // font-size: 10px;
+	// style.TextColor;   // color: #ABCDEF;
+	// style.Underlined;  // text-decoration: underline;     text-decoration-line: underline;
+	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
+	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit)
+	{
+		TStyle styles = parseStyle(styleString);
+		TStyle::iterator it;
+		for (it=styles.begin(); it != styles.end(); ++it)
+		{
+			if (it->first == "font-size")
+			{
+				float tmp;
+				sint size = 0;
+				getPercentage (size, tmp, it->second.c_str());
+				if (size > 0)
+					style.FontSize = size;
+			}
+			else
+			if (it->first == "font-style")
+			{
+				if (it->second == "italic" || it->second == "oblique")
+					style.FontOblique = true;
+			}
+			else
+			if (it->first == "font-weight")
+			{
+				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
+				uint weight = 400;
+				if (it->second == "normal")
+					weight = 400;
+				else
+				if (it->second == "bold")
+					weight = 700;
+				else
+				if (it->second == "lighter")
+				{
+					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
+					int index = getFontWeight() / 100 - 1;
+					clamp(index, 1, 9);
+					weight = lighter[index-1];
+				}
+				else
+				if (it->second == "bolder")
+				{
+					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
+					uint index = getFontWeight() / 100 + 1;
+					clamp(index, 1, 9);
+					weight = bolder[index-1];
+				}
+				else
+				if (fromString(it->second, weight))
+				{
+					weight = (weight / 100);
+					clamp(weight, 1, 9);
+					weight *= 100;
+				}
+				style.FontWeight = weight;
+			}
+			else
+			if (it->first == "color")
+				scanHTMLColor(it->second.c_str(), style.TextColor);
+			else
+			if (it->first == "text-decoration" || it->first == "text-decoration-line")
+			{
+				std::string prop(strlwr(it->second));
+				style.Underlined = (prop.find("underline") != std::string::npos);
+				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
+			}
+		}
+		if (inherit)
+		{
+			style.Underlined = getFontUnderlined() || style.Underlined;
+			style.StrikeThrough = getFontStrikeThrough() || style.StrikeThrough;
+		}
 	}
 }
 

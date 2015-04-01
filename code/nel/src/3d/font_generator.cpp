@@ -31,6 +31,7 @@ using namespace std;
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_SYNTHESIS_H
 
 // for freetype 2.0
 #ifdef FTERRORS_H
@@ -171,7 +172,7 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 	height = _Face->glyph->metrics.height >> 6;
 }
 
-uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
+uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
 	FT_Error error;
 
@@ -207,6 +208,16 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, uint32 &width, uint32 &
 		advx = 0;
 		glyphIndex = glyph_index;
 		return NULL;
+	}
+
+	if (embolden)
+	{
+		FT_GlyphSlot_Embolden(_Face->glyph);
+	}
+
+	if (oblique)
+	{
+		FT_GlyphSlot_Oblique(_Face->glyph);
 	}
 
 	// convert to an anti-aliased bitmap
@@ -389,7 +400,7 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 HFONT hFont = NULL;
 uint32 CurrentFontSize = 0;
 
-uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
+uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex)
 {
 /*	FT_Error error;
 
