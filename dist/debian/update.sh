@@ -1,16 +1,12 @@
 #!/bin/sh
 
 HGBIN="/usr/bin/hg"
-CODEROOT=../..
-
-# download packaging stuff
-echo "Updating packaging files..."
-$HGBIN pull && $HGBIN update
+CODEROOT=../../code
 
 echo "Generating changelogs..."
 $HGBIN log -M --style $CODEROOT/changelog.template > $CODEROOT/changelog
 
-REVISION=`$HGBIN identify -n`
+REVISION=$($HGBIN identify -n | grep -o -P "[0-9]+")
 echo "Found revision $REVISION"
 
 REVISION_H=$CODEROOT/revision.h

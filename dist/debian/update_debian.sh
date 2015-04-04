@@ -38,7 +38,7 @@ then
   exit 1
 fi
 
-REVISION=`$HGBIN identify -n`
+REVISION=$($HGBIN identify -n | grep -o -P "[0-9]+")
 
 DSTFOLDER=ryzom-core-$VERSION.$REVISION
 
