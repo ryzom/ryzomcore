@@ -44,6 +44,7 @@ namespace NLGUI
 	{
 		_CaseMode = CaseNormal;
 		_Underlined = false;
+		_StrikeThrough = false;
 		_ContinuousUpdate = false;
 		_Active = true;
 		_X = 0;
@@ -58,6 +59,8 @@ namespace NLGUI
 
 		_FontSize = 12 +
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		_Embolden = false;
+		_Oblique = false;
 		_Color = CRGBA(255,255,255,255);
 		_Shadow = false;
 		_ShadowOutline = false;
@@ -157,6 +160,10 @@ namespace NLGUI
 		_PosRef = vt._PosRef;
 
 		_FontSize = vt._FontSize;
+		_Embolden = vt._Embolden;
+		_Oblique = vt._Oblique;
+		_Underlined = vt._Underlined;
+		_StrikeThrough = vt._StrikeThrough;
 		_Color = vt._Color;
 		_Shadow = vt._Shadow;
 		_ShadowOutline = vt._ShadowOutline;
@@ -219,6 +226,21 @@ namespace NLGUI
 			return toString(
 				_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32()
 				);
+		}
+		else
+		if( name == "fontweight" )
+		{
+			if (_Embolden)
+				return "bold";
+
+			return "normal";
+		}
+		if( name == "fontstyle" )
+		{
+			if (_Oblique)
+				return "oblique";
+
+			return "normal";
 		}
 		else
 		if( name == "shadow" )
@@ -284,6 +306,11 @@ namespace NLGUI
 		if( name == "underlined" )
 		{
 			return toString( _Underlined );
+		}
+		else
+		if( name == "strikthrough" )
+		{
+			return toString( _StrikeThrough );
 		}
 		else
 		if( name == "case_mode" )
@@ -355,6 +382,20 @@ namespace NLGUI
 			sint i;
 			if( fromString( value, i ) )
 				_FontSize = i + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+			return true;
+		}
+		else
+		if( name == "fontweight" )
+		{
+			if (value == "bold")
+				_Embolden = true;
+
+			return true;
+		}
+		if( name == "fontstyle" )
+		{
+			if( value == "oblique" )
+				_Oblique = true;
 			return true;
 		}
 		else
@@ -441,6 +482,14 @@ namespace NLGUI
 			bool b;
 			if( fromString( value, b ) )
 				_Underlined = b;
+			return true;
+		}
+		else
+		if( name == "strikethrough" )
+		{
+			bool b;
+			if( fromString( value, b ) )
+				_StrikeThrough = b;
 			return true;
 		}
 		else
@@ -533,6 +582,16 @@ namespace NLGUI
 			_FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32() 
 			).c_str() );
 
+		std::string fontweight("normal");
+		if (_Embolden)
+			fontweight = "bold";
+		xmlSetProp( node, BAD_CAST "fontweight", BAD_CAST fontweight.c_str() );
+
+		std::string fontstyle("normal");
+		if (_Oblique)
+			fontstyle = "oblique";
+		xmlSetProp( node, BAD_CAST "fontstyle", BAD_CAST fontstyle.c_str() );
+
 		xmlSetProp( node, BAD_CAST "shadow", BAD_CAST toString( _Shadow ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "shadow_color", BAD_CAST toString( _ShadowColor ).c_str() );
@@ -561,6 +620,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "multi_line_maxw_only", BAD_CAST toString( _MultiLineMaxWOnly ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_max_line", BAD_CAST toString( _MultiMaxLine ).c_str() );
 		xmlSetProp( node, BAD_CAST "underlined", BAD_CAST toString( _Underlined ).c_str() );
+		xmlSetProp( node, BAD_CAST "strikethrough", BAD_CAST toString( _StrikeThrough ).c_str() );
 		xmlSetProp( node, BAD_CAST "case_mode", BAD_CAST toString( uint32( _CaseMode ) ).c_str() );
 		xmlSetProp( node, BAD_CAST "over_extend_view_text", BAD_CAST toString( _OverExtendViewText ).c_str() );
 		xmlSetProp( node, BAD_CAST "over_extend_parent_rect",
@@ -612,6 +672,22 @@ namespace NLGUI
 		{
 			fromString((const char*)prop, _FontSize);
 			_FontSize += CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+		}
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontweight" );
+		_Embolden = false;
+		if (prop)
+		{
+			if (nlstricmp("bold", (const char*)prop) == 0) _Embolden = true;
+			else nlwarning("<CViewText::parse> bad fontweight '%s'", (const char *)prop);
+		}
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"fontstyle" );
+		_Oblique = false;
+		if (prop)
+		{
+			if (nlstricmp("oblique", (const char *) prop) == 0) _Oblique = true;
+			else nlwarning("<CViewText::parse> bad fontstyle '%s'", (const char *)prop);
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"shadow" );
@@ -667,6 +743,11 @@ namespace NLGUI
 		_Underlined = false;
 		if (prop)
 			_Underlined = convertBool(prop);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"strikethrough" );
+		_StrikeThrough = false;
+		if (prop)
+			_StrikeThrough = convertBool(prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"case_mode" );
 		_CaseMode = CaseNormal;
@@ -887,6 +968,8 @@ namespace NLGUI
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
 			TextContext->setFontSize (_FontSize);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 			float y = (float)(_YReal) * ooh; // y is expressed in scree, coordinates [0..1]
 			//y += _LinesInfos[_LinesInfos.size()-1].StringLine / h;
@@ -953,7 +1036,7 @@ namespace NLGUI
 					// skip spaces before current word
 					float firstSpace = currWord.NumSpaces * currLine.getSpaceWidth();
 					sint line_width = 0;
-					if (_Underlined)
+					if (_Underlined || _StrikeThrough)
 					{
 						line_width = (sint)floorf(currLine.getWidthWithoutSpaces() + currLine.getSpaceWidth());
 						line_width -= (sint)floorf(firstSpace);
@@ -970,6 +1053,9 @@ namespace NLGUI
 					// Draw a line
 					if (_Underlined)
 						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1, 0, false, rVR.getBlankTextureId(), col);
+
+					if (_StrikeThrough)
+						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line + (_FontHeight / 2), line_width, 1, 0, false, rVR.getBlankTextureId(), col);
 
 					// skip word
 					px += currWord.Info.StringWidth;
@@ -1002,6 +1088,8 @@ namespace NLGUI
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setShadeColor (shcol);
 			TextContext->setFontSize (_FontSize);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 
 			if(_LetterColors!=NULL && !TextContext->isSameLetterColors(_LetterColors, _Index))
@@ -1031,6 +1119,9 @@ namespace NLGUI
 			// Draw a line
 			if (_Underlined)
 				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+_FontLegHeight-2, _WReal, 1, 0, false, rVR.getBlankTextureId(), col);
+
+			if (_StrikeThrough)
+				rVR.drawRotFlipBitmap (_RenderLayer, _XReal, _YReal+(_FontLegHeight/2), _WReal, 1, 0, false, rVR.getBlankTextureId(), col);
 
 			// reset selection
 			if(_TextSelection)
@@ -1152,6 +1243,22 @@ namespace NLGUI
 	sint CViewText::getFontSize() const
 	{
 		return _FontSize - CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
+	}
+
+	// ***************************************************************************
+	void CViewText::setEmbolden (bool embolden)
+	{
+		_Embolden = embolden;
+		computeFontSize ();
+		invalidateContent();
+	}
+
+	// ***************************************************************************
+	void CViewText::setOblique (bool oblique)
+	{
+		_Oblique = oblique;
+		computeFontSize ();
+		invalidateContent();
 	}
 
 	// ***************************************************************************
@@ -1679,6 +1786,8 @@ namespace NLGUI
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		// default state
 		_SingleLineTextClamped= false;
@@ -2000,6 +2109,8 @@ namespace NLGUI
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 		height = getFontHeight();
 		//
@@ -2132,6 +2243,8 @@ namespace NLGUI
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 		 // find the line where the character is
 	//	CViewRenderer &rVR = *CViewRenderer::getInstance();
 		uint      charPos = 0;
@@ -2407,6 +2520,8 @@ namespace NLGUI
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		TCharPos linePos = 0;
 		while (linePos < _Text.length())
@@ -2492,6 +2607,8 @@ namespace NLGUI
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
 			TextContext->setFontSize (_FontSize);
+			TextContext->setEmbolden (_Embolden);
+			TextContext->setOblique (_Oblique);
 
 			// Current position in text
 			TCharPos currPos = 0;
@@ -2544,6 +2661,8 @@ namespace NLGUI
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
 		TextContext->setFontSize (_FontSize);
+		TextContext->setEmbolden (_Embolden);
+		TextContext->setOblique (_Oblique);
 
 		// Letter size
 		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext

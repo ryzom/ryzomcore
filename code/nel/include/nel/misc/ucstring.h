@@ -363,7 +363,7 @@ struct CUCStringHashMapTraits
 	}
 	bool operator() (const ucstring &id1, const ucstring &id2) const
 	{
-		return id1.size() < id2.size();
+		return id1 < id2;
 	}
 };
 

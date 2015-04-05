@@ -54,11 +54,13 @@ public:
 	/** generate and return a bitmap
 	 * \param c the unicode char
 	 * \param size size of the generated font in ??? format
+	 * \param embolden set embolden style (bold)
+	 * \param oblique set oblique style (slanted, italic)
 	 * \param width width of the generated bitmap, this value is set by this function
 	 * \param height height of the generated bitmap, this value is set by this function
 	 * \param pitch pitch of the generated bitmap (+ or - the number of bytes per row), this value is set by this function
 	 */
-	uint8	*getBitmap (ucchar c, uint32 size, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex);
+	uint8	*getBitmap (ucchar c, uint32 size, bool embolden, bool oblique, uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top, sint32 &advx, uint32 &glyphIndex);
 
 	/** returns the width and height of a character using a specific size and
 	 *

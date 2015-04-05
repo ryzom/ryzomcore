@@ -74,6 +74,10 @@ public:
 
 	void setFontSize (uint32 fontSize)	{ _FontSize = fontSize; }
 
+	void setEmbolden (bool b) { _Embolden = b; }
+
+	void setOblique (bool b) { _Oblique = b; }
+
 	void setHotSpot (CComputedString::THotSpot hotSpot)	{ _HotSpot = hotSpot; }
 
 	void setScaleX (float scaleX) { _ScaleX = scaleX; }
@@ -100,6 +104,10 @@ public:
 	NLMISC::CRGBA				getColor () const { return _Color; }
 
 	uint32						getFontSize () const { return _FontSize; }
+
+	bool						getEmbolden () const { return _Embolden; }
+
+	bool						getOblique () const { return _Oblique; }
 
 	CComputedString::THotSpot	getHotSpot() const { return _HotSpot; }
 
@@ -240,7 +248,7 @@ public:
 		nlassert(_FontGen);
 
 		// compute the string just one time
-		_FontManager->computeString (ucstr, _FontGen, _Color, _FontSize, _Driver, _TempString, _Keep800x600Ratio);
+		_FontManager->computeString (ucstr, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
 
 		// draw shaded
 		if (_Shaded)
@@ -279,7 +287,7 @@ public:
 		// compute the string just one time
 		char *str;
 		NLMISC_CONVERT_VARGS (str, format, NLMISC::MaxCStringSize);
-		_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Driver, _TempString, _Keep800x600Ratio);
+		_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, _TempString, _Keep800x600Ratio);
 
 		// draw shaded
 		if (_Shaded)
@@ -334,7 +342,7 @@ public:
 	 */
 	void computeString (const std::string& s, CComputedString& output)
 	{
-		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	/**
@@ -345,12 +353,12 @@ public:
 	 */
 	void computeString (const ucstring& s, CComputedString& output)
 	{
-		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeString (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	void computeStringInfo (const ucstring& s, CComputedString& output)
 	{
-		_FontManager->computeStringInfo (s, _FontGen, _Color, _FontSize, _Driver, output, _Keep800x600Ratio);
+		_FontManager->computeStringInfo (s, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, output, _Keep800x600Ratio);
 	}
 
 	/// Debug : write to the disk the texture cache
@@ -380,6 +388,10 @@ private:
 
 	/// Font size;
 	uint32						_FontSize;
+
+	bool						_Embolden;
+
+	bool						_Oblique;
 
 	/// Current text color
 	NLMISC::CRGBA				_Color;
