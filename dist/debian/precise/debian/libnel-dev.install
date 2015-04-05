@@ -1,11 +1,3 @@
 usr/include/*
-usr/lib/*/libnel3d.so
-usr/lib/*/libnelgeorges.so
-usr/lib/*/libnelligo.so
-usr/lib/*/libnellogic.so
-usr/lib/*/libnelmisc.so
-usr/lib/*/libnelnet.so
-usr/lib/*/libnelpacs.so
-usr/lib/*/libnelsnd_lowlevel.so
-usr/lib/*/libnelsound.so
+usr/lib/*/libnel*.so
 usr/lib/*/pkgconfig/*
