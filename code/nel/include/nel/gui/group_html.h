@@ -102,6 +102,9 @@ namespace NLGUI
 		// Browse
 		virtual void browse (const char *url);
 
+		// parse html string using libxml2 parser
+		virtual bool parseHtml(std::string htmlString);
+
 		// Refresh
 		void refresh();
 
@@ -199,6 +202,7 @@ namespace NLGUI
 		int luaBeginElement(CLuaState &ls);
 		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
+		int luaParseHtml(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
@@ -210,6 +214,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("beginElement", luaBeginElement)
 			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
+			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
@@ -250,6 +255,10 @@ namespace NLGUI
 
 		// the current request is terminated
 		virtual void requestTerminated(HTRequest *request);
+
+		// libxml2 html parser functions
+		void htmlElement(xmlNode *node, int element_number);
+		void htmlWalkDOM(xmlNode *a_node);
 
 		// Get Home URL
 		virtual std::string	home();
