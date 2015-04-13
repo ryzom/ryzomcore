@@ -570,7 +570,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTChildAnchor *anchor, const BOOL *present, const char **value)
+	void CGroupHTML::addLink (uint element_number, const BOOL *present, const char **value)
 	{
 		if (_Browsing)
 		{
@@ -591,16 +591,8 @@ namespace NLGUI
 					}
 					else
 					{
-						HTAnchor * dest = HTAnchor_followMainLink((HTAnchor *) anchor);
-						if (dest)
-						{
-							C3WSmartPtr uri = HTAnchor_address(dest);
-							_Link.push_back ((const char*)uri);
-						}
-						else
-						{
-							_Link.push_back("");
-						}
+						// convert href from "?key=val" into "http://domain.com/?key=val"
+						_Link.push_back(getAbsoluteUrl(suri));
 					}
 
 					for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
@@ -4516,7 +4508,7 @@ namespace NLGUI
 
 		beginElement(element_number, &present[0], &value[0]);
 		if (element_number == HTML_A)
-			addLink(element_number, 0, NULL, &present[0], &value[0]);
+			addLink(element_number, &present[0], &value[0]);
 
 		return 0;
 	}
@@ -4648,6 +4640,15 @@ namespace NLGUI
 		}
 
 		return result;
+	}
+
+	// ***************************************************************************
+	std::string CGroupHTML::getAbsoluteUrl(const std::string &url)
+	{
+		if (HTURL_isAbsolute(url.c_str()))
+			return url;
+
+		return std::string(HTParse(url.c_str(), _URL.c_str(), PARSE_ALL));
 	}
 
 	// ***************************************************************************

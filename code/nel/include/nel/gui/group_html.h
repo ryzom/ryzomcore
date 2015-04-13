@@ -228,7 +228,7 @@ namespace NLGUI
 		virtual void addText (const char * buf, int len);
 
 		// A link has been parsed
-		virtual void addLink (uint element_number, uint attribute_number, HTChildAnchor *anchor, const BOOL *present, const char **value);
+		virtual void addLink (uint element_number, const BOOL *present, const char **value);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
 		virtual void beginElement (uint element_number, const BOOL *present, const char **value);
@@ -699,6 +699,7 @@ namespace NLGUI
 		void checkImageDownload();
 		void addImageDownload(const std::string &url, CViewBase *img);
 		std::string localImageName(const std::string &url);
+		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file);

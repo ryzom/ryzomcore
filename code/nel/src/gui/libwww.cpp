@@ -322,7 +322,10 @@ namespace NLGUI
 				const char **	value)
 	{
 		// Do the work in the class
-		me->Parent->addLink (element_number, attribute_number, anchor, present, value);
+		if (element_number == HTML_A)
+		{
+			me->Parent->addLink (element_number, present, value);
+		}
 	}
 
 	// ***************************************************************************
