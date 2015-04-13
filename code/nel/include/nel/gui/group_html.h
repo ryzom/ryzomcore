@@ -677,6 +677,12 @@ namespace NLGUI
 		// read style attribute
 		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
 
+		// load and render local html file (from bnp for example)
+		void doBrowseLocalFile(const std::string &filename);
+
+		// render html string as new browser page
+		bool renderHtmlString(const std::string &html);
+
 	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);

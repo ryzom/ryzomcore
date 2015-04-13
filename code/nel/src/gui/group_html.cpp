@@ -3824,6 +3824,10 @@ namespace NLGUI
 					stopBrowse ();
 					updateRefreshButton();
 
+					// Browsing
+					_Browsing = true;
+					updateRefreshButton();
+
 					// Home ?
 					if (_URL == "home")
 						_URL = home();
@@ -3843,16 +3847,23 @@ namespace NLGUI
 					_Connecting = true;
 					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
 
+					// Save new url
+					_URL = finalUrl;
+
+					// file is probably from bnp (ingame help)
+					if (isLocal)
+					{
+						if (strlwr(finalUrl).find("file:/") == 0)
+						{
+							finalUrl = finalUrl.substr(6, finalUrl.size() - 6);
+						}
+						doBrowseLocalFile(finalUrl);
+					}
+					else
+					{
 
 					CButtonFreezer freezer;
 					this->visit(&freezer);
-
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// Save new url
-					_URL = finalUrl;
 
 					// display HTTP query
 					//nlinfo("WEB: GET '%s'", finalUrl.c_str());
@@ -3869,12 +3880,7 @@ namespace NLGUI
 					C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
 
 					// Create an anchor
-	#ifdef NL_OS_WINDOWS
 					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-	#else
-					// temporarily disable local URL's until LibWWW can be replaced.
-					if (isLocal || ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL))
-	#endif
 					{
 						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
 					}
@@ -3910,6 +3916,8 @@ namespace NLGUI
 							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
 						}
 					}
+
+					} // !isLocal
 
 					_BrowseNextTime = false;
 				}
@@ -4097,6 +4105,57 @@ namespace NLGUI
 		if(isBrowsing())
 		  handleLibwwwEvents();
 	#endif
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::doBrowseLocalFile(const std::string &filename)
+	{
+		CIFile in;
+		if (in.open(filename))
+		{
+			std::string html;
+			while(!in.eof())
+			{
+				char buf[1024];
+				in.getline(buf, 1024);
+				html += std::string(buf) + "\n";
+			}
+			in.close();
+
+			if (!renderHtmlString(html))
+			{
+				browseError((string("Failed to parse html from file : ")+filename).c_str());
+			}
+		}
+		else
+		{
+			browseError((string("The page address is malformed : ")+filename).c_str());
+		}
+	}
+
+	// ***************************************************************************
+
+	bool CGroupHTML::renderHtmlString(const std::string &html)
+	{
+		bool success;
+
+		// clear content
+		beginBuild();
+
+		success = parseHtml(html);
+
+		// invalidate coords
+		endBuild();
+
+		// libwww would call requestTerminated() here
+		_Browsing = false;
+		if (_TitleString.empty())
+		{
+			setTitle(_TitlePrefix);
+		}
+		updateRefreshButton();
+
+		return success;
 	}
 
 	// ***************************************************************************
