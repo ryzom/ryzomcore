@@ -2,7 +2,7 @@
 #
 # Ryzom Core
 #  Authors: Nevrax and the Ryzom Core Community
-#  Version: 0.11.3
+#  Version: 0.12.0
 #
 # Notes:
 #   * Changing install location: add -DCMAKE_INSTALL_PREFIX:PATH=/my/new/path
@@ -47,8 +47,8 @@ CHECK_OUT_OF_SOURCE()
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
-SET(NL_VERSION_MINOR 11)
-SET(NL_VERSION_PATCH 3)
+SET(NL_VERSION_MINOR 12)
+SET(NL_VERSION_PATCH 0)
 SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
 
 #-----------------------------------------------------------------------------
