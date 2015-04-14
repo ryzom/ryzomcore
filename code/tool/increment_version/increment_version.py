@@ -31,8 +31,8 @@ os.chdir('../../')
 RootDir = os.getcwd();
 
 MajorVersion = 0
-MinorVersion = 11
-PatchVersion = 3
+MinorVersion = 12
+PatchVersion = 0
 Revision = 0
 
 VersionString = str(MajorVersion) + "." + str(MinorVersion) + "." + str(PatchVersion)
