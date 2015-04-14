@@ -1264,6 +1264,7 @@ sint main(int argc, char **argv)
 	{
 		// use log.log if NEL_LOG_IN_FILE and SBCLIENT_USE_LOG_LOG defined as 1
 		createDebug(NULL, SBCLIENT_USE_LOG_LOG, false);
+		INelContext::getInstance().setWindowedApplication(true);
 
 	#if SBCLIENT_USE_LOG
 		// create snowballs_client.log

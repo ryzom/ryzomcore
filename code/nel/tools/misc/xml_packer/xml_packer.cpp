@@ -379,7 +379,7 @@ int main(int argc, char *argv[])
 					CSString subFileName = parser.leftCrop(sizeof("	<nel:xml_file name=")-1);
 					subFileName = subFileName.matchDelimiters(false, false, true, false);
 					subFileName = subFileName.unquoteIfQuoted();
-					subFileName = dirName+"/"+subFileName;
+					subFileName = dirName + "/" + subFileName.c_str();
 					
 					printf("Extracting file '%s'...\n", CFile::getFilename(subFileName).c_str());
 					// open the output file 

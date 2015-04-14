@@ -66,6 +66,10 @@ public:
 	void setColor(NLMISC::CRGBA color);
 	void setFontSize(uint32 fontSize);
 	uint32 getFontSize() const;
+	void setEmbolden(bool b);
+	bool getEmbolden() const;
+	void setOblique(bool b);
+	bool getOblique() const;
 	void setHotSpot(THotSpot hotSpot);
 	THotSpot getHotSpot() const;
 	void setScaleX(float scaleX);

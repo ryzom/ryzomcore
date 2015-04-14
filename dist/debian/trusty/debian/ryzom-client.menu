@@ -1,0 +1,6 @@
+?package(ryzom-client): \
+	needs="x11" \
+	section="Games/Adventure" \
+	icon="/usr/share/pixmaps/ryzom.xpm" \
+	title="Ryzom" \
+	command="/usr/games/ryzom"

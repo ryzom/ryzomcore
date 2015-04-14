@@ -17,6 +17,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
+#include <limits>
 
 // DtName must be the 1st one
 enum TDataCol { DtName, DtTitle, DtRMFamily, DtGroup, DtEcosystem, DtLevelZone, DtStatQuality, DtProp, DtCreature, DtCreaTitle, DtCraftSlotName, DtCraftCivSpec, DtColor, DtAverageEnergy, DtMaxLevel, DtCustomizedProperties, DtNbCols };

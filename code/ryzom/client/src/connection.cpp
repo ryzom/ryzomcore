@@ -103,7 +103,6 @@ extern uint32			Version;	// Client Version.
 extern UDriver			*Driver;
 extern UTextContext		*TextContext;
 extern bool				game_exit;
-extern CMsgBoxDisplayer MsgBoxError;
 
 extern CSoundManager	*SoundMngr;
 

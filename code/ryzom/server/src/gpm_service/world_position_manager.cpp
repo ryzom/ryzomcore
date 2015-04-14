@@ -504,7 +504,7 @@ void	CWorldPositionManager::triggerSubscribe(NLNET::TServiceId serviceId, const 
 	STOP_IF(IsRingShard,"Illegal use of CWorldPositionManager on ring shard");
 	if (_PatatSubscribeManager.exist(name))
 	{
-		_PatatSubscribeManager.subscribe(serviceId, make_pair<string,uint16>(name, id));
+		_PatatSubscribeManager.subscribe(serviceId, std::pair<string,uint16>(name, id));
 	}
 }
 
@@ -2113,7 +2113,7 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	{
 		if (entity->PlayerInfos->DistanceHistory.size() >= 20)
 			entity->PlayerInfos->DistanceHistory.pop_back();
-		entity->PlayerInfos->DistanceHistory.push_front(make_pair<CVectorD,	uint>(CVectorD(x*0.001, y*0.001, z*0.001), tick));
+		entity->PlayerInfos->DistanceHistory.push_front(std::pair<CVectorD, uint>(CVectorD(x*0.001, y*0.001, z*0.001), tick));
 	}
 #endif
 
@@ -3227,7 +3227,7 @@ void	CWorldPositionManager::visionRequest(sint32 x, sint32 y, sint32 range, vect
 		if (abs(x - entity->X) < range && abs(y - entity->Y) < range &&
 			(rrange = sqrt(sqr((x - entity->X)*0.001) + sqr((y - entity->Y)*0.001))) < frange)
 		{
-			entities.push_back(make_pair<CEntityId, sint32>(entity->Id, (sint32)(rrange*1000)));
+			entities.push_back(std::pair<CEntityId, sint32>(entity->Id, (sint32)(rrange * 1000)));
 		}
 	}
 
@@ -3240,7 +3240,7 @@ void	CWorldPositionManager::visionRequest(sint32 x, sint32 y, sint32 range, vect
 		if (abs(x - entity->X) < range && abs(y - entity->Y) < range &&
 			(rrange = sqrt(sqr((x - entity->X)*0.001) + sqr((y - entity->Y)*0.001))) < frange)
 		{
-			entities.push_back(make_pair<CEntityId, sint32>(entity->Id, (sint32)(rrange*1000)));
+			entities.push_back(std::pair<CEntityId, sint32>(entity->Id, (sint32)(rrange * 1000)));
 		}
 	}
 }

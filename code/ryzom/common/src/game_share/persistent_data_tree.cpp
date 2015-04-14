@@ -139,10 +139,10 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent)
 bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uint32 idx)
 {
 	// check value of 'idx'
-	BOMB_IF(parent!=NULL && idx>1024*1024,"Implausibly high number of children requested ("+NLMISC::toString("%d",idx)+") for persistent data tree node: "+parent->getNodeName(),return false);
+	BOMB_IF(parent != NULL && idx>1024 * 1024, "Implausibly high number of children requested (" + NLMISC::toString("%d", idx) + ") for persistent data tree node: " + parent->getNodeName().c_str(), return false);
 
 	// check for attachment to previous parent
-	BOMB_IF(_Parent!=NULL,"Attempting to attach a persistent data node to parent '"+(parent==NULL?"NULL":parent->getNodeName())+"' when it's already attached to another parent as: "+getNodeName(),return false);
+	BOMB_IF(_Parent != NULL, "Attempting to attach a persistent data node to parent '" + (parent == NULL ? "NULL" : parent->getNodeName()) + "' when it's already attached to another parent as: " + getNodeName().c_str(), return false);
 
 	// split the name into its component parts
 	CSString mapIndex= _Name;
@@ -159,7 +159,7 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 	if (parent!=NULL)
 	{
 		// check parent isn't a value
-		BOMB_IF(parent->_IsValue,"Attempting to attach a persistent data node to parent that has a value '"+parent->getNodeName()+"' = "+parent->_Value,return false);
+		BOMB_IF(parent->_IsValue, "Attempting to attach a persistent data node to parent that has a value '" + parent->getNodeName() + "' = " + parent->_Value.c_str(), return false);
 
 		if (hasExplicitIndex)
 		{
@@ -179,7 +179,7 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 				}
 
 				// ensure that there isn't already a node with the same '#' value attached to the same parent
-				DROP_IF(parent->_ChildIndex.find(nameBase+'#'+mapIndex)!=parent->_ChildIndex.end(),"Failed to add child '"+_Name+"' to parent '"+parent->getNodeName()+"' because another child of same name already exists",return false);
+				DROP_IF(parent->_ChildIndex.find(nameBase + '#' + mapIndex.c_str()) != parent->_ChildIndex.end(), "Failed to add child '" + _Name + "' to parent '" + parent->getNodeName().c_str() + "' because another child of same name already exists", return false);
 			}
 		}
 		if (!hasExplicitIndex)
@@ -190,7 +190,7 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 		}
 
 		// construct our cleaned up name from its constituent parts
-		_Name= nameBase+'#'+mapIndex;
+		_Name = nameBase + '#' + mapIndex.c_str();
 
 		// setup own _Parent property and ensure that there are no trailing spaces round the _Name
 		_Parent= parent;
@@ -205,7 +205,7 @@ bool CPersistentDataTreeNode::attachToParent(CPersistentDataTreeNode* parent,uin
 		}
 
 		// ensure that there isn't another child already assigned to this parent slot
-		BOMB_IF(_Parent->_Children[idx]!=NULL,"Ignoring attempt to add second child to same slot ("+NLMISC::toString("%d",idx)+") in persistent data tree node's children: "+_Parent->getNodeName(),return false);
+		BOMB_IF(_Parent->_Children[idx] != NULL, "Ignoring attempt to add second child to same slot (" + NLMISC::toString("%d", idx) + ") in persistent data tree node's children: " + _Parent->getNodeName().c_str(), return false);
 
 		// write own pointer into parent's _Children vector
 		_Parent->_Children[idx]= this;
@@ -239,7 +239,7 @@ bool CPersistentDataTreeNode::readFromPdr(CPersistentDataRecord& pdr)
 				return false;
 
 			// pop the end of block token for the block we just finished processing
-			DROP_IF(pdr.peekNextToken()!=token,"ERROR: End of "+pdr.lookupString(token)+" block expected but not found at: "+getNodeName(),return false);
+			DROP_IF(pdr.peekNextToken() != token, "ERROR: End of " + pdr.lookupString(token) + " block expected but not found at: " + getNodeName().c_str(), return false);
 			pdr.popStructEnd(token);
 		}
 		else if (pdr.isEndOfStruct())
@@ -259,7 +259,7 @@ bool CPersistentDataTreeNode::readFromPdr(CPersistentDataRecord& pdr)
 				// extract the map key and ensure that it's followed by a valid __Val__ entry
 				CSString mapKey;
 				pdr.pop(mapKeyToken,mapKey);
-				DROP_IF(pdr.isEndOfData() || pdr.peekNextToken()!=mapValToken,"ERROR: Ignoring map key (__Key__) because __Val__ token expected but not found at: "+getNodeName()+":"+mapKey,continue);
+				DROP_IF(pdr.isEndOfData() || pdr.peekNextToken() != mapValToken, "ERROR: Ignoring map key (__Key__) because __Val__ token expected but not found at: " + getNodeName() + ":" + mapKey.c_str(), continue);
 				if (needsQuotes(mapKey))
 					mapKey=mapKey.quote();
 
@@ -278,7 +278,7 @@ bool CPersistentDataTreeNode::readFromPdr(CPersistentDataRecord& pdr)
 						return false;
 
 					// pop the end of struct marker
-					DROP_IF(pdr.peekNextToken()!=mapValToken,"ERROR: End of __Val__ block expected but not found at: "+getNodeName()+":"+mapKey,return false);
+					DROP_IF(pdr.peekNextToken() != mapValToken, "ERROR: End of __Val__ block expected but not found at: " + getNodeName() + ":" + mapKey.c_str(), return false);
 					pdr.popStructEnd(mapValToken);
 				}
 				else
@@ -419,9 +419,9 @@ bool CPersistentDataTreeNode::writeToBuffer(NLMISC::CSString& buffer) const
 	{
 		// write a value
 		if (needsQuotes(_Value))
-			buffer+= getNodeName()+"=="+_Value.quote()+"\n";
+			buffer += getNodeName() + "==" + _Value.quote().c_str() + "\n";
 		else
-			buffer+= getNodeName()+"="+_Value+"\n";
+			buffer += getNodeName() + "=" + _Value.c_str() + "\n";
 	}
 	else
 	{
@@ -468,8 +468,8 @@ CSString CPersistentDataTreeNode::getNodeName() const
 
 	// return one of name, parentName.name and parentName:name
 	if (parentName.empty())	return name;
-	if (isMapEntry())		return parentName+":"+name;
-	else					return parentName+"."+name;
+	if (isMapEntry())		return parentName + ":" + name.c_str();
+	else					return parentName + "." + name.c_str();
 }
 
 void   CPersistentDataTreeNode::setValue(const TValue& value)
@@ -507,7 +507,7 @@ bool CPersistentDataTreeNode::isMapEntry() const
 
 bool CPersistentDataTreeNode::flagAsMap()
 {
-	DROP_IF(_IsValue,"ERROR: Failed to flag persistent data tree node '"+getNodeName()+"' as a map as it already has a value: "+_Value,return false);
+	DROP_IF(_IsValue, "ERROR: Failed to flag persistent data tree node '" + getNodeName() + "' as a map as it already has a value: " + _Value.c_str(), return false);
 
 	if (_IsMap)
 		return true;

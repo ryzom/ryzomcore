@@ -281,8 +281,7 @@ public:
 // HashMapTraits for NLMISC::TKey
 struct CTKeyHashMapTraits
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	CTKeyHashMapTraits() { }
 	size_t operator() (NLMISC::TKey key) const
 	{

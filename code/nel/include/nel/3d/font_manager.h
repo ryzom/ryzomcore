@@ -102,6 +102,8 @@ public:
 	 * \param fontGen font generator
 	 * \param color primitive blocks color
 	 * \param fontSize font size
+	 * \param embolden font style bold
+	 * \param oblique font style slanted (italic)
 	 * \param desc display descriptor (screen size, font ratio)
 	 * \param output computed string
 	 * \param keep800x600Ratio true if you want that CFontManager look at Driver window size, and resize fontSize so it keeps same size...
@@ -110,6 +112,8 @@ public:
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
 						uint32 fontSize,
+						bool embolden,
+						bool oblique,
 					    IDriver *driver,
 						CComputedString& output,
 						bool	keep800x600Ratio= true);
@@ -121,6 +125,8 @@ public:
 						CFontGenerator *fontGen,
 						const NLMISC::CRGBA &color,
 						uint32 fontSize,
+						bool embolden,
+						bool oblique,
 					    IDriver *driver,
 						CComputedString &output,
 						bool	keep800x600Ratio= true);
@@ -132,6 +138,8 @@ public:
 							CFontGenerator *fontGen,
 							const NLMISC::CRGBA &color,
 							uint32 fontSize,
+							bool embolden,
+							bool oblique,
 							IDriver *driver,
 							CComputedString &output,
 							bool keep800x600Ratio= true);

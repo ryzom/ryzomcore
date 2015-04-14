@@ -142,7 +142,6 @@ using namespace std;
 // Ligo primitive class
 CLigoConfig				LigoConfig;
 
-CMsgBoxDisplayer		MsgBoxError;
 CClientChatManager		ChatMngr;
 
 bool					LastScreenSaverEnabled = false;
@@ -568,7 +567,7 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 		std::stringstream name;
 		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
 		std::stringstream fullname;
-		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
 		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
 		if (cache)
 		{
@@ -847,8 +846,8 @@ void prelogInit()
 		FPU_CHECKER_ONCE
 
 		// Set default email value for reporting error
-		setReportEmailFunction ((void*)sendEmail);
-		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
+		// setReportEmailFunction ((void*)sendEmail);
+		// setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
 		// create the save dir.
 		if (!CFile::isExists("save")) CFile::createDirectory("save");

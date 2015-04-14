@@ -100,6 +100,30 @@ uint32 CTextContextUser::getFontSize() const
 
 	return _TextContext.getFontSize();
 }
+void CTextContextUser::setEmbolden(bool b)
+{
+	H_AUTO2;
+
+	_TextContext.setEmbolden(b);
+}
+bool CTextContextUser::getEmbolden() const
+{
+	H_AUTO2;
+
+	return _TextContext.getEmbolden();
+}
+void CTextContextUser::setOblique(bool b)
+{
+	H_AUTO2;
+
+	_TextContext.setOblique(b);
+}
+bool CTextContextUser::getOblique() const
+{
+	H_AUTO2;
+
+	return _TextContext.getOblique();
+}
 void CTextContextUser::setHotSpot(THotSpot hotSpot)
 {
 	H_AUTO2;

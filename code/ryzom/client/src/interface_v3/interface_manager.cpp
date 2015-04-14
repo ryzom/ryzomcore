@@ -2684,7 +2684,7 @@ bool CInterfaceManager::deletePlayerKeys (const std::string &playerFileIdent)
 }
 
 // ***************************************************************************
-void CInterfaceManager::log(const ucstring &str)
+void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 {
 	if (_LogState)
 	{
@@ -2693,7 +2693,7 @@ void CInterfaceManager::log(const ucstring &str)
 		FILE *f = fopen(fileName.c_str(), "at");
 		if (f != NULL)
 		{
-			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " * " + str.toUtf8();
+			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
 			fprintf(f, "%s\n", finalString.c_str());
 		}
 		fclose(f);

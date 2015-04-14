@@ -353,7 +353,7 @@ bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup 
 	if (ptrName)
 	{
 		// Does the action exist ?
-		std::string name = ptrName;
+		std::string name = ptrName.str();
 		if (!ICommand::exists (name) || (CUserCommand::CommandMap.find(name) != CUserCommand::CommandMap.end()))
 		{
 			// Get the action
@@ -369,7 +369,7 @@ bool CCommandParser::parse( xmlNodePtr cur, NLGUI::CInterfaceGroup *parentGroup 
 					// if prop "ctrlchar" is declared with false, then disable ctrlchar for this command
 					CXMLAutoPtr prop((const char*) xmlGetProp( cur, (xmlChar*)"ctrlchar" ));
 					if( (const char*)prop && (CInterfaceElement::convertBool((const char*)prop)==false) )
-						ICommand::enableControlCharForCommand(ptrName, false);
+						ICommand::enableControlCharForCommand(ptrName.str(), false);
 
 					// Done
 					ret = true;

@@ -365,6 +365,8 @@ int main(int argc, char **argv)
 
 	createDebug();
 
+	INelContext::getInstance().setWindowedApplication(true);
+
 #ifndef NL_DEBUG
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
@@ -434,9 +436,9 @@ int main(int argc, char **argv)
 
 	// Set default email value for reporting error
 #ifdef TEST_CRASH_COUNTER
-	//initCrashReport ();
-	setReportEmailFunction ((void*)sendEmail);
-	setDefaultEmailParams ("smtp.nevrax.com", "", "hulud@nevrax.com");
+	// initCrashReport ();
+	// setReportEmailFunction ((void*)sendEmail);
+	// setDefaultEmailParams ("smtp.nevrax.com", "", "hulud@nevrax.com");
 
 	if (string(cmdline) == "/crash")
 		volatile int toto = *(int*)0;

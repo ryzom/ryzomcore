@@ -48,7 +48,7 @@ CMissionQueueManager::CMissionQueueManager()
 // ----------------------------------------------------------------------------
 void CMissionQueueManager::init()
 {
-	string sFilename = MissionQueueFile;
+	string sFilename = MissionQueueFile.get();
 	sFilename = Bsi.getLocalPath() + sFilename;
 	
 	if (CFile::fileExists(sFilename))
@@ -141,7 +141,7 @@ void CMissionQueueManager::saveToFile()
 
 	if( _InitOk )
 	{
-		string sFilename = MissionQueueFile;
+		string sFilename = MissionQueueFile.get();
 		
 		// save file via Backup Service (BS)
 		try

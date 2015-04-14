@@ -1356,7 +1356,7 @@ void	CStringManager::mergeEntityWords(CEntityWords& dest, const CEntityWords& so
 	std::map<std::string, uint32>::const_iterator	iti;
 	for (iti=source._ColumnInfo.begin(); iti!=source._ColumnInfo.end(); ++iti)
 		if (dest._ColumnInfo.find((*iti).first) == dest._ColumnInfo.end())
-			extraColumns.push_back(std::make_pair<std::string, uint32>((*iti).first, osz+(uint32)extraColumns.size()));
+			extraColumns.push_back(std::pair<std::string, uint32>((*iti).first, osz + (uint32)extraColumns.size()));
 
 	for (iti=source._RowInfo.begin(); iti!=source._RowInfo.end(); ++iti)
 		if (dest._RowInfo.find((*iti).first) == dest._RowInfo.end())

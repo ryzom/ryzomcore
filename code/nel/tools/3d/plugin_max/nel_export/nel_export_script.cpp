@@ -957,6 +957,7 @@ protected:
 Value* force_quit_on_msg_displayer_cf(Value** arg_list, int count)
 {
 	nlwarning("Enable force quit on NeL report msg displayer");
+	NLMISC::INelContext::getInstance().setWindowedApplication(false);
 	// disable the Windows popup telling that the application aborted and disable the dr watson report.
 	_set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 	putenv("NEL_IGNORE_ASSERT=1");
