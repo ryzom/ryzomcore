@@ -706,7 +706,12 @@ inline float CPersistentDataRecord::CArg::asFloat() const
 	case UINT64:		return (float)(uint64)_Value.i64;
 	case FLOAT32:		return (float)_Value.f32;
 	case FLOAT64:		return (float)_Value.f64;
-	case STRING:		return (float)atof(_String.c_str());
+	case STRING:
+	{
+		float val;
+		NLMISC::fromString(_String, val);
+		return val;
+	}
 	case FLAG:			return 1.0f;
 	case EXTEND_TYPE:
 		switch(_Value.ExType)
@@ -733,7 +738,12 @@ inline double CPersistentDataRecord::CArg::asDouble() const
 	case UINT64:		return (double)(uint64)_Value.i64;
 	case FLOAT32:		return (double)_Value.f32;
 	case FLOAT64:		return (double)_Value.f64;
-	case STRING:		return (double)atof(_String.c_str());
+	case STRING:
+	{
+		double val;
+		NLMISC::fromString(_String, val);
+		return val;
+	}
 	case FLAG:			return 1.0;
 	case EXTEND_TYPE:
 		switch(_Value.ExType)

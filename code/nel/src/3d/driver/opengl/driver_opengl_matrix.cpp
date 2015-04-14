@@ -37,19 +37,11 @@ void CDriverGL::setFrustum(float left, float right, float bottom, float top, flo
 
 	if (perspective)
 	{
-#ifdef USE_OPENGLES
-		glFrustumf(left,right,bottom,top,znear,zfar);
-#else
 		glFrustum(left,right,bottom,top,znear,zfar);
-#endif
 	}
 	else
 	{
-#ifdef USE_OPENGLES
-		glOrthof(left,right,bottom,top,znear,zfar);
-#else
 		glOrtho(left,right,bottom,top,znear,zfar);
-#endif
 	}
 
 	_ProjMatDirty = true;

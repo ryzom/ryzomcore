@@ -447,8 +447,9 @@ private:
 	std::string UpdateBatchFilename;
 
 	// Where the client get all delta and desc file
-	std::string ClientPatchPath;
-	std::string ClientDataPath;
+	std::string ClientPatchPath; // Temporary path
+	std::string ReadableClientDataPath; // Where original data can be found
+	std::string WritableClientDataPath; // Where data can be written
 
 	/// Output useful information for debugging in the log file
 	bool VerboseLog;

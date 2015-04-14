@@ -217,7 +217,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 			return true;
 		}
 	}
-	
+
 #ifdef NL_TEMP_YUBO_NO_SOUND_SHEET_ID
 	if (a_NoSoundSheetId && sheetName.find(".sound") != std::string::npos)
 	{
@@ -236,7 +236,7 @@ bool CSheetId::buildSheetId(const std::string& sheetName)
 		return true;
 	}
 #endif
-	
+
 	return false;
 }
 
@@ -417,10 +417,10 @@ void CSheetId::initWithoutSheet()
 		nlassert(_DontHaveSheetKnowledge);
 		return;
 	}
-	
+
 	_Initialised = true;
 	_DontHaveSheetKnowledge = true;
-	
+
 	// Initialize id 0,0 as unknown.unknown
 	CSheetId unknownunknown = CSheetId("unknown.unknown");
 	nlassert(unknownunknown == CSheetId::Unknown);
@@ -525,7 +525,7 @@ bool CSheetId::operator < (const CSheetId& sheetRef ) const
 string CSheetId::toString(bool ifNotFoundUseNumericId) const
 {
 	if (!_Initialised) init(false);
-	
+
 	if (_DontHaveSheetKnowledge)
 	{
 		// FIXME: When someone punches in a fake sheet id this will 
@@ -564,7 +564,7 @@ string CSheetId::toString(bool ifNotFoundUseNumericId) const
 void CSheetId::serial(NLMISC::IStream	&f) throw(NLMISC::EStream)
 {
 	nlassert(!_DontHaveSheetKnowledge);
-	
+
 	f.serial( _Id.Id );
 
 #ifdef NL_DEBUG_SHEET_ID

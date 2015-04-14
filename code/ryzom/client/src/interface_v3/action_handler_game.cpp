@@ -1950,13 +1950,14 @@ public:
 						womanTitle = pChar->getGender() == GSGENDER::female;
 					
 					STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
-					
+
 					// Sometimes translation contains another title
 					ucstring::size_type pos = copyInout.find('$');
 					if (pos != ucstring::npos)
 					{
 						copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 					}
+
 					CStringPostProcessRemoveTitle::cbIDStringReceived(copyInout);
 					inout = copyInout;
 				}

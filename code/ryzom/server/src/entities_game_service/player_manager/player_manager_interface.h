@@ -41,10 +41,11 @@ public:
 
 	};
 
-	class CUint32Hash
+	struct CUint32Hash
 	{
-	public:
-		size_t	operator () ( const uint32 &i ) const { return i; }
+		enum { bucket_size = 4, min_buckets = 8, };
+		size_t	operator () (const uint32 &i) const { return i; }
+		bool operator()(const uint32 left, const uint32 right) const { return left < right; }
 	};
 
 	typedef uint32	TUserId;

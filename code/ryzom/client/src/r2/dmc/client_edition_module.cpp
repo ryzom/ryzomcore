@@ -1352,8 +1352,8 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		}
 	}
 
-	std::string sourceExtension = UserComponentsSourceExtension;
-	std::string componentExtension = UserComponentsComponentExtension;
+	std::string sourceExtension = UserComponentsSourceExtension.get();
+	std::string componentExtension = UserComponentsComponentExtension.get();
 
 
 	uint32 uncompressedFileLength = 0;

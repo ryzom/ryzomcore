@@ -104,7 +104,7 @@ public:
 	// classic init(), update() and release()
 
 	/** create an AI instance, return the instance index in the AIList
-	 *	Return ~0 if the instance number is already in use.
+	 *	Return std::numeric_limits<uint32>::max() if the instance number is already in use.
 	 */
 	uint32	createAIInstance(const std::string &continentName, uint32 instanceNumber);
 	/** destroy an AI Instance (useful for ring creation / destruction of session)
@@ -205,7 +205,7 @@ public:
 	/// Time warp managment. This method is called when time as warped more than 600ms
 	bool	advanceUserTimer(uint32 nbTicks);
 
-	/// Retreive emot number given it's name, return ~0 if not found
+	/// Retreive emot number given it's name, return std::numeric_limits<uint32>::max() if not found
 	uint32	getEmotNumber(const std::string &name);
 
 	CCont<CAIInstance>		&AIList	()		{	return	_AIInstances;	}
@@ -243,7 +243,7 @@ public:
 	class CCounter
 	{
 	public:
-		CCounter(const uint32 max=~0):_Total(0),_Max(max)
+		CCounter(const uint32 max=std::numeric_limits<uint32>::max()):_Total(0),_Max(max)
 		{}
 		virtual ~CCounter()
 		{}

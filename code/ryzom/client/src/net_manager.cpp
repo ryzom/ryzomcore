@@ -879,7 +879,28 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	}
 
 	// Log
-	pIM->log (finalString);
+
+	string channel;
+	if (mode == CChatGroup::dyn_chat)
+	{
+		sint32	dbIndex = ChatMngr.getDynamicChannelDbIndexFromId(dynChatId);
+		clamp(dbIndex, (sint32)0 , (sint32)CChatGroup::MaxDynChanPerPlayer);
+
+		channel = "dyn" + toString(dbIndex);
+	}
+	else
+	{
+		channel = CChatGroup::groupTypeToString(mode);
+		if (channel.empty())
+		{
+			channel = "#" + toString((uint32)mode);
+		}
+	}
+	if (!stringCategory.empty() && NLMISC::toUpper(stringCategory) != "SYS")
+	{
+		channel = channel + "/" + stringCategory;
+	}
+	pIM->log (finalString, channel);
 
 }
 
@@ -911,7 +932,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
  	colorizeSender(finalString, senderPart, prop.getRGBA());
 
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */finalString, goodSenderName, prop.getRGBA(), 2, &windowVisible);
-	CInterfaceManager::getInstance()->log(finalString);
+	CInterfaceManager::getInstance()->log(finalString, CChatGroup::groupTypeToString(CChatGroup::tell));
 
 	// Open the free teller window
 	CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();

@@ -218,6 +218,13 @@ namespace NLGUI
 		HTML_ATTR(DIV,STYLE),
 	};
 
+	enum
+	{
+		HTML_ATTR(SPAN,CLASS) = 0,
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
+	};
+
 
 	#undef HTML_ATTR
 

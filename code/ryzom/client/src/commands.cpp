@@ -3890,7 +3890,6 @@ NLMISC_COMMAND(displayInventoryCounter, "display the Inventory counter to compar
 
 NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 {
-
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 

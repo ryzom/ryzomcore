@@ -198,7 +198,7 @@ void CWinThread::start ()
 {
 	if (isRunning())
 		throw EThread("Starting a thread that is already started, existing thread will continue running, this should not happen");	
-	
+
 //	ThreadHandle = (void *) ::CreateThread (NULL, _StackSize, ProxyFunc, this, 0, (DWORD *)&ThreadId);
 	ThreadHandle = (void *) ::CreateThread (NULL, 0, ProxyFunc, this, 0, (DWORD *)&ThreadId);
 //	nldebug("NLMISC: thread %x started for runnable '%x'", typeid( Runnable ).name());

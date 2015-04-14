@@ -777,7 +777,7 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 	sint32 dstPhraseId= pCSDst->getSPhraseId();
 	sint32 dstMacroId= pCSDst->getMacroId();
 
-	if ((src.empty()) && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
+	if (src.empty() && (CHandlerPhraseMemoryCopy::haveLastPhraseElement))
 	{		
 		// get the slot ids from save
 		srcIsMacro= CHandlerPhraseMemoryCopy::isMacro;
@@ -1600,7 +1600,6 @@ public:
 		}
 	}
 };
-
 REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory2, "phrase_select_memory_2");
 
 // ***************************************************************************

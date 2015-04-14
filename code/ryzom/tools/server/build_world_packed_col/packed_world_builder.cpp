@@ -443,7 +443,7 @@ void CPackedWorldBuilder::fly(std::vector<CIslandInfo>  &islands, float camSpeed
 	texturedMaterial.setDoubleSided(true);
 	texturedMaterial.setZFunc(CMaterial::lessequal);
 	//
-	uint currWorldIndex = ~0;
+	uint currWorldIndex = std::numeric_limits<uint>::max();
 	bool newPosWanted = true;
 	//
 	std::vector<TPackedZoneBaseSPtr> zones;	

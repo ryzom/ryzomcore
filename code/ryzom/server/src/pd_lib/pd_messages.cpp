@@ -504,7 +504,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const N
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{
@@ -561,7 +561,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const s
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{
@@ -644,7 +644,7 @@ bool	CUpdateLog::selectMessages(const CDBDescriptionParser& description, const N
 
 		if (message.getType() == CDbMessage::PushContext)
 		{
-			contextsStart.push_back(std::make_pair<uint, bool>(msg, false));
+			contextsStart.push_back(std::pair<uint, bool>(msg, false));
 		}
 		else if (message.getType() == CDbMessage::PopContext)
 		{

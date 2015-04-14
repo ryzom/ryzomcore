@@ -255,6 +255,16 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ELSE(WITH_STATIC)
     OPTION(WITH_STATIC_LIBXML2    "With static libxml2"                           OFF)
   ENDIF(WITH_STATIC)
+  IF (WITH_STATIC)
+    OPTION(WITH_STATIC_CURL       "With static curl"                              ON )
+  ELSE(WITH_STATIC)
+    OPTION(WITH_STATIC_CURL       "With static curl"                              OFF)
+  ENDIF(WITH_STATIC)
+  IF(APPLE)
+    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      ON )
+  ELSE(APPLE)
+    OPTION(WITH_LIBXML2_ICONV     "With libxml2 using iconv"                      OFF)
+  ENDIF(APPLE)
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
   IF(WIN32)
     OPTION(WITH_EXTERNAL          "With provided external."                       ON )
@@ -363,6 +373,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
+  OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
@@ -557,9 +568,15 @@ MACRO(NL_SETUP_BUILD)
     # Ignore default include paths
     ADD_PLATFORM_FLAGS("/X")
 
-    IF(MSVC11)
+    IF(MSVC12)
       ADD_PLATFORM_FLAGS("/Gy- /MP")
-      # /Ox is working with VC++ 2010, but custom optimizations don't exist
+      # /Ox is working with VC++ 2013, but custom optimizations don't exist
+      SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
+      # without inlining it's unusable, use custom optimizations again
+      SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
+    ELSEIF(MSVC11)
+      ADD_PLATFORM_FLAGS("/Gy- /MP")
+      # /Ox is working with VC++ 2012, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
@@ -581,9 +598,9 @@ MACRO(NL_SETUP_BUILD)
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 ${DEBUG_CFLAGS}")
-    ELSE(MSVC11)
+    ELSE(MSVC12)
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
-    ENDIF(MSVC11)
+    ENDIF(MSVC12)
 
     ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /Zm1000 /wd4250")
 

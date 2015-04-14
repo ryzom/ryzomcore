@@ -1,3 +1,18 @@
+// Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
+// Copyright (C) 2010  Winch Gate Property Limited
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as
+// published by the Free Software Foundation, either version 3 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /////////////////////////////////////////////////////////////////
 // WARNING : this is a generated file, don't change it !
@@ -303,7 +318,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -321,7 +336,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);
@@ -781,7 +796,7 @@ namespace RSMGR
 		}
 		else if (cmd == NOPE::cc_instance_count)
 		{
-			return _ObjectCache.size();
+			return (uint32)_ObjectCache.size();
 		}
 
 		// default return value
@@ -799,7 +814,7 @@ namespace RSMGR
 		TReleasedObject::iterator first(_ReleasedObject.begin()), last(_ReleasedObject.end());
 		for (; first != last; ++first)
 		{
-			nbReleased += first->second.size();
+			nbReleased += (uint32)first->second.size();
 		}
 
 		nlinfo("	There are %u object instances in cache not referenced (waiting deletion or re-use))", nbReleased);

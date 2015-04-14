@@ -559,7 +559,8 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 	}
 	// if the user is online reset its guild id
 	CGuildMemberModule * module = NULL;
-	if ( member->getReferencingModule( module ) )
+
+	if (member->getReferencingModule(module))
 	{
 		module->clearOnlineGuildProperties();
 	}
@@ -568,7 +569,7 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 	params[0].setEIdAIAlias( proxy.getId(), CAIAliasTranslator::getInstance()->getAIAlias(proxy.getId()) );
 	params[1].StringId = CEntityIdTranslator::getInstance()->getEntityNameStringId(member->getIngameEId());
 	sendMessageToGuildMembers("GUILD_KICK_MEMBER",params);
-	
+
 	guild->deleteMember( member );	
 }
 

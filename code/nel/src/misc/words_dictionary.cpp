@@ -251,7 +251,7 @@ void CWordsDictionary::exactLookupByKey( const CSString& key, CVectorSString& re
  */
 inline CSString CWordsDictionary::makeResult( const CSString &key, const CSString &word )
 {
-	return key + CSString(": ") + word;
+	return key + ": " + word.c_str();
 }
 
 

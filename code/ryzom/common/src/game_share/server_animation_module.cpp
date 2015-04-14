@@ -1017,7 +1017,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 				}
 
 				if(result.size()>=2)
-					result[1] = "DSS_"+toString(scenarioId)+" "+result[1];
+					result[1] = "DSS_"+toString(scenarioId)+" "+result[1].c_str();
 				if(result.size()>=3)
 				{
 					for(uint32 i=2;i<result.size();++i)

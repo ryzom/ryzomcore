@@ -79,7 +79,7 @@ void CAnimCombatState::build(const string &line)
 {
 	StateCode= line.substr(4, 2);
 	string time= line.substr(10, 5);
-	MeanAnimTime= (float)atof(time.c_str());
+	NLMISC::fromString(time, MeanAnimTime);
 }
 
 

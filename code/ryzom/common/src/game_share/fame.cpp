@@ -479,10 +479,9 @@ void CStaticFames::loadStaticFame( const string& filename )
 				else
 					NLMISC::fromString(s.substr(sep+1, s.size()-sep-1), factor);
 				// Fames in file are in [-600;600] so don't forget 1000 factor
-				sint32 fame;
 				float fameFloat;
 				NLMISC::fromString(s.substr(0, sep), fameFloat);
-				fame = (sint32)(fameFloat * 1000.f);
+				sint32 fame = (sint32)(fameFloat * 1000.f);
 
 				_FameTable[iFaction*_FameTableSize + jFaction] = fame;
 				_PropagationFactorTable[iFaction*_FameTableSize + jFaction] = factor;

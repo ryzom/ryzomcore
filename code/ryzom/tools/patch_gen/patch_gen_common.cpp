@@ -19,6 +19,7 @@
 //-----------------------------------------------------------------------------
 
 #include <cstdio>
+#include <limits>
 
 #include "game_share/bnp_patch.h"
 #include "nel/misc/path.h"
@@ -149,7 +150,7 @@ CPackageDescription::CPackageDescription()
 
 void CPackageDescription::clear()
 {
-	_NextVersionNumber= ~0u;
+	_NextVersionNumber= std::numeric_limits<uint32>::max();
 	_VersionNumberReserved = false;
 	_Categories.clear();
 	_IndexFileName.clear();
@@ -345,8 +346,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		if (packageIndex.getFile(i).versionCount()==1)
 		{
 			prevVersionFileName= _RootDirectory + "empty";
-			NLMISC::COFile tmpFile(prevVersionFileName);
-			tmpFile.close();
+			CFile::createEmptyFile(prevVersionFileName);
 			usingTemporaryFile = true;
 			deleteRefAfterDelta= false;
 		}

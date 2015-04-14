@@ -483,7 +483,7 @@ void CChatWindow::displayLocalPlayerTell(const ucstring &receiver, const ucstrin
 	strFindReplace(s, "%name", receiver);
 	strFindReplace(finalMsg, CI18N::get("youTell"), s);
 	displayMessage(finalMsg, prop.getRGBA(), CChatGroup::tell, 0, numBlinks);
-	CInterfaceManager::getInstance()->log(finalMsg);
+	CInterfaceManager::getInstance()->log(finalMsg, CChatGroup::groupTypeToString(CChatGroup::tell));
 }
 
 void CChatWindow::encodeColorTag(const NLMISC::CRGBA &color, ucstring &text, bool append)
@@ -601,7 +601,7 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					if (pos == ucstring::npos || (colonpos < pos))
 					{
 						// No timestamp, so put it right after the color and add a space
-						pos = newmsg.find(ucstring("}"));;
+						pos = newmsg.find(ucstring("}"));
 						prefix += " ";
 					}
 					

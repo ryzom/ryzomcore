@@ -142,7 +142,6 @@ using namespace std;
 // Ligo primitive class
 CLigoConfig				LigoConfig;
 
-CMsgBoxDisplayer		MsgBoxError;
 CClientChatManager		ChatMngr;
 
 bool					LastScreenSaverEnabled = false;
@@ -554,26 +553,6 @@ void checkDriverDepth ()
 	}
 }
 
-static std::string replaceApplicationDirToken(const std::string &dir)
-{
-#ifdef NL_OS_MAC
-	// if client_default.cfg is not in current directory, and it's not an absolute path, use application default directory
-	if (!CFile::isExists("client_default.cfg") && !dir.empty() && dir[0]!='/')
-	{
-		return getAppBundlePath() + "/Contents/Resources/" + dir;
-	}
-#else
-	static const std::string token = "<ApplicationDir>";
-	std::string::size_type pos = dir.find(token);
-	if (pos != std::string::npos)
-		return dir.substr(0, pos) + getAppBundlePath() + dir.substr(pos + token.length());
-#endif
-
-//	preDataPath = getAppBundlePath() + "/Contents/Resources/" + preDataPath;
-
-	return dir;
-}
-
 void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 {
 	bool cache = VRDeviceCache.empty();
@@ -588,7 +567,7 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 		std::stringstream name;
 		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
 		std::stringstream fullname;
-		fullname << std::string("[") << name << "] [" << it->Serial << "]";
+		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
 		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
 		if (cache)
 		{
@@ -677,39 +656,94 @@ void addSearchPaths(IProgressCallback &progress)
 			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
 			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPath[i]), true, false, &progress);
+			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
 
 			progress.popCropedValues ();
 		}
 
 		CPath::loadRemappedFiles("remap_files.csv");
 	}
+
 	for (uint i = 0; i < ClientCfg.DataPathNoRecurse.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.DataPathNoRecurse[i]), false, false, &progress);
+		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
 
 		progress.popCropedValues ();
 	}
-}
 
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#endif
+
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.DataPath[i].empty() && ClientCfg.DataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.DataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
+}
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
 {
 	NLMISC::TTime initPaths = ryzomGetLocalTime ();
-	H_AUTO(InitRZAddSearchPaths)
+
+	H_AUTO(InitRZAddSearchPaths);
+
 	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
 	{
 		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
 
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.PreDataPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
 
 		progress.popCropedValues ();
 	}
+
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
+
+	std::string defaultDirectory;
+
+#ifdef NL_OS_MAC
+	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
+#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#endif
+
+	// add in last position, a specific possibly read only directory
+	if (!defaultDirectory.empty())
+	{
+		for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
+		{
+			// don't prepend default directory if path is absolute
+			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
+			{
+				progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
+				progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
+
+				CPath::addSearchPath(defaultDirectory + ClientCfg.PreDataPath[i], true, false, &progress);
+
+				progress.popCropedValues ();
+			}
+		}
+	}
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
@@ -718,7 +752,7 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(replaceApplicationDirToken(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
+		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
 		progress.popCropedValues();
 	}
 }
@@ -753,12 +787,12 @@ void prelogInit()
 #ifdef NL_OS_WINDOWS
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
-		
+
 		CTime::CTimerInfo timerInfo;
 		NLMISC::CTime::probeTimerInfo(timerInfo);
 		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
 			setCPUMask();
-		
+
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
@@ -812,8 +846,8 @@ void prelogInit()
 		FPU_CHECKER_ONCE
 
 		// Set default email value for reporting error
-		setReportEmailFunction ((void*)sendEmail);
-		setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
+		// setReportEmailFunction ((void*)sendEmail);
+		// setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
 
 		// create the save dir.
 		if (!CFile::isExists("save")) CFile::createDirectory("save");
@@ -895,7 +929,6 @@ void prelogInit()
 		switch(ClientCfg.Driver3D)
 		{
 #ifdef NL_OS_WINDOWS
-
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
@@ -948,7 +981,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(1);
 		else
 			Driver->setSwapVBLInterval(0);
-		
+
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -1076,7 +1109,7 @@ void prelogInit()
 
 		// Set the monitor color properties
 		CMonitorColorProperties monitorColor;
-		for ( uint i=0; i<3; i++)
+		for (uint i=0; i<3; i++)
 		{
 			monitorColor.Contrast[i] = ClientCfg.Contrast;
 			monitorColor.Luminosity[i] = ClientCfg.Luminosity;

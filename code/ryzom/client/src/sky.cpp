@@ -235,7 +235,7 @@ uint CSky::setup(const CClientDate &date, const CClientDate &animationDate, floa
 	// animate objects
 	if (_PlayListManager)
 	{
-		double globalDate = ((double) _NumHourInDay * date.Day + (double) date.Hour) / _NumHourInDay;
+		double globalDate = (double)date.Hour / (double)_NumHourInDay;
 		//nlinfo("global date = %f", (float) globalDate);
 		_PlayListManager->animate(_AnimLengthInSeconds * globalDate);
 	}

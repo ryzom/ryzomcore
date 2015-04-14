@@ -233,6 +233,14 @@ namespace NLGUI
 		{ 0 }
 	};
 
+	HTAttr span_attr[] =
+	{
+		HTML_ATTR(SPAN,CLASS),
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
+		{ 0 }
+	};
+
 	// ***************************************************************************
 
 	void _VerifyLibWWW(const char *function, bool ok, const char *file, int line)
@@ -699,6 +707,8 @@ namespace NLGUI
 			HTML_DTD->tags[HTML_I].number_of_attributes = 0;
 			HTML_DTD->tags[HTML_DIV].attributes = div_attr;
 			HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_SPAN].attributes = span_attr;
+			HTML_DTD->tags[HTML_SPAN].number_of_attributes = sizeof(span_attr) / sizeof(HTAttr) - 1;
 
 			// Set a request timeout
 			//		HTHost_setEventTimeout (30000);

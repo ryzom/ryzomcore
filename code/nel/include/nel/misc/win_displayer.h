@@ -21,8 +21,19 @@
 
 #ifdef NL_OS_WINDOWS
 
-#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
-#ifndef NL_COMP_MINGW
+#ifndef WIN32_LEAN_AND_MEAN
+#	define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINDOWS
+#	define _WIN32_WINDOWS 0x0410
+#endif
+#ifndef _WIN32_WINNT
+#	define _WIN32_WINNT 0x0400
+#endif
+#ifndef WINVER
+#	define WINVER 0x0400
+#endif
+#ifndef NOMINMAX
 #	define NOMINMAX
 #endif
 #include <windows.h>
@@ -46,11 +57,7 @@ class CWinDisplayer : public NLMISC::CWindowDisplayer
 {
 public:
 
-	CWinDisplayer (const char *displayerName = "") : CWindowDisplayer(displayerName), Exit(false)
-	{
-		needSlashR = true;
-		createLabel ("@Clear|CLEAR");
-	}
+	CWinDisplayer(const char *displayerName = "");
 
 	virtual ~CWinDisplayer ();
 

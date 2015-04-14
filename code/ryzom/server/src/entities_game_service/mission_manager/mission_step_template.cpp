@@ -170,7 +170,6 @@ uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<ui
 			params = _AdditionalParams;
 			textPtr = &_OverridenText;
 		}
-
 	}
 
 	if( !textPtr )

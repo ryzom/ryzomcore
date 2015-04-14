@@ -260,7 +260,7 @@ bool	CDBDescriptionParser::loadType(xmlNodePtr node)
 				return false;
 			}
 
-			typeNode.EnumValues.push_back(make_pair<string, uint32>(name, value));
+			typeNode.EnumValues.push_back(std::pair<string, uint32>(name, value));
 
 			if (typeNode.Dimension <= value)
 				typeNode.Dimension = value;

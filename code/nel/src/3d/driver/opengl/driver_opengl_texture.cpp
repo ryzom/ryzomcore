@@ -93,19 +93,6 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 	{
 		_Driver->_TextureUsed[TextureUsedIdx] = NULL;
 	}
-
-#ifdef USE_OPENGLES
-	if (InitFBO)
-	{
-		nglDeleteFramebuffersOES(1, &FBOId);
-		if(AttachDepthStencil)
-		{
-			nglDeleteRenderbuffersOES(1, &DepthFBOId);
-			if(!UsePackedDepthStencil)
-				nglDeleteRenderbuffersOES(1, &StencilFBOId);
-		}
-	}
-#endif
 }
 
 CDepthStencilFBO::CDepthStencilFBO(CDriverGL *driver, uint width, uint height)
@@ -175,56 +162,9 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 			AttachDepthStencil = !((CTextureBloom*)tex)->isMode2D();
 		}
 
-#ifdef USE_OPENGLES
-		// generate IDs
-		nglGenFramebuffersOES(1, &FBOId);
-		if(AttachDepthStencil)
-		{
-			nglGenRenderbuffersOES(1, &DepthFBOId);
-			if(UsePackedDepthStencil)
-				StencilFBOId = DepthFBOId;
-			else
-				nglGenRenderbuffersOES(1, &StencilFBOId);
-		}
-
-		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
-
-		// initialize FBO
-		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
-		nglFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, TextureMode, ID, 0);
-
-		// attach depth/stencil render to FBO
-		// note: for some still unkown reason it's impossible to add
-		// a stencil buffer as shown in the respective docs (see
-		// opengl.org extension registry). Until a safe approach to add
-		// them is found, there will be no attached stencil for the time
-		// being, aside of using packed depth+stencil buffers.
-		if(AttachDepthStencil)
-		{
-			if(UsePackedDepthStencil)
-			{
-				//nldebug("3D: using packed depth stencil");
-				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, StencilFBOId);
-				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH24_STENCIL8_OES, tex->getWidth(), tex->getHeight());
-			}
-			else
-			{
-				nglBindRenderbufferOES(GL_RENDERBUFFER_OES, DepthFBOId);
-				nglRenderbufferStorageOES(GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT24_OES, tex->getWidth(), tex->getHeight());
-				/*
-				nglBindRenderbufferEXT(GL_RENDERBUFFER_OES, StencilFBOId);
-				nglRenderbufferStorageEXT(GL_RENDERBUFFER_OES, GL_STENCIL_INDEX8_EXT, tex->getWidth(), tex->getHeight());
-				*/
-			}
-			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, DepthFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-			nglFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_STENCIL_ATTACHMENT_OES, GL_RENDERBUFFER_OES, StencilFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES));
-		}
-#else
 		// generate IDs
 		nglGenFramebuffersEXT(1, &FBOId);
-		
+
 		//nldebug("3D: using depth %d and stencil %d", DepthFBOId, StencilFBOId);
 
 		// initialize FBO
@@ -253,15 +193,10 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->StencilFBOId);
 			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 		}
-#endif
 
 		// check status
-		GLenum status;
-#ifdef USE_OPENGLES
-		status = (GLenum) nglCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
-#else
-		status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-#endif
+		GLenum status = (GLenum) nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+
 		switch(status) {
 #ifdef GL_FRAMEBUFFER_COMPLETE_EXT
 			case GL_FRAMEBUFFER_COMPLETE_EXT:
@@ -361,11 +296,8 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 		// clean up resources if allocation failed
 		if (!InitFBO)
 		{
-#ifdef USE_OPENGLES
-			nglDeleteFramebuffersOES(1, &FBOId);
-#else
 			nglDeleteFramebuffersEXT(1, &FBOId);
-#endif
+
 			if (AttachDepthStencil)
 			{
 				DepthStencilFBO = NULL;
@@ -385,22 +317,14 @@ bool CTextureDrvInfosGL::activeFrameBufferObject(ITexture * tex)
 		if(initFrameBufferObject(tex))
 		{
 			glBindTexture(TextureMode, 0);
-#ifdef USE_OPENGLES
-			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, FBOId);
-#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, FBOId);
-#endif
 		}
 		else
 			return false;
 	}
 	else
 	{
-#ifdef USE_OPENGLES
-		nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-#else
 		nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
 	}
 
 	return true;
@@ -508,11 +432,7 @@ GLint	CDriverGL::getGlTextureFormat(ITexture& tex, bool &compressed)
 		break;
 	}
 
-#ifdef USE_OPENGLES
-	return GL_RGBA;
-#else
 	return GL_RGBA8;
-#endif
 }
 
 // ***************************************************************************
@@ -521,11 +441,7 @@ static GLint	getGlSrcTextureFormat(ITexture &tex, GLint glfmt)
 	H_AUTO_OGL(getGlSrcTextureFormat)
 
 	// Is destination format is alpha or lumiance ?
-#ifdef USE_OPENGLES
-	if ((glfmt==GL_ALPHA)||(glfmt==GL_LUMINANCE_ALPHA)||(glfmt==GL_LUMINANCE))
-#else
 	if ((glfmt==GL_ALPHA8)||(glfmt==GL_LUMINANCE8_ALPHA8)||(glfmt==GL_LUMINANCE8))
-#endif
 	{
 		switch(tex.getPixelFormat())
 		{
@@ -578,19 +494,9 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 	H_AUTO_OGL(CDriverGL_computeMipMapMemoryUsage)
 	switch(glfmt)
 	{
-#ifdef GL_RGBA8
 	case GL_RGBA8:		return w*h* 4;
-#endif
-#ifdef GL_RGBA
-	case GL_RGBA:		return w*h* 4;
-#endif
 	// Well this is ugly, but simple :). GeForce 888 is stored as 32 bits.
-#ifdef GL_RGB8
 	case GL_RGB8:		return w*h* 4;
-#endif
-#ifdef GL_RGB
-	case GL_RGB:		return w*h* 4;
-#endif
 #ifdef GL_RGBA4
 	case GL_RGBA4:		return w*h* 2;
 #endif
@@ -600,24 +506,9 @@ uint				CDriverGL::computeMipMapMemoryUsage(uint w, uint h, GLint glfmt) const
 #ifdef GL_RGB5
 	case GL_RGB5:		return w*h* 2;
 #endif
-#ifdef GL_LUMINANCE8
 	case GL_LUMINANCE8:	return w*h* 1;
-#endif
-#ifdef GL_LUMINANCE
-	case GL_LUMINANCE:	return w*h* 1;
-#endif
-#ifdef GL_ALPHA8
 	case GL_ALPHA8:		return w*h* 1;
-#endif
-#ifdef GL_ALPHA
-	case GL_ALPHA:		return w*h* 1;
-#endif
-#ifdef GL_LUMINANCE8_ALPHA8
 	case GL_LUMINANCE8_ALPHA8:	return w*h* 2;
-#endif
-#ifdef GL_LUMINANCE_ALPHA
-	case GL_LUMINANCE_ALPHA:	return w*h* 2;
-#endif
 #ifdef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
 	case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:	return w*h /2;
 #endif

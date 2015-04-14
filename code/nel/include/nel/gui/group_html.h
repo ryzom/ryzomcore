@@ -17,7 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#define CURL_STATICLIB 1
 #include <curl/curl.h>
 
 #include "nel/misc/types_nl.h"
@@ -107,7 +106,7 @@ namespace NLGUI
 		void refresh();
 
 		// submit form
-		void submitForm (uint formId, const char *submitButtonName);
+		void submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y);
 
 		// Browse error
 		void browseError (const char *msg);
@@ -328,7 +327,11 @@ namespace NLGUI
 		bool			_BrowseNextTime;
 		bool			_PostNextTime;
 		uint			_PostFormId;
+		std::string		_PostFormSubmitType;
 		std::string		_PostFormSubmitButton;
+		std::string		_PostFormSubmitValue;
+		sint32			_PostFormSubmitX;
+		sint32			_PostFormSubmitY;
 
 		// Browsing..
 		bool			_Browsing;
@@ -420,6 +423,38 @@ namespace NLGUI
 			if (_FontSize.empty())
 				return TextFontSize;
 			return _FontSize.back();
+		}
+
+		std::vector<uint>			_FontWeight;
+		inline uint getFontWeight() const
+		{
+			if (_FontWeight.empty())
+				return 400;
+			return _FontWeight.back();
+		}
+
+		std::vector<bool>			_FontOblique;
+		inline uint getFontOblique() const
+		{
+			if (_FontOblique.empty())
+				return false;
+			return _FontOblique.back();
+		}
+
+		std::vector<bool>			_FontUnderlined;
+		inline uint getFontUnderlined() const
+		{
+			if (_FontUnderlined.empty())
+				return false;
+			return _FontUnderlined.back();
+		}
+
+		std::vector<bool>			_FontStrikeThrough;
+		inline uint getFontStrikeThrough() const
+		{
+			if (_FontStrikeThrough.empty())
+				return false;
+			return _FontStrikeThrough.back();
 		}
 
 		// Current link
@@ -541,6 +576,26 @@ namespace NLGUI
 		};
 		std::vector<CCellParams>	_CellParams;
 
+		class CStyleParams
+		{
+		public:
+			CStyleParams () : TextColor(255,255,255,255)
+			{
+				FontSize=10;
+				FontWeight=400;
+				FontOblique=false;
+				Underlined=false;
+				StrikeThrough=false;
+			}
+			uint FontSize;
+			uint FontWeight;
+			bool FontOblique;
+			NLMISC::CRGBA TextColor;
+			bool Underlined;
+			bool StrikeThrough;
+
+		};
+
 		// Indentation
 		uint	_Indent;
 
@@ -610,8 +665,10 @@ namespace NLGUI
 		typedef std::map<uint32, NLMISC::CRefPtr<CGroupHTML> >	TGroupHtmlByUIDMap;
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
-	private:
+		// read style attribute
+		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
 
+	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
 

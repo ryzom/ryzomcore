@@ -177,7 +177,7 @@ void CViewRadar::draw ()
 		// Select the icon to display and draw it
 		uint spotId = CNPCIconCache::getInstance().getNPCIcon(entity).getSpotId();
 		CRadarSpotDesc spotDesc = _SpotDescriptions[spotId];
-			
+
 		if (!_MissionIconsObs._displayMissionSpots)
 			spotDesc = _SpotDescriptions[0];
 

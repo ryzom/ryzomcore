@@ -652,7 +652,9 @@ void CCharacterVersionAdapter::adaptToVersion11(CCharacter &character) const
 		case EGSPD::CPeople::Zorai :
 			mission = CAIAliasTranslator::getInstance()->getMissionUniqueIdFromName( "ZORAI_NEWB_WELCOME_SHENG_WO_1" );
 			CAIAliasTranslator::getInstance()->getNPCAliasesFromName("welcomer_sheng_wo_1", bots);
-			break;	
+			break;
+		default:
+			break;
 		}
 	}
 	// other give him a rite intro mission

@@ -31,6 +31,8 @@ CTextContext::CTextContext()
 	_FontGen = NULL;
 
 	_FontSize = 12;
+	_Embolden = false;
+	_Oblique = false;
 
 	_Color = NLMISC::CRGBA(0,0,0);
 
@@ -81,7 +83,7 @@ uint32 CTextContext::textPush (const char *format, ...)
 	// compute the string.
 	uint32 index = _CacheFreePlaces[_CacheNbFreePlaces-1];
 	CComputedString &strToFill = _CacheStrings[index];
-	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Driver, strToFill, _Keep800x600Ratio);
+	_FontManager->computeString (str, _FontGen, _Color, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 
 	_CacheNbFreePlaces--;
 
@@ -109,7 +111,7 @@ uint32 CTextContext::textPush (const ucstring &str)
 	nlassert (index < _CacheStrings.size());
 	CComputedString &strToFill = _CacheStrings[index];
 	_FontManager->computeString (str, _FontGen, _Color
-		, _FontSize, _Driver, strToFill, _Keep800x600Ratio);
+		, _FontSize, _Embolden, _Oblique, _Driver, strToFill, _Keep800x600Ratio);
 
 	_CacheNbFreePlaces--;
 
