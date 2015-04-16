@@ -646,7 +646,7 @@ void initStereoDisplayDevice()
 void initStreamedPackageManager(NLMISC::IProgressCallback &progress)
 {
 	CStreamedPackageManager &spm = CStreamedPackageManager::getInstance();
-	spm.Path = replaceApplicationDirToken(ClientCfg.StreamedPackagePath);
+	spm.Path = ClientCfg.StreamedPackagePath;
 	for (uint i = 0; i < ClientCfg.StreamedPackageHosts.size(); i++)
 		spm.Hosts.push_back(ClientCfg.StreamedPackageHosts[i]);
 }
