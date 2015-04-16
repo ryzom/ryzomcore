@@ -65,9 +65,11 @@ class CPlayerSheet;
 enum TLightGroup
 {
 	LightGroupAlways = 0,
-	LightGroupDay,
-	LightGroupNight,
-	LightGroupFireworks,
+	LightGroupLandscapeDiffuse = 1,
+	LightGroupNightCycle = 2,
+	LightGroupDayCycle = 3,
+	LightGroupLandscapeAmbient = 4,
+	LightGroupFireworks
 };
 
 class CSeeds;
