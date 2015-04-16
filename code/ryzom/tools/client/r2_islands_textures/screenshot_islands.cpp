@@ -1540,7 +1540,6 @@ void CScreenshotIslands::buildIslandsTextures()
 							CIFile proxFS(proxFileName.c_str());
 							proxBitmap.load(proxFS);
 
-							
 							// resize proximity bitmap
 							CBitmap tempBitmap;
 							int newWidth = islandBitmap.getWidth();
@@ -1568,7 +1567,7 @@ void CScreenshotIslands::buildIslandsTextures()
 							// swap them
 							proxBitmap.resize(newWidth, newHeight, proxBitmap.PixelFormat);
 							proxBitmap.swap(tempBitmap);
-							
+
 							//proxBitmap.resample(newWidth, newHeight);
 
 

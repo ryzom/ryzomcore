@@ -37,7 +37,7 @@
         <property>
             <name>texture</name>
             <type>texture</type>
-            <default></default>
+            <default>log_kami.tga</default>
         </property>
         <property>
             <name>scale</name>

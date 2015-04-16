@@ -1407,13 +1407,12 @@ public:
 			return false;
 		}
 
-		//	check if its a number or a var.
-		//TODO: et les variables negatives?
+		// check if it's a number or a var.
+		//TODO: and negative values ?
 		if ((str[0]<='9' && str[0]>='0')||(str[0]=='-'))	//	its a number
 		{
 			var.Type = constant;
-			double val = atof(str.c_str());
-			var.Value = float(val);
+			NLMISC::fromString(str, var.Value);
 			return	true;
 		}
 

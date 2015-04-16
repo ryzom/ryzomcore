@@ -201,7 +201,7 @@ bool CTpSpawnZone::build(const NLLIGO::CPrimPoint * point)
 			nlwarning("<CTpSpawnZone build> : no z in CTpSpawnZone '%s'",_Name.c_str() );
 			return false;
 		}
-		Point.z = ( float ) atof( value.c_str() );
+		NLMISC::fromString(value, Point.z);
 		Point.z = float( sint32 (1000.0f* Point.z) );
 	}
 	else

@@ -20,8 +20,18 @@ class Ticket_User{
     * @param $permission the permission that will be given to the user. 1=user, 2=mod, 3=admin
     */
     public static function createTicketUser( $extern_id, $permission) {
-        $dbl = new DBLayer("lib");
-		$dbl->insert("ticket_user",array('TUserId' => $extern_id, 'Permission' => $permission, 'ExternId' => $extern_id));
+          try {
+               //make connection with and put into db
+               $dbl = new DBLayer("lib");
+               $dbl->insert("ticket_user",array('TUserId' => $extern_id, 'Permission' => $permission, 'ExternId' => $extern_id));
+          }
+          catch (PDOException $e) {
+                //oh noooz...
+                //error_log(print_r($e, true));
+                //print_r($e);
+                echo "Problem creating user in database!";
+          }
+		
     }
 
 

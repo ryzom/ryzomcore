@@ -17,7 +17,6 @@
 #ifndef CL_GROUP_HTML_H
 #define CL_GROUP_HTML_H
 
-#define CURL_STATICLIB 1
 #include <curl/curl.h>
 
 #include "nel/misc/types_nl.h"
@@ -103,11 +102,14 @@ namespace NLGUI
 		// Browse
 		virtual void browse (const char *url);
 
+		// parse html string using libxml2 parser
+		virtual bool parseHtml(std::string htmlString);
+
 		// Refresh
 		void refresh();
 
 		// submit form
-		void submitForm (uint formId, const char *submitButtonName);
+		void submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y);
 
 		// Browse error
 		void browseError (const char *msg);
@@ -200,6 +202,7 @@ namespace NLGUI
 		int luaBeginElement(CLuaState &ls);
 		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
+		int luaParseHtml(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
@@ -211,6 +214,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("beginElement", luaBeginElement)
 			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
+			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
@@ -229,7 +233,7 @@ namespace NLGUI
 		virtual void addText (const char * buf, int len);
 
 		// A link has been parsed
-		virtual void addLink (uint element_number, uint attribute_number, HTChildAnchor *anchor, const BOOL *present, const char **value);
+		virtual void addLink (uint element_number, const BOOL *present, const char **value);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
 		virtual void beginElement (uint element_number, const BOOL *present, const char **value);
@@ -251,6 +255,10 @@ namespace NLGUI
 
 		// the current request is terminated
 		virtual void requestTerminated(HTRequest *request);
+
+		// libxml2 html parser functions
+		void htmlElement(xmlNode *node, int element_number);
+		void htmlWalkDOM(xmlNode *a_node);
 
 		// Get Home URL
 		virtual std::string	home();
@@ -328,7 +336,11 @@ namespace NLGUI
 		bool			_BrowseNextTime;
 		bool			_PostNextTime;
 		uint			_PostFormId;
+		std::string		_PostFormSubmitType;
 		std::string		_PostFormSubmitButton;
+		std::string		_PostFormSubmitValue;
+		sint32			_PostFormSubmitX;
+		sint32			_PostFormSubmitY;
 
 		// Browsing..
 		bool			_Browsing;
@@ -420,6 +432,38 @@ namespace NLGUI
 			if (_FontSize.empty())
 				return TextFontSize;
 			return _FontSize.back();
+		}
+
+		std::vector<uint>			_FontWeight;
+		inline uint getFontWeight() const
+		{
+			if (_FontWeight.empty())
+				return 400;
+			return _FontWeight.back();
+		}
+
+		std::vector<bool>			_FontOblique;
+		inline uint getFontOblique() const
+		{
+			if (_FontOblique.empty())
+				return false;
+			return _FontOblique.back();
+		}
+
+		std::vector<bool>			_FontUnderlined;
+		inline uint getFontUnderlined() const
+		{
+			if (_FontUnderlined.empty())
+				return false;
+			return _FontUnderlined.back();
+		}
+
+		std::vector<bool>			_FontStrikeThrough;
+		inline uint getFontStrikeThrough() const
+		{
+			if (_FontStrikeThrough.empty())
+				return false;
+			return _FontStrikeThrough.back();
 		}
 
 		// Current link
@@ -541,6 +585,26 @@ namespace NLGUI
 		};
 		std::vector<CCellParams>	_CellParams;
 
+		class CStyleParams
+		{
+		public:
+			CStyleParams () : TextColor(255,255,255,255)
+			{
+				FontSize=10;
+				FontWeight=400;
+				FontOblique=false;
+				Underlined=false;
+				StrikeThrough=false;
+			}
+			uint FontSize;
+			uint FontWeight;
+			bool FontOblique;
+			NLMISC::CRGBA TextColor;
+			bool Underlined;
+			bool StrikeThrough;
+
+		};
+
 		// Indentation
 		uint	_Indent;
 
@@ -610,8 +674,16 @@ namespace NLGUI
 		typedef std::map<uint32, NLMISC::CRefPtr<CGroupHTML> >	TGroupHtmlByUIDMap;
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
-	private:
+		// read style attribute
+		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
 
+		// load and render local html file (from bnp for example)
+		void doBrowseLocalFile(const std::string &filename);
+
+		// render html string as new browser page
+		bool renderHtmlString(const std::string &html);
+
+	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
 
@@ -642,6 +714,7 @@ namespace NLGUI
 		void checkImageDownload();
 		void addImageDownload(const std::string &url, CViewBase *img);
 		std::string localImageName(const std::string &url);
+		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file);

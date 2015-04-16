@@ -60,7 +60,8 @@ namespace NLQT
 
 		CFormItem* curItem = m->getItem(mp->mapToSource(index));
 		NLGEORGES::UFormElm *curElm = curItem->getFormElm();
-		if (!curElm) {
+		if (!curElm)
+		{
 			// TODO: create new Element
 			return 0;
 		}

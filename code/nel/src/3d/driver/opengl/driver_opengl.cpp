@@ -435,11 +435,7 @@ bool CDriverGL::setupDisplay()
 	glViewport(0,0,_CurrentMode.Width,_CurrentMode.Height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-#ifdef USE_OPENGLES
-	glOrthof(0.f,_CurrentMode.Width,_CurrentMode.Height,0.f,-1.0f,1.0f);
-#else
 	glOrtho(0,_CurrentMode.Width,_CurrentMode.Height,0,-1.0f,1.0f);
-#endif
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 #ifndef USE_OPENGLES
@@ -725,11 +721,7 @@ bool CDriverGL::activeFrameBufferObject(ITexture * tex)
 		}
 		else
 		{
-#ifdef USE_OPENGLES
-			nglBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
-#else
 			nglBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-#endif
 			return true;
 		}
 	}
@@ -2178,7 +2170,7 @@ void CDriverGL::flush()
 // ***************************************************************************
 void	CDriverGL::setSwapVBLInterval(uint interval)
 {
-	H_AUTO_OGL(CDriverGL_setSwapVBLInterval)
+	H_AUTO_OGL(CDriverGL_setSwapVBLInterval);
 
 	if (!_Initialized)
 		return;

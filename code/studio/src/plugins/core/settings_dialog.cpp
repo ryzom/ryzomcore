@@ -145,11 +145,17 @@ void SettingsDialog::pageSelected()
 void SettingsDialog::accept()
 {
 	m_applied = true;
+
+	setCursor( Qt::WaitCursor );
+
 	Q_FOREACH(IOptionsPage *page, m_pages)
 	{
 		page->apply();
 		page->finish();
 	}
+
+	setCursor( Qt::ArrowCursor );
+
 	done(QDialog::Accepted);
 }
 
@@ -162,8 +168,13 @@ void SettingsDialog::reject()
 
 void SettingsDialog::apply()
 {
+	setCursor( Qt::WaitCursor );
+
 	Q_FOREACH(IOptionsPage *page, m_pages)
 	page->apply();
+
+	setCursor( Qt::ArrowCursor );
+
 	m_applied = true;
 }
 

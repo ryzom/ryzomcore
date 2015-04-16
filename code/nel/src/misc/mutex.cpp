@@ -41,15 +41,6 @@ using namespace std;
 
 #ifdef NL_OS_WINDOWS
 
-// these defines are for IsDebuggerPresent(). It'll not compile on windows 95
-// just comment this and the IsDebuggerPresent to compile on windows 95
-#define _WIN32_WINDOWS	0x0410
-#ifndef NL_COMP_MINGW
-#	define WINVER			0x0400
-#	define NOMINMAX
-#endif
-#include <windows.h>
-
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -406,13 +397,21 @@ void CUnfairMutex::leave()
  */
 CFairMutex::CFairMutex()
 {
+#ifdef NL_OS_MAC
+	_Sem = dispatch_semaphore_create(1);
+#else
 	sem_init( const_cast<sem_t*>(&_Sem), 0, 1 );
+#endif
 }
 
 
 CFairMutex::CFairMutex(	const std::string &name )
 {
+#ifdef NL_OS_MAC
+	_Sem = dispatch_semaphore_create(1);
+#else
 	sem_init( const_cast<sem_t*>(&_Sem), 0, 1 );
+#endif
 }
 
 
@@ -421,7 +420,11 @@ CFairMutex::CFairMutex(	const std::string &name )
  */
 CFairMutex::~CFairMutex()
 {
+#ifdef NL_OS_MAC
+	dispatch_release(_Sem);
+#else
 	sem_destroy( const_cast<sem_t*>(&_Sem) ); // needs that no thread is waiting on the semaphore
+#endif
 }
 
 
@@ -430,7 +433,11 @@ CFairMutex::~CFairMutex()
  */
 void CFairMutex::enter()
 {
+#ifdef NL_OS_MAC
+	dispatch_semaphore_wait(_Sem, DISPATCH_TIME_FOREVER);
+#else
 	sem_wait( const_cast<sem_t*>(&_Sem) );
+#endif
 }
 
 
@@ -439,7 +446,11 @@ void CFairMutex::enter()
  */
 void CFairMutex::leave()
 {
+#ifdef NL_OS_MAC
+	dispatch_semaphore_signal(_Sem);
+#else
 	sem_post( const_cast<sem_t*>(&_Sem) );
+#endif
 }
 
 

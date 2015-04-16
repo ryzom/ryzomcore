@@ -94,21 +94,21 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 
 			switch (cg.Type)
 			{
-			case CChatGroup::universe:
-			case CChatGroup::say:
-			case CChatGroup::shout:
-				continue;
-			case CChatGroup::team:
-			case CChatGroup::guild:
-			case CChatGroup::civilization:
-			case CChatGroup::territory:
-			case CChatGroup::tell:
-			case CChatGroup::arround:
-			case CChatGroup::system:
-			case CChatGroup::region:
-			case CChatGroup::dyn_chat:
-				groupToRemove.push_back(gid);
-				break;
+				case CChatGroup::universe:
+				case CChatGroup::say:
+				case CChatGroup::shout:
+					continue;
+				case CChatGroup::team:
+				case CChatGroup::guild:
+				case CChatGroup::civilization:
+				case CChatGroup::territory:
+				case CChatGroup::tell:
+				case CChatGroup::arround:
+				case CChatGroup::system:
+				case CChatGroup::region:
+				case CChatGroup::dyn_chat:
+					groupToRemove.push_back(gid);
+					break;
 			}
 		}
 
@@ -121,7 +121,7 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 
 		// clear muted players table
 		_MutedUsers.clear();
-		
+
 		// clear the dyn chats
 		_DynChat.removeAllChannels();
 	}
@@ -151,9 +151,11 @@ bool CChatManager::checkClient( const TDataSetRow& id )
 void CChatManager::addClient( const TDataSetRow& id )
 {
 	if (VerboseChatManagement)
-		nldebug("IOSCM: addClient : adding client %s:%x into chat manager and universe group.", 
+	{
+		nldebug("IOSCM: addClient : adding client %s:%x into chat manager and universe group.",
 			TheDataset.getEntityId(id).toString().c_str(),
 			id.getIndex());
+	}
 
 	if(id.getIndex() == 0xffffff)
 	{
@@ -197,10 +199,11 @@ void CChatManager::addClient( const TDataSetRow& id )
 void CChatManager::removeClient( const TDataSetRow& id )
 {
 	if (VerboseChatManagement)
-		nldebug("IOSCM: removeClient : removing the client %s:%x from chat manager !", 
+	{
+		nldebug("IOSCM: removeClient : removing the client %s:%x from chat manager !",
 			TheDataset.getEntityId(id).toString().c_str(),
 			id.getIndex());
-
+	}
 
 	TClientInfoCont::iterator itCl = _Clients.find( id );
 	if( itCl != _Clients.end() )
@@ -214,7 +217,7 @@ void CChatManager::removeClient( const TDataSetRow& id )
 	}
 	else
 	{
-		nlwarning("CChatManager::removeClient : The client %s:%x is unknown !", 
+		nlwarning("CChatManager::removeClient : The client %s:%x is unknown !",
 			TheDataset.getEntityId(id).toString().c_str(),
 			id.getIndex());
 	}
@@ -233,7 +236,7 @@ CChatClient& CChatManager::getClient( const TDataSetRow& id )
 	TClientInfoCont::iterator itCl = _Clients.find( id );
 	if( itCl != _Clients.end() )
 	{
-		return *(itCl->second);	
+		return *(itCl->second);
 	}
 	else
 	{
@@ -259,15 +262,15 @@ void CChatManager::addGroup( TGroupId gId, CChatGroup::TGroupType gType, const s
 	{
 		if (!groupName.empty())
 			nldebug("IOSCM: addGroup : adding %s named chat group %s as '%s'",
-				CChatGroup::groupTypeToString(gType).c_str(), 
+				CChatGroup::groupTypeToString(gType).c_str(),
 				gId.toString().c_str(),
 				groupName.c_str());
 		else
 			nldebug("IOSCM: addGroup : adding %s anonymous chat group %s",
-				CChatGroup::groupTypeToString(gType).c_str(), 
+				CChatGroup::groupTypeToString(gType).c_str(),
 				gId.toString().c_str());
 	}
-		
+
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( gId );
 	if( itGrp == _Groups.end() )
 	{
@@ -290,7 +293,7 @@ void CChatManager::addGroup( TGroupId gId, CChatGroup::TGroupType gType, const s
 	{
 		nlwarning("CChatManager::addGroup : the group %s already exists", gId.toString().c_str());
 	}
-	
+
 } // addGroup //
 
 
@@ -302,8 +305,10 @@ void CChatManager::addGroup( TGroupId gId, CChatGroup::TGroupType gType, const s
 void CChatManager::removeGroup( TGroupId gId )
 {
 	if (VerboseChatManagement)
+	{
 		nldebug("IOSCM: removeGroup : removing group %s",
 			gId.toString().c_str());
+	}
 
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( gId );
 	if( itGrp != _Groups.end() )
@@ -338,10 +343,12 @@ void CChatManager::removeGroup( TGroupId gId )
 void CChatManager::addToGroup( TGroupId gId, const TDataSetRow &charId )
 {
 	if (VerboseChatManagement)
+	{
 		nldebug("IOSCM: addtoGroup : adding player %s:%x to group %s",
 		TheDataset.getEntityId(charId).toString().c_str(),
 		charId.getIndex(),
 		gId.toString().c_str());
+	}
 
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( gId );
 	if( itGrp != _Groups.end() )
@@ -372,7 +379,7 @@ void CChatManager::addToGroup( TGroupId gId, const TDataSetRow &charId )
 			}
 			else
 			{
-				nlwarning("CChatManager::addToGroup : client %s:%x is unknown", 
+				nlwarning("CChatManager::addToGroup : client %s:%x is unknown",
 					TheDataset.getEntityId(charId).toString().c_str(),
 					charId.getIndex());
 				// remove it from the group (don't leave bad client...)
@@ -396,10 +403,12 @@ void CChatManager::addToGroup( TGroupId gId, const TDataSetRow &charId )
 void CChatManager::removeFromGroup( TGroupId gId, const TDataSetRow &charId )
 {
 	if (VerboseChatManagement)
+	{
 		nldebug("IOSCM: removeFromGroup : removing player %s:%x from group %s",
 			TheDataset.getEntityId(charId).toString().c_str(),
-			charId.getIndex(), 
+			charId.getIndex(),
 			gId.toString().c_str());
+	}
 
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( gId );
 	if( itGrp != _Groups.end() )
@@ -443,7 +452,7 @@ void CChatManager::removeFromGroup( TGroupId gId, const TDataSetRow &charId )
 
 } // removeFromGroup //
 
-	
+
 
 
 //-----------------------------------------------
@@ -486,7 +495,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		}
 
 //		CEntityId eid = TheDataset.getEntityId(sender);
-		// Get the char info 
+		// Get the char info
 		//WARNING: can be NULL
 		CCharacterInfos *ci = IOS->getCharInfos(eid);
 
@@ -525,7 +534,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 		// clean up container
 		_DestUsers.clear();
-		
+
 		switch( itCl->second->getChatMode() )
 		{
 			// dynamic group
@@ -533,7 +542,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		case CChatGroup::say :
 			{
 				CChatGroup::TMemberCont::iterator itA;
-				for( itA = itCl->second->getAudience().Members.begin(); 
+				for( itA = itCl->second->getAudience().Members.begin();
 						itA != itCl->second->getAudience().Members.end();
 							++itA )
 				{
@@ -566,7 +575,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				// so even after teleporting in a remote region the previous around people were still receiving
 				// the messages.
 
-				TGroupId grpId = itCl->second->getRegionChatGroup();				
+				TGroupId grpId = itCl->second->getRegionChatGroup();
 				_DestUsers.push_back(grpId);
 
 				_Log.displayNL("'%s' (%s) : \t\"%s\"", senderName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
@@ -599,7 +608,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 //					}
 //				}
 
-				TGroupId grpId = CEntityId(RYZOMID::chatGroup,0);
+				TGroupId grpId = CEntityId(RYZOMID::chatGroup, 0);
 
 				_Log.displayNL("'%s' (%s) : \t\"%s\"", senderName.c_str(), groupNames[itCl->second->getChatMode()], ucstr.toString().c_str() );
 				_DestUsers.push_back(grpId);
@@ -621,15 +630,15 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 				TGroupId grpId = itCl->second->getGuildChatGroup();
 				_DestUsers.push_back(grpId);
 
-				_Log.displayNL("'%s' (%s) : \t\"%s\"", 
-					senderName.c_str(), 
-					groupNames[itCl->second->getChatMode()], 
+				_Log.displayNL("'%s' (%s) : \t\"%s\"",
+					senderName.c_str(),
+					groupNames[itCl->second->getChatMode()],
 					ucstr.toString().c_str() );
 				chatInGroup( grpId, ucstr, sender );
 			}
 			break;
 		case CChatGroup::dyn_chat:
-		{			
+		{
 			TChanID chanID = itCl->second->getDynChatChan();
 			CDynChatSession *session = _DynChat.getSession(chanID, sender);
 			if (session) // player must have a session in that channel
@@ -650,7 +659,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 
 					if (!session->getChan()->getDontBroadcastPlayerInputs())
 					{
-						// add msg to the historic						
+						// add msg to the historic
 						CDynChatChan::CHistoricEntry entry;
 						entry.String = ucstr;
 						if (ci != NULL)
@@ -671,15 +680,15 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 							ucstring tmp("{no_bubble}");
 							if (ucstr.find(tmp) == ucstring::npos)
 							{
-								tmp += ucstr;								
+								tmp += ucstr;
 								content.swap(tmp);
 							}
 							else
 							{
 								content = ucstr;
 							}
-						}						
-				
+						}
+
 
 						// broadcast to other client in the channel
 						CDynChatSession *dcc = session->getChan()->getFirstSession();
@@ -687,7 +696,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						{
 							sendChat(itCl->second->getChatMode(), dcc->getClient()->getID(), content, sender, chanID);
 							dcc = dcc->getNextChannelSession(); // next session in this channel
-						}						
+						}
 					}
 					else
 					{
@@ -702,11 +711,11 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 						TPlayerInputForward	pif;
 						pif.ChanID = chanID;
 						pif.Sender = sender;
-						pif.Content = ucstr;						
+						pif.Content = ucstr;
 
 						CMessage msgout( "DYN_CHAT:FORWARD");
 						msgout.serial(pif);
-						
+
 						CUnifiedNetwork::getInstance()->send(serviceId, msgout);
 					}
 					if (session->getChan()->getUnifiedChannel())
@@ -716,19 +725,19 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 							IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
 					}
 				}
-			}			
+			}
 		}
 		break;
 			// static group
 		default :
 			nlwarning("<CChatManager::chat> client %u chat in %s ! don't know how to handle it.",
-				sender.getIndex(), 
+				sender.getIndex(),
 				groupNames[itCl->second->getChatMode()]);
 /*			{
 				TGroupId grpId = itCl->second.getChatGroup();
 
 				_Log.displayNL("'%s' (%s) : \t\"%s\"", senderName.c_str(), groupNames[itCl->second.getChatMode()], ucstr.toString().c_str() );
-				
+
 				chatInGroup( grpId, ucstr, sender );
 			}
 */		}
@@ -736,8 +745,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 		// log chat to PDS system
 //		IOSPD::logChat(ucstr, itCl->second->getId(), _DestUsers);
 		log_Chat_Chat(CChatGroup::groupTypeToString(itCl->second->getChatMode()),
-			TheDataset.getEntityId(sender), 
-			ucstr.toUtf8(), 
+			TheDataset.getEntityId(sender),
+			ucstr.toUtf8(),
 			_DestUsers);
 
 	}
@@ -770,7 +779,7 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 			CMirrorPropValueRO<uint32> instanceId( TheDataset, *itM, DSPropertyAI_INSTANCE );
 
 			// check the ai instance for region chat
-			if (chatGrp.Type != CChatGroup::region 
+			if (chatGrp.Type != CChatGroup::region
 				|| instanceId == senderInstanceId)
 			{
 				// check homeSessionId for universe
@@ -795,7 +804,7 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					_DestUsers.push_back(TheDataset.getEntityId(*itM));
 				}
 			}
-		}	
+		}
 
 		if (chatGrp.Type == CChatGroup::guild)
 		{
@@ -855,7 +864,7 @@ void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const u
 					continue;
 			}
 			sendFarChat( itGrp->second.Type, *itM, text, senderName );
-		}	
+		}
 	}
 	else
 	{
@@ -885,7 +894,7 @@ void CChatManager::chat2( const TDataSetRow& sender, const std::string &phraseId
 		case CChatGroup::shout :
 			{
 				CChatGroup::TMemberCont::iterator itA;
-				for( itA = itCl->second->getAudience().Members.begin(); 
+				for( itA = itCl->second->getAudience().Members.begin();
 						itA != itCl->second->getAudience().Members.end();
 							++itA )
 				{
@@ -900,7 +909,7 @@ void CChatManager::chat2( const TDataSetRow& sender, const std::string &phraseId
 				chatInGroup2( grpId, phraseId, sender );
 			}
 			break;
-			
+
 
 		case CChatGroup::universe:
 			{
@@ -937,7 +946,7 @@ void CChatManager::chat2( const TDataSetRow& sender, const std::string &phraseId
 			{
 			nlwarning("<CChatManager::chat> client %s:%x chat in mode %u ! don't know how to handle it.",
 				TheDataset.getEntityId(sender).toString().c_str(),
-				sender.getIndex(), 
+				sender.getIndex(),
 				itCl->second->getChatMode());
 			}
 		}
@@ -973,7 +982,7 @@ void CChatManager::chatParam( const TDataSetRow& sender, const std::string &phra
 		case CChatGroup::shout :
 			{
 				CChatGroup::TMemberCont::iterator itA;
-				for( itA = itCl->second->getAudience().Members.begin(); 
+				for( itA = itCl->second->getAudience().Members.begin();
 						itA != itCl->second->getAudience().Members.end();
 							++itA )
 				{
@@ -988,7 +997,7 @@ void CChatManager::chatParam( const TDataSetRow& sender, const std::string &phra
 				chatParamInGroup( grpId, phraseId, params, sender );
 			}
 			break;
-			
+
 
 		case CChatGroup::universe:
 			{
@@ -1025,7 +1034,7 @@ void CChatManager::chatParam( const TDataSetRow& sender, const std::string &phra
 			{
 			nlwarning("<CChatManager::chat> client %s:%x chat in mode %u ! don't know how to handle it.",
 				TheDataset.getEntityId(sender).toString().c_str(),
-				sender.getIndex(), 
+				sender.getIndex(),
 				itCl->second->getChatMode());
 			}
 		}
@@ -1049,7 +1058,7 @@ void CChatManager::chat2Ex( const TDataSetRow& sender, uint32 phraseId)
 		CEntityId eid = TheDataset.getEntityId(sender);
 		if(_MutedUsers.find( eid ) != _MutedUsers.end())
 		{
-			nldebug("IOSCM: chat2Ex The player %s:%x is muted", 
+			nldebug("IOSCM: chat2Ex The player %s:%x is muted",
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex());
 			return;
@@ -1061,7 +1070,7 @@ void CChatManager::chat2Ex( const TDataSetRow& sender, uint32 phraseId)
 		case CChatGroup::shout :
 			{
 				CChatGroup::TMemberCont::iterator itA;
-				for( itA = itCl->second->getAudience().Members.begin(); 
+				for( itA = itCl->second->getAudience().Members.begin();
 				itA != itCl->second->getAudience().Members.end();
 				++itA )
 				{
@@ -1076,7 +1085,7 @@ void CChatManager::chat2Ex( const TDataSetRow& sender, uint32 phraseId)
 				chatInGroup2Ex( grpId, phraseId, sender );
 			}
 			break;
-			
+
 		case CChatGroup::universe:
 			{
 				CEntityId eid = TheDataset.getEntityId(sender);
@@ -1098,21 +1107,21 @@ void CChatManager::chat2Ex( const TDataSetRow& sender, uint32 phraseId)
 				chatInGroup2Ex( grpId, phraseId, sender );
 			}
 			break;
-			
+
 		case CChatGroup::guild:
 			{
 				TGroupId grpId = itCl->second->getGuildChatGroup();
 				chatInGroup2Ex( grpId, phraseId, sender );
 			}
 			break;
-			
-			
+
+
 			// static group
 		default :
 			{
 				nlwarning("<CChatManager::chat> client %s:%x chat in mode %u ! don't know how to handle it.",
 					TheDataset.getEntityId(sender).toString().c_str(),
-					sender.getIndex(), 
+					sender.getIndex(),
 					itCl->second->getChatMode());
 				//				TGroupId grpId = (*itCl).second.getChatGroup();
 				//				chatInGroup2( grpId, phraseId, sender );
@@ -1141,7 +1150,7 @@ void CChatManager::chatInGroup2Ex( TGroupId& grpId, uint32 phraseId, const TData
 		{
 			CMirrorPropValueRO<uint32> instanceId( TheDataset, *itM, DSPropertyAI_INSTANCE );
 
-			if (chatGrp.Type != CChatGroup::region 
+			if (chatGrp.Type != CChatGroup::region
 				|| instanceId == senderInstanceId)
 			{
 				const CEntityId &eid = TheDataset.getEntityId(*itM);
@@ -1184,14 +1193,14 @@ void CChatManager::chatInGroup2( TGroupId& grpId, const std::string & phraseId, 
 			CMirrorPropValueRO<uint32> instanceId( TheDataset, *itM, DSPropertyAI_INSTANCE );
 
 			// check the ai instance for region chat
-			if (chatGrp.Type != CChatGroup::region 
+			if (chatGrp.Type != CChatGroup::region
 				|| instanceId == senderInstanceId)
 			{
 				const CEntityId &eid = TheDataset.getEntityId(*itM);
 				if (eid.getType() == RYZOMID::player && std::find( excluded.begin(), excluded.end(), *itM ) == excluded.end() )
 					sendChat2( (*itGrp ).second.Type, *itM, phraseId, sender );
 			}
-		}	
+		}
 		if (chatGrp.Type == CChatGroup::guild)
 		{
 			CCharacterInfos *charInfos = IOS->getCharInfos(TheDataset.getEntityId(sender));
@@ -1232,7 +1241,7 @@ void CChatManager::chatParamInGroup( TGroupId& grpId, const std::string & phrase
 				if (eid.getType() == RYZOMID::player && std::find( excluded.begin(), excluded.end(), *itM ) == excluded.end() )
 					sendChat2( (*itGrp ).second.Type, *itM, phraseId, sender );
 			}
-		}	
+		}
 		if (chatGrp.Type == CChatGroup::guild)
 		{
 			CCharacterInfos *charInfos = IOS->getCharInfos(TheDataset.getEntityId(sender));
@@ -1278,10 +1287,10 @@ void CChatManager::sendEmoteTextToAudience(  const TDataSetRow& sender,const std
 		TChanID	oldChan = itCl->second->getDynChatChan();
 		itCl->second->setChatMode(CChatGroup::say);
 		itCl->second->updateAudience();
-		
+
 		// get audience around the emoting player
 		CChatGroup::TMemberCont::iterator itA;
-		for( itA = itCl->second->getAudience().Members.begin(); 
+		for( itA = itCl->second->getAudience().Members.begin();
 		itA != itCl->second->getAudience().Members.end();
 		++itA )
 		{
@@ -1329,10 +1338,10 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 		TChanID	oldChan = itCl->second->getDynChatChan();
 		itCl->second->setChatMode(CChatGroup::say);
 		itCl->second->updateAudience();
-		
+
 		// get audience around the emoting player
 		CChatGroup::TMemberCont::iterator itA;
-		for( itA = itCl->second->getAudience().Members.begin(); 
+		for( itA = itCl->second->getAudience().Members.begin();
 		itA != itCl->second->getAudience().Members.end();
 		++itA )
 		{
@@ -1347,7 +1356,7 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 			TheDataset.getEntityId(sender).toString().c_str(),
 			sender.getIndex());
 	}
-	
+
 }
 
 
@@ -1386,7 +1395,7 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 //			bms.serial( index );
 //			bms.serial( infos->Str );
 //		}
-//		
+//
 ////		nldebug("<CChatManager::addDynStr> sending association [%s,%d] to %s",infos->Str.c_str(),index,receiver.toString().c_str());
 //		msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 //		sendMessageViaMirror(frontendId, msgout);
@@ -1406,7 +1415,7 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 //
 //-----------------------------------------------
 void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const TDataSetRow &sender, TChanID chanID, const ucstring &senderName)
-{	
+{
 	//if( receiver != sender )
 	{
 		CCharacterInfos * charInfos = NULL;
@@ -1440,14 +1449,14 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 					}
 
 					uint32 senderNameIndex;
-					// if the sender exists 
+					// if the sender exists
 					if( charInfos )
 					{
 						senderNameIndex = charInfos->NameIndex;
 					}
 					else
 					{
-						// if no sender, we use a special name 
+						// if no sender, we use a special name
 						ucstring senderName("<BROADCAST MESSAGE>");
 						senderNameIndex = SM->storeString( senderName );
 					}
@@ -1466,14 +1475,14 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 					msgout.serial( channel );
 					CBitMemStream bms;
 					GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
-					
+
 					CChatMsg chatMsg;
 					chatMsg.CompressedIndex = sender.getCompressedIndex();
 					chatMsg.SenderNameId = senderNameIndex;
 					chatMsg.ChatMode = (uint8) senderChatMode;
 					if (senderChatMode == CChatGroup::dyn_chat)
-					{						
-						chatMsg.DynChatChanID = chanID;					
+					{
+						chatMsg.DynChatChanID = chanID;
 					}
 					chatMsg.Content = ucstr;
 					bms.serial( chatMsg );
@@ -1483,7 +1492,7 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 						chatMsg.Sender,
 						receiver.toString().c_str(),
 						chatMsg.ChatMode);
-	*/				
+	*/
 					msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 					sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 				}
@@ -1500,7 +1509,7 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 			nlwarning("<CChatManager::chat> The character %s:%x is unknown, no chat msg sent",
 				TheDataset.getEntityId(receiver).toString().c_str(),
 				receiver.getIndex());
-		}		
+		}
 	}
 
 } // sendChat //
@@ -1526,14 +1535,14 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 				msgout.serial( channel );
 				CBitMemStream bms;
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
-				
+
 				CChatMsg chatMsg;
 				chatMsg.CompressedIndex = 0xFFFFF;
 				chatMsg.SenderNameId = senderNameIndex;
 				chatMsg.ChatMode = (uint8) senderChatMode;
 				if (senderChatMode == CChatGroup::dyn_chat)
-				{						
-					chatMsg.DynChatChanID = chanID;					
+				{
+					chatMsg.DynChatChanID = chanID;
 				}
 				chatMsg.Content = ucstr;
 				bms.serial( chatMsg );
@@ -1554,7 +1563,7 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 		nlwarning("<CChatManager::chat> The character %s:%x is unknown, no chat msg sent",
 			TheDataset.getEntityId(receiver).toString().c_str(),
 			receiver.getIndex());
-	}		
+	}
 
 }
 
@@ -1584,7 +1593,7 @@ void CChatManager::sendChatParam( CChatGroup::TGroupType senderChatMode, const T
 {
 	TVectorParamCheck params2;
 	params2.resize( params.size() + 1);
-	// send the chat phrase to the client	
+	// send the chat phrase to the client
 	params2[0].Type = STRING_MANAGER::bot;
 	params2[0].setEId(  TheDataset.getEntityId(sender) );
 	uint32 first = 0, last = (uint32)params.size();
@@ -1643,7 +1652,7 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				msgout.serial( channel );
 				CBitMemStream bms;
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT2", bms );
-				
+
 				CChatMsg2 chatMsg;
 				chatMsg.CompressedIndex = sender.getCompressedIndex();
 				chatMsg.SenderNameId = charInfos ? charInfos->NameIndex : 0; // empty string if there is no sender
@@ -1651,7 +1660,7 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 				chatMsg.PhraseId = phraseId;
 				chatMsg.CustomTxt = customTxt;
 				bms.serial( chatMsg );
-				
+
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 			}
@@ -1677,9 +1686,9 @@ void CChatManager::sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDa
 //
 //-----------------------------------------------
 void CChatManager::sendChatCustomEmote( const TDataSetRow &sender, const TDataSetRow &receiver, const ucstring& ucstr )
-{	
+{
 	TDataSetRow senderFake = TDataSetRow::createFromRawIndex( INVALID_DATASET_ROW );
-		
+
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( TheDataset.getEntityId(receiver) );
 	CCharacterInfos * senderInfos = IOS->getCharInfos( TheDataset.getEntityId(sender) );
 	if( receiverInfos )
@@ -1698,7 +1707,7 @@ void CChatManager::sendChatCustomEmote( const TDataSetRow &sender, const TDataSe
 				{
 					return;
 				}
-				
+
 				// send the string to FE
 				CMessage msgout( "IMPULS_CH_ID" );
 				uint8 channel = 1;
@@ -1707,7 +1716,7 @@ void CChatManager::sendChatCustomEmote( const TDataSetRow &sender, const TDataSe
 				msgout.serial( channel );
 				CBitMemStream bms;
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
-				
+
 				CChatMsg chatMsg;
 				chatMsg.CompressedIndex = senderFake.getCompressedIndex();
 				chatMsg.SenderNameId = 0;
@@ -1785,7 +1794,7 @@ void CChatManager::tell2( const TDataSetRow& sender, const TDataSetRow& receiver
 					TheDataset.getEntityId(receiver).toString().c_str() );
 				return;
 			}
-			
+
 			// check if the sender is CSR or is not in the ignore list of the receiver
 			if(senderInfos->HavePrivilege || !itCl->second->isInIgnoreList(sender) )
 			{
@@ -1802,10 +1811,10 @@ void CChatManager::tell2( const TDataSetRow& sender, const TDataSetRow& receiver
 				msgout.serial( channel );
 				CBitMemStream bms;
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:TELL2", bms);
-				
+
 				bms.serial( senderInfos->NameIndex );
 				bms.serial( id);
-									
+		
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 			}
@@ -1938,8 +1947,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 */
 
 				_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.c_str(), receiverName.c_str(), "tell", ucstr.toString().c_str() );
-				
-				
+
+
 				// if the client doesn't know this dynamic string(name of sender), we send it to him
 				// send the string to FE
 				CMessage msgout( "IMPULS_CH_ID" );
@@ -1948,12 +1957,12 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				msgout.serial( channel );
 				CBitMemStream bms;
 				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:TELL", bms);
-				
+
 				TDataSetIndex dsi = senderInfos->DataSetIndex.getCompressedIndex();
 				bms.serial( dsi );
 				bms.serial( senderInfos->NameIndex );
 				bms.serial( const_cast<ucstring&>(ucstr) );
-				
+
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 
@@ -2088,8 +2097,8 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 				string receiverName = receiverInfos->Name.toString();
 
 				_Log.displayNL("'%s' to '%s' (%s) : \t\"%s\"", senderName.toUtf8().c_str(), receiverName.c_str(), "tell", ucstr.toString().c_str() );
-				
-				
+
+
 				// if the client doesn't know this dynamic string(name of sender), we send it to him
 				// send the string to FE
 				CMessage msgout( "IMPULS_CH_ID" );
@@ -2103,7 +2112,7 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 				ftm.SenderName = senderName;
 				ftm.Text = ucstr;
 				ftm.serial(bms);
-				
+
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 
@@ -2134,19 +2143,19 @@ void CChatManager::displayChatClients(NLMISC::CLog &log)
 		if (ci != NULL)
 		{
 			if (ci->EntityId.getType() == RYZOMID::player)
-				log.displayNL("'%s' %s:%x %s mode '%s'", 
-					ci->Name.toString().c_str(), 
-					ci->EntityId.toString().c_str(), 
-					im->first.getIndex(), 
-					im->second->isMuted()?"(muted)":"", 
+				log.displayNL("'%s' %s:%x %s mode '%s'",
+					ci->Name.toString().c_str(),
+					ci->EntityId.toString().c_str(),
+					im->first.getIndex(),
+					im->second->isMuted()?"(muted)":"",
 					CChatGroup::groupTypeToString(im->second->getChatMode()).c_str() );
 		}
 		else
 		{
-			log.displayNL("*no name* %s:%x %s mode '%s'", 
-				ci->EntityId.toString().c_str(), 
-				im->first.getIndex(), 
-				im->second->isMuted()?"(muted)":"", 
+			log.displayNL("*no name* %s:%x %s mode '%s'",
+				ci->EntityId.toString().c_str(),
+				im->first.getIndex(),
+				im->second->isMuted()?"(muted)":"",
 				CChatGroup::groupTypeToString(im->second->getChatMode()).c_str() );
 		}
 	}
@@ -2157,17 +2166,17 @@ void CChatManager::displayChatGroup(NLMISC::CLog &log, TGroupId gid, CChatGroup 
 {
 	if (chatGroup.GroupName == CStringMapper::emptyId())
 	{
-		log.displayNL("Group : anonym (%s), %s : %u clients :", 
+		log.displayNL("Group : anonym (%s), %s : %u clients :",
 				gid.toString().c_str(),
-				CChatGroup::groupTypeToString(chatGroup.Type).c_str(), 
+				CChatGroup::groupTypeToString(chatGroup.Type).c_str(),
 				chatGroup.Members.size());
 	}
 	else
 	{
-		log.displayNL("Group : '%s' (%s), %s : %u clients :", 
+		log.displayNL("Group : '%s' (%s), %s : %u clients :",
 				CStringMapper::unmap(chatGroup.GroupName).c_str(),
-				gid.toString().c_str(), 
-				CChatGroup::groupTypeToString(chatGroup.Type).c_str(), 
+				gid.toString().c_str(),
+				CChatGroup::groupTypeToString(chatGroup.Type).c_str(),
 				chatGroup.Members.size());
 	}
 
@@ -2179,12 +2188,12 @@ void CChatManager::displayChatGroup(NLMISC::CLog &log, TGroupId gid, CChatGroup 
 		{
 			CCharacterInfos *ci = IOS->getCharInfos(TheDataset.getEntityId(*first));
 			if (ci != NULL)
-				log.displayNL("  '%s' %s:%x", 
-					ci->Name.toString().c_str(), 
+				log.displayNL("  '%s' %s:%x",
+					ci->Name.toString().c_str(),
 					ci->EntityId.toString().c_str(),
 					first->getIndex());
 			else
-				log.displayNL("   *unknow* %s:%x", 
+				log.displayNL("   *unknow* %s:%x",
 					eid.toString().c_str(),
 					first->getIndex());
 		}
@@ -2262,13 +2271,13 @@ void CChatManager::displayChatAudience(NLMISC::CLog &log, const CEntityId &eid, 
 			{
 				CCharacterInfos *ci = IOS->getCharInfos(TheDataset.getEntityId(*first));
 				if (ci != NULL)
-					log.displayNL("  '%s' %s:%x", 
-						ci->Name.toString().c_str(), 
+					log.displayNL("  '%s' %s:%x",
+						ci->Name.toString().c_str(),
 						TheDataset.getEntityId(*first).toString().c_str(),
 						first->getIndex());
-						
+
 				else
-					log.displayNL("   *unknow* %s:%x", 
+					log.displayNL("   *unknow* %s:%x",
 						TheDataset.getEntityId(*first).toString().c_str(),
 						first->getIndex());
 			}
@@ -2301,9 +2310,9 @@ ucstring CChatManager::filterClientInputColorCode(ucstring &text)
 {
 	ucstring result;
 	result.reserve(text.size());
-	
+
 	ucstring::size_type pos = 0;
-	
+
 	for (; pos < text.size(); ++pos)
 	{
 		if (text[pos] == '@' && pos < text.size()-1 && text[pos+1] == '{')
@@ -2316,7 +2325,7 @@ ucstring CChatManager::filterClientInputColorCode(ucstring &text)
 			result += text[pos];
 		}
 	}
-	
+
 	return result;
 }
 
@@ -2340,7 +2349,7 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 	bool lastIsWhite = false;
 	for (; pos < text.size(); ++pos)
 	{
-		bool currentIsWhite = (text[pos] == ' ' || text[pos] == '\t'); 
+		bool currentIsWhite = (text[pos] == ' ' || text[pos] == '\t');
 		if (!(lastIsWhite && currentIsWhite))
 		{
 			// any double white skipped
@@ -2353,7 +2362,7 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 					hasBrackets = (text[pos-1] == '>') &&
 						(text[pos-5] == '<');
 				}
-				// Filter out '&' at the first non-whitespace position to remove 
+				// Filter out '&' at the first non-whitespace position to remove
 				// system color code (like '&SYS&' )
 				bool disallowAmpersand = (result.size() == 0) || hasBrackets;
 				if (disallowAmpersand)

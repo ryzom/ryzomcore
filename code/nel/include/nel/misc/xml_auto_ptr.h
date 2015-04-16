@@ -31,7 +31,7 @@ public:
 	~CXMLAutoPtr() { destroy(); }
 	operator const char *() const { return _Value; }
 	operator bool() const { return _Value != NULL; }
-	operator std::string() const { return std::string(_Value); }
+	inline std::string str() const { return _Value; }
 	bool operator ! () const { return _Value == NULL; }
 	operator const unsigned char *() const { return (const unsigned char *)  _Value; }
 	char operator * ()  const { nlassert(_Value); return *_Value; }

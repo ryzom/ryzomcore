@@ -1138,7 +1138,7 @@ bool CNameManager::loadGuildsNamesFromTxt()
 		// merge the first words until we have only 3 words
 		while (words.size() > 3)
 		{
-			words[0] += words[1];
+			words[0] += " " + words[1];
 			words.erase(words.begin()+1);
 		}
 		BOMB_IF (words.size()!=3,"Invalid line "<<i+1<<" found in guild names file : '"<<line<<"'", continue);

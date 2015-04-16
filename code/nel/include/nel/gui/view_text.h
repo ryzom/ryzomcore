@@ -81,6 +81,8 @@ namespace NLGUI
 
 		void setText (const ucstring &text);
 		void setFontSize (sint nFontSize);
+		void setEmbolden (bool nEmbolden);
+		void setOblique (bool nOblique);
 		void setColor (const NLMISC::CRGBA &color);
 		void setShadow (bool bShadow);
 		void setShadowOutline (bool bShadowOutline);
@@ -101,6 +103,8 @@ namespace NLGUI
 
 		ucstring		getText() const		{ return _Text; }
 		sint			getFontSize() const;
+		bool			getEmbolden() 		{ return _Embolden; }
+		bool			getOblique() 		{ return _Oblique; }
 		NLMISC::CRGBA	getColor()			{ return _Color; }
 		bool			getShadow()			{ return _Shadow; }
 		bool			getShadowOutline()	{ return _ShadowOutline; }
@@ -125,6 +129,8 @@ namespace NLGUI
 		uint			getLastLineW () const;
 		void			setUnderlined (bool underlined) { _Underlined = underlined; }
 		bool			getUnderlined () const { return _Underlined; }
+		void			setStrikeThrough (bool linethrough) { _StrikeThrough = linethrough; }
+		bool			getStrikeThrough () const { return _StrikeThrough; }
 		// true if the viewText is a single line clamped.
 		bool			isSingleLineTextClamped() const {return _SingleLineTextClamped;}
 
@@ -220,6 +226,8 @@ namespace NLGUI
 		NL3D::UTextContext::CStringInfo _Info;
 		/// the font size
 		sint	_FontSize;
+		bool	_Embolden;
+		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
 		uint	_FontWidth;
 		// height of the font in pixel.
@@ -374,6 +382,7 @@ namespace NLGUI
 		bool	_TextSelection : 1;
 		bool	_InvalidTextContext : 1;
 		bool	_Underlined : 1;
+		bool	_StrikeThrough : 1;
 		bool    _ContinuousUpdate : 1;
 		bool	_Setuped : 1;
 

@@ -187,7 +187,7 @@ end
 function strify(str) 
 	return [["]] .. tostring(str) .. [["]]
 end	
-		
+
 -------------------------------------------------------------------------------------------------
 -- enclose a string by double quotes
 function strifyXml(str)

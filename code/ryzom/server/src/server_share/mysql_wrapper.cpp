@@ -116,7 +116,7 @@ namespace MSW
 		if (MSWAutoReconnect)
 		{
 			addOption(MYSQL_OPT_RECONNECT, "1");
-		}		
+		}
 
 		return _connect();
 	}

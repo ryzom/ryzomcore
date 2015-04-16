@@ -25,6 +25,8 @@ extern "C"
 #include "WWWInit.h"
 }
 
+#include "nel/misc/rgba.h"
+
 namespace NLGUI
 {
 	class CCtrlBaseButton;
@@ -214,6 +216,13 @@ namespace NLGUI
 		HTML_ATTR(DIV,ID),
 		HTML_ATTR(DIV,NAME),
 		HTML_ATTR(DIV,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(SPAN,CLASS) = 0,
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
 	};
 
 

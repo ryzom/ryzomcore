@@ -3,6 +3,7 @@ SUBDIRS(bnp_make snp_make disp_sheet_id extract_filename lock make_sheet_id xml_
 IF(WITH_QT)
   ADD_SUBDIRECTORY(words_dic_qt)
   ADD_SUBDIRECTORY(message_box_qt)
+  ADD_SUBDIRECTORY(crash_report)
 ENDIF(WITH_QT)
 
 IF(WIN32)

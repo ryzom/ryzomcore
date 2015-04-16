@@ -21,6 +21,7 @@
 #include "expression_loader.h"
 #include <QMap>
 #include <QDir>
+#include "gui_editor_config.h"
 
 class ExpressionStorePvt
 {
@@ -50,7 +51,7 @@ ExpressionStore::~ExpressionStore()
 
 bool ExpressionStore::load()
 {
-	QDir d( "expressions" );
+    QDir d( EXPRESSIONS_DIR );
 	if( !d.exists() )
 		return false;
 

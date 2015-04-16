@@ -797,7 +797,7 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 		}
 
 		// Instance skin color
-		if (c3ds.People != -1)
+		if (c3ds.People != EGSPD::CPeople::Undefined)
 		if ((c3ds.People != _CurrentSetup.People) || bInstanceRebuilt || bQualityRebuilt)
 		{
 			if (!_Instances[i].empty())

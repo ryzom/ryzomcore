@@ -267,7 +267,7 @@ void CDynamicMapClient::save(const std::string& /* filename */)
 void CDynamicMapClient::saveRtData(const std::string& filename)
 {
 	//H_AUTO(R2_CDynamicMapClient_saveRtData)
-	std::string name = "";
+	std::string name;
 	name += filename;
 	//std::ostringstream out2;
 	std::string out2;

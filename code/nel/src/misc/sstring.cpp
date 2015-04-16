@@ -1731,7 +1731,9 @@ namespace NLMISC
 
 	double CSString::atof() const
 	{
-		return ::atof(c_str());
+		double val;
+		NLMISC::fromString(*this, val);
+		return val;
 	}
 
 	bool CSString::readFromFile(const CSString& fileName)

@@ -57,9 +57,10 @@ void cbNotesChanged()
 			Notes.Notes.clear();
 			return;
 		}
-		pos.x = (float)atof(posstr[0].c_str());
-		pos.y = (float)atof(posstr[1].c_str());
-		pos.z = (float)atof(posstr[2].c_str());
+
+		NLMISC::fromString(posstr[0], pos.x);
+		NLMISC::fromString(posstr[1], pos.y);
+		NLMISC::fromString(posstr[2], pos.z);
 
 		string note(var.asString(i+2));
 		if(note.empty())

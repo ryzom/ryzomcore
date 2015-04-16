@@ -490,13 +490,16 @@ typedef std::vector<CObjectIndex>		TIndexList;
 
 struct CColumnIndexHashMapTraits
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	CColumnIndexHashMapTraits() { }
 	size_t operator() (const CColumnIndex &id) const
-		{
-			return id.hash();
-		}
+	{
+		return id.hash();
+	}
+	bool operator()(const CColumnIndex &left, const CColumnIndex &right)
+	{
+		return left < right;
+	}
 };
 
 class CSetMap

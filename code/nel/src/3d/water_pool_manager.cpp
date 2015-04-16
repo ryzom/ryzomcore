@@ -44,19 +44,19 @@ NLMISC_COMMAND(setWaterPool, "Setup a pool of water in the water pool manager",
 	}
 	if (numArgs == 3)
 	{
-		whmb.FilterWeight = ::atof(args[2].c_str());
+		NLMISC::fromString(args[2], whmb.FilterWeight);
 	}
 	if (numArgs == 4)
 	{
-		whmb.UnitSize = ::atof(args[3].c_str());
+		NLMISC::fromString(args[3], whmb.UnitSize);
 	}
 	if (numArgs == 5)
 	{
-		whmb.WaveIntensity = ::atof(args[4].c_str());
+		NLMISC::fromString(args[4], whmb.WaveIntensity);
 	}
 	if (numArgs == 4)
 	{
-		whmb.WavePeriod = ::atof(args[5].c_str());
+		NLMISC::fromString(args[5], whmb.WavePeriod);
 	}
 	// create the water pool
 	GetWaterPoolManager().createWaterPool(whmb);

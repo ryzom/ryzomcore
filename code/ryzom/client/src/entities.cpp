@@ -426,7 +426,7 @@ void CEntityManager::initialize(uint nbMaxEntity)
 		_Entities.resize(_NbMaxEntity, 0);
 		_EntityGroundFXHandle.resize(_NbMaxEntity);
 	}
-	
+
 	ICDBNode::CTextId textId;
 
 	// Add an observer on the mission database

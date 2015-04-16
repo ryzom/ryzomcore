@@ -905,14 +905,16 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 
 	case PDS_float:
 		{
-			float	data = (float)atof(value.c_str());
+			float data;
+			NLMISC::fromString(value, data);
 			return set(table, row, column, sizeof(data), &data);
 		}
 		break;
 
 	case PDS_double:
 		{
-			double	data = (double)atof(value.c_str());
+			double data;
+			NLMISC::fromString(value, data);
 			return set(table, row, column, sizeof(data), &data);
 		}
 		break;

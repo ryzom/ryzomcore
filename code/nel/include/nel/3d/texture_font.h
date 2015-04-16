@@ -43,6 +43,8 @@ public:
 		ucchar Char;
 		CFontGenerator *FontGenerator;
 		sint Size;
+		bool Embolden;
+		bool Oblique;
 
 
 		// The less recently used infos
@@ -66,6 +68,8 @@ public:
 		ucchar Char;
 		CFontGenerator *FontGenerator;
 		sint Size;
+		bool Embolden;
+		bool Oblique;
 
 		uint32 getVal();
 		//bool operator < (const SLetterKey&k) const;

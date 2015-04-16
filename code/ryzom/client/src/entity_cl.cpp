@@ -2296,6 +2296,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 			}
 			
 			ucstring replacement(STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle));
+
 			// Sometimes translation contains another title
 			{
 				ucstring::size_type pos = replacement.find('$');
@@ -2308,7 +2309,7 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 					replacement = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(_TitleRaw, womanTitle);
 				}
 			}
-			
+
 			_Tags = STRING_MANAGER::CStringManagerClient::getTitleInfos(_TitleRaw, womanTitle);
 
 			if (!replacement.empty() || !ClientCfg.DebugStringManager)
@@ -2949,7 +2950,7 @@ void CEntityCL::dataSetId(CLFECOMMON::TClientDataSetIndex dataSet)
 {
 	_DataSetId = dataSet;
 
-	if (_Primitive &&  _Primitive->UserData == UserDataEntity)
+	if (_Primitive && _Primitive->UserData == UserDataEntity)
 		_Primitive->UserData |= (((uint64)_DataSetId)<<16);
 
 	// additionaly, on a UID change, must check the IsInTeam and IsAniml flags

@@ -114,11 +114,11 @@ private:
 
 	typedef std::vector<TClientId> TEntityIndexToClient;
 
-	class CIdHash
+	struct CIdHash
 	{
-	public:
-
-		size_t	operator () ( NLMISC::CEntityId id ) const { return (uint32)id.getShortId(); }
+		enum { bucket_size = 4, min_buckets = 8, };
+		size_t	operator () (NLMISC::CEntityId id) const { return (uint32)id.getShortId(); }
+		bool operator() (const NLMISC::CEntityId& left, const NLMISC::CEntityId& right) { return left < right; }
 	};
 
 	typedef CHashMap<NLMISC::CEntityId, TClientId, CIdHash>	TIdToClientMap;

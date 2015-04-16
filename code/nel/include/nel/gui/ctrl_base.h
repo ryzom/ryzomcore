@@ -50,6 +50,8 @@ namespace NLGUI
 			// see interface.txt for meaning of auto
 			_ToolTipParentPosRef= Hotspot_TTAuto;
 			_ToolTipPosRef= Hotspot_TTAuto;
+			_EventX = 0;
+			_EventY = 0;
 			resizer = false;
 		}
 
@@ -69,6 +71,9 @@ namespace NLGUI
 		virtual bool parse(xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 		bool handleEvent (const NLGUI::CEventDescriptor &event);
+
+		sint32 getEventX() { return _EventX; }
+		sint32 getEventY() { return _EventY; }
 
 		virtual CCtrlBase	*getSubCtrl (sint32 /* x */, sint32 /* y */) { return this; }
 
@@ -181,6 +186,9 @@ namespace NLGUI
 		static std::map< std::string, std::map< std::string, std::string > > AHCache;
 
 		bool resizer;
+
+		sint32 _EventX;
+		sint32 _EventY;
 	};
 
 }

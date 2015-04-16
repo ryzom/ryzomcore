@@ -520,7 +520,7 @@ char * rz_crypt(register const char *key, register const char *setting, char *bu
 	return buff;
 #endif
 
-	if (setting[0] == '$' && setting[1] == '6') {
+	if (strlen(setting) >= 2 && setting[0] == '$' && setting[1] == '6') {
 		return __crypt_sha512(key, setting, buf);
 	}
 
