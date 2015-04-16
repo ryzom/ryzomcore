@@ -714,9 +714,12 @@ void CBotNpc::sendVPA()	// alternate VPA
 
 void CBotNpc::sendVisualProperties()	// VisualPropertyA, B, C
 {
-	CMirrors::setVisualPropertyA( getSpawn()->dataSetRow(), _VisualPropertyA );
-	CMirrors::setVisualPropertyB( getSpawn()->dataSetRow(), _VisualPropertyB );
-	CMirrors::setVisualPropertyC( getSpawn()->dataSetRow(), _VisualPropertyC );
+	if (getSpawn())
+	{
+		CMirrors::setVisualPropertyA( getSpawn()->dataSetRow(), _VisualPropertyA );
+		CMirrors::setVisualPropertyB( getSpawn()->dataSetRow(), _VisualPropertyB );
+		CMirrors::setVisualPropertyC( getSpawn()->dataSetRow(), _VisualPropertyC );
+	}
 }
 
 bool CBotNpc::reSpawn(bool sendMessage)
@@ -875,9 +878,9 @@ Colors are something like that:
 2:	VERT CITRON		VERT CITRON			GREEN 
 3:	VERT			VERT				TURQUOISE 
 4:	BLEU			BLEU				BLUE 
-5:	ROUGE fonce		ROUGE (tout court)	CRIMSON 
+5:	ROUGE dark		ROUGE (normal)		CRIMSON 
 6:	BLANC			JAUNE				WHITE 
-7:	NOIR			BLEU tres fonce		BLACK
+7:	NOIR			BLEU very dark		BLACK
 
 3D column is (probably) used for equipment
 */

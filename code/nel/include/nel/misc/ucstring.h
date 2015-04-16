@@ -355,8 +355,7 @@ namespace NLMISC
 // Traits for hash_map using CEntityId
 struct CUCStringHashMapTraits
 {
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	CUCStringHashMapTraits() { }
 	size_t operator() (const ucstring &id ) const
 	{
@@ -364,7 +363,7 @@ struct CUCStringHashMapTraits
 	}
 	bool operator() (const ucstring &id1, const ucstring &id2) const
 	{
-		return id1.size() < id2.size();
+		return id1 < id2;
 	}
 };
 

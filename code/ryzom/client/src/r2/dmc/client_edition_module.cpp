@@ -1116,12 +1116,12 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 
 
 		uint32 myUserId = NetMngr.getUserId();
-		std::string connectionState = "";
+		std::string connectionState;
 
 		if (myUserId == (charId>>4) || ClientCfg.Local)
 		{
 
-			std::string errorMsg = "";
+			std::string errorMsg;
 
 			CObject* hlScenario = _Scenario->getHighLevel();
 			hlData.setData(hlScenario); // clone before modify by translateFeatures
@@ -1352,8 +1352,8 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		}
 	}
 
-	std::string sourceExtension = UserComponentsSourceExtension;
-	std::string componentExtension = UserComponentsComponentExtension;
+	std::string sourceExtension = UserComponentsSourceExtension.get();
+	std::string componentExtension = UserComponentsComponentExtension.get();
 
 
 	uint32 uncompressedFileLength = 0;
@@ -2425,10 +2425,10 @@ bool CClientEditionModule::addToLoadList( const std::string& filename, CScenario
 void CClientEditionModule::loadScenarioSucceded(const std::string& filename, const std::string& body, const CScenarioValidator::TValues& values)
 {
 	//H_AUTO(R2_CClientEditionModule_loadScenarioSucceded)
-	string initialIsland="", initialEntryPoint="", initialSeason = "";
-	string creatorMD5 = "", modifiedByMD5="";
-	string name = "";
-	string locked = "";
+	string initialIsland, initialEntryPoint, initialSeason;
+	string creatorMD5, modifiedByMD5;
+	string name;
+	string locked;
 	for(uint i=0; i<values.size(); i++)
 	{
 		const std::pair<std::string, std::string>& pair = values[i];

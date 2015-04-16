@@ -46,6 +46,7 @@ public:
 	QIcon categoryIcon() const;
 	virtual QWidget *createPage(QWidget *parent);
 
+	virtual void readSettings();
 	virtual void apply();
 	virtual void finish() {}
 

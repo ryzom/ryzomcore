@@ -1,4 +1,3 @@
-
 IF(WITH_LIGO)
   ADD_SUBDIRECTORY(ai_build_wmap)
 ENDIF(WITH_LIGO)

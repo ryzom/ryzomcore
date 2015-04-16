@@ -1469,7 +1469,7 @@ bool CWorldMap::findAStarPath(CWorldPosition const& start, CWorldPosition const&
 	uint father = (uint)nodes.size()-1;
 
 	// Add start topology to visited nodes (father holds start topo node index for the moment)
-	visited.insert(make_pair<CTopology::TTopologyId,uint>(startTopo, father));
+	visited.insert(std::pair<CTopology::TTopologyId, uint>(startTopo, father));
 	// Push start node in the heap with a zero cost
 	heap.push(0.0f, father);
 
@@ -1562,7 +1562,7 @@ bool CWorldMap::findAStarPath(CWorldPosition const& start, CWorldPosition const&
 			// Add node to heap with a computed f(n)=g(n)+h(n)
 			heap.push(distance + heuristic, child);
 			// Add node to visited
-			visited.insert(make_pair<CTopology::TTopologyId,uint>(next, child));
+			visited.insert(std::pair<CTopology::TTopologyId, uint>(next, child));
 		}
 	}
 
@@ -1633,7 +1633,7 @@ bool	CWorldMap::findAStarPath(const CTopology::TTopologyId &start, const CTopolo
 	uint	father = (uint)nodes.size()-1;
 
 	// add current to visited nodes
-	visited.insert(make_pair<CTopology::TTopologyId,uint>(startTopo, father));
+	visited.insert(std::pair<CTopology::TTopologyId, uint>(startTopo, father));
 	heap.push(0.0f, father);
 
 	bool	found=false;
@@ -1699,7 +1699,7 @@ bool	CWorldMap::findAStarPath(const CTopology::TTopologyId &start, const CTopolo
 
 			// add node to visited and to heap
 			heap.push(heuristic, child);
-			visited.insert(make_pair<CTopology::TTopologyId,uint>(next, child));
+			visited.insert(std::pair<CTopology::TTopologyId, uint>(next, child));
 		}
 	}
 
@@ -1767,7 +1767,7 @@ bool CWorldMap::findInsideAStarPath(CWorldPosition const& start, CWorldPosition 
 	uint father = (uint)nodes.size()-1;
 
 	// Add start node to visited nodes (father holds start node index for the moment)
-	visited.insert(make_pair<CAStarNode, uint>(startNode, father));
+	visited.insert(std::pair<CAStarNode, uint>(startNode, father));
 	// Push start node in the heap with a zero cost
 	heap.push(0.0f, father);
 
@@ -1854,7 +1854,7 @@ bool CWorldMap::findInsideAStarPath(CWorldPosition const& start, CWorldPosition 
 			// Add node to heap with a computed f(n)=g(n)+h(n)
 			heap.push(distance + heuristic, child);
 			// Add node to visited
-			visited.insert(make_pair<CAStarNode, uint>(next, child));
+			visited.insert(std::pair<CAStarNode, uint>(next, child));
 		}
 	}
 

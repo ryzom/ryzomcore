@@ -31,7 +31,7 @@
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_text_context.h"
-#include <nel/3d/stereo_display.h>
+#include "nel/3d/stereo_display.h"
 // Game Share
 //#include "game_share/gd_time.h"		// \todo GUIGUI : TO DELETE/CHANGE
 #include "game_share/gender.h"
@@ -103,7 +103,6 @@ extern uint32			Version;	// Client Version.
 extern UDriver			*Driver;
 extern UTextContext		*TextContext;
 extern bool				game_exit;
-extern CMsgBoxDisplayer MsgBoxError;
 
 extern CSoundManager	*SoundMngr;
 

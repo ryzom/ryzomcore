@@ -556,7 +556,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	ptr = (char*) xmlGetProp( cur, (xmlChar*)"map_mode" );
 	if (ptr)
 	{
-		string sTmp = ptr;
+		string sTmp = ptr.str();
 		if (sTmp == "normal")
 			_MapMode = MapMode_Normal;
 		else if (sTmp == "death")
@@ -3213,7 +3213,7 @@ class CAHValidateUserLandMarkName : public IActionHandler
 		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(ig->getGroup("eb"));
 		if (!eb) return;
 		ig->setActive(false);
-		
+
 		CGroupContainer *gc = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(WIN_LANDMARK_NAME));
 		if (!gc) return;
 		// Retrieve ComboBox to get the position(ordered landmark type) of the selected item

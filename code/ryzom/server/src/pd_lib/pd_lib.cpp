@@ -571,7 +571,7 @@ void	CPDSLib::update()
 			CMessage*	msgupd = new CMessage("PD_UPDATE");
 			msgupd->serial(_DatabaseId);
 			msgupd->serial(_UpdateId);
-			_QueuedMessages.push_back(make_pair<uint32,CMessage*>(_UpdateId, msgupd));
+			_QueuedMessages.push_back(std::pair<uint32, CMessage*>(_UpdateId, msgupd));
 			++_UpdateId;
 
 			// serial queue

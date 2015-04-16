@@ -2200,7 +2200,7 @@ namespace NLGUI
 			if( editorMode )
 				_Extends = std::string( (const char*)prop );
 
-			CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop));
+			CGroupMenu *gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId(prop.str()));
 			if (!gm)
 			{
 				gm = dynamic_cast<CGroupMenu *>(CWidgetManager::getInstance()->getElementFromId("ui:interface:" + std::string((const char*)prop)));

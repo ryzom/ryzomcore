@@ -2253,7 +2253,7 @@ bool	NLPACS::CLocalRetriever::checkSurfaceIntegrity(uint surf, NLMISC::CVector t
 
 				for (k=0; k+1<ochain.getVertices().size(); ++k)
 				{
-					edges.push_back(make_pair<CVector2s, CVector2s>(ochain[k], ochain[k+1]));
+					edges.push_back(std::pair<CVector2s, CVector2s>(ochain[k], ochain[k+1]));
 				}
 			}
 		}

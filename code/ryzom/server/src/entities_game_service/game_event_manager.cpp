@@ -59,7 +59,7 @@ CGameEventManager::CGameEventManager()
 // ----------------------------------------------------------------------------
 void CGameEventManager::init()
 {
-	string sFilename = GameEventFile;
+	string sFilename = GameEventFile.get();
 	sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
 
 	if (CFile::fileExists(sFilename))
@@ -302,7 +302,7 @@ void CGameEventManager::saveGameEventFile()
 {
 	if( _InitOk )
 	{
-		string sFilename = GameEventFile;
+		string sFilename = GameEventFile.get();
 		sFilename = CPath::standardizePath(IService::getInstance()->WriteFilesDirectory) + sFilename;
 		
 		static CPersistentDataRecordRyzomStore	pdr;

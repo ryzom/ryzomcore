@@ -61,8 +61,7 @@ public:
 class CClassIdHashMapTraits
 {
 public:
-	static const size_t bucket_size = 4;
-	static const size_t min_buckets = 8;
+	enum { bucket_size = 4, min_buckets = 8, };
 	inline size_t operator() ( const CClassId& classId ) const
 	{
 		return ((((uint64)classId >> 32)|0xFFFFFFFF) ^ (((uint64)classId|0xFFFFFFFF) & 0xFFFFFFFF));

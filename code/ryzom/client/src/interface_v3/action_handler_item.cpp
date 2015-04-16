@@ -815,7 +815,6 @@ public:
 		CurrentStackDst= NULL;
 		validateStackItem(pCSSrc, pCSDst, val, CurrentStackMode);
 	}
-
 };
 REGISTER_ACTION_HANDLER( CHandlerStackOk, "stack_item");
 
@@ -826,17 +825,17 @@ class CPlayerTradePutBagItemToExchange : public IActionHandler
 public:
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
-			CDBCtrlSheet *dest = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-			if (src->getSheetId() == 0)
-			{
-				putExchangedItemToInventory(dest);
-			}
-			else
-			{
-				putInventoryItemToExchange(src, dest);
-			}
+		CInterfaceManager *im = CInterfaceManager::getInstance();
+		CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
+		CDBCtrlSheet *dest = dynamic_cast<CDBCtrlSheet *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		if (src->getSheetId() == 0)
+		{
+			putExchangedItemToInventory(dest);
+		}
+		else
+		{
+			putInventoryItemToExchange(src, dest);
+		}
 	}
 };
 REGISTER_ACTION_HANDLER(CPlayerTradePutBagItemToExchange, "put_bag_item_to_exchange");

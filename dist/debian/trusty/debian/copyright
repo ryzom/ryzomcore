@@ -1,0 +1,53 @@
+This package was debianized by Gürkan Sengün <gurkan@phys.ethz.ch> on
+Tue, 23 Oct 2007 12:56:45 +0200.
+
+It was downloaded from <http://dev.ryzom.com>
+
+Upstream Authors:
+
+    Olivier Cado <cado@nevrax.com>
+    Bertram Felgenhauer <int-e@gmx.de>
+    Krzysztof Kotlenga <piernik@gmail.com>
+    Henri Kuuste <al-rtsan@totl.net>
+    Vianney Lecroart <acemtp@gmail.com>
+    Namine
+    Cédric Ochs <kervala@gmail.com>
+    Guillaume Puzin
+    Matt Raykowski <matt.raykowski@gmail.com>
+    Robert Timm <mail@rtti.de>
+    Titegus
+    Ulukyn
+    Robert Wetzel <spexius@gmx.de>
+    Zorglor
+    TODO: take names from Ryzom credits
+
+Copyright:
+
+    Copyright (C) 2003-2009 Vianney Lecroart
+    Copyright (C) 2003-2009 Matt Raykowski
+    Copyright (C) 2000-2006 Nevrax Ltd.
+    Copyright (C) 2006-2007 Gameforge France
+    Copyright (C) 2008-2010 Winch Gate Property Limited
+
+License:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+The Debian packaging is:
+
+    Copyright (C) 2007 Gürkan Sengün <gurkan@phys.ethz.ch>
+
+and is licensed under the GPL version 2, 
+see `/usr/share/common-licenses/GPL-2'.
+

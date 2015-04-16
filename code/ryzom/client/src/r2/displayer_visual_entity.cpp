@@ -564,7 +564,7 @@ void CDisplayerVisualEntity::updateWorldMapPresence()
 				_MapDeco.setDisplayedInstance(getDisplayedInstance(), true);
 				// retrieve icon from the displayed object (lua code)
 				CLuaState &ls = getEditor().getLua();
-				std::string texName = "";
+				std::string texName;
 				{
 					CLuaStackChecker lsc(&ls);
 					if (getDisplayedInstance()->getLuaProjection().callMethodByNameNoThrow("getSelectBarIcon", 0, 1))
@@ -984,7 +984,7 @@ void CDisplayerVisualEntity::updateName()
 				break;
 			}
 		}
-		std::string firstPart = "";
+		std::string firstPart;
 		if(actNb>0)
 			firstPart = CI18N::get("uiR2EDDefaultActTitle").toString() + " " + NLMISC::toString(actNb);
 

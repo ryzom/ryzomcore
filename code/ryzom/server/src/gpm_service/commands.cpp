@@ -179,8 +179,8 @@ NLMISC_COMMAND(getPatatEntryIndex, "Get the patat entry index at a pos", "x, y")
 
 	CVector		pos;
 
-	pos.x = (float)atof(args[0].c_str());
-	pos.y = (float)atof(args[1].c_str());
+	NLMISC::fromString(args[0], pos.x);
+	NLMISC::fromString(args[1], pos.y);
 	pos.z = 0;
 
 	nlinfo("entryIndex(%.1f, %.1f) = %d", pos.x, pos.y, CWorldPositionManager::getEntryIndex(pos));

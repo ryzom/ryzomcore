@@ -161,7 +161,7 @@ public:
 		if	(_value==-1)	//	not for affectation.
 			return;
 		
-		if	(_index==~0)	//	all indexs ?
+		if	(_index==std::numeric_limits<size_t>::max())	//	all indexs ?
 		{
 			for	(uint32 nrjIndex=0;nrjIndex<4;nrjIndex++)
 				fb->setModifier	(_value, nrjIndex);

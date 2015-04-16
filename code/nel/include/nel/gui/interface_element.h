@@ -117,6 +117,7 @@ namespace NLGUI
 			editorSelected = false;
 
 			serializable = true;
+			_EditorSelectable = true;
 		}
 
 		// dtor
@@ -531,9 +532,16 @@ namespace NLGUI
 		/// Aligns the element to the other element specified
 		void alignTo( CInterfaceElement *other );
 
+		/// Specifies if the widget can be selected in the editor
+		void setEditorSelectable( bool b ){ _EditorSelectable = b; }
+
+		/// Tells if the widget can be selected in the editor
+		bool isEditorSelectable() const{ return _EditorSelectable; }
+
 	protected:
 
 		bool editorSelected;
+		bool _EditorSelectable;
 
 		static bool editorMode;
 

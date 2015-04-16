@@ -8028,7 +8028,7 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	}
 
 	// create character start skills, skill point and money
-	string s = CreateCharacterStartSkillsValue;
+	string s = CreateCharacterStartSkillsValue.get();
 	if( s.size() > 0 )
 	{
 		CSString skillValue = s;

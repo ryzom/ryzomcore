@@ -603,6 +603,9 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 {
 	H_AUTO_OGL(CDriverGL_setDisplay)
 
+	if (!mode.OffScreen)
+		NLMISC::INelContext::getInstance().setWindowedApplication(true);
+
 	_win = EmptyWindow;
 
 	_CurrentMode = mode;
@@ -627,12 +630,15 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 	// Offscreen mode ?
 	if (_CurrentMode.OffScreen)
 	{
-		if (!createWindow(mode))
-			return false;
+		if (!createWindow(mode)) return false;
+
 		HWND tmpHWND = _win;
 		int width = mode.Width;
 		int height = mode.Height;
 
+#ifdef USE_OPENGLES
+		// TODO: implement for OpenGL ES 1.x
+#else
 		// resize the window
 		RECT rc;
 		SetRect (&rc, 0, 0, width, height);
@@ -910,6 +916,7 @@ bool CDriverGL::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool re
 			_hDC = NULL;
 			return false;
 		}
+#endif
 	}
 	else
 	{
@@ -1479,7 +1486,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
-	[NSApp setDelegate:appDelegate];
+	[NSApp setDelegate:(id<NSFileManagerDelegate>)appDelegate];
 
 	// bind the close button of the window to applicationShouldTerminate
 	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];

@@ -187,11 +187,14 @@ fn haveCoarseMesh node =
 	return false
 )
 
+fn getRoot node = if isvalidnode node.parent then getRoot node.parent else node
+
 fn runNelMaxExportSub inputMaxFile retryCount = 
 (
 	tagThisFile = false
 	
 	-- Unhide category
+	unhidelayers()
 	unhidecategory()
 	
 	-- Unhide
@@ -273,54 +276,50 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 	-- For each node
 	for node in array_node do
 	(
-		-- It is root ?
-		if (node.parent == undefined) then
+		-- Is not a skeleton ?
+		if (((substring node.name 1 3) != "Bip") and ((substring (getRoot node).name 1 3) != "Bip")) then
 		(
-			-- Is not a skeleton ?
-			if (node.name != "Bip01") then
+			-- Can be exported ?
+			if (isToBeExported node == true) then
 			(
-				-- Can be exported ?
-				if (isToBeExported node == true) then
+				-- Not a lod ?
+				if ((isLod node) == false) then
 				(
-					-- Not a lod ?
-					if ((isLod node) == false) then
+					-- Output directory
+					if (haveCoarseMesh node) == true then
+						output = ("%OutputDirectoryWithCoarseMesh%/" + (node.name) + ".shape")
+					else
+						output = ("%OutputDirectoryWithoutCoarseMesh%/" + (node.name) + ".shape")
+					
+					-- Compare file date
+					if (NeLTestFileDate output inputMaxFile) == true then
 					(
-						-- Output directory
-						if (haveCoarseMesh node) == true then
-							output = ("%OutputDirectoryWithCoarseMesh%/" + (node.name) + ".shape")
-						else
-							output = ("%OutputDirectoryWithoutCoarseMesh%/" + (node.name) + ".shape")
-						
-						-- Compare file date
-						if (NeLTestFileDate output inputMaxFile) == true then
+						try
 						(
-							try
+							-- Export the shape
+							if (NelExportShapeEx node output %ShapeExportOptShadow% %ShapeExportOptExportLighting% "%OutputDirectoryLightmap%" %ShapeExportOptLightingLimit% %ShapeExportOptLumelSize% %ShapeExportOptOversampling% true false %ShapeExportOptLightmapLog%) == true then
 							(
-								-- Export the shape
-								if (NelExportShapeEx node output %ShapeExportOptShadow% %ShapeExportOptExportLighting% "%OutputDirectoryLightmap%" %ShapeExportOptLightingLimit% %ShapeExportOptLumelSize% %ShapeExportOptOversampling% true false %ShapeExportOptLightmapLog%) == true then
-								(
-									nlerror("OK "+output)
-									exported = exported +1 
-								)
-								else
-								(
-									-- Error
-									nlerror("ERROR exporting shape " + node.name + " in file " + inputMaxFile)
-									tagThisFile = false
-								)
+								nlerror("OK "+output)
+								exported = exported +1 
 							)
-							catch 
+							else
 							(
 								-- Error
-								nlerror("ERROR fatal error exporting shape " + node.name + " in file " + inputMaxFile)
+								nlerror("ERROR exporting shape " + node.name + " in file " + inputMaxFile)
 								tagThisFile = false
 							)
 						)
-						else
+						catch 
 						(
-							nlerror("SKIPPED " + output)
-							exported = exported + 1
+							-- Error
+							nlerror("ERROR fatal error exporting shape " + node.name + " in file " + inputMaxFile)
+							tagThisFile = false
 						)
+					)
+					else
+					(
+						nlerror("SKIPPED " + output)
+						exported = exported + 1
 					)
 				)
 			)

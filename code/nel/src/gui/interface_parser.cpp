@@ -664,7 +664,7 @@ namespace NLGUI
 			//if it begins with a #, it is a reference in the instance attribute
 			if (strchr(ptr, '#') != NULL)
 			{
-				string LastProp = ptr;
+				string LastProp = ptr.str();
 				string NewProp ="";
 				string RepProp;
 
@@ -796,7 +796,7 @@ namespace NLGUI
 			return false;
 		}
 		sint32 size;
-		fromString(cSize, size);
+		fromString(cSize.str(), size);
 		if (size <= 0)
 		{
 			// todo hulud interface syntax error
@@ -929,7 +929,7 @@ namespace NLGUI
 			nlwarning("<CInterfaceParser::parseLink> Can't read  the expression for a link node");
 			return false;
 		}
-		std::string expr = ptr;
+		std::string expr = ptr.str();
 
 
 		std::vector<CInterfaceLink::CTargetInfo> targets;
@@ -1119,13 +1119,13 @@ namespace NLGUI
 			nlinfo ("options has no name");
 			return false;
 		}
-		string optionsName = ptr;
+		string optionsName = ptr.str();
 
 		// herit if possible
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"herit" );
 		if (ptr)
 		{
-			string optionsParentName = ptr;
+			string optionsParentName = ptr.str();
 			CInterfaceOptions *io = wm->getOptions( optionsParentName );
 			if( io != NULL )
 				options->copyBasicMap( *io );
@@ -1771,7 +1771,7 @@ namespace NLGUI
 		{
 			CInterfaceExprValue res;
 
-			if (CInterfaceExpr::eval(ptrVal2, res))
+			if (CInterfaceExpr::eval(ptrVal2.str(), res))
 			{
 				if (!res.toString())
 				{
@@ -1807,7 +1807,7 @@ namespace NLGUI
 			nlwarning ("no id in a procedure");
 			return false;
 		}
-		string	procId= ptr;
+		string	procId= ptr.str();
 
 		if (_ProcedureMap.find(procId) != _ProcedureMap.end())
 		{
@@ -2171,7 +2171,7 @@ namespace NLGUI
 			//get the property value
 			ptr = (char*)xmlGetProp( cur, props->name);
 			nlassert(ptr);
-			string	propVal= ptr;
+			string	propVal= ptr.str();
 			string	newPropVal;
 
 			// solve define of this prop
@@ -2328,7 +2328,7 @@ namespace NLGUI
 			nlinfo ("anim has no id");
 			return false;
 		}
-		string animId = ptr;
+		string animId = ptr.str();
 		pAnim = new CInterfaceAnim;
 
 		if (pAnim->parse (cur, parentGroup))

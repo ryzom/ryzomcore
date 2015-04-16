@@ -8,6 +8,7 @@
 
 // NeL includes
 #include "nel/misc/debug.h"
+#include "nel/3d/init_3d.h"
 
 // Qt includes
 #include <QtCore/QObject>
@@ -32,6 +33,8 @@ bool ObjectViewerPlugin::initialize(ExtensionSystem::IPluginManager *pluginManag
 {
 	Q_UNUSED(errorString);
 	_plugMan = pluginManager;
+
+	NL3D::init3d();
 	Modules::init();
 	addAutoReleasedObject(new CObjectViewerContext());
 	addAutoReleasedObject(new GraphicsSettingsPage());

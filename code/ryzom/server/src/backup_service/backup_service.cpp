@@ -718,7 +718,7 @@ void CBackupService::init()
 		BSIsSlave = true;
 		FileManager.forbidStall();
 		// I'm a slave, try to contact master
-		string	host = MasterBSHost;
+		string	host = MasterBSHost.get();
 		if (host.find (":") == string::npos)
 			host += ":49990";
 

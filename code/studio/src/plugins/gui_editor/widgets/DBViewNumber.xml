@@ -9,6 +9,11 @@
         <icon></icon>
     </header>
     <properties>
+		<property>
+			<name>hardtext</name>
+            <type>string</type>
+            <default>0</default>
+		</property>
         <property>
             <name>value</name>
             <type>string</type>

@@ -381,7 +381,7 @@ void CBSIINonModule::activate()
 	// setup the callback array
 	CUnifiedNetwork::getInstance()->addCallbackArray( CbArray, sizeof(CbArray)/sizeof(CbArray[0]) );
 
-	string host = BackupServiceIP;
+	string host = BackupServiceIP.get();
 	if(host.empty())
 	{
 		nlwarning("Can't use backup because BSHost variable is empty");

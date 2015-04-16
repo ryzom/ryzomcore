@@ -485,7 +485,7 @@ namespace NLGUI
 				string fullstyle = style[1];
 				for (uint j=2; j < style.size(); j++)
 					fullstyle += ":"+style[j];
-				styles[trim(style[0])] = fullstyle;
+				styles[trim(style[0])] = trim(fullstyle);
 			}
 		}
 
@@ -570,7 +570,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTChildAnchor *anchor, const BOOL *present, const char **value)
+	void CGroupHTML::addLink (uint element_number, const BOOL *present, const char **value)
 	{
 		if (_Browsing)
 		{
@@ -591,16 +591,8 @@ namespace NLGUI
 					}
 					else
 					{
-						HTAnchor * dest = HTAnchor_followMainLink((HTAnchor *) anchor);
-						if (dest)
-						{
-							C3WSmartPtr uri = HTAnchor_address(dest);
-							_Link.push_back ((const char*)uri);
-						}
-						else
-						{
-							_Link.push_back("");
-						}
+						// convert href from "?key=val" into "http://domain.com/?key=val"
+						_Link.push_back(getAbsoluteUrl(suri));
 					}
 
 					for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
@@ -894,7 +886,20 @@ namespace NLGUI
 			switch(element_number)
 			{
 			case HTML_A:
-				_TextColor.push_back(LinkColor);
+			{
+				CStyleParams style;
+				style.FontSize = getFontSize();
+				style.TextColor = LinkColor;
+				style.Underlined = true;
+				style.StrikeThrough = getFontStrikeThrough();
+
+				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
+					getStyleParams(value[HTML_A_STYLE], style);
+
+				_FontSize.push_back(style.FontSize);
+				_TextColor.push_back(style.TextColor);
+				_FontUnderlined.push_back(style.Underlined);
+				_FontStrikeThrough.push_back(style.StrikeThrough);
 				_GlobalColor.push_back(LinkColorGlobalColor);
 				_A.push_back(true);
 
@@ -903,6 +908,7 @@ namespace NLGUI
 				if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
 					_LinkClass.push_back(value[MY_HTML_A_CLASS]);
 
+			}
 				break;
 
 			case HTML_DIV:
@@ -1217,7 +1223,7 @@ namespace NLGUI
 								normal = value[MY_HTML_INPUT_SRC];
 
 							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name;
+							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=image";
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
@@ -1241,7 +1247,15 @@ namespace NLGUI
 								text = value[MY_HTML_INPUT_VALUE];
 
 							// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
-							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name;
+							string param = "name=" + getId() + "|form=" + toString (_Forms.size()-1) + "|submit_button=" + name + "|submit_button_type=submit";
+							if (text.size() > 0)
+							{
+								// escape AH param separator
+								string tmp = text;
+								while(NLMISC::strFindReplace(tmp, "|", "&#124;"))
+									;
+								param = param + "|submit_button_value=" + tmp;
+							}
 
 							// Add the ctrl button
 							if (!_Paragraph)
@@ -1626,6 +1640,28 @@ namespace NLGUI
 				_Object = true;
 
 				break;
+			case HTML_SPAN:
+				{
+					CStyleParams style;
+					style.TextColor = getTextColor();
+					style.FontSize = getFontSize();
+					style.FontWeight = getFontWeight();
+					style.FontOblique = getFontOblique();
+					style.Underlined = getFontUnderlined();
+					style.StrikeThrough = getFontStrikeThrough();
+
+					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
+						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
+
+					_TextColor.push_back(style.TextColor);
+					_FontSize.push_back(style.FontSize);
+					_FontWeight.push_back(style.FontWeight);
+					_FontOblique.push_back(style.FontOblique);
+					_FontUnderlined.push_back(style.Underlined);
+					_FontStrikeThrough.push_back(style.StrikeThrough);
+				}
+				break;
+
 			case HTML_STYLE:
 				_IgnoreText = true;
 				break;
@@ -1647,7 +1683,10 @@ namespace NLGUI
 				popIfNotEmpty (_FontSize);
 			break;
 			case HTML_A:
+				popIfNotEmpty (_FontSize);
 				popIfNotEmpty (_TextColor);
+				popIfNotEmpty (_FontUnderlined);
+				popIfNotEmpty (_FontStrikeThrough);
 				popIfNotEmpty (_GlobalColor);
 				popIfNotEmpty (_A);
 				popIfNotEmpty (_Link);
@@ -1754,6 +1793,14 @@ namespace NLGUI
 					endParagraph();
 					popIfNotEmpty (_UL);
 				}
+				break;
+			case HTML_SPAN:
+				popIfNotEmpty (_FontSize);
+				popIfNotEmpty (_FontWeight);
+				popIfNotEmpty (_FontOblique);
+				popIfNotEmpty (_TextColor);
+				popIfNotEmpty (_FontUnderlined);
+				popIfNotEmpty (_FontStrikeThrough);
 				break;
 			case HTML_STYLE:
 				_IgnoreText = false;
@@ -3069,6 +3116,7 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
+			bool embolden = getFontWeight() >= 700;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
@@ -3078,6 +3126,10 @@ namespace NLGUI
 				if (!skipLine &&
 					(getTextColor() == _CurrentViewLink->getColor()) &&
 					(getFontSize() == (uint)_CurrentViewLink->getFontSize()) &&
+					(getFontUnderlined() == _CurrentViewLink->getUnderlined()) &&
+					(getFontStrikeThrough() == _CurrentViewLink->getStrikeThrough()) &&
+					(embolden == _CurrentViewLink->getEmbolden()) &&
+					(getFontOblique() == _CurrentViewLink->getOblique()) &&
 					(getLink() == _CurrentViewLink->Link) &&
 					(getGlobalColor() == _CurrentViewLink->getModulateGlobalColor()))
 				{
@@ -3133,12 +3185,15 @@ namespace NLGUI
 						if (!newLink->Link.empty())
 						{
 							newLink->setHTMLView (this);
-							newLink->setUnderlined (true);
 						}
 					}
 					newLink->setText(tmpStr);
 					newLink->setColor(getTextColor());
 					newLink->setFontSize(getFontSize());
+					newLink->setEmbolden(embolden);
+					newLink->setOblique(getFontOblique());
+					newLink->setUnderlined(getFontUnderlined());
+					newLink->setStrikeThrough(getFontStrikeThrough());
 					newLink->setMultiLineSpace((uint)((float)getFontSize()*LineSpaceFontFactor));
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(getGlobalColor());
@@ -3414,6 +3469,10 @@ namespace NLGUI
 		_TextColor.clear();
 		_GlobalColor.clear();
 		_FontSize.clear();
+		_FontWeight.clear();
+		_FontOblique.clear();
+		_FontUnderlined.clear();
+		_FontStrikeThrough.clear();
 		_Indent = 0;
 		_LI = false;
 		_UL.clear();
@@ -3638,14 +3697,18 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::submitForm (uint formId, const char *submitButtonName)
+	void CGroupHTML::submitForm (uint formId, const char *submitButtonType, const char *submitButtonName, const char *submitButtonValue, sint32 x, sint32 y)
 	{
 		// Form id valid ?
 		if (formId < _Forms.size())
 		{
 			_PostNextTime = true;
 			_PostFormId = formId;
+			_PostFormSubmitType = submitButtonType;
 			_PostFormSubmitButton = submitButtonName;
+			_PostFormSubmitValue = submitButtonValue;
+			_PostFormSubmitX = x;
+			_PostFormSubmitY = y;
 		}
 	}
 
@@ -3761,6 +3824,10 @@ namespace NLGUI
 					stopBrowse ();
 					updateRefreshButton();
 
+					// Browsing
+					_Browsing = true;
+					updateRefreshButton();
+
 					// Home ?
 					if (_URL == "home")
 						_URL = home();
@@ -3780,16 +3847,23 @@ namespace NLGUI
 					_Connecting = true;
 					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
 
+					// Save new url
+					_URL = finalUrl;
+
+					// file is probably from bnp (ingame help)
+					if (isLocal)
+					{
+						if (strlwr(finalUrl).find("file:/") == 0)
+						{
+							finalUrl = finalUrl.substr(6, finalUrl.size() - 6);
+						}
+						doBrowseLocalFile(finalUrl);
+					}
+					else
+					{
 
 					CButtonFreezer freezer;
 					this->visit(&freezer);
-
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// Save new url
-					_URL = finalUrl;
 
 					// display HTTP query
 					//nlinfo("WEB: GET '%s'", finalUrl.c_str());
@@ -3806,12 +3880,7 @@ namespace NLGUI
 					C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
 
 					// Create an anchor
-	#ifdef NL_OS_WINDOWS
 					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-	#else
-					// temporarily disable local URL's until LibWWW can be replaced.
-					if (isLocal || ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL))
-	#endif
 					{
 						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
 					}
@@ -3847,6 +3916,8 @@ namespace NLGUI
 							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
 						}
 					}
+
+					} // !isLocal
 
 					_BrowseNextTime = false;
 				}
@@ -3918,9 +3989,22 @@ namespace NLGUI
 						}
 					}
 
-					// Add the button coordinates
-					HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=0").c_str());
-					HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=0").c_str());
+					if (_PostFormSubmitType == "image")
+					{
+						// Add the button coordinates
+						if (_PostFormSubmitButton.find_first_of("[") == string::npos)
+						{
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=" + NLMISC::toString(_PostFormSubmitX)).c_str());
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=" + NLMISC::toString(_PostFormSubmitY)).c_str());
+						}
+						else
+						{
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitX)).c_str());
+							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitY)).c_str());
+						}
+					}
+					else
+						HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + _PostFormSubmitValue).c_str());
 
 					// Add custom params
 					addHTTPPostParams(formfields, _TrustedDomain);
@@ -4021,6 +4105,57 @@ namespace NLGUI
 		if(isBrowsing())
 		  handleLibwwwEvents();
 	#endif
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::doBrowseLocalFile(const std::string &filename)
+	{
+		CIFile in;
+		if (in.open(filename))
+		{
+			std::string html;
+			while(!in.eof())
+			{
+				char buf[1024];
+				in.getline(buf, 1024);
+				html += std::string(buf) + "\n";
+			}
+			in.close();
+
+			if (!renderHtmlString(html))
+			{
+				browseError((string("Failed to parse html from file : ")+filename).c_str());
+			}
+		}
+		else
+		{
+			browseError((string("The page address is malformed : ")+filename).c_str());
+		}
+	}
+
+	// ***************************************************************************
+
+	bool CGroupHTML::renderHtmlString(const std::string &html)
+	{
+		bool success;
+
+		// clear content
+		beginBuild();
+
+		success = parseHtml(html);
+
+		// invalidate coords
+		endBuild();
+
+		// libwww would call requestTerminated() here
+		_Browsing = false;
+		if (_TitleString.empty())
+		{
+			setTitle(_TitlePrefix);
+		}
+		updateRefreshButton();
+
+		return success;
 	}
 
 	// ***************************************************************************
@@ -4432,7 +4567,7 @@ namespace NLGUI
 
 		beginElement(element_number, &present[0], &value[0]);
 		if (element_number == HTML_A)
-			addLink(element_number, 0, NULL, &present[0], &value[0]);
+			addLink(element_number, &present[0], &value[0]);
 
 		return 0;
 	}
@@ -4564,6 +4699,94 @@ namespace NLGUI
 		}
 
 		return result;
+	}
+
+	// ***************************************************************************
+	std::string CGroupHTML::getAbsoluteUrl(const std::string &url)
+	{
+		if (HTURL_isAbsolute(url.c_str()))
+			return url;
+
+		return std::string(HTParse(url.c_str(), _URL.c_str(), PARSE_ALL));
+	}
+
+	// ***************************************************************************
+	// CGroupHTML::CStyleParams style;
+	// style.FontSize;    // font-size: 10px;
+	// style.TextColor;   // color: #ABCDEF;
+	// style.Underlined;  // text-decoration: underline;     text-decoration-line: underline;
+	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
+	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit)
+	{
+		TStyle styles = parseStyle(styleString);
+		TStyle::iterator it;
+		for (it=styles.begin(); it != styles.end(); ++it)
+		{
+			if (it->first == "font-size")
+			{
+				float tmp;
+				sint size = 0;
+				getPercentage (size, tmp, it->second.c_str());
+				if (size > 0)
+					style.FontSize = size;
+			}
+			else
+			if (it->first == "font-style")
+			{
+				if (it->second == "italic" || it->second == "oblique")
+					style.FontOblique = true;
+			}
+			else
+			if (it->first == "font-weight")
+			{
+				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
+				uint weight = 400;
+				if (it->second == "normal")
+					weight = 400;
+				else
+				if (it->second == "bold")
+					weight = 700;
+				else
+				if (it->second == "lighter")
+				{
+					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
+					int index = getFontWeight() / 100 - 1;
+					clamp(index, 1, 9);
+					weight = lighter[index-1];
+				}
+				else
+				if (it->second == "bolder")
+				{
+					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
+					uint index = getFontWeight() / 100 + 1;
+					clamp(index, 1, 9);
+					weight = bolder[index-1];
+				}
+				else
+				if (fromString(it->second, weight))
+				{
+					weight = (weight / 100);
+					clamp(weight, 1, 9);
+					weight *= 100;
+				}
+				style.FontWeight = weight;
+			}
+			else
+			if (it->first == "color")
+				scanHTMLColor(it->second.c_str(), style.TextColor);
+			else
+			if (it->first == "text-decoration" || it->first == "text-decoration-line")
+			{
+				std::string prop(strlwr(it->second));
+				style.Underlined = (prop.find("underline") != std::string::npos);
+				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
+			}
+		}
+		if (inherit)
+		{
+			style.Underlined = getFontUnderlined() || style.Underlined;
+			style.StrikeThrough = getFontStrikeThrough() || style.StrikeThrough;
+		}
 	}
 }
 

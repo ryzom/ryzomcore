@@ -785,7 +785,7 @@ NLNET::CMessage&	CDbManager::addTask(const std::string& msg, ITaskEventListener*
 
 	// add listener to task listeners
 	if (listener != NULL)
-		_TaskListeners[id] = std::make_pair<ITaskEventListener*, void*>(listener, arg);
+		_TaskListeners[id] = std::pair<ITaskEventListener*, void*>(listener, arg);
 
 	return *msgrbs;
 }

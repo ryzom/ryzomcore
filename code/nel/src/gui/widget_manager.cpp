@@ -2207,7 +2207,7 @@ namespace NLGUI
 		}
 
 		// Manage complex "Enter"
-		if (eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN)
+		if( eventDesc.getKeyEventType() == CEventDescriptorKey::keychar && eventDesc.getChar() == NLMISC::KeyRETURN && !eventDesc.getKeyCtrl() )
 		{
 			// If the  top window has Enter AH
 			CInterfaceGroup	*tw= getTopWindow();
@@ -2436,6 +2436,9 @@ namespace NLGUI
 							CCtrlBase	*ctrl= _CtrlsUnderPointer[i];
 							if (ctrl && ctrl->isCapturable() && ctrl->isInGroup( pNewCurrentWnd ) )
 							{
+								if( CInterfaceElement::getEditorMode() && !ctrl->isEditorSelectable() )
+									continue;
+
 								uint d = ctrl->getDepth( pNewCurrentWnd );
 								if (d > nMaxDepth)
 								{
@@ -2454,6 +2457,9 @@ namespace NLGUI
 							CViewBase *v = _ViewsUnderPointer[i];
 							if( ( v != NULL ) && v->isInGroup( pNewCurrentWnd ) )
 							{
+								if( CInterfaceElement::getEditorMode() && !v->isEditorSelectable() )
+									continue;
+
 								_CapturedView = v;
 								captured = true;
 								break;
