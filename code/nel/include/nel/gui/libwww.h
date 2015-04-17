@@ -20,11 +20,6 @@
 #ifndef CL_LIB_WWW_H
 #define CL_LIB_WWW_H
 
-extern "C"
-{
-#include "WWWInit.h"
-}
-
 #include "nel/misc/rgba.h"
 
 namespace NLGUI
@@ -37,11 +32,6 @@ namespace NLGUI
 
 	// Init the libwww
 	void initLibWWW();
-
-	// Get an url and setup a local domain
-	const std::string &setCurrentDomain(const std::string &url);
-
-	extern std::string CurrentCookie;
 
 	// ***************************************************************************
 
@@ -230,46 +220,6 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	// A smart ptr for LibWWW strings
-	class C3WSmartPtr
-	{
-	public:
-		C3WSmartPtr ()
-		{
-			_Ptr = NULL;
-		}
-		C3WSmartPtr (const char *ptr)
-		{
-			_Ptr = ptr;
-		}
-		~C3WSmartPtr ()
-		{
-			clear();
-		}
-		void operator=(const char *str)
-		{
-			clear ();
-			_Ptr = str;
-		}
-		operator const char *() const
-		{
-			return _Ptr;
-		}
-		void clear()
-		{
-			if (_Ptr)
-			{
-				void *ptr = (void*)_Ptr;
-				HT_FREE(ptr);
-			}
-			_Ptr = NULL;
-		}
-	private:
-		const char *_Ptr;
-	};
-
-	// ***************************************************************************
-
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
 	bool getPercentage (sint32 &width, float &percent, const char *str);
 
@@ -280,15 +230,6 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void _VerifyLibWWW(const char *function, bool ok, const char *file, int line);
-	#define VerifyLibWWW(a,b) _VerifyLibWWW(a,(b)!=FALSE,__FILE__,__LINE__)
-
-	// ***************************************************************************
-
-	// Standard request terminator
-	int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status) ;
-
-	// ***************************************************************************
 }
 
 #endif

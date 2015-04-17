@@ -39,8 +39,8 @@ namespace NLGUI
 		{
 			CXMLAutoPtr ptr;
 			// load attributes into libwww structs
-			BOOL present[MAX_ATTRIBUTES];
-			const char *value[MAX_ATTRIBUTES];
+			BOOL present[MAX_ATTRIBUTES] = {0};
+			const char *value[MAX_ATTRIBUTES] = {NULL};
 			std::string strvalues[MAX_ATTRIBUTES];
 
 			uint nbAttributes = std::min(MAX_ATTRIBUTES, HTML_DTD->tags[element_number].number_of_attributes);
@@ -56,11 +56,6 @@ namespace NLGUI
 					// now use string pointer in value[] array
 					value[i] = strvalues[i].c_str();
 					present[i] = true;
-				}
-				else
-				{
-					value[i] = NULL;
-					present[i] = false;
 				}
 			}
 
@@ -110,7 +105,7 @@ namespace NLGUI
 				// find libwww tag
 				for(element_number = 0; element_number<HTML_ELEMENTS; ++element_number)
 				{
-					if (xmlStrncasecmp(node->name, (const xmlChar *)HTML_DTD->tags[element_number].name, xmlStrlen(node->name)) == 0)
+					if (xmlStrncasecmp(node->name, (const xmlChar *)HTML_DTD->tags[element_number].name.c_str(), xmlStrlen(node->name)) == 0)
 						break;
 				}
 

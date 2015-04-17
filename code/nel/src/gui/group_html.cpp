@@ -19,14 +19,6 @@
 #include "stdpch.h"
 #include "nel/gui/group_html.h"
 
-// LibWWW
-extern "C"
-{
-#include "WWWLib.h"			      /* Global Library Include file */
-#include "WWWApp.h"
-#include "WWWInit.h"
-}
-
 #include <string>
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
@@ -65,7 +57,6 @@ namespace NLGUI
 	// Uncomment to see the log about image download
 	//#define LOG_DL 1
 
-	CGroupHTML *CGroupHTML::_ConnectingLock = NULL;
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
 
@@ -332,7 +323,6 @@ namespace NLGUI
 							curl_easy_cleanup(it->curl);
 
 							string file;
-
 							if (it->type == ImgType)
 								file = localImageName(it->url);
 							else
@@ -440,20 +430,6 @@ namespace NLGUI
 
 	template<class A> void popIfNotEmpty(A &vect) { if(!vect.empty()) vect.pop_back(); }
 
-	// Data stored in CGroupHTML for libwww.
-
-	class CLibWWWData
-	{
-	public:
-		CLibWWWData ()
-		{
-			Request = NULL;
-			Anchor = NULL;
-		}
-		HTRequest	*Request;
-		HTAnchor	*Anchor;
-	};
-
 	// ***************************************************************************
 
 	void CGroupHTML::beginBuild ()
@@ -461,9 +437,7 @@ namespace NLGUI
 		if (_Browsing)
 		{
 			nlassert (_Connecting);
-			nlassert (_ConnectingLock == this);
 			_Connecting = false;
-			_ConnectingLock = NULL;
 
 			removeContent ();
 		}
@@ -1068,30 +1042,13 @@ namespace NLGUI
 					// Get the action name
 					if (present[HTML_FORM_ACTION] && value[HTML_FORM_ACTION])
 					{
-						HTParentAnchor *parent = HTAnchor_parent (_LibWWW->Anchor);
-						HTChildAnchor *child = HTAnchor_findChildAndLink (parent, "", value[HTML_FORM_ACTION], NULL);
-						if (child)
-						{
-							HTAnchor *mainChild = HTAnchor_followMainLink((HTAnchor *) child);
-							if (mainChild)
-							{
-								C3WSmartPtr uri = HTAnchor_address(mainChild);
-								form.Action = (const char*)uri;
-							}
-						}
-						else
-						{
-							HTAnchor * dest = HTAnchor_findAddress (value[HTML_FORM_ACTION]);
-							if (dest)
-							{
-								C3WSmartPtr uri = HTAnchor_address(dest);
-								form.Action = (const char*)uri;
-							}
-							else
-							{
-								form.Action = value[HTML_FORM_ACTION];
-							}
-						}
+						form.Action = getAbsoluteUrl(string(value[HTML_FORM_ACTION]));
+						nlinfo("(%s) form.action '%s' (converted)", _Id.c_str(), form.Action.c_str());
+					}
+					else
+					{
+						form.Action = _URL;
+						nlinfo("(%s) using _URL for form.action '%s'", _Id.c_str(), form.Action.c_str());
 					}
 					_Forms.push_back(form);
 				}
@@ -1881,7 +1838,6 @@ namespace NLGUI
 		_PostNextTime = false;
 		_Browsing = false;
 		_Connecting = false;
-		_LibWWW = new CLibWWWData;
 		_CurrentViewLink = NULL;
 		_CurrentViewImage = NULL;
 		_Indent = 0;
@@ -1965,7 +1921,6 @@ namespace NLGUI
 					   //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
 
 		clearContext();
-		delete _LibWWW;
 	}
 
 	std::string CGroupHTML::getProperty( const std::string &name ) const
@@ -2894,15 +2849,7 @@ namespace NLGUI
 			clearContext();
 
 			_Browsing = false;
-			if (_Connecting)
-			{
-				nlassert (_ConnectingLock == this);
-				_ConnectingLock = NULL;
-			}
-			else
-				nlassert (_ConnectingLock != this);
 			_Connecting = false;
-	//		stopBrowse ();
 			updateRefreshButton();
 
 	#ifdef LOG_DL
@@ -2970,24 +2917,6 @@ namespace NLGUI
 		clearContext();
 
 		_Browsing = false;
-
-		if (_Connecting)
-		{
-			nlassert (_ConnectingLock == this);
-			_ConnectingLock = NULL;
-		}
-		else
-			nlassert (_ConnectingLock != this);
-		_Connecting = false;
-
-		// Request running ?
-		if (_LibWWW->Request)
-		{
-	//		VerifyLibWWW("HTRequest_kill", HTRequest_kill(_LibWWW->Request) == TRUE);
-			HTRequest_kill(_LibWWW->Request);
-			HTRequest_delete(_LibWWW->Request);
-			_LibWWW->Request = NULL;
-		}
 	}
 
 	// ***************************************************************************
@@ -3766,36 +3695,6 @@ namespace NLGUI
 		}
 	};
 
-	static int timer_called = 0;
-
-	static int
-	timer_callback(HTTimer *   const timer     ,
-				   void *      const user_data ,
-				   HTEventType const event     )
-	{
-	/*----------------------------------------------------------------------------
-	  A handy timer callback which cancels the running event loop.
-	-----------------------------------------------------------------------------*/
-		nlassert(event == HTEvent_TIMEOUT);
-		timer_called = 1;
-		HTEventList_stopLoop();
-
-		/* XXX - The meaning of this return value is undocumented, but close
-		** inspection of libwww's source suggests that we want to return HT_OK. */
-		return HT_OK;
-	}
-
-	static void handleLibwwwEvents()
-	{
-	  HTTimer *timer;
-	  timer_called = 0;
-	  timer = HTTimer_new(NULL, &timer_callback, NULL,
-				  1, YES, NO);
-	  if (!timer_called)
-		HTEventList_newLoop();
-	  HTTimer_delete(timer);
-	}
-
 	// ***************************************************************************
 
 	void CGroupHTML::handle ()
@@ -3806,8 +3705,6 @@ namespace NLGUI
 
 		if (_Connecting)
 		{
-			nlassert (_ConnectingLock == this);
-
 			// Check timeout if needed
 			if (_TimeoutValue != 0 && _ConnectingTimeout <= ( times.thisFrameMs / 1000.0f ) )
 			{
@@ -3815,296 +3712,12 @@ namespace NLGUI
 			}
 		}
 		else
+		if (_BrowseNextTime || _PostNextTime)
 		{
-			if (_ConnectingLock == NULL)
-			{
-				if (_BrowseNextTime)
-				{
-					// Stop browsing now
-					stopBrowse ();
-					updateRefreshButton();
 
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// Home ?
-					if (_URL == "home")
-						_URL = home();
-
-					string finalUrl;
-					bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
-
-					// Reset the title
-					if(_TitlePrefix.empty())
-						setTitle (CI18N::get("uiPleaseWait"));
-					else
-						setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
-
-					// Start connecting
-					nlassert (_ConnectingLock == NULL);
-					_ConnectingLock = this;
-					_Connecting = true;
-					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
-
-					// Save new url
-					_URL = finalUrl;
-
-					// file is probably from bnp (ingame help)
-					if (isLocal)
-					{
-						if (strlwr(finalUrl).find("file:/") == 0)
-						{
-							finalUrl = finalUrl.substr(6, finalUrl.size() - 6);
-						}
-						doBrowseLocalFile(finalUrl);
-					}
-					else
-					{
-
-					CButtonFreezer freezer;
-					this->visit(&freezer);
-
-					// display HTTP query
-					//nlinfo("WEB: GET '%s'", finalUrl.c_str());
-
-					// Init LibWWW
-					initLibWWW();
-					_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
-
-					// Add custom get params
-					addHTTPGetParams (finalUrl, _TrustedDomain);
-
-
-					// Get the final URL
-					C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
-
-					// Create an anchor
-					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-					{
-						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
-					}
-					else
-					{
-						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
-						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
-
-						/* Set the timeout for long we are going to wait for a response */
-						HTHost_setEventTimeout(60000);
-
-						/* Start the first request */
-
-						// request = Request_new(app);
-						_LibWWW->Request = HTRequest_new();
-						HTRequest_setContext(_LibWWW->Request, this);
-
-						// add supported language header
-						HTList *langs = HTList_new();
-						// set the language code used by the client
-						HTLanguage_add(langs, options.languageCode.c_str(), 1.0);
-						HTRequest_setLanguage (_LibWWW->Request, langs, 1);
-
-						// get_document(_LibWWW->Request, _LibWWW->Anchor);
-						C3WSmartPtr address = HTAnchor_address(_LibWWW->Anchor);
-						HTRequest_setAnchor(_LibWWW->Request, _LibWWW->Anchor);
-						if (HTLoad(_LibWWW->Request, NO))
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}
-					}
-
-					} // !isLocal
-
-					_BrowseNextTime = false;
-				}
-
-				if (_PostNextTime)
-				{
-					/* Create a list to hold the form arguments */
-					HTAssocList * formfields = HTAssocList_new();
-
-					// Add text area text
-					uint i;
-
-					// Ref the form
-					CForm &form = _Forms[_PostFormId];
-
-					// Save new url
-					_URL = form.Action;
-
-					for (i=0; i<form.Entries.size(); i++)
-					{
-						// Text area ?
-						bool addEntry = false;
-						ucstring entryData;
-						if (form.Entries[i].TextArea)
-						{
-							// Get the edit box view
-							CInterfaceGroup *group = form.Entries[i].TextArea->getGroup ("eb");
-							if (group)
-							{
-								// Should be a CGroupEditBox
-								CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
-								if (editBox)
-								{
-									entryData = editBox->getViewText()->getText();
-									addEntry = true;
-								}
-							}
-						}
-						else if (form.Entries[i].Checkbox)
-						{
-							// todo handle unicode POST here
-							if (form.Entries[i].Checkbox->getPushed ())
-							{
-								entryData = ucstring ("on");
-								addEntry = true;
-							}
-						}
-						else if (form.Entries[i].ComboBox)
-						{
-							CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-							entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
-							addEntry = true;
-						}
-						// This is a hidden value
-						else
-						{
-							entryData = form.Entries[i].Value;
-							addEntry = true;
-						}
-
-						// Add this entry
-						if (addEntry)
-						{
-							// Build a utf8 string
-							string uft8 = form.Entries[i].Name + "=" + CI18N::encodeUTF8(entryData);
-
-							/* Parse the content and add it to the association list */
-							HTParseFormInput(formfields, uft8.c_str());
-						}
-					}
-
-					if (_PostFormSubmitType == "image")
-					{
-						// Add the button coordinates
-						if (_PostFormSubmitButton.find_first_of("[") == string::npos)
-						{
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=" + NLMISC::toString(_PostFormSubmitX)).c_str());
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=" + NLMISC::toString(_PostFormSubmitY)).c_str());
-						}
-						else
-						{
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitX)).c_str());
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitY)).c_str());
-						}
-					}
-					else
-						HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + _PostFormSubmitValue).c_str());
-
-					// Add custom params
-					addHTTPPostParams(formfields, _TrustedDomain);
-
-					// Reset the title
-					if(_TitlePrefix.empty())
-						setTitle (CI18N::get("uiPleaseWait"));
-					else
-						setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
-
-					// Stop previous browse
-					stopBrowse ();
-
-					// Set timeout
-					nlassert (_ConnectingLock == NULL);
-					_ConnectingLock = this;
-					_Connecting = true;
-					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
-
-					CButtonFreezer freezer;
-					this->visit(&freezer);
-
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// display HTTP query with post parameters
-					//nlinfo("WEB: POST %s", _URL.c_str());
-
-					// Init LibWWW
-					initLibWWW();
-					_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
-
-					// Get the final URL
-					C3WSmartPtr uri = HTParse(_URL.c_str(), NULL, PARSE_ALL);
-
-					// Create an anchor
-					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-					{
-						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
-					}
-					else
-					{
-						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
-						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
-
-						/* Start the first request */
-
-						// request = Request_new(app);
-						_LibWWW->Request = HTRequest_new();
-						HTRequest_setContext(_LibWWW->Request, this);
-
-						/*
-						** Dream up a source anchor (an editor can for example use this).
-						** After creation we associate the data that we want to post and
-						** set some metadata about what the data is. More formats can be found
-						** ../src/HTFormat.html
-						*/
-						/*HTParentAnchor *src = HTTmpAnchor(NULL);
-						HTAnchor_setDocument(src, (void*)(data.c_str()));
-						HTAnchor_setFormat(src, WWW_PLAINTEXT);*/
-
-						/*
-						** If not posting to an HTTP/1.1 server then content length MUST be
-						** there. If HTTP/1.1 then it doesn't matter as we just use chunked
-						** encoding under the covers
-						*/
-						// HTAnchor_setLength(src, data.size());
-
-						HTParentAnchor *result =  HTPostFormAnchor (formfields, _LibWWW->Anchor, _LibWWW->Request);
-						if (result)
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}
-
-						/* POST the source to the dest */
-						/*
-						BOOL status = NO;
-						status = HTPostAnchor(src, _LibWWW->Anchor, _LibWWW->Request);
-						if (status)
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}*/
-					}
-
-					_PostNextTime = false;
-				}
-			}
+			_BrowseNextTime = false;
+			_PostNextTime = false;
 		}
-	#ifndef NL_OS_WINDOWS
-		if(isBrowsing())
-		  handleLibwwwEvents();
-	#endif
 	}
 
 	// ***************************************************************************
@@ -4149,6 +3762,7 @@ namespace NLGUI
 
 		// libwww would call requestTerminated() here
 		_Browsing = false;
+
 		if (_TitleString.empty())
 		{
 			setTitle(_TitlePrefix);
@@ -4189,20 +3803,7 @@ namespace NLGUI
 
 	void CGroupHTML::requestTerminated(HTRequest * request )
 	{
-		// this callback is being called for every request terminated
-		if (request == _LibWWW->Request)
-		{
-			// set the browser as complete
-			_Browsing = false;
-			updateRefreshButton();
-			// check that the title is set, or reset it (in the case the page
-			// does not provide a title)
-			if (_TitleString.empty())
-			{
-				setTitle(_TitlePrefix);
-			}
-        }
-    }
+	}
 
 	// ***************************************************************************
 

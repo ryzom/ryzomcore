@@ -28,11 +28,6 @@
 
 typedef std::map<std::string, std::string>	TStyle;
 
-extern "C"
-{
-#include "WWWInit.h"
-}
-
 namespace NLGUI
 {
 	class CCtrlButton;
@@ -54,15 +49,6 @@ namespace NLGUI
 	{
 	public:
         DECLARE_UI_CLASS( CGroupHTML )
-
-		friend void TextAdd (struct _HText *me, const char * buf, int len);
-		friend void TextBeginElement (_HText *me, int element_number, const BOOL *present, const char **	value);
-		friend void TextEndElement (_HText *me, int element_number);
-		friend void TextLink (struct _HText *me, int element_number, int attribute_number, struct _HTChildAnchor *anchor, const BOOL *present, const char **value);
-		friend void TextBuild (HText * me, HTextStatus status);
-		friend void TextBeginUnparsedElement(HText *me, const char *buffer, int length);
-		friend void TextEndUnparsedElement(HText *me, const char *buffer, int length);
-		friend int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status);
 
 		/// Web browser options for CGroupHTML
 		struct SWebOptions
@@ -359,12 +345,6 @@ namespace NLGUI
 
 		bool			_Object;
 		std::string		_ObjectScript;
-
-		// Someone is conecting. We got problem with libwww : 2 connection requests can deadlock the client.
-		static CGroupHTML *_ConnectingLock;
-
-		// LibWWW data
-		class CLibWWWData	*_LibWWW;
 
 		// Current paragraph
 		std::string		_DivName;
