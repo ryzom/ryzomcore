@@ -20,7 +20,10 @@
 #ifndef CL_LIB_WWW_H
 #define CL_LIB_WWW_H
 
+#include <curl/curl.h>
+
 #include "nel/misc/rgba.h"
+#include "nel/gui/libwww_types.h"
 
 namespace NLGUI
 {
@@ -29,6 +32,9 @@ namespace NLGUI
 	class CGroupList;
 
 	// ***************************************************************************
+
+	// Legacy function from libwww
+	SGML_dtd * HTML_dtd (void);
 
 	// Init the libwww
 	void initLibWWW();
@@ -229,6 +235,10 @@ namespace NLGUI
 	NLMISC::CRGBA getColor (const char *color);
 
 	// ***************************************************************************
+
+	const std::string &setCurrentDomain(const std::string &uri);
+	void receiveCookies (CURL *curl, const std::string &domain, bool trusted);
+	void sendCookies(CURL *curl, const std::string &domain, bool trusted);
 
 }
 

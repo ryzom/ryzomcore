@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 
+#include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 
 using namespace NLMISC;
@@ -23,11 +24,13 @@ using namespace NLMISC;
 namespace NLGUI
 {
 
+	// ***************************************************************************
+
 	/// the cookie value for session identification (nel cookie)
 	std::string CurrentCookie;
 
 	/// store all cookies we receive and resent them depending of the domain
-	std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
+	static std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
 	std::string HTTPCurrentDomain;	// The current domain that will be used to get which cookies to send
 
 	// ***************************************************************************
@@ -279,6 +282,138 @@ namespace NLGUI
 			dst.A = 255;
 		}
 		return dst;
+	}
+
+	// set current HTTPCurrentDomain for cookie selection, return new domain
+	const std::string &setCurrentDomain(const std::string &uri)
+	{
+		if (uri.find("http://") == 0)
+			HTTPCurrentDomain = uri.substr(7, uri.find("/", 7) - 7);
+		else
+		if (uri.find("https://") == 0)
+			HTTPCurrentDomain = uri.substr(8, uri.find("/", 8) - 8);
+		else
+		if (uri.find("//") == 0)
+			HTTPCurrentDomain = uri.substr(2, uri.find("/", 2) - 2);
+		else
+		if (uri.find("/") != std::string::npos)
+			HTTPCurrentDomain = uri.substr(0, uri.find("/") - 1);
+
+		return HTTPCurrentDomain;
+	}
+
+	// update HTTPCookies list
+	static void receiveCookie(const char *nsformat, const std::string &domain, bool trusted)
+	{
+		// 0        1           2       3       4       5       6
+		// domain	tailmatch	path	secure	expires	name	value
+		// .app.ryzom.com	TRUE	/	 FALSE	1234	ryzomId	AAAAAAAA|BBBBBBBB|CCCCCCCC
+		// #HttpOnly_app.ryzom.com	FALSE	/	FALSE	0	PHPSESSID	sess-id-value
+		std::string cookie(nsformat);
+
+		std::vector<std::string> chunks;
+		splitString(cookie, "\t", chunks);
+		if (chunks.size() < 6)
+		{
+			nlwarning("invalid cookie format '%s'", cookie.c_str());
+		}
+
+		if (chunks[0].find("#HttpOnly_") == 0)
+		{
+			chunks[0] = chunks[0].substr(10);
+		}
+
+		if (chunks[0] != domain && chunks[0] != std::string("." + domain))
+		{
+			// cookie is for different domain
+			//nlinfo("cookie for different domain ('%s')", nsformat);
+			return;
+		}
+
+		if (chunks[5] == "ryzomId")
+		{
+			// we receive this cookie because we are telling curl about this on send
+			// normally, this cookie should be set from client and not from headers
+			// it's used for R2 sessions
+			if (trusted && CurrentCookie != chunks[6])
+			{
+				CurrentCookie = chunks[6];
+				nlwarning("received ryzomId cookie '%s' from trusted domain '%s'", CurrentCookie.c_str(), domain.c_str());
+			}
+		}
+		else
+		{
+			uint32 expires = 0;
+			fromString(chunks[4], expires);
+			// expires == 0 is session cookie
+			if (expires > 0)
+			{
+				time_t now;
+				time(&now);
+				if (expires < now)
+				{
+					nlwarning("cookie expired, remove from list '%s'", nsformat);
+					HTTPCookies[domain].erase(chunks[5]);
+
+					return;
+				}
+			}
+
+			// this overrides cookies with same name, but different paths
+			//nlwarning("save domain '%s' cookie '%s' value '%s'", domain.c_str(), chunks[5].c_str(), nsformat);
+			HTTPCookies[domain][chunks[5]] = nsformat;
+		}
+	}
+
+	// update HTTPCookies with cookies received from curl
+	void receiveCookies (CURL *curl, const std::string &domain, bool trusted)
+	{
+		struct curl_slist *cookies = NULL;
+		if (curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies) == CURLE_OK)
+		{
+			struct curl_slist *nc;
+			nc = cookies;
+			while(nc)
+			{
+				//nlwarning("received cookie '%s'", nc->data);
+				receiveCookie(nc->data, domain, trusted);
+				nc = nc->next;
+			}
+
+			curl_slist_free_all(cookies);
+		}
+	}
+
+	// add all cookies for domain to curl handle
+	void sendCookies(CURL *curl, const std::string &domain, bool trusted)
+	{
+		if (domain.empty())
+			return;
+
+		if (trusted && !CurrentCookie.empty())
+		{
+			// domain	tailmatch	path	secure	expires	name	value
+			// .app.ryzom.com	TRUE	/	 FALSE	1234	ryzomId	AAAAAAAA|BBBBBBBB|CCCCCCCC
+			// #HttpOnly_app.ryzom.com	FALSE	/	FALSE	0	PHPSESSID	sess-id-value
+			std::string cookie;
+			// set tailmatch
+			if (domain[0] != '.' && domain[0] != '#')
+				cookie = "." + domain + "\tTRUE";
+			else
+				cookie = domain + "\tFALSE";
+			cookie += "\t/\tFALSE\t0\tryzomId\t" + CurrentCookie;
+			curl_easy_setopt(curl, CURLOPT_COOKIELIST, cookie.c_str());
+			//nlwarning("domain '%s', cookie '%s'", domain.c_str(), cookie.c_str());
+		}
+
+		if(!HTTPCookies[domain].empty())
+		{
+			for(std::map<std::string, std::string>::iterator it = HTTPCookies[domain].begin(); it != HTTPCookies[domain].end(); it++)
+			{
+				curl_easy_setopt(curl, CURLOPT_COOKIELIST, it->second.c_str());
+				//nlwarning("set domain '%s' cookie '%s'", domain.c_str(), it->second.c_str());
+			}
+		}
 	}
 
 	void initLibWWW()
