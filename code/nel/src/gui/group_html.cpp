@@ -43,7 +43,7 @@
 #include "nel/misc/md5.h"
 #include "nel/3d/texture_file.h"
 #include "nel/misc/big_file.h"
-#include <libxml/uri.h>
+#include "nel/gui/url_parser.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -4777,20 +4777,13 @@ namespace NLGUI
 	// ***************************************************************************
 	std::string CGroupHTML::getAbsoluteUrl(const std::string &url)
 	{
-		if (_URL.size() == 0 || url.find("http://") != std::string::npos || url.find("https://") != std::string::npos)
+		CUrlParser uri(url);
+		if (uri.isAbsolute())
 			return url;
 
-		xmlChar * uri;
-		uri = xmlBuildURI(reinterpret_cast<const xmlChar *>(url.c_str()), reinterpret_cast<const xmlChar *>(_URL.c_str()));
-		if (uri)
-		{
-			std::string ret(reinterpret_cast<char *>(uri));
-			xmlFree(uri);
+		uri.inherit(_URL);
 
-			return ret;
-		}
-
-		return url;
+		return uri.toString();
 	}
 
 	// ***************************************************************************
