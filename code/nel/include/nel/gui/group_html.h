@@ -713,7 +713,7 @@ namespace NLGUI
 		struct CDataDownload
 		{
 		public:
-			CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), luaScript(s), md5sum(m), type(t), fp(f)
+			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
 			{
 				if (t == ImgType) imgs.push_back(i);
 			}
@@ -721,6 +721,7 @@ namespace NLGUI
 		public:
 			CURL *curl;
 			std::string url;
+			std::string dest;
 			std::string luaScript;
 			std::string md5sum;
 			TDataType type;

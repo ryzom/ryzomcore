@@ -177,13 +177,15 @@ namespace NLGUI
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	{
+		string finalUrl = getAbsoluteUrl(url);
+
 		// Search if we are not already downloading this url.
 		for(uint i = 0; i < Curls.size(); i++)
 		{
-			if(Curls[i].url == url)
+			if(Curls[i].url == finalUrl)
 			{
 	#ifdef LOG_DL
-				nlwarning("already downloading '%s' img %p", url.c_str(), img);
+				nlwarning("already downloading '%s' img %p", finalUrl.c_str(), img);
 	#endif
 				Curls[i].imgs.push_back(img);
 				return;
@@ -192,12 +194,13 @@ namespace NLGUI
 
 		CURL *curl = curl_easy_init();
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
 
+		// use requested url for local name
 		string dest = localImageName(url);
 		string tmpdest = localImageName(url)+".tmp";
 	#ifdef LOG_DL
-		nlwarning("add to download '%s' dest '%s' img %p", url.c_str(), dest.c_str(), img);
+		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 	#endif
 
 		// erase the tmp file if exists
@@ -216,7 +219,7 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, "", ""));
+			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", ""));
 		#ifdef LOG_DL
 			nlwarning("adding handle %x, %d curls", curl, Curls.size());
 		#endif
@@ -311,7 +314,7 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL, script, md5sum));
+			Curls.push_back(CDataDownload(curl, url, dest, fp, BnpType, NULL, script, md5sum));
 	#ifdef LOG_DL
 			nlwarning("adding handle %x, %d curls", curl, Curls.size());
 	#endif
@@ -453,34 +456,29 @@ namespace NLGUI
 							curl_multi_remove_handle(MultiCurl, it->curl);
 							curl_easy_cleanup(it->curl);
 
-							string file;
-							if (it->type == ImgType)
-								file = localImageName(it->url);
-							else
-								file = localBnpName(it->url);
-
-							if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(file+".tmp").toString())))
+							string tmpfile = it->dest + ".tmp";
+							if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(tmpfile).toString())))
 							{
-								NLMISC::CFile::deleteFile((file+".tmp").c_str());
+								NLMISC::CFile::deleteFile(tmpfile.c_str());
 							}
 							else
 							{
 								string finalUrl;
 								if (it->type == ImgType)
 								{
-									CFile::moveFile(file.c_str(), (file+".tmp").c_str());
-									if (lookupLocalFile (finalUrl, file.c_str(), false))
+									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										for(uint i = 0; i < it->imgs.size(); i++)
 										{
-											setImage(it->imgs[i], file);
+											setImage(it->imgs[i], it->dest);
 										}
 									}
 								}
 								else
 								{
-									CFile::moveFile(file.c_str(), (file+".tmp").c_str());
-									if (lookupLocalFile (finalUrl, file.c_str(), false))
+									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										CLuaManager::getInstance().executeLuaScript( it->luaScript, true );
 									}
