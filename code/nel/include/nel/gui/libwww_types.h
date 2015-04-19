@@ -32,8 +32,6 @@
 #ifndef CL_LIB_WWW_TYPES_H
 #define CL_LIB_WWW_TYPES_H
 
-typedef char BOOL;
-
 //
 // LibWWW elements
 // - order must be kept for backward compatibility, new tags can be added to the end

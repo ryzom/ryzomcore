@@ -39,9 +39,11 @@ namespace NLGUI
 		{
 			CXMLAutoPtr ptr;
 			// load attributes into libwww structs
-			BOOL present[MAX_ATTRIBUTES] = {0};
-			const char *value[MAX_ATTRIBUTES] = {NULL};
+			std::vector<bool> present;
+			std::vector<const char *>value;
 			std::string strvalues[MAX_ATTRIBUTES];
+			present.resize(30, false);
+			value.resize(30);
 
 			uint nbAttributes = std::min(MAX_ATTRIBUTES, HTML_DTD->tags[element_number].number_of_attributes);
 			for(uint i=0; i<nbAttributes; i++)

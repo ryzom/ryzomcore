@@ -48,7 +48,7 @@ private:
 	virtual void updateCoords();
 
 	// From CGroupHTML
-	virtual void beginElement (uint element_number, const BOOL *present, const char **value);
+	virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *>&value);
 	virtual void endBuild ();
 	virtual void browse (const char *url);
 	virtual std::string	home();

@@ -674,7 +674,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addLink (uint element_number, const BOOL *present, const char **value)
+	void CGroupHTML::addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
 	{
 		if (_Browsing)
 		{
@@ -982,7 +982,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::beginElement (uint element_number, const BOOL *present, const char **value)
+	void CGroupHTML::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
 	{
 		if (_Browsing)
 		{
@@ -4604,7 +4604,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
 
 		uint element_number = (uint)ls.toNumber(1);
-		std::vector<BOOL> present;
+		std::vector<bool> present;
 		std::vector<const char *> value;
 		present.resize(30, false);
 		value.resize(30);
@@ -4638,9 +4638,9 @@ namespace NLGUI
 			value.insert(value.begin() + (uint)it.nextKey().toNumber(), buffer);
 		}
 
-		beginElement(element_number, &present[0], &value[0]);
+		beginElement(element_number, present, value);
 		if (element_number == HTML_A)
-			addLink(element_number, &present[0], &value[0]);
+			addLink(element_number, present, value);
 
 		return 0;
 	}

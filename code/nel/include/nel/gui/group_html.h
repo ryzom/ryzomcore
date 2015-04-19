@@ -249,10 +249,10 @@ namespace NLGUI
 		virtual void addText (const char * buf, int len);
 
 		// A link has been parsed
-		virtual void addLink (uint element_number, const BOOL *present, const char **value);
+		virtual void addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
-		virtual void beginElement (uint element_number, const BOOL *present, const char **value);
+		virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
 
 		// A new end HTML element has been parsed (</IMG> for exemple)
 		virtual void endElement (uint element_number);
