@@ -192,10 +192,6 @@ namespace NLGUI
 			}
 		}
 
-		CURL *curl = curl_easy_init();
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
-
 		// use requested url for local name
 		string dest = localImageName(url);
 		string tmpdest = localImageName(url)+".tmp";
@@ -209,13 +205,30 @@ namespace NLGUI
 
 		if (!NLMISC::CFile::fileExists(dest))
 		{
+			if (!MultiCurl)
+			{
+				nlwarning("Invalid MultiCurl handle, unable to download '%s'", finalUrl.c_str());
+				return;
+			}
+
+			CURL *curl = curl_easy_init();
+			if (!curl)
+			{
+				nlwarning("Creating cURL handle failed, unable to download '%s'", finalUrl.c_str());
+				return;
+			}
 
 			FILE *fp = fopen (tmpdest.c_str(), "wb");
 			if (fp == NULL)
 			{
+				curl_easy_cleanup(curl);
+
 				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
 				return;
 			}
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
+
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
@@ -298,19 +311,30 @@ namespace NLGUI
 		}
 		if (action != "delete")
 		{
-			CURL *curl = curl_easy_init();
-			if (!MultiCurl || !curl)
+			if (!MultiCurl)
+			{
+				nlwarning("Invalid MultiCurl handle, unable to download '%s'", url.c_str());
 				return false;
+			}
 
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			CURL *curl = curl_easy_init();
+			if (!curl)
+			{
+				nlwarning("Creating cURL handle failed, unable to download '%s'", url.c_str());
+				return false;
+			}
 
 			FILE *fp = fopen (tmpdest.c_str(), "wb");
 			if (fp == NULL)
 			{
+				curl_easy_cleanup(curl);
 				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
 				return false;
 			}
+
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
