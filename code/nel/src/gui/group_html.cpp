@@ -19,14 +19,6 @@
 #include "stdpch.h"
 #include "nel/gui/group_html.h"
 
-// LibWWW
-extern "C"
-{
-#include "WWWLib.h"			      /* Global Library Include file */
-#include "WWWApp.h"
-#include "WWWInit.h"
-}
-
 #include <string>
 #include "nel/misc/types_nl.h"
 #include "nel/misc/rgba.h"
@@ -51,13 +43,16 @@ extern "C"
 #include "nel/misc/md5.h"
 #include "nel/3d/texture_file.h"
 #include "nel/misc/big_file.h"
+#include "nel/gui/url_parser.h"
 
 using namespace std;
 using namespace NLMISC;
 
 
 // Default timeout to connect a server
-#define DEFAULT_RYZOM_CONNECTION_TIMEOUT (10.0)
+#define DEFAULT_RYZOM_CONNECTION_TIMEOUT (30.0)
+// Allow up to 10 redirects, then give up
+#define DEFAULT_RYZOM_REDIRECT_LIMIT (10)
 
 namespace NLGUI
 {
@@ -65,9 +60,61 @@ namespace NLGUI
 	// Uncomment to see the log about image download
 	//#define LOG_DL 1
 
-	CGroupHTML *CGroupHTML::_ConnectingLock = NULL;
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
+
+	// Active cURL www transfer
+	class CCurlWWWData
+	{
+		public:
+			CCurlWWWData(CURL *curl, const std::string &url)
+				: Request(curl), Url(url), Content(""), HeadersSent(NULL)
+			{
+			}
+			~CCurlWWWData()
+			{
+				if (Request)
+					curl_easy_cleanup(Request);
+
+				if (HeadersSent)
+					curl_slist_free_all(HeadersSent);
+			}
+
+			void setRecvHeader(const std::string &header)
+			{
+				size_t pos = header.find(": ");
+				if (pos == std::string::npos)
+					return;
+
+				std::string key = toLower(header.substr(0, pos));
+				if (pos != std::string::npos)
+				{
+					HeadersRecv[key] = header.substr(pos + 2);
+					//nlinfo(">> received header '%s' = '%s'", key.c_str(), HeadersRecv[key].c_str());
+				}
+			}
+
+			// return last received "Location: <url>" header or empty string if no header set
+			const std::string getLocationHeader()
+			{
+				if (HeadersRecv.count("location") > 0)
+					return HeadersRecv["location"];
+
+				return "";
+			}
+
+		public:
+			CURL *Request;
+
+			std::string Url;
+			std::string Content;
+
+			// headers sent with curl request, must be released after transfer
+			curl_slist * HeadersSent;
+
+			// headers received from curl transfer
+			std::map<std::string, std::string> HeadersRecv;
+	};
 
 	// Check if domain is on TrustedDomain
 	bool CGroupHTML::isTrustedDomain(const string &domain)
@@ -130,13 +177,15 @@ namespace NLGUI
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
 	{
+		string finalUrl = getAbsoluteUrl(url);
+
 		// Search if we are not already downloading this url.
 		for(uint i = 0; i < Curls.size(); i++)
 		{
-			if(Curls[i].url == url)
+			if(Curls[i].url == finalUrl)
 			{
 	#ifdef LOG_DL
-				nlwarning("already downloading '%s' img %p", url.c_str(), img);
+				nlwarning("already downloading '%s' img %p", finalUrl.c_str(), img);
 	#endif
 				Curls[i].imgs.push_back(img);
 				return;
@@ -145,12 +194,13 @@ namespace NLGUI
 
 		CURL *curl = curl_easy_init();
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
 
+		// use requested url for local name
 		string dest = localImageName(url);
 		string tmpdest = localImageName(url)+".tmp";
 	#ifdef LOG_DL
-		nlwarning("add to download '%s' dest '%s' img %p", url.c_str(), dest.c_str(), img);
+		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 	#endif
 
 		// erase the tmp file if exists
@@ -169,7 +219,7 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, url, fp, ImgType, img, "", ""));
+			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", ""));
 		#ifdef LOG_DL
 			nlwarning("adding handle %x, %d curls", curl, Curls.size());
 		#endif
@@ -264,7 +314,7 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, url, fp, BnpType, NULL, script, md5sum));
+			Curls.push_back(CDataDownload(curl, url, dest, fp, BnpType, NULL, script, md5sum));
 	#ifdef LOG_DL
 			nlwarning("adding handle %x, %d curls", curl, Curls.size());
 	#endif
@@ -294,7 +344,7 @@ namespace NLGUI
 	{
 		//nlassert(_CrtCheckMemory());
 
-		if(RunningCurls == 0)
+		if(Curls.empty() && _CurlWWW == NULL)
 			return;
 
 		int NewRunningCurls = 0;
@@ -315,8 +365,82 @@ namespace NLGUI
 			int msgs_left;
 			while ((msg = curl_multi_info_read(MultiCurl, &msgs_left)))
 			{
+	#ifdef LOG_DL
+				nlwarning("> (%s) msgs_left %d", _Id.c_str(), msgs_left);
+	#endif
 				if (msg->msg == CURLMSG_DONE)
 				{
+					if (_CurlWWW && _CurlWWW->Request && _CurlWWW->Request == msg->easy_handle)
+					{
+						CURLcode res = msg->data.result;
+						long code;
+						curl_easy_getinfo(_CurlWWW->Request, CURLINFO_RESPONSE_CODE, &code);
+	#ifdef LOG_DL
+						nlwarning("(%s) web transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), _CurlWWW->Request, res, code, _CurlWWW->Url.size(), _CurlWWW->Url.c_str());
+	#endif
+
+						if (res != CURLE_OK)
+						{
+							browseError(string("Connection failed with curl error " + string(curl_easy_strerror(res))).c_str());
+						}
+						else
+						if ((code >= 301 && code <= 303) || code == 307 || code == 308)
+						{
+							if (_RedirectsRemaining < 0)
+							{
+								browseError(string("Redirect limit reached : " + _URL).c_str());
+							}
+							else
+							{
+								// redirect, get the location and try browse again
+								// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
+								std::string location(_CurlWWW->getLocationHeader());
+								if (location.size() > 0)
+								{
+	#ifdef LOG_DL
+									nlwarning("(%s) request (%d) redirected to (len %d) '%s'", _Id.c_str(), _RedirectsRemaining, location.size(), location.c_str());
+	#endif
+									location = getAbsoluteUrl(location);
+									// throw away this handle and start with new one (easier than reusing)
+									requestTerminated();
+
+									_PostNextTime = false;
+									_RedirectsRemaining--;
+
+									doBrowse(location.c_str());
+								}
+								else
+								{
+									browseError(string("Request was redirected, but location was not set : "+_URL).c_str());
+								}
+							}
+						}
+						else
+						{
+							_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
+
+							if ( (code < 200 || code >= 300) )
+							{
+								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString(code) + ") : " + _CurlWWW->Url).c_str());
+							}
+							else
+							{
+								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+
+								char *ch;
+								std::string contentType;
+								res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
+								if (res == CURLE_OK)
+								{
+									contentType = ch;
+								}
+
+								htmlDownloadFinished(_CurlWWW->Content, contentType, code);
+							}
+							requestTerminated();
+						}
+					}
+
 					for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 					{
 						if(msg->easy_handle == it->curl)
@@ -327,49 +451,40 @@ namespace NLGUI
 							fclose(it->fp);
 
 	#ifdef LOG_DL
-							nlwarning("transfer %x completed with status res %d r %d - %d curls", msg->easy_handle, res, r, Curls.size());
+							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->curl, res, r, it->url.size(), it->url.c_str());
 	#endif
+							curl_multi_remove_handle(MultiCurl, it->curl);
 							curl_easy_cleanup(it->curl);
 
-							string file;
-
-							if (it->type == ImgType)
-								file = localImageName(it->url);
-							else
-								file = localBnpName(it->url);
-
-							if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(file+".tmp").toString())))
+							string tmpfile = it->dest + ".tmp";
+							if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(tmpfile).toString())))
 							{
-								NLMISC::CFile::deleteFile((file+".tmp").c_str());
+								NLMISC::CFile::deleteFile(tmpfile.c_str());
 							}
 							else
 							{
 								string finalUrl;
 								if (it->type == ImgType)
 								{
-									CFile::moveFile(file.c_str(), (file+".tmp").c_str());
-									if (lookupLocalFile (finalUrl, file.c_str(), false))
+									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										for(uint i = 0; i < it->imgs.size(); i++)
 										{
-											// don't display image that are not power of 2
-											//uint32 w, h;
-											//CBitmap::loadSize (file, w, h);
-											//if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-											//	file.clear();
-											setImage(it->imgs[i], file);
+											setImage(it->imgs[i], it->dest);
 										}
 									}
 								}
 								else
 								{
-									CFile::moveFile(file.c_str(), (file+".tmp").c_str());
-									if (lookupLocalFile (finalUrl, file.c_str(), false))
+									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										CLuaManager::getInstance().executeLuaScript( it->luaScript, true );
 									}
 								}
 							}
+
 							Curls.erase(it);
 							break;
 						}
@@ -378,6 +493,10 @@ namespace NLGUI
 			}
 		}
 		RunningCurls = NewRunningCurls;
+	#ifdef LOG_DL
+		if (RunningCurls > 0 || Curls.size() > 0)
+			nlwarning("(%s) RunningCurls %d, _Curls %d", _Id.c_str(), RunningCurls, Curls.size());
+	#endif
 	}
 
 
@@ -440,33 +559,18 @@ namespace NLGUI
 
 	template<class A> void popIfNotEmpty(A &vect) { if(!vect.empty()) vect.pop_back(); }
 
-	// Data stored in CGroupHTML for libwww.
-
-	class CLibWWWData
-	{
-	public:
-		CLibWWWData ()
-		{
-			Request = NULL;
-			Anchor = NULL;
-		}
-		HTRequest	*Request;
-		HTAnchor	*Anchor;
-	};
-
 	// ***************************************************************************
 
 	void CGroupHTML::beginBuild ()
 	{
 		if (_Browsing)
 		{
-			nlassert (_Connecting);
-			nlassert (_ConnectingLock == this);
 			_Connecting = false;
-			_ConnectingLock = NULL;
 
 			removeContent ();
 		}
+		else
+			nlwarning("_Browsing = FALSE");
 	}
 
 
@@ -570,7 +674,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addLink (uint element_number, uint /* attribute_number */, HTChildAnchor *anchor, const BOOL *present, const char **value)
+	void CGroupHTML::addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
 	{
 		if (_Browsing)
 		{
@@ -591,16 +695,8 @@ namespace NLGUI
 					}
 					else
 					{
-						HTAnchor * dest = HTAnchor_followMainLink((HTAnchor *) anchor);
-						if (dest)
-						{
-							C3WSmartPtr uri = HTAnchor_address(dest);
-							_Link.push_back ((const char*)uri);
-						}
-						else
-						{
-							_Link.push_back("");
-						}
+						// convert href from "?key=val" into "http://domain.com/?key=val"
+						_Link.push_back(getAbsoluteUrl(suri));
 					}
 
 					for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
@@ -886,7 +982,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::beginElement (uint element_number, const BOOL *present, const char **value)
+	void CGroupHTML::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
 	{
 		if (_Browsing)
 		{
@@ -1076,30 +1172,11 @@ namespace NLGUI
 					// Get the action name
 					if (present[HTML_FORM_ACTION] && value[HTML_FORM_ACTION])
 					{
-						HTParentAnchor *parent = HTAnchor_parent (_LibWWW->Anchor);
-						HTChildAnchor *child = HTAnchor_findChildAndLink (parent, "", value[HTML_FORM_ACTION], NULL);
-						if (child)
-						{
-							HTAnchor *mainChild = HTAnchor_followMainLink((HTAnchor *) child);
-							if (mainChild)
-							{
-								C3WSmartPtr uri = HTAnchor_address(mainChild);
-								form.Action = (const char*)uri;
-							}
-						}
-						else
-						{
-							HTAnchor * dest = HTAnchor_findAddress (value[HTML_FORM_ACTION]);
-							if (dest)
-							{
-								C3WSmartPtr uri = HTAnchor_address(dest);
-								form.Action = (const char*)uri;
-							}
-							else
-							{
-								form.Action = value[HTML_FORM_ACTION];
-							}
-						}
+						form.Action = getAbsoluteUrl(string(value[HTML_FORM_ACTION]));
+					}
+					else
+					{
+						form.Action = _URL;
 					}
 					_Forms.push_back(form);
 				}
@@ -1294,7 +1371,16 @@ namespace NLGUI
 
 									// Translate the tooltip
 									if (tooltip)
-										ctrlButton->setDefaultContextHelp (CI18N::get (tooltip));
+									{
+										if (CI18N::hasTranslation(tooltip))
+										{
+											ctrlButton->setDefaultContextHelp(CI18N::get(tooltip));
+										}
+										else
+										{
+											ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+										}
+									}
 
 									ctrlButton->setText(ucstring::makeFromUtf8(text));
 								}
@@ -1387,24 +1473,11 @@ namespace NLGUI
 				if (!(_Forms.empty()))
 				{
 					// A select box
-
-					// read general property
-					string templateName;
-					string minWidth;
-
-					// Widget template name
-					if (present[MY_HTML_INPUT_Z_INPUT_TMPL] && value[MY_HTML_INPUT_Z_INPUT_TMPL])
-						templateName = value[MY_HTML_INPUT_Z_INPUT_TMPL];
-					// Widget minimal width
-					if (present[MY_HTML_INPUT_Z_INPUT_WIDTH] && value[MY_HTML_INPUT_Z_INPUT_WIDTH])
-						minWidth = value[MY_HTML_INPUT_Z_INPUT_WIDTH];
-
 					string name;
 					if (present[HTML_SELECT_NAME] && value[HTML_SELECT_NAME])
 						name = value[HTML_SELECT_NAME];
 
-					string formTemplate = templateName.empty() ? DefaultFormSelectGroup : templateName;
-					CDBGroupComboBox *cb = addComboBox(formTemplate, name.c_str());
+					CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
 					CGroupHTML::CForm::CEntry entry;
 					entry.Name = name;
 					entry.ComboBox = cb;
@@ -1875,7 +1948,8 @@ namespace NLGUI
 	// ***************************************************************************
 	CGroupHTML::CGroupHTML(const TCtorParam &param)
 	:	CGroupScrollText(param),
-		_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT)
+		_TimeoutValue(DEFAULT_RYZOM_CONNECTION_TIMEOUT),
+		_RedirectsRemaining(DEFAULT_RYZOM_REDIRECT_LIMIT)
 	{
 		// add it to map of group html created
 		_GroupHtmlUID= ++_GroupHtmlUIDPool; // valid assigned Id begin to 1!
@@ -1889,7 +1963,6 @@ namespace NLGUI
 		_PostNextTime = false;
 		_Browsing = false;
 		_Connecting = false;
-		_LibWWW = new CLibWWWData;
 		_CurrentViewLink = NULL;
 		_CurrentViewImage = NULL;
 		_Indent = 0;
@@ -1946,9 +2019,11 @@ namespace NLGUI
 
 		MultiCurl = curl_multi_init();
 		RunningCurls = 0;
+		_CurlWWW = NULL;
 
 		initImageDownload();
 		initBnpDownload();
+		initLibWWW();
 	}
 
 	// ***************************************************************************
@@ -1973,7 +2048,8 @@ namespace NLGUI
 					   //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
 
 		clearContext();
-		delete _LibWWW;
+		if (_CurlWWW)
+			delete _CurlWWW;
 	}
 
 	std::string CGroupHTML::getProperty( const std::string &name ) const
@@ -2902,28 +2978,20 @@ namespace NLGUI
 			clearContext();
 
 			_Browsing = false;
-			if (_Connecting)
-			{
-				nlassert (_ConnectingLock == this);
-				_ConnectingLock = NULL;
-			}
-			else
-				nlassert (_ConnectingLock != this);
-			_Connecting = false;
-	//		stopBrowse ();
 			updateRefreshButton();
 
 	#ifdef LOG_DL
-			nlwarning("*** ALREADY BROWSING, break first");
+			nlwarning("(%s) *** ALREADY BROWSING, break first", _Id.c_str());
 	#endif
 		}
 
 	#ifdef LOG_DL
-		nlwarning("Browsing URL : '%s'", url);
+		nlwarning("(%s) Browsing URL : '%s'", _Id.c_str(), url);
 	#endif
 
 		// go
 		_URL = url;
+		_Connecting = false;
 		_BrowseNextTime = true;
 
 		// if a BrowseTree is bound to us, try to select the node that opens this URL (auto-locate)
@@ -2971,7 +3039,7 @@ namespace NLGUI
 	void CGroupHTML::stopBrowse ()
 	{
 	#ifdef LOG_DL
-		nlwarning("*** STOP BROWSE");
+		nlwarning("*** STOP BROWSE (%s)", _Id.c_str());
 	#endif
 
 		// Clear all the context
@@ -2979,23 +3047,7 @@ namespace NLGUI
 
 		_Browsing = false;
 
-		if (_Connecting)
-		{
-			nlassert (_ConnectingLock == this);
-			_ConnectingLock = NULL;
-		}
-		else
-			nlassert (_ConnectingLock != this);
-		_Connecting = false;
-
-		// Request running ?
-		if (_LibWWW->Request)
-		{
-	//		VerifyLibWWW("HTRequest_kill", HTRequest_kill(_LibWWW->Request) == TRUE);
-			HTRequest_kill(_LibWWW->Request);
-			HTRequest_delete(_LibWWW->Request);
-			_LibWWW->Request = NULL;
-		}
+		requestTerminated();
 	}
 
 	// ***************************************************************************
@@ -3618,7 +3670,6 @@ namespace NLGUI
 			p->setTopSpace(beginSpace);
 		else
 			group->setY(-(sint32)beginSpace);
-
 		parentGroup->addGroup (group);
 	}
 
@@ -3774,36 +3825,6 @@ namespace NLGUI
 		}
 	};
 
-	static int timer_called = 0;
-
-	static int
-	timer_callback(HTTimer *   const timer     ,
-				   void *      const user_data ,
-				   HTEventType const event     )
-	{
-	/*----------------------------------------------------------------------------
-	  A handy timer callback which cancels the running event loop.
-	-----------------------------------------------------------------------------*/
-		nlassert(event == HTEvent_TIMEOUT);
-		timer_called = 1;
-		HTEventList_stopLoop();
-
-		/* XXX - The meaning of this return value is undocumented, but close
-		** inspection of libwww's source suggests that we want to return HT_OK. */
-		return HT_OK;
-	}
-
-	static void handleLibwwwEvents()
-	{
-	  HTTimer *timer;
-	  timer_called = 0;
-	  timer = HTTimer_new(NULL, &timer_callback, NULL,
-				  1, YES, NO);
-	  if (!timer_called)
-		HTEventList_newLoop();
-	  HTTimer_delete(timer);
-	}
-
 	// ***************************************************************************
 
 	void CGroupHTML::handle ()
@@ -3812,306 +3833,408 @@ namespace NLGUI
 
 		const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
+		// handle curl downloads
+		checkDownloads();
+
 		if (_Connecting)
 		{
-			nlassert (_ConnectingLock == this);
-
 			// Check timeout if needed
 			if (_TimeoutValue != 0 && _ConnectingTimeout <= ( times.thisFrameMs / 1000.0f ) )
 			{
 				browseError(("Connection timeout : "+_URL).c_str());
+
+				_Connecting = false;
+			}
+		}
+		else
+		if (_BrowseNextTime || _PostNextTime)
+		{
+			// Set timeout
+			_Connecting = true;
+			_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
+
+			// freeze form buttons
+			CButtonFreezer freezer;
+			this->visit(&freezer);
+
+			// Home ?
+			if (_URL == "home")
+				_URL = home();
+
+			string finalUrl;
+			bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
+
+			// Save new url
+			_URL = finalUrl;
+
+			// file is probably from bnp (ingame help)
+			if (isLocal)
+			{
+				doBrowseLocalFile(finalUrl);
+			}
+			else
+			{
+				_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
+
+				SFormFields formfields;
+				if (_PostNextTime)
+				{
+					buildHTTPPostParams(formfields);
+					// _URL is set from form.Action
+					finalUrl = _URL;
+				}
+				else
+				{
+					// Add custom get params from child classes
+					addHTTPGetParams (finalUrl, _TrustedDomain);
+				}
+
+				doBrowseRemoteUrl(finalUrl, "", _PostNextTime, formfields);
+			}
+
+			_BrowseNextTime = false;
+			_PostNextTime = false;
+		}
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::buildHTTPPostParams (SFormFields &formfields)
+	{
+		// Add text area text
+		uint i;
+
+		if (_PostFormId >= _Forms.size())
+		{
+			nlwarning("(%s) invalid form index %d, _Forms %d", _Id.c_str(), _PostFormId, _Forms.size());
+			return;
+		}
+		// Ref the form
+		CForm &form = _Forms[_PostFormId];
+
+		// Save new url
+		_URL = form.Action;
+		_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
+
+		for (i=0; i<form.Entries.size(); i++)
+		{
+			// Text area ?
+			bool addEntry = false;
+			ucstring entryData;
+			if (form.Entries[i].TextArea)
+			{
+				// Get the edit box view
+				CInterfaceGroup *group = form.Entries[i].TextArea->getGroup ("eb");
+				if (group)
+				{
+					// Should be a CGroupEditBox
+					CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
+					if (editBox)
+					{
+						entryData = editBox->getViewText()->getText();
+						addEntry = true;
+					}
+				}
+			}
+			else if (form.Entries[i].Checkbox)
+			{
+				// todo handle unicode POST here
+				if (form.Entries[i].Checkbox->getPushed ())
+				{
+					entryData = ucstring ("on");
+					addEntry = true;
+				}
+			}
+			else if (form.Entries[i].ComboBox)
+			{
+				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
+				entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
+				addEntry = true;
+			}
+			// This is a hidden value
+			else
+			{
+				entryData = form.Entries[i].Value;
+				addEntry = true;
+			}
+
+			// Add this entry
+			if (addEntry)
+			{
+				formfields.add(form.Entries[i].Name, CI18N::encodeUTF8(entryData));
+			}
+		}
+
+		if (_PostFormSubmitType == "image")
+		{
+			// Add the button coordinates
+			if (_PostFormSubmitButton.find_first_of("[") == string::npos)
+			{
+				formfields.add(_PostFormSubmitButton + "_x", NLMISC::toString(_PostFormSubmitX));
+				formfields.add(_PostFormSubmitButton + "_y", NLMISC::toString(_PostFormSubmitY));
+			}
+			else
+			{
+				formfields.add(_PostFormSubmitButton, NLMISC::toString(_PostFormSubmitX));
+				formfields.add(_PostFormSubmitButton, NLMISC::toString(_PostFormSubmitY));
+			}
+		}
+		else
+			formfields.add(_PostFormSubmitButton, _PostFormSubmitValue);
+
+		// Add custom params from child classes
+		addHTTPPostParams(formfields, _TrustedDomain);
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::doBrowseLocalFile(const std::string &uri)
+	{
+		std::string filename;
+		if (strlwr(uri).find("file:/") == 0)
+		{
+			filename = uri.substr(6, uri.size() - 6);
+		}
+		else
+		{
+			filename = uri;
+		}
+
+	#if LOG_DL
+		nlwarning("(%s) browse local file '%s'", filename.c_str());
+	#endif
+
+		_TrustedDomain = true;
+
+		// Stop previous browse, remove content
+		stopBrowse ();
+
+		_Browsing = true;
+		updateRefreshButton();
+
+		CIFile in;
+		if (in.open(filename))
+		{
+			std::string html;
+			while(!in.eof())
+			{
+				char buf[1024];
+				in.getline(buf, 1024);
+				html += std::string(buf) + "\n";
+			}
+			in.close();
+
+			if (!renderHtmlString(html))
+			{
+				browseError((string("Failed to parse html from file : ")+filename).c_str());
 			}
 		}
 		else
 		{
-			if (_ConnectingLock == NULL)
-			{
-				if (_BrowseNextTime)
-				{
-					// Stop browsing now
-					stopBrowse ();
-					updateRefreshButton();
-
-					// Home ?
-					if (_URL == "home")
-						_URL = home();
-
-					string finalUrl;
-					bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
-
-					// Reset the title
-					if(_TitlePrefix.empty())
-						setTitle (CI18N::get("uiPleaseWait"));
-					else
-						setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
-
-					// Start connecting
-					nlassert (_ConnectingLock == NULL);
-					_ConnectingLock = this;
-					_Connecting = true;
-					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
-
-
-					CButtonFreezer freezer;
-					this->visit(&freezer);
-
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// Save new url
-					_URL = finalUrl;
-
-					// display HTTP query
-					//nlinfo("WEB: GET '%s'", finalUrl.c_str());
-
-					// Init LibWWW
-					initLibWWW();
-					_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
-
-					// Add custom get params
-					addHTTPGetParams (finalUrl, _TrustedDomain);
-
-
-					// Get the final URL
-					C3WSmartPtr uri = HTParse(finalUrl.c_str(), NULL, PARSE_ALL);
-
-					// Create an anchor
-	#ifdef NL_OS_WINDOWS
-					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-	#else
-					// temporarily disable local URL's until LibWWW can be replaced.
-					if (isLocal || ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL))
-	#endif
-					{
-						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
-					}
-					else
-					{
-						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
-						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
-
-						/* Set the timeout for long we are going to wait for a response */
-						HTHost_setEventTimeout(60000);
-
-						/* Start the first request */
-
-						// request = Request_new(app);
-						_LibWWW->Request = HTRequest_new();
-						HTRequest_setContext(_LibWWW->Request, this);
-
-						// add supported language header
-						HTList *langs = HTList_new();
-						// set the language code used by the client
-						HTLanguage_add(langs, options.languageCode.c_str(), 1.0);
-						HTRequest_setLanguage (_LibWWW->Request, langs, 1);
-
-						// get_document(_LibWWW->Request, _LibWWW->Anchor);
-						C3WSmartPtr address = HTAnchor_address(_LibWWW->Anchor);
-						HTRequest_setAnchor(_LibWWW->Request, _LibWWW->Anchor);
-						if (HTLoad(_LibWWW->Request, NO))
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}
-					}
-
-					_BrowseNextTime = false;
-				}
-
-				if (_PostNextTime)
-				{
-					/* Create a list to hold the form arguments */
-					HTAssocList * formfields = HTAssocList_new();
-
-					// Add text area text
-					uint i;
-
-					// Ref the form
-					CForm &form = _Forms[_PostFormId];
-
-					// Save new url
-					_URL = form.Action;
-
-					for (i=0; i<form.Entries.size(); i++)
-					{
-						// Text area ?
-						bool addEntry = false;
-						ucstring entryData;
-						if (form.Entries[i].TextArea)
-						{
-							// Get the edit box view
-							CInterfaceGroup *group = form.Entries[i].TextArea->getGroup ("eb");
-							if (group)
-							{
-								// Should be a CGroupEditBox
-								CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(group);
-								if (editBox)
-								{
-									entryData = editBox->getViewText()->getText();
-									addEntry = true;
-								}
-							}
-						}
-						else if (form.Entries[i].Checkbox)
-						{
-							// todo handle unicode POST here
-							if (form.Entries[i].Checkbox->getPushed ())
-							{
-								entryData = ucstring ("on");
-								addEntry = true;
-							}
-						}
-						else if (form.Entries[i].ComboBox)
-						{
-							CDBGroupComboBox *cb = form.Entries[i].ComboBox;
-							entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
-							addEntry = true;
-						}
-						// This is a hidden value
-						else
-						{
-							entryData = form.Entries[i].Value;
-							addEntry = true;
-						}
-
-						// Add this entry
-						if (addEntry)
-						{
-							// Build a utf8 string
-							string uft8 = form.Entries[i].Name + "=" + CI18N::encodeUTF8(entryData);
-
-							/* Parse the content and add it to the association list */
-							HTParseFormInput(formfields, uft8.c_str());
-						}
-					}
-
-					if (_PostFormSubmitType == "image")
-					{
-						// Add the button coordinates
-						if (_PostFormSubmitButton.find_first_of("[") == string::npos)
-						{
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "_x=" + NLMISC::toString(_PostFormSubmitX)).c_str());
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "_y=" + NLMISC::toString(_PostFormSubmitY)).c_str());
-						}
-						else
-						{
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitX)).c_str());
-							HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + NLMISC::toString(_PostFormSubmitY)).c_str());
-						}
-					}
-					else
-						HTParseFormInput(formfields, (_PostFormSubmitButton + "=" + _PostFormSubmitValue).c_str());
-
-					// Add custom params
-					addHTTPPostParams(formfields, _TrustedDomain);
-
-					// Reset the title
-					if(_TitlePrefix.empty())
-						setTitle (CI18N::get("uiPleaseWait"));
-					else
-						setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
-
-					// Stop previous browse
-					stopBrowse ();
-
-					// Set timeout
-					nlassert (_ConnectingLock == NULL);
-					_ConnectingLock = this;
-					_Connecting = true;
-					_ConnectingTimeout = ( times.thisFrameMs / 1000.0f ) + _TimeoutValue;
-
-					CButtonFreezer freezer;
-					this->visit(&freezer);
-
-					// Browsing
-					_Browsing = true;
-					updateRefreshButton();
-
-					// display HTTP query with post parameters
-					//nlinfo("WEB: POST %s", _URL.c_str());
-
-					// Init LibWWW
-					initLibWWW();
-					_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
-
-					// Get the final URL
-					C3WSmartPtr uri = HTParse(_URL.c_str(), NULL, PARSE_ALL);
-
-					// Create an anchor
-					if ((_LibWWW->Anchor = HTAnchor_findAddress(uri)) == NULL)
-					{
-						browseError((string("The page address is malformed : ")+(const char*)uri).c_str());
-					}
-					else
-					{
-						/* Add our own request terminate handler. Nb: pass as param a UID, not the ptr */
-						/* FIX ME - every connection is appending a new callback to the list, and its never removed (Vinicius Arroyo)*/
-						HTNet_addAfter(requestTerminater, NULL, (void*)(size_t)_GroupHtmlUID, HT_ALL, HT_FILTER_LAST);
-
-						/* Start the first request */
-
-						// request = Request_new(app);
-						_LibWWW->Request = HTRequest_new();
-						HTRequest_setContext(_LibWWW->Request, this);
-
-						/*
-						** Dream up a source anchor (an editor can for example use this).
-						** After creation we associate the data that we want to post and
-						** set some metadata about what the data is. More formats can be found
-						** ../src/HTFormat.html
-						*/
-						/*HTParentAnchor *src = HTTmpAnchor(NULL);
-						HTAnchor_setDocument(src, (void*)(data.c_str()));
-						HTAnchor_setFormat(src, WWW_PLAINTEXT);*/
-
-						/*
-						** If not posting to an HTTP/1.1 server then content length MUST be
-						** there. If HTTP/1.1 then it doesn't matter as we just use chunked
-						** encoding under the covers
-						*/
-						// HTAnchor_setLength(src, data.size());
-
-						HTParentAnchor *result =  HTPostFormAnchor (formfields, _LibWWW->Anchor, _LibWWW->Request);
-						if (result)
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}
-
-						/* POST the source to the dest */
-						/*
-						BOOL status = NO;
-						status = HTPostAnchor(src, _LibWWW->Anchor, _LibWWW->Request);
-						if (status)
-						{
-						}
-						else
-						{
-							browseError((string("The page cannot be displayed : ")+(const char*)uri).c_str());
-						}*/
-					}
-
-					_PostNextTime = false;
-				}
-			}
+			browseError((string("The page address is malformed : ")+filename).c_str());
 		}
-	#ifndef NL_OS_WINDOWS
-		if(isBrowsing())
-		  handleLibwwwEvents();
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::doBrowseRemoteUrl(const std::string &url, const std::string &referer, bool doPost, const SFormFields &formfields)
+	{
+		// Stop previous request and remove content
+		stopBrowse ();
+
+		_Browsing = true;
+		updateRefreshButton();
+
+		// Reset the title
+		if(_TitlePrefix.empty())
+			setTitle (CI18N::get("uiPleaseWait"));
+		else
+			setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
+
+	#if LOG_DL
+		nlwarning("(%s) browse url (trusted=%s) '%s', referer='%s', post='%s', nb form values %d",
+				_Id.c_str(), (_TrustedDomain ? "true" :"false"), url.c_str(), referer.c_str(), (doPost ? "true" : "false"), formfields.Values.size());
 	#endif
+
+		if (!MultiCurl)
+		{
+			browseError(string("Invalid MultCurl handle, loading url failed : "+url).c_str());
+			return;
+		}
+
+		CURL *curl = curl_easy_init();
+		if (!curl)
+		{
+			nlwarning("(%s) failed to create curl handle", _Id.c_str());
+			browseError(string("Failed to create cURL handle : " + url).c_str());
+			return;
+		}
+
+		// do not follow redirects, we have own handler
+		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
+		// after redirect
+		curl_easy_setopt(curl, CURLOPT_FRESH_CONNECT, 1);
+
+		// tell curl to use compression if possible (gzip, deflate)
+		// leaving this empty allows all encodings that curl supports
+		//curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+
+		// limit curl to HTTP and HTTPS protocols only
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+		// Destination
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+		// User-Agent:
+		std::string userAgent = options.appName + "/" + options.appVersion;
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
+
+		// Cookies
+		sendCookies(curl, HTTPCurrentDomain, _TrustedDomain);
+
+		// Referer
+		if (!referer.empty())
+		{
+			curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+	#ifdef LOG_DL
+			nlwarning("(%s) set referer '%s'", _Id.c_str(), referer.c_str());
+	#endif
+		}
+
+		if (doPost)
+		{
+			// serialize form data and add it to curl
+			std::string data;
+			for(uint i=0; i<formfields.Values.size(); ++i)
+			{
+				char * escapedName = curl_easy_escape(curl, formfields.Values[i].name.c_str(), formfields.Values[i].name.size());
+				char * escapedValue = curl_easy_escape(curl, formfields.Values[i].value.c_str(), formfields.Values[i].value.size());
+
+				if (i>0)
+					data += "&";
+
+				data += std::string(escapedName) + "=" + escapedValue;
+
+				curl_free(escapedName);
+				curl_free(escapedValue);
+			}
+			curl_easy_setopt(curl, CURLOPT_POST, 1);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.size());
+			curl_easy_setopt(curl, CURLOPT_COPYPOSTFIELDS, data.c_str());
+		}
+		else
+		{
+			curl_easy_setopt(curl, CURLOPT_HTTPGET, 1);
+		}
+
+		// transfer handle
+		_CurlWWW = new CCurlWWWData(curl, url);
+
+		// set the language code used by the client
+		std::vector<std::string> headers;
+		headers.push_back("Accept-Language: "+options.languageCode);
+		headers.push_back("Accept-Charset: utf-8");
+		for(uint i=0; i< headers.size(); ++i)
+		{
+			_CurlWWW->HeadersSent = curl_slist_append(_CurlWWW->HeadersSent, headers[i].c_str());
+		}
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _CurlWWW->HeadersSent);
+
+		// catch headers for redirect
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, _CurlWWW);
+
+		// catch body
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlDataCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, _CurlWWW);
+
+	#if LOG_DL
+		// progress callback
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, curlProgressCallback);
+		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, _CurlWWW);
+	#else
+		// progress off
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
+	#endif
+
+		//
+		curl_multi_add_handle(MultiCurl, curl);
+
+		// start the transfer
+		int NewRunningCurls = 0;
+		curl_multi_perform(MultiCurl, &NewRunningCurls);
+		RunningCurls++;
+	}
+
+	// ***************************************************************************
+	void CGroupHTML::htmlDownloadFinished(const std::string &content, const std::string &type, long code)
+	{
+	#ifdef LOG_DL
+		nlwarning("(%s) HTML download finished, content length %d, type '%s', code %d", _Id.c_str(), content.size(), type.c_str(), code);
+	#endif
+
+		// set trusted domain for parsing
+		_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
+
+		// create <html> markup for image downloads
+		if (type.find("image/") == 0 && content.size() > 0)
+		{
+			try
+			{
+				std::string dest = localImageName(_URL);
+				COFile out;
+				out.open(dest);
+				out.serialBuffer((uint8 *)(content.c_str()), content.size());
+				out.close();
+	#ifdef LOG_DL
+				nlwarning("(%s) image saved to '%s', url '%s'", _Id.c_str(), dest.c_str(), _URL.c_str());
+	#endif
+			}
+			catch(...) { }
+
+			// create html code with image url inside and do the request again
+			renderHtmlString("<html><head><title>"+_URL+"</title></head><body><img src=\"" + _URL + "\"></body></html>");
+		}
+		else
+		{
+			renderHtmlString(content);
+		}
+	}
+
+	// ***************************************************************************
+
+	bool CGroupHTML::renderHtmlString(const std::string &html)
+	{
+		bool success;
+
+		//
+		_Browsing = true;
+
+		// clear content
+		beginBuild();
+
+		success = parseHtml(html);
+
+		// invalidate coords
+		endBuild();
+
+		// set the browser as complete
+		_Browsing = false;
+		updateRefreshButton();
+
+		// check that the title is set, or reset it (in the case the page
+		// does not provide a title)
+		if (_TitleString.empty())
+		{
+			setTitle(_TitlePrefix);
+		}
+
+		return success;
 	}
 
 	// ***************************************************************************
 
 	void CGroupHTML::draw ()
 	{
-		checkDownloads();
 		CGroupScrollText::draw ();
 	}
 
@@ -4130,28 +4253,27 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addHTTPPostParams (HTAssocList * /* formfields */, bool /*trustedDomain*/)
+	void CGroupHTML::addHTTPPostParams (SFormFields &/* formfields */, bool /*trustedDomain*/)
 	{
 	}
 
 	// ***************************************************************************
-
-	void CGroupHTML::requestTerminated(HTRequest * request )
+	void CGroupHTML::requestTerminated()
 	{
-		// this callback is being called for every request terminated
-		if (request == _LibWWW->Request)
+		if (_CurlWWW)
 		{
-			// set the browser as complete
-			_Browsing = false;
-			updateRefreshButton();
-			// check that the title is set, or reset it (in the case the page
-			// does not provide a title)
-			if (_TitleString.empty())
-			{
-				setTitle(_TitlePrefix);
-			}
-        }
-    }
+	#if LOG_DL
+			nlwarning("(%s) stop curl, url '%s'", _Id.c_str(), _CurlWWW->Url.c_str());
+	#endif
+			if (MultiCurl)
+				curl_multi_remove_handle(MultiCurl, _CurlWWW->Request);
+
+			delete _CurlWWW;
+
+			_CurlWWW = NULL;
+			_Connecting = false;
+		}
+	}
 
 	// ***************************************************************************
 
@@ -4178,7 +4300,9 @@ namespace NLGUI
 		_GroupListAdaptor->clearViews();
 		CWidgetManager::getInstance()->clearViewUnders();
 		CWidgetManager::getInstance()->clearCtrlsUnders();
-		_Paragraph = NULL;
+
+		// Clear all the context
+		clearContext();
 
 		// Reset default background color
 		setBackgroundColor (BgColor);
@@ -4480,7 +4604,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
 
 		uint element_number = (uint)ls.toNumber(1);
-		std::vector<BOOL> present;
+		std::vector<bool> present;
 		std::vector<const char *> value;
 		present.resize(30, false);
 		value.resize(30);
@@ -4514,9 +4638,9 @@ namespace NLGUI
 			value.insert(value.begin() + (uint)it.nextKey().toNumber(), buffer);
 		}
 
-		beginElement(element_number, &present[0], &value[0]);
+		beginElement(element_number, present, value);
 		if (element_number == HTML_A)
-			addLink(element_number, 0, NULL, &present[0], &value[0]);
+			addLink(element_number, present, value);
 
 		return 0;
 	}
@@ -4651,6 +4775,18 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	std::string CGroupHTML::getAbsoluteUrl(const std::string &url)
+	{
+		CUrlParser uri(url);
+		if (uri.isAbsolute())
+			return url;
+
+		uri.inherit(_URL);
+
+		return uri.toString();
+	}
+
+	// ***************************************************************************
 	// CGroupHTML::CStyleParams style;
 	// style.FontSize;    // font-size: 10px;
 	// style.TextColor;   // color: #ABCDEF;
@@ -4728,5 +4864,46 @@ namespace NLGUI
 			style.StrikeThrough = getFontStrikeThrough() || style.StrikeThrough;
 		}
 	}
+
+	// ***************************************************************************
+	size_t CGroupHTML::curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+		{
+			std::string header;
+			header.append(buffer, size * nmemb);
+			me->setRecvHeader(header.substr(0, header.find_first_of("\n\r")));
+		}
+
+		return size * nmemb;
+	}
+
+	// ***************************************************************************
+	size_t CGroupHTML::curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+			me->Content.append(buffer, size * nmemb);
+
+		return size * nmemb;
+	}
+
+	// ***************************************************************************
+	size_t CGroupHTML::curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+	{
+		CCurlWWWData * me = static_cast<CCurlWWWData *>(pCCurlWWWData);
+		if (me)
+		{
+			if (dltotal > 0 || dlnow > 0 || ultotal > 0 || ulnow > 0)
+			{
+				nlwarning("> dltotal %d, dlnow %d, ultotal %d, ulnow %d, url '%s'", dltotal, dlnow, ultotal, ulnow, me->Url.c_str());
+			}
+		}
+
+		// return 1 to cancel download
+		return 0;
+	}
+
 }
 

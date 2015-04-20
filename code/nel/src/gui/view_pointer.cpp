@@ -252,7 +252,7 @@ namespace NLGUI
 
 				if (vLink->getMouseOverShape(tooltip, rot, col))
 				{
-					setString(ucstring(tooltip));
+					setString(ucstring::makeFromUtf8(tooltip));
 					sint32 texId = rVR.getTextureIdFromName ("curs_pick.tga");
 
 					CInterfaceGroup *stringCursor = hwMouse ? _StringCursorHardware : _StringCursor;
@@ -408,7 +408,7 @@ namespace NLGUI
 				splitString(tooltipInfos, "@", tooltipInfosList);
 				texName = tooltipInfosList[0];
 				tooltip = tooltipInfosList[1];
-				setString(ucstring(tooltip));
+				setString(ucstring::makeFromUtf8(tooltip));
 				CViewRenderer &rVR = *CViewRenderer::getInstance();
 				sint32 texId = rVR.getTextureIdFromName (texName);
 

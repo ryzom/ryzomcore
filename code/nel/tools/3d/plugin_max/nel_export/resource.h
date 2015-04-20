@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by nel_export.rc
 //
 #define IDS_LIBDESCRIPTION              1
@@ -7,7 +7,6 @@
 #define IDS_CLASS_NAME                  3
 #define IDC_ADD                         3
 #define IDS_PARAMS                      4
-#define IDC_STATIC                      -1
 #define IDC_REMOVE                      4
 #define IDS_SPIN                        5
 #define IDC_UP                          5
@@ -225,9 +224,6 @@
 #define IDC_OPEN_OCC_MODEL              1529
 #define IDC_ENV_FX                      1531
 #define IDC_SOUND_GROUP                 1532
-#define IDC_LIGHT_GROUP_ALWAYS          1533
-#define IDC_LIGHT_GROUP_DAY             1534
-#define IDC_LIGHT_GROUP_NIGHT           1535
 #define IDC_LIGHT_DONT_CAST_SHADOW_INTERIOR 1536
 #define IDC_LIGHT_DONT_CAST_SHADOW_EXTERIOR 1537
 #define IDC_8BITS_LIGHTMAP              1537
@@ -270,6 +266,12 @@
 #define IDC_LMC_COPY_ALWAYS_DIFFUSE     1567
 #define IDC_LMC_COPY_LIST               1568
 #define IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN 1569
+#define IDC_LIGHT_GROUP_ALWAYS          1570
+#define IDC_LIGHT_GROUP_LANDSCAPE_DIFFUSE 1571
+#define IDC_LIGHT_GROUP_NIGHT_CYCLE     1572
+#define IDC_LIGHT_GROUP_DAY_CYCLE       1573
+#define IDC_LIGHT_GROUP_LANDSCAPE_AMBIENT 1574
+#define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 
