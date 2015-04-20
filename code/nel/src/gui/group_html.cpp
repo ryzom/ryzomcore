@@ -416,6 +416,8 @@ namespace NLGUI
 							}
 							else
 							{
+								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+
 								// redirect, get the location and try browse again
 								// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
 								std::string location(_CurlWWW->getLocationHeader());
@@ -441,6 +443,8 @@ namespace NLGUI
 						}
 						else
 						{
+							receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+
 							_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
 
 							if ( (code < 200 || code >= 300) )
@@ -449,8 +453,6 @@ namespace NLGUI
 							}
 							else
 							{
-								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
-
 								char *ch;
 								std::string contentType;
 								res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);

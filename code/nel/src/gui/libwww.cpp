@@ -387,6 +387,9 @@ namespace NLGUI
 	// add all cookies for domain to curl handle
 	void sendCookies(CURL *curl, const std::string &domain, bool trusted)
 	{
+		// enable curl cookie engine
+		curl_easy_setopt(curl, CURLOPT_COOKIELIST, "");
+
 		if (domain.empty())
 			return;
 
