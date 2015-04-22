@@ -192,10 +192,6 @@ namespace NLGUI
 			}
 		}
 
-		CURL *curl = curl_easy_init();
-		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-		curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
-
 		// use requested url for local name
 		string dest = localImageName(url);
 		string tmpdest = localImageName(url)+".tmp";
@@ -209,13 +205,30 @@ namespace NLGUI
 
 		if (!NLMISC::CFile::fileExists(dest))
 		{
+			if (!MultiCurl)
+			{
+				nlwarning("Invalid MultiCurl handle, unable to download '%s'", finalUrl.c_str());
+				return;
+			}
+
+			CURL *curl = curl_easy_init();
+			if (!curl)
+			{
+				nlwarning("Creating cURL handle failed, unable to download '%s'", finalUrl.c_str());
+				return;
+			}
 
 			FILE *fp = fopen (tmpdest.c_str(), "wb");
 			if (fp == NULL)
 			{
+				curl_easy_cleanup(curl);
+
 				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
 				return;
 			}
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
+
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
@@ -298,19 +311,30 @@ namespace NLGUI
 		}
 		if (action != "delete")
 		{
-			CURL *curl = curl_easy_init();
-			if (!MultiCurl || !curl)
+			if (!MultiCurl)
+			{
+				nlwarning("Invalid MultiCurl handle, unable to download '%s'", url.c_str());
 				return false;
+			}
 
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			CURL *curl = curl_easy_init();
+			if (!curl)
+			{
+				nlwarning("Creating cURL handle failed, unable to download '%s'", url.c_str());
+				return false;
+			}
 
 			FILE *fp = fopen (tmpdest.c_str(), "wb");
 			if (fp == NULL)
 			{
+				curl_easy_cleanup(curl);
 				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
 				return false;
 			}
+
+			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
@@ -392,6 +416,8 @@ namespace NLGUI
 							}
 							else
 							{
+								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+
 								// redirect, get the location and try browse again
 								// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
 								std::string location(_CurlWWW->getLocationHeader());
@@ -417,16 +443,16 @@ namespace NLGUI
 						}
 						else
 						{
+							receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+
 							_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
 
 							if ( (code < 200 || code >= 300) )
 							{
-								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString(code) + ") : " + _CurlWWW->Url).c_str());
+								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString((sint32)code) + ") : " + _CurlWWW->Url).c_str());
 							}
 							else
 							{
-								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
-
 								char *ch;
 								std::string contentType;
 								res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
