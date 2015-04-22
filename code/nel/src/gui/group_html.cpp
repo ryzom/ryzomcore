@@ -449,7 +449,7 @@ namespace NLGUI
 
 							if ( (code < 200 || code >= 300) )
 							{
-								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString(code) + ") : " + _CurlWWW->Url).c_str());
+								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString((sint32)code) + ") : " + _CurlWWW->Url).c_str());
 							}
 							else
 							{
