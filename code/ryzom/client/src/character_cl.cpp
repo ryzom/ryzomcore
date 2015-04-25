@@ -8388,14 +8388,8 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "Prim Pos: %f %f %f", primFinalPos.x, primFinalPos.y, primFinalPos.z);
 		y += lineStep;
 	}
-	// Skeleton Ptr
-	TextContext->printfAt(x, y, "Skel Ptr: %p", &_Skeleton);
-	y += lineStep;
-	// Animset Ptr
-	TextContext->printfAt(x, y, "AnimSet Ptr: %p", _CurrentAnimSet[MOVE]);
-	y += lineStep;
-	// Current State Ptr
-	TextContext->printfAt(x, y, "State Ptr: %p", _CurrentState);
+	// Skeleton Ptr, Animset Ptr and Current State Ptr
+	TextContext->printfAt(x, y, "Skel Ptr: %p - AnimSet Ptr: %p - State Ptr: %p", &_Skeleton, _CurrentAnimSet[MOVE], _CurrentState);
 	y += lineStep;
 	// Display the target mount and rider.
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);
