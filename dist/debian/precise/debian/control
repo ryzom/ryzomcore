@@ -12,8 +12,8 @@ Standards-Version: 3.9.3
 Section: games
 Bugs: https://bitbucket.org/ryzom/ryzomcore/issues
 Homepage: https://bitbucket.org/ryzom/ryzomcore/
-Vcs-Svn: svn://svn.debian.org/svn/pkg-games/packages/trunk/nel/
-Vcs-Browser: http://svn.debian.org/wsvn/pkg-games/packages/trunk/nel/?op=log
+Vcs-Hg: https://bitbucket.org/ryzom/ryzomcore
+Vcs-Browser: https://bitbucket.org/ryzom/ryzomcore
 
 Package: libnel0
 Section: libdevel
