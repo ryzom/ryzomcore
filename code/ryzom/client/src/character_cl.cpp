@@ -8369,7 +8369,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	// Display the Run Factor.
 	TextContext->printfAt(x, y, "(Walk)Run Factor: %f", runFactor());
 	y += lineStep;
-	// Display the current animation name(id)(offset)(nbloop) pour le channel MOVE.
+	// Display the current animation name(id)(offset)(nbloop) for channel MOVE.
 	TextContext->printfAt(x, y, "Current Animation: %s(%u)(%lf)(%u loops)", animId(MOVE)==std::numeric_limits<uint>::max()?"[NONE]":currentAnimationName().c_str(), animId(MOVE), animOffset(MOVE), _NbLoopAnim);
 	y += lineStep;
 	// First Pos
@@ -8388,14 +8388,8 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "Prim Pos: %f %f %f", primFinalPos.x, primFinalPos.y, primFinalPos.z);
 		y += lineStep;
 	}
-	// Skeleton Ptr
-	TextContext->printfAt(x, y, "Skel Ptr: %p", &_Skeleton);
-	y += lineStep;
-	// Animset Ptr
-	TextContext->printfAt(x, y, "AnimSet Ptr: %p", _CurrentAnimSet[MOVE]);
-	y += lineStep;
-	// Current State Ptr
-	TextContext->printfAt(x, y, "State Ptr: %p", _CurrentState);
+	// Skeleton Ptr, Animset Ptr and Current State Ptr
+	TextContext->printfAt(x, y, "Skel Ptr: %p - AnimSet Ptr: %p - State Ptr: %p", &_Skeleton, _CurrentAnimSet[MOVE], _CurrentState);
 	y += lineStep;
 	// Display the target mount and rider.
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);

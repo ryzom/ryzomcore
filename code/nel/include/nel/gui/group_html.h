@@ -457,7 +457,7 @@ namespace NLGUI
 		}
 
 		std::vector<bool>			_FontOblique;
-		inline uint getFontOblique() const
+		inline bool getFontOblique() const
 		{
 			if (_FontOblique.empty())
 				return false;
@@ -465,7 +465,7 @@ namespace NLGUI
 		}
 
 		std::vector<bool>			_FontUnderlined;
-		inline uint getFontUnderlined() const
+		inline bool getFontUnderlined() const
 		{
 			if (_FontUnderlined.empty())
 				return false;
@@ -473,7 +473,7 @@ namespace NLGUI
 		}
 
 		std::vector<bool>			_FontStrikeThrough;
-		inline uint getFontStrikeThrough() const
+		inline bool getFontStrikeThrough() const
 		{
 			if (_FontStrikeThrough.empty())
 				return false;
