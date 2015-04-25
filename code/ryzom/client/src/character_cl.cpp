@@ -8369,7 +8369,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	// Display the Run Factor.
 	TextContext->printfAt(x, y, "(Walk)Run Factor: %f", runFactor());
 	y += lineStep;
-	// Display the current animation name(id)(offset)(nbloop) pour le channel MOVE.
+	// Display the current animation name(id)(offset)(nbloop) for channel MOVE.
 	TextContext->printfAt(x, y, "Current Animation: %s(%u)(%lf)(%u loops)", animId(MOVE)==std::numeric_limits<uint>::max()?"[NONE]":currentAnimationName().c_str(), animId(MOVE), animOffset(MOVE), _NbLoopAnim);
 	y += lineStep;
 	// First Pos
