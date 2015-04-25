@@ -12,7 +12,7 @@ override_dh_strip:
 	dh_strip -pryzom-tools --dbg-package=ryzom-tools-dbg
 
 override_dh_auto_configure:
-	dh_auto_configure -- -DLIBRARY_ARCHITECTURE=$(DEB_HOST_MULTIARCH) -DTARGET_CPU=$(DEB_HOST_GNU_CPU) -DWITH_SYMBOLS=ON -DNL_ETC_PREFIX=/etc/nel -DRYZOM_ETC_PREFIX=/etc/ryzom -DRYZOM_SHARE_PREFIX=/usr/share/games/ryzom -DRYZOM_BIN_PREFIX=/usr/bin -DRYZOM_GAMES_PREFIX=/usr/games -DWITH_RYZOM_SERVER=OFF -DWITH_NEL_TESTS=OFF -DWITH_LIBWWW_STATIC=ON -DWITH_QT=ON
+	dh_auto_configure -- -DLIBRARY_ARCHITECTURE=$(DEB_HOST_MULTIARCH) -DTARGET_CPU=$(DEB_HOST_GNU_CPU) -DWITH_SYMBOLS=ON -DNL_ETC_PREFIX=/etc/nel -DRYZOM_ETC_PREFIX=/etc/ryzom -DRYZOM_SHARE_PREFIX=/usr/share/games/ryzom -DRYZOM_BIN_PREFIX=/usr/bin -DRYZOM_GAMES_PREFIX=/usr/games -DWITH_RYZOM_SERVER=OFF -DWITH_NEL_TESTS=OFF -DWITH_QT=ON
 
 override_dh_install:
 	dh_install

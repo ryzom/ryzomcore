@@ -6,12 +6,12 @@ Build-Depends: debhelper (>= 9), cmake(>= 2.6), libxml2-dev,
  libgl1-mesa-dev, libjpeg8-dev | libjpeg62-dev, libpng12-dev, libopenal-dev,
  libfreetype6-dev, libxxf86vm-dev, libxrandr-dev, libxrender-dev,
  libvorbis-dev, libsquish-dev, libcurl4-openssl-dev, libluabind-dev,
- libboost-dev, libwww-dev, libmysqlclient-dev,
+ libboost-dev, libmysqlclient-dev,
  libcpptest-dev, libqt4-dev, libqt4-opengl-dev
 Standards-Version: 3.9.3
 Section: games
-Bugs: http://dev.ryzom.com/projects/ryzom/issues
-Homepage: http://dev.ryzom.com
+Bugs: https://bitbucket.org/ryzom/ryzomcore/issues
+Homepage: https://bitbucket.org/ryzom/ryzomcore/
 Vcs-Svn: svn://svn.debian.org/svn/pkg-games/packages/trunk/nel/
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-games/packages/trunk/nel/?op=log
 
