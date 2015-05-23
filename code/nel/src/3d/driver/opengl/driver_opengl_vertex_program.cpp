@@ -178,7 +178,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 		// Setup not ok
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 
@@ -1568,7 +1568,7 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	{
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 
@@ -1695,7 +1695,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 	{
 		delete drvInfo;
 		program->m_DrvInfo = NULL;
-		_GPUPrgDrvInfos.erase(it);
+		//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 		return false;
 	}
 
