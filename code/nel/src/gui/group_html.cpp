@@ -1445,30 +1445,71 @@ namespace NLGUI
 								_Forms.back().Entries.push_back (entry);
 							}
 						}
-						else if (type == "checkbox")
+						else if (type == "checkbox" || type == "radio")
 						{
-							// The submit button
+							CCtrlButton::EType btnType;
 							string name;
-							string normal = DefaultCheckBoxBitmapNormal;
-							string pushed = DefaultCheckBoxBitmapPushed;
-							string over = DefaultCheckBoxBitmapOver;
+							string normal;
+							string pushed;
+							string over;
+							ucstring ucValue = ucstring("on");
 							bool checked = false;
+
+							if (type == "radio")
+							{
+								btnType = CCtrlButton::RadioButton;
+								normal = DefaultRadioButtonBitmapNormal;
+								pushed = DefaultRadioButtonBitmapPushed;
+								over = DefaultRadioButtonBitmapOver;
+							}
+							else
+							{
+								btnType = CCtrlButton::ToggleButton;
+								normal = DefaultCheckBoxBitmapNormal;
+								pushed = DefaultCheckBoxBitmapPushed;
+								over = DefaultCheckBoxBitmapOver;
+							}
+
 							if (present[MY_HTML_INPUT_NAME] && value[MY_HTML_INPUT_NAME])
 								name = value[MY_HTML_INPUT_NAME];
 							if (present[MY_HTML_INPUT_SRC] && value[MY_HTML_INPUT_SRC])
 								normal = value[MY_HTML_INPUT_SRC];
+							if (present[MY_HTML_INPUT_VALUE] && value[MY_HTML_INPUT_VALUE])
+								ucValue.fromUtf8(value[MY_HTML_INPUT_VALUE]);
 							checked = (present[MY_HTML_INPUT_CHECKED] && value[MY_HTML_INPUT_CHECKED]);
 
 							// Add the ctrl button
-							CCtrlButton *checkbox = addButton (CCtrlButton::ToggleButton, name, normal, pushed, over,
+							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over,
 								globalColor, "", "", tooltip);
 							if (checkbox)
 							{
+								if (btnType == CCtrlButton::RadioButton)
+								{
+									// group together buttons with same name
+									CForm &form = _Forms.back();
+									bool notfound = true;
+									for (uint i=0; i<form.Entries.size(); i++)
+									{
+										if (form.Entries[i].Name == name && form.Entries[i].Checkbox->getType() == CCtrlButton::RadioButton)
+										{
+											checkbox->initRBRefFromRadioButton(form.Entries[i].Checkbox);
+											notfound = false;
+											break;
+										}
+									}
+									if (notfound)
+									{
+										// this will start a new group (initRBRef() would take first button in group container otherwise)
+										checkbox->initRBRefFromRadioButton(checkbox);
+									}
+								}
+
 								checkbox->setPushed (checked);
 
-								// Add the text area to the form
+								// Add the button to the form
 								CGroupHTML::CForm::CEntry entry;
 								entry.Name = name;
+								entry.Value = decodeHTMLEntities(ucValue);
 								entry.Checkbox = checkbox;
 								_Forms.back().Entries.push_back (entry);
 							}
@@ -2040,6 +2081,9 @@ namespace NLGUI
 		DefaultCheckBoxBitmapNormal =	"checkbox_normal.tga";
 		DefaultCheckBoxBitmapPushed =	"checkbox_pushed.tga";
 		DefaultCheckBoxBitmapOver =		"checkbox_over.tga";
+		DefaultRadioButtonBitmapNormal = "w_radiobutton.png";
+		DefaultRadioButtonBitmapPushed = "w_radiobutton_pushed.png";
+		DefaultRadioButtonBitmapOver =	"";
 		DefaultBackgroundBitmapView =	"bg";
 		clearContext();
 
@@ -2273,6 +2317,21 @@ namespace NLGUI
 		if( name == "checkbox_bitmap_over" )
 		{
 			return DefaultCheckBoxBitmapOver;
+		}
+		else
+		if( name == "radiobutton_bitmap_normal" )
+		{
+			return DefaultRadioButtonBitmapNormal;
+		}
+		else
+		if( name == "radiobutton_bitmap_pushed" )
+		{
+			return DefaultRadioButtonBitmapPushed;
+		}
+		else
+		if( name == "radiobutton_bitmap_over" )
+		{
+			return DefaultRadioButtonBitmapOver;
 		}
 		else
 		if( name == "background_bitmap_view" )
@@ -2618,6 +2677,24 @@ namespace NLGUI
 			return;
 		}
 		else
+		if( name == "radiobutton_bitmap_normal" )
+		{
+			DefaultRadioButtonBitmapNormal = value;
+			return;
+		}
+		else
+		if( name == "radiobutton_bitmap_pushed" )
+		{
+			DefaultRadioButtonBitmapPushed = value;
+			return;
+		}
+		else
+		if( name == "radiobutton_bitmap_over" )
+		{
+			DefaultRadioButtonBitmapOver = value;
+			return;
+		}
+		else
 		if( name == "background_bitmap_view" )
 		{
 			DefaultBackgroundBitmapView = value;
@@ -2731,6 +2808,9 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "checkbox_bitmap_normal", BAD_CAST DefaultCheckBoxBitmapNormal.c_str() );
 		xmlSetProp( node, BAD_CAST "checkbox_bitmap_pushed", BAD_CAST DefaultCheckBoxBitmapPushed.c_str() );
 		xmlSetProp( node, BAD_CAST "checkbox_bitmap_over", BAD_CAST DefaultCheckBoxBitmapOver.c_str() );
+		xmlSetProp( node, BAD_CAST "radiobutton_bitmap_normal", BAD_CAST DefaultRadioButtonBitmapNormal.c_str() );
+		xmlSetProp( node, BAD_CAST "radiobutton_bitmap_pushed", BAD_CAST DefaultRadioButtonBitmapPushed.c_str() );
+		xmlSetProp( node, BAD_CAST "radiobutton_bitmap_over", BAD_CAST DefaultRadioButtonBitmapOver.c_str() );
 		xmlSetProp( node, BAD_CAST "background_bitmap_view", BAD_CAST DefaultBackgroundBitmapView.c_str() );
 		xmlSetProp( node, BAD_CAST "home", BAD_CAST Home.c_str() );
 		xmlSetProp( node, BAD_CAST "browse_next_time", BAD_CAST toString( _BrowseNextTime ).c_str() );
@@ -2888,6 +2968,15 @@ namespace NLGUI
 		ptr = xmlGetProp (cur, (xmlChar*)"checkbox_bitmap_over");
 		if (ptr)
 			DefaultCheckBoxBitmapOver = (const char*)(ptr);
+		ptr = xmlGetProp (cur, (xmlChar*)"radiobutton_bitmap_normal");
+		if (ptr)
+			DefaultRadioButtonBitmapNormal = (const char*)(ptr);
+		ptr = xmlGetProp (cur, (xmlChar*)"radiobutton_bitmap_pushed");
+		if (ptr)
+			DefaultRadioButtonBitmapPushed = (const char*)(ptr);
+		ptr = xmlGetProp (cur, (xmlChar*)"radiobutton_bitmap_over");
+		if (ptr)
+			DefaultRadioButtonBitmapOver = (const char*)(ptr);
 		ptr = xmlGetProp (cur, (xmlChar*)"background_bitmap_view");
 		if (ptr)
 			DefaultBackgroundBitmapView = (const char*)(ptr);
@@ -3966,7 +4055,7 @@ namespace NLGUI
 				// todo handle unicode POST here
 				if (form.Entries[i].Checkbox->getPushed ())
 				{
-					entryData = ucstring ("on");
+                                        entryData = form.Entries[i].Value;
 					addEntry = true;
 				}
 			}

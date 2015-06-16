@@ -163,6 +163,9 @@ namespace NLGUI
 		std::string		DefaultCheckBoxBitmapNormal;
 		std::string		DefaultCheckBoxBitmapPushed;
 		std::string		DefaultCheckBoxBitmapOver;
+		std::string		DefaultRadioButtonBitmapNormal;
+		std::string		DefaultRadioButtonBitmapPushed;
+		std::string		DefaultRadioButtonBitmapOver;
 		std::string		DefaultBackgroundBitmapView;
 		std::string		CurrentLinkTitle;
 
