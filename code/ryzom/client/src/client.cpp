@@ -64,6 +64,12 @@
 #include "client_cfg.h"
 #include "far_tp.h"
 
+#ifdef WITH_CEF3
+#include <cef_app.h>
+#include "nel/gui/webkit_app.h"
+#include "user_agent.h"
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -360,6 +366,28 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cm
 int main(int argc, char **argv)
 #endif
 {
+
+#ifdef WITH_CEF3
+#ifdef NL_OS_WINDOWS
+	CefMainArgs main_args(hInstance);
+#else
+	CefMainArgs main_args(argc, argv);
+#endif
+	// >>>>> webhelper.cpp >>>>>
+	{
+		// create app instance used in sub-process threads
+		CefRefPtr<CWebkitApp> app(new CWebkitApp);
+
+		sint result = CefExecuteProcess(main_args, app.get(), NULL);
+		if (result >= 0)
+		{
+			// child process ended
+			return result;
+		}
+	}
+	// <<<< webhelper.cpp <<<<<
+#endif
+
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
@@ -555,6 +583,19 @@ int main(int argc, char **argv)
 	RYZOM_TRY("Pre-Login Init")
 		prelogInit();
 	RYZOM_CATCH("Pre-Login Init")
+
+#ifdef WITH_CEF3
+	{
+		std::string locale = ClientCfg.getHtmlLanguageCode();
+		// "Ryzom/ryzomcore/v0.12.0-dev-unix-x64 Chrome/39.0.2171.95"
+		std::string userAgent = getUserAgent() + " " + CWebkitApp::getChromeVersion();
+		if (!webkitInitialize(main_args, locale, userAgent))
+		{
+			nlerror("webkit initialize failed\n");
+			return -1;
+		}
+	}
+#endif
 
 	// Log the client and choose from shard
 	RYZOM_TRY("Login")

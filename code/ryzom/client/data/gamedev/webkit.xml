@@ -1,0 +1,78 @@
+<interface_config>
+    <root id="interface" x="0" y="0" w="800" h="600" active="true"/>
+
+    <lua file="webkit.lua"/>
+
+    <group type="modal" id="webkit_js_alert" exit_click_out="false" mouse_pos="false" posref="MM MM" x="0" y="45" h="110" w="400" _child_resize_w="true" child_resize_wmargin="10" win_priority="%win_priority_highest" options="skin_modal" on_deactive="lua" on_deactive_params="Webkit:onJsDeactive()">
+        <view type="text" id="text" posref="TM TM" color="233, 197, 42, 255" x="0" y="-50" fontsize="10" global_color="false" shadow="true" hardtext="alert message..." multi_line="true" multi_line_space="0" multi_line_maxw_only="true" line_maxw="600"/>
+        <group id="indent_middle" child_resize_w="true" child_resize_wmargin="16" h="24" posref="BM BM" x="8" y="8">
+            <ctrl style="quit_button" id="button_ok" posref="TL TL" hardtext="uittOK" onclick_l="webkit_jsdialog" params_l="button=ok" color="10 250 180 255" col_over="180 250 180 255" col_pushed="180 255 180 255" text_color_normal="180 250 180 160" />
+        </group>
+    </group>
+
+    <group type="modal" id="webkit_js_confirm" exit_click_out="false" mouse_pos="false" posref="MM MM" x="0" y="45" h="110" w="400" _child_resize_w="true" child_resize_wmargin="10" win_priority="%win_priority_highest" options="skin_modal" on_deactive="lua" on_deactive_params="Webkit:onJsDeactive()">
+        <view type="text" id="text" posref="TM TM" color="233, 197, 42, 255" x="0" y="-50" fontsize="10" global_color="false" shadow="true" hardtext="confirm message..." multi_line="true" multi_line_space="0" multi_line_maxw_only="true" line_maxw="600"/>
+        <group id="indent_middle" child_resize_w="true" child_resize_wmargin="16" h="24" posref="BM BM" x="8" y="8">
+            <ctrl style="quit_button" id="button_ok" posref="TL TL" hardtext="uittOK" onclick_l="webkit_jsdialog" params_l="button=ok" color="10 250 180 255" col_over="180 250 180 255" col_pushed="180 255 180 255" text_color_normal="180 250 180 160" />
+            <ctrl style="quit_button" id="button_cancel" posparent="button_ok" posref="TR TL" x="4" hardtext="uittCancel" onclick_l="webkit_jsdialog" params_l="button=cancel" color="10 250 180 255" col_over="180 250 180 255" col_pushed="180 255 180 255" text_color_normal="180 250 180 160" />
+        </group>
+    </group>
+
+    <group type="modal" id="webkit_js_prompt" exit_click_out="false" mouse_pos="false" posref="MM MM" x="0" y="45" h="110" w="400" _child_resize_w="true" child_resize_wmargin="10" win_priority="%win_priority_highest" options="skin_modal" on_deactive="lua" on_deactive_params="Webkit:onJsDeactive()">
+        <view type="text" id="text" posref="TM TM" color="233, 197, 42, 255" x="0" y="-50" fontsize="10" global_color="false" shadow="true" hardtext="alert message..." multi_line="true" multi_line_space="0" multi_line_maxw_only="true" line_maxw="600"/>
+        <instance template="edit_box_widget" id="prompt" sizeref="w" posparent="text" posref="TM TM" x="2" y="-12" w="170" h="20" entry_type="text"/>
+        <group id="indent_middle" child_resize_w="true" child_resize_wmargin="16" h="24" posref="BM BM" x="8" y="8">
+            <ctrl style="quit_button" id="button_ok" posref="TL TL" hardtext="uittOK" onclick_l="webkit_jsdialog" params_l="button=ok" color="10 250 180 255" col_over="180 250 180 255" col_pushed="180 255 180 255" text_color_normal="180 250 180 160" />
+            <ctrl style="quit_button" id="button_cancel" posparent="button_ok" posref="TR TL" x="4" hardtext="uittCancel" onclick_l="webkit_jsdialog" params_l="button=cancel" color="10 250 180 255" col_over="180 250 180 255" col_pushed="180 255 180 255" text_color_normal="180 250 180 160" />
+        </group>
+    </group>
+
+    <group type="menu" id="webkit_menu" extends="base_menu_with_color">
+        <action id="home" name="uiHOME" handler="lua" params="Webkit:onMenuHome()"/>
+        <separator/>
+        <action id="zoom_in" name="uimZoomIn" handler="lua" params="Webkit:onMenuZoomIn()"/>
+        <action id="zoom_in" name="uimZoomOut" handler="lua" params="Webkit:onMenuZoomOut()"/>
+        <action id="zoom_reset" name="uiZoomReset" handler="lua" params="Webkit:onMenuZoomReset()"/>
+        <action id="grab_keyboard" name="uiGrabKeyboard" handler="lua" params="Webkit:onMenuGrabKeyboard()"/>
+        <separator/>
+        <action id="close" name="uiClose" handler="lua" params="Webkit:onMenuQuit()"/>
+        <separator/>
+    </group>
+
+    <template name="webkit_browser" home="" keep="true" x="0" y="0" w="800" h="600">
+        <group id="browser" type="container" w="#w" h="#h" x="#x" y="#y" pop_max_w="2000" pop_max_h="2000" pop_min_w="64" pop_min_h="32" header_color="UI:SAVE:WIN:COLORS:COM" posref="TL TL" title="" global_color="true" global_color_over="true" right_button="true" movable="true" active="false" resizer="true" on_active="lua" on_active_params="Webkit:onActive()">
+
+            <group id="header_closed" x="0" y="0" h="16" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:webkit_menu" on_active="lua" on_active_params="Webkit:onClickHeaderClose()"/>
+            <group id="header_opened" x="0" y="0" h="16" posref="TL TL" group_onclick_r="active_menu" group_params_r="menu=ui:interface:webkit_menu" on_active="lua" on_active_params="Webkit:onClickHeaderOpen()">
+                <ctrl id="browse_redo" button_type="push_button" style="text_button_header" frozen="true" x="-16" y="0" posref="MR MR" tooltip="uittBrowseRedo" hardtext="uiBrowseRedoButton" onclick_l="lua" params_l="Webkit:onClickRedo()"/>
+                <ctrl id="browse_undo" button_type="push_button" style="text_button_header" frozen="true" x="-4" y="0" posref="ML MR" posparent="browse_redo" tooltip="uittBrowseUndo" hardtext="uiBrowseUndoButton" onclick_l="lua" params_l="Webkit:onClickUndo()"/>
+                <ctrl id="browse_refresh" button_type="push_button" style="text_button_header" x="-4" y="0" posref="ML MR" posparent="browse_undo" tooltip="uittBrowseRefresh" hardtext="uiBrowseRefresh" onclick_l="lua" params_l="Webkit:onClickRefresh()"/>
+                <ctrl id="browse_home" button_type="push_button" style="text_button_header" x="-4" y="0" posref="ML MR" posparent="browse_refresh" tooltip="uittBrowseHome" hardtext="uiBrowseHome" onclick_l="lua" params_l="Webkit:onClickHome()"/>
+                <ctrl id="grab_keyboard" type="button" button_type="toggle_button" x="-8" y="0" posref="ML MR" posparent="browse_home" tooltip="uittGrabKeyboard" tx_normal="w_win_popin.tga" tx_over="W_button_16_over.tga" tx_pushed="w_warning.tga" onclick_l="lua" params_l="Webkit:onGrabKeyboard()" />
+            </group>
+
+            <group id="content" x="0" y="-2" w="0" h="-2" posref="TL TL">
+                <group id="html" type="webkit" posref="TL TL" home="#home" title_prefix="" sizeref="wh" x="2" y="-4" w="-4" h="-6">
+
+                <!--
+                    <group id="black" posref="BR BR" sizeref="hw" w="-10" h="-12" inherit_gc_alpha="true"/>
+                    <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true"/>
+
+                    <view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
+                -->
+
+                </group>
+
+                <group id="status_bar" type="text" posref="BL BL" sizeref="w" x="0" y="0" h="16" active="false">
+                    <view type="bitmap" id="black2" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="grey_10.tga" global_color="false"/>
+                    <!-- FIXME: correct texture and tooltip -->
+                    <view type="bitmap" id="loading" posref="MR MR" x="-2" y="0" texture="w_online.tga" global_color="false"/>
+                    <view type="text" id="status" posref="ML ML" x="2" y="0" color="255 255 255 255" shadow="true" value="status text"/>
+                </group>
+            </group>
+        </group>
+    </template>
+
+    <!-- define /webkit <url> command -->
+    <command name="webkit" action="lua" params="Webkit:newWindow([[+]], 800, 600)"/>
+</interface_config>

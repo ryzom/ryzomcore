@@ -49,6 +49,10 @@
 #include "nel/gui/group_html.h"
 #include "nel/gui/group_header.h"
 
+#ifdef WITH_CEF3
+#include "nel/gui/group_webkit.h"
+#endif
+
 namespace NLGUI
 {
 	void CReflectableRegister::registerClasses()
@@ -88,6 +92,9 @@ namespace NLGUI
 		REGISTER_REFLECTABLE_CLASS(CGroupTree::SNode, CReflectable);
 		REGISTER_REFLECTABLE_CLASS(CGroupList, CInterfaceGroup);
 		REGISTER_REFLECTABLE_CLASS(CGroupHeader, CGroupList);
+#ifdef WITH_CEF3
+		REGISTER_REFLECTABLE_CLASS(CGroupWebkit, CInterfaceGroup);
+#endif
 	}
 }
 
