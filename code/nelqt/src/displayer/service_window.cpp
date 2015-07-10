@@ -86,7 +86,7 @@ QWidget *CServiceWindow::addLabel()
 QWidget *CServiceWindow::addButton()
 {
 	QPushButton *button = new QPushButton(this);
-	button->setFont(m_Font);
+	// button->setFont(m_Font);
 	connect(button, SIGNAL(clicked()), this, SLOT(buttonCallback()));
 	m_LabelHBox->addWidget(button);
 	return button;
