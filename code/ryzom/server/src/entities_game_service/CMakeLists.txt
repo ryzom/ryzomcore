@@ -111,6 +111,10 @@ NL_ADD_RUNTIME_FLAGS(ryzom_entities_game_service)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
+IF(MSVC)
+	SET_TARGET_PROPERTIES(ryzom_entities_game_service PROPERTIES COMPILE_FLAGS "/bigobj")
+ENDIF(MSVC)
+
 IF(WITH_PCH AND NOT MINGW) # FIXME: PCH too large (> 130MB), crashes cc1plus under MinGW
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_entities_game_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
 ENDIF(WITH_PCH AND NOT MINGW)
