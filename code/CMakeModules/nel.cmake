@@ -78,7 +78,7 @@ ENDMACRO(NL_GEN_REVISION_H)
 #
 ###
 MACRO(NL_TARGET_LIB name)
-  CMAKE_POLICY(SET CMP0020 OLD)
+  CMAKE_POLICY(SET CMP0020 NEW)
   IF(WITH_STATIC)
     ADD_LIBRARY(${name} STATIC ${ARGN})
   ELSE(WITH_STATIC)
@@ -281,6 +281,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
   OPTION(WITH_QT                  "With QT4 Support"                              OFF)
   OPTION(WITH_QT5                 "With QT5 Support"                              OFF)
+  OPTION(WITH_NET_QT5             "Use QT5 inside NLNET"                          OFF)
 
   IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )

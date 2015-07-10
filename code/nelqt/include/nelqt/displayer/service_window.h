@@ -1,6 +1,6 @@
 /*
 
-Copyright (C) 2010-2015  by authors
+Copyright (C) 2015  by authors
 Author: Jan Boon <jan.boon@kaetemi.be>
 All rights reserved.
 
@@ -27,16 +27,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-#ifndef NLQT_COMMAND_LOG_H
-#define NLQT_COMMAND_LOG_H
+#ifndef NLQT_SERVICE_WINDOW_H
+#define NLQT_SERVICE_WINDOW_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
 
 // Qt includes
-#include <QWidget>
-#include <QTextEdit>
-#include <QLineEdit>
+#include <QMainWindow>
+#include <QFont>
 
 // NeL includes
 #include <nel/misc/log.h>
@@ -45,67 +44,56 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Project includes
 
+class QHBoxLayout;
+class QVBoxLayout;
+
 namespace NLQT {
+	class CCommandLog;
 
-typedef NLMISC::CCallback<void, const std::string &> TCommandExecute;
+typedef NLMISC::CCallback<void, QWidget *> TDisplayerButtonCallback;
+typedef NLMISC::CCallback<void> TDisplayerTimerCallback;
+typedef NLMISC::CCallback<void> TDisplayerExitCallback;
 
-class CCommandLog : public QWidget
+class CServiceWindow : public QMainWindow
 {
 	Q_OBJECT
 	
 public:
-	CCommandLog(QWidget *parent);
-	virtual ~CCommandLog();
+	CServiceWindow(QWidget *parent = NULL, Qt::WindowFlags flags = 0);
+	virtual ~CServiceWindow();
 
-	void setExecCommand(const TCommandExecute &func) { m_Func = func; }
-	void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
+	inline void setButtonCallback(const TDisplayerButtonCallback &cb) { m_ButtonCallback = cb; }
+	inline void setTimerCallback(const TDisplayerTimerCallback &cb) { m_TimerCallback = cb; }
+	inline void setExitCallback(const TDisplayerExitCallback &cb) { m_ExitCallback = cb; }
+	inline CCommandLog *commandLog() { return m_CommandLog; }
 
-	void clear() { m_DisplayerOutput->clear(); }
-
-signals:
-	void tSigDisplay(const QColor &c, const QString &text);
-	void execCommand(const std::string &cmd);
+	QWidget *addLabel();
+	QWidget *addButton();
+	void addLine();
 
 private slots:
-	void returnPressed();
-	void tSlotDisplay(const QColor &c, const QString &text);
+	void buttonCallback();
+	void timerCallback();
 
 private:
-	QTextEdit *m_DisplayerOutput;
-	QLineEdit *m_CommandInput;
-	TCommandExecute m_Func;
+	CCommandLog *m_CommandLog;
+	TDisplayerButtonCallback m_ButtonCallback;
+	TDisplayerTimerCallback m_TimerCallback;
+	TDisplayerExitCallback m_ExitCallback;
+
+	QVBoxLayout *m_LabelVBox;
+	QHBoxLayout *m_LabelHBox;
+
+	QFont m_Font;
 
 private:
-	CCommandLog(const CCommandLog &);
-	CCommandLog &operator=(const CCommandLog &);
+	CServiceWindow(const CServiceWindow &);
+	CServiceWindow &operator=(const CServiceWindow &);
 	
-}; /* class CCommandLog */
-
-class CCommandLogDisplayer : public CCommandLog, public NLMISC::IDisplayer
-{
-	Q_OBJECT
-
-public:
-	CCommandLogDisplayer(QWidget *parent);
-	virtual ~CCommandLogDisplayer();
-
-protected:
-	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
-
-private slots:
-	void execCommandLog(const std::string &cmd);
-
-private:
-	NLMISC::CLog m_Log;
-
-private:
-	CCommandLogDisplayer(const CCommandLogDisplayer &);
-	CCommandLogDisplayer &operator=(const CCommandLogDisplayer &);
-
-}; /* class CCommandLogDisplayer */
+}; /* class CServiceWindow */
 
 } /* namespace NLQT */
 
-#endif /* #ifndef NLQT_COMMAND_LOG_H */
+#endif /* #ifndef NLQT_SERVICE_WINDOW_H */
 
 /* end of file */

@@ -48,7 +48,7 @@ public:
 	virtual ~CWindowDisplayer ();
 
 	// open the window and run the display thread (MT)
-	void	create (std::string titleBar = "", bool iconified = false, sint x = -1, sint y = -1, sint w = -1, sint h = -1, sint hs = -1, sint fs = 0, const std::string &fn = "", bool ww = false, CLog *log = InfoLog);
+	void	create(int argc, char **argv, std::string titleBar = "", bool iconified = false, sint x = -1, sint y = -1, sint w = -1, sint h = -1, sint hs = -1, sint fs = 0, const std::string &fn = "", bool ww = false, CLog *log = InfoLog);
 
 	// create a new label. empty string mean separator. start with @ means that is a command (MT)
 	uint	createLabel (const char *value = "?");
@@ -88,7 +88,7 @@ protected:
 	CSynchronized<std::vector<std::string> >						_CommandsToExecute;
 
 	// called by DT only
-	virtual void	open (std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log) = 0;
+	virtual void	open(int argc, char **argv, std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log) = 0;
 	// called by DT only
 	virtual void	display_main () = 0;
 

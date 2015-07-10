@@ -40,6 +40,10 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/timeout_assertion_thread.h"
 
+#if NLNET_USE_QT5
+#	include <nelqt/displayer/service_displayer.h>
+#endif
+
 #include "nel/net/naming_client.h"
 #include "nel/net/service.h"
 #include "nel/net/unified_network.h"
@@ -551,7 +555,7 @@ void cbExecuteCommands (CConfigFile::CVar &var)
 // The main function of the service
 //
 
-sint IService::main (const char *serviceShortName, const char *serviceLongName, uint16 servicePort, const char *configDir, const char *logDir, const char *compilationDate)
+sint IService::main(int argc, char **argv, const char *serviceShortName, const char *serviceLongName, uint16 servicePort, const char *configDir, const char *logDir, const char *compilationDate)
 {
 	bool userInitCalled = false;
 	CConfigFile::CVar *var = NULL;
@@ -773,16 +777,23 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 #ifdef NL_USE_GTK
 			if (disp == "GTK")
 			{
-				WindowDisplayer = new CGtkDisplayer ("DEFAULT_WD");
+				WindowDisplayer = new CGtkDisplayer("DEFAULT_WD");
 			}
 #endif // NL_USE_GTK
 
 #ifdef NL_OS_WINDOWS
 			if (disp == "WIN")
 			{
-				WindowDisplayer = new CWinDisplayer ("DEFAULT_WD");
+				WindowDisplayer = new CWinDisplayer("DEFAULT_WD");
 			}
 #endif // NL_OS_WINDOWS
+
+#ifdef NLNET_USE_QT5
+			if (disp == "QT5")
+			{
+				WindowDisplayer = new NLQT::CServiceDisplayer("DEFAULT_WD");
+			}
+#endif // NLNET_USE_QT5
 
 			if (WindowDisplayer == NULL && disp != "NONE")
 			{
@@ -814,7 +825,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 			if (haveArg('I')) iconified = true;
 
-			WindowDisplayer->create (string("*INIT* ") + _ShortName + " " + _LongName, iconified, x, y, w, h, history, fs, fn, ww, &CommandLog);
+			WindowDisplayer->create(argc, argv, string("*INIT* ") + _ShortName + " " + _LongName, iconified, x, y, w, h, history, fs, fn, ww, &CommandLog);
 
 			DebugLog->addDisplayer (WindowDisplayer);
 			InfoLog->addDisplayer (WindowDisplayer);

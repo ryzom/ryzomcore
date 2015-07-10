@@ -54,7 +54,7 @@ private:
 	void	updateLabels ();
 
 	// called by DT only
-	void	open (std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log);
+	void	open (int argc, char **argv, std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log);
 	// called by DT only
 	void	clear ();
 	// called by DT only

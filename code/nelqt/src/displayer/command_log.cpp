@@ -117,6 +117,7 @@ void CCommandLog::returnPressed()
 
 	std::string cmd = text.toLocal8Bit().data();
 	execCommand(cmd);
+	if (m_Func) m_Func(cmd);
 
 	m_CommandInput->clear();
 }
@@ -149,6 +150,7 @@ void CCommandLogDisplayer::doDisplay(const NLMISC::CLog::TDisplayInfo& args, con
 
 void CCommandLogDisplayer::execCommandLog(const std::string &cmd)
 {
+	m_Log.displayRawNL("> %s", cmd.c_str());
 	ICommand::execute(cmd, m_Log);
 }
 

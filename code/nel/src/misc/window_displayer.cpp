@@ -33,6 +33,8 @@ namespace NLMISC {
 class CUpdateThread : public IRunnable
 {
 	CWindowDisplayer *Disp;
+	int ArgC;
+	char **ArgV;
 	string WindowNameEx;
 	sint X, Y, W, H, HS;
 	bool Iconified;
@@ -42,14 +44,14 @@ class CUpdateThread : public IRunnable
 	CLog *Log;
 
 public:
-	CUpdateThread (CWindowDisplayer *disp, string windowNameEx, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log) :
-	  Disp(disp), WindowNameEx(windowNameEx), X(x), Y(y), W(w), H(h), HS(hs), Iconified(iconified), FS(fs), FN(fn), WW(ww), Log(log)
+	CUpdateThread(CWindowDisplayer *disp, int argc, char **argv, string windowNameEx, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log) :
+		Disp(disp), ArgC(argc), ArgV(argv), WindowNameEx(windowNameEx), X(x), Y(y), W(w), H(h), HS(hs), Iconified(iconified), FS(fs), FN(fn), WW(ww), Log(log)
 	{
 	}
 
 	void run()
 	{
-		Disp->open (WindowNameEx, Iconified, X, Y, W, H, HS, FS, FN, WW, Log);
+		Disp->open(ArgC, ArgV, WindowNameEx, Iconified, X, Y, W, H, HS, FS, FN, WW, Log);
 		Disp->display_main ();
 	}
 };
@@ -105,10 +107,10 @@ void CWindowDisplayer::setLabel (uint label, const string &value)
 	}
 }
 
-void CWindowDisplayer::create (string windowNameEx, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
+void CWindowDisplayer::create(int argc, char **argv, string windowNameEx, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
 {
 	nlassert (_Thread == NULL);
-	_Thread = IThread::create (new CUpdateThread(this, windowNameEx, iconified, x, y, w, h, hs, fs, fn, ww, log));
+	_Thread = IThread::create(new CUpdateThread(this, argc, argv, windowNameEx, iconified, x, y, w, h, hs, fs, fn, ww, log));
 
 	Log = log;
 

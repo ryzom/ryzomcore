@@ -38,6 +38,7 @@
 #include <nel/misc/path.h>
 #include <nel/misc/command.h>
 #include <nel/misc/sheet_id.h>
+#include <nelqt/common.h>
 
 // Project includes
 #include "tool_config.h"
@@ -153,23 +154,9 @@ sint main(int argc, char **argv)
 
 	CSheetId::initWithoutSheet();
 
+	NLQT::preApplication();
 	QApplication app(argc, const_cast<char **>(argv));
-
-	QApplication::setStyle(QStyleFactory::create("Fusion"));
-	QPalette palette = app.palette();
-	palette.setColor(QPalette::Window, QColor(64, 64, 64));
-	palette.setColor(QPalette::WindowText, Qt::white);
-	palette.setColor(QPalette::Base, QColor(48, 48, 48));
-	palette.setColor(QPalette::AlternateBase, QColor(64, 64, 64));
-	palette.setColor(QPalette::ToolTipBase, Qt::white);
-	palette.setColor(QPalette::ToolTipText, Qt::white);
-	palette.setColor(QPalette::Text, Qt::white);
-	palette.setColor(QPalette::Button, QColor(64, 64, 64));
-	palette.setColor(QPalette::ButtonText, Qt::white);
-	palette.setColor(QPalette::BrightText, Qt::red);
-	palette.setColor(QPalette::Highlight, QColor(64, 128, 96));
-	palette.setColor(QPalette::HighlightedText, Qt::white);
-	app.setPalette(palette);
+	NLQT::postApplication();
 
 	QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
 

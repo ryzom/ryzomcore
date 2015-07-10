@@ -266,7 +266,7 @@ void CGtkDisplayer::setTitleBar (const string &titleBar)
 	gtk_window_set_title (GTK_WINDOW (RootWindow), wn.c_str());
 }
 
-void CGtkDisplayer::open (std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
+void CGtkDisplayer::open (int argc, char **argv, std::string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
 {
 	_HistorySize = hs;
 

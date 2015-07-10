@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 #ifndef NL_SERVICE_H
 #define NL_SERVICE_H
 
@@ -124,7 +123,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 	scn->setArgs (lpCmdLine); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-    sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+    sint retval = scn->main (__argc, __argv, __ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -132,14 +131,14 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
 #else
 #define NLNET_SERVICE_MAIN(__ServiceClassName, __ServiceShortName, __ServiceLongName, __ServicePort, __ServiceCallbackArray, __ConfigDir, __LogDir) \
  \
-int main(int argc, const char **argv) \
+int main(int argc, char **argv) \
 { \
 	NLMISC::CApplicationContext serviceContext; \
 	__ServiceClassName *scn = new __ServiceClassName; \
-	scn->setArgs (argc, argv); \
+	scn->setArgs (argc, (const char **)argv); \
 	createDebug(NULL,!scn->haveLongArg("nolog"));\
 	scn->setCallbackArray (__ServiceCallbackArray, sizeof(__ServiceCallbackArray)/sizeof(__ServiceCallbackArray[0])); \
-	sint retval = scn->main (__ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
+	sint retval = scn->main (argc, argv, __ServiceShortName, __ServiceLongName, __ServicePort, __ConfigDir, __LogDir, __DATE__" "__TIME__); \
 	delete scn; \
 	return retval; \
 }
@@ -335,7 +334,7 @@ public:
 	// @{
 
 	/// This main is called by the macro (service5 says if we have to use layer5 or not)
-	sint main (const char *serviceShortName, const char *serviceLongName, uint16 servicePort, const char *configDir, const char *logDir, const char *compilationDate);
+	sint main(int argc, char **argv, const char *serviceShortName, const char *serviceLongName, uint16 servicePort, const char *configDir, const char *logDir, const char *compilationDate);
 
 	/// Sets the command line and init _Args variable. You must call this before calling main()
 	void setArgs (int argc, const char **argv);

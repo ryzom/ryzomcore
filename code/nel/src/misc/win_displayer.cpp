@@ -357,7 +357,7 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 	SetWindowTextW (_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str());
 }
 
-void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
+void CWinDisplayer::open(int argc, char **argv, string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
 {
 	if (w == -1)
 		w = 700;

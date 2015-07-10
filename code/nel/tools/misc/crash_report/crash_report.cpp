@@ -18,8 +18,10 @@
 
 
 #include "crash_report_widget.h"
+#include <nelqt/common.h>
 #include <QApplication>
 #include <QMessageBox>
+#include <QDir>
 
 #include <stack>
 #include <vector>
@@ -91,7 +93,9 @@ int main( int argc, char **argv )
 	}
 #endif
 
-	QApplication app( argc, argv );
+	NLQT::preApplication();
+	QApplication app(argc, argv);
+	NLQT::postApplication();
 
 	std::vector< std::pair< std::string, std::string > > params;
 
