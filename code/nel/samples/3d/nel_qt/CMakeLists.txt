@@ -22,6 +22,4 @@ TARGET_LINK_LIBRARIES(nl_sample_qt
 NL_DEFAULT_PROPS(nl_sample_qt "NeL, Samples, 3D: Qt")
 NL_ADD_RUNTIME_FLAGS(nl_sample_qt)
 
-qt5_use_modules(nl_sample_qt Widgets)
-
 INSTALL(TARGETS nl_sample_qt RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT samples3d)
