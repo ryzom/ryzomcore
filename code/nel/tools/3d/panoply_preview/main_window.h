@@ -38,8 +38,11 @@ class QDirModel;
 class QUndoStack;
 class QScrollArea;
 
-namespace NLTOOLS {
+namespace NLQT {
 	class CCommandLog;
+}
+
+namespace NLTOOLS {
 	class CPanoplyPreview;
 
 /**
@@ -75,7 +78,7 @@ private:
 private:
 	CPanoplyPreview *m_PanoplyPreview;
 
-	CCommandLog *m_CommandLog;
+	NLQT::CCommandLog *m_CommandLog;
 	QDockWidget *m_CommandLogDock;
 	
 	QMenu *m_WidgetsMenu;

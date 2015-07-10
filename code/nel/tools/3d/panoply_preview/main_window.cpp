@@ -39,9 +39,9 @@
 // #include <nel/misc/debug.h>
 #include <nel/misc/i18n.h>
 #include <nel/3d/u_driver.h>
+#include <nelqt/displayer/command_log.h>
 
 // Project includes
-#include "command_log.h"
 #include "panoply_preview.h"
 
 using namespace std;
@@ -121,7 +121,7 @@ void CMainWindow::createDockWindows()
 		m_CommandLogDock = new QDockWidget(this);
 		m_CommandLogDock->setWindowTitle(tr("Console"));
 		m_CommandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-		m_CommandLog = new CCommandLog(m_CommandLogDock);
+		m_CommandLog = new NLQT::CCommandLog(m_CommandLogDock);
 		m_CommandLogDock->setWidget(m_CommandLog);
 		addDockWidget(Qt::BottomDockWidgetArea, m_CommandLogDock);
 		m_WidgetsMenu->addAction(m_CommandLogDock->toggleViewAction());

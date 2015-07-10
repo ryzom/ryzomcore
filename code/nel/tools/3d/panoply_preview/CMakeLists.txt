@@ -15,6 +15,7 @@ SET(CMAKE_AUTOMOC ON)
 
 QT5_ADD_RESOURCES(RESOURCE_ADDED ${RESOURCES})
 
+CMAKE_POLICY(SET CMP0020 NEW)
 ADD_EXECUTABLE(nl_panoply_preview WIN32 ${SRC}
 	${SRCS}
 	${HDRS}
@@ -26,6 +27,7 @@ ADD_EXECUTABLE(nl_panoply_preview WIN32 ${SRC}
 TARGET_LINK_LIBRARIES(nl_panoply_preview
 	nelmisc
 	nel3d
+	nelqtdisplayer
 	Qt5::Widgets)
 
 NL_DEFAULT_PROPS(nl_panoply_preview "NeL, Tools, 3D: panoply_preview")
