@@ -37,7 +37,7 @@ MACRO(DETECT_WINSDK_VERSION _VERSION)
   ENDIF(NOT WINSDK${_VERSION}_FOUND)
 ENDMACRO(DETECT_WINSDK_VERSION)
 
-SET(WINSDK_VERSIONS "8.0" "8.0A" "7.1" "7.1A" "7.0" "7.0A" "6.1" "6.0" "6.0A")
+SET(WINSDK_VERSIONS "8.1" "8.0" "8.0A" "7.1" "7.1A" "7.0" "7.0A" "6.1" "6.0" "6.0A")
 SET(WINSDK_DETECTED_VERSIONS)
 
 # Search all supported Windows SDKs
@@ -82,12 +82,23 @@ MACRO(FIND_WINSDK_VERSION_HEADERS)
     )
 
     IF(_MSI_FILE)
-      # Look for Windows SDK 8.0
-      FILE(STRINGS ${_MSI_FILE} _CONTENT REGEX "^#ifndef NTDDI_WIN8")
+      IF(NOT WINSDK_VERSION)
+        # Look for Windows SDK 8.1
+        FILE(STRINGS ${_MSI_FILE} _CONTENT REGEX "^#ifndef NTDDI_WINBLUE")
 
-      IF(_CONTENT)
-        SET(WINSDK_VERSION "8.0")
-      ENDIF(_CONTENT)
+        IF(_CONTENT)
+          SET(WINSDK_VERSION "8.1")
+        ENDIF(_CONTENT)
+      ENDIF(NOT WINSDK_VERSION)
+      
+      IF(NOT WINSDK_VERSION)
+        # Look for Windows SDK 8.0
+        FILE(STRINGS ${_MSI_FILE} _CONTENT REGEX "^#ifndef NTDDI_WIN8")
+
+        IF(_CONTENT)
+          SET(WINSDK_VERSION "8.0")
+        ENDIF(_CONTENT)
+      ENDIF(NOT WINSDK_VERSION)
       
       IF(NOT WINSDK_VERSION)
         # Look for Windows SDK 7.0
@@ -206,9 +217,9 @@ MACRO(USE_CURRENT_WINSDK)
   IF(NOT WINSDK_DIR)
     # Use Windows SDK versions installed with VC++ when possible
     IF(MSVC12)
-      SET(WINSDK_VERSION "8.1A")
+      SET(WINSDK_VERSION "8.1")
     ELSEIF(MSVC11)
-      SET(WINSDK_VERSION "8.0A")
+      SET(WINSDK_VERSION "8.0")
     ELSEIF(MSVC10)
       IF(NOT TARGET_X64 OR NOT MSVC_EXPRESS)
         SET(WINSDK_VERSION "7.0A")
@@ -228,7 +239,11 @@ MACRO(USE_CURRENT_WINSDK)
 
     # Use installed Windows SDK
     IF(NOT WINSDK_VERSION)
-      IF(WINSDK7.1_FOUND)
+      IF(WINSDK8.1_FOUND)
+        SET(WINSDK_VERSION "8.1")
+      ELSEIF(WINSDK8.0_FOUND)
+        SET(WINSDK_VERSION "8.0")
+      ELSEIF(WINSDK7.1_FOUND)
         SET(WINSDK_VERSION "7.1")
       ELSEIF(WINSDK7.0_FOUND)
         SET(WINSDK_VERSION "7.0")
@@ -286,6 +301,7 @@ FIND_PATH(WINSDK_SHARED_INCLUDE_DIR d3d9.h
 # directory where OpenGL headers are found
 FIND_PATH(WINSDK_OPENGL_INCLUDE_DIR GL.h
   HINTS
+  ${WINSDK_DIR}/Include/um/gl
   ${WINSDK_DIR}/Include/gl
   ${WINSDK_DIR}/Include
 )
@@ -293,6 +309,7 @@ FIND_PATH(WINSDK_OPENGL_INCLUDE_DIR GL.h
 # directory where all libraries are found
 FIND_PATH(WINSDK_LIBRARY_DIR ComCtl32.lib
   HINTS
+  ${WINSDK_DIR}/Lib/winv6.3/um/${WINSDK8_SUFFIX}
   ${WINSDK_DIR}/Lib/win8/um/${WINSDK8_SUFFIX}
   ${WINSDK_DIR}/Lib/${WINSDK_SUFFIX}
 )
@@ -300,6 +317,7 @@ FIND_PATH(WINSDK_LIBRARY_DIR ComCtl32.lib
 # signtool is used to sign executables
 FIND_PROGRAM(WINSDK_SIGNTOOL signtool
   HINTS
+  ${WINSDK_DIR}/Bin/${WINSDK8_SUFFIX}
   ${WINSDK_DIR}/Bin/x86
   ${WINSDK_DIR}/Bin
 )
@@ -307,6 +325,7 @@ FIND_PROGRAM(WINSDK_SIGNTOOL signtool
 # midl is used to generate IDL interfaces
 FIND_PROGRAM(WINSDK_MIDL midl
   HINTS
+  ${WINSDK_DIR}/Bin/${WINSDK8_SUFFIX}
   ${WINSDK_DIR}/Bin/x86
   ${WINSDK_DIR}/Bin
 )
