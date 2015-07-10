@@ -667,7 +667,7 @@ bool abortProgram(uint32 pid)
 #endif
 }
 
-bool launchProgram (const std::string &programName, const std::string &arguments)
+bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
 {
 
 #ifdef NL_OS_WINDOWS
@@ -719,7 +719,8 @@ bool launchProgram (const std::string &programName, const std::string &arguments
 	{
 		LPVOID lpMsgBuf;
 		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL);
-		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), GetLastError (), lpMsgBuf);
+		if (log)
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), GetLastError(), lpMsgBuf);
 		LocalFree(lpMsgBuf);
 		CloseHandle( pi.hProcess );
 		CloseHandle( pi.hThread );
@@ -776,7 +777,8 @@ bool launchProgram (const std::string &programName, const std::string &arguments
 	if (status == -1)
 	{
 		char *err = strerror (errno);
-		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
+		if (log)
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
 	}
 	else if (status == 0)
     {
@@ -796,7 +798,8 @@ bool launchProgram (const std::string &programName, const std::string &arguments
 		return true;
 	}
 #else
-	nlwarning ("LAUNCH: launchProgram() not implemented");
+	if (log)
+		nlwarning ("LAUNCH: launchProgram() not implemented");
 #endif
 
 	return false;

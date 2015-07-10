@@ -2104,11 +2104,8 @@ void CEntityCL::setEntityName(const ucstring &name)
 //---------------------------------------------------
 void CEntityCL::displayDebug(float x, float &y, float lineStep)	// virtual
 {
-	// Type
-	TextContext->printfAt(x, y, "Type: %d", Type);
-	y += lineStep;
-	// Slot
-	TextContext->printfAt(x, y, "Slot: %d", _Slot);
+	// Type and slot
+	TextContext->printfAt(x, y, "Type: %d - Slot: %d", Type, _Slot);
 	y += lineStep;
 	// Outpost
 	TextContext->printfAt(x, y, "Outpost id:%d side:%s",this->getOutpostId(),OUTPOSTENUMS::toString(this->getOutpostSide()).c_str() );
@@ -2119,11 +2116,8 @@ void CEntityCL::displayDebug(float x, float &y, float lineStep)	// virtual
 	else
 		TextContext->printfAt(x, y, "Name not received");
 	y += lineStep;
-	// Target
-	TextContext->printfAt(x, y, "Target: %d", _TargetSlot);
-	y += lineStep;
-	// DataSet Id
-	TextContext->printfAt(x, y, "DataSet Id: %u", _DataSetId);
+	// Target and DataSet Id
+	TextContext->printfAt(x, y, "Target: %d - DataSet Id: %u", _TargetSlot, _DataSetId);
 	y += lineStep;
 	// Sheet Id
 	TextContext->printfAt(x, y, "Sheet: %d(%s)", _SheetId.asInt(), _SheetId.toString().c_str());

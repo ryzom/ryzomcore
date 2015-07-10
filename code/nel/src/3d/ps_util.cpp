@@ -277,6 +277,8 @@ void CPSUtil::print(IDriver *driver, const std::string &text, CFontGenerator &fg
 						&fg,
 						col,
 						16,
+						false,
+						false,
 						driver,
 						cptedString);
 

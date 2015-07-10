@@ -55,7 +55,7 @@ namespace NLGUI
 		if (ptr) _Dynamic = CInterfaceElement::convertBool (ptr);
 
 		ptr = xmlGetProp (cur, (xmlChar*)"type");
-		string sTmp = ptr;
+		string sTmp = ptr.str();
 		sTmp = strlwr(sTmp);
 		if (sTmp == "linear")
 			_Type = Track_Linear;
@@ -194,7 +194,7 @@ namespace NLGUI
 				fromString((const char*)time, fAnimTime);
 				TAnimationTime animTime = fAnimTime * CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionMulCoefAnim).getValFloat();
 				double animValue;
-				fromString(value, animValue);
+				fromString(value.str(), animValue);
 
 				// Depending on the type of the track add the key
 				switch(_Type)

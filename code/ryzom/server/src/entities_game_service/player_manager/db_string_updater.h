@@ -48,6 +48,15 @@ class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 		{
 			return ClientDB == other.ClientDB && Node == other.Node;
 		}
+
+		bool operator <(const TBDStringLeaf &other) const
+		{
+			if (ClientDB != other.ClientDB)
+				return ClientDB < other.ClientDB;
+			if (Node != other.Node)
+				return Node < other.Node;
+			return false;
+		}
 	};
 
 	// hasher for the identifier
@@ -57,6 +66,10 @@ class CDBStringUpdater : public NLMISC::CSingleton<CDBStringUpdater>
 		size_t operator()(const TBDStringLeaf &stringLeaf) const
 		{
 			return ((size_t)stringLeaf.ClientDB>>4) ^ ((size_t)stringLeaf.Node>>4);
+		}
+		bool operator()(const TBDStringLeaf &left, const TBDStringLeaf &right) const
+		{
+			return left < right;
 		}
 	};
 

@@ -417,12 +417,12 @@ extern void operator delete[](void *p) throw();
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
-#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 120)
-#	include <hash_map>
-#	include <hash_set>
-#	define CHashMap ::std::hash_map
-#	define CHashSet ::std::hash_set
-#	define CHashMultiMap ::std::hash_multimap
+#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100)
+#	include <unordered_map>
+#	include <unordered_set>
+#	define CHashMap ::std::unordered_map
+#	define CHashSet ::std::unordered_set
+#	define CHashMultiMap ::std::unordered_multimap
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>

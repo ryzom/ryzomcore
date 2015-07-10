@@ -1,0 +1,212 @@
+Source: ryzom-core
+Priority: extra
+Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
+Uploaders: Luboš Novák <alvinx12@centrum.cz>, Cédric OCHS <kervala@gmail.com>
+Build-Depends: debhelper (>= 9), cmake(>= 2.6), libxml2-dev,
+ libgl1-mesa-dev, libjpeg8-dev | libjpeg62-dev, libpng12-dev, libopenal-dev,
+ libfreetype6-dev, libxxf86vm-dev, libxrandr-dev, libxrender-dev,
+ libvorbis-dev, libsquish-dev, libcurl4-openssl-dev, libluabind-dev,
+ libboost-dev, libmysqlclient-dev,
+ libcpptest-dev, libqt4-dev, libqt4-opengl-dev
+Standards-Version: 3.9.3
+Section: games
+Bugs: https://bitbucket.org/ryzom/ryzomcore/issues
+Homepage: https://bitbucket.org/ryzom/ryzomcore/
+Vcs-Hg: https://bitbucket.org/ryzom/ryzomcore
+Vcs-Browser: https://bitbucket.org/ryzom/ryzomcore
+
+Package: libnel0
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Massive multi-user 3D game environments library (shared library)
+ This is a software platform for creating and running massively multi-user
+ entertainment in a 3D environment over the Internet.
+ .
+ This library is further divided into specific modules: network, ai, 3d
+ and misc. If you want to use any of these, you also need to use the misc
+ part of the library, but ai, 3d and network are totally independent from
+ each other so you can use only the parts you really need in your project.
+ .
+ This package contains the shared library.
+
+Package: libnel-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Depends: ${misc:Depends}, libnel0 (= ${binary:Version})
+Description: Massive multi-user 3D game environments library (development files)
+ This is a software platform for creating and running massively multi-user
+ entertainment in a 3D environment over the Internet.
+ .
+ This library is further divided into specific modules: network, ai, 3d
+ and misc. If you want to use any of these, you also need to use the misc
+ part of the library, but ai, 3d and network are totally independent from
+ each other so you can use only the parts you really need in your project.
+ .
+ This package contains the headers.
+
+Package: libnel0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libnel0 (= ${binary:Version})
+Description: Massive multi-user 3D game environments library (debugging symbols)
+ This is a software platform for creating and running massively multi-user
+ entertainment in a 3D environment over the Internet.
+ .
+ This library is further divided into specific modules: network, ai, 3d
+ and misc. If you want to use any of these, you also need to use the misc
+ part of the library, but ai, 3d and network are totally independent from
+ each other so you can use only the parts you really need in your project.
+ .
+ This package contains the debugging symbols.
+
+Package: nel-tools
+Section: devel
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libnel0 (= ${binary:Version})
+Description: Massive multi-user 3D game environments library (tools)
+ This is a software platform for creating and running massively multi-user
+ entertainment in a 3D environment over the Internet.
+ .
+ This library is further divided into specific modules: network, ai, 3d
+ and misc. If you want to use any of these, you also need to use the misc
+ part of the library, but ai, 3d and network are totally independent from
+ each other so you can use only the parts you really need in your project.
+ .
+ This package contains the tools.
+ 
+Package: nel-tools-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, nel-tools (= ${binary:Version})
+Description: Massive multi-user 3D game environments library (tools debugging symbols)
+ This is a software platform for creating and running massively multi-user
+ entertainment in a 3D environment over the Internet.
+ .
+ This library is further divided into specific modules: network, ai, 3d
+ and misc. If you want to use any of these, you also need to use the misc
+ part of the library, but ai, 3d and network are totally independent from
+ each other so you can use only the parts you really need in your project.
+ .
+ This package contains the tools debugging symbols.
+
+Package: libryzom-sevenzip0
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: Ryzom science-fantasy MMORPG (decompression library)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the decompression shared library.
+
+Package: libryzom-sevenzip0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libryzom-sevenzip0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (decompression library debugging symbols)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the decompression shared library debugging symbols.
+
+Package: libryzom-gameshare0
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libnel0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (common shared library)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the game common shared library.
+
+Package: libryzom-gameshare0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libryzom-gameshare0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (common debugging symbols)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the game common debugging symbols.
+
+Package: libryzom-clientsheets0
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libryzom-gameshare0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (client sheets shared library)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the client sheets shared library.
+
+Package: libryzom-clientsheets0-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libryzom-clientsheets0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (client sheets debugging symbols)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the client sheets debugging symbols.
+
+Package: ryzom-client
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}, libryzom-gameshare0 (= ${binary:Version}),
+ libryzom-clientsheets0 (= ${binary:Version}),
+ ryzom-client-config (>= ${source:Version}), rsync, wget, p7zip-full
+Description: Ryzom science-fantasy MMORPG (client)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the game client.
+
+Package: ryzom-client-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, ryzom-client (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (client debugging symbols)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the client debugging symbols.
+
+Package: ryzom-tools
+Section: devel
+Architecture: any
+Multi-Arch: same
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libryzom-gameshare0 (= ${binary:Version}),
+ libryzom-clientsheets0 (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (tools)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the tools.
+
+Package: ryzom-tools-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, ryzom-tools (= ${binary:Version})
+Description: Ryzom science-fantasy MMORPG (tools debugging symbols)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the tools debugging symbols.
+
+Package: ryzom-client-config
+Architecture: all
+Depends: ${misc:Depends}
+Description: Ryzom science-fantasy MMORPG (client configuration)
+ Ryzom Core provides the base technologies and a set of development
+ methodologies for the development of both client and server code.
+ .
+ This package contains the client configuration.

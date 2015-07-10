@@ -40,7 +40,7 @@ public:
 
 	// From CGroupHTML
 	virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
-	virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
+	virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
 	virtual std::string	home();
 
 private:

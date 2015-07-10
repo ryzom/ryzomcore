@@ -32,6 +32,8 @@
 // AI share
 #include "ai_share/world_map.h"
 
+// STL
+#include <limits>
 
 //-------------------------------------------------------------------------------------------------
 // using namespaces...

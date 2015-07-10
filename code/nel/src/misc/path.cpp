@@ -898,10 +898,10 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 
 		if (isdirectory(de))
 		{
-			// skip CVS and .svn directory
-			if ((!showEverything) && (fn == "CVS" || fn == ".svn"))
+			// skip CVS, .svn and .hg directory
+			if ((!showEverything) && (fn == "CVS" || fn == ".svn" || fn == ".hg"))
 			{
-				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS and .svn directory", path.c_str(), recurse, wantDir, wantFile);
+				NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): skip CVS, .svn and .hg directory", path.c_str(), recurse, wantDir, wantFile);
 				continue;
 			}
 
@@ -937,10 +937,10 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 	closedir (dir);
 
 #ifndef NL_OS_WINDOWS
-	BasePathgetPathContent = "";
+	BasePathgetPathContent.clear();
 #endif
 
-	// let s recurse
+	// let's recurse
 	for (uint i = 0; i < recursPath.size (); i++)
 	{
 		// Progress bar
@@ -1033,6 +1033,9 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		{
 			// find all path and subpath
 			getPathContent (newPath, recurse, true, false, pathsToProcess, progressCallBack);
+
+			// sort files
+			sort(pathsToProcess.begin(), pathsToProcess.end());
 		}
 
 		for (uint p = 0; p < pathsToProcess.size(); p++)
@@ -1078,7 +1081,10 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 		// find all files in the path and subpaths
 		getPathContent (newPath, recurse, false, true, filesToProcess, progressCallBack);
 
-		// Progree bar
+		// sort files
+		sort(filesToProcess.begin(), filesToProcess.end());
+
+		// Progress bar
 		if (progressCallBack)
 		{
 			progressCallBack->popCropedValues ();

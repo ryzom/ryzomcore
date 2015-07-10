@@ -71,6 +71,19 @@ struct CContextMatcher
 			return memcmp(JokersValues, other.JokersValues, sizeof(uint32)*NbJoker) == 0;
 	}
 
+	bool operator<(const CContextMatcher &other) const
+	{
+		if (UseRandom)
+			if (RandomValue != other.RandomValue)
+				return RandomValue < other.RandomValue;
+
+		int cmp = memcmp(JokersValues, other.JokersValues, sizeof(uint32) * NbJoker);
+		if (cmp != 0)
+			return cmp < 0;
+
+		return false;
+	}
+
 	size_t getHashValue() const
 	{
 		return size_t(HashValue);
@@ -89,10 +102,9 @@ struct CContextMatcher
 		}
 		bool operator() (const CContextMatcher &patternMatcher1, const CContextMatcher &patternMatcher2) const
 		{
-			return patternMatcher1.getHashValue() < patternMatcher2.getHashValue();
+			return patternMatcher1 < patternMatcher2;
 		}
 	};
-
 };
 
 

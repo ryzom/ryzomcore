@@ -25,6 +25,7 @@
 #include "nel/misc/report.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
+#include "nel/misc/system_utils.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -102,8 +103,9 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 	}
 
-	if (INelContext::isContextInitialised()
-		&& INelContext::getInstance().isWindowedApplication()
+	if (((INelContext::isContextInitialised()
+		&& INelContext::getInstance().isWindowedApplication())
+		|| CSystemUtils::detectWindowedApplication())
 		&& CFile::isExists(NL_CRASH_REPORT_TOOL))
 	{
 		std::stringstream params;
@@ -151,7 +153,8 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 		else
 		{
-			NLMISC::launchProgram(NL_CRASH_REPORT_TOOL, paramsStr); // FIXME: Don't use this function, it uses logging, etc, so may loop infinitely!
+			NLMISC::launchProgram(NL_CRASH_REPORT_TOOL, paramsStr, 
+				NL_DEBUG_REPORT ? INelContext::isContextInitialised() : false); // Only log if required, avoid infinite loop
 			return defaultResult;
 		}
 	}

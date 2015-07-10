@@ -25,13 +25,9 @@
 #include "nel/gui/group_tree.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/group_table.h"
+#include "nel/gui/libwww_types.h"
 
 typedef std::map<std::string, std::string>	TStyle;
-
-extern "C"
-{
-#include "WWWInit.h"
-}
 
 namespace NLGUI
 {
@@ -41,7 +37,8 @@ namespace NLGUI
 	class CDBGroupComboBox;
 	class CGroupParagraph;
 
-
+	extern std::string CurrentCookie;
+	extern std::string HTTPCurrentDomain;
 
 	// HTML group
 	/**
@@ -54,15 +51,6 @@ namespace NLGUI
 	{
 	public:
         DECLARE_UI_CLASS( CGroupHTML )
-
-		friend void TextAdd (struct _HText *me, const char * buf, int len);
-		friend void TextBeginElement (_HText *me, int element_number, const BOOL *present, const char **	value);
-		friend void TextEndElement (_HText *me, int element_number);
-		friend void TextLink (struct _HText *me, int element_number, int attribute_number, struct _HTChildAnchor *anchor, const BOOL *present, const char **value);
-		friend void TextBuild (HText * me, HTextStatus status);
-		friend void TextBeginUnparsedElement(HText *me, const char *buffer, int length);
-		friend void TextEndUnparsedElement(HText *me, const char *buffer, int length);
-		friend int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status);
 
 		/// Web browser options for CGroupHTML
 		struct SWebOptions
@@ -101,6 +89,9 @@ namespace NLGUI
 
 		// Browse
 		virtual void browse (const char *url);
+
+		// parse html string using libxml2 parser
+		virtual bool parseHtml(std::string htmlString);
 
 		// Refresh
 		void refresh();
@@ -172,8 +163,39 @@ namespace NLGUI
 		std::string		DefaultCheckBoxBitmapNormal;
 		std::string		DefaultCheckBoxBitmapPushed;
 		std::string		DefaultCheckBoxBitmapOver;
+		std::string		DefaultRadioButtonBitmapNormal;
+		std::string		DefaultRadioButtonBitmapPushed;
+		std::string		DefaultRadioButtonBitmapOver;
 		std::string		DefaultBackgroundBitmapView;
 		std::string		CurrentLinkTitle;
+
+		struct TFormField {
+		public:
+			TFormField(const std::string &k, const std::string &v)
+				:name(k),value(v)
+			{}
+			std::string name;
+			std::string value;
+		};
+
+		struct SFormFields {
+		public:
+			SFormFields()
+			{
+			}
+
+			void clear()
+			{
+				Values.clear();
+			}
+
+			void add(const std::string &key, const std::string &value)
+			{
+				Values.push_back(TFormField(key, value));
+			}
+
+			std::vector<TFormField> Values;
+		};
 
 		// Browser home
 		std::string		Home;
@@ -199,6 +221,7 @@ namespace NLGUI
 		int luaBeginElement(CLuaState &ls);
 		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
+		int luaParseHtml(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
@@ -210,6 +233,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("beginElement", luaBeginElement)
 			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
+			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
@@ -228,10 +252,10 @@ namespace NLGUI
 		virtual void addText (const char * buf, int len);
 
 		// A link has been parsed
-		virtual void addLink (uint element_number, uint attribute_number, HTChildAnchor *anchor, const BOOL *present, const char **value);
+		virtual void addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
 
 		// A new begin HTML element has been parsed (<IMG> for exemple)
-		virtual void beginElement (uint element_number, const BOOL *present, const char **value);
+		virtual void beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value);
 
 		// A new end HTML element has been parsed (</IMG> for exemple)
 		virtual void endElement (uint element_number);
@@ -246,10 +270,14 @@ namespace NLGUI
 		virtual void addHTTPGetParams (std::string &url, bool trustedDomain);
 
 		// Add POST params to the libwww list
-		virtual void addHTTPPostParams (HTAssocList *formfields, bool trustedDomain);
+		virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
 
 		// the current request is terminated
-		virtual void requestTerminated(HTRequest *request);
+		virtual void requestTerminated();
+
+		// libxml2 html parser functions
+		void htmlElement(xmlNode *node, int element_number);
+		void htmlWalkDOM(xmlNode *a_node);
 
 		// Get Home URL
 		virtual std::string	home();
@@ -338,6 +366,7 @@ namespace NLGUI
 		bool			_Connecting;
 		double			_TimeoutValue;			// the timeout in seconds
 		double			_ConnectingTimeout;
+		uint32			_RedirectsRemaining;
 
 		// minimal embeded lua script support
 		// Note : any embeded script is executed immediately after the closing
@@ -351,11 +380,8 @@ namespace NLGUI
 		bool			_Object;
 		std::string		_ObjectScript;
 
-		// Someone is conecting. We got problem with libwww : 2 connection requests can deadlock the client.
-		static CGroupHTML *_ConnectingLock;
-
-		// LibWWW data
-		class CLibWWWData	*_LibWWW;
+		// Data container for active curl transfer
+		class CCurlWWWData *	_CurlWWW;
 
 		// Current paragraph
 		std::string		_DivName;
@@ -423,6 +449,38 @@ namespace NLGUI
 			if (_FontSize.empty())
 				return TextFontSize;
 			return _FontSize.back();
+		}
+
+		std::vector<uint>			_FontWeight;
+		inline uint getFontWeight() const
+		{
+			if (_FontWeight.empty())
+				return 400;
+			return _FontWeight.back();
+		}
+
+		std::vector<bool>			_FontOblique;
+		inline bool getFontOblique() const
+		{
+			if (_FontOblique.empty())
+				return false;
+			return _FontOblique.back();
+		}
+
+		std::vector<bool>			_FontUnderlined;
+		inline bool getFontUnderlined() const
+		{
+			if (_FontUnderlined.empty())
+				return false;
+			return _FontUnderlined.back();
+		}
+
+		std::vector<bool>			_FontStrikeThrough;
+		inline bool getFontStrikeThrough() const
+		{
+			if (_FontStrikeThrough.empty())
+				return false;
+			return _FontStrikeThrough.back();
 		}
 
 		// Current link
@@ -544,6 +602,26 @@ namespace NLGUI
 		};
 		std::vector<CCellParams>	_CellParams;
 
+		class CStyleParams
+		{
+		public:
+			CStyleParams () : TextColor(255,255,255,255)
+			{
+				FontSize=10;
+				FontWeight=400;
+				FontOblique=false;
+				Underlined=false;
+				StrikeThrough=false;
+			}
+			uint FontSize;
+			uint FontWeight;
+			bool FontOblique;
+			NLMISC::CRGBA TextColor;
+			bool Underlined;
+			bool StrikeThrough;
+
+		};
+
 		// Indentation
 		uint	_Indent;
 
@@ -613,8 +691,22 @@ namespace NLGUI
 		typedef std::map<uint32, NLMISC::CRefPtr<CGroupHTML> >	TGroupHtmlByUIDMap;
 		static TGroupHtmlByUIDMap _GroupHtmlByUID;
 
-	private:
+		// read style attribute
+		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
 
+		// load and render local html file (from bnp for example)
+		void doBrowseLocalFile(const std::string &filename);
+
+		// load remote content using either GET or POST
+		void doBrowseRemoteUrl(const std::string &url, const std::string &referer, bool doPost = false, const SFormFields &formfields = SFormFields());
+
+		// render html string as new browser page
+		bool renderHtmlString(const std::string &html);
+
+		// initialize formfields list from form elements on page
+		void buildHTTPPostParams (SFormFields &formfields);
+
+	private:
 		// decode all HTML entities
 		static ucstring decodeHTMLEntities(const ucstring &str);
 
@@ -623,13 +715,16 @@ namespace NLGUI
 
 		struct CDataDownload
 		{
-			CDataDownload(CURL *c, const std::string &u, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), luaScript(s), md5sum(m), type(t), fp(f)
+		public:
+			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
 			{
 				if (t == ImgType) imgs.push_back(i);
 			}
 
+		public:
 			CURL *curl;
 			std::string url;
+			std::string dest;
 			std::string luaScript;
 			std::string md5sum;
 			TDataType type;
@@ -645,6 +740,7 @@ namespace NLGUI
 		void checkImageDownload();
 		void addImageDownload(const std::string &url, CViewBase *img);
 		std::string localImageName(const std::string &url);
+		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file);
@@ -658,6 +754,13 @@ namespace NLGUI
 		void releaseDownloads();
 		void checkDownloads();
 
+		// HtmlType download finished
+		void htmlDownloadFinished(const std::string &content, const std::string &type, long code);
+
+		// cURL transfer callbacks
+		static size_t curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
+		static size_t curlDataCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData);
+		static size_t curlProgressCallback(void *pCCurlWWWData, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 	};
 
 	// adapter group that store y offset for inputs inside an html form
@@ -671,7 +774,6 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	};
-
 }
 
 #endif

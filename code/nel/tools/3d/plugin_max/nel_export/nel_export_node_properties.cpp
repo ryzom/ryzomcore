@@ -1054,7 +1054,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			// Set enable disable
 			LightingStateChanged (hwndDlg, currentParam);
 
-			CheckRadioButton (hwndDlg, IDC_LIGHT_GROUP_ALWAYS, IDC_LIGHT_GROUP_NIGHT, IDC_LIGHT_GROUP_ALWAYS+(currentParam->LightGroup%3));
+			CheckRadioButton (hwndDlg, IDC_LIGHT_GROUP_ALWAYS, IDC_LIGHT_GROUP_LANDSCAPE_AMBIENT, IDC_LIGHT_GROUP_ALWAYS+(currentParam->LightGroup%5));
 		}
 		break;
 
@@ -1096,10 +1096,14 @@ INT_PTR CALLBACK LightmapDialogCallback (
 							// Get the acceleration type
 							if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_ALWAYS) == BST_CHECKED)
 								currentParam->LightGroup = 0;
-							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_DAY) == BST_CHECKED)
+							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_LANDSCAPE_DIFFUSE) == BST_CHECKED)
 								currentParam->LightGroup = 1;
-							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_NIGHT) == BST_CHECKED)
+							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_NIGHT_CYCLE) == BST_CHECKED)
 								currentParam->LightGroup = 2;
+							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_DAY_CYCLE) == BST_CHECKED)
+								currentParam->LightGroup = 3;
+							else if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_LANDSCAPE_AMBIENT) == BST_CHECKED)
+								currentParam->LightGroup = 4;
 							else
 								currentParam->LightGroup = -1;
 						}

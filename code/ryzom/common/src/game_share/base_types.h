@@ -242,7 +242,7 @@ public:
 
 		size_t	operator () ( const TDataSetRow &index ) const { return index.getHashCode(); }
 
-		bool operator() (const TDataSetRow &index1, const TDataSetRow &index2) const { return index1.getHashCode() < index2.getHashCode(); }
+		bool operator() (const TDataSetRow &index1, const TDataSetRow &index2) const { return index1 < index2; }
 	};
 
 	/// Warning: method to avoid (use it only when using rows as a static array)
