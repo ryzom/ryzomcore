@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <nel/misc/debug.h>
 #include <nel/misc/command.h>
 #include <nel/misc/path.h>
+#include <nel/misc/window_displayer.h>
 
 // Project includes
 
@@ -62,20 +63,11 @@ CCommandLog::CCommandLog(QWidget *parent) : QWidget(parent)
 	connect(m_CommandInput, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
 	connect(this, SIGNAL(tSigDisplay(const QColor &, const QString &)), this, SLOT(tSlotDisplay(const QColor &, const QString &)));
 
-	DebugLog->addDisplayer(this);
-	InfoLog->addDisplayer(this);
-	WarningLog->addDisplayer(this);
-	AssertLog->addDisplayer(this);
-	ErrorLog->addDisplayer(this);
 }
 
 CCommandLog::~CCommandLog()
 {
-	DebugLog->removeDisplayer(this);
-	InfoLog->removeDisplayer(this);
-	WarningLog->removeDisplayer(this);
-	AssertLog->removeDisplayer(this);
-	ErrorLog->removeDisplayer(this);
+
 }
 
 void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
@@ -106,81 +98,7 @@ void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 		break;
 	}
 
-	bool needSpace = false;
-	//stringstream ss;
-	string str;
-
-	if (args.LogType != CLog::LOG_NO)
-	{
-		str += logTypeToString(args.LogType);
-		needSpace = true;
-	}
-
-	// Write thread identifier
-	if (args.ThreadId != 0)
-	{
-		if (needSpace) { str += " "; needSpace = false; }
-#ifdef NL_OS_WINDOWS
-		str += NLMISC::toString("%4x", args.ThreadId);
-#else
-		str += NLMISC::toString("%08x", args.ThreadId);
-#endif
-		needSpace = true;
-	}
-
-	if (args.FileName != NULL)
-	{
-		if (needSpace) { str += " "; needSpace = false; }
-		str += NLMISC::toString("%20s", CFile::getFilename(args.FileName).c_str());
-		needSpace = true;
-	}
-
-	if (args.Line != -1)
-	{
-		if (needSpace) { str += " "; needSpace = false; }
-		str += NLMISC::toString("%4u", args.Line);
-		//ss << setw(4) << args.Line;
-		needSpace = true;
-	}
-
-	if (args.FuncName != NULL)
-	{
-		if (needSpace) { str += " "; needSpace = false; }
-		str += NLMISC::toString("%20s", args.FuncName);
-		needSpace = true;
-	}
-
-	if (needSpace) { str += ": "; needSpace = false; }
-
-	uint nbl = 1;
-
-	char *npos, *pos = const_cast<char *>(message);
-	while ((npos = strchr (pos, '\n')))
-	{
-		*npos = '\0';
-		str += pos;
-		/*if (needSlashR)
-			str += "\r";*/
-		str += "\n";
-		*npos = '\n';
-		pos = npos+1;
-		nbl++;
-	}
-	str += pos;
-
-	pos = const_cast<char *>(args.CallstackAndLog.c_str());
-	while ((npos = strchr (pos, '\n')))
-	{
-		*npos = '\0';
-		str += pos;
-		/*if (needSlashR)
-			str += "\r";*/
-		str += "\n";
-		*npos = '\n';
-		pos = npos+1;
-		nbl++;
-	}
-	str += pos;
+	std::string str = NLMISC::CWindowDisplayer::stringifyMessage(args, message);
 
 	tSigDisplay(color, str.substr(0, str.size() - 1).c_str());
 }
@@ -198,9 +116,40 @@ void CCommandLog::returnPressed()
 		return;
 
 	std::string cmd = text.toLocal8Bit().data();
-	ICommand::execute(cmd, InfoLog());
+	execCommand(cmd);
 
 	m_CommandInput->clear();
+}
+
+CCommandLogDisplayer::CCommandLogDisplayer(QWidget *parent) : CCommandLog(parent)
+{
+	connect(this, SIGNAL(execCommand(const std::string &)), this, SLOT(execCommandLog(const std::string &)));
+	DebugLog->addDisplayer(this);
+	InfoLog->addDisplayer(this);
+	WarningLog->addDisplayer(this);
+	AssertLog->addDisplayer(this);
+	ErrorLog->addDisplayer(this);
+	m_Log.addDisplayer(this);
+}
+
+CCommandLogDisplayer::~CCommandLogDisplayer()
+{
+	DebugLog->removeDisplayer(this);
+	InfoLog->removeDisplayer(this);
+	WarningLog->removeDisplayer(this);
+	AssertLog->removeDisplayer(this);
+	ErrorLog->removeDisplayer(this);
+	m_Log.removeDisplayer(this);
+}
+
+void CCommandLogDisplayer::doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message)
+{
+	CCommandLog::doDisplay(args, message);
+}
+
+void CCommandLogDisplayer::execCommandLog(const std::string &cmd)
+{
+	ICommand::execute(cmd, m_Log);
 }
 
 } /* namespace NLQT */

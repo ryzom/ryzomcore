@@ -121,7 +121,7 @@ void CMainWindow::createDockWindows()
 		m_CommandLogDock = new QDockWidget(this);
 		m_CommandLogDock->setWindowTitle(tr("Console"));
 		m_CommandLogDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-		m_CommandLog = new NLQT::CCommandLog(m_CommandLogDock);
+		m_CommandLog = new NLQT::CCommandLogDisplayer(m_CommandLogDock);
 		m_CommandLogDock->setWidget(m_CommandLog);
 		addDockWidget(Qt::BottomDockWidgetArea, m_CommandLogDock);
 		m_WidgetsMenu->addAction(m_CommandLogDock->toggleViewAction());

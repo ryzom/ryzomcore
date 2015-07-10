@@ -46,7 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace NLQT {
 
-class CCommandLog : public QWidget, public NLMISC::IDisplayer
+class CCommandLog : public QWidget
 {
 	Q_OBJECT
 	
@@ -54,11 +54,11 @@ public:
 	CCommandLog(QWidget *parent);
 	virtual ~CCommandLog();
 
-protected:
-	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
+	void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
 
 signals:
 	void tSigDisplay(const QColor &c, const QString &text);
+	void execCommand(const std::string &cmd);
 
 private slots:
 	void returnPressed();
@@ -73,6 +73,29 @@ private:
 	CCommandLog &operator=(const CCommandLog &);
 	
 }; /* class CCommandLog */
+
+class CCommandLogDisplayer : public CCommandLog, public NLMISC::IDisplayer
+{
+	Q_OBJECT
+
+public:
+	CCommandLogDisplayer(QWidget *parent);
+	virtual ~CCommandLogDisplayer();
+
+protected:
+	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
+
+private slots:
+	void execCommandLog(const std::string &cmd);
+
+private:
+	NLMISC::CLog m_Log;
+
+private:
+	CCommandLogDisplayer(const CCommandLogDisplayer &);
+	CCommandLogDisplayer &operator=(const CCommandLogDisplayer &);
+
+}; /* class CCommandLogDisplayer */
 
 } /* namespace NLQT */
 

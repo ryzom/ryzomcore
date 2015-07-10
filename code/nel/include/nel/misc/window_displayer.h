@@ -62,12 +62,13 @@ public:
 	// set a special title to the window bar
 	virtual void	setTitleBar (const std::string &/* titleBar */) { }
 
-	virtual void	getWindowPos (uint32 &x, uint32 &y, uint32 &w, uint32 &h) { x=y=w=h=0; }
+	virtual void	getWindowPos(uint32 &x, uint32 &y, uint32 &w, uint32 &h) { x = y = w = h = 0; }
+
+	static std::string stringifyMessage(const NLMISC::CLog::TDisplayInfo &args, const char *message, bool needSlashR = false);
 
 protected:
-
 	// display a string (MT)
-	virtual void doDisplay (const NLMISC::CLog::TDisplayInfo &args, const char *message);
+	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo &args, const char *message);
 
 	// true for windows
 	bool needSlashR;
