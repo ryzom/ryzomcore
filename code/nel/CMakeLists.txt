@@ -4,11 +4,7 @@ IF(WITH_STATIC_DRIVERS)
   ADD_DEFINITIONS(-DNL_STATIC)
 ENDIF(WITH_STATIC_DRIVERS)
 
-# On Windows we need to find DirectInput for NLMISC.
-# This is how we get events.
 IF(WIN32)
-  FIND_PACKAGE(DirectXSDK REQUIRED)
-
   # On Win32 we can also build the MAX plugins.
   IF(WITH_NEL_MAXPLUGIN)
     FIND_PACKAGE(3dsMaxSDK)

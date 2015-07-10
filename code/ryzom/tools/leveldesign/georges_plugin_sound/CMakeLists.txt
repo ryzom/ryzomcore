@@ -1,17 +1,6 @@
 
 FILE(GLOB SRC *.cpp *.h)
 
-# Bugfix...
-IF (NOT DXSDK_INCLUDE_DIR)
-	IF (DXSDK_DIR)
-		SET(DXSDK_INCLUDE_DIR "${DXSDK_DIR}/Include")
-	ENDIF (DXSDK_DIR)
-ENDIF (NOT DXSDK_INCLUDE_DIR)
-
-IF (NOT DXSDK_INCLUDE_DIR)
-	message(FATAL_ERROR "Configuration bad, cannot find DirectX include.")
-ENDIF (NOT DXSDK_INCLUDE_DIR)
-
 ADD_LIBRARY(georges_plugin_sound SHARED ${SRC})
 
 INCLUDE_DIRECTORIES(georges_plugin_sound ${NEL_INCLUDE_DIR} ${DXSDK_INCLUDE_DIR})
