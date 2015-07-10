@@ -44,7 +44,6 @@
 #include "nel/3d/texture_grouped.h"
 #include "nel/3d/nelu.h"
 #include "nel/3d/font_manager.h"
-#include "nel/3d/font_generator.h"
 //
 #include "nel/misc/file.h"
 #include "start_stop_particle_system.h"
