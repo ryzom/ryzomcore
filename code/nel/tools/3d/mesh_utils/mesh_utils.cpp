@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-void mesh_utils_placeholder()
+#include <nel/misc/types_nl.h>
+#include "mesh_utils.h"
+
+int exportScene(CMeshUtilsSettings &settings)
 {
-	
+	return EXIT_SUCCESS;
 }
 
 /* end of file */
