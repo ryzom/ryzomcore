@@ -274,6 +274,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_STATIC_EXTERNAL     "With static external libraries"                OFF)
   OPTION(WITH_INSTALL_LIBRARIES   "Install development files."                    ON )
 
+  OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
+  
   ###
   # GUI toolkits
   ###
