@@ -21,6 +21,9 @@
 #include <nel/misc/cmd_args.h>
 #include <nel/misc/path.h>
 
+#include <nel/3d/register_3d.h>
+#include <nel/3d/scene.h>
+
 int printHelp(const NLMISC::CCmdArgs &args)
 {
 	printf("NeL Mesh Export\n");
@@ -29,6 +32,8 @@ int printHelp(const NLMISC::CCmdArgs &args)
 
 int main(int argc, char *argv[])
 {
+	NLMISC::CApplicationContext app;
+
 	NLMISC::CCmdArgs args;
 	args.setArgs(argc, (const char **)argv);
 
@@ -48,12 +53,16 @@ int main(int argc, char *argv[])
 	CMeshUtilsSettings settings;
 	settings.SourceFilePath = filePath;
 	
-	settings.DestinationDirectory = args.getArg('d');
-	if (settings.DestinationDirectory.empty())
-		settings.DestinationDirectory = args.getLongArg("dst");
-	if (settings.DestinationDirectory.empty())
-		settings.DestinationDirectory = filePath + "_export";
-	settings.DestinationDirectory += "/";
+	if (args.haveArg('d'))
+		settings.DestinationDirectoryPath = args.getArg('d');
+	if (settings.DestinationDirectoryPath.empty())
+		settings.DestinationDirectoryPath = args.getLongArg("dst");
+	if (settings.DestinationDirectoryPath.empty())
+		settings.DestinationDirectoryPath = filePath + "_export";
+	settings.DestinationDirectoryPath += "/";
+
+	NL3D::CScene::registerBasics();
+	NL3D::registerSerial3d();
 
 	return exportScene(settings);
 }

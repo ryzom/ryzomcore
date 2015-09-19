@@ -21,10 +21,18 @@
 
 struct CMeshUtilsSettings
 {
+	CMeshUtilsSettings();
+
+	// Absolute Paths
 	std::string SourceFilePath;
-	std::string DestinationDirectory;
+	std::string DestinationDirectoryPath;
+
+	// Relative Directories
+	std::string ShapeDirectory;
+	std::string IGDirectory;
+	std::string SkelDirectory;
 };
 
-int exportScene(CMeshUtilsSettings &settings);
+int exportScene(const CMeshUtilsSettings &settings);
 
 /* end of file */
