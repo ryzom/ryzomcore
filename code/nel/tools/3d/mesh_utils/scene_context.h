@@ -24,6 +24,8 @@
 
 #include <nel/misc/sstring.h>
 #include <nel/misc/tool_logger.h>
+#include <nel/misc/smart_ptr.h>
+#include <nel/misc/matrix.h>
 
 #ifndef NL_NODE_INTERNAL_TYPE
 #define NL_NODE_INTERNAL_TYPE void
@@ -31,6 +33,10 @@
 #ifndef NL_SCENE_INTERNAL_TYPE
 #define NL_SCENE_INTERNAL_TYPE void
 #endif
+
+namespace NL3D {
+	class IShape;
+}
 
 struct CNodeContext
 {
@@ -43,6 +49,9 @@ struct CNodeContext
 
 	const NL_NODE_INTERNAL_TYPE *InternalNode;
 	bool IsBone;
+
+	// NLMISC::CMatrix Transform; // TODO
+	NLMISC::CRefPtr<NL3D::IShape> Shape;
 };
 
 typedef std::map<NLMISC::CSString, CNodeContext> TNodeContextMap;

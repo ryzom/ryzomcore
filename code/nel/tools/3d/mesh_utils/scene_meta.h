@@ -32,6 +32,8 @@ enum TMesh
 	TMeshCollisionInt = 2,
 	TMeshCollisionExt = 3,
 	TMeshZone = 4,
+	TMeshPortal = 5,
+	TMeshCluster = 6,
 };
 
 enum TBone
@@ -47,11 +49,13 @@ struct CNodeMeta
 
 	bool AddToIG; // Add this node to an instance group
 	TMesh ExportMesh;
-	TBone ExportBone; 
+	TBone ExportBone;
 
 	std::string InstanceShape;
 	std::string InstanceName;
 	std::string InstanceGroupName;
+
+	bool AutoAnim;
 
 	void serial(NLMISC::IStream &s);
 };

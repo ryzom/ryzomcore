@@ -20,6 +20,6 @@
 struct CMeshUtilsContext;
 struct CNodeContext;
 
-void assimpShape(CMeshUtilsContext &context, CNodeContext &nodeContext);
+bool assimpShape(CMeshUtilsContext &context, CNodeContext &nodeContext);
 
 /* end of file */

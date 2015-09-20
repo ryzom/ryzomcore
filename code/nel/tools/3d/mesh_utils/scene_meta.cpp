@@ -28,7 +28,8 @@ using namespace NLMISC;
 CNodeMeta::CNodeMeta() :
 	AddToIG(true),
 	ExportMesh(TMeshShape),
-	ExportBone(TBoneAuto)
+	ExportBone(TBoneAuto),
+	AutoAnim(false)
 {
 
 }
@@ -42,6 +43,7 @@ void CNodeMeta::serial(NLMISC::IStream &s)
 	s.serial(InstanceShape);
 	s.serial(InstanceName);
 	s.serial(InstanceGroupName);
+	s.serial(AutoAnim);
 }
 
 CSceneMeta::CSceneMeta() :

@@ -47,7 +47,7 @@ void importShapes(CMeshUtilsContext &context, const aiNode *node)
 	{
 		CNodeContext &nodeContext = context.Nodes[node->mName.C_Str()];
 		CNodeMeta &nodeMeta = context.SceneMeta.Nodes[node->mName.C_Str()];
-		if (nodeMeta.ExportMesh == TMeshShape)
+		if (nodeMeta.ExportMesh == TMeshShape && nodeMeta.InstanceName.empty())
 		{
 			if (node->mNumMeshes)
 			{
@@ -232,7 +232,11 @@ int exportScene(const CMeshUtilsSettings &settings)
 	CDatabaseConfig::initTextureSearchDirectories();
 
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, aiProcess_Triangulate | aiProcess_ValidateDataStructure); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
+	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, 0
+		| aiProcess_Triangulate 
+		| aiProcess_ValidateDataStructure
+		| aiProcess_GenNormals // Or GenSmoothNormals? TODO: Validate smoothness between material boundaries!
+		); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
 	if (!scene)
 	{
 		const char *errs = importer.GetErrorString();
@@ -264,6 +268,9 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// 2) When a different root is found, connect the two to the nearest common bone
 	// ]
 	// -- SKEL FLAG --
+
+	// TODO
+	// First import materials...
 
 	importShapes(context, context.InternalScene->mRootNode);
 
