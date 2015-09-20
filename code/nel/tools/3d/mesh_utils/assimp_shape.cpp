@@ -87,10 +87,10 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 				"(%s) mesh->GetNumColorChannels() > 2", node->mName.C_Str());
 			return false;
 		}
-		if (mesh->GetNumUVChannels() > 1)
+		if (mesh->GetNumUVChannels() > CVertexBuffer::MaxStage)
 		{
 			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
-				"(%s) mesh->GetNumUVChannels() > 1", node->mName.C_Str());
+				"(%s) mesh->GetNumUVChannels() > CVertexBuffer::MaxStage", node->mName.C_Str());
 			return false;
 		}
 		if (!mesh->HasNormals())
@@ -161,13 +161,14 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			}
 			CMesh::CFace &face = buildMesh.Faces[numFaces];
 			face.MaterialId = mi;
-			face.SmoothGroup = 0; // No smoothing group (bitfield)
+			face.SmoothGroup = 0; // No smoothing groups (bitfield)
 			face.Corner[0].Vertex = vertexRemapping[mi][af.mIndices[0]];
 			face.Corner[1].Vertex = vertexRemapping[mi][af.mIndices[1]];
 			face.Corner[2].Vertex = vertexRemapping[mi][af.mIndices[2]];
 			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[0]]);
 			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[1]]);
 			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[2]]);
+			// TODO: If we want normal maps, we need to add tangent vectors to CFace and build process
 			// TODO: UV
 			if (numColorChannels > 0) // TODO: Verify
 			{
@@ -176,9 +177,9 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 				face.Corner[2].Color = convColor(mesh->mColors[0][af.mIndices[2]]);
 				if (numColorChannels > 1) // TODO: Verify
 				{
-					face.Corner[0].Specular = convColor(mesh->mColors[0][af.mIndices[0]]);
-					face.Corner[1].Specular = convColor(mesh->mColors[0][af.mIndices[1]]);
-					face.Corner[2].Specular = convColor(mesh->mColors[0][af.mIndices[2]]);
+					face.Corner[0].Specular = convColor(mesh->mColors[1][af.mIndices[0]]);
+					face.Corner[1].Specular = convColor(mesh->mColors[1][af.mIndices[1]]);
+					face.Corner[2].Specular = convColor(mesh->mColors[1][af.mIndices[2]]);
 				}
 			}
 			// TODO: Color modulate, alpha, use color alpha for vp tree, etc
