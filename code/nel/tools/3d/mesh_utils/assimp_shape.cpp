@@ -32,6 +32,8 @@
 
 #include <nel/3d/mesh.h>
 
+#include "assimp_material.h"
+
 using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
@@ -50,10 +52,31 @@ using namespace NL3D;
 
 // TODO: Skinned - reverse transform by skeleton root bone to align?
 
-void assimpBuildBaseMesh(CMeshBase::CMeshBaseBuild &buildBaseMesh, CNodeContext &nodeContext)
+void assimpBuildBaseMesh(CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
 	const aiNode *node = nodeContext.InternalNode;
-	// TODO: Reference CExportNel::buildBaseMeshInterface
+	// Reference CExportNel::buildBaseMeshInterface
+
+	// Load materials
+	buildBaseMesh.Materials.resize(node->mNumMeshes);
+
+	for (unsigned int mi = 0; mi < node->mNumMeshes; ++mi)
+	{
+		const aiMesh *mesh = context.InternalScene->mMeshes[node->mMeshes[mi]];
+		const aiMaterial *am = context.InternalScene->mMaterials[mesh->mMaterialIndex];
+
+		aiString amname;
+		if (am->Get(AI_MATKEY_NAME, amname) != aiReturn_SUCCESS)
+		{
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Material used by node '%s' has no name", node->mName.C_Str()); // TODO: Maybe autogen names by index in mesh or node if this is actually a thing
+			assimpMaterial(buildBaseMesh.Materials[mi], context, am);
+		}
+		else
+		{
+			buildBaseMesh.Materials[mi] = *context.SceneMeta.Materials[amname.C_Str()];
+		}
+	}
 }
 
 inline CVector convVector(const aiVector3D &av)
@@ -100,6 +123,9 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			return false;
 		}
 	}
+
+	// Default vertex flags
+	buildMesh.VertexFlags = CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag;
 
 	// TODO: UV Channels
 	for (uint i = 0; i < CVertexBuffer::MaxStage; ++i)
@@ -208,7 +234,7 @@ bool assimpShape(CMeshUtilsContext &context, CNodeContext &nodeContext)
 
 	// Fill the build interface of CMesh
 	CMeshBase::CMeshBaseBuild buildBaseMesh;
-	assimpBuildBaseMesh(buildBaseMesh, nodeContext);
+	assimpBuildBaseMesh(buildBaseMesh, context, nodeContext);
 
 	CMesh::CMeshBuild buildMesh;
 	if (!assimpBuildMesh(buildMesh, buildBaseMesh, context, nodeContext))

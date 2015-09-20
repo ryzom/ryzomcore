@@ -48,10 +48,8 @@ inline CRGBA convColor(const aiColor4D &ac)
 	return CRGBA(ac.r * 255.99f, ac.g * 255.99f, ac.b * 255.99f, ac.a * 255.99f);
 }
 
-CSmartPtr<CMaterial> assimpMaterial(CMeshUtilsContext &context, const aiMaterial *am)
+void assimpMaterial(NL3D::CMaterial &mat, CMeshUtilsContext &context, const aiMaterial *am)
 {
-	CSmartPtr<CMaterial> matp = new CMaterial();
-	CMaterial &mat = *matp;
 	mat.initLighted();
 	mat.setShader(CMaterial::Normal);
 
@@ -107,12 +105,20 @@ CSmartPtr<CMaterial> assimpMaterial(CMeshUtilsContext &context, const aiMaterial
 
 	if (am->Get(AI_MATKEY_COLOR_EMISSIVE, c3) == aiReturn_SUCCESS)
 		mat.setEmissive(convColor(c3));
+}
 
+CSmartPtr<CMaterial> assimpMaterial(CMeshUtilsContext &context, const aiMaterial *am)
+{
+	CSmartPtr<CMaterial> matp = new CMaterial();
+	CMaterial &mat = *matp;
+	assimpMaterial(mat, context, am);
 	return matp;
 }
 
 void assimpMaterials(CMeshUtilsContext &context)
 {
+	set<CSString> materialNames;
+
 	const aiScene *scene = context.InternalScene;
 	for (unsigned int mi = 0; mi < scene->mNumMaterials; ++mi)
 	{
@@ -131,10 +137,18 @@ void assimpMaterials(CMeshUtilsContext &context)
 				"Material has no name");
 			continue;
 		}
+
+		if (materialNames.find(amname.C_Str()) != materialNames.end())
+		{
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Material name '%s' used more than once", amname.C_Str());
+			continue;
+		}
 		
 		if (context.SceneMeta.Materials.find(amname.C_Str())
 			== context.SceneMeta.Materials.end())
 		{
+			materialNames.insert(amname.C_Str());
 			context.SceneMeta.Materials[amname.C_Str()] = assimpMaterial(context, am);
 		}
 	}

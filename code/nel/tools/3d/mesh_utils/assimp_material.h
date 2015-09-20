@@ -17,8 +17,12 @@
 
 #include <nel/misc/types_nl.h>
 
-struct CMeshUtilsContext;
+namespace NL3D {
+	class CMaterial;
+}
 
+struct CMeshUtilsContext;
+void assimpMaterial(NL3D::CMaterial &mat, CMeshUtilsContext &context, const aiMaterial *am);
 void assimpMaterials(CMeshUtilsContext &context);
 
 /* end of file */

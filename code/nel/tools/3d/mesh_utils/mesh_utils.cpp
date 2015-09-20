@@ -21,6 +21,9 @@
 #include <nel/misc/debug.h>
 #include <nel/misc/tool_logger.h>
 #include <nel/misc/sstring.h>
+#include <nel/misc/file.h>
+
+#include <nel/3d/shape.h>
 
 #include "database_config.h"
 #include "scene_meta.h"
@@ -217,6 +220,34 @@ void flagExpandedBones(CMeshUtilsContext &context)
 	}
 }
 
+void exportShapes(CMeshUtilsContext &context)
+{
+	for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+	{
+		CNodeContext &nodeContext = it->second;
+		if (nodeContext.Shape)
+		{
+			std::string shapePath = context.Settings.DestinationDirectoryPath + "/" + it->first + ".shape";
+			context.ToolLogger.writeDepend(NLMISC::BUILD, shapePath.c_str(), "*");
+			NLMISC::COFile f;
+			if (f.open(shapePath, false, false, true))
+			{
+				try
+				{
+					NL3D::CShapeStream shapeStream(nodeContext.Shape);
+					shapeStream.serial(f);
+					f.close();
+				}
+				catch (...)
+				{
+					tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+						"Shape '%s' serialization failed!", it->first.c_str());
+				}
+			}
+		}
+	}
+}
+
 // TODO: Separate load scene and save scene functions
 int exportScene(const CMeshUtilsSettings &settings)
 {
@@ -276,6 +307,9 @@ int exportScene(const CMeshUtilsSettings &settings)
 
 	// Import shapes
 	importShapes(context, context.InternalScene->mRootNode);
+
+	// Export shapes
+	exportShapes(context);
 
 	return EXIT_SUCCESS;
 }
