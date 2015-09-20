@@ -57,7 +57,7 @@ struct CNodeMeta
 enum TSkel
 {
 	TSkelLocal = 0, // Export smallest skeleton possible from connected bones
-	TSkelRoot = 1, // Export skeleton from direct child node in the scene root node
+	TSkelRoot = 1, // Export skeleton from a direct child node in the scene root node
 	TSkelFull = 2, // Include all connected child nodes in the skeleton
 };
 

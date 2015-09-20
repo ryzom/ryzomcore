@@ -46,7 +46,7 @@ void CNodeMeta::serial(NLMISC::IStream &s)
 
 CSceneMeta::CSceneMeta() :
 	DefaultInstanceGroup(false),
-	SkeletonMode(TSkelLocal)
+	SkeletonMode(TSkelRoot)
 {
 	
 }

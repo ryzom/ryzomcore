@@ -64,7 +64,7 @@ struct CMeshUtilsContext
 	const aiScene *AssimpScene;
 	CSceneMeta SceneMeta;
 
-	TNodeContextMap Nodes;
+	TNodeContextMap Nodes; // Impl note: Should never end up containing the scene root node.
 	// std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
 };
 
@@ -139,15 +139,23 @@ void flagAssimpBones(CMeshUtilsContext &context)
 			}
 		}
 	}
+
+	// Find out which nodes are bones by checking the animation info
+	// TODO
 }
 
-void flagRecursiveBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
+void flagRecursiveBones(CMeshUtilsContext &context, CNodeContext &nodeContext, bool autoStop = false)
 {
 	nodeContext.IsBone = true;
 	const aiNode *node = nodeContext.AssimpNode;
 	nlassert(node);
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		flagRecursiveBones(context, context.Nodes[node->mName.C_Str()]);
+	{
+		CNodeContext &ctx = context.Nodes[node->mName.C_Str()];
+		if (autoStop && ctx.IsBone)
+			continue;
+		flagRecursiveBones(context, ctx);
+	}
 }
 
 void flagMetaBones(CMeshUtilsContext &context)
@@ -168,11 +176,24 @@ void flagLocalParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
 	const aiNode *node = nodeContext.AssimpNode;
 }
 
-void flagAllParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
+void flagAllParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext, bool autoStop = false)
 {
 	const aiNode *parent = nodeContext.AssimpNode;
-	while (parent = parent->mParent) if (parent->mName.length)
-		context.Nodes[parent->mName.C_Str()].IsBone = true;
+	while (parent = parent->mParent) if (parent->mName.length && parent != context.AssimpScene->mRootNode)
+	{
+		CNodeContext &ctx = context.Nodes[parent->mName.C_Str()];
+		if (autoStop && ctx.IsBone)
+			break;
+		ctx.IsBone = true;
+	}
+}
+
+bool hasIndirectParentBone(CMeshUtilsContext &context, CNodeContext &nodeContext)
+{
+	const aiNode *parent = nodeContext.AssimpNode;
+	while (parent = parent->mParent) if (parent->mName.length && parent != context.AssimpScene->mRootNode)
+		if (context.Nodes[parent->mName.C_Str()].IsBone) return true;
+	return false;
 }
 
 void flagExpandedBones(CMeshUtilsContext &context)
@@ -183,10 +204,8 @@ void flagExpandedBones(CMeshUtilsContext &context)
 		for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
 		{
 			CNodeContext &nodeContext = it->second;
-			if (nodeContext.IsBone)
-			{
-
-			}
+			if (nodeContext.IsBone && hasIndirectParentBone(context, nodeContext))
+				flagAllParentBones(context, nodeContext, true);
 		}
 		break;
 	case TSkelRoot:
@@ -194,9 +213,7 @@ void flagExpandedBones(CMeshUtilsContext &context)
 		{
 			CNodeContext &nodeContext = it->second;
 			if (nodeContext.IsBone)
-			{
-
-			}
+				flagAllParentBones(context, nodeContext, true);
 		}
 		break;
 	case TSkelFull:
@@ -204,9 +221,13 @@ void flagExpandedBones(CMeshUtilsContext &context)
 		{
 			CNodeContext &nodeContext = it->second;
 			if (nodeContext.IsBone)
-			{
-
-			}
+				flagAllParentBones(context, nodeContext, true);
+		}
+		for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+		{
+			CNodeContext &nodeContext = it->second;
+			if (nodeContext.IsBone)
+				flagRecursiveBones(context, nodeContext, true);
 		}
 		break;
 	}
@@ -248,9 +269,19 @@ int exportScene(const CMeshUtilsSettings &settings)
 		context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
 	validateAssimpNodeNames(context, context.AssimpScene->mRootNode);
+
+	// -- SKEL FLAG --
 	flagAssimpBones(context);
 	flagMetaBones(context);
 	flagExpandedBones(context);
+	// TODO
+	// [
+	// Only necessary in TSkelLocal
+	// For each shape test if all the bones have the same root bones for their skeleton
+	// 1) Iterate each until a different is found
+	// 2) When a different root is found, connect the two to the nearest common bone
+	// ]
+	// -- SKEL FLAG --
 
 	importNode(context, scene->mRootNode);
 
