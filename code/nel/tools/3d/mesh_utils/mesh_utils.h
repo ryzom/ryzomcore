@@ -30,9 +30,9 @@ struct CMeshUtilsSettings
 	std::string ToolErrorLog;
 
 	// Relative Directories
-	std::string ShapeDirectory;
+	/*std::string ShapeDirectory;
 	std::string IGDirectory;
-	std::string SkelDirectory;
+	std::string SkelDirectory;*/
 };
 
 int exportScene(const CMeshUtilsSettings &settings);

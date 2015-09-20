@@ -88,7 +88,7 @@ private:
 	FILE *m_DependLog;
 
 public:
-	inline CToolLogger()
+	inline CToolLogger() : m_ErrorLog(NULL), m_DependLog(NULL)
 	{
 
 	}

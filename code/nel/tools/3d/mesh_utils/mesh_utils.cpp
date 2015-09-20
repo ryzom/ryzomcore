@@ -22,15 +22,17 @@
 #include <nel/misc/tool_logger.h>
 #include <nel/misc/sstring.h>
 
+#include "database_config.h"
+
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
 CMeshUtilsSettings::CMeshUtilsSettings()
 {
-	ShapeDirectory = "shape";
+	/*ShapeDirectory = "shape";
 	IGDirectory = "ig";
-	SkelDirectory = "skel";
+	SkelDirectory = "skel";*/
 }
 
 struct CNodeContext
@@ -119,11 +121,11 @@ void flagAssimpBones(CMeshUtilsContext &context)
 		const aiMesh *mesh = scene->mMeshes[i];
 		for (unsigned int j = 0; j < mesh->mNumBones; ++j)
 		{
-			CNodeContext &nodeContext = context.Nodes[mesh->mBones[i]->mName.C_Str()];
+			CNodeContext &nodeContext = context.Nodes[mesh->mBones[j]->mName.C_Str()];
 			if (!nodeContext.AssimpNode)
 			{
 				tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
-					"Bone '%s' has no associated node", mesh->mBones[i]->mName.C_Str());
+					"Bone '%s' has no associated node", mesh->mBones[j]->mName.C_Str());
 			}
 			else
 			{
@@ -145,25 +147,28 @@ void flagAssimpBones(CMeshUtilsContext &context)
 int exportScene(const CMeshUtilsSettings &settings)
 {
 	CMeshUtilsContext context(settings);
+	NLMISC::CFile::createDirectoryTree(settings.DestinationDirectoryPath);
 
 	if (!settings.ToolDependLog.empty())
 		context.ToolLogger.initDepend(settings.ToolDependLog);
 	if (!settings.ToolErrorLog.empty())
-		context.ToolLogger.initDepend(settings.ToolErrorLog);
+		context.ToolLogger.initError(settings.ToolErrorLog);
 	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.Settings.SourceFilePath.c_str()); // Base input file
 
-	// Find database configuration
-
+	// Apply database configuration
+	CDatabaseConfig::init(settings.SourceFilePath);
+	CDatabaseConfig::initTextureSearchDirectories();
 
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, aiProcess_Triangulate | aiProcess_ValidateDataStructure); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
 	if (!scene)
 	{
 		const char *errs = importer.GetErrorString();
-		if (errs) tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), errs);
+		if (errs) tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Assimp failed to load the scene: '%s'", errs);
 		else tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to load scene");
 		return EXIT_FAILURE;
 	}
+	// aiProcess_Triangulate
 	// aiProcess_ValidateDataStructure: TODO: Catch Assimp error output stream
 	// aiProcess_RemoveRedundantMaterials: Not used because we may override materials with NeL Material from meta
 	// aiProcess_ImproveCacheLocality: TODO: Verify this does not modify vertex indices
@@ -171,6 +176,7 @@ int exportScene(const CMeshUtilsSettings &settings)
 
 	context.AssimpScene = scene;
 
+	validateAssimpNodeNames(context, context.AssimpScene->mRootNode);
 	flagAssimpBones(context);
 
 	importNode(context, scene->mRootNode, &g_DefaultMeta);
