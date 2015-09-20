@@ -192,8 +192,8 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			face.Corner[1].Vertex = vertexRemapping[mi][af.mIndices[1]];
 			face.Corner[2].Vertex = vertexRemapping[mi][af.mIndices[2]];
 			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[0]]);
-			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[1]]);
-			face.Corner[0].Normal = convVector(mesh->mNormals[af.mIndices[2]]);
+			face.Corner[1].Normal = convVector(mesh->mNormals[af.mIndices[1]]);
+			face.Corner[2].Normal = convVector(mesh->mNormals[af.mIndices[2]]);
 			// TODO: If we want normal maps, we need to add tangent vectors to CFace and build process
 			// TODO: UV
 			if (numColorChannels > 0) // TODO: Verify
