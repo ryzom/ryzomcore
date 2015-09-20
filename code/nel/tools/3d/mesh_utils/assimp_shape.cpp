@@ -41,6 +41,7 @@ using namespace NL3D;
 // TODO: buildRemanence ??
 // TODO: buildFlare ??
 // Probably specific settings we can only do in meta editor on a dummy node..
+// TODO: pacs prim
 
 // TODO: buildWaterShape specifics when node has water material
 
