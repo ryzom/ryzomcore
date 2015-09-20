@@ -15,30 +15,27 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_MESH_UTILS_H
-#define NL_MESH_UTILS_H
 #include <nel/misc/types_nl.h>
+#include "assimp_shape.h"
 
-#include <string>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
 
-struct CMeshUtilsSettings
+#define NL_NODE_INTERNAL_TYPE aiNode
+#define NL_SCENE_INTERNAL_TYPE aiScene
+#include "scene_context.h"
+
+#include <nel/misc/debug.h>
+#include <nel/misc/path.h>
+#include <nel/misc/tool_logger.h>
+
+using namespace std;
+using namespace NLMISC;
+
+void assimpShape(CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
-	CMeshUtilsSettings();
 
-	// Absolute Paths
-	std::string SourceFilePath;
-	std::string DestinationDirectoryPath;
-	std::string ToolDependLog;
-	std::string ToolErrorLog;
-
-	// Relative Directories
-	/*std::string ShapeDirectory;
-	std::string IGDirectory;
-	std::string SkelDirectory;*/
-};
-
-int exportScene(const CMeshUtilsSettings &settings);
-
-#endif /* NL_MESH_UTILS_H */
+}
 
 /* end of file */

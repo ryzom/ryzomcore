@@ -29,6 +29,11 @@
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
 
+#define NL_NODE_INTERNAL_TYPE aiNode
+#define NL_SCENE_INTERNAL_TYPE aiScene
+#include "scene_context.h"
+#include "assimp_shape.h"
+
 CMeshUtilsSettings::CMeshUtilsSettings()
 {
 	/*ShapeDirectory = "shape";
@@ -36,52 +41,29 @@ CMeshUtilsSettings::CMeshUtilsSettings()
 	SkelDirectory = "skel";*/
 }
 
-struct CNodeContext
+void importShapes(CMeshUtilsContext &context, const aiNode *node)
 {
-	CNodeContext() :
-		AssimpNode(NULL),
-		IsBone(false)
+	if (node != context.InternalScene->mRootNode)
 	{
-
-	}
-
-	const aiNode *AssimpNode;
-	bool IsBone;
-};
-
-typedef std::map<NLMISC::CSString, CNodeContext> TNodeContextMap;
-struct CMeshUtilsContext
-{
-	CMeshUtilsContext(const CMeshUtilsSettings &settings) : Settings(settings), AssimpScene(NULL)
-	{
-
-	}
-
-	const CMeshUtilsSettings &Settings;
-	
-	NLMISC::CToolLogger ToolLogger;
-
-	const aiScene *AssimpScene;
-	CSceneMeta SceneMeta;
-
-	TNodeContextMap Nodes; // Impl note: Should never end up containing the scene root node.
-	// std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
-};
-
-void importNode(CMeshUtilsContext &context, const aiNode *node)
-{
-	if (node->mNumMeshes)
-	{
-		// TODO
+		CNodeContext &nodeContext = context.Nodes[node->mName.C_Str()];
+		CNodeMeta &nodeMeta = context.SceneMeta.Nodes[node->mName.C_Str()];
+		if (nodeMeta.ExportMesh == TMeshShape)
+		{
+			if (node->mNumMeshes)
+			{
+				nldebug("Shape '%s' found containing '%u' meshes", node->mName.C_Str(), node->mNumMeshes);
+				assimpShape(context, nodeContext);
+			}
+		}
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		importNode(context, node->mChildren[i]);
+		importShapes(context, node->mChildren[i]);
 }
 
-void validateAssimpNodeNames(CMeshUtilsContext &context, const aiNode *node)
+void validateInternalNodeNames(CMeshUtilsContext &context, const aiNode *node)
 {
-	if (!node->mParent || node == context.AssimpScene->mRootNode)
+	if (!node->mParent || node == context.InternalScene->mRootNode)
 	{
 		// do nothing
 	}
@@ -94,25 +76,25 @@ void validateAssimpNodeNames(CMeshUtilsContext &context, const aiNode *node)
 	{
 		CNodeContext &nodeContext = context.Nodes[node->mName.C_Str()];
 
-		if (nodeContext.AssimpNode && nodeContext.AssimpNode != node)
+		if (nodeContext.InternalNode && nodeContext.InternalNode != node)
 		{
 			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
 				"Node name '%s' appears multiple times", node->mName.C_Str());
 		}
 		else
 		{
-			nodeContext.AssimpNode = node;
+			nodeContext.InternalNode = node;
 		}
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		validateAssimpNodeNames(context, node->mChildren[i]);
+		validateInternalNodeNames(context, node->mChildren[i]);
 }
 
 void flagAssimpBones(CMeshUtilsContext &context)
 {
 	// Find out which nodes are bones by checking the mesh meta info
-	const aiScene *scene = context.AssimpScene;
+	const aiScene *scene = context.InternalScene;
 	for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
 	{
 		// nldebug("FOUND MESH '%s'\n", scene->mMeshes[i]->mName.C_Str());
@@ -120,7 +102,7 @@ void flagAssimpBones(CMeshUtilsContext &context)
 		for (unsigned int j = 0; j < mesh->mNumBones; ++j)
 		{
 			CNodeContext &nodeContext = context.Nodes[mesh->mBones[j]->mName.C_Str()];
-			if (!nodeContext.AssimpNode)
+			if (!nodeContext.InternalNode)
 			{
 				tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
 					"Bone '%s' has no associated node", mesh->mBones[j]->mName.C_Str());
@@ -131,7 +113,7 @@ void flagAssimpBones(CMeshUtilsContext &context)
 				nodeContext.IsBone = true;
 
 				// Flag all parents as bones
-				/*const aiNode *parent = nodeContext.AssimpNode;
+				/*const aiNode *parent = nodeContext.InternalNode;
 				while (parent = parent->mParent) if (parent->mName.length)
 				{
 					context.Nodes[parent->mName.C_Str()].IsBone = true;
@@ -147,7 +129,7 @@ void flagAssimpBones(CMeshUtilsContext &context)
 void flagRecursiveBones(CMeshUtilsContext &context, CNodeContext &nodeContext, bool autoStop = false)
 {
 	nodeContext.IsBone = true;
-	const aiNode *node = nodeContext.AssimpNode;
+	const aiNode *node = nodeContext.InternalNode;
 	nlassert(node);
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
 	{
@@ -173,13 +155,13 @@ void flagMetaBones(CMeshUtilsContext &context)
 
 void flagLocalParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
-	const aiNode *node = nodeContext.AssimpNode;
+	const aiNode *node = nodeContext.InternalNode;
 }
 
 void flagAllParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext, bool autoStop = false)
 {
-	const aiNode *parent = nodeContext.AssimpNode;
-	while (parent = parent->mParent) if (parent->mName.length && parent != context.AssimpScene->mRootNode)
+	const aiNode *parent = nodeContext.InternalNode;
+	while (parent = parent->mParent) if (parent->mName.length && parent != context.InternalScene->mRootNode)
 	{
 		CNodeContext &ctx = context.Nodes[parent->mName.C_Str()];
 		if (autoStop && ctx.IsBone)
@@ -190,8 +172,8 @@ void flagAllParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext, b
 
 bool hasIndirectParentBone(CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
-	const aiNode *parent = nodeContext.AssimpNode;
-	while (parent = parent->mParent) if (parent->mName.length && parent != context.AssimpScene->mRootNode)
+	const aiNode *parent = nodeContext.InternalNode;
+	while (parent = parent->mParent) if (parent->mName.length && parent != context.InternalScene->mRootNode)
 		if (context.Nodes[parent->mName.C_Str()].IsBone) return true;
 	return false;
 }
@@ -264,11 +246,11 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// aiProcess_ImproveCacheLocality: TODO: Verify this does not modify vertex indices
 	//scene->mRootNode->mMetaData
 
-	context.AssimpScene = scene;
+	context.InternalScene = scene;
 	if (context.SceneMeta.load(context.Settings.SourceFilePath))
 		context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
-	validateAssimpNodeNames(context, context.AssimpScene->mRootNode);
+	validateInternalNodeNames(context, context.InternalScene->mRootNode);
 
 	// -- SKEL FLAG --
 	flagAssimpBones(context);
@@ -283,7 +265,7 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// ]
 	// -- SKEL FLAG --
 
-	importNode(context, scene->mRootNode);
+	importShapes(context, context.InternalScene->mRootNode);
 
 	return EXIT_SUCCESS;
 }

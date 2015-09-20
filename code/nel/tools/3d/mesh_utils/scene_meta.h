@@ -15,6 +15,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NL_SCENE_META_H
+#define NL_SCENE_META_H
 #include <nel/misc/types_nl.h>
 
 #include <nel/misc/sstring.h>
@@ -79,5 +81,7 @@ private:
 	std::string m_MetaFilePath;
 
 };
+
+#endif NL_SCENE_META_H
 
 /* end of file */
