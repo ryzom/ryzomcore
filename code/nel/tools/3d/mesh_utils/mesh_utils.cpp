@@ -32,6 +32,8 @@
 #define NL_NODE_INTERNAL_TYPE aiNode
 #define NL_SCENE_INTERNAL_TYPE aiScene
 #include "scene_context.h"
+
+#include "assimp_material.h"
 #include "assimp_shape.h"
 
 CMeshUtilsSettings::CMeshUtilsSettings()
@@ -269,9 +271,10 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// ]
 	// -- SKEL FLAG --
 
-	// TODO
-	// First import materials...
+	// First import materials
+	assimpMaterials(context);
 
+	// Import shapes
 	importShapes(context, context.InternalScene->mRootNode);
 
 	return EXIT_SUCCESS;

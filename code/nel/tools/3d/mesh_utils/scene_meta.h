@@ -20,9 +20,16 @@
 #include <nel/misc/types_nl.h>
 
 #include <nel/misc/sstring.h>
+#include <nel/misc/smart_ptr.h>
+
+#include <nel/3d/material.h>
 
 namespace NLMISC {
 	class IStream;
+}
+
+namespace NL3D {
+	class CMaterial;
 }
 
 enum TMesh
@@ -56,6 +63,7 @@ struct CNodeMeta
 	std::string InstanceGroupName;
 
 	bool AutoAnim;
+	// std::vector<NLMISC::CSString> Materials; // In case there's an issue with nameless materials in some format... Map to material entirely in the meta editor.
 
 	void serial(NLMISC::IStream &s);
 };
@@ -67,13 +75,16 @@ enum TSkel
 	TSkelFull = 2, // Include all connected child nodes in the skeleton
 };
 
+typedef std::map<NLMISC::CSString, NLMISC::CSmartPtr<NL3D::CMaterial> > TMaterialMap;
 struct CSceneMeta
 {
 	CSceneMeta();
 
-	bool DefaultInstanceGroup; // Export a default instance group from nodes the scene that do not have an instance group set
+	bool ExportDefaultIG; // Export a default instance group from nodes the scene that do not have an instance group set
 	TSkel SkeletonMode;
+
 	std::map<NLMISC::CSString, CNodeMeta> Nodes;
+	TMaterialMap Materials;
 
 	const std::string &metaFilePath() const { return m_MetaFilePath; }
 

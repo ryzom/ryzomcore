@@ -27,6 +27,8 @@
 #include <nel/misc/smart_ptr.h>
 #include <nel/misc/matrix.h>
 
+#include <nel/3d/shape.h>
+
 #ifndef NL_NODE_INTERNAL_TYPE
 #define NL_NODE_INTERNAL_TYPE void
 #endif
@@ -36,6 +38,7 @@
 
 namespace NL3D {
 	class IShape;
+	class CMaterial;
 }
 
 struct CNodeContext
@@ -51,7 +54,7 @@ struct CNodeContext
 	bool IsBone;
 
 	// NLMISC::CMatrix Transform; // TODO
-	NLMISC::CRefPtr<NL3D::IShape> Shape;
+	NLMISC::CSmartPtr<NL3D::IShape> Shape;
 };
 
 typedef std::map<NLMISC::CSString, CNodeContext> TNodeContextMap;

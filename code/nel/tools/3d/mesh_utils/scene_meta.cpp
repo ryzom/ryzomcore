@@ -22,6 +22,8 @@
 #include <nel/misc/stream.h>
 #include <nel/misc/file.h>
 
+#include <nel/3d/material.h>
+
 using namespace std;
 using namespace NLMISC;
 
@@ -47,7 +49,7 @@ void CNodeMeta::serial(NLMISC::IStream &s)
 }
 
 CSceneMeta::CSceneMeta() :
-	DefaultInstanceGroup(false),
+	ExportDefaultIG(false),
 	SkeletonMode(TSkelRoot)
 {
 	
@@ -77,10 +79,11 @@ void CSceneMeta::serial(NLMISC::IStream &s)
 {
 	uint version = s.serialVersion(1);
 
-	s.serial(DefaultInstanceGroup);
+	s.serial(ExportDefaultIG);
 	s.serial((uint32 &)SkeletonMode);
 
 	s.serialCont(Nodes);
+	s.serialPtrCont(Materials);
 }
 
 /* end of file */
