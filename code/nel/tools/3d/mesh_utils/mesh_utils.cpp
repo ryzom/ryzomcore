@@ -23,6 +23,7 @@
 #include <nel/misc/sstring.h>
 
 #include "database_config.h"
+#include "scene_meta.h"
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -48,6 +49,7 @@ struct CNodeContext
 	bool IsBone;
 };
 
+typedef std::map<NLMISC::CSString, CNodeContext> TNodeContextMap;
 struct CMeshUtilsContext
 {
 	CMeshUtilsContext(const CMeshUtilsSettings &settings) : Settings(settings), AssimpScene(NULL)
@@ -60,17 +62,13 @@ struct CMeshUtilsContext
 	NLMISC::CToolLogger ToolLogger;
 
 	const aiScene *AssimpScene;
-	std::map<NLMISC::CSString, CNodeContext> Nodes;
-	std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
+	CSceneMeta SceneMeta;
+
+	TNodeContextMap Nodes;
+	// std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
 };
 
-struct CNodeMeta
-{
-	// TODO
-};
-static const CNodeMeta g_DefaultMeta;
-
-void importNode(CMeshUtilsContext &context, const aiNode *node, const CNodeMeta *meta)
+void importNode(CMeshUtilsContext &context, const aiNode *node)
 {
 	if (node->mNumMeshes)
 	{
@@ -78,7 +76,7 @@ void importNode(CMeshUtilsContext &context, const aiNode *node, const CNodeMeta 
 	}
 
 	for (unsigned int i = 0; i < node->mNumChildren; ++i)
-		importNode(context, node->mChildren[i], &g_DefaultMeta);
+		importNode(context, node->mChildren[i]);
 }
 
 void validateAssimpNodeNames(CMeshUtilsContext &context, const aiNode *node)
@@ -143,6 +141,77 @@ void flagAssimpBones(CMeshUtilsContext &context)
 	}
 }
 
+void flagRecursiveBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
+{
+	nodeContext.IsBone = true;
+	const aiNode *node = nodeContext.AssimpNode;
+	nlassert(node);
+	for (unsigned int i = 0; i < node->mNumChildren; ++i)
+		flagRecursiveBones(context, context.Nodes[node->mName.C_Str()]);
+}
+
+void flagMetaBones(CMeshUtilsContext &context)
+{
+	for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+	{
+		CNodeContext &ctx = it->second;
+		CNodeMeta &meta = context.SceneMeta.Nodes[it->first];
+		if (meta.ExportBone == TBoneForce)
+			ctx.IsBone = true;
+		else if (meta.ExportBone == TBoneRoot)
+			flagRecursiveBones(context, ctx);
+	}
+}
+
+void flagLocalParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
+{
+	const aiNode *node = nodeContext.AssimpNode;
+}
+
+void flagAllParentBones(CMeshUtilsContext &context, CNodeContext &nodeContext)
+{
+	const aiNode *parent = nodeContext.AssimpNode;
+	while (parent = parent->mParent) if (parent->mName.length)
+		context.Nodes[parent->mName.C_Str()].IsBone = true;
+}
+
+void flagExpandedBones(CMeshUtilsContext &context)
+{
+	switch (context.SceneMeta.SkeletonMode)
+	{
+	case TSkelLocal:
+		for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+		{
+			CNodeContext &nodeContext = it->second;
+			if (nodeContext.IsBone)
+			{
+
+			}
+		}
+		break;
+	case TSkelRoot:
+		for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+		{
+			CNodeContext &nodeContext = it->second;
+			if (nodeContext.IsBone)
+			{
+
+			}
+		}
+		break;
+	case TSkelFull:
+		for (TNodeContextMap::iterator it(context.Nodes.begin()), end(context.Nodes.end()); it != end; ++it)
+		{
+			CNodeContext &nodeContext = it->second;
+			if (nodeContext.IsBone)
+			{
+
+			}
+		}
+		break;
+	}
+}
+
 // TODO: Separate load scene and save scene functions
 int exportScene(const CMeshUtilsSettings &settings)
 {
@@ -175,11 +244,15 @@ int exportScene(const CMeshUtilsSettings &settings)
 	//scene->mRootNode->mMetaData
 
 	context.AssimpScene = scene;
+	if (context.SceneMeta.load(context.Settings.SourceFilePath))
+		context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
 	validateAssimpNodeNames(context, context.AssimpScene->mRootNode);
 	flagAssimpBones(context);
+	flagMetaBones(context);
+	flagExpandedBones(context);
 
-	importNode(context, scene->mRootNode, &g_DefaultMeta);
+	importNode(context, scene->mRootNode);
 
 	return EXIT_SUCCESS;
 }
