@@ -19,6 +19,8 @@
 #include "mesh_utils.h"
 
 #include <nel/misc/debug.h>
+#include <nel/misc/tool_logger.h>
+#include <nel/misc/sstring.h>
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -52,9 +54,12 @@ struct CMeshUtilsContext
 	}
 
 	const CMeshUtilsSettings &Settings;
+	
+	NLMISC::CToolLogger ToolLogger;
 
 	const aiScene *AssimpScene;
-	std::map<std::string, CNodeContext> Nodes;
+	std::map<NLMISC::CSString, CNodeContext> Nodes;
+	std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
 };
 
 struct CNodeMeta
@@ -82,7 +87,8 @@ void validateAssimpNodeNames(CMeshUtilsContext &context, const aiNode *node)
 	}
 	else if (node->mName.length == 0)
 	{
-		nlwarning("CRITICAL: Node has no name");
+		tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
+			"Node has no name");
 	}
 	else
 	{
@@ -90,7 +96,8 @@ void validateAssimpNodeNames(CMeshUtilsContext &context, const aiNode *node)
 
 		if (nodeContext.AssimpNode && nodeContext.AssimpNode != node)
 		{
-			nlwarning("CRITICAL: Node name '%s' appears multiple times", node->mName.C_Str());
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
+				"Node name '%s' appears multiple times", node->mName.C_Str());
 		}
 		else
 		{
@@ -115,7 +122,8 @@ void flagAssimpBones(CMeshUtilsContext &context)
 			CNodeContext &nodeContext = context.Nodes[mesh->mBones[i]->mName.C_Str()];
 			if (!nodeContext.AssimpNode)
 			{
-				nlwarning("CRITICAL: Bone '%s' has no associated node", mesh->mBones[i]->mName.C_Str());
+				tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
+					"Bone '%s' has no associated node", mesh->mBones[i]->mName.C_Str());
 			}
 			else
 			{
@@ -123,11 +131,11 @@ void flagAssimpBones(CMeshUtilsContext &context)
 				nodeContext.IsBone = true;
 
 				// Flag all parents as bones
-				const aiNode *parent = nodeContext.AssimpNode;
+				/*const aiNode *parent = nodeContext.AssimpNode;
 				while (parent = parent->mParent) if (parent->mName.length)
 				{
 					context.Nodes[parent->mName.C_Str()].IsBone = true;
-				}
+				}*/
 			}
 		}
 	}
@@ -136,14 +144,31 @@ void flagAssimpBones(CMeshUtilsContext &context)
 // TODO: Separate load scene and save scene functions
 int exportScene(const CMeshUtilsSettings &settings)
 {
+	CMeshUtilsContext context(settings);
+
+	if (!settings.ToolDependLog.empty())
+		context.ToolLogger.initDepend(settings.ToolDependLog);
+	if (!settings.ToolErrorLog.empty())
+		context.ToolLogger.initDepend(settings.ToolErrorLog);
+	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.Settings.SourceFilePath.c_str()); // Base input file
+
+	// Find database configuration
+
+
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, aiProcess_Triangulate | aiProcess_ValidateDataStructure); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
+	if (!scene)
+	{
+		const char *errs = importer.GetErrorString();
+		if (errs) tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), errs);
+		else tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to load scene");
+		return EXIT_FAILURE;
+	}
 	// aiProcess_ValidateDataStructure: TODO: Catch Assimp error output stream
 	// aiProcess_RemoveRedundantMaterials: Not used because we may override materials with NeL Material from meta
 	// aiProcess_ImproveCacheLocality: TODO: Verify this does not modify vertex indices
 	//scene->mRootNode->mMetaData
 
-	CMeshUtilsContext context(settings);
 	context.AssimpScene = scene;
 
 	flagAssimpBones(context);

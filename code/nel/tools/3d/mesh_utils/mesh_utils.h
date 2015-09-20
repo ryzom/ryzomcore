@@ -26,6 +26,8 @@ struct CMeshUtilsSettings
 	// Absolute Paths
 	std::string SourceFilePath;
 	std::string DestinationDirectoryPath;
+	std::string ToolDependLog;
+	std::string ToolErrorLog;
 
 	// Relative Directories
 	std::string ShapeDirectory;

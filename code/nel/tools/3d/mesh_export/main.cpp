@@ -61,6 +61,13 @@ int main(int argc, char *argv[])
 		settings.DestinationDirectoryPath = filePath + "_export";
 	settings.DestinationDirectoryPath += "/";
 
+	settings.ToolDependLog = args.getLongArg("dependlog");
+	if (settings.ToolDependLog.empty())
+		settings.ToolDependLog = settings.DestinationDirectoryPath + "depend.log";
+	settings.ToolErrorLog = args.getLongArg("errorlog");
+	if (settings.ToolErrorLog.empty())
+		settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
+
 	NL3D::CScene::registerBasics();
 	NL3D::registerSerial3d();
 
