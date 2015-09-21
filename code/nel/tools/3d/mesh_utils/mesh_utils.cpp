@@ -247,7 +247,7 @@ void exportShapes(CMeshUtilsContext &context)
 						"Shape '%s' serialization failed!", it->first.c_str());
 				}
 			}
-			if (NL3D::CMesh *mesh = dynamic_cast<NL3D::CMesh *>(nodeContext.Shape.getPtr()))
+			if (NL3D::CMeshBase *mesh = dynamic_cast<NL3D::CMeshBase *>(nodeContext.Shape.getPtr()))
 			{
 				for (uint mi = 0; mi < mesh->getNbMaterial(); ++mi)
 				{

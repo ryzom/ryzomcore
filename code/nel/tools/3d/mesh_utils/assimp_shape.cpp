@@ -89,6 +89,11 @@ inline CRGBA convColor(const aiColor4D &ac)
 	return CRGBA(ac.r * 255.99f, ac.g * 255.99f, ac.b * 255.99f, ac.a * 255.99f);
 }
 
+inline CUVW convUvw(const aiVector3D &av)
+{
+	return CUVW(av.x, av.y, av.z); // UH OH COORDINATE CONVERSION ?!
+}
+
 bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
 	// TODO
@@ -98,6 +103,7 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 	// TODO Support skinning
 
 	const aiNode *node = nodeContext.InternalNode;
+	nlassert(node->mNumMeshes);
 
 	// Basic validations before processing starts
 	for (unsigned int mi = 0; mi < node->mNumMeshes; ++mi)
@@ -127,12 +133,13 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 	// Default vertex flags
 	buildMesh.VertexFlags = CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag;
 
-	// TODO: UV Channels
+	// TODO: UV Channels routing to correct texture stage
 	for (uint i = 0; i < CVertexBuffer::MaxStage; ++i)
 		buildMesh.UVRouting[i] = i;
 
 	// Meshes in assimp are separated per material, so we need to re-merge them for the mesh build process
 	// This process also deduplicates vertices
+	bool cleanupMesh = false;
 	sint32 numVertices = 0;
 	for (unsigned int mi = 0; mi < node->mNumMeshes; ++mi)
 		numVertices += context.InternalScene->mMeshes[node->mMeshes[mi]]->mNumVertices;
@@ -152,7 +159,7 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			if (vecit == vertexIdentifiers.end())
 			{
 				buildMesh.Vertices[numVertices] = vec;
-				vertexIdentifiers[vec] = numVertices;
+				if (cleanupMesh) vertexIdentifiers[vec] = numVertices; // Don't remap if we don't wan't to lose vertex indices
 				vertexRemapping[mi][vi] = numVertices;
 				++numVertices;
 			}
@@ -172,10 +179,45 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 		numFaces += context.InternalScene->mMeshes[node->mMeshes[mi]]->mNumFaces;
 	buildMesh.Faces.resize(numFaces);
 	numFaces = 0;
+	unsigned int refNumColorChannels = context.InternalScene->mMeshes[node->mMeshes[0]]->GetNumColorChannels();
+	unsigned int refNumUVChannels = context.InternalScene->mMeshes[node->mMeshes[0]]->GetNumUVChannels();
 	for (unsigned int mi = 0; mi < node->mNumMeshes; ++mi)
 	{
 		const aiMesh *mesh = context.InternalScene->mMeshes[node->mMeshes[mi]];
-		unsigned int numColorChannels = mesh->GetNumColorChannels(); // TODO: Maybe needs to be same on all mesh parts
+
+		// Get channel numbers
+		unsigned int numColorChannels = mesh->GetNumColorChannels();
+		if (numColorChannels > 2)
+		{
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Shape '%s' has too many color channels in mesh %i (%i channels found)", node->mName.C_Str(), mi, numColorChannels);
+		}
+		if (numColorChannels > 0)
+		{
+			buildMesh.VertexFlags |= CVertexBuffer::PrimaryColorFlag;
+			if (numColorChannels > 1)
+			{
+				buildMesh.VertexFlags |= CVertexBuffer::SecondaryColorFlag;
+			}
+		}
+		unsigned int numUVChannels = mesh->GetNumUVChannels();
+		if (numUVChannels > CVertexBuffer::MaxStage)
+		{
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Shape '%s' has too many uv channels in mesh %i (%i channels found)", node->mName.C_Str(), mi, numUVChannels);
+			numUVChannels = CVertexBuffer::MaxStage;
+		}
+		for (unsigned int ui = 0; ui < numUVChannels; ++ui)
+			buildMesh.VertexFlags |= (CVertexBuffer::TexCoord0 << ui); // TODO: Coord UV tex stage rerouting
+
+		// TODO: Channels do in fact differ between submeshes, so we need to correctly recount and reroute the materials properly
+		if (numColorChannels != refNumColorChannels)
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Shape '%s' mismatch of nb color channel in mesh '%i', please contact developer", node->mName.C_Str(), mi);
+		if (numUVChannels != refNumUVChannels)
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Shape '%s' mismatch of nb uv channel in mesh '%i', please contact developer", node->mName.C_Str(), mi);
+
 		for (unsigned int fi = 0; fi < mesh->mNumFaces; ++fi)
 		{
 			const aiFace &af = mesh->mFaces[fi];
@@ -195,18 +237,43 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			face.Corner[1].Normal = convVector(mesh->mNormals[af.mIndices[1]]);
 			face.Corner[2].Normal = convVector(mesh->mNormals[af.mIndices[2]]);
 			// TODO: If we want normal maps, we need to add tangent vectors to CFace and build process
-			// TODO: UV
+			// UV channels
+			for (unsigned int ui = 0; ui < numUVChannels; ++ui) // TODO: UV Rerouting
+			{
+				face.Corner[0].Uvws[ui] = convUvw(mesh->mTextureCoords[ui][af.mIndices[0]]);
+				face.Corner[1].Uvws[ui] = convUvw(mesh->mTextureCoords[ui][af.mIndices[1]]);
+				face.Corner[2].Uvws[ui] = convUvw(mesh->mTextureCoords[ui][af.mIndices[2]]);
+			}
+			for (unsigned int ui = numUVChannels; ui < CVertexBuffer::MaxStage; ++ui)
+			{
+				face.Corner[0].Uvws[ui] = CUVW(0, 0, 0);
+				face.Corner[1].Uvws[ui] = CUVW(0, 0, 0);
+				face.Corner[2].Uvws[ui] = CUVW(0, 0, 0);
+			}
+			// Primary and secondary color channels
 			if (numColorChannels > 0) // TODO: Verify
 			{
 				face.Corner[0].Color = convColor(mesh->mColors[0][af.mIndices[0]]);
 				face.Corner[1].Color = convColor(mesh->mColors[0][af.mIndices[1]]);
 				face.Corner[2].Color = convColor(mesh->mColors[0][af.mIndices[2]]);
-				if (numColorChannels > 1) // TODO: Verify
-				{
-					face.Corner[0].Specular = convColor(mesh->mColors[1][af.mIndices[0]]);
-					face.Corner[1].Specular = convColor(mesh->mColors[1][af.mIndices[1]]);
-					face.Corner[2].Specular = convColor(mesh->mColors[1][af.mIndices[2]]);
-				}
+			}
+			else
+			{
+				face.Corner[0].Color = CRGBA(255, 255, 255, 255);
+				face.Corner[1].Color = CRGBA(255, 255, 255, 255);
+				face.Corner[2].Color = CRGBA(255, 255, 255, 255);
+			}
+			if (numColorChannels > 1) // TODO: Verify
+			{
+				face.Corner[0].Specular = convColor(mesh->mColors[1][af.mIndices[0]]);
+				face.Corner[1].Specular = convColor(mesh->mColors[1][af.mIndices[1]]);
+				face.Corner[2].Specular = convColor(mesh->mColors[1][af.mIndices[2]]);
+			}
+			else
+			{
+				face.Corner[0].Specular = CRGBA(255, 255, 255, 255);
+				face.Corner[1].Specular = CRGBA(255, 255, 255, 255);
+				face.Corner[2].Specular = CRGBA(255, 255, 255, 255);
 			}
 			// TODO: Color modulate, alpha, use color alpha for vp tree, etc
 			++numFaces;
