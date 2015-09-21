@@ -31,6 +31,7 @@
 #include <nel/misc/tool_logger.h>
 
 #include <nel/3d/mesh.h>
+#include <nel/3d/texture_file.h>
 
 using namespace std;
 using namespace NLMISC;
@@ -50,6 +51,10 @@ inline CRGBA convColor(const aiColor4D &ac)
 
 void assimpMaterial(NL3D::CMaterial &mat, CMeshUtilsContext &context, const aiMaterial *am)
 {
+	aiString amname;
+	if (am->Get(AI_MATKEY_NAME, amname) != aiReturn_SUCCESS)
+		amname = "";
+
 	mat.initLighted();
 	mat.setShader(CMaterial::Normal);
 
@@ -99,6 +104,78 @@ void assimpMaterial(NL3D::CMaterial &mat, CMeshUtilsContext &context, const aiMa
 
 	if (am->Get(AI_MATKEY_COLOR_EMISSIVE, c3) == aiReturn_SUCCESS)
 		mat.setEmissive(convColor(c3));
+
+	// Textures
+	unsigned int texCount = am->GetTextureCount(aiTextureType_DIFFUSE);
+	if (texCount > IDRV_MAT_MAXTEXTURES)
+	{
+		tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+			"Material '%s' has more than %i textures (%i textures found)", amname.C_Str(), IDRV_MAT_MAXTEXTURES, texCount);
+		texCount = IDRV_MAT_MAXTEXTURES;
+	}
+	
+	for (unsigned int ti = 0; ti < texCount; ++ti)
+	{
+		aiString path;
+		aiTextureMapping mapping;
+		unsigned int uvindex;
+		float blend; // Partially supported
+		aiTextureOp op;
+		aiTextureMapMode mapmode;
+		if (am->GetTexture(aiTextureType_DIFFUSE, ti, &path, &mapping, &uvindex, &blend, &op, &mapmode) != aiReturn_SUCCESS)
+		{
+			tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+				"Failed to get texture %i in material '%s'", ti, amname.C_Str());
+			break;
+		}
+
+		std::string fileName = CFile::getFilename(CPath::standardizePath(path.C_Str(), false));
+		std::string knownPath = CPath::lookup(fileName, false, false, false);
+		if (knownPath.empty())
+		{
+			tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(), 
+				"Texture '%s' referenced in material '%s' but not found in the database search paths", fileName.c_str(), amname.C_Str());
+		}
+
+		// NeL supports bitmap and cubemap, but we import only basic bitmap here. Cubemap can be inserted from the mesh editor tool
+		// NeL also has fancy multi-bitmap thing to switch between summer and winter and so on. Same story
+		CSmartPtr<CTextureFile> tex = new CTextureFile();
+		tex->setFileName(fileName);
+		tex->setWrapS(mapmode == aiTextureMapMode_Clamp ? ITexture::Clamp : ITexture::Repeat);
+		tex->setWrapT(mapmode == aiTextureMapMode_Clamp ? ITexture::Clamp : ITexture::Repeat);
+		mat.setTexture(ti, tex);
+
+		// TODO uvindex for uv routing (probably necessary during shape import - if so also need to also ask the uv channel in the editor and store in meta)
+
+		// TODO aiTextureMapping texcoordgen if useful to import
+
+		mat.texEnvArg0Alpha(ti, CMaterial::Texture, CMaterial::SrcAlpha);
+		mat.texEnvArg0RGB(ti, CMaterial::Texture, CMaterial::SrcColor);
+		mat.texEnvArg1Alpha(ti, ti == 0 ? CMaterial::Diffuse : CMaterial::Previous, CMaterial::SrcAlpha);
+		mat.texEnvArg1RGB(ti, ti == 0 ? CMaterial::Diffuse : CMaterial::Previous, CMaterial::SrcColor);
+		switch (op)
+		{
+		case aiTextureOp_Multiply:
+		default:
+			mat.texEnvOpAlpha(ti, CMaterial::Modulate);
+			mat.texEnvOpRGB(ti, CMaterial::Modulate);
+			break;
+		case aiTextureOp_Add:
+			mat.texEnvOpAlpha(ti, CMaterial::Add);
+			mat.texEnvOpRGB(ti, CMaterial::Add);
+			break;
+		case aiTextureOp_Subtract:
+			mat.texEnvArg0Alpha(ti, CMaterial::Texture, CMaterial::InvSrcAlpha);
+			mat.texEnvArg0RGB(ti, CMaterial::Texture, CMaterial::InvSrcColor);
+			mat.texEnvOpAlpha(ti, CMaterial::Add);
+			mat.texEnvOpRGB(ti, CMaterial::Add);
+			break;
+		case aiTextureOp_SignedAdd:
+			mat.texEnvOpAlpha(ti, CMaterial::AddSigned);
+			mat.texEnvOpRGB(ti, CMaterial::AddSigned);
+			break;
+		}
+	}
 }
 
 CSmartPtr<CMaterial> assimpMaterial(CMeshUtilsContext &context, const aiMaterial *am)

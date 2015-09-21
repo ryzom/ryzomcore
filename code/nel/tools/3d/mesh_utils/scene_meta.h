@@ -80,6 +80,12 @@ struct CSceneMeta
 {
 	CSceneMeta();
 
+	bool ImportShape;
+	bool ImportSkel;
+	bool ImportAnim;
+	bool ImportCmb;
+	bool ImportIG;
+
 	bool ExportDefaultIG; // Export a default instance group from nodes the scene that do not have an instance group set
 	TSkel SkeletonMode;
 

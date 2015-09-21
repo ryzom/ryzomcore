@@ -49,6 +49,11 @@ void CNodeMeta::serial(NLMISC::IStream &s)
 }
 
 CSceneMeta::CSceneMeta() :
+	ImportShape(true),
+	ImportSkel(true),
+	ImportAnim(true),
+	ImportCmb(true),
+	ImportIG(true),
 	ExportDefaultIG(false),
 	SkeletonMode(TSkelRoot)
 {
@@ -57,7 +62,7 @@ CSceneMeta::CSceneMeta() :
 
 bool CSceneMeta::load(const std::string &filePath)
 {
-	m_MetaFilePath = filePath + ".nelmeta";
+	m_MetaFilePath = NLMISC::CPath::standardizePath(filePath + ".nelmeta", false);
 	if (CFile::fileExists(m_MetaFilePath))
 	{
 		CIFile f(m_MetaFilePath);
@@ -78,6 +83,12 @@ void CSceneMeta::save()
 void CSceneMeta::serial(NLMISC::IStream &s)
 {
 	uint version = s.serialVersion(1);
+
+	s.serial(ImportShape);
+	s.serial(ImportSkel);
+	s.serial(ImportAnim);
+	s.serial(ImportCmb);
+	s.serial(ImportIG);
 
 	s.serial(ExportDefaultIG);
 	s.serial((uint32 &)SkeletonMode);

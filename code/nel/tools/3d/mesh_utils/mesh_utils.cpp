@@ -22,8 +22,11 @@
 #include <nel/misc/tool_logger.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/file.h>
+#include <nel/misc/path.h>
 
 #include <nel/3d/shape.h>
+#include <nel/3d/mesh.h>
+#include <nel/3d/texture_file.h>
 
 #include "database_config.h"
 #include "scene_meta.h"
@@ -227,7 +230,7 @@ void exportShapes(CMeshUtilsContext &context)
 		CNodeContext &nodeContext = it->second;
 		if (nodeContext.Shape)
 		{
-			std::string shapePath = context.Settings.DestinationDirectoryPath + "/" + it->first + ".shape";
+			std::string shapePath = NLMISC::CPath::standardizePath(context.Settings.DestinationDirectoryPath, true) + it->first + ".shape";
 			context.ToolLogger.writeDepend(NLMISC::BUILD, shapePath.c_str(), "*");
 			NLMISC::COFile f;
 			if (f.open(shapePath, false, false, true))
@@ -244,6 +247,34 @@ void exportShapes(CMeshUtilsContext &context)
 						"Shape '%s' serialization failed!", it->first.c_str());
 				}
 			}
+			if (NL3D::CMesh *mesh = dynamic_cast<NL3D::CMesh *>(nodeContext.Shape.getPtr()))
+			{
+				for (uint mi = 0; mi < mesh->getNbMaterial(); ++mi)
+				{
+					NL3D::CMaterial &mat = mesh->getMaterial(mi);
+					for (uint ti = 0; ti < NL3D::IDRV_MAT_MAXTEXTURES; ++ti)
+					{
+						if (NL3D::ITexture *itex = mat.getTexture(ti))
+						{
+							if (NL3D::CTextureFile *tex = dynamic_cast<NL3D::CTextureFile *>(itex))
+							{
+								std::string fileName = tex->getFileName();
+								std::string knownPath = NLMISC::CPath::lookup(fileName, false, false, false);
+								if (!knownPath.empty())
+								{
+									context.ToolLogger.writeDepend(NLMISC::RUNTIME, shapePath.c_str(), knownPath.c_str());
+								}
+								else
+								{
+									// TODO: Move this warning into nelmeta serialization so it's shown before export
+									tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+										"Texture '%s' referenced in material but not found in the database search paths", fileName.c_str());
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -258,7 +289,7 @@ int exportScene(const CMeshUtilsSettings &settings)
 		context.ToolLogger.initDepend(settings.ToolDependLog);
 	if (!settings.ToolErrorLog.empty())
 		context.ToolLogger.initError(settings.ToolErrorLog);
-	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.Settings.SourceFilePath.c_str()); // Base input file
+	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
 
 	// Apply database configuration
 	CDatabaseConfig::init(settings.SourceFilePath);
