@@ -38,7 +38,7 @@ using namespace NL3D;
 
 // http://assimp.sourceforge.net/lib_html/materials.html
 
-inline CRGBA convColor(const aiColor3D &ac)
+inline CRGBA convColor(const aiColor3D &ac, uint8 a = 255)
 {
 	return CRGBA(ac.r * 255.99f, ac.g * 255.99f, ac.b * 255.99f);
 }
@@ -73,35 +73,29 @@ void assimpMaterial(NL3D::CMaterial &mat, CMeshUtilsContext &context, const aiMa
 		break;
 	}
 
+	// Colors follow GL convention
+	// "While the ambient, diffuse, specular and emission
+	// "material parameters all have alpha components, only the diffuse"
+	// "alpha component is used in the lighting computation."
+	if (am->Get(AI_MATKEY_COLOR_DIFFUSE, c3) == aiReturn_SUCCESS)
+		mat.setDiffuse(convColor(c3));
+
 	if (am->Get(AI_MATKEY_OPACITY, f) == aiReturn_SUCCESS)
 		mat.setOpacity(f * 255.99f);
-
-	if (am->Get(AI_MATKEY_SHININESS, f) == aiReturn_SUCCESS)
-		mat.setShininess(f); // OR (float)pow(2.0, shininess * 10.0) * 4.f ??
-
-	if (am->Get(AI_MATKEY_COLOR_DIFFUSE, c3) == aiReturn_SUCCESS)
-	{
-		CRGBA diffuse = convColor(c3);
-		diffuse.A = mat.getOpacity();
-		mat.setDiffuse(diffuse);
-	}
 
 	if (am->Get(AI_MATKEY_COLOR_AMBIENT, c3) == aiReturn_SUCCESS)
 		mat.setAmbient(convColor(c3));
 
+	if (am->Get(AI_MATKEY_SHININESS, f) == aiReturn_SUCCESS)
+		mat.setShininess(f); // (float)pow(2.0, f * 10.0) * 4.f;
+
 	if (am->Get(AI_MATKEY_COLOR_SPECULAR, c3) == aiReturn_SUCCESS)
-	{
-		CRGBA specular = convColor(c3);
-		if (am->Get(AI_MATKEY_SHININESS_STRENGTH, f) == aiReturn_SUCCESS)
-		{
-			CRGBAF fColor = specular;
-			fColor *= f;
-			uint8 a = specular.A;
-			specular = fColor;
-			specular.A = a;
-		}
-		mat.setSpecular(specular);
-	}
+		mat.setSpecular(convColor(c3));
+
+	if (am->Get(AI_MATKEY_SHININESS_STRENGTH, f) == aiReturn_SUCCESS)
+		mat.setSpecular(CRGBAF(mat.getSpecular()) * f);
+	else
+		mat.setSpecular(NLMISC::CRGBA::Black);
 
 	if (am->Get(AI_MATKEY_COLOR_EMISSIVE, c3) == aiReturn_SUCCESS)
 		mat.setEmissive(convColor(c3));
