@@ -52,6 +52,34 @@ using namespace NL3D;
 
 // TODO: Skinned - reverse transform by skeleton root bone to align?
 
+/*inline CMatrix convMatrix(const aiMatrix4x4 &tf)
+{
+	CMatrix m;
+	for (int i = 0; i < 16; ++i)
+		m.set(&tf.a1);
+	return m;
+}*/
+
+inline CVector convVector(const aiVector3D &av)
+{
+	return CVector(av.x, av.y, av.z); // COORDINATE CONVERSION
+}
+
+inline CRGBA convColor(const aiColor4D &ac)
+{
+	return CRGBA(ac.r * 255.99f, ac.g * 255.99f, ac.b * 255.99f, ac.a * 255.99f);
+}
+
+inline CUVW convUvw(const aiVector3D &av)
+{
+	return CUVW(av.x, -av.y, av.z); // UH OH COORDINATE CONVERSION ?! ONLY FOR TEXTURES !!
+}
+
+inline CQuat convQuat(const aiQuaternion &aq)
+{
+	return CQuat(aq.x, aq.y, aq.z, aq.w);
+}
+
 void assimpBuildBaseMesh(CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsContext &context, CNodeContext &nodeContext)
 {
 	const aiNode *node = nodeContext.InternalNode;
@@ -77,21 +105,24 @@ void assimpBuildBaseMesh(CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsCon
 			buildBaseMesh.Materials[mi] = *context.SceneMeta.Materials[amname.C_Str()];
 		}
 	}
-}
 
-inline CVector convVector(const aiVector3D &av)
-{
-	return CVector(-av.x, av.z, av.y); // COORDINATE CONVERSION
-}
+	// Positioning
+	const aiMatrix4x4 &root = context.InternalScene->mRootNode->mTransformation;
+	const aiMatrix4x4 &tf = nodeContext.InternalNode->mTransformation; // COORDINATE CONVERSION HERE INSTEAD OF PER VERTEX ??
+	aiVector3D scaling;
+	aiQuaternion rotation;
+	aiVector3D position;
+	tf.Decompose(scaling, rotation, position);
+	buildBaseMesh.DefaultScale = convVector(scaling);
+	buildBaseMesh.DefaultRotQuat = convQuat(rotation);
+	buildBaseMesh.DefaultRotEuler = CVector(0, 0, 0);
+	buildBaseMesh.DefaultPivot = CVector(0, 0, 0);
+	buildBaseMesh.DefaultPos = convVector(position);
 
-inline CRGBA convColor(const aiColor4D &ac)
-{
-	return CRGBA(ac.r * 255.99f, ac.g * 255.99f, ac.b * 255.99f, ac.a * 255.99f);
-}
+	// Meta
+	// dst.CollisionMeshGeneration = src.CollisionMeshGeneration;
 
-inline CUVW convUvw(const aiVector3D &av)
-{
-	return CUVW(av.x, av.y, av.z); // UH OH COORDINATE CONVERSION ?!
+	// TODO: Morph
 }
 
 bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsContext &context, CNodeContext &nodeContext)
@@ -139,7 +170,7 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 
 	// Meshes in assimp are separated per material, so we need to re-merge them for the mesh build process
 	// This process also deduplicates vertices
-	bool cleanupMesh = false;
+	bool cleanupMesh = true;
 	sint32 numVertices = 0;
 	for (unsigned int mi = 0; mi < node->mNumMeshes; ++mi)
 		numVertices += context.InternalScene->mMeshes[node->mMeshes[mi]]->mNumVertices;
@@ -208,7 +239,7 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			numUVChannels = CVertexBuffer::MaxStage;
 		}
 		for (unsigned int ui = 0; ui < numUVChannels; ++ui)
-			buildMesh.VertexFlags |= (CVertexBuffer::TexCoord0 << ui); // TODO: Coord UV tex stage rerouting
+			buildMesh.VertexFlags |= (CVertexBuffer::TexCoord0Flag << ui); // TODO: Coord UV tex stage rerouting
 
 		// TODO: Channels do in fact differ between submeshes, so we need to correctly recount and reroute the materials properly
 		if (numColorChannels != refNumColorChannels)
@@ -226,6 +257,13 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 				tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
 					"(%s) Face %i on mesh %i has %i faces", node->mName.C_Str(), fi, mi, af.mNumIndices);
 				continue; // return false; Keep going, just drop the face for better user experience
+			}
+			if (cleanupMesh)
+			{
+				if (vertexRemapping[mi][af.mIndices[0]] == vertexRemapping[mi][af.mIndices[1]]
+					|| vertexRemapping[mi][af.mIndices[1]] == vertexRemapping[mi][af.mIndices[2]]
+					|| vertexRemapping[mi][af.mIndices[2]] == vertexRemapping[mi][af.mIndices[0]])
+					continue; // Not a triangle
 			}
 			CMesh::CFace &face = buildMesh.Faces[numFaces];
 			face.MaterialId = mi;
@@ -279,7 +317,12 @@ bool assimpBuildMesh(CMesh::CMeshBuild &buildMesh, CMeshBase::CMeshBaseBuild &bu
 			++numFaces;
 		}
 	}
-	buildMesh.Faces.resize(numFaces);
+	if (numFaces != buildMesh.Faces.size())
+	{
+		tlmessage(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+			"Removed %u degenerate faces in shape '%s'", (uint32)(buildMesh.Faces.size() - numFaces), node->mName.C_Str());
+		buildMesh.Faces.resize(numFaces);
+	}
 
 	// clear for MRM info
 	buildMesh.Interfaces.clear();
