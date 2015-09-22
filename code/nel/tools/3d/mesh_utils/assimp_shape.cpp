@@ -118,6 +118,11 @@ void assimpBuildBaseMesh(CMeshBase::CMeshBaseBuild &buildBaseMesh, CMeshUtilsCon
 	buildBaseMesh.DefaultRotEuler = CVector(0, 0, 0);
 	buildBaseMesh.DefaultPivot = CVector(0, 0, 0);
 	buildBaseMesh.DefaultPos = convVector(position);
+	if (buildBaseMesh.DefaultScale.x != 1.0f || buildBaseMesh.DefaultScale.y != 1.0f || buildBaseMesh.DefaultScale.z != 1.0f)
+	{
+		tlmessage(context.ToolLogger, context.Settings.SourceFilePath.c_str(),
+			"Node '%s' has a scaled transformation. This may be a mistake", node->mName.C_Str());
+	}
 
 	// Meta
 	// dst.CollisionMeshGeneration = src.CollisionMeshGeneration;
