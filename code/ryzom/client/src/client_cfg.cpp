@@ -295,8 +295,8 @@ CClientConfig::CClientConfig()
 	SelectedSlot		= 0;						// Default is slot 0
 
 	Windowed			= false;					// Default is windowed mode.
-	Width				= 800;						// Default Width for the window.
-	Height				= 600;						// Default Height for the window.
+	Width				= 0;						// Default Width for the window (0 = current screen resolution).
+	Height				= 0;						// Default Height for the window (0 = current screen resolution).
 	Depth				= 32;						// Default Bit per Pixel.
 	Driver3D			= DrvAuto;					// Select best driver depending on hardware.
 	Contrast			= 0.f;						// Default Monitor Contrast.
@@ -1747,7 +1747,7 @@ void CClientConfig::setValues()
 	// Allow warning display only first time.
 	DisplayCFGWarning= false;
 
-	// If it is the load time, bkup the ClientCfg into LastClientCfg
+	// If it is the load time, backup the ClientCfg into LastClientCfg
 	if(firstTimeSetValues)
 		LastClientCfg = ClientCfg;
 
