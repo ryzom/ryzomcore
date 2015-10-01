@@ -709,10 +709,12 @@ namespace NLGUI
 				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
 				{
 					string suri = value[MY_HTML_A_HREF];
-					if(_TrustedDomain && suri.find("ah:") == 0)
+					if(suri.find("ah:") == 0)
 					{
-						// in ah: command we don't respect the uri standard so the HTAnchor_address doesn't work correctly
-						_Link.push_back (suri);
+						if (_TrustedDomain)
+							_Link.push_back (suri);
+						else
+							_Link.push_back ("");
 					}
 					else if (_TrustedDomain && suri[0] == '#')
 					{

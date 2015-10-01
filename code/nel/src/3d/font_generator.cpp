@@ -76,7 +76,10 @@ const char *CFontGenerator::getFT2Error(FT_Error fte)
 	return ukn;
 }
 
-
+CFontGenerator *newCFontGenerator(const std::string &fontFileName)
+{
+	return new CFontGenerator(fontFileName);
+}
 
 /*
  * Constructor

@@ -185,11 +185,12 @@ string CSystemInfo::getOS()
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 	typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+	typedef LONG (WINAPI* pRtlGetVersion)(OSVERSIONINFOEXA*);
 
 	SYSTEM_INFO si;
 	PGNSI pGNSI;
 	PGPI pGPI;
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEXA osvi;
 	BOOL bOsVersionInfoEx;
 	const int BUFSIZE = 80;
 
@@ -197,15 +198,26 @@ string CSystemInfo::getOS()
 	// If that fails, try using the OSVERSIONINFO structure.
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	ZeroMemory(&osvi, sizeof(osvi));
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-	bOsVersionInfoEx = GetVersionExA ((OSVERSIONINFO *) &osvi);
+	HMODULE hNtDll = GetModuleHandleA("ntdll.dll");
+	pRtlGetVersion RtlGetVersion = (pRtlGetVersion)GetProcAddress(hNtDll, "RtlGetVersion");
+ 
+	if (RtlGetVersion)
+	{
+		bOsVersionInfoEx = RtlGetVersion(&osvi) == 0;
+	}
 
 	if(!bOsVersionInfoEx)
 	{
-		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-		if (! GetVersionExA ( (OSVERSIONINFO *) &osvi) )
+		bOsVersionInfoEx = GetVersionExA ((OSVERSIONINFOA *) &osvi);
+	}
+
+	if(!bOsVersionInfoEx)
+	{
+		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
+		if (! GetVersionExA ( (OSVERSIONINFOA *) &osvi) )
 			return OSString+" Can't GetVersionEx()";
 	}
 
@@ -223,13 +235,24 @@ string CSystemInfo::getOS()
 	{
 		OSString = "Microsoft";
 
-		if ( osvi.dwMajorVersion > 6 )
+		if ( osvi.dwMajorVersion > 10 )
 		{
 			OSString += " Windows (not released)";
 		}
+		else if ( osvi.dwMajorVersion == 10 )
+		{
+			OSString += " Windows 10";
+		}
 		else if ( osvi.dwMajorVersion == 6 )
 		{
-			if ( osvi.dwMinorVersion == 2 )
+			if ( osvi.dwMinorVersion == 3 )
+			{
+				if( osvi.wProductType == VER_NT_WORKSTATION )
+					OSString += " Windows 8.1";
+				else
+					OSString += " Windows Server 2012 R2";
+			}
+			else if ( osvi.dwMinorVersion == 2 )
 			{
 				if( osvi.wProductType == VER_NT_WORKSTATION )
 					OSString += " Windows 8";

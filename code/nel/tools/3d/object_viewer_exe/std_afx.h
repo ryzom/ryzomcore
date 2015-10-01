@@ -23,8 +23,9 @@
 #endif // _MSC_VER > 1000
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-
 #define NOMINMAX
+#define _WIN32_WINNT 0x0501
+
 #include <windows.h>
 
 #endif

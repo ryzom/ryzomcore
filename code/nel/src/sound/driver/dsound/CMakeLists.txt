@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h *.def)
 
 NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 
-INCLUDE_DIRECTORIES(${DXSDK_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(BEFORE ${DXSDK_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(nel_drv_dsound_win nelmisc nelsnd_lowlevel ${DXSDK_DSOUND_LIBRARY} ${DXSDK_GUID_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_dsound_win "NeL, Driver, Sound: DirectSound")

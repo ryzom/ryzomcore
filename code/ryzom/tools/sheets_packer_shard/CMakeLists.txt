@@ -12,6 +12,7 @@ ADD_EXECUTABLE(sheets_packer_shard	${SRC} ${EGSSHEETS}
 				${CMAKE_SOURCE_DIR}/ryzom/server/src/ai_service/sheets.h
 				${CMAKE_SOURCE_DIR}/ryzom/server/src/ai_service/commands_mlf.cpp)
 
+
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/tools/sheets_packer_shard ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
 TARGET_LINK_LIBRARIES(sheets_packer_shard
 					ryzom_gameshare
@@ -30,5 +31,9 @@ NL_ADD_RUNTIME_FLAGS(sheets_packer_shard)
 
 ADD_DEFINITIONS(-DNO_EGS_VARS)
 ADD_DEFINITIONS(-DNO_AI_COMP)
+
+IF(MSVC)
+	SET_TARGET_PROPERTIES(sheets_packer_shard PROPERTIES COMPILE_FLAGS "/bigobj")
+ENDIF(MSVC)
 
 INSTALL(TARGETS sheets_packer_shard RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

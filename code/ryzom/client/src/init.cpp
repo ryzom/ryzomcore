@@ -953,6 +953,22 @@ void prelogInit()
 			return;
 		}
 
+		if (ClientCfg.Width <= 0 || ClientCfg.Height <= 0)
+		{
+			UDriver::CMode mode;
+
+			if (!ClientCfg.Windowed && Driver->getCurrentScreenMode(mode))
+			{
+				ClientCfg.Width = mode.Width;
+				ClientCfg.Height = mode.Height;
+			}
+			else
+			{
+				ClientCfg.Width = 1024;
+				ClientCfg.Height = 768;
+			}
+		}
+
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetup, "login_step_video_mode_setup"));
 
 		FPU_CHECKER_ONCE

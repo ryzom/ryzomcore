@@ -36,7 +36,6 @@
 #include "nel/3d/scene_group.h"
 #include "nel/3d/animation_playlist.h"
 #include "nel/3d/track_keyframer.h"
-#include "nel/3d/font_generator.h"
 #include "nel/3d/register_3d.h"
 #include "nel/3d/seg_remanence.h"
 
@@ -592,6 +591,12 @@ void CObjectViewer::initCamera ()
 
 // ***************************************************************************
 
+namespace NL3D {
+	CFontGenerator *newCFontGenerator(const std::string &fontFileName);
+}
+	
+// ***************************************************************************
+
 bool CObjectViewer::initUI (HWND parent)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());	
@@ -616,7 +621,7 @@ bool CObjectViewer::initUI (HWND parent)
 	_FontPath+="\\fonts\\arial.ttf";
 
 	// The font generator
-	_FontGenerator = new NL3D::CFontGenerator ( _FontPath );
+	_FontGenerator = NL3D::newCFontGenerator ( _FontPath );
 	delete[] wd;
 
 	// The viewport
