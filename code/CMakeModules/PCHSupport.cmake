@@ -40,7 +40,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
   GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
 
-  IF(${_targetType} STREQUAL SHARED_LIBRARY OR ${_targetType} STREQUAL MODULE_LIBRARY)
+  IF(${_targetType} STREQUAL "SHARED_LIBRARY" OR ${_targetType} STREQUAL "MODULE_LIBRARY")
     LIST(APPEND _FLAGS " ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
   ELSE()
     GET_TARGET_PROPERTY(_pic ${_target} POSITION_INDEPENDENT_CODE)
@@ -101,11 +101,14 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     ENDFOREACH()
   ENDIF()
 
-  GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
-  GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
   LIST(APPEND _FLAGS " ${GLOBAL_DEFINITIONS}")
-  LIST(APPEND _FLAGS " ${_directory_flags}")
-  LIST(APPEND _FLAGS " ${_directory_definitions}")
+  
+  IF(CMAKE_VERSION VERSION_LESS "3.3.0")
+    GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
+    GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
+    LIST(APPEND _FLAGS " ${_directory_flags}")
+    LIST(APPEND _FLAGS " ${_directory_definitions}")
+  ENDIF()
 
   # Format definitions
   IF(MSVC)
