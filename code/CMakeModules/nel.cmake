@@ -102,10 +102,10 @@ ENDMACRO(NL_TARGET_DRIVER)
 # Argument:
 ###
 MACRO(NL_DEFAULT_PROPS name label)
-  IF(HAVE_REVISION_H)
+  IF(TARGET revision)
     # explicitly say that the target depends on revision.h
     ADD_DEPENDENCIES(${name} revision)
-  ENDIF(HAVE_REVISION_H)
+  ENDIF()
 
   # Note: This is just a workaround for a CMake bug generating VS10 files with a colon in the project name.
   # CMake Bug ID: http://www.cmake.org/Bug/view.php?id=11819
