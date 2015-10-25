@@ -16,9 +16,9 @@ ELSE()
       ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
       OUTPUT_VARIABLE gcc_compiler_version)
 
-    IF(gcc_compiler_version MATCHES "^4\\.1(\\.[0-9]+)?")
+    IF(gcc_compiler_version VERSION_LESS "4.2")
       SET(PCHSupport_FOUND FALSE)
-    ELSEIF(gcc_compiler_version MATCHES "^4\\.[0-9]+(\\.[0-9]+)?")
+    ELSE()
       SET(PCHSupport_FOUND TRUE)
     ENDIF()
   ELSE()
