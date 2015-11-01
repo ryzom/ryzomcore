@@ -251,10 +251,10 @@ MACRO(USE_CURRENT_WINSDK)
         SET(WINSDK_VERSION "6.1")
       ELSEIF(WINSDK6.0_FOUND)
         SET(WINSDK_VERSION "6.0")
-      ELSE(WINSDK7.1_FOUND)
+      ELSE()
         MESSAGE(FATAL_ERROR "You have no compatible Windows SDK installed.")
-      ENDIF(WINSDK7.1_FOUND)
-    ENDIF(NOT WINSDK_VERSION)
+      ENDIF()
+    ENDIF()
 
     # Look for correct registered Windows SDK version
     FOREACH(_VERSION ${WINSDK_DETECTED_VERSIONS})

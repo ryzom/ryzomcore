@@ -1,4 +1,3 @@
-LIBRARY nel_drv_opengl_win_r
 EXPORTS
 	NL3D_createIDriverInstance
 	NL3D_interfaceVersion
