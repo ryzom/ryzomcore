@@ -953,7 +953,7 @@ void prelogInit()
 			return;
 		}
 
-		if (ClientCfg.Width <= 0 || ClientCfg.Height <= 0)
+		if (ClientCfg.Width < 800 || ClientCfg.Height < 600)
 		{
 			UDriver::CMode mode;
 
@@ -967,6 +967,15 @@ void prelogInit()
 				ClientCfg.Width = 1024;
 				ClientCfg.Height = 768;
 			}
+
+			// update client.cfg with detected resolution
+			CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr("Width");
+			if(varPtr)
+				varPtr->forceAsInt(ClientCfg.Width);
+
+			varPtr = ClientCfg.ConfigFile.getVarPtr("Height");
+			if(varPtr)
+				varPtr->forceAsInt(ClientCfg.Height);
 		}
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetup, "login_step_video_mode_setup"));
