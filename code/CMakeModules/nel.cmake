@@ -373,6 +373,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_LUA51               "Build Ryzom Core using Lua 5.1"                ON )
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
+  OPTION(WITH_LUA53               "Build Ryzom Core using Lua 5.3"                OFF)
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
