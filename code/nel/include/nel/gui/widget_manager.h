@@ -569,7 +569,7 @@ namespace NLGUI
 		std::vector< CInterfaceGroup* > _GroupsUnderPointer;
 
 		// view that should be notified from clock msg
-		std::vector<CCtrlBase*> _ClockMsgTargets;
+		std::list<CCtrlBase*> _ClockMsgTargets;
 
 		NLMISC::CRGBA _GlobalColor;
 		NLMISC::CRGBA _GlobalColorForContent;
