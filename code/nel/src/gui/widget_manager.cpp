@@ -2866,17 +2866,19 @@ namespace NLGUI
 	void CWidgetManager::unregisterClockMsgTarget(CCtrlBase *vb)
 	{
 		if (!vb) return;
-		std::vector<CCtrlBase*>::iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+		std::list<CCtrlBase*>::iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
 		if (it != _ClockMsgTargets.end())
 		{
-			_ClockMsgTargets.erase(it);
+			// instead of deleting, just mark as deleted incase we are inside iterating loop,
+			// it will be removed in sendClockTickEvent
+			(*it) = NULL;
 		}
 	}
 
 	// ***************************************************************************
 	bool CWidgetManager::isClockMsgTarget(CCtrlBase *vb) const
 	{
-		std::vector<CCtrlBase*>::const_iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+		std::list<CCtrlBase*>::const_iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
 		return it != _ClockMsgTargets.end();
 	}
 
@@ -2895,10 +2897,16 @@ namespace NLGUI
 		}
 
 		// and send clock tick msg to ctrl that are registered
-		std::vector<CCtrlBase*> clockMsgTarget = _ClockMsgTargets;
-		for(std::vector<CCtrlBase*>::iterator it = clockMsgTarget.begin(); it != clockMsgTarget.end(); ++it)
+		for(std::list<CCtrlBase*>::iterator it = _ClockMsgTargets.begin(); it != _ClockMsgTargets.end();)
 		{
-			(*it)->handleEvent(clockTick);
+			CCtrlBase* ctrl = *it;
+			if (ctrl)
+			{
+				ctrl->handleEvent(clockTick);
+				++it;
+			}
+			else
+				it = _ClockMsgTargets.erase(it);
 		}
 	}
 
