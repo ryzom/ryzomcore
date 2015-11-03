@@ -8,7 +8,7 @@
 # EXTERNAL_FOUND        - True if the external libraries are available
 
 SET(EXTERNAL_TEMP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/external ${CMAKE_CURRENT_SOURCE_DIR}/../external ${CMAKE_CURRENT_SOURCE_DIR}/3rdParty ${CMAKE_CURRENT_SOURCE_DIR}/../3rdParty ${EXTERNAL_PATH})
-SET(EXTERNAL_TEMP_FILE "include/wwwconf.h")
+SET(EXTERNAL_TEMP_FILE "include/zlib.h")
 SET(EXTERNAL_NAME "external")
 
 # If using STLport preprend external_stlport
