@@ -44,6 +44,7 @@ const uint32	DDS_HEADER = NL_MAKEFOURCC('D', 'D', 'S', ' ');
 const uint32	DXT_HEADER = NL_MAKEFOURCC('D', 'X', 'T', '\0');
 const uint32	PNG_HEADER = NL_MAKEFOURCC(0x89, 'P', 'N', 'G');
 const uint32	JPG_HEADER = NL_MAKEFOURCC(0xff, 0xd8, 0xff, 0xe0);
+const uint32	GIF_HEADER = NL_MAKEFOURCC('G', 'I', 'F', '8');
 
 
 // dwLinearSize is valid
@@ -130,6 +131,15 @@ private :
 	 * \return image depth if succeed, 0 else
 	 */
 	uint8 readJPG( NLMISC::IStream &f );
+
+
+	/**
+	 * Read a GIF from an IStream.
+	 * GIF pictures are all converted to 32bit
+	 * \param f IStream (must be a reading stream)
+	 * \return image depth if succeed, 0 else
+	 */
+	uint8 readGIF( NLMISC::IStream &f );
 
 
 	/**
