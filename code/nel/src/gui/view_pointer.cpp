@@ -52,6 +52,9 @@ namespace NLGUI
 		_TxIdPanR2 = -2;
 		_TxIdCanPanR2 = -2;
 
+		_OffsetX = 0;
+		_OffsetY = 0;
+
 		// The pointer must be draw over ALL layers
 		_RenderLayer= VR_LAYER_MAX;
 		_Color = CRGBA(255,255,255,255);
@@ -59,6 +62,7 @@ namespace NLGUI
 		_StringMode = false;
 		_ForceStringMode = false;
 		_StringCursor = NULL;
+		_StringCursorHardware = NULL;
 	}
 
 	void CViewPointer::forceLink()
