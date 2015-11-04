@@ -27198,3 +27198,19 @@ uittChooseLMFiberColor	[Choisissez une couleur pour le repère 'Fibre']
 // INDEX 6456
 uiSelectShortcutBar2	[Choisir la Barre de Raccourci #2]
 
+// HASH_VALUE 5854C7639701383B
+// INDEX 6457
+uiFXAA	[Activer FXAA]
+
+// HASH_VALUE DC75700D1144549D
+// INDEX 6458
+uiVREnable	[Activer Réalité Virtuelle]
+
+// HASH_VALUE EFCBC4603996C0AE
+// INDEX 6459
+uiVRGeneral	[Options de Réalité Virtuelle]
+
+// HASH_VALUE CF42883683C0EC33
+// INDEX 6460
+uigcVR	[REALITE VIRTUELLE]
+

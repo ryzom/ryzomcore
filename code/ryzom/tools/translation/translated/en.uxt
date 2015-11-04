@@ -27197,3 +27197,19 @@ uittChooseLMFiberColor	[Choose color for 'Fiber' landmark]
 // INDEX 6456
 uiSelectShortcutBar2	[Select Shortcut Bar #2]
 
+// HASH_VALUE 5854C7639701383B
+// INDEX 6457
+uiFXAA	[Enable FXAA]
+
+// HASH_VALUE DC75700D1144549D
+// INDEX 6458
+uiVREnable	[Enable VR]
+
+// HASH_VALUE EFCBC4603996C0AE
+// INDEX 6459
+uiVRGeneral	[Virtual Reality Options]
+
+// HASH_VALUE CF42883683C0EC33
+// INDEX 6460
+uigcVR	[VIRTUAL REALITY]
+
