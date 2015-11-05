@@ -1430,15 +1430,19 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
-					if (nFoundMode == -1)
+					if (nFoundStringMode == -1)
 					{
-						nFoundMode = j;
+						nFoundStringMode = j;
+						nFoundMode = i;
 					}
 					else
 					{
 						if ((videoModes[i].Width >= videoModes[nFoundMode].Width) &&
 							(videoModes[i].Height >= videoModes[nFoundMode].Height))
-							nFoundMode = j;
+						{
+							nFoundStringMode = j;
+							nFoundMode = i;
+						}
 					}
 				}
 			}
