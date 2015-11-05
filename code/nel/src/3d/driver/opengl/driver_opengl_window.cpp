@@ -1738,7 +1738,9 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 	else if (windowStyle == EWSFullscreen)
 	{
+#ifndef _DEBUG
 		dwNewStyle |= WS_POPUP;
+#endif
 		isVisible = true;
 	}
 
