@@ -134,6 +134,19 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	}
 #endif // USE_JPEG
 
+#ifdef USE_GIF
+	if (fileType == GIF_HEADER)
+	{
+#ifdef NEL_ALL_BITMAP_WHITE
+		uint8 result = readGIF(f);
+		MakeWhite (*this);
+		return result;
+#else // NEL_ALL_BITMAP_WHITE
+		return readGIF(f);
+#endif // NEL_ALL_BITMAP_WHITE
+	}
+#endif // USE_GIF
+
 	// assuming it's TGA
 	NLMISC::IStream::TSeekOrigin origin= f.begin;
 	if(!f.seek (0, origin))
@@ -3148,6 +3161,25 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 			}
 		}
 		while(!eof);
+	}
+	else if(fileType == GIF_HEADER)
+	{
+		// check second part of header ("7a" or "9a" in 'GIF89a')
+		uint16 s;
+		f.serial(s);
+		if (s != 0x6137 && s != 0x6139)
+		{
+			nlwarning("Invalid GIF header, expected GIF87a or GIF89a");
+			return;
+		}
+
+		uint16 lsWidth;
+		uint16 lsHeight;
+		f.serial(lsWidth);
+		f.serial(lsHeight);
+
+		retWidth = lsWidth;
+		retHeight = lsHeight;
 	}
 	// assuming it's TGA
 	else
