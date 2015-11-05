@@ -97,7 +97,6 @@
 // Sound
 #include "nel/sound/sound_anim_manager.h"
 // Game share
-#include "game_share/ryzom_version.h"
 #include "game_share/light_cycle.h"
 #include "sound_manager.h"
 #include "precipitation_clip_grid.h"

@@ -18,10 +18,11 @@
 
 #include "stdpch.h"
 #include "user_agent.h"
+#include "client_cfg.h"
 
 #include "game_share/ryzom_version.h"
 
-#if defined(RYZOM_COMPATIBILITY_VERSION) && defined(HAVE_REVISION_H)
+#ifdef HAVE_REVISION_H
 #include "revision.h"
 #endif
 
@@ -60,17 +61,57 @@ std::string getUserAgentVersion()
 
 	if (s_userAgent.empty())
 	{
-		char buffer[256];
-
-#if defined(REVISION) && defined(RYZOM_COMPATIBILITY_VERSION)
-		// we don't need RYZOM_VERSION if we already have a numeric form a.b.c, we just need to append revision to it
-		sprintf(buffer, "%s.%s-%s-%s", RYZOM_COMPATIBILITY_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
+#ifdef REVISION
+		s_userAgent = NLMISC::toString("%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
 #else
-		sprintf(buffer, "%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
+		s_userAgent = NLMISC::toString("%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
 #endif
-
-		s_userAgent = buffer;
 	}
 
 	return s_userAgent;
+}
+
+std::string getVersion()
+{
+	return RYZOM_VERSION;
+}
+
+std::string getDisplayVersion()
+{
+	static std::string s_version;
+
+	if (s_version.empty())
+	{
+#if FINAL_VERSION
+		s_version = "FV ";
+#else
+		s_version = "DEV ";
+#endif
+		if (ClientCfg.ExtendedCommands) s_version += "_E";
+
+		s_version += getVersion();
+
+#ifdef REVISION
+		s_version += NLMISC::toString(".%s", REVISION);
+#endif
+	}
+
+	return s_version;
+}
+
+std::string getDebugVersion()
+{
+	static std::string s_version;
+
+	if (s_version.empty())
+	{
+		s_version = getDisplayVersion();
+#ifdef BUILD_DATE
+		s_version += NLMISC::toString(" (%s)", BUILD_DATE);
+#else
+		s_version += NLMISC::toString(" (%s %s)", __DATE__, __TIME__);
+#endif
+	}
+
+	return s_version;
 }

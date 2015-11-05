@@ -48,8 +48,6 @@
 // Std.
 #include <fstream>
 #include <sstream>
-// Game Share
-#include "game_share/ryzom_version.h"
 // Client
 #include "init.h"
 #include "input.h"
@@ -89,6 +87,7 @@
 #include "interface_v3/add_on_manager.h"
 
 #include "bg_downloader_access.h"
+#include "user_agent.h"
 
 #include "nel/misc/check_fpu.h"
 
@@ -837,11 +836,7 @@ void prelogInit()
 		displayCPUInfo();
 
 		// Display the client version.
-#if FINAL_VERSION
-		nlinfo("RYZOM VERSION : FV %s ("__DATE__" "__TIME__")", RYZOM_VERSION);
-#else
-		nlinfo("RYZOM VERSION : DEV %s ("__DATE__" "__TIME__")", RYZOM_VERSION);
-#endif
+		nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
 
 		FPU_CHECKER_ONCE
 
@@ -953,14 +948,28 @@ void prelogInit()
 			return;
 		}
 
+		// used to determine screen default resolution
 		if (ClientCfg.Width < 800 || ClientCfg.Height < 600)
 		{
 			UDriver::CMode mode;
+
+			CConfigFile::CVar *varPtr = NULL;
 
 			if (!ClientCfg.Windowed && Driver->getCurrentScreenMode(mode))
 			{
 				ClientCfg.Width = mode.Width;
 				ClientCfg.Height = mode.Height;
+				ClientCfg.Depth = mode.Depth;
+				ClientCfg.Frequency = mode.Frequency;
+
+				// update client.cfg with detected depth and frequency
+				varPtr = ClientCfg.ConfigFile.getVarPtr("Depth");
+				if(varPtr)
+					varPtr->forceAsInt(ClientCfg.Depth);
+
+				varPtr = ClientCfg.ConfigFile.getVarPtr("Frequency");
+				if(varPtr)
+					varPtr->forceAsInt(ClientCfg.Frequency);
 			}
 			else
 			{
@@ -969,7 +978,7 @@ void prelogInit()
 			}
 
 			// update client.cfg with detected resolution
-			CConfigFile::CVar *varPtr = ClientCfg.ConfigFile.getVarPtr("Width");
+			varPtr = ClientCfg.ConfigFile.getVarPtr("Width");
 			if(varPtr)
 				varPtr->forceAsInt(ClientCfg.Width);
 

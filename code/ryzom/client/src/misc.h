@@ -228,7 +228,7 @@ uint getCurrentColorDepth();
 bool isWindowMaximized();
 
 // get all supported video modes
-sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList);
+bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList, std::vector<std::string> &stringFreqList, sint &nFoundMode, sint &nFoundFreq);
 
 #endif // CL_MISC_H
 

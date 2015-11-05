@@ -2990,12 +2990,15 @@ public:
 		if (Driver == NULL) return;
 
 		VideoModes.clear();
-		vector<string> stringModeList;
+		vector<string> stringModeList, stringFreqList;
+		sint nFoundMode, nFoundFreq;
 
-		sint nFoundMode = getRyzomModes(VideoModes, stringModeList);
+		getRyzomModes(VideoModes, stringModeList, stringFreqList, nFoundMode, nFoundFreq);
 
 		// Initialize interface combo box
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// resolutions
 		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 		if( pCB )
 		{
@@ -3003,10 +3006,22 @@ public:
 			for (sint j = 0; j < (sint)stringModeList.size(); j++)
 				pCB->addText(ucstring(stringModeList[j]));
 		}
+
+		// frequencies
+		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+		if( pCB )
+		{
+			pCB->resetTexts();
+			for (sint j = 0; j < (sint)stringFreqList.size(); j++)
+				pCB->addText(ucstring(stringFreqList[j]));
+		}
+
 		// -1 is important to indicate we set this value in edit mode
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(-1);
-		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(nFoundMode);
+
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 		if (pBut)
