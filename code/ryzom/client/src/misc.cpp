@@ -1392,12 +1392,19 @@ bool isWindowMaximized()
 		screenMode.Width == width && screenMode.Height == height);
 }
 
-sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList)
+bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList, std::vector<std::string> &stringFreqList, sint &nFoundStringMode, sint &nFoundStringFreq)
 {
+	// default values
+	nFoundStringMode = -1;
+	nFoundStringFreq = -1;
+
+	// mode index in original video modes
+	sint nFoundMode = -1;
+
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 	// Remove modes under 800x600 and get the unique strings
-	sint i, j, nFoundMode = -1;
+	sint i, j;
 	for (i=0; i < (sint)videoModes.size(); ++i)
 	{
 		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
@@ -1408,10 +1415,10 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 		else
 		{
 			bool bFound = false;
-			string tmp = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+			string res = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
 			for (j = 0; j < (sint)stringModeList.size(); ++j)
 			{
-				if (stringModeList[j] == tmp)
+				if (stringModeList[j] == res)
 				{
 					bFound = true;
 					break;
@@ -1419,7 +1426,8 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 			}
 			if (!bFound)
 			{
-				stringModeList.push_back(tmp);
+				stringModeList.push_back(res);
+
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
 					if (nFoundMode == -1)
@@ -1436,14 +1444,32 @@ sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 			}
 		}
 	}
-	
+
 	// If no modes are available, fallback to windowed mode
-	if (nFoundMode == -1)
+	if (nFoundStringMode == -1)
 	{
 		nlwarning("Mode %ux%u not found, fall back to windowed", (uint)ClientCfg.Width, (uint)ClientCfg.Height);
 		ClientCfg.Windowed = true;
 		ClientCfg.writeInt("FullScreen", 0);
 	}
+	else
+	{
+		// add frequencies to frequencies list
+		for (i=0; i < (sint)videoModes.size(); ++i)
+		{
+			if (videoModes[i].Width == videoModes[nFoundMode].Width && videoModes[i].Height == videoModes[nFoundMode].Height)
+			{
+				uint freq = videoModes[i].Frequency;
 
-	return nFoundMode;
+				if (ClientCfg.Frequency > 0 && freq == ClientCfg.Frequency)
+				{
+					nFoundStringFreq = stringFreqList.size();
+				}
+
+				stringFreqList.push_back(toString(freq));
+			}
+		}
+	}
+
+	return nFoundStringMode > -1;
 }

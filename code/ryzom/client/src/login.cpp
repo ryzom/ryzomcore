@@ -1945,7 +1945,10 @@ class CAHInitResLod : public IActionHandler
 		VideoModes.clear();
 		StringModeList.clear();
 
-		CurrentMode = getRyzomModes(VideoModes, StringModeList);
+		std::vector<std::string> stringFreqList;
+		sint currentFreq;
+
+		getRyzomModes(VideoModes, StringModeList, stringFreqList, CurrentMode, currentFreq);
 
 		// getRyzomModes() expects empty list, so we need to insert 'Windowed' after mode list is filled
 		StringModeList.insert(StringModeList.begin(), "uiConfigWindowed");
