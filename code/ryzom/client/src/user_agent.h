@@ -21,6 +21,10 @@ std::string getUserAgent();
 std::string getUserAgentName();
 std::string getUserAgentVersion();
 
+std::string getVersion();
+std::string getDisplayVersion();
+std::string getDebugVersion();
+
 #endif // CL_USER_AGENT_H
 
 /* End of user_agent.h */

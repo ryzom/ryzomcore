@@ -20,8 +20,6 @@
 #include <nel/3d/u_text_context.h>
 #include <nel/gui/lua_ihm.h>
 
-#include "game_share/ryzom_version.h"
-
 #include "global.h"
 #include "client_cfg.h"
 #include "user_entity.h"
@@ -44,7 +42,7 @@
 #include "misc.h"
 #include "interface_v3/interface_manager.h"
 #include "actions_client.h"
-
+#include "user_agent.h"
 
 
 using namespace NLMISC;
@@ -244,15 +242,7 @@ void displayDebug()
 	//-----------//
 	TextContext->setHotSpot(UTextContext::TopLeft);
 	line = 1.f;
-	string str;
-#if FINAL_VERSION
-	str = "FV";
-#else
-	str = "DEV";
-#endif
-	if(ClientCfg.ExtendedCommands)
-		str += "_E";
-	str += " "RYZOM_VERSION;
+	string str = getDisplayVersion();
 	TextContext->printfAt(0.f, line, "Version %s", str.c_str());
 
 	// TOP MIDDLE //

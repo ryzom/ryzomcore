@@ -49,9 +49,6 @@
  #define FINAL_VERSION 1
 #endif // TEST_CRASH_COUNTER
 
-// game share
-#include "game_share/ryzom_version.h"
-
 // Client
 #include "resource.h"
 #include "init.h"
