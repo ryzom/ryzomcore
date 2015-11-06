@@ -1026,7 +1026,7 @@ namespace NLGUI
 	void CWidgetManager::reset()
 	{
 		setCurContextHelp( NULL );
-		
+
 		_ViewsUnderPointer.clear();
 		_CtrlsUnderPointer.clear();
 		_GroupsUnderPointer.clear();
@@ -1254,7 +1254,7 @@ namespace NLGUI
 												sint32 wParent, sint32 hParent )
 	{
 		CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
-		CInterfaceGroup *groupContextHelp = 
+		CInterfaceGroup *groupContextHelp =
 			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
 
 		uint32 _ScreenH, _ScreenW;
@@ -1383,7 +1383,7 @@ namespace NLGUI
 	{
 		if (!newCtrl) return;
 		if (!newCtrl->getInvalidCoords()) return;
-		
+
 		CInterfaceGroup *groupContextHelp =
 			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
 
@@ -1450,7 +1450,7 @@ namespace NLGUI
 
 
 				// **** resolve auto posref
-				uint clampCount = 
+				uint clampCount =
 					adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRef(),
 										newCtrl->getToolTipPosRef(), xParent, yParent,
 										wParent, hParent);
@@ -1458,7 +1458,7 @@ namespace NLGUI
 				if (clampCount != 0)
 				{
 					// try to fallback on alternate tooltip posref
-					uint altClampCount = 
+					uint altClampCount =
 						adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRefAlt(),
 												newCtrl->getToolTipPosRefAlt(), xParent, yParent,
 												wParent, hParent);
@@ -1961,6 +1961,7 @@ namespace NLGUI
 			}
 			while (cb);
 		}
+		
 		// Check if screen size changed
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
@@ -1974,7 +1975,7 @@ namespace NLGUI
 				setScreenWH( w, h );
 			}
 		}
-
+		
 		// Update global color from database
 		if (!_RProp)
 		{
@@ -1983,6 +1984,7 @@ namespace NLGUI
 			_BProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
 			_AProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
 		}
+
 		setGlobalColor(NLMISC::CRGBA(
 			(uint8)_RProp->getValue32(),
 			(uint8)_GProp->getValue32(),
@@ -1996,7 +1998,7 @@ namespace NLGUI
 		c.B = gc.B;
 		c.A = (uint8) (( (uint16) c.A * (uint16) getContentAlpha() ) >> 8);
 		setGlobalColorForContent( c );
-		
+
 		// Update global alphaS from database
 		updateGlobalAlphas();
 
@@ -2005,7 +2007,7 @@ namespace NLGUI
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
 		CDBManager::getInstance()->flushObserverCalls();
-		
+
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -2158,7 +2160,7 @@ namespace NLGUI
 	bool CWidgetManager::handleKeyboardEvent( const CEventDescriptor &evnt )
 	{
 		bool handled = false;
-		
+
 		CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)evnt;
 
 		//_LastEventKeyDesc = eventDesc;
@@ -2541,7 +2543,7 @@ namespace NLGUI
 
 
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
-			{			
+			{
 				if (!handled)
 					if (pNewCurrentWnd != NULL)
 						pNewCurrentWnd->handleEvent(evnt);
@@ -2589,7 +2591,7 @@ namespace NLGUI
 				}
 
 				_CapturedView = NULL;
-				
+
 				if( CInterfaceElement::getEditorMode() )
 					stopDragging();
 			}
@@ -2634,7 +2636,7 @@ namespace NLGUI
 		if( eventDesc.getType() != CEventDescriptor::mouse )
 			return false;
 
-		const CEventDescriptorMouse &e = static_cast< const CEventDescriptorMouse& >( eventDesc );	
+		const CEventDescriptorMouse &e = static_cast< const CEventDescriptorMouse& >( eventDesc );
 
 		if( e.getEventTypeExtended() != CEventDescriptorMouse::mousemove )
 			return false;
@@ -2699,7 +2701,7 @@ namespace NLGUI
 
 		e->setParent( NULL );
 		draggedElement = e;
-				
+
 		return true;
 	}
 
@@ -2715,7 +2717,7 @@ namespace NLGUI
 				g = tw;
 
 			std::string oldid = e->getId();
-			
+
 			e->setParent( g );
 			e->setIdRecurse( e->getShortId() );
 			e->setParentPos( g );
@@ -2730,7 +2732,7 @@ namespace NLGUI
 			onWidgetMoved( oldid, e->getId() );
 		}
 	}
-	
+
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::movePointer (sint32 dx, sint32 dy)
 	{
@@ -3091,7 +3093,7 @@ namespace NLGUI
 		{
 			const SMasterGroup &mg = _MasterGroups[ i ];
 
-			std::vector< CInterfaceGroup* >::size_type j;			
+			std::vector< CInterfaceGroup* >::size_type j;
 			for( j = 0; j < mg.Group->getNumGroup(); j++ )
 			{
 				CInterfaceGroup *g = mg.Group->getGroup( j );
@@ -3106,8 +3108,8 @@ namespace NLGUI
 
 		return true;
 	}
-	
-	
+
+
 	// ***************************************************************************
 	void CWidgetManager::enableMouseHandling( bool handle )
 	{
@@ -3116,7 +3118,7 @@ namespace NLGUI
 		{
 			if(!getPointer())
 				return;
-			
+
 			// If Left captured, reset
 			if( getCapturePointerLeft() )
 				setCapturePointerLeft( NULL );
@@ -3124,12 +3126,12 @@ namespace NLGUI
 			// Same for Right
 			if( getCapturePointerRight() )
 				setCapturePointerRight( NULL );
-			
+
 			// Avoid any problem with modals
 			disableModalWindow();
 		}
 	}
-	
+
 	// ***************************************************************************
 	uint CWidgetManager::getUserDblClickDelay()
 	{
@@ -3137,11 +3139,11 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *pNL = CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
 		if( pNL != NULL )
 			nVal = pNL->getValue32();
-		
+
 		uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
 		return dbclickDelay;
 	}
-	
+
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::setupOptions()
 	{
@@ -3165,9 +3167,9 @@ namespace NLGUI
 			_SystemOptions[OptionTimeoutContext]= opt->getValue("context_timeout");
 			_SystemOptions[OptionTimeoutContextHtml]= opt->getValue("context_html_timeout");
 		}
-		
+
 	}
-	
+
 	// Get the alpha roll over speed
 	float CWidgetManager::getAlphaRolloverSpeed()
 	{
@@ -3181,7 +3183,7 @@ namespace NLGUI
 	{
 		_AlphaRolloverSpeedDB = NULL;
 	}
-	
+
 	void CWidgetManager::setContainerAlpha(uint8 alpha)
 	{
 		_ContainerAlpha = alpha;
@@ -3376,11 +3378,11 @@ namespace NLGUI
 
 	void CWidgetManager::selectWidget( const std::string &name )
 	{
-		std::vector< std::string >::iterator itr 
+		std::vector< std::string >::iterator itr
 			= std::find( editorSelection.begin(), editorSelection.end(), name );
 
 		CInterfaceElement *e = getElementFromId( name );
-		
+
 		if( itr != editorSelection.end() )
 		{
 			// If multiselection is on unselect if already selected
@@ -3405,7 +3407,7 @@ namespace NLGUI
 				e->setEditorSelected( true );
 				editorSelection.push_back( name );
 			}
-				
+
 		}
 
 		notifySelectionWatchers();
@@ -3422,7 +3424,7 @@ namespace NLGUI
 		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
 		while( itr != selectionWatchers.end() )
 		{
-			(*itr)->selectionChanged();	
+			(*itr)->selectionChanged();
 			++itr;
 		}
 	}
@@ -3431,7 +3433,7 @@ namespace NLGUI
 	{
 		std::vector< IEditorSelectionWatcher* >::iterator itr =
 			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
-		
+
 		// We already have this watcher
 		if( itr != selectionWatchers.end() )
 			return;
@@ -3443,7 +3445,7 @@ namespace NLGUI
 	{
 		std::vector< IEditorSelectionWatcher* >::iterator itr =
 			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
-		
+
 		// We don't have this watcher
 		if( itr == selectionWatchers.end() )
 			return;
@@ -3473,7 +3475,7 @@ namespace NLGUI
 
 	void CWidgetManager::registerWidgetWatcher( IWidgetWatcher *watcher )
 	{
-		std::vector< IWidgetWatcher* >::const_iterator itr 
+		std::vector< IWidgetWatcher* >::const_iterator itr
 			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
 		// already exists
 		if( itr != widgetWatchers.end() )
@@ -3524,7 +3526,7 @@ namespace NLGUI
 			g->addView( v );
 
 		onWidgetAdded( v->getId() );
-		
+
 		return v;
 	}
 
@@ -3568,7 +3570,7 @@ namespace NLGUI
 			e->setParent( g );
 			e->setParentPos( g );
 			e->setParentSize( g );
-			e->setIdRecurse( e->getShortId() );	
+			e->setIdRecurse( e->getShortId() );
 
 			onWidgetMoved( oldId, e->getId() );
 		}
@@ -3580,9 +3582,9 @@ namespace NLGUI
 		g->alignElements();
 		// Align the new group to the top window
 		g->alignTo( getTopWindow() );
-		
+
 		g->setActive( true );
-		
+
 		return true;
 	}
 
@@ -3634,7 +3636,7 @@ namespace NLGUI
 
 		SMasterGroup mg;
 		mg.Group = root;
-		
+
 		root->setIdRecurse( project );
 		root->setW( 1024 );
 		root->setH( 768 );
@@ -3666,7 +3668,7 @@ namespace NLGUI
 		VariableData v;
 		v.type = "sint32";
 		v.value = "255";
-		
+
 		v.entry = "UI:SAVE:COLOR:R";
 		parser->setVariable( v );
 
@@ -3678,7 +3680,7 @@ namespace NLGUI
 
 		v.entry = "UI:SAVE:COLOR:A";
 		parser->setVariable( v );
-			
+
 		return true;
 	}
 

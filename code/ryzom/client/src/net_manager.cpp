@@ -923,7 +923,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	bool windowVisible;
 
 	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
- 
+
 	// The sender part is up to and including the first ":" after the goodSenderName
 	ucstring::size_type pos = finalString.find(goodSenderName);
 	pos = finalString.find(':', pos);
@@ -3288,7 +3288,7 @@ private:
 				contentStr = "";
 				i = digitStart;
 			}
-		} 
+		}
 		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
