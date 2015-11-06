@@ -784,7 +784,7 @@ bool			NLPACS::CGlobalRetriever::buildInstance(const string &id, const NLMISC::C
 	const CRetrieverInstance	&instance = makeInstance(retrieverId, 0, CVector(position));
 
 	// check make instance success
-	if (&instance == NULL || instance.getInstanceId() == -1 || instance.getRetrieverId() != retrieverId)
+	if (instance.getInstanceId() == -1 || instance.getRetrieverId() != retrieverId)
 		return false;
 
 	// links new instance to its neighbors
