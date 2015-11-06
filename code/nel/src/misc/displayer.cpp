@@ -700,6 +700,9 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 #		endif
 				abort();
 				break;
+
+			default:
+				break;
 			}
 
 			// no more sent mail for crash

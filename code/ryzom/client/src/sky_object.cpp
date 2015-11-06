@@ -396,7 +396,7 @@ bool CSkyObject::setup(const CClientDate &date, const CClientDate &animationDate
 		for(uint k = 0; k < SKY_MAX_NUM_STAGE; ++k)
 		{
 			if (TexPanner[k].U != 0.f || TexPanner[k].V != 0.f ||
-				OffsetUBitmap != NULL || OffsetVBitmap != NULL )
+				OffsetUBitmap[k] != NULL || OffsetVBitmap[k] != NULL )
 			{
 				//nlinfo("global date = %f", animTime);
 				// there's tex panning for that stage

@@ -923,7 +923,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const u
 	bool windowVisible;
 
 	ucstring goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
- 
+
 	// The sender part is up to and including the first ":" after the goodSenderName
 	ucstring::size_type pos = finalString.find(goodSenderName);
 	pos = finalString.find(':', pos);
@@ -3288,7 +3288,7 @@ private:
 				contentStr = "";
 				i = digitStart;
 			}
-		} 
+		}
 		else if(contentStr.size()>=5 && contentStr[0]=='@' && contentStr[1]=='{' && contentStr[2]=='W')
 		{
 			uint	i;
@@ -3883,30 +3883,67 @@ bool CNetManager::update()
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CCDBNodeLeaf *node = m_PingLeaf ? &*m_PingLeaf
-				: &*(m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false));
-			if (node)
-				node->setValue32(getPing());
-			node = m_UploadLeaf ? &*m_UploadLeaf
-				: &*(m_UploadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false));
-			if (node)
-				node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
-			node = m_DownloadLeaf ? &*m_DownloadLeaf
-				: &*(m_DownloadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false));
-			if (node)
-				node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
-			node = m_PacketLostLeaf ? &* m_PacketLostLeaf
-				: &*(m_PacketLostLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false));
-			if (node)
-				node->setValue32((sint32)getMeanPacketLoss());
-			node = m_ServerStateLeaf ? &*m_ServerStateLeaf
-				: &*(m_ServerStateLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false));
-			if (node)
-				node->setValue32((sint32)getConnectionState());
-			node = m_ConnectionQualityLeaf ? &*m_ConnectionQualityLeaf
-				: &*(m_ConnectionQualityLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false));
-			if (node)
-				node->setValue32((sint32)getConnectionQuality());
+			CCDBNodeLeaf *node = NULL;
+
+			if (!m_PingLeaf)
+				m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false);
+
+			if (m_PingLeaf)
+			{
+				node = &*m_PingLeaf;
+				if (node)
+					node->setValue32(getPing());
+			}
+
+			if (!m_UploadLeaf)
+				m_UploadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:UPLOAD", false);
+
+			if (m_UploadLeaf)
+			{
+				node = &*m_UploadLeaf;
+				if (node)
+					node->setValue32((sint32)(getMeanUpload()*1024.f/8.f));
+			}
+
+			if (!m_DownloadLeaf)
+				m_DownloadLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DOWNLOAD", false);
+
+			if (m_DownloadLeaf)
+			{
+				node = &*m_DownloadLeaf;
+				if (node)
+					node->setValue32((sint32)(getMeanDownload()*1024.f/8.f));
+			}
+
+			if (!m_PacketLostLeaf)
+				m_PacketLostLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PACKETLOST", false);
+
+			if (m_PacketLostLeaf)
+			{
+				node = &*m_PacketLostLeaf;
+				if (node)
+					node->setValue32((sint32)getMeanPacketLoss());
+			}
+
+			if (!m_ServerStateLeaf)
+				m_ServerStateLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SERVERSTATE", false);
+
+			if (m_ServerStateLeaf)
+			{
+				node = &*m_ServerStateLeaf;
+				if (node)
+					node->setValue32((sint32)getConnectionState());
+			}
+
+			if (!m_ConnectionQualityLeaf)
+				m_ConnectionQualityLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CONNECTION_QUALITY", false);
+
+			if (m_ConnectionQualityLeaf)
+			{
+				node = &*m_ConnectionQualityLeaf;
+				if (node)
+					node->setValue32((sint32)getConnectionQuality());
+			}
 		}
 	}
 

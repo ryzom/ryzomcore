@@ -1950,8 +1950,14 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
 	{
-		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
-			: &*(_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+		if (!_CurrentPlayerCharacLeaf[i])
+			_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false);
+
+		NLMISC::CCDBNodeLeaf *node = NULL;
+
+		if (_CurrentPlayerCharacLeaf[i])
+			node = &*_CurrentPlayerCharacLeaf[i];
+
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
 	}
 
