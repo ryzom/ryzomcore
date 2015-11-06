@@ -1781,13 +1781,19 @@ void	registerGlExtensions(CGlExtensions &ext)
 //      GPU_MEMORY_INFO_EVICTED_MEMORY_NVX;
 
 		GLint nDedicatedMemoryInKB = 0;
+#ifdef GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX
 		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedMemoryInKB);
+#endif
 
 		GLint nTotalMemoryInKB = 0;
+#ifdef GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX
 		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
+#endif
 
 		GLint nCurAvailMemoryInKB = 0;
+#ifdef GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX
 		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurAvailMemoryInKB);
+#endif
 
 		nlinfo("Memory: total: %d available: %d dedicated: %d", nTotalMemoryInKB, nCurAvailMemoryInKB, nDedicatedMemoryInKB);
 	}
