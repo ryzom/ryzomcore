@@ -3913,20 +3913,12 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 }
 
 
-#if defined(NL_OS_WINDOWS)
 NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 {
 	if (args.size () != 1)
 		return false;
 
-	HINSTANCE result = ShellExecute(NULL, "open", args[0].c_str(), NULL,NULL, SW_SHOW);
-	if ((intptr_t)result > 32)
-		return true;
-	else
-	{
-		log.displayNL ("ShellExecute failed %d", (uint32)(intptr_t)result);
-		return false;
-	}
+	return openURL(args[0].c_str());
 }
 
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
@@ -3948,8 +3940,6 @@ NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
 
 	return true;
 }
-
-#endif // !FINAL_VERSION
 
 struct CItemSheetSort
 {

@@ -2140,7 +2140,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_ChildrenGroups[k]);
+				NLGUI::CInterfaceGroup *group = _ChildrenGroups[k];
+				const type_info &ti = typeid(*group);
 				typeName = ti.name();
 			}
 			nlinfo("Group %d, name = %s, type=%s", k,  _ChildrenGroups[k] ? _ChildrenGroups[k]->getId().c_str() : "???", typeName.c_str());
@@ -2156,7 +2157,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_EltOrder[k]);
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
 				typeName = ti.name();
 			}
 			CInterfaceElement *el = _EltOrder[k];

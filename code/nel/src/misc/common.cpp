@@ -440,7 +440,7 @@ NLMISC_CATEGORISED_COMMAND(nel,hrtob, "Convert a human readable number into a by
 string secondsToHumanReadable (uint32 time)
 {
 	static const char *divTable[] = { "s", "mn", "h", "d" };
-	static uint  divCoef[]  = { 60, 60, 24 };
+	static uint divCoef[] = { 60, 60, 24 };
 	uint div = 0;
 	uint32 res = time;
 	uint32 newres = res;
@@ -671,13 +671,13 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 {
 
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA         si;
-    PROCESS_INFORMATION pi;
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
 
-    memset(&si, 0, sizeof(si));
-    memset(&pi, 0, sizeof(pi));
+	memset(&si, 0, sizeof(si));
+	memset(&pi, 0, sizeof(pi));
 
-    si.cb = sizeof(si);
+	si.cb = sizeof(si);
 
 /*	SECURITY_ATTRIBUTES sa;
 	sa.nLength = sizeof (sa);
@@ -781,7 +781,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
 	}
 	else if (status == 0)
-    {
+	{
 
 		// Exec (the only allowed instruction after vfork)
 		status = execvp(programName.c_str(), &argv.front());
@@ -1009,50 +1009,87 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 #ifdef NL_OS_WINDOWS
 LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
 {
-    HKEY hkey;
-    LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
+	HKEY hkey;
+	LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
 
-    if (retval == ERROR_SUCCESS)
+	if (retval == ERROR_SUCCESS)
 	{
-        long datasize = MAX_PATH;
-        char data[MAX_PATH];
-        RegQueryValueA(hkey, NULL, data, &datasize);
-        lstrcpyA(retdata,data);
-        RegCloseKey(hkey);
-    }
+		long datasize = MAX_PATH;
+		char data[MAX_PATH];
+		RegQueryValueA(hkey, NULL, data, &datasize);
+		lstrcpyA(retdata,data);
+		RegCloseKey(hkey);
+	}
 
-    return retval;
+	return retval;
 }
 #endif // NL_OS_WINDOWS
+
+static bool openDocWithExtension (const char *document, const char *ext)
+{
+#ifdef NL_OS_WINDOWS
+	// First try ShellExecute()
+	HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL, NULL, SW_SHOWDEFAULT);
+
+	// If it failed, get the .htm regkey and lookup the program
+	if ((uintptr_t)result <= HINSTANCE_ERROR)
+	{
+		char key[MAX_PATH + MAX_PATH];
+
+		if (GetRegKey(HKEY_CLASSES_ROOT, ext, key) == ERROR_SUCCESS)
+		{
+			lstrcatA(key, "\\shell\\open\\command");
+
+			if (GetRegKey(HKEY_CLASSES_ROOT, key, key) == ERROR_SUCCESS)
+			{
+				char *pos = strstr(key, "\"%1\"");
+
+				if (pos == NULL)
+				{
+					// No quotes found
+					// Check for %1, without quotes
+					pos = strstr(key, "%1");
+		
+					if (pos == NULL)
+					{
+						// No parameter at all...
+						pos = key+lstrlenA(key)-1;
+					}
+					else
+					{
+						// Remove the parameter
+						*pos = '\0';
+					}
+				}
+				else
+				{
+					// Remove the parameter
+					*pos = '\0';
+				}
+
+				lstrcatA(pos, " ");
+				lstrcatA(pos, document);
+				int res = WinExec(key, SW_SHOWDEFAULT);
+				return (res>31);
+			}
+		}
+	}
+	else
+	{
+		return true;
+	}
+#else
+	// TODO: implement for Linux and Mac OS X
+	nlunreferenced(document);
+#endif // NL_OS_WINDOWS
+
+	return false;
+}
 
 bool openURL (const char *url)
 {
 #ifdef NL_OS_WINDOWS
-    char key[1024];
-    if (GetRegKey(HKEY_CLASSES_ROOT, ".html", key) == ERROR_SUCCESS)
-	{
-        lstrcatA(key, "\\shell\\open\\command");
-
-        if (GetRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS)
-		{
-            char *pos;
-            pos = strstr(key, "\"%1\"");
-            if (pos == NULL) {                     // No quotes found
-                pos = strstr(key, "%1");       // Check for %1, without quotes
-                if (pos == NULL)                   // No parameter at all...
-                    pos = key+lstrlenA(key)-1;
-                else
-                    *pos = '\0';                   // Remove the parameter
-            }
-            else
-                *pos = '\0';                       // Remove the parameter
-
-            lstrcatA(pos, " ");
-            lstrcatA(pos, url);
-            int res = WinExec(key,SW_SHOWDEFAULT);
-			return (res>31);
-		}
-	}
+	return openDocWithExtension(url, "htm");
 #elif defined(NL_OS_MAC)
 	return launchProgram("open", url);
 #elif defined(NL_OS_UNIX)
@@ -1060,53 +1097,17 @@ bool openURL (const char *url)
 #else
 	nlwarning("openURL() is not implemented for this OS");
 #endif // NL_OS_WINDOWS
+
 	return false;
 }
 
 bool openDoc (const char *document)
 {
-#ifdef NL_OS_WINDOWS
-	string ext = CFile::getExtension (document);
-    char key[MAX_PATH + MAX_PATH];
+	// get extension from document fullpath
+	string ext = CFile::getExtension(document);
 
-    // First try ShellExecute()
-    HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL,NULL, SW_SHOWDEFAULT);
-
-    // If it failed, get the .htm regkey and lookup the program
-    if ((uintptr_t)result <= HINSTANCE_ERROR)
-	{
-        if (GetRegKey(HKEY_CLASSES_ROOT, ext.c_str(), key) == ERROR_SUCCESS)
-		{
-            lstrcatA(key, "\\shell\\open\\command");
-
-            if (GetRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS)
-			{
-                char *pos;
-                pos = strstr(key, "\"%1\"");
-                if (pos == NULL) {                     // No quotes found
-                    pos = strstr(key, "%1");       // Check for %1, without quotes
-                    if (pos == NULL)                   // No parameter at all...
-                        pos = key+lstrlenA(key)-1;
-                    else
-                        *pos = '\0';                   // Remove the parameter
-                }
-                else
-                    *pos = '\0';                       // Remove the parameter
-
-                lstrcatA(pos, " ");
-                lstrcatA(pos, document);
-                int res = WinExec(key,SW_SHOWDEFAULT);
-				return (res>31);
-            }
-        }
-    }
-	else
-		return true;
-#else
-	// TODO: implement for Linux and Mac OS X
-	nlunreferenced(document);
-#endif // NL_OS_WINDOWS
-	return false;
+	// try to open document
+	return openDocWithExtension(document, ext.c_str());
 }
 
 } // NLMISC
