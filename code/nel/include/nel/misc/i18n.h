@@ -104,6 +104,11 @@ public:
 	 */
 	static const std::vector<std::string> &getLanguageCodes();
  
+	/** Check if a language code is supported.
+	 *	Code are ISO 639-2 compliant.
+	 */
+	static bool isLanguageCodeSupported(const std::string &lang);
+
 	/// Load a language file depending of the language code("en", "fr", ...). Code are ISO 639-2 compliant.
 	static void load (const std::string &languageCode, const std::string &fallbackLanguageCode="");
 
@@ -118,6 +123,9 @@ public:
 
 	/// Returns the code of the language ("fr", "en", ...)
 	static std::string getCurrentLanguageCode ();
+
+	/// Returns the code of the language ("fr", "en", ...) defined on system
+	static std::string getSystemLanguageCode ();
 
 	/// Find a string in the selected language and return his association.
 	static const ucstring &get (const std::string &label);

@@ -20,6 +20,12 @@
 #include "nel/misc/path.h"
 #include "nel/misc/i18n.h"
 
+#include <locale.h>
+
+#ifdef NL_OS_MAC
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 using namespace std;
 
 #ifdef DEBUG_NEW
@@ -52,11 +58,13 @@ void CI18N::initLanguages()
 		_LanguageCodes.push_back("fr");
 		_LanguageCodes.push_back("de");
 		_LanguageCodes.push_back("ru");
+		_LanguageCodes.push_back("es");
 
 		_LanguageNames.push_back(ucstring("English"));
 		_LanguageNames.push_back(ucstring("French"));
 		_LanguageNames.push_back(ucstring("German"));
 		_LanguageNames.push_back(ucstring("Russian"));
+		_LanguageNames.push_back(ucstring("Spanish"));
 
 		_LanguagesNamesLoaded = true;
 	}
@@ -224,6 +232,108 @@ ucstring CI18N::getCurrentLanguageName ()
 string CI18N::getCurrentLanguageCode ()
 {
 	return _SelectedLanguageCode;
+}
+
+bool CI18N::isLanguageCodeSupported(const std::string &lang)
+{
+	initLanguages();
+
+	for (sint i = 0, ilen = _LanguageCodes.size(); i < ilen; ++i)
+	{
+		if (lang == _LanguageCodes[i]) return true;
+	}
+
+	return false;
+}
+
+std::string CI18N::getSystemLanguageCode ()
+{
+	static std::string s_cachedSystemLanguage;
+
+	if (!s_cachedSystemLanguage.empty())
+		return s_cachedSystemLanguage;
+
+#ifdef NL_OS_MAC
+	// under OS X, locale is only defined in console, not in UI
+	// so we need to use CoreFoundation API to retrieve it
+
+	// get an array with all preferred languages
+	CFArrayRef langs = CFLocaleCopyPreferredLanguages();
+
+	if (langs)
+	{
+		// get languages count
+		sint languagesCount = CFArrayGetCount(langs);
+
+		// process each language
+		for (sint i = 0; i < languagesCount; ++i)
+		{
+			std::string lang;
+
+			// get language CFString
+			CFStringRef langCF = (CFStringRef)CFArrayGetValueAtIndex(langs, i);
+
+			if (langCF)
+			{
+				// get a C string from CFString
+				const char *langStr = CFStringGetCStringPtr(langCF, kCFStringEncodingASCII);
+
+				if (!langStr)
+				{
+					// get length of the CFString
+					CFIndex length = CFStringGetLength(langCF);
+
+					// allocate a temporary buffer to hold converted string
+					char *tmp = new char[length+1];
+
+					// use alternative function to get a C string from CFString
+					if (CFStringGetCString(langCF, tmp, length+1, kCFStringEncodingASCII))
+					{
+						lang = std::string(tmp, length);
+					}
+					else
+					{
+						nlerror("Unable to convert CFStringRef to string");
+					}
+
+					delete [] tmp;
+				}
+				else
+				{
+					lang = std::string(langStr);
+				}
+
+				CFRelease(langCF);
+			}
+
+			// only keep language code if supported by NeL
+			if (!lang.empty() && isLanguageCodeSupported(lang))
+			{
+				s_cachedSystemLanguage = lang;
+				break;
+			}
+		}
+
+		// don't need languages array anymore
+		CFRelease(langs);
+	}
+#endif
+
+	// use system locale (works under Linux and Windows)
+	if (s_cachedSystemLanguage.empty())
+	{
+		std::string lang = NLMISC::toLower(std::string(setlocale(LC_CTYPE, "")));
+
+		// only keep 2 first characters
+		if (lang.size() > 1)
+			s_cachedSystemLanguage = lang.substr(0, 2);
+	}
+
+	// english is default language
+	if (s_cachedSystemLanguage.empty())
+		s_cachedSystemLanguage = "en";
+
+	return s_cachedSystemLanguage;
 }
 
 void CI18N::removeCComment(ucstring &commentedString)

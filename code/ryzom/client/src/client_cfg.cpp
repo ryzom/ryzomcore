@@ -49,8 +49,6 @@
 #include "app_bundle_utils.h"
 #endif // NL_OS_MAC
 
-#include <locale.h>
-
 ///////////
 // MACRO //
 ///////////
@@ -1919,8 +1917,7 @@ void CClientConfig::init(const string &configFileName)
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
 
 		// get current locale
-		std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
-		lang = lang.substr(0, 2);
+		std::string lang = CI18N::getSystemLanguageCode();
 
 		const std::vector<std::string> &languages = CI18N::getLanguageCodes();
 

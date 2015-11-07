@@ -2015,7 +2015,7 @@ bool mainLoop()
 				}
 
 				// Temp for weather test
-				if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
+				if (ClientCfg.ManualWeatherSetup)
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
 					static float displayHourDelta = 0.04f; // static for edition during debug..
