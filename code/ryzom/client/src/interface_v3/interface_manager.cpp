@@ -2488,7 +2488,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getViews()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getViews()[k]).name(), ig->getViews()[k]);
+					NLGUI::CViewBase *view = ig->getViews()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*view).name(), view);
 				}
 				else
 				{
@@ -2504,7 +2505,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getControls()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getControls()[k]).name(), ig->getControls()[k]);
+					NLGUI::CCtrlBase *control = ig->getControls()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*control).name(), control);
 				}
 				else
 				{
