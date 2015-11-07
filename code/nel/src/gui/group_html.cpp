@@ -2090,6 +2090,11 @@ namespace NLGUI
 		clearContext();
 
 		MultiCurl = curl_multi_init();
+		if (MultiCurl)
+		{
+			curl_multi_setopt(MultiCurl, CURLMOPT_MAX_HOST_CONNECTIONS, options.curlMaxConnections);
+			curl_multi_setopt(MultiCurl, CURLMOPT_PIPELINING, 1);
+		}
 		RunningCurls = 0;
 		_CurlWWW = NULL;
 

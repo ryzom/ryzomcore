@@ -429,6 +429,8 @@ CClientConfig::CClientConfig()
 	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
 
+	CurlMaxConnections = 2;
+
 	RingReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes_ring/index.php";
 	ReleaseNotePath = "http://" + WebIgMainDomain + "/releasenotes/index.php";
 
@@ -1074,6 +1076,9 @@ void CClientConfig::setValues()
 	// WEBIG //
 	READ_STRING_FV(WebIgMainDomain);
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
+	READ_INT_FV(CurlMaxConnections);
+	if (ClientCfg.CurlMaxConnections < 0)
+		ClientCfg.CurlMaxConnections = 2;
 
 	///////////////
 	// ANIMATION //
