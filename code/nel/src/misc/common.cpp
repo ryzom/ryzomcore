@@ -440,7 +440,7 @@ NLMISC_CATEGORISED_COMMAND(nel,hrtob, "Convert a human readable number into a by
 string secondsToHumanReadable (uint32 time)
 {
 	static const char *divTable[] = { "s", "mn", "h", "d" };
-	static uint  divCoef[]  = { 60, 60, 24 };
+	static uint divCoef[] = { 60, 60, 24 };
 	uint div = 0;
 	uint32 res = time;
 	uint32 newres = res;
@@ -671,13 +671,13 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 {
 
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA         si;
-    PROCESS_INFORMATION pi;
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
 
-    memset(&si, 0, sizeof(si));
-    memset(&pi, 0, sizeof(pi));
+	memset(&si, 0, sizeof(si));
+	memset(&pi, 0, sizeof(pi));
 
-    si.cb = sizeof(si);
+	si.cb = sizeof(si);
 
 /*	SECURITY_ATTRIBUTES sa;
 	sa.nLength = sizeof (sa);
@@ -781,7 +781,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
 	}
 	else if (status == 0)
-    {
+	{
 
 		// Exec (the only allowed instruction after vfork)
 		status = execvp(programName.c_str(), &argv.front());
@@ -1009,19 +1009,19 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 #ifdef NL_OS_WINDOWS
 LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
 {
-    HKEY hkey;
-    LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
+	HKEY hkey;
+	LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
 
-    if (retval == ERROR_SUCCESS)
+	if (retval == ERROR_SUCCESS)
 	{
-        long datasize = MAX_PATH;
-        char data[MAX_PATH];
-        RegQueryValueA(hkey, NULL, data, &datasize);
-        lstrcpyA(retdata,data);
-        RegCloseKey(hkey);
-    }
+		long datasize = MAX_PATH;
+		char data[MAX_PATH];
+		RegQueryValueA(hkey, NULL, data, &datasize);
+		lstrcpyA(retdata,data);
+		RegCloseKey(hkey);
+	}
 
-    return retval;
+	return retval;
 }
 #endif // NL_OS_WINDOWS
 
