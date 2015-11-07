@@ -1922,7 +1922,7 @@ class CAHOpenURL : public IActionHandler
 		url += "language=" + ClientCfg.LanguageCode;
 		openURL(url.c_str());
 
-		nlinfo("openURL %s",url.c_str());
+		nlinfo("openURL %s", url.c_str());
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenURL, "open_url");
