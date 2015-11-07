@@ -58,11 +58,13 @@ void CI18N::initLanguages()
 		_LanguageCodes.push_back("fr");
 		_LanguageCodes.push_back("de");
 		_LanguageCodes.push_back("ru");
+		_LanguageCodes.push_back("es");
 
 		_LanguageNames.push_back(ucstring("English"));
 		_LanguageNames.push_back(ucstring("French"));
 		_LanguageNames.push_back(ucstring("German"));
 		_LanguageNames.push_back(ucstring("Russian"));
+		_LanguageNames.push_back(ucstring("Spanish"));
 
 		_LanguagesNamesLoaded = true;
 	}
