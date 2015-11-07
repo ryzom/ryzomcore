@@ -17,53 +17,57 @@
 #include "stdpch.h"
 #include "app_bundle_utils.h"
 
-#if defined(NL_OS_MAC)
+#ifdef NL_OS_MAC
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 std::string getAppBundlePath()
 {
-	static std::string cachedPathToBundle;
+	static std::string s_cachedPathToBundle;
 
-	if(cachedPathToBundle.size())
-		return cachedPathToBundle;
+	if (!s_cachedPathToBundle.empty())
+		return s_cachedPathToBundle;
 
 #if defined(NL_OS_MAC)
 	// get the bundle
 	CFBundleRef bundle = CFBundleGetMainBundle();
 
-	if(bundle)
+	if (bundle)
 	{
 		// get the url to the bundles root
 		CFURLRef url = CFBundleCopyBundleURL(bundle);
 
-		if(url)
+		if (url)
 		{
 			// get the file system path
 			CFStringRef str;
-			str = CFURLCopyFileSystemPath(
-				CFURLCopyAbsoluteURL(url), kCFURLPOSIXPathStyle);
+			str = CFURLCopyFileSystemPath(CFURLCopyAbsoluteURL(url), kCFURLPOSIXPathStyle);
 			CFRelease(url);
 	
-			if(str)
+			if (str)
 			{
-				cachedPathToBundle = CFStringGetCStringPtr(
-					str, CFStringGetSmallestEncoding(str));
+				s_cachedPathToBundle = CFStringGetCStringPtr(str, CFStringGetSmallestEncoding(str));
 				CFRelease(str);
 			}
 			else
+			{
 				nlerror("CFStringGetCStringPtr");
+			}
 		}
 		else
+		{
 			nlerror("CFBundleCopyBundleURL");
+		}
 	}
 	else
+	{
 		nlerror("CFBundleGetMainBundle");
+	}
 #elif defined(NL_OS_WINDOWS)
 	char buffer[MAX_PATH+1];
 	if (GetModuleFileNameA(NULL, buffer, MAX_PATH))
-		cachedPathToBundle = NLMISC::CPath::standardizePath(NLMISC::CFile::getPath(buffer), false);
+		s_cachedPathToBundle = NLMISC::CPath::standardizePath(NLMISC::CFile::getPath(buffer), false);
 #endif // defined(NL_OS_MAC)
 	
-	return cachedPathToBundle;
+	return s_cachedPathToBundle;
 }
