@@ -213,11 +213,11 @@ void connectionRestoreVideoMode ()
 		(ClientCfg.Width != mode.Width) ||
 		(ClientCfg.Height != mode.Height)))
 	{
-		mode.Windowed = ClientCfg.Windowed;
-		mode.Depth    = uint8(ClientCfg.Depth);
-		mode.Width    = ClientCfg.Width;
-		mode.Height   = ClientCfg.Height;
-		mode.Frequency= ClientCfg.Frequency;
+		mode.Windowed	= ClientCfg.Windowed;
+		mode.Depth		= uint8(ClientCfg.Depth);
+		mode.Width		= ClientCfg.Width;
+		mode.Height		= ClientCfg.Height;
+		mode.Frequency	= ClientCfg.Frequency;
 		setVideoMode(mode);
 	}
 

@@ -1758,14 +1758,14 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 #elif defined(NL_OS_MAC)
 
 	// leave fullscreen mode, enter windowed mode
-	if(windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
@@ -1780,13 +1780,13 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 

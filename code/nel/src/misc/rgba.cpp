@@ -298,7 +298,8 @@ void CRGBA::modulateColors(CRGBA *dest, const CRGBA *src1, const CRGBA *src2, ui
 		uint64 blank = 0;
 		/// well, this could be further optimized when stride is 4
 		if (dup == 1)
-		{	__asm
+		{
+			__asm
 			{
 						push        ebp
 						movq        mm2, blank
