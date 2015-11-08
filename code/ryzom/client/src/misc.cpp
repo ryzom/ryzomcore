@@ -1478,7 +1478,8 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 			{
 				uint freq = videoModes[i].Frequency;
 
-				if (ClientCfg.Frequency > 0 && freq == ClientCfg.Frequency)
+				// if frequency is 0, take the first one else use the exact one
+				if (nFoundStringFreq == -1 && ((ClientCfg.Frequency == 0) || (freq == ClientCfg.Frequency)))
 				{
 					nFoundStringFreq = stringFreqList.size();
 				}
