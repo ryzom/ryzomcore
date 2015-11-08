@@ -71,7 +71,7 @@ CVBDrvInfosGL::CVBDrvInfosGL(CDriverGL *drv, ItVBDrvInfoPtrList it, CVertexBuffe
 CVBDrvInfosGL::~CVBDrvInfosGL()
 {
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGLDtor)
-	// Restaure non resident memory
+	// Restore non resident memory
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);

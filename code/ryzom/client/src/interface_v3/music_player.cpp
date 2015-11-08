@@ -291,11 +291,11 @@ public:
 					Driver->endDialogMode();
 			}
 
-			// Restaure mouse
+			// Restore mouse
 			InitMouseWithCursor (wasHardware);
 			Driver->showCursor (wasHardware);
 
-			// Restaure current path
+			// Restore current path
 			CPath::setCurrentPath (currentPath.c_str());
 #endif // NL_OS_WINDOWS
 		}

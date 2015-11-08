@@ -187,7 +187,7 @@ bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
-void connectionRestaureVideoMode ()
+void connectionRestoreVideoMode ()
 {
 	// Setup full screen if we have to
 	UDriver::CMode mode;
@@ -342,7 +342,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 		return true;
 	}
 
@@ -513,7 +513,7 @@ bool reconnection()
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 		return true;
 	}
 */
@@ -1266,10 +1266,10 @@ TInterfaceState globalMenu()
 	}
 
 
-	// Restaure video mode
+	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
 	{
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 	}
 
 	// Skip intro next time

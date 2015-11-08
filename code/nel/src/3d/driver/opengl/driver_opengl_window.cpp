@@ -329,7 +329,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
-		_NeedToRestaureGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
+		_NeedToRestoreGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
 
 		// Release the DC
 		ReleaseDC (NULL, dc);
@@ -465,8 +465,8 @@ bool CDriverGL::unInit()
 	}
 	_Registered = 0;
 
-	// Restaure monitor color parameters
-	if (_NeedToRestaureGammaRamp)
+	// Restore monitor color parameters
+	if (_NeedToRestoreGammaRamp)
 	{
 		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
 		if (dc)
