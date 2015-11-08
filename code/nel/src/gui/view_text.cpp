@@ -42,6 +42,8 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::setupDefault ()
 	{
+		_ParentElm = NULL;
+
 		_CaseMode = CaseNormal;
 		_Underlined = false;
 		_StrikeThrough = false;
@@ -2650,6 +2652,10 @@ namespace NLGUI
 	void CViewText::onInvalidateContent()
 	{
 		_InvalidTextContext= true;
+
+		if (_ParentElm)
+			_ParentElm->invalidateCoords();
+
 		invalidateCoords();
 	}
 
