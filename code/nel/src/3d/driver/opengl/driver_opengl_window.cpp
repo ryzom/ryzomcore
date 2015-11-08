@@ -2050,6 +2050,10 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 				// nldebug(" Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
 			}
 		}
+
+#ifdef NL_MAC_VERSION_10_6_UP
+		CFRelease(modeList);
+#endif
 	}
 
 #elif defined (NL_OS_UNIX)
