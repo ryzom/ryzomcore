@@ -329,7 +329,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
-		_NeedToRestaureGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
+		_NeedToRestoreGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
 
 		// Release the DC
 		ReleaseDC (NULL, dc);
@@ -465,8 +465,8 @@ bool CDriverGL::unInit()
 	}
 	_Registered = 0;
 
-	// Restaure monitor color parameters
-	if (_NeedToRestaureGammaRamp)
+	// Restore monitor color parameters
+	if (_NeedToRestoreGammaRamp)
 	{
 		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
 		if (dc)
@@ -1758,14 +1758,14 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 #elif defined(NL_OS_MAC)
 
 	// leave fullscreen mode, enter windowed mode
-	if(windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
+	if (windowStyle == EWSWindowed && [containerView() isInFullScreenMode])
 	{
 		// disable manual setting of back buffer size, cocoa handles this
 		// automatically as soon as the view gets resized
 		CGLError error = CGLDisable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot disable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
@@ -1780,20 +1780,20 @@ bool CDriverGL::setWindowStyle(EWindowStyle windowStyle)
 	}
 
 	// enter fullscreen, leave windowed mode
-	else if(windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
+	else if (windowStyle == EWSFullscreen && ![containerView() isInFullScreenMode])
 	{
 		// enable manual back buffer size for mode setting in fullscreen
 		CGLError error = CGLEnable((CGLContextObj)[_ctx CGLContextObj],
 			kCGLCESurfaceBackingSize);
 
-		if(error != kCGLNoError)
+		if (error != kCGLNoError)
 			nlerror("cannot enable kCGLCESurfaceBackingSize (%s)",
 				CGLErrorString(error));
 
 		// put the view in fullscreen mode, hiding the dock but enabling the menubar
 		// to pop up if the mouse hits the top screen border.
 		// NOTE: withOptions:nil disables <CMD>+<Tab> application switching!
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 		[containerView() enterFullScreenMode:[NSScreen mainScreen] withOptions:
 			[NSDictionary dictionaryWithObjectsAndKeys:
 				[NSNumber numberWithInt:
@@ -1917,8 +1917,9 @@ bool CDriverGL::setMode(const GfxMode& mode)
 	return true;
 }
 
-#if defined(NL_OS_MAC) && defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_OS_MAC
 
+#ifdef NL_MAC_VERSION_10_6_UP
 
 /// helper to extract bits per pixel value from screen mode, only 16 or 32 bits
 static int bppFromDisplayMode(CGDisplayModeRef mode)
@@ -1936,7 +1937,7 @@ static int bppFromDisplayMode(CGDisplayModeRef mode)
 	return 0;
 }
 
-#elif defined(NL_OS_MAC)
+#else
 
 long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 {
@@ -1953,7 +1954,9 @@ long GetDictionaryLong(CFDictionaryRef theDict, const void* key)
 #define GetModeHeight(mode) GetDictionaryLong((mode), kCGDisplayHeight)
 #define GetModeBitsPerPixel(mode) GetDictionaryLong((mode), kCGDisplayBitsPerPixel)
 
-#endif // defined(NL_OS_MAC)
+#endif
+
+#endif // NL_OS_MAC
 
 // --------------------------------------------------
 bool CDriverGL::getModes(std::vector<GfxMode> &modes)
@@ -2000,7 +2003,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 	{
 		CGDirectDisplayID dspy = display[i];
 
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 		CFArrayRef modeList = CGDisplayCopyAllDisplayModes(dspy, NULL);
 #else
 		CFArrayRef modeList = CGDisplayAvailableModes(dspy);
@@ -2014,7 +2017,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 		for (CFIndex j = 0; j < CFArrayGetCount(modeList); ++j)
 		{
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 			CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(modeList, j);
 			uint8 bpp = bppFromDisplayMode(mode);
 #else
@@ -2024,7 +2027,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 			if (bpp >= 16)
 			{
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 				uint16 w = CGDisplayModeGetWidth(mode);
 				uint16 h = CGDisplayModeGetHeight(mode);
 #else
@@ -2047,6 +2050,10 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 				// nldebug(" Display 0x%x: Mode %dx%d, %d BPP", dspy, w, h, bpp);
 			}
 		}
+
+#ifdef NL_MAC_VERSION_10_6_UP
+		CFRelease(modeList);
+#endif
 	}
 
 #elif defined (NL_OS_UNIX)

@@ -755,7 +755,7 @@ bool CUserEntity::mode(MBEHAV::EMode m)
 		break;
 		// Leave DEATH Mode
 		case MBEHAV::DEATH:
-			// Restaure the last view.
+			// Restore the last view.
 			viewMode(viewMode());
 			break;
 		case MBEHAV::SWIM:

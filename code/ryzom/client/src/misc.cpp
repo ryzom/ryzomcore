@@ -1403,19 +1403,25 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
+
 	// Remove modes under 800x600 and get the unique strings
 	sint i, j;
-	for (i=0; i < (sint)videoModes.size(); ++i)
+	for (i = 0; i < (sint)videoModes.size(); ++i)
 	{
 		if ((videoModes[i].Width < 800) || (videoModes[i].Height < 600))
 		{
+			// discard modes under 800x600
 			videoModes.erase(videoModes.begin()+i);
 			--i;
 		}
 		else
 		{
 			bool bFound = false;
+
+			// create string format with width and height
 			string res = toString(videoModes[i].Width)+" x "+toString(videoModes[i].Height);
+
+			// check if video mode already found in list
 			for (j = 0; j < (sint)stringModeList.size(); ++j)
 			{
 				if (stringModeList[j] == res)
@@ -1424,12 +1430,17 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 					break;
 				}
 			}
+
+			// if not found
 			if (!bFound)
 			{
+				// add it to the list
 				stringModeList.push_back(res);
 
+				// process all screen sizes less or equal to desired one
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
+					// take first one by default
 					if (nFoundStringMode == -1)
 					{
 						nFoundStringMode = j;
@@ -1437,6 +1448,7 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 					}
 					else
 					{
+						// then take the largest one
 						if ((videoModes[i].Width >= videoModes[nFoundMode].Width) &&
 							(videoModes[i].Height >= videoModes[nFoundMode].Height))
 						{
@@ -1459,13 +1471,15 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	else
 	{
 		// add frequencies to frequencies list
-		for (i=0; i < (sint)videoModes.size(); ++i)
+		for (i = 0; i < (sint)videoModes.size(); ++i)
 		{
+			// only take exact screen sizes
 			if (videoModes[i].Width == videoModes[nFoundMode].Width && videoModes[i].Height == videoModes[nFoundMode].Height)
 			{
 				uint freq = videoModes[i].Frequency;
 
-				if (ClientCfg.Frequency > 0 && freq == ClientCfg.Frequency)
+				// if frequency is 0, take the first one else use the exact one
+				if (nFoundStringFreq == -1 && ((ClientCfg.Frequency == 0) || (freq == ClientCfg.Frequency)))
 				{
 					nFoundStringFreq = stringFreqList.size();
 				}

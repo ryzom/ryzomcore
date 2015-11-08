@@ -1558,7 +1558,7 @@ private:
 
 
 	// Monitor color parameters backup
-	bool							_NeedToRestaureGammaRamp;
+	bool							_NeedToRestoreGammaRamp;
 	uint16							_GammaRampBackuped[3*256];
 
 

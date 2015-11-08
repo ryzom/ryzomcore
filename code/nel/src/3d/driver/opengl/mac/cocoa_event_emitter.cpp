@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "../stdopengl.h"
 #include "cocoa_event_emitter.h"
 
 namespace NLMISC
@@ -380,7 +381,7 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	case NSOtherMouseDown:break;
 	case NSOtherMouseUp:break;
 	case NSOtherMouseDragged:break;
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 	case NSEventTypeGesture:break;
 	case NSEventTypeMagnify:break;
 	case NSEventTypeSwipe:break;

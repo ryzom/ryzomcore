@@ -24,21 +24,26 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 	std::string url;
 	std::string languageCode = "wk";
 	CConfigFile::CVar *languageCodeVarPtr = cf.getVarPtr("LanguageCode");
+
 	if (languageCodeVarPtr)
 	{
 		languageCode = languageCodeVarPtr->asString();
 	}
+
 	CConfigFile::CVar *helpPages = cf.getVarPtr("HelpPages");
+
 	if (helpPages)
 	{
 		for (uint i = 0; i < helpPages->size(); ++i)
 		{
 			std::string entry = helpPages->asString(i);
+
 			if (entry.size() >= languageCode.size())
 			{
 				if (nlstricmp(entry.substr(0, languageCode.size()), languageCode) == 0)
 				{
 					std::string::size_type pos = entry.find("=");
+
 					if (pos != std::string::npos)
 					{
 						url = entry.substr(pos + 1);

@@ -234,7 +234,7 @@ CDriverGL::CDriverGL()
 	_CursorScale = 1.f;
 	_MouseCaptured = false;
 
-	_NeedToRestaureGammaRamp = false;
+	_NeedToRestoreGammaRamp = false;
 
 	_win = EmptyWindow;
 	_WindowX = 0;

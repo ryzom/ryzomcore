@@ -440,10 +440,9 @@ int main(int argc, char **argv)
 	if (string(cmdline) == "/crash")
 		volatile int toto = *(int*)0;
 	if (string(cmdline) == "/break")
-		__asm
-		{
-			int 3
-		};
+	{
+		__debugbreak();
+	}
 #endif // TEST_CRASH_COUNTER
 
 	HInstance = hInstance;

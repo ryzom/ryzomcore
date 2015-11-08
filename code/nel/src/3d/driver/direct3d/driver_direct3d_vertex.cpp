@@ -63,7 +63,7 @@ CVBDrvInfosD3D::~CVBDrvInfosD3D()
 {
 	H_AUTO_D3D(CVBDrvInfosD3D_CVBDrvInfosD3D)
 	CDriverD3D *driver = static_cast<CDriverD3D*>(_Driver);
-	// Restaure non resident memory
+	// Restore non resident memory
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);

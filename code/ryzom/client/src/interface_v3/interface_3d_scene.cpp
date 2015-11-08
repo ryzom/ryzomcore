@@ -539,7 +539,7 @@ void CInterface3DScene::draw ()
 	Driver->setViewport(oldVP);
 	Driver->setFrustum(oldFrustum);
 
-	// Restaure render states
+	// Restore render states
 	CViewRenderer::getInstance()->setRenderStates();
 
 	restoreClip (oldSciX, oldSciY, oldSciW, oldSciH);

@@ -677,7 +677,7 @@ void CFairMutex::debugEndEnter()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (entered) __asm int 3;
+		if (entered) __debugbreak();
 		entered = true;
 	}
 */
@@ -704,7 +704,7 @@ void CFairMutex::debugLeave()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (!entered) __asm int 3;
+		if (!entered) __debugbreak();
 		entered = false;
 	}
 */

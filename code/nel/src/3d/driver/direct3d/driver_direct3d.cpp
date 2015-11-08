@@ -1912,7 +1912,7 @@ bool CDriverD3D::clear2D(CRGBA rgba)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_TARGET, NL_D3DCOLOR_RGBA(rgba), 1.0f, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 	return result;
 }
@@ -1931,7 +1931,7 @@ bool CDriverD3D::clearZBuffer(float zval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0,0,0,0), zval, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	// NVidia driver 56.72 needs to reset the vertex buffer after a clear Z
@@ -1954,7 +1954,7 @@ bool CDriverD3D::clearStencilBuffer(float stencilval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_ARGB(0,0,0,0), 1.0f, (unsigned long)stencilval ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	return result;
@@ -2526,7 +2526,7 @@ bool CDriverD3D::reset (const GfxMode& mode)
 	_CurrentMaterial = NULL;
 	_CurrentMaterialInfo = NULL;
 
-	// Restaure non managed vertex buffer in system memory
+	// Restore non managed vertex buffer in system memory
 	ItVBDrvInfoPtrList iteVb = _VBDrvInfos.begin();
 	while (iteVb != _VBDrvInfos.end())
 	{
