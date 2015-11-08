@@ -304,6 +304,7 @@ struct CClientConfig
 	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
 
+	sint32			CurlMaxConnections;
 
 	///////////////
 	// ANIMATION //
