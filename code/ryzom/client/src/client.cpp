@@ -121,6 +121,12 @@ static void sigHandler(int Sig)
 //---------------------------------------------------
 #ifdef NL_OS_WINDOWS
 
+// enable optimus for NVIDIA cards
+extern "C"
+{
+	_declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+}
+
 void pump ()
 {
 	// Display the window
