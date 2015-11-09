@@ -1919,7 +1919,7 @@ class CAHOpenURL : public IActionHandler
 		if (pos_lang != string::npos)
 			pos_lang = url.find("=en#");
 
-		if (pos_lang != string::npos)
+		if (pos_lang == string::npos)
 			url.replace(pos_lang + 1, 2, ClientCfg.getHtmlLanguageCode());
 
 		// append language
