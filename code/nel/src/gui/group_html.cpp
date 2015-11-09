@@ -2092,7 +2092,10 @@ namespace NLGUI
 		MultiCurl = curl_multi_init();
 		if (MultiCurl)
 		{
+#ifdef CURLMOPT_MAX_HOST_CONNECTIONS
+			// added in libcurl 7.30.0
 			curl_multi_setopt(MultiCurl, CURLMOPT_MAX_HOST_CONNECTIONS, options.curlMaxConnections);
+#endif
 			curl_multi_setopt(MultiCurl, CURLMOPT_PIPELINING, 1);
 		}
 		RunningCurls = 0;
