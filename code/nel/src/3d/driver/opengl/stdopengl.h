@@ -105,5 +105,6 @@
 #define NL_MAC_VERSION_10_6_UP
 #else
 #endif
+#endif
 
 #endif
