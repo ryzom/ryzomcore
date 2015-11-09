@@ -326,12 +326,8 @@ CClientConfig::CClientConfig()
 
 	DisplayAccountButtons = true;
 	CreateAccountURL	= "https://secure.ryzom.com/signup/from_client.php";
-	ConditionsTermsURL	= "https://secure.ryzom.com/signup/terms_of_use.php";
 	EditAccountURL		= "https://secure.ryzom.com/payment_profile/index.php";
-	BetaAccountURL		= "http://www.ryzom.com/profile";
 	ForgetPwdURL		= "https://secure.ryzom.com/payment_profile/lost_secure_password.php";
-	FreeTrialURL		= "http://www.ryzom.com/join/?freetrial=1";
-	LoginSupportURL		= "http://www.ryzom.com/en/support.html";
 	Position			= CVector(0.f, 0.f, 0.f);	// Default Position.
 	Heading				= CVector(0.f, 1.f, 0.f);	// Default Heading.
 	EyesHeight			= 1.5f;						// Default User Eyes Height.
@@ -876,11 +872,13 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(DisplayAccountButtons)
 	READ_STRING_DEV(CreateAccountURL)
 	READ_STRING_DEV(EditAccountURL)
-	READ_STRING_DEV(ConditionsTermsURL)
-	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(ForgetPwdURL)
+	READ_STRING_DEV(BetaAccountURL)
 	READ_STRING_DEV(FreeTrialURL)
-	READ_STRING_DEV(LoginSupportURL)
+
+	// defined in client_default.cfg
+	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
 	// if cookie is not empty, it means that the client was launch
