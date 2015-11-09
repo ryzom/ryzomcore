@@ -1561,12 +1561,20 @@ static bool	setupATIMeminfo(const char *glext)
 void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
+
 	// OpenGL 1.2 ??
 	const char	*nglVersion= (const char *)glGetString (GL_VERSION);
 	sint	a=0, b=0;
+
 	// 1.2***  ???
 	sscanf(nglVersion, "%d.%d", &a, &b);
-	ext.Version1_2= (a==1 && b>=2) || (a>=2);
+	ext.Version1_2 = (a==1 && b>=2) || (a>=2);
+
+	const char *vendor = (const char *) glGetString (GL_VENDOR);
+	const char *renderer = (const char *) glGetString (GL_RENDERER);
+
+	// Log GPU details
+	nlinfo("3D: OpenGL %s / %s / %s", nglVersion, vendor, renderer);
 
 	// Extensions.
 	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
