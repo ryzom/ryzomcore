@@ -123,6 +123,9 @@ struct	CGlExtensions
 	// WGL_AMD_gpu_association
 	bool	WGLAMDGPUAssociation;
 
+	// WGL_NV_gpu_affinity
+	bool	WGLNVGPUAffinity;
+
 public:
 
 	/// \name Disable Hardware feature. False by default. setuped by IDriver
@@ -793,6 +796,13 @@ extern PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC	nwglMakeAssociatedContextCurren
 extern PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC		nwglGetCurrentAssociatedContextAMD;
 extern PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC			nwglBlitContextFramebufferAMD;
 
+// WGL_NV_gpu_affinity
+//====================
+extern PFNWGLENUMGPUSNVPROC							nwglEnumGpusNV;
+extern PFNWGLENUMGPUDEVICESNVPROC					nwglEnumGpuDevicesNV;
+extern PFNWGLCREATEAFFINITYDCNVPROC					nwglCreateAffinityDCNV;
+extern PFNWGLENUMGPUSFROMAFFINITYDCNVPROC			nwglEnumGpusFromAffinityDCNV;
+extern PFNWGLDELETEDCNVPROC							nwglDeleteDCNV;
 
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
