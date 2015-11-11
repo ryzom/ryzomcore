@@ -1916,19 +1916,23 @@ class CAHOpenURL : public IActionHandler
 		string::size_type pos_lang = url.find("/en/");
 
 		// or new forums
-		if (pos_lang != string::npos)
+		if (pos_lang == string::npos)
 			pos_lang = url.find("=en#");
 
-		if (pos_lang == string::npos)
+		if (pos_lang != string::npos)
+		{
 			url.replace(pos_lang + 1, 2, ClientCfg.getHtmlLanguageCode());
-
-		// append language
-		if (url.find('?') != string::npos)
-			url += "&";
+		}
 		else
-			url += "?";
+		{
+			// append language
+			if (url.find('?') != string::npos)
+				url += "&";
+			else
+				url += "?";
 
-		url += "language=" + ClientCfg.LanguageCode;
+			url += "language=" + ClientCfg.LanguageCode;
+		}
 
 		openURL(url.c_str());
 
