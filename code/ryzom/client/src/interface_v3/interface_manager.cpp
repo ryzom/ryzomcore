@@ -1761,6 +1761,8 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	// *** If saved resolution is different from the current one setuped, must fix positions in _Modes
 	if(lastInGameScreenResLoaded)
 	{
+		// Temporarily set screen to saved size so that positions are correctly calculated
+		CWidgetManager::getInstance()->setScreenWH(_LastInGameScreenW, _LastInGameScreenH);
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
 		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(ClientCfg.Width, ClientCfg.Height, false);
@@ -2018,6 +2020,9 @@ void CInterfaceManager::updateDesktops( uint32 newScreenW, uint32 newScreenH )
 			CWidgetManager::getInstance()->getNewWindowCoordToNewScreenSize(gcCont.X, gcCont.Y, gcCont.W, gcCont.H ,newScreenW, newScreenH);
 		}
 	}
+
+	_LastInGameScreenW = newScreenW;
+	_LastInGameScreenH = newScreenH;
 }
 
 class InvalidateTextVisitor : public CInterfaceElementVisitor
