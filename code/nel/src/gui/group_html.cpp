@@ -3621,7 +3621,7 @@ namespace NLGUI
 			}
 			else
 			{
-				ctrlButton->setDefaultContextHelp(ucstring(tooltip));
+				ctrlButton->setDefaultContextHelp(ucstring::makeFromUtf8(tooltip));
 				//ctrlButton->setOnContextHelp(string(tooltip));
 			}
 
