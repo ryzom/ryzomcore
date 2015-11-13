@@ -734,17 +734,23 @@ void CRGBA::buildFromHLS(float h, float l, float s)
 
 CRGBA CRGBA::stringToRGBA( const char *ptr )
 {
-	if (!ptr)
-		return NLMISC::CRGBA::White;
+	if (ptr)
+	{
+		int r = 255, g = 255, b = 255, a = 255;
+
+		// we need at least 3 integer values to consider string is valid
+		if (sscanf( ptr, "%d %d %d %d", &r, &g, &b, &a ) >= 3)
+		{
+			clamp( r, 0, 255 );
+			clamp( g, 0, 255 );
+			clamp( b, 0, 255 );
+			clamp( a, 0, 255 );
 	
-	int r = 255, g = 255, b = 255, a = 255;
-	sscanf( ptr, "%d %d %d %d", &r, &g, &b, &a );
-	clamp( r, 0, 255 );
-	clamp( g, 0, 255 );
-	clamp( b, 0, 255 );
-	clamp( a, 0, 255 );
-	
-	return CRGBA( r,g,b,a );
+			return CRGBA( r,g,b,a );
+		}
+	}
+
+	return NLMISC::CRGBA::White;
 }
 
 std::string CRGBA::toString() const
