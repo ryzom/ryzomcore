@@ -500,7 +500,7 @@ void			CSBrickManager::compileBrickProperties()
 							k++;
 						}
 						// get the key and replace text with value
-						if(key.size())
+						if (!key.empty())
 						{
 							// Parse all the brick properties if match the key
 							float	value= 0.f;

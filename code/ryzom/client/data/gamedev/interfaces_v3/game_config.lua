@@ -19,7 +19,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
--- WIDGET TO CHOOSE A COLOR 
+-- WIDGET TO CHOOSE A COLOR
 ------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------
 
@@ -29,14 +29,14 @@ function game:mcwChooseColor(title, pal)
 
 	local ui = getUICaller();
 
-	-- get the color of the button and store it in temporary db location	
+	-- get the color of the button and store it in temporary db location
 	local rgba = ui.col_normal_rgba;
 	game.ColorPicker.r = rgba.R;
 	game.ColorPicker.g = rgba.G;
 	game.ColorPicker.b = rgba.B;
 	game.ColorPicker.button = ui;
 	game.ColorPicker.pal = pal;
-	
+
 	-- setup the color picker window
 	local uiModalWin = getUI('ui:interface:define_mcw_color');
 	if (game.ColorPicker.pal == 0) then
@@ -64,8 +64,8 @@ end
 -- called when we have finished choosing the color in the modal window and the chosen color is valid
 function game:mcwValidateColor()
 
-	if (game.ColorPicker.button == nil) then 
-		return; 
+	if (game.ColorPicker.button == nil) then
+		return;
 	end
 	game.ColorPicker.button.col_normal = game.ColorPicker.r .. ' ' .. game.ColorPicker.g .. ' ' .. game.ColorPicker.b;
 	--debugInfo(game.ColorPicker.button.col_normal)
@@ -108,10 +108,10 @@ end
 -- hide all the pages of the config window
 function game:configHideAll()
 
-	local	uiList = { 
+	local	uiList = {
 		'explanation', 'general', 'landscape', 'fx', 'char', 'hud', 'language', 'alpha_colors',
-		'chat_colors', 'entity_colors', 'in_scene_user', 'in_scene_friend', 'in_scene_enemy', 
-		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'vr', 'sound', 'landmark_colors', 'help' 
+		'chat_colors', 'entity_colors', 'in_scene_user', 'in_scene_friend', 'in_scene_enemy',
+		'in_scene_chat_messages', 'win_colors', 'win_colors_r2', 'mouse', 'keyb', 'vr', 'sound', 'landmark_colors', 'help'
 	};
 
 	for k,v in pairs(uiList) do
@@ -127,19 +127,19 @@ function game:configShowOne(strUIToShow)
 	game:configHideAll();
 	-- special case : if the display tab was shown, update the aspect ratio if needed
 	local generalGrp = getUI('ui:interface:game_config:content:general');
-	local uiGrp = getUI('ui:interface:game_config:content:' .. strUIToShow);	
+	local uiGrp = getUI('ui:interface:game_config:content:' .. strUIToShow);
 	-- Removed the following code to solve RT n°14720
-	-- The 'game_config_change_screen_ratio_custom' action handler 
-	-- should only be called if the user changed the apect ratio himself 
+	-- The 'game_config_change_screen_ratio_custom' action handler
+	-- should only be called if the user changed the apect ratio himself
 	-- (else the edit box containing the aspect ratio may not have been initiliazed here)
-	--if uiGrp ~= generalGrp then		
+	--if uiGrp ~= generalGrp then
 	--	runAH(nil, 'game_config_change_screen_ratio_custom', '')
 	--end
 	uiGrp.active = true;
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:configInit()
 
 	-- init language
@@ -187,9 +187,9 @@ function game:configInit()
 	winActive("wc_r2_dialogs", r2WinOn)
 	winActive("wc_r2_events", r2WinOn)
 	winActive("wc_r2_activities", r2WinOn)
-	winActive("wc_r2_feature_help", r2WinOn)	
-	winActive("wc_r2_connect", not r2WinOn)	
-	winActive("wc_r2_session_browser", not r2WinOn)	
-	winActive("wc_r2_scenario_control", true)	
+	winActive("wc_r2_feature_help", r2WinOn)
+	winActive("wc_r2_connect", not r2WinOn)
+	winActive("wc_r2_session_browser", not r2WinOn)
+	winActive("wc_r2_scenario_control", true)
 	winActive("wc_r2_player_tracking", r2WinOn)
 end
