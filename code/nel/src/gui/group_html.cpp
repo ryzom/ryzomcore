@@ -4725,7 +4725,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
 
-		uint element_number = (uint)ls.toNumber(1);
+		uint element_number = (uint)ls.toInteger(1);
 		std::vector<bool> present;
 		std::vector<const char *> value;
 		present.resize(30, false);
@@ -4738,7 +4738,7 @@ namespace NLGUI
 
 		ENUM_LUA_TABLE(params, it)
 		{
-			if (!it.nextKey().isNumber())
+			if (!it.nextKey().isInteger())
 			{
 				nlwarning("%s : bad key encountered with type %s, number expected.", funcName, it.nextKey().getTypename());
 				continue;
@@ -4748,16 +4748,16 @@ namespace NLGUI
 				nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
 				continue;
 			}
-			uint idx = (uint)it.nextKey().toNumber();
+			uint idx = (uint)it.nextKey().toInteger();
 
-			present.insert(present.begin() + (uint)it.nextKey().toNumber(), true);
+			present.insert(present.begin() + (uint)it.nextKey().toInteger(), true);
 
 			string str = it.nextValue().toString();
 			size_t size = str.size() + 1;
 			char * buffer = new char[ size ];
 			strncpy(buffer, str.c_str(), size );
 
-			value.insert(value.begin() + (uint)it.nextKey().toNumber(), buffer);
+			value.insert(value.begin() + (uint)it.nextKey().toInteger(), buffer);
 		}
 
 		beginElement(element_number, present, value);
@@ -4775,7 +4775,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 
-		uint element_number = (uint)ls.toNumber(1);
+		uint element_number = (uint)ls.toInteger(1);
 		endElement(element_number);
 
 		return 0;

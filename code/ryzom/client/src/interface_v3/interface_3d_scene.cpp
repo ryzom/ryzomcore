@@ -856,7 +856,7 @@ int CInterface3DCharacter::luaSetupCharacter3D(CLuaState &ls)
 	const char *funcName = "setupCharacter3D";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-	setupCharacter3D((sint32) ls.toNumber(1));
+	setupCharacter3D((sint32) ls.toInteger(1));
 	return 0;
 }
 

@@ -3327,11 +3327,17 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 
 	sint	type= ls.type(index);
 	if(type==LUA_TNIL)
+	{
 		str= "nil";
+	}
 	else if(type==LUA_TNUMBER)
-		str= NLMISC::toString(ls.toNumber(index));
+	{
+		str= NLMISC::toString(ls.isInteger(index) ? ls.toInteger(index):ls.toNumber(index));
+	}
 	else if(type==LUA_TBOOLEAN)
+	{
 		str= ls.toBoolean(index)?"true":"false";
+	}
 	else if(type==LUA_TSTRING)
 	{
 		ls.toString(index, str);

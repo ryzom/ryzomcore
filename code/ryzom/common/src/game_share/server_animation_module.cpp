@@ -609,9 +609,9 @@ public:
 	void setAttributeAsBool(const std::string & attrName, const std::string& propName)
 	{
 		CObject* attr = _Object->getAttr(attrName);
-		if (attr && attr->isNumber())
+		if (attr && attr->isInteger())
 		{
-			sint value = static_cast<sint>(attr->toNumber());
+			sint value = static_cast<sint>(attr->toInteger());
 			_Primitive->addPropertyByName(propName.c_str(), new CPropertyString(value?"true":"false"));
 		}
 	}
@@ -1093,7 +1093,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 	CObject* weight = action->getAttr("Weight");
 	if(weight)
 	{
-		uint32 w = (int)weight->toNumber();
+		uint32 w = (int)weight->toInteger();
 		std::string weightStr = toString(w);
 		pAction->addPropertyByName("Weight", new CPropertyString(weightStr));
 	}
@@ -1381,7 +1381,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 	animSession->Acts[actId] = rtAct;
 
-	if ( act->isNumber("LocationId")
+	if ( act->isInteger("LocationId")
 		&& act->isString("Name")
 		&& act->isString("ActDescription")
 		&& act->isString("PreActDescription")
@@ -1390,7 +1390,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		rtAct->Name = act->toString("Name");
 		rtAct->ActDescription = act->toString("ActDescription");
 		rtAct->PreActDescription = act->toString("PreActDescription");
-		rtAct->LocationId = static_cast<uint32>(act->toNumber("LocationId"));
+		rtAct->LocationId = static_cast<uint32>(act->toInteger("LocationId"));
 	}
 	else
 	{
@@ -1508,9 +1508,9 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		a2pAiState.setAttributeAsStringArray("Keywords", "keywords");
 
 		bool isTriggerZone = false;
-		if ( aiState->isNumber("IsTriggerZone") )
+		if ( aiState->isInteger("IsTriggerZone") )
 		{
-			isTriggerZone = static_cast<uint32>(aiState->toNumber("IsTriggerZone")) == 1;
+			isTriggerZone = aiState->toInteger("IsTriggerZone") == 1;
 		}
 		if (isTriggerZone)
 		{
@@ -1550,7 +1550,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 			npc_group->addPropertyByName("name", new CPropertyString(prefix+component->toString("Id")));
 			npc_group->addPropertyByName("ai_type", new CPropertyString("GROUP_NPC"));	// AJM
-			if (component->isNumber("AutoSpawn") && component->toNumber("AutoSpawn")==0)
+			if (component->isInteger("AutoSpawn") && component->toInteger("AutoSpawn")==0)
 			{
 				npc_group->addPropertyByName("autoSpawn", new CPropertyString("false"));
 			}
@@ -1740,9 +1740,9 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				npc_bot->insertChild(npc_bot_alias);
 //				nlinfo("R2Anim: Bot %u %s", npc_bot_alias->getFullAlias(), std::string(prefix+objectNpc->toString("Id")).c_str());
 				uint32 dmProperty = 0;
-				if (objectNpc->isNumber("DmProperty"))
+				if (objectNpc->isInteger("DmProperty"))
 				{
-					dmProperty = static_cast< uint32 > (objectNpc->toNumber("DmProperty"));
+					dmProperty = static_cast< uint32 > (objectNpc->toInteger("DmProperty"));
 				}
 				CRtNpc* rtNpc =  new CRtNpc(npc_bot_alias->getFullAlias(), objectNpc, npc_group_alias->getFullAlias(), dmProperty);
 
@@ -1770,9 +1770,9 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		CObject* eventObject = events->getValue(firstEvent);
 
 		bool isTriggerZone = false;
-		if ( eventObject->isNumber("IsTriggerZone") )
+		if ( eventObject->isInteger("IsTriggerZone") )
 		{
-			isTriggerZone = static_cast<uint32>(eventObject->toNumber("IsTriggerZone")) == 1;
+			isTriggerZone = static_cast<uint32>(eventObject->toInteger("IsTriggerZone")) == 1;
 		}
 		if (isTriggerZone)
 		{
@@ -1788,7 +1788,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 	CObject *weatherValue = act->getAttr("WeatherValue");
 	if (weatherValue)
 	{
-		animSession->Acts[actId]->WeatherValue = (uint16) weatherValue->toNumber();
+		animSession->Acts[actId]->WeatherValue = (uint16) weatherValue->toInteger();
 	}
 
 
@@ -1901,7 +1901,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		CObject* plotItem = plotItems->getValue(firstPlotItem);
 		if (!plotItem
 			|| !plotItem->isTable()
-			|| !plotItem->isNumber("SheetId")
+			|| !plotItem->isInteger("SheetId")
 			|| !plotItem->isString("Name")
 			|| !plotItem->isString("Description")
 			|| !plotItem->isString("Comment")
@@ -1911,7 +1911,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			return false;
 		}
 
-		uint32 sheetIdAsInt = static_cast<uint32>(plotItem->toNumber("SheetId"));
+		uint32 sheetIdAsInt = static_cast<uint32>(plotItem->toInteger("SheetId"));
 		CSheetId plotItemSheetId( sheetIdAsInt );
 
 
@@ -1958,7 +1958,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			CObject* location = locations->getValue(firstLocation);
 			if (!location
 				|| !location->isTable()
-				|| !location->isNumber("Season")
+				|| !location->isInteger("Season")
 				|| !location->isString("Island")
 				|| !location->isString("EntryPoint")
 
@@ -1969,7 +1969,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			}
 
 			CRtLocation locationItem;
-			locationItem.Season = static_cast<uint8>(location->toNumber("Season"));
+			locationItem.Season = static_cast<uint8>(location->toInteger("Season"));
 			locationItem.Island = location->toString("Island");
 			locationItem.EntryPoint = location->toString("EntryPoint");
 			animSession->Locations.push_back(locationItem);

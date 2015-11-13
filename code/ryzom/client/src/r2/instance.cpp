@@ -650,9 +650,9 @@ sint CInstance::getSelectedSequence() const
 	//H_AUTO(R2_CInstance_getSelectedSequence)
 	CLuaObject selected = const_cast<CInstance *>(this)->getLuaProjection()["User"]["SelectedSequence"];
 	sint index = 0;
-	if (selected.isNumber())
+	if (selected.isInteger())
 	{
-		index = (sint) selected.toNumber();
+		index = (sint) selected.toInteger();
 	}
 	return index;
 }

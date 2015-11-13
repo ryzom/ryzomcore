@@ -220,15 +220,22 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 	}
 	else if(type==LUA_TNUMBER)
 	{
-		// get and pop
-		double	val= ls.toNumber();
-		ls.pop();
-		// set double or integer?
-		if(val==floor(val))
-			result.setInteger(sint64(floor(val)));
+		if (ls.isInteger())
+		{
+			// get and pop
+			sint64	val= ls.toInteger();
+			ls.pop();
+			result.setInteger(val);
+			ok= true;
+		}
 		else
+		{
+			// get and pop
+			double	val= ls.toNumber();
+			ls.pop();
 			result.setDouble(val);
-		ok= true;
+			ok= true;
+		}
 	}
 	else if(type==LUA_TSTRING)
 	{
@@ -1020,7 +1027,7 @@ int CLuaIHMRyzom::setLuaBreakPoint(CLuaState &ls)
 	#ifdef LUA_NEVRAX_VERSION
 		if (LuaDebuggerIDE)
 		{
-			LuaDebuggerIDE->setBreakPoint(ls.toString(1), (int) ls.toNumber(2));
+			LuaDebuggerIDE->setBreakPoint(ls.toString(1), (int) ls.toInteger(2));
 		}
 	#endif
 
@@ -1144,7 +1151,7 @@ int CLuaIHMRyzom::getPlayerDirection(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerGender(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerGender", 0);
-	ls.push((lua_Number)(UserEntity->getGender()));
+	ls.push((lua_Integer)(UserEntity->getGender()));
 	return 1;
 }
 
@@ -1210,7 +1217,7 @@ int CLuaIHMRyzom::getTargetGender(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getTargetGender", 0);
 	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
 	if (!target) return (int)GSGENDER::unknown;
-	ls.push((lua_Number)(target->getGender()));
+	ls.push((lua_Integer)(target->getGender()));
 	return 1;
 }
 
@@ -1344,14 +1351,14 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, "getSheet2idx", 2, LUA_TNUMBER);
 
 	const std::string & sheedtName = ls.toString(1);
-	uint32 slotId = (uint32)ls.toNumber(2);
+	uint32 slotId = (uint32)ls.toInteger(2);
 
 	NLMISC::CSheetId sheetId;
 
 	if (sheetId.buildSheetId(sheedtName))
 	{
 		uint32 idx = CVisualSlotManager::getInstance()->sheet2Index(sheetId, (SLOTTYPE::EVisualSlot)slotId);
-		ls.push((lua_Number)idx);
+		ls.push((lua_Integer)idx);
 	}
 	else
 		return 0;
@@ -1362,7 +1369,7 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 int CLuaIHMRyzom::getTargetSlot(CLuaState &ls)
 {
 	uint32 slot = (uint32)getTargetSlotNr();
-	ls.push((lua_Number)slot);
+	ls.push((lua_Integer)slot);
 	return 1;
 }
 
@@ -1372,7 +1379,7 @@ int CLuaIHMRyzom::getSlotDataSetId(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getSlotDataSetId", 1);
 	CLuaIHM::checkArgType(ls, "getSlotDataSetId", 1, LUA_TNUMBER);
 
-	uint32 slot = (uint32)ls.toNumber(1);
+	uint32 slot = (uint32)ls.toInteger(1);
 	CEntityCL *e = getSlotEntity(slot);
 	string id = toString(e->dataSetId());
 	ls.push(id);
@@ -1676,7 +1683,7 @@ int CLuaIHMRyzom::displayBubble(CLuaState &ls)
 		strs.push_back(it.nextKey().toString());
 	}
 	
-	InSceneBubbleManager.webIgChatOpen((uint32)ls.toNumber(1), ls.toString(2), strs, links);
+	InSceneBubbleManager.webIgChatOpen((uint32)ls.toInteger(1), ls.toString(2), strs, links);
 	
 	return 1;
 }

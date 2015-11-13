@@ -4820,7 +4820,7 @@ namespace NLGUI
 		const char *funcName = "blink";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		enableBlink((uint) ls.toNumber(1));
+		enableBlink((uint) ls.toInteger(1));
 		return 0;
 	}
 

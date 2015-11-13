@@ -194,7 +194,7 @@ int CSessionBrowserImpl::luaUpdateScenarioScores(CLuaState &ls)
 	if (R2::getEditor().getMode() != R2::CEditor::NotInitialized)
 	{
 		CSessionBrowserImpl::getInstance().setPlayerRating(getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(),
-			(uint32) ls.toNumber(1), (uint32) ls.toNumber(2), (uint32) ls.toNumber(3), (uint32) ls.toNumber(4), (uint32) ls.toNumber(5));
+			(uint32) ls.toInteger(1), (uint32) ls.toInteger(2), (uint32) ls.toInteger(3), (uint32) ls.toInteger(4), (uint32) ls.toInteger(5));
 	}
 
 	return 0;
@@ -210,7 +210,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
-	sessionBrowser.joinSession(getCharId(), (TSessionId)(uint32) ls.toNumber(1), ClientCfg.ConfigFile.getVar("Application").asString(0));
+	sessionBrowser.joinSession(getCharId(), (TSessionId)(uint32) ls.toInteger(1), ClientCfg.ConfigFile.getVar("Application").asString(0));
 
 	if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_joinSessionResult")))
 	{

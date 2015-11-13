@@ -1183,7 +1183,7 @@ namespace NLGUI
 		const char *funcName = "CInterfaceGroup::getGroup";
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getGroup", 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		uint index = (uint) ls.toNumber(1);
+		uint index = (uint) ls.toInteger(1);
 		if (index >= _ChildrenGroups.size())
 		{
 			CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());

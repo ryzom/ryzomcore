@@ -38,6 +38,7 @@ class CObjectTable;
 class CObjectString;
 class CObjectRefId;
 class CObjectNumber;
+class CObjectInteger;
 class CSerializeContext;
 
 
@@ -49,6 +50,7 @@ struct IObjectVisitor
 	virtual void visit(CObjectRefId &/* obj */) {}
 	virtual void visit(CObjectString &/* obj */) {}
 	virtual void visit(CObjectNumber &/* obj */) {}
+	virtual void visit(CObjectInteger &/* obj */) {}
 	virtual void visit(CObjectTable &/* obj */) {}
 };
 
@@ -82,6 +84,8 @@ public:
 	// test type
 	bool isNumber(const std::string & prop="") const;
 
+	bool isInteger(const std::string & prop="") const;
+
 	bool isString(const std::string & prop="") const;
 
 	bool isTable(const std::string & prop="") const;
@@ -92,6 +96,8 @@ public:
 
 	// to Value
 	double toNumber(const std::string & prop="") const;
+
+	sint64 toInteger(const std::string & prop="") const;
 
 	std::string toString(const std::string & prop="") const;
 
@@ -127,11 +133,15 @@ public:
 
 	void add(const std::string& key, double value);
 
+	void add(const std::string& key, sint64 value);
+
 
 	// set Value
 	virtual bool set(const std::string& key, const std::string & value);
 
 	virtual bool set(const std::string& key, double value);
+
+	virtual bool set(const std::string& key, sint64 value);
 
 	virtual bool setObject(const std::string& key, CObject* value);
 
@@ -172,6 +182,8 @@ protected:
 
 	virtual bool doIsNumber() const;
 
+	virtual bool doIsInteger() const;
+
 	virtual bool doIsString() const;
 
 	virtual bool doIsTable() const;
@@ -179,6 +191,8 @@ protected:
 	virtual bool doIsRefId() const;
 
 	virtual double doToNumber() const;
+
+	virtual sint64 doToInteger() const;
 
 	virtual std::string doToString() const;
 
@@ -192,6 +206,7 @@ public:
 	virtual void inPlaceCopyTo(CObject &dest) const = 0;
 	virtual void inPlaceCopy(const CObjectString &src);
 	virtual void inPlaceCopy(const CObjectNumber &src);
+	virtual void inPlaceCopy(const CObjectInteger &src);
 	virtual void inPlaceCopy(const CObjectTable &src);
 protected:
 	void		 copyMismatchMsg(const CObject &src);
@@ -305,6 +320,45 @@ protected:
 private:
 	double _Value;
 
+};
+
+class CObjectInteger : public CObject
+{
+
+public:
+	explicit CObjectInteger(sint64 value);
+
+	virtual const char *getTypeAsString() const;
+
+	virtual bool set(const std::string& key, sint64 value);
+	virtual bool set(const std::string& key, const std::string &value);
+
+	virtual bool setObject(const std::string& key, CObject* value);
+
+	virtual CObject* clone() const;
+
+	sint64 getValue() const { return _Value; }
+
+	virtual void dump(const std::string prefix = "", uint depth = 0) const;
+
+	virtual bool equal(const CObject* other) const;
+
+protected:
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+
+	virtual bool doIsInteger() const;
+
+	virtual sint64 doToInteger() const;
+
+	virtual std::string doToString() const;
+
+	virtual void inPlaceCopyTo(CObject &dest) const;
+	virtual void inPlaceCopy(const CObjectInteger &src);
+
+	virtual void visitInternal(IObjectVisitor &visitor);
+
+private:
+	sint64 _Value;
 };
 
 class CObjectTable: public CObject

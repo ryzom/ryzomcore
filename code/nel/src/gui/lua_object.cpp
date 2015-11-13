@@ -150,7 +150,8 @@ namespace NLGUI
 	// *************************************************
 	bool CLuaObject::isNil() const           { push(); bool result = _LuaState->isNil();           _LuaState->pop(); return result; }
 	bool CLuaObject::isNumber() const        { push(); bool result = _LuaState->isNumber();        _LuaState->pop(); return result; }
-	bool CLuaObject::isBoolean() const        { push(); bool result = _LuaState->isBoolean();      _LuaState->pop(); return result; }
+	bool CLuaObject::isInteger() const       { push(); bool result = _LuaState->isInteger();       _LuaState->pop(); return result; }
+	bool CLuaObject::isBoolean() const       { push(); bool result = _LuaState->isBoolean();       _LuaState->pop(); return result; }
 	bool CLuaObject::isString() const        { push(); bool result = _LuaState->isString();        _LuaState->pop(); return result; }
 	bool CLuaObject::isFunction() const      { push(); bool result = _LuaState->isFunction();      _LuaState->pop(); return result; }
 	bool CLuaObject::isCFunction() const     { push(); bool result = _LuaState->isCFunction();     _LuaState->pop(); return result; }
@@ -168,6 +169,7 @@ namespace NLGUI
 	// *************************************************
 	bool            CLuaObject::toBoolean() const    {	push(); bool          result  = _LuaState->toBoolean();   _LuaState->pop(); return result; }
 	lua_Number		CLuaObject::toNumber() const     {	push(); lua_Number    result  = _LuaState->toNumber();    _LuaState->pop(); return result; }
+	lua_Integer		CLuaObject::toInteger() const     {	push(); lua_Integer   result  = _LuaState->toInteger();    _LuaState->pop(); return result; }
 	std::string		CLuaObject::toString() const
 	{
 		push();
@@ -194,6 +196,8 @@ namespace NLGUI
 	CLuaObject::operator bool() const         { return toBoolean(); }
 	CLuaObject::operator float() const        { return (float) toNumber(); }
 	CLuaObject::operator double() const       { return (double) toNumber(); }
+	CLuaObject::operator sint32() const        { return (sint32) toInteger(); }
+	CLuaObject::operator sint64() const       { return (sint64) toInteger(); }
 	CLuaObject::operator std::string() const  { return toString(); }
 
 

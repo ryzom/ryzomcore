@@ -624,6 +624,23 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	sint64		CLuaState::getTableIntegerValue(const char *name,    sint64 defaultValue)
+	{
+		//H_AUTO(Lua_CLuaState_getTableIntegerValue)
+		nlassert(name);
+		push(name);
+		getTable(-2);
+		if (isNil())
+		{
+			pop();
+			return defaultValue;
+		}
+		sint64 result = toInteger(-1);
+		pop();
+		return result;
+	}
+
+	// ***************************************************************************
 	const char   *CLuaState::getTableStringValue(const char *name,   const char *defaultValue)
 	{
 		//H_AUTO(Lua_CLuaState_getTableStringValue)

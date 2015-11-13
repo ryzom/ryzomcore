@@ -239,6 +239,7 @@ namespace NLGUI
 		bool				isNil(int index = -1);
 		bool				isBoolean(int index = -1);
 		bool				isNumber(int index = -1);
+		bool				isInteger(int index = -1);
 		bool				isString(int index = -1);
 		bool				isTable(int index = -1);
 		bool				isFunction(int index = -1);
@@ -248,6 +249,7 @@ namespace NLGUI
 		// converting then getting a value from the stack
 		bool				toBoolean(int index = -1);
 		lua_Number			toNumber(int index = -1);
+		lua_Integer			toInteger(int index = -1);
 		const char			*toString(int index = -1);
 		void				toString(int index, std::string &str);		// convert to a std::string, with a NULL check.
 		size_t				strlen(int index = -1);
@@ -259,11 +261,13 @@ namespace NLGUI
 		* If conversion fails then an exception is thrown (with optional msg)
 		*/
 		bool				getTableBooleanValue(const char *name, bool        defaultValue= false);
-		double				getTableNumberValue(const char *name,  double      defaultValue= 0);
+		double				getTableNumberValue(const char *name,  double      defaultValue= 0.0);
+		sint64				getTableIntegerValue(const char *name,  sint64     defaultValue= 0);
 		const char			*getTableStringValue(const char *name, const char *defaultValue= NULL);
 		// pushing value onto the stack
 		void				push(bool value);
 		void				push(lua_Number value);
+		void				push(lua_Integer value);
 		void				push(const char *str);
 		void				push(const char *str, int length);
 		void				push(const std::string &str);
