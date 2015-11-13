@@ -333,29 +333,29 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"nature" );
 	if (prop)
 	{
-		if (NLMISC::strlwr(prop.str()) == "item")
+		if (NLMISC::toLower(prop.str()) == "item")
 			_Type = CCtrlSheetInfo::SheetType_Item;
-		else if (NLMISC::strlwr(prop.str()) == "pact")
+		else if (NLMISC::toLower(prop.str()) == "pact")
 			_Type = CCtrlSheetInfo::SheetType_Pact;
-		else if (NLMISC::strlwr(prop.str()) == "skill")
+		else if (NLMISC::toLower(prop.str()) == "skill")
 			_Type = CCtrlSheetInfo::SheetType_Skill;
-		else if (NLMISC::strlwr(prop.str()) == "auto")
+		else if (NLMISC::toLower(prop.str()) == "auto")
 			_Type = CCtrlSheetInfo::SheetType_Auto;
-		else if (NLMISC::strlwr(prop.str()) == "macro")
+		else if (NLMISC::toLower(prop.str()) == "macro")
 			_Type = CCtrlSheetInfo::SheetType_Macro;
-		else if (NLMISC::strlwr(prop.str()) == "guild_flag")
+		else if (NLMISC::toLower(prop.str()) == "guild_flag")
 			_Type = CCtrlSheetInfo::SheetType_GuildFlag;
-		else if (NLMISC::strlwr(prop.str()) == "mission")
+		else if (NLMISC::toLower(prop.str()) == "mission")
 			_Type = CCtrlSheetInfo::SheetType_Mission;
-		else if (NLMISC::strlwr(prop.str()) == "sbrick")
+		else if (NLMISC::toLower(prop.str()) == "sbrick")
 			_Type = CCtrlSheetInfo::SheetType_SBrick;
-		else if (NLMISC::strlwr(prop.str()) == "sphraseid")
+		else if (NLMISC::toLower(prop.str()) == "sphraseid")
 			_Type = CCtrlSheetInfo::SheetType_SPhraseId;
-		else if (NLMISC::strlwr(prop.str()) == "sphrase")
+		else if (NLMISC::toLower(prop.str()) == "sphrase")
 			_Type = CCtrlSheetInfo::SheetType_SPhrase;
-		else if (NLMISC::strlwr(prop.str()) == "elevator_destination")
+		else if (NLMISC::toLower(prop.str()) == "elevator_destination")
 			_Type = CCtrlSheetInfo::SheetType_ElevatorDestination;
-		else if (NLMISC::strlwr(prop.str()) == "outpost_building")
+		else if (NLMISC::toLower(prop.str()) == "outpost_building")
 			_Type = CCtrlSheetInfo::SheetType_OutpostBuilding;
 	}
 
@@ -363,8 +363,7 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		string TxName = (const char *) prop;
-		TxName = strlwr (TxName);
+		string TxName = toLower((const char *) prop);
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		_DispNoSheetBmpId = rVR.getTextureIdFromName (TxName);
 	}
@@ -410,27 +409,23 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_l" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuLeft = strlwr(tmp);
+		_ListMenuLeft = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRight = strlwr(tmp);
+		_ListMenuRight = toLower((const char *) prop);
 	}
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r_empty_slot" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		_ListMenuRightEmptySlot = strlwr(tmp);
+		_ListMenuRightEmptySlot = toLower((const char *) prop);
 	}
 	// list menu on both clicks
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_b" );
 	if (prop)
 	{
-		string tmp = (const char *) prop;
-		setListMenuBoth(strlwr(tmp));
+		setListMenuBoth(toLower((const char *) prop));
 	}
 
 	// _BrickTypeBitField
@@ -1745,7 +1740,7 @@ void CDBCtrlSheet::resetCharBitmaps()
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = strlwr(_OptString);
+	_OptString = toLower(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 

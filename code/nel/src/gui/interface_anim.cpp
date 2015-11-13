@@ -55,8 +55,7 @@ namespace NLGUI
 		if (ptr) _Dynamic = CInterfaceElement::convertBool (ptr);
 
 		ptr = xmlGetProp (cur, (xmlChar*)"type");
-		string sTmp = ptr.str();
-		sTmp = strlwr(sTmp);
+		string sTmp = toLower(ptr.str());
 		if (sTmp == "linear")
 			_Type = Track_Linear;
 		else if (sTmp == "bezier")

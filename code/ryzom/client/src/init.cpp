@@ -505,8 +505,7 @@ void checkDriverVersion()
 		uint i;
 		for (i=0; i< sizeofarray(driversVersion); i++)
 		{
-			string lwr = deviceName;
-			strlwr(lwr);
+			string lwr = toLower(deviceName);
 			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i]==NULL || lwr.find (driversNTest[i])==string::npos))
 			{
 				if (driverVersion < driversVersion[i])
@@ -1290,7 +1289,7 @@ void	initBotObjectSelection()
 						{
 							// IS the item a valid one ?
 							CSheetId itemId;
-							if(itemId.buildSheetId(NLMISC::strlwr(strShape)))
+							if(itemId.buildSheetId(NLMISC::toLower(strShape)))
 							{
 								// Get this item sheet ?
 								CItemSheet		*itemSheet= dynamic_cast<CItemSheet *>(SheetMngr.get(itemId));

@@ -294,7 +294,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 			CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"name"));
 			string animName;
 			if (ptr)
-				animName = strlwr (CFile::getFilenameWithoutExtension(ptr.str()));
+				animName = toLower(CFile::getFilenameWithoutExtension(ptr.str()));
 
 			if (!animName.empty())
 			{
@@ -1084,11 +1084,9 @@ bool CInterface3DIG::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
+	if (ptr) _Name = toLower((const char*)ptr);
 
-	_Name = strlwr(name);
 	_IG = UInstanceGroup::createInstanceGroup(_Name);
 	if (_IG == NULL)
 		return true; // Create anyway
@@ -1202,7 +1200,7 @@ std::string CInterface3DIG::getName() const
 // ----------------------------------------------------------------------------
 void CInterface3DIG::setName (const std::string &ht)
 {
-	string lwrname = strlwr(ht);
+	string lwrname = toLower(ht);
 	if (lwrname != _Name)
 	{
 		CInterface3DScene *pI3DS = dynamic_cast<CInterface3DScene*>(_Parent);
@@ -1248,11 +1246,9 @@ bool CInterface3DShape::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
+	if (ptr) _Name = toLower((const char*)ptr);
 
-	_Name = strlwr(name);
 	_Instance = parentGroup->getScene()->createInstance(_Name);
 	if (_Instance.empty())
 		return false;
@@ -1529,11 +1525,8 @@ bool CInterface3DFX::parse (xmlNodePtr cur, CInterface3DScene *parentGroup)
 	ptr = xmlGetProp (cur, (xmlChar*)"rot");
 	if (ptr) _Rot = convertVector(ptr);
 
-	string name;
 	ptr = xmlGetProp (cur, (xmlChar*)"name");
-	if (ptr) name = (const char*)ptr;
-
-	_Name = strlwr(name);
+	if (ptr) _Name = toLower((const char*)ptr);
 
 	return true;
 }

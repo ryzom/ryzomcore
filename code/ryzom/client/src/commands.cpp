@@ -929,7 +929,7 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 	}
 	else
 	{
-		std::string type = NLMISC::strlwr(args[0]);
+		std::string type = NLMISC::toLower(args[0]);
 		if     (type == "none")
 			Verbose = VerboseNone;
 		else if(type == "magic")

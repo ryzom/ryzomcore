@@ -610,7 +610,7 @@ uint32 CCharacterCL::buildEquipment(const CCharacterSheet::CEquipment &slot, SLO
 	{
 		// IS the item a valid one ?
 		CSheetId itemId;
-		if(itemId.buildSheetId(NLMISC::strlwr(slot.getItem())))
+		if(itemId.buildSheetId(NLMISC::toLower(slot.getItem())))
 		{
 			// Is it stored in the database ?
 			CEntitySheet *entitySheet = SheetMngr.get(itemId);
@@ -1098,7 +1098,7 @@ string CCharacterCL::automatonType() const	// virtual
 //-----------------------------------------------
 void CCharacterCL::computeAutomaton()
 {
-	_CurrentAutomaton = automatonType() + "_" + NLMISC::strlwr(MBEHAV::modeToString(_Mode)) + ".automaton";
+	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLower(MBEHAV::modeToString(_Mode)) + ".automaton";
 }// computeAutomaton //
 
 

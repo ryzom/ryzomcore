@@ -520,7 +520,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 		}
 		if (!fxName.empty())
 		{
-			stdFXName = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fxName));
+			stdFXName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fxName));
 		}
 		// is an fx already attached to the entity ?
 		if (_SortedInstances[k]->HasFX)

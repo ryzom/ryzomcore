@@ -85,7 +85,7 @@ void CWeatherStateSheet::build(const NLGEORGES::UFormElm &item)
 	GetWeatherFormValue(item, fxName, "FXName");
 	if (!fxName.empty())
 	{
-		fxName = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fxName));
+		fxName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fxName));
 		if (!fxName.empty())
 		{
 			FXInfos.resize(1);
@@ -192,7 +192,7 @@ void CWeatherSetupSheetBase::build(const NLGEORGES::UFormElm &item)
 	CloudState.build(item);
 	std::string setupName;
 	GetWeatherFormValue(item, setupName, "SetupName");
-	SetupName = NLMISC::CStringMapper::map(NLMISC::strlwr(setupName));
+	SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
 }
 
 //==================================================================================
@@ -203,7 +203,7 @@ void CWeatherSetupSheetBase::serial(class NLMISC::IStream &f) throw(NLMISC::EStr
 	{
 		std::string setupName;
 		f.serial(setupName);
-		SetupName = NLMISC::CStringMapper::map(NLMISC::strlwr(setupName));
+		SetupName = NLMISC::CStringMapper::map(NLMISC::toLower(setupName));
 	}
 	else
 	{

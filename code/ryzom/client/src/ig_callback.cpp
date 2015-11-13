@@ -197,7 +197,7 @@ void CIGCallback::CIGInstance::instanceGroupAdded()
 	uint numInstances = _IG->getNumInstance();
 	for(uint k = 0; k < numInstances; ++k)
 	{
-		TPacsPrimMap::iterator pbIt = PacsPrims.find(NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(_IG->getShapeName(k))));
+		TPacsPrimMap::iterator pbIt = PacsPrims.find(NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(_IG->getShapeName(k))));
 		if (pbIt != PacsPrims.end())
 		{
 			// compute orientation and position

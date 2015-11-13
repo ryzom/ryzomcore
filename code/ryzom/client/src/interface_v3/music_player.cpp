@@ -243,7 +243,7 @@ public:
 					while (*bufferPtr)
 					{
 						// Concat the directory name with the filename
-						if (strlwr (CFile::getExtension(bufferPtr)) == "m3u")
+						if (toLower(CFile::getExtension(bufferPtr)) == "m3u")
 							playlists.push_back (path+bufferPtr);
 						else
 							filenames.push_back (path+bufferPtr);

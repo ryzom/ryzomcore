@@ -183,7 +183,7 @@ void CContinentManager::preloadSheets()
 	for (i = 0; i < ws->ContLocs.size(); ++i)
 	{
 		const SContLoc &clTmp = ws->ContLocs[i];
-		std::string continentSheetName = NLMISC::strlwr(clTmp.ContinentName);
+		std::string continentSheetName = NLMISC::toLower(clTmp.ContinentName);
 		if (continentSheetName.find(".continent") == std::string::npos)
 		{
 			continentSheetName += ".continent";
