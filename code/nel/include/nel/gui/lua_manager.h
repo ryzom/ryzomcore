@@ -31,8 +31,8 @@ namespace NLGUI
 	class CLuaManager
 	{
 	public:
-		~CLuaManager();
 
+		/// Get or create singleton
 		static CLuaManager& getInstance()
 		{
 			if( instance == NULL )
@@ -41,6 +41,9 @@ namespace NLGUI
 			}
 			return *instance;
 		}
+
+		/// Release singleton
+		static void releaseInstance();
 
 		/// Enables attaching the Lua debugger in the CLuaState instance, only matters on startup.
 		static void enableLuaDebugging(){ debugLua = true;	}
@@ -65,6 +68,7 @@ namespace NLGUI
 
 	private:
 		CLuaManager();
+		~CLuaManager();
 
 		static CLuaManager *instance;
 		static bool debugLua;

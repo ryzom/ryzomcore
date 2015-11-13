@@ -676,7 +676,6 @@ CClientConfig::CClientConfig()
 	DamageShieldEnabled = false;
 
 	AllowDebugLua = false;
-	LoadLuaDebugger = false;
 	DisplayLuaDebugInfo = false;
 	BeepWhenLaunched = false;
 
@@ -1747,7 +1746,6 @@ void CClientConfig::setValues()
 	READ_BOOL_DEV(DamageShieldEnabled)
 
 	READ_BOOL_DEV(AllowDebugLua)
-	READ_BOOL_DEV(LoadLuaDebugger)
 	READ_BOOL_DEV(DisplayLuaDebugInfo)
 
 	READ_BOOL_DEV(LuaDebugInfoGotoButtonEnabled)

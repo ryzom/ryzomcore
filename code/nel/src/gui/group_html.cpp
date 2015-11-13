@@ -772,8 +772,7 @@ namespace NLGUI
 			cellParams.NoWrap = true; \
 		if (present[prefix##_ALIGN] && value[prefix##_ALIGN]) \
 		{ \
-			string align = value[prefix##_ALIGN]; \
-			align = strlwr(align); \
+			string align = toLower(value[prefix##_ALIGN]); \
 			if (align == "left") \
 				cellParams.Align = CGroupCell::Left; \
 			if (align == "center") \
@@ -783,8 +782,7 @@ namespace NLGUI
 		} \
 		if (present[prefix##_VALIGN] && value[prefix##_VALIGN]) \
 		{ \
-			string align = value[prefix##_VALIGN]; \
-			align = strlwr(align); \
+			string align = toLower(value[prefix##_VALIGN]); \
 			if (align == "top") \
 				cellParams.VAlign = CGroupCell::Top; \
 			if (align == "middle") \
@@ -1182,7 +1180,7 @@ namespace NLGUI
 						if (it != styles.end())
 						{
 							string image = it->second;
-							string::size_type texExt = strlwr(image).find("url(");
+							string::size_type texExt = toLower(image).find("url(");
 							// Url image
 							if (texExt != string::npos)
 								// Remove url()
@@ -1321,8 +1319,7 @@ namespace NLGUI
 						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
 							tooltip = value[MY_HTML_INPUT_ALT];
 
-						string type = value[MY_HTML_INPUT_TYPE];
-						type = strlwr (type);
+						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
 						{
 							// The submit button
@@ -1668,7 +1665,7 @@ namespace NLGUI
 								{
 									nlinfo("found background-image %s", it->second.c_str());
 									string image = (*it).second;
-									string::size_type texExt = strlwr(image).find("url(");
+									string::size_type texExt = toLower(image).find("url(");
 									// Url image
 									if (texExt != string::npos)
 									{
@@ -3826,7 +3823,7 @@ namespace NLGUI
 		// folder used for images cache
 		static const string cacheDir = "cache";
 
-		string::size_type protocolPos = strlwr(result).find("://");
+		string::size_type protocolPos = toLower(result).find("://");
 
 		if (protocolPos != string::npos)
 		{
@@ -3840,7 +3837,7 @@ namespace NLGUI
 		else
 		{
 			// Url is a file ?
-			if (strlwr(result).find("file:") == 0)
+			if (toLower(result).find("file:") == 0)
 			{
 				result = result.substr(5, result.size()-5);
 			}
@@ -3857,7 +3854,7 @@ namespace NLGUI
 		{
 			// Normalize the path
 			if (isUrl)
-				//result = "file:"+strlwr(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
+				//result = "file:"+toLower(CPath::standardizePath (CPath::getFullPath (CFile::getPath(result)))+CFile::getFilename(result));*/
 				result = "file:/"+tmp;
 			else
 				result = tmp;
@@ -4114,7 +4111,7 @@ namespace NLGUI
 	void CGroupHTML::doBrowseLocalFile(const std::string &uri)
 	{
 		std::string filename;
-		if (strlwr(uri).find("file:/") == 0)
+		if (toLower(uri).find("file:/") == 0)
 		{
 			filename = uri.substr(6, uri.size() - 6);
 		}
@@ -4728,7 +4725,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TTABLE);
 
-		uint element_number = (uint)ls.toNumber(1);
+		uint element_number = (uint)ls.toInteger(1);
 		std::vector<bool> present;
 		std::vector<const char *> value;
 		present.resize(30, false);
@@ -4741,7 +4738,7 @@ namespace NLGUI
 
 		ENUM_LUA_TABLE(params, it)
 		{
-			if (!it.nextKey().isNumber())
+			if (!it.nextKey().isInteger())
 			{
 				nlwarning("%s : bad key encountered with type %s, number expected.", funcName, it.nextKey().getTypename());
 				continue;
@@ -4751,16 +4748,16 @@ namespace NLGUI
 				nlwarning("%s : bad value encountered with type %s for key %s, string expected.", funcName, it.nextValue().getTypename(), it.nextKey().toString().c_str());
 				continue;
 			}
-			uint idx = (uint)it.nextKey().toNumber();
+			uint idx = (uint)it.nextKey().toInteger();
 
-			present.insert(present.begin() + (uint)it.nextKey().toNumber(), true);
+			present.insert(present.begin() + (uint)it.nextKey().toInteger(), true);
 
 			string str = it.nextValue().toString();
 			size_t size = str.size() + 1;
 			char * buffer = new char[ size ];
 			strncpy(buffer, str.c_str(), size );
 
-			value.insert(value.begin() + (uint)it.nextKey().toNumber(), buffer);
+			value.insert(value.begin() + (uint)it.nextKey().toInteger(), buffer);
 		}
 
 		beginElement(element_number, present, value);
@@ -4778,7 +4775,7 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
 
-		uint element_number = (uint)ls.toNumber(1);
+		uint element_number = (uint)ls.toInteger(1);
 		endElement(element_number);
 
 		return 0;
@@ -4978,7 +4975,7 @@ namespace NLGUI
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
-				std::string prop(strlwr(it->second));
+				std::string prop(toLower(it->second));
 				style.Underlined = (prop.find("underline") != std::string::npos);
 				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
 			}

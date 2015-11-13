@@ -168,6 +168,12 @@ void CObject::inPlaceCopy(const CObjectNumber &src)
 	copyMismatchMsg(src);
 }
 
+void CObject::inPlaceCopy(const CObjectInteger &src)
+{
+	//H_AUTO(R2_CObject_inPlaceCopy)
+	copyMismatchMsg(src);
+}
+
 void CObject::inPlaceCopy(const CObjectTable &src)
 {
 	//H_AUTO(R2_CObject_inPlaceCopy)
@@ -187,6 +193,18 @@ bool CObject::isNumber(const std::string & prop) const
 		return attr->doIsNumber();
 	}
 	return doIsNumber();
+}
+
+bool CObject::isInteger(const std::string & prop) const
+{
+	//H_AUTO(R2_CObject_isInteger)
+	if (!prop.empty())
+	{
+		CObject* attr = getAttr(prop);
+		if (!attr) return false;
+		return attr->doIsInteger();
+	}
+	return doIsInteger();
 }
 
 bool CObject::isString(const std::string & prop) const
@@ -239,6 +257,12 @@ bool CObject::doIsNumber() const
 	return false;
 }
 
+bool CObject::doIsInteger() const
+{
+	//H_AUTO(R2_CObject_doIsInteger)
+	return false;
+}
+
 bool CObject::doIsString() const
 {
 	//H_AUTO(R2_CObject_doIsString)
@@ -272,6 +296,20 @@ double CObject::toNumber(const std::string & prop) const
 	return doToNumber();
 }
 
+sint64 CObject::toInteger(const std::string & prop) const
+{
+	//H_AUTO(R2_CObject_toInteger)
+	if (!prop.empty())
+	{
+		CObject* attr = getAttr(prop);
+		if (!attr)
+		{
+			BOMB("Try to use the method toInteger() on a NULL Object", return 0);
+		}
+		return attr->doToInteger();
+	}
+	return doToInteger();
+}
 
 std::string CObject::toString(const std::string & prop) const
 {
@@ -328,6 +366,14 @@ double CObject::doToNumber() const
 
 }
 
+sint64 CObject::doToInteger() const
+{
+	//H_AUTO(R2_CObject_doToInteger)
+	BOMB("Try to convert an objet to integer without being allowed", return 0);
+	return 0;
+
+}
+
 std::string CObject::doToString() const
 {
 	//H_AUTO(R2_CObject_doToString)
@@ -366,8 +412,15 @@ bool CObject::set(const std::string& /* key */, const std::string & /* value */)
 	return false;
 }
 
-bool CObject::set(const std::string& /* key */, double /* value */){
+bool CObject::set(const std::string& /* key */, double /* value */)
+{
 	BOMB("Try to set the value of an object with a double on an object that does not allowed it", return false);
+	return false;
+}
+
+bool CObject::set(const std::string& /* key */, sint64 /* value */)
+{
+	BOMB("Try to set the value of an object with an integer on an object that does not allowed it", return false);
 	return false;
 }
 
@@ -602,7 +655,7 @@ bool CObjectString::set(const std::string& key,  const std::string & value)
 bool CObjectString::setObject(const std::string& key,  CObject* value)
 {
 	//H_AUTO(R2_CObjectString_setObject)
-	BOMB_IF( !key.empty() || ! (value->isString() || value->isNumber()) , "Try to set the a sub value of an object that does not allowed it", return false);
+	BOMB_IF( !key.empty() || ! (value->isString() || value->isNumber() || value->isInteger()) , "Try to set the a sub value of an object that does not allowed it", return false);
 	bool canSet = set(key, value->toString());
 	if (canSet)
 	{
@@ -732,7 +785,7 @@ void CObjectNumber::inPlaceCopy(const CObjectNumber &src)
 }
 
 
-std::string CObjectNumber::doToString() const { return NLMISC::toString("%d", _Value);}
+std::string CObjectNumber::doToString() const { return NLMISC::toString("%lf", _Value);}
 
 void CObjectNumber::doSerialize(std::string& out,  CSerializeContext& /* context */) const
 {
@@ -767,9 +820,6 @@ bool CObjectNumber::set(const std::string& key,  const std::string & value)
 	//H_AUTO(R2_CObjectNumber_set)
 	//XXX
 	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
-//	std::stringstream ss ;
-//	ss << value;
-//	ss >> _Value;
 	NLMISC::fromString(value, _Value);
 	return true;
 }
@@ -808,9 +858,105 @@ bool CObjectNumber::equal(const CObject* other) const
 	double otherValue = other->toNumber();
 	if (_Value == otherValue ) return true;
 	/*
-	fabs + epsilon trick
+		TODO: fabs + epsilon trick
 	*/
 	return false;
+}
+
+
+//----------------------- CObjectInteger ----------------------------------------
+
+
+CObjectInteger::CObjectInteger(sint64 value) : CObject(), _Value(value){}
+
+const char *CObjectInteger::getTypeAsString() const
+{
+	return "Integer";
+}
+
+void CObjectInteger::visitInternal(IObjectVisitor &visitor)
+{
+	//H_AUTO(R2_CObjectInteger_visit)
+	visitor.visit(*this);
+}
+
+
+void CObjectInteger::inPlaceCopyTo(CObject &dest) const
+{
+	//H_AUTO(R2_CObjectInteger_inPlaceCopyTo)
+	dest.inPlaceCopy(*this);
+}
+
+void CObjectInteger::inPlaceCopy(const CObjectInteger &src)
+{
+	//H_AUTO(R2_CObjectInteger_inPlaceCopy)
+	_Value = src._Value;
+	setGhost(src.getGhost());
+}
+
+
+std::string CObjectInteger::doToString() const { return NLMISC::toString("%d"NL_I64, _Value); }
+
+void CObjectInteger::doSerialize(std::string& out,  CSerializeContext& /* context */) const
+{
+	//H_AUTO(R2_CObjectInteger_doSerialize)
+	nlassert(!getGhost());
+	out += NLMISC::toString(_Value);
+}
+
+bool CObjectInteger::set(const std::string& key,  sint64 value)
+{
+	//H_AUTO(R2_CObjectInteger_set)
+
+	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+
+	_Value = value;
+	return true;
+}
+
+
+bool CObjectInteger::set(const std::string& key,  const std::string & value)
+{
+	//H_AUTO(R2_CObjectInteger_set)
+	//XXX
+	BOMB_IF(key != "", "Try to set an element of a table on an object that is not a table", return false);
+	NLMISC::fromString(value, _Value);
+	return true;
+}
+
+
+sint64 CObjectInteger::doToInteger() const {  return _Value; }
+
+CObject* CObjectInteger::clone() const
+{
+	//H_AUTO(R2_CObjectInteger_clone)
+	CObjectInteger *result = new CObjectInteger(_Value);
+	result->setGhost(getGhost());
+	return result;
+}
+
+bool CObjectInteger::doIsInteger() const  { return true;}
+
+
+
+bool CObjectInteger::setObject(const std::string& /* key */,  CObject* value)
+{
+	//H_AUTO(R2_CObjectInteger_setObject)
+	BOMB_IF(!value->isInteger(), NLMISC::toString("Try to set an element of a type '%s' with  a value of type '%s' on an object that is not an integer", this->getTypeAsString(), value->getTypeAsString()), return false);
+
+	_Value = value->toInteger();
+	setGhost(value->getGhost());
+	return true;
+}
+
+
+
+bool CObjectInteger::equal(const CObject* other) const
+{
+	//H_AUTO(R2_CObjectInteger_equal)
+	if (!other || !other->isInteger()) return false;
+	sint64 otherValue = other->toInteger();
+	return _Value == otherValue;
 }
 
 
@@ -1756,7 +1902,7 @@ CObject* CObjectGenerator::instanciate(CObjectFactory* factory) const
 		{
 			CObject*defaultInBase = found->getAttr("DefaultInBase");
 
-			if (!defaultInBase || (defaultInBase->isNumber() && defaultInBase->toNumber() != 1))
+			if (!defaultInBase || (defaultInBase->isInteger() && defaultInBase->toInteger() != 1))
 			{
 
 				std::string type = found->toString("Type");
@@ -1824,7 +1970,15 @@ void CObjectNumber::dump(const std::string prefix, uint depth) const
 {
 	//H_AUTO(R2_CObjectNumber_dump)
 	std::string result(depth * 4, ' ');
-	result += NLMISC::toString("%sNumber, ptr = 0x%p, value = %f, ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
+	result += NLMISC::toString("%sNumber, ptr = 0x%p, value = %lf, ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
+	nlwarning(result.c_str());
+}
+
+void CObjectInteger::dump(const std::string prefix, uint depth) const
+{
+	//H_AUTO(R2_CObjectInteger_dump)
+	std::string result(depth * 4, ' ');
+	result += NLMISC::toString("%sInteger, ptr = 0x%p, value = %d"NL_I64", ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
 	nlwarning(result.c_str());
 }
 
@@ -1929,96 +2083,169 @@ std::string CObject::uint32ToInstanceId(uint32 id)
 
 static void writeNumber( NLMISC::IStream& stream, double theValue)
 {
-		double value = theValue;
-		double absValue = fabs(value);
-		uint8 type;
+	double value = theValue;
+	double absValue = fabs(value);
+	uint8 type;
 
-		// It's 0
-		if (absValue <= std::numeric_limits<double>::epsilon())
+	// It's 0
+	if (absValue <= std::numeric_limits<double>::epsilon())
+	{
+		type = ObjectNumberZero;
+		stream.serial(type);
+		return;
+	}
+
+	double integral;
+
+	double fractional = modf(absValue, &integral);
+
+	// It is an integral type (no fractional part)
+	if ( fractional <= std::numeric_limits<double>::epsilon() )
+	{
+		bool pos = 0.0 <= value;
+		// positif
+		if (pos)
 		{
-			type = ObjectNumberZero;
+			if (integral <=  uint8Max)
+			{
+				uint8 uint8value = static_cast<uint8>(value);
+				type = ObjectNumberUInt8;
+				stream.serial(type);
+				stream.serial( uint8value);
+				return;
+			}
+
+			if (integral <= uint16Max)
+			{
+				uint16 uint16value = static_cast<uint16>(value);
+				type = ObjectNumberUInt16;
+				stream.serial(type);
+				stream.serial(uint16value);
+				return;
+			}
+
+			if (integral <= uint32Max)
+			{
+				uint32 uint32value = static_cast<uint32>(value);
+				type = ObjectNumberUInt32;
+				stream.serial(type);
+				stream.serial(uint32value);
+				return;
+			}
+		}
+		//negatif
+		else
+		{
+			if ( sint8Min <= integral && integral <=  sint8Max)
+			{
+				sint8 sint8value = static_cast<sint8>(value);
+				type = ObjectNumberSInt8;
+				stream.serial(type);
+				stream.serial( sint8value);
+				return;
+			}
+
+			if ( sint16Min <= integral && integral <=  sint16Max)
+			{
+				sint16 sint16value = static_cast<sint16>(value);
+				type = ObjectNumberSInt16;
+				stream.serial(type);
+				stream.serial( sint16value);
+				return;
+			}
+
+			if ( sint32Min <= integral && integral <=  sint32Max)
+			{
+				sint32 sint32value = static_cast<sint32>(value);
+				type = ObjectNumberSInt32;
+				stream.serial(type);
+				stream.serial( sint32value);
+				return;
+			}
+
+		}
+
+	}
+
+	//Default case
+	// Float are evil: you loose too much precision
+	type = ObjectNumberDouble;
+	double fValue = value;
+	stream.serial(type);
+	stream.serial(fValue);
+}
+
+static void writeInteger( NLMISC::IStream& stream, sint64 theValue)
+{
+	sint64 value = theValue;
+	uint8 type;
+
+	// It's 0
+	if (value == 0)
+	{
+		type = ObjectNumberZero;
+		stream.serial(type);
+		return;
+	}
+
+	bool pos = value >= 0;
+	// positif
+	if (pos)
+	{
+		if (value <=  uint8Max)
+		{
+			uint8 uint8value = static_cast<uint8>(value);
+			type = ObjectNumberUInt8;
 			stream.serial(type);
+			stream.serial( uint8value);
 			return;
 		}
 
-		double integral;
-
-		double fractional = modf(absValue, &integral);
-
-		// It is an integral type (no fractional part)
-		if ( fractional <= std::numeric_limits<double>::epsilon() )
+		if (value <= uint16Max)
 		{
-			bool pos = 0.0 <= value;
-			// positif
-			if (pos)
-			{
-				if (integral <=  uint8Max)
-				{
-					uint8 uint8value = static_cast<uint8>(value);
-					type = ObjectNumberUInt8;
-					stream.serial(type);
-					stream.serial( uint8value);
-					return;
-				}
-
-				if (integral <= uint16Max)
-				{
-					uint16 uint16value = static_cast<uint16>(value);
-					type = ObjectNumberUInt16;
-					stream.serial(type);
-					stream.serial(uint16value);
-					return;
-				}
-
-				if (integral <= uint32Max)
-				{
-					uint32 uint32value = static_cast<uint32>(value);
-					type = ObjectNumberUInt32;
-					stream.serial(type);
-					stream.serial(uint32value);
-					return;
-				}
-			}
-			//negatif
-			else
-			{
-				if ( sint8Min <= integral && integral <=  sint8Max)
-				{
-					sint8 sint8value = static_cast<sint8>(value);
-					type = ObjectNumberSInt8;
-					stream.serial(type);
-					stream.serial( sint8value);
-					return;
-				}
-
-				if ( sint16Min <= integral && integral <=  sint16Max)
-				{
-					sint16 sint16value = static_cast<sint16>(value);
-					type = ObjectNumberSInt16;
-					stream.serial(type);
-					stream.serial( sint16value);
-					return;
-				}
-
-				if ( sint32Min <= integral && integral <=  sint32Max)
-				{
-					sint32 sint32value = static_cast<sint32>(value);
-					type = ObjectNumberSInt32;
-					stream.serial(type);
-					stream.serial( sint32value);
-					return;
-				}
-
-			}
-
+			uint16 uint16value = static_cast<uint16>(value);
+			type = ObjectNumberUInt16;
+			stream.serial(type);
+			stream.serial(uint16value);
+			return;
 		}
 
-		//Default case
-		// Float are evil: you loose too much precision
-		type = ObjectNumberDouble;
-		double fValue = value;
-		stream.serial(type);
-		stream.serial(fValue);
+		if (value <= uint32Max)
+		{
+			uint32 uint32value = static_cast<uint32>(value);
+			type = ObjectNumberUInt32;
+			stream.serial(type);
+			stream.serial(uint32value);
+			return;
+		}
+	}
+	//negatif
+	else
+	{
+		if ( sint8Min <= value && value <=  sint8Max)
+		{
+			sint8 sint8value = static_cast<sint8>(value);
+			type = ObjectNumberSInt8;
+			stream.serial(type);
+			stream.serial( sint8value);
+			return;
+		}
+
+		if ( sint16Min <= value && value <=  sint16Max)
+		{
+			sint16 sint16value = static_cast<sint16>(value);
+			type = ObjectNumberSInt16;
+			stream.serial(type);
+			stream.serial( sint16value);
+			return;
+		}
+	}
+
+	// Default case
+	type = ObjectNumberSInt32;
+	sint32 fValue = (sint32)value;
+	stream.serial(type);
+	stream.serial(fValue);
 }
 
 static void serialStringInstanceId( NLMISC::IStream& stream, CObject*& data)
@@ -2939,6 +3166,13 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			stream.serial(type);
 			uint endLength = stream.getPos();
 			if (serializer->Log) { nldebug("R2NET: (%u) Null sent %u bytes", serializer->Level, endLength - initLength);}
+		}
+		else if (data->isInteger())
+		{
+			uint initLength = stream.getPos();
+			writeInteger(stream, data->toInteger());
+			uint endLength = stream.getPos();
+			if (serializer->Log) { nldebug("R2NET: (%u) Integer sent %u bytes", serializer->Level, endLength - initLength); }
 		}
 		else if (data->isNumber())
 		{

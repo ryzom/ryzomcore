@@ -766,7 +766,6 @@ struct CClientConfig
 
 	/// Allow Lua commands (commands beginning with Lua)
 	bool			AllowDebugLua;
-	bool			LoadLuaDebugger;
 
 	bool			LuaDebugInfoGotoButtonEnabled;
 	std::string		LuaDebugInfoGotoButtonTemplate;

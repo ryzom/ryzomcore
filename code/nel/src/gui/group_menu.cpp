@@ -1712,7 +1712,7 @@ namespace NLGUI
 		const char *funcName = "getSubMenu";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1722,8 +1722,8 @@ namespace NLGUI
 		const char *funcName = "addSubMenu";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setSubMenu((uint) ls.toNumber(1), new CGroupSubMenu(CViewText::TCtorParam()));
-		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toNumber(1)));
+		setSubMenu((uint) ls.toInteger(1), new CGroupSubMenu(CViewText::TCtorParam()));
+		CLuaIHM::pushUIOnStack(ls, getSubMenu((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1733,7 +1733,7 @@ namespace NLGUI
 		const char *funcName = "getLineId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		std::string id = getLineId((uint) ls.toNumber(1));
+		std::string id = getLineId((uint) ls.toInteger(1));
 		CLuaIHM::push(ls, id);
 		return 1;
 	}
@@ -1754,7 +1754,7 @@ namespace NLGUI
 		const char *funcName = "isSeparator";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		ls.push(isSeparator((uint) ls.toNumber(1)));
+		ls.push(isSeparator((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1785,7 +1785,7 @@ namespace NLGUI
 		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
 		ucstring arg2;
 		nlverify(CLuaIHM::getUCStringOnStack(ls, 2, arg2));
-		addLineAtIndex((uint) ls.toNumber(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
+		addLineAtIndex((uint) ls.toInteger(1), arg2, ls.toString(3), ls.toString(4), ls.toString(5));
 		return 0;
 	}
 
@@ -1803,7 +1803,7 @@ namespace NLGUI
 		const char *funcName = "addSeparatorAtIndex";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		addSeparatorAtIndex((uint) ls.toNumber(1));
+		addSeparatorAtIndex((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -1813,7 +1813,7 @@ namespace NLGUI
 		const char *funcName = "removeLine";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeLine((uint) ls.toNumber(1));
+		removeLine((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -1833,7 +1833,7 @@ namespace NLGUI
 		{
 			CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 		}
-		setUserGroupRight((uint) ls.toNumber(1), group, true);
+		setUserGroupRight((uint) ls.toInteger(1), group, true);
 		return 0;
 	}
 
@@ -1853,7 +1853,7 @@ namespace NLGUI
 		{
 			CLuaIHM::fails(ls, "%s :  Group required as argument 2", funcName);
 		}
-		setUserGroupLeft((uint) ls.toNumber(1), group, true);
+		setUserGroupLeft((uint) ls.toInteger(1), group, true);
 		return 0;
 	}
 
@@ -1864,7 +1864,7 @@ namespace NLGUI
 		const char *funcName = "getUserGroupRight";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::pushUIOnStack(ls, getUserGroupRight((uint) ls.toNumber(1)));
+		CLuaIHM::pushUIOnStack(ls, getUserGroupRight((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -1875,7 +1875,7 @@ namespace NLGUI
 		const char *funcName = "getUserGroupLeft";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CInterfaceElement *pIE = getUserGroupLeft((uint) ls.toNumber(1));
+		CInterfaceElement *pIE = getUserGroupLeft((uint) ls.toInteger(1));
 		if (pIE)
 		{
 			CLuaIHM::pushUIOnStack(ls, pIE);
@@ -1890,7 +1890,7 @@ namespace NLGUI
 		const char *funcName = "setMaxVisibleLine";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setMaxVisibleLine((uint) ls.toNumber(1));
+		setMaxVisibleLine((uint) ls.toInteger(1));
 		return 0;
 	}
 
@@ -2566,7 +2566,7 @@ namespace NLGUI
 		const char *funcName = "setMinW";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		setMinW((sint32) ls.toNumber(1));
+		setMinW((sint32) ls.toInteger(1));
 		return 0;
 	}
 }

@@ -80,6 +80,7 @@ namespace NLGUI
 		const char		*getTypename() const;
 		bool            isNil() const;
 		bool            isNumber() const;
+		bool            isInteger() const;
 		bool            isBoolean() const;
 		bool            isString() const;
 		bool            isFunction() const;
@@ -94,6 +95,7 @@ namespace NLGUI
 		NLMISC::CRGBA	toRGBA() const; // default to black if not a crgba
 		bool			toBoolean() const;
 		lua_Number		toNumber() const;
+		lua_Integer		toInteger() const;
 		std::string 	toString() const;
 		lua_CFunction	toCFunction() const;
 		void			*toUserData() const;
@@ -102,6 +104,8 @@ namespace NLGUI
 		operator bool() const;
 		operator float() const;
 		operator double() const;
+		operator sint32() const;
+		operator sint64() const;
 		operator std::string() const;
 		/** create a sub table for this object, with a string as a key
 		  * This object must be a table or an exception if thrown

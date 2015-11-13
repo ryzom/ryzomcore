@@ -202,7 +202,7 @@ namespace NLGUI
 		const char *funcName = "enlargeColumns";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		enlargeColumns((sint32) ls.toNumber(1));
+		enlargeColumns((sint32) ls.toInteger(1));
 		return 0;
 	}
 
@@ -212,7 +212,7 @@ namespace NLGUI
 		const char *funcName = "resizeColumnsAndContainer";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		resizeColumnsAndContainer((sint32) ls.toNumber(1));
+		resizeColumnsAndContainer((sint32) ls.toInteger(1));
 		return 0;
 	}
 

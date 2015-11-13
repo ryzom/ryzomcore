@@ -692,7 +692,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		if (!stringCategory.empty() && stringCategory != "SYS")
 		{
 			map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-			it = ClientCfg.SystemInfoParams.find(strlwr(stringCategory));
+			it = ClientCfg.SystemInfoParams.find(toLower(stringCategory));
 			if (it != ClientCfg.SystemInfoParams.end())
 			{
 				col = it->second.Color;
@@ -723,7 +723,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 	if( !stringCategory.empty() )
 	{
 		map<string, CClientConfig::SSysInfoParam>::const_iterator it;
-		it = ClientCfg.SystemInfoParams.find( strlwr(stringCategory) );
+		it = ClientCfg.SystemInfoParams.find( toLower(stringCategory) );
 		if( it != ClientCfg.SystemInfoParams.end() )
 		{
 			if( !(*it).second.SysInfoFxName.empty() )

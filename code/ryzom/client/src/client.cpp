@@ -520,7 +520,7 @@ int main(int argc, char **argv)
 		uint i;
 		for (i=0; i<files.size(); i++)
 		{
-			if (strlwr (CFile::getExtension (files[i])) == "ttf")
+			if (toLower(CFile::getExtension (files[i])) == "ttf")
 				CFile::deleteFile (files[i]);
 		}
 	}

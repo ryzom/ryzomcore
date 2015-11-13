@@ -1224,7 +1224,7 @@ namespace NLGUI
 		const char *funcName = "getChild";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		sint index = (sint) ls.toNumber(1);
+		sint index = (sint) ls.toInteger(1);
 		if(index < 0 || index >= (sint) _Elements.size())
 		{
 			CLuaIHM::fails(ls, "getChild : trying to access element %d in list '%s', which has %d elements",
@@ -1304,10 +1304,10 @@ namespace NLGUI
 		ucstring ucText;
 		ucText.fromUtf8(text);
 
-		uint r = (uint) ls.toNumber(2);
-		uint g = (uint) ls.toNumber(3);
-		uint b = (uint) ls.toNumber(4);
-		uint a = (uint) ls.toNumber(5);
+		uint r = (uint) ls.toInteger(2);
+		uint g = (uint) ls.toInteger(3);
+		uint b = (uint) ls.toInteger(4);
+		uint a = (uint) ls.toInteger(5);
 
 		addTextChild(ucText, CRGBA(r, g, b, a));
 
@@ -1344,7 +1344,7 @@ namespace NLGUI
 		}
 		else
 		{
-			addChildAtIndex(vb, (uint) ls.toNumber(2));
+			addChildAtIndex(vb, (uint) ls.toInteger(2));
 		}
 		return 0;
 	}

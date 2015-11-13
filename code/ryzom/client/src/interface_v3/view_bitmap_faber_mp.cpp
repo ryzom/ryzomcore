@@ -59,8 +59,7 @@ bool CViewBitmapFaberMp::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 	prop = (char*) xmlGetProp( cur, (xmlChar*)"tx_noitem" );
 	if (prop)
 	{
-		_TextureNoItemName = (const char *) prop;
-		_TextureNoItemName = strlwr (_TextureNoItemName);
+		_TextureNoItemName = toLower((const char *) prop);
 		_TextureNoItemId = -2;
 	}
 

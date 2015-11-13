@@ -248,8 +248,7 @@ void CDoorManager::SDoor::checkToClose()
 std::string CDoorManager::transformName (uint /* index */, const std::string &/* instanceName */, const std::string &shapeName)
 {
 	if (shapeName.rfind('.') == string::npos) return shapeName;
-	string sExt = shapeName.substr(shapeName.rfind('.')+1,shapeName.size());
-	sExt = strlwr(sExt);
+	string sExt = toLower(shapeName.substr(shapeName.rfind('.')+1,shapeName.size()));
 	if (sExt != "pacs_prim") return shapeName;
 	return ""; // Do not load a pacs prim as a mesh...
 }
@@ -266,8 +265,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 		string sShapeName = ig->getShapeName(k);
 		if (sShapeName.rfind('.') == string::npos) continue;
 
-		string sExt = sShapeName.substr(sShapeName.rfind('.')+1,sShapeName.size());
-		sExt = strlwr(sExt);
+		string sExt = toLower(sShapeName.substr(sShapeName.rfind('.')+1,sShapeName.size()));
 		if (sExt != "pacs_prim") continue;
 
 		// Check if the pacs_prim is a door detection
@@ -349,7 +347,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 						case SDoor::Matis3PartBourgeon:
 						{
 							string sDebug = ig->getShapeName(i);
-							sDebug = strlwr(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
+							sDebug = toLower(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
 							if (sDebug == "gauche")
 								pDoor->Instances[0] = i;
 							else if (sDebug == "droite")
@@ -362,7 +360,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 						case SDoor::Zorai2Part:
 						{
 							string sDebug = ig->getShapeName(i);
-							sDebug = strlwr(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
+							sDebug = toLower(sDebug.substr(sDebug.rfind('_')+1,sDebug.size()));
 							if (sDebug == "gauche")
 								pDoor->Instances[0] = i;
 							else if (sDebug == "droite")

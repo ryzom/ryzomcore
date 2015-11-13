@@ -84,56 +84,43 @@ namespace NLGUI
 		_OffsetY = getY();
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_default");
-		if (prop) _TxDefault = (const char *) prop;
-		_TxDefault = NLMISC::strlwr (_TxDefault);
+		if (prop) _TxDefault = NLMISC::toLower ((const char *) prop);
 
  		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_move_window");
-		if (prop) _TxMoveWindow = (const char *) prop;
-		_TxMoveWindow = NLMISC::strlwr (_TxMoveWindow);
+		if (prop) _TxMoveWindow = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_BR_TL");
-		if (prop) _TxResizeBRTL = (const char *) prop;
-		_TxResizeBRTL = NLMISC::strlwr (_TxResizeBRTL);
+		if (prop) _TxResizeBRTL = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_BL_TR");
-		if (prop) _TxResizeBLTR = (const char *) prop;
-		_TxResizeBLTR = NLMISC::strlwr (_TxResizeBLTR);
+		if (prop) _TxResizeBLTR = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_TB");
-		if (prop) _TxResizeTB = (const char *) prop;
-		_TxResizeTB = NLMISC::strlwr (_TxResizeTB);
+		if (prop) _TxResizeTB = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_resize_LR");
-		if (prop) _TxResizeLR = (const char *) prop;
-		_TxResizeLR = NLMISC::strlwr (_TxResizeLR);
+		if (prop) _TxResizeLR = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_rotate");
-		if (prop) _TxRotate = (const char *) prop;
-		_TxRotate = NLMISC::strlwr (_TxRotate);
+		if (prop) _TxRotate = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_scale");
-		if (prop) _TxScale = (const char *) prop;
-		_TxScale = NLMISC::strlwr (_TxScale);
+		if (prop) _TxScale = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_colpick");
-		if (prop) _TxColPick = (const char *) prop;
-		_TxColPick = NLMISC::strlwr (_TxColPick);
+		if (prop) _TxColPick = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan");
-		if (prop) _TxPan = (const char *) prop;
-		_TxPan = NLMISC::strlwr (_TxPan);
+		if (prop) _TxPan = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan");
-		if (prop) _TxCanPan = (const char *) prop;
-		_TxCanPan = NLMISC::strlwr (_TxCanPan);
+		if (prop) _TxCanPan = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_pan_r2");
-		if (prop) _TxPanR2 = (const char *) prop;
-		_TxPanR2 = NLMISC::strlwr (_TxPanR2);
+		if (prop) _TxPanR2 = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"tx_can_pan_r2");
-		if (prop) _TxCanPanR2 = (const char *) prop;
-		_TxCanPanR2 = NLMISC::strlwr (_TxCanPanR2);
+		if (prop) _TxCanPanR2 = NLMISC::toLower ((const char *) prop);
 
 		prop = (char*) xmlGetProp (cur, (xmlChar*)"color");
 		if (prop) _Color = convertColor(prop);

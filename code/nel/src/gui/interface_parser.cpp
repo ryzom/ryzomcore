@@ -1359,6 +1359,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		CInterfaceElement *pEltFound = NULL;
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1367,8 +1370,8 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;
@@ -1408,6 +1411,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1416,8 +1422,7 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;
@@ -1600,6 +1605,9 @@ namespace NLGUI
 	{
 		CXMLAutoPtr ptr((const char*) xmlGetProp( cur, (xmlChar*)"node" ));
 		if (!ptr) return false;
+
+		string stmp2 = toLower(string((const char*)ptr));
+
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = CWidgetManager::getInstance()->getAllMasterGroup();
 		CInterfaceElement *pEltFound = NULL;
 		for (uint32 i = 0; i < _MasterGroups.size(); ++i)
@@ -1608,8 +1616,8 @@ namespace NLGUI
 			for (uint32 j = 0; j < rMG.Group->getGroups().size(); ++j)
 			{
 				CInterfaceGroup *pIG = rMG.Group->getGroups()[j];
-				string stmp = strlwr(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
-				string stmp2 = strlwr(string((const char*)ptr));
+				string stmp = toLower(pIG->getId().substr(pIG->getId().rfind(':')+1,pIG->getId().size()));
+
 				if (stmp == stmp2)
 				{
 					pEltFound = pIG;

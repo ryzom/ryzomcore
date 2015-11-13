@@ -543,7 +543,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
-		setText((uint) ls.toNumber(1), text);
+		setText((uint) ls.toInteger(1), text);
 		return 0;
 	}
 
@@ -556,7 +556,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring text;
 		nlverify(CLuaIHM::pop(ls, text));
-		insertText((uint) ls.toNumber(1), text);
+		insertText((uint) ls.toInteger(1), text);
 		return 0;
 	}
 
@@ -569,7 +569,7 @@ namespace NLGUI
 		CLuaIHM::checkArgTypeUCString(ls, funcName, 2);
 		ucstring texture;
 		nlverify(CLuaIHM::pop(ls, texture));
-		setTexture((uint) ls.toNumber(1), texture);
+		setTexture((uint) ls.toInteger(1), texture);
 		return 0;
 	}
 
@@ -579,7 +579,7 @@ namespace NLGUI
 		const char *funcName = "setText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		CLuaIHM::push(ls, getText((uint) ls.toNumber(1)));
+		CLuaIHM::push(ls, getText((uint) ls.toInteger(1)));
 		return 1;
 	}
 
@@ -589,7 +589,7 @@ namespace NLGUI
 		const char *funcName = "removeText";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		removeText((uint) ls.toNumber(1));
+		removeText((uint) ls.toInteger(1));
 		return 0;
 	}
 

@@ -3488,7 +3488,7 @@ CItemImage &CInventoryManager::getServerItem(uint inv, uint index)
 // ***************************************************************************
 CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &str)
 {
-	string sTmp = strlwr(str);
+	string sTmp = toLower(str);
 	if (sTmp == "inv_bag")		return InvBag;
 	if (sTmp == "inv_pa0")		return InvPA0;
 	if (sTmp == "inv_pa1")		return InvPA1;

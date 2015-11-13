@@ -231,20 +231,24 @@ namespace NLGUI
 
 }
 
+#if LUA_VERSION_NUM < 503
+#define lua_isinteger(a, b) lua_isnumber(a, b)
+#endif
+
 	// ***************************************************************************
 	#define LUA_REGISTER_BASIC(_type_)															\
-	luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);													\
-	_type_ convert_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)						\
+	luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);					\
+	_type_ convert_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)	\
 	{																							\
-		return (_type_)lua_tonumber(L,    index);													\
+		return (_type_)lua_tointeger(L,    index);												\
 	}																							\
-	int match_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)								\
+	int match_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)		\
 	{																							\
-		if (lua_isnumber(L,    index)) return 0; else return -1;									\
+		if (lua_isinteger(L,    index)) return 0; else return -1;								\
 	}																							\
-	void convert_cpp_to_lua(lua_State* L,    const  _type_& v)										\
+	void convert_cpp_to_lua(lua_State* L,    const  _type_& v)									\
 	{																							\
-		lua_pushnumber(L,    (double)v);															\
+		lua_pushinteger(L,    (double)v);														\
 	}
 
 	// Basic LUA types
@@ -258,8 +262,6 @@ namespace NLGUI
 			LUA_REGISTER_BASIC(uint16)
 			LUA_REGISTER_BASIC(sint32)
 			LUA_REGISTER_BASIC(uint32)
-	//		LUA_REGISTER_BASIC(sint)
-	//		LUA_REGISTER_BASIC(uint)
 		}
 	}
 
@@ -1381,7 +1383,7 @@ namespace NLGUI
 				ls.push( (reflectedObject.*(property.GetMethod.GetBool))() );
 			break;
 			case CReflectedProperty::SInt32:
-				ls.push( (lua_Number)(reflectedObject.*(property.GetMethod.GetSInt32))() );
+				ls.push( (lua_Integer)(reflectedObject.*(property.GetMethod.GetSInt32))() );
 			break;
 			case CReflectedProperty::Float:
 				ls.push( (lua_Number)(reflectedObject.*(property.GetMethod.GetFloat))() );
@@ -1447,13 +1449,13 @@ namespace NLGUI
 				}
 			case CReflectedProperty::SInt32:
 				{
-					sint32	val= (sint32)ls.toNumber(stackIndex);
+					sint32	val= (sint32)ls.toInteger(stackIndex);
 					(target.*(property.SetMethod.SetSInt32))(val);
 					return;
 				}
 			case CReflectedProperty::UInt32:
 				{
-					uint32	val= (uint32)ls.toNumber(stackIndex);
+					uint32	val= (uint32)ls.toInteger(stackIndex);
 					(target.*(property.SetMethod.SetUInt32))(val);
 					return;
 				}
@@ -1474,7 +1476,7 @@ namespace NLGUI
 				{
 					ucstring val;
 					// Additionaly return of CInterfaceExpr may be std::string... test std string too
-					if(ls.isString() || ls.isNumber())
+					if(ls.isString() || ls.isNumber() || ls.isInteger())
 					{
 						std::string	str;
 						ls.toString(stackIndex,    str);

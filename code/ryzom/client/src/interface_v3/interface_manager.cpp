@@ -2280,7 +2280,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	CRGBA color = CRGBA::White;
 
 
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 	{
 		mode = it->second.Mode;
@@ -2315,7 +2315,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 {
 	CRGBA col = CRGBA::White;
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 		col = it->second.Color;
 	return col;
@@ -3327,11 +3327,17 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 
 	sint	type= ls.type(index);
 	if(type==LUA_TNIL)
+	{
 		str= "nil";
+	}
 	else if(type==LUA_TNUMBER)
-		str= NLMISC::toString(ls.toNumber(index));
+	{
+		str= NLMISC::toString(ls.isInteger(index) ? ls.toInteger(index):ls.toNumber(index));
+	}
 	else if(type==LUA_TBOOLEAN)
+	{
 		str= ls.toBoolean(index)?"true":"false";
+	}
 	else if(type==LUA_TSTRING)
 	{
 		ls.toString(index, str);

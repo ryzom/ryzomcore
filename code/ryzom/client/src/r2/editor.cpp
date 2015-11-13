@@ -1297,13 +1297,13 @@ int CEditor::luaSetPlotItemInfos(CLuaState &ls)
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 3);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 4);
 	CLuaIHM::checkArgTypeUCString(ls, funcName, 5);
-	CItemSheet *item = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId((uint32) ls.toNumber(2))));
+	CItemSheet *item = dynamic_cast<CItemSheet *>(SheetMngr.get(CSheetId((uint32) ls.toInteger(2))));
 	if (!item || item->Family != ITEMFAMILY::SCROLL_R2)
 	{
 		CLuaIHM::fails(ls, "%s : bad sheet, r2 plot item required", funcName);
 	}
 	R2::TMissionItem mi;
-	mi.SheetId = (uint32) ls.toNumber(2);
+	mi.SheetId = (uint32) ls.toInteger(2);
 	CLuaIHM::getUCStringOnStack(ls, 3, mi.Name);
 	CLuaIHM::getUCStringOnStack(ls, 4, mi.Description);
 	CLuaIHM::getUCStringOnStack(ls, 5, mi.Comment);
@@ -1383,7 +1383,7 @@ int CEditor::luaKickCharacter(CLuaState &ls)
 
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 	sb.kickCharacter(sb.getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(),
-		(uint32)ls.toNumber(2));
+		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
 		nlwarning("kickCharacter callback return false");
@@ -1401,7 +1401,7 @@ int CEditor::luaUnkickCharacter(CLuaState &ls)
 
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 	sb.unkickCharacter(sb.getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(),
-		(uint32)ls.toNumber(2));
+		(uint32)ls.toInteger(2));
 
 	if(!sb.waitOneMessage(sb.getMessageName("on_invokeResult")))
 		nlwarning("unkickCharacter callback return false");
@@ -1419,7 +1419,7 @@ int CEditor::luaTeleportToCharacter(CLuaState &ls)
 
 	CClientEditionModule & cem = R2::getEditor().getDMC().getEditionModule();
 	cem.requestTeleportOneCharacterToAnother(cem.getCurrentAdventureId(), CSessionBrowserImpl::getInstance().getCharId(),
-		(uint32)ls.toNumber(2));
+		(uint32)ls.toInteger(2));
 	return 0;
 }
 
@@ -1954,17 +1954,17 @@ int CEditor::luaRemoveInstanceObserver(CLuaState &ls)
 	const char *funcName = "removeInstanceObserver";
 	CLuaIHM::checkArgCount(ls, funcName, 2); // this is a method (self + 1 params)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // instance  id
-	IInstanceObserver *observer = getEditor().getInstanceObserver((TInstanceObserverHandle) ls.toNumber(2));
+	IInstanceObserver *observer = getEditor().getInstanceObserver((TInstanceObserverHandle) ls.toInteger(2));
 	if (observer == NULL)
 	{
-		CLuaIHM::fails(ls, "Instance observer not found for handle = %d", (int) ls.toNumber(2));
+		CLuaIHM::fails(ls, "Instance observer not found for handle = %d"NL_I64, ls.toInteger(2));
 	}
 	CInstanceObserverLua *luaObserver = dynamic_cast<CInstanceObserverLua *>(observer);
 	if (luaObserver == NULL)
 	{
-		CLuaIHM::fails(ls, "Instance observer found for handle %d, but has bad type, it wasn't registered from lua.", (int) ls.toNumber(2));
+		CLuaIHM::fails(ls, "Instance observer found for handle %d"NL_I64", but has bad type, it wasn't registered from lua.", ls.toInteger(2));
 	}
-	getEditor().removeInstanceObserver((TInstanceObserverHandle) ls.toNumber(2));
+	getEditor().removeInstanceObserver((TInstanceObserverHandle) ls.toInteger(2));
 	CLuaObject receiver = luaObserver->getReceiver();
 	delete luaObserver;
 	receiver.push();
@@ -3221,10 +3221,10 @@ void CEditor::initObjectProjectionMetatable()
 				throw ELuaWrappedFunctionException(&ls, "Attempt to access an erased object");
 			}
 
-			if (ls.isNumber(2))
+			if (ls.isInteger(2))
 			{
-				// index is a number
-				const CObject *other = obj->getValue((uint32) ls.toNumber(2));
+				// index is an integer
+				const CObject *other = obj->getValue((uint32) ls.toInteger(2));
 				if (other)
 				{
 					pushValue(ls, other);
@@ -3481,6 +3481,10 @@ void CEditor::initObjectProjectionMetatable()
 			{
 				ls.push(obj->toString());
 			}
+			else if (obj->isInteger())
+			{
+				ls.push(obj->toInteger());
+			}
 			else if (obj->isNumber())
 			{
 				ls.push(obj->toNumber());
@@ -3574,9 +3578,9 @@ void CEditor::initObjectProjectionMetatable()
 				// continuation of traversal
 				// -> retrieve index from the key
 				sint32 index;
-				if (ls.isNumber(2))
+				if (ls.isInteger(2))
 				{
-					index = (uint32) ls.toNumber(2);
+					index = (uint32) ls.toInteger(2);
 				}
 				else
 				{
@@ -5384,12 +5388,12 @@ sint CEditor::getLeftQuota()
 	CLuaState &ls = getLua();
 	CLuaStackChecker lsc(&ls);
 	callEnvMethod("getLeftQuota", 0, 1);
-	if (!ls.isNumber(-1))
+	if (!ls.isInteger(-1))
 	{
 		ls.pop(1);
 		return 0;
 	}
-	sint result = (sint) ls.toNumber(-1);
+	sint result = (sint) ls.toInteger(-1);
 	ls.pop(1);
 	return result;
 }
@@ -5419,7 +5423,7 @@ bool CEditor::verifyRoomLeft(uint aiCost, uint staticCost)
 	if (aiCost)
 	{
 		CLuaStackChecker lsc(&ls);
-		getEditor().getLua().push((lua_Number)aiCost);
+		getEditor().getLua().push((lua_Integer)aiCost);
 		callEnvMethod("checkAiQuota", 1, 1);
 		if (!ls.isBoolean(-1))
 		{
@@ -5433,7 +5437,7 @@ bool CEditor::verifyRoomLeft(uint aiCost, uint staticCost)
 	if (staticCost)
 	{
 		CLuaStackChecker lsc(&ls);
-		getEditor().getLua().push((lua_Number)staticCost);
+		getEditor().getLua().push((lua_Integer)staticCost);
 		callEnvMethod("checkStaticQuota", 1, 1);
 		if (!ls.isBoolean(-1))
 		{
@@ -5781,7 +5785,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	// teleport in good island
 	if (ClientCfg.Local)
 	{
-		sint locationId = (uint) _ScenarioInstance->getLuaProjection()["Description"]["LocationId"].toNumber();
+		sint locationId = (uint) _ScenarioInstance->getLuaProjection()["Description"]["LocationId"].toInteger();
 
 		CScenarioEntryPoints &sep = CScenarioEntryPoints::getInstance();
 		_IslandCollision.loadEntryPoints();
@@ -6647,10 +6651,16 @@ std::string getString(const CObject *obj, const std::string &attrName)
 double getNumber(const CObject *obj, const std::string &attrName)
 {
 	obj = getObject(obj, attrName);
-	if (!obj) return 0;
-	return obj->isNumber() ? obj->toNumber() : 0;
+	if (!obj) return 0.0;
+	return obj->isNumber() ? obj->toNumber() : 0.0;
 }
 
+sint64 getInteger(const CObject *obj, const std::string &attrName)
+{
+	obj = getObject(obj, attrName);
+	if (!obj) return 0;
+	return obj->isInteger() ? obj->toInteger() : 0;
+}
 
 bool isEditionCurrent()
 {
@@ -6703,7 +6713,7 @@ bool CEditor::getVisualPropertiesFromObject(CObject* object, SPropVisualA& vA, S
 
 	//-------------------------random init npc visual properties
 
-	std::map< std::string, double > visualProps;
+	std::map< std::string, sint64 > visualProps;
 
 
 	static const char* keys[] = { "GabaritHeight", "GabaritTorsoWidth", "GabaritArmsWidth", "GabaritLegsWidth", "GabaritBreastSize"
@@ -6719,7 +6729,7 @@ bool CEditor::getVisualPropertiesFromObject(CObject* object, SPropVisualA& vA, S
 	unsigned int last = sizeof(keys) / sizeof(keys[0]);
 	for (; first != last; ++first)
 	{
-		visualProps[keys[first]] = getNumber(object, keys[first]);
+		visualProps[keys[first]] = getInteger(object, keys[first]);
 	}
 
 	//vA.PropertySubData.Sex = (uint) visualProps["Sex"];
@@ -7054,10 +7064,10 @@ class CAHCreateEntity : public IActionHandler
 			if (getEditor().getEnv().callMethodByNameNoThrow("randomNPCProperties", 2, 1))
 			{
 				CLuaObject result(getEditor().getLua());
-				std::map< std::string, double > visualProps;
+				std::map< std::string, sint64 > visualProps;
 				ENUM_LUA_TABLE(result, it)
 				{
-					visualProps[it.nextKey().toString()] = it.nextValue().toNumber();
+					visualProps[it.nextKey().toString()] = it.nextValue().toInteger();
 				}
 
 				// visual property A depends on the type of the entity

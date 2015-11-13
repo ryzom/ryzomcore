@@ -659,7 +659,7 @@ void release()
 	CInterfaceExpr::release();
 	CPdrTokenRegistry::releaseInstance();
 	NLNET::IModuleManager::releaseInstance();
-	delete &CLuaManager::getInstance();
+	CLuaManager::releaseInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
 

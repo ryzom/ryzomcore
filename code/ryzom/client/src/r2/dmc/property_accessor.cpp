@@ -46,6 +46,14 @@ double CPropertyAccessor::getValueAsNumber(CObject* component, const std::string
 	return object->toNumber();
 }
 
+sint64 CPropertyAccessor::getValueAsInteger(CObject* component, const std::string& attrName) const
+{
+	//H_AUTO(R2_CPropertyAccessor_getValueAsInteger)
+	const CObject* object=getPropertyValue((const CObject *) component, attrName);
+	if (!object || !object->isInteger()) { return 0; }
+	return object->toInteger();
+}
+
 bool CPropertyAccessor::hasValueInBase(CObject *component, const std::string& attrName)
 {
 	//H_AUTO(R2_CPropertyAccessor_hasValueInBase)

@@ -142,7 +142,7 @@ UInstanceGroup *getCluster(const UGlobalPosition &gp)
 	if(strPos.empty())
 		return 0;
 	// try to find the ig in the loaded ig map
-	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(strlwr(strPos));
+	std::map<std::string, UInstanceGroup *>::const_iterator igIt = IGLoaded.find(toLower(strPos));
 	if (igIt != IGLoaded.end())
 	{
 		return igIt->second;
@@ -188,7 +188,7 @@ void releaseLandscapeIGCallbacks()
 
 void addPacsPrim(const std::string &fileName)
 {
-	std::string ppName = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fileName));
+	std::string ppName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fileName));
 	if (PacsPrims.find(ppName) != PacsPrims.end())
 	{
 		nlwarning(("Pacs primitive " + ppName + " already has been inserted").c_str());
