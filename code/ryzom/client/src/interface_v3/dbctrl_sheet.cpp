@@ -141,7 +141,7 @@ int CDBCtrlSheet::luaGetHpBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.HpBuff);
+	ls.push(itemInfo.HpBuff);
 
 	return 1;
 }
@@ -153,7 +153,7 @@ int CDBCtrlSheet::luaGetSapBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.SapBuff);
+	ls.push(itemInfo.SapBuff);
 	
 	return 1;
 }
@@ -165,7 +165,7 @@ int CDBCtrlSheet::luaGetFocusBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.FocusBuff);
+	ls.push(itemInfo.FocusBuff);
 
 	return 1;
 }
@@ -177,7 +177,7 @@ int CDBCtrlSheet::luaGetStaBuff(CLuaState &ls)
 	uint32	itemSlotId= getInventory().getItemSlotId(ctrlSheet);
 	CClientItemInfo itemInfo = getInventory().getItemInfo(itemSlotId);
 
-	ls.push((double)itemInfo.StaBuff);
+	ls.push(itemInfo.StaBuff);
 
 	return 1;
 }

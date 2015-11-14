@@ -1702,7 +1702,7 @@ namespace NLGUI
 	int CGroupSubMenu::luaGetNumLine(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "getNumLine", 0);
-		ls.push((double) getNumLine());
+		ls.push(getNumLine());
 		return 1;
 	}
 
@@ -1744,7 +1744,7 @@ namespace NLGUI
 		const char *funcName = "getLineFromId";
 		CLuaIHM::checkArgCount(ls, funcName, 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
-		ls.push((double) getLineFromId(ls.toString(1)));
+		ls.push(getLineFromId(ls.toString(1)));
 		return 1;
 	}
 

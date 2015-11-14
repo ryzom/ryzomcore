@@ -1145,7 +1145,7 @@ namespace NLGUI
 	{
 		CLuaIHM::checkArgCount(ls, "getElementIndex", 1);
 		CViewBase * viewBase = dynamic_cast<CViewBase *>(CLuaIHM::getUIOnStack(ls, 1));
-		ls.push((double) getElementIndex(viewBase));
+		ls.push(getElementIndex(viewBase));
 		return 1;
 	}
 

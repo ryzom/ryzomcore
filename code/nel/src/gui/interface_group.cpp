@@ -1173,7 +1173,7 @@ namespace NLGUI
 	int CInterfaceGroup::luaGetNumGroups(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getNumGroups", 0);
-		ls.push((double) _ChildrenGroups.size());
+		ls.push((uint)_ChildrenGroups.size());
 		return 1;
 	}
 

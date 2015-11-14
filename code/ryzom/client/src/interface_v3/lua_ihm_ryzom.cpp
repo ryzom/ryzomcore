@@ -316,7 +316,7 @@ int CLuaIHMRyzom::luaClientCfgIndex(CLuaState &ls)
 	switch(v->Type)
 	{
 		case CConfigFile::CVar::T_REAL:
-			ls.push((double) v->asDouble());
+			ls.push(v->asDouble());
 			return 1;
 		break;
 		case CConfigFile::CVar::T_STRING:
@@ -325,7 +325,7 @@ int CLuaIHMRyzom::luaClientCfgIndex(CLuaState &ls)
 		break;
 		default: // handle both T_INT && T_BOOL
 		case CConfigFile::CVar::T_INT:
-			ls.push((double) v->asInt());
+			ls.push(v->asInt());
 			return 1;
 		break;
 	}
@@ -1010,7 +1010,7 @@ int CLuaIHMRyzom::hideAllNonSavableWindows(CLuaState &/* ls */)
 int CLuaIHMRyzom::getDesktopIndex(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_getDesktopIndex)
-	ls.push((double) CInterfaceManager::getInstance()->getMode());
+	ls.push(CInterfaceManager::getInstance()->getMode());
 	return 1;
 }
 
@@ -1050,7 +1050,7 @@ int	CLuaIHMRyzom::getCharSlot(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_getCharSlot)
 	const char *funcName = "getCharSlot";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push(double(PlayerSelectedSlot));
+	ls.push(PlayerSelectedSlot);
 	return 1;
 }
 
@@ -1060,7 +1060,7 @@ int CLuaIHMRyzom::getServerSeason(CLuaState &ls)
 	const char *funcName = "getServerSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	extern uint8 ServerSeasonValue;
-	ls.push((double) ServerSeasonValue);
+	ls.push(ServerSeasonValue);
 	return 1;
 }
 
@@ -1069,7 +1069,7 @@ int CLuaIHMRyzom::computeCurrSeason(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_computeCurrSeason)
 	const char *funcName = "computeCurrSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push((double) (::computeCurrSeason() + 1));
+	ls.push((sint)(::computeCurrSeason() + 1));
 	return 1;
 }
 
@@ -1078,7 +1078,7 @@ int CLuaIHMRyzom::getAutoSeason(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_getAutoSeason)
 	const char *funcName = "getAutoSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push((double) (StartupSeason + 1));
+	ls.push((sint)(StartupSeason + 1));
 	return 1;
 }
 
@@ -1151,7 +1151,7 @@ int CLuaIHMRyzom::getPlayerDirection(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerGender(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerGender", 0);
-	ls.push((lua_Integer)(UserEntity->getGender()));
+	ls.push((uint8)UserEntity->getGender());
 	return 1;
 }
 
@@ -1217,7 +1217,7 @@ int CLuaIHMRyzom::getTargetGender(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getTargetGender", 0);
 	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
 	if (!target) return (int)GSGENDER::unknown;
-	ls.push((lua_Integer)(target->getGender()));
+	ls.push((uint8)target->getGender());
 	return 1;
 }
 
@@ -1358,7 +1358,7 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 	if (sheetId.buildSheetId(sheedtName))
 	{
 		uint32 idx = CVisualSlotManager::getInstance()->sheet2Index(sheetId, (SLOTTYPE::EVisualSlot)slotId);
-		ls.push((lua_Integer)idx);
+		ls.push(idx);
 	}
 	else
 		return 0;
@@ -1369,7 +1369,7 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 int CLuaIHMRyzom::getTargetSlot(CLuaState &ls)
 {
 	uint32 slot = (uint32)getTargetSlotNr();
-	ls.push((lua_Integer)slot);
+	ls.push(slot);
 	return 1;
 }
 
@@ -1401,7 +1401,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 		switch(v->Type)
 		{
 			case CConfigFile::CVar::T_REAL:
-				ls.push((double) v->asDouble());
+				ls.push(v->asDouble());
 				return 1;
 			break;
 			case CConfigFile::CVar::T_STRING:
@@ -1410,7 +1410,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 			break;
 			default: // handle both T_INT && T_BOOL
 			case CConfigFile::CVar::T_INT:
-				ls.push((double) v->asInt());
+				ls.push(v->asInt());
 				return 1;
 			break;
 		}
@@ -1521,9 +1521,9 @@ int	CLuaIHMRyzom::getIndexInDB(CLuaState &ls)
 
 	// get the index in db
 	if(pCS)
-		ls.push((double)pCS->getIndexInDB());
+		ls.push(pCS->getIndexInDB());
 	else
-		ls.push(0.0);
+		ls.push((sint)0);
 
 	return 1;
 }
@@ -1791,7 +1791,7 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 	CScenarioEntryPoints scenarioEntryPoints = CScenarioEntryPoints::getInstance();
 	uint32 id = scenarioEntryPoints.getIslandId(ls.toString(1));
-	ls.push((double)id);
+	ls.push(id);
 
 	return 1;
 }

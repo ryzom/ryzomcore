@@ -4563,14 +4563,14 @@ int CSPhraseComAdpater::luaGetCastTime(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push(0.0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();	
 	float castTime;
 	float castTimeMalus;
 	pPM->getPhraseCastTime(Phrase, pPM->getTotalActionMalus(Phrase), castTime, castTimeMalus);
-	ls.push((double) (castTime + castTimeMalus));
+	ls.push(castTime + castTimeMalus);
 	return 1;
 }
 
@@ -4579,14 +4579,14 @@ int CSPhraseComAdpater::luaGetCastRange(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	sint range;
-	sint  rangeMalus;
+	sint rangeMalus;
 	pPM->getPhraseMagicRange(this->Phrase, pPM->getTotalActionMalus(Phrase), range, rangeMalus);
-	ls.push((double) (range + rangeMalus));
+	ls.push(range + rangeMalus);
 	return 1;
 }
 
@@ -4595,14 +4595,14 @@ int CSPhraseComAdpater::luaGetHpCost(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	sint hpCost;
 	sint hpCostMalus;
 	pPM->getPhraseHpCost(this->Phrase, pPM->getTotalActionMalus(Phrase), hpCost, hpCostMalus);
-	ls.push((double) (hpCost + hpCostMalus));
+	ls.push(hpCost + hpCostMalus);
 	return 1;
 }
 
@@ -4611,14 +4611,14 @@ int CSPhraseComAdpater::luaGetSapCost(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	sint sapCost;
 	sint sapCostMalus;
 	pPM->getPhraseSapCost(this->Phrase, pPM->getTotalActionMalus(Phrase), sapCost, sapCostMalus);
-	ls.push((double) (sapCost + sapCostMalus));
+	ls.push(sapCost + sapCostMalus);
 	return 1;
 }
 
@@ -4627,11 +4627,11 @@ int CSPhraseComAdpater::luaGetSuccessRate(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();		;
-	ls.push((double) pPM->getPhraseSuccessRate(this->Phrase));
+	ls.push(pPM->getPhraseSuccessRate(this->Phrase));
 	return 1;
 }
 
@@ -4641,14 +4641,14 @@ int CSPhraseComAdpater::luaGetFocusCost(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	sint focusCost;
 	sint focusCostMalus;
 	pPM->getPhraseFocusCost(this->Phrase, pPM->getTotalActionMalus(Phrase), focusCost, focusCostMalus);
-	ls.push((double) (focusCost + focusCostMalus));
+	ls.push(focusCost + focusCostMalus);
 	return 1;
 }
 
@@ -4657,14 +4657,14 @@ int CSPhraseComAdpater::luaGetStaCost(CLuaState &ls)
 {
 	if (Phrase.Bricks.empty())
 	{
-		ls.push((double) 0);
+		ls.push((sint)0);
 		return 1;
 	}
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
 	sint staCost;
 	sint staCostMalus;
 	pPM->getPhraseStaCost(this->Phrase, pPM->getTotalActionMalus(Phrase), staCost, staCostMalus);
-	ls.push((double) (staCost + staCostMalus));
+	ls.push(staCost + staCostMalus);
 	return 1;
 }
 
@@ -4756,7 +4756,7 @@ int CSPhraseComAdpater::luaIsPowerPhrase(CLuaState &ls)
 int CSPhraseComAdpater::luaGetRegenTime(CLuaState &ls)
 {	
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
-	ls.push((double) pPM->getRegenTime(Phrase));
+	ls.push((sint)pPM->getRegenTime(Phrase));
 	return 1;
 }
 
@@ -4764,7 +4764,7 @@ int CSPhraseComAdpater::luaGetRegenTime(CLuaState &ls)
 int CSPhraseComAdpater::luaGetTotalRegenTime(CLuaState &ls)
 {
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
-	ls.push((double) pPM->getTotalRegenTime(Phrase));
+	ls.push((sint)pPM->getTotalRegenTime(Phrase));
 	return 1;
 }
 
@@ -4772,7 +4772,7 @@ int CSPhraseComAdpater::luaGetTotalRegenTime(CLuaState &ls)
 int CSPhraseComAdpater::luaGetPowerDisableTime(CLuaState &ls)
 {
 	CSPhraseManager *pPM = CSPhraseManager::getInstance();
-	ls.push((double) pPM->getPowerDisableTime(Phrase));
+	ls.push((sint)pPM->getPowerDisableTime(Phrase));
 	return 1;
 }
 

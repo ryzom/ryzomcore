@@ -1869,8 +1869,8 @@ void CClientEditionModule::onKicked(NLNET::IModuleProxy * /* sender */, uint32 t
 {
 	//H_AUTO(R2_CClientEditionModule_onKicked)
 
-	R2::getEditor().getLua().push((double)timeBeforeDisconnection);
-	R2::getEditor().getLua().push((bool)mustKick);
+	R2::getEditor().getLua().push(timeBeforeDisconnection);
+	R2::getEditor().getLua().push(mustKick);
 	R2::getEditor().callEnvFunc( "onKicked", 2, 0);
 
 }
@@ -2019,9 +2019,9 @@ void CClientEditionModule::onAnimationModePlayConnected(NLNET::IModuleProxy * /*
 void CClientEditionModule::scheduleStartAct(NLNET::IModuleProxy * /* sender */, uint32 errorId, uint32 actId, uint32 nbSeconds)
 {
 	//H_AUTO(R2_CClientEditionModule_scheduleStartAct)
-	R2::getEditor().getLua().push((double)errorId);
-	R2::getEditor().getLua().push((double)actId);
-	R2::getEditor().getLua().push((double)nbSeconds);
+	R2::getEditor().getLua().push(errorId);
+	R2::getEditor().getLua().push(actId);
+	R2::getEditor().getLua().push(nbSeconds);
 	R2::getEditor().callEnvFunc( "onScheduleStartAct", 3, 0);
 
 }

@@ -944,8 +944,8 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls,   "getWindowSize",   0);
 		uint32 w,   h;
 		CViewRenderer::getInstance()->getScreenSize(w,   h);
-		ls.push((double) w);
-		ls.push((double) h);
+		ls.push(w);
+		ls.push(h);
 		return 2;
 	}
 
@@ -976,8 +976,8 @@ namespace NLGUI
 		CIFile fs(CPath::lookup(textureName).c_str());
 		bitmap.load(fs);
 
-		ls.push((double) bitmap.getWidth());
-		ls.push((double) bitmap.getHeight());
+		ls.push(bitmap.getWidth());
+		ls.push(bitmap.getHeight());
 
 		return 2;
 	}
@@ -1100,7 +1100,7 @@ namespace NLGUI
 				ls.push(value.getBool());
 				break;
 			case CInterfaceExprValue::Integer:
-				ls.push((double)value.getInteger());
+				ls.push(value.getInteger());
 				break;
 			case CInterfaceExprValue::Double:
 				ls.push(value.getDouble());
@@ -1363,7 +1363,7 @@ namespace NLGUI
 		ls.newTable();
 		for(uint k = 0; k < files.size(); ++k)
 		{
-			ls.push((double) k);
+			ls.push(k);
 			ls.push(files[k]);
 			ls.setTable(-3);
 		}
@@ -1383,10 +1383,10 @@ namespace NLGUI
 				ls.push( (reflectedObject.*(property.GetMethod.GetBool))() );
 			break;
 			case CReflectedProperty::SInt32:
-				ls.push( (lua_Integer)(reflectedObject.*(property.GetMethod.GetSInt32))() );
+				ls.push( (reflectedObject.*(property.GetMethod.GetSInt32))() );
 			break;
 			case CReflectedProperty::Float:
-				ls.push( (lua_Number)(reflectedObject.*(property.GetMethod.GetFloat))() );
+				ls.push( (reflectedObject.*(property.GetMethod.GetFloat))() );
 			break;
 			case CReflectedProperty::String:
 				ls.push( (reflectedObject.*(property.GetMethod.GetString))() );
