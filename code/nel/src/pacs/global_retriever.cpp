@@ -752,7 +752,7 @@ sint32			NLPACS::CGlobalRetriever::getIdentifier(const string &id) const
 
 const string	&NLPACS::CGlobalRetriever::getIdentifier(const NLPACS::UGlobalPosition &position) const
 {
-	static const string		nullString = string("");
+	static const string		nullString;
 
 	if (position.InstanceId == -1)
 		return nullString;

@@ -2469,7 +2469,7 @@ class CAHCreateAccountRules : public IActionHandler
 					if(Params==rules[i])
 					{
 						if(rulesGr)
-							rulesGr->setActive(text->getText() != ucstring(""));
+							rulesGr->setActive(!text->getText().empty());
 					}
 				}
 			}

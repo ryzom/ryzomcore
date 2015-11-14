@@ -856,11 +856,10 @@ bool CObjectNumber::equal(const CObject* other) const
 	//H_AUTO(R2_CObjectNumber_equal)
 	if (!other || !other->isNumber()) return false;
 	double otherValue = other->toNumber();
-	if (_Value == otherValue ) return true;
-	/*
-		TODO: fabs + epsilon trick
-	*/
-	return false;
+	if (_Value == otherValue) return true;
+
+	// if difference between 2 values less than epsilon, we consider they are equals
+	return fabs(_Value - otherValue) <= std::numeric_limits<double>::epsilon();
 }
 
 

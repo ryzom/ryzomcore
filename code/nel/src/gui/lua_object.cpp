@@ -390,6 +390,48 @@ namespace NLGUI
 	}
 
 	// *************************************************
+	void CLuaObject::setValue(const char *key,  uint32 value) throw(ELuaNotATable)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%u' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
+	void CLuaObject::setValue(const char *key,  sint32 value) throw(ELuaNotATable)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%d' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
+	void CLuaObject::setValue(const char *key,  sint64 value) throw(ELuaNotATable)
+	{
+		nlassert(key);
+		nlassert(isValid());
+		if (!isTable()) throw ELuaNotATable(NLMISC::toString("Trying to set a value '%d"NL_I64"' at key %s on object '%s' of type %s (not a table).", value, key, getId().c_str(), getTypename()));
+		CLuaStackChecker lsc(_LuaState);
+		push();
+		_LuaState->push(key);
+		_LuaState->push(value);
+		_LuaState->setTable(-3);
+		_LuaState->pop();
+	}
+
+	// *************************************************
 	void CLuaObject::eraseValue(const char *key) throw(ELuaNotATable)
 	{
 		nlassert(isValid());

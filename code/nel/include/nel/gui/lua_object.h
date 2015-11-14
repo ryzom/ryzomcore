@@ -125,6 +125,9 @@ namespace NLGUI
 		void       setValue(const char *key, bool value) throw(ELuaNotATable);
 		void       setValue(const char *key, TLuaWrappedFunction value) throw(ELuaNotATable);
 		void       setValue(const char *key, double value) throw(ELuaNotATable);
+		void       setValue(const char *key, uint32 value) throw(ELuaNotATable);
+		void       setValue(const char *key, sint32 value) throw(ELuaNotATable);
+		void       setValue(const char *key, sint64 value) throw(ELuaNotATable);
 		void	   setValue(const std::string &key, const std::string &value) throw(ELuaNotATable) { setValue(key.c_str(), value); }
 		void       setNil(const char *key) throw(ELuaNotATable);
 		void       setNil(const std::string &key) throw(ELuaNotATable) { setNil(key.c_str()); }

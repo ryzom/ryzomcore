@@ -968,7 +968,7 @@ void CDisplayerVisualEntity::updateName()
 		ucName = CI18N::get("uiR2EDNoName");
 	}
 
-	std::string actName=std::string("");
+	std::string actName;
 
 	// If entity is in an additionnal act, then postfix its name with the name of the act
 	if (getDisplayedInstance()->getParentAct() != getEditor().getBaseAct())

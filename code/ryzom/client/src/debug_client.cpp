@@ -36,7 +36,7 @@
 #include "user_entity.h"
 #include "view.h"
 #include "login.h"
-#include "game_share/ryzom_version.h"
+#include "user_agent.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/sphrase_manager.h"
 #include "entities.h"
@@ -526,7 +526,7 @@ string getDebugInformation()
 	str += toString("ConnectState: %s\n", NetMngr.getConnectionStateCStr());
 	str += toString("LocalAddress: %s\n", NetMngr.getAddress().asString().c_str());
 	str += toString("Language: %s\n", CI18N::getCurrentLanguageName().toString().c_str());
-	str += toString("ClientVersion: "RYZOM_VERSION"\n");
+	str += toString("ClientVersion: %s\n", getDebugVersion().c_str());
 	if (ClientCfg.R2Mode)
 	{
 		str += toString("PatchVersion: %s\n", R2ServerVersion.c_str());

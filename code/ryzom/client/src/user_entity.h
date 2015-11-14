@@ -479,7 +479,7 @@ public:
 
 	ucstring getLoginName()
 	{
-		if (_LoginName == ucstring(""))
+		if (_LoginName.empty())
 			_LoginName = getDisplayName();
 
 		return _LoginName;
