@@ -1427,7 +1427,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 		}
 		for(uint i = 0; i<v->IntValues.size(); i++)
 		{
-			result.setValue(toString(count).c_str(), (double)v->IntValues[i]);
+			result.setValue(toString(count).c_str(), (sint32)v->IntValues[i]);
 			count++;
 		}
 		for(uint i = 0; i<v->RealValues.size(); i++)
@@ -1752,10 +1752,10 @@ int CLuaIHMRyzom::getCompleteIslands(CLuaState &ls)
 		ls.newTable();
 		CLuaObject islandTable(ls);
 		islandTable.setValue("continent", island->Continent);
-		islandTable.setValue("xmin", (double)island->XMin);
-		islandTable.setValue("ymin", (double)island->YMin);
-		islandTable.setValue("xmax", (double)island->XMax);
-		islandTable.setValue("ymax", (double)island->YMax);
+		islandTable.setValue("xmin", island->XMin);
+		islandTable.setValue("ymin", island->YMin);
+		islandTable.setValue("xmax", island->XMax);
+		islandTable.setValue("ymax", island->YMax);
 
 		ls.newTable();
 		CLuaObject entrypointsTable(ls);
@@ -1765,8 +1765,8 @@ int CLuaIHMRyzom::getCompleteIslands(CLuaState &ls)
 			const CScenarioEntryPoints::CShortEntryPoint & entryPoint = island->EntryPoints[e];
 			ls.newTable();
 			CLuaObject entrypointTable(ls);
-			entrypointTable.setValue("x", (double)entryPoint.X);
-			entrypointTable.setValue("y", (double)entryPoint.Y);
+			entrypointTable.setValue("x", entryPoint.X);
+			entrypointTable.setValue("y", entryPoint.Y);
 
 			entrypointsTable.setValue(entryPoint.Location, entrypointTable);
 		}
