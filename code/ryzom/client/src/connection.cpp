@@ -2682,7 +2682,7 @@ class CAHScenarioControl : public IActionHandler
 		// init current scenario name and parameters
 		if(!R2::getEditor().isInitialized())
 		{
-			ScenarioFileName = string("");
+			ScenarioFileName.clear();
 
 			// empty scenario
 			CInterfaceElement *result = scenarioWnd->findFromShortId(string("scenario_value_text"));
@@ -2950,7 +2950,7 @@ class CAHLoadScenario : public IActionHandler
 		}
 
 		// description
-		string description = string("");
+		string description;
 		result = scenarioWnd->findFromShortId(string("edit_small_description"));
 		if(result)
 		{

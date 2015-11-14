@@ -572,7 +572,7 @@ void checkUnderCursor()
 						selectedInstance.getMaterial(j).setShininess( 10.0f );
 					}
 					selectedInstance = noSelectedInstance;
-					selectedInstanceURL = string("");
+					selectedInstanceURL.clear();
 				}
 			}
 			SlotUnderCursor = CLFECOMMON::INVALID_SLOT;

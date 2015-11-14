@@ -65,6 +65,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 		game.setValue("checkRingAccess", luaCheckRingAccess);
 		game.setValue("getFileHeader", luaGetFileHeader);
 	}
+
 	if (!ClientCfg.Local)
 	{
 		CSessionBrowserImpl::getInstance().setAuthInfo(getCookie());
@@ -76,8 +77,8 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 	_LastAuthorRating = 0;
 	_LastAMRating = 0;
 	_LastMasterlessRating = 0;
-	_LastRingPoints = string("");
-	_LastMaxRingPoints = string("");
+	_LastRingPoints.clear();
+	_LastMaxRingPoints.clear();
 }
 
 
