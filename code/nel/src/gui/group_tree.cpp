@@ -1836,7 +1836,7 @@ namespace NLGUI
 	{
 		const char *funcName = "CGroupTree::SNode::luaGetNumChildren";
 		CLuaIHM::checkArgCount(ls, funcName, 0);
-		ls.push((double) Children.size());
+		ls.push((uint)Children.size());
 		return 1;
 	}
 

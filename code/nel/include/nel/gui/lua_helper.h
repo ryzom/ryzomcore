@@ -266,8 +266,16 @@ namespace NLGUI
 		const char			*getTableStringValue(const char *name, const char *defaultValue= NULL);
 		// pushing value onto the stack
 		void				push(bool value);
-		void				push(lua_Number value);
-		void				push(lua_Integer value);
+		void				push(float value);
+		void				push(double value);
+		void				push(uint8 value);
+		void				push(uint16 value);
+		void				push(uint32 value);
+		void				push(uint64 value);
+		void				push(sint8 value);
+		void				push(sint16 value);
+		void				push(sint32 value);
+		void				push(sint64 value);
 		void				push(const char *str);
 		void				push(const char *str, int length);
 		void				push(const std::string &str);

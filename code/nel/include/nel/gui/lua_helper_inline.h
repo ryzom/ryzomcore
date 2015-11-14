@@ -322,19 +322,83 @@ inline void CLuaState::push(bool value)
 }
 
 //================================================================================
-inline void CLuaState::push(lua_Number value)
+inline void CLuaState::push(float value)
 {
 	//H_AUTO(Lua_CLuaState_push)
 	nlverify( lua_checkstack(_State, 1) );
-	lua_pushnumber(_State, value);
+	lua_pushnumber(_State, (lua_Number)value);
 }
 
 //================================================================================
-inline void CLuaState::push(lua_Integer value)
+inline void CLuaState::push(double value)
 {
 	//H_AUTO(Lua_CLuaState_push)
 	nlverify( lua_checkstack(_State, 1) );
-	lua_pushinteger(_State, value);
+	lua_pushnumber(_State, (lua_Number)value);
+}
+
+//================================================================================
+inline void CLuaState::push(uint8 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(uint16 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(uint32 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(uint64 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(sint8 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(sint16 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(sint32 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
+}
+
+//================================================================================
+inline void CLuaState::push(sint64 value)
+{
+	//H_AUTO(Lua_CLuaState_push)
+	nlverify( lua_checkstack(_State, 1) );
+	lua_pushinteger(_State, (lua_Integer)value);
 }
 
 //================================================================================

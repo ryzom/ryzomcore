@@ -1009,9 +1009,9 @@ int CEditor::luaSnapPosToGround(CLuaState &ls)
 	if (gpos.InstanceId != -1)
 	{
 		CVector snappedPos = GR->getGlobalPosition(gpos);
-		ls.push((double) snappedPos.x);
-		ls.push((double) snappedPos.y);
-		ls.push((double) snappedPos.z);
+		ls.push(snappedPos.x);
+		ls.push(snappedPos.y);
+		ls.push(snappedPos.z);
 		return 3;
 	}
 	else
@@ -1025,9 +1025,9 @@ int CEditor::luaSnapPosToGround(CLuaState &ls)
 	CVector inter;
 	if (CTool::computeWorldMapIntersection((float) ls.toNumber(2), (float) ls.toNumber(3), inter) != CTool::NoIntersection)
 	{
-		ls.push((double) inter.x);
-		ls.push((double) inter.y);
-		ls.push((double) inter.z);
+		ls.push(inter.x);
+		ls.push(inter.y);
+		ls.push(inter.z);
 		return 3;
 	}
 	else
@@ -1045,9 +1045,9 @@ int CEditor::luaGetUserEntityPosition(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "getUserEntityPosition";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
-	ls.push((double) UserEntity->pos().x);
-	ls.push((double) UserEntity->pos().y);
-	ls.push((double) UserEntity->pos().z);
+	ls.push(UserEntity->pos().x);
+	ls.push(UserEntity->pos().y);
+	ls.push(UserEntity->pos().z);
 	return 3;
 }
 
@@ -1058,8 +1058,8 @@ int CEditor::luaGetUserEntityFront(CLuaState &ls)
 	CHECK_EDITOR
 	const char *funcName = "getUserEntityPosition";
 	CLuaIHM::checkArgCount(ls, funcName, 1);
-	ls.push((double) UserEntity->front().x);
-	ls.push((double) UserEntity->front().y);
+	ls.push(UserEntity->front().x);
+	ls.push(UserEntity->front().y);
 	return 2;
 }
 
@@ -1443,7 +1443,7 @@ int CEditor::luaIsScenarioUpdating(CLuaState &ls)
 	//H_AUTO(R2_CEditor_luaIsScenarioUpdating)
 	const char *funcName = "isScenarioUpdating";
 	CLuaIHM::checkArgCount(ls, funcName, 1); // method with no args
-	ls.push( (double)getEditor()._UpdatingScenario  );
+	ls.push( getEditor()._UpdatingScenario  );
 	return 1;
 }
 
@@ -1487,9 +1487,9 @@ int CEditor::luaIsValidPosition(CLuaState &ls)
 	if (gpos.InstanceId != -1)
 	{
 		CVector snappedPos = GR->getGlobalPosition(gpos);
-		ls.push((double) snappedPos.x);
-		ls.push((double) snappedPos.y);
-		ls.push((double) snappedPos.z);
+		ls.push(snappedPos.x);
+		ls.push(snappedPos.y);
+		ls.push(snappedPos.z);
 		return 3;
 	}
 	else
@@ -1503,9 +1503,9 @@ int CEditor::luaIsValidPosition(CLuaState &ls)
 	CVector inter;
 	if (CTool::computeWorldMapIntersection((float) ls.toNumber(2), (float) ls.toNumber(3), inter) != CTool::NoIntersection)
 	{
-		ls.push((double) inter.x);
-		ls.push((double) inter.y);
-		ls.push((double) inter.z);
+		ls.push(inter.x);
+		ls.push(inter.y);
+		ls.push(inter.z);
 
 }
 
@@ -1540,7 +1540,7 @@ int CEditor::luaGetUserEntityName(CLuaState &ls)
 	if (UserEntity)
 	{
 		ucstring name = UserEntity->getEntityName()+PlayerSelectedHomeShardNameWithParenthesis;
-		ls.push( std::string( name.toUtf8() ) );
+		ls.push( name.toUtf8() );
 	}
 	else
 	{
@@ -1928,7 +1928,7 @@ void CInstanceObserverLua::onAttrModified(CInstance &instance, const std::string
 	if (_Receiver["onAttrModified"].isNil()) return; // no-op if not handled
 	getEditor().projectInLua(instance.getObjectTable());
 	getEditor().getLua().push(attrName);
-	getEditor().getLua().push((double) attrIndex);
+	getEditor().getLua().push(attrIndex);
 	_Receiver.callMethodByNameNoThrow("onAttrModified", 3, 0);
 }
 
@@ -1942,7 +1942,7 @@ int CEditor::luaAddInstanceObserver(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING); // instance  id
 	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TTABLE); // receiver
 	CLuaObject receiver(ls); // pop the receiver
-	ls.push((double) getEditor().addInstanceObserver(ls.toString(2), new CInstanceObserverLua(receiver)));
+	ls.push(getEditor().addInstanceObserver(ls.toString(2), new CInstanceObserverLua(receiver)));
 	return 1;
 }
 
@@ -2214,11 +2214,11 @@ void CEditor::setUIMode(uint8 mode)
 	if (_ForceDesktopReset[mode])
 	{
 		// force to call reset when reloading the ui
-		getLua().push((double) mode);
+		getLua().push(mode);
 		callEnvMethod("resetDesktop", 1, 0);
 		_ForceDesktopReset[mode] = false;
 	}
-	getLua().push((double) mode);
+	getLua().push(mode);
 	callEnvMethod("onChangeDesktop", 1, 0);
 }
 
@@ -3293,11 +3293,11 @@ void CEditor::initObjectProjectionMetatable()
 				sint32 index = obj->getParent()->findIndex(obj);
 				if (obj->getParent()->getKey(index).empty())
 				{
-					ls.push((double) index);
+					ls.push(index);
 				}
 				else
 				{
-					ls.push((double) -1);
+					ls.push(-1);
 				}
 				return 1;
 			}
@@ -3311,7 +3311,7 @@ void CEditor::initObjectProjectionMetatable()
 			{
 				if (obj->isTable())
 				{
-					ls.push((double) obj->getSize());
+					ls.push(obj->getSize());
 				}
 				else
 				{
@@ -3509,7 +3509,7 @@ void CEditor::initObjectProjectionMetatable()
 			}
 			if (obj->getKey(index).empty())
 			{
-				ls.push((double) index);
+				ls.push(index);
 			}
 			else
 			{
@@ -5423,7 +5423,7 @@ bool CEditor::verifyRoomLeft(uint aiCost, uint staticCost)
 	if (aiCost)
 	{
 		CLuaStackChecker lsc(&ls);
-		getEditor().getLua().push((lua_Integer)aiCost);
+		getEditor().getLua().push(aiCost);
 		callEnvMethod("checkAiQuota", 1, 1);
 		if (!ls.isBoolean(-1))
 		{
@@ -5437,7 +5437,7 @@ bool CEditor::verifyRoomLeft(uint aiCost, uint staticCost)
 	if (staticCost)
 	{
 		CLuaStackChecker lsc(&ls);
-		getEditor().getLua().push((lua_Integer)staticCost);
+		getEditor().getLua().push(staticCost);
 		callEnvMethod("checkStaticQuota", 1, 1);
 		if (!ls.isBoolean(-1))
 		{

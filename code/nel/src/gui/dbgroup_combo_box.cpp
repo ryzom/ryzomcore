@@ -598,7 +598,7 @@ namespace NLGUI
 	{
 		const char *funcName = "getNumTexts";
 		CLuaIHM::checkArgCount(ls, funcName, 0);
-		ls.push((double) getNumTexts());
+		ls.push(getNumTexts());
 		return 1;
 	}
 
