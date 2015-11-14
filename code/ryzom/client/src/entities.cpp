@@ -524,7 +524,7 @@ void CEntityManager::reinit()
 
 CShapeInstanceReference CEntityManager::createInstance(const string& shape, const CVector &pos, const string& text, const string& url, bool bbox_active)
 {
-	CShapeInstanceReference nullinstref(UInstance(), string(), string());
+	CShapeInstanceReference nullinstref(UInstance(), string(""), string(""));
 	if (!Scene) return nullinstref;
 
 	UInstance instance = Scene->createInstance(shape);
