@@ -9985,36 +9985,36 @@ uittKeepInfo	[Conserver l'info dans cette fenêtre.]
 // HASH_VALUE 45FB9FEFF875C517
 // INDEX 2420
 uihelpItemMagicBonusAll	[@{FFF9}Bonus pour Magie :\n
-	@{T3}Vitesse du Sort :@{T14}@{FFFF}%cs%@{FFF9}\n
-	@{T3}Puissance :@{T14}@{FFFF}%mp%\n
+	@{T3}Vitesse du Sort :@{T19}@{FFFF}%cs%@{FFF9}\n
+	@{T3}Puissance :@{T19}@{FFFF}%mp%\n
 	]
 
 // HASH_VALUE 2FB33DD3AB8213E8
 // INDEX 2421
 uihelpItemMagicBonusOffElemental	[@{FFF9}Bonus pour Magie Destructrice Elémentaire :\n
-	@{T3}Vitesse du Sort :@{T14}@{FFFF}%cs%@{FFF9}\n
-	@{T3}Puissance :@{T14}@{FFFF}%mp%\n
+	@{T3}Vitesse du Sort :@{T19}@{FFFF}%cs%@{FFF9}\n
+	@{T3}Puissance :@{T19}@{FFFF}%mp%\n
 	]
 
 // HASH_VALUE 2098D0E88AF919A7
 // INDEX 2422
 uihelpItemMagicBonusOffAffliction	[@{FFF9}Bonus pour Magie Débilitante :\n
-	@{T3}Vitesse du Sort :@{T14}@{FFFF}%cs%@{FFF9}\n
-	@{T3}Puissance :@{T14}@{FFFF}%mp%\n
+	@{T3}Vitesse du Sort :@{T19}@{FFFF}%cs%@{FFF9}\n
+	@{T3}Puissance :@{T19}@{FFFF}%mp%\n
 	]
 
 // HASH_VALUE DD4432757076566B
 // INDEX 2423
 uihelpItemMagicBonusDefHeal	[@{FFF9}Bonus pour Magie Salvatrice Curative :\n
-	@{T3}Vitesse du Sort :@{T14}@{FFFF}%cs%@{FFF9}\n
-	@{T3}Puissance :@{T14}@{FFFF}%mp%\n
+	@{T3}Vitesse du Sort :@{T19}@{FFFF}%cs%@{FFF9}\n
+	@{T3}Puissance :@{T19}@{FFFF}%mp%\n
 	]
 
 // HASH_VALUE 2088A4E88AF919A7
 // INDEX 2424
 uihelpItemMagicBonusDefAffliction	[@{FFF9}Bonus pour Magie Salvatrice Neutralisante :\n
-	@{T3}Vitesse du Sort :@{T14}@{FFFF}%cs%@{FFF9}\n
-	@{T3}Puissance :@{T14}@{FFFF}%mp%\n
+	@{T3}Vitesse du Sort :@{T19}@{FFFF}%cs%@{FFF9}\n
+	@{T3}Puissance :@{T19}@{FFFF}%mp%\n
 	]
 
 // HASH_VALUE 4A4CE5C3DA44A737
@@ -10025,42 +10025,42 @@ uihelpItemMagicBonusHeader	[\n
 
 // HASH_VALUE 49F09B8ED6794263
 // INDEX 2426
-uihelpItemHpBonus	[@{FFF9}Bonus Vie :@{T12}@{2F2F}%val\n
+uihelpItemHpBonus	[@{FFF9}Bonus Vie :@{T19}@{2F2F}%val\n
 	]
 
 // HASH_VALUE C6C052A2D6794261
 // INDEX 2427
-uihelpItemHpMalus	[@{FFF9}Pénalité Vie :@{T12}@{F44F}%val\n
+uihelpItemHpMalus	[@{FFF9}Pénalité Vie :@{T19}@{F44F}%val\n
 	]
 
 // HASH_VALUE C22128B75D575A2C
 // INDEX 2428
-uihelpItemSapBonus	[@{FFF9}Bonus en Sève :@{T12}@{2F2F}%val\n
+uihelpItemSapBonus	[@{FFF9}Bonus en Sève :@{T19}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 060079B75D57521E
 // INDEX 2429
-uihelpItemSapMalus	[@{FFF9}Pénalité en Sève :@{T12}@{F44F}%val\n
+uihelpItemSapMalus	[@{FFF9}Pénalité en Sève :@{T19}@{F44F}%val\n
 	]
 
 // HASH_VALUE 74BAE89A0594E3CA
 // INDEX 2430
-uihelpItemStaBonus	[@{FFF9}Bonus Endurance :@{T12}@{2F2F}%val\n
+uihelpItemStaBonus	[@{FFF9}Bonus Endurance :@{T19}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 74BAE08C497334CA
 // INDEX 2431
-uihelpItemStaMalus	[@{FFF9}Pénalité Endurance :@{T12}@{F44F}%val\n
+uihelpItemStaMalus	[@{FFF9}Pénalité Endurance :@{T19}@{F44F}%val\n
 	]
 
 // HASH_VALUE 242B21C617440631
 // INDEX 2432
-uihelpItemFocusBonus	[@{FFF9}Bonus Concentration :@{T12}@{2F2F}%val\n
+uihelpItemFocusBonus	[@{FFF9}Bonus Concentration :@{T19}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 292B21C697643A1F
 // INDEX 2433
-uihelpItemFocusMalus	[@{FFF9}Pénalité Concentration :@{T12}@{F44F}%val\n
+uihelpItemFocusMalus	[@{FFF9}Pénalité Concentration :@{T19}@{F44F}%val\n
 	]
 
 // HASH_VALUE F0AA55011CAF7807
@@ -10228,43 +10228,43 @@ uihelpItemCosmetic	[\n
 
 // HASH_VALUE EA125F4DF699651A
 // INDEX 2469
-uihelpItemArmorFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin\n
-	@{FFF9}@{HuittInfoArmorQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
-	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
+uihelpItemArmorFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origin\n
+	@{FFF9}@{HuittInfoArmorQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
+	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
-	@{FFF9}@{HuittInfoArmorType}Type d'Armure :@{H}@{T14}@{FFFF}%armor %armor_bonus\n
-	@{FFF9}@{HuittInfoDodgeMod}Modif. d'Esquive :@{H}@{T20}@{FFFF}%dodge\n
-	@{FFF9}@{HuittInfoParryMod}Modif. de Parade :@{H}@{T20}@{FFFF}%parry\n
-	@{FFF9}@{HuittInfoMalus}Pénalité de l'Action :@{H}@{T20}@{FFFF}+%actmalus\n
-	@{FFF9}@{HuittInfoArmorProtection}Protection :@{H}@{T20}@{FFFF}%protect%\n
-	@{FFF9}  @{HuittInfoArmorSlash}Max / Cp Tranchant :@{H}@{T20}@{FFFF}%p_slash\n
-	@{FFF9}  @{HuittInfoArmorBlunt}Max / Cp Contondant :@{H}@{T20}@{FFFF}%p_blunt\n
-	@{FFF9}  @{HuittInfoArmorPierc}Max / Cp Perforant :@{H}@{T20}@{FFFF}%p_pierce\n
+	@{FFF9}@{HuittInfoArmorType}Type d'Armure :@{H}@{T22}@{FFFF}%armor %armor_bonus\n
+	@{FFF9}@{HuittInfoDodgeMod}Modif. d'Esquive :@{H}@{T22}@{FFFF}%dodge\n
+	@{FFF9}@{HuittInfoParryMod}Modif. de Parade :@{H}@{T22}@{FFFF}%parry\n
+	@{FFF9}@{HuittInfoMalus}Pénalité de l'Action :@{H}@{T22}@{FFFF}+%actmalus\n
+	@{FFF9}@{HuittInfoArmorProtection}Protection :@{H}@{T22}@{FFFF}%protect%\n
+	@{FFF9}  @{HuittInfoArmorSlash}Max / Cp Tranchant :@{H}@{T22}@{FFFF}%p_slash\n
+	@{FFF9}  @{HuittInfoArmorBlunt}Max / Cp Contondant :@{H}@{T22}@{FFFF}%p_blunt\n
+	@{FFF9}  @{HuittInfoArmorPierc}Max / Cp Perforant :@{H}@{T22}@{FFFF}%p_pierce\n
 	%buffs%special_effects%desc%custom_text]
 
 // HASH_VALUE 13E0EBA3282D2876
 // INDEX 2470
-uihelpItemMeleeWeaponFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origin\n
-	@{FFF9}@{HuittInfoWeaponQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
-	@{FFF9}@{HuittInfoWeaponSapLoad}Charge en Sève :@{H}@{T14}@{FFFF}%sap / %sapmax\n
-	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T14}@{FFFF}%skill\n
-	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
+uihelpItemMeleeWeaponFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T17}@{FFFF}%origin\n
+	@{FFF9}@{HuittInfoWeaponQuality}Qualité :@{H}@{T17}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T17}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T17}@{FFFF}%bulk\n
+	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T17}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoWeaponSapLoad}Charge en Sève :@{H}@{T17}@{FFFF}%sap / %sapmax\n
+	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T17}@{FFFF}%skill\n
+	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T17}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
-	@{FFF9}@{HuittInfoDamageType}Type de Dégâts :@{H}@{T20}@{FFFF}%dmtype\n
-	@{FFF9}@{HuittInfoWeaponDamage}Dégâts :@{H}@{T20}@{FFFF}%dmg (@{T12}@{FFFF}%max_dmg)\n
-	@{FFF9}@{HuittInfoWeaponHitMin}Coups/Minute :@{H}@{T20}@{FFFF}%speed\n
-	@{FFF9}@{HuittInfoWeaponReach}Portée :@{H}@{T20}@{FFFF}%reach\n
-	@{FFF9}@{HuittInfoDodgeMod}Modif. d'Esquive :@{H}@{T20}@{FFFF}%dodge\n
-	@{FFF9}@{HuittInfoParryMod}Modif. de Parade :@{H}@{T20}@{FFFF}%parry\n
-	@{FFF9}@{HuittInfoTargetDodgeMod}Modif. d'Esquive/Cible :@{H}@{T20}@{FFFF}%adv_dodge\n
-	@{FFF9}@{HuittInfoTargetParryMod}Modif. de Parade/Cible :@{H}@{T20}@{FFFF}%adv_parry\n
-	@{FFF9}@{HuittInfoMalus}Pénalité de l'Action :@{H}@{T20}@{FFFF}+%actmalus\n
+	@{FFF9}@{HuittInfoDamageType}Type de Dégâts :@{H}@{T23}@{FFFF}%dmtype\n
+	@{FFF9}@{HuittInfoWeaponDamage}Dégâts :@{H}@{T23}@{FFFF}%dmg (@{T12}@{FFFF}%max_dmg)\n
+	@{FFF9}@{HuittInfoWeaponHitMin}Coups/Minute :@{H}@{T23}@{FFFF}%speed\n
+	@{FFF9}@{HuittInfoWeaponReach}Portée :@{H}@{T23}@{FFFF}%reach\n
+	@{FFF9}@{HuittInfoDodgeMod}Modif. d'Esquive :@{H}@{T23}@{FFFF}%dodge\n
+	@{FFF9}@{HuittInfoParryMod}Modif. de Parade :@{H}@{T23}@{FFFF}%parry\n
+	@{FFF9}@{HuittInfoTargetDodgeMod}Modif. d'Esquive/Cible :@{H}@{T23}@{FFFF}%adv_dodge\n
+	@{FFF9}@{HuittInfoTargetParryMod}Modif. de Parade/Cible :@{H}@{T23}@{FFFF}%adv_parry\n
+	@{FFF9}@{HuittInfoMalus}Pénalité de l'Action :@{H}@{T23}@{FFFF}+%actmalus\n
 	%magic_bonus%buffs%special_effects%skill_mod_vs_type%desc%custom_text%enchantment]
 
 // HASH_VALUE 3C0F81B91BD521BD
@@ -10307,13 +10307,13 @@ uihelpItemAmmoFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin
 
 // HASH_VALUE 83398662F7CD3D0A
 // INDEX 2473
-uihelpItemMPFormat	[@{FFF9}@{HuittInfoMpQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
+uihelpItemMPFormat	[@{FFF9}@{HuittInfoMpQuality}Qualité :@{H}@{T13}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T13}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T13}@{FFFF}%bulk\n
 	%cansell\n
-	@{FFF9}@{HuittInfoMpEco}Ecosystème :@{H}@{T12}@{FFFF}%ecosystem\n
-	@{FFF9}@{HuittInfoMpFam}Famille :@{H}@{T12}@{FFFF}%family\n
-	@{FFF9}@{HuittInfoMpColor}Couleur :@{H}@{T12}@{FFFF}%mpcolor\n
+	@{FFF9}@{HuittInfoMpEco}Ecosystème :@{H}@{T13}@{FFFF}%ecosystem\n
+	@{FFF9}@{HuittInfoMpFam}Famille :@{H}@{T13}@{FFFF}%family\n
+	@{FFF9}@{HuittInfoMpColor}Couleur :@{H}@{T13}@{FFFF}%mpcolor\n
 	@{FFFF}%desc\n
 	%craft]
 
@@ -10403,14 +10403,14 @@ uihelpItemShieldFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%orig
 
 // HASH_VALUE FFE62CC8B7369AC0
 // INDEX 2490
-uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin\n
-	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
-	@{FFF9}@{HuittToolCraftType}Type d'Outil :@{H}@{T12}@{FFFF}%tool\n
+uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origin\n
+	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
+	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittToolCraftType}Type d'Outil :@{H}@{T14}@{FFFF}%tool\n
 	%cansell\n
-	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
+	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	        %buffs\n
 	%special_effects\n
 	\n
@@ -10418,13 +10418,13 @@ uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF
 
 // HASH_VALUE 12DD79BE889C767A
 // INDEX 2491
-uihelpItemHarvestToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin\n
-	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
+uihelpItemHarvestToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origin\n
+	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
+	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
 	%cansell\n
-	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
+	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	%buffs\n
 	%special_effects\n
 	\n
@@ -10446,12 +10446,12 @@ uihelpItemTamingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%
 
 // HASH_VALUE C6ED74E2DF2FE4E5
 // INDEX 2493
-uihelpItemJewelFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin\n
-	@{FFF9}@{HuittInfoJewelryQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
-	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
-	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
-	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
+uihelpItemJewelFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origin\n
+	@{FFF9}@{HuittInfoJewelryQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
+	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
+	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
+	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
 	%magic_protection%magic_resistance%buffs%desc%custom_text]
 
