@@ -32,7 +32,7 @@ using namespace NLMISC;
 namespace NLSOUND {
 
 CSourceXAudio2::CSourceXAudio2(CSoundDriverXAudio2 *soundDriver) 
-: _SoundDriver(soundDriver), _SourceVoice(NULL), _StaticBuffer(NULL), _OperationSet(soundDriver->getUniqueOperationSet()), 
+: _SoundDriver(soundDriver), _SourceVoice(NULL), _StaticBuffer(NULL), _LastPreparedBuffer(NULL), _OperationSet(soundDriver->getUniqueOperationSet()), 
 _Format(IBuffer::FormatUnknown), _Frequency(0), _PlayStart(0), 
 _Doppler(1.0f), _Pos(0.0f, 0.0f, 0.0f), _Relative(false), _Alpha(1.0), 
 _DirectDryVoice(NULL), _DirectFilterVoice(NULL), _EffectDryVoice(NULL), _EffectFilterVoice(NULL), 
@@ -407,6 +407,7 @@ void CSourceXAudio2::submitStreamingBuffer(IBuffer *buffer)
 		uint32 frequency;
 		buffer->getFormat(bufferFormat, channels, bitsPerSample, frequency);
 		preparePlay(bufferFormat, channels, bitsPerSample, frequency);
+		_LastPreparedBuffer = NULL;
 	}
 	
 	submitBuffer(static_cast<CBufferXAudio2 *>(buffer));
@@ -455,7 +456,8 @@ void CSourceXAudio2::setLooping(bool l)
 						if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 							nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 						// resubmit with updated looping settings
-						submitBuffer(_StaticBuffer);
+						if (_LastPreparedBuffer == _StaticBuffer)
+							submitBuffer(_StaticBuffer);
 					}
 					else
 					{
@@ -478,7 +480,8 @@ void CSourceXAudio2::setLooping(bool l)
 						if (FAILED(_SourceVoice->FlushSourceBuffers())) 
 							nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 						// queue buffer with correct looping parameters
-						submitBuffer(_StaticBuffer);
+						if (_LastPreparedBuffer == _StaticBuffer)
+							submitBuffer(_StaticBuffer);
 					}
 				}
 			}
@@ -635,6 +638,7 @@ bool CSourceXAudio2::play()
 					_StaticBuffer->getChannels(), 
 					_StaticBuffer->getBitsPerSample(),
 					_StaticBuffer->getFrequency());
+				_LastPreparedBuffer = _StaticBuffer;
 				submitBuffer(_StaticBuffer);
 				_PlayStart = CTime::getLocalTime();
 				if (SUCCEEDED(_SourceVoice->Start(0))) _IsPlaying = true;
