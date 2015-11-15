@@ -258,7 +258,7 @@ public:
 
 				for(uint i = 0; i < filters.size(); ++i)
 				{
-					strcpy(szFilters + offset, filters[i].c_str());
+					strcpy(szFilter + offset, filters[i].c_str());
 
 					// move offset to string length + 1 for \0
 					offset += filters[i].length() + 1;

@@ -139,7 +139,7 @@ public:
 
 	struct CEntityIdHash
 	{
-		enum { bucket_size = 4, min_buckets = 8, };
+		enum { bucket_size = 4, min_buckets = 8 };
 		size_t	operator () (const NLMISC::CEntityId &id) const { return (uint32)id.getShortId(); }
 		size_t	operator () (const NLMISC::CEntityId &left, const NLMISC::CEntityId &right) const { return left < right; }
 	};

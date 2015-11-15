@@ -53,7 +53,7 @@ using namespace NL3D;
 
 // ---------------------------------------------------------------------------
 // Out a string to the stdout and log.log
-void outString (string &sText)
+void outString (const string &sText)
 {
 	createDebug ();
 	InfoLog->displayRaw(sText.c_str());

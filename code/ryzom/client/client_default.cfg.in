@@ -483,7 +483,7 @@ XMLR2EDInterfaceFiles =
 {      
 	"r2ed.xml",
 	"r2_triggers.xml",
-    "r2_logic_entities.xml",
+	"r2_logic_entities.xml",
 	"r2ed_acts.xml",
 	"r2ed_scenario.xml",
 	"r2ed_connect.xml"
