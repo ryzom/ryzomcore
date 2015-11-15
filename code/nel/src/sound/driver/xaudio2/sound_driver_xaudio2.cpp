@@ -179,7 +179,7 @@ CSoundDriverXAudio2::CSoundDriverXAudio2(ISoundDriver::IStringMapperProvider * /
 
 	uint32 flags = 0;
 #ifdef NL_DEBUG
-	flags |= XAUDIO2_DEBUG_ENGINE; // comment when done using this :)
+//	flags |= XAUDIO2_DEBUG_ENGINE; // comment when done using this :)
 #endif
 
 	// XAudio2

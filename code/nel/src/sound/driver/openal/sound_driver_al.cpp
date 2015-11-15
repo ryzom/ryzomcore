@@ -630,7 +630,11 @@ void CSoundDriverAL::commit3DChanges()
 /// Write information about the driver to the output stream.
 void CSoundDriverAL::writeProfile(std::string& out)
 {
-	// TODO
+	out = toString("OpenAL\n");
+	out += toString("Source size: %u\n", (uint32)_Sources.size());
+	out += toString("Effects size: %u\n", (uint32)_Effects.size());
+
+	// TODO: write other useful information like OpenAL version and supported extensions
 }
 
 // Does not create a sound loader .. what does it do then?
