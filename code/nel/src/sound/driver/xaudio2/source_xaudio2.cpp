@@ -667,6 +667,8 @@ void CSourceXAudio2::stop()
 
 		// stop source voice and remove pending buffers
 		_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
+		if (FAILED(_SourceVoice->ExitLoop()))
+			nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED ExitLoop");
 		if (FAILED(_SourceVoice->Stop(0))) 
 			nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED Stop");
 		if (FAILED(_SourceVoice->FlushSourceBuffers())) 
