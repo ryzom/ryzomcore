@@ -181,6 +181,12 @@ public:
 
 		if (Params == "play_songs")
 		{
+			std::vector<std::string> extensions;
+			SoundMngr->getMixer()->getMusicExtensions(extensions);
+
+			// no format supported
+			if (extensions.empty()) return;
+
 #ifdef NL_OS_WINDOWS
 			// Backup the current directory
 			string currentPath = CPath::getCurrentPath ();
@@ -195,13 +201,68 @@ public:
 			}
 			else
 			{
-				static char szFilter[] =
-					"All Supported Files\0*.mp3;*.mp2;*.mp1;*.ogg;*.m3u\0"
-					"MPEG Audio Files (*.mp3;*.mp2;*.mp1)\0*.mp3;*.mp2;*.mp1\0"
-					"Vorbis Files (*.ogg)\0*.ogg\0"
-					"Playlist Files (*.m3u)\0*.m3u\0"
-					"All Files (*.*)\0*.*\0"
-					"\0";
+				bool oggSupported = false;
+				bool mp3Supported = false;
+
+				for(uint i = 0; i < extensions.size(); ++i)
+				{
+					if (extensions[i] == "ogg")
+					{
+						oggSupported = true;
+					}
+					else if (extensions[i] == "mp3")
+					{
+						mp3Supported = true;
+					}
+				}
+
+				std::vector<std::string> filters;
+
+				// supported formats
+				filters.push_back("All Supported Files");
+
+				std::string filter;
+				if (mp3Supported) filter += "*.mp3;*.mp2;*.mp1;";
+				if (oggSupported) filter += "*.ogg;";
+				filter += "*.m3u";
+
+				filters.push_back(filter);
+
+				// mp3 format
+				if (mp3Supported)
+				{
+					filters.push_back("MPEG Audio Files (*.mp3;*.mp2;*.mp1)");
+					filters.push_back("*.mp3;*.mp2;*.mp1");
+				}
+
+				// ogg format
+				if (oggSupported)
+				{
+					filters.push_back("Vorbis Files (*.ogg)");
+					filters.push_back("*.ogg");
+				}
+
+				// playlist
+				filters.push_back("Playlist Files (*.m3u)");
+				filters.push_back("*.m3u");
+
+				// all files
+				filters.push_back("All Files (*.*)");
+				filters.push_back("*.*");
+
+				filters.push_back("");
+
+				static char szFilter[1024] = { '\0' };
+
+				uint offset = 0;
+
+				for(uint i = 0; i < filters.size(); ++i)
+				{
+					strcpy(szFilters + offset, filters[i].c_str());
+
+					// move offset to string length + 1 for \0
+					offset += filters[i].length() + 1;
+				}
 
 				// Filename buffer
 				char buffer[65535];

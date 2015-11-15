@@ -54,6 +54,7 @@
 #include "nel/sound/sound_bank.h"
 #include "nel/sound/group_controller.h"
 #include "nel/sound/containers.h"
+#include "nel/sound/audio_decoder.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -2751,7 +2752,14 @@ bool	CAudioMixerUser::isEventMusicEnded()
 /// Get audio/container extensions that are currently supported by nel or the used driver implementation.
 void CAudioMixerUser::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	_SoundDriver->getMusicExtensions(extensions);
+	if (_SoundDriver)
+	{
+		// add file formats supported by driver
+		_SoundDriver->getMusicExtensions(extensions);
+	}
+
+	// add 3rd party libraries support file formats
+	IAudioDecoder::getMusicExtensions(extensions);
 }
 
 /// Add a reverb environment
