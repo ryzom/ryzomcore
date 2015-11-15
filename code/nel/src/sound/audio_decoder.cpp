@@ -124,7 +124,12 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 /// Get audio/container extensions that are currently supported by the nel sound library.
 void IAudioDecoder::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	extensions.push_back("ogg");
+	// only add ogg format if not already in extensions list
+	if (std::find(extensions.begin(), extensions.end(), "ogg") == extensions.end())
+	{
+		extensions.push_back("ogg");
+	}
+
 	// extensions.push_back("wav"); // TODO: Easy.
 }
 

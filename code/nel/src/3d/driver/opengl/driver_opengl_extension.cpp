@@ -1793,8 +1793,15 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 	if (ext.NVXGPUMemoryInfo)
 	{
-//      GPU_MEMORY_INFO_EVICTION_COUNT_NVX;
-//      GPU_MEMORY_INFO_EVICTED_MEMORY_NVX;
+		GLint nEvictionCount = 0;
+#ifdef GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX
+		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX, &nEvictionCount);
+#endif
+
+		GLint nEvictionMemory = 0;
+#ifdef GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX
+		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &nEvictionMemory);
+#endif
 
 		GLint nDedicatedMemoryInKB = 0;
 #ifdef GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX

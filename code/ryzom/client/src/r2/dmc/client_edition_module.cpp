@@ -2475,7 +2475,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	}
 	if (CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename.c_str());
+		CFile::copyFile("save/r2_buffer.dat", filename);
 	}
 }
 
