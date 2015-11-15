@@ -2690,21 +2690,30 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 	{
 		std::string artist;
 		std::string title;
-		if (_SoundDriver->getMusicInfo(filename, artist, title))
+
+		if (!_SoundDriver->getMusicInfo(filename, artist, title))
 		{
-			if (!title.empty())
-			{
-				if (!artist.empty()) result = artist + " - " + title;
-				else result = title;
-			}
-			else if (!artist.empty())
-			{
-				result = artist + " - " + CFile::getFilename(filename);
-			}
-			else result = CFile::getFilename(filename);
-			return true;
+			// use 3rd party libraries supported formats
+			IAudioDecoder::getInfo(filename, artist, title);
 		}
+
+		if (!title.empty())
+		{
+			if (!artist.empty()) result = artist + " - " + title;
+			else result = title;
+		}
+		else if (!artist.empty())
+		{
+			result = artist + " - " + CFile::getFilename(filename);
+		}
+		else
+		{
+			result = CFile::getFilename(filename);
+		}
+
+		return true;
 	}
+
 	result = "???";
 	return false;
 }

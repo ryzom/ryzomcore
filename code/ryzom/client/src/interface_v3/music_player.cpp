@@ -83,7 +83,7 @@ void CMusicPlayer::play ()
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:mp3_player:screen:text"));
 		if (pVT)
-			pVT->setText (_Songs[_CurrentSong].Title);
+			pVT->setText (ucstring::makeFromUtf8(_Songs[_CurrentSong].Title));
 	}
 }
 
