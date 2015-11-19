@@ -10025,42 +10025,42 @@ uihelpItemMagicBonusHeader	[\n
 
 // HASH_VALUE 49F09B8ED6794263
 // INDEX 2426
-uihelpItemHpBonus	[@{FFF9}Bonus Vie :@{T19}@{2F2F}%val\n
+uihelpItemHpBonus	[@{FFF9}Bonus Vie :@{T21}@{2F2F}%val\n
 	]
 
 // HASH_VALUE C6C052A2D6794261
 // INDEX 2427
-uihelpItemHpMalus	[@{FFF9}Pénalité Vie :@{T19}@{F44F}%val\n
+uihelpItemHpMalus	[@{FFF9}Pénalité Vie :@{T21}@{F44F}%val\n
 	]
 
 // HASH_VALUE C22128B75D575A2C
 // INDEX 2428
-uihelpItemSapBonus	[@{FFF9}Bonus en Sève :@{T19}@{2F2F}%val\n
+uihelpItemSapBonus	[@{FFF9}Bonus en Sève :@{T21}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 060079B75D57521E
 // INDEX 2429
-uihelpItemSapMalus	[@{FFF9}Pénalité en Sève :@{T19}@{F44F}%val\n
+uihelpItemSapMalus	[@{FFF9}Pénalité en Sève :@{T21}@{F44F}%val\n
 	]
 
 // HASH_VALUE 74BAE89A0594E3CA
 // INDEX 2430
-uihelpItemStaBonus	[@{FFF9}Bonus Endurance :@{T19}@{2F2F}%val\n
+uihelpItemStaBonus	[@{FFF9}Bonus Endurance :@{T21}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 74BAE08C497334CA
 // INDEX 2431
-uihelpItemStaMalus	[@{FFF9}Pénalité Endurance :@{T19}@{F44F}%val\n
+uihelpItemStaMalus	[@{FFF9}Pénalité Endurance :@{T21}@{F44F}%val\n
 	]
 
 // HASH_VALUE 242B21C617440631
 // INDEX 2432
-uihelpItemFocusBonus	[@{FFF9}Bonus Concentration :@{T19}@{2F2F}%val\n
+uihelpItemFocusBonus	[@{FFF9}Bonus Concentration :@{T21}@{2F2F}%val\n
 	]
 
 // HASH_VALUE 292B21C697643A1F
 // INDEX 2433
-uihelpItemFocusMalus	[@{FFF9}Pénalité Concentration :@{T19}@{F44F}%val\n
+uihelpItemFocusMalus	[@{FFF9}Pénalité Concentration :@{T21}@{F44F}%val\n
 	]
 
 // HASH_VALUE F0AA55011CAF7807
