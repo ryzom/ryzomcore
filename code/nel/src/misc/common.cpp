@@ -742,7 +742,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		//
 		// But it works fine on my GNU/Linux so I do this because it's easier :) and I don't know exactly
 		// what to do to be portable.
-		signal(SIGCHLD,SIG_IGN);
+		signal(SIGCHLD, SIG_IGN);
 
 		firstLaunchProgram = false;
 	}
@@ -771,7 +771,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRCUTION AFTER VFORK !
+	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
 	/// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
