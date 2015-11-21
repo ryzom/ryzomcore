@@ -1078,9 +1078,36 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	{
 		return true;
 	}
+#elif defined(NL_OS_MAC)
+	return launchProgram("open", document);
 #else
-	// TODO: implement for Linux and Mac OS X
-	nlunreferenced(document);
+	std::string command = "/usr/bin/xdg-open";
+
+	if (!CFile::fileExists(command))
+	{
+		if (strcmp(ext, "htm") == 0)
+		{
+			command = "/etc/alternatives/x-www-browser";
+
+			if (!CFile::fileExists(command))
+			{
+				command.clear();
+			}
+		}
+		else
+		{
+			command.clear();
+		}
+	}
+
+	if (command.empty())
+	{
+		nlwarning("Unable to open %s", document);
+		return false;
+	}
+
+	return launchProgram(command, document);
+
 #endif // NL_OS_WINDOWS
 
 	return false;
@@ -1088,17 +1115,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 
 bool openURL (const char *url)
 {
-#ifdef NL_OS_WINDOWS
 	return openDocWithExtension(url, "htm");
-#elif defined(NL_OS_MAC)
-	return launchProgram("open", url);
-#elif defined(NL_OS_UNIX)
-	return launchProgram("/etc/alternatives/x-www-browser", url);
-#else
-	nlwarning("openURL() is not implemented for this OS");
-#endif // NL_OS_WINDOWS
-
-	return false;
 }
 
 bool openDoc (const char *document)
