@@ -1000,7 +1000,7 @@ void CPatchManager::executeBatchFile()
 		if (execl(strCmdLine.c_str(), strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), (char *) NULL) == -1)
 		{
 			int errsv = errno;
-			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str(), (char *) NULL);
+			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str());
 		}
 		else
 		{

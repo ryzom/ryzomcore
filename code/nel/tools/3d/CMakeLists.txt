@@ -1,6 +1,11 @@
 
 IF(WITH_NEL_TOOLS)
   IF(WITH_3D)
+    IF(WITH_ASSIMP)
+      SUBDIRS(
+        mesh_utils
+        mesh_export)
+    ENDIF()
     SUBDIRS(
       anim_builder
       animation_set_builder
@@ -27,7 +32,6 @@ IF(WITH_NEL_TOOLS)
       zone_dump
       zviewer)
   ENDIF()
-    
   SUBDIRS(
     build_interface
     get_neighbors

@@ -742,7 +742,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		//
 		// But it works fine on my GNU/Linux so I do this because it's easier :) and I don't know exactly
 		// what to do to be portable.
-		signal(SIGCHLD,SIG_IGN);
+		signal(SIGCHLD, SIG_IGN);
 
 		firstLaunchProgram = false;
 	}
@@ -768,10 +768,16 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		argv[i+1] = (char *) args[i].c_str();
 	}
 	argv[i+1] = NULL;
+	
+	// save LD_LIBRARY_PATH
+	const char *previousEnv = getenv("LD_LIBRARY_PATH");
+
+	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
+	setenv("LD_LIBRARY_PATH", "", 1);
 
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRCUTION AFTER VFORK !
+	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
 	/// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
@@ -779,10 +785,12 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		char *err = strerror (errno);
 		if (log)
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
+
+		// restore previous LD_LIBRARY_PATH
+		setenv("LD_LIBRARY_PATH", previousEnv, 1);
 	}
 	else if (status == 0)
 	{
-
 		// Exec (the only allowed instruction after vfork)
 		status = execvp(programName.c_str(), &argv.front());
 
@@ -795,6 +803,10 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	else
 	{
 		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+		
+		// restore previous LD_LIBRARY_PATH
+		setenv("LD_LIBRARY_PATH", previousEnv, 1);
+
 		return true;
 	}
 #else
@@ -1078,9 +1090,36 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	{
 		return true;
 	}
+#elif defined(NL_OS_MAC)
+	return launchProgram("open", document);
 #else
-	// TODO: implement for Linux and Mac OS X
-	nlunreferenced(document);
+	std::string command = "/usr/bin/xdg-open";
+
+	if (!CFile::fileExists(command))
+	{
+		if (strcmp(ext, "htm") == 0)
+		{
+			command = "/etc/alternatives/x-www-browser";
+
+			if (!CFile::fileExists(command))
+			{
+				command.clear();
+			}
+		}
+		else
+		{
+			command.clear();
+		}
+	}
+
+	if (command.empty())
+	{
+		nlwarning("Unable to open %s", document);
+		return false;
+	}
+
+	return launchProgram(command, document);
+
 #endif // NL_OS_WINDOWS
 
 	return false;
@@ -1088,17 +1127,7 @@ static bool openDocWithExtension (const char *document, const char *ext)
 
 bool openURL (const char *url)
 {
-#ifdef NL_OS_WINDOWS
 	return openDocWithExtension(url, "htm");
-#elif defined(NL_OS_MAC)
-	return launchProgram("open", url);
-#elif defined(NL_OS_UNIX)
-	return launchProgram("/etc/alternatives/x-www-browser", url);
-#else
-	nlwarning("openURL() is not implemented for this OS");
-#endif // NL_OS_WINDOWS
-
-	return false;
 }
 
 bool openDoc (const char *document)
