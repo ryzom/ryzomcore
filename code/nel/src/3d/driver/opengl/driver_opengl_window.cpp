@@ -350,6 +350,12 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	nlunreferenced(windowIcon);
 
+	// allow several threads to access X functions
+	if (XInitThreads() == 0)
+	{
+		nlwarning("XInitThreads failed");
+	}
+
 	_dpy = XOpenDisplay(NULL);
 
 	if (_dpy == NULL)
