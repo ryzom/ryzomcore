@@ -337,9 +337,6 @@ void CLoginProgressPostThread::init(NLMISC::CConfigFile &configFile)
 	std::string installStartupPage;
 	std::string installStartupHost;
 	static std::string httpStr = "http://";
-	// The url where the stats system are has changed from
-	// http://r2linux03:80/login2/client_install.php (using InstallStartupPage and StartupPage )
-	// http://r2linux03:80/stats/stats.php (using InstallStatsUrl
 
 	if (configFile.getVarPtr("InstallStatsUrl") )
 	{
