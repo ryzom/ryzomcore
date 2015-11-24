@@ -1,0 +1,104 @@
+X: 0.25 Y: 0.01 Width: 510  Height: 150 Name: 15 MinWidth: 400 MinHeight: 100
+
+/***********************************************************/
+/		THE PUBLIC CHAT WINDOW
+/***********************************************************/
+
+
+/ bottom left
+[2000]			Origin: BL	HotSpot: TR X: 0   Y:  0   X_Pixel:  0 	Y_Pixel:  0    W:  0   H: 0 W_Pixel:   64    H_Pixel: 64  Texture: 13 RGBA: 255 255 255 128
+/ bottom right
+[2002]			Origin: BR	HotSpot: TL X: 0   Y:  0   X_Pixel:  0 	Y_Pixel:  0    W:  0   H: 0 W_Pixel:   512   H_Pixel: 64  Texture: 14  RGBA: 255 255 255 128
+/ rezisable_bottom
+[2001]	Parent: 2000	Origin: BR	HotSpot: TR X: 0   Y:  0   X_Pixel:  -18 Y_Pixel:  0    W:  1   H: 0 W_Pixel:   -394  H_Pixel: 64  Texture: 17  RGBA: 255 255 255 128
+
+/ mid_left
+[2003]	Parent: 2000	Origin: TL	HotSpot: TR X: 0   Y:  0   X_Pixel:  0	Y_Pixel:  0    W:  0   H: 1 W_Pixel:   16   H_Pixel: -95  Texture: 15  RGBA: 255 255 255 128
+/mid_right
+[2004]	Parent: 2002	Origin: TR	HotSpot: TL X: 0   Y:  0   X_Pixel:  0 	Y_Pixel:  0    W:  0   H: 1 W_Pixel:   16   H_Pixel: -95  Texture: 16  RGBA: 255 255 255 128
+/mid_mid
+[2005]	Parent: 2000	Origin: TL	HotSpot: TR X: 0   Y:  0   X_Pixel:  16	Y_Pixel:  0    W:  1   H: 1 W_Pixel:   -32   H_Pixel: -95  Texture: 12  RGBA: 255 255 255 128
+
+/top left
+[2006]	Parent: 2003	Origin: TL	HotSpot: TR X: 0   Y:  0   X_Pixel:  0	Y_Pixel:  0    W:  0   H: 0 W_Pixel:   512   H_Pixel: 32  Texture: 20  RGBA: 255 255 255 128
+/rezisable top
+[2007]	Parent: 2006	Origin: BR	HotSpot: TR X: 0   Y:  0   X_Pixel:  -225 Y_Pixel:  0    W:  1   H: 0 W_Pixel:   -493   H_Pixel: 32  Texture: 18  RGBA: 255 255 255 128
+/top right
+[2008]	Parent: 2004	Origin: TR	HotSpot: TL X: 0   Y:  0   X_Pixel:  0	Y_Pixel:  0    W:  0   H: 0 W_Pixel:   256   H_Pixel: 32  Texture: 19  RGBA: 255 255 255 128
+
+
+/ the chat box
+[22] Origin: BL	HotSpot: TR X: 0   Y:  0   X_Pixel:  5 Y_Pixel:  54    W:  1   H: 1  W_Pixel:   -10   H_Pixel: -86  Pen: 6 LeftClickFunction: 30 RightClickFunction: 31 UpTexture: 11 DownTexture: 10 ScrollBarTexture: 28 
+
+/ the input control for chat box messages
+[23] 		Origin: BL	HotSpot: TR X: 0   Y:  0   X_Pixel: 26 	Y_Pixel:  26    W:  1   H: 0 W_Pixel: -31  H_Pixel: 16	 Function: 33  Pen: 7
+
+
+/**** Buttons setting the chat mode (public, team, family...) and the talk mode if in pubic mode (talk(say), shout, whisper).
+/ the Whisper button
+[24] 		 Origin: BR	HotSpot: TL X: 0   Y: 0    X_Pixel: -136  Y_Pixel:  0	W:    0 H: 0	W_Pixel: 64    H_Pixel: 16 Function: 14 Text: 24 Pen: 7
+
+/ the 'say' button
+[25]  		 Origin: BR	HotSpot: TL X: 0   Y: 0    X_Pixel: -69   Y_Pixel:  0	W:    0 H: 0	W_Pixel: 64    H_Pixel: 16 Function: 15 Text: 25 Pen: 7
+
+/ the Shout button
+[26] 		Origin: BR	HotSpot: TL X: 0   Y: 0    X_Pixel: -4   Y_Pixel:  0	W:    0 H: 0	W_Pixel: 64    H_Pixel: 16 Function: 16 Text: 26 Pen: 7
+
+/ the 'Team' button (message sent to teammates)
+[58]		Origin: BR	HotSpot: TL X: 0   Y: 0   X_Pixel: -268   Y_Pixel:  0	W:   0   H: 0	W_Pixel: 64    H_Pixel: 16 Function: 51 Text: 58 Pen: 7
+
+/ the 'Family' button (message sent to family)
+[60]		Origin: BR	HotSpot: TL X: 0   Y: 0   X_Pixel: -202    Y_Pixel:  0	W:   0   H: 0	W_Pixel: 64    H_Pixel: 16 Function: 53 Text: 60 Pen: 7
+
+/ the 'clade' button (message sent to clade)
+[70]		Origin: BR	HotSpot: TL X: 0   Y: 0   X_Pixel: -334    Y_Pixel:  0	W:   0   H: 0	W_Pixel: 64    H_Pixel: 16 Function: 70 Text: 70 Pen: 7
+
+/// group these buttons as radio, and init the controller
+[64]	Buttons: 24 25 26 58 60 70 End
+
+
+/ the 'UnmuteAll' button
+[27]  	Origin: TL	HotSpot: BR X: 0   Y: 0    X_Pixel: 8 	 Y_Pixel:  -2	W:    0 H: 0 W_Pixel: 76   H_Pixel: 16	 Function: 13 Text: 27 Pen: 7
+
+/ the record button
+[35]		Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -20    Y_Pixel:  -2	W:   0   H: 0 W_Pixel: 48   H_Pixel: 16	 Function: 62 Text: 33 Pen: 9
+
+/ sentence 1
+[28] 		Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -201   Y_Pixel:  0	W:   0   H: 0 W_Pixel: 27   H_Pixel: 19	 Function: 17 Text: 28 Pen: 7
+/ sentence 2
+[29]	 	Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -169   Y_Pixel:  0	W:   0   H: 0 W_Pixel: 27   H_Pixel: 19	 Function: 19 Text: 29 Pen: 7
+/ sentence 3
+[30]		Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -137   Y_Pixel:  0	W:   0   H: 0 W_Pixel: 27   H_Pixel: 19	 Function: 21 Text: 30 Pen: 7
+/ sentence 4
+[31]		Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -106   Y_Pixel:  0	W:   0   H: 0 W_Pixel: 27   H_Pixel: 19	 Function: 23 Text: 31 Pen: 7
+/ sentence 5
+[32] 		Origin: TR	HotSpot: BL X: 0   Y: 0    X_Pixel: -73    Y_Pixel:  0	W:   0   H: 0 W_Pixel: 27   H_Pixel: 19	 Function: 25 Text: 32 Pen: 7
+
+/ radio controller for the buttons 28 to 32
+[33]	Buttons: 28 29 30 31 32 End
+
+
+
+/ the 'Min' button, minimize/restore chat window
+/[36] 		Origin: BL      HotSpot: TL X: 1   Y: 0.85  X_Pixel: 0    Y_Pixel:  -20	W:   0   H: 0 W_Pixel: 50   H_Pixel: 20	 Function: 28 Text: 36 Pen: 7
+/ the Lock/unlock button, to lock/unlock the chat window 
+[37]		Origin: BL      HotSpot: TR X: 0   Y: 0     X_Pixel: 2    Y_Pixel: 2   W:   0   H: 0 W_Pixel: 16   H_Pixel: 16	 Function: 29 Text: 37 Pen: 7
+
+
+/ the leave Team Button (only if player allready in a team)
+[62] 	Origin: TL      HotSpot: BR X: 0   Y: 0  	X_Pixel: 92     Y_Pixel:  -1	W:   0   H: 0 W_Pixel: 74    H_Pixel: 19	 Function: 56 Text: 62 Pen: 8
+
+/ the create Team Button (only if player not allready in a team)
+[61] 	Origin: TL      HotSpot: BR X: 0   Y: 0  	X_Pixel: 92     Y_Pixel:  -1	W:   0   H: 0 W_Pixel: 74    H_Pixel: 19	 Function: 55 Text: 61 Pen: 8
+
+/ clear button
+/[66] Parent: 22 Origin: TL	HotSpot: TR X: 0   Y: 0    X_Pixel: 100 Y_Pixel:  0	W:    0 H: 0 W_Pixel: 50     H_Pixel: 20	 Function: 66 Text: 66 Pen: 7
+
+/ leave clade button
+[68] 		Origin: TL	HotSpot: BR X: 0   Y: 0    X_Pixel: 173 Y_Pixel:  -2	W:    0 H: 0 W_Pixel: 76     H_Pixel: 16	 Function: 68 Text: 68 Pen: 8
+
+/ create clade button
+[67]		Origin: TL	HotSpot: BR X: 0   Y: 0    X_Pixel: 173 Y_Pixel:  -2	W:    0 H: 0 W_Pixel: 76     H_Pixel: 16	 Function: 67 Text: 67 Pen: 8
+
+/ the vote button (when a vote can be done)
+[71]		Origin: BL	HotSpot: TR X: 0   Y: 0    X_Pixel: 30   Y_Pixel:  0	W:    0 H: 0 W_Pixel: 68     H_Pixel: 20	 Function: 71 Text: 71 Pen: 8

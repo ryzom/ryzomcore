@@ -1,0 +1,96 @@
+/*****************************************************************************************************/
+THIS FILE GIVE THE RELATION BEETWEEN A FUNCTION NUMBER AND THE CORRESPONDING FUNCTION NAME IN THE CODE
+
+
+NB : this is NOT a configuration file, only an information file for users, this file is NOT read by the program and evrything can be written in it.
+
+Users who want to be sure of what they do should give a look to the file functions.cpp
+
+
+
+0 :    cbTest
+1 :    cbSelectFYROS
+2 :    cbSelectTRYKER
+3 :    cbSelectMATIS
+4 :    cbSelectKALAB
+5 :    cbSelectMale
+6 :    cbSelectFemale
+7 :    cbCreateCharacter
+8 :    cbEnterWorld
+9 :    cbDeleteCharacter
+10 :    cbConnect
+11 :    cbUpdateLogin
+
+12 : <unused>
+
+13 :    cbUnmuteAll
+14 :    cbWhisper
+15 :    cbTalk
+16 :    cbShout
+
+17 :    cbPreprogSentence1
+18 : <unused>
+
+19 :    cbPreprogSentence2
+20 : <unused>
+
+21 :    cbPreprogSentence3
+22 : <unused>
+
+23 :    cbPreprogSentence4
+24 : <unused>
+
+25 :    cbPreprogSentence5
+
+26 : <unused>
+27 : <unused>
+
+28 :    cbMinRestore
+29 :    cbLockUnlock
+30 :    cbMuteUnmutePublic
+31 :    cbPublicPopUp
+
+32 : <unused>
+
+33 :    cbProcessChatLine
+34 :    cbUsePreprog
+
+35 : <unused>			//   cbAddToContactList
+36 : <unused>			//   cbProposeJoinClade
+
+37 :    cbTeammateProposal
+
+38 :    cbPreprog1
+39 :    cbPreprog2
+40 :    cbPreprog3
+41 :    cbPreprog4
+42 :    cbPreprog5
+
+43 : <unused>   		//   cbSpeech
+44 : <unused>			//   cbCreateSpeech
+45 : <unused>			//   cbJoinSpeech
+46 : <unused>			//   cbVote
+47 : <unused>			//   cbLeaveSpeech
+48 : <unused>			//   cbCreateGroup
+
+49 : <unused>			//   cbToSpeech
+50 : <unused>			//   cbToPublic
+
+51 :    cbToTeam
+
+52 : <unused>			//   cbToClade
+
+53 :    cbToFamily
+
+54 :    cbTeammateRequest
+
+55 :    cbCreateTeam
+56 :    cbLeaveTeam
+
+57 :    cbAcceptProposal
+58 :    cbRejectProposal
+59 :    cbAcceptRequest
+60 :    cbRejectRequest
+
+61 :    cbSendPrivateMessage
+62 :    cbRecord
