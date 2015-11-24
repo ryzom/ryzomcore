@@ -23,6 +23,8 @@
 #	include <ShellAPI.h>
 #	include <io.h>
 #	include <tchar.h>
+#elif defined NL_OS_MAC
+#	include <ApplicationServices/ApplicationServices.h>
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	include <cerrno>
@@ -1091,7 +1093,26 @@ static bool openDocWithExtension (const char *document, const char *ext)
 		return true;
 	}
 #elif defined(NL_OS_MAC)
-	return launchProgram("open", document);
+	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)document, strlen(document), kCFStringEncodingUTF8, NULL);
+
+	if (url)
+	{
+		OSStatus res = LSOpenCFURLRef(url, 0);
+		CFRelease(url);
+
+		if (res != 0)
+		{
+			nlwarning("LSOpenCFURLRef %s returned %d", document, (sint)res);
+			return false;
+		}
+
+		return true;
+	}
+	else
+	{
+		nlwarning("Unable to create URL from %s", document);
+		return false;
+	}
 #else
 	std::string command = "/usr/bin/xdg-open";
 
