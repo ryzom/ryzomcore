@@ -85,6 +85,7 @@ function game:mcwOnColorChanged()
 	else
 		uiPath = uiPath .. 'pick2';
 	end
+
 	local ui = getUI(uiPath);
 	game.ColorPicker.r = ui.r;
 	game.ColorPicker.g = ui.g;
