@@ -1108,23 +1108,12 @@
                 params_l="user"
                 tooltip="uittChatUser"
                 tooltip_parent="win" />
-          <ctrl style="tab_button_new"
-                id="tab6"
-                posparent="tab5"
-                group="content:cb:yubo_chat"
-                hardtext="uitabChatYuboChat"
-                onclick_r="set"
-                params_r="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=1"
-                onclick_l="chat_group_filter"
-                params_l="yubo_chat"
-                tooltip="uittChatYubo"
-                tooltip_parent="win" />
           <!-- Fixed number of dynamic chat allowed. force  _firstpos and _nextpos to have correctly aligned tab-->
           <vector template="temp_tab_dyn_chat"
                   _size="%max_dyn_chan_per_player"
                   id="tab_array0_$i"
                   nb="$i"
-                  posparent="tab6"
+                  posparent="tab5"
                   _firstpos="TR TL"
                   _nextpos="TR TL" />
           <!-- Show or hide tabs : a tab is visible if it is not filtered into the user chat AND not detached -->
@@ -1148,9 +1137,6 @@
                 target="tab4:active" />
           <link expr="not(@UI:SAVE:ISDETACHED:USER_CHAT)"
                 target="tab5:active" />
-          <link expr="and(and(%is_yubo_chat_present, @UI:SAVE:ISENABLED:YUBO_CHAT),
-                                                                not(@UI:SAVE:ISDETACHED:YUBO_CHAT))"
-                target="tab6:active" />
           <!-- Show individual chat windows if needed -->
           <link expr="and (@UI:SAVE:ISENABLED:AROUND_ME, 
                                                                 @UI:SAVE:ISDETACHED:AROUND_ME)"
@@ -1172,9 +1158,6 @@
                 target="ui:interface:system_info:active" />
           <link expr="@UI:SAVE:ISDETACHED:USER_CHAT"
                 target="ui:interface:user_chat:active" />
-          <link expr="and(and(%is_yubo_chat_present, @UI:SAVE:ISENABLED:YUBO_CHAT),
-                                                                @UI:SAVE:ISDETACHED:YUBO_CHAT)"
-                target="ui:interface:yubo_chat:active" />
         </group>
         <view type="bitmap"
               id="sep"
@@ -1243,13 +1226,6 @@
                     h="0" />
           <instance template="chat_box_mainchat"
                     id="user"
-                    posref="TL TL"
-                    sizeref="wh"
-                    y="0"
-                    w="0"
-                    h="0" />
-          <instance template="chat_box_mainchat"
-                    id="yubo_chat"
                     posref="TL TL"
                     sizeref="wh"
                     y="0"
@@ -1957,10 +1933,6 @@
                 name="uiSystemInfo"
                 usergroup_l="chat_menu_button"
                 usergroup_params_l="chat_db=SYSTEM_INFO" />
-        <action id="yubo_chat"
-                name="uitabChatYuboChat"
-                usergroup_l="chat_menu_button"
-                usergroup_params_l="chat_db=YUBO_CHAT" />
         <!-- Bit of a hack as vector is not supported inside a submenu -->
         <action id="dyn0"
                 name="0"
@@ -3060,13 +3032,6 @@
 <tree node="debug_console">
 </tree>
 -->
-  <!-- ************* -->
-  <!-- * YUBO CHAT * -->
-  <!-- ************* -->
-  <proc id="yubo_chat_proc_close">
-    <action handler="set"
-            params="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=0" />
-  </proc>
   <!-- **************** -->
   <!-- * DYNAMIC CHAT * -->
   <!-- **************** -->
