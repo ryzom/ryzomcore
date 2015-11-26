@@ -343,6 +343,10 @@ namespace NLGUI
 
 		// Current URL
 		std::string		_URL;
+		// Fragment from loading url
+		std::string		_UrlFragment;
+		std::map<std::string,NLGUI::CInterfaceElement *> _Anchors;
+		std::vector<std::string> _AnchorName;
 
 		// Current DOMAIN
 		bool			_TrustedDomain;
@@ -378,6 +382,7 @@ namespace NLGUI
 		bool			_IgnoreText;
 		// the script to execute
 		std::string		_LuaScript;
+		bool			_LuaHrefHack;
 
 		bool			_Object;
 		std::string		_ObjectScript;
@@ -673,6 +678,8 @@ namespace NLGUI
 		// search if the action / params match the url. look recurs into procedures
 		bool	actionLaunchUrlRecurs(const std::string &ah, const std::string &params, const std::string &url);
 
+		void	registerAnchor(CInterfaceElement* elm);
+
 		// Browse undo and redo
 		enum	{MaxUrlUndoRedo= 256};
 		std::string		_BrowseUndoButton;
@@ -683,7 +690,8 @@ namespace NLGUI
 		std::deque<std::string>		_BrowseUndo;
 		std::deque<std::string>		_BrowseRedo;
 		void	pushUrlUndoRedo(const std::string &url);
-		void	doBrowse(const char *url);
+		void	doBrowse(const char *url, bool force = false);
+		void	doBrowseAnchor(const std::string &anchor);
 		void	updateUndoRedoButtons();
 		void	updateRefreshButton();
 
