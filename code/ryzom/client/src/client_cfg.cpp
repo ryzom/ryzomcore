@@ -39,7 +39,6 @@
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
-#include "game_share/ryzom_version.h"
 
 #ifdef HAVE_CONFIG_H
 #	include "config.h"
