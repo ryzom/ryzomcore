@@ -10,7 +10,7 @@ IF(NOT WIN32)
   ENDIF()
 ENDIF()
 
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
 IF(APPLE)
   FILE(GLOB MAC_SRC mac/*.h mac/*.m mac/*.mm mac/*.cpp)

@@ -20,10 +20,8 @@
 #include "user_agent.h"
 #include "client_cfg.h"
 
-#include "game_share/ryzom_version.h"
-
-#ifdef HAVE_REVISION_H
-#include "revision.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #if defined(HAVE_X86_64)
@@ -61,11 +59,7 @@ std::string getUserAgentVersion()
 
 	if (s_userAgent.empty())
 	{
-#ifdef REVISION
-		s_userAgent = NLMISC::toString("%s.%s-%s-%s", RYZOM_VERSION, REVISION, RYZOM_SYSTEM, RYZOM_ARCH);
-#else
 		s_userAgent = NLMISC::toString("%s-%s-%s", RYZOM_VERSION, RYZOM_SYSTEM, RYZOM_ARCH);
-#endif
 	}
 
 	return s_userAgent;
@@ -90,10 +84,6 @@ std::string getDisplayVersion()
 		if (ClientCfg.ExtendedCommands) s_version += "_E";
 
 		s_version += getVersion();
-
-#ifdef REVISION
-		s_version += NLMISC::toString(".%s", REVISION);
-#endif
 	}
 
 	return s_version;

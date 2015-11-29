@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
 SOURCE_GROUP(sfx FILES
         buffer_xaudio2.cpp

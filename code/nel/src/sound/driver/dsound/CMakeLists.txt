@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
 NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 

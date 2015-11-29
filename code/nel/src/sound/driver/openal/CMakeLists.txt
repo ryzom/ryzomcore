@@ -1,4 +1,4 @@
-FILE(GLOB SRC *.cpp *.h *.def)
+FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
 IF(WIN32)
   SET(NLDRV_AL_LIB "nel_drv_openal_win")

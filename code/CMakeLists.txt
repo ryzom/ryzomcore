@@ -49,7 +49,8 @@ PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 12)
 SET(NL_VERSION_PATCH 0)
-SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
+SET(YEAR "2004-2015")
+SET(AUTHOR "Winchgate and The Ryzom Core Community")
 
 #-----------------------------------------------------------------------------
 # Redirect output files

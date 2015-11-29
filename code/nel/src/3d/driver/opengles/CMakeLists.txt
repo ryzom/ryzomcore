@@ -12,7 +12,7 @@ ENDIF()
 
 SET(SOURCE_DIR ${CMAKE_SOURCE_DIR}/nel/src/3d/driver/opengl)
 
-FILE(GLOB SRC ${SOURCE_DIR}/*.cpp ${SOURCE_DIR}/*.h ${SOURCE_DIR}/*.def)
+FILE(GLOB SRC ${SOURCE_DIR}/*.cpp ${SOURCE_DIR}/*.h ${SOURCE_DIR}/*.def *.rc)
 
 IF(APPLE)
   FILE(GLOB MAC_SRC ${SOURCE_DIR}/mac/*.h ${SOURCE_DIR}/mac/*.m ${SOURCE_DIR}/mac/*.mm ${SOURCE_DIR}/mac/*.cpp)

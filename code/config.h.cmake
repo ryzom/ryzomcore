@@ -20,4 +20,18 @@
 #cmakedefine RYZOM_ETC_PREFIX "${RYZOM_ETC_ABSOLUTE_PREFIX}"
 #cmakedefine RYZOM_SHARE_PREFIX "${RYZOM_SHARE_ABSOLUTE_PREFIX}"
 
+#cmakedefine REVISION "${REVISION}"
+#cmakedefine BUILD_DATE "${BUILD_DATE}"
+
+#cmakedefine NL_VERSION "${NL_VERSION}"
+#cmakedefine NL_VERSION_RC ${NL_VERSION_RC}
+
+#cmakedefine RYZOM_VERSION "${RYZOM_VERSION}"
+#cmakedefine RYZOM_VERSION_RC ${RYZOM_VERSION_RC}
+#cmakedefine AUTHOR "${AUTHOR}"
+#cmakedefine YEAR "${YEAR}"
+#cmakedefine COPYRIGHT "${COPYRIGHT}"
+
+#cmakedefine RYZOM_CLIENT_ICON "${RYZOM_CLIENT_ICON}"
+
 #endif // CONFIG_H
