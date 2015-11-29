@@ -8,6 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include <windows.h>
+#include "config.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -165,8 +166,8 @@ IDB_ERROR_LOGO          BITMAP  DISCARDABLE     "error_logo.bmp"
 /////////////////////////////////////////////////////////////////////////////
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION 2,1,0
-PRODUCTVERSION 2,1,0
+FILEVERSION RYZOM_VERSION_RC
+PRODUCTVERSION NL_VERSION_RC
 FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
 FILEFLAGS VS_FF_DEBUG
@@ -182,15 +183,15 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Ryzom client"
-            VALUE "FileVersion", "2.1.0"
-            VALUE "LegalCopyright", "Copyright (C) 2004-2015 Winchgate and The Ryzom Core Community"
+            VALUE "FileVersion", RYZOM_VERSION
+            VALUE "LegalCopyright", COPYRIGHT
 #ifdef _DEBUG
             VALUE "OriginalFilename", "ryzom_client_d.exe"
 #else
             VALUE "OriginalFilename", "ryzom_client_r.exe"
 #endif			
-            VALUE "ProductName", "Ryzom"
-            VALUE "ProductVersion", "2.1.0"
+            VALUE "ProductName", "Ryzom Core"
+            VALUE "ProductVersion", NL_VERSION
         END
     END
     BLOCK "VarFileInfo"

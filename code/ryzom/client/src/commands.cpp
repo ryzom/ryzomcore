@@ -46,7 +46,6 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/mode_and_behaviour.h"
-#include "game_share/ryzom_version.h"
 #include "game_share/brick_types.h"
 #include "game_share/time_weather_season/time_and_season.h"
 
@@ -100,6 +99,10 @@
 #include "far_tp.h"
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 
 //

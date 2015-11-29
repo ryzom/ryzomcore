@@ -33,9 +33,9 @@ IF(COMMAND cmake_policy)
   cmake_policy(SET CMP0005 OLD)
 ENDIF(COMMAND cmake_policy)
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/nel.cmake)
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/ConfigureChecks.cmake)
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/CheckDepends.cmake)
+INCLUDE(nel)
+INCLUDE(ConfigureChecks)
+INCLUDE(CheckDepends)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
@@ -49,7 +49,12 @@ PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 12)
 SET(NL_VERSION_PATCH 0)
-SET(NL_VERSION "${NL_VERSION_MAJOR}.${NL_VERSION_MINOR}.${NL_VERSION_PATCH}")
+SET(YEAR "2004-2015")
+SET(AUTHOR "Winchgate and The Ryzom Core Community")
+
+SET(RYZOM_VERSION_MAJOR 2)
+SET(RYZOM_VERSION_MINOR 1)
+SET(RYZOM_VERSION_PATCH 0)
 
 #-----------------------------------------------------------------------------
 # Redirect output files
@@ -94,7 +99,6 @@ NL_SETUP_BUILD_FLAGS()
 #Platform specifics
 
 SETUP_EXTERNAL()
-NL_GEN_REVISION_H()
 
 IF(WIN32)
   SET(WINSOCK2_LIB ws2_32.lib)

@@ -21,60 +21,6 @@ MACRO(NL_GEN_PC name)
 ENDMACRO(NL_GEN_PC)
 
 ###
-# Helper macro that generates revision.h from revision.h.in
-###
-MACRO(NL_GEN_REVISION_H)
-  IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
-    SET(TOOL_FOUND OFF)
-
-    IF(EXISTS "${CMAKE_SOURCE_DIR}/../.svn/")
-      FIND_PACKAGE(Subversion)
-
-      IF(SUBVERSION_FOUND)
-        SET(TOOL_FOUND ON)
-      ENDIF(SUBVERSION_FOUND)
-    ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/../.svn/")
-
-    IF(EXISTS "${CMAKE_SOURCE_DIR}/../.hg/")
-      FIND_PACKAGE(Mercurial)
-
-      IF(MERCURIAL_FOUND)
-        SET(TOOL_FOUND ON)
-      ENDIF(MERCURIAL_FOUND)
-    ENDIF(EXISTS "${CMAKE_SOURCE_DIR}/../.hg/")
-
-    # if already generated
-    IF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
-      # copy it
-      MESSAGE(STATUS "Copying provided revision.h...")
-      FILE(COPY ${CMAKE_SOURCE_DIR}/revision.h DESTINATION ${CMAKE_BINARY_DIR})
-      SET(HAVE_REVISION_H ON)
-    ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h)
-
-    IF(TOOL_FOUND)
-      # a custom target that is always built
-      ADD_CUSTOM_TARGET(revision ALL
-        COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -DROOT_DIR=${CMAKE_SOURCE_DIR}/..
-        -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMakeModules
-        -P ${CMAKE_SOURCE_DIR}/CMakeModules/GetRevision.cmake)
-
-      # revision.h is a generated file
-      SET_SOURCE_FILES_PROPERTIES(${CMAKE_BINARY_DIR}/revision.h
-        PROPERTIES GENERATED TRUE
-        HEADER_FILE_ONLY TRUE)
-      SET(HAVE_REVISION_H ON)
-    ENDIF(TOOL_FOUND)
-
-    IF(HAVE_REVISION_H)
-      INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
-      ADD_DEFINITIONS(-DHAVE_REVISION_H)
-    ENDIF(HAVE_REVISION_H)
-  ENDIF(EXISTS ${CMAKE_SOURCE_DIR}/revision.h.in)
-ENDMACRO(NL_GEN_REVISION_H)
-
-###
 #
 ###
 MACRO(NL_TARGET_LIB name)
