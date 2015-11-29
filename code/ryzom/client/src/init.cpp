@@ -1060,26 +1060,42 @@ void prelogInit()
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 		// add all existing icons
-		vector<string> filenames;
-		filenames.push_back("/usr/share/icons/hicolor/128x128/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/48x48/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/32x32/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/24x24/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/22x22/apps/ryzom.png");
-		filenames.push_back("/usr/share/icons/hicolor/16x16/apps/ryzom.png");
-		filenames.push_back("/usr/share/pixmaps/ryzom.png");
+		vector<string> directories;
+
+		// system directories
+		directories.push_back("/usr/share/icons/hicolor/256x256/apps");
+		directories.push_back("/usr/share/icons/hicolor/128x128/apps");
+		directories.push_back("/usr/share/icons/hicolor/96x96/apps");
+		directories.push_back("/usr/share/icons/hicolor/48x48/apps");
+		directories.push_back("/usr/share/icons/hicolor/32x32/apps");
+		directories.push_back("/usr/share/icons/hicolor/24x24/apps");
+		directories.push_back("/usr/share/icons/hicolor/22x22/apps");
+		directories.push_back("/usr/share/icons/hicolor/16x16/apps");
+		directories.push_back("/usr/share/pixmaps");
+
+		// local directories
+		directories.push_back("~/.local/share/icons/hicolor/256x256/apps");
+		directories.push_back("~/.local/share/icons/hicolor/128x128/apps");
+		directories.push_back("~/.local/share/icons/hicolor/96x96/apps");
+		directories.push_back("~/.local/share/icons/hicolor/48x48/apps");
+		directories.push_back("~/.local/share/icons/hicolor/32x32/apps");
+		directories.push_back("~/.local/share/icons/hicolor/24x24/apps");
+		directories.push_back("~/.local/share/icons/hicolor/22x22/apps");
+		directories.push_back("~/.local/share/icons/hicolor/16x16/apps");
+		directories.push_back("~/.local/share/pixmaps");
 
 		// check if an icon is present in registered paths
-		if(CPath::exists("ryzom.png"))
-			filenames.push_back(CPath::lookup("ryzom.png"));
+		directories.push_back(".");
 
 		vector<CBitmap> bitmaps;
-		
-		for(size_t i = 0; i < filenames.size(); ++i)
+
+		for(size_t i = 0; i < directories.size(); ++i)
 		{
+			std::string filename = NLMISC::toString("%s/%s.png", directories[i].c_str(), RYZOM_CLIENT_ICON);
+
 			CIFile file;
 
-			if (CFile::fileExists(filenames[i]) && file.open(filenames[i]))
+			if (CFile::fileExists(filename) && file.open(filename))
 			{
 				CBitmap bitmap;
 				if (bitmap.load(file))
@@ -1184,7 +1200,7 @@ void prelogInit()
 //		resetTextContext ("bremenb.ttf", false);
 		resetTextContext ("ryzom.ttf", false);
 
-		
+
 		CInterfaceManager::getInstance();
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
@@ -1233,7 +1249,7 @@ void prelogInit()
 
 		// init bloom effect
 		CBloomEffect::getInstance().init();
-		
+
 		if (StereoDisplay) // VR_CONFIG
 		{
 			// Init stereo display resources
