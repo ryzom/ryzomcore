@@ -72,12 +72,3 @@ IF(SOURCE_DIR AND NOT DEFINED REVISION)
     MESSAGE(STATUS "Read revision ${REVISION} from file")
   ENDIF()
 ENDIF()
-
-IF(SOURCE_DIR AND DEFINED REVISION)
-  IF(EXISTS ${SOURCE_DIR}/revision.h.in)
-    MESSAGE(STATUS "Revision: ${REVISION}")
-    NOW(BUILD_DATE)
-    CONFIGURE_FILE(${SOURCE_DIR}/revision.h.in revision.h.txt)
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy revision.h.txt revision.h) # copy_if_different
-  ENDIF()
-ENDIF()
