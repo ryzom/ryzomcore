@@ -321,7 +321,7 @@ can_t_create_a_window_display	[Cannot create a window display]
 
 // HASH_VALUE 58393B04E6548F6A
 // INDEX 80
-can_t_create_a_fullscreen_display	[Cannot create a full screen display]
+can_t_create_a_fullscreen_display	[Cannot create a fullscreen display]
 
 // HASH_VALUE 701C9488701C9488
 // INDEX 81
@@ -853,7 +853,7 @@ mpftMpSH	[Sharpening Tool]
 
 // HASH_VALUE 698860976537D488
 // INDEX 213
-mpftMpTK	[Tunnelling Knife]
+mpftMpTK	[Tunneling Knife]
 
 // HASH_VALUE EC6964961238A794
 // INDEX 214
@@ -4753,7 +4753,7 @@ uittOutpostStatus	[Current state of the Outpost]
 
 // HASH_VALUE 458F04DDFF6A6EAF
 // INDEX 1179
-uiOutpostCrash	[A server crash during the Attack or Defense Phase has cancelled the Outpost war.\n
+uiOutpostCrash	[A server crash during the Attack or Defense Phase has canceled the Outpost war.\n
 	Any money spent on this war has been reimbursed to the guilds (i.e. the cost for declaring, for buying squads, etc.)]
 
 // HASH_VALUE 8A709A3EBFB0A4E9
@@ -5729,7 +5729,7 @@ uittFameAllegianceCiv7	[You have sworn allegiance to the @{2F2F}Zoraïs@{FFFF}.\
 // INDEX 1402
 uittFameAllegianceCult0	[Your cult allegiance is @{2F2F}undetermined@{FFFF}.\n
 	This can happen for instance if your guild lost its allegiance due to low fame.\n
-	In this state you cannot gain fame any more. You can:\n
+	In this state you cannot gain fame anymore. You can:\n
 	@{T4}- become neutral\n
 	@{T4}- leave your guild and go see a @{2F2F}bonze@{FFFF} or a @{2F2F}priest@{FFFF} in the temple of a cult, if you want to swear allegiance to it (fame of @{2F2F}30@{FFFF} required).\n
 	@{T4}- wait till your guild can declare its allegiance again, to declare yours.]
@@ -5765,35 +5765,35 @@ uittFameAllegianceCivGuild0	[The civilization allegiance of your guild is @{2F2F
 // HASH_VALUE 3867F610AADC3C4B
 // INDEX 1407
 uittFameAllegianceCivGuild1	[Your guild is @{2F2F}stateless@{FFFF}.\n
-	It is limited in its civilization fames and can only enrol members with a Neutral allegiance.\n
+	It is limited in its civilization fames and can only enroll members with a Neutral allegiance.\n
 	To swear allegiance to a civilization, The guild leader has to go see the guild @{2F2F}magistrate@{FFFF} in the appropriate capital city.\n
 	The guild must have at least @{2F2F}30@{FFFF} fame for that civilization.]
 
 // HASH_VALUE 48B5E21ED594D35A
 // INDEX 1408
 uittFameAllegianceCivGuild4	[Your guild has sworn allegiance to the @{2F2F}Fyros@{FFFF}.\n
-	This enables it to have a higher Fyros fame, and to enrol members who have Fyros or Neutral allegiances.\n
+	This enables it to have a higher Fyros fame, and to enroll members who have Fyros or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}magistrate@{FFFF} in one of the capital cities.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Fyros@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
 // HASH_VALUE 0AB5CA14D1A21342
 // INDEX 1409
 uittFameAllegianceCivGuild5	[Your guild has sworn allegiance to the @{2F2F}Matis@{FFFF}.\n
-	This enables it to have a higher Matis fame, and to enrol members who have Matis or Neutral allegiances.\n
+	This enables it to have a higher Matis fame, and to enroll members who have Matis or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}magistrate@{FFFF} in one of the capital cities.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Matis@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
 // HASH_VALUE 527303AF879765CE
 // INDEX 1410
 uittFameAllegianceCivGuild6	[Your guild has sworn allegiance to the @{2F2F}Trykers@{FFFF}.\n
-	This enables it to have a higher Tryker fame, and to enrol members who have Tryker or Neutral allegiances.\n
+	This enables it to have a higher Tryker fame, and to enroll members who have Tryker or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}magistrate@{FFFF} in one of the capital cities.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Tryker@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
 // HASH_VALUE 4D145A02D0B37350
 // INDEX 1411
 uittFameAllegianceCivGuild7	[Your guild has sworn allegiance to the @{2F2F}Zoraïs@{FFFF}.\n
-	This enables it to have a higher Zoraï fame, and to enrol members who have Zoraï or Neutral allegiances.\n
+	This enables it to have a higher Zoraï fame, and to enroll members who have Zoraï or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}magistrate@{FFFF} in one of the capital cities.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Zoraï@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
@@ -5807,21 +5807,21 @@ uittFameAllegianceCultGuild0	[The cult allegiance of your guild is @{2F2F}undete
 // HASH_VALUE 7B003A98BC232BB8
 // INDEX 1413
 uittFameAllegianceCultGuild1	[Your guild is @{2F2F}unbelieving@{FFFF}.\n
-	It is limited in its cult fames and can only enrol members with a Neutral allegiance.\n
+	It is limited in its cult fames and can only enroll members with a Neutral allegiance.\n
 	To swear allegiance to a cult, the guild leader has to go see a guild @{2F2F}bonze@{FFFF} or @{2F2F}priest@{FFFF} in an appropriate temple.\n
 	The guild must have at least @{2F2F}30@{FFFF} in the corresponding cult fame.]
 
 // HASH_VALUE A1B5C5D32E70A250
 // INDEX 1414
 uittFameAllegianceCultGuild2	[Your guild has sworn allegiance to the @{2F2F}Kami@{FFFF}.\n
-	This enables it to have a higher Kami fame, and to enrol members who have Kami or Neutral allegiances.\n
+	This enables it to have a higher Kami fame, and to enroll members who have Kami or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}bonze@{FFFF} or a guild @{2F2F}priest@{FFFF} in a temple.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Kami@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
 // HASH_VALUE A6342B025D599CA6
 // INDEX 1415
 uittFameAllegianceCultGuild3	[Your guild has sworn allegiance to the @{2F2F}Karavan@{FFFF}.\n
-	This enables it to have a higher Karavan fame, and to enrol members who have Karavan or Neutral allegiances.\n
+	This enables it to have a higher Karavan fame, and to enroll members who have Karavan or Neutral allegiances.\n
 	To renounce allegiance, the leader of the guild can go see a guild @{2F2F}bonze@{FFFF} or a guild @{2F2F}priest@{FFFF} in a temple.\n
 	Your guild automatically loses its allegiance if its @{2F2F}Karavan@{FFFF} fame reaches 0. The members then have an undetermined allegiance.]
 
@@ -9169,11 +9169,11 @@ uittSeed1	[Rotting Dead Seed]
 
 // HASH_VALUE A4437F81DFB4B763
 // INDEX 2222
-uittSeed2	[Mouldy Dead Seed]
+uittSeed2	[Moldy Dead Seed]
 
 // HASH_VALUE A007678122B4005F
 // INDEX 2223
-uittSeed3	[Shrivelled Dead Seed]
+uittSeed3	[Shriveled Dead Seed]
 
 // HASH_VALUE 5587B8E929B6A685
 // INDEX 2224
@@ -9805,7 +9805,7 @@ uiSelInfos	[INFORMATION\n
 uiCultFy	[FYROS: WARRIORS OF FIRE AND MASTERS OF THE BURNING DESERT\n
 	\n
 	The Fyros are the warrior race.\n
-	Their society rests on a strict code of honour and a common goal: the quest for the Great Dragon who has devastated entire regions of the planet.]
+	Their society rests on a strict code of honor and a common goal: the quest for the Great Dragon who has devastated entire regions of the planet.]
 
 // HASH_VALUE BD8E5DB70F346936
 // INDEX 2380
@@ -11964,7 +11964,7 @@ fct_outpost_officer_tribe	[Tribe Outpost Officer]
 // HASH_VALUE B053DCD1E8FD3C1C
 // INDEX 2825
 welcome_phrase	[I bid you welcome, young homin.\n
-	You showed great courage in taking the perilous journey to answer our call to join us in our endeavour to rebuild our great Matis Kingdom...{break}\n
+	You showed great courage in taking the perilous journey to answer our call to join us in our endeavor to rebuild our great Matis Kingdom...{break}\n
 	We salute your courage, and welcome you among us.\n
 	Now, it is my duty to tell you more about this place. You are on a small island, not very far from the Matis mainland.\n
 	We have five small outposts on this island, and you are on one of them.\n
@@ -12356,7 +12356,7 @@ uiInitHelp1	[These buttons represent your 4 virtual desktops.]
 
 // HASH_VALUE C494ACDDCE7EE794
 // INDEX 2921
-uiInitHelp2	[You can switch between them by clicking on these buttons or by pressing the short cut keys F1, F2, F3 and F4 respectively (by default).]
+uiInitHelp2	[You can switch between them by clicking on these buttons or by pressing the shortcut keys F1, F2, F3 and F4 respectively (by default).]
 
 // HASH_VALUE B0921BE50D3DDE9C
 // INDEX 2922
@@ -12364,7 +12364,7 @@ uiInitHelp3	[When you click and hold the button, you display the main window men
 
 // HASH_VALUE 39ACC5456D3C6BC1
 // INDEX 2923
-uiInitHelp4	[You can also hold down the desktop short cut key to display the main menu and keep it down while doing your window modification.]
+uiInitHelp4	[You can also hold down the desktop shortcut key to display the main menu and keep it down while doing your window modification.]
 
 // HASH_VALUE 17D66E96B10293C6
 // INDEX 2924
@@ -20061,7 +20061,7 @@ uiWebOnQuit	[FILL IN THE SURVEY]
 // INDEX 4835
 uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 	\n
-	Truth, honour and discipline are the values prized by every true born Fyros! We are the champions of the desert who stand by a strict code of honour. We are the warriors of knowledge who vow never to retreat in our quest for the truth behind the Dragon of the Myth. Neither the Law of Jena nor Karavan prohibitions will stop us from delving down into the bowels of Atys where we have uncovered as many mysterious relics as evils.\n
+	Truth, honor and discipline are the values prized by every true born Fyros! We are the champions of the desert who stand by a strict code of honor. We are the warriors of knowledge who vow never to retreat in our quest for the truth behind the Dragon of the Myth. Neither the Law of Jena nor Karavan prohibitions will stop us from delving down into the bowels of Atys where we have uncovered as many mysterious relics as evils.\n
 	\n
 	We are the protectors of the more fertile regions. For we are the only ones brave enough to rebuild our towns in the scorching desert where the Dragon is most likely to resurface.\n
 	\n
@@ -20076,7 +20076,7 @@ uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 	You are a young homin refugee. You have bravely taken the long and perilous journey from the old lands to these new lands where we have begun building our new Empire. Once you've got enough training behind you, you'll be able to put your skills to good use for our Emperor and help rebuild our civilization.\n
 	\n
 	Who are my ancestors?\n
-	By sword and fire, your ancestors forged the most powerful empire in history. Honour their memory as long as you live! But the fruit of their labor was destroyed by great invasions of kitins. Your parents, and their parents, were lucky to escape the massacre. For many years they survived in the wilds of Atys where you were brought up. They showed great courage in urging you to take the long road to join your own people here in these new lands. Now you have found us you must live up to their courage. It's taken forty four years of blood and sweat to build the foundations of our new Empire, your generation must now build it up.\n
+	By sword and fire, your ancestors forged the most powerful empire in history. Honor their memory as long as you live! But the fruit of their labor was destroyed by great invasions of kitins. Your parents, and their parents, were lucky to escape the massacre. For many years they survived in the wilds of Atys where you were brought up. They showed great courage in urging you to take the long road to join your own people here in these new lands. Now you have found us you must live up to their courage. It's taken forty four years of blood and sweat to build the foundations of our new Empire, your generation must now build it up.\n
 	\n
 	Who is our chief?\n
 	Dexton is our lawful Emperor, you owe him your allegiance. His orders can only be debated in higher spheres. Until you have gained enough rank you will not contest them, never forget it, young homin! You will carry out imperial orders with success or you will die trying, unless you will willingly tarnish the name of your ancestors. Dexton has chosen the best to counsel him, Abycus Zekops and Kyla Dyntheus are his senators.\n
@@ -20088,8 +20088,8 @@ uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 	Your life must be built upon the four pillars that uphold our Empire:\n
 	Truth is the first pillar.\n
 	Cowardly lies will not deceive the cut and thrust of battle! Tell nothing but the truth to your comrades, just as they must give straightforward answers to your questions. Do not hesitate, however, to use the art of cunning in the face of the enemy. Stratagem used wisely is as dangerous a weapon as a sharp spear held firmly in hand!\n
-	Honour is the second pillar.\n
-	Let yourself be guided by honour no matter what. Never stoop to the minor sentiments, no matter how high the potential gain. And remember, an honourable death is better than a cowardly existence.\n
+	Honor is the second pillar.\n
+	Let yourself be guided by honor no matter what. Never stoop to the minor sentiments, no matter how high the potential gain. And remember, an honorable death is better than a cowardly existence.\n
 	Discipline is the third pillar.\n
 	The Fyros Empire exists thanks to the chain of obedience that links us to the Emperor, from the youngest novice to the most celebrated general. Each and every one of us must show obedience to higher command. Just one insubordinate Fyros is enough to break the link and so threaten the whole Empire.\n
 	Justice is the fourth pillar.\n
@@ -20099,7 +20099,7 @@ uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 	- Never be tempted to do favors for the Karavan. They are against the Kamis and against our sense of justice. Indeed, they place their Jena Law above social justice.\n
 	- Never carry out a mission for the Karavan.\n
 	- Never carry out a mission for the enemy tribes.\n
-	- Never violate the code of honour.\n
+	- Never violate the code of honor.\n
 	\n
 	What are our goals?\n
 	Our empire suffered greatly from the Great Swarming. Our sense of discipline has allowed us to survive much better than the Matis or the Trykers, our great city of Pyr is proof. We must now:\n
@@ -22319,7 +22319,7 @@ uiQuitingRyzom	[Leaving Ryzom...]
 
 // HASH_VALUE 69AD08699B76E8FF
 // INDEX 5312
-uiQuitingRules	[Note: If you move or are hit, the exit will be cancelled.\n
+uiQuitingRules	[Note: If you move or are hit, the exit will be canceled.\n
 	Note: If you 'Quit Now' your avatar will still be connected for 30 seconds.]
 
 // HASH_VALUE 7458544474D8E480
@@ -23109,7 +23109,7 @@ uiCloseScanData	[CLOSE]
 
 // HASH_VALUE C3480F9CE5F4FC70
 // INDEX 5491
-uiCancelingScanData	[Cancelling Data Scan. Please wait...]
+uiCancelingScanData	[Canceling Data Scan. Please wait...]
 
 // HASH_VALUE 661A66B087AD7306
 // INDEX 5492
@@ -26957,7 +26957,7 @@ uiShowOnlineOfflineNotifications	[Show Online/Offline Notifications]
 
 // HASH_VALUE 4CD4D1CC173C6E8A
 // INDEX 6397
-uittShowOnlineOfflineNotifications	[Show a notification when guild members or friends go online or offline.]
+uittShowOnlineOfflineNotifications	[Show a notification when guildmembers or friends go online or offline.]
 
 // HASH_VALUE C5878CD4F49A9E18
 // INDEX 6398
