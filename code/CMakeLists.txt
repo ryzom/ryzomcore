@@ -33,9 +33,9 @@ IF(COMMAND cmake_policy)
   cmake_policy(SET CMP0005 OLD)
 ENDIF(COMMAND cmake_policy)
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/nel.cmake)
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/ConfigureChecks.cmake)
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/CheckDepends.cmake)
+INCLUDE(nel)
+INCLUDE(ConfigureChecks)
+INCLUDE(CheckDepends)
 INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
