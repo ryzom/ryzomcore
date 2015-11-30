@@ -98,7 +98,7 @@ ENDIF(WITH_STATIC)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nelsound ${LIBXML2_LIBRARIES} nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
+TARGET_LINK_LIBRARIES(nelsound nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
 SET_TARGET_PROPERTIES(nelsound PROPERTIES LINK_INTERFACE_LIBRARIES "")
 NL_DEFAULT_PROPS(nelsound "NeL, Library: NeL Sound")
 NL_ADD_RUNTIME_FLAGS(nelsound)
