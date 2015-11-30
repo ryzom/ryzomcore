@@ -95,7 +95,13 @@
 
 #include "browse_faq.h"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#ifndef RYZOM_CLIENT_ICON
+#define RYZOM_CLIENT_ICON "ryzom_client"
+#endif
 
 // XMLLib
 #include <libxml/xmlmemory.h>
