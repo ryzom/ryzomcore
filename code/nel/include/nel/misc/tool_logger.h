@@ -47,13 +47,13 @@
 #endif
 
 #ifdef NL_DEBUG_H
-#define tlerror(toolLogger, path, error, ...) nlwarning(error, __VA_ARGS__), toolLogger.writeError(NLMISC::ERROR, path, error, __VA_ARGS__)
-#define tlwarning(toolLogger, path, error, ...) nlwarning(error, __VA_ARGS__), toolLogger.writeError(NLMISC::WARNING, path, error, __VA_ARGS__)
-#define tlmessage(toolLogger, path, error, ...) nlinfo(error, __VA_ARGS__), toolLogger.writeError(NLMISC::MESSAGE, path, error, __VA_ARGS__)
+#define tlerror(toolLogger, path, error, ...) nlwarning(error, __VA_ARGS__), toolLogger.writeError(NLMISC::ERROR, path, error, ## __VA_ARGS__)
+#define tlwarning(toolLogger, path, error, ...) nlwarning(error, __VA_ARGS__), toolLogger.writeError(NLMISC::WARNING, path, error, ## __VA_ARGS__)
+#define tlmessage(toolLogger, path, error, ...) nlinfo(error, __VA_ARGS__), toolLogger.writeError(NLMISC::MESSAGE, path, error, ## __VA_ARGS__)
 #else
-#define tlerror(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::ERROR, path, error, __VA_ARGS__)
-#define tlwarning(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::WARNING, path, error, __VA_ARGS__)
-#define tlmessage(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::MESSAGE, path, error, __VA_ARGS__)
+#define tlerror(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::ERROR, path, error, ## __VA_ARGS__)
+#define tlwarning(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::WARNING, path, error, ## __VA_ARGS__)
+#define tlmessage(toolLogger, path, error, ...) toolLogger.writeError(NLMISC::MESSAGE, path, error, ## __VA_ARGS__)
 #endif
 
 namespace NLMISC {

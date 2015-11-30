@@ -103,6 +103,6 @@ private:
 
 };
 
-#endif NL_SCENE_META_H
+#endif /* NL_SCENE_META_H */
 
 /* end of file */
