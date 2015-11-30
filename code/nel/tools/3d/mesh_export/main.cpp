@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 	if (!NLMISC::CFile::fileExists(filePath))
 	{
 		printHelp(args);
-		nlerror("File '%s' does not exist", filePath);
+		nlerror("File '%s' does not exist", filePath.c_str());
 		return EXIT_FAILURE;
 	}
 
