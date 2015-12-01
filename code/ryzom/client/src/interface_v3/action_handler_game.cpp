@@ -65,6 +65,7 @@
 #include "../far_tp.h"
 #include "nel/gui/interface_link.h"
 #include "../npc_icon.h"
+#include "user_agent.h"
 
 // Game Share
 #include "game_share/character_summary.h"
@@ -2911,6 +2912,7 @@ REGISTER_ACTION_HANDLER (CHandlerToggleInventory, "toggle_inventory");
 // ***************************************************************************
 
 #define GAME_CONFIG_DDX					"ui:interface:game_config:content:all"
+#define GAME_CONFIG_TREE_LIST			"ui:interface:game_config:content:sbtree:tree_list"
 
 static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_VIDEO_MODES_COMBO	"ui:interface:game_config:content:general:video_modes"
@@ -3085,6 +3087,29 @@ public:
 		}
 
 		// **** Init Language : look in game_config.lua
+
+		// display or not VR page
+		NLGUI::CGroupTree* configTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_TREE_LIST));
+
+		if (configTree)
+		{
+			CGroupTree::SNode *rootNode = configTree->getRootNode();
+
+			if (rootNode)
+			{
+				CGroupTree::SNode *graphNode = rootNode->getNodeFromId("graph");
+
+				if (graphNode)
+				{
+					CGroupTree::SNode *vrNode = graphNode->getNodeFromId("vr");
+
+					if (vrNode)
+					{
+						vrNode->setShow(isStereoAvailable());
+					}
+				}
+			}
+		}
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigInit, "game_config_init");
