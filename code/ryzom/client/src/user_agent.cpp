@@ -105,3 +105,12 @@ std::string getDebugVersion()
 
 	return s_version;
 }
+
+bool isStereoAvailable()
+{
+#ifdef NL_STEREO_AVAILABLE
+	return true;
+#else
+	return false;
+#endif
+}

@@ -25,6 +25,8 @@ std::string getVersion();
 std::string getDisplayVersion();
 std::string getDebugVersion();
 
+bool isStereoAvailable();
+
 #endif // CL_USER_AGENT_H
 
 /* End of user_agent.h */
