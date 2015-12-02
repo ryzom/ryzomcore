@@ -2933,6 +2933,10 @@ static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_TEXTURE_MODE_COMBO	"ui:interface:game_config:content:general:texture_mode:combo"
 #define GAME_CONFIG_TEXTURE_MODE_DB		"UI:TEMP:TEXTURE_MODE"
 
+// Anisotropic Filtering controls
+#define GAME_CONFIG_ANISOTROPIC_COMBO	"ui:interface:game_config:content:fx:anisotropic_gr:anisotropic"
+#define GAME_CONFIG_ANISOTROPIC_DB		"UI:TEMP:ANISOTROPIC"
+
 // The 3 possible modes editable (NB: do not allow client.cfg HDEntityTexture==1 and DivideTextureSizeBy2=2
 enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
 
@@ -3043,6 +3047,37 @@ public:
 			if(ClientCfg.HDTextureInstalled)
 				pCB->addText(CI18N::get("uigcHighTextureMode"));
 		}
+
+		// Anisotropic Filtering
+		pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_ANISOTROPIC_COMBO));
+
+		sint nAnisotropic = 0;
+
+		if (pCB)
+		{
+			uint maxAnisotropic = Driver->getAnisotropicFilterMaximum();
+
+			pCB->resetTexts();
+			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
+
+			uint anisotropic = 2;
+			uint i = 1;
+
+			while (anisotropic <= maxAnisotropic)
+			{
+				pCB->addText(ucstring(NLMISC::toString("%ux", anisotropic)));
+
+				if (ClientCfg.AnisotropicFilter == anisotropic)
+					nAnisotropic = i;
+
+				anisotropic <<= 1;
+				++i;
+			}
+		}
+
+		// -1 is important to indicate we set this value in edit mode
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->setValue32(nAnisotropic);
 
 		// VR_CONFIG
 		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
@@ -3481,6 +3516,34 @@ class CHandlerGameConfigApply : public IActionHandler
 			}
 		}
 
+		// **** Apply Anisotropic Filtering
+		sint nAnisotropic = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->getValue32();
+
+		if (nAnisotropic >= 0)
+		{
+			uint anisotropic = 0;
+
+			// compute the real anisotropic value
+			if (nAnisotropic > 0)
+			{
+				anisotropic = 1;
+
+				for(size_t i = 0; i < nAnisotropic; ++i)
+				{
+					anisotropic <<= 1;
+				}
+			}
+
+
+			if (ClientCfg.AnisotropicFilter != anisotropic)
+			{
+				ClientCfg.AnisotropicFilter = anisotropic;
+				ClientCfg.writeInt("AnisotropicFilter", anisotropic);
+				requestReboot = true;
+			}
+		}
+
+
 		// *** Apply the Screen AR
 		// since already set in the config file, need only to bkup the current version
 		CHandlerGameConfigInit::BkupScreenAspectRatio= ClientCfg.ScreenAspectRatio;
@@ -3595,6 +3658,33 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioMode, "game_config_change_screen_ratio_mode");
+
+
+// ***************************************************************************
+class CHandlerGameConfigChangeAnisotropic : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		if (CInterfaceLink::isUpdatingAllLinks()) return; // don't want to trash the value in client.cfg at init, due to 'updateAllLinks' being called
+
+		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
+
+		// get values of anisotropic filtering
+		sint	oldAnisotropic = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_ANISOTROPIC_DB)->getOldValue32();
+		sint	anisotropic = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_ANISOTROPIC_DB)->getValue32();
+
+		// dirt the apply button of the DDX.
+		// don't do it at init!
+		if(oldAnisotropic != anisotropic && oldAnisotropic != -1 && anisotropic != -1)
+		{
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if(pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeAnisotropic, "game_config_change_anisotropic");
 
 
 // ***************************************************************************
