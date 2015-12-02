@@ -221,6 +221,48 @@ namespace NLGUI
 		HTML_ATTR(SPAN,STYLE),
 	};
 
+	enum
+	{
+		HTML_ATTR(H1,CLASS) = 0,
+		HTML_ATTR(H1,ID),
+		HTML_ATTR(H1,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H2,CLASS) = 0,
+		HTML_ATTR(H2,ID),
+		HTML_ATTR(H2,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H3,CLASS) = 0,
+		HTML_ATTR(H3,ID),
+		HTML_ATTR(H3,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H4,CLASS) = 0,
+		HTML_ATTR(H4,ID),
+		HTML_ATTR(H4,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H5,CLASS) = 0,
+		HTML_ATTR(H5,ID),
+		HTML_ATTR(H5,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H6,CLASS) = 0,
+		HTML_ATTR(H6,ID),
+		HTML_ATTR(H6,STYLE),
+	};
+
 
 	#undef HTML_ATTR
 

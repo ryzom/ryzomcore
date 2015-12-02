@@ -226,6 +226,54 @@ namespace NLGUI
 		{ 0 }
 	};
 
+	HTAttr h1_attr[] =
+	{
+		HTML_ATTR(H1,CLASS),
+		HTML_ATTR(H1,ID),
+		HTML_ATTR(H1,STYLE),
+		{ 0 }
+	};
+
+	HTAttr h2_attr[] =
+	{
+		HTML_ATTR(H2,CLASS),
+		HTML_ATTR(H2,ID),
+		HTML_ATTR(H2,STYLE),
+		{ 0 }
+	};
+
+	HTAttr h3_attr[] =
+	{
+		HTML_ATTR(H3,CLASS),
+		HTML_ATTR(H3,ID),
+		HTML_ATTR(H3,STYLE),
+		{ 0 }
+	};
+
+	HTAttr h4_attr[] =
+	{
+		HTML_ATTR(H4,CLASS),
+		HTML_ATTR(H4,ID),
+		HTML_ATTR(H4,STYLE),
+		{ 0 }
+	};
+
+	HTAttr h5_attr[] =
+	{
+		HTML_ATTR(H5,CLASS),
+		HTML_ATTR(H5,ID),
+		HTML_ATTR(H5,STYLE),
+		{ 0 }
+	};
+
+	HTAttr h6_attr[] =
+	{
+		HTML_ATTR(H6,CLASS),
+		HTML_ATTR(H6,ID),
+		HTML_ATTR(H6,STYLE),
+		{ 0 }
+	};
+
 	// ***************************************************************************
 
 	// Read a width HTML parameter. "100" or "100%". Returns true if percent (0 ~ 1) else false
@@ -449,6 +497,18 @@ namespace NLGUI
 			HTML_DTD->tags[HTML_DIV].number_of_attributes = sizeof(div_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_SPAN].attributes = span_attr;
 			HTML_DTD->tags[HTML_SPAN].number_of_attributes = sizeof(span_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H1].attributes = h1_attr;
+			HTML_DTD->tags[HTML_H1].number_of_attributes = sizeof(h1_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H2].attributes = h2_attr;
+			HTML_DTD->tags[HTML_H2].number_of_attributes = sizeof(h2_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H3].attributes = h3_attr;
+			HTML_DTD->tags[HTML_H3].number_of_attributes = sizeof(h3_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H4].attributes = h4_attr;
+			HTML_DTD->tags[HTML_H4].number_of_attributes = sizeof(h4_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H5].attributes = h5_attr;
+			HTML_DTD->tags[HTML_H5].number_of_attributes = sizeof(h5_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_H6].attributes = h6_attr;
+			HTML_DTD->tags[HTML_H6].number_of_attributes = sizeof(h6_attr) / sizeof(HTAttr) - 1;
 
 			// Initialized
 			initialized = true;

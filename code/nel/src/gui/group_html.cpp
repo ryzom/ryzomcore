@@ -700,12 +700,26 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	#define registerAnchorName(prefix) \
+	{\
+		if (present[prefix##_ID] && value[prefix##_ID]) \
+			_AnchorName.push_back(value[prefix##_ID]); \
+	}
+
+	// ***************************************************************************
+
 	void CGroupHTML::addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
 	{
 		if (_Browsing)
 		{
 			if (element_number == HTML_A)
 			{
+				registerAnchorName(MY_HTML_A);
+
+				// #fragment works with both ID and NAME so register both
+				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
+					_AnchorName.push_back(value[MY_HTML_A_NAME]);
+
 				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
 				{
 					string suri = value[MY_HTML_A_HREF];
@@ -716,7 +730,7 @@ namespace NLGUI
 						else
 							_Link.push_back ("");
 					}
-					else if (_TrustedDomain && suri[0] == '#')
+					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
 					{
 						// Direct url (hack for lua beginElement)
 						_Link.push_back (suri.substr(1));
@@ -1043,6 +1057,8 @@ namespace NLGUI
 
 			case HTML_DIV:
 			{
+				registerAnchorName(MY_HTML_DIV);
+
 				if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
 					_DivName = value[MY_HTML_DIV_NAME];
 
@@ -1208,36 +1224,42 @@ namespace NLGUI
 				}
 				break;
 			case HTML_H1:
+				registerAnchorName(MY_HTML_H1);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H1FontSize);
 				_TextColor.push_back(H1Color);
 				_GlobalColor.push_back(H1ColorGlobalColor);
 				break;
 			case HTML_H2:
+				registerAnchorName(MY_HTML_H2);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H2FontSize);
 				_TextColor.push_back(H2Color);
 				_GlobalColor.push_back(H2ColorGlobalColor);
 				break;
 			case HTML_H3:
+				registerAnchorName(MY_HTML_H3);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H3FontSize);
 				_TextColor.push_back(H3Color);
 				_GlobalColor.push_back(H3ColorGlobalColor);
 				break;
 			case HTML_H4:
+				registerAnchorName(MY_HTML_H4);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H4FontSize);
 				_TextColor.push_back(H4Color);
 				_GlobalColor.push_back(H4ColorGlobalColor);
 				break;
 			case HTML_H5:
+				registerAnchorName(MY_HTML_H5);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H5FontSize);
 				_TextColor.push_back(H5Color);
 				_GlobalColor.push_back(H5ColorGlobalColor);
 				break;
 			case HTML_H6:
+				registerAnchorName(MY_HTML_H6);
 				newParagraph(PBeginSpace);
 				_FontSize.push_back(H6FontSize);
 				_TextColor.push_back(H6Color);
@@ -1604,6 +1626,8 @@ namespace NLGUI
 				break;
 			case HTML_TABLE:
 				{
+					registerAnchorName(MY_HTML_TABLE);
+
 					// Get cells parameters
 					getCellsParameters (MY_HTML_TABLE, false);
 
@@ -2024,6 +2048,7 @@ namespace NLGUI
 		// init
 		_TrustedDomain = false;
 		_ParsingLua = false;
+		_LuaHrefHack = false;
 		_IgnoreText = false;
 		_BrowseNextTime = false;
 		_PostNextTime = false;
@@ -2035,6 +2060,7 @@ namespace NLGUI
 		_LI = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
+		_UrlFragment.clear();
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -3087,11 +3113,11 @@ namespace NLGUI
 	void CGroupHTML::refresh()
 	{
 		if (!_URL.empty())
-			doBrowse(_URL.c_str());
+			doBrowse(_URL.c_str(), true);
 	}
 
 	// ***************************************************************************
-	void CGroupHTML::doBrowse(const char *url)
+	void CGroupHTML::doBrowse(const char *url, bool force)
 	{
 		// Stop previous browse
 		if (_Browsing)
@@ -3111,8 +3137,29 @@ namespace NLGUI
 		nlwarning("(%s) Browsing URL : '%s'", _Id.c_str(), url);
 	#endif
 
+
+		CUrlParser uri(url);
+		if (uri.hash.size() > 0)
+		{
+			// Anchor to scroll after page has loaded
+			_UrlFragment = uri.hash;
+
+			uri.inherit(_URL);
+			uri.hash.clear();
+
+			// compare urls and see if we only navigating to new anchor
+			if (!force && _URL == uri.toString())
+			{
+				// scroll happens in updateCoords()
+				invalidateCoords();
+				return;
+			}
+		}
+		else
+			_UrlFragment.clear();
+
 		// go
-		_URL = url;
+		_URL = uri.toString();
 		_Connecting = false;
 		_BrowseNextTime = true;
 
@@ -3177,6 +3224,13 @@ namespace NLGUI
 	void CGroupHTML::updateCoords()
 	{
 		CGroupScrollText::updateCoords();
+
+		// all elements are in their correct place, tell scrollbar to scroll to anchor
+		if (!_Browsing && !_UrlFragment.empty())
+		{
+			doBrowseAnchor(_UrlFragment);
+			_UrlFragment.clear();
+		}
 	}
 
 	// ***************************************************************************
@@ -3224,6 +3278,25 @@ namespace NLGUI
 		}
 
 		return keep;
+	}
+
+	// ***************************************************************************
+
+	void CGroupHTML::registerAnchor(CInterfaceElement* elm)
+	{
+		if (_AnchorName.size() > 0)
+		{
+			for(uint32 i=0; i <  _AnchorName.size(); ++i)
+			{
+				// filter out duplicates and register only first
+				if (!_AnchorName[i].empty() && _Anchors.count(_AnchorName[i]) == 0)
+				{
+					_Anchors[_AnchorName[i]] = elm;
+				}
+			}
+
+			_AnchorName.clear();
+		}
 	}
 
 	// ***************************************************************************
@@ -3380,6 +3453,8 @@ namespace NLGUI
 					newLink->setMultiLine(true);
 					newLink->setModulateGlobalColor(getGlobalColor());
 					// newLink->setLineAtBottom (true);
+
+					registerAnchor(newLink);
 
 					if (getA() && !newLink->Link.empty())
 					{
@@ -3666,6 +3741,8 @@ namespace NLGUI
 		_TR.clear();
 		_Forms.clear();
 		_Groups.clear();
+		_Anchors.clear();
+		_AnchorName.clear();
 		_CellParams.clear();
 		_Title = false;
 		_TextArea = false;
@@ -3746,6 +3823,8 @@ namespace NLGUI
 			_Paragraph->getParent ()->delGroup(_Paragraph);
 			_Paragraph = NULL;
 		}
+
+		registerAnchor(group);
 
 		if (!_DivName.empty())
 		{
@@ -4355,6 +4434,22 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	void CGroupHTML::doBrowseAnchor(const std::string &anchor)
+	{
+		CInterfaceElement *pIE = _Anchors.find(anchor)->second;
+		if (pIE)
+		{
+			// hotspot depends on vertical/horizontal scrollbar
+			CCtrlScroll *pSB = getScrollBar();
+			if (pSB)
+			{
+				pSB->ensureVisible(pIE, Hotspot_Tx, Hotspot_Tx);
+			}
+		}
+	}
+
+	// ***************************************************************************
+
 	void CGroupHTML::draw ()
 	{
 		CGroupScrollText::draw ();
@@ -4762,7 +4857,13 @@ namespace NLGUI
 
 		beginElement(element_number, present, value);
 		if (element_number == HTML_A)
+		{
+			// ingame lua scripts from browser are using <a href="#http://..."> url scheme
+			// reason unknown
+			_LuaHrefHack = true;
 			addLink(element_number, present, value);
+			_LuaHrefHack = false;
+		}
 
 		return 0;
 	}
