@@ -27214,3 +27214,11 @@ uiVRGeneral	[Options de Réalité Virtuelle]
 // INDEX 6460
 uigcVR	[REALITE VIRTUELLE]
 
+// HASH_VALUE 9C58F47FED081B8E
+// INDEX 6461
+uigcFxAnisotropicFilter	[Filtrage Anisotrope :]
+
+// HASH_VALUE 6498F4386498F438
+// INDEX 6462
+uigcFxAnisotropicFilterNone	[Aucun]
+
