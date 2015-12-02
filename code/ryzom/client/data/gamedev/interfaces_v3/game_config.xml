@@ -183,7 +183,7 @@
             posref="BL BL"
             scale="true"
             y="4"
-            w="86"
+            w="110"
             h="2"
             texture="W_line_hor2.tga" />
       <view type="text"
@@ -202,7 +202,7 @@
             posref="MM MM"
             x="0"
             y="-1"
-            w="86"
+            w="110"
             h="8"
             vertical="false"
             align="L"
@@ -246,7 +246,7 @@
             posref="BL BL"
             scale="true"
             y="4"
-            w="86"
+            w="110"
             h="2"
             texture="W_line_hor2.tga" />
       <view type="text"
@@ -265,7 +265,7 @@
             posref="MM MM"
             x="0"
             y="-1"
-            w="86"
+            w="110"
             h="8"
             vertical="false"
             align="L"
@@ -378,7 +378,7 @@
             y="-18"
             value="">
     <group id="#id"
-           w="160"
+           w="184"
            h="20"
            posparent="#posparent"
            posref="#posref"
@@ -399,7 +399,7 @@
              posref="MR MR"
              x="0"
              y="0"
-             w="90"
+             w="120"
              h="20"
              value="#value">
         <instance template="combo_box_def1" />
@@ -916,7 +916,7 @@
         </group>
         <group type="combo_box"
                id="video_modes"
-               w="90"
+               w="100"
                h="20"
                value="UI:TEMP:VID_MODE"
                posparent="fullscreen"
