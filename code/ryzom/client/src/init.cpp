@@ -1115,6 +1115,7 @@ void prelogInit()
 		iconSizes.push_back(256);
 		iconSizes.push_back(128);
 		iconSizes.push_back(96);
+		iconSizes.push_back(64);
 		iconSizes.push_back(48);
 		iconSizes.push_back(32);
 		iconSizes.push_back(24);

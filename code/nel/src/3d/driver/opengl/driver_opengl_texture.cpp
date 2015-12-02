@@ -2129,6 +2129,22 @@ void		CDriverGL::setAnisotropicFilter(sint filtering)
 }
 
 // ***************************************************************************
+uint		CDriverGL::getAnisotropicFilter() const
+{
+	H_AUTO_OGL(CDriverGL_getAnisotropicFilter);
+
+	return (uint)_AnisotropicFilter;
+}
+
+// ***************************************************************************
+uint		CDriverGL::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_OGL(CDriverGL_getAnisotropicFilterMaximum);
+
+	return (uint)_Extensions.EXTTextureFilterAnisotropicMaximum;
+}
+
+// ***************************************************************************
 void		CDriverGL::forceTextureResize(uint divisor)
 {
 	H_AUTO_OGL(CDriverGL_forceTextureResize)

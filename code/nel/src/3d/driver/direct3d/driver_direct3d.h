@@ -879,6 +879,8 @@ public:
 	virtual void			disableHardwareTextureShader();
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 	virtual void			forceTextureResize(uint divisor);
 
 	// Driver information

@@ -1481,6 +1481,20 @@ void			CDriverUser::setAnisotropicFilter(sint filter)
 	_Driver->setAnisotropicFilter(filter);
 }
 
+uint			CDriverUser::getAnisotropicFilter() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilter();
+}
+
+uint			CDriverUser::getAnisotropicFilterMaximum() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilterMaximum();
+}
+
 void			CDriverUser::forceTextureResize(uint divisor)
 {
 	NL3D_HAUTO_UI_DRIVER;

@@ -2103,6 +2103,24 @@ void CDriverD3D::setAnisotropicFilter(sint filter)
 
 // ***************************************************************************
 
+uint CDriverD3D::getAnisotropicFilter() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilter);
+
+	return _AnisotropicFilter;
+}
+
+// ***************************************************************************
+
+uint CDriverD3D::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilterMaximum);
+
+	return _MaxAnisotropy;
+}
+
+// ***************************************************************************
+
 void CDriverD3D::forceTextureResize(uint divisor)
 {
 	H_AUTO_D3D(CDriverD3D_forceTextureResize);
