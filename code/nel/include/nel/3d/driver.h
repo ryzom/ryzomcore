@@ -415,6 +415,16 @@ public:
 	 */
 	virtual void			setAnisotropicFilter(sint filter) = 0;
 
+	/**
+	 * Get current anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilter() const = 0;
+
+	/**
+	 * Get maximum anisotropic filter value
+	 */
+	virtual uint			getAnisotropicFilterMaximum() const = 0;
+
 	/** if !=1, force mostly all the textures (but TextureFonts lightmaps, interfaces  etc..)
 	 *	to be divided by Divisor (2, 4, 8...)
 	 *	Default is 1.

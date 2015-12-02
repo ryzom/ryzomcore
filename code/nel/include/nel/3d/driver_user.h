@@ -474,6 +474,8 @@ public:
 	virtual TPolygonMode 	getPolygonMode ();
 	virtual void			forceDXTCCompression(bool dxtcComp);
 	virtual void			setAnisotropicFilter(sint filter);
+	virtual uint			getAnisotropicFilter() const;
+	virtual uint			getAnisotropicFilterMaximum() const;
 	virtual void			forceTextureResize(uint divisor);
 	virtual bool			setMonitorColorProperties (const CMonitorColorProperties &properties);
 	// @}
