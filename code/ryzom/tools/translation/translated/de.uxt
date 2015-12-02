@@ -27231,3 +27231,27 @@ uittChooseLMFiberColor	[Farbe für 'Faser'-Landmarke auswählen]
 // INDEX 6456
 uiSelectShortcutBar2	[Wähle Tastaturkürzelbalken #2]
 
+// HASH_VALUE 5854C7639701383B
+// INDEX 6457
+uiFXAA	[Schalte FXAA frei]
+
+// HASH_VALUE DC75700D1144549D
+// INDEX 6458
+uiVREnable	[Schalte VR frei]
+
+// HASH_VALUE EFCBC4603996C0AE
+// INDEX 6459
+uiVRGeneral	[Virtual-Reality- Optionen]
+
+// HASH_VALUE CF42883683C0EC33
+// INDEX 6460
+uigcVR	[VIRTUAL REALITY]
+
+// HASH_VALUE 9C58F47FED081B8E
+// INDEX 6461
+uigcFxAnisotropicFilter	[Anisotropischer Filter:]
+
+// HASH_VALUE 6498F4386498F438
+// INDEX 6462
+uigcFxAnisotropicFilterNone	[Keiner]
+
