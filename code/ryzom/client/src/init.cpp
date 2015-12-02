@@ -761,6 +761,35 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	}
 }
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+static bool addRyzomIconBitmap(const std::string &directory, vector<CBitmap> &bitmaps)
+{
+	if (CFile::isDirectory(directory))
+	{
+		// build filename from directory and default ryzom client icon name
+		std::string filename = NLMISC::toString("%s/%s.png", directory.c_str(), RYZOM_CLIENT_ICON);
+
+		if (CFile::fileExists(filename))
+		{
+			CIFile file;
+
+			if (file.open(filename))
+			{
+				CBitmap bitmap;
+
+				if (bitmap.load(file))
+				{
+					bitmaps.push_back(bitmap);
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+#endif
+
 //---------------------------------------------------
 // prelogInit :
 // Initialize the application before login
@@ -1065,48 +1094,55 @@ void prelogInit()
 		Driver->setWindowTitle(CI18N::get("TheSagaOfRyzom"));
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		// add all existing icons
-		vector<string> directories;
+		// add all existing directory prefixes
+		vector<string> directoryPrefixes;
 
-		// system directories
-		directories.push_back("/usr/share/icons/hicolor/256x256/apps");
-		directories.push_back("/usr/share/icons/hicolor/128x128/apps");
-		directories.push_back("/usr/share/icons/hicolor/96x96/apps");
-		directories.push_back("/usr/share/icons/hicolor/48x48/apps");
-		directories.push_back("/usr/share/icons/hicolor/32x32/apps");
-		directories.push_back("/usr/share/icons/hicolor/24x24/apps");
-		directories.push_back("/usr/share/icons/hicolor/22x22/apps");
-		directories.push_back("/usr/share/icons/hicolor/16x16/apps");
-		directories.push_back("/usr/share/pixmaps");
+		// user local directory prefix (~/.local)
+		const char* homeDirectory = getenv("HOME");
 
-		// local directories
-		directories.push_back("~/.local/share/icons/hicolor/256x256/apps");
-		directories.push_back("~/.local/share/icons/hicolor/128x128/apps");
-		directories.push_back("~/.local/share/icons/hicolor/96x96/apps");
-		directories.push_back("~/.local/share/icons/hicolor/48x48/apps");
-		directories.push_back("~/.local/share/icons/hicolor/32x32/apps");
-		directories.push_back("~/.local/share/icons/hicolor/24x24/apps");
-		directories.push_back("~/.local/share/icons/hicolor/22x22/apps");
-		directories.push_back("~/.local/share/icons/hicolor/16x16/apps");
-		directories.push_back("~/.local/share/pixmaps");
+		if (homeDirectory)
+			directoryPrefixes.push_back(CPath::standardizePath(homeDirectory) + ".local");
 
-		// check if an icon is present in registered paths
-		directories.push_back(".");
+		// system local directory prefix (/usr/local)
+		directoryPrefixes.push_back("/usr/local");
+
+		// system directory prefix (/usr)
+		directoryPrefixes.push_back("/usr");
+
+		// all supported icon sizes
+		vector<uint> iconSizes;
+		iconSizes.push_back(512);
+		iconSizes.push_back(256);
+		iconSizes.push_back(128);
+		iconSizes.push_back(96);
+		iconSizes.push_back(48);
+		iconSizes.push_back(32);
+		iconSizes.push_back(24);
+		iconSizes.push_back(22);
+		iconSizes.push_back(16);
 
 		vector<CBitmap> bitmaps;
 
-		for(size_t i = 0; i < directories.size(); ++i)
+		// process all icon sizes
+		for(size_t j = 0; j < iconSizes.size(); ++j)
 		{
-			std::string filename = NLMISC::toString("%s/%s.png", directories[i].c_str(), RYZOM_CLIENT_ICON);
-
-			CIFile file;
-
-			if (CFile::fileExists(filename) && file.open(filename))
+			// process all directory prefixes
+			for(size_t i = 0; i < directoryPrefixes.size(); ++i)
 			{
-				CBitmap bitmap;
-				if (bitmap.load(file))
-					bitmaps.push_back(bitmap);
+				uint size = iconSizes[j];
+
+				// build directory where to look for icon
+				std::string directory = toString("%s/share/icons/hicolor/%ux%u/apps", directoryPrefixes[i].c_str(), size, size);
+
+				// if found, skip other directories for this icon size
+				if (addRyzomIconBitmap(directory, bitmaps)) break;
 			}
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in current directory
+			addRyzomIconBitmap(".", bitmaps);
 		}
 
 		Driver->setWindowIcon(bitmaps);
