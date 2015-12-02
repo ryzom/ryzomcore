@@ -3034,7 +3034,7 @@ public:
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
-		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
+		pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
 		if( pCB )
 		{
 			pCB->resetTexts();
@@ -3050,6 +3050,7 @@ public:
 		{
 			pBut->setPushed(ClientCfg.VREnable);
 		}
+
 		updateVRDevicesComboUI(ClientCfg.VREnable);
 
 		// init the mode in DB
@@ -3060,6 +3061,7 @@ public:
 			texMode= HighTextureMode;
 		else
 			texMode= NormalTextureMode;
+
 		// -1 is important to indicate we set this value in edit mode
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(-1);
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(texMode);
@@ -3485,7 +3487,7 @@ class CHandlerGameConfigApply : public IActionHandler
 
 		// *** Apply the language code
 		// only if not in "work" language mode (else strange requestReboot)
-		if(ClientCfg.LanguageCode!="wk")
+		if (ClientCfg.LanguageCode!="wk")
 		{
 			sint newOne = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
 			//string newVal = (newOne==2)?"de":(newOne==1)?"fr":"en";

@@ -59,30 +59,9 @@ void displayDebugUIUnderMouse();
 void inGamePatchUncompleteWarning();
 
 
-// active/desactive bloom config interface
+// enable/disable bloom config interface
 void initBloomConfigUI();
 
 #endif // CL_MAIN_LOOP_H
 
 /* End of main_loop.h */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

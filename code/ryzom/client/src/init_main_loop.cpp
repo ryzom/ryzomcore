@@ -1340,10 +1340,10 @@ void initMainLoop()
 	// init CSessionBrowserImpl
 	CSessionBrowserImpl::getInstance().init(CLuaManager::getInstance().getLuaState());
 
-	// active/desactive welcome window
+	// enable/disable welcome window
 	initWelcomeWindow();
 
-	// active/desactive bloom config interface
+	// enable/disable bloom config interface
 	initBloomConfigUI();
 
 	// popup to offer hardware cursor activation
@@ -1364,7 +1364,7 @@ void destroyLoadingBitmap ()
 		// Destroy the Loading Background.
 		Driver->deleteTextureFile(LoadingBitmap);
 		LoadingBitmap = NULL;
-		LoadingBitmapFilename = "";
+		LoadingBitmapFilename.clear();
 		LoadingMaterial.setTexture (0, NULL);
 	}
 	if (LoadingBitmapFull && Driver)
