@@ -1078,7 +1078,7 @@
                 tooltip_parent="win" />
           <!-- Yes order is strange, but don't want to modify all the ugly hardcoded code -->
           <ctrl style="tab_button_new"
-                id="tab7"
+                id="tab6"
                 posparent="tab3"
                 group="content:cb:universe"
                 hardtext="uitabChatUniverse"
@@ -1090,7 +1090,7 @@
                 tooltip_parent="win" />
           <ctrl style="tab_button_new"
                 id="tab4"
-                posparent="tab7"
+                posparent="tab6"
                 group="content:cb:sysinfo"
                 hardtext="uitabChatSysInfo"
                 onclick_r="set"
