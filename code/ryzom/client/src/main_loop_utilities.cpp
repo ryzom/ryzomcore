@@ -238,6 +238,12 @@ void updateFromClientCfg()
 	}
 
 	//---------------------------------------------------
+	if (ClientCfg.AnisotropicFilter != LastClientCfg.AnisotropicFilter)
+	{
+		Driver->setAnisotropicFilter(ClientCfg.AnisotropicFilter);
+	}
+
+	//---------------------------------------------------
 	if (ClientCfg.FXAA != LastClientCfg.FXAA)
 	{
 		if (ClientCfg.FXAA)
