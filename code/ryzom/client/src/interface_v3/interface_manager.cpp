@@ -1447,9 +1447,6 @@ void CInterfaceManager::updateFrameEvents()
 		// Update contact list with incoming server string ids
 		PeopleInterraction.updateWaitingContacts();
 
-		// Connect and receive/send to the yubo chat
-		checkYuboChat();
-
 		// Update string if some waiting
 		CEncyclopediaManager::getInstance()->updateAllFrame();
 
@@ -3203,67 +3200,6 @@ CInterfaceElement *getInterfaceResource(const std::string &key)
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	return CWidgetManager::getInstance()->getElementFromId (key);
-}
-
-
-// ***************************************************************************
-void	CInterfaceManager::sendStringToYuboChat(const ucstring &str)
-{
-	// If the yubo chat really connected
-	if(_YuboChat.connected())
-	{
-		_YuboChat.send(str);
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::checkYuboChat()
-{
-	// flush the receive queue
-	if(_YuboChat.connected())
-	{
-		std::list<ucstring>		toReceive;
-		_YuboChat.receive(toReceive);
-		while(!toReceive.empty())
-		{
-			PeopleInterraction.ChatInput.YuboChat.displayMessage(toReceive.front(), CRGBA::White, 2, NULL);
-			toReceive.pop_front();
-		}
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::connectYuboChat()
-{
-	// force disconnection if was connected
-	_YuboChat.disconnect();
-
-	uint32 KlientChatPort = 0;
-
-	extern TSessionId HighestMainlandSessionId;
-	switch(HighestMainlandSessionId.asInt())
-	{
-	case 101: KlientChatPort = 6002; break;	// fr
-	case 102: KlientChatPort = 6003; break;	// de
-	case 103: KlientChatPort = 6001; break;	// en
-	case 301: KlientChatPort = 4000; break;	// yubo
-	default:
-		if(!ClientCfg.KlientChatPort.empty())
-			fromString(ClientCfg.KlientChatPort, KlientChatPort);
-		break;
-	}
-
-	// check if must reconnect
-	if(KlientChatPort != 0 && !_YuboChat.connected())
-	{
-		// NB: hard code url, to avoid "client.cfg trojan"
-		// (a client.cfg with an url pointing to a hacker site, to grab login/password)
-		extern std::string LoginLogin, LoginPassword;
-		_YuboChat.connect(string("chat.ryzom.com:")+toString(KlientChatPort), LoginLogin, LoginPassword);
-
-		// Inform the interface that the chat is present
-		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:YUBO_CHAT_PRESENT")->setValue32(1);
-	}
 }
 
 // ***************************************************************************

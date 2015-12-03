@@ -627,9 +627,6 @@ void CChatGroupWindow::displayMessage(const ucstring &msg, NLMISC::CRGBA col, CC
 					}
 				}
 				break;
-
-				// NB: the yubo chat cannot be in a user chat
-			case CChatGroup::yubo_chat:	gl = NULL;	break;
 		}
 
 		if (gl != NULL)
@@ -1039,10 +1036,6 @@ void CChatGroupWindow::getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 
 		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:region:text_list"));
 		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab1"));
 		break;
-	case CChatGroup::yubo_chat:
-		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:yubo_chat:text_list"));
-		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab6"));
-		break;
 	case CChatGroup::dyn_chat:
 		{
 			// use dynamicChatDbIndex to get the wanted tab button/group
@@ -1052,7 +1045,7 @@ void CChatGroupWindow::getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 
 		break;
 	case CChatGroup::universe:
 		gl = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:universe:text_list"));
-		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab7"));
+		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab6"));
 		break;
 	}
 }

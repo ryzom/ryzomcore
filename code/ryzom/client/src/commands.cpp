@@ -159,14 +159,6 @@ void releaseCommands()
 // COMMANDS //
 //////////////
 
-// connect to the support chat
-NLMISC_COMMAND(supportChat, "connect to the external support chat", "")
-{
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->connectYuboChat();
-	return true;
-}
-
 // 'follow' : To Follow the target.
 NLMISC_COMMAND(follow, "Follow the target", "")
 {
