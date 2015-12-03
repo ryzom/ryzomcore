@@ -1,6 +1,6 @@
 ﻿// HASH_VALUE 6B09AC86E0363C89
 // INDEX 0
-LanguageName	[Inglés]
+LanguageName	[Español]
 
 // HASH_VALUE 3259CCA76B39A0A8
 // INDEX 1
@@ -28,19 +28,19 @@ ArrivedPureWater	[Has llegado a la villa de Etoole en la tierra de las aguas pur
 
 // HASH_VALUE 85F15671AEAF648A
 // INDEX 7
-NoCastOnMount	[Imposible lanzar un hechizo cuando se monta.]
+NoCastOnMount	[Imposible lanzar un hechizo cuando se esta montando.]
 
 // HASH_VALUE 24F2B967C4563470
 // INDEX 8
-NoCreateOnMount	[Imposible lanzar un hechizo cuando se monta.]
+NoCreateOnMount	[Imposible lanzar un hechizo cuando se está montando.]
 
 // HASH_VALUE 83BA2A1EAEFC68ED
 // INDEX 9
-NoTeleportOnMount	[Imposible teletransportar a un jugador cuando se monta.]
+NoTeleportOnMount	[Imposible teletransportar a un jugador cuando se está montando.]
 
 // HASH_VALUE E9194A956170D128
 // INDEX 10
-NoMountWhenSpell	[Imposible montar cuando se crea o lanza un hechizo.]
+NoMountWhenSpell	[Imposible montar cuando se crea o se lanza un hechizo.]
 
 // HASH_VALUE 5565E4501C8BDC65
 // INDEX 11
@@ -48,7 +48,7 @@ PropertyNotFound	[Propiedad no encontrada.]
 
 // HASH_VALUE 7338BC59AC44A449
 // INDEX 12
-uittQuitRyzom	[Dejar a Ryzom]
+uittQuitRyzom	[Abandonar Ryzom]
 
 // HASH_VALUE 6187AF81E9FAF455
 // INDEX 13
@@ -60,7 +60,7 @@ uittQuitCancel	[Volver al Juego]
 
 // HASH_VALUE A8C4945353A41F40
 // INDEX 15
-uittQuitCancelEditor	[Regresar al Editor]
+uittQuitCancelEditor	[Volver al Editor]
 
 // HASH_VALUE 6A18C81B8FE8F4B6
 // INDEX 16
@@ -68,7 +68,7 @@ uittLaunchEditor	[Editor de Escenario]
 
 // HASH_VALUE EF767B666BB4667F
 // INDEX 17
-uittLeaveEditor	[Dejar al Editor]
+uittLeaveEditor	[Dejar el Editor]
 
 // HASH_VALUE 48D0B43C48D0B43C
 // INDEX 18
@@ -80,7 +80,7 @@ uittCancel	[Cancelar]
 
 // HASH_VALUE 87A8142AE949CC6B
 // INDEX 20
-uiDistanceto	[Distancia para Alcanzar al Objetivo]
+uiDistanceto	[Distancia hasta el Objetivo de Brújula]
 
 // HASH_VALUE 25971C7F6077008C
 // INDEX 21
@@ -108,19 +108,19 @@ Craftsman	[Artesano]
 
 // HASH_VALUE FB5FBC3D8F01EEF7
 // INDEX 27
-uiPlayerTitle	[TITULO :]
+uiPlayerTitle	[TÍTULO :]
 
 // HASH_VALUE 4450141844501418
 // INDEX 28
-uiFameTitle	[FAMA]
+uiFameTitle	[Fama]
 
 // HASH_VALUE 9CE3947E9A96E7AC
 // INDEX 29
-MeleeFighter	[Luchador de Pelea]
+MeleeFighter	[Luchador Cuerpo a Cuerpo]
 
 // HASH_VALUE 1B5484851A5603AE
 // INDEX 30
-RangeFighter	[Luchador de Alcance]
+RangeFighter	[Luchador a Distancia]
 
 // HASH_VALUE D658F468E4B6BC8C
 // INDEX 31
@@ -128,11 +128,11 @@ AttackCaster	[Lanzador de Ataque]
 
 // HASH_VALUE 57F8006E22E6F080
 // INDEX 32
-BufferCaster	[Lanzador de Parachoques]
+BufferCaster	[Lanzador de Defensa]
 
 // HASH_VALUE D508C07AE1E5207B
 // INDEX 33
-HealerCaster	[Lanzador de Hechizo de Curación]
+HealerCaster	[Sanador]
 
 // HASH_VALUE A3E80493AB3B04AE
 // INDEX 34
@@ -140,15 +140,15 @@ Harvester	[Recolector]
 
 // HASH_VALUE 609C5434749814A0
 // INDEX 35
-Shopkeeper	[Comerciante]
+Shopkeeper	[Tendero]
 
 // HASH_VALUE E5F6F07EDAC7FC7F
 // INDEX 36
-Faber	[Crafter]
+Faber	[Artesano]
 
 // HASH_VALUE D1677B8BA053A484
 // INDEX 37
-IreFighter	[Luchador de la Ira]
+IreFighter	[Berserker]
 
 // HASH_VALUE 2CD9F479281AA08E
 // INDEX 38
@@ -156,11 +156,11 @@ Swashbuckler	[Espadachín]
 
 // HASH_VALUE 29257B6714247B8E
 // INDEX 39
-KamicFist	[Puño Kamic]
+KamicFist	[Puño Kámico]
 
 // HASH_VALUE 27A6AB4A67B47A6D
 // INDEX 40
-BladeBearer	[Portador de Cuchilla]
+BladeBearer	[Portacuchillos]
 
 // HASH_VALUE E6A7E84B9DE3D451
 // INDEX 41
@@ -172,7 +172,7 @@ Runner	[Corredor]
 
 // HASH_VALUE 2DB8689FE4A880AB
 // INDEX 43
-Scout	[Scout]
+Scout	[Explorador]
 
 // HASH_VALUE A7D7242A61A3003B
 // INDEX 44
@@ -180,11 +180,11 @@ FireLance	[Lancero de Fuego]
 
 // HASH_VALUE AE18FC6AD9166B98
 // INDEX 45
-ScarletHunter	[Cazador de Escarlata]
+ScarletHunter	[Cazador Escarlata]
 
 // HASH_VALUE AB86E36AAFB49A91
 // INDEX 46
-GreenHunter	[Cazador de lo Verde]
+GreenHunter	[Cazador Verde]
 
 // HASH_VALUE AEB59B87E1E6B868
 // INDEX 47
@@ -196,11 +196,11 @@ ShadowHunter	[Cazador de las Sombras]
 
 // HASH_VALUE 681C945C70582494
 // INDEX 49
-Witherer	[Witherer]
+Witherer	[Marchitador]
 
 // HASH_VALUE AD68F4666D750085
 // INDEX 50
-Fouler	[Viciado]
+Fouler	[Pestilente]
 
 // HASH_VALUE 6438147DEAEB3CC5
 // INDEX 51
@@ -208,7 +208,7 @@ Disturber	[Perturbador]
 
 // HASH_VALUE DF3760AB6287009A
 // INDEX 52
-KamicFury	[Furia Kamic]
+KamicFury	[Furia Kámica]
 
 // HASH_VALUE 6C96827EE23ACCA4
 // INDEX 53
@@ -224,7 +224,7 @@ WindGuardian	[Guardián del Viento]
 
 // HASH_VALUE 5768987DAB149356
 // INDEX 56
-KamicGuardian	[Guardián Kamic]
+KamicGuardian	[Guardián Kámico]
 
 // HASH_VALUE EE09DC9C65D7A4A9
 // INDEX 57
@@ -248,7 +248,7 @@ SapCristal	[Cristal de Savia]
 
 // HASH_VALUE A85654A521A9586D
 // INDEX 62
-SandCaravanner	[Karavaneer de la Arena]
+SandCaravanner	[Caravanero de la Arena]
 
 // HASH_VALUE EA1C14386ED894BC
 // INDEX 63
@@ -256,19 +256,19 @@ ImperialSupplier	[Proveedor Imperial]
 
 // HASH_VALUE EA0AC8A32718788A
 // INDEX 64
-Steward	[Mayordomo o Administrador]
+Steward	[Mayordomo]
 
 // HASH_VALUE A8C8806C26D5C489
 // INDEX 65
-Hawker	[Halcón o Vendedor Ambulante]
+Hawker	[Vendedor Ambulante]
 
 // HASH_VALUE 6A32BC93D54A13A4
 // INDEX 66
-melee_warrior	[Luchador de Pelea]
+melee_warrior	[Luchador Cuerpo a Cuerpo]
 
 // HASH_VALUE E9A3AC9A550A2FA6
 // INDEX 67
-range_warrior	[Guerrero de Alcance]
+range_warrior	[Luchador a Distancia]
 
 // HASH_VALUE ABEA84B3AB3B04AE
 // INDEX 68
@@ -280,15 +280,15 @@ attack_magician	[Lanzador de Ataque]
 
 // HASH_VALUE 2498B07FA0E287A1
 // INDEX 70
-buffer_magician	[Lanzador de Parachoque]
+buffer_magician	[Lanzador de Defensa]
 
 // HASH_VALUE A6A85C751E4287A1
 // INDEX 71
-healer_magician	[Lanzador de Hechizo de Curación]
+healer_magician	[Sanador]
 
 // HASH_VALUE E5F8709EE2C97C9F
 // INDEX 72
-faber	[Crafter]
+faber	[Artesano]
 
 // HASH_VALUE 5A8754799717944F
 // INDEX 73
@@ -296,13 +296,13 @@ FireMaster	[Maestro del Fuego]
 
 // HASH_VALUE DC16347895777847
 // INDEX 74
-LakeMaster	[Maestro del Lago]
+LakeMaster	[Maestro de los Lagos]
 
 // HASH_VALUE DA9AB6B3E228F4CD
 // INDEX 75
 agp_trouble	[La unidad ha fallado en asignar memoria AGP. Esto puede resultar en problemas de rendimiento y visualización.\n
 	        \n
-	       Quieres saber más?]
+	       ¿Quieres saber más?]
 
 // HASH_VALUE 5A56887FA8E007AF
 // INDEX 76
@@ -310,11 +310,11 @@ can_t_load_the_display_driver	[No puede cargar la unidad de visualización]
 
 // HASH_VALUE D236BC3F590A766E
 // INDEX 77
-can_t_initialise_the_mouse	[No puede iniciar el mouse]
+can_t_initialise_the_mouse	[No puede iniciar el ratón]
 
 // HASH_VALUE 1618E42EED39DF64
 // INDEX 78
-can_t_initialise_the_keyboard	[No puede iniciar el tablero]
+can_t_initialise_the_keyboard	[No puede iniciar el teclado]
 
 // HASH_VALUE 553984846E949284
 // INDEX 79
@@ -334,7 +334,7 @@ ___faber_skill_sep___	[--------------------------------]
 
 // HASH_VALUE 60DC943460DC9434
 // INDEX 83
-Misc	[Varios]
+Misc	[Miscelaneo]
 
 // HASH_VALUE 4871A044C7026C0D
 // INDEX 84
@@ -342,7 +342,7 @@ CivilizationKnowledge	[CONOCIMIENTO DE LA CIVILIZACIÓN]
 
 // HASH_VALUE 4841BB27C9523633
 // INDEX 85
-FaberCompetences	[HABILIDADES DE FABRICACIÓN]
+FaberCompetences	[HABILIDADES DE ARTESANÍA]
 
 // HASH_VALUE 8A6188317CC10728
 // INDEX 86
@@ -354,39 +354,39 @@ HarvestCompetences	[HABILIDADES DE RECOLECCIÓN]
 
 // HASH_VALUE C4E184020E01DB03
 // INDEX 88
-MagicAlterationCompetences	[HABILIDADES PARA LA ALTERACIÓN DE LA MAGIA]
+MagicAlterationCompetences	[HABILIDADES DE ALTERACIÓN DE LA MAGIA]
 
 // HASH_VALUE 8C22400D3F10F7E5
 // INDEX 89
-MagicAttackCompetences	[HABILIDADES PARA LOS ATAQUES MÁGICOS]
+MagicAttackCompetences	[HABILIDADES DE ATAQUES MÁGICOS]
 
 // HASH_VALUE C9D1CB27C7421A21
 // INDEX 90
-MagicGenericCompetences	[HABILIDADES DE MAGIA GENÉRICAS]
+MagicGenericCompetences	[HABILIDADES GENÉRICAS DE MAGIA]
 
 // HASH_VALUE 0A50E71A08C13618
 // INDEX 91
-MagicHealingCompetences	[HABILIDADES DE MAGIA CURATIVAS]
+MagicHealingCompetences	[HABILIDADES DE MAGIA CURATIVA]
 
 // HASH_VALUE 47CF70244E3EEF2F
 // INDEX 92
-MeleeFightingCompetences	[HABILIDADES PARA LA LUCHA CUERPO A CUERPO]
+MeleeFightingCompetences	[HABILIDADES DE COMBATE CUERPO A CUERPO]
 
 // HASH_VALUE C7EF602BCEFE032F
 // INDEX 93
-RangeFightingCompetences	[HABILIDADES PARA COMBATE DE ALCANCE]
+RangeFightingCompetences	[HABILIDADES DE COMBATE A DISTANCIA]
 
 // HASH_VALUE 8B00B8317F024F30
 // INDEX 94
-TradingCompetences	[HABILIDADES DE NEGOCIACIÓN]
+TradingCompetences	[HABILIDADES DE COMERCIO]
 
 // HASH_VALUE C840E80D8B307442
 // INDEX 95
-TrainingCharacteristics	[CARACTER?STICAS DE ENTRENAMIENTO]
+TrainingCharacteristics	[CARACTERÍSTICAS DE ENTRENAMIENTO]
 
 // HASH_VALUE C882C0098B3FD844
 // INDEX 96
-TrainingScores	[ESTAD?STICAS DE ENTRENAMIENTO]
+TrainingScores	[ESTADÍSTICAS DE ENTRENAMIENTO]
 
 // HASH_VALUE 6E074C942238548F
 // INDEX 97
@@ -394,11 +394,11 @@ ifARMOR	[Armadura]
 
 // HASH_VALUE A6F76B60A6A65678
 // INDEX 98
-ifMELEE_WEAPON	[Arma de lucha cuerpo a cuerpo]
+ifMELEE_WEAPON	[Arma cuerpo a cuerpo]
 
 // HASH_VALUE A6374B6A26C6467D
 // INDEX 99
-ifRANGE_WEAPON	[Arma de alcanze]
+ifRANGE_WEAPON	[Arma a distancia]
 
 // HASH_VALUE 6C58D4046C58D404
 // INDEX 100
@@ -414,11 +414,11 @@ ifSHIELD	[Escudo]
 
 // HASH_VALUE ABD69C386699CBA8
 // INDEX 103
-ifCRAFTING_TOOL	[Herramienta de Fabricación]
+ifCRAFTING_TOOL	[Herramienta de Artesanía]
 
 // HASH_VALUE 5D8B9449C8ABDC66
 // INDEX 104
-ifHARVEST_TOOL	[Herramienta de Cosecha o Recolección]
+ifHARVEST_TOOL	[Herramienta de Recolección]
 
 // HASH_VALUE 23C76797E3D3545E
 // INDEX 105
@@ -430,11 +430,11 @@ ifTRAINING_TOOL	[Herramienta de Entrenamiento]
 
 // HASH_VALUE 4850940448509404
 // INDEX 107
-ifAI	[AI]
+ifAI	[IA]
 
 // HASH_VALUE AB08E0812D2794A8
 // INDEX 108
-ifBRICK	[Estancia]
+ifBRICK	[Ladrillo]
 
 // HASH_VALUE 6CB9D06B2BC6A89B
 // INDEX 109
@@ -446,11 +446,11 @@ ifCARRION	[Carroña]
 
 // HASH_VALUE 5126B04C19D4C86B
 // INDEX 111
-ifBAG	[Bag]
+ifBAG	[Bolsa]
 
 // HASH_VALUE 27C8509521485882
 // INDEX 112
-ifSTACK	[Montón o Pila]
+ifSTACK	[Montón]
 
 // HASH_VALUE 9FC85F8E22B2545C
 // INDEX 113
@@ -462,7 +462,7 @@ ifDEAD_SEED	[Semilla Muerta]
 
 // HASH_VALUE 64D8F41864D8F418
 // INDEX 115
-ifFOOD	[Alimento]
+ifFOOD	[Comida]
 
 // HASH_VALUE 6EBAB88B21086CA1
 // INDEX 116
@@ -470,7 +470,7 @@ ifJEWELRY	[Joyas]
 
 // HASH_VALUE 64185450749CF4C0
 // INDEX 117
-ifTELEPORT	[Teletransportar]
+ifTELEPORT	[Teleportación]
 
 // HASH_VALUE 62C7348CE738649D
 // INDEX 118
@@ -510,7 +510,7 @@ ioRefugee	[Refugiado]
 
 // HASH_VALUE E8BAAC7F1ED7F090
 // INDEX 127
-ioKaravan	[Karavan]
+ioKaravan	[La Karavan]
 
 // HASH_VALUE 6858142C6858142C
 // INDEX 128
@@ -550,15 +550,15 @@ wtHANDS	[Manos]
 
 // HASH_VALUE 60B6647653438FAC
 // INDEX 137
-wtLIGHT_GUN	[Pistola liviana o ligera]
+wtLIGHT_GUN	[Pistola Ligera]
 
 // HASH_VALUE 1F732057DF73A89B
 // INDEX 138
-wtMEDIUM_GUN	[Pistola mediana]
+wtMEDIUM_GUN	[Pistola Mediana]
 
 // HASH_VALUE 60D644729474C3B5
 // INDEX 139
-wtHEAVY_GUN	[Heavy gun]
+wtHEAVY_GUN	[Pistola Pesada]
 
 // HASH_VALUE EE09DC9C65D7A4A9
 // INDEX 140
@@ -578,19 +578,19 @@ stLARGE_SHIELD	[Escudo grande]
 
 // HASH_VALUE 7058C44C649894A0
 // INDEX 144
-dtSLASHING	[Cuchillada]
+dtSLASHING	[Cortante]
 
 // HASH_VALUE 705894406498948C
 // INDEX 145
-dtPIERCING	[Perforación]
+dtPIERCING	[Perforante]
 
 // HASH_VALUE 30276090A3884499
 // INDEX 146
-dtBLUNT	[Desbaratar o hacer pedazos]
+dtBLUNT	[Contundente]
 
 // HASH_VALUE 20A994876787A8A4
 // INDEX 147
-dtROT	[Rot]
+dtROT	[Podredumbre]
 
 // HASH_VALUE 6458340464583404
 // INDEX 148
@@ -610,11 +610,11 @@ dtPOISON	[Veneno]
 
 // HASH_VALUE 1F6AB4852DB6D0BD
 // INDEX 152
-dtELECTRICITY	[Electricidad]
+dtELECTRICITY	[Electrico]
 
 // HASH_VALUE A7E75889A1672890
 // INDEX 153
-dtSHOCK	[Onda de choque]
+dtSHOCK	[Choque]
 
 // HASH_VALUE 62C7348CE738649D
 // INDEX 154
@@ -650,7 +650,7 @@ ecosysGoo	[Goo]
 
 // HASH_VALUE DBB9185388BA1864
 // INDEX 162
-ecosysPrimaryRoot	[Primeras Raíces]
+ecosysPrimaryRoot	[Raíces Primarias]
 
 // HASH_VALUE 62C7348CE738649D
 // INDEX 163
@@ -670,7 +670,7 @@ mpcatUpgrade	[Mejorar]
 
 // HASH_VALUE D9A8E875D866AF80
 // INDEX 167
-scoreHitPoints	[Puntos de Golpe]
+scoreHitPoints	[Salud]
 
 // HASH_VALUE 0C5398378883D425
 // INDEX 168
@@ -690,11 +690,11 @@ scoreDiseaseResist	[Resistencia a las enfermedades]
 
 // HASH_VALUE 2A482F7029F72A86
 // INDEX 172
-scoreMagicResist	[Resitencia a la magia]
+scoreMagicResist	[Resistencia a la magia]
 
 // HASH_VALUE 5707EC94A1754497
 // INDEX 173
-scoreTechnoResist	[Techno resistancia]
+scoreTechnoResist	[Resistencia a la tecnología]
 
 // HASH_VALUE 9778E08227451099
 // INDEX 174
@@ -710,7 +710,7 @@ scoreUnknown	[Desconocido]
 
 // HASH_VALUE 63F6E47ADE96EC80
 // INDEX 177
-bricktMAGIC	[Magic]
+bricktMAGIC	[Magia]
 
 // HASH_VALUE 28F6D4546B54E872
 // INDEX 178
@@ -722,7 +722,7 @@ bricktFABER	[Artesano]
 
 // HASH_VALUE EF1BBC91A3084494
 // INDEX 180
-bricktHARVEST	[Guardabosque o Explorador]
+bricktHARVEST	[Ranger]
 
 // HASH_VALUE 60582450649894AC
 // INDEX 181
@@ -746,31 +746,31 @@ toolNone	[Desconocido]
 
 // HASH_VALUE 6D25B7765A56B78F
 // INDEX 186
-toolArmorTool	[Herramienta para la Elaboración de Armaduras]
+toolArmorTool	[Herramienta para la Creación de Armaduras]
 
 // HASH_VALUE D57BB054849BE476
 // INDEX 187
-toolJewelryTool	[Herramienta para la Elaboración de Joyas]
+toolJewelryTool	[Herramienta para la Creación de Joyas]
 
 // HASH_VALUE E186288BD3334369
 // INDEX 188
-toolAmmoTool	[Herramienta para la Elaboración de Armaduras]
+toolAmmoTool	[Herramienta para la Creación de Armaduras]
 
 // HASH_VALUE EAF91484E4B2E65A
 // INDEX 189
-toolRangeWeaponTool	[Herramienta para la Elaboración de Armas de Alcance]
+toolRangeWeaponTool	[Herramienta para la Creación de Armas a Distancia]
 
 // HASH_VALUE 6CA7683A23536C48
 // INDEX 190
-toolToolMaker	[Herramienta para la Elaboración de Herramientas]
+toolToolMaker	[Herramienta para la Creación de Herramientas]
 
 // HASH_VALUE EA19107FE4B2E658
 // INDEX 191
-toolMeleeWeaponTool	[Herramienta para la elaboración de Armas de Cuerpo a Cuerpo]
+toolMeleeWeaponTool	[Herramienta para la Creación de Armas de Cuerpo a Cuerpo]
 
 // HASH_VALUE E546D4771C56E06C
 // INDEX 192
-mpftMpL	[Cuchilla]
+mpftMpL	[Filo]
 
 // HASH_VALUE AA868862A734CC7F
 // INDEX 193
@@ -782,11 +782,11 @@ mpftMpP	[Punta]
 
 // HASH_VALUE 28374495DF18588E
 // INDEX 195
-mpftMpM	[Eje o Asta]
+mpftMpM	[Mango]
 
 // HASH_VALUE 7058241C7058241C
 // INDEX 196
-mpftMpG	[Empuñadura o Asidero]
+mpftMpG	[Empuñadura]
 
 // HASH_VALUE 2C57047E6CFAF0D4
 // INDEX 197
@@ -798,11 +798,11 @@ mpftMpGA	[Gatillo]
 
 // HASH_VALUE 6B23BC3DA973A08F
 // INDEX 199
-mpftMpPE	[Perno disparador]
+mpftMpPE	[Percutor]
 
 // HASH_VALUE ABC8845B67C5B07E
 // INDEX 200
-mpftMpCA	[Barril]
+mpftMpCA	[Cañón]
 
 // HASH_VALUE A6386489AE89FCC3
 // INDEX 201
@@ -810,19 +810,19 @@ mpftMpE	[Explosivo]
 
 // HASH_VALUE 9F558C8394D6BC53
 // INDEX 202
-mpftMpEN	[Chaqueta de Municiones]
+mpftMpEN	[Casquillo de Munición]
 
 // HASH_VALUE DEE5DC7CD727C067
 // INDEX 203
-mpftMpPR	[Munición de Bala]
+mpftMpPR	[Bala de Munición]
 
 // HASH_VALUE 8C4904336D9787C3
 // INDEX 204
-mpftMpCR	[Armazón de la armadura]
+mpftMpCR	[Carcasa de la Armadura]
 
 // HASH_VALUE E7768C74E7548496
 // INDEX 205
-mpftMpRI	[Forro o revestimiento]
+mpftMpRI	[Forro]
 
 // HASH_VALUE 645C444C64989498
 // INDEX 206
@@ -834,7 +834,7 @@ mpftMpAT	[Broche de la Armadura]
 
 // HASH_VALUE CE5BE4483096C7B2
 // INDEX 208
-mpftMpSU	[Engaste de joyas]
+mpftMpSU	[Engaste de Joya]
 
 // HASH_VALUE CEDAB0502C27C3B2
 // INDEX 209
@@ -854,7 +854,7 @@ mpftMpSH	[Herramienta para Afilar]
 
 // HASH_VALUE 698860976537D488
 // INDEX 213
-mpftMpTK	[Cuchillo excavador]
+mpftMpTK	[Cuchillo Excavador]
 
 // HASH_VALUE EC6964961238A794
 // INDEX 214
@@ -866,15 +866,15 @@ mpftMpCF	[Hoguera]
 
 // HASH_VALUE 6C19E092E3272083
 // INDEX 216
-mpftMpVE	[Vestidos]
+mpftMpVE	[Ropas]
 
 // HASH_VALUE 8DD918376804A77F
 // INDEX 217
-mpftMpMF	[Enfoque de Magia]
+mpftMpMF	[Concentración Mágica]
 
 // HASH_VALUE 6408978EDFA22BB2
 // INDEX 218
-mpft	[Objetivo Indefinido de Materias Primas]
+mpft	[Objetivo de Materia Prima Indefinido]
 
 // HASH_VALUE 8D999734D693746B
 // INDEX 219
@@ -882,7 +882,7 @@ mpfqSlightly	[Mediocre %p]
 
 // HASH_VALUE 5D12B72C1AD6002C
 // INDEX 220
-mpfqModerately	[Promedio %p]
+mpfqModerately	[Medio %p]
 
 // HASH_VALUE 86908B89A0672FFC
 // INDEX 221
@@ -966,23 +966,23 @@ mpstat4	[Velocidad]
 
 // HASH_VALUE 25971C7F6077008C
 // INDEX 241
-mpstat5	[Alcance o Intervalo]
+mpstat5	[Alcance]
 
 // HASH_VALUE E8F4B479DFA8889F
 // INDEX 242
-mpstat6	[Modificador de la evasión o desvío]
+mpstat6	[Modificador de Evasión]
 
 // HASH_VALUE 2896CC906209E4C1
 // INDEX 243
-mpstat7	[Modificador de la Parada]
+mpstat7	[Modificador de Bloqueo]
 
 // HASH_VALUE A8EADC94A195F49F
 // INDEX 244
-mpstat8	[Modificador del Desvío del Adversario]
+mpstat8	[Modificador de Evasión del Adversario]
 
 // HASH_VALUE 2B0A0C94A49544AA
 // INDEX 245
-mpstat9	[Modificador de la Parada del Adversario]
+mpstat9	[Modificador de Bloqueo del Adversario]
 
 // HASH_VALUE EAB4047EEC7ABC90
 // INDEX 246
@@ -990,63 +990,63 @@ mpstat10	[Factor de Protección]
 
 // HASH_VALUE 9FA9C06C6A7A1CB4
 // INDEX 247
-mpstat11	[Máxima Protección de Cuchilladas]
+mpstat11	[Protección Máx. a Cortante]
 
 // HASH_VALUE A156D87AAC493CB8
 // INDEX 248
-mpstat12	[Máxima Protección de Golpes violentos]
+mpstat12	[Protección Máx. a Contundente]
 
 // HASH_VALUE 9FE9B469286A2CAC
 // INDEX 249
-mpstat13	[Máxima Protección de Perforación]
+mpstat13	[Protección Máx. a Perforante]
 
 // HASH_VALUE 9859547D20178048
 // INDEX 250
-mpstat14	[Protección del Ácido]
+mpstat14	[Protección contra Ácido]
 
 // HASH_VALUE 9889908BA3378048
 // INDEX 251
-mpstat15	[Protección del Frío]
+mpstat15	[Protección contra Frío]
 
 // HASH_VALUE 99896F9FD8B81080
 // INDEX 252
-mpstat16	[Protección de Pudrición]
+mpstat16	[Protección contra Podredumbre]
 
 // HASH_VALUE D8FA9088E3678048
 // INDEX 253
-mpstat17	[Protección del Fuego]
+mpstat17	[Protección contra Fuego]
 
 // HASH_VALUE AC07A397E967CF92
 // INDEX 254
-mpstat18	[Protección de la Onda de Choque]
+mpstat18	[Protección contra Onda de Choque]
 
 // HASH_VALUE ACC9848051C5D4AA
 // INDEX 255
-mpstat19	[Protección del Veneno]
+mpstat19	[Protección contra Veneno]
 
 // HASH_VALUE 0C9954402FF8BCA4
 // INDEX 256
-mpstat20	[Protección de la Electricidad]
+mpstat20	[Protección contra Eléctrico]
 
 // HASH_VALUE 6B5A08600F45F0BE
 // INDEX 257
-mpstat21	[Resistencia del Desierto]
+mpstat21	[Resistencia al Desierto]
 
 // HASH_VALUE 2BEA38620F45F4BF
 // INDEX 258
-mpstat22	[Resistencia del Bosque]
+mpstat22	[Resistencia al Bosque]
 
 // HASH_VALUE 5438244EE7FCC08F
 // INDEX 259
-mpstat23	[Resistencia de los Lagos]
+mpstat23	[Resistencia a los Lagos]
 
 // HASH_VALUE AA0A60660F549CBA
 // INDEX 260
-mpstat24	[Resistencia de la Jungla]
+mpstat24	[Resistencia a la Jungla]
 
 // HASH_VALUE 28A9F87D8C458461
 // INDEX 261
-mpstat25	[Resistencia de las Primeras Raíces]
+mpstat25	[Resistencia a las Primeras Raíces]
 
 // HASH_VALUE 24277F86DFD3BB89
 // INDEX 262
@@ -1058,35 +1058,35 @@ mpstat27	[Poder Elemental]
 
 // HASH_VALUE 5EC754634A55C70F
 // INDEX 264
-mpstat28	[Desactivar Velocidad de Lanzamiento de Aflicción]
+mpstat28	[Velocidad de Lanzamiento de Aflicción Of.]
 
 // HASH_VALUE 9A277B391248B061
 // INDEX 265
-mpstat29	[Desactivar Poder de Aflicción]
+mpstat29	[Poder Aflictivo Of.]
 
 // HASH_VALUE 1E1750584A55C70F
 // INDEX 266
-mpstat30	[Def. Velocidad de Lanzamiento de Aflicción]
+mpstat30	[Velocidad de Lanzamiento de Aflicción Def.]
 
 // HASH_VALUE 9A27772E12388461
 // INDEX 267
-mpstat31	[Def. Poder de Aflicción]
+mpstat31	[Poder Aflictivo Def.]
 
 // HASH_VALUE 9818E7416417B82D
 // INDEX 268
-mpstat32	[Velocidad de Lanzamiento de Curación]
+mpstat32	[Velocidad de Lanzamiento de Sanación]
 
 // HASH_VALUE EDE67C3C6592502E
 // INDEX 269
-mpstat33	[Poder de Curación]
+mpstat33	[Poder de Sanación]
 
 // HASH_VALUE 1FB5049096993C70
 // INDEX 270
-mpstatItemQualifier0	[de Durabilidad]
+mpstatItemQualifier0	[Duradera]
 
 // HASH_VALUE 1FC164B5294568AF
 // INDEX 271
-mpstatItemQualifier1	[de Ligereza]
+mpstatItemQualifier1	[Ligera]
 
 // HASH_VALUE 9E20EB4E54238328
 // INDEX 272
@@ -1094,11 +1094,11 @@ mpstatItemQualifier2	[de Carga de Savia]
 
 // HASH_VALUE 8DB4889CE446CB2B
 // INDEX 273
-mpstatItemQualifier3	[de Daño]
+mpstatItemQualifier3	[Dañina]
 
 // HASH_VALUE 500864BC645854C0
 // INDEX 274
-mpstatItemQualifier4	[de Velocidad]
+mpstatItemQualifier4	[Veloz]
 
 // HASH_VALUE 684A3C5FA3D62472
 // INDEX 275
@@ -1106,19 +1106,19 @@ mpstatItemQualifier5	[con Alcance]
 
 // HASH_VALUE 23B68C8B95E6F35D
 // INDEX 276
-mpstatItemQualifier6	[con Modificador de Desvío]
+mpstatItemQualifier6	[con Modificador de Evasión]
 
 // HASH_VALUE E697A4A218062371
 // INDEX 277
-mpstatItemQualifier7	[con Modificador de Parada]
+mpstatItemQualifier7	[con Modificador de Bloqueo]
 
 // HASH_VALUE 248A98B4E4D4FC24
 // INDEX 278
-mpstatItemQualifier8	[con Modificador de Desvío del Adversario]
+mpstatItemQualifier8	[con Modificador de Evasión del Adversario]
 
 // HASH_VALUE 293BD0A6E7D4FC24
 // INDEX 279
-mpstatItemQualifier9	[con Modificador de la Parada del Adversario]
+mpstatItemQualifier9	[con Modificador de Bloqueo del Adversario]
 
 // HASH_VALUE 68B560A596CB846A
 // INDEX 280
@@ -1126,63 +1126,63 @@ mpstatItemQualifier10	[con Factor de Protección]
 
 // HASH_VALUE 2325A09A54D55C4F
 // INDEX 281
-mpstatItemQualifier11	[de Protección de Cuchilladas]
+mpstatItemQualifier11	[de Protección a Cortante]
 
 // HASH_VALUE E5F283B561335F62
 // INDEX 282
-mpstatItemQualifier12	[de Protección de Golpes Violentos]
+mpstatItemQualifier12	[de Protección a Contundente]
 
 // HASH_VALUE E115B09794D55C4F
 // INDEX 283
-mpstatItemQualifier13	[de Protección de Perforaciones]
+mpstatItemQualifier13	[de Protección a Perforante]
 
 // HASH_VALUE A2F39B9294190857
 // INDEX 284
-mpstatItemQualifier14	[de Protección del Ácido]
+mpstatItemQualifier14	[de Protección contra Ácido]
 
 // HASH_VALUE 22F39B9255D91C63
 // INDEX 285
-mpstatItemQualifier15	[de Protección del Frío]
+mpstatItemQualifier15	[de Protección contra Frío]
 
 // HASH_VALUE 12A5DC9F5126EC89
 // INDEX 286
-mpstatItemQualifier16	[de Protección de Pudrición]
+mpstatItemQualifier16	[de Protección Contra Podredumbre]
 
 // HASH_VALUE E3F39B93D689405D
 // INDEX 287
-mpstatItemQualifier17	[de Protección del Fuego]
+mpstatItemQualifier17	[de Protección contra Fuego]
 
 // HASH_VALUE 64D433C06DF94860
 // INDEX 288
-mpstatItemQualifier18	[de Protección de la Onda de Choque]
+mpstatItemQualifier18	[de Protección contra Onda de Choque]
 
 // HASH_VALUE 263463C063948FBB
 // INDEX 289
-mpstatItemQualifier19	[de Protección del Veneno]
+mpstatItemQualifier19	[de Protección contra Veneno]
 
 // HASH_VALUE 0C45E0662D49E88E
 // INDEX 290
-mpstatItemQualifier20	[de Protección de la Electricidad]
+mpstatItemQualifier20	[de Protección contra Electrico]
 
 // HASH_VALUE 5FB39FA923B48BBB
 // INDEX 291
-mpstatItemQualifier21	[de Resistencia de Desierto]
+mpstatItemQualifier21	[de Resistencia al Desierto]
 
 // HASH_VALUE 1FB39BB3E3B487C5
 // INDEX 292
-mpstatItemQualifier22	[De Resistencia del Bosque]
+mpstatItemQualifier22	[De Resistencia al Bosque]
 
 // HASH_VALUE 8E8464766BCB848B
 // INDEX 293
-mpstatItemQualifier23	[de Resistencia de los Lagos]
+mpstatItemQualifier23	[de Resistencia a los Lagos]
 
 // HASH_VALUE 5FD38BAA23D477BC
 // INDEX 294
-mpstatItemQualifier24	[de Resistencia de la Selva]
+mpstatItemQualifier24	[de Resistencia a la Selva]
 
 // HASH_VALUE 9B31A896555A7474
 // INDEX 295
-mpstatItemQualifier25	[de Resistencia de las Primeras Raíces]
+mpstatItemQualifier25	[de Resistencia a las Primeras Raíces]
 
 // HASH_VALUE A3A16AB7AB88EC56
 // INDEX 296
@@ -1194,27 +1194,27 @@ mpstatItemQualifier27	[del Poder Elemental]
 
 // HASH_VALUE 66D6F9F695A9A80F
 // INDEX 298
-mpstatItemQualifier28	[de la Velocidad de Lanzamiento de Aflición Ofensiva]
+mpstatItemQualifier28	[de Velocidad de Lanzamiento de Aflicción Of.]
 
 // HASH_VALUE A216A09E44081861
 // INDEX 299
-mpstatItemQualifier29	[del Poder de Aflicción Ofensivo]
+mpstatItemQualifier29	[de Poder de Aflictivo Ofensivo]
 
 // HASH_VALUE A4D6F9F695A9A80E
 // INDEX 300
-mpstatItemQualifier30	[de la Velocidad del Lanzamiento de Aflicción Defensivo]
+mpstatItemQualifier30	[de Velocidad de Lanzamiento de Aflicción Def.]
 
 // HASH_VALUE E016A09E44081860
 // INDEX 301
-mpstatItemQualifier31	[del Poder de Aflicción Defensivo]
+mpstatItemQualifier31	[de Poder de Aflictivo Defensivo]
 
 // HASH_VALUE 20632F838D25C418
 // INDEX 302
-mpstatItemQualifier32	[de la Velocidad del Lanzamiento de Curación]
+mpstatItemQualifier32	[de la Velocidad del Lanzamiento de Sanación]
 
 // HASH_VALUE 1F85B46C4578A417
 // INDEX 303
-mpstatItemQualifier33	[del Poder de Curación]
+mpstatItemQualifier33	[de Poder de Sanación]
 
 // HASH_VALUE 6418F40C6418F40C
 // INDEX 304
@@ -27256,4 +27256,28 @@ uittChooseLMFiberColor	[Escoger color para la marca 'Fibra']
 // HASH_VALUE 9B4A6C691004BB09
 // INDEX 6456
 uiSelectShortcutBar2	[Seleccionar Barra de Atajo #2]
+
+// HASH_VALUE 5854C7639701383B
+// INDEX 6457
+uiFXAA	[Activar FXAA]
+
+// HASH_VALUE DC75700D1144549D
+// INDEX 6458
+uiVREnable	[Activar VR]
+
+// HASH_VALUE EFCBC4603996C0AE
+// INDEX 6459
+uiVRGeneral	[Opciones de Realidad Virtual]
+
+// HASH_VALUE CF42883683C0EC33
+// INDEX 6460
+uigcVR	[REALIDAD VIRTUAL]
+
+// HASH_VALUE 9C58F47FED081B8E
+// INDEX 6461
+uigcFxAnisotropicFilter	[Filtrado Anisotropico:]
+
+// HASH_VALUE 6498F4386498F438
+// INDEX 6462
+uigcFxAnisotropicFilterNone	[Ninguno]
 
