@@ -182,7 +182,6 @@ struct CStatThread : public NLMISC::IRunnable
 		CURL *curl = curl_easy_init();
 		if(!curl) return;
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1);
-//		curl_easy_setopt(curl, CURLOPT_USERAGENT, "unknown");
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10 (.NET CLR 3.5.30729)");
 		curl_easy_setopt(curl, CURLOPT_REFERER, string("http://www.ryzom.com/" + referer).c_str());
 		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());

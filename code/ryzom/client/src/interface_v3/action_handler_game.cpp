@@ -3517,6 +3517,7 @@ class CHandlerGameConfigApply : public IActionHandler
 		}
 
 		// **** Apply Anisotropic Filtering
+		// read value from DB, it's a combo so value is the index of text
 		sint nAnisotropic = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->getValue32();
 
 		if (nAnisotropic >= 0)
@@ -3526,23 +3527,21 @@ class CHandlerGameConfigApply : public IActionHandler
 			// compute the real anisotropic value
 			if (nAnisotropic > 0)
 			{
-				anisotropic = 1;
+				anisotropic = 2;
 
-				for(size_t i = 0; i < nAnisotropic; ++i)
+				for(size_t i = 1; i < nAnisotropic; ++i)
 				{
 					anisotropic <<= 1;
 				}
 			}
 
-
 			if (ClientCfg.AnisotropicFilter != anisotropic)
 			{
 				ClientCfg.AnisotropicFilter = anisotropic;
-				ClientCfg.writeInt("AnisotropicFilter", anisotropic);
+				ClientCfg.writeInt("AnisotropicFilter", ClientCfg.AnisotropicFilter);
 				requestReboot = true;
 			}
 		}
-
 
 		// *** Apply the Screen AR
 		// since already set in the config file, need only to bkup the current version

@@ -218,7 +218,7 @@
   <!-- ************** -->
   <!-- CURRENT ACTION -->
   <!-- ************** -->
-  <!-- Must pass through an other DB, to allow multiple isntances of the action bar template -->
+  <!-- Must pass through an other DB, to allow multiple instances of the action bar template -->
   <variable entry="UI:PHRASE:ACT_BAR_LEN"
             type="sint32"
             value="0" />
