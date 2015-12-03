@@ -3535,7 +3535,6 @@ class CHandlerGameConfigApply : public IActionHandler
 				}
 			}
 
-
 			if (ClientCfg.AnisotropicFilter != anisotropic)
 			{
 				ClientCfg.AnisotropicFilter = anisotropic;
@@ -3543,7 +3542,6 @@ class CHandlerGameConfigApply : public IActionHandler
 				requestReboot = true;
 			}
 		}
-
 
 		// *** Apply the Screen AR
 		// since already set in the config file, need only to bkup the current version
