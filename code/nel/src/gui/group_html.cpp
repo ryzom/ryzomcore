@@ -53,6 +53,8 @@ using namespace NLMISC;
 #define DEFAULT_RYZOM_CONNECTION_TIMEOUT (30.0)
 // Allow up to 10 redirects, then give up
 #define DEFAULT_RYZOM_REDIRECT_LIMIT (10)
+//
+#define FONT_WEIGHT_BOLD 700
 
 namespace NLGUI
 {
@@ -1832,10 +1834,63 @@ namespace NLGUI
 					_FontStrikeThrough.push_back(style.StrikeThrough);
 				}
 				break;
-
+			case HTML_DEL:
+				_FontStrikeThrough.push_back(true);
+				break;
+			case HTML_U:
+				_FontUnderlined.push_back(true);
+				break;
+			case HTML_EM:
+				_FontOblique.push_back(true);
+				break;
+			case HTML_STRONG:
+				_FontWeight.push_back(FONT_WEIGHT_BOLD);
+				break;
+			case HTML_SMALL:
+				_FontSize.push_back(getFontSizeSmaller());
+				break;
 			case HTML_STYLE:
 			case HTML_SCRIPT:
 				_IgnoreText = true;
+				break;
+			case HTML_DL:
+				_DL.push_back(true);
+				endParagraph();
+				break;
+			case HTML_DT:
+				if (getDL())
+				{
+					newParagraph(0);
+
+					// see if this is the first <dt>, closing tag not required
+					if (!_DT)
+					{
+						_DT = true;
+						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+					}
+
+					if (_DL.size() > 1)
+					{
+						uint indent = (_DL.size()-1) * ULIndent;
+						getParagraph()->setFirstViewIndent(indent);
+					}
+				}
+				break;
+			case HTML_DD:
+				if (getDL())
+				{
+					newParagraph(0);
+
+					// if there was no closing tag for <dt>, then remove <dt> style
+					if (_DT)
+					{
+						_DT = false;
+						popIfNotEmpty (_FontWeight);
+					}
+
+					uint indent = _DL.size()*ULIndent;
+					getParagraph()->setFirstViewIndent(indent);
+				}
 				break;
 			}
 		}
@@ -1966,6 +2021,30 @@ namespace NLGUI
 					popIfNotEmpty (_UL);
 				}
 				break;
+			case HTML_DL:
+				if (getDL())
+				{
+					endParagraph();
+					popIfNotEmpty (_DL);
+					if (_DT) {
+						_DT = false;
+						popIfNotEmpty (_FontWeight);
+					}
+				}
+				break;
+			case HTML_DT:
+				if (getDL())
+				{
+					if (_DT)
+					{
+						_DT = false;
+						popIfNotEmpty (_FontWeight);
+					}
+				}
+				break;
+			case HTML_DD:
+				// style not changed
+				break;
 			case HTML_SPAN:
 				popIfNotEmpty (_FontSize);
 				popIfNotEmpty (_FontWeight);
@@ -1973,6 +2052,21 @@ namespace NLGUI
 				popIfNotEmpty (_TextColor);
 				popIfNotEmpty (_FontUnderlined);
 				popIfNotEmpty (_FontStrikeThrough);
+				break;
+			case HTML_DEL:
+				popIfNotEmpty (_FontStrikeThrough);
+				break;
+			case HTML_U:
+				popIfNotEmpty (_FontUnderlined);
+				break;
+			case HTML_EM:
+				popIfNotEmpty (_FontOblique);
+				break;
+			case HTML_STRONG:
+				popIfNotEmpty (_FontWeight);
+				break;
+			case HTML_SMALL:
+				popIfNotEmpty (_FontSize);
 				break;
 			case HTML_STYLE:
 			case HTML_SCRIPT:
@@ -2060,6 +2154,7 @@ namespace NLGUI
 		_CurrentViewImage = NULL;
 		_Indent = 0;
 		_LI = false;
+		_DT = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
 		_UrlFragment.clear();
@@ -3373,7 +3468,7 @@ namespace NLGUI
 
 			// Text added ?
 			bool added = false;
-			bool embolden = getFontWeight() >= 700;
+			bool embolden = getFontWeight() >= FONT_WEIGHT_BOLD;
 
 			// Number of child in this paragraph
 			if (_CurrentViewLink)
@@ -3734,7 +3829,9 @@ namespace NLGUI
 		_FontStrikeThrough.clear();
 		_Indent = 0;
 		_LI = false;
+		_DT = false;
 		_UL.clear();
+		_DL.clear();
 		_A.clear();
 		_Link.clear();
 		_LinkTitle.clear();

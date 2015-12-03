@@ -419,6 +419,15 @@ namespace NLGUI
 			return _UL.back();
 		}
 
+		// DL list
+		std::vector<bool>	_DL;
+		inline bool getDL() const
+		{
+			if (_DL.empty())
+				return false;
+			return _DL.back();
+		}
+
 		// A mode
 		std::vector<bool>	_A;
 		inline bool getA() const
@@ -430,6 +439,7 @@ namespace NLGUI
 
 		// IL mode
 		bool _LI;
+		bool _DT;
 
 		// Current text color
 		std::vector<NLMISC::CRGBA>	_TextColor;
@@ -456,6 +466,12 @@ namespace NLGUI
 			if (_FontSize.empty())
 				return TextFontSize;
 			return _FontSize.back();
+		}
+		inline uint getFontSizeSmaller() const
+		{
+			if (getFontSize() < 5)
+				return 3;
+			return getFontSize()-2;
 		}
 
 		std::vector<uint>			_FontWeight;
