@@ -1834,6 +1834,7 @@ namespace NLGUI
 				break;
 
 			case HTML_STYLE:
+			case HTML_SCRIPT:
 				_IgnoreText = true;
 				break;
 			}
@@ -1974,6 +1975,7 @@ namespace NLGUI
 				popIfNotEmpty (_FontStrikeThrough);
 				break;
 			case HTML_STYLE:
+			case HTML_SCRIPT:
 				_IgnoreText = false;
 				break;
 			case HTML_OBJECT:
