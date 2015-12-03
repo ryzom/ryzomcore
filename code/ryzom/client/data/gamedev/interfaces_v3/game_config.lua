@@ -151,6 +151,10 @@ function game:configInit()
 		langNb = 2;
 	elseif (lang == 'fr') then
 		langNb = 1;
+	elseif (lang == 'ru') then
+		langNb = 3;
+	elseif (lang == 'es') then
+		langNb = 4;
 	end
 
 	-- force observers call
