@@ -24082,7 +24082,7 @@ uittIdentityStaReg	[@{6F6F}Régénération Endurance@{FFFF}: %n\n
 
 // HASH_VALUE 5D4AE956019C7A23
 // INDEX 5725
-uittIdentityFocReg	[@{6F6F}Régénération Focus@{FFFF}: %n\n
+uittIdentityFocReg	[@{6F6F}Régénération Concentration@{FFFF}: %n\n
 	Points de concentration régénérés en 10 secondes.]
 
 // HASH_VALUE 45CB3DCB2618D3E3
