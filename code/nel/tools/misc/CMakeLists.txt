@@ -1,10 +1,10 @@
 SUBDIRS(bnp_make disp_sheet_id extract_filename lock make_sheet_id xml_packer)
 
-IF(WITH_QT)
+IF(WITH_QT OR WITH_QT5)
   ADD_SUBDIRECTORY(words_dic_qt)
   ADD_SUBDIRECTORY(message_box_qt)
   ADD_SUBDIRECTORY(crash_report)
-ENDIF(WITH_QT)
+ENDIF()
 
 IF(WIN32)
   ADD_SUBDIRECTORY(exec_timeout)
@@ -17,7 +17,7 @@ IF(WIN32)
     ADD_SUBDIRECTORY(log_analyser)
     ADD_SUBDIRECTORY(log_analyser_plug_ins)
     ADD_SUBDIRECTORY(words_dic)
-  ENDIF(MFC_FOUND)
-ENDIF(WIN32)
+  ENDIF()
+ENDIF()
 
 ADD_SUBDIRECTORY(probe_timers)

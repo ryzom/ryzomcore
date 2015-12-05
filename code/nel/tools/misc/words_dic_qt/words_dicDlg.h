@@ -1,6 +1,11 @@
-
 #ifndef WORDS_DICDLG_H
 #define WORDS_DICDLG_H
+
+#include <qglobal.h>
+
+#ifdef Q_COMPILER_RVALUE_REFS
+#undef Q_COMPILER_RVALUE_REFS
+#endif
 
 #include <QMainWindow>
 #include "ui_words_dic_Qt.h"

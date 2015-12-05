@@ -20,8 +20,9 @@
 #ifndef RCERROR_SOCKET
 #define RCERROR_SOCKET
 
-#include <QObject>
 #include "crash_report_data.h"
+
+#include <QObject>
 
 class CCrashReportSocketPvt;
 class QNetworkReply;

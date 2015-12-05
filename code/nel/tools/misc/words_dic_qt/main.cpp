@@ -1,7 +1,8 @@
+#include "words_dicDlg.h"
+
 #include <QApplication>
 #include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
-#include "words_dicDlg.h"
 
 #ifdef NL_OS_UNIX
 #include <stdlib.h>
