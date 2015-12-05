@@ -226,7 +226,8 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   # GUI toolkits
   ###
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
-  OPTION(WITH_QT                  "With QT Support"                               OFF)
+  OPTION(WITH_QT                  "With Qt 4 Support"                             OFF)
+  OPTION(WITH_QT5                 "With Qt 5 Support"                             OFF)
 
   IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )
@@ -809,11 +810,6 @@ MACRO(NL_SETUP_BUILD)
 
     IF(WITH_WARNINGS)
       ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
-      IF(CLANG)
-        ADD_PLATFORM_FLAGS("-std=gnu99")
-      ELSE(CLANG)
-        ADD_PLATFORM_FLAGS("-ansi")
-      ENDIF(CLANG)
     ENDIF(WITH_WARNINGS)
 
     IF(ANDROID)

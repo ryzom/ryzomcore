@@ -444,13 +444,13 @@ bool CCtrlSheetInfo::parseCtrlInfo(xmlNodePtr cur, CInterfaceGroup * /* parentGr
 		for(uint i=0;i<strList.size();i++)
 		{
 			BRICK_TYPE::EBrickType	brickType= BRICK_TYPE::toBrickType(strList[i]);
-			if(brickType==BRICK_TYPE::UNKNOWN)
+			if (brickType==BRICK_TYPE::UNKNOWN)
 			{
 				nlwarning("<CCtrlSheetInfo::parseCtrlInfo> %s has an unvalid Brick Type", (const char *) prop);
 			}
 			else
 			{
-				// must not have so much brick type, else must change code!
+				// must not have so much brick type else must change code!
 				// nlassert(brickType<32);
 
 				// Ok set the bit associated

@@ -147,7 +147,25 @@ IF(WITH_SSE2)
   ENDIF(WITH_SSE3)
 ENDIF(WITH_SSE2)
 
+IF(WITH_QT5)
+  CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
+
+  FIND_PACKAGE(Qt5Core QUIET)
+
+  IF(Qt5Core_FOUND)
+    FIND_PACKAGE(Qt5Gui)
+    FIND_PACKAGE(Qt5Widgets)
+    FIND_PACKAGE(Qt5OpenGL)
+    FIND_PACKAGE(Qt5Xml)
+    FIND_PACKAGE(Qt5LinguistTools)
+    FIND_PACKAGE(Qt5Network)
+  ELSE()
+    MESSAGE(WARNING "Unable to find Qt 5")
+  ENDIF()
+ENDIF()
+
 IF(WITH_QT)
+  # Use Qt 4
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
 ENDIF(WITH_QT)
 
@@ -186,7 +204,7 @@ IF(WITH_NEL)
         IF(IDN_LIBRARY)
           SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${IDN_LIBRARY})
         ENDIF()
-        
+
         # CURL Macports version depends on libidn, libintl and libiconv too
         IF(APPLE)
           FIND_LIBRARY(INTL_LIBRARY intl)
