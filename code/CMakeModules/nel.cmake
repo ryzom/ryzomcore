@@ -810,11 +810,6 @@ MACRO(NL_SETUP_BUILD)
 
     IF(WITH_WARNINGS)
       ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
-      IF(CLANG)
-        ADD_PLATFORM_FLAGS("-std=gnu99")
-      ELSE(CLANG)
-        ADD_PLATFORM_FLAGS("-ansi")
-      ENDIF(CLANG)
     ENDIF(WITH_WARNINGS)
 
     IF(ANDROID)
