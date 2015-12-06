@@ -24,7 +24,9 @@
 int main( sint32 argc, char **argv )
 {
 	QApplication app( argc, argv );
-	QPixmap pixmap( ":/resources/splash_screen.bmp" );
+
+	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
+	QPixmap pixmap(":/resources/splash_screen.png" );
 	QSplashScreen splash( pixmap );
 
 	splash.show();
