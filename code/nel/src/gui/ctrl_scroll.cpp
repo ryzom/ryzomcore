@@ -653,8 +653,7 @@ namespace NLGUI
 								factor = -(float)_Target->getOfsY() / factor;
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
-								factor = factor * (getHReal()-_TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = factor * (getHReal()-_TrackSize);
 							}
 							else // TOP
 							{
@@ -663,8 +662,7 @@ namespace NLGUI
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
 								sint32 hreal = getHReal();
-								factor = (1.0f-factor) * (hreal - _TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = (1.0f-factor) * (hreal - _TrackSize);
 							}
 						}
 
@@ -712,8 +710,7 @@ namespace NLGUI
 								factor = -(float)_Target->getOfsX() / factor;
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
-								factor = factor * (getWReal()-_TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = factor * (getWReal()-_TrackSize);
 							}
 							else // RIGHT
 							{
@@ -722,8 +719,7 @@ namespace NLGUI
 								if (factor < 0.0f) factor = 0.0f;
 								if (factor > 1.0f) factor = 1.0f;
 								sint32 hreal = getWReal();
-								factor = (1.0f-factor) * (hreal - _TrackSize);
-								_TrackPos = (sint32)factor;
+								_TrackPos = (1.0f-factor) * (hreal - _TrackSize);
 							}
 						}
 
@@ -930,8 +926,8 @@ namespace NLGUI
 		if ((getWReal()-_TrackSize) <= 0)
 			return 0;
 
-		sint32 newtpos;
-		sint32 tpos = _TrackPos;
+		float newtpos;
+		float tpos = _TrackPos;
 		sint32 tsize = _TrackSize;
 
 		// Limit the scroller to the defined area
@@ -998,8 +994,8 @@ namespace NLGUI
 		if ((getHReal()-_TrackSize) <= 0)
 			return 0;
 
-		sint32 newtpos;
-		sint32 tpos = _TrackPos;
+		float newtpos;
+		float tpos = _TrackPos;
 		sint32 tsize = _TrackSize;
 
 		// Limit the scroller to the defined area
@@ -1202,16 +1198,14 @@ namespace NLGUI
 			float factor = (float)(wReal-maxWReal);
 			factor = -(float)ofsX / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = factor * (getWReal()-_TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = factor * (getWReal()-_TrackSize);
 		}
 		else // RIGHT
 		{
 			float factor = (float)(wReal-maxWReal);
 			factor = (float)ofsX / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = (1.0f-factor) * (getWReal() - _TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = (1.0f-factor) * (getWReal() - _TrackSize);
 		}
 
 		// invalidate only position. 1 pass is sufficient
@@ -1240,8 +1234,7 @@ namespace NLGUI
 			float factor = (float)(hReal-maxHReal);
 			factor = -(float)ofsY / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = factor * (getHReal()-_TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = factor * (getHReal()-_TrackSize);
 		}
 		else // TOP
 		{
@@ -1250,8 +1243,7 @@ namespace NLGUI
 			float factor = (float)(hReal-maxHReal);
 			factor = (float)ofsY / factor;
 			clamp(factor, 0.f, 1.f);
-			factor = (1.0f-factor) * (getHReal() - _TrackSize);
-			_TrackPos = (sint32)factor;
+			_TrackPos = (1.0f-factor) * (getHReal() - _TrackSize);
 		}
 
 		// invalidate only position. 1 pass is sufficient
