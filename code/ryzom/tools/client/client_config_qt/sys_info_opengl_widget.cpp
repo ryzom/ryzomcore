@@ -33,12 +33,3 @@ CSysInfoOpenGLWidget::CSysInfoOpenGLWidget( QWidget *parent ) :
 CSysInfoOpenGLWidget::~CSysInfoOpenGLWidget()
 {
 }
-
-void CSysInfoOpenGLWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-	QWidget::changeEvent( event );
-}

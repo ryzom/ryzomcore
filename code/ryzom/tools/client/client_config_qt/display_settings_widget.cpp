@@ -142,17 +142,6 @@ void CDisplaySettingsWidget::save()
 	s.config.setInt( "PositionY", ypositionLineEdit->text().toInt() );
 }
 
-void CDisplaySettingsWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		disconnect( videomodeComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSomethingChanged() ) );
-		retranslateUi( this );
-		connect( videomodeComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSomethingChanged() ) );
-	}
-	QWidget::changeEvent( event );
-}
-
 void CDisplaySettingsWidget::updateVideoModes()
 {
 	CSystem &s = CSystem::GetInstance();

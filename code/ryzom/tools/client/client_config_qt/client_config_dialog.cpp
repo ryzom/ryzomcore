@@ -111,26 +111,6 @@ void CClientConfigDialog::closeEvent( QCloseEvent *event )
 		event->ignore();
 }
 
-void CClientConfigDialog::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		int pageIndex = CategoryStackedWidget->currentIndex();
-		// Signals that are emitted on index change need to be disconnected, since retranslation cleans the widget
-		disconnect( treeWidget, SIGNAL( itemClicked( QTreeWidgetItem *, int ) ),
-					this, SLOT( onClickCategory( QTreeWidgetItem * ) ) );
-
-		retranslateUi( this );
-
-		connect( treeWidget, SIGNAL( itemClicked( QTreeWidgetItem *, int ) ),
-				 this, SLOT( onClickCategory( QTreeWidgetItem * ) ) );
-
-		CategoryStackedWidget->setCurrentIndex( pageIndex );
-	}
-
-	QDialog::changeEvent( event );
-}
-
 void CClientConfigDialog::onClickOK()
 {
 	saveChanges();

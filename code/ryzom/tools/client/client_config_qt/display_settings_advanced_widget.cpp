@@ -76,13 +76,3 @@ void CDisplaySettingsAdvancedWidget::save()
 	else
 		s.config.setInt( "DisableTextureShdr", 0 );
 }
-
-void CDisplaySettingsAdvancedWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-
-	QWidget::changeEvent( event );
-}

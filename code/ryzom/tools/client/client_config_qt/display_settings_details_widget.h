@@ -45,13 +45,10 @@ class CDisplaySettingsDetailsWidget : public CWidgetBase, public Ui::display_set
 	Q_OBJECT
 public:
 	CDisplaySettingsDetailsWidget( QWidget *parent = NULL );
-	~CDisplaySettingsDetailsWidget();
+	virtual ~CDisplaySettingsDetailsWidget();
 
 	void load();
 	void save();
-
-protected:
-	void changeEvent( QEvent *event );
 
 private slots:
 	void onLandscapeSliderChange( int value );

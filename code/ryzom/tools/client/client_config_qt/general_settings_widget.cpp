@@ -20,22 +20,15 @@
 #include "system.h"
 #include <QTranslator>
 
-const QString CGeneralSettingsWidget::languageCodes[ NUM_LANGUAGE_CODES ] =
-{
-	"en",
-	"fr",
-	"de",
-	"hu"
-};
+#include <nel/misc/i18n.h>
 
 CGeneralSettingsWidget::CGeneralSettingsWidget( QWidget *parent ) :
 	CWidgetBase( parent )
 {
-	currentTranslator = NULL;
 	setupUi( this );
 	load();
 
-	connect( languageComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onLanguageChanged() ) );
+	connect( languageComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSomethingChanged() ) );
 	connect( saveConfigOnQuitCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onSomethingChanged() ) );
 	connect( lowPriorityProcessCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( onSomethingChanged() ) );
 }
@@ -48,26 +41,37 @@ void CGeneralSettingsWidget::load()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	sint32 cbIndex = getIndexForLanguageCode( QString::fromUtf8( s.config.getString( "LanguageCode" ).c_str() ) );
-	if( cbIndex != -1 ){
-		languageComboBox->setCurrentIndex( cbIndex );
-		onLanguageChanged();
+	std::vector<std::string> codes = NLMISC::CI18N::getLanguageCodes();
+	std::vector<ucstring> names = NLMISC::CI18N::getLanguageNames();
+
+	languageComboBox->clear();
+
+	for(uint i = 0; i < codes.size(); ++i)
+	{
+		languageComboBox->addItem(QString::fromUtf16(names[i].c_str()), QString::fromUtf8(codes[i].c_str()));
 	}
 
-	if( s.config.getInt( "SaveConfig" ) )
+	sint32 cbIndex = getIndexForLanguageCode( QString::fromUtf8( s.config.getString( "LanguageCode" ).c_str() ) );
+
+	if (cbIndex != -1)
+	{
+		languageComboBox->setCurrentIndex( cbIndex );
+	}
+
+	if (s.config.getInt("SaveConfig"))
 		saveConfigOnQuitCheckBox->setChecked( true );
 
-	if( s.config.getInt( "ProcessPriority" ) == -1 )
-		lowPriorityProcessCheckBox->setChecked( true );
+	if (s.config.getInt("ProcessPriority") == -1)
+		lowPriorityProcessCheckBox->setChecked(true);
 	else
-		lowPriorityProcessCheckBox->setChecked( false );
+		lowPriorityProcessCheckBox->setChecked(false);
 }
 
 void CGeneralSettingsWidget::save()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	s.config.setString( "LanguageCode", std::string( languageCodes[ languageComboBox->currentIndex() ].toUtf8() ) );
+	s.config.setString( "LanguageCode", std::string(languageComboBox->itemData(languageComboBox->currentIndex()).toString().toUtf8()));
 
 	if( saveConfigOnQuitCheckBox->isChecked() )
 		s.config.setInt( "SaveConfig", 1 );
@@ -80,43 +84,10 @@ void CGeneralSettingsWidget::save()
 		s.config.setInt( "ProcessPriority", 0 );
 }
 
-void CGeneralSettingsWidget::onLanguageChanged()
-{
-	sint32 i = languageComboBox->currentIndex();
-
-	if( currentTranslator != NULL )
-	{
-		qApp->removeTranslator( currentTranslator );
-		delete currentTranslator;
-		currentTranslator = NULL;
-	}
-
-	currentTranslator = new QTranslator();
-	if( currentTranslator->load( QString( ":/translations/ryzom_configuration_%1" ).arg( languageCodes[ i ] ) ) )
-		qApp->installTranslator( currentTranslator );
-
-	emit changed();
-}
-
-void CGeneralSettingsWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		sint32 i = languageComboBox->currentIndex();
-		// Signals that are emitted on index change need to be disconnected, since retranslation cleans the widget
-		disconnect( languageComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onLanguageChanged() ) );
-		retranslateUi( this );
-		languageComboBox->setCurrentIndex( i );
-		connect( languageComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onLanguageChanged() ) );
-	}
-
-	QWidget::changeEvent( event );
-}
-
 int CGeneralSettingsWidget::getIndexForLanguageCode(const QString &languageCode)
 {
-	for( sint32 i = 0; i < NUM_LANGUAGE_CODES; i++ )
-		if( languageCode.compare( languageCodes[ i ] ) == 0 )
+	for( sint32 i = 0; i < languageComboBox->count(); i++ )
+		if( languageCode.compare(languageComboBox->itemData(i).toString()) == 0 )
 			return i;
 
 	return -1;

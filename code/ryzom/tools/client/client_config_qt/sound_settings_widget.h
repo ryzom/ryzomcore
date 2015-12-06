@@ -28,13 +28,10 @@ class CSoundSettingsWidget : public CWidgetBase, public Ui::sound_settings_widge
 	Q_OBJECT
 public:
 	CSoundSettingsWidget( QWidget *parent = NULL );
-	~CSoundSettingsWidget();
+	virtual ~CSoundSettingsWidget();
 
 	void load();
 	void save();
-
-protected:
-	void changeEvent( QEvent *event );
 
 private slots:
 	void onTracksSliderChange();

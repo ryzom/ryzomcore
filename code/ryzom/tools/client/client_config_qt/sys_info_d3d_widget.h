@@ -29,10 +29,6 @@ class CSysInfoD3DWidget : public QWidget, public Ui::sys_info_d3d_widget
 public:
 	CSysInfoD3DWidget( QWidget *parent = NULL );
 	virtual ~CSysInfoD3DWidget();
-
-protected:
-	void changeEvent( QEvent *event );
-
 };
 
 

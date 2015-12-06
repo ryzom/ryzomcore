@@ -37,12 +37,3 @@ CSysInfoWidget::CSysInfoWidget( QWidget *parent ) :
 CSysInfoWidget::~CSysInfoWidget()
 {
 }
-
-void CSysInfoWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-	QWidget::changeEvent( event );
-}

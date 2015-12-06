@@ -34,12 +34,3 @@ CSysInfoD3DWidget::CSysInfoD3DWidget( QWidget *parent ) :
 CSysInfoD3DWidget::~CSysInfoD3DWidget()
 {
 }
-
-void CSysInfoD3DWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-	QWidget::changeEvent( event );
-}
