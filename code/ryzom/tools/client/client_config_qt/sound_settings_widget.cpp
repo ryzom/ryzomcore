@@ -62,6 +62,8 @@ void CSoundSettingsWidget::load()
 		tracks = 32;
 	tracksSlider->setValue( tracks / 4 );
 
+	updateTracksLabel();
+
 	if( s.config.getString( "DriverSound" ).compare( "FMod" ) == 0 )
 		fmodCheckBox->setChecked( true );
 }
@@ -83,16 +85,6 @@ void CSoundSettingsWidget::save()
 
 	if( fmodCheckBox->isChecked() )
 		s.config.setString( "DriverSound", std::string( "FMod" ) );
-}
-
-void CSoundSettingsWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-		updateTracksLabel();
-	}
-	QWidget::changeEvent( event );
 }
 
 void CSoundSettingsWidget::updateTracksLabel()
