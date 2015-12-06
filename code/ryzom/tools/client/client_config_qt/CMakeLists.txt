@@ -28,9 +28,10 @@ SET( CLIENT_CONFIG_UIS
                       sys_info_widget.ui
 )
 
-SET( CLIENT_CONFIG_TRANS
-                     translations/ryzom_configuration_en.ts
-                     translations/ryzom_configuration_hu.ts
+SET(CLIENT_CONFIG_TRANS
+  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_en.ts
+  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_fr.ts
+  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_hu.ts
 )
 
 CONFIGURE_FILE( translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY )
