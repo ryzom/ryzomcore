@@ -29,6 +29,7 @@
 #include "system.h"
 
 #include <QtGui>
+#include <QMessageBox>
 
 CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	QDialog( parent )
@@ -156,7 +157,7 @@ void CClientConfigDialog::onClickPlay()
 {
 	bool started = false;
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	started = QProcess::startDetached( "ryzom_client_r.exe" );
 	if( !started )
 		QProcess::startDetached( "ryzom_client_rd.exe" );

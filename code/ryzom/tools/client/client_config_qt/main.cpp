@@ -19,6 +19,8 @@
 #include "client_config_dialog.h"
 #include "system.h"
 
+#include <QSplashScreen>
+
 int main( sint32 argc, char **argv )
 {
 	QApplication app( argc, argv );
