@@ -163,12 +163,10 @@ void CClientConfigDialog::onClickPlay()
 		QProcess::startDetached( "ryzom_client_rd.exe" );
 	if( !started )
 		QProcess::startDetached( "ryzom_client_d.exe" );
+#elif defined(Q_OS_MAC)
+	started = QProcess::startDetached( "./Ryzom" );
 #else
-	started = QProcess::startDetached( "./ryzom_client_r" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_rd" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_d" );
+	started = QProcess::startDetached( "./ryzom_client" );
 #endif
 
 	onClickOK();
