@@ -1442,6 +1442,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 						DWORD valueType;
 						char value[512];
 						DWORD size = 512;
+						string driverName;
 						if (RegQueryValueExA(baseKey, keyName.c_str(), NULL, &valueType, (unsigned char *)value, &size) == ERROR_SUCCESS)
 						{
 							// Null ?
@@ -1459,6 +1460,15 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 										{
 											if (value[0] != 0)
 											{
+												static const std::string s_systemRoot = "\\SystemRoot\\";
+
+												driverName = value;
+
+												if (driverName.substr(0, s_systemRoot.length()) == s_systemRoot)
+												{
+													driverName = driverName.substr(s_systemRoot.length());
+												}
+
 												ok = true;
 											}
 											else
@@ -1484,7 +1494,6 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 									if (_VerQueryValue && _GetFileVersionInfoSize && _GetFileVersionInfo)
 									{
 										// value got the path to the driver
-										string driverName = value;
 										if (atleastNT4)
 										{
 											nlverify (GetWindowsDirectoryA(value, 512) != 0);
