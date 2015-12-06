@@ -24,25 +24,15 @@ CSysInfoWidget::CSysInfoWidget( QWidget *parent ) :
 {
 	setupUi( this );
 
-	osLabel->setText( CSystem::GetInstance().sysInfo.osName.c_str() );
-	cpuLabel->setText( CSystem::GetInstance().sysInfo.cpuName.c_str() );
+	osLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.osName.c_str()));
+	cpuLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.cpuName.c_str()));
 
-	ramLabel->setText(
-		QString().setNum( CSystem::GetInstance().sysInfo.totalRAM ).append( " Mb" ) );
+	ramLabel->setText(QString(tr("%1 MB").arg(CSystem::GetInstance().sysInfo.totalRAM)));
 
-	gfxcardLabel->setText( CSystem::GetInstance().sysInfo.videoDevice.c_str() );
-	gfxdriverLabel->setText( CSystem::GetInstance().sysInfo.videoDriverVersion.c_str() );
+	gfxcardLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.videoDevice.c_str()));
+	gfxdriverLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.videoDriverVersion.c_str()));
 }
 
 CSysInfoWidget::~CSysInfoWidget()
 {
-}
-
-void CSysInfoWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-	QWidget::changeEvent( event );
 }

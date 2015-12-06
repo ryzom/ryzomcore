@@ -38,13 +38,10 @@ class CDisplaySettingsWidget : public CWidgetBase, public Ui::display_settings_w
 	Q_OBJECT
 public:
 	CDisplaySettingsWidget( QWidget *parent = NULL );
-	~CDisplaySettingsWidget();
+	virtual ~CDisplaySettingsWidget();
 
 	void load();
 	void save();
-
-protected:
-	void changeEvent( QEvent *event );
 
 private slots:
 	/**

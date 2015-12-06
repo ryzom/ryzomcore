@@ -108,21 +108,6 @@ void CDisplaySettingsDetailsWidget::save()
 		s.config.setInt( "DivideTextureSizeBy2", 1 );
 }
 
-void CDisplaySettingsDetailsWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-
-		landscapeLabel->setText( getQualityString( landscapeSlider->value() ) );
-		characterLabel->setText( getQualityString( charactersSlider->value() ) );
-		fxLabel->setText( getQualityString( fxSlider->value() ) );
-		textureLabel->setText( getTextureQualityString( texturesSlider->value() ) );
-	}
-	QWidget::changeEvent( event );
-}
-
-
 void CDisplaySettingsDetailsWidget::onLandscapeSliderChange( int value )
 {
 	if( ( value < 0 ) || ( value > 3 ) )

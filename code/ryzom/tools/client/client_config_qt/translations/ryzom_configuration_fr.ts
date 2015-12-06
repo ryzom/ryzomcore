@@ -19,7 +19,7 @@
     <message>
         <location filename="display_settings_details_widget.cpp" line="231"/>
         <source>Low</source>
-        <translation>Bas</translation>
+        <translation>Faible</translation>
     </message>
     <message>
         <location filename="display_settings_details_widget.cpp" line="234"/>
@@ -34,12 +34,12 @@
     <message>
         <location filename="display_settings_details_widget.cpp" line="240"/>
         <source>High</source>
-        <translation>Haut</translation>
+        <translation>Elevé</translation>
     </message>
     <message>
         <location filename="display_settings_details_widget.cpp" line="253"/>
         <source>Low (32 MB)</source>
-        <translation>Bas (32 Mo)</translation>
+        <translation>Faible (32 Mo)</translation>
     </message>
     <message>
         <location filename="display_settings_details_widget.cpp" line="257"/>
@@ -49,7 +49,7 @@
     <message>
         <location filename="display_settings_details_widget.cpp" line="261"/>
         <source>High (128 MB)</source>
-        <translation>Haut (128 Mo)</translation>
+        <translation>Elevé (128 Mo)</translation>
     </message>
 </context>
 <context>
@@ -188,7 +188,7 @@
         <location filename="display_settings_details_widget.ui" line="254"/>
         <location filename="display_settings_details_widget.ui" line="334"/>
         <source>Low</source>
-        <translation>Bas</translation>
+        <translation>Faible</translation>
     </message>
     <message>
         <location filename="display_settings_details_widget.ui" line="106"/>
@@ -329,7 +329,7 @@
     <message>
         <location filename="general_settings_widget.ui" line="100"/>
         <source>Slow down the game ( process low priority )</source>
-        <translation>Ralentir le jeu (priorité basse au processus)</translation>
+        <translation>Ralentir le jeu (priorité basse du processus)</translation>
     </message>
 </context>
 <context>

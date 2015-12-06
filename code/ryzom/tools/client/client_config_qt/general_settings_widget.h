@@ -22,11 +22,6 @@
 
 class QTranslator;
 
-enum
-{
-	NUM_LANGUAGE_CODES = 4
-};
-
 /**
  @brief The general settings page of the configuration tool
 */
@@ -41,12 +36,6 @@ public:
 	void load();
 	void save();
 
-private slots:
-	void onLanguageChanged();
-
-protected:
-	void changeEvent( QEvent *event );
-
 private:
 	/**
 	 @brief  Retrieves the language combobox index for the language code provided.
@@ -54,12 +43,6 @@ private:
 	 @return Returns the index on success, returns -1 if the language code cannot be found.
     */
 	sint32 getIndexForLanguageCode(const QString &languageCode);
-
-	// Contains the language codes used in the config file
-	// They are in the same order as the options in languageComboBox
-	static const QString languageCodes[ NUM_LANGUAGE_CODES ];
-
-	QTranslator *currentTranslator;
 };
 
 #endif // GENERALSETTINGWIDGET_H

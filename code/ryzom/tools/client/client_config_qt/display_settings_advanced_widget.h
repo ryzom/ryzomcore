@@ -28,14 +28,10 @@ class CDisplaySettingsAdvancedWidget : public CWidgetBase, public Ui::display_se
 	Q_OBJECT
 public:
 	CDisplaySettingsAdvancedWidget( QWidget *parent );
-	~CDisplaySettingsAdvancedWidget();
+	virtual ~CDisplaySettingsAdvancedWidget();
 
 	void load();
 	void save();
-
-protected:
-	void changeEvent( QEvent *event );
-
 };
 
 #endif // DISPLAYSETTINGSADVANCEDWIDGET_H
