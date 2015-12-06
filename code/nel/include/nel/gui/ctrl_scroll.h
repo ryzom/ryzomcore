@@ -147,7 +147,7 @@ namespace NLGUI
 		sint32 _Aligned; // 0-Top 1-Bottom 2-Left 3-Right
 
 		sint32 _TrackDispPos;
-		sint32 _TrackPos;
+		float  _TrackPos;
 		sint32 _TrackSize;
 		sint32 _TrackSizeMin;
 
