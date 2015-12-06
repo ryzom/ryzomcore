@@ -31,6 +31,14 @@ int main( sint32 argc, char **argv )
 
 	splash.show();
 
+	QString locale = QLocale::system().name().left(2);
+
+	QTranslator localTranslator;
+	if (localTranslator.load(QString(":/translations/ryzom_configuration_%1.qm").arg(locale)))
+	{
+		app.installTranslator(&localTranslator);
+	}
+
 	CSystem::GetInstance().config.load( "client.cfg" );
 
 	CClientConfigDialog d;
