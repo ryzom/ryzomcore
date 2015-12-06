@@ -29,6 +29,7 @@
 #include "system.h"
 
 #include <QtGui>
+#include <QMessageBox>
 
 CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	QDialog( parent )
@@ -156,18 +157,16 @@ void CClientConfigDialog::onClickPlay()
 {
 	bool started = false;
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	started = QProcess::startDetached( "ryzom_client_r.exe" );
 	if( !started )
 		QProcess::startDetached( "ryzom_client_rd.exe" );
 	if( !started )
 		QProcess::startDetached( "ryzom_client_d.exe" );
+#elif defined(Q_OS_MAC)
+	started = QProcess::startDetached( "./Ryzom" );
 #else
-	started = QProcess::startDetached( "./ryzom_client_r" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_rd" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_d" );
+	started = QProcess::startDetached( "./ryzom_client" );
 #endif
 
 	onClickOK();
@@ -180,14 +179,14 @@ void CClientConfigDialog::onClickCategory( QTreeWidgetItem *item )
 
 	static const char *iconNames[] =
 	{
-		":/resources/general_icon.bmp",
-		":/resources/display_icon.bmp",
-		":/resources/display_properties_icon.bmp",
-		":/resources/display_config_icon.bmp",
-		":/resources/sound_icon.bmp",
-		":/resources/general_icon.bmp",
-		":/resources/card_icon.bmp",
-		":/resources/card_icon.bmp"
+		":/resources/general_icon.png",
+		":/resources/display_icon.png",
+		":/resources/display_properties_icon.png",
+		":/resources/display_config_icon.png",
+		":/resources/sound_icon.png",
+		":/resources/general_icon.png",
+		":/resources/card_icon.png",
+		":/resources/card_icon.png"
 	};
 
 	sint32 index = item->data( 0, Qt::UserRole ).toInt();

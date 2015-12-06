@@ -1,16 +1,16 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/card_icon.bmp</file>
-        <file>resources/display_config_icon.bmp</file>
-        <file>resources/display_icon.bmp</file>
-        <file>resources/display_properties_icon.bmp</file>
-        <file>resources/general_icon.bmp</file>
-        <file>resources/left_bitmap_0.bmp</file>
-        <file>resources/network_icon.bmp</file>
-        <file>resources/sound_icon.bmp</file>
-        <file>resources/splash_screen.bmp</file>
-        <file>resources/top_right.bmp</file>
-        <file>resources/update_icon.bmp</file>
-        <file>resources/welcome_icon.bmp</file>
+        <file>resources/card_icon.png</file>
+        <file>resources/display_config_icon.png</file>
+        <file>resources/display_icon.png</file>
+        <file>resources/display_properties_icon.png</file>
+        <file>resources/general_icon.png</file>
+        <file>resources/left_bitmap_0.png</file>
+        <file>resources/network_icon.png</file>
+        <file>resources/sound_icon.png</file>
+        <file>resources/splash_screen.png</file>
+        <file>resources/top_right.png</file>
+        <file>resources/update_icon.png</file>
+        <file>resources/welcome_icon.png</file>
     </qresource>
 </RCC>

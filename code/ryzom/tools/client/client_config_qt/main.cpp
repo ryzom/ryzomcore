@@ -19,13 +19,25 @@
 #include "client_config_dialog.h"
 #include "system.h"
 
+#include <QSplashScreen>
+
 int main( sint32 argc, char **argv )
 {
 	QApplication app( argc, argv );
-	QPixmap pixmap( ":/resources/splash_screen.bmp" );
+
+	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
+	QPixmap pixmap(":/resources/splash_screen.png" );
 	QSplashScreen splash( pixmap );
 
 	splash.show();
+
+	QString locale = QLocale::system().name().left(2);
+
+	QTranslator localTranslator;
+	if (localTranslator.load(QString(":/translations/ryzom_configuration_%1.qm").arg(locale)))
+	{
+		app.installTranslator(&localTranslator);
+	}
 
 	CSystem::GetInstance().config.load( "client.cfg" );
 
