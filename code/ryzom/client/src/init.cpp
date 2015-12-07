@@ -95,14 +95,6 @@
 
 #include "browse_faq.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef RYZOM_CLIENT_ICON
-#define RYZOM_CLIENT_ICON "ryzom_client"
-#endif
-
 // XMLLib
 #include <libxml/xmlmemory.h>
 
@@ -682,8 +674,8 @@ void addSearchPaths(IProgressCallback &progress)
 
 #ifdef NL_OS_MAC
 	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
-	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+#elif defined(NL_OS_UNIX)
+	if (!getRyzomSharePrefix().empty()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
 #endif
 
 	// add in last position, a specific possibly read only directory
@@ -727,8 +719,9 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 #ifdef NL_OS_MAC
 	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
+#elif defined(NL_OS_UNIX)
 	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
+	if (!getRyzomSharePrefix().empty()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
 #endif
 
 	// add in last position, a specific possibly read only directory
@@ -767,7 +760,7 @@ static bool addRyzomIconBitmap(const std::string &directory, vector<CBitmap> &bi
 	if (CFile::isDirectory(directory))
 	{
 		// build filename from directory and default ryzom client icon name
-		std::string filename = NLMISC::toString("%s/%s.png", directory.c_str(), RYZOM_CLIENT_ICON);
+		std::string filename = NLMISC::toString("%s/%s.png", directory.c_str(), getRyzomClientIcon().c_str());
 
 		if (CFile::fileExists(filename))
 		{

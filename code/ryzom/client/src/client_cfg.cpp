@@ -33,16 +33,13 @@
 #include "view.h"	// For the cameraDistance funtion
 #include "user_entity.h"
 #include "misc.h"
+#include "user_agent.h"
 
 // 3D Interface.
 #include "nel/3d/u_driver.h"
 #include "nel/3d/u_scene.h"
 // Game Share.
 #include "game_share/time_weather_season/time_and_season.h"
-
-#ifdef HAVE_CONFIG_H
-#	include "config.h"
-#endif // HAVE_CONFIG_H
 
 #ifdef NL_OS_MAC
 #include "app_bundle_utils.h"
@@ -1994,10 +1991,10 @@ void CClientConfig::init(const string &configFileName)
 	if (varPtr)
 	{
 		string str = varPtr->asString ();
-		if (str != RYZOM_VERSION && ClientCfg.SaveConfig)
+		if (str != getVersion() && ClientCfg.SaveConfig)
 		{
-			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), RYZOM_VERSION);
-			varPtr->setAsString (RYZOM_VERSION);
+			nlinfo ("Update and save the ClientVersion variable in config file %s -> %s", str.c_str(), getVersion().c_str());
+			varPtr->setAsString (getVersion());
 			ClientCfg.ConfigFile.save ();
 		}
 	}
@@ -2211,12 +2208,12 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
 	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-#elif defined(RYZOM_ETC_PREFIX)
+#elif defined(NL_OS_UNIX)
 	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
-	defaultConfigPath = CPath::standardizePath(RYZOM_ETC_PREFIX);
+	if (!getRyzomEtcPrefix().empty()) defaultConfigPath = CPath::standardizePath(getRyzomEtcPrefix());
 #else
 	// some other prefix here :)
-#endif // RYZOM_ETC_PREFIX
+#endif // NL_OS_UNIX
 
 	// look in the current working directory first
 	if (CFile::isExists(defaultConfigFileName))

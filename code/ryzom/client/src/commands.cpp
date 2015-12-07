@@ -99,10 +99,7 @@
 #include "far_tp.h"
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "user_agent.h"
 
 
 //
@@ -690,10 +687,10 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 		sys += "AttachedFile "+filename+" ";
 	}
 
-	sys += "ClientVersion "RYZOM_VERSION" ";
+	sys += NLMISC::toString("ClientVersion %s ", getVersion().c_str());
 
 	// for now, set the same version than client one
-	sys += "ShardVersion "RYZOM_VERSION" ";
+	sys += NLMISC::toString("ShardVersion %s ", getVersion().c_str());
 
 	if (ClientCfg.Local)
 		sys += "ShardName OFFLINE ";
