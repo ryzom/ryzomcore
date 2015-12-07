@@ -720,7 +720,6 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 #ifdef NL_OS_MAC
 	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
 #elif defined(NL_OS_UNIX)
-	defaultDirectory = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX));
 	if (!getRyzomSharePrefix().empty()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
 #endif
 
