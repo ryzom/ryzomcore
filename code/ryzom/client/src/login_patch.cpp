@@ -62,6 +62,7 @@
 
 #include "login_patch.h"
 #include "login.h"
+#include "user_agent.h"
 
 
 #ifndef RY_BG_DOWNLOADER
@@ -218,8 +219,15 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 
 #ifdef NL_OS_MAC
 	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
-#elif defined(NL_OS_UNIX) && defined(RYZOM_SHARE_PREFIX)
-	ReadableClientDataPath = CPath::standardizePath(std::string(RYZOM_SHARE_PREFIX) + "/data");
+#elif defined(NL_OS_UNIX)
+	if (!getRyzomSharePrefix().empty())
+	{
+		ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
+	}
+	else
+	{
+		ReadableClientDataPath = WritableClientDataPath;
+	}
 #else
 	ReadableClientDataPath = WritableClientDataPath;
 #endif
