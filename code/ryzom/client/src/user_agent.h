@@ -27,6 +27,10 @@ std::string getDebugVersion();
 
 bool isStereoAvailable();
 
+std::string getRyzomClientIcon();
+std::string getRyzomEtcPrefix();
+std::string getRyzomSharePrefix();
+
 #endif // CL_USER_AGENT_H
 
 /* End of user_agent.h */

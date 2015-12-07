@@ -43,6 +43,10 @@
 #define RYZOM_SYSTEM "unknown"
 #endif
 
+#ifndef RYZOM_CLIENT_ICON
+#define RYZOM_CLIENT_ICON "ryzom_client"
+#endif
+
 std::string getUserAgent()
 {
 	return getUserAgentName() + "/" + getUserAgentVersion();
@@ -113,4 +117,19 @@ bool isStereoAvailable()
 #else
 	return false;
 #endif
+}
+
+std::string getRyzomClientIcon()
+{
+	return RYZOM_CLIENT_ICON;
+}
+
+std::string getRyzomEtcPrefix()
+{
+	return RYZOM_ETC_PREFIX;
+}
+
+std::string getRyzomSharePrefix()
+{
+	return RYZOM_SHARE_PREFIX;
 }
