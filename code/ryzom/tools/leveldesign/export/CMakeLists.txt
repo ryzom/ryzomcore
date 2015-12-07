@@ -5,7 +5,7 @@ NL_TARGET_LIB(ryzom_export ${PRIV_H} ${SRC})
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs ${LIBXML2_LIBRARIES} ${ZLIB_LIBRARIES})
+TARGET_LINK_LIBRARIES(ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs)
 NL_DEFAULT_PROPS(ryzom_export "Ryzom, Library, World: Export Tools")
 NL_ADD_RUNTIME_FLAGS(ryzom_export)
 NL_ADD_LIB_SUFFIX(ryzom_export)
