@@ -102,7 +102,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   ENDIF()
 
   LIST(APPEND _FLAGS " ${GLOBAL_DEFINITIONS}")
-  
+
   IF(CMAKE_VERSION VERSION_LESS "3.3.0")
     GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
     GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
@@ -307,7 +307,7 @@ MACRO(ADD_PRECOMPILED_HEADER_TO_TARGET _targetName)
     IF(APPLE)
       SET(PCH_ADDITIONAL_COMPILER_FLAGS "-fobjc-abi-version=2 -fobjc-legacy-dispatch -x objective-c++ ${PCH_ADDITIONAL_COMPILER_FLAGS}")
     ENDIF()
-    
+
     IF(WITH_PCH_DEBUG)
       SET(PCH_ADDITIONAL_COMPILER_FLAGS "-H ${PCH_ADDITIONAL_COMPILER_FLAGS}")
     ENDIF()
@@ -380,53 +380,52 @@ MACRO(ADD_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
 ENDMACRO()
 
 MACRO(ADD_NATIVE_PRECOMPILED_HEADER _targetName _inputh _inputcpp)
-  IF(NOT PCHSupport_FOUND)
-    MESSAGE(STATUS "PCH disabled because compiler doesn't support them")
-    RETURN()
-  ENDIF()
-
-  # 0 => creating a new target for PCH, works for all makefiles
-  # 1 => setting PCH for VC++ project, works for VC++ projects
-  # 2 => setting PCH for XCode project, works for XCode projects
-  IF(CMAKE_GENERATOR MATCHES "Visual Studio")
-    SET(PCH_METHOD 1)
-  ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
-    SET(PCH_METHOD 2)
-  ELSE()
-    SET(PCH_METHOD 0)
-  ENDIF()
-
-  IF(PCH_METHOD EQUAL 1)
-    # Auto include the precompile (useful for moc processing, since the use of
-    # precompiled is specified at the target level
-    # and I don't want to specifiy /F- for each moc/res/ui generated files (using Qt)
-
-    GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
-    IF(${oldProps} MATCHES NOTFOUND)
-      SET(oldProps "")
+  IF(PCHSupport_FOUND)
+    # 0 => creating a new target for PCH, works for all makefiles
+    # 1 => setting PCH for VC++ project, works for VC++ projects
+    # 2 => setting PCH for XCode project, works for XCode projects
+    IF(CMAKE_GENERATOR MATCHES "Visual Studio")
+      SET(PCH_METHOD 1)
+    ELSEIF(CMAKE_GENERATOR MATCHES "Xcode")
+      SET(PCH_METHOD 2)
+    ELSE()
+      SET(PCH_METHOD 0)
     ENDIF()
 
-    SET(newProperties "${oldProps} /Yu\"${_inputh}\" /FI\"${_inputh}\"")
-    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS "${newProperties}")
+    IF(PCH_METHOD EQUAL 1)
+      # Auto include the precompile (useful for moc processing, since the use of
+      # precompiled is specified at the target level
+      # and I don't want to specifiy /F- for each moc/res/ui generated files (using Qt)
 
-    #also inlude ${oldProps} to have the same compile options
-    SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES COMPILE_FLAGS "${oldProps} /Yc\"${_inputh}\"")
-  ELSEIF(PCH_METHOD EQUAL 2)
-    # For Xcode, cmake needs my patch to process
-    # GCC_PREFIX_HEADER and GCC_PRECOMPILE_PREFIX_HEADER as target properties
+      GET_TARGET_PROPERTY(oldProps ${_targetName} COMPILE_FLAGS)
+      IF(${oldProps} MATCHES NOTFOUND)
+        SET(oldProps "")
+      ENDIF()
 
-    # When buiding out of the tree, precompiled may not be located
-    # Use full path instead.
-    GET_FILENAME_COMPONENT(fullPath ${_inputh} ABSOLUTE)
+      SET(newProperties "${oldProps} /Yu\"${_inputh}\" /FI\"${_inputh}\"")
+      SET_TARGET_PROPERTIES(${_targetName} PROPERTIES COMPILE_FLAGS "${newProperties}")
 
-    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PREFIX_HEADER "${fullPath}")
-    SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PRECOMPILE_PREFIX_HEADER "YES")
+      #also inlude ${oldProps} to have the same compile options
+      SET_SOURCE_FILES_PROPERTIES(${_inputcpp} PROPERTIES COMPILE_FLAGS "${oldProps} /Yc\"${_inputh}\"")
+    ELSEIF(PCH_METHOD EQUAL 2)
+      # For Xcode, cmake needs my patch to process
+      # GCC_PREFIX_HEADER and GCC_PRECOMPILE_PREFIX_HEADER as target properties
+
+      # When buiding out of the tree, precompiled may not be located
+      # Use full path instead.
+      GET_FILENAME_COMPONENT(fullPath ${_inputh} ABSOLUTE)
+
+      SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PREFIX_HEADER "${fullPath}")
+      SET_TARGET_PROPERTIES(${_targetName} PROPERTIES XCODE_ATTRIBUTE_GCC_PRECOMPILE_PREFIX_HEADER "YES")
+    ELSE()
+      #Fallback to the "old" precompiled suppport
+      ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
+    ENDIF()
+
+    IF(TARGET ${_targetName}_static)
+      ADD_NATIVE_PRECOMPILED_HEADER(${_targetName}_static ${_inputh} ${_inputcpp})
+    ENDIF()
   ELSE()
-    #Fallback to the "old" precompiled suppport
-    ADD_PRECOMPILED_HEADER(${_targetName} ${_inputh} ${_inputcpp})
-  ENDIF()
-
-  IF(TARGET ${_targetName}_static)
-    ADD_NATIVE_PRECOMPILED_HEADER(${_targetName}_static ${_inputh} ${_inputcpp})
+    MESSAGE(STATUS "PCH disabled because compiler doesn't support them")
   ENDIF()
 ENDMACRO()
