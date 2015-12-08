@@ -7,6 +7,8 @@ compiler:
 
 os:
     - linux
+env:
+    - WITH_NEL_TESTS=off
 
 addons:
     apt:
@@ -25,5 +27,5 @@ before_script:
     - cmake --version
 
 script:
-    - cmake -Hcode -Bbuild
+    - cmake -Hcode -Bbuild -DWITH_NEL_TESTS:BOOL=$WITH_NEL_TESTS
     - cmake --build build
