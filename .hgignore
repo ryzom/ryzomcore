@@ -139,8 +139,6 @@ moc_*.cpp
 *.cache
 *.patch
 *.7z
-external
-external_stlport
 3rdParty
 .svn
 thumbs.db

@@ -1,5 +1,6 @@
 FILE(GLOB SRC main.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/app_bundle_utils.cpp
+	${CMAKE_SOURCE_DIR}/ryzom/client/src/user_agent.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/client_cfg.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_patch.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/login_xdelta.cpp
