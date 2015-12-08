@@ -1,0 +1,29 @@
+sudo: false
+language: cpp
+
+compiler:
+    - gcc
+    - clang
+
+os:
+    - linux
+
+addons:
+    apt:
+        packages:
+            - libluabind-dev
+            - libcpptest-dev
+            - libogg-dev
+            - libvorbis-dev
+            - libopenal-dev
+            - libgif-dev
+            - libfreetype6-dev
+            - libxml2-dev
+
+before_script:
+    - mkdir build
+    - cmake --version
+
+script:
+    - cmake -Hcode -Bbuild
+    - cmake --build build
