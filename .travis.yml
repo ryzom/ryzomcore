@@ -7,6 +7,8 @@ compiler:
 
 os:
     - linux
+env:
+    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off"
 
 addons:
     apt:
@@ -25,5 +27,5 @@ before_script:
     - cmake --version
 
 script:
-    - cmake -Hcode -Bbuild
+    - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
     - cmake --build build
