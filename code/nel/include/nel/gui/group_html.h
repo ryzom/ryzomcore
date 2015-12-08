@@ -73,6 +73,33 @@ namespace NLGUI
 		};
 
 		static SWebOptions options;
+		
+		class CStyleParams
+		{
+		public:
+			CStyleParams () : TextColor(255,255,255,255)
+			{
+				FontSize=10;
+				FontWeight=400;
+				FontOblique=false;
+				Underlined=false;
+				StrikeThrough=false;
+				Width=-1;
+				Height=-1;
+				MaxWidth=-1;
+				MaxHeight=-1;
+			}
+			uint FontSize;
+			uint FontWeight;
+			bool FontOblique;
+			NLMISC::CRGBA TextColor;
+			bool Underlined;
+			bool StrikeThrough;
+			sint32 Width;
+			sint32 Height;
+			sint32 MaxWidth;
+			sint32 MaxHeight;
+		};
 
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
@@ -311,7 +338,7 @@ namespace NLGUI
 		void addString(const ucstring &str);
 
 		// Add an image in the current paragraph
-		void addImage(const char *image, bool globalColor, bool reloadImg=false);
+		void addImage(const char *image, bool globalColor, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
 		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
@@ -321,7 +348,8 @@ namespace NLGUI
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
-			const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams, const char *tooltip);
+			const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
+			const CStyleParams &style = CStyleParams());
 
 		// Set the background color
 		void setBackgroundColor (const NLMISC::CRGBA &bgcolor);
@@ -625,26 +653,6 @@ namespace NLGUI
 		};
 		std::vector<CCellParams>	_CellParams;
 
-		class CStyleParams
-		{
-		public:
-			CStyleParams () : TextColor(255,255,255,255)
-			{
-				FontSize=10;
-				FontWeight=400;
-				FontOblique=false;
-				Underlined=false;
-				StrikeThrough=false;
-			}
-			uint FontSize;
-			uint FontWeight;
-			bool FontOblique;
-			NLMISC::CRGBA TextColor;
-			bool Underlined;
-			bool StrikeThrough;
-
-		};
-
 		// Indentation
 		uint	_Indent;
 
@@ -719,6 +727,7 @@ namespace NLGUI
 
 		// read style attribute
 		void getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit = true);
+		void applyCssMinMax(sint32 &width, sint32 &height, sint32 minw=0, sint32 minh=0, sint32 maxw=0, sint32 maxh=0);
 
 		// load and render local html file (from bnp for example)
 		void doBrowseLocalFile(const std::string &filename);
@@ -738,13 +747,24 @@ namespace NLGUI
 
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType};
+		
+		struct CDataImageDownload
+		{
+		public:
+			CDataImageDownload(CViewBase *img, CStyleParams style): Image(img), Style(style)
+			{
+			}
+		public:
+			CViewBase * Image;
+			CStyleParams Style;
+		};
 
 		struct CDataDownload
 		{
 		public:
-			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
+			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams()) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
 			{
-				if (t == ImgType) imgs.push_back(i);
+				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style));
 			}
 
 		public:
@@ -755,7 +775,7 @@ namespace NLGUI
 			std::string md5sum;
 			TDataType type;
 			FILE *fp;
-			std::vector<CViewBase *> imgs;
+			std::vector<CDataImageDownload> imgs;
 		};
 
 		std::vector<CDataDownload> Curls;
@@ -764,12 +784,13 @@ namespace NLGUI
 
 		void initImageDownload();
 		void checkImageDownload();
-		void addImageDownload(const std::string &url, CViewBase *img);
+		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams());
 		std::string localImageName(const std::string &url);
 		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
 		void setImage(CViewBase *view, const std::string &file);
+		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
 
 		// BnpDownload system
 		void initBnpDownload();

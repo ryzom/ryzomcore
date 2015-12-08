@@ -126,6 +126,7 @@ namespace NLGUI
 		return it != options.trustedDomains.end();
 	}
 
+	// Update view after download has finished
 	void CGroupHTML::setImage(CViewBase * view, const string &file)
 	{
 		CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
@@ -166,7 +167,90 @@ namespace NLGUI
 			}
 		}
 	}
+	
+	// Force image width, height
+	void CGroupHTML::setImageSize(CViewBase *view, const CStyleParams &style)
+	{
+		sint32 width = style.Width;
+		sint32 height = style.Height;
+		sint32 maxw = style.MaxWidth;
+		sint32 maxh = style.MaxHeight;
+		
+		sint32 imageWidth, imageHeight;
+		bool changed = true;
+		
+		// get image texture size
+		// if image is being downloaded, then correct size is set after thats done
+		CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
+		if(btn)
+		{
+			btn->fitTexture();
+			imageWidth = btn->getW(false);
+			imageHeight = btn->getH(false);
+		}
+		else
+		{
+			CViewBitmap *btm = dynamic_cast<CViewBitmap*>(view);
+			if(btm)
+			{
+				btm->fitTexture();
+				imageWidth = btm->getW(false);
+				imageHeight = btm->getH(false);
+			}
+			else
+			{
+				// not supported
+				return;
+			}
+		}
+		
+		// if width/height is not requested, then use image size
+		// else recalculate missing value, keep image ratio
+		if (width == -1 && height == -1)
+		{
+			width = imageWidth;
+			height = imageHeight;
+			
+			changed = false;
+		}
+		else
+		if (width == -1 || height == -1) {
+			float ratio = (float) imageWidth / std::max(1, imageHeight);
+			if (width == -1)
+				width = height * ratio;
+			else
+				height = width / ratio;
+		}
+		
+		// apply max-width, max-height rules if asked
+		if (maxw > -1 || maxh > -1)
+		{
+			applyCssMinMax(width, height, 0, 0, maxw, maxh);
+			changed = true;
+		}
 
+		if (changed)
+		{
+			CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
+			if(btn)
+			{
+				btn->setScale(true);
+				btn->setW(width);
+				btn->setH(height);
+			}
+			else
+			{
+				CViewBitmap *image = dynamic_cast<CViewBitmap*>(view);
+				if(image)
+				{
+					image->setScale(true);
+					image->setW(width);
+					image->setH(height);
+				}
+			}
+		}
+	}
+	
 	// Get an url and return the local filename with the path where the url image should be
 	string CGroupHTML::localImageName(const string &url)
 	{
@@ -177,7 +261,7 @@ namespace NLGUI
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img)
+	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style)
 	{
 		string finalUrl = getAbsoluteUrl(url);
 
@@ -189,7 +273,7 @@ namespace NLGUI
 	#ifdef LOG_DL
 				nlwarning("already downloading '%s' img %p", finalUrl.c_str(), img);
 	#endif
-				Curls[i].imgs.push_back(img);
+				Curls[i].imgs.push_back(CDataImageDownload(img, style));
 				return;
 			}
 		}
@@ -234,7 +318,7 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_FILE, fp);
 
 			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", ""));
+			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", "", style));
 		#ifdef LOG_DL
 			nlwarning("adding handle %x, %d curls", curl, Curls.size());
 		#endif
@@ -243,6 +327,7 @@ namespace NLGUI
 		else
 		{
 			setImage(img, dest);
+			setImageSize(img, style);
 		}
 	}
 
@@ -499,7 +584,8 @@ namespace NLGUI
 									{
 										for(uint i = 0; i < it->imgs.size(); i++)
 										{
-											setImage(it->imgs[i], it->dest);
+											setImage(it->imgs[i].Image, it->dest);
+											setImageSize(it->imgs[i].Image, it->imgs[i].Style);
 										}
 									}
 								}
@@ -1272,6 +1358,17 @@ namespace NLGUI
 					// Get the string name
 					if (present[MY_HTML_IMG_SRC] && value[MY_HTML_IMG_SRC])
 					{
+						CStyleParams style;
+						float tmpf;
+						
+						if (present[MY_HTML_IMG_WIDTH] && value[MY_HTML_IMG_WIDTH])
+							getPercentage(style.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
+						if (present[MY_HTML_IMG_HEIGHT] && value[MY_HTML_IMG_HEIGHT])
+							getPercentage(style.Height, tmpf, value[MY_HTML_IMG_HEIGHT]);
+						// width, height from inline css
+						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
+							getStyleParams(value[MY_HTML_IMG_STYLE], style);
+						
 						// Get the global color name
 						bool globalColor = false;
 						if (present[MY_HTML_IMG_GLOBAL_COLOR])
@@ -1286,20 +1383,20 @@ namespace NLGUI
 
 							string params = "name=" + getId() + "|url=" + getLink ();
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								"", globalColor, "browse", params.c_str(), tooltip);
+								"", globalColor, "browse", params.c_str(), tooltip, style);
 						}
 						else
 						{
 							// Get the option to reload (class==reload)
 							bool reloadImg = false;
-
-							string style;
+							
+							string styleString;
 							if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
-								style = value[MY_HTML_IMG_STYLE];
+								styleString = value[MY_HTML_IMG_STYLE];
 
-							if (!style.empty())
+							if (!styleString.empty())
 							{
-								TStyle styles = parseStyle(style);
+								TStyle styles = parseStyle(styleString);
 								TStyle::iterator	it;
 
 								it = styles.find("reload");
@@ -1307,7 +1404,7 @@ namespace NLGUI
 									reloadImg = true;
 							}
 							
-							addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg);
+							addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg, style);
 						}
 					}
 				}
@@ -1346,6 +1443,11 @@ namespace NLGUI
 						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
 						{
+							CStyleParams style;
+							// width, height from inline css
+							if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
+								getStyleParams(value[MY_HTML_INPUT_STYLE], style);
+							
 							// The submit button
 							string name;
 							string normal;
@@ -1361,7 +1463,7 @@ namespace NLGUI
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-								globalColor, "html_submit_form", param.c_str(), tooltip);
+								globalColor, "html_submit_form", param.c_str(), tooltip, style);
 						}
 						if (type == "button" || type == "submit")
 						{
@@ -3569,7 +3671,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg)
+	void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3615,14 +3717,16 @@ namespace NLGUI
 				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
 				//
 				image = "web_del.tga";
-				addImageDownload(img, newImage);
+				addImageDownload(img, newImage, style);
 			}
 		}
 		newImage->setTexture (image);
 		newImage->setModulateGlobalColor(globalColor);
 
-		getParagraph()->addChild(newImage);
+		getParagraph()->addChild(newImage);	
 		paragraphChange ();
+		
+		setImageSize(newImage, style);
 	}
 
 	// ***************************************************************************
@@ -3720,7 +3824,7 @@ namespace NLGUI
 
 	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/* name */, const std::string &normalBitmap, const std::string &pushedBitmap,
 									  const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams,
-									  const char *tooltip)
+									  const char *tooltip, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3748,7 +3852,7 @@ namespace NLGUI
 				if(!CFile::fileExists(normal))
 				{
 					normal = "web_del.tga";
-					addImageDownload(normalBitmap, ctrlButton);
+					addImageDownload(normalBitmap, ctrlButton, style);
 				}
 			}
 		}
@@ -3803,6 +3907,8 @@ namespace NLGUI
 
 		getParagraph()->addChild (ctrlButton);
 		paragraphChange ();
+		
+		setImageSize(ctrlButton, style);
 
 		return ctrlButton;
 	}
@@ -5116,6 +5222,7 @@ namespace NLGUI
 	// style.StrikeThrough; // text-decoration: line-through;  text-decoration-line: line-through;
 	void CGroupHTML::getStyleParams(const std::string &styleString, CStyleParams &style, bool inherit)
 	{
+		float tmpf;
 		TStyle styles = parseStyle(styleString);
 		TStyle::iterator it;
 		for (it=styles.begin(); it != styles.end(); ++it)
@@ -5179,6 +5286,18 @@ namespace NLGUI
 				style.Underlined = (prop.find("underline") != std::string::npos);
 				style.StrikeThrough = (prop.find("line-through") != std::string::npos);
 			}
+			else
+			if (it->first == "width")
+				getPercentage(style.Width, tmpf, it->second.c_str());
+			else
+			if (it->first == "height")
+				getPercentage(style.Height, tmpf, it->second.c_str());
+			else
+			if (it->first == "max-width")
+				getPercentage(style.MaxWidth, tmpf, it->second.c_str());
+			else
+			if (it->first == "max-height")
+				getPercentage(style.MaxHeight, tmpf, it->second.c_str());
 		}
 		if (inherit)
 		{
@@ -5187,6 +5306,74 @@ namespace NLGUI
 		}
 	}
 
+	// ***************************************************************************
+	void CGroupHTML::applyCssMinMax(sint32 &width, sint32 &height, sint32 minw, sint32 minh, sint32 maxw, sint32 maxh)
+	{
+		if (maxw <= 0) maxw = width;
+		if (maxh <= 0) maxh = height;
+
+		maxw = std::max(minw, maxw);
+		maxh = std::max(minh, maxh);
+		
+		float ratio = (float) width / std::max(1, height);
+		if (width > maxw)
+		{
+			width = maxw;
+			height = std::max((sint32)(maxw /ratio), minh);
+		}
+		if (width < minw)
+		{
+			width = minw;
+			height = std::min((sint32)(minw / ratio), maxh);
+		}
+		if (height > maxh)
+		{
+			width = std::max((sint32)(maxh * ratio), minw);
+			height = maxh;
+		}
+		if (height < minh)
+		{
+			width = std::min((sint32)(minh * ratio), maxw);
+			height = minh;
+		}
+		if (width > maxw && height > maxh)
+		{
+			if (maxw/width <= maxh/height)
+			{
+				width = maxw;
+				height = std::max(minh, (sint32)(maxw / ratio));
+			}
+			else
+			{
+				width = std::max(minw, (sint32)(maxh * ratio));
+				height = maxh;
+			}
+		}
+		if (width < minw && height < minh)
+		{
+			if (minw / width <= minh / height)
+			{
+				width = std::min(maxw, (sint32)(minh * ratio));
+				height = minh;
+			}
+			else
+			{
+				width = minw;
+				height = std::min(maxh, (sint32)(minw / ratio));
+			}
+		}
+		if (width < minw && height > maxh)
+		{
+			width = minw;
+			height = maxh;
+		}
+		if (width > maxw && height < minh)
+		{
+			width = maxw;
+			height = minh;
+		}
+	}
+	
 	// ***************************************************************************
 	size_t CGroupHTML::curlHeaderCallback(char *buffer, size_t size, size_t nmemb, void *pCCurlWWWData)
 	{
