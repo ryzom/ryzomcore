@@ -3,7 +3,6 @@ language: cpp
 
 compiler:
     - gcc
-    - clang
 
 os:
     - linux
@@ -28,4 +27,4 @@ before_script:
 
 script:
     - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
-    - cmake --build build
+    - cmake --build build -- -j 2
