@@ -1,0 +1,30 @@
+sudo: false
+language: cpp
+
+compiler:
+    - gcc
+
+os:
+    - linux
+env:
+    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off"
+
+addons:
+    apt:
+        packages:
+            - libluabind-dev
+            - libcpptest-dev
+            - libogg-dev
+            - libvorbis-dev
+            - libopenal-dev
+            - libgif-dev
+            - libfreetype6-dev
+            - libxml2-dev
+
+before_script:
+    - mkdir build
+    - cmake --version
+
+script:
+    - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
+    - cmake --build build -- -j 2

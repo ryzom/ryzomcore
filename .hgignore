@@ -124,6 +124,9 @@ aes_state.txt
 *.kdev4
 .kdev4
 
+# intellij project folder
+.idea/
+
 # Python cache
 *.pyd
 *.pyc
