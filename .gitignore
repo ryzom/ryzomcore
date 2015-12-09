@@ -1,0 +1,265 @@
+syntax: glob
+
+# Various build directories
+bin
+obj
+Debug
+Release
+ReleaseDebug
+DebugFast
+ReleaseDebugStatic
+DebugFastStatic
+
+# Test and application directories
+screenshots
+release
+test
+Temp
+
+# NeL cache
+*.packed_sheets
+
+# Ryzom save
+save_shard
+last_loaded_char.bin
+*.binprim
+*.string_cache
+graphs_output
+default_c
+
+# Windows compile
+*.exe
+*.dll
+*.lib
+*.obj
+
+# Linux compile
+*.a
+*.la
+*.lo
+*.Po
+*.Plo
+*.o
+*.so
+*.so.*
+*_debug
+*.pc
+*.gch
+
+# Mac OS X compile
+*.dylib
+
+# Log dump files
+report_refused
+report_failed
+exception_catched
+*.stat
+*.log
+log.txt
+
+# Max plugin extensions
+*.dlx
+*.dlm
+*.dlu
+
+# makeall build
+.mode_static
+
+# cmake build files & directories
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CPackConfig.cmake
+CPackSourceConfig.cmake
+.libs
+
+# Linux garbage
+Makefile*
+aclocal.m4
+config.guess
+config.sub
+configure
+depcomp
+config.h.in
+nelconfig.h.in
+install-sh
+ltmain.sh
+missing
+ylwrap
+*.mk
+
+# Visual Studio garbage
+*.opensdf
+UpgradeLog*.XML
+_UpgradeReport_Files
+BuildLog.htm
+mt.dep
+ipch
+*.suo
+*.ncb
+*.user
+*.ilk
+*.pdb
+*.aps
+*.exp
+*.idb
+*.sdf
+
+# Mac OS X garbage
+.DS_Store
+
+# Ryzom server garbage
+aes_alias_name.cfg
+aes_nagios_report.txt
+aes_state.txt
+*.launch_ctrl
+*.state
+*.start_count
+
+# Vim and kwrite cache
+*~
+
+# Kdevelop4 garbage
+*.kdev4
+.kdev4
+
+# intellij project folder
+.idea/
+
+# Python cache
+*.pyd
+*.pyc
+
+# Qt compiler
+moc_*.cpp
+*.moc
+
+# Misc garbage
+*.rej
+*.orig
+*.cachefile
+*.cache
+*.patch
+*.7z
+3rdParty
+.svn
+thumbs.db
+Thumbs.db
+*.tpl.php
+.SyncID
+.SyncIgnore
+.SyncArchive
+
+# build
+code/nel/build/*
+code/nelns/build/*
+code/snowballs/build/*
+code/ryzom/build/*
+code/build/*
+code/build-2010/*
+build/*
+install/*
+build_vc*
+code/nel/tools/build_gamedata/configuration/buildsite.py
+
+# Linux nel compile
+code/nel/build/nel-config
+code/nel/config.status
+code/nel/include/nelconfig.h
+code/nel/include/stamp-h1
+code/nel/libtool
+code/nel/nel-config
+code/nel/samples/3d/cluster_viewer/cluster_viewer
+code/nel/samples/3d/font/font
+code/nel/samples/georges/georges
+code/nel/samples/misc/command/command
+code/nel/samples/misc/configfile/configfile
+code/nel/samples/misc/debug/debug
+code/nel/samples/misc/i18n/i18n
+code/nel/samples/misc/log/log
+code/nel/samples/misc/strings/strings
+code/nel/samples/net/chat/chatclient
+code/nel/samples/net/chat/chatserver
+code/nel/samples/net/login_system/nls_frontend_service
+code/nel/samples/net/login_system/nls_login_client
+code/nel/samples/net/udp/udp_bench_client
+code/nel/samples/net/udp/udp_bench_service
+code/nel/samples/pacs/pacs_sample
+code/nel/tools/3d/build_coarse_mesh/build_coarse_mesh
+code/nel/tools/3d/build_far_bank/build_far_bank
+code/nel/tools/3d/build_smallbank/build_smallbank
+code/nel/tools/3d/ig_lighter/ig_lighter
+code/nel/tools/3d/zone_dependencies/zone_dependencies
+code/nel/tools/3d/zone_ig_lighter/zone_ig_lighter
+code/nel/tools/3d/zone_lighter/zone_lighter
+code/nel/tools/3d/zone_welder/zone_welder
+code/nel/tools/misc/bnp_make/bnp_make
+code/nel/tools/misc/disp_sheet_id/disp_sheet_id
+code/nel/tools/misc/make_sheet_id/make_sheet_id
+code/nel/tools/misc/xml_packer/xml_packer
+code/nel/tools/pacs/build_ig_boxes/build_ig_boxes
+code/nel/tools/pacs/build_indoor_rbank/build_indoor_rbank
+code/nel/tools/pacs/build_rbank/build_rbank
+code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/skills.skill_tree
+code/ryzom/common/data_leveldesign/leveldesign/game_element/xp_table/xptable.xp_table
+code/ryzom/tools/server/sql/ryzom_admin_default_data.sql
+
+
+# Linux server compile
+code/ryzom/server/src/entities_game_service/entities_game_service
+code/ryzom/server/src/frontend_service/frontend_service
+code/ryzom/server/src/gpm_service/gpm_service
+code/ryzom/server/src/input_output_service/input_output_service
+code/ryzom/server/src/mirror_service/mirror_service
+code/ryzom/server/src/ryzom_admin_service/ryzom_admin_service
+code/ryzom/server/src/ryzom_naming_service/ryzom_naming_service
+code/ryzom/server/src/ryzom_welcome_service/ryzom_welcome_service
+code/ryzom/server/src/tick_service/tick_service
+# WebTT temp dir
+code/ryzom/tools/server/www/webtt/app/tmp
+
+# AMS ignore
+code/web/public_php/ams/is_installed
+code/web/docs/ams/html
+code/web/public_php/ams/templates_c
+code/ryzom/tools/server/ryzom_ams/drupal
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/autoload
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/configs
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/cron
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/img
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/plugins
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/smarty
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/translations
+code/ryzom/tools/server/ryzom_ams/drupal_module/ryzommanage/ams_lib/libinclude.php
+code/ryzom/tools/server/ryzom_ams/old
+
+
+
+#tools and external dir's
+external
+external_stlport
+nel_tools*
+ryzom_tools*
+
+#Dumps
+*.dmp
+
+code/nel/tools/build_gamedata/processes/ai_wmap/ai_build_wmap.cfg
+code/nel/tools/build_gamedata/processes/sheets/sheets_packer.cfg
+code/nel/tools/build_gamedata/processes/rbank/build_rbank.cfg
+code/nel/tools/build_gamedata/processes/zone/debug_zone_dependencies.cfg
+code/web/public_php/config.php
+code/web/public_php/is_installed
+code/web/public_php/ams/files
+code/web/public_php/db_version_lib
+code/web/public_php/db_version_shard
+code/web/public_php/db_version_tool
+code/web/public_php/db_version_web
+code/web/public_php/role_service
+code/web/public_php/role_support
+code/web/public_php/role_domain
+code/web/public_php/db_version_ring
+code/web/public_php/config_user.php
+code/nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
+code/nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
