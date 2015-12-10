@@ -2623,6 +2623,10 @@ namespace NLGUI
 
 			// If the mouse is over a window, always consider the event is taken (avoid click behind)
 			handled|= isMouseOverWindow();
+
+			// If mouse click was not on interface and we have keyboard captured, then release keyboard
+			if (!handled && getCaptureKeyboard() != NULL && eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
+				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 		}
 
 		return handled;
