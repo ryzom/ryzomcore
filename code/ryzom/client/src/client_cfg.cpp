@@ -2210,7 +2210,7 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
 #elif defined(NL_OS_UNIX)
 	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
-	if (!getRyzomEtcPrefix().empty()) defaultConfigPath = CPath::standardizePath(getRyzomEtcPrefix());
+	defaultConfigPath = CPath::standardizePath(getRyzomEtcPrefix());
 #else
 	// some other prefix here :)
 #endif // NL_OS_UNIX
