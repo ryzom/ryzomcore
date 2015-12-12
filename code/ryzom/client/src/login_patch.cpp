@@ -221,7 +221,7 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
 #elif defined(NL_OS_UNIX)
 	ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
-	if (CFile::isDirectory(ReadableClientDataPath))	ReadableClientDataPath.clear()
+	if (CFile::isDirectory(ReadableClientDataPath))	ReadableClientDataPath.clear();
 #else
 	ReadableClientDataPath.clear();
 #endif
