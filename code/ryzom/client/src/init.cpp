@@ -675,7 +675,7 @@ void addSearchPaths(IProgressCallback &progress)
 #ifdef NL_OS_MAC
 	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
 #elif defined(NL_OS_UNIX)
-	if (!getRyzomSharePrefix().empty()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
+	if (CFile::isDirectory(getRyzomSharePrefix()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
 #endif
 
 	// add in last position, a specific possibly read only directory
@@ -720,7 +720,7 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 #ifdef NL_OS_MAC
 	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
 #elif defined(NL_OS_UNIX)
-	if (!getRyzomSharePrefix().empty()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
+	if (CFile::isDirectory(getRyzomSharePrefix()) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
 #endif
 
 	// add in last position, a specific possibly read only directory

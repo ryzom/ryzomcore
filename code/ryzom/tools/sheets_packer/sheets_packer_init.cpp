@@ -93,7 +93,7 @@ bool init()
 	nlinfo("Loading sheets...");
 	IProgressCallback callback;
 	SheetMngr.setOutputDataPath(AppCfg.OutputDataPath);
-	SheetMngr.load (callback, true, true);
+	SheetMngr.load (callback, true, true, AppCfg.DumpVisualSlotsIndex);
 
 	// Make the lmconts.packed file
 	if (!LigoConfig.readPrimitiveClass (AppCfg.LigoPrimitiveClass.c_str(), false))

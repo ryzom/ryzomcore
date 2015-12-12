@@ -51,8 +51,11 @@ struct CClientConfig
 	/// Path where to create lmconts.packed
 	std::string			OutputDataPath;
 
+	// File containing LIGO primitives
+	std::string			LigoPrimitiveClass;
 
-	std::string		LigoPrimitiveClass;
+	// Whether dump visual slots index or not
+	bool				DumpVisualSlotsIndex;
 
 public:
 	/// Constructor.

@@ -220,17 +220,13 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 #ifdef NL_OS_MAC
 	ReadableClientDataPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/data");
 #elif defined(NL_OS_UNIX)
-	if (!getRyzomSharePrefix().empty())
-	{
-		ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
-	}
-	else
-	{
-		ReadableClientDataPath = WritableClientDataPath;
-	}
+	ReadableClientDataPath = CPath::standardizePath(getRyzomSharePrefix() + "/data");
+	if (CFile::isDirectory(ReadableClientDataPath))	ReadableClientDataPath.clear()
 #else
-	ReadableClientDataPath = WritableClientDataPath;
+	ReadableClientDataPath.clear();
 #endif
+
+	if (ReadableClientDataPath.empty()) ReadableClientDataPath = WritableClientDataPath;
 }
 
 // ****************************************************************************
