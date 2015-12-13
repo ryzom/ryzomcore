@@ -567,7 +567,7 @@
     <!-- compass clock -->
     <group id="clock"
            posref="TL TL"
-           w="50"
+           w="70"
            h="16"
            x="4"
            y="-4">
