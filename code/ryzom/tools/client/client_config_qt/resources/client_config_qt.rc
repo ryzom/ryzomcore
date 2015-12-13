@@ -20,13 +20,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "FileDescription", "Client Config Qt"
+            VALUE "FileDescription", "Ryzom Configuration"
             VALUE "FileVersion", NL_VERSION
             VALUE "LegalCopyright", COPYRIGHT
 #ifdef _DEBUG
-            VALUE "OriginalFilename", "client_config_qt_d.exe"
+            VALUE "OriginalFilename", "ryzom_configuration_qt_d.exe"
 #else
-            VALUE "OriginalFilename", "client_config_qt_r.exe"
+            VALUE "OriginalFilename", "ryzom_configuration_qt_r.exe"
 #endif			
             VALUE "ProductName", "Ryzom Core"
             VALUE "ProductVersion", NL_VERSION
