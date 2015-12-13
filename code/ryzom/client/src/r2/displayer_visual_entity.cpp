@@ -978,7 +978,7 @@ void CDisplayerVisualEntity::updateName()
 		sint actNb = -1;
 		for(uint i=0; i<acts->getSize(); i++)
 		{
-			if(acts->getValue(i)->equal(act))
+			if(acts->getValueAtPos(i)->equal(act))
 			{
 				actNb = i;
 				break;

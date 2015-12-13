@@ -154,10 +154,12 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 
 		if (curFrame->ExtensionBlockCount > 0)
 		{
-			for(uint e=0; e<curFrame->ExtensionBlockCount; e++){
+			for(sint e = 0; e < curFrame->ExtensionBlockCount; e++)
+			{
 				ExtensionBlock *ext = &curFrame->ExtensionBlocks[e];
 
-				if (ext->Function == GRAPHICS_EXT_FUNC_CODE) {
+				if (ext->Function == GRAPHICS_EXT_FUNC_CODE)
+				{
 					uint8 flag = ext->Bytes[0];
 					//delay = (ext.Bytes[1] << 8) | ext.Bytes[2];
 					transparency = (flag & GIF_TRANSPARENT_MASK) ? ext->Bytes[3] : GIF_NOT_TRANSPARENT;

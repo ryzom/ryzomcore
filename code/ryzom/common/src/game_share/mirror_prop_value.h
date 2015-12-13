@@ -1154,8 +1154,8 @@ public:
 	friend											iterator; // MSVC
 	friend											const_iterator;
 #else
-	template <class U, class V> friend				class _CMirrorPropValueListIterator; // GCC3
-	template <class U, class V> friend				class _CCMirrorPropValueListIterator;
+	template <class U, class V> friend				struct _CMirrorPropValueListIterator; // GCC3
+	template <class U, class V> friend				struct _CCMirrorPropValueListIterator;
 #endif
 
 	/// Constructor
@@ -1241,9 +1241,9 @@ public:
 	friend											iterator; // MSVC
 	friend											const_iterator;
 #else
-	template <class U, class V> friend				class _CMirrorPropValueListIterator; // GCC3
-	template <class U, class V> friend				class _CCMirrorPropValueListIterator;
-        template<class U, class V> friend                               class CMirrorPropValueItem;
+	template <class U, class V> friend				struct _CMirrorPropValueListIterator; // GCC3
+	template <class U, class V> friend				struct _CCMirrorPropValueListIterator;
+	template<class U, class V> friend				class CMirrorPropValueItem;
 #endif
 
 	/// Constructor

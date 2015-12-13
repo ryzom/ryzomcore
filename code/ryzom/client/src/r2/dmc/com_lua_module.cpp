@@ -1114,7 +1114,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 		for (first=0 ; first != last; ++first)
 		{
 			std::string key = object->getKey(first);
-			CObject *value =  object->getValue(first);
+			CObject *value =  object->getValueAtPos(first);
 			if (!key.empty())
 			{
 				lua_pushstring(state, key.c_str());
@@ -2246,7 +2246,7 @@ sint CComLuaModule::luaUpdateScenarioAck(lua_State* state)
 		for(uint i = 0; i < size;  ++i)
 		{
 			std::string key = object->getKey(i);
-			CObject* value = object->getValue(i);
+			CObject* value = object->getValueAtPos(i);
 			if (value->isInteger())
 			{
 

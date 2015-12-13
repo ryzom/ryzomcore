@@ -221,7 +221,7 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 		{
 			if (_IndexInParentArray == -1)
 			{
-				if (parentInstanceTable->getValue(_IndexInParent) == static_cast<const CObject *>(this))
+				if (parentInstanceTable->getValueAtPos(_IndexInParent) == static_cast<const CObject *>(this))
 				{
 					name =  parentInstanceTable->getKey(_IndexInParent);
 					indexInArray = -1;
@@ -230,13 +230,13 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 			}
 			else
 			{
-				CObject *subObject = parentInstanceTable->getValue(_IndexInParent);
+				CObject *subObject = parentInstanceTable->getValueAtPos(_IndexInParent);
 				if (subObject->isTable())
 				{
 					CObjectTable *subTable = (CObjectTable *) subObject;
 					if (_IndexInParentArray < (sint32) subTable->getSize())
 					{
-						if (subTable->getValue(_IndexInParentArray) == static_cast<const CObject *>(this))
+						if (subTable->getValueAtPos(_IndexInParentArray) == static_cast<const CObject *>(this))
 						{
 							name =  parentInstanceTable->getKey(_IndexInParent);
 							indexInArray = _IndexInParentArray;
@@ -261,7 +261,7 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 	// if instance is the direct parent (e.g object is not in an array of the parent)
 	for (uint k = 0; k < parentInstanceTable->getSize(); ++k)
 	{
-		if (parentInstanceTable->getValue(k) == ptrInParent)
+		if (parentInstanceTable->getValueAtPos(k) == ptrInParent)
 		{
 			_IndexInParent = k;
 			if (ptrInParent == this)
@@ -276,7 +276,7 @@ void CObjectRefIdClient::getNameInParent(std::string &name, sint32 &indexInArray
 				// I'm in an array in my parent, retrieve the index
 				for (uint l = 0; l < getParent()->getSize(); ++l)
 				{
-					if (getParent()->getValue(l) == static_cast<const CObject *>(this))
+					if (getParent()->getValueAtPos(l) == static_cast<const CObject *>(this))
 					{
 						name = parentInstanceTable->getKey(_IndexInParent);
 						_IndexInParentArray = l;

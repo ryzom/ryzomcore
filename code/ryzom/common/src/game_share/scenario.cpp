@@ -122,7 +122,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 	}
 	if (position != -1)
 	{
-		CObject *subObj = src->getValue(position);
+		CObject *subObj = src->getValueAtPos(position);
 		if (!subObj)
 		{
 			nlwarning("Can't find attribute %s[%d] inside object with InstanceId =  %s", attrName.c_str(), (int) position, instanceId.c_str());
@@ -388,7 +388,7 @@ void CInstanceMap::add(CObject* root)
 		sint32 first = 0;
 		for (first = 0 ; first != size ; ++first)
 		{
-			CObject* value = root->getValue(first);
+			CObject* value = root->getValueAtPos(first);
 			add(value);
 		}
 
@@ -416,7 +416,7 @@ void CInstanceMap::remove(CObject* root)
 		sint32 first = 0;
 		for (first = 0 ; first != size ; ++first)
 		{
-			CObject* value = root->getValue(first);
+			CObject* value = root->getValueAtPos(first);
 			remove(value);
 		}
 

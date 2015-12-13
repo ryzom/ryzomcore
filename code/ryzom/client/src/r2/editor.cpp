@@ -3224,7 +3224,7 @@ void CEditor::initObjectProjectionMetatable()
 			if (ls.isInteger(2))
 			{
 				// index is an integer
-				const CObject *other = obj->getValue((uint32) ls.toInteger(2));
+				const CObject *other = obj->getValueAtPos((uint32) ls.toInteger(2));
 				if (other)
 				{
 					pushValue(ls, other);
@@ -3569,7 +3569,7 @@ void CEditor::initObjectProjectionMetatable()
 					}
 					ls.pop(2);
 					pushKey(ls, obj, 0);
-					pushValue(ls, obj->getValue(0));
+					pushValue(ls, obj->getValueAtPos(0));
 					return 2;
 				}
 			}
@@ -3618,7 +3618,7 @@ void CEditor::initObjectProjectionMetatable()
 				{
 					ls.pop(2);
 					pushKey(ls, obj, newIndex);
-					pushValue(ls, obj->getValue(newIndex));
+					pushValue(ls, obj->getValueAtPos(newIndex));
 					return 2;
 				}
 			}
@@ -3751,7 +3751,7 @@ void CEditor::setCurrentActFromTitle(const std::string &wantedTitle)
 	{
 		for(uint k = 0; k < actTable->getSize(); ++k)
 		{
-			R2::CObject *act = actTable->getValue(k);
+			R2::CObject *act = actTable->getValueAtPos(k);
 			nlassert(act);
 			std::string actTitle;
 			if (act->isString("Name"))
@@ -4560,7 +4560,7 @@ void CEditor::updatePrimitiveContextualVisibility()
 			for(uint k = 0; k < activities->getSize(); ++k)
 			{
 				// search next zone of activity
-				CObjectTable *activity = activities->getValue(k)->toTable();
+				CObjectTable *activity = activities->getValueAtPos(k)->toTable();
 				if (!activity) continue;
 				std::string zoneId = getString(activity, "ActivityZoneId");
 				CInstance *primitive = getInstanceFromId(zoneId);
@@ -5031,7 +5031,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 	{
 		for(uint k = 0; k < root->getSize(); ++k)
 		{
-			CObject *obj = root->getValue(k);
+			CObject *obj = root->getValueAtPos(k);
 			if (obj->isTable())
 			{
 				onErase(obj);
@@ -5122,7 +5122,7 @@ void CEditor::onErase(CObject *root, bool &foundInBase, std::string &nameInParen
 		CObjectTable *rootTable = root->toTable();
 		for (uint32 k = 0; k < rootTable->getSize(); ++k)
 		{
-			CObject *obj = rootTable->getValue(k);
+			CObject *obj = rootTable->getValueAtPos(k);
 			CObjectRefIdClient *objRefId = dynamic_cast<CObjectRefIdClient *>(obj);
 			if (objRefId)
 			{
@@ -5547,7 +5547,7 @@ void CEditor::createNewInstanceForObjectTableInternal(const CObject *obj)
 	// do the same on sons
 	for(uint k = 0; k < table->getSize(); ++k)
 	{
-		createNewInstanceForObjectTableInternal(table->getValue(k));
+		createNewInstanceForObjectTableInternal(table->getValueAtPos(k));
 	}
 }
 
@@ -5754,7 +5754,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 	CObject *acts = _Scenario->getAttr("Acts");
 	if (acts)
 	{
-		CObject *baseAct = acts->getValue(0);
+		CObject *baseAct = acts->getValueAtPos(0);
 		if (baseAct)
 		{
 			_BaseAct = getInstanceFromId(baseAct->toString("InstanceId"));
@@ -5871,7 +5871,7 @@ CInstance *CEditor::getDefaultFeature(CInstance *act)
 	if (!act) return NULL;
 	CObject *defaultFeature = act->getObjectTable()->getAttr("Features");
 	if (!defaultFeature) return NULL;
-	defaultFeature = defaultFeature->getValue(0);
+	defaultFeature = defaultFeature->getValueAtPos(0);
 	if (!defaultFeature) return NULL; // 0 should be the default feature
 	CInstance *result = getInstanceFromId(defaultFeature->toString("InstanceId"));
 	if (!result) return NULL;

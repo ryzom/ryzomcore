@@ -123,7 +123,7 @@ CSmallStringManager::CSmallStringManager(CObject* textManager)
 	//unused ids
 	for(uint32 i=0;i<max;i++)
 	{
-		uint32 id = static_cast<uint32>(unused->getValue(i)->toInteger());
+		uint32 id = static_cast<uint32>(unused->getValueAtPos(i)->toInteger());
 		_FreeIds.insert(id);
 	}
 
@@ -131,7 +131,7 @@ CSmallStringManager::CSmallStringManager(CObject* textManager)
 	max = texts->getSize();
 	for(uint32 i=0;i<max;i++)
 	{
-		CObject* entry = texts->getValue(i);
+		CObject* entry = texts->getValueAtPos(i);
 		std::string text = entry->getAttr("Text")->toString();
 		uint32 textId = static_cast<uint32>(entry->getAttr("TextId")->toInteger());
 		uint32 textCount = static_cast<uint32>(entry->getAttr("Count")->toInteger());
