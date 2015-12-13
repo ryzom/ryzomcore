@@ -167,7 +167,11 @@ CViewBase *CChatTextManager::createMsgText(const ucstring &cstMsg, NLMISC::CRGBA
 	ucstring cur_time;
 	if (showTimestamps())
 	{
-		cur_time = CInterfaceManager::getTimestampHuman();
+		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
+		if (node && node->getValueBool())
+			cur_time = CInterfaceManager::getTimestampHuman("[%I:%M:%S %p] ");
+		else
+			cur_time = CInterfaceManager::getTimestampHuman();
 	}
 
 	// if text contain any color code, set the text formated and white,

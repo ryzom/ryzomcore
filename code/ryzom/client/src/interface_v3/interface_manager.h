@@ -408,6 +408,10 @@ public:
 	void	notifyMailAvailable();
 	void	notifyForumUpdated();
 
+	/** Return true if 12-hour clock should be used
+	 */
+	static bool use12hClock();
+
 	/** Returns a human readable timestamp with the given format.
 	 */
 	static char* getTimestampHuman(const char* format = "[%H:%M:%S] ");
