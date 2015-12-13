@@ -96,7 +96,7 @@ void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
 	if (error)
 	{
 		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
-		
+
 		CFile::deleteFile(outputFile);
 	}
 	else
@@ -131,7 +131,7 @@ public:
 	void getCategories(CPersistentDataRecord &pdr) const;
 
 	void updateIndexFileList(CBNPFileSet& packageIndex) const;
-	void generateClientIndex(CProductDescriptionForClient& theClientPackage,const CBNPFileSet& packageIndex) const;	
+	void generateClientIndex(CProductDescriptionForClient& theClientPackage,const CBNPFileSet& packageIndex) const;
 	void addVersion(CBNPFileSet& packageIndex);
 	void generatePatches(CBNPFileSet& packageIndex) const;
 	void createDirectories() const;
@@ -193,22 +193,22 @@ void CPackageDescription::setup(const std::string& packageName)
 	apply(pdr);
 
 	// root directory
-	if (_RootDirectory.empty())		
+	if (_RootDirectory.empty())
 		_RootDirectory= NLMISC::CFile::getPath(packageName);
 	_RootDirectory= NLMISC::CPath::standardizePath(_RootDirectory,true);
 
 	// patch directory
-	if (_PatchDirectory.empty())	
+	if (_PatchDirectory.empty())
 		_PatchDirectory= _RootDirectory+"patch";
 	_PatchDirectory= NLMISC::CPath::standardizePath(_PatchDirectory,true);
 
 	// BNP directory
-	if (_BnpDirectory.empty())	
+	if (_BnpDirectory.empty())
 		_BnpDirectory= _RootDirectory+"bnp";
 	_BnpDirectory= NLMISC::CPath::standardizePath(_BnpDirectory,true);
 
 	// ref directory
-	if (_RefDirectory.empty())	
+	if (_RefDirectory.empty())
 		_RefDirectory= _RootDirectory+"ref";
 	_RefDirectory= NLMISC::CPath::standardizePath(_RefDirectory,true);
 
@@ -309,7 +309,7 @@ void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theC
 	// create the output file
 	pdr.clear();
 	theClientPackage.store(pdr);
-	
+
 	std::string newName = _PatchDirectory + toString("%05u/", packageIndex.getVersionNumber()) + NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName);
 	newName += NLMISC::toString("_%05u", packageIndex.getVersionNumber());
 
@@ -384,7 +384,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		string lzmaFile = versionSubDir+CFile::getFilename(bnpFileName)+".lzma";
 		if (!CFile::fileExists(lzmaFile))
 		{
-			// build the lzma compression in a temp file (avoid leaving dirty file if the 
+			// build the lzma compression in a temp file (avoid leaving dirty file if the
 			// process cannot terminate)
 			GenerateLZMA(bnpFileName, lzmaFile+".tmp");
 			// rename the tmp file
