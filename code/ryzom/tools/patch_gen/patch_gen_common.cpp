@@ -86,7 +86,7 @@ void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
 	_spawnlp(_P_WAIT, "lzma.exe","lzma.exe", "e", sourceFile.c_str(), outputFile.c_str(), NULL);
 #else // NL_OS_WINDOWS
 	// new lzma only supports one file name on command line, so make a copy
-	CFile::copyFile(sourceFile, outputFile);
+	CFile::copyFile(outputFile, sourceFile);
 
 	// new lzma syntax, -z = compress, -9 = best compression
 	std::string cmd = NLMISC::toString("lzma -z -9 %s", outputFile.c_str());
@@ -102,7 +102,7 @@ void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
 	else
 	{
 		// lzma always append a .lzma extension, so rename compressed file to wanted one
-		CFile::moveFile(outputFile + ".lzma", outputFile);
+		CFile::moveFile(outputFile, outputFile + ".lzma");
 	}
 #endif // NL_OS_WINDOWS
 }
