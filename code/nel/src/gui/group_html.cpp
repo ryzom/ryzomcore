@@ -579,7 +579,7 @@ namespace NLGUI
 								string finalUrl;
 								if (it->type == ImgType)
 								{
-									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									CFile::moveFile(it->dest, tmpfile);
 									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										for(uint i = 0; i < it->imgs.size(); i++)
@@ -591,7 +591,7 @@ namespace NLGUI
 								}
 								else
 								{
-									CFile::moveFile(it->dest.c_str(), tmpfile.c_str());
+									CFile::moveFile(it->dest, tmpfile);
 									//if (lookupLocalFile (finalUrl, file.c_str(), false))
 									{
 										CLuaManager::getInstance().executeLuaScript( it->luaScript, true );

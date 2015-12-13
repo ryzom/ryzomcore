@@ -701,7 +701,7 @@ struct CFile
 	/** Move a file
 	  * NB this keeps file attributes
 	  */
-	static bool moveFile(const char *dest, const char *src);
+	static bool moveFile(const std::string &dest, const std::string &src);
 
 	/** Create a directory
 	  *	\return true if success

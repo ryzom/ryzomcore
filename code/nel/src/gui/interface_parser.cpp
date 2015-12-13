@@ -356,7 +356,7 @@ namespace NLGUI
 				string	backup = nextFileName+".backup";
 				if (CFile::fileExists(backup))
 					CFile::deleteFile(backup);
-				CFile::moveFile(backup.c_str(), nextFileName.c_str());
+				CFile::moveFile(backup, nextFileName);
 			}
 			return false;
 		}

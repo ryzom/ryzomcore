@@ -854,7 +854,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					else
 					{
 						deleteFile(DstName);
-						CFile::moveFile(DstName.c_str(), SrcName.c_str());
+						CFile::moveFile(DstName, SrcName);
 					}
 
 					nblab++;
@@ -1128,7 +1128,7 @@ void CPatchManager::renameFile (const string &src, const string &dst)
 	ucstring s = CI18N::get("uiRenameFile") + " " + NLMISC::CFile::getFilename(src);
 	setState(true, s);
 
-	if (!NLMISC::CFile::moveFile(dst.c_str(), src.c_str()))
+	if (!NLMISC::CFile::moveFile(dst, src))
 	{
 		s = CI18N::get("uiRenameErr") + " " + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
@@ -3677,7 +3677,7 @@ void CDownloadThread::run()
 				try
 				{
 					pPM->getServerFile(patchName, false, tmpFile);
-					NLMISC::CFile::moveFile(finalFile.c_str(), tmpFile.c_str());
+					NLMISC::CFile::moveFile(finalFile, tmpFile);
 
 					pPM->applyDate(finalFile, _Entries[first].Timestamp);
 				}

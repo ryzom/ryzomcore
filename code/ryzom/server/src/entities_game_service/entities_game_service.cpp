@@ -3244,8 +3244,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getCharacterPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i])).c_str(),
-					allChars[i].c_str()
+					PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i]),
+					allChars[i]
 					);
 			}
 		}
@@ -3271,8 +3271,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getOfflineCommandPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i])).c_str(),
-					allCommands[i].c_str()
+					PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i]),
+					allCommands[i]
 					);
 			}
 		}

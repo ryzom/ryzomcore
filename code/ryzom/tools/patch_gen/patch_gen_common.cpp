@@ -369,7 +369,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 			// process cannot terminate)
 			GenerateLZMA(bnpFileName, lzmaFile+".tmp");
 			// rename the tmp file
-			CFile::moveFile(lzmaFile.c_str(), (lzmaFile+".tmp").c_str());
+			CFile::moveFile(lzmaFile, lzmaFile+".tmp");
 		}
 
 		// store the lzma file size in the descriptor

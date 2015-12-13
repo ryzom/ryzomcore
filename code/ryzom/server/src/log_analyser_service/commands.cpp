@@ -98,7 +98,7 @@ public:
 		// rename the created file...
 		DROP_IF(!NLMISC::CFile::fileExists(_TmpFileName),"No output file created: "+_TmpFileName,return);
 		DROP_IF(NLMISC::CFile::fileExists(_FileName),"Cannot rename output file '"+_TmpFileName+"' because another file is in the way: "+_FileName,return);
-		NLMISC::CFile::moveFile(_FileName.c_str(),_TmpFileName.c_str());
+		NLMISC::CFile::moveFile(_FileName, _TmpFileName);
 		DROP_IF(!NLMISC::CFile::fileExists(_FileName),"Failed to create final output file: '"+_FileName+"' from tmp file: '"+_TmpFileName+"'",return);
 	}
 

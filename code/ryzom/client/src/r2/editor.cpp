@@ -4734,7 +4734,7 @@ void CEditor::autoSave()
 			{
 				CFile::deleteFile(next);
 			}
-			CFile::moveFile(next.c_str(), current.c_str());
+			CFile::moveFile(next, current);
 		}
 	}
 
