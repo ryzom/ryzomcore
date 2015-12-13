@@ -1,8 +1,6 @@
 #-----------------------------------------------------------------------------
 #Platform specifics
 
-FIND_PACKAGE(ZLIB)
-
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common/src )
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common )
 SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/server/src)
@@ -20,9 +18,7 @@ ELSEIF(WITH_RYZOM_TOOLS)
   ADD_SUBDIRECTORY(client)
 ENDIF(WITH_RYZOM_CLIENT)
 
-IF(WITH_RYZOM_TOOLS)
-  ADD_SUBDIRECTORY(tools)
-ENDIF(WITH_RYZOM_TOOLS)
+ADD_SUBDIRECTORY(tools)
 
 IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   # Need servershare for build packed collision tool

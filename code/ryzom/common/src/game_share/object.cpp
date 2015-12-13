@@ -392,7 +392,7 @@ CObject* CObject::getAttr(const std::string & /* name */) const {  return 0;}
 
 std::string CObject::getKey(uint32 /* pos */) const{ BOMB("Try to call the function getKey() on an object that is not a table", return "");  return "";}
 
-CObject* CObject::getValue(uint32 /* pos */) const{ BOMB("Try to call the function getValue() on an object that is not a table", return 0);   return 0;}
+CObject* CObject::getValueAtPos(uint32 /* pos */) const{ BOMB("Try to call the function getValueAtPos() on an object that is not a table", return 0);   return 0;}
 
 uint32 CObject::getSize() const { BOMB("Try to call the function getSize() on an object that is not a table", return 0);  return 0; }
 
@@ -974,7 +974,7 @@ void CObjectTable::checkIntegrity() const
 	{
 		for(uint k = 0; k < getSize(); ++k)
 		{
-			CObject *subObj = getValue(k);
+			CObject *subObj = getValueAtPos(k);
 			if (subObj)
 			{
 				if (!subObj->getGhost())
@@ -1017,7 +1017,7 @@ void CObjectTable::setGhost(bool ghost)
 
 	for(uint k = 0; k < getSize(); ++k)
 	{
-		CObject *subObj = getValue(k);
+		CObject *subObj = getValueAtPos(k);
 		if (subObj)
 		{
 			subObj->setGhost(ghost);
@@ -1031,7 +1031,7 @@ void CObjectTable::previsit(std::vector<CObject::TRefPtr> &sons)
 	sons.reserve(sons.size() + getSize());
 	for(uint k = 0; k < getSize(); ++k)
 	{
-		CObject *subObj = getValue(k);
+		CObject *subObj = getValueAtPos(k);
 		if (subObj)
 		{
 			subObj->previsit(sons);
@@ -1068,7 +1068,7 @@ void CObjectTable::inPlaceCopy(const CObjectTable &src)
 			}
 			else
 			{
-				src.getValue(k)->inPlaceCopyTo(*dest);
+				src.getValueAtPos(k)->inPlaceCopyTo(*dest);
 			}
 		}
 		else
@@ -1115,7 +1115,7 @@ void CObjectTable::sort()
 	uint32 lastKey = keys->getSize();
 	for (; firstKey != lastKey ; ++firstKey)
 	{
-		CObject* keyObject = keys->getValue(firstKey);
+		CObject* keyObject = keys->getValueAtPos(firstKey);
 		if (! keyObject->isString()) return;
 		std::string key = keyObject->toString();
 
@@ -1344,7 +1344,7 @@ std::string CObjectTable::getKey(uint32 pos) const
 	return _Value[pos].first;
 }
 
-CObject* CObjectTable::getValue(uint32 pos) const
+CObject* CObjectTable::getValueAtPos(uint32 pos) const
 {
 	//H_AUTO(R2_CObjectTable_getValue)
 	if (pos >= _Value.size())
@@ -1404,7 +1404,7 @@ bool CObjectTable::setObject(const std::string& key,  CObject* value)
 		for ( ; first != last ; ++first)
 		{
 			std::string key1 = table->getKey(first);
-			CObject* value1 = table->getValue(first);
+			CObject* value1 = table->getValueAtPos(first);
 			add(key1,  value1->clone());
 		}
 		return true;
@@ -1577,9 +1577,9 @@ bool CObjectTable::equal(const CObject* other) const
 	for ( i=0; i!= size ; ++i )
 	{
 		std::string key = other->getKey(i);
-		CObject* value = other->getValue(i);
+		CObject* value = other->getValueAtPos(i);
 		if (key != this->getKey(i)) return false;
-		if ( !value->equal(this->getValue(i))) return false;
+		if ( !value->equal(this->getValueAtPos(i))) return false;
 	}
 	return true;
 }
@@ -1835,7 +1835,7 @@ void CObjectGenerator::createDefaultValues(CObjectFactory* factory)
 	uint32 last = prop->getSize();
 	for ( ; first != last ; ++first )
 	{
-		CObject* found = prop->getValue(first);
+		CObject* found = prop->getValueAtPos(first);
 
 		if (found && found->isString("DefaultValue") && found->isString("Name") )
 		{
@@ -1895,7 +1895,7 @@ CObject* CObjectGenerator::instanciate(CObjectFactory* factory) const
 	uint32 last = prop->getSize();
 	for ( ; first != last ; ++first )
 	{
-		CObject* found = prop->getValue(first);
+		CObject* found = prop->getValueAtPos(first);
 
 		if (found && found->isString("Type") )
 		{
@@ -2461,7 +2461,7 @@ public:
 					uint8 shortKey = static_cast<uint8>(uiKey);
 					stream.serial(shortKey);
 
-					CObject*value = data->getValue(optionalPropFoundIndex[first]);
+					CObject*value = data->getValueAtPos(optionalPropFoundIndex[first]);
 					if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
 					onSerial(stream, key, value, serializer);
 				}
@@ -2483,7 +2483,7 @@ public:
 				stream.serial(last16);
 				for (; first != last; ++first)
 				{
-					CObject* value = data->getValue(valuePropFoundIndex[first]);
+					CObject* value = data->getValueAtPos(valuePropFoundIndex[first]);
 					if (serializer->Log) { nldebug("R2NET: (%u) Field [%u]", serializer->Level, first);}
 					CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
 				}
@@ -2509,7 +2509,7 @@ public:
 				{
 					uint32 keyIndex = otherPropFoundIndex[first];
 					std::string key = data->getKey(keyIndex);
-					CObject* value = data->getValue(keyIndex);
+					CObject* value = data->getValueAtPos(keyIndex);
 					stream.serial(key);
 					if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}
 					CObjectSerializerImpl::getInstance().serialImpl(stream, value, serializer);
@@ -3270,7 +3270,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			for (uint first = 0; first != size; ++first)
 			{
 				std::string key = data->getKey(first);
-				CObject* value = data->getValue(first);
+				CObject* value = data->getValueAtPos(first);
 				stream.serial(key);
 				++ (serializer->Level);
 				if (serializer->Log) { nldebug("R2NET: (%u) Field '%s'", serializer->Level, key.c_str());}

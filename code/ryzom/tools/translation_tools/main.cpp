@@ -408,7 +408,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 		if (archiveDiff)
 		{
 			// move the diff file in the history dir
-			CFile::moveFile((historyDir+CFile::getFilename(diffs[i])).c_str(), diffs[i].c_str());
+			CFile::moveFile(historyDir+CFile::getFilename(diffs[i]), diffs[i]);
 		}
 	}
 
@@ -801,7 +801,7 @@ int mergeStringDiff(int argc, char *argv[])
 			ucstring old;
 			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
 			if (old != str)
-				CFile::moveFile((historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename)).c_str(), filename.c_str());
+				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
 
 		CI18N::writeTextFile(filename, str);
@@ -909,7 +909,7 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 		if (archiveDiff)
 		{
 			// move the diff file in the history dir
-			CFile::moveFile((historyDir+CFile::getFilename(diffs[i])).c_str(), diffs[i].c_str());
+			CFile::moveFile(historyDir+CFile::getFilename(diffs[i]), diffs[i]);
 		}
 	}
 
@@ -1165,7 +1165,7 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 			ucstring old;
 			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
 			if (old != str)
-				CFile::moveFile((historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename)).c_str(), filename.c_str());
+				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
 
 		CI18N::writeTextFile(transDir+basename+".txt", str);
@@ -1334,7 +1334,7 @@ int mergeClauseDiff(int argc, char *argv[])
 			ucstring old;
 			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
 			if (old != str)
-				CFile::moveFile((historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename)).c_str(), filename.c_str());
+				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
 
 		CI18N::writeTextFile(filename, str);
@@ -1449,7 +1449,7 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 		if (archiveDiff)
 		{
 			// move the diff file in the history dir
-			CFile::moveFile((historyDir+CFile::getFilename(fileList[i])).c_str(), fileList[i].c_str());
+			CFile::moveFile(historyDir+CFile::getFilename(fileList[i]), fileList[i]);
 		}
 	}
 

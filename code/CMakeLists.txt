@@ -72,10 +72,6 @@ IF(WIN32)
   IF(WITH_MFC)
     FIND_PACKAGE(MFC QUIET)
   ENDIF(WITH_MFC)
-
-  IF(NOT DEFINED ENV{QTDIR})
-    SET(ENV{QTDIR} "c:/qt/4.6.3")
-  ENDIF(NOT DEFINED ENV{QTDIR})
 ENDIF(WIN32)
 
 #-----------------------------------------------------------------------------
@@ -108,6 +104,7 @@ IF(WIN32)
   ENDIF(WITH_MFC)
 ENDIF(WIN32)
 
+FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
 FIND_PACKAGE(GIF)
@@ -147,24 +144,194 @@ IF(WITH_SSE2)
   ENDIF(WITH_SSE3)
 ENDIF(WITH_SSE2)
 
+MACRO(ADD_QT_LIBRARY _NAME)
+  IF(WIN32)
+    SET(_PREFIX "Qt5")
+    SET(_EXT "lib")
+  ELSE()
+    SET(_PREFIX "libQt5")
+    SET(_EXT "a")
+  ENDIF()
+  SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}.${_EXT}")
+  IF(EXISTS ${_LIB})
+    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
+  ENDIF()
+  SET(_LIB "${QT_LIBRARY_DIR}/${_PREFIX}${_NAME}d.${_EXT}")
+  IF(EXISTS ${_LIB})
+    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
+  ENDIF()
+ENDMACRO()
+
+MACRO(ADD_QT_PLUGIN _TYPE _NAME)
+  IF(WIN32)
+    SET(_PREFIX "")
+    SET(_EXT "lib")
+  ELSE()
+    SET(_PREFIX "lib")
+    SET(_EXT "a")
+  ENDIF()
+  SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}.${_EXT}")
+  IF(EXISTS ${_LIB})
+    SET(QT_LIBRARIES ${QT_LIBRARIES} optimized ${_LIB})
+  ENDIF()
+  SET(_LIB "${QT_PLUGINS_DIR}/${_TYPE}/${_PREFIX}${_NAME}d.${_EXT}")
+  IF(EXISTS ${_LIB})
+    SET(QT_LIBRARIES ${QT_LIBRARIES} debug ${_LIB})
+  ENDIF()
+ENDMACRO()
+
 IF(WITH_QT5)
   CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11 FATAL_ERROR)
+
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
 
   FIND_PACKAGE(Qt5Core QUIET)
 
   IF(Qt5Core_FOUND)
+    # Check if we are using Qt static or shared libraries
+    GET_TARGET_PROPERTY(_FILE Qt5::Core IMPORTED_LOCATION_RELEASE)
+
+    SET(QT_VERSION "${Qt5Core_VERSION_STRING}")
+    SET(_VERSION "${QT_VERSION}")
+
+    IF(_FILE MATCHES "\\.(lib|a)$")
+      SET(QT_STATIC ON)
+      SET(_VERSION "${_VERSION} static version")
+    ELSE()
+      SET(QT_STATIC OFF)
+      SET(_VERSION "${_VERSION} shared version")
+    ENDIF()
+
+    MESSAGE(STATUS "Found Qt ${_VERSION}")
+
+    # These variables are not defined with Qt5 CMake modules
+    SET(QT_BINARY_DIR "${_qt5Core_install_prefix}/bin")
+    SET(QT_LIBRARY_DIR "${_qt5Core_install_prefix}/lib")
+    SET(QT_PLUGINS_DIR "${_qt5Core_install_prefix}/plugins")
+    SET(QT_TRANSLATIONS_DIR "${_qt5Core_install_prefix}/translations")
+
+    # Fix wrong include directories with Qt 5 under Mac OS X
+    INCLUDE_DIRECTORIES("${_qt5Core_install_prefix}/include")
+
     FIND_PACKAGE(Qt5Gui)
     FIND_PACKAGE(Qt5Widgets)
     FIND_PACKAGE(Qt5OpenGL)
     FIND_PACKAGE(Qt5Xml)
     FIND_PACKAGE(Qt5LinguistTools)
     FIND_PACKAGE(Qt5Network)
+
+    SET(QT_LIBRARIES Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Network Qt5::OpenGL Qt5::Xml)
+
+    IF(QT_STATIC)
+      ADD_DEFINITIONS(-DQT_STATICPLUGIN)
+
+      # Core
+      IF(APPLE)
+        FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
+
+        FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
+        FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
+        FIND_LIBRARY(SECURITY_FRAMEWORK Security)
+
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${PCRE_LIBRARY}
+          ${FOUNDATION_FRAMEWORK}
+          ${CARBON_FRAMEWORK}
+          ${SECURITY_FRAMEWORK})
+      ENDIF()
+
+      # Network
+      FIND_PACKAGE(OpenSSL REQUIRED)
+      SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
+
+      IF(WIN32)
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib)
+      ENDIF()
+
+      SET(QT_LIBRARIES ${QT_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+
+      # Gui
+      ADD_QT_LIBRARY(PrintSupport)
+      ADD_QT_LIBRARY(PlatformSupport)
+
+      IF(WIN32)
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${WINSDK_LIBRARY_DIR}/Imm32.lib
+          ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
+          ${WINSDK_LIBRARY_DIR}/WinMM.Lib)
+        ADD_QT_PLUGIN(platforms qwindows)
+      ELSEIF(APPLE)
+        # Cups needs .dylib
+        SET(OLD_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+        SET(CMAKE_FIND_LIBRARY_SUFFIXES .dylib)
+        FIND_LIBRARY(CUPS_LIBRARY cups)
+        SET(CMAKE_FIND_LIBRARY_SUFFIXES ${OLD_CMAKE_FIND_LIBRARY_SUFFIXES})
+
+        FIND_LIBRARY(IOKIT_FRAMEWORK IOKit)
+        FIND_LIBRARY(COCOA_FRAMEWORK Cocoa)
+        FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+        FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
+
+      SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${CUPS_LIBRARY}
+          ${COCOA_FRAMEWORK}
+          ${SYSTEMCONFIGURATION_FRAMEWORK}
+          ${IOKIT_FRAMEWORK}
+          ${OPENGL_FRAMEWORK})
+
+        ADD_QT_PLUGIN(printsupport cocoaprintersupport)
+        ADD_QT_PLUGIN(platforms qcocoa)
+      ENDIF()
+
+      ADD_QT_PLUGIN(imageformats qgif)
+      ADD_QT_PLUGIN(imageformats qicns)
+      ADD_QT_PLUGIN(imageformats qico)
+      ADD_QT_PLUGIN(imageformats qjpeg)
+      ADD_QT_PLUGIN(imageformats qmng)
+      ADD_QT_PLUGIN(imageformats qwebp)
+
+      # harfbuzz is needed since Qt 5.3
+      IF(APPLE)
+        SET(HB_LIB "${QT_LIBRARY_DIR}/libqtharfbuzzng.a")
+      ELSEIF(WIN32)
+        SET(HB_LIB "${QT_LIBRARY_DIR}/qtharfbuzzng.lib")
+      ENDIF()
+      IF(EXISTS ${HB_LIB})
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${HB_LIB})
+      ENDIF()
+
+      # freetype is needed since Qt 5.5
+      IF(APPLE)
+        SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
+      ELSEIF(WIN32)
+        SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
+      ENDIF()
+      IF(EXISTS ${FREETYPE_LIB})
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
+      ENDIF()
+
+      # pcre is needed since Qt 5.5
+      IF(APPLE)
+        SET(PCRE_LIB "${QT_LIBRARY_DIR}/libqtpcre.a")
+      ELSEIF(WIN32)
+        SET(PCRE_LIB "${QT_LIBRARY_DIR}/qtpcre.lib")
+      ENDIF()
+      IF(EXISTS ${PCRE_LIB})
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${PCRE_LIB})
+      ENDIF()
+
+      ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
+    ENDIF()
   ELSE()
     MESSAGE(WARNING "Unable to find Qt 5")
   ENDIF()
 ENDIF()
 
 IF(WITH_QT)
+  SET(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QTDIR} $ENV{QTDIR})
+
   # Use Qt 4
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
 ENDIF(WITH_QT)
@@ -235,7 +402,7 @@ ENDIF(WITH_SNOWBALLS)
 
 IF(WITH_TOOLS)
   ADD_SUBDIRECTORY(tool)
-ENDIF(WITH_TOOLS)
+ENDIF()
 
 IF(WITH_STUDIO)
   ADD_SUBDIRECTORY(studio)

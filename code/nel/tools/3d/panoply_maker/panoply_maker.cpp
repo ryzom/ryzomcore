@@ -563,7 +563,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 			return true;
 
 		// ok, can move the cache
-		if (!NLMISC::CFile::moveFile(outputHLSInfo.c_str(), cacheHLSInfo.c_str()))
+		if (!NLMISC::CFile::moveFile(outputHLSInfo, cacheHLSInfo))
 		{
 			nlwarning(("Couldn't move " + cacheHLSInfo + " to " + outputHLSInfo).c_str());
 			return true;
@@ -595,7 +595,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 
 		// get version that is in the cache
 		std::string cacheDest = bi.OutputPath + outputFileName + bi.OutputFormat;
-		if (!NLMISC::CFile::moveFile(cacheDest.c_str(), searchName.c_str()))
+		if (!NLMISC::CFile::moveFile(cacheDest, searchName))
 		{
 			nlwarning(("Couldn't move " + searchName + " to " + cacheDest).c_str());
 			return true;

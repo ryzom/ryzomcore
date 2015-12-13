@@ -1744,7 +1744,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		string	sFileNameBackup = sFileName+"backup";
 		if (CFile::fileExists(sFileNameBackup))
 			CFile::deleteFile(sFileNameBackup);
-		CFile::moveFile(sFileNameBackup.c_str(), sFileName.c_str());
+		CFile::moveFile(sFileNameBackup, sFileName);
 		nlwarning("Config loading failed : restore default");
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)

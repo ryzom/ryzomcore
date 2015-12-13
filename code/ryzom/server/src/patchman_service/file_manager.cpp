@@ -677,7 +677,7 @@ namespace PATCHMAN
 		}
 
 		// write succeeded so rename the tmp file to the correct file name
-		bool ok= NLMISC::CFile::moveFile(fileName.c_str(),tmpFileName.c_str());
+		bool ok= NLMISC::CFile::moveFile(fileName, tmpFileName);
 		DROP_IF(!ok,"Failed to save file '"+fileName+"' because failed to rename tmp file: '"+tmpFileName+"'",return false);
 
 		return true;

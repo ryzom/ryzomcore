@@ -127,7 +127,7 @@ void CPlayer::checkCrashMarker()
 			wipeAndRestore(NLMISC::toString("%s/account_%u_%d_pdr.bin", PlayerManager.getCharacterPath(userId, false).c_str(), userId, charId));
 			
 			//			string fileName = makeCharacterFileName(lastBad[0], lastBad[1]);
-			//			CFile::moveFile((fileName+".wiped").c_str(), fileName.c_str());
+			//			CFile::moveFile(fileName+".wiped", fileName);
 			//
 			//			// try to restore a backup
 			//			if (CFile::isExists(fileName+".last_good"))
@@ -166,9 +166,9 @@ bool wipeAndRestore(const std::string &fileName)
 			return false;
 		}
 		// move the last wiped file
-		CFile::moveFile(incFn.c_str(), newfn.c_str());
+		CFile::moveFile(incFn, newfn);
 	}
-	CFile::moveFile(newfn.c_str(), fileName.c_str());
+	CFile::moveFile(newfn, fileName);
 
 	//	// try to restore a backup
 	//if (CFile::isExists(fileName+".last_good"))
@@ -811,13 +811,13 @@ void CPlayer::loadAllCharacters()
 				{
 					nlwarning("Failed to load '%s': %s", serialBinFileName.c_str(), e.what());
 					string newfn = serialBinFileName+".wiped";
-					CFile::moveFile(newfn.c_str(), serialBinFileName.c_str());
+					CFile::moveFile(newfn, serialBinFileName);
 				}
 				catch(...)
 				{
 					nlwarning("Failed to load '%s': low level exception", serialBinFileName.c_str());
 					string newfn = serialBinFileName+".wiped";
-					CFile::moveFile(newfn.c_str(), serialBinFileName.c_str());
+					CFile::moveFile(newfn, serialBinFileName);
 				}
 			}
 			break;
@@ -910,13 +910,13 @@ void CPlayer::loadAllCharacters()
 				{
 					nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 					string newfn = fileName+".wiped";
-					CFile::moveFile(newfn.c_str(), fileName.c_str());
+					CFile::moveFile(newfn, fileName);
 				}
 				catch(...)
 				{
 					nlwarning("Failed to load '%s': low level exception", fileName.c_str());
 					string newfn = fileName+".wiped";
-					CFile::moveFile(newfn.c_str(), fileName.c_str());
+					CFile::moveFile(newfn, fileName);
 				}
 			}
 			else
@@ -937,13 +937,13 @@ void CPlayer::loadAllCharacters()
 				{
 					nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 					string newfn = fileName+".wiped";
-					CFile::moveFile(newfn.c_str(), fileName.c_str());
+					CFile::moveFile(newfn, fileName);
 				}
 				catch(...)
 				{
 					nlwarning("Failed to load '%s': low level exception", fileName.c_str());
 					string newfn = fileName+".wiped";
-					CFile::moveFile(newfn.c_str(), fileName.c_str());
+					CFile::moveFile(newfn, fileName);
 				}
 			}
 		}
@@ -983,14 +983,14 @@ void CPlayer::loadAllCharactersPdr()
 		{
 			nlwarning("Failed to load '%s': %s", fileName.c_str(), e.what());
 			string newfn = fileName+".wiped";
-			CFile::moveFile(newfn.c_str(), fileName.c_str());
+			CFile::moveFile(newfn, fileName);
 			continue;
 		}
 		catch(...)
 		{
 			nlwarning("Failed to load '%s': low level exception", fileName.c_str());
 			string newfn = fileName+".wiped";
-			CFile::moveFile(newfn.c_str(), fileName.c_str());
+			CFile::moveFile(newfn, fileName);
 			continue;
 		}
 

@@ -6,4 +6,6 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 ENDIF()
 
-ADD_SUBDIRECTORY(r2_islands_textures)
+IF(WITH_RYZOM_TOOLS)
+  ADD_SUBDIRECTORY(r2_islands_textures)
+ENDIF()

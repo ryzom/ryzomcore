@@ -127,7 +127,7 @@ private:
 		fclose(fp);
 		fp = NULL;
 
-		NLMISC::CFile::moveFile(_DstFile.c_str(), _SrcFile.c_str());
+		NLMISC::CFile::moveFile(_DstFile, _SrcFile);
 
 		// verify the resulting file
 		fp = fopen(_SrcFile.c_str(), "rb");

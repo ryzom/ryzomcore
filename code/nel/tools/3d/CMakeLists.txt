@@ -66,15 +66,17 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
     ADD_SUBDIRECTORY(object_viewer_widget)
   ENDIF(WITH_QT)
   
+  IF(WITH_NEL_TOOLS)
+    FIND_PACKAGE(Squish)
+  ENDIF()
+  
   IF(SQUISH_FOUND)
     ADD_SUBDIRECTORY(s3tc_compressor_lib)
     ADD_SUBDIRECTORY(panoply_maker)
     ADD_SUBDIRECTORY(tga_2_dds)
     ADD_SUBDIRECTORY(hls_bank_maker)
-  ENDIF(SQUISH_FOUND)
+  ENDIF()
 
   #crash_log_analyser
-  #shapes_exporter
-
 ENDIF()
 

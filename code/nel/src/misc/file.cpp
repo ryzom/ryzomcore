@@ -627,7 +627,7 @@ void	COFile::internalClose(bool success)
 					if (CFile::fileExists(_FileName))
 						CFile::deleteFile (_FileName);
 
-					if (CFile::moveFile (_FileName.c_str(), _TempFileName.c_str()))
+					if (CFile::moveFile(_FileName, _TempFileName))
 						break;
 					nlSleep (0);
 				}

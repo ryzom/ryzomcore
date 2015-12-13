@@ -245,7 +245,7 @@ void BNPFileHandle::addFiles( const vector<string> &filePathes)
 	if (CFile::fileExists( m_openedBNPFile ))
 		CFile::deleteFile( m_openedBNPFile );
 	string src = m_openedBNPFile + ".tmp";
-	CFile::moveFile( m_openedBNPFile.c_str(), src.c_str() );
+	CFile::moveFile(m_openedBNPFile, src);
 }
 // ***************************************************************************
 void BNPFileHandle::deleteFiles( const vector<string>& fileNames)
@@ -281,7 +281,7 @@ void BNPFileHandle::deleteFiles( const vector<string>& fileNames)
 	
 	CFile::deleteFile( m_openedBNPFile );
 	string src = m_openedBNPFile + ".tmp";
-	CFile::moveFile( m_openedBNPFile.c_str(), src.c_str() );
+	CFile::moveFile(m_openedBNPFile, src);
 }
 // ***************************************************************************
 void BNPFileHandle::append(const string &destination, const PackedFile &source)

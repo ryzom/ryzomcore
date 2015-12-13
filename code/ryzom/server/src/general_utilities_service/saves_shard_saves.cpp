@@ -318,7 +318,7 @@ namespace SAVES
 
 		// do the moving
 		nlinfo("Treating request to move file: %s => %s",srcPath.c_str(),dstPath.c_str());
-		CFile::moveFile((_Path+dstPath).c_str(),(_Path+srcPath).c_str());
+		CFile::moveFile(_Path+dstPath, _Path+srcPath);
 
 		// make sure the src file no longer exists and that a destination file now exists
 		if (CFile::fileExists(_Path+srcPath) && !CFile::fileExists(_Path+dstPath))

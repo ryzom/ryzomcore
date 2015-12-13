@@ -2451,7 +2451,7 @@ bool CFile::thoroughFileCompare(const std::string &fileName0, const std::string 
 	return true;
 }
 
-bool CFile::moveFile(const char *dest,const char *src)
+bool CFile::moveFile(const std::string &dest, const std::string &src)
 {
 	return CopyMoveFile(dest, src, false);
 }

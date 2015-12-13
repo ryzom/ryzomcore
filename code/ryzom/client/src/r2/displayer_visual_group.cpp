@@ -755,7 +755,7 @@ void CDisplayerVisualGroup::updateInstanceList() const
 	_Instances.resize(sons->getSize());
 	for(uint k = 0; k < sons->getSize(); ++k)
 	{
-		CInstance *inst = getEditor().getInstanceFromObject(sons->getValue(k));
+		CInstance *inst = getEditor().getInstanceFromObject(sons->getValueAtPos(k));
 		if (inst)
 		{
 			_Instances[k] = inst->getDisplayerVisual();

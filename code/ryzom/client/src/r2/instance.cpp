@@ -754,7 +754,7 @@ const CInstance *CInstance::getParentGroupLeader() const
 	{
 		return NULL;
 	}
-	return getEditor().getInstanceFromObject(components->getValue(0));
+	return getEditor().getInstanceFromObject(components->getValueAtPos(0));
 }
 
 // *********************************************************************************************************
@@ -776,7 +776,7 @@ CObject *CInstance::getGroupSelectedSequence() const
 				{
 					if (selectedSequence >= 0 && selectedSequence < (sint) activities->getSize())
 					{
-						return activities->getValue((sint32) selectedSequence);
+						return activities->getValueAtPos((sint32) selectedSequence);
 					}
 				}
 			}

@@ -76,15 +76,34 @@ void ApplyPatch(const std::string& srcFileName,const std::string& destFileName,c
 
 void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
 {
-	std::string cmd="lzma e ";
-	cmd+=" "+sourceFile+" "+outputFile;
-	nlinfo("executing system command: %s",cmd.c_str());
+	{
+		// old syntax incompatible with new versions
+		std::string cmd = "lzma e ";
+		cmd += " " + sourceFile + " " + outputFile;
+		nlinfo("Executing system command: %s", cmd.c_str());
+	}
 #ifdef NL_OS_WINDOWS
 	_spawnlp(_P_WAIT, "lzma.exe","lzma.exe", "e", sourceFile.c_str(), outputFile.c_str(), NULL);
 #else // NL_OS_WINDOWS
-	sint error = system (cmd.c_str());
+	// new lzma only supports one file name on command line, so make a copy
+	CFile::copyFile(sourceFile, outputFile);
+
+	// new lzma syntax, -z = compress, -9 = best compression
+	std::string cmd = NLMISC::toString("lzma -z -9 %s", outputFile.c_str());
+
+	sint error = system(cmd.c_str());
+
 	if (error)
+	{
 		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
+		
+		CFile::deleteFile(outputFile);
+	}
+	else
+	{
+		// lzma always append a .lzma extension, so rename compressed file to wanted one
+		CFile::moveFile(outputFile + ".lzma", outputFile);
+	}
 #endif // NL_OS_WINDOWS
 }
 
@@ -369,7 +388,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 			// process cannot terminate)
 			GenerateLZMA(bnpFileName, lzmaFile+".tmp");
 			// rename the tmp file
-			CFile::moveFile(lzmaFile.c_str(), (lzmaFile+".tmp").c_str());
+			CFile::moveFile(lzmaFile, lzmaFile+".tmp");
 		}
 
 		// store the lzma file size in the descriptor

@@ -21,6 +21,19 @@
 
 #include <QSplashScreen>
 
+#ifdef QT_STATICPLUGIN
+
+#include <QtPlugin>
+
+#ifdef Q_OS_WIN32
+	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#endif
+	
+#ifdef Q_OS_MAC
+	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#endif
+#endif
+
 int main( sint32 argc, char **argv )
 {
 	QApplication app( argc, argv );

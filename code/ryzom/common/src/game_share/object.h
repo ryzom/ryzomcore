@@ -114,7 +114,7 @@ public:
 
 	virtual std::string getKey(uint32 pos) const;
 
-	virtual CObject* getValue(uint32 pos) const;
+	virtual CObject* getValueAtPos(uint32 pos) const;
 
 	virtual uint32 getSize() const;
 
@@ -385,7 +385,7 @@ public:
 
 	virtual std::string getKey(uint32 pos) const;
 
-	virtual CObject* getValue(uint32 pos) const;
+	virtual CObject* getValueAtPos(uint32 pos) const;
 
 	virtual sint32 findIndex(const CObject* child) const;
 

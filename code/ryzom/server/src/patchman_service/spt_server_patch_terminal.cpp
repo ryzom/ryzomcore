@@ -290,7 +290,7 @@ void CServerPatchTerminal::onModuleUpdate()
 		{
 			// move the command file to a tmp file...
 			CSString tmpFileName= _CommandFileName+"__patchman__spt__.tmp";
-			bool ok= NLMISC::CFile::moveFile(tmpFileName.c_str(),_CommandFileName.c_str());
+			bool ok= NLMISC::CFile::moveFile(tmpFileName,_CommandFileName);
 			DROP_IF(!ok,"Attempt to move file '"+_CommandFileName+"' to '"+tmpFileName+"' FAILED",return);
 
 			// read the tmp file and delete it

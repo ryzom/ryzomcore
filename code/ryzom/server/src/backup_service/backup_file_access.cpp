@@ -478,7 +478,7 @@ IFileAccess::TReturnCode	CDeleteFile::execute(CFileAccessManager& manager)
 			}
 			while (i <= 10000 && NLMISC::CFile::fileExists(backup));
 
-			fileBackuped = (i <= 10000 && NLMISC::CFile::moveFile(backup.c_str(), (getBackupFileName(Filename)).c_str()));
+			fileBackuped = (i <= 10000 && NLMISC::CFile::moveFile(backup, getBackupFileName(Filename)));
 		}
 		catch (...)
 		{
