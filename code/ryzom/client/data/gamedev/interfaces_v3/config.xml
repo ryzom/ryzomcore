@@ -2765,6 +2765,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:SHOW_CLOCK"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:SHOW_CLOCK_12H"
+            type="bool"
+            value="false" />
   <variable entry="UI:SAVE:SHOW_RETICLE"
             type="bool"
             value="true" />

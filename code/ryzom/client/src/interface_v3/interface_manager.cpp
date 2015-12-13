@@ -1495,7 +1495,10 @@ void CInterfaceManager::updateFrameEvents()
 			{
 				if (pVT->getActive())
 				{
-					str = getTimestampHuman("%H:%M");
+					if (use12hClock())
+						str = getTimestampHuman("%I:%M %p");
+					else
+						str = getTimestampHuman("%H:%M");
 					pVT->setText(str);
 				}
 			}
@@ -3637,6 +3640,14 @@ void CInterfaceManager::CServerToLocalAutoCopy::onLocalChange(ICDBNode *localNod
 			_UpdateList.push_back(node);
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+bool CInterfaceManager::use12hClock()
+{
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
+
+	return (node && node->getValueBool());
 }
 
 // ------------------------------------------------------------------------------------------------
