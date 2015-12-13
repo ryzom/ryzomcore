@@ -4048,7 +4048,7 @@ public:
 
 		// Get the sum of the bulk for this db branch
 		const double epsilon = 0.001;
-		sint32 val = sint32(CInventoryManager::getBranchBulk(dbBranch, 0, 10000) + epsilon);
+		float val = CInventoryManager::getBranchBulk(dbBranch, 0, 10000) + epsilon;
 
 		// Get the Max value
 		sint32	maxVal= 0;
@@ -4058,7 +4058,7 @@ public:
 
 		// Replace in the formated text
 		ucstring	str= CI18N::get("uittBulkFormat");
-		strFindReplace(str, "%v", toString(val) );
+		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
 		CWidgetManager::getInstance()->setContextHelpText(str);
 	}

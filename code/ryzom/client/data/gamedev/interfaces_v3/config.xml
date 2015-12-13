@@ -2765,6 +2765,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
   <variable entry="UI:SAVE:SHOW_CLOCK"
             type="bool"
             value="false" />
+  <variable entry="UI:SAVE:SHOW_CLOCK_12H"
+            type="bool"
+            value="false" />
   <variable entry="UI:SAVE:SHOW_RETICLE"
             type="bool"
             value="true" />
@@ -3702,7 +3705,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
           value_from_code="getMaxDynChanPerPlayer()" />
   <variable entry="UI:SAVE:ISDETACHED:DYNAMIC_CHAT$i"
             type="sint32"
-            value="1"
+            value="0"
             size="%max_dyn_chan_per_player" />
   <variable entry="UI:SAVE:ISENABLED:DYNAMIC_CHAT$i"
             type="sint32"

@@ -1400,11 +1400,19 @@
                   x="0"
                   y="-12" />
         <instance template="tgcw_checkbox"
+                  id="show_clock_12h"
+                  text="uiShowClock12h"
+                  tooltip="uittShowClock12h"
+                  posref="BL TL"
+                  posparent="show_clock"
+                  x="0"
+                  y="-12" />
+        <instance template="tgcw_checkbox"
                   id="show_reticle"
                   text="uiShowReticle"
                   tooltip="uittShowReticle"
                   posref="BL TL"
-                  posparent="show_clock"
+                  posparent="show_clock_12h"
                   x="0"
                   y="-12" />
       </group>
@@ -3254,6 +3262,11 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:SHOW_CLOCK"
+               realtime="true" />
+        <param ui="hud:show_clock_12h:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:SHOW_CLOCK_12H"
                realtime="true" />
         <param ui="hud:show_reticle:c"
                type="db"
