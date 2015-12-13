@@ -1,11 +1,15 @@
 # Don't add other subdirectories if only max plugins are selected.
+ADD_SUBDIRECTORY(misc)
+
 IF(WITH_NEL_TOOLS)
-  ADD_SUBDIRECTORY(misc)
   ADD_SUBDIRECTORY(memory)
 ENDIF(WITH_NEL_TOOLS)
 
 # Max plugins are under the 3d directory as well.
-ADD_SUBDIRECTORY(3d)
+# Allow to compile only max plugins without other tools.
+IF(WITH_NEL_TOOLS OR WITH_NEL_MAXPLUGIN)
+  ADD_SUBDIRECTORY(3d)
+ENDIF()
 
 # Don't add other subdirectories if only max plugins are selected.
 IF(WITH_NEL_TOOLS)
