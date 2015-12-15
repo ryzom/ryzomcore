@@ -140,8 +140,7 @@ public:
 	//get the number of nodes
 	uint16 getNbNodes() const
 	{
-		return (uint16)
-			_Nodes.size();
+		return (uint16)_Nodes.size();
 	}
 
 	/**
