@@ -24,6 +24,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/net/unified_network.h"
 
+#include <limits>
 
 /*
  * Types for options of CMirroredDataSet::declareProperty()
@@ -374,13 +375,13 @@ const TPropertyIndex INVALID_PROPERTY_INDEX = (TPropertyIndex)~0;
 #ifdef MIRROR_LIST_ROW_32BITS
 
 typedef uint32 TSharedListRow;
-const TSharedListRow INVALID_SHAREDLIST_ROW = ~0; //((uint16)~0)-1;
+const TSharedListRow INVALID_SHAREDLIST_ROW = std::numeric_limits<uint16>::max(); // std::numeric_limits<uint16>::max()-1;
 const uint NB_SHAREDLIST_CELLS = 500000; // property+list container footprint with data size of 32 bit and 500000 rows: 5.8 MB
 
 #else
 
 typedef uint16 TSharedListRow;
-const TSharedListRow INVALID_SHAREDLIST_ROW = ((uint16)~0)-1;
+const TSharedListRow INVALID_SHAREDLIST_ROW = std::numeric_limits<uint16>::max()-1;
 const uint NB_SHAREDLIST_CELLS = INVALID_SHAREDLIST_ROW; // property+list container footprint with data size of 32 bit and 500000 rows: 1.3 MB
 
 #endif
