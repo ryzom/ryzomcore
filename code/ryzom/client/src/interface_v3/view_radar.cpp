@@ -35,6 +35,8 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+extern NL3D::UCamera					MainCam;
+
 NLMISC_REGISTER_OBJECT(CViewBase, CViewRadar, std::string, "radar");
 
 // ----------------------------------------------------------------------------
@@ -127,10 +129,25 @@ void CViewRadar::draw ()
 	CEntityCL *user = EntitiesMngr.entity(0);
 	if (user == NULL) return;
 
+	float angle;
 	CVectorD xyzRef = user->pos();
-	const CVector dir = user->front();
+	if (_UseCamera)
+	{
+		CVector projectedFront = MainCam.getMatrix().getJ();
+		if (projectedFront.norm() <= 0.01f)
+		{
+			projectedFront = MainCam.getMatrix().getK();
+			projectedFront.z = 0.f;
+		}
+		CVector cam = projectedFront.normed();
+		angle = (float)(atan2(cam.y, cam.x) - (Pi / 2.0));
+	}
+	else
+	{
+		const CVector dir = user->front();
+		angle = (float)(atan2(dir.y, dir.x) - (Pi / 2.0));
+	}
 
-	float angle = (float)(atan2(dir.y, dir.x) - (Pi / 2.0));
 	CMatrix mat;
 	mat.identity();
 	// Scale to transform from world to interface screen

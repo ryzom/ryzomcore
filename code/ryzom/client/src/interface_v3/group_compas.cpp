@@ -39,6 +39,7 @@
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"
 
+extern NL3D::UCamera MainCam;
 extern CEntityManager EntitiesMngr;
 extern CContinentManager ContinentMngr;
 CCompassDialogsManager * CCompassDialogsManager::_Instance = NULL;
@@ -129,11 +130,24 @@ CGroupCompas::CGroupCompas(const TCtorParam &param)
 	_LastDynamicTargetPos = 0xFFFFFFFF;
 	_SavedTargetValid = false;
 	_TargetSetOnce = false;
+
+	CCDBNodeLeaf *pRC = CDBManager::getInstance()->getDbProp("UI:SAVE:RADAR:USE_CAMERA");
+	if (pRC)
+	{
+		ICDBNode::CTextId textId;
+		pRC->addObserver( &_UseCameraObs, textId);
+	}
 }
 
 // ***************************************************************************
 CGroupCompas::~CGroupCompas()
 {
+	CCDBNodeLeaf *pRC = CDBManager::getInstance()->getDbProp("UI:SAVE:RADAR:USE_CAMERA");
+	if (pRC)
+	{
+		ICDBNode::CTextId textId;
+		pRC->removeObserver( &_UseCameraObs, textId);
+	}
 }
 
 
@@ -225,12 +239,37 @@ void CGroupCompas::draw()
 {
 	if ((uint) _Target.getType() >= CCompassTarget::NumTypes) return;
 	CInterfaceManager *im = CInterfaceManager::getInstance();
+
+	if (_RadarView && _UseCameraObs._changed)
+	{
+		_UseCameraObs._changed = false;
+		_RadarView->setUseCamera(_UseCameraObs._useCamera);
+	}
+
 	//
 	const NLMISC::CVectorD &userPosD = UserEntity->pos();
 	NLMISC::CVector userPos((float) userPosD.x, (float) userPosD.y, (float) userPosD.z);
 	NLMISC::CVector2f targetPos(0.f, 0.f);
 	// if a position tracker is provided, use it
 	CCompassTarget displayedTarget = _Target;
+	float myAngle;
+
+	if (_UseCameraObs._useCamera)
+	{
+		CVector projectedFront = MainCam.getMatrix().getJ();
+		if (projectedFront.norm() <= 0.01f)
+		{
+			projectedFront = MainCam.getMatrix().getK();
+			projectedFront.z = 0.f;
+		}
+		CVector cam = projectedFront.normed();
+		myAngle = (float)atan2(cam.y, cam.x);
+	}
+	else
+	{
+		const CVector &front = UserEntity->front();
+		myAngle = (float)atan2 (front.y, front.x);
+	}
 
 	switch(_Target.getType())
 	{
@@ -332,8 +371,6 @@ void CGroupCompas::draw()
 			_ArrowShape->getShape().getMaterial(0).setDiffuse(color);
 
 		// Set angle
-		const CVector &front = UserEntity->front();
-		float myAngle = (float)atan2 (front.y, front.x);
 		float deltaX = targetPos.x - userPos.x;
 		float deltaY = targetPos.y - userPos.y;
 		float targetAngle = (float)atan2 (deltaY, deltaX);
@@ -494,6 +531,13 @@ bool CGroupCompas::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	_DynamicTargetPos = NLGUI::CDBManager::getInstance()->getDbProp(COMPASS_DB_PATH ":TARGET");
 
 	return true;
+}
+
+// ***************************************************************************
+void CGroupCompas::CDBUseCameraObs::update( NLMISC::ICDBNode *node)
+{
+	_changed = true;
+	_useCamera = ((CCDBNodeLeaf*)node)->getValueBool();
 }
 
 // ***************************************************************************
