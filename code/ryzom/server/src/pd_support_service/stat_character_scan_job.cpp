@@ -284,7 +284,7 @@ bool CCharacterScanJob::deleteFilesInOutputDirectory() const
 bool CCharacterScanJob::runForFile(const std::string& fileName)
 {
 	// load the file into a pdr record
-	static CPersistentDataRecord	pdr;
+	static CPersistentDataRecord pdr;
 	pdr.clear();
 	pdr.readFromFile(fileName);
 

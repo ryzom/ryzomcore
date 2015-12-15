@@ -825,14 +825,14 @@ bool CPersistentDataRecord::writeToFile(const std::string &fileName, TFileFormat
 			goto binary_file;
 		}
 	}
-	BOMB("Bad file type supplied to writeToFile() - file not saved: "<<fileName,return false);
+	BOMB("Bad file type supplied to writeToFile() - file not saved: " << fileName, return false);
 }
 
 //-------------------------------------------------------------------------
 // set of accessors for retrieving a data record from various sources
 //-------------------------------------------------------------------------
 
-bool CPersistentDataRecord::fromBuffer(const char *src,uint32 bufferSize)
+bool CPersistentDataRecord::fromBuffer(const char *src, uint32 bufferSize)
 {
 	H_AUTO(CPersistentDataRecordFromBuffer);
 
@@ -1133,7 +1133,7 @@ bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 	// read the data
 	uint32 blocksRead= (uint32)fread(&buffer[0],length,1,inf);
 	fclose(inf);
-	DROP_IF( blocksRead!=1, "Failed to read data from file "<<fileName, return false);
+	DROP_IF( blocksRead!=1, "Failed to read data from file " << fileName, return false);
 
 	// test whether our data buffer is binary
 	bool isBinary=(length>8 && *(uint32*)&buffer[4]==length);
@@ -1143,7 +1143,7 @@ bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 	}
 
 	// it's not a valid binary file so see whether it looks like a valid text file
-	DROP_IF(!buffer.isValidText(),"File is binary but 'file size' header entry doesn't match true file size",return false);
+	DROP_IF(!buffer.isValidText(),"File is binary but 'file size' header entry doesn't match true file size", return false);
 
 	// parse the data as text...
 	return fromString(buffer);
@@ -1153,13 +1153,13 @@ bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 	// open the file
 	CIFile f;
 	bool open = f.open(fileName);
-	DROP_IF( !open, "Failed to open input file "<<fileName, return false);
+	DROP_IF( !open, "Failed to open input file " << fileName, return false);
 
 	// get the file size
 	uint32 len= f.getFileSize();
 
 	bool result= fromStream(f, len);
-	DROP_IF( !result, "Failed to parse input file "<<fileName, return false);
+	DROP_IF( !result, "Failed to parse input file " << fileName, return false);
 
 	return true;
 
@@ -1194,7 +1194,7 @@ bool CPersistentDataRecord::readFromBinFile(const std::string &fileName)
 
 	// parse the buffer contents to re-generate the data
 	bool result= fromBuffer(&s[0],(uint32)s.size());
-	DROP_IF( !result, "Failed to parse input file "<<fileName, return false);
+	DROP_IF( !result, "Failed to parse input file " << fileName, return false);
 
 	return true;
 }

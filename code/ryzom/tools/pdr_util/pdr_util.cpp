@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
 			outputFileName += outExt;
 		}
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 
 		switch(mode)

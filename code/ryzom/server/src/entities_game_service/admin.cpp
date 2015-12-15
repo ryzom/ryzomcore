@@ -2223,7 +2223,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromXML,"load a character from an XML file","
 		uint32				guildId= c->getGuildId();
 		NLMISC::CEntityId	id=		 c->getId();
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		pdr.readFromTxtFile(fileName+".xml");
 		c->apply(pdr);
@@ -2249,7 +2249,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,saveToPDR,"save a character to a binary PDR file"
 	if (args.size () < 2) return false;
 	GET_CHARACTER
 
-		std::string fileName = args[1];
+	std::string fileName = args[1];
 
 	if( c )
 	{
@@ -2280,7 +2280,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromPDR,"load a character from a binary PDR f
 		uint32				guildId= c->getGuildId();
 		NLMISC::CEntityId	id=		 c->getId();
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		pdr.readFromBinFile(fileName+".pdr");
 		c->apply(pdr);

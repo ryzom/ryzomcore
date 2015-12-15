@@ -97,7 +97,7 @@ void CCharacterScanJob::update()
 		return;
 
 	// load the file into a pdr record
-	static CPersistentDataRecord	pdr;
+	static CPersistentDataRecord pdr;
 	pdr.clear();
 	pdr.readFromFile(_Files[_NextFile]);
 	++_NextFile;

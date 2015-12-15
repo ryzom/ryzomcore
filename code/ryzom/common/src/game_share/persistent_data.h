@@ -427,7 +427,7 @@ public:
 
 	// read from a binary data buffer
 	// if the input data looks like text then calls fromString()
-	bool fromBuffer(const char *src,uint32 bufferSize);
+	bool fromBuffer(const char *src, uint32 bufferSize);
 
 	// read from a text string (either xml or lines)
 	// note 1: This routine is not at all optimised

@@ -60,7 +60,7 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeGuildIdFix,"set the guild ids in the 
 		nlinfo("Setting id for guild: %s to: %d",fdc[i].FileName.c_str(),id);
 
 		// read the file
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		pdr.readFromFile(fdc[i].FileName.c_str());
 
@@ -107,7 +107,7 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeChangeCharacterNames,"change names of
 		// read the file
 		NLMISC::CSString fileName= args[0]+NLMISC::toString("/characters/account_%d_%d_pdr.bin",account,slot);
 		DROP_IF(!NLMISC::CFile::fileExists(fileName),"Skipping inexistant file: "+fileName,continue);
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
 		pdr.readFromFile(fileName.c_str());
 

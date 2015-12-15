@@ -428,7 +428,7 @@ void COutpostManager::loadOutpostSaveFiles()
 //			else
 //			{
 //				// load dynamic data
-//				static CPersistentDataRecord	pdr;
+//				static CPersistentDataRecord pdr;
 //				pdr.clear();
 //				pdr.readFromBinFile(files[i]);
 //				outpost->apply( pdr );
