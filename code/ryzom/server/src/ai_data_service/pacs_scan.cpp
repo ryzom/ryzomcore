@@ -1346,12 +1346,14 @@ public:
 				CComputeCell	*cell =	_WorldMap.getComputeCell(scanline);
 
 				{
-					uint	i;
-					for (i=0; i<16*16; ++i)
+					for (uint i = 0; i < 16; ++i)
 					{
-						toposGridList[0][i].topos[0]	=
-						toposGridList[0][i].topos[1]	=
-						toposGridList[0][i].topos[2]	=	-1;
+						for (uint j = 0; j < 16; ++j)
+						{
+							toposGridList[i][j].topos[0]	=
+							toposGridList[i][j].topos[1]	=
+							toposGridList[i][j].topos[2]	=	-1;
+						}
 					}
 				}
 

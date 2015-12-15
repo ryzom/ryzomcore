@@ -60,7 +60,7 @@ void CPowerActivationDateVector::clearConsumable()
 {
 	for(sint32 i = (sint32)PowerActivationDates.size()-1; i >= 0; --i )
 	{
-		if (PowerActivationDates[i].ConsumableFamilyId != (uint16)~0)
+		if (PowerActivationDates[i].ConsumableFamilyId != std::numeric_limits<uint16>::max())
 		{
 			PowerActivationDates[i] = PowerActivationDates[PowerActivationDates.size()-1];
 			PowerActivationDates.pop_back();
@@ -117,7 +117,7 @@ bool CPowerActivationDateVector::isPowerAllowed(POWERS::TPowerType type, uint16 
 		}
 		else
 		{
-			if ( (*it).PowerType == type || ((*it).ConsumableFamilyId != (uint16)~0 && (*it).ConsumableFamilyId == consumableFamilyId))
+			if ( (*it).PowerType == type || ((*it).ConsumableFamilyId != std::numeric_limits<uint16>::max() && (*it).ConsumableFamilyId == consumableFamilyId))
 			{
 				endDate = (*it).ActivationDate;
 				result = false;
@@ -195,7 +195,7 @@ void CAuraActivationDateVector::clear()
 //-----------------------------------------------------------------------------
 void CAuraActivationDateVector::disableAura(POWERS::TPowerType type, NLMISC::TGameCycle startDate, NLMISC::TGameCycle endDate, const NLMISC::CEntityId &userId)
 {
-	_AuraActivationDates.push_back( CPowerActivationDate(type,(uint16)~0, startDate, endDate) );
+	_AuraActivationDates.push_back( CPowerActivationDate(type, std::numeric_limits<uint16>::max(), startDate, endDate) );
 	_AuraUsers.push_back(userId);
 }
 

@@ -37,7 +37,7 @@ struct CPowerActivationDate
 	NLMISC::TGameCycle	DeactivationDate;
 	NLMISC::TGameCycle	ActivationDate;
 
-	CPowerActivationDate() : PowerType(POWERS::UnknownType), ConsumableFamilyId((uint16)~0), DeactivationDate(0), ActivationDate(0)
+	CPowerActivationDate() : PowerType(POWERS::UnknownType), ConsumableFamilyId(std::numeric_limits<uint16>::max()), DeactivationDate(0), ActivationDate(0)
 	{}
 
 	CPowerActivationDate(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle dateOff, NLMISC::TGameCycle dateOn) : PowerType(type), ConsumableFamilyId(consumableFamilyId), DeactivationDate(dateOff), ActivationDate(dateOn)

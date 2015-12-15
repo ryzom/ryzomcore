@@ -33,7 +33,7 @@
 
 class CDeposit;
 
-const uint16 MaxNbActiveSources = (uint16)~0;
+const uint16 MaxNbActiveSources = std::numeric_limits<uint16>::max();
 
 /**
  * A recent forage site prevents from extracting too much material from the same place in a short time.

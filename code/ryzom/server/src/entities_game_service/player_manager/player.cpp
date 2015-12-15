@@ -831,7 +831,7 @@ void CPlayer::loadAllCharacters()
 				bool isOK;
 				{
 					H_AUTO(LoadAllCharactersPdrBinReadFile);
-					isOK= pdr.readFromBinFile(pdrBinFileName.c_str());
+					isOK= pdr.readFromBinFile(pdrBinFileName);
 				}
 				if (!isOK)
 					break;
@@ -854,7 +854,7 @@ void CPlayer::loadAllCharacters()
 				bool isOK;
 				{
 					H_AUTO(LoadAllCharactersPdrXmlReadFile);
-					isOK= pdr.readFromTxtFile(pdrXmlFileName.c_str());
+					isOK= pdr.readFromTxtFile(pdrXmlFileName);
 				}
 				if (!isOK)
 					break;
@@ -975,7 +975,7 @@ void CPlayer::loadAllCharactersPdr()
 		// try loading the save data from disk
 		try
 		{
-			bool isOK= pdr.readFromFile(fileName.c_str());
+			bool isOK= pdr.readFromFile(fileName);
 			if (!isOK)
 				continue;
 		}
@@ -1478,11 +1478,11 @@ NLMISC_CATEGORISED_COMMAND(egs, convertToPdr, "Load all possible characters from
 				bool	writeSuccess = false;
 				if (xml)
 				{
-					writeSuccess = pdr.writeToTxtFile(dstFile.c_str());
+					writeSuccess = pdr.writeToTxtFile(dstFile);
 				}
 				else
 				{
-					writeSuccess = pdr.writeToBinFile(dstFile.c_str());
+					writeSuccess = pdr.writeToBinFile(dstFile);
 				}
 
 				// check file can be read back
@@ -1491,7 +1491,7 @@ NLMISC_CATEGORISED_COMMAND(egs, convertToPdr, "Load all possible characters from
 					static CPersistentDataRecord	pdrTest;
 					pdrTest.clear();
 					
-					if (pdrTest.readFromFile(dstFile.c_str()))
+					if (pdrTest.readFromFile(dstFile))
 					{
 						CCharacter*	characterTest = new CCharacter();
 						characterTest->setId( PlayerManager.createCharacterId( UserId, CharId ) );

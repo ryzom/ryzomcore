@@ -118,10 +118,10 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 	}
 
 	// the file exist !
-	static CPersistentDataRecord	pdr;
+	static CPersistentDataRecord pdr;
 	pdr.clear();
 
-	if (!pdr.readFromBinFile(fileName.c_str()))
+	if (!pdr.readFromBinFile(fileName))
 	{
 		log.displayNL("Error while reading file '%s'", fileName.c_str());
 		return true;

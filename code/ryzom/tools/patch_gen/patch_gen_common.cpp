@@ -78,7 +78,7 @@ void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
 {
 	{
 		// old syntax incompatible with new versions
-		std::string cmd = "lzma e ";
+		std::string cmd = "lzma e";
 		cmd += " " + sourceFile + " " + outputFile;
 		nlinfo("Executing system command: %s", cmd.c_str());
 	}
@@ -187,38 +187,38 @@ void CPackageDescription::setup(const std::string& packageName)
 	clear();
 
 	// read new contents from input file
-	static CPersistentDataRecord	pdr;
+	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromTxtFile(packageName.c_str());
+	pdr.readFromTxtFile(packageName);
 	apply(pdr);
 
 	// root directory
 	if (_RootDirectory.empty())
-		_RootDirectory= NLMISC::CFile::getPath(packageName);
-	_RootDirectory= NLMISC::CPath::standardizePath(_RootDirectory,true);
+		_RootDirectory = NLMISC::CFile::getPath(packageName);
+	_RootDirectory = NLMISC::CPath::standardizePath(_RootDirectory, true);
 
 	// patch directory
 	if (_PatchDirectory.empty())
-		_PatchDirectory= _RootDirectory+"patch";
-	_PatchDirectory= NLMISC::CPath::standardizePath(_PatchDirectory,true);
+		_PatchDirectory = _RootDirectory + "patch";
+	_PatchDirectory = NLMISC::CPath::standardizePath(_PatchDirectory, true);
 
 	// BNP directory
 	if (_BnpDirectory.empty())
-		_BnpDirectory= _RootDirectory+"bnp";
-	_BnpDirectory= NLMISC::CPath::standardizePath(_BnpDirectory,true);
+		_BnpDirectory = _RootDirectory+"bnp";
+	_BnpDirectory = NLMISC::CPath::standardizePath(_BnpDirectory, true);
 
 	// ref directory
 	if (_RefDirectory.empty())
-		_RefDirectory= _RootDirectory+"ref";
-	_RefDirectory= NLMISC::CPath::standardizePath(_RefDirectory,true);
+		_RefDirectory = _RootDirectory+"ref";
+	_RefDirectory = NLMISC::CPath::standardizePath(_RefDirectory, true);
 
 	// client index file
 	if (_ClientIndexFileName.empty())
-		_ClientIndexFileName= NLMISC::CFile::getFilenameWithoutExtension(packageName)+".idx";
+		_ClientIndexFileName = NLMISC::CFile::getFilenameWithoutExtension(packageName)+".idx";
 
 	// index file
 	if (_IndexFileName.empty())
-		_IndexFileName=	 NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName)+".hist";
+		_IndexFileName = NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName)+".hist";
 }
 
 void CPackageDescription::storeToPdr(CPersistentDataRecord& pdr) const
@@ -229,30 +229,34 @@ void CPackageDescription::storeToPdr(CPersistentDataRecord& pdr) const
 
 void CPackageDescription::readIndex(CBNPFileSet& packageIndex) const
 {
-	nlinfo("Reading history file: %s ...",(_RootDirectory+_IndexFileName).c_str());
+	std::string indexPath = _RootDirectory + _IndexFileName;
+	
+	nlinfo("Reading history file: %s ...", indexPath.c_str());
 
 	// clear out old contents before reading from input file
 	packageIndex.clear();
 
 	// read new contents from input file
-	if (NLMISC::CFile::fileExists(_RootDirectory+_IndexFileName))
+	if (NLMISC::CFile::fileExists(indexPath))
 	{
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromTxtFile((_RootDirectory+_IndexFileName).c_str());
+		pdr.readFromTxtFile(indexPath);
 		packageIndex.apply(pdr);
 	}
 }
 
 void CPackageDescription::writeIndex(const CBNPFileSet& packageIndex) const
 {
-	nlinfo("Writing history file: %s ...",(_RootDirectory+_IndexFileName).c_str());
+	std::string indexPath = _RootDirectory + _IndexFileName;
+
+	nlinfo("Writing history file: %s ...", indexPath.c_str());
 
 	// write contents to output file
-	static CPersistentDataRecordRyzomStore	pdr;
+	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	packageIndex.store(pdr);
-	pdr.writeToTxtFile((_RootDirectory+_IndexFileName).c_str());
+	pdr.writeToTxtFile(indexPath);
 }
 
 void CPackageDescription::getCategories(CPersistentDataRecord &pdr) const
@@ -285,18 +289,22 @@ void CPackageDescription::updateIndexFileList(CBNPFileSet& packageIndex) const
 	}
 }
 
-void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theClientPackage,const CBNPFileSet& packageIndex) const
+void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theClientPackage, const CBNPFileSet& packageIndex) const
 {
-	nlinfo("Generating client index: %s ...",(_PatchDirectory+toString("%05u/", packageIndex.getVersionNumber())+_ClientIndexFileName).c_str());
+	std::string patchNumber = toString("%05u", packageIndex.getVersionNumber());
+	std::string patchDirectory = _PatchDirectory + patchNumber;
+	std::string patchFile = patchDirectory + "/" + _ClientIndexFileName;
+	
+	nlinfo("Generating client index: %s...", patchFile.c_str());
 
 	// make sure the version sub directory exist
-	CFile::createDirectory(_PatchDirectory+toString("%05u/", packageIndex.getVersionNumber()));
+	CFile::createDirectory(patchDirectory);
 
 	// clear out the client package before we start
 	theClientPackage.clear();
 
 	// copy the categories using a pdr record
-	static CPersistentDataRecordRyzomStore	pdr;
+	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	_Categories.store(pdr);
 	theClientPackage.setCategories(pdr);
@@ -310,11 +318,10 @@ void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theC
 	pdr.clear();
 	theClientPackage.store(pdr);
 
-	std::string newName = _PatchDirectory + toString("%05u/", packageIndex.getVersionNumber()) + NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName);
-	newName += NLMISC::toString("_%05u", packageIndex.getVersionNumber());
+	std::string newName = patchDirectory + "/" + NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName) + "_" + patchNumber;
 
-	pdr.writeToBinFile((newName+".idx").c_str());
-	pdr.writeToTxtFile((newName+"_debug.xml").c_str());
+	pdr.writeToBinFile(newName + ".idx");
+	pdr.writeToTxtFile(newName + "_debug.xml");
 }
 
 void CPackageDescription::addVersion(CBNPFileSet& packageIndex)
@@ -341,14 +348,14 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 {
 	nlinfo("Generating patches ...");
 
-	for (uint32 i=packageIndex.fileCount();i--;)
+	for (uint32 i = packageIndex.fileCount(); i--;)
 	{
-		bool deleteRefAfterDelta= true;
+		bool deleteRefAfterDelta = true;
 		bool usingTemporaryFile = false;
 		// generate file name root
-		std::string bnpFileName= _BnpDirectory+packageIndex.getFile(i).getFileName();
-		std::string refNameRoot= _RefDirectory+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
-		std::string patchNameRoot= _PatchDirectory+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
+		std::string bnpFileName = _BnpDirectory + packageIndex.getFile(i).getFileName();
+		std::string refNameRoot = _RefDirectory + NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
+		std::string patchNameRoot = _PatchDirectory + NLMISC::CFile::getFilenameWithoutExtension(bnpFileName);
 
 		// if the file has no versions then skip on to the next file
 		if (packageIndex.getFile(i).versionCount()==0)
@@ -358,7 +365,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		const CBNPFileVersion& curVersion= packageIndex.getFile(i).getVersion(packageIndex.getFile(i).versionCount()-1);
 		std::string curVersionFileName= refNameRoot+NLMISC::toString("_%05u.%s",curVersion.getVersionNumber(),NLMISC::CFile::getExtension(bnpFileName).c_str());
 //		std::string patchFileName= patchNameRoot+NLMISC::toString("_%05d.patch",curVersion.getVersionNumber());
-		std::string patchFileName= _PatchDirectory+toString("%05u/",curVersion.getVersionNumber())+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName)+toString("_%05u",curVersion.getVersionNumber())+".patch";
+		std::string patchFileName= _PatchDirectory + toString("%05u/",curVersion.getVersionNumber())+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName)+toString("_%05u",curVersion.getVersionNumber())+".patch";
 
 		// get the second last version number and the related file name
 		std::string prevVersionFileName;
@@ -377,7 +384,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		std::string refVersionFileName= prevVersionFileName;
 
 		// create the subdirectory for this patch number
-		string versionSubDir = _PatchDirectory+"/"+toString("%05u/", curVersion.getVersionNumber());
+		string versionSubDir = _PatchDirectory + toString("%05u/", curVersion.getVersionNumber());
 		CFile::createDirectory(versionSubDir);
 
 		// generate the lzma packed version of the bnp if needed (lzma file are slow to generate)
@@ -406,7 +413,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 				refVersionFileName= _BnpDirectory+NLMISC::CFile::getFilenameWithoutExtension(bnpFileName)+"_.ref";
 
 				// delete the previous patch - because we only need the latest patch for non-incremental files
-				std::string lastPatch= _PatchDirectory+NLMISC::CFile::getFilenameWithoutExtension(prevVersionFileName)+".patch";
+				std::string lastPatch= _PatchDirectory + NLMISC::CFile::getFilenameWithoutExtension(prevVersionFileName)+".patch";
 				if (NLMISC::CFile::fileExists(lastPatch.c_str()))
 					NLMISC::CFile::deleteFile(lastPatch.c_str());
 			}
@@ -545,17 +552,18 @@ static bool createNewProduct(std::string fileName)
 
 	// create a new package, store it to a persistent data record and write the latter to a file
 	CPackageDescription package;
-	static CPersistentDataRecordRyzomStore	pdr;
+	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	package.storeToPdr(pdr);
-	pdr.writeToTxtFile(fileName.c_str());
+	pdr.writeToTxtFile(fileName);
 	package.setup(fileName);
 	package.createDirectories();
 	package.buildDefaultFileList();
 	package.storeToPdr(pdr);
-	pdr.writeToTxtFile(fileName.c_str());
+	pdr.writeToTxtFile(fileName);
+
 	BOMB_IF(!NLMISC::CFile::fileExists(fileName),("Failed to create new package file: "+fileName).c_str(),return false);
-	nlinfo("New package description file created successfully: %s",fileName.c_str());
+	nlinfo("New package description file created successfully: %s", fileName.c_str());
 
 	return true;
 }

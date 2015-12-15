@@ -737,7 +737,7 @@ bool CPersistentDataRecord::toLines(std::string& result)
 	return pdt.readFromPdr(*this) && pdt.writeToBuffer(reinterpret_cast<NLMISC::CSString&>(result));
 }
 
-bool CPersistentDataRecord::writeToBinFile(const char* fileName)
+bool CPersistentDataRecord::writeToBinFile(const std::string &fileName)
 {
 	H_AUTO(CPersistentDataRecordWriteToBinFile);
 
@@ -750,7 +750,7 @@ bool CPersistentDataRecord::writeToBinFile(const char* fileName)
 	// write the buffer to a file
 	COFile f;
 	bool open = f.open(fileName);
-	DROP_IF(!open,NLMISC::toString("Failed to open output file %s",fileName).c_str(),return false);
+	DROP_IF(!open, NLMISC::toString("Failed to open output file %s", fileName.c_str()).c_str(),return false);
 
 	// write the binary data to file
 	try
@@ -759,7 +759,7 @@ bool CPersistentDataRecord::writeToBinFile(const char* fileName)
 	}
 	catch(...)
 	{
-		DROP(NLMISC::toString("Failed to write output file: %s",fileName),return false);
+		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()),return false);
 	}
 
 	// rewind the read pointer 'cos it's at the end of file
@@ -768,7 +768,7 @@ bool CPersistentDataRecord::writeToBinFile(const char* fileName)
 	return true;
 }
 
-bool CPersistentDataRecord::writeToTxtFile(const char* fileName,TStringFormat stringFormat)
+bool CPersistentDataRecord::writeToTxtFile(const std::string &fileName,TStringFormat stringFormat)
 {
 	H_AUTO(CPersistentDataRecordWriteToTxtFile);
 
@@ -779,7 +779,7 @@ bool CPersistentDataRecord::writeToTxtFile(const char* fileName,TStringFormat st
 	// write the text buffer to a file
 	COFile f;
 	bool open = f.open(fileName);
-	DROP_IF(!open,NLMISC::toString("Failed to open output file %s",fileName).c_str(),return false);
+	DROP_IF(!open,NLMISC::toString("Failed to open output file %s", fileName.c_str()).c_str(), return false);
 
 	// write the binary data to file
 	try
@@ -788,7 +788,7 @@ bool CPersistentDataRecord::writeToTxtFile(const char* fileName,TStringFormat st
 	}
 	catch(...)
 	{
-		DROP(NLMISC::toString("Failed to write output file: %s",fileName),return false);
+		DROP(NLMISC::toString("Failed to write output file: %s", fileName.c_str()), return false);
 	}
 
 	// rewind the read pointer 'cos it's at the end of file
@@ -797,7 +797,7 @@ bool CPersistentDataRecord::writeToTxtFile(const char* fileName,TStringFormat st
 	return true;
 }
 
-bool CPersistentDataRecord::writeToFile(const char* fileName,TFileFormat fileFormat)
+bool CPersistentDataRecord::writeToFile(const std::string &fileName, TFileFormat fileFormat)
 {
 	H_AUTO(CPersistentDataRecordWriteToFile);
 
@@ -805,18 +805,18 @@ bool CPersistentDataRecord::writeToFile(const char* fileName,TFileFormat fileFor
 	{
 	case BINARY_FILE:
 	binary_file:
-		nlinfo("saving binary file: %s",fileName);
+		nlinfo("saving binary file: %s", fileName.c_str());
 		return writeToBinFile(fileName);
 
 	case XML_FILE:
 	xml_file:
-		nlinfo("saving xml file: %s",fileName);
-		return writeToTxtFile(fileName,XML_STRING);
+		nlinfo("saving xml file: %s", fileName.c_str());
+		return writeToTxtFile(fileName, XML_STRING);
 
 	case LINES_FILE:
 	lines_file:
-		nlinfo("saving line-based txt file: %s",fileName);
-		return writeToTxtFile(fileName,LINES_STRING);
+		nlinfo("saving line-based txt file: %s", fileName.c_str());
+		return writeToTxtFile(fileName, LINES_STRING);
 
 	case ANY_FILE:
 		{
@@ -825,14 +825,14 @@ bool CPersistentDataRecord::writeToFile(const char* fileName,TFileFormat fileFor
 			goto binary_file;
 		}
 	}
-	BOMB("Bad file type supplied to writeToFile() - file not saved: "<<fileName,return false);
+	BOMB("Bad file type supplied to writeToFile() - file not saved: " << fileName, return false);
 }
 
 //-------------------------------------------------------------------------
 // set of accessors for retrieving a data record from various sources
 //-------------------------------------------------------------------------
 
-bool CPersistentDataRecord::fromBuffer(const char *src,uint32 bufferSize)
+bool CPersistentDataRecord::fromBuffer(const char *src, uint32 bufferSize)
 {
 	H_AUTO(CPersistentDataRecordFromBuffer);
 
@@ -1113,15 +1113,15 @@ bool CPersistentDataRecord::fromBuffer(NLMISC::IStream& stream)
 }
 
 
-bool CPersistentDataRecord::readFromFile(const char* fileName)
+bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 {
 	H_AUTO(pdrReadFromFile)
 
 #ifdef NL_OS_WINDOWS
 
 	// open the file
-	FILE* inf= fopen(fileName,"rb");
-	DROP_IF( inf==NULL, "Failed to open input file "<<fileName, return false);
+	FILE* inf= fopen(fileName.c_str(), "rb");
+	DROP_IF( inf==NULL, "Failed to open input file " << fileName, return false);
 
 	// get the file size
 	uint32 length= filelength(fileno(inf));
@@ -1133,7 +1133,7 @@ bool CPersistentDataRecord::readFromFile(const char* fileName)
 	// read the data
 	uint32 blocksRead= (uint32)fread(&buffer[0],length,1,inf);
 	fclose(inf);
-	DROP_IF( blocksRead!=1, "Failed to read data from file "<<fileName, return false);
+	DROP_IF( blocksRead!=1, "Failed to read data from file " << fileName, return false);
 
 	// test whether our data buffer is binary
 	bool isBinary=(length>8 && *(uint32*)&buffer[4]==length);
@@ -1143,7 +1143,7 @@ bool CPersistentDataRecord::readFromFile(const char* fileName)
 	}
 
 	// it's not a valid binary file so see whether it looks like a valid text file
-	DROP_IF(!buffer.isValidText(),"File is binary but 'file size' header entry doesn't match true file size",return false);
+	DROP_IF(!buffer.isValidText(),"File is binary but 'file size' header entry doesn't match true file size", return false);
 
 	// parse the data as text...
 	return fromString(buffer);
@@ -1153,27 +1153,27 @@ bool CPersistentDataRecord::readFromFile(const char* fileName)
 	// open the file
 	CIFile f;
 	bool open = f.open(fileName);
-	DROP_IF( !open, "Failed to open input file "<<fileName, return false);
+	DROP_IF( !open, "Failed to open input file " << fileName, return false);
 
 	// get the file size
 	uint32 len= f.getFileSize();
 
 	bool result= fromStream(f, len);
-	DROP_IF( !result, "Failed to parse input file "<<fileName, return false);
+	DROP_IF( !result, "Failed to parse input file " << fileName, return false);
 
 	return true;
 
 #endif
 }
 
-bool CPersistentDataRecord::readFromBinFile(const char* fileName)
+bool CPersistentDataRecord::readFromBinFile(const std::string &fileName)
 {
 	H_AUTO(CPersistentDataRecordReadFromBinFile);
 
 	// open the file
 	CIFile f;
 	bool open = f.open(fileName);
-	DROP_IF(!open,NLMISC::toString("Failed to open input file %s",fileName).c_str(),return false)
+	DROP_IF(!open, NLMISC::toString("Failed to open input file %s", fileName.c_str()), return false)
 
 	// get the file size
 	uint32 len=CFile::getFileSize(fileName);
@@ -1189,24 +1189,24 @@ bool CPersistentDataRecord::readFromBinFile(const char* fileName)
 	}
 	catch(...)
 	{
-		DROP(NLMISC::toString("Failed to read input file: %s",fileName),return false);
+		DROP(NLMISC::toString("Failed to read input file: %s", fileName.c_str()), return false);
 	}
 
 	// parse the buffer contents to re-generate the data
 	bool result= fromBuffer(&s[0],(uint32)s.size());
-	DROP_IF( !result, "Failed to parse input file "<<fileName, return false);
+	DROP_IF( !result, "Failed to parse input file " << fileName, return false);
 
 	return true;
 }
 
-bool CPersistentDataRecord::readFromTxtFile(const char* fileName)
+bool CPersistentDataRecord::readFromTxtFile(const std::string &fileName)
 {
 	H_AUTO(CPersistentDataRecordReadFromTxtFile);
 
 	// open the file
 	CIFile f;
 	bool open = f.open(fileName);
-	DROP_IF(!open,NLMISC::toString("Failed to open input file %s",fileName).c_str(),return false)
+	DROP_IF(!open, NLMISC::toString("Failed to open input file %s", fileName.c_str()), return false)
 
 	// get the file size
 	uint32 len=CFile::getFileSize(fileName);
@@ -1222,7 +1222,7 @@ bool CPersistentDataRecord::readFromTxtFile(const char* fileName)
 	}
 	catch(...)
 	{
-		DROP(NLMISC::toString("Failed to read input file: %s",fileName),return false);
+		DROP(NLMISC::toString("Failed to read input file: %s", fileName.c_str()), return false);
 	}
 
 	// parse the buffer contents to re-generate the data

@@ -2199,7 +2199,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,saveToXML,"save a character to an XML file","<eid
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		c->store(pdr);
-		pdr.writeToTxtFile((fileName+".xml").c_str());
+		pdr.writeToTxtFile(fileName+".xml");
 		return true;
 	}
 
@@ -2223,9 +2223,9 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromXML,"load a character from an XML file","
 		uint32				guildId= c->getGuildId();
 		NLMISC::CEntityId	id=		 c->getId();
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromTxtFile((fileName+".xml").c_str());
+		pdr.readFromTxtFile(fileName+".xml");
 		c->apply(pdr);
 		c->setName(name);
 		c->setGuildId(guildId);
@@ -2249,14 +2249,14 @@ NLMISC_CATEGORISED_COMMAND(pdr,saveToPDR,"save a character to a binary PDR file"
 	if (args.size () < 2) return false;
 	GET_CHARACTER
 
-		std::string fileName = args[1];
+	std::string fileName = args[1];
 
 	if( c )
 	{
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		c->store(pdr);
-		pdr.writeToBinFile((fileName+".pdr").c_str());
+		pdr.writeToBinFile(fileName+".pdr");
 		return true;
 	}
 
@@ -2280,9 +2280,9 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromPDR,"load a character from a binary PDR f
 		uint32				guildId= c->getGuildId();
 		NLMISC::CEntityId	id=		 c->getId();
 
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromBinFile((fileName+".pdr").c_str());
+		pdr.readFromBinFile(fileName+".pdr");
 		c->apply(pdr);
 
 		c->setName(name);

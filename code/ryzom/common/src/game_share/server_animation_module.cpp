@@ -2039,7 +2039,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		{
 			string tmp = toString("r2.%04u.act%u.pdr.xml", sessionId.asInt(), first);
 			nldebug( "writing xml pdr file %s", tmp.c_str() );
-			animSession->Pdrs[first].writeToTxtFile( tmp.c_str() );
+			animSession->Pdrs[first].writeToTxtFile( tmp );
 		}
 	}
 

@@ -370,13 +370,13 @@ void PERSISTENT_CLASS::store(CPersistentDataRecord &pdr _PERSISTENT_STORE_ARGS) 
 
 	#else
 		// define the set of tokens - this makes sure that the tokens exist in the map and that we only look them up the once
-		static uint16 __Tok__MapKey= (uint16)~0u; pdr.addString("__Key__",__Tok__MapKey);
-		static uint16 __Tok__MapVal= (uint16)~0u; pdr.addString("__Val__",__Tok__MapVal);
-		#define _PROP(token,name,type,logic,get,set)							static uint16 token= (uint16)~0u; pdr.addString(name,token);
-		#define _STRUCT(token,name,logic,write,read)							static uint16 token= (uint16)~0u; pdr.addString(name,token);
-		#define _PROP_MAP(token,name,keyType,valType,logic,getKey,getVal,set)	static uint16 token= (uint16)~0u; pdr.addString(name,token);
-		#define _STRUCT_MAP(token,name,keyType,logic,getKey,valWrite,read)		static uint16 token= (uint16)~0u; pdr.addString(name,token);
-		#define _FLAG(token,name,logic,code)									static uint16 token= (uint16)~0u; pdr.addString(name,token);
+		static uint16 __Tok__MapKey = std::numeric_limits<uint16>::max(); pdr.addString("__Key__",__Tok__MapKey);
+		static uint16 __Tok__MapVal = std::numeric_limits<uint16>::max(); pdr.addString("__Val__",__Tok__MapVal);
+		#define _PROP(token,name,type,logic,get,set)							static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+		#define _STRUCT(token,name,logic,write,read)							static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+		#define _PROP_MAP(token,name,keyType,valType,logic,getKey,getVal,set)	static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+		#define _STRUCT_MAP(token,name,keyType,logic,getKey,valWrite,read)		static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+		#define _FLAG(token,name,logic,code)									static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
 		PERSISTENT_DATA
 		#undef _PROP
 		#undef _STRUCT
@@ -471,13 +471,13 @@ void PERSISTENT_CLASS::apply(CPersistentDataRecord &pdr _PERSISTENT_APPLY_ARGS)
 	#endif
 
 	// define the set of tokens - this makes sure that the tokens exist in the map and that we only look them up the once
-	static uint16 __Tok__MapKey= (uint16)~0u; pdr.addString("__Key__",__Tok__MapKey);
-	static uint16 __Tok__MapVal= (uint16)~0u; pdr.addString("__Val__",__Tok__MapVal);
-	#define _PROP(token,name,type,logic,get,set)							static uint16 token= (uint16)~0u; pdr.addString(name,token);
-	#define _STRUCT(token,name,logic,write,read)							static uint16 token= (uint16)~0u; pdr.addString(name,token);
-	#define _PROP_MAP(token,name,keyType,valType,logic,getKey,getVal,set)	static uint16 token= (uint16)~0u; pdr.addString(name,token);
-	#define _STRUCT_MAP(token,name,keyType,logic,getKey,valWrite,read)		static uint16 token= (uint16)~0u; pdr.addString(name,token);
-	#define _FLAG(token,name,logic,code)									static uint16 token= (uint16)~0u; pdr.addString(name,token);
+	static uint16 __Tok__MapKey = std::numeric_limits<uint16>::max(); pdr.addString("__Key__",__Tok__MapKey);
+	static uint16 __Tok__MapVal = std::numeric_limits<uint16>::max(); pdr.addString("__Val__",__Tok__MapVal);
+	#define _PROP(token,name,type,logic,get,set)							static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+	#define _STRUCT(token,name,logic,write,read)							static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+	#define _PROP_MAP(token,name,keyType,valType,logic,getKey,getVal,set)	static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+	#define _STRUCT_MAP(token,name,keyType,logic,getKey,valWrite,read)		static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
+	#define _FLAG(token,name,logic,code)									static uint16 token = std::numeric_limits<uint16>::max(); pdr.addString(name,token);
 	PERSISTENT_DATA
 	#undef _PROP
 	#undef _STRUCT
