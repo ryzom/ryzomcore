@@ -31,7 +31,7 @@
 #    MESSAGE("Current revision is ${Project_WC_REVISION}")
 #    Mercurial_WC_LOG(${PROJECT_SOURCE_DIR} Project)
 #    MESSAGE("Last changed log is ${Project_LAST_CHANGED_LOG}")
-#  ENDIF(MERCURIAL_FOUND)
+#  ENDIF()
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -74,22 +74,22 @@ IF(Mercurial_HG_EXECUTABLE)
 
     IF(NOT ${Mercurial_hg_info_result} EQUAL 0)
       MESSAGE(SEND_ERROR "Command \"${Mercurial_HG_EXECUTABLE} tip\" failed with output:\n${Mercurial_hg_info_error}")
-    ELSE(NOT ${Mercurial_hg_info_result} EQUAL 0)
+    ELSE()
       LIST(LENGTH ${prefix}_WC_INFO _COUNT)
       IF(_COUNT EQUAL 4)
         LIST(GET ${prefix}_WC_INFO 0 ${prefix}_WC_REVISION)
         LIST(GET ${prefix}_WC_INFO 1 ${prefix}_WC_CHANGESET)
         LIST(GET ${prefix}_WC_INFO 2 ${prefix}_WC_BRANCH)
         LIST(GET ${prefix}_WC_INFO 3 ${prefix}_WC_LAST_CHANGED_AUTHOR)
-      ELSE(_COUNT EQUAL 4)
+      ELSE()
         MESSAGE(STATUS "Bad output from HG")
         SET(${prefix}_WC_REVISION "unknown")
         SET(${prefix}_WC_CHANGESET "unknown")
         SET(${prefix}_WC_BRANCH "unknown")
-      ENDIF(_COUNT EQUAL 4)
-    ENDIF(NOT ${Mercurial_hg_info_result} EQUAL 0)
+      ENDIF()
+    ENDIF()
 
-  ENDMACRO(Mercurial_WC_INFO)
+  ENDMACRO()
 
   MACRO(Mercurial_WC_LOG dir prefix)
     # This macro can block if the certificate is not signed:
@@ -105,9 +105,9 @@ IF(Mercurial_HG_EXECUTABLE)
 
     IF(NOT ${Mercurial_hg_log_result} EQUAL 0)
       MESSAGE(SEND_ERROR "Command \"${Mercurial_HG_EXECUTABLE} log -r BASE ${dir}\" failed with output:\n${Mercurial_hg_log_error}")
-    ENDIF(NOT ${Mercurial_hg_log_result} EQUAL 0)
-  ENDMACRO(Mercurial_WC_LOG)
-ENDIF(Mercurial_HG_EXECUTABLE)
+    ENDIF()
+  ENDMACRO()
+ENDIF()
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Mercurial DEFAULT_MSG Mercurial_HG_EXECUTABLE)
