@@ -119,6 +119,8 @@
 		STRUCT_VECT	- 'i' is the vector index during all read and write operations
 */
 
+#include <limits>
+
 #ifndef PERSISTENT_CLASS
 #error PERSISTENT_CLASS not defined
 #endif
