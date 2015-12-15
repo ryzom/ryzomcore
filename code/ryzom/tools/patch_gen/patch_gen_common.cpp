@@ -384,7 +384,7 @@ void CPackageDescription::generatePatches(CBNPFileSet& packageIndex) const
 		std::string refVersionFileName= prevVersionFileName;
 
 		// create the subdirectory for this patch number
-		string versionSubDir = _PatchDirectory+"/"+toString("%05u/", curVersion.getVersionNumber());
+		string versionSubDir = _PatchDirectory + toString("%05u/", curVersion.getVersionNumber());
 		CFile::createDirectory(versionSubDir);
 
 		// generate the lzma packed version of the bnp if needed (lzma file are slow to generate)
