@@ -27255,3 +27255,19 @@ uigcFxAnisotropicFilter	[Anisotropischer Filter:]
 // INDEX 6462
 uigcFxAnisotropicFilterNone	[Keiner]
 
+// HASH_VALUE 050BB49718B1CAD4
+// INDEX 6463
+uiShowClock12h	[Verwende 12-Stunden-Uhrzeit-Anzeige.]
+
+// HASH_VALUE BCF4DB5845BC4EDA
+// INDEX 6464
+uittShowClock12h	[Wenn aktiviert, wird die Uhrzeit am Kompass und zu den Chat-Nachrichten in 12-Stunden-Version angezeigt.]
+
+// HASH_VALUE 68F99C8C69A81273
+// INDEX 6465
+uiRadarUseCamera	[Radar folgt der Kamera-Rotation.]
+
+// HASH_VALUE B83EBD58DE9C068F
+// INDEX 6466
+uittRadarUseCamera	[Wenn aktiviert, wird die Kamera-Rotation für die Radar-Ansicht eingeschaltet.]
+
