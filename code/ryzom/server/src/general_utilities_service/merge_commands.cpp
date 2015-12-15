@@ -62,7 +62,7 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeGuildIdFix,"set the guild ids in the 
 		// read the file
 		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromFile(fdc[i].FileName.c_str());
+		pdr.readFromFile(fdc[i].FileName);
 
 		// convert to XML
 		NLMISC::CSString inputString;
@@ -80,8 +80,8 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeGuildIdFix,"set the guild ids in the 
 		pdr.fromXML(resultString);
 
 		// write the file
-		pdr.writeToFile((fdc[i].FileName+".new.xml").c_str());
-		pdr.writeToFile((fdc[i].FileName+".new.bin").c_str());
+		pdr.writeToFile(fdc[i].FileName+".new.xml");
+		pdr.writeToFile(fdc[i].FileName+".new.bin");
 	}
 
 	return true;
@@ -109,7 +109,7 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeChangeCharacterNames,"change names of
 		DROP_IF(!NLMISC::CFile::fileExists(fileName),"Skipping inexistant file: "+fileName,continue);
 		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromFile(fileName.c_str());
+		pdr.readFromFile(fileName);
 
 		// convert to XML
 		NLMISC::CSString inputString;
@@ -127,8 +127,8 @@ NLMISC_CATEGORISED_COMMAND(ShardMerge,mergeChangeCharacterNames,"change names of
 		pdr.fromXML(resultString);
 
 		// write the file
-		pdr.writeToFile((fileName+".new.xml").c_str());
-		pdr.writeToFile((fileName+".new.bin").c_str());
+		pdr.writeToFile(fileName+".new.xml");
+		pdr.writeToFile(fileName+".new.bin");
 	}
 
 	return true;
