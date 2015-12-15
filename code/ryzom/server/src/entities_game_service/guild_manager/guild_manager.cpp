@@ -328,7 +328,7 @@ void CGuildManager::saveGuild( CGuild* guild )
 	{
 		H_AUTO( CGuildManagerUpdate_PDR_WRITE_TEXT )
 			string fileName = Bsi.getLocalPath()+NLMISC::toString("guilds/guild_%05u.txt", id & 0x000fffff);
-		pdr.writeToTxtFile(fileName.c_str());
+		pdr.writeToTxtFile(fileName);
 	}
 	else
 	{
@@ -360,7 +360,7 @@ void CGuildManager::saveGuild( CGuild* guild )
 		else
 		{
 			H_AUTO( CGuildManagerUpdatePDR_WRITE_BIN_NO_PDS )
-				pdr.writeToBinFile((Bsi.getLocalPath() + fileName).c_str());
+				pdr.writeToBinFile(Bsi.getLocalPath() + fileName);
 		}
 	}
 

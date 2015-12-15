@@ -407,15 +407,15 @@ public:
 	bool toLines(std::string& result);
 
 	// perform a toBuffer() and write the result to a binary file
-	bool writeToBinFile(const char* fileName);
+	bool writeToBinFile(const std::string &fileName);
 
 	// perform a toString() and write the result to a text file
-	bool writeToTxtFile(const char* fileName,TStringFormat stringFormat=XML_STRING);
+	bool writeToTxtFile(const std::string &fileName, TStringFormat stringFormat=XML_STRING);
 
 	// if the format is set to 'ANY_FILE' then use the extension provided in the 'fileName' argument to
 	// determine the file type. In this case 'txt' and 'xml' have specific meanings
 	// returns writeToTxtFile(...) or writeToBinFile(...) depending on the file format
-	bool writeToFile(const char* fileName,TFileFormat fileFormat=ANY_FILE);
+	bool writeToFile(const std::string &fileName, TFileFormat fileFormat=ANY_FILE);
 
 
 	//-------------------------------------------------------------------------
@@ -445,14 +445,14 @@ public:
 	bool fromLines(const std::string& s);
 
 	// read from a binary file
-	bool readFromBinFile(const char* fileName);
+	bool readFromBinFile(const std::string &fileName);
 
 	// read from a text file
-	bool readFromTxtFile(const char* fileName);
+	bool readFromTxtFile(const std::string &fileName);
 
 	// read a file and determine whether it's a binary or text file from it's
 	// content - then behave like readFromBinFile() or readFromTxtFile()
-	bool readFromFile(const char* fileName);
+	bool readFromFile(const std::string &fileName);
 
 
 private:

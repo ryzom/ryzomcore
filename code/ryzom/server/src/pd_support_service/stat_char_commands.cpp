@@ -310,7 +310,7 @@ NLMISC_CATEGORISED_COMMAND(Stats,listCharNames,"display the names of the charact
 	{
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromFile(files[i].c_str());
+		pdr.readFromFile(files[i]);
 
 		CStatsScanCharacter c;
 		c.apply(pdr);

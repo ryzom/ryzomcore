@@ -2199,7 +2199,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,saveToXML,"save a character to an XML file","<eid
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		c->store(pdr);
-		pdr.writeToTxtFile((fileName+".xml").c_str());
+		pdr.writeToTxtFile(fileName+".xml");
 		return true;
 	}
 
@@ -2225,7 +2225,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromXML,"load a character from an XML file","
 
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromTxtFile((fileName+".xml").c_str());
+		pdr.readFromTxtFile(fileName+".xml");
 		c->apply(pdr);
 		c->setName(name);
 		c->setGuildId(guildId);
@@ -2256,7 +2256,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,saveToPDR,"save a character to a binary PDR file"
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		c->store(pdr);
-		pdr.writeToBinFile((fileName+".pdr").c_str());
+		pdr.writeToBinFile(fileName+".pdr");
 		return true;
 	}
 
@@ -2282,7 +2282,7 @@ NLMISC_CATEGORISED_COMMAND(pdr,loadFromPDR,"load a character from a binary PDR f
 
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromBinFile((fileName+".pdr").c_str());
+		pdr.readFromBinFile(fileName+".pdr");
 		c->apply(pdr);
 
 		c->setName(name);

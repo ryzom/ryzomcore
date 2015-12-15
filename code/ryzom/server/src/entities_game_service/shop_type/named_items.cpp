@@ -68,7 +68,7 @@ void CNamedItems::loadNamedItemsFromFile(const std::string & fileName)
 
 	static CPersistentDataRecord	pdr;
 	pdr.clear();
-	pdr.readFromTxtFile(path.c_str());
+	pdr.readFromTxtFile(path);
 	CInventoryPtr inv = loadFromPdr(pdr);
 	if (inv == NULL)
 	{

@@ -91,8 +91,8 @@ NLMISC_CATEGORISED_COMMAND(utils,pdrBin2xml,"convert a binary pdr file to xml","
 
 	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromBinFile(args[0].c_str());
-	pdr.writeToTxtFile(args[1].c_str());
+	pdr.readFromBinFile(args[0]);
+	pdr.writeToTxtFile(args[1]);
 
 	return true;
 }
@@ -108,8 +108,8 @@ NLMISC_CATEGORISED_COMMAND(utils,pdrXml2bin,"convert a text pdr file to binary",
 
 	static CPersistentDataRecord pdr;
 	pdr.clear();
-	pdr.readFromTxtFile(args[0].c_str());
-	pdr.writeToBinFile(args[1].c_str());
+	pdr.readFromTxtFile(args[0]);
+	pdr.writeToBinFile(args[1]);
 
 	return true;
 }
@@ -138,8 +138,8 @@ NLMISC_CATEGORISED_COMMAND(utils,pdr2xml,"convert one or more sets of pdr files 
 			log.displayNL("Converting to XML : %s => %s",fd.FileName.c_str(),outputFileName.c_str());
 			static CPersistentDataRecord	pdr;
 			pdr.clear();
-			pdr.readFromFile(fd.FileName.c_str());
-			pdr.writeToFile(outputFileName.c_str());
+			pdr.readFromFile(fd.FileName);
+			pdr.writeToFile(outputFileName);
 		}
 	}
 
@@ -170,8 +170,8 @@ NLMISC_CATEGORISED_COMMAND(utils,pdr2bin,"convert one or more sets of pdr files 
 			log.displayNL("Converting to Binary : %s => %s",fd.FileName.c_str(),outputFileName.c_str());
 			static CPersistentDataRecord	pdr;
 			pdr.clear();
-			pdr.readFromFile(fd.FileName.c_str());
-			pdr.writeToFile(outputFileName.c_str());
+			pdr.readFromFile(fd.FileName);
+			pdr.writeToFile(outputFileName);
 		}
 	}
 
@@ -202,8 +202,8 @@ NLMISC_CATEGORISED_COMMAND(utils,pdr2txt,"convert one or more sets of pdr files 
 			log.displayNL("Converting to TXT : %s => %s",fd.FileName.c_str(),outputFileName.c_str());
 			static CPersistentDataRecord	pdr;
 			pdr.clear();
-			pdr.readFromFile(fd.FileName.c_str());
-			pdr.writeToFile(outputFileName.c_str());
+			pdr.readFromFile(fd.FileName);
+			pdr.writeToFile(outputFileName);
 		}
 	}
 
@@ -218,10 +218,10 @@ NLMISC_CATEGORISED_COMMAND(utils,pdrFileCompare,"Compare 2 pdr files","<first fi
 		return false;
 
 	CPersistentDataRecord pdr0;
-	pdr0.readFromFile(args[0].c_str());
+	pdr0.readFromFile(args[0]);
 
 	CPersistentDataRecord pdr1;
-	pdr1.readFromFile(args[1].c_str());
+	pdr1.readFromFile(args[1]);
 
 	log.displayNL("%s : %s / %s", (pdr0==pdr1)?"Files MATCH":"Files DON'T match", args[0].c_str(), args[1].c_str());
 
@@ -272,7 +272,7 @@ NLMISC_CATEGORISED_COMMAND(utils,pdrInfo,"Extract info from pdr file(s)","<input
 
 			{
 				H_AUTO(pdrInfo_readFromFile)
-				pdr.readFromFile(fd.FileName.c_str());
+				pdr.readFromFile(fd.FileName);
 			}
 			log.displayNL("%s",pdr.getInfo().c_str());
 

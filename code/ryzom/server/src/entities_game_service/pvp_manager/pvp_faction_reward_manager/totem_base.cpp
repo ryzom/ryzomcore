@@ -332,7 +332,7 @@ void CTotemBase::totemFileCallback(const CFileDescription& fileDescription, NLMI
 	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	pdr.fromBuffer(dataStream);
-//	pdr.readFromFile( sFilePath.c_str() );
+//	pdr.readFromFile( sFilePath );
 
 	apply( pdr );
 }
@@ -352,7 +352,7 @@ void CTotemBase::loadFromPDR()
 	
 //	static CPersistentDataRecordRyzomStore pdr;
 //	pdr.clear();
-//	pdr.readFromFile( sFilePath.c_str() );
+//	pdr.readFromFile( sFilePath );
 //
 //	apply( pdr );
 }

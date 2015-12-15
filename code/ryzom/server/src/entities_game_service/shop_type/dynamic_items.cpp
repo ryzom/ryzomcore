@@ -262,7 +262,7 @@ void CDynamicItems::init()
 //			static CPersistentDataRecord	pdr;
 //			pdr.clear();
 //			
-//			pdr.readFromFile(fileName.c_str());
+//			pdr.readFromFile(fileName);
 //			apply(pdr, i);
 //
 //			for( uint32 j = 0; j < subVec.size(); ++j )

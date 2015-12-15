@@ -142,7 +142,7 @@ NLMISC_COMMAND(listCharNames,"display the names of the characters int he listed 
 	{
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromFile(files[i].c_str());
+		pdr.readFromFile(files[i]);
 
 		CStatsScanCharacter c;
 		c.apply(pdr);

@@ -66,7 +66,7 @@ void CGameEventManager::init()
 	{
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromTxtFile(sFilename.c_str());
+		pdr.readFromTxtFile(sFilename);
 		apply(pdr);
 		createEventChannel();
 	}
@@ -308,7 +308,7 @@ void CGameEventManager::saveGameEventFile()
 		static CPersistentDataRecordRyzomStore	pdr;
 		pdr.clear();
 		store(pdr);
-		pdr.writeToTxtFile(sFilename.c_str());
+		pdr.writeToTxtFile(sFilename);
 	}
 }
 

@@ -510,7 +510,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 		if ( id > 0)
 		{
 			// this is a guild file. We can load it
-			pdr.readFromBinFile(args[0].c_str());
+			pdr.readFromBinFile(args[0]);
 
 			guildId = id;
 		}
@@ -540,7 +540,7 @@ NLMISC_COMMAND( importGuildFile, "Import a guild file into the server", "<filena
 			if ( id > 0)
 			{
 				// this is a guild file. We can load it
-				pdr.readFromTxtFile(args[0].c_str());
+				pdr.readFromTxtFile(args[0]);
 				guildId = id;
 			}
 			else

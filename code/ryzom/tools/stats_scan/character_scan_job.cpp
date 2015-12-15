@@ -99,7 +99,7 @@ void CCharacterScanJob::update()
 	// load the file into a pdr record
 	static CPersistentDataRecord	pdr;
 	pdr.clear();
-	pdr.readFromFile(_Files[_NextFile].c_str());
+	pdr.readFromFile(_Files[_NextFile]);
 	++_NextFile;
 
 	// create a character representation and apply the pdr

@@ -189,7 +189,7 @@ void CPackageDescription::setup(const std::string& packageName)
 	// read new contents from input file
 	static CPersistentDataRecord	pdr;
 	pdr.clear();
-	pdr.readFromTxtFile(packageName.c_str());
+	pdr.readFromTxtFile(packageName);
 	apply(pdr);
 
 	// root directory
@@ -229,30 +229,34 @@ void CPackageDescription::storeToPdr(CPersistentDataRecord& pdr) const
 
 void CPackageDescription::readIndex(CBNPFileSet& packageIndex) const
 {
-	nlinfo("Reading history file: %s ...",(_RootDirectory+_IndexFileName).c_str());
+	std::string indexPath = _RootDirectory + _IndexFileName;
+	
+	nlinfo("Reading history file: %s ...", indexPath.c_str());
 
 	// clear out old contents before reading from input file
 	packageIndex.clear();
 
 	// read new contents from input file
-	if (NLMISC::CFile::fileExists(_RootDirectory+_IndexFileName))
+	if (NLMISC::CFile::fileExists(indexPath))
 	{
 		static CPersistentDataRecord	pdr;
 		pdr.clear();
-		pdr.readFromTxtFile((_RootDirectory+_IndexFileName).c_str());
+		pdr.readFromTxtFile(indexPath);
 		packageIndex.apply(pdr);
 	}
 }
 
 void CPackageDescription::writeIndex(const CBNPFileSet& packageIndex) const
 {
-	nlinfo("Writing history file: %s ...",(_RootDirectory+_IndexFileName).c_str());
+	std::string indexPath = _RootDirectory + _IndexFileName;
+
+	nlinfo("Writing history file: %s ...", indexPath.c_str());
 
 	// write contents to output file
 	static CPersistentDataRecordRyzomStore	pdr;
 	pdr.clear();
 	packageIndex.store(pdr);
-	pdr.writeToTxtFile((_RootDirectory+_IndexFileName).c_str());
+	pdr.writeToTxtFile(indexPath);
 }
 
 void CPackageDescription::getCategories(CPersistentDataRecord &pdr) const
@@ -285,12 +289,16 @@ void CPackageDescription::updateIndexFileList(CBNPFileSet& packageIndex) const
 	}
 }
 
-void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theClientPackage,const CBNPFileSet& packageIndex) const
+void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theClientPackage, const CBNPFileSet& packageIndex) const
 {
-	nlinfo("Generating client index: %s ...",(_PatchDirectory+toString("%05u/", packageIndex.getVersionNumber())+_ClientIndexFileName).c_str());
+	std::string patchNumber = toString("%05u", packageIndex.getVersionNumber());
+	std::string patchDirectory = _PatchDirectory + patchNumber;
+	std::string patchFile = patchDirectory + "/" + _ClientIndexFileName;
+	
+	nlinfo("Generating client index: %s...", patchFile.c_str());
 
 	// make sure the version sub directory exist
-	CFile::createDirectory(_PatchDirectory+toString("%05u/", packageIndex.getVersionNumber()));
+	CFile::createDirectory(patchDirectory);
 
 	// clear out the client package before we start
 	theClientPackage.clear();
@@ -310,11 +318,10 @@ void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theC
 	pdr.clear();
 	theClientPackage.store(pdr);
 
-	std::string newName = _PatchDirectory + toString("%05u/", packageIndex.getVersionNumber()) + NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName);
-	newName += NLMISC::toString("_%05u", packageIndex.getVersionNumber());
+	std::string newName = patchDirectory + "/" + NLMISC::CFile::getFilenameWithoutExtension(_ClientIndexFileName) + "_" + patchNumber;
 
-	pdr.writeToBinFile((newName+".idx").c_str());
-	pdr.writeToTxtFile((newName+"_debug.xml").c_str());
+	pdr.writeToBinFile(newName + ".idx");
+	pdr.writeToTxtFile(newName + "_debug.xml");
 }
 
 void CPackageDescription::addVersion(CBNPFileSet& packageIndex)
@@ -548,12 +555,13 @@ static bool createNewProduct(std::string fileName)
 	static CPersistentDataRecordRyzomStore	pdr;
 	pdr.clear();
 	package.storeToPdr(pdr);
-	pdr.writeToTxtFile(fileName.c_str());
+	pdr.writeToTxtFile(fileName);
 	package.setup(fileName);
 	package.createDirectories();
 	package.buildDefaultFileList();
 	package.storeToPdr(pdr);
-	pdr.writeToTxtFile(fileName.c_str());
+	pdr.writeToTxtFile(fileName);
+
 	BOMB_IF(!NLMISC::CFile::fileExists(fileName),("Failed to create new package file: "+fileName).c_str(),return false);
 	nlinfo("New package description file created successfully: %s",fileName.c_str());
 
