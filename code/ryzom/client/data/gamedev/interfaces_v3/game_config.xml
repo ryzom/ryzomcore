@@ -1415,6 +1415,14 @@
                   posparent="show_clock_12h"
                   x="0"
                   y="-12" />
+        <instance template="tgcw_checkbox"
+                  id="radar_use_camera"
+                  text="uiRadarUseCamera"
+                  tooltip="uittRadarUseCamera"
+                  posref="BL TL"
+                  posparent="show_reticle"
+                  x="0"
+                  y="-12" />
       </group>
       <ctrl style="skin_scroll"
             id="sb_hud"
@@ -3272,6 +3280,11 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:SHOW_RETICLE"
+               realtime="true" />
+        <param ui="hud:radar_use_camera:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:RADAR:USE_CAMERA"
                realtime="true" />
         <param ui="alpha_colors:col_day:c"
                type="db"
