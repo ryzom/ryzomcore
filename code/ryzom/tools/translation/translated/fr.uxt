@@ -27222,3 +27222,19 @@ uigcFxAnisotropicFilter	[Filtrage Anisotrope :]
 // INDEX 6462
 uigcFxAnisotropicFilterNone	[Aucun]
 
+// HASH_VALUE 050BB49718B1CAD4
+// INDEX 6463
+uiShowClock12h	[Utiliser le système horaire sur 12 heures]
+
+// HASH_VALUE BCF4DB5845BC4EDA
+// INDEX 6464
+uittShowClock12h	[Si coché, utilise le système horaire sur 12 heures dans le compas et les messages du chat.]
+
+// HASH_VALUE 68F99C8C69A81273
+// INDEX 6465
+uiRadarUseCamera	[Le radar suit la rotation de la caméra]
+
+// HASH_VALUE B83EBD58DE9C068F
+// INDEX 6466
+uittRadarUseCamera	[Si coché, utilise la rotation de la caméra pour la vue du radar.]
+

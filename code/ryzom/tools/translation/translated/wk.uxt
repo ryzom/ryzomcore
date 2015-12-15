@@ -27439,3 +27439,19 @@ uigcFxAnisotropicFilter	[Anisotropic Filtering:]
 // INDEX 6462
 uigcFxAnisotropicFilterNone	[None]
 
+// HASH_VALUE 050BB49718B1CAD4
+// INDEX 6463
+uiShowClock12h	[Use 12-hour clock]
+
+// HASH_VALUE BCF4DB5845BC4EDA
+// INDEX 6464
+uittShowClock12h	[If checked, use 12-hour clock in compass and in chat messages.]
+
+// HASH_VALUE 68F99C8C69A81273
+// INDEX 6465
+uiRadarUseCamera	[Radar follows camera rotation]
+
+// HASH_VALUE B83EBD58DE9C068F
+// INDEX 6466
+uittRadarUseCamera	[If checked, use camera rotation for radar view.]
+
