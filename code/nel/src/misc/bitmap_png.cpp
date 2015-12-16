@@ -136,6 +136,36 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	// get again width, height and the new bit-depth and color-type
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &iBitDepth, &iColorType, NULL, NULL, NULL);
 
+	uint8 imageDepth;
+
+	switch(iColorType)
+	{
+		case PNG_COLOR_TYPE_GRAY:
+		imageDepth = iBitDepth;
+		break;
+
+		case PNG_COLOR_TYPE_PALETTE:
+		imageDepth = iBitDepth;
+		break;
+
+		case PNG_COLOR_TYPE_RGB:
+		imageDepth = iBitDepth * 3;
+		break;
+
+		case PNG_COLOR_TYPE_RGB_ALPHA:
+		imageDepth = iBitDepth * 4;
+		break;
+
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+		imageDepth = iBitDepth * 2;
+		break;
+
+		default:
+		imageDepth = iBitDepth * 4;
+		nlwarning("Unable to determine PNG color type: %d, consider it as RGBA", iColorType);
+		break;
+	}
+
 	// at this point, the image must be converted to an 24bit image RGB
 
 	// rowbytes is the width x number of channels
@@ -208,7 +238,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 
 	//return the size of a pixel, either 8,24,32 bit
-	return uint8(dstChannels * iBitDepth);
+	return imageDepth;
 }
 
 /*-------------------------------------------------------------------*\
