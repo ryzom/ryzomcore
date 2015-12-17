@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 
 		std::string _Path_Input_TexBases;
 		std::string _Path_Input_Masks;
-		std::string _Path_Output_MaksOptimized;
+		std::string _Path_Output_MasksOptimized;
 		std::string _Path_Output_Gtm;
 		std::string _Path_Output_Cgi;
 
@@ -162,10 +162,10 @@ int main(int argc, char* argv[])
 			{
 			}
 
-			/// repertory output of masks optimized created 
+			/// optimized masks output directory created
 			try
 			{
-				_Path_Output_MaksOptimized = NLMISC::CPath::standardizePath(cf.getVar ("output_path_mask_optimized").asString());
+				_Path_Output_MasksOptimized = NLMISC::CPath::standardizePath(cf.getVar ("output_path_mask_optimized").asString());
 			}
 			catch (const NLMISC::EUnknownVar &)
 			{
