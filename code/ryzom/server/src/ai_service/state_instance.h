@@ -544,7 +544,7 @@ void CStateInstance::setNextState(CAIState* state)
 	// make sure the state is positional (not punctual)
 	if (!state->isPositional()) 
 	{ 
-		nlwarning("setNextState(): State should not be punctual '%s'%s - setting state to ~0",
+		nlwarning("setNextState(): State should not be punctual '%s'%s - setting state to std::numeric_limits<uint32>::max()",
 			state->getAliasNode()->fullName().c_str(),
 			state->getAliasString().c_str());
 		_NextState = NULL;
@@ -565,7 +565,7 @@ void CStateInstance::setNextPunctualState(CAIState* state)
 	// make sure the state is not positional (ie punctual)
 	if (state->isPositional()) 
 	{ 
-		nlwarning("CStateInstance::setNextPunctualState(): State should be punctual '%s'%s - setting state to ~0",
+		nlwarning("CStateInstance::setNextPunctualState(): State should be punctual '%s'%s - setting state to std::numeric_limits<uint32>::max()",
 			state->getAliasNode()->fullName().c_str(),
 			state->getAliasString().c_str());
 		state = NULL;
