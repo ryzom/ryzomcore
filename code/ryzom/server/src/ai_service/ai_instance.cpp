@@ -412,7 +412,7 @@ CAIEntity* CAIInstance::tryToGetEntity(char const* str, CAIS::TSearchType search
 	CManager	*mgrPtr=NULL;
 	CGroup		*grpPtr=NULL;
 	CBot		*botPtr=NULL;
-	uint32		localIndex=~0;
+	uint32		localIndex = std::numeric_limits<uint32>::max();
 
 	mgr	=	id;
 	while((*id!=':')&&(*id!=0))		id++;
@@ -635,7 +635,7 @@ static CAIVector randomPos(double dispersionRadius)
 	{
 		return CAIVector(0., 0.);
 	}
-	uint32 const maxLimit=((uint32)~0U)>>1;
+	const uint32 maxLimit = std::numeric_limits<uint32>::max() >>1;
 	double rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
 	double r = dispersionRadius*sqrt(rval);
 	rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
@@ -896,7 +896,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(messageVersion);
 	nlassert(messageVersion==1);
 	msgin.serial(nbString);
-	
+
 	string eid;
 	string firstCommand;
 	msgin.serial(eid); // Player or boteid
