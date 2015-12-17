@@ -192,8 +192,7 @@ int main(int argc, char* argv[])
 		}
 		catch (const std::exception &e)
 		{
-			nlwarning("Panoply building failed.");
-			nlwarning(e.what());
+			nlerror("Panoply building failed: %s", e.what());
 			return -1;
 		}
 
@@ -228,7 +227,7 @@ int main(int argc, char* argv[])
 
 		if (argc != 2)
 		{
-			nlwarning("usage : %s [config_file name]", argv[0]);
+			nlinfo("Usage : %s [config_file name]", argv[0]);
 			return -1;
 		}
 
@@ -349,8 +348,7 @@ int main(int argc, char* argv[])
 			}
 			catch (const std::exception &e)
 			{
-				nlwarning("Panoply building failed.");
-				nlwarning(e.what());
+				nlerror("Panoply building failed: %s", e.what());
 				return -1;
 			}
 
@@ -363,7 +361,7 @@ int main(int argc, char* argv[])
 		}
 		catch (const std::exception &e)
 		{
-			nlwarning("Something went wrong while building bitmap : %s", e.what());
+			nlerror("Something went wrong while building bitmap: %s", e.what());
 			return -1;
 		}
 		return 0;
@@ -391,7 +389,7 @@ static void validateCgiInfo()
 	}
 	catch(const std::exception &e)
 	{
-		nlwarning("Panoply building failed.");
+		nlerror("Panoply building failed: %s", e.what());
 	}
 
 	uint16 a = temp.size();
@@ -455,7 +453,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 {
 	if (!NLMISC::CFile::isExists(bi.InputPath))
 	{
-		nlwarning(("Path not found : " + bi.InputPath).c_str());
+		nlerror("Path not found: %s", bi.InputPath.c_str());
 		return;
 	}
 	for(uint sizeVersion= 0; sizeVersion<2; sizeVersion++)
@@ -493,7 +491,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 					}
 					catch (const std::exception &e)
 					{
-						nlwarning("Processing of %s failed : %s \n", files[k].c_str(), e.what());
+						nlerror("Processing of %s failed: %s", files[k].c_str(), e.what());
 					}
 				}
 			}
@@ -565,7 +563,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 		// ok, can move the cache
 		if (!NLMISC::CFile::moveFile(outputHLSInfo, cacheHLSInfo))
 		{
-			nlwarning(("Couldn't move " + cacheHLSInfo + " to " + outputHLSInfo).c_str());
+			nlerror("Couldn't move %s to %s", cacheHLSInfo.c_str(), outputHLSInfo.c_str());
 			return true;
 		}
 	}
@@ -595,9 +593,10 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 
 		// get version that is in the cache
 		std::string cacheDest = bi.OutputPath + outputFileName + bi.OutputFormat;
+
 		if (!NLMISC::CFile::moveFile(cacheDest, searchName))
 		{
-			nlwarning(("Couldn't move " + searchName + " to " + cacheDest).c_str());
+			nlerror("Couldn't move %s to %s", searchName.c_str(), cacheDest.c_str());
 			return true;
 		}
 
@@ -641,15 +640,17 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			actualInputPath= bi.InputPath;
 
 		// load
+		std::string fullInputBitmapPath = actualInputPath + fileNameWithExtension;
+
 		NLMISC::CIFile is;
 		try
 		{
-			if (is.open(actualInputPath + fileNameWithExtension))
+			if (is.open(fullInputBitmapPath))
 			{
 				depth = srcBitmap.load(is);
 				if (depth == 0 || srcBitmap.getPixels().empty())
 				{
-					throw NLMISC::Exception(std::string("Failed to load bitmap ") + actualInputPath + fileNameWithExtension);
+					throw NLMISC::Exception("Failed to load bitmap");
 				}
 
 				if (srcBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
@@ -659,13 +660,13 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			}
 			else
 			{
-				nlwarning("Unable to open %s. Processing next", (actualInputPath + fileNameWithExtension).c_str());
+				nlerror("Unable to open %s. Processing next", fullInputBitmapPath.c_str());
 				return;
 			}
 		}
-		catch (const NLMISC::Exception &)
+		catch (const NLMISC::Exception &e)
 		{
-			nlwarning("File or format error with : %s. Processing next...", fileNameWithExtension.c_str());
+			nlerror("File or format error with %s (%s). Processing next...", fullInputBitmapPath.c_str(), e.what());
 			return;
 		}
 	}
@@ -715,14 +716,10 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			{
 
 				if (is.open(maskFileName))
-				{				
-					if (li.Mask.load(is) == 0)
+				{
+					if (li.Mask.load(is) == 0 || li.Mask.getPixels().empty())
 					{
-						throw NLMISC::Exception(std::string("Failed to load mask ") + maskFileName);
-					}
-					if (li.Mask.getPixels().empty())
-					{
-						throw NLMISC::Exception(std::string("Failed to load mask ") + maskFileName);
+						throw NLMISC::Exception("Failed to load mask");
 					}
 
 					if (li.Mask.PixelFormat != NLMISC::CBitmap::RGBA)
@@ -741,13 +738,13 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				}
 				else
 				{
-					nlwarning("Unable to open %s. Processing next", maskFileName.c_str());
+					nlerror("Unable to open %s. Processing next", maskFileName.c_str());
 					return;
 				}
 			}
 			catch (const std::exception &e)
 			{
-				nlwarning("Error with : %s : %s. Aborting this bitmap processing", maskFileName.c_str(), e.what());				
+				nlerror("Error with %s: %s. Aborting this bitmap processing", maskFileName.c_str(), e.what());
 				return;
 			}
 		}
@@ -803,13 +800,15 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 		// save good hlsInfo instance name
 		hlsTextInstance.Name = outputFileName + bi.OutputFormat;
 
-		nlwarning("Writing %s", outputFileName.c_str());
+		nlinfo("Writing %s", outputFileName.c_str());
 		/// Save the result. We let propagate exceptions (if there's no more space disk it useless to continue...)
 		{
+			std::string fullOutputPath = bi.OutputPath + "/" + outputFileName + bi.OutputFormat;
+
 			try
 			{
 				NLMISC::COFile os;
-				if (os.open(bi.OutputPath + "/" + outputFileName + bi.OutputFormat))
+				if (os.open(fullOutputPath))
 				{
 					// divide by 2 when needed.
 					if(mustDivideBy2)
@@ -826,12 +825,12 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				}
 				else
 				{
-					nlwarning(("Couldn't open " + bi.OutputPath + outputFileName + bi.OutputFormat + " for writing").c_str());
+					nlerror("Couldn't open %s for writing", fullOutputPath.c_str());
 				}
 			}
 			catch(const NLMISC::EStream &e)
 			{
-				nlwarning(("Couldn't write " + bi.OutputPath + outputFileName + bi.OutputFormat + " : " + e.what()).c_str());
+				nlerror("Couldn't write %s: %s", fullOutputPath.c_str(), e.what());
 			}
 		}
 
@@ -855,14 +854,16 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	}
 
 	// **** save the TMP hlsInfo
+	std::string fullHlsInfoPath = bi.HlsInfoPath + fileName + ".hlsinfo";
+
 	NLMISC::COFile os;
-	if (os.open(bi.HlsInfoPath + fileName + ".hlsinfo"))
+	if (os.open(fullHlsInfoPath))
 	{
 		os.serial(hlsInfo);
 	}
 	else
 	{
-		nlwarning(("Couldn't write " + bi.HlsInfoPath + fileName + ".hlsinfo").c_str());
+		nlerror("Couldn't write %s", fullHlsInfoPath.c_str());
 	}
 
 }
