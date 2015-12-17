@@ -635,7 +635,7 @@ static CAIVector randomPos(double dispersionRadius)
 	{
 		return CAIVector(0., 0.);
 	}
-	const uint32 maxLimit = std::numeric_limits<uint32>::max() >>1;
+	const uint32 maxLimit = std::numeric_limits<uint32>::max() >> 1;
 	double rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
 	double r = dispersionRadius*sqrt(rval);
 	rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[

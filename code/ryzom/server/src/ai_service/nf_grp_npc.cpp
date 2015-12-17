@@ -1472,7 +1472,7 @@ void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
 	stack.pop();
-	if (botId!=NLMISC::CEntityId::Unknown)
+	if (botId != NLMISC::CEntityId::Unknown)
 	{
 		CGroup* grp = NULL;
 		CSpawnBotNpc* bot = NULL;
