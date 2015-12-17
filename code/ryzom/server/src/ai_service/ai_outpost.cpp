@@ -1149,7 +1149,7 @@ NLMISC_COMMAND(displayOutposts, "list the available outpost", "")
 	if (args.size() > 0)
 		return false;
 	
-	uint32 instanceNumber = ~0;
+	uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	for (uint i=0; i<CAIS::instance().AIList().size(); ++i)
 	{
 		CAIInstance	*const	aii = CAIS::instance().AIList()[i];
@@ -1251,7 +1251,7 @@ NLMISC_COMMAND(outpostSpawnSquad, "Spawns a squad in an outpost", "<instance_num
 	if (args.size() != 6)
 		return false;
 	
-	uint32 instanceNumber = ~0;
+	uint32 instanceNumber = std::numeric_limits<uint32>::max();
 	fromString(args[0], instanceNumber);
 	string continentName = args[1];
 	string outpostName = args[2];

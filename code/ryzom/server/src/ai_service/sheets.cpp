@@ -303,7 +303,7 @@ bool AISHEETS::CCreature::mustAssist(CCreature const& creature) const
 void AISHEETS::CCreature::setAssisGroupIndexs()
 {
 	_GroupPropertiesIndex = CSheets::getInstance()->getGroupPropertiesIndex(GroupIndexStr());
-	if (_GroupPropertiesIndex==~0)
+	if (_GroupPropertiesIndex==std::numeric_limits<uint32>::max())
 		return;
 	
 	std::vector<uint32> groupList;
@@ -316,7 +316,7 @@ void AISHEETS::CCreature::setAssisGroupIndexs()
 void AISHEETS::CCreature::setAttackGroupIndexs()
 {
 	_GroupPropertiesIndex = CSheets::getInstance()->getGroupPropertiesIndex(GroupIndexStr());
-	if (_GroupPropertiesIndex==~0)
+	if (_GroupPropertiesIndex==std::numeric_limits<uint32>::max())
 		return;
 	
 	std::vector<uint32>	groupList;
@@ -356,9 +356,9 @@ bool AISHEETS::CCreature::addActionConfig(NLMISC::CSheetId const& sheetId, NLMIS
 AISHEETS::CGroupProperties& AISHEETS::CCreature::getProperties(uint32 groupIndex)
 {
 #if !FINAL_VERSION
-	nlassert(groupIndex!=~0);
+	nlassert(groupIndex!=std::numeric_limits<uint32>::max());
 #endif
-	if (_GroupPropertiesTbl.size()<=groupIndex && groupIndex!=~0)
+	if (_GroupPropertiesTbl.size()<=groupIndex && groupIndex!=std::numeric_limits<uint32>::max())
 	{
 		uint32 const resizeSize = std::max((uint32)CSheets::getInstance()->_NameToGroupIndex.size(), (uint32)(groupIndex+1));
 		_GroupPropertiesTbl.resize(resizeSize);
@@ -812,7 +812,7 @@ void AISHEETS::CCreature::getGroupStr(std::vector<uint32>& groupIndexStrList, st
 			str = groupIndexStr.substr(firstIndex, lastIndex-firstIndex);
 		
 		uint32 const otherGroupIndex = CSheets::getInstance()->getGroupPropertiesIndex(str);
-		if (otherGroupIndex!=~0)
+		if (otherGroupIndex!=std::numeric_limits<uint32>::max())
 			groupIndexStrList.push_back(otherGroupIndex);
 	} while (lastIndex!=std::string::npos);
 }
@@ -881,7 +881,7 @@ void AISHEETS::CSheets::init()
 	
 	_PlayerGroupIndex=getGroupPropertiesIndex("zp");
 #if !FINAL_VERSION
-	nlassert(_PlayerGroupIndex!=~0);
+	nlassert(_PlayerGroupIndex!=std::numeric_limits<uint32>::max());
 #endif
 	
 	packSheets(IService::getInstance()->WriteFilesDirectory.toString());
@@ -966,13 +966,12 @@ void AISHEETS::CSheets::release()
 	_RaceStatsSheets.clear();
 }
 
-uint32 AISHEETS::CSheets::getGroupPropertiesIndex(std::string groupIndexName)
+uint32 AISHEETS::CSheets::getGroupPropertiesIndex(const std::string &groupIndexName)
 {
 	if (groupIndexName.empty())
-		return	~0;
+		return	std::numeric_limits<uint32>::max();
 	
-	NLMISC::strupr(groupIndexName);
-	std::map<string, uint32>::iterator it = _NameToGroupIndex.find(groupIndexName);
+	std::map<string, uint32>::iterator it = _NameToGroupIndex.find(NLMISC::toUpper(groupIndexName));
 	if (it==_NameToGroupIndex.end())
 	{
 		uint32 groupIndex = (uint32)_NameToGroupIndex.size();

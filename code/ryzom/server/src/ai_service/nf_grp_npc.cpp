@@ -1472,7 +1472,7 @@ void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
 	stack.pop();
 	NLMISC::CEntityId botId = NLMISC::CEntityId((std::string)stack.top());
 	stack.pop();
-	if (botId!=NLMISC::CEntityId::Unknown)
+	if (botId != NLMISC::CEntityId::Unknown)
 	{
 		CGroup* grp = NULL;
 		CSpawnBotNpc* bot = NULL;
@@ -2482,7 +2482,7 @@ void emote_css_(CStateInstance* entity, CScriptStack& stack)
 
 	// Is the emote valid
 	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
-	if (emoteId == ~0)
+	if (emoteId == std::numeric_limits<uint32>::max())
 	{
 		return;
 	}
@@ -2513,7 +2513,7 @@ void emote_ss_(CStateInstance* entity, CScriptStack& stack)
 
 	// Is the emote valid
 	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
-	if (emoteId == ~0)
+	if (emoteId == std::numeric_limits<uint32>::max())
 	{
 		return;
 	}
@@ -2539,7 +2539,7 @@ void emote_s_(CStateInstance* entity, CScriptStack& stack)
 
 	// Is the emote valid
 	uint32 emoteId = CAIS::instance().getEmotNumber(emoteName);
-	if (emoteId == ~0)
+	if (emoteId == std::numeric_limits<uint32>::max())
 		return;
 
 	// Get the behaviour Id

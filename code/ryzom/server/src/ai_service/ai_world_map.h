@@ -240,7 +240,7 @@ inline CAIMapSurfaceNeighbour::CAIMapSurfaceNeighbour(bool isNoGo)	// constructo
 
 inline CAIMapSurface::CAIMapSurface(): _entityList(NULL)
 {
-	_regionId=~0;
+	_regionId=std::numeric_limits<uint>::max();
 	_cell=NULL;
 	_h=0;
 }
