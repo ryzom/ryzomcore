@@ -90,14 +90,14 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
   */
 static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::string &fileNameWithExtension, bool mustDivideBy2);
 
-											
+
 
 /// replace slashes by the matching os value in a file name
 static std::string replaceSlashes(const std::string &src)
 {
 	std::string result = src;
 	for(uint k = 0; k < result.size(); ++k)
-	#ifdef NL_OS_WINDOWS			
+	#ifdef NL_OS_WINDOWS
 		if (result[k] == '/') result[k] = '\\';
 	#else
 		if (result[k] == '\\') result[k] = '/';
@@ -109,7 +109,7 @@ static std::string replaceSlashes(const std::string &src)
 
 ///=====================================================
 int main(int argc, char* argv[])
-{	
+{
 	// Filter addSearchPath
 	NLMISC::createDebug();
 
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 		{
 			CInfoMaskGeneration infoMaskGen(_Path_Input_TexBases,
 											_Path_Input_Masks,
-											_Path_Output_MaksOptimized,
+											_Path_Output_MasksOptimized,
 											_Path_Output_Gtm,
 											argv[3],
 											1);
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 			return -1;
 		}
 
-		CBuildInfo bi;	
+		CBuildInfo bi;
 
 		/////////////////////////////////////////
 		// reads infos from the config files   //
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 				catch (const NLMISC::EUnknownVar &)
 				{
 				}
-				
+
 				/// input
 				try
 				{
@@ -310,7 +310,7 @@ int main(int argc, char* argv[])
 				/// default ascii character for unused masks
 				try
 				{
-					bi.DefaultSeparator = cf.getVar ("default_separator").asString();								
+					bi.DefaultSeparator = cf.getVar ("default_separator").asString();
 				}
 				catch (const NLMISC::EUnknownVar &)
 				{
@@ -319,7 +319,7 @@ int main(int argc, char* argv[])
 				/// extension for bitmaps
 				try
 				{
-					NLMISC::CConfigFile::CVar &bitmap_extensions = cf.getVar ("bitmap_extensions");				
+					NLMISC::CConfigFile::CVar &bitmap_extensions = cf.getVar ("bitmap_extensions");
 					for (uint k = 0; k < (uint) bitmap_extensions.size(); ++k)
 					{
 						std::string ext = "." + bitmap_extensions.asString(k);
@@ -327,8 +327,8 @@ int main(int argc, char* argv[])
 						if (std::find(bi.BitmapExtensions.begin(), bi.BitmapExtensions.end(), ext) == bi.BitmapExtensions.end())
 						{
 							bi.BitmapExtensions.push_back(ext);
-						}					
-					}				
+						}
+					}
 				}
 				catch (const NLMISC::EUnknownVar &)
 				{
@@ -338,7 +338,7 @@ int main(int argc, char* argv[])
 
 				try
 				{
-					bi.LowDefShift = cf.getVar ("low_def_shift").asInt();								
+					bi.LowDefShift = cf.getVar ("low_def_shift").asInt();
 				}
 				catch (const NLMISC::EUnknownVar &)
 				{
@@ -377,7 +377,7 @@ int main(int argc, char* argv[])
 static void validateCgiInfo()
 {
 	NLMISC::CIFile f;
-	
+
 
 	vector<StrInfoTexColor> temp;
 	uint version;
@@ -409,15 +409,15 @@ static void validateGtmInfo()
 ///======================================================
 static void BuildMasksFromConfigFile(NLMISC::CConfigFile &cf,
 									 TColorMaskVect &colorMasks)
-									 
+
 {
-	/// get a list of the alpha mask extensions	
+	/// get a list of the alpha mask extensions
 	NLMISC::CConfigFile::CVar &mask_extensions = cf.getVar ("mask_extensions");
 	colorMasks.resize(mask_extensions.size());
 
 	/// For each kind of mask, build a list of the color modifiers
 	for (uint k = 0; k < (uint) mask_extensions.size(); ++k)
-	{			
+	{
 		colorMasks[k].MaskExt = mask_extensions.asString(k);
 		NLMISC::CConfigFile::CVar &luminosities    = cf.getVar (colorMasks[k].MaskExt + "_luminosities");
 		NLMISC::CConfigFile::CVar &contrasts	   = cf.getVar (colorMasks[k].MaskExt + "_constrasts");
@@ -427,7 +427,7 @@ static void BuildMasksFromConfigFile(NLMISC::CConfigFile &cf,
 		NLMISC::CConfigFile::CVar &colorIDs		   = cf.getVar (colorMasks[k].MaskExt + "_color_id");
 
 		if (luminosities.size() != contrasts.size()
-			|| luminosities.size() != hues.size()	
+			|| luminosities.size() != hues.size()
 			|| luminosities.size() != lightness.size()
 			|| luminosities.size() != saturation.size()
 			|| luminosities.size() != colorIDs.size()
@@ -473,16 +473,16 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 		{
 			for (uint l = 0; l < bi.BitmapExtensions.size(); ++l)
 			{
-				std::string fileExt = "." + NLMISC::strupr(NLMISC::CFile::getExtension(files[k]));						
+				std::string fileExt = "." + NLMISC::strupr(NLMISC::CFile::getExtension(files[k]));
 				if (fileExt == bi.BitmapExtensions[l])
 				{
-					//nlwarning("Processing : %s ", files[k].c_str());				
+					//nlwarning("Processing : %s ", files[k].c_str());
 					try
 					{
 						if (CheckIfNeedRebuildColoredVersionForOneBitmap(bi, NLMISC::CFile::getFilename(files[k]),
 																		sizeVersion==1) )
-						{					
-							BuildColoredVersionForOneBitmap(bi,											
+						{
+							BuildColoredVersionForOneBitmap(bi,
 															NLMISC::CFile::getFilename(files[k]),
 														   sizeVersion==1);
 						}
@@ -493,7 +493,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 					}
 					catch (const std::exception &e)
 					{
-						nlwarning("Processing of %s failed : %s \n", files[k].c_str(), e.what());					
+						nlwarning("Processing of %s failed : %s \n", files[k].c_str(), e.what());
 					}
 				}
 			}
@@ -502,7 +502,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 }
 
 
-/// used to loop throiugh the process, avoiding unused masks 
+/// used to loop throiugh the process, avoiding unused masks
 struct CLoopInfo
 {
 	NLMISC::CBitmap		Mask;
@@ -512,11 +512,11 @@ struct CLoopInfo
 
 
 ///======================================================
-static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::string &fileNameWithExtension, 
+static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::string &fileNameWithExtension,
 	bool mustDivideBy2)
-{		
+{
 	if (bi.CachePath.empty()) return true;
-	uint32 srcDate = (uint32) NLMISC::CFile::getFileModificationDate(replaceSlashes(bi.InputPath + fileNameWithExtension));		
+	uint32 srcDate = (uint32) NLMISC::CFile::getFileModificationDate(replaceSlashes(bi.InputPath + fileNameWithExtension));
 	static std::vector<CLoopInfo> masks;
 	/// check the needed masks
 	masks.clear();
@@ -530,16 +530,16 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 		std::string maskFileName = NLMISC::CPath::lookup(maskName,
 														 false, false);
 		if (!maskFileName.empty()) // found the mask ?
-		{			
+		{
 			CLoopInfo li;
 			li.Counter = 0;
 			li.MaskID = k;
 
 			if (NLMISC::CFile::fileExists(maskFileName))
 			{
-				srcDate = std::max(srcDate, (uint32) NLMISC::CFile::getFileModificationDate(replaceSlashes(maskFileName)));			
-				masks.push_back(li);	
-			}			
+				srcDate = std::max(srcDate, (uint32) NLMISC::CFile::getFileModificationDate(replaceSlashes(maskFileName)));
+				masks.push_back(li);
+			}
 		}
 	}
 
@@ -550,7 +550,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 		return true;
 	else
 	{
-		// Must now if was moved beetween normal dir and d4/ dir. 
+		// Must now if was moved beetween normal dir and d4/ dir.
 		CHLSBankTextureInfo		hlsInfo;
 		// read .hlsInfo cache
 		CIFile		f;
@@ -573,24 +573,24 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 
 	/// check is each generated texture has the same date or is more recent
 	for(;;)
-	{			
+	{
 		uint l;
 		std::string outputFileName = fileName;
-		
+
 		/// build current tex name
 		for (l  = 0; l < masks.size(); ++l)
 		{
 			uint maskID = masks[l].MaskID;
-			uint colorID = masks[l].Counter;			
+			uint colorID = masks[l].Counter;
 			/// complete the file name
 			outputFileName += bi.DefaultSeparator + bi.ColorMasks[maskID].CMs[colorID].ColID;
 		}
 
-		// compare date							
+		// compare date
 		std::string searchName = replaceSlashes(bi.CachePath + outputFileName + bi.OutputFormat);
-		if ((uint32) NLMISC::CFile::getFileModificationDate(searchName) < srcDate) 
-		{					
-			return true; // not found or more old => need rebuild			
+		if ((uint32) NLMISC::CFile::getFileModificationDate(searchName) < srcDate)
+		{
+			return true; // not found or more old => need rebuild
 		}
 
 		// get version that is in the cache
@@ -599,7 +599,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 		{
 			nlwarning(("Couldn't move " + searchName + " to " + cacheDest).c_str());
 			return true;
-		}		
+		}
 
 		/// increment counters
 		for (l  = 0; l < (uint) masks.size(); ++l)
@@ -624,9 +624,9 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 
 
 ///======================================================
-static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::string &fileNameWithExtension, 
+static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::string &fileNameWithExtension,
 	bool mustDivideBy2)
-{		
+{
 	uint32 depth;
 	NLMISC::CBitmap srcBitmap;
 	NLMISC::CBitmap resultBitmap;
@@ -651,6 +651,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				{
 					throw NLMISC::Exception(std::string("Failed to load bitmap ") + actualInputPath + fileNameWithExtension);
 				}
+
 				if (srcBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
 				{
 					srcBitmap.convertToType(NLMISC::CBitmap::RGBA);
@@ -660,7 +661,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			{
 				nlwarning("Unable to open %s. Processing next", (actualInputPath + fileNameWithExtension).c_str());
 				return;
-			}			
+			}
 		}
 		catch (const NLMISC::Exception &)
 		{
@@ -668,7 +669,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			return;
 		}
 	}
-	
+
 	/// **** Build and prepare build of the .hlsinfo to write.
 	CHLSBankTextureInfo		hlsInfo;
 	CBitmap					hlsInfoSrcBitmap;
@@ -703,7 +704,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 		std::string maskFileName = NLMISC::CPath::lookup(maskName,
 														 false, false);
 		if (!maskFileName.empty()) // found the mask ?
-		{			
+		{
 			CLoopInfo li;
 			li.Counter = 0;
 			li.MaskID = k;
@@ -735,6 +736,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 					{
 						throw NLMISC::Exception("Bitmap and mask do not have the same size");
 					}
+
 					masks.push_back(li);
 				}
 				else
@@ -762,14 +764,14 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	}
 
 
-	// **** generate each texture 
+	// **** generate each texture
 	// NB : if there are no masks the texture just will be copied
 	for(;;)
-	{	
+	{
 		resultBitmap = srcBitmap;
 		uint l;
 		std::string outputFileName = fileName;
-		
+
 		// Add an instance entry to the hlsInfo
 		uint	instId= (uint)hlsInfo.Instances.size();
 		hlsInfo.Instances.resize(instId+1);
@@ -797,9 +799,9 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			/// complete the file name
 			outputFileName += bi.DefaultSeparator + bi.ColorMasks[maskID].CMs[colorID].ColID;
 		}
-		
+
 		// save good hlsInfo instance name
-		hlsTextInstance.Name= outputFileName + bi.OutputFormat;
+		hlsTextInstance.Name = outputFileName + bi.OutputFormat;
 
 		nlwarning("Writing %s", outputFileName.c_str());
 		/// Save the result. We let propagate exceptions (if there's no more space disk it useless to continue...)
@@ -832,9 +834,9 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				nlwarning(("Couldn't write " + bi.OutputPath + outputFileName + bi.OutputFormat + " : " + e.what()).c_str());
 			}
 		}
-		
 
-		/// increment counters		
+
+		/// increment counters
 		for (l  = 0; l < (uint) masks.size(); ++l)
 		{
 			++ (masks[l].Counter);

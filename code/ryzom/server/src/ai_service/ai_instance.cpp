@@ -896,7 +896,7 @@ void cbEventNpcGroupScript( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(messageVersion);
 	nlassert(messageVersion==1);
 	msgin.serial(nbString);
-	
+
 	string eid;
 	string firstCommand;
 	msgin.serial(eid); // Player or boteid
