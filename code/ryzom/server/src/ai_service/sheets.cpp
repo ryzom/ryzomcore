@@ -971,8 +971,7 @@ uint32 AISHEETS::CSheets::getGroupPropertiesIndex(const std::string &groupIndexN
 	if (groupIndexName.empty())
 		return	std::numeric_limits<uint32>::max();
 	
-	NLMISC::strupr(groupIndexName);
-	std::map<string, uint32>::iterator it = _NameToGroupIndex.find(groupIndexName);
+	std::map<string, uint32>::iterator it = _NameToGroupIndex.find(NLMISC::toUpper(groupIndexName));
 	if (it==_NameToGroupIndex.end())
 	{
 		uint32 groupIndex = (uint32)_NameToGroupIndex.size();
