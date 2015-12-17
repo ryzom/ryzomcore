@@ -846,11 +846,11 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		nlwarning("CGrpFauna::spawn(idx) FAILED for group %s because idx (%d) >= _Populations.size() (%d)",this->CGroup::getFullName().c_str(),popVersion,_Populations.size());
 		return	false;
 	}
-	
-	popVersion = ~0;
-	
+
+	popVersion = std::numeric_limits<uint>::max();
+
 	//	if we are in a cycle.
-	if (_CurrentCycle!=~0)
+	if (_CurrentCycle != std::numeric_limits<uint32>::max())
 	{
 		Cycle const& cycle = _Cycles[_CurrentCycle];
 
@@ -868,18 +868,18 @@ bool CGrpFauna::spawnPop(uint popVersion)
 
 			if (!timeAllowSpawn(popVersion))
 			{
-				popVersion=~0;
+				popVersion = std::numeric_limits<uint>::max();
 			}
 		}
-		
-		if (popVersion==~0)
+
+		if (popVersion == std::numeric_limits<uint>::max())
 		{
-			_CurrentCycle = ~0;
+			_CurrentCycle = std::numeric_limits<uint32>::max();
 		}
 	}
 
 	// if the population version has not been specified then select one at weighted random with day/night difference.
-	if (popVersion==~0)
+	if (popVersion == std::numeric_limits<uint>::max())
 	{
 		uint32 totalWeight = 0;
 
@@ -913,9 +913,9 @@ bool CGrpFauna::spawnPop(uint popVersion)
 		}
 
 #if !FINAL_VERSION
-		nlassert(popVersion!=~0);
+		nlassert(popVersion != std::numeric_limits<uint>::max());
 #endif
-		if	(popVersion==~0)
+		if	(popVersion == std::numeric_limits<uint>::max())
 			return	false;
 
 		//	find if we are starting a new cycle ..
@@ -951,9 +951,9 @@ bool CGrpFauna::spawnPop(uint popVersion)
 	{
 		despawnGrp();
 	}
-	
-	nlassert(_CurPopulation!=~0);
-	
+
+	nlassert(_CurPopulation != std::numeric_limits<uint32>::max());
+
 	//////////////////////////////////////////////////////////////////////////
 	// Init the group type.
 	setType	((*_Populations[_CurPopulation])[0].getCreatureSheet()->FaunaType()); //	gets the first population record of the population to spawn.
@@ -990,15 +990,15 @@ bool CGrpFauna::spawnPop(uint popVersion)
 void CGrpFauna::despawnGrp()
 {
 	CGroup::despawnGrp();
-	_CurPopulation = ~0u;
+	_CurPopulation = std::numeric_limits<uint32>::max();
 }
 
 //	reads cycle from primitive (string representation).
 void CGrpFauna::setCyles(std::string const& cycles)
 {
 	uint32 strIndex = 0;
-	uint32 curCycle = ~0;
-	
+	uint32 curCycle = std::numeric_limits<uint32>::max();
+
 	while (strIndex<cycles.size())
 	{
 		char carac = cycles[++strIndex];
@@ -1008,7 +1008,7 @@ void CGrpFauna::setCyles(std::string const& cycles)
 
 		if (carac>='a' && carac<='z')
 		{
-			if (curCycle==~0)
+			if (curCycle == std::numeric_limits<uint32>::max())
 			{
 				curCycle = (uint32)_Cycles.size();
 				_Cycles.push_back(Cycle());
@@ -1018,7 +1018,7 @@ void CGrpFauna::setCyles(std::string const& cycles)
 		}
 		else
 		{
-			curCycle = ~0;
+			curCycle = std::numeric_limits<uint32>::max();
 		}
 	}
 }
@@ -1026,8 +1026,8 @@ void CGrpFauna::setCyles(std::string const& cycles)
 void CGrpFauna::setPopulation(CPopulation* pop)
 {
 	CPopulation* sameAliasPop = NULL;
-	uint32 index = ~0;
-	
+	uint32 index = std::numeric_limits<uint32>::max();
+
 	if (pop)
 		sameAliasPop = _Populations.getChildByAlias(pop->getAlias());
 
