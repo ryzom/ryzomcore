@@ -456,6 +456,21 @@ namespace NLGUI
 			return _DL.back();
 		}
 
+		// OL
+		class HTMLOListElement {
+		public:
+			HTMLOListElement(int start, std::string type)
+				: Value(start),Type(type), First(true)
+			{ }
+
+			std::string getListMarkerText() const;
+		public:
+			sint32 Value;
+			std::string Type;
+			bool First;
+		};
+		std::vector<HTMLOListElement> _OL;
+
 		// A mode
 		std::vector<bool>	_A;
 		inline bool getA() const
