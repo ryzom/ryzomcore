@@ -31,6 +31,7 @@
 
 using namespace std;
 using namespace NLMISC;
+using namespace NLNET;
 using namespace MULTI_LINE_FORMATER;
 
 CAIInstance::CAIInstance(CAIS* owner)
@@ -694,6 +695,11 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 			bot->equipmentInit();
 			bot->initEnergy(/*groupEnergyCoef()*/0);
 			CAIVector rpos(pos);
+			if (dispersionRadius == 0)
+			{
+				nlinfo("Stucked !");
+				bot->setStuck(true);
+			}
 			// Spawn all randomly except if only 1 bot
 			if (nbBots > 1)
 			{
@@ -853,6 +859,7 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	uint32 instanceNumber;
 	sint32 x;
 	sint32 y;
+	sint32 z;
 	sint32 orientation;
 	uint32 nbBots;
 	NLMISC::CSheetId sheetId;
@@ -861,12 +868,14 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	bool spawnBots;
 	std::string botsName;
 	std::string look;
+	sint32 cell;
 	msgin.serial(messageVersion);
 	nlassert(messageVersion==1);
 	msgin.serial(instanceNumber);
 	msgin.serial(playerId);
 	msgin.serial(x);
 	msgin.serial(y);
+	msgin.serial(z);
 	msgin.serial(orientation);
 	msgin.serial(nbBots);
 	msgin.serial(sheetId);
@@ -874,13 +883,39 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(spawnBots);
 	msgin.serial(botsName);
 	msgin.serial(look);
+	msgin.serial(cell);
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{
-		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector((double)x/1000., (double)y/1000.), dispersionRadius, spawnBots, (double)orientation/1000., botsName, look);
+		CGroupNpc* npcGroup = instance->eventCreateNpcGroup(nbBots, sheetId, CAIVector(((double)x)/1000.0, ((double)y)/1000.0), dispersionRadius, spawnBots, ((double)orientation)/1000.0, botsName, look);
 		if (npcGroup != NULL)
 		{
 			_PlayersLastCreatedNpcGroup[playerId] = npcGroup->getName();
+
+			FOREACH(botIt, CCont<CBot>,	npcGroup->bots())
+			{
+				CSpawnBot* pbot = botIt->getSpawnObj();
+				if (pbot!=NULL)
+				{
+					CEntityId id = pbot->getEntityId();
+					float t = 0;
+					uint8 cont = 0;
+					uint8 one = 1;
+					NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+					CMessage msgout2("ENTITY_TELEPORTATION");
+					msgout2.serial( id   );
+					msgout2.serial( x );
+					msgout2.serial( y );
+					msgout2.serial( z );
+					msgout2.serial( t );
+					msgout2.serial( tick );
+					msgout2.serial( cont );
+					msgout2.serial( cell );
+					msgout2.serial( one  );
+
+					sendMessageViaMirror("GPMS", msgout2);
+				}
+			}
 		}
 	}
 }

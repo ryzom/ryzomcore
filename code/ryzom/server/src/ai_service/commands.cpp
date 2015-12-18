@@ -1665,6 +1665,35 @@ bool execScriptGroupByName(CStringWriter& stringWriter, TCommand const& args)
 	return true;
 }
 
+NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given filter", "<groupFilter>")
+{
+	if (args.size()!=1)
+		return false;
+
+	string const& botName = args[0];
+	string DatasetIds;
+
+	vector<CBot*> bots;
+	/// try to find the bot name
+	buildFilteredBotList(bots, botName);
+	if (bots.empty())
+	{
+		log.displayNL("ERR: No bot correspond to name %s", botName.c_str());
+		return false;
+	}
+	else
+	{
+		FOREACH(itBot, vector<CBot*>, bots)
+		{
+			CBot* bot = *itBot;
+			DatasetIds += bot->getSpawnObj()->dataSetRow().toString()+"|";
+
+		}
+	}
+	log.displayNL("%s", DatasetIds.c_str());
+	return true;
+}
+
 NLMISC_COMMAND(script,"execute a script for groups matching the given filter [buffered]","<groupFilter> <code>")
 {
 	clearBufferedRetStrings();
