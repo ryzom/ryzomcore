@@ -2032,6 +2032,43 @@ namespace NLGUI
 					endParagraph();
 				}
 				break;
+			case HTML_HR:
+				{
+					newParagraph(0);
+
+					CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
+					if (sep)
+					{
+						CStyleParams style;
+						style.TextColor = CRGBA(120, 120, 120, 255);
+						style.Height = 0;
+						style.Width = 0;
+
+						if (present[HTML_HR_STYLE] && value[HTML_HR_STYLE])
+							getStyleParams(value[HTML_HR_STYLE], style);
+
+						CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
+						if (bitmap)
+						{
+							bitmap->setColor(style.TextColor);
+							if (style.Width > 0)
+							{
+								clamp(style.Width, 1, 32000);
+								bitmap->setW(style.Width);
+								bitmap->setSizeRef(CInterfaceElement::none);
+							}
+							if (style.Height > 0)
+							{
+								clamp(style.Height, 1, 1000);
+								bitmap->setH(style.Height);
+							}
+						}
+
+						getParagraph()->addChild(sep);
+						endParagraph();
+					}
+				}
+				break;
 			}
 		}
 	}

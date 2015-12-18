@@ -6927,4 +6927,27 @@
       </group>
     </group>
   </template>
+  <!-- html <hr> element -->
+  <!-- html <hr> element -->
+  <template name="html_hr"
+            keep="true">
+    <group id="sep_gr"
+           posref="ML ML"
+           sizeref="w"
+           w="0"
+           h="0"
+           child_resize_h="true"
+           child_resize_hmargin="12">
+      <view type="bitmap"
+            id="hr"
+            posref="MM MM"
+            sizeref="w"
+            w="-2"
+            h="2"
+            inherit_gc_alpha="true"
+            scale="true"
+            texture="blank.tga"
+            global_color="false" />
+    </group>
+  </template>
 </interface_config>
