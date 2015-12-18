@@ -481,6 +481,8 @@ namespace NLGUI
 			HTML_DTD->tags[HTML_TR].number_of_attributes = sizeof(tr_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_TD].attributes = td_attr;
 			HTML_DTD->tags[HTML_TD].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
+			HTML_DTD->tags[HTML_TH].attributes = td_attr;
+			HTML_DTD->tags[HTML_TH].number_of_attributes = sizeof(td_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_IMG].attributes = img_attr;
 			HTML_DTD->tags[HTML_IMG].number_of_attributes = sizeof(img_attr) / sizeof(HTAttr) - 1;
 			HTML_DTD->tags[HTML_INPUT].attributes = input_attr;

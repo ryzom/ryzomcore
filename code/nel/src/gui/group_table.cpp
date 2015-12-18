@@ -805,12 +805,13 @@ namespace NLGUI
 						uint newsize = column + cell->ColSpan - 1;
 						if (newsize >= _Columns.size())
 							_Columns.resize(newsize+1);
+
 						for(uint span = 0; span < cell->ColSpan -1; span++){
 							column++;
-							_Columns[column].Width = _Columns[column-1].Width;
-							_Columns[column].WidthMax = _Columns[column-1].WidthMax;
-							_Columns[column].TableRatio = _Columns[column-1].TableRatio;
-							_Columns[column].WidthWanted = _Columns[column-1].WidthWanted;
+							_Columns[column].Width = std::max(_Columns[column].Width, _Columns[column-1].Width);
+							_Columns[column].WidthMax =  std::max(_Columns[column].WidthMax, _Columns[column-1].WidthMax);
+							_Columns[column].TableRatio =  std::max(_Columns[column].TableRatio, _Columns[column-1].TableRatio);
+							_Columns[column].WidthWanted =  std::max(_Columns[column].WidthWanted, _Columns[column-1].WidthWanted);
 							_Columns[column].RowSpan = _Columns[column-1].RowSpan;
 						}
 					}
