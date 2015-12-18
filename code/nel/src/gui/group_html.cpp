@@ -1783,10 +1783,20 @@ namespace NLGUI
 					_TR.push_back(false);
 				}
 				break;
+			case HTML_TH:
+				// TH is similar to TD, just different font style
 			case HTML_TD:
 				{
 					// Get cells parameters
 					getCellsParameters (MY_HTML_TD, true);
+
+					if (element_number == HTML_TH)
+					{
+						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+						// center if not specified otherwise. TD/TH present/value arrays have same indices
+						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
+							_CellParams.back().Align = CGroupCell::Center;
+					}
 
 					CGroupTable *table = getTable();
 					if (table)
@@ -2124,6 +2134,9 @@ namespace NLGUI
 				endParagraph();
 				// Add a cell
 				break;
+			case HTML_TH:
+				popIfNotEmpty (_FontWeight);
+				// no break;
 			case HTML_TD:
 				popIfNotEmpty (_CellParams);
 				if (!_Cells.empty())
