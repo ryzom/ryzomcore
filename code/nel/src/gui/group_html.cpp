@@ -4154,9 +4154,7 @@ namespace NLGUI
 		group->setSizeRef(CInterfaceElement::width);
 
 		// Compute begin space between paragraph and tables
-
 		// * If first in group, no begin space
-		// * If behind a paragraph, take the biggest begin space between the previous paragraph and current one.
 
 		// Pointer on the current paragraph (can be a table too)
 		CGroupParagraph *p = dynamic_cast<CGroupParagraph*>(group);
@@ -4178,11 +4176,6 @@ namespace NLGUI
 			group->setParentPos(groups.back());
 			group->setPosRef(Hotspot_TL);
 			group->setParentPosRef(Hotspot_BL);
-
-			// Begin space for previous paragraph
-			CGroupParagraph *previous = dynamic_cast<CGroupParagraph*>(groups.back());
-			if (previous)
-				beginSpace = std::max(beginSpace, previous->getTopSpace());
 		}
 
 		// Set the begin space
