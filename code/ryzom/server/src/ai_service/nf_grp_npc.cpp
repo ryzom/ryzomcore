@@ -1482,14 +1482,14 @@ void setPlayerController_ss_(CStateInstance* entity, CScriptStack& stack)
 			CAIEntityPhysical *botEntity = inst->getEntity(botId);
 			if (botEntity)
 			{
-				if ((bot = dynamic_cast<CSpawnBotNpc*>(botEntity))
-					&& (&bot->getPersistent().getGroup())==entity->getGroup())
+				if ((bot = dynamic_cast<CSpawnBotNpc*>(botEntity)) && (&bot->getPersistent().getGroup())==entity->getGroup())
 				{
-					CBotPlayer* player = NULL;
-					if (playerId!=NLMISC::CEntityId::Unknown
-						&& (player = dynamic_cast<CBotPlayer*>(CAIEntityPhysicalLocator::getInstance()->getEntity(playerId))))
+					if (playerId != NLMISC::CEntityId::Unknown)
 					{
-						bot->setPlayerController(player);
+						CAIEntityPhysical *playerEntity = inst->getEntity(playerId);
+						CBotPlayer* player = NULL;
+						if (playerEntity && (player = dynamic_cast<CBotPlayer*>(playerEntity)))
+							bot->setPlayerController(player);
 					}
 					else
 						bot->setPlayerController(NULL);

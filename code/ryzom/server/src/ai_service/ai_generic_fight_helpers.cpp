@@ -277,7 +277,11 @@ static void s_calcRanges(
 			_RangeMax = CBotProfileFightHeal::fightRangeMaxRange;
 		}
 	}
-	_RangeMax += _Bot->getPersistent().getSheet()->Radius() * _Bot->getPersistent().getSheet()->Scale();
+	if (_Bot->getPersistent().getClientSheet() != NLMISC::CSheetId::Unknown && _Bot->getPersistent().getClientCSheet())
+		_RangeMax += _Bot->getPersistent().getClientCSheet()->Radius() * _Bot->getPersistent().getClientCSheet()->Scale();
+	else
+		_RangeMax += _Bot->getPersistent().getSheet()->Radius() * _Bot->getPersistent().getSheet()->Scale();
+
 	_RangeCalculated = true;
 }	
 
