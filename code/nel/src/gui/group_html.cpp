@@ -1721,6 +1721,29 @@ namespace NLGUI
 					flushString ();
 					getParagraph()->setFirstViewIndent(LIIndent);
 				}
+				else if (!_OL.empty())
+				{
+					if (_OL.back().First)
+					{
+						_OL.back().First = false;
+						newParagraph(ULBeginSpace);
+					}
+					else
+					{
+						newParagraph(LIBeginSpace);
+					}
+
+					// OL list index can be overridden by <li value="1"> attribute
+					if (present[HTML_LI_VALUE] && value[HTML_LI_VALUE])
+						fromString(value[HTML_LI_VALUE], _OL.back().Value);
+
+					ucstring str;
+					str.fromUtf8(_OL.back().getListMarkerText() + ". ");
+					addString(str);
+					flushString();
+					getParagraph()->setFirstViewIndent(LIIndent);
+					_OL.back().Value++;
+				}
 				break;
 			case HTML_P:
 				newParagraph(PBeginSpace);
@@ -1760,10 +1783,20 @@ namespace NLGUI
 					_TR.push_back(false);
 				}
 				break;
+			case HTML_TH:
+				// TH is similar to TD, just different font style
 			case HTML_TD:
 				{
 					// Get cells parameters
 					getCellsParameters (MY_HTML_TD, true);
+
+					if (element_number == HTML_TH)
+					{
+						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+						// center if not specified otherwise. TD/TH present/value arrays have same indices
+						if (!(present[MY_HTML_TD_ALIGN] && value[MY_HTML_TD_ALIGN]))
+							_CellParams.back().Align = CGroupCell::Center;
+					}
 
 					CGroupTable *table = getTable();
 					if (table)
@@ -1994,6 +2027,58 @@ namespace NLGUI
 					getParagraph()->setFirstViewIndent(indent);
 				}
 				break;
+			case HTML_OL:
+				{
+					sint32 start = 1;
+					std::string type("1");
+
+					if (present[HTML_OL_START] && value[HTML_OL_START])
+						fromString(value[HTML_OL_START], start);
+					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
+						type = value[HTML_OL_TYPE];
+
+					_OL.push_back(HTMLOListElement(start, type));
+					_Indent += ULIndent;
+					endParagraph();
+				}
+				break;
+			case HTML_HR:
+				{
+					newParagraph(0);
+
+					CInterfaceGroup *sep = CWidgetManager::getInstance()->getParser()->createGroupInstance("html_hr", "", NULL, 0);
+					if (sep)
+					{
+						CStyleParams style;
+						style.TextColor = CRGBA(120, 120, 120, 255);
+						style.Height = 0;
+						style.Width = 0;
+
+						if (present[HTML_HR_STYLE] && value[HTML_HR_STYLE])
+							getStyleParams(value[HTML_HR_STYLE], style);
+
+						CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(sep->getView("hr"));
+						if (bitmap)
+						{
+							bitmap->setColor(style.TextColor);
+							if (style.Width > 0)
+							{
+								clamp(style.Width, 1, 32000);
+								bitmap->setW(style.Width);
+								bitmap->setSizeRef(CInterfaceElement::none);
+							}
+							if (style.Height > 0)
+							{
+								clamp(style.Height, 1, 1000);
+								bitmap->setH(style.Height);
+							}
+						}
+
+						getParagraph()->addChild(sep);
+						endParagraph();
+					}
+				}
+				break;
 			}
 		}
 	}
@@ -2049,6 +2134,9 @@ namespace NLGUI
 				endParagraph();
 				// Add a cell
 				break;
+			case HTML_TH:
+				popIfNotEmpty (_FontWeight);
+				// no break;
 			case HTML_TD:
 				popIfNotEmpty (_CellParams);
 				if (!_Cells.empty())
@@ -2112,6 +2200,15 @@ namespace NLGUI
 			case HTML_I:
 				{
 					_Localize = false;
+				}
+				break;
+			case HTML_OL:
+				if (!_OL.empty())
+				{
+					_Indent -= ULIndent;
+					_Indent = std::max(_Indent, (uint)0);
+					endParagraph();
+					popIfNotEmpty(_OL);
 				}
 				break;
 			case HTML_UL:
@@ -3938,6 +4035,7 @@ namespace NLGUI
 		_DT = false;
 		_UL.clear();
 		_DL.clear();
+		_OL.clear();
 		_A.clear();
 		_Link.clear();
 		_LinkTitle.clear();
@@ -5414,5 +5512,85 @@ namespace NLGUI
 		return 0;
 	}
 
+	// ***************************************************************************
+	std::string CGroupHTML::HTMLOListElement::getListMarkerText() const
+	{
+		std::string ret;
+		sint32 number = Value;
+		bool upper = false;
+
+		if (Type == "a" || Type == "A")
+		{
+			// @see toAlphabeticOrNumeric in WebKit
+			static const char lower[26] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+											'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+			static const char upper[26] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+											'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+			uint size = 26;
+			if (number < 1)
+			{
+				ret = toString(number);
+			}
+			else
+			{
+				const char* digits = (Type == "A" ? upper : lower);
+				while(number > 0)
+				{
+					--number;
+					ret.insert(ret.begin(), digits[number % size]);
+					number /= size;
+				}
+			}
+		}
+		else if (Type == "i" || Type == "I")
+		{
+			// @see toRoman in WebKit
+			static const char lower[7] = {'i', 'v', 'x', 'l', 'c', 'd', 'm'};
+			static const char upper[7] = {'I', 'V', 'X', 'L', 'C', 'D', 'M'};
+
+			if (number < 1 || number > 3999)
+			{
+				ret = toString(number);
+			}
+			else
+			{
+				const char* digits = (Type == "I" ? upper : lower);
+				uint8 i, d=0;
+				do {
+					uint32 num = number % 10;
+					if (num % 5 < 4){
+						for (i = num % 5; i > 0; i--)
+						{
+							ret.insert(ret.begin(), digits[d]);
+						}
+					}
+					if (num >= 4 && num <= 8)
+					{
+						ret.insert(ret.begin(), digits[d + 1]);
+					}
+					if (num == 9)
+					{
+						ret.insert(ret.begin(), digits[d + 2]);
+					}
+					if (num % 5 == 4)
+					{
+						ret.insert(ret.begin(), digits[d]);
+					}
+					number /= 10;
+					d += 2;
+				} while (number > 0);
+				if (Type == "I")
+				{
+					ret = toUpper(ret);
+				}
+			}
+		}
+		else
+		{
+			ret = toString(Value);
+		}
+
+		return ret;
+	}
 }
 
