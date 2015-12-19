@@ -232,4 +232,5 @@ void CChatTextManager::reset ()
 	_TextFontSize = NULL;
 	_TextMultilineSpace = NULL;
 	_TextShadowed = NULL;
+	_ShowTimestamps = NULL;
 }
