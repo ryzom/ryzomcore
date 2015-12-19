@@ -1145,6 +1145,7 @@ namespace NLGUI
 
 			case HTML_DIV:
 			{
+				_BlockLevelElement.push_back(true);
 				registerAnchorName(MY_HTML_DIV);
 
 				if (present[MY_HTML_DIV_NAME] && value[MY_HTML_DIV_NAME])
@@ -1204,6 +1205,8 @@ namespace NLGUI
 									inst->setPosRef(Hotspot_TL);
 									inst->setParentPosRef(Hotspot_TL);
 									getDiv()->addGroup(inst);
+
+									_BlockLevelElement.back() = false;
 							}
 							else
 							{
@@ -1219,6 +1222,11 @@ namespace NLGUI
 							_Divs.push_back(inst);
 						}
 					}
+				}
+
+				if (isBlockLevelElement())
+				{
+					newParagraph(0);
 				}
 			}
 				break;
@@ -2118,12 +2126,20 @@ namespace NLGUI
 				popIfNotEmpty (_GlobalColor);
 				endParagraph();
 				break;
+			case HTML_P:
+				endParagraph();
+				break;
 			case HTML_PRE:
 				popIfNotEmpty (_PRE);
 				break;
 			case HTML_DIV:
+				if (isBlockLevelElement())
+				{
+					endParagraph();
+				}
 				_DivName = "";
 				popIfNotEmpty (_Divs);
+				popIfNotEmpty (_BlockLevelElement);
 				break;
 
 			case HTML_TABLE:
