@@ -569,27 +569,39 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 					tmpName.replace(posBottes+7, 0, "_" + orgType);
 					tmpName.replace(7, orgType.length(), "caster01");
 
-					// temporary hack because Fyros boots don't respect conventions
-					if (tmpName[0] == 'f')
-					{
-						if (tmpName[5] == 'f')
-						{
-							tmpName = "fy_hof_caster01_bottes_civil.shape";
-						}
-						else
-						{
-							tmpName = "fy_hom_caster01_civil01_bottes.shape";
-						}
-					}
-
-					// use fixed shape name only if file is present
 					if (CPath::exists(tmpName))
 					{
+						// use fixed shape name only if file is present
 						shapeName = tmpName;
 					}
 					else
 					{
-						nlwarning("File %s doesn't exist, use %s", tmpName.c_str(), shapeName.c_str());
+						// temporary hack because Fyros light boots don't respect conventions
+						if (tmpName[0] == 'f' && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS))
+						{
+							if (tmpName[5] == 'f')
+							{
+								tmpName = "fy_hof_caster01_bottes_civil.shape";
+							}
+							else
+							{
+								tmpName = "fy_hom_caster01_civil01_bottes.shape";
+							}
+
+							// use fixed shape name only if file is present
+							if (CPath::exists(tmpName))
+							{
+								shapeName = tmpName;
+							}
+							else
+							{
+								nlwarning("File %s doesn't exist, use %s", tmpName.c_str(), shapeName.c_str());
+							}
+						}
+						else
+						{
+							nlwarning("File %s doesn't exist, use %s", tmpName.c_str(), shapeName.c_str());
+						}
 					}
 				}
 			}
