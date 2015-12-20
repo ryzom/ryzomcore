@@ -634,12 +634,10 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 		{
 			if(SheetMngr.getItem(slot, (uint)idx))
 			{
-				// If the gender is a female get the right shape.
-				if(_Gender == GSGENDER::female)
-					equip(slot, SheetMngr.getItem(slot, (uint)idx)->getShapeFemale());
-				// Else get the default shape.
-				else
-					equip(slot, SheetMngr.getItem(slot, (uint)idx)->getShape());
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
+
+				// If the gender is a female get the right shape else get the default shape.
+				equip(slot, _Gender == GSGENDER::female ? itemSheet->getShapeFemale():itemSheet->getShape());
 			}
 		}
 	}
