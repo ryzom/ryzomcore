@@ -642,40 +642,6 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 					equip(slot, SheetMngr.getItem(slot, (uint)idx)->getShape());
 			}
 		}
-/*
-		//
-		switch(slot)
-		{
-		case SLOTTYPE::CHEST_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Chest.", _Slot);
-			equip(slot, _DefaultChest);
-			break;
-		case SLOTTYPE::LEGS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Legs.", _Slot);
-			equip(slot, _DefaultLegs);
-			break;
-		case SLOTTYPE::ARMS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Arms.", _Slot);
-			equip(slot, _DefaultArms);
-			break;
-		case SLOTTYPE::HANDS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Hands.", _Slot);
-			equip(slot, _DefaultHands);
-			break;
-		case SLOTTYPE::FEET_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Feet.", _Slot);
-			equip(slot, _DefaultFeet);
-			break;
-		case SLOTTYPE::HEAD_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Head.", _Slot);
-			equip(slot, _DefaultHair);
-			break;
-
-		default:
-			nlwarning("PL::equip(2):%d: default equipement used for an unknown slot.", _Slot);
-			break;
-		}
-*/
 	}
 }// equip //
 
