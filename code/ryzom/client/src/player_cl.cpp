@@ -469,8 +469,6 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 			return;
 	}
 
-
-
 	// Attach to the skeleton.
 	string stickPoint;
 	if(!_Skeleton.empty())
