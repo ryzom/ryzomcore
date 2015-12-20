@@ -55,11 +55,11 @@ SCharacter3DSetup::SCharacter3DSetup ()
 	Male = true;
 	Skeleton = "fy_hom_skel.skel";
 	AnimPlayed = 0;
-	Parts[Char3DPart_Chest].Name = "FY_HOM_underwear_gilet.shape";
+	Parts[Char3DPart_Chest].Name = "TR_HOM_underwear_gilet.shape";
 	Parts[Char3DPart_Legs].Name = "FY_HOM_underwear_pantabottes.shape";
-	Parts[Char3DPart_Arms].Name = "FY_HOM_underwear_armpad.shape";
-	Parts[Char3DPart_Feet].Name = "FY_HOM_underwear_bottes.shape";
-	Parts[Char3DPart_Face].Name = "FY_HOM_visage.shape";
+	Parts[Char3DPart_Arms].Name = "TR_HOM_underwear_armpad.shape";
+	Parts[Char3DPart_Feet].Name = "TR_HOM_underwear_bottes.shape";
+	Parts[Char3DPart_Face].Name = "TR_HOM_visage.shape";
 	Parts[Char3DPart_Head].Name = "FY_HOM_cheveux_medium01.shape";
 	Parts[Char3DPart_Hands].Name = "TR_HOM_underwear_hand.shape";
 	Parts[Char3DPart_HandRightItem].Name = "";
