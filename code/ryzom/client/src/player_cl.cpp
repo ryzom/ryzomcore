@@ -734,7 +734,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		// To re-link the skeleton to the mount if needed.
 		parent(parent());
 		// Set the skeleton scale.
-		// \todo GUIGUI: mettre le scale aussi dans race_stats.
+		// \todo GUIGUI: put scale too in race_stats.
 		// Setup Lod Character skeleton, if skeleton exist
 		// Get Lod Character Id from the sheet.
 		sint clodId= getLodCharacterId(*Scene, _PlayerSheet->GenderInfos[_Gender].LodCharacterName);
