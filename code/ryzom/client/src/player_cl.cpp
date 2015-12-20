@@ -469,8 +469,6 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 			return;
 	}
 
-
-
 	// Attach to the skeleton.
 	string stickPoint;
 	if(!_Skeleton.empty())
@@ -525,8 +523,8 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 	else
 		nlwarning("PL::equip(1):%d: cannot create the instance '%s'.", _Slot, shapeName.c_str());
 
-	if ((slot != SLOTTYPE::RIGHT_HAND_SLOT) && (slot != SLOTTYPE::LEFT_HAND_SLOT))
-		applyColorSlot(_Instances[s], skin(), 0, _HairColor, _EyesColor);
+	if (!item && (slot != SLOTTYPE::RIGHT_HAND_SLOT) && (slot != SLOTTYPE::LEFT_HAND_SLOT))
+		applyColorSlot(_Instances[s], skin(), 6, _HairColor, _EyesColor);
 
 }// equip //
 
@@ -542,12 +540,63 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	{
 		const CItemSheet *item = _Items[slot].Sheet;
 
-		// If the gender is a female get the right shape.
-		if(_Gender == GSGENDER::female)
-			equip(slot, item->getShapeFemale(), item);
-		// Else get the default shape.
-		else
-			equip(slot, item->getShape(), item);
+		std::string shapeName = _Gender == GSGENDER::female ? item->getShapeFemale():item->getShape();
+
+		// use the right type of boots if wearing a caster dress
+		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS))
+		{
+			std::string shapeLegs;
+
+			if (!_Instances[SLOTTYPE::LEGS_SLOT].Loading.empty())
+			{
+				shapeLegs = _Instances[SLOTTYPE::LEGS_SLOT].LoadingName;
+			}
+			else if (!_Instances[SLOTTYPE::LEGS_SLOT].Current.empty())
+			{
+				shapeLegs = _Instances[SLOTTYPE::LEGS_SLOT].CurrentName;
+			}
+
+			if (!shapeLegs.empty() && shapeLegs.find("_caster01_") != std::string::npos)
+			{
+				std::string tmpName = toLower(shapeName);
+
+				std::string::size_type posBottes = tmpName.find("_bottes");
+
+				if (posBottes != std::string::npos)
+				{
+					std::string orgType = tmpName.substr(7, posBottes-7); // underwear, caster01, armor00 or armor01
+
+					tmpName.replace(posBottes+7, 0, "_" + orgType);
+					tmpName.replace(7, orgType.length(), "caster01");
+
+					// temporary hack because Fyros boots don't respect conventions
+					if (tmpName[0] == 'f')
+					{
+						if (tmpName[5] == 'f')
+						{
+							tmpName = "fy_hof_caster01_bottes_civil.shape";
+						}
+						else
+						{
+							tmpName = "fy_hom_caster01_civil01_bottes.shape";
+						}
+					}
+
+					// use fixed shape name only if file is present
+					if (CPath::exists(tmpName))
+					{
+						shapeName = tmpName;
+					}
+					else
+					{
+						nlwarning("File %s doesn't exist, use %s", tmpName.c_str(), shapeName.c_str());
+					}
+				}
+			}
+		}
+
+		// If the gender is a female get the right shape else get the default shape.
+		equip(slot, shapeName, item);
 
 		// Check there is a shape.
 		UInstance pInst = _Instances[slot].createLoadingFromCurrent();
@@ -577,54 +626,18 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	// Default equipment.
 	else
 	{
-		nlwarning("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
+		nldebug("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
 		sint idx = SheetMngr.getVSIndex(_PlayerSheet->GenderInfos[_Gender].Items[slot], slot);
 		if(idx != -1)
 		{
 			if(SheetMngr.getItem(slot, (uint)idx))
 			{
-				// If the gender is a female get the right shape.
-				if(_Gender == GSGENDER::female)
-					equip(slot, SheetMngr.getItem(slot, (uint)idx)->getShapeFemale());
-				// Else get the default shape.
-				else
-					equip(slot, SheetMngr.getItem(slot, (uint)idx)->getShape());
+				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
+
+				// If the gender is a female get the right shape else get the default shape.
+				equip(slot, _Gender == GSGENDER::female ? itemSheet->getShapeFemale():itemSheet->getShape());
 			}
 		}
-/*
-		//
-		switch(slot)
-		{
-		case SLOTTYPE::CHEST_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Chest.", _Slot);
-			equip(slot, _DefaultChest);
-			break;
-		case SLOTTYPE::LEGS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Legs.", _Slot);
-			equip(slot, _DefaultLegs);
-			break;
-		case SLOTTYPE::ARMS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Arms.", _Slot);
-			equip(slot, _DefaultArms);
-			break;
-		case SLOTTYPE::HANDS_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Hands.", _Slot);
-			equip(slot, _DefaultHands);
-			break;
-		case SLOTTYPE::FEET_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Feet.", _Slot);
-			equip(slot, _DefaultFeet);
-			break;
-		case SLOTTYPE::HEAD_SLOT:
-			nlwarning("PL::equip(2):%d: default equipement used for the Head.", _Slot);
-			equip(slot, _DefaultHair);
-			break;
-
-		default:
-			nlwarning("PL::equip(2):%d: default equipement used for an unknown slot.", _Slot);
-			break;
-		}
-*/
 	}
 }// equip //
 
@@ -717,7 +730,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 		// To re-link the skeleton to the mount if needed.
 		parent(parent());
 		// Set the skeleton scale.
-		// \todo GUIGUI: mettre le scale aussi dans race_stats.
+		// \todo GUIGUI: put scale too in race_stats.
 		// Setup Lod Character skeleton, if skeleton exist
 		// Get Lod Character Id from the sheet.
 		sint clodId= getLodCharacterId(*Scene, _PlayerSheet->GenderInfos[_Gender].LodCharacterName);

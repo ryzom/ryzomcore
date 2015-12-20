@@ -741,7 +741,7 @@ void initMainLoop()
 			nmsg = "Creating Landscape ...";
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			Landscape = Scene->createLandscape();
-			if(Landscape == 0)
+			if(Landscape == NULL)
 				nlerror("initMainLoop : Cannot create a Landscape.");
 
 			if (!ClientCfg.Light)
@@ -829,7 +829,7 @@ void initMainLoop()
 		H_AUTO(InitRZWorld)
 
 		// Initialize World and select the right continent.
-			nmsg = "Loading World ...";
+		nmsg = "Loading World ...";
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		ContinentMngr.load();
 		ContinentMngr.select(UserEntity->pos(), ProgressBar);
@@ -880,8 +880,9 @@ void initMainLoop()
 			{
 				nlwarning("Can't load HLSBank: %s", e.what());
 			}
+
 			// setup according to client
-			if(ClientCfg.HDTextureInstalled)
+			if (ClientCfg.HDTextureInstalled)
 			{
 				if(ClientCfg.HDEntityTexture)
 				{

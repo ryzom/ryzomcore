@@ -403,7 +403,7 @@ void CPlayerR2CL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	// Default equipment.
 	else
 	{
-		nlwarning("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
+		nldebug("PL:equip(2):%d: VS '%d' default equipement used.", _Slot, slot);
 		//sint idx = SheetMngr.getVSIndex(_PlayerSheet->GenderInfos[_Gender].Items[slot], slot);
 		sint idx = SheetMngr.getVSIndex(getGenderInfo()->Items[slot], slot);
 
