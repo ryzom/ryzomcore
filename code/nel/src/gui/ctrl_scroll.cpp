@@ -1135,7 +1135,7 @@ namespace NLGUI
 				factor = factor * (1.0f-(_TrackPos / favoid0((float)(getHReal()-_TrackSize))));
 
 			// Compute Steped target
-			sint32	nexOfsY= (sint32) (_Inverted ? factor : -factor);
+			sint32	nexOfsY= (sint32) floorf(0.5+(_Inverted ? factor : -factor));
 			if(_TargetStepY>1)
 				nexOfsY= ((nexOfsY+_TargetStepY/2)/_TargetStepY) * _TargetStepY;
 			_Target->setOfsY (nexOfsY);
@@ -1154,7 +1154,7 @@ namespace NLGUI
 				factor = factor * (1.0f-(_TrackPos / favoid0((float)(getWReal()-_TrackSize))));
 
 			// Compute Steped target
-			sint32	nexOfsX= (sint32) (_Inverted ? factor : -factor);
+			sint32	nexOfsX= (sint32) floorf(0.5+(_Inverted ? factor : -factor));
 			if(_TargetStepX>1)
 				nexOfsX= ((nexOfsX+_TargetStepX/2)/_TargetStepX) * _TargetStepX;
 			_Target->setOfsX (nexOfsX);
