@@ -543,7 +543,7 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 		std::string shapeName = _Gender == GSGENDER::female ? item->getShapeFemale():item->getShape();
 
 		// use the right type of boots if wearing a caster dress
-		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS))
+		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))
 		{
 			std::string shapeLegs;
 

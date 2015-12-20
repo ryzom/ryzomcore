@@ -441,7 +441,7 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 			Parts[part].Name = item->getShapeFemale();
 
 		// use the right type of boots if wearing a caster dress
-		if ((s == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS))
+		if ((s == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS || item->ItemType == ITEM_TYPE::MEDIUM_BOOTS || item->ItemType == ITEM_TYPE::HEAVY_BOOTS))
 		{
 			std::string shapeLegs = Parts[Char3DPart_Legs].Name;
 
