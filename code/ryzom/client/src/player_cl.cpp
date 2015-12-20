@@ -525,8 +525,8 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 	else
 		nlwarning("PL::equip(1):%d: cannot create the instance '%s'.", _Slot, shapeName.c_str());
 
-	if ((slot != SLOTTYPE::RIGHT_HAND_SLOT) && (slot != SLOTTYPE::LEFT_HAND_SLOT))
-		applyColorSlot(_Instances[s], skin(), 0, _HairColor, _EyesColor);
+	if (!item && (slot != SLOTTYPE::RIGHT_HAND_SLOT) && (slot != SLOTTYPE::LEFT_HAND_SLOT))
+		applyColorSlot(_Instances[s], skin(), 6, _HairColor, _EyesColor);
 
 }// equip //
 

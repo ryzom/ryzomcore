@@ -508,6 +508,9 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 	}
 	else
 	{
+		// fix underwears color
+		if (model == 0) col = 6; // white
+
 		if ((part == Char3DPart_HandLeftItem) || (part == Char3DPart_HandRightItem))
 			Parts[part].Name = "none.shape";
 	}
