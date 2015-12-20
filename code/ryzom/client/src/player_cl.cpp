@@ -542,12 +542,63 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, uint index, uint color)
 	{
 		const CItemSheet *item = _Items[slot].Sheet;
 
-		// If the gender is a female get the right shape.
-		if(_Gender == GSGENDER::female)
-			equip(slot, item->getShapeFemale(), item);
-		// Else get the default shape.
-		else
-			equip(slot, item->getShape(), item);
+		std::string shapeName = _Gender == GSGENDER::female ? item->getShapeFemale():item->getShape();
+
+		// use the right type of boots if wearing a caster dress
+		if ((slot == SLOTTYPE::FEET_SLOT) && (item->ItemType == ITEM_TYPE::LIGHT_BOOTS))
+		{
+			std::string shapeLegs;
+
+			if (!_Instances[SLOTTYPE::LEGS_SLOT].Loading.empty())
+			{
+				shapeLegs = _Instances[SLOTTYPE::LEGS_SLOT].LoadingName;
+			}
+			else if (!_Instances[SLOTTYPE::LEGS_SLOT].Current.empty())
+			{
+				shapeLegs = _Instances[SLOTTYPE::LEGS_SLOT].CurrentName;
+			}
+
+			if (!shapeLegs.empty() && shapeLegs.find("_caster01_") != std::string::npos)
+			{
+				std::string tmpName = toLower(shapeName);
+
+				std::string::size_type posBottes = tmpName.find("_bottes");
+
+				if (posBottes != std::string::npos)
+				{
+					std::string orgType = tmpName.substr(7, posBottes-7); // underwear, caster01, armor00 or armor01
+
+					tmpName.replace(posBottes+7, 0, "_" + orgType);
+					tmpName.replace(7, orgType.length(), "caster01");
+
+					// temporary hack because Fyros boots don't respect conventions
+					if (tmpName[0] == 'f')
+					{
+						if (tmpName[5] == 'f')
+						{
+							tmpName = "fy_hof_caster01_bottes_civil.shape";
+						}
+						else
+						{
+							tmpName = "fy_hom_caster01_civil01_bottes.shape";
+						}
+					}
+
+					// use fixed shape name only if file is present
+					if (CPath::exists(tmpName))
+					{
+						shapeName = tmpName;
+					}
+					else
+					{
+						nlwarning("File %s doesn't exist, use %s", tmpName.c_str(), shapeName.c_str());
+					}
+				}
+			}
+		}
+
+		// If the gender is a female get the right shape else get the default shape.
+		equip(slot, shapeName, item);
 
 		// Check there is a shape.
 		UInstance pInst = _Instances[slot].createLoadingFromCurrent();
