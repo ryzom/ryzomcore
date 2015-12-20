@@ -154,15 +154,15 @@ void flushDebugStack(const std::string &title)
 			strTmp = toString("\n");
 			DebugFile.serialBuffer((uint8*)strTmp.c_str(), (uint)strTmp.size());
 		}
-		// No Output File -> nlwarning
-		else
+		// No Output File -> nldebug only if DisableNLDebug not set to true
+		else if (!DisableNLDebug)
 		{
-			nlwarning("%s", title.c_str());
+			nldebug("%s", title.c_str());
 			for(uint i=0; i<DebugStack.size(); ++i)
-				nlwarning("  %s", DebugStack[i].c_str());
+				nldebug("  %s", DebugStack[i].c_str());
 
 			// Empty line separator
-			nlwarning("");
+			nldebug("");
 		}
 	}
 
