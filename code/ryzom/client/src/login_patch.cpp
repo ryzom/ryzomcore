@@ -3052,7 +3052,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 				// to apply a single patch from a refrence version to them. (so here we necessarily got
 				// 'rFTP.Patches.size() == 1' !)
 				// The reference version itself is incrementally patched, however, and may be rebuilt from time to time
-				// when the delta to the reference has become to big (but is most of the time < to the sum of equivallent delta patchs)
+				// when the delta to the reference has become too big (but is most of the time < to the sum of equivallent delta patchs)
 				// The non-incremental final patch (from ref file to final bnp), is guaranteed to be done last
 				// after the reference file has been updated
 
