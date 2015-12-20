@@ -12,7 +12,7 @@ IF(WITH_RYZOM_PATCH)
   ADD_DEFINITIONS(-DRZ_USE_PATCH)
 ENDIF()
 
-FILE(GLOB CFG ../*.cfg ../*.cfg.in)
+FILE(GLOB CFG ../*.cfg)
 FILE(GLOB SRC *.cpp *.h motion/*.cpp motion/*.h client.rc)
 FILE(GLOB SRC_INTERFACE interface_v3/*.h interface_v3/*.cpp)
 FILE(GLOB SRC_MODE motion/modes/*.cpp motion/modes/*.h)
