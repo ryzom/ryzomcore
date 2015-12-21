@@ -1190,7 +1190,12 @@ namespace NLGUI
 						if (haveParentDiv)
 							parentId = getDiv()->getId();
 						else
+						{
+							if (!_Paragraph)
+								newParagraph (0);
+
 							parentId = _Paragraph->getId();
+						}
 
 						CInterfaceGroup *inst = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, parentId+":"+id, tmplParams);
 						if (inst)
@@ -1210,12 +1215,6 @@ namespace NLGUI
 							}
 							else
 							{
-								if (!_Paragraph)
-								{
-									newParagraph (0);
-									paragraphChange ();
-								}
-
 								getParagraph()->addChild(inst);
 								paragraphChange();
 							}
