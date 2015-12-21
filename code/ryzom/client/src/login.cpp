@@ -992,9 +992,16 @@ static void getPatchParameters(std::string &url, std::string &ver, std::vector<s
 {
 	if (ClientCfg.R2Mode)
 	{
-		patchURIs = R2PatchURLs;
-		url = R2BackupPatchURL;
-		ver = R2ServerVersion;
+		url = ClientCfg.PatchUrl;
+		ver = ClientCfg.PatchVersion;
+
+		// if PatchUrl is forced, don't use URLs returned by server
+		if (url.empty())
+		{
+			patchURIs = R2PatchURLs;
+			url = R2BackupPatchURL;
+			ver = R2ServerVersion;
+		}
 	}
 	else
 	{

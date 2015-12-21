@@ -202,10 +202,10 @@ int main(int argc, char *argv[])
 	// load client.cfg or client_default.cfg
 	ClientCfg.init(config);
 
-	// check if PatchServer is defined
-	if (ClientCfg.PatchServer.empty())
+	// check if PatchUrl is defined
+	if (ClientCfg.PatchUrl.empty())
 	{
-		printError("PatchServer not defined in " + config);
+		printError("PatchUrl not defined in " + config);
 		return 1;
 	}
 
@@ -273,9 +273,9 @@ int main(int argc, char *argv[])
 	// set the correct root path
 	pPM->setClientRootPath(rootPath);
 
-	// use PatchServer URL
+	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, ClientCfg.PatchServer, ClientCfg.PatchVersion);
+	pPM->init(patchURLs, ClientCfg.PatchUrl, ClientCfg.PatchVersion);
 	pPM->startCheckThread(true /* include background patchs */);
 
 	ucstring state;

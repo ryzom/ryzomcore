@@ -416,7 +416,6 @@ CClientConfig::CClientConfig()
 	PatchUrl.clear();
 	PatchletUrl.clear();
 	PatchVersion.clear();
-	PatchServer.clear();
 
 	WebIgMainDomain = "atys.ryzom.com";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
@@ -1039,12 +1038,19 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_FV(PatchWanted)
+	READ_BOOL_DEV(PatchWanted)
+
+#ifdef RZ_USE_CUSTOM_PATCH_SERVER
+	READ_STRING_FV(PatchUrl)
+	READ_STRING_FV(PatchVersion)
+	READ_STRING_FV(RingReleaseNotePath)
+	READ_STRING_FV(ReleaseNotePath)
+#else
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
 	READ_STRING_DEV(ReleaseNotePath)
-	READ_STRING_FV(PatchServer)
+#endif
 
 	/////////////////////////
 	// NEW PATCHLET SYSTEM //
