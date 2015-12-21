@@ -5863,7 +5863,7 @@ uiFameAllegianceCultSetNeutralGuildTT	[By becoming Neutral your guild will becom
 
 // HASH_VALUE BE5FE5FA26384BE9
 // INDEX 1424
-uiFameAllegianceCivSetNeutralGuildWarning	[Be careful! By becoming Neutral your Guild may lose cult fame (Kami/Karavan) if you have any above the maximum possible for Neutral Guilds.]
+uiFameAllegianceCivSetNeutralGuildWarning	[Be careful! By becoming Neutral your Guild may lose civilization fame (Fyros/Matis/Tryker/Zoraï) if you have any above the maximum possible for Neutral Guilds.]
 
 // HASH_VALUE 0F277CDE233581B4
 // INDEX 1425
