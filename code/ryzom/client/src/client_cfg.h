@@ -296,7 +296,6 @@ struct CClientConfig
 	std::string		PatchUrl;
 	std::string		PatchletUrl;
 	std::string		PatchVersion;
-	std::string		PatchServer;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;

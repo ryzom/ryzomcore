@@ -420,7 +420,6 @@ CClientConfig::CClientConfig()
 	PatchUrl.clear();
 	PatchletUrl.clear();
 	PatchVersion.clear();
-	PatchServer.clear();
 
 	WebIgMainDomain = "shard.ryzomcore.org";
 	WebIgTrustedDomains.push_back(WebIgMainDomain);
@@ -1050,13 +1049,11 @@ void CClientConfig::setValues()
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
 	READ_BOOL_FV(PatchWanted)
-	READ_STRING_FV(PatchServer)
 	READ_STRING_FV(PatchUrl)
 	READ_STRING_FV(PatchVersion)
 	READ_STRING_FV(RingReleaseNotePath)
 	READ_STRING_FV(ReleaseNotePath)
 	READ_BOOL_DEV(PatchWanted)
-	READ_STRING_DEV(PatchServer)
 	READ_STRING_DEV(PatchUrl)
 	READ_STRING_DEV(PatchVersion)
 	READ_STRING_DEV(RingReleaseNotePath)
