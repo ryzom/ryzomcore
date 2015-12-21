@@ -237,7 +237,7 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 {
 	ClientRootPath = CPath::standardizePath(clientRootPath);
 	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
-	
+
 	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
 
 #ifdef NL_OS_MAC
@@ -275,6 +275,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 {
 	uint	i;
 	PatchServers.clear();
+
 	for (i=0; i<patchURIs.size(); ++i)
 	{
 		PatchServers.push_back(CPatchServer(patchURIs[i]));
@@ -895,7 +896,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			fprintf(fp, ":looppatch\n");
 		}
 #endif
-		
+
 		vector<string> vFileList;
 		CPath::getPathContent ("patch", false, false, true, vFileList, NULL, false);
 
@@ -2736,7 +2737,7 @@ void CPatchThread::run()
 		for (i = 0; i < AllFilesToPatch.size(); ++i)
 		{
 			CPatchManager::SFileToPatch &rFTP = AllFilesToPatch[i];
-			
+
 			string ext = NLMISC::CFile::getExtension(rFTP.FileName);
 			if (ext == "bnp")
 			{
