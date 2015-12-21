@@ -270,7 +270,7 @@ IF(WITH_QT5)
         FIND_LIBRARY(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
         FIND_LIBRARY(OPENGL_FRAMEWORK NAMES OpenGL)
 
-      SET(QT_LIBRARIES ${QT_LIBRARIES}
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
           ${CUPS_LIBRARY}
           ${COCOA_FRAMEWORK}
           ${SYSTEMCONFIGURATION_FRAMEWORK}
@@ -279,6 +279,10 @@ IF(WITH_QT5)
 
         ADD_QT_PLUGIN(printsupport cocoaprintersupport)
         ADD_QT_PLUGIN(platforms qcocoa)
+      ELSE()
+        FIND_LIBRARY(OPENGL_LIBRARY GL)
+
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENGL_LIBRARY})
       ENDIF()
 
       ADD_QT_PLUGIN(imageformats qgif)
@@ -289,7 +293,7 @@ IF(WITH_QT5)
       ADD_QT_PLUGIN(imageformats qwebp)
 
       # harfbuzz is needed since Qt 5.3
-      IF(APPLE)
+      IF(UNIX)
         SET(HB_LIB "${QT_LIBRARY_DIR}/libqtharfbuzzng.a")
       ELSEIF(WIN32)
         SET(HB_LIB "${QT_LIBRARY_DIR}/qtharfbuzzng.lib")
@@ -299,7 +303,7 @@ IF(WITH_QT5)
       ENDIF()
 
       # freetype is needed since Qt 5.5
-      IF(APPLE)
+      IF(UNIX)
         SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
       ELSEIF(WIN32)
         SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
@@ -309,7 +313,7 @@ IF(WITH_QT5)
       ENDIF()
 
       # pcre is needed since Qt 5.5
-      IF(APPLE)
+      IF(UNIX)
         SET(PCRE_LIB "${QT_LIBRARY_DIR}/libqtpcre.a")
       ELSEIF(WIN32)
         SET(PCRE_LIB "${QT_LIBRARY_DIR}/qtpcre.lib")
