@@ -320,7 +320,6 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_TOOLS         "Build Ryzom Core Tools"                        ON )
   OPTION(WITH_RYZOM_SERVER        "Build Ryzom Core Services"                     ON )
   OPTION(WITH_RYZOM_SOUND         "Enable Ryzom Core Sound"                       ON )
-  OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
 
   ###
   # Optional support
@@ -329,6 +328,8 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_LUA52               "Build Ryzom Core using Lua 5.2"                OFF)
   OPTION(WITH_LUA53               "Build Ryzom Core using Lua 5.3"                OFF)
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
+  OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
+  OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
