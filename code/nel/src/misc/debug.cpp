@@ -715,7 +715,8 @@ public:
 			{
 				str = "<NoModule>";
 			}
-			str += toString("!0x%X", addr);
+
+			str += toString("!0x%p", (void*)addr);
 		}
 
 //
@@ -740,9 +741,8 @@ public:
 			{
 				str = "<NoModule>";
 			}
-			char tmp[32];
-			sprintf (tmp, "!0x%p", addr);
-			str += tmp;
+
+			str += toString("!0x%p", (void*)addr);
 		//}
 		str +=" DEBUG:"+toString("0x%p", addr);
 

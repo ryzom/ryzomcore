@@ -138,9 +138,8 @@ static string getSourceInfo (DWORD_TYPE addr)
 		{
 			str = "<NoModule>";
 		}
-		char tmp[32];
-		sprintf (tmp, "!0x%X", addr);
-		str += tmp;
+
+		str += toString("!0x%p", (void*)addr);
 	}
 
 	return str;
