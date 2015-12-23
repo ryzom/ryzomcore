@@ -1790,44 +1790,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 #ifndef USE_OPENGLES
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);
-
-	if (ext.NVXGPUMemoryInfo)
-	{
-		GLint nEvictionCount = 0;
-#ifdef GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX
-		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTION_COUNT_NVX, &nEvictionCount);
-#endif
-
-		GLint nEvictionMemory = 0;
-#ifdef GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX
-		glGetIntegerv(GL_GPU_MEMORY_INFO_EVICTED_MEMORY_NVX, &nEvictionMemory);
-#endif
-
-		GLint nDedicatedMemoryInKB = 0;
-#ifdef GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX
-		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedMemoryInKB);
-#endif
-
-		GLint nTotalMemoryInKB = 0;
-#ifdef GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX
-		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
-#endif
-
-		GLint nCurAvailMemoryInKB = 0;
-#ifdef GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX
-		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurAvailMemoryInKB);
-#endif
-
-		nlinfo("Memory: total: %d available: %d dedicated: %d", nTotalMemoryInKB, nCurAvailMemoryInKB, nDedicatedMemoryInKB);
-	}
-
 	ext.ATIMeminfo = setupATIMeminfo(glext);
-
-	if (ext.ATIMeminfo)
-	{
-		GLint nCurAvailMemoryInKB = 0;
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &nCurAvailMemoryInKB);
-	}
 #endif
 }
 
@@ -1998,18 +1961,6 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 	ext.WGLEXTSwapControl= setupWGLEXTSwapControl(glext);
 
 	ext.WGLAMDGPUAssociation = setupWGLAMDGPUAssociation(glext);
-
-	if (ext.WGLAMDGPUAssociation)
-	{
-		GLuint uNoOfGPUs = nwglGetGPUIDsAMD(0, 0);
-		GLuint *uGPUIDs = new GLuint[uNoOfGPUs];
-		nwglGetGPUIDsAMD(uNoOfGPUs, uGPUIDs);
-
-		GLuint uTotalMemoryInMB = 0;
-		nwglGetGPUInfoAMD(uGPUIDs[0], WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(GLuint), &uTotalMemoryInMB);
-
-		delete [] uGPUIDs;
-	}
 
 	ext.WGLNVGPUAffinity = setupWGLNVGPUAssociation(glext);
 

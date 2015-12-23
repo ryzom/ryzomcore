@@ -32,7 +32,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x6f; // getters for anisotropic filter
+const uint32 IDriver::InterfaceVersion = 0x70; // total video memory
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )

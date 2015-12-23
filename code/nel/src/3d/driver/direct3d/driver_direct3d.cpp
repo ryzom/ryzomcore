@@ -2381,6 +2381,7 @@ bool CDriverD3D::getAdapter(uint adapter, IDriver::CAdapter &desc) const
 			desc.Revision = identifier.Revision;
 			desc.SubSysId = identifier.SubSysId;
 			desc.VendorId = identifier.VendorId;
+			desc.VideoMemory = _Adapter == _adapter ? getTotalVideoMemory():-1;
 			return true;
 		}
 	}
@@ -2870,6 +2871,17 @@ const char *CDriverD3D::getVideocardInformation ()
 	}
 	else
 		return "Can't get video card information";
+}
+
+// ***************************************************************************
+
+sint CDriverD3D::getTotalVideoMemory () const
+{
+	H_AUTO_D3D(CDriverD3D_getTotalVideoMemory);
+
+	// Can't use _DeviceInterface->GetAvailableTextureMem() because it's not reliable
+	// Returns 4 GiB instead of 2 with my GPU
+	return -1;
 }
 
 // ***************************************************************************

@@ -865,6 +865,12 @@ public:
 	  * get the official name of the driver
 	  */
 	virtual const char		*getVideocardInformation () = 0;
+
+	/**
+	  * Get total video memory.
+	  * get the amount of video memory of current adapter, result is in KiB, -1 if unable to determine
+	  */
+	virtual sint			getTotalVideoMemory () const = 0;
 	// @}
 
 
@@ -1342,6 +1348,7 @@ public:
 		uint32				DeviceId;
 		uint32				SubSysId;
 		uint32				Revision;
+		sint32				VideoMemory; // video memory in KiB, -1 if unable to determine
 	};
 
 	// Get the number of hardware renderer available on the client platform.

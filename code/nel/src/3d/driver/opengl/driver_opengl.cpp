@@ -1199,6 +1199,105 @@ const char *CDriverGL::getVideocardInformation ()
 	return name;
 }
 
+sint CDriverGL::getTotalVideoMemory() const
+{
+	H_AUTO_OGL(CDriverGL_getTotalVideoMemory);
+
+	if (_Extensions.NVXGPUMemoryInfo)
+	{
+		GLint memoryInKiB = 0;
+		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &memoryInKiB);
+
+		nlinfo("3D: GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX returned %d KiB", memoryInKiB);
+		return memoryInKiB;
+	}
+
+	if (_Extensions.ATIMeminfo)
+	{
+		GLint memoryInKiB = 0;
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &memoryInKiB);
+
+		nlinfo("3D: GL_TEXTURE_FREE_MEMORY_ATI returned %d KiB", memoryInKiB);
+		return memoryInKiB;
+	}
+
+#if defined(NL_OS_WINDOWS)
+	if (_Extensions.WGLAMDGPUAssociation)
+	{
+		GLuint uNoOfGPUs = nwglGetGPUIDsAMD(0, 0);
+		GLuint *uGPUIDs = new GLuint[uNoOfGPUs];
+		nwglGetGPUIDsAMD(uNoOfGPUs, uGPUIDs);
+
+		GLuint memoryInMiB = 0;
+		nwglGetGPUInfoAMD(uGPUIDs[0], WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(GLuint), &memoryInMiB);
+
+		delete [] uGPUIDs;
+
+		nlinfo("3D: WGL_GPU_RAM_AMD returned %d MiB", memoryInMiB);
+		return memoryInMiB * 1024;
+	}
+#elif defined(NL_OS_MAC)
+	GLint rendererID;
+
+	// get current renderer ID
+	CGLError error = CGLGetParameter([_ctx CGLContextObj], kCGLCPCurrentRendererID, &rendererID);
+
+	if (error == kCGLNoError)
+	{
+		GLint nrend = 0;
+		CGLRendererInfoObj rend;
+
+		// get renderer info for all renderers
+		error = CGLQueryRendererInfo(0xffffffff, &rend, &nrend);
+
+		if (error == kCGLNoError)
+		{
+			for (GLint i = 0; i < nrend; ++i)
+			{
+				GLint thisRendererID;
+				error = CGLDescribeRenderer(rend, i, kCGLRPRendererID, &thisRendererID);
+
+				if (error == kCGLNoError)
+				{
+					// see if this is the one we want
+					if (thisRendererID == rendererID)
+					{
+						GLint memoryInMiB = 0;
+						CGLError error = CGLDescribeRenderer(rend, i, kCGLRPVideoMemoryMegabytes, &memoryInMiB);
+
+						if (error == kCGLNoError)
+						{
+							// convert in KiB
+							return memoryInMiB * 1024;
+						}
+						else
+						{
+							nlerror("3D: Unable to get video memory (%s)", CGLErrorString(error));
+						}
+					}
+				}
+				else
+				{
+					nlerror("3D: Unable to get renderer ID (%s)", CGLErrorString(error));
+				}
+			}
+ 
+			CGLDestroyRendererInfo(rend);
+		}
+		else
+		{
+			nlerror("3D: Unable to get renderers info (%s)", CGLErrorString(error));
+		}
+	}
+	else
+	{
+		nlerror("3D: Unable to get current renderer ID (%s)", CGLErrorString(error));
+	}
+#endif
+
+	return -1;
+}
+
 bool CDriverGL::clipRect(NLMISC::CRect &rect)
 {
 	H_AUTO_OGL(CDriverGL_clipRect)
@@ -2546,6 +2645,7 @@ bool CDriverGL::getAdapter(uint adapter, CAdapter &desc) const
 		desc.Revision = 0;
 		desc.SubSysId = 0;
 		desc.VendorId = 0;
+		desc.VideoMemory = getTotalVideoMemory();
 		return true;
 	}
 	return false;
