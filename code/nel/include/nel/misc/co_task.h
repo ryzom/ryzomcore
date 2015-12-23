@@ -28,8 +28,8 @@ namespace NLMISC
 # define NL_WIN_CALLBACK
 #endif
 
-	// Default to 8KB stack for tasks
-	const unsigned int	NL_TASK_STACK_SIZE = 8*1024;
+	// Default to 1MiB stack for tasks
+	const uint NL_TASK_STACK_SIZE = 1024*1024;
 
 	// forward def for platform specific data
 	struct TCoTaskData;
