@@ -886,6 +886,15 @@ void initMainLoop()
 			{
 				if(ClientCfg.HDEntityTexture)
 				{
+					// temporary code for debug
+					sint videoMemory = Driver->getTotalVideoMemory();
+
+					if (videoMemory < 0) videoMemory = CSystemUtils::getTotalVideoMemory();
+
+					videoMemory /= 1024; // size in MiB
+
+					nlinfo("Video Memory detected: %d MiB", videoMemory);
+
 					// setup "v2 texture" (or 512*512)
 					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_HIGH_LEVEL);
 					// Allow a big cache for them (should be on 512 Mo card only)
