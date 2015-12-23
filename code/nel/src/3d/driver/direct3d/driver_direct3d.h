@@ -900,6 +900,7 @@ public:
 	virtual uint32			getImplementationVersion () const;
 	virtual const char*		getDriverInformation ();
 	virtual const char*		getVideocardInformation ();
+	virtual sint			getTotalVideoMemory () const;
 	virtual CVertexBuffer::TVertexColorType getVertexColorFormat() const;
 
 	// Textures

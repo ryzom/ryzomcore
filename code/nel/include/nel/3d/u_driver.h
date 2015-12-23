@@ -505,6 +505,12 @@ public:
 	  */
 	virtual const char*		getVideocardInformation () = 0;
 
+	/**
+	  * Get total video memory.
+	  * get the amount of video memory of current adapter, result is in KiB, -1 if unable to determine
+	  */
+	virtual sint			getTotalVideoMemory () const = 0;
+
 	/// Get the number of texture stage available, for multitexturing (Normal material shaders). Valid only after setDisplay().
 	virtual	uint			getNbTextureStages() = 0;
 

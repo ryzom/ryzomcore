@@ -8,6 +8,20 @@
 #include <QFile>
 #include <QMessageBox>
 
+#ifdef QT_STATICPLUGIN
+
+#include <QtPlugin>
+
+#if defined(Q_OS_WIN32)
+	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#elif defined(Q_OS_MAC)
+	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#elif defined(Q_OS_UNIX)
+	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
+
+#endif
+
 int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);

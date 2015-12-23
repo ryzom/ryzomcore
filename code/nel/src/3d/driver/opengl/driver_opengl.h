@@ -520,6 +520,8 @@ public:
 
 	virtual const char*		getVideocardInformation ();
 
+	virtual sint			getTotalVideoMemory() const;
+
 	virtual bool			isActive ();
 
 	virtual uint8			getBitPerPixel ();

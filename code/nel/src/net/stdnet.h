@@ -17,9 +17,9 @@
 #include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
-#	define _WIN32_WINDOWS	0x0410
+#	define _WIN32_WINDOWS	0x0500
 #	ifndef NL_COMP_MINGW
-#		define WINVER			0x0400
+#		define WINVER			0x0500
 #		define NOMINMAX
 #	endif
 #	include <winsock2.h>
