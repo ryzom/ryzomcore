@@ -18,6 +18,14 @@
 #include "nel/misc/system_utils.h"
 
 #ifdef NL_OS_WINDOWS
+#define INITGUID
+#include <ddraw.h>
+#include <windows.h>
+#include <string.h>
+#include <stdio.h>
+#include <dxgi.h>
+#include <initguid.h>
+#include <CGuid.h>
 #	include <ObjBase.h>
 #	ifdef _WIN32_WINNT_WIN7
 		// only supported by Windows 7 Platform SDK
@@ -363,6 +371,236 @@ bool CSystemUtils::detectWindowedApplication()
 		return true;
 #endif
 	return false;
+}
+
+#ifdef NL_OS_WINDOWS
+#ifndef SAFE_RELEASE
+#define SAFE_RELEASE(p)      { if (p) { (p)->Release(); (p) = NULL; } }
+#endif
+
+typedef HRESULT (WINAPI* LPDIRECTDRAWCREATE)(GUID FAR *lpGUID, LPDIRECTDRAW FAR *lplpDD, IUnknown FAR *pUnkOuter);
+typedef HRESULT (WINAPI* LPCREATEDXGIFACTORY)(REFIID, void**);
+
+static std::string FormatError(HRESULT hr)
+{
+	std::string res;
+
+	LPTSTR errorText = NULL;
+
+	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&errorText, 0, NULL);
+
+	if (errorText)
+	{
+		res = NLMISC::toString("%s (0x%x)", errorText, hr);
+		LocalFree(errorText);
+		errorText = NULL;
+	}
+
+	return res;
+}
+
+struct SAdapter
+{
+	uint id;
+	std::string name;
+	sint memory;
+	GUID guid;
+	HMONITOR hMonitor;
+	bool found;
+
+	SAdapter()
+	{
+		id = 0;
+		memory = -1;
+		guid = GUID_NULL;
+		hMonitor = NULL;
+		found = false;
+	}
+};
+
+static std::list<SAdapter> s_dxgiAdapters;
+
+static void EnumerateUsingDXGI(IDXGIFactory *pDXGIFactory)
+{
+	nlassert(pDXGIFactory != NULL);
+
+	for(uint index = 0; ; ++index)
+	{
+		IDXGIAdapter *pAdapter = NULL;
+		HRESULT hr = pDXGIFactory->EnumAdapters(index, &pAdapter);
+		// DXGIERR_NOT_FOUND is expected when the end of the list is hit
+		if (FAILED(hr)) break;
+
+		DXGI_ADAPTER_DESC desc;
+		memset(&desc, 0, sizeof(DXGI_ADAPTER_DESC));
+
+		if (SUCCEEDED(pAdapter->GetDesc(&desc)))
+		{
+			SAdapter adapter;
+			adapter.id = index;
+			adapter.name = ucstring((ucchar*)desc.Description).toUtf8();
+			adapter.memory = desc.DedicatedVideoMemory / 1024;
+			adapter.found = true;
+
+			nldebug("DXGI Adapter: %u - %s - DedicatedVideoMemory: %d KiB", index, adapter.name.c_str(), adapter.memory);
+
+			s_dxgiAdapters.push_back(adapter);
+		}
+
+		SAFE_RELEASE(pAdapter);
+	}
+}
+
+BOOL WINAPI DDEnumCallbackEx(GUID FAR* lpGUID, LPSTR lpDriverDescription, LPSTR lpDriverName, LPVOID lpContext, HMONITOR hm)
+{
+	SAdapter * pAdapter = (SAdapter*)lpContext;
+
+	if (pAdapter->hMonitor == hm)
+	{
+		pAdapter->name = lpDriverDescription;
+		pAdapter->guid = *lpGUID;
+		pAdapter->found = true;
+	}
+
+	return TRUE;
+}
+
+#endif
+
+sint CSystemUtils::getTotalVideoMemory()
+{
+	sint res = -1;
+
+#ifdef NL_OS_WINDOWS
+	// using DXGI
+	HINSTANCE hDXGI = LoadLibraryA("dxgi.dll");
+
+	if (hDXGI)
+	{
+
+		// We prefer the use of DXGI 1.1
+		LPCREATEDXGIFACTORY pCreateDXGIFactory = (LPCREATEDXGIFACTORY)GetProcAddress(hDXGI, "CreateDXGIFactory1");
+
+		if (!pCreateDXGIFactory)
+		{
+			pCreateDXGIFactory = (LPCREATEDXGIFACTORY)GetProcAddress(hDXGI, "CreateDXGIFactory");
+		}
+
+		if (pCreateDXGIFactory)
+		{
+			IDXGIFactory *pDXGIFactory = NULL;
+			HRESULT hr = pCreateDXGIFactory(__uuidof(IDXGIFactory), (LPVOID*)&pDXGIFactory);
+
+			if (SUCCEEDED(hr))
+			{
+				EnumerateUsingDXGI(pDXGIFactory);
+
+				SAFE_RELEASE(pDXGIFactory);
+
+				if (!s_dxgiAdapters.empty())
+				{
+					// TODO: determine what adapter is used by NeL
+					res = s_dxgiAdapters.front().memory;
+				}
+				else
+				{
+					nlwarning("Unable to find an DXGI adapter");
+				}
+			}
+			else
+			{
+				nlwarning("Unable to create DXGI factory");
+			}
+		}
+		else
+		{
+			nlwarning("dxgi.dll missing entry-point");
+		}
+
+		FreeLibrary(hDXGI);
+	}
+
+	if (res == -1)
+	{
+		// using DirectDraw
+		HMODULE hInstDDraw = LoadLibraryA("ddraw.dll");
+
+		if (hInstDDraw)
+		{
+			SAdapter adapter;
+			adapter.hMonitor = MonitorFromWindow(s_window, MONITOR_DEFAULTTONULL);
+
+			LPDIRECTDRAWENUMERATEEXA pDirectDrawEnumerateEx = (LPDIRECTDRAWENUMERATEEXA)GetProcAddress(hInstDDraw, "DirectDrawEnumerateExA");
+			LPDIRECTDRAWCREATE pDDCreate = (LPDIRECTDRAWCREATE)GetProcAddress(hInstDDraw, "DirectDrawCreate");
+
+			if (pDirectDrawEnumerateEx && pDDCreate)
+			{
+				HRESULT hr = pDirectDrawEnumerateEx(DDEnumCallbackEx, (VOID*)&adapter, DDENUM_ATTACHEDSECONDARYDEVICES);
+
+				if (SUCCEEDED(hr) && adapter.found)
+				{
+					LPDIRECTDRAW pDDraw = NULL;
+					hr = pDDCreate(&adapter.guid, &pDDraw, NULL);
+
+					if (SUCCEEDED(hr))
+					{
+						LPDIRECTDRAW7 pDDraw7 = NULL;
+						hr = pDDraw->QueryInterface(IID_IDirectDraw7, (VOID**)&pDDraw7);
+
+						if (SUCCEEDED(hr))
+						{
+							DDSCAPS2 ddscaps;
+							memset(&ddscaps, 0, sizeof(DDSCAPS2));
+							ddscaps.dwCaps = DDSCAPS_VIDEOMEMORY | DDSCAPS_LOCALVIDMEM;
+
+							DWORD pdwAvailableVidMem;
+							hr = pDDraw7->GetAvailableVidMem(&ddscaps, &pdwAvailableVidMem, NULL);
+
+ 							if (SUCCEEDED(hr))
+							{
+								res = (sint)pdwAvailableVidMem / 1024;
+								nlinfo("DirectDraw Adapter: %s - DedicatedVideoMemory: %d KiB", adapter.name.c_str(), adapter.memory);
+							}
+							else
+							{
+								nlwarning("Unable to get DirectDraw available video memory: %s", FormatError(hr).c_str());
+							}
+
+							SAFE_RELEASE(pDDraw7);
+						}
+						else
+						{
+							nlwarning("Unable to query IDirectDraw7 interface: %s", FormatError(hr).c_str());
+						}
+					}
+					else
+					{
+						nlwarning("Unable to call DirectDrawCreate: %s", FormatError(hr).c_str());
+					}
+				}
+				else
+				{
+					nlwarning("Unable to enumerate DirectDraw adapters (%s): %s", (adapter.found ? "found":"not found"), FormatError(hr).c_str());
+				}
+			}
+			else
+			{
+				nlwarning("Unable to get pointer on DirectDraw functions (DirectDrawEnumerateExA %p, DirectDrawCreate %p)", pDirectDrawEnumerateEx, pDDCreate);
+			}
+
+			FreeLibrary(hInstDDraw);
+		}
+		else
+		{
+			nlwarning("Unable to load ddraw.dll");
+		}
+	}
+#else
+	// TODO: implement for other systems
+#endif
+
+	return res;
 }
 
 } // NLMISC
