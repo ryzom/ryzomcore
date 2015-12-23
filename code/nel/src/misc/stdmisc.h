@@ -46,12 +46,12 @@
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
-#	define _WIN32_WINDOWS 0x0410
+#	define _WIN32_WINDOWS 0x0500
 #	ifndef _WIN32_WINNT
-#		define _WIN32_WINNT 0x0400
+#		define _WIN32_WINNT 0x0500
 #	endif
 #	ifndef NL_COMP_MINGW
-#		define WINVER 0x0400
+#		define WINVER 0x0500
 #		define NOMINMAX
 #	endif
 #	include <WinSock2.h>
