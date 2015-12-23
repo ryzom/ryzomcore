@@ -4880,7 +4880,7 @@ void CCharacter::updateVisualInformation( uint16 InventoryEmpty, uint16 SlotEmpt
 			}
 			// update visual property only if srcForm is valid
 			if(srcForm)
-				setVisualPropertyForEquipment( SlotEmpty, srcForm, 0 , 254 );
+				setVisualPropertyForEquipment( SlotEmpty, srcForm, 0 , 6 );
 		}
 	}
 
