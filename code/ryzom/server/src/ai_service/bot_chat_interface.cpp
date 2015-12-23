@@ -88,7 +88,7 @@ struct SBotChatAutomatonState
 	uint On[5];				// value to return on player click of slot 0..4
 
 	// ctor -----------------------------------------------------------------
-	SBotChatAutomatonState(SBotChatPage	*page,uint on0=~0u,uint on1=~0u,uint on2=~0u,uint on3=~0u,uint on4=~0u)
+	SBotChatAutomatonState(SBotChatPage	*page,uint on0=std::numeric_limits<uint>::max(),uint on1=std::numeric_limits<uint>::max(),uint on2=std::numeric_limits<uint>::max(),uint on3=std::numeric_limits<uint>::max(),uint on4=std::numeric_limits<uint>::max())
 	{
 		Page=page;
 		On[0]=on0;
@@ -100,8 +100,8 @@ struct SBotChatAutomatonState
 		// make sure the number of arguments supplied corresponds to the 
 		// number of options prresent on the user interfac page
 		nlassert(page->NumOptions>=0 && page->NumOptions<=4);
-		nlassert(page->NumOptions==0 || On[page->NumOptions-1]!=~0u);
-		nlassert(page->NumOptions==4 || On[page->NumOptions]==~0u);
+		nlassert(page->NumOptions==0 || On[page->NumOptions-1]!=std::numeric_limits<uint>::max());
+		nlassert(page->NumOptions==4 || On[page->NumOptions]==std::numeric_limits<uint>::max());
 	}
 };
 
@@ -344,7 +344,7 @@ struct CBotChat
 
 	void setState(uint32 state)
 	{
-		if (state>=Automaton->Size && state!=~0u)
+		if (state>=Automaton->Size && state!=std::numeric_limits<uint32>::max())
 		{
 			nlwarning("CBotChatEntry()::setState: Invalid state: %d",state);
 			return;
@@ -356,7 +356,7 @@ struct CBotChat
 
 		// open the new page
 		CurrentState=state;
-		if (state==~0u)
+		if (state==std::numeric_limits<uint32>::max())
 			Done=true;
 		else
 			Done=!Automaton->States[CurrentState].Page->PageType->open(Player,Bot);
@@ -377,7 +377,7 @@ struct CBotChat
 	void setAutomaton(SBotChatAutomaton *automaton)
 	{
 		Automaton=automaton;
-		CurrentState=~0u;	// set this to a ~0 so that setState doesn't try to clse existing page
+		CurrentState=std::numeric_limits<uint32>::max();	// set this to a ~0 so that setState doesn't try to clse existing page
 		setState(0);
 	}
 
@@ -396,7 +396,7 @@ struct CBotChat
 
 	void endChat ()
 	{
-		setState(~0u);
+		setState(std::numeric_limits<uint32>::max());
 	}
 
 	CEntityId Player;
@@ -672,7 +672,7 @@ struct SBotChatAutomatonState
 	uint On[5];				// value to return on player click of slot 0..4
 
 	// ctor -----------------------------------------------------------------
-	SBotChatAutomatonState(SBotChatPage	*page,uint on0=~0u,uint on1=~0u,uint on2=~0u,uint on3=~0u,uint on4=~0u)
+	SBotChatAutomatonState(SBotChatPage	*page,uint on0=std::numeric_limits<uint>::max(),uint on1=std::numeric_limits<uint>::max(),uint on2=std::numeric_limits<uint>::max(),uint on3=std::numeric_limits<uint>::max(),uint on4=std::numeric_limits<uint>::max())
 	{
 		Page=page;
 		On[0]=on0;
@@ -684,8 +684,8 @@ struct SBotChatAutomatonState
 		// make sure the number of arguments supplied corresponds to the 
 		// number of options prresent on the user interfac page
 		nlassert(page->NumOptions>=0 && page->NumOptions<=4);
-		nlassert(page->NumOptions==0 || On[page->NumOptions-1]!=~0u);
-		nlassert(page->NumOptions==4 || On[page->NumOptions]==~0u);
+		nlassert(page->NumOptions==0 || On[page->NumOptions-1]!=std::numeric_limits<uint>::max());
+		nlassert(page->NumOptions==4 || On[page->NumOptions]==std::numeric_limits<uint>::max());
 	}
 };
 
@@ -928,7 +928,7 @@ struct CBotChat
 
 	void setState(uint32 state)
 	{
-		if (state>=Automaton->Size && state!=~0u)
+		if (state>=Automaton->Size && state!=std::numeric_limits<uint32>::max())
 		{
 			nlwarning("CBotChatEntry()::setState: Invalid state: %d",state);
 			return;
@@ -940,7 +940,7 @@ struct CBotChat
 
 		// open the new page
 		CurrentState=state;
-		if (state==~0u)
+		if (state==std::numeric_limits<uint32>::max())
 			Done=true;
 		else
 			Done=!Automaton->States[CurrentState].Page->PageType->open(Player,Bot);
@@ -961,7 +961,7 @@ struct CBotChat
 	void setAutomaton(SBotChatAutomaton *automaton)
 	{
 		Automaton=automaton;
-		CurrentState=~0u;	// set this to a ~0 so that setState doesn't try to clse existing page
+		CurrentState=std::numeric_limits<uint32>::max();	// set this to a std::numeric_limits<uint32>::max() so that setState doesn't try to clse existing page
 		setState(0);
 	}
 
@@ -980,7 +980,7 @@ struct CBotChat
 
 	void endChat ()
 	{
-		setState(~0u);
+		setState(std::numeric_limits<uint32>::max());
 	}
 
 	CEntityId Player;
