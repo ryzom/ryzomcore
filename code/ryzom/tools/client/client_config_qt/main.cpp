@@ -25,18 +25,19 @@
 
 #include <QtPlugin>
 
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-#endif
-	
-#ifdef Q_OS_MAC
+#elif defined(Q_OS_MAC)
 	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
-#endif
+#elif defined(Q_OS_UNIX)
+	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 #endif
 
-int main( sint32 argc, char **argv )
+#endif
+
+int main(sint32 argc, char **argv)
 {
-	QApplication app( argc, argv );
+	QApplication app(argc, argv);
 
 	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
 	QPixmap pixmap(":/resources/splash_screen.png" );

@@ -80,16 +80,17 @@ public:
 
 #include <QtPlugin>
 
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-#endif
-	
-#ifdef Q_OS_MAC
+#elif defined(Q_OS_MAC)
 	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
-#endif
+#elif defined(Q_OS_UNIX)
+	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 #endif
 
-int main( int argc, char **argv )
+#endif
+
+int main(int argc, char **argv)
 {
 #ifndef WIN32
 	// Workaround to default -style=gtk+ on recent Cinnamon versions
@@ -111,14 +112,13 @@ int main( int argc, char **argv )
 	CCmdLineParser::parse( argc, argv, params );
 
 	CCrashReportWidget w;
-	w.setup( params );
+	w.setup(params);
 	w.show();
 
 	int ret = app.exec();
 
-	if( ret != EXIT_SUCCESS )
+	if(ret != EXIT_SUCCESS)
 		return ret;
 	else
 		return w.getReturnValue();
-	
 }
