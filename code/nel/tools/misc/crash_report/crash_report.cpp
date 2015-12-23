@@ -92,7 +92,7 @@ public:
 
 int main(int argc, char **argv)
 {
-#ifndef WIN32
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 	// Workaround to default -style=gtk+ on recent Cinnamon versions
 	char *currentDesktop = getenv("XDG_CURRENT_DESKTOP");
 	if (currentDesktop)
