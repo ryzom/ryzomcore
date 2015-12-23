@@ -1272,13 +1272,13 @@ sint CDriverGL::getTotalVideoMemory() const
 						}
 						else
 						{
-							nlerror("3D: Unable to get video memory (%s)", CGLErrorString(error));
+							nlwarning("3D: Unable to get video memory (%s)", CGLErrorString(error));
 						}
 					}
 				}
 				else
 				{
-					nlerror("3D: Unable to get renderer ID (%s)", CGLErrorString(error));
+					nlwarning("3D: Unable to get renderer ID (%s)", CGLErrorString(error));
 				}
 			}
  
@@ -1286,7 +1286,7 @@ sint CDriverGL::getTotalVideoMemory() const
 		}
 		else
 		{
-			nlerror("3D: Unable to get renderers info (%s)", CGLErrorString(error));
+			nlwarning("3D: Unable to get renderers info (%s)", CGLErrorString(error));
 		}
 	}
 	else
