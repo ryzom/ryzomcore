@@ -362,7 +362,7 @@ string bytesToHumanReadable (const std::string &bytes)
 
 string bytesToHumanReadable (uint64 bytes)
 {
-	static const char *divTable[]= { "B", "KB", "MB", "GB", "TB" };
+	static const char *divTable[]= { "B", "KiB", "MiB", "GiB", "TiB" };
 	uint div = 0;
 	uint64 res = bytes;
 	uint64 newres = res;
