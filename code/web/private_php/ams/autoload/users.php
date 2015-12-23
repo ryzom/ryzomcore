@@ -357,7 +357,7 @@ class Users{
                 //error_log(print_r($rows,true));
                 //error_log(print_r($result,true));
                 //error_log(print_r($json,true));
-               foreach ($json as $key => $value) {
+               if ($json) foreach ($json as $key => $value) {
                     //error_log(print_r($key,true));
                     //error_log(print_r($value,true));
                     
