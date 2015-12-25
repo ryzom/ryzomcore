@@ -349,6 +349,9 @@ std::string formatThousands(const std::string& s);
 /// The program will be launched in the current directory
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
+/// This function executes a program and returns output as a string
+std::string getCommandOutput(const std::string &command);
+
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
 

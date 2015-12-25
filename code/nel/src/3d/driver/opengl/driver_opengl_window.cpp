@@ -2058,6 +2058,12 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 
 #elif defined (NL_OS_UNIX)
 
+	if (!_dpy)
+	{
+		nlwarning("3D: Unable to list modes because Display is NULL, did you forget to call init() ?");
+		return false;
+	}
+
 	bool found = false;
 	int screen = DefaultScreen(_dpy);
 
