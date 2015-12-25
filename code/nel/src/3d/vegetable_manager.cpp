@@ -670,33 +670,33 @@ public:
 	virtual void buildInfo()
 	{
 		m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
-		nlassert(m_Idx.ProgramConstants0 != ~0);
+		nlassert(m_Idx.ProgramConstants0 != std::numeric_limits<uint>::max());
 		m_Idx.DirectionalLight = getUniformIndex("directionalLight");
-		nlassert(m_Idx.DirectionalLight != ~0);
+		nlassert(m_Idx.DirectionalLight != std::numeric_limits<uint>::max());
 		m_Idx.ViewCenter = getUniformIndex("viewCenter");
-		nlassert(m_Idx.ViewCenter != ~0);
+		nlassert(m_Idx.ViewCenter != std::numeric_limits<uint>::max());
 		m_Idx.NegInvTransDist = getUniformIndex("negInvTransDist");
-		nlassert(m_Idx.NegInvTransDist != ~0);
+		nlassert(m_Idx.NegInvTransDist != std::numeric_limits<uint>::max());
 		m_Idx.AngleAxis = getUniformIndex("angleAxis");
-		nlassert(m_Idx.AngleAxis != ~0);
+		nlassert(m_Idx.AngleAxis != std::numeric_limits<uint>::max());
 		m_Idx.Wind = getUniformIndex("wind");
-		nlassert(m_Idx.Wind != ~0);
+		nlassert(m_Idx.Wind != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff0 = getUniformIndex("cosCoeff0");
-		nlassert(m_Idx.CosCoeff0 != ~0);
+		nlassert(m_Idx.CosCoeff0 != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff1 = getUniformIndex("cosCoeff1");
-		nlassert(m_Idx.CosCoeff1 != ~0);
+		nlassert(m_Idx.CosCoeff1 != std::numeric_limits<uint>::max());
 		m_Idx.CosCoeff2 = getUniformIndex("cosCoeff2");
-		nlassert(m_Idx.CosCoeff2 != ~0);
+		nlassert(m_Idx.CosCoeff2 != std::numeric_limits<uint>::max());
 		m_Idx.QuatConstants = getUniformIndex("quatConstants");
-		nlassert(m_Idx.QuatConstants != ~0);
+		nlassert(m_Idx.QuatConstants != std::numeric_limits<uint>::max());
 		m_Idx.PiConstants = getUniformIndex("piConstants");
-		nlassert(m_Idx.PiConstants != ~0);
+		nlassert(m_Idx.PiConstants != std::numeric_limits<uint>::max());
 		m_Idx.LUTSize = getUniformIndex("lutSize");
-		nlassert(m_Idx.LUTSize != ~0);
+		nlassert(m_Idx.LUTSize != std::numeric_limits<uint>::max());
 		for (uint i = 0; i < NL3D_VEGETABLE_VP_LUT_SIZE; ++i)
 		{
 			m_Idx.LUT[i] = getUniformIndex(NLMISC::toString("lut[%i]", i));
-			nlassert(m_Idx.LUT[i] != ~0);
+			nlassert(m_Idx.LUT[i] != std::numeric_limits<uint>::max());
 		}
 	}
 	const CIdx &idx() const { return m_Idx; }

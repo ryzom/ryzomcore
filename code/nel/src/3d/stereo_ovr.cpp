@@ -301,15 +301,15 @@ public:
 		CPixelProgram::buildInfo();
 
 		m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
-		nlassert(m_OVRIndices.LensCenter != ~0);
+		nlassert(m_OVRIndices.LensCenter != std::numeric_limits<uint>::max());
 		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
-		nlassert(m_OVRIndices.ScreenCenter != ~0);
+		nlassert(m_OVRIndices.ScreenCenter != std::numeric_limits<uint>::max());
 		m_OVRIndices.Scale = getUniformIndex("cScale");
-		nlassert(m_OVRIndices.Scale != ~0);
+		nlassert(m_OVRIndices.Scale != std::numeric_limits<uint>::max());
 		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
-		nlassert(m_OVRIndices.ScaleIn != ~0);
+		nlassert(m_OVRIndices.ScaleIn != std::numeric_limits<uint>::max());
 		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
-		nlassert(m_OVRIndices.HmdWarpParam != ~0);
+		nlassert(m_OVRIndices.HmdWarpParam != std::numeric_limits<uint>::max());
 	}
 
 	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }

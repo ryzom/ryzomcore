@@ -797,7 +797,7 @@ void		CRenderTrav::beginVPLightSetup(CVertexProgramLighted *program, const CMatr
 	for(; i<MaxVPLight; i++)
 	{
 		_VPLightDiffuse[i] = CRGBA::Black;
-		if (program->idxLighted().Diffuse[i] != ~0)
+		if (program->idxLighted().Diffuse[i] != std::numeric_limits<uint>::max())
 		{
 			Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Diffuse[i], 0.f, 0.f, 0.f, 0.f);
 		}
@@ -813,7 +813,7 @@ void		CRenderTrav::beginVPLightSetup(CVertexProgramLighted *program, const CMatr
 		for(; i<MaxVPLight; i++)
 		{
 			_VPLightSpecular[i]= CRGBA::Black;
-			if (program->idxLighted().Specular[i] != ~0)
+			if (program->idxLighted().Specular[i] != std::numeric_limits<uint>::max())
 			{
 				Driver->setUniform4f(IDriver::VertexProgram, program->idxLighted().Specular[i], 0.f, 0.f, 0.f, 0.f);
 			}
@@ -1215,14 +1215,14 @@ void CVertexProgramLighted::buildInfo()
 		// etc
 	}
 
-	nlassert(m_IdxLighted.Diffuse[0] != ~0);
+	nlassert(m_IdxLighted.Diffuse[0] != std::numeric_limits<uint>::max());
 	if (m_FeaturesLighted.SupportSpecular)
 	{
-		nlassert(m_IdxLighted.Specular[0] != ~0);
-		nlassert(m_IdxLighted.EyePosition != ~0);
+		nlassert(m_IdxLighted.Specular[0] != std::numeric_limits<uint>::max());
+		nlassert(m_IdxLighted.EyePosition != std::numeric_limits<uint>::max());
 	}
-	nlassert(m_IdxLighted.DirOrPos[0] != ~0);
-	nlassert(m_IdxLighted.DiffuseAlpha != ~0);
+	nlassert(m_IdxLighted.DirOrPos[0] != std::numeric_limits<uint>::max());
+	nlassert(m_IdxLighted.DiffuseAlpha != std::numeric_limits<uint>::max());
 }
 
 // generates the lighting part of a vertex program, nelvp profile

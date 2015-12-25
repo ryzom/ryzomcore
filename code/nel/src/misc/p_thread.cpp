@@ -148,7 +148,7 @@ void CPThread::start()
 	}
 
 	bool detach_old_thread = false;
-	pthread_t old_thread_handle;
+	pthread_t old_thread_handle = _ThreadHandle;
 	if (_State != ThreadStateNone)
 	{
 		if (_State == ThreadStateRunning)
@@ -159,7 +159,6 @@ void CPThread::start()
 			throw EThread("Starting a thread that is already started, existing thread will continue running, this should not happen");
 		}
 		detach_old_thread = true;
-		old_thread_handle = _ThreadHandle;
 	}
 
 	if (pthread_create(&_ThreadHandle, _StackSize != 0 ? &tattr : NULL, ProxyFunc, this) != 0)

@@ -244,25 +244,37 @@ inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(
 
 inline bool fromString(const std::string &str, bool &val)
 {
-	if( str.length() == 1 )
+	if (str.length() == 1)
 	{
-		if( str[ 0 ] == '1' )
+		if (str[0] == '1')
+		{
 			val = true;
-		else
-		if( str[ 0 ] == '0' )
+		}
+		else if (str[0] == '0')
+		{
 			val = false;
+		}
 		else
+		{
+			val = false;
 			return false;
+		}
 	}
 	else
 	{
-		if( str == "true" )
+		if (str == "true")
+		{
 			val = true;
-		else
-		if( str == "false" )
+		}
+		else if (str == "false")
+		{
 			val = false;
+		}
 		else
+		{
+			val = false;
 			return false;
+		}
 	}
 
 	return true;

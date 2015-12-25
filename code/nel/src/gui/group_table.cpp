@@ -715,7 +715,7 @@ namespace NLGUI
 				// *** Get the column sizes, we need to know min for the table
 
 				uint i;
-				uint column = 0;
+				sint column = 0;
 				_Columns.clear ();
 				for (i=0; i<_Cells.size(); i++)
 				{
@@ -800,14 +800,16 @@ namespace NLGUI
 					if (_Columns[column].WidthWanted > _Columns[column].Width)
 						_Columns[column].Width = _Columns[column].WidthWanted;
 
-					if (cell->ColSpan > 1) {
+					if (cell->ColSpan > 1)
+					{
 						// copy this info to all spanned columns, create new columns as needed
 						uint newsize = column + cell->ColSpan - 1;
 						if (newsize >= _Columns.size())
 							_Columns.resize(newsize+1);
 
-						for(uint span = 0; span < cell->ColSpan -1; span++){
-							column++;
+						for(sint span = 0; span < cell->ColSpan -1; ++span)
+						{
+							++column;
 							_Columns[column].Width = std::max(_Columns[column].Width, _Columns[column-1].Width);
 							_Columns[column].WidthMax =  std::max(_Columns[column].WidthMax, _Columns[column-1].WidthMax);
 							_Columns[column].TableRatio =  std::max(_Columns[column].TableRatio, _Columns[column-1].TableRatio);
@@ -1033,7 +1035,7 @@ namespace NLGUI
 					if (cell->TableColumnIndex > 0)
 					{
 						// we have active rowspan, must add up 'skipped' columns
-						for( ; column<cell->TableColumnIndex; column++)
+						for( ; column<cell->TableColumnIndex; ++column)
 							currentX += _Columns[column].Width + padding*2 + CellSpacing;
 					}
 

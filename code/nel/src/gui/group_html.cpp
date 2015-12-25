@@ -5370,7 +5370,7 @@ namespace NLGUI
 				{
 					const uint bolder[] =  {400, 400, 400, 700, 700, 900, 900, 900, 900};
 					uint index = getFontWeight() / 100 + 1;
-					clamp(index, 1, 9);
+					clamp(index, 1u, 9u);
 					weight = bolder[index-1];
 				}
 				else

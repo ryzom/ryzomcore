@@ -54,7 +54,7 @@ namespace {
 
 } /* anonymous namespace */
 
-CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_VP(NULL), m_Width(~0), m_Height(~0)
+CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), m_Width(~0), m_Height(~0)
 {
 	nldebug("3D: Create FXAA");
 

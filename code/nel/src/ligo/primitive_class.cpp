@@ -346,7 +346,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 		// Lookup
 		parameter.WidgetHeight = 100;
-		int temp;
+		int temp = 0;
 		if (ReadInt ("WIDGET_HEIGHT", temp, paramNode))
 			parameter.WidgetHeight = (uint)temp;
 

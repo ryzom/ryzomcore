@@ -56,9 +56,9 @@ CCrashReportWidget::~CCrashReportWidget()
 
 void CCrashReportWidget::setup( const std::vector< std::pair< std::string, std::string > > &params )
 {
-	for( int i = 0; i < params.size(); i++ )
+	for(uint i = 0; i < params.size(); ++i)
 	{
-		const std::pair< std::string, std::string > &p = params[ i ];
+		const std::pair< std::string, std::string > &p = params[i];
 		const std::string &k = p.first;
 		const std::string &v = p.second;
 

@@ -54,7 +54,7 @@ namespace R2
 class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
 {
 public:
-	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : Instance(instance), CCtrlPolygon( param ) {}
+	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : CCtrlPolygon(param), Instance(instance) {}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
@@ -99,7 +99,7 @@ protected:
 class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
 {
 public:
-	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : Instance(instance), EdgeIndex(edgeIndex), CCtrlQuad( param ){}
+	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : CCtrlQuad(param), Instance(instance), EdgeIndex(edgeIndex) {}
 	// from IDisplayerUIHandle
 	virtual CInstance &getDisplayedInstance() { return Instance; }
 	// from IDisplayerUIHandle
