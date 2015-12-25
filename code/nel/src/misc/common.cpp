@@ -23,6 +23,10 @@
 #	include <ShellAPI.h>
 #	include <io.h>
 #	include <tchar.h>
+
+#define popen _popen
+#define pclose _pclose
+
 #elif defined NL_OS_MAC
 #	include <ApplicationServices/ApplicationServices.h>
 #elif defined NL_OS_UNIX
@@ -31,6 +35,8 @@
 #	include <pthread.h>
 #	include <sched.h>
 #endif
+
+#define MAX_LINE_WIDTH 256
 
 #include "nel/misc/command.h"
 #include "nel/misc/path.h"
@@ -838,6 +844,25 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	return false;
 
+}
+
+std::string getCommandOutput(const std::string &command)
+{
+	FILE *pipe = popen(command.c_str(), "r");
+	
+	if (!pipe) return "";
+
+	char buffer[MAX_LINE_WIDTH];
+	std::string result;
+
+	while (!feof(pipe))
+	{
+		if (fgets(buffer, MAX_LINE_WIDTH, pipe) != NULL) result += buffer;
+	}
+		
+	pclose(pipe);
+
+	return result;
 }
 
 /*
