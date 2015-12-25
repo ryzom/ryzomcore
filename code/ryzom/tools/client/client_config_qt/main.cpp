@@ -31,6 +31,7 @@
 	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #elif defined(Q_OS_UNIX)
 	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+	Q_IMPORT_PLUGIN(QXcbGlxIntegrationPlugin)
 #endif
 
 #endif
