@@ -145,6 +145,7 @@ void CSystem::GatherOpenGLInfo()
 	try
 	{
 		NL3D::IDriver *driver = NL3D::CDRU::createGlDriver();
+		driver->init(0);
 		GetVideoModes( openglInfo.modes, driver );
 		driver->release();
 	}
