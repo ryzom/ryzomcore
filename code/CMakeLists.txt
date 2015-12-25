@@ -216,41 +216,15 @@ IF(WITH_QT5)
     FIND_PACKAGE(Qt5LinguistTools)
     FIND_PACKAGE(Qt5Network)
 
-    SET(QT_LIBRARIES Qt5::Widgets Qt5::Core Qt5::Gui Qt5::Network Qt5::OpenGL Qt5::Xml)
-
     IF(QT_STATIC)
       ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 
-      # Core
-      IF(APPLE)
-        FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
-
-        FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
-        FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
-        FIND_LIBRARY(SECURITY_FRAMEWORK Security)
-
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${PCRE_LIBRARY}
-          ${FOUNDATION_FRAMEWORK}
-          ${CARBON_FRAMEWORK}
-          ${SECURITY_FRAMEWORK})
-      ENDIF()
-
-      # Network
-      FIND_PACKAGE(OpenSSL REQUIRED)
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
-
-      IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES}
-          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
-          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib)
-      ENDIF()
-
-      SET(QT_LIBRARIES ${QT_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+      SET(QT_LIBRARIES Qt5::Widgets)
 
       # Gui
+      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::OpenGL)
+
       ADD_QT_LIBRARY(PrintSupport)
-      ADD_QT_LIBRARY(PlatformSupport)
 
       IF(WIN32)
         SET(QT_LIBRARIES ${QT_LIBRARIES}
@@ -280,17 +254,21 @@ IF(WITH_QT5)
         ADD_QT_PLUGIN(printsupport cocoaprintersupport)
         ADD_QT_PLUGIN(platforms qcocoa)
       ELSE()
-        FIND_LIBRARY(OPENGL_LIBRARY GL)
+        ADD_QT_PLUGIN(platforms qxcb)
+        ADD_QT_PLUGIN(xcbglintegrations qxcb-glx-integration)
 
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENGL_LIBRARY})
+        ADD_QT_LIBRARY(XcbQpa)
+        ADD_QT_LIBRARY(PlatformSupport)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
+        SET(QT_LIBRARIES ${QT_LIBRARIES} -lfontconfig)
+        ADD_QT_LIBRARY(DBus)
       ENDIF()
 
       ADD_QT_PLUGIN(imageformats qgif)
       ADD_QT_PLUGIN(imageformats qicns)
       ADD_QT_PLUGIN(imageformats qico)
       ADD_QT_PLUGIN(imageformats qjpeg)
-      ADD_QT_PLUGIN(imageformats qmng)
-      ADD_QT_PLUGIN(imageformats qwebp)
 
       # harfbuzz is needed since Qt 5.3
       IF(UNIX)
@@ -312,6 +290,25 @@ IF(WITH_QT5)
         SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
       ENDIF()
 
+      ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
+
+      SET(QT_LIBRARIES ${QT_LIBRARIES} ${PNG_LIBRARIES} ${JPEG_LIBRARY})
+
+      # Network
+      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Network Qt5::Xml)
+
+      FIND_PACKAGE(OpenSSL REQUIRED)
+      SET(QT_LIBRARIES ${QT_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
+
+      IF(WIN32)
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${WINSDK_LIBRARY_DIR}/Crypt32.lib
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib)
+      ENDIF()
+
+      # Core
+      SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Core)
+
       # pcre is needed since Qt 5.5
       IF(UNIX)
         SET(PCRE_LIB "${QT_LIBRARY_DIR}/libqtpcre.a")
@@ -322,7 +319,23 @@ IF(WITH_QT5)
         SET(QT_LIBRARIES ${QT_LIBRARIES} ${PCRE_LIB})
       ENDIF()
 
-      ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
+      IF(APPLE)
+        FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
+
+        FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
+        FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
+        FIND_LIBRARY(SECURITY_FRAMEWORK Security)
+
+        SET(QT_LIBRARIES ${QT_LIBRARIES}
+          ${PCRE_LIBRARY}
+          ${FOUNDATION_FRAMEWORK}
+          ${CARBON_FRAMEWORK}
+          ${SECURITY_FRAMEWORK})
+      ELSEIF(UNIX)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} -ldl)
+      ENDIF()
+    ELSE()
+      SET(QT_LIBRARIES Qt5::Widgets Qt5::Network Qt5::Xml Qt5::Gui Qt5::OpenGL Qt5::Core)
     ENDIF()
   ELSE()
     MESSAGE(WARNING "Unable to find Qt 5")
