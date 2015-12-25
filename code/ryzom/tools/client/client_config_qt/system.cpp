@@ -162,7 +162,7 @@ void CSystem::GetVideoModes( std::vector< CVideoMode > &dst, NL3D::IDriver *driv
 
 	for( std::vector< NL3D::GfxMode >::iterator itr = modes.begin(); itr != modes.end(); ++itr )
 	{
-		if( ( itr->Width >= 800 ) && ( itr->Height >= 600 ) && ( itr->Depth == 32 ) && ( itr->Frequency >= 60 ) )
+		if( ( itr->Width >= 800 ) && ( itr->Height >= 600 ) && ( itr->Depth >= 16 ) )
 		{
 			CVideoMode mode;
 			mode.depth = itr->Depth;
