@@ -3055,17 +3055,17 @@ public:
 
 		if (pCB)
 		{
-			uint maxAnisotropic = Driver->getAnisotropicFilterMaximum();
+			sint maxAnisotropic = (sint)Driver->getAnisotropicFilterMaximum();
 
 			pCB->resetTexts();
 			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
 
-			uint anisotropic = 2;
+			sint anisotropic = 2;
 			uint i = 1;
 
 			while (anisotropic <= maxAnisotropic)
 			{
-				pCB->addText(ucstring(NLMISC::toString("%ux", anisotropic)));
+				pCB->addText(ucstring(NLMISC::toString("%dx", anisotropic)));
 
 				if (ClientCfg.AnisotropicFilter == anisotropic)
 					nAnisotropic = i;
@@ -3522,14 +3522,14 @@ class CHandlerGameConfigApply : public IActionHandler
 
 		if (nAnisotropic >= 0)
 		{
-			uint anisotropic = 0;
+			sint anisotropic = 0;
 
 			// compute the real anisotropic value
 			if (nAnisotropic > 0)
 			{
 				anisotropic = 2;
 
-				for(size_t i = 1; i < nAnisotropic; ++i)
+				for(sint i = 1; i < nAnisotropic; ++i)
 				{
 					anisotropic <<= 1;
 				}

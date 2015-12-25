@@ -545,7 +545,7 @@ size_t CGPUProgramParams::getOffset(const std::string &name) const
 void CGPUProgramParams::freeOffset(size_t offset)
 {
 	uint index = getIndexByOffset(offset);
-	if (index != ~0)
+	if (index != std::numeric_limits<uint>::max())
 	{
 		if (m_Map.size() > index)
 		{

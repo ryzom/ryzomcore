@@ -574,7 +574,7 @@ namespace NLGUI
 		}
 
 		std::vector<bool>				_BlockLevelElement;
-		inline const bool isBlockLevelElement() const
+		inline bool isBlockLevelElement() const
 		{
 			if (_BlockLevelElement.empty())
 				return false;

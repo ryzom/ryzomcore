@@ -881,8 +881,8 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 			break;
 		}
 	}
-	int category = 0;
-	uint32 form;
+	sint category = 0;
+	uint32 form = 0;
 	if (args.size() == 1)
 	{
 		if (fromString(args[0], category))

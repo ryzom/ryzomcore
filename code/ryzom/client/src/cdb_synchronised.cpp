@@ -57,7 +57,7 @@ uint32 NbDatabaseChanges = 0;
 //	CCDBSynchronised
 //
 //-----------------------------------------------
-CCDBSynchronised::CCDBSynchronised() : _InitInProgress(true), _InitDeltaReceived(0), CCDBManager( "SERVER", NB_CDB_BANKS )
+CCDBSynchronised::CCDBSynchronised() : CCDBManager("SERVER", NB_CDB_BANKS), _InitInProgress(true), _InitDeltaReceived(0)
 {
 }
 

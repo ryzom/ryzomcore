@@ -992,8 +992,8 @@ public:
 			  * NB : the system should be restarted for this to work correctly
 			  * The default is true
 			  */
-				void enableEmitThreshold(bool enabled = true) { _EmitThreshold = enabled; }
-				bool isEmitThresholdEnabled() const { return _EmitThreshold; }
+			void enableEmitThreshold(bool enabled = true) { _EmitThreshold = enabled; }
+			bool isEmitThresholdEnabled() const { return _EmitThreshold; }
 
 			// activate // deactivate all emitters in the system
 			void activateEmitters(bool active);
