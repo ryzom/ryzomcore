@@ -1125,7 +1125,7 @@
                 target="tab1:active" />
           <link expr="and(@UI:SAVE:ISENABLED:UNIVERSE_CHAT,
                                                                 not(@UI:SAVE:ISDETACHED:UNIVERSE_CHAT))"
-                target="tab7:active" />
+                target="tab6:active" />
           <link expr="and (and(%is_team_present, @UI:SAVE:ISENABLED:TEAM_CHAT),
                                                                 not(@UI:SAVE:ISDETACHED:TEAM_CHAT))"
                 target="tab2:active" />

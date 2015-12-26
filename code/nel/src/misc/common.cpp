@@ -687,24 +687,6 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	si.cb = sizeof(si);
 
-/*	SECURITY_ATTRIBUTES sa;
-	sa.nLength = sizeof (sa);
-	sa.lpSecurityDescriptor = NULL;
-	sa.bInheritHandle = FALSE;
-
-	STARTUPINFO si;
-	si.cb = sizeof (si);
-	si.lpReserved = NULL;
-	si.lpDesktop = NULL;
-	si.lpTitle = NULL;
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.cbReserved2 = 0;
-	si.wShowWindow = SW_MINIMIZE;
-	si.lpReserved2 = NULL;
-
-	PROCESS_INFORMATION pi;
-*/
-
 	// Enable nlassert/nlstop to display the error reason & callstack
 	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
 	TCHAR envBuf [2];

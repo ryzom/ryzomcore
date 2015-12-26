@@ -87,6 +87,7 @@ struct	CGlExtensions
 	bool	GLXEXTSwapControl;
 	bool	GLXSGISwapControl;
 	bool	GLXMESASwapControl;
+	bool	GLXMESAQueryRenderer;
 
 	// ATI Extensions.
 	bool	ATIVertexArrayObject;
@@ -164,6 +165,7 @@ public:
 		GLXEXTSwapControl= false;
 		GLXSGISwapControl= false;
 		GLXMESASwapControl= false;
+		GLXMESAQueryRenderer= false;
 		EXTBlendColor= false;
 		ATIVertexArrayObject= false;
 		ATIEnvMapBumpMap = false;
@@ -264,6 +266,7 @@ public:
 		result += GLXEXTSwapControl ? "GLXEXTSwapControl " : "";
 		result += GLXSGISwapControl ? "GLXSGISwapControl " : "";
 		result += GLXMESASwapControl ? "GLXMESASwapControl " : "";
+		result += GLXMESAQueryRenderer ? "GLXMESAQueryRenderer " : "";
 #endif
 
 		result += "\n  Array/VBO: ";
@@ -815,6 +818,10 @@ extern PFNGLXSWAPINTERVALSGIPROC			nglXSwapIntervalSGI;
 
 extern PFNGLXSWAPINTERVALMESAPROC			nglXSwapIntervalMESA;
 extern PFNGLXGETSWAPINTERVALMESAPROC		nglXGetSwapIntervalMESA;
+
+// GLX_MESA_query_renderer
+// =======================
+extern PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC	nglXQueryCurrentRendererIntegerMESA;
 
 #endif
 
