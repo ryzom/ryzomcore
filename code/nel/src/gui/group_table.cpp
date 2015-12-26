@@ -764,7 +764,7 @@ namespace NLGUI
 					}
 
 					// Resize the array
-					if (column>=_Columns.size())
+					if (column >= _Columns.size())
 						_Columns.resize(column+1);
 
 					// Handle rowspan from previous row
@@ -773,7 +773,7 @@ namespace NLGUI
 						_Columns[column].RowSpan--;
 						column++;
 						// if previous row had less <TD> elements, then we missing columns
-						if (column>=_Columns.size())
+						if (column >= _Columns.size())
 							_Columns.resize(column+1);
 					}
 

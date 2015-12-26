@@ -1790,13 +1790,13 @@ namespace NLGUI
 				for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 				{
 					CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-					if(!rMG.Group || rMG.Group->getId()!="ui:interface")
+					if (!rMG.Group || rMG.Group->getId() != "ui:interface")
 						continue;
 
 					// For all priorities, but the worldspace one
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
-						if(nPriority==WIN_PRIORITY_WORLD_SPACE)
+						if (nPriority==WIN_PRIORITY_WORLD_SPACE)
 							continue;
 
 						// For All windows (only layer 0 group container)
@@ -1972,7 +1972,7 @@ namespace NLGUI
 			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
 			{
 				updateAllLocalisedElements ();
-				setScreenWH( w, h );
+				setScreenWH(w, h);
 			}
 		}
 		
@@ -2075,18 +2075,18 @@ namespace NLGUI
 		}
 
 		// Draw the pointer and DND Item
-		if( getPointer() != NULL)
+		if (getPointer() != NULL)
 		{
-			if ( getPointer()->getActive())
+			if (getPointer()->getActive())
 				getPointer()->draw ();
 		}
 
-		if( CInterfaceElement::getEditorMode() )
+		if (CInterfaceElement::getEditorMode())
 		{
 			for( int i = 0; i < editorSelection.size(); i++ )
 			{
-				CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-				if( e != NULL )
+				CInterfaceElement *e = getElementFromId(editorSelection[i]);
+				if (e != NULL)
 					e->drawHighlight();
 			}
 		}
@@ -3541,9 +3541,9 @@ namespace NLGUI
 		// Resolve the widget names
 		for( int i = 0; i < editorSelection.size(); i++ )
 		{
-			CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-			if( e != NULL )
-				elms.push_back( e );
+			CInterfaceElement *e = getElementFromId(editorSelection[i]);
+			if (e != NULL)
+				elms.push_back(e);
 		}
 
 		editorSelection.clear();
@@ -3564,19 +3564,19 @@ namespace NLGUI
 		// Reparent the widgets to the new group
 		for( int i = 0; i < elms.size(); i++ )
 		{
-			CInterfaceElement *e = elms[ i ];
+			CInterfaceElement *e = elms[i];
 			oldId = e->getId();
 			CInterfaceGroup *p = e->getParent();
-			if( p != NULL )
-				p->takeElement( e );
+			if (p != NULL)
+				p->takeElement(e);
 
-			g->addElement( e );
-			e->setParent( g );
-			e->setParentPos( g );
-			e->setParentSize( g );
-			e->setIdRecurse( e->getShortId() );
+			g->addElement(e);
+			e->setParent(g);
+			e->setParentPos(g);
+			e->setParentSize(g);
+			e->setIdRecurse(e->getShortId());
 
-			onWidgetMoved( oldId, e->getId() );
+			onWidgetMoved(oldId, e->getId());
 		}
 		elms.clear();
 
@@ -3724,7 +3724,7 @@ namespace NLGUI
 		_MouseOverWindow = false;
 		inGame = false;
 
-		setScreenWH( 0, 0 );
+		setScreenWH(0, 0);
 
 		_GroupSelection = false;
 		multiSelection = false;
