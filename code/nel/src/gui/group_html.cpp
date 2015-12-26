@@ -5361,8 +5361,8 @@ namespace NLGUI
 				if (it->second == "lighter")
 				{
 					const uint lighter[] = {100, 100, 100, 100, 100, 400, 400, 700, 700};
-					int index = getFontWeight() / 100 - 1;
-					clamp(index, 1, 9);
+					uint index = getFontWeight() / 100 - 1;
+					clamp(index, 1u, 9u);
 					weight = lighter[index-1];
 				}
 				else
@@ -5377,7 +5377,7 @@ namespace NLGUI
 				if (fromString(it->second, weight))
 				{
 					weight = (weight / 100);
-					clamp(weight, 1, 9);
+					clamp(weight, 1u, 9u);
 					weight *= 100;
 				}
 				style.FontWeight = weight;

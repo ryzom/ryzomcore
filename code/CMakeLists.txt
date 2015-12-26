@@ -236,6 +236,7 @@ IF(WITH_QT5)
           ${WINSDK_LIBRARY_DIR}/OpenGL32.lib
           ${WINSDK_LIBRARY_DIR}/WinMM.Lib)
         ADD_QT_PLUGIN(platforms qwindows)
+        ADD_QT_LIBRARY(PlatformSupport)
       ELSEIF(APPLE)
         # Cups needs .dylib
         SET(OLD_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -257,7 +258,9 @@ IF(WITH_QT5)
 
         ADD_QT_PLUGIN(printsupport cocoaprintersupport)
         ADD_QT_PLUGIN(platforms qcocoa)
+        ADD_QT_LIBRARY(PlatformSupport)
       ELSE()
+        # order is very important there
         ADD_QT_PLUGIN(platforms qxcb)
         ADD_QT_PLUGIN(xcbglintegrations qxcb-glx-integration)
 
