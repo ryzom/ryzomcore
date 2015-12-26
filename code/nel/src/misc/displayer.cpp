@@ -520,10 +520,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 //                           in release "<Msg>"
 void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *message)
 {
-//#ifdef NL_OS_WINDOWS
-
 	bool needSpace = false;
-//	stringstream ss;
 	string str;
 
 	// create the string for the clipboard
@@ -536,7 +533,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.LogType != CLog::LOG_NO)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += logTypeToString(args.LogType);
 		needSpace = true;
@@ -544,7 +540,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (!args.ProcessName.empty())
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.ProcessName;
 		needSpace = true;
@@ -552,7 +547,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.FileName != NULL)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += CFile::getFilename(args.FileName);
 		needSpace = true;
@@ -560,7 +554,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.Line != -1)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += NLMISC::toString(args.Line);
 		needSpace = true;
@@ -568,7 +561,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	if (args.FuncName != NULL)
 	{
-		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.FuncName;
 		needSpace = true;
@@ -582,7 +574,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 
 	// create the string on the screen
 	needSpace = false;
-//	stringstream ss2;
 	string str2;
 
 #ifdef NL_DEBUG
@@ -709,8 +700,6 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 			setCrashAlreadyReported(true);
 		}
 	}
-
-//#endif
 }
 
 
