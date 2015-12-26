@@ -541,6 +541,9 @@ PFNGLXSWAPINTERVALSGIPROC					nglXSwapIntervalSGI;
 PFNGLXSWAPINTERVALMESAPROC					nglXSwapIntervalMESA;
 PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 
+// GLX_MESA_query_renderer
+// =======================
+PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC	nglXQueryCurrentRendererIntegerMESA;
 #endif
 
 #endif // USE_OPENGLES
@@ -1888,6 +1891,19 @@ static bool	setupGLXMESASwapControl(const char	*glext)
 	return true;
 }
 
+// *********************************
+static bool	setupGLXMESAQueryRenderer(const char	*glext)
+{
+	H_AUTO_OGL(setupGLXMESAQueryRenderer);
+	CHECK_EXT("GLX_MESA_query_renderer");
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	CHECK_ADDRESS(PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC, glXQueryCurrentRendererIntegerMESA);
+#endif
+
+	return true;
+}
+
 #ifdef USE_OPENGLES
 // ***************************************************************************
 bool registerEGlExtensions(CGlExtensions &ext, EGLDisplay dpy)
@@ -2029,6 +2045,9 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 	ext.GLXEXTSwapControl= setupGLXEXTSwapControl(glext);
 	ext.GLXSGISwapControl= setupGLXSGISwapControl(glext);
 	ext.GLXMESASwapControl= setupGLXMESASwapControl(glext);
+
+	// check for renderer information
+	ext.GLXMESAQueryRenderer= setupGLXMESAQueryRenderer(glext);
 
 	return true;
 }

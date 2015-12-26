@@ -1293,6 +1293,17 @@ sint CDriverGL::getTotalVideoMemory() const
 	{
 		nlerror("3D: Unable to get current renderer ID (%s)", CGLErrorString(error));
 	}
+#else
+	if (_Extensions.GLXMESAQueryRenderer)
+	{
+		uint32 memoryInMiB = 0;
+
+		if (nglXQueryCurrentRendererIntegerMESA(GLX_RENDERER_VIDEO_MEMORY_MESA, &memoryInMiB))
+		{
+			nlinfo("3D: GLX_RENDERER_VIDEO_MEMORY_MESA returned %u MiB", memoryInMiB);
+			return memoryInMiB * 1024;
+		}
+	}
 #endif
 
 	return -1;
