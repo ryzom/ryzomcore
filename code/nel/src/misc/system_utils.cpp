@@ -32,6 +32,8 @@
 #		include <ShObjIdl.h>
 #		define TASKBAR_PROGRESS 1
 #	endif
+#elif defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#include "nel/misc/file.h"
 #endif
 
 #ifdef DEBUG_NEW
@@ -472,7 +474,7 @@ sint CSystemUtils::getTotalVideoMemory()
 {
 	sint res = -1;
 
-#ifdef NL_OS_WINDOWS
+#if defined(NL_OS_WINDOWS)
 	// using DXGI
 	HINSTANCE hDXGI = LoadLibraryA("dxgi.dll");
 
@@ -596,8 +598,192 @@ sint CSystemUtils::getTotalVideoMemory()
 			nlwarning("Unable to load ddraw.dll");
 		}
 	}
+#elif defined(NL_OS_MAC)
+	// the right method is using OpenGL
 #else
-	// TODO: implement for other systems
+	// under Linux, no method is really reliable...
+	NLMISC::CIFile file;
+	
+	std::string logFile = "/var/log/Xorg.0.log";
+
+	// parse last Xorg.0.log
+	if (file.open(logFile, true))
+	{
+		char buffer[256];
+
+		while(!file.eof())
+		{
+			file.getline(buffer, 256);
+			
+			if (buffer[0] == '\0') break;
+
+			std::string line(buffer);
+
+			// nvidia driver
+			std::string::size_type pos = line.find(") NVIDIA(");
+
+			if (pos != std::string::npos)
+			{
+				// [    20.883] (--) NVIDIA(0): Memory: 2097152 kBytes
+				pos = line.find("Memory: ", pos);
+
+				// found memory line
+				if (pos == std::string::npos) continue;
+				pos += 8;
+
+				std::string::size_type posUnits = line.find(" kBytes", pos);
+
+				// found units in KiB
+				if (posUnits == std::string::npos) continue;
+
+				std::string videoMemory = line.substr(pos, posUnits-pos);
+					
+				if (!NLMISC::fromString(videoMemory, res)) continue;
+
+				nlinfo("Xorg NVIDIA driver reported %d KiB of video memory", res);
+				break;
+			}
+
+			// intel driver
+			pos = line.find(") intel(");
+
+			if (pos != std::string::npos)
+			{
+				// (**) intel(0): VideoRam: 131072 KB
+				pos = line.find("VideoRam: ", pos);
+
+				// found memory line
+				if (pos == std::string::npos) continue;
+				pos += 10;
+
+				std::string::size_type posUnits = line.find(" KB", pos);
+
+				// found units in KiB
+				if (posUnits == std::string::npos) continue;
+
+				std::string videoMemory = line.substr(pos, posUnits-pos);
+					
+				if (!NLMISC::fromString(videoMemory, res)) continue;
+
+				nlinfo("Xorg Intel driver reported %d KiB of video memory", res);
+				break;
+			}
+
+			// TODO: other drivers: nv, fglrx (ATI), radeon (ATI)
+		}
+
+		file.close();
+	}
+
+	if (res == -1)
+	{
+		// use lspci
+		std::string command = "lspci";
+
+		std::string out = getCommandOutput(command);
+
+		if (out.empty())
+		{
+			nlwarning("Unable to launch %s", command.c_str());
+		}
+		else
+		{
+			std::vector<std::string> lines;
+			std::string deviceId;
+
+			explode(out, std::string("\n"), lines, true);
+	
+			// process each line
+			for(uint i = 0; i < lines.size(); ++i)
+			{
+				std::string line = lines[i];
+	
+				if (line.find("VGA") == std::string::npos &&
+					line.find("3D") == std::string::npos &&
+					line.find("2D") == std::string::npos)
+					continue;
+
+				std::string::size_type pos = line.find(' ');
+			
+				if (pos == std::string::npos) continue;
+
+				// found device ID
+				deviceId = line.substr(0, pos);
+				break;
+			}
+
+			if (deviceId.empty())
+			{
+				nlwarning("Unable to find a 3D device with lspci");
+			}
+			else
+			{
+				command = "lspci -v -s " + deviceId;
+
+				out = getCommandOutput(command);
+
+				if (out.empty())
+				{
+					nlwarning("Unable to launch %s", command.c_str());
+				}
+				else
+				{
+					explode(out, std::string("\n"), lines, true);
+
+					// process each line
+					for(uint i = 0; i < lines.size(); ++i)
+					{
+						std::string line = lines[i];
+	
+						// look for a size
+						std::string::size_type pos0 = line.find("[size=");
+						if (pos0 == std::string::npos) continue;
+
+						// move to first digit
+						pos0 += 6;
+
+						// end of the size
+						std::string::size_type pos1 = line.find("]", pos0);
+						if (pos1 == std::string::npos) continue;
+
+						sint units;
+
+						if (line.substr(pos1-1, 1) == "M")
+						{
+							// size in MiB
+							units = 1024;
+							--pos1;
+						}
+						else if (line.substr(pos1-1, 1) == "K")
+						{
+							// size in KiB
+							units = 1;
+							--pos1;
+						}
+						else
+						{
+							// size in B
+							units = 0;
+						}
+
+						// extract the size
+						std::string sizeStr = line.substr(pos0, pos1-pos0);
+
+						// convert size to integer with right units
+						sint tmpSize;
+						if (!NLMISC::fromString(sizeStr, tmpSize)) continue;
+
+						tmpSize *= units;
+
+						// take the higher size (up to 256 MiB apparently)
+						if (tmpSize > res) res = tmpSize;
+					}
+
+					nlinfo("lspci reported %d KiB of video memory", res);
+				}
+			}
+		}
+	}
 #endif
 
 	return res;
