@@ -335,7 +335,7 @@ namespace NLGUI
 												sint32 newW, sint32 newH) const;
 		
 		// move windows according to new screen size
-		void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI );
+		void moveAllWindowsToNewScreenSize(uint32 newScreenW, uint32 newScreenH, bool fixCurrentUI );
 		
 		void updateAllLocalisedElements();
 

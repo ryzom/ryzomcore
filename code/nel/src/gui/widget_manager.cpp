@@ -1774,7 +1774,7 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CWidgetManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
+	void CWidgetManager::moveAllWindowsToNewScreenSize(uint32 newScreenW, uint32 newScreenH, bool fixCurrentUI)
 	{
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = getAllMasterGroup();
 		// If resolutions correctly setuped, and really different from new setup
@@ -2083,7 +2083,7 @@ namespace NLGUI
 
 		if (CInterfaceElement::getEditorMode())
 		{
-			for( int i = 0; i < editorSelection.size(); i++ )
+			for(uint i = 0; i < editorSelection.size(); ++i)
 			{
 				CInterfaceElement *e = getElementFromId(editorSelection[i]);
 				if (e != NULL)
@@ -3376,8 +3376,8 @@ namespace NLGUI
 	void CWidgetManager::getEditorSelection( std::vector< std::string > &selection )
 	{
 		selection.clear();
-		for( int i = 0; i < editorSelection.size(); i++ )
-			selection.push_back( editorSelection[ i ] );
+		for(uint i = 0; i < editorSelection.size(); ++i)
+			selection.push_back(editorSelection[i]);
 	}
 
 	void CWidgetManager::selectWidget( const std::string &name )
@@ -3539,7 +3539,7 @@ namespace NLGUI
 		std::vector< CInterfaceElement* > elms;
 
 		// Resolve the widget names
-		for( int i = 0; i < editorSelection.size(); i++ )
+		for(uint i = 0; i < editorSelection.size(); ++i)
 		{
 			CInterfaceElement *e = getElementFromId(editorSelection[i]);
 			if (e != NULL)
@@ -3562,7 +3562,7 @@ namespace NLGUI
 		std::string oldId;
 
 		// Reparent the widgets to the new group
-		for( int i = 0; i < elms.size(); i++ )
+		for(uint i = 0; i < elms.size(); ++i)
 		{
 			CInterfaceElement *e = elms[i];
 			oldId = e->getId();
@@ -3631,7 +3631,7 @@ namespace NLGUI
 	{
 		reset();
 
-		for( int i = 0; i < _MasterGroups.size(); i++ )
+		for(uint i = 0; i < _MasterGroups.size(); ++i)
 			delete _MasterGroups[i].Group;
 		_MasterGroups.clear();
 
