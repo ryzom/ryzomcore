@@ -398,7 +398,7 @@ namespace NLGUI
 			{
 				time_t now;
 				time(&now);
-				if (expires < now)
+				if (expires < (uint32)now)
 				{
 					nlwarning("cookie expired, remove from list '%s'", nsformat);
 					HTTPCookies[domain].erase(chunks[5]);

@@ -152,8 +152,10 @@ bool						UseEscapeDuringLoading = USE_ESCAPE_DURING_LOADING;
 #define	ENTITY_TEXTURE_NORMAL_LEVEL		1
 #define	ENTITY_TEXTURE_HIGH_LEVEL		0
 // Size in MB of the cache for entity texturing.
-#define	ENTITY_TEXTURE_NORMAL_MEMORY	40
-#define	ENTITY_TEXTURE_HIGH_MEMORY		160
+#define	ENTITY_TEXTURE_LOW_MEMORY		10	// 64, 32 or less
+#define	ENTITY_TEXTURE_NORMAL_MEMORY	40	// 128
+#define	ENTITY_TEXTURE_HIGH_MEMORY		80	// 256
+#define	ENTITY_TEXTURE_VERY_HIGH_MEMORY	160	// 512 and more
 // Size in KB of max upload per frame
 #define ENTITY_TEXTURE_LOW_MAXUP		64
 #define ENTITY_TEXTURE_NORMAL_MAXUP		128
@@ -884,33 +886,67 @@ void initMainLoop()
 			// setup according to client
 			if (ClientCfg.HDTextureInstalled)
 			{
-				if(ClientCfg.HDEntityTexture)
-				{
-					// temporary code for debug
-					sint videoMemory = Driver->getTotalVideoMemory();
+				sint videoMemory;
 
+				// only detect amount of video memory if using HD textures
+				if (ClientCfg.HDEntityTexture)
+				{
+					// determine video memory using 3D driver
+					videoMemory = Driver->getTotalVideoMemory();
+
+					// if unable to determine, use plaform methods
 					if (videoMemory < 0) videoMemory = CSystemUtils::getTotalVideoMemory();
+
+					// in the worst case, use default value of 128 MiB
+					if (videoMemory < 0) videoMemory = 128 * 1024;
 
 					videoMemory /= 1024; // size in MiB
 
-					nlinfo("Video Memory detected: %d MiB", videoMemory);
-
-					// setup "v2 texture" (or 512*512)
-					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_HIGH_LEVEL);
-					// Allow a big cache for them (should be on 512 Mo card only)
-					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_HIGH_MEMORY*1024*1024);
-					// Allow high upload
-					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_HIGH_MAXUP*1024);
+					nlinfo("Video memory detected: %d MiB", videoMemory);
 				}
 				else
 				{
-					// setup "v1 texture" (or 256*256)
-					Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, ENTITY_TEXTURE_NORMAL_LEVEL);
-					// Allow a big cache for them
-					Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
-					// Allow normal upload
-					Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_NORMAL_MAXUP*1024);
+					// 32 MiB of VRAM if DivideTextureSizeBy2 else 64 MiB
+					videoMemory = ClientCfg.DivideTextureSizeBy2 ? 32:64;
 				}
+
+				uint maxText, maxLevel, maxup;
+
+				if (videoMemory > 256)
+				{
+					// 512 MB or higher
+					maxLevel = ENTITY_TEXTURE_HIGH_LEVEL;
+					maxText = ENTITY_TEXTURE_VERY_HIGH_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else if (videoMemory > 128)
+				{
+					// 256 MB
+					maxLevel = ENTITY_TEXTURE_HIGH_LEVEL;
+					maxText = ENTITY_TEXTURE_HIGH_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else if (videoMemory > 64)
+				{
+					// 128 MB
+					maxLevel = ENTITY_TEXTURE_NORMAL_LEVEL;
+					maxText = ENTITY_TEXTURE_NORMAL_MEMORY;
+					maxup = ENTITY_TEXTURE_HIGH_MAXUP;
+				}
+				else
+				{
+					// 64 MB or lower
+					maxLevel = ENTITY_TEXTURE_NORMAL_LEVEL;
+					maxText = ENTITY_TEXTURE_LOW_MEMORY;
+					maxup = ENTITY_TEXTURE_NORMAL_MAXUP;
+				}
+
+				// setup "v2 texture" (or 512*512) or "v1 texture" (or 256*256)
+				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL, maxLevel);
+				// Allow a big cache for them
+				Driver->setupMaxTotalAsyncTextureSize(maxText*1024*1024);
+				// Allow normal or high upload
+				Driver->setupAsyncTextureMaxUploadPerFrame(maxup*1024);
 			}
 			else
 			{
@@ -919,7 +955,7 @@ void initMainLoop()
 				*/
 				Driver->setupAsyncTextureLod(ENTITY_TEXTURE_COARSE_LEVEL-1, ENTITY_TEXTURE_NORMAL_LEVEL-1);
 				// Allow a big cache for them
-				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_NORMAL_MEMORY*1024*1024);
+				Driver->setupMaxTotalAsyncTextureSize(ENTITY_TEXTURE_LOW_MEMORY*1024*1024);
 				// Allow low upload
 				Driver->setupAsyncTextureMaxUploadPerFrame(ENTITY_TEXTURE_LOW_MAXUP*1024);
 			}

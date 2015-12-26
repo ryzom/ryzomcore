@@ -1722,8 +1722,8 @@ namespace NLGUI
 		// *** First detect from which screen position the window is the more sticked (borders or center)
 		// In X: best hotspot is left, middle or right?
 		sint32	posXToLeft= x;
-		sint32	posXToMiddle= x+w/2-screenW/2;
-		sint32	posXToRight= screenW-(x+w);
+		sint32	posXToMiddle= x+w/2-_ScreenW/2;
+		sint32	posXToRight= _ScreenW-(x+w);
 		sint32	bestXHotSpot= Hotspot_xL;
 		sint32	bestXPosVal= posXToLeft;
 		if(abs(posXToMiddle) < bestXPosVal)
@@ -1740,8 +1740,8 @@ namespace NLGUI
 		// Same In Y: best hotspot is bottom, middle or top?
 		// remember here that y is the top of window (relative to bottom of screen)
 		sint32	posYToBottom= y-h;
-		sint32	posYToMiddle= y-h/2-screenH/2;
-		sint32	posYToTop= screenH-y;
+		sint32	posYToMiddle= y-h/2-_ScreenH/2;
+		sint32	posYToTop= _ScreenH-y;
 		sint32	bestYHotSpot= Hotspot_Bx;
 		sint32	bestYPosVal= posYToBottom;
 		const	sint32	middleYWeight= 6;		// Avoid default Mission/Team/Map/ContactList positions to be considered as "middle"
@@ -1774,13 +1774,13 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CWidgetManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
+	void CWidgetManager::moveAllWindowsToNewScreenSize(uint32 newScreenW, uint32 newScreenH, bool fixCurrentUI)
 	{
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = getAllMasterGroup();
 		// If resolutions correctly setuped, and really different from new setup
-		if( screenW >0 && screenH>0 &&
+		if( _ScreenW >0 && _ScreenH>0 &&
 			newScreenW >0 && newScreenH>0 &&
-			( screenW != newScreenW || screenH != newScreenH)
+			( _ScreenW != newScreenW || _ScreenH != newScreenH)
 			)
 		{
 			// *** Do it for the Active Desktop (if wanted)
@@ -1790,13 +1790,13 @@ namespace NLGUI
 				for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 				{
 					CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-					if(!rMG.Group || rMG.Group->getId()!="ui:interface")
+					if (!rMG.Group || rMG.Group->getId() != "ui:interface")
 						continue;
 
 					// For all priorities, but the worldspace one
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
-						if(nPriority==WIN_PRIORITY_WORLD_SPACE)
+						if (nPriority==WIN_PRIORITY_WORLD_SPACE)
 							continue;
 
 						// For All windows (only layer 0 group container)
@@ -1842,8 +1842,8 @@ namespace NLGUI
 		// Now those are the last screen coordinates used for window position correction
 		if(newScreenW >0 && newScreenH>0)
 		{
-			screenW = newScreenW;
-			screenH = newScreenH;
+			_ScreenW = newScreenW;
+			_ScreenH = newScreenH;
 		}
 	}
 
@@ -1966,13 +1966,13 @@ namespace NLGUI
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
 		CViewRenderer::getInstance()->getScreenSize (w, h);
-		if ((w != screenW) || (h != screenH))
+		if ((w != _ScreenW) || (h != _ScreenH))
 		{
 			// No Op if screen minimized
 			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
 			{
 				updateAllLocalisedElements ();
-				setScreenWH( w, h );
+				setScreenWH(w, h);
 			}
 		}
 		
@@ -2075,18 +2075,18 @@ namespace NLGUI
 		}
 
 		// Draw the pointer and DND Item
-		if( getPointer() != NULL)
+		if (getPointer() != NULL)
 		{
-			if ( getPointer()->getActive())
+			if (getPointer()->getActive())
 				getPointer()->draw ();
 		}
 
-		if( CInterfaceElement::getEditorMode() )
+		if (CInterfaceElement::getEditorMode())
 		{
-			for( int i = 0; i < editorSelection.size(); i++ )
+			for(uint i = 0; i < editorSelection.size(); ++i)
 			{
-				CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-				if( e != NULL )
+				CInterfaceElement *e = getElementFromId(editorSelection[i]);
+				if (e != NULL)
 					e->drawHighlight();
 			}
 		}
@@ -3376,8 +3376,8 @@ namespace NLGUI
 	void CWidgetManager::getEditorSelection( std::vector< std::string > &selection )
 	{
 		selection.clear();
-		for( int i = 0; i < editorSelection.size(); i++ )
-			selection.push_back( editorSelection[ i ] );
+		for(uint i = 0; i < editorSelection.size(); ++i)
+			selection.push_back(editorSelection[i]);
 	}
 
 	void CWidgetManager::selectWidget( const std::string &name )
@@ -3539,11 +3539,11 @@ namespace NLGUI
 		std::vector< CInterfaceElement* > elms;
 
 		// Resolve the widget names
-		for( int i = 0; i < editorSelection.size(); i++ )
+		for(uint i = 0; i < editorSelection.size(); ++i)
 		{
-			CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-			if( e != NULL )
-				elms.push_back( e );
+			CInterfaceElement *e = getElementFromId(editorSelection[i]);
+			if (e != NULL)
+				elms.push_back(e);
 		}
 
 		editorSelection.clear();
@@ -3562,21 +3562,21 @@ namespace NLGUI
 		std::string oldId;
 
 		// Reparent the widgets to the new group
-		for( int i = 0; i < elms.size(); i++ )
+		for(uint i = 0; i < elms.size(); ++i)
 		{
-			CInterfaceElement *e = elms[ i ];
+			CInterfaceElement *e = elms[i];
 			oldId = e->getId();
 			CInterfaceGroup *p = e->getParent();
-			if( p != NULL )
-				p->takeElement( e );
+			if (p != NULL)
+				p->takeElement(e);
 
-			g->addElement( e );
-			e->setParent( g );
-			e->setParentPos( g );
-			e->setParentSize( g );
-			e->setIdRecurse( e->getShortId() );
+			g->addElement(e);
+			e->setParent(g);
+			e->setParentPos(g);
+			e->setParentSize(g);
+			e->setIdRecurse(e->getShortId());
 
-			onWidgetMoved( oldId, e->getId() );
+			onWidgetMoved(oldId, e->getId());
 		}
 		elms.clear();
 
@@ -3631,7 +3631,7 @@ namespace NLGUI
 	{
 		reset();
 
-		for( int i = 0; i < _MasterGroups.size(); i++ )
+		for(uint i = 0; i < _MasterGroups.size(); ++i)
 			delete _MasterGroups[i].Group;
 		_MasterGroups.clear();
 
@@ -3724,7 +3724,7 @@ namespace NLGUI
 		_MouseOverWindow = false;
 		inGame = false;
 
-		setScreenWH( 0, 0 );
+		setScreenWH(0, 0);
 
 		_GroupSelection = false;
 		multiSelection = false;

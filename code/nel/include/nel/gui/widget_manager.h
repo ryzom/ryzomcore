@@ -335,7 +335,7 @@ namespace NLGUI
 												sint32 newW, sint32 newH) const;
 		
 		// move windows according to new screen size
-		void moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI );
+		void moveAllWindowsToNewScreenSize(uint32 newScreenW, uint32 newScreenH, bool fixCurrentUI );
 		
 		void updateAllLocalisedElements();
 
@@ -481,7 +481,7 @@ namespace NLGUI
 		void setIngame( bool i ){ inGame = i; }
 		bool isIngame() const{ return inGame; }
 
-		void setScreenWH( uint32 w, uint32 h ){ screenW = w; screenH = h; }
+		void setScreenWH(uint32 w, uint32 h){ _ScreenW = w; _ScreenH = h; }
 
 		void registerNewScreenSizeHandler( INewScreenSizeHandler *handler );
 		void removeNewScreenSizeHandler( INewScreenSizeHandler *handler );
@@ -612,8 +612,8 @@ namespace NLGUI
 
 		CEventDescriptorKey lastKeyEvent;
 
-		uint32 screenH;
-		uint32 screenW;
+		uint32 _ScreenH;
+		uint32 _ScreenW;
 		
 		std::vector< CInterfaceAnim* > activeAnims;
 

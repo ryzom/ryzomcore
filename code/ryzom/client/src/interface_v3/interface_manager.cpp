@@ -495,8 +495,8 @@ CInterfaceManager::CInterfaceManager()
 	CViewRenderer::getInstance()->checkNewScreenSize();
 	{
 		uint32 w,h;
-		CViewRenderer::getInstance()->getScreenSize( w, h );
-		CWidgetManager::getInstance()->setScreenWH( w, h );
+		CViewRenderer::getInstance()->getScreenSize(w, h);
+		CWidgetManager::getInstance()->setScreenWH(w, h);
 	}
 	CViewRenderer::getInstance()->init();
 

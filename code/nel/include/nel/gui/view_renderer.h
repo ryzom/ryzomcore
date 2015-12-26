@@ -169,7 +169,7 @@ namespace NLGUI
 		/*
 		 * getScreenSize : get the screen window size changed (at last checkNewScreenSize called)
 		 */
-		void getScreenSize (uint32 &w, uint32 &h);
+		void getScreenSize(uint32 &w, uint32 &h);
 
 		/*
 		 * get OOW / OOH

@@ -1640,6 +1640,9 @@ void	CWaterModel::traverseRender()
 		for(sint k = 0; k < (sint) poly.Vertices.size() - 2; ++k)
 		{
 			NLMISC::CTriangleUV truv;
+			truv.Uv0.set(0.f, 0.f);
+			truv.Uv1.set(0.f, 0.f);
+			truv.Uv2.set(0.f, 0.f);
 			truv.V0.set(poly.Vertices[0].x, poly.Vertices[0].y, 0.f);
 			truv.V1.set(poly.Vertices[k + 1].x, poly.Vertices[k + 1].y, 0.f);
 			truv.V2.set(poly.Vertices[k + 2].x, poly.Vertices[k + 2].y, 0.f);

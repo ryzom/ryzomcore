@@ -64,7 +64,7 @@ namespace NLGUI
 			rVR.getClipWindow(x, y, w, h);
 			uint32 sw, sh;
 			rVR.getScreenSize(sw, sh);
-			rVR.setClipWindow(0, 0, (sint32) sw, (sint32) sh);
+			rVR.setClipWindow(0, 0, (sint32)sw, (sint32)sh);
 			rVR.drawRotFlipBitmap (renderLayer, xreal, yreal, wreal, hreal, 0, false, rVR.getBlankTextureId(), color );
 			rVR.setClipWindow(x, y, w ,h);
 		}
@@ -350,7 +350,7 @@ namespace NLGUI
 		{
 			if (_ResizerPos & Hotspot_xR)
 			{
-				clippedNewW = std::min((sint32) sw + _Parent->getW() - _Parent->getXReal(), clippedNewW);
+				clippedNewW = std::min((sint32)sw + _Parent->getW() - _Parent->getXReal(), clippedNewW);
 			}
 			else
 			{
@@ -365,7 +365,7 @@ namespace NLGUI
 			}
 			else
 			{
-				clippedNewW = std::min((sint32) sw - _Parent->getXReal(), clippedNewW);
+				clippedNewW = std::min((sint32)sw - _Parent->getXReal(), clippedNewW);
 			}
 		}
 		//

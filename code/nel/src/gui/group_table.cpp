@@ -715,7 +715,7 @@ namespace NLGUI
 				// *** Get the column sizes, we need to know min for the table
 
 				uint i;
-				sint column = 0;
+				uint column = 0;
 				_Columns.clear ();
 				for (i=0; i<_Cells.size(); i++)
 				{
@@ -764,7 +764,7 @@ namespace NLGUI
 					}
 
 					// Resize the array
-					if (column>=_Columns.size())
+					if (column >= _Columns.size())
 						_Columns.resize(column+1);
 
 					// Handle rowspan from previous row
@@ -773,7 +773,7 @@ namespace NLGUI
 						_Columns[column].RowSpan--;
 						column++;
 						// if previous row had less <TD> elements, then we missing columns
-						if (column>=_Columns.size())
+						if (column >= _Columns.size())
 							_Columns.resize(column+1);
 					}
 
@@ -783,13 +783,12 @@ namespace NLGUI
 					// new column, set rowspan from current <TD>
 					_Columns[column].RowSpan = cell->RowSpan;
 					float colspan = 1.f / cell->ColSpan;
-					float rowspan = 1.f / cell->RowSpan;
 
 					// Update sizes
 					if (cellWidth*colspan > _Columns[column].Width)
-						_Columns[column].Width = cellWidth*colspan;
+						_Columns[column].Width = (sint32)(cellWidth*colspan);
 					if (cell->WidthMax*colspan > _Columns[column].WidthMax)
-						_Columns[column].WidthMax = cell->WidthMax*colspan;
+						_Columns[column].WidthMax = (sint32)(cell->WidthMax*colspan);
 					if (cell->TableRatio*colspan > _Columns[column].TableRatio)
 						_Columns[column].TableRatio = cell->TableRatio*colspan;
 					if (cell->WidthWanted*colspan + additionnalWidth > _Columns[column].WidthWanted)
@@ -1035,7 +1034,7 @@ namespace NLGUI
 					if (cell->TableColumnIndex > 0)
 					{
 						// we have active rowspan, must add up 'skipped' columns
-						for( ; column<cell->TableColumnIndex; ++column)
+						for( ; column < (uint)cell->TableColumnIndex; ++column)
 							currentX += _Columns[column].Width + padding*2 + CellSpacing;
 					}
 
@@ -1081,7 +1080,7 @@ namespace NLGUI
 					cell->Group->updateCoords();
 
 					// Resize the row array
-					float rowspan = 1 / cell->RowSpan;
+					float rowspan = 1.f / (float)cell->RowSpan;
 					_Rows.back().Height = std::max((sint32)(cell->Height*rowspan), std::max(_Rows.back().Height, (sint32)(cell->Group->getH()*rowspan)));
 
 					// Next column
