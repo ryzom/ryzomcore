@@ -214,12 +214,13 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 						dstOffset+= dstChannels;
 
 						uint32 index = curFrame->RasterBits[srcOffset];
-						if (index != transparency)
+
+						if ((sint32)index != transparency)
 						{
 							// make sure color index is not outside colormap
 							if (ColorMap)
 							{
-								if (index > ColorMap->ColorCount)
+								if ((sint)index > ColorMap->ColorCount)
 								{
 									index = 0;
 								}
