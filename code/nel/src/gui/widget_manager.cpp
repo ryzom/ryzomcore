@@ -1722,8 +1722,8 @@ namespace NLGUI
 		// *** First detect from which screen position the window is the more sticked (borders or center)
 		// In X: best hotspot is left, middle or right?
 		sint32	posXToLeft= x;
-		sint32	posXToMiddle= x+w/2-screenW/2;
-		sint32	posXToRight= screenW-(x+w);
+		sint32	posXToMiddle= x+w/2-_ScreenW/2;
+		sint32	posXToRight= _ScreenW-(x+w);
 		sint32	bestXHotSpot= Hotspot_xL;
 		sint32	bestXPosVal= posXToLeft;
 		if(abs(posXToMiddle) < bestXPosVal)
@@ -1740,8 +1740,8 @@ namespace NLGUI
 		// Same In Y: best hotspot is bottom, middle or top?
 		// remember here that y is the top of window (relative to bottom of screen)
 		sint32	posYToBottom= y-h;
-		sint32	posYToMiddle= y-h/2-screenH/2;
-		sint32	posYToTop= screenH-y;
+		sint32	posYToMiddle= y-h/2-_ScreenH/2;
+		sint32	posYToTop= _ScreenH-y;
 		sint32	bestYHotSpot= Hotspot_Bx;
 		sint32	bestYPosVal= posYToBottom;
 		const	sint32	middleYWeight= 6;		// Avoid default Mission/Team/Map/ContactList positions to be considered as "middle"
@@ -1778,9 +1778,9 @@ namespace NLGUI
 	{
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = getAllMasterGroup();
 		// If resolutions correctly setuped, and really different from new setup
-		if( screenW >0 && screenH>0 &&
+		if( _ScreenW >0 && _ScreenH>0 &&
 			newScreenW >0 && newScreenH>0 &&
-			( screenW != newScreenW || screenH != newScreenH)
+			( _ScreenW != newScreenW || _ScreenH != newScreenH)
 			)
 		{
 			// *** Do it for the Active Desktop (if wanted)
@@ -1842,8 +1842,8 @@ namespace NLGUI
 		// Now those are the last screen coordinates used for window position correction
 		if(newScreenW >0 && newScreenH>0)
 		{
-			screenW = newScreenW;
-			screenH = newScreenH;
+			_ScreenW = newScreenW;
+			_ScreenH = newScreenH;
 		}
 	}
 
@@ -1966,7 +1966,7 @@ namespace NLGUI
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
 		CViewRenderer::getInstance()->getScreenSize (w, h);
-		if ((w != screenW) || (h != screenH))
+		if ((w != _ScreenW) || (h != _ScreenH))
 		{
 			// No Op if screen minimized
 			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
