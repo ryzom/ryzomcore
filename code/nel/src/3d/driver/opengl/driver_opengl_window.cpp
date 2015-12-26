@@ -2087,6 +2087,7 @@ bool CDriverGL::getModes(std::vector<GfxMode> &modes)
 					GfxMode mode;
 					mode.Width = sizes[i].width;
 					mode.Height = sizes[i].height;
+					mode.Depth = 32;
 					mode.Frequency = 0;
 					modes.push_back(mode);
 //					nldebug("3D:   Mode %d: %dx%d", i, mode.Width, mode.Height);
