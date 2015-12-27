@@ -1566,12 +1566,21 @@ void	registerGlExtensions(CGlExtensions &ext)
 	H_AUTO_OGL(registerGlExtensions);
 
 	// OpenGL 1.2 ??
-	const char	*nglVersion= (const char *)glGetString (GL_VERSION);
-	sint	a=0, b=0;
+	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
 
-	// 1.2***  ???
-	sscanf(nglVersion, "%d.%d", &a, &b);
-	ext.Version1_2 = (a==1 && b>=2) || (a>=2);
+	if (nglVersion)
+	{
+		sint a = 0, b = 0;
+
+		// 1.2***  ???
+		sscanf(nglVersion, "%d.%d", &a, &b);
+		ext.Version1_2 = (a==1 && b>=2) || (a>=2);
+	}
+	else
+	{
+		nlwarning("3D: Unable to get GL_VERSION, OpenGL 1.2 should be supported on all recent GPU...");
+		ext.Version1_2 = true;
+	}
 
 	const char *vendor = (const char *) glGetString (GL_VENDOR);
 	const char *renderer = (const char *) glGetString (GL_RENDERER);

@@ -1352,9 +1352,9 @@ void CDriverGL::getZBufferPart (std::vector<float>  &zbuffer, NLMISC::CRect &rec
 #ifdef USE_OPENGLES
 		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT16_OES, GL_FLOAT, &(zbuffer[0]));
 #else
-		glPixelTransferf(GL_DEPTH_SCALE, 1.0f) ;
-		glPixelTransferf(GL_DEPTH_BIAS, 0.f) ;
-		glReadPixels (rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT , GL_FLOAT, &(zbuffer[0]));
+		glPixelTransferf(GL_DEPTH_SCALE, 1.0f);
+		glPixelTransferf(GL_DEPTH_BIAS, 0.f);
+		glReadPixels(rect.X, rect.Y, rect.Width, rect.Height, GL_DEPTH_COMPONENT , GL_FLOAT, &(zbuffer[0]));
 #endif
 	}
 }
