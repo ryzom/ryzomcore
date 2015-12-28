@@ -371,7 +371,8 @@ int main(int argc, char **argv)
 	DisableNLDebug = true;
 #endif
 
-	createDebug();
+	// don't create log.log anymore because client.log is used
+	createDebug(NULL, false);
 
 	INelContext::getInstance().setWindowedApplication(true);
 
