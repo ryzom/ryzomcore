@@ -179,6 +179,8 @@ void		CS3TCCompressor::compress(const NLMISC::CBitmap &bmpSrc, bool optMipMap, u
 	DDS_HEADER			dest;
 	NLMISC::CBitmap		picSrc= bmpSrc;
 
+	// initialize DDS_HEADER
+	memset(&dest, 0, sizeof(dest));
 
 	// For all mipmaps, compress.
 	if(optMipMap)
