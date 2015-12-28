@@ -55,16 +55,17 @@ string	DivideBy2Dir= "/d4/";
 /// describes the building infos
 struct CBuildInfo
 {
-	std::string					 InputPath;
-	std::string					 OutputPath;
-	std::string					 HlsInfoPath;
-	std::string					 CachePath;
-	std::vector<std::string>     BitmapExtensions; // the supported extension for bitmaps
-	std::string					 OutputFormat; // png or tga
-	std::string					 DefaultSeparator;
-	TColorMaskVect				 ColorMasks;
+	std::string					InputPath;
+	std::string					OutputPath;
+	std::string					HlsInfoPath;
+	std::string					CachePath;
+	std::vector<std::string>    BitmapExtensions; // the supported extension for bitmaps
+	std::string					OutputFormat; // png or tga
+	std::string					DefaultSeparator;
+	TColorMaskVect				ColorMasks;
 	// how to shift right the size of the src Bitmap for the .hlsinfo
-	uint						 LowDefShift;
+	uint						LowDefShift;
+	uint						OptimizeTextures; // 0 = don't optimize, 1 = check, 2 = optimize
 };
 
 
@@ -345,6 +346,15 @@ int main(int argc, char* argv[])
 					bi.LowDefShift= 3;
 				}
 
+				try
+				{
+					bi.OptimizeTextures = cf.getVar ("optimize_textures").asInt();
+				}
+				catch (const NLMISC::EUnknownVar &)
+				{
+					// don't optimize files by default
+					bi.OptimizeTextures = 0;
+				}
 			}
 			catch (const std::exception &e)
 			{
@@ -648,9 +658,81 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 			if (is.open(fullInputBitmapPath))
 			{
 				depth = srcBitmap.load(is);
+				is.close();
+
 				if (depth == 0 || srcBitmap.getPixels().empty())
 				{
 					throw NLMISC::Exception("Failed to load bitmap");
+				}
+
+				// if bitmap is RGBA but has an alpha channel fully transparent,
+				// we can save it as RGB to optimize it
+				if (bi.OptimizeTextures > 0 && depth == 32)
+				{
+					uint32 size = srcBitmap.getSize(0);
+
+					if (size > 0)
+					{
+						// get a pointer on original data
+						uint8 *data = srcBitmap.getPixels().getPtr();
+
+						// pointer on first alpha value
+						uint8 *tmp = data + 3;
+						uint8 *endData = data + size;
+						uint8 value = *tmp;
+
+						// check if all alphas have the same value
+						while(tmp < endData && *tmp == value) tmp += 4;
+
+						// texture can be converted if all alphas are 0 or 255
+						if (tmp >= endData && (value == 255 || value == 0))
+						{
+							if (bi.OptimizeTextures > 1)
+							{
+								// original depth is now 24 bits, since we discarded alpha channel
+								depth = 24;
+
+								// if texture is fully transparent, make it fully opaque
+								if (value == 0)
+								{
+									tmp = data + 3;
+
+									while(tmp < endData)
+									{
+										*tmp = 255;
+										tmp += 4;
+									}
+								}
+
+								NLMISC::COFile os;
+
+								if (os.open(fullInputBitmapPath))
+								{
+									nlwarning("Optimizing texture %s...", fullInputBitmapPath.c_str());
+
+									std::string ext = CFile::getExtension(fullInputBitmapPath);
+
+									// resave the texture in optimized same format
+									if (ext == "png")
+									{
+										srcBitmap.writePNG(os, 24);
+									}
+									else if (ext == "tga")
+									{
+										srcBitmap.writeTGA(os, 24);
+									}
+									else
+									{
+										nlwarning("Don't support %s format for texture, unable to save it", ext.c_str());
+									}
+								}
+							}
+							else
+							{
+								nlwarning("Texture %s can be optimized", fullInputBitmapPath.c_str());
+							}
+						}
+					}
 				}
 
 				if (srcBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
@@ -702,8 +784,8 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	for (k = 0; k < bi.ColorMasks.size(); ++k)
 	{
 		std::string maskName = fileName + "_" + bi.ColorMasks[k].MaskExt + "." + fileExt;
-		std::string maskFileName = NLMISC::CPath::lookup(maskName,
-														 false, false);
+		std::string maskFileName = NLMISC::CPath::lookup(maskName, false, false);
+
 		if (!maskFileName.empty()) // found the mask ?
 		{
 			CLoopInfo li;
@@ -717,9 +799,50 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 
 				if (is.open(maskFileName))
 				{
-					if (li.Mask.load(is) == 0 || li.Mask.getPixels().empty())
+					// masks are always opaque, if the mask is 8bits, it's in grayscale
+					li.Mask.loadGrayscaleAsAlpha(false);
+
+					uint8 maskDepth = li.Mask.load(is);
+
+					is.close();
+
+					if (maskDepth == 0 || li.Mask.getPixels().empty())
 					{
 						throw NLMISC::Exception("Failed to load mask");
+					}
+
+					// masks can be converted to grayscale files
+					if (bi.OptimizeTextures > 0 && maskDepth > 8)
+					{
+						if (bi.OptimizeTextures > 1)
+						{
+							NLMISC::COFile os;
+
+							if (os.open(maskFileName))
+							{
+								std::string ext = CFile::getExtension(maskFileName);
+
+								nlwarning("Optimizing mask %s...", maskFileName.c_str());
+
+								// resave the texture in optimized same format
+								if (ext == "png")
+								{
+									li.Mask.writePNG(os, 8);
+								}
+								else if (ext == "tga")
+								{
+									li.Mask.writeTGA(os, 8);
+								}
+								else
+								{
+									nlwarning("Don't support %s format for mask, unable to save it", ext.c_str());
+								}
+							}
+						}
+						else
+						{
+							nlwarning("Mask %s can be optimized", maskFileName.c_str());
+						}
 					}
 
 					if (li.Mask.PixelFormat != NLMISC::CBitmap::RGBA)
