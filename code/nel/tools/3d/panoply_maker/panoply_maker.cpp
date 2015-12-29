@@ -669,7 +669,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				// we can save it as RGB to optimize it
 				if (bi.OptimizeTextures > 0 && depth == 32)
 				{
-					uint32 size = srcBitmap.getSize(0);
+					uint32 size = srcBitmap.getPixels().size();
 
 					if (size > 0)
 					{
