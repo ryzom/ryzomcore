@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 			script += testMission->generateDotScript();
 			script = script.replace(NL.c_str(), "\n");
 
-			char *tmp = ::getenv("TEMP");
+			const char *tmp = ::getenv("TEMP");
 		
 			FILE *fp = ::fopen((string(tmp)+"/compiled_mission.script").c_str(), "w");
 			::fwrite(script.data(), script.size(), 1, fp);
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
 
 			// TODO: set diff program in .cfg
 			std::string compareApp = "";
-			sint error = system(compareApp+(string(" ")+string(tmp)+"/compiled_mission.script test_compilateur.script").c_str());
+			std::string command = NLMISC::toString("%s %s/compiled_mission.script test_compilateur.script", compareApp.c_str(), tmp);
+			sint error = system(command.c_str());
 
 			if (error)
 				nlwarning("'%s' failed with error code %d", "", error);
