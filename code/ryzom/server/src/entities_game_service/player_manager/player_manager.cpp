@@ -460,6 +460,7 @@ void CPlayerManager::addClientCallback()
 		{ "SET_PLAYER_SEASON",					cbSetPlayerSeason		}, // from DSS
 
 		{ "TELEPORT_PLAYER",					cbTeleportPlayer		}, // from AIS
+		{ "TRIGGER_WEBIG",						cbTriggerWebig			}, // from AIS
 		
 		{ "SET_CHAR_AIINSTANCE",			cbSetCharacterAIInstance},
 

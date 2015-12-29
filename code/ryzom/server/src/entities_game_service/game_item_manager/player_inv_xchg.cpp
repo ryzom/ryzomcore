@@ -81,7 +81,7 @@ bool CExchangeView::putItemInExchange(uint32 bagSlot, uint32 exchangeSlot, uint3
 
 	// if it is an exchange between 2 players
 	// do not permit exchange of non dropable items, but pet animal ticket are NoDrop item but must ne exchangeable
-	if (_InterlocutorView != NULL && (!form->DropOrSell && form->Family != ITEMFAMILY::PET_ANIMAL_TICKET))
+	if (!item->getMovable() && _InterlocutorView != NULL && form->Family != ITEMFAMILY::PET_ANIMAL_TICKET && (!form->DropOrSell || item->getUnMovable()))
 		return false;
 
 	// Can't trade items locked by owner

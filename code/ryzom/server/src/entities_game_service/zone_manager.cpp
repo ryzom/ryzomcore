@@ -342,16 +342,14 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 	_GooPath = false;
 	_GooActive = false;
 
-	// get place_type of re-spawn point
-	PLACE_TYPE::TPlaceType placeType;
 	if( zone->getPropertyByName("place_type", val) )
 	{
-		placeType = PLACE_TYPE::fromString(val);
-		if( placeType == PLACE_TYPE::Undefined )
-			placeType = PLACE_TYPE::Place;
+		_PlaceType = PLACE_TYPE::fromString(val);
+		if( _PlaceType == PLACE_TYPE::Undefined )
+			_PlaceType = PLACE_TYPE::Place;
 	}
 	else
-		placeType = PLACE_TYPE::Place;
+		_PlaceType = PLACE_TYPE::Place;
 
 	// get children respawn points
 	bool ret = true;
@@ -377,7 +375,7 @@ bool CPlace::build(const NLLIGO::CPrimZone * zone,uint16 id, bool reportAutorise
 					spawn->getType() == RESPAWN_POINT::NEWBIELAND ||
 					spawn->getType() == RESPAWN_POINT::RESPAWNABLE )
 				{
-					(const_cast<CTpSpawnZone *>(spawn))->setPlaceType(placeType);
+					(const_cast<CTpSpawnZone *>(spawn))->setPlaceType(_PlaceType);
 					_RespawnPoints.push_back( idx );
 				}
 			}

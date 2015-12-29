@@ -500,6 +500,9 @@ public:
 	// Set entity mounted
 	void setEntityMounted( const TDataSetRow& entityRowId ) { _EntityMounted = entityRowId; }
 
+	// Set speed factor
+	inline void setSpeedVariationModifier( sint32 speed ) { _PhysScores.SpeedVariationModifier = speed; }
+
 	// get entity mounted
 	const TDataSetRow& getEntityMounted() const { return _EntityMounted(); }
 

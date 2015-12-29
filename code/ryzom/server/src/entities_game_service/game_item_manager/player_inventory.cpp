@@ -186,7 +186,7 @@ CInventoryBase::TInventoryOpResult CInventoryBase::doInsertItem(CGameItemPtr &it
 		vector< pair<uint32,uint32> > Modifs;
 
 		// If slot provided is NULL directly insert item in it
-		if (_Items[slotBegin] == NULL)
+		if (_Items[slotBegin] == NULL && slot != INVENTORIES::INSERT_IN_FIRST_FREE_SLOT)
 		{
 			Modifs.push_back(make_pair(slotBegin, itemStackSize));
 		}

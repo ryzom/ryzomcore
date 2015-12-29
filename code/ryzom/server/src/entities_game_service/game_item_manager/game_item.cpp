@@ -1205,6 +1205,7 @@ CGameItemPtr CGameItem::getItemCopy()
 	item->_SapLoad = _SapLoad;
 	item->_LostHPremains = 0.0f;
 	item->_PhraseId = _PhraseId;
+	item->_RequiredFaction = _RequiredFaction;
 	item->computeItemWornState();
 
 	log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
@@ -1372,9 +1373,12 @@ void CGameItem::clear()
 	_HasPrerequisit= false;
 
 	_LockedByOwner = false;
+	_Movable = false;
+	_UnMovable = false;
 
 	_TypeSkillMods.clear();
 	_PhraseId.clear();
+	_RequiredFaction.clear();
 	_CustomText.clear();
 }
 
@@ -4325,6 +4329,51 @@ void CGameItem::displayInLog( CLog &log )
 	}
 } // displayInLog //
 
+//-----------------------------------------------
+// getStats
+//-----------------------------------------------
+bool CGameItem::getStats(const std::string &stats, std::string &final )
+{
+	if (stats.size() % 2)
+		return false;
+
+	// cut hash in portion of 4
+	for (uint i=0; i<stats.size()/2; i++)
+	{
+		string part = stats.substr(i*2, 2);
+		if (part == "Sh")
+			final += NLMISC::toString("%s|", _SheetId.toString().c_str());
+		else if (part == "Qt")
+			final += NLMISC::toString("%u|", _StackSize);
+		else if (part == "Ql")
+			final += NLMISC::toString("%u|", quality());
+		else if (part == "Cl")
+			final += NLMISC::toString("%u|", (uint)getItemClass());
+		else if (part == "Se")
+			final += NLMISC::toString("%.1f|", getStatEnergy());
+		else if (part == "Hp")
+			final += NLMISC::toString("%u|", durability());
+		else if (part == "HP")
+			final += NLMISC::toString("%u|", maxDurability());
+		else if (part == "Sl")
+			final += NLMISC::toString("%u|", sapLoad());
+		else if (part == "SL")
+			final += NLMISC::toString("%u|", maxSapLoad());
+		else if (part == "Cr")
+			final += NLMISC::toString("%s|", getCreator().toString().c_str());
+		else if (part == "Fo")
+			final += NLMISC::toString("%s|", _Form->Name.c_str());
+		else if (part == "Ct")
+			final += NLMISC::toString("%s|", getCustomText().toString().c_str());
+		else if (part == "Bu")
+			final += NLMISC::toString("%u|", _Form->Bulk);
+		else if (part == "We")
+			final += NLMISC::toString("%u|", _Form->Weight);
+		else
+			return false;
+	}
+	return true;
+} // getStats //
 
 //-----------------------------------------------
 // getClientEnchantValue

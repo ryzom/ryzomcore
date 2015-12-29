@@ -97,6 +97,8 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 				case CChatGroup::universe:
 				case CChatGroup::say:
 				case CChatGroup::shout:
+				case CChatGroup::player:
+				case CChatGroup::nbChatMode:
 					continue;
 				case CChatGroup::team:
 				case CChatGroup::guild:
@@ -130,7 +132,7 @@ void CChatManager::onServiceDown(const std::string &serviceShortName)
 /*
  * Reset ChatLog management
  */
-void	CChatManager::resetChatLog()
+void CChatManager::resetChatLog()
 {
 	std::string	logPath = (LogChatDirectory.get().empty() ? Bsi.getLocalPath() : LogChatDirectory.get());
 	_Displayer.setParam(CPath::standardizePath(logPath) + "chat.log");
@@ -181,7 +183,7 @@ void CChatManager::addClient( const TDataSetRow& id )
 	}
 	else
 	{
-		nlwarning("CChatManager::addClient :  the client %s:%x is already in the manager !", 
+		nlwarning("CChatManager::addClient :  the client %s:%x is already in the manager !",
 			TheDataset.getEntityId(id).toString().c_str(),
 			id.getIndex());
 	}

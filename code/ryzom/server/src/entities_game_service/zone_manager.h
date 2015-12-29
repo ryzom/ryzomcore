@@ -155,6 +155,7 @@ public:
 	bool isGooActive() const { return _GooActive; }
 	bool isMainPlace() const { return _MainPlace; }
 	TAIAlias getAlias()const{ return _Alias; }
+	PLACE_TYPE::TPlaceType getPlaceType() const { return _PlaceType; }
 
 	const std::vector<uint16> & getRespawnPoints() const { return _RespawnPoints; }
 
@@ -178,6 +179,8 @@ private:
 	std::vector<uint16> _RespawnPoints;
 	/// persistant alias
 	TAIAlias	_Alias;
+	/// place type: capital, village etc
+	PLACE_TYPE::TPlaceType	_PlaceType;
 };
 
 /**

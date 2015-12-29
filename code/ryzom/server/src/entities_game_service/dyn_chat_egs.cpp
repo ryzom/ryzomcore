@@ -95,7 +95,7 @@ TChanID CDynChatEGS::addChan(const std::string &name, const ucstring &title, boo
 		{
 			_DynChat.getChan(chan)->Localized = localized;
 			_DynChat.getChan(chan)->Title = title;
-			iosAddChan(chan, noBroadcast, forwardPlayerInputs, unify);
+			iosAddChan(chan, noBroadcast, forwardPlayerInputs, unify, name);
 			_ChanNames.add(chan, name);
 			return chan;
 		}
@@ -108,7 +108,7 @@ TChanID CDynChatEGS::addChan(const std::string &name, const ucstring &title, boo
 	else if (_DynChat.addChan(_NextChanID, false, false, false))
 	{
 		TChanID result = _NextChanID;
-		iosAddChan(_NextChanID, noBroadcast, forwardPlayerInputs, unify);
+		iosAddChan(_NextChanID, noBroadcast, forwardPlayerInputs, unify, name);
 		_DynChat.getChan(_NextChanID)->Localized = localized;
 		_DynChat.getChan(_NextChanID)->Title = title;
 		_ChanNames.add(_NextChanID, name);
@@ -465,13 +465,16 @@ void CDynChatEGS::onServiceDown(NLNET::TServiceId serviceId)
 
 
 //============================================================================================================
-void CDynChatEGS::iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify)
+void CDynChatEGS::iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify, const std::string &name)
 {
 	CMessage msg("DYN_CHAT:ADD_CHAN");
 	msg.serial(chan);	
 	msg.serial(noBroadcast);
 	msg.serial(forwardPlayerInputs);
 	msg.serial(unify);
+	msg.serial(const_cast<std::string&>(name));
+
+	nlinfo("ask IOS to create channel: %s - name: '%s'", chan.toString().c_str(), name.c_str());
 
 	sendMessageViaMirror( "IOS", msg);
 }
@@ -542,12 +545,14 @@ void CDynChatEGS::iosResetDynChat()
 //============================================================================================================
 void CDynChatEGS::iosConnection()
 {
+	nlwarning("IOS connected, add all chan we already have in memory");
+
 	iosResetDynChat();
 	CDynChat::TChanPtrVector chans;
 	_DynChat.getChans(chans);
 	for(uint k = 0; k < chans.size(); ++k)
 	{			
-		iosAddChan(chans[k]->getID(), chans[k]->getDontBroadcastPlayerInputs(), chans[k]->getForwardPlayerIntputToOwnerService(), chans[k]->getUnifiedChannel());
+		iosAddChan(chans[k]->getID(), chans[k]->getDontBroadcastPlayerInputs(), chans[k]->getForwardPlayerIntputToOwnerService(), chans[k]->getUnifiedChannel(), getChanNameFromID(chans[k]->getID()));
 		// add each session in the channel
 		CDynChatSession *currSession = chans[k]->getFirstSession();
 		while (currSession)

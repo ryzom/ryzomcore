@@ -1473,7 +1473,7 @@ void	CWorldPositionManager::computeVision()
 			break;
 
 		cell->setVisionUpdateCycle(CTickEventHandler::getGameCycle());
-		H_TIME(ComputeCellVision, computeCellVision(cell, cellVisionArray, numEntities););
+		H_TIME(ComputeCellVision, computeCellVision(cell, cellVisionArray, numEntities, player->Entity););
 
 		CPlayerInfos	*plv;
 		for (plv=cell->getPlayersList(); plv!=NULL; plv=plv->Next)
@@ -1632,7 +1632,7 @@ TPlayerList::iterator	CWorldPositionManager::prioritizeVisionState(TPlayerList::
 /****************************************************************\
 						computeCellVision()
 \****************************************************************/
-void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities)
+void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities, CWorldEntity *player)
 {
 	STOP_IF(IsRingShard,"Illegal use of CWorldPositionManager on ring shard");
 	CVisionEntry*	fillPtr;				// entities pointer fill buffer
@@ -1656,7 +1656,7 @@ void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entiti
 	// First adds objects
 	fillPtr = entitiesSeenFromCell;
 	endPtr = entitiesSeenFromCell+MAX_SEEN_OBJECTS;
-	fillPtr = cell->addObjects(fillPtr, endPtr, centerCellMask, 0);
+	fillPtr = cell->addObjects(fillPtr, endPtr, centerCellMask, 0, cell->isIndoor(), player);
 
 	// if the cell has vision on other cells
 	if (!cell->isIndoor())
@@ -1706,7 +1706,7 @@ void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entiti
 
 	// then adds entities
 	endPtr = entitiesSeenFromCell+MAX_SEEN_ENTITIES;
-	fillPtr = cell->addEntities(fillPtr, endPtr, centerCellMask, 0);
+	fillPtr = cell->addEntities(fillPtr, endPtr, centerCellMask, 0, cell->isIndoor(), player);
 
 	// if the cell has vision on other cells
 	if (!cell->isIndoor())
@@ -1777,6 +1777,8 @@ void	CWorldPositionManager::setCellVisionToEntity( CWorldEntity *entity, CVision
 	// discard players if vision processing disabled
 	if (!infos->EnableVisionProcessing)
 		return;
+
+	infos->Indoor = entity->CellPtr != NULL && entity->CellPtr->isIndoor();
 
 	// update the player vision, new entities in vision are stored in inVision, old ones in outVision
 	static CPlayerVisionDelta	visionDelta;
@@ -1983,15 +1985,13 @@ void	CWorldPositionManager::computePlayerDeltaVision( CPlayerInfos *infos, CVisi
 		if (e->TempVisionState)
 		{
 			addToEntitiesIn(infos, e, visionDelta);
+			e->TempVisionState = false;
 		}
-
-		cellVision[i].Entity->TempVisionState = false;
 	}
 
 	// reset vision state for entities that were not checked (not enough slots)
 	for (; i<numEntities; ++i)
 		cellVision[i].Entity->TempVisionState = false;
-
 
 	// *** Prevent from splitting vision of controller/controlled entity.
 	// Ex: mounted mounts must not be visible if their rider is not visible.

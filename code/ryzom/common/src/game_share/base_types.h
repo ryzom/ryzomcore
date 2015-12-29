@@ -239,7 +239,7 @@ public:
 
 		CHashCode() {}
 
-		enum { bucket_size = 4, min_buckets = 8, };
+		enum { bucket_size = 4, min_buckets = 8 };
 
 		size_t	operator () ( const TDataSetRow &index ) const { return index.getHashCode(); }
 

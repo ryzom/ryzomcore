@@ -104,37 +104,58 @@ uint32 IMissionStepTemplate::sendRpStepText(CCharacter * user,const std::vector<
 
 	_User = user;
 
-	if ( !_RoleplayText.empty() )
+	if (_RoleplayText.substr(0, 6) == "WEBIG_")
 	{
-		// build the param list
-		getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
-
-		params.reserve(params.size() + _AdditionalParams.size());
-		params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-		if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+		TVectorParamCheck params;
+		string name = _RoleplayText;
+		if (user)
 		{
-			buffer = _RoleplayText + "_";
-			textPtr = &buffer;
+			uint32 userId = PlayerManager.getPlayerId(user->getId());
+			string text = user->getCustomMissionText(_RoleplayText);
+			if (text.empty())
+				return 0;
+			name = _RoleplayText+"_"+toString(userId);
+			ucstring phrase = ucstring(name+"(){["+text+"]}");
+			NLNET::CMessage	msgout("SET_PHRASE");
+			msgout.serial(name);
+			msgout.serial(phrase);
+			sendMessageViaMirror("IOS", msgout);
 		}
-		else
-			textPtr = &_RoleplayText;
-	}
-	
-	if( !textPtr )
-		return 0;
-
-	// solve dynamic names
-	CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
-
-	// if the text was generated, compute its suffix
-	if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
-	{
-		std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
-		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(), name, params );
 	}
 	else
-		return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+	{
+		if ( !_RoleplayText.empty() )
+		{
+			// build the param list
+			getTextParams(nbSteps,(const std::string *&)textPtr,params,stepStates);
 
+			params.reserve(params.size() + _AdditionalParams.size());
+			params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
+			if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+			{
+				buffer = _RoleplayText + "_";
+				textPtr = &buffer;
+			}
+			else
+				textPtr = &_RoleplayText;
+		}
+
+		if( !textPtr )
+			return 0;
+
+		// solve dynamic names
+		CMissionParser::solveEntitiesNames(params,user->getEntityRowId(),giver);
+
+		// if the text was generated, compute its suffix
+		if ( !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+		{
+			std::string text = NLMISC::toString( "%s%u", textPtr->c_str(),nbSteps );
+			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),text,params);
+		}
+		else
+			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(),*textPtr,params);
+	}
 }// IMissionStepTemplate::sendRpStepText
 
 
@@ -153,22 +174,39 @@ uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<ui
 	// If the text is overriden, add the overide parameters
 	if ( !_OverridenText.empty() )
 	{
-		if ( _AddDefaultParams )
+		if (_OverridenText.substr(0, 6) == "WEBIG_")
 		{
-			params.reserve(params.size() + _AdditionalParams.size());
-			params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
-			if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+			string text = _OverridenText;
+			if (user)
 			{
-				buffer = _OverridenText + "_";
-				textPtr = &buffer;
+				uint32 userId = PlayerManager.getPlayerId(user->getId());
+				text = user->getCustomMissionText(_OverridenText);
+				if (text.empty())
+					text = _OverridenText;
 			}
-			else
-				textPtr = &_OverridenText;
+			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal.fromUtf8(text);
+			return STRING_MANAGER::sendStringToClient( user->getEntityRowId(), "LITERAL", params );
 		}
 		else
 		{
-			params = _AdditionalParams;
-			textPtr = &_OverridenText;
+			if ( _AddDefaultParams )
+			{
+				params.reserve(params.size() + _AdditionalParams.size());
+				params.insert(params.end(), _AdditionalParams.begin(), _AdditionalParams.end());
+				if ( textPtr && !textPtr->empty() && (*textPtr)[textPtr->size()-1] == '_' )
+				{
+					buffer = _OverridenText + "_";
+					textPtr = &buffer;
+				}
+				else
+					textPtr = &_OverridenText;
+			}
+			else
+			{
+				params = _AdditionalParams;
+				textPtr = &_OverridenText;
+			}
 		}
 	}
 
