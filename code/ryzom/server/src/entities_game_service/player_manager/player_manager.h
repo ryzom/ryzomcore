@@ -50,7 +50,7 @@ extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 struct CServiceIdHash
 {
-	enum { bucket_size = 4, min_buckets = 8, };
+	enum { bucket_size = 4, min_buckets = 8 };
 	size_t	operator () ( const NLNET::TServiceId &sid ) const { return sid.get(); }
 	bool operator()(const NLNET::TServiceId &left, const NLNET::TServiceId &right) const { return left < right; }
 };
