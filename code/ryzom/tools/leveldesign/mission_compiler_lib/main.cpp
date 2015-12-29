@@ -29,7 +29,7 @@ class IStep;
 
 int main(int argc, char *argv[])
 {
-	CSmartPtr<NLMISC::CApplicationContext> appContext(new NLMISC::CApplicationContext());
+	NLMISC::CApplicationContext appContext;
 
 	CPath::addSearchPath("L:\\primitives\\", true, false);
 
