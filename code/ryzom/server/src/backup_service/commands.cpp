@@ -30,7 +30,7 @@ using namespace NLNET;
 
 CDirectoryRateStat	DirStats;
 
-extern CVariable<string>	SaveShardRoot;
+extern CVariable<string>	SaveShardRootBackupService;
 
 
 NLMISC_COMMAND(displayFileStats, "display file read/write stats for the last minute", "")
@@ -74,9 +74,9 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 	{
 		// just output the list of available shard id
 		vector<string>	shards;
-		CPath::getPathContent(SaveShardRoot, false, true, false, shards);
+		CPath::getPathContent(SaveShardRootBackupService, false, true, false, shards);
 
-		log.displayNL("Listing %u available shard id in path '%s':", shards.size(), SaveShardRoot.c_str());
+		log.displayNL("Listing %u available shard id in path '%s':", shards.size(), SaveShardRootBackupService.c_str());
 		for (uint i=0; i<shards.size(); ++i)
 		{
 			string id = shards[i];
@@ -107,7 +107,7 @@ NLMISC_COMMAND ( dumpCharacterFile, "dump the content of the save file for a cha
 		useFilter = true;
 	}
 
-	string fileName = SaveShardRoot.toString()+"/"+args[0]+"/characters/account_"+args[1]+"_"+args[2]+"_pdr.bin";
+	string fileName = SaveShardRootBackupService.toString()+"/"+args[0]+"/characters/account_"+args[1]+"_"+args[2]+"_pdr.bin";
 	if (!CFile::isExists(fileName))
 	{
 		log.displayNL("The file '%s' (located here '%s') cannot be found in '%s' backup directory", 

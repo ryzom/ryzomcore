@@ -388,6 +388,8 @@ private:
 	std::string					_ReqGrade;
 	std::string					_ReqTeamSize;
 	std::vector<std::string>	_ReqBrick;
+	std::string					_ReqCharacterAge;
+	std::string					_ReqMaxPlayerID;
 	std::string					_ReqSeason;
 //	bool						_ReqEncycloTasksDone;
 	std::string					_ReqEncyclo;

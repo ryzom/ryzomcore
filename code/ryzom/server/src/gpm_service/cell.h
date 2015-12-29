@@ -117,12 +117,15 @@ public:
 
 
 	/// Gets at maximum MAX_SEEN_ENTITIES entities contained in the cell
-	CVisionEntry*	addEntities(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance)
+	CVisionEntry*	addEntities(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
 	{
 		CWorldEntity	*ent = _EntitiesList.getHead();
 		while (ent != NULL && fillPtr < endPtr)
 		{
 			sint32	mask = cellMask & (sint32)(ent->WhoSeesMe);
+			if (mask && indoor && (float)(player->X()-ent->X())*(float)(player->X()-ent->X()) + (float)(player->Y()-ent->Y())*(float)(player->Y()-ent->Y()) > 15625000000)
+				mask = 0;
+			
 			//if (!ent->IsInvisibleToPlayer && mask != 0)
 			if (mask != 0)
 			{
@@ -136,12 +139,15 @@ public:
 		return fillPtr;
 	}
 	/// Gets at maximum MAX_SEEN_ENTITIES entities contained in the cell
-	CVisionEntry*	addObjects(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance)
+	CVisionEntry*	addObjects(CVisionEntry* fillPtr, CVisionEntry* endPtr, uint32 cellMask, uint32 distance, bool indoor, CWorldEntity *player)
 	{
 		CWorldEntity	*ent = _ObjectsList.getHead();
 		while (ent != NULL && fillPtr < endPtr)
 		{
 			sint32	mask = cellMask & (sint32)(ent->WhoSeesMe);
+			if (mask && indoor && (float)(player->X()-ent->X())*(float)(player->X()-ent->X()) + (float)(player->Y()-ent->Y())*(float)(player->Y()-ent->Y()) > 15625000000)
+				mask = 0;
+
 			//if (!ent->IsInvisibleToPlayer && mask != 0)
 			if (mask != 0)
 			{

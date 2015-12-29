@@ -181,7 +181,7 @@ void CDamageScoreTable::addPlayerDamage(TDataSetRow playerRowId, uint32 damage)
 void CDamageScoreTable::addCreatureDamage(TDataSetRow creatureRowId, uint32 damage)
 {
 	nlassert(damage > 0);
-
+	/*
 	CCreatureDamageScore * creatureScore = getCreatureDamageScore(creatureRowId);
 	if (creatureScore == NULL)
 	{
@@ -193,6 +193,7 @@ void CDamageScoreTable::addCreatureDamage(TDataSetRow creatureRowId, uint32 dama
 	{
 		creatureScore->TotalDamage += damage;
 	}
+	*/
 }
 
 //-----------------------------------------------------------------------------
@@ -1694,7 +1695,7 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 		CPVPVersusZone * zone = dynamic_cast<CPVPVersusZone *>(const_cast<CPVPInterface &>(playerChar->getPVPInterface()).getPVPSession());
 		if (zone != NULL)
 		{
-			PVP_CLAN::TPVPClan factionInZone = zone->getCharacterClan(playerChar->getId());
+			/*PVP_CLAN::TPVPClan factionInZone = zone->getCharacterClan(playerChar->getId());
 			if (factionInZone == PVP_CLAN::Neutral)
 				return false;
 			
@@ -1705,7 +1706,7 @@ bool CDamageScoreManager::playerInFactionPvP(const CCharacter * playerChar, PVP_
 			
 			if (withFactionPoints)
 				*withFactionPoints = zone->giveFactionPoints();
-			
+			*/
 			return true;
 		}
 	}

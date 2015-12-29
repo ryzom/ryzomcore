@@ -49,7 +49,7 @@ NL_INSTANCE_COUNTER_IMPL(CBackupInterfaceSingleton);
 // method used to update stuff on config file reload / variable change
 void onSaveShardRootModified( NLMISC::IVariable &var );
 // configuration variables - to be setup in cfg files
-CVariable<string>	SaveShardRoot("variables", "SaveShardRoot", "Root directory of all files saved by any shard", "", 0, true, onSaveShardRootModified, false);
+CVariable<string>	SaveShardRootGameShare("variables", "SaveShardRoot", "Root directory of all files saved by any shard", "", 0, true, onSaveShardRootModified, false);
 
 // stats variables
 CVariable<NLMISC::TTime> BSLastAckTime("BSIF", "BSLastAckTime", "The timestamp of the last ack received from backup system", 0, 0, true);
@@ -103,15 +103,15 @@ void CBackupInterfaceSingleton::init()
 
 	_ShardDependentBsi.init("BS");
 	_ShardDependentBsi.setRemotePath( IService::getInstance()->SaveFilesDirectory.toString() );
-	_ShardDependentBsi.setLocalPath( CPath::standardizePath( SaveShardRoot.get() ) + IService::getInstance()->SaveFilesDirectory.toString() );
+	_ShardDependentBsi.setLocalPath( CPath::standardizePath( SaveShardRootGameShare.get() ) + IService::getInstance()->SaveFilesDirectory.toString() );
 
 	_GlobalBsi.init("BS");
 	_GlobalBsi.setRemotePath( string() );
-	_GlobalBsi.setLocalPath( SaveShardRoot.get() );
+	_GlobalBsi.setLocalPath( SaveShardRootGameShare.get() );
 
 //	_PDBsi.init("PDBS");
 //	_PDBsi.setRemotePath( IService::getInstance()->SaveFilesDirectory.toString() );
-//	_PDBsi.setLocalPath( CPath::standardizePath( SaveShardRoot.get() ) + IService::getInstance()->SaveFilesDirectory.toString() );
+//	_PDBsi.setLocalPath( CPath::standardizePath( SaveShardRootGameShare.get() ) + IService::getInstance()->SaveFilesDirectory.toString() );
 
 	IService::getInstance()->setDirectoryChangeCallback( this );
 }
@@ -357,9 +357,9 @@ void CBackupInterfaceSingleton::onVariableChanged( NLMISC::IVariable &var )
 	if ( var.getName() == "SaveFilesDirectory" )
 	{
 		_ShardDependentBsi.setRemotePath( var.toString() );
-		_ShardDependentBsi.setLocalPath( CPath::standardizePath( SaveShardRoot.get() ) + var.toString() );
+		_ShardDependentBsi.setLocalPath( CPath::standardizePath( SaveShardRootGameShare.get() ) + var.toString() );
 //		_PDBsi.setRemotePath( var.toString() );
-//		_PDBsi.setLocalPath( CPath::standardizePath( SaveShardRoot.get() ) + var.toString() );
+//		_PDBsi.setLocalPath( CPath::standardizePath( SaveShardRootGameShare.get() ) + var.toString() );
 	}
 	else if ( var.getName() == "SaveShardRoot" )
 	{

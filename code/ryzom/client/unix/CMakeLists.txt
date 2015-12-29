@@ -1,7 +1,4 @@
-IF(RYZOM_ETC_PREFIX STREQUAL ".")
-  # in case of local client, only copy 48x48 icon
-  INSTALL(FILES ryzom_48x48.png DESTINATION ${RYZOM_ETC_PREFIX} RENAME ${RYZOM_CLIENT_ICON}.png)
-ELSE()
+IF(WITH_UNIX_STRUCTURE)
   CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/ryzom_client.desktop.in" "${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.desktop")
 
   INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/ryzom_client.desktop" DESTINATION share/applications)
@@ -13,4 +10,7 @@ ELSE()
   INSTALL(FILES ryzom_32x32.png DESTINATION share/icons/hicolor/32x32/apps RENAME ${RYZOM_CLIENT_ICON}.png)
   INSTALL(FILES ryzom_48x48.png DESTINATION share/icons/hicolor/48x48/apps RENAME ${RYZOM_CLIENT_ICON}.png)
   INSTALL(FILES ryzom_128x128.png DESTINATION share/icons/hicolor/128x128/apps RENAME ${RYZOM_CLIENT_ICON}.png)
+ELSE()
+  # in case of local client, only copy 48x48 icon
+  INSTALL(FILES ryzom_48x48.png DESTINATION ${RYZOM_ETC_PREFIX} RENAME ${RYZOM_CLIENT_ICON}.png)
 ENDIF()
