@@ -999,7 +999,7 @@ private:
 	 * compute Cell Vision, 
 	 * \param CCell the cell to compute vision on
 	 */
-	static void computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities);
+	static void computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities, CWorldEntity *player);
 
 	/**
 	 * Update vision for this player

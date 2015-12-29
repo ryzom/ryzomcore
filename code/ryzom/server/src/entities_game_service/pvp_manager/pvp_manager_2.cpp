@@ -213,10 +213,15 @@ std::vector<TChanID> CPVPManager2::getCharacterChannels(CCharacter * user)
 	// Add lang channel, should be first.
 	if (!user->getLangChannel().empty())
 	{
-		TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(user->getLangChannel());
-		if (it != _ExtraFactionChannel.end())
+		std::vector<std::string> langChannels;
+		NLMISC::splitString(user->getLangChannel(), " ", langChannels);
+		for ( uint i = 0; i < langChannels.size(); i++ )
 		{
-			result.push_back((*it).second);
+			TMAPExtraFactionChannel::iterator it = _ExtraFactionChannel.find(langChannels[i]);
+			if (it != _ExtraFactionChannel.end())
+			{
+				result.push_back((*it).second);
+			}
 		}
 	}
 	else
@@ -713,10 +718,15 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 	_Instance->_PVPOutpostAllyReminder = false;
 	_Instance->_PVPOutpostEnemyReminder = false;
 	
+	PVP_RELATION::TPVPRelation relationTmp = PVP_RELATION::Neutral;
 
 	CCharacter * pTarget = dynamic_cast<CCharacter*>(target);
 	if( pTarget )
 	{
+		if (curative && pTarget == actor)
+		{
+			return PVP_RELATION::Ally;
+		}
 		// Full PVP is ennemy of everybody
 		if (pTarget->getFullPVP() || actor->getFullPVP())
 		{
@@ -731,8 +741,8 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		IPVP * pvpSession = pTarget->getPVPInterface().getPVPSession();
 		if( pvpSession )
 		{
-			relation = pvpSession->getPVPRelation( actor, target );
-			if( relation == PVP_RELATION::Ennemy )
+			relationTmp = pvpSession->getPVPRelation( actor, target );
+			if( relationTmp == PVP_RELATION::Ennemy )
 			{
 				pvpSession = actor->getPVPInterface().getPVPSession();
 				if( pvpSession )
@@ -753,12 +763,16 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 						}
 					}
 				}
+			} 
+			else if ( relationTmp != PVP_RELATION::Ally )
+			{
+				relationTmp = PVP_RELATION::NeutralPVP;
 			}
+			relation = relationTmp;
 		}
 		////////////////////////////////////////////////////////
 	}
 
-	PVP_RELATION::TPVPRelation relationTmp = PVP_RELATION::Neutral;
 	uint i;
 	for( i=0; i<_PVPInterface.size(); ++i )
 	{
@@ -970,7 +984,7 @@ bool CPVPManager2::canApplyAreaEffect(CCharacter* actor, CEntityBase * areaTarge
 			// set faction flag
 			if( offensive && _PVPFactionEnemyReminder )
 			{
-				if(pTarget)
+				if(pTarget && pTarget->getId() != actor->getId())
 				{
 					actor->setPVPRecentActionFlag();
 					TeamManager.pvpAttackOccursInTeam( actor, pTarget );

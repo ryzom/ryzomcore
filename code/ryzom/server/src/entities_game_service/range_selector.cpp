@@ -38,14 +38,14 @@ void CRangeSelector::buildDisc( CEntityBase * actor, sint32 x, sint32 y,float ra
 			CEntityBase * areaTarget = &(*it);
 			if( c != 0)
 			{
-				// Do not add the entity if a PVP rule excludes it from being selected
-				if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, offensiveAction, ignoreMainTarget ) )
-					continue;
 				// Do not add invisible entity for player
 				if( !R2_VISION::isEntityVisibleToPlayers(areaTarget->getWhoSeesMe()))
 					continue;
 				// Do not add invulnerable entities, they are GM and use a slot for nothing
 				if( areaTarget && areaTarget->invulnerableMode() )
+					continue;
+				// Do not add the entity if a PVP rule excludes it from being selected
+				if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, offensiveAction, ignoreMainTarget ) )
 					continue;
 			}
 			else
@@ -154,15 +154,16 @@ void CRangeSelector::buildCone(CEntityBase* source , CEntityBase* target,float h
 		CEntityBase * areaTarget = &(*it);
 		if( c != 0 )
 		{
-			// Do not add the entity if a PVP rule excludes it from being selected
-			if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, offensiveAction, ignoreMainTarget ) )
-				continue;
 			// Do not add invisible entity for player
 			if( !R2_VISION::isEntityVisibleToPlayers(areaTarget->getWhoSeesMe()))
 				continue;
 			// Do not add invulnerable entities, they are GM and use a slot for nothing
 			if( areaTarget && areaTarget->invulnerableMode() )
 				continue;
+			// Do not add the entity if a PVP rule excludes it from being selected
+			if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, offensiveAction, ignoreMainTarget ) )
+				continue;
+
 		}
 		else
 		{
@@ -210,15 +211,17 @@ void CRangeSelector::buildChain( CEntityBase* actor, CEntityBase* target, float 
 				CEntityBase * areaTarget = &(*it);
 				if( c != 0 )
 				{
-					// Do not add the entity if a PVP rule excludes it from being selected
-					if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, (nature == ACTNATURE::FIGHT || nature == ACTNATURE::OFFENSIVE_MAGIC), ignoreMainTarget ) )
-						continue;
 					// Do not add invisible entity for player
 					if( !R2_VISION::isEntityVisibleToPlayers(areaTarget->getWhoSeesMe()))
 						continue;
 					// Do not add invulnerable entities, they are GM and use a slot for nothing
 					if( areaTarget && areaTarget->invulnerableMode() )
 						continue;
+
+					// Do not add the entity if a PVP rule excludes it from being selected
+					if( ! CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, (nature == ACTNATURE::FIGHT || nature == ACTNATURE::OFFENSIVE_MAGIC), ignoreMainTarget ) )
+						continue;
+
 				}
 				else
 				{
@@ -250,15 +253,18 @@ void CRangeSelector::buildChain( CEntityBase* actor, CEntityBase* target, float 
 						CEntityBase * areaTarget = &(*it);
 						if( c != 0 )
 						{
-							// Do not add the entity if a PVP rule excludes it from being selected
-							if( CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, (nature == ACTNATURE::FIGHT || nature == ACTNATURE::OFFENSIVE_MAGIC), ignoreMainTarget ) )
-								continue;
 							// Do not add invisible entity player
 							if( !R2_VISION::isEntityVisibleToPlayers(areaTarget->getWhoSeesMe()))
 								continue;
 							// Do not add invulnerable entities, they are GM and use a slot for nothing
 							if( areaTarget && areaTarget->invulnerableMode() )
 								continue;
+
+							// Do not add the entity if a PVP rule excludes it from being selected
+							if( CPVPManager2::getInstance()->canApplyAreaEffect( c, areaTarget, (nature == ACTNATURE::FIGHT || nature == ACTNATURE::OFFENSIVE_MAGIC), ignoreMainTarget ) )
+								continue;
+
+
 						}
 						else
 						{

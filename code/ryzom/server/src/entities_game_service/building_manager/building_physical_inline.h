@@ -74,6 +74,25 @@ inline bool IBuildingPhysical::removeUser(const TDataSetRow & row)
 	return false;
 }
 
+//----------------------------------------------------------------------------
+inline sint32 IBuildingPhysical::getRoomCell( uint16 roomIdx, uint16 ownerIdx )
+{
+	/// simply get the cell matching the parameters
+	if ( roomIdx >= _Rooms.size() )
+	{
+		nlwarning("<BUILDING>Invalid room %u count is %u",roomIdx,_Rooms.size() );
+		return false;
+	}
+	if ( ownerIdx >= _Rooms[roomIdx].Cells.size() )
+	{
+		nlwarning("<BUILDING>Invalid owner idx %u count is %u",ownerIdx,_Rooms[roomIdx].Cells.size());
+		return false;
+	}
+
+	return  _Rooms[roomIdx].Cells[ownerIdx];
+}
+
+
 /*****************************************************************************/
 //						CBuildingPhysicalCommon implementation
 /*****************************************************************************/
@@ -167,7 +186,7 @@ inline void CBuildingPhysicalPlayer::addPlayer( const NLMISC::CEntityId & userId
 {
 	if ( std::find(_Players.begin(), _Players.end(), userId) != _Players.end() )
 	{
-		nlwarning("<BUILDING> trying to add player %s which is already present in the building", userId.toString().c_str());
+		//nlwarning("<BUILDING> trying to add player %s which is already present in the building", userId.toString().c_str());
 		return;
 	}
 
@@ -180,6 +199,30 @@ inline void CBuildingPhysicalPlayer::addPlayer( const NLMISC::CEntityId & userId
 		_Rooms[i].Cells.push_back( 0 );
 	}
 }
+
+//----------------------------------------------------------------------------
+inline uint16 CBuildingPhysicalPlayer::getOwnerIdx( const NLMISC::CEntityId & userId )
+{
+	for ( uint16 i = 0; i < _Players.size(); i++ )
+	{
+		if ( _Players[i] == userId )
+		{
+			return i;
+		}
+	}
+	
+	_StateCounter++;
+	_Players.push_back( userId );
+	// add an instance cell to each room for this player
+	const uint size = (uint)_Rooms.size();
+	for ( uint i = 0; i < size; i++ )
+	{
+		_Rooms[i].Cells.push_back( 0 );
+	}
+
+	return (uint16)(_Players.size() - 1);
+}
+
 
 //----------------------------------------------------------------------------
 inline void CBuildingPhysicalPlayer::resetRoomCell( uint16 roomIdx,const NLMISC::CEntityId & userId )

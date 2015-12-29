@@ -123,7 +123,7 @@ private:
 	TChanTwinMap 	_ChanNames;
 private:
 	// ios msg
-	void			 iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify);
+	void			 iosAddChan(TChanID chan, bool noBroadcast, bool forwardPlayerInputs, bool unify, const std::string &name);
 	void			 iosSetHideBubble(TChanID chan, bool hideBubble);
 	void			 iosSetUniversalChannel(TChanID chan, bool universalChannel);
 	void			 iosRemoveChan(TChanID chan);

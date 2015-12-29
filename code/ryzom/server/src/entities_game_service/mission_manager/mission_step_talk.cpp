@@ -172,8 +172,27 @@ class CMissionStepTalk : public IMissionStepTemplate
 				return 0;
 			}
 
+			_User = PlayerManager.getChar(getEntityIdFromRow(user));
+			uint32 userId = PlayerManager.getPlayerId(_User->getId());
+			string text = _PhraseId;
+			if (_User)
+			{
+				uint32 userId = PlayerManager.getPlayerId(_User->getId());
+				text = _User->getCustomMissionText(_PhraseId);
+				if (text.empty())
+					return 0;
+			}
 			TVectorParamCheck params;
+			ucstring phrase = ucstring(_PhraseId+"(){["+text+"]}");
+			NLNET::CMessage	msgout("SET_PHRASE");
+			msgout.serial(_PhraseId);
+			msgout.serial(phrase);
+			sendMessageViaMirror("IOS", msgout);
+
 			return STRING_MANAGER::sendStringToClient( user, _PhraseId, params );
+
+/*			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+			params[0].Literal= text;*/
 		}
 
 		CCreature * bot = CreatureManager.getCreature( interlocutor );

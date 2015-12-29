@@ -1203,7 +1203,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 			CCharacter * winnerChar = PlayerManager.getChar(players[k]);
 			BOMB_IF(winnerChar == NULL, "invalid winner!", continue);
 
-			PVP_CLAN::TPVPClan winnerFaction = PVP_CLAN::None;
+			PVP_CLAN::TPVPClan winnerFaction = PVP_CLAN::Neutral;
 			bool winnerGainFactionPoints = true;
 
 			if (!canPlayerWinPoints(winnerChar, victimChar))
@@ -1247,7 +1247,7 @@ void CDamageScoreManager::playerDeath(CCharacter * victimChar, const CCharacter 
 						fameFactor--;						
 				}
 				clamp(fameFactor, 0, 3);
-				nlinfo("points = %d * %d", fpPerPlayer, fameFactor);
+				//nlinfo("points = %d * %d", fpPerPlayer, fameFactor);
 
 				// player gains faction points
 				changePlayerPvpPoints(winnerChar, sint32(fpPerPlayer) * fameFactor);

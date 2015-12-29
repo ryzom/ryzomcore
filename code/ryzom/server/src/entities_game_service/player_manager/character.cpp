@@ -670,6 +670,8 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_LastTickNpcControlUpdated = CTickEventHandler::getGameCycle();
 
 	_LastWebCommandIndex = 0;
+	_LastUrlIndex = 0;
+
 
 	_CustomMissionsParams.clear();
 
@@ -1532,6 +1534,9 @@ uint32 CCharacter::tickUpdate()
 	{
 		nextUpdate = 8;
 	}
+
+	_SavedPosX = _EntityState.X();
+	_SavedPosY = _EntityState.Y();
 
 	return nextUpdate;
 } // tickUpdate //
@@ -2400,6 +2405,17 @@ void CCharacter::applyRegenAndClipCurrentValue()
 
 	// restore value without weight malus
 	_PhysScores.SpeedVariationModifier -= _LastAppliedWeightMalus;
+
+	// adapt speed of mount without weight malus
+	if( TheDataset.isAccessible(_EntityMounted()) )
+	{
+		TDataSetRow creatureId = _EntityMounted;
+		CCreature *creature = CreatureManager.getCreature(creatureId);
+		if (creature)
+		{
+			creature->setSpeedVariationModifier(_PhysScores.SpeedVariationModifier);
+		}
+	}
 
 	// compute new value
 	_LastAppliedWeightMalus = getWeightMalus();
@@ -3705,7 +3721,28 @@ void CCharacter::setTargetBotchatProgramm( CEntityBase * target, const CEntityId
 
 			// send the web page url
 			SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
-			params[0].Literal= c->getWebPage();
+			string url = c->getWebPage();
+
+			// add ? or & with
+			if ( url.find('?') == string::npos )
+				url += NLMISC::toString("?urlidx=%d", getUrlIndex());
+			else
+				url += NLMISC::toString("&urlidx=%d", getUrlIndex());
+
+			setUrlIndex(getUrlIndex()+1);
+
+			url += "&player_eid="+getId().toString();
+
+			// add cheksum : pnj eid
+			url += "&teid="+c->getId().toString();
+
+			string defaultSalt = toString(getLastConnectedDate());
+			nlinfo(defaultSalt.c_str());
+			nlinfo(url.c_str());
+			string control = "&hmac="+getHMacSHA1((uint8*)&url[0], (uint32)url.size(), (uint8*)&defaultSalt[0], (uint32)defaultSalt.size()).toString();
+
+			params[0].Literal= url+control;
+
 			text = STRING_MANAGER::sendStringToClient(_EntityRowId, "LITERAL", params );
 //			_PropertyDatabase.setProp( "TARGET:CONTEXT_MENU:WEB_PAGE_URL" , text );
 			CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().setWEB_PAGE_URL(_PropertyDatabase, text );
@@ -3856,6 +3893,12 @@ void CCharacter::sendBetaTesterStatus()
 
 	sendReservedTitleStatus( CHARACTER_TITLE::FBT, p->isBetaTester() );
 
+	/*if (!p->isBetaTester() && _Title == CHARACTER_TITLE::FBT)
+	{
+		_Title = CHARACTER_TITLE::Refugee;
+		registerName();
+	}*/
+
 	if (!p->isBetaTester() && _NewTitle == "FBT")
 	{
 		_NewTitle = "Refugee";
@@ -3873,6 +3916,12 @@ void CCharacter::sendWindermeerStatus()
 		return;
 
 	sendReservedTitleStatus( CHARACTER_TITLE::WIND, p->isWindermeerCommunity() );
+
+	/*if ( !p->isWindermeerCommunity() && _Title == CHARACTER_TITLE::WIND)
+	{
+		_Title = CHARACTER_TITLE::Refugee;
+		registerName();
+	}*/
 
 	if ( !p->isWindermeerCommunity() && _NewTitle == "WIND")
 	{
@@ -4343,6 +4392,37 @@ void CCharacter::addKnownBrick( const CSheetId& brickId )
 } //addKnownBrick//
 
 //-----------------------------------------------
+// CCharacter::addKnownBrickBonus add a know brick bonus
+//-----------------------------------------------
+void CCharacter::addKnownBrickBonus( const CSheetId& brickId )
+{
+//	egs_chinfo("<CCharacter::addKnownBrickBonus> adding new known brick idSheet (%s)", brickId.toString().c_str() );
+	const CStaticBrick* brickForm = CSheets::getSBrickForm( brickId );
+	if( brickForm )
+	{
+		
+		// if the brick is a training brick, then apply charac increase
+		if ( BRICK_FAMILIES::brickType(brickForm->Family) == BRICK_TYPE::TRAINING)
+		{
+			processTrainingBrick(brickForm);
+		}
+
+		// if the brick is a bonus that needs to be taken into account now, do it
+		switch ( brickForm->Family )
+		{
+		case BRICK_FAMILIES::BPBHFEA:
+			processForageBonusBrick(brickForm);
+			break;
+		case BRICK_FAMILIES::BPBGLA:
+			processMiscBonusBrick(brickForm);
+			break;
+		default:;
+		}
+	}
+		
+} //addKnownBrickBonus//
+
+//-----------------------------------------------
 // CCharacter::removeKnownBrick remove a known brick
 //-----------------------------------------------
 void CCharacter::removeKnownBrick( const CSheetId& brickId )
@@ -4419,6 +4499,37 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 		nlwarning("<CCharacter::removeKnownBrick> Can't remove known brick cause static form of idSheet (%s) missing", brickId.toString().c_str() );
 	}
 } //removeKnownBrick//
+
+//-----------------------------------------------
+// CCharacter::removeKnownBrickBonus remove a known brick bonus
+//-----------------------------------------------
+void CCharacter::removeKnownBrickBonus( const CSheetId& brickId )
+{
+//	egs_chinfo("<CCharacter::removeKnownBrickBonus> removing a known brick idSheet (%s)", brickId.toString().c_str() );
+	const CStaticBrick* brickForm = CSheets::getSBrickForm( brickId );
+	if( brickForm )
+	{
+	
+		// if the brick is a training brick, then apply charac increase
+		if ( BRICK_FAMILIES::brickType(brickForm->Family) == BRICK_TYPE::TRAINING)
+		{
+			unprocessTrainingBrick(brickForm, true);
+		}
+
+		// if the brick is a bonus that needs to be taken into account now, do it
+		switch ( brickForm->Family )
+		{
+		case BRICK_FAMILIES::BPBHFEA:
+			unprocessForageBonusBrick(brickForm);
+			break;
+		case BRICK_FAMILIES::BPBGLA:
+			unprocessMiscBonusBrick(brickForm);
+			break;
+		default:;
+		}
+	}
+
+} //removeKnownBrickBonus//
 
 //-----------------------------------------------
 // CCharacter::processTrainingBrick
@@ -9896,7 +10007,7 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			nlwarning("<CCharacter sellItem> character %s Invalid item sheet %s : the sheet is invalid",_Id.toString().c_str(),sheet.toString().c_str());
 			return;
 		}
-		if ( !itemForm->DropOrSell )
+		if ( !item->getMovable() && ( !itemForm->DropOrSell || item->getUnMovable() ) )
 		{
 			nlwarning("<CCharacter sellItem> character %s try to sell item slot %u  sheet %s",
 						_Id.toString().c_str(),
@@ -10924,6 +11035,47 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 						c->removeExchangeItems(items2, exchangePlayerPets2);
 					}
 
+					if (haveAnyPrivilege() && !c->haveAnyPrivilege())
+					{
+						for (uint i = 0; i < items1.size(); ++i)
+						{
+							nlinfo ("ADMIN: CSR (%s,%s) exchange %ux%s Q%u with %s",
+								getId().toString().c_str(), 
+								getName().toString().c_str(),
+								items1[i]->getStackSize(),
+								items1[i]->getSheetId().toString().c_str(),
+								items1[i]->quality(),
+								c->getName().toString().c_str());
+						}
+						if (_ExchangeMoney)
+								nlinfo ("ADMIN: CSR (%s,%s) give %u dappers to %s",
+										getId().toString().c_str(), 
+										getName().toString().c_str(),
+										_ExchangeMoney,
+										c->getName().toString().c_str());
+					}
+
+					if (c->haveAnyPrivilege() && !haveAnyPrivilege())
+					{
+						for (uint i = 0; i < items2.size(); ++i)
+						{
+							nlinfo ("ADMIN: CSR (%s,%s) exchange %ux%s Q%u with %s",
+								c->getId().toString().c_str(), 
+								c->getName().toString().c_str(),
+								items2[i]->getStackSize(),
+								items2[i]->getSheetId().toString().c_str(),
+								items2[i]->quality(),
+								getName().toString().c_str());
+						}
+						if (c->_ExchangeMoney)
+							nlinfo ("ADMIN: CSR (%s,%s) give %u dappers to %s",
+								c->getId().toString().c_str(), 
+								c->getName().toString().c_str(),
+								c->_ExchangeMoney,
+								getName().toString().c_str());
+					}
+
+
 					// do the exchange
 					{
 						TLogContext_Item_Swap logContext(_Id);
@@ -11539,7 +11691,8 @@ void CCharacter::cancelStaticActionInProgress(STATIC_ACT_TYPES::TStaticActTypes 
 {
 	setAfkState( false );
 	// changed : always stop links (so one can only have one link at a time... as casting a new one will cancel the previous one)
-	stopAllLinks();
+	if (!isDead())
+		stopAllLinks();
 
 	CPhraseManager::getInstance().cancelTopPhrase(_EntityRowId, true);
 
@@ -13131,6 +13284,66 @@ void CCharacter::setPlaces(const std::vector<const CPlace*> & places)
 }
 
 //-----------------------------------------------
+//	isSpawnValid
+//-----------------------------------------------
+bool CCharacter::isSpawnValid(bool inVillage, bool inOutpost, bool inStable, bool inAtys)
+{
+	if (inVillage)
+		nlinfo("inVillage");
+	if (inOutpost)
+		nlinfo("inOutpost");
+	if (inStable)
+		nlinfo("inStable");
+	if (inAtys)
+		nlinfo("inAtys");
+
+	const uint size = (uint)_Places.size();
+	for ( uint i = 0; i < size; i++ )
+	{
+		CPlace * p = CZoneManager::getInstance().getPlaceFromId( _Places[i] );
+		if (p)
+		{
+			PLACE_TYPE::TPlaceType place_type = p->getPlaceType();
+			nlinfo("Place type = %s", PLACE_TYPE::toString(p->getPlaceType()).c_str());
+			if (!inVillage && (place_type == PLACE_TYPE::Village || place_type == PLACE_TYPE::Capital))
+			{
+				CCharacter::sendDynamicSystemMessage( _EntityRowId, "NO_ACTION_IN_VILLAGE" );
+				return false;
+			}
+			
+			TAIAlias outpostAlias = getOutpostAlias();
+			if (!inOutpost && outpostAlias != 0)
+			{
+				CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias( outpostAlias );
+				if( outpost && outpost->getState() != OUTPOSTENUMS::Peace )
+				{
+					CCharacter::sendDynamicSystemMessage( _EntityRowId, "NO_ACTION_IN_OUPOST" );
+					return false;
+				}
+			}
+
+			if( !inStable && _CurrentStable != 0xFFFF )
+			{
+				CCharacter::sendDynamicSystemMessage( _EntityRowId, "NO_ACTION_IN_STABLE" );
+				return false;
+			}
+
+			TDataSetRow dsr = getEntityRowId();
+			CMirrorPropValueRO<TYPE_CELL> srcCell( TheDataset, dsr, DSPropertyCELL );
+			sint32 cell = srcCell;
+
+			if (!inAtys && cell >= 0)
+			{
+				CCharacter::sendDynamicSystemMessage( _EntityRowId, "NO_ACTION_IN_ATYS" );
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+//-----------------------------------------------
 // memorize
 //-----------------------------------------------
 void CCharacter::memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, const vector<CSheetId> &bricks)
@@ -13658,6 +13871,21 @@ uint16 CCharacter::getFirstFreeSlotInKnownPhrase()
 } // getFirstFreeSlotInKnownPhrase //
 
 
+void CCharacter::sendDynamicMessage(const string &phrase, const string &message)
+{
+	TVectorParamCheck messageParams;
+	ucstring phraseText;
+	string phraseName = phrase;
+	phraseText.fromUtf8(message);
+	ucstring phraseContent = phrase+"(){["+phraseText+"]}";
+	NLNET::CMessage	msgout("SET_PHRASE");
+	msgout.serial(phraseName);
+	msgout.serial(phraseContent);
+	sendMessageViaMirror("IOS", msgout);
+	PHRASE_UTILITIES::sendDynamicSystemMessage( _EntityRowId, phrase, messageParams );
+}
+
+
 void CCharacter::sendUrl(const string &url, const string &salt)
 {
 	string control;
@@ -13672,18 +13900,15 @@ void CCharacter::sendUrl(const string &url, const string &salt)
 	}
 
 	nlinfo(url.c_str());
-	TVectorParamCheck titleParams;
-	TVectorParamCheck textParams;
+	
 	uint32 userId = PlayerManager.getPlayerId(getId());
-	std::string name = "CUSTOM_URL_"+toString(userId);
-	ucstring phrase = ucstring(name+"(){[WEB : "+url+control+"]}");
-	NLNET::CMessage	msgout("SET_PHRASE");
-	msgout.serial(name);
-	msgout.serial(phrase);
-	sendMessageViaMirror("IOS", msgout);
 
+	SM_STATIC_PARAMS_1(textParams, STRING_MANAGER::literal);
+	textParams[0].Literal= "WEB : "+url+control;
+
+	TVectorParamCheck titleParams;
 	uint32 titleId = STRING_MANAGER::sendStringToUser(userId, "web_transactions", titleParams);
-	uint32 textId = STRING_MANAGER::sendStringToUser(userId, name, textParams);
+	uint32 textId = STRING_MANAGER::sendStringToClient(_EntityRowId, "LITERAL", textParams );
 	PlayerManager.sendImpulseToClient(getId(), "USER:POPUP", titleId, textId);
 }
 
@@ -13695,7 +13920,10 @@ void CCharacter::validateDynamicMissionStep(const string &url)
 /// set custom mission param
 void CCharacter::setCustomMissionParams(const string &missionName, const string &params)
 {
-	_CustomMissionsParams[missionName] = params;
+	if (params.empty())
+		_CustomMissionsParams.erase(missionName);
+	else
+		_CustomMissionsParams[missionName] = params;
 }
 
 /// add custom mission param
@@ -13722,6 +13950,21 @@ vector<string> CCharacter::getCustomMissionParams(const string &missionName)
 			NLMISC::splitString(_CustomMissionsParams[missionName], ",", params);
 	}
 	return params;
+}
+
+/// get custom mission text
+string CCharacter::getCustomMissionText(const string &missionName)
+{
+	if (_CustomMissionsParams.empty()) 
+	{
+		return "";
+	}
+	
+	if (!_CustomMissionsParams.empty() && _CustomMissionsParams.find(missionName) != _CustomMissionsParams.end())
+	{
+		return _CustomMissionsParams[missionName];
+	}
+	return "";
 }
 
 
@@ -14063,6 +14306,49 @@ bool CCharacter::pickUpRawMaterial( uint32 indexInTempInv, bool * lastMaterial )
 			return false; // don't try to quarter an item for looting
 		}
 
+		// Send url for Arcc triggers
+
+		vector<string> params = getCustomMissionParams("__LOOT_SHEET__");
+		if (params.size() >= 2)
+		{
+			// check if it's the creature have good sheet
+			CSheetId creatureSheetId(params[1]);
+			if (creatureSheetId != CSheetId::Unknown && creatureSheetId == creature->getType()) 
+			{
+				validateDynamicMissionStep(params[0]);
+				setCustomMissionParams("__LOOT_SHEET__", "");
+			}
+		}
+		// only check first item
+		if (indexInTempInv == 0)
+		{
+			
+			params = getCustomMissionParams("__LOOT_SHEET_WITH_ITEM__");
+			if (params.size() >= 3)
+			{
+				// check if it's the creature have good sheet
+				CSheetId creatureSheetId(params[1]);
+				if (creatureSheetId != CSheetId::Unknown && creatureSheetId == creature->getType()) 
+				{
+					// check if player have item in right hand
+					CGameItemPtr rightHandItem = getRightHandItem();
+					CSheetId needItem(params[2]);
+					if (rightHandItem != NULL && rightHandItem->getSheetId() == needItem)
+					{
+						validateDynamicMissionStep(params[0]);
+						setCustomMissionParams("__LOOT_SHEET_WITH_ITEM__", "");
+						if (params.size() >= 4)
+							setCustomMissionParams(params[3], "");
+					}
+					else if (params.size() >= 4)
+					{
+						string message = getCustomMissionText(params[3]);
+						if (!message.empty())
+							sendDynamicMessage(params[3], message);
+					}
+				}
+			}
+		}
 		// first slots are filled with loot items, quarter items are not in temp inv but only info in DB
 		uint32 rawMaterialIndex = indexInTempInv - creature->getLootSlotCount();
 		const CCreatureRawMaterial * mp = creature->getCreatureRawMaterial( rawMaterialIndex );
@@ -14284,6 +14570,13 @@ void CCharacter::setFameBoundaries()
 void CCharacter::resetFameDatabase()
 {
 	CFameInterface &fi = CFameInterface::getInstance();
+
+	// Check fames and fix bad values
+	if (!haveAnyPrivilege())
+	{
+		CFameManager::getInstance().enforceFameCaps(getId(), getAllegiance());
+		CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), getAllegiance());
+	}
 
 	for (uint i=0; i<CStaticFames::getInstance().getNbFame(); ++i)
 	{
@@ -14760,6 +15053,18 @@ TCharConnectionState CCharacter::isFriendCharVisualyOnline(const NLMISC::CEntity
 		{
 			// better CSR grade return always 'offline' status
 			return ccs_offline;
+		}
+
+		if ( PlayerManager.hasBetterCSRGrade(_Id, friendId, true))
+		{
+			// better CSR grade return always 'online' status
+			return ccs_online;
+		}
+
+		if (haveAnyPrivilege())
+		{
+			// this character has some privs, so just show status.
+			return ccs_online;
 		}
 
 		ret = ccs_online;
@@ -17953,6 +18258,8 @@ void CCharacter::setOutpostAlias( uint32 id )
 		if( _OutpostAlias != 0 )
 		{
 			sendDynamicSystemMessage( _Id, "OUTPOST_NO_MORE_IN_CONFLICT");
+			if (getCurrentPVPZone() != CAIAliasTranslator::Invalid)
+				CPVPManager::getInstance()->enterPVPZone( this, getCurrentPVPZone() );
 		}
 //		_PropertyDatabase.setProp("CHARACTER_INFO:PVP_OUTPOST:ROUND_LVL_CUR", 0 );
 		CBankAccessor_PLR::getCHARACTER_INFO().getPVP_OUTPOST().setROUND_LVL_CUR(_PropertyDatabase, 0 );

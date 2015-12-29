@@ -955,9 +955,11 @@ void CGuild::putItem( CCharacter * user, uint32 slot, uint32 quantity, uint16 se
 
 	// check if this type of item is legal in the guild inventory
 	CGameItemPtr item = srcItem;
-	if (	!item->getStaticForm()->DropOrSell
-		||	item->getStaticForm()->Family == ITEMFAMILY::PET_ANIMAL_TICKET
-		|| 	user->isAnActiveXpCatalyser(item)
+	if (!item->getMovable() && (
+		!item->getStaticForm()->DropOrSell
+		|| item->getStaticForm()->Family == ITEMFAMILY::PET_ANIMAL_TICKET
+		|| user->isAnActiveXpCatalyser(item)
+		|| item->getUnMovable() )
 		)
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"GUILD_ITEM_CANT_BE_PUT" );

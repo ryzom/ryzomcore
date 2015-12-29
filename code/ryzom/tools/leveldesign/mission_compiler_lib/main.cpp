@@ -29,7 +29,8 @@ class IStep;
 
 int main(int argc, char *argv[])
 {
-	new NLMISC::CApplicationContext;
+	CSmartPtr<NLMISC::CApplicationContext> appContext(new NLMISC::CApplicationContext());
+
 	CPath::addSearchPath("L:\\primitives\\", true, false);
 
 	bool test = false;
@@ -95,7 +96,12 @@ int main(int argc, char *argv[])
 			::fwrite(script.data(), script.size(), 1, fp);
 			::fclose(fp);
 
-			system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script test_compilateur.script").c_str());
+			// TODO: set diff program in .cfg
+			std::string compareApp = "";
+			sint error = system(compareApp+(string(" ")+string(tmp)+"/compiled_mission.script test_compilateur.script").c_str());
+
+			if (error)
+				nlwarning("'%s' failed with error code %d", "", error);
 		}
 		catch(const EParseException &e)
 		{
@@ -265,6 +271,8 @@ int main(int argc, char *argv[])
 	}
 
 	CPrimitiveContext::instance().CurrentLigoConfig = NULL;
+
+	return 0;
 }
 
 

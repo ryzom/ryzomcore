@@ -2233,9 +2233,11 @@ NLMISC_COMMAND(create_obj,"create a new object","<type>")
 	if( args.size() > 0 )
 	{
 		CWorldObjectLocation loc;
+		uint32 type;
 		uint16 quality = 0;
 		uint32 hp = 0;
-		WorldObjectManager.createObject(NLMISC::fromString(args[2].c_str()),loc,quality,hp);
+		NLMISC::fromString(args[0], type);
+		WorldObjectManager.createObject(type,loc,quality,hp);
 		return true;
 	}
 	return false;

@@ -638,6 +638,12 @@ public:
 	void setEnterFlag( bool b );
 
 	/**
+	 * Get/Set the score permanent modifier
+	 */
+	uint32 getScorePermanentModifiers(SCORES::TScores score) const;
+	void setScorePermanentModifiers(SCORES::TScores score, uint32 value);
+
+	/**
 	 * Get the enter flag 
 	 * \return true if the player entered the game, false if he left
 	 */
@@ -717,13 +723,19 @@ public:
 	void updateTarget();
 
 	/// add a known brick
-	void addKnownBrick( const NLMISC::CSheetId& brickId );
+	void addKnownBrick( const NLMISC::CSheetId& brickId);
+
+	/// add a known brick bonus
+	void addKnownBrickBonus( const NLMISC::CSheetId& brickId);
 
 	/// check if have brick
 	bool haveBrick( const NLMISC::CSheetId& brickId );
 
 	/// remove a known brick
 	void removeKnownBrick( const NLMISC::CSheetId& brickId );
+
+	/// remove a known brick
+	void removeKnownBrickBonus( const NLMISC::CSheetId& brickId );
 
 	/// get known bricks
 	const std::set<NLMISC::CSheetId> &getKnownBricks() const;
@@ -1542,6 +1554,9 @@ public:
 	/// client (in)validate melee combat
 	void validateMeleeCombat(bool flag);
 
+	/// check is player can spawn npc group in here position
+	bool isSpawnValid(bool inVillage, bool inOutpost, bool inStable, bool inAtys);
+
 	/// memorize a phrase 
 	void memorize(uint8 memorizationSet, uint8 index, uint16 phraseId, const std::vector<NLMISC::CSheetId> &bricks);
 
@@ -1660,6 +1675,9 @@ public:
 	/// get ammo item
 	virtual CGameItemPtr getAmmoItem() const;
 
+	/// send dynamic message
+	void sendDynamicMessage(const std::string &phrase, const std::string &message);
+
 	/// send custom url
 	void sendUrl(const std::string &url, const std::string &salt);
 
@@ -1671,6 +1689,9 @@ public:
 
  	/// get custom mission params
  	std::vector<std::string> getCustomMissionParams(const std::string &missionName);
+
+ 	/// get custom mission texts
+ 	std::string getCustomMissionText(const std::string &missionName);
 
  	/// validate dynamic mission step sending url
  	void validateDynamicMissionStep(const std::string &url);
@@ -3174,6 +3195,11 @@ private:
 	/// old pos Y
 	mutable sint32				_OldPosY;
 
+	/// old pos X
+	mutable sint32				_SavedPosX;
+	/// old pos Y
+	mutable sint32				_SavedPosY;
+
 	/// last X position written in DB
 	sint32						_LastPosXInDB;
 	/// last Y position written in DB
@@ -3315,6 +3341,9 @@ private:
 
 	/// last webcommand index
 	uint32						_LastWebCommandIndex;
+
+	/// last web url index
+	uint32						_LastUrlIndex;
 
  	std::map<std::string, std::string>	_CustomMissionsParams;
 
@@ -3716,6 +3745,9 @@ private:
 	/// keep the Ids of the mission queues in which is this player
 	std::vector<uint32>	_MissionsQueues;
 
+	/// keep the validated web commandes
+	std::set<uint32>	_ValideWebCommandIndex;
+
 	/// keep here the queue for which this player currently has an enter critical zone proposal
 	uint32				_EnterCriticalZoneProposalQueueId;
 
@@ -3748,7 +3780,7 @@ private:
 	
 public:
 	uint32 getLastDisconnectionDate();
-
+	bool hasMoved();
 
 private:
 	TAIAlias _SelectedOutpost;
@@ -3782,6 +3814,11 @@ public:
 	void			setWebCommandIndex(uint32 index) { _LastWebCommandIndex = index;}
 	uint32			getWebCommandIndex() const { return _LastWebCommandIndex;}
 
+	void			validateWebCommandIndex(uint32 index) { _ValideWebCommandIndex.insert(index);}
+	uint32			isValidWebCommandIndex(uint32 index) { return _ValideWebCommandIndex.find(index) != _ValideWebCommandIndex.end();}
+
+	void			setUrlIndex(uint32 index) { _LastUrlIndex = index;}
+	uint32			getUrlIndex() const { return _LastUrlIndex;}
 
 	bool			getInvisibility() const	{ return _Invisibility;}
 	/// Set the invisibility flag, NB : just for persistence, do not change nothing.
