@@ -1993,7 +1993,6 @@ void	CWorldPositionManager::computePlayerDeltaVision( CPlayerInfos *infos, CVisi
 	for (; i<numEntities; ++i)
 		cellVision[i].Entity->TempVisionState = false;
 
-
 	// *** Prevent from splitting vision of controller/controlled entity.
 	// Ex: mounted mounts must not be visible if their rider is not visible.
 	// It might waste some free slot space but this way we are sure the players won't have invisible riders.

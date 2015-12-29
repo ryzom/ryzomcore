@@ -840,7 +840,7 @@ void __name##Class::pointer(CEntityId entity, bool get, std::string &value)
 #define ENTITY_GET_ENTITY \
 	TLogContext_Character_AdminCommand commandContext(entity); \
 	CEntityBase *e = CEntityBaseManager::getEntityBasePtr(entity); \
-	if(e == 0) \
+	if(e == NULL) \
 	{ \
 		nlwarning ("Unknown entity '%s'", entity.toString().c_str()); \
 		if(get) value = "UnknownEntity"; \
@@ -856,7 +856,7 @@ void __name##Class::pointer(CEntityId entity, bool get, std::string &value)
 #define ENTITY_GET_CHARACTER \
 	TLogContext_Character_AdminCommand commandContext(entity); \
 	CCharacter *c = PlayerManager.getChar(entity); \
-	if(c == 0) \
+	if(c == NULL) \
 	{ \
 		nlwarning ("Unknown player '%s'", entity.toString().c_str()); \
 		if(get) value = "UnknownPlayer"; \
@@ -1158,7 +1158,7 @@ ENTITY_VARIABLE (Priv, "User privilege")
 	ENTITY_GET_CHARACTER
 
 	CPlayer *p = PlayerManager.getPlayer(PlayerManager.getPlayerId(c->getId()));
-	if (p == 0)
+	if (p == NULL)
 	{
 		nlwarning ("Can't find player with UserId %d for checking privilege, assume no priv", PlayerManager.getPlayerId(c->getId()));
 		return;
@@ -1301,7 +1301,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 					return;
 				}
 				CEntityBase *entityBase = PlayerManager.getCharacterByName (CShardNames::getInstance().makeFullNameFromRelative(c->getHomeMainlandSessionId(), value));
-				if (entityBase == 0)
+				if (entityBase == NULL)
 				{
 					// try to find the bot name
 					vector<TAIAlias> aliases;
@@ -1326,7 +1326,7 @@ ENTITY_VARIABLE(Position, "Position of a player (in meter) <eid> <posx>,<posy>[,
 					}
 
 				}
-				if (entityBase != 0)
+				if (entityBase != NULL)
 				{
 					x = entityBase->getState().X + sint32 (cos (entityBase->getState ().Heading) * 2000);
 					y = entityBase->getState().Y + sint32 (sin (entityBase->getState ().Heading) * 2000);
@@ -1489,7 +1489,7 @@ NLMISC_COMMAND (createItemInBag, "Create an item and put it in the player bag", 
 	}
 
 	const CStaticItem *form = CSheets::getForm (sheet);
-	if (form == 0)
+	if (form == NULL)
 	{
 		log.displayNL ("sheetId '%s' is not found", sheetName.c_str());
 		return false;
@@ -1573,7 +1573,7 @@ NLMISC_COMMAND (createItemInTmpInv, "Create an item and put it in the player tem
 	}
 
 	const CStaticItem *form = CSheets::getForm (sheet);
-	if (form == 0)
+	if (form == NULL)
 	{
 		log.displayNL ("sheetId '%s' is not found", sheetName.c_str());
 		return false;
@@ -1640,7 +1640,7 @@ NLMISC_COMMAND (createItemInInv, "Create items and put them in the given invento
 	}
 
 	const CStaticItem *form = CSheets::getForm (sheet);
-	if (form == 0)
+	if (form == NULL)
 	{
 		log.displayNL ("sheetId '%s' is not found", sheetName.c_str());
 		return false;
@@ -3079,7 +3079,7 @@ void cbClientAdmin (NLNET::CMessage& msgin, const std::string &serviceName, NLNE
 
 	// find the character
 	CCharacter *c = PlayerManager.getChar( eid );
-	if (c == 0)
+	if (c == NULL)
 	{
 		nlwarning ("ADMIN: Unknown player %s", eid.toString().c_str());
 		chatToPlayer (eid, "Unknown player");
@@ -3225,7 +3225,7 @@ void cbClientAdminOffline (NLNET::CMessage& msgin, const std::string &serviceNam
 
 	// find the character
 	CCharacter *c = PlayerManager.getChar( eid );
-	if (c == 0)
+	if (c == NULL)
 	{
 		nlwarning ("ADMIN: Unknown player %s", eid.toString().c_str());
 		chatToPlayer (eid, "Unknown player");
@@ -3698,7 +3698,7 @@ NLMISC_COMMAND( killMob, "kill a mob ( /a killMob )", "<CSR eId>" )
 	TRY_GET_CHARACTER
 
 	CCreature * creature = CreatureManager.getCreature( c->getTarget() );
-	if( creature == 0 )
+	if (creature == NULL)
 	{
 		nlwarning ("Unknown creature '%s'", c->getTarget().toString().c_str() );
 		return false;
@@ -3730,7 +3730,7 @@ NLMISC_COMMAND( dssTarget, "target a mob and send information to dss( /b dssTarg
 	TRY_GET_CHARACTER
 
 	CCreature * creature = CreatureManager.getCreature( c->getTarget() );
-	if( creature == 0 )
+	if (creature == NULL)
 	{
 		nlwarning ("Unknown creature '%s'", c->getTarget().toString().c_str() );
 		return false;
@@ -4782,7 +4782,9 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 
 		string salt = getSalt();
 		string checksumEid = web_app_url + toString(c->getLastConnectedDate()) + index + command + c->getId().toString();
+
 		string checksumRowId = web_app_url + toString(c->getLastConnectedDate()) + index + command + toString(c->getEntityRowId().getIndex());
+
 		string realhmacEid = getHMacSHA1((uint8*)&checksumEid[0], checksumEid.size(), (uint8*)&salt[0], salt.size()).toString();
 		string realhmacRowId = getHMacSHA1((uint8*)&checksumRowId[0], checksumRowId.size(), (uint8*)&salt[0], salt.size()).toString();
 		if (realhmacEid != hmac && realhmacRowId != hmac && command != "is_valid_index")
@@ -7013,7 +7015,7 @@ NLMISC_COMMAND(roomInvite, "send a room invite to a player character", "<eid> <m
 
 	CCharacter * target = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(user->getHomeMainlandSessionId(), args[1]));
 
-	if(target == 0 || target->getEnterFlag() == false )
+	if(target == NULL || target->getEnterFlag() == false )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(), "TEAM_INVITED_CHARACTER_MUST_BE_ONLINE" );
 		return true;
@@ -7058,7 +7060,7 @@ NLMISC_COMMAND(roomKick, "kick player from room", "<eid> <member name>")
 	}
 	CCharacter * target = PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(user->getHomeMainlandSessionId(), args[1]));
 
-	if(target == 0 || target->getEnterFlag() == false )
+	if(target == NULL || target->getEnterFlag() == false )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(), "TEAM_KICKED_CHARACTER_MUST_BE_ONLINE" );
 		return true;
@@ -8616,7 +8618,7 @@ NLMISC_COMMAND(displayPositionStack, "Display the position stack of a character 
 	if (eid == CEntityId::Unknown)
 		return true;
 	CCharacter *c = PlayerManager.getChar(eid);
-	if(c == 0)
+	if (c == NULL)
 	{
 		log.displayNL( "Character not found" );
 		return true;
@@ -8748,7 +8750,7 @@ NLMISC_COMMAND(farTPSubst, "Substitute a position in the stack (no immediate far
 	if (eid == CEntityId::Unknown)
 		return true;
 	CCharacter *c = PlayerManager.getChar(eid);
-	if(c == 0)
+	if (c == NULL)
 	{
 		log.displayNL( "Character not found" );
 		return true;
@@ -8818,7 +8820,7 @@ NLMISC_COMMAND(teamInvite, "send a team invite to a player character", "<eid> <m
 
 	// Get target
 	CCharacter	*invitedCharacter= PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(user->getHomeMainlandSessionId(), args[1]));
-	if(invitedCharacter == 0 || invitedCharacter->getEnterFlag() == false )
+	if (invitedCharacter == NULL || invitedCharacter->getEnterFlag() == false )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"TEAM_INVITED_CHARACTER_MUST_BE_ONLINE" );
 		return true;
@@ -8860,7 +8862,7 @@ NLMISC_COMMAND(leagueInvite, "send a League invite to a player character", "<eid
 
 	// Get target
 	CCharacter	*invitedCharacter= PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(user->getHomeMainlandSessionId(), args[1]));
-	if(invitedCharacter == 0 || invitedCharacter->getEnterFlag() == false )
+	if (invitedCharacter == NULL || invitedCharacter->getEnterFlag() == false )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"TEAM_INVITED_CHARACTER_MUST_BE_ONLINE" );
 		return true;
@@ -8902,7 +8904,7 @@ NLMISC_COMMAND(leagueKick, "kick a player character from league", "<eid> <member
 
 	// Get target
 	CCharacter	*invitedCharacter= PlayerManager.getCharacterByName(CShardNames::getInstance().makeFullNameFromRelative(user->getHomeMainlandSessionId(), args[1]));
-	if(invitedCharacter == 0 || invitedCharacter->getEnterFlag() == false )
+	if (invitedCharacter == NULL || invitedCharacter->getEnterFlag() == false )
 	{
 		CCharacter::sendDynamicSystemMessage( user->getId(),"TEAM_INVITED_CHARACTER_MUST_BE_ONLINE" );
 		return true;
