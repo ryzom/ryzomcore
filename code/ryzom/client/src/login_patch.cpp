@@ -2400,19 +2400,6 @@ void CCheckThread::run ()
 		fromString(sServerVersion, nServerVersion);
 		fromString(sClientVersion, nClientVersion);
 
-#ifdef NL_OS_UNIX
-		string sClientNewVersion = ClientCfg.BuildName;
-
-		sint32 nClientNewVersion;
-		fromString(sClientNewVersion, nClientNewVersion);
-
-		// servers files are not compatible with current client, use last client version
-		if (nClientNewVersion && nServerVersion > nClientNewVersion)
-		{
-			nServerVersion = nClientNewVersion;
-		}
-#endif
-
 		if (nClientVersion != nServerVersion)
 		{
 			// first, try in the version subdirectory
