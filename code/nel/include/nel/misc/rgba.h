@@ -147,6 +147,14 @@ public:
 	uint8 toGray() const;
 
 	/**
+	 * Color is gray
+	 */
+	bool isGray() const
+	{
+		return R == G && G == B;
+	}
+
+	/**
 	 * Get a 16 bits 565 pixel.
 	 */
 	uint16 get565 () const
