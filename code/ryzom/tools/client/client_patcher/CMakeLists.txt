@@ -8,6 +8,9 @@ FILE(GLOB SRC main.cpp
 	${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h
 )
 
+# always enable custom patch server
+ADD_DEFINITIONS(-DRZ_USE_CUSTOM_PATCH_SERVER)
+
 ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
 
 INCLUDE_DIRECTORIES(
