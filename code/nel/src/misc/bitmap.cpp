@@ -65,9 +65,9 @@ const uint32 CBitmap::bitPerPixels[ModeCount]=
 	16		// DsDt
 };
 
-const uint32 CBitmap::DXTC1HEADER = NL_MAKEFOURCC('D','X', 'T', '1');
-const uint32 CBitmap::DXTC3HEADER = NL_MAKEFOURCC('D','X', 'T', '3');
-const uint32 CBitmap::DXTC5HEADER = NL_MAKEFOURCC('D','X', 'T', '5');
+const uint32 CBitmap::DXTC1HEADER = NL_MAKEFOURCC('D', 'X', 'T', '1');
+const uint32 CBitmap::DXTC3HEADER = NL_MAKEFOURCC('D', 'X', 'T', '3');
+const uint32 CBitmap::DXTC5HEADER = NL_MAKEFOURCC('D', 'X', 'T', '5');
 
 
 #ifdef NEL_ALL_BITMAP_WHITE
