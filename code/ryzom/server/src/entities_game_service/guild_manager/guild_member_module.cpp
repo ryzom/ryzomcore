@@ -47,7 +47,7 @@ NL_INSTANCE_COUNTER_IMPL(CGuildMemberModule);
 CGuildMemberModule * CGuildMemberModule::createModule( CGuildCharProxy& proxy, CGuildMember* guildMember )
 {
 	nlassert( guildMember );
-	switch( guildMember->getGrade() ) 
+	switch( guildMember->getGrade() )
 	{
 	case EGSPD::CGuildGrade::Member:
 		return new CGuildMemberModule(proxy,guildMember);
@@ -103,7 +103,7 @@ void CGuildMemberModule::quitGuild()
 	EGS_PD_AST( guild );
 	SM_STATIC_PARAMS_1( params,STRING_MANAGER::player );
 	params[0].setEIdAIAlias( _GuildMemberCore->getIngameEId(), CAIAliasTranslator::getInstance()->getAIAlias(_GuildMemberCore->getIngameEId()) );
-	
+
 	CFameManager::getInstance().clearPlayerGuild( _GuildMemberCore->getIngameEId() );
 
 	CGuildCharProxy proxy;
@@ -134,7 +134,7 @@ void CGuildMemberModule::setGrade( uint16 index,uint8 session, EGSPD::CGuildGrad
 	CGuildCharProxy proxy;
 	getProxy(proxy);
 	proxy.cancelAFK();
-		
+
 	if ( guild->getMembersSession() != session )
 	{
 		proxy.sendSystemMessage( "GUILD_BAD_SESSION" );
@@ -165,17 +165,17 @@ void CGuildMemberModule::setGrade( uint16 index,uint8 session, EGSPD::CGuildGrad
 		proxy.sendSystemMessage("GUILD_GRADE_FULL",paramFull);
 		return;
 	}
-	
+
 	member->setMemberGrade(grade);
 	guild->incGradeCount( grade );
 	guild->decGradeCount( oldGrade );
-	
+
 	// send system message
 	SM_STATIC_PARAMS_3(params,STRING_MANAGER::player,STRING_MANAGER::player,STRING_MANAGER::string_id);
 	params[0].setEIdAIAlias( proxy.getId(), CAIAliasTranslator::getInstance()->getAIAlias(proxy.getId()) );
 	params[1].setEIdAIAlias( member->getIngameEId(), CAIAliasTranslator::getInstance()->getAIAlias(member->getIngameEId()) );
 	params[2].StringId = guild->getNameId();
-	
+
 	// If the player is online, the module must be recreated. Do as the reference was destroyed
 	CGuildMemberModule * module = NULL;
 	if ( member->getReferencingModule(module) )
@@ -266,7 +266,7 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 	if ( target.getModule(inviteModule) )
 	{
 		CCharacter::sendDynamicSystemMessage( invitor.getRowId(), "GUILD_ALREADY_HAS_JOIN_PROPOSAL",params1 );
-		return;		
+		return;
 	}
 
 	/// the invitor must not be in the ignore list of the target
@@ -323,16 +323,18 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		SM_STATIC_PARAMS_1(params,STRING_MANAGER::integer);
 		params[0].Int = GuildMaxMemberCount;
 		CCharacter::sendDynamicSystemMessage( invitor.getRowId(), "GUILD_MAX_MEMBER_COUNT", params);
-		return;		
+		return;
 	}
 
 	/// check guild and invited member allegiances compatibilities
 	CGuild::TAllegiances guildAllegiance, invitedAllegiance;
 	guildAllegiance = guild->getAllegiance();
+
 	CCharacter * invitedChar = PlayerManager.getChar(target.getId());
-	if( invitedChar == 0 ) return;
+	if (invitedChar == NULL) return;
 	invitedAllegiance = invitedChar->getAllegiance();
-	if( invitedAllegiance.first != guildAllegiance.first && invitedAllegiance.first != PVP_CLAN::Neutral )
+
+	if (invitedAllegiance.first != guildAllegiance.first && invitedAllegiance.first != PVP_CLAN::Neutral)
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
@@ -340,7 +342,8 @@ void CGuildMemberModule::_inviteCharacterInGuild(CGuildCharProxy& invitor, CGuil
 		invitor.sendSystemMessage("GUILD_ICOMPATIBLE_ALLEGIANCE",params);
 		return;
 	}
-	if( invitedAllegiance.second != guildAllegiance.second && invitedAllegiance.second != PVP_CLAN::Neutral )
+
+	if (invitedAllegiance.second != guildAllegiance.second && invitedAllegiance.second != PVP_CLAN::Neutral)
 	{
 		SM_STATIC_PARAMS_2( params, STRING_MANAGER::player, STRING_MANAGER::faction );
 		params[0].setEIdAIAlias( target.getId(), CAIAliasTranslator::getInstance()->getAIAlias( target.getId()) );
@@ -504,11 +507,11 @@ void CGuildMemberModule::clearOnlineGuildProperties()
 	getProxy(targetProxy);
 	targetProxy.setGuildId(0);
 	targetProxy.updateTargetingChars();
-	
+
 	CMirrorPropValueRO<TYPE_CELL> mirrorCell( TheDataset, targetProxy.getEntityRowId(), DSPropertyCELL );
-	sint32 cell = mirrorCell;		
+	sint32 cell = mirrorCell;
 	if ( CBuildingManager::getInstance()->isRoomCell(cell) )
-	{	
+	{
 		CRoomInstanceGuild * room = dynamic_cast<CRoomInstanceGuild *>( CBuildingManager::getInstance()->getRoomInstanceFromCell( cell ) );
 		if ( room && room->getGuildId() && room->getBuilding() )
 		{
@@ -533,7 +536,7 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 	CGuildCharProxy proxy;
 	getProxy(proxy);
 	proxy.cancelAFK();
-	
+
 	if ( guild->getMembersSession() != session )
 	{
 		proxy.sendSystemMessage( "GUILD_BAD_SESSION" );
@@ -544,7 +547,7 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 		nlwarning("<GUILD>%s tries to kick himself",proxy.getId().toString().c_str());
 		return;
 	}
-	
+
 	CGuildMember * member = guild->getMemberByIndex( index );
 	if ( member == NULL )
 	{
@@ -570,7 +573,7 @@ void CGuildMemberModule::kickMember( uint16 index,uint8 session )const
 	params[1].StringId = CEntityIdTranslator::getInstance()->getEntityNameStringId(member->getIngameEId());
 	sendMessageToGuildMembers("GUILD_KICK_MEMBER",params);
 
-	guild->deleteMember( member );	
+	guild->deleteMember( member );
 }
 
 //----------------------------------------------------------------------------
