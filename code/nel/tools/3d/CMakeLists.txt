@@ -35,6 +35,7 @@ IF(WITH_NEL_TOOLS)
   SUBDIRS(
     build_interface
     get_neighbors
+    textures_optimizer
     tga_cut
     tga_resize)
 ENDIF()
