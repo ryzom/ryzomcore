@@ -177,6 +177,17 @@ public:
 		B= (B<<3) + (B>>2);
 	}
 
+	/**
+	 * Set the RGBA fields with a 32 bits 8888 pixel.
+	 */
+	void	set8888(uint32 col)
+	{
+		R = col & 255;
+		G = (col >> 8) & 255;
+		B = (col >> 16) & 255;
+		A = (col >> 24) & 255;
+	}
+
 
 	/**
 	 * Compute in this the average of 2 RGBA.
