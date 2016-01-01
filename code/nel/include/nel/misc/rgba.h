@@ -147,6 +147,14 @@ public:
 	uint8 toGray() const;
 
 	/**
+	 * Color is gray
+	 */
+	bool isGray() const
+	{
+		return R == G && G == B;
+	}
+
+	/**
 	 * Get a 16 bits 565 pixel.
 	 */
 	uint16 get565 () const
@@ -167,6 +175,17 @@ public:
 		R= (R<<3) + (R>>2);
 		G= (G<<2) + (G>>4);
 		B= (B<<3) + (B>>2);
+	}
+
+	/**
+	 * Set the RGBA fields with a 32 bits 8888 pixel.
+	 */
+	void	set8888(uint32 col)
+	{
+		R = col & 255;
+		G = (col >> 8) & 255;
+		B = (col >> 16) & 255;
+		A = (col >> 24) & 255;
 	}
 
 

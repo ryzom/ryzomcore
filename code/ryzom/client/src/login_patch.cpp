@@ -843,7 +843,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 				for (uint32 fff = 0; fff < vFilenames.size (); fff++)
 				{
 					string SrcPath = ClientPatchPath;
-					string DstPath = rCat.getUnpackTo();
+					string DstPath = CPath::standardizePath(rCat.getUnpackTo()); // to be sure there is a / at the end
 					NLMISC::CFile::createDirectoryTree(DstPath);
 
 					// this file must be moved
@@ -2399,19 +2399,6 @@ void CCheckThread::run ()
 		sint32 nServerVersion, nClientVersion;
 		fromString(sServerVersion, nServerVersion);
 		fromString(sClientVersion, nClientVersion);
-
-#ifdef NL_OS_UNIX
-		string sClientNewVersion = ClientCfg.BuildName;
-
-		sint32 nClientNewVersion;
-		fromString(sClientNewVersion, nClientNewVersion);
-
-		// servers files are not compatible with current client, use last client version
-		if (nClientNewVersion && nServerVersion > nClientNewVersion)
-		{
-			nServerVersion = nClientNewVersion;
-		}
-#endif
 
 		if (nClientVersion != nServerVersion)
 		{

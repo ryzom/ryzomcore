@@ -2441,7 +2441,7 @@ uint32 CMissionTemplate::testPrerequisits( CCharacter * user, CPrerequisitInfos 
 
 uint32 CMissionTemplate::sendTitleText( const TDataSetRow & userRow, const TDataSetRow & giver ) const
 {
-	if (TitleText.substr(0, 6) == "WEBIG_")
+	if (TitleText.compare(0, 6, "WEBIG_") == 0)
 	{
 		string text = TitleText;
 		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));
@@ -2469,7 +2469,7 @@ uint32 CMissionTemplate::sendTitleText( const TDataSetRow & userRow, const TData
 
 uint32 CMissionTemplate::sendAutoText( const TDataSetRow & userRow,const NLMISC::CEntityId & giver) const
 {
-	if (AutoText.substr(0, 6) == "WEBIG_")
+	if (AutoText.compare(0, 6, "WEBIG_") == 0)
 	{
 		string text = AutoText;
 		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));
@@ -2494,7 +2494,7 @@ uint32 CMissionTemplate::sendAutoText( const TDataSetRow & userRow,const NLMISC:
 
 uint32 CMissionTemplate::sendDescText( const TDataSetRow & userRow, const TDataSetRow & giver, uint32 descIndex) const
 {
-	if (DescText.substr(0, 6) == "WEBIG_")
+	if (DescText.compare(0, 6, "WEBIG_") == 0)
 	{
 		string text = DescText;
 		CCharacter *user = PlayerManager.getChar(getEntityIdFromRow(userRow));

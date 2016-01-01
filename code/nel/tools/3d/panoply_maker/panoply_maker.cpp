@@ -669,68 +669,49 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				// we can save it as RGB to optimize it
 				if (bi.OptimizeTextures > 0 && depth == 32)
 				{
-					uint32 size = srcBitmap.getPixels().size();
+					uint8 value = 0;
 
-					if (size > 0)
+					// texture can be converted if all alphas are 0 or 255
+					if (srcBitmap.isAlphaUniform(&value) && (value == 255 || value == 0))
 					{
-						// get a pointer on original data
-						uint8 *data = srcBitmap.getPixels().getPtr();
-
-						// pointer on first alpha value
-						uint8 *tmp = data + 3;
-						uint8 *endData = data + size;
-						uint8 value = *tmp;
-
-						// check if all alphas have the same value
-						while(tmp < endData && *tmp == value) tmp += 4;
-
-						// texture can be converted if all alphas are 0 or 255
-						if (tmp >= endData && (value == 255 || value == 0))
+						if (bi.OptimizeTextures > 1)
 						{
-							if (bi.OptimizeTextures > 1)
+							// make bitmap opaque
+							srcBitmap.makeOpaque();
+
+							// original depth is now 24 bits, since we discarded alpha channel
+							depth = 24;
+
+							NLMISC::COFile os;
+
+							if (os.open(fullInputBitmapPath))
 							{
-								// original depth is now 24 bits, since we discarded alpha channel
-								depth = 24;
+								nlwarning("Optimizing texture %s...", fullInputBitmapPath.c_str());
 
-								// if texture is fully transparent, make it fully opaque
-								if (value == 0)
+								std::string ext = CFile::getExtension(fullInputBitmapPath);
+
+								// resave the texture in optimized same format
+								if (ext == "png")
 								{
-									tmp = data + 3;
-
-									while(tmp < endData)
-									{
-										*tmp = 255;
-										tmp += 4;
-									}
+									srcBitmap.writePNG(os, 24);
 								}
-
-								NLMISC::COFile os;
-
-								if (os.open(fullInputBitmapPath))
+								else if (ext == "tga")
 								{
-									nlwarning("Optimizing texture %s...", fullInputBitmapPath.c_str());
-
-									std::string ext = CFile::getExtension(fullInputBitmapPath);
-
-									// resave the texture in optimized same format
-									if (ext == "png")
-									{
-										srcBitmap.writePNG(os, 24);
-									}
-									else if (ext == "tga")
-									{
-										srcBitmap.writeTGA(os, 24);
-									}
-									else
-									{
-										nlwarning("Don't support %s format for texture, unable to save it", ext.c_str());
-									}
+									srcBitmap.writeTGA(os, 24);
+								}
+								else
+								{
+									nlwarning("Don't support %s format for texture, unable to save it", ext.c_str());
 								}
 							}
 							else
 							{
-								nlwarning("Texture %s can be optimized", fullInputBitmapPath.c_str());
+								nlwarning("Unable to save texture %s", fullInputBitmapPath.c_str());
 							}
+						}
+						else
+						{
+							nlwarning("Texture %s can be optimized", fullInputBitmapPath.c_str());
 						}
 					}
 				}

@@ -601,78 +601,157 @@ sint CSystemUtils::getTotalVideoMemory()
 #elif defined(NL_OS_MAC)
 	// the right method is using OpenGL
 #else
-	// under Linux, no method is really reliable...
-	NLMISC::CIFile file;
-	
-	std::string logFile = "/var/log/Xorg.0.log";
-
-	// parse last Xorg.0.log
-	if (file.open(logFile, true))
+	if (res == -1)
 	{
-		char buffer[256];
+		// use nvidia-smi
+		std::string command = "nvidia-smi -q -d MEMORY";
 
-		while(!file.eof())
+		std::string out = getCommandOutput(command);
+
+		if (out.empty())
 		{
-			file.getline(buffer, 256);
-			
-			if (buffer[0] == '\0') break;
-
-			std::string line(buffer);
-
-			// nvidia driver
-			std::string::size_type pos = line.find(") NVIDIA(");
-
-			if (pos != std::string::npos)
-			{
-				// [    20.883] (--) NVIDIA(0): Memory: 2097152 kBytes
-				pos = line.find("Memory: ", pos);
-
-				// found memory line
-				if (pos == std::string::npos) continue;
-				pos += 8;
-
-				std::string::size_type posUnits = line.find(" kBytes", pos);
-
-				// found units in KiB
-				if (posUnits == std::string::npos) continue;
-
-				std::string videoMemory = line.substr(pos, posUnits-pos);
-					
-				if (!NLMISC::fromString(videoMemory, res)) continue;
-
-				nlinfo("Xorg NVIDIA driver reported %d KiB of video memory", res);
-				break;
-			}
-
-			// intel driver
-			pos = line.find(") intel(");
-
-			if (pos != std::string::npos)
-			{
-				// (**) intel(0): VideoRam: 131072 KB
-				pos = line.find("VideoRam: ", pos);
-
-				// found memory line
-				if (pos == std::string::npos) continue;
-				pos += 10;
-
-				std::string::size_type posUnits = line.find(" KB", pos);
-
-				// found units in KiB
-				if (posUnits == std::string::npos) continue;
-
-				std::string videoMemory = line.substr(pos, posUnits-pos);
-					
-				if (!NLMISC::fromString(videoMemory, res)) continue;
-
-				nlinfo("Xorg Intel driver reported %d KiB of video memory", res);
-				break;
-			}
-
-			// TODO: other drivers: nv, fglrx (ATI), radeon (ATI)
+			nlwarning("Unable to launch %s", command.c_str());
 		}
+		else
+		{
+			std::vector<std::string> lines;
+			explode(out, std::string("\n"), lines, true);
+	
+			// process each line
+			for(uint i = 0; i < lines.size(); ++i)
+			{
+				//        Total                   : 62 MB
 
-		file.close();
+				std::string line = lines[i];
+	
+				// find Total line
+				std::string::size_type pos = line.find("Total");
+				if (pos == std::string::npos) continue;
+				pos += 6;
+
+				// find separator
+				pos = line.find(':', pos);
+				if (pos == std::string::npos) continue;
+				pos += 2;
+
+				// find units
+				std::string::size_type posUnits = line.find(' ', pos);
+				if (posUnits == std::string::npos) continue;
+				++posUnits;
+
+				// found device ID
+				std::string memory = line.substr(pos, posUnits-pos-1);
+				std::string units = line.substr(posUnits);
+
+				// convert video memory to sint
+				if (NLMISC::fromString(memory, res))
+				{
+					if (units == "MB")
+					{
+						res *= 1024;
+					}
+					else if (units == "GB")
+					{
+						res *= 1024 * 1024;
+					}
+					else
+					{
+						// reset to use other methods
+						res = -1;
+
+						nlwarning("nvidia-smi reported %d %s as wrong video memory units", res, units.c_str());
+						break;
+					}
+
+					nlinfo("nvidia-smi reported %d KiB of video memory", res);
+				}
+				else
+				{
+					// reset to use other methods
+					res = -1;
+				}
+
+				break;
+			}
+		}
+	}
+
+	if (res == -1)
+	{
+		// under Linux, no method is really reliable...
+		NLMISC::CIFile file;
+	
+		std::string logFile = "/var/log/Xorg.0.log";
+
+		// parse last Xorg.0.log
+		if (file.open(logFile, true))
+		{
+			char buffer[256];
+
+			while(!file.eof())
+			{
+				file.getline(buffer, 256);
+			
+				if (buffer[0] == '\0') break;
+
+				std::string line(buffer);
+
+				// nvidia driver
+				std::string::size_type pos = line.find(") NVIDIA(");
+
+				if (pos != std::string::npos)
+				{
+					// [    20.883] (--) NVIDIA(0): Memory: 2097152 kBytes
+					// [    28.515] (--) NVIDIA(0): Memory: 262144 kBytes
+					pos = line.find("Memory: ", pos);
+
+					// found memory line
+					if (pos == std::string::npos) continue;
+					pos += 8;
+
+					std::string::size_type posUnits = line.find(" kBytes", pos);
+
+					// found units in KiB
+					if (posUnits == std::string::npos) continue;
+
+					std::string videoMemory = line.substr(pos, posUnits-pos);
+					
+					if (!NLMISC::fromString(videoMemory, res)) continue;
+
+					nlinfo("Xorg NVIDIA driver reported %d KiB of video memory", res);
+					break;
+				}
+
+				// intel driver
+				pos = line.find(") intel(");
+
+				if (pos != std::string::npos)
+				{
+					// (**) intel(0): VideoRam: 131072 KB
+					pos = line.find("VideoRam: ", pos);
+
+					// found memory line
+					if (pos == std::string::npos) continue;
+					pos += 10;
+
+					std::string::size_type posUnits = line.find(" KB", pos);
+
+					// found units in KiB
+					if (posUnits == std::string::npos) continue;
+
+					std::string videoMemory = line.substr(pos, posUnits-pos);
+					
+					if (!NLMISC::fromString(videoMemory, res)) continue;
+
+					nlinfo("Xorg Intel driver reported %d KiB of video memory", res);
+					break;
+				}
+
+				// TODO: other drivers: fglrx (ATI), radeon (ATI)
+			}
+
+			file.close();
+		}
 	}
 
 	if (res == -1)

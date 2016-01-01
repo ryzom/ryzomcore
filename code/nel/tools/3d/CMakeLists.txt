@@ -35,6 +35,7 @@ IF(WITH_NEL_TOOLS)
   SUBDIRS(
     build_interface
     get_neighbors
+    textures_optimizer
     tga_cut
     tga_resize)
 ENDIF()
@@ -54,22 +55,22 @@ ENDIF()
 
 IF(WITH_NEL_TOOLS AND WITH_3D)
   IF(WIN32)
-#    ADD_SUBDIRECTORY(lightmap_optimizer)  
+#    ADD_SUBDIRECTORY(lightmap_optimizer)
     IF(MFC_FOUND)
       ADD_SUBDIRECTORY(object_viewer_exe)
       ADD_SUBDIRECTORY(tile_edit)
     ENDIF(MFC_FOUND)
   ENDIF(WIN32)
-  
+
   IF(WITH_QT)
     ADD_SUBDIRECTORY(tile_edit_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
   ENDIF(WITH_QT)
-  
+
   IF(WITH_NEL_TOOLS)
     FIND_PACKAGE(Squish)
   ENDIF()
-  
+
   IF(SQUISH_FOUND)
     ADD_SUBDIRECTORY(s3tc_compressor_lib)
     ADD_SUBDIRECTORY(panoply_maker)
