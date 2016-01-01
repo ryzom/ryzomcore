@@ -104,7 +104,7 @@ uint32 IMissionStepTemplate::sendRpStepText(CCharacter * user,const std::vector<
 
 	_User = user;
 
-	if (_RoleplayText.substr(0, 6) == "WEBIG_")
+	if (_RoleplayText.compare(0, 6, "WEBIG_") == 0)
 	{
 		TVectorParamCheck params;
 		string name = _RoleplayText;
@@ -174,7 +174,7 @@ uint32 IMissionStepTemplate::sendStepText(CCharacter * user,const std::vector<ui
 	// If the text is overriden, add the overide parameters
 	if ( !_OverridenText.empty() )
 	{
-		if (_OverridenText.substr(0, 6) == "WEBIG_")
+		if (_OverridenText.compare(0, 6, "WEBIG_") == 0)
 		{
 			string text = _OverridenText;
 			if (user)
