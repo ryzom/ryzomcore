@@ -348,6 +348,27 @@ public:
 	 */
 	void	makeNonPowerOf2Dummy();
 
+
+	/**
+	 * Make a bitmap fully opaque (set alpha to 255).
+	 */
+	void	makeOpaque();
+
+
+	/**
+	 * Return if the bitmap has uniform alpha values for all pixels.
+	 * \param alpha return the uniform value if return is true
+	 * \return uniform or not
+	 */
+	bool	isAlphaUniform(uint8 *alpha = NULL) const;
+
+
+	/**
+	 * Return if the bitmap is a real grayscale.
+	 * \return grayscale or not
+	 */
+	bool	isGrayscale() const;
+
 	/**
 	 * Return the pixels buffer of the image, or of one of its mipmap.
 	 * Return a reference of an array in pixel format get with getPixelFormat().

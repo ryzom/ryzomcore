@@ -309,6 +309,155 @@ void	CBitmap::makeDummyFromBitField(const uint8	bitmap[1024])
 	}
 }
 
+/*-------------------------------------------------------------------*\
+								makeOpaque
+\*-------------------------------------------------------------------*/
+void	CBitmap::makeOpaque()
+{
+	if (_Width*_Height == 0) return;
+
+	uint pixelSize;
+
+	switch(PixelFormat)
+	{
+		case RGBA: pixelSize = 4; break;
+		case AlphaLuminance: pixelSize = 2; break;
+		case Alpha: pixelSize = 1; break;
+		default: return;
+	}
+
+	for(uint8 m = 0; m < _MipMapCount; ++m)
+	{
+		// get a pointer on original data
+		uint8 *data = _Data[m].getPtr();
+
+		// special case for only alpha values
+		if (pixelSize == 1)
+		{
+			memset(data, 255, _Data[m].size());
+		}
+		else
+		{
+			// end of data
+			uint8 *endData = data + _Data[m].size();
+
+			// first alpha
+			data += pixelSize - 1;
+
+			// replace all alpha values by 255
+			while(data < endData)
+			{
+				*data = 255;
+				data += pixelSize;
+			}
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+								isAlphaUniform
+\*-------------------------------------------------------------------*/
+bool	CBitmap::isAlphaUniform(uint8 *alpha) const
+{
+	uint32 size = _Data[0].size();
+
+	if (size == 0) return false;
+
+	uint pixelSize;
+
+	switch(PixelFormat)
+	{
+		// formats with alpha channel
+		case RGBA:
+		pixelSize = 4;
+		break;
+
+		case AlphaLuminance:
+		pixelSize = 2;
+		break;
+
+		case Alpha:
+		pixelSize = 1;
+		break;
+
+		// formats without alpha channel
+		case Luminance:
+		if (alpha) *alpha = 255;
+		return true;
+
+		default:
+		return false;
+	}
+
+	// get a pointer on original data
+	uint8 *data = (uint8*)_Data[0].getPtr();
+	uint8 *endData = data + size;
+
+	// first alpha
+	data += pixelSize - 1;
+
+	// first alpha value
+	uint8 value = *data;
+
+	// check if all alphas have the same value
+	while(data < endData && *data == value) data += pixelSize;
+
+	// texture can be converted if all alphas are 0 or 255
+	if (data >= endData)
+	{
+		// return the uniform value
+		if (alpha) *alpha = value;
+		return true;
+	}
+
+	return false;
+}
+
+
+/*-------------------------------------------------------------------*\
+								isGrayscale
+\*-------------------------------------------------------------------*/
+bool	CBitmap::isGrayscale() const
+{
+	// all grayscale formats or, al least, without color information
+	switch(PixelFormat)
+	{
+		case Luminance:
+		case AlphaLuminance:
+		case Alpha:
+		return true;
+
+		case RGBA:
+		break;
+
+		default:
+		// DXTC formats won't be managed at the moment
+		return false;
+	}
+
+	uint32 size = _Data[0].size();
+	if (size == 0) return false;
+
+	// get a pointer on original data
+	uint32 *data = (uint32*)_Data[0].getPtr();
+	uint32 *endData = (uint32*)((uint8*)data + size);
+
+	NLMISC::CRGBA color;
+
+	// check if all alphas have the same value
+	while(data < endData)
+	{
+		color.set8888(*data);
+
+		if (!color.isGray()) return false;
+
+		++data;
+	}
+
+	return true;
+}
+
 
 
 
