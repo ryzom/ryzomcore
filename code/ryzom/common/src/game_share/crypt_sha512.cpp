@@ -294,7 +294,7 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
 
   /* DS = sha(repeat-salt) */
   sha512_init(&ctx);
-  for (i = 0; i < 16 + md[0]; i++)
+  for (i = 0; i < 16u + md[0]; i++)
     sha512_update(&ctx, salt, slen);
   sha512_sum(&ctx, smd);
 
@@ -373,7 +373,7 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
   return output;
 }
 
-char *__crypt_sha512(const char *key, const char *setting, char *output)
+std::string __crypt_sha512(const char *key, const char *setting, char *output)
 {
   static const char testkey[] = "Xy01@#\x01\x02\x80\x7f\xff\r\n\x81\t !";
   static const char testsetting[] = "$6$rounds=1234$abc0123456789$";
