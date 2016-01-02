@@ -84,26 +84,36 @@ void CUnixEventEmitter::createIM()
 
 	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
 
-	char *modifiers = XSetLocaleModifiers(getenv("XMODIFIERS"));
-
 	_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
-	if (_im)
+	if (_im == NULL)
 	{
-		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
-//		XSetICFocus(_ic);
-	}
-	else
-	{
-		_ic = 0;
-		nlwarning("XCreateIM failed");
-	}
+		XSetLocaleModifiers("@im=local");
+ 
+		_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
-	if (!_ic)
-	{
-		nlwarning("XCreateIC failed");
-	}
+		if (_im == NULL)
+		{
+			XSetLocaleModifiers("@im=");
 
+			_im = XOpenIM(_dpy, NULL, NULL, NULL);
+
+			if (_im == NULL)
+			{
+				nlwarning("XOpenIM failed");
+			}
+		}
+	}
+ 
+ 	if (_im)
+ 	{
+ 		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
+
+		if (!_ic)
+		{
+			nlwarning("XCreateIC failed");
+		}
+	}
 #endif
 }
 
