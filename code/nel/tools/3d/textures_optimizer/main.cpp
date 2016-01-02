@@ -131,6 +131,9 @@ int main(int argc, char **argv)
 
 		NLMISC::CBitmap bitmap;
 
+		// all 8 bits textures are grayscale and not alpha
+		bitmap.loadGrayscaleAsAlpha(false);
+
 		uint8 depth = bitmap.load(input);
 
 		// don't need file so close it
