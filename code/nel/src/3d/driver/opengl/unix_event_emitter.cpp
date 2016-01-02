@@ -37,11 +37,9 @@ static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _driver(NULL)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _im(NULL), _ic(NULL), _driver(NULL)
 {
-	_im = 0;
-	_ic = 0;
-	_SelectionOwned=false;
+	_SelectionOwned = false;
 }
 
 CUnixEventEmitter::~CUnixEventEmitter()
@@ -513,7 +511,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (keyCode)
 		{
 			TKey key = getKeyFromKeySym(k);
-			if(key == KeyNOKEY)
+			if (key == KeyNOKEY)
 				key = getKeyFromKeycode(keyCode);
 
 			// search for key in map
@@ -526,12 +524,12 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			_PressedKeys[key] = true;
 
 			// don't send a control character when deleting
-			if (key == KeyDELETE)
-				c = 0;
+			if (key == KeyDELETE) c = 0;
 		}
 
 		Text[c] = '\0';
-		if(c>0)
+
+		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;
