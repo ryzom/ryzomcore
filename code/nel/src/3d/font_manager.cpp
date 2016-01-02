@@ -304,9 +304,6 @@ void CFontManager::computeStringInfo (	const ucstring &s,
 // ***************************************************************************
 string CFontManager::getCacheInformation() const
 {
-//	stringstream ss;
-//	ss << "MaxMemory: " << (uint) _MaxMemory << " MemSize: " << (uint) _MemSize << " NbChar: " << (uint) _NbChar;
-//	return ss.str();
 	string str;
 	str = "MaxMemory: " + NLMISC::toString(_MaxMemory) + " MemSize: " + NLMISC::toString(_MemSize) + " NbChar: " + NLMISC::toString(_NbChar);
 	return str;
