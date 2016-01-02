@@ -677,7 +677,6 @@ bool abortProgram(uint32 pid)
 
 bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
 {
-
 #ifdef NL_OS_WINDOWS
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
@@ -723,16 +722,19 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	{
 		// we need to open bundles with "open" command
 		command = NLMISC::toString("open \"%s\"", programName.c_str());
+
+		// append arguments if any
+		if (!arguments.empty())
+		{
+			command += NLMISC::toString(" --args %s", arguments.c_str());
+		}
 	}
 	else
 	{
 		command = programName;
-	}
 
-	// append arguments if any
-	if (!arguments.empty())
-	{
-		command += NLMISC::toString(" --args %s", arguments.c_str());
+		// append arguments if any
+		if (!arguments.empty()) command += " " + arguments;
 	}
 
 	int res = system(command.c_str());
@@ -825,6 +827,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 #endif
 
 	return false;
+}
 
 sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log)
 {
