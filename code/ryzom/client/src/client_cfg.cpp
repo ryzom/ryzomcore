@@ -254,6 +254,43 @@ extern NL3D::UDriver	*Driver;
 extern CRyzomTime		RT;
 extern string	Cookie;
 extern string	FSAddr;
+
+extern uint64		Debug_OldCPUMask;
+extern uint64		Debug_NewCPUMask;
+
+// For multi cpu, active only one CPU for the main thread
+void setCPUMask(uint64 userCPUMask)
+{
+	uint64 cpuMask = IProcess::getCurrentProcess()->getCPUMask();
+	Debug_OldCPUMask = cpuMask;
+
+	// if user CPU mask is valid
+	if (cpuMask & userCPUMask)
+	{
+		// use it
+		IProcess::getCurrentProcess ()->setCPUMask(cpuMask & userCPUMask);
+	}
+	else
+	{
+		// else get first available CPU
+
+		// get the processor to allow process
+		uint i = 0;
+		while ((i < 64) && ((cpuMask & (UINT64_CONSTANT(1) << i)) == 0))
+			i++;
+
+		// Set the CPU mask
+		if (i < 64)
+		{
+			IProcess::getCurrentProcess ()->setCPUMask(UINT64_CONSTANT(1) << i);
+		}
+	}
+
+	// check
+	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
+	Debug_NewCPUMask = cpuMask;
+}
+
 #endif
 
 /////////////
@@ -1662,6 +1699,22 @@ void CClientConfig::setValues()
 	clamp(index, 0, 6);
 	SetPriorityClass (GetCurrentProcess(), priority[index]);
 #endif // NL_OS_WINDOWS
+
+	sint cpuMask;
+
+	if (ClientCfg.CPUMask < 1)
+	{
+		CTime::CTimerInfo timerInfo;
+		NLMISC::CTime::probeTimerInfo(timerInfo);
+
+		cpuMask = timerInfo.RequiresSingleCore ? 1:0;
+	}
+	else
+	{
+		cpuMask = ClientCfg.CPUMask;
+	}
+		
+	if (cpuMask) setCPUMask(cpuMask);
 
 	// Init Verbose Modes (at the beginning to be able to display them as soon as possible).
 	::VerboseVP				= ClientCfg.VerboseVP;

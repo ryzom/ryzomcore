@@ -374,30 +374,8 @@ void outOfMemory()
 	nlstopex (("OUT OF MEMORY"));
 }
 
-// For multi cpu, active only one CPU for the main thread
-uint64		Debug_OldCPUMask= 0;
-uint64		Debug_NewCPUMask= 0;
-void setCPUMask ()
-{
-	uint64 cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_OldCPUMask= cpuMask;
-
-	// get the processor to allow process
-	uint i = 0;
-	while ((i<64) && ((cpuMask&(SINT64_CONSTANT(1)<<i)) == 0))
-		i++;
-
-	// Set the CPU mask
-	if (i<64)
-	{
-		IProcess::getCurrentProcess ()->setCPUMask(1<<i);
-		//IThread::getCurrentThread ()->setCPUMask (1<<i);
-	}
-
-	// check
-	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
-	Debug_NewCPUMask= cpuMask;
-}
+uint64		Debug_OldCPUMask = 0;
+uint64		Debug_NewCPUMask = 0;
 
 void	displayCPUInfo()
 {
@@ -791,13 +769,24 @@ void prelogInit()
 {
 	try
 	{
+		H_AUTO ( RZ_Client_Init );
+
 		// Assert if no more memory
-		//	NLMEMORY::SetOutOfMemoryHook(outOfMemory);
+		set_new_handler(outOfMemory);
+
+		NLMISC_REGISTER_CLASS(CStage);
+		NLMISC_REGISTER_CLASS(CStageSet);
+		NLMISC_REGISTER_CLASS(CEntityManager);
+		NLMISC_REGISTER_CLASS(CCharacterCL);
+		NLMISC_REGISTER_CLASS(CPlayerCL);
+		NLMISC_REGISTER_CLASS(CUserEntity);
+		NLMISC_REGISTER_CLASS(CFxCL);
+		NLMISC_REGISTER_CLASS(CItemCL);
+		NLMISC_REGISTER_CLASS(CNamedEntityPositionState);
+		NLMISC_REGISTER_CLASS(CAnimalPositionState);
 
 		// Progress bar for init() and connection()
 		ProgressBar.reset (BAR_STEP_INIT_CONNECTION);
-
-		set_new_handler(outOfMemory);
 
 		// save screen saver state and disable it
 		LastScreenSaverEnabled = CSystemUtils::isScreensaverEnabled();
@@ -813,36 +802,15 @@ void prelogInit()
 		_control87 (_EM_INVALID|_EM_DENORMAL/*|_EM_ZERODIVIDE|_EM_OVERFLOW*/|_EM_UNDERFLOW|_EM_INEXACT, _MCW_EM);
 #endif // NL_OS_WINDOWS
 
-		CTime::CTimerInfo timerInfo;
-		NLMISC::CTime::probeTimerInfo(timerInfo);
-		if (timerInfo.RequiresSingleCore) // TODO: Also have a FV configuration value to force single core.
-			setCPUMask();
-
 		FPU_CHECKER_ONCE
 
 		NLMISC::TTime initStart = ryzomGetLocalTime ();
-
-		H_AUTO ( RZ_Client_Init );
-
-		NLMISC_REGISTER_CLASS(CStage);
-		NLMISC_REGISTER_CLASS(CStageSet);
-		NLMISC_REGISTER_CLASS(CEntityManager);
-		NLMISC_REGISTER_CLASS(CCharacterCL);
-		NLMISC_REGISTER_CLASS(CPlayerCL);
-		NLMISC_REGISTER_CLASS(CUserEntity);
-		NLMISC_REGISTER_CLASS(CFxCL);
-		NLMISC_REGISTER_CLASS(CItemCL);
-		NLMISC_REGISTER_CLASS(CNamedEntityPositionState);
-		NLMISC_REGISTER_CLASS(CAnimalPositionState);
 
 	//	_CrtSetDbgFlag( _CRTDBG_CHECK_CRT_DF );
 
 		// Init XML Lib allocator
 		// Due to Bug #906, we disable the stl xml allocation
 		// nlverify (xmlMemSetup (XmlFree4NeL, XmlMalloc4NeL, XmlRealloc4NeL, XmlStrdup4NeL) == 0);
-
-		// Init the debug memory
-		initDebugMemory();
 
 		// Add a displayer for Debug Infos.
 		createDebug();
@@ -856,13 +824,23 @@ void prelogInit()
 		ErrorLog->addDisplayer (ClientLogDisplayer);
 		AssertLog->addDisplayer (ClientLogDisplayer);
 
+		// Display the client version.
+		nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
+
+		// Init the debug memory
+		initDebugMemory();
+
+		// Load the application configuration.
+		ucstring nmsg("Loading config file...");
+		ProgressBar.newMessage (nmsg);
+
+		ClientCfg.init(ConfigFileName);
+		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
+
 		setCrashCallback(crashCallback);
 
 		// Display Some Info On CPU
 		displayCPUInfo();
-
-		// Display the client version.
-		nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
 
 		FPU_CHECKER_ONCE
 
@@ -880,14 +858,6 @@ void prelogInit()
 		// if we're not in final version then start the file access logger to keep track of the files that we read as we play
 		//ICommand::execute("iFileAccessLogStart",*NLMISC::InfoLog);
 #endif
-
-		// Load the application configuration.
-		ucstring nmsg("Loading config file...");
-		ProgressBar.newMessage (nmsg);
-
-		ClientCfg.init(ConfigFileName);
-
-		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
 
 		// check "BuildName" in ClientCfg
 		//nlassert(!ClientCfg.BuildName.empty()); // TMP comment by nico do not commit

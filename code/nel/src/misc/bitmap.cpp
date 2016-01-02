@@ -2163,13 +2163,11 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	// Determining whether file is in Original or New TGA format
 
-	bool newTgaFormat;
 	uint32 extAreaOffset;
 	uint32 devDirectoryOffset;
 	char signature[16];
 
 	f.seek (0, f.end);
-	newTgaFormat = false;
 	if (f.getPos() >= 26)
 	{
 		f.seek (-26, f.end);
@@ -2179,8 +2177,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 		{
 			f.serial(signature[i]);
 		}
-		if(strncmp(signature,"TRUEVISION-XFILE",16)==0)
-			newTgaFormat = true;
 	}
 
 
