@@ -75,7 +75,7 @@ extern void flushMessagesToSend();
 void cbGwTrDisconnection ( TClientId clientId );
 
 
-extern CVariable<string>	SaveShardRoot;
+extern CVariable<string>	SaveShardRootGameShare;
 extern CVariable<bool>		VerboseFEStatsTime;
 
 
