@@ -421,6 +421,8 @@ struct CClientConfig
 	sint			Sleep;
 	/// Force process priority
 	sint			ProcessPriority;
+	/// CPU Mask
+	sint			CPUMask;
 	// To show/hide the entities path
 	bool			ShowPath;
 	/// Draw the Boxes used for the selection.

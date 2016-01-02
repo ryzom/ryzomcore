@@ -705,7 +705,7 @@ sint32	CFameInterface::getFameIndexed(const CEntityId &entityId, uint32 factionI
 		if (!returnUnknownValue && fame == NO_FAME)
 			fame = 0;
 
-		return sint32(fame);
+		return fame;
 	}
 }
 

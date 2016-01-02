@@ -502,6 +502,7 @@ CClientConfig::CClientConfig()
 
 	Sleep				= -1;						// Default : client does not sleep.
 	ProcessPriority		= 0;						// Default : NORMAL
+	CPUMask				= 0;						// Default : auto detection
 	ShowPath			= false;					// Default : do not display the path.
 	DrawBoxes			= false;					// Default : Do not draw the selection.
 
@@ -1476,6 +1477,8 @@ void CClientConfig::setValues()
 	READ_INT_FV(Sleep)
 	// ProcessPriority
 	READ_INT_FV(ProcessPriority)
+	// CPUMask
+	READ_INT_FV(CPUMask)
 	// ShowPath : Get the ShowPath value.
 	READ_BOOL_DEV(ShowPath)
 	// UserSheet : Get the sheet to used for the use rin Local mode.

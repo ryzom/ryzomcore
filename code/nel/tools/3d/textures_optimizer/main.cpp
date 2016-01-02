@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 
 		if (hasAlpha && bitmap.isAlphaUniform(&alpha))
 		{
-			std::cout << InputFilenames[i] << " (image with uniform alpha channel " << alpha << ")" << std::endl;
+			std::cout << InputFilenames[i] << " (image with uniform alpha channel " << (sint)alpha << ")" << std::endl;
 
 			if (FixAlpha && (alpha == 0 || alpha == 255))
 			{

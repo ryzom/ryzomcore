@@ -513,7 +513,7 @@ int main(int argc, char **argv)
 	std::string::size_type pos = inputFileName.rfind(".");
 	if (pos == std::string::npos)
 	{
-		// name whithout extension
+		// name without extension
 		userColorFileName = inputFileName + "_usercolor";
 	}
 	else
