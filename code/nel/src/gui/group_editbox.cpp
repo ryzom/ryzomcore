@@ -953,7 +953,6 @@ namespace NLGUI
 			maxPos = _CursorPos;
 		}
 
-		nlinfo("%d, %d", minPos, maxPos);
 		if (replace)
 		{
 			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);
