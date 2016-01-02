@@ -18,8 +18,8 @@
 
 #include "crypt.h"
 
-char * rz_crypt(register const char *key, register const char *setting, char *buf);
-char *__crypt_sha512(const char *key, const char *setting, char *output);
+std::string rz_crypt(register const char *key, register const char *setting, char *buf);
+std::string __crypt_sha512(const char *key, const char *setting, char *output);
 
 
 // Crypts password using salt
@@ -505,7 +505,7 @@ static char	cryptresult[1+4+4+11+1];	/* encrypted result */
  * Return a pointer to static data consisting of the "setting"
  * followed by an encryption produced by the "key" and "setting".
  */
-char * rz_crypt(register const char *key, register const char *setting, char *buf) {
+std::string rz_crypt(register const char *key, register const char *setting, char *buf) {
 	register char *encp;
 	register long i;
 	register int t;
@@ -580,7 +580,7 @@ char * rz_crypt(register const char *key, register const char *setting, char *bu
 	encp += salt_size;
 	if (rz_des_cipher((char *)&constdatablock, (char *)&rsltblock,
 	    salt, num_iter))
-		return (NULL);
+		return "";
 
 	/*
 	 * Encode the 64 cipher bits as 11 ascii characters.
@@ -602,7 +602,7 @@ char * rz_crypt(register const char *key, register const char *setting, char *bu
 
 	encp[3] = 0;
 
-	return (cryptresult);
+	return cryptresult;
 }
 
 

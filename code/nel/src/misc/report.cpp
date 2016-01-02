@@ -105,7 +105,6 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		&& CFile::isExists(NL_CRASH_REPORT_TOOL))
 	{
 		std::string params;
-		params += NL_CRASH_REPORT_TOOL;
 
 		if (!reportPath.empty())
 			params += NLMISC::toString(" -log \"%s\"", reportPath.c_str());
@@ -131,7 +130,8 @@ TReportResult report(const std::string &title, const std::string &subject, const
 
 		if (synchronous)
 		{
-			TReportResult result = (TReportResult)::system(params.c_str());
+			TReportResult result = (TReportResult)NLMISC::launchProgramAndWaitForResult(NL_CRASH_REPORT_TOOL, params);
+
 			if (result != ReportAlwaysIgnore
 				&& result != ReportIgnore
 				&& result != ReportAbort

@@ -677,7 +677,6 @@ bool abortProgram(uint32 pid)
 
 bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
 {
-
 #ifdef NL_OS_WINDOWS
 	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
@@ -723,16 +722,19 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	{
 		// we need to open bundles with "open" command
 		command = NLMISC::toString("open \"%s\"", programName.c_str());
+
+		// append arguments if any
+		if (!arguments.empty())
+		{
+			command += NLMISC::toString(" --args %s", arguments.c_str());
+		}
 	}
 	else
 	{
 		command = programName;
-	}
 
-	// append arguments if any
-	if (!arguments.empty())
-	{
-		command += NLMISC::toString(" --args %s", arguments.c_str());
+		// append arguments if any
+		if (!arguments.empty()) command += " " + arguments;
 	}
 
 	int res = system(command.c_str());
@@ -825,7 +827,92 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 #endif
 
 	return false;
+}
 
+sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log)
+{
+	sint res = 0;
+
+#ifdef NL_OS_WINDOWS
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
+
+	memset(&si, 0, sizeof(si));
+	memset(&pi, 0, sizeof(pi));
+
+	si.cb = sizeof(si);
+
+	// Enable nlassert/nlstop to display the error reason & callstack
+	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
+	TCHAR envBuf [2];
+	if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) != 0)
+	{
+		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
+	}
+
+	string arg = " " + arguments;
+	BOOL ok = CreateProcessA(programName.c_str(), (char*)arg.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+
+	if (ok)
+	{
+		// Successfully created the process.  Wait for it to finish.
+		WaitForSingleObject(pi.hProcess, INFINITE);
+
+		// Get the exit code.
+		DWORD exitCode = 0;
+		ok = GetExitCodeProcess(pi.hProcess, &exitCode);
+
+		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+
+		if (ok)
+		{
+			res = (sint)exitCode;
+		}
+		else
+		{
+			if (log)
+				nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+		}
+	}
+	else
+	{
+		LPVOID lpMsgBuf;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL);
+
+		if (log)
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), GetLastError(), lpMsgBuf);
+
+		LocalFree(lpMsgBuf);
+
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
+#else
+	// save LD_LIBRARY_PATH
+	const char *previousEnv = getenv("LD_LIBRARY_PATH");
+
+	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
+	setenv("LD_LIBRARY_PATH", "", 1);
+
+	// program name is the only required string
+	std::string command = programName;
+
+	// only appends arguments if any
+	if (!arguments.empty()) command += " " + arguments;
+
+	// execute the command
+	res = system(command.c_str());
+
+	// restore previous LD_LIBRARY_PATH
+	setenv("LD_LIBRARY_PATH", previousEnv, 1);
+
+	if (res && log)
+		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
+#endif
+
+	return res;
 }
 
 std::string getCommandOutput(const std::string &command)

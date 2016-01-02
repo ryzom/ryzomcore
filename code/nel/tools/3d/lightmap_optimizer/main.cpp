@@ -920,6 +920,14 @@ int main(int nNbArg, char **ppArgs)
 								const CMeshGeom *pMG = dynamic_cast<const CMeshGeom*>(&pMeshML->getMeshGeom(m));
 								pVB = const_cast<CVertexBuffer*>(&pMG->getVertexBuffer());
 							}
+							else
+							{
+								pVB = NULL;
+							}
+
+							// to avoid a possible crash
+							if (!pVB) continue;
+
 							CVertexBufferReadWrite vba; 
 							pVB->lock (vba);
 
