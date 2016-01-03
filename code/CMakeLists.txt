@@ -144,6 +144,28 @@ IF(WITH_SSE2)
   ENDIF(WITH_SSE3)
 ENDIF(WITH_SSE2)
 
+IF(APPLE_CERTIFICATE)
+  # Find codesign_allocate
+
+  # Xcode 7.0 and later versions
+  SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
+
+  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+    # Xcode 6.4 and previous versions
+    SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
+  ENDIF()
+
+  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+    # System path
+    SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
+  ENDIF()
+
+  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+    MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
+    SET(CODESIGN_ALLOCATE)
+  ENDIF()
+ENDIF()
+
 MACRO(ADD_QT_LIBRARY _NAME)
   IF(WIN32)
     SET(_PREFIX "Qt5")

@@ -83,7 +83,8 @@ void CLog::setProcessName (const std::string &processName)
 		}
 	}
 
-	*_ProcessName = processName;
+	// keep only filename without path
+	*_ProcessName = CFile::getFilename(processName);
 }
 
 void CLog::setPosition (sint line, const char *fileName, const char *funcName)

@@ -443,14 +443,14 @@ bool	CBitmap::isGrayscale() const
 	uint32 *data = (uint32*)_Data[0].getPtr();
 	uint32 *endData = (uint32*)((uint8*)data + size);
 
-	NLMISC::CRGBA color;
+	NLMISC::CRGBA *color = NULL;
 
 	// check if all alphas have the same value
 	while(data < endData)
 	{
-		color.set8888(*data);
+		color = (NLMISC::CRGBA*)data;
 
-		if (!color.isGray()) return false;
+		if (!color->isGray()) return false;
 
 		++data;
 	}

@@ -784,12 +784,6 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	}
 	argv[i+1] = NULL;
 	
-	// save LD_LIBRARY_PATH
-	const char *previousEnv = getenv("LD_LIBRARY_PATH");
-
-	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
-	setenv("LD_LIBRARY_PATH", "", 1);
-
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
 	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
@@ -800,9 +794,6 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		char *err = strerror (errno);
 		if (log)
 			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
-
-		// restore previous LD_LIBRARY_PATH
-		setenv("LD_LIBRARY_PATH", previousEnv, 1);
 	}
 	else if (status == 0)
 	{
@@ -818,9 +809,6 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	else
 	{
 		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		
-		// restore previous LD_LIBRARY_PATH
-		setenv("LD_LIBRARY_PATH", previousEnv, 1);
 
 		return true;
 	}
@@ -890,12 +878,6 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 		CloseHandle(pi.hThread);
 	}
 #else
-	// save LD_LIBRARY_PATH
-	const char *previousEnv = getenv("LD_LIBRARY_PATH");
-
-	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
-	setenv("LD_LIBRARY_PATH", "", 1);
-
 	// program name is the only required string
 	std::string command = programName;
 
@@ -904,9 +886,6 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 
 	// execute the command
 	res = system(command.c_str());
-
-	// restore previous LD_LIBRARY_PATH
-	setenv("LD_LIBRARY_PATH", previousEnv, 1);
 
 	if (res && log)
 		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
@@ -1253,8 +1232,18 @@ static bool openDocWithExtension (const char *document, const char *ext)
 		return false;
 	}
 
-	return launchProgram(command, document);
+	// save LD_LIBRARY_PATH
+	const char *previousEnv = getenv("LD_LIBRARY_PATH");
 
+	// clear LD_LIBRARY_PATH to avoid problems with Steam Runtime
+	setenv("LD_LIBRARY_PATH", "", 1);
+
+	bool res = launchProgram(command, document);
+
+	// restore previous LD_LIBRARY_PATH
+	setenv("LD_LIBRARY_PATH", previousEnv, 1);
+
+	return res;
 #endif // NL_OS_WINDOWS
 
 	return false;

@@ -795,8 +795,38 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 					// masks can be converted to grayscale files
 					if (bi.OptimizeTextures > 0 && maskDepth > 8)
 					{
+						if (!li.Mask.isGrayscale())
+						{
+							nlwarning("Mask %s is using colors, results may by incorrect! Use OptimizeTextures = 2 to fix it.", maskFileName.c_str());
+						}
+
 						if (bi.OptimizeTextures > 1)
 						{
+							// get a pointer on original data
+							uint32 size = li.Mask.getPixels().size();
+							uint32 *data = (uint32*)li.Mask.getPixels().getPtr();
+							uint32 *endData = (uint32*)((uint8*)data + size);
+
+							NLMISC::CRGBA *color = NULL;
+
+							// process all pixels
+							while(data < endData)
+							{
+								color = (NLMISC::CRGBA*)data;
+
+								// copy red value to green and blue,
+								// because only red is used for mask
+								color->B = color->G = color->R;
+
+								// make opaque
+								color->A = 255;
+
+								++data;
+							}
+
+							// convert image to real grayscale
+							li.Mask.convertToType(NLMISC::CBitmap::Luminance);
+
 							NLMISC::COFile os;
 
 							if (os.open(maskFileName))
@@ -826,9 +856,9 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 						}
 					}
 
-					if (li.Mask.PixelFormat != NLMISC::CBitmap::RGBA)
+					if (li.Mask.PixelFormat != NLMISC::CBitmap::Luminance)
 					{
-						li.Mask.convertToType(NLMISC::CBitmap::RGBA);
+						li.Mask.convertToType(NLMISC::CBitmap::Luminance);
 					}
 
 					/// make sure the mask has the same size
@@ -969,5 +999,4 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	{
 		nlerror("Couldn't write %s", fullHlsInfoPath.c_str());
 	}
-
 }
