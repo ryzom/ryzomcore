@@ -990,11 +990,26 @@ void prelogInit()
 		// Check the driver is not is 16 bits
 		checkDriverDepth ();
 
-		// For login phase, MUST be in windowed
 		UDriver::CMode mode;
-		mode.Width		= 1024;
-		mode.Height		= 768;
-		mode.Windowed	= true;
+
+		bool forceWindowed1024x768 = true;
+		
+		if (Driver->getCurrentScreenMode(mode))
+		{
+			// if screen mode lower than 1024x768, use same mode in fullscreen
+			if (mode.Width <= 1024 && mode.Height <= 768)
+			{
+				mode.Windowed = false;
+				forceWindowed1024x768 = false;
+			}
+		}
+
+		if (forceWindowed1024x768)
+		{
+			mode.Width		= 1024;
+			mode.Height		= 768;
+			mode.Windowed	= true;
+		}
 
 		// Disable Hardware Vertex Program.
 		if(ClientCfg.DisableVtxProgram)
