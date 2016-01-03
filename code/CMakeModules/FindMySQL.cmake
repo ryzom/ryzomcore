@@ -20,6 +20,8 @@ ELSE()
       /usr/include/mysql
       /usr/local/include/mysql
       /opt/local/include/mysql5/mysql
+      /opt/local/include/mysql55/mysql
+      /opt/local/include/mysql51/mysql
       $ENV{ProgramFiles}/MySQL/*/include
       $ENV{SystemDrive}/MySQL/*/include)
 
@@ -41,6 +43,8 @@ ELSE()
       /usr/lib/mysql
       /usr/local/lib/mysql
       /opt/local/lib/mysql5/mysql
+      /opt/local/lib/mysql55/mysql
+      /opt/local/lib/mysql51/mysql
       )
 
     FIND_LIBRARY(MYSQL_LIBRARY_DEBUG NAMES mysqlclientd
@@ -50,6 +54,8 @@ ELSE()
       /usr/lib/mysql
       /usr/local/lib/mysql
       /opt/local/lib/mysql5/mysql
+      /opt/local/lib/mysql55/mysql
+      /opt/local/lib/mysql51/mysql
       )
   ENDIF()
 
