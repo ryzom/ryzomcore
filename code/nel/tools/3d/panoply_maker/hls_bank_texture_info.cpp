@@ -43,18 +43,15 @@ void			CHLSBankTextureInfo::serial(NLMISC::IStream &f)
 // ***************************************************************************
 void		CHLSBankTextureInfo::CMaskBitmap::build(const NLMISC::CBitmap &src)
 {
-	nlassert(src.getPixelFormat()==CBitmap::RGBA);
+	nlassert(src.getPixelFormat()==CBitmap::Luminance);
 	Width= src.getWidth();
 	Height= src.getHeight();
 	Pixels.resize(Width*Height);
 	if(!Pixels.empty())
 	{
-		CRGBA	*pSrc= (CRGBA*)(&src.getPixels()[0]);
-		uint8	*pDst= &Pixels[0];
-		for(uint i=0; i<Pixels.size(); i++)
-		{
-			pDst[i]= pSrc[i].R;
-		}
+		uint8	*pSrc = (uint8*)src.getPixels().getPtr();
+		uint8	*pDst = &Pixels[0];
+		memcpy(pDst, pSrc, Pixels.size());
 	}
 }
 
