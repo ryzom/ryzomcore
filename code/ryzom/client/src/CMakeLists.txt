@@ -78,27 +78,8 @@ IF(WITH_RYZOM_CLIENT)
       ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS -RpX ${RYZOM_DATA_DIR} ${RYZOM_RESOURCES_DIR})
     ENDIF()
 
-    IF(APPLE_CERTIFICATE)
-      # Find codesign_allocate
-
-      # Xcode 7.0 and later versions
-      SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
-
-      IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-        # Xcode 6.4 and previous versions
-        SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
-      ENDIF()
-
-      IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-        # System path
-        SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
-      ENDIF()
-
-      IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-        MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
-      ELSE()
-        ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_OUTPUT_DIR}" COMMENT "Signing bundle...")
-      ENDIF()
+    IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_OUTPUT_DIR}" COMMENT "Signing bundle...")
     ENDIF()
   ENDIF()
 
