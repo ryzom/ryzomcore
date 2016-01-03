@@ -31,7 +31,7 @@ public:
 	static void parse( int argc, char **argv, std::vector< std::pair< std::string, std::string > > &v )
 	{
 		std::stack< std::string > stack;
-		std::string key;		
+		std::string key;
 		std::string value;
 
 		for( int i = argc - 1 ; i >= 0; i-- )
@@ -105,7 +105,9 @@ int main(int argc, char **argv)
 	}
 #endif
 
-	QApplication app( argc, argv );
+	QApplication app(argc, argv);
+
+	QApplication::setWindowIcon(QIcon(":/icons/nevraxpill.ico"));
 
 	std::vector< std::pair< std::string, std::string > > params;
 
