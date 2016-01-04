@@ -34,6 +34,11 @@
 #		include <cpuid.h>
 #		define nlcpuid(regs, idx) __cpuid(idx, regs[0], regs[1], regs[2], regs[3])
 #	endif // NL_CPU_INTEL
+#	ifdef NL_OS_MAC
+#		include <sys/mount.h>
+#	else
+#		include <sys/vfs.h>
+#	endif
 #endif // NL_OS_WINDOWS
 
 #include "nel/misc/system_info.h"
@@ -1118,49 +1123,24 @@ bool CSystemInfo::isNT()
 #endif
 }
 
-string CSystemInfo::availableHDSpace (const string &filename)
+uint64 CSystemInfo::availableHDSpace (const string &filename)
 {
+	std::string path = CFile::getPath(filename);
+
 #ifdef NL_OS_UNIX
-	string cmd = "df ";
-	if(filename.empty())
-		cmd += ".";
-	else
-		cmd += filename;
-	cmd += " >/tmp/nelhdfs";
-	sint error = system (cmd.c_str());
-	if (error)
-		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
+	struct stat stst;
+	struct statfs stfs;
 
-	int fd = open("/tmp/nelhdfs", O_RDONLY);
-	if (fd == -1)
-	{
-		return 0;
-	}
-	else
-	{
-		char buffer[4096+1];
-		int len = read(fd, buffer, sizeof(buffer)-1);
-		close(fd);
-		buffer[len] = '\0';
+	if (::stat(path.c_str(), &stst) == -1) return 0;
+	if (::statfs(c_str(), &stfs) == -1) return 0;
 
-		vector<string> splitted;
-		explode(string(buffer), string("\n"), splitted, true);
-
-		if(splitted.size() < 2)
-			return "NoInfo";
-
-		vector<string> sline;
-		explode(splitted[1], string(" "), sline, true);
-
-		if(sline.size() < 5)
-			return splitted[1];
-
-		string space = sline[3] + "000";
-		return bytesToHumanReadable(space);
-	}
+	return (uint64)(stfs.f_bavail * stst.st_blksize);
 #else
-	nlunreferenced(filename);
-	return "NoInfo";
+	ULARGE_INTEGER freeSpace = {0};
+	BOOL bRes = ::GetDiskFreeSpaceExA(path.c_str(), &freeSpace, NULL, NULL);
+	if (!bRes) return 0;
+
+	return (uint64)freeSpace.QuadPart;
 #endif
 }
 
