@@ -935,28 +935,27 @@ bool CBitmap::alphaToLuminance()
 \*-------------------------------------------------------------------*/
 bool CBitmap::alphaLuminanceToLuminance()
 {
-	uint32 i;
+	if (_Width*_Height == 0)  return false;
 
-	if(_Width*_Height == 0)  return false;
-
-	for(uint8 m= 0; m<_MipMapCount; m++)
+	for(uint8 m = 0; m<_MipMapCount; ++m)
 	{
 		CObjectVector<uint8> dataTmp;
 		dataTmp.resize(_Data[m].size()/2);
 		uint	dstId= 0;
 
-		for(i=0; i<_Data[m].size(); i+=2)
+		for(uint32 i=0; i<_Data[m].size(); i+=2)
 		{
-			dataTmp[dstId++]= 0;
-			dataTmp[dstId++]= 0;
-			dataTmp[dstId++]= 0;
 			dataTmp[dstId++]= _Data[m][i];
 		}
+
 		NLMISC::contReset(_Data[m]);
+
 		_Data[m].resize(0);
 		_Data[m] = dataTmp;
 	}
+
 	PixelFormat = Luminance;
+
 	return true;
 }
 
