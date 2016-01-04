@@ -237,6 +237,34 @@ private :
 
 
 	/**
+	 * The grayscale resample function
+	 * \param pSrc grayscale 8-bits array
+	 * \param pDest grayscale 8-bits array for storing resampled texture
+	 * \param nSrcWidth original width
+	 * \param nSrcHeight original height
+	 * \param nDestWidth width after resample
+	 * \param nDestHeight height after resample
+	 */
+	void resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
+							 sint32 nSrcWidth, sint32 nSrcHeight,
+							 sint32 nDestWidth, sint32 nDestHeight);
+
+	/**
+	 * The FAST resample function : works only when reducing the size by two
+	 * and when the image is square
+	 * \param pSrc grayscale 8-bits array
+	 * \param pDest grayscale 8-bits array for storing resampled texture
+	 * \param nSrcWidth original width
+	 * \param nSrcHeight original height
+	 * \param nDestWidth width after resample
+	 * \param nDestHeight height after resample
+	 */
+	void resamplePicture8Fast (const uint8 *pSrc, uint8 *pDest,
+								sint32 nSrcWidth, sint32 nSrcHeight,
+								sint32 nDestWidth, sint32 nDestHeight);
+
+
+	/**
 	 * Quadratic interpolator
 	 * \return the interpolation in (x,y) of the values (xy**)
 	 */

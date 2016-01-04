@@ -1785,7 +1785,7 @@ void CBitmap::releaseMipMaps()
 \*-------------------------------------------------------------------*/
 void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 {
-	nlassert(PixelFormat == RGBA);
+	nlassert(PixelFormat == RGBA || PixelFormat == Luminance);
 	bool needRebuild = false;
 
 	// Deleting mipmaps
@@ -1804,13 +1804,27 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 
 	//logResample("Resample: 30");
 	CObjectVector<uint8> pDestui;
-	pDestui.resize(nNewWidth*nNewHeight*4);
-	//logResample("Resample: 40");
-	NLMISC::CRGBA *pDestRgba = (NLMISC::CRGBA*)&pDestui[0];
-	//logResample("Resample: 50");
 
-	resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
-	//logResample("Resample: 60");
+	if (PixelFormat == RGBA)
+	{
+		pDestui.resize(nNewWidth*nNewHeight*4);
+		//logResample("Resample: 40");
+		NLMISC::CRGBA *pDestRgba = (NLMISC::CRGBA*)&pDestui[0];
+		//logResample("Resample: 50");
+
+		resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
+		//logResample("Resample: 60");
+	}
+	else if (PixelFormat == Luminance)
+	{
+		pDestui.resize(nNewWidth*nNewHeight);
+		//logResample("Resample: 40");
+		uint8 *pDestGray = &pDestui[0];
+		//logResample("Resample: 50");
+
+		resamplePicture8 (&_Data[0][0], pDestGray, _Width, _Height, nNewWidth, nNewHeight);
+		//logResample("Resample: 60");
+	}
 
 	NLMISC::contReset(_Data[0]); // free memory
 	//logResample("Resample: 70");
@@ -2121,6 +2135,230 @@ void CBitmap::resamplePicture32Fast (const NLMISC::CRGBA *pSrc, NLMISC::CRGBA *p
 										pSrc[twoX   + twoSrcWidthByY + nSrcWidth ],
 										pSrc[twoX+1 + twoSrcWidthByY             ],
 										pSrc[twoX+1 + twoSrcWidthByY + nSrcWidth ]);
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+							resamplePicture32
+\*-------------------------------------------------------------------*/
+void CBitmap::resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
+								 sint32 nSrcWidth, sint32 nSrcHeight,
+								 sint32 nDestWidth, sint32 nDestHeight)
+{
+	//logResample("RP8: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+		return;
+
+	// If we're reducing it by 2, call the fast resample
+	if (((nSrcHeight / 2) == nDestHeight) && ((nSrcHeight % 2) == 0) &&
+		((nSrcWidth  / 2) == nDestWidth)  && ((nSrcWidth  % 2) == 0))
+	{
+		resamplePicture8Fast(pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
+		return;
+	}
+
+	bool bXMag=(nDestWidth>=nSrcWidth);
+	bool bYMag=(nDestHeight>=nSrcHeight);
+	bool bXEq=(nDestWidth==nSrcWidth);
+	bool bYEq=(nDestHeight==nSrcHeight);
+	std::vector<float> pIterm (nDestWidth*nSrcHeight);
+
+	if (bXMag)
+	{
+		float fXdelta=(float)(nSrcWidth)/(float)(nDestWidth);
+		float *pItermPtr=&*pIterm.begin();
+		sint32 nY;
+		for (nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			float fX=0.f;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+			{
+				float fVirgule=fX-(float)floor(fX);
+				nlassert (fVirgule>=0.f);
+				float vColor;
+				if (fVirgule>=0.5f)
+				{
+					if (fX<(float)(nSrcWidth-1))
+					{
+						float vColor1 (pSrcLine[(sint32)floor(fX)]);
+						float vColor2 (pSrcLine[(sint32)floor(fX)+1]);
+						vColor=vColor1*(1.5f-fVirgule)+vColor2*(fVirgule-0.5f);
+					}
+					else
+						vColor = float(pSrcLine[(sint32)floor(fX)]);
+				}
+				else
+				{
+					if (fX>=1.f)
+					{
+						float vColor1 (pSrcLine[(sint32)floor(fX)]);
+						float vColor2 (pSrcLine[(sint32)floor(fX)-1]);
+						vColor = vColor1*(0.5f+fVirgule)+vColor2*(0.5f-fVirgule);
+					}
+					else
+						vColor = float (pSrcLine[(sint32)floor(fX)]);
+				}
+				*(pItermPtr++)=vColor;
+				fX+=fXdelta;
+			}
+			pSrc+=nSrcWidth;
+		}
+	}
+	else if (bXEq)
+	{
+		float *pItermPtr=&*pIterm.begin();
+		for (sint32 nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+				*(pItermPtr++) = float (pSrcLine[nX]);
+			pSrc+=nSrcWidth;
+		}
+	}
+	else
+	{
+		double fXdelta=(double)(nSrcWidth)/(double)(nDestWidth);
+		nlassert (fXdelta>1.f);
+		float *pItermPtr=&*pIterm.begin();
+		sint32 nY;
+		for (nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			double fX=0.f;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+			{
+				float vColor = 0.f;
+				double fFinal=fX+fXdelta;
+				while ((fX<fFinal)&&((sint32)fX!=nSrcWidth))
+				{
+					double fNext=(double)floor (fX)+1.f;
+					if (fNext>fFinal)
+						fNext=fFinal;
+					vColor+=((float)(fNext-fX))* float (pSrcLine[(sint32)floor(fX)]);
+					fX=fNext;
+				}
+				fX = fFinal; // ensure fX == fFinal
+				vColor/=(float)fXdelta;
+				*(pItermPtr++)=vColor;
+			}
+			pSrc+=nSrcWidth;
+		}
+	}
+
+	if (bYMag)
+	{
+		double fYdelta=(double)(nSrcHeight)/(double)(nDestHeight);
+		sint32 nX;
+		for (nX=0; nX<nDestWidth; nX++)
+		{
+			double fY=0.f;
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				double fVirgule=fY-(double)floor(fY);
+				nlassert (fVirgule>=0.f);
+				float vColor;
+				if (fVirgule>=0.5f)
+				{
+					if (fY<(double)(nSrcHeight-1))
+					{
+						float vColor1=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+						float vColor2=pIterm[(((sint32)floor(fY))+1)*nDestWidth+nX];
+						vColor=vColor1*(1.5f-(float)fVirgule)+vColor2*((float)fVirgule-0.5f);
+					}
+					else
+						vColor=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+				}
+				else
+				{
+					if (fY>=1.f)
+					{
+						float vColor1=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+						float vColor2=pIterm[(((sint32)floor(fY))-1)*nDestWidth+nX];
+						vColor=vColor1*(0.5f+(float)fVirgule)+vColor2*(0.5f-(float)fVirgule);
+					}
+					else
+						vColor=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+				}
+				pDest[nX+nY*nDestWidth]=vColor;
+				fY+=fYdelta;
+			}
+		}
+	}
+	else if (bYEq)
+	{
+		for (sint32 nX=0; nX<nDestWidth; nX++)
+		{
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				pDest[nX+nY*nDestWidth]=pIterm[nY*nDestWidth+nX];
+			}
+		}
+	}
+	else
+	{
+		double fYdelta=(double)(nSrcHeight)/(double)(nDestHeight);
+		nlassert (fYdelta>1.f);
+		sint32 nX;
+		for (nX=0; nX<nDestWidth; nX++)
+		{
+			double fY=0.f;
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				float vColor = 0.f;
+				double fFinal=fY+fYdelta;
+				while ((fY<fFinal)&&((sint32)fY!=nSrcHeight))
+				{
+					double fNext=(double)floor (fY)+1.f;
+					if (fNext>fFinal)
+						fNext=fFinal;
+					vColor+=((float)(fNext-fY))*pIterm[((sint32)floor(fY))*nDestWidth+nX];
+					fY=fNext;
+				}
+				vColor/=(float)fYdelta;
+				pDest[nX+nY*nDestWidth]=vColor;
+			}
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+							resamplePicture8Fast
+\*-------------------------------------------------------------------*/
+void CBitmap::resamplePicture8Fast (const uint8 *pSrc, uint8 *pDest,
+									 sint32 nSrcWidth, sint32 nSrcHeight,
+									 sint32 nDestWidth, sint32 nDestHeight)
+{
+	// the image is divided by two : 1 pixel in dest = 4 pixels in src
+	// the resulting pixel in dest is an average of the four pixels in src
+
+	nlassert(nSrcWidth  % 2 == 0);
+	nlassert(nSrcHeight % 2 == 0);
+	nlassert(nSrcWidth  / 2 == nDestWidth);
+	nlassert(nSrcHeight / 2 == nDestHeight);
+
+	sint32 x, y, twoX, twoSrcWidthByY;
+
+	for (y=0 ; y<nDestHeight ; y++)
+	{
+		twoSrcWidthByY = 2*nSrcWidth*y;
+		for (x=0 ; x<nDestWidth ; x++)
+		{
+			twoX = 2*x;
+			pDest[x+y*nDestWidth] = (
+				(uint)pSrc[twoX   + twoSrcWidthByY             ]+
+				(uint)pSrc[twoX   + twoSrcWidthByY + nSrcWidth ]+
+				(uint)pSrc[twoX+1 + twoSrcWidthByY             ]+
+				(uint)pSrc[twoX+1 + twoSrcWidthByY + nSrcWidth ]+1)>>2;
 		}
 	}
 }

@@ -80,7 +80,7 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 #endif // !NL_COMP_MINGW
 
 
-#ifdef NL_HAS_SSE2
+#if defined(NL_HAS_SSE2) && !defined(NL_CPU_X86_64)
 
 void *operator new(size_t size) throw(std::bad_alloc)
 {
