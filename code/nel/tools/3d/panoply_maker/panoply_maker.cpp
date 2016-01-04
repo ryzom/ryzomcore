@@ -322,8 +322,7 @@ int main(int argc, char* argv[])
 					NLMISC::CConfigFile::CVar &bitmap_extensions = cf.getVar ("bitmap_extensions");
 					for (uint k = 0; k < (uint) bitmap_extensions.size(); ++k)
 					{
-						std::string ext = "." + bitmap_extensions.asString(k);
-						ext = NLMISC::strupr(ext);
+						std::string ext = "." + NLMISC::toLower(bitmap_extensions.asString(k));
 						if (std::find(bi.BitmapExtensions.begin(), bi.BitmapExtensions.end(), ext) == bi.BitmapExtensions.end())
 						{
 							bi.BitmapExtensions.push_back(ext);
@@ -481,7 +480,7 @@ static void BuildColoredVersions(const CBuildInfo &bi)
 		{
 			for (uint l = 0; l < bi.BitmapExtensions.size(); ++l)
 			{
-				std::string fileExt = "." + NLMISC::strupr(NLMISC::CFile::getExtension(files[k]));
+				std::string fileExt = "." + NLMISC::toLower(NLMISC::CFile::getExtension(files[k]));
 				if (fileExt == bi.BitmapExtensions[l])
 				{
 					//nlwarning("Processing : %s ", files[k].c_str());
@@ -530,7 +529,7 @@ static bool CheckIfNeedRebuildColoredVersionForOneBitmap(const CBuildInfo &bi, c
 	masks.clear();
 
 	std::string fileName = NLMISC::CFile::getFilenameWithoutExtension(fileNameWithExtension);
-	std::string fileExt  = NLMISC::strupr(NLMISC::CFile::getExtension(fileNameWithExtension));
+	std::string fileExt  = NLMISC::toLower(NLMISC::CFile::getExtension(fileNameWithExtension));
 
 	for (uint k = 0; k < bi.ColorMasks.size(); ++k)
 	{
@@ -759,7 +758,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 	masks.clear();
 
 	std::string fileName = NLMISC::CFile::getFilenameWithoutExtension(fileNameWithExtension);
-	std::string fileExt  = NLMISC::strupr(NLMISC::CFile::getExtension(fileNameWithExtension));
+	std::string fileExt  = NLMISC::toLower(NLMISC::CFile::getExtension(fileNameWithExtension));
 
 	uint	k;
 	for (k = 0; k < bi.ColorMasks.size(); ++k)
@@ -831,7 +830,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 
 							if (os.open(maskFileName))
 							{
-								std::string ext = CFile::getExtension(maskFileName);
+								std::string ext = NLMISC::toLower(CFile::getExtension(maskFileName));
 
 								nlwarning("Optimizing mask %s...", maskFileName.c_str());
 
