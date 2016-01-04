@@ -1057,7 +1057,7 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	struct statfs stfs;
 
 	if (::stat(path.c_str(), &stst) == -1) return 0;
-	if (::statfs(c_str(), &stfs) == -1) return 0;
+	if (::statfs(path.c_str(), &stfs) == -1) return 0;
 
 	return (uint64)(stfs.f_bavail * stst.st_blksize);
 #else
