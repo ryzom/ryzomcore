@@ -34,6 +34,11 @@
 #		include <cpuid.h>
 #		define nlcpuid(regs, idx) __cpuid(idx, regs[0], regs[1], regs[2], regs[3])
 #	endif // NL_CPU_INTEL
+#	ifdef NL_OS_MAC
+#		include <sys/mount.h>
+#	else
+#		include <sys/vfs.h>
+#	endif
 #endif // NL_OS_WINDOWS
 
 #include "nel/misc/system_info.h"
@@ -950,19 +955,8 @@ static bool DetectSSE()
 			// check OS support for SSE
 			try
 			{
-				#ifdef NL_OS_WINDOWS
-				#ifdef NL_NO_ASM
 				unsigned int tmp = _mm_getcsr();
 				nlunreferenced(tmp);
-				#else
-				__asm
-				{
-					xorps xmm0, xmm0  // Streaming SIMD Extension
-				}
-				#endif // NL_NO_ASM
-				#elif NL_OS_UNIX
-					__asm__ __volatile__ ("xorps %xmm0, %xmm0;");
-				#endif // NL_OS_UNIX
 			}
 			catch(...)
 			{
@@ -984,74 +978,10 @@ bool CSystemInfo::_HaveSSE = DetectSSE ();
 bool CSystemInfo::hasCPUID ()
 {
 	#ifdef NL_CPU_INTEL
-		 uint32 result = 0;
-		#ifdef NL_OS_WINDOWS
-		#ifdef NL_NO_ASM
-			sint32 CPUInfo[4] = {-1};
-			nlcpuid(CPUInfo, 0);
-			if (CPUInfo[3] != -1) result = 1;
-		#else
-		 __asm
-		 {
-			 pushad
-			 pushfd
-			 //	 If ID bit of EFLAGS can change, then cpuid is available
-			 pushfd
-			 pop  eax					// Get EFLAG
-			 mov  ecx,eax
-			 xor  eax,0x200000			// Flip ID bit
-			 push eax
-			 popfd						// Write EFLAGS
-			 pushfd
-			 pop  eax					// read back EFLAG
-			 xor  eax,ecx
-			 je   noCpuid				// no flip -> no CPUID instr.
-
-			 popfd						// restore state
-			 popad
-			 mov  result, 1
-			 jmp  CPUIDPresent
-
-			noCpuid:
-			 popfd					    // restore state
-			 popad
-			 mov result, 0
-			CPUIDPresent:
-		 }
-		#endif // NL_NO_ASM
-		#elif NL_OS_UNIX // NL_OS_WINDOWS
-			__asm__ __volatile__ (
-				/* Save Register */
-				"pushl  %%ebp;"
-				"pushl  %%ebx;"
-				"pushl  %%edx;"
-
-				/* Check if this CPU supports cpuid */
-				"pushf;"
-				"pushf;"
-				"popl   %%eax;"
-				"movl   %%eax, %%ebx;"
-				"xorl   $(1 << 21), %%eax;"	// CPUID bit
-				"pushl  %%eax;"
-				"popf;"
-				"pushf;"
-				"popl   %%eax;"
-				"popf;"                  	// Restore flags
-				"xorl   %%ebx, %%eax;"
-				"jz     NoCPUID;"
-				"movl   $1, %0;"
-				"jmp    CPUID;"
-
-			"NoCPUID:;"
-				"movl   $0, %0;"
-              		"CPUID:;"
-				"popl   %%edx;"
-				"popl   %%ebx;"
-				"popl   %%ebp;"
-
-				:"=a"(result)
-                	);
-		#endif // NL_OS_UNIX
+		uint32 result = 0;
+		sint32 CPUInfo[4] = {-1};
+		nlcpuid(CPUInfo, 0);
+		if (CPUInfo[3] != -1) result = 1;
 		return result == 1;
 	#else
 		return false;
@@ -1062,7 +992,7 @@ bool CSystemInfo::hasCPUID ()
 uint32 CSystemInfo::getCPUID()
 {
 #ifdef NL_CPU_INTEL
-	if(hasCPUID())
+	if (hasCPUID())
 	{
 		uint32 result = 0;
 		sint32 CPUInfo[4];
@@ -1118,49 +1048,24 @@ bool CSystemInfo::isNT()
 #endif
 }
 
-string CSystemInfo::availableHDSpace (const string &filename)
+uint64 CSystemInfo::availableHDSpace (const string &filename)
 {
+	std::string path = CFile::getPath(filename);
+
 #ifdef NL_OS_UNIX
-	string cmd = "df ";
-	if(filename.empty())
-		cmd += ".";
-	else
-		cmd += filename;
-	cmd += " >/tmp/nelhdfs";
-	sint error = system (cmd.c_str());
-	if (error)
-		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
+	struct stat stst;
+	struct statfs stfs;
 
-	int fd = open("/tmp/nelhdfs", O_RDONLY);
-	if (fd == -1)
-	{
-		return 0;
-	}
-	else
-	{
-		char buffer[4096+1];
-		int len = read(fd, buffer, sizeof(buffer)-1);
-		close(fd);
-		buffer[len] = '\0';
+	if (::stat(path.c_str(), &stst) == -1) return 0;
+	if (::statfs(c_str(), &stfs) == -1) return 0;
 
-		vector<string> splitted;
-		explode(string(buffer), string("\n"), splitted, true);
-
-		if(splitted.size() < 2)
-			return "NoInfo";
-
-		vector<string> sline;
-		explode(splitted[1], string(" "), sline, true);
-
-		if(sline.size() < 5)
-			return splitted[1];
-
-		string space = sline[3] + "000";
-		return bytesToHumanReadable(space);
-	}
+	return (uint64)(stfs.f_bavail * stst.st_blksize);
 #else
-	nlunreferenced(filename);
-	return "NoInfo";
+	ULARGE_INTEGER freeSpace = {0};
+	BOOL bRes = ::GetDiskFreeSpaceExA(path.c_str(), &freeSpace, NULL, NULL);
+	if (!bRes) return 0;
+
+	return (uint64)freeSpace.QuadPart;
 #endif
 }
 

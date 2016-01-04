@@ -38,6 +38,10 @@
 #	include <sys/types.h>
 #endif
 
+#if defined(NL_CPU_INTEL) && defined(NL_COMP_GCC)
+#include "x86intrin.h"
+#endif
+
 #include "string_common.h"
 
 #ifdef NL_OS_WINDOWS
@@ -65,20 +69,8 @@ namespace	NLMISC
 
 inline uint64 rdtsc()
 {
-	uint64 ticks;
-#	ifdef NL_OS_WINDOWS
-#	ifdef NL_NO_ASM
-		ticks = uint64(__rdtsc());
-#	else
-		// We should use the intrinsic code now. ticks = uint64(__rdtsc());
-		__asm	rdtsc
-		__asm	mov		DWORD PTR [ticks], eax
-		__asm	mov		DWORD PTR [ticks + 4], edx
-#	endif // NL_NO_ASM
-#	else
-		__asm__ volatile(".byte 0x0f, 0x31" : "=a" (ticks.low), "=d" (ticks.high));
-#	endif // NL_OS_WINDOWS
-	return ticks;
+	// __rdtsc() is defined under all platforms
+	return uint64(__rdtsc());
 }
 
 #endif	// NL_CPU_INTEL
