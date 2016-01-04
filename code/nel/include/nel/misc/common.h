@@ -39,7 +39,7 @@
 #endif
 
 #if defined(NL_CPU_INTEL) && defined(NL_COMP_GCC)
-#include "x86intrin.h"
+#include <x86intrin.h>
 #endif
 
 #include "string_common.h"
@@ -69,8 +69,20 @@ namespace	NLMISC
 
 inline uint64 rdtsc()
 {
-	// __rdtsc() is defined under all platforms
+#if defined(NL_COMP_GCC) && !defined(CLANG_VERSION) && (GCC_VERSION <= 40405)
+// for GCC versions that don't implement __rdtsc()
+#ifdef NL_CPU_X86_64
+	uint64 low, high;
+	__asm__ volatile("rdtsc" : "=a" (low), "=d" (high));
+	return low | (high << 32);
+#else
+	uint64 ticks;
+	__asm__ volatile("rdtsc" : "=A" (ticks));
+	return ticks;
+#endif
+#else
 	return uint64(__rdtsc());
+#endif
 }
 
 #endif	// NL_CPU_INTEL

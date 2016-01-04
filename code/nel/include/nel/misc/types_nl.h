@@ -192,6 +192,10 @@
 #			define NL_ISO_STDTR1_NAMESPACE std
 #		endif
 #	endif
+	// clang define GCC version for compatibility
+#	ifdef __clang__
+#		define CLANG_VERSION (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__)
+#	endif
 #endif
 
 // Remove stupid Visual C++ warnings
