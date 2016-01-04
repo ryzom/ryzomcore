@@ -43,11 +43,25 @@
 // This way we know about _HAS_TR1 and _STLPORT_VERSION
 #include <string>
 
+#if defined(HAVE_X86_64)
+#	define NL_CPU_INTEL
+#	define NL_CPU_X86_64
+// x86_64 CPU always have SSE2 instructions
+#	ifndef NL_HAS_SSE2
+#		define NL_HAS_SSE2
+#	endif
+#elif defined(HAVE_X86)
+#	define NL_CPU_INTEL
+#	define NL_CPU_X86
+#endif
+
 // Operating systems definition
 #ifdef _WIN32
 #	define NL_OS_WINDOWS
 #	define NL_LITTLE_ENDIAN
-#	define NL_CPU_INTEL
+#	ifndef NL_CPU_INTEL
+#		define NL_CPU_INTEL
+#	endif
 #	ifndef _WIN32_WINNT
 #		define _WIN32_WINNT 0x0500	// Minimal OS = Windows 2000 (NeL is not supported on Windows 95/98)
 #	endif
@@ -384,10 +398,13 @@ inline void aligned_free(void *ptr) { free(ptr); }
 #define NL_DEFAULT_MEMORY_ALIGNMENT 16
 #define NL_ALIGN_SSE2 NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT)
 
+#ifndef NL_CPU_X86_64
+// on x86_64, new and delete are already aligned on 16 bytes
 extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
+#endif
 
 #else /* NL_HAS_SSE2 */
 
