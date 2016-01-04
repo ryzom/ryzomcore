@@ -78,8 +78,41 @@ IF(WITH_RYZOM_CLIENT)
       ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS -RpX ${RYZOM_DATA_DIR} ${RYZOM_RESOURCES_DIR})
     ENDIF()
 
+    IF(TARGET crash_report)
+      ADD_DEPENDENCIES(ryzom_client crash_report)
+
+      # copy crash_report to bundle
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/crash_report ${RYZOM_CONTENTS_DIR}/MacOS/CrashReport)
+
+      IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
+        ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/CrashReport" COMMENT "Signing CrashReport executable...")
+      ENDIF()
+    ENDIF()
+
+    IF(TARGET ryzom_client_patcher)
+      ADD_DEPENDENCIES(ryzom_client ryzom_client_patcher)
+
+      # copy ryzom_client_patcher to bundle
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_client_patcher ${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher)
+
+      IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
+        ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomClientPatcher" COMMENT "Signing RyzomClientPatcher executable...")
+      ENDIF()
+    ENDIF()
+
+    IF(TARGET ryzom_configuration_qt)
+      ADD_DEPENDENCIES(ryzom_client ryzom_configuration_qt)
+
+      # copy ryzom_configuration_qt to bundle
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ryzom_configuration_qt ${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration)
+
+      IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
+        ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_CONTENTS_DIR}/MacOS/RyzomConfiguration" COMMENT "Signing RyzomConfiguration executable...")
+      ENDIF()
+    ENDIF()
+
     IF(CODESIGN_ALLOCATE AND APPLE_CERTIFICATE)
-      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_OUTPUT_DIR}" COMMENT "Signing bundle...")
+      ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND CODESIGN_ALLOCATE=${CODESIGN_ALLOCATE} codesign -fs "${APPLE_CERTIFICATE}" "${RYZOM_OUTPUT_DIR}" COMMENT "Signing Ryzom bundle...")
     ENDIF()
   ENDIF()
 
