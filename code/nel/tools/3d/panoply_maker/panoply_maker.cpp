@@ -936,7 +936,7 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 		nlinfo("Writing %s", outputFileName.c_str());
 		/// Save the result. We let propagate exceptions (if there's no more space disk it useless to continue...)
 		{
-			std::string fullOutputPath = bi.OutputPath + "/" + outputFileName + bi.OutputFormat;
+			std::string fullOutputPath = bi.OutputPath + outputFileName + bi.OutputFormat;
 
 			try
 			{
