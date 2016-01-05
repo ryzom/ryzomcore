@@ -29,8 +29,10 @@ void writeInstructions()
 	std::cout << "  By default, it only make checks and display if texture can optimized or not" << std::endl;
 	std::cout << std::endl;
 	std::cout << "with" << std::endl;
-	std::cout << "-a : Remove alpha channel if useless" << std::endl;
+	std::cout << "-a : Remove alpha channel if useless (255)" << std::endl;
 	std::cout << "-g : Convert to grayscale if all pixels are gray" << std::endl;
+	std::cout << "-t : Apply texture optimizations (same as -a -g)" << std::endl;
+	std::cout << "-m : Apply mask optimizations (convert to grayscale using red value and remove alpha)" << std::endl;
 	std::cout << std::endl;
 	std::cout << "-h or -? for this help" << std::endl;
 	std::cout << std::endl;
@@ -38,6 +40,8 @@ void writeInstructions()
 
 bool FixAlpha = false;
 bool FixGrayscale = false;
+bool TextureOptimizations = false;
+bool MaskOptimizations = false;
 
 std::vector<std::string> InputFilenames;
 
@@ -73,6 +77,18 @@ bool parseOptions(int argc, char **argv)
 				else if (option == "g")
 				{
 					FixGrayscale = true;
+				}
+				// Texture optimizations
+				else if (option == "t")
+				{
+					TextureOptimizations = true;
+					FixAlpha = true;
+					FixGrayscale = true;
+				}
+				// Mask optimizations
+				else if (option == "m")
+				{
+					MaskOptimizations = true;
 				}
 				else if (option == "h" || option == "?")
 				{
@@ -168,35 +184,74 @@ int main(int argc, char **argv)
 			isGrayscale = true;
 		}
 
-		if (!isGrayscale && bitmap.isGrayscale())
+		if (MaskOptimizations && (!isGrayscale || hasAlpha))
 		{
-			std::cout << InputFilenames[i] << " (grayscale image with RGB colors)" << std::endl;
+			std::cout << InputFilenames[i] << " (mask with wrong format)" << std::endl;
 
-			if (FixGrayscale)
+			if (!isGrayscale)
 			{
-				if (!bitmap.convertToType(hasAlpha ? NLMISC::CBitmap::AlphaLuminance:NLMISC::CBitmap::Luminance))
+				// get a pointer on original RGBA data
+				uint32 size = bitmap.getPixels().size();
+				uint32 *data = (uint32*)bitmap.getPixels().getPtr();
+				uint32 *endData = (uint32*)((uint8*)data + size);
+
+				NLMISC::CRGBA *color = NULL;
+
+				// process all pixels
+				while(data < endData)
 				{
-					std::cerr << "Unable to convert to Luminance" << std::endl;
-					return 1;
+					color = (NLMISC::CRGBA*)data;
+
+					// copy red value to green and blue,
+					// because only red is used for mask
+					color->B = color->G = color->R;
+
+					// make opaque
+					color->A = 255;
+
+					++data;
 				}
-
-				isGrayscale = true;
-				modified = true;
 			}
+
+			// already in grayscale, just remove alpha
+			bitmap.convertToType(NLMISC::CBitmap::Luminance);
+
+			isGrayscale = true;
+			hasAlpha = false;
+			modified = true;
 		}
-
-		uint8 alpha = 0;
-
-		if (hasAlpha && bitmap.isAlphaUniform(&alpha))
+		else
 		{
-			std::cout << InputFilenames[i] << " (image with uniform alpha channel " << (sint)alpha << ")" << std::endl;
+			if (!isGrayscale && bitmap.isGrayscale())
+			{
+				std::cout << InputFilenames[i] << " (grayscale image with RGB colors)" << std::endl;
+
+				if (FixGrayscale)
+				{
+					if (!bitmap.convertToType(hasAlpha ? NLMISC::CBitmap::AlphaLuminance:NLMISC::CBitmap::Luminance))
+					{
+						std::cerr << "Unable to convert to Luminance" << std::endl;
+						return 1;
+					}
+
+					isGrayscale = true;
+					modified = true;
+				}
+			}
+
+			uint8 alpha = 0;
+
+			if (hasAlpha && bitmap.isAlphaUniform(&alpha))
+			{
+				std::cout << InputFilenames[i] << " (image with uniform alpha channel " << (sint)alpha << ")" << std::endl;
 
 				if (FixAlpha && alpha == 255)
 				{
 					bitmap.makeOpaque();
 
-				hasAlpha = false;
-				modified = true;
+					hasAlpha = false;
+					modified = true;
+				}
 			}
 		}
 
