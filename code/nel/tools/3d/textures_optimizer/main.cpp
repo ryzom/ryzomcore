@@ -191,9 +191,9 @@ int main(int argc, char **argv)
 		{
 			std::cout << InputFilenames[i] << " (image with uniform alpha channel " << (sint)alpha << ")" << std::endl;
 
-			if (FixAlpha && (alpha == 0 || alpha == 255))
-			{
-				bitmap.makeOpaque();
+				if (FixAlpha && alpha == 255)
+				{
+					bitmap.makeOpaque();
 
 				hasAlpha = false;
 				modified = true;
