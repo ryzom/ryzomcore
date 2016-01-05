@@ -2155,19 +2155,19 @@ void CProximityMapBuffer::generateZoneProximityMap(const CProximityZone& zone,TB
 			zoneBuffer[val]=dist;
 
 			// decompose into x and y in order to manage identification of neighbour cells correctly
-			uint32 x= val% zoneWidth;
-			uint32 y= val/ zoneWidth;
+			uint32 x= val % zoneWidth;
+			uint32 y= val / zoneWidth;
 
 			#define TEST_MOVE(xoffs,yoffs,newDist)\
 				{\
-					if (((uint32)(x+(xoffs))<zoneWidth) && ((uint32)(y+(yoffs))<zoneHeight))\
+					if (((uint32)(x+xoffs)<zoneWidth) && ((uint32)(y+yoffs)<zoneHeight))\
 					{\
-						uint32 newVal= val+(xoffs)+((yoffs)*zoneWidth);\
-						bool isInterior= ((zoneBuffer[newVal]==InteriorValue && newDist > BigValue) || (zoneBuffer[newVal]==ValueBorder && newDist > BigValue));\
-						if (zoneBuffer[newVal]>(newDist) && !isInterior)\
+						uint32 newVal= val+xoffs+(yoffs*zoneWidth);\
+						bool isInterior = ((zoneBuffer[newVal] == InteriorValue && newDist > BigValue) || (zoneBuffer[newVal] == ValueBorder && newDist > BigValue));\
+						if (zoneBuffer[newVal] > newDist && !isInterior)\
 						{\
-							zoneBuffer[newVal]=(newDist);\
-							vects[(newDist)&15].push_back(newVal);\
+							zoneBuffer[newVal] = newDist;\
+							vects[newDist & 15].push_back(newVal);\
 							++entriesToTreat;\
 						}\
 					}\
