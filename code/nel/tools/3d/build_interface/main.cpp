@@ -268,7 +268,11 @@ int main(int nNbArg, char **ppArgs)
 
 			uint8 colors = pBtmp->load(inFile);
 
-			if (colors != 32) throw NLMISC::Exception(AllMapNames[i] + " is using " + toString(colors) + " bits colors, only 32 bit supported!");
+			if (pBtmp->getPixelFormat() != CBitmap::RGBA)
+			{
+				nlwarning("Converting %s to RGBA (32 bits), originally using %u bits...", AllMapNames[i].c_str(), (uint)colors);
+				pBtmp->convertToType(CBitmap::RGBA);
+			}
 
 			AllMaps[i] = pBtmp;
 		}
