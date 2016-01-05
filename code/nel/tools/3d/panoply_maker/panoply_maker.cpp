@@ -670,8 +670,8 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 				{
 					uint8 value = 0;
 
-					// texture can be converted if all alphas are 0 or 255
-					if (srcBitmap.isAlphaUniform(&value) && (value == 255 || value == 0))
+					// texture can be converted if all alphas are 255
+					if (srcBitmap.isAlphaUniform(&value) && value == 255)
 					{
 						if (bi.OptimizeTextures > 1)
 						{
