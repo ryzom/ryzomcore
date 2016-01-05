@@ -656,6 +656,9 @@ static void BuildColoredVersionForOneBitmap(const CBuildInfo &bi, const std::str
 		{
 			if (is.open(fullInputBitmapPath))
 			{
+				// 8 bits textures are grayscale
+				srcBitmap.loadGrayscaleAsAlpha(false);
+
 				depth = srcBitmap.load(is);
 				is.close();
 
