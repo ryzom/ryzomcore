@@ -439,13 +439,17 @@ namespace NLGUI
 		}
 
 		// DL list
-		std::vector<bool>	_DL;
-		inline bool getDL() const
-		{
-			if (_DL.empty())
-				return false;
-			return _DL.back();
-		}
+		class HTMLDListElement {
+		public:
+			HTMLDListElement()
+				: DT(false), DD(false)
+			{ }
+
+		public:
+			bool DT;
+			bool DD;
+		};
+		std::vector<HTMLDListElement>	_DL;
 
 		// OL and UL
 		class HTMLOListElement {
@@ -473,7 +477,6 @@ namespace NLGUI
 
 		// IL mode
 		bool _LI;
-		bool _DT;
 
 		// Current text color
 		std::vector<NLMISC::CRGBA>	_TextColor;

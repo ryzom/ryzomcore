@@ -1930,7 +1930,7 @@ namespace NLGUI
 				else
 					_UL.push_back(HTMLOListElement(1, "square"));
 				// if LI is already present
-				_LI = _UL.size() > 1 || getDL();
+				_LI = _UL.size() > 1 || _DL.size() > 1;
 				_Indent += ULIndent;
 				endParagraph();
 				break;
@@ -1991,17 +1991,17 @@ namespace NLGUI
 				_IgnoreText = true;
 				break;
 			case HTML_DL:
-				_DL.push_back(true);
+				_DL.push_back(HTMLDListElement());
 				_LI = _DL.size() > 1 || !_UL.empty();
 				endParagraph();
 				break;
 			case HTML_DT:
-				if (getDL())
+				if (!_DL.empty())
 				{
 					// see if this is the first <dt>, closing tag not required
-					if (!_DT)
+					if (!_DL.back().DT)
 					{
-						_DT = true;
+						_DL.back().DT = true;
 						_FontWeight.push_back(FONT_WEIGHT_BOLD);
 					}
 
@@ -2017,16 +2017,21 @@ namespace NLGUI
 				}
 				break;
 			case HTML_DD:
-				if (getDL())
+				if (!_DL.empty())
 				{
 					// if there was no closing tag for <dt>, then remove <dt> style
-					if (_DT)
+					if (_DL.back().DT)
 					{
-						_DT = false;
+						_DL.back().DT = false;
 						popIfNotEmpty (_FontWeight);
 					}
 
-					_Indent += ULIndent;
+					if (!_DL.back().DD)
+					{
+						_Indent += ULIndent;
+						_DL.back().DD = true;
+					}
+
 					if (!_LI)
 					{
 						_LI = true;
@@ -2050,7 +2055,7 @@ namespace NLGUI
 
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
-					_LI = _UL.size() > 1 || getDL();
+					_LI = _UL.size() > 1 || _DL.size() > 1;
 					_Indent += ULIndent;
 					endParagraph();
 				}
@@ -2237,41 +2242,44 @@ namespace NLGUI
 				}
 				break;
 			case HTML_DL:
-				if (getDL())
+				if (!_DL.empty())
 				{
 					endParagraph();
-					if (getDL())
+
+					// unclosed DT
+					if (_DL.back().DT)
+					{
+						popIfNotEmpty (_FontWeight);
+					}
+
+					// unclosed DD
+					if (_DL.back().DD)
 					{
 						if (_Indent > ULIndent)
 							_Indent = _Indent - ULIndent;
 						else
 							_Indent = 0;
 					}
+
 					popIfNotEmpty (_DL);
-					if (_DT) {
-						_DT = false;
-						popIfNotEmpty (_FontWeight);
-					}
 				}
 				break;
 			case HTML_DT:
-				if (getDL())
+				if (!_DL.empty())
 				{
-					if (_DT)
-					{
-						_DT = false;
-						popIfNotEmpty (_FontWeight);
-					}
+					_DL.back().DT = false;
+					popIfNotEmpty (_FontWeight);
 				}
 				break;
 			case HTML_DD:
-				// style not changed
-				if (getDL())
+				if (!_DL.empty())
 				{
 					if (_Indent > ULIndent)
 						_Indent = _Indent - ULIndent;
 					else
 						_Indent = 0;
+
+					_DL.back().DD = false;
 				}
 				break;
 			case HTML_SPAN:
@@ -2383,7 +2391,6 @@ namespace NLGUI
 		_CurrentViewImage = NULL;
 		_Indent = 0;
 		_LI = false;
-		_DT = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
 		_UrlFragment.clear();
@@ -4062,7 +4069,6 @@ namespace NLGUI
 		_FontStrikeThrough.clear();
 		_Indent = 0;
 		_LI = false;
-		_DT = false;
 		_UL.clear();
 		_DL.clear();
 		_A.clear();
