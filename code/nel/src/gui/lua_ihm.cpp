@@ -1537,7 +1537,7 @@ namespace NLGUI
 		for (uint e=0 ; e<__num__ ; e++) \
 		{ \
 			std::string str = __toStringFunc__((__enum__)e); \
-			std::string temp = __name__ + toString(".") + __toStringFunc__((__enum__)e) + " = " + toString("%d;", e); \
+			std::string temp = __name__ + toString(".") + __toStringFunc__((__enum__)e) + " = " + toString("%u;", e); \
 			ls.executeScript(temp); \
 		} \
 
