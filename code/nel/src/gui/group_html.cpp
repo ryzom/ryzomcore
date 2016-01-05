@@ -1924,7 +1924,7 @@ namespace NLGUI
 				else
 					_UL.push_back(HTMLOListElement(1, "square"));
 				// if LI is already present
-				_LI = _UL.size() > 1;
+				_LI = _UL.size() > 1 || getDL();
 				_Indent += ULIndent;
 				endParagraph();
 				break;
@@ -1986,18 +1986,27 @@ namespace NLGUI
 				break;
 			case HTML_DL:
 				_DL.push_back(true);
+				_LI = _DL.size() > 1 || !_UL.empty();
 				endParagraph();
 				break;
 			case HTML_DT:
 				if (getDL())
 				{
-					newParagraph(0);
-
 					// see if this is the first <dt>, closing tag not required
 					if (!_DT)
 					{
 						_DT = true;
 						_FontWeight.push_back(FONT_WEIGHT_BOLD);
+					}
+
+					if (!_LI)
+					{
+						_LI = true;
+						newParagraph(ULBeginSpace);
+					}
+					else
+					{
+						newParagraph(LIBeginSpace);
 					}
 				}
 				break;
@@ -2012,7 +2021,15 @@ namespace NLGUI
 					}
 
 					_Indent += ULIndent;
-					newParagraph(0);
+					if (!_LI)
+					{
+						_LI = true;
+						newParagraph(ULBeginSpace);
+					}
+					else
+					{
+						newParagraph(LIBeginSpace);
+					}
 				}
 				break;
 			case HTML_OL:
@@ -2027,7 +2044,7 @@ namespace NLGUI
 
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
-					_LI = _UL.size() > 1;
+					_LI = _UL.size() > 1 || getDL();
 					_Indent += ULIndent;
 					endParagraph();
 				}
