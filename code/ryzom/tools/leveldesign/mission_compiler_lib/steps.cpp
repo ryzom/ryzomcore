@@ -255,8 +255,8 @@ public:
 
 	CStepObjective(CMissionData &md, IPrimitive *prim, const std::string &prefix = "")
 		: CStep(md, prim),
-		_HideObj(false),
-		_Prefix(prefix)
+		_Prefix(prefix),
+		_HideObj(false)
 	{
 	}
 

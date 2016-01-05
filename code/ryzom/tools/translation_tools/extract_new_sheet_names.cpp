@@ -206,7 +206,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 		return;
 	}
 	// get the name column index
-	uint	nameColIndex;
+	uint	nameColIndex = 0;
 	if(!workSheet.findCol(ucstring("name"), nameColIndex))
 	{
 		nlwarning("Error: Don't find the column 'name'. '%s' Aborted", workSheetFileName.c_str());
