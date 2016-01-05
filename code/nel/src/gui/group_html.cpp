@@ -1917,7 +1917,12 @@ namespace NLGUI
 				}
 				break;
 			case HTML_UL:
-				_UL.push_back(HTMLOListElement(1, "disc"));
+				if (_UL.empty())
+					_UL.push_back(HTMLOListElement(1, "disc"));
+				else if (_UL.size() == 1)
+					_UL.push_back(HTMLOListElement(1, "circle"));
+				else
+					_UL.push_back(HTMLOListElement(1, "square"));
 				// if LI is already present
 				_LI = _UL.size() > 1;
 				_Indent += ULIndent;
@@ -5511,6 +5516,16 @@ namespace NLGUI
 		{
 			// (ucchar)0x2219;
 			ret = "\xe2\x88\x99 ";
+		}
+		else if (Type == "circle")
+		{
+			// (uchar)0x26AA;
+			ret = "\xe2\x9a\xaa ";
+		}
+		else if (Type == "square")
+		{
+			// (ucchar)0x25AA;
+			ret = "\xe2\x96\xaa ";
 		}
 		else if (Type == "a" || Type == "A")
 		{
