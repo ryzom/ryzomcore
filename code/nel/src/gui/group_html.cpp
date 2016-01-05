@@ -1729,8 +1729,14 @@ namespace NLGUI
 					ucstring str;
 					str.fromUtf8(_UL.back().getListMarkerText());
 					addString (str);
+
+					sint32 indent = LIIndent;
+					// list-style-type: outside
+					if (_CurrentViewLink)
+						indent -= _CurrentViewLink->getMaxUsedW();
+					getParagraph()->setFirstViewIndent(indent);
+
 					flushString ();
-					getParagraph()->setFirstViewIndent(LIIndent);
 
 					_UL.back().Value++;
 				}
