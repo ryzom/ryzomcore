@@ -49,6 +49,7 @@
 #include <nel/3d/material.h>
 
 #include <math.h>
+#include <limits>
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -70,8 +71,8 @@ UMaterial sceneMaterial;
 namespace R2
 {
 
-const TBufferEntry InteriorValue= (TBufferEntry)(~0u-1);
-const TBufferEntry ValueBorder= (TBufferEntry)(~0u-2);
+const TBufferEntry InteriorValue = std::numeric_limits<TBufferEntry>::max()-1;
+const TBufferEntry ValueBorder = std::numeric_limits<TBufferEntry>::max()-2;
 const uint32 BigValue= 15*5;
 const float limitValue = 200.0;
 
@@ -1957,7 +1958,7 @@ void CProximityMapBuffer::load(const std::string& name)
 				}
 			}
 			// setup the next pixel in the output buffers...
-			_Buffer[y*_ScanWidth+x]= (isAccessible? 0: (TBufferEntry)~0u);
+			_Buffer[y*_ScanWidth+x]= (isAccessible? 0:std::numeric_limits<TBufferEntry>::max());
 		}
 	}
 }
@@ -2044,7 +2045,7 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 	uint32 zoneWidth= zone.getZoneWidth();
 	uint32 zoneHeight= zone.getZoneHeight();
 	zoneBuffer.clear();
-	zoneBuffer.resize(zoneWidth*zoneHeight,(TBufferEntry)~0u);
+	zoneBuffer.resize(zoneWidth*zoneHeight, std::numeric_limits<TBufferEntry>::max());
 
 	// setup the buffer's accessible points and prime vects[0] with the set of accessible points in the zone buffer
 	for (uint32 i=0;i<zone.getOffsets().size();++i)
@@ -2073,11 +2074,11 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 			{
 				zoneBuffer[offset]= InteriorValue;
 
-				if(offset-1>=startOffset && zoneBuffer[offset-1]==(TBufferEntry)~0u)
+				if(offset-1>=startOffset && zoneBuffer[offset-1] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset-1] = ValueBorder;
 				}
-				if(offset+1<=endOffset && zoneBuffer[offset+1]==(TBufferEntry)~0u)
+				if(offset+1<=endOffset && zoneBuffer[offset+1] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset+1] = ValueBorder;
 				}
@@ -2105,11 +2106,11 @@ void CProximityMapBuffer::_prepareBufferForZoneProximityMap(const CProximityZone
 			{
 				zoneBuffer[offset]= InteriorValue;
 
-				if(offset>zoneWidth && zoneBuffer[offset-zoneWidth]==(TBufferEntry)~0u)
+				if(offset>zoneWidth && zoneBuffer[offset-zoneWidth] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset-zoneWidth] = ValueBorder;
 				}
-				if(offset+zoneWidth<zoneHeight*zoneWidth && zoneBuffer[offset+zoneWidth]==(TBufferEntry)~0u)
+				if(offset+zoneWidth<zoneHeight*zoneWidth && zoneBuffer[offset+zoneWidth] == std::numeric_limits<TBufferEntry>::max())
 				{
 					zoneBuffer[offset+zoneWidth] = ValueBorder;
 				}
@@ -2239,8 +2240,8 @@ CProximityZone::CProximityZone(uint32 scanWidth,uint32 scanHeight,sint32 xOffset
 
 	_MaxOffset	= scanWidth * scanHeight -1;
 
-	_XMin = ~0u;
-	_YMin = ~0u;
+	_XMin = std::numeric_limits<uint32>::max();
+	_YMin = std::numeric_limits<uint32>::max();
 	_XMax = 0;
 	_YMax = 0;
 
