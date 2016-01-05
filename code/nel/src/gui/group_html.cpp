@@ -1999,19 +1999,11 @@ namespace NLGUI
 						_DT = true;
 						_FontWeight.push_back(FONT_WEIGHT_BOLD);
 					}
-
-					if (_DL.size() > 1)
-					{
-						uint indent = (_DL.size()-1) * ULIndent;
-						getParagraph()->setFirstViewIndent(indent);
-					}
 				}
 				break;
 			case HTML_DD:
 				if (getDL())
 				{
-					newParagraph(0);
-
 					// if there was no closing tag for <dt>, then remove <dt> style
 					if (_DT)
 					{
@@ -2019,8 +2011,8 @@ namespace NLGUI
 						popIfNotEmpty (_FontWeight);
 					}
 
-					uint indent = _DL.size()*ULIndent;
-					getParagraph()->setFirstViewIndent(indent);
+					_Indent += ULIndent;
+					newParagraph(0);
 				}
 				break;
 			case HTML_OL:
@@ -2225,6 +2217,13 @@ namespace NLGUI
 				if (getDL())
 				{
 					endParagraph();
+					if (getDL())
+					{
+						if (_Indent > ULIndent)
+							_Indent = _Indent - ULIndent;
+						else
+							_Indent = 0;
+					}
 					popIfNotEmpty (_DL);
 					if (_DT) {
 						_DT = false;
@@ -2244,6 +2243,13 @@ namespace NLGUI
 				break;
 			case HTML_DD:
 				// style not changed
+				if (getDL())
+				{
+					if (_Indent > ULIndent)
+						_Indent = _Indent - ULIndent;
+					else
+						_Indent = 0;
+				}
 				break;
 			case HTML_SPAN:
 				popIfNotEmpty (_FontSize);
