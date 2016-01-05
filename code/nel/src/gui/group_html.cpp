@@ -1709,9 +1709,9 @@ namespace NLGUI
 				_SelectOption = true;
 			break;
 			case HTML_LI:
-				if (getUL())
+				if (!_UL.empty())
 				{
-					// First LI ?
+					// UL, OL top margin if this is the first LI
 					if (!_LI)
 					{
 						_LI = true;
@@ -1721,35 +1721,24 @@ namespace NLGUI
 					{
 						newParagraph(LIBeginSpace);
 					}
-					ucstring str;
-					str += (ucchar)0x2219;
-					str += (ucchar)' ';
-					addString (str);
-					flushString ();
-					getParagraph()->setFirstViewIndent(LIIndent);
-				}
-				else if (!_OL.empty())
-				{
-					if (_OL.back().First)
-					{
-						_OL.back().First = false;
-						newParagraph(ULBeginSpace);
-					}
-					else
-					{
-						newParagraph(LIBeginSpace);
-					}
 
 					// OL list index can be overridden by <li value="1"> attribute
 					if (present[HTML_LI_VALUE] && value[HTML_LI_VALUE])
-						fromString(value[HTML_LI_VALUE], _OL.back().Value);
+						fromString(value[HTML_LI_VALUE], _UL.back().Value);
 
 					ucstring str;
-					str.fromUtf8(_OL.back().getListMarkerText() + ". ");
-					addString(str);
-					flushString();
-					getParagraph()->setFirstViewIndent(LIIndent);
-					_OL.back().Value++;
+					str.fromUtf8(_UL.back().getListMarkerText());
+					addString (str);
+
+					sint32 indent = LIIndent;
+					// list-style-type: outside
+					if (_CurrentViewLink)
+						indent -= _CurrentViewLink->getMaxUsedW();
+					getParagraph()->setFirstViewIndent(indent);
+
+					flushString ();
+
+					_UL.back().Value++;
 				}
 				break;
 			case HTML_P:
@@ -1934,10 +1923,16 @@ namespace NLGUI
 				}
 				break;
 			case HTML_UL:
+				if (_UL.empty())
+					_UL.push_back(HTMLOListElement(1, "disc"));
+				else if (_UL.size() == 1)
+					_UL.push_back(HTMLOListElement(1, "circle"));
+				else
+					_UL.push_back(HTMLOListElement(1, "square"));
+				// if LI is already present
+				_LI = _UL.size() > 1 || _DL.size() > 1;
 				_Indent += ULIndent;
-				_LI = false;
 				endParagraph();
-				_UL.push_back(true);
 				break;
 			case HTML_OBJECT:
 				_ObjectType = "";
@@ -1996,42 +1991,56 @@ namespace NLGUI
 				_IgnoreText = true;
 				break;
 			case HTML_DL:
-				_DL.push_back(true);
+				_DL.push_back(HTMLDListElement());
+				_LI = _DL.size() > 1 || !_UL.empty();
 				endParagraph();
 				break;
 			case HTML_DT:
-				if (getDL())
+				if (!_DL.empty())
 				{
-					newParagraph(0);
-
 					// see if this is the first <dt>, closing tag not required
-					if (!_DT)
+					if (!_DL.back().DT)
 					{
-						_DT = true;
+						_DL.back().DT = true;
 						_FontWeight.push_back(FONT_WEIGHT_BOLD);
 					}
 
-					if (_DL.size() > 1)
+					if (!_LI)
 					{
-						uint indent = (_DL.size()-1) * ULIndent;
-						getParagraph()->setFirstViewIndent(indent);
+						_LI = true;
+						newParagraph(ULBeginSpace);
+					}
+					else
+					{
+						newParagraph(LIBeginSpace);
 					}
 				}
 				break;
 			case HTML_DD:
-				if (getDL())
+				if (!_DL.empty())
 				{
-					newParagraph(0);
-
 					// if there was no closing tag for <dt>, then remove <dt> style
-					if (_DT)
+					if (_DL.back().DT)
 					{
-						_DT = false;
+						_DL.back().DT = false;
 						popIfNotEmpty (_FontWeight);
 					}
 
-					uint indent = _DL.size()*ULIndent;
-					getParagraph()->setFirstViewIndent(indent);
+					if (!_DL.back().DD)
+					{
+						_Indent += ULIndent;
+						_DL.back().DD = true;
+					}
+
+					if (!_LI)
+					{
+						_LI = true;
+						newParagraph(ULBeginSpace);
+					}
+					else
+					{
+						newParagraph(LIBeginSpace);
+					}
 				}
 				break;
 			case HTML_OL:
@@ -2044,7 +2053,9 @@ namespace NLGUI
 					if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE])
 						type = value[HTML_OL_TYPE];
 
-					_OL.push_back(HTMLOListElement(start, type));
+					_UL.push_back(HTMLOListElement(start, type));
+					// if LI is already present
+					_LI = _UL.size() > 1 || _DL.size() > 1;
 					_Indent += ULIndent;
 					endParagraph();
 				}
@@ -2218,46 +2229,58 @@ namespace NLGUI
 				}
 				break;
 			case HTML_OL:
-				if (!_OL.empty())
-				{
-					_Indent -= ULIndent;
-					_Indent = std::max(_Indent, (uint)0);
-					endParagraph();
-					popIfNotEmpty(_OL);
-				}
-				break;
 			case HTML_UL:
-				if (getUL())
+				if (!_UL.empty())
 				{
-					_Indent -= ULIndent;
-					_Indent = std::max(_Indent, (uint)0);
+					if (_Indent > ULIndent)
+						_Indent = _Indent - ULIndent;
+					else
+						_Indent = 0;
+
 					endParagraph();
-					popIfNotEmpty (_UL);
+					popIfNotEmpty(_UL);
 				}
 				break;
 			case HTML_DL:
-				if (getDL())
+				if (!_DL.empty())
 				{
 					endParagraph();
-					popIfNotEmpty (_DL);
-					if (_DT) {
-						_DT = false;
+
+					// unclosed DT
+					if (_DL.back().DT)
+					{
 						popIfNotEmpty (_FontWeight);
 					}
+
+					// unclosed DD
+					if (_DL.back().DD)
+					{
+						if (_Indent > ULIndent)
+							_Indent = _Indent - ULIndent;
+						else
+							_Indent = 0;
+					}
+
+					popIfNotEmpty (_DL);
 				}
 				break;
 			case HTML_DT:
-				if (getDL())
+				if (!_DL.empty())
 				{
-					if (_DT)
-					{
-						_DT = false;
-						popIfNotEmpty (_FontWeight);
-					}
+					_DL.back().DT = false;
+					popIfNotEmpty (_FontWeight);
 				}
 				break;
 			case HTML_DD:
-				// style not changed
+				if (!_DL.empty())
+				{
+					if (_Indent > ULIndent)
+						_Indent = _Indent - ULIndent;
+					else
+						_Indent = 0;
+
+					_DL.back().DD = false;
+				}
 				break;
 			case HTML_SPAN:
 				popIfNotEmpty (_FontSize);
@@ -2368,7 +2391,6 @@ namespace NLGUI
 		_CurrentViewImage = NULL;
 		_Indent = 0;
 		_LI = false;
-		_DT = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
 		_UrlFragment.clear();
@@ -4047,10 +4069,8 @@ namespace NLGUI
 		_FontStrikeThrough.clear();
 		_Indent = 0;
 		_LI = false;
-		_DT = false;
 		_UL.clear();
 		_DL.clear();
-		_OL.clear();
 		_A.clear();
 		_Link.clear();
 		_LinkTitle.clear();
@@ -5527,7 +5547,22 @@ namespace NLGUI
 		sint32 number = Value;
 		bool upper = false;
 
-		if (Type == "a" || Type == "A")
+		if (Type == "disc")
+		{
+			// (ucchar)0x2219;
+			ret = "\xe2\x88\x99 ";
+		}
+		else if (Type == "circle")
+		{
+			// (uchar)0x26AA;
+			ret = "\xe2\x9a\xaa ";
+		}
+		else if (Type == "square")
+		{
+			// (ucchar)0x25AA;
+			ret = "\xe2\x96\xaa ";
+		}
+		else if (Type == "a" || Type == "A")
 		{
 			// @see toAlphabeticOrNumeric in WebKit
 			static const char lower[26] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -5549,6 +5584,7 @@ namespace NLGUI
 					number /= size;
 				}
 			}
+			ret += ". ";
 		}
 		else if (Type == "i" || Type == "I")
 		{
@@ -5592,10 +5628,11 @@ namespace NLGUI
 					ret = toUpper(ret);
 				}
 			}
+			ret += ". ";
 		}
 		else
 		{
-			ret = toString(Value);
+			ret = toString(Value) + ". ";
 		}
 
 		return ret;

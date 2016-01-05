@@ -438,25 +438,20 @@ namespace NLGUI
 			return _PRE.back();
 		}
 
-		// UL mode
-		std::vector<bool>	_UL;
-		inline bool getUL() const
-		{
-			if (_UL.empty())
-				return false;
-			return _UL.back();
-		}
-
 		// DL list
-		std::vector<bool>	_DL;
-		inline bool getDL() const
-		{
-			if (_DL.empty())
-				return false;
-			return _DL.back();
-		}
+		class HTMLDListElement {
+		public:
+			HTMLDListElement()
+				: DT(false), DD(false)
+			{ }
 
-		// OL
+		public:
+			bool DT;
+			bool DD;
+		};
+		std::vector<HTMLDListElement>	_DL;
+
+		// OL and UL
 		class HTMLOListElement {
 		public:
 			HTMLOListElement(int start, std::string type)
@@ -469,7 +464,7 @@ namespace NLGUI
 			std::string Type;
 			bool First;
 		};
-		std::vector<HTMLOListElement> _OL;
+		std::vector<HTMLOListElement> _UL;
 
 		// A mode
 		std::vector<bool>	_A;
@@ -482,7 +477,6 @@ namespace NLGUI
 
 		// IL mode
 		bool _LI;
-		bool _DT;
 
 		// Current text color
 		std::vector<NLMISC::CRGBA>	_TextColor;
