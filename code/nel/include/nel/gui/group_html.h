@@ -438,15 +438,6 @@ namespace NLGUI
 			return _PRE.back();
 		}
 
-		// UL mode
-		std::vector<bool>	_UL;
-		inline bool getUL() const
-		{
-			if (_UL.empty())
-				return false;
-			return _UL.back();
-		}
-
 		// DL list
 		std::vector<bool>	_DL;
 		inline bool getDL() const
@@ -456,7 +447,7 @@ namespace NLGUI
 			return _DL.back();
 		}
 
-		// OL
+		// OL and UL
 		class HTMLOListElement {
 		public:
 			HTMLOListElement(int start, std::string type)
@@ -469,7 +460,7 @@ namespace NLGUI
 			std::string Type;
 			bool First;
 		};
-		std::vector<HTMLOListElement> _OL;
+		std::vector<HTMLOListElement> _UL;
 
 		// A mode
 		std::vector<bool>	_A;
