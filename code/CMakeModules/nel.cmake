@@ -181,13 +181,14 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   IF(WITH_QT)
     OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
   ENDIF(WITH_QT)
-  
+
   ###
   # Features
   ###
   OPTION(WITH_LOGGING             "With Logging"                                  ON )
   OPTION(WITH_COVERAGE            "With Code Coverage Support"                    OFF)
   OPTION(WITH_PCH                 "With Precompiled Headers"                      ON )
+  OPTION(WITH_LOW_MEMORY          "With low memory (use the least of RAM)"        OFF)
   OPTION(FINAL_VERSION            "Build in Final Version mode"                   ON )
 
   # Default to static building on Windows.
@@ -226,7 +227,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_INSTALL_LIBRARIES   "Install development files."                    ON )
 
   OPTION(WITH_ASSIMP              "Use assimp exporter"                           OFF)
-  
+
   ###
   # GUI toolkits
   ###
@@ -295,10 +296,10 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_LIBOVR              "With LibOVR support"                           OFF)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
-  
+
   OPTION(WITH_SSE2                "With SSE2"                                     ON )
   OPTION(WITH_SSE3                "With SSE3"                                     ON )
-  
+
   IF(NOT MSVC)
     OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
   ENDIF(NOT MSVC)
@@ -374,7 +375,7 @@ MACRO(NL_SETUP_BUILD)
   ELSEIF(HOST_CPU MATCHES "i.86")
     SET(HOST_CPU "x86")
   ENDIF(HOST_CPU MATCHES "(amd|AMD)64")
-  
+
   # Determine target CPU
 
   # If not specified, use the same CPU as host
@@ -809,7 +810,11 @@ MACRO(NL_SETUP_BUILD)
       ENDIF(HOST_CPU STREQUAL "x86" AND TARGET_CPU STREQUAL "x86_64")
     ENDIF(APPLE)
 
-    ADD_PLATFORM_FLAGS("-D_REENTRANT -pipe -fno-strict-aliasing")
+    ADD_PLATFORM_FLAGS("-D_REENTRANT -fno-strict-aliasing")
+
+    IF(NOT WITH_LOW_MEMORY)
+      ADD_PLATFORM_FLAGS("-pipe")
+    ENDIF()
 
     IF(WITH_COVERAGE)
       ADD_PLATFORM_FLAGS("-fprofile-arcs -ftest-coverage")
@@ -1084,7 +1089,7 @@ MACRO(SETUP_EXTERNAL)
     ENDIF(APPLE)
   ENDIF(WIN32)
 
-  # Android and iOS have pthread  
+  # Android and iOS have pthread
   IF(ANDROID OR IOS)
     SET(CMAKE_USE_PTHREADS_INIT 1)
     SET(Threads_FOUND TRUE)

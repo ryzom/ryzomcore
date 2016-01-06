@@ -2376,7 +2376,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	if(!f.isReading()) return 0;
 
-	uint32			size;
 	uint32			x,y;
 	sint32			slsize;
 	uint8			*scanline;
@@ -2452,7 +2451,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	_Width = width;
 	_Height = height;
-	size = _Width * _Height * (imageDepth/8);
 
 	switch(imageType)
 	{
@@ -2599,7 +2597,7 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 		case 10:
 		{
 			uint8 packet;
-			uint8 pixel[4];
+			uint8 pixel[4] = {0};
 			uint32 imageSize = width*height;
 			uint32 readSize = 0;
 			uint8 upSideDown = ((desc & (1 << 5))==0);
@@ -2617,20 +2615,10 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 					}
 					for (i=0; i < (packet & 0x7F) + 1; i++)
 					{
-						if(imageDepth==32)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= pixel[3];
-						}
-						if(imageDepth==24)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= 0;
-						}
+						_Data[0][dstId++]= pixel[2];
+						_Data[0][dstId++]= pixel[1];
+						_Data[0][dstId++]= pixel[0];
+						_Data[0][dstId++]= pixel[3];
 					}
 				}
 				else	// packet Raw
@@ -2641,20 +2629,10 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 						{
 							f.serial(pixel[j]);
 						}
-						if(imageDepth==32)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= pixel[3];
-						}
-						if(imageDepth==24)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= 0;
-						}
+						_Data[0][dstId++]= pixel[2];
+						_Data[0][dstId++]= pixel[1];
+						_Data[0][dstId++]= pixel[0];
+						_Data[0][dstId++]= pixel[3];
 					}
   				}
 				readSize += (packet & 0x7F) + 1;

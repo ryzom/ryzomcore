@@ -14,18 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#include "common.h"
 #include "browser_model.h"
-
-#include <string>
-
-#include <nel/3d/tile_bank.h>
-#include <nel/misc/stream.h>
-#include <nel/misc/file.h>
-
-#include <QtGui/QMessageBox>
-
-#include "pic/readpic.h"
 
 using namespace std;
 using namespace NL3D;
@@ -33,6 +23,37 @@ using namespace NLMISC;
 
 extern CTileBank tileBankBrowser;
 static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
+
+static bool loadPic(const string &path, std::vector<NLMISC::CBGRA> &tampon, uint &width, uint &height)
+{
+	try
+	{
+		NLMISC::CIFile file;
+		if (file.open(path.c_str()))
+		{
+			NLMISC::CBitmap bitmap;
+			bitmap.load(file);
+			width = bitmap.getWidth();
+			height = bitmap.getHeight();
+			tampon.resize(width * height);
+			bitmap.convertToType(NLMISC::CBitmap::RGBA);
+			for (uint y = 0; y < height; ++y)
+			{
+				for (uint x = 0; x < width; ++x)
+				{
+					NLMISC::CRGBA c = bitmap.getPixelColor(x, y, 0);
+					c.R = (c.R * c.A) / 255;
+					c.G = (c.G * c.A) / 255;
+					c.B = (c.B * c.A) / 255;
+					tampon[(y * width) + x] = c;
+				}
+			}
+			return true;
+		}
+	}
+	catch (NLMISC::Exception& ) { }
+	return false;
+}
 
 bool RemovePath (std::string& path, const char* absolutePathToRemplace);
 
@@ -65,7 +86,7 @@ int loadPixmapBuffer(const std::string& path, std::vector<NLMISC::CBGRA>& Buffer
 {	
 	uint Width;
 	uint Height;
-	if (PIC_LoadPic(path, Buffer, Width, Height))
+	if (loadPic(path, Buffer, Width, Height))
 	{
 		while (rot)
 		{
@@ -272,13 +293,13 @@ int TileList::addTile256 ()
 bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitmap type)
 {
 	// Remove the absolute path from the path name
-	std::string troncated=name;
-	if (RemovePath (troncated, tileBankBrowser.getAbsPath ().c_str()))
+	std::string troncated = name;
+	if (RemovePath(troncated, tileBankBrowser.getAbsPath ().c_str()))
 	{
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No));
 		}
@@ -343,7 +364,7 @@ bool TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitm
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 
@@ -409,7 +430,7 @@ bool TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap."),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}
@@ -473,7 +494,7 @@ bool TileList::setDisplacement (int tile, const std::string& name, NL3D::CTile::
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap"),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}
@@ -516,7 +537,7 @@ bool TileList::setTileTransitionAlpha (int tile, const std::string& name, int ro
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;
 		uint Height;
-		if (!PIC_LoadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
+		if (!loadPic(tileBankBrowser.getAbsPath ()+troncated, tampon, Width, Height))
 		{
 			return ( QMessageBox::Yes == QMessageBox::question( NULL, QObject::tr("Can't load bitmap"),  QString( ((tileBankBrowser.getAbsPath ()+troncated)+"\nContinue ?").c_str() ), QMessageBox::Yes | QMessageBox::No) );
 		}

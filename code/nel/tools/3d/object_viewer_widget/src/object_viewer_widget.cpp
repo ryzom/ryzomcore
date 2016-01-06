@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "stdpch.h"
 #include "object_viewer_widget.h"
 
 // STL includes
@@ -46,7 +47,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Project includes
 
+#ifndef USE_QT5
 Q_EXPORT_PLUGIN2(object_viewer_widget_qt, NLQT::CObjectViewerWidget)
+#endif
 
 using namespace NLMISC;
 using namespace NL3D;

@@ -463,6 +463,7 @@ int main(int argc, char **argv)
 	}
 	else
 	{
+		// TODO: if alpha channel is 0, use DXTC1a instead DXTC1
 		if(imageDepth==24)
 			algo = DXT1;
 		else

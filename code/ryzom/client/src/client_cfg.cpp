@@ -1803,8 +1803,8 @@ void CClientConfig::setValues()
 
 	READ_BOOL_DEV(DamageShieldEnabled)
 
-	READ_BOOL_DEV(AllowDebugLua)
-	READ_BOOL_DEV(DisplayLuaDebugInfo)
+	READ_BOOL_FV(AllowDebugLua)
+	READ_BOOL_FV(DisplayLuaDebugInfo)
 
 	READ_BOOL_DEV(LuaDebugInfoGotoButtonEnabled)
 	READ_STRING_DEV(LuaDebugInfoGotoButtonTemplate)

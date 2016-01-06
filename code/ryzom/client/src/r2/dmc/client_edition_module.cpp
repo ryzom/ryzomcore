@@ -1511,6 +1511,10 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 			nlwarning("Error while reading %s", filename.c_str());
 		}
 
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(uncompressedFileLength);
+#endif
+
 		fclose(file);
 
 		// Test if data are not too big

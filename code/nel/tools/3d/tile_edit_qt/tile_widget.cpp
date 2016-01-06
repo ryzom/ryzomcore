@@ -1,3 +1,4 @@
+#include "common.h"
 #include <QtGui/QtGui>
 #include "tile_widget.h"
 
