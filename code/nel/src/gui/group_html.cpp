@@ -2274,12 +2274,16 @@ namespace NLGUI
 			case HTML_DD:
 				if (!_DL.empty())
 				{
-					if (_Indent > ULIndent)
-						_Indent = _Indent - ULIndent;
-					else
-						_Indent = 0;
+					// parser will process two DD in a row as nested when first DD is not closed
+					if (_DL.back().DD)
+					{
+						if (_Indent > ULIndent)
+							_Indent = _Indent - ULIndent;
+						else
+							_Indent = 0;
 
-					_DL.back().DD = false;
+						_DL.back().DD = false;
+					}
 				}
 				break;
 			case HTML_SPAN:
