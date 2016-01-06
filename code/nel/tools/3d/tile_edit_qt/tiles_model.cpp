@@ -60,7 +60,11 @@ QVariant tiles_model::data(const QModelIndex &index, int role) const
 	{
 		CTile_Widget wiwi;
 		wiwi.initWidget(tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel());
+#ifdef USE_QT5
 		QPixmap pixpix = wiwi.grab(wiwi.contentsRect());
+#else
+		QPixmap::grabWidget(wiwi, wiwi.contentsRect());
+#endif
 		return pixpix;
 	}
     else if (role == Qt::UserRole + 1)

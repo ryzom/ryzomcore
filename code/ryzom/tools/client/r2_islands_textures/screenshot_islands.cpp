@@ -844,6 +844,7 @@ void CScreenshotIslands::processProximityBuffer(TBuffer & inputBuffer, uint32 li
 
 		bool lastValue = false;
 		CVector2f firstPixelBorder;
+		firstPixelBorder.set(0.f, 0.f);
 		uint32 nbPixelsBorder = 0;
 
 		for (uint32 x=0;x<lineLength;++x)
@@ -907,6 +908,7 @@ void CScreenshotIslands::processProximityBuffer(TBuffer & inputBuffer, uint32 li
 	{
 		bool lastValue = false;
 		CVector2f firstPixelBorder;
+		firstPixelBorder.set(0.f, 0.f);
 		uint32 nbPixelsBorder = 0;
 	
 		for(uint32 y=0; y<numLines; y++)
@@ -1379,11 +1381,18 @@ void CScreenshotIslands::buildIslandsTextures()
 	{
 		string seasonSuffix = *itSeason;
 
-		int season;
-		if(seasonSuffix=="_sp") season = CSeason::Spring;
-		else if(seasonSuffix=="_su") season = CSeason::Summer;
-		else if(seasonSuffix=="_au") season = CSeason::Autumn;
-		else if(seasonSuffix=="_wi") season = CSeason::Winter;
+		sint season = -1;
+
+		if (seasonSuffix == "_sp") season = CSeason::Spring;
+		else if (seasonSuffix == "_su") season = CSeason::Summer;
+		else if (seasonSuffix == "_au") season = CSeason::Autumn;
+		else if (seasonSuffix == "_wi") season = CSeason::Winter;
+
+		if (season == -1)
+		{
+			nlwarning("Unknown season suffix %s, skipping...", seasonSuffix.c_str());
+			continue;
+		}
 
 		// Iterations on Continents
 		TContinentsData::iterator itCont(_ContinentsData.begin()), lastCont(_ContinentsData.end());
@@ -1673,11 +1682,9 @@ inline bool RGB2HSV(const CRGBA & rgba, uint & Hue, uint & Sat, uint & Val)
 {
 	double Min_, Max_, Delta, H, S, V;
 	
-	H = 0.0;
 	Min_ = min(min(rgba.R, rgba.G), rgba.B);
 	Max_ = max(max(rgba.R, rgba.G), rgba.B);
 	Delta = ( Max_ - Min_);
-	V = Max_;
 
 	if(Max_ != 0.0)
 	{
@@ -1685,10 +1692,14 @@ inline bool RGB2HSV(const CRGBA & rgba, uint & Hue, uint & Sat, uint & Val)
 	}
 	else
 	{
-		S = 0.0;
-		H = -1;
+		Hue = 0;
+		Sat = 0;
+		Val = 0;
 		return false;
 	}
+
+	H = 0.0;
+	V = Max_;
 
 	if(rgba.R == Max_) 
 	{
@@ -1761,7 +1772,6 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 			}
 		}
 	}
-
 
 	// HLS order
 	list< CRGBA > sortedHLS;
