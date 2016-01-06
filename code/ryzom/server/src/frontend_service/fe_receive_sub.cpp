@@ -137,7 +137,7 @@ void CFeReceiveSub::init( uint16 firstAcceptableFrontendPort, uint16 lastAccepta
 	_CurrentInMsg = new TReceivedMessage();
 
 	_History = history;
-	
+
 	_ClientIdCont = clientidcont;
 	_ClientIdCont->resize( MaxNbClients+1 ); // because the client ids start at 1
 	TClientIdCont::iterator iclient;
@@ -326,7 +326,7 @@ void CFeReceiveSub::handleIncomingMsg()
 
 	//nldebug( "FERECV: Handling incoming message" );
 
-	// Retrieve client info or add one		
+	// Retrieve client info or add one
 	THostMap::iterator ihm = _ClientMap.find( _CurrentInMsg->AddrFrom );
 	if ( ihm == _ClientMap.end() )
 	{
@@ -348,7 +348,7 @@ void CFeReceiveSub::handleIncomingMsg()
 		{
 			// Remove client
 			nlinfo( "FERECV: Disc event for client %u", GETCLIENTA(ihm)->clientId() );
-			removeFromRemoveList(GETCLIENTA(ihm)->clientId() ); 
+			removeFromRemoveList(GETCLIENTA(ihm)->clientId() );
 			removeClientById( GETCLIENTA(ihm)->clientId() );
 
 			// Do not call handleReceivedMsg()
@@ -398,7 +398,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	}
 
 	CClientHost *clienthost;
-	
+
 	// Create client object and add it into the client map
 	TClientId clientid = _ClientIdPool.getNewClientId();
 	if ( clientid == InvalidClientId )
@@ -425,7 +425,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 	{
 		nlwarning( "Problem: Inserted twice the same address in the client map" );
 
-		
+
 	}
 	MEM_DELTA_MULTI2_MID(Client,AfterInsertClient); // 24
 	CFrontEndService::instance()->PrioSub.VisionProvider.DistanceSpreader.notifyClientAddition( cmPreviousEnd );
@@ -491,7 +491,7 @@ CClientHost *CFeReceiveSub::addClient( const NLNET::CInetAddress& addrfrom, TUid
 			// The client object will be removed when the client exits
 			return NULL;
 		}
-		
+
 		MEM_DELTA_MULTI2_MID(Client,AfterSendCLConnect);
 		TClientId mon = CFrontEndService::instance()->MonitoredClient;
 		if ( mon != 0 && clientid == mon )
@@ -654,7 +654,7 @@ void CFeReceiveSub::doRemoveClient( CClientHost *client, bool crashed )
 		//if( ! findInReconnectList( client->Uid ) )
 		//nldebug( "disconnecting client %d from login service", client->clientId() );
 		CLoginServer::clientDisconnected( client->Uid );
-		
+
 	}
 
 	CFrontEndService::instance()->sendSub()->disableSendBuffer( client->clientId() );
@@ -732,7 +732,7 @@ void CFeReceiveSub::freeIdsOfRemovedClients()
 	{
 		MEM_DELTA_MULTI2(RemClient,FreeIdsOfRemovedClients);
 		CClientHost *clienthost = *ic;
-		
+
 		// Display info
 		nlinfo( "FE: Freeing client %u (%s)", clienthost->clientId(), clienthost->address().asString().c_str() );
 		clienthost->displayClientProperties( false );
@@ -740,7 +740,7 @@ void CFeReceiveSub::freeIdsOfRemovedClients()
 		// Reset vision and links in tables
 		clienthost->resetClientVision();
 		removeClientLinks( clienthost );
-		
+
 		// Remove all about the client and delete object
 		deleteClient( clienthost );
 
@@ -778,7 +778,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 	//nlinfo( "currentsize: %u", currentsize );
 
 	memcpy( Msgin.bufferToFill( currentsize ), _CurrentInMsg->userDataR(), currentsize );
-	
+
 	try
 	{
 		uint32	receivednumber;
@@ -842,9 +842,9 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			{
 				// The client has neither been authenticated nor provided a user id, but is allowed to connect (dev mode)
 				nlinfo ("%s using AutoAllocUserid", _CurrentInMsg->AddrFrom.asString().c_str() );
-				string filename = CPath::standardizePath( SaveShardRoot.get() ) + CPath::standardizePath( IService::getInstance()->SaveFilesDirectory.get() ) + "auto_uid_map.bin";
+				string filename = CPath::standardizePath( SaveShardRootGameShare.get() ) + CPath::standardizePath( IService::getInstance()->SaveFilesDirectory.get() ) + "auto_uid_map.bin";
 
-				// Get previously allocated user ids 
+				// Get previously allocated user ids
 				if ( _AutoUidMap.empty() )
 				{
 					// Load from file
@@ -858,7 +858,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					{
 						nlinfo( "No AutoAllocUserid data found yet" );
 					}
-					
+
 					// Init CurrentAutoAllocUserid
 					TUid maxUid = 0;
 					for ( TAutoUidMap::const_iterator itaum=_AutoUidMap.begin(); itaum!=_AutoUidMap.end(); ++itaum )
@@ -868,7 +868,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					}
 					CurrentAutoAllocUserid = std::max( BaseAutoAllocUserid, maxUid + 1 );
 				}
-				
+
 				// Look up the address
 				TAutoUidMap::iterator itaum = _AutoUidMap.find( _CurrentInMsg->AddrFrom.internalIPAddress() );
 				if ( itaum != _AutoUidMap.end() )
@@ -888,7 +888,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 					do { uid = CurrentAutoAllocUserid++; }
 					while ( findClientHostByUid( uid ) != NULL );
 					_AutoUidMap.insert( std::make_pair( _CurrentInMsg->AddrFrom.internalIPAddress(), uid ) );
-						
+
 				}
 
 				// Save the allocated user ids
@@ -946,7 +946,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 				computeStats( clienthost, receivednumber, currentsize, false );
 
 				nlinfo( "FERECV: Client %u is disconnecting", clienthost->clientId() );
-				removeFromRemoveList( clienthost->clientId() ); 
+				removeFromRemoveList( clienthost->clientId() );
 				// false because the client, in this case, didn't crashed
 				removeClientById( clienthost->clientId(), false );
 				// actions are automatically removed when deleting blocks
@@ -955,7 +955,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 
 			if (code == SYSTEM_QUIT_CODE)
 			{
-				H_AUTO(SystemQuitCode);			
+				H_AUTO(SystemQuitCode);
 				uint32		quitId;
 
 				Msgin.serialAndLog1(quitId);
@@ -1027,7 +1027,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 //				}
 //			}
 
-			H_AUTO(SwitchConnectionState);	
+			H_AUTO(SwitchConnectionState);
 			switch (clienthost->ConnectionState)
 			{
 			case CClientHost::Synchronize:
@@ -1198,7 +1198,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 		{
 			// actions are automatically removed when deleting blocks
 			nlinfo( "FERECV: Client %u is disconnecting", clienthost->clientId() );
-			removeFromRemoveList( clienthost->clientId() ); 
+			removeFromRemoveList( clienthost->clientId() );
 			removeClientById( clienthost->clientId() );
 			// Make stats and set client's receive number
 			// only acknowledge packet number for good normal messages
@@ -1417,7 +1417,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 
 		//nlinfo("FERECV: received packet %d from client %d (%d actions decoded): %s", receivednumber, clienthost->clientId(), numActions, debugcat);
 
-	// warning: actions in CActionBlock are automatically removed when deleting block 
+	// warning: actions in CActionBlock are automatically removed when deleting block
 }
 
 

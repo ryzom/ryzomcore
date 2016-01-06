@@ -146,7 +146,6 @@
 #include "modules/client_command_forwarder.h"
 #include "server_share/log_character_gen.h"
 #include "server_share/log_item_gen.h"
-#include "server_share/mongo_wrapper.h"
 
 ///////////
 // USING //

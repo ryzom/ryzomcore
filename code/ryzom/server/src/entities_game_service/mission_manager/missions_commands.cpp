@@ -1068,7 +1068,7 @@ NLMISC_COMMAND(accessPowo, "give access to the powo", "<uid> player_name number"
 				sint32 cell;
 				buildingPlayer->addUser(c, 0, ownerId, cell);
 //				c->setPowoCell(cell);
-				CBuildingManager::getInstance()->setRoomLifeTime(cell, TGameCycle(NLMISC::TGameTime(4*60*60) / CTickEventHandler::getGameTimeStep()));
+//				CBuildingManager::getInstance()->setRoomLifeTime(cell, TGameCycle(NLMISC::TGameTime(4*60*60) / CTickEventHandler::getGameTimeStep()));
 				log.displayNL("%d", cell);
 			}
 		} else {
