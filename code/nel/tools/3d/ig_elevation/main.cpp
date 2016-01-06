@@ -26,6 +26,7 @@
 
 #include "nel/misc/config_file.h"
 #include "nel/misc/file.h"
+#include "nel/misc/path.h"
 #include "nel/misc/bitmap.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/i_xml.h"
@@ -34,15 +35,6 @@
 #include "nel/ligo/zone_region.h"
 
 #include "nel/3d/scene_group.h"
-
-#ifdef NL_OS_WINDOWS
-	#include <windows.h>
-#else
-	#include <dirent.h> /* for directories functions */
-	#include <sys/types.h> 
-	#include <unistd.h> /* getcwd, chdir -- replacement for getCurDiretory & setCurDirectory on windows */
-#endif
-
 
 // ---------------------------------------------------------------------------
 
@@ -133,75 +125,6 @@ struct CZoneLimits
 };
 
 // ---------------------------------------------------------------------------
-#ifdef NL_OS_WINDOWS  // win32 code 
-void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
-{
-	WIN32_FIND_DATA findData;
-	HANDLE hFind;
-	char sCurDir[MAX_PATH];
-	sAllFiles.clear ();
-	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile (("*"+sFilter).c_str(), &findData);
-	while (hFind != INVALID_HANDLE_VALUE)
-	{
-		DWORD res = GetFileAttributes(findData.cFileName);
-		if (res != INVALID_FILE_ATTRIBUTES && !(res&FILE_ATTRIBUTE_DIRECTORY))
-		{
-			if (bFullPath)
-				sAllFiles.push_back(string(sCurDir) + "\\" + findData.cFileName);
-			else
-				sAllFiles.push_back(findData.cFileName);
-		}
-		if (FindNextFile (hFind, &findData) == 0)
-			break;
-	}
-	FindClose (hFind);
-}
-
-void getcwd (char *dir, int length)
-{
-	GetCurrentDirectoryA (length, dir);
-}
-
-void chdir(const char *path)
-{
-	SetCurrentDirectoryA (path);
-}
-
-#else   // posix version  of the void dir(...) function.
-void dir (const string &sFilter, vector<string> &sAllFiles, bool bFullPath)
-{
-	char sCurDir[MAX_PATH];
-	DIR* dp = NULL;
-	struct dirent *dirp= NULL;
-
-	getcwd ( sCurDir, MAX_PATH ) ;
-	sAllFiles.clear ();
-	if ( (dp = opendir( sCurDir )) == NULL)
-	{
-		string sTmp = string("ERROR :  Can't open the dir : \"")+string(sCurDir)+string("\"") ;
-		outString ( sTmp ) ;
-		return ; 
-	}
-
-	while ( (dirp = readdir(dp)) != NULL)
-	{
-		std:string sFileName = std::string(dirp->d_name) ;
-		if (sFileName.substr((sFileName.length()-sFilter.length()),sFilter.length()).find(sFilter)!= std::string::npos )
-		{
-			if (bFullPath)
-				sAllFiles.push_back(string(sCurDir) + "/" + sFileName);
-			else
-				sAllFiles.push_back(sFileName);  
-		}
-
-	}
-	closedir(dp);
-}
-#endif
-
-
-// ---------------------------------------------------------------------------
 CZoneRegion *loadLand (const string &filename)
 {
 	CZoneRegion *ZoneRegion = NULL;
@@ -219,21 +142,19 @@ CZoneRegion *loadLand (const string &filename)
 		}
 		else
 		{
-			string sTmp = string("Can't open the land file : ") + filename;
-			outString (sTmp);
+			outString (toString("Can't open the land files: %s", filename.c_str()));
 		}
 	}
 	catch (const Exception& e)
 	{
-		string sTmp = string("Error in land file : ") + e.what();
-		outString (sTmp);
+		outString(toString("Error in land file: %s", e.what()));
 	}
 	return ZoneRegion;
 }
 
 
 // ***************************************************************************
-CInstanceGroup* LoadInstanceGroup (const char* sFilename)
+CInstanceGroup* LoadInstanceGroup (const std::string &sFilename)
 {
 	CIFile file;
 	CInstanceGroup *newIG = new CInstanceGroup;
@@ -260,7 +181,7 @@ CInstanceGroup* LoadInstanceGroup (const char* sFilename)
 }
 
 // ***************************************************************************
-void SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
+void SaveInstanceGroup (const std::string  &sFilename, CInstanceGroup *pIG)
 {
 	COFile file;
 
@@ -272,14 +193,12 @@ void SaveInstanceGroup (const char* sFilename, CInstanceGroup *pIG)
 		}
 		catch (const Exception &e)
 		{
-			string stTmp = string(e.what()) ;
-			outString(  stTmp );
+			outString(e.what());
 		}
 	}
 	else
 	{
-		string stTemp = string("Couldn't create ") + string(sFilename) ;
-		outString( stTemp );
+		outString(toString("Couldn't create %s", sFilename.c_str()));
 	}
 }
 
@@ -325,8 +244,7 @@ int main(int nNbArg, char**ppArgs)
 		new CApplicationContext();
 
 	NL3D_BlockMemoryAssertOnPurge = false;
-	char sCurDir[MAX_PATH];
-	getcwd (sCurDir, MAX_PATH);
+	std::string sCurDir = CPath::getCurrentPath();
 
 	if (nNbArg != 2)
 	{
@@ -386,17 +304,14 @@ int main(int nNbArg, char**ppArgs)
 			}
 			else
 			{
-				string sTmp = string("Couldn't not open ")+string(options.HeightMapFile1)
-					+string(" : heightmap 1 map ignored");
-				outString(sTmp);
+				outString(toString("Couldn't not open %s: heightmap 1 map ignored", options.HeightMapFile1.c_str()));
 				delete HeightMap1;
 				HeightMap1 = NULL;
 			}
 		}
 		catch (const Exception &e)
 		{
-			string sTmp = string("Cant load height map : ") + options.HeightMapFile1 + " : " + e.what();
-			outString (sTmp);
+			outString(toString("Cant load height map : %s : %s", options.HeightMapFile1.c_str(), e.what()));
 			delete HeightMap1;
 			HeightMap1 = NULL;
 		}
@@ -414,33 +329,37 @@ int main(int nNbArg, char**ppArgs)
 			}
 			else
 			{
-				string sTmp = string("Couldn't not open ")+string(options.HeightMapFile2)
-					+string(" : heightmap 2 map ignored\n");
-				outString(sTmp);
+				outString(toString("Couldn't not open %s: heightmap 2 map ignored", options.HeightMapFile2.c_str()));
 				delete HeightMap2;
 				HeightMap2 = NULL;
 			}
 		}
 		catch (const Exception &e)
 		{
-			string sTmp = string("Cant load height map : ") + options.HeightMapFile2 + " : " + e.what() + "\n";
-			outString (sTmp);
+			outString (string("Cant load height map : ") + options.HeightMapFile2 + " : " + e.what() + "\n");
 			delete HeightMap2;
 			HeightMap1 = NULL;
 		}
 	}
 
-	// Get all files
+	// get all files
+	vector<string> vAllFilesUnfiltered;
+	CPath::getPathContent(options.InputIGDir, false, false, true, vAllFilesUnfiltered);
+
+	// keep only .ig files
 	vector<string> vAllFiles;
-	chdir (options.InputIGDir.c_str());
-	dir (".ig", vAllFiles, false);
-	chdir (sCurDir);
+	for(uint i = 0, len = (uint)vAllFilesUnfiltered.size(); i < len; ++i)
+	{
+		if (toLower(CFile::getExtension(vAllFilesUnfiltered[i])) == "ig")
+		{
+			vAllFiles.push_back(vAllFilesUnfiltered[i]);
+		}
+	}
 
 	for (uint32 i = 0; i < vAllFiles.size(); ++i)
 	{
-		chdir (options.InputIGDir.c_str());
-		CInstanceGroup *pIG = LoadInstanceGroup (vAllFiles[i].c_str());
-		chdir (sCurDir);
+		CInstanceGroup *pIG = LoadInstanceGroup (CPath::standardizePath(options.InputIGDir) + vAllFiles[i]);
+
 		if (pIG != NULL)
 		{
 			bool realTimeSunContribution = pIG->getRealTimeSunContribution();
@@ -511,10 +430,8 @@ int main(int nNbArg, char**ppArgs)
 			pIGout->build (vGlobalPos, IA, Clusters, Portals, PLN);
 			pIGout->enableRealTimeSunContribution(realTimeSunContribution);
 
+			SaveInstanceGroup (CPath::standardizePath(options.OutputIGDir) + vAllFiles[i], pIGout);
 
-			chdir (options.OutputIGDir.c_str());
-			SaveInstanceGroup (vAllFiles[i].c_str(), pIGout);
-			chdir (sCurDir);
 			delete pIG;
 		}
 	}
