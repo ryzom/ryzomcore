@@ -88,7 +88,8 @@ public:
 	const CAIEventType &operator=(const CAIEventType &other)
 	{
 		_val=other._val;
-	} 
+		return *this;
+	}
 	bool operator==(const CAIEventType &other)	const
 	{
 		return _val==other._val;
