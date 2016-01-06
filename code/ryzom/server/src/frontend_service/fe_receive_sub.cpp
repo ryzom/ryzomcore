@@ -842,7 +842,7 @@ void CFeReceiveSub::handleReceivedMsg( CClientHost *clienthost )
 			{
 				// The client has neither been authenticated nor provided a user id, but is allowed to connect (dev mode)
 				nlinfo ("%s using AutoAllocUserid", _CurrentInMsg->AddrFrom.asString().c_str() );
-				string filename = CPath::standardizePath( SaveShardRoot.get() ) + CPath::standardizePath( IService::getInstance()->SaveFilesDirectory.get() ) + "auto_uid_map.bin";
+				string filename = CPath::standardizePath( SaveShardRootGameShare.get() ) + CPath::standardizePath( IService::getInstance()->SaveFilesDirectory.get() ) + "auto_uid_map.bin";
 
 				// Get previously allocated user ids 
 				if ( _AutoUidMap.empty() )
