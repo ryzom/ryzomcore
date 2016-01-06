@@ -90,15 +90,15 @@ using namespace NLNET;
 
 
 
-// Automatic SaveShardRoot path standardization
+// Automatic SaveShardRootGameShare path standardization
 void cbOnSaveShardRootModified( NLMISC::IVariable& var )
 {
 	var.fromString( CPath::standardizePath( var.toString() ) );
 }
 
 
-// (SaveShardRoot from game_share/backup_service_interface.cpp is not instanciated because nothing is used from that file)
-extern NLMISC::CVariable<std::string> SaveShardRoot;
+// (SaveShardRootGameShare from game_share/backup_service_interface.cpp is not instanciated because nothing is used from that file)
+extern NLMISC::CVariable<std::string> SaveShardRootGameShare;
 CVariable<string>	PdrFilename("ai", "PdrFilename", "Pdr file containing AIScript variables", string("ai_persistent_var.pdr"), 0, true);
 
 
@@ -174,7 +174,7 @@ CAIScriptDataManager::~CAIScriptDataManager()
 
 std::string CAIScriptDataManager::dirname()
 {
-	return SaveShardRoot.get()+"/"+IService::getInstance()->SaveFilesDirectory.toString()+"/ai_script_data";
+	return SaveShardRootGameShare.get()+"/"+IService::getInstance()->SaveFilesDirectory.toString()+"/ai_script_data";
 }
 
 //CConfigFile* CAIScriptDataManager::createFile(string name)
