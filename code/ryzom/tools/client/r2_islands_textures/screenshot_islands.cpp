@@ -1773,7 +1773,6 @@ void CScreenshotIslands::buildBackTextureHLS(const std::string & islandName, con
 		}
 	}
 
-
 	// HLS order
 	list< CRGBA > sortedHLS;
 	list< CRGBA >::iterator itCol, itHLS;
