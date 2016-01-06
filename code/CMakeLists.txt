@@ -238,6 +238,10 @@ IF(WITH_QT5)
     FIND_PACKAGE(Qt5LinguistTools)
     FIND_PACKAGE(Qt5Network)
 
+    IF(WIN32)
+      FIND_PACKAGE(Qt5WinExtras)
+    ENDIF()
+
     IF(QT_STATIC)
       ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 
@@ -245,6 +249,10 @@ IF(WITH_QT5)
 
       # Gui
       SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::OpenGL)
+
+      IF(WIN32)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::WinExtras)
+      ENDIF()
 
       ADD_QT_LIBRARY(PrintSupport)
 
