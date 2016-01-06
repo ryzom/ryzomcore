@@ -210,7 +210,7 @@ void CTile_browser_dlg::on_actionAddTile_triggered(bool checked)
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 
 	qSort(fileNames.begin(), fileNames.end());
 
@@ -284,7 +284,7 @@ void CTile_browser_dlg::on_actionReplaceImage_triggered(bool checked)
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, "Choose Bitmap", QString(tileBankBrowser.getAbsPath().c_str()) , "All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
@@ -396,7 +396,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , tr("Targa Bitmap (*.tga);;PNG Image (*.png);;All Files (*.*);;"), &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , tr("All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap (*.tga);;All Files (*.*);;"), &selectedFilter, options);
 	QFileInfo fi(fileName);
 	QString baseName = fi.baseName() ;
 
@@ -497,7 +497,7 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 	// Select a file
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
@@ -568,7 +568,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 {
 	QFileDialog::Options options;
 	QString selectedFilter;
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Choose Bitmap"), QString(tileBankBrowser.getAbsPath().c_str()) , "All supported files (*.png;*.tga);;PNG Bitmap (*.png);;Targa Bitmap(*.tga);;All Files (*.*);;", &selectedFilter, options);
 	
 	if (!fileName.isEmpty())
 	{
