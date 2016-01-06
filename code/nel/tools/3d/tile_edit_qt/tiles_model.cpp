@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "common.h"
 #include <QtGui/QtGui>
 #include "tiles_model.h"
 #include "tile_widget.h"
@@ -57,10 +58,9 @@ QVariant tiles_model::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DecorationRole || role == Qt::UserRole)
 	{
-		CTile_Widget* wiwi = new CTile_Widget;
-		wiwi->initWidget( tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel() );
-		QPixmap pixpix = QPixmap::grabWidget(wiwi, wiwi->contentsRect());
-		delete wiwi;
+		CTile_Widget wiwi;
+		wiwi.initWidget(tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel());
+		QPixmap pixpix = wiwi.grab(wiwi.contentsRect());
 		return pixpix;
 	}
     else if (role == Qt::UserRole + 1)

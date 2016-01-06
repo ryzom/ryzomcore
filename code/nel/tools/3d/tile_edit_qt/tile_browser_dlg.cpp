@@ -14,18 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QColor>
-#include <QtCore/QList>
-#include <QtGui/QAction>
-#include <QtCore/QSettings>
-#include "nel/3d/tile_bank.h"
-#include "nel/misc/bitmap.h"
-#include "nel/misc/file.h"
-#include "pic/readpic.h"
-#include "pic/pic.h"
+#include "common.h"
+
 #include "tile_browser_dlg.h"
 #include "tile_rotation_dlg.h"
 
@@ -109,10 +99,10 @@ void CTile_browser_dlg::initDialog(const int& tileSetIndex)
 		tileZoomButtonGroup->button(settings.value("browser/TileZoom").toInt())->setChecked(true);
 
 	//GroupBox checkedIdChanged subscription
-    connect(tileTypeButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileTypeButtonGroup_clicked(int)));
+	connect(tileTypeButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileTypeButtonGroup_clicked(int)));
 	connect(tileTextureButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileTextureButtonGroup_clicked(int)));
-    connect(tileLabelButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileLabelButtonGroup_clicked(int)));
-    connect(tileZoomButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileZoomButtonGroup_clicked(int)));
+	connect(tileLabelButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileLabelButtonGroup_clicked(int)));
+	connect(tileZoomButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(on_tileZoomButtonGroup_clicked(int)));
 
 	//Tile View Model
 	tileViewModel = new tiles_model(this);

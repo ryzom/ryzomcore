@@ -14,18 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <nel/misc/types_nl.h>
+#include "common.h"
 #include "browser_model.h"
-
-#include <string>
-
-#include <nel/3d/tile_bank.h>
-#include <nel/misc/stream.h>
-#include <nel/misc/file.h>
-
-#include <QtGui/QMessageBox>
-
-#include "pic/readpic.h"
 
 using namespace std;
 using namespace NL3D;
@@ -272,8 +262,8 @@ int TileList::addTile256 ()
 bool TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitmap type)
 {
 	// Remove the absolute path from the path name
-	std::string troncated=name;
-	if (RemovePath (troncated, tileBankBrowser.getAbsPath ().c_str()))
+	std::string troncated = name;
+	if (RemovePath(troncated, tileBankBrowser.getAbsPath ().c_str()))
 	{
 		vector<NLMISC::CBGRA> tampon;
 		uint Width;

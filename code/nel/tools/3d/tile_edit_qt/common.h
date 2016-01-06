@@ -14,32 +14,43 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef TILE_ROTATIONDLG_H
-#define TILE_ROTATIONDLG_H
+#ifndef COMMON_H
+#define COMMON_H
 
-#include "ui_tile_rotation_qt.h"
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+	#undef realloc
+	#undef free
+#endif
 
-class CTile_rotation_dlg : public QDialog
-{
-	Q_OBJECT
+#include <qglobal.h>
 
-public:
-	static int getRotation(QWidget *parent, bool *ok = 0,Qt::WindowFlags f = 0);
+#ifdef Q_COMPILER_RVALUE_REFS
+#undef Q_COMPILER_RVALUE_REFS
+#endif
 
-	enum TileRotation
-	{ 
-		_0Rotation = 0,
-		_90Rotation = 3,
-		_180Rotation = 2,
-		_270Rotation = 1
-	};
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
 
-	int getCheckedRotation() const {	return rotationButtonGroup->checkedId();	}
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#define USE_QT5
+#endif
 
-private:
-	CTile_rotation_dlg(QWidget *parent = 0, Qt::WindowFlags f = 0);
-	Ui::TileRotationDialog ui;
-	QButtonGroup* rotationButtonGroup;
-};
+#ifdef USE_QT5
+#include <QtWidgets/QtWidgets>
+#include <QtConcurrent/QtConcurrent>
+#endif
+
+#include <string>
+
+#include <nel/misc/types_nl.h>
+#include <nel/3d/tile_bank.h>
+#include <nel/misc/stream.h>
+#include <nel/misc/file.h>
+#include <nel/misc/app_context.h>
+#include <nel/misc/bitmap.h>
 
 #endif

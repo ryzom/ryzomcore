@@ -1,3 +1,4 @@
+#include "common.h"
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include "items_edit_dlg.h"
