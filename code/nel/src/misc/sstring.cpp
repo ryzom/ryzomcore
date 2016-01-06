@@ -17,6 +17,10 @@
 #include "stdmisc.h"
 #include "nel/misc/sstring.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 namespace NLMISC
 {
 
@@ -225,14 +229,14 @@ namespace NLMISC
 				return false;
 
 			// iterate from size-2 to 1
-			for (uint32 i=(uint32)size()-1; --i;)
+			for (uint i=(uint)size()-1; --i;)
 				if (!isValidFileNameChar((*this)[i]) && (*this)[i]!=' ')
 					return false;
 		}
 		else
 		{
 			// iterate from size-1 to 0
-			for (uint32 i=(uint32)size(); i--;)
+			for (uint i=(uint)size(); i--;)
 				if (!isValidFileNameChar((*this)[i]))
 					return false;
 		}
@@ -253,7 +257,7 @@ namespace NLMISC
 			return false;
 
 		// iterate from size-1 to 1
-		for (uint32 i=(uint32)size(); --i;)
+		for (uint i=(uint)size(); --i;)
 			if (!isValidKeywordChar((*this)[i]))
 				return false;
 
@@ -489,9 +493,9 @@ namespace NLMISC
 		CSString s=strip();
 		while(!s.empty())
 		{
-			uint32 pre=(uint32)s.size();
+			uint pre=(uint)s.size();
 			result.push_back(s.firstWord(true));
-			uint32 post=(uint32)s.size();
+			uint post=(uint)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -503,9 +507,9 @@ namespace NLMISC
 		CSString s=*this;
 		while(!s.empty())
 		{
-			uint32 pre=(uint32)s.size();
+			uint pre=(uint)s.size();
 			result.push_back(s.firstWordOrWords(true,useSlashStringEscape,useRepeatQuoteStringEscape));
-			uint32 post=(uint32)s.size();
+			uint post=(uint)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -520,8 +524,8 @@ namespace NLMISC
 		if (s.contains('\r'))
 			s=s.replace("\r","");
 
-		uint32 it=0;
-		uint32 len= (uint32)s.size();
+		uint it=0;
+		uint len= (uint)s.size();
 		while(it<len)
 		{
 			// extract the text up to the next '\n'character
@@ -542,12 +546,12 @@ namespace NLMISC
 		CSString s=*this;
 		while(!s.empty())
 		{
-			uint32 pre=(uint32)s.size();
+			uint pre=(uint)s.size();
 			result.push_back(s.splitToSeparator(separator,true,useAngleBrace,useSlashStringEscape,
 												useRepeatQuoteStringEscape,true));
 			if (skipBlankEntries && result.back().empty())
 				result.pop_back();
-			uint32 post=(uint32)s.size();
+			uint post=(uint)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -568,7 +572,7 @@ namespace NLMISC
 
 		while(!s.empty())
 		{
-			uint32 pre=(uint32)s.size();
+			uint pre=(uint)s.size();
 			result.push_back(s.splitToOneOfSeparators(	separators,true,useAngleBrace,useSlashStringEscape,
 														useRepeatQuoteStringEscape,!retainSeparators ));
 
@@ -586,7 +590,7 @@ namespace NLMISC
 				}
 			}
 
-			uint32 post=(uint32)s.size();
+			uint post=(uint)s.size();
 			if (post>=pre)
 				return false;
 		}
@@ -716,7 +720,7 @@ namespace NLMISC
 		for (i=0;i<size();++i)
 		{
 			// perform a quick string compare
-			int j;
+			uint j;
 			for (j=0;s[j]!=0 && s[j]==(&((*this)[i]))[j];++j)
 			{
 			}
@@ -1022,7 +1026,7 @@ namespace NLMISC
 		}
 		else if ((*this)[0]=='\"' && isDelimitedMonoBlock(false,useSlashStringEscape,useRepeatQuoteStringEscape))
 		{
-			i=(uint32)size();
+			i=(uint)size();
 		}
 		if (i!=size())
 			return quote(useSlashStringEscape,useRepeatQuoteStringEscape);
@@ -1224,7 +1228,7 @@ namespace NLMISC
 	{
 		bool foundToken= false;
 
-		for (uint32 i=(uint32)size();i--;)
+		for (uint i=(uint)size();i--;)
 		{
 			switch((*this)[i])
 			{
@@ -1274,7 +1278,7 @@ namespace NLMISC
 
 	bool CSString::isXMLCompatible(bool isParameter) const
 	{
-		for (uint32 i=(uint32)size();i--;)
+		for (uint i=(uint)size();i--;)
 		{
 			switch((*this)[i])
 			{
