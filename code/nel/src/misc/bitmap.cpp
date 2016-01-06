@@ -2376,7 +2376,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	if(!f.isReading()) return 0;
 
-	uint32			size;
 	uint32			x,y;
 	sint32			slsize;
 	uint8			*scanline;
@@ -2452,7 +2451,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	_Width = width;
 	_Height = height;
-	size = _Width * _Height * (imageDepth/8);
 
 	switch(imageType)
 	{
