@@ -43,6 +43,7 @@ static void		compressMipMap(uint8 *pixSrc, sint width, sint height, vector<uint8
 		case DXT1A:
 			flags |= squish::kDxt1;
 			dest.ddpf.dwFourCC = MAKEFOURCC('D', 'X', 'T', '1');
+			// TODO: add special headers flags for DXTC1a
 			break;
 		case DXT3:
 			flags |= squish::kDxt3;
