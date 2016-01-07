@@ -891,18 +891,28 @@ void initMainLoop()
 				// only detect amount of video memory if using HD textures
 				if (ClientCfg.HDEntityTexture)
 				{
-					// determine video memory using 3D driver
-					videoMemory = Driver->getTotalVideoMemory();
+					if (ClientCfg.VideoMemory <= 0)
+					{
+						// determine video memory using 3D driver
+						videoMemory = Driver->getTotalVideoMemory();
 
-					// if unable to determine, use plaform methods
-					if (videoMemory < 0) videoMemory = CSystemUtils::getTotalVideoMemory();
+						// if unable to determine, use plaform methods
+						if (videoMemory <= 0) videoMemory = CSystemUtils::getTotalVideoMemory();
 
-					// in the worst case, use default value of 128 MiB
-					if (videoMemory < 0) videoMemory = 128 * 1024;
+						// in the worst case, use default value of 128 MiB
+						if (videoMemory <= 0) videoMemory = 128 * 1024;
 
-					videoMemory /= 1024; // size in MiB
+						videoMemory /= 1024; // size in MiB
 
-					nlinfo("Video memory detected: %d MiB", videoMemory);
+						nlinfo("Video memory detected: %d MiB", videoMemory);
+					}
+					else
+					{
+						// force video memory (at least 32 MiB)
+						videoMemory = ClientCfg.VideoMemory < 32 ? 32:ClientCfg.VideoMemory;
+
+						nlinfo("Video memory forced: %d MiB", videoMemory);
+					}
 				}
 				else
 				{

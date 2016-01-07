@@ -575,12 +575,12 @@ public:
 // Traits for hash_map using CEntityId
 struct CEntityIdHashMapTraits
 {
-	enum { bucket_size = 4, min_buckets = 8, };
+	enum { bucket_size = 4, min_buckets = 8 };
 	CEntityIdHashMapTraits() { }
 	size_t operator() (const NLMISC::CEntityId &id ) const
 	{
 		uint64 hash64 = id.getUniqueId();
-#if (HAVE_X86_64)
+#ifdef HAVE_X86_64
 		return (size_t)hash64;
 #else
 		return (size_t)hash64 ^ (size_t)(hash64 >> 32);

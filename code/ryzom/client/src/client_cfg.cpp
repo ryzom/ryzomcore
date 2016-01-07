@@ -415,6 +415,7 @@ CClientConfig::CClientConfig()
 	HDTextureInstalled	= false;
 	Fog					= true;						// Fog is on by default
 	WaitVBL				= false;
+	VideoMemory			= 0;
 
 	FXAA				= true;
 
@@ -1041,6 +1042,8 @@ void CClientConfig::setValues()
 
 	// WaitVBL
 	READ_BOOL_FV(WaitVBL)
+	// VideoMemory
+	READ_INT_FV(VideoMemory);
 
 	READ_INT_DEV(TimerMode)
 

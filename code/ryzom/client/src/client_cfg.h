@@ -255,6 +255,8 @@ struct CClientConfig
 	bool			Fog;
 	/// Enable/Disable VSync
 	bool			WaitVBL;
+	/// Force or auto-detect video memory (in MiB)
+	sint			VideoMemory;
 
 	/// Timer mode. 0 : QueryPerformanceCounter, 1 : timeGetTime.
 	uint			TimerMode;
