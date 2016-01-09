@@ -280,31 +280,17 @@ bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::strin
 	Byte *outBuffer = 0; /* it must be 0 before first call for each new archive. */
 	size_t outBufferSize = 0; /* it can have any value before first call (if outBuffer = 0) */
 
-	size_t offset;
+	size_t offset = 0;
 	size_t outSizeProcessed = 0;
 
 	// get the first file
-	CFileItem *f = db.Database.Files;
 	res = SzExtract(&inStr, &db, 0,
 		&blockIndex, &outBuffer, &outBufferSize,
 		&offset, &outSizeProcessed,
 		&allocImp, &allocTempImp);
 
 	// write the extracted file
-	FILE *outputHandle;
-	UInt32 processedSize;
-	char *fileName = f->Name;
-	size_t nameLen = strlen(f->Name);
-	for (; nameLen > 0; nameLen--)
-	{
-		if (f->Name[nameLen - 1] == '/')
-		{
-			fileName = f->Name + nameLen;
-			break;
-		}
-	}
-
-	outputHandle = fopen(destFileName.c_str(), "wb+");
+	FILE *outputHandle = fopen(destFileName.c_str(), "wb+");
 
 	if (outputHandle == 0)
 	{
@@ -312,7 +298,7 @@ bool CPatchManager::unpack7Zip(const std::string &sevenZipFile, const std::strin
 		return false;
 	}
 
-	processedSize = (UInt32)fwrite(outBuffer + offset, 1, outSizeProcessed, outputHandle);
+	UInt32 processedSize = (UInt32)fwrite(outBuffer + offset, 1, outSizeProcessed, outputHandle);
 
 	if (processedSize != outSizeProcessed)
 	{
