@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../7z.h"
-#include "../../7zAlloc.h"
-#include "../../7zBuf.h"
-#include "../../7zCrc.h"
-#include "../../7zFile.h"
-#include "../../7zVersion.h"
+#include "7z.h"
+#include "7zAlloc.h"
+#include "7zBuf.h"
+#include "7zCrc.h"
+#include "7zFile.h"
+#include "7zVersion.h"
 
 #ifndef USE_WINDOWS_FILE
 /* for mkdir */
@@ -164,7 +164,7 @@ static SRes Utf16_To_Char(CBuf *buf, const UInt16 *s
         char defaultChar = '_';
         BOOL defUsed;
         unsigned numChars = 0;
-        numChars = WideCharToMultiByte(codePage, 0, s, len, (char *)buf->data, size, &defaultChar, &defUsed);
+        numChars = WideCharToMultiByte(codePage, 0, (LPCWSTR)s, len, (char *)buf->data, size, &defaultChar, &defUsed);
         if (numChars == 0 || numChars >= size)
           return SZ_ERROR_FAIL;
         buf->data[numChars] = 0;
@@ -190,7 +190,7 @@ static WRes MyCreateDir(const UInt16 *name)
 {
   #ifdef USE_WINDOWS_FILE
   
-  return CreateDirectoryW(name, NULL) ? 0 : GetLastError();
+  return CreateDirectoryW((LPCWSTR)name, NULL) ? 0 : GetLastError();
   
   #else
 
@@ -215,7 +215,7 @@ static WRes MyCreateDir(const UInt16 *name)
 static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name)
 {
   #ifdef USE_WINDOWS_FILE
-  return OutFile_OpenW(p, name);
+  return OutFile_OpenW(p, (const WCHAR *)name);
   #else
   CBuf buf;
   WRes res;
@@ -571,7 +571,7 @@ int MY_CDECL main(int numargs, char *args[])
           
           #ifdef USE_WINDOWS_FILE
           if (SzBitWithVals_Check(&db.Attribs, i))
-            SetFileAttributesW(destPath, db.Attribs.Vals[i]);
+            SetFileAttributesW((LPCWSTR)destPath, db.Attribs.Vals[i]);
           #endif
         }
         printf("\n");
