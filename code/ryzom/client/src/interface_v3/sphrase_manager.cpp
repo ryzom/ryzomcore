@@ -3834,7 +3834,7 @@ void				CSPhraseManager::computePhraseProgression()
 			pse.Text= STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(pse.ProgressInfo.SheetId));
 			// avoid mutliple sapce problem
 			strFindReplace(pse.Text, " ", "");
-			// replace each number with 001 format. strlwr
+			// replace each number with 001 format. toLower
 			for(uint k=0;k<pse.Text.size();k++)
 			{
 				if(pse.Text[k] < 256 && isalpha(pse.Text[k]))

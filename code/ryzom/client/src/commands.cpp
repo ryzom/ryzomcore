@@ -1326,7 +1326,7 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.size() == 0)
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && strlwr(args[0]) == "lua")
+	if (!ClientCfg.AllowDebugLua && toLower(args[0]) == "lua")
 	{
 		return false; // not allowed!!
 	}
@@ -1883,7 +1883,7 @@ NLMISC_COMMAND(pos, "Change the position of the user (in local only)", "<x, y, (
 	if(args.size() == 1)
 	{
 		string dest = args[0];
-		newPos = CTeleport::getPos(NLMISC::strlwr(dest));
+		newPos = CTeleport::getPos(NLMISC::toLower(dest));
 		if(newPos == CTeleport::Unknown)
 		{
 			//here we try to teleport to a bot destination
