@@ -28,3 +28,6 @@ before_script:
 script:
     - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
     - cmake --build build -- -j 2
+
+notifications:
+    irc: "chat.freenode.net#ryzomforge"
