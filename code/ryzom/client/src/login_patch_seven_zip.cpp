@@ -22,7 +22,7 @@
 #include "login_patch.h"
 
 #define RZ_USE_SEVENZIP 1
-//#define RZ_USE_NEW_LZMA
+#define RZ_USE_NEW_LZMA
 
 #ifdef RZ_USE_SEVENZIP
 
