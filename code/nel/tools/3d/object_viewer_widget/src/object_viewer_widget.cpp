@@ -95,13 +95,13 @@ namespace NLQT
 
 	void CObjectViewerWidget::showEvent ( QShowEvent * event )
 	{
-		if (!_mainTimer->isActive()) 
+		if (!_mainTimer->isActive())
 		{
 			_mainTimer->start(25);
 		}
 	}
 
-	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext) 
+	void CObjectViewerWidget::setNelContext(NLMISC::INelContext &nelContext)
 	{
 		_LibContext = new CLibraryContext(nelContext);
 	}
@@ -268,7 +268,7 @@ namespace NLQT
 			// ...
 
 			// 09. Update Animations (playlists)
-			//      - Needs to be either before or after entities, not sure, 
+			//      - Needs to be either before or after entities, not sure,
 			//        there was a problem with wrong order a while ago!!!
 
 
@@ -291,7 +291,7 @@ namespace NLQT
 
 			if (_isGraphicsInitialized && !getDriver()->isLost())
 			{
-				// 01. Render Driver (background color)			
+				// 01. Render Driver (background color)
 				renderDriver(); // clear all buffers
 
 				// 02. Render Sky (sky scene)
@@ -436,14 +436,14 @@ namespace NLQT
 	bool CObjectViewerWidget::loadMesh(const std::string &meshFileName, const std::string &skelFileName)
 	{
 		std::string fileName = CFile::getFilenameWithoutExtension(meshFileName);
-		if ( _Entities.count(fileName) != 0) 
+		if ( _Entities.count(fileName) != 0)
 			return false;
 
 		CPath::addSearchPath(CFile::getPath(meshFileName), false, false);
 
 		// create instance of the mesh character
 		UInstance Entity = _Scene->createInstance(meshFileName);
-		
+
 		CAABBox bbox;
 		Entity.getShapeAABBox(bbox);
 		setCamera(_Scene, bbox , Entity, true);
@@ -464,7 +464,7 @@ namespace NLQT
 		entity._FileNameShape = meshFileName;
 		entity._FileNameSkeleton = skelFileName;
 		entity._Instance = Entity;
-		if (!Skeleton.empty()) 
+		if (!Skeleton.empty())
 		{
 			entity._Skeleton = Skeleton;
 			entity._Skeleton.bindSkin (entity._Instance);

@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "entity.h"
 #include "interfaces.h"
 
-namespace NL3D 
+namespace NL3D
 {
 	class UDriver;
 	class UScene;
@@ -50,14 +50,14 @@ class QIcon;
 namespace NLQT
 @brief namespace NLQT
 */
-namespace NLQT 
+namespace NLQT
 {
-	class CObjectViewerWidget: 
-		public QWidget, 
+	class CObjectViewerWidget:
+		public QWidget,
 		public IObjectViewer
 	{
 		Q_OBJECT
-		Q_INTERFACES(NLQT::IObjectViewer) 
+		Q_INTERFACES(NLQT::IObjectViewer)
 
 	public:
 		/// Default constructor.
@@ -113,7 +113,7 @@ namespace NLQT
 		/// @param w - width window.
 		/// @param h - height window.
 		void setSizeViewport(uint16 w, uint16 h);
-		
+
 		void setBloomEffect(bool enabled) { _BloomEffect = enabled; }
 
 		/// Select instance from the scene
@@ -184,7 +184,7 @@ namespace NLQT
 		void updateRender();
 
 	private:
-	
+
 		/// Update the animation time for Particle System animation.
 		/// @param deltaTime - set the manual animation time.
 		void updateAnimatePS(uint64 deltaTime = 0);
