@@ -166,12 +166,18 @@ namespace NLQT
 		virtual QString name() const {return ("ObjectViewerWidget");}
 
 	protected:
+#ifdef USE_QT5
+		virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+#else
+
 #if defined(NL_OS_WINDOWS)
 		virtual bool winEvent(MSG * message, long * result);
 #elif defined(NL_OS_MAC)
 		virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
 #elif defined(NL_OS_UNIX)
 		virtual bool x11Event(XEvent *event);
+#endif
+
 #endif
 
 	private Q_SLOTS:

@@ -51,6 +51,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Q_EXPORT_PLUGIN2(object_viewer_widget_qt, NLQT::CObjectViewerWidget)
 #endif
 
+#if defined(NL_OS_WINDOWS)
+	typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+#elif defined(NL_OS_MAC)
+	typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
+#else
+	typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
+#endif
+
 using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
@@ -735,11 +743,38 @@ namespace NLQT
 		_Scene->animate ( fdelta);
 	}
 
+#ifdef USE_QT5
+
+	bool CObjectViewerWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
+	{
+		if (getDriver() && getDriver()->isActive())
+		{
+			NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser*>(getDriver())->getDriver();
+			if (driver)
+			{
+				// see what to do with result
+#if defined(NL_OS_WINDOWS)
+				MSG *msg = (MSG*)message;
+				winProc proc = (winProc)driver->getWindowProc();
+				return proc(driver, msg->hwnd, msg->message, msg->wParam, msg->lParam);
+#elif defined(NL_OS_MAC)
+				cocoaProc proc = (cocoaProc)driver->getWindowProc();
+				return proc(driver, message);
+#else
+				x11Proc proc = (x11Proc)driver->getWindowProc();
+				return proc(driver, message);
+#endif
+			}
+		}
+
+		return false;
+	}
+
+#else
+
 #if defined(NL_OS_WINDOWS)
 
-	typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-	bool CObjectViewerWidget::winEvent(MSG * message, long * result)
+	bool CObjectViewerWidget::winEvent(MSG *message, long *result)
 	{
 		if (getDriver() && getDriver()->isActive())
 		{
@@ -755,8 +790,6 @@ namespace NLQT
 	}
 
 #elif defined(NL_OS_MAC)
-
-	typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 	bool CObjectViewerWidget::macEvent(EventHandlerCallRef caller, EventRef event)
 	{
@@ -778,8 +811,6 @@ namespace NLQT
 
 #elif defined(NL_OS_UNIX)
 
-	typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
-
 	bool CObjectViewerWidget::x11Event(XEvent *event)
 	{
 		if (getDriver() && getDriver()->isActive())
@@ -794,6 +825,8 @@ namespace NLQT
 
 		return false;
 	}
+#endif
+
 #endif
 
 } /* namespace NLQT */
