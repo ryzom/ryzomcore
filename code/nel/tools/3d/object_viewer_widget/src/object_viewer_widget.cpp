@@ -762,7 +762,7 @@ namespace NLQT
 				return proc(driver, message);
 #else
 				x11Proc proc = (x11Proc)driver->getWindowProc();
-				return proc(driver, message);
+				return proc(driver, (XEvent*)message);
 #endif
 			}
 		}
