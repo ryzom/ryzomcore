@@ -3847,7 +3847,7 @@ namespace NLGUI
 				uint32 w, h;
 				CBitmap::loadSize (image, w, h);
 				if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
-					image.clear();
+					image = "web_del.tga";
 			}
 			else
 			{
@@ -3991,6 +3991,13 @@ namespace NLGUI
 				{
 					normal = "web_del.tga";
 					addImageDownload(normalBitmap, ctrlButton, style);
+				}
+				else
+				{
+					uint32 w, h;
+					CBitmap::loadSize(normal, w, h);
+					if (w == 0 || h == 0)
+						normal = "web_del.tga";
 				}
 			}
 		}
