@@ -38,6 +38,8 @@
 
 int main(sint32 argc, char **argv)
 {
+	NLMISC::CApplicationContext applicationContext;
+
 	QApplication app(argc, argv);
 
 	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
