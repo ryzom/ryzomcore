@@ -231,24 +231,20 @@ namespace NLGUI
 
 }
 
-#if LUA_VERSION_NUM < 503
-#define lua_isinteger(a, b) lua_isnumber(a, b)
-#endif
-
 	// ***************************************************************************
 	#define LUA_REGISTER_BASIC(_type_)															\
 	luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);					\
-	_type_ convert_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)	\
+	_type_ convert_lua_to_cpp(lua_State* L, luabind::detail::by_value<_type_>, int index)		\
 	{																							\
-		return (_type_)lua_tointeger(L,    index);												\
+		return (_type_)lua_tointeger(L, index);													\
 	}																							\
-	int match_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)		\
+	int match_lua_to_cpp(lua_State* L, luabind::detail::by_value<_type_>, int index)			\
 	{																							\
-		if (lua_isinteger(L,    index)) return 0; else return -1;								\
+		return lua_isnumber(L, index) ? 0:-1;													\
 	}																							\
-	void convert_cpp_to_lua(lua_State* L,    const  _type_& v)									\
+	void convert_cpp_to_lua(lua_State* L, const  _type_& v)										\
 	{																							\
-		lua_pushinteger(L,    (double)v);														\
+		lua_pushinteger(L, (lua_Integer)v);														\
 	}
 
 	// Basic LUA types
