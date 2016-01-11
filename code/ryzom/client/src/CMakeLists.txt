@@ -74,6 +74,9 @@ IF(WITH_RYZOM_CLIENT)
     ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS -p ${MAC_RESOURCES_DIR}/ryzom.icns ${RYZOM_RESOURCES_DIR})
     ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS -p ${CMAKE_SOURCE_DIR}/ryzom/client/client_default.cfg ${RYZOM_RESOURCES_DIR})
 
+    # remove any present installscript_osx.vdf before signing
+    ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND rm -f ${MAC_RESOURCES_DIR}/installscript_osx.vdf)
+
     IF(RYZOM_DATA_DIR)
       ADD_CUSTOM_COMMAND(TARGET ryzom_client POST_BUILD COMMAND cp ARGS -RpX ${RYZOM_DATA_DIR} ${RYZOM_RESOURCES_DIR})
     ENDIF()
