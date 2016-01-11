@@ -5177,7 +5177,7 @@ namespace NLGUI
 		{
 			if (!it.nextKey().isInteger())
 			{
-				nlwarning("%s : bad key encountered with type %s, number expected.", funcName, it.nextKey().getTypename());
+				nlwarning("%s : bad key encountered with type %s, integer expected.", funcName, it.nextKey().getTypename());
 				continue;
 			}
 			if (!it.nextValue().isString())
