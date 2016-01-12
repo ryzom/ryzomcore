@@ -253,7 +253,15 @@ inline lua_Integer CLuaState::toInteger(int index)
 {
 	//H_AUTO(Lua_CLuaState_toInteger)
 	checkIndex(index);
-	return lua_tointeger(_State, index);
+	sint isnum = 0;
+	lua_Integer res = lua_tointegerx(_State, index, &isnum);
+	if (!isnum)
+	{
+		lua_Number d = lua_tonumber(_State, index);
+		nlwarning("Lua: Unable to convert Lua number %lf to integer", d);
+		res = (lua_Integer)d;
+	}
+	return res;
 }
 
 //================================================================================
