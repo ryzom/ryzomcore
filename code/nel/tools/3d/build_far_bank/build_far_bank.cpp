@@ -153,8 +153,6 @@ int main (int argc, char **argv)
 			outputVersion=true;
 		if (strcmp (argv[n], "-?")==0)
 			outputHelp=true;
-		if (strcmp (argv[n], "-?")==0)
-			outputHelp=true;
 		if (strncmp (argv[n], "-d", 2)==0)
 		{
 			rootDir = argv[n];
@@ -181,7 +179,6 @@ int main (int argc, char **argv)
 			"options:\n"
 			"\t-d#: change the root directory of the small bank. # is the new directory\n"
 			"\t-p#: postfix tiles filename by #\n"
-			"\t-r: load the bitmaps from the current directory\n"
 			"\t-r: load the bitmaps from the current directory\n"
 			"\t-f: force recomputation of all the tiles\n"
 			"\t-v: print the version\n"
