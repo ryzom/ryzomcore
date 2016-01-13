@@ -1854,7 +1854,7 @@ std::string CFileContainer::getTemporaryDirectory()
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int CFile::getLastSeparator (const string &filename)
+std::string::size_type CFile::getLastSeparator (const string &filename)
 {
 	string::size_type pos = filename.find_last_of ('/');
 	if (pos == string::npos)
@@ -1865,7 +1865,7 @@ int CFile::getLastSeparator (const string &filename)
 			pos = filename.find_last_of ('@');
 		}
 	}
-	return (int)pos;
+	return pos;
 }
 
 string CFile::getFilename (const string &filename)

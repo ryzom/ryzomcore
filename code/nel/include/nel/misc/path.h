@@ -618,7 +618,7 @@ struct CFile
 	 * Return the position between [begin,end[ of the last separator between path and filename ('/' or '\').
 	 * If there's no separator, it returns string::npos.
 	 */
-	static int getLastSeparator (const std::string &filename);
+	static std::string::size_type getLastSeparator (const std::string &filename);
 
 	static std::string getFilenameWithoutExtension (const std::string &filename);
 	static std::string getExtension (const std::string &filename);
