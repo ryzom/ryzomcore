@@ -2597,6 +2597,25 @@ std::string CPath::makePathAbsolute( const std::string &relativePath, const std:
 	return npath;
 }
 
+bool CPath::isAbsolutePath(const std::string &path)
+{
+	if (path.empty()) return false;
+
+#ifdef NL_OS_WINDOWS
+	// Windows root of current disk. Eg.: "\" or
+	// Windows network address. Eg.: \\someshare\path
+	if (path[0] == '\\') return true;
+
+	// Normal Windows absolute path. Eg.: C:\something
+	if (path.length() > 2 && isalpha(path[0]) && (path[1] == ':' ) && ((path[2] == '\\') || (path[2] == '/' ))) return true;
+#endif
+
+	// Unix filesystem absolute path (works also under Windows)
+	if (path[0] == '/') return true;
+
+	return false;
+}
+
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS

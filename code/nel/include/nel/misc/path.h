@@ -514,6 +514,12 @@ public:
 	*/
 	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory );
 
+	/** Return if a path is absolute or not.
+	 * \param path - The path
+	 * returns true if path is absolute or false if relative.
+	 */
+	static bool isAbsolutePath (const std::string &path);
+
 	/** If File in this list is added more than one in an addSearchPath, it doesn't launch a warning.
 	 */
 	static void addIgnoredDoubleFile(const std::string &ignoredFile);
