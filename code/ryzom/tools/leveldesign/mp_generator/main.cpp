@@ -145,7 +145,7 @@ void LoadCraftParts()
 void LoadCreatureFiles()
 {
 	printf( "-- REGISTERING CREATURE FILES --\n" );
-	CSString inputSheetPath = LEVEL_DESIGN_PATH + "leveldesign\\Game_elem\\Creature\\Fauna\\bestiary";
+	CSString inputSheetPath = LEVEL_DESIGN_PATH + "leveldesign/Game_elem/Creature/Fauna/bestiary";
 	CPath::addSearchPath( inputSheetPath, true, false );
 
 	vector<string> files;
