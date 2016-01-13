@@ -360,6 +360,11 @@ sint launchProgramAndWaitForResult (const std::string &programName, const std::s
 /// This function executes a program and returns output as a string
 std::string getCommandOutput(const std::string &command);
 
+/// This function replace all environment variables in a string by their content.
+/// Environment variables names can use both Windows (%NAME%) and UNIX syntax ($NAME)
+/// Authorized characters in names are A-Z, a-z, 0-9 and _
+std::string expandEnvironmentVariables(const std::string &s);
+
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
 
