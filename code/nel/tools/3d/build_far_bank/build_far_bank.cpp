@@ -50,16 +50,6 @@ bool recompute (const char* f1, const char* f2)
 	return buf1.st_mtime > buf2.st_mtime;
 }
 
-// Return true if the file exist
-bool isFileExist (const char* sName)
-{
-	FILE *pFile=fopen (sName, "rb");
-	if (!pFile)
-		return false;
-	fclose (pFile);
-	return true;
-}
-
 // Fill tile far pixel with this bitmap
 bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTileFarBank& farBank, bool _256, uint8 rotate)
 {
@@ -90,7 +80,7 @@ bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTi
 			// Get bitmap size
 			uint width=bitmap.getWidth();
 			uint height=bitmap.getHeight();
-			
+
 
 			// Check size..
 			if ((!((_256&&(width==256)&&(height==256))||((!_256)&&(width==128)&&(height==128)))))
@@ -163,8 +153,6 @@ int main (int argc, char **argv)
 			outputVersion=true;
 		if (strcmp (argv[n], "-?")==0)
 			outputHelp=true;
-		if (strcmp (argv[n], "-?")==0)
-			outputHelp=true;
 		if (strncmp (argv[n], "-d", 2)==0)
 		{
 			rootDir = argv[n];
@@ -191,7 +179,6 @@ int main (int argc, char **argv)
 			"options:\n"
 			"\t-d#: change the root directory of the small bank. # is the new directory\n"
 			"\t-p#: postfix tiles filename by #\n"
-			"\t-r: load the bitmaps from the current directory\n"
 			"\t-r: load the bitmaps from the current directory\n"
 			"\t-f: force recomputation of all the tiles\n"
 			"\t-v: print the version\n"
@@ -223,7 +210,7 @@ int main (int argc, char **argv)
 					// Serial the bank in input
 					farBank.serial (inputFarBank);
 				}
-				
+
 				// Force recomputation ?
 				if (recompute (argv[1], argv[2]))
 				{
@@ -287,8 +274,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::diffuse)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::diffuse), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
@@ -307,7 +294,7 @@ int main (int argc, char **argv)
 								{
 									// One more tile
 									tileCount++;
-	
+
 									printf ("Skipping %s...\n", tileFilename.c_str());
 									bDeleteDiffuse=false;
 								}
@@ -318,8 +305,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::additive)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::additive);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::additive), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
@@ -349,8 +336,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::alpha)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::alpha);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::alpha), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
@@ -418,7 +405,7 @@ int main (int argc, char **argv)
 		{
 			nlwarning ("ERROR Can't open file %s for reading\n", argv[1]);
 		}
-	}		
+	}
 
 	// exit
 	return 0;

@@ -71,11 +71,17 @@ public:
 		// elements list for a visual slot.
 		std::vector<TElement> Element;
 
+		// std::map to increase access speed
+		typedef std::map<NLMISC::CSheetId, uint32> SheetIdToIndexMapType;
+		SheetIdToIndexMapType SheetIdToIndexMap;
+
 		/// Load/Save the values using the serial system
 		void serial(class NLMISC::IStream &s) throw(NLMISC::EStream)
 		{
 			s.serialCont(Element);
 		}
+
+		void updateMaps();
 	} TElementList;
 
 	typedef std::vector <TElementList> TVisualSlot;

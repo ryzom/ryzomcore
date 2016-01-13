@@ -145,7 +145,7 @@ void LoadCraftParts()
 void LoadCreatureFiles()
 {
 	printf( "-- REGISTERING CREATURE FILES --\n" );
-	CSString inputSheetPath = LEVEL_DESIGN_PATH + "leveldesign\\Game_elem\\Creature\\Fauna\\bestiary";
+	CSString inputSheetPath = LEVEL_DESIGN_PATH + "leveldesign/Game_elem/Creature/Fauna/bestiary";
 	CPath::addSearchPath( inputSheetPath, true, false );
 
 	vector<string> files;
@@ -1472,6 +1472,7 @@ void SetupDirectories()
 		
 	data.readFromFile( "raw_material_generation.cfg" );
 
+	// beurk :s Use CConfigFile instead
 	LEVEL_DESIGN_PATH = data.splitFrom( "LevelDesignPath = \"").splitTo( "\"" );
 	TRANSLATION_PATH = data.splitFrom( "TranslationPath = \"" ).splitTo( "\"" );
 

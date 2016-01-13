@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
 	{
 		for(uint i = 0; i < ClientCfg.PreDataPath.size(); ++i)
 		{
-			CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false);
+			CPath::addSearchPath(NLMISC::expandEnvironmentVariables(ClientCfg.PreDataPath[i]), true, false);
 		}
 	}
 

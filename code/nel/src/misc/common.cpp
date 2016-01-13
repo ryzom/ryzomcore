@@ -913,6 +913,80 @@ std::string getCommandOutput(const std::string &command)
 	return result;
 }
 
+std::string expandEnvironmentVariables(const std::string &s)
+{
+	size_t len = s.length();
+	std::string ret;
+
+	std::string::size_type pos1 = 0, pos2 = 0;
+	
+	// look for environement variables delimiters
+	while(pos2 < len && (pos1 = s.find_first_of("%$", pos2)) != std::string::npos)
+	{
+		// copy string unprocessed part
+		ret += s.substr(pos2, pos1-pos2);
+
+		// extract a valid variable name (a-zA-Z0-9_)
+		pos2 = pos1+1;
+
+		while(pos2 < len && (isalnum(s[pos2]) || s[pos2] == '_')) ++pos2;
+
+		// check if variable name is empty
+		bool found = pos2 > pos1+1;
+
+		std::string name;
+
+		if (found)
+		{
+			// found at least 1 character
+			name = s.substr(pos1+1, pos2-pos1-1);
+		}
+
+		// Windows format needs a trailing % delimiter
+		if (found && s[pos1] == '%')
+		{
+			if (pos2 >= len || s[pos2] != '%')
+			{
+				// not a variable name, because no trailing %
+				found = false;
+			}
+			else
+			{
+				// found a trailing %, next character to check
+				++pos2;
+			}
+		}
+
+		// get variable value if name found
+		if (found)
+		{
+			const char *value = getenv(name.c_str());
+
+			if (value)
+			{
+				// value found
+				ret += std::string(value);
+			}
+			else
+			{
+				// value not found
+				found = false;
+			}
+		}
+
+		if (!found)
+		{
+			// variable or value not found, don't evaluate variable
+			ret += s.substr(pos1, pos2-pos1);
+		}
+	}
+
+	// copy last unprocessed part
+	ret += s.substr(pos2);
+
+	return ret;
+}
+
 /*
  * Display the bits (with 0 and 1) composing a byte (from right to left)
  */

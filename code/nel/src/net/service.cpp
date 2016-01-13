@@ -1169,7 +1169,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
-				CPath::addSearchPath (var->asString(i), true, false);
+				CPath::addSearchPath (NLMISC::expandEnvironmentVariables(var->asString(i)), true, false);
 			}
 		}
 
@@ -1177,7 +1177,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
-				CPath::addSearchPath (var->asString(i), false, false);
+				CPath::addSearchPath (NLMISC::expandEnvironmentVariables(var->asString(i)), false, false);
 			}
 		}
 

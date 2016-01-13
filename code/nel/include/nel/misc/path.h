@@ -497,7 +497,7 @@ public:
 	static void getFileListByName(const std::string &extension, const std::string &name, std::vector<std::string> &filenames);
 
 	/** Create a list of file having the requested string in the path and the requested extension
-	*/
+	 */
 	static void getFileListByPath(const std::string &extension, const std::string &path, std::vector<std::string> &filenames);
 
 	/** Make a path relative to another if possible, else doesn't change it.
@@ -508,18 +508,24 @@ public:
 	static bool makePathRelative (const char *basePath, std::string &relativePath);
 
 	/** Make path absolute
-	* \param relativePath - The relative path
-	* \param directory - the directory to which the path is relative to
-	* returns the absolute path, or empty if something went wrong.
-	*/
+	 * \param relativePath - The relative path
+	 * \param directory - the directory to which the path is relative to
+	 * returns the absolute path, or empty if something went wrong.
+	 */
 	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory );
+
+	/** Return if a path is absolute or not.
+	 * \param path - The path
+	 * returns true if path is absolute or false if relative.
+	 */
+	static bool isAbsolutePath (const std::string &path);
 
 	/** If File in this list is added more than one in an addSearchPath, it doesn't launch a warning.
 	 */
 	static void addIgnoredDoubleFile(const std::string &ignoredFile);
 
 	/** For the moment after memoryCompress you cant addsearchpath anymore
-	*/
+	 */
 	static void memoryCompress();
 
 	static void memoryUncompress();
@@ -527,17 +533,17 @@ public:
 	static bool isMemoryCompressed()	{ return getInstance()->_FileContainer.isMemoryCompressed(); }
 
 	/** Get the ms windows directory (in standardized way with end slash), or returns an empty string on other os
-	*/
+	 */
 	static std::string getWindowsDirectory();
 
 	/** Get application directory.
-	* \return directory where applications should write files.
-	*/
+	 * \return directory where applications should write files.
+	 */
 	static std::string getApplicationDirectory(const std::string &appName = "");
 
 	/** Get a temporary directory.
-	* \return temporary directory where applications should write files.
-	*/
+	 * \return temporary directory where applications should write files.
+	 */
 	static std::string getTemporaryDirectory();
 
 	// release singleton
@@ -612,7 +618,7 @@ struct CFile
 	 * Return the position between [begin,end[ of the last separator between path and filename ('/' or '\').
 	 * If there's no separator, it returns string::npos.
 	 */
-	static int getLastSeparator (const std::string &filename);
+	static std::string::size_type getLastSeparator (const std::string &filename);
 
 	static std::string getFilenameWithoutExtension (const std::string &filename);
 	static std::string getExtension (const std::string &filename);

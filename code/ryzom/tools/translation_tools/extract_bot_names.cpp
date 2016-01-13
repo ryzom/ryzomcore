@@ -256,11 +256,11 @@ int extractBotNames(int argc, char *argv[])
 
 	for (uint i=0; i<paths.size(); ++i)
 	{
-		CPath::addSearchPath(paths.asString(i), true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(paths.asString(i)), true, false);
 	}
 	for (uint i=0; i<pathNoRecurse.size(); ++i)
 	{
-		CPath::addSearchPath(pathNoRecurse.asString(i), false, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(pathNoRecurse.asString(i)), false, false);
 	}
 
 	for (uint i=0; i<filtersVar.size(); ++i)
@@ -278,7 +278,7 @@ int extractBotNames(int argc, char *argv[])
 	if (Creatures.empty())
 	{
 		for (uint i=0;i<georgesPaths.size();++i)
-			CPath::addSearchPath(georgesPaths.asString(i).c_str(), true, false);
+			CPath::addSearchPath(NLMISC::expandEnvironmentVariables(georgesPaths.asString(i)), true, false);
 
 		loadForm("creature", PACKED_SHEETS_NAME, Creatures, true);
 	}

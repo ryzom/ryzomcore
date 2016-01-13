@@ -1854,7 +1854,7 @@ std::string CFileContainer::getTemporaryDirectory()
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int CFile::getLastSeparator (const string &filename)
+std::string::size_type CFile::getLastSeparator (const string &filename)
 {
 	string::size_type pos = filename.find_last_of ('/');
 	if (pos == string::npos)
@@ -1865,7 +1865,7 @@ int CFile::getLastSeparator (const string &filename)
 			pos = filename.find_last_of ('@');
 		}
 	}
-	return (int)pos;
+	return pos;
 }
 
 string CFile::getFilename (const string &filename)
@@ -2595,6 +2595,25 @@ std::string CPath::makePathAbsolute( const std::string &relativePath, const std:
 	npath = standardizePath( npath, false );
 
 	return npath;
+}
+
+bool CPath::isAbsolutePath(const std::string &path)
+{
+	if (path.empty()) return false;
+
+#ifdef NL_OS_WINDOWS
+	// Windows root of current disk. Eg.: "\" or
+	// Windows network address. Eg.: \\someshare\path
+	if (path[0] == '\\') return true;
+
+	// Normal Windows absolute path. Eg.: C:\something
+	if (path.length() > 2 && isalpha(path[0]) && (path[1] == ':' ) && ((path[2] == '\\') || (path[2] == '/' ))) return true;
+#endif
+
+	// Unix filesystem absolute path (works also under Windows)
+	if (path[0] == '/') return true;
+
+	return false;
 }
 
 bool CFile::setRWAccess(const std::string &filename)

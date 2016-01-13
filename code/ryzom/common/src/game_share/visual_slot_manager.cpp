@@ -94,70 +94,59 @@ void CVisualSlotManager::init()
 		f.close();
 
 		// Display elements read.
-//		for(uint i=0; i<_VisualSlot.size(); ++i)
-//		{
+		for(uint i=0, len = _VisualSlot.size(); i<len; ++i)
+		{
+			_VisualSlot[i].updateMaps();
 //			for(uint j=0; j<_VisualSlot[i].Element.size(); ++j)
 //				nlinfo("Visu: %d Num: %d Id: %d sheet: %s", i, _VisualSlot[i].Element[j].Index, _VisualSlot[i].Element[j].SheetId.asInt(), _VisualSlot[i].Element[j].SheetId.toString().c_str());
-//		}
+		}
 	}
 	else
 		nlwarning("VSMngr:load: cannot open the file '%s'.", filename.c_str());
 }// init //
 
+void CVisualSlotManager::TElementList::updateMaps()
+{
+	SheetIdToIndexMap.clear();
+
+	for(uint i=0, len = Element.size(); i<len; ++i)
+	{
+		const TElement &e = Element[i];
+		SheetIdToIndexMap[e.SheetId] = e.Index;
+	}
+}
+
 //-----------------------------------------------
 // rightItem2Index :
 // Return the visual slot index from a sheet Id for items in right hand.
-// \todo GUIGUI : Use map for faster search for example
 //-----------------------------------------------
 uint32 CVisualSlotManager::rightItem2Index(const NLMISC::CSheetId &id)
 {
-	if(SLOTTYPE::RIGHT_HAND_SLOT < _VisualSlot.size())
-	{
-		for(uint i=0; i<_VisualSlot[SLOTTYPE::RIGHT_HAND_SLOT].Element.size(); ++i)
-			if(_VisualSlot[SLOTTYPE::RIGHT_HAND_SLOT].Element[i].SheetId == id)
-				return _VisualSlot[SLOTTYPE::RIGHT_HAND_SLOT].Element[i].Index;
-	}
-	else
-		nlwarning("VSMngr:rightItem2Index: Bad slot -> you probably need to rebuild the tab.");
-
-	// No Item
-	return 0;
+	return sheet2Index(id, SLOTTYPE::RIGHT_HAND_SLOT);
 }// rightItem2Index //
 
 
 //-----------------------------------------------
 // leftItem2Index :
 // Return the visual slot index from a sheet Id for items in left hand.
-// \todo GUIGUI : Use map for faster search for example
 //-----------------------------------------------
 uint32 CVisualSlotManager::leftItem2Index(const NLMISC::CSheetId &id)
 {
-	if(SLOTTYPE::LEFT_HAND_SLOT < _VisualSlot.size())
-	{
-		for(uint i=0; i<_VisualSlot[SLOTTYPE::LEFT_HAND_SLOT].Element.size(); ++i)
-			if(_VisualSlot[SLOTTYPE::LEFT_HAND_SLOT].Element[i].SheetId == id)
-				return _VisualSlot[SLOTTYPE::LEFT_HAND_SLOT].Element[i].Index;
-	}
-	else
-		nlwarning("VSMngr:leftItem2Index: Bad slot -> you probably need to rebuild the tab.");
-
-	// No Item
-	return 0;
+	return sheet2Index(id, SLOTTYPE::LEFT_HAND_SLOT);
 }// leftItem2Index //
 
 
 //-----------------------------------------------
 // sheet2Index :
 // Return the visual index from a sheet Id and the visual slot.
-// \todo GUIGUI : Use map for faster search for example
 //-----------------------------------------------
 uint32 CVisualSlotManager::sheet2Index(const NLMISC::CSheetId &id, SLOTTYPE::EVisualSlot slot)
 {
 	if((uint)slot < _VisualSlot.size())
 	{
-		for(uint i=0; i<_VisualSlot[slot].Element.size(); ++i)
-			if(_VisualSlot[slot].Element[i].SheetId == id)
-				return _VisualSlot[slot].Element[i].Index;
+		const TElementList &el = _VisualSlot[slot];
+		TElementList::SheetIdToIndexMapType::const_iterator it = el.SheetIdToIndexMap.find(id);
+		if (it != el.SheetIdToIndexMap.end()) return it->second;
 	}
 	else
 		nlwarning("VSMngr:sheet2Index: Bad slot '%d' -> you probably need to rebuild the tab.", (sint)slot);

@@ -356,19 +356,22 @@ int extractNewSheetNames(int argc, char *argv[])
 	CConfigFile::CVar &paths = cf.getVar("Paths");
 	CConfigFile::CVar &pathNoRecurse= cf.getVar("PathsNoRecurse");
 	CConfigFile::CVar &ligoClassFile= cf.getVar("LigoClassFile");
+	CConfigFile::CVar &leveldesignDataPathVar = cf.getVar("LeveldesignDataPath");
 
 	// parse path
 	for (uint i=0; i<paths.size(); ++i)
 	{
-		CPath::addSearchPath(paths.asString(i), true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(paths.asString(i)), true, false);
 	}
 	for (uint i=0; i<pathNoRecurse.size(); ++i)
 	{
-		CPath::addSearchPath(pathNoRecurse.asString(i), false, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(pathNoRecurse.asString(i)), false, false);
 	}
+
+	std::string leveldesignDataPath = NLMISC::expandEnvironmentVariables(leveldesignDataPathVar.asString());
 	
 	// init ligo config once
-	string ligoPath = CPath::lookup(ligoClassFile.asString(), true, true);
+	string ligoPath = CPath::lookup(NLMISC::expandEnvironmentVariables(ligoClassFile.asString()), true, true);
 	LigoConfig.readPrimitiveClass(ligoPath.c_str(), false);
 	NLLIGO::Register();
 	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
@@ -382,10 +385,10 @@ int extractNewSheetNames(int argc, char *argv[])
 		// 2nd is the Key column identifier. 
 		// 3rd is the sheet extension
 		// 4th is the directory where to find new sheets
-		"work/item_words_wk.txt",		"item ID",		"sitem",		"l:/leveldesign/game_element/sitem",
-		"work/creature_words_wk.txt",	"creature ID",	"creature",		"l:/leveldesign/game_elem/creature/fauna",	// take fauna only because other are special
-		"work/sbrick_words_wk.txt",		"sbrick ID",	"sbrick",		"l:/leveldesign/game_element/sbrick",
-		"work/sphrase_words_wk.txt",	"sphrase ID",	"sphrase",		"l:/leveldesign/game_element/sphrase",
+		"work/item_words_wk.txt",		"item ID",		"sitem",		"leveldesign/game_element/sitem",
+		"work/creature_words_wk.txt",	"creature ID",	"creature",		"leveldesign/game_elem/creature/fauna",	// take fauna only because other are special
+		"work/sbrick_words_wk.txt",		"sbrick ID",	"sbrick",		"leveldesign/game_element/sbrick",
+		"work/sphrase_words_wk.txt",	"sphrase ID",	"sphrase",		"leveldesign/game_element/sphrase",
 	};
 	uint	numSheetDefs= sizeof(sheetDefs) / (4*sizeof(sheetDefs[0]));
 	
@@ -394,7 +397,7 @@ int extractNewSheetNames(int argc, char *argv[])
 	{
 		CSheetWordListBuilder	builder;
 		builder.SheetExt= sheetDefs[i*4+2];
-		builder.SheetPath= sheetDefs[i*4+3];
+		builder.SheetPath= CPath::standardizePath(leveldesignDataPath) + sheetDefs[i*4+3];
 		extractNewWords(sheetDefs[i*4+0], sheetDefs[i*4+1], builder);
 	}
 
@@ -403,7 +406,7 @@ int extractNewSheetNames(int argc, char *argv[])
 	{
 		// build place names
 		CRegionPrimWordListBuilder	builder;
-		builder.PrimPath= "l:/primitives";
+		builder.PrimPath= leveldesignDataPath;
 		builder.PrimFilter.push_back("region_*.primitive");
 		builder.PrimFilter.push_back("indoors_*.primitive");
 		extractNewWords("work/place_words_wk.txt", "placeId", builder);
