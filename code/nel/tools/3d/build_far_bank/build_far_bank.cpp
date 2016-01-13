@@ -80,7 +80,7 @@ bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTi
 			// Get bitmap size
 			uint width=bitmap.getWidth();
 			uint height=bitmap.getHeight();
-			
+
 
 			// Check size..
 			if ((!((_256&&(width==256)&&(height==256))||((!_256)&&(width==128)&&(height==128)))))
@@ -210,7 +210,7 @@ int main (int argc, char **argv)
 					// Serial the bank in input
 					farBank.serial (inputFarBank);
 				}
-				
+
 				// Force recomputation ?
 				if (recompute (argv[1], argv[2]))
 				{
@@ -294,7 +294,7 @@ int main (int argc, char **argv)
 								{
 									// One more tile
 									tileCount++;
-	
+
 									printf ("Skipping %s...\n", tileFilename.c_str());
 									bDeleteDiffuse=false;
 								}
@@ -405,7 +405,7 @@ int main (int argc, char **argv)
 		{
 			nlwarning ("ERROR Can't open file %s for reading\n", argv[1]);
 		}
-	}		
+	}
 
 	// exit
 	return 0;
