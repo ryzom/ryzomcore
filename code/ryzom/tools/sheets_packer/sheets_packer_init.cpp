@@ -83,7 +83,7 @@ bool init()
 	// Define the root path that contains all data needed for the application.
 	nlinfo("Adding search paths...");
 	for(uint i = 0; i < AppCfg.DataPath.size(); i++)
-		CPath::addSearchPath(AppCfg.DataPath[i], true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(AppCfg.DataPath[i]), true, false);
 
 	// Initialize Sheet IDs.
 	nlinfo("Init SheetId...");

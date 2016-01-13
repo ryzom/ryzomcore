@@ -906,7 +906,7 @@ void AISHEETS::CSheets::packSheets(const std::string &writeFilesDirectoryName)
 			{
 				addSearchPath=true;
 				for (uint32 i=0;i<varPtr->size();++i)
-					CPath::addSearchPath(varPtr->asString(i).c_str(), true, false);
+					CPath::addSearchPath(NLMISC::expandEnvironmentVariables(varPtr->asString(i)), true, false);
 			}
 			loadForm2("aiaction",	writeFilesDirectoryName+AISPackedActionSheetsFilename, _ActionSheets, true);
 		}
@@ -918,7 +918,7 @@ void AISHEETS::CSheets::packSheets(const std::string &writeFilesDirectoryName)
 			{
 				addSearchPath=true;
 				for (uint32 i=0;i<varPtr->size();++i)
-					CPath::addSearchPath(varPtr->asString(i).c_str(), true, false);
+					CPath::addSearchPath(NLMISC::expandEnvironmentVariables(varPtr->asString(i)), true, false);
 			}
 			loadForm("actionlist", writeFilesDirectoryName+AISPackedFightConfigSheetsFilename, _ActionListSheets, true);
 		}
@@ -931,7 +931,7 @@ void AISHEETS::CSheets::packSheets(const std::string &writeFilesDirectoryName)
 			{
 				addSearchPath=true;
 				for (uint32 i=0;i<varPtr->size();++i)
-					CPath::addSearchPath(varPtr->asString(i).c_str(), true, false);
+					CPath::addSearchPath(NLMISC::expandEnvironmentVariables(varPtr->asString(i)), true, false);
 			}
 			loadForm2("creature", writeFilesDirectoryName+AISPackedSheetsFilename, _Sheets, true);
 		}
@@ -943,7 +943,7 @@ void AISHEETS::CSheets::packSheets(const std::string &writeFilesDirectoryName)
 			{
 				addSearchPath=true;
 				for (uint32 i=0;i<varPtr->size();++i)
-					CPath::addSearchPath(varPtr->asString(i).c_str(), true, false);
+					CPath::addSearchPath(NLMISC::expandEnvironmentVariables(varPtr->asString(i)), true, false);
 			}
 			loadForm2("race_stats", writeFilesDirectoryName+AISPackedRaceStatsSheetsFilename, _RaceStatsSheets, true);
 		}

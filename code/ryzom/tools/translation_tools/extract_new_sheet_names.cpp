@@ -360,15 +360,15 @@ int extractNewSheetNames(int argc, char *argv[])
 	// parse path
 	for (uint i=0; i<paths.size(); ++i)
 	{
-		CPath::addSearchPath(paths.asString(i), true, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(paths.asString(i)), true, false);
 	}
 	for (uint i=0; i<pathNoRecurse.size(); ++i)
 	{
-		CPath::addSearchPath(pathNoRecurse.asString(i), false, false);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(pathNoRecurse.asString(i)), false, false);
 	}
 	
 	// init ligo config once
-	string ligoPath = CPath::lookup(ligoClassFile.asString(), true, true);
+	string ligoPath = CPath::lookup(NLMISC::expandEnvironmentVariables(ligoClassFile.asString()), true, true);
 	LigoConfig.readPrimitiveClass(ligoPath.c_str(), false);
 	NLLIGO::Register();
 	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
