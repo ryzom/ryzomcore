@@ -20,6 +20,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/rgba.h"
+#include "nel/misc/path.h"
 #include <vector>
 #include <set>
 #include <string>
@@ -82,8 +83,8 @@ public:
 		// not free
 		_Flags&=~NL3D_CTILE_FREE_FLAG;
 
-		// set filename
-		_BitmapName[bitmapType]=name;
+		// set filename, replacing \\ by / if needed
+		_BitmapName[bitmapType] = NLMISC::CPath::standardizePath(name, false);
 	}
 
 	std::string getFileName (TBitmap bitmapType) const
