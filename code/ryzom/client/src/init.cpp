@@ -616,6 +616,63 @@ void initStereoDisplayDevice()
 	IStereoDisplay::releaseUnusedLibraries();
 }
 
+static void addPaths(IProgressCallback &progress, const std::vector<std::string> &paths, bool recurse)
+{
+	// all prefixes for paths
+	std::vector<std::string> directoryPrefixes;
+
+	// current directory has priority everywhere
+	directoryPrefixes.push_back("");
+
+#if defined(NL_OS_WINDOWS)
+	char path[MAX_PATH];
+	GetModuleFileNameA(GetModuleHandleA(NULL), path, MAX_PATH);
+
+	// check in same directory as executable
+	directoryPrefixes.push_back(CPath::standardizePath(CFile::getPath(path)));
+#elif defined(NL_OS_MAC)
+	// check in bundle (Installer)
+	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/Contents/Resources"));
+
+	// check in same directory as bundle (Steam)
+	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath());
+#elif defined(NL_OS_UNIX)
+	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
+#endif
+
+	float total = (float)(directoryPrefixes.size() * paths.size());
+	float current = 0.f, next = 0.f;
+
+	for (uint j = 0; j < directoryPrefixes.size(); j++)
+	{
+		std::string directoryPrefix = directoryPrefixes[j];
+
+		for (uint i = 0; i < paths.size(); i++)
+		{
+			std::string directory = NLMISC::expandEnvironmentVariables(paths[i]);
+
+			// only prepend default directory if path is relative
+			if (!directory.empty() && !directoryPrefix.empty() && !CPath::isAbsolutePath(directory))
+			{
+					directory = directoryPrefix + directory;
+			}
+
+			// update next progress value
+			next += 1.f;
+
+			progress.progress (current/total);
+			progress.pushCropedValues (current/total, next/total);
+
+			// next is current value
+			current = next;
+
+			CPath::addSearchPath(directory, recurse, false, &progress);
+
+			progress.popCropedValues ();
+		}
+	}
+}
+
 void addSearchPaths(IProgressCallback &progress)
 {
 	// Add search path of UI addon. Allow only a subset of files.
@@ -625,54 +682,13 @@ void addSearchPaths(IProgressCallback &progress)
 	// Add Standard search paths
 	{
 		H_AUTO(InitRZAddSearchPath2)
-		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
-		{
-			progress.progress ((float)i/(float)ClientCfg.DataPath.size());
-			progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
 
-			CPath::addSearchPath(ClientCfg.DataPath[i], true, false, &progress);
-
-			progress.popCropedValues ();
-		}
+		addPaths(progress, ClientCfg.DataPath, true);
 
 		CPath::loadRemappedFiles("remap_files.csv");
 	}
 
-	for (uint i = 0; i < ClientCfg.DataPathNoRecurse.size(); i++)
-	{
-		progress.progress ((float)i/(float)ClientCfg.DataPathNoRecurse.size());
-		progress.pushCropedValues ((float)i/(float)ClientCfg.DataPathNoRecurse.size(), (float)(i+1)/(float)ClientCfg.DataPathNoRecurse.size());
-
-		CPath::addSearchPath(ClientCfg.DataPathNoRecurse[i], false, false, &progress);
-
-		progress.popCropedValues ();
-	}
-
-	std::string defaultDirectory;
-
-#ifdef NL_OS_MAC
-	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX)
-	if (CFile::isDirectory(getRyzomSharePrefix())) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
-#endif
-
-	// add in last position, a specific possibly read only directory
-	if (!defaultDirectory.empty())
-	{
-		for (uint i = 0; i < ClientCfg.DataPath.size(); i++)
-		{
-			// don't prepend default directory if path is absolute
-			if (!ClientCfg.DataPath[i].empty() && ClientCfg.DataPath[i][0] != '/')
-			{
-				progress.progress ((float)i/(float)ClientCfg.DataPath.size());
-				progress.pushCropedValues ((float)i/(float)ClientCfg.DataPath.size(), (float)(i+1)/(float)ClientCfg.DataPath.size());
-
-				CPath::addSearchPath(defaultDirectory + ClientCfg.DataPath[i], true, false, &progress);
-
-				progress.popCropedValues ();
-			}
-		}
-	}
+	addPaths(progress, ClientCfg.DataPathNoRecurse, false);
 }
 
 void addPreDataPaths(NLMISC::IProgressCallback &progress)
@@ -681,43 +697,9 @@ void addPreDataPaths(NLMISC::IProgressCallback &progress)
 
 	H_AUTO(InitRZAddSearchPaths);
 
-	for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
-	{
-		progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
-		progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
-
-		CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false, &progress);
-
-		progress.popCropedValues ();
-	}
+	addPaths(progress, ClientCfg.PreDataPath, true);
 
 	//nlinfo ("PROFILE: %d seconds for Add search paths Predata", (uint32)(ryzomGetLocalTime ()-initPaths)/1000);
-
-	std::string defaultDirectory;
-
-#ifdef NL_OS_MAC
-	defaultDirectory = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources");
-#elif defined(NL_OS_UNIX)
-	if (CFile::isDirectory(getRyzomSharePrefix())) defaultDirectory = CPath::standardizePath(getRyzomSharePrefix());
-#endif
-
-	// add in last position, a specific possibly read only directory
-	if (!defaultDirectory.empty())
-	{
-		for (uint i = 0; i < ClientCfg.PreDataPath.size(); i++)
-		{
-			// don't prepend default directory if path is absolute
-			if (!ClientCfg.PreDataPath[i].empty() && ClientCfg.PreDataPath[i][0] != '/')
-			{
-				progress.progress ((float)i/(float)ClientCfg.PreDataPath.size());
-				progress.pushCropedValues ((float)i/(float)ClientCfg.PreDataPath.size(), (float)(i+1)/(float)ClientCfg.PreDataPath.size());
-
-				CPath::addSearchPath(defaultDirectory + ClientCfg.PreDataPath[i], true, false, &progress);
-
-				progress.popCropedValues ();
-			}
-		}
-	}
 }
 
 static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
@@ -726,7 +708,7 @@ static void addPackedSheetUpdatePaths(NLMISC::IProgressCallback &progress)
 	{
 		progress.progress((float)i/(float)ClientCfg.UpdatePackedSheetPath.size());
 		progress.pushCropedValues ((float)i/(float)ClientCfg.UpdatePackedSheetPath.size(), (float)(i+1)/(float)ClientCfg.UpdatePackedSheetPath.size());
-		CPath::addSearchPath(ClientCfg.UpdatePackedSheetPath[i], true, false, &progress);
+		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(ClientCfg.UpdatePackedSheetPath[i]), true, false, &progress);
 		progress.popCropedValues();
 	}
 }
