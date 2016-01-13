@@ -50,16 +50,6 @@ bool recompute (const char* f1, const char* f2)
 	return buf1.st_mtime > buf2.st_mtime;
 }
 
-// Return true if the file exist
-bool isFileExist (const char* sName)
-{
-	FILE *pFile=fopen (sName, "rb");
-	if (!pFile)
-		return false;
-	fclose (pFile);
-	return true;
-}
-
 // Fill tile far pixel with this bitmap
 bool fillTileFar (uint tile, const char* sName, CTileFarBank::TFarType type, CTileFarBank& farBank, bool _256, uint8 rotate)
 {
@@ -287,8 +277,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::diffuse)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::diffuse), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
@@ -318,8 +308,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::additive)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::additive);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::additive), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
@@ -349,8 +339,8 @@ int main (int argc, char **argv)
 						if (pTile->getRelativeFileName (CTile::alpha)!="")
 						{
 							// File exist ?
-							string tileFilename = bank.getAbsPath()+pTile->getRelativeFileName (CTile::alpha);
-							if (isFileExist (tileFilename.c_str()))
+							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::alpha), false);
+							if (CFile::fileExists(tileFilename))
 							{
 								// Recompute it?
 								if (recompute (tileFilename.c_str(), argv[2])||forceRecomputation)
