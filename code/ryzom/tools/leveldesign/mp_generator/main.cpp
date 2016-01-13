@@ -1472,6 +1472,7 @@ void SetupDirectories()
 		
 	data.readFromFile( "raw_material_generation.cfg" );
 
+	// beurk :s Use CConfigFile instead
 	LEVEL_DESIGN_PATH = data.splitFrom( "LevelDesignPath = \"").splitTo( "\"" );
 	TRANSLATION_PATH = data.splitFrom( "TranslationPath = \"" ).splitTo( "\"" );
 
