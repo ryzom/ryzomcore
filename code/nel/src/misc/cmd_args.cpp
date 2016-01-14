@@ -321,17 +321,17 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 		}
 	}
 
-	// process help if requested or if required arguments are missing
-	if (haveLongArg("help") || (needRequiredArg() && !haveRequiredArg()))
-	{
-		displayHelp();
-		return false;
-	}
-
 	// process version
 	if (haveLongArg("version"))
 	{
 		displayVersion();
+		return false;
+	}
+
+	// process help if requested or if required arguments are missing
+	if (haveLongArg("help") || (needRequiredArg() && !haveRequiredArg()))
+	{
+		displayHelp();
 		return false;
 	}
 
