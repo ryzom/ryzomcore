@@ -19,7 +19,6 @@
 #include "nel/misc/bitmap.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/file.h"
-#include "nel/misc/system_info.h"
 
 // Define this to force all bitmap white (debug)
 // #define NEL_ALL_BITMAP_WHITE
@@ -477,7 +476,7 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	uint32 size = 0;
 	f.serial(size); // size in Bytes of header(without "DDS")
-	 uint32 * _DDSSurfaceDesc = new uint32[size];
+	uint32 * _DDSSurfaceDesc = new uint32[size];
 	_DDSSurfaceDesc[0]= size;
 
 #ifdef NL_LITTLE_ENDIAN
@@ -508,6 +507,7 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	// If no mipmap.
 	if(_MipMapCount==0)
 		_MipMapCount=1;
+
 	switch (_DDSSurfaceDesc[20])
 	{
 	case DXTC1HEADER:
@@ -2761,7 +2761,6 @@ bool CBitmap::writeTGA( NLMISC::IStream &f, uint32 d, bool upsideDown)
 
 	for(y=0; y<(sint32)height; y++)
 	{
-
 		uint32 k=0;
 		if (PixelFormat == Alpha)
 		{
@@ -3569,7 +3568,7 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		f.serial(imageType);
 		if(imageType!=2 && imageType!=3 && imageType!=10 && imageType!=11)
 		{
-			nlwarning("Invalid TGA format, type %u in not supported (must be 2,3,10 or 11)", imageType);
+			nlwarning("Invalid TGA format, type %u in not supported (must be 2, 3, 10 or 11)", imageType);
 			return;
 		}
 		f.serial(tgaOrigin);

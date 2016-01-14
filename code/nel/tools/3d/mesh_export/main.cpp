@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 		if (settings.DestinationDirectoryPath.empty())
 			settings.DestinationDirectoryPath = filePath + "_export";
 
-		settings.DestinationDirectoryPath = NLMISC::standardizePath(settings.DestinationDirectoryPath);
+		settings.DestinationDirectoryPath = NLMISC::CPath::standardizePath(settings.DestinationDirectoryPath);
 
 		if (args.haveLongArg("dependlog"))
 			settings.ToolDependLog = args.getLongArg("dependlog").front();
