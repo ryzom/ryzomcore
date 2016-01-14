@@ -3193,15 +3193,15 @@ uigcChatColor	[ЧАТ]
 
 // HASH_VALUE 4B01AC26C830BC29
 // INDEX 797
-uigcEnglish	[Английский]
+uigcEnglish	[ENGLISH]
 
 // HASH_VALUE 4C5024185050140C
 // INDEX 798
-uigcFrancais	[Французский]
+uigcFrancais	[FRANCAIS]
 
 // HASH_VALUE 8D229C20C911A81F
 // INDEX 799
-uigcDeutch	[Немецкий]
+uigcDeutch	[DEUTSCH]
 
 // HASH_VALUE 0912144D9193DC2A
 // INDEX 800
@@ -3209,7 +3209,7 @@ uigcRussian	[РУССКИЙ]
 
 // HASH_VALUE CBC1A432CBD2FC37
 // INDEX 801
-uigcSpanish	[ИСПАНСКИЙ]
+uigcSpanish	[ESPANOL]
 
 /* OLD VALUE : [??? ????, ????? ????????? ???????? ? ????, ?????????? ????????????? ??????] */
 // HASH_VALUE D72E51D69923FABB
