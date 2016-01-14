@@ -24,54 +24,63 @@
 #include <nel/3d/register_3d.h>
 #include <nel/3d/scene.h>
 
-int printHelp(const NLMISC::CCmdArgs &args)
-{
-	printf("NeL Mesh Export\n");
-	return EXIT_SUCCESS;
-}
-
 int main(int argc, char *argv[])
 {
 	NLMISC::CApplicationContext app;
 
 	NLMISC::CCmdArgs args;
-	args.setArgs(argc, (const char **)argv);
 
-	if (args.getArgs().size() == 1
-		|| args.haveArg('h')
-		|| args.haveLongArg("help"))
-		return printHelp(args);
+	args.addArg("d", "dst", "destination", "Destination directory path");
+	args.addArg("", "dependlog", "log", "Dependencies log path");
+	args.addArg("", "errorlog", "log", "Errors log path");
+	args.addArg("filename", "Filename of 3D model to convert");
 
-	const NLMISC::CSString &filePath = args.getArgs().back();
-	if (!NLMISC::CFile::fileExists(filePath))
-	{
-		printHelp(args);
-		nlerror("File '%s' does not exist", filePath.c_str());
-		return EXIT_FAILURE;
-	}
+	if (!args.parse(argc, argv)) return EXIT_SUCCESS;
 
-	CMeshUtilsSettings settings;
-	settings.SourceFilePath = filePath;
-	
-	if (args.haveArg('d'))
-		settings.DestinationDirectoryPath = args.getArg('d');
-	if (settings.DestinationDirectoryPath.empty())
-		settings.DestinationDirectoryPath = args.getLongArg("dst");
-	if (settings.DestinationDirectoryPath.empty())
-		settings.DestinationDirectoryPath = filePath + "_export";
-	settings.DestinationDirectoryPath += "/";
-
-	settings.ToolDependLog = args.getLongArg("dependlog");
-	if (settings.ToolDependLog.empty())
-		settings.ToolDependLog = settings.DestinationDirectoryPath + "depend.log";
-	settings.ToolErrorLog = args.getLongArg("errorlog");
-	if (settings.ToolErrorLog.empty())
-		settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
+	const std::vector<std::string> &filePathes = args.getRequiredArg();
 
 	NL3D::CScene::registerBasics();
 	NL3D::registerSerial3d();
 
-	return exportScene(settings);
+	sint res = 0;
+	
+	for(uint i = 0; i < filePathes.size(); ++i)
+	{
+		std::string filePath = filePathes[i];
+
+		if (!NLMISC::CFile::fileExists(filePath))
+		{
+			nlerror("File '%s' does not exist", filePath.c_str());
+			return EXIT_FAILURE;
+		}
+
+		CMeshUtilsSettings settings;
+		settings.SourceFilePath = filePath;
+
+		if (args.haveArg("d"))
+			settings.DestinationDirectoryPath = args.getArg("d").front();
+
+		if (settings.DestinationDirectoryPath.empty())
+			settings.DestinationDirectoryPath = filePath + "_export";
+
+		settings.DestinationDirectoryPath = NLMISC::standardizePath(settings.DestinationDirectoryPath);
+
+		if (args.haveLongArg("dependlog"))
+			settings.ToolDependLog = args.getLongArg("dependlog").front();
+
+		if (settings.ToolDependLog.empty())
+			settings.ToolDependLog = settings.DestinationDirectoryPath + "depend.log";
+
+		if (args.haveLongArg("errorlog"))
+			settings.ToolErrorLog = args.getLongArg("errorlog").front();
+
+		if (settings.ToolErrorLog.empty())
+			settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
+
+		res = exportScene(settings);
+	}
+
+	return res;
 }
 
 /* end of file */

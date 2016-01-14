@@ -83,7 +83,10 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	CategoryStackedWidget->addWidget( new CSoundSettingsWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CSysInfoWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CSysInfoOpenGLWidget( CategoryStackedWidget ) );
+
+#ifdef Q_OS_WIN
 	CategoryStackedWidget->addWidget( new CSysInfoD3DWidget( CategoryStackedWidget ) );
+#endif
 
 	for( sint32 i = 0; i < CategoryStackedWidget->count();  i++ )
 	{
