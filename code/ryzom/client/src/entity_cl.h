@@ -86,10 +86,9 @@ namespace NL3D
 
 class CEntitySheet;
 class CEntityCL;
+class CAttackInfo;
 
 class CItemSheet;
-
-class CPhysicalDamage;
 
 namespace NLMISC{
 class CCDBNodeLeaf;
@@ -586,7 +585,7 @@ public:
 	virtual void impact(uint /* impactType */, uint /* type */, uint /* id */, uint /* intensity */) {}
 	/** Try to play a melee impact on this entity.
 	  */
-	virtual void meleeImpact(const CPhysicalDamage &/* damage */) {}
+	virtual void meleeImpact(const CAttackInfo &/* attack */) {}
 	/** Play the magic impact on the entity
 	 * \param type : type of the impact (host/good/neutral).
 	 * \param intensity : intensity of the impact.
