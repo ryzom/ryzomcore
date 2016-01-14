@@ -635,7 +635,7 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/Contents/Resources"));
 
 	// check in same directory as bundle (Steam)
-	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath()));
+	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/.."));
 #elif defined(NL_OS_UNIX)
 	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
 #endif
