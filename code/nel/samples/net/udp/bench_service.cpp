@@ -299,7 +299,7 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 	}
 	else
 	{
-		fprintf (fp, "%"NL_I64"d\t%"NL_I64"d\t%"NL_I64"d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
+		fprintf (fp, "%" NL_I64 "d\t%" NL_I64 "d\t%" NL_I64 "d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
 		fclose (fp);
 	}
 }
