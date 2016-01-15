@@ -945,7 +945,7 @@ CEvalNumExpr::TReturnState CEvalNumExpr::evalExpression (double &finalResult, TT
 				value = (double)(uint)((floor (value+0.5)==0.0));
 				break;
 			case Tilde:
-				value = (double)~((uint)floor (value+0.5));
+				value = (double)(~((uint)floor (value+0.5)) & std::numeric_limits<uint>::max());
 				break;
 			case Minus:
 				value = -value;

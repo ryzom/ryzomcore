@@ -864,18 +864,18 @@ public:
 					else if(type == "int")
 					{
 						if (!IsBadReadPtr(addr,sizeof(int)))
-							sprintf (tmp, "%d", *addr);
+							sprintf (tmp, "%p", (void *)(*addr));
 					}
 					else if (type == "char")
 					{
 						if (!IsBadReadPtr(addr,sizeof(char)))
 							if (nlisprint(*addr))
 							{
-								sprintf (tmp, "'%c'", *addr);
+								sprintf (tmp, "'%c'", (char)((*addr) & 0xFF));
 							}
 							else
 							{
-								sprintf (tmp, "%d", *addr);
+								sprintf (tmp, "%p", (void *)(*addr));
 							}
 					}
 					else if (type == "char*")
@@ -932,7 +932,7 @@ public:
 							if(*addr == 0)
 								sprintf (tmp, "<NULL>");
 							else
-								sprintf (tmp, "0x%p", *addr);
+								sprintf (tmp, "0x%p", (void *)*addr);
 						}
 					}
 
