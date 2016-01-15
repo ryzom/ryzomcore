@@ -67,6 +67,11 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
     ADD_SUBDIRECTORY(object_viewer_widget)
   ENDIF()
 
+  IF(WITH_QT5)
+    ADD_SUBDIRECTORY(shared_widgets)
+    ADD_SUBDIRECTORY(panoply_preview)
+  ENDIF()
+
   IF(WITH_NEL_TOOLS)
     FIND_PACKAGE(Squish)
   ENDIF()
