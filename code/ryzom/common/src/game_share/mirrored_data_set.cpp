@@ -1550,12 +1550,12 @@ void				CMirroredDataSet::displayPropValue( const std::string& propName, const T
 			}
 		case TypeUint64:
 			{
-				displayValueLine( propName, "%"NL_I64"u", "U64", (uint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%" NL_I64 "u", "U64", (uint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeSint64:
 			{
-				displayValueLine( propName, "%"NL_I64"d", "S64", (sint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%" NL_I64 "d", "S64", (sint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeFloat:
@@ -1635,12 +1635,12 @@ void				CMirroredDataSet::setValueFromString( const TDataSetRow& entityIndex, TP
 			}
 		case TypeUint64:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%"NL_I64"u", (uint64*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "u", (uint64*)NULL );
 				break;
 			}
 		case TypeSint64:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%"NL_I64"d", (sint64*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "d", (sint64*)NULL );
 				break;
 			}
 		case TypeFloat:
@@ -1726,12 +1726,12 @@ void				CMirroredDataSet::getValueToString( const TDataSetRow& entityIndex, TPro
 			}
 		case TypeUint64:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%"NL_I64"u", (uint64*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "u", (uint64*)NULL );
 				break;
 			}
 		case TypeSint64:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%"NL_I64"d", (sint64*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "d", (sint64*)NULL );
 				break;
 			}
 		case TypeFloat:

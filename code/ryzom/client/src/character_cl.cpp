@@ -8399,7 +8399,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	if(isPlayer() || isUser())
 	{
 		SPropVisualA visualA = *(SPropVisualA *)(&prop);
-		TextContext->printfAt(x, y, "VPA: %"NL_I64"X : Chest(%d,%d) Legs(%d,%d) Arms(%d,%d) Hat(%d,%d) RH(%d) LH(%d)", prop,
+		TextContext->printfAt(x, y, "VPA: %" NL_I64 "X : Chest(%d,%d) Legs(%d,%d) Arms(%d,%d) Hat(%d,%d) RH(%d) LH(%d)", prop,
 			(uint)visualA.PropertySubData.JacketModel,	(uint)visualA.PropertySubData.JacketColor,
 			(uint)visualA.PropertySubData.TrouserModel,	(uint)visualA.PropertySubData.TrouserColor,
 			(uint)visualA.PropertySubData.ArmModel,		(uint)visualA.PropertySubData.ArmColor,
@@ -8408,29 +8408,29 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 			(uint)visualA.PropertySubData.WeaponLeftHand);
 	}
 	else
-		TextContext->printfAt(x, y, "VPA: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPA: %" NL_I64 "X", prop);
 	y += lineStep;
 	// VPB
 	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualB visualB = *(SPropVisualB *)(&prop);
-		TextContext->printfAt(x, y, "VPB: %"NL_I64"X : Hands(%d,%d) Feet(%d,%d).", prop,
+		TextContext->printfAt(x, y, "VPB: %" NL_I64 "X : Hands(%d,%d) Feet(%d,%d).", prop,
 			(uint)visualB.PropertySubData.HandsModel,	(uint)visualB.PropertySubData.HandsColor,
 			(uint)visualB.PropertySubData.FeetModel,	(uint)visualB.PropertySubData.FeetColor);
 	}
 	else
-		TextContext->printfAt(x, y, "VPB: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPB: %" NL_I64 "X", prop);
 	y += lineStep;
 	// VPC
 	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualC visualC = *(SPropVisualC *)(&prop);
-		TextContext->printfAt(x, y, "VPC: %"NL_I64"X : EyesColor(%d) Tattoo(%d).", prop, visualC.PropertySubData.EyesColor, visualC.PropertySubData.Tattoo);
+		TextContext->printfAt(x, y, "VPC: %" NL_I64 "X : EyesColor(%d) Tattoo(%d).", prop, visualC.PropertySubData.EyesColor, visualC.PropertySubData.Tattoo);
 	}
 	else
-		TextContext->printfAt(x, y, "VPC: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPC: %" NL_I64 "X", prop);
 	y += lineStep;
 }// displayDebug //
 
