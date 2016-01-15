@@ -263,8 +263,8 @@ void CPanoplyPreview::goPushed(bool)
 			uint32 depth = m_ColorThread->MaskBitmap.load(is);
 			if (depth == 0 || m_ColorThread->MaskBitmap.getPixels().empty())
 				throw NLMISC::Exception("Failed to load bitmap '%s'", m_MaskFile.toLocal8Bit().data());
-			if (m_ColorThread->MaskBitmap.PixelFormat != NLMISC::CBitmap::RGBA)
-				m_ColorThread->MaskBitmap.convertToType(NLMISC::CBitmap::RGBA);
+			if (m_ColorThread->MaskBitmap.PixelFormat != NLMISC::CBitmap::Luminance)
+				m_ColorThread->MaskBitmap.convertToType(NLMISC::CBitmap::Luminance);
 		}
 		{
 			m_ColorThread->BitmapsOk = true;
