@@ -352,7 +352,7 @@ public:
 	}
 };
 
-#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80
+#if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80 && NL_COMP_VC_VERSION < 140
 
 // This operator only purpose is to compare with NULL value
 template <class T>
