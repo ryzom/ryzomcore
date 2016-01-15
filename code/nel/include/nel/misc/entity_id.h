@@ -354,7 +354,7 @@ public:
 		}
 		else
 		{
-			nlerror ("CEntityId looped (max was %"NL_I64"d", MaxEntityId);
+			nlerror ("CEntityId looped (max was %" NL_I64 "d", MaxEntityId);
 		}
 		return *this;
 	}
@@ -487,7 +487,7 @@ public:
 		uint		creatorId;
 		uint		dynamicId;
 
-		if (sscanf(str, "(%"NL_I64"x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
+		if (sscanf(str, "(%" NL_I64 "x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
 		{
 			*this = Unknown;
 			return;

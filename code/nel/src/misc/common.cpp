@@ -380,7 +380,7 @@ string bytesToHumanReadable (uint64 bytes)
 		div++;
 		res = newres;
 	}
-	return toString ("%"NL_I64"u%s", res, divTable[div]);
+	return toString ("%" NL_I64 "u%s", res, divTable[div]);
 }
 
 uint32 humanReadableToBytes (const string &str)

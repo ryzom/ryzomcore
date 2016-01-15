@@ -791,7 +791,7 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 		while (atIt!=atItEnd)
 		{
 			uint64 delta= (*atIt-IFileAccessLogStartTime);
-			log.display("%"NL_I64"u,",delta);
+			log.display("%" NL_I64 "u,",delta);
 			++atIt;
 		}
 		log.displayNL("");

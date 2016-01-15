@@ -525,7 +525,13 @@ MACRO(NL_SETUP_BUILD)
     # Ignore default include paths
     ADD_PLATFORM_FLAGS("/X")
 
-    IF(MSVC12)
+    IF(MSVC14)
+      ADD_PLATFORM_FLAGS("/Gy- /MP")
+      # /Ox is working with VC++ 2015, but custom optimizations don't exist
+      SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
+      # without inlining it's unusable, use custom optimizations again
+      SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
+    ELSEIF(MSVC12)
       ADD_PLATFORM_FLAGS("/Gy- /MP")
       # /Ox is working with VC++ 2013, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
@@ -557,7 +563,7 @@ MACRO(NL_SETUP_BUILD)
       SET(DEBUG_CFLAGS "/Od /Ob1 ${DEBUG_CFLAGS}")
     ELSE(MSVC12)
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
-    ENDIF(MSVC12)
+    ENDIF(MSVC14)
 
     ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /Zm1000 /wd4250")
 

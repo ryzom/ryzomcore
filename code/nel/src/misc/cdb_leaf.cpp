@@ -120,7 +120,7 @@ ICDBNode * CCDBNodeLeaf::getNode (const CTextId& id, bool /* bCreate */)
 //-----------------------------------------------
 void CCDBNodeLeaf::write( CTextId& id, FILE * f)
 {
-	fprintf(f,"%"NL_I64"d\t%s\n",_Property,id.toString().c_str());
+	fprintf(f,"%" NL_I64 "d\t%s\n",_Property,id.toString().c_str());
 } // write //
 
 //-----------------------------------------------
@@ -165,7 +165,7 @@ void CCDBNodeLeaf::readDelta(TGameCycle gc, CBitMemStream & f )
 		}
 		if ( verboseDatabase )
 		{
-			nlinfo( "CDB: Read value (%u bits) %"NL_I64"d", bits, _Property );
+			nlinfo( "CDB: Read value (%u bits) %" NL_I64 "d", bits, _Property );
 		}
 
 		// bkup the date of change
