@@ -100,7 +100,7 @@ void CCommandLog::doDisplay(const CLog::TDisplayInfo& args, const char *message)
 
 	std::string str = NLMISC::CWindowDisplayer::stringifyMessage(args, message);
 
-	tSigDisplay(color, str.substr(0, str.size() - 1).c_str());
+	emit tSigDisplay(color, QString::fromUtf8(str.substr(0, str.size() - 1).c_str()));
 }
 
 void CCommandLog::tSlotDisplay(const QColor &c, const QString &text)
@@ -115,9 +115,8 @@ void CCommandLog::returnPressed()
 	if (text.isEmpty())
 		return;
 
-	std::string cmd = text.toLocal8Bit().data();
-	execCommand(cmd);
-	if (m_Func) m_Func(cmd);
+	emit execCommand(text);
+	if (m_Func) m_Func(text.toUtf8().constData());
 
 	m_CommandInput->clear();
 }
@@ -148,10 +147,12 @@ void CCommandLogDisplayer::doDisplay(const NLMISC::CLog::TDisplayInfo& args, con
 	CCommandLog::doDisplay(args, message);
 }
 
-void CCommandLogDisplayer::execCommandLog(const std::string &cmd)
+void CCommandLogDisplayer::execCommandLog(const QString &cmd)
 {
-	m_Log.displayRawNL("> %s", cmd.c_str());
-	ICommand::execute(cmd, m_Log);
+	std::string str = cmd.toUtf8().constData();
+
+	m_Log.displayRawNL("> %s", str.c_str());
+	ICommand::execute(str, m_Log);
 }
 
 } /* namespace NLQT */

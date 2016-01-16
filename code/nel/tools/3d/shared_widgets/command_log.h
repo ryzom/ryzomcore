@@ -70,7 +70,7 @@ public:
 
 signals:
 	void tSigDisplay(const QColor &c, const QString &text);
-	void execCommand(const std::string &cmd);
+	void execCommand(const QString &cmd);
 
 private slots:
 	void returnPressed();
@@ -99,7 +99,7 @@ protected:
 	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
 
 private slots:
-	void execCommandLog(const std::string &cmd);
+	void execCommandLog(const QString &cmd);
 
 private:
 	NLMISC::CLog m_Log;
