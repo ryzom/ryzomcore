@@ -368,8 +368,8 @@ int extractNewSheetNames(int argc, char *argv[])
 		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(pathNoRecurse.asString(i)), false, false);
 	}
 
-	std::string leveldesignDataPath = NLMISC::expandEnvironmentVariables(leveldesignDataPathVar.asString());
-	
+	std::string leveldesignDataPath = CPath::standardizePath(NLMISC::expandEnvironmentVariables(leveldesignDataPathVar.asString()));
+
 	// init ligo config once
 	string ligoPath = CPath::lookup(NLMISC::expandEnvironmentVariables(ligoClassFile.asString()), true, true);
 	LigoConfig.readPrimitiveClass(ligoPath.c_str(), false);
@@ -395,7 +395,7 @@ int extractNewSheetNames(int argc, char *argv[])
 	{
 		CSheetWordListBuilder	builder;
 		builder.SheetExt= sheetDefs[i*4+2];
-		builder.SheetPath= CPath::standardizePath(leveldesignDataPath) + sheetDefs[i*4+3];
+		builder.SheetPath= leveldesignDataPath + sheetDefs[i*4+3];
 		extractNewWords(sheetDefs[i*4+0], sheetDefs[i*4+1], builder);
 	}
 
@@ -403,7 +403,7 @@ int extractNewSheetNames(int argc, char *argv[])
 	{
 		// build place names
 		CRegionPrimWordListBuilder	builder;
-		builder.PrimPath= leveldesignDataPath;
+		builder.PrimPath= leveldesignDataPath + "primitives";
 		builder.PrimFilter.push_back("region_*.primitive");
 		builder.PrimFilter.push_back("indoors_*.primitive");
 		extractNewWords("work/place_words_wk.txt", "placeId", builder);
