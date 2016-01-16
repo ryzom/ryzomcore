@@ -44,12 +44,18 @@ CHECK_OUT_OF_SOURCE()
 # To be able to specify a different deployment target on Mac OS X :
 # export MACOSX_DEPLOYMENT_TARGET=10.6
 
+IF(CMAKE_VERSION VERSION_GREATER "2.8.10")
+  STRING(TIMESTAMP CURRENT_YEAR "%Y")
+ELSE()
+  SET(CURRENT_YEAR "2016")
+ENDIF()
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 0)
 SET(NL_VERSION_MINOR 12)
 SET(NL_VERSION_PATCH 0)
-SET(YEAR "2004-2015")
+SET(YEAR "2004-${CURRENT_YEAR}")
 SET(AUTHOR "Winchgate and The Ryzom Core Community")
 
 #-----------------------------------------------------------------------------
