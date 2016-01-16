@@ -7,7 +7,7 @@ compiler:
 os:
     - linux
 env:
-    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off"
+    - CMAKE_BUILD_OPTIONS="-DCPPTEST_LIBRARY_DEBUG:STRING=/usr/lib/libcpptest.so"
 
 addons:
     apt:
@@ -26,6 +26,7 @@ before_script:
     - cmake --version
 
 script:
+    - cat build/CMakeCache.txt
     - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
     - cmake --build build -- -j 2
 
