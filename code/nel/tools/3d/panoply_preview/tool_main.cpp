@@ -26,6 +26,12 @@
 #endif
 
 // Qt includes
+#include <qglobal.h>
+
+#ifdef Q_COMPILER_RVALUE_REFS
+#undef Q_COMPILER_RVALUE_REFS
+#endif
+
 #include <QApplication>
 #include <QtCore/QMap>
 #include <QtCore/qdebug.h>

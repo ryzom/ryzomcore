@@ -34,6 +34,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // STL includes
 
 // Qt includes
+#include <qglobal.h>
+
+#ifdef Q_COMPILER_RVALUE_REFS
+#undef Q_COMPILER_RVALUE_REFS
+#endif
+
 #include <QWidget>
 #include <QTextEdit>
 #include <QLineEdit>
@@ -64,7 +70,7 @@ public:
 
 signals:
 	void tSigDisplay(const QColor &c, const QString &text);
-	void execCommand(const std::string &cmd);
+	void execCommand(const QString &cmd);
 
 private slots:
 	void returnPressed();
@@ -93,7 +99,7 @@ protected:
 	virtual void doDisplay(const NLMISC::CLog::TDisplayInfo& args, const char *message);
 
 private slots:
-	void execCommandLog(const std::string &cmd);
+	void execCommandLog(const QString &cmd);
 
 private:
 	NLMISC::CLog m_Log;
