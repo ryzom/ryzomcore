@@ -52,6 +52,7 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 			}
 		}
 	}
+
 	if (url.empty())
 	{
 		// not found
