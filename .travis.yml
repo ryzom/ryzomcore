@@ -32,7 +32,7 @@ script:
 notifications:
   irc:
     channels:
-	  - "chat.freenode.net#ryzom"
+      - "chat.freenode.net#ryzom"
     template:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
       - "Description : %{commit_message}"
