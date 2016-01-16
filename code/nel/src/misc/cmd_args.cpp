@@ -70,7 +70,7 @@ void CCmdArgs::addArg(const std::string &helpName, const std::string &helpDescri
 bool CCmdArgs::haveArg(const std::string &argName) const
 {
 	// process each argument
-	for(uint i = 0; i < _Args.size(); i)
+	for(uint i = 0; i < _Args.size(); ++i)
 	{
 		const TArg &arg = _Args[i];
 

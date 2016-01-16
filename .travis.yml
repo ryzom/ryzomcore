@@ -30,7 +30,9 @@ script:
     - cmake --build build -- -j 2
 
 notifications:
-  irc: "chat.freenode.net#ryzom"
+  irc:
+    channels:
+      - "chat.freenode.net#ryzom"
     template:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
       - "Description : %{commit_message}"

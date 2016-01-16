@@ -59,19 +59,19 @@ struct CSheetWordListBuilder : public IWordListBuilder
 	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
 	{
 		SheetExt= toLower(SheetExt);
-		
+
 		// verify the directory is correct
 		if(!CFile::isDirectory(SheetPath))
 		{
 			nlwarning("Error: Directory '%s' not found. '%s' Aborted", SheetPath.c_str(), workSheetFileName.c_str());
 			return false;
 		}
-		
+
 		// list all files.
 		std::vector<string>		allFiles;
 		allFiles.reserve(100000);
 		CPath::getPathContent(SheetPath, true, false, true, allFiles, NULL);
-		
+
 		// Keep only the extension we want, and remove "_" (parent)
 		allWords.clear();
 		allWords.reserve(allFiles.size());
@@ -91,7 +91,7 @@ struct CSheetWordListBuilder : public IWordListBuilder
 
 		return true;
 	}
-	
+
 };
 
 
@@ -103,7 +103,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 {
 	string			PrimPath;
 	vector<string>	PrimFilter;
-	
+
 	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
 	{
 		// verify the directory is correct
@@ -112,12 +112,12 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 			nlwarning("Error: Directory '%s' not found. '%s' Aborted", PrimPath.c_str(), workSheetFileName.c_str());
 			return false;
 		}
-		
+
 		// list all files.
 		std::vector<string>		allFiles;
 		allFiles.reserve(100000);
 		CPath::getPathContent(PrimPath, true, false, true, allFiles, NULL);
-		
+
 		// parse all primitive that match the filter
 		allWords.clear();
 		allWords.reserve(100000);
@@ -146,11 +146,11 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 				return false;
 			}
 			CPrimitiveContext::instance().CurrentPrimitive = NULL;
-			
+
 			// For all primitives of interest
-			const char	*listClass[]= {"continent", "region", "place", "stable", 
+			const char	*listClass[]= {"continent", "region", "place", "stable",
 				"teleport_destination", "room_template"};
-			const char	*listProp[]= {"name", "name", "name", "name", 
+			const char	*listProp[]= {"name", "name", "name", "name",
 				"place_name", "place_name"};
 			const uint	numListClass= sizeof(listClass)/sizeof(listClass[0]);
 			const uint	numListProp= sizeof(listProp)/sizeof(listProp[0]);
@@ -178,7 +178,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 				}
 			}
 		}
-		
+
 		return true;
 	}
 };
@@ -199,7 +199,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 	}
 	// get the key column index
 	uint	keyColIndex = 0;
-	
+
 	if(!workSheet.findCol(columnId, keyColIndex))
 	{
 		nlwarning("Error: Don't find the column '%s'. '%s' Aborted", columnId.c_str(), workSheetFileName.c_str());
@@ -220,7 +220,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 		ucstring	key= workSheetLwr.getData(i, keyColIndex);
 		workSheetLwr.setData(i, keyColIndex, toLower(key));
 	}
-	
+
 
 	// **** List all words with the builder given
 	std::vector<string>		allWords;
@@ -247,7 +247,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 			workSheet.resize(workSheet.size()+1);
 			workSheet.setData(rowIdx, keyColIndex, keyName);
 			workSheet.setData(rowIdx, nameColIndex, string("<GEN>")+keyName);
-			
+
 			nbAdd++;
 		}
 	}
@@ -284,7 +284,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 			{
 				nbRemove++;
 				// log
-				NLMISC::InfoLog->displayRawNL("'%s': '%s' entry erased at line '%d'.", workSheetFileName.c_str(), 
+				NLMISC::InfoLog->displayRawNL("'%s': '%s' entry erased at line '%d'.", workSheetFileName.c_str(),
 					keyStr.c_str(), i);
 			}
 		}
@@ -343,12 +343,12 @@ int extractNewSheetNames(int argc, char *argv[])
 			return -1;
 		}
 	}
-	
+
 	// **** avoid some flood
 	NLMISC::createDebug();
 	NLMISC::DebugLog->addNegativeFilter("numCol changed to");
 	NLMISC::InfoLog->addNegativeFilter("CPath::addSearchPath");
-	
+
 
 	// **** read the configuration file
 	CConfigFile	cf;
@@ -368,21 +368,19 @@ int extractNewSheetNames(int argc, char *argv[])
 		CPath::addSearchPath(NLMISC::expandEnvironmentVariables(pathNoRecurse.asString(i)), false, false);
 	}
 
-	std::string leveldesignDataPath = NLMISC::expandEnvironmentVariables(leveldesignDataPathVar.asString());
-	
+	std::string leveldesignDataPath = CPath::standardizePath(NLMISC::expandEnvironmentVariables(leveldesignDataPathVar.asString()));
+
 	// init ligo config once
 	string ligoPath = CPath::lookup(NLMISC::expandEnvironmentVariables(ligoClassFile.asString()), true, true);
 	LigoConfig.readPrimitiveClass(ligoPath.c_str(), false);
 	NLLIGO::Register();
 	CPrimitiveContext::instance().CurrentLigoConfig = &LigoConfig;
-	
-	
-	
+
 	// **** Parse all the different type of sheets
 	const char	*sheetDefs[]=
 	{
-		// 1st is the name of the worksheet file. 
-		// 2nd is the Key column identifier. 
+		// 1st is the name of the worksheet file.
+		// 2nd is the Key column identifier.
 		// 3rd is the sheet extension
 		// 4th is the directory where to find new sheets
 		"work/item_words_wk.txt",		"item ID",		"sitem",		"leveldesign/game_element/sitem",
@@ -391,27 +389,25 @@ int extractNewSheetNames(int argc, char *argv[])
 		"work/sphrase_words_wk.txt",	"sphrase ID",	"sphrase",		"leveldesign/game_element/sphrase",
 	};
 	uint	numSheetDefs= sizeof(sheetDefs) / (4*sizeof(sheetDefs[0]));
-	
+
 	// For all different type of sheet
 	for(uint i=0;i<numSheetDefs;i++)
 	{
 		CSheetWordListBuilder	builder;
 		builder.SheetExt= sheetDefs[i*4+2];
-		builder.SheetPath= CPath::standardizePath(leveldesignDataPath) + sheetDefs[i*4+3];
+		builder.SheetPath= leveldesignDataPath + sheetDefs[i*4+3];
 		extractNewWords(sheetDefs[i*4+0], sheetDefs[i*4+1], builder);
 	}
-
 
 	// **** Parse place and region names
 	{
 		// build place names
 		CRegionPrimWordListBuilder	builder;
-		builder.PrimPath= leveldesignDataPath;
+		builder.PrimPath= leveldesignDataPath + "primitives";
 		builder.PrimFilter.push_back("region_*.primitive");
 		builder.PrimFilter.push_back("indoors_*.primitive");
 		extractNewWords("work/place_words_wk.txt", "placeId", builder);
 	}
-
 
 	return 0;
 }
