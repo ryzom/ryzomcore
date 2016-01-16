@@ -327,14 +327,14 @@ void COXml::serial(sint32 &b)
 
 void COXml::serial(uint64 &b)
 {
-	writenumber( b, "%"NL_I64"u", 20 );
+	writenumber( b, "%" NL_I64 "u", 20 );
 }
 
 // ***************************************************************************
 
 void COXml::serial(sint64 &b)
 {
-	writenumber( b, "%"NL_I64"d", 20 );
+	writenumber( b, "%" NL_I64 "d", 20 );
 }
 
 // ***************************************************************************

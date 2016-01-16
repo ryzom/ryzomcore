@@ -255,7 +255,7 @@ bool CCDBSynchronised::setProp(const string &name, sint64 value)
 	}
 
 #ifdef TRACE_SET_VALUE
-	nlinfo("Set value %"NL_I64"d for Prop %s", value,name.c_str() );
+	nlinfo("Set value %" NL_I64 "d for Prop %s", value,name.c_str() );
 #endif
 
 	// Set the property.

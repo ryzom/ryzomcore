@@ -838,7 +838,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			}
 		}
 
-		nlinfo ("SERVICE: Starting Service '%s' using NeL ("__DATE__" "__TIME__") compiled %s", _ShortName.c_str(), CompilationDate.c_str());
+		nlinfo ("SERVICE: Starting Service '%s' using NeL (" __DATE__ " " __TIME__ ") compiled %s", _ShortName.c_str(), CompilationDate.c_str());
 		nlinfo ("SERVICE: On OS: %s", CSystemInfo::getOS().c_str());
 
 		setExitStatus (EXIT_SUCCESS);
@@ -1802,7 +1802,7 @@ NLMISC_CATEGORISED_COMMAND(nel, serviceInfo, "display information about this ser
 
 	if(args.size() != 0) return false;
 
-	log.displayNL ("Service %s '%s' using NeL ("__DATE__" "__TIME__")", IService::getInstance()->getServiceLongName().c_str(), IService::getInstance()->getServiceUnifiedName().c_str());
+	log.displayNL ("Service %s '%s' using NeL (" __DATE__ " " __TIME__ ")", IService::getInstance()->getServiceLongName().c_str(), IService::getInstance()->getServiceUnifiedName().c_str());
 	log.displayNL ("Service listening port: %d", IService::getInstance()->ListeningPort.get());
 	log.displayNL ("Service running directory: '%s'", IService::getInstance()->RunningDirectory.c_str());
 	log.displayNL ("Service log directory: '%s'", IService::getInstance()->LogDirectory.c_str());

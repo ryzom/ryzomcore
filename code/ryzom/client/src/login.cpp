@@ -208,7 +208,7 @@ void createOptionalCatUI()
 	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 	if (pList == NULL)
 	{
-		nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
+		nlwarning("element " GROUP_LIST_CAT " not found probably bad login_main.xml");
 		return;
 	}
 
@@ -1085,7 +1085,7 @@ void initShardDisplay()
 	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 	if (pList == NULL)
 	{
-		nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
+		nlwarning("element " GROUP_LIST_SHARD " not found probably bad login_main.xml");
 		return;
 	}
 	/* // To test more servers
@@ -1303,7 +1303,7 @@ class CAHOnLogin : public IActionHandler
 		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 		if ((pGEBLog == NULL) || (pGEBPwd == NULL))
 		{
-			nlwarning("element "CTRL_EDITBOX_LOGIN" or "CTRL_EDITBOX_PASSWORD" not found probably bad login_main.xml");
+			nlwarning("element " CTRL_EDITBOX_LOGIN " or " CTRL_EDITBOX_PASSWORD " not found probably bad login_main.xml");
 			return;
 		}
 
@@ -1587,7 +1587,7 @@ void initPatch()
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 		if (pList == NULL)
 		{
-			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
+			nlwarning("element " GROUP_LIST_CAT " not found probably bad login_main.xml");
 			return;
 		}
 

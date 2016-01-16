@@ -385,7 +385,7 @@ void			CTextureDLM::releaseLightMap(uint x, uint y)
 
 	// Free this bit in the block.
 	nlassert(block->FreeSpace & mask);
-	block->FreeSpace&= ~mask;
+	block->FreeSpace&= (~mask & std::numeric_limits<uint>::max());
 
 
 	// Free the block if necessary.

@@ -2122,7 +2122,7 @@ public:
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
 		{
-			nlwarning("element "GROUP_LIST_MAINLAND" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_MAINLAND " not found probably bad outgame.xml");
 			return;
 		}
 
@@ -2315,7 +2315,7 @@ public:
 		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (List == NULL)
 		{
-			nlwarning("element "GROUP_LIST_KEYSET" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_KEYSET " not found probably bad outgame.xml");
 			return;
 		}
 

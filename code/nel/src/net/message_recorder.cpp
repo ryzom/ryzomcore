@@ -301,7 +301,7 @@ TNetworkEvent CMessageRecorder::checkNextOne( sint64 updatecounter )
 	TMessageRecord record;
 	if ( getNext( record, updatecounter ) )
 	{
-		nldebug( "MR: Check next one: %s at update %"NL_I64"u", EventToString(record.Event).c_str(), updatecounter );
+		nldebug( "MR: Check next one: %s at update %" NL_I64 "u", EventToString(record.Event).c_str(), updatecounter );
 		return record.Event;
 	}
 	else
@@ -330,7 +330,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 			{
 				// Found
 				event = (*ipr).Event;
-				nldebug( "MR: Connection attempt found at update %"NL_I64"u", (*ipr).UpdateCounter );
+				nldebug( "MR: Connection attempt found at update %" NL_I64 "u", (*ipr).UpdateCounter );
 				_ConnectionAttempts.erase( ipr );
 				return event;
 			}
@@ -348,7 +348,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 			if ( stored_addr == addr )
 			{
 				// Found
-				nldebug( "MR: Connection attempt found at update %"NL_I64"u", (*ipr).UpdateCounter );
+				nldebug( "MR: Connection attempt found at update %" NL_I64 "u", (*ipr).UpdateCounter );
 				_PreloadedRecords.erase( ipr );
 				return event;
 			}
@@ -367,7 +367,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 				if ( stored_addr == addr )
 				{
 					// Found
-					nldebug( "MR: Connection attempt found at update %"NL_I64"u", rec.UpdateCounter );
+					nldebug( "MR: Connection attempt found at update %" NL_I64 "u", rec.UpdateCounter );
 					return rec.Event;
 				}
 				else

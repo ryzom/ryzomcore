@@ -894,7 +894,7 @@ void CObjectInteger::inPlaceCopy(const CObjectInteger &src)
 }
 
 
-std::string CObjectInteger::doToString() const { return NLMISC::toString("%d"NL_I64, _Value); }
+std::string CObjectInteger::doToString() const { return NLMISC::toString("%" NL_I64 "d", _Value); }
 
 void CObjectInteger::doSerialize(std::string& out,  CSerializeContext& /* context */) const
 {
@@ -1977,7 +1977,7 @@ void CObjectInteger::dump(const std::string prefix, uint depth) const
 {
 	//H_AUTO(R2_CObjectInteger_dump)
 	std::string result(depth * 4, ' ');
-	result += NLMISC::toString("%sInteger, ptr = 0x%p, value = %d"NL_I64", ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
+	result += NLMISC::toString("%sInteger, ptr = 0x%p, value = %" NL_I64 "d, ghost = %s", prefix.c_str(), this, _Value, _Ghost ? "true" : "false");
 	nlwarning(result.c_str());
 }
 

@@ -3552,7 +3552,7 @@ void CUserEntity::CSpeedFactor::update(ICDBNode *node) // virtual
 {
 	CCDBNodeLeaf *leaf = safe_cast<CCDBNodeLeaf *>(node);
 	_Value = ((float)leaf->getValue64())/100.0f;
-	//nlinfo("SpeedFactor changed to %f / %"NL_I64"u", _Value, leaf->getValue64());
+	//nlinfo("SpeedFactor changed to %f / %" NL_I64 "u", _Value, leaf->getValue64());
 	
 	// clamp the value (2.0 is the egg item or the level 6 speed up power up, nothing should be faster)
 	// commented because ring editor speed is in fact faster

@@ -72,12 +72,12 @@ void CNetLog::output( const char *srchost, uint8 msgnum,
 					  const char *desthost, const char *msgname, uint32 msgsize )
 {
 /*OLD	char line [1024];
-	smprintf( line, 1024, "@@%"NL_I64"d@%s@%hu@%s@%s@%s@%u@", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
+	smprintf( line, 1024, "@@%" NL_I64 "d@%s@%hu@%s@%s@%s@%u@", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
 		srchost, (uint16)msgnum, _ProcessName.c_str(), desthost, msgname, msgsize );
 
 	displayRawNL( line );
 	*/
-/*	displayRawNL( "@@%"NL_I64"d@%s@%hu@%s@%s@%s@%u@", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
+/*	displayRawNL( "@@%" NL_I64 "d@%s@%hu@%s@%s@%s@%u@", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
 		srchost, (uint16)msgnum, _ProcessName.c_str(), desthost, msgname, msgsize );
 */
 	displayRawNL( "@@0@%s@%hu@%s@%s@%s@%u@",
@@ -91,11 +91,11 @@ void CNetLog::output( const char *srchost, uint8 msgnum,
 void CNetLog::input( const char *srchost, uint8 msgnum, const char *desthost )
 {
 /*OLD	char line [1024];
-	smprintf( line, 1024, "##%"NL_I64"d#%s#%hu#%s#%s#", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
+	smprintf( line, 1024, "##%" NL_I64 "d#%s#%hu#%s#%s#", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
 			  srchost, msgnum, _ProcessName.c_str(), desthost );
 	displayRawNL( line );
 */
-/*	displayRawNL( "##%"NL_I64"d#%s#%hu#%s#%s#", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
+/*	displayRawNL( "##%" NL_I64 "d#%s#%hu#%s#%s#", (CUniTime::Sync?CUniTime::getUniTime():(TTime)0),
 		  srchost, msgnum, _ProcessName.c_str(), desthost );
 */
 	displayRawNL( "##0#%s#%hu#%s#%s#",

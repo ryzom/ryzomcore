@@ -1108,7 +1108,7 @@ std::string CDisplayerVisualEntity::getVisualProperties() const
 	uint64 uVPB = leafB->getValue64();
 	uint64 uVPC = leafC->getValue64();
 
-	const std::string strVPABC = NLMISC::toString( "VPA:%016.16"NL_I64"x\nVPB:%016.16"NL_I64"x\nVPC:%016.16"NL_I64"x", uVPA, uVPB, uVPC );
+	const std::string strVPABC = NLMISC::toString( "VPA:%016.16" NL_I64 "x\nVPB:%016.16" NL_I64 "x\nVPC:%016.16" NL_I64 "x", uVPA, uVPB, uVPC );
 
 	return strVPABC;
 }

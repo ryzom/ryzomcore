@@ -806,7 +806,7 @@ int CEditor::luaGetVisualPropertiesFromInstanceId(CLuaState &ls)
 	uint64 uVPB = vB.get();
 	uint64 uVPC = vC.get();
 
-	std::string strVPABC = NLMISC::toString( "VPA:%016.16"NL_I64"x\nVPB:%016.16"NL_I64"x\nVPC:%016.16"NL_I64"x", uVPA, uVPB, uVPC );
+	std::string strVPABC = NLMISC::toString( "VPA:%016.16" NL_I64 "x\nVPB:%016.16" NL_I64 "x\nVPC:%016.16" NL_I64 "x", uVPA, uVPB, uVPC );
 
 	ls.push(strVPABC);
 
@@ -1957,12 +1957,12 @@ int CEditor::luaRemoveInstanceObserver(CLuaState &ls)
 	IInstanceObserver *observer = getEditor().getInstanceObserver((TInstanceObserverHandle) ls.toInteger(2));
 	if (observer == NULL)
 	{
-		CLuaIHM::fails(ls, "Instance observer not found for handle = %d"NL_I64, ls.toInteger(2));
+		CLuaIHM::fails(ls, "Instance observer not found for handle = %" NL_I64 "d", ls.toInteger(2));
 	}
 	CInstanceObserverLua *luaObserver = dynamic_cast<CInstanceObserverLua *>(observer);
 	if (luaObserver == NULL)
 	{
-		CLuaIHM::fails(ls, "Instance observer found for handle %d"NL_I64", but has bad type, it wasn't registered from lua.", ls.toInteger(2));
+		CLuaIHM::fails(ls, "Instance observer found for handle %" NL_I64 "d, but has bad type, it wasn't registered from lua.", ls.toInteger(2));
 	}
 	getEditor().removeInstanceObserver((TInstanceObserverHandle) ls.toInteger(2));
 	CLuaObject receiver = luaObserver->getReceiver();

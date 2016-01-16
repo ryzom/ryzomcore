@@ -138,7 +138,7 @@ void sendUDPNow (CUdpSock *client, const uint8 *packet, uint32 packetSize, const
 		client->sendTo (packet, packetSize, *addr);
 
 //	uint32 packetNumber = *(uint32 *)packet;
-//	nlinfo ("time %"NL_I64"u sending now packet %5u", CTime::getLocalTime (), packetNumber);
+//	nlinfo ("time %" NL_I64 "u sending now packet %5u", CTime::getLocalTime (), packetNumber);
 }
 
 void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CInetAddress *addr)

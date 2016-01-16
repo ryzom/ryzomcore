@@ -189,7 +189,7 @@ void			displayReceiveLog()
 			TReceiveDateLog::iterator idl;
 			for ( idl=ReceivePosDateLog[i].begin(); idl!=ReceivePosDateLog[i].end(); ++idl )
 			{
-				ReceiveLogger.displayRawNL( "%u\t%u\t%"NL_I64"u", (*idl).ServerCycle, (*idl).PredictedInterval, (*idl).LocalTime );
+				ReceiveLogger.displayRawNL( "%u\t%u\t%" NL_I64 "u", (*idl).ServerCycle, (*idl).PredictedInterval, (*idl).LocalTime );
 			}
 		}
 	}
@@ -1156,7 +1156,7 @@ void	CNetworkConnection::receiveSystemSync(CBitMemStream &msgin)
 	_CurrentClientTick = uint32(_CurrentServerTick - (_LCT+_MsPerTick)/_MsPerTick);
 	_CurrentClientTime = _UpdateTime - (_LCT+_MsPerTick);
 
-	//nlinfo( "CNET[%p]: received SYNC %"NL_I64"u %"NL_I64"u - _CurrentReceivedNumber=%d _CurrentServerTick=%d", this, (uint64)_Synchronize, (uint64)stime, _CurrentReceivedNumber, _CurrentServerTick );
+	//nlinfo( "CNET[%p]: received SYNC %" NL_I64 "u %" NL_I64 "u - _CurrentReceivedNumber=%d _CurrentServerTick=%d", this, (uint64)_Synchronize, (uint64)stime, _CurrentReceivedNumber, _CurrentServerTick );
 
 	sendSystemAckSync();
 }
@@ -1704,7 +1704,7 @@ void	CNetworkConnection::decodeVisualProperties( CBitMemStream& msgin )
 							{
 								nlinfo( "CLIENT: recvd property %hu (%s) for slot %hu, date %u", (uint16)PROPERTY_ORIENTATION, getPropText(PROPERTY_ORIENTATION), (uint16)slot, timestamp );
 							}
-							//nldebug("CLPROPNET[%p]: received property %d for entity %d: %"NL_I64"u", this, action->PropIndex, action->CLEntityId, action->getValue());
+							//nldebug("CLPROPNET[%p]: received property %d for entity %d: %" NL_I64 "u", this, action->PropIndex, action->CLEntityId, action->getValue());
 						}
 					}
 
@@ -1964,7 +1964,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 					{
 						nlinfo( "CLIENT: recvd property %hu (%s) for slot %hu, date %u", (uint16)propIndex, getPropText(propIndex), (uint16)slot, TVPNodeClient::SlotContext.Timestamp );
 					}
-					//nldebug("CLPROPNET[%p]: received property %d for entity %d: %"NL_I64"u", this, action->PropIndex, action->CLEntityId, action->getValue());
+					//nldebug("CLPROPNET[%p]: received property %d for entity %d: %" NL_I64 "u", this, action->PropIndex, action->CLEntityId, action->getValue());
 				}
 			}
 		}
