@@ -6,6 +6,8 @@ compiler:
 
 os:
     - linux
+matrix:
+    fast_finish: true
 env:
     - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=on -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=off"
     - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=on -DWITH_LUA53:BOOL=off"
