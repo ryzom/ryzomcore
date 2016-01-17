@@ -7,11 +7,17 @@ compiler:
 os:
     - linux
 env:
-    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off"
+    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=on -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=off"
+    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=on -DWITH_LUA53:BOOL=off"
+    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=on"
 
 addons:
     apt:
         packages:
+            - liblua5.1-0-dev
+            - liblua5.1-0-dbg
+            - liblua5.2-0-dev
+            - liblua5.2-0-dbg
             - libluabind-dev
             - libcpptest-dev
             - libogg-dev
@@ -32,7 +38,7 @@ script:
 notifications:
   irc:
     channels:
-      - "chat.freenode.net#ryzom"
+      - $NOTIFICATION_IRC_CHANNEL
     template:
       - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
       - "Description : %{commit_message}"
