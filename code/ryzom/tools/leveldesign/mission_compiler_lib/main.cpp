@@ -31,7 +31,15 @@ int main(int argc, char *argv[])
 {
 	NLMISC::CApplicationContext appContext;
 
-	CPath::addSearchPath("L:\\primitives\\", true, false);
+	const char *leveldesignPath = getenv("RYZOM_LEVELDESIGN");
+	
+	if (leveldesignPath == NULL)
+	{
+		printf("Error: You need to define RYZOM_LEVELDESIGN environment variable that points to previous L:\\ equivalent under Windows\n");
+		return -1;
+	}
+
+	CPath::addSearchPath(NLMISC::CPath::standardizePath(leveldesignPath), true, false);
 
 	bool test = false;
 	if (argc == 4 && string(argv[3]) == "-test")
