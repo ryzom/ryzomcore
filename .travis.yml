@@ -6,10 +6,15 @@ compiler:
 
 os:
     - linux
+matrix:
+    fast_finish: true
 env:
-    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=on -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=off"
-    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=on -DWITH_LUA53:BOOL=off"
-    - CMAKE_BUILD_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=on"
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=on -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=off"
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=on -DWITH_LUA53:BOOL=off"
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=on"
+    - CMAKE_CONFIGURE_OPTIONS="-DCPPTEST_LIBRARY_DEBUG:STRING=/usr/lib/libcpptest.so"
+      CMAKE_BUILD_OPTIONS="--target nel_unit_test -- -j 2"
+      RUN="build/bin/nel_unit_test"
 
 addons:
     apt:
@@ -30,10 +35,12 @@ addons:
 before_script:
     - mkdir build
     - cmake --version
+    - cmake -Hcode -Bbuild $CMAKE_CONFIGURE_OPTIONS
+    - cat build/CMakeCache.txt
 
 script:
-    - cmake -Hcode -Bbuild $CMAKE_BUILD_OPTIONS
-    - cmake --build build -- -j 2
+    - cmake --build build $CMAKE_BUILD_OPTIONS
+    - $RUN
 
 notifications:
   irc:

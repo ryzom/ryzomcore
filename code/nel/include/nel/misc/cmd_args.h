@@ -40,6 +40,8 @@ public:
 
 		std::string helpName; // name of argument in help. Eg: <output directory>
 		std::string helpDescription; // description of argument in help. Eg: Specifies the directory where to write generated files
+		bool onlyOnce; // only one argument of this type is used, if several are provided, only the last one is kept
+		bool required; // at least one argument of this type must be provided
 
 		bool found; // all values for this argument
 		std::vector<std::string> values; // all values for this argument
@@ -55,12 +57,15 @@ public:
 	/// longName is "print" of the argument is --print
 	/// helpName is the name that will be displayed in help if it's a required argument
 	/// helpDescription is the description of the argument that will be displayed in help
-	void addArg(const std::string &shortName, const std::string &longName, const std::string &helpName, const std::string &helpDescription);
+	/// onlyOnce can be set to false, if we allows to use this argument more than once
+	void addArg(const std::string &shortName, const std::string &longName, const std::string &helpName, const std::string &helpDescription, bool onlyOnce = true);
 
-	/// Add a required argument to arguments list.
+	/// Add a additional argument to arguments list.
 	/// helpName is the name that will be displayed in help if it's a required argument
 	/// helpDescription is the description of the argument that will be displayed in help
-	void addArg(const std::string &helpName, const std::string &helpDescription);
+	/// onlyOnce can be set to false, if we allows to use this argument more than once
+	/// required can be set to false, if this argument is required
+	void addAdditionalArg(const std::string &name, const std::string &helpDescription, bool onlyOnce = true, bool required = true);
 
 	/// Parse the command line from main() parameters argc and argv and process default arguments.
 	bool parse(int argc, char **argv);
@@ -93,21 +98,39 @@ public:
 	std::vector<std::string> getLongArg(const std::string &argName) const;
 
 	/// return true if there are arguments that are required
-	bool needRequiredArg() const;
+	bool needAdditionalArg() const;
 
-	/// return true if required or optional args are present on the commandline
-	bool haveRequiredArg() const;
+	/// return true if any additional args are present on the commandline
+	bool haveAdditionalArg() const;
 
-	/// Returns all additional required parameters
-	std::vector<std::string> getRequiredArg() const;
+	/// return true if a specific additional arg is present on the commandline
+	bool haveAdditionalArg(const std::string &name) const;
+
+	/// Returns values of a specific additional arg
+	std::vector<std::string> getAdditionalArg(const std::string &name) const;
 
 	/// Display help of the program.
 	void displayHelp();
 
 	/// Display version of the program.
 	void displayVersion();
+
+	/// Returns program name or path passed as first parameter to parse() method
+	std::string getProgramName() const { return _ProgramName; }
+	std::string getProgramPath() const { return _ProgramPath; }
+
+	/// Set or get description to display in help
+	void setDescription(const std::string &description) { _Description = description; }
+	std::string getDescription() const { return _Description; }
+
+	/// Set or get version to display in -v
+	void setVersion(const std::string &version) { _Version = version; }
+	std::string getVersion() const { return _Version; }
 protected:
-	std::string		_ProgramName;
+	std::string		_ProgramName;	// filename of the program
+	std::string		_ProgramPath;	// full path of the program
+	std::string		_Description;	// description of the program
+	std::string		_Version;		// version of the program
 
 	/// Array of arguments pass from the command line
 	TArgs			_Args;

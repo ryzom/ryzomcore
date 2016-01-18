@@ -443,11 +443,13 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit -1
 		ret = NLMISC::fromString("-9223372036854775809", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(LLONG_MIN == val);
 
 		// max limit +1
 		ret = NLMISC::fromString("9223372036854775808", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(LLONG_MAX == val);
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -498,16 +500,19 @@ struct CUTMiscStringCommon : public Test::Suite
 		TEST_ASSERT(ret && val == 0);
 
 		// max limit
-		ret = NLMISC::fromString("4294967295", val);
-		TEST_ASSERT(ret && val == 4294967295);
+		ret = NLMISC::fromString("18446744073709551615", val);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(ULLONG_MAX == val);
 
 		// min limit -1
 		ret = NLMISC::fromString("-1", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(ULLONG_MAX == val);
 
 		// max limit +1
-		ret = NLMISC::fromString("4294967296", val);
-		TEST_ASSERT(!ret && val == 0);
+		ret = NLMISC::fromString("18446744073709551616", val);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(ULLONG_MAX == val);
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -559,23 +564,28 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("-2147483648", val);
-		TEST_ASSERT(ret && val == INT_MIN);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(INT_MIN == val);
 
 		// max limit
 		ret = NLMISC::fromString("2147483647", val);
-		TEST_ASSERT(ret && val == INT_MAX);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(INT_MAX == val);
 
 		// min limit -1
 		ret = NLMISC::fromString("-2147483649", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(INT_MIN == val);
 
 		// max limit +1
 		ret = NLMISC::fromString("2147483648", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(INT_MAX == val);
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(1.2f == val);
 
 		// with coma
 		ret = NLMISC::fromString("1,2", val);
@@ -623,19 +633,23 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("2.2250738585072014e-308", val);
-		TEST_ASSERT(ret && val == DBL_MIN);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(DBL_MIN == val);
 
 		// max limit
 		ret = NLMISC::fromString("1.7976931348623158e+308", val);
-		TEST_ASSERT(ret && val == DBL_MAX);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(DBL_MAX == val);
 
 		// min limit -1
 		ret = NLMISC::fromString("3e-408", val);
-		TEST_ASSERT(!ret && val == 0.0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(0 == val);
 
 		// max limit +1
 		ret = NLMISC::fromString("2e+308", val);
-		TEST_ASSERT(!ret && val == 0.0);
+		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(INFINITY == val);
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -670,60 +684,59 @@ struct CUTMiscStringCommon : public Test::Suite
 		bool val;
 
 		// true value
+		val = false;
 		ret = NLMISC::fromString("1", val);
-		TEST_ASSERT(ret && val);
+		TEST_ASSERT(val);
+		TEST_ASSERT_MSG(ret, "should succeed");
 
-		// false value
+		val = false;
+		NLMISC::fromString("t", val);
+		TEST_ASSERT(val);
+
+		val = false;
+		NLMISC::fromString("y", val);
+		TEST_ASSERT(val);
+
+		val = false;
+		NLMISC::fromString("T", val);
+		TEST_ASSERT(val);
+
+		val = false;
+		NLMISC::fromString("Y", val);
+		TEST_ASSERT(val);
+
+		val = true;
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(ret && !val);
+		TEST_ASSERT(!val);
+		TEST_ASSERT_MSG(ret, "should succeed");
+
+		val = true;
+		NLMISC::fromString("f", val);
+		TEST_ASSERT(!val);
+
+		val = true;
+		NLMISC::fromString("n", val);
+		TEST_ASSERT(!val);
+
+		val = true;
+		NLMISC::fromString("F", val);
+		TEST_ASSERT(!val);
+
+		val = true;
+		NLMISC::fromString("N", val);
+		TEST_ASSERT(!val);
 
 		// bad character
 		ret = NLMISC::fromString("a", val);
-		TEST_ASSERT(!ret && val);
+		TEST_ASSERT_MSG(!ret, "should not succeed");
 
-		// right character and bad character
-		ret = NLMISC::fromString("1a", val);
-		TEST_ASSERT(!ret && val);
+		val = true;
+		NLMISC::fromString("a", val);
+		TEST_ASSERT_MSG(val, "should not modify the value");
 
-		// min limit
-		ret = NLMISC::fromString("-2147483648", val);
-		TEST_ASSERT(!ret && val);
-
-		// max limit
-		ret = NLMISC::fromString("2147483647", val);
-		TEST_ASSERT(!ret && val);
-
-		// min limit -1
-		ret = NLMISC::fromString("-2147483649", val);
-		TEST_ASSERT(!ret && val);
-
-		// max limit +1
-		ret = NLMISC::fromString("2147483648", val);
-		TEST_ASSERT(!ret && val);
-
-		// with period
-		ret = NLMISC::fromString("1.2", val);
-		TEST_ASSERT(!ret && val);
-
-		// with coma
-		ret = NLMISC::fromString("1,2", val);
-		TEST_ASSERT(!ret && val);
-
-		// with spaces before
-		ret = NLMISC::fromString("  10", val);
-		TEST_ASSERT(!ret && val);
-
-		// with spaces after
-		ret = NLMISC::fromString("10  ", val);
-		TEST_ASSERT(!ret && val);
-
-		// with 0s before
-		ret = NLMISC::fromString("001", val);
-		TEST_ASSERT(!ret && val);
-
-		// with + before
-		ret = NLMISC::fromString("+1", val);
-		TEST_ASSERT(!ret && val);
+		val = false;
+		NLMISC::fromString("a", val);
+		TEST_ASSERT_MSG(!val, "should not modify the value");
 	}
 };
 

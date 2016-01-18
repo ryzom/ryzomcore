@@ -33,6 +33,10 @@ namespace NLMISC
 
 CCmdArgs::CCmdArgs()
 {
+#ifdef NL_VERSION
+	_Version = NL_VERSION;
+#endif
+
 	// add help
 	addArg("h", "help", "", "Display this help");
 
@@ -45,24 +49,28 @@ void CCmdArgs::addArg(const TArg &arg)
 	_Args.push_back(arg);
 }
 
-void CCmdArgs::addArg(const std::string &shortName, const std::string &longName, const std::string &helpName, const std::string &helpDescription)
+void CCmdArgs::addArg(const std::string &shortName, const std::string &longName, const std::string &helpName, const std::string &helpDescription, bool onlyOnce)
 {
 	TArg arg;
 	arg.shortName = shortName;
 	arg.longName = longName;
 	arg.helpName = helpName;
 	arg.helpDescription = helpDescription;
+	arg.onlyOnce = onlyOnce;
 	arg.found = false;
+	arg.required = false;
 
 	addArg(arg);
 }
 
-void CCmdArgs::addArg(const std::string &helpName, const std::string &helpDescription)
+void CCmdArgs::addAdditionalArg(const std::string &helpName, const std::string &helpDescription, bool onlyOnce, bool required)
 {
 	TArg arg;
 	arg.helpName = helpName;
 	arg.helpDescription = helpDescription;
+	arg.onlyOnce = onlyOnce;
 	arg.found = false;
+	arg.required = required;
 
 	addArg(arg);
 }
@@ -125,7 +133,7 @@ std::vector<std::string> CCmdArgs::getLongArg(const std::string &argName) const
 	return std::vector<std::string>();
 }
 
-bool CCmdArgs::needRequiredArg() const
+bool CCmdArgs::needAdditionalArg() const
 {
 	// process each argument
 	for(uint i = 0; i < _Args.size(); ++i)
@@ -133,14 +141,14 @@ bool CCmdArgs::needRequiredArg() const
 		const TArg &arg = _Args[i];
 
 		// they don't have any short or long name, but need a name in help
-		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty())
+		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.required)
 			return true;
 	}
 
 	return false;
 }
 
-bool CCmdArgs::haveRequiredArg() const
+bool CCmdArgs::haveAdditionalArg() const
 {
 	// process each argument
 	for(uint i = 0; i < _Args.size(); ++i)
@@ -148,14 +156,14 @@ bool CCmdArgs::haveRequiredArg() const
 		const TArg &arg = _Args[i];
 
 		// they don't have any short or long name, but need a name in help
-		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty())
-			return !arg.values.empty();
+		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.found)
+			return false;
 	}
 
 	return false;
 }
 
-std::vector<std::string> CCmdArgs::getRequiredArg() const
+bool CCmdArgs::haveAdditionalArg(const std::string &name) const
 {
 	// process each argument
 	for(uint i = 0; i < _Args.size(); ++i)
@@ -163,7 +171,22 @@ std::vector<std::string> CCmdArgs::getRequiredArg() const
 		const TArg &arg = _Args[i];
 
 		// they don't have any short or long name, but need a name in help
-		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty())
+		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.helpName == name && arg.found)
+			return false;
+	}
+
+	return false;
+}
+
+std::vector<std::string> CCmdArgs::getAdditionalArg(const std::string &name) const
+{
+	// process each argument
+	for(uint i = 0; i < _Args.size(); ++i)
+	{
+		const TArg &arg = _Args[i];
+
+		// they don't have any short or long name, but need a name in help
+		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.helpName == name)
 			return arg.values;
 	}
 
@@ -174,6 +197,15 @@ std::vector<std::string> CCmdArgs::getRequiredArg() const
 bool CCmdArgs::parse(const std::string &args)
 {
 	std::vector<std::string> argv;
+
+#ifdef NL_OS_WINDOWS
+	char str[4096];
+	uint len = GetModuleFileNameA(NULL, str, 4096);
+
+	if (len && len < 4096)
+		argv.push_back(str);
+#endif
+
 	std::string::size_type pos1 = 0, pos2 = 0;
 
 	do
@@ -230,6 +262,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 
 	// first argument is always the program name
 	_ProgramName = CFile::getFilename(argv.front());
+	_ProgramPath = CPath::standardizePath(CFile::getPath(argv.front()));
 
 	// arguments count
 	uint argc = argv.size();
@@ -272,6 +305,8 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 				name = name.substr(0, 1);
 			}
 
+			bool found = false;
+
 			// process each argument definition
 			for(uint j = 0; j < _Args.size(); ++j)
 			{
@@ -280,8 +315,15 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 				// only process arguments of the right type
 				if ((useLongName && name != arg.longName) || (!useLongName && name != arg.shortName)) continue;
 
+				// already get the only once argument
+				if (arg.found && arg.onlyOnce)
+				{
+					// the last one is the only kept, so discard previous ones
+					arg.values.clear();
+				}
+
 				// argument is found
-				arg.found = true;
+				found = arg.found = true;
 
 				// another argument is required
 				if (!arg.helpName.empty())
@@ -302,6 +344,11 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 
 				break;
 			}
+
+			if (!found)
+			{
+				printf("Warning: Argument %s not recognized, skip it!\n", name.c_str());
+			}
 		}
 		else
 		{
@@ -312,6 +359,11 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 
 				// only process arguments that don't have a name
 				if (!arg.shortName.empty() || !arg.longName.empty()) continue;
+
+				// already get the only once argument
+				if (arg.found && arg.onlyOnce) continue;
+
+				arg.found = true;
 
 				// in fact, if there are more than one required arguments, all arguments are added in first one to simplify
 				arg.values.push_back(name);
@@ -329,7 +381,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	}
 
 	// process help if requested or if required arguments are missing
-	if (haveLongArg("help") || (needRequiredArg() && !haveRequiredArg()))
+	if (haveLongArg("help") || (needAdditionalArg() && !haveAdditionalArg()))
 	{
 		displayHelp();
 		return false;
@@ -363,14 +415,6 @@ void CCmdArgs::displayHelp()
 		}
 	}
 
-	sint last = -1;
-
-	// look for last required argument
-	for(uint i = 0; i < _Args.size(); ++i)
-	{
-		if (_Args[i].shortName.empty()) last = (sint)i;
-	}
-
 	// display required arguments
 	for(uint i = 0; i < _Args.size(); ++i)
 	{
@@ -379,17 +423,23 @@ void CCmdArgs::displayHelp()
 		// they don't have any short or long name, but need a name in help
 		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty())
 		{
-			printf(" <%s>", arg.helpName.c_str());
+			printf(" %c%s", arg.required ? '<':'[', arg.helpName.c_str());
 
-			// if last argument, it can support additional arguments
-			if ((sint)i == last)
-			{
-				printf(" [%s...]", arg.helpName.c_str());
-			}
+			// if support more than once argument
+			if (!arg.onlyOnce) printf("...");
+
+			printf("%c", arg.required ? '>':']');
 		}
 	}
 
 	printf("\n");
+
+	if (!_Description.empty())
+	{
+		printf("\n%s", _Description.c_str());
+	}
+
+	printf("\nWhere options are:\n");
 
 	// display details on each argument
 	for(uint i = 0; i < _Args.size(); ++i)
@@ -399,19 +449,23 @@ void CCmdArgs::displayHelp()
 		// not an optional argument
 		if (arg.shortName.empty() && arg.longName.empty()) continue;
 
-		// a tab
-		printf("\t");
+		// 2 spaces
+		printf("  ");
+
+		std::vector<std::string> syntaxes;
 
 		// display short argument
 		if (!arg.shortName.empty())
 		{
-			printf("-%s", arg.shortName.c_str());
-
 			// and it's required argument
 			if (!arg.helpName.empty())
 			{
-				printf(" <%s>", arg.helpName.c_str());
-				printf(" or -%s<%s>", arg.shortName.c_str(), arg.helpName.c_str());
+				syntaxes.push_back(toString("-%s <%s>", arg.shortName.c_str(), arg.helpName.c_str()));
+				syntaxes.push_back(toString("-%s<%s>", arg.shortName.c_str(), arg.helpName.c_str()));
+			}
+			else
+			{
+				syntaxes.push_back(toString("-%s", arg.shortName.c_str()));
 			}
 		}
 
@@ -420,29 +474,29 @@ void CCmdArgs::displayHelp()
 		{
 			if (!arg.helpName.empty())
 			{
-				// prepend a coma if a short argument was already displayed
-				if (!arg.shortName.empty())
-				{
-					printf(", ");
-				}
-
 				// display first syntax for long argument, --arg <value>
-				printf("--%s <%s>", arg.longName.c_str(), arg.helpName.c_str());
+				syntaxes.push_back(toString("--%s <%s>", arg.longName.c_str(), arg.helpName.c_str()));
 			}
-
-			// prepend " or " if 3 formats for argument
-			if (!arg.shortName.empty() || !arg.helpName.empty())
-			{
-				printf(" or ");
-			}
-
-			// display second syntax for long argument, --arg=<value>
-			printf("--%s", arg.longName.c_str());
 
 			if (!arg.helpName.empty())
 			{
-				printf("=<%s>", arg.helpName.c_str());
+				// display second syntax for long argument, --arg=<value>
+				syntaxes.push_back(toString("--%s=<%s>", arg.longName.c_str(), arg.helpName.c_str()));
 			}
+			else
+			{
+				syntaxes.push_back(toString("--%s", arg.longName.c_str()));
+			}
+		}
+
+		for(uint j = 0; j < syntaxes.size(); ++j)
+		{
+			if (j > 0)
+			{
+				printf("%s ", (j == syntaxes.size() - 1) ? " or":",");
+			}
+
+			printf("%s", syntaxes[j].c_str());
 		}
 
 		// display argument description
@@ -462,7 +516,7 @@ void CCmdArgs::displayHelp()
 		// only display required arguments
 		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && !arg.helpDescription.empty())
 		{
-			printf("\t%s : %s\n", arg.helpName.c_str(), arg.helpDescription.c_str());
+			printf("  %s : %s\n", arg.helpName.c_str(), arg.helpDescription.c_str());
 		}
 	}
 }
@@ -471,7 +525,7 @@ void CCmdArgs::displayVersion()
 {
 	// display a verbose version string
 #ifdef BUILD_DATE
-	printf("%s %s (built on %s)\nCopyright (C) %s\n", _ProgramName.c_str(), NL_VERSION, BUILD_DATE, COPYRIGHT);
+	printf("%s %s (built on %s)\nCopyright (C) %s\n", _ProgramName.c_str(), _Version.c_str(), BUILD_DATE, COPYRIGHT);
 #endif
 }
 

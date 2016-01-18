@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		if (html)
 		{
 			std::ofstream fout(outputFileName);
-			html->generate(fout, true, "NeLTest");
+			html->generate(fout, true, "NeL");
 		}
 	}
 	catch (...)
