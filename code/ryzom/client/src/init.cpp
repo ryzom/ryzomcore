@@ -637,12 +637,16 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	// check in same directory as bundle (Steam)
 	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/.."));
 #elif defined(NL_OS_UNIX)
+	// TODO: check in same directory as executable
 	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
 #endif
 
-	float total = (float)(directoryPrefixes.size() * paths.size());
-	float current = 0.f, next = 0.f;
+	std::vector<std::string> directoriesToProcess;
 
+	// reserve maximum memory space for all combinations
+	directoriesToProcess.reserve(directoryPrefixes.size() * paths.size());
+
+	// first pass, build a vector with all existing directories to process in second pass
 	for (uint j = 0; j < directoryPrefixes.size(); j++)
 	{
 		std::string directoryPrefix = directoryPrefixes[j];
@@ -651,25 +655,34 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 		{
 			std::string directory = NLMISC::expandEnvironmentVariables(paths[i]);
 
-			// only prepend default directory if path is relative
+			// only prepend prefix if path is relative
 			if (!directory.empty() && !directoryPrefix.empty() && !CPath::isAbsolutePath(directory))
-			{
 					directory = directoryPrefix + directory;
-			}
 
-			// update next progress value
-			next += 1.f;
-
-			progress.progress (current/total);
-			progress.pushCropedValues (current/total, next/total);
-
-			// next is current value
-			current = next;
-
-			CPath::addSearchPath(directory, recurse, false, &progress);
-
-			progress.popCropedValues ();
+			// only process existing directories
+			if (CFile::isExists(directory))
+				directoriesToProcess.push_back(directory);
 		}
+	}
+
+	uint total = (uint)directoriesToProcess.size();
+	uint current = 0, next = 0;
+
+	// second pass, add search paths
+	for (uint i = 0, len = directoriesToProcess.size(); i < len; ++i)
+	{
+		// update next progress value
+		++next;
+
+		progress.progress((float)current/(float)total);
+		progress.pushCropedValues((float)current/(float)total, (float)next/(float)total);
+
+		// next is current value
+		current = next;
+
+		CPath::addSearchPath(directoriesToProcess[i], recurse, false, &progress);
+
+		progress.popCropedValues();
 	}
 }
 
