@@ -25,6 +25,8 @@
 #include <vector>
 #include <string>
 
+#include "../../3d/shared_widgets/common.h"
+
 class CCmdLineParser
 {
 public:
@@ -105,6 +107,7 @@ int main(int argc, char **argv)
 	}
 #endif
 
+	NLQT::preApplication();
 	QApplication app(argc, argv);
 
 	QApplication::setWindowIcon(QIcon(":/icons/nevraxpill.ico"));
