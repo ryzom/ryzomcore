@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 	Q_INIT_RESOURCE(tile_edit_qt);
 	QApplication app(argc, argv);
 
-	CTile_edit_dlg *tileEdit = new CTile_edit_dlg;
-	tileEdit->show();
+	CTile_edit_dlg tileEdit;
+	tileEdit.show();
 
 	return app.exec();
 }
