@@ -33,11 +33,11 @@ int main(int argc, char *argv[])
 	args.addArg("d", "dst", "destination", "Destination directory path");
 	args.addArg("", "dependlog", "log", "Dependencies log path");
 	args.addArg("", "errorlog", "log", "Errors log path");
-	args.addArg("filename", "Filename of 3D model to convert");
+	args.addAdditionalArg("input", "Filename of 3D model to convert", false);
 
 	if (!args.parse(argc, argv)) return EXIT_SUCCESS;
 
-	const std::vector<std::string> &filePathes = args.getRequiredArg();
+	const std::vector<std::string> &filePathes = args.getAdditionalArg("input");
 
 	NL3D::CScene::registerBasics();
 	NL3D::registerSerial3d();
