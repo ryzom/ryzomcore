@@ -27281,3 +27281,19 @@ uigcFxAnisotropicFilter	[Filtrado Anisotropico:]
 // INDEX 6462
 uigcFxAnisotropicFilterNone	[Ninguno]
 
+// HASH_VALUE 050BB49718B1CAD4
+// INDEX 6463
+uiShowClock12h	[Usar reloj de 12 horas]
+
+// HASH_VALUE BCF4DB5845BC4EDA
+// INDEX 6464
+uittShowClock12h	[Si marcado, usar reloj de 12 horas en el reloj de la brújula y en los mensajes de chat.]
+
+// HASH_VALUE 68F99C8C69A81273
+// INDEX 6465
+uiRadarUseCamera	[El radar sigue la rotación de la cámara]
+
+// HASH_VALUE B83EBD58DE9C068F
+// INDEX 6466
+uittRadarUseCamera	[Si marcado, usar la rotación de cámara para la vista de radar.]
+
