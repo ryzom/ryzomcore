@@ -34,14 +34,14 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include <nel/3d/u_camera.h>
-#include <nel/3d/u_driver.h>
-#include <nel/3d/material.h>
-#include <nel/3d/texture_bloom.h>
-#include <nel/3d/texture_user.h>
-#include <nel/3d/driver_user.h>
-#include <nel/3d/u_texture.h>
-#include <nel/3d/render_target_manager.h>
+#include "nel/3d/u_camera.h"
+#include "nel/3d/u_driver.h"
+#include "nel/3d/material.h"
+#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_user.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/u_texture.h"
+#include "nel/3d/render_target_manager.h"
 
 using namespace std;
 // using namespace NLMISC;

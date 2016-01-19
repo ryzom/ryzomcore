@@ -26,7 +26,7 @@
  */
 
 #include "std3d.h"
-#include <nel/3d/stereo_hmd.h>
+#include "nel/3d/stereo_hmd.h"
 
 // STL includes
 
