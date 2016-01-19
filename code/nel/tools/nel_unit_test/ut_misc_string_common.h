@@ -17,6 +17,7 @@
 #ifndef UT_MISC_STRING_COMMON
 #define UT_MISC_STRING_COMMON
 
+#include <limits>
 #include <nel/misc/string_common.h>
 
 struct CUTMiscStringCommon : public Test::Suite
@@ -63,11 +64,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("-128", val);
-		TEST_ASSERT(ret && val == -128);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint8>::min());
 
 		// max limit
 		ret = NLMISC::fromString("127", val);
-		TEST_ASSERT(ret && val == 127);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint8>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-129", val);
@@ -123,11 +124,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(ret && val == 0);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint8>::min());
 
 		// max limit
 		ret = NLMISC::fromString("255", val);
-		TEST_ASSERT(ret && val == 255);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint8>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-1", val);
@@ -187,11 +188,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("-32768", val);
-		TEST_ASSERT(ret && val == -32768);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint16>::min());
 
 		// max limit
 		ret = NLMISC::fromString("32767", val);
-		TEST_ASSERT(ret && val == 32767);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint16>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-32769", val);
@@ -247,11 +248,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(ret && val == 0);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint16>::min());
 
 		// max limit
 		ret = NLMISC::fromString("65535", val);
-		TEST_ASSERT(ret && val == 65535);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint16>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-1", val);
@@ -311,11 +312,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("-2147483648", val);
-		TEST_ASSERT(ret && val == INT_MIN);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint32>::min());
 
 		// max limit
 		ret = NLMISC::fromString("2147483647", val);
-		TEST_ASSERT(ret && val == INT_MAX);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint32>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-2147483649", val);
@@ -371,11 +372,11 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(ret && val == 0);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint32>::min());
 
 		// max limit
 		ret = NLMISC::fromString("4294967295", val);
-		TEST_ASSERT(ret && val == 4294967295);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint32>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("-1", val);
@@ -435,21 +436,19 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("-9223372036854775808", val);
-		TEST_ASSERT(ret && val == LLONG_MIN);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::min());
 
 		// max limit
 		ret = NLMISC::fromString("9223372036854775807", val);
-		TEST_ASSERT(ret && val == LLONG_MAX);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::max());
 
-		// min limit -1
+		// min limit -1, unable to compare with minimum value because no lower type
 		ret = NLMISC::fromString("-9223372036854775809", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(LLONG_MIN == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::max());
 
-		// max limit +1
+		// max limit +1, unable to compare with maximum value because no higher type
 		ret = NLMISC::fromString("9223372036854775808", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(LLONG_MAX == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::min());
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -497,22 +496,19 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(ret && val == 0);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint64>::min());
 
 		// max limit
 		ret = NLMISC::fromString("18446744073709551615", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(ULLONG_MAX == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint64>::max());
 
-		// min limit -1
+		// min limit -1, unable to compare with minimum value because no lower type
 		ret = NLMISC::fromString("-1", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(ULLONG_MAX == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint64>::max());
 
-		// max limit +1
+		// max limit +1, unable to compare with maximum value because no higher type
 		ret = NLMISC::fromString("18446744073709551616", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(ULLONG_MAX == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<uint64>::min());
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -548,64 +544,67 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// positive value
 		ret = NLMISC::fromString("1", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT(ret && val == 1.f);
 
 		// negative value
 		ret = NLMISC::fromString("-1", val);
-		TEST_ASSERT(ret && val == -1);
+		TEST_ASSERT(ret && val == -1.f);
 
 		// bad character
 		ret = NLMISC::fromString("a", val);
-		TEST_ASSERT(!ret && val == 0);
+		TEST_ASSERT(!ret && val == 0.f);
 
 		// right character and bad character
 		ret = NLMISC::fromString("1a", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT(ret && val == 1.f);
 
 		// min limit
-		ret = NLMISC::fromString("-2147483648", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(INT_MIN == val);
+		ret = NLMISC::fromString("-3.4028235e+038", val);
+		TEST_ASSERT(ret && val == -std::numeric_limits<float>::max());
+
+		// min limit towards 0
+		ret = NLMISC::fromString("1.1754944e-038", val);
+		TEST_ASSERT(ret && val == std::numeric_limits<float>::min());
 
 		// max limit
-		ret = NLMISC::fromString("2147483647", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(INT_MAX == val);
+		ret = NLMISC::fromString("3.4028235e+038", val);
+		TEST_ASSERT(ret && val == std::numeric_limits<float>::max());
 
 		// min limit -1
-		ret = NLMISC::fromString("-2147483649", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(INT_MIN == val);
+		ret = NLMISC::fromString("-3.4028235e+048", val);
+		TEST_ASSERT(ret && val == -std::numeric_limits<float>::infinity());
+
+		// min limit towards 0 -1
+		ret = NLMISC::fromString("1.1754944e-048", val);
+		TEST_ASSERT(ret && val == 0.f);
 
 		// max limit +1
-		ret = NLMISC::fromString("2147483648", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(INT_MAX == val);
+		ret = NLMISC::fromString("3.4028235e+048", val);
+		TEST_ASSERT(ret && val == std::numeric_limits<float>::infinity());
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(1.2f == val);
+		TEST_ASSERT(ret && val == 1.2f);
 
 		// with coma
 		ret = NLMISC::fromString("1,2", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT(ret && val == 1.f);
 
 		// with spaces before
 		ret = NLMISC::fromString("  10", val);
-		TEST_ASSERT(ret && val == 10);
+		TEST_ASSERT(ret && val == 10.f);
 
 		// with spaces after
 		ret = NLMISC::fromString("10  ", val);
-		TEST_ASSERT(ret && val == 10);
+		TEST_ASSERT(ret && val == 10.f);
 
 		// with 0s before
 		ret = NLMISC::fromString("001", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT(ret && val == 1.f);
 
 		// with + before
 		ret = NLMISC::fromString("+1", val);
-		TEST_ASSERT(ret && val == 1);
+		TEST_ASSERT(ret && val == 1.f);
 	}
 
 	void fromStringDouble()
@@ -632,24 +631,24 @@ struct CUTMiscStringCommon : public Test::Suite
 		TEST_ASSERT(ret && val == 1.0);
 
 		// min limit
+		ret = NLMISC::fromString("-1.7976931348623158e+308", val);
+		TEST_ASSERT(ret && val == -std::numeric_limits<double>::max());
+
+		// min limit towards 0
 		ret = NLMISC::fromString("2.2250738585072014e-308", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(DBL_MIN == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<double>::min());
 
 		// max limit
 		ret = NLMISC::fromString("1.7976931348623158e+308", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(DBL_MAX == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<double>::max());
 
 		// min limit -1
 		ret = NLMISC::fromString("3e-408", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(0 == val);
+		TEST_ASSERT(ret && val == 0.0);
 
 		// max limit +1
 		ret = NLMISC::fromString("2e+308", val);
-		TEST_ASSERT_MSG(ret, "should succeed");
-		TEST_ASSERT(INFINITY == val);
+		TEST_ASSERT(ret && val == std::numeric_limits<double>::infinity());
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
