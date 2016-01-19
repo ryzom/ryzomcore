@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/fxaa.h>
+#include "std3d.h"
+#include "nel/3d/fxaa.h"
 
 // STL includes
 
