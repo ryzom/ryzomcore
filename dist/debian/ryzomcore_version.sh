@@ -1,6 +1,11 @@
 #!/bin/sh
 
-CODEROOT=../../code
+CODEROOT=$1
+
+if [ -z "$CODEROOT" ]
+then
+  CODEROOT=../../code
+fi
 
 VERSION_FILE=$CODEROOT/CMakeLists.txt
 
@@ -12,10 +17,11 @@ fi
 
 parse_version()
 {
-  FILE=$1
-  VAR=$2
+  PREFIX=$1
+  FILE=$2
+  VAR=$3
 
-  V=$(grep -o -P "NL_$VAR [0-9]+" $FILE | awk '{print $2}' | head -n 1)
+  V=$(grep -o -P $PREFIX"_$VAR [0-9]+" $FILE | awk '{print $2}' | head -n 1)
 
   if [ -z "$V" ]
   then
@@ -26,9 +32,9 @@ parse_version()
   export $VAR=$V
 }
 
-parse_version $VERSION_FILE VERSION_MAJOR
-parse_version $VERSION_FILE VERSION_MINOR
-parse_version $VERSION_FILE VERSION_PATCH
+parse_version RYZOM $VERSION_FILE VERSION_MAJOR
+parse_version RYZOM $VERSION_FILE VERSION_MINOR
+parse_version RYZOM $VERSION_FILE VERSION_PATCH
 
 VERSION=$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH
 
