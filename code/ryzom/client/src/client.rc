@@ -185,11 +185,19 @@ BEGIN
             VALUE "FileDescription", "Ryzom client"
             VALUE "FileVersion", RYZOM_VERSION
             VALUE "LegalCopyright", COPYRIGHT
+#if defined(FINAL_VERSION) && (FINAL_VERSION == 1)
 #ifdef _DEBUG
             VALUE "OriginalFilename", "ryzom_client_d.exe"
 #else
             VALUE "OriginalFilename", "ryzom_client_r.exe"
 #endif			
+#else
+#ifdef _DEBUG
+            VALUE "OriginalFilename", "ryzom_client_dev_d.exe"
+#else
+            VALUE "OriginalFilename", "ryzom_client_dev_r.exe"
+#endif			
+#endif
             VALUE "ProductName", "Ryzom Core"
             VALUE "ProductVersion", NL_VERSION
         END
