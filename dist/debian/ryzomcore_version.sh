@@ -21,7 +21,7 @@ parse_version()
   FILE=$2
   VAR=$3
 
-  V=$(grep -o -P $PREFIX"_$VAR [0-9]+" $FILE | awk '{print $2}' | head -n 1)
+  V=$(egrep -o $PREFIX"_$VAR [0-9]+" $FILE | awk '{print $2}' | head -n 1)
 
   if [ -z "$V" ]
   then
