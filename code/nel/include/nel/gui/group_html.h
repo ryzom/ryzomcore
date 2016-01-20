@@ -369,12 +369,20 @@ namespace NLGUI
 		// Delete page content and prepare next page
 		void removeContent ();
 
-		// Current URL
+		// Current URL for relative links in page
 		std::string		_URL;
+		// Current URL
+		std::string		_DocumentUrl;
+		// Valid base href was found
+		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url
 		std::string		_UrlFragment;
 		std::map<std::string,NLGUI::CInterfaceElement *> _Anchors;
 		std::vector<std::string> _AnchorName;
+
+		// Parser context
+		bool			_ReadingHeadTag;
+		bool			_IgnoreHeadTag;
 
 		// Current DOMAIN
 		bool			_TrustedDomain;

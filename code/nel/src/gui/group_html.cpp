@@ -1117,6 +1117,24 @@ namespace NLGUI
 			// Paragraph ?
 			switch(element_number)
 			{
+			case HTML_HEAD:
+				_ReadingHeadTag = !_IgnoreHeadTag;
+				_IgnoreHeadTag = true;
+				break;
+			case HTML_BASE:
+				if (_ReadingHeadTag && !_IgnoreBaseUrlTag)
+				{
+					if (present[HTML_BASE_HREF] && value[HTML_BASE_HREF])
+					{
+						CUrlParser uri(value[HTML_BASE_HREF]);
+						if (uri.isAbsolute())
+						{
+							_URL = uri.toString();
+							_IgnoreBaseUrlTag = true;
+						}
+					}
+				}
+				break;
 			case HTML_A:
 			{
 				CStyleParams style;
@@ -2110,6 +2128,9 @@ namespace NLGUI
 			// Paragraph ?
 			switch(element_number)
 			{
+			case HTML_HEAD:
+				_ReadingHeadTag = false;
+				break;
 			case HTML_FONT:
 				popIfNotEmpty (_TextColor);
 				popIfNotEmpty (_FontSize);
@@ -2397,6 +2418,7 @@ namespace NLGUI
 		_LI = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
+		_DocumentUrl = "";
 		_UrlFragment.clear();
 
 		// Register
@@ -3481,11 +3503,11 @@ namespace NLGUI
 			// Anchor to scroll after page has loaded
 			_UrlFragment = uri.hash;
 
-			uri.inherit(_URL);
+			uri.inherit(_DocumentUrl);
 			uri.hash.clear();
 
 			// compare urls and see if we only navigating to new anchor
-			if (!force && _URL == uri.toString())
+			if (!force && _DocumentUrl == uri.toString())
 			{
 				// scroll happens in updateCoords()
 				invalidateCoords();
@@ -4097,6 +4119,9 @@ namespace NLGUI
 		_TextArea = false;
 		_Object = false;
 		_Localize = false;
+		_ReadingHeadTag = false;
+		_IgnoreHeadTag = false;
+		_IgnoreBaseUrlTag = false;
 
 		// TR
 
@@ -4751,6 +4776,7 @@ namespace NLGUI
 
 		//
 		_Browsing = true;
+		_DocumentUrl = _URL;
 
 		// clear content
 		beginBuild();
