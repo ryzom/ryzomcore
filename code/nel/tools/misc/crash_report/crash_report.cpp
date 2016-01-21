@@ -90,6 +90,8 @@ public:
 	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 #endif
 
+	Q_IMPORT_PLUGIN(QIcoPlugin)
+
 #endif
 
 int main(int argc, char **argv)
