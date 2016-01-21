@@ -215,7 +215,7 @@ inline std::string toString(const size_t &val) { return toString("%u", val); }
 
 inline std::string toString(const float &val) { return toString("%f", val); }
 inline std::string toString(const double &val) { return toString("%lf", val); }
-inline std::string toString(const bool &val) { return toString("%u", val?1:0); }
+inline std::string toString(const bool &val) { return val ? "1":"0"; }
 inline std::string toString(const std::string &val) { return val; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference
