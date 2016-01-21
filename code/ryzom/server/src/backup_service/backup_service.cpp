@@ -62,7 +62,7 @@ struct CBackupMsgSaveFileRecv
 
 
 extern CDirectoryRateStat	DirStats;
-extern NLMISC::CVariable<std::string> SaveShardRootBackupService;
+extern NLMISC::CVariable<std::string> SaveShardRootGameShare;
 
 using namespace NLNET;
 using namespace NLMISC;
@@ -542,7 +542,7 @@ static CMessage getFileClassImp( CMessage& msgin)
 		}
 	}
 	// In case something like getPathContent() has returned full paths, make paths relative to match the requested filenames
-	fdc.stripFilename(SaveShardRootBackupService.get());
+	fdc.stripFilename(SaveShardRootGameShare.get());
 
 	// compose the output message
 	CMessage	msgout("BS_FILE_CLASS");
