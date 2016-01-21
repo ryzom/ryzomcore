@@ -219,7 +219,6 @@ end
 function game:updateTargetConsiderUI()
 	--debugInfo("Updating consider widget")
 
-
 	local targetWindow = getUI("ui:interface:target")	
 	-- 	
 	local wgTargetSlotForce = targetWindow:find("slot_force")
@@ -229,7 +228,7 @@ function game:updateTargetConsiderUI()
 	local wgToolTip     = targetWindow:find("target_tooltip")
 	local wgPvPTag     = targetWindow:find("pvp_tags")
 	local wgHeader     = targetWindow:find("header_opened")
-		
+
 	wgTargetSlotForce.active = true
 	wgImpossible.active = true
 
