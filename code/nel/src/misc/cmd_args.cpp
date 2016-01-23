@@ -157,7 +157,7 @@ bool CCmdArgs::haveAdditionalArg() const
 
 		// they don't have any short or long name, but need a name in help
 		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.found)
-			return false;
+			return true;
 	}
 
 	return false;
