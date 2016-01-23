@@ -41,6 +41,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/command.h"
 #include "nel/net/tcp_sock.h"
+#include "nel/misc/cmd_args.h"
 
 //#define TEST_CRASH_COUNTER
 #ifdef TEST_CRASH_COUNTER
@@ -169,6 +170,36 @@ int main(int argc, char **argv)
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 #endif // NL_DEBUG
 
+	Args.setVersion(getDisplayVersion());
+	Args.setDescription("Ryzom client");
+	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
+	Args.addAdditionalArg("login", "Login to use", true, false);
+	Args.addAdditionalArg("password", "Password to use", true, false);
+	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
+
+#ifdef NL_OS_WINDOWS
+	if (!Args.parse(cmdline)) return 1;
+#else
+	if (!Args.parse(argc, argv)) return 1;
+#endif
+
+	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
+
+	// no shard id in ring mode
+	std::string sLoginShardId;
+
+	if (Args.haveAdditionalArg("login") && Args.haveAdditionalArg("password"))
+	{
+		LoginLogin = Args.getAdditionalArg("login").front();
+		LoginPassword = Args.getAdditionalArg("password").front();
+
+		if (Args.haveAdditionalArg("shard_id"))
+			sLoginShardId = Args.getAdditionalArg("shard_id").front();
+	}
+
+	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
+		LoginShardId = std::numeric_limits<uint32>::max();
+
 	// if client_default.cfg is not in current directory, use application default directory
 	if (!CFile::isExists("client_default.cfg"))
 	{
@@ -178,9 +209,6 @@ int main(int argc, char **argv)
 
 		CPath::setCurrentPath(currentPath);
 	}
-
-	// temporary buffer to store Ryzom full path
-	char filename[1024];
 
 #ifdef NL_OS_MAC
 	struct rlimit rlp, rlp2, rlp3;
@@ -201,24 +229,6 @@ int main(int argc, char **argv)
 
 #if defined(NL_OS_WINDOWS)
 
-	/* Windows bug: When the Window IconeMode is in "ThumbNails" mode, the current path is set to
-		"document settings"..... Force the path to be the path of the exe
-	*/
-	{
-#ifdef FINAL_VERSION
-		char	str[4096];
-		uint	len= GetModuleFileName(NULL, str, 4096);
-		if(len && len<4096)
-		{
-			str[len]= 0;
-			string	path= CFile::getPath(str);
-//			if(!path.empty())
-//				CPath::setCurrentPath(path.c_str());
-		}
-#endif // FINAL_VERSION
-	}
-
-	string sCmdLine = cmdline;
 #if FINAL_VERSION
 	//if (sCmdLine.find("/multi") == string::npos) // If '/multi' not found
 	//{
@@ -267,26 +277,6 @@ int main(int argc, char **argv)
 
 	pump ();
 
-	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
-	vector<string> res;
-	explode(sCmdLine, std::string(" "), res, true);
-
-	// no shard id in ring mode
-	if (res.size() >= 3)
-	{
-		LoginLogin = res[0];
-		LoginPassword = res[1];
-		if (!fromString(res[2], LoginShardId)) LoginShardId = -1;
-	}
-	else if (res.size() >= 2)
-	{
-		LoginLogin = res[0];
-		LoginPassword = res[1];
-		LoginShardId = -1;
-	}
-
-	GetModuleFileName(GetModuleHandle(NULL), filename, 1024);
-
 	// Delete the .bat file because it s not useful anymore
 	if (NLMISC::CFile::fileExists("updt_nl.bat"))
 		NLMISC::CFile::deleteFile("updt_nl.bat");
@@ -317,24 +307,6 @@ int main(int argc, char **argv)
 
 	// TODO for Linux : splashscreen
 
-	if (argc >= 4)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		if (!fromString(argv[3], LoginShardId)) LoginShardId = -1;
-	}
-	else if (argc >= 3)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		LoginShardId = -1;
-	}
-
-	strcpy(filename, argv[0]);
-
-	// set process name for logs
-	CLog::setProcessName(filename);
-
 	// Delete the .sh file because it s not useful anymore
 	if (NLMISC::CFile::fileExists("updt_nl.sh"))
 		NLMISC::CFile::deleteFile("updt_nl.sh");
@@ -342,7 +314,7 @@ int main(int argc, char **argv)
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
-	pPM->setRyzomFilename(filename);
+	pPM->setRyzomFilename(Args.getProgramPath() + Args.getProgramName());
 
 	/////////////////////////////////
 	// Initialize the application. //
