@@ -16,6 +16,7 @@
 
 #include "stdmisc.h"
 
+#include "nel/misc/file.h"
 #include "nel/misc/big_file.h"
 #include "nel/misc/path.h"
 
@@ -138,141 +139,17 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 	handle.File = fopen (sBigFileName.c_str(), "rb");
 	if (handle.File == NULL)
 		return false;
-	uint32 nFileSize=CFile::getFileSize (handle.File);
-	//nlfseek64 (handle.File, 0, SEEK_END);
-	//uint32 nFileSize = ftell (handle.File);
 
-	// Result
-	if (nlfseek64 (handle.File, nFileSize-4, SEEK_SET) != 0)
+	// Used internally by CBigFile, use optimizations and lower case of filenames
+	bnp.InternalUse = true;
+
+	// read BNP header
+	if (!bnp.readHeader(handle.File))
 	{
 		fclose (handle.File);
 		handle.File = NULL;
 		return false;
 	}
-
-	uint32 nOffsetFromBeginning;
-	if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, handle.File) != 1)
-	{
-		fclose (handle.File);
-		handle.File = NULL;
-		return false;
-	}
-
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nOffsetFromBeginning);
-#endif
-
-	if (nlfseek64 (handle.File, nOffsetFromBeginning, SEEK_SET) != 0)
-	{
-		fclose (handle.File);
-		handle.File = NULL;
-		return false;
-	}
-
-	// Read the file count
-	uint32 nNbFile;
-	if (fread (&nNbFile, sizeof(uint32), 1, handle.File) != 1)
-	{
-		fclose (handle.File);
-		handle.File = NULL;
-		return false;
-	}
-
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nNbFile);
-#endif
-
-	map<string,BNPFile> tempMap;
-	for (uint32 i = 0; i < nNbFile; ++i)
-	{
-		char FileName[256];
-		uint8 nStringSize;
-		if (fread (&nStringSize, 1, 1, handle.File) != 1)
-		{
-			fclose (handle.File);
-			handle.File = NULL;
-			return false;
-		}
-
-		if (fread (FileName, nStringSize, 1, handle.File) != 1)
-		{
-			fclose (handle.File);
-			handle.File = NULL;
-			return false;
-		}
-
-		FileName[nStringSize] = 0;
-		uint32 nFileSize2;
-		if (fread (&nFileSize2, sizeof(uint32), 1, handle.File) != 1)
-		{
-			fclose (handle.File);
-			handle.File = NULL;
-			return false;
-		}
-
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(nFileSize2);
-#endif
-
-		uint32 nFilePos;
-		if (fread (&nFilePos, sizeof(uint32), 1, handle.File) != 1)
-		{
-			fclose (handle.File);
-			handle.File = NULL;
-			return false;
-		}
-
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(nFilePos);
-#endif
-
-		BNPFile bnpfTmp;
-		bnpfTmp.Pos = nFilePos;
-		bnpfTmp.Size = nFileSize2;
-		tempMap.insert (make_pair(toLower(string(FileName)), bnpfTmp));
-	}
-
-	if (nlfseek64 (handle.File, 0, SEEK_SET) != 0)
-	{
-		fclose (handle.File);
-		handle.File = NULL;
-		return false;
-	}
-
-	// Convert temp map
-	if (nNbFile > 0)
-	{
-		uint nSize = 0, nNb = 0;
-		map<string,BNPFile>::iterator it = tempMap.begin();
-		while (it != tempMap.end())
-		{
-			nSize += (uint)it->first.size() + 1;
-			nNb++;
-			it++;
-		}
-
-		bnp.FileNames = new char[nSize];
-		memset(bnp.FileNames, 0, nSize);
-		bnp.Files.resize(nNb);
-
-		it = tempMap.begin();
-		nSize = 0;
-		nNb = 0;
-		while (it != tempMap.end())
-		{
-			strcpy(bnp.FileNames+nSize, it->first.c_str());
-
-			bnp.Files[nNb].Name = bnp.FileNames+nSize;
-			bnp.Files[nNb].Size = it->second.Size;
-			bnp.Files[nNb].Pos = it->second.Pos;
-
-			nSize += (uint)it->first.size() + 1;
-			nNb++;
-			it++;
-		}
-	}
-	// End of temp map conversion
-
 	if (nOptions&BF_CACHE_FILE_ON_OPEN)
 		bnp.CacheFileOnOpen = true;
 	else
@@ -312,6 +189,369 @@ void CBigFile::remove (const std::string &sBigFileName)
 		delete [] rbnp.FileNames;
 		_BNPs.erase (it);
 	}
+}
+
+//// ***************************************************************************
+bool CBigFile::BNP::readHeader()
+{
+	// Only external use
+	if (InternalUse || BigFileName.empty()) return false;
+
+	FILE *f = fopen (BigFileName.c_str(), "rb");
+	if (f == NULL) return false;
+
+	bool res = readHeader(f);
+	fclose (f);
+
+	return res;
+}
+
+//// ***************************************************************************
+bool CBigFile::BNP::readHeader(FILE *file)
+{
+	if (file == NULL) return false;
+
+	uint32 nFileSize=CFile::getFileSize (file);
+
+	// Result
+	if (nlfseek64 (file, nFileSize-4, SEEK_SET) != 0)
+	{
+		return false;
+	}
+
+	if (fread (&OffsetFromBeginning, sizeof(uint32), 1, file) != 1)
+	{
+		return false;
+	}
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(OffsetFromBeginning);
+#endif
+
+	if (nlfseek64 (file, OffsetFromBeginning, SEEK_SET) != 0)
+	{
+		return false;
+	}
+
+	// Read the file count
+	uint32 nNbFile;
+	if (fread (&nNbFile, sizeof(uint32), 1, file) != 1)
+	{
+		return false;
+	}
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nNbFile);
+#endif
+
+	map<string, BNPFile> tempMap;
+
+	if (!InternalUse) SFiles.clear();
+
+	for (uint32 i = 0; i < nNbFile; ++i)
+	{
+		uint8 nStringSize;
+		if (fread (&nStringSize, 1, 1, file) != 1)
+		{
+			return false;
+		}
+
+		char sFileName[256];
+		if (fread (sFileName, 1, nStringSize, file) != nStringSize)
+		{
+			return false;
+		}
+
+		sFileName[nStringSize] = 0;
+
+		uint32 nFileSize2;
+		if (fread (&nFileSize2, sizeof(uint32), 1, file) != 1)
+		{
+			return false;
+		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFileSize2);
+#endif
+
+		uint32 nFilePos;
+		if (fread (&nFilePos, sizeof(uint32), 1, file) != 1)
+		{
+			return false;
+		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFilePos);
+#endif
+
+		if (InternalUse)
+		{
+			BNPFile bnpfTmp;
+			bnpfTmp.Pos = nFilePos;
+			bnpfTmp.Size = nFileSize2;
+			tempMap.insert (make_pair(toLower(string(sFileName)), bnpfTmp));
+		}
+		else
+		{
+			SBNPFile bnpfTmp;
+			bnpfTmp.Name = sFileName;
+			bnpfTmp.Pos = nFilePos;
+			bnpfTmp.Size = nFileSize2;
+			SFiles.push_back(bnpfTmp);
+		}
+	}
+
+	if (nlfseek64 (file, 0, SEEK_SET) != 0)
+	{
+		return false;
+	}
+
+	// Convert temp map
+	if (InternalUse && nNbFile > 0)
+	{
+		uint nSize = 0, nNb = 0;
+		map<string,BNPFile>::iterator it = tempMap.begin();
+		while (it != tempMap.end())
+		{
+			nSize += (uint)it->first.size() + 1;
+			nNb++;
+			it++;
+		}
+
+		FileNames = new char[nSize];
+		memset(FileNames, 0, nSize);
+		Files.resize(nNb);
+
+		it = tempMap.begin();
+		nSize = 0;
+		nNb = 0;
+		while (it != tempMap.end())
+		{
+			strcpy(FileNames+nSize, it->first.c_str());
+
+			Files[nNb].Name = FileNames+nSize;
+			Files[nNb].Size = it->second.Size;
+			Files[nNb].Pos = it->second.Pos;
+
+			nSize += (uint)it->first.size() + 1;
+			nNb++;
+			it++;
+		}
+	}
+	// End of temp map conversion
+
+	return true;
+}
+
+bool CBigFile::BNP::appendHeader()
+{
+	// Only external use
+	if (InternalUse || BigFileName.empty()) return false;
+
+	FILE *f = fopen (BigFileName.c_str(), "ab");
+	if (f == NULL) return false;
+
+	uint32 nNbFile = (uint32)SFiles.size();
+
+	// value to be serialized
+	uint32 nNbFile2 = nNbFile;
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nNbFile2);
+#endif
+
+	if (fwrite (&nNbFile2, sizeof(uint32), 1, f) != 1)
+	{
+		fclose(f);
+		return false;
+	}
+
+	for (uint32 i = 0; i < nNbFile; ++i)
+	{
+		uint8 nStringSize = (uint8)SFiles[i].Name.length();
+		if (fwrite (&nStringSize, 1, 1, f) != 1)
+		{
+			fclose(f);
+			return false;
+		}
+
+		if (fwrite (SFiles[i].Name.c_str(), 1, nStringSize, f) != nStringSize)
+		{
+			fclose(f);
+			return false;
+		}
+
+		uint32 nFileSize = SFiles[i].Size;
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFileSize);
+#endif
+
+		if (fwrite (&nFileSize, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
+			return false;
+		}
+
+		uint32 nFilePos = SFiles[i].Pos;
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(nFilePos);
+#endif
+
+		if (fwrite (&nFilePos, sizeof(uint32), 1, f) != 1)
+		{
+			fclose(f);
+			return false;
+		}
+	}
+
+	uint32 nOffsetFromBeginning = OffsetFromBeginning;
+
+#ifdef NL_BIG_ENDIAN
+	NLMISC_BSWAP32(nOffsetFromBeginning);
+#endif
+
+	if (fwrite (&nOffsetFromBeginning, sizeof(uint32), 1, f) != 1)
+	{
+		fclose(f);
+		return false;
+	}
+
+	fclose (f);
+	return true;
+}
+
+// ***************************************************************************
+bool CBigFile::BNP::appendFile(const std::string &filename)
+{
+	// Only external use
+	if (InternalUse || BigFileName.empty()) return false;
+
+	// Check if we can read the source file
+	if (!CFile::fileExists(filename)) return false;
+
+	SBNPFile ftmp;
+	ftmp.Name = CFile::getFilename(filename);
+	ftmp.Size = CFile::getFileSize(filename);
+	ftmp.Pos = OffsetFromBeginning;
+	SFiles.push_back(ftmp);
+	OffsetFromBeginning += ftmp.Size;
+
+	FILE *f1 = fopen(BigFileName.c_str(), "ab");
+	if (f1 == NULL) return false;
+
+	FILE *f2 = fopen(filename.c_str(), "rb");
+	if (f2 == NULL)
+	{
+		fclose(f1);
+		return false;
+	}
+	
+	uint8 *ptr = new uint8[ftmp.Size];
+
+	if (fread (ptr, ftmp.Size, 1, f2) != 1)
+	{
+		nlwarning("%s read error", filename.c_str());
+	}
+	else if (fwrite (ptr, ftmp.Size, 1, f1) != 1)
+	{
+		nlwarning("%s write error", BigFileName.c_str());
+	}
+
+	delete [] ptr;
+	
+	fclose(f2);
+	fclose(f1);
+
+	return true;
+}
+
+// ***************************************************************************
+bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback *callback)
+{
+	// Only external use
+	if (InternalUse || BigFileName.empty()) return false;
+
+	FILE *bnp = fopen (BigFileName.c_str(), "rb");
+	if (bnp == NULL)
+		return false;
+
+	// only read header is not already read
+	if (SFiles.empty() && !readHeader(bnp))
+	{
+		fclose (bnp);
+		return false;
+	}
+
+	CFile::createDirectory(sDestDir);
+
+	uint32 totalUncompressed = 0, total = 0;
+
+	for (uint32 i = 0; i < SFiles.size(); ++i)
+	{
+		total += SFiles[i].Size;
+	}
+
+	FILE *out = NULL;
+
+	for (uint32 i = 0; i < SFiles.size(); ++i)
+	{
+		const SBNPFile &rBNPFile = SFiles[i];
+		string filename = CPath::standardizePath(sDestDir) + rBNPFile.Name;
+
+		if (callback && !(*callback)(filename, totalUncompressed, total))
+		{
+			fclose (bnp);
+			return false;
+		}
+
+		out = fopen (filename.c_str(), "wb");
+		if (out != NULL)
+		{
+			nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
+			uint8 *ptr = new uint8[rBNPFile.Size];
+			bool readError = fread (ptr, rBNPFile.Size, 1, bnp) != 1;
+			if (readError)
+			{
+				nlwarning("%s read error errno = %d: %s", filename.c_str(), errno, strerror(errno));
+			}
+			bool writeError = fwrite (ptr, rBNPFile.Size, 1, out) != 1;
+			if (writeError)
+			{
+				nlwarning("%s write error errno = %d: %s", filename.c_str(), errno, strerror(errno));
+			}
+			bool diskFull = ferror(out) && errno == 28 /* ENOSPC*/;
+			fclose (out);
+			delete [] ptr;
+			if (diskFull)
+			{
+				fclose (bnp);
+				throw NLMISC::EDiskFullError(filename);
+			}
+			if (writeError)
+			{
+				fclose (bnp);
+				throw NLMISC::EWriteError(filename);
+			}
+			if (readError)
+			{
+				fclose (bnp);
+				throw NLMISC::EReadError(filename);
+			}
+		}
+
+		totalUncompressed += rBNPFile.Size;
+
+		if (callback && !(*callback)(filename, totalUncompressed, total))
+		{
+			fclose (bnp);
+			return false;
+		}
+	}
+
+	fclose (bnp);
+	return true;
 }
 
 // ***************************************************************************
@@ -358,6 +598,14 @@ void CBigFile::removeAll ()
 		remove (_BNPs.begin()->first);
 	}
 }
+
+struct CBNPFileComp
+{
+	bool operator()(const CBigFile::BNPFile &f, const CBigFile::BNPFile &s )
+	{
+		return strcmp( f.Name, s.Name ) < 0;
+	}
+};
 
 // ***************************************************************************
 bool CBigFile::getFileInternal (const std::string &sFileName, BNP *&zeBnp, BNPFile *&zeBnpFile)
@@ -504,5 +752,12 @@ void CBigFile::getBigFilePaths(std::vector<std::string> &bigFilePaths)
 	}
 }
 
+// ***************************************************************************
+bool CBigFile::unpack(const std::string &sBigFileName, const std::string &sDestDir, TUnpackProgressCallback *callback)
+{
+	BNP bnpFile;
+	bnpFile.BigFileName = sBigFileName;
+	return bnpFile.unpack(sDestDir, callback);
+}
 
 } // namespace NLMISC
