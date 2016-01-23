@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 			// if OptOutputFileName is a directory, append the original filename
 			if (CFile::isDirectory(OptOutputFileName))
 			{
-				outputFileName = CPath::standardizePath(outputFileName) + getOutputFileName(inputFileName);
+				outputFileName = CPath::standardizePath(OptOutputFileName) + CFile::getFilename(getOutputFileName(inputFileName));
 			}
 			else
 			{
