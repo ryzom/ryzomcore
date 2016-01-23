@@ -234,13 +234,6 @@ int main(int argc, char **argv)
 #if defined(NL_OS_WINDOWS)
 
 #if FINAL_VERSION
-	//if (sCmdLine.find("/multi") == string::npos) // If '/multi' not found
-	//{
-	//	HANDLE mutex = CreateMutex (NULL, false, "RyzomClient");
-	//	if (mutex && GetLastError() == ERROR_ALREADY_EXISTS)
-	//		exit (0);
-	//}
-
 	//initCrashReport ();
 #endif // FINAL_VERSION
 
@@ -308,7 +301,6 @@ int main(int argc, char **argv)
 	}
 
 #else
-
 	// TODO for Linux : splashscreen
 
 	// Delete the .sh file because it s not useful anymore
