@@ -20,7 +20,7 @@
 #include "types_nl.h"
 #include "tds.h"
 #include "singleton.h"
-
+#include "callback.h"
 
 namespace NLMISC {
 
@@ -86,6 +86,66 @@ public:
 	// Used for CPath only for the moment !
 	char *getFileNamePtr(const std::string &sFileName, const std::string &sBigFileName);
 
+	typedef CCallback<bool /* continue */, const std::string &/* filename */, uint32 /* currentSize */, uint32 /* totalSize */> TUnpackProgressCallback;
+
+	// Unpack all files in sBigFileName to sDestDir and send progress notifications to optional callback
+	static bool unpack(const std::string &sBigFileName, const std::string &sDestDir, TUnpackProgressCallback *callback = NULL);
+
+	// A BNPFile header (filename is a char* pointing on FileNames and is always lowercase)
+	struct BNPFile
+	{
+		BNPFile() : Name(NULL), Size(0), Pos(0) { }
+		char*		Name;
+		uint32		Size;
+		uint32		Pos;
+	};
+
+	// A SBNPFile header (filename is a std::string and keeps the original case)
+	struct SBNPFile
+	{
+		SBNPFile() : Size(0), Pos(0) { }
+		std::string	Name;
+		uint32		Size;
+		uint32		Pos;
+	};
+
+	// A BNP structure
+	struct BNP
+	{
+		BNP() : FileNames(NULL), ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0) { }
+
+		// FileName of the BNP. important to open it in getFile() (for other threads or if not always opened).
+		std::string						BigFileName;
+		// map of files in the BNP.
+		char							*FileNames;
+		std::vector<BNPFile>			Files;
+		std::vector<SBNPFile>			SFiles;
+
+		// Since many seek may be done on a FILE*, each thread should have its own FILE opened.
+		uint32							ThreadFileId;
+		bool							CacheFileOnOpen;
+		bool							AlwaysOpened;
+		bool							InternalUse;
+
+		// Offset written in BNP header
+		uint32							OffsetFromBeginning;
+
+		// Read BNP header from FILE* and init member variables
+		bool readHeader(FILE* file);
+
+		// Read BNP header from BigFileName and init member variables
+		bool readHeader();
+
+		// Append BNP header to the big file BigFileName (to use after appendFile calls)
+		bool appendHeader();
+
+		// Append a file to BigFileName
+		bool appendFile(const std::string &filename);
+
+		// Unpack BigFileName to sDestDir and send progress notifications to optional callback
+		bool unpack(const std::string &sDestDir, TUnpackProgressCallback *callback = NULL);
+	};
+
 // ***************
 private:
 	class	CThreadFileArray;
@@ -118,38 +178,6 @@ private:
 		uint32		_CurrentId;
 	};
 
-	// A BNPFile header
-	struct BNPFile
-	{
-		BNPFile() : Name(NULL), Size(0), Pos(0) { }
-		char		*Name;
-		uint32		Size;
-		uint32		Pos;
-	};
-
-	struct CBNPFileComp
-	{
-		bool operator()(const BNPFile &f, const BNPFile &s )
-		{
-			return strcmp( f.Name, s.Name ) < 0;
-		}
-	};
-
-	// A BNP structure
-	struct BNP
-	{
-		BNP() : FileNames(NULL) { }
-
-		// FileName of the BNP. important to open it in getFile() (for other threads or if not always opened).
-		std::string						BigFileName;
-		// map of files in the BNP.
-		char							*FileNames;
-		std::vector<BNPFile>			Files;
-		// Since many seek may be done on a FILE*, each thread should have its own FILE opened.
-		uint32							ThreadFileId;
-		bool							CacheFileOnOpen;
-		bool							AlwaysOpened;
-	};
 private:
 
 //	CBigFile(); // Singleton mode -> access it with the getInstance function

@@ -260,7 +260,7 @@ void CFileContainer::getFileListByPath(const std::string &extension, const std::
 			{
 				string ext = SSMext.get(first->idExt);
 				string p = SSMpath.get(first->idPath);
-				
+
 				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);
@@ -2546,55 +2546,112 @@ bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
 	return false;
 }
 
-std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory )
+std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory, bool simplify )
 {
 	if( relativePath.empty() )
 		return "";
 	if( directory.empty() )
 		return "";
 
+	std::string absolutePath;
+
 #ifdef NL_OS_WINDOWS
 	// Windows network address. Eg.: \\someshare\path
-	if( ( relativePath[ 0 ] == '\\' ) && ( relativePath[ 1 ] == '\\' ) )
-		return relativePath;
+	if ((relativePath[0] == '\\') && (relativePath[1] == '\\'))
+	{
+		absolutePath = relativePath;
+	}
 
 	// Normal Windows absolute path. Eg.: C:\something
 	//
-	if( isalpha( relativePath[ 0 ] ) && ( relativePath[ 1 ] == ':' ) && ( ( relativePath[ 2 ] == '\\' ) || ( relativePath[ 2 ] == '/' ) ) )
-		return relativePath;
+	else if (isalpha(relativePath[0]) && (relativePath[1] == ':') && ((relativePath[2] == '\\') || (relativePath[2] == '/')))
+	{
+		absolutePath = relativePath;
+	}
 #else
 	// Unix filesystem absolute path
-	if( relativePath[ 0 ] == '/' )
-		return relativePath;
-
+	if (relativePath[0] == '/')
+	{
+		absolutePath = relativePath;
+	}
 #endif
-
-	// Add a slash to the directory if necessary.
-	// If the relative path starts with dots we need a slash.
-	// If the relative path starts with a slash we don't.
-	// If it starts with neither, we need a slash.
-	bool needSlash = true;
-	char c = relativePath[ 0 ];
-	if( ( c == '\\' ) || ( c == '/' ) )
-		needSlash = false;
-	
-	bool hasSlash = false;
-	std::string npath = directory;
-	c = npath[ npath.size() - 1 ];
-	if( ( c == '\\' ) || ( c == '/' ) )
-		hasSlash = true;
-
-	if( needSlash && !hasSlash )
-		npath += '/';
 	else
-	if( hasSlash && !needSlash )
-		npath.resize( npath.size() - 1 );
-	
-	// Now build the new absolute path
-	npath += relativePath;
-	npath = standardizePath( npath, false );
+	{
+		// Add a slash to the directory if necessary.
+		// If the relative path starts with dots we need a slash.
+		// If the relative path starts with a slash we don't.
+		// If it starts with neither, we need a slash.
+		bool needSlash = true;
+		char c = relativePath[0];
+		if ((c == '\\') || (c == '/'))
+			needSlash = false;
 
-	return npath;
+		bool hasSlash = false;
+		absolutePath = directory;
+		c = absolutePath[absolutePath.size() - 1];
+		if ((c == '\\') || (c == '/'))
+			hasSlash = true;
+
+		if (needSlash && !hasSlash)
+			absolutePath += '/';
+		else
+		if (hasSlash && !needSlash)
+			absolutePath.resize(absolutePath.size() - 1);
+
+		// Now build the new absolute path
+		absolutePath += relativePath;
+		absolutePath = standardizePath(absolutePath, true);
+	}
+
+	if (simplify)
+	{
+		// split all components path to manage parent directories
+		std::vector<std::string> tokens;
+		explode(absolutePath, std::string("/"), tokens, true);
+
+		std::vector<std::string> directoryParts;
+
+		// process all components
+		for(uint i = 0, len = tokens.size(); i < len; ++i)
+		{
+			std::string token = tokens[i];
+
+			// current directory
+			if (token != ".")
+			{
+				// parent directory
+				if (token == "..")
+				{
+					// remove last directory
+					directoryParts.pop_back();
+				}
+				else
+				{
+					// append directory
+					directoryParts.push_back(token);
+				}
+			}
+		}
+
+		if (!directoryParts.empty())
+		{
+			absolutePath = directoryParts[0];
+
+			// rebuild the whole absolute path
+			for(uint i = 1, len = directoryParts.size(); i < len; ++i)
+				absolutePath += "/" + directoryParts[i];
+
+			// add trailing slash
+			absolutePath += "/";
+		}
+		else
+		{
+			// invalid path
+			absolutePath.clear();
+		}
+	}
+
+	return absolutePath;
 }
 
 bool CPath::isAbsolutePath(const std::string &path)
