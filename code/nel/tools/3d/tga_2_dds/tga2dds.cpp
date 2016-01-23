@@ -21,6 +21,8 @@
 #include "nel/misc/bitmap.h"
 #include "nel/misc/path.h"
 #include "nel/misc/debug.h"
+#include "nel/misc/cmd_args.h"
+
 #include <math.h>
 
 #include "../s3tc_compressor_lib/s3tc_compressor.h"
@@ -40,7 +42,6 @@ using namespace std;
 bool sameType(const std::string &sFileNameDest, uint8 algo);
 bool dataCheck(const std::string &sFileNameSrc, const std::string &FileNameDest, uint8 algo);
 std::string getOutputFileName(const std::string &inputFileName);
-void writeInstructions();
 
 
 
@@ -197,39 +198,6 @@ bool dataCheck(const std::string &sFileNameSrc, const std::string &sFileNameDest
 	return true;
 }
 
-void writeInstructions()
-{
-	cout<<endl;
-	cout<<"TGA2DDS"<<endl;
-	cout<<"  Convert TGA or PNG image file (24bits or 32 bits) to DDS compressed file using"<<endl;
-	cout<<"DXTC compression (DXTC1, DXTC1 with alpha, DXTC3, or DXTC5). "<<endl;
-	cout<<"  The program looks for possible user color files and load them automatically,"<<endl;
-	cout<<"a user color file must have the same name that the original tga file, plus the"<<endl;
-	cout<<"extension \"_usercolor\""<<endl;
-	cout<<"ex : pic.tga, the associated user color file must be : pic_usercolor.tga"<<endl;
-	cout<<endl;
-	cout<<"syntax : tga2dds <input> [-o <output.dds>] [-a <algo>] [-m]"<<endl;
-	cout<<endl;
-	cout<<"with"<<endl;
-	cout<<"algo      : 1  for DXTC1 (no alpha)"<<endl;
-	cout<<"            1A for DXTC1 with alpha"<<endl;
-	cout<<"            3  for DXTC3"<<endl;
-	cout<<"            5  for DXTC5"<<endl;
-	cout<<"            tga16  for 16 bits TGA"<<endl;
-	cout<<"            tga8   for 8  bits TGA"<<endl;
-	cout<<"            png16  for 16 bits PNG"<<endl;
-	cout<<"            png8   for 8  bits PNG"<<endl;
-	cout<<"-m        : Create MipMap"<<endl;
-	cout<<"-rFACTOR  : Reduce the bitmap size before compressing"<<endl;
-	cout<<"            FACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8"<<endl;
-	cout<<endl;
-	cout<<"default   : DXTC1 if 24b, DXTC5 if 32b."<<endl;
-	cout<<endl;
-	cout<<"/? for this help"<<endl;
-	cout<<endl;
-}
-
-
 std::string getOutputFileName(const std::string &inputFileName)
 {
 	std::string::size_type pos = inputFileName.rfind(".");
@@ -242,85 +210,6 @@ std::string getOutputFileName(const std::string &inputFileName)
 	{
 		return inputFileName.substr(0,pos) + ".dds";
 	}
-}
-
-
-// ***************************************************************************
-string		OptOutputFileName;
-uint8		OptAlgo = NOT_DEFINED;
-bool		OptMipMap = false;
-uint		Reduce = 0;
-bool	parseOptions(int argc, char **argv)
-{
-	for(sint i=2;i<argc;i++)
-	{
-		// OutputFileName.
-		if(!strcmp(argv[i], "-o"))
-		{
-			i++;
-			if(i>=argc) return false;
-			OptOutputFileName= argv[i];
-		}
-		// Algo.
-		else if(!strcmp(argv[i], "-a"))
-		{
-			i++;
-			if(i>=argc) return false;
-			if(!strcmp(argv[i],"1"))	OptAlgo = DXT1;
-			else
-			if(!strcmp(argv[i],"1A")) 	OptAlgo = DXT1A;
-			else
-			if(!strcmp(argv[i],"1a")) 	OptAlgo = DXT1A;
-			else
-			if(!strcmp(argv[i],"3"))	OptAlgo = DXT3;
-			else
-			if(!strcmp(argv[i],"5"))	OptAlgo = DXT5;
-			else
-			if(!strcmp(argv[i],"tga16"))	OptAlgo = TGA16;
-			else
-			if(!strcmp(argv[i],"tga8"))	OptAlgo = TGA8;
-			else
-			if(!strcmp(argv[i],"png16"))	OptAlgo = PNG16;
-			else
-			if(!strcmp(argv[i],"png8"))	OptAlgo = PNG8;
-			else
-			{
-				cerr<<"Algorithm unknown : "<<argv[i]<<endl;
-				return 1;
-			}
-		}
-		// MipMap.
-		else if(!strcmp(argv[i], "-m"))
-		{
-			OptMipMap= true;
-		}
-		// Reduce size of the bitmap
-		else if(!strcmp(argv[i], "-r0"))
-			Reduce = 0;
-		else if(!strcmp(argv[i], "-r1"))
-			Reduce = 1;
-		else if(!strcmp(argv[i], "-r2"))
-			Reduce = 2;
-		else if(!strcmp(argv[i], "-r3"))
-			Reduce = 3;
-		else if(!strcmp(argv[i], "-r4"))
-			Reduce = 4;
-		else if(!strcmp(argv[i], "-r5"))
-			Reduce = 5;
-		else if(!strcmp(argv[i], "-r6"))
-			Reduce = 6;
-		else if(!strcmp(argv[i], "-r7"))
-			Reduce = 7;
-		else if(!strcmp(argv[i], "-r8"))
-			Reduce = 8;
-		// What is this option?
-		else
-		{
-			return false;
-		}
-	}
-
-	return true;
 }
 
 // ***************************************************************************
@@ -374,9 +263,9 @@ const int bayerDiv8G[4][4] = {
 };
 
 const int bayerDiv8B[4][4] = {
-	{ 5, 1, 4, 0 }, 
-	{ 3, 7, 2, 6 }, 
-	{ 4, 0, 5, 1 }, 
+	{ 5, 1, 4, 0 },
+	{ 3, 7, 2, 6 },
+	{ 4, 0, 5, 1 },
 	{ 2, 6, 3, 7 }
 };
 
@@ -385,350 +274,418 @@ int main(int argc, char **argv)
 {
 	CApplicationContext applicationContext;
 
-	uint8 algo;
-
 	// Parse Command Line.
 	//====================
-	if(argc<2)
-	{
-		writeInstructions();
-		return 0;
-	}
-	if(!strcmp(argv[1],"/?"))
-	{
-		writeInstructions();
-		return 0;
-	}
-	if(!strcmp(argv[1],"-?"))
-	{
-		writeInstructions();
-		return 0;
-	}
-	if(!parseOptions(argc, argv))
-	{
-		writeInstructions();
-		return 0;
-	}
+	NLMISC::CCmdArgs args;
 
-	// Reading TGA or PNG and converting to RGBA
-	//====================================
-	CBitmap picTga;
-	CBitmap picTga2;
-	CBitmap picSrc;
+	args.setDescription(
+		"Convert TGA or PNG image file to DDS compressed file using DXTC compression (DXTC1, DXTC1 with alpha, DXTC3, or DXTC5).\n"
+		"  The program looks for possible user color files and load them automatically, a user color file must have the same name that the original tga file, plus the extension \"_usercolor\"\n"
+		"Eg.: pic.tga, the associated user color file must be: pic_usercolor.tga\n"
+		);
+	args.addArg("o", "output", "output.dds", "Output DDS filename or directory");
+	args.addArg("a", "algo", "algo", "Conversion algorithm to use\n"
+		"  1      for DXTC1 (no alpha)\n"
+		"  1A     for DXTC1 with alpha\n"
+		"  3      for DXTC3\n"
+		"  5      for DXTC5\n"
+		"  tga16  for 16 bits TGA\n"
+		"  tga8   for 8  bits TGA\n"
+		"  png16  for 16 bits PNG\n"
+		"  png8   for 8  bits PNG\n"
+		"\n"
+		"  default : DXTC1 if 24 bits, DXTC5 if 32 bits."
+		);
+	args.addArg("m", "mipmap", "", "Create MipMap");
+	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n\t\t\tFACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
+	args.addAdditionalArg("input", "PNG or TGA files to convert", false);
 
-	std::string inputFileName(argv[1]);
-	if(inputFileName.find("_usercolor")<inputFileName.length())
-	{
-		return 0;
-	}
-	NLMISC::CIFile input;
-	if(!input.open(inputFileName))
-	{
-		cerr<<"Can't open input file "<<inputFileName<<endl;
-		return 1;
-	}
-	uint8 imageDepth = picTga.load(input);
-	if(imageDepth==0)
-	{
-		cerr<<"Can't load file : "<<inputFileName<<endl;
-		return 1;
-	}
-	if(imageDepth!=16 && imageDepth!=24 && imageDepth!=32 && imageDepth!=8)
-	{
-		cerr<<"Image not supported : "<<imageDepth<<endl;
-		return 1;
-	}
-	input.close();
-	uint32 height = picTga.getHeight();
-	uint32 width= picTga.getWidth();
-	picTga.convertToType (CBitmap::RGBA);
+	if (!args.parse(argc, argv)) return 1;
 
+	string OptOutputFileName;
+	uint8 OptAlgo = NOT_DEFINED;
+	bool OptMipMap = false;
+	uint Reduce = 0;
 
-	// Output file name and algo.
-	//===========================
-	std::string outputFileName;
-	if (!OptOutputFileName.empty())
-		outputFileName = OptOutputFileName;
-	else
-		outputFileName = getOutputFileName(inputFileName);
+	if (args.haveArg("o"))
+		OptOutputFileName = args.getArg("o").front();
 
-	// Check dest algo
-	if (OptAlgo==NOT_DEFINED)
-		OptAlgo = getType (outputFileName);
-
-	// Choose Algo.
-	if(OptAlgo!=NOT_DEFINED)
+	if (args.haveArg("a"))
 	{
-		algo= OptAlgo;
-	}
-	else
-	{
-		// TODO: if alpha channel is 0, use DXTC1a instead DXTC1
-		if(imageDepth==24)
-			algo = DXT1;
+		std::string strAlgo = args.getArg("a").front();
+
+		if (strAlgo == "1")					OptAlgo = DXT1;
+		else if (toLower(strAlgo) == "1a") 	OptAlgo = DXT1A;
+		else if (strAlgo == "3")			OptAlgo = DXT3;
+		else if (strAlgo == "5") 			OptAlgo = DXT5;
+		else if (strAlgo == "tga8")			OptAlgo = TGA8;
+		else if (strAlgo == "tga16")		OptAlgo = TGA16;
+		else if (strAlgo == "png8")			OptAlgo = PNG8;
+		else if (strAlgo == "png16")		OptAlgo = PNG16;
 		else
-			algo = DXT5;
-	}
-
-	// Data check
-	//===========
-	if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
-	{
-		cout<<outputFileName<<" : a recent dds file already exists"<<endl;
-		return 0;
-	}
-
-
-	// Vectors for RGBA data
-	CObjectVector<uint8> RGBASrc = picTga.getPixels();
-	CObjectVector<uint8> RGBASrc2;
-	CObjectVector<uint8> RGBADest;
-	RGBADest.resize(height*width*4);
-	uint	dstRGBADestId= 0;
-
-	// UserColor
-	//===========
-	/*
-	// Checking if option "usercolor" has been used
-	std::string userColorFileName;
-	if(argc>4)
-	{
-		if(strcmp("-usercolor",argv[4])==0)
 		{
-			if(argc!=6)
+			cerr << "Unknown algorithm: " << strAlgo << endl;
+			return 1;
+		}
+	}
+
+	if (args.haveArg("r"))
+	{
+		std::string strReduce = args.getArg("r").front();
+
+		// Reduce size of the bitmap
+		if (fromString(strReduce, Reduce))
+		{
+			if (Reduce > 8) Reduce = 8;
+		}
+	}
+
+	std::vector<std::string> inputFileNames = args.getAdditionalArg("input");
+
+	for(uint i = 0; i < inputFileNames.size(); ++i)
+	{
+		uint8 algo;
+
+		// Reading TGA or PNG and converting to RGBA
+		//====================================
+		CBitmap picTga;
+		CBitmap picTga2;
+		CBitmap picSrc;
+
+		std::string inputFileName = inputFileNames[i];
+
+		if(inputFileName.find("_usercolor")<inputFileName.length())
+		{
+			return 0;
+		}
+		NLMISC::CIFile input;
+		if(!input.open(inputFileName))
+		{
+			cerr<<"Can't open input file " << inputFileName << endl;
+			return 1;
+		}
+		uint8 imageDepth = picTga.load(input);
+		if(imageDepth==0)
+		{
+			cerr<<"Can't load file: "<<inputFileName<<endl;
+			return 1;
+		}
+		if(imageDepth!=16 && imageDepth!=24 && imageDepth!=32 && imageDepth!=8)
+		{
+			cerr<<"Image not supported: "<<imageDepth<<endl;
+			return 1;
+		}
+		input.close();
+		uint32 height = picTga.getHeight();
+		uint32 width= picTga.getWidth();
+		picTga.convertToType (CBitmap::RGBA);
+
+
+		// Output file name and algo.
+		//===========================
+		std::string outputFileName;
+
+		if (!OptOutputFileName.empty())
+		{
+			// if OptOutputFileName is a directory, append the original filename
+			if (CFile::isDirectory(OptOutputFileName))
+			{
+				outputFileName = CPath::standardizePath(outputFileName) + getOutputFileName(inputFileName);
+			}
+			else
+			{
+				outputFileName = OptOutputFileName;
+
+				if (inputFileNames.size() > 1)
+				{
+					cerr<<"WARNING! Several files to convert to the same output filename! Use an output directory instead."<<endl;
+					return 1;
+				}
+			}
+		}
+		else
+		{
+			outputFileName = getOutputFileName(inputFileName);
+		}
+
+		// Check dest algo
+		if (OptAlgo==NOT_DEFINED)
+			OptAlgo = getType (outputFileName);
+
+		// Choose Algo.
+		if(OptAlgo!=NOT_DEFINED)
+		{
+			algo= OptAlgo;
+		}
+		else
+		{
+			// TODO: if alpha channel is 0, use DXTC1a instead DXTC1
+			if(imageDepth==24)
+				algo = DXT1;
+			else
+				algo = DXT5;
+		}
+
+		// Data check
+		//===========
+		if(dataCheck(inputFileName,outputFileName, OptAlgo, OptMipMap))
+		{
+			cout<<outputFileName<<" : a recent dds file already exists"<<endl;
+			return 0;
+		}
+
+
+		// Vectors for RGBA data
+		CObjectVector<uint8> RGBASrc = picTga.getPixels();
+		CObjectVector<uint8> RGBASrc2;
+		CObjectVector<uint8> RGBADest;
+		RGBADest.resize(height*width*4);
+		uint	dstRGBADestId= 0;
+
+		// UserColor
+		//===========
+		/*
+		// Checking if option "usercolor" has been used
+		std::string userColorFileName;
+		if(argc>4)
+		{
+			if(strcmp("-usercolor",argv[4])==0)
+			{
+				if(argc!=6)
+				{
+					writeInstructions();
+					return;
+				}
+				userColorFileName = argv[5];
+			}
+			else
 			{
 				writeInstructions();
 				return;
 			}
-			userColorFileName = argv[5];
+		}
+		*/
+		// Checking if associate usercolor file  exists
+		std::string userColorFileName;
+		std::string::size_type pos = inputFileName.rfind(".");
+		if (pos == std::string::npos)
+		{
+			// name without extension
+			userColorFileName = inputFileName + "_usercolor";
 		}
 		else
 		{
-			writeInstructions();
-			return;
+			// append input filename extension
+			userColorFileName = inputFileName.substr(0,pos) + "_usercolor" + inputFileName.substr(pos);
 		}
-	}
-	*/
-	// Checking if associate usercolor file  exists
-	std::string userColorFileName;
-	std::string::size_type pos = inputFileName.rfind(".");
-	if (pos == std::string::npos)
-	{
-		// name without extension
-		userColorFileName = inputFileName + "_usercolor";
-	}
-	else
-	{
-		// append input filename extension
-		userColorFileName = inputFileName.substr(0,pos) + "_usercolor" + inputFileName.substr(pos);
-	}
 
-	// Reading second Tga for user color, don't complain if _usercolor is missing
-	NLMISC::CIFile input2;
-	if (CPath::exists(userColorFileName) && input2.open(userColorFileName))
-	{
-		picTga2.load(input2);
-		uint32 height2 = picTga2.getHeight();
-		uint32 width2 = picTga2.getWidth();
-		nlassert(width2==width);
-		nlassert(height2==height);
-		picTga2.convertToType (CBitmap::RGBA);
-
-		RGBASrc2 = picTga2.getPixels();
-
-		NLMISC::CRGBA *pRGBASrc = (NLMISC::CRGBA*)&RGBASrc[0];
-		NLMISC::CRGBA *pRGBASrc2 = (NLMISC::CRGBA*)&RGBASrc2[0];
-	
-		for(uint32 i = 0; i<width*height; i++)
+		// Reading second Tga for user color, don't complain if _usercolor is missing
+		NLMISC::CIFile input2;
+		if (CPath::exists(userColorFileName) && input2.open(userColorFileName))
 		{
-			// If no UserColor, must take same RGB, and keep same Alpha from src1 !!! So texture can have both alpha
-			// userColor and other alpha usage.
-			if(pRGBASrc2[i].A==255)
+			picTga2.load(input2);
+			uint32 height2 = picTga2.getHeight();
+			uint32 width2 = picTga2.getWidth();
+			nlassert(width2==width);
+			nlassert(height2==height);
+			picTga2.convertToType (CBitmap::RGBA);
+
+			RGBASrc2 = picTga2.getPixels();
+
+			NLMISC::CRGBA *pRGBASrc = (NLMISC::CRGBA*)&RGBASrc[0];
+			NLMISC::CRGBA *pRGBASrc2 = (NLMISC::CRGBA*)&RGBASrc2[0];
+
+			for(uint32 i = 0; i<width*height; i++)
 			{
-				RGBADest[dstRGBADestId++]= pRGBASrc[i].R;
-				RGBADest[dstRGBADestId++]= pRGBASrc[i].G;
-				RGBADest[dstRGBADestId++]= pRGBASrc[i].B;
-				RGBADest[dstRGBADestId++]= pRGBASrc[i].A;
-			}
-			else
-			{
-				// Old code.
-				/*uint8 F = (uint8) ((float)pRGBASrc[i].R*0.3 + (float)pRGBASrc[i].G*0.56 + (float)pRGBASrc[i].B*0.14);
-				uint8 Frgb;
-				if((F*pRGBASrc2[i].A/255)==255)
-					Frgb = 0;
-				else
-					Frgb = (255-pRGBASrc2[i].A)/(255-F*pRGBASrc2[i].A/255);
-				RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].R/255;
-				RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].G/255;
-				RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].B/255;
-				RGBADest[dstRGBADestId++]= F*pRGBASrc[i].A/255;*/
-
-				// New code: use new restrictions from IDriver.
-				float	Rt, Gt, Bt, At;
-				float	Lt;
-				float	Rtm, Gtm, Btm, Atm;
-
-				// read 0-1 RGB pixel.
-				Rt= (float)pRGBASrc[i].R/255;
-				Gt= (float)pRGBASrc[i].G/255;
-				Bt= (float)pRGBASrc[i].B/255;
-				Lt= Rt*0.3f + Gt*0.56f + Bt*0.14f;
-
-				// take Alpha from userColor src.
-				At= (float)pRGBASrc2[i].A/255;
-				Atm= 1-Lt*(1-At);
-
-				// If normal case.
-				if(Atm>0)
+				// If no UserColor, must take same RGB, and keep same Alpha from src1 !!! So texture can have both alpha
+				// userColor and other alpha usage.
+				if(pRGBASrc2[i].A==255)
 				{
-					Rtm= Rt*At / Atm;
-					Gtm= Gt*At / Atm;
-					Btm= Bt*At / Atm;
+					RGBADest[dstRGBADestId++]= pRGBASrc[i].R;
+					RGBADest[dstRGBADestId++]= pRGBASrc[i].G;
+					RGBADest[dstRGBADestId++]= pRGBASrc[i].B;
+					RGBADest[dstRGBADestId++]= pRGBASrc[i].A;
 				}
-				// Else special case: At==0, and Lt==1.
 				else
 				{
-					Rtm= Gtm= Btm= 0;
+					// Old code.
+					/*uint8 F = (uint8) ((float)pRGBASrc[i].R*0.3 + (float)pRGBASrc[i].G*0.56 + (float)pRGBASrc[i].B*0.14);
+					uint8 Frgb;
+					if((F*pRGBASrc2[i].A/255)==255)
+						Frgb = 0;
+					else
+						Frgb = (255-pRGBASrc2[i].A)/(255-F*pRGBASrc2[i].A/255);
+					RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].R/255;
+					RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].G/255;
+					RGBADest[dstRGBADestId++]= Frgb*pRGBASrc[i].B/255;
+					RGBADest[dstRGBADestId++]= F*pRGBASrc[i].A/255;*/
+
+					// New code: use new restrictions from IDriver.
+					float	Rt, Gt, Bt, At;
+					float	Lt;
+					float	Rtm, Gtm, Btm, Atm;
+
+					// read 0-1 RGB pixel.
+					Rt= (float)pRGBASrc[i].R/255;
+					Gt= (float)pRGBASrc[i].G/255;
+					Bt= (float)pRGBASrc[i].B/255;
+					Lt= Rt*0.3f + Gt*0.56f + Bt*0.14f;
+
+					// take Alpha from userColor src.
+					At= (float)pRGBASrc2[i].A/255;
+					Atm= 1-Lt*(1-At);
+
+					// If normal case.
+					if(Atm>0)
+					{
+						Rtm= Rt*At / Atm;
+						Gtm= Gt*At / Atm;
+						Btm= Bt*At / Atm;
+					}
+					// Else special case: At==0, and Lt==1.
+					else
+					{
+						Rtm= Gtm= Btm= 0;
+					}
+
+					// copy to buffer.
+					sint	r,g,b,a;
+					r= (sint)floor(Rtm*255+0.5f);
+					g= (sint)floor(Gtm*255+0.5f);
+					b= (sint)floor(Btm*255+0.5f);
+					a= (sint)floor(Atm*255+0.5f);
+					clamp(r, 0,255);
+					clamp(g, 0,255);
+					clamp(b, 0,255);
+					clamp(a, 0,255);
+					RGBADest[dstRGBADestId++]= r;
+					RGBADest[dstRGBADestId++]= g;
+					RGBADest[dstRGBADestId++]= b;
+					RGBADest[dstRGBADestId++]= a;
 				}
-
-				// copy to buffer.
-				sint	r,g,b,a;
-				r= (sint)floor(Rtm*255+0.5f);
-				g= (sint)floor(Gtm*255+0.5f);
-				b= (sint)floor(Btm*255+0.5f);
-				a= (sint)floor(Atm*255+0.5f);
-				clamp(r, 0,255);
-				clamp(g, 0,255);
-				clamp(b, 0,255);
-				clamp(a, 0,255);
-				RGBADest[dstRGBADestId++]= r;
-				RGBADest[dstRGBADestId++]= g;
-				RGBADest[dstRGBADestId++]= b;
-				RGBADest[dstRGBADestId++]= a;
 			}
 		}
-	}
-	else
-		RGBADest = RGBASrc;
+		else
+			RGBADest = RGBASrc;
 
-	// Copy to the dest bitmap.
-	picSrc.resize(width, height, CBitmap::RGBA);
-	picSrc.getPixels(0)= RGBADest;
+		// Copy to the dest bitmap.
+		picSrc.resize(width, height, CBitmap::RGBA);
+		picSrc.getPixels(0)= RGBADest;
 
-	// Resize the destination bitmap ?
-	while (Reduce != 0)
-	{
-		dividSize (picSrc);
-		Reduce--;
-	}
-
-	if (algo == TGA16)
-	{
-		// Apply bayer dither
-		CObjectVector<uint8> &rgba = picSrc.getPixels(0);
-		const uint32 w = picSrc.getWidth(0);
-		uint32 x = 0;
-		uint32 y = 0;
-		for (uint32 i = 0; i < rgba.size(); i += 4)
+		// Resize the destination bitmap ?
+		while (Reduce != 0)
 		{
-			NLMISC::CRGBA &c = reinterpret_cast<NLMISC::CRGBA &>(rgba[i]);
-			c.R = (uint8)std::min(255, (int)c.R + bayerDiv8R[x % 4][y % 4]);
-			c.G = (uint8)std::min(255, (int)c.G + bayerDiv8G[x % 4][y % 4]);
-			c.B = (uint8)std::min(255, (int)c.B + bayerDiv8B[x % 4][y % 4]);
-			++x;
-			x %= w;
-			if (x == 0)
-				++y;
+			dividSize (picSrc);
+			Reduce--;
 		}
-	}
 
-	// 8 or 16 bits TGA or PNG ?
-	if ((algo == TGA16) || (algo == TGA8) || (algo == PNG16) || (algo == PNG8))
-	{
-		// Saving TGA or PNG file
-		//=================
-		NLMISC::COFile output;
-		if(!output.open(outputFileName))
+		if (algo == TGA16)
 		{
-			cerr<<"Can't open output file "<<outputFileName<<endl;
-			return 1;
-		}
-		try
-		{
-			if (algo == TGA16)
+			// Apply bayer dither
+			CObjectVector<uint8> &rgba = picSrc.getPixels(0);
+			const uint32 w = picSrc.getWidth(0);
+			uint32 x = 0;
+			uint32 y = 0;
+			for (uint32 i = 0; i < rgba.size(); i += 4)
 			{
-				picSrc.writeTGA (output, 16);
+				NLMISC::CRGBA &c = reinterpret_cast<NLMISC::CRGBA &>(rgba[i]);
+				c.R = (uint8)std::min(255, (int)c.R + bayerDiv8R[x % 4][y % 4]);
+				c.G = (uint8)std::min(255, (int)c.G + bayerDiv8G[x % 4][y % 4]);
+				c.B = (uint8)std::min(255, (int)c.B + bayerDiv8B[x % 4][y % 4]);
+				++x;
+				x %= w;
+				if (x == 0)
+					++y;
 			}
-			else if (algo == TGA8)
+		}
+
+		// 8 or 16 bits TGA or PNG ?
+		if ((algo == TGA16) || (algo == TGA8) || (algo == PNG16) || (algo == PNG8))
+		{
+			// Saving TGA or PNG file
+			//=================
+			NLMISC::COFile output;
+			if(!output.open(outputFileName))
 			{
-				picSrc.convertToType(CBitmap::Luminance);
-				picSrc.writeTGA (output, 8);
+				cerr<<"Can't open output file "<<outputFileName<<endl;
+				return 1;
 			}
-			else if (algo == PNG16)
+			try
 			{
-				picSrc.writePNG (output, 16);
+				if (algo == TGA16)
+				{
+					picSrc.writeTGA (output, 16);
+				}
+				else if (algo == TGA8)
+				{
+					picSrc.convertToType(CBitmap::Luminance);
+					picSrc.writeTGA (output, 8);
+				}
+				else if (algo == PNG16)
+				{
+					picSrc.writePNG (output, 16);
+				}
+				else if (algo == PNG8)
+				{
+					picSrc.convertToType(CBitmap::Luminance);
+					picSrc.writePNG (output, 8);
+				}
 			}
-			else if (algo == PNG8)
+			catch(const NLMISC::EWriteError &e)
 			{
-				picSrc.convertToType(CBitmap::Luminance);
-				picSrc.writePNG (output, 8);
+				cerr<<e.what()<<endl;
+				return 1;
 			}
-		}
-		catch(const NLMISC::EWriteError &e)
-		{
-			cerr<<e.what()<<endl;
-			return 1;
-		}
 
-		output.close();
-	}
-	else
-	{
-		// Compress
-		//===========
-
-		// log.
-		std::string algostr;
-		switch(algo)
-		{
-			case DXT1:
-				algostr = "DXTC1";
-				break;
-			case DXT1A:
-				algostr = "DXTC1A";
-				break;
-			case DXT3:
-				algostr = "DXTC3";
-				break;
-			case DXT5:
-				algostr = "DXTC5";
-				break;
+			output.close();
 		}
-		cout<<"compressing ("<<algostr<<") "<<inputFileName<<" to "<<outputFileName<<endl;
+		else
+		{
+			// Compress
+			//===========
+
+			// log.
+			std::string algostr;
+			switch(algo)
+			{
+				case DXT1:
+					algostr = "DXTC1";
+					break;
+				case DXT1A:
+					algostr = "DXTC1A";
+					break;
+				case DXT3:
+					algostr = "DXTC3";
+					break;
+				case DXT5:
+					algostr = "DXTC5";
+					break;
+			}
+			cout<<"compressing ("<<algostr<<") "<<inputFileName<<" to "<<outputFileName<<endl;
 
 
-		// Saving compressed DDS file
-		// =================
-		NLMISC::COFile output;
-		if(!output.open(outputFileName))
-		{
-			cerr<<"Can't open output file "<<outputFileName<<endl;
-			return 1;
-		}
-		try
-		{
-			CS3TCCompressor		comp;
-			comp.compress(picSrc, OptMipMap, algo, output);
-		}
-		catch(const NLMISC::EWriteError &e)
-		{
-			cerr<<e.what()<<endl;
-			return 1;
-		}
+			// Saving compressed DDS file
+			// =================
+			NLMISC::COFile output;
+			if(!output.open(outputFileName))
+			{
+				cerr<<"Can't open output file "<<outputFileName<<endl;
+				return 1;
+			}
+			try
+			{
+				CS3TCCompressor		comp;
+				comp.compress(picSrc, OptMipMap, algo, output);
+			}
+			catch(const NLMISC::EWriteError &e)
+			{
+				cerr<<e.what()<<endl;
+				return 1;
+			}
 
-		output.close();
+			output.close();
+		}
 	}
 
 	return 0;
-}	
+}
