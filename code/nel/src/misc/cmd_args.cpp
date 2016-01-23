@@ -262,7 +262,10 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 
 	// first argument is always the program name
 	_ProgramName = CFile::getFilename(argv.front());
-	_ProgramPath = CPath::standardizePath(CFile::getPath(argv.front()));
+	_ProgramPath = CPath::makePathAbsolute(CPath::standardizePath(CFile::getPath(argv.front())), CPath::getCurrentPath(), true);
+
+	// set process name for logs
+	CLog::setProcessName(_ProgramName);
 
 	// arguments count
 	uint argc = argv.size();
