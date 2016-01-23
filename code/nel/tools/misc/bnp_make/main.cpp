@@ -92,10 +92,20 @@ void packSubRecurse(const std::string &srcDirectory)
 	printf ("Treating directory: %s\n", srcDirectory.c_str());
 	CPath::getPathContent(srcDirectory, true, false, true, pathContent);
 
-	// TODO: remove duplicate files
+	if (pathContent.empty()) return;
 
 	// Sort filename
 	sort (pathContent.begin(), pathContent.end(), i_comp);
+
+	// check for files with same name
+	for(uint i = 1, len = pathContent.size(); i < len; ++i)
+	{
+		if (toLower(CFile::getFilename(pathContent[i-1])) == toLower(CFile::getFilename(pathContent[i])))
+		{
+			nlerror("File %s is not unique in BNP!", CFile::getFilename(pathContent[i]).c_str());
+			return;
+		}
+	}
 
 	for (uint i=0; i<pathContent.size(); ++i)
 	{
@@ -103,11 +113,11 @@ void packSubRecurse(const std::string &srcDirectory)
 		{
 			if (gBNPHeader.appendFile(pathContent[i]))
 			{
-				printf("adding %s\n", pathContent[i].c_str());
+				printf("Adding %s\n", pathContent[i].c_str());
 			}
 			else
 			{
-				printf("error cannot open %s\n", pathContent[i].c_str());
+				printf("Error: cannot open %s\n", pathContent[i].c_str());
 			}
 		}
 	}

@@ -34,6 +34,7 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/block_memory.h"
 #include "nel/misc/system_utils.h"
+#include "nel/misc/cmd_args.h"
 // 3D Interface.
 #include "nel/3d/bloom_effect.h"
 #include "nel/3d/u_driver.h"
@@ -616,6 +617,9 @@ void initStereoDisplayDevice()
 	IStereoDisplay::releaseUnusedLibraries();
 }
 
+// we want to get executable directory
+extern NLMISC::CCmdArgs Args;
+
 static void addPaths(IProgressCallback &progress, const std::vector<std::string> &paths, bool recurse)
 {
 	// all prefixes for paths
@@ -625,19 +629,19 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	directoryPrefixes.push_back("");
 
 #if defined(NL_OS_WINDOWS)
-	char path[MAX_PATH];
-	GetModuleFileNameA(GetModuleHandleA(NULL), path, MAX_PATH);
-
 	// check in same directory as executable
-	directoryPrefixes.push_back(CPath::standardizePath(CFile::getPath(path)));
+	directoryPrefixes.push_back(Args.getProgramPath());
 #elif defined(NL_OS_MAC)
 	// check in bundle (Installer)
-	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/Contents/Resources"));
+	directoryPrefixes.push_back(getAppBundlePath() + "/Contents/Resources/");
 
 	// check in same directory as bundle (Steam)
-	directoryPrefixes.push_back(CPath::standardizePath(getAppBundlePath() + "/.."));
+	directoryPrefixes.push_back(CPath::makePathAbsolute(getAppBundlePath() + "/..", ".", true));
 #elif defined(NL_OS_UNIX)
-	// TODO: check in same directory as executable
+	// check in same directory as executable
+	directoryPrefixes.push_back(Args.getProgramPath());
+
+	// check in installed directory
 	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
 #endif
 

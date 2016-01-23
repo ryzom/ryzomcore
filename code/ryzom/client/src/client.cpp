@@ -17,7 +17,7 @@
 
 
 #include "stdpch.h"
-
+#include "user_agent.h"
 
 //////////////
 // INCLUDES //
@@ -41,6 +41,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/command.h"
 #include "nel/net/tcp_sock.h"
+#include "nel/misc/cmd_args.h"
 
 //#define TEST_CRASH_COUNTER
 #ifdef TEST_CRASH_COUNTER
@@ -141,213 +142,9 @@ INT_PTR CALLBACK MyDialogProc(
 
 HWND SlashScreen = NULL;
 HINSTANCE HInstance;
-/*
-static bool connect()
-{
-	string server = "crashcounter.nevrax.com";
 
-	if(CrashCounterSock.connected())
-		return true;
-
-	try
-	{
-		// add the default port if no port in the cfg
-		if(server.find(':') == string::npos)
-			server+=":80";
-		CrashCounterSock.connect(CInetAddress(server));
-		if(!CrashCounterSock.connected())
-		{
-			nlwarning("Can't connect to web server '%s'", server.c_str());
-			goto end;
-		}
-	}
-	catch(const Exception &e)
-	{
-		nlwarning("Can't connect to web server '%s': %s", server.c_str(), e.what());
-		goto end;
-	}
-
-	return true;
-
-end:
-
-	if(CrashCounterSock.connected())
-		CrashCounterSock.close ();
-
-	return false;
-}
-
-// ***************************************************************************
-static bool send(const string &url)
-{
-	if (CrashCounterSock.connected())
-	{
-		string buffer = "GET " + url +
-			" HTTP/1.0\n"
-			"Host: crashcounter.nevrax.com\n"
-			"User-agent: Ryzom\n"
-			"\n";
-		uint32 size = (uint32)buffer.size();
-		if(!url.empty())
-		{
-			if(CrashCounterSock.send((uint8 *)buffer.c_str(), size, false) != CSock::Ok)
-			{
-				nlwarning ("Can't send data to the server");
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
-}
-
-// ***************************************************************************
-static bool receive(string &res)
-{
-	if (CrashCounterSock.connected())
-	{
-		uint32 size;
-		res = "";
-
-		uint8 buf[1024];
-
-		for(;;)
-		{
-			size = 1023;
-
-			if (CrashCounterSock.receive((uint8*)buf, size, false) == CSock::Ok)
-			{
-				buf[1023] = '\0';
-				res += (char*)buf;
-				//nlinfo("block received '%s'", buf);
-			}
-			else
-			{
-				buf[size] = '\0';
-				res += (char*)buf;
-				//nlwarning ("server connection closed");
-				break;
-			}
-		}
-		//nlinfo("all received '%s'", res.c_str());
-		return true;
-	}
-	else
-		return false;
-}
-
-string CrashFeedback = "CRASHED";
-
-INT_PTR CALLBACK ReportDialogProc(
-  HWND hwndDlg,  // handle to dialog box
-  UINT uMsg,     // message
-  WPARAM wParam, // first message parameter
-  LPARAM lParam  // second message parameter
-)
-{
-	switch (uMsg)
-	{
-	case WM_INITDIALOG:
-		{
-			RECT rect;
-			RECT rectDesktop;
-			GetWindowRect (hwndDlg, &rect);
-			GetWindowRect (GetDesktopWindow (), &rectDesktop);
-			SetWindowPos (hwndDlg, HWND_TOPMOST, (rectDesktop.right-rectDesktop.left-rect.right+rect.left)/2, (rectDesktop.bottom-rectDesktop.top-rect.bottom+rect.top)/2, 0, 0, SWP_NOSIZE);
-		}
-		break;
-	case WM_COMMAND:
-		switch (LOWORD(wParam))
-		{
-		case FROZEN:
-			CrashFeedback = "USER_FROZEN";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case REBOOTED:
-			CrashFeedback = "USER_REBOOTED";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case WINDOWED:
-			CrashFeedback = "USER_WINDOWED";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case NO_WINDOW:
-			CrashFeedback = "USER_NO_WINDOW";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case KILLED:
-			CrashFeedback = "USER_KILLED";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case NOT_CRASHED:
-			CrashFeedback = "USER_NOT_CRASHED";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		case CRASHED:
-			CrashFeedback = "CRASHED";
-			EndDialog (hwndDlg, IDOK);
-			break;
-		}
-		break;
-	}
-	return FALSE;
-}
-
-void initCrashReport ()
-{
-	//
-	bool crashed = CFile::isExists (getLogDirectory() + "ryzom_started");
-	bool during_release = false;
-	bool exception_catched = false;
-	bool breakpointed = false;
-	bool dumped = false;
-	bool report_failed = false;
-	bool report_refused = false;
-	bool report_sent = false;
-	if (crashed && CFile::isExists (getLogDirectory() + "during_release"))
-		during_release = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "during_release");
-	if (crashed && CFile::isExists (getLogDirectory() + "exception_catched"))
-		exception_catched = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "exception_catched");
-	if (crashed && CFile::isExists (getLogDirectory() + "breakpointed"))
-		breakpointed = CFile::getFileModificationDate ("ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "breakpointed");
-	if (crashed && CFile::isExists (getLogDirectory() + "nel_debug.dmp"))
-		dumped = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "nel_debug.dmp");
-	if (crashed && CFile::isExists (getLogDirectory() + "report_failed"))
-		report_failed = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_failed");
-	if (crashed && CFile::isExists (getLogDirectory() + "report_refused"))
-		report_refused = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_refused");
-	if (crashed && CFile::isExists (getLogDirectory() + "report_sent"))
-		report_sent = CFile::getFileModificationDate (getLogDirectory() + "ryzom_started") <= CFile::getFileModificationDate (getLogDirectory() + "report_sent");
-	CFile::createEmptyFile(getLogDirectory() + "ryzom_started");
-	connect();
-	if (report_sent)
-		send("/?crashtype=REPORT_SENT");
-	else if (report_refused)
-		send("/?crashtype=REPORT_REFUSED");
-	else if (report_failed)
-		send("/?crashtype=REPORT_FAILED");
-	else if (dumped)
-		send("/?crashtype=DUMPED");
-	else if (breakpointed)
-		send("/?crashtype=BREAKPOINTED");
-	else if (exception_catched)
-		send("/?crashtype=EXCEPTION_CATCHED");
-	else if (during_release)
-		send("/?crashtype=DURING_RELEASE");
-	else if (crashed)
-	{
-		//DialogBox (HInstance, MAKEINTRESOURCE(IDD_CRASH_INFORMATION), NULL, ReportDialogProc);
-		//send("/?crashtype="+CrashFeedback);
-		send("/?crashtype=CRASHED");
-	}
-	else
-		send("/?crashtype=NOT_CRASHED");
-	string res;
-	receive(res);
-#ifdef TEST_CRASH_COUNTER
-	MessageBox (NULL, res.c_str(), res.c_str(), MB_OK);
-#endif // TEST_CRASH_COUNTER
-}*/
+// make it global if other classes/functions want to access to it
+NLMISC::CCmdArgs Args;
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
 #else
@@ -373,18 +170,49 @@ int main(int argc, char **argv)
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
 #endif // NL_DEBUG
 
+	Args.setVersion(getDisplayVersion());
+	Args.setDescription("Ryzom client");
+	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
+	Args.addAdditionalArg("login", "Login to use", true, false);
+	Args.addAdditionalArg("password", "Password to use", true, false);
+	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
+
+#ifdef NL_OS_WINDOWS
+	if (!Args.parse(cmdline)) return 1;
+#else
+	if (!Args.parse(argc, argv)) return 1;
+#endif
+
+	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
+
+	// no shard id in ring mode
+	std::string sLoginShardId;
+
+	if (Args.haveAdditionalArg("login") && Args.haveAdditionalArg("password"))
+	{
+		LoginLogin = Args.getAdditionalArg("login").front();
+		LoginPassword = Args.getAdditionalArg("password").front();
+
+		if (Args.haveAdditionalArg("shard_id"))
+			sLoginShardId = Args.getAdditionalArg("shard_id").front();
+	}
+
+	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
+		LoginShardId = std::numeric_limits<uint32>::max();
+
 	// if client_default.cfg is not in current directory, use application default directory
 	if (!CFile::isExists("client_default.cfg"))
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
+		// append config ID to directory
+		if (Args.haveArg("c"))
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("c").front();
+
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
 		CPath::setCurrentPath(currentPath);
 	}
-
-	// temporary buffer to store Ryzom full path
-	char filename[1024];
 
 #ifdef NL_OS_MAC
 	struct rlimit rlp, rlp2, rlp3;
@@ -405,32 +233,7 @@ int main(int argc, char **argv)
 
 #if defined(NL_OS_WINDOWS)
 
-	/* Windows bug: When the Window IconeMode is in "ThumbNails" mode, the current path is set to
-		"document settings"..... Force the path to be the path of the exe
-	*/
-	{
-#ifdef FINAL_VERSION
-		char	str[4096];
-		uint	len= GetModuleFileName(NULL, str, 4096);
-		if(len && len<4096)
-		{
-			str[len]= 0;
-			string	path= CFile::getPath(str);
-//			if(!path.empty())
-//				CPath::setCurrentPath(path.c_str());
-		}
-#endif // FINAL_VERSION
-	}
-
-	string sCmdLine = cmdline;
 #if FINAL_VERSION
-	//if (sCmdLine.find("/multi") == string::npos) // If '/multi' not found
-	//{
-	//	HANDLE mutex = CreateMutex (NULL, false, "RyzomClient");
-	//	if (mutex && GetLastError() == ERROR_ALREADY_EXISTS)
-	//		exit (0);
-	//}
-
 	//initCrashReport ();
 #endif // FINAL_VERSION
 
@@ -471,26 +274,6 @@ int main(int argc, char **argv)
 
 	pump ();
 
-	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
-	vector<string> res;
-	explode(sCmdLine, std::string(" "), res, true);
-
-	// no shard id in ring mode
-	if (res.size() >= 3)
-	{
-		LoginLogin = res[0];
-		LoginPassword = res[1];
-		if (!fromString(res[2], LoginShardId)) LoginShardId = -1;
-	}
-	else if (res.size() >= 2)
-	{
-		LoginLogin = res[0];
-		LoginPassword = res[1];
-		LoginShardId = -1;
-	}
-
-	GetModuleFileName(GetModuleHandle(NULL), filename, 1024);
-
 	// Delete the .bat file because it s not useful anymore
 	if (NLMISC::CFile::fileExists("updt_nl.bat"))
 		NLMISC::CFile::deleteFile("updt_nl.bat");
@@ -518,26 +301,7 @@ int main(int argc, char **argv)
 	}
 
 #else
-
 	// TODO for Linux : splashscreen
-
-	if (argc >= 4)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		if (!fromString(argv[3], LoginShardId)) LoginShardId = -1;
-	}
-	else if (argc >= 3)
-	{
-		LoginLogin = argv[1];
-		LoginPassword = argv[2];
-		LoginShardId = -1;
-	}
-
-	strcpy(filename, argv[0]);
-
-	// set process name for logs
-	CLog::setProcessName(filename);
 
 	// Delete the .sh file because it s not useful anymore
 	if (NLMISC::CFile::fileExists("updt_nl.sh"))
@@ -546,7 +310,7 @@ int main(int argc, char **argv)
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
-	pPM->setRyzomFilename(filename);
+	pPM->setRyzomFilename(Args.getProgramPath() + Args.getProgramName());
 
 	/////////////////////////////////
 	// Initialize the application. //

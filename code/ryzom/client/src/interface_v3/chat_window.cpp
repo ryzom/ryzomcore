@@ -1308,7 +1308,7 @@ public:
 			else
 			{
 				CInterfaceManager *im = CInterfaceManager::getInstance();
-				im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
+				im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
 			}
 		}
 		else
