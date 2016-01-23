@@ -102,13 +102,6 @@ public:
 		uint32				SZFileSize;			// Size of the SZ file
 	};
 
-	struct SBNPFile
-	{
-		std::string	Name;
-		uint32		Size;
-		uint32		Pos;
-	};
-
 	struct SPatchInfo
 	{
 		struct SCat
@@ -326,7 +319,6 @@ private:
 
 	void getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, bool forceCheckSumTest);
 
-	bool readBNPHeader(const std::string &Filename, std::vector<SBNPFile> &FilesOut);
 	bool bnpUnpack(const std::string &srcBigfile, const std::string &dstPath, std::vector<std::string> &vFilenames);
 
 	// stop the threads (called when knowing the thread ended)
@@ -471,6 +463,7 @@ private:
 	// The date to apply when file is buggy: use default of year 2001, just to have a coherent date
 	enum	{DefaultResetDate= 31 * 366 * 24 * 3600};
 	// The file size of a an empty BNP
+	// If the BNP Header format change, please modify 'EmptyBnpFileSize' as needed
 	enum	{EmptyBnpFileSize= 8};
 	// Use an external downloader: (BitTorrent)
 	IAsyncDownloader* _AsyncDownloader;

@@ -297,7 +297,7 @@ int main(int argc, char **argv)
 		"  default : DXTC1 if 24 bits, DXTC5 if 32 bits."
 		);
 	args.addArg("m", "mipmap", "", "Create MipMap");
-	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n\t\t\tFACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
+	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n  FACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
 	args.addAdditionalArg("input", "PNG or TGA files to convert", false);
 
 	if (!args.parse(argc, argv)) return 1;
