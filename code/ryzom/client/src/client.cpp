@@ -205,6 +205,10 @@ int main(int argc, char **argv)
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
+		// append config ID to directory
+		if (Args.haveArg("c"))
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("c").front();
+
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
 		CPath::setCurrentPath(currentPath);
