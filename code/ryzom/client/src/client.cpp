@@ -107,6 +107,9 @@ void quitCrashReport ()
 	contReset(CrashCounterSock);
 }
 
+// make it global if other classes/functions want to access to it
+NLMISC::CCmdArgs Args;
+
 //---------------------------------------------------
 // MAIN :
 // Entry for the Application.
@@ -142,9 +145,6 @@ INT_PTR CALLBACK MyDialogProc(
 
 HWND SlashScreen = NULL;
 HINSTANCE HInstance;
-
-// make it global if other classes/functions want to access to it
-NLMISC::CCmdArgs Args;
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cmdline, int /* nCmdShow */)
 #else
