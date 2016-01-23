@@ -1746,92 +1746,6 @@ void CPatchManager::getPatchFromDesc(SFileToPatch &ftpOut, const CBNPFile &fIn, 
 }
 
 // ****************************************************************************
-bool CPatchManager::readBNPHeader(const string &SourceName, vector<SBNPFile> &Files)
-{
-	/* *****
-		If the BNP Header format change, please modify 'EmptyBnpFileSize' as needed
-	***** */
-	FILE *f = fopen (SourceName.c_str(), "rb");
-	if (f == NULL) return false;
-
-	nlfseek64 (f, 0, SEEK_END);
-	uint32 nFileSize = NLMISC::CFile::getFileSize (SourceName);
-	nlfseek64 (f, nFileSize-sizeof(uint32), SEEK_SET);
-
-	uint32 nOffsetFromBeginning;
-	if (fread (&nOffsetFromBeginning, sizeof(uint32), 1, f) != 1)
-	{
-		fclose(f);
-		return false;
-	}
-
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nOffsetFromBeginning);
-#endif
-
-	if (nlfseek64 (f, nOffsetFromBeginning, SEEK_SET) != 0)
-	{
-		fclose(f);
-		return false;
-	}
-
-	uint32 nNbFile;
-	if (fread (&nNbFile, sizeof(uint32), 1, f) != 1)
-	{
-		fclose(f);
-		return false;
-	}
-
-#ifdef NL_BIG_ENDIAN
-	NLMISC_BSWAP32(nNbFile);
-#endif
-
-	for (uint32 i = 0; i < nNbFile; ++i)
-	{
-		uint8 nStringSize;
-		if (fread (&nStringSize, 1, 1, f) != 1)
-		{
-			fclose(f);
-			return false;
-		}
-
-		char sName[256];
-		if (fread (sName, 1, nStringSize, f) != nStringSize)
-		{
-			fclose(f);
-			return false;
-		}
-		sName[nStringSize] = 0;
-
-		SBNPFile tmpBNPFile;
-		tmpBNPFile.Name = sName;
-		if (fread (&tmpBNPFile.Size, sizeof(uint32), 1, f) != 1)
-		{
-			fclose(f);
-			return false;
-		}
-
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(tmpBNPFile.Size);
-#endif
-
-		if (fread (&tmpBNPFile.Pos, sizeof(uint32), 1, f) != 1)
-		{
-			fclose(f);
-			return false;
-		}
-
-#ifdef NL_BIG_ENDIAN
-		NLMISC_BSWAP32(tmpBNPFile.Pos);
-#endif
-
-		Files.push_back (tmpBNPFile);
-	}
-	fclose (f);
-	return true;
-}
-
-// ****************************************************************************
 bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, vector<string> &vFilenames)
 {
 	nldebug("bnpUnpack: srcBigfile=%s", srcBigfile.c_str());
@@ -1856,8 +1770,10 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 	setState(true,s);
 
 	// Read Header of the BNP File
-	vector<CPatchManager::SBNPFile> Files;
-	if (!readBNPHeader(SourceName, Files))
+	CBigFile::BNP bnpFile;
+	bnpFile.BigFileName = SourceName;
+
+	if (!bnpFile.readHeader())
 	{
 		ucstring s = CI18N::get("uiUnpackErrHead") + " " + SourceName;
 		setState(true,s);
@@ -1865,54 +1781,14 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 	}
 
 	// Unpack
-	{
-		FILE *bnp = fopen (SourceName.c_str(), "rb");
-		FILE *out;
-		if (bnp == NULL)
-			return false;
-
-		for (uint32 i = 0; i < Files.size(); ++i)
-		{
-			CPatchManager::SBNPFile &rBNPFile = Files[i];
-			string filename = DestPath + rBNPFile.Name;
-			out = fopen (filename.c_str(), "wb");
-			if (out != NULL)
-			{
-				nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
-				uint8 *ptr = new uint8[rBNPFile.Size];
-
-				if (fread (ptr, rBNPFile.Size, 1, bnp) != 1)
-				{
-					fclose(out);
-					return false;
-				}
-
-				bool writeError = fwrite (ptr, rBNPFile.Size, 1, out) != 1;
-				if (writeError)
-				{
-					nlwarning("errno = %d", errno);
-				}
-				bool diskFull = ferror(out) && errno == 28 /* ENOSPC*/;
-				fclose (out);
-				delete [] ptr;
-				if (diskFull)
-				{
-					throw NLMISC::EDiskFullError(filename);
-				}
-				if (writeError)
-				{
-					throw NLMISC::EWriteError(filename);
-				}
-			}
-		}
-		fclose (bnp);
-	}
+	if (!bnpFile.unpack(DestPath))
+		return false;
 
 	// Return names
 	{
 		vFilenames.clear();
-		for (uint32 i = 0; i < Files.size(); ++i)
-			vFilenames.push_back(Files[i].Name);
+		for (uint32 i = 0; i < bnpFile.SFiles.size(); ++i)
+			vFilenames.push_back(bnpFile.SFiles[i].Name);
 	}
 
 	return true;
@@ -2332,16 +2208,18 @@ void CCheckThread::run ()
 
 					sTranslate = CI18N::get("uiCheckInBNP") + " " + rCat.getFile(j);
 					pPM->setState(true, sTranslate);
-					vector<CPatchManager::SBNPFile> vFiles;
-					if (pPM->readBNPHeader(sBNPFilename, vFiles))
+					CBigFile::BNP bnpFile;
+					bnpFile.BigFileName = sBNPFilename;
+
+					if (bnpFile.readHeader())
 					{
 						// read the file inside the bnp and calculate the sha1
 						FILE *bnp = fopen (sBNPFilename.c_str(), "rb");
 						if (bnp != NULL)
 						{
-							for (uint32 k = 0; k < vFiles.size(); ++k)
+							for (uint32 k = 0; k < bnpFile.SFiles.size(); ++k)
 							{
-								CPatchManager::SBNPFile &rBNPFile = vFiles[k];
+								const CBigFile::SBNPFile &rBNPFile = bnpFile.SFiles[k];
 								// Is the real file exists ?
 								string sRealFilename = rCat.getUnpackTo() + rBNPFile.Name;
 								if (NLMISC::CFile::fileExists(sRealFilename))
