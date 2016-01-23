@@ -260,7 +260,7 @@ void CFileContainer::getFileListByPath(const std::string &extension, const std::
 			{
 				string ext = SSMext.get(first->idExt);
 				string p = SSMpath.get(first->idPath);
-				
+
 				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);

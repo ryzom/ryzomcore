@@ -129,12 +129,12 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 
 	bnp.BigFileName= sBigFileName;
 
-
 	// Allocate a new ThreadSafe FileId for this bnp.
 	bnp.ThreadFileId= _ThreadFileArray.allocate();
 
 	// Get a ThreadSafe handle on the file
 	CHandleFile		&handle= _ThreadFileArray.get(bnp.ThreadFileId);
+
 	// Open the big file.
 	handle.File = fopen (sBigFileName.c_str(), "rb");
 	if (handle.File == NULL)
