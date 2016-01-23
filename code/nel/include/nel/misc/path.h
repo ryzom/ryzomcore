@@ -510,9 +510,10 @@ public:
 	/** Make path absolute
 	 * \param relativePath - The relative path
 	 * \param directory - the directory to which the path is relative to
+	 * \param simplify - if we should simplify or not the path (convert . and .. in path)
 	 * returns the absolute path, or empty if something went wrong.
 	 */
-	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory );
+	static std::string makePathAbsolute (const std::string &relativePath, const std::string &directory, bool simplify = false );
 
 	/** Return if a path is absolute or not.
 	 * \param path - The path
