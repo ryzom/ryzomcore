@@ -15,7 +15,9 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+#include "stdlogic.h"
 #include "nel/logic/logic_event.h"
+
 #include "nel/logic/logic_state_machine.h"
 
 #include "nel/net/service.h"

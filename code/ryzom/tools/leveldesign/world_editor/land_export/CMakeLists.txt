@@ -2,9 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(land_export ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(land_export nelmisc nelligo ryzom_landexport)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(land_export "Ryzom, Tools, World: Land Export")
 NL_ADD_RUNTIME_FLAGS(land_export)

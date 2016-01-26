@@ -140,12 +140,13 @@ IF(WITH_RYZOM_CLIENT)
               ryzom_clientsheets
               ryzom_gameshare
               nelpacs
-              ${LIBXML2_LIBRARIES}
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}
               ${SEVENZIP_LIBRARY}
   )
+
+  ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
   IF(NOT APPLE AND NOT WIN32)
     TARGET_LINK_LIBRARIES(ryzom_client ${X11_LIBRARIES})

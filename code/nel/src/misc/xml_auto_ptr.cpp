@@ -14,30 +14,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NELGUI_H
-#define NELGUI_H
 
-#include <string>
-#include <limits>
 
-#include "nel/misc/types_nl.h"
-#include "nel/misc/algo.h"
-#include "nel/misc/factory.h"
-#include "nel/misc/bit_mem_stream.h"
-#include "nel/misc/i18n.h"
-#include "nel/misc/path.h"
-#include "nel/misc/file.h"
-#include "nel/misc/uv.h"
-#include "nel/misc/hierarchical_timer.h"
+#include "stdmisc.h"
+#include "nel/misc/xml_auto_ptr.h"
 
 #include <libxml/parser.h>
 
-#ifdef NL_OS_WINDOWS
-	#ifndef NL_COMP_MINGW
-	#	define NOMINMAX
-	#endif
-	#include <WinSock2.h>
-	#include <windows.h>
-#endif
+//=======================================
+void CXMLAutoPtr::destroy()
+{
+	if (_Value)
+	{
+		xmlFree(const_cast<char *>(_Value));
+		_Value = NULL;
+	}
+}
 
-#endif
+//=======================================
+CXMLAutoPtr::~CXMLAutoPtr()
+{
+	destroy();
+}
+
+//=======================================
+CXMLAutoPtr &CXMLAutoPtr::operator = (const char *other)
+{
+	if (other == _Value) return *this;
+	destroy();
+	_Value = other;
+	return *this;
+}
