@@ -44,6 +44,8 @@
 
 #include <nel/misc/types_nl.h>
 
+#include <libxml/parser.h>
+
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN
 #	define _WIN32_WINDOWS 0x0500
