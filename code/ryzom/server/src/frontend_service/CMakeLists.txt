@@ -10,14 +10,12 @@ LIST(REMOVE_ITEM SRC
 
 ADD_EXECUTABLE(ryzom_frontend_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						ryzom_adminmodules
 						ryzom_gameshare
-						${LIBXML2_LIBRARIES}
 						${MYSQL_LIBRARIES}
-						${ZLIB_LIBRARIES}
 						nelmisc
 						nelnet
 						nelgeorges

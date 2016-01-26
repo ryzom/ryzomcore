@@ -4,14 +4,13 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(ai_data_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
-TARGET_LINK_LIBRARIES(ai_data_service 	admin_modules 
-					ryzom_gameshare 
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR})
+
+TARGET_LINK_LIBRARIES(ai_data_service
+					admin_modules
+					ryzom_gameshare
 					server_share
 					ai_share
-					${LIBXML2_LIBRARIES} 
-					${MYSQL_LIBRARIES} 
-					${ZLIB_LIBRARIES} 
 					nelmisc
 					nelnet
 					nelgeorges
