@@ -3053,6 +3053,7 @@ void cbClientQuitGameRequest( NLNET::CMessage& msgin, const std::string & servic
 {
 	CEntityId charId;
 	bool bypassDisconnectionTimer = false;
+
 	try
 	{
 		msgin.serial(charId);
