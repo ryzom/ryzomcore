@@ -66,6 +66,8 @@
 
 #include <nel/georges/load_form.h>
 
+#include <libxml/parser.h>
+
 #ifdef NL_OS_WINDOWS
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX

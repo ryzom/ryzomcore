@@ -19,7 +19,6 @@
 #ifndef NL_INPUT_HANDLER_MANAGER_H
 #define NL_INPUT_HANDLER_MANAGER_H
 
-#include <libxml/parser.h>
 #include "nel/misc/event_server.h"
 #include <vector>
 #include <map>
@@ -27,6 +26,10 @@
 #include "nel/gui/event_descriptor.h"
 #include "nel/gui/input_handler.h"
 #include "nel/gui/group_editbox.h"
+
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
 
 /**
