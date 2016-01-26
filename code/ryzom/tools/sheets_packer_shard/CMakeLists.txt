@@ -13,7 +13,8 @@ ADD_EXECUTABLE(sheets_packer_shard	${SRC} ${EGSSHEETS}
 				${CMAKE_SOURCE_DIR}/ryzom/server/src/ai_service/commands_mlf.cpp)
 
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/tools/sheets_packer_shard ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/ryzom/common/src ${CMAKE_SOURCE_DIR}/ryzom/server/src ${CMAKE_SOURCE_DIR}/ryzom/tools/sheets_packer_shard ${CMAKE_SOURCE_DIR}/ryzom/server/src/entities_game_service)
+
 TARGET_LINK_LIBRARIES(sheets_packer_shard
 					ryzom_gameshare
 					ryzom_servershare
@@ -21,10 +22,7 @@ TARGET_LINK_LIBRARIES(sheets_packer_shard
 					nelmisc
 					nelgeorges
 					nelnet
-					nelligo
-					${LIBXML2_LIBRARIES})
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+					nelligo)
 
 NL_DEFAULT_PROPS(sheets_packer_shard "Ryzom, Tools: Sheets Packer Shard")
 NL_ADD_RUNTIME_FLAGS(sheets_packer_shard)

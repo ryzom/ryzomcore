@@ -44,10 +44,6 @@
 #include "nel/georges/u_form_loader.h"
 #include "nel/georges/load_form.h"
 
-// Include from libxml2
-#include <libxml/parser.h>
-#include <libxml/tree.h>
-
 // Georges, bypassing interface
 #include "nel/georges/form.h"
 

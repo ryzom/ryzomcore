@@ -25,7 +25,9 @@
 #include "string_mapper.h"
 #include "sstring.h"
 
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
 namespace NLMISC
 {

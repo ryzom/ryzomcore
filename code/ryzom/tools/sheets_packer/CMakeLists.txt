@@ -7,14 +7,14 @@ ADD_EXECUTABLE(sheets_packer	${SRC}
 				${CMAKE_SOURCE_DIR}/ryzom/client/src/sheet_manager.h)
 
 INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/ryzom/client/src)
+
 TARGET_LINK_LIBRARIES(sheets_packer	
 					ryzom_clientsheets
 					ryzom_gameshare
 					nelmisc
 					nelgeorges
 					nelnet
-					nelligo
-					${LIBXML2_LIBRARIES})
+					nelligo)
 
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 

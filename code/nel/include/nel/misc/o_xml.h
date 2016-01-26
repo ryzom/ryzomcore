@@ -25,9 +25,12 @@
 #include "types_nl.h"
 #include "stream.h"
 
-// Include from libxml2
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
+typedef struct _xmlDoc xmlDoc;
+typedef xmlDoc *xmlDocPtr;
 
 namespace NLMISC {
 

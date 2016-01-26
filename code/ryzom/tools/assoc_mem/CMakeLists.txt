@@ -2,9 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_EXECUTABLE(assoc_mem ${SRC})
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(assoc_mem nelmisc)
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(assoc_mem "Ryzom, Tools, Misc: assoc_mem")
 NL_ADD_RUNTIME_FLAGS(assoc_mem)

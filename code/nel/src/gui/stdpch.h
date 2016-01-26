@@ -30,6 +30,8 @@
 #include "nel/misc/uv.h"
 #include "nel/misc/hierarchical_timer.h"
 
+#include <libxml/parser.h>
+
 #ifdef NL_OS_WINDOWS
 	#ifndef NL_COMP_MINGW
 	#	define NOMINMAX

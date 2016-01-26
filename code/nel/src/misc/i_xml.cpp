@@ -1030,12 +1030,12 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const char *childName)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, xmlElementType type)
+xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, sint /* xmlElementType */ type)
 {
 	xmlNodePtr child = parent->children;
 	while (child)
 	{
-		if (child->type == type)
+		if (child->type == (xmlElementType)type)
 			return child;
 		child = child->next;
 	}
@@ -1044,12 +1044,12 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, xmlElementType type)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, xmlElementType type)
+xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ type)
 {
 	last = last->next;
 	while (last)
 	{
-		if (last->type == type)
+		if (last->type == (xmlElementType)type)
 			return last;
 		last = last->next;
 	}
@@ -1072,7 +1072,7 @@ uint CIXml::countChildren (xmlNodePtr node, const char *childName)
 
 // ***************************************************************************
 
-uint CIXml::countChildren (xmlNodePtr node, xmlElementType type)
+uint CIXml::countChildren (xmlNodePtr node, sint /* xmlElementType */ type)
 {
 	uint count=0;
 	xmlNodePtr child = getFirstChildNode (node, type);
