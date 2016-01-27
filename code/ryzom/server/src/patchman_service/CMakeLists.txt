@@ -20,7 +20,7 @@ LIST(REMOVE_ITEM SRC
 
 ADD_EXECUTABLE(ryzom_patchman_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${MYSQL_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_patchman_service
 					ryzom_adminmodules
@@ -34,7 +34,5 @@ TARGET_LINK_LIBRARIES(ryzom_patchman_service
 
 NL_DEFAULT_PROPS(ryzom_patchman_service "Ryzom, Services: Patch Manager Service (PMS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_patchman_service)
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS ryzom_patchman_service RUNTIME DESTINATION sbin COMPONENT services)

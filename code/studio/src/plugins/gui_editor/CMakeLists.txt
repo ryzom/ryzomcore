@@ -89,7 +89,6 @@ TARGET_LINK_LIBRARIES(
 						nelgui
 						${QT_LIBRARIES}
 						${QT_QTOPENGL_LIBRARY}
-						${LIBXML2_LIBRARIES}
 						qt_property_browser
 						)
 

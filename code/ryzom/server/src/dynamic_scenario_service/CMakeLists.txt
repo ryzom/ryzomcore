@@ -4,7 +4,7 @@ LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/service.cpp ${CMAKE_CURRENT_SOU
 
 ADD_EXECUTABLE(ryzom_dynamic_scenario_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
 						ryzom_adminmodules
@@ -18,7 +18,5 @@ TARGET_LINK_LIBRARIES(ryzom_dynamic_scenario_service
 
 NL_DEFAULT_PROPS(ryzom_dynamic_scenario_service "Ryzom, Services: Dynamic Scenario Service (DSS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_dynamic_scenario_service)
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS ryzom_dynamic_scenario_service RUNTIME DESTINATION sbin COMPONENT services)

@@ -10,15 +10,12 @@ ADD_EXECUTABLE(world_editor WIN32 ${SRC} world_editor.rc)
 
 SOURCE_GROUP(Resources FILES world_editor.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(world_editor	
 					nelmisc
 					nelligo
 					nel3d
 					nelgeorges
-					nelpacs
-					${LIBXML2_LIBRARIES})
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
+					nelpacs)
 
 NL_DEFAULT_PROPS(world_editor "Ryzom, Tools, World: World Editor")
 NL_ADD_RUNTIME_FLAGS(world_editor)
