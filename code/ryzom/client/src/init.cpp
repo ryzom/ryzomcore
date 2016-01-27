@@ -378,6 +378,39 @@ void outOfMemory()
 uint64		Debug_OldCPUMask = 0;
 uint64		Debug_NewCPUMask = 0;
 
+// For multi cpu, active only one CPU for the main thread
+void setCPUMask(uint64 userCPUMask)
+{
+	uint64 cpuMask = IProcess::getCurrentProcess()->getCPUMask();
+	Debug_OldCPUMask = cpuMask;
+
+	// if user CPU mask is valid
+	if (cpuMask & userCPUMask)
+	{
+		// use it
+		IProcess::getCurrentProcess ()->setCPUMask(cpuMask & userCPUMask);
+	}
+	else
+	{
+		// else get first available CPU
+
+		// get the processor to allow process
+		uint i = 0;
+		while ((i < 64) && ((cpuMask & (UINT64_CONSTANT(1) << i)) == 0))
+			i++;
+
+		// Set the CPU mask
+		if (i < 64)
+		{
+			IProcess::getCurrentProcess ()->setCPUMask(UINT64_CONSTANT(1) << i);
+		}
+	}
+
+	// check
+	cpuMask = IProcess::getCurrentProcess ()->getCPUMask();
+	Debug_NewCPUMask = cpuMask;
+}
+
 void	displayCPUInfo()
 {
 	nlinfo("CPUInfo: CPUMask before change: %x, after change: %x, CPUID: %x, hasHyperThreading: %s", (uint32)Debug_OldCPUMask, (uint32)Debug_NewCPUMask, CSystemInfo::getCPUID(), (CSystemInfo::hasHyperThreading()?"YES":"NO"));
@@ -835,6 +868,22 @@ void prelogInit()
 
 		ClientCfg.init(ConfigFileName);
 		CLoginProgressPostThread::getInstance().init(ClientCfg.ConfigFile);
+
+		sint cpuMask;
+
+		if (ClientCfg.CPUMask < 1)
+		{
+			CTime::CTimerInfo timerInfo;
+			NLMISC::CTime::probeTimerInfo(timerInfo);
+
+			cpuMask = timerInfo.RequiresSingleCore ? 1:0;
+		}
+		else
+		{
+			cpuMask = ClientCfg.CPUMask;
+		}
+
+		if (cpuMask) setCPUMask(cpuMask);
 
 		setCrashCallback(crashCallback);
 
