@@ -1,6 +1,5 @@
 INCLUDE_DIRECTORIES(  ${CMAKE_CURRENT_BINARY_DIR}
                       ${CMAKE_CURRENT_SOURCE_DIR}
-                      ${LIBXML2_INCLUDE_DIR}
                       ${QT_INCLUDES}
 					  ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser)
 
@@ -56,7 +55,7 @@ NL_DEFAULT_PROPS(studio_plugin_georges_editor "Tools: Studio Plugin: Georges Edi
 NL_ADD_RUNTIME_FLAGS(studio_plugin_georges_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_georges_editor)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 
 IF(WITH_PCH)

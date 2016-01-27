@@ -126,7 +126,7 @@ SOURCE_GROUP("GUS Core" FILES	gus_chat.cpp
 
 ADD_EXECUTABLE(ryzom_general_utilities_service WIN32 ${SRC})
 
-INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${LIBXML2_INCLUDE_DIR} ${NEL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
 						ryzom_adminmodules
@@ -140,7 +140,5 @@ TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
 
 NL_DEFAULT_PROPS(ryzom_general_utilities_service "Ryzom, Services: General Utilities Service (GUS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_general_utilities_service)
-
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 INSTALL(TARGETS ryzom_general_utilities_service RUNTIME DESTINATION sbin COMPONENT services)

@@ -1,6 +1,5 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 						${CMAKE_CURRENT_SOURCE_DIR}
-						${LIBXML2_INCLUDE_DIR}
 						${QT_INCLUDES})
 
 FILE(GLOB SRC *.cpp *.h)
@@ -44,7 +43,7 @@ NL_DEFAULT_PROPS(studio_plugin_mission_compiler "Tools: Studio Plugin: Mission C
 NL_ADD_RUNTIME_FLAGS(studio_plugin_mission_compiler)
 NL_ADD_LIB_SUFFIX(studio_plugin_mission_compiler)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
+ADD_DEFINITIONS(-DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 
 
