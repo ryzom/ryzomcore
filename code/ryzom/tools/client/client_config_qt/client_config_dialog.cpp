@@ -75,6 +75,10 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	item = treeWidget->topLevelItem( 3 )->child( 1 );
 	item->setData( 0, Qt::UserRole, 7 );
 
+#ifndef Q_OS_WIN
+	// Hide Direct3D page under Linux and OS X
+	item->setHidden(true);
+#endif
 
 	CategoryStackedWidget->addWidget( new CGeneralSettingsWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CDisplaySettingsWidget( CategoryStackedWidget ) );
@@ -85,6 +89,7 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	CategoryStackedWidget->addWidget( new CSysInfoOpenGLWidget( CategoryStackedWidget ) );
 
 #ifdef Q_OS_WIN
+	// Add Direct3D widget only under Windows
 	CategoryStackedWidget->addWidget( new CSysInfoD3DWidget( CategoryStackedWidget ) );
 #endif
 
