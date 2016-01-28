@@ -150,7 +150,7 @@ void CClientConfigDialog::onClickPlay()
 	if( !started )
 		QProcess::startDetached( "ryzom_client_d.exe" );
 #elif defined(Q_OS_MAC)
-	started = QProcess::startDetached( "./Ryzom" );
+	started = QProcess::startDetached( "./Ryzom.app" );
 #else
 	started = QProcess::startDetached( "./ryzom_client" );
 #endif
