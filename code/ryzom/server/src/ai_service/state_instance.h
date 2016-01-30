@@ -376,7 +376,7 @@ inline
 float CStateInstance::getNelVar(std::string const& varId)
 {
 	TNelVarList::iterator it = _NelVar.find(varId);
-	if (it != _NelVar.end()) return it->second->get()
+	if (it != _NelVar.end()) return it->second->get();
 
 	if (NLMISC::CVariable<float>::exists(varId))
 	{
