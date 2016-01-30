@@ -423,7 +423,7 @@ inline
 std::string CStateInstance::getStrNelVar(std::string const& varId)
 {
 	TStrNelVarList::iterator it = _StrNelVar.find(varId);
-	if (it!=_StrNelVar.end()) return it->second->get();
+	if (it != _StrNelVar.end()) return it->second->get();
 
 	if (NLMISC::CVariable<float>::exists(varId))
 	{
@@ -431,8 +431,8 @@ std::string CStateInstance::getStrNelVar(std::string const& varId)
 		return "";
 	}
 
-	_StrNelVar[varId] = new NLMISC::CVariable<std::string>("StateInstanceVar", varId.c_str(), "", std::string());
-	return _NelVar[varId]->get();
+	_StrNelVar[varId] = new NLMISC::CVariable<std::string>("StateInstanceStrVar", varId.c_str(), "", std::string());
+	return _StrNelVar[varId]->get();
 }
 
 inline
