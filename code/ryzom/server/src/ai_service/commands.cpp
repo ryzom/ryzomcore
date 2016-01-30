@@ -1686,7 +1686,9 @@ NLMISC_COMMAND(getDatasetId,"get datasetid of bots with name matchiong the given
 		FOREACH(itBot, vector<CBot*>, bots)
 		{
 			CBot* bot = *itBot;
-			DatasetIds += bot->getSpawnObj()->dataSetRow().toString()+"|";
+			CSpawnBot* spawnBot = bot->getSpawnObj();
+			if (spawnBot!=NULL)
+				DatasetIds += spawnBot->dataSetRow().toString()+"|";
 
 		}
 	}
