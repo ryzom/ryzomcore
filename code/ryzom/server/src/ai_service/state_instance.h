@@ -376,17 +376,16 @@ inline
 float CStateInstance::getNelVar(std::string const& varId)
 {
 	TNelVarList::iterator it = _NelVar.find(varId);
-	if (it==_NelVar.end())
+	if (it != _NelVar.end()) return it->second->get()
+
+	if (NLMISC::CVariable<float>::exists(varId))
 	{
-		if (NLMISC::CVariable<float>::exists(varId))
-		{
-			nlwarning("Nel variable \"%s\" exists outside of this state instance", varId.c_str());
-			return 0.f;
-		}
-		_NelVar[varId] = new NLMISC::CVariable<float>("StateInstance", varId.c_str(), "", 0.f);
-		_NelVar[varId]->get();
+		nlwarning("Nel variable \"%s\" exists outside of this state instance", varId.c_str());
+		return 0.f;
 	}
-	return it->second->get();
+
+	_NelVar[varId] = new NLMISC::CVariable<float>("StateInstance", varId.c_str(), "", 0.f);
+	return _NelVar[varId]->get();
 }
 
 inline
@@ -424,17 +423,16 @@ inline
 std::string CStateInstance::getStrNelVar(std::string const& varId)
 {
 	TStrNelVarList::iterator it = _StrNelVar.find(varId);
-	if (it==_StrNelVar.end())
+	if (it!=_StrNelVar.end()) return it->second->get();
+
+	if (NLMISC::CVariable<float>::exists(varId))
 	{
-		if (NLMISC::CVariable<float>::exists(varId))
-		{
-			nlwarning("Nel variable \"%s\" exists outside of this state instance", varId.c_str());
-			return "";
-		}
-		_StrNelVar[varId] = new NLMISC::CVariable<std::string>("StateInstanceVar", varId.c_str(), "", std::string());
-		_NelVar[varId]->get();
+		nlwarning("Nel variable \"%s\" exists outside of this state instance", varId.c_str());
+		return "";
 	}
-	return it->second->get();
+
+	_StrNelVar[varId] = new NLMISC::CVariable<std::string>("StateInstanceVar", varId.c_str(), "", std::string());
+	return _NelVar[varId]->get();
 }
 
 inline
