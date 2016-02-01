@@ -134,8 +134,8 @@ int main(int argc, char **argv)
 	args.addArg("u", "unpack", "", "Unpack the BNP file to a directory");
 	args.addArg("l", "list", "", "List the files contained in the BNP file");
 	args.addArg("o", "output", "destination", "Output directory or file");
-	args.addArg("i", "if", "wildcard", "Add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)");
-	args.addArg("n", "ifnot", "wildcard", "Add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)");
+	args.addArg("i", "if", "wildcard", "Add the file if it matches the wilcard (at least one 'if' conditions must be met for a file to be adding)", false);
+	args.addArg("n", "ifnot", "wildcard", "Add the file if it doesn't match the wilcard (all the 'ifnot' conditions must be met for a file to be adding)", false);
 	args.addAdditionalArg("input", "Input directory or BNP file depending on command");
 
 	if (!args.parse(argc, argv)) return 1;
