@@ -732,7 +732,22 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
 	}
 
-	BOOL res = CreateProcessA(programName.empty() ? NULL:programName.c_str(), (char*)arguments.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	const char *sProgramName = programName.c_str();
+
+	std::string args;
+
+	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
+	if (CFile::getExtension(programName) == "bat")
+	{
+		sProgramName = NULL;
+		args = "\"" + programName + "\" " + arguments;
+	}
+	else
+	{
+		args = arguments;
+	}
+
+	BOOL res = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
 	if (res)
 	{
