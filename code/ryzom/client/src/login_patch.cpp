@@ -727,29 +727,12 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 {
 	uint nblab = 0;
 
-	FILE *fp = NULL;
-
-	if (useBatchFile)
-	{
-		deleteBatchFile();
-		fp = fopen (UpdateBatchFilename.c_str(), "wt");
-		if (fp == 0)
-		{
-			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", UpdateBatchFilename.c_str(), errno, strerror(errno));
-			throw Exception (err);
-		}
-
-		//use bat if windows if not use sh
-#ifdef NL_OS_WINDOWS
-		fprintf(fp, "@echo off\n");
-#else
-		fprintf(fp, "#!/bin/sh\n");
-#endif
-	}
+	std::string content;
 
 	// Unpack files with category ExtractPath non empty
 	const CBNPCategorySet &rDescCats = descFile.getCategories();
 	OptionalCat.clear();
+
 	for (uint32 i = 0; i < rDescCats.categoryCount(); ++i)
 	{
 		// For all optional categories check if there is a 'file to patch' in it
@@ -769,11 +752,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			}
 			catch(...)
 			{
-				if (useBatchFile)
-				{
-					fclose(fp);
-				}
-
 				throw;
 			}
 
@@ -781,11 +759,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			{
 				// TODO: handle exception?
 				string err = toString("Error unpacking %s", rFilename.c_str());
-
-				if (useBatchFile)
-				{
-					fclose(fp);
-				}
 
 				throw Exception (err);
 			}
@@ -798,38 +771,40 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					NLMISC::CFile::createDirectoryTree(DstPath);
 
 					// this file must be moved
-					if (useBatchFile)
-					{
 #ifdef NL_OS_WINDOWS
-						SrcPath = CPath::standardizeDosPath(SrcPath);
-						DstPath = CPath::standardizeDosPath(DstPath);
-#else
-						SrcPath = CPath::standardizePath(SrcPath);
-						DstPath = CPath::standardizePath(DstPath);
+					SrcPath = CPath::standardizeDosPath(SrcPath);
+					DstPath = CPath::standardizeDosPath(DstPath);
 #endif
-					}
 
 					std::string SrcName = SrcPath + vFilenames[fff];
 					std::string DstName = DstPath + vFilenames[fff];
 
-					if (useBatchFile)
+					bool succeeded = false;
+
+					if (!useBatchFile)
+					{
+						// don't check result, because it's possible the olk file doesn't exist
+						CFile::deleteFile(DstName);
+						
+						// try to move it, if fails move it later in a script
+						if (CFile::moveFile(DstName, SrcName))
+							succeeded = true;
+					}
+
+					// if we didn't succeed to delete or move the file, create a batch file anyway
+					if (!succeeded)
 					{
 						// write windows .bat format else write sh format
 #ifdef NL_OS_WINDOWS
-						fprintf(fp, ":loop%u\n", nblab);
-						fprintf(fp, "attrib -r -a -s -h %s\n", DstName.c_str());
-						fprintf(fp, "del %s\n", DstName.c_str());
-						fprintf(fp, "if exist %s goto loop%u\n", DstName.c_str(), nblab);
-						fprintf(fp, "move %s %s\n", SrcName.c_str(), DstPath.c_str());
+						content += toString(":loop%u\n", nblab);
+						content += toString("attrib -r -a -s -h \"%s\"\n", DstName.c_str());
+						content += toString("del \"%s\"\n", DstName.c_str());
+						content += toString("if exist \"%s\" goto loop%u\n", DstName.c_str(), nblab);
+						content += toString("move \"%s\" \"%s\"\n", SrcName.c_str(), DstPath.c_str());
 #else
-						fprintf(fp, "rm -rf %s\n", DstName.c_str());
-						fprintf(fp, "mv %s %s\n", SrcName.c_str(), DstPath.c_str());
+						content += toString("rm -rf \"%s\"\n", DstName.c_str());
+						content += toString("mv %s \"%s\"\n", SrcName.c_str(), DstPath.c_str());
 #endif
-					}
-					else
-					{
-						deleteFile(DstName);
-						CFile::moveFile(DstName, SrcName);
 					}
 
 					nblab++;
@@ -838,58 +813,86 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 	}
 
+	std::string patchDirectory = CPath::standardizeDosPath(ClientRootPath + "patch");
+
 	// Finalize batch file
-	if (NLMISC::CFile::isExists("patch") && NLMISC::CFile::isDirectory("patch"))
+	if (NLMISC::CFile::isExists(patchDirectory) && NLMISC::CFile::isDirectory(patchDirectory))
 	{
-#ifdef NL_OS_WINDOWS
-		if (useBatchFile)
-		{
-			fprintf(fp, ":looppatch\n");
-		}
-#endif
+		std::string patchContent;
 
 		vector<string> vFileList;
-		CPath::getPathContent ("patch", false, false, true, vFileList, NULL, false);
+		CPath::getPathContent (patchDirectory, false, false, true, vFileList, NULL, false);
 
 		for(uint32 i = 0; i < vFileList.size(); ++i)
 		{
-			if (useBatchFile)
+			bool succeeded = false;
+
+			if (!useBatchFile)
+			{
+				if (CFile::deleteFile(vFileList[i]))
+					succeeded = true;
+			}
+
+			// if we didn't succeed to delete, create a batch file anyway
+			if (!succeeded)
 			{
 #ifdef NL_OS_WINDOWS
-				fprintf(fp, "del %s\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+				patchContent += toString("del \"%s\"\n", CPath::standardizeDosPath(vFileList[i]).c_str());
 #else
-				fprintf(fp, "rm -f %s\n", CPath::standardizePath(vFileList[i]).c_str());
+				patchContent += toString("rm -f \"%s\"\n", CPath::standardizePath(vFileList[i]).c_str());
 #endif
-			}
-			else
-			{
-				CFile::deleteFile(vFileList[i]);
 			}
 		}
 
-		if (useBatchFile)
+		if (!patchContent.empty())
 		{
 #ifdef NL_OS_WINDOWS
-			fprintf(fp, "rd /Q /S patch\n");
-			fprintf(fp, "if exist patch goto looppatch\n");
+			content += toString(":looppatch\n");
+
+			content += patchContent;
+
+			content += toString("rd /Q /S \"" + patchDirectory + "\"\n");
+			content += toString("if exist \"" + patchDirectory + "\" goto looppatch\n");
 #else
-			fprintf(fp, "rm -rf patch\n");
+			content += toString("rm -rf \"" + patchDirectory + "\"\n");
 #endif
 		}
 		else
 		{
-			CFile::deleteDirectory("patch");
+			CFile::deleteDirectory(patchDirectory);
 		}
 	}
 
-	if (useBatchFile)
+	if (!content.empty())
 	{
+		deleteBatchFile();
+
+		std::string batchFilename = ClientRootPath + UpdateBatchFilename;
+
+		FILE *fp = fopen (batchFilename.c_str(), "wt");
+
+		if (fp == NULL)
+		{
+			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", batchFilename.c_str(), errno, strerror(errno));
+			throw Exception (err);
+		}
+
+		//use bat if windows if not use sh
+#ifdef NL_OS_WINDOWS
+		fprintf(fp, "@echo off\n");
+#else
+		fprintf(fp, "#!/bin/sh\n");
+#endif
+
+		// append content of script
+		fprintf(fp, content.c_str());
+
 		if (wantRyzomRestart)
 		{
 #ifdef NL_OS_WINDOWS
-			fprintf(fp, "start %s %%1 %%2 %%3\n", RyzomFilename.c_str());
+			fprintf(fp, "start \"\" \"%s\" %%1 %%2 %%3\n", CPath::standardizeDosPath(RyzomFilename).c_str());
 #else
-			fprintf(fp, "%s $1 $2 $3\n", RyzomFilename.c_str());
+			fprintf(fp, "\"%s\" $1 $2 $3\n", RyzomFilename.c_str());
 #endif
 		}
 
@@ -898,11 +901,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		fclose(fp);
 		if (diskFull)
 		{
-			throw NLMISC::EDiskFullError(UpdateBatchFilename.c_str());
+			throw NLMISC::EDiskFullError(batchFilename.c_str());
 		}
 		if (writeError)
 		{
-			throw NLMISC::EWriteError(UpdateBatchFilename.c_str());
+			throw NLMISC::EWriteError(batchFilename.c_str());
 		}
 	}
 }
