@@ -917,93 +917,44 @@ void CPatchManager::executeBatchFile()
 	extern void quitCrashReport ();
 	quitCrashReport ();
 
-#ifdef NL_OS_WINDOWS
-	// Launch the batch file
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE; // SW_SHOW
-
-	si.cb = sizeof(si);
-
-	ZeroMemory( &pi, sizeof(pi) );
-
-	// Start the child process.
-	string strCmdLine;
-	bool r2Mode = false;
-	#ifndef RY_BG_DOWNLOADER
-		r2Mode = ClientCfg.R2Mode;
-	#endif
-	if (r2Mode)
-	{
-		strCmdLine = UpdateBatchFilename + " " + LoginLogin + " " + LoginPassword;
-	}
-	else
-	{
-		strCmdLine = UpdateBatchFilename + " " + LoginLogin + " " + LoginPassword + " " + toString(LoginShardId);
-	}
-	if( !CreateProcess( NULL, // No module name (use command line).
-		(char*)strCmdLine.c_str(), // Command line.
-		NULL,				// Process handle not inheritable.
-		NULL,				// Thread handle not inheritable.
-		FALSE,				// Set handle inheritance to FALSE.
-		0,					// No creation flags.
-		NULL,				// Use parent's environment block.
-		NULL,				// Use parent's starting directory.
-		&si,				// Pointer to STARTUPINFO structure.
-		&pi )				// Pointer to PROCESS_INFORMATION structure.
-		)
-	{
-		// error occurs during the launch
-		string str = toString("Can't execute '%s': code=%d %s (error code 30)", UpdateBatchFilename.c_str(), errno, strerror(errno));
-		throw Exception (str);
-	}
-	// Close process and thread handles.
-//	CloseHandle( pi.hProcess );
-//	CloseHandle( pi.hThread );
-
-#else
-	// Start the child process.
 	bool r2Mode = false;
 
 #ifndef RY_BG_DOWNLOADER
 	r2Mode = ClientCfg.R2Mode;
 #endif
 
-	string strCmdLine;
+	std::string batchFilename;
 
-	strCmdLine = "./" + UpdateBatchFilename;
+#ifdef NL_OS_WINDOWS
+	batchFilename = CPath::standardizeDosPath(ClientRootPath);
+#else
+	batchFilename = ClientRootPath;
+#endif
 
-	chmod(strCmdLine.c_str(), S_IRWXU);
-	if (r2Mode)
+	batchFilename += UpdateBatchFilename;
+
+#ifdef NL_OS_UNIX
+	// make script executable under UNIX
+	chmod(batchFilename.c_str(), S_IRWXU);
+#endif
+
+	std::string cmdLine = "\"" + batchFilename + "\" " + LoginLogin + " " + LoginPassword;
+
+	if (!r2Mode)
 	{
-		if (execl(strCmdLine.c_str(), strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), (char *) NULL) == -1)
-		{
-			int errsv = errno;
-			nlerror("Execl Error: %d %s", errsv, strCmdLine.c_str());
-		}
-		else
-		{
-			nlinfo("Ran batch file r2Mode Success");
-		}
+		cmdLine += " " + toString(LoginShardId);
+	}
+
+	if (launchProgram("", cmdLine, false))
+	{
+		exit(0);
 	}
 	else
 	{
-		if (execl(strCmdLine.c_str(), strCmdLine.c_str(), LoginLogin.c_str(), LoginPassword.c_str(), toString(LoginShardId).c_str(), (char *) NULL) == -1)
-		{
-			int errsv = errno;
-			nlerror("Execl r2mode Error: %d %s", errsv, strCmdLine.c_str());
-		}
-		else
-		{
-			nlinfo("Ran batch file Success");
-		}
+		// error occurs during the launch
+		string str = toString("Can't execute '%s': code=%d %s (error code 30)", UpdateBatchFilename.c_str(), errno, strerror(errno));
+		throw Exception (str);
 	}
-#endif
-
-//	exit(0);
 }
 
 // ****************************************************************************
