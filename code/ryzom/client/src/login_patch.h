@@ -331,10 +331,6 @@ private:
 	void clearDataScanLog();
 	static void getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate);
 
-	// utility func to decompress a monofile 7zip archive
-	static bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName);
-	// utility func to decompress a single LZMA packed file
-	static bool unpackLZMA(const std::string &sevenZipFile, const std::string &destFileName);
 	static bool downloadAndUnpack(const std::string& patchPath, const std::string& sourceFilename, const std::string& extractPath, const std::string& tmpDirectory, uint32 timestamp);
 	// Forward message to Installation Software
 	void onFileInstallFinished();
