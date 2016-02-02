@@ -24,9 +24,74 @@ struct CUTMiscCommon : public Test::Suite
 {
 	CUTMiscCommon()
 	{
+		TEST_ADD(CUTMiscCommon::bytesToHumanReadableUnits);
 		TEST_ADD(CUTMiscCommon::humanReadableToBytes);
 
 		// Add a line here when adding a new test METHOD
+	}
+
+	void bytesToHumanReadableUnits()
+	{
+		std::vector<std::string> units;
+
+		std::string res;
+
+		// no unit, returns an empty string
+		res = NLMISC::bytesToHumanReadableUnits(0, units);
+		TEST_ASSERT(res.empty());
+
+		// support bytes
+		units.push_back("B");
+
+		// 0 bytes
+		res = NLMISC::bytesToHumanReadableUnits(0, units);
+		TEST_ASSERT(res == "0 B");
+
+		// 1000 bytes in B
+		res = NLMISC::bytesToHumanReadableUnits(1000, units);
+		TEST_ASSERT(res == "1000 B");
+
+		// 1024 bytes in B
+		res = NLMISC::bytesToHumanReadableUnits(1024, units);
+		TEST_ASSERT(res == "1024 B");
+
+		// support kibibytes
+		units.push_back("KiB");
+
+		// 1000 bytes in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1000, units);
+		TEST_ASSERT(res == "1000 B");
+
+		// 1024 bytes in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1024, units);
+		TEST_ASSERT(res == "1024 B");
+
+		// 1 MB in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1000 * 1000, units);
+		TEST_ASSERT(res == "976 KiB");
+
+		// 1 MiB in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1024 * 1024, units);
+		TEST_ASSERT(res == "1024 KiB");
+
+		// 1 GB in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1000 * 1000 * 1000, units);
+		TEST_ASSERT(res == "976562 KiB");
+
+		// 1 GiB in B or KiB
+		res = NLMISC::bytesToHumanReadableUnits(1024 * 1024 * 1024, units);
+		TEST_ASSERT(res == "1048576 KiB");
+
+		// support mebibytes
+		units.push_back("MiB");
+
+		// 1 GB in B, KiB or MiB
+		res = NLMISC::bytesToHumanReadableUnits(1000 * 1000 * 1000, units);
+		TEST_ASSERT(res == "953 MiB");
+
+		// 1 GiB in B, KiB or MiB
+		res = NLMISC::bytesToHumanReadableUnits(1024 * 1024 * 1024, units);
+		TEST_ASSERT(res == "1024 MiB");
 	}
 
 	void humanReadableToBytes()
@@ -85,7 +150,7 @@ struct CUTMiscCommon : public Test::Suite
 		bytes = NLMISC::humanReadableToBytes("1 kB");
 		TEST_ASSERT(bytes == 1000);
 
-		// 1 Megabyte
+		// 1 megabyte
 		bytes = NLMISC::humanReadableToBytes("1 MB");
 		TEST_ASSERT(bytes == 1000*1000);
 
