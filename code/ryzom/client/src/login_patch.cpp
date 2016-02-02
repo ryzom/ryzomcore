@@ -47,6 +47,7 @@
 #include "nel/misc/sha1.h"
 #include "nel/misc/big_file.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/cmd_args.h"
 
 #include "game_share/bg_downloader_msg.h"
 
@@ -89,6 +90,8 @@ extern string R2ServerVersion;
 	std::string TheTmpInstallDirectory = "patch/client_install";
 #endif
 
+extern NLMISC::CCmdArgs Args;
+
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -120,8 +123,16 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	UpdateBatchFilename = "updt_nl.sh";
 #endif
 
-	// use current directory by default
-	setClientRootPath("./");
+	// use application directory by default
+	std::string rootPath = Args.getProgramPath();
+
+	if (!CFile::fileExists(rootPath + "client_default.cfg"))
+	{
+		// use current directory
+		rootPath = CPath::getCurrentPath();
+	}
+
+	setClientRootPath(rootPath);
 
 	VerboseLog = true;
 
