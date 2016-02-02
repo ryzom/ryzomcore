@@ -380,7 +380,26 @@ string bytesToHumanReadable (uint64 bytes)
 		div++;
 		res = newres;
 	}
-	return toString ("%" NL_I64 "u%s", res, divTable[div]);
+	return toString ("%" NL_I64 "u %s", res, divTable[div]);
+}
+
+std::string bytesToHumanReadableUnits (uint64 bytes, const std::vector<std::string> &units)
+{
+	if (units.empty()) return "";
+
+	uint div = 0;
+	uint last = units.size()-1;
+	uint64 res = bytes;
+	uint64 newres = res;
+	for(;;)
+	{
+		newres /= 1024;
+		if(newres < 8 || div > 3 || div == last)
+			break;
+		++div;
+		res = newres;
+	}
+	return toString ("%" NL_I64 "u %s", res, units[div].c_str());
 }
 
 uint32 humanReadableToBytes (const string &str)
@@ -394,7 +413,8 @@ uint32 humanReadableToBytes (const string &str)
 	if(str[0]<'0' || str[0]>'9')
 		return 0;
 
-	res = atoi (str.c_str());
+	if (!fromString(str, res))
+		return 0;
 
 	if(str[str.size()-1] == 'B')
 	{
@@ -404,10 +424,28 @@ uint32 humanReadableToBytes (const string &str)
 		// there's no break and it's **normal**
 		switch (str[str.size()-2])
 		{
-		case 'G': res *= 1024;
-		case 'M': res *= 1024;
-		case 'K': res *= 1024;
-		default: ;
+			// kB/KB, MB, GB and TB are 1000 multiples
+			case 'T': res *= 1000;
+			case 'G': res *= 1000;
+			case 'M': res *= 1000;
+			case 'k': res *= 1000; break; // kilo symbol should be a lowercase K
+			case 'K': res *= 1000; break;
+			case 'i':
+			{
+				// KiB, MiB, GiB and TiB are 1024 multiples
+				if (str.size()<4)
+					return res;
+
+				switch (str[str.size()-3])
+				{
+					case 'T': res *= 1024;
+					case 'G': res *= 1024;
+					case 'M': res *= 1024;
+					case 'K': res *= 1024;
+					default: ;
+				}
+			}
+			default: ;
 		}
 	}
 

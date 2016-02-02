@@ -336,6 +336,10 @@ void itoaInt64 (sint64 number, char *str, sint64 base = 10);
 std::string bytesToHumanReadable (const std::string &bytes);
 std::string bytesToHumanReadable (uint64 bytes);
 
+/// Convert a number in bytes into a string that is easily readable by an human, for example 105123 -> "102kb"
+/// Using units array as string: 0 => B, 1 => KiB, 2 => MiB, 3 => GiB, etc...
+std::string bytesToHumanReadableUnits (uint64 bytes, const std::vector<std::string> &units);
+
 /// Convert a human readable into a bytes,  for example "102kb" -> 105123
 uint32 humanReadableToBytes (const std::string &str);
 

@@ -54,6 +54,7 @@
 #include "login.h"
 #include "user_agent.h"
 
+#include "seven_zip/seven_zip.h"
 
 #ifndef RY_BG_DOWNLOADER
 	#include "client_cfg.h"
@@ -2625,7 +2626,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 			// try to unpack the file
 			try
 			{
-				if (!CPatchManager::unpackLZMA(pPM->ClientPatchPath+lzmaFile, OutFilename+".tmp"))
+				if (!unpackLZMA(pPM->ClientPatchPath+lzmaFile, OutFilename+".tmp"))
 				{
 					// fallback to standard patch method
 					usePatchFile = true;
@@ -3087,7 +3088,7 @@ bool CPatchManager::download(const std::string& patchFullname, const std::string
 		&& patchName.substr(patchName.size() - zsStrLength) == zsStr)
 	{
 		std::string outFilename = patchName.substr(0, patchName.size() - zsStrLength);
-		CPatchManager::unpack7Zip(patchName, outFilename);
+		unpack7Zip(patchName, outFilename);
 		pPM->deleteFile(patchName);
 		pPM->renameFile(outFilename, sourceFullname);
 	}
@@ -3449,7 +3450,7 @@ void CInstallThread::run()
 					std::string outFilename = patchName.substr(0, patchName.size() - zsStrLength);
 					std::string localOutFilename = CPath::standardizeDosPath(outFilename);
 
-					if ( CPatchManager::unpackLZMA(patchName, localOutFilename) )
+					if ( unpackLZMA(patchName, localOutFilename) )
 					{
 						pPM->deleteFile(patchName);
 						pPM->renameFile(outFilename, sourceName);

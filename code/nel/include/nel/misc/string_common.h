@@ -246,27 +246,38 @@ inline bool fromString(const std::string &str, bool &val)
 {
 	if (str.length() == 1)
 	{
-		if (str[0] == '1')
+		const char c = str[0];
+
+		switch(c)
 		{
+			case '1':
+			case 't':
+			case 'T':
+			case 'y':
+			case 'Y':
 			val = true;
-		}
-		else if (str[0] == '0')
-		{
+			break;
+
+			case '0':
+			case 'f':
+			case 'F':
+			case 'n':
+			case 'N':
 			val = false;
-		}
-		else
-		{
+			break;
+
+			default:
 			val = false;
 			return false;
 		}
 	}
 	else
 	{
-		if (str == "true")
+		if (str == "true" || str == "yes")
 		{
 			val = true;
 		}
-		else if (str == "false")
+		else if (str == "false" || str == "no")
 		{
 			val = false;
 		}

@@ -114,6 +114,20 @@ int main(int argc, char *argv[])
 	// init Nel context
 	new NLMISC::CApplicationContext;
 
+	// disable nldebug messages in logs in Release
+#ifdef NL_RELEASE
+	NLMISC::DisableNLDebug = true;
+#endif
+
+	NLMISC::createDebug(NULL);
+
+#ifndef NL_DEBUG
+	NLMISC::INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
+	NLMISC::INelContext::getInstance().getErrorLog()->removeDisplayer("DEFAULT_SD");
+#endif // NL_DEBUG
+
 	bool noerrors = false;
 
 	try
