@@ -394,7 +394,8 @@ uint32 humanReadableToBytes (const string &str)
 	if(str[0]<'0' || str[0]>'9')
 		return 0;
 
-	res = atoi (str.c_str());
+	if (!fromString(str, res))
+		return 0;
 
 	if(str[str.size()-1] == 'B')
 	{
@@ -404,10 +405,28 @@ uint32 humanReadableToBytes (const string &str)
 		// there's no break and it's **normal**
 		switch (str[str.size()-2])
 		{
-		case 'G': res *= 1024;
-		case 'M': res *= 1024;
-		case 'K': res *= 1024;
-		default: ;
+			// kB/KB, MB, GB and TB are 1000 multiples
+			case 'T': res *= 1000;
+			case 'G': res *= 1000;
+			case 'M': res *= 1000;
+			case 'k': res *= 1000; break; // kilo symbol should be a lowercase K
+			case 'K': res *= 1000; break;
+			case 'i':
+			{
+				// KiB, MiB, GiB and TiB are 1024 multiples
+				if (str.size()<4)
+					return res;
+
+				switch (str[str.size()-3])
+				{
+					case 'T': res *= 1024;
+					case 'G': res *= 1024;
+					case 'M': res *= 1024;
+					case 'K': res *= 1024;
+					default: ;
+				}
+			}
+			default: ;
 		}
 	}
 
