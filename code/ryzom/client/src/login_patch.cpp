@@ -2356,7 +2356,6 @@ void CPatchThread::run()
 	ucstring sTranslate;
 	try
 	{
-
 		// First do all ref files
 		// ----------------------
 
@@ -2428,7 +2427,6 @@ void CPatchThread::run()
 	{
 		pPM->deleteFile(pPM->UpdateBatchFilename, false, false);
 	}
-
 
 	if (!bErr)
 	{
