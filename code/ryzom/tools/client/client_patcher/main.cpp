@@ -1,6 +1,10 @@
 #include "stdpch.h"
 #include "login_patch.h"
 #include "client_cfg.h"
+#include "user_agent.h"
+
+#include "nel/misc/cmd_args.h"
+
 #include <locale.h>
 
 #ifdef NL_OS_WINDOWS
@@ -27,6 +31,8 @@ string	VersionName;
 
 string LoginLogin, LoginPassword;
 uint32 LoginShardId = 0xFFFFFFFF;
+
+CCmdArgs Args;
 
 bool useUtf8 = false;
 bool useEsc = false;
@@ -146,6 +152,12 @@ int main(int argc, char *argv[])
 {
 	// init the Nel context
 	CApplicationContext appContext;
+
+	Args.setVersion(getDisplayVersion());
+	Args.setDescription("Ryzom client");
+	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
+
+	if (!Args.parse(argc, argv)) return 1;
 
 	// create logs in temporary directory
 	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
