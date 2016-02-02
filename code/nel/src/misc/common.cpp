@@ -380,7 +380,26 @@ string bytesToHumanReadable (uint64 bytes)
 		div++;
 		res = newres;
 	}
-	return toString ("%" NL_I64 "u%s", res, divTable[div]);
+	return toString ("%" NL_I64 "u %s", res, divTable[div]);
+}
+
+std::string bytesToHumanReadableUnits (uint64 bytes, const std::vector<std::string> &units)
+{
+	if (units.empty()) return "";
+
+	uint div = 0;
+	uint last = units.size()-1;
+	uint64 res = bytes;
+	uint64 newres = res;
+	for(;;)
+	{
+		newres /= 1024;
+		if(newres < 8 || div > 3 || div == last)
+			break;
+		++div;
+		res = newres;
+	}
+	return toString ("%" NL_I64 "u %s", res, units[div].c_str());
 }
 
 uint32 humanReadableToBytes (const string &str)
