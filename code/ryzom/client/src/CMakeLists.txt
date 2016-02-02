@@ -1,12 +1,10 @@
 # Need clientsheets lib for sheets packer tool
 ADD_SUBDIRECTORY(client_sheets)
 
+# Need seven_zip lib for patch_gen tool
+ADD_SUBDIRECTORY(seven_zip)
+
 IF(WITH_RYZOM_CLIENT)
-  # These are Windows/MFC apps
-  SET(SEVENZIP_LIBRARY "ryzom_sevenzip")
-
-  ADD_SUBDIRECTORY(seven_zip)
-
   # Patch should never be enabled on Steam
   IF(WITH_RYZOM_PATCH AND NOT WITH_RYZOM_STEAM)
     ADD_DEFINITIONS(-DRZ_USE_PATCH)
@@ -137,13 +135,13 @@ IF(WITH_RYZOM_CLIENT)
               nel3d
               nelgui
               nelsound
+              ryzom_sevenzip
               ryzom_clientsheets
               ryzom_gameshare
               nelpacs
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}
-              ${SEVENZIP_LIBRARY}
   )
 
   ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
