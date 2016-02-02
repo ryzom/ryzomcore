@@ -209,59 +209,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// set default paths
-	std::string dataPath = "./data/";
-	std::string rootPath = "./";
-
-	// use custom data path if specified
-	if (!ClientCfg.DataPath.empty())
-	{
-		dataPath = CPath::standardizePath(ClientCfg.DataPath.front());
-		string::size_type pos = dataPath.rfind('/', dataPath.length()-2);
-		if (pos != string::npos)
-			rootPath = dataPath.substr(0, pos+1);
-	}
-
-	std::string unpackPath = CPath::standardizePath(rootPath + "unpack");
-
-	// check if user can write in data directory
-	if (!CFile::isExists(unpackPath))
-	{
-		if (!CFile::createDirectoryTree(unpackPath))
-		{
-			printError("You don't have permission to create " + unpackPath);
-			return 1;
-		}
-	}
-	else
-	{
-		if (!CFile::createEmptyFile(unpackPath + "empty"))
-		{
-			printError("You don't have write permission in " + unpackPath);
-			return 1;
-		}
-
-		CFile::deleteFile(unpackPath + "empty");
-	}
-
-	// only use PreDataPath for looking paths
-	if (!ClientCfg.PreDataPath.empty())
-	{
-		for(uint i = 0; i < ClientCfg.PreDataPath.size(); ++i)
-		{
-			CPath::addSearchPath(NLMISC::expandEnvironmentVariables(ClientCfg.PreDataPath[i]), true, false);
-		}
-	}
-
-	// add more search paths if translation is not found
-	if (!CPath::exists(lang + ".uxt"))
-	{
-		CPath::addSearchPath("patcher", true, false);
-#ifdef RYZOM_SHARE_PREFIX
-		CPath::addSearchPath(RYZOM_SHARE_PREFIX"/patcher", true, false);
-#endif
-	}
-
  	// load translation
 	CI18N::load(lang);
 
@@ -269,9 +216,6 @@ int main(int argc, char *argv[])
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
-
-	// set the correct root path
-	pPM->setClientRootPath(rootPath);
 
 	// use PatchUrl
 	vector<string> patchURLs;
@@ -385,6 +329,8 @@ int main(int argc, char *argv[])
 			printError(convert(CI18N::get("uiErrPatchApply")) + " " + error);
 			return 1;
 		}
+
+		pPM->executeBatchFile();
 	}
 
 /*
