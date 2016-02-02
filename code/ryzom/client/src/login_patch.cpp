@@ -719,7 +719,7 @@ void CPatchManager::stopPatchThread()
 // ****************************************************************************
 void CPatchManager::deleteBatchFile()
 {
-	deleteFile(UpdateBatchFilename, false, false);
+	deleteFile(ClientRootPath + UpdateBatchFilename, false, false);
 }
 
 // ****************************************************************************
@@ -952,7 +952,7 @@ void CPatchManager::executeBatchFile()
 	else
 	{
 		// error occurs during the launch
-		string str = toString("Can't execute '%s': code=%d %s (error code 30)", UpdateBatchFilename.c_str(), errno, strerror(errno));
+		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));
 		throw Exception (str);
 	}
 }
