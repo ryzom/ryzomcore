@@ -659,7 +659,7 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	std::vector<std::string> directoryPrefixes;
 
 	// current directory has priority everywhere
-	directoryPrefixes.push_back("");
+	directoryPrefixes.push_back(CPath::standardizePath(CPath::getCurrentPath()));
 
 #if defined(NL_OS_WINDOWS)
 	// check in same directory as executable
