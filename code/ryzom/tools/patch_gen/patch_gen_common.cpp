@@ -27,6 +27,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/sstring.h"
 #include "game_share/singleton_registry.h"
+#include "seven_zip.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -74,37 +75,16 @@ void ApplyPatch(const std::string& srcFileName,const std::string& destFileName,c
 #endif // NL_OS_WINDOWS
 }
 
-void GenerateLZMA(const std::string sourceFile, const std::string &outputFile)
+void GenerateLZMA(const std::string &sourceFile, const std::string &outputFile)
 {
 	{
-		// old syntax incompatible with new versions
-		std::string cmd = "lzma e";
-		cmd += " " + sourceFile + " " + outputFile;
-		nlinfo("Executing system command: %s", cmd.c_str());
+		nlinfo("Compressing %s to %s using LZMA...", sourceFile.c_str(), outputFile.c_str());
 	}
-#ifdef NL_OS_WINDOWS
-	_spawnlp(_P_WAIT, "lzma.exe","lzma.exe", "e", sourceFile.c_str(), outputFile.c_str(), NULL);
-#else // NL_OS_WINDOWS
-	// new lzma only supports one file name on command line, so make a copy
-	CFile::copyFile(outputFile, sourceFile);
 
-	// new lzma syntax, -z = compress, -9 = best compression
-	std::string cmd = NLMISC::toString("lzma -z -9 %s", outputFile.c_str());
-
-	sint error = system(cmd.c_str());
-
-	if (error)
+	if (!packLZMA(sourceFile, outputFile))
 	{
-		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
-
-		CFile::deleteFile(outputFile);
+		nlwarning("LZMA compress failed");
 	}
-	else
-	{
-		// lzma always append a .lzma extension, so rename compressed file to wanted one
-		CFile::moveFile(outputFile, outputFile + ".lzma");
-	}
-#endif // NL_OS_WINDOWS
 }
 
 
@@ -230,7 +210,7 @@ void CPackageDescription::storeToPdr(CPersistentDataRecord& pdr) const
 void CPackageDescription::readIndex(CBNPFileSet& packageIndex) const
 {
 	std::string indexPath = _RootDirectory + _IndexFileName;
-	
+
 	nlinfo("Reading history file: %s ...", indexPath.c_str());
 
 	// clear out old contents before reading from input file
@@ -294,7 +274,7 @@ void CPackageDescription::generateClientIndex(CProductDescriptionForClient& theC
 	std::string patchNumber = toString("%05u", packageIndex.getVersionNumber());
 	std::string patchDirectory = _PatchDirectory + patchNumber;
 	std::string patchFile = patchDirectory + "/" + _ClientIndexFileName;
-	
+
 	nlinfo("Generating client index: %s...", patchFile.c_str());
 
 	// make sure the version sub directory exist
