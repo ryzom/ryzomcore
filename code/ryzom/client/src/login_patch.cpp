@@ -938,14 +938,14 @@ void CPatchManager::executeBatchFile()
 	chmod(batchFilename.c_str(), S_IRWXU);
 #endif
 
-	std::string cmdLine = "\"" + batchFilename + "\" " + LoginLogin + " " + LoginPassword;
+	std::string arguments = LoginLogin + " " + LoginPassword;
 
 	if (!r2Mode)
 	{
-		cmdLine += " " + toString(LoginShardId);
+		arguments += " " + toString(LoginShardId);
 	}
 
-	if (launchProgram("", cmdLine, false))
+	if (launchProgram(batchFilename, arguments, false))
 	{
 		exit(0);
 	}
