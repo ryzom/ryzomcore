@@ -682,60 +682,59 @@ struct CUTMiscStringCommon : public Test::Suite
 		// tests for bool
 		bool val;
 
-		// true value
-		val = false;
+		// true values
 		ret = NLMISC::fromString("1", val);
-		TEST_ASSERT(val);
-		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(ret && val);
 
-		val = false;
-		NLMISC::fromString("t", val);
-		TEST_ASSERT(val);
+		ret = NLMISC::fromString("t", val);
+		TEST_ASSERT(ret && val);
 
-		val = false;
-		NLMISC::fromString("y", val);
-		TEST_ASSERT(val);
+		ret = NLMISC::fromString("y", val);
+		TEST_ASSERT(ret && val);
 
-		val = false;
-		NLMISC::fromString("T", val);
-		TEST_ASSERT(val);
+		ret = NLMISC::fromString("T", val);
+		TEST_ASSERT(ret && val);
 
-		val = false;
-		NLMISC::fromString("Y", val);
-		TEST_ASSERT(val);
+		ret = NLMISC::fromString("Y", val);
+		TEST_ASSERT(ret && val);
 
-		val = true;
+		ret = NLMISC::fromString("true", val);
+		TEST_ASSERT(ret && val);
+
+		ret = NLMISC::fromString("yes", val);
+		TEST_ASSERT(ret && val);
+
+		// false values
 		ret = NLMISC::fromString("0", val);
-		TEST_ASSERT(!val);
-		TEST_ASSERT_MSG(ret, "should succeed");
+		TEST_ASSERT(ret && !val);
 
-		val = true;
-		NLMISC::fromString("f", val);
-		TEST_ASSERT(!val);
+		ret = NLMISC::fromString("f", val);
+		TEST_ASSERT(ret && !val);
 
-		val = true;
-		NLMISC::fromString("n", val);
-		TEST_ASSERT(!val);
+		ret = NLMISC::fromString("n", val);
+		TEST_ASSERT(ret && !val);
 
-		val = true;
-		NLMISC::fromString("F", val);
-		TEST_ASSERT(!val);
+		ret = NLMISC::fromString("F", val);
+		TEST_ASSERT(ret && !val);
 
-		val = true;
-		NLMISC::fromString("N", val);
-		TEST_ASSERT(!val);
+		ret = NLMISC::fromString("N", val);
+		TEST_ASSERT(ret && !val);
 
-		// bad character
+		ret = NLMISC::fromString("false", val);
+		TEST_ASSERT(ret && !val);
+
+		ret = NLMISC::fromString("no", val);
+		TEST_ASSERT(ret && !val);
+
+		// wrong values
+		ret = NLMISC::fromString("YES", val);
+		TEST_ASSERT(!ret && !val);
+
+		ret = NLMISC::fromString("foo", val);
+		TEST_ASSERT(!ret && !val);
+
 		ret = NLMISC::fromString("a", val);
-		TEST_ASSERT_MSG(!ret, "should not succeed");
-
-		val = true;
-		NLMISC::fromString("a", val);
-		TEST_ASSERT_MSG(val, "should not modify the value");
-
-		val = false;
-		NLMISC::fromString("a", val);
-		TEST_ASSERT_MSG(!val, "should not modify the value");
+		TEST_ASSERT(!ret && !val);
 	}
 };
 
