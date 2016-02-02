@@ -5,7 +5,7 @@ FILE(GLOB LIB_SRC *.cpp *.h)
 LIST(REMOVE_ITEM LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/7zMain.cpp)
 
 NL_TARGET_LIB(ryzom_sevenzip ${LIB_SRC})
-# TARGET_LINK_LIBRARIES(ryzom_sevenzip ${PLATFORM_LINKFLAGS})
+TARGET_LINK_LIBRARIES(ryzom_sevenzip nelmisc)
 NL_DEFAULT_PROPS(ryzom_sevenzip "Ryzom, Library: Seven Zip")
 NL_ADD_RUNTIME_FLAGS(ryzom_sevenzip)
 NL_ADD_LIB_SUFFIX(ryzom_sevenzip)
