@@ -732,8 +732,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
 	}
 
-	string arg = " " + arguments;
-	BOOL res = CreateProcessA(programName.c_str(), (char*)arg.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	BOOL res = CreateProcessA(programName.empty() ? NULL:programName.c_str(), (char*)arguments.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
 	if (res)
 	{
