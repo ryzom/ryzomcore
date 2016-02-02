@@ -753,25 +753,13 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	}
 
 #elif defined(NL_OS_MAC)
-	std::string command;
+	// we need to open bundles with "open" command
+	std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
 
-	if (CFile::getExtension(programName) == "app")
+	// append arguments if any
+	if (!arguments.empty())
 	{
-		// we need to open bundles with "open" command
-		command = NLMISC::toString("open \"%s\"", programName.c_str());
-
-		// append arguments if any
-		if (!arguments.empty())
-		{
-			command += NLMISC::toString(" --args %s", arguments.c_str());
-		}
-	}
-	else
-	{
-		command = programName;
-
-		// append arguments if any
-		if (!arguments.empty()) command += " " + arguments;
+		command += NLMISC::toString(" --args %s", arguments.c_str());
 	}
 
 	int res = system(command.c_str());
