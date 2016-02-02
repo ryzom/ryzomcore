@@ -1121,9 +1121,9 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 			std::string unpackTo = category.getUnpackTo();
 
-			if (unpackTo.substr(0, 2) == "./")
+			if (unpackTo.substr(0, 1) == ".")
 			{
-				unpackTo = ClientRootPath + unpackTo.substr(2);
+				unpackTo = CPath::makePathAbsolute(unpackTo, ClientRootPath, true);
 				category.setUnpackTo(unpackTo);
 			}
 		}
@@ -2402,6 +2402,7 @@ void CPatchThread::run()
 		// Set a more explicit error message
 		pPM->setErrorMessage(sTranslate);
 	}
+
 	PatchOk = !bErr;
 	Ended = true;
 }
