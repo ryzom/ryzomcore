@@ -27455,3 +27455,11 @@ uiRadarUseCamera	[Radar follows camera rotation]
 // INDEX 6466
 uittRadarUseCamera	[If checked, use camera rotation for radar view.]
 
+// HASH_VALUE 82A1901C06A3F72E
+// INDEX 6467
+uiTotalPatch	[TOTAL PATCH]
+
+// HASH_VALUE D091B40C4890BC25
+// INDEX 6468
+uiRequiredFiles	[REQUIRED FILES]
+
