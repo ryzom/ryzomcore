@@ -1793,7 +1793,7 @@ void CPatchManager::MyPatchingCB::progress(float f)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double p = 100.0*f;
-	ucstring sTranslate = CI18N::get("uiApplyingDelta") + toString(" %s (%5.02f %%)", patchFilename.c_str(), p);
+	ucstring sTranslate = CI18N::get("uiApplyingDelta") + toString(" %s (%5.02f %%)", CFile::getFilename(patchFilename).c_str(), p);
 	pPM->setState(false, sTranslate);
 }
 
@@ -2711,7 +2711,7 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 			string OutFilename = pPM->ClientPatchPath + rFTP.FileName + ".tmp__" + toString(j);
 
-			sTranslate = CI18N::get("uiApplyingDelta") + " " + PatchName;
+			sTranslate = CI18N::get("uiApplyingDelta") + " " + CFile::getFilename(PatchName);
 			pPM->setState(true, sTranslate);
 
 			xDeltaPatch(PatchName, SourceNameXD, OutFilename);
