@@ -259,7 +259,7 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 
 bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 {
-	nldebug("unpackLZMA: compress '%s' to LZMA file '%s", srcFileName.c_str(), lzmaFileName.c_str());
+	nldebug("packLZMA: compress '%s' to LZMA file '%s", srcFileName.c_str(), lzmaFileName.c_str());
 
 	// open file
 	CIFile inStream(srcFileName);
