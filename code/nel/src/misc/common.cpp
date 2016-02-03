@@ -878,8 +878,22 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
 	}
 
-	string arg = " " + arguments;
-	BOOL ok = CreateProcessA(programName.c_str(), (char*)arg.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	const char *sProgramName = programName.c_str();
+
+	std::string args;
+
+	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
+	if (CFile::getExtension(programName) == "bat")
+	{
+		sProgramName = NULL;
+		args = "\"" + programName + "\" " + arguments;
+	}
+	else
+	{
+		args = arguments;
+	}
+
+	BOOL ok = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
 	if (ok)
 	{
