@@ -361,11 +361,11 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     fontsize="10" shadow="true" hardtext="uiOnPatchOpt" />
 
     <group id="global_patch" w="382" h="22" posparent="global_win" posref="MM MM" >
-      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="TOTAL PATCH" />
+      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiTotalPatch" />
       <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
     </group>
       <group id="nonopt_patch" w="382" h="22" posparent="nonopt_win" posref="MM MM" >
-      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="NON OPTIONAL FILES" />
+      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiRequiredFiles" />
       <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
     </group>
 
