@@ -1415,13 +1415,13 @@ uiErrPatchApply	[Error: Patch process ended but the patch has not been successfu
 // INDEX 353
 uiErrChecking	[Error: Patch files failed - checking.]
 
-// HASH_VALUE 40D0242C40D0242C
+// HASH_VALUE 8E9280411622E45F
 // INDEX 354
-uiKb	[KB]
+uiKb	[KiB]
 
-// HASH_VALUE 4050243440502434
+// HASH_VALUE 90B288459762EC61
 // INDEX 355
-uiMb	[MB]
+uiMb	[MiB]
 
 // HASH_VALUE 9FA5A06DD895B637
 // INDEX 356

@@ -1415,13 +1415,13 @@ uiErrPatchApply	[Erreur : le processus de mises à jour est terminé mais les pa
 // INDEX 353
 uiErrChecking	[Erreur : Echec des fichiers de mises à jour - vérification.]
 
-// HASH_VALUE 40D0242C40D0242C
+// HASH_VALUE 8E9280411622E45F
 // INDEX 354
-uiKb	[Ko]
+uiKb	[Kio]
 
-// HASH_VALUE 4050243440502434
+// HASH_VALUE 90B288459762EC61
 // INDEX 355
-uiMb	[Mo]
+uiMb	[Mio]
 
 // HASH_VALUE 9FA5A06DD895B637
 // INDEX 356
