@@ -269,10 +269,6 @@ IF(WITH_QT5)
       # Gui
       SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::Gui Qt5::OpenGL)
 
-      IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::WinExtras)
-      ENDIF()
-
       ADD_QT_LIBRARY(PrintSupport)
 
       IF(WIN32)
@@ -390,10 +386,6 @@ IF(WITH_QT5)
       ENDIF()
     ELSE()
       SET(QT_LIBRARIES Qt5::Widgets Qt5::Network Qt5::Xml Qt5::Gui Qt5::OpenGL Qt5::Core)
-
-      IF(WIN32)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} Qt5::WinExtras)
-      ENDIF()
     ENDIF()
   ELSE()
     MESSAGE(WARNING "Unable to find Qt 5")
