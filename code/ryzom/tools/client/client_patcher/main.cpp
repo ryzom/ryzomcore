@@ -34,7 +34,6 @@ uint32 LoginShardId = 0xFFFFFFFF;
 
 CCmdArgs Args;
 
-bool useUtf8 = false;
 bool useEsc = false;
 
 #ifdef NL_OS_WINDOWS
@@ -44,9 +43,6 @@ sint attributes = 0;
 
 std::string convert(const ucstring &str)
 {
-	if (useUtf8)
-		return str.toUtf8();
-
 	return str.toString();
 }
 
@@ -97,28 +93,12 @@ void printDownload(const std::string &str)
 	// temporary modified string
 	std::string nstr = str;
 
-	uint length = 0;
+	uint length = (uint)nstr.length();
 
-	if (useUtf8)
+	if (length > maxLength)
 	{
-		ucstring ucstr;
-		ucstr.fromUtf8(nstr);
-		length = (uint)ucstr.length();
-		if (length > maxLength)
-		{
-			ucstr = ucstr.luabind_substr(length - maxLength + 3);
-			nstr = std::string("...") + ucstr.toUtf8();
-			length = maxLength;
-		}
-	}
-	else
-	{
-		length = (uint)nstr.length();
-		if (length > maxLength)
-		{
-			nstr = std::string("...") + nstr.substr(length - maxLength + 3);
-			length = maxLength;
-		}
+		nstr = std::string("...") + nstr.substr(length - maxLength + 3);
+		length = maxLength;
 	}
 
 	// add padding with spaces
@@ -147,6 +127,54 @@ void printDownload(const std::string &str)
 
 	fflush(stdout);
 }
+
+// hardcoded english translations to not depends on external files
+struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
+{
+	virtual void loadStringFile(const std::string &filename, ucstring &text)
+	{
+		text.fromUtf8(
+			"TheSagaOfRyzom	[Ryzom]\n"
+			"uiErrPatchApply	[Error: Patch process ended but the patch has not been successfully applied.]\n"
+			"uiErrChecking	[Error: Patch files failed - checking.]\n"
+			"uiKb	[KiB]\n"
+			"uiMb	[MiB]\n"
+			"uiLoginGetFile	[Getting File:]\n"
+			"uiDLWithCurl	[Downloading File With Curl:]\n"
+			"uiDecompressing	[Decompressing File:]\n"
+			"uiCheckInt	[Checking Integrity:]\n"
+			"uiNoVersionFound	[No Version Found]\n"
+			"uiVersionFound	[Version Found:]\n"
+			"uiApplyingDelta	[Applying Delta:]\n"
+			"uiClientVersion	[Client Version]\n"
+			"uiServerVersion	[Server Version]\n"
+			"uiCheckingFile	[Checking File]\n"
+			"uiNeededPatches	[Required Patches:]\n"
+			"uiCheckInBNP	[Checking inside BNP:]\n"
+			"uiSHA1Diff	[Force BNP Unpacking: checksums do not correspond:]\n"
+			"uiCheckEndNoErr	[Checking file ended with no errors]\n"
+			"uiCheckEndWithErr	[Checking file ended with errors:]\n"
+			"uiPatchEndNoErr	[Patching file ended with no errors]\n"
+			"uiPatchEndWithErr	[Patch failed!]\n"
+			"uiPatchDiskFull	[Disk full!]\n"
+			"uiPatchWriteError	[Disk write error! (disk full?)]\n"
+			"uiProcessing	[Processing file:]\n"
+			"uiUnpack	[BNP Unpacking:]\n"
+			"uiUnpackErrHead	[Cannot read bnp header:]\n"
+			"uiChangeDate	[Changing the mod date:]\n"
+			"uiChgDateErr	[Cannot change file time:]\n"
+			"uiNowDate	[Now the date is:]\n"
+			"uiSetAttrib	[Set file attributes:]\n"
+			"uiAttribErr	[Cannot have read/write access:]\n"
+			"uiDelFile	[Delete file:]\n"
+			"uiDelErr	[Cannot delete file:]\n"
+			"uiDelNoFile	[Delete file (no file)]\n"
+			"uiRenameFile	[Rename File:]\n"
+			"uiRenameErr	[Cannot rename file:]\n"
+		);
+	}
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -189,11 +217,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// check if console supports utf-8
-	std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
-	useUtf8 = (lang.find("utf8") != string::npos || lang.find("utf-8") != string::npos);
-	lang = lang.substr(0, 2);
-
 	// check if console supports colors
 	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
@@ -221,8 +244,17 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
- 	// load translation
-	CI18N::load(lang);
+	// allocate translations proxy
+	CClientPatcherTranslations *trans = new CClientPatcherTranslations();
+
+	// use proxy
+	CI18N::setLoadProxy(trans);
+
+ 	// load english translations
+	CI18N::load("en");
+
+	// now translations are read, we don't need it anymore
+	delete trans;
 
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 
