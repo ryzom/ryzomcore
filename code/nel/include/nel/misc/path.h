@@ -230,7 +230,7 @@ public:
 	/** Get application directory.
 	* \return directory where applications should write files.
 	*/
-	std::string getApplicationDirectory(const std::string &appName = "");
+	std::string getApplicationDirectory(const std::string &appName = "", bool local = false);
 
 	/** Get a temporary directory.
 	* \return temporary directory where applications should write files.
@@ -540,7 +540,7 @@ public:
 	/** Get application directory.
 	 * \return directory where applications should write files.
 	 */
-	static std::string getApplicationDirectory(const std::string &appName = "");
+	static std::string getApplicationDirectory(const std::string &appName = "", bool local = false);
 
 	/** Get a temporary directory.
 	 * \return temporary directory where applications should write files.

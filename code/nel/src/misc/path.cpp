@@ -1777,19 +1777,29 @@ std::string CFileContainer::getWindowsDirectory()
 #endif
 }
 
-std::string CPath::getApplicationDirectory(const std::string &appName)
+std::string CPath::getApplicationDirectory(const std::string &appName, bool local)
 {
-	return getInstance()->_FileContainer.getApplicationDirectory(appName);
+	return getInstance()->_FileContainer.getApplicationDirectory(appName, local);
 }
 
-std::string CFileContainer::getApplicationDirectory(const std::string &appName)
+std::string CFileContainer::getApplicationDirectory(const std::string &appName, bool local)
 {
-	static std::string appPath;
+	static std::string appPaths[2];
+	std::string &appPath = appPaths[local ? 1 : 0];
 	if (appPath.empty())
 	{
 #ifdef NL_OS_WINDOWS
 		wchar_t buffer[MAX_PATH];
-		SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
+#ifdef CSIDL_LOCAL_APPDATA
+		if (local)
+		{
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
+		}
+		else
+#endif
+		{
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
+		}
 		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
 #elif defined(NL_OS_MAC)
 		appPath = CPath::standardizePath(getenv("HOME"));
