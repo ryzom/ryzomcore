@@ -112,7 +112,7 @@ bool	InitMouseWithCursor (bool hardware)
 				}
 				else if (width != 0 && height != 0)
 				{
-					nlwarning("mouse pos %u, %u", x, y);
+					nlwarning("Mouse pos %f, %f", x, y);
 					Driver->setMousePos(x / width, y / height);
 				}
 			}

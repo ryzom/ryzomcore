@@ -678,12 +678,9 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 	if (CFile::isDirectory(getRyzomSharePrefix())) directoryPrefixes.push_back(CPath::standardizePath(getRyzomSharePrefix()));
 #endif
 
-	std::vector<std::string> directoriesToProcess;
+	std::map<std::string, sint> directoriesToProcess;
 
-	// reserve maximum memory space for all combinations
-	directoriesToProcess.reserve(directoryPrefixes.size() * paths.size());
-
-	// first pass, build a vector with all existing directories to process in second pass
+	// first pass, build a map with all existing directories to process in second pass
 	for (uint j = 0; j < directoryPrefixes.size(); j++)
 	{
 		std::string directoryPrefix = directoryPrefixes[j];
@@ -698,15 +695,17 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 
 			// only process existing directories
 			if (CFile::isExists(directory))
-				directoriesToProcess.push_back(directory);
+				directoriesToProcess[directory] = 1;
 		}
 	}
 
 	uint total = (uint)directoriesToProcess.size();
 	uint current = 0, next = 0;
 
+	std::map<std::string, sint>::const_iterator it = directoriesToProcess.begin(), iend = directoriesToProcess.end();
+
 	// second pass, add search paths
-	for (uint i = 0, len = directoriesToProcess.size(); i < len; ++i)
+	while (it != iend)
 	{
 		// update next progress value
 		++next;
@@ -717,9 +716,11 @@ static void addPaths(IProgressCallback &progress, const std::vector<std::string>
 		// next is current value
 		current = next;
 
-		CPath::addSearchPath(directoriesToProcess[i], recurse, false, &progress);
+		CPath::addSearchPath(it->first, recurse, false, &progress);
 
 		progress.popCropedValues();
+
+		++it;
 	}
 }
 
