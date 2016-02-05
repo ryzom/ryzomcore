@@ -444,11 +444,13 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// min limit -1, unable to compare with minimum value because no lower type
 		ret = NLMISC::fromString("-9223372036854775809", val);
-		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::max());
+		// with GCC, it returns min, with VC++ it returns max
+		TEST_ASSERT(ret && (val == std::numeric_limits<sint64>::max() || std::numeric_limits<sint64>::min()));
 
 		// max limit +1, unable to compare with maximum value because no higher type
 		ret = NLMISC::fromString("9223372036854775808", val);
-		TEST_ASSERT(ret && val == std::numeric_limits<sint64>::min());
+		// with GCC, it returns max with VC++ it returns min
+		TEST_ASSERT(ret && (val == std::numeric_limits<sint64>::min() || std::numeric_limits<sint64>::max()));
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
@@ -508,7 +510,8 @@ struct CUTMiscStringCommon : public Test::Suite
 
 		// max limit +1, unable to compare with maximum value because no higher type
 		ret = NLMISC::fromString("18446744073709551616", val);
-		TEST_ASSERT(ret && val == std::numeric_limits<uint64>::min());
+		// with GCC, it returns max with VC++ it returns min
+		TEST_ASSERT(ret && (val == std::numeric_limits<uint64>::min() || val == std::numeric_limits<uint64>::max()));
 
 		// with period
 		ret = NLMISC::fromString("1.2", val);
