@@ -258,6 +258,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   OPTION(WITH_NELNS               "Build NeL Network Services."                   OFF)
   OPTION(WITH_RYZOM               "Build Ryzom Core."                             ON )
   OPTION(WITH_SNOWBALLS           "Build Snowballs."                              OFF)
+  OPTION(WITH_TOOLS               "Build Tools"                                   OFF)
 ENDMACRO(NL_SETUP_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
