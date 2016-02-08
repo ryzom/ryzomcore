@@ -24,7 +24,7 @@ ArrivedGreatDesert	[Vous arrivez dans le grand désert, à l'ouest de l'oasis de
 
 // HASH_VALUE C6B78C97E7522A31
 // INDEX 6
-ArrivedPureWater	[Vous arrivez dans le village d'Etoole dans la région des eaux pures.]
+ArrivedPureWater	[Vous arrivez dans le village d'Etoole dans la région des Eaux Pures.]
 
 // HASH_VALUE 85F15671AEAF648A
 // INDEX 7
@@ -52,7 +52,7 @@ uittQuitRyzom	[Quitter Ryzom]
 
 // HASH_VALUE 6187AF81E9FAF455
 // INDEX 13
-uittQuitGame	[Sélection du Personnage]
+uittQuitGame	[Sélection du personnage]
 
 // HASH_VALUE 1538E0EB43F8ACC9
 // INDEX 14
@@ -60,15 +60,15 @@ uittQuitCancel	[Revenir à Ryzom]
 
 // HASH_VALUE A8C4945353A41F40
 // INDEX 15
-uittQuitCancelEditor	[Retour Editeur]
+uittQuitCancelEditor	[Retour Éditeur]
 
 // HASH_VALUE 6A18C81B8FE8F4B6
 // INDEX 16
-uittLaunchEditor	[Editeur Scenarios]
+uittLaunchEditor	[Éditeur de scénarios]
 
 // HASH_VALUE EF767B666BB4667F
 // INDEX 17
-uittLeaveEditor	[Quitter Editeur]
+uittLeaveEditor	[Quitter l'Éditeur]
 
 // HASH_VALUE 48D0B43C48D0B43C
 // INDEX 18
@@ -88,11 +88,11 @@ uiRange	[Portée]
 
 // HASH_VALUE AF06A35FABD45A88
 // INDEX 22
-uittLead	[Chef du Groupe]
+uittLead	[Chef du groupe]
 
 // HASH_VALUE 31DAA87FA2275372
 // INDEX 23
-uittSuccessor	[Successeur du Groupe]
+uittSuccessor	[Successeur du chef]
 
 // HASH_VALUE 2C99B47EDE971C91
 // INDEX 24
@@ -108,195 +108,195 @@ Craftsman	[Artisan]
 
 // HASH_VALUE FB5FBC3D8F01EEF7
 // INDEX 27
-uiPlayerTitle	[TITRE >]
+uiPlayerTitle	[TITRE :]
 
 // HASH_VALUE 4450141844501418
 // INDEX 28
-uiFameTitle	[RENOMMEE]
+uiFameTitle	[Renommée]
 
 // HASH_VALUE 9CE3947E9A96E7AC
 // INDEX 29
-MeleeFighter	[COMBATTANT DE MELEE]
+MeleeFighter	[Combattant de mêlée]
 
 // HASH_VALUE 1B5484851A5603AE
 // INDEX 30
-RangeFighter	[COMBATTANT A DISTANCE]
+RangeFighter	[Combattant à distance]
 
 // HASH_VALUE D658F468E4B6BC8C
 // INDEX 31
-AttackCaster	[ATTAQUANT]
+AttackCaster	[Mage offensif]
 
 // HASH_VALUE 57F8006E22E6F080
 // INDEX 32
-BufferCaster	[BUFFER]
+BufferCaster	[Mage protecteur]
 
 // HASH_VALUE D508C07AE1E5207B
 // INDEX 33
-HealerCaster	[GUERISSEUR]
+HealerCaster	[Guérisseur]
 
 // HASH_VALUE A3E80493AB3B04AE
 // INDEX 34
-Harvester	[RECOLTEUR]
+Harvester	[Récolteur]
 
 // HASH_VALUE 609C5434749814A0
 // INDEX 35
-Shopkeeper	[MARCHAND]
+Shopkeeper	[Marchand]
 
 // HASH_VALUE E5F6F07EDAC7FC7F
 // INDEX 36
-Faber	[ARTISAN]
+Faber	[Artisan]
 
 // HASH_VALUE D1677B8BA053A484
 // INDEX 37
-IreFighter	[COMBATTANT AGRESSIF]
+IreFighter	[Combattant fou-furieux]
 
 // HASH_VALUE 2CD9F479281AA08E
 // INDEX 38
-Swashbuckler	[BRETTEUR]
+Swashbuckler	[Bretteur]
 
 // HASH_VALUE 29257B6714247B8E
 // INDEX 39
-KamicFist	[POING KAMIC]
+KamicFist	[Poing kamique]
 
 // HASH_VALUE 27A6AB4A67B47A6D
 // INDEX 40
-BladeBearer	[PORTEUR DE LAMES]
+BladeBearer	[Porteur de lames]
 
 // HASH_VALUE E6A7E84B9DE3D451
 // INDEX 41
-WindChild	[ENFANT DES VENTS]
+WindChild	[Enfant des vents]
 
 // HASH_VALUE 2F472C77F186208A
 // INDEX 42
-Runner	[COUREUR]
+Runner	[Coureur]
 
 // HASH_VALUE 2DB8689FE4A880AB
 // INDEX 43
-Scout	[ECLAIREUR]
+Scout	[Éclaireur]
 
 // HASH_VALUE A7D7242A61A3003B
 // INDEX 44
-FireLance	[LANCEUR DE FLAMMES]
+FireLance	[Lanceur de flammes]
 
 // HASH_VALUE AE18FC6AD9166B98
 // INDEX 45
-ScarletHunter	[CHASSEUR ECARLATE]
+ScarletHunter	[Chasseur écarlate]
 
 // HASH_VALUE AB86E36AAFB49A91
 // INDEX 46
-GreenHunter	[CHASSEUR VERT]
+GreenHunter	[Chasseur vert]
 
 // HASH_VALUE AEB59B87E1E6B868
 // INDEX 47
-AtysGuardian	[GARDIEN D'ATYS]
+AtysGuardian	[Gardien d'Atys]
 
 // HASH_VALUE 9409E0916464908A
 // INDEX 48
-ShadowHunter	[CHASSEUR DE L'OMBRE]
+ShadowHunter	[Chasseur de l'ombre]
 
 // HASH_VALUE 681C945C70582494
 // INDEX 49
-Witherer	[FLETRISSEUR]
+Witherer	[Flétrisseur]
 
 // HASH_VALUE AD68F4666D750085
 // INDEX 50
-Fouler	[CONTAMINEUR]
+Fouler	[Contamineur]
 
 // HASH_VALUE 6438147DEAEB3CC5
 // INDEX 51
-Disturber	[TROUBLEUR D'ESPRITS]
+Disturber	[Troubleur d'esprits]
 
 // HASH_VALUE DF3760AB6287009A
 // INDEX 52
-KamicFury	[FURIE KAMIQUE]
+KamicFury	[Furie kamique]
 
 // HASH_VALUE 6C96827EE23ACCA4
 // INDEX 53
-SpiritualShield	[BOUCLIER SPIRITUEL]
+SpiritualShield	[Bouclier spirituel]
 
 // HASH_VALUE 2786147E1C57FC88
 // INDEX 54
-Faker	[FEINTEUR]
+Faker	[Feinteur]
 
 // HASH_VALUE 28656F8E1E35D45D
 // INDEX 55
-WindGuardian	[GARDIEN DES VENTS]
+WindGuardian	[Gardien des vents]
 
 // HASH_VALUE 5768987DAB149356
 // INDEX 56
-KamicGuardian	[GARDIEN KAMIC]
+KamicGuardian	[Gardien kamique]
 
 // HASH_VALUE EE09DC9C65D7A4A9
 // INDEX 57
-Unknown	[INCONNU]
+Unknown	[Inconnu]
 
 // HASH_VALUE 59C784A8D994647B
 // INDEX 58
-SecondBreath	[SECOND SOUFFLE]
+SecondBreath	[Second souffle]
 
 // HASH_VALUE A7694819A74AF0ED
 // INDEX 59
-LifeStealer	[VOLEUR DE VIES]
+LifeStealer	[Voleur de vie]
 
 // HASH_VALUE 22366B83A0C3E459
 // INDEX 60
-SecondLife	[SECONDE VIE]
+SecondLife	[Seconde vie]
 
 // HASH_VALUE 95386FA95C15087E
 // INDEX 61
-SapCristal	[CRISTAL DE SEVE]
+SapCristal	[Cristal de sève]
 
 // HASH_VALUE A85654A521A9586D
 // INDEX 62
-SandCaravanner	[CARAVANNIER DES SABLES]
+SandCaravanner	[Caravannier des dunes]
 
 // HASH_VALUE EA1C14386ED894BC
 // INDEX 63
-ImperialSupplier	[FOURNISSEUR IMPERIAL]
+ImperialSupplier	[Fournisseur impérial]
 
 // HASH_VALUE EA0AC8A32718788A
 // INDEX 64
-Steward	[REGISSEUR]
+Steward	[Régisseur]
 
 // HASH_VALUE A8C8806C26D5C489
 // INDEX 65
-Hawker	[COLPORTEUR]
+Hawker	[Colporteur]
 
 // HASH_VALUE 6A32BC93D54A13A4
 // INDEX 66
-melee_warrior	[GUERRIER DE MELEE]
+melee_warrior	[Guerrier de mêlée]
 
 // HASH_VALUE E9A3AC9A550A2FA6
 // INDEX 67
-range_warrior	[GUERRIER A DISTANCE]
+range_warrior	[Tireur]
 
 // HASH_VALUE ABEA84B3AB3B04AE
 // INDEX 68
-harvester	[RECOLTEUR]
+harvester	[Récolteur]
 
 // HASH_VALUE 6229E47D20D26B98
 // INDEX 69
-attack_magician	[ATTAQUANT]
+attack_magician	[Mage offensif]
 
 // HASH_VALUE 2498B07FA0E287A1
 // INDEX 70
-buffer_magician	[BUFFER]
+buffer_magician	[Mage protecteur]
 
 // HASH_VALUE A6A85C751E4287A1
 // INDEX 71
-healer_magician	[GUERISSEUR]
+healer_magician	[Guérisseur]
 
 // HASH_VALUE E5F8709EE2C97C9F
 // INDEX 72
-faber	[ARTISAN]
+faber	[Artisan]
 
 // HASH_VALUE 5A8754799717944F
 // INDEX 73
-FireMaster	[MAITRE DU FEU]
+FireMaster	[Maître du feu]
 
 // HASH_VALUE DC16347895777847
 // INDEX 74
-LakeMaster	[MAITRE DES LACS]
+LakeMaster	[Maître des lacs]
 
 // HASH_VALUE DA9AB6B3E228F4CD
 // INDEX 75
@@ -305,23 +305,23 @@ agp_trouble	[Le driver n'a pas réussi à attribuer la mémoire AGP. Il peut don
 
 // HASH_VALUE 5A56887FA8E007AF
 // INDEX 76
-can_t_load_the_display_driver	[Impossible de charger le driver d'affichage]
+can_t_load_the_display_driver	[Impossible de charger le driver d'affichage.]
 
 // HASH_VALUE D236BC3F590A766E
 // INDEX 77
-can_t_initialise_the_mouse	[Impossible d'initialiser la souris]
+can_t_initialise_the_mouse	[Impossible d'initialiser la souris.]
 
 // HASH_VALUE 1618E42EED39DF64
 // INDEX 78
-can_t_initialise_the_keyboard	[Impossible d'initialiser le clavier]
+can_t_initialise_the_keyboard	[Impossible d'initialiser le clavier.]
 
 // HASH_VALUE 553984846E949284
 // INDEX 79
-can_t_create_a_window_display	[Impossible de créer une fenêtre d'affichage]
+can_t_create_a_window_display	[Impossible de créer une fenêtre d'affichage.]
 
 // HASH_VALUE 58393B04E6548F6A
 // INDEX 80
-can_t_create_a_fullscreen_display	[Impossible d'afficher en plein écran]
+can_t_create_a_fullscreen_display	[Impossible d'afficher en plein écran.]
 
 // HASH_VALUE 701C9488701C9488
 // INDEX 81
@@ -337,55 +337,55 @@ Misc	[Divers]
 
 // HASH_VALUE 4871A044C7026C0D
 // INDEX 84
-CivilizationKnowledge	[CONNAISSANCES DE LA CIVILISATION]
+CivilizationKnowledge	[Connaissances de civilisation]
 
 // HASH_VALUE 4841BB27C9523633
 // INDEX 85
-FaberCompetences	[COMPETENCES ARTISANALES]
+FaberCompetences	[Compérences d'artisanat]
 
 // HASH_VALUE 8A6188317CC10728
 // INDEX 86
-GenericCompetences	[COMPETENCES GENERIQUES]
+GenericCompetences	[Compétences génériques]
 
 // HASH_VALUE 50D1BC36BF231F2D
 // INDEX 87
-HarvestCompetences	[COMPETENCES DE RECOLTES]
+HarvestCompetences	[Compétences de récolte]
 
 // HASH_VALUE C4E184020E01DB03
 // INDEX 88
-MagicAlterationCompetences	[COMPETENCES D'ALTERATION MAGIQUE]
+MagicAlterationCompetences	[Compétences d'altération magique]
 
 // HASH_VALUE 8C22400D3F10F7E5
 // INDEX 89
-MagicAttackCompetences	[COMPETENCES D'ATTAQUES MAGIQUES]
+MagicAttackCompetences	[Compétences d'attaques magiques]
 
 // HASH_VALUE C9D1CB27C7421A21
 // INDEX 90
-MagicGenericCompetences	[COMPETENCES DE MAGIE GENERIQUE]
+MagicGenericCompetences	[Compétences de magie générique]
 
 // HASH_VALUE 0A50E71A08C13618
 // INDEX 91
-MagicHealingCompetences	[COMPETENCES DE GUERISON MAGIQUE]
+MagicHealingCompetences	[Compétences de guérison magique]
 
 // HASH_VALUE 47CF70244E3EEF2F
 // INDEX 92
-MeleeFightingCompetences	[COMPETENCES DE COMBATS DE MELEE]
+MeleeFightingCompetences	[Compétences de combats de mêlée]
 
 // HASH_VALUE C7EF602BCEFE032F
 // INDEX 93
-RangeFightingCompetences	[COMPETENCES DE COMBATS A DISTANCE]
+RangeFightingCompetences	[Compétence de combats à distance]
 
 // HASH_VALUE 8B00B8317F024F30
 // INDEX 94
-TradingCompetences	[COMPETENCES DE TROC]
+TradingCompetences	[Compétences de troc]
 
 // HASH_VALUE C840E80D8B307442
 // INDEX 95
-TrainingCharacteristics	[CARACTERISTIQUES DE L'ENTRAINEMENT]
+TrainingCharacteristics	[CARACTÉRISTIQUES DE L'ENTRAÎNEMENT]
 
 // HASH_VALUE C882C0098B3FD844
 // INDEX 96
-TrainingScores	[CARACT. DE L'ENTRAINEMENT]
+TrainingScores	[CARACT. DE L'ENTRAÎNEMENT]
 
 // HASH_VALUE 6E074C942238548F
 // INDEX 97
@@ -393,11 +393,11 @@ ifARMOR	[Armure]
 
 // HASH_VALUE A6F76B60A6A65678
 // INDEX 98
-ifMELEE_WEAPON	[Arme de Mêlée]
+ifMELEE_WEAPON	[Arme de mêlée]
 
 // HASH_VALUE A6374B6A26C6467D
 // INDEX 99
-ifRANGE_WEAPON	[Arme de Tir]
+ifRANGE_WEAPON	[Arme de tir]
 
 // HASH_VALUE 6C58D4046C58D404
 // INDEX 100
@@ -405,7 +405,7 @@ ifAMMO	[Munitions]
 
 // HASH_VALUE 844B3463D51B345E
 // INDEX 101
-ifRAW_MATERIAL	[Matière Première]
+ifRAW_MATERIAL	[Matière première]
 
 // HASH_VALUE E527687BA6C65894
 // INDEX 102
@@ -413,19 +413,19 @@ ifSHIELD	[Bouclier]
 
 // HASH_VALUE ABD69C386699CBA8
 // INDEX 103
-ifCRAFTING_TOOL	[Outil d'Artisanat]
+ifCRAFTING_TOOL	[Outil d'artisanat]
 
 // HASH_VALUE 5D8B9449C8ABDC66
 // INDEX 104
-ifHARVEST_TOOL	[Outil de Récolte]
+ifHARVEST_TOOL	[Outil de récolte]
 
 // HASH_VALUE 23C76797E3D3545E
 // INDEX 105
-ifTAMING_TOOL	[Outil de Dressage]
+ifTAMING_TOOL	[Outil de dressage]
 
 // HASH_VALUE 6CE7844C66381BA2
 // INDEX 106
-ifTRAINING_TOOL	[Outil d'Entraînement]
+ifTRAINING_TOOL	[Outil d'entraînement]
 
 // HASH_VALUE 4850940448509404
 // INDEX 107
@@ -461,7 +461,7 @@ ifDEAD_SEED	[Graines mortes]
 
 // HASH_VALUE 64D8F41864D8F418
 // INDEX 115
-ifFOOD	[Aliments]
+ifFOOD	[Nourriture]
 
 // HASH_VALUE 6EBAB88B21086CA1
 // INDEX 116
@@ -545,7 +545,7 @@ wtHEAVY	[Lourde]
 
 // HASH_VALUE E8C62C801EB7048D
 // INDEX 136
-wtHANDS	[à Mains]
+wtHANDS	[Mains nues]
 
 // HASH_VALUE 60B6647653438FAC
 // INDEX 137
@@ -609,11 +609,11 @@ dtPOISON	[Poison]
 
 // HASH_VALUE 1F6AB4852DB6D0BD
 // INDEX 152
-dtELECTRICITY	[Electricité]
+dtELECTRICITY	[Électricité]
 
 // HASH_VALUE A7E75889A1672890
 // INDEX 153
-dtSHOCK	[Décharge]
+dtSHOCK	[Ondes de choc]
 
 // HASH_VALUE 62C7348CE738649D
 // INDEX 154
@@ -649,7 +649,7 @@ ecosysGoo	[Goo]
 
 // HASH_VALUE DBB9185388BA1864
 // INDEX 162
-ecosysPrimaryRoot	[Prime Racine]
+ecosysPrimaryRoot	[Primes Racines]
 
 // HASH_VALUE 62C7348CE738649D
 // INDEX 163
@@ -685,23 +685,23 @@ scoreWeight	[Poids]
 
 // HASH_VALUE ACBB747C14F6C37D
 // INDEX 171
-scoreDiseaseResist	[Résis. aux Maladies]
+scoreDiseaseResist	[Résis. aux maladies]
 
 // HASH_VALUE 2A482F7029F72A86
 // INDEX 172
-scoreMagicResist	[Résis. à la Magie]
+scoreMagicResist	[Résis. à la magie]
 
 // HASH_VALUE 5707EC94A1754497
 // INDEX 173
-scoreTechnoResist	[Résis. à la Techno]
+scoreTechnoResist	[Résis. à la techno]
 
 // HASH_VALUE 9778E08227451099
 // INDEX 174
-scoreImpactResist	[Résis. aux Impacts]
+scoreImpactResist	[Résis. aux impacts]
 
 // HASH_VALUE 1B96C06219776C5D
 // INDEX 175
-scoreFearResist	[Résis. au Feu]
+scoreFearResist	[Résis. au feu]
 
 // HASH_VALUE EE09DC9C65D7A4A9
 // INDEX 176
@@ -717,11 +717,11 @@ bricktCOMBAT	[Combat]
 
 // HASH_VALUE E5F6F07EDAC7FC7F
 // INDEX 179
-bricktFABER	[Artisan]
+bricktFABER	[Artisanat]
 
 // HASH_VALUE EF1BBC91A3084494
 // INDEX 180
-bricktHARVEST	[Ranger]
+bricktHARVEST	[Forage]
 
 // HASH_VALUE 60582450649894AC
 // INDEX 181
@@ -745,27 +745,27 @@ toolNone	[Inconnu]
 
 // HASH_VALUE 6D25B7765A56B78F
 // INDEX 186
-toolArmorTool	[Outil de Création d'une Armure]
+toolArmorTool	[Outil de création d'une armure]
 
 // HASH_VALUE D57BB054849BE476
 // INDEX 187
-toolJewelryTool	[Outil de Création d'un Bijou]
+toolJewelryTool	[Outil de création d'un bijou]
 
 // HASH_VALUE E186288BD3334369
 // INDEX 188
-toolAmmoTool	[Outil de Création de Munitions]
+toolAmmoTool	[Outil de création de munitions]
 
 // HASH_VALUE EAF91484E4B2E65A
 // INDEX 189
-toolRangeWeaponTool	[Outil de Création d'une Arme de Tir]
+toolRangeWeaponTool	[Outil de création d'une arme de tir]
 
 // HASH_VALUE 6CA7683A23536C48
 // INDEX 190
-toolToolMaker	[Matériel de création d'outils]
+toolToolMaker	[Outil de création d'outils]
 
 // HASH_VALUE EA19107FE4B2E658
 // INDEX 191
-toolMeleeWeaponTool	[Outil de Création d'une Arme de Mêlée]
+toolMeleeWeaponTool	[Outil de Création d'une arme de mêlée]
 
 // HASH_VALUE E546D4771C56E06C
 // INDEX 192
@@ -809,7 +809,7 @@ mpftMpE	[Explosif]
 
 // HASH_VALUE 9F558C8394D6BC53
 // INDEX 202
-mpftMpEN	[Cartouche de Munitions]
+mpftMpEN	[Cartouche de munitions]
 
 // HASH_VALUE DEE5DC7CD727C067
 // INDEX 203
@@ -829,7 +829,7 @@ mpftMpRE	[Rembourrage]
 
 // HASH_VALUE AEB6BB7F9A47C789
 // INDEX 207
-mpftMpAT	[Fixation pour Armures]
+mpftMpAT	[Fixation pour armures]
 
 // HASH_VALUE CE5BE4483096C7B2
 // INDEX 208
@@ -845,7 +845,7 @@ mpftMpBT	[Outil de forgeron]
 
 // HASH_VALUE 650AA3976C44E460
 // INDEX 211
-mpftMpPES	[Outil de pilon]
+mpftMpPES	[Pilon]
 
 // HASH_VALUE EB5AA79A17587CA0
 // INDEX 212
@@ -861,7 +861,7 @@ mpftMpJH	[Marteau d'orfèvre]
 
 // HASH_VALUE 7058140C649C9498
 // INDEX 215
-mpftMpCF	[Feu de Camp]
+mpftMpCF	[Feu de camp]
 
 // HASH_VALUE 6C19E092E3272083
 // INDEX 216
@@ -869,11 +869,11 @@ mpftMpVE	[Vêtements]
 
 // HASH_VALUE 8DD918376804A77F
 // INDEX 217
-mpftMpMF	[Concentration Magique]
+mpftMpMF	[Concentration magique]
 
 // HASH_VALUE 6408978EDFA22BB2
 // INDEX 218
-mpft	[Cible de la Matière Première Non Définie]
+mpft	[Cible de la matière première non définie]
 
 // HASH_VALUE 8D999734D693746B
 // INDEX 219
@@ -957,7 +957,7 @@ mpstat2	[Charge en Sève]
 
 // HASH_VALUE 4600981C88D08025
 // INDEX 239
-mpstat3	[DMG]
+mpstat3	[Dégâts]
 
 // HASH_VALUE E7E8348CA2D83481
 // INDEX 240
@@ -969,11 +969,11 @@ mpstat5	[Portée]
 
 // HASH_VALUE E8F4B479DFA8889F
 // INDEX 242
-mpstat6	[Modif. d'Esquives]
+mpstat6	[Modif. d'esquive]
 
 // HASH_VALUE 2896CC906209E4C1
 // INDEX 243
-mpstat7	[Modif. de Parades]
+mpstat7	[Modif. de parade]
 
 // HASH_VALUE A8EADC94A195F49F
 // INDEX 244
@@ -985,27 +985,27 @@ mpstat9	[Modif. Parades Adversaire]
 
 // HASH_VALUE EAB4047EEC7ABC90
 // INDEX 246
-mpstat10	[Facteur de Protection]
+mpstat10	[Facteur de protection]
 
 // HASH_VALUE 9FA9C06C6A7A1CB4
 // INDEX 247
-mpstat11	[Protect. Max/Cp Tranchant]
+mpstat11	[Protect. Max/Cp tranchant]
 
 // HASH_VALUE A156D87AAC493CB8
 // INDEX 248
-mpstat12	[Protect. Max/Cp Contondant]
+mpstat12	[Protect. Max/Cp contondant]
 
 // HASH_VALUE 9FE9B469286A2CAC
 // INDEX 249
-mpstat13	[Protect. Max/Cp Perforant]
+mpstat13	[Protect. Max/Cp perforant]
 
 // HASH_VALUE 9859547D20178048
 // INDEX 250
-mpstat14	[Protection Acide]
+mpstat14	[Protection contre l'Acide]
 
 // HASH_VALUE 9889908BA3378048
 // INDEX 251
-mpstat15	[Protection Froid]
+mpstat15	[Protection contre le Froid]
 
 // HASH_VALUE 99896F9FD8B81080
 // INDEX 252
@@ -1021,11 +1021,11 @@ mpstat18	[Protection Ondes de Choc]
 
 // HASH_VALUE ACC9848051C5D4AA
 // INDEX 255
-mpstat19	[Protection Poison]
+mpstat19	[Protection contre le Poison]
 
 // HASH_VALUE 0C9954402FF8BCA4
 // INDEX 256
-mpstat20	[Protection Électricité]
+mpstat20	[Protection contre l'Électricité]
 
 // HASH_VALUE 6B5A08600F45F0BE
 // INDEX 257
@@ -1049,171 +1049,171 @@ mpstat25	[Résistance Primes Racines]
 
 // HASH_VALUE 24277F86DFD3BB89
 // INDEX 262
-mpstat26	[Vitesse magie élémentaire]
+mpstat26	[Vitesse Magie élémentaire]
 
 // HASH_VALUE 6C27073DDFD8E8AF
 // INDEX 263
-mpstat27	[Puissance magie élémentaire]
+mpstat27	[Puissance Magie élémentaire]
 
 // HASH_VALUE 5EC754634A55C70F
 // INDEX 264
-mpstat28	[Vitesse magie débilitante]
+mpstat28	[Vitesse Magie débilitante]
 
 // HASH_VALUE 9A277B391248B061
 // INDEX 265
-mpstat29	[Puissance magie debilitante]
+mpstat29	[Puissance Magie débilitante]
 
 // HASH_VALUE 1E1750584A55C70F
 // INDEX 266
-mpstat30	[Vitesse magie neutralisante]
+mpstat30	[Vitesse Magie neutralisante]
 
 // HASH_VALUE 9A27772E12388461
 // INDEX 267
-mpstat31	[Puissance magie neutralisante]
+mpstat31	[Puissance Magie neutralisante]
 
 // HASH_VALUE 9818E7416417B82D
 // INDEX 268
-mpstat32	[Vitesse magie curative]
+mpstat32	[Vitesse Magie curative]
 
 // HASH_VALUE EDE67C3C6592502E
 // INDEX 269
-mpstat33	[Puissance magie curative]
+mpstat33	[Puissance Magie curative]
 
 // HASH_VALUE 1FB5049096993C70
 // INDEX 270
-mpstatItemQualifier0	[Solide]
+mpstatItemQualifier0	[solide]
 
 // HASH_VALUE 1FC164B5294568AF
 // INDEX 271
-mpstatItemQualifier1	[Souple]
+mpstatItemQualifier1	[souple]
 
 // HASH_VALUE 9E20EB4E54238328
 // INDEX 272
-mpstatItemQualifier2	[de Sève]
+mpstatItemQualifier2	[de sève]
 
 // HASH_VALUE 8DB4889CE446CB2B
 // INDEX 273
-mpstatItemQualifier3	[Puissant(e)]
+mpstatItemQualifier3	[puissant(e)]
 
 // HASH_VALUE 500864BC645854C0
 // INDEX 274
-mpstatItemQualifier4	[Rapide]
+mpstatItemQualifier4	[rapide]
 
 // HASH_VALUE 684A3C5FA3D62472
 // INDEX 275
-mpstatItemQualifier5	[à Grande Portée]
+mpstatItemQualifier5	[à grande portée]
 
 // HASH_VALUE 23B68C8B95E6F35D
 // INDEX 276
-mpstatItemQualifier6	[Agile]
+mpstatItemQualifier6	[agile]
 
 // HASH_VALUE E697A4A218062371
 // INDEX 277
-mpstatItemQualifier7	[Contre-attaque]
+mpstatItemQualifier7	[de contre-attaque]
 
 // HASH_VALUE 248A98B4E4D4FC24
 // INDEX 278
-mpstatItemQualifier8	[Sournois(e) (esquiver-)]
+mpstatItemQualifier8	[sournois(e)]
 
 // HASH_VALUE 293BD0A6E7D4FC24
 // INDEX 279
-mpstatItemQualifier9	[Fendant(e) (parer-)]
+mpstatItemQualifier9	[fendant(e)]
 
 // HASH_VALUE 68B560A596CB846A
 // INDEX 280
-mpstatItemQualifier10	[Gardien(ne)]
+mpstatItemQualifier10	[gardien(ne)]
 
 // HASH_VALUE 2325A09A54D55C4F
 // INDEX 281
-mpstatItemQualifier11	[Renforcé(e)]
+mpstatItemQualifier11	[renforcé(e)]
 
 // HASH_VALUE E5F283B561335F62
 // INDEX 282
-mpstatItemQualifier12	[Rembourré(e)]
+mpstatItemQualifier12	[rembourré(e)]
 
 // HASH_VALUE E115B09794D55C4F
 // INDEX 283
-mpstatItemQualifier13	[Lisse]
+mpstatItemQualifier13	[lisse]
 
 // HASH_VALUE A2F39B9294190857
 // INDEX 284
-mpstatItemQualifier14	[de Protection contre l'Acide]
+mpstatItemQualifier14	[de protection contre l'Acide]
 
 // HASH_VALUE 22F39B9255D91C63
 // INDEX 285
-mpstatItemQualifier15	[de Protection contre le Froid]
+mpstatItemQualifier15	[de protection contre le Froid]
 
 // HASH_VALUE 12A5DC9F5126EC89
 // INDEX 286
-mpstatItemQualifier16	[de Protection contre la Pourriture]
+mpstatItemQualifier16	[de protection contre la Pourriture]
 
 // HASH_VALUE E3F39B93D689405D
 // INDEX 287
-mpstatItemQualifier17	[de Protection contre le Feu]
+mpstatItemQualifier17	[de protection contre le Feu]
 
 // HASH_VALUE 64D433C06DF94860
 // INDEX 288
-mpstatItemQualifier18	[de Protection contre les Ondes de Choc]
+mpstatItemQualifier18	[de protection contre les Ondes de choc]
 
 // HASH_VALUE 263463C063948FBB
 // INDEX 289
-mpstatItemQualifier19	[de Protection contre le Poison]
+mpstatItemQualifier19	[de protection contre le Poison]
 
 // HASH_VALUE 0C45E0662D49E88E
 // INDEX 290
-mpstatItemQualifier20	[de Protection contre l'Électricité]
+mpstatItemQualifier20	[de protection contre l'Électricité]
 
 // HASH_VALUE 5FB39FA923B48BBB
 // INDEX 291
-mpstatItemQualifier21	[de Résistance au Désert]
+mpstatItemQualifier21	[de résistance au Désert]
 
 // HASH_VALUE 1FB39BB3E3B487C5
 // INDEX 292
-mpstatItemQualifier22	[de Résistance à la Forêt]
+mpstatItemQualifier22	[de résistance à la Forêt]
 
 // HASH_VALUE 8E8464766BCB848B
 // INDEX 293
-mpstatItemQualifier23	[de Résistance aux Lacs]
+mpstatItemQualifier23	[de résistance aux Lacs]
 
 // HASH_VALUE 5FD38BAA23D477BC
 // INDEX 294
-mpstatItemQualifier24	[de Résistance à la Jungle]
+mpstatItemQualifier24	[de résistance à la Jungle]
 
 // HASH_VALUE 9B31A896555A7474
 // INDEX 295
-mpstatItemQualifier25	[de Résistance aux Primes Racines]
+mpstatItemQualifier25	[de résistance aux Primes Racines]
 
 // HASH_VALUE A3A16AB7AB88EC56
 // INDEX 296
-mpstatItemQualifier26	[de Vitesse Élémentaire]
+mpstatItemQualifier26	[de vitesse Élémentaire]
 
 // HASH_VALUE 22F4C8AFA3949C0D
 // INDEX 297
-mpstatItemQualifier27	[de Puissance Élémentaire]
+mpstatItemQualifier27	[de puissance Élémentaire]
 
 // HASH_VALUE 66D6F9F695A9A80F
 // INDEX 298
-mpstatItemQualifier28	[de Vitesse Débilitante]
+mpstatItemQualifier28	[de vitesse Débilitante]
 
 // HASH_VALUE A216A09E44081861
 // INDEX 299
-mpstatItemQualifier29	[de Puissance Débilitante]
+mpstatItemQualifier29	[de puissance Débilitante]
 
 // HASH_VALUE A4D6F9F695A9A80E
 // INDEX 300
-mpstatItemQualifier30	[de Vitesse Neutralisante]
+mpstatItemQualifier30	[de vitesse Neutralisante]
 
 // HASH_VALUE E016A09E44081860
 // INDEX 301
-mpstatItemQualifier31	[de Puissance Neutralisante]
+mpstatItemQualifier31	[de puissance Neutralisante]
 
 // HASH_VALUE 20632F838D25C418
 // INDEX 302
-mpstatItemQualifier32	[de Vitesse Curative]
+mpstatItemQualifier32	[de vitesse Curative]
 
 // HASH_VALUE 1F85B46C4578A417
 // INDEX 303
-mpstatItemQualifier33	[de Puissance Curative]
+mpstatItemQualifier33	[de puissance Curative]
 
 // HASH_VALUE 6418F40C6418F40C
 // INDEX 304
@@ -1289,11 +1289,11 @@ uiUsername	[Pseudonyme]
 
 // HASH_VALUE 70DC1440649CF4DC
 // INDEX 322
-uiPassword	[Mot de Passe]
+uiPassword	[Mot de passe]
 
 // HASH_VALUE EA3A842642FA0CC0
 // INDEX 323
-uiConfirmPassword	[Confirmer le mot de Passe]
+uiConfirmPassword	[Confirmer le mot de passe]
 
 // HASH_VALUE A9797F6868794A8F
 // INDEX 324
@@ -1305,7 +1305,7 @@ uiOnLogin	[CONNEXION]
 
 // HASH_VALUE 42F2C02F42EED015
 // INDEX 326
-uiShardDisp	[CHOISISSEZ VOTRE SHARD]
+uiShardDisp	[CHOISISSEZ VOTRE SERVEUR]
 
 // HASH_VALUE 5450544454505444
 // INDEX 327
@@ -1313,11 +1313,11 @@ uiLoginQuit	[QUITTER]
 
 // HASH_VALUE 8860AC38C9908837
 // INDEX 328
-uiOnline	[CONNECTE]
+uiOnline	[CONNECTÉ]
 
 // HASH_VALUE 49A088270810A42B
 // INDEX 329
-uiOffline	[DECONNECTE]
+uiOffline	[DÉCONNECTÉ]
 
 // HASH_VALUE C950C42EC951A81F
 // INDEX 330
@@ -1325,7 +1325,7 @@ uiOnConnect	[CONNEXION]
 
 // HASH_VALUE 13B2403C13D33C3E
 // INDEX 331
-uiOnStatus	[STATUS]
+uiOnStatus	[STATUT]
 
 // HASH_VALUE 8CE2D0404EC2E43C
 // INDEX 332
@@ -1333,11 +1333,11 @@ uiOnVersion	[VERSION]
 
 // HASH_VALUE C7CC3BE0464ED819
 // INDEX 333
-uiOnChecking	[EXAMINE LES FICHIERS A PATCHER...]
+uiOnChecking	[EXAMINE LES FICHIERS À PATCHER...]
 
 // HASH_VALUE FB21B433B2B1EC22
 // INDEX 334
-uiOnRelease	[NOTE VERSION]
+uiOnRelease	[NOTES DE VERSION]
 
 // HASH_VALUE 48209C2B05607C06
 // INDEX 335
@@ -1345,27 +1345,27 @@ uiGameConfiguration	[CONFIGURATION DE RYZOM]
 
 // HASH_VALUE 0B71B01A04BEB405
 // INDEX 336
-uiCreateAccount	[CREER UN COMPTE]
+uiCreateAccount	[CRÉER UN COMPTE]
 
 // HASH_VALUE 0F407CF9CAE070D4
 // INDEX 337
-uiEditAccount	[ACCEDER A SON COMPTE]
+uiEditAccount	[ACCÉDER A SON COMPTE]
 
 // HASH_VALUE 01F1BC27BC416CF8
 // INDEX 338
-uiBetaAccount	[TRANSFERER COMPTE BETA]
+uiBetaAccount	[TRANSFÉRER COMPTE BÊTA]
 
 // HASH_VALUE 01120F12C422D70B
 // INDEX 339
-uiForgetPwd	[J'AI OUBLIE MON MOT DE PASSE]
+uiForgetPwd	[J'AI OUBLIÉ MON MOT DE PASSE]
 
 // HASH_VALUE 4AF1F0F94CDFE0EC
 // INDEX 340
-uiFreeTrial	[CREER UN COMPTE D'ESSAI GRATUIT]
+uiFreeTrial	[CRÉER UN COMPTE D'ESSAI GRATUIT]
 
 // HASH_VALUE 9023144851D43C48
 // INDEX 341
-uiLoginSupport	[SUPPORT]
+uiLoginSupport	[ASSISTANCE]
 
 // HASH_VALUE 46E1C43A831ECFEA
 // INDEX 342
@@ -1381,7 +1381,7 @@ uiOnPatch	[PATCH]
 
 // HASH_VALUE 04628F3C85610A34
 // INDEX 345
-uiOnPatchDetail	[DETAILS DU PATCH]
+uiOnPatchDetail	[DÉTAILS DU PATCH]
 
 // HASH_VALUE 648AB4935C60B4C1
 // INDEX 346
@@ -2793,7 +2793,7 @@ uiDesertRawMats	[Matières premières exotiques du Désert]
 
 // HASH_VALUE 9C79AB96DFA4AFB9
 // INDEX 698
-uiForestRawMats	[Matières premières exotiques des Forêts]
+uiForestRawMats	[Matières premières exotiques de la Forêt]
 
 // HASH_VALUE 1D38C39A1EC463B8
 // INDEX 699
@@ -3139,35 +3139,35 @@ uigcScreenRatioCustom	[Personnalisé]
 // INDEX 784
 uigcttScreenRatio	[L'@{6F6F}Aspect Ratio@{FFFF} de votre moniteur.\n
 	Changez si vous n'avez pas un moniteur standard 4/3.\n
-	NB: ne prenez pas en compte la résolution en pixel (même si vous êtes en fenétré). Ryzom s'en occupe.]
+	NB: ne prenez pas en compte la résolution en pixels (même si vous êtes en fenêtré). Ryzom s'en occupe.]
 
 // HASH_VALUE 5050241C50D09420
 // INDEX 785
-uigcGraph	[GRAPHISMES]
+uigcGraph	[Graphismes]
 
 // HASH_VALUE 4871AC1F06706826
 // INDEX 786
-uigcGeneral	[GENERALE]
+uigcGeneral	[Général]
 
 // HASH_VALUE 07108C2208C1A426
 // INDEX 787
-uigcLandscape	[PAYSAGE]
+uigcLandscape	[Paysage]
 
 // HASH_VALUE 4340882E4130D421
 // INDEX 788
-uigcSpecialFX	[EFFETS SPECIAUX]
+uigcSpecialFX	[Effets spéciaux]
 
 // HASH_VALUE CBB2902AC7A1C417
 // INDEX 789
-uigcCharacter	[PERSONNAGES]
+uigcCharacter	[Personnages]
 
 // HASH_VALUE 4490143044D01454
 // INDEX 790
-uigcLanguage	[LANGUE]
+uigcLanguage	[Langue]
 
 // HASH_VALUE 4B11801245F1C839
 // INDEX 791
-uigcInterface	[INTERFACE]
+uigcInterface	[Interface]
 
 // HASH_VALUE 8A61DC29CDA19836
 // INDEX 792
@@ -3175,75 +3175,75 @@ uigcHUD	[HUD]
 
 // HASH_VALUE 8D91AC32CB222C50
 // INDEX 793
-uigcAlphaColor	[FENETRES]
+uigcAlphaColor	[Fenêtres]
 
 // HASH_VALUE CAD14012C421CC32
 // INDEX 794
-uigcWinColor	[EN-TETES]
+uigcWinColor	[En-têtes]
 
 // HASH_VALUE 0CB0F444FB91E30C
 // INDEX 795
-uigcWinColorR2	[EN-TETES RING]
+uigcWinColorR2	[En-têtes Ring]
 
 // HASH_VALUE 5450840C5450840C
 // INDEX 796
-uigcChatColor	[CHAT]
+uigcChatColor	[Chat]
 
 // HASH_VALUE 4B01AC26C830BC29
 // INDEX 797
-uigcEnglish	[ENGLISH]
+uigcEnglish	[English]
 
 // HASH_VALUE 4C5024185050140C
 // INDEX 798
-uigcFrancais	[FRANCAIS]
+uigcFrancais	[Français]
 
 // HASH_VALUE 8D229C20C911A81F
 // INDEX 799
-uigcDeutch	[DEUTSCH]
+uigcDeutch	[Deutsch]
 
 // HASH_VALUE 0912144D9193DC2A
 // INDEX 800
-uigcRussian	[РУССКИЙ]
+uigcRussian	[Русский]
 
 // HASH_VALUE CBC1A432CBD2FC37
 // INDEX 801
-uigcSpanish	[ESPANOL]
+uigcSpanish	[Español]
 
 // HASH_VALUE D72E51D69923FABB
 // INDEX 802
-uigcRequestReboot	[Ryzom doit redémarrer pour appliquer les modifications]
+uigcRequestReboot	[Ryzom doit redémarrer pour appliquer les modifications.]
 
 // HASH_VALUE 11E314364F722841
 // INDEX 803
-uigcInput	[CONTROLES]
+uigcInput	[Contrôles]
 
 // HASH_VALUE 4D52DC344F71D43A
 // INDEX 804
-uigcMouse	[SOURIS]
+uigcMouse	[Souris]
 
 // HASH_VALUE 4054542C4494143C
 // INDEX 805
-uigcKeyboard	[CLAVIER]
+uigcKeyboard	[Clavier]
 
 // HASH_VALUE CC62F0348FC2D43A
 // INDEX 806
-uigcSound	[SON]
+uigcSound	[Son]
 
 // HASH_VALUE 07F1B03C09518420
 // INDEX 807
-uigcLandmarkColor	[REPERES]
+uigcLandmarkColor	[Repères]
 
 // HASH_VALUE 38D4041838D40418
 // INDEX 808
-uiFPS	[FPS:]
+uiFPS	[FPS :]
 
 // HASH_VALUE 2A19E06B0573BCB0
 // INDEX 809
-uiGeneralColor	[Options Générales]
+uiGeneralColor	[Options générales]
 
 // HASH_VALUE ABBAA4A89C540447
 // INDEX 810
-uiScreen	[Contrôle de l'Ecran]
+uiScreen	[Contrôle de l'écran]
 
 // HASH_VALUE 7498F40C74DC14C8
 // INDEX 811
@@ -3259,11 +3259,11 @@ uiGamma	[Gamma]
 
 // HASH_VALUE 182AF39428C3A0A6
 // INDEX 814
-uiDivideTxBy2	[Faible Résolution de la Texture]
+uiDivideTxBy2	[Faible Résolution de la texture]
 
 // HASH_VALUE 7458145C4C906480
 // INDEX 815
-uiWaitVBL	[attente du VBL]
+uiWaitVBL	[Attente du VBL]
 
 // HASH_VALUE 6CA7B090A988CC8A
 // INDEX 816
@@ -3271,7 +3271,7 @@ uiFullscreen	[Plein écran]
 
 // HASH_VALUE A3F2CB94EAD8D0BB
 // INDEX 817
-uiLandGeneral	[Options du Paysage]
+uiLandGeneral	[Options du paysage]
 
 // HASH_VALUE 1F160C8228C9A4A6
 // INDEX 818
@@ -3291,7 +3291,7 @@ uiThreshold	[Qualité]
 
 // HASH_VALUE E8FA7468E8B6B2C6
 // INDEX 822
-uiMicroVeget	[Micro-Végétation]
+uiMicroVeget	[Micro-végétation]
 
 // HASH_VALUE B1FAC08AE1175C9A
 // INDEX 823
@@ -3299,7 +3299,7 @@ uiMicroVegetDensity	[Densité]
 
 // HASH_VALUE 6348886E4934D4A1
 // INDEX 824
-uiFXGeneral	[Effets Spéciaux]
+uiFXGeneral	[Effets spéciaux]
 
 // HASH_VALUE A0EAD4896C97ACBF
 // INDEX 825
@@ -3307,11 +3307,11 @@ uiFxLimitations	[Limitations]
 
 // HASH_VALUE 4ABA8451A0F9BC54
 // INDEX 826
-uiFxMaxPoly	[Polygones Max.]
+uiFxMaxPoly	[Polygones max.]
 
 // HASH_VALUE 5417F477DEA4E483
 // INDEX 827
-uiFxCloud	[Activer Nuages]
+uiFxCloud	[Activer nuages]
 
 // HASH_VALUE F0B9B0932419D0A7
 // INDEX 828
@@ -3319,19 +3319,19 @@ uiFxCloudQuality	[Qualité]
 
 // HASH_VALUE 6ABAAC8EDE709CB2
 // INDEX 829
-uiFxCloudUpdate	[Fréq. Mises à jour]
+uiFxCloudUpdate	[Fréq. mises à jour]
 
 // HASH_VALUE A89984725FF26848
 // INDEX 830
-uiFxShadow	[Activer Ombres]
+uiFxShadow	[Activer les ombres]
 
 // HASH_VALUE 1B24C4621310A089
 // INDEX 831
-uiFxBloom	[Activer le Bloom]
+uiFxBloom	[Activer le bloom]
 
 // HASH_VALUE 152908826C060CBF
 // INDEX 832
-uiFxSquareBloom	[Filtre Carré]
+uiFxSquareBloom	[Filtre carré]
 
 // HASH_VALUE B1FAC08AE1175C9A
 // INDEX 833
@@ -3343,7 +3343,7 @@ uiFxTooltipBloom	[Votre configuration ne supporte pas l'effet de Bloom. Essayez 
 
 // HASH_VALUE 6573D09729FA6452
 // INDEX 835
-uiCharPoly	[Options du Personnage]
+uiCharPoly	[Options du personnage]
 
 // HASH_VALUE 6866348DA0D63882
 // INDEX 836
@@ -3351,11 +3351,11 @@ uiCharModel	[Modèle]
 
 // HASH_VALUE 4ABA8451A0F9BC54
 // INDEX 837
-uiCharMaxPoly	[Polygones Max.]
+uiCharMaxPoly	[Polygones max.]
 
 // HASH_VALUE C3DAC002D5C9E0FD
 // INDEX 838
-uiCharMaxNotCLod	[Haute Déf Max]
+uiCharMaxNotCLod	[Haute déf. max]
 
 // HASH_VALUE 209C14187058C40C
 // INDEX 839
@@ -3367,7 +3367,7 @@ uiEnableRacialAnimation	[Activer les animations raciales]
 
 // HASH_VALUE 5CDA8874D1C96450
 // INDEX 841
-uiHDTexture	[Texture Hte Résolution]
+uiHDTexture	[Texture haute résolution]
 
 // HASH_VALUE 8A61DC29CDA19836
 // INDEX 842
@@ -3375,7 +3375,7 @@ uiHud	[HUD]
 
 // HASH_VALUE 6EEBB02CCB28D4BA
 // INDEX 843
-uiHardwareCursor	[Curseur Hardware]
+uiHardwareCursor	[Curseur hardware]
 
 // HASH_VALUE 33832A66F2D875AC
 // INDEX 844
@@ -3383,11 +3383,11 @@ uiActivateHardwareCursor	[Voulez vous activer le curseur Hardware ?]
 
 // HASH_VALUE 90A54C8E6B99734F
 // INDEX 845
-uiShowUnderCursor	[Afficher sous le Curseur]
+uiShowUnderCursor	[Afficher sous le curseur]
 
 // HASH_VALUE A8B74796A9F41865
 // INDEX 846
-uiShowTargeted	[Affichage de la Cible]
+uiShowTargeted	[Affichage de la cible]
 
 // HASH_VALUE 5A081C44E478CB3A
 // INDEX 847
@@ -3403,11 +3403,11 @@ uiAtkOnSelect	[Attaquer la Source aussitôt Choisie]
 
 // HASH_VALUE 6E56639A22D5F44D
 // INDEX 850
-uiCharFade	[Fondu du Personnage Utilisateur]
+uiCharFade	[Fondu du personnage utilisateur]
 
 // HASH_VALUE E7C8A475884340BF
 // INDEX 851
-uiCharOpacityMin	[Opacité Minimum]
+uiCharOpacityMin	[Opacité minimale]
 
 // HASH_VALUE 98FC03AA6A398888
 // INDEX 852
@@ -3420,7 +3420,7 @@ uittCurrentActionOut	[Si coché, l'@{6F6F}action en cours@{FFFF} est affichée e
 
 // HASH_VALUE 2909F07F0AE530C3
 // INDEX 854
-uiGlobalColor	[Options des Fenêtres]
+uiGlobalColor	[Options des fenêtres]
 
 // HASH_VALUE 2B46C79BDF46A46A
 // INDEX 855
@@ -3428,35 +3428,35 @@ uiUIColor	[Couleurs de l'Interface Utilisateur]
 
 // HASH_VALUE 6B896489DE73843C
 // INDEX 856
-uiGlobalOpacity	[Opacité Globale]
+uiGlobalOpacity	[Opacité globale :]
 
 // HASH_VALUE 2683447557870F6A
 // INDEX 857
-uiMouseOverOpacity	[Opacité au passage de la Souris]
+uiMouseOverOpacity	[Opacité au passage de la souris :]
 
 // HASH_VALUE 26836833A153FC85
 // INDEX 858
-uiColorD	[Pendant la Journée]
+uiColorD	[Pendant la journée]
 
 // HASH_VALUE 64D6E45F9DB1AC89
 // INDEX 859
-uiColorN	[Pendant la Nuit]
+uiColorN	[Pendant la nuit]
 
 // HASH_VALUE 1526525E29E2BF6C
 // INDEX 860
-uiDefDayCol	[Définir la Couleur du Jour]
+uiDefDayCol	[Définir la couleur du jour]
 
 // HASH_VALUE 97668B3989A16C9C
 // INDEX 861
-uiDefNightCol	[Définir la Couleur de la Nuit]
+uiDefNightCol	[Définir la couleur de la nuit]
 
 // HASH_VALUE 55B65E5D6A42E374
 // INDEX 862
-uittColDay	[Choisir la Couleur du Jour]
+uittColDay	[Choisir la couleur du jour]
 
 // HASH_VALUE 18F6AB3ECBD168A1
 // INDEX 863
-uittColNight	[Choisir la Couleur de la Nuit]
+uittColNight	[Choisir la couleur de la nuit]
 
 // HASH_VALUE A836B4862BC68C7A
 // INDEX 864
@@ -3476,7 +3476,7 @@ uiAlphaRolloverContent	[Contenu]
 
 // HASH_VALUE A1E43C6A1BA05492
 // INDEX 868
-uiRolloverAlphaSpeed	[Vitesse de Fondu]
+uiRolloverAlphaSpeed	[Vitesse de fondu]
 
 // HASH_VALUE 63372888A6D9B4B2
 // INDEX 869
@@ -3484,7 +3484,7 @@ uiContainer	[Conteneur]
 
 // HASH_VALUE 9815F856D9671069
 // INDEX 870
-uiChatColors	[Couleurs du Chat]
+uiChatColors	[Couleurs du chat]
 
 // HASH_VALUE EB27288CA3A73480
 // INDEX 871
@@ -3613,11 +3613,11 @@ uiCCDRegion	[Couleur des messages "Région"]
 
 // HASH_VALUE 6C59A0585505AB92
 // INDEX 902
-uiWinColors	[Couleurs des En-têtes]
+uiWinColors	[Couleurs des en-têtes]
 
 // HASH_VALUE 33B8407C33D73C9E
 // INDEX 903
-uiPlaColor	[Etat]
+uiPlaColor	[État]
 
 // HASH_VALUE AA489885A0C73C81
 // INDEX 904
@@ -3641,7 +3641,7 @@ uiLabColor	[Orientation]
 
 // HASH_VALUE 99A4BF4686706A63
 // INDEX 909
-uiMemColor	[Guilde & Equipe]
+uiMemColor	[Guilde & Équipe]
 
 // HASH_VALUE 7018542070185420
 // INDEX 910
@@ -3653,7 +3653,7 @@ uiInfColor	[Informations]
 
 // HASH_VALUE 66C8348F22D8407E
 // INDEX 912
-uiTraColor	[Echange]
+uiTraColor	[Échange]
 
 // HASH_VALUE 0A51C82F8B019431
 // INDEX 913
@@ -3758,11 +3758,11 @@ uiLMMiscColor	[Divers]
 
 // HASH_VALUE E728548DA3583884
 // INDEX 938
-uiLMTribeColor	[Tribus]
+uiLMTribeColor	[Tribu]
 
 // HASH_VALUE A7866C5BE6C4B882
 // INDEX 939
-uiLMBanditColor	[Bandit]
+uiLMBanditColor	[Bandits]
 
 // HASH_VALUE ECDA0489A1F70090
 // INDEX 940
