@@ -265,7 +265,7 @@
             fontsize="10"
             line_maxw="182"
             shadow="true"
-            hardtext="No File..." />
+            hardtext="uiNoFiles" />
     </group>
   </group>
   <tree node="mp3_player" />
