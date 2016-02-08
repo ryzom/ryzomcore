@@ -1417,11 +1417,11 @@ uiErrPatchApply	[Fehler : Patchprozess beendet, aber der Patch konnte nicht erfo
 // INDEX 353
 uiErrChecking	[Fehler : Patchdateien versagen - Überprüfung.]
 
-// HASH_VALUE 40D0242C40D0242C
+// HASH_VALUE 8E9280411622E45F
 // INDEX 354
 uiKb	[KB]
 
-// HASH_VALUE 4050243440502434
+// HASH_VALUE 90B288459762EC61
 // INDEX 355
 uiMb	[MB]
 
@@ -27270,4 +27270,12 @@ uiRadarUseCamera	[Radar folgt der Kamera-Rotation.]
 // HASH_VALUE B83EBD58DE9C068F
 // INDEX 6466
 uittRadarUseCamera	[Wenn aktiviert, wird die Kamera-Rotation für die Radar-Ansicht eingeschaltet.]
+
+// HASH_VALUE 82A1901C06A3F72E
+// INDEX 6467
+uiTotalPatch	[GESAMTER PATCH]
+
+// HASH_VALUE D091B40C4890BC25
+// INDEX 6468
+uiRequiredFiles	[BENÖTIGTE DATEIEN]
 

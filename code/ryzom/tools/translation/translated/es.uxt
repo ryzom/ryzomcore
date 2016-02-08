@@ -1416,13 +1416,13 @@ uiErrPatchApply	[Error: Proceso de Parcheado finalize pero el parche no ha sido 
 // INDEX 353
 uiErrChecking	[Error: Archivos del Parcheado han fallado - revisando.]
 
-// HASH_VALUE 40D0242C40D0242C
+// HASH_VALUE 8E9280411622E45F
 // INDEX 354
-uiKb	[KB]
+uiKb	[KiB]
 
-// HASH_VALUE 4050243440502434
+// HASH_VALUE 90B288459762EC61
 // INDEX 355
-uiMb	[MB]
+uiMb	[MiB]
 
 // HASH_VALUE 9FA5A06DD895B637
 // INDEX 356
@@ -27296,4 +27296,12 @@ uiRadarUseCamera	[El radar sigue la rotación de la cámara]
 // HASH_VALUE B83EBD58DE9C068F
 // INDEX 6466
 uittRadarUseCamera	[Si marcado, usar la rotación de cámara para la vista de radar.]
+
+// HASH_VALUE 82A1901C06A3F72E
+// INDEX 6467
+uiTotalPatch	[PARCHE TOTAL]
+
+// HASH_VALUE D091B40C4890BC25
+// INDEX 6468
+uiRequiredFiles	[ARCHIVOS NECESARIOS]
 

@@ -8109,11 +8109,11 @@ uiDebugProfile	[Profil]
 
 // HASH_VALUE 58F0A44CC8187CB0
 // INDEX 1961
-uiDebugProfileVbLock	[Verrouillages du Profil VB]
+uiDebugProfileVbLock	[Profilage du VB Lock]
 
 // HASH_VALUE E859D05F09290C63
 // INDEX 1962
-uiDebugProfileTexture	[Utilisation Profil de Texture]
+uiDebugProfileTexture	[Profilage des Texture]
 
 // HASH_VALUE D837F09328866CA5
 // INDEX 1963
@@ -27245,4 +27245,20 @@ uiTotalPatch	[PATCH TOTAL]
 // HASH_VALUE D091B40C4890BC25
 // INDEX 6468
 uiRequiredFiles	[FICHIERS REQUIS]
+
+// HASH_VALUE 8C42E02F0C01D422
+// INDEX 6469
+uiLodValue	[NORMAL]
+
+// HASH_VALUE 6878DC2CC23A6CB6
+// INDEX 6470
+uiDebugProfileFillRate	[Profilage du Fillrate]
+
+// HASH_VALUE 0F54678C93B4CBF6
+// INDEX 6471
+uiFixedMissionEntry_Mainland_Unknwown	[Continent / Inconnu]
+
+// HASH_VALUE CAB123089C80B66B
+// INDEX 6472
+uiNoFiles	[Aucun fichier...]
 
