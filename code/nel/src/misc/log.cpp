@@ -260,7 +260,7 @@ void CLog::displayString (const char *str)
 			TempArgs.FileName = _FileName;
 			TempArgs.Line = _Line;
 			TempArgs.FuncName = _FuncName;
-			TempArgs.CallstackAndLog = "";
+			TempArgs.CallstackAndLog.clear();
 
 			TempString = str;
 		}
@@ -281,7 +281,7 @@ void CLog::displayString (const char *str)
 			localargs.FileName = _FileName;
 			localargs.Line = _Line;
 			localargs.FuncName = _FuncName;
-			localargs.CallstackAndLog = "";
+			localargs.CallstackAndLog.clear();
 
 			disp = str;
 			args = &localargs;
@@ -314,7 +314,7 @@ void CLog::displayString (const char *str)
 			(*idi)->display( *args, disp );
 		}
 	}
-	TempString = "";
+	TempString.clear();
 	unsetPosition();
 }
 
