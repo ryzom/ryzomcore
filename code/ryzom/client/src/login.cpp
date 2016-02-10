@@ -77,7 +77,7 @@ extern bool SetMousePosFirstTime;
 
 vector<CShard> Shards;
 
-string LoginLogin, LoginPassword, ClientApp, Salt;
+string LoginLogin, LoginPassword, ClientApp, Salt, LoginCustomParameters;
 uint32 LoginShardId = 0xFFFFFFFF;
 
 
@@ -1169,7 +1169,7 @@ void onlogin(bool vanishScreen = true)
 	// Check the login/pass
 
 	// main menu page for r2mode
-	string res = checkLogin(LoginLogin, LoginPassword, ClientApp);
+	string res = checkLogin(LoginLogin, LoginPassword, ClientApp, LoginCustomParameters);
 	if (res.empty())
 	{
 		// if not in auto login, push login ok event
@@ -2738,7 +2738,7 @@ REGISTER_ACTION_HANDLER (CAHOnBackToLogin, "on_back_to_login");
 
 
 // ***************************************************************************
-string checkLogin(const string &login, const string &password, const string &clientApp)
+string checkLogin(const string &login, const string &password, const string &clientApp, const std::string &customParameters)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	Shards.clear();
@@ -2795,7 +2795,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 	{
 		// R2 login sequence
 		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
-		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"+"&lg="+ClientCfg.LanguageCode))
+		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"+"&lg="+ClientCfg.LanguageCode+customParameters))
 			return "Can't send (error code 2)";
 
 		// the response should contains the result code and the cookie value
