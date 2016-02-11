@@ -2578,13 +2578,13 @@ std::string CPath::makePathAbsolute( const std::string &relativePath, const std:
 	{
 		absolutePath = relativePath;
 	}
-#else
-	// Unix filesystem absolute path
+	else
+#endif
+	// Unix filesystem absolute path (works also under Windows)
 	if (relativePath[0] == '/')
 	{
 		absolutePath = relativePath;
 	}
-#endif
 	else
 	{
 		// Add a slash to the directory if necessary.
@@ -2610,14 +2610,15 @@ std::string CPath::makePathAbsolute( const std::string &relativePath, const std:
 
 		// Now build the new absolute path
 		absolutePath += relativePath;
-		absolutePath = standardizePath(absolutePath, true);
 	}
+
+	absolutePath = standardizePath(absolutePath, true);
 
 	if (simplify)
 	{
 		// split all components path to manage parent directories
 		std::vector<std::string> tokens;
-		explode(absolutePath, std::string("/"), tokens, true);
+		explode(absolutePath, std::string("/"), tokens, false);
 
 		std::vector<std::string> directoryParts;
 
@@ -2649,7 +2650,10 @@ std::string CPath::makePathAbsolute( const std::string &relativePath, const std:
 
 			// rebuild the whole absolute path
 			for(uint i = 1, len = directoryParts.size(); i < len; ++i)
-				absolutePath += "/" + directoryParts[i];
+			{
+				if (!directoryParts[i].empty())
+					absolutePath += "/" + directoryParts[i];
+			}
 
 			// add trailing slash
 			absolutePath += "/";
