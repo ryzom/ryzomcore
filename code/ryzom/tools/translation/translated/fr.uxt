@@ -977,11 +977,11 @@ mpstat7	[Modif. de parade]
 
 // HASH_VALUE A8EADC94A195F49F
 // INDEX 244
-mpstat8	[Modif. Esquives Adversaire]
+mpstat8	[Modif. d'esquive adversaire]
 
 // HASH_VALUE 2B0A0C94A49544AA
 // INDEX 245
-mpstat9	[Modif. Parades Adversaire]
+mpstat9	[Modif. de parade adversaire]
 
 // HASH_VALUE EAB4047EEC7ABC90
 // INDEX 246
@@ -1349,7 +1349,7 @@ uiCreateAccount	[CRÉER UN COMPTE]
 
 // HASH_VALUE 0F407CF9CAE070D4
 // INDEX 337
-uiEditAccount	[ACCÉDER A SON COMPTE]
+uiEditAccount	[ACCÉDER À SON COMPTE]
 
 // HASH_VALUE 01F1BC27BC416CF8
 // INDEX 338
@@ -1385,35 +1385,35 @@ uiOnPatchDetail	[DÉTAILS DU PATCH]
 
 // HASH_VALUE 648AB4935C60B4C1
 // INDEX 346
-uiOnPatchOpt	[FACULTATIF : Ajouter/Enlever des Fichiers du Patch]
+uiOnPatchOpt	[FACULTATIF : ajouter / enlever des fichiers du patch]
 
 // HASH_VALUE 3980093F2B930979
 // INDEX 347
-uiErrOffLineShard	[Erreur : Vous ne pouvez pas vous connecter à un shard "offline" (erreur code 15).]
+uiErrOffLineShard	[ERREUR : vous ne pouvez pas vous connecter à un serveur déconnecté (erreur code 15).]
 
 // HASH_VALUE 3DDF0D8BBD1D3C7A
 // INDEX 348
-uiErrCantPatch	[Erreur : Vous ne pouvez pas patcher car l'URL des mises à jour n'est pas configurée dans la base de données (erreur code 16).]
+uiErrCantPatch	[ERREUR : vous ne pouvez pas patcher car l'URL des mises à jour n'est pas configurée dans la base de données (erreur code 16).]
 
 // HASH_VALUE E1B933F053557A69
 // INDEX 349
-uiNeedToPatch	[Information : Vous devez installer les mises à jour pour accéder à ce shard.]
+uiNeedToPatch	[INFORMATION : vous devez installer les mises à jour pour accéder à ce serveur.]
 
 // HASH_VALUE 1CFD71DE1856F357
 // INDEX 350
-uiErrServerLost	[Erreur : Perte du serveur durant la mise à jour de Ryzom.]
+uiErrServerLost	[ERREUR : déconnexion durant la mise à jour de Ryzom.]
 
 // HASH_VALUE 0781700FFA41B8F9
 // INDEX 351
-uiPatching	[MISE A JOUR EN COURS, VEUILLEZ PATIENTER]
+uiPatching	[MISE À JOUR EN COURS, VEUILLEZ PATIENTER]
 
 // HASH_VALUE B11FE4024EE3A1CB
 // INDEX 352
-uiErrPatchApply	[Erreur : le processus de mises à jour est terminé mais les patchs n'ont pas pu être installés correctement.]
+uiErrPatchApply	[ERREUR : le processus de mise à jour est terminé mais les patchs n'ont pas pu être installés correctement.]
 
 // HASH_VALUE 428B3D2BDA3B2CD2
 // INDEX 353
-uiErrChecking	[Erreur : Echec des fichiers de mises à jour - vérification.]
+uiErrChecking	[ERREUR : échec de la mise à jour des fichiers - vérification.]
 
 // HASH_VALUE 8E9280411622E45F
 // INDEX 354
@@ -1429,23 +1429,23 @@ uiLoginGetFile	[Récupération du fichier :]
 
 // HASH_VALUE 373988CC56A4B9DB
 // INDEX 357
-uiDLFailed	[Echec téléchargement à partir du serveur d'urgence, processus de patchs avorté]
+uiDLFailed	[Échec du téléchargement à partir du serveur d'urgence, processus de patch avorté]
 
 // HASH_VALUE 0DD314AEEB0A6833
 // INDEX 358
-uiDLURIFailed	[Echec téléchargement à partir d'URI (nouvel essai) :]
+uiDLURIFailed	[Échec du téléchargement à partir de l'URL (nouvel essai) :]
 
 // HASH_VALUE 9FEF11F92FE58883
 // INDEX 359
-uiNoMoreURI	[Plus de patchs URI, essayez le serveur d'urgence]
+uiNoMoreURI	[Plus d'URL pour les patchs, utilisation du serveur de secours]
 
 // HASH_VALUE D126843FEAF6BF89
 // INDEX 360
-uiDLWithCurl	[Téléchargement des fichiers via Curl:]
+uiDLWithCurl	[Téléchargement des fichiers via Curl :]
 
 // HASH_VALUE 5DF5B8902957A38B
 // INDEX 361
-uiDecompressing	[Decompression du fichier :]
+uiDecompressing	[Décompression du fichier :]
 
 // HASH_VALUE 5C24504228490833
 // INDEX 362
@@ -1453,7 +1453,7 @@ uiCheckInt	[Vérification de l'intégrité :]
 
 // HASH_VALUE 4C08EC7AE63A3CA8
 // INDEX 363
-uiNoVersionFound	[Pas de Version trouvée]
+uiNoVersionFound	[Pas de version trouvée]
 
 // HASH_VALUE EA9BF07087F0DE5C
 // INDEX 364
@@ -1465,11 +1465,11 @@ uiApplyingDelta	[Application du Delta :]
 
 // HASH_VALUE 6BA9B484A5229440
 // INDEX 366
-uiClientVersion	[Version du Client]
+uiClientVersion	[Version du client]
 
 // HASH_VALUE 2EAADC9D27B47047
 // INDEX 367
-uiServerVersion	[Version du Serveur]
+uiServerVersion	[Version du serveur]
 
 // HASH_VALUE A8B6FC32E686BF9C
 // INDEX 368
@@ -1485,23 +1485,23 @@ uiCheckInBNP	[Vérification du BNP :]
 
 // HASH_VALUE 8810F72436CBB610
 // INDEX 371
-uiSHA1Diff	[Force BNP Analysée : SHA1 ne correspond pas :]
+uiSHA1Diff	[Contrôle de l'empreinte du BNP : SHA1 ne correspond pas :]
 
 // HASH_VALUE 0328885969AA93AC
 // INDEX 372
-uiCheckEndNoErr	[Fin de vérification du fichier - Pas d'erreur]
+uiCheckEndNoErr	[Fin de vérification des fichiers - Pas d'erreur]
 
 // HASH_VALUE 9759642196BA93B6
 // INDEX 373
-uiCheckEndWithErr	[Fin de vérification du fichier - Erreur(s) :]
+uiCheckEndWithErr	[Fin de vérification des fichiers - Erreur(s) :]
 
 // HASH_VALUE 03196C6669AA93A9
 // INDEX 374
-uiPatchEndNoErr	[Fichier de patch terminé - Pas d'erreur]
+uiPatchEndNoErr	[Patch des fichiers terminé - Pas d'erreur]
 
 // HASH_VALUE E2A45B80D6C8F35E
 // INDEX 375
-uiPatchEndWithErr	[Echec de la mise à jour !]
+uiPatchEndWithErr	[Échec de la mise à jour]
 
 // HASH_VALUE 97987345E8D46F43
 // INDEX 376
@@ -1509,11 +1509,11 @@ uiPatchDiskFull	[Disque plein !]
 
 // HASH_VALUE 67818F3F0F656F1B
 // INDEX 377
-uiPatchWriteError	[Erreur d'écriture ! (disque plein ?)]
+uiPatchWriteError	[Erreur d'écriture (disque plein ?)]
 
 // HASH_VALUE 54956061978AB897
 // INDEX 378
-uiProcessing	[Traîtement des fichiers :]
+uiProcessing	[Traitement des fichiers :]
 
 // HASH_VALUE D183CC5E53E4E24A
 // INDEX 379
@@ -1521,7 +1521,7 @@ uiUnpack	[Décompression BNP :]
 
 // HASH_VALUE 57282453CE0D24A5
 // INDEX 380
-uiUnpackErrHead	[Impossible de lire l'en-tête bnp :]
+uiUnpackErrHead	[Impossible de lire l'en-tête BNP :]
 
 // HASH_VALUE 3EC17830B80D1B1D
 // INDEX 381
@@ -1529,11 +1529,11 @@ uiRebootConfirm	[Ryzom va être redémarré. Attendez que le jeu soit totalement
 
 // HASH_VALUE 809F582A06023625
 // INDEX 382
-uiRebootBut	[CLIQUEZ ICI POUR REDEMARRER]
+uiRebootBut	[CLIQUEZ ICI POUR REDÉMARRER]
 
 // HASH_VALUE EA9888EBCAF59355
 // INDEX 383
-uiChangeDate	[Changement du mode date :]
+uiChangeDate	[Changement de la date du fichier :]
 
 // HASH_VALUE 4589434CDD042E75
 // INDEX 384
@@ -1545,11 +1545,11 @@ uiNowDate	[La date est :]
 
 // HASH_VALUE 485B4807F0581777
 // INDEX 386
-uiSetAttrib	[Réglages attributs du fichier :]
+uiSetAttrib	[Réglages des attributs du fichier :]
 
 // HASH_VALUE 5EB5789353166D5E
 // INDEX 387
-uiAttribErr	[Impossible d'obtenir l'accès lire/écrire :]
+uiAttribErr	[Impossible de changer les attributs du fichier :]
 
 // HASH_VALUE C2B6FF326665E080
 // INDEX 388
@@ -1585,11 +1585,11 @@ uiEmote0	[absent]
 
 // HASH_VALUE 2709809226094C9D
 // INDEX 396
-uiEmote1	[convenir]
+uiEmote1	[d_accord]
 
 // HASH_VALUE 6E99C0BA6809ECB3
 // INDEX 397
-uiEmote2	[fache]
+uiEmote2	[fâché]
 
 // HASH_VALUE 6A69C4A9ACC8C8BA
 // INDEX 398
@@ -1609,7 +1609,7 @@ uiEmote6	[saluer]
 
 // HASH_VALUE E769E8A2AD3998B9
 // INDEX 402
-uiEmote7	[Au revoir]
+uiEmote7	[au_revoir]
 
 // HASH_VALUE 6C18148C6C18148C
 // INDEX 403
@@ -1629,7 +1629,7 @@ uiEmote11	[danser]
 
 // HASH_VALUE 60DC94906458249C
 // INDEX 407
-uiEmote12	[desaccord]
+uiEmote12	[désaccord]
 
 // HASH_VALUE EEE808A7AE8828B0
 // INDEX 408
@@ -1637,7 +1637,7 @@ uiEmote13	[suivre]
 
 // HASH_VALUE 6FFC08B32B5990B3
 // INDEX 409
-uiEmote14	[grossier]
+uiEmote14	[gesticuler]
 
 // HASH_VALUE 65287CA1E6286CA6
 // INDEX 410
@@ -1689,7 +1689,7 @@ uiEmote26	[remercier]
 
 // HASH_VALUE EEAAA0AC6A5A34CE
 // INDEX 422
-uiEmote27	[insatisfait]
+uiEmote27	[mecontent]
 
 // HASH_VALUE F29AC0B6ECCA2CD0
 // INDEX 423
@@ -1701,435 +1701,435 @@ uiEmote29	[salut]
 
 // HASH_VALUE 5190081E8FF0201E
 // INDEX 425
-uiEM_Emotes	[EMOTES]
+uiEM_Emotes	[Emotes]
 
 // HASH_VALUE 48D4F44044949450
 // INDEX 426
-uiEM_Pos	[POSITIFS]
+uiEM_Pos	[positifs]
 
 // HASH_VALUE 0CD3043C4E51842D
 // INDEX 427
-uiEM_Neu	[NEUTRES]
+uiEM_Neu	[neutres]
 
 // HASH_VALUE 40D0543844949450
 // INDEX 428
-uiEM_Neg	[NEGATIFS]
+uiEM_Neg	[négatifs]
 
 // HASH_VALUE 4B00C436CC71F435
 // INDEX 429
-uiEM_Opi	[OPINIONS]
+uiEM_Opi	[opinions]
 
 // HASH_VALUE 4814440444105450
 // INDEX 430
-uiEM_Att	[ATTITUDES]
+uiEM_Att	[attitudes]
 
 // HASH_VALUE 4FF408330B519033
 // INDEX 431
-uiEM_Ges	[GESTES]
+uiEM_Ges	[gestes]
 
 // HASH_VALUE 4874F4E0C8B29444
 // INDEX 432
-uiEM_PosOpi	[OPINION POSITIVE]
+uiEM_PosOpi	[Opinions positives]
 
 // HASH_VALUE 8E12D032BF8EAC2B
 // INDEX 433
-uiEM_NeuOpi	[OPINION NEUTRE]
+uiEM_NeuOpi	[Opinions neutres]
 
 // HASH_VALUE 44F2A4DCC8B29444
 // INDEX 434
-uiEM_NegOpi	[OPINION NEGATIVE]
+uiEM_NegOpi	[Opinions négatives]
 
 // HASH_VALUE 508203FA4C93EC3A
 // INDEX 435
-uiEM_PosAtt	[ATTITUDE POSITIVE]
+uiEM_PosAtt	[Attitudes positives]
 
 // HASH_VALUE CE34CC1EB210B44C
 // INDEX 436
-uiEM_NeuAtt	[ATTITUDE NEUTRE]
+uiEM_NeuAtt	[Attitudes neutres]
 
 // HASH_VALUE 4B21D3F84C93EC32
 // INDEX 437
-uiEM_NegAtt	[ATTITUDE NEGATIVE]
+uiEM_NegAtt	[Attitudes négatives]
 
 // HASH_VALUE 4C12B4E04414F450
 // INDEX 438
-uiEM_PosGes	[GESTE POSITIF]
+uiEM_PosGes	[Gestes positifs]
 
 // HASH_VALUE 1314CC1FBDFE943A
 // INDEX 439
-uiEM_NeuGes	[GESTE NEUTRE]
+uiEM_NeuGes	[Gestes neutres]
 
 // HASH_VALUE 489064DC4414F450
 // INDEX 440
-uiEM_NegGes	[GESTE NEGATIF]
+uiEM_NegGes	[Gestes négatifs]
 
 // HASH_VALUE 0592741E0631BC2B
 // INDEX 441
-uiEM_Absentminded	[ECERVELE]
+uiEM_Absentminded	[Étourdi]
 
 // HASH_VALUE 89A3D03A8DB1403C
 // INDEX 442
-uiEM_Adventurous	[AVENTUREUX]
+uiEM_Adventurous	[Aventureux]
 
 // HASH_VALUE 0822A42F8B11C823
 // INDEX 443
-uiEM_Aggressive	[AGRESSIF]
+uiEM_Aggressive	[Agressif]
 
 // HASH_VALUE 0701801206014C1D
 // INDEX 444
-uiEM_Agree	[CONVENIR]
+uiEM_Agree	[D'accord]
 
 // HASH_VALUE 0D519C334871D02C
 // INDEX 445
-uiEM_Alert	[ALERTE]
+uiEM_Alert	[Alerter]
 
 // HASH_VALUE 5014C40454D49454
 // INDEX 446
-uiEM_Altruist	[ALTRUISTE]
+uiEM_Altruist	[Altruiste]
 
 // HASH_VALUE 9090E4084D90C00C
 // INDEX 447
-uiEM_Amazed	[STUPEFAIT]
+uiEM_Amazed	[Stupéfait]
 
 // HASH_VALUE 0BE0A0314661B027
 // INDEX 448
-uiEM_Ambivalent	[AMBIVALENT]
+uiEM_Ambivalent	[Ambivalent]
 
 // HASH_VALUE 0C12C81C8BD1A420
 // INDEX 449
-uiEM_Amused	[AMUSE]
+uiEM_Amused	[Amusé]
 
 // HASH_VALUE 4E91C03A4801EC33
 // INDEX 450
-uiEM_Angry	[FACHE]
+uiEM_Angry	[Fâché]
 
 // HASH_VALUE 8BC1142C49206423
 // INDEX 451
-uiEM_Annoyed	[AGACE]
+uiEM_Annoyed	[Énervé]
 
 // HASH_VALUE C9617821CA628C2D
 // INDEX 452
-uiEM_Apathetic	[APATHIQUE]
+uiEM_Apathetic	[Apathique]
 
 // HASH_VALUE 4D8308330C72B42B
 // INDEX 453
-uiEM_Approve	[APPROUVER]
+uiEM_Approve	[Approuver]
 
 // HASH_VALUE 4C9424045490141C
 // INDEX 454
-uiEM_Arrogant	[ARROGANT]
+uiEM_Arrogant	[Arrogant]
 
 // HASH_VALUE 05C0A81D86117817
 // INDEX 455
-uiEM_Ashamed	[HONTEUX]
+uiEM_Ashamed	[Honteux]
 
 // HASH_VALUE C5C2941ACA90E821
 // INDEX 456
-uiEM_Belligerent	[BELLIQUEUX]
+uiEM_Belligerent	[Belliqueux]
 
 // HASH_VALUE 1002E41D4DE10820
 // INDEX 457
-uiEM_Bitter	[AMER]
+uiEM_Bitter	[Amer]
 
 // HASH_VALUE 4EB1001ACD41201C
 // INDEX 458
-uiEM_Bloodthirsty	[SANGUINAIRE]
+uiEM_Bloodthirsty	[Sanguinaire]
 
 // HASH_VALUE C991A01A48816C1D
 // INDEX 459
-uiEM_Bored	[ENNUYE]
+uiEM_Bored	[Ennuyé]
 
 // HASH_VALUE C802E02A0BB10037
 // INDEX 460
-uiEM_Bow	[SALUER]
+uiEM_Bow	[Saluer]
 
 // HASH_VALUE CAC26C2F09B1C01E
 // INDEX 461
-uiEM_Brave	[BRAVE]
+uiEM_Brave	[Courageux]
 
 // HASH_VALUE CB3018129030281C
 // INDEX 462
-uiEM_Bubbly	[PETILLANT]
+uiEM_Bubbly	[Pétillant]
 
 // HASH_VALUE 5094540850945408
 // INDEX 463
-uiEM_Burp	[ROTER]
+uiEM_Burp	[Roter]
 
 // HASH_VALUE 4C10140C4C10140C
 // INDEX 464
-uiEM_Calm	[CALME]
+uiEM_Calm	[Calme]
 
 // HASH_VALUE 4C10140C4CD4F410
 // INDEX 465
-uiEM_Calmdown	[APAISER]
+uiEM_Calmdown	[Apaiser]
 
 // HASH_VALUE 4A327C1B0531982A
 // INDEX 466
-uiEM_Careful	[AVISE]
+uiEM_Careful	[Prudent]
 
 // HASH_VALUE 4494140C50D45430
 // INDEX 467
-uiEM_Careless	[NEGLIGENT]
+uiEM_Careless	[Négligent]
 
 // HASH_VALUE 0DB2901A08B1BC18
 // INDEX 468
-uiEM_Casual	[DESINVOLTE]
+uiEM_Casual	[Désinvolte]
 
 // HASH_VALUE 0AE1B41B05006023
 // INDEX 469
-uiEM_Chaotic	[CHAOTIQUE]
+uiEM_Chaotic	[Chaotique]
 
 // HASH_VALUE 48608C2284318C1F
 // INDEX 470
-uiEM_Cheer	[ACCLAMER]
+uiEM_Cheer	[Acclamer]
 
 // HASH_VALUE 4C50C40C4C503424
 // INDEX 471
-uiEM_Clinical	[METICULEUX]
+uiEM_Clinical	[Méticuleux]
 
 // HASH_VALUE 4410F40C4410F40C
 // INDEX 472
-uiEM_Cold	[FROID]
+uiEM_Cold	[Froid]
 
 // HASH_VALUE D0519036C921D81C
 // INDEX 473
-uiEM_Compassionate	[COMPATISSANT]
+uiEM_Compassionate	[Compatissant]
 
 // HASH_VALUE 47E180230AC0A41F
 // INDEX 474
-uiEM_Condescending	[CONDESCENDANT]
+uiEM_Condescending	[Condescendant]
 
 // HASH_VALUE C751D42A4790882C
 // INDEX 475
-uiEM_Confident	[CONFIANT]
+uiEM_Confident	[Confiant]
 
 // HASH_VALUE 4490F40C44503454
 // INDEX 476
-uiEM_Confused	[CONFUS]
+uiEM_Confused	[Embrouillé]
 
 // HASH_VALUE 1322EC201343E422
 // INDEX 477
-uiEM_Contemptuous	[MEPRISANT]
+uiEM_Contemptuous	[Méprisant]
 
 // HASH_VALUE 0E61DC344B51D42A
 // INDEX 478
-uiEM_Content	[SATISFAIT]
+uiEM_Content	[Satisfait]
 
 // HASH_VALUE 0E32E41E0BF1F02E
 // INDEX 479
-uiEM_Courageous	[COURAGEUX]
+uiEM_Courageous	[Courageux]
 
 // HASH_VALUE 12832C398C12E03C
 // INDEX 480
-uiEM_Courtly	[ELEGANT]
+uiEM_Courtly	[Élégant]
 
 // HASH_VALUE 8443902F0702643E
 // INDEX 481
-uiEM_Coward	[LACHE]
+uiEM_Coward	[Lâche]
 
 // HASH_VALUE D012C0484A022437
 // INDEX 482
-uiEM_Crazy	[FOU]
+uiEM_Crazy	[Fou]
 
 // HASH_VALUE 4BF2C01ECA027C21
 // INDEX 483
-uiEM_Crude	[CRU]
+uiEM_Crude	[Grossier]
 
 // HASH_VALUE 4D02DC260A729C29
 // INDEX 484
-uiEM_Cruel	[CRUEL]
+uiEM_Cruel	[Cruel]
 
 // HASH_VALUE 4E0200330BE3043A
 // INDEX 485
-uiEM_Curious	[CURIEUX]
+uiEM_Curious	[Curieux]
 
 // HASH_VALUE 85C0D0330B71A813
 // INDEX 486
-uiEM_Cynical	[CYNIQUE]
+uiEM_Cynical	[Cynique]
 
 // HASH_VALUE CCB1A82589610835
 // INDEX 487
-uiEM_Dainty	[DELICAT]
+uiEM_Dainty	[Délicat]
 
 // HASH_VALUE 0470640DC490381A
 // INDEX 488
-uiEM_Dance	[DANSER]
+uiEM_Dance	[Danser]
 
 // HASH_VALUE 445094284E01B41E
 // INDEX 489
-uiEM_Defensive	[DEFENSIF]
+uiEM_Defensive	[Défensif]
 
 // HASH_VALUE 0AE14C204AE3EC2C
 // INDEX 490
-uiEM_Depressed	[DEPRIME]
+uiEM_Depressed	[Déprimé]
 
 // HASH_VALUE 46D3642D45E2643B
 // INDEX 491
-uiEM_Desire	[DESIRER]
+uiEM_Desire	[Désirer]
 
 // HASH_VALUE 4A114C1F87D2B829
 // INDEX 492
-uiEM_Despaired	[DESESPERE]
+uiEM_Despaired	[Désespéré]
 
 // HASH_VALUE CDF3CC358F510830
 // INDEX 493
-uiEM_Destructive	[DESTRUCTEUR]
+uiEM_Destructive	[Destructeur]
 
 // HASH_VALUE C58070160670601B
 // INDEX 494
-uiEM_Die	[MOURIR]
+uiEM_Die	[Mourir]
 
 // HASH_VALUE C7905C1686709427
 // INDEX 495
-uiEM_Dignified	[DIGNE]
+uiEM_Dignified	[Digne]
 
 // HASH_VALUE 4AF1B81DCD51982C
 // INDEX 496
-uiEM_Diplomatic	[DIPLOMATE]
+uiEM_Diplomatic	[Diplomate]
 
 // HASH_VALUE 03B2DC260571F832
 // INDEX 497
-uiEM_Disappointed	[DECU]
+uiEM_Disappointed	[Déçu]
 
 // HASH_VALUE 40D4941054505448
 // INDEX 498
-uiEM_Discreet	[DISCRET]
+uiEM_Discreet	[Discret]
 
 // HASH_VALUE 07B2942846718C2D
 // INDEX 499
-uiEM_Disdainful	[DEDAIGNEUX]
+uiEM_Disdainful	[Dédaigneux]
 
 // HASH_VALUE 4AE390384C60042E
 // INDEX 500
-uiEM_Disgruntled	[DEPITE]
+uiEM_Disgruntled	[Dépité]
 
 // HASH_VALUE 08515C218F430C38
 // INDEX 501
-uiEM_Disgusted	[DEGOUTE]
+uiEM_Disgusted	[Dégoûté]
 
 // HASH_VALUE 4A21A41B4EA18C36
 // INDEX 502
-uiEM_Disillusioned	[DESILLUSIONNE]
+uiEM_Disillusioned	[Désabusé]
 
 // HASH_VALUE 4CD4941044509404
 // INDEX 503
-uiEM_Dismayed	[CONSTERNE]
+uiEM_Dismayed	[Consterné]
 
 // HASH_VALUE 4B828C34CAD1BC25
 // INDEX 504
-uiEM_Disoriented	[DESORIENTE]
+uiEM_Disoriented	[Désorienté]
 
 // HASH_VALUE 8D018C1ECCD28C2E
 // INDEX 505
-uiEM_Distracted	[DISTRAIT]
+uiEM_Distracted	[Distrait]
 
 // HASH_VALUE 4054F4104C546450
 // INDEX 506
-uiEM_Doubtful	[DOUTEUX]
+uiEM_Doubtful	[Douteux]
 
 // HASH_VALUE 4C50241040504404
 // INDEX 507
-uiEM_Dramatic	[THEATRAL]
+uiEM_Dramatic	[Théâtral]
 
 // HASH_VALUE 8AC0FC1ACEB01823
 // INDEX 508
-uiEM_Dreamy	[REVEUR]
+uiEM_Dreamy	[Rêveur]
 
 // HASH_VALUE 4EA2DC2F8D72C032
 // INDEX 509
-uiEM_Drunk	[SOUL]
+uiEM_Drunk	[Soûl]
 
 // HASH_VALUE 4B92E436CDA2EC2B
 // INDEX 510
-uiEM_Dutiful	[DEVOUE]
+uiEM_Dutiful	[Dévoué]
 
 // HASH_VALUE 0630801DC3017823
 // INDEX 511
-uiEM_Eager	[EMPRESSE]
+uiEM_Eager	[Empressé]
 
 // HASH_VALUE CD929C26C8D2B831
 // INDEX 512
-uiEM_Earnest	[ATTENTIF]
+uiEM_Earnest	[Attentif]
 
 // HASH_VALUE 54D4341440504404
 // INDEX 513
-uiEM_Ecstatic	[DELIRANT]
+uiEM_Ecstatic	[Délirant]
 
 // HASH_VALUE 48D074144050444C
 // INDEX 514
-uiEM_Egoistic	[EGO]
+uiEM_Egoistic	[Égoïste]
 
 // HASH_VALUE 09C2542C0CB1B025
 // INDEX 515
-uiEM_Embarrassed	[EMBARRASSE]
+uiEM_Embarrassed	[Embarrassé]
 
 // HASH_VALUE 8CE0802008B1F039
 // INDEX 516
-uiEM_Emotional	[EMOTIF]
+uiEM_Emotional	[Émotif]
 
 // HASH_VALUE 8A810C288CD1F837
 // INDEX 517
-uiEM_Emotionless	[IMPASSIBLE]
+uiEM_Emotionless	[Impassible]
 
 // HASH_VALUE 4814D41440504404
 // INDEX 518
-uiEM_Emphatic	[COMPREHENSIF]
+uiEM_Emphatic	[Compréhensif]
 
 // HASH_VALUE 0A71B4234CF09032
 // INDEX 519
-uiEM_Encouraging	[ENCOURAGEANT]
+uiEM_Encouraging	[Encourageant]
 
 // HASH_VALUE 8301A426C8A17415
 // INDEX 520
-uiEM_Enraged	[ENRAGE]
+uiEM_Enraged	[Furieux]
 
 // HASH_VALUE 44B2103282012442
 // INDEX 521
-uiEM_Enthusiastic	[ENTHOUSIASTE]
+uiEM_Enthusiastic	[Enthousiaste]
 
 // HASH_VALUE 4E42F432CBD2F03C
 // INDEX 522
-uiEM_Envious	[ENVIEUX]
+uiEM_Envious	[Envieux]
 
 // HASH_VALUE 4C5064144C506414
 // INDEX 523
-uiEM_Evil	[MALFAISANT]
+uiEM_Evil	[Malfaisant]
 
 // HASH_VALUE C961E42989519C22
 // INDEX 524
-uiEM_Excited	[EXCITE]
+uiEM_Excited	[Excité]
 
 // HASH_VALUE 5050841444D4940C
 // INDEX 525
-uiEM_Exercise	[ENTRAINEMENT]
+uiEM_Exercise	[Entraînement]
 
 // HASH_VALUE C9A19C228FE3C836
 // INDEX 526
-uiEM_Exhausted	[EPUISE]
+uiEM_Exhausted	[Épuisé]
 
 // HASH_VALUE 4C730028C8B1BC34
 // INDEX 527
-uiEM_Exuberant	[EXUBERANT]
+uiEM_Exuberant	[Exubérant]
 
 // HASH_VALUE 545014184C546420
 // INDEX 528
-uiEM_Faithful	[FIDELE]
+uiEM_Faithful	[Fidèle]
 
 // HASH_VALUE C42054168721B424
 // INDEX 529
-uiEM_Fanatical	[FANATIQUE]
+uiEM_Fanatical	[Fanatique]
 
 // HASH_VALUE 0C82A02D49C1B437
 // INDEX 530
-uiEM_Fastidious	[TATILLON]
+uiEM_Fastidious	[Méticulleux]
 
 // HASH_VALUE 8DF27C1EC690B42D
 // INDEX 531
-uiEM_Fearful	[EFFRAYER]
+uiEM_Fearful	[Effrayé]
 
 // HASH_VALUE 4C9494184C949418
 // INDEX 532
-uiEM_Firm	[FERME]
+uiEM_Firm	[Ferme]
 
 // HASH_VALUE C7127C22C631C41E
 // INDEX 533
@@ -2137,655 +2137,655 @@ uiEM_FBT	[FBT]
 
 // HASH_VALUE 0992C82EC9D1C42A
 // INDEX 534
-uiEM_Forgive	[PARDONNER]
+uiEM_Forgive	[Pardonner]
 
 // HASH_VALUE 8A619821C8A2B42C
 // INDEX 535
-uiEM_Fraternal	[FRATERNEL]
+uiEM_Fraternal	[Fraternel]
 
 // HASH_VALUE 4450241858104438
 // INDEX 536
-uiEM_Friendly	[AMICAL]
+uiEM_Friendly	[Amical]
 
 // HASH_VALUE 8E21F4201112F034
 // INDEX 537
-uiEM_Frustrated	[contrarié]
+uiEM_Frustrated	[Contrarié]
 
 // HASH_VALUE D1810C420C320C3B
 // INDEX 538
-uiEM_Funny	[DROLE]
+uiEM_Funny	[Drôle]
 
 // HASH_VALUE 4490541C5054F448
 // INDEX 539
-uiEM_Generous	[GENEREUX]
+uiEM_Generous	[Généreux]
 
 // HASH_VALUE 457053204410021E
 // INDEX 540
-uiEM_Gimme5	[Tope la !]
+uiEM_Gimme5	[Tope là]
 
 // HASH_VALUE 0F30042A4FB03830
 // INDEX 541
-uiEM_Gloomy	[LUGUBRE]
+uiEM_Gloomy	[Morose]
 
 // HASH_VALUE 8DC0FC3508F1D835
 // INDEX 542
-uiEM_Goofy	[NIAIS]
+uiEM_Goofy	[Niais]
 
 // HASH_VALUE 4A01CC2E0632BC21
 // INDEX 543
-uiEM_Great	[FORMIDABLE]
+uiEM_Great	[Formidable]
 
 // HASH_VALUE 4C50241C4C50241C
 // INDEX 544
-uiEM_Grin	[RICTUS]
+uiEM_Grin	[Large sourire]
 
 // HASH_VALUE 90232C33D142483C
 // INDEX 545
-uiEM_Grumpy	[GROGNON]
+uiEM_Grumpy	[Grognon]
 
 // HASH_VALUE D1E1402B13C15038
 // INDEX 546
-uiEM_Guilty	[COUPABLE]
+uiEM_Guilty	[Coupable]
 
 // HASH_VALUE CEA2CC328A32CC41
 // INDEX 547
-uiEM_Happy	[CONTENT]
+uiEM_Happy	[Content]
 
 // HASH_VALUE 0802543145709823
 // INDEX 548
-uiEM_Hardsilence	[SILENCE LOURD]
+uiEM_Hardsilence	[Silence lourd]
 
 // HASH_VALUE 4E9298258882DC3D
 // INDEX 549
-uiEM_Haughty	[HAUTAIN]
+uiEM_Haughty	[Hautain]
 
 // HASH_VALUE 0D82A0298A60BC2F
 // INDEX 550
-uiEM_Helpful	[UTILE]
+uiEM_Helpful	[Serviable]
 
 // HASH_VALUE C762742B45C16C2C
 // INDEX 551
-uiEM_Heroic	[HEROIQUE]
+uiEM_Heroic	[Héroïque]
 
 // HASH_VALUE 4010942040109420
 // INDEX 552
-uiEM_Hiha	[HIHA]
+uiEM_Hiha	[Hiha]
 
 // HASH_VALUE 8A81E0310C21F43C
 // INDEX 553
-uiEM_Honest	[HONNETE]
+uiEM_Honest	[Honnête]
 
 // HASH_VALUE 4A12AC2C4A41E42F
 // INDEX 554
-uiEM_Hopeful	[ESPOIR]
+uiEM_Hopeful	[Espoir]
 
 // HASH_VALUE 4414F42050D45430
 // INDEX 555
-uiEM_Hopeless	[MISERABLE]
+uiEM_Hopeless	[Nul]
 
 // HASH_VALUE C6F0C8298BA0882D
 // INDEX 556
-uiEM_Humble	[HUMBLE]
+uiEM_Humble	[Humble]
 
 // HASH_VALUE 4D712C30D1113C3A
 // INDEX 557
-uiEM_Hungry	[AFFAME]
+uiEM_Hungry	[Affamé]
 
 // HASH_VALUE 48320C418F429C1A
 // INDEX 558
-uiEM_Hurried	[PRESSE]
+uiEM_Hurried	[Pressé]
 
 // HASH_VALUE D32324488F932445
 // INDEX 559
-uiEM_Hurry	[HATER]
+uiEM_Hurry	[Hâter]
 
 // HASH_VALUE 4E61EC17CFA13021
 // INDEX 560
-uiEM_Hysterical	[HYSTERIQUE]
+uiEM_Hysterical	[Hystérique]
 
 // HASH_VALUE CCE1B0274C71F838
 // INDEX 561
-uiEM_Imploring	[IMPLORANT]
+uiEM_Imploring	[Implorant]
 
 // HASH_VALUE 8612AC184BD0C427
 // INDEX 562
-uiEM_Indifferent	[INDIFFERENT]
+uiEM_Indifferent	[Indifférent]
 
 // HASH_VALUE 4801E82C47008C22
 // INDEX 563
-uiEM_Indignant	[INDIGNE]
+uiEM_Indignant	[Indigné]
 
 // HASH_VALUE 4B01E830C8E1B433
 // INDEX 564
-uiEM_Indulgent	[INDULGENT]
+uiEM_Indulgent	[Indulgent]
 
 // HASH_VALUE 4C90E4245490540C
 // INDEX 565
-uiEM_Innocent	[INNOCENT]
+uiEM_Innocent	[Innocent]
 
 // HASH_VALUE 44D4E4244494540C
 // INDEX 566
-uiEM_Insecure	[ANGOISSE]
+uiEM_Insecure	[Précaire]
 
 // HASH_VALUE 0A62B0334A337434
 // INDEX 567
-uiEM_Interested	[INTERESSE]
+uiEM_Interested	[Intéressé]
 
 // HASH_VALUE 0F21881C4641E041
 // INDEX 568
-uiEM_Jealous	[JALOUX]
+uiEM_Jealous	[Jaloux]
 
 // HASH_VALUE 0823C4424A32B84D
 // INDEX 569
-uiEM_Joyful	[JOYEUX]
+uiEM_Joyful	[Joyeux]
 
 // HASH_VALUE 4490942C4490942C
 // INDEX 570
-uiEM_Kind	[GENTIL]
+uiEM_Kind	[Gentil]
 
 // HASH_VALUE 5894143058941430
 // INDEX 571
-uiEM_Lazy	[PARESSEUX]
+uiEM_Lazy	[Paresseux]
 
 // HASH_VALUE 5450F43044909420
 // INDEX 572
-uiEM_Loathing	[DEGOUT]
+uiEM_Loathing	[Dégoût]
 
 // HASH_VALUE 85508C2B09F0A41C
 // INDEX 573
-uiEM_Logical	[LOGIQUE]
+uiEM_Logical	[Logique]
 
 // HASH_VALUE CB50F4324D301C32
 // INDEX 574
-uiEM_Lonely	[SOLITAIRE]
+uiEM_Lonely	[Solitaire]
 
 // HASH_VALUE 4454F4304454F430
 // INDEX 575
-uiEM_Loud	[BRUYANT]
+uiEM_Loud	[Bruyant]
 
 // HASH_VALUE 4494F4304494F430
 // INDEX 576
-uiEM_Love	[AMOUR]
+uiEM_Love	[Amour]
 
 // HASH_VALUE 8C6104288C11A432
 // INDEX 577
-uiEM_Loyal	[LOYAL]
+uiEM_Loyal	[Loyal]
 
 // HASH_VALUE 0E330C4851120C33
 // INDEX 578
-uiEM_Lustful	[SENSUEL]
+uiEM_Lustful	[Sensuel]
 
 // HASH_VALUE 0740A83DC5C1A83D
 // INDEX 579
-uiEM_Malevolent	[MALVEILLANT]
+uiEM_Malevolent	[Malveillant]
 
 // HASH_VALUE 08E1DC444A508819
 // INDEX 580
-uiEM_Malicious	[MECHANT]
+uiEM_Malicious	[Méchant]
 
 // HASH_VALUE 4C5054344C505434
 // INDEX 581
-uiEM_Mean	[MAUVAIS]
+uiEM_Mean	[Mauvais]
 
 // HASH_VALUE C0D08C34C030B433
 // INDEX 582
-uiEM_Megalomaniac	[MEGALOMANE]
+uiEM_Megalomaniac	[Mégalomane]
 
 // HASH_VALUE 409454344C546424
 // INDEX 583
-uiEM_Merciful	[CLEMENT]
+uiEM_Merciful	[Clément]
 
 // HASH_VALUE 48539C384E50182B
 // INDEX 584
-uiEM_Mischievous	[MALICIEUX]
+uiEM_Mischievous	[Malicieux]
 
 // HASH_VALUE 88609C2AC870C82B
 // INDEX 585
-uiEM_Mocking	[MOQUEUR]
+uiEM_Mocking	[Moqueur]
 
 // HASH_VALUE 91D3F43B0D92F045
 // INDEX 586
-uiEM_Nervous	[NERVEUX]
+uiEM_Nervous	[Nerveux]
 
 // HASH_VALUE 0CD3043C4E51842D
 // INDEX 587
-uiEM_Neutral	[NEUTRE]
+uiEM_Neutral	[Neutre]
 
 // HASH_VALUE 44D0943844D09438
 // INDEX 588
-uiEM_Nice	[SYMPA]
+uiEM_Nice	[Sympa]
 
 // HASH_VALUE 4AA1C0340A51983B
 // INDEX 589
-uiEM_Noclue	[AUCUNE IDEE]
+uiEM_Noclue	[Aucune idée]
 
 // HASH_VALUE 4490F4384490F438
 // INDEX 590
-uiEM_None	[RIEN]
+uiEM_None	[Rien]
 
 // HASH_VALUE 4F41A8218691D437
 // INDEX 591
-uiEM_Nostalgic	[NOSTALGIQUE]
+uiEM_Nostalgic	[Nostalgique]
 
 // HASH_VALUE C931E8469001FC37
 // INDEX 592
-uiEM_Obnoxious	[ODIEUX]
+uiEM_Obnoxious	[Odieux]
 
 // HASH_VALUE 0AE3B82707A1A43B
 // INDEX 593
-uiEM_Obscure	[OBSCUR]
+uiEM_Obscure	[Obscur]
 
 // HASH_VALUE 44D4243C4450344C
 // INDEX 594
-uiEM_Obsessed	[OBSEDE]
+uiEM_Obsessed	[Obsédé]
 
 // HASH_VALUE 4490643C44504438
 // INDEX 595
-uiEM_Offended	[OFFENSE]
+uiEM_Offended	[Offensé]
 
 // HASH_VALUE 4B02C438CD429839
 // INDEX 596
-uiEM_Optimistic	[OPTIMISTE]
+uiEM_Optimistic	[Optimiste]
 
 // HASH_VALUE 5050643C5050643C
 // INDEX 597
-uiEM_Over	[RETABLI]
+uiEM_Over	[Se remettre]
 
 // HASH_VALUE 05C0501D86817822
 // INDEX 598
-uiEM_Pacific	[PACIFIQUE]
+uiEM_Pacific	[Pacifique]
 
 // HASH_VALUE 8C317C284971CC37
 // INDEX 599
-uiEM_Painful	[DOULOUREUX]
+uiEM_Painful	[Douloureux]
 
 // HASH_VALUE C6015C31C4228424
 // INDEX 600
-uiEM_Panick	[PANIQUE]
+uiEM_Panick	[Paniquer]
 
 // HASH_VALUE 4B11902ECBA3D037
 // INDEX 601
-uiEM_Patient	[PATIENT]
+uiEM_Patient	[Patient]
 
 // HASH_VALUE 0D9278308CF2FC30
 // INDEX 602
-uiEM_Patriotic	[PATRIOTE]
+uiEM_Patriotic	[Patriotique]
 
 // HASH_VALUE 4010544040504438
 // INDEX 603
-uiEM_Pedantic	[POINTILLEUX]
+uiEM_Pedantic	[Pointilleux]
 
 // HASH_VALUE 0EC27C1BCAE33840
 // INDEX 604
-uiEM_Perturbed	[PERTURBE]
+uiEM_Perturbed	[Perturbé]
 
 // HASH_VALUE 5032AC44C913DC20
 // INDEX 605
-uiEM_Pessimistic	[PESSIMISTE]
+uiEM_Pessimistic	[Pessimiste]
 
 // HASH_VALUE 5414544054901430
 // INDEX 606
-uiEM_Petulant	[IRRITABLE]
+uiEM_Petulant	[Irritable]
 
 // HASH_VALUE 4802B4250A00E034
 // INDEX 607
-uiEM_Philosophical	[PHILOSOPHE]
+uiEM_Philosophical	[Philosophe]
 
 // HASH_VALUE 0C520046D152BC2E
 // INDEX 608
-uiEM_Pitying	[PITIE]
+uiEM_Pitying	[Pitié]
 
 // HASH_VALUE 4F62B436CDA1F837
 // INDEX 609
-uiEM_Playful	[ENJOUE]
+uiEM_Playful	[Enjoué]
 
 // HASH_VALUE 86F19822C861982C
 // INDEX 610
-uiEM_Pleased	[RAVI]
+uiEM_Pleased	[Ravi]
 
 // HASH_VALUE CD71F441CCD2083B
 // INDEX 611
-uiEM_Point	[POINTER]
+uiEM_Point	[Pointer]
 
 // HASH_VALUE CC41B81FC561B83A
 // INDEX 612
-uiEM_Pointback	[POINTER ARRIERE]
+uiEM_Pointback	[Pointer arrière]
 
 // HASH_VALUE 4EA2E444CA03E03B
 // INDEX 613
-uiEM_Pointfront	[POINTER AVANT]
+uiEM_Pointfront	[Pointer avant]
 
 // HASH_VALUE CCD2E82F0A41E03A
 // INDEX 614
-uiEM_Pointleft	[POINTER GAUCHE]
+uiEM_Pointleft	[Pointer gauche]
 
 // HASH_VALUE 4CB1F435CB721035
 // INDEX 615
-uiEM_Pointright	[POINTER DROITE]
+uiEM_Pointright	[Pointer droite]
 
 // HASH_VALUE C8D2B44049138C44
 // INDEX 616
-uiEM_Polite	[POLI]
+uiEM_Polite	[Poli]
 
 // HASH_VALUE 1022F03C4E022047
 // INDEX 617
-uiEM_Pompous	[POMPEUX]
+uiEM_Pompous	[Pompeux]
 
 // HASH_VALUE 44D4F4404C546448
 // INDEX 618
-uiEM_Powerful	[PUISSANT]
+uiEM_Powerful	[Puissant]
 
 // HASH_VALUE 0C21D83C4EB2E02E
 // INDEX 619
-uiEM_Praying	[PRIANT]
+uiEM_Praying	[Priant]
 
 // HASH_VALUE CD73D83BD062F038
 // INDEX 620
-uiEM_Proud	[FIER]
+uiEM_Proud	[Fier]
 
 // HASH_VALUE CB81002B1112B038
 // INDEX 621
-uiEM_Provocative	[PROVOQUANT]
+uiEM_Provocative	[Provoquant]
 
 // HASH_VALUE 0B6258599543BC25
 // INDEX 622
-uiEM_Puzzled	[PERPLEXE]
+uiEM_Puzzled	[Perplexe]
 
 // HASH_VALUE 0D52103F4C430033
 // INDEX 623
-uiEM_Quiet	[TRANQUILLE]
+uiEM_Quiet	[Tranquille]
 
 // HASH_VALUE 08D1C8344622D430
 // INDEX 624
-uiEM_Ready	[PRET]
+uiEM_Ready	[Prêt]
 
 // HASH_VALUE 09D1842D0EE4F42C
 // INDEX 625
-uiEM_Reassured	[RASSURE]
+uiEM_Reassured	[Rassuré]
 
 // HASH_VALUE 4932D03C88A1A835
 // INDEX 626
-uiEM_Rebellious	[REBELLE]
+uiEM_Rebellious	[Rebelle]
 
 // HASH_VALUE 48D0544850D45430
 // INDEX 627
-uiEM_Reckless	[INSOUCIANT]
+uiEM_Reckless	[Téméraire]
 
 // HASH_VALUE 4AB1E4394C22CC23
 // INDEX 628
-uiEM_Regretful	[REGRETS]
+uiEM_Regretful	[Regrets]
 
 // HASH_VALUE C8B1AC2448818433
 // INDEX 629
-uiEM_Relaxed	[DETENDU]
+uiEM_Relaxed	[Détendu]
 
 // HASH_VALUE 4810544844506414
 // INDEX 630
-uiEM_Relieved	[SOULAGE]
+uiEM_Relieved	[Soulagé]
 
 // HASH_VALUE 4D82E835C8E2E429
 // INDEX 631
-uiEM_Reluctant	[RETICENT]
+uiEM_Reluctant	[A contrecoeur]
 
 // HASH_VALUE C8A2AC3E8972D046
 // INDEX 632
-uiEM_Remorseful	[REMORDS]
+uiEM_Remorseful	[Remords]
 
 // HASH_VALUE 48D454484450E41C
 // INDEX 633
-uiEM_Resigned	[RESIGNE]
+uiEM_Resigned	[Résigné]
 
 // HASH_VALUE 09F46C40C6F3943F
 // INDEX 634
-uiEM_Respectful	[RESPECTUEUX]
+uiEM_Respectful	[Respectueux]
 
 // HASH_VALUE 46337C3A04C2784B
 // INDEX 635
-uiEM_Revengeful	[VINDICATIF]
+uiEM_Revengeful	[Vindicatif]
 
 // HASH_VALUE 44D0944844D09448
 // INDEX 636
-uiEM_Rice	[RIZ]
+uiEM_Rice	[Riz]
 
 // HASH_VALUE 481094484410540C
 // INDEX 637
-uiEM_Ridicule	[RIDICULE]
+uiEM_Ridicule	[Ridicule]
 
 // HASH_VALUE C96210498E11A42C
 // INDEX 638
-uiEM_Righteous	[INTEGRE]
+uiEM_Righteous	[Intègre]
 
 // HASH_VALUE 4050F44840504438
 // INDEX 639
-uiEM_Romantic	[ROMANTIQUE]
+uiEM_Romantic	[Romantique]
 
 // HASH_VALUE 4410544844105448
 // INDEX 640
-uiEM_Rude	[IMPOLI]
+uiEM_Rude	[Impoli]
 
 // HASH_VALUE 09D1682B85C27419
 // INDEX 641
-uiEM_Sad	[TRISTE]
+uiEM_Sad	[Triste]
 
 // HASH_VALUE 88A284338BC2A817
 // INDEX 642
-uiEM_Sarcastic	[SARCASTIQUE]
+uiEM_Sarcastic	[Sarcastique]
 
 // HASH_VALUE 09B1742C45D2781E
 // INDEX 643
-uiEM_Scared	[APPEURE]
+uiEM_Scared	[Apeuré]
 
 // HASH_VALUE 4CD0344C44909410
 // INDEX 644
-uiEM_Scolding	[REPRIMANDE]
+uiEM_Scolding	[Réprimander]
 
 // HASH_VALUE 4202443E43F3443F
 // INDEX 645
-uiEM_Sedate	[DISPERSE]
+uiEM_Sedate	[Calmer]
 
 // HASH_VALUE C9F1842AC9D1D037
 // INDEX 646
-uiEM_Selfish	[EGOISTE]
+uiEM_Selfish	[Égoïste]
 
 // HASH_VALUE 4E02C0330BE3044A
 // INDEX 647
-uiEM_Serious	[SERIEUX]
+uiEM_Serious	[Sérieux]
 
 // HASH_VALUE 8902083E8940801B
 // INDEX 648
-uiEM_Shameless	[EHONTE]
+uiEM_Shameless	[Effronté]
 
 // HASH_VALUE 4450844C48D49440
 // INDEX 649
-uiEM_Sheepish	[PENAUD]
+uiEM_Sheepish	[Penaud]
 
 // HASH_VALUE 8AA2C0430B430444
 // INDEX 650
-uiEM_Shifty	[SOURNOIS]
+uiEM_Shifty	[Sournois]
 
 // HASH_VALUE 0430982D89F19427
 // INDEX 651
-uiEM_Shocked	[CHOQUE]
+uiEM_Shocked	[Choqué]
 
 // HASH_VALUE 5034D4504D14F452
 // INDEX 652
-uiEM_Shutup	[CHUT]
+uiEM_Shutup	[Chut]
 
 // HASH_VALUE 10E3F4474E83383C
 // INDEX 653
-uiEM_Shy	[TIMIDE]
+uiEM_Shy	[Timide]
 
 // HASH_VALUE 48D0944C48D0944C
 // INDEX 654
-uiEM_Sigh	[SOUPIR]
+uiEM_Sigh	[Soupirer]
 
 // HASH_VALUE 0530A42D8AE19429
 // INDEX 655
-uiEM_Silence	[SILENCE]
+uiEM_Silence	[Silence]
 
 // HASH_VALUE CE5108414C220844
 // INDEX 656
-uiEM_Silly	[IDIOT]
+uiEM_Silly	[Idiot]
 
 // HASH_VALUE 8942083D4901A41F
 // INDEX 657
-uiEM_Sincerely	[SINCERE]
+uiEM_Sincerely	[Sincère]
 
 // HASH_VALUE 0BE2DC3BCDC31038
 // INDEX 658
-uiEM_Sleepy	[ENDORMI]
+uiEM_Sleepy	[Endormi]
 
 // HASH_VALUE 1123144B50C34844
 // INDEX 659
-uiEM_Sly	[RUSE]
+uiEM_Sly	[Rusé]
 
 // HASH_VALUE 4551B42E47D1BC22
 // INDEX 660
-uiEM_Smack	[GIFLER]
+uiEM_Smack	[Gifler]
 
 // HASH_VALUE 4454D44C4454D44C
 // INDEX 661
-uiEM_Smug	[SUFFISANT]
+uiEM_Smug	[Suffisant]
 
 // HASH_VALUE 5173384DCFE33850
 // INDEX 662
-uiEM_Sorry	[DESOLE]
+uiEM_Sorry	[Désolé]
 
 // HASH_VALUE 5450044C4C546414
 // INDEX 663
-uiEM_Spiteful	[VENIMEUX]
+uiEM_Spiteful	[Rancunier]
 
 // HASH_VALUE CE230037C9D0A42C
 // INDEX 664
-uiEM_Squeamish	[MALAISE]
+uiEM_Squeamish	[Écoeuré]
 
 // HASH_VALUE 8800C42B4AC0C032
 // INDEX 665
-uiEM_Stop	[STOP]
+uiEM_Stop	[Stop]
 
 // HASH_VALUE 8C63FC46CE73C841
 // INDEX 666
-uiEM_Strong	[FORT]
+uiEM_Strong	[Fort]
 
 // HASH_VALUE 4054444C4C94F408
 // INDEX 667
-uiEM_Stubborn	[ENTETE]
+uiEM_Stubborn	[Obstiné]
 
 // HASH_VALUE 4B62F831CA719026
 // INDEX 668
-uiEM_Suffering	[SOUFFRANCE]
+uiEM_Suffering	[Souffrance]
 
 // HASH_VALUE D1F3C82F0BF3F849
 // INDEX 669
-uiEM_Surprised	[SURPRIS]
+uiEM_Surprised	[Surpris]
 
 // HASH_VALUE 1053EC3A0C92F044
 // INDEX 670
-uiEM_Suspicious	[MEFIANT]
+uiEM_Suspicious	[Méfiant]
 
 // HASH_VALUE 4C54145044909450
 // INDEX 671
-uiEM_Taunting	[AGACEMENT]
+uiEM_Taunting	[Railleur]
 
 // HASH_VALUE 8E028C2686B1D032
 // INDEX 672
-uiEM_Terrified	[TERRIFIE]
+uiEM_Terrified	[Terrifié]
 
 // HASH_VALUE 4C5084504C54642C
 // INDEX 673
-uiEM_Thankful	[RECONNAISSANT]
+uiEM_Thankful	[Reconnaissant]
 
 // HASH_VALUE D333DC370DF22854
 // INDEX 674
-uiEM_Thirsty	[ASSOIFFE]
+uiEM_Thirsty	[Assoiffé]
 
 // HASH_VALUE 0BD38C440AF2C83F
 // INDEX 675
-uiEM_Thoughtful	[PENSIF]
+uiEM_Thoughtful	[Pensif]
 
 // HASH_VALUE 4852D0264C429C2F
 // INDEX 676
-uiEM_Tired	[FATIGUE]
+uiEM_Tired	[Fatigué]
 
 // HASH_VALUE 4410F45054901448
 // INDEX 677
-uiEM_Tolerant	[TOLERANT]
+uiEM_Tolerant	[Tolérant]
 
 // HASH_VALUE 54D024504450C408
 // INDEX 678
-uiEM_Troubled	[PREOCCUPE]
+uiEM_Troubled	[Préoccupé]
 
 // HASH_VALUE 0951EC2D4BD2BC28
 // INDEX 679
-uiEM_Uncertain	[INCERTAIN]
+uiEM_Uncertain	[Incertain]
 
 // HASH_VALUE CEA2A02C4A52344E
 // INDEX 680
-uiEM_Unhappy	[MECONTENT]
+uiEM_Unhappy	[Mécontent]
 
 // HASH_VALUE 0F22E4330BB0E43A
 // INDEX 681
-uiEM_Unwilling	[REFLECHI]
+uiEM_Unwilling	[Réticent]
 
 // HASH_VALUE 449054584C546414
 // INDEX 682
-uiEM_Vengeful	[VENGEUR]
+uiEM_Vengeful	[Vengeur]
 
 // HASH_VALUE 5450145C5450145C
 // INDEX 683
-uiEM_Wait	[ATTENTE]
+uiEM_Wait	[Attente]
 
 // HASH_VALUE 4C94145C4C94145C
 // INDEX 684
-uiEM_Warm	[CHALEUREUX]
+uiEM_Warm	[Chaleureux]
 
 // HASH_VALUE 5894145C5894145C
 // INDEX 685
-uiEM_Wary	[PRUDENT]
+uiEM_Wary	[Prudent]
 
 // HASH_VALUE 4494145C4494145C
 // INDEX 686
-uiEM_Wave	[SALUT]
+uiEM_Wave	[Salut]
 
 // HASH_VALUE 4871B832CCE1CC33
 // INDEX 687
-uiEM_Whine	[GEINDRE]
+uiEM_Whine	[Geindre]
 
 // HASH_VALUE 0731883687727424
 // INDEX 688
-uiEM_Wicked	[VILAIN]
+uiEM_Wicked	[Vilain]
 
 // HASH_VALUE 44D4945C44D4945C
 // INDEX 689
-uiEM_Wise	[SAGE]
+uiEM_Wise	[Sage]
 
 // HASH_VALUE 0E33DC471002083E
 // INDEX 690
-uiEM_Wistful	[MELANCOLIQUE]
+uiEM_Wistful	[Mélancolique]
 
 // HASH_VALUE 4832F44AD0D2C029
 // INDEX 691
-uiEM_Worried	[INQUIET]
+uiEM_Worried	[Inquiet]
 
 // HASH_VALUE 06D1DC499002C024
 // INDEX 692
-uiEM_Wounded	[BLESSE]
+uiEM_Wounded	[Blessé]
 
 // HASH_VALUE 4CD414644CD41464
 // INDEX 693
-uiEM_Yawn	[BAILLER]
+uiEM_Yawn	[Bailler]
 
 // HASH_VALUE 4054F46444504438
 // INDEX 694
-uiEM_Youandme	[TOI ET MOI]
+uiEM_Youandme	[Toi et moi]
 
 // HASH_VALUE CBD0C4394911E831
 // INDEX 695
-uimInfos	[INFOS]
+uimInfos	[Infos]
 
 // HASH_VALUE 08F0D4144B50E812
 // INDEX 696
-uiCombatTitle	[COMBAT]
+uiCombatTitle	[Combat]
 
 // HASH_VALUE 1C8983949FA4B3AE
 // INDEX 697
@@ -2809,11 +2809,11 @@ uiComStaminaCost	[Coût en Endurance :]
 
 // HASH_VALUE 4C50F40C44D02414
 // INDEX 702
-uiCommerceTitle	[COMMERCE]
+uiCommerceTitle	[Commerce]
 
 // HASH_VALUE 8F56A32FA81AE471
 // INDEX 703
-uittEval	[Evaluer le prix de la matière première]
+uittEval	[Évaluer le prix de la matière première]
 
 // HASH_VALUE 54D4745C54D4745C
 // INDEX 704
@@ -2897,55 +2897,55 @@ uiRadarZoom3	[250m]
 
 // HASH_VALUE 405E2F458F710411
 // INDEX 724
-uimZoomIn	[ZOOM AVANT]
+uimZoomIn	[Zoom avant]
 
 // HASH_VALUE 4CD0F4685454F480
 // INDEX 725
-uimZoomOut	[ZOOM ARRIERE]
+uimZoomOut	[Zoom arrière]
 
 // HASH_VALUE 7212E837BB01C03B
 // INDEX 726
-uiNotReceived	[NON RECU]
+uiNotReceived	[Non reçu]
 
 // HASH_VALUE 8ADF983D3FA273FD
 // INDEX 727
-uiTypeOfObject	[TYPE D'OBJETS]
+uiTypeOfObject	[Type d'objet]
 
 // HASH_VALUE 882288228731AC25
 // INDEX 728
-uiDesign	[CONCEPTION]
+uiDesign	[Conception]
 
 // HASH_VALUE 4E73FC2FC980EC3C
 // INDEX 729
-uiOptionals	[OPTIONS]
+uiOptionals	[Options]
 
 // HASH_VALUE 4C50544458149450
 // INDEX 730
-uiQuantity	[QUANTITE]
+uiQuantity	[Quantité]
 
 // HASH_VALUE 4CD0F4504CD0F450
 // INDEX 731
-uiTool	[OUTIL]
+uiTool	[Outil]
 
 // HASH_VALUE 0962B82D4921D42C
 // INDEX 732
-uiMaterials	[MATIERES]
+uiMaterials	[Matières]
 
 // HASH_VALUE 4C42C836C691B027
 // INDEX 733
-uiDifficulty	[DIFFICULTE]
+uiDifficulty	[Difficulté]
 
 // HASH_VALUE C371183278710028
 // INDEX 734
-uiStaminaCost	[COUT EN ENDURANCE]
+uiStaminaCost	[Coût en endurance]
 
 // HASH_VALUE 1053D0430C430C3D
 // INDEX 735
-uiResult	[RESULTAT]
+uiResult	[Résultat]
 
 // HASH_VALUE CE71233E80820432
 // INDEX 736
-uiInventoryFull	[INVENTAIRE PLEIN]
+uiInventoryFull	[Inventaire plein]
 
 // HASH_VALUE D9F4B3922521435D
 // INDEX 737
@@ -2953,35 +2953,35 @@ uiBonusURInAWorkshop	[Bonus : vous êtes dans un atelier !]
 
 // HASH_VALUE 3F32C42ACACEB43B
 // INDEX 738
-uiSourceObject	[OBJET SOURCE]
+uiSourceObject	[Objet source]
 
 // HASH_VALUE 87C18F23CAD10A2F
 // INDEX 739
-uiFaberCreateTitle	[ARTISAN EN CREATION]
+uiFaberCreateTitle	[Artisan en création]
 
 // HASH_VALUE 4C4F9C2A89C1E804
 // INDEX 740
-uiFaberPlanSel	[CHOIX DU PLAN]
+uiFaberPlanSel	[Choix du plan]
 
 // HASH_VALUE 87018F2E87020A3A
 // INDEX 741
-uiFaberRepairTitle	[ARTISAN EN REPARATION]
+uiFaberRepairTitle	[Artisan en réparation]
 
 // HASH_VALUE 4451AF2444522A30
 // INDEX 742
-uiFaberRefineTitle	[ARTISAN EN PEAUFINEMENT]
+uiFaberRefineTitle	[Artisan en peaufinement]
 
 // HASH_VALUE CBD0C4394911E831
 // INDEX 743
-uimFaInfos	[INFOS]
+uimFaInfos	[Infos]
 
 // HASH_VALUE C4124CE4D012AA2A
 // INDEX 744
-uimFaReset	[REINITIALISER]
+uimFaReset	[Réinitialiser]
 
 // HASH_VALUE 48609C2284718C1B
 // INDEX 745
-uimFaClear	[ANNULER]
+uimFaClear	[Annuler]
 
 // HASH_VALUE DAA1B744DD169B17
 // INDEX 746
@@ -3005,15 +3005,15 @@ uiItem21to25	[Niveau de l'objet de 21 à 25]
 
 // HASH_VALUE 862459CA70BBFB94
 // INDEX 751
-uittClickSelMat	[Cliquez pour choisir la matière première dans vos sacs]
+uittClickSelMat	[Cliquer pour choisir la matière première dans votre sac]
 
 // HASH_VALUE E32F9F0DC46BED9B
 // INDEX 752
-uittDropPlan	[Déposez un plan d'artisan ici pour créer un objet]
+uittDropPlan	[Déposer un plan d'artisan ici pour créer un objet]
 
 // HASH_VALUE 2F8F0856F46D4C19
 // INDEX 753
-uittClickSelTool	[Cliquez pour choisir un outil dans vos gaines]
+uittClickSelTool	[Cliquer pour choisir un outil dans votre étui]
 
 // HASH_VALUE 5D24E07C5DFACCB8
 // INDEX 754
@@ -3025,27 +3025,27 @@ uittClearComp	[Annuler la composition]
 
 // HASH_VALUE 97978B9D54F7AF6C
 // INDEX 756
-uittStartFaComp	[Lancer la création de l'Artisan]
+uittStartFaComp	[Lancer la création de l'artisan]
 
 // HASH_VALUE A37A6E7719FACCD2
 // INDEX 757
-uittDropItem	[Déposez un objet ici pour le réparer]
+uittDropItem	[Déposer un objet ici pour le réparer]
 
 // HASH_VALUE 2F8F0856F46D4C19
 // INDEX 758
-uittClickTool	[Cliquez pour choisir un outil dans vos gaines]
+uittClickTool	[Cliquer pour choisir un outil dans votre étui]
 
 // HASH_VALUE 1A98B46411D75E99
 // INDEX 759
-uittStartFaRepair	[Lancer la réparation de l'Artisan]
+uittStartFaRepair	[Lancer la réparation de l'objet]
 
 // HASH_VALUE A3A9827F96FACCD2
 // INDEX 760
-uittDropItRef	[Déposez un objet ici pour le peaufiner]
+uittDropItRef	[Déposer un objet ici pour le raffiner]
 
 // HASH_VALUE 1A98806913365E99
 // INDEX 761
-uittStartFaRefine	[Lancer le peaufinement de l'Artisan]
+uittStartFaRefine	[Lancer le raffinage de l'objet]
 
 // HASH_VALUE EE1AB066D965CB6A
 // INDEX 762
@@ -3065,23 +3065,23 @@ uigcPreSet	[Réglage : ]
 
 // HASH_VALUE CEA2083E8EF12841
 // INDEX 766
-uigcPreSetLow	[FAIBLE]
+uigcPreSetLow	[Faible]
 
 // HASH_VALUE 48B184334741A43B
 // INDEX 767
-uigcPreSetMedium	[MOYEN]
+uigcPreSetMedium	[Moyen]
 
 // HASH_VALUE 8C42E02F0C01D422
 // INDEX 768
-uigcPreSetNormal	[NORMAL]
+uigcPreSetNormal	[Normal]
 
 // HASH_VALUE 48D0942048D09420
 // INDEX 769
-uigcPreSetHigh	[HAUT]
+uigcPreSetHigh	[Haut]
 
 // HASH_VALUE D292302812911034
 // INDEX 770
-uigcPreSetCustom	[PERSONNALISE]
+uigcPreSetCustom	[Personnalisé]
 
 // HASH_VALUE 91E2EC368BB3DC36
 // INDEX 771
@@ -3109,15 +3109,15 @@ uigcTextureMode	[Texture :]
 
 // HASH_VALUE 3A8B4223C0BD4D18
 // INDEX 777
-uigcLowTextureMode	[FAIBLE (32 Mo)]
+uigcLowTextureMode	[Faible (32 Mio)]
 
 // HASH_VALUE 033177F63D6EB21E
 // INDEX 778
-uigcNormalTextureMode	[NORMALE (64 Mo)]
+uigcNormalTextureMode	[Normale (64 Mio)]
 
 // HASH_VALUE 8B4EC937BAABC2C2
 // INDEX 779
-uigcHighTextureMode	[HAUTE (128 Mo)]
+uigcHighTextureMode	[Haute (128 Mio)]
 
 // HASH_VALUE 14D8DB8825D52063
 // INDEX 780
@@ -3279,11 +3279,11 @@ uiLand	[Paysage]
 
 // HASH_VALUE 209C14187058C40C
 // INDEX 819
-uiVision	[Netteté Loin.]
+uiVision	[Netteté lointaine]
 
 // HASH_VALUE 23926B7513882442
 // INDEX 820
-uiTileNear	[Dégradation Loin.]
+uiTileNear	[Dégradation lointaine]
 
 // HASH_VALUE F0B9B0932419D0A7
 // INDEX 821
@@ -3327,7 +3327,7 @@ uiFxShadow	[Activer les ombres]
 
 // HASH_VALUE 1B24C4621310A089
 // INDEX 831
-uiFxBloom	[Activer le bloom]
+uiFxBloom	[Activer le flou lumineux]
 
 // HASH_VALUE 152908826C060CBF
 // INDEX 832
@@ -3339,7 +3339,7 @@ uiFxDensityBloom	[Densité]
 
 // HASH_VALUE B2D1AC8FB27D333E
 // INDEX 834
-uiFxTooltipBloom	[Votre configuration ne supporte pas l'effet de Bloom. Essayez de mettre à jour vos pilotes.]
+uiFxTooltipBloom	[Votre configuration ne supporte pas le "flou lumineux". Essayez de mettre à jour vos pilotes.]
 
 // HASH_VALUE 6573D09729FA6452
 // INDEX 835
@@ -3359,7 +3359,7 @@ uiCharMaxNotCLod	[Haute déf. max]
 
 // HASH_VALUE 209C14187058C40C
 // INDEX 839
-uiCharFarClip	[Netteté Loint.]
+uiCharFarClip	[Netteté lointaine]
 
 // HASH_VALUE 28E8807DD82152A6
 // INDEX 840
@@ -3379,7 +3379,7 @@ uiHardwareCursor	[Curseur hardware]
 
 // HASH_VALUE 33832A66F2D875AC
 // INDEX 844
-uiActivateHardwareCursor	[Voulez vous activer le curseur Hardware ?]
+uiActivateHardwareCursor	[Voulez vous activer le curseur hardware ?]
 
 // HASH_VALUE 90A54C8E6B99734F
 // INDEX 845
@@ -3395,11 +3395,11 @@ uiSelectWithRClick	[Clic droit pour choisir]
 
 // HASH_VALUE 4E72B87EA335E4A3
 // INDEX 848
-uiFollowOnAtk	[Suivre la Cible Attaquée]
+uiFollowOnAtk	[Suivre la cible attaquée]
 
 // HASH_VALUE 7EB8F3F064C41068
 // INDEX 849
-uiAtkOnSelect	[Attaquer la Source aussitôt Choisie]
+uiAtkOnSelect	[Attaquer la source aussitôt choisie]
 
 // HASH_VALUE 6E56639A22D5F44D
 // INDEX 850
@@ -3411,11 +3411,11 @@ uiCharOpacityMin	[Opacité minimale]
 
 // HASH_VALUE 98FC03AA6A398888
 // INDEX 852
-uiCurrentActionOut	[Affichage Action en Cours dynamique]
+uiCurrentActionOut	[Affichage dynamique de l'action en cours]
 
 // HASH_VALUE 0290135ACB958DD5
 // INDEX 853
-uittCurrentActionOut	[Si coché, l'@{6F6F}action en cours@{FFFF} est affichée en dessous de la barre d'action si nécessaire.\n
+uittCurrentActionOut	[Si coché, l'@{6F6F}action en cours@{FFFF} est affichée au-dessous de la barre d'action si nécessaire.\n
 	Si décoché, l'@{6F6F}action en cours@{FFFF} est affichée dans la fenêtre des indicateurs du joueur.]
 
 // HASH_VALUE 2909F07F0AE530C3
@@ -3424,7 +3424,7 @@ uiGlobalColor	[Options des fenêtres]
 
 // HASH_VALUE 2B46C79BDF46A46A
 // INDEX 855
-uiUIColor	[Couleurs de l'Interface Utilisateur]
+uiUIColor	[Couleurs de l'Interface de l'utilisateur :]
 
 // HASH_VALUE 6B896489DE73843C
 // INDEX 856
@@ -3496,19 +3496,19 @@ uittChooseGuildColor	[Choisir la couleur des messages de la guilde]
 
 // HASH_VALUE E978D38D2584EF83
 // INDEX 873
-uiCCDGuild	[Couleur des messages de la Guilde]
+uiCCDGuild	[Couleur des messages de la guilde]
 
 // HASH_VALUE 6C5854506C585450
 // INDEX 874
-uiTeamColor	[Equipe]
+uiTeamColor	[Équipe]
 
 // HASH_VALUE A858F045E7027B65
 // INDEX 875
-uittChooseTeamColor	[Choisir la couleur des mess. de l'équipe]
+uittChooseTeamColor	[Choisir la couleur des messages de l'équipe]
 
 // HASH_VALUE A5EA6CA09BB85759
 // INDEX 876
-uiCCDTeam	[Couleur des mess. de l'équipe]
+uiCCDTeam	[Couleur des messages de l'équipe]
 
 // HASH_VALUE 5E793C80E2179C8E
 // INDEX 877
@@ -3516,11 +3516,11 @@ uiSayColor	[Dire]
 
 // HASH_VALUE 275ABB379F315F73
 // INDEX 878
-uittChooseSayColor	[Choisir la couleur des mess. "dire"]
+uittChooseSayColor	[Choisir la couleur des messages "dire"]
 
 // HASH_VALUE 2CF84B3068046726
 // INDEX 879
-uiCCDSay	[Couleur des mess. "dire"]
+uiCCDSay	[Couleur des messages "dire"]
 
 // HASH_VALUE 6F087CA426F894AB
 // INDEX 880
@@ -3528,11 +3528,11 @@ uiShoutColor	[Crier]
 
 // HASH_VALUE 6D79A36596B58875
 // INDEX 881
-uittChooseShoutColor	[Choisir la couleur des mess. "crier"]
+uittChooseShoutColor	[Choisir la couleur des messages "crier"]
 
 // HASH_VALUE EFA92C1C1110B766
 // INDEX 882
-uiCCDShout	[Couleur des mess. "crier"]
+uiCCDShout	[Couleur des messages "crier"]
 
 // HASH_VALUE 6C1854506C185450
 // INDEX 883
@@ -3552,11 +3552,11 @@ uiNpcColor	[PNJ]
 
 // HASH_VALUE E307BB379F315F3D
 // INDEX 887
-uittChooseNpcColor	[Choisir la couleur des mess. des "PNJ"]
+uittChooseNpcColor	[Choisir la couleur des messages des "PNJ"]
 
 // HASH_VALUE 9EE73730DAF35326
 // INDEX 888
-uiCCDNpc	[Couleur des mess. des "PNJ"]
+uiCCDNpc	[Couleur des messages des "PNJ"]
 
 // HASH_VALUE A7FB9466A5CB948F
 // INDEX 889
@@ -3564,11 +3564,11 @@ uiCiviColor	[Civilisation]
 
 // HASH_VALUE 079E08B2B28629D9
 // INDEX 890
-uittChooseCiviColor	[Choisir la couleur des mess. de la "civilisation"]
+uittChooseCiviColor	[Choisir la couleur des messages de la "civilisation"]
 
 // HASH_VALUE AB29685099037EB0
 // INDEX 891
-uiCCDCivi	[Couleur des mess. de la "civilisation"]
+uiCCDCivi	[Couleur des messages de la "civilisation"]
 
 // HASH_VALUE A65994AEEEFA08B2
 // INDEX 892
@@ -3576,11 +3576,11 @@ uiTerriColor	[Territoire]
 
 // HASH_VALUE F23E3CB46DE4AC98
 // INDEX 893
-uittChooseTerriColor	[Choisir la couleur des mess. du "territoire"]
+uittChooseTerriColor	[Choisir la couleur des messages du "territoire"]
 
 // HASH_VALUE 95909C692C9B9064
 // INDEX 894
-uiCCDTerri	[Couleur des mess. du "territoire"]
+uiCCDTerri	[Couleur des messages du "territoire"]
 
 // HASH_VALUE 7458E45464DC2494
 // INDEX 895
@@ -3588,11 +3588,11 @@ uiUnivColor	[Univers]
 
 // HASH_VALUE F60920A6EC859C69
 // INDEX 896
-uittChooseUnivColor	[Choisir la couleur des mess. de "l'univers"]
+uittChooseUnivColor	[Choisir la couleur des messages du canal Univers]
 
 // HASH_VALUE 58742265AB7AF8A7
 // INDEX 897
-uiCCDUniv	[Couleur des mess. de "l'univers"]
+uiCCDUniv	[Couleur des messages du canal Univers]
 
 // HASH_VALUE A807887AA7B6AC97
 // INDEX 898
@@ -3600,7 +3600,7 @@ uiRegionColor	[Région]
 
 // HASH_VALUE 29E73B5EE804A06D
 // INDEX 899
-uittChooseRegionColor	[Choisir la couleur des messages "Région"]
+uittChooseRegionColor	[Choisir la couleur des messages du canal Région]
 
 // HASH_VALUE 82820D6BEE8C6D1D
 // INDEX 900
@@ -3609,7 +3609,7 @@ uittChatEnter	[Si vous cochez cette case, vous ne quitterez pas le chat après l
 
 // HASH_VALUE EA58130CF3F5B8B7
 // INDEX 901
-uiCCDRegion	[Couleur des messages "Région"]
+uiCCDRegion	[Couleur des messages du canal Région]
 
 // HASH_VALUE 6C59A0585505AB92
 // INDEX 902
@@ -3661,91 +3661,91 @@ uiBotColor	[PNJ]
 
 // HASH_VALUE 24097393EA255FA4
 // INDEX 914
-uiCCDPla	[Couleur en-tête Joueur]
+uiCCDPla	[Couleur de l'en-tête "Joueur"]
 
 // HASH_VALUE 18D9B07954E5C86F
 // INDEX 915
-uiCCDAni	[Couleur en-tête Animaux]
+uiCCDAni	[Couleur de l'en-tête "Animaux"]
 
 // HASH_VALUE ADF6E874E7697B70
 // INDEX 916
-uiCCDCom	[Couleur en-tête Communication]
+uiCCDCom	[Couleur de l'en-tête "Communication"]
 
 // HASH_VALUE EAC95B58DB77F4AD
 // INDEX 917
-uiCCDInv	[Couleur en-tête Inventaire]
+uiCCDInv	[Couleur de l'en-tête "Inventaire"]
 
 // HASH_VALUE 178AC0955396D88B
 // INDEX 918
-uiCCDOpt	[Couleur en-tête Options]
+uiCCDOpt	[Couleur de l'en-tête "Options"]
 
 // HASH_VALUE 9214186CEF38E8B3
 // INDEX 919
-uiCCDLab	[Couleur en-tête Orientation]
+uiCCDLab	[Couleur de l'en-tête "Orientation"]
 
 // HASH_VALUE D82A1C71C4806F53
 // INDEX 920
-uiCCDMem	[Couleur en-tête Guilde & Equipe]
+uiCCDMem	[Couleur de l'en-tête "Guilde & Équipe"]
 
 // HASH_VALUE DB99DC7FA7986B13
 // INDEX 921
-uiCCDHel	[Couleur en-tête Aide]
+uiCCDHel	[Couleur de l' en-tête "Aide"]
 
 // HASH_VALUE 96B4F860EF38B0BB
 // INDEX 922
-uiCCDInf	[Couleur en-tête Informations]
+uiCCDInf	[Couleur de l'en-tête "Informations"]
 
 // HASH_VALUE 6AC7B88C54D4674B
 // INDEX 923
-uiCCDTra	[Couleur en-tête Echange]
+uiCCDTra	[Couleur de l'en-tête "Échange"]
 
 // HASH_VALUE C06C14666A188CAE
 // INDEX 924
-uiCCDBot	[Couleur en-tête PNJ]
+uiCCDBot	[Couleur de l'en-tête "PNJ"]
 
 // HASH_VALUE EB776EF9ACA4A455
 // INDEX 925
-uittChoosePlaColor	[Choisir couleur/en-tête "Joueur"]
+uittChoosePlaColor	[Choisir la couleur de l'en-tête "Joueur"]
 
 // HASH_VALUE 2C028AB7E8546861
 // INDEX 926
-uittChooseAniColor	[Choisir couleur/en-tête "Animaux"]
+uittChooseAniColor	[Choisir la couleur de l'en-tête "Animaux"]
 
 // HASH_VALUE C78C1C5BD85C35CD
 // INDEX 927
-uittChooseComColor	[Choisir couleur/en-tête "Communication"]
+uittChooseComColor	[Choisir la couleur de l'en-tête "Communication"]
 
 // HASH_VALUE DB3E4CA5E9346429
 // INDEX 928
-uittChooseInvColor	[Choisir couleur/en-tête "Inventaire"]
+uittChooseInvColor	[Choisir la couleur de l'en-tête "Inventaire"]
 
 // HASH_VALUE ADE28AB76834586C
 // INDEX 929
-uittChooseOptColor	[Choisir couleur/en-tête "Options"]
+uittChooseOptColor	[Choisir la couleur de l'en-tête "Options"]
 
 // HASH_VALUE 47BC4498ABE05FDC
 // INDEX 930
-uittChooseLabColor	[Choisir couleur/en-tête "Orientation"]
+uittChooseLabColor	[Choisir la couleur de l'en-tête "Orientation"]
 
 // HASH_VALUE 46BB036084B05DC2
 // INDEX 931
-uittChooseMemColor	[Choisir couleur/en-tête "Guilde & Equipe"]
+uittChooseMemColor	[Choisir la couleur de l'en-tête "Guilde & Equipe"]
 
 // HASH_VALUE E986833A969EB864
 // INDEX 932
-uittChooseHelColor	[Choisir couleur/en-tête "Aide"]
+uittChooseHelColor	[Choisir la couleur de l'en-tête "Aide"]
 
 // HASH_VALUE 062C549BD79181CC
 // INDEX 933
-uittChooseInfColor	[Choisir couleur/en-tête "Informations"]
+uittChooseInfColor	[Choisir la couleur de l'en-tête "Informations"]
 
 // HASH_VALUE 6B878FF20D755458
 // INDEX 934
-uittChooseTraColor	[Choisir couleur/en-tête "Echange"]
+uittChooseTraColor	[Choisir la couleur de l'en-tête "Échange"]
 
 // HASH_VALUE E41673376980D748
 // INDEX 935
-uittChooseBotColor	[Choisir couleur/en-tête "PNJ"]
+uittChooseBotColor	[Choisir la couleur de l'en-tête "PNJ"]
 
 // interface - LandMarks
 // HASH_VALUE E8340A7E6C9C84B2
@@ -3786,11 +3786,11 @@ uiLMForageColor	[Source]
 
 // HASH_VALUE 1AEAEC802B04F080
 // INDEX 945
-uiLMForageExcelColor	[Source Excellente]
+uiLMForageExcelColor	[Source excellente]
 
 // HASH_VALUE 60886C7E631780A9
 // INDEX 946
-uiLMForageSupColor	[Source Suprême]
+uiLMForageSupColor	[Source suprême]
 
 // HASH_VALUE 1C591877A0875485
 // INDEX 947
@@ -3810,7 +3810,7 @@ uiLMFiberColor	[Fibre]
 
 // HASH_VALUE 689C1408689C1408
 // INDEX 951
-uiLMBarkColor	[Ecorce]
+uiLMBarkColor	[Écorce]
 
 // HASH_VALUE 6458544C6458544C
 // INDEX 952
@@ -3818,7 +3818,7 @@ uiLMSeedColor	[Graine]
 
 // HASH_VALUE A9D7349362D75090
 // INDEX 953
-uiLMShellColor	[Carapaces]
+uiLMShellColor	[Carapace]
 
 // HASH_VALUE 2A48648E23983C9C
 // INDEX 954
@@ -3858,11 +3858,11 @@ uiLMKitinColor	[Kitin]
 
 // HASH_VALUE E8B7B47569658C9D
 // INDEX 963
-uiLMNociveColor	[Matière Nocive]
+uiLMNociveColor	[Matière nocive]
 
 // HASH_VALUE 697A0079E58B008E
 // INDEX 964
-uiLMPreservativeColor	[Matière de Conservation]
+uiLMPreservativeColor	[Matière de conservation]
 
 // HASH_VALUE 66FAA49724A8F87D
 // INDEX 965
@@ -3874,243 +3874,243 @@ uiLMTeleporterColor	[Téléporteur]
 
 // HASH_VALUE E05A9C8958A98361
 // INDEX 967
-uiCCDLMMisc	[Couleur de repère Divers]
+uiCCDLMMisc	[Couleur des repères "Divers"]
 
 // HASH_VALUE E4288B9620348799
 // INDEX 968
-uiCCDLMTribe	[Couleur de repère Tribus]
+uiCCDLMTribe	[Couleur des repères "Tribu"]
 
 // HASH_VALUE 5739A06AD7B428A8
 // INDEX 969
-uiCCDLMBandit	[Couleur de repère Bandit]
+uiCCDLMBandit	[Couleur des repères "Bandits"]
 
 // HASH_VALUE E7CA5C43940763C4
 // INDEX 970
-uiCCDLMCitizen	[Couleur de repère Citoyen]
+uiCCDLMCitizen	[Couleur des repères "Citoyen"]
 
 // HASH_VALUE E7E9478423F54387
 // INDEX 971
-uiCCDLMFauna	[Couleur de repère Faune]
+uiCCDLMFauna	[Couleur des repères "Faune"]
 
 // HASH_VALUE 1B25187E2CE71093
 // INDEX 972
-uiCCDLMFaunaExcel	[Couleur de repère Nommé]
+uiCCDLMFaunaExcel	[Couleur des repères "Nommé"]
 
 // HASH_VALUE 69898B32519B9484
 // INDEX 973
-uiCCDLMFaunaSup	[Couleur de repère Roi]
+uiCCDLMFaunaSup	[Couleur des repères "Roi"]
 
 // HASH_VALUE 9689D06BD894FCA6
 // INDEX 974
-uiCCDLMForage	[Couleur de repère Source]
+uiCCDLMForage	[Couleur des repères "Source"]
 
 // HASH_VALUE 1578A085ABA62C65
 // INDEX 975
-uiCCDLMForageExcel	[Couleur de repère Source Excellente]
+uiCCDLMForageExcel	[Couleur des repères "Source excellente"]
 
 // HASH_VALUE E016A76EAE366CAB
 // INDEX 976
-uiCCDLMForageSup	[Couleur de repère Source Suprême]
+uiCCDLMForageSup	[Couleur des repères "Source suprême"]
 
 // HASH_VALUE 9239649D64A43F6E
 // INDEX 977
-uiCCDLMSap	[Couleur de repère Sève]
+uiCCDLMSap	[Couleur des repères "Sève"]
 
 // HASH_VALUE A5B87790E1C47393
 // INDEX 978
-uiCCDLMAmber	[Couleur de repère Ambre]
+uiCCDLMAmber	[Couleur des repères "Ambre"]
 
 // HASH_VALUE A169B48A58C94767
 // INDEX 979
-uiCCDLMNode	[Couleur de repère Boucle]
+uiCCDLMNode	[Couleur des repères "Boucle"]
 
 // HASH_VALUE A5B86795E1C46398
 // INDEX 980
-uiCCDLMFiber	[Couleur de repère Fibre]
+uiCCDLMFiber	[Couleur des repères "Fibre"]
 
 // HASH_VALUE 1F4A7C7E58297F59
 // INDEX 981
-uiCCDLMBark	[Couleur de repère Ecorce]
+uiCCDLMBark	[Couleur des repères "Écorce"]
 
 // HASH_VALUE A2798C8F58B94B5D
 // INDEX 982
-uiCCDLMSeed	[Couleur de repère Graine]
+uiCCDLMSeed	[Couleur des repères "Graine"]
 
 // HASH_VALUE 67E8639CA3F45F9F
 // INDEX 983
-uiCCDLMShell	[Couleur de repère Carapaces]
+uiCCDLMShell	[Couleur des repères "Carapace"]
 
 // HASH_VALUE A6C9579DE2D553A0
 // INDEX 984
-uiCCDLMResin	[Couleur de repère Résine]
+uiCCDLMResin	[Couleur des repères "Résine"]
 
 // HASH_VALUE A319B49358B97367
 // INDEX 985
-uiCCDLMWood	[Couleur de repère Bois]
+uiCCDLMWood	[Couleur des repères "Bois"]
 
 // HASH_VALUE 94B7849964A43F6A
 // INDEX 986
-uiCCDLMOil	[Couleur de repère Huile]
+uiCCDLMOil	[Couleur des repères "Huile"]
 
 // HASH_VALUE EBA9844C94A78BB3
 // INDEX 987
-uiCCDLMMission	[Couleur de repère Mission]
+uiCCDLMMission	[Couleur des repères "Mission"]
 
 // HASH_VALUE 5F19B48258B97367
 // INDEX 988
-uiCCDLMFood	[Couleur de repère Nourriture]
+uiCCDLMFood	[Couleur des repères "Nourriture"]
 
 // HASH_VALUE E319D4876BDAB36E
 // INDEX 989
-uiCCDLMConstruction	[Couleur de repère Construction]
+uiCCDLMConstruction	[Couleur des repères "Construction"]
 
 // HASH_VALUE 15679C9164A43F6D
 // INDEX 990
-uiCCDLMGoo	[Couleur de repère Goo]
+uiCCDLMGoo	[Couleur des repères "Goo"]
 
 // HASH_VALUE 978ABC72188444A2
 // INDEX 991
-uiCCDLMInsect	[Couleur de repère Insecte]
+uiCCDLMInsect	[Couleur des repères "Insecte"]
 
 // HASH_VALUE A6D96796E2E56399
 // INDEX 992
-uiCCDLMKitin	[Couleur de repère Kitin]
+uiCCDLMKitin	[Couleur des repères "Kitin"]
 
 // HASH_VALUE 98980C7B14941CB5
 // INDEX 993
-uiCCDLMNocive	[Couleur de repère Matière Nocive]
+uiCCDLMNocive	[Couleur des repères "Matière nocive"]
 
 // HASH_VALUE E5FAE09427EA8F62
 // INDEX 994
-uiCCDLMPreservative	[Couleur de repère Matière de Conservation]
+uiCCDLMPreservative	[Couleur des repères "Matière de conservation"]
 
 // HASH_VALUE E929644F92486BA2
 // INDEX 995
-uiCCDLMPassage	[Couleur de repère Chemin]
+uiCCDLMPassage	[Couleur des repères "Chemin"]
 
 // HASH_VALUE 97D4788CEF29F499
 // INDEX 996
-uiCCDLMTeleporter	[Couleur de repère Téléporteur]
+uiCCDLMTeleporter	[Couleur des repères "Téléporteur"]
 
 // HASH_VALUE EAA6733E56914073
 // INDEX 997
-uittChooseLMMiscColor	[Choisissez une couleur pour le repère 'Divers']
+uittChooseLMMiscColor	[Choisissez une couleur pour les repères "Divers"]
 
 // HASH_VALUE AE479F5DD9646C60
 // INDEX 998
-uittChooseLMTribeColor	[Choisissez une couleur pour le repère 'Tribus']
+uittChooseLMTribeColor	[Choisissez une couleur pour les repères "Tribus"]
 
 // HASH_VALUE 27D61B6BE964506F
 // INDEX 999
-uittChooseLMBanditColor	[Choisissez une couleur pour le repère 'Bandit']
+uittChooseLMBanditColor	[Choisissez une couleur pour les repères "Bandits"]
 
 // HASH_VALUE ECD853A128E58C68
 // INDEX 1000
-uittChooseLMCitizenColor	[Choisissez une couleur pour le repère 'Citoyen']
+uittChooseLMCitizenColor	[Choisissez une couleur pour les repères "Citoyen"]
 
 // HASH_VALUE 6A669F5DD9249C6C
 // INDEX 1001
-uittChooseLMFaunaColor	[Choisissez une couleur pour le repère 'Faune']
+uittChooseLMFaunaColor	[Choisissez une couleur pour les repères "Faune"]
 
 // HASH_VALUE 427C0CB81DD414A1
 // INDEX 1002
-uittChooseLMFaunaExcelColor	[Choisissez une couleur pour le repère 'Nommé']
+uittChooseLMFaunaExcelColor	[Choisissez une couleur pour les repères "Nommé"]
 
 // HASH_VALUE B1E934B461F46C74
 // INDEX 1003
-uittChooseLMFaunaSupColor	[Choisissez une couleur pour le repère 'Roi']
+uittChooseLMFaunaSupColor	[Choisissez une couleur pour les repères "Roi"]
 
 // HASH_VALUE AA161B6B25444473
 // INDEX 1004
-uittChooseLMForageColor	[Choisissez une couleur pour le repère 'Source']
+uittChooseLMForageColor	[Choisissez une couleur pour les repères "Source"]
 
 // HASH_VALUE 06CC8878E82618D2
 // INDEX 1005
-uittChooseLMForageExcelColor	[Choisissez une couleur pour le repère 'Source Excellente']
+uittChooseLMForageExcelColor	[Choisissez une couleur pour les repères "Source excellente"]
 
 // HASH_VALUE B76D788968846490
 // INDEX 1006
-uittChooseLMForageSupColor	[Choisissez une couleur pour le repère 'Source Suprême']
+uittChooseLMForageSupColor	[Choisissez une couleur pour les repères "Source suprême"]
 
 // HASH_VALUE 2A67A7335FB09364
 // INDEX 1007
-uittChooseLMSapColor	[Choisissez une couleur pour le repère 'Sève']
+uittChooseLMSapColor	[Choisissez une couleur pour les repères "Sève"]
 
 // HASH_VALUE 6D169F5DD9357859
 // INDEX 1008
-uittChooseLMAmberColor	[Choisissez une couleur pour le repère 'Ambre']
+uittChooseLMAmberColor	[Choisissez une couleur pour les repères "Ambre"]
 
 // HASH_VALUE 6BB6733E56914864
 // INDEX 1009
-uittChooseLMNodeColor	[Choisissez une couleur pour le repère 'Boucle']
+uittChooseLMNodeColor	[Choisissez une couleur pour les repères "Boucle"]
 
 // HASH_VALUE E8F6733E56916072
 // INDEX 1010
-uittChooseLMBarkColor	[Choisissez une couleur pour le repère 'Ecorce']
+uittChooseLMBarkColor	[Choisissez une couleur pour les repères "Écorce"]
 
 // HASH_VALUE E907733E56914465
 // INDEX 1011
-uittChooseLMSeedColor	[Choisissez une couleur pour le repère 'Graine']
+uittChooseLMSeedColor	[Choisissez une couleur pour les repères "Graine"]
 
 // HASH_VALUE 2C379F5DD9D4945C
 // INDEX 1012
-uittChooseLMShellColor	[Choisissez une couleur pour le repère 'Carapaces']
+uittChooseLMShellColor	[Choisissez une couleur pour les repères "Carapace"]
 
 // HASH_VALUE 6B279F5DD9F4886A
 // INDEX 1013
-uittChooseLMResinColor	[Choisissez une couleur pour le repère 'Résine']
+uittChooseLMResinColor	[Choisissez une couleur pour les repères "Résine"]
 
 // HASH_VALUE 6B47733E5691446F
 // INDEX 1014
-uittChooseLMWoodColor	[Choisissez une couleur pour le repère 'Bois']
+uittChooseLMWoodColor	[Choisissez une couleur pour les repères "Bois"]
 
 // HASH_VALUE 2C26A7335FB09360
 // INDEX 1015
-uittChooseLMOilColor	[Choisissez une couleur pour le repère 'Huile']
+uittChooseLMOilColor	[Choisissez une couleur pour les repères "Huile"]
 
 // HASH_VALUE EC7853A1AAD4B467
 // INDEX 1016
-uittChooseLMMissionColor	[Choisissez une couleur pour le repère 'Mission']
+uittChooseLMMissionColor	[Choisissez une couleur pour les repères "Mission"]
 
 // HASH_VALUE 6B36733E5691446F
 // INDEX 1017
-uittChooseLMFoodColor	[Choisissez une couleur pour le repère 'Nourriture']
+uittChooseLMFoodColor	[Choisissez une couleur pour les repères "Nourriture"]
 
 // HASH_VALUE C54D00B3F2D839DD
 // INDEX 1018
-uittChooseLMConstructionColor	[Choisissez une couleur pour le repère 'Construction']
+uittChooseLMConstructionColor	[Choisissez une couleur pour les repères "Construction"]
 
 // HASH_VALUE ADA6A7335FB09363
 // INDEX 1019
-uittChooseLMGooColor	[Choisissez une couleur pour le repère 'Goo']
+uittChooseLMGooColor	[Choisissez une couleur pour les repères "Goo"]
 
 // HASH_VALUE 6A461B6BE9045474
 // INDEX 1020
-uittChooseLMInsectColor	[Choisissez une couleur pour le repère 'Insecte']
+uittChooseLMInsectColor	[Choisissez une couleur pour les repères "Insecte"]
 
 // HASH_VALUE 6CB69F5DD9F4886B
 // INDEX 1021
-uittChooseLMKitinColor	[Choisissez une couleur pour le repère 'Kitin']
+uittChooseLMKitinColor	[Choisissez une couleur pour les repères "Kitin"]
 
 // HASH_VALUE AA961B6B25356464
 // INDEX 1022
-uittChooseLMNociveColor	[Choisissez une couleur pour le repère 'Matière Nocive']
+uittChooseLMNociveColor	[Choisissez une couleur pour les repères "Matière nocive"]
 
 // HASH_VALUE 861EF8B4F2E715DB
 // INDEX 1023
-uittChooseLMPreservativeColor	[Choisissez une couleur pour le repère 'Matière de Conservation']
+uittChooseLMPreservativeColor	[Choisissez une couleur pour les repères "Matière de conservation"]
 
 // HASH_VALUE EAA95398A854B467
 // INDEX 1024
-uittChooseLMPassageColor	[Choisissez une couleur pour le repère 'Chemin']
+uittChooseLMPassageColor	[Choisissez une couleur pour les repères "Chemin"]
 
 // HASH_VALUE C45D50B2A7C5F098
 // INDEX 1025
-uittChooseLMTeleporterColor	[Choisissez une couleur pour le repère 'Téléporteur']
+uittChooseLMTeleporterColor	[Choisissez une couleur pour les repères "Téléporteur"]
 
 // HASH_VALUE 2523C4A25CD653BD
 // INDEX 1026
-uiMouseOptions	[Options de la Souris]
+uiMouseOptions	[Options de la souris]
 
 // HASH_VALUE 6317007265F9C8B9
 // INDEX 1027
@@ -4118,15 +4118,15 @@ uiMouseInterface	[Interface]
 
 // HASH_VALUE 4D0407315B567C79
 // INDEX 1028
-uiDoubleClickSpeed	[Vitesse Dbl Clic]
+uiDoubleClickSpeed	[Vitesse du double-clic]
 
 // HASH_VALUE A5A608659D81FC91
 // INDEX 1029
-uiCursorSpeed	[Vitesse Curseur]
+uiCursorSpeed	[Vitesse du curseur]
 
 // HASH_VALUE 9F779F81A115F0AC
 // INDEX 1030
-uiCursorAccel	[Accélération Curseur]
+uiCursorAccel	[Accélération du curseur]
 
 // HASH_VALUE DF974C8FD112DB5C
 // INDEX 1031
@@ -4134,19 +4134,19 @@ uiMouseHead	[Mode Observateur]
 
 // HASH_VALUE E4F7083D9FA3042E
 // INDEX 1032
-uiHeadSpeed	[Vitesse de Rotation]
+uiHeadSpeed	[Vitesse de rotation]
 
 // HASH_VALUE 6688FC7EE527DB57
 // INDEX 1033
-uiHeadAccel	[Accélération de la Rotation]
+uiHeadAccel	[Accélération de la rotation]
 
 // HASH_VALUE 6A3CA4D6EA1A84B0
 // INDEX 1034
-uiKeybOptions	[Options du Clavier]
+uiKeybOptions	[Options du clavier]
 
 // HASH_VALUE 9F0424681A302497
 // INDEX 1035
-uiKeybCamera	[Vitesse de la Camera]
+uiKeybCamera	[Vitesse de la caméra]
 
 // HASH_VALUE 6D4AC08F2347449C
 // INDEX 1036
@@ -4158,7 +4158,7 @@ uiKeybCamSpeedMin	[Minimum]
 
 // HASH_VALUE E484C0A35CC657BC
 // INDEX 1038
-uiSoundGeneral	[Options du Son]
+uiSoundGeneral	[Options du son]
 
 // HASH_VALUE 2446905727846C7E
 // INDEX 1039
@@ -4170,7 +4170,7 @@ uiUseEax	[Utiliser EAX]
 
 // HASH_VALUE 1427A86DD4B69B84
 // INDEX 1041
-uiMaxTracks	[Pistes Max.]
+uiMaxTracks	[Nombre de pistes max.]
 
 // HASH_VALUE 19D9773EAEB8F72D
 // INDEX 1042
@@ -4182,7 +4182,7 @@ uiSoundSFXVolume	[Volume SFX]
 
 // HASH_VALUE E8A9FF6969D7AA7F
 // INDEX 1044
-uiSoundGameMusicVolume	[Volume Musique]
+uiSoundGameMusicVolume	[Volume de la musique]
 
 // HASH_VALUE E48970A26427ACA4
 // INDEX 1045
@@ -4194,123 +4194,123 @@ uiSoundVolume	[Volume]
 
 // HASH_VALUE 4494F4344494F434
 // INDEX 1047
-uimGcmMove	[DEPLACER]
+uimGcmMove	[Déplacement automatique]
 
 // HASH_VALUE D0C20C3DC3CF3313
 // INDEX 1048
-uimGcmStopMove	[ARRETER DEPLACER]
+uimGcmStopMove	[Arrêt du déplacement automatique]
 
 // HASH_VALUE 4810145048101450
 // INDEX 1049
-uimGcmTalk	[PARLER]
+uimGcmTalk	[Parler]
 
 // HASH_VALUE 50D4543850D45438
 // INDEX 1050
-uimGcmNews	[INFOS]
+uimGcmNews	[Infos]
 
 // HASH_VALUE CF3204424E33CC40
 // INDEX 1051
-uimGcmUse	[UTILISER]
+uimGcmUse	[Utiliser]
 
 // HASH_VALUE 5490943054909430
 // INDEX 1052
-uimGcmLift	[SOULEVER]
+uimGcmLift	[Soulever]
 
 // HASH_VALUE 48D0F43048D0F430
 // INDEX 1053
-uimGcmLook	[REGARDER]
+uimGcmLook	[Regarder]
 
 // HASH_VALUE 87D2D4194CA1B01B
 // INDEX 1054
-uimGcmAttack	[ATTAQUER]
+uimGcmAttack	[Attaquer]
 
 // HASH_VALUE 47F0D326C6BF74FA
 // INDEX 1055
-uimGcmDuel	[ENGAGER LE DUEL]
+uimGcmDuel	[Engager le duel]
 
 // HASH_VALUE 4160A40AB630D80D
 // INDEX 1056
-uimGcmUnDuel	[ABANDONNER LE DUEL]
+uimGcmUnDuel	[Abandonner le duel]
 
 // HASH_VALUE 85ECC827473C942A
 // INDEX 1057
-uimGcmPvpChallenge	[ENGAGER LE DEFI PVP]
+uimGcmPvpChallenge	[Engager le défi PVP]
 
 // HASH_VALUE FFF1882B7F81A4EC
 // INDEX 1058
-uimGcmUnPvpChanllenge	[ABANDONNER LE DEFI PVP]
+uimGcmUnPvpChanllenge	[Abandonner le défi PVP]
 
 // HASH_VALUE 0CCFD42703919807
 // INDEX 1059
-uimGcmInvit	[INVITATION EQUIPE]
+uimGcmInvit	[Invitation équipe]
 
 // HASH_VALUE 0A014F288A017A25
 // INDEX 1060
-uimGcmGuildInvit	[INVITATION GUILDE]
+uimGcmGuildInvit	[Invitation guilde]
 
 // HASH_VALUE 54D0F43054D0F430
 // INDEX 1061
-uimGcmLoot	[PRELEVER]
+uimGcmLoot	[Prélever]
 
 // HASH_VALUE CF13BC318B02C434
 // INDEX 1062
-uimGcmHarvest	[TONTE]
+uimGcmHarvest	[Récolter]
 
 // HASH_VALUE C402903B43237001
 // INDEX 1063
-uimGcmExtractRM	[EXTRAIRE LES MATIERES PREMIERES]
+uimGcmExtractRM	[Extraire les matières premières]
 
 // HASH_VALUE 8760841B05C08C22
 // INDEX 1064
-uimGcmDigging	[EXTRACTION]
+uimGcmDigging	[Extraction]
 
 // HASH_VALUE 08D2942F0B42C82D
 // INDEX 1065
-uimGcmHarvesting	[TONTE]
+uimGcmHarvesting	[Récolte]
 
 // HASH_VALUE C7F28C2CC7D18436
 // INDEX 1066
-uimGcmDiving	[PLONGEON]
+uimGcmDiving	[Plongeon]
 
 // HASH_VALUE C831B82AC9A19424
 // INDEX 1067
-uimGcmFishing	[PECHE]
+uimGcmFishing	[Pêche]
 
 // HASH_VALUE 0C32AC458C93D034
 // INDEX 1068
-uimGcmQuartering	[DEPECAGE]
+uimGcmQuartering	[Dépeçage]
 
 // HASH_VALUE 48D0841444D0E404
 // INDEX 1069
-uimGcmExchange	[ECHANGER]
+uimGcmExchange	[Échanger]
 
 // HASH_VALUE D001183E0E62FC44
 // INDEX 1070
-uimGcmMount	[MONTER]
+uimGcmMount	[Monter]
 
 // HASH_VALUE 8861681185C0B82F
 // INDEX 1071
-uimGcmDisengage	[ROMPRE ENGAGEMENT]
+uimGcmDisengage	[Rompre l'engagement]
 
 // HASH_VALUE 10D2D424BEE04712
 // INDEX 1072
-uimGcmQuitTeam	[QUITTER L'EQUIPE]
+uimGcmQuitTeam	[Quitter l'équipe]
 
 // HASH_VALUE CDC2A8128D00D406
 // INDEX 1073
-uimGcmQuitGuild	[QUITTER LA GUILDE]
+uimGcmQuitGuild	[Quitter la guilde]
 
 // HASH_VALUE 4C90E4244C90E424
 // INDEX 1074
-uimGcmInfo	[INFOS]
+uimGcmInfo	[Infos]
 
 // HASH_VALUE 8A70A0F8032FFC36
 // INDEX 1075
-uimFollowMe	[SUIVEZ MOI]
+uimFollowMe	[Suis-moi !]
 
 // HASH_VALUE 70D8444C70D8444C
 // INDEX 1076
-uimGcmStop	[Stop]
+uimGcmStop	[Stop !]
 
 // HASH_VALUE 6458241864582418
 // INDEX 1077
@@ -4322,11 +4322,11 @@ uimGcmEnterStable	[Entrer dans l'étable]
 
 // HASH_VALUE EDC82852A5045446
 // INDEX 1079
-uiQuitGuild	[Quitter la Guilde]
+uiQuitGuild	[Quitter la guilde]
 
 // HASH_VALUE D6347B5FD694A310
 // INDEX 1080
-uiGuildInfoTitle	[Icône et Nom]
+uiGuildInfoTitle	[Icône et nom]
 
 // HASH_VALUE A58BA0A9ED19FCB6
 // INDEX 1081
@@ -4342,7 +4342,7 @@ uiGuildInfoEff	[Membres]
 
 // HASH_VALUE 59BA788624C3D244
 // INDEX 1084
-uiGuildInfoHead	[Quartier Général> ]
+uiGuildInfoHead	[Quartier général> ]
 
 // HASH_VALUE 289714776057E07A
 // INDEX 1085
@@ -4354,7 +4354,7 @@ uiGuildInfoFame	[Renommée> ]
 
 // HASH_VALUE 18DA0493637139E2
 // INDEX 1087
-uiGuildInfoScore	[Points de Guilde> ]
+uiGuildInfoScore	[Points de guilde> ]
 
 // HASH_VALUE 8965A2705D78E370
 // INDEX 1088
@@ -4362,7 +4362,7 @@ uiGuildInfoCharge	[Avant-postes> ]
 
 // HASH_VALUE B1E6AFB125E5346C
 // INDEX 1089
-uiGuildViewOutposts	[Voir Avant-postes]
+uiGuildViewOutposts	[Voir avant-postes]
 
 // HASH_VALUE 6498F4386498F438
 // INDEX 1090
@@ -4370,31 +4370,31 @@ uiGuildInfoCharge2	[Aucun]
 
 // HASH_VALUE 9FC40497988823B1
 // INDEX 1091
-uiGuildChargeState	[Sous Contrôle]
+uiGuildChargeState	[Sous contrôle]
 
 // HASH_VALUE 4A42C82AC7808C2E
 // INDEX 1092
-uiGuildInfoBuilding	[BATIMENTS]
+uiGuildInfoBuilding	[Bâtiments]
 
 // HASH_VALUE 8621C0330B42842C
 // INDEX 1093
-uiBuildingType1	[ETABLE]
+uiBuildingType1	[Étable]
 
 // HASH_VALUE 0B10E0160C70AC16
 // INDEX 1094
-uiBuildingType2	[GRANGE]
+uiBuildingType2	[Grange]
 
 // HASH_VALUE CAD1F82ECA12E831
 // INDEX 1095
-uiBuildingType3	[APPARTEMENT]
+uiBuildingType3	[Appartement]
 
 // HASH_VALUE 389174147021A819
 // INDEX 1096
-uiBuildingType4	[DISCOTHEQUE]
+uiBuildingType4	[Discothèque]
 
 // HASH_VALUE 0DA2F4374E83A83C
 // INDEX 1097
-uiBuildingType5	[BAR]
+uiBuildingType5	[Bar]
 
 // HASH_VALUE F278709FE5C880A2
 // INDEX 1098
@@ -4402,15 +4402,15 @@ uiEmptyBuilding	[Vide]
 
 // HASH_VALUE 9A87643DAF65D3BA
 // INDEX 1099
-uiBuidingState1	[En Progrès]
+uiBuidingState1	[En cours de construction]
 
 // HASH_VALUE EBD714876257207B
 // INDEX 1100
-uiBuidingState2	[Construire]
+uiBuidingState2	[Construit]
 
 // HASH_VALUE 497168218731E037
 // INDEX 1101
-uiGuildMembers	[MEMBRES]
+uiGuildMembers	[Membres]
 
 // HASH_VALUE A8882C8D23B73899
 // INDEX 1102
@@ -4426,31 +4426,31 @@ uiGuildMemberOnline	[En ligne]
 
 // HASH_VALUE 7670DC0684E11A41
 // INDEX 1105
-uimGuildLeader	[METTRE AU RANG DE CHEF]
+uimGuildLeader	[Promouvoir chef]
 
 // HASH_VALUE A9E2B8E64A903C35
 // INDEX 1106
-uimGuildHighOfficer	[METTRE AU RANG D'OFFICIER SUPERIEUR]
+uimGuildHighOfficer	[Nommer officier supérieur]
 
 // HASH_VALUE EC12B4F78B4CAC3A
 // INDEX 1107
-uimGuildOfficer	[METTRE AU RANG D'OFFICIER]
+uimGuildOfficer	[Nommer officier]
 
 // HASH_VALUE F492D4E84EB1E741
 // INDEX 1108
-uimGuildRecruiter	[METTRE AU RANG DE RECRUTEUR]
+uimGuildRecruiter	[Nommer recruteur]
 
 // HASH_VALUE 7670DC0607411A37
 // INDEX 1109
-uimGuildBearer	[METTRE AU RANG DE PORTEUR]
+uimGuildBearer	[Titulariser]
 
 // HASH_VALUE 7670DC0603B11A42
 // INDEX 1110
-uimGuildMember	[METTRE AU RANG DE MEMBRE]
+uimGuildMember	[Nommer membre]
 
 // HASH_VALUE 872F7C1DFEE0C0F3
 // INDEX 1111
-uimGuildKick	[CHASSER LE MEMBRE]
+uimGuildKick	[Exclure de la guilde]
 
 // HASH_VALUE 2746845E67F4B877
 // INDEX 1112
@@ -4458,7 +4458,7 @@ uiGuildLeader	[Chef]
 
 // HASH_VALUE 69A81419E898ACF1
 // INDEX 1113
-uiGuildHighOfficer	[Officier Supérieur]
+uiGuildHighOfficer	[Officier supérieur]
 
 // HASH_VALUE 278864845FE73489
 // INDEX 1114
@@ -4470,7 +4470,7 @@ uiGuildRecruiter	[Recruteur]
 
 // HASH_VALUE 2DA6BC4AEAB4F06D
 // INDEX 1116
-uiGuildBearer	[Porteur]
+uiGuildBearer	[Titulaire]
 
 // HASH_VALUE 25D67C6CE6D4B084
 // INDEX 1117
@@ -4498,7 +4498,7 @@ uiBuildingWorkshop	[Atelier]
 
 // HASH_VALUE 66BAB8AEE9EABC9B
 // INDEX 1123
-uiBuildingStabe	[Etable]
+uiBuildingStabe	[Étable]
 
 // HASH_VALUE 6C1894CC6C1894CC
 // INDEX 1124
@@ -4530,7 +4530,7 @@ uiBuildingGuardTower	[Tour de garde]
 
 // HASH_VALUE 29C85BA36794885A
 // INDEX 1131
-uiBuildingClaimsFlag	[Drapeau de possession]
+uiBuildingClaimsFlag	[Drapeau du propriétaire]
 
 // HASH_VALUE EDCA38595A89E4BD
 // INDEX 1132
@@ -4542,7 +4542,7 @@ uiBuildingTradingPost	[Poste d'échange]
 
 // HASH_VALUE A93988BDA6EAACB9
 // INDEX 1134
-uiBuildingSchool	[Ecole]
+uiBuildingSchool	[École]
 
 // HASH_VALUE E715B060EC6853BE
 // INDEX 1135
@@ -4558,23 +4558,23 @@ uiBuildingState1	[Construit]
 
 // HASH_VALUE 92E43C49D3A4384E
 // INDEX 1138
-uittPutMoney	[DONNER]
+uittPutMoney	[Donner]
 
 // HASH_VALUE 085298278881D425
 // INDEX 1139
-uittGetMoney	[PRENDRE]
+uittGetMoney	[Prendre]
 
 // HASH_VALUE FE51F742BE8F073C
 // INDEX 1140
-uiMoneyFromGuild	[PRENDRE L'ARGENT DE LA GUILDE]
+uiMoneyFromGuild	[Prendre des dappers dans le coffre de guilde]
 
 // HASH_VALUE 888FF822C3018E11
 // INDEX 1141
-uiMoneyToGuild	[DONNER L'ARGENT A LA GUILDE]
+uiMoneyToGuild	[Mettre des dappers dans le coffre de guilde]
 
 // HASH_VALUE CD81B7290D72123C
 // INDEX 1142
-uiOutpostManagerTitle	[AVANT-POSTES]
+uiOutpostManagerTitle	[Avant-postes]
 
 // HASH_VALUE 2ECA178D6F11EF48
 // INDEX 1143
@@ -4582,7 +4582,7 @@ uiOutpostTitleNameOwned	[Avant-postes détenus]
 
 // HASH_VALUE 7458441474584414
 // INDEX 1144
-uiOutpostTitleStatus	[Etat]
+uiOutpostTitleStatus	[État]
 
 // HASH_VALUE 7858244078582440
 // INDEX 1145
@@ -4606,105 +4606,106 @@ uiOutpostPeace	[Paix]
 
 // HASH_VALUE 2C59A808B9105132
 // INDEX 1150
-uiOutpostWarDeclaration	[Guerre Déclarée]
+uiOutpostWarDeclaration	[Guerre déclarée]
 
 // HASH_VALUE A8FA446AC5C2D0C8
 // INDEX 1151
-uiOutpostAttackBefore	[Attente Attaque]
+uiOutpostAttackBefore	[Attente d'attaque]
 
 // HASH_VALUE BA86477ED6AA8C96
 // INDEX 1152
-uiOutpostAttackRound	[Période d'Attaque !]
+uiOutpostAttackRound	[Période d'attaque !]
 
 // HASH_VALUE 0354A8121D68F9BE
 // INDEX 1153
-uiOutpostAttackAfter	[Après Attaque]
+uiOutpostAttackAfter	[Après attaque]
 
 // HASH_VALUE E859E2E286C2C8C3
 // INDEX 1154
-uiOutpostDefenseBefore	[Attente Défense]
+uiOutpostDefenseBefore	[Attente de défense]
 
 // HASH_VALUE 983D668BF88673A6
 // INDEX 1155
-uiOutpostDefenseRound	[Période de Défense !]
+uiOutpostDefenseRound	[Période de défense !]
 
 // HASH_VALUE 6CFCF0264AD844B4
 // INDEX 1156
-uiOutpostDefenseAfter	[Attente Résultat]
+uiOutpostDefenseAfter	[Attente du résultat]
 
 // HASH_VALUE 5B3E9C27AC85A003
 // INDEX 1157
 uittOutpostPeace	[@{6F6F}Paix@{FFFF}\n
-	L'avant-poste n'est contesté par aucune Guilde.]
+	L'avant-poste n'est contesté par aucune guilde.]
 
 // HASH_VALUE FC6A07DFD06A9822
 // INDEX 1158
-uittOutpostWarDeclaration	[@{6F6F}Déclaration de Guerre@{FFFF}\n
-	Une guilde ennemie a déclaré la guerre. La Guilde défendant l'avant-poste a environ un jour pour changer sa @{6F6F}Période de Défense@{FFFF} si elle le désire.]
+uittOutpostWarDeclaration	[@{6F6F}Déclaration de guerre@{FFFF}\n
+	Une guilde ennemie a déclaré la guerre. La guilde défendant l'avant-poste a environ un jour pour changer sa @{6F6F}période de défense@{FFFF} si elle le désire.]
 
 // HASH_VALUE 0D666EA573077ABB
 // INDEX 1159
-uittOutpostWarDeclarationMyGuildAttack	[@{6F6F}Déclaration de Guerre@{FFFF}\n
-	Votre guilde a déclaré la guerre. La Guilde défendant l'avant-poste a environ un jour pour changer sa @{6F6F}Période de Défense@{FFFF} si elle le désire.]
+uittOutpostWarDeclarationMyGuildAttack	[@{6F6F}Déclaration de guerre@{FFFF}\n
+	Votre guilde a déclaré la guerre. La guilde défendant l'avant-poste a environ un jour pour changer sa @{6F6F}période de défense@{FFFF} si elle le désire.]
 
 // HASH_VALUE ED84ECB4E644E644
 // INDEX 1160
-uittOutpostWarDeclarationMyGuildDefend	[@{6F6F}Déclaration de Guerre@{FFFF}\n
-	Une guilde ennemie a déclaré la guerre. Votre guilde a environ un jour pour changer sa @{6F6F}Période de Défense@{FFFF} si elle le désire.]
+uittOutpostWarDeclarationMyGuildDefend	[@{6F6F}Déclaration de guerre@{FFFF}\n
+	Une guilde ennemie a déclaré la guerre. Votre guilde a environ un jour pour changer sa @{6F6F}période de défense@{FFFF} si elle le désire.]
 
 // HASH_VALUE 28F456CCD85D244C
 // INDEX 1161
-uittOutpostAttackBefore	[@{6F6F}Attente Attaque@{FFFF}\n
-	La guerre a commencé ! Les personnages-joueurs peuvent déja se battre sur l'avant-poste mais les escouades de l'avant-poste n'apparaîtront que pendant la @{6F6F}Période d'Attaque@{FFFF} choisie par l'attaquant.\n
-	Pendant cette période, les attaquants essaieront alors de dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs.]
+uittOutpostAttackBefore	[@{6F6F}Attente d'attaque@{FFFF}\n
+	La guerre a commencé ! Les personnages-joueurs peuvent déja se battre sur l'avant-poste mais les escouades de l'avant-poste n'apparaîtront que pendant la @{6F6F}période d'attaque@{FFFF} choisie par l'attaquant.\n
+
+	Pendant cette période, les attaquants essaieront alors de dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs.]
 
 // HASH_VALUE 8D5E59E3DBC77439
 // INDEX 1162
-uittOutpostAttackRound	[@{6F6F}Période d'Attaque !@{FFFF}\n
+uittOutpostAttackRound	[@{6F6F}Période d'attaque !@{FFFF}\n
 	Les attaquants doivent atteindre un @{6F6F}Niveau de Round@{FFFF} le plus haut possible.\n
-	Ils doivent au moins dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant le temps imparti.\n
-	À chaque round gagné, le @{6F6F}Niveau de Round@{FFFF} augmentera ainsi que le nombre d'escouades à éliminer.\n
-	À chaque round perdu, le @{6F6F}Niveau de Round@{FFFF} diminuera ainsi que le nombre d'escouades à éliminer.\n
+	Ils doivent au moins dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs pendant le temps imparti.\n
+	À chaque round gagné, le @{6F6F}niveau de round@{FFFF} augmentera ainsi que le nombre d'escouades à éliminer.\n
+	À chaque round perdu, le @{6F6F}niveau de round@{FFFF} diminuera ainsi que le nombre d'escouades à éliminer.\n
 	]
 
 // HASH_VALUE C3CD3092CDC57722
 // INDEX 1163
-uittOutpostAttackAfterWin	[@{6F6F}Après Attaque@{FFFF}\n
-	La guerre continue!\n
-	Les attaquants ont réussi à dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}Période d'Attaque@{FFFF}.\n
+uittOutpostAttackAfterWin	[@{6F6F}Après attaque@{FFFF}\n
+	La guerre continue !\n
+	Les attaquants ont réussi à dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}période d'attaque@{FFFF}.\n
 	Il faut attendre la fin de la phase d'attaque pour que les attaquants conquièrent l'avant-poste.\n
 	]
 
 // HASH_VALUE 3FD04DD028A7D053
 // INDEX 1164
-uittOutpostAttackAfterLoose	[@{6F6F}Après Attaque@{FFFF}\n
-	Les attaquants n'ont pas réussi à dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}Période d'Attaque@{FFFF}.\n
+uittOutpostAttackAfterLoose	[@{6F6F}Après attaque@{FFFF}\n
+	Les attaquants n'ont pas réussi à dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}période d'attaque@{FFFF}.\n
 	Ils ont donc perdu.\n
 	L'avant-poste sera complètement libéré à la fin de la phase d'attaque.\n
 	]
 
 // HASH_VALUE FE5CECB92CB02670
 // INDEX 1165
-uittOutpostDefenseBefore	[@{6F6F}Attente Défense@{FFFF}\n
-	La guerre continue!\n
-	Les attaquants ont réussi à dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}Période d'Attaque@{FFFF}.\n
+uittOutpostDefenseBefore	[@{6F6F}Attente défense@{FFFF}\n
+	La guerre continue !\n
+	Les attaquants ont réussi à dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}période d'attaque@{FFFF}.\n
 	Ils ont temporairement pris le contrôle des escouades de l'avant-poste.\n
-	Ces escouades n'apparaîtront que pendant la @{6F6F}Période de Défense@{FFFF}.\n
-	Pendant cette période, les défenseurs essaieront alors d'atteindre le @{6F6F}Niveau de Round@{FFFF} maximum fixé par les attaquants.]
+	Ces escouades n'apparaîtront que pendant la @{6F6F}période de défense@{FFFF}.\n
+	Pendant cette période, les défenseurs essaieront alors d'atteindre le @{6F6F}niveau de round@{FFFF} maximum fixé par les attaquants.]
 
 // HASH_VALUE 37F579E582C09905
 // INDEX 1166
-uittOutpostDefenseRound	[@{6F6F}Période de Défense!@{FFFF}\n
-	Les défenseurs doivent atteindre le @{6F6F}Niveau de Round@{FFFF} fixé par les attaquants lors de leur @{6F6F}Période d'Attaque@{FFFF}.\n
-	S'ils n'atteignent pas ce niveau, la Guilde en défense perdra l'avant-poste.\n
-	À chaque round gagné, le @{6F6F}Niveau de Round@{FFFF} augmentera ainsi que le nombre d'escouades à éliminer.\n
-	À chaque round perdu, le @{6F6F}Niveau de Round@{FFFF} diminuera ainsi que le nombre d'escouades à éliminer.\n
+uittOutpostDefenseRound	[@{6F6F}Période de défense !@{FFFF}\n
+	Les défenseurs doivent atteindre le @{6F6F}niveau de round@{FFFF} fixé par les attaquants lors de leur @{6F6F}période d'attaque@{FFFF}.\n
+	S'ils n'atteignent pas ce niveau, la guilde en défense perdra l'avant-poste.\n
+	À chaque round gagné, le @{6F6F}niveau de round@{FFFF} augmentera ainsi que le nombre d'escouades à éliminer.\n
+	À chaque round perdu, le @{6F6F}niveau de round@{FFFF} diminuera ainsi que le nombre d'escouades à éliminer.\n
 	]
 
 // HASH_VALUE 327473E0EACEF1A3
 // INDEX 1167
-uittOutpostDefenseAfter	[@{6F6F}Attente Résultat@{FFFF}\n
-	Il faut attendre la fin des vingt-quatre heures de la phase de Défense pour connaître le résultat du vainqueur.]
+uittOutpostDefenseAfter	[@{6F6F}Attente du résultat@{FFFF}\n
+	Il faut attendre la fin des vingt-quatre heures de la phase de défense pour connaître le résultat du vainqueur.]
 
 // HASH_VALUE 42E75F8E29188B60
 // INDEX 1168
@@ -4721,7 +4722,7 @@ uiOutpostLevel	[Niveau : ]
 // HASH_VALUE 6EFBF746AB75B469
 // INDEX 1171
 uittOutpostLevel	[Niveau de l'avant-poste\n
-	Plus le Niveau est haut, plus les escouades sont résistantes, mais plus les bonus générés sont de haut Niveau.]
+	Plus le niveau est élevé, plus les escouades sont fortes et plus les matières produites sont de haut niveau.]
 
 // HASH_VALUE 197AF48C25ECB435
 // INDEX 1172
@@ -4729,11 +4730,11 @@ uiOutpostOwner	[Propriétaire : ]
 
 // HASH_VALUE 2F68C76D413DA758
 // INDEX 1173
-uittOutpostOwner	[Propriétaire de l'avant-poste.]
+uittOutpostOwner	[Propriétaire de l'avant-poste]
 
 // HASH_VALUE 4B48AC7CBB368441
 // INDEX 1174
-uiOutpostTribe	[L'avant-poste est détenu par un groupe de Maraudeurs.]
+uiOutpostTribe	[L'avant-poste est détenu par un clan de Maraudeurs.]
 
 // HASH_VALUE 5347F7679616FB97
 // INDEX 1175
@@ -4741,19 +4742,19 @@ uiOutpostAttacker	[Attaquant : ]
 
 // HASH_VALUE A29C60CD69C6386E
 // INDEX 1176
-uittOutpostAttacker	[Guilde qui attaque l'avant-poste.]
+uittOutpostAttacker	[Guilde attaquant l'avant-poste]
 
 // HASH_VALUE BB02A78EE3B34EBF
 // INDEX 1177
-uiOutpostStatus	[Etat : ]
+uiOutpostStatus	[État : ]
 
 // HASH_VALUE D68AB8507120BC37
 // INDEX 1178
-uittOutpostStatus	[Etat actuel de l'avant-poste]
+uittOutpostStatus	[État actuel de l'avant-poste]
 
 // HASH_VALUE 458F04DDFF6A6EAF
 // INDEX 1179
-uiOutpostCrash	[Une extinction inopinée du serveur pendant une Période d'Attaque ou de Défense a annulé la guerre d'avant-poste en cours.\n
+uiOutpostCrash	[Une extinction inopinée du serveur pendant une période d'attaque ou de défense a annulé la guerre d'avant-poste en cours.\n
 	Toutes les dépenses faites pendant cette guerre ont été remboursées aux guildes (coût de déclaration, achat des escouades, etc.)]
 
 // HASH_VALUE 8A709A3EBFB0A4E9
@@ -4762,48 +4763,48 @@ uiOutpostWarStatus	[STATUT DE LA GUERRE]
 
 // HASH_VALUE 6E5A7482C4EE00B2
 // INDEX 1181
-uiOutpostLvlThreshold	[Seuil Minimum : ]
+uiOutpostLvlThreshold	[Seuil minimum : ]
 
 // HASH_VALUE 6296E2E90728FFF2
 // INDEX 1182
-uittOutpostLvlThreshold	[@{6F6F}Seuil Minimum@{FFFF}\n
-	C'est le @{6F6F}Niveau de Round@{FFFF} que les attaquants doivent dépasser lors de leur @{6F6F}Période d'Attaque@{FFFF}.\n
-	Ce seuil est calculé en fonction du plus haut @{6F6F}Niveau de Round@{FFFF} atteint lors de la @{6F6F}Période d'Attaque@{FFFF} de la dernière conquête d'un avant-poste.\n
+uittOutpostLvlThreshold	[@{6F6F}Seuil minimum@{FFFF}\n
+	C'est le @{6F6F}Niveau de round@{FFFF} que les attaquants doivent dépasser lors de leur @{6F6F}période d'attaque@{FFFF}.\n
+	Ce seuil est calculé en fonction du plus haut @{6F6F}niveau de round@{FFFF} atteint lors de la @{6F6F}Période d'Attaque@{FFFF} de la dernière conquête d'un avant-poste.\n
 	Par la suite, ce seuil décroît régulièrement et assez lentement.]
 
 // HASH_VALUE 4792246493E57856
 // INDEX 1183
-uiOutpostLvlMaxAttacker	[Niveau Max. des Attaquants : ]
+uiOutpostLvlMaxAttacker	[Niveau max. des attaquants : ]
 
 // HASH_VALUE 384FE58FF1A62CA0
 // INDEX 1184
-uittOutpostLvlMaxAttacker	[@{6F6F}Niveau de Round@{FFFF} maximum Atteint par les attaquants.\n
-	C'est le @{6F6F}Niveau de Round@{FFFF} maximum que les attaquants ont pu valider pendant leur période d'Attaque.\n
+uittOutpostLvlMaxAttacker	[@{6F6F}Niveau de round@{FFFF} maximum atteint par les attaquants.\n
+	C'est le @{6F6F}niveau de round@{FFFF} maximum que les attaquants ont pu valider pendant leur période d'attaque.\n
 	]
 
 // HASH_VALUE 48B1FA6555257053
 // INDEX 1185
-uiOutpostLvlMaxDefender	[Niveau Max. des Défenseurs : ]
+uiOutpostLvlMaxDefender	[Niveau max. des Défenseurs : ]
 
 // HASH_VALUE A9A5CF968DD5501D
 // INDEX 1186
-uittOutpostLvlMaxDefender	[@{6F6F}Niveau de Round@{FFFF} maximum Atteint par les défenseurs.\n
-	C'est le @{6F6F}Niveau de Round@{FFFF} maximum que les défenseurs ont pu valider pendant leur période de Défense.\n
+uittOutpostLvlMaxDefender	[@{6F6F}Niveau de round@{FFFF} maximum atteint par les défenseurs.\n
+	C'est le @{6F6F}niveau de round@{FFFF} maximum que les défenseurs ont pu valider pendant leur période de défense.\n
 	]
 
 // HASH_VALUE 2AC7623086A5DCAD
 // INDEX 1187
-uiOutpostLvlCurrent	[Niveau de Round Courant : ]
+uiOutpostLvlCurrent	[Niveau de round courant : ]
 
 // HASH_VALUE CE36AF95996F110D
 // INDEX 1188
-uittOutpostLvlCurrent	[@{6F6F}Niveau de Round@{FFFF} courant.\n
-	Pendant une période d'attaque ou de défense, C'est le @{6F6F}Niveau de Round@{FFFF} courant atteint par le camp qui attaque les escouades.\n
+uittOutpostLvlCurrent	[@{6F6F}Niveau de round@{FFFF} courant.\n
+	Pendant une période d'attaque ou de défense, C'est le @{6F6F}Niveau de round@{FFFF} courant atteint par le camp qui attaque les escouades.\n
 	]
 
 // HASH_VALUE 6CDA0C8EC6AE00B0
 // INDEX 1189
-uiOutpostRoundCur	[Round Courant : ]
+uiOutpostRoundCur	[Round courant : ]
 
 // HASH_VALUE 280C5A64E033A6AE
 // INDEX 1190
@@ -4817,43 +4818,43 @@ uiOutpostWarSchedule	[HORAIRES DE LA GUERRE]
 
 // HASH_VALUE 50528C8047F81492
 // INDEX 1192
-uiOutpostDefHour	[Horaire de Défense : ]
+uiOutpostDefHour	[Horaire de défense : ]
 
 // HASH_VALUE F3E48BB10FDA1262
 // INDEX 1193
-uittOutpostDefHour	[@{6F6F}Horaire de Défense@{FFFF}\n
-	Horaire auquel la guilde veut défendre son avant-poste (Horaire @{6F6F}LOCAL@{FFFF} au fuseau horaire sélectionné).]
+uittOutpostDefHour	[@{6F6F}Horaire de défense@{FFFF}\n
+	Horaire auquel la guilde veut défendre son avant-poste (Horaire @{6F6F}LOCAL@{FFFF} du fuseau horaire sélectionné).]
 
 // HASH_VALUE 326075E495374C2E
 // INDEX 1194
-uittOutpostDefHourError	[@{6F6F}Horaire de Défense@{FFFF}\n
-	Horaire à laquelle la guilde veut défendre sont avant-poste (Horaire @{6F6F}LOCAL@{FFFF} au fuseau horaire sélectionné).\n
+uittOutpostDefHourError	[@{6F6F}Horaire de défense@{FFFF}\n
+	Horaire à laquelle la guilde veut défendre sont avant-poste (Horaire @{6F6F}LOCAL@{FFFF} du fuseau horaire sélectionné).\n
 	@{F80F}L'horaire sélectionné n'a pu être appliqué car la plage horaire doit rentrer en entier dans la phase de défense. Par conséquent l'heure de défense a été avancée.]
 
 // HASH_VALUE A0B52418EF5A9327
 // INDEX 1195
 uittOutpostDefHourCannotEdit	[Vous ne pouvez modifier la période de défense que si:\n
 	- vous êtes un officier de la guilde qui défend l'avant-poste\n
-	- l'état de l'avant-poste est en @{6F6F}Paix@{FFFF}, ou en @{6F6F}Déclaration de guerre@{FFFF}\n
+	- l'état de l'avant-poste est en @{6F6F}paix@{FFFF}, ou en @{6F6F}déclaration de guerre@{FFFF}\n
 	]
 
 // HASH_VALUE 52718E9047A0FC98
 // INDEX 1196
-uiOutpostDefPeriod	[Période de Défense : ]
+uiOutpostDefPeriod	[Période de défense : ]
 
 // HASH_VALUE A173BD1DA14A45A2
 // INDEX 1197
-uittOutpostDefPeriod	[@{6F6F}Période de Défense@{FFFF}\n
-	Période réelle à laquelle la guilde va défendre son avant-poste (Date @{6F6F}LOCALE@{FFFF} au fuseau horaire sélectionné).]
+uittOutpostDefPeriod	[@{6F6F}Période de défense@{FFFF}\n
+	Période réelle à laquelle la guilde va défendre son avant-poste (Date @{6F6F}LOCALE@{FFFF} du fuseau horaire sélectionné).]
 
 // HASH_VALUE 87345488DCA85997
 // INDEX 1198
-uiOutpostAttPeriod	[Période d'Attaque : ]
+uiOutpostAttPeriod	[Période d'attaque : ]
 
 // HASH_VALUE 479AFD7F21DC723E
 // INDEX 1199
-uittOutpostAttPeriod	[@{6F6F}Période d'Attaque@{FFFF}\n
-	Période réelle à laquelle la guilde attaquante va attaquer cet avant-poste (Date @{6F6F}LOCALE@{FFFF} au fuseau horaire sélectionné).]
+uittOutpostAttPeriod	[@{6F6F}Période d'attaque@{FFFF}\n
+	Période réelle à laquelle la guilde attaquante va attaquer cet avant-poste (Date @{6F6F}LOCALE@{FFFF} du fuseau horaire sélectionné).]
 
 // HASH_VALUE FC234C09E2729D59
 // INDEX 1200
@@ -4865,13 +4866,13 @@ uiOutpostPeriodEnded	[Attaque terminée]
 
 // HASH_VALUE E7CB741DB0B1B8A1
 // INDEX 1202
-uiOutpostTimeZone	[Fuseau Horaire : ]
+uiOutpostTimeZone	[Fuseau horaire : ]
 
 // HASH_VALUE 207810C3149695AB
 // INDEX 1203
 uittOutpostTimeZone	[Choisissez le fuseau horaire de votre pays pour un affichage correct des heures.\n
 	@{6F6F}Attention!@{FFFF} Il vous faut prendre en compte aussi l'heure d'été dans ce choix.\n
-	Cela s'applique aussi pour le @{6F6F}mode automatique@{FFFF}. Ainsi par exemple en France en heure d'été, le mode affiché sera GMT+2 (alors que la France est en GMT+1).]
+	Cela s'applique aussi pour le @{6F6F}mode automatique@{FFFF}. Ainsi par exemple en France en heure d'été, le mode affiché sera UTC+2 (alors que la France est en UTC+1).]
 
 // HASH_VALUE 7F8EA4FB11304F0C
 // INDEX 1204
@@ -4894,17 +4895,17 @@ uiOutpostWarCostDesc	[Déclarer la guerre à un avant-poste coûte de l'argent �
 
 // HASH_VALUE 8F52938208D44C1D
 // INDEX 1208
-uiOutpostAttHour	[Horaire d'Attaque : ]
+uiOutpostAttHour	[Horaire d'attaque : ]
 
 // HASH_VALUE D585578451CB3AFB
 // INDEX 1209
-uittOutpostAttHour	[@{6F6F}Horaire d'Attaque@{FFFF}\n
-	Horaire auquel la guilde attaquante veut attaquer cet avant-poste (Horaire @{6F6F}LOCAL@{FFFF} au fuseau horaire sélectionné).]
+uittOutpostAttHour	[@{6F6F}Horaire d'attaque@{FFFF}\n
+	Horaire auquel la guilde attaquante veut attaquer cet avant-poste (Horaire @{6F6F}LOCAL@{FFFF} du fuseau horaire sélectionné).]
 
 // HASH_VALUE 6AC86689D368D21B
 // INDEX 1210
-uittOutpostAttHourError	[@{6F6F}Horaire d' Attaque@{FFFF}\n
-	Horaire à laquelle la guilde veut attaquer sont avant-poste (Horaire @{6F6F}LOCAL@{FFFF} au fuseau horaire sélectionné).\n
+uittOutpostAttHourError	[@{6F6F}Horaire d'attaque@{FFFF}\n
+	Horaire à laquelle la guilde veut attaquer sont avant-poste (Horaire @{6F6F}LOCAL@{FFFF} du fuseau horaire sélectionné).\n
 	@{F80F}L'horaire sélectionné n'a pu être appliqué car la plage horaire doit rentrer en entier dans la phase d'attaque. Par conséquent l'heure d'attaque a été avancée.]
 
 // HASH_VALUE CD7124A26E55399A
@@ -4937,7 +4938,7 @@ uittOutpostInsertSquad	[Insérer l'escouade avant celle sélectionnée]
 
 // HASH_VALUE 264F33320E64B6AB
 // INDEX 1218
-uittOutpostSquadLvl	[Cette escouade n'apparaîtra qu'avec un @{6F6F}Niveau de Round@{FFFF} de @{6F6F}%lvl@{FFFF}]
+uittOutpostSquadLvl	[Cette escouade n'apparaîtra qu'avec un @{6F6F}niveau de round@{FFFF} de @{6F6F}%lvl@{FFFF}]
 
 // HASH_VALUE 5450441454504414
 // INDEX 1219
@@ -4949,7 +4950,7 @@ uitabOutpostSquads	[ESCOUADES]
 
 // HASH_VALUE 47B2AC374CA0C02B
 // INDEX 1221
-uitabOutpostBuildings	[BATIMENTS]
+uitabOutpostBuildings	[BÂTIMENTS]
 
 // HASH_VALUE 3F497A4006ECFD5A
 // INDEX 1222
@@ -4966,7 +4967,7 @@ uiOutpostSSquad	[ESCOUADES ACTIVES]
 // HASH_VALUE 0F3B4563845E6EFF
 // INDEX 1225
 uittOutpostSSquad	[Escouades sorties et défendant l'avant-poste.\n
-	Au total, le nombre d'escouades sorties dépend directement du @{6F6F}Niveau de Round@{FFFF}.\n
+	Au total, le nombre d'escouades sorties dépend directement du @{6F6F}niveau de round@{FFFF}.\n
 	]
 
 // HASH_VALUE 08110B32CC11D70D
@@ -4975,55 +4976,55 @@ uiOutpostTSquad	[ESCOUADES EN ATTENTE]
 
 // HASH_VALUE F1D1A88C0BDB046E
 // INDEX 1227
-uittOutpostTSquad	[Escouades prêtes à combattre et en attente pour le prochain Round.\n
-	Suivant le @{6F6F}Niveau de Round@{FFFF}, seules les 'X' premières sortiront.\n
+uittOutpostTSquad	[Escouades prêtes à combattre et en attente pour le prochain round.\n
+	Suivant le @{6F6F}niveau de round@{FFFF}, seules les 'X' premières sortiront.\n
 	]
 
 // HASH_VALUE DB499A35C8B08D6A
 // INDEX 1228
-uiOutpostSSquadStart	[Début du Round]
+uiOutpostSSquadStart	[Début du round]
 
 // HASH_VALUE B9DFD98B9078B369
 // INDEX 1229
-uittOutpostSSquadStart	[Escouades qui sont apparues dès le début du Round]
+uittOutpostSSquadStart	[Escouades qui sont apparues dès le début du round]
 
 // HASH_VALUE 5AD05478425A1CA0
 // INDEX 1230
-uiOutpostSSquadDuring	[Pendant le Round]
+uiOutpostSSquadDuring	[Pendant le round]
 
 // HASH_VALUE FE99BA6C4B31DDDE
 // INDEX 1231
-uittOutpostSSquadDuring	[Escouades qui apparaîtront une à une pendant le Round]
+uittOutpostSSquadDuring	[Escouades qui apparaîtront une à une pendant le round]
 
 // HASH_VALUE DB499A35C8B08D6A
 // INDEX 1232
-uiOutpostTSquadStart	[Début du Round]
+uiOutpostTSquadStart	[Début du round]
 
 // HASH_VALUE 96BEF85F8CB24D86
 // INDEX 1233
-uittOutpostTSquadStart	[Escouades qui apparaîtront dès le debut du Round]
+uittOutpostTSquadStart	[Escouades qui apparaîtront dès le début du round]
 
 // HASH_VALUE 5AD05478425A1CA0
 // INDEX 1234
-uiOutpostTSquadDuring	[Pendant le Round]
+uiOutpostTSquadDuring	[Pendant le round]
 
 // HASH_VALUE FE99BA6C4B31DDDE
 // INDEX 1235
-uittOutpostTSquadDuring	[Escouades qui apparaîtront une à une pendant le Round]
+uittOutpostTSquadDuring	[Escouades qui apparaîtront une à une pendant le round]
 
 // HASH_VALUE 9344AEB00A6F6FA1
 // INDEX 1236
 uiOutpostSquadEditDef	[Vous défendez cet avant-poste.\n
-	Pendant la @{6F6F}Période d'Attaque@{FFFF}, des escouades vont sortir pour défendre cet avant-poste.\n
+	Pendant la @{6F6F}période d'attaque@{FFFF}, des escouades vont sortir pour défendre cet avant-poste.\n
 	Dans cette fenêtre, vous pouvez voir les escouades sorties ainsi que changer les escouades qui sortiront.\n
-	Note: Seuls les Officiers Supérieurs et le Chef de Guilde peuvent éditer les escouades.]
+	Note: Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
 
 // HASH_VALUE C24385362A0BC5BD
 // INDEX 1237
 uiOutpostSquadEditAtt	[Vous attaquez cet avant-poste.\n
-	Pendant la @{6F6F}Période de Défense@{FFFF}, des escouades vont sortir pour contrer les défenseurs qui essaieront de récupérer cet avant-poste.\n
+	Pendant la @{6F6F}période de défense@{FFFF}, des escouades vont sortir pour contrer les défenseurs qui essaieront de récupérer cet avant-poste.\n
 	Dans cette fenêtre, vous pouvez voir les escouades sorties ainsi que changer les escouades qui sortiront.\n
-	Note: Seuls les Officiers Supérieurs et le Chef de Guilde peuvent éditer les escouades.]
+	Note: Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
 
 // HASH_VALUE 3F6F38EC4351C039
 // INDEX 1238
@@ -5034,9 +5035,9 @@ uiOutpostCapital	[CAPITAL DE GUERRE]
 uiOutpostCapitalDoc	[Les escouades que vous éditez ici ne coûtent pas immédiatement de l'argent à la guilde.\n
 	L'argent est dépensé seulement quand elles sortent pour un round.\n
 	Cependant si la guilde n'a plus assez d'argent pour payer la @{6F6F}sortie d'une escouade@{FFFF}, une escouade par défaut (beaucoup moins forte) sera utilisée.\n
-	De plus vous avez la possibilité @{6F6F}Par avant-poste@{FFFF} de limiter les dépenses des escouades, en changeant le @{6F6F}Capital@{FFFF} ci-dessous.\n
-	Chaque @{6F6F}sortie d'escouade@{FFFF} diminue à la fois l'argent de la guilde et le @{6F6F}Capital@{FFFF} de l'avant-poste (si possible).\n
-	Chaque @{6F6F}rentrée d'escouade@{FFFF} vivante (même partiellement) remonte d'autant l'argent de la guilde et le @{6F6F}Capital@{FFFF} de l'avant-poste.\n
+	De plus vous avez la possibilité @{6F6F}par avant-poste@{FFFF} de limiter les dépenses des escouades, en modifiant le @{6F6F}capital@{FFFF} ci-dessous.\n
+	Chaque @{6F6F}sortie d'escouade@{FFFF} diminue à la fois l'argent de la guilde et le @{6F6F}capital@{FFFF} de l'avant-poste (si possible).\n
+	Chaque @{6F6F}rentrée d'escouade@{FFFF} vivante (même partiellement) remonte d'autant l'argent de la guilde et le @{6F6F}capital@{FFFF} de l'avant-poste.\n
 	]
 
 // HASH_VALUE 9E53FA091EB9BCAE
@@ -5045,19 +5046,19 @@ uiOutpostCapitalHeader	[Capital : ]
 
 // HASH_VALUE B5F8EA99B9981482
 // INDEX 1241
-uiOutpostCapitalEditOK	[Cliquez sur ce bouton pour changer le @{6F6F}Capital@{FFFF} de guerre de l'avant-poste.]
+uiOutpostCapitalEditOK	[Cliquez sur ce bouton pour modifier le @{6F6F}capital@{FFFF} de guerre de l'avant-poste.]
 
 // HASH_VALUE 0906F15B3A481A8C
 // INDEX 1242
-uiOutpostCapitalEditKO	[Il faut être Chef de Guilde ou Officier Supérieur pour pouvoir changer le @{6F6F}Capital@{FFFF} de guerre de cet avant-poste.]
+uiOutpostCapitalEditKO	[Il faut être chef de guilde ou officier supérieur pour pouvoir modifier le @{6F6F}capital@{FFFF} de guerre de cet avant-poste.]
 
 // HASH_VALUE 4EFCD05556575B95
 // INDEX 1243
-uiOutpostChangeCapital	[Changer Le Capital]
+uiOutpostChangeCapital	[Modifier le capital]
 
 // HASH_VALUE 0B48E9436F6E2255
 // INDEX 1244
-uittPvpOutpostOutOfZone	[Vous participez à un PVP d'outpost.\n
+uittPvpOutpostOutOfZone	[Vous participez à une guerre d'avant-poste.\n
 	Vous êtes sortis de la zone, vous serez encore flaggué PVP pour un moment. Si vous faites l'une des actions suivantes, le timer redémarrera:\n
 	@{T4}- Soigner un allié.\n
 	@{T4}- Attaquer un ennemi.\n
@@ -5065,19 +5066,19 @@ uittPvpOutpostOutOfZone	[Vous participez à un PVP d'outpost.\n
 
 // HASH_VALUE 42D7C3705E707D9C
 // INDEX 1245
-uittPvpOutpostOn	[Vous participez à un PVP d'outpost.\n
-	La phase d'attaque ou de défense n'a pas encore commencé mais vous pouvez déja vous battre avec vos ennemis]
+uittPvpOutpostOn	[Vous participez à une guerre d'avant-poste.\n
+	La phase d'attaque ou de défense n'a pas encore commencé mais vous pouvez déjà combattre vos ennemis.]
 
 // HASH_VALUE CA559BEB9D015D55
 // INDEX 1246
-uittPvpOutpostInRound	[Vous participez à un PVP d'outpost.\n
+uittPvpOutpostInRound	[Vous participez à une guerre d'avant-poste.\n
 	Une phase de combat est en cours.\n
 	Le round courant est affiché dans l'icône.\n
 	Le temps avant la fin du round est affiché sous l'icône.]
 
 // HASH_VALUE 544777846044A88C
 // INDEX 1247
-uiOutpostJoinPVPProposalTitle	[PvP Avant-poste]
+uiOutpostJoinPVPProposalTitle	[PvP d'avant-poste]
 
 // HASH_VALUE F15D3DA357B124B7
 // INDEX 1248
@@ -5108,7 +5109,7 @@ uiOutpostJoinPVPDefHeader	[Défenseur :]
 
 // HASH_VALUE D4E792A162074EAE
 // INDEX 1254
-uiOutpostJoinPVPDefMarauder	[Groupe de Maraudeurs.]
+uiOutpostJoinPVPDefMarauder	[Clan maraudeurs.]
 
 // HASH_VALUE 898B73AF77FC7803
 // INDEX 1255
@@ -5116,11 +5117,11 @@ uiOutpostJoinPVPTimer	[@{FFFA}Vous serez automatiquement déclaré neutre dans @
 
 // HASH_VALUE EC140A4E5EB2BCBC
 // INDEX 1256
-uimGcmOutpostBanishPlayer	[Bannir Le Personnage-Joueur]
+uimGcmOutpostBanishPlayer	[Bannir le personnage-joueur]
 
 // HASH_VALUE F0B40A46D890F4A4
 // INDEX 1257
-uimGcmOutpostBanishGuild	[Bannir La Guilde]
+uimGcmOutpostBanishGuild	[Bannir la guilde]
 
 // HASH_VALUE C8DA6D580293191D
 // INDEX 1258
@@ -5168,11 +5169,11 @@ uittOutpostSS	[Escouades pouvant être recrutées]
 
 // HASH_VALUE E0C7459F9DC969A4
 // INDEX 1269
-uiSquadSpawnTitle	[SELECTION DE LA POSITION DE SORTIE DE L'ESCOUADE]
+uiSquadSpawnTitle	[Sélection de la position de sortie de l'escouade]
 
 // HASH_VALUE 3C02AC03C8AF103A
 // INDEX 1270
-uiOutpostSquadShopTitle	[RECRUTEMENT DE L'ESCOUADE]
+uiOutpostSquadShopTitle	[Recrutement de l'escouade]
 
 // HASH_VALUE E0F8448127A9A4BA
 // INDEX 1271
@@ -5184,7 +5185,7 @@ uiQConfirmGiveupOutpost	[Souhaitez-vous vraiment abandonner cet avant-poste ?]
 
 // HASH_VALUE D0509449F9E26B15
 // INDEX 1273
-uiRespawnMapTitle	[CARTE DE RESURRECTION]
+uiRespawnMapTitle	[Carte de résurrection]
 
 // HASH_VALUE CCC3A83ACD92F438
 // INDEX 1274
@@ -5200,7 +5201,7 @@ uiSquadSpawnPoint	[Position de sortie]
 
 // HASH_VALUE A627C0732B46848C
 // INDEX 1277
-uiStable	[Etable]
+uiStable	[Étable]
 
 // HASH_VALUE 68D8140868D81408
 // INDEX 1278
@@ -5208,15 +5209,15 @@ uittBack	[Retour]
 
 // HASH_VALUE 8B4068214CFD7036
 // INDEX 1279
-uiLinksTitle	[LIENS ACTIFS]
+uiLinksTitle	[Liens actifs]
 
 // HASH_VALUE 90A2E4398C92E83D
 // INDEX 1280
-uiLinksCosts	[COUTS]
+uiLinksCosts	[Coûts]
 
 // HASH_VALUE 8DF2E40F4E30100E
 // INDEX 1281
-uiStopLinkSpell	[ARRETER LE SORT]
+uiStopLinkSpell	[Arrêter le sort]
 
 // HASH_VALUE A9B9907EDF18248C
 // INDEX 1282
@@ -5224,11 +5225,11 @@ uiLinkInfo	[Détails]
 
 // HASH_VALUE EE1834D82CB0E2BA
 // INDEX 1283
-uiTIWaitLoot	[Pillage, attendre...]
+uiTIWaitLoot	[Pillage en cours...]
 
 // HASH_VALUE 9350F35271E64FC7
 // INDEX 1284
-uiTIWaitQuartering	[Dépeçage, attendre...]
+uiTIWaitQuartering	[Dépeçage en cours...]
 
 // HASH_VALUE AA28F306DC05B0A5
 // INDEX 1285
@@ -5244,7 +5245,7 @@ uiTIWaitCraft	[Création, patientez...]
 
 // HASH_VALUE 6C9A04DA3290EABA
 // INDEX 1288
-uiTIWaitMissionItem	[Mission : patientez...]
+uiTIWaitMissionItem	[Mission, patientez...]
 
 // HASH_VALUE 5ABB248632929E75
 // INDEX 1289
@@ -5256,35 +5257,35 @@ uiTIForaging	[%qt objet(s) de qualité %ql]
 
 // HASH_VALUE AAC6F3742A34A29E
 // INDEX 1291
-uiTILoot	[Objets Pillés]
+uiTILoot	[Objets pillés]
 
 // HASH_VALUE A8E837A967CAA45B
 // INDEX 1292
-uiTIQuartering	[Ressources Dépecées]
+uiTIQuartering	[Ressources dépecées]
 
 // HASH_VALUE 5638F878EEA5C8BF
 // INDEX 1293
-uiTIForageResult	[Résultat de l'Extraction]
+uiTIForageResult	[Résultat de l'extraction]
 
 // HASH_VALUE 20D814086C185418
 // INDEX 1294
-uiTIBagFull	[Sac Plein]
+uiTIBagFull	[Sac plein]
 
 // HASH_VALUE A133C87C1A18DFAE
 // INDEX 1295
-uiTICraft	[Objets Créés]
+uiTICraft	[Objets créés]
 
 // HASH_VALUE 6859174F57BE07AF
 // INDEX 1296
-uiTIMissionItem	[Mission : Objets à Prendre]
+uiTIMissionItem	[Mission : objets à prendre]
 
 // HASH_VALUE 6CDC2CDE68D814B8
 // INDEX 1297
-uiTICrystallize	[Cristal Obtenu]
+uiTICrystallize	[Cristal obtenu]
 
 // HASH_VALUE 02F3CC00B79E8633
 // INDEX 1298
-uiTIError	[ERREUR TITRE NON TROUVE !!!]
+uiTIError	[ERREUR : TITRE NON TROUVÉ !]
 
 // HASH_VALUE 8BD3A835C7E3803B
 // INDEX 1299
@@ -5316,7 +5317,7 @@ uihTalkToBot	[Parler à un robot]
 
 // HASH_VALUE 2C5C54086C18544C
 // INDEX 1306
-uihBuySellBot	[Acheter/Vendre]
+uihBuySellBot	[Acheter / Vendre]
 
 // HASH_VALUE 6AF62C8BDEB73089
 // INDEX 1307
@@ -5328,15 +5329,15 @@ uihUseSpell	[Utiliser un sort]
 
 // HASH_VALUE 4C00FA093610FBFD
 // INDEX 1309
-uihWhatIs	[QUE SONT ?]
+uihWhatIs	[Qu'est-ce c'est ?]
 
 // HASH_VALUE EB370F451D37F8AF
 // INDEX 1310
-uihAbilitiesItem	[Capacités/Objets]
+uihAbilitiesItem	[Capacités / Objets]
 
 // HASH_VALUE 5014143450141434
 // INDEX 1311
-uihMaps	[CARTES]
+uihMaps	[Cartes]
 
 // HASH_VALUE DB4498851A1713B8
 // INDEX 1312
@@ -5352,7 +5353,7 @@ uihHowToSelfHeal	[Se guérir]
 
 // HASH_VALUE 61D5E07D17E7B06B
 // INDEX 1315
-uihHowToHealOther	[Guérir les autres]
+uihHowToHealOther	[Soigner les autres]
 
 // HASH_VALUE 2B2A538C2D64F46F
 // INDEX 1316
@@ -5376,7 +5377,7 @@ uihHowToResurectADeadFriend	[Ressusciter un ami mort]
 
 // HASH_VALUE ED7A937BADEB6694
 // INDEX 1321
-uihWhatIsSkillPoints	[Points de Compétences]
+uihWhatIsSkillPoints	[Points de compétences]
 
 // HASH_VALUE A6C7DC9EA734FC54
 // INDEX 1322
@@ -5412,11 +5413,11 @@ uihJewelry	[Bijoux]
 
 // HASH_VALUE 6C584424781C94D0
 // INDEX 1330
-uihIdentity	[Mes Statistiques]
+uihIdentity	[Mes statistiques]
 
 // HASH_VALUE E67874686595BC86
 // INDEX 1331
-uihGauges	[Mon Etat]
+uihGauges	[Mon état]
 
 // HASH_VALUE 27E9787FA607C490
 // INDEX 1332
@@ -5428,7 +5429,7 @@ uihHands	[Mains]
 
 // HASH_VALUE A0C7108A4AA2EB58
 // INDEX 1334
-uihMainChat	[CHAT PRINCIPAL]
+uihMainChat	[Chat principal]
 
 // HASH_VALUE 2C2AB88F2237648A
 // INDEX 1335
@@ -5444,11 +5445,11 @@ uihActionBook	[Livre d'actions]
 
 // HASH_VALUE 847334492917FB60
 // INDEX 1338
-uihTradeNPC	[Echanges avec un PNJ]
+uihTradeNPC	[Échanges avec un PNJ]
 
 // HASH_VALUE C7123CF2C76344CB
 // INDEX 1339
-uihCredits	[CREDITS JEU]
+uihCredits	[Crédits du jeu]
 
 // HASH_VALUE 2EE71C61EF252092
 // INDEX 1340
@@ -5460,11 +5461,11 @@ uihShield	[Boucliers]
 
 // HASH_VALUE 2292B8815728CFA9
 // INDEX 1342
-uihMWeapon	[Armes de Mêlée]
+uihMWeapon	[Armes de mêlée]
 
 // HASH_VALUE A103A888D7E8EBAB
 // INDEX 1343
-uihRWeapon	[Armes de Tir]
+uihRWeapon	[Armes de tir]
 
 // HASH_VALUE 6DB63C90E1F74490
 // INDEX 1344
@@ -5472,15 +5473,15 @@ uihAmmo	[Munitions]
 
 // HASH_VALUE 98C82C50E6C7179C
 // INDEX 1345
-uihRawMat	[Matières Premières]
+uihRawMat	[Matières premières]
 
 // HASH_VALUE 4C8A6433AFD58FA6
 // INDEX 1346
-uihCraftTool	[Outils de Construction]
+uihCraftTool	[Outils de construction]
 
 // HASH_VALUE 2DD8A47E5BA9186A
 // INDEX 1347
-uihHarvestTool	[Outils de Récolte]
+uihHarvestTool	[Outils de récolte]
 
 // HASH_VALUE 60DC943460DC9434
 // INDEX 1348
@@ -5496,7 +5497,7 @@ uiSap	[Sève]
 
 // HASH_VALUE A868B095A4A85C8B
 // INDEX 1351
-uiStamina	[Endurance]
+uiStamina	[Endur.]
 
 // HASH_VALUE ECE7309DA1C77891
 // INDEX 1352
@@ -5504,7 +5505,7 @@ uiFocus	[Concentr.]
 
 // HASH_VALUE 2A7AB885D852D3B5
 // INDEX 1353
-uiActionProgression	[Progression de l'Action]
+uiActionProgression	[Progression de l'action]
 
 // HASH_VALUE 2BB9C075D895C791
 // INDEX 1354
@@ -5516,67 +5517,67 @@ uiHunger	[Faim]
 
 // HASH_VALUE EB89D87A00B1DCAB
 // INDEX 1356
-uiActionStatus	[Evolution de l'Action en Cours]
+uiActionStatus	[Évolution de l'action en cours]
 
 // HASH_VALUE 41E3D738C5300C19
 // INDEX 1357
-uiSapBarDisplay	[AFFICHAGE SEVE]
+uiSapBarDisplay	[Affichage sève]
 
 // HASH_VALUE CC22C83402E0A824
 // INDEX 1358
-uiStaBarDisplay	[AFFICHAGE ENDURANCE]
+uiStaBarDisplay	[Affichage endurance]
 
 // HASH_VALUE 895E302F3D723B38
 // INDEX 1359
-uiFocBarDisplay	[AFFICHAGE CONCENTRATION]
+uiFocBarDisplay	[Affichage concentration]
 
 // HASH_VALUE EB5042B44A367EE6
 // INDEX 1360
-uiXpBonusInfo	[Bonus XP:    Lvl@{6F6F}%lvl@{FFFF}    x@{6F6F}%count@{FFFF}]
+uiXpBonusInfo	[Bonus d'expérience:    Lvl@{6F6F}%lvl@{FFFF}    x@{6F6F}%count@{FFFF}]
 
 // HASH_VALUE 2D79EC806D00D1D6
 // INDEX 1361
 uittXpBonus	[Un catalyseur d'expérience est actif, il vous donnera un bonus d'expérience.\n
-	Cliquez pour le désactiver]
+	Cliquez pour le désactiver.]
 
 // HASH_VALUE E02A77CCC8F159E8
 // INDEX 1362
-uittDeathPenalty	[@{6F6F}Vous avez une pénalité XP de Décès\n
+uittDeathPenalty	[@{6F6F}Vous avez une pénalité de décès\n
 	@{FFFF}Quand vous mourez, cette pénalité augmente.\n
-	Les prochains gains d'XP seront utilisés pour rembourser cette dette.\n
+	Les prochains gains d'expérience seront utilisés pour rembourser cette dette.\n
 	Il reste à rembourser @{6F6F}%dp@{FFFF}% de la dette.]
 
 // HASH_VALUE 54642750D9A8FC62
 // INDEX 1363
-uiHpMax	[Vie Max]
+uiHpMax	[Vie max.]
 
 // HASH_VALUE 50A43B50D9A8B866
 // INDEX 1364
-uiHpReg	[Vie Rég]
+uiHpReg	[Vie rég.]
 
 // HASH_VALUE 1D35906FD7F59F9F
 // INDEX 1365
-uiStaMax	[Endurance Max]
+uiStaMax	[Endurance max.]
 
 // HASH_VALUE 5E24A074D8465BA3
 // INDEX 1366
-uiStaReg	[Endurance Rég]
+uiStaReg	[Endurance rég.]
 
 // HASH_VALUE D1F3FB4450D93879
 // INDEX 1367
-uiSapMax	[Sève Max]
+uiSapMax	[Sève max.]
 
 // HASH_VALUE CE840F4450C80471
 // INDEX 1368
-uiSapReg	[Sève Rég]
+uiSapReg	[Sève rég.]
 
 // HASH_VALUE A1173C6C8F64AFBA
 // INDEX 1369
-uiWishMax	[Concentration Max]
+uiWishMax	[Concentration max.]
 
 // HASH_VALUE A1060864D1B5AFBA
 // INDEX 1370
-uiWishReg	[Concentration Rég]
+uiWishReg	[Concentration rég.]
 
 // HASH_VALUE D433345651734C4C
 // INDEX 1371
@@ -5624,7 +5625,7 @@ uiFameZorai	[Zoraï]
 
 // HASH_VALUE 26F780842756BC9E
 // INDEX 1382
-uiFameHominists	[Tenant]
+uiFameHominists	[Hoministe]
 
 // HASH_VALUE 609C1434705844D4
 // INDEX 1383
@@ -5632,19 +5633,19 @@ uiFameMarauders	[Maraudeur]
 
 // HASH_VALUE EAAA008C6297F482
 // INDEX 1384
-uiFameAgnos	[Antithe]
+uiFameAgnos	[Athéiste]
 
 // HASH_VALUE 6F87649C2397749D
 // INDEX 1385
-uiFameUrasies	[Gnost]
+uiFameUrasies	[Théiste]
 
 // HASH_VALUE 75E4D8329E79B828
 // INDEX 1386
-uiFameAllegianceCult	[Culte : ]
+uiFameAllegianceCult	[Allégeance de religion (Culte) : ]
 
 // HASH_VALUE 8AA4182D9CE8C822
 // INDEX 1387
-uiFameAllegianceCiv	[Allégeance civilisation: ]
+uiFameAllegianceCiv	[Allégeance de civilisation (Nationalité) : ]
 
 // HASH_VALUE 5E01D07BAEA782C2
 // INDEX 1388
@@ -5682,42 +5683,42 @@ uiFameAllegiance7	[Zoraï]
 // INDEX 1396
 uittFameAllegianceCiv0	[Votre allégeance de civilisation est @{2F2F}indéterminée@{FFFF}.\n
 	Ceci peut arriver par exemple si votre guilde a perdu son allégeance à cause d'une renommée devenue trop basse.\n
-	Dans cet état vous ne pouvez plus gagner de renommée. Vous pouvez soit:\n
+	Dans cet état vous ne pouvez plus gagner de renommée. Vous pouvez soit :\n
 	@{T4}- passer neutre\n
-	@{T4}- quitter votre guilde et aller voir un @{2F2F}magistrat@{FFFF} dans la capitale d'une civilisation, si vous voulez lui porter allégeance (renommée de @{2F2F}30@{FFFF} requis).\n
-	@{T4}- attendre que votre guilde puisse redéclarer son allégeance, pour redéclarer la votre.]
+	@{T4}- quitter votre guilde et aller voir un @{2F2F}magistrat@{FFFF} dans la capitale d'une civilisation, si vous voulez lui prêter allégeance (renommée de @{2F2F}30@{FFFF} requise).\n
+	@{T4}- attendre que votre guilde puisse redéclarer son allégeance, pour redéclarer la vôtre.]
 
 // HASH_VALUE 21D8DEBBDF540F69
 // INDEX 1397
 uittFameAllegianceCiv1	[Vous êtes un(e) @{2F2F}apatride@{FFFF}.\n
 	Vous êtes limité(e) dans vos renommées de civilisation mais vous pouvez rejoindre n'importe quelle guilde.\n
-	Pour porter allégeance à une civilisation, il faut aller voir le @{2F2F}magistrat@{FFFF} dans la capitale appropriée.\n
+	Pour prêter allégeance à une civilisation, il faut aller voir le @{2F2F}magistrat@{FFFF} dans la capitale appropriée.\n
 	Vous devez avoir au moins @{2F2F}30@{FFFF} dans la renommée de civilisation correspondante.]
 
 // HASH_VALUE EEF11BA25CE59320
 // INDEX 1398
-uittFameAllegianceCiv4	[Vous avez porté allégeance aux @{2F2F}Fyros@{FFFF}.\n
-	Ceci vous permet d'avoir une renommée Fyros plus grande, mais votre guilde doit aussi être d'allégeance Fyros.\n
+uittFameAllegianceCiv4	[Vous avez prêté allégeance aux @{2F2F}Fyros@{FFFF}.\n
+	Ceci vous permet d'avoir une renommée fyros plus grande, mais votre guilde doit aussi être d'allégeance fyros.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
-	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Fyros@{FFFF} atteint 0.]
+	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}fyros@{FFFF} atteint 0.]
 
 // HASH_VALUE F3701FA45695A3EA
 // INDEX 1399
-uittFameAllegianceCiv5	[Vous avez porté allégeance aux @{2F2F}Matis@{FFFF}.\n
+uittFameAllegianceCiv5	[Vous avez prêté allégeance aux @{2F2F}Matis@{FFFF}.\n
 	Ceci vous permet d'avoir une renommée Matis plus grande, mais votre guilde doit aussi être d'allégeance Matis.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Matis@{FFFF} atteint 0.]
 
 // HASH_VALUE 9F69A500FA32081B
 // INDEX 1400
-uittFameAllegianceCiv6	[Vous avez porté allégeance aux @{2F2F}Tryker@{FFFF}.\n
+uittFameAllegianceCiv6	[Vous avez prêté allégeance aux @{2F2F}Trykers@{FFFF}.\n
 	Ceci vous permet d'avoir une renommée Tryker plus grande, mais votre guilde doit aussi être d'allégeance Tryker.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Tryker@{FFFF} atteint 0.]
 
 // HASH_VALUE F8AF33A2D5666BFE
 // INDEX 1401
-uittFameAllegianceCiv7	[Vous avez porté allégeance aux @{2F2F}Zoraï@{FFFF}.\n
+uittFameAllegianceCiv7	[Vous avez prêté allégeance aux @{2F2F}Zoraïs@{FFFF}.\n
 	Ceci vous permet d'avoir une renommée Zoraï plus grande, mais votre guilde doit aussi être d'allégeance Zoraï.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Zoraï@{FFFF} atteint 0.]
@@ -5726,28 +5727,28 @@ uittFameAllegianceCiv7	[Vous avez porté allégeance aux @{2F2F}Zoraï@{FFFF}.\n
 // INDEX 1402
 uittFameAllegianceCult0	[Votre allégeance de culte est @{2F2F}indéterminée@{FFFF}.\n
 	Ceci peut arriver par exemple si votre guilde a perdu son allégeance à cause d'une renommée devenue trop basse.\n
-	Dans cet état vous ne pouvez plus gagner de renommée. Vous pouvez soit:\n
+	Dans cet état vous ne pouvez plus gagner de renommée. Vous pouvez soit :\n
 	@{T4}- passer neutre\n
-	@{T4}- quitter votre guilde et aller voir un @{2F2F}bonze@{FFFF} ou un @{2F2F}prêtre@{FFFF} dans le temple d'un culte, si vous voulez lui porter allégeance (renommée de @{2F2F}30@{FFFF} requis).\n
-	@{T4}- attendre que votre guilde puisse redéclarer son allégeance, pour redéclarer la votre.]
+	@{T4}- quitter votre guilde et aller voir un @{2F2F}bonze@{FFFF} ou un @{2F2F}prêtre@{FFFF} dans le temple d'un culte, si vous voulez lui prêter allégeance (renommée de @{2F2F}30@{FFFF} requise).\n
+	@{T4}- attendre que votre guilde puisse redéclarer son allégeance, pour redéclarer la vôtre.]
 
 // HASH_VALUE 21C50A6E944DEAAC
 // INDEX 1403
-uittFameAllegianceCult1	[Vous êtes un(e) @{2F2F}incroyant(e)@{FFFF}.\n
+uittFameAllegianceCult1	[Vous êtes un(e) @{2F2F}athée@{FFFF}.\n
 	Vous êtes limité(e) dans vos renommées de culte mais vous pouvez rejoindre n'importe quelle guilde.\n
-	Pour porter allégeance à un culte, il faut aller voir le @{2F2F}prêtre@{FFFF} ou le @{2F2F}bonze@{FFFF} dans le temple approprié.\n
+	Pour prêter allégeance à un culte, il faut aller voir le @{2F2F}prêtre@{FFFF} ou le @{2F2F}bonze@{FFFF} dans le temple approprié.\n
 	Vous devez avoir au moins @{2F2F}30@{FFFF} dans la renommée de culte correspondante.]
 
 // HASH_VALUE D2FE27E9B9979E1B
 // INDEX 1404
-uittFameAllegianceCult2	[Vous avez porté allégeance aux @{2F2F}Kami@{FFFF}.\n
+uittFameAllegianceCult2	[Vous avez prêté allégeance aux @{2F2F}Kamis@{FFFF}.\n
 	Ceci vous permet d'avoir une renommée Kami plus grande, mais votre guilde doit aussi être d'allégeance Kami.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}prêtre@{FFFF} ou un @{2F2F}bonze@{FFFF} dans un temple.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Kami@{FFFF} atteint 0.]
 
 // HASH_VALUE FDC4333DC5DF2BAB
 // INDEX 1405
-uittFameAllegianceCult3	[Vous avez porté allégeance aux @{2F2F}Karavan@{FFFF}.\n
+uittFameAllegianceCult3	[Vous avez prêté allégeance à la @{2F2F}Karavan@{FFFF}.\n
 	Ceci vous permet d'avoir une renommée Karavan plus grande, mais votre guilde doit aussi être d'allégeance Karavan.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}prêtre@{FFFF} ou un @{2F2F}bonze@{FFFF} dans un temple.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Karavan@{FFFF} atteint 0.]
@@ -5755,96 +5756,96 @@ uittFameAllegianceCult3	[Vous avez porté allégeance aux @{2F2F}Karavan@{FFFF}.
 // HASH_VALUE 0A90322EFBC91874
 // INDEX 1406
 uittFameAllegianceCivGuild0	[L'allégeance de civilisation de votre guilde est @{2F2F}indéterminée@{FFFF}.\n
-	Votre guilde ne peut plus gagner de renommée. Le chef de guilde peut soit:\n
+	Votre guilde ne peut plus gagner de renommée. Le chef de guilde peut soit :\n
 	@{T4}- passer l'allégeance de la guilde à neutre\n
-	@{T4}- porter allégeance à une civilisation en allant voir un @{2F2F}magistrat@{FFFF} de guilde dans la capitale appropriée (pas de prérequis de renommée nécessaire)]
+	@{T4}- prêter allégeance à une civilisation en allant voir un @{2F2F}magistrat@{FFFF} de guilde dans la capitale appropriée (pas de prérequis de renommée nécessaire)]
 
 // HASH_VALUE 3867F610AADC3C4B
 // INDEX 1407
 uittFameAllegianceCivGuild1	[Votre guilde est @{2F2F}apatride@{FFFF}.\n
-	Elle est limitée dans ses renommées de civilisations et ne peut enrôler que des membres d'allégeance Neutre.\n
-	Pour porter allégeance à une civilisation, le chef de guilde doit aller voir le @{2F2F}magistrat@{FFFF} de guilde dans la capitale appropriée.\n
+	Elle est limitée dans ses renommées de civilisations et ne peut enrôler que des membres d'allégeance de civilisation Neutre (apatrides).\n
+	Pour prêter allégeance à une civilisation, le chef de guilde doit aller voir le @{2F2F}magistrat@{FFFF} de guilde dans la capitale appropriée.\n
 	La guilde doit avoir au moins @{2F2F}30@{FFFF} dans la renommée de civilisation correspondante.]
 
 // HASH_VALUE 48B5E21ED594D35A
 // INDEX 1408
-uittFameAllegianceCivGuild4	[Votre guilde a porté allégeance aux @{2F2F}Fyros@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Fyros plus grande, et d'enrôler des membres d'allégeance Fyros ou Neutre.\n
+uittFameAllegianceCivGuild4	[Votre guilde a prêté allégeance aux @{2F2F}Fyros@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Fyros plus grande, et d'enrôler des membres d'allégeance Fyros ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Fyros@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 0AB5CA14D1A21342
 // INDEX 1409
-uittFameAllegianceCivGuild5	[Votre guilde a porté allégeance aux @{2F2F}Matis@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Matis plus grande, et d'enrôler des membres d'allégeance Matis ou Neutre.\n
+uittFameAllegianceCivGuild5	[Votre guilde a prêté allégeance aux @{2F2F}Matis@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Matis plus grande, et d'enrôler des membres d'allégeance Matis ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Matis@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 527303AF879765CE
 // INDEX 1410
-uittFameAllegianceCivGuild6	[Votre guilde a porté allégeance aux @{2F2F}Tryker@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Tryker plus grande, et d'enrôler des membres d'allégeance Tryker ou Neutre.\n
+uittFameAllegianceCivGuild6	[Votre guilde a prêté allégeance aux @{2F2F}Trykers@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Tryker plus grande, et d'enrôler des membres d'allégeance Tryker ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Tryker@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 4D145A02D0B37350
 // INDEX 1411
-uittFameAllegianceCivGuild7	[Votre guilde a porté allégeance aux @{2F2F}Zoraï@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Zoraï plus grande, et d'enrôler des membres d'allégeance Zoraï ou Neutre.\n
+uittFameAllegianceCivGuild7	[Votre guilde a prêté allégeance aux @{2F2F}Zoraïs@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Zoraï plus grande, et d'enrôler des membres d'allégeance Zoraï ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Zoraï@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 87F020E581564B7C
 // INDEX 1412
 uittFameAllegianceCultGuild0	[L'allégeance de culte de votre guilde est @{2F2F}indéterminée@{FFFF}.\n
-	Votre guilde ne peut plus gagner de renommée. Le chef de guilde peut soit:\n
+	Votre guilde ne peut plus gagner de renommée. Le chef de guilde peut soit :\n
 	@{T4}- passer l'allégeance de la guilde à neutre\n
-	@{T4}- porter allégeance à un culte en allant voir un @{2F2F}prêtre@{FFFF} ou un @{2F2F}bonze@{FFFF} de guilde dans un temple approprié (pas de prérequis de renommée nécessaire)]
+	@{T4}- prêter allégeance à un culte en allant voir un @{2F2F}prêtre@{FFFF} ou un @{2F2F}bonze@{FFFF} de guilde dans un temple approprié (pas de prérequis de renommée nécessaire).]
 
 // HASH_VALUE 7B003A98BC232BB8
 // INDEX 1413
-uittFameAllegianceCultGuild1	[Votre guilde est @{2F2F}incroyante@{FFFF}.\n
-	Elle est limitée dans ses renommées de culte et ne peut enrôler que des membres d'allégeance Neutre.\n
-	Pour porter allégeance à un culte, le chef de guilde doit aller voir le @{2F2F}bonze@{FFFF} ou @{2F2F}prêtre@{FFFF} de guilde dans un temple approprié.\n
+uittFameAllegianceCultGuild1	[Votre guilde est @{2F2F}athée@{FFFF}.\n
+	Elle est limitée dans ses renommées de culte et ne peut enrôler que des membres d'allégeance Neutre (athées).\n
+	Pour prêter allégeance à un culte, le chef de guilde doit aller voir le @{2F2F}bonze@{FFFF} ou @{2F2F}prêtre@{FFFF} de guilde dans un temple approprié.\n
 	La guilde doit avoir au moins @{2F2F}30@{FFFF} dans la renommée de culte correspondante.]
 
 // HASH_VALUE A1B5C5D32E70A250
 // INDEX 1414
-uittFameAllegianceCultGuild2	[Votre guilde a porté allégeance aux @{2F2F}Kami@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Kami plus grande, et d'enrôler des membres d'allégeance Kami ou Neutre.\n
+uittFameAllegianceCultGuild2	[Votre guilde a prêté allégeance aux @{2F2F}Kamis@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Kami plus grande, et d'enrôler des membres d'allégeance Kami ou Neutre (athées).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}bonze@{FFFF} ou un @{2F2F}prêtre@{FFFF} de guilde dans un temple.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Kami@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE A6342B025D599CA6
 // INDEX 1415
-uittFameAllegianceCultGuild3	[Votre guilde a porté allégeance aux @{2F2F}Karavan@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Karavan plus grande, et d'enrôler des membres d'allégeance Karavan ou Neutre.\n
+uittFameAllegianceCultGuild3	[Votre guilde a prêté allégeance à la @{2F2F}Karavan@{FFFF}.\n
+	Cela lui permet d'avoir une renommée Karavan plus grande, et d'enrôler des membres d'allégeance Karavan ou Neutre (athée).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}bonze@{FFFF} ou un @{2F2F}prêtre@{FFFF} de guilde dans un temple.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Karavan@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE D8AA849A28C56C8B
 // INDEX 1416
-uiFameAllegianceCivSetNeutral	[Passer Neutre]
+uiFameAllegianceCivSetNeutral	[Passer Neutre (apatride)]
 
 // HASH_VALUE D8AA849A28C56C8B
 // INDEX 1417
-uiFameAllegianceCultSetNeutral	[Passer Neutre]
+uiFameAllegianceCultSetNeutral	[Passer Neutre (athée)]
 
 // HASH_VALUE 77E6B622B95448FB
 // INDEX 1418
-uiFameAllegianceCivSetNeutralTT	[En devenant neutre vous serez un(e) apatride, vous n'aurez aucune allégeance de civilisation]
+uiFameAllegianceCivSetNeutralTT	[En devenant Neutre vous serez un(e) apatride, vous n'aurez aucune allégeance de civilisation.]
 
 // HASH_VALUE F0D1D5B5D65C7E37
 // INDEX 1419
-uiFameAllegianceCultSetNeutralTT	[En devenant neutre vous serez un(e) incroyant(e), vous n'aurez aucune allégeance envers un culte]
+uiFameAllegianceCultSetNeutralTT	[En devenant Neutre vous serez un(e) athée, vous n'aurez aucune allégeance envers un culte.]
 
 // HASH_VALUE C6382BD9E5BE63CA
 // INDEX 1420
-uiFameAllegianceCivSetNeutralWarning	[Attention! En passant Neutre vous risquez de perdre de la renommée dans vos renommées de civilisations (Fyros/Matis/Tryker/Zoraï)]
+uiFameAllegianceCivSetNeutralWarning	[Attention ! En passant Neutre vous risquez de perdre de la renommée dans vos renommées de civilisations (Fyros / Matis / Tryker / Zoraï).]
 
 // HASH_VALUE E090B9CAD3908C08
 // INDEX 1421
-uiFameAllegianceCultSetNeutralWarning	[Attention! En passant Neutre vous risquez de perdre de la renommée dans vos renommées de cultes (Kami/Karavan)]
+uiFameAllegianceCultSetNeutralWarning	[Attention ! En passant Neutre vous risquez de perdre de la renommée dans vos renommées de cultes (Kami / Karavan).]
 
 // HASH_VALUE 12E4812321F30793
 // INDEX 1422
@@ -5854,17 +5855,17 @@ uiFameAllegianceCivSetNeutralGuildTT	[En devenant neutre votre GUILDE sera apatr
 
 // HASH_VALUE AE8AC62D968D7C91
 // INDEX 1423
-uiFameAllegianceCultSetNeutralGuildTT	[En devenant neutre votre GUILDE sera incroyante,\n
-	elle n'aura aucune allégeance envers un culte\n
+uiFameAllegianceCultSetNeutralGuildTT	[En devenant Neutre de culte votre GUILDE sera athée,\n
+	elle n'aura aucune allégeance envers un culte.\n
 	Seul le chef de guilde est autorisé à le faire.]
 
 // HASH_VALUE BE5FE5FA26384BE9
 // INDEX 1424
-uiFameAllegianceCivSetNeutralGuildWarning	[Attention! En passant Neutre votre GUILDE risque de perdre de la renommée dans celles de civilisations (Fyros/Matis/Tryker/Zoraï)]
+uiFameAllegianceCivSetNeutralGuildWarning	[Attention ! En passant Neutre votre GUILDE risque de perdre de la renommée dans celles de civilisations (Fyros / Matis / Tryker / Zoraï).]
 
 // HASH_VALUE 0F277CDE233581B4
 // INDEX 1425
-uiFameAllegianceCultSetNeutralGuildWarning	[Attention! En passant Neutre votre GUILDE risque de perdre de la renommée dans celles de cultes (Kami/Karavan)]
+uiFameAllegianceCultSetNeutralGuildWarning	[Attention ! En passant Neutre votre GUILDE risque de perdre de la renommée dans celles de cultes (Kami / Karavan).]
 
 // HASH_VALUE 2969AC6199D5BF7E
 // INDEX 1426
@@ -5872,7 +5873,7 @@ uiFame_tribe_ancient_dryads	[Dryades]
 
 // HASH_VALUE 2C0768382243584B
 // INDEX 1427
-uiFame_tribe_antikamis	[Antekamis]
+uiFame_tribe_antikamis	[Antékamis]
 
 // HASH_VALUE AB5A90A0669AA4AC
 // INDEX 1428
@@ -6088,11 +6089,11 @@ uittFameNormal	[Pas de pénalité.]
 
 // HASH_VALUE 5B857B30ED2878FE
 // INDEX 1481
-uittFameMaxPossible	[Renommée max possible : %famemax]
+uittFameMaxPossible	[Renommée max. possible : %famemax]
 
 // HASH_VALUE 1DD98C4C3E297072
 // INDEX 1482
-uiPvpFameAllegiance	[Allégeances:]
+uiPvpFameAllegiance	[Allégeances :]
 
 // HASH_VALUE 1A54278F5EAD1979
 // INDEX 1483
@@ -6109,8 +6110,8 @@ uiPvpFameAllegiancePoints	[  Points de la faction @{FE7F}%faction @{2F2F}: %poin
 // HASH_VALUE EF3939FA4ACF5B6F
 // INDEX 1486
 uittPvpFameInfo	[Vous pouvez activer votre @{2F2F}tag PVP @{FFFF}à l'aide du bouton associé de la fenêtre Joueur.\n
-	Vous bénéficierez de @{2F2F}bonus @{FFFF}si vous êtes situé dans une zone contrôlée par votre faction.\n
-	Vous subirez des @{2F2F}malus @{FFFF}si vous êtes situé dans une zone contrôlée par la faction adverse.]
+	Vous bénéficierez de @{2F2F}bonus @{FFFF}si vous êtes situé(e) dans une zone contrôlée par votre faction.\n
+	Vous subirez des @{2F2F}malus @{FFFF}si vous êtes situé(e) dans une zone contrôlée par la faction adverse.]
 
 // HASH_VALUE 5EB9CE136A1CA81F
 // INDEX 1487
@@ -6119,15 +6120,15 @@ uittPvpFameAllegianceInfo	[Vous gagnez des points lorsque vous tuez un membre de
 // HASH_VALUE 3C424447D935F882
 // INDEX 1488
 uiPvpEffectInfo	[\n
-	Effets des spires:]
+	Effets des spires :]
 
 // HASH_VALUE AA23A7680FD8F008
 // INDEX 1489
-uiPvpEffectBonus	[@{FFFF}Bonus:]
+uiPvpEffectBonus	[@{FFFF}Bonus :]
 
 // HASH_VALUE AA239F5AD2B8B813
 // INDEX 1490
-uiPvpEffectMalus	[@{FFFF}Malus:]
+uiPvpEffectMalus	[@{FFFF}Malus :]
 
 // HASH_VALUE BCEB26324EFF9CAF
 // INDEX 1491
@@ -6531,7 +6532,7 @@ uiStaDesc	[@{6F6F}Endurance@{FFFF},\n
 
 // HASH_VALUE 57516E1B1624B27C
 // INDEX 1571
-uiSapDesc	[@{6F6F}Sap@{FFFF},\n
+uiSapDesc	[@{6F6F}Sève@{FFFF},\n
 	l'énergie qui permet à un personnage de canaliser des forces magiques.]
 
 // HASH_VALUE 0818382AFDB10CD9
@@ -6571,7 +6572,7 @@ uiWisDesc	[@{6F6F}Sagesse@{FFFF},\n
 
 // HASH_VALUE DFFD9B8BE269FBC5
 // INDEX 1579
-uiWBDesc	[@{6F6F}Equilibre@{FFFF},\n
+uiWBDesc	[@{6F6F}Équilibre@{FFFF},\n
 	permet à un personnage de diminuer le temps nécessaire pour se reposer.]
 
 // HASH_VALUE C9E791CC1DBE5661
@@ -6585,7 +6586,7 @@ uiValues	[VALEURS]
 
 // HASH_VALUE 8501644684B26442
 // INDEX 1582
-uiRegeneration	[REGENERATION]
+uiRegeneration	[RÉGÉNERATION]
 
 // HASH_VALUE B009C46E316AAC9F
 // INDEX 1583
@@ -6601,7 +6602,7 @@ uiCarac_StaMax	[Force]
 
 // HASH_VALUE 25955F899E549C5C
 // INDEX 1586
-uiCarac_StaReg	[Equilibre]
+uiCarac_StaReg	[Équilibre]
 
 // HASH_VALUE E45ADC6364A9D486
 // INDEX 1587
@@ -6641,7 +6642,7 @@ uiCaracId4	[Force]
 
 // HASH_VALUE 25955F899E549C5C
 // INDEX 1596
-uiCaracId5	[Equilibre]
+uiCaracId5	[Équilibre]
 
 // HASH_VALUE A5B85C9A6C5A10B6
 // INDEX 1597
@@ -6665,7 +6666,7 @@ uiDisease	[Maladie]
 
 // HASH_VALUE 68978879A7A6B093
 // INDEX 1602
-uiTechno	[Techno]
+uiTechno	[Technologie]
 
 // HASH_VALUE 28D8C0652B65DC7F
 // INDEX 1603
@@ -6685,19 +6686,19 @@ uiScores	[CARACT.]
 
 // HASH_VALUE 4BB39826C702B810
 // INDEX 1607
-uiCaracs	[CARACTERISTIQUES]
+uiCaracs	[CARACTÉRISTIQUES]
 
 // HASH_VALUE CB83543C0901241E
 // INDEX 1608
-uiResistances	[RESISTANCE]
+uiResistances	[RÉSISTANCE]
 
 // HASH_VALUE DEB7947A68B56CA4
 // INDEX 1609
-uiLVL	[Niv]
+uiLVL	[Niv.]
 
 // HASH_VALUE DEB7947A68B56CA4
 // INDEX 1610
-uiLevel	[Niv]
+uiLevel	[Niv.]
 
 // HASH_VALUE 0452581784819415
 // INDEX 1611
@@ -6705,15 +6706,15 @@ uiCap	[MAJ]
 
 // HASH_VALUE 4E943B1C59F37212
 // INDEX 1612
-uiSkillJobLVL	[Niv : ]
+uiSkillJobLVL	[Niv. : ]
 
 // HASH_VALUE 13B2403C13D33C3E
 // INDEX 1613
-uiStatusTitle	[ETAT]
+uiStatusTitle	[ÉTAT]
 
 // HASH_VALUE 0AF2781B05A2A82D
 // INDEX 1614
-uiCareers	[CARRIERES]
+uiCareers	[CARRIÈRES]
 
 // HASH_VALUE 89C7BB1D992EB754
 // INDEX 1615
@@ -6729,7 +6730,7 @@ uiCurMissions	[MISSIONS EN COURS]
 
 // HASH_VALUE 41201F2949D2C839
 // INDEX 1618
-uiComMissions	[MISSIONS TERMINEES]
+uiComMissions	[MISSIONS TERMINÉES]
 
 // HASH_VALUE 0992A0384982E43A
 // INDEX 1619
@@ -6753,11 +6754,11 @@ uiMissionTimerDay	[j]
 
 // HASH_VALUE C8C3D81FBEEFF42D
 // INDEX 1624
-uiMissionDetails	[DETAILS DE LA MISSION]
+uiMissionDetails	[DÉTAILS DE LA MISSION]
 
 // HASH_VALUE 450170220A31CC20
 // INDEX 1625
-uiAbilitiesTitle	[CAPACITES]
+uiAbilitiesTitle	[CAPACITÉS]
 
 // HASH_VALUE C5F0701EC2C17C1F
 // INDEX 1626
@@ -6785,7 +6786,7 @@ uiFameDetail	[Détails]
 
 // HASH_VALUE 3F15E882AA244256
 // INDEX 1632
-uiGuildFameProgress	[Evolution Renommée de la Guilde : ]
+uiGuildFameProgress	[Evolution de la renommée de la guilde : ]
 
 // HASH_VALUE 4C90E4244C90E424
 // INDEX 1633
@@ -6793,7 +6794,7 @@ uiInfo	[INFOS]
 
 // HASH_VALUE C2E0380A83B0380D
 // INDEX 1634
-uiPeopleAdd	[AJOUTER]
+uiPeopleAdd	[Ajouter]
 
 // HASH_VALUE 88659B8D6F6FE8B4
 // INDEX 1635
@@ -6833,7 +6834,7 @@ uiPvpClanNeutral	[Neutre]
 
 // HASH_VALUE 190C2BCF467374EF
 // INDEX 1644
-uiJoinClanProposalDesc	[ Vous entrez dans une zone de clan pvp. Vous choisissez un clan ou restez neutre. Attention, choisir un clan peut influencer votre renommée... ]
+uiJoinClanProposalDesc	[ Vous entrez dans une zone de clan PVP. Vous choisissez un clan ou restez neutre. Attention, choisir un clan peut influencer votre renommée... ]
 
 // HASH_VALUE 4B6F401306FF332F
 // INDEX 1645
@@ -6845,7 +6846,7 @@ uiAscensorTeleportList	[DESTINATIONS]
 
 // HASH_VALUE 3E32C812CBF2B822
 // INDEX 1647
-uiTeleportLocation	[LOCATIONS DES TELEPORTEURS]
+uiTeleportLocation	[EMPLACEMENT DES TÉLÉPORTEURS]
 
 // HASH_VALUE 7FC236417613BC31
 // INDEX 1648
@@ -6861,20 +6862,20 @@ uimRemoveUserChat	[SUP. L'UTILISATEUR DU CHAT]
 
 // HASH_VALUE 4DD2CC2D8A42D033
 // INDEX 1651
-uimDismiss	[REJETER]
+uimDismiss	[Rejeter]
 
 /* OLD VALUE : [SELECT. LE SUCCESSEUR] */
 // HASH_VALUE FC04F8070EF2373C
 // INDEX 1652
-uimSetSuccesor	[PASSER SUCCESSEUR]
+uimSetSuccesor	[Passer successeur]
 
 // HASH_VALUE 07E3783F8603C430
 // INDEX 1653
-uimTarget	[CIBLE]
+uimTarget	[Cible]
 
 // HASH_VALUE CE61A0363F825B1C
 // INDEX 1654
-uimTeamCompass	[VISER LA CIBLE]
+uimTeamCompass	[Viser la cible]
 
 // HASH_VALUE 5190081E8FF0201E
 // INDEX 1655
@@ -6914,31 +6915,31 @@ uimCommands	[COMMANDES]
 
 // HASH_VALUE 490F8B17CB10A82A
 // INDEX 1664
-uimCommand1	[COMMANDE 1]
+uimCommand1	[Commande 1]
 
 // HASH_VALUE 491F8F18CB10A82A
 // INDEX 1665
-uimCommand2	[COMMANDE 2]
+uimCommand2	[Commande 2]
 
 // HASH_VALUE 492F9319CB10A82A
 // INDEX 1666
-uimCommand3	[COMMANDE 3]
+uimCommand3	[Commande 3]
 
 // HASH_VALUE 493F971ACB10A82A
 // INDEX 1667
-uimCommand4	[COMMANDE 4]
+uimCommand4	[Commande 4]
 
 // HASH_VALUE 494F9B1BCB10A82A
 // INDEX 1668
-uimCommand5	[COMMANDE 5]
+uimCommand5	[Commande 5]
 
 // HASH_VALUE 495F9F1CCB10A82A
 // INDEX 1669
-uimCommand6	[COMMANDE 6]
+uimCommand6	[Commande 6]
 
 // HASH_VALUE 10D2D424BEE04712
 // INDEX 1670
-uimQuitTeam	[QUITTER L'EQUIPE]
+uimQuitTeam	[QUITTER L'ÉQUIPE]
 
 // HASH_VALUE C91FC826BDE3E327
 // INDEX 1671
@@ -6950,31 +6951,31 @@ uimRemove	[SUPPRIMER]
 
 // HASH_VALUE 41002B370C210010
 // INDEX 1673
-uimMoveTo	[DEPLACER]
+uimMoveTo	[DÉPLACER]
 
 // HASH_VALUE C81227254C1ED00C
 // INDEX 1674
-uimIgnoreList	[LISTE A IGNORER]
+uimIgnoreList	[LISTE À IGNORER]
 
 // HASH_VALUE C990E433B73EF808
 // INDEX 1675
-uimMoveToIgnoreList	[DEPLACER VERS LA LISTE A IGNORER]
+uimMoveToIgnoreList	[Déplacer vers la liste à ignorer]
 
 // HASH_VALUE 86401030B69EE00F
 // INDEX 1676
-uimMoveToFriendList	[DEPLACER VERS LA LISTE D'AMIS]
+uimMoveToFriendList	[Déplacer vers la liste d'amis]
 
 // HASH_VALUE 8810A41C4690741F
 // INDEX 1677
-uimBlock	[BLOQUER]
+uimBlock	[Bloquer]
 
 // HASH_VALUE 4C1054504C105450
 // INDEX 1678
-uimTell	[MESSAGE PRIVE]
+uimTell	[Message privé]
 
 // HASH_VALUE 8810B0318B11C832
 // INDEX 1679
-uimUnBlock	[DEBLOQUER]
+uimUnBlock	[Débloquer]
 
 // HASH_VALUE 45812B1C0E4EB813
 // INDEX 1680
@@ -6982,31 +6983,31 @@ uimFriendList	[LISTE D'AMIS]
 
 // HASH_VALUE 5494F44C5494F44C
 // INDEX 1681
-uimSort	[TRIER]
+uimSort	[Trier]
 
 // HASH_VALUE 9192AC377E0EFB1E
 // INDEX 1682
-uimRemovePartyChat	[SUPPRIMER DU CHAT]
+uimRemovePartyChat	[Supprimer du chat]
 
 // HASH_VALUE 88A3AC3CC9D28847
 // INDEX 1683
-uimInvite	[INVITER]
+uimInvite	[Inviter]
 
 // HASH_VALUE C2F074F5BC31D3F8
 // INDEX 1684
-uimAddAllGM	[AJOUTER TOUS LES MEMBRES DE LA GUILDE]
+uimAddAllGM	[Ajouter tous les membres de la guilde]
 
 // HASH_VALUE CAFE901085ED6443
 // INDEX 1685
-uimRemoveAllGM	[SUPPRIMER TOUS LES MEMBRES DE LA GUILDE]
+uimRemoveAllGM	[Supprimer tous les membres de la guilde]
 
 // HASH_VALUE 37416C18B6708CF6
 // INDEX 1686
-uimAddAllTM	[AJOUTER TOUS LES MEMBRES DE L'EQUIPE]
+uimAddAllTM	[Ajouter tous les membres de l'équipe]
 
 // HASH_VALUE 0D9E9030FF1FE325
 // INDEX 1687
-uimRemoveAllTM	[SUPPRIMER TOUS LES MEMBRES DE L'EQUIPE]
+uimRemoveAllTM	[Supprimer tous les membres de l'équipe]
 
 // HASH_VALUE 4FE0F81F8E00C02C
 // INDEX 1688
@@ -7018,11 +7019,11 @@ uitabChatUniverse	[UNIVERS]
 
 // HASH_VALUE 8801883A87B2AC37
 // INDEX 1690
-uitabChatRegion	[REGION]
+uitabChatRegion	[RÉGION]
 
 // HASH_VALUE 4C5054504C505450
 // INDEX 1691
-uitabChatTeam	[EQUIPE]
+uitabChatTeam	[ÉQUIPE]
 
 // HASH_VALUE CB21A82C8BA1B420
 // INDEX 1692
@@ -7046,11 +7047,11 @@ uiFilterUniverse	[UNIVERS]
 
 // HASH_VALUE 8801883A87B2AC37
 // INDEX 1697
-uiFilterRegion	[REGION]
+uiFilterRegion	[RÉGION]
 
 // HASH_VALUE 4C5054504C505450
 // INDEX 1698
-uiFilterTeam	[EQUIPE]
+uiFilterTeam	[ÉQUIPE]
 
 // HASH_VALUE CB21A82C8BA1B420
 // INDEX 1699
@@ -7066,11 +7067,11 @@ uiFilterMenuUniverse	[UNIVERS @{T8}/u]
 
 // HASH_VALUE E0DD804CC85218F0
 // INDEX 1702
-uiFilterMenuRegion	[REGION @{T8}/r]
+uiFilterMenuRegion	[RÉGION @{T8}/r]
 
 // HASH_VALUE 1ECFB04DCB621CE4
 // INDEX 1703
-uiFilterMenuTeam	[EQUIPE @{T8}/p]
+uiFilterMenuTeam	[ÉQUIPE @{T8}/p]
 
 // HASH_VALUE 9C4DCC438DC108DA
 // INDEX 1704
@@ -7086,11 +7087,11 @@ uittEmote	[Cliquez pour sélectionner et lancer un Emote]
 
 // HASH_VALUE 17774BA065F05056
 // INDEX 1707
-uittTell	[Parlez-en à un ami]
+uittTell	[Parler à un ami]
 
 // HASH_VALUE 5050545044502480
 // INDEX 1708
-uiTempMemory	[SAC TEMP]
+uiTempMemory	[SAC TEMP.]
 
 // HASH_VALUE 64D814506C181480
 // INDEX 1709
@@ -7098,7 +7099,7 @@ uittTakeAll	[Prendre tout]
 
 // HASH_VALUE 70D824106C181480
 // INDEX 1710
-uittDropAll	[Jeter Tout]
+uittDropAll	[Jeter tout]
 
 // HASH_VALUE 2AA63C8DA0F73899
 // INDEX 1711
@@ -7106,7 +7107,7 @@ uiIcons	[Icônes]
 
 // HASH_VALUE 45027C0EC8DFAC07
 // INDEX 1712
-uiTeamShareTitle	[PARTAGE DE L'EQUIPE]
+uiTeamShareTitle	[PARTAGE DE L'ÉQUIPE]
 
 // HASH_VALUE C6D1A0244A81942F
 // INDEX 1713
@@ -7134,7 +7135,7 @@ uiTS_Select	[Le choix de votre objet]
 
 // HASH_VALUE AA48C06E5918ABBA
 // INDEX 1719
-uiTS_Items	[Descriptions de l'Objet]
+uiTS_Items	[Descriptions de l'objet]
 
 // HASH_VALUE 45AC77FED706D39D
 // INDEX 1720
@@ -7150,7 +7151,7 @@ uiTS_Valids	[Joueurs validant le partage]
 
 // HASH_VALUE 0F52F02F4CC3C033
 // INDEX 1723
-uitabInvEquip	[EQUIPEMENT]
+uitabInvEquip	[ÉQUIPEMENT]
 
 // HASH_VALUE 4120300C01D0480B
 // INDEX 1724
@@ -7170,7 +7171,7 @@ uitabInvPAPacker0	[MEKTOUB 1]
 
 // HASH_VALUE 43D02B23C140DA2D
 // INDEX 1728
-uitabInvPADemon0	[DEMON 1]
+uitabInvPADemon0	[DÉMON 1]
 
 // HASH_VALUE 85C37B43C542064A
 // INDEX 1729
@@ -7182,7 +7183,7 @@ uitabInvPAPacker1	[MEKTOUB 2]
 
 // HASH_VALUE 83D02F230140E22D
 // INDEX 1731
-uitabInvPADemon1	[DEMON 2]
+uitabInvPADemon1	[DÉMON 2]
 
 // HASH_VALUE C5C37F4305420E4A
 // INDEX 1732
@@ -7194,7 +7195,7 @@ uitabInvPAPacker2	[MEKTOUB 3]
 
 // HASH_VALUE C3D033234140EA2D
 // INDEX 1734
-uitabInvPADemon2	[DEMON 3]
+uitabInvPADemon2	[DÉMON 3]
 
 // HASH_VALUE 06C383434642164A
 // INDEX 1735
@@ -7206,7 +7207,7 @@ uitabInvPAPacker3	[MEKTOUB 4]
 
 // HASH_VALUE 04D037238240F22D
 // INDEX 1737
-uitabInvPADemon3	[DEMON 4]
+uitabInvPADemon3	[DÉMON 4]
 
 // HASH_VALUE CB21A82C8BA1B420
 // INDEX 1738
@@ -7214,11 +7215,11 @@ uitabInvGuild	[GUILDE]
 
 // HASH_VALUE 4CD0F4484CD0F448
 // INDEX 1739
-uitabInvRoom	[PIECE]
+uitabInvRoom	[PIÈCE]
 
 // HASH_VALUE 89B1901EC712A42C
 // INDEX 1740
-uiDetail	[DETAILS]
+uiDetail	[DÉTAILS]
 
 // HASH_VALUE 4A9B60EE5DF6980C
 // INDEX 1741
@@ -7226,28 +7227,28 @@ uittDetail	[Passer la liste du mode complet au mode simple]
 
 // HASH_VALUE FD72B7455EC7285F
 // INDEX 1742
-uittFilterArmor	[Filtre d'@{6F6F}Armures\n
-	@{FFFF}Clic Droit pour sélectionner seulement les @{6F6F}Armures@{FFFF}.]
+uittFilterArmor	[Filtre d'@{6F6F}armures\n
+	@{FFFF}Clic-droit pour sélectionner seulement les @{6F6F}armures@{FFFF}.]
 
 // HASH_VALUE E9E3C6E6EE8B69C7
 // INDEX 1743
-uittFilterWeapon	[Filtre d'@{6F6F}Armes\n
-	@{FFFF}Clic Droit pour sélectionner seulement les @{6F6F}Armes@{FFFF}.]
+uittFilterWeapon	[Filtre d'@{6F6F}armes\n
+	@{FFFF}Clic-droit pour sélectionner seulement les @{6F6F}armes@{FFFF}.]
 
 // HASH_VALUE 55691FEE9A045C17
 // INDEX 1744
-uittFilterTool	[Filtre d'@{6F6F}Outils\n
-	@{FFFF}Clic Droit pour sélectionner seulement les @{6F6F}Outils@{FFFF}.]
+uittFilterTool	[Filtre d'@{6F6F}outils\n
+	@{FFFF}Clic-droit pour sélectionner seulement les @{6F6F}outils@{FFFF}.]
 
 // HASH_VALUE F7EC4C94289E3142
 // INDEX 1745
-uittFilterMP	[Filtre de @{6F6F}Matières\n
-	@{FFFF}Clic Droit pour sélectionner seulement les @{6F6F}Matières@{FFFF}.]
+uittFilterMP	[Filtre de @{6F6F}matières premières\n
+	@{FFFF}Clic-droit pour sélectionner seulement les @{6F6F}matières premières@{FFFF}.]
 
 // HASH_VALUE 9BDEB6C211CDE882
 // INDEX 1746
-uittFilterMissMP	[Filtre d'@{6F6F}Objets ou Matières de Mission\n
-	@{FFFF}Clic Droit pour sélectionner seulement les @{6F6F}Objets ou Matières de Mission@{FFFF}.]
+uittFilterMissMP	[Filtre d'@{6F6F}objets ou matières de mission\n
+	@{FFFF}Clic-droit pour sélectionner seulement les @{6F6F}objets ou matières de mission@{FFFF}.]
 
 // HASH_VALUE A54058101559C818
 // INDEX 1747
@@ -7271,11 +7272,11 @@ uiMacroNone	[Non attribuée]
 
 // HASH_VALUE 91831F4AD1484877
 // INDEX 1752
-uittNewKeyShortcut	[Nouvelle Touche]
+uittNewKeyShortcut	[Nouvelle touche]
 
 // HASH_VALUE 545044145850B480
 // INDEX 1753
-uiEditKey	[EDITER UNE TOUCHE]
+uiEditKey	[ÉDITER UNE TOUCHE]
 
 // HASH_VALUE 831B0064D50B1077
 // INDEX 1754
@@ -7291,11 +7292,11 @@ uiNewCmd	[NOUVELLE COMMANDE]
 
 // HASH_VALUE 8E0034F7CC6030D2
 // INDEX 1757
-uiEditCmd	[EDITER UNE COMMANDE]
+uiEditCmd	[ÉDITER UNE COMMANDE]
 
 // HASH_VALUE 89E1E0F809BEE0FC
 // INDEX 1758
-uiMacroExec	[EXEC LA MACRO]
+uiMacroExec	[EXÉC. LA MACRO]
 
 // HASH_VALUE 8741842F0710C031
 // INDEX 1759
@@ -7311,11 +7312,11 @@ uimMacInfos	[INFOS]
 
 // HASH_VALUE 8B22D8258881DC33
 // INDEX 1762
-uimMacroExec	[EXECUTER]
+uimMacroExec	[EXÉCUTER]
 
 // HASH_VALUE 5450441454504414
 // INDEX 1763
-uimMacroEdit	[EDITER]
+uimMacroEdit	[ÉDITER]
 
 // HASH_VALUE 4411542844915438
 // INDEX 1764
@@ -7323,19 +7324,19 @@ uimMacroDel	[SUPPRIMER]
 
 // HASH_VALUE C2102B370C320812
 // INDEX 1765
-uimMCMoveUp	[DEPLACER VERS LE HAUT]
+uimMCMoveUp	[Déplacer vers le haut]
 
 // HASH_VALUE 0C110841C18EFF0A
 // INDEX 1766
-uimMCMoveDown	[DEPLACER VERS LE BAS]
+uimMCMoveDown	[Déplacer vers le bas]
 
 // HASH_VALUE 5450441454504414
 // INDEX 1767
-uimMCEdit	[EDITER]
+uimMCEdit	[Éditer]
 
 // HASH_VALUE 4411542844915438
 // INDEX 1768
-uimMCDel	[SUPPRIMER]
+uimMCDel	[Supprimer]
 
 // HASH_VALUE 4F517B288CF0C80A
 // INDEX 1769
@@ -7343,7 +7344,7 @@ uiKeysPlayerTitle	[TOUCHES DU JOUEUR]
 
 // HASH_VALUE 0C62243E815E1B0A
 // INDEX 1770
-uiKeysMovementTitle	[TOUCHES DE DEPLACEMENT]
+uiKeysMovementTitle	[TOUCHES DE DÉPLACEMENT]
 
 // HASH_VALUE 86221728CBFE040B
 // INDEX 1771
@@ -7359,19 +7360,19 @@ uiKeysViewTitle	[TOUCHES DE VUE]
 
 // HASH_VALUE FE92BC48F5E3F440
 // INDEX 1774
-uiKeysWindowsTitle	[TOUCHES DES FENETRES]
+uiKeysWindowsTitle	[TOUCHES DES FENÊTRES]
 
 // HASH_VALUE 8D729B38CFD0FC17
 // INDEX 1775
-uiKeysSystemTitle	[TOUCHES DU SYSTEME]
+uiKeysSystemTitle	[TOUCHES DU SYSTÈME]
 
 // HASH_VALUE C961D836814F2301
 // INDEX 1776
-uiKeysEditTitle	[TOUCHES D'EDITION]
+uiKeysEditTitle	[TOUCHES D'ÉDITION]
 
 // HASH_VALUE CBB1F72FFF903726
 // INDEX 1777
-uiKeysDebugTitle	[TOUCHES DE DEBOGAGE]
+uiKeysDebugTitle	[TOUCHES DE DÉBOGAGE]
 
 // HASH_VALUE 5054542C5054542C
 // INDEX 1778
@@ -7523,27 +7524,27 @@ uiKeyZ	[Z]
 
 // HASH_VALUE 90D300370D21B03D
 // INDEX 1815
-uiKeyLBUTTON	[BOUTOND]
+uiKeyLBUTTON	[BoutonG]
 
 // HASH_VALUE 90D3003D8E82C843
 // INDEX 1816
-uiKeyRBUTTON	[BOUTONG]
+uiKeyRBUTTON	[BoutonR]
 
 // HASH_VALUE 0350481983A0741B
 // INDEX 1817
-uiKeyCANCEL	[ANNULER]
+uiKeyCANCEL	[Annuler]
 
 // HASH_VALUE 90D300384D31B43E
 // INDEX 1818
-uiKeyMBUTTON	[BOUTONDEP]
+uiKeyMBUTTON	[BoutonM]
 
 // HASH_VALUE 48D0140848D01408
 // INDEX 1819
-uiKeyBACK	[RETOUR]
+uiKeyBACK	[Retour]
 
 // HASH_VALUE 0AA1642B45C26818
 // INDEX 1820
-uiKeyTAB	[TAB]
+uiKeyTAB	[Tab]
 
 // HASH_VALUE 48609C2284718C1B
 // INDEX 1821
@@ -7551,119 +7552,119 @@ uiKeyCLEAR	[ANNULER]
 
 // HASH_VALUE 8ED4B84A8AB4DC4A
 // INDEX 1822
-uiKeyRETURN	[RETOUR]
+uiKeyRETURN	[Entrée]
 
 // HASH_VALUE 0AB1E435C992D836
 // INDEX 1823
-uiKeySHIFT	[SHIFT]
+uiKeySHIFT	[Maj]
 
 // HASH_VALUE 4C94440C4C94440C
 // INDEX 1824
-uiKeyCONTROL	[CTRL]
+uiKeyCONTROL	[Ctrl]
 
 // HASH_VALUE C862B8228B31D82D
 // INDEX 1825
-uiKeyMENU	[ALT]
+uiKeyMENU	[Alt]
 
 // HASH_VALUE CAA3B0298DC2A83D
 // INDEX 1826
-uiKeyPAUSE	[PAUSE]
+uiKeyPAUSE	[Pause]
 
 // HASH_VALUE CAF2BC1D86114824
 // INDEX 1827
-uiKeyCAPITAL	[MAJUSCULES]
+uiKeyCAPITAL	[Majuscules]
 
 // HASH_VALUE 4090142C4090142C
 // INDEX 1828
-uiKeyKANA	[KANA]
+uiKeyKANA	[Kana]
 
 // HASH_VALUE 8A01701EC640AC2E
 // INDEX 1829
-uiKeyHANGEUL	[HANGEUL]
+uiKeyHANGEUL	[Hangeul]
 
 // HASH_VALUE 05A1583384418440
 // INDEX 1830
-uiKeyHANGUL	[HANGUL]
+uiKeyHANGUL	[Hangul]
 
 // HASH_VALUE CA81BC2A0CF1AC23
 // INDEX 1831
-uiKeyJUNJA	[JUNJA]
+uiKeyJUNJA	[Junja]
 
 // HASH_VALUE 48F0A81CC6A07421
 // INDEX 1832
-uiKeyFINAL	[FINAL]
+uiKeyFINAL	[Final]
 
 // HASH_VALUE C520641487905421
 // INDEX 1833
-uiKeyHANJA	[HANJA]
+uiKeyHANJA	[Hanja]
 
 // HASH_VALUE C750901F4740802C
 // INDEX 1834
-uiKeyKANJI	[KANJI]
+uiKeyKANJI	[Kanji]
 
 // HASH_VALUE C5C1B41D49E17C28
 // INDEX 1835
-uiKeyESCAPE	[ECHAP]
+uiKeyESCAPE	[Échap]
 
 // HASH_VALUE 8FC2E436CB51E42E
 // INDEX 1836
-uiKeyCONVERT	[CONVERTIR]
+uiKeyCONVERT	[Convertir]
 
 // HASH_VALUE 0952DC458721D43D
 // INDEX 1837
-uiKeyNONCONVERT	[PASCONVERTIR]
+uiKeyNONCONVERT	[PasConvertir]
 
 // HASH_VALUE 878180150661C424
 // INDEX 1838
-uiKeyACCEPT	[ACCEPTER]
+uiKeyACCEPT	[Accepter]
 
 // HASH_VALUE 08A0AC18C960881B
 // INDEX 1839
-uiKeyMODECHANGE	[MODECHANGE]
+uiKeyMODECHANGE	[ModeChange]
 
 // HASH_VALUE 8582A82B08A2B01C
 // INDEX 1840
-uiKeySPACE	[ESPACE]
+uiKeySPACE	[Espace]
 
 // HASH_VALUE 4DB2F843CDE3103A
 // INDEX 1841
-uiKeyPRIOR	[PRECEDENT]
+uiKeyPRIOR	[Précédent]
 
 // HASH_VALUE 5414543854145438
 // INDEX 1842
-uiKeyNEXT	[SUIVANT]
+uiKeyNEXT	[Suivant]
 
 // HASH_VALUE 46C0981C88D07025
 // INDEX 1843
-uiKeyEND	[FIN]
+uiKeyEND	[Fin]
 
 // HASH_VALUE 4450F4204450F420
 // INDEX 1844
-uiKeyHOME	[ORIG.]
+uiKeyHOME	[Début]
 
 // HASH_VALUE 5490543054905430
 // INDEX 1845
-uiKeyLEFT	[GAUCHE]
+uiKeyLEFT	[Gauche]
 
 // HASH_VALUE 5054045450540454
 // INDEX 1846
-uiKeyUP	[HAUT]
+uiKeyUP	[Haut]
 
 // HASH_VALUE 4AB1DC37C972E035
 // INDEX 1847
-uiKeyRIGHT	[DROITE]
+uiKeyRIGHT	[Droite]
 
 // HASH_VALUE 4CD4F4104CD4F410
 // INDEX 1848
-uiKeyDOWN	[BAS]
+uiKeyDOWN	[Bas]
 
 // HASH_VALUE 08F190350862CC25
 // INDEX 1849
-uiKeySELECT	[SELECT]
+uiKeySELECT	[Sélect]
 
 // HASH_VALUE 8EA200448D03143B
 // INDEX 1850
-uiKeyPRINT	[IMPR]
+uiKeyPRINT	[Impr]
 
 // HASH_VALUE 8B22D8258881DC33
 // INDEX 1851
@@ -8113,7 +8114,7 @@ uiDebugProfileVbLock	[Profilage du VB Lock]
 
 // HASH_VALUE E859D05F09290C63
 // INDEX 1962
-uiDebugProfileTexture	[Profilage des Texture]
+uiDebugProfileTexture	[Profilage des Textures]
 
 // HASH_VALUE D837F09328866CA5
 // INDEX 1963
@@ -24047,42 +24048,42 @@ uittIdentityInfo	[Permet de connaître tout ce qui a été nécessaire pour déb
 
 // HASH_VALUE CC9875537F4EABA4
 // INDEX 5718
-uittIdentityHP	[@{6F6F}Points de vie@{FFFF}: %n\n
+uittIdentityHP	[@{6F6F}Points de vie @{FFFF}: %n\n
 	Lorsque vos points de vie tombent à 0, vous sombrez dans le coma et, si vous n'êtes pas rapidement soigné par vos amis, vous mourez.]
 
 // HASH_VALUE E62E03C44CC6CCDF
 // INDEX 5719
-uittIdentitySap	[@{6F6F}Points de sève@{FFFF}: %n\n
+uittIdentitySap	[@{6F6F}Points de sève @{FFFF}: %n\n
 	Lorsque votre niveau de sève est faible, vous ne pouvez pas jeter de sorts.]
 
 // HASH_VALUE 96475BB346DF4BF2
 // INDEX 5720
-uittIdentitySta	[@{6F6F}Points d'Endurance@{FFFF}: %n\n
+uittIdentitySta	[@{6F6F}Points d'Endurance @{FFFF}: %n\n
 	Lorsque votre niveau d'Endurance est faible, vous ne pouvez plus réaliser de coups spéciaux et devez vous contenter de l'attaque par défaut jusqu'à la régénération de votre Endurance.]
 
 // HASH_VALUE 5429E1693D81762D
 // INDEX 5721
-uittIdentityFoc	[@{6F6F}Points de concentration@{FFFF}: %n\n
+uittIdentityFoc	[@{6F6F}Points de concentration @{FFFF}: %n\n
 	Lorsque votre niveau de concentration est faible, vous ne pouvez plus réaliser d'actions de forage.]
 
 // HASH_VALUE 98A8D5EC1A1065BF
 // INDEX 5722
-uittIdentityHPReg	[@{6F6F}Régénération HP@{FFFF}: %n\n
+uittIdentityHPReg	[@{6F6F}Régénération HP @{FFFF}: %n\n
 	Points de vie régénérés en 10 secondes.]
 
 // HASH_VALUE 0DA80D1162D9EB76
 // INDEX 5723
-uittIdentitySapReg	[@{6F6F}Régénération Sap@{FFFF}: %n\n
+uittIdentitySapReg	[@{6F6F}Régénération Sap @{FFFF}: %n\n
 	Points de sève régénérés en 10 secondes.]
 
 // HASH_VALUE CBC3826C632A9CB8
 // INDEX 5724
-uittIdentityStaReg	[@{6F6F}Régénération Endurance@{FFFF}: %n\n
+uittIdentityStaReg	[@{6F6F}Régénération Endurance @{FFFF}: %n\n
 	Points d'Endurance régénérés en 10 secondes.]
 
 // HASH_VALUE 5D4AE956019C7A23
 // INDEX 5725
-uittIdentityFocReg	[@{6F6F}Régénération Concentration@{FFFF}: %n\n
+uittIdentityFocReg	[@{6F6F}Régénération Concentration @{FFFF}: %n\n
 	Points de concentration régénérés en 10 secondes.]
 
 // HASH_VALUE 45CB3DCB2618D3E3
@@ -26871,11 +26872,11 @@ uiEchelon	[Echelon : ]
 /* OLD VALUE : [Show Clock in Compass] */
 // HASH_VALUE 2E428F9A99366770
 // INDEX 6376
-uiShowClock	[Afficher l'heure au dessus du compas.]
+uiShowClock	[Afficher l'heure au-dessus du compas]
 
 // HASH_VALUE E80563EA6265AD11
 // INDEX 6377
-uittShowClock	[Si coché, affiche l'heure courante au dessus du compas.]
+uittShowClock	[Si coché, affiche l'heure courante au-dessus du compas]
 
 // HASH_VALUE 5B008CB3BFE212C7
 // INDEX 6378
@@ -26891,7 +26892,7 @@ uittShow3dItemPreview	[Si coché, affiche la prévisualisation en 3D de l'objet 
 
 // HASH_VALUE C2BAF45AC14F102F
 // INDEX 6381
-uiShowDynChannelNameInChatCB	[Affichez le nom des canaux du chat dynamique dans le chat.]
+uiShowDynChannelNameInChatCB	[Afficher le nom des canaux du chat dynamique dans le chat]
 
 // HASH_VALUE 68467226378FE4E8
 // INDEX 6382
