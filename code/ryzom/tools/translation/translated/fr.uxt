@@ -2449,19 +2449,19 @@ uiEM_Point	[Pointer]
 
 // HASH_VALUE CC41B81FC561B83A
 // INDEX 612
-uiEM_Pointback	[Pointer_arrière]
+uiEM_Pointback	[Pointer arrière]
 
 // HASH_VALUE 4EA2E444CA03E03B
 // INDEX 613
-uiEM_Pointfront	[Pointer_avant]
+uiEM_Pointfront	[Pointer avant]
 
 // HASH_VALUE CCD2E82F0A41E03A
 // INDEX 614
-uiEM_Pointleft	[Pointer_gauche]
+uiEM_Pointleft	[Pointer gauche]
 
 // HASH_VALUE 4CB1F435CB721035
 // INDEX 615
-uiEM_Pointright	[Pointer_droite]
+uiEM_Pointright	[Pointer droite]
 
 // HASH_VALUE C8D2B44049138C44
 // INDEX 616
