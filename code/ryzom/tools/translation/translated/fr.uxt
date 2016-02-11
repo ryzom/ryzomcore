@@ -637,7 +637,7 @@ ecosysForest	[Forêt]
 
 // HASH_VALUE 74D81430649C44CC
 // INDEX 159
-ecosysLacustre	[Lac]
+ecosysLacustre	[Lacs]
 
 // HASH_VALUE 6836DC6EECF49C90
 // INDEX 160
@@ -745,11 +745,11 @@ toolNone	[Inconnu]
 
 // HASH_VALUE 6D25B7765A56B78F
 // INDEX 186
-toolArmorTool	[Outil de création d'une armure]
+toolArmorTool	[Outil de création d'armures]
 
 // HASH_VALUE D57BB054849BE476
 // INDEX 187
-toolJewelryTool	[Outil de création d'un bijou]
+toolJewelryTool	[Outil de création de bijoux]
 
 // HASH_VALUE E186288BD3334369
 // INDEX 188
@@ -757,7 +757,7 @@ toolAmmoTool	[Outil de création de munitions]
 
 // HASH_VALUE EAF91484E4B2E65A
 // INDEX 189
-toolRangeWeaponTool	[Outil de création d'une arme de tir]
+toolRangeWeaponTool	[Outil de création d'armes de tir]
 
 // HASH_VALUE 6CA7683A23536C48
 // INDEX 190
@@ -765,7 +765,7 @@ toolToolMaker	[Outil de création d'outils]
 
 // HASH_VALUE EA19107FE4B2E658
 // INDEX 191
-toolMeleeWeaponTool	[Outil de Création d'une arme de mêlée]
+toolMeleeWeaponTool	[Outil de Création d'armes de mêlée]
 
 // HASH_VALUE E546D4771C56E06C
 // INDEX 192
@@ -937,7 +937,7 @@ mpsapload1	[Moyenne]
 
 // HASH_VALUE 68D8942068D89420
 // INDEX 234
-mpsapload2	[Elevée]
+mpsapload2	[Élevée]
 
 // HASH_VALUE E8682C8E4DB34F70
 // INDEX 235
@@ -1017,7 +1017,7 @@ mpstat17	[Protection contre le Feu]
 
 // HASH_VALUE AC07A397E967CF92
 // INDEX 254
-mpstat18	[Protection Ondes de Choc]
+mpstat18	[Protection contre les Ondes de Choc]
 
 // HASH_VALUE ACC9848051C5D4AA
 // INDEX 255
@@ -1029,23 +1029,23 @@ mpstat20	[Protection contre l'Électricité]
 
 // HASH_VALUE 6B5A08600F45F0BE
 // INDEX 257
-mpstat21	[Résistance Désert]
+mpstat21	[Résistance au Désert]
 
 // HASH_VALUE 2BEA38620F45F4BF
 // INDEX 258
-mpstat22	[Résistance Forêt]
+mpstat22	[Résistance à la Forêt]
 
 // HASH_VALUE 5438244EE7FCC08F
 // INDEX 259
-mpstat23	[Résistance Lacs]
+mpstat23	[Résistance aux Lacs]
 
 // HASH_VALUE AA0A60660F549CBA
 // INDEX 260
-mpstat24	[Résistance Jungle]
+mpstat24	[Résistance à la Jungle]
 
 // HASH_VALUE 28A9F87D8C458461
 // INDEX 261
-mpstat25	[Résistance Primes Racines]
+mpstat25	[Résistance aux Primes Racines]
 
 // HASH_VALUE 24277F86DFD3BB89
 // INDEX 262
@@ -1297,7 +1297,7 @@ uiConfirmPassword	[Confirmer le mot de passe]
 
 // HASH_VALUE A9797F6868794A8F
 // INDEX 324
-uiEmail	[Adresse email]
+uiEmail	[Adresse courriel]
 
 // HASH_VALUE 89C0C4320910CC2A
 // INDEX 325
@@ -2449,19 +2449,19 @@ uiEM_Point	[Pointer]
 
 // HASH_VALUE CC41B81FC561B83A
 // INDEX 612
-uiEM_Pointback	[Pointer arrière]
+uiEM_Pointback	[Pointer_arrière]
 
 // HASH_VALUE 4EA2E444CA03E03B
 // INDEX 613
-uiEM_Pointfront	[Pointer avant]
+uiEM_Pointfront	[Pointer_avant]
 
 // HASH_VALUE CCD2E82F0A41E03A
 // INDEX 614
-uiEM_Pointleft	[Pointer gauche]
+uiEM_Pointleft	[Pointer_gauche]
 
 // HASH_VALUE 4CB1F435CB721035
 // INDEX 615
-uiEM_Pointright	[Pointer droite]
+uiEM_Pointright	[Pointer_droite]
 
 // HASH_VALUE C8D2B44049138C44
 // INDEX 616
@@ -3367,7 +3367,7 @@ uiEnableRacialAnimation	[Activer les animations raciales]
 
 // HASH_VALUE 5CDA8874D1C96450
 // INDEX 841
-uiHDTexture	[Texture haute résolution]
+uiHDTexture	[Textures haute résolution]
 
 // HASH_VALUE 8A61DC29CDA19836
 // INDEX 842
@@ -3391,7 +3391,7 @@ uiShowTargeted	[Affichage de la cible]
 
 // HASH_VALUE 5A081C44E478CB3A
 // INDEX 847
-uiSelectWithRClick	[Clic droit pour choisir]
+uiSelectWithRClick	[Clic-droit pour choisir]
 
 // HASH_VALUE 4E72B87EA335E4A3
 // INDEX 848
@@ -4170,7 +4170,7 @@ uiUseEax	[Utiliser EAX]
 
 // HASH_VALUE 1427A86DD4B69B84
 // INDEX 1041
-uiMaxTracks	[Nombre de pistes max.]
+uiMaxTracks	[Nombre max. de pistes]
 
 // HASH_VALUE 19D9773EAEB8F72D
 // INDEX 1042
@@ -7079,11 +7079,11 @@ uiFilterMenuGuild	[GUILDE @{T8}/g]
 
 // HASH_VALUE E077D052719D1EAD
 // INDEX 1705
-uittFilterChat	[Cliquez pour sélectionner le mode de discussion]
+uittFilterChat	[Cliquer pour sélectionner le mode de discussion]
 
 // HASH_VALUE D0F8CD5A68438599
 // INDEX 1706
-uittEmote	[Cliquez pour sélectionner et lancer un Emote]
+uittEmote	[Cliquer pour sélectionner et lancer un Emote]
 
 // HASH_VALUE 17774BA065F05056
 // INDEX 1707
@@ -7252,11 +7252,11 @@ uittFilterMissMP	[Filtre d'@{6F6F}objets ou matières de mission\n
 
 // HASH_VALUE A54058101559C818
 // INDEX 1747
-uittDragToMacro	[Glissez cette brique pour créer une macro]
+uittDragToMacro	[Glisser cette brique pour créer une macro]
 
 // HASH_VALUE 9B59867FA149785E
 // INDEX 1748
-uittDropCmd	[Déposez ici la brique de commande]
+uittDropCmd	[Déposer ici la brique de commande]
 
 // HASH_VALUE A96A94FAA7638CD0
 // INDEX 1749
@@ -7264,7 +7264,7 @@ uittMacroMemorize	[Mémoriser la macro en cours]
 
 // HASH_VALUE A524A030BB79C757
 // INDEX 1750
-uittMacroUserDefIcon	[Cliquez pour définir une icône]
+uittMacroUserDefIcon	[Cliquer pour définir une icône]
 
 // HASH_VALUE 831B0064D50B1077
 // INDEX 1751
@@ -10463,7 +10463,7 @@ uihelpItemCrystalSpell	[Cet objet peut servir à\n
 	\n
 	Placez l'arme à enchanter dans votre main droite.\n
 	\n
-	Puis faites un clic droit sur le cristal, et choisissez "ENCHANTER MAIN DROITE".\n
+	Puis faites un clic-droit sur le cristal, et choisissez "ENCHANTER MAIN DROITE".\n
 	\n
 	Attention ! Appliquer un sort cristallisé supprime l'enchantement précédent et vide la charge en sève actuelle.\n
 	\n
@@ -10479,9 +10479,9 @@ uihelpItemChargeSpell	[@{FFF9}Charge en Sève :@{T12}@{FFFF}%quality\n
 	\n
 	Placez l'arme à recharger dans votre main droite.\n
 	\n
-	Puis faites un clic droit sur la charge, et choisissez "RECHARGER MAIN DROITE".\n
+	Puis faites un clic-droit sur la charge, et choisissez "RECHARGER MAIN DROITE".\n
 	\n
-	La Charge en Sève courante et maximum d'un objet peut être consultée avec un clic droit sur l'objet puis en sélectionnant 'info'.\n
+	La Charge en Sève courante et maximum d'un objet peut être consultée avec un clic-droit sur l'objet puis en sélectionnant 'info'.\n
 	%cansell%custom_text]
 
 // HELP - ITEM - animals
@@ -10503,7 +10503,7 @@ uihelpItemAnimal	[Cet objet représente \n
 
 // HASH_VALUE CB10EC5C14C1477D
 // INDEX 2497
-uihelpItemTeleport	[Pour l'utiliser, faites un clic droit et choisissez\n
+uihelpItemTeleport	[Pour l'utiliser, faites un clic-droit et choisissez\n
 	 "UTILISER TELEPORTEUR"\n
 	\n
 	\n
@@ -10909,7 +10909,7 @@ uiForce	[@{FFFE}Force :@{FFFF} donne une indication générale des capacités de
 	La @{FFFE}couleur de fond@{FFFF} indique le niveau moyen de la cible.\n
 	Les @{FFFE}étoiles blanches@{FFFF} précédées d'un chiffre sont une indication plus précise de la puissance de la cible.\n
 	Les @{FFFE}étoiles noires@{FFFF} sont réservées aux Créatures Nommées (@{FFFE}1 étoile@{FFFF}) ou aux Boss (@{FFFE}2 étoiles@{FFFF})\n
-	@{FFFE}Clic droit@{FFFF} et sélectionnez @{FFFE}Aide@{FFFF} pour plus d'informations...]
+	@{FFFE}Clic-droit@{FFFF} et sélectionnez @{FFFE}Aide@{FFFF} pour plus d'informations...]
 
 // HASH_VALUE 4814440444105450
 // INDEX 2563
@@ -14334,11 +14334,11 @@ uiTips1	[Pour apprendre à utiliser le jeu, cliquez simplement sur le bouton "?"
 
 // HASH_VALUE 7DA5956B2703DF0F
 // INDEX 3413
-uiTips2	[Un clic droit sur une fenêtre permet de la verrouiller/déverrouiller et de régler son opacité.]
+uiTips2	[Un clic-droit sur une fenêtre permet de la verrouiller/déverrouiller et de régler son opacité.]
 
 // HASH_VALUE C29310531817450A
 // INDEX 3414
-uiTips3	[Un clic droit sur la fenêtre du Chat Principal vous permet de filtrer les messages.]
+uiTips3	[Un clic-droit sur la fenêtre du Chat Principal vous permet de filtrer les messages.]
 
 // HASH_VALUE 91F397CE6119F537
 // INDEX 3415
@@ -19445,20 +19445,20 @@ uittSatiety	[Rouge : Vie / Orange : Volume / Blanc : Satiété. Si cette barre t
 // HASH_VALUE 2EE6A09C38655ED5
 // INDEX 4688
 uittAliveLandscape	[L'animal est en vie, et en dehors de l'étable.\n
-	@{6F6F}Clic gauche @{FFFF}pour sélectionner.\n
-	@{6F6F}Clic droit @{FFFF}pour donner un ordre.]
+	@{6F6F}Clic-gauche @{FFFF}pour sélectionner.\n
+	@{6F6F}Clic-droit @{FFFF}pour donner un ordre.]
 
 // HASH_VALUE 3CB6917B84CD2195
 // INDEX 4689
 uittStable	[L'animal est à l'étable.\n
-	@{6F6F}Clic gauche @{FFFF}pour sélectionner.\n
-	@{6F6F}Clic droit @{FFFF}pour donner un ordre.]
+	@{6F6F}Clic-gauche @{FFFF}pour sélectionner.\n
+	@{6F6F}Clic-droit @{FFFF}pour donner un ordre.]
 
 // HASH_VALUE AF075E2295E176F7
 // INDEX 4690
 uittDead	[L'animal est mort.\n
-	@{6F6F}Clic gauche @{FFFF}pour sélectionner.\n
-	@{6F6F}Clic droit @{FFFF}pour donner un ordre.]
+	@{6F6F}Clic-gauche @{FFFF}pour sélectionner.\n
+	@{6F6F}Clic-droit @{FFFF}pour donner un ordre.]
 
 // HASH_VALUE 309E23DB19F9A563
 // INDEX 4691
@@ -23499,7 +23499,7 @@ uimItemTextDisplay	[Lire]
 
 // HASH_VALUE DBC89089E5521B69
 // INDEX 5588
-uiTabInfo	[Clic droit pour séparer]
+uiTabInfo	[Clic-droit pour séparer]
 
 // HASH_VALUE 0000000000000000
 // INDEX 5589
@@ -24220,51 +24220,51 @@ uittAnimalInv	[L'@{6F6F}inventaire @{FFFF}donne accès aux objets transportés p
 // INDEX 5756
 uittChatAround	[@{6F6F}Alentours\n
 	@{FFFF}Affiche les messages à tous les joueurs situés dans un rayon d'environ 25 mètres autour de vous.\n
-	Clic droit pour séparer.]
+	Clic-droit pour séparer.]
 
 // HASH_VALUE 71DAEEB31452DCEA
 // INDEX 5757
 uittChatRegion	[@{6F6F}Region\n
 	@{FFFF}Affiche les messages à tous les joueurs situés dans votre région.\n
-	Clic droit pour séparer.]
+	Clic-droit pour séparer.]
 
 // HASH_VALUE 899B178F5AD9368A
 // INDEX 5758
 uittChatUniverse	[@{6F6F}Univers\n
 	@{FFFF}Affiche les messages à tous les joueurs dans le jeu (à utiliser avec parcimonie).\n
-	Clic droit pour séparer.]
+	Clic-droit pour séparer.]
 
 // HASH_VALUE 165BD172D9A11956
 // INDEX 5759
 uittChatUser	[@{6F6F}Utilisateur\n
-	@{FFFF}Clic droit dans la fenêtre pour modifier les filtres des messages à afficher dans ce canal.]
+	@{FFFF}Clic-droit dans la fenêtre pour modifier les filtres des messages à afficher dans ce canal.]
 
 // HASH_VALUE 0F80B12F2D86C0D5
 // INDEX 5760
 uittChatGuild	[@{6F6F}Guilde\n
-	@{FFFF}Clic droit pour séparer.]
+	@{FFFF}Clic-droit pour séparer.]
 
 // HASH_VALUE 1250E12BAD86C0D5
 // INDEX 5761
 uittChatTeam	[@{6F6F}Equipe\n
-	@{FFFF}Clic droit pour séparer.]
+	@{FFFF}Clic-droit pour séparer.]
 
 // HASH_VALUE 76AFA0DE40C6CEC0
 // INDEX 5762
 uittChatYubo	[@{6F6F}Chat du Support\n
-	@{FFFF}Clic droit pour séparer.]
+	@{FFFF}Clic-droit pour séparer.]
 
 // HASH_VALUE 3E6C1A6BDD69D5F5
 // INDEX 5763
 uittChatSysInfo	[@{6F6F}Informations Système\n
 	@{FFFF}Affiche les messages de combat et les informations du sytème.\n
-	Clic droit pour séparer.]
+	Clic-droit pour séparer.]
 
 // HASH_VALUE C5D74B8FF574901A
 // INDEX 5764
 uittCompassRange	[@{6F6F}Portée\n
 	@{FFFF}Distance de la zone visible sur le Radar.\n
-	Utilisez la molette de la souris sur la fenêtre du @{6F6F}compas @{FFFF}ou faites un clic droit et choisissez @{6F6F}Zoom Avant @{FFFF}ou @{6F6F}Zoom Arrière @{FFFF}pour modifier la valeur de la @{6F6F}portée@{FFFF}.]
+	Utilisez la molette de la souris sur la fenêtre du @{6F6F}compas @{FFFF}ou faites un clic-droit et choisissez @{6F6F}Zoom Avant @{FFFF}ou @{6F6F}Zoom Arrière @{FFFF}pour modifier la valeur de la @{6F6F}portée@{FFFF}.]
 
 // HASH_VALUE 70874AF6596CE72C
 // INDEX 5765
@@ -25231,7 +25231,7 @@ uiRAP_CharFlagsTooltip	[Un oeil indique que le joueur est connecté à ce scéna
 
 // HASH_VALUE C1F77B1087622C01
 // INDEX 5987
-uiRAP_CharNameTooltip	[Nom du joueur qui a été invité. Vous pouvez envoyer un  @{6F6F}message privé@{FFFF} à ce joueur, @{6F6F}l'éjecter@{FFFF} ou @{6F6F}aller à@{FFFF} sa position, en utilisant le clic droit, ou le bouton en bas à droite de la fenêtre. Cliquez pour trier avec ce critère.]
+uiRAP_CharNameTooltip	[Nom du joueur qui a été invité. Vous pouvez envoyer un  @{6F6F}message privé@{FFFF} à ce joueur, @{6F6F}l'éjecter@{FFFF} ou @{6F6F}aller à@{FFFF} sa position, en utilisant le clic-droit, ou le bouton en bas à droite de la fenêtre. Cliquez pour trier avec ce critère.]
 
 // HASH_VALUE 87FE819401AF7A96
 // INDEX 5988
