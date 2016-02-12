@@ -292,7 +292,12 @@ int exportScene(const CMeshUtilsSettings &settings)
 	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
 
 	// Apply database configuration
-	CDatabaseConfig::init(settings.SourceFilePath);
+	if (!CDatabaseConfig::init(settings.SourceFilePath))
+	{
+		tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to find database.cfg in input path or any of its parents.");
+		return EXIT_FAILURE;
+	}
+
 	CDatabaseConfig::initTextureSearchDirectories();
 
 	Assimp::Importer importer;

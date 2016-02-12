@@ -411,21 +411,7 @@ typedef HRESULT (WINAPI* LPCREATEDXGIFACTORY)(REFIID, void**);
 
 static std::string FormatError(HRESULT hr)
 {
-	std::string res;
-
-	LPTSTR errorText = NULL;
-
-	FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, hr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&errorText, 0, NULL);
-
-	if (errorText)
-	{
-		res = NLMISC::toString("%s (0x%x)", errorText, hr);
-		LocalFree(errorText);
-		errorText = NULL;
-	}
-
-	return res;
+	return NLMISC::toString("%s (0x%x)", formatErrorMessage(hr).c_str(), hr);
 }
 
 struct SAdapter

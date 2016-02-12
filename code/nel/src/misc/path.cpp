@@ -2358,23 +2358,13 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 #ifdef NL_OS_WINDOWS
 		if (MoveFile(ssrc.c_str(), sdest.c_str()) == 0)
 		{
-			LPVOID lpMsgBuf;
-			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-					    FORMAT_MESSAGE_FROM_SYSTEM |
-						FORMAT_MESSAGE_IGNORE_INSERTS,
-						NULL,
-						GetLastError(),
-						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-						(LPTSTR) &lpMsgBuf,
-						0,
-						NULL );
+			sint lastError = NLMISC::getLastError();
 			nlwarning ("PATH: CopyMoveFile error: can't link/move '%s' into '%s', error %u (%s)",
 				ssrc.c_str(),
 				sdest.c_str(),
-				GetLastError(),
-				lpMsgBuf);
+				lastError,
+				NLMISC::formatErrorMessage(lastError).c_str());
 
-			LocalFree(lpMsgBuf);
 			return false;
 		}
 #else
