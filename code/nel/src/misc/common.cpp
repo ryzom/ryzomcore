@@ -685,10 +685,7 @@ bool killProgram(uint32 pid)
 /*#elif defined(NL_OS_WINDOWS)
 	// it doesn't work because pid != handle and i don't know how to kill a pid or know the real handle of another service (not -1)
 	int res = TerminateProcess((HANDLE)pid, 888);
-	LPVOID lpMsgBuf;
-	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL);
 	nlwarning("Failed to kill '%d' err %d: '%s'", pid, GetLastError (), lpMsgBuf);
-	LocalFree(lpMsgBuf);
 	return res != 0;
 */
 #else
@@ -758,11 +755,12 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	}
 	else
 	{
-		LPVOID lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL);
 		if (log)
-			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), GetLastError(), lpMsgBuf);
-		LocalFree(lpMsgBuf);
+		{
+			sint lastError = getLastError();
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
+		}
+
 		CloseHandle( pi.hProcess );
 		CloseHandle( pi.hThread );
 	}
@@ -920,13 +918,11 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 	}
 	else
 	{
-		LPVOID lpMsgBuf;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL);
-
 		if (log)
-			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), GetLastError(), lpMsgBuf);
-
-		LocalFree(lpMsgBuf);
+		{
+			sint lastError = getLastError();
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
+		}
 
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
