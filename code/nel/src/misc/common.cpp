@@ -1033,6 +1033,7 @@ std::string expandEnvironmentVariables(const std::string &s)
 			{
 				// value not found
 				found = false;
+				nlwarning("Environment variable '%s' not found, won't be replaced", name.c_str());
 			}
 		}
 
