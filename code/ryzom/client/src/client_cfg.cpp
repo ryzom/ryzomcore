@@ -25,6 +25,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/cmd_args.h"
 // Client.
 #include "client_cfg.h"
 #include "entities.h"
@@ -255,6 +256,8 @@ extern CRyzomTime		RT;
 extern string	Cookie;
 extern string	FSAddr;
 #endif
+
+extern NLMISC::CCmdArgs Args;
 
 /////////////
 // METHODS //
@@ -2202,24 +2205,26 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-#elif defined(NL_OS_UNIX)
-	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
-	defaultConfigPath = CPath::standardizePath(getRyzomEtcPrefix());
+	defaultConfigPath = getAppBundlePath() + "/Contents/Resources/";
 #else
-	// some other prefix here :)
-#endif // NL_OS_UNIX
+	// unders Windows or Linux, search client_default.cfg is same directory as executable
+	defaultConfigPath = Args.getProgramPath();
+#endif
 
 	// look in the current working directory first
 	if (CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
 
-	// if not in working directory, check using prefix path
+	// look in startup directory
+	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))
+		p_name = Args.getStartupPath() + defaultConfigFileName;
+
+	// look in prefix path
 	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
 	// if some client_default.cfg was found return true
-	if(p_name.size())
+	if (p_name.size())
 		return true;
 
 	return false;

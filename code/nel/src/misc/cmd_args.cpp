@@ -264,6 +264,9 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	_ProgramName = CFile::getFilename(argv.front());
 	_ProgramPath = CPath::makePathAbsolute(CPath::standardizePath(CFile::getPath(argv.front())), CPath::getCurrentPath(), true);
 
+	// current path
+	_StartupPath = CPath::standardizePath(CPath::getCurrentPath());
+
 	// set process name for logs
 	CLog::setProcessName(_ProgramName);
 

@@ -303,7 +303,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     fontsize="12" shadow="true" hardtext="uiOnChecking" />
 
     <view type="text" id="state" posparent="check_win" posref="TL TL" w="584" x="8" y="-8" line_maxw="584" color="135 243 28 255"
-    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
     <view type="text" id="progress" posref="BL TL" posparent="state" fontsize="12" y="-8" color="135 243 28 255" line_maxw="584"
     shadow="true" multi_line="true" multi_line_space="0" />
 
@@ -419,7 +419,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 
     <view type="text" id="progress" posref="TL TL" posparent="patch_win" fontsize="12" x="8" y="-8" color="135 243 28 255" shadow="true"/>
     <view type="text" id="state" posparent="progress" posref="TR TL" w="520" x="4" y="0" line_maxw="520" color="135 243 28 255"
-    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
     <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="progress:active,state:active"/>
 
     <!-- Reboot -->
@@ -572,7 +572,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 	<!-- check state -->
     <instance template="server_box" id="check_win" posparent="placeholder" posref="TM TM" sizeref="w" h="88" x="0" y="0" />
     <view type="text" id="state" posparent="check_win" posref="TL TL" w="584" x="8" y="-8" line_maxw="584" color="135 243 28 255"
-    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up"/>
+    fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
     <view type="text" id="progress" posref="BL TL" posparent="state" fontsize="12" y="-8" color="135 243 28 255" line_maxw="584"
     shadow="true" multi_line="true" multi_line_space="0" />
 

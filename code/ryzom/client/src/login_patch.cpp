@@ -892,6 +892,13 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 #ifdef NL_OS_WINDOWS
 			fprintf(fp, "start \"\" \"%s\" %%1 %%2 %%3\n", CPath::standardizeDosPath(RyzomFilename).c_str());
 #else
+			// wait until client is not in memory
+			fprintf(fp, "until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+
+			// be sure file is executable
+			fprintf(fp, "chmod +x \"%s\"\n", RyzomFilename.c_str());
+
+			// launch new client
 			fprintf(fp, "\"%s\" $1 $2 $3\n", RyzomFilename.c_str());
 #endif
 		}
@@ -945,11 +952,7 @@ void CPatchManager::executeBatchFile()
 		arguments += " " + toString(LoginShardId);
 	}
 
-	if (launchProgram(batchFilename, arguments, false))
-	{
-		exit(0);
-	}
-	else
+	if (!launchProgram(batchFilename, arguments, false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));
@@ -1015,12 +1018,12 @@ float CPatchManager::getCurrentFileProgress() const
 // ****************************************************************************
 void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 {
-	ucstring s = CI18N::get("uiSetAttrib") + " " + filename;
+	ucstring s = CI18N::get("uiSetAttrib") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::setRWAccess(filename) && bThrowException)
 	{
-		s = CI18N::get("uiAttribErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiAttribErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
 		throw Exception (s.toString());
 	}
@@ -1029,7 +1032,7 @@ void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 // ****************************************************************************
 string CPatchManager::deleteFile (const string &filename, bool bThrowException, bool bWarning)
 {
-	ucstring s = CI18N::get("uiDelFile") + " " + filename;
+	ucstring s = CI18N::get("uiDelFile") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::fileExists(filename))
@@ -1041,7 +1044,7 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 
 	if (!NLMISC::CFile::deleteFile(filename))
 	{
-		s = CI18N::get("uiDelErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiDelErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
@@ -1269,7 +1272,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 	try
 	{
 #ifdef USE_CURL
-		ucstring s = CI18N::get("uiDLWithCurl") + " " + dest;
+		ucstring s = CI18N::get("uiDLWithCurl") + " " + CFile::getFilename(dest);
 		setState(true, s);
 
 		// user agent = nel_launcher
@@ -1776,10 +1779,19 @@ int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ul
 // ****************************************************************************
 int CPatchManager::validateProgress(void *foo, double t, double d, double /* ultotal */, double /* ulnow */)
 {
+	static std::vector<std::string> units;
+
+	if (units.empty())
+	{
+		units.push_back("B"); // there is no translation for byte unit...
+		units.push_back(CI18N::get("uiKb").toUtf8());
+		units.push_back(CI18N::get("uiMb").toUtf8());
+	}
+
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double pour1 = t!=0.0?d*100.0/t:0.0;
-	ucstring sTranslate = CI18N::get("uiLoginGetFile") + toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
-		NLMISC::bytesToHumanReadable((uint64)d).c_str(), NLMISC::bytesToHumanReadable((uint64)t).c_str(), pour1);
+	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
+		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1));
 	pPM->setState(false, sTranslate);
 	if (foo)
 	{
@@ -2791,49 +2803,8 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 
 	// Launching xdelta
 /*
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE;
-	si.cb = sizeof(si);
-
-	ZeroMemory( &pi, sizeof(pi) );
-
 	// Start the child process.
 	string strCmdLine = "xdelta patch " + patch + " " + src + " " + out;
-
-	if( !CreateProcess( NULL, // No module name (use command line).
-		(char*)strCmdLine.c_str(), // Command line.
-		NULL,							// Process handle not inheritable.
-		NULL,							// Thread handle not inheritable.
-		FALSE,						// Set handle inheritance to FALSE.
-		0,								// No creation flags.
-		NULL,							// Use parent's environment block.
-		NULL,							// Use parent's starting directory.
-		&si,							// Pointer to STARTUPINFO structure.
-		&pi )							// Pointer to PROCESS_INFORMATION structure.
-		)
-	{
-		// error occurs during the launch
-		string str = toString("Can't execute '%s'", strCmdLine.c_str());
-		throw Exception (str);
-	}
-
-	// Wait for the process to terminate
-	DWORD dwTimeout = 1000 * 300; // 5 min = 300 s
-	DWORD nRetWait = WaitForSingleObject(pi.hProcess, dwTimeout);
-
-	if (nRetWait == WAIT_TIMEOUT)
-	{
-		string str = toString("Time Out After %d s", dwTimeout/1000);
-		throw Exception (str);
-	}
-
-	// Close process and thread handles.
-	CloseHandle( pi.hProcess );
-	CloseHandle( pi.hThread );
 */
 }
 
@@ -3170,44 +3141,13 @@ bool CPatchManager::extract(const std::string& patchPath,
 		stopFun();
 	}
 
-#ifdef NL_OS_WINDOWS
-	// normal quit
-	// Launch the batch file
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE; // SW_SHOW
-
-	si.cb = sizeof(si);
-
-	ZeroMemory( &pi, sizeof(pi) );
-
-	// Start the child process.
-	string strCmdLine;
-	strCmdLine = updateBatchFilename;
-	//onFileInstallFinished();
-
-	if( !CreateProcess( NULL, // No module name (use command line).
-		(LPSTR)strCmdLine.c_str(), // Command line.
-		NULL,				// Process handle not inheritable.
-		NULL,				// Thread handle not inheritable.
-		FALSE,				// Set handle inheritance to FALSE.
-		0,					// No creation flags.
-		NULL,				// Use parent's environment block.
-		NULL,				// Use parent's starting directory.
-		&si,				// Pointer to STARTUPINFO structure.
-		&pi )				// Pointer to PROCESS_INFORMATION structure.
-		)
+	if (!launchProgram(updateBatchFilename, "", false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", updateBatchFilename.c_str(), errno, strerror(errno));
 		throw Exception (str);
 	}
-#else
-	// TODO for Linux and Mac OS
-#endif
+
 	return true;
 }
 
@@ -3497,4 +3437,3 @@ void CInstallThread::run()
 
 	pPM->reboot(); // do not reboot just run the extract .bat
 }
-

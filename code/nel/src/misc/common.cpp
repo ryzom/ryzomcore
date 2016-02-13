@@ -765,25 +765,33 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 		CloseHandle( pi.hThread );
 	}
 
-#elif defined(NL_OS_MAC)
-	// we need to open bundles with "open" command
-	std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
-
-	// append arguments if any
-	if (!arguments.empty())
-	{
-		command += NLMISC::toString(" --args %s", arguments.c_str());
-	}
-
-	int res = system(command.c_str());
-
-	if (!res) return true;
-
-	if (log)
-	{
-		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
-	}
 #else
+
+#ifdef NL_OS_MAC
+	// special OS X case with bundles
+	if (toLower(programName).find(".app") != std::string::npos)
+	{
+		// we need to open bundles with "open" command
+		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
+
+		// append arguments if any
+		if (!arguments.empty())
+		{
+			command += NLMISC::toString(" --args %s", arguments.c_str());
+		}
+
+		int res = system(command.c_str());
+
+		if (!res) return true;
+
+		if (log)
+		{
+			nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
+		}
+
+		return false;
+	}
+#endif
 
 	static bool firstLaunchProgram = true;
 	if (firstLaunchProgram)
@@ -1025,6 +1033,7 @@ std::string expandEnvironmentVariables(const std::string &s)
 			{
 				// value not found
 				found = false;
+				nlwarning("Environment variable '%s' not found, won't be replaced", name.c_str());
 			}
 		}
 
