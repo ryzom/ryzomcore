@@ -37,7 +37,9 @@ typedef void			(__cdecl *SteamAPI_RunCallbacksFuncPtr)();
 
 // macros to simplify dynamic functions loading
 #define NL_DECLARE_SYMBOL(symbol) symbol##FuncPtr nl##symbol = NULL
-#define NL_LOAD_SYMBOL(symbol) nl##symbol = (symbol##FuncPtr)NLMISC::nlGetSymbolAddress(_Handle, #symbol)
+#define NL_LOAD_SYMBOL(symbol) \
+nl##symbol = (symbol##FuncPtr)NLMISC::nlGetSymbolAddress(_Handle, #symbol); \
+if (nl##symbol == NULL) return false
 
 NL_DECLARE_SYMBOL(SteamAPI_Init);
 NL_DECLARE_SYMBOL(SteamAPI_Shutdown);
