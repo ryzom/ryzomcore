@@ -2215,13 +2215,11 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 
 #ifdef NL_OS_MAC
 	// on mac, client_default.cfg should be searched in .app/Contents/Resources/
-	defaultConfigPath = CPath::standardizePath(getAppBundlePath() + "/Contents/Resources/");
-#elif defined(NL_OS_UNIX)
-	// if RYZOM_ETC_PREFIX is defined, client_default.cfg might be over there
-	defaultConfigPath = CPath::standardizePath(getRyzomEtcPrefix());
+	defaultConfigPath = getAppBundlePath() + "/Contents/Resources/";
 #else
-	// some other prefix here :)
-#endif // NL_OS_UNIX
+	// unders Windows or Linux, search client_default.cfg is same directory as executable
+	defaultConfigPath = Args.getProgramPath();
+#endif
 
 	// look in the current working directory first
 	if (CFile::isExists(defaultConfigFileName))
