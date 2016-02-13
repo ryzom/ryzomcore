@@ -899,7 +899,7 @@ bool login()
 	Actions.enable(true);
 	EditActions.enable(true);
 
-	if(ClientCfg.ConfigFile.exists("pPM->isVerboseLog()"))
+	if(ClientCfg.ConfigFile.exists("VerboseLog"))
 		pPM->setVerboseLog(ClientCfg.ConfigFile.getVar("VerboseLog").asInt() == 1);
 	if(pPM->isVerboseLog()) nlinfo("Using verbose log mode");
 
@@ -1864,9 +1864,7 @@ class CAHOpenURL : public IActionHandler
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			nlwarning("RegQueryValue for '%s' : %s", KeyName, lpMsgBuf);
-			// Free the buffer.
-			LocalFree( lpMsgBuf );
+			nlwarning("RegQueryValue for '%s' : %s", KeyName, NLMISC::formatErrorMessage(0).c_str());
 		}
 #else
 		// TODO: for Linux and Mac OS
