@@ -1848,19 +1848,6 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
-			DWORD ret = 0;
-			LPVOID lpMsgBuf;
-			FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				ret,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-				(LPTSTR) &lpMsgBuf,
-				0,
-				NULL
-			);
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
