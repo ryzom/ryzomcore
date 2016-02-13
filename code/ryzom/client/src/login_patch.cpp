@@ -952,11 +952,7 @@ void CPatchManager::executeBatchFile()
 		arguments += " " + toString(LoginShardId);
 	}
 
-	if (launchProgram(batchFilename, arguments, false))
-	{
-		exit(0);
-	}
-	else
+	if (!launchProgram(batchFilename, arguments, false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));
