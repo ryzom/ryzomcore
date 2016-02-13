@@ -1779,10 +1779,19 @@ int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ul
 // ****************************************************************************
 int CPatchManager::validateProgress(void *foo, double t, double d, double /* ultotal */, double /* ulnow */)
 {
+	static std::vector<std::string> units;
+
+	if (units.empty())
+	{
+		units.push_back("B"); // there is no translation for byte unit...
+		units.push_back(CI18N::get("uiKb").toUtf8());
+		units.push_back(CI18N::get("uiMb").toUtf8());
+	}
+
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double pour1 = t!=0.0?d*100.0/t:0.0;
-	ucstring sTranslate = CI18N::get("uiLoginGetFile") + toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
-		NLMISC::bytesToHumanReadable((uint64)d).c_str(), NLMISC::bytesToHumanReadable((uint64)t).c_str(), pour1);
+	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
+		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1));
 	pPM->setState(false, sTranslate);
 	if (foo)
 	{
