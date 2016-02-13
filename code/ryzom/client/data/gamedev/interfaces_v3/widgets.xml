@@ -1702,7 +1702,7 @@
          color_grayed="255 255 255 64"
          shadow_color_grayed="0 0 0 255"
          highlight_over="255 255 255 150"
-         case_mode="%case_first_word_letter_up"></group>
+         case_mode="%case_normal"></group>
   <group type="menu"
          id="base_menu_with_color"
          extends="base_menu">

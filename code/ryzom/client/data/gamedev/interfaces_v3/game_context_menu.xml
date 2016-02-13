@@ -20,7 +20,7 @@
 	shadow_color_grayed="0 0 0 255"
 	highlight_over="255 255 255 128"
 	formatted="true"
-	case_mode="%case_first_word_letter_up"
+	case_mode="%case_normal"
 >
 
 	<!-- Put First NPC interaction, sorted by usage frequency-->
