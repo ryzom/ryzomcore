@@ -3177,44 +3177,13 @@ bool CPatchManager::extract(const std::string& patchPath,
 		stopFun();
 	}
 
-#ifdef NL_OS_WINDOWS
-	// normal quit
-	// Launch the batch file
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE; // SW_SHOW
-
-	si.cb = sizeof(si);
-
-	ZeroMemory( &pi, sizeof(pi) );
-
-	// Start the child process.
-	string strCmdLine;
-	strCmdLine = updateBatchFilename;
-	//onFileInstallFinished();
-
-	if( !CreateProcess( NULL, // No module name (use command line).
-		(LPSTR)strCmdLine.c_str(), // Command line.
-		NULL,				// Process handle not inheritable.
-		NULL,				// Thread handle not inheritable.
-		FALSE,				// Set handle inheritance to FALSE.
-		0,					// No creation flags.
-		NULL,				// Use parent's environment block.
-		NULL,				// Use parent's starting directory.
-		&si,				// Pointer to STARTUPINFO structure.
-		&pi )				// Pointer to PROCESS_INFORMATION structure.
-		)
+	if (!launchProgram(updateBatchFilename, "", false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", updateBatchFilename.c_str(), errno, strerror(errno));
 		throw Exception (str);
 	}
-#else
-	// TODO for Linux and Mac OS
-#endif
+
 	return true;
 }
 
