@@ -26,26 +26,28 @@
 
 // prototypes definitions for Steam API functions we'll call
 typedef bool			(__cdecl *SteamAPI_InitFuncPtr)();
-typedef void			(__cdecl *SteamAPI_RegisterCallbackFuncPtr)(class CCallbackBase *pCallback, int iCallback);
-typedef void			(__cdecl *SteamAPI_RunCallbacksFuncPtr)();
 typedef void			(__cdecl *SteamAPI_ShutdownFuncPtr)();
-typedef void			(__cdecl *SteamAPI_UnregisterCallbackFuncPtr)(class CCallbackBase *pCallback);
-typedef ISteamUtils*	(__cdecl *SteamUtilsFuncPtr)();
-typedef ISteamUser*		(__cdecl *SteamUserFuncPtr)();
+typedef ISteamClient*	(__cdecl *SteamClientFuncPtr)();
 typedef ISteamFriends*	(__cdecl *SteamFriendsFuncPtr)();
+typedef ISteamUser*		(__cdecl *SteamUserFuncPtr)();
+typedef ISteamUtils*	(__cdecl *SteamUtilsFuncPtr)();
+typedef void			(__cdecl *SteamAPI_RegisterCallbackFuncPtr)(class CCallbackBase *pCallback, int iCallback);
+typedef void			(__cdecl *SteamAPI_UnregisterCallbackFuncPtr)(class CCallbackBase *pCallback);
+typedef void			(__cdecl *SteamAPI_RunCallbacksFuncPtr)();
 
 // macros to simplify dynamic functions loading
 #define NL_DECLARE_SYMBOL(symbol) symbol##FuncPtr nl##symbol = NULL
 #define NL_LOAD_SYMBOL(symbol) nl##symbol = (symbol##FuncPtr)NLMISC::nlGetSymbolAddress(_Handle, #symbol)
 
 NL_DECLARE_SYMBOL(SteamAPI_Init);
+NL_DECLARE_SYMBOL(SteamAPI_Shutdown);
+NL_DECLARE_SYMBOL(SteamClient);
 NL_DECLARE_SYMBOL(SteamFriends);
 NL_DECLARE_SYMBOL(SteamUser);
 NL_DECLARE_SYMBOL(SteamUtils);
 NL_DECLARE_SYMBOL(SteamAPI_RegisterCallback);
 NL_DECLARE_SYMBOL(SteamAPI_UnregisterCallback);
 NL_DECLARE_SYMBOL(SteamAPI_RunCallbacks);
-NL_DECLARE_SYMBOL(SteamAPI_Shutdown);
 
 // taken from steam_api.h, we needed to change it to use our dynamically loaded functions
 
@@ -260,6 +262,24 @@ CSteamClient::~CSteamClient()
 	release();
 }
 
+static void SteamWarningMessageHook(int severity, const char *message)
+{
+	switch(severity)
+	{
+		case 1: // warning
+		nlwarning("%s", message);
+		break;
+
+		case 0: // message
+		nlinfo("%s", message);
+		break;
+
+		default: // unknown
+		nlwarning("Unknown severity %d: %s", severity, message);
+		break;
+	}
+}
+
 bool CSteamClient::init()
 {
 	std::string filename;
@@ -283,7 +303,9 @@ bool CSteamClient::init()
 		return false;
 	}
 
+	// load Steam functions
 	NL_LOAD_SYMBOL(SteamAPI_Init);
+	NL_LOAD_SYMBOL(SteamAPI_Shutdown);
 
 	// check if function was found
 	if (!nlSteamAPI_Init)
@@ -301,11 +323,14 @@ bool CSteamClient::init()
 
 	_Initialized = true;
 
-	// load more functions
+	// load more Steam functions
+	NL_LOAD_SYMBOL(SteamClient);
 	NL_LOAD_SYMBOL(SteamFriends);
 	NL_LOAD_SYMBOL(SteamUser);
 	NL_LOAD_SYMBOL(SteamUtils);
-	NL_LOAD_SYMBOL(SteamAPI_Shutdown);
+
+	// set warning messages hook
+	nlSteamClient()->SetWarningMessageHook(SteamWarningMessageHook);
 
 	bool loggedOn = nlSteamUser()->BLoggedOn();
 
