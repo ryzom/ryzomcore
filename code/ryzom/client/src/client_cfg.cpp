@@ -25,6 +25,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/bit_mem_stream.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/cmd_args.h"
 // Client.
 #include "client_cfg.h"
 #include "entities.h"
@@ -255,6 +256,8 @@ extern CRyzomTime		RT;
 extern string	Cookie;
 extern string	FSAddr;
 #endif
+
+extern NLMISC::CCmdArgs Args;
 
 /////////////
 // METHODS //
@@ -2224,7 +2227,11 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	if (CFile::isExists(defaultConfigFileName))
 		p_name = defaultConfigFileName;
 
-	// if not in working directory, check using prefix path
+	// look in startup directory
+	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))
+		p_name = Args.getStartupPath() + defaultConfigFileName;
+
+	// look in prefix path
 	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 

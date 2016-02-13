@@ -118,6 +118,7 @@ public:
 	/// Returns program name or path passed as first parameter to parse() method
 	std::string getProgramName() const { return _ProgramName; }
 	std::string getProgramPath() const { return _ProgramPath; }
+	std::string getStartupPath() const { return _StartupPath; }
 
 	/// Set or get description to display in help
 	void setDescription(const std::string &description) { _Description = description; }
@@ -129,6 +130,7 @@ public:
 protected:
 	std::string		_ProgramName;	// filename of the program
 	std::string		_ProgramPath;	// full path of the program
+	std::string		_StartupPath;	// initial startup path
 	std::string		_Description;	// description of the program
 	std::string		_Version;		// version of the program
 
