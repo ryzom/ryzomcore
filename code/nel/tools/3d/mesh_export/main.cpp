@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	NL3D::registerSerial3d();
 
 	sint res = 0;
-	
+
 	for(uint i = 0; i < filePathes.size(); ++i)
 	{
 		std::string filePath = filePathes[i];
@@ -78,6 +78,8 @@ int main(int argc, char *argv[])
 			settings.ToolErrorLog = settings.DestinationDirectoryPath + "error.log";
 
 		res = exportScene(settings);
+
+		if (res != EXIT_SUCCESS) break;
 	}
 
 	return res;

@@ -777,8 +777,12 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	int res = system(command.c_str());
 
-	if (res && log)
+	if (!res) return true;
+
+	if (log)
+	{
 		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
+	}
 #else
 
 	static bool firstLaunchProgram = true;

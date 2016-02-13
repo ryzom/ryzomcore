@@ -899,7 +899,7 @@ bool login()
 	Actions.enable(true);
 	EditActions.enable(true);
 
-	if(ClientCfg.ConfigFile.exists("pPM->isVerboseLog()"))
+	if(ClientCfg.ConfigFile.exists("VerboseLog"))
 		pPM->setVerboseLog(ClientCfg.ConfigFile.getVar("VerboseLog").asInt() == 1);
 	if(pPM->isVerboseLog()) nlinfo("Using verbose log mode");
 
@@ -1848,25 +1848,10 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
-			DWORD ret = 0;
-			LPVOID lpMsgBuf;
-			FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				ret,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-				(LPTSTR) &lpMsgBuf,
-				0,
-				NULL
-			);
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			nlwarning("RegQueryValue for '%s' : %s", KeyName, lpMsgBuf);
-			// Free the buffer.
-			LocalFree( lpMsgBuf );
+			nlwarning("RegQueryValue for '%s' : %s", KeyName, NLMISC::formatErrorMessage(0).c_str());
 		}
 #else
 		// TODO: for Linux and Mac OS
