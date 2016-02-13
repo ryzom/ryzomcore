@@ -1789,18 +1789,18 @@ std::string CFileContainer::getApplicationDirectory(const std::string &appName, 
 	if (appPath.empty())
 	{
 #ifdef NL_OS_WINDOWS
-		wchar_t buffer[MAX_PATH];
+		char buffer[MAX_PATH];
 #ifdef CSIDL_LOCAL_APPDATA
 		if (local)
 		{
-			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
+			SHGetSpecialFolderPathA(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
 		}
 		else
 #endif
 		{
-			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
+			SHGetSpecialFolderPathA(NULL, buffer, CSIDL_APPDATA, TRUE);
 		}
-		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
+		appPath = CPath::standardizePath(buffer);
 #elif defined(NL_OS_MAC)
 		appPath = CPath::standardizePath(getenv("HOME"));
 		appPath += "/Library/Application Support/";
