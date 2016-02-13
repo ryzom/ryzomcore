@@ -2794,49 +2794,8 @@ void CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 
 	// Launching xdelta
 /*
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	ZeroMemory( &si, sizeof(si) );
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_HIDE;
-	si.cb = sizeof(si);
-
-	ZeroMemory( &pi, sizeof(pi) );
-
 	// Start the child process.
 	string strCmdLine = "xdelta patch " + patch + " " + src + " " + out;
-
-	if( !CreateProcess( NULL, // No module name (use command line).
-		(char*)strCmdLine.c_str(), // Command line.
-		NULL,							// Process handle not inheritable.
-		NULL,							// Thread handle not inheritable.
-		FALSE,						// Set handle inheritance to FALSE.
-		0,								// No creation flags.
-		NULL,							// Use parent's environment block.
-		NULL,							// Use parent's starting directory.
-		&si,							// Pointer to STARTUPINFO structure.
-		&pi )							// Pointer to PROCESS_INFORMATION structure.
-		)
-	{
-		// error occurs during the launch
-		string str = toString("Can't execute '%s'", strCmdLine.c_str());
-		throw Exception (str);
-	}
-
-	// Wait for the process to terminate
-	DWORD dwTimeout = 1000 * 300; // 5 min = 300 s
-	DWORD nRetWait = WaitForSingleObject(pi.hProcess, dwTimeout);
-
-	if (nRetWait == WAIT_TIMEOUT)
-	{
-		string str = toString("Time Out After %d s", dwTimeout/1000);
-		throw Exception (str);
-	}
-
-	// Close process and thread handles.
-	CloseHandle( pi.hProcess );
-	CloseHandle( pi.hThread );
 */
 }
 
