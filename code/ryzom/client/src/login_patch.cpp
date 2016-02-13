@@ -1018,12 +1018,12 @@ float CPatchManager::getCurrentFileProgress() const
 // ****************************************************************************
 void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 {
-	ucstring s = CI18N::get("uiSetAttrib") + " " + filename;
+	ucstring s = CI18N::get("uiSetAttrib") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::setRWAccess(filename) && bThrowException)
 	{
-		s = CI18N::get("uiAttribErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiAttribErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
 		throw Exception (s.toString());
 	}
@@ -1032,7 +1032,7 @@ void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 // ****************************************************************************
 string CPatchManager::deleteFile (const string &filename, bool bThrowException, bool bWarning)
 {
-	ucstring s = CI18N::get("uiDelFile") + " " + filename;
+	ucstring s = CI18N::get("uiDelFile") + " " + CFile::getFilename(filename);
 	setState(true, s);
 
 	if (!NLMISC::CFile::fileExists(filename))
@@ -1044,7 +1044,7 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 
 	if (!NLMISC::CFile::deleteFile(filename))
 	{
-		s = CI18N::get("uiDelErr") + " " + filename + " (" + toString(errno) + "," + strerror(errno) + ")";
+		s = CI18N::get("uiDelErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
@@ -1272,7 +1272,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 	try
 	{
 #ifdef USE_CURL
-		ucstring s = CI18N::get("uiDLWithCurl") + " " + dest;
+		ucstring s = CI18N::get("uiDLWithCurl") + " " + CFile::getFilename(dest);
 		setState(true, s);
 
 		// user agent = nel_launcher
