@@ -3005,7 +3005,6 @@ void CInterfaceManager::initEmotes()
 				nbToken++;
 
 		CGroupMenu *pRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:user_chat_emote_menu"));
-		pRootMenu->setProperty("case_mode", "0");
 		nlassert(pRootMenu);
 
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();

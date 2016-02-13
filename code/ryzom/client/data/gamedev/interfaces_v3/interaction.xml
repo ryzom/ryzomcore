@@ -521,7 +521,6 @@
 
     <view type="text"
           id="text"
-          case_mode="%case_first_word_letter_up"
           posref="TL TL"
           x="8"
           y="-8"
@@ -859,7 +858,7 @@
   <group type="menu"
          id="user_chat_emote_menu"
          extends="base_menu"
-         case_mode="%case_first_word_letter_up"
+         case_mode="%case_normal"
          on_active="lua:game:updateEmoteMenu()">
     <action id="uiEM_Wave"
             name="uiQuickEmote" />
@@ -1263,7 +1262,7 @@
               tooltip_parent="win"
               onclick_l="select_chat_target"
               params_l="menu=ui:interface:user_chat_target_menu|party_chats=false"
-              case_mode="%case_first_word_letter_up" />
+              case_mode="%case_normal" />
         <ctrl style="text_button_16"
               id="but_emote"
               posref="BR TR"
