@@ -892,6 +892,13 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 #ifdef NL_OS_WINDOWS
 			fprintf(fp, "start \"\" \"%s\" %%1 %%2 %%3\n", CPath::standardizeDosPath(RyzomFilename).c_str());
 #else
+			// wait until client is not in memory
+			fprintf(fp, "until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+
+			// be sure file is executable
+			fprintf(fp, "chmod +x \"%s\"\n", RyzomFilename.c_str());
+
+			// launch new client
 			fprintf(fp, "\"%s\" $1 $2 $3\n", RyzomFilename.c_str());
 #endif
 		}
