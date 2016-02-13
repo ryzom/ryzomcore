@@ -579,9 +579,11 @@ namespace NLGUI
 								string finalUrl;
 								if (it->type == ImgType)
 								{
-									CFile::moveFile(it->dest, tmpfile);
-									//if (lookupLocalFile (finalUrl, file.c_str(), false))
+									// there is race condition if two browser instances are downloading same file
+									// second instance deletes first tmpfile and creates new file for itself.
+									if (CFile::getFileSize(tmpfile) > 0)
 									{
+										CFile::moveFile(it->dest, tmpfile);
 										for(uint i = 0; i < it->imgs.size(); i++)
 										{
 											setImage(it->imgs[i].Image, it->dest);
@@ -3876,6 +3878,9 @@ namespace NLGUI
 				//
 				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
 				//
+				if (reloadImg && CFile::fileExists(image))
+					CFile::deleteFile(image);
+
 				image = "web_del.tga";
 				addImageDownload(img, newImage, style);
 			}
