@@ -2234,7 +2234,7 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 		p_name = defaultConfigPath + defaultConfigFileName;
 
 	// if some client_default.cfg was found return true
-	if(p_name.size())
+	if (p_name.size())
 		return true;
 
 	return false;

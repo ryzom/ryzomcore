@@ -3497,4 +3497,3 @@ void CInstallThread::run()
 
 	pPM->reboot(); // do not reboot just run the extract .bat
 }
-

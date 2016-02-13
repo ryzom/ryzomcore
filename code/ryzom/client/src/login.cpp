@@ -2178,7 +2178,6 @@ void initDataScan()
 	pPM->startScanDataThread();
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
-
 }
 
 // ***************************************************************************
