@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 		LoginShardId = std::numeric_limits<uint32>::max();
 
 	// if client_default.cfg is not in current directory, use application default directory
-	if (!CFile::isExists("client_default.cfg"))
+	if (Args.haveArg("c") || !CFile::isExists("client_default.cfg"))
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
