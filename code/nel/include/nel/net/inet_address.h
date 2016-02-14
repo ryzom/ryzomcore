@@ -24,7 +24,9 @@
 
 
 struct sockaddr_in;
+struct sockaddr_in6;
 struct in_addr;
+struct in6_addr;
 
 
 #ifdef NL_OS_WINDOWS
@@ -89,16 +91,24 @@ public:
 	/// Sets hostname and port (ex: www.nevrax.com:80)
 	void				setNameAndPort( const std::string& hostNameAndPort );
 
-	/** Sets internal socket address directly (contents is copied).
+	/** Sets internal IPv4 socket address directly (contents is copied).
 	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
 	 */
 	void				setSockAddr( const sockaddr_in* saddr );
 
+	/** Sets internal IPv6 socket address directly (contents is copied).
+	 * It also retrieves the host name if CInetAddress::RetrieveNames is true.
+	 */
+	void				setSockAddr6( const sockaddr_in6* saddr6 );
+
 	/// Returns if object (address and port) is valid
 	bool				isValid() const;
 
-	/// Returns internal socket address (read only)
+	/// Returns internal IPv4 socket address (read only)
 	const sockaddr_in	 *sockAddr() const;
+
+	/// Returns internal IPv6 socket address (read only)
+	const sockaddr_in6	 *sockAddr6() const;
 
 	/// Returns internal IP address
 	uint32				internalIPAddress() const;
@@ -140,8 +150,11 @@ public:
 
 protected:
 
-	/// Constructor with ip address, port=0
+	/// Constructor with IPv4 address, port=0
 	CInetAddress( const in_addr *ip, const char *hostname = 0);
+
+	/// Constructor with IPv6 address, port=0
+	CInetAddress( const in6_addr *ip, const char *hostname = 0);
 
 	/// Update _HostName from _SockAddr
 	void				updateHostName();
@@ -153,6 +166,7 @@ private:
 
 	std::string			_HostName;
 	sockaddr_in			*_SockAddr;
+	sockaddr_in6		*_SockAddr6;
 	bool				_Valid;
 
 };
