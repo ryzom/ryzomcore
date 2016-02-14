@@ -14,17 +14,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NL_STDNET_H
+#define NL_STDNET_H
+
 #include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
-#	define _WIN32_WINDOWS	0x0500
+#	define WIN32_LEAN_AND_MEAN
+#	define _WIN32_WINDOWS 0x0500
+#	ifndef _WIN32_WINNT
+#		define _WIN32_WINNT 0x0500
+#	endif
 #	ifndef NL_COMP_MINGW
-#		define WINVER			0x0500
+#		define WINVER 0x0500
 #		define NOMINMAX
 #	endif
-#	include <winsock2.h>
-#	include <windows.h>
-#endif // NL_OS_WINDOWS
+#	include <WinSock2.h>
+#	include <Windows.h>
+#endif
 
 #include <map>
 #include <set>
@@ -49,7 +56,6 @@
 #include <errno.h>
 
 #include "nel/misc/debug.h"
-
 #include "nel/misc/common.h"
 #include "nel/misc/stream.h"
 #include "nel/misc/time_nl.h"
@@ -57,3 +63,5 @@
 #include "nel/misc/variable.h"
 #include "nel/misc/mem_stream.h"
 #include "nel/misc/hierarchical_timer.h"
+
+#endif
