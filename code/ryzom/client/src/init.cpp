@@ -896,10 +896,6 @@ void prelogInit()
 
 		FPU_CHECKER_ONCE
 
-		// Set default email value for reporting error
-		// setReportEmailFunction ((void*)sendEmail);
-		// setDefaultEmailParams ("smtp.nevrax.com", "", "ryzombug@nevrax.com");
-
 		// create the save dir.
 		if (!CFile::isExists("save")) CFile::createDirectory("save");
 
