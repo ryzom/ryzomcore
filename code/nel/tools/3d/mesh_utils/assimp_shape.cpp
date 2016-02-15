@@ -28,7 +28,7 @@
 
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
-#include <nel/misc/tool_logger.h>
+#include <nel/pipeline/tool_logger.h>
 
 #include <nel/3d/mesh.h>
 

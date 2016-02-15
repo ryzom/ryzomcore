@@ -16,7 +16,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <nel/misc/types_nl.h>
-#include "database_config.h"
+#include "nel/pipeline/database_config.h"
 
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
@@ -24,6 +24,8 @@
 
 using namespace std;
 using namespace NLMISC;
+
+namespace NLPIPELINE {
 
 TPathString CDatabaseConfig::s_RootPath;
 NLMISC::CConfigFile *CDatabaseConfig::s_ConfigFile = NULL;
@@ -103,5 +105,7 @@ void CDatabaseConfig::release()
 	CPath::clearMap();
 	cleanup();
 }
+
+} /* namespace NLPIPELINE */
 
 /* end of file */

@@ -19,7 +19,8 @@
 #include "mesh_utils.h"
 
 #include <nel/misc/debug.h>
-#include <nel/misc/tool_logger.h>
+#include <nel/pipeline/tool_logger.h>
+#include <nel/pipeline/database_config.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
@@ -28,7 +29,6 @@
 #include <nel/3d/mesh.h>
 #include <nel/3d/texture_file.h>
 
-#include "database_config.h"
 #include "scene_meta.h"
 
 #include <assimp/postprocess.h>
@@ -231,7 +231,7 @@ void exportShapes(CMeshUtilsContext &context)
 		if (nodeContext.Shape)
 		{
 			std::string shapePath = NLMISC::CPath::standardizePath(context.Settings.DestinationDirectoryPath, true) + it->first + ".shape";
-			context.ToolLogger.writeDepend(NLMISC::BUILD, shapePath.c_str(), "*");
+			context.ToolLogger.writeDepend(NLPIPELINE::BUILD, shapePath.c_str(), "*");
 			NLMISC::COFile f;
 			if (f.open(shapePath, false, false, true))
 			{
@@ -262,7 +262,7 @@ void exportShapes(CMeshUtilsContext &context)
 								std::string knownPath = NLMISC::CPath::lookup(fileName, false, false, false);
 								if (!knownPath.empty())
 								{
-									context.ToolLogger.writeDepend(NLMISC::RUNTIME, shapePath.c_str(), knownPath.c_str());
+									context.ToolLogger.writeDepend(NLPIPELINE::RUNTIME, shapePath.c_str(), knownPath.c_str());
 								}
 								else
 								{
@@ -289,16 +289,16 @@ int exportScene(const CMeshUtilsSettings &settings)
 		context.ToolLogger.initDepend(settings.ToolDependLog);
 	if (!settings.ToolErrorLog.empty())
 		context.ToolLogger.initError(settings.ToolErrorLog);
-	context.ToolLogger.writeDepend(NLMISC::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
+	context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
 
 	// Apply database configuration
-	if (!CDatabaseConfig::init(settings.SourceFilePath))
+	if (!NLPIPELINE::CDatabaseConfig::init(settings.SourceFilePath))
 	{
 		tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to find database.cfg in input path or any of its parents.");
 		return EXIT_FAILURE;
 	}
 
-	CDatabaseConfig::initTextureSearchDirectories();
+	NLPIPELINE::CDatabaseConfig::initTextureSearchDirectories();
 
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, 0
@@ -321,7 +321,7 @@ int exportScene(const CMeshUtilsSettings &settings)
 
 	context.InternalScene = scene;
 	if (context.SceneMeta.load(context.Settings.SourceFilePath))
-		context.ToolLogger.writeDepend(NLMISC::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
+		context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
 	validateInternalNodeNames(context, context.InternalScene->mRootNode);
 
