@@ -323,12 +323,12 @@ void CInetAddress::init()
 
 	// IPv4
 	_SockAddr = new sockaddr_in;
-	memset(_SockAddr, 0, sizeof(_SockAddr));
+	memset(_SockAddr, 0, sizeof(sockaddr_in));
 	_SockAddr->sin_family = AF_INET;
 
 	// IPv6
 	_SockAddr6 = new sockaddr_in6;
-	memset(_SockAddr6, 0, sizeof(_SockAddr6));
+	memset(_SockAddr6, 0, sizeof(sockaddr_in6));
 	_SockAddr6->sin6_family = AF_INET6;
 }
 
