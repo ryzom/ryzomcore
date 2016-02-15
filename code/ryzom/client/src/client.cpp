@@ -17,7 +17,6 @@
 
 
 #include "stdpch.h"
-#include "user_agent.h"
 
 //////////////
 // INCLUDES //
@@ -45,7 +44,6 @@
 
 //#define TEST_CRASH_COUNTER
 #ifdef TEST_CRASH_COUNTER
-#include "nel/net/email.h"
  #undef FINAL_VERSION
  #define FINAL_VERSION 1
 #endif // TEST_CRASH_COUNTER
@@ -61,6 +59,7 @@
 #include "release.h"
 #include "client_cfg.h"
 #include "far_tp.h"
+#include "user_agent.h"
 
 ///////////
 // USING //
@@ -177,6 +176,12 @@ int main(int argc, char **argv)
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
 
+#ifdef TEST_CRASH_COUNTER
+	Args.addArg("", "crash", "", "Crash client before init");
+	Args.addArg("", "break", "", "Create a break point");
+	Args.addArg("", "release", "", "Crash client after init");
+#endif // TEST_CRASH_COUNTER
+
 #ifdef NL_OS_WINDOWS
 	if (!Args.parse(cmdline)) return 1;
 #else
@@ -214,6 +219,13 @@ int main(int argc, char **argv)
 		CPath::setCurrentPath(currentPath);
 	}
 
+#ifdef TEST_CRASH_COUNTER
+	if (Args.haveLongArg("crash"))
+	{
+		volatile int toto = *(int*)0;
+	}
+#endif // TEST_CRASH_COUNTER
+
 #ifdef NL_OS_MAC
 	struct rlimit rlp, rlp2, rlp3;
 
@@ -233,19 +245,8 @@ int main(int argc, char **argv)
 
 #if defined(NL_OS_WINDOWS)
 
-#if FINAL_VERSION
-	//initCrashReport ();
-#endif // FINAL_VERSION
-
-	// Set default email value for reporting error
 #ifdef TEST_CRASH_COUNTER
-	// initCrashReport ();
-	// setReportEmailFunction ((void*)sendEmail);
-	// setDefaultEmailParams ("smtp.nevrax.com", "", "hulud@nevrax.com");
-
-	if (string(cmdline) == "/crash")
-		volatile int toto = *(int*)0;
-	if (string(cmdline) == "/break")
+	if (Args.haveLongArg("break"))
 	{
 		__debugbreak();
 	}
@@ -406,8 +407,10 @@ int main(int argc, char **argv)
 	//CFile::createEmptyFile(getLogDirectory() + "during_release");
 
 #ifdef TEST_CRASH_COUNTER
-	if (string(cmdline) == "/release")
+	if (Args.haveLongArg("release"))
+	{
 		volatile int toto = *(int*)0;
+	}
 #endif // TEST_CRASH_COUNTER
 
 	// Final release
