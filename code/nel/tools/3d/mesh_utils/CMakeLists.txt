@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES(${assimp_INCLUDE_DIRS})
 
 NL_TARGET_LIB(mesh_utils ${SRCS} ${HDRS})
 
-TARGET_LINK_LIBRARIES(mesh_utils ${assimp_LIBRARIES} nelmisc nel3d)
+TARGET_LINK_LIBRARIES(mesh_utils ${assimp_LIBRARIES} nelmisc nelpipeline nel3d)
 NL_DEFAULT_PROPS(mesh_utils "NeL, Tools, 3D: Mesh Utils")
 NL_ADD_RUNTIME_FLAGS(mesh_utils)
 
