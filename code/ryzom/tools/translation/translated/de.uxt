@@ -4671,21 +4671,24 @@ uittOutpostAttackRound	[@{6F6F}Angriffsperiode!@{FFFF}\n
 	Die Angreifer müssen einen höchstmöglichen @{6F6F}Rundenstand@{FFFF} erreichen.\n
 	Sie müssen mindestens die angegebene @{6F6F}Mindestschwelle@{FFFF} erreichen, die der Außenposten zur Zeit hat.\n
 	Bei jeder gewonnenen Runde steigen das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu zerstörenden Truppen.\n
-	Bei jeder verlorenen Runde sinken das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu zerstörenden Truppen.\n  ]
+	Bei jeder verlorenen Runde sinken das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu zerstörenden Truppen.\n
+	]
 
 // HASH_VALUE C3CD3092CDC57722
 // INDEX 1163
 uittOutpostAttackAfterWin	[@{6F6F}Nach dem Angriff@{FFFF}\n
 	Der Krieg geht weiter! \n
 	Die Angreifer haben es geschafft, die @{6F6F}Mindestschwelle@{FFFF} zu erreichen, die die Verteidiger während der @{6F6F}Angriffsperiode@{FFFF} festgelegt haben.\n
-	Das Ende der Angriffsphase muss abgewartet werden, ehe die Angreifer den Außenposten gewinnen.\n  ]
+	Das Ende der Angriffsphase muss abgewartet werden, ehe die Angreifer den Außenposten gewinnen.\n
+	]
 
 // HASH_VALUE 3FD04DD028A7D053
 // INDEX 1164
 uittOutpostAttackAfterLoose	[@{6F6F}Nach Angriff@{FFFF}\n
 	Es ist den Angreifern nicht gelungen, die @{6F6F}Mindestschwelle@{FFFF} zu überschreiten, die die Verteidiger während der @{6F6F}Angriffsperiode@{FFFF} festgelegt haben.\n
 	Also haben die Angreifer verloren.\n
-	Der Außenposten wird am Ende der Angriffsphase ganz befreit.\n  ]
+	Der Außenposten wird am Ende der Angriffsphase ganz befreit.\n
+	]
 
 // HASH_VALUE FE5CECB92CB02670
 // INDEX 1165
@@ -4702,7 +4705,8 @@ uittOutpostDefenseRound	[@{6F6F}Verteidigungsperiode!@{FFFF}\n
 	Die Verteidiger müssen das @{6F6F}Rundenlevel@{FFFF} überschreiten, das die Angreifer während ihrer @{6F6F}Angriffsperiode@{FFFF} festgelegt haben.\n
 	Die Verteidiger verlieren den Außenposten, wenn sie dieses Niveau nicht erreichen.\n
 	Bei jeder gewonnenen Runde steigen das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu besiegenden Truppen.\n
-	Bei jeder verlorenen Runde sinken das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu besiegenden Truppen.\n  ]
+	Bei jeder verlorenen Runde sinken das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu besiegenden Truppen.\n
+	]
 
 // HASH_VALUE 327473E0EACEF1A3
 // INDEX 1167
@@ -4887,12 +4891,13 @@ uittOutpostDeclareWar	[Diesem Außenposten den Krieg erklären\n
 
 // HASH_VALUE F64ED3F482D06804
 // INDEX 1206
-uiOutpostWarCost	[KOSTEN DER KRIEGSERKLÄRUNG: ] 
+uiOutpostWarCost	[KOSTEN DER KRIEGSERKLÄRUNG: ]
 
 // HASH_VALUE CAF544A84E2694D6
 // INDEX 1207
 uiOutpostWarCostDesc	[Einem Außenposten den Krieg zu erklären, kostet die Gilde Dapper (Geld) - hauptsächlich, um die Truppen während der Verteidigungsperiode zu bezahlen..\n
-	Diese Summe wird entweder dem Gildenvermögen oder deiner Tasche entnommen\n  ]
+	Diese Summe wird entweder dem Gildenvermögen oder deiner Tasche entnommen\n
+	  ]
 
 // HASH_VALUE 8F52938208D44C1D
 // INDEX 1208
@@ -4968,7 +4973,8 @@ uiOutpostSSquad	[AKTIVE TRUPPEN]
 // HASH_VALUE 0F3B4563845E6EFF
 // INDEX 1225
 uittOutpostSSquad	[Eingesetzte Truppen, die den Außenposten verteidigen.\n
-	Die Gesamtheit aller eingesetzten Truppen hängt vom @{6F6F}Rundenlevel@{FFFF} ab.\n  ]
+	Die Gesamtheit aller eingesetzten Truppen hängt vom @{6F6F}Rundenlevel@{FFFF} ab.\n
+	]
 
 // HASH_VALUE 08110B32CC11D70D
 // INDEX 1226
@@ -4977,7 +4983,8 @@ uiOutpostTSquad	[BEREITSTEHENDE TRUPPEN]
 // HASH_VALUE F1D1A88C0BDB046E
 // INDEX 1227
 uittOutpostTSquad	[Kampfbereite Truppen, die auf die nächste Runde warten.\n
-	Laut des @{6F6F}Rundenlevels@{FFFF}, kommen nur die 'X' Ersten heraus.\n   ]
+	Laut des @{6F6F}Rundenlevels@{FFFF}, kommen nur die 'X' Ersten heraus.\n
+	]
 
 // HASH_VALUE DB499A35C8B08D6A
 // INDEX 1228
@@ -5036,7 +5043,8 @@ uiOutpostCapitalDoc	[Die Truppen, die du hier bearbeiten willst, kosten die Gild
 	Doch wenn die Gilde nicht mehr genug Dapper hat, um den @{6F6F) Einsatz einer Truppe@{FFFF} zu bezahlen, wird eine Standard-Truppe eingesetzt, die nicht stark ist.\n
 	Außerdem hast du die Möglichkeit, @{6F6F}über Außenposten@{FFFF} die Ausgaben für die Truppen zu vermindern, indem du den Etat der unten stehenden @{6F6F}Kriegskasse@{FFFF} änderst.\n
 	Jeder @{6F6F}Einsatz einer Truppe@{FFFF} vermindert gleichzeitig das Vermögen einer Gilde und den Etat der @{6F6F}Kriegskasse@{FFFF} des Außenpostens (wenn möglich).\n
-	Jeder Einzug einer lebenden @{6F6F}Truppe@{FFFF} (auch nur teilweise) erhöht das Vermögen der Gilde und den Etat der @{6F6F}Kriegskasse@{FFFF} des Außenpostens.\n  ]
+	Jeder Einzug einer lebenden @{6F6F}Truppe@{FFFF} (auch nur teilweise) erhöht das Vermögen der Gilde und den Etat der @{6F6F}Kriegskasse@{FFFF} des Außenpostens.\n
+	]
 
 // HASH_VALUE 9E53FA091EB9BCAE
 // INDEX 1240
@@ -10426,7 +10434,7 @@ uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Herkunft:@{H}@{T12}@{FFFF
 	@{FFF9}@{HuittToolCraftType}Werkzeugart:@{H}@{T12}@{FFFF}%tool\n
 	%cansell\n
 	@{FFF9}@{HuittInfoRequirement}Anforderung:@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
-		%buffs\n
+	%buffs\n
 	%special_effects\n
 	\n
 	@{FFFF}%desc%custom_text]
@@ -10496,7 +10504,6 @@ uihelpItemChargeSpell	[@{FFF9}Sapladung:@{T12}@{FFFF}%quality\n
 	\n
 	Die Sapladung und ihr Maximum können mit einem Rechtsklick auf den Gegenstand unter "Info" eingesehen werden.\n
 	%cansell%custom_text]
-
 
 // HASH_VALUE E83415184D022FA7
 // INDEX 2496
@@ -13630,7 +13637,7 @@ uiTryton3	[Seitdem haben drei Generationen versucht, die geschlagenen Wunden zu 
 uiTryton4	[Das ist meine Hoffnung, denn nur gemeinsam werden wir gegen das kommende Böse am besten gerüstet sein und sein Vorrücken zurückstoßen können. Gewiss, auch ich hörte den herannahenden  drohenden Donner von Mega Corp, der leider eines Tages das Innere des ganzen grünen Planeten Atys erschüttern wird.\n
 	Aber ich habe Vertrauen zu diesem Neuanfang der Hominheit.\n
 	\n
-					E. Tryton]
+	E. Tryton]
 
 // HASH_VALUE 741C5438741C5438
 // INDEX 3238
@@ -24292,7 +24299,6 @@ uittPhraseXPMalus	[@{6F6F}Sterbe-Erfahrungsstrafe.\n
 	@{FFFF}Wenn dein Charakter von den Mächten wiederbelebt werden muss, wird diese Strafe erhöht.\n
 	Die darauf folgenden Erfahrungs-Gewinne begleichen die Strafe, bis sie abgetragen ist.\n
 	Bis die Strafe auf 0 gesunken ist, bringen Aktionen keine Fertigkeitserhöhungen. Es verbleiben @{6F6F}%dp@{FFFF}% der Strafe.]
-
 
 // HASH_VALUE 29532B61D5EBA4EA
 // INDEX 5769

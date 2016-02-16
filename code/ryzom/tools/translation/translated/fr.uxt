@@ -4656,7 +4656,6 @@ uittOutpostWarDeclarationMyGuildDefend	[@{6F6F}Déclaration de guerre@{FFFF}\n
 // INDEX 1161
 uittOutpostAttackBefore	[@{6F6F}Attente d'attaque@{FFFF}\n
 	La guerre a commencé ! Les personnages-joueurs peuvent déja se battre sur l'avant-poste mais les escouades de l'avant-poste n'apparaîtront que pendant la @{6F6F}période d'attaque@{FFFF} choisie par l'attaquant.\n
-
 	Pendant cette période, les attaquants essaieront alors de dépasser le @{6F6F}seuil minimum@{FFFF} fixé par les défenseurs.]
 
 // HASH_VALUE 8D5E59E3DBC77439
