@@ -27263,3 +27263,8 @@ uiFixedMissionEntry_Mainland_Unknwown	[Continent / Inconnu]
 // INDEX 6472
 uiNoFiles	[Aucun fichier...]
 
+// symbol of byte unit
+// HASH_VALUE 4090240840902408
+// INDEX 6473
+uiByte	[o]
+

@@ -27263,3 +27263,23 @@ uiTotalPatch	[GESAMTER PATCH]
 // INDEX 6468
 uiRequiredFiles	[BENÖTIGTE DATEIEN]
 
+// HASH_VALUE 8C42E02F0C01D422
+// INDEX 6469
+uiLodValue	[STANDARD]
+
+// HASH_VALUE 6878DC2CC23A6CB6
+// INDEX 6470
+uiDebugProfileFillRate	[Profil Füllrate]
+
+// HASH_VALUE 0F54678C93B4CBF6
+// INDEX 6471
+uiFixedMissionEntry_Mainland_Unknwown	[Hauptland / unbekannt]
+
+// HASH_VALUE CAB123089C80B66B
+// INDEX 6472
+uiNoFiles	[Keine Dateien]
+
+// HASH_VALUE 4090240840902408
+// INDEX 6473
+uiByte	[B]
+

@@ -13464,3 +13464,5 @@ uiDebugProfileFillRate [Profile Fillrate]
 uiFixedMissionEntry_Mainland_Unknwown [Main land / Unknown]
 // displayed when no files are playing in MP3 player
 uiNoFiles [No Files...]
+// symbol of byte unit
+uiByte [B]
