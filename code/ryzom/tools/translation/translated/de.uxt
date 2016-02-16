@@ -1417,11 +1417,11 @@ uiErrPatchApply	[Fehler : Patchprozess beendet, aber der Patch konnte nicht erfo
 // INDEX 353
 uiErrChecking	[Fehler : Patchdateien versagen - Überprüfung.]
 
-// HASH_VALUE 40D0242C40D0242C
+// HASH_VALUE 8E9280411622E45F
 // INDEX 354
 uiKb	[KiB]
 
-// HASH_VALUE 4050243440502434
+// HASH_VALUE 90B288459762EC61
 // INDEX 355
 uiMb	[MiB]
 
@@ -15964,9 +15964,9 @@ uiHumidity	[Feuchtigkeit]
 // INDEX 3816
 uiWind	[Wind]
 
-// HASH_VALUE 0000000000000000
+// HASH_VALUE 2E59C4AAE9F9F4BD
 // INDEX 3817
-uiContinentIndoors	[Innenraum]
+uiContinentIndoors	[indoors]
 
 // HASH_VALUE 94A55E9E066B888F
 // INDEX 3818

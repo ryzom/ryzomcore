@@ -15958,9 +15958,9 @@ uiHumidity	[Humidité]
 // INDEX 3816
 uiWind	[Vent]
 
-// HASH_VALUE 0000000000000000
+// HASH_VALUE 2E59C4AAE9F9F4BD
 // INDEX 3817
-uiContinentIndoors	[]
+uiContinentIndoors	[intérieurs]
 
 // HASH_VALUE 94A55E9E066B888F
 // INDEX 3818

@@ -8674,7 +8674,7 @@ uiWind	[Wind]
 
 // Continent names
 
-uiContinentIndoors	[]
+uiContinentIndoors	[indoors]
 
 uiContinentRouteGouffre	[the Abyss Road]
 
