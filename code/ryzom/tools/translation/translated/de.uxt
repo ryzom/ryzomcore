@@ -23270,219 +23270,219 @@ uiTextCommandFT3	[]
 uiTextCommandFT4	[]
 
 // HASH_VALUE 24B816A0C9599FAC
-// INDEX 5530
+// INDEX 5529
 uiLoadingString0	[Die Mektoubfutterrechnung der letzten 4 Wochen wird automatisch abgezogen; vielen Dank.]
 
 // HASH_VALUE E98900FFF775E4A4
-// INDEX 5531
+// INDEX 5530
 uiLoadingString1	[Alle Mektoubs der Gilde werden gerade gefüttert, vielen Dank für Deine Spende.]
 
 // HASH_VALUE EC380C7826B0E2B8
-// INDEX 5532
+// INDEX 5531
 uiLoadingString2	[Yubos sind Freunde, kein Futter!]
 
 // HASH_VALUE 982918929DE29270
-// INDEX 5533
+// INDEX 5532
 uiLoadingString3	[Hier könnte dein Handelsangebot stehen!]
 
 // HASH_VALUE A9A928B20D40C067
-// INDEX 5534
+// INDEX 5533
 uiLoadingString4	[Bitte die Karavanwachen nicht mehr mit Dappern bewerfen, Rumstehen ist ihr Job!]
 
 // HASH_VALUE 57987089DF3E8526
-// INDEX 5535
+// INDEX 5534
 uiLoadingString5	[Wettervorhersage in Pyr: staubig, windig, heiß... Wüste halt!]
 
 // HASH_VALUE DDCF5B28C4882657
-// INDEX 5536
+// INDEX 5535
 uiLoadingString6	[Wo bin ich hier?]
 
 // HASH_VALUE C3845961575BCF17
-// INDEX 5537
+// INDEX 5536
 uiLoadingString7	[Wettervorhersage in Fairhaven: ziemlich bunt mit Schirmchen und Strohhalmen!]
 
 // HASH_VALUE 38F016093D5F5AF8
-// INDEX 5538
+// INDEX 5537
 uiLoadingString8	[Wettervorhersage in Yrkanis: 10:00 Uhr Regen, 16:00 Uhr Regen, 20:00 Uhr Regen...]
 
 // HASH_VALUE 8934F3FADA08A86E
-// INDEX 5539
+// INDEX 5538
 uiLoadingString9	[Horoskop heute: meide den Kontakt zu 10 Meter großen Kitins!]
 
 // HASH_VALUE A235B485FD91F379
-// INDEX 5540
+// INDEX 5539
 uiLoadingString10	[Der Heiler: 1121341... verdammt!]
 
 // HASH_VALUE 7185186ACE241B26
-// INDEX 5541
+// INDEX 5540
 uiLoadingString11	[Der Krieger: "Ha, elender Kitin! Nimm dies!" *pieks* ... "und lach nicht!!!"]
 
 // HASH_VALUE D3A4AE55153998BE
-// INDEX 5542
+// INDEX 5541
 uiLoadingString12	[Der Magier: "3 Sprüche pro Mob, schaut her!" *brutzel* "Oh..." *Schluck* "Jetzt kommen 5..."]
 
 // HASH_VALUE A235B485FD91F379
-// INDEX 5543
+// INDEX 5542
 uiLoadingString13	[Der Beherrschungsmagier: "Wartet, ich schick den Boss kurz weg..." *widersteht* "Ups..."]
 
 // HASH_VALUE 2C7660055814BCAD
-// INDEX 5544
+// INDEX 5543
 uiLoadingString14	[Der Beherrschungsmagier: "Lass uns mal ganz in Ruhe drüber reden, Kirosta..." *stun*]
 
 // HASH_VALUE DA2580B0E74AB8DE
-// INDEX 5545
+// INDEX 5544
 uiLoadingString15	[Der Harvester: "Buddeln und Chatten? Kein Problem!" ... *bumm* "Argh..."]
 
 // HASH_VALUE 9F5A8863CDA463CB
-// INDEX 5546
+// INDEX 5545
 uiLoadingString16	[Der Crafter: "Wart, ich bau mir noch schnell ne Rüstung!" *degrade*...*degrade*...*seufz*...]
 
 // HASH_VALUE 4A93117E839C41A5
-// INDEX 5547
+// INDEX 5546
 uiLoadingString17	[Marktwirtschaft: Kaufe 3 Tickets zum Freundschaftspreis von... 3 Tickets!]
 
 // HASH_VALUE 0D16EA857967AA4C
-// INDEX 5548
+// INDEX 5547
 uiLoadingString18	[Merke: 'Buddeln bis der Arzt kommt' kann man auf Atys durchaus wörtlich nehmen!]
 
 // HASH_VALUE C8D5F76A5807BF6E
-// INDEX 5549
+// INDEX 5548
 uiLoadingString19	[Vorsicht: Swingende, besoffene Yubos in Miniröcken gesichtet. Tryker dementieren Beteiligung!]
 
 // HASH_VALUE 47BCE034A35B081F
-// INDEX 5550
+// INDEX 5549
 uiLoadingString20	[*gähn* "Guten Morgen, gut geschlafen?" *auf die Uhr schau* "Ähm... äh... Hallo alle!"]
 
 // HASH_VALUE 86E4AC9E5A742C23
-// INDEX 5551
+// INDEX 5550
 uiLoadingString21	[Schade, Trykerweitwurf aufgrund zu wehrhafter Tryker abgesagt!]
 
 // HASH_VALUE CD0616F57A127246
-// INDEX 5552
+// INDEX 5551
 uiLoadingString22	[Nicht vergessen: Packer bürsten, Appartement aufräumen, Gildenhalle polieren...]
 
 // HASH_VALUE 8CC27B9A2CA9589B
-// INDEX 5553
+// INDEX 5552
 uiLoadingString23	[Keine Tastatur gefunden. Drücke beliebige Taste, um fortzufahren.]
 
 // HASH_VALUE E9B90C41F6A1E0AA
-// INDEX 5554
+// INDEX 5553
 uiLoadingString24	[An alles gedacht? Kaffee? Chips? Pizza? Slim Fast? Na, dann los!]
 
 // HASH_VALUE 7218245C26B0E2B8
-// INDEX 5555
+// INDEX 5554
 uiLoadingString25	[Ladedauer verzögert sich, empfehle Powerleveln des RAMs zur Beschleunigung.]
 
 // HASH_VALUE 4BB6F756D6E77479
-// INDEX 5556
+// INDEX 5555
 uiLoadingString26	[Rechtschreibkontrolleur nimmt sich heute frei...]
 
 // HASH_VALUE D955C83AACB50070
-// INDEX 5557
+// INDEX 5556
 uiLoadingString27	[Kamis werden gewaschen, gefönt und flauschig gebürstet...]
 
 // HASH_VALUE 2D5ACC1B8911C2AB
-// INDEX 5558
+// INDEX 5557
 uiLoadingString28	[Der Yubo: läuft und läuft und läuft...]
 
 // HASH_VALUE E4794CC009B1A0AD
-// INDEX 5559
+// INDEX 5558
 uiLoadingString29	[Neue Chatfarben werden installiert: pink, magenta und aprikot...]
 
 // HASH_VALUE 9A769398D849FB83
-// INDEX 5560
+// INDEX 5559
 uiLoadingString30	[Unbekannte Portale werden hinzugefügt, die nie ein Homin zuvor betreten hat!]
 
 // HASH_VALUE 6CB8DCBA26B0E2B8
-// INDEX 5561
+// INDEX 5560
 uiLoadingString31	[Atys: unendliche Weiten... unendliche Gefahren... unendlich viele Kitins!]
 
 // HASH_VALUE 2844727AEC68D05A
-// INDEX 5562
+// INDEX 5561
 uiLoadingString32	[GM-Rechte hinzugefügt, wieder aberkannt, trotzdem viel Spaß auf Atys!]
 
 // HASH_VALUE A6A94808F765ACA5
-// INDEX 5563
+// INDEX 5562
 uiLoadingString33	[Godmode für Yubos wird aktiviert...]
 
 // HASH_VALUE D83B54B9E988EF1F
-// INDEX 5564
+// INDEX 5563
 uiLoadingString34	[Rohstoffquellen werden aufgefüllt... das ist mehr Arbeit, als du denkst!]
 
 // HASH_VALUE DBFAF08F5CC96722
-// INDEX 5565
+// INDEX 5564
 uiLoadingString35	[Ich sehe dich User, aber nicht gut... putz mal den Monitor! ]
 
 // HASH_VALUE 23B5B3719B486459
-// INDEX 5566
+// INDEX 5565
 uiLoadingString36	[Grotten werden im Seenland gegraben...]
 
 // HASH_VALUE C5047097A6340F71
-// INDEX 5567
+// INDEX 5566
 uiLoadingString37	[Wettereffekte werden getestet...]
 
 // HASH_VALUE 8895244968FA2376
-// INDEX 5568
+// INDEX 5567
 uiLoadingString38	[Kitins werden gefüttert...]
 
 // HASH_VALUE 4C15D78519D67645
-// INDEX 5569
+// INDEX 5568
 uiLoadingString39	[Yubos werden geklont...]
 
 // HASH_VALUE AE3A484B87D4AF5D
-// INDEX 5570
+// INDEX 5569
 uiLoadingString40	[Unsichtbare Arbeiter werden gejagt...]
 
 // HASH_VALUE 1CE4869B2D587BA1
-// INDEX 5571
+// INDEX 5570
 uiLoadingString41	[Himmel wird gereinigt...]
 
 // HASH_VALUE 5E8DEB579667D7AF
-// INDEX 5572
+// INDEX 5571
 uiLoadingString42	[Die Atys-Kugel wird aufgeblasen...]
 
 // HASH_VALUE DCBA205296141008
-// INDEX 5573
+// INDEX 5572
 uiLoadingString43	[GMs werden versteckt...]
 
 // HASH_VALUE 76760A7A4CF0DACE
-// INDEX 5574
+// INDEX 5573
 uiLoadingString44	[Magie wird in Atys hineingepumpt... ]
 
 // HASH_VALUE 0D04174F9C980447
-// INDEX 5575
+// INDEX 5574
 uiLoadingString45	[Ninja-Yubos werden installiert...]
 
 // HASH_VALUE 5986E37DE9942C70
-// INDEX 5576
+// INDEX 5575
 uiLoadingString46	[Ragusse werden abgelenkt...]
 
 // HASH_VALUE 0C7AA3809C77E378
-// INDEX 5577
+// INDEX 5576
 uiLoadingString47	[Gravitationskonstane von Atys wird berechnet...]
 
 // HASH_VALUE 28BB8F6D5A15ACBB
-// INDEX 5578
+// INDEX 5577
 uiLoadingString48	[Geheime Untergrund-Militär-Einrichtung wird hochgefahren...]
 
 // HASH_VALUE A6BAB0718A5CFB73
-// INDEX 5579
+// INDEX 5578
 uiLoadingString49	[Zoraï-Ale wird gebraut...]
 
 // HASH_VALUE 6609F4514840E4A9
-// INDEX 5580
+// INDEX 5579
 uiLoadingString50	[Wasser wird in die entsprechenden Vertiefungen gefüllt...]
 
 // HASH_VALUE 1BA9D89090FEA62B
-// INDEX 5581
+// INDEX 5580
 uiLoadingString51	[Geheimes Zeug wird im Boden versteckt...]
 
 // HASH_VALUE 6F798442B63488B7
-// INDEX 5582
+// INDEX 5581
 uiLoadingString52	[Gingos werden geärgert, um die Aggressivität zu erhöhen... ]
 
 // HASH_VALUE E0617F4556CA98A4
-// INDEX 5583
+// INDEX 5582
 uiLoadingString53	[Gras wird wachsen gelassen...]
 
 // HASH_VALUE 5E07187358A2309C
