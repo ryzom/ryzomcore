@@ -18,6 +18,7 @@
 #ifndef NLPIPELINE_PROJECT_CONFIG_H
 #define NLPIPELINE_PROJECT_CONFIG_H
 #include <nel/misc/types_nl.h>
+#include <vector>
 
 namespace NLMISC {
 	class CConfigFile;
@@ -65,7 +66,7 @@ private:
 	static TPathString s_ProjectConfigPath;
 
 	static std::string s_ProjectName;
-	static CProjectConfig::Flags CProjectConfig::s_InitFlags;
+	static CProjectConfig::Flags s_InitFlags;
 
 	static std::vector<TPathString> s_ConfigPaths;
 	static std::vector<NLMISC::CConfigFile *> s_ConfigFiles;
