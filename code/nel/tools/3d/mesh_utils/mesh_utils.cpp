@@ -279,10 +279,10 @@ void exportShapes(CMeshUtilsContext &context)
 	}
 }
 
-// TODO: Separate load scene and save scene functions
-int exportScene(const CMeshUtilsSettings &settings)
+int initSceneContext(CMeshUtilsContext &context)
 {
-	CMeshUtilsContext context(settings);
+	const CMeshUtilsSettings &settings = context.Settings;
+
 	NLMISC::CFile::createDirectoryTree(settings.DestinationDirectoryPath);
 
 	if (!settings.ToolDependLog.empty())
@@ -290,19 +290,31 @@ int exportScene(const CMeshUtilsSettings &settings)
 	if (!settings.ToolErrorLog.empty())
 		context.ToolLogger.initError(settings.ToolErrorLog);
 	context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
-
-	// Apply database configuration
-	if (!NLPIPELINE::CProjectConfig::init(settings.SourceFilePath, 
+																																			// Apply database configuration
+	if (!NLPIPELINE::CProjectConfig::init(settings.SourceFilePath,
 		NLPIPELINE::CProjectConfig::DatabaseTextureSearchPaths,
 		true))
 	{
-		tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to find database.cfg in input path or any of its parents.");
+		tlwarning(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to find nel.cfg in input path or any of its parents.");
 		// return EXIT_FAILURE; We can continue but the output will not be guaranteed...
 	}
 
+	return EXIT_SUCCESS;
+}
+
+int loadSceneMeta(CMeshUtilsContext &context)
+{
+	if (context.SceneMeta.load(context.Settings.SourceFilePath))
+		context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
+
+	return EXIT_SUCCESS;
+}
+
+int importSceneAssimp(CMeshUtilsContext &context)
+{
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, 0
-		| aiProcess_Triangulate 
+	const aiScene *scene = importer.ReadFile(context.Settings.SourceFilePath, 0
+		| aiProcess_Triangulate
 		| aiProcess_ValidateDataStructure
 		| aiProcess_GenNormals // Or GenSmoothNormals? TODO: Validate smoothness between material boundaries!
 		); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
@@ -313,6 +325,7 @@ int exportScene(const CMeshUtilsSettings &settings)
 		else tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to load scene");
 		return EXIT_FAILURE;
 	}
+
 	// aiProcess_Triangulate
 	// aiProcess_ValidateDataStructure: TODO: Catch Assimp error output stream
 	// aiProcess_RemoveRedundantMaterials: Not used because we may override materials with NeL Material from meta
@@ -320,8 +333,6 @@ int exportScene(const CMeshUtilsSettings &settings)
 	//scene->mRootNode->mMetaData
 
 	context.InternalScene = scene;
-	if (context.SceneMeta.load(context.Settings.SourceFilePath))
-		context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", context.SceneMeta.metaFilePath().c_str()); // Meta input file
 
 	validateInternalNodeNames(context, context.InternalScene->mRootNode);
 
@@ -344,10 +355,43 @@ int exportScene(const CMeshUtilsSettings &settings)
 	// Import shapes
 	importShapes(context, context.InternalScene->mRootNode);
 
+	return EXIT_SUCCESS;
+}
+
+int saveSceneMeta(CMeshUtilsContext &context)
+{
+	// Save scene meta
+	context.SceneMeta.save();
+
+	return EXIT_SUCCESS;
+}
+
+int exportScene(CMeshUtilsContext &context)
+{
 	// Export shapes
 	exportShapes(context);
 
 	return EXIT_SUCCESS;
+}
+
+int exportScene(const CMeshUtilsSettings &settings)
+{
+	CMeshUtilsContext context(settings);
+	
+	int res;
+
+	res = initSceneContext(context);
+	if (res != EXIT_SUCCESS) return res;
+
+	res = loadSceneMeta(context);
+	if (res != EXIT_SUCCESS) return res;
+	
+	res = importSceneAssimp(context);
+	if (res != EXIT_SUCCESS) return res;
+
+	res = exportScene(context);
+
+	return res;
 }
 
 /* end of file */

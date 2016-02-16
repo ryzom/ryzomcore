@@ -21,6 +21,7 @@
 
 #include <string>
 
+struct CMeshUtilsContext;
 struct CMeshUtilsSettings
 {
 	CMeshUtilsSettings();
@@ -36,6 +37,14 @@ struct CMeshUtilsSettings
 	std::string IGDirectory;
 	std::string SkelDirectory;*/
 };
+
+int initSceneContext(CMeshUtilsContext &context);
+
+int loadSceneMeta(CMeshUtilsContext &context);
+int saveSceneMeta(CMeshUtilsContext &context);
+
+int importSceneAssimp(CMeshUtilsContext &context);
+int exportScene(CMeshUtilsContext &context);
 
 int exportScene(const CMeshUtilsSettings &settings);
 
