@@ -20,7 +20,7 @@
 
 #include <nel/misc/debug.h>
 #include <nel/pipeline/tool_logger.h>
-#include <nel/pipeline/database_config.h>
+#include <nel/pipeline/project_config.h>
 #include <nel/misc/sstring.h>
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
@@ -292,13 +292,13 @@ int exportScene(const CMeshUtilsSettings &settings)
 	context.ToolLogger.writeDepend(NLPIPELINE::BUILD, "*", NLMISC::CPath::standardizePath(context.Settings.SourceFilePath, false).c_str()); // Base input file
 
 	// Apply database configuration
-	if (!NLPIPELINE::CDatabaseConfig::init(settings.SourceFilePath))
+	if (!NLPIPELINE::CProjectConfig::init(settings.SourceFilePath, 
+		NLPIPELINE::CProjectConfig::DatabaseTextureSearchPaths,
+		true))
 	{
 		tlerror(context.ToolLogger, context.Settings.SourceFilePath.c_str(), "Unable to find database.cfg in input path or any of its parents.");
-		return EXIT_FAILURE;
+		// return EXIT_FAILURE; We can continue but the output will not be guaranteed...
 	}
-
-	NLPIPELINE::CDatabaseConfig::initTextureSearchDirectories();
 
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(settings.SourceFilePath, 0
