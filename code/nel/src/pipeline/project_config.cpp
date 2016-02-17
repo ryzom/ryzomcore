@@ -233,6 +233,20 @@ void CProjectConfig::release()
 	cleanup();
 }
 
+std::string CProjectConfig::databaseRoot()
+{
+	for (uint i = 0; i < s_ConfigFiles.size(); ++i)
+	{
+		CConfigFile *cfg = s_ConfigFiles[i];
+		const TPathString &dir = s_ConfigPaths[i];
+		CConfigFile::CVar *path = cfg->getVarPtr("DatabaseRoot");
+		if (path && CFile::isExists(dir + path->asString()))
+			return CPath::standardizePath(dir + path->asString());
+	}
+
+	return "";
+}
+
 } /* namespace NLPIPELINE */
 
 /* end of file */

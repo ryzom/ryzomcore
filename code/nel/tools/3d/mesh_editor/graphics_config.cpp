@@ -135,6 +135,8 @@ CGraphicsConfig::CGraphicsConfig(QWidget *parent, CConfiguration *configuration,
 		
 		m_ScreenshotGroup->setLayout(groupVboxLayout);
 		vboxLayout->addWidget(m_ScreenshotGroup);		
+
+		m_ScreenshotGroup->setVisible(false);
 	}
 
 	vboxLayout->addStretch();

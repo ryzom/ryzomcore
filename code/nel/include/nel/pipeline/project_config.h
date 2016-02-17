@@ -53,6 +53,8 @@ public:
 	/// Undo init
 	static void release();
 
+	static std::string databaseRoot();
+
 private:
 	static void cleanup();
 	static void searchDirectories(const char *var);

@@ -98,6 +98,8 @@ protected:
 private:
 	void updateInitialization(bool visible);
 
+	void initProjectConfig(const std::string &asset);
+
 	void createActions();
 	void translateActions();
 	void createMenus();

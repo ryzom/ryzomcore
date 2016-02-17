@@ -35,6 +35,8 @@
 // NeL includes
 // #include <nel/misc/debug.h>
 #include <nel/3d/u_driver.h>
+#include <nel/misc/path.h>
+#include <nel/pipeline/project_config.h>
 
 // Project includes
 #include "../shared_widgets/command_log.h"
@@ -87,6 +89,18 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 	connect(m_GraphicsConfig, SIGNAL(applyGraphicsConfig()), this, SLOT(applyGraphicsConfig()));
 	m_Configuration.setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
 
+	NLMISC::CConfigFile::CVar *lastFiles = m_Configuration.getConfigFile().getVarPtr("LastFiles");
+	if (lastFiles)
+	{
+		for (uint i = 0; i < lastFiles->size(); ++i)
+		{
+			if (NLMISC::CFile::isExists(lastFiles->asString()))
+			{
+				initProjectConfig(lastFiles->asString());
+				break;
+			}
+		}
+	}
 }
 
 CMainWindow::~CMainWindow()
@@ -100,6 +114,17 @@ CMainWindow::~CMainWindow()
 	m_Configuration.dropCallback("LanguageCode");
 
 	m_Configuration.release();
+}
+
+void CMainWindow::initProjectConfig(const std::string &asset)
+{
+	NLPIPELINE::CProjectConfig::init(asset,
+		NLPIPELINE::CProjectConfig::DatabaseTextureSearchPaths,
+		true);
+
+	std::string databaseRoot = NLPIPELINE::CProjectConfig::databaseRoot();
+	if (!databaseRoot.empty()) m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(QString::fromStdString(databaseRoot)));
+	else m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(""));
 }
 
 void CMainWindow::closeEvent(QCloseEvent *e)
@@ -336,6 +361,15 @@ void CMainWindow::createDockWindows()
 		m_AssetTreeDock->setAllowedAreas(Qt::AllDockWidgetAreas);
 		m_AssetTreeView = new QTreeView(m_AssetTreeDock);
 		m_AssetTreeModel = new QDirModel();
+		/*
+		QStringList filters;
+		filters.push_back("*.nelmat");
+		filters.push_back("*.dae");
+		filters.push_back("*.3ds");
+		filters.push_back("*.fbx");
+		filters.push_back("*.blend");
+		m_AssetTreeModel->setNameFilters(filters);
+		*/
 		m_AssetTreeView->setModel(m_AssetTreeModel);
 		m_AssetTreeView->setSortingEnabled(true);
 		m_AssetTreeDock->setWidget(m_AssetTreeView);
@@ -348,7 +382,7 @@ void CMainWindow::translateDockWindows()
 {
 	m_CommandLogDock->setWindowTitle(tr("Console"));
 	m_GraphicsConfigDock->setWindowTitle(tr("Graphics Configuration"));
-	m_AssetTreeDock->setWindowTitle(tr("Asset Tree"));
+	m_AssetTreeDock->setWindowTitle(tr("Asset Database"));
 }
 
 void CMainWindow::recalculateMinimumWidth()
