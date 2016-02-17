@@ -136,7 +136,7 @@ void CGraphicsViewport::release()
 
 void CGraphicsViewport::updateInput()
 {
-	m_Driver->EventServer.pump();
+	// m_Driver->EventServer.pump(); // Can't do this, conflicts with Qt processing
 }
 
 void CGraphicsViewport::renderDriver()

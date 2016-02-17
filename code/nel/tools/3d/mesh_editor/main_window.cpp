@@ -424,9 +424,10 @@ void CMainWindow::about()
 
 void CMainWindow::updateRender()
 {
-	updateInitialization(isVisible());
+	bool visible = isVisible();
+	updateInitialization(visible);
 	
-	if (isVisible())
+	if (visible)
 	{
 
 		// call all update functions

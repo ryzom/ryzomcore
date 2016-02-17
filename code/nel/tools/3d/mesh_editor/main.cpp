@@ -110,7 +110,11 @@ sint main(int argc, char **argv)
 	CFile::createDirectoryTree(appData);
 	CFile::createDirectoryTree(appData + "screenshots/");
 
+	CFile::setRWAccess(localAppData + "andbasr.ttf");
+	QFile::remove(QString::fromStdString(localAppData + "andbasr.ttf"));
 	QFile(":/data/andbasr.ttf").copy(QString::fromStdString(localAppData + "andbasr.ttf"));
+	CFile::setRWAccess(appData + "mesh_editor_default.cfg");
+	QFile::remove(QString::fromStdString(appData + "mesh_editor_default.cfg"));
 	QFile(":/data/mesh_editor_default.cfg").copy(QString::fromStdString(appData + "mesh_editor_default.cfg"));
 	if (!QFileInfo(QString::fromStdString(appData + "mesh_editor.cfg")).exists())
 	{
