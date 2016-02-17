@@ -68,7 +68,7 @@ public:
 
 	inline NL3D::UDriver *getDriver() { return m_Driver; }
 	inline NL3D::UTextContext *getTextContext() { return m_TextContext; }
-	inline NL3D::UScene *getScene() { return m_Scene; }
+	// inline NL3D::UScene *getScene() { return m_Scene; }
 
 public slots:		
 	void saveScreenshot();
@@ -87,7 +87,7 @@ private:
 
 	NL3D::UDriver *m_Driver;
 	NL3D::UTextContext *m_TextContext;
-	NL3D::UScene *m_Scene;
+	// NL3D::UScene *m_Scene;
 
 	bool m_Direct3D;
 

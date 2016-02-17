@@ -113,7 +113,10 @@ sint main(int argc, char **argv)
 	QFile(":/data/andbasr.ttf").copy(QString::fromStdString(localAppData + "andbasr.ttf"));
 	QFile(":/data/mesh_editor_default.cfg").copy(QString::fromStdString(appData + "mesh_editor_default.cfg"));
 	if (!QFileInfo(QString::fromStdString(appData + "mesh_editor.cfg")).exists())
+	{
 		QFile(":/data/mesh_editor.cfg").copy(QString::fromStdString(appData + "mesh_editor.cfg"));
+		CFile::setRWAccess(appData + "mesh_editor.cfg");
+	}
 
 	NLQT::preApplication();
 	QApplication app(argc, const_cast<char **>(argv));
