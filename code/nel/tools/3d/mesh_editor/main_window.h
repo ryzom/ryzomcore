@@ -92,6 +92,9 @@ private slots:
 	void updateRender();
 	void printDebug();
 
+protected:
+	virtual void closeEvent(QCloseEvent *e);
+
 private:
 	void updateInitialization(bool visible);
 

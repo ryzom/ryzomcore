@@ -60,6 +60,7 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 	m_IsExiting(false)
 {
 	setObjectName("CMainWindow");
+	setWindowTitle(tr("NeL Mesh Editor"));
 	
 	m_UndoStack = new QUndoStack(this);
 
@@ -78,11 +79,8 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 
 	recalculateMinimumWidth();
 	
-	// As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed. This can be used to do heavy work while providing a snappy user interface.
 	m_Timer = new QTimer(this);
 	connect(m_Timer, SIGNAL(timeout()), this, SLOT(updateRender()));
-	// timer->start(); // <- timeout 0
-	// it's heavy on cpu, though, when no 3d driver initialized :)
 	m_Timer->start(40); // 25fps
 	
 	m_IsGraphicsEnabled = m_GraphicsConfig->getGraphicsEnabled();
@@ -102,6 +100,14 @@ CMainWindow::~CMainWindow()
 	m_Configuration.dropCallback("LanguageCode");
 
 	m_Configuration.release();
+}
+
+void CMainWindow::closeEvent(QCloseEvent *e)
+{
+	m_Timer->stop();
+	updateInitialization(false);
+
+	QMainWindow::closeEvent(e);
 }
 
 void CMainWindow::setVisible(bool visible)
