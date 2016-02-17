@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file>icons/cross-circle.png</file>
+    <file>icons/exclamation.png</file>
+    <file>icons/information-white.png</file>
+  </qresource>
+</RCC>

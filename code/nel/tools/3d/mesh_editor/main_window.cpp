@@ -40,6 +40,7 @@
 
 // Project includes
 #include "../shared_widgets/command_log.h"
+#include "../shared_widgets/error_list.h"
 #include "graphics_viewport.h"
 #include "graphics_config.h"
 
@@ -54,6 +55,7 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 	m_IsSoundInitialized(false), m_IsSoundEnabled(false), 
 	m_Timer(NULL), m_GraphicsViewport(NULL),
 	m_CommandLog(NULL), m_CommandLogDock(NULL), 
+	m_ErrorList(NULL), m_ErrorListDock(NULL), 
 	m_GraphicsConfig(NULL), m_GraphicsConfigScroll(NULL), m_GraphicsConfigDock(NULL), 
 	m_FileMenu(NULL), m_EditMenu(NULL), m_ViewportMenu(NULL), m_WidgetsMenu(NULL), m_HelpMenu(NULL), 
 	m_FileToolBar(NULL), m_EditToolBar(NULL),
@@ -341,6 +343,17 @@ void CMainWindow::createDockWindows()
 		m_WidgetsMenu->addAction(m_CommandLogDock->toggleViewAction());
 	}
 
+	// ErrorList (Error List)
+	{
+		m_ErrorListDock = new QDockWidget(this);
+		m_ErrorListDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+		m_ErrorList = new CErrorList(m_ErrorListDock);
+		m_ErrorListDock->setWidget(m_ErrorList);
+		addDockWidget(Qt::BottomDockWidgetArea, m_ErrorListDock);
+		m_WidgetsMenu->addAction(m_ErrorListDock->toggleViewAction());
+		tabifyDockWidget(m_CommandLogDock, m_ErrorListDock);
+	}
+
 	// GraphicsConfig (Graphics Configuration)
 	{
 		m_GraphicsConfigDock = new QDockWidget(this);
@@ -381,6 +394,7 @@ void CMainWindow::createDockWindows()
 void CMainWindow::translateDockWindows()
 {
 	m_CommandLogDock->setWindowTitle(tr("Console"));
+	m_ErrorListDock->setWindowTitle(tr("Error List"));
 	m_GraphicsConfigDock->setWindowTitle(tr("Graphics Configuration"));
 	m_AssetTreeDock->setWindowTitle(tr("Asset Database"));
 }

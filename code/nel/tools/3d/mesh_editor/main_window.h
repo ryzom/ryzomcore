@@ -63,6 +63,7 @@ namespace NLSOUND {
 
 namespace NLQT {
 	class CCommandLogDisplayer;
+	class CErrorList;
 }
 
 class CGraphicsViewport;
@@ -135,6 +136,9 @@ private:
 
 	NLQT::CCommandLogDisplayer *m_CommandLog;
 	QDockWidget *m_CommandLogDock;
+
+	NLQT::CErrorList *m_ErrorList;
+	QDockWidget *m_ErrorListDock;
 
 	CGraphicsConfig *m_GraphicsConfig;
 	QScrollArea *m_GraphicsConfigScroll;
