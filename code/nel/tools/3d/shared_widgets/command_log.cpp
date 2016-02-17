@@ -60,8 +60,8 @@ CCommandLog::CCommandLog(QWidget *parent) : QWidget(parent)
 	layout->addWidget(m_CommandInput);
 	setLayout(layout);
 
-	connect(m_CommandInput, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
-	connect(this, SIGNAL(tSigDisplay(const QColor &, const QString &)), this, SLOT(tSlotDisplay(const QColor &, const QString &)));
+	connect(m_CommandInput, SIGNAL(returnPressed()), this, SLOT(returnPressed()), Qt::QueuedConnection);
+	connect(this, SIGNAL(tSigDisplay(const QColor &, const QString &)), this, SLOT(tSlotDisplay(const QColor &, const QString &)), Qt::QueuedConnection);
 
 }
 
@@ -123,7 +123,7 @@ void CCommandLog::returnPressed()
 
 CCommandLogDisplayer::CCommandLogDisplayer(QWidget *parent) : CCommandLog(parent)
 {
-	connect(this, SIGNAL(execCommand(const std::string &)), this, SLOT(execCommandLog(const std::string &)));
+	connect(this, SIGNAL(execCommand(const QString &)), this, SLOT(execCommandLog(const QString &)), Qt::QueuedConnection);
 	DebugLog->addDisplayer(this);
 	InfoLog->addDisplayer(this);
 	WarningLog->addDisplayer(this);

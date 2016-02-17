@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/">
+    <file>data/andbasr.ttf</file>
+    <file>data/mesh_editor.cfg</file>
+    <file>data/mesh_editor_default.cfg</file>
+  </qresource>
+</RCC>

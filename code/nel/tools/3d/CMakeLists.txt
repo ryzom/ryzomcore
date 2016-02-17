@@ -1,10 +1,20 @@
 
 IF(WITH_NEL_TOOLS)
   IF(WITH_3D)
+    IF(WITH_QT5)
+      SUBDIRS(
+        shared_widgets
+        panoply_preview)
+    ENDIF()
     IF(WITH_ASSIMP)
       SUBDIRS(
         mesh_utils
         mesh_export)
+        IF(WITH_QT5)
+          # NOTE: Also requires C++11, because.
+          SUBDIRS(
+            mesh_editor)
+        ENDIF()
     ENDIF()
     SUBDIRS(
       anim_builder
@@ -65,11 +75,6 @@ IF(WITH_NEL_TOOLS AND WITH_3D)
   IF(WITH_QT OR WITH_QT5)
     ADD_SUBDIRECTORY(tile_edit_qt)
     ADD_SUBDIRECTORY(object_viewer_widget)
-  ENDIF()
-
-  IF(WITH_QT5)
-    ADD_SUBDIRECTORY(shared_widgets)
-    ADD_SUBDIRECTORY(panoply_preview)
   ENDIF()
 
   IF(WITH_NEL_TOOLS)

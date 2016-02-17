@@ -48,16 +48,21 @@ namespace {
 
 void preApplication()
 {
-	QCoreApplication::libraryPaths();
-	QString app_location = QCoreApplication::applicationFilePath();
-	app_location.truncate(app_location.lastIndexOf(QLatin1Char('/')));
-	app_location = QDir(app_location).canonicalPath();
-	QCoreApplication::removeLibraryPath(app_location);
-	QCoreApplication::addLibraryPath("./platforms");
-	QCoreApplication::addLibraryPath("./qtwebengine");
-	QCoreApplication::addLibraryPath("./imageformats");
-	QCoreApplication::addLibraryPath("./iconengines");
-	QCoreApplication::addLibraryPath("./designer");
+	char *qpa = getenv("QT_QPA_PLATFORM_PLUGIN_PATH");
+	if (qpa && qpa[0])
+	{
+		// Trick to avoid Qt attempting to load up every file in the application path as Qt plugin, speeds up debug startup
+		QCoreApplication::libraryPaths();
+		QString app_location = QCoreApplication::applicationFilePath();
+		app_location.truncate(app_location.lastIndexOf(QLatin1Char('/')));
+		app_location = QDir(app_location).canonicalPath();
+		QCoreApplication::removeLibraryPath(app_location);
+		QCoreApplication::addLibraryPath("./platforms");
+		QCoreApplication::addLibraryPath("./qtwebengine");
+		QCoreApplication::addLibraryPath("./imageformats");
+		QCoreApplication::addLibraryPath("./iconengines");
+		QCoreApplication::addLibraryPath("./designer");
+	}
 }
 
 void postApplication()
