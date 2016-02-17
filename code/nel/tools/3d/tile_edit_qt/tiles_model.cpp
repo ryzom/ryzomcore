@@ -63,7 +63,7 @@ QVariant tiles_model::data(const QModelIndex &index, int role) const
 #ifdef USE_QT5
 		QPixmap pixpix = wiwi.grab(wiwi.contentsRect());
 #else
-		QPixmap::grabWidget(wiwi, wiwi.contentsRect());
+		QPixmap pixpix = QPixmap::grabWidget(&wiwi, wiwi.contentsRect());
 #endif
 		return pixpix;
 	}
