@@ -75,8 +75,10 @@ CTextureBrowser::CTextureBrowser(QWidget *parent) : QListWidget(parent)
 	m_Thread->run();
 
 	setViewMode(QListWidget::IconMode);
-	setIconSize(QSize(200, 200));
+	setIconSize(QSize(128, 128));
 	setResizeMode(QListWidget::Adjust);
+
+	setGridSize(QSize(144, 160));
 
 	setDirectory("W:/database/stuff/fyros/agents/_textures/actors/");
 }
@@ -98,12 +100,13 @@ void CTextureBrowser::setDirectory(const QString &dir)
 			clear();
 			std::vector<std::string> files;
 			NLMISC::CPath::getPathContent(dir.toUtf8().data(), false, false, true, files);
-			QPixmap dummy = QPixmap::fromImage(QImage(128, 128, QImage::Format_RGB32));
+			QPixmap dummy = QPixmap::fromImage(QImage(128, 128, QImage::Format_ARGB32));
 			for (size_t i = 0; i < files.size(); ++i)
 			{
 				std::string &file = files[i];
 				QString fileName = QFileInfo(QString::fromUtf8(file.c_str())).fileName();
 				QListWidgetItem *item = new QListWidgetItem(QIcon(dummy), fileName);
+				item->setSizeHint(gridSize());
 				addItem(item);
 				m_Thread->immediate([this, file, item]() -> void {
 					std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(file));
@@ -114,7 +117,11 @@ void CTextureBrowser::setDirectory(const QString &dir)
 						{
 							NLMISC::CBitmap bitmap;
 							bitmap.load(f);
-							bitmap.resample(128, 128);
+							uint w = bitmap.getWidth();
+							uint h = bitmap.getHeight();
+							if (w == h) bitmap.resample(128, 128);
+							else if (w > h) bitmap.resample(128, h * 128 / w);
+							else bitmap.resample(w * 128 / h, 128);
 							QPixmap pixmap = qPixmapFromCBitmap(bitmap, false);
 							invokeStdFunction([this, pixmap, item]() -> void {
 								item->setIcon(QIcon(pixmap)); // IMPORANT: Must set icon with exact size of existing so the Qt UI doesn't flicker...
