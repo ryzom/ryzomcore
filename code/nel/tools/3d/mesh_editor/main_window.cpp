@@ -108,8 +108,8 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 	QDockWidget *dock = new QDockWidget(this);
 	dock->setFloating(true);
 	CTextureBrowser *browser = new CTextureBrowser(dock);
-	browser->resize(800, 800);
 	dock->setWidget(browser);
+	dock->resize(800, 800);
 }
 
 CMainWindow::~CMainWindow()

@@ -95,14 +95,17 @@ void CTextureBrowser::setDirectory(const QString &dir)
 	// Sync up, clear, and start processing
 	m_Thread->immediate([this, dir]() -> void {
 		invokeStdFunction([this, dir]() -> void {
-			// m_listeWidget->addItem(new QListWidgetItem(QIcon("../earth.jpg"), "Earth"));
 			clear();
 			std::vector<std::string> files;
 			NLMISC::CPath::getPathContent(dir.toUtf8().data(), false, false, true, files);
+			QPixmap dummy = QPixmap::fromImage(QImage(128, 128, QImage::Format_RGB32));
 			for (size_t i = 0; i < files.size(); ++i)
 			{
 				std::string &file = files[i];
-				m_Thread->immediate([this, file]() -> void {
+				QString fileName = QFileInfo(QString::fromUtf8(file.c_str())).fileName();
+				QListWidgetItem *item = new QListWidgetItem(QIcon(dummy), fileName);
+				addItem(item);
+				m_Thread->immediate([this, file, item]() -> void {
 					std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(file));
 					if (ext == "dds" || ext == "tga" || ext == "png" || ext == "jpg" || ext == "jpeg")
 					{
@@ -113,9 +116,8 @@ void CTextureBrowser::setDirectory(const QString &dir)
 							bitmap.load(f);
 							bitmap.resample(128, 128);
 							QPixmap pixmap = qPixmapFromCBitmap(bitmap, false);
-							QString fileName = QFileInfo(QString::fromUtf8(file.c_str())).fileName();
-							invokeStdFunction([this, pixmap, fileName]() -> void {
-								addItem(new QListWidgetItem(QIcon(pixmap), fileName));
+							invokeStdFunction([this, pixmap, item]() -> void {
+								item->setIcon(QIcon(pixmap)); // IMPORANT: Must set icon with exact size of existing so the Qt UI doesn't flicker...
 							});
 						}
 					}
