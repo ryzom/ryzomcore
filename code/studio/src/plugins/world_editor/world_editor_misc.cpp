@@ -26,8 +26,7 @@
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
 
-
-// Qt includes
+#include <libxml/tree.h>
 
 namespace WorldEditor
 {
