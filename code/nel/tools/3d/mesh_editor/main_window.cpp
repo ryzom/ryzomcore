@@ -43,6 +43,7 @@
 #include "../shared_widgets/error_list.h"
 #include "graphics_viewport.h"
 #include "graphics_config.h"
+#include "texture_browser.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -103,6 +104,12 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 			}
 		}
 	}
+
+	QDockWidget *dock = new QDockWidget(this);
+	dock->setFloating(true);
+	CTextureBrowser *browser = new CTextureBrowser(dock);
+	browser->resize(800, 800);
+	dock->setWidget(browser);
 }
 
 CMainWindow::~CMainWindow()
