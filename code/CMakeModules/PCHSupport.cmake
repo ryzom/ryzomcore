@@ -56,33 +56,37 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     LIST(APPEND _FLAGS " -I\"${item}\"")
   ENDFOREACH()
 
+  # NOTE: As cmake files (eg FindQT4) may now use generator expressions around their defines that evaluate
+  #       to an empty string, wrap all "items" in an expression that outputs a -D IFF the generated
+  #       expression is not empty.
+
   # Required for CMake 2.6
   SET(GLOBAL_DEFINITIONS)
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+       LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
   GET_DIRECTORY_PROPERTY(DEFINITIONS COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+      LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
   GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+       LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
   GET_DIRECTORY_PROPERTY(DEFINITIONS DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+       LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
@@ -106,14 +110,14 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS)
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+       LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
   GET_TARGET_PROPERTY(DEFINITIONS ${_target} COMPILE_DEFINITIONS_${_UPPER_BUILD})
   IF(DEFINITIONS)
     FOREACH(item ${DEFINITIONS})
-      LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
+       LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
     ENDFOREACH()
   ENDIF()
 
@@ -135,10 +139,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
         IF(_DEFINITIONS)
           FOREACH(item ${_DEFINITIONS})
-            # don't use dynamic expressions
-            IF(NOT item MATCHES "\\$<")
-              LIST(APPEND GLOBAL_DEFINITIONS " -D${item}")
-            ENDIF()
+            LIST(APPEND GLOBAL_DEFINITIONS "$<$<BOOL:${item}>:-D$<JOIN:${item},-D>>")
           ENDFOREACH()
         ENDIF()
       ENDIF()
@@ -149,7 +150,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   IF(GLOBAL_DEFINITIONS MATCHES "QT_CORE_LIB")
     # Hack to define missing QT_NO_DEBUG with Qt 5.2
     IF(_UPPER_BUILD STREQUAL "RELEASE")
-      LIST(APPEND GLOBAL_DEFINITIONS " -DQT_NO_DEBUG")
+      LIST(APPEND GLOBAL_DEFINITIONS "-DQT_NO_DEBUG")
     ENDIF()
 
     # Qt5_POSITION_INDEPENDENT_CODE should be true if Qt was compiled with PIC
@@ -161,8 +162,6 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
       LIST(APPEND _FLAGS " ${CMAKE_CXX_COMPILE_OPTIONS_PIC}")
     ENDIF()
   ENDIF()
-
-  LIST(APPEND _FLAGS " ${GLOBAL_DEFINITIONS}")
 
   IF(CMAKE_VERSION VERSION_LESS "3.3.0")
     GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
@@ -179,6 +178,9 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
     SEPARATE_ARGUMENTS(_FLAGS)
   ENDIF()
+
+  # Already in list form and items may contain non-leading spaces that should not be split on
+  LIST(INSERT _FLAGS 0 "${GLOBAL_DEFINITIONS}")
 
   IF(CLANG)
     # Determining all architectures and get common flags
