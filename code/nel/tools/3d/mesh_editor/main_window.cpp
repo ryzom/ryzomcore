@@ -124,9 +124,8 @@ void CMainWindow::initProjectConfig(const std::string &asset)
 		NLPIPELINE::CProjectConfig::DatabaseTextureSearchPaths,
 		true);
 
-	std::string databaseRoot = NLPIPELINE::CProjectConfig::databaseRoot();
-	if (!databaseRoot.empty()) m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(QString::fromStdString(databaseRoot)));
-	else m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(""));
+	std::string databaseRoot = NLPIPELINE::CProjectConfig::assetRoot();
+	m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(QString::fromUtf8(databaseRoot.c_str())));
 }
 
 void CMainWindow::closeEvent(QCloseEvent *e)

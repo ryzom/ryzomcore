@@ -111,14 +111,14 @@ sint main(int argc, char **argv)
 	CFile::createDirectoryTree(appData + "screenshots/");
 
 	CFile::setRWAccess(localAppData + "andbasr.ttf");
-	QFile::remove(QString::fromStdString(localAppData + "andbasr.ttf"));
-	QFile(":/data/andbasr.ttf").copy(QString::fromStdString(localAppData + "andbasr.ttf"));
+	QFile::remove(QString::fromUtf8((localAppData + "andbasr.ttf").c_str()));
+	QFile(":/data/andbasr.ttf").copy(QString::fromUtf8((localAppData + "andbasr.ttf").c_str()));
 	CFile::setRWAccess(appData + "mesh_editor_default.cfg");
-	QFile::remove(QString::fromStdString(appData + "mesh_editor_default.cfg"));
-	QFile(":/data/mesh_editor_default.cfg").copy(QString::fromStdString(appData + "mesh_editor_default.cfg"));
-	if (!QFileInfo(QString::fromStdString(appData + "mesh_editor.cfg")).exists())
+	QFile::remove(QString::fromUtf8((appData + "mesh_editor_default.cfg").c_str()));
+	QFile(":/data/mesh_editor_default.cfg").copy(QString::fromUtf8((appData + "mesh_editor_default.cfg").c_str()));
+	if (!QFileInfo(QString::fromUtf8((appData + "mesh_editor.cfg").c_str())).exists())
 	{
-		QFile(":/data/mesh_editor.cfg").copy(QString::fromStdString(appData + "mesh_editor.cfg"));
+		QFile(":/data/mesh_editor.cfg").copy(QString::fromUtf8((appData + "mesh_editor.cfg").c_str()));
 		CFile::setRWAccess(appData + "mesh_editor.cfg");
 	}
 

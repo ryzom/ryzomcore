@@ -233,6 +233,12 @@ void CProjectConfig::release()
 	cleanup();
 }
 
+std::string CProjectConfig::assetRoot()
+{
+	return CFile::getPath(s_AssetConfigPath);
+}
+
+/*
 std::string CProjectConfig::databaseRoot()
 {
 	for (uint i = 0; i < s_ConfigFiles.size(); ++i)
@@ -246,6 +252,7 @@ std::string CProjectConfig::databaseRoot()
 
 	return "";
 }
+*/
 
 } /* namespace NLPIPELINE */
 

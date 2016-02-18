@@ -53,7 +53,7 @@ public:
 	/// Undo init
 	static void release();
 
-	static std::string databaseRoot();
+	static std::string assetRoot();
 
 private:
 	static void cleanup();
