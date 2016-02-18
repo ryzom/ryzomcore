@@ -1629,7 +1629,7 @@ bool CDriverGL::destroyWindow()
 	if (_hDC)
 		wglMakeCurrent(_hDC, NULL);
 
-	if (_DestroyWindow && _hRC)
+	if (_hRC)
 	{
 		wglDeleteContext(_hRC);
 		_hRC = NULL;
@@ -1644,7 +1644,7 @@ bool CDriverGL::destroyWindow()
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 
-	if (_DestroyWindow && _ctx)
+	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
 		glXDestroyContext(_dpy, _ctx);
 
 	_ctx = NULL;

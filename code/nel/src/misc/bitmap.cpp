@@ -84,6 +84,20 @@ void MakeWhite(CBitmap &bitmaps)
 }
 #endif // NEL_ALL_BITMAP_WHITE
 
+CBitmap::CBitmap()
+{
+	_MipMapCount = 1;
+	_Width = 0;
+	_Height = 0;
+	PixelFormat = RGBA;
+	_LoadGrayscaleAsAlpha = true;
+}
+
+CBitmap::~CBitmap()
+{
+
+}
+
 /*-------------------------------------------------------------------*\
 								load
 \*-------------------------------------------------------------------*/

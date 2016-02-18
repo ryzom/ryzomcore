@@ -320,16 +320,8 @@ public:
 
 	// don't forget to update operator=() and swap() if adding a data member
 
-	CBitmap()
-	{
-		_MipMapCount = 1;
-		_Width = 0;
-		_Height = 0;
-		PixelFormat = RGBA;
-		_LoadGrayscaleAsAlpha = true;
-	}
-
-	virtual ~CBitmap() { }
+	CBitmap();
+	virtual ~CBitmap();
 
 	// swap 2 bitmaps contents
 	void	swap(CBitmap &other);
