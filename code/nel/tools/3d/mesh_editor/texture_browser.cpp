@@ -34,6 +34,7 @@
 #include <nel/misc/common.h>
 #include <nel/misc/bitmap.h>
 #include <nel/misc/file.h>
+#include <nel/misc/sha1.h>
 #include <nel/pipeline/project_config.h>
 
 // Project includes
@@ -42,7 +43,7 @@
 // See also: studio/.../gui_editor/texture_chooser.cpp
 
 // UTILITY ->
-QPixmap qPixmapFromCBitmap(NLMISC::CBitmap &bitmap, bool alpha)
+QImage qImageFromCBitmap(NLMISC::CBitmap &bitmap, bool alpha)
 {
 	QImage img(bitmap.getWidth(), bitmap.getHeight(), alpha ? QImage::Format_ARGB32 : QImage::Format_RGB32);
 	NLMISC::CObjectVector<uint8> &pixels = bitmap.getPixels();
@@ -64,7 +65,7 @@ QPixmap qPixmapFromCBitmap(NLMISC::CBitmap &bitmap, bool alpha)
 		}
 	}
 
-	return QPixmap::fromImage(img);
+	return img;
 }
 // <- UTILITY
 
@@ -91,6 +92,9 @@ CTextureBrowser::~CTextureBrowser()
 
 void CTextureBrowser::setDirectory(const QString &dir)
 {
+	if (dir == m_CurrentDirectory)
+		return;
+
 	// Remove any pending stuff
 	m_Thread->clear();
 
@@ -98,6 +102,8 @@ void CTextureBrowser::setDirectory(const QString &dir)
 	m_Thread->immediate([this, dir]() -> void {
 		invokeStdFunction([this, dir]() -> void {
 			clear();
+			std::string cacheDir = NLMISC::CPath::getApplicationDirectory("NeL", true) + "cache/thumbnails/";
+			NLMISC::CFile::createDirectoryTree(cacheDir);
 			std::vector<std::string> files;
 			NLMISC::CPath::getPathContent(dir.toUtf8().data(), false, false, true, files);
 			QPixmap dummy = QPixmap::fromImage(QImage(128, 128, QImage::Format_ARGB32));
@@ -105,30 +111,66 @@ void CTextureBrowser::setDirectory(const QString &dir)
 			{
 				std::string &file = files[i];
 				QString fileName = QFileInfo(QString::fromUtf8(file.c_str())).fileName();
-				QListWidgetItem *item = new QListWidgetItem(QIcon(dummy), fileName);
-				item->setSizeHint(gridSize());
-				addItem(item);
-				m_Thread->immediate([this, file, item]() -> void {
-					std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(file));
-					if (ext == "dds" || ext == "tga" || ext == "png" || ext == "jpg" || ext == "jpeg")
-					{
-						NLMISC::CIFile f;
-						if (f.open(file))
+				std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(file));
+				if (ext == "dds" || ext == "tga" || ext == "png" || ext == "jpg" || ext == "jpeg")
+				{
+					QListWidgetItem *item = new QListWidgetItem(QIcon(dummy), fileName);
+					item->setSizeHint(gridSize());
+					addItem(item);
+					m_Thread->immediate([this, file, cacheDir, item]() -> void {
+						CHashKey filePathHash = getSHA1((uint8 *)file.c_str(), file.size()); // Get SHA1 of filepath
+						std::string hash = NLMISC::toLower(filePathHash.toString()); // Hash in text format
+						std::string cacheFile = cacheDir + hash + ".png";
+						QString cacheFilePath = QString::fromUtf8(cacheFile.c_str());
+						uint32 assetModification = NLMISC::CFile::getFileModificationDate(file);
+						uint32 assetSize = NLMISC::CFile::getFileSize(file);
+						QImage image;
+						if (NLMISC::CFile::isExists(cacheFile))
 						{
-							NLMISC::CBitmap bitmap;
-							bitmap.load(f);
-							uint w = bitmap.getWidth();
-							uint h = bitmap.getHeight();
-							if (w == h) bitmap.resample(128, 128);
-							else if (w > h) bitmap.resample(128, h * 128 / w);
-							else bitmap.resample(w * 128 / h, 128);
-							QPixmap pixmap = qPixmapFromCBitmap(bitmap, false);
-							invokeStdFunction([this, pixmap, item]() -> void {
-								item->setIcon(QIcon(pixmap)); // IMPORANT: Must set icon with exact size of existing so the Qt UI doesn't flicker...
+							if (image.load(QString::fromUtf8(cacheFile.c_str()), "PNG"))
+							{
+								// Use thumnbail if it matches only
+								uint32 thumbnailModification = image.text("NL_ASSET_MODIFICATION").toUInt();
+								uint32 thumbnailSize = image.text("NL_ASSET_SIZE").toUInt();
+								if (thumbnailSize != assetSize || thumbnailModification != assetModification)
+								{
+									image = QImage();
+								}
+							}
+							else
+							{
+								image = QImage();
+							}
+						}
+						if (image.isNull())
+						{
+							if (NLMISC::CFile::isExists(cacheFile))
+								NLMISC::CFile::deleteFile(cacheFile);
+							NLMISC::CIFile f;
+							if (f.open(file))
+							{
+								NLMISC::CBitmap bitmap;
+								bitmap.load(f);
+								uint w = bitmap.getWidth();
+								uint h = bitmap.getHeight();
+								if (w == h) bitmap.resample(128, 128);
+								else if (w > h) bitmap.resample(128, h * 128 / w);
+								else bitmap.resample(w * 128 / h, 128);
+								image = qImageFromCBitmap(bitmap, false);
+								image.setText("NL_ASSET_MODIFICATION", QString::number(assetModification));
+								image.setText("NL_ASSET_SIZE", QString::number(assetSize));
+								image.save(cacheFilePath, "PNG");
+							}
+						}
+						if (!image.isNull())
+						{
+							QIcon icon = QIcon(QPixmap::fromImage(image));
+							invokeStdFunction([this, icon, item]() -> void {
+								item->setIcon(icon); // IMPORANT: Must set icon with exact size of existing so the Qt UI doesn't flicker...
 							});
 						}
-					}
-				});
+					});
+				}
 			}
 		});
 	});

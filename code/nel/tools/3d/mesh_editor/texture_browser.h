@@ -58,6 +58,7 @@ private slots:
 
 private:
 	CEventLoop *m_Thread;
+	QString m_CurrentDirectory;
 
 private:
 	CTextureBrowser(const CTextureBrowser &);
