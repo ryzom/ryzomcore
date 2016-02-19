@@ -208,12 +208,12 @@ void CProjectConfig::searchDirectories(const char *var)
 	{
 		CConfigFile *cfg = s_ConfigFiles[i];
 		const TPathString &dir = s_ConfigPaths[i];
-		CConfigFile::CVar *paths = cfg->getVarPtr(var);
-		if (paths)
+		CConfigFile::CVar *pathvar = cfg->getVarPtr(var);
+		if (pathvar)
 		{
-			for (uint i = 0; i < paths->size(); i++)
+			for (uint j = 0; j < pathvar->size(); j++)
 			{
-				TPathString path = paths->asString(i);
+				TPathString path = pathvar->asString(j);
 				if (!CPath::isAbsolutePath(path)) path = dir + path;
 				path = CPath::standardizePath(path);
 				if (s_SearchPaths.find(path) == s_SearchPaths.end())
@@ -233,9 +233,39 @@ void CProjectConfig::release()
 	cleanup();
 }
 
-std::string CProjectConfig::assetRoot()
+std::string CProjectConfig::getAssetRoot()
 {
 	return CFile::getPath(s_AssetConfigPath);
+}
+
+void CProjectConfig::getSearchPaths(std::vector<std::string> &paths, const char *var)
+{
+	std::set<std::string> deduplicate;
+	for (uint i = 0; i < s_ConfigFiles.size(); ++i)
+	{
+		CConfigFile *cfg = s_ConfigFiles[i];
+		const TPathString &dir = s_ConfigPaths[i];
+		CConfigFile::CVar *pathvar = cfg->getVarPtr(var);
+		if (pathvar)
+		{
+			for (uint j = 0; j < pathvar->size(); j++)
+			{
+				TPathString path = pathvar->asString(j);
+				if (!CPath::isAbsolutePath(path)) path = dir + path;
+				path = CPath::standardizePath(path);
+				if (deduplicate.find(path) == deduplicate.end())
+				{
+					paths.push_back(path);
+					deduplicate.insert(path);
+				}
+			}
+		}
+	}
+}
+
+void CProjectConfig::getDatabaseTextureSearchPaths(std::vector<std::string> &paths)
+{
+	getSearchPaths(paths, "DatabaseTextureSearchPaths");
 }
 
 /*

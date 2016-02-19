@@ -81,13 +81,22 @@ CTextureBrowser::CTextureBrowser(QWidget *parent) : QListWidget(parent)
 
 	setGridSize(QSize(144, 160));
 
-	setDirectory("W:/database/stuff/fyros/agents/_textures/actors/");
+	// setDirectory("W:/database/stuff/fyros/agents/_textures/actors/");
 }
 
 CTextureBrowser::~CTextureBrowser()
 {
 	m_Thread->clear();
 	delete m_Thread;
+}
+
+std::string CTextureBrowser::getSelectedTextureFile() const
+{
+	std::string res;
+	QList<QListWidgetItem *> items = selectedItems();
+	if (items.size() > 0)
+		res = items[0]->text().toUtf8().data();
+	return res;
 }
 
 void CTextureBrowser::setDirectory(const QString &dir)
@@ -106,7 +115,9 @@ void CTextureBrowser::setDirectory(const QString &dir)
 			NLMISC::CFile::createDirectoryTree(cacheDir);
 			std::vector<std::string> files;
 			NLMISC::CPath::getPathContent(dir.toUtf8().data(), false, false, true, files);
-			QPixmap dummy = QPixmap::fromImage(QImage(128, 128, QImage::Format_ARGB32));
+			QImage dummyimg = QImage(128, 128, QImage::Format_ARGB32);
+			dummyimg.fill(0);
+			QIcon dummy = QIcon(QPixmap::fromImage(dummyimg));
 			for (size_t i = 0; i < files.size(); ++i)
 			{
 				std::string &file = files[i];
@@ -114,7 +125,7 @@ void CTextureBrowser::setDirectory(const QString &dir)
 				std::string ext = NLMISC::toLower(NLMISC::CFile::getExtension(file));
 				if (ext == "dds" || ext == "tga" || ext == "png" || ext == "jpg" || ext == "jpeg")
 				{
-					QListWidgetItem *item = new QListWidgetItem(QIcon(dummy), fileName);
+					QListWidgetItem *item = new QListWidgetItem(dummy, fileName);
 					item->setSizeHint(gridSize());
 					addItem(item);
 					m_Thread->immediate([this, file, cacheDir, item]() -> void {

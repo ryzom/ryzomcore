@@ -53,11 +53,13 @@ public:
 	/// Undo init
 	static void release();
 
-	static std::string assetRoot();
+	static std::string getAssetRoot();
+	static void getDatabaseTextureSearchPaths(std::vector<std::string> &paths);
 
 private:
 	static void cleanup();
 	static void searchDirectories(const char *var);
+	static void getSearchPaths(std::vector<std::string> &paths, const char *var);
 
 	static CProjectConfig s_Instance;
 

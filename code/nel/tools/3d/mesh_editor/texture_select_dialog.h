@@ -15,57 +15,46 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef NL_TEXTURE_BROWSER_H
-#define NL_TEXTURE_BROWSER_H
+#ifndef NL_TEXTURE_SELECT_DIALOG_H
+#define NL_TEXTURE_SELECT_DIALOG_H
 #include <nel/misc/types_nl.h>
 
 // STL includes
-#include <functional>
 
 // Qt includes
-#include <QListWidget>
+#include <QDialog>
 
 // NeL includes
 // ...
 
-class CEventLoop;
-typedef std::function<void()> CStdFunctionVoid;
+// Project includes
+#include "texture_browser.h"
 
 /**
- * CTextureBrowser
- * \brief CTextureBrowser
+ * CTextureSelectDialog
+ * \brief CTextureSelectDialog
  * \date 2016-02-18 14:06GMT
  * \author Jan Boon <jan.boon@kaetemi.be>
  */
-class CTextureBrowser : public QListWidget
+class CTextureSelectDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
-	CTextureBrowser(QWidget *parent = NULL);
-	virtual ~CTextureBrowser();
+	CTextureSelectDialog(QWidget *parent = NULL);
+	virtual ~CTextureSelectDialog();
 
-	std::string getSelectedTextureFile() const;
-
-	void setDirectory(const QString &dir);
-
-	// STD INVOKE ->
-public:
-	void invokeStdFunction(CStdFunctionVoid f);
-private slots:
-	void callStdFunction(CStdFunctionVoid f);
-	// <- STD INVOKE
+	inline std::string getSelectedTextureFile() const { return m_TextureBrowser->getSelectedTextureFile(); }
 
 private:
-	CEventLoop *m_Thread;
-	QString m_CurrentDirectory;
+	CTextureBrowser *m_TextureBrowser;
 
 private:
-	CTextureBrowser(const CTextureBrowser &);
-	CTextureBrowser &operator=(const CTextureBrowser &);
+	CTextureSelectDialog(const CTextureSelectDialog &);
+	CTextureSelectDialog &operator=(const CTextureSelectDialog &);
 	
-}; /* class CTextureBrowser */
+}; /* class CTextureSelectDialog */
 
-#endif /* #ifndef NL_TEXTURE_BROWSER_H */
+#endif /* #ifndef NL_TEXTURE_SELECT_DIALOG_H */
 
 /* end of file */

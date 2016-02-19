@@ -43,7 +43,7 @@
 #include "../shared_widgets/error_list.h"
 #include "graphics_viewport.h"
 #include "graphics_config.h"
-#include "texture_browser.h"
+#include "texture_select_dialog.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -92,24 +92,29 @@ CMainWindow::CMainWindow(QWidget *parent, Qt::WindowFlags flags)
 	connect(m_GraphicsConfig, SIGNAL(applyGraphicsConfig()), this, SLOT(applyGraphicsConfig()));
 	m_Configuration.setAndCallback("SoundEnabled", CConfigCallback(this, &CMainWindow::cfcbSoundEnabled));
 
-	NLMISC::CConfigFile::CVar *lastFiles = m_Configuration.getConfigFile().getVarPtr("LastFiles");
-	if (lastFiles)
+	NLMISC::CConfigFile::CVar *recentFiles = m_Configuration.getConfigFile().getVarPtr("RecentFiles");
+	if (recentFiles)
 	{
-		for (uint i = 0; i < lastFiles->size(); ++i)
+		for (uint i = 0; i < recentFiles->size(); ++i)
 		{
-			if (NLMISC::CFile::isExists(lastFiles->asString()))
+			if (NLMISC::CFile::isExists(recentFiles->asString()))
 			{
-				initProjectConfig(lastFiles->asString());
+				initProjectConfig(recentFiles->asString());
 				break;
 			}
 		}
 	}
 
+	/*
 	QDockWidget *dock = new QDockWidget(this);
 	dock->setFloating(true);
 	CTextureBrowser *browser = new CTextureBrowser(dock);
 	dock->setWidget(browser);
 	dock->resize(800, 800);
+	*/
+
+	CTextureSelectDialog *textureSelect = new CTextureSelectDialog(this);
+	textureSelect->exec();
 }
 
 CMainWindow::~CMainWindow()
@@ -131,7 +136,7 @@ void CMainWindow::initProjectConfig(const std::string &asset)
 		NLPIPELINE::CProjectConfig::DatabaseTextureSearchPaths,
 		true);
 
-	std::string databaseRoot = NLPIPELINE::CProjectConfig::assetRoot();
+	std::string databaseRoot = NLPIPELINE::CProjectConfig::getAssetRoot();
 	m_AssetTreeView->setRootIndex(m_AssetTreeModel->index(QString::fromUtf8(databaseRoot.c_str())));
 }
 
