@@ -1785,7 +1785,7 @@ int CPatchManager::validateProgress(void *foo, double t, double d, double /* ult
 
 	if (units.empty())
 	{
-		units.push_back("B"); // there is no translation for byte unit...
+		units.push_back(CI18N::get("uiByte").toUtf8());
 		units.push_back(CI18N::get("uiKb").toUtf8());
 		units.push_back(CI18N::get("uiMb").toUtf8());
 	}
