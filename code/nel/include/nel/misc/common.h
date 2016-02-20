@@ -353,6 +353,8 @@ uint32 humanReadableToBytes (const std::string &str);
 /// Convert a time into a string that is easily readable by an human, for example 3600 -> "1h"
 std::string secondsToHumanReadable (uint32 time);
 
+/// Convert a UNIX timestamp to a formatted date in ISO format
+std::string timestampToHumanReadable(uint32 timestamp);
 
 /// Get a bytes or time in string format and convert it in seconds or bytes
 uint32 fromHumanReadable (const std::string &str);

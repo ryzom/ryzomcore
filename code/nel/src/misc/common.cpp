@@ -506,6 +506,21 @@ string secondsToHumanReadable (uint32 time)
 	return toString ("%u%s", res, divTable[div]);
 }
 
+std::string timestampToHumanReadable(uint32 timestamp)
+{
+	char buffer[30];
+	time_t dtime = timestamp;
+	tm *tms = localtime(&dtime);
+
+	if (tms)
+	{
+		strftime(buffer, 30, "%Y-%m-%d %H:%M:%S", tms);
+		return std::string(buffer);
+	}
+
+	return "";
+}
+
 uint32 fromHumanReadable (const std::string &str)
 {
 	if (str.size() == 0)
