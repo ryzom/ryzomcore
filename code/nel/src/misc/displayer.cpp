@@ -491,7 +491,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 
 	if (_FilePointer == (FILE*)1)
 	{
-		_FilePointer = fopen (_FileName.c_str(), "at");
+		_FilePointer = nlfopen (_FileName, "at");
 		if (_FilePointer == NULL)
 			printf ("Can't open log file '%s': %s\n", _FileName.c_str(), strerror (errno));
 	}

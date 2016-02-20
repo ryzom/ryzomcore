@@ -143,7 +143,7 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 	}
 	else
 	{
-		_File = fopen(sFilename.c_str(), "rb");
+		_File = nlfopen(sFilename, "rb");
 		if (_File == NULL)
 			return false;
 		fseek(_File, nLowerBound, SEEK_SET);
@@ -560,7 +560,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		errorMsg = toString("output file %s already exists", sFileOutput.c_str());
 		return ApplyResult_Error;
 	}
-	FILE *outFILE = fopen(sFileOutput.c_str(), "wb");
+	FILE *outFILE = nlfopen(sFileOutput, "wb");
 	if (outFILE == NULL)
 	{
 		errorMsg = toString("cant create %s", sFileOutput.c_str());
@@ -572,7 +572,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	bool ftpPresent = false;
 	if (pFromSource)
 	{
-		ftpFILE = fopen(sFileToPatch.c_str(), "rb");
+		ftpFILE = nlfopen(sFileToPatch, "rb");
 		if (ftpFILE == NULL)
 		{
 			errorMsg = toString("expecting file %s", sFileToPatch.c_str());

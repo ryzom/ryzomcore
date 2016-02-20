@@ -575,7 +575,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		if (haveLongArg("writepid"))
 		{
 			// use legacy C primitives
-			FILE *fp = fopen("pid.state", "wt");
+			FILE *fp = nlfopen("pid.state", "wt");
 			if (fp)
 			{
 				fprintf(fp, "%u", getpid());
@@ -623,7 +623,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			else
 			{
 				// create the basic .cfg that link the default one
-				FILE *fp = fopen (cfn.c_str(), "w");
+				FILE *fp = nlfopen (cfn, "w");
 				if (fp == NULL)
 				{
 					nlerror ("SERVICE: Can't create config file '%s'", cfn.c_str());

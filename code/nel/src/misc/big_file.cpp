@@ -136,7 +136,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 	CHandleFile		&handle= _ThreadFileArray.get(bnp.ThreadFileId);
 
 	// Open the big file.
-	handle.File = fopen (sBigFileName.c_str(), "rb");
+	handle.File = nlfopen (sBigFileName, "rb");
 	if (handle.File == NULL)
 		return false;
 
@@ -197,7 +197,7 @@ bool CBigFile::BNP::readHeader()
 	// Only external use
 	if (InternalUse || BigFileName.empty()) return false;
 
-	FILE *f = fopen (BigFileName.c_str(), "rb");
+	FILE *f = nlfopen (BigFileName, "rb");
 	if (f == NULL) return false;
 
 	bool res = readHeader(f);
@@ -348,7 +348,7 @@ bool CBigFile::BNP::appendHeader()
 	// Only external use
 	if (InternalUse || BigFileName.empty()) return false;
 
-	FILE *f = fopen (BigFileName.c_str(), "ab");
+	FILE *f = nlfopen (BigFileName, "ab");
 	if (f == NULL) return false;
 
 	uint32 nNbFile = (uint32)SFiles.size();
@@ -438,10 +438,10 @@ bool CBigFile::BNP::appendFile(const std::string &filename)
 	SFiles.push_back(ftmp);
 	OffsetFromBeginning += ftmp.Size;
 
-	FILE *f1 = fopen(BigFileName.c_str(), "ab");
+	FILE *f1 = nlfopen(BigFileName, "ab");
 	if (f1 == NULL) return false;
 
-	FILE *f2 = fopen(filename.c_str(), "rb");
+	FILE *f2 = nlfopen(filename, "rb");
 	if (f2 == NULL)
 	{
 		fclose(f1);
@@ -473,7 +473,7 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 	// Only external use
 	if (InternalUse || BigFileName.empty()) return false;
 
-	FILE *bnp = fopen (BigFileName.c_str(), "rb");
+	FILE *bnp = nlfopen (BigFileName, "rb");
 	if (bnp == NULL)
 		return false;
 
@@ -506,7 +506,7 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 			return false;
 		}
 
-		out = fopen (filename.c_str(), "wb");
+		out = nlfopen (filename, "wb");
 		if (out != NULL)
 		{
 			nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
@@ -681,7 +681,7 @@ FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 	*/
 	if(handle.File== NULL)
 	{
-		handle.File = fopen (bnp->BigFileName.c_str(), "rb");
+		handle.File = nlfopen (bnp->BigFileName, "rb");
 		if (handle.File == NULL)
 		{
 			nlwarning ("bnp: can't fopen big file '%s' error %d '%s'", bnp->BigFileName.c_str(), errno, strerror(errno));

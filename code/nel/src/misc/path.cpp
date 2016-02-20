@@ -1269,7 +1269,7 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 	// Open and read the big file header
 	nlassert(!_MemoryCompressed);
 
-	FILE *Handle = fopen (sBigFilename.c_str(), "rb");
+	FILE *Handle = nlfopen (sBigFilename, "rb");
 	if (Handle == NULL)
 	{
 		nlwarning ("PATH: CPath::addSearchBigFile(%s, %d, %d): can't open file, skip it", sBigFilename.c_str(), recurse, alternative);
@@ -1421,7 +1421,7 @@ void CFileContainer::addSearchXmlpackFile (const string &sXmlpackFilename, bool 
 	}
 	// Open and read the xmlpack file header
 
-	FILE *Handle = fopen (sXmlpackFilename.c_str(), "rb");
+	FILE *Handle = nlfopen (sXmlpackFilename, "rb");
 	if (Handle == NULL)
 	{
 		nlwarning ("PATH: CPath::addSearchXmlpackFile(%s, %d, %d): can't open file, skip it", sXmlpackFilename.c_str(), recurse, alternative);
@@ -1950,7 +1950,7 @@ bool CFile::isExists (const string &filename)
 
 bool CFile::createEmptyFile (const std::string& filename)
 {
-	FILE *file = fopen (filename.c_str(), "wb");
+	FILE *file = nlfopen (filename, "wb");
 
 	if (file)
 	{
@@ -2311,13 +2311,13 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 		{
 			totalSize = CFile::getFileSize(ssrc);
 		}
-		FILE *fp1 = fopen(ssrc.c_str(), "rb");
+		FILE *fp1 = nlfopen(ssrc, "rb");
 		if (fp1 == NULL)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read mode '%s'", ssrc.c_str());
 			return false;
 		}
-		FILE *fp2 = fopen(sdest.c_str(), "wb");
+		FILE *fp2 = nlfopen(sdest, "wb");
 		if (fp2 == NULL)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read write mode '%s'", sdest.c_str());

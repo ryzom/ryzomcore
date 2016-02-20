@@ -141,7 +141,7 @@ static void markBNPFile(std::string &path)
 
 	uint32 nFileSize=CFile::getFileSize(path);
 	if (!nFileSize) return;
-	FILE *f = fopen(path.c_str(), "rb+");
+	FILE *f = nlfopen(path, "rb+");
 	if (!f) return;
 // Result
 	if (nlfseek64 (f, nFileSize-4, SEEK_SET) != 0)

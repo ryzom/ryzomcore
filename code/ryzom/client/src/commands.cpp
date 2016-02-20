@@ -695,7 +695,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 	if (ClientCfg.Local)
 		sys += "ShardName OFFLINE ";
 
-	FILE *fp = fopen (std::string(getLogDirectory() + "bug_report.txt").c_str(), "wb");
+	FILE *fp = nlfopen (getLogDirectory() + "bug_report.txt", "wb");
 	if (fp != NULL)
 	{
 		string res = addSlashR(getDebugInformation());

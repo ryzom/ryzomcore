@@ -19,6 +19,7 @@
 
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
+#include <nel/misc/common.h>
 
 // Test suite for NLMISC::CFile behavior
 struct CUTMiscFile : public Test::Suite
@@ -49,7 +50,7 @@ private:
 	void copyFileSize(uint fileSize)
 	{
 		// create a source file (using standard c code)
-		FILE *fp = fopen(_SrcFile.c_str(), "wb");
+		FILE *fp = NLMISC::nlfopen(_SrcFile, "wb");
 		nlverify(fp != NULL);
 
 		for (uint i=0; i<fileSize; ++i)
@@ -63,7 +64,7 @@ private:
 		NLMISC::CFile::copyFile(_DstFile, _SrcFile, false);
 
 		// verify the resulting file
-		fp = fopen(_DstFile.c_str(), "rb");
+		fp = NLMISC::nlfopen(_DstFile, "rb");
 		TEST_ASSERT(fp != NULL);
 		if (fp)
 		{
@@ -108,7 +109,7 @@ private:
 	void moveFileSize(size_t fileSize)
 	{
 		// remove the destination if any
-		FILE *fp = fopen(_DstFile.c_str(), "rb");
+		FILE *fp = NLMISC::nlfopen(_DstFile, "rb");
 		if (fp != NULL)
 		{
 			fclose(fp);
@@ -116,7 +117,7 @@ private:
 		}
 
 		// create a source file (using standard c code)
-		fp = fopen(_SrcFile.c_str(), "wb");
+		fp = NLMISC::nlfopen(_SrcFile, "wb");
 		nlverify(fp != NULL);
 
 		for (uint i=0; i<fileSize; ++i)
@@ -130,12 +131,12 @@ private:
 		NLMISC::CFile::moveFile(_DstFile, _SrcFile);
 
 		// verify the resulting file
-		fp = fopen(_SrcFile.c_str(), "rb");
+		fp = NLMISC::nlfopen(_SrcFile, "rb");
 		TEST_ASSERT_MSG(fp == NULL, "The source file is not removed");
 		if (fp)
 			fclose(fp);
 
-		fp = fopen(_DstFile.c_str(), "rb");
+		fp = NLMISC::nlfopen(_DstFile, "rb");
 		TEST_ASSERT(fp != NULL);
 		if (fp)
 		{

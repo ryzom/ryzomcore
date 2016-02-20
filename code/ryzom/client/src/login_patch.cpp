@@ -869,7 +869,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 		std::string batchFilename = ClientRootPath + UpdateBatchFilename;
 
-		FILE *fp = fopen (batchFilename.c_str(), "wt");
+		FILE *fp = nlfopen (batchFilename, "wt");
 
 		if (fp == NULL)
 		{
@@ -1302,7 +1302,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
-		FILE *fp = fopen (dest.c_str(), "wb");
+		FILE *fp = nlfopen (dest, "wb");
 		if (fp == NULL)
 		{
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
@@ -1441,8 +1441,8 @@ void CPatchManager::decompressFile (const string &filename)
 
 	string dest = filename.substr(0, filename.size ()-4);
 	setRWAccess(dest, false);
-	//if(isVerboseLog()) nlinfo("Calling fopen('%s','wb')", dest.c_str());
-	FILE *fp = fopen (dest.c_str(), "wb");
+	//if(isVerboseLog()) nlinfo("Calling nlfopen('%s','wb')", dest.c_str());
+	FILE *fp = nlfopen (dest, "wb");
 	if (fp == NULL)
 	{
 		string err = toString("Can't open file '%s' : code=%d %s, (error code 32)", dest.c_str(), errno, strerror(errno));
@@ -2192,7 +2192,7 @@ void CCheckThread::run ()
 					if (bnpFile.readHeader())
 					{
 						// read the file inside the bnp and calculate the sha1
-						FILE *bnp = fopen (sBNPFilename.c_str(), "rb");
+						FILE *bnp = nlfopen (sBNPFilename, "rb");
 						if (bnp != NULL)
 						{
 							for (uint32 k = 0; k < bnpFile.SFiles.size(); ++k)
@@ -3068,7 +3068,7 @@ bool CPatchManager::extract(const std::string& patchPath,
 	uint nblab = 0;
 	pPM->deleteFile(updateBatchFilename, false, false);
 
-	FILE *fp = fopen (updateBatchFilename.c_str(), "wt");
+	FILE *fp = nlfopen (updateBatchFilename, "wt");
 
 	if (fp == 0)
 	{

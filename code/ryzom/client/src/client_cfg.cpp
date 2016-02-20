@@ -1931,7 +1931,7 @@ void CClientConfig::init(const string &configFileName)
 	if(!CFile::fileExists(configFileName))
 	{
 		// create the basic .cfg
-		FILE *fp = fopen(configFileName.c_str(), "w");
+		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == NULL)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());

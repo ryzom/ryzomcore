@@ -1120,7 +1120,7 @@ bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 #ifdef NL_OS_WINDOWS
 
 	// open the file
-	FILE* inf= fopen(fileName.c_str(), "rb");
+	FILE* inf= nlfopen(fileName, "rb");
 	DROP_IF( inf==NULL, "Failed to open input file " << fileName, return false);
 
 	// get the file size

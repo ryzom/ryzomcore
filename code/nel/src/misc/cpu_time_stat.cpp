@@ -42,7 +42,7 @@ bool	CCPUTimeStat::getCPUTicks(uint64& user, uint64& nice, uint64& system, uint6
 #ifdef NL_OS_UNIX
 
 	const char*	statfile = "/proc/stat";
-	FILE*		f = fopen(statfile, "r");
+	FILE*		f = nlfopen(statfile, "r");
 
 	if (f == NULL)
 		return false;
@@ -66,7 +66,7 @@ bool	CCPUTimeStat::getPIDTicks(uint64& utime, uint64& stime, uint64& cutime, uin
 #ifdef NL_OS_UNIX
 
 	std::string	statfile = NLMISC::toString("/proc/%u/stat", pid);
-	FILE*	f = fopen(statfile.c_str(), "r");
+	FILE*	f = nlfopen(statfile, "r");
 
 	if (f == NULL)
 		return false;
