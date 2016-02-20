@@ -119,8 +119,10 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 
 #ifdef NL_OS_WINDOWS
 	UpdateBatchFilename = "updt_nl.bat";
+	UpgradeBatchFilename = "upgd_nl.bat";
 #else
 	UpdateBatchFilename = "updt_nl.sh";
+	UpgradeBatchFilename = "upgd_nl.sh";
 #endif
 
 	// use application directory by default
