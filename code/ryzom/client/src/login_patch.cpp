@@ -1792,7 +1792,7 @@ int CPatchManager::validateProgress(void *foo, double t, double d, double /* ult
 
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double pour1 = t!=0.0?d*100.0/t:0.0;
-	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
+	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
 		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1));
 	pPM->setState(false, sTranslate);
 	if (foo)
