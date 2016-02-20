@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
-	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
+	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
 	Args.addAdditionalArg("login", "Login to use", true, false);
 	Args.addAdditionalArg("password", "Password to use", true, false);
 	Args.addAdditionalArg("shard_id", "Shard ID to use", true, false);
@@ -206,13 +206,13 @@ int main(int argc, char **argv)
 		LoginShardId = std::numeric_limits<uint32>::max();
 
 	// if client_default.cfg is not in current directory, use application default directory
-	if (Args.haveArg("c") || !CFile::isExists("client_default.cfg"))
+	if (Args.haveArg("p") || !CFile::isExists("client_default.cfg"))
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
-		// append config ID to directory
-		if (Args.haveArg("c"))
-			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("c").front();
+		// append profile ID to directory
+		if (Args.haveArg("p"))
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
 
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
