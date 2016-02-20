@@ -1963,7 +1963,14 @@ bool CFile::createEmptyFile (const std::string& filename)
 bool CFile::fileExists (const string& filename)
 {
 	//H_AUTO(FileExists);
-	return ! ! fstream( filename.c_str(), ios::in );
+#ifdef NL_OS_WINDOWS
+	DWORD attr = GetFileAttributesW(utf8ToWide(filename));
+	// attributes are valid and file is not a directory
+	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY)) return false;
+	return true;
+#else
+	return access(filename.c_str(), R_OK) != -1;
+#endif
 }
 
 
@@ -2676,7 +2683,10 @@ bool CPath::isAbsolutePath(const std::string &path)
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	wchar_t *wideFile = utf8ToWide(filename);
+	ucstring ucFile;
+	ucFile.fromUtf8(filename);
+
+	wchar_t *wideFile = (wchar_t*)ucFile.c_str();
 
 	// if the file exists and there's no write access
 	if (_waccess (wideFile, 00) == 0 && _waccess (wideFile, 06) == -1)
@@ -2717,15 +2727,14 @@ bool CFile::setRWAccess(const std::string &filename)
 	return true;
 }
 
-
-#ifdef NL_OS_WINDOWS
-#define unlink _unlink
-#endif
-
 bool CFile::deleteFile(const std::string &filename)
 {
 	setRWAccess(filename);
-	int res = unlink (filename.c_str());
+#ifdef NL_OS_WINDOWS
+	sint res = _wunlink(utf8ToWide(filename));
+#else
+	sint res = unlink(filename.c_str());
+#endif
 	if (res == -1)
 	{
 		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
@@ -2737,14 +2746,14 @@ bool CFile::deleteFile(const std::string &filename)
 	return true;
 }
 
-#ifdef NL_OS_WINDOWS
-#define rmdir _rmdir
-#endif
-
 bool CFile::deleteDirectory(const std::string &filename)
 {
 	setRWAccess(filename);
-	int res = rmdir (filename.c_str());
+#ifdef NL_OS_WINDOWS
+	sint res = _wrmdir(utf8ToWide(filename));
+#else
+	sint res = rmdir(filename.c_str());
+#endif
 	if (res == -1)
 	{
 		nlwarning ("PATH: Can't delete directory '%s': (errno %d) %s", filename.c_str(), errno, strerror(errno));
