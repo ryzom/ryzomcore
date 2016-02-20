@@ -1592,15 +1592,12 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 	// change the file time
 	if(nDate != 0)
 	{
-//		_utimbuf utb;
-//		utb.actime = utb.modtime = nDate;
 		setRWAccess(sFilename, false);
 		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename)) +
 						" -> " + timestampToHumanReadable(nDate);
 		setState(true,s);
 
 		if (!NLMISC::CFile::setFileModificationDate(sFilename, nDate))
-//		if (_utime (sFilename.c_str (), &utb) == -1)
 		{
 			int err = NLMISC::getLastError();
 			s = CI18N::get("uiChgDateErr") + " " + CFile::getFilename(sFilename) + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
