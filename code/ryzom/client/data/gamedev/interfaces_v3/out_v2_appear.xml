@@ -1361,7 +1361,7 @@
                 id="but_next" posref="TR TR" x="0" y="-6"
                 onclick_l="proc" params_l="proc_appear_name_sub_race_add_one" />
                 
-            <view type="text" id="surname" case="%case_first_string_letter_up" posparent="name_sub_race_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_Surame" color="255 255 255 255" fontsize="11"/>
+            <view type="text" id="surname" case="%case_first_string_letter_up" posparent="name_sub_race_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_FirstName" color="255 255 255 255" fontsize="11"/>
             <view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
             <ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race_slider" posref="MM MM" x="0" y="0" w="160" h="32"
                                 vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_SUB_RACE" tracksize="40" 
@@ -1385,7 +1385,7 @@
                 id="but_next" posref="TR TR" x="0" y="-6"
                 onclick_l="proc" params_l="proc_appear_name_sub_race2_add_one" />
                 
-            <view type="text" id="name" case="%case_first_string_letter_up" posparent="name_sub_race2_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_Name" color="255 255 255 255" fontsize="11"/>
+            <view type="text" id="name" case="%case_first_string_letter_up" posparent="name_sub_race2_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_LastName" color="255 255 255 255" fontsize="11"/>
             <view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race2_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
             <ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race2_slider" posref="MM MM" x="0" y="0" w="160" h="32"
                                 vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_SUB_RACE2" tracksize="40" 
