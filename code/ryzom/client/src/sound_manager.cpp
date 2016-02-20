@@ -1028,10 +1028,11 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 
 	// Search for the file.
 	string filePath = CPath::lookup(soundName+".sdf");
-	ifstream file(filePath.c_str(), ios::in);
+
+	CIFile file;
 
 	// Try to open the file.
-	if(file.is_open())
+	if (file.open(filePath))
 	{
 		char tmpBuff[260];
 		char delimiterBox[] = "\t ";

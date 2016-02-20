@@ -104,29 +104,31 @@ void CCDBSynchronised::read( const string &fileName )
 	int linecount=1;
 #endif
 
-	if( _Database == 0 )
+	if (_Database == NULL)
 	{
 		throw CCDBSynchronised::EDBNotInit();
 	}
 
-	ifstream f(fileName.c_str(), ios::in);
-	if( !f.is_open() )
+	CIFile f;
+
+	if (!f.open(fileName, true))
 	{
 		nlerror("can't open file : %s\n", fileName.c_str());
 	}
 
-	while( !f.eof() )
+	while(!f.eof())
 	{
-		string line;
-		getline(f,line,'\n');
+		char line[1024];
+		f.getline(line, 1024);
+
 #ifdef _DEBUG
-	nlinfo("%s:%i",fileName.c_str(),linecount);
-	linecount++;
+		nlinfo("%s:%i", fileName.c_str(), linecount);
+		linecount++;
 #endif
 
 		char * token;
-		char * buffer = new char[line.size()+1];
-		strcpy(buffer,line.c_str());
+		char * buffer = new char[strlen(line)+1];
+		strcpy(buffer, line);
 
 		// value
 		token = strtok(buffer," \t");
