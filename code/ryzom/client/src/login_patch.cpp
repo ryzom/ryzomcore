@@ -698,7 +698,7 @@ bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateL
 	// verbose log
 	if (isVerboseLog() && !stateLogOut.empty())
 		for (uint32 i = 0; i < stateLogOut.size(); ++i)
-			nlinfo("%s", stateLogOut[i].toString().c_str());
+			nlinfo("%s", stateLogOut[i].toUtf8().c_str());
 
 	return changed;
 }
@@ -1025,7 +1025,7 @@ void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 	{
 		s = CI18N::get("uiAttribErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toString());
+		throw Exception (s.toUtf8());
 	}
 }
 
@@ -1039,7 +1039,7 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 	{
 		s = CI18N::get("uiDelNoFile");
 		setState(true, s);
-		return s.toString();
+		return s.toUtf8();
 	}
 
 	if (!NLMISC::CFile::deleteFile(filename))
@@ -1048,8 +1048,8 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
-			throw Exception (s.toString());
-		return s.toString();
+			throw Exception (s.toUtf8());
+		return s.toUtf8();
 	}
 	return "";
 }
@@ -1064,7 +1064,7 @@ void CPatchManager::renameFile (const string &src, const string &dst)
 	{
 		s = CI18N::get("uiRenameErr") + " " + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toString());
+		throw Exception (s.toUtf8());
 	}
 }
 
@@ -1744,7 +1744,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 
 	if (!bnpFile.readHeader())
 	{
-		ucstring s = CI18N::get("uiUnpackErrHead") + " " + SourceName;
+		ucstring s = CI18N::get("uiUnpackErrHead") + " " + CFile::getFilename(SourceName);
 		setState(true,s);
 		return false;
 	}
@@ -1805,7 +1805,7 @@ void CPatchManager::MyPatchingCB::progress(float f)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double p = 100.0*f;
-	ucstring sTranslate = CI18N::get("uiApplyingDelta") + toString(" %s (%5.02f %%)", CFile::getFilename(patchFilename).c_str(), p);
+	ucstring sTranslate = CI18N::get("uiApplyingDelta") + ucstring::makeFromUtf8(toString(" %s (%.02f %%)", CFile::getFilename(patchFilename).c_str(), p));
 	pPM->setState(false, sTranslate);
 }
 
@@ -1981,7 +1981,7 @@ void CPatchManager::clearDataScanLog()
 // ***************************************************************************
 void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate)
 {
-	sTranslate = CI18N::get("uiCorruptedFile") + " " + ftp.FileName + " (" +
+	sTranslate = CI18N::get("uiCorruptedFile") + " " + ucstring::makeFromUtf8(ftp.FileName) + " (" +
 		toString("%.1f ", (float)ftp.FinalFileSize/1000000.f) + CI18N::get("uiMb") + ")";
 }
 
@@ -2068,7 +2068,7 @@ void CCheckThread::run ()
 		for (i = 0; i < rDescFiles.fileCount(); ++i)
 		{
 			CPatchManager::SFileToPatch ftp;
-			sTranslate = CI18N::get("uiCheckingFile") + " " + rDescFiles.getFile(i).getFileName();
+			sTranslate = CI18N::get("uiCheckingFile") + " " + ucstring::makeFromUtf8(rDescFiles.getFile(i).getFileName());
 			pPM->setState(true, sTranslate);
 			// get list of patch to apply to this file. don't to a full checksum test if possible
 			nlwarning(rDescFiles.getFile(i).getFileName().c_str());

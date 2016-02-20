@@ -1787,7 +1787,7 @@ class CAHReboot : public IActionHandler
 		}
 		catch (const std::exception &e)
 		{
-			im->messageBoxWithHelp(ucstring(e.what()), "ui:login", "login_quit");
+			im->messageBoxWithHelp(ucstring::makeFromUtf8(e.what()), "ui:login", "login_quit");
 		}
 	}
 };
