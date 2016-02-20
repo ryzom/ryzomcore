@@ -671,14 +671,6 @@ struct TTypeLimits<uint32>
 	};
 	static uint32	floor(uint32 value)	{	return value;		}
 };
-/*
-#ifdef NL_OS_WINDOWS
-template <>
-struct TTypeLimits<unsigned int> : public TTypeLimits<uint32>
-{
-};
-#endif
-*/
 template <>
 struct TTypeLimits<uint64>
 {
@@ -728,12 +720,7 @@ struct TTypeLimits<sint32>
 	};
 	static sint32	floor(sint32 value)	{	return value;		}
 };
-/*#ifdef NL_OS_WINDOWS
-template <>
-struct TTypeLimits<int> : public TTypeLimits<sint32>
-{
-};
-#endif*/
+
 template <>
 struct TTypeLimits<sint64>
 {

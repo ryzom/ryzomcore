@@ -1857,17 +1857,7 @@ class CAHOpenURL : public IActionHandler
 		// TODO: for Linux and Mac OS
 #endif
 
-		/*
-		if (sParams == "cfg_CreateAccountURL")
-		{
-			url = ClientCfg.CreateAccountURL;
-
-			if (!installTag.empty())
-			{
-				url += string("/?from=")+installTag;
-			}
-		}
-		else */if (sParams == "cfg_EditAccountURL")
+		if (sParams == "cfg_EditAccountURL")
 		{
 			url = ClientCfg.EditAccountURL;
 		}

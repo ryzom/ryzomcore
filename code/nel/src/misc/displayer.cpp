@@ -290,12 +290,6 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		}
 		else
 		{
-			/*OutputDebugString(ss2.str().c_str());
-			OutputDebugString("\n\t\t\t");
-			OutputDebugString("message end: ");
-			OutputDebugString(&message[strlen(message) - 1024]);
-			OutputDebugString("\n");*/
-
 			sint count = 0;
 			uint n = (uint)strlen(message);
 			std::string s(&str2.c_str()[0], (str2.size() - n));
@@ -701,59 +695,5 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		}
 	}
 }
-
-
-
-/***************************************************************/
-/******************* THE FOLLOWING CODE IS COMMENTED OUT *******/
-/***************************************************************
-void CStdDisplayer::display (const std::string& str)
-{
-//	printf("%s", str.c_str ());
-	cout << str;
-
-#ifdef NL_OS_WINDOWS
-	// display the string in the debugger is the application is started with the debugger
-	if (IsDebuggerPresent ())
-		OutputDebugString(str.c_str ());
-#endif
-}
-
-
-void CFileDisplayer::display (const std::string& str)
-{
-	if (_FileName.size () == 0) return;
-
-	ofstream ofs (_FileName.c_str (), ios::out | ios::app);
-	if (ofs.is_open ())
-	{
-		ofs << str;
-		ofs.close();
-	}
-
-
-//	FILE *fp = fopen (_FileName.c_str (), "a");
-//	if (fp == NULL) return;
-
-//	fprintf (fp, "%s", str.c_str ());
-
-//	fclose (fp);
-}
-
-
-
-void CMsgBoxDisplayer::display (const std::string& str)
-{
-#ifdef NL_OS_WINDOWS
-
-	CSystemUtils::copyTextToClipboard(str);
-
-	string strf = str;
-	strf += "\n\n(this message was copied in the clipboard)";
-	MessageBox (NULL, strf.c_str (), "", MB_OK | MB_ICONEXCLAMATION);
-#endif
-}
-**************************************************************************/
-
 
 } // NLMISC

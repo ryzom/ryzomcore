@@ -2299,9 +2299,6 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	std::string sdest = CPath::standardizePath(dest,false);
 	std::string ssrc = CPath::standardizePath(src,false);
 
-//	return copyFile  ? CopyFile(dossrc.c_str(), dosdest.c_str(), failIfExists) != FALSE
-//					 : MoveFile(dossrc.c_str(), dosdest.c_str()) != FALSE;
-
 	if (progress) progress->progress(0.f);
 	if(copyFile)
 	{

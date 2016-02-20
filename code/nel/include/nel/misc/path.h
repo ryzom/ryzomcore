@@ -722,7 +722,6 @@ struct CFile
 
 	/** Try to set the file access to read/write if not already set.
 	 * return true if the file doesn't exist or if the file already have RW access.
-	 * Work actually only on Windows and returns always true on other platforms.
 	 * \return true if RW access is granted
 	 */
 	static bool	setRWAccess(const std::string &filename);
