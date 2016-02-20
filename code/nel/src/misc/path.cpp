@@ -681,11 +681,11 @@ std::string CPath::getCurrentPath ()
 
 std::string CFileContainer::getCurrentPath ()
 {
-	char buffer [1024];
-
 #ifdef NL_OS_WINDOWS
-	return standardizePath(_getcwd(buffer, 1024), false);
+	wchar_t buffer[1024];
+	return standardizePath(wideToUtf8(_wgetcwd(buffer, 1024)), false);
 #else
+	char buffer [1024];
 	return standardizePath(getcwd(buffer, 1024), false);
 #endif
 }
@@ -700,7 +700,7 @@ bool CFileContainer::setCurrentPath (const std::string &path)
 	int res;
 	//nldebug("Change current path to '%s' (current path is '%s')", path.c_str(), getCurrentPath().c_str());
 #ifdef NL_OS_WINDOWS
-	res = _chdir(path.c_str());
+	res = _wchdir(utf8ToWide(path));
 #else
 	res = chdir(path.c_str());
 #endif
@@ -756,11 +756,11 @@ std::string CFileContainer::getFullPath (const std::string &path, bool addFinalS
 
 
 #ifdef NL_OS_WINDOWS
-#	define dirent	WIN32_FIND_DATA
+#	define dirent	WIN32_FIND_DATAW
 #	define DIR		void
 
 static string sDir;
-static WIN32_FIND_DATA findData;
+static WIN32_FIND_DATAW findData;
 static HANDLE hFind;
 
 DIR *opendir (const char *path)
@@ -792,13 +792,12 @@ dirent *readdir (DIR *dir)
 	// first visit in this directory : FindFirstFile()
 	if (hFind == NULL)
 	{
-		string fullPath = CPath::standardizePath(sDir) + "*";
-		hFind = FindFirstFileA (fullPath.c_str(), &findData);
+		hFind = FindFirstFileW (utf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
 	}
 	// directory already visited : FindNextFile()
 	else
 	{
-		if (!FindNextFileA (hFind, &findData))
+		if (!FindNextFileW (hFind, &findData))
 			return NULL;
 	}
 
@@ -845,7 +844,7 @@ string getname (dirent *de)
 {
 	nlassert (de != NULL);
 #ifdef NL_OS_WINDOWS
-	return de->cFileName;
+	return wideToUtf8(de->cFileName);
 #else
 	return de->d_name;
 #endif // NL_OS_WINDOWS
@@ -1766,14 +1765,14 @@ std::string CFileContainer::getWindowsDirectory()
 	nlwarning("not a ms windows platform");
 	return "";
 #else
-	char winDir[MAX_PATH];
-	UINT numChar = ::GetWindowsDirectory(winDir, MAX_PATH);
+	wchar_t winDir[MAX_PATH];
+	UINT numChar = GetWindowsDirectoryW(winDir, MAX_PATH);
 	if (numChar > MAX_PATH || numChar == 0)
 	{
 		nlwarning("Couldn't retrieve windows directory");
 		return "";
 	}
-	return CPath::standardizePath(winDir);
+	return CPath::standardizePath(wideToUtf8(winDir));
 #endif
 }
 
@@ -1789,18 +1788,18 @@ std::string CFileContainer::getApplicationDirectory(const std::string &appName, 
 	if (appPath.empty())
 	{
 #ifdef NL_OS_WINDOWS
-		char buffer[MAX_PATH];
+		wchar_t buffer[MAX_PATH];
 #ifdef CSIDL_LOCAL_APPDATA
 		if (local)
 		{
-			SHGetSpecialFolderPathA(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
 		}
 		else
 #endif
 		{
-			SHGetSpecialFolderPathA(NULL, buffer, CSIDL_APPDATA, TRUE);
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
 		}
-		appPath = CPath::standardizePath(buffer);
+		appPath = CPath::standardizePath(wideToUtf8(buffer));
 #elif defined(NL_OS_MAC)
 		appPath = CPath::standardizePath(getenv("HOME"));
 		appPath += "/Library/Application Support/";
@@ -1918,7 +1917,7 @@ string CFile::getPath (const string &filename)
 bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	DWORD res = GetFileAttributes(filename.c_str());
+	DWORD res = GetFileAttributesW(utf8ToWide(filename));
 	if (res == INVALID_FILE_ATTRIBUTES)
 	{
 		// nlwarning ("PATH: '%s' is not a valid file or directory name", filename.c_str ());
@@ -1941,7 +1940,7 @@ bool CFile::isDirectory (const string &filename)
 bool CFile::isExists (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return (GetFileAttributes(filename.c_str()) != INVALID_FILE_ATTRIBUTES);
+	return GetFileAttributesW(utf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
 #else // NL_OS_WINDOWS
 	struct stat buf;
 	return stat (filename.c_str (), &buf) == 0;
@@ -2013,7 +2012,7 @@ uint32	CFile::getFileSize (const std::string &filename)
 	{
 #if defined (NL_OS_WINDOWS)
 		struct _stat buf;
-		int result = _stat (filename.c_str (), &buf);
+		int result = _wstat (utf8ToWide(filename), &buf);
 #elif defined (NL_OS_UNIX)
 		struct stat buf;
 		int result = stat (filename.c_str (), &buf);
@@ -2064,7 +2063,7 @@ uint32	CFile::getFileModificationDate(const std::string &filename)
 	// Use the WIN32 API to read the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFile(fn.c_str(), 0, 0, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(utf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't get modification date on file '%s' : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2134,7 +2133,7 @@ bool	CFile::setFileModificationDate(const std::string &filename, uint32 modTime)
 	// Use the WIN32 API to set the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFile(fn.c_str(), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(utf8ToWide(fn), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't set modification date on file '%s' (error accessing file) : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2219,7 +2218,7 @@ uint32	CFile::getFileCreationDate(const std::string &filename)
 
 #if defined (NL_OS_WINDOWS)
 	struct _stat buf;
-	int result = _stat (fn.c_str (), &buf);
+	int result = _wstat(utf8ToWide(fn), &buf);
 #elif defined (NL_OS_UNIX)
 	struct stat buf;
 	int result = stat (fn.c_str (), &buf);
@@ -2353,7 +2352,7 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	else
 	{
 #ifdef NL_OS_WINDOWS
-		if (MoveFile(ssrc.c_str(), sdest.c_str()) == 0)
+		if (MoveFileW(utf8ToWide(ssrc), utf8ToWide(sdest)) == 0)
 		{
 			sint lastError = NLMISC::getLastError();
 			nlwarning ("PATH: CopyMoveFile error: can't link/move '%s' into '%s', error %u (%s)",
@@ -2456,7 +2455,7 @@ bool CFile::moveFile(const std::string &dest, const std::string &src)
 bool CFile::createDirectory(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return _mkdir(filename.c_str())==0;
+	return _wmkdir(utf8ToWide(filename))==0;
 #else
 	// Set full permissions....
 	return mkdir(filename.c_str(), 0xFFFF)==0;
@@ -2677,11 +2676,13 @@ bool CPath::isAbsolutePath(const std::string &path)
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
+	wchar_t *wideFile = utf8ToWide(filename);
+
 	// if the file exists and there's no write access
-	if (_access (filename.c_str(), 00) == 0 && _access (filename.c_str(), 06) == -1)
+	if (_waccess (wideFile, 00) == 0 && _waccess (wideFile, 06) == -1)
 	{
 		// try to set the read/write access
-		if (_chmod (filename.c_str(), _S_IREAD | _S_IWRITE) == -1)
+		if (_wchmod (wideFile, _S_IREAD | _S_IWRITE) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{

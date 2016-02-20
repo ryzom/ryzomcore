@@ -310,9 +310,9 @@ static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
 			&memoryBasicInfo, sizeof(memoryBasicInfo)))
 		{
 			DWORD cch = 0;
-			char szFile[MAX_PATH] = { 0 };
+			wchar_t szFile[MAX_PATH] = { 0 };
 
-		 cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase,
+			cch = GetModuleFileNameW((HINSTANCE)memoryBasicInfo.AllocationBase,
 								 szFile, MAX_PATH);
 
 		if (cch && (lstrcmpA(szFile, "DBFN")== 0))
@@ -527,9 +527,9 @@ public:
 			string progname;
 			if(!shortExc.empty() || !longExc.empty())
 			{
-				char name[1024];
-				GetModuleFileNameA (NULL, name, 1023);
-				progname = CFile::getFilename(name);
+				wchar_t name[1024];
+				GetModuleFileNameW (NULL, name, 1023);
+				progname = CFile::getFilename(wideToUtf8(name));
 				progname += " ";
 			}
 

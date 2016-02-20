@@ -198,7 +198,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					string str = ucs.toUtf8();
 					nlassert (cwd->Log != NULL);
 					ICommand::expand (str, *cwd->Log);
-					SendMessage (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)str.c_str());
+					SendMessageW (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)wText);
 
 					SendMessage (cwd->_HInputEdit, EM_SETSEL, str.size(), str.size());
 

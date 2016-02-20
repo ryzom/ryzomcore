@@ -95,7 +95,7 @@ bool CXDPFileReader::init(const std::string &sFilename, sint32 nLowerBound, sint
 	{
 		// First open the file with a normal function
 #ifdef NL_OS_WINDOWS
-		int fd = _open(sFilename.c_str(), _O_BINARY | _O_RDONLY);
+		int fd = _wopen(utf8ToWide(sFilename), _O_BINARY | _O_RDONLY);
 #else
 		int fd = open(sFilename.c_str(), O_RDONLY);
 #endif

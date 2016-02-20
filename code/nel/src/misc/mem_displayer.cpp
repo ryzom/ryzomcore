@@ -227,28 +227,28 @@ static void displayCallStack (CLog *log)
 
 	if (symbolPath.empty())
 	{
-		CHAR tmpPath[stringSize];
+		wchar_t tmpPath[stringSize];
 
 		symbolPath = ".";
 
-		if (GetEnvironmentVariable ("_NT_SYMBOL_PATH", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"_NT_SYMBOL_PATH", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 		}
 
-		if (GetEnvironmentVariable ("_NT_ALTERNATE_SYMBOL_PATH", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"_NT_ALTERNATE_SYMBOL_PATH", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 		}
 
-		if (GetEnvironmentVariable ("SYSTEMROOT", tmpPath, stringSize))
+		if (GetEnvironmentVariableW (L"SYSTEMROOT", tmpPath, stringSize))
 		{
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 			symbolPath += ";";
-			symbolPath += tmpPath;
+			symbolPath += wideToUtf8(tmpPath);
 			symbolPath += "\\system32";
 		}
 	}
