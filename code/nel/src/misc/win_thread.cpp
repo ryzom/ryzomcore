@@ -373,7 +373,7 @@ bool CPSAPILib::init()
 	if (_LoadFailed) return false;
 	if (!_PSAPILibHandle)
 	{
-		_PSAPILibHandle = LoadLibrary("psapi.dll");
+		_PSAPILibHandle = LoadLibraryA("psapi.dll");
 		if (!_PSAPILibHandle)
 		{
 			nlwarning("couldn't load psapi.dll, possibly not supported by os");

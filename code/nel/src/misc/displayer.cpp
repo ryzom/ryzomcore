@@ -216,7 +216,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 	static bool consoleModeTest = false;
 	if (!consoleModeTest)
 	{
-		HANDLE handle = CreateFile ("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
+		HANDLE handle = CreateFileA ("CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, 0);
 		consoleMode = handle != INVALID_HANDLE_VALUE;
 		if (consoleMode)
 			CloseHandle (handle);

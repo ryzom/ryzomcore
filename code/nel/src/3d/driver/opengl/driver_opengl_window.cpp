@@ -326,7 +326,7 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	}
 
 	// Backup monitor color parameters
-	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+	HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
 		_NeedToRestoreGammaRamp = GetDeviceGammaRamp (dc, _GammaRampBackuped) != FALSE;
@@ -468,7 +468,7 @@ bool CDriverGL::unInit()
 	// Restore monitor color parameters
 	if (_NeedToRestoreGammaRamp)
 	{
-		HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+		HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
 		if (dc)
 		{
 			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
@@ -558,13 +558,13 @@ void CDriverGL::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	if (winIconBig)
 	{
-		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+		SendMessageA(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
 	}
 	else
 	{
-		SendMessage(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_win, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
 	}
 
 #elif defined(NL_OS_MAC)
@@ -2847,7 +2847,7 @@ bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &proper
 #ifdef NL_OS_WINDOWS
 
 	// Get a DC
-	HDC dc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+	HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
 	if (dc)
 	{
 		// The ramp

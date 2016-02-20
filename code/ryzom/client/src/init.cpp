@@ -271,7 +271,7 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 			GetWindowRect (GetDesktopWindow (), &rectDesktop);
 			SetWindowPos (hwndDlg, HWND_TOPMOST, (rectDesktop.right-rectDesktop.left-rect.right+rect.left)/2, (rectDesktop.bottom-rectDesktop.top-rect.bottom+rect.top)/2, 0, 0, SWP_NOSIZE);
 			HICON exitClientDlgIcon = LoadIcon(HInstance, MAKEINTRESOURCE(IDI_MAIN_ICON));
-			::SendMessage(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) exitClientDlgIcon);
+			::SendMessageA(hwndDlg, WM_SETICON, (WPARAM) ICON_BIG, (LPARAM) exitClientDlgIcon);
 		}
 		break;
 		case WM_COMMAND:

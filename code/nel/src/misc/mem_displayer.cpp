@@ -165,16 +165,15 @@ static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
 			DWORD cch = 0;
 			char szFile[MAX_PATH] = { 0 };
 
-		 cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase,
-								 szFile, MAX_PATH);
+			cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase, szFile, MAX_PATH);
 
-		if (cch && (lstrcmp(szFile, "DBFN")== 0))
-		{
-			char mn[] = { 'M', 'N', 0x00 };
+			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
+			{
+				char mn[] = { 'M', 'N', 0x00 };
 #ifdef NL_OS_WIN64
-			if (!SymLoadModule64(
+				if (!SymLoadModule64(
 #else
-			if (!SymLoadModule(
+				if (!SymLoadModule(
 #endif
 					hProcess,
 					NULL, mn,

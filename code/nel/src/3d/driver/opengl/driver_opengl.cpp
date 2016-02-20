@@ -2527,7 +2527,7 @@ void CDriverGL::retrieveATIDriverVersion()
 	// get from the registry
 	HKEY parentKey;
 	// open key about current video card
-	LONG result = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
+	LONG result = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}", 0, KEY_READ, &parentKey);
 	if (result == ERROR_SUCCESS)
 	{
 		// find last config
@@ -2541,7 +2541,7 @@ void CDriverGL::retrieveATIDriverVersion()
 		for(;;)
 		{
 			nameBufferSize = sizeof(subKeyName) / sizeof(subKeyName[0]);
-			result = RegEnumKeyEx(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
+			result = RegEnumKeyExA(parentKey, keyIndex, subKeyName, &nameBufferSize, NULL, NULL, NULL, &lastWriteTime);
 			if (result == ERROR_NO_MORE_ITEMS) break;
 			if (result == ERROR_SUCCESS)
 			{
@@ -2577,14 +2577,14 @@ void CDriverGL::retrieveATIDriverVersion()
 		if (configFound)
 		{
 			HKEY subKey;
-			result = RegOpenKeyEx(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
+			result = RegOpenKeyExA(parentKey, latestSubKeyName, 0, KEY_READ, &subKey);
 			if (result == ERROR_SUCCESS)
 			{
 				// see if it is a radeon card
 				DWORD valueType;
 				char driverDesc[256];
 				DWORD driverDescBufSize = sizeof(driverDesc) / sizeof(driverDesc[0]);
-				result = RegQueryValueEx(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
+				result = RegQueryValueExA(subKey, "DriverDesc", NULL, &valueType, (unsigned char *) driverDesc, &driverDescBufSize);
 				if (result == ERROR_SUCCESS && valueType == REG_SZ)
 				{
 					toLower(driverDesc);
@@ -2592,7 +2592,7 @@ void CDriverGL::retrieveATIDriverVersion()
 					{
 						char driverVersion[256];
 						DWORD driverVersionBufSize = sizeof(driverVersion) / sizeof(driverVersion[0]);
-						result = RegQueryValueEx(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
+						result = RegQueryValueExA(subKey, "DriverVersion", NULL, &valueType, (unsigned char *) driverVersion, &driverVersionBufSize);
 						if (result == ERROR_SUCCESS && valueType == REG_SZ)
 						{
 							int subVersionNumber[4];

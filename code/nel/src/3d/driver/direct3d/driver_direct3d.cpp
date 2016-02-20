@@ -1243,23 +1243,23 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
+	_WindowClass = "NLD3D" + toString(windowIcon);
+
 	// Register a window class
-	WNDCLASSW		wc;
+	WNDCLASSA		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleW(NULL);
+	wc.hInstance		= GetModuleHandleA(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
-	_WindowClass = "NLD3D" + toString(windowIcon);
-	ucstring us = _WindowClass;
-	wc.lpszClassName	= (LPCWSTR)us.c_str();
+	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassW(&wc))
+	if (!RegisterClassA(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
@@ -2327,13 +2327,13 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	if (winIconBig)
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
 	}
 	else
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
 	}
 }
 

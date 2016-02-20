@@ -273,14 +273,14 @@ bool CSystemUtils::isScreensaverEnabled()
 //	SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
 //	res = (bRetValue == TRUE);
 	HKEY hKeyScreenSaver = NULL;
-	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
+	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
 	if (lReturn == ERROR_SUCCESS)
 	{
 		DWORD dwType = 0L;
 		DWORD dwSize = KeyMaxLength;
 		unsigned char Buffer[KeyMaxLength] = {0};
 
-		lReturn = RegQueryValueExA(hKeyScreenSaver, TEXT("SCRNSAVE.EXE"), NULL, &dwType, NULL, &dwSize);
+		lReturn = RegQueryValueExA(hKeyScreenSaver, "SCRNSAVE.EXE", NULL, &dwType, NULL, &dwSize);
 		// if SCRNSAVE.EXE is present, check also if it's empty
 		if (lReturn == ERROR_SUCCESS)
 			res = (Buffer[0] != '\0');
