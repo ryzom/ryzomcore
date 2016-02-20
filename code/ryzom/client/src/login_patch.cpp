@@ -1525,10 +1525,10 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 //		if (_utime (sFilename.c_str (), &utb) == -1)
 		{
 			int err = NLMISC::getLastError();
-			s = CI18N::get("uiChgDateErr") + " " + sFilename + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
+			s = CI18N::get("uiChgDateErr") + " " + CFile::getFilename(sFilename) + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
 			setState(true,s);
 		}
-		s = CI18N::get("uiNowDate") + " " + sFilename + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename));
+		s = CI18N::get("uiNowDate") + " " + CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename));
 		setState(true,s);
 	}
 }
