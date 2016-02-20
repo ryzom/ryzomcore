@@ -520,7 +520,7 @@ uint32 CPersistentDataRecord::getNumValues() const
 		}
 	}
 
-	// restore the original values of teh state variables
+	// restore the original values of the state variables
 	_ArgOffset=oldArgOffset;
 	_TokenOffset=oldTokenOffset;
 	_ReadingStructStack=oldRSS;
@@ -1117,6 +1117,7 @@ bool CPersistentDataRecord::readFromFile(const std::string &fileName)
 {
 	H_AUTO(pdrReadFromFile)
 
+	// TODO: see why code is different under Linux and Windows
 #ifdef NL_OS_WINDOWS
 
 	// open the file

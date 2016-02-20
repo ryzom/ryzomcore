@@ -1039,7 +1039,7 @@ void CSoundManager::loadProperties(const string &soundName, USource *source)
 		// While the end of the file is not reached.
 		while(!file.eof())
 		{
-			// Get a line (teh line should not be more than _MAX_LINE_SIZE).
+			// Get a line (the line should not be more than _MAX_LINE_SIZE).
 			file.getline(tmpBuff, 260);
 			char *token = strtok(tmpBuff, delimiterBox);
 			while(token != NULL)
