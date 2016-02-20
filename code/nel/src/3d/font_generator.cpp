@@ -22,6 +22,7 @@
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"
 #include "nel/misc/path.h"
+#include "nel/misc/file.h"
 
 #include "nel/3d/font_generator.h"
 
@@ -81,6 +82,93 @@ CFontGenerator *newCFontGenerator(const std::string &fontFileName)
 	return new CFontGenerator(fontFileName);
 }
 
+// Freetype will call this function to get a buffer in data
+static unsigned long nlFreetypeStreamIo(FT_Stream stream, unsigned long offset, unsigned char* buffer, unsigned long count)
+{
+	// if count is 0, we don't need to do anything
+	if (count > 0)
+	{
+		// get a pointer on our CIFile
+		CIFile *file = (CIFile*)stream->descriptor.pointer;
+
+		// try to seek to offset
+		if (file->seek(offset, IStream::begin))
+		{
+			try
+			{
+				// try to fill buffer with data from file
+				file->serialBuffer(buffer, count);
+			}
+			catch(const EFile &e)
+			{
+				nlwarning("Unable to read %u bytes from position %u of %s", (uint)count, (uint)offset, file->getStreamName().c_str());
+				count = 0;
+			}
+		}
+		else
+		{
+			nlwarning("Unable to seek to position %u of %s", (uint)offset, file->getStreamName().c_str());
+			count = 0;
+		}
+	}
+
+	return count;
+}
+
+// Freetype will call this function when it won't need to access to file anymore
+static void nlFreetypeStreamClose(FT_Stream stream)
+{
+	if (!stream) return;
+
+	// get a pointer on our CIFile
+	CIFile *file = (CIFile*)stream->descriptor.pointer;
+
+	if (file)
+	{
+		// close and delete file
+		file->close();
+		delete file;
+
+		stream->descriptor.pointer = NULL;
+	}
+
+	// free Freetype stream structure
+	free(stream);
+}
+
+// helper to open a font and use our functions to handle BNP files and UTF-8 filenames
+static bool createFreetypeStream(const std::string &filename, FT_Open_Args &args)
+{
+	CIFile *file = new CIFile();
+
+	if (!file->open(filename))
+	{
+		nlwarning("Unable to open %s", filename.c_str());
+		return false;
+	}
+
+	args.flags = FT_OPEN_STREAM;
+	args.stream = (FT_Stream)malloc(sizeof(*args.stream));
+
+	if (args.stream == NULL)
+	{
+		nlwarning("Unable to allocate FT_Stream for %s", filename.c_str());
+
+		delete file;
+		return false;
+	}
+
+	args.stream->base = NULL; // only used for memory streams
+	args.stream->size = file->getFileSize();
+	args.stream->pos = 0;
+	args.stream->descriptor.pointer = file;
+	args.stream->pathname.pointer = NULL; // filename is already managed by CIFile
+	args.stream->read = nlFreetypeStreamIo;
+	args.stream->close = nlFreetypeStreamClose;
+
+	return true;
+}
+
 /*
  * Constructor
  */
@@ -102,7 +190,14 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 	}
 	++_LibraryInit;
 
-	error = FT_New_Face (_Library, fontFileName.c_str (), 0, &_Face);
+	FT_Open_Args args;
+
+	if (!createFreetypeStream(fontFileName, args))
+	{
+		nlerror ("createFreetypeStream failed with file '%s'", fontFileName.c_str());
+	}
+
+	error = FT_Open_Face(_Library, &args, 0, &_Face);
 	if (error)
 	{
 		nlerror ("FT_New_Face() failed with file '%s': %s", fontFileName.c_str(), getFT2Error(error));
@@ -117,7 +212,12 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 
 	if (!fontEx.empty())
 	{
-		error = FT_Attach_File (_Face, fontEx.c_str ());
+		if (!createFreetypeStream(fontEx, args))
+		{
+			nlerror ("createFreetypeStream failed with file '%s'", fontFileName.c_str());
+		}
+
+		error = FT_Attach_Stream(_Face, &args);
 		if (error)
 		{
 			nlwarning ("FT_Attach_File() failed with file '%s': %s", fontEx.c_str(), getFT2Error(error));
