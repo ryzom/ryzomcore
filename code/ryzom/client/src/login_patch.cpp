@@ -739,6 +739,18 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	const CBNPCategorySet &rDescCats = descFile.getCategories();
 	OptionalCat.clear();
 
+	string SrcPath = ClientPatchPath;
+	string DstPath = ClientRootPath;
+
+#ifdef NL_OS_WINDOWS
+	// only fix backslashes for .bat
+	string batchSrcPath = CPath::standardizeDosPath(SrcPath);
+	string batchDstPath = CPath::standardizeDosPath(DstPath);
+#else
+	string batchSrcPath = SrcPath;
+	string batchDstPath = DstPath;
+#endif
+
 	for (uint32 i = 0; i < rDescCats.categoryCount(); ++i)
 	{
 		// For all optional categories check if there is a 'file to patch' in it
@@ -747,14 +759,14 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
 		{
-			string rFilename = ClientPatchPath + rCat.getFile(j);
+			string rFilename = SrcPath + rCat.getFile(j);
 			nlwarning("\tFileName = %s", rFilename.c_str());
 			// Extract to patch
 			vector<string> vFilenames;
 			bool result = false;
 			try
 			{
-				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
+				result = bnpUnpack(rFilename, SrcPath, vFilenames);
 			}
 			catch(...)
 			{
@@ -772,45 +784,59 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			{
 				for (uint32 fff = 0; fff < vFilenames.size (); fff++)
 				{
-					string SrcPath = ClientPatchPath;
-					string DstPath = CPath::standardizePath(rCat.getUnpackTo()); // to be sure there is a / at the end
-					NLMISC::CFile::createDirectoryTree(DstPath);
-
 					// this file must be moved
-#ifdef NL_OS_WINDOWS
-					SrcPath = CPath::standardizeDosPath(SrcPath);
-					DstPath = CPath::standardizeDosPath(DstPath);
-#endif
+					string fullDstPath = CPath::standardizePath(rCat.getUnpackTo()); // to be sure there is a / at the end
+					NLMISC::CFile::createDirectoryTree(fullDstPath);
 
-					std::string SrcName = SrcPath + vFilenames[fff];
-					std::string DstName = DstPath + vFilenames[fff];
+					std::string FileName = vFilenames[fff];
 
 					bool succeeded = false;
 
 					if (!useBatchFile)
 					{
 						// don't check result, because it's possible the olk file doesn't exist
-						CFile::deleteFile(DstName);
+						CFile::deleteFile(fullDstPath + FileName);
 						
 						// try to move it, if fails move it later in a script
-						if (CFile::moveFile(DstName, SrcName))
+						if (CFile::moveFile(fullDstPath + FileName, SrcPath + FileName))
 							succeeded = true;
 					}
 
 					// if we didn't succeed to delete or move the file, create a batch file anyway
 					if (!succeeded)
 					{
+						string batchRelativeDstPath;
+
+						if (fullDstPath.compare(0, DstPath.length(), DstPath) == 0)
+						{
+							batchRelativeDstPath = fullDstPath.substr(DstPath.length()) + FileName;
+						}
+						else
+						{
+							batchRelativeDstPath = fullDstPath + FileName;
+						}
+#ifdef NL_OS_WINDOWS
+						// only fix backslashes for .bat
+						batchRelativeDstPath = CPath::standardizeDosPath(batchRelativeDstPath);
+#endif
+
 						// write windows .bat format else write sh format
 #ifdef NL_OS_WINDOWS
+						string realDstPath = toString("\"%%DSTPATH%%\\%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"%%SRCPATH%%\\%s\"", FileName.c_str());
+
 						content += toString(":loop%u\n", nblab);
-						content += toString("attrib -r -a -s -h \"%s\"\n", DstName.c_str());
-						content += toString("del \"%s\"\n", DstName.c_str());
-						content += toString("if exist \"%s\" goto loop%u\n", DstName.c_str(), nblab);
-						content += toString("move \"%s\" \"%s\"\n", SrcName.c_str(), DstPath.c_str());
+						content += toString("attrib -r -a -s -h %s\n", realDstPath.c_str());
+						content += toString("del %s\n", realDstPath.c_str());
+						content += toString("if exist %s goto loop%u\n", realDstPath.c_str(), nblab);
+						content += toString("move %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #else
-						content += toString("rm -rf \"%s\"\n", DstName.c_str());
-						content += toString("mv %s \"%s\"\n", SrcName.c_str(), DstPath.c_str());
+						content += toString("rm -rf %s\n", realDstPath.c_str());
+						// TODO: add test of returned $?
+						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #endif
+
+						content += "\n";
 					}
 
 					nblab++;
@@ -857,10 +883,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 			content += patchContent;
 
-			content += toString("rd /Q /S \"" + patchDirectory + "\"\n");
-			content += toString("if exist \"" + patchDirectory + "\" goto looppatch\n");
+			content += toString("rd /Q /S \"%s\"\n", patchDirectory.c_str());
+			content += toString("if exist \"%s\" goto looppatch\n", patchDirectory.c_str());
 #else
-			content += toString("rm -rf \"" + patchDirectory + "\"\n");
+			content += toString("rm -rf \"%s\"\n", patchDirectory.c_str());
 #endif
 		}
 		else
@@ -883,30 +909,70 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			throw Exception (err);
 		}
 
+		string contentPrefix;
+
 		//use bat if windows if not use sh
 #ifdef NL_OS_WINDOWS
-		fprintf(fp, "@echo off\n");
+		contentPrefix += "@echo off\n";
+		contentPrefix += "set RYZOM_CLIENT=%1\n";
+		contentPrefix += "set SRCPATH=%2\n";
+		contentPrefix += "set DSTPATH=%3\n";
+		contentPrefix += "set LOGIN=%4\n";
+		contentPrefix += "set PASSWORD=%5\n";
+		contentPrefix += "set SHARDID=%6\n";
+		contentPrefix += toString("set UPGRADE_FILE=%%DSTPATH%%\\%s\n", UpgradeBatchFilename.c_str());
 #else
-		fprintf(fp, "#!/bin/sh\n");
+		contentPrefix += "#!/bin/sh\n";
+		contentPrefix += "RYZOM_CLIENT=$1\n";
+		contentPrefix += "SRCPATH=$2\n";
+		contentPrefix += "DSTPATH=$3\n";
+		contentPrefix += "LOGIN=$4\n";
+		contentPrefix += "PASSWORD=$5\n";
+		contentPrefix += "SHARDID=$6\n";
+		contentPrefix += toString("UPGRADE_FILE=$DSTPATH\\%s\n", UpgradeBatchFilename.c_str());
 #endif
 
+		contentPrefix += "\n";
+
 		// append content of script
-		fprintf(fp, content.c_str());
+		fputs(contentPrefix.c_str(), fp);
+		fputs(content.c_str(), fp);
+
+		std::string additionalParams;
+
+		if (Args.haveLongArg("profile"))
+		{
+			additionalParams = "--profile " + Args.getLongArg("profile").front();
+		}
 
 		if (wantRyzomRestart)
 		{
+			string contentSuffix;
+
 #ifdef NL_OS_WINDOWS
-			fprintf(fp, "start \"\" \"%s\" %%1 %%2 %%3\n", CPath::standardizeDosPath(RyzomFilename).c_str());
+			// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+			contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
+
+			// client shouldn't be in memory anymore else it couldn't be overwritten
+			contentSuffix += toString("start \"\" /D \"%%DSTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
 #else
-			// wait until client is not in memory
-			fprintf(fp, "until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+			// wait until client not in memory anymore
+			contentSuffix += toString("until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+
+			// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+			contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n";
 
 			// be sure file is executable
-			fprintf(fp, "chmod +x \"%s\"\n", RyzomFilename.c_str());
+			contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n");
+
+			// change to previous client directory
+			contentSuffix += "cd \"$DSTPATH\"\n");
 
 			// launch new client
-			fprintf(fp, "\"%s\" $1 $2 $3\n", RyzomFilename.c_str());
+			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
 #endif
+
+			fputs(contentSuffix.c_str(), fp);
 		}
 
 		bool writeError = ferror(fp) != 0;
@@ -946,12 +1012,20 @@ void CPatchManager::executeBatchFile()
 
 	batchFilename += UpdateBatchFilename;
 
-#ifdef NL_OS_UNIX
-	// make script executable under UNIX
-	chmod(batchFilename.c_str(), S_IRWXU);
+	// make script executable
+	CFile::setRWAccess(batchFilename);
+
+	std::string arguments;
+
+	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
+#ifdef NL_OS_WINDOWS
+	arguments += "\"" + CPath::standardizeDosPath(RyzomFilename) + "\" \"" + CPath::standardizeDosPath(ClientPatchPath) + "\" \"" + CPath::standardizeDosPath(ClientRootPath) + "\"";
+#else
+	arguments += "\"" + RyzomFilename + "\" \"" + ClientPatchPath + "\" " + ClientRootPath + "\"";
 #endif
 
-	std::string arguments = LoginLogin + " " + LoginPassword;
+	// append login and password
+	arguments += " " + LoginLogin + " " + LoginPassword;
 
 	if (!r2Mode)
 	{
