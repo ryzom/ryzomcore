@@ -1886,6 +1886,10 @@ class CAHOpenURL : public IActionHandler
 		{
 			url = ClientCfg.ConditionsTermsURL;
 		}
+		else if (sParams == "cfg_NamingPolicyURL")
+		{
+			url = ClientCfg.NamingPolicyURL;
+		}
 		else
 		{
 			nlwarning("no URL found");
