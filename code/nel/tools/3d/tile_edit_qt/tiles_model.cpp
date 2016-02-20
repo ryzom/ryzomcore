@@ -53,32 +53,31 @@ tiles_model::tiles_model(QObject *parent)
 
 QVariant tiles_model::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid())
-        return QVariant();
+	if (!index.isValid())
+		return QVariant();
 
-    if (role == Qt::DecorationRole || role == Qt::UserRole)
+	if (role == Qt::DecorationRole || role == Qt::UserRole)
 	{
 		CTile_Widget wiwi;
 		wiwi.initWidget(tiles.value(index.row()).getPixmap(), tiles.value(index.row()).getPixmapSide(), tiles.value(index.row()).getTileLabel());
 #ifdef USE_QT5
 		QPixmap pixpix = wiwi.grab(wiwi.contentsRect());
 #else
-		QPixmap::grabWidget(wiwi, wiwi.contentsRect());
+		QPixmap pixpix = QPixmap::grabWidget(&wiwi, wiwi.contentsRect());
 #endif
 		return pixpix;
 	}
-    else if (role == Qt::UserRole + 1)
+	else if (role == Qt::UserRole + 1)
 	{
-        return tiles.value(index.row()).getIndex();
+		return tiles.value(index.row()).getIndex();
 	}
 
-    return QVariant();
+	return QVariant();
 }
 
 void tiles_model::sort ( int column, Qt::SortOrder order)
 {
 	qSort(tiles.begin(), tiles.end(), caseInsensitiveLessThan);
-
 }
 
 

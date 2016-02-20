@@ -23,7 +23,7 @@
 #include "scene_meta.h"
 
 #include <nel/misc/sstring.h>
-#include <nel/misc/tool_logger.h>
+#include <nel/pipeline/tool_logger.h>
 #include <nel/misc/smart_ptr.h>
 #include <nel/misc/matrix.h>
 
@@ -67,7 +67,7 @@ struct CMeshUtilsContext
 
 	const CMeshUtilsSettings &Settings;
 
-	NLMISC::CToolLogger ToolLogger;
+	NLPIPELINE::CToolLogger ToolLogger;
 
 	const NL_SCENE_INTERNAL_TYPE *InternalScene;
 	CSceneMeta SceneMeta;

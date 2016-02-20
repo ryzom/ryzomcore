@@ -199,11 +199,11 @@ bool CCmdArgs::parse(const std::string &args)
 	std::vector<std::string> argv;
 
 #ifdef NL_OS_WINDOWS
-	char str[4096];
-	uint len = GetModuleFileNameA(NULL, str, 4096);
+	wchar_t str[4096];
+	uint len = GetModuleFileNameW(NULL, str, 4096);
 
 	if (len && len < 4096)
-		argv.push_back(str);
+		argv.push_back(wideToUtf8(str));
 #endif
 
 	std::string::size_type pos1 = 0, pos2 = 0;

@@ -258,7 +258,8 @@ IF(WITH_QT5)
     FIND_PACKAGE(Qt5Network)
 
     IF(WIN32)
-      FIND_PACKAGE(Qt5WinExtras)
+      # Please add option to switch off
+      # FIND_PACKAGE(Qt5WinExtras)
     ENDIF()
 
     IF(QT_STATIC)

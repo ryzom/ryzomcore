@@ -59,9 +59,9 @@ void CLog::setDefaultProcessName ()
 #ifdef NL_OS_WINDOWS
 	if ((*_ProcessName).empty())
 	{
-		char name[1024];
-		GetModuleFileName (NULL, name, 1023);
-		(*_ProcessName) = CFile::getFilename(name);
+		wchar_t name[1024];
+		GetModuleFileNameW(NULL, name, 1023);
+		(*_ProcessName) = CFile::getFilename(wideToUtf8(name));
 	}
 #else
 	if ((*_ProcessName).empty())

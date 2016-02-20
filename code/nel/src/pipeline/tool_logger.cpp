@@ -25,8 +25,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include "stdmisc.h"
-#include "nel/misc/tool_logger.h"
+#include "nel/pipeline/tool_logger.h"
 
 // STL includes
 
@@ -35,11 +34,11 @@
 
 // Project includes
 
-namespace NLMISC {
+namespace NLPIPELINE {
 
 // Tool logger is fully implemented in header so small tools do not need to link to this library unnecessarily.
 void dummy_tool_logger_cpp() { }
 
-} /* namespace NLMISC */
+} /* namespace NLPIPELINE */
 
 /* end of file */

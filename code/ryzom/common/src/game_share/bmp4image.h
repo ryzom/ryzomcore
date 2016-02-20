@@ -65,7 +65,7 @@ public:
 
 	/*bool write(char *filename)
 	{
-		FILE *outf=fopen(filename,"wb");
+		FILE *outf=nlfopen(filename, "wb");
 		if (outf==NULL)
 			return false;
 

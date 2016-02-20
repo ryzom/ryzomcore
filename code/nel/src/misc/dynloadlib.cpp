@@ -32,7 +32,7 @@ NL_LIB_HANDLE nlLoadLibrary(const std::string &libName)
 {
 	NL_LIB_HANDLE res = 0;
 #ifdef NL_OS_WINDOWS
-	res = LoadLibrary(libName.c_str());
+	res = LoadLibraryW(utf8ToWide(libName));
 #elif defined(NL_OS_UNIX)
 	res = dlopen(libName.c_str(), RTLD_NOW);
 #else

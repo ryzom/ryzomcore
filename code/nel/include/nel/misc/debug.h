@@ -229,7 +229,7 @@ void	setCrashAlreadyReported(bool state);
  *\code
 	void function(char *filename)
 	{
-		FILE *fp = fopen (filename, "r");
+		FILE *fp = nlfopen (filename, "r");
 		if (fp==NULL)
 		{
 			nlerror("file not found");

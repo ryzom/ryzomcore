@@ -15,8 +15,11 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include <curl/curl.h>
 #include "http_client_curl.h"
+
+#include <curl/curl.h>
+
+#include <openssl/ssl.h>
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -58,16 +61,73 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 
 const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
+static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+{
+	string path = CPath::lookup(CAFilename);
+	nldebug("Cert path '%s'", path.c_str());
+
+	CIFile file;
+
+	if (!file.open(CAFilename))
+	{
+		nlwarning("Unable to open %s", CAFilename.c_str());
+		return CURLE_SSL_CACERT;
+	}
+
+	CURLcode res = CURLE_OK;
+
+	std::vector<uint8> buffer(file.getFileSize());
+	file.serialBuffer(&buffer[0], file.getFileSize());
+
+	// get a BIO
+	BIO *bio = BIO_new_mem_buf(&buffer[0], file.getFileSize());
+
+	if (bio)
+	{
+		// use it to read the PEM formatted certificate from memory into an X509
+		// structure that SSL can use
+		X509 *cert = NULL;
+		PEM_read_bio_X509(bio, &cert, 0, NULL);
+
+		if (cert)
+		{
+			// get a pointer to the X509 certificate store (which may be empty!)
+			X509_STORE *store = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
+
+			// add our certificate to this store
+			if (X509_STORE_add_cert(store, cert) == 0)
+			{
+				nlwarning("Error adding certificate");
+				res = CURLE_SSL_CACERT;
+			}
+
+			// decrease reference counts
+			X509_free(cert);
+		}
+		else
+		{
+			nlwarning("PEM_read_bio_X509 failed...");
+			res = CURLE_SSL_CACERT;
+		}
+
+		// decrease reference counts
+		BIO_free(bio);
+	}
+
+	// all set to go
+	return CURLE_OK ;
+}
+
 // ***************************************************************************
 bool CCurlHttpClient::verifyServer(bool verify)
 {
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYHOST, verify ? 2 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
-	//curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function); // would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	string path = CPath::lookup(CAFilename);
-	nldebug("cert path '%s'", path.c_str());
-	curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
+	// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
+	curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function);
+	// don't use that anymore, because CA can't be loaded from BNP and doesn't support UTF-8 under Windows
+	// curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
 	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
 	return true;
 }

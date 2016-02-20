@@ -84,6 +84,20 @@ void MakeWhite(CBitmap &bitmaps)
 }
 #endif // NEL_ALL_BITMAP_WHITE
 
+CBitmap::CBitmap()
+{
+	_MipMapCount = 1;
+	_Width = 0;
+	_Height = 0;
+	PixelFormat = RGBA;
+	_LoadGrayscaleAsAlpha = true;
+}
+
+CBitmap::~CBitmap()
+{
+
+}
+
 /*-------------------------------------------------------------------*\
 								load
 \*-------------------------------------------------------------------*/
@@ -541,17 +555,10 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 		(very) bad rendered with this fix	so we have to deactivate it the for moment
 */
 
-//#ifdef NL_OS_WINDOWS
-//	if(PixelFormat==DXTC1) //AlphaBitDepth
-//	{
-//		PixelFormat = DXTC1Alpha;
-//	}
-//#else
 	if(PixelFormat==DXTC1 && _DDSSurfaceDesc[21]>0) //AlphaBitDepth
 	{
 		PixelFormat = DXTC1Alpha;
 	}
-//#endif
 
 	if(PixelFormat!= DXTC1 && PixelFormat!= DXTC1Alpha && PixelFormat!= DXTC3 && PixelFormat!= DXTC5)
 	{

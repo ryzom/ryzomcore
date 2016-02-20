@@ -282,6 +282,13 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
+// macros helper to convert UTF-8 std::string and wchar_t*
+#define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
+#define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
+
+// wrapper for fopen to be able to open files with an UTF-8 filename
+FILE* nlfopen(const std::string &filename, const std::string &mode);
+
 /** Signed 64 bit fseek. Same interface as fseek
   */
 int		nlfseek64( FILE *stream, sint64 offset, int origin );
@@ -346,6 +353,8 @@ uint32 humanReadableToBytes (const std::string &str);
 /// Convert a time into a string that is easily readable by an human, for example 3600 -> "1h"
 std::string secondsToHumanReadable (uint32 time);
 
+/// Convert a UNIX timestamp to a formatted date in ISO format
+std::string timestampToHumanReadable(uint32 timestamp);
 
 /// Get a bytes or time in string format and convert it in seconds or bytes
 uint32 fromHumanReadable (const std::string &str);

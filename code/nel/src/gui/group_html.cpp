@@ -304,7 +304,7 @@ namespace NLGUI
 				return;
 			}
 
-			FILE *fp = fopen (tmpdest.c_str(), "wb");
+			FILE *fp = nlfopen (tmpdest, "wb");
 			if (fp == NULL)
 			{
 				curl_easy_cleanup(curl);
@@ -411,7 +411,7 @@ namespace NLGUI
 				return false;
 			}
 
-			FILE *fp = fopen (tmpdest.c_str(), "wb");
+			FILE *fp = nlfopen (tmpdest, "wb");
 			if (fp == NULL)
 			{
 				curl_easy_cleanup(curl);

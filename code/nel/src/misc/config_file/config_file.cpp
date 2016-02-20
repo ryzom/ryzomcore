@@ -600,7 +600,7 @@ void CConfigFile::save () const
 	// Avoid any problem, Force Locale to default
 	setlocale(LC_ALL, "C");
 
-	FILE *fp = fopen (getFilename().c_str (), "w");
+	FILE *fp = nlfopen (getFilename(), "w");
 	if (fp == NULL)
 	{
 		nlwarning ("CF: Couldn't create %s file", getFilename().c_str ());

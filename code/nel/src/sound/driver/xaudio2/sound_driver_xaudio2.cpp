@@ -266,8 +266,7 @@ void CSoundDriverXAudio2::getDevices(std::vector<std::string> &devices)
 		for (uint i = 0; i < deviceCount; ++i)
 		{
 			_XAudio2->GetDeviceDetails(i, &deviceDetails);
-			std::basic_string<WCHAR> deviceNameW = deviceDetails.DisplayName;
-			std::string deviceName = std::string(deviceNameW.begin(), deviceNameW.end());
+			std::string deviceName = wideToUtf8(deviceDetails.DisplayName);
 			nldebug("XA2:   - %s", deviceName.c_str());
 			devices.push_back(deviceName);
 		}
@@ -289,8 +288,7 @@ uint CSoundDriverXAudio2::getDeviceIndex(const std::string &device, XAUDIO2_DEVI
 	for (uint i = 0; i < deviceCount; ++i)
 	{
 		_XAudio2->GetDeviceDetails(i, deviceDetails);
-		std::basic_string<WCHAR> deviceNameW = deviceDetails->DisplayName;
-		std::string deviceName = std::string(deviceNameW.begin(), deviceNameW.end());
+		std::string deviceName = wideToUtf8(deviceDetails->DisplayName);
 		if (deviceName == device)
 			return i;
 	}

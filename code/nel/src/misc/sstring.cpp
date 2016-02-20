@@ -1743,7 +1743,7 @@ namespace NLMISC
 	bool CSString::readFromFile(const CSString& fileName)
 	{
 		FILE* file;
-		file=fopen(fileName.c_str(),"rb");
+		file = nlfopen(fileName, "rb");
 		if (file==NULL)
 		{
 			clear();
@@ -1766,7 +1766,7 @@ namespace NLMISC
 	bool CSString::writeToFile(const CSString& fileName) const
 	{
 		FILE* file;
-		file=fopen(fileName.c_str(),"wb");
+		file = nlfopen(fileName, "wb");
 		if (file==NULL)
 		{
 			nlwarning("Failed to open file for writing: %s",fileName.c_str());

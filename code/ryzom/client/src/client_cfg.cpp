@@ -877,6 +877,7 @@ void CClientConfig::setValues()
 
 	// defined in client_default.cfg
 	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(NamingPolicyURL)
 	READ_STRING_FV(LoginSupportURL)
 
 #ifndef RZ_NO_CLIENT
@@ -1921,7 +1922,7 @@ void CClientConfig::init(const string &configFileName)
 	if(!CFile::fileExists(configFileName))
 	{
 		// create the basic .cfg
-		FILE *fp = fopen(configFileName.c_str(), "w");
+		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == NULL)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());

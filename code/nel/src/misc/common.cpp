@@ -506,6 +506,21 @@ string secondsToHumanReadable (uint32 time)
 	return toString ("%u%s", res, divTable[div]);
 }
 
+std::string timestampToHumanReadable(uint32 timestamp)
+{
+	char buffer[30];
+	time_t dtime = timestamp;
+	tm *tms = localtime(&dtime);
+
+	if (tms)
+	{
+		strftime(buffer, 30, "%Y-%m-%d %H:%M:%S", tms);
+		return std::string(buffer);
+	}
+
+	return "";
+}
+
 uint32 fromHumanReadable (const std::string &str)
 {
 	if (str.size() == 0)
@@ -710,50 +725,54 @@ bool abortProgram(uint32 pid)
 #endif
 }
 
-bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
-{
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA si;
-	PROCESS_INFORMATION pi;
 
+static bool createProcess(const std::string &programName, const std::string &arguments, bool log, PROCESS_INFORMATION &pi)
+{
+	STARTUPINFOW si;
 	memset(&si, 0, sizeof(si));
 	memset(&pi, 0, sizeof(pi));
 
 	si.cb = sizeof(si);
 
 	// Enable nlassert/nlstop to display the error reason & callstack
-	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-	TCHAR envBuf [2];
-	if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) != 0)
+	const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
+
+	char envBuf[2];
+	if (GetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2) != 0)
 	{
-		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
+		SetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, NULL);
 	}
 
-	const char *sProgramName = programName.c_str();
-
+	wchar_t *sProgramName = NULL;
+	
 	std::string args;
 
 	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
 	if (CFile::getExtension(programName) == "bat")
 	{
-		sProgramName = NULL;
 		args = "\"" + programName + "\" " + arguments;
 	}
 	else
 	{
+		ucstring ucProgramName;
+		ucProgramName.fromUtf8(programName);
+
+		sProgramName = new wchar_t[MAX_PATH];
+		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
+
 		args = arguments;
 	}
 
-	BOOL res = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
-	if (res)
+	if (sProgramName)
 	{
-		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
-		return true;
+		delete [] sProgramName;
+		sProgramName = NULL;
 	}
-	else
+
+	if (!res)
 	{
 		if (log)
 		{
@@ -763,8 +782,26 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 		CloseHandle( pi.hProcess );
 		CloseHandle( pi.hThread );
+
+		return false;
 	}
 
+	return true;
+}
+
+#endif
+
+bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
+{
+#ifdef NL_OS_WINDOWS
+	PROCESS_INFORMATION pi;
+
+	if (!createProcess(programName, arguments, log, pi)) return false;
+
+	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	CloseHandle( pi.hProcess );
+	CloseHandle( pi.hThread );
+	return true;
 #else
 
 #ifdef NL_OS_MAC
@@ -869,76 +906,28 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log)
 {
-	sint res = 0;
-
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 
-	memset(&si, 0, sizeof(si));
-	memset(&pi, 0, sizeof(pi));
+	if (!createProcess(programName, arguments, log, pi)) return -1;
 
-	si.cb = sizeof(si);
+	// Successfully created the process.  Wait for it to finish.
+	WaitForSingleObject(pi.hProcess, INFINITE);
 
-	// Enable nlassert/nlstop to display the error reason & callstack
-	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-	TCHAR envBuf [2];
-	if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) != 0)
-	{
-		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
-	}
+	// Get the exit code.
+	DWORD exitCode = 0;
+	BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
 
-	const char *sProgramName = programName.c_str();
+	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 
-	std::string args;
+	if (ok) return (sint)exitCode;
 
-	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
-	if (CFile::getExtension(programName) == "bat")
-	{
-		sProgramName = NULL;
-		args = "\"" + programName + "\" " + arguments;
-	}
-	else
-	{
-		args = arguments;
-	}
+	if (log)
+		nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
 
-	BOOL ok = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-
-	if (ok)
-	{
-		// Successfully created the process.  Wait for it to finish.
-		WaitForSingleObject(pi.hProcess, INFINITE);
-
-		// Get the exit code.
-		DWORD exitCode = 0;
-		ok = GetExitCodeProcess(pi.hProcess, &exitCode);
-
-		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-
-		if (ok)
-		{
-			res = (sint)exitCode;
-		}
-		else
-		{
-			if (log)
-				nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		}
-	}
-	else
-	{
-		if (log)
-		{
-			sint lastError = getLastError();
-			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
-		}
-
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-	}
+	return -1;
 #else
 	// program name is the only required string
 	std::string command = programName;
@@ -947,13 +936,13 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 	if (!arguments.empty()) command += " " + arguments;
 
 	// execute the command
-	res = system(command.c_str());
+	sint res = system(command.c_str());
 
 	if (res && log)
 		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
-#endif
 
 	return res;
+#endif
 }
 
 std::string getCommandOutput(const std::string &command)
@@ -1099,6 +1088,14 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 	}
 }
 
+FILE* nlfopen(const std::string &filename, const std::string &mode)
+{
+#ifdef NL_OS_WINDOWS
+	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+#else
+	return fopen(filename.c_str(), mode.c_str());
+#endif
+}
 
 int	nlfseek64( FILE *stream, sint64 offset, int origin )
 {

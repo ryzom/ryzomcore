@@ -20,7 +20,7 @@
 
 #include <nel/misc/debug.h>
 #include <nel/misc/path.h>
-#include <nel/misc/tool_logger.h>
+#include <nel/pipeline/tool_logger.h>
 
 using namespace std;
 using namespace NLMISC;

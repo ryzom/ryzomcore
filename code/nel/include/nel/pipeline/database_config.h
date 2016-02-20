@@ -28,6 +28,8 @@ typedef NLMISC::CSString TPathString;
 typedef std::string TPathString;
 #endif
 
+namespace NLPIPELINE {
+
 /// Asset database configuration
 class CDatabaseConfig
 {
@@ -54,5 +56,7 @@ private:
 	static NLMISC::CConfigFile *s_ConfigFile;
 
 };
+
+} /* namespace NLPIPELINE */
 
 /* end of file */
