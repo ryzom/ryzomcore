@@ -125,10 +125,14 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	UpgradeBatchFilename = "upgd_nl.sh";
 #endif
 
-	// use application directory by default
-	std::string rootPath = Args.getProgramPath();
+	std::string rootPath;
 
-	if (!CFile::fileExists(rootPath + "client_default.cfg"))
+	if (ClientCfg.getDefaultConfigLocation(rootPath))
+	{
+		// use same directory as client_default.cfg
+		rootPath = CFile::getPath(rootPath);
+	}
+	else
 	{
 		// use current directory
 		rootPath = CPath::getCurrentPath();
