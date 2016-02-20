@@ -13466,3 +13466,15 @@ uiFixedMissionEntry_Mainland_Unknwown [Main land / Unknown]
 uiNoFiles [No Files...]
 // symbol of byte unit
 uiByte [B]
+// name generator title
+uiCP_Name_Generator [Name generator]
+// for the generate button
+uiCP_Name_Generate [Generate]
+// Marauder's nation name
+uiCP_Maraudeur [Marauder]
+// Same as the forum post title
+uiCP_Name_Policy [Naming policy]
+// last name
+uiCP_FirstName [First name]
+// first name
+uiCP_LastName [Last name]

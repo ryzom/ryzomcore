@@ -27267,3 +27267,27 @@ uiNoFiles	[Aucun fichier...]
 // INDEX 6473
 uiByte	[o]
 
+// HASH_VALUE EBE4B481E866A442
+// INDEX 6474
+uiCP_Name_Generator	[Générateur de nom]
+
+// HASH_VALUE 6498541C641C14C8
+// INDEX 6475
+uiCP_Name_Generate	[Générer]
+
+// HASH_VALUE 609C1434705844D4
+// INDEX 6476
+uiCP_Maraudeur	[Maraudeur]
+
+// HASH_VALUE 92C6D489AAC438C4
+// INDEX 6477
+uiCP_Name_Policy	[Charte des noms]
+
+// HASH_VALUE E7473F9596B88799
+// INDEX 6478
+uiCP_FirstName	[Prénom]
+
+// HASH_VALUE 6467007F5645D768
+// INDEX 6479
+uiCP_LastName	[Nom]
+

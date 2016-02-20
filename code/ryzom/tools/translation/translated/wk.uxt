@@ -27484,3 +27484,33 @@ uiNoFiles	[No Files...]
 // INDEX 6473
 uiByte	[B]
 
+// name generator title
+// HASH_VALUE EBE4B481E866A442
+// INDEX 6474
+uiCP_Name_Generator	[Name generator]
+
+// for the generate button
+// HASH_VALUE 6498541C641C14C8
+// INDEX 6475
+uiCP_Name_Generate	[Generate]
+
+// Marauder's nation name
+// HASH_VALUE 609C1434705844D4
+// INDEX 6476
+uiCP_Maraudeur	[Marauder]
+
+// Same as the forum post title
+// HASH_VALUE 92C6D489AAC438C4
+// INDEX 6477
+uiCP_Name_Policy	[Naming policy]
+
+// last name
+// HASH_VALUE E7473F9596B88799
+// INDEX 6478
+uiCP_FirstName	[First name]
+
+// first name
+// HASH_VALUE 6467007F5645D768
+// INDEX 6479
+uiCP_LastName	[Last name]
+
