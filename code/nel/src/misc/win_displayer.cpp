@@ -149,10 +149,9 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtr (hWnd, GWLP_USERDATA);
 					// get the text as unicode string
 					GetWindowTextW(cwd->_HInputEdit, wText, 20000);
-					ucstring ucs((ucchar*)wText);
 					// and convert it to UTF-8 encoding.
-					TextSend = ucs.toUtf8();
-					SendMessage (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)"");
+					TextSend = wideToUtf8(wText);
+					SendMessageA (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)"");
 					const char *pos2 = TextSend.c_str();
 					string str;
 					while (*pos2 != '\0')
@@ -193,14 +192,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					// get the text as unicode string
 					GetWindowTextW(cwd->_HInputEdit, wText, 20000);
-					ucstring ucs((ucchar*)wText);
 					// and convert it to UTF-8 encoding
-					string str = ucs.toUtf8();
+					string str = wideToUtf8(wText);
 					nlassert (cwd->Log != NULL);
 					ICommand::expand (str, *cwd->Log);
 					SendMessageW (cwd->_HInputEdit, WM_SETTEXT, (WPARAM)0, (LPARAM)wText);
 
-					SendMessage (cwd->_HInputEdit, EM_SETSEL, str.size(), str.size());
+					SendMessageA (cwd->_HInputEdit, EM_SETSEL, wcslen(wText), wcslen(wText));
 
 					return 1;
 				}
@@ -209,7 +207,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				if (pmf->wParam == VK_UP)
 				{
-					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtrW (hWnd, GWLP_USERDATA);
+					CWinDisplayer *cwd=(CWinDisplayer *)GetWindowLongPtrA (hWnd, GWLP_USERDATA);
 
 					if (cwd->_PosInHistory > 0)
 						cwd->_PosInHistory--;
@@ -262,11 +260,11 @@ void CWinDisplayer::updateLabels ()
 					// create a button for command and label for variables
 					if (access.value()[i].Value[0] == '@')
 					{
-						access.value()[i].Hwnd = CreateWindowW (L"BUTTON", L"", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
+						access.value()[i].Hwnd = CreateWindowA ("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_DEFPUSHBUTTON, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtrA(_HWnd, GWLP_HINSTANCE), NULL);
 					}
 					else
 					{
-						access.value()[i].Hwnd = CreateWindowW (L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_SIMPLE, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtr(_HWnd, GWLP_HINSTANCE), NULL);
+						access.value()[i].Hwnd = CreateWindowA ("STATIC", "", WS_CHILD | WS_VISIBLE | SS_SIMPLE, 0, 0, 0, 0, _HWnd, (HMENU) NULL, (HINSTANCE) GetWindowLongPtrA(_HWnd, GWLP_HINSTANCE), NULL);
 					}
 					SendMessageA ((HWND)access.value()[i].Hwnd, WM_SETFONT, (WPARAM)_HFont, TRUE);
 					needResize = true;
@@ -290,7 +288,7 @@ void CWinDisplayer::updateLabels ()
 					}
 				}
 
-				SendMessage ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) n.c_str());
+				SendMessageW ((HWND)access.value()[i].Hwnd, WM_SETTEXT, 0, (LPARAM) utf8ToWide(n));
 				access.value()[i].NeedUpdate = false;
 			}
 		}
@@ -604,7 +602,7 @@ void CWinDisplayer::display_main ()
 					}
 
 					// add the string to the edit control
-					SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) str.c_str());
+					SendMessageW(_HEdit, EM_REPLACESEL, FALSE, (LPARAM) str.c_str());
 				}
 
 				// restore old selection
