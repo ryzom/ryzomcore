@@ -70,7 +70,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
 	if (!file.open(CAFilename))
 	{
-		nlwarning("Unable to open %s", CAFilename.c_str());
+		nlwarning("Unable to open %s", CAFilename);
 		return CURLE_SSL_CACERT;
 	}
 
