@@ -2221,7 +2221,7 @@ uint32	CFile::getFileCreationDate(const std::string &filename)
 	int result = _wstat(utf8ToWide(fn), &buf);
 #elif defined (NL_OS_UNIX)
 	struct stat buf;
-	int result = stat (fn.c_str (), &buf);
+	int result = stat(fn.c_str (), &buf);
 #endif
 
 	if (result != 0) return 0;
@@ -2386,15 +2386,15 @@ bool CFile::copyFile(const std::string &dest, const std::string &src, bool failI
 bool CFile::quickFileCompare(const std::string &fileName0, const std::string &fileName1)
 {
 	// make sure the files both exist
-	if (!fileExists(fileName0.c_str()) || !fileExists(fileName1.c_str()))
+	if (!fileExists(fileName0) || !fileExists(fileName1))
 		return false;
 
 	// compare time stamps
-	if (getFileModificationDate(fileName0.c_str()) != getFileModificationDate(fileName1.c_str()))
+	if (getFileModificationDate(fileName0) != getFileModificationDate(fileName1))
 		return false;
 
 	// compare file sizes
-	if (getFileSize(fileName0.c_str()) != getFileSize(fileName1.c_str()))
+	if (getFileSize(fileName0) != getFileSize(fileName1))
 		return false;
 
 	// everything matched so return true
@@ -2404,14 +2404,14 @@ bool CFile::quickFileCompare(const std::string &fileName0, const std::string &fi
 bool CFile::thoroughFileCompare(const std::string &fileName0, const std::string &fileName1,uint32 maxBufSize)
 {
 	// make sure the files both exist
-	if (!fileExists(fileName0.c_str()) || !fileExists(fileName1.c_str()))
+	if (!fileExists(fileName0) || !fileExists(fileName1))
 		return false;
 
 	// setup the size variable from file length of first file
-	uint32 fileSize=getFileSize(fileName0.c_str());
+	uint32 fileSize=getFileSize(fileName0);
 
 	// compare file sizes
-	if (fileSize != getFileSize(fileName1.c_str()))
+	if (fileSize != getFileSize(fileName1))
 		return false;
 
 	// allocate a couple of data buffers for our 2 files
