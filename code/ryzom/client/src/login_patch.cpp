@@ -1517,8 +1517,8 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 //		_utimbuf utb;
 //		utb.actime = utb.modtime = nDate;
 		setRWAccess(sFilename, false);
-		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
-						" -> " + toString(nDate);
+		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename)) +
+						" -> " + timestampToHumanReadable(nDate);
 		setState(true,s);
 
 		if (!NLMISC::CFile::setFileModificationDate(sFilename, nDate))
