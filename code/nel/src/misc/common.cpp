@@ -1099,6 +1099,14 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 	}
 }
 
+FILE* nlfopen(const std::string &filename, const std::string &mode)
+{
+#ifdef NL_OS_WINDOWS
+	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+#else
+	return fopen(filename.c_str(), mode.c_str());
+#endif
+}
 
 int	nlfseek64( FILE *stream, sint64 offset, int origin )
 {
