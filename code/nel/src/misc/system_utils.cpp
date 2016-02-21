@@ -319,9 +319,9 @@ string CSystemUtils::getRegKey(const string &Entry)
 	{
 		DWORD	dwType	= 0L;
 		DWORD	dwSize	= KeyMaxLength;
-		unsigned char	Buffer[KeyMaxLength];
+		wchar_t Buffer[KeyMaxLength];
 
-		if (RegQueryValueExW(hkey, utf8ToWide(Entry), NULL, &dwType, Buffer, &dwSize) != ERROR_SUCCESS)
+		if (RegQueryValueExW(hkey, utf8ToWide(Entry), NULL, &dwType, (LPBYTE)Buffer, &dwSize) != ERROR_SUCCESS)
 		{
 			nlwarning("Can't get the reg key '%s'", Entry.c_str());
 		}
@@ -329,6 +329,7 @@ string CSystemUtils::getRegKey(const string &Entry)
 		{
 			ret = wideToUtf8(Buffer);
 		}
+
 		RegCloseKey(hkey);
 	}
 	else
@@ -346,11 +347,13 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	wchar_t nstr[] = { 0x00 };
-	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, nstr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, L"", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
 		ucstring utf16Value = ucstring::makeFromUtf8(Value);
+
+		// we must use the real Unicode string size in bytes
 		DWORD size = (utf16Value.length() + 1) * 2;
+
 		if (RegSetValueExW(hkey, utf8ToWide(ValueName), 0L, REG_SZ, (const BYTE *)utf16Value.c_str(), size) == ERROR_SUCCESS)
 			res = true;
 		RegCloseKey(hkey);
