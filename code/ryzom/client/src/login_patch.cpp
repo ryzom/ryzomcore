@@ -3157,7 +3157,8 @@ bool CPatchManager::extract(const std::string& patchPath,
 	fprintf(fp, "@echo off\n");
 	fprintf(fp, "ping 127.0.0.1 -n 7 -w 1000 > nul\n"); // wait
 #else
-	// TODO: for Linux and OS X
+	fprintf(fp, "#!/bin/sh\n");
+	fprintf(fp, "sleep 7\n"); // wait
 #endif
 
 	// Unpack files with category ExtractPath non empty
