@@ -743,7 +743,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		// For all optional categories check if there is a 'file to patch' in it
 		const CBNPCategory &rCat = rDescCats.getCategory(i);
-		nlwarning("Category = %s", rCat.getName().c_str());
+
+		nlinfo("Category = %s", rCat.getName().c_str());
+
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
 		{
@@ -753,7 +755,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 			// Extract to patch
 			vector<string> vFilenames;
+
 			bool result = false;
+
 			try
 			{
 				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
@@ -806,6 +810,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						{
 							batchRelativeDstPath = fullDstPath + FileName;
 						}
+
 #ifdef NL_OS_WINDOWS
 						// only fix backslashes for .bat
 						batchRelativeDstPath = CPath::standardizeDosPath(batchRelativeDstPath);
@@ -825,7 +830,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						string realSrcPath = toString("\"$UNPACKPATH\\%s\"", FileName.c_str());
 
 						content += toString("rm -rf %s\n", realDstPath.c_str());
-						// TODO: add test of returned $?
 						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #endif
 
@@ -872,7 +876,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (!patchContent.empty())
 		{
 #ifdef NL_OS_WINDOWS
-			content += toString(":looppatch\n");
+			content += ":looppatch\n";
 
 			content += patchContent;
 
@@ -892,8 +896,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		deleteBatchFile();
 
+		// batch full path
 		std::string batchFilename = ClientRootPath + UpdateBatchFilename;
 
+		// write windows .bat format else write sh format
 		FILE *fp = nlfopen (batchFilename, "wt");
 
 		if (fp == NULL)
