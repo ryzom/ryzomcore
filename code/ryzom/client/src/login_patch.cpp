@@ -842,7 +842,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 	}
 
-	std::string patchDirectory = CPath::standardizeDosPath(ClientRootPath + "patch");
+	std::string patchDirectory = CPath::standardizePath(ClientRootPath + "patch");
 
 	// Finalize batch file
 	if (NLMISC::CFile::isExists(patchDirectory) && NLMISC::CFile::isDirectory(patchDirectory))
