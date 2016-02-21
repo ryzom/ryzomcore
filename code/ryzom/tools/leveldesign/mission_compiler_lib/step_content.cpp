@@ -1139,6 +1139,66 @@ public:
 };
 REGISTER_STEP_CONTENT(CActionLearnBrick, "learn_brick");
 
+
+// ---------------------------------------------------------------------------
+class CActionUnlearnBrick : public IStepContent
+{
+	string				_BotGiver;
+	vector<string>		_Bricks;
+	bool				_Group;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		_BotGiver = md.getProperty(prim, "npc_name", true, false);
+		vector<string> vs;
+		vs = md.getPropertyArray(prim, "bricks", true, false);
+
+		for (uint i=0; i<vs.size(); ++i)
+		{
+			if (!vs[i].empty())
+				_Bricks.push_back(vs[i]);
+		}
+
+		string s;
+		s = md.getProperty(prim, "group", true, false);
+		_Group = (NLMISC::toLower(s) == "true");
+
+		IStepContent::init(md, prim);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		string ret;
+
+//		if (_Bricks.empty())
+//			return ret;
+
+		ret = "unlearn_brick : ";
+		for (uint i=0; i<_Bricks.size(); ++i)
+		{
+			ret += _Bricks[i];
+			if (i < _Bricks.size()-1)
+				ret += "; ";
+		}
+
+		if (!_BotGiver.empty())
+			ret += " : "+_BotGiver;
+		if (_Group)
+			ret += " : group";
+		ret += NL;
+
+		return ret;
+	}
+};
+REGISTER_STEP_CONTENT(CActionUnlearnBrick, "unlearn_brick");
+
+
+
 // ---------------------------------------------------------------------------
 class CActionBotChat : public IStepContent
 {

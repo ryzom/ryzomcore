@@ -690,6 +690,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="unlearn_brick"/>
 	</PRIMITIVE>
 
 	
@@ -1028,7 +1029,13 @@
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
-
+	
+	<PRIMITIVE CLASS_NAME="unlearn_brick" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="unlearn_brick $action$"/>
+		<PARAMETER NAME="bricks" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+	</PRIMITIVE>
 <!-- Fin actions -->
 
 	<!-- *************************************** -->
@@ -1101,6 +1108,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="unlearn_brick"/>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="kill" TYPE="node" PARENT_CLASS="objective_parent">
