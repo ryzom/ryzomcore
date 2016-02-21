@@ -1108,7 +1108,6 @@
 		<PARAMETER NAME="faction/quantity" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="clan_name/min_level/max_level/quantity" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
-	
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="talk_to" TYPE="node"  PARENT_CLASS="objective_parent">
@@ -1118,7 +1117,6 @@
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
 		<PARAMETER NAME="phrase" TYPE="string_array" VISIBLE="true" FILE_EXTENSION="txt"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="cast" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1126,25 +1124,21 @@
 						
 		<PARAMETER NAME="action" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="forage" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="forage"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="loot" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="loot"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="craft" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="craft"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="target" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1159,14 +1153,12 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="sell"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="buy" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="buy"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="give_item" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1176,7 +1168,6 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="give_money" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1185,7 +1176,6 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="$giver$"/>
 		</PARAMETER>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="visit" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1193,7 +1183,6 @@
 						
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="items_worn" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="escort" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1201,20 +1190,17 @@
 						
 		<PARAMETER NAME="group_to_escort" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="save_all" TYPE="boolean" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="skill" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="skill $skill_name$ $level$"/>
 		<PARAMETER NAME="skill_name/level" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="do_mission" TYPE="node" PARENT_CLASS="objective_parent">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="do_mission"/>
 						
 		<PARAMETER NAME="mission_names" TYPE="string_array" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="wait_ai_msg" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1259,7 +1245,6 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="ring_scenario"/>
 						
 		<PARAMETER NAME="scenario_tag" TYPE="string" VISIBLE="true"/>
-		
 	</PRIMITIVE>
 	
 
