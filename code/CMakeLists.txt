@@ -257,11 +257,6 @@ IF(WITH_QT5)
     FIND_PACKAGE(Qt5LinguistTools)
     FIND_PACKAGE(Qt5Network)
 
-    IF(WIN32)
-      # Please add option to switch off
-      # FIND_PACKAGE(Qt5WinExtras)
-    ENDIF()
-
     IF(QT_STATIC)
       ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 

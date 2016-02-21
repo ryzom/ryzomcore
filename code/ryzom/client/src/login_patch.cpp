@@ -739,34 +739,28 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	const CBNPCategorySet &rDescCats = descFile.getCategories();
 	OptionalCat.clear();
 
-	string SrcPath = ClientPatchPath;
-	string DstPath = ClientRootPath;
-
-#ifdef NL_OS_WINDOWS
-	// only fix backslashes for .bat
-	string batchSrcPath = CPath::standardizeDosPath(SrcPath);
-	string batchDstPath = CPath::standardizeDosPath(DstPath);
-#else
-	string batchSrcPath = SrcPath;
-	string batchDstPath = DstPath;
-#endif
-
 	for (uint32 i = 0; i < rDescCats.categoryCount(); ++i)
 	{
 		// For all optional categories check if there is a 'file to patch' in it
 		const CBNPCategory &rCat = rDescCats.getCategory(i);
-		nlwarning("Category = %s", rCat.getName().c_str());
+
+		nlinfo("Category = %s", rCat.getName().c_str());
+
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
 		{
-			string rFilename = SrcPath + rCat.getFile(j);
-			nlwarning("\tFileName = %s", rFilename.c_str());
+			string rFilename = ClientPatchPath + rCat.getFile(j);
+
+			nlinfo("\tFileName = %s", rFilename.c_str());
+
 			// Extract to patch
 			vector<string> vFilenames;
+
 			bool result = false;
+
 			try
 			{
-				result = bnpUnpack(rFilename, SrcPath, vFilenames);
+				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
 			}
 			catch(...)
 			{
@@ -798,7 +792,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						CFile::deleteFile(fullDstPath + FileName);
 						
 						// try to move it, if fails move it later in a script
-						if (CFile::moveFile(fullDstPath + FileName, SrcPath + FileName))
+						if (CFile::moveFile(fullDstPath + FileName, ClientPatchPath + FileName))
 							succeeded = true;
 					}
 
@@ -807,23 +801,23 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					{
 						string batchRelativeDstPath;
 
-						if (fullDstPath.compare(0, DstPath.length(), DstPath) == 0)
+						// should be always true
+						if (fullDstPath.compare(0, ClientRootPath.length(), ClientRootPath) == 0)
 						{
-							batchRelativeDstPath = fullDstPath.substr(DstPath.length()) + FileName;
+							batchRelativeDstPath = fullDstPath.substr(ClientRootPath.length()) + FileName;
 						}
 						else
 						{
 							batchRelativeDstPath = fullDstPath + FileName;
 						}
+
 #ifdef NL_OS_WINDOWS
 						// only fix backslashes for .bat
 						batchRelativeDstPath = CPath::standardizeDosPath(batchRelativeDstPath);
-#endif
 
-						// write windows .bat format else write sh format
-#ifdef NL_OS_WINDOWS
-						string realDstPath = toString("\"%%DSTPATH%%\\%s\"", batchRelativeDstPath.c_str());
-						string realSrcPath = toString("\"%%SRCPATH%%\\%s\"", FileName.c_str());
+						// use DSTPATH and SRCPATH variables and append filenames
+						string realDstPath = toString("\"%%ROOTPATH%%\\%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"%%UNPACKPATH%%\\%s\"", FileName.c_str());
 
 						content += toString(":loop%u\n", nblab);
 						content += toString("attrib -r -a -s -h %s\n", realDstPath.c_str());
@@ -831,8 +825,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						content += toString("if exist %s goto loop%u\n", realDstPath.c_str(), nblab);
 						content += toString("move %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #else
+						// use DSTPATH and SRCPATH variables and append filenames
+						string realDstPath = toString("\"$ROOTPATH\\%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"$UNPACKPATH\\%s\"", FileName.c_str());
+
 						content += toString("rm -rf %s\n", realDstPath.c_str());
-						// TODO: add test of returned $?
 						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #endif
 
@@ -845,7 +842,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 	}
 
-	std::string patchDirectory = CPath::standardizeDosPath(ClientRootPath + "patch");
+	std::string patchDirectory = CPath::standardizePath(ClientRootPath + "patch");
 
 	// Finalize batch file
 	if (NLMISC::CFile::isExists(patchDirectory) && NLMISC::CFile::isDirectory(patchDirectory))
@@ -869,9 +866,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			if (!succeeded)
 			{
 #ifdef NL_OS_WINDOWS
-				patchContent += toString("del \"%s\"\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+				patchContent += toString("del \"%%ROOTPATH%%\\patch\\%s\"\n", vFileList[i].c_str());
 #else
-				patchContent += toString("rm -f \"%s\"\n", CPath::standardizePath(vFileList[i]).c_str());
+				patchContent += toString("rm -f \"$ROOTPATH/patch/%s\"\n", vFileList[i].c_str());
 #endif
 			}
 		}
@@ -879,14 +876,14 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (!patchContent.empty())
 		{
 #ifdef NL_OS_WINDOWS
-			content += toString(":looppatch\n");
+			content += ":looppatch\n";
 
 			content += patchContent;
 
-			content += toString("rd /Q /S \"%s\"\n", patchDirectory.c_str());
-			content += toString("if exist \"%s\" goto looppatch\n", patchDirectory.c_str());
+			content += "rd /Q /S \"%%ROOTPATH%%\\patch\"\n";
+			content += "if exist \"%%ROOTPATH%%\\patch\" goto looppatch\n";
 #else
-			content += toString("rm -rf \"%s\"\n", patchDirectory.c_str());
+			content += "rm -rf \"$ROOTPATH/patch\"\n");
 #endif
 		}
 		else
@@ -899,8 +896,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		deleteBatchFile();
 
+		// batch full path
 		std::string batchFilename = ClientRootPath + UpdateBatchFilename;
 
+		// write windows .bat format else write sh format
 		FILE *fp = nlfopen (batchFilename, "wt");
 
 		if (fp == NULL)
@@ -914,30 +913,29 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		//use bat if windows if not use sh
 #ifdef NL_OS_WINDOWS
 		contentPrefix += "@echo off\n";
-		contentPrefix += "set RYZOM_CLIENT=%1\n";
-		contentPrefix += "set SRCPATH=%2\n";
-		contentPrefix += "set DSTPATH=%3\n";
+		contentPrefix += "set RYZOM_CLIENT=\"%1\"\n";
+		contentPrefix += "set UNPACKPATH=\"%2\"\n";
+		contentPrefix += "set ROOTPATH=\"%3\"\n";
 		contentPrefix += "set LOGIN=%4\n";
 		contentPrefix += "set PASSWORD=%5\n";
 		contentPrefix += "set SHARDID=%6\n";
-		contentPrefix += toString("set UPGRADE_FILE=%%DSTPATH%%\\%s\n", UpgradeBatchFilename.c_str());
+		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
 #else
 		contentPrefix += "#!/bin/sh\n";
-		contentPrefix += "RYZOM_CLIENT=$1\n";
-		contentPrefix += "SRCPATH=$2\n";
-		contentPrefix += "DSTPATH=$3\n";
+		contentPrefix += "RYZOM_CLIENT=\"$1\"\n";
+		contentPrefix += "UNPACKPATH=\"$2\"\n";
+		contentPrefix += "ROOTPATH=\"$3\"\n";
 		contentPrefix += "LOGIN=$4\n";
 		contentPrefix += "PASSWORD=$5\n";
 		contentPrefix += "SHARDID=$6\n";
-		contentPrefix += toString("UPGRADE_FILE=$DSTPATH\\%s\n", UpgradeBatchFilename.c_str());
+		contentPrefix += toString("UPGRADE_FILE=\"$ROOTPATH\\%s\"\n", UpgradeBatchFilename.c_str());
 #endif
 
 		contentPrefix += "\n";
 
-		// append content of script
-		fputs(contentPrefix.c_str(), fp);
-		fputs(content.c_str(), fp);
+		string contentSuffix;
 
+		// if we need to restart Ryzom, we need to launch it in batch
 		std::string additionalParams;
 
 		if (Args.haveLongArg("profile"))
@@ -945,35 +943,42 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			additionalParams = "--profile " + Args.getLongArg("profile").front();
 		}
 
+#ifdef NL_OS_WINDOWS
+		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+		contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
+
 		if (wantRyzomRestart)
 		{
-			string contentSuffix;
-
-#ifdef NL_OS_WINDOWS
-			// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
-			contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
-
 			// client shouldn't be in memory anymore else it couldn't be overwritten
-			contentSuffix += toString("start \"\" /D \"%%DSTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+			contentSuffix += toString("start \"\" /D \"%%ROOTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+		}
 #else
+		if (wantRyzomRestart)
+		{
 			// wait until client not in memory anymore
 			contentSuffix += toString("until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+		}
 
-			// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
-			contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n";
+		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n";
 
-			// be sure file is executable
-			contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n");
+		// be sure file is executable
+		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n";
 
+		if (wantRyzomRestart)
+		{
 			// change to previous client directory
-			contentSuffix += "cd \"$DSTPATH\"\n");
+			contentSuffix += "cd \"$ROOTPATH\"\n";
 
 			// launch new client
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+		}
 #endif
 
-			fputs(contentSuffix.c_str(), fp);
-		}
+		// append content of script
+		fputs(contentPrefix.c_str(), fp);
+		fputs(content.c_str(), fp);
+		fputs(contentSuffix.c_str(), fp);
 
 		bool writeError = ferror(fp) != 0;
 		bool diskFull = ferror(fp) && errno == 28 /* ENOSPC */;
@@ -3157,7 +3162,8 @@ bool CPatchManager::extract(const std::string& patchPath,
 	fprintf(fp, "@echo off\n");
 	fprintf(fp, "ping 127.0.0.1 -n 7 -w 1000 > nul\n"); // wait
 #else
-	// TODO: for Linux and OS X
+	fprintf(fp, "#!/bin/sh\n");
+	fprintf(fp, "sleep 7\n"); // wait
 #endif
 
 	// Unpack files with category ExtractPath non empty
