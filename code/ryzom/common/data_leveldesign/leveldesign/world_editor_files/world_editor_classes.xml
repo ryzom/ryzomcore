@@ -256,6 +256,8 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
 	
 		<PARAMETER NAME="require_skill/min_level/max_level" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="require_character_age" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="require_max_player_id" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="require_mission_done" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="require_mission_not_done" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="require_mission_running" TYPE="string_array" VISIBLE="true"/>
@@ -1102,7 +1104,7 @@
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="kill" TYPE="node" PARENT_CLASS="objective_parent">
-		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="kill $fauna/quantity$$race/quantity$$group$$npc$$faction/quantity$"/>
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="kill $fauna/quantity$$race/quantity$$group$$npc$$faction/quantity$$clan_name/min_level/max_level/quantity$"/>
 		
 		<PARAMETER NAME="fauna/quantity" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="race/quantity" TYPE="string_array" VISIBLE="true"/>
@@ -1110,6 +1112,7 @@
 		<PARAMETER NAME="npc" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="npc_by_name/quantity" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="faction/quantity" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="clan_name/min_level/max_level/quantity" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="place" TYPE="string" VISIBLE="true"/>
 	</PRIMITIVE>
 
