@@ -739,18 +739,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	const CBNPCategorySet &rDescCats = descFile.getCategories();
 	OptionalCat.clear();
 
-	string SrcPath = ClientPatchPath;
-	string DstPath = ClientRootPath;
-
-#ifdef NL_OS_WINDOWS
-	// only fix backslashes for .bat
-	string batchSrcPath = CPath::standardizeDosPath(SrcPath);
-	string batchDstPath = CPath::standardizeDosPath(DstPath);
-#else
-	string batchSrcPath = SrcPath;
-	string batchDstPath = DstPath;
-#endif
-
 	for (uint32 i = 0; i < rDescCats.categoryCount(); ++i)
 	{
 		// For all optional categories check if there is a 'file to patch' in it
@@ -759,14 +747,16 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
 		{
-			string rFilename = SrcPath + rCat.getFile(j);
-			nlwarning("\tFileName = %s", rFilename.c_str());
+			string rFilename = ClientPatchPath + rCat.getFile(j);
+
+			nlinfo("\tFileName = %s", rFilename.c_str());
+
 			// Extract to patch
 			vector<string> vFilenames;
 			bool result = false;
 			try
 			{
-				result = bnpUnpack(rFilename, SrcPath, vFilenames);
+				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
 			}
 			catch(...)
 			{
@@ -798,7 +788,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						CFile::deleteFile(fullDstPath + FileName);
 						
 						// try to move it, if fails move it later in a script
-						if (CFile::moveFile(fullDstPath + FileName, SrcPath + FileName))
+						if (CFile::moveFile(fullDstPath + FileName, ClientPatchPath + FileName))
 							succeeded = true;
 					}
 
@@ -807,9 +797,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					{
 						string batchRelativeDstPath;
 
-						if (fullDstPath.compare(0, DstPath.length(), DstPath) == 0)
+						// should be always true
+						if (fullDstPath.compare(0, ClientRootPath.length(), ClientRootPath) == 0)
 						{
-							batchRelativeDstPath = fullDstPath.substr(DstPath.length()) + FileName;
+							batchRelativeDstPath = fullDstPath.substr(ClientRootPath.length()) + FileName;
 						}
 						else
 						{
