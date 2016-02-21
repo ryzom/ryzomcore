@@ -152,6 +152,7 @@ FILE(GLOB NLMISC_BITMAP
 FILE(GLOB NLMISC_CRYPT
 	md5.cpp ../../include/nel/misc/md5.h
 	sha1.cpp ../../include/nel/misc/sha1.h
+	../../include/nel/misc/wang_hash.h
 )
 
 SOURCE_GROUP("" FILES ${SRC} ${HEADERS})
