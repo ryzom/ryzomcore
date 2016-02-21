@@ -696,6 +696,7 @@
 	<PRIMITIVE CLASS_NAME="recv_money" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="recv_money $amount$"/>
 		<PARAMETER NAME="amount" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 	
 	<PRIMITIVE CLASS_NAME="chain_mission" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -708,6 +709,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="spawn_mission : $mission_name$ : $giver_name$"/>
 		<PARAMETER NAME="mission_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="giver_name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="encyclo_unlock" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -842,6 +844,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="recv_fame $value$ $fame_owner$"/>
 		<PARAMETER NAME="faction" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="value" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="recv_guild_xp" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -854,6 +857,7 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="learn_action" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -1009,6 +1013,7 @@
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="recv_xp" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
@@ -1021,6 +1026,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="destroy_item $item/quantity/quality$"/>
 		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
 
 <!-- Fin actions -->
