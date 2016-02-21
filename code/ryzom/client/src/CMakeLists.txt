@@ -137,6 +137,7 @@ IF(WITH_RYZOM_CLIENT)
         ${LUABIND_INCLUDE_DIR}
         ${CURL_INCLUDE_DIRS}
         ${ZLIB_INCLUDE_DIR}
+        ${OPENSSL_INCLUDE_DIR}
   )
 
   IF(STEAM_FOUND)
@@ -158,6 +159,7 @@ IF(WITH_RYZOM_CLIENT)
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}
+              ${OPENSSL_LIBRARIES}
   )
 
   IF(NOT APPLE AND NOT WIN32)
