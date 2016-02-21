@@ -933,10 +933,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 		contentPrefix += "\n";
 
-		// append content of script
-		fputs(contentPrefix.c_str(), fp);
-		fputs(content.c_str(), fp);
+		string contentSuffix;
 
+		// if we need to restart Ryzom, we need to launch it in batch
 		std::string additionalParams;
 
 		if (Args.haveLongArg("profile"))
@@ -944,12 +943,18 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			additionalParams = "--profile " + Args.getLongArg("profile").front();
 		}
 
+#ifdef NL_OS_WINDOWS
+		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+		contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
+
 		if (wantRyzomRestart)
 		{
 			// client shouldn't be in memory anymore else it couldn't be overwritten
 			contentSuffix += toString("start \"\" /D \"%%ROOTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
 		}
 #else
+		if (wantRyzomRestart)
+		{
 			// wait until client not in memory anymore
 			contentSuffix += toString("until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
 		}
@@ -967,10 +972,13 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 			// launch new client
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+		}
 #endif
 
-			fputs(contentSuffix.c_str(), fp);
-		}
+		// append content of script
+		fputs(contentPrefix.c_str(), fp);
+		fputs(content.c_str(), fp);
+		fputs(contentSuffix.c_str(), fp);
 
 		bool writeError = ferror(fp) != 0;
 		bool diskFull = ferror(fp) && errno == 28 /* ENOSPC */;
