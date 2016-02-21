@@ -883,7 +883,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			content += "rd /Q /S \"%%ROOTPATH%%\\patch\"\n";
 			content += "if exist \"%%ROOTPATH%%\\patch\" goto looppatch\n";
 #else
-			content += "rm -rf \"$ROOTPATH/patch\"\n");
+			content += "rm -rf \"$ROOTPATH/patch\"\n";
 #endif
 		}
 		else
