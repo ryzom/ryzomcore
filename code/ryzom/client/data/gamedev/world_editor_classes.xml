@@ -98,7 +98,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/fauna_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//root"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
@@ -128,7 +128,7 @@
 		<!-- For now, fauna don't have AI profile-->
 		<!--		<PARAMETER NAME= "ai_movement"			TYPE="const_string"	VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
 												<COMBO_FILES CONTEXT_NAME="default"	
-												PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/> </PARAMETER>
+												PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/> </PARAMETER>
 -->
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="state_event_handler"/>
@@ -147,7 +147,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="event_handler_action"/>
@@ -159,7 +159,7 @@
 			<DEFAULT_VALUE VALUE="ACTION_ZONE"/>
 		</PARAMETER>
 		<PARAMETER NAME="params" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -175,7 +175,7 @@
 		</PARAMETER>
 		<PARAMETER NAME="parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="500" SHOW_HS="true" FILE_EXTENSION="cs"/>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="event_handler_action"/>
 		<DYNAMIC_CHILD CLASS_NAME="action_zone"/>
@@ -690,6 +690,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="unlearn_brick"/>
 	</PRIMITIVE>
 
 	
@@ -1028,7 +1029,13 @@
 		<PARAMETER NAME="item/quantity/quality" TYPE="string_array" VISIBLE="true"/>
 		<PARAMETER NAME="guild" TYPE="boolean" VISIBLE="true" />
 	</PRIMITIVE>
-
+	
+	<PRIMITIVE CLASS_NAME="unlearn_brick" TYPE="node" AUTO_INIT="false" DELETABLE="true" NUMBERIZE="false">
+		<PARAMETER NAME="name" TYPE="string" VISIBLE="true" AUTONAME="unlearn_brick $action$"/>
+		<PARAMETER NAME="bricks" TYPE="string_array" VISIBLE="true"/>
+		<PARAMETER NAME="npc_name" TYPE="string" VISIBLE="true"/>
+		<PARAMETER NAME="group" TYPE="boolean" VISIBLE="true"/>
+	</PRIMITIVE>
 <!-- Fin actions -->
 
 	<!-- *************************************** -->
@@ -1101,6 +1108,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="recv_named_item"/>
 		<DYNAMIC_CHILD CLASS_NAME="recv_xp"/>
 		<DYNAMIC_CHILD CLASS_NAME="destroy_item"/>
+		<DYNAMIC_CHILD CLASS_NAME="unlearn_brick"/>
 	</PRIMITIVE>
 
 	<PRIMITIVE CLASS_NAME="kill" TYPE="node" PARENT_CLASS="objective_parent">
@@ -1558,15 +1566,15 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="item_parts" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="item_part" LOOKUP="true">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/item_parts"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/item_parts"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="mps" TYPE="const_string_array" VISIBLE="true" FILENAME="true"  FILE_EXTENSION="mp" LOOKUP="true">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/mps"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/mps"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="craft_civ" TYPE="const_string_array" VISIBLE="true" FILENAME="true"  FILE_EXTENSION="craft_civ" LOOKUP="true">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/craft_civs"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/craft_civs"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="exact_mp_item" TYPE="string_array" VISIBLE="true" FILENAME="false"/>
@@ -1588,13 +1596,13 @@
  		</PARAMETER>
 <!-- Deposit
 		<PARAMETER NAME="item_parts" TYPE="string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="item_part" LOOKUP="true" WIDGET_HEIGHT="100">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/item_parts"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/item_parts"/>
 		</PARAMETER>
 		<PARAMETER NAME="mps" TYPE="string_array" VISIBLE="true" FILENAME="true"  FILE_EXTENSION="mp" LOOKUP="true" WIDGET_HEIGHT="100">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/mps"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/mps"/>
 		</PARAMETER>
 		<PARAMETER NAME="craft_civ" TYPE="string" VISIBLE="true" FILENAME="true"  FILE_EXTENSION="craft_civ" LOOKUP="true" WIDGET_HEIGHT="100">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/craft_civ"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/craft_civ"/>
 		</PARAMETER>
 	-->
 
@@ -1696,7 +1704,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="ecotype" TYPE="const_string" VISIBLE="true" FILENAME="true"  FILE_EXTENSION="ecotype" LOOKUP="true">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/ecotypes"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/ecotypes"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 	</PRIMITIVE>
@@ -1857,7 +1865,7 @@
 
 		<PARAMETER NAME="ConstArray" TYPE="const_string_array" VISIBLE="true" FILENAME="true" WIDGET_HEIGHT="100" FILE_EXTENSION="flora" LOOKUP="true">
 
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_elem/plant/flora_template/forest"/>
 			<COMBO_VALUES CONTEXT_NAME="jungle">
 				<CONTEXT_VALUE VALUE="jungle0"/>
 			</COMBO_VALUES>
@@ -1880,7 +1888,7 @@
 
 		<PARAMETER NAME="ConstArray2" TYPE="const_string_array" VISIBLE="true" FILENAME="true" WIDGET_HEIGHT="100" FILE_EXTENSION="flora" LOOKUP="true" AUTONAME="$ConstArray$">
 
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_elem/plant/flora_template/forest"/>
 			<COMBO_VALUES CONTEXT_NAME="jungle">
 				<CONTEXT_VALUE VALUE="jungle0"/>
 			</COMBO_VALUES>
@@ -1989,11 +1997,11 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
 		</PARAMETER>
 		<PARAMETER NAME="form" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="flora" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_elem/plant/flora_template/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_elem/plant/flora_template/desert"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_elem/plant/flora_template/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_elem/plant/flora_template/primes_racines"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_elem/plant/flora_template/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_elem/plant/flora_template/desert"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_elem/plant/flora_template/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_elem/plant/flora_template/primes_racines"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="flora_exclude"/>
 		<GENERATED_CHILD CLASS_NAME="prim"/>
@@ -2006,11 +2014,11 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
 		</PARAMETER>
 		<PARAMETER NAME="form" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="flora" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_elem/plant/flora_template/forest"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_elem/plant/flora_template/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_elem/plant/flora_template/desert"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_elem/plant/flora_template/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_elem/plant/flora_template/primes_racines"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_elem/plant/flora_template/forest"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_elem/plant/flora_template/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_elem/plant/flora_template/desert"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_elem/plant/flora_template/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_elem/plant/flora_template/primes_racines"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="flora_exclude"/>
 		<GENERATED_CHILD CLASS_NAME="prim"/>
@@ -2025,11 +2033,11 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true">
 		</PARAMETER>
 		<PARAMETER NAME="form" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="plant" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_elem/plant/ecosystem/forest"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_elem/plant/ecosystem/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_elem/plant/ecosystem/desert"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_elem/plant/ecosystem/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_elem/plant/ecosystem/primes_racines"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_elem/plant/ecosystem/forest"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_elem/plant/ecosystem/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_elem/plant/ecosystem/desert"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_elem/plant/ecosystem/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_elem/plant/ecosystem/primes_racines"/>
 		</PARAMETER>
 		<PARAMETER NAME="radius" TYPE="string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="1"/>
@@ -2103,7 +2111,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_event_handler_action"/>		
@@ -2123,7 +2131,7 @@
 		<!-- For now, fauna don't have AI profile-->
 		<!--		<PARAMETER NAME= "ai_movement"			TYPE="const_string"	VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
 												<COMBO_FILES CONTEXT_NAME="default"	
-												PATH="l:\leveldesign\world_editor_files/npc/ai_movement"/> </PARAMETER>
+												PATH="L:/leveldesign\world_editor_files/npc/ai_movement"/> </PARAMETER>
 -->
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="group_fauna"/>
@@ -2143,7 +2151,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_event_handler_action"/>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -2158,7 +2166,7 @@
 	<!--		<PARAMETER NAME="params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/> -->
 
 		<PARAMETER NAME="params" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -2172,7 +2180,7 @@
 	<!--		<PARAMETER NAME="params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/> -->
 
 		<PARAMETER NAME="params" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\world_editor_files/npc_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -2188,7 +2196,7 @@
 		</PARAMETER>
 		<PARAMETER NAME="parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="500" SHOW_HS="true" FILE_EXTENSION="cs"/>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\world_editor_files/npc/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_event_handler_action"/>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_action_zone"/>
@@ -2462,22 +2470,22 @@
 			<DEFAULT_VALUE VALUE="0"/>
 		</PARAMETER>
 		<PARAMETER NAME="creature_code" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true">
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="invasion" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
-			<COMBO_FILES CONTEXT_NAME="goo" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
-			<COMBO_FILES CONTEXT_NAME="invasion" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="invasion" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="goo" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="invasion" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
 		</PARAMETER>
 	</PRIMITIVE>
 	<!-- *********************************************************************************** -->
@@ -2516,10 +2524,10 @@
 -->
 		<!--		<PARAMETER NAME= "keywords"				TYPE="string_array"	VISIBLE="true"/> -->
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -2576,7 +2584,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Kami/kamikeep"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Kami/kamikeep"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 	</PRIMITIVE>
@@ -2595,7 +2603,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Kami/kamiguide"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Kami/kamiguide"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 	</PRIMITIVE>
@@ -2617,21 +2625,21 @@
 			<DEFAULT_VALUE VALUE="deposit"/>
 		</PARAMETER>
 		<PARAMETER NAME="type" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="deposit" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_element/deposit"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_element/deposit"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/game_element/deposit"/>
 		</PARAMETER>
 		<PARAMETER NAME="deposit_type" TYPE="string" VISIBLE="false">
 			<DEFAULT_VALUE VALUE="flora"/>
@@ -2723,10 +2731,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2764,10 +2772,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2805,10 +2813,10 @@
 -->
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2831,10 +2839,10 @@
 		<PARAMETER NAME="grp_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="grps_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_movement" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_movement"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_movement"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_activity" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/ai_activity"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/ai_activity"/>
 			<DEFAULT_VALUE VALUE="no_change"/>
 		</PARAMETER>
 		<PARAMETER NAME="ai_profile_params" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -2872,7 +2880,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2891,7 +2899,7 @@
 		<PARAMETER NAME="group_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="groups_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2910,7 +2918,7 @@
 		<PARAMETER NAME="state_keyword_filter" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="states_by_name" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -2927,7 +2935,7 @@
 		</PARAMETER>
 		<PARAMETER NAME="parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="500" SHOW_HS="true" FILE_EXTENSION="cs"/>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
 		<DYNAMIC_CHILD CLASS_NAME="fauna_action_zone"/>
@@ -2956,17 +2964,17 @@
 		<PARAMETER NAME="bot_equipment" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="bot_chat_parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="bot_sheet_client" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true" EDITABLE="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
 		</PARAMETER>
 		<PARAMETER NAME="bot_vertical_pos" TYPE="const_string" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="auto"/>
@@ -3018,17 +3026,17 @@
 		<PARAMETER NAME="keywords" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="equipment" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="sheet_client" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true" EDITABLE="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
 		</PARAMETER>
 		<PARAMETER NAME="is_stuck" TYPE="boolean" VISIBLE="true">
 			<DEFAULT_VALUE VALUE="false"/>
@@ -3063,11 +3071,11 @@
 		<PARAMETER NAME="effect" TYPE="string" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="neighbours" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="sheet_socle" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
 		</PARAMETER>
 		<!--
 		<PARAMETER NAME="sheet_spire" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
 		</PARAMETER>
 		-->
 		<PARAMETER NAME="sheet_spire" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
@@ -3111,17 +3119,17 @@
 		</PARAMETER>
 		
 		<PARAMETER NAME="sheet_client" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true" EDITABLE="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
 		</PARAMETER>
 	</PRIMITIVE>
 	
@@ -3234,7 +3242,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="continent" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world"/>
 		</PARAMETER>
 
 <!--		<PARAMETER NAME="alias" TYPE="string" VISIBLE="true">
@@ -3665,7 +3673,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST"/>
 		</PARAMETER>
 		<PARAMETER NAME="owner_tribe" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -3681,7 +3689,7 @@
 		<PARAMETER NAME="tribe_squads2" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 
 		<PARAMETER NAME="outpost_sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="outpost" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/outpost/outpost"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/outpost/outpost"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="PVP_Type"			TYPE="const_string" VISIBLE="true" FILENAME="false" LOOKUP="false">
@@ -3754,7 +3762,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST_MANAGER_EVENT"/>
 		</PARAMETER>
 		<PARAMETER NAME="event" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/outpost/manager/event_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/outpost/manager/event_type"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<DYNAMIC_CHILD CLASS_NAME="npc_event_handler_action"/>
@@ -3768,7 +3776,7 @@
 			<DEFAULT_VALUE VALUE="OUTPOST_MANAGER_EVENT_ACTION"/>
 		</PARAMETER>
 		<PARAMETER NAME="action" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/outpost/manager/action_type"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/outpost/manager/action_type"/>
 		</PARAMETER>
 		<DYNAMIC_CHILD CLASS_NAME="outpost_manager_event_handler_action"/>
 	</PRIMITIVE>
@@ -3822,7 +3830,7 @@
 			</COMBO_VALUES>
 		</PARAMETER>
 		<PARAMETER NAME="sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="outpost_building" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/outpost/building"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/outpost/building"/>
 			<DEFAULT_VALUE VALUE="empty.outpost_building"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -3869,7 +3877,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="continent_name" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/continents"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/continents"/>
 		</PARAMETER>
 
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
@@ -3994,12 +4002,12 @@
 -->
 
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<!-- Sample ..
 		<PARAMETER NAME="item_parts" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="item_part" LOOKUP="true">
-				<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/deposit_system/item_parts"/>
+				<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/deposit_system/item_parts"/>
 		</PARAMETER>
 		-->
 
@@ -4022,10 +4030,10 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="food" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 		<PARAMETER NAME="rest" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy_0_25" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4055,7 +4063,7 @@
 		</PARAMETER>
 -->
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy_0_25" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4101,7 +4109,7 @@
 		<DYNAMIC_CHILD CLASS_NAME="group_template_npc_ml"/>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 		<PARAMETER NAME="flags" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc_zone_properties"/>
 		</PARAMETER>
 	</PRIMITIVE>
 
@@ -4121,18 +4129,18 @@
 		</PARAMETER>
 		<PARAMETER NAME="bot_equipment" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="bot_sheet_look" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true" EDITABLE="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\goo"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\prime_roots"/>
 		</PARAMETER>
 		<PARAMETER NAME="grp_parameters" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 
@@ -4192,7 +4200,7 @@
 		<PARAMETER NAME="name" TYPE="string" VISIBLE="true"/>
 		<PARAMETER NAME="is tribe" TYPE="boolean" VISIBLE="true"/>
 		<PARAMETER NAME="squad sheet" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="outpost_squad" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/game_element/outpost/squad"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/game_element/outpost/squad"/>
 		</PARAMETER>
 		<PARAMETER NAME="bot_sheets" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="ai_type" TYPE="string" VISIBLE="false">
@@ -4217,18 +4225,18 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="sheet_look" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true">
-			<COMBO_FILES CONTEXT_NAME="global" PATH="l:/leveldesign/Game_elem/Creature/Npc/bestiary/creature"/>
-			<COMBO_FILES CONTEXT_NAME="global" PATH="l:/leveldesign/Game_elem/Creature/Npc/world/3dset"/>
-			<COMBO_FILES CONTEXT_NAME="global" PATH="l:/leveldesign/Game_elem/Creature/objects"/>
-			<COMBO_FILES CONTEXT_NAME="global" PATH="l:/leveldesign/Game_elem/Creature/Npc/bestiary/bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="global" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary"/>
-			<COMBO_FILES CONTEXT_NAME="desert" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
-			<COMBO_FILES CONTEXT_NAME="forest" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
-			<COMBO_FILES CONTEXT_NAME="goo" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
-			<COMBO_FILES CONTEXT_NAME="invasion" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
-			<COMBO_FILES CONTEXT_NAME="jungle" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
-			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="l:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="global" PATH="L:/leveldesign/Game_elem/Creature/Npc/bestiary/creature"/>
+			<COMBO_FILES CONTEXT_NAME="global" PATH="L:/leveldesign/Game_elem/Creature/Npc/world/3dset"/>
+			<COMBO_FILES CONTEXT_NAME="global" PATH="L:/leveldesign/Game_elem/Creature/objects"/>
+			<COMBO_FILES CONTEXT_NAME="global" PATH="L:/leveldesign/Game_elem/Creature/Npc/bestiary/bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="global" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary"/>
+			<COMBO_FILES CONTEXT_NAME="desert" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/desert"/>
+			<COMBO_FILES CONTEXT_NAME="forest" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/forest"/>
+			<COMBO_FILES CONTEXT_NAME="goo" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/goo"/>
+			<COMBO_FILES CONTEXT_NAME="invasion" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/invasion"/>
+			<COMBO_FILES CONTEXT_NAME="jungle" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/jungle"/>
+			<COMBO_FILES CONTEXT_NAME="lacustre" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="prime_roots" PATH="L:/leveldesign/Game_elem/Creature/Fauna/bestiary/prime_roots"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="level_delta" TYPE="string" VISIBLE="true">
@@ -4310,18 +4318,18 @@
 		</PARAMETER>
 		<PARAMETER NAME="equipment" TYPE="string_array" VISIBLE="true" WIDGET_HEIGHT="100"/>
 		<PARAMETER NAME="sheet_look" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="creature" LOOKUP="true" SORT_ENTRIES="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\objects"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\desert"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\forest"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\goo"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\invasion"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\jungle"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\lacustre"/>
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign\Game_elem\Creature\Fauna\bestiary\prime_roots"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\creature"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\world\3dset"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\objects"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Npc\bestiary\bot_object"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\desert"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\forest"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\goo"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\invasion"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\jungle"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\lacustre"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign\Game_elem\Creature\Fauna\bestiary\prime_roots"/>
 		</PARAMETER>
 		<STATIC_CHILD CLASS_NAME="alias" NAME="alias"/>
 	</PRIMITIVE>
@@ -4496,7 +4504,7 @@
 -->
 
 		<PARAMETER NAME="family" TYPE="const_string" VISIBLE="true" FILENAME="true" FILE_EXTENSION="html" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/families"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/families"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="energy" TYPE="string" VISIBLE="true" FILENAME="false">
@@ -4638,7 +4646,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/fauna_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/fauna_zone_properties"/>
 		</PARAMETER>
 
 		<PARAMETER NAME="vertical_pos" TYPE="const_string" VISIBLE="true">
@@ -4673,7 +4681,7 @@
 		</PARAMETER>
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 
@@ -4707,7 +4715,7 @@
 -->
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 
@@ -4741,7 +4749,7 @@
 -->
 
 		<PARAMETER NAME="properties" TYPE="const_string_array" VISIBLE="true" FILENAME="true" FILE_EXTENSION="zone" LOOKUP="true">
-			<COMBO_FILES CONTEXT_NAME="default" PATH="l:/leveldesign/world_editor_files/npc_zone_properties"/>
+			<COMBO_FILES CONTEXT_NAME="default" PATH="L:/leveldesign/world_editor_files/npc_zone_properties"/>
 			<COMBO_FILES CONTEXT_NAME="default" PRIM_PATH="//property_rep"/>
 		</PARAMETER>
 
