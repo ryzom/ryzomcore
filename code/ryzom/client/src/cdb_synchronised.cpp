@@ -155,7 +155,6 @@ void CCDBSynchronised::read( const string &fileName )
 	}
 
 	f.close();
-
 } // read //
 
 
@@ -168,7 +167,7 @@ void CCDBSynchronised::write( const string &fileName )
 {
 	bool res = false;
 
-	if( _Database != 0 )
+	if (_Database != 0)
 	{
 		FILE * f = nlfopen(fileName, "w");
 		if (f)
@@ -292,11 +291,9 @@ string CCDBSynchronised::getString( uint32 id )
 	{
 		return (*itStr).second;
 	}
-	else
-	{
-		nlwarning("<CCDBSynchronised::getString> string with id %d was not found",id);
-		return "";
-	}
+
+	nlwarning("<CCDBSynchronised::getString> string with id %d was not found",id);
+	return "";
 } // getString //
 
 
