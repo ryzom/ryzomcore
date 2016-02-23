@@ -2212,9 +2212,11 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	defaultConfigPath = Args.getProgramPath();
 #endif
 
+	std::string currentPath = CPath::standardizePath(CPath::getCurrentPath());
+
 	// look in the current working directory first
-	if (CFile::isExists(defaultConfigFileName))
-		p_name = defaultConfigFileName;
+	if (CFile::isExists(currentPath + defaultConfigFileName))
+		p_name = currentPath + defaultConfigFileName;
 
 	// look in startup directory
 	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))

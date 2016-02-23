@@ -1029,12 +1029,20 @@ void CPatchManager::executeBatchFile()
 	arguments += "\"" + RyzomFilename + "\" \"" + ClientPatchPath + "\" " + ClientRootPath + "\"";
 #endif
 
-	// append login and password
-	arguments += " " + LoginLogin + " " + LoginPassword;
-
-	if (!r2Mode)
+	// append login, password and shard 
+	if (!LoginLogin.empty())
 	{
-		arguments += " " + toString(LoginShardId);
+		arguments += " " + LoginLogin;
+	
+		if (!LoginPassword.empty())
+		{
+			arguments += " " + LoginPassword;
+
+			if (!r2Mode)
+			{
+				arguments += " " + toString(LoginShardId);
+			}
+		}
 	}
 
 	if (!launchProgram(batchFilename, arguments, false))
