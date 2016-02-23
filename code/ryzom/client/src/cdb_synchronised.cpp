@@ -132,18 +132,26 @@ void CCDBSynchronised::read( const string &fileName )
 
 		// value
 		token = strtok(buffer," \t");
-		if( token == NULL ) continue;
-		sint64 value;
-		fromString((const char*)token, value);
 
-		// property name
-		token = strtok(NULL," \n");
-		if( token == NULL ) continue;
-		string propName(token);
+		if (token)
+		{
+			sint64 value;
+			fromString((const char*)token, value);
 
-		// set the value of the property
-		ICDBNode::CTextId txtId(propName);
-		_Database->setProp(txtId,value);
+			// property name
+			token = strtok(NULL," \n");
+
+			if (token)
+			{
+				string propName(token);
+
+				// set the value of the property
+				ICDBNode::CTextId txtId(propName);
+				_Database->setProp(txtId, value);
+			}
+		}
+
+		delete [] buffer;
 	}
 
 	f.close();
@@ -177,7 +185,6 @@ void CCDBSynchronised::write( const string &fileName )
 	{
 		nlwarning("<CCDBSynchronised::write> can't write %s : the database has not been initialized",fileName.c_str());
 	}
-
 } // write //
 
 
