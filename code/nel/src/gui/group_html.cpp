@@ -1137,6 +1137,40 @@ namespace NLGUI
 					}
 				}
 				break;
+			case HTML_META:
+				if (_ReadingHeadTag)
+				{
+					bool httpEquiv = present[HTML_META_HTTP_EQUIV] && value[HTML_META_HTTP_EQUIV];
+					bool httpContent = present[HTML_META_CONTENT] && value[HTML_META_CONTENT];
+					if (httpEquiv && httpContent)
+					{
+						// only first http-equiv="refresh" should be handled
+						if (_RefreshUrl.empty() && toLower(value[HTML_META_HTTP_EQUIV]) == "refresh")
+						{
+							const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+							double timeSec = times.thisFrameMs / 1000.0f;
+							string content(value[HTML_META_CONTENT]);
+
+							string::size_type pos = content.find_first_of(";");
+							if (pos == string::npos)
+							{
+								fromString(content, _NextRefreshTime);
+								_RefreshUrl = _URL;
+							}
+							else
+							{
+								fromString(content.substr(0, pos), _NextRefreshTime);
+
+								pos = toLower(content).find("url=");
+								if (pos != string::npos)
+									_RefreshUrl = content.substr(pos + 4);
+							}
+
+							_NextRefreshTime += timeSec;
+						}
+					}
+				}
+				break;
 			case HTML_A:
 			{
 				CStyleParams style;
@@ -2422,6 +2456,9 @@ namespace NLGUI
 		_GroupListAdaptor = NULL;
 		_DocumentUrl = "";
 		_UrlFragment.clear();
+		_RefreshUrl.clear();
+		_NextRefreshTime = 0.0;
+		_LastRefreshTime = 0.0;
 
 		// Register
 		CWidgetManager::getInstance()->registerClockMsgTarget(this);
@@ -3413,8 +3450,15 @@ namespace NLGUI
 				// Handle now
 				handle ();
 			}
+			if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::activecalledonparent)
+			{
+				if (!((NLGUI::CEventDescriptorActiveCalledOnParent &) systemEvent).getActive())
+				{
+					// stop refresh when window gets hidden
+					_NextRefreshTime = 0;
+				}
+			}
 		}
-
 		return traited;
 	}
 
@@ -4410,6 +4454,21 @@ namespace NLGUI
 		// handle curl downloads
 		checkDownloads();
 
+		// handle refresh timer
+		if (_NextRefreshTime > 0 && _NextRefreshTime <= (times.thisFrameMs / 1000.0f) )
+		{
+			// there might be valid uses for 0sec refresh, but two in a row is probably a mistake
+			if (_NextRefreshTime - _LastRefreshTime >= 1.0)
+			{
+				_LastRefreshTime = _NextRefreshTime;
+				doBrowse(_RefreshUrl.c_str());
+			}
+			else
+				nlwarning("Ignore second 0sec http-equiv refresh in a row (url '%s')", _URL.c_str());
+
+			_NextRefreshTime = 0;
+		}
+
 		if (_Connecting)
 		{
 			// Check timeout if needed
@@ -4783,6 +4842,8 @@ namespace NLGUI
 		//
 		_Browsing = true;
 		_DocumentUrl = _URL;
+		_NextRefreshTime = 0;
+		_RefreshUrl.clear();
 
 		// clear content
 		beginBuild();

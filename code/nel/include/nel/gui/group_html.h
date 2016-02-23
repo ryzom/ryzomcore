@@ -409,6 +409,10 @@ namespace NLGUI
 		double			_TimeoutValue;			// the timeout in seconds
 		double			_ConnectingTimeout;
 		sint			_RedirectsRemaining;
+		// Automatic page refresh
+		double			_LastRefreshTime;
+		double			_NextRefreshTime;
+		std::string		_RefreshUrl;
 
 		// minimal embeded lua script support
 		// Note : any embeded script is executed immediately after the closing
