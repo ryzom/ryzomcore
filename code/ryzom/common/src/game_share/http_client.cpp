@@ -79,7 +79,7 @@ bool CHttpClient::send(const std::string& buffer, bool verbose)
 
 	if(verbose)
 	{
-		nldebug("Sending '%s' to '%s'", buffer.c_str(), _Sock.remoteAddr().asString().c_str());
+		nldebug("Sending '%s' to '%s'", trim(buffer).c_str(), _Sock.remoteAddr().asString().c_str());
 	}
 
 	uint32 size = (uint32)buffer.size();
