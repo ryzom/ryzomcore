@@ -231,11 +231,11 @@ bool CSystemUtils::supportUnicode()
 	{
 		init = true;
 #ifdef NL_OS_WINDOWS
-		OSVERSIONINFO osvi;
+		OSVERSIONINFOA osvi;
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 
 		// get Windows version
-		if (GetVersionEx(&osvi))
+		if (GetVersionExA(&osvi))
 		{
 			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
 			{
@@ -347,7 +347,7 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, L"", REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
 		ucstring utf16Value = ucstring::makeFromUtf8(Value);
 
