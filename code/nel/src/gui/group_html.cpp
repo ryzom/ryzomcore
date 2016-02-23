@@ -26,6 +26,7 @@
 #include "nel/gui/libwww.h"
 #include "nel/gui/group_html.h"
 #include "nel/gui/group_list.h"
+#include "nel/gui/group_menu.h"
 #include "nel/gui/group_container.h"
 #include "nel/gui/view_link.h"
 #include "nel/gui/ctrl_scroll.h"
@@ -1725,15 +1726,50 @@ namespace NLGUI
 			case HTML_SELECT:
 				if (!(_Forms.empty()))
 				{
+					CStyleParams style;
+
 					// A select box
 					string name;
+					bool multiple = false;
+					sint32 size = 0;
+
 					if (present[HTML_SELECT_NAME] && value[HTML_SELECT_NAME])
 						name = value[HTML_SELECT_NAME];
+					if (present[HTML_SELECT_SIZE] && value[HTML_SELECT_SIZE])
+						fromString(value[HTML_SELECT_SIZE], size);
+					if (present[HTML_SELECT_MULTIPLE] && value[HTML_SELECT_MULTIPLE])
+						multiple = true;
+					if (present[HTML_SELECT_STYLE] && value[HTML_SELECT_STYLE])
+						getStyleParams(value[HTML_SELECT_STYLE], style);
 
-					CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
 					CGroupHTML::CForm::CEntry entry;
 					entry.Name = name;
-					entry.ComboBox = cb;
+					entry.sbMultiple = multiple;
+					if (size > 1 || multiple)
+					{
+						entry.InitialSelection = -1;
+						CGroupMenu *sb = addSelectBox(DefaultFormSelectBoxMenuGroup, name.c_str());
+						if (sb)
+						{
+							if (size < 1)
+								size = 4;
+
+							if (style.Width > -1)
+								sb->setMinW(style.Width);
+
+							if (style.Height > -1)
+								sb->setMinH(style.Height);
+
+							sb->setMaxVisibleLine(size);
+						}
+
+						entry.SelectBox = sb;
+					}
+					else
+					{
+						CDBGroupComboBox *cb = addComboBox(DefaultFormSelectGroup, name.c_str());
+						entry.ComboBox = cb;
+					}
 					_Forms.back().Entries.push_back (entry);
 				}
 			break;
@@ -1747,17 +1783,14 @@ namespace NLGUI
 						_SelectOptionStr.clear();
 
 						std::string optionValue;
-						bool	 selected = false;
 						if (present[HTML_OPTION_VALUE] && value[HTML_OPTION_VALUE])
 							optionValue = value[HTML_OPTION_VALUE];
-						if (present[HTML_OPTION_SELECTED] && value[HTML_OPTION_SELECTED])
-							selected = nlstricmp(value[HTML_OPTION_SELECTED], "selected") == 0;
 						_Forms.back().Entries.back().SelectValues.push_back(optionValue);
-						if (selected)
-						{
-							_Forms.back().Entries.back().InitialSelection = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
-						}
 
+						if (present[HTML_OPTION_SELECTED])
+							_Forms.back().Entries.back().InitialSelection = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
+						if (present[HTML_OPTION_DISABLED])
+							_Forms.back().Entries.back().sbOptionDisabled = (sint)_Forms.back().Entries.back().SelectValues.size() - 1;
 					}
 				}
 				_SelectOption = true;
@@ -2278,6 +2311,59 @@ namespace NLGUI
 					{
 						cb->addText(_SelectOptionStr);
 					}
+					else
+					{
+						CGroupMenu *sb = _Forms.back().Entries.back().SelectBox;
+						if (sb)
+						{
+							uint lineIndex = sb->getNumLine();
+							sb->addLine(_SelectOptionStr, "", "");
+
+							if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
+							{
+								sb->setGrayedLine(lineIndex, true);
+							}
+							else
+							{
+								// create option line checkbox, CGroupMenu is taking ownership of the checbox
+								CInterfaceGroup *ig = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_checkbox", "", NULL, 0);
+								if (ig)
+								{
+									CCtrlButton *cb = dynamic_cast<CCtrlButton *>(ig->getCtrl("b"));
+									if (cb)
+									{
+										if (_Forms.back().Entries.back().sbMultiple)
+										{
+											cb->setType(CCtrlButton::ToggleButton);
+											cb->setTexture(DefaultCheckBoxBitmapNormal);
+											cb->setTexturePushed(DefaultCheckBoxBitmapPushed);
+											cb->setTextureOver(DefaultCheckBoxBitmapOver);
+										}
+										else
+										{
+											cb->setType(CCtrlButton::RadioButton);
+											cb->setTexture(DefaultRadioButtonBitmapNormal);
+											cb->setTexturePushed(DefaultRadioButtonBitmapPushed);
+											cb->setTextureOver(DefaultRadioButtonBitmapOver);
+
+											if (_Forms.back().Entries.back().sbRBRef == NULL)
+												_Forms.back().Entries.back().sbRBRef = cb;
+
+											cb->initRBRefFromRadioButton(_Forms.back().Entries.back().sbRBRef);
+										}
+
+										cb->setPushed(_Forms.back().Entries.back().InitialSelection == lineIndex);
+										sb->setUserGroupLeft(lineIndex, ig);
+									}
+									else
+									{
+										nlwarning("Failed to get 'b' element from 'menu_checkbox' template");
+										delete ig;
+									}
+								}
+							}
+						}
+					}
 				}
 				break;
 			case HTML_I:
@@ -2501,6 +2587,7 @@ namespace NLGUI
 		DefaultFormTextGroup =			"edit_box_widget";
 		DefaultFormTextAreaGroup =		"edit_box_widget_multiline";
 		DefaultFormSelectGroup =		"html_form_select_widget";
+		DefaultFormSelectBoxMenuGroup =	"html_form_select_box_menu_widget";
 		DefaultCheckBoxBitmapNormal =	"checkbox_normal.tga";
 		DefaultCheckBoxBitmapPushed =	"checkbox_pushed.tga";
 		DefaultCheckBoxBitmapOver =		"checkbox_over.tga";
@@ -3440,7 +3527,34 @@ namespace NLGUI
 
 	bool CGroupHTML::handleEvent (const NLGUI::CEventDescriptor& eventDesc)
 	{
-		bool traited = CGroupScrollText::handleEvent (eventDesc);
+		bool traited = false;
+
+		if (eventDesc.getType() == NLGUI::CEventDescriptor::mouse)
+		{
+			const NLGUI::CEventDescriptorMouse &mouseEvent = (const NLGUI::CEventDescriptorMouse &)eventDesc;
+			if (mouseEvent.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
+			{
+				// Check if mouse wheel event was on any of multiline select box widgets
+				// Must do this before CGroupScrollText
+				for (uint i=0; i<_Forms.size() && !traited; i++)
+				{
+					for (uint j=0; j<_Forms[i].Entries.size() && !traited; j++)
+					{
+						if (_Forms[i].Entries[j].SelectBox)
+						{
+							if (_Forms[i].Entries[j].SelectBox->handleEvent(eventDesc))
+							{
+								traited = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (!traited)
+			traited = CGroupScrollText::handleEvent (eventDesc);
 
 		if (eventDesc.getType() == NLGUI::CEventDescriptor::system)
 		{
@@ -4031,6 +4145,45 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	CGroupMenu *CGroupHTML::addSelectBox(const std::string &templateName, const char *name)
+	{
+		// In a paragraph ?
+		if (!_Paragraph)
+		{
+			newParagraph (0);
+			paragraphChange ();
+		}
+
+		// Not added ?
+		std::vector<std::pair<std::string,std::string> > templateParams;
+		templateParams.push_back(std::pair<std::string,std::string> ("id", name));
+		CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName.c_str(),
+			getParagraph()->getId(), &(templateParams[0]), (uint)templateParams.size());
+
+		// Group created ?
+		if (group)
+		{
+			// Set the content
+			CGroupMenu *sb = dynamic_cast<CGroupMenu *>(group);
+			if (!sb)
+			{
+				nlwarning("'%s' template has bad type, CGroupMenu expected", templateName.c_str());
+				delete sb;
+				return NULL;
+			}
+			else
+			{
+				getParagraph()->addChild (sb);
+				paragraphChange ();
+				return sb;
+			}
+		}
+
+		// No group created
+		return NULL;
+	}
+
+	// ***************************************************************************
 
 	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/* name */, const std::string &normalBitmap, const std::string &pushedBitmap,
 									  const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams,
@@ -4582,6 +4735,24 @@ namespace NLGUI
 				CDBGroupComboBox *cb = form.Entries[i].ComboBox;
 				entryData.fromUtf8(form.Entries[i].SelectValues[cb->getSelection()]);
 				addEntry = true;
+			}
+			else if (form.Entries[i].SelectBox)
+			{
+				CGroupMenu *sb = form.Entries[i].SelectBox;
+				CGroupSubMenu *rootMenu = sb->getRootMenu();
+				if (rootMenu)
+				{
+					for(uint j=0; j<rootMenu->getNumLine(); ++j)
+					{
+						CInterfaceGroup *ig = rootMenu->getUserGroupLeft(j);
+						if (ig)
+						{
+							CCtrlBaseButton *cb = dynamic_cast<CCtrlBaseButton *>(ig->getCtrl("b"));
+							if (cb && cb->getPushed())
+								formfields.add(form.Entries[i].Name, form.Entries[i].SelectValues[j]);
+						}
+					}
+				}
 			}
 			// This is a hidden value
 			else
@@ -5741,5 +5912,6 @@ namespace NLGUI
 
 		return ret;
 	}
+
 }
 
