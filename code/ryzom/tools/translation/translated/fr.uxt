@@ -10904,11 +10904,11 @@ uiForce	[@{FFFE}Force :@{FFFF} donne une indication générale des capacités de
 
 // HASH_VALUE 4814440444105450
 // INDEX 2563
-uiAttitude	[Attitude] ?
+uiAttitude	[Attitude]
 
 // HASH_VALUE 8ABC2C448E7E044D
 // INDEX 2564
-uiProgressionTitle	[Ma progression] ?
+uiProgressionTitle	[Ma progression]
 
 // HASH_VALUE 8D21782307A23445
 // INDEX 2565
@@ -14642,7 +14642,7 @@ uiSAP	[Sève du personnage]
 
 // HASH_VALUE DF3C16CBBFAB2ADA
 // INDEX 3490
-uittSAP	[Afficher la barre de Sève du personnage au-dessus de lui]]
+uittSAP	[Afficher la barre de Sève du personnage au-dessus de lui]
 
 // HASH_VALUE A797BF3DDF08009C
 // INDEX 3491
@@ -16951,7 +16951,7 @@ mpfam243	[Pigment noir]
 
 // HASH_VALUE 22A41F89225293B3
 // INDEX 4067
-mpfam244	[Reste de Goo fraîche])
+mpfam244	[Reste de Goo fraîche]
 
 // HASH_VALUE A0E41787225283A1
 // INDEX 4068
@@ -18979,7 +18979,7 @@ mpfam760	[Mousse de Psykopla corrompu]
 
 // HASH_VALUE EE2BDF59EC5568BA
 // INDEX 4574
-mpfam761	[Peau de Torbak corrompu]]
+mpfam761	[Peau de Torbak corrompu]
 
 // HASH_VALUE 2E7ADF592D95A8B3
 // INDEX 4575
@@ -19789,7 +19789,7 @@ uiCP_BP1	[Spécialisation : ]
 
 // HASH_VALUE CA52A40E2CF4D41C
 // INDEX 4775
-uiCP_BP_Des	[DÉTAILS DU CONTENU] ?
+uiCP_BP_Des	[DÉTAILS DU CONTENU]
 
 // HASH_VALUE 4971BF2A0BB15634
 // INDEX 4776
