@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>background.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>ryzom.ico</file>
+    </qresource>
+</RCC>
