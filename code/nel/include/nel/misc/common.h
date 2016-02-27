@@ -366,6 +366,9 @@ std::string formatThousands(const std::string& s);
 /// The program will be launched in the current directory
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
+/// Same but with an array of strings for arguments
+bool launchProgramArray (const std::string &programName, const std::vector<std::string> &arguments, bool log = true);
+
 /// This function executes a program and wait for result (used for example for crash report).
 /// The program will be launched in the current directory
 sint launchProgramAndWaitForResult (const std::string &programName, const std::string &arguments, bool log = true);

@@ -1022,32 +1022,37 @@ void CPatchManager::executeBatchFile()
 	// make script executable
 	CFile::setRWAccess(batchFilename);
 
-	std::string arguments;
+	std::vector<std::string> arguments;
 
 	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
 #ifdef NL_OS_WINDOWS
-	arguments += "\"" + CPath::standardizeDosPath(RyzomFilename) + "\" \"" + CPath::standardizeDosPath(ClientPatchPath) + "\" \"" + CPath::standardizeDosPath(ClientRootPath) + "\"";
+	arguments.push_back(CPath::standardizeDosPath(RyzomFilename));
+	arguments.push_back(CPath::standardizeDosPath(ClientPatchPath));
+	arguments.push_back(CPath::standardizeDosPath(ClientRootPath));
 #else
-	arguments += "\"" + RyzomFilename + "\" \"" + ClientPatchPath + "\" " + ClientRootPath + "\"";
+	arguments.push_back(RyzomFilename);
+	arguments.push_back(ClientPatchPath);
+	arguments.push_back(ClientRootPath);
 #endif
 
-	// append login, password and shard 
+	// append login, password and shard
 	if (!LoginLogin.empty())
 	{
-		arguments += " " + LoginLogin;
+		arguments.push_back(LoginLogin);
 	
 		if (!LoginPassword.empty())
 		{
-			arguments += " " + LoginPassword;
+			arguments.push_back(LoginPassword);
 
 			if (!r2Mode)
 			{
-				arguments += " " + toString(LoginShardId);
+				arguments.push_back(toString(LoginShardId));
 			}
 		}
 	}
 
-	if (!launchProgram(batchFilename, arguments, false))
+	// launchProgram with array of strings as argument will escape arguments with spaces
+	if (!launchProgramArray(batchFilename, arguments, false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));
