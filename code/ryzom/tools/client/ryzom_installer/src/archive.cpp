@@ -34,20 +34,23 @@
 
 #include <Windows.h>
 
-#define FILE_ATTRIBUTE_READONLY             1
-#define FILE_ATTRIBUTE_HIDDEN               2
-#define FILE_ATTRIBUTE_SYSTEM               4
-#define FILE_ATTRIBUTE_DIRECTORY           16
-#define FILE_ATTRIBUTE_ARCHIVE             32
-#define FILE_ATTRIBUTE_DEVICE              64
-#define FILE_ATTRIBUTE_NORMAL             128
-#define FILE_ATTRIBUTE_TEMPORARY          256
-#define FILE_ATTRIBUTE_SPARSE_FILE        512
-#define FILE_ATTRIBUTE_REPARSE_POINT     1024
-#define FILE_ATTRIBUTE_COMPRESSED        2048
+#define FILE_ATTRIBUTE_READONLY            0x1
+#define FILE_ATTRIBUTE_HIDDEN              0x2
+#define FILE_ATTRIBUTE_SYSTEM              0x4
+#define FILE_ATTRIBUTE_DIRECTORY          0x10
+#define FILE_ATTRIBUTE_ARCHIVE            0x20
+#define FILE_ATTRIBUTE_DEVICE             0x40
+#define FILE_ATTRIBUTE_NORMAL             0x80
+#define FILE_ATTRIBUTE_TEMPORARY         0x100
+#define FILE_ATTRIBUTE_SPARSE_FILE       0x200
+#define FILE_ATTRIBUTE_REPARSE_POINT     0x400
+#define FILE_ATTRIBUTE_COMPRESSED        0x800
 #define FILE_ATTRIBUTE_OFFLINE          0x1000
 #define FILE_ATTRIBUTE_ENCRYPTED        0x4000
 #define FILE_ATTRIBUTE_UNIX_EXTENSION   0x8000   /* trick for Unix */
+
+#define FILE_ATTRIBUTE_WINDOWS          0x5fff
+#define FILE_ATTRIBUTE_UNIX         0xffff0000
 
 bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 {
@@ -63,23 +66,18 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 	bool attrReparsePoint = (fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT != 0);
 	bool attrCompressed = (fileAttributes & FILE_ATTRIBUTE_COMPRESSED != 0);
 	bool attrOffline = (fileAttributes & FILE_ATTRIBUTE_OFFLINE != 0);
-	bool attrEncryoted = (fileAttributes & FILE_ATTRIBUTE_ENCRYPTED != 0);
+	bool attrEncrypted = (fileAttributes & FILE_ATTRIBUTE_ENCRYPTED != 0);
 	bool attrUnix = (fileAttributes & FILE_ATTRIBUTE_UNIX_EXTENSION != 0);
+
+	uint32 unixAttributes = (fileAttributes & FILE_ATTRIBUTE_UNIX) >> 16;
+	uint32 windowsAttributes = fileAttributes & FILE_ATTRIBUTE_WINDOWS;
 
 	qDebug() << "attribs" << QByteArray::fromRawData((const char*)&fileAttributes, 4).toHex();
 
 #ifdef Q_OS_WIN
-	SetFileAttributesW((wchar_t*)filename.utf16(), fileAttributes);
-
-//	QFile::set
-
-//	QFileDevice::Permissions::
-
-	// attribs "2080ed81"
-//	QFile::setPermissions(destPath, QFileDevice::Permissions);
-
+	SetFileAttributesW((wchar_t*)filename.utf16(), windowsAttributes);
 #else
-	const char * name = filename.toUtf8().constData();
+	const char *name = filename.toUtf8().constData();
 
 	struct stat stat_info;
 	if (lstat(name, &stat_info)!=0)
@@ -88,9 +86,9 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		return false;
 	}
 
-	if (fileAttributes & FILE_ATTRIBUTE_UNIX_EXTENSION)
+	if (attrUnix)
 	{
-		stat_info.st_mode = fileAttributes >> 16;
+		stat_info.st_mode = unixAttributes;
 
 		if (S_ISLNK(stat_info.st_mode))
 		{
@@ -103,14 +101,14 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		else if (S_ISREG(stat_info.st_mode))
 		{
 			nlwarning("##DBG chmod-2(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name,stat_info.st_mode & gbl_umask.mask);
+			chmod(name, stat_info.st_mode & gbl_umask.mask);
 		}
 		else if (S_ISDIR(stat_info.st_mode))
 		{
 			// user/7za must be able to create files in this directory
 			stat_info.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
 			nlwarning("##DBG chmod-3(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name,stat_info.st_mode & gbl_umask.mask);
+			chmod(name, stat_info.st_mode & gbl_umask.mask);
 		}
 	}
 	else if (!S_ISLNK(stat_info.st_mode))
