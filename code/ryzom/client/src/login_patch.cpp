@@ -826,8 +826,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						content += toString("move %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #else
 						// use DSTPATH and SRCPATH variables and append filenames
-						string realDstPath = toString("\"$ROOTPATH\\%s\"", batchRelativeDstPath.c_str());
-						string realSrcPath = toString("\"$UNPACKPATH\\%s\"", FileName.c_str());
+						string realDstPath = toString("\"$ROOTPATH/%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"$UNPACKPATH/%s\"", FileName.c_str());
 
 						content += toString("rm -rf %s\n", realDstPath.c_str());
 						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
@@ -929,7 +929,6 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "LOGIN=$4\n";
 		contentPrefix += "PASSWORD=$5\n";
 		contentPrefix += "SHARDID=$6\n";
-		contentPrefix += toString("UPGRADE_FILE=\"$ROOTPATH\\%s\"\n", UpgradeBatchFilename.c_str());
 #endif
 
 		contentPrefix += "\n";
