@@ -977,7 +977,7 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 	{
 		char *err = strerror (errno);
 		if (log)
-			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), errno, err);
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), joinArguments(arguments).c_str(), errno, err);
 	}
 	else if (status == 0)
 	{
