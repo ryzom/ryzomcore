@@ -851,15 +851,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	// convert one arg into several args
 	vector<string> args;
-	string::size_type pos1 = 0, pos2 = 0;
-	do
-	{
-		pos1 = arguments.find_first_not_of (" ", pos2);
-		if (pos1 == string::npos) break;
-		pos2 = arguments.find_first_of (" ", pos1);
-		args.push_back (arguments.substr (pos1, pos2-pos1));
-	}
-	while (pos2 != string::npos);
+	explodeArguments(arguments, args);
 
 	// Store the size of each arg
 	vector<char *> argv(args.size()+2);
@@ -1037,6 +1029,75 @@ std::string expandEnvironmentVariables(const std::string &s)
 	ret += s.substr(pos2);
 
 	return ret;
+}
+
+bool explodeArguments(const std::string &str, std::vector<std::string> &args)
+{
+	if (str.empty()) return false;
+
+	std::string::size_type pos1 = 0, pos2 = 0;
+
+	do
+	{
+		// Look for the first non space character
+		pos1 = str.find_first_not_of (" ", pos2);
+		if (pos1 == std::string::npos) break;
+
+		// Look for the first space or "
+		pos2 = str.find_first_of (" \"", pos1);
+		if (pos2 != std::string::npos)
+		{
+			// " ?
+			if (str[pos2] == '"')
+			{
+				// Look for the final \"
+				pos2 = str.find_first_of ("\"", pos2+1);
+				if (pos2 != std::string::npos)
+				{
+					// Look for the first space
+					pos2 = str.find_first_of (" ", pos2+1);
+				}
+			}
+		}
+
+		// Compute the size of the string to extract
+		std::string::difference_type length = (pos2 != std::string::npos) ? pos2-pos1 : std::string::npos;
+
+		std::string tmp = str.substr (pos1, length);
+
+		// remove escape " from argument
+		if (tmp.length() > 1 && tmp[0] == '"' && tmp[tmp.length()-1] == '"') tmp = tmp.substr(1, tmp.length()-2);
+
+		args.push_back (tmp);
+	}
+	while(pos2 != std::string::npos);
+
+	return true;
+}
+
+std::string joinArguments(const std::vector<std::string> &args)
+{
+	std::string res;
+
+	for(uint i = 0, len = (uint)args.size(); i < len; ++i)
+	{
+		const std::string &arg = args[i];
+
+		// prepend space
+		if (!res.empty()) res += " ";
+
+		// escape only if spaces or empty argument
+		if (arg.empty() || arg.find(' ') != std::string::npos)
+		{
+			res += "\"" + arg + "\"";
+		}
+		else
+		{
+			res += arg;
+		}
+	}
+
+	return res;
 }
 
 /*

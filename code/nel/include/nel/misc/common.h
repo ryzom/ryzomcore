@@ -378,6 +378,10 @@ std::string getCommandOutput(const std::string &command);
 /// Authorized characters in names are A-Z, a-z, 0-9 and _
 std::string expandEnvironmentVariables(const std::string &s);
 
+/// Functions to convert a string with arguments to array or array to string (will espace strings with spaces)
+bool explodeArguments(const std::string &str, std::vector<std::string> &args);
+std::string joinArguments(const std::vector<std::string> &args);
+
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
 
