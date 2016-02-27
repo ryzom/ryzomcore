@@ -919,12 +919,13 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set LOGIN=%4\n";
 		contentPrefix += "set PASSWORD=%5\n";
 		contentPrefix += "set SHARDID=%6\n";
-		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
 #else
 		contentPrefix += "#!/bin/sh\n";
-		contentPrefix += "RYZOM_CLIENT=\"$1\"\n";
-		contentPrefix += "UNPACKPATH=\"$2\"\n";
-		contentPrefix += "ROOTPATH=\"$3\"\n";
+		contentPrefix += "export RYZOM_CLIENT=$1\n";
+		contentPrefix += "export UNPACKPATH=$2\n";
+		contentPrefix += "export ROOTPATH=$3\n";
+		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
 		contentPrefix += "LOGIN=$4\n";
 		contentPrefix += "PASSWORD=$5\n";
 		contentPrefix += "SHARDID=$6\n";
