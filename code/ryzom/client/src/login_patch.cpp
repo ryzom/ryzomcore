@@ -167,18 +167,18 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #elif defined(NL_OS_WIN32)
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #elif defined(NL_OS_APPLE)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 #elif defined(NL_OS_UNIX) && defined(_LP64)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #else
@@ -826,8 +826,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						content += toString("move %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #else
 						// use DSTPATH and SRCPATH variables and append filenames
-						string realDstPath = toString("\"$ROOTPATH\\%s\"", batchRelativeDstPath.c_str());
-						string realSrcPath = toString("\"$UNPACKPATH\\%s\"", FileName.c_str());
+						string realDstPath = toString("\"$ROOTPATH/%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"$UNPACKPATH/%s\"", FileName.c_str());
 
 						content += toString("rm -rf %s\n", realDstPath.c_str());
 						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
@@ -916,19 +916,21 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set RYZOM_CLIENT=\"%1\"\n";
 		contentPrefix += "set UNPACKPATH=\"%2\"\n";
 		contentPrefix += "set ROOTPATH=\"%3\"\n";
+		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
 		contentPrefix += "set LOGIN=%4\n";
 		contentPrefix += "set PASSWORD=%5\n";
 		contentPrefix += "set SHARDID=%6\n";
-		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
 #else
 		contentPrefix += "#!/bin/sh\n";
-		contentPrefix += "RYZOM_CLIENT=\"$1\"\n";
-		contentPrefix += "UNPACKPATH=\"$2\"\n";
-		contentPrefix += "ROOTPATH=\"$3\"\n";
+		contentPrefix += "export RYZOM_CLIENT=$1\n";
+		contentPrefix += "export UNPACKPATH=$2\n";
+		contentPrefix += "export ROOTPATH=$3\n";
+		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
 		contentPrefix += "LOGIN=$4\n";
 		contentPrefix += "PASSWORD=$5\n";
 		contentPrefix += "SHARDID=$6\n";
-		contentPrefix += toString("UPGRADE_FILE=\"$ROOTPATH\\%s\"\n", UpgradeBatchFilename.c_str());
 #endif
 
 		contentPrefix += "\n";
@@ -960,15 +962,15 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
-		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n";
+		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n\n";
 
 		// be sure file is executable
-		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n";
+		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n\n";
 
 		if (wantRyzomRestart)
 		{
 			// change to previous client directory
-			contentSuffix += "cd \"$ROOTPATH\"\n";
+			contentSuffix += "cd \"$ROOTPATH\"\n\n";
 
 			// launch new client
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
@@ -1020,32 +1022,37 @@ void CPatchManager::executeBatchFile()
 	// make script executable
 	CFile::setRWAccess(batchFilename);
 
-	std::string arguments;
+	std::vector<std::string> arguments;
 
 	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
 #ifdef NL_OS_WINDOWS
-	arguments += "\"" + CPath::standardizeDosPath(RyzomFilename) + "\" \"" + CPath::standardizeDosPath(ClientPatchPath) + "\" \"" + CPath::standardizeDosPath(ClientRootPath) + "\"";
+	arguments.push_back(CPath::standardizeDosPath(RyzomFilename));
+	arguments.push_back(CPath::standardizeDosPath(ClientPatchPath));
+	arguments.push_back(CPath::standardizeDosPath(ClientRootPath));
 #else
-	arguments += "\"" + RyzomFilename + "\" \"" + ClientPatchPath + "\" " + ClientRootPath + "\"";
+	arguments.push_back(RyzomFilename);
+	arguments.push_back(ClientPatchPath);
+	arguments.push_back(ClientRootPath);
 #endif
 
-	// append login, password and shard 
+	// append login, password and shard
 	if (!LoginLogin.empty())
 	{
-		arguments += " " + LoginLogin;
+		arguments.push_back(LoginLogin);
 	
 		if (!LoginPassword.empty())
 		{
-			arguments += " " + LoginPassword;
+			arguments.push_back(LoginPassword);
 
 			if (!r2Mode)
 			{
-				arguments += " " + toString(LoginShardId);
+				arguments.push_back(toString(LoginShardId));
 			}
 		}
 	}
 
-	if (!launchProgram(batchFilename, arguments, false))
+	// launchProgram with array of strings as argument will escape arguments with spaces
+	if (!launchProgramArray(batchFilename, arguments, false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));

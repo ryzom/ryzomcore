@@ -366,6 +366,9 @@ std::string formatThousands(const std::string& s);
 /// The program will be launched in the current directory
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
 
+/// Same but with an array of strings for arguments
+bool launchProgramArray (const std::string &programName, const std::vector<std::string> &arguments, bool log = true);
+
 /// This function executes a program and wait for result (used for example for crash report).
 /// The program will be launched in the current directory
 sint launchProgramAndWaitForResult (const std::string &programName, const std::string &arguments, bool log = true);
@@ -377,6 +380,10 @@ std::string getCommandOutput(const std::string &command);
 /// Environment variables names can use both Windows (%NAME%) and UNIX syntax ($NAME)
 /// Authorized characters in names are A-Z, a-z, 0-9 and _
 std::string expandEnvironmentVariables(const std::string &s);
+
+/// Functions to convert a string with arguments to array or array to string (will espace strings with spaces)
+bool explodeArguments(const std::string &str, std::vector<std::string> &args);
+std::string joinArguments(const std::vector<std::string> &args);
 
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
