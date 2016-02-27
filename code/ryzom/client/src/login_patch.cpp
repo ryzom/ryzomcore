@@ -167,18 +167,18 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #elif defined(NL_OS_WIN32)
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #elif defined(NL_OS_APPLE)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 #elif defined(NL_OS_UNIX) && defined(_LP64)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #else
