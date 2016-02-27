@@ -33,7 +33,7 @@ public:
 
 	bool extract(const QString &filename, const QString &dest);
 	bool copyServerFiles(const QString &src, const QString &dst);
-	bool copyConfigurationFiles(const QString &src, const QString &dst);
+	bool copyProfileFiles(const QString &src, const QString &dst);
 
 	void stop();
 	bool mustStop();
@@ -80,7 +80,7 @@ protected:
 	bool progress(const std::string &filename, uint32 currentFile, uint32 totalFiles);
 
 	bool copyServerFiles();
-	bool copyConfigurationFiles();
+	bool copyProfileFiles();
 	bool copyFiles(const FilesToCopy &files);
 
 	static void getFilesList(const QString &srcDir, const QString &dstDir, const QStringList &filter, FilesToCopy &files);

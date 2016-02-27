@@ -25,11 +25,11 @@
 #endif
 
 const CServer NoServer;
-const CConfiguration NoConfiguration;
+const CProfile NoProfile;
 
 CConfigFile *CConfigFile::s_instance = NULL;
 
-CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServer(0), m_defaultConfiguration(0), m_use64BitsClient(false)
+CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServer(0), m_defaultProfile(0), m_use64BitsClient(false)
 {
 	s_instance = this;
 
@@ -92,26 +92,26 @@ bool CConfigFile::load(const QString &filename)
 		settings.endGroup();
 	}
 
-	settings.beginGroup("configurations");
-	int configurationsCounts = settings.value("size").toInt();
-	m_defaultConfiguration = settings.value("default").toInt();
+	settings.beginGroup("profiles");
+	int profilesCounts = settings.value("size").toInt();
+	m_defaultProfile = settings.value("default").toInt();
 	settings.endGroup();
 	
-	m_configurations.resize(configurationsCounts);
+	m_profiles.resize(profilesCounts);
 
-	for(int i = 0; i < configurationsCounts; ++i)
+	for(int i = 0; i < profilesCounts; ++i)
 	{
-		CConfiguration &configuration = m_configurations[i];
+		CProfile &profile = m_profiles[i];
 
-		settings.beginGroup(QString("configuration_%1").arg(i));
+		settings.beginGroup(QString("profile_%1").arg(i));
 
-		configuration.id = settings.value("id").toInt();
-		configuration.name = settings.value("name").toString();
-		configuration.account = settings.value("account").toString();
-		configuration.server = settings.value("server").toString();
-		configuration.executable = settings.value("executable").toString();
-		configuration.parameters = settings.value("parameters").toString();
-		configuration.comments = settings.value("comments").toString();
+		profile.id = settings.value("id").toInt();
+		profile.name = settings.value("name").toString();
+		profile.account = settings.value("account").toString();
+		profile.server = settings.value("server").toString();
+		profile.executable = settings.value("executable").toString();
+		profile.parameters = settings.value("parameters").toString();
+		profile.comments = settings.value("comments").toString();
 
 		settings.endGroup();
 	}
@@ -162,24 +162,24 @@ bool CConfigFile::save() const
 		settings.endGroup();
 	}
 
-	settings.beginGroup("configurations");
-	settings.setValue("size", m_configurations.size());
-	settings.setValue("default", m_defaultConfiguration);
+	settings.beginGroup("profiles");
+	settings.setValue("size", m_profiles.size());
+	settings.setValue("default", m_defaultProfile);
 	settings.endGroup();
 
-	for(int i = 0; i < m_configurations.size(); ++i)
+	for(int i = 0; i < m_profiles.size(); ++i)
 	{
-		const CConfiguration &configuration = m_configurations[i];
+		const CProfile &profile = m_profiles[i];
 
-		settings.beginGroup(QString("configuration_%1").arg(i));
+		settings.beginGroup(QString("profile_%1").arg(i));
 
-		settings.setValue("id", configuration.id);
-		settings.setValue("name", configuration.name);
-		settings.setValue("account", configuration.account);
-		settings.setValue("server", configuration.server);
-		settings.setValue("executable", configuration.executable);
-		settings.setValue("parameters", configuration.parameters);
-		settings.setValue("comments", configuration.comments);
+		settings.setValue("id", profile.id);
+		settings.setValue("name", profile.name);
+		settings.setValue("account", profile.account);
+		settings.setValue("server", profile.server);
+		settings.setValue("executable", profile.executable);
+		settings.setValue("parameters", profile.parameters);
+		settings.setValue("comments", profile.comments);
 
 		settings.endGroup();
 	}
@@ -217,37 +217,37 @@ const CServer& CConfigFile::getServer(const QString &id) const
 	return getServer();
 }
 
-int CConfigFile::getConfigurationsCount() const
+int CConfigFile::getProfilesCount() const
 {
-	return m_configurations.size();
+	return m_profiles.size();
 }
 
-CConfiguration CConfigFile::getConfiguration(int i) const
+CProfile CConfigFile::getProfile(int i) const
 {
-	if (i < 0) i = m_defaultConfiguration;
+	if (i < 0) i = m_defaultProfile;
 
-	if (i >= m_configurations.size()) return NoConfiguration;
+	if (i >= m_profiles.size()) return NoProfile;
 
-	return m_configurations.at(i);
+	return m_profiles.at(i);
 }
 
-void CConfigFile::setConfiguration(int i, const CConfiguration &configuration)
+void CConfigFile::setProfile(int i, const CProfile &profile)
 {
-	m_configurations[i] = configuration;
+	m_profiles[i] = profile;
 }
 
-int CConfigFile::addConfiguration(const CConfiguration &configuration)
+int CConfigFile::addProfile(const CProfile &profile)
 {
-	m_configurations.append(configuration);
+	m_profiles.append(profile);
 
-	return m_configurations.size()-1;
+	return m_profiles.size()-1;
 }
 
-void CConfigFile::removeConfiguration(int i)
+void CConfigFile::removeProfile(int i)
 {
-	m_configurations.removeAt(i);
+	m_profiles.removeAt(i);
 
-	// TODO: decalle all configurations and move files
+	// TODO: decalle all profiles and move files
 }
 
 bool CConfigFile::has64bitsOS()
@@ -255,9 +255,9 @@ bool CConfigFile::has64bitsOS()
 	return QSysInfo::currentCpuArchitecture() == "x86_64";
 }
 
-int CConfigFile::getDefaultConfiguration() const
+int CConfigFile::getDefaultProfile() const
 {
-	return m_defaultConfiguration;
+	return m_defaultProfile;
 }
 
 int CConfigFile::getDefaultServer() const
@@ -267,7 +267,7 @@ int CConfigFile::getDefaultServer() const
 
 bool CConfigFile::isRyzomInstallerConfigured() const
 {
-	return m_configurations.size() > 0;
+	return m_profiles.size() > 0;
 }
 
 QString CConfigFile::getInstallationDirectory() const
@@ -290,12 +290,12 @@ void CConfigFile::setSrcServerDirectory(const QString &directory)
 	m_srcDirectory = directory;
 }
 
-QString CConfigFile::getConfigurationDirectory() const
+QString CConfigFile::getProfileDirectory() const
 {
 	return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }
 
-QString CConfigFile::getSrcConfigurationDirectory() const
+QString CConfigFile::getSrcProfileDirectory() const
 {
 	if (QFile::exists(getSrcServerDirectory() + "/client.cfg")) return getSrcServerDirectory();
 
@@ -425,7 +425,7 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 
 QString CConfigFile::getClientFullPath() const
 {
-	QString path = getConfiguration().executable;
+	QString path = getProfile().executable;
 
 	if (!path.isEmpty()) return path;
 
@@ -439,13 +439,13 @@ QString CConfigFile::getSrcServerClientBNPFullPath() const
 
 CConfigFile::InstallationStep CConfigFile::getNextStep() const
 {
-	// get last used configuration
-	const CConfiguration &configuration = getConfiguration();
+	// get last used profile
+	const CProfile &profile = getProfile();
 
 	// get server used by it or default server
-	CServer server = getServer(configuration.server);
+	CServer server = getServer(profile.server);
 
-	// no or wrong configuration
+	// no or wrong profile
 	if (server.id.isEmpty())
 	{
 		// get last used server
@@ -542,16 +542,16 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		}
 	}
 
-	// no default configuration
-	if (configuration.id < 0)
+	// no default profile
+	if (profile.id < 0)
 	{
-		return CreateConfiguration;
+		return CreateProfile;
 	}
 
-	// migration configuration
-	if (!getSrcServerDirectory().isEmpty() && QFile::exists(getSrcConfigurationDirectory() + "/client.cfg") && !QFile::exists(QString("%1/%2/client.cfg").arg(getConfigurationDirectory()).arg(configuration.name)))
+	// migration profile
+	if (!getSrcServerDirectory().isEmpty() && QFile::exists(getSrcProfileDirectory() + "/client.cfg") && !QFile::exists(QString("%1/%2/client.cfg").arg(getProfileDirectory()).arg(profile.name)))
 	{
-		return CopyConfigurationFiles;
+		return CopyProfileFiles;
 	}
 
 	if (!QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk"))

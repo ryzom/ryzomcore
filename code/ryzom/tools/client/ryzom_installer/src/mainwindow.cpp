@@ -92,8 +92,8 @@ void CMainWindow::processNextStep()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default configuration
-	const CConfiguration &configuration = config->getConfiguration();
+	// default profile
+	const CProfile &configuration = config->getProfile();
 
 	switch(CConfigFile::getInstance()->getNextStep())
 	{
@@ -126,9 +126,9 @@ void CMainWindow::processNextStep()
 		m_archive->copyServerFiles(config->getSrcServerDirectory(), config->getInstallationDirectory() + "/" + server.id);
 		break;
 
-		case CConfigFile::CopyConfigurationFiles:
+		case CConfigFile::CopyProfileFiles:
 		displayProgressBar();
-		m_archive->copyConfigurationFiles(config->getSrcConfigurationDirectory(), config->getConfigurationDirectory() + "/0");
+		m_archive->copyProfileFiles(config->getSrcProfileDirectory(), config->getProfileDirectory() + "/0");
 		break;
 
 		case CConfigFile::ExtractBnpClient:
@@ -136,7 +136,7 @@ void CMainWindow::processNextStep()
 		m_archive->extract(config->getSrcServerClientBNPFullPath(), config->getInstallationDirectory() + "/" + server.id);
 		break;
 
-		case CConfigFile::CreateConfiguration:
+		case CConfigFile::CreateProfile:
 		displayProgressBar();
 		break;
 

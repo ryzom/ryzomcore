@@ -40,9 +40,9 @@ struct CServer
 
 extern const CServer NoServer;
 
-struct CConfiguration
+struct CProfile
 {
-	CConfiguration()
+	CProfile()
 	{
 		id = -1;
 	}
@@ -56,7 +56,7 @@ struct CConfiguration
 	QString comments;
 };
 
-extern const CConfiguration NoConfiguration;
+extern const CProfile NoProfile;
 
 /**
  * Config file management and other stuff related to location of files/directories.
@@ -78,9 +78,9 @@ public:
 		DownloadClient,
 		ExtractDownloadedClient,
 		CopyServerFiles,
-		CopyConfigurationFiles,
+		CopyProfileFiles,
 		ExtractBnpClient,
-		CreateConfiguration,
+		CreateProfile,
 		CreateShortcuts,
 		Done
 	};
@@ -98,14 +98,14 @@ public:
 	const CServer& getServer(int i = -1) const;
 	const CServer& getServer(const QString &id) const;
 
-	int getConfigurationsCount() const;
-	CConfiguration getConfiguration(int i = -1) const;
-	void setConfiguration(int i, const CConfiguration &configuration);
-	int addConfiguration(const CConfiguration &configuration);
-	void removeConfiguration(int i);
+	int getProfilesCount() const;
+	CProfile getProfile(int i = -1) const;
+	void setProfile(int i, const CProfile &profile);
+	int addProfile(const CProfile &profile);
+	void removeProfile(int i);
 
 	int getDefaultServer() const;
-	int getDefaultConfiguration() const;
+	int getDefaultProfile() const;
 
 	bool isRyzomInstallerConfigured() const;
 
@@ -115,8 +115,8 @@ public:
 	QString getSrcServerDirectory() const;
 	void setSrcServerDirectory(const QString &directory);
 
-	QString getConfigurationDirectory() const;
-	QString getSrcConfigurationDirectory() const;
+	QString getProfileDirectory() const;
+	QString getSrcProfileDirectory() const;
 
 	static bool has64bitsOS();
 
@@ -147,10 +147,10 @@ public:
 
 private:
 	int m_defaultServer;
-	int m_defaultConfiguration;
+	int m_defaultProfile;
 
 	QVector<CServer> m_servers;
-	QVector<CConfiguration> m_configurations;
+	QVector<CProfile> m_profiles;
 
 	QString m_installationDirectory;
 	QString m_srcDirectory;

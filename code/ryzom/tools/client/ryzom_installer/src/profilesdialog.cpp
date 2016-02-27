@@ -15,22 +15,22 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "configurationsdialog.h"
+#include "profilesdialog.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
 
-CConfigurationsDialog::CConfigurationsDialog():QDialog()
+CProfilesDialog::CProfilesDialog():QDialog()
 {
 	setupUi(this);
 }
 
-CConfigurationsDialog::~CConfigurationsDialog()
+CProfilesDialog::~CProfilesDialog()
 {
 }
 
-void CConfigurationsDialog::accept()
+void CProfilesDialog::accept()
 {
 	// TODO: add save code
 

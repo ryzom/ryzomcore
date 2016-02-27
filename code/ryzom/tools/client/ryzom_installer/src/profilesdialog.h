@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef CONFIGURATIONSDIALOG_H
-#define CONFIGURATIONSDIALOG_H
+#ifndef PROFILESDIALOG_H
+#define PROFILESDIALOG_H
 
-#include "ui_configurations.h"
+#include "ui_profiles.h"
 
-class CConfigurationsDialog : public QDialog, public Ui::ConfigurationsDialog
+class CProfilesDialog : public QDialog, public Ui::ConfigurationsDialog
 {
 	Q_OBJECT
 
 public:
-	CConfigurationsDialog();
-	virtual ~CConfigurationsDialog();
+	CProfilesDialog();
+	virtual ~CProfilesDialog();
 
 private slots:
 	void accept();

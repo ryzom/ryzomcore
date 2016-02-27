@@ -338,7 +338,7 @@ bool CArchive::copyServerFiles()
 	return copyFiles(files);
 }
 
-bool CArchive::copyConfigurationFiles()
+bool CArchive::copyProfileFiles()
 {
 	emit extractPrepare();
 
@@ -372,7 +372,7 @@ bool CArchive::copyServerFiles(const QString &src, const QString &dst)
 	return true;
 }
 
-bool CArchive::copyConfigurationFiles(const QString &src, const QString &dst)
+bool CArchive::copyProfileFiles(const QString &src, const QString &dst)
 {
 	if (src.isEmpty() || dst.isEmpty()) return false;
 
@@ -382,7 +382,7 @@ bool CArchive::copyConfigurationFiles(const QString &src, const QString &dst)
 	// create destination directory
 	QDir().mkpath(dst);
 
-	QFuture<bool> future = QtConcurrent::run(this, &CArchive::copyConfigurationFiles);
+	QFuture<bool> future = QtConcurrent::run(this, &CArchive::copyProfileFiles);
 
 	return true;
 }
