@@ -916,6 +916,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set RYZOM_CLIENT=\"%1\"\n";
 		contentPrefix += "set UNPACKPATH=\"%2\"\n";
 		contentPrefix += "set ROOTPATH=\"%3\"\n";
+		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
 		contentPrefix += "set LOGIN=%4\n";
 		contentPrefix += "set PASSWORD=%5\n";
 		contentPrefix += "set SHARDID=%6\n";
@@ -960,15 +962,15 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
-		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n";
+		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n\n";
 
 		// be sure file is executable
-		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n";
+		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n\n";
 
 		if (wantRyzomRestart)
 		{
 			// change to previous client directory
-			contentSuffix += "cd \"$ROOTPATH\"\n";
+			contentSuffix += "cd \"$ROOTPATH\"\n\n";
 
 			// launch new client
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
