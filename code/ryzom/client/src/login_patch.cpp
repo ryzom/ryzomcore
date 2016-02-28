@@ -195,6 +195,12 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 	ClientRootPath = CPath::standardizePath(clientRootPath);
 	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
 
+	// Delete the .sh file because it's not useful anymore
+	std::string fullUpdateBatchFilename = ClientRootPath + UpdateBatchFilename;
+
+	if (NLMISC::CFile::fileExists(fullUpdateBatchFilename))
+		NLMISC::CFile::deleteFile(fullUpdateBatchFilename);
+
 	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
 
 #ifdef NL_OS_MAC
