@@ -806,7 +806,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 #ifdef NL_OS_MAC
 	// special OS X case with bundles
-	if (toLower(programName).find(".app") != std::string::npos)
+	if (toLower(CFile::getExtension(programName)) == ".app")
 	{
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
@@ -914,7 +914,7 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 
 #ifdef NL_OS_MAC
 	// special OS X case with bundles
-	if (toLower(programName).find(".app") != std::string::npos)
+	if (toLower(CFile::getExtension(programName)) == "app")
 	{
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());

@@ -171,7 +171,7 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#elif defined(NL_OS_APPLE)
+#elif defined(NL_OS_MAC)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
 	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
@@ -194,6 +194,12 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 {
 	ClientRootPath = CPath::standardizePath(clientRootPath);
 	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
+
+	// Delete the .sh file because it's not useful anymore
+	std::string fullUpdateBatchFilename = ClientRootPath + UpdateBatchFilename;
+
+	if (NLMISC::CFile::fileExists(fullUpdateBatchFilename))
+		NLMISC::CFile::deleteFile(fullUpdateBatchFilename);
 
 	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
 

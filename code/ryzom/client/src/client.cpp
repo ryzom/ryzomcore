@@ -279,20 +279,6 @@ int main(int argc, char **argv)
 
 	pump ();
 
-	// Delete the .bat file because it s not useful anymore
-	if (NLMISC::CFile::fileExists("updt_nl.bat"))
-		NLMISC::CFile::deleteFile("updt_nl.bat");
-	if (NLMISC::CFile::fileExists("bug_report.exe"))
-		NLMISC::CFile::deleteFile("bug_report.exe");
-	if (NLMISC::CFile::fileExists("bug_report_r.exe"))
-		NLMISC::CFile::deleteFile("bug_report_r.exe");
-	if (NLMISC::CFile::fileExists("bug_report_rd.exe"))
-		NLMISC::CFile::deleteFile("bug_report_rd.exe");
-	if (NLMISC::CFile::fileExists("bug_report_df.exe"))
-		NLMISC::CFile::deleteFile("bug_report_df.exe");
-	if (NLMISC::CFile::fileExists("bug_report_d.exe"))
-		NLMISC::CFile::deleteFile("bug_report_d.exe");
-
 	// Delete all the .ttf file in the /data directory
 	{
 		vector<string> files;
@@ -307,10 +293,6 @@ int main(int argc, char **argv)
 
 #else
 	// TODO for Linux : splashscreen
-
-	// Delete the .sh file because it s not useful anymore
-	if (NLMISC::CFile::fileExists("updt_nl.sh"))
-		NLMISC::CFile::deleteFile("updt_nl.sh");
 #endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
