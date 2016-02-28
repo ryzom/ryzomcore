@@ -919,10 +919,12 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
 
+		std::string argumentsJoined = joinArguments(arguments);
+
 		// append arguments if any
-		if (!arguments.empty())
+		if (!argumentsJoined.empty())
 		{
-			command += NLMISC::toString(" --args %s", joinArguments(arguments).c_str());
+			command += NLMISC::toString(" --args %s", argumentsJoined.c_str());
 		}
 
 		int res = system(command.c_str());
@@ -931,7 +933,7 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 
 		if (log)
 		{
-			nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
+			nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), argumentsJoined.c_str(), res);
 		}
 
 		return false;
