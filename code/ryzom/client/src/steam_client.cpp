@@ -22,6 +22,8 @@
 
 #include "steam_client.h"
 
+#include "nel/misc/cmd_args.h"
+
 #include <steam_api.h>
 
 // prototypes definitions for Steam API functions we'll call
@@ -147,6 +149,8 @@ protected:
 	T *m_pObj;
 	func_t m_Func;
 };
+
+extern NLMISC::CCmdArgs Args;
 
 // listener called by Steam when AuthSessionTicket is available
 class CAuthSessionTicketListener
@@ -297,7 +301,7 @@ bool CSteamClient::init()
 #endif
 
 	// try to load library
-	_Handle = NLMISC::nlLoadLibrary(filename);
+	_Handle = NLMISC::nlLoadLibrary(Args.getProgramPath() + filename);
 
 	if (!_Handle)
 	{
