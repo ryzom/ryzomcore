@@ -41,6 +41,7 @@ public slots:
 	void onResumeClicked();
 	void onStopClicked();
 
+	void onProfiles();
 	void onAbout();
 	void onAboutQt();
 

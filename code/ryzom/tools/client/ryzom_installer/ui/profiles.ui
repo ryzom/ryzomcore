@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ConfigurationsDialog</class>
- <widget class="QDialog" name="ConfigurationsDialog">
+ <class>ProfilesDialog</class>
+ <widget class="QDialog" name="ProfilesDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,16 +17,16 @@
    <item>
     <layout class="QHBoxLayout" name="mainLayout">
      <item>
-      <layout class="QVBoxLayout" name="configurationsLayout" stretch="0,1,0">
+      <layout class="QVBoxLayout" name="profilesLayout" stretch="0,1,0">
        <item>
-        <widget class="QLabel" name="configurationsLabel">
+        <widget class="QLabel" name="profilesLabel">
          <property name="text">
-          <string>List of configurations:</string>
+          <string>List of profiles:</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QListView" name="configurationsListView">
+        <widget class="QListView" name="profilesListView">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -45,7 +45,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="configurationsActionsLayout" stretch="0,0">
+        <layout class="QHBoxLayout" name="profilesActionsLayout" stretch="0,0">
          <item>
           <widget class="QPushButton" name="addButton">
            <property name="text">
@@ -67,14 +67,14 @@
      <item>
       <layout class="QFormLayout" name="formLayout">
        <item row="0" column="0">
-        <widget class="QLabel" name="configurationLabel">
+        <widget class="QLabel" name="profileLabel">
          <property name="text">
-          <string>Configuration:</string>
+          <string>Profile:</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLabel" name="configurationIdLabel">
+        <widget class="QLabel" name="profileIdLabel">
          <property name="text">
           <string>0</string>
          </property>
@@ -254,7 +254,7 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>configurationsListView</tabstop>
+  <tabstop>profilesListView</tabstop>
   <tabstop>addButton</tabstop>
   <tabstop>deleteButton</tabstop>
   <tabstop>accountEdit</tabstop>
@@ -272,7 +272,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ConfigurationsDialog</receiver>
+   <receiver>ProfilesDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -288,7 +288,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ConfigurationsDialog</receiver>
+   <receiver>ProfilesDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

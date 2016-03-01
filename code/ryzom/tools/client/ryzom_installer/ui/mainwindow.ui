@@ -159,10 +159,10 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>&amp;Settings</string>
     </property>
-    <addaction name="action_Configurations"/>
-    <addaction name="action_Directories"/>
+    <addaction name="actionProfiles"/>
+    <addaction name="actionDirectories"/>
     <addaction name="separator"/>
-    <addaction name="action_Quit"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -189,17 +189,17 @@ p, li { white-space: pre-wrap; }
     <string>About...</string>
    </property>
   </action>
-  <action name="action_Configurations">
+  <action name="actionProfiles">
    <property name="text">
-    <string>&amp;Configurations</string>
+    <string>&amp;Profiles</string>
    </property>
   </action>
-  <action name="action_Directories">
+  <action name="actionDirectories">
    <property name="text">
     <string>&amp;Directories</string>
    </property>
   </action>
-  <action name="action_Quit">
+  <action name="actionQuit">
    <property name="text">
     <string>&amp;Quit</string>
    </property>

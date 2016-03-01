@@ -19,7 +19,7 @@
 
 #include "ui_profiles.h"
 
-class CProfilesDialog : public QDialog, public Ui::ConfigurationsDialog
+class CProfilesDialog : public QDialog, public Ui::ProfilesDialog
 {
 	Q_OBJECT
 

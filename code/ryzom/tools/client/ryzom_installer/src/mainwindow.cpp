@@ -19,6 +19,7 @@
 #include "downloader.h"
 #include "archive.h"
 #include "wizarddialog.h"
+#include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"
 
@@ -67,6 +68,8 @@ CMainWindow::CMainWindow():QMainWindow(), m_archive(NULL), m_statusLabel(NULL)
 	connect(m_archive, SIGNAL(extractSuccess(qint64)), SLOT(onExtractSuccess(qint64)));
 	connect(m_archive, SIGNAL(extractFail(QString)), SLOT(onExtractFail(QString)));
 
+	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+
 	connect(actionAboutQt, SIGNAL(triggered()), SLOT(onAboutQt()));
 	connect(actionAbout, SIGNAL(triggered()), SLOT(onAbout()));
 
@@ -75,10 +78,6 @@ CMainWindow::CMainWindow():QMainWindow(), m_archive(NULL), m_statusLabel(NULL)
 	statusBar()->addWidget(m_statusLabel);
 
 //	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-
-//	processNextStep();
-
-	m_archive->extract("d:/Ryzom/bonjourx.7z", "");
 }
 
 CMainWindow::~CMainWindow()
@@ -175,6 +174,8 @@ void CMainWindow::showEvent(QShowEvent *e)
 #endif
 
 	e->accept();
+
+	processNextStep();
 }
 
 void CMainWindow::closeEvent(QCloseEvent *e)
@@ -206,6 +207,13 @@ void CMainWindow::onStopClicked()
 	{
 		m_archive->stop();
 	}
+}
+
+void CMainWindow::onProfiles()
+{
+	CProfilesDialog dialog;
+
+	dialog.exec();
 }
 
 void CMainWindow::onAbout()
