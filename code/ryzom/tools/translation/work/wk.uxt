@@ -13478,3 +13478,5 @@ uiCP_Name_Policy [Naming policy]
 uiCP_FirstName [First name]
 // first name
 uiCP_LastName [Last name]
+uiHorizontal [Horizontal]
+uiVertical [Vertical]
