@@ -104,48 +104,57 @@ void CCDBSynchronised::read( const string &fileName )
 	int linecount=1;
 #endif
 
-	if( _Database == 0 )
+	if (_Database == NULL)
 	{
 		throw CCDBSynchronised::EDBNotInit();
 	}
 
-	ifstream f(fileName.c_str(), ios::in);
-	if( !f.is_open() )
+	CIFile f;
+
+	if (!f.open(fileName, true))
 	{
 		nlerror("can't open file : %s\n", fileName.c_str());
 	}
 
-	while( !f.eof() )
+	while(!f.eof())
 	{
-		string line;
-		getline(f,line,'\n');
+		char line[1024];
+		f.getline(line, 1024);
+
 #ifdef _DEBUG
-	nlinfo("%s:%i",fileName.c_str(),linecount);
-	linecount++;
+		nlinfo("%s:%i", fileName.c_str(), linecount);
+		linecount++;
 #endif
 
 		char * token;
-		char * buffer = new char[line.size()+1];
-		strcpy(buffer,line.c_str());
+		char * buffer = new char[strlen(line)+1];
+		strcpy(buffer, line);
 
 		// value
 		token = strtok(buffer," \t");
-		if( token == NULL ) continue;
-		sint64 value;
-		fromString((const char*)token, value);
 
-		// property name
-		token = strtok(NULL," \n");
-		if( token == NULL ) continue;
-		string propName(token);
+		if (token)
+		{
+			sint64 value;
+			fromString((const char*)token, value);
 
-		// set the value of the property
-		ICDBNode::CTextId txtId(propName);
-		_Database->setProp(txtId,value);
+			// property name
+			token = strtok(NULL," \n");
+
+			if (token)
+			{
+				string propName(token);
+
+				// set the value of the property
+				ICDBNode::CTextId txtId(propName);
+				_Database->setProp(txtId, value);
+			}
+		}
+
+		delete [] buffer;
 	}
 
 	f.close();
-
 } // read //
 
 
@@ -156,19 +165,25 @@ void CCDBSynchronised::read( const string &fileName )
 //-----------------------------------------------
 void CCDBSynchronised::write( const string &fileName )
 {
-	if( _Database != 0 )
+	bool res = false;
+
+	if (_Database != 0)
 	{
-		FILE * f;
-		f = fopen(fileName.c_str(),"w");
-		ICDBNode::CTextId id;
-		_Database->write(id,f);
-		fclose(f);
+		FILE * f = nlfopen(fileName, "w");
+		if (f)
+		{
+			ICDBNode::CTextId id;
+			_Database->write(id,f);
+			fclose(f);
+
+			res = true;
+		}
 	}
-	else
+
+	if (!res)
 	{
 		nlwarning("<CCDBSynchronised::write> can't write %s : the database has not been initialized",fileName.c_str());
 	}
-
 } // write //
 
 
@@ -276,11 +291,9 @@ string CCDBSynchronised::getString( uint32 id )
 	{
 		return (*itStr).second;
 	}
-	else
-	{
-		nlwarning("<CCDBSynchronised::getString> string with id %d was not found",id);
-		return "";
-	}
+
+	nlwarning("<CCDBSynchronised::getString> string with id %d was not found",id);
+	return "";
 } // getString //
 
 

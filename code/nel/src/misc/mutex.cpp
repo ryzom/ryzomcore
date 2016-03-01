@@ -159,7 +159,7 @@ bool	CSharedMutex::createByName( const char *objectName )
 #ifdef NL_DEBUG
 	nlassert( _Mutex == NULL );
 #endif
-	_Mutex = (void *) CreateMutex( NULL, FALSE, objectName );
+	_Mutex = (void *) CreateMutexA( NULL, FALSE, objectName );
 	//nldebug( "Creating mutex %s: handle %p", objectName, _Mutex );
 	return ( _Mutex != NULL );
 }

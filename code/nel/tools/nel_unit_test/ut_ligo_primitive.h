@@ -72,7 +72,7 @@ private:
 		+	"	</PRIMITIVE>\n"
 		+	"</NEL_LIGO_PRIMITIVE_CLASS>";
 
-		FILE *fp = fopen(CLASS_FILE_NAME, "wt");
+		FILE *fp = NLMISC::nlfopen(CLASS_FILE_NAME, "wt");
 		nlassert(fp != NULL);
 		size_t s = fwrite(classfile.data(), 1, classfile.size(), fp);
 		nlassert(s == classfile.size());

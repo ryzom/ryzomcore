@@ -884,6 +884,7 @@ void CClientConfig::setValues()
 	READ_STRING_FV(CreateAccountURL)
 	READ_STRING_FV(EditAccountURL)
 	READ_STRING_FV(ConditionsTermsURL)
+	READ_STRING_FV(NamingPolicyURL)
 	READ_STRING_FV(BetaAccountURL)
 	READ_STRING_FV(ForgetPwdURL)
 	READ_STRING_FV(FreeTrialURL)
@@ -1931,7 +1932,7 @@ void CClientConfig::init(const string &configFileName)
 	if(!CFile::fileExists(configFileName))
 	{
 		// create the basic .cfg
-		FILE *fp = fopen(configFileName.c_str(), "w");
+		FILE *fp = nlfopen(configFileName, "w");
 
 		if (fp == NULL)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
@@ -2221,9 +2222,11 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	defaultConfigPath = Args.getProgramPath();
 #endif
 
+	std::string currentPath = CPath::standardizePath(CPath::getCurrentPath());
+
 	// look in the current working directory first
-	if (CFile::isExists(defaultConfigFileName))
-		p_name = defaultConfigFileName;
+	if (CFile::isExists(currentPath + defaultConfigFileName))
+		p_name = currentPath + defaultConfigFileName;
 
 	// look in startup directory
 	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))

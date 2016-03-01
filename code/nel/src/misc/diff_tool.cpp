@@ -93,7 +93,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		return true;
 	}
 */
-/*	FILE *fp = fopen(filename.c_str(), "rb");
+/*	FILE *fp = nlfopen(filename, "rb");
 
 	if (fp == NULL)
 	{

@@ -310,14 +310,14 @@ static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
 			&memoryBasicInfo, sizeof(memoryBasicInfo)))
 		{
 			DWORD cch = 0;
-			char szFile[MAX_PATH] = { 0 };
+			wchar_t szFile[MAX_PATH] = { 0 };
 
-		 cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase,
+			cch = GetModuleFileNameW((HINSTANCE)memoryBasicInfo.AllocationBase,
 								 szFile, MAX_PATH);
 
-		if (cch && (lstrcmpA(szFile, "DBFN")== 0))
-		{
-			 if (!SymLoadModule(hProcess,
+			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
+			{
+				if (!SymLoadModule(hProcess,
 				   NULL, "MN",
 				   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
 				{
@@ -527,9 +527,9 @@ public:
 			string progname;
 			if(!shortExc.empty() || !longExc.empty())
 			{
-				char name[1024];
-				GetModuleFileNameA (NULL, name, 1023);
-				progname = CFile::getFilename(name);
+				wchar_t name[1024];
+				GetModuleFileNameW (NULL, name, 1023);
+				progname = CFile::getFilename(wideToUtf8(name));
 				progname += " ";
 			}
 
@@ -1171,12 +1171,12 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 			// Use an environment variable to share the value among the EXE and its child DLLs
 			// (otherwise there would be one distinct bool by module, and the last
 			// _set_se_translator would overwrite the previous ones)
-			const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-			TCHAR envBuf [2];
-			if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) == 0)
+			const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
+			char envBuf [2];
+			if ( GetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) == 0)
 			{
 				_set_se_translator(exceptionTranslator);
-				SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, _T("1") );
+				SetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, "1" );
 			}
 		}
 #	endif // NL_OS_WINDOWS

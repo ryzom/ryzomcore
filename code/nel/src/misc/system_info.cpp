@@ -638,7 +638,7 @@ string CSystemInfo::getOS()
 			else  // Test for specific product on Windows NT 4.0 SP5 and earlier
 			{
 				HKEY hKey;
-				TCHAR szProductType[BUFSIZE];
+				char szProductType[BUFSIZE];
 				DWORD dwBufLen=BUFSIZE;
 				LONG lRet;
 
@@ -652,18 +652,18 @@ string CSystemInfo::getOS()
 
 				RegCloseKey( hKey );
 
-				if ( lstrcmpi( _T("WINNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "WINNT", szProductType) == 0 )
 					OSString += " Workstation";
-				if ( lstrcmpi( _T("LANMANNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "LANMANNT", szProductType) == 0 )
 					OSString += " Server";
-				if ( lstrcmpi( _T("SERVERNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "SERVERNT", szProductType) == 0 )
 					OSString += " Advanced Server";
 			}
 		}
 
 		std::string servicePack;
 
-		if( osvi.dwMajorVersion == 4 && lstrcmpi( osvi.szCSDVersion, _T("Service Pack 6") ) == 0 )
+		if (osvi.dwMajorVersion == 4 && lstrcmpiA(osvi.szCSDVersion, "Service Pack 6") == 0 )
 		{
 			HKEY hKey;
 			LONG lRet;
@@ -768,7 +768,7 @@ string CSystemInfo::getProc ()
 	{
 		// get processor name
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("ProcessorNameString"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString = value;
 		else
@@ -778,7 +778,7 @@ string CSystemInfo::getProc ()
 
 		// get processor identifier
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("Identifier"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "Identifier", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString += value;
 		else
@@ -788,7 +788,7 @@ string CSystemInfo::getProc ()
 
 		// get processor vendor
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("VendorIdentifier"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "VendorIdentifier", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString += value;
 		else
@@ -797,7 +797,7 @@ string CSystemInfo::getProc ()
 		ProcString += " / ";
 
 		// get processor frequency
-		result = ::RegQueryValueEx (hKey, _T("~MHz"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "~MHz", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 		{
 			uint32 freq = *(int *)value;
@@ -1062,7 +1062,7 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	return (uint64)(stfs.f_bavail * stst.st_blksize);
 #else
 	ULARGE_INTEGER freeSpace = {0};
-	BOOL bRes = ::GetDiskFreeSpaceExA(path.c_str(), &freeSpace, NULL, NULL);
+	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);
 	if (!bRes) return 0;
 
 	return (uint64)freeSpace.QuadPart;
@@ -1387,12 +1387,12 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 								}
 
 								// Version dll link
-								HMODULE hmVersion = LoadLibrary (_T("version"));
+								HMODULE hmVersion = LoadLibraryA ("version.dll");
 								if (hmVersion)
 								{
-									BOOL (WINAPI* _GetFileVersionInfo)(LPTSTR, DWORD, DWORD, LPVOID) = NULL;
-									DWORD (WINAPI* _GetFileVersionInfoSize)(LPTSTR, LPDWORD) = NULL;
-									BOOL (WINAPI* _VerQueryValue)(const LPVOID, LPTSTR, LPVOID*, PUINT) = NULL;
+									BOOL (WINAPI* _GetFileVersionInfo)(LPSTR, DWORD, DWORD, LPVOID) = NULL;
+									DWORD (WINAPI* _GetFileVersionInfoSize)(LPSTR, LPDWORD) = NULL;
+									BOOL (WINAPI* _VerQueryValue)(const LPVOID, LPSTR, LPVOID*, PUINT) = NULL;
 									*(FARPROC*)&_GetFileVersionInfo = GetProcAddress(hmVersion, "GetFileVersionInfoA");
 									*(FARPROC*)&_GetFileVersionInfoSize = GetProcAddress(hmVersion, "GetFileVersionInfoSizeA");
 									*(FARPROC*)&_VerQueryValue = GetProcAddress(hmVersion, "VerQueryValueA");

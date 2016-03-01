@@ -26,9 +26,6 @@
 #include "nel/misc/file.h"
 #include "nel/misc/hierarchical_timer.h"
 
-// std.
-#include <fstream>
-
 
 using namespace NLMISC;
 using namespace std;
@@ -84,8 +81,6 @@ void	CLandscapeIGManager::initIG(UScene *scene, const std::string &igDesc, UDriv
 		return;
 
 	string igFile = CPath::lookup(igDesc);
-
-	//ifstream file(igFile.c_str(), ios::in);
 
 	CIFile file;
 

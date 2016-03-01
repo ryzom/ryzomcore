@@ -1,13 +1,14 @@
 INCLUDE_DIRECTORIES(  ${CMAKE_CURRENT_BINARY_DIR}
                       ${CMAKE_CURRENT_SOURCE_DIR}
                       ${QT_INCLUDES}
-					  ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser)
+                      ${LIBXML2_INCLUDE_DIR}
+                      ${CMAKE_CURRENT_SOURCE_DIR}/../../3rdparty/qtpropertybrowser)
 
 FILE(GLOB SRC *.cpp *.h)
 SET(OVQT_EXT_SYS_SRC  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
                       ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h
-					  ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
+                      ${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
 
 SET(OVQT_PLUG_GEORGES_EDITOR_HDR  georges_editor_plugin.h 
                                   georges_editor_form.h
@@ -49,7 +50,7 @@ SOURCE_GROUP("OVQT Extension System" FILES ${OVQT_EXT_SYS_SRC})
 
 ADD_LIBRARY(studio_plugin_georges_editor MODULE ${SRC} ${OVQT_PLUG_GEORGES_EDITOR_MOC_SRC} ${OVQT_EXT_SYS_SRC} ${OVQT_PLUG_GEORGES_EDITOR_UI_HDRS} ${OVQT_PLUGIN_GEORGES_EDITOR_RC_SRCS})
 
-TARGET_LINK_LIBRARIES(studio_plugin_georges_editor studio_plugin_core nelmisc nelgeorges qt_property_browser ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(studio_plugin_georges_editor studio_plugin_core nelmisc nelgeorges qt_property_browser ${QT_LIBRARIES} ${LIBXML2_LIBRARIES})
 
 NL_DEFAULT_PROPS(studio_plugin_georges_editor "Tools: Studio Plugin: Georges Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_georges_editor)

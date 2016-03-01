@@ -160,6 +160,7 @@ struct CClientConfig
 	string			CreateAccountURL;
 	string			EditAccountURL;
 	string			ConditionsTermsURL;
+	string			NamingPolicyURL;
 	string			BetaAccountURL;
 	string			ForgetPwdURL;
 	string			FreeTrialURL;

@@ -3,7 +3,7 @@ ADD_SUBDIRECTORY(misc)
 
 IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(memory)
-ENDIF(WITH_NEL_TOOLS)
+ENDIF()
 
 # Max plugins are under the 3d directory as well.
 # Allow to compile only max plugins without other tools.
@@ -15,21 +15,21 @@ ENDIF()
 IF(WITH_NEL_TOOLS)
   IF(WITH_PACS)
     ADD_SUBDIRECTORY(pacs)
-  ENDIF(WITH_PACS)
+  ENDIF()
   
   IF(WITH_LOGIC)
     ADD_SUBDIRECTORY(logic)
-  ENDIF(WITH_LOGIC)
+  ENDIF()
   
   IF(WITH_GEORGES)
     ADD_SUBDIRECTORY(georges)
-  ENDIF(WITH_GEORGES)
+  ENDIF()
   
   IF(WITH_SOUND)
     ADD_SUBDIRECTORY(sound)
-  ENDIF(WITH_SOUND)
-  
-  IF(WITH_NEL_TESTS)
-    ADD_SUBDIRECTORY(nel_unit_test)
-  ENDIF(WITH_NEL_TESTS)
-ENDIF(WITH_NEL_TOOLS)
+  ENDIF()
+ENDIF()
+
+IF(WITH_NEL_TESTS)
+  ADD_SUBDIRECTORY(nel_unit_test)
+ENDIF()

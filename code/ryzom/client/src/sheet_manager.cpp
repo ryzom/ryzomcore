@@ -1020,7 +1020,7 @@ void CSheetManager::dumpVisualSlots()
 // ***************************************************************************
 void CSheetManager::dumpVisualSlotsIndex()
 {
-	FILE * vsIndexFile = fopen(std::string(getLogDirectory() + "vs_index.txt").c_str(),"w");
+	FILE * vsIndexFile = nlfopen(getLogDirectory() + "vs_index.txt", "w");
 	if( vsIndexFile )
 	{
 		for (uint i=0; i < SLOTTYPE::NB_SLOT; ++i)

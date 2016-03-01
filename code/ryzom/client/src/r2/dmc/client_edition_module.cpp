@@ -1384,7 +1384,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	uint32 timeStamp = 0;
 	if (! compressed)
 	{
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1491,7 +1491,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	else
 	{
 		// Get Uncompressed File length (4 last byte of a gz)
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1653,7 +1653,7 @@ void CClientEditionModule::saveUserComponentFile(const std::string& filename, bo
 		if (!mustCompress)
 		{
 			{
-				FILE* output = fopen(uncompressedName.c_str(), "wb");
+				FILE* output = nlfopen(uncompressedName, "wb");
 				if (output)
 				{
 					fwrite(component->UncompressedData, sizeof(char) , component->UncompressedDataLength, output);

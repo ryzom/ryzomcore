@@ -199,45 +199,16 @@ bool CCmdArgs::parse(const std::string &args)
 	std::vector<std::string> argv;
 
 #ifdef NL_OS_WINDOWS
-	char str[4096];
-	uint len = GetModuleFileNameA(NULL, str, 4096);
+	wchar_t str[4096];
+	uint len = GetModuleFileNameW(NULL, str, 4096);
 
+	// first argument should be full path to executable
 	if (len && len < 4096)
-		argv.push_back(str);
+		argv.push_back(wideToUtf8(str));
 #endif
 
-	std::string::size_type pos1 = 0, pos2 = 0;
-
-	do
-	{
-		// Look for the first non space character
-		pos1 = args.find_first_not_of (" ", pos2);
-		if(pos1 == std::string::npos) break;
-
-		// Look for the first space or "
-		pos2 = args.find_first_of (" \"", pos1);
-		if(pos2 != std::string::npos)
-		{
-			// " ?
-			if(args[pos2] == '"')
-			{
-				// Look for the final \"
-				pos2 = args.find_first_of ("\"", pos2+1);
-				if(pos2 != std::string::npos)
-				{
-					// Look for the first space
-					pos2 = args.find_first_of (" ", pos2+1);
-				}
-			}
-		}
-
-		// Compute the size of the string to extract
-		std::string::difference_type length = (pos2 != std::string::npos) ? pos2-pos1 : std::string::npos;
-
-		std::string tmp = args.substr (pos1, length);
-		argv.push_back (tmp);
-	}
-	while(pos2 != std::string::npos);
+	// convert string with arguments to array
+	explodeArguments(args, argv);
 
 	return parse(argv);
 }

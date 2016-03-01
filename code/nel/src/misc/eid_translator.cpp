@@ -445,7 +445,7 @@ void cbInvalidEntityNamesFilename(const std::string &invalidEntityNamesFilename)
 		return;
 	}
 
-	FILE *fp = fopen (fn.c_str(), "r");
+	FILE *fp = nlfopen (fn, "r");
 	if (fp == NULL)
 	{
 		nlwarning ("EIT: Can't load filename '%s' for invalid entity names filename", fn.c_str());

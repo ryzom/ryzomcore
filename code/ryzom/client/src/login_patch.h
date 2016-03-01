@@ -433,6 +433,7 @@ private:
 	/// Now deprecated : the launcher is the client ryzom
 	std::string RyzomFilename;
 	std::string UpdateBatchFilename;
+	std::string UpgradeBatchFilename;
 
 	// Where the client get all delta and desc file
 	std::string ClientPatchPath; // Temporary path

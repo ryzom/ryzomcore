@@ -119,14 +119,20 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 
 #ifdef NL_OS_WINDOWS
 	UpdateBatchFilename = "updt_nl.bat";
+	UpgradeBatchFilename = "upgd_nl.bat";
 #else
 	UpdateBatchFilename = "updt_nl.sh";
+	UpgradeBatchFilename = "upgd_nl.sh";
 #endif
 
-	// use application directory by default
-	std::string rootPath = Args.getProgramPath();
+	std::string rootPath;
 
-	if (!CFile::fileExists(rootPath + "client_default.cfg"))
+	if (ClientCfg.getDefaultConfigLocation(rootPath))
+	{
+		// use same directory as client_default.cfg
+		rootPath = CFile::getPath(rootPath);
+	}
+	else
 	{
 		// use current directory
 		rootPath = CPath::getCurrentPath();
@@ -161,18 +167,18 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #elif defined(NL_OS_WIN32)
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#elif defined(NL_OS_APPLE)
+#elif defined(NL_OS_MAC)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_linux64");
 #elif defined(NL_OS_UNIX) && defined(_LP64)
 	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win34");
+	ForceRemovePatchCategories.push_back("main_exedll_win64");
 	ForceRemovePatchCategories.push_back("main_exedll_linux32");
 	ForceRemovePatchCategories.push_back("main_exedll_osx");
 #else
@@ -188,6 +194,12 @@ void CPatchManager::setClientRootPath(const std::string& clientRootPath)
 {
 	ClientRootPath = CPath::standardizePath(clientRootPath);
 	ClientPatchPath = CPath::standardizePath(ClientRootPath + "unpack");
+
+	// Delete the .sh file because it's not useful anymore
+	std::string fullUpdateBatchFilename = ClientRootPath + UpdateBatchFilename;
+
+	if (NLMISC::CFile::fileExists(fullUpdateBatchFilename))
+		NLMISC::CFile::deleteFile(fullUpdateBatchFilename);
 
 	WritableClientDataPath = CPath::standardizePath(ClientRootPath + "data");
 
@@ -698,7 +710,7 @@ bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateL
 	// verbose log
 	if (isVerboseLog() && !stateLogOut.empty())
 		for (uint32 i = 0; i < stateLogOut.size(); ++i)
-			nlinfo("%s", stateLogOut[i].toString().c_str());
+			nlinfo("%s", stateLogOut[i].toUtf8().c_str());
 
 	return changed;
 }
@@ -737,15 +749,21 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		// For all optional categories check if there is a 'file to patch' in it
 		const CBNPCategory &rCat = rDescCats.getCategory(i);
-		nlwarning("Category = %s", rCat.getName().c_str());
+
+		nlinfo("Category = %s", rCat.getName().c_str());
+
 		if (!rCat.getUnpackTo().empty())
 		for (uint32 j = 0; j < rCat.fileCount(); ++j)
 		{
 			string rFilename = ClientPatchPath + rCat.getFile(j);
-			nlwarning("\tFileName = %s", rFilename.c_str());
+
+			nlinfo("\tFileName = %s", rFilename.c_str());
+
 			// Extract to patch
 			vector<string> vFilenames;
+
 			bool result = false;
+
 			try
 			{
 				result = bnpUnpack(rFilename, ClientPatchPath, vFilenames);
@@ -766,45 +784,62 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			{
 				for (uint32 fff = 0; fff < vFilenames.size (); fff++)
 				{
-					string SrcPath = ClientPatchPath;
-					string DstPath = CPath::standardizePath(rCat.getUnpackTo()); // to be sure there is a / at the end
-					NLMISC::CFile::createDirectoryTree(DstPath);
-
 					// this file must be moved
-#ifdef NL_OS_WINDOWS
-					SrcPath = CPath::standardizeDosPath(SrcPath);
-					DstPath = CPath::standardizeDosPath(DstPath);
-#endif
+					string fullDstPath = CPath::standardizePath(rCat.getUnpackTo()); // to be sure there is a / at the end
+					NLMISC::CFile::createDirectoryTree(fullDstPath);
 
-					std::string SrcName = SrcPath + vFilenames[fff];
-					std::string DstName = DstPath + vFilenames[fff];
+					std::string FileName = vFilenames[fff];
 
 					bool succeeded = false;
 
 					if (!useBatchFile)
 					{
 						// don't check result, because it's possible the olk file doesn't exist
-						CFile::deleteFile(DstName);
+						CFile::deleteFile(fullDstPath + FileName);
 						
 						// try to move it, if fails move it later in a script
-						if (CFile::moveFile(DstName, SrcName))
+						if (CFile::moveFile(fullDstPath + FileName, ClientPatchPath + FileName))
 							succeeded = true;
 					}
 
 					// if we didn't succeed to delete or move the file, create a batch file anyway
 					if (!succeeded)
 					{
-						// write windows .bat format else write sh format
+						string batchRelativeDstPath;
+
+						// should be always true
+						if (fullDstPath.compare(0, ClientRootPath.length(), ClientRootPath) == 0)
+						{
+							batchRelativeDstPath = fullDstPath.substr(ClientRootPath.length()) + FileName;
+						}
+						else
+						{
+							batchRelativeDstPath = fullDstPath + FileName;
+						}
+
 #ifdef NL_OS_WINDOWS
+						// only fix backslashes for .bat
+						batchRelativeDstPath = CPath::standardizeDosPath(batchRelativeDstPath);
+
+						// use DSTPATH and SRCPATH variables and append filenames
+						string realDstPath = toString("\"%%ROOTPATH%%\\%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"%%UNPACKPATH%%\\%s\"", FileName.c_str());
+
 						content += toString(":loop%u\n", nblab);
-						content += toString("attrib -r -a -s -h \"%s\"\n", DstName.c_str());
-						content += toString("del \"%s\"\n", DstName.c_str());
-						content += toString("if exist \"%s\" goto loop%u\n", DstName.c_str(), nblab);
-						content += toString("move \"%s\" \"%s\"\n", SrcName.c_str(), DstPath.c_str());
+						content += toString("attrib -r -a -s -h %s\n", realDstPath.c_str());
+						content += toString("del %s\n", realDstPath.c_str());
+						content += toString("if exist %s goto loop%u\n", realDstPath.c_str(), nblab);
+						content += toString("move %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #else
-						content += toString("rm -rf \"%s\"\n", DstName.c_str());
-						content += toString("mv %s \"%s\"\n", SrcName.c_str(), DstPath.c_str());
+						// use DSTPATH and SRCPATH variables and append filenames
+						string realDstPath = toString("\"$ROOTPATH/%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"$UNPACKPATH/%s\"", FileName.c_str());
+
+						content += toString("rm -rf %s\n", realDstPath.c_str());
+						content += toString("mv %s %s\n", realSrcPath.c_str(), realDstPath.c_str());
 #endif
+
+						content += "\n";
 					}
 
 					nblab++;
@@ -813,7 +848,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		}
 	}
 
-	std::string patchDirectory = CPath::standardizeDosPath(ClientRootPath + "patch");
+	std::string patchDirectory = CPath::standardizePath(ClientRootPath + "patch");
 
 	// Finalize batch file
 	if (NLMISC::CFile::isExists(patchDirectory) && NLMISC::CFile::isDirectory(patchDirectory))
@@ -837,9 +872,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			if (!succeeded)
 			{
 #ifdef NL_OS_WINDOWS
-				patchContent += toString("del \"%s\"\n", CPath::standardizeDosPath(vFileList[i]).c_str());
+				patchContent += toString("del \"%%ROOTPATH%%\\patch\\%s\"\n", vFileList[i].c_str());
 #else
-				patchContent += toString("rm -f \"%s\"\n", CPath::standardizePath(vFileList[i]).c_str());
+				patchContent += toString("rm -f \"$ROOTPATH/patch/%s\"\n", vFileList[i].c_str());
 #endif
 			}
 		}
@@ -847,14 +882,14 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (!patchContent.empty())
 		{
 #ifdef NL_OS_WINDOWS
-			content += toString(":looppatch\n");
+			content += ":looppatch\n";
 
 			content += patchContent;
 
-			content += toString("rd /Q /S \"" + patchDirectory + "\"\n");
-			content += toString("if exist \"" + patchDirectory + "\" goto looppatch\n");
+			content += "rd /Q /S \"%%ROOTPATH%%\\patch\"\n";
+			content += "if exist \"%%ROOTPATH%%\\patch\" goto looppatch\n";
 #else
-			content += toString("rm -rf \"" + patchDirectory + "\"\n");
+			content += "rm -rf \"$ROOTPATH/patch\"\n";
 #endif
 		}
 		else
@@ -867,9 +902,11 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 	{
 		deleteBatchFile();
 
+		// batch full path
 		std::string batchFilename = ClientRootPath + UpdateBatchFilename;
 
-		FILE *fp = fopen (batchFilename.c_str(), "wt");
+		// write windows .bat format else write sh format
+		FILE *fp = nlfopen (batchFilename, "wt");
 
 		if (fp == NULL)
 		{
@@ -877,31 +914,79 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			throw Exception (err);
 		}
 
+		string contentPrefix;
+
 		//use bat if windows if not use sh
 #ifdef NL_OS_WINDOWS
-		fprintf(fp, "@echo off\n");
+		contentPrefix += "@echo off\n";
+		contentPrefix += "set RYZOM_CLIENT=\"%1\"\n";
+		contentPrefix += "set UNPACKPATH=\"%2\"\n";
+		contentPrefix += "set ROOTPATH=\"%3\"\n";
+		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
+		contentPrefix += "set LOGIN=%4\n";
+		contentPrefix += "set PASSWORD=%5\n";
+		contentPrefix += "set SHARDID=%6\n";
 #else
-		fprintf(fp, "#!/bin/sh\n");
+		contentPrefix += "#!/bin/sh\n";
+		contentPrefix += "export RYZOM_CLIENT=$1\n";
+		contentPrefix += "export UNPACKPATH=$2\n";
+		contentPrefix += "export ROOTPATH=$3\n";
+		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
+		contentPrefix += "\n";
+		contentPrefix += "LOGIN=$4\n";
+		contentPrefix += "PASSWORD=$5\n";
+		contentPrefix += "SHARDID=$6\n";
 #endif
 
-		// append content of script
-		fprintf(fp, content.c_str());
+		contentPrefix += "\n";
+
+		string contentSuffix;
+
+		// if we need to restart Ryzom, we need to launch it in batch
+		std::string additionalParams;
+
+		if (Args.haveLongArg("profile"))
+		{
+			additionalParams = "--profile " + Args.getLongArg("profile").front();
+		}
+
+#ifdef NL_OS_WINDOWS
+		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+		contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
 
 		if (wantRyzomRestart)
 		{
-#ifdef NL_OS_WINDOWS
-			fprintf(fp, "start \"\" \"%s\" %%1 %%2 %%3\n", CPath::standardizeDosPath(RyzomFilename).c_str());
+			// client shouldn't be in memory anymore else it couldn't be overwritten
+			contentSuffix += toString("start \"\" /D \"%%ROOTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+		}
 #else
-			// wait until client is not in memory
-			fprintf(fp, "until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+		if (wantRyzomRestart)
+		{
+			// wait until client not in memory anymore
+			contentSuffix += toString("until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+		}
 
-			// be sure file is executable
-			fprintf(fp, "chmod +x \"%s\"\n", RyzomFilename.c_str());
+		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
+		contentSuffix += "if [ -e \"$UPGRADE_FILE\" ]; then chmod +x \"$UPGRADE_FILE\" && \"$UPGRADE_FILE\"; fi\n\n";
+
+		// be sure file is executable
+		contentSuffix += "chmod +x \"$RYZOM_CLIENT\"\n\n";
+
+		if (wantRyzomRestart)
+		{
+			// change to previous client directory
+			contentSuffix += "cd \"$ROOTPATH\"\n\n";
 
 			// launch new client
-			fprintf(fp, "\"%s\" $1 $2 $3\n", RyzomFilename.c_str());
-#endif
+			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
 		}
+#endif
+
+		// append content of script
+		fputs(contentPrefix.c_str(), fp);
+		fputs(content.c_str(), fp);
+		fputs(contentSuffix.c_str(), fp);
 
 		bool writeError = ferror(fp) != 0;
 		bool diskFull = ferror(fp) && errno == 28 /* ENOSPC */;
@@ -940,19 +1025,40 @@ void CPatchManager::executeBatchFile()
 
 	batchFilename += UpdateBatchFilename;
 
-#ifdef NL_OS_UNIX
-	// make script executable under UNIX
-	chmod(batchFilename.c_str(), S_IRWXU);
+	// make script executable
+	CFile::setRWAccess(batchFilename);
+
+	std::vector<std::string> arguments;
+
+	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
+#ifdef NL_OS_WINDOWS
+	arguments.push_back(CPath::standardizeDosPath(RyzomFilename));
+	arguments.push_back(CPath::standardizeDosPath(ClientPatchPath));
+	arguments.push_back(CPath::standardizeDosPath(ClientRootPath));
+#else
+	arguments.push_back(RyzomFilename);
+	arguments.push_back(ClientPatchPath);
+	arguments.push_back(ClientRootPath);
 #endif
 
-	std::string arguments = LoginLogin + " " + LoginPassword;
-
-	if (!r2Mode)
+	// append login, password and shard
+	if (!LoginLogin.empty())
 	{
-		arguments += " " + toString(LoginShardId);
+		arguments.push_back(LoginLogin);
+	
+		if (!LoginPassword.empty())
+		{
+			arguments.push_back(LoginPassword);
+
+			if (!r2Mode)
+			{
+				arguments.push_back(toString(LoginShardId));
+			}
+		}
 	}
 
-	if (!launchProgram(batchFilename, arguments, false))
+	// launchProgram with array of strings as argument will escape arguments with spaces
+	if (!launchProgramArray(batchFilename, arguments, false))
 	{
 		// error occurs during the launch
 		string str = toString("Can't execute '%s': code=%d %s (error code 30)", batchFilename.c_str(), errno, strerror(errno));
@@ -1025,7 +1131,7 @@ void CPatchManager::setRWAccess (const string &filename, bool bThrowException)
 	{
 		s = CI18N::get("uiAttribErr") + " " + CFile::getFilename(filename) + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toString());
+		throw Exception (s.toUtf8());
 	}
 }
 
@@ -1039,7 +1145,7 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 	{
 		s = CI18N::get("uiDelNoFile");
 		setState(true, s);
-		return s.toString();
+		return s.toUtf8();
 	}
 
 	if (!NLMISC::CFile::deleteFile(filename))
@@ -1048,8 +1154,8 @@ string CPatchManager::deleteFile (const string &filename, bool bThrowException, 
 		if(bWarning)
 			setState(true, s);
 		if(bThrowException)
-			throw Exception (s.toString());
-		return s.toString();
+			throw Exception (s.toUtf8());
+		return s.toUtf8();
 	}
 	return "";
 }
@@ -1064,7 +1170,7 @@ void CPatchManager::renameFile (const string &src, const string &dst)
 	{
 		s = CI18N::get("uiRenameErr") + " " + src + " -> " + dst + " (" + toString(errno) + "," + strerror(errno) + ")";
 		setState(true, s);
-		throw Exception (s.toString());
+		throw Exception (s.toUtf8());
 	}
 }
 
@@ -1302,7 +1408,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
-		FILE *fp = fopen (dest.c_str(), "wb");
+		FILE *fp = nlfopen (dest, "wb");
 		if (fp == NULL)
 		{
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
@@ -1441,8 +1547,8 @@ void CPatchManager::decompressFile (const string &filename)
 
 	string dest = filename.substr(0, filename.size ()-4);
 	setRWAccess(dest, false);
-	//if(isVerboseLog()) nlinfo("Calling fopen('%s','wb')", dest.c_str());
-	FILE *fp = fopen (dest.c_str(), "wb");
+	//if(isVerboseLog()) nlinfo("Calling nlfopen('%s','wb')", dest.c_str());
+	FILE *fp = nlfopen (dest, "wb");
 	if (fp == NULL)
 	{
 		string err = toString("Can't open file '%s' : code=%d %s, (error code 32)", dest.c_str(), errno, strerror(errno));
@@ -1512,21 +1618,18 @@ void CPatchManager::applyDate (const string &sFilename, uint32 nDate)
 	// change the file time
 	if(nDate != 0)
 	{
-//		_utimbuf utb;
-//		utb.actime = utb.modtime = nDate;
 		setRWAccess(sFilename, false);
-		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename)) +
-						" -> " + toString(nDate);
+		ucstring s = CI18N::get("uiChangeDate") + " " + NLMISC::CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename)) +
+						" -> " + timestampToHumanReadable(nDate);
 		setState(true,s);
 
 		if (!NLMISC::CFile::setFileModificationDate(sFilename, nDate))
-//		if (_utime (sFilename.c_str (), &utb) == -1)
 		{
 			int err = NLMISC::getLastError();
-			s = CI18N::get("uiChgDateErr") + " " + sFilename + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
+			s = CI18N::get("uiChgDateErr") + " " + CFile::getFilename(sFilename) + " (" + toString(err) + ", " + formatErrorMessage(err) + ")";
 			setState(true,s);
 		}
-		s = CI18N::get("uiNowDate") + " " + sFilename + " " + toString(NLMISC::CFile::getFileModificationDate (sFilename));
+		s = CI18N::get("uiNowDate") + " " + CFile::getFilename(sFilename) + " " + timestampToHumanReadable(NLMISC::CFile::getFileModificationDate (sFilename));
 		setState(true,s);
 	}
 }
@@ -1744,7 +1847,7 @@ bool CPatchManager::bnpUnpack(const string &srcBigfile, const string &dstPath, v
 
 	if (!bnpFile.readHeader())
 	{
-		ucstring s = CI18N::get("uiUnpackErrHead") + " " + SourceName;
+		ucstring s = CI18N::get("uiUnpackErrHead") + " " + CFile::getFilename(SourceName);
 		setState(true,s);
 		return false;
 	}
@@ -1783,14 +1886,14 @@ int CPatchManager::validateProgress(void *foo, double t, double d, double /* ult
 
 	if (units.empty())
 	{
-		units.push_back("B"); // there is no translation for byte unit...
+		units.push_back(CI18N::get("uiByte").toUtf8());
 		units.push_back(CI18N::get("uiKb").toUtf8());
 		units.push_back(CI18N::get("uiMb").toUtf8());
 	}
 
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double pour1 = t!=0.0?d*100.0/t:0.0;
-	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%5.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
+	ucstring sTranslate = CI18N::get("uiLoginGetFile") + ucstring::makeFromUtf8(toString(" %s : %s / %s (%.02f %%)", NLMISC::CFile::getFilename(pPM->CurrentFile).c_str(),
 		NLMISC::bytesToHumanReadableUnits((uint64)d, units).c_str(), NLMISC::bytesToHumanReadableUnits((uint64)t, units).c_str(), pour1));
 	pPM->setState(false, sTranslate);
 	if (foo)
@@ -1805,7 +1908,7 @@ void CPatchManager::MyPatchingCB::progress(float f)
 {
 	CPatchManager *pPM = CPatchManager::getInstance();
 	double p = 100.0*f;
-	ucstring sTranslate = CI18N::get("uiApplyingDelta") + toString(" %s (%5.02f %%)", CFile::getFilename(patchFilename).c_str(), p);
+	ucstring sTranslate = CI18N::get("uiApplyingDelta") + ucstring::makeFromUtf8(toString(" %s (%.02f %%)", CFile::getFilename(patchFilename).c_str(), p));
 	pPM->setState(false, sTranslate);
 }
 
@@ -1981,7 +2084,7 @@ void CPatchManager::clearDataScanLog()
 // ***************************************************************************
 void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, ucstring &sTranslate)
 {
-	sTranslate = CI18N::get("uiCorruptedFile") + " " + ftp.FileName + " (" +
+	sTranslate = CI18N::get("uiCorruptedFile") + " " + ucstring::makeFromUtf8(ftp.FileName) + " (" +
 		toString("%.1f ", (float)ftp.FinalFileSize/1000000.f) + CI18N::get("uiMb") + ")";
 }
 
@@ -2068,7 +2171,7 @@ void CCheckThread::run ()
 		for (i = 0; i < rDescFiles.fileCount(); ++i)
 		{
 			CPatchManager::SFileToPatch ftp;
-			sTranslate = CI18N::get("uiCheckingFile") + " " + rDescFiles.getFile(i).getFileName();
+			sTranslate = CI18N::get("uiCheckingFile") + " " + ucstring::makeFromUtf8(rDescFiles.getFile(i).getFileName());
 			pPM->setState(true, sTranslate);
 			// get list of patch to apply to this file. don't to a full checksum test if possible
 			nlwarning(rDescFiles.getFile(i).getFileName().c_str());
@@ -2192,7 +2295,7 @@ void CCheckThread::run ()
 					if (bnpFile.readHeader())
 					{
 						// read the file inside the bnp and calculate the sha1
-						FILE *bnp = fopen (sBNPFilename.c_str(), "rb");
+						FILE *bnp = nlfopen (sBNPFilename, "rb");
 						if (bnp != NULL)
 						{
 							for (uint32 k = 0; k < bnpFile.SFiles.size(); ++k)
@@ -3068,7 +3171,7 @@ bool CPatchManager::extract(const std::string& patchPath,
 	uint nblab = 0;
 	pPM->deleteFile(updateBatchFilename, false, false);
 
-	FILE *fp = fopen (updateBatchFilename.c_str(), "wt");
+	FILE *fp = nlfopen (updateBatchFilename, "wt");
 
 	if (fp == 0)
 	{
@@ -3080,7 +3183,8 @@ bool CPatchManager::extract(const std::string& patchPath,
 	fprintf(fp, "@echo off\n");
 	fprintf(fp, "ping 127.0.0.1 -n 7 -w 1000 > nul\n"); // wait
 #else
-	// TODO: for Linux and OS X
+	fprintf(fp, "#!/bin/sh\n");
+	fprintf(fp, "sleep 7\n"); // wait
 #endif
 
 	// Unpack files with category ExtractPath non empty

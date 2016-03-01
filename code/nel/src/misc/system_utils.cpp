@@ -231,11 +231,11 @@ bool CSystemUtils::supportUnicode()
 	{
 		init = true;
 #ifdef NL_OS_WINDOWS
-		OSVERSIONINFO osvi;
+		OSVERSIONINFOA osvi;
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 
 		// get Windows version
-		if (GetVersionEx(&osvi))
+		if (GetVersionExA(&osvi))
 		{
 			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
 			{
@@ -273,14 +273,14 @@ bool CSystemUtils::isScreensaverEnabled()
 //	SystemParametersInfoA(SPI_GETSCREENSAVEACTIVE, 0, &bRetValue, 0);
 //	res = (bRetValue == TRUE);
 	HKEY hKeyScreenSaver = NULL;
-	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, TEXT("Control Panel\\Desktop"), 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
+	LSTATUS lReturn = RegOpenKeyExA(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_QUERY_VALUE, &hKeyScreenSaver);
 	if (lReturn == ERROR_SUCCESS)
 	{
 		DWORD dwType = 0L;
 		DWORD dwSize = KeyMaxLength;
 		unsigned char Buffer[KeyMaxLength] = {0};
 
-		lReturn = RegQueryValueExA(hKeyScreenSaver, TEXT("SCRNSAVE.EXE"), NULL, &dwType, NULL, &dwSize);
+		lReturn = RegQueryValueExA(hKeyScreenSaver, "SCRNSAVE.EXE", NULL, &dwType, NULL, &dwSize);
 		// if SCRNSAVE.EXE is present, check also if it's empty
 		if (lReturn == ERROR_SUCCESS)
 			res = (Buffer[0] != '\0');
@@ -315,20 +315,21 @@ string CSystemUtils::getRegKey(const string &Entry)
 #ifdef NL_OS_WINDOWS
 	HKEY hkey;
 
-	if(RegOpenKeyEx(HKEY_CURRENT_USER, RootKey.c_str(), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, KEY_READ, &hkey) == ERROR_SUCCESS)
 	{
 		DWORD	dwType	= 0L;
 		DWORD	dwSize	= KeyMaxLength;
-		unsigned char	Buffer[KeyMaxLength];
+		wchar_t Buffer[KeyMaxLength];
 
-		if(RegQueryValueEx(hkey, Entry.c_str(), NULL, &dwType, Buffer, &dwSize) != ERROR_SUCCESS)
+		if (RegQueryValueExW(hkey, utf8ToWide(Entry), NULL, &dwType, (LPBYTE)Buffer, &dwSize) != ERROR_SUCCESS)
 		{
 			nlwarning("Can't get the reg key '%s'", Entry.c_str());
 		}
 		else
 		{
-			ret = (char*)Buffer;
+			ret = wideToUtf8(Buffer);
 		}
+
 		RegCloseKey(hkey);
 	}
 	else
@@ -346,10 +347,14 @@ bool CSystemUtils::setRegKey(const string &ValueName, const string &Value)
 	HKEY hkey;
 	DWORD dwDisp;
 
-	char nstr[] = { 0x00 };
-	if (RegCreateKeyExA(HKEY_CURRENT_USER, RootKey.c_str(), 0, nstr, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, utf8ToWide(RootKey), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkey, &dwDisp) == ERROR_SUCCESS)
 	{
-		if (RegSetValueExA(hkey, ValueName.c_str(), 0L, REG_SZ, (const BYTE *)Value.c_str(), (DWORD)(Value.size())+1) == ERROR_SUCCESS)
+		ucstring utf16Value = ucstring::makeFromUtf8(Value);
+
+		// we must use the real Unicode string size in bytes
+		DWORD size = (utf16Value.length() + 1) * 2;
+
+		if (RegSetValueExW(hkey, utf8ToWide(ValueName), 0L, REG_SZ, (const BYTE *)utf16Value.c_str(), size) == ERROR_SUCCESS)
 			res = true;
 		RegCloseKey(hkey);
 	}
@@ -453,7 +458,7 @@ static void EnumerateUsingDXGI(IDXGIFactory *pDXGIFactory)
 		{
 			SAdapter adapter;
 			adapter.id = index;
-			adapter.name = ucstring((ucchar*)desc.Description).toUtf8();
+			adapter.name = wideToUtf8(desc.Description);
 			adapter.memory = desc.DedicatedVideoMemory / 1024;
 			adapter.found = true;
 

@@ -26,11 +26,11 @@ using namespace NLMISC;
 /****************************************************************\
 						buildTableFormat()
 \****************************************************************/
-void CSTLoader::buildTableFormat( string fileName, list<pair<string,TDataType> >& tableFormat )
+void CSTLoader::buildTableFormat(const string &fileName, list<pair<string,TDataType> >& tableFormat )
 {
-	_File = new ifstream(fileName.c_str(), ios::in);
+	_File = nlfopen(fileName, "rb");
 
-	if( !_File->is_open() )
+	if (!_File)
 	{
 		nlerror("can't open file : %s\n", fileName.c_str());
 	}
@@ -40,7 +40,7 @@ void CSTLoader::buildTableFormat( string fileName, list<pair<string,TDataType> >
 	//================
 	char readBuffer[4096];
 	char * token;
-	_File->getline(readBuffer, 4096);
+	if (fgets(readBuffer, 4096, _File) == NULL) return;
 
 	// extract first token
 	//====================
@@ -102,13 +102,17 @@ void CSTLoader::readData( list<list<string> >& data )
 	char * token;
 	bool firstToken = true;
 
-	while( !_File->eof() )
+	while( !feof(_File) )
 	{
 		// list of current object values
 		list<string> lineData;
 
 		// read a line
-		_File->getline(readBuffer, 4096);
+		if (fgets(readBuffer, 4096, _File) == NULL)
+		{
+			// EOF
+			break;
+		}
 
 		// check all tokens of the current line
 		do
@@ -146,74 +150,44 @@ void CSTLoader::readData( list<list<string> >& data )
 /****************************************************************\
 					generateDerivedClasses()
 \****************************************************************/
-void CSTLoader::generateDerivedClasses(ofstream &file, std::list< std::pair<std::string, TDataType> > &format, std::list< std::list< std::string> > &data )
+void CSTLoader::generateDerivedClasses(const std::list< std::pair<std::string, TDataType> > &format, const std::list< std::list< std::string> > &data )
 {
+	std::string content;
 
-
-	std::list< std::list< std::string> >::iterator it_dl = data.begin();
+	std::list< std::list< std::string> >::const_iterator it_dl = data.begin();
 
 	while ( it_dl != data.end() )
 	{
-		std::list< std::pair<std::string, TDataType> >::iterator it_def = format.begin();
-		std::list<std::string>::iterator it_val = (*it_dl).begin();
+		std::list< std::pair<std::string, TDataType> >::const_iterator it_def = format.begin();
+		std::list<std::string>::const_iterator it_val = (*it_dl).begin();
 //		sint32 size = data.size();
 //		sint32 size2 = (*it_dl).size();
 
-//			std::string name = convertName( *it_val );
+//		std::string name = convertName( *it_val );
 
-//			std::string test = *it_val;
+//		std::string test = *it_val;
 
 		if ( (*it_dl).size() )
 		{
-			file << "From Item : Define " << convertName( *it_val ) << endl;
+			content += "From Item : Define " + convertName( *it_val ) + "\n";
 			it_val++;
 			it_def++;
-			file << "{" << endl;
-			file << "\tComponent:" << endl;
+			content += "{\n";
+			content += "\tComponent:\n";
 		}
 
-		std::list< std::pair<std::string,TDataType> >::iterator it_obj = format.begin();
+		std::list< std::pair<std::string,TDataType> >::const_iterator it_obj = format.begin();
 		it_obj++;
 		while ( it_obj != format.end() )
 		{
-			file << "\t\t";
-			switch ( (*it_obj).second )
-			{
-				case UINT8:
-					file << "uint8";
-					break;
-				case SINT8:
-					file << "sint8";
-					break;
-				case UINT16:
-					file << "uint16";
-					break;
-				case SINT16:
-					file << "sint16";
-					break;
-				case UINT32:
-					file << "uint32";
-					break;
-				case SINT32:
-					file << "sint32";
-					break;
-				case FLOAT:
-					file << "Float";
-					break;
-				case STRING:
-					file << "String";
-					break;
-				case BOOL:
-					file << "Bool";
-					break;
-			}
-			file << "<'" << (*it_obj).first << "', Static>;" << endl;
+			content += "\t\t" + convertFromType((*it_obj).second);
+			content += "<'" + (*it_obj).first + "', Static>;\n";
 			it_obj++;
 		}
 
-		file << "\tEnd" << endl << endl;
+		content += "\tEnd\n";
 
-		file << "\t StaticInit()" << endl;
+		content += "\t StaticInit()\n";
 		while ( it_def != format.end() && it_val != (*it_dl).end() )
 		{
 
@@ -222,50 +196,52 @@ void CSTLoader::generateDerivedClasses(ofstream &file, std::list< std::pair<std:
 			std::string test2 = (*it_def).first;
 #endif
 
-			file << "\t\t" << (*it_def).first << " = ";
+			content += "\t\t" + (*it_def).first + " = ";
 			switch ( (*it_def).second )
 			{
 				case UINT8:
-					file << "new uint8(" << convertName(*it_val);
+					content += "new uint8(" + convertName(*it_val);
 					break;
 				case SINT8:
-					file << "new sint8(" << convertName(*it_val);
+					content += "new sint8(" + convertName(*it_val);
 					break;
 				case UINT16:
-					file << "new uint16(" << convertName(*it_val);
+					content += "new uint16(" + convertName(*it_val);
 					break;
 				case SINT16:
-					file << "new sint16(" << convertName(*it_val);
+					content += "new sint16(" + convertName(*it_val);
 					break;
 				case UINT32:
-					file << "new uint32(" << convertName(*it_val);
+					content += "new uint32(" + convertName(*it_val);
 					break;
 				case SINT32:
-					file << "new sint32(" << convertName(*it_val);
+					content += "new sint32(" + convertName(*it_val);
 					break;
 				case FLOAT:
-					file << "new Float(" <<convertName(*it_val);
+					content += "new Float(" + convertName(*it_val);
 					break;
 				case STRING:
-					file << "'" << (*it_val) << "'";
+					content += "'" + (*it_val) + "'";
 					break;
 				case BOOL:
-					file << "new Bool(" << (*it_val);
+					content += "new Bool(" + (*it_val);
 					break;
 				default:
-					file << "ERROR: unsuported type " << (*it_def).second << std::endl;
+					content += "ERROR: unsuported type " + toString((uint)(*it_def).second) + "\n";
 					break;
 			}
-			file << ");" << endl;
+			content += ");\n";
 
 			it_def++;
 			it_val++;
 		}
-		file << "\tEnd" << endl;
-		file << "}" << endl;
+		content += "\tEnd\n";
+		content += "}\n";
 
 		it_dl++;
 	}
+
+	fwrite(content.c_str(), 1, content.length(), _File);
 }
 
 
@@ -274,15 +250,15 @@ void CSTLoader::generateDerivedClasses(ofstream &file, std::list< std::pair<std:
 /****************************************************************\
 							init()
 \****************************************************************/
-void CSTLoader::init(string fileName, const map<string,TDataType>& fileFormat)
+void CSTLoader::init(const string &fileName, const map<string,TDataType>& fileFormat)
 {
 	_FileFormat = fileFormat;
 
 	_FileName = fileName;
 
-	_File = new ifstream(fileName.c_str(), ios::in);
+	_File = nlfopen(fileName, "rb");
 
-	if( !_File->is_open() )
+	if (!_File)
 	{
 		nlerror("can't open file : %s\n", fileName.c_str());
 	}
@@ -291,7 +267,8 @@ void CSTLoader::init(string fileName, const map<string,TDataType>& fileFormat)
 	// read first line
 	char readBuffer[4096];
 	char * token;
-	_File->getline(readBuffer, 4096);
+
+	if (fgets(readBuffer, 4096, _File) == NULL) return;
 
 	// extract first token
 	token = strtok(readBuffer, _Seps.c_str());
@@ -316,7 +293,7 @@ void CSTLoader::init(string fileName, const map<string,TDataType>& fileFormat)
 \****************************************************************/
 bool CSTLoader::readLine()
 {
-	if( _File->eof() )
+	if (feof(_File))
 	{
 		return false;
 	}
@@ -333,7 +310,7 @@ bool CSTLoader::readLine()
 	_Tokens.clear();
 
 	// read a line
-	_File->getline(readBuffer, 4096);
+	if (fgets(readBuffer, 4096, _File) == NULL) return false;
 
 	// if the line is empty we consider we are at end of file
 	if( strlen(readBuffer) == 0)
@@ -429,3 +406,21 @@ bool CSTLoader::readLine()
 	return true;
 }
 
+std::string CSTLoader::convertFromType(TDataType type)
+{
+	switch (type)
+	{
+		case UINT8: return "uint8";
+		case SINT8: return "sint8";
+		case UINT16: return "uint16";
+		case SINT16: return "sint16";
+		case UINT32: return "uint32";
+		case SINT32: return "sint32";
+		case FLOAT: return "Float";
+		case STRING: return "String";
+		case BOOL: return "Bool";
+		default: break;
+	}
+
+	return "";
+}

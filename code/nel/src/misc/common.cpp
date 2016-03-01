@@ -506,6 +506,21 @@ string secondsToHumanReadable (uint32 time)
 	return toString ("%u%s", res, divTable[div]);
 }
 
+std::string timestampToHumanReadable(uint32 timestamp)
+{
+	char buffer[30];
+	time_t dtime = timestamp;
+	tm *tms = localtime(&dtime);
+
+	if (tms)
+	{
+		strftime(buffer, 30, "%Y-%m-%d %H:%M:%S", tms);
+		return std::string(buffer);
+	}
+
+	return "";
+}
+
 uint32 fromHumanReadable (const std::string &str)
 {
 	if (str.size() == 0)
@@ -710,50 +725,54 @@ bool abortProgram(uint32 pid)
 #endif
 }
 
-bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
-{
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA si;
-	PROCESS_INFORMATION pi;
 
+static bool createProcess(const std::string &programName, const std::string &arguments, bool log, PROCESS_INFORMATION &pi)
+{
+	STARTUPINFOW si;
 	memset(&si, 0, sizeof(si));
 	memset(&pi, 0, sizeof(pi));
 
 	si.cb = sizeof(si);
 
 	// Enable nlassert/nlstop to display the error reason & callstack
-	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-	TCHAR envBuf [2];
-	if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) != 0)
+	const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
+
+	char envBuf[2];
+	if (GetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2) != 0)
 	{
-		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
+		SetEnvironmentVariableA(SE_TRANSLATOR_IN_MAIN_MODULE, NULL);
 	}
 
-	const char *sProgramName = programName.c_str();
-
+	wchar_t *sProgramName = NULL;
+	
 	std::string args;
 
 	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
 	if (CFile::getExtension(programName) == "bat")
 	{
-		sProgramName = NULL;
 		args = "\"" + programName + "\" " + arguments;
 	}
 	else
 	{
+		ucstring ucProgramName;
+		ucProgramName.fromUtf8(programName);
+
+		sProgramName = new wchar_t[MAX_PATH];
+		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
+
 		args = arguments;
 	}
 
-	BOOL res = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
 
-	if (res)
+	if (sProgramName)
 	{
-		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
-		return true;
+		delete [] sProgramName;
+		sProgramName = NULL;
 	}
-	else
+
+	if (!res)
 	{
 		if (log)
 		{
@@ -763,13 +782,31 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 		CloseHandle( pi.hProcess );
 		CloseHandle( pi.hThread );
+
+		return false;
 	}
 
+	return true;
+}
+
+#endif
+
+bool launchProgram(const std::string &programName, const std::string &arguments, bool log)
+{
+#ifdef NL_OS_WINDOWS
+	PROCESS_INFORMATION pi;
+
+	if (!createProcess(programName, arguments, log, pi)) return false;
+
+	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	CloseHandle( pi.hProcess );
+	CloseHandle( pi.hThread );
+	return true;
 #else
 
 #ifdef NL_OS_MAC
 	// special OS X case with bundles
-	if (toLower(programName).find(".app") != std::string::npos)
+	if (toLower(CFile::getExtension(programName)) == ".app")
 	{
 		// we need to open bundles with "open" command
 		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
@@ -794,6 +831,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 #endif
 
 	static bool firstLaunchProgram = true;
+
 	if (firstLaunchProgram)
 	{
 		// The aim of this is to avoid defunct process.
@@ -814,15 +852,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 
 	// convert one arg into several args
 	vector<string> args;
-	string::size_type pos1 = 0, pos2 = 0;
-	do
-	{
-		pos1 = arguments.find_first_not_of (" ", pos2);
-		if (pos1 == string::npos) break;
-		pos2 = arguments.find_first_of (" ", pos1);
-		args.push_back (arguments.substr (pos1, pos2-pos1));
-	}
-	while (pos2 != string::npos);
+	explodeArguments(arguments, args);
 
 	// Store the size of each arg
 	vector<char *> argv(args.size()+2);
@@ -867,78 +897,136 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	return false;
 }
 
-sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log)
+bool launchProgramArray (const std::string &programName, const std::vector<std::string> &arguments, bool log)
 {
-	sint res = 0;
-
 #ifdef NL_OS_WINDOWS
-	STARTUPINFOA si;
 	PROCESS_INFORMATION pi;
 
-	memset(&si, 0, sizeof(si));
-	memset(&pi, 0, sizeof(pi));
+	std::string argumentsJoined = joinArguments(arguments);
 
-	si.cb = sizeof(si);
+	if (!createProcess(programName, argumentsJoined, log, pi)) return false;
 
-	// Enable nlassert/nlstop to display the error reason & callstack
-	const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-	TCHAR envBuf [2];
-	if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) != 0)
+	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	CloseHandle( pi.hProcess );
+	CloseHandle( pi.hThread );
+	return true;
+#else
+
+#ifdef NL_OS_MAC
+	// special OS X case with bundles
+	if (toLower(CFile::getExtension(programName)) == "app")
 	{
-		SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, NULL );
-	}
+		// we need to open bundles with "open" command
+		std::string command = NLMISC::toString("open \"%s\"", programName.c_str());
 
-	const char *sProgramName = programName.c_str();
+		std::string argumentsJoined = joinArguments(arguments);
 
-	std::string args;
-
-	// a .bat file must have first parameter to NULL and use 2nd parameter to pass filename
-	if (CFile::getExtension(programName) == "bat")
-	{
-		sProgramName = NULL;
-		args = "\"" + programName + "\" " + arguments;
-	}
-	else
-	{
-		args = arguments;
-	}
-
-	BOOL ok = CreateProcessA(sProgramName, (char*)args.c_str(), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-
-	if (ok)
-	{
-		// Successfully created the process.  Wait for it to finish.
-		WaitForSingleObject(pi.hProcess, INFINITE);
-
-		// Get the exit code.
-		DWORD exitCode = 0;
-		ok = GetExitCodeProcess(pi.hProcess, &exitCode);
-
-		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
-
-		if (ok)
+		// append arguments if any
+		if (!argumentsJoined.empty())
 		{
-			res = (sint)exitCode;
+			command += NLMISC::toString(" --args %s", argumentsJoined.c_str());
 		}
-		else
-		{
-			if (log)
-				nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-		}
-	}
-	else
-	{
+
+		int res = system(command.c_str());
+
+		if (!res) return true;
+
 		if (log)
 		{
-			sint lastError = getLastError();
-			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), arguments.c_str(), lastError, formatErrorMessage(lastError).c_str());
+			nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), argumentsJoined.c_str(), res);
 		}
 
-		CloseHandle(pi.hProcess);
-		CloseHandle(pi.hThread);
+		return false;
 	}
+#endif
+
+	static bool firstLaunchProgram = true;
+
+	if (firstLaunchProgram)
+	{
+		// The aim of this is to avoid defunct process.
+		//
+		// From "man signal":
+		//------
+		// According to POSIX (3.3.1.3) it is unspecified what happens when SIGCHLD is set to SIG_IGN.   Here
+		// the  BSD  and  SYSV  behaviours  differ,  causing BSD software that sets the action for SIGCHLD to
+		// SIG_IGN to fail on Linux.
+		//------
+		//
+		// But it works fine on my GNU/Linux so I do this because it's easier :) and I don't know exactly
+		// what to do to be portable.
+		signal(SIGCHLD, SIG_IGN);
+
+		firstLaunchProgram = false;
+	}
+
+	// Store the size of each arg
+	vector<char *> argv(arguments.size()+2);
+	uint i = 0;
+	argv[i] = (char *)programName.c_str();
+	for (; i < arguments.size(); i++)
+	{
+		argv[i+1] = (char *) arguments[i].c_str();
+	}
+	argv[i+1] = NULL;
+	
+	int status = vfork ();
+	/////////////////////////////////////////////////////////
+	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	/// READ VFORK manual
+	/////////////////////////////////////////////////////////
+	if (status == -1)
+	{
+		char *err = strerror (errno);
+		if (log)
+			nlwarning("LAUNCH: Failed launched '%s' with arg '%s' err %d: '%s'", programName.c_str(), joinArguments(arguments).c_str(), errno, err);
+	}
+	else if (status == 0)
+	{
+		// Exec (the only allowed instruction after vfork)
+		status = execvp(programName.c_str(), &argv.front());
+
+		if (status == -1)
+		{
+			perror("Failed launched");
+			_exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+
+		return true;
+	}
+#endif
+
+	return false;
+}
+
+sint launchProgramAndWaitForResult(const std::string &programName, const std::string &arguments, bool log)
+{
+#ifdef NL_OS_WINDOWS
+	PROCESS_INFORMATION pi;
+
+	if (!createProcess(programName, arguments, log, pi)) return -1;
+
+	// Successfully created the process.  Wait for it to finish.
+	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Get the exit code.
+	DWORD exitCode = 0;
+	BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
+
+	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	if (ok) return (sint)exitCode;
+
+	if (log)
+		nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+
+	return -1;
 #else
 	// program name is the only required string
 	std::string command = programName;
@@ -947,13 +1035,13 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 	if (!arguments.empty()) command += " " + arguments;
 
 	// execute the command
-	res = system(command.c_str());
+	sint res = system(command.c_str());
 
 	if (res && log)
 		nlwarning ("LAUNCH: Failed launched '%s' with arg '%s' return code %d", programName.c_str(), arguments.c_str(), res);
-#endif
 
 	return res;
+#endif
 }
 
 std::string getCommandOutput(const std::string &command)
@@ -1050,6 +1138,75 @@ std::string expandEnvironmentVariables(const std::string &s)
 	return ret;
 }
 
+bool explodeArguments(const std::string &str, std::vector<std::string> &args)
+{
+	if (str.empty()) return false;
+
+	std::string::size_type pos1 = 0, pos2 = 0;
+
+	do
+	{
+		// Look for the first non space character
+		pos1 = str.find_first_not_of (" ", pos2);
+		if (pos1 == std::string::npos) break;
+
+		// Look for the first space or "
+		pos2 = str.find_first_of (" \"", pos1);
+		if (pos2 != std::string::npos)
+		{
+			// " ?
+			if (str[pos2] == '"')
+			{
+				// Look for the final \"
+				pos2 = str.find_first_of ("\"", pos2+1);
+				if (pos2 != std::string::npos)
+				{
+					// Look for the first space
+					pos2 = str.find_first_of (" ", pos2+1);
+				}
+			}
+		}
+
+		// Compute the size of the string to extract
+		std::string::difference_type length = (pos2 != std::string::npos) ? pos2-pos1 : std::string::npos;
+
+		std::string tmp = str.substr (pos1, length);
+
+		// remove escape " from argument
+		if (tmp.length() > 1 && tmp[0] == '"' && tmp[tmp.length()-1] == '"') tmp = tmp.substr(1, tmp.length()-2);
+
+		args.push_back (tmp);
+	}
+	while(pos2 != std::string::npos);
+
+	return true;
+}
+
+std::string joinArguments(const std::vector<std::string> &args)
+{
+	std::string res;
+
+	for(uint i = 0, len = (uint)args.size(); i < len; ++i)
+	{
+		const std::string &arg = args[i];
+
+		// prepend space
+		if (!res.empty()) res += " ";
+
+		// escape only if spaces or empty argument
+		if (arg.empty() || arg.find(' ') != std::string::npos)
+		{
+			res += "\"" + arg + "\"";
+		}
+		else
+		{
+			res += arg;
+		}
+	}
+
+	return res;
+}
+
 /*
  * Display the bits (with 0 and 1) composing a byte (from right to left)
  */
@@ -1099,6 +1256,14 @@ void displayDwordBits( uint32 b, uint nbits, sint beginpos, bool displayBegin, N
 	}
 }
 
+FILE* nlfopen(const std::string &filename, const std::string &mode)
+{
+#ifdef NL_OS_WINDOWS
+	return _wfopen(utf8ToWide(filename), utf8ToWide(mode));
+#else
+	return fopen(filename.c_str(), mode.c_str());
+#endif
+}
 
 int	nlfseek64( FILE *stream, sint64 offset, int origin )
 {

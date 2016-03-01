@@ -1787,7 +1787,7 @@ class CAHReboot : public IActionHandler
 		}
 		catch (const std::exception &e)
 		{
-			im->messageBoxWithHelp(ucstring(e.what()), "ui:login", "login_quit");
+			im->messageBoxWithHelp(ucstring::makeFromUtf8(e.what()), "ui:login", "login_quit");
 		}
 	}
 };
@@ -1857,17 +1857,7 @@ class CAHOpenURL : public IActionHandler
 		// TODO: for Linux and Mac OS
 #endif
 
-		/*
-		if (sParams == "cfg_CreateAccountURL")
-		{
-			url = ClientCfg.CreateAccountURL;
-
-			if (!installTag.empty())
-			{
-				url += string("/?from=")+installTag;
-			}
-		}
-		else */if (sParams == "cfg_EditAccountURL")
+		if (sParams == "cfg_EditAccountURL")
 		{
 			url = ClientCfg.EditAccountURL;
 		}
@@ -1895,6 +1885,10 @@ class CAHOpenURL : public IActionHandler
 		else if (sParams == "cfg_ConditionsTermsURL")
 		{
 			url = ClientCfg.ConditionsTermsURL;
+		}
+		else if (sParams == "cfg_NamingPolicyURL")
+		{
+			url = ClientCfg.NamingPolicyURL;
 		}
 		else
 		{

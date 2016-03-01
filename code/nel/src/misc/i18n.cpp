@@ -567,7 +567,7 @@ void CI18N::readTextFile(const string &filename,
 
 	if (!readContext.IfStack.empty())
 	{
-		nlwarning("Preprocess: Missing %u closing #endif after parsing %s", readContext.IfStack.size(), filename.c_str() );
+		nlwarning("Preprocess: Missing %u closing #endif after parsing %s", (uint)readContext.IfStack.size(), filename.c_str() );
 	}
 }
 

@@ -82,9 +82,10 @@ TReportResult report(const std::string &title, const std::string &subject, const
 	{
 		std::string reportFile = getLogDirectory() + NLMISC::toString("nel_report_%u.log", (uint)time(NULL));
 		reportPath = CFile::findNewFile(reportFile);
-		std::ofstream f;
-		f.open(reportPath.c_str());
-		if (!f.good())
+
+		FILE *f = nlfopen(reportPath, "wb"); // write as binary so \n are preserved
+
+		if (!f)
 		{
 #if NL_DEBUG_REPORT
 			if (INelContext::isContextInitialised())
@@ -94,8 +95,14 @@ TReportResult report(const std::string &title, const std::string &subject, const
 		}
 		else
 		{
-			f << body;
-			f.close();
+			size_t written = fwrite(body.c_str(), 1, body.length(), f);
+
+			if (written != body.length())
+			{
+				nlwarning("Unable to write %u bytes to %s, only %u written", (uint)body.length(), reportPath.c_str(), (uint)written);
+			}
+
+			fclose(f);
 		}
 	}
 

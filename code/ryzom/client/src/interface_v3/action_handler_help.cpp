@@ -3937,13 +3937,15 @@ public:
 		s += getSystemInformation();
 
 		string progname;
-		char name[1024] = "";
+		std::string moduleName;
 #ifdef NL_OS_WINDOWS
-		GetModuleFileName (NULL, name, 1023);
+		wchar_t name[1024];
+		GetModuleFileNameW(NULL, name, 1023);
+		moduleName = wideToUtf8(name);
 #else
 		// TODO for Linux
 #endif
-		progname = CFile::getFilename(name);
+		progname = CFile::getFilename(moduleName);
 		progname += " ";
 		progname += "Statistic Report";
 
