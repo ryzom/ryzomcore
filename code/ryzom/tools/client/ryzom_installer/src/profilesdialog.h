@@ -29,6 +29,9 @@ public:
 
 private slots:
 	void accept();
+
+	void onAddProfile();
+	void onDeleteProfile();
 };
 
 #endif

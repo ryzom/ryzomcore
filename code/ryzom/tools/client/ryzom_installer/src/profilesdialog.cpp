@@ -24,6 +24,9 @@
 CProfilesDialog::CProfilesDialog():QDialog()
 {
 	setupUi(this);
+
+	connect(addButton, SIGNAL(clicked()), SLOT(onAddProfile));
+	connect(deleteButton, SIGNAL(clicked()), SLOT(onDeleteProfile));
 }
 
 CProfilesDialog::~CProfilesDialog()
@@ -35,4 +38,12 @@ void CProfilesDialog::accept()
 	// TODO: add save code
 
 	QDialog::accept();
+}
+
+void CProfilesDialog::onAddProfile()
+{
+}
+
+void CProfilesDialog::onDeleteProfile()
+{
 }
