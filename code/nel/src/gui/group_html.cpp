@@ -3550,6 +3550,7 @@ namespace NLGUI
 		CViewText *viewText = new CViewText ("", (string("Error : ")+msg).c_str());
 		viewText->setColor (ErrorColor);
 		viewText->setModulateGlobalColor(ErrorColorGlobalColor);
+		viewText->setMultiLine (true);
 		getParagraph()->addChild (viewText);
 		if(!_TitlePrefix.empty())
 			setTitle (_TitlePrefix);
