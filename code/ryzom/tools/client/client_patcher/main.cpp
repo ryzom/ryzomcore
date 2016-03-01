@@ -137,6 +137,7 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 			"TheSagaOfRyzom	[Ryzom]\n"
 			"uiErrPatchApply	[Error: Patch process ended but the patch has not been successfully applied.]\n"
 			"uiErrChecking	[Error: Patch files failed - checking.]\n"
+			"uiByte	[B]\n"
 			"uiKb	[KiB]\n"
 			"uiMb	[MiB]\n"
 			"uiLoginGetFile	[Getting File:]\n"
