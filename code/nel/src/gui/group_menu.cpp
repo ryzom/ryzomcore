@@ -2497,6 +2497,17 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
+	void CGroupMenu::setMinH(sint32 minH)
+	{
+		if ( _RootMenu )
+		{
+			_RootMenu->_GroupList->setMinH(minH-_RootMenu->getResizeFromChildHMargin());
+			_RootMenu->_GroupList->setH(minH-_RootMenu->getResizeFromChildHMargin());
+			_RootMenu->setH(minH-_RootMenu->getResizeFromChildHMargin());
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	void CGroupMenu::setGrayedLine(uint line,  bool g)
 	{
 		if ( _RootMenu )
