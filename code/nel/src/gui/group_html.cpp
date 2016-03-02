@@ -2309,7 +2309,12 @@ namespace NLGUI
 					CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
 					if (cb)
 					{
+						uint lineIndex = cb->getNumTexts();
 						cb->addText(_SelectOptionStr);
+						if (_Forms.back().Entries.back().sbOptionDisabled == lineIndex)
+						{
+							cb->setGrayed(lineIndex, true);
+						}
 					}
 					else
 					{
