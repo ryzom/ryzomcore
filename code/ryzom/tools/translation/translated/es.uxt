@@ -27305,3 +27305,23 @@ uiTotalPatch	[PARCHE TOTAL]
 // INDEX 6468
 uiRequiredFiles	[ARCHIVOS NECESARIOS]
 
+// default value for LOD in login screen
+// HASH_VALUE 8C42E02F0C01D422
+// INDEX 6469
+uiLodValue	[NORMAL]
+
+// option displayed in keys configuration (Debug section)
+// HASH_VALUE 6878DC2CC23A6CB6
+// INDEX 6470
+uiDebugProfileFillRate	[Tasa de Perfil]
+
+// displayed in mission window when continent is unknown
+// HASH_VALUE 0F54678C93B4CBF6
+// INDEX 6471
+uiFixedMissionEntry_Mainland_Unknwown	[Continente/ Desconocido]
+
+// displayed when no files are playing in MP3 player
+// HASH_VALUE CAB123089C80B66B
+// INDEX 6472
+uiNoFiles	[No hay Archivos...]
+

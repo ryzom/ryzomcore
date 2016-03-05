@@ -10408,7 +10408,7 @@ uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF
 	@{FFF9}@{HuittToolCraftType}Type d'outil :@{H}@{T14}@{FFFF}%tool\n
 	%cansell\n
 	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
-		%buffs\n
+	%buffs\n
 	%special_effects\n
 	\n
 	@{FFFF}%desc%custom_text]
@@ -19895,7 +19895,7 @@ uiCP_Res_C	[- Spécialisation en artisanat]
 // HASH_VALUE 2E07FBEF9EC2E674
 // INDEX 4802
 uiCP_Job_F1	[1- Dague\n
- 2 - Action Attaque précise 1]
+	2 - Action Attaque précise 1]
 
 // HASH_VALUE 40E73E605EC2B540
 // INDEX 4803
@@ -19911,7 +19911,7 @@ uiCP_Job_G1	[1 - Pioche\n
 // INDEX 4805
 uiCP_Job_C1	[1 - Outil de création d'armure\n
 	2 - 50 Matières premières génériques de qualité 10\n
-	3 - 1e action pour créer une armure de votre race\n
+	3 - 1ère action pour créer une armure de votre race\n
 	4 - Plan de création de bottes]
 
 // HASH_VALUE AE336402F917F9B6
@@ -19936,7 +19936,7 @@ uiCP_Job_G2	[1 - Pioche\n
 // INDEX 4809
 uiCP_Job_C2	[1 - Outil de Création d'armure\n
 	2 - 100 Matières premières génériques de qualité 10\n
-	3 - 1e action pour créer une armure de votre race\n
+	3 - 1ère action pour créer une armure de votre race\n
 	4 - Plan de création de bottes\n
 	5 - Plan de création de gants]
 
@@ -21903,7 +21903,7 @@ gn_class_arcane_master	[Mage d'élite chevronné]
 
 // HASH_VALUE 242A1893E18B1897
 // INDEX 5212
-gn_class_archery_lord	[Grand tireur chevronné] 
+gn_class_archery_lord	[Grand tireur chevronné]
 
 // HASH_VALUE 6F19C0A4E5B9D8A4
 // INDEX 5213
@@ -25466,7 +25466,7 @@ uiR2EDNewScenarioWarning	[Cliquez sur OK pour réinitialiser l'éditeur et crée
 
 // HASH_VALUE B6A20AC0306A751A
 // INDEX 6052
-uiNoAvailableMissions	[Le journal des missions n'est pas disponible dans le Ring]
+uiNoAvailableMissions	[Le journal des missions n'est pas disponible dans le Ring.]
 
 // HASH_VALUE D82A99D541A5B0A0
 // INDEX 6053
@@ -25512,15 +25512,15 @@ uiRingWarningNewcomer	[Vous ne pouvez pas inviter ce joueur car l'un de vous deu
 
 // HASH_VALUE 0FDAAC9109769FFD
 // INDEX 6061
-uiRingWarningBanishedPlayer	[Vous avez été bani, et donc avez perdu la possibilité de lancer un scénario.]
+uiRingWarningBanishedPlayer	[Vous avez été banni, et donc avez perdu la possibilité de lancer un scénario.]
 
 // HASH_VALUE 7484A535D707EA06
 // INDEX 6062
-uiRingLaunchScenarioError	[Une erreur est survenue comme vous tentiez de lancer votre scénario.]
+uiRingLaunchScenarioError	[Une erreur est survenue quand vous tentiez de lancer votre scénario.]
 
 // HASH_VALUE D34A4A98246E6F7A
 // INDEX 6063
-uiRingUpdateScenarioFiltersError	[Une erreur est survenue comme vous tentiez de mettre vos filtres de scénario à jour.]
+uiRingUpdateScenarioFiltersError	[Une erreur est survenue quand vous tentiez de mettre vos filtres de scénario à jour.]
 
 // HASH_VALUE 2A62ABF263466CB3
 // INDEX 6064
@@ -25529,7 +25529,7 @@ uiRingChooseScenario	[Sélectionnez un scénario.]
 // HASH_VALUE 50A91151AFCA7798
 // INDEX 6065
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Name	[@{6F6F}Nom du fichier\n
-	@{FFFF}Nom du fichier du scénario ring à charger.]
+	@{FFFF}Nom du fichier du scénario Ring à charger.]
 
 // HASH_VALUE 59BE229752871595
 // INDEX 6066
@@ -25544,7 +25544,7 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Description	[@{6F6F}Description\
 // HASH_VALUE B347D4DBDA147171
 // INDEX 6068
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Rules	[@{6F6F}Maîtrise\n
-	@{FFFF} Animé signifie que vous serez l'Animateur dans ce scénario.\n
+	@{FFFF} Animé signifie que vous serez l'animateur dans ce scénario.\n
 	Autonome signifie que vous participerez à ce scénario comme un joueur.]
 
 // HASH_VALUE FC2BD65951F97767
@@ -25559,22 +25559,22 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Language	[@{6F6F}Langage\n
 
 // HASH_VALUE 66CEF50ED8DC276E
 // INDEX 6071
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel	[@{6F6F}Prérecquis\n
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel	[@{6F6F}Prérequis\n
 	@{FFFF} Indique si vous pouvez ou non charger ce scénario. Vous ne pouvez charger que les scénarii dont vous avez accès au contenu. Vous pouvez gagner du contenu additionnel en explorant le continent.]
 
 // HASH_VALUE 2F284F3398091766
 // INDEX 6072
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Author	[@{6F6F}Auteur\n
-	@{FFFF} Auteur du scénario sélectionné. Entre crochets est la note donnée au scénario par son propre auteur.]
+	@{FFFF} Auteur du scénario sélectionné. Le nombre entre crochets est la note donnée au scénario par son propre auteur.]
 
 // HASH_VALUE 7D5B350CB5DF616F
 // INDEX 6073
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo	[@{6F6F}Scenarii de la Zone de Départ\n
-	@{FFFF} M'ECRIRE]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo	[@{6F6F}Scenarii de la zone de départ\n
+	@{FFFF} M'ÉCRIRE]
 
 // HASH_VALUE F0009604F468F22A
 // INDEX 6074
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun	[@{6F6F}Note de Divertissement\n
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun	[@{6F6F}Note de divertissement\n
 	@{FFFF} Note le divertissement apporté par le scénario sélectionné.]
 
 // HASH_VALUE 5CC60FE247B6E541
@@ -25584,7 +25584,7 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty	[@{6F6F}Note de diffi
 
 // HASH_VALUE C3A8D93AB4BF2DF7
 // INDEX 6076
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility	[@{6F6F}Note d'Accessibilité\n
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility	[@{6F6F}Note d'accessibilité\n
 	@{FFFF} Note l'accessibilité du scénario sélectionné.]
 
 // HASH_VALUE E63CECE3EAA44809
@@ -25594,7 +25594,7 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality	[@{6F6F}Note d'origi
 
 // HASH_VALUE EAB3000597E79860
 // INDEX 6078
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction	[@{6F6F}Direction Rating\n
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction	[@{6F6F}Note de clarté de consignes\n
 	@{FFFF} Note la clarté des consignes du scénario sélectionné.]
 
 // HASH_VALUE F9C96D1B8F3186FB
@@ -25605,10 +25605,10 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal	[@{6F6F}Total des point
 // HASH_VALUE DEB31F903CC13218
 // INDEX 6080
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_TreeInfo	[@{6F6F}Exemples de Winch Gate\n
-	@{FFFF}Exemples de scenarii fournis avec Ryzom pour faire la démonstration de quelques unes des possibilités du Ring.\n
-	@{6F6F}Scenarii pioniers\n
+	@{FFFF}Exemples de scenarii fournis avec Ryzom pour faire la démonstration de quelques-unes des possibilités du Ring.\n
+	@{6F6F}Scenarii pionniers\n
 	@{FFFF}Fournis par d'autres joueurs et le support client, ils n'ont pas été validés par Winch Gate. Visitez le site ryzom.com pour plus de détails.\n
-	@{6F6F}Mes Fichiers\n
+	@{6F6F}Mes fichiers\n
 	@{FFFF}Les fichiers qui sont dans le répertoire 'My_scenarios' sur votre ordinateur.]
 
 // HASH_VALUE 26367F872144C855
@@ -25649,7 +25649,7 @@ uiR2EDProp_LoadScenario_Name	[Nom du fichier]
 
 // HASH_VALUE 1A877C6FE605609E
 // INDEX 6090
-uiR2EDProp_LoadScenario_FunRating	[Fun]
+uiR2EDProp_LoadScenario_FunRating	[Amusement]
 
 // HASH_VALUE 6C48C896E697B087
 // INDEX 6091
@@ -25665,7 +25665,7 @@ uiR2EDProp_LoadScenario_OriginalityRating	[Originalité]
 
 // HASH_VALUE 60E72C8A2A69BCA3
 // INDEX 6094
-uiR2EDProp_LoadScenario_DirectionRating	[Direction]
+uiR2EDProp_LoadScenario_DirectionRating	[Clarté des consignes]
 
 // HASH_VALUE 95B6849CA6A3979B
 // INDEX 6095
@@ -25677,11 +25677,11 @@ uiR2EDLoadScenario_InvalidFileName	[Nom de fichier incorrect]
 
 // HASH_VALUE E082DD6A29896311
 // INDEX 6097
-uiR2EDLoadScenario_Yes	[Votre connaissance d'Atys est suffisante]
+uiR2EDLoadScenario_Yes	[Votre connaissance d'Atys est suffisante.]
 
 // HASH_VALUE 18577D9A4E0EA0E9
 // INDEX 6098
-uiR2EDLoadScenario_No	[Votre connaissance d'Atys n'est PAS suffisante]
+uiR2EDLoadScenario_No	[Votre connaissance d'Atys n'est PAS suffisante.]
 
 // HASH_VALUE AAC8204867A84443
 // INDEX 6099
@@ -25713,7 +25713,7 @@ uiR2EDRingSkills	[Stats Avancées]
 
 // HASH_VALUE 2CD4FB8A6DF7CB69
 // INDEX 6106
-uiR2EDEcosystemPointsTitle	[CONNAISSANCE D'ATYS]
+uiR2EDEcosystemPointsTitle	[Connaissance d'Atys]
 
 // HASH_VALUE 6879AC7F1E76E886
 // INDEX 6107
@@ -25799,38 +25799,38 @@ uiR2EDRrpsLevel250	[Maître]
 
 // HASH_VALUE 118869B320D7EDCD
 // INDEX 6126
-uiR2EDRrpsLevel20Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Débutant@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Débutant'\n
+uiR2EDRrpsLevel20Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau débutant@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'débutant'\n
 	]
 
 // HASH_VALUE EF966A1FB8731D23
 // INDEX 6127
-uiR2EDRrpsLevel50Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Apprenti@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Maître' (Utilisant des compétences de niveau 21 minimum)\n
+uiR2EDRrpsLevel50Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau apprenti@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'apprenti' (Utilisant des compétences de niveau 21 minimum)\n
 	]
 
 // HASH_VALUE 5B2F7EAB79E12023
 // INDEX 6128
-uiR2EDRrpsLevel100Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Confirmé@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Confirmé' (Utilisant des compétences de niveau 51 minimum)\n
+uiR2EDRrpsLevel100Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau confirmé@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'confirmé' (Utilisant des compétences de niveau 51 minimum)\n
 	]
 
 // HASH_VALUE BB8E4159D1270158
 // INDEX 6129
-uiR2EDRrpsLevel150Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Avancé@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Avancé' (Utilisant des compétences de niveau 101 minimum)\n
+uiR2EDRrpsLevel150Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau avancé@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'avancé' (Utilisant des compétences de niveau 101 minimum)\n
 	]
 
 // HASH_VALUE 867F514CB2A03C2D
 // INDEX 6130
-uiR2EDRrpsLevel200Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Expert@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Expert' (Utilisant des compétences de niveau 151 minimum)\n
+uiR2EDRrpsLevel200Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau expert@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'axpert' (Utilisant des compétences de niveau 151 minimum)\n
 	]
 
 // HASH_VALUE 4350293FB42F5C2B
 // INDEX 6131
-uiR2EDRrpsLevel250Tooltip	[@{6F6F}Points de récompenses pour les scenarii ring de niveau Maître@{FFFF}: %n.\n
-	Point gagnés dans les scenarii de niveau 'Maître' (Utilisant des compétences de niveau 201 minimum)\n
+uiR2EDRrpsLevel250Tooltip	[@{6F6F}Points de récompenses pour les scenarii Ring de niveau maître@{FFFF}: %n.\n
+	Point gagnés dans les scenarii de niveau 'maître' (Utilisant des compétences de niveau 201 minimum)\n
 	]
 
 // HASH_VALUE AB584C2DEF88F0FB
@@ -25839,37 +25839,37 @@ uiR2EDRingRatingTitle	[Notes du Ring]
 
 // HASH_VALUE 1A180078A796F49C
 // INDEX 6133
-uiR2EDAuthorRingRating	[Note de Créateur]
+uiR2EDAuthorRingRating	[Note de créateur]
 
 // HASH_VALUE 3F60907F6A181F20
 // INDEX 6134
-uiR2EDAMRingRating	[Note de Maître de jeu]
+uiR2EDAMRingRating	[Note de maître de jeu]
 
 // HASH_VALUE 60369282641A94C4
 // INDEX 6135
-uiR2EDMasterlessRingRating	[Note d'Organisateur]
+uiR2EDMasterlessRingRating	[Note d'organisateur]
 
 // HASH_VALUE 23C8A5EEEDF6E93B
 // INDEX 6136
-uiR2EDAuthorRingRatingTooltip	[@{6F6F}Note de l'Auteur@{FFFF}: Niveau : %n, Amélioration : %p%.\n
-	Note du Créateur de scenarii. Cette note augmente comme des joueurs participent à des scenarii que vous avez créé.\n
+uiR2EDAuthorRingRatingTooltip	[@{6F6F}Note de l'auteur@{FFFF}: niveau : %n, Amélioration : %p%.\n
+	Note du créateur de scenarii. Cette note augmente quand des joueurs participent à des scenarii que vous avez créés.\n
 	]
 
 // HASH_VALUE 6DC021DB83F07BB9
 // INDEX 6137
-uiR2EDAMRingRatingTooltip	[@{6F6F}Note d'Animateur@{FFFF}: Niveau : %n, Amélioration : %p%.\n
-	Notation de l'Animateur. Cette note augmente comme des joueurs participent aux scenarii animés que vous lancez.\n
+uiR2EDAMRingRatingTooltip	[@{6F6F}Note d'animateur@{FFFF}: niveau : %n, amélioration : %p%.\n
+	Notation de l'animateur. Cette note augmente comme des joueurs participent aux scenarii animés que vous lancez.\n
 	]
 
 // HASH_VALUE 8444264E77E31EF4
 // INDEX 6138
-uiR2EDMasterlessRingRatingTooltip	[@{6F6F}Note d'Organisateur@{FFFF}: Niveau : %n, Amélioration : %p%.\n
+uiR2EDMasterlessRingRatingTooltip	[@{6F6F}Note d'organisateur@{FFFF}: niveau : %n, amélioration : %p%.\n
 	Notation de l'organisateur d'un scénario autonome. Cette note augmente comme des joueurs participent aux scenarii autonomes que vous avez lancé.\n
 	]
 
 // HASH_VALUE 2FA7448946541072
 // INDEX 6139
-uiRingLoadingNotARoSScenario	[Vous ne pouvez pas lancer un scénario du continent alors que vous êtes dans es Ruines de Silan.]
+uiRingLoadingNotARoSScenario	[Vous ne pouvez pas lancer un scénario du continent alors que vous êtes dans les Ruines de Silan.]
 
 // HASH_VALUE B4F03AFFA31F6D0B
 // INDEX 6140
@@ -25877,7 +25877,7 @@ uiRingNoRatings	[Les scores des scenarii ne sont pas disponibles sur le continen
 
 // HASH_VALUE 4A01C80AFF1F901B
 // INDEX 6141
-uiR2EDScenarioScores	[Scores moyen des scenarii]
+uiR2EDScenarioScores	[Scores moyens des scenarii]
 
 // HASH_VALUE 84EFDC320541EF05
 // INDEX 6142
@@ -25885,7 +25885,7 @@ uiR2EDMyScenarioScores	[Scores de mes scenarii]
 
 // HASH_VALUE 6C05A88ADDA13E69
 // INDEX 6143
-uiClickToSelectAMission	[Cliquer ici pour sélectionner une mission.]
+uiClickToSelectAMission	[Cliquez ici pour sélectionner une mission.]
 
 // HASH_VALUE 6F6AD0A31C58BBD9
 // INDEX 6144
@@ -25893,15 +25893,15 @@ uiNoAvailableMission	[Votre journal de mission est vide.]
 
 // HASH_VALUE D5EF87890D23D659
 // INDEX 6145
-uittExpandMissionList	[Cliquer ici pour basculer entre la liste étendue ou le menu déroulant.]
+uittExpandMissionList	[Cliquez ici pour basculer entre la liste étendue ou le menu déroulant.]
 
 // HASH_VALUE D191FA72CB9FB222
 // INDEX 6146
-uittMissionCombo	[Ceci est la mission courante de votre journal de mission. @{6F6F}Cliquer@{FFFF} ou utiliser la @{6F6F}roulette de la souris@{FFFF} pour regarder vos missions disponibles.]
+uittMissionCombo	[Ceci est la mission courante de votre journal de mission. @{6F6F}Cliquez@{FFFF} ou utilisez la @{6F6F}roulette de la souris@{FFFF} pour regarder vos missions disponibles.]
 
 // HASH_VALUE 2EF9BCB21D59A4B4
 // INDEX 6147
-uittMissionJournal	[Ceci est votre journal de mission]
+uittMissionJournal	[Ceci est votre journal de mission.]
 
 // HASH_VALUE 59798C4465B3A795
 // INDEX 6148
@@ -25909,15 +25909,15 @@ uiFixedMissionEntry_Newbie	[Ruines de Silan]
 
 // HASH_VALUE 520898FB6194839C
 // INDEX 6149
-uiFixedMissionEntry_Newbie_R2	[Ruines de Silan/Ring]
+uiFixedMissionEntry_Newbie_R2	[Ruines de Silan / Ring]
 
 // HASH_VALUE 18D900505D80CFB6
 // INDEX 6150
-uiFixedMissionEntry_Newbie_Trial	[Ruines de Silan/Free trial]
+uiFixedMissionEntry_Newbie_Trial	[Ruines de Silan / Free trial]
 
 // HASH_VALUE 18A77350DFA39FB6
 // INDEX 6151
-uiFixedMissionEntry_Newbie_R2_Trial	[Ruines de Silan/Free trial/Ring]
+uiFixedMissionEntry_Newbie_R2_Trial	[Ruines de Silan/Free trial / Ring]
 
 // HASH_VALUE C8A0CB926A9A2FF4
 // INDEX 6152
@@ -25937,11 +25937,11 @@ uiFixedMissionEntry_Mainland_Zorai	[Continent / Zoraï]
 
 // HASH_VALUE 6CD9A79F9BC9BFA7
 // INDEX 6156
-uiFixedMissionEntry_R2	[Ryzom ring]
+uiFixedMissionEntry_R2	[Ryzom Ring]
 
 // HASH_VALUE 6C7A4A8CE2187A28
 // INDEX 6157
-uiCaptionToggle	[Barre de titre on/off]
+uiCaptionToggle	[Barre de titre on / off]
 
 // HASH_VALUE 8B2CEDC612649D91
 // INDEX 6158
@@ -25957,7 +25957,7 @@ uiR2Palette	[Palette]
 
 // HASH_VALUE 6C58344C6C582484
 // INDEX 6161
-uiR2Scenario	[Scenario]
+uiR2Scenario	[Scénario]
 
 // HASH_VALUE EE98048EAE982089
 // INDEX 6162
@@ -25969,7 +25969,7 @@ uiR2Form	[Formulaires]
 
 // HASH_VALUE 2DE9E3872057208A
 // INDEX 6164
-uiR2Custom_look	[Personnaliser l'Apparence]
+uiR2Custom_look	[Personnaliser l'apparence]
 
 // HASH_VALUE AB48987ADE27208D
 // INDEX 6165
@@ -25993,11 +25993,11 @@ uiR2Connect	[Connecter]
 
 // HASH_VALUE EFDBE88CCD44D4B0
 // INDEX 6170
-uiR2Session_browser	[Gestionnaire de Session]
+uiR2Session_browser	[Gestionnaire de eession]
 
 // HASH_VALUE 2B98E01C8FE8CCAC
 // INDEX 6171
-uiR2Scenario_control	[Filtre de Scenarii]
+uiR2Scenario_control	[Filtre de scenarii]
 
 // HASH_VALUE EB99488FE0C29FAE
 // INDEX 6172
@@ -26005,47 +26005,47 @@ uiR2Player_tracking	[Gestion des joueurs]
 
 // HASH_VALUE 16289C9B5234B491
 // INDEX 6173
-uiCCDPalette	[Couleur de l'en-tête Palette]
+uiCCDPalette	[Couleur de l'en-tête "Palette"]
 
 // HASH_VALUE 2899704495792BA6
 // INDEX 6174
-uiCCDScenario	[Couleur de l'en-tête Scénario]
+uiCCDScenario	[Couleur de l'en-tête "Scénario"]
 
 // HASH_VALUE 6A35D399204ADCA8
 // INDEX 6175
-uiCCDProp_window	[Couleur de l'en-tête Propriétés]
+uiCCDProp_window	[Couleur de l'en-tête "Propriétés"]
 
 // HASH_VALUE EBF7AC7E54B58B6A
 // INDEX 6176
-uiCCDForm	[Couleur de l'en-tête Formulaires]
+uiCCDForm	[Couleur de l'en-tête "Formulaires"]
 
 // HASH_VALUE 216A97796E15AFC5
 // INDEX 6177
-uiCCDCustom_look	[Couleur de l'en-tête Personnaliser l'Apparence]
+uiCCDCustom_look	[Couleur de l'en-tête "Personnaliser l'apparence"]
 
 // HASH_VALUE D859888A1465A080
 // INDEX 6178
-uiCCDDialogs	[Couleur de l'en-tête Dialogues]
+uiCCDDialogs	[Couleur de l'en-tête "Dialogues"]
 
 // HASH_VALUE 9E499B89AE7473BD
 // INDEX 6179
-uiCCDEvents	[Couleur de l'en-tête Événements]
+uiCCDEvents	[Couleur de l'en-tête "Événements"]
 
 // HASH_VALUE EC15AB7B5C4AB8B0
 // INDEX 6180
-uiCCDActivities	[Couleur de l'en-tête Activités]
+uiCCDActivities	[Couleur de l'en-tête "Activités"]
 
 // HASH_VALUE 9959D8849499FC6C
 // INDEX 6181
-uiCCDFeature_help	[Couleur de l'en-tête Aide Contextuelle]
+uiCCDFeature_help	[Couleur de l'en-tête "Aide contextuelle"]
 
 // HASH_VALUE 5839907F9445A875
 // INDEX 6182
-uiCCDConnect	[Couleur de l'en-tête Connexion]
+uiCCDConnect	[Couleur de l'en-tête "Connexion"]
 
 // HASH_VALUE 6E39A48CC446B094
 // INDEX 6183
-uiCCDSession_browser	[Couleur de l'en-tête Gestionnaire de Session]
+uiCCDSession_browser	[Couleur de l'en-tête "Gestionnaire de session"]
 
 // HASH_VALUE 6968F8F657E974AB
 // INDEX 6184
@@ -26053,7 +26053,7 @@ uiCCDScenario_control	[Couleur de l'en-tête Gestionnaire de Scénario]
 
 // HASH_VALUE ED587C995390FC83
 // INDEX 6185
-uiCCDPlayer_tracking	[Couleur de l'en-tête Gestion des Joueurs]
+uiCCDPlayer_tracking	[Couleur de l'en-tête "Gestion des joueurs"]
 
 // HASH_VALUE 5779246256A6A3B0
 // INDEX 6186
@@ -26089,7 +26089,7 @@ uittR2_Activities	[Choisissez la couleur de l'en-tête pour 'Activités']
 
 // HASH_VALUE AF0F9D5B5686432F
 // INDEX 6194
-uittR2_Feature_help	[Choisissez la couleur de l'en-tête pour 'Aide Contextuelle']
+uittR2_Feature_help	[Choisissez la couleur de l'en-tête pour 'Aide contextuelle']
 
 // HASH_VALUE D759F0621A9567B9
 // INDEX 6195
@@ -26097,15 +26097,15 @@ uittR2_Connect	[Choisissez la couleur de l'en-tête pour 'Connexion']
 
 // HASH_VALUE F3E0B98234AB4435
 // INDEX 6196
-uittR2_Session_browser	[Choisissez la couleur de l'en-tête pour 'Gestionnaire de Session']
+uittR2_Session_browser	[Choisissez la couleur de l'en-tête pour 'Gestionnaire de session']
 
 // HASH_VALUE 70CF4C1632AD2827
 // INDEX 6197
-uittR2_Scenario_control	[Choisissez la couleur de l'en-tête pour 'Gestionnaire du Scénario']
+uittR2_Scenario_control	[Choisissez la couleur de l'en-tête pour 'Gestionnaire du scénario']
 
 // HASH_VALUE 6C3FEDB6DE6C0C2F
 // INDEX 6198
-uittR2_Player_tracking	[Choisissez la couleur de l'en-tête pour 'Gestion des Joueurs']
+uittR2_Player_tracking	[Choisissez la couleur de l'en-tête pour 'Gestion des joueurs']
 
 // HASH_VALUE 6CDA3C92EE34229C
 // INDEX 6199
@@ -26121,7 +26121,7 @@ uiBGD_ShowHide	[Montrer / Cacher]
 
 // HASH_VALUE AA49704C941FE205
 // INDEX 6202
-uiBGD_CloseWarning	[Cette action ne fermera pas Ryzom Downloader. Celui-ci continuera de fonctionner en tâche de fond. Pour le fermer, cliquez sur son icon dans la Zone de Notification, puis sélectionnez 'Quitter'.]
+uiBGD_CloseWarning	[Cette action ne fermera pas Ryzom Downloader. Celui-ci continuera de fonctionner en tâche de fond. Pour le fermer, cliquez sur son icone dans la zone de notifications, puis sélectionnez 'Quitter'.]
 
 // HASH_VALUE 9705DCECA260D0BA
 // INDEX 6203
@@ -26137,11 +26137,11 @@ uiBGD_PatchComplete	[Mise à jour terminée avec succès !]
 
 // HASH_VALUE 5EC6F732DF7DE95E
 // INDEX 6206
-uiBGD_CheckFailed	[ECHEC lors de la recherche de fichiers à télécharger]
+uiBGD_CheckFailed	[Échec lors de la recherche de fichiers à télécharger]
 
 // HASH_VALUE C14FCEFAA047F85B
 // INDEX 6207
-uiBGD_PatchingFailed	[Echec de la mise à jour. Vérifiez s'il vous plaît l'espace disque displonible ainsi que votre connexion internet, puis réessayez.]
+uiBGD_PatchingFailed	[Échec de la mise à jour. Vérifiez s'il vous plaît l'espace disque disponible ainsi que votre connexion internet, puis réessayez.]
 
 // HASH_VALUE 5B64887497D8775D
 // INDEX 6208
@@ -26153,7 +26153,7 @@ uiBGD_Progress	[Mise à jour en cours : ]
 
 // HASH_VALUE 7F3B30F36D90E7CF
 // INDEX 6210
-uiBGD_PatchUpToDate	[Ryzom est maintenant à jour]
+uiBGD_PatchUpToDate	[Ryzom est maintenant à jour.]
 
 // HASH_VALUE 39907708AD43B943
 // INDEX 6211
@@ -26161,7 +26161,7 @@ uiBGD_PatchError	[Erreur de la mise à jour, vérifiez l'espace disque disponibl
 
 // HASH_VALUE 1EF6CD9CD14C00BD
 // INDEX 6212
-uiBGD_ProtocolError	[Erreur de communication Jeu/Ryzom Downloader. Relancer s'il vous plaît Ryzom ou en dernier recours utiliser le Ryzom Downloader pour réparer votre application.]
+uiBGD_ProtocolError	[Erreur de communication Jeu / Ryzom Downloader. Relancer s'il vous plaît Ryzom ou en dernier recours utiliser le Ryzom Downloader pour réparer votre application.]
 
 // HASH_VALUE 26A8FD55064E9186
 // INDEX 6213
@@ -26173,7 +26173,7 @@ uiBGD_Launching	[Lancement de Ryzom Downloader...]
 
 // HASH_VALUE 362A10B37B9728DB
 // INDEX 6215
-uiBGD_LaunchError	[Echec lors du lancement de Ryzom Downloader...]
+uiBGD_LaunchError	[Échec lors du lancement de Ryzom Downloader...]
 
 // HASH_VALUE 7ECB388114199FF6
 // INDEX 6216
@@ -26193,7 +26193,7 @@ uiBGD_FullPatchNeeded	[Cette fonctionnalité n'est disponible qu'après que la m
 
 // HASH_VALUE A01CE7B6A9D03D43
 // INDEX 6220
-uiBGD_MainlandCharFullPatchNeeded	[L'endroit dans lequel se trouve ce personnage ne sera accessible qu'une fois que le Logiciel de mise à jour aura fini. La progression de la mise à jour est indiquée par la barre de progression.]
+uiBGD_MainlandCharFullPatchNeeded	[L'endroit dans lequel se trouve ce personnage ne sera accessible qu'une fois que le logiciel de mise à jour aura fini. La progression de la mise à jour est indiquée par la barre de progression.]
 
 // HASH_VALUE 2B27D4766A97FC8C
 // INDEX 6221
@@ -26213,7 +26213,7 @@ uiBGD_NormalPriority	[Priorité normale]
 
 // HASH_VALUE BD4D3CF8E95C917A
 // INDEX 6225
-uiBGD_PriorityTooltip	[Sélectionnez la priorité de Ryzom Downloader. Il vous sera possible de mettre le logiciel en @{6F6F}Pause@{FFFF} si vous subissez des ralentissements. Si vous avez une machine rapide, ou que vous souhaitez accélérer le processus de mise à jour, sélectionnez @{6F6F}Priorité normale@{FFFF}.]
+uiBGD_PriorityTooltip	[Sélectionnez la priorité de Ryzom Downloader. Il vous sera possible de mettre le logiciel en @{6F6F}pause@{FFFF} si vous subissez des ralentissements. Si vous avez une machine rapide, ou que vous souhaitez accélérer le processus de mise à jour, sélectionnez @{6F6F}priorité normale@{FFFF}.]
 
 // HASH_VALUE 201CF438645834D4
 // INDEX 6226
@@ -26221,11 +26221,11 @@ uiBGD_NotUsed	[Non utilisé]
 
 // HASH_VALUE F40D1B4F626F4271
 // INDEX 6227
-uiBGD_ShutdownFailed	[Echec lors de la fermeture de Ryzom Downloader, vous serez pet-être amené à redémarrez votre ordinateur pour résoudre le problème.]
+uiBGD_ShutdownFailed	[Échec lors de la fermeture de Ryzom Downloader, vous serez peut-être amené à redémarrer votre ordinateur pour résoudre le problème.]
 
 // HASH_VALUE B703221C05EDDEEE
 // INDEX 6228
-uiBGD_InGamePatchIncomplete	[Accéder aux terres principales d'Atys ainsi qu'au Ryzom Ring nécessite que la mise à jour soit finie. La progression est indiquée dnas la fenêtre du Logiciel de mise à jour.]
+uiBGD_InGamePatchIncomplete	[Accéder aux terres principales d'Atys ainsi qu'au Ryzom Ring nécessite que la mise à jour soit finie. La progression est indiquée dans la fenêtre du logiciel de mise à jour.]
 
 // HASH_VALUE 40DA4DB418F59CA7
 // INDEX 6229
@@ -26245,19 +26245,19 @@ uiCP_KeysetName_bi_wow_alike	[Autre 1]
 
 // HASH_VALUE 9181AE4143F379CE
 // INDEX 6233
-uiCP_KeysetTooltip_bi_wow_alike	[Pour les personnes habituées à la configuration des touches d'un autre MMO, celle peut éventuellement vous premettre de retrouver vos marques. Ceci ne s'applique qu'à Ryzom (La configuration du Ring reste la même).]
+uiCP_KeysetTooltip_bi_wow_alike	[Pour les personnes habituées à la configuration des touches d'un autre MMO, celle peut éventuellement vous permettre de retrouver vos marques. Ceci ne s'applique qu'à Ryzom (La configuration du Ring reste la même).]
 
 // HASH_VALUE 2957F04D21D5A0AF
 // INDEX 6234
-uiAutomaticCamera	[Camera Automatique]
+uiAutomaticCamera	[Caméra automatique]
 
 // HASH_VALUE C238DC5E6A1884C6
 // INDEX 6235
-uiMouseDblClickMode	[Mode Double Clic]
+uiMouseDblClickMode	[Mode double clic]
 
 // HASH_VALUE 3A67F68BFEEC9DDD
 // INDEX 6236
-uiAutoEquipTool	[S'équiper automatiquement de l'arme/outil]
+uiAutoEquipTool	[S'équiper automatiquement de l'arme / outil]
 
 // HASH_VALUE 6B383031692D6A2F
 // INDEX 6237
@@ -26294,11 +26294,11 @@ uiBGD_Quit	[Quitter]
 
 // HASH_VALUE F686610840B57FC7
 // INDEX 6245
-uiBGD_ChoosePackage	[Sélectionner l'installation désirée : ]
+uiBGD_ChoosePackage	[Sélectionner l'installation désirée  : ]
 
 // HASH_VALUE F1F783BFC21EFB8D
 // INDEX 6246
-uiBGD_MinimalInstall	[Installation minimum. L'île de départ sera installée (Free Trial).]
+uiBGD_MinimalInstall	[Installation minimum. L'île de départ sera installée (Free trial).]
 
 // HASH_VALUE 2522249A66C6EC1A
 // INDEX 6247
@@ -26336,7 +26336,7 @@ uiBGD_FinishInstall	[Terminer]
 
 // HASH_VALUE 719D107BFC098D19
 // INDEX 6255
-uiBGD_ResumeDownloadInfo	[Note : Vous pouvez reprendre cette installation à tout moment en double-cliquant sur le raccourci de l'installeur sur votre bureau.]
+uiBGD_ResumeDownloadInfo	[Note : vous pouvez reprendre cette installation à tout moment en double-cliquant sur le raccourci de l'installeur sur votre bureau.]
 
 // HASH_VALUE 13F3EFA1EB9ABB9E
 // INDEX 6256
@@ -26371,7 +26371,7 @@ uiBGD_Connecting	[Connexion]
 
 // HASH_VALUE 18F9B83B2739089E
 // INDEX 6263
-uiDownloadingMetadata	[Téléchargement des métadata]
+uiDownloadingMetadata	[Téléchargement des métadonnées]
 
 // HASH_VALUE E0561484EBE9CCB3
 // INDEX 6264
@@ -26405,7 +26405,7 @@ uiBGD_CategoryInstall	[Installation (2/2)]
 
 // HASH_VALUE 32B8685B66C794BE
 // INDEX 6271
-uiBGD_Restarting	[L'application va être relancée]
+uiBGD_Restarting	[L'application va être relancée.]
 
 // HASH_VALUE 1799D444A927A0A4
 // INDEX 6272
@@ -26512,21 +26512,21 @@ uiBGD_ContentStartProcessInstall	[Vous êtes sur le point de télécharger et d'
 
 // HASH_VALUE 0716CC8CFA483488
 // INDEX 6297
-uiBGD_ContentStartProcessRepair	[Vous êtes sur le point de mettre à jours votre installation de Ryzom à la dernière version.\n
+uiBGD_ContentStartProcessRepair	[Vous êtes sur le point de mettre à jour la dernière version de Ryzom.\n
 	Cette opération va réparer les fichiers qui sont manquants ou endommagés.\n
-	A la fin de la mise à jours les fichiers de configurations du jeu seront remis à zero.]
+	À la fin de la mise à jour, les fichiers de configurations du jeu seront remis à zéro.]
 
 // HASH_VALUE ADA2E41D709F5795
 // INDEX 6298
-uiBGD_ContentStartProcessTorrent	[Le 'Mode Torrent' utilise la technolgie peer-to-peer pour accélérer le téléchargement. Désactiver cette option peut résoudre certains problèmes.]
+uiBGD_ContentStartProcessTorrent	[Le 'mode Torrent' utilise la technolgie peer-to-peer pour accélérer le téléchargement. Désactiver cette option peut résoudre certains problèmes.]
 
 // HASH_VALUE A8B4ECB24E75F05B
 // INDEX 6299
-uiBGD_TitleStartProcessInstall	[Bienvenue dans le Ryzom Downloader]
+uiBGD_TitleStartProcessInstall	[Bienvenue dans le Ryzom Downloader !]
 
 // HASH_VALUE AA39CC7F2309DCB0
 // INDEX 6300
-uiBGD_TitleInstallSuccess	[Félicitations]
+uiBGD_TitleInstallSuccess	[Félicitations !]
 
 // HASH_VALUE 7F31D4B9A7157F1A
 // INDEX 6301
@@ -26534,7 +26534,7 @@ uiBGD_ContentInstallSuccess	[Ryzom a été installé avec succès.]
 
 // HASH_VALUE 9E1F03D60DC3E49B
 // INDEX 6302
-uiBGD_QuitInstallContent	[Etes-vous sûre de vouloir quitter l'application ?]
+uiBGD_QuitInstallContent	[Etes-vous sûr(e) de vouloir quitter l'application ?]
 
 // HASH_VALUE 78E7ED45ECD4B47D
 // INDEX 6303
@@ -26546,7 +26546,7 @@ uiBGD_QuitInstallTitle	[Quitter ?]
 
 // HASH_VALUE 0CCB8A3B129779C5
 // INDEX 6305
-uiBGD_ErrorSupportFormat	[Des solutions pour les problèmes le plus commun peuvent se trouver sur {0}.]
+uiBGD_ErrorSupportFormat	[Des solutions pour les problèmes les plus communs peuvent se trouver sur {0}.]
 
 // HASH_VALUE E38B768D810F532E
 // INDEX 6306
@@ -26566,21 +26566,21 @@ uittBrowseFaq	[Aide]
 
 // HASH_VALUE F3EFAB8B176EEA64
 // INDEX 6310
-uiUnsupportedColorDepth	[Le nombre actuel de couleurs de votre bureau n'est pas supporté par Ryzom. Lancez Ryzom en mode 16 millions de coleurs s'il vous plaît.]
+uiUnsupportedColorDepth	[Le nombre actuel de couleurs de votre bureau n'est pas supporté par Ryzom. Veuillez lancer Ryzom en mode 16 millions de couleurs.]
 
 // HASH_VALUE 839DB655EBC9E640
 // INDEX 6311
-uiUnsupportedNewColorDepth	[Le nouveau nombre de couleurs de votre bureau n'est pas supporté par Ryzom. Lancez Ryzom en mode 16 millions de coleurs s'il vous plaît.]
+uiUnsupportedNewColorDepth	[Le nouveau nombre de couleurs de votre bureau n'est pas supporté par Ryzom. Veuillez lancer Ryzom en mode 16 millions de couleurs.]
 
 // HASH_VALUE D51ACCF3858BA4D0
 // INDEX 6312
-uiDeathWarningTitle	[Coma et Mort]
+uiDeathWarningTitle	[Coma et mort]
 
 // HASH_VALUE 38DAD4E07D7667A5
 // INDEX 6313
 uiDeathWarningContent	[Vous êtes dans le coma.\n
 	\n
-	Si personne ne vous soigne avant la fin du décompte, les Kamis ou la Karavan vous rameneront à la vie à côté d'endroits spécialisés avec une pénalité.\n
+	Si personne ne vous soigne avant la fin du décompte, les Kamis ou la Karavan vous ramèneront à la vie à côté d'endroits spécialisés avec une pénalité.\n
 	\n
 	Choisissez un point de résurrection sur la carte, puis cliquez sur RESSUSCITER. Vous réapparaîtrez alors à l'endroit sélectionné avec vos énergies au minimum.]
 
@@ -26606,7 +26606,7 @@ uiQResetUI	[Voulez vous vraiment réinitialiser l'IU ?]
 
 // HASH_VALUE EC18EC7026582CA0
 // INDEX 6319
-uiCommandNotExists	[Commande inconnue.]
+uiCommandNotExists	[Commande inconnue]
 
 // HASH_VALUE 6FD5933B0E232C9E
 // INDEX 6320
@@ -26633,7 +26633,7 @@ uitabBuyUpgrade	[Amélioration]
 
 // HASH_VALUE DEF61087D57120A9
 // INDEX 6325
-uitabBuyPower	[Pouvoirs/Auras]
+uitabBuyPower	[Pouvoirs / Auras]
 
 // HASH_VALUE ABDA7C922847EC6E
 // INDEX 6326
@@ -26649,25 +26649,25 @@ uittConsiderTargetLevel	[@{6F6F}Niveau@{FFFF} de la cible séléctionnée]
 
 // HASH_VALUE 0AB7FA32A8511BE3
 // INDEX 6329
-uittConsiderBoss	[Cette créature est @{6F6F}guild challenging@{FFFF}.]
+uittConsiderBoss	[Cette créature est @{6F6F}un défi de guilde@{FFFF}.]
 
 // HASH_VALUE 2AF11D0906C7D2D2
 // INDEX 6330
-uittConsiderBossNpc	[Ce personnage est @{6F6F}guild challenging@{FFFF}.]
+uittConsiderBossNpc	[Ce personnage est @{6F6F}défi de guilde@{FFFF}.]
 
 // HASH_VALUE 8C74A6F550643098
 // INDEX 6331
-uittConsiderNamedOrMiniBoss	[Cette créature est @{6F6F}team challenging@{FFFF}.]
+uittConsiderNamedOrMiniBoss	[Cette créature est @{6F6F}défi d'équipe@{FFFF}.]
 
 // HASH_VALUE 359EDEECC69B0BB1
 // INDEX 6332
-uittConsiderUnknownLevel	[Le niveau de la cible est @{F00F}trop élevé@{FFFF} par rapport a votre niveau.\n
+uittConsiderUnknownLevel	[Le niveau de la cible est @{F00F}trop élevé@{FFFF} par rapport à votre niveau.\n
 	\n
-	@{888F}Note : Vous pouvez voir le niveau exact de votre cible jusqu'à 10 niveaux au-dessus de votre propre niveau. Vous recevez un bonus de 10 niveaux pour chaque joueur ajouté dans votre équipe.]
+	@{888F}Note : vous pouvez voir le niveau exact de votre cible jusqu'à 10 niveaux au-dessus de votre propre niveau. Vous recevez un bonus de 10 niveaux pour chaque joueur ajouté dans votre équipe.]
 
 // HASH_VALUE A7189BEC5B76E245
 // INDEX 6333
-uittConsiderBothPVPToSeeLevel	[@{6F6F}Astuce :@{FFFF} Vous et votre cible devez être en mode PVP pour pouvoir voir le niveau de votre adversaire.]
+uittConsiderBothPVPToSeeLevel	[@{6F6F}Astuce :@{FFFF} vous et votre cible devez être en mode PVP pour pouvoir voir le niveau de votre adversaire.]
 
 // tooltip for the tab in the trainer window
 // HASH_VALUE 2ED574482B685C4E
@@ -26688,7 +26688,7 @@ uittTabBuyPower	[Apprendre de nouveaux pouvoirs et auras]
 
 // HASH_VALUE F298C84F29398785
 // INDEX 6338
-uittTabBuyCarac	[Augmentez vos caractéristiques]
+uittTabBuyCarac	[Augmenter vos caractéristiques]
 
 // spell cast time (displayed in the tooltip of actions)
 // HASH_VALUE 57D08F660BB56E6F
@@ -26711,7 +26711,7 @@ uittSecondsShort	[ s ]
 // 'minutes' (abreviated)
 // HASH_VALUE 73DC6ACDC6DC351A
 // INDEX 6343
-uittMinutesShort	[ mn ]
+uittMinutesShort	[ min ]
 
 // 'hours" (abreviated)
 // HASH_VALUE 328C42C8448C2110
@@ -26733,11 +26733,11 @@ uittSuccessRate	[Taux de réussite : @{6F6F}]
 
 // HASH_VALUE FA111C562D322699
 // INDEX 6348
-uittRegenTime	[Temps de Regen. : @{6F6F}]
+uittRegenTime	[Temps de régén. : @{6F6F}]
 
 // HASH_VALUE 5FA7D8A4CB502E07
 // INDEX 6349
-uittDisableTime	[Temps de Recast. : @{FFFF}]
+uittDisableTime	[Temps de relance. : @{FFFF}]
 
 // HASH_VALUE 91D82F4921A4338B
 // INDEX 6350
@@ -26765,47 +26765,47 @@ uiRpJobs	[Métiers]
 
 // HASH_VALUE 21D2AB9C60E8E0A4
 // INDEX 6356
-uiRpJobsElementary	[Métiers Élémentaires]
+uiRpJobsElementary	[Métiers élémentaires]
 
 // HASH_VALUE 62A74024692697BB
 // INDEX 6357
-uiRpJobsAdvanced	[Métiers Avancés]
+uiRpJobsAdvanced	[Métiers avancés]
 
 // HASH_VALUE 24A774396FB70FC8
 // INDEX 6358
-uiRpJobsRoleplay	[Métiers RP]
+uiRpJobsRoleplay	[Métiers roleplay]
 
 // HASH_VALUE A153C47D2C2A5C6A
 // INDEX 6359
-rpjob_200	[Apprenti Boucher]
+rpjob_200	[Apprenti boucher]
 
 // HASH_VALUE A253CC8B2A8A5861
 // INDEX 6360
-rpjob_201	[Apprenti Fleuriste]
+rpjob_201	[Apprenti fleuriste]
 
 // HASH_VALUE A9262412EC3AE89D
 // INDEX 6361
-rpjob_202	[Apprenti Porteur d'eau]
+rpjob_202	[Apprenti porteur d'eau]
 
 // HASH_VALUE 4F66988720AA7C79
 // INDEX 6362
-rpjob_203	[Apprenti Cartographe en magnétisme]
+rpjob_203	[Apprenti cartographe en magnétisme]
 
 // HASH_VALUE A7A6BC6A6616CC78
 // INDEX 6363
-rpjob_204	[Apprenti Outilleur]
+rpjob_204	[Apprenti outilleur]
 
 // HASH_VALUE A553C47D2E29985A
 // INDEX 6364
-rpjob_205	[Apprenti Secouriste]
+rpjob_205	[Apprenti secouriste]
 
 // HASH_VALUE A5A6E07C62B7D86A
 // INDEX 6365
-rpjob_206	[Apprenti Larviculteur]
+rpjob_206	[Apprenti larviculteur]
 
 // HASH_VALUE E575D480EA87F0A1
 // INDEX 6366
-rpjob_207	[Apprenti Parcheminier]
+rpjob_207	[Apprenti parcheminier]
 
 // HASH_VALUE 24245B3163C7514A
 // INDEX 6367
@@ -26813,27 +26813,27 @@ uiRpjobMaxLevel	[Vous avez atteint l'échelon maximum dans ce métier.]
 
 // HASH_VALUE 17D39358571A4838
 // INDEX 6368
-uiChapterI	[Chapitre I : Les temps changent]
+uiChapterI	[Chapitre I : les temps changent]
 
 // HASH_VALUE 97614C57D7EAE36B
 // INDEX 6369
-uiChapterII	[Chapitre II : Prêt à se battre]
+uiChapterII	[Chapitre II : prêt à se battre]
 
 // HASH_VALUE 59E74861D1E36294
 // INDEX 6370
-uiChapterIII	[Chapitre III : Avant-Postes]
+uiChapterIII	[Chapitre III : avant-postes]
 
 // HASH_VALUE A3244C43859A1438
 // INDEX 6371
-uiChapterIV	[Chapitre IV : Métiers élémentaires]
+uiChapterIV	[Chapitre IV : métiers élémentaires]
 
 // HASH_VALUE 96469B3B70F9145A
 // INDEX 6372
-uiChapterV	[Chapitre V : L'appel du pouvoir]
+uiChapterV	[Chapitre V : l'appel du pouvoir]
 
 // HASH_VALUE 15B6E48990EABC69
 // INDEX 6373
-uiShowTimesInChatCB	[Afficher l'heure dans les fenêtres de discussion.]
+uiShowTimesInChatCB	[Afficher l'heure dans les fenêtres de discussion]
 
 // HASH_VALUE 3D0B2453397DF2BC
 // INDEX 6374
@@ -26841,7 +26841,7 @@ uittShowTimesInChat	[Si coché, affiche l'heure dans les fenêtres de discussion
 
 // HASH_VALUE 41634A5914865F53
 // INDEX 6375
-uiEchelon	[Echelon : ]
+uiEchelon	[Échelon : ]
 
 // HASH_VALUE 2E428F9A99366770
 // INDEX 6376
@@ -26849,11 +26849,11 @@ uiShowClock	[Afficher l'heure au-dessus du radar]
 
 // HASH_VALUE E80563EA6265AD11
 // INDEX 6377
-uittShowClock	[Si coché, affiche l'heure courante au-dessus du radar]
+uittShowClock	[Si coché, affiche l'heure courante au-dessus du radar.]
 
 // HASH_VALUE 5B008CB3BFE212C7
 // INDEX 6378
-uiUntranslatedToken	[Valeur saisie incorrect: la valeur '%s' n'a pas été définie.]
+uiUntranslatedToken	[Valeur saisie incorrecte : la valeur '%s' n'a pas été définie.]
 
 // HASH_VALUE 1DE6E33299B77FDC
 // INDEX 6379
@@ -26877,11 +26877,11 @@ uiShowReticle	[Afficher le réticule autour de la cible]
 
 // HASH_VALUE DEF8FF70C06E611F
 // INDEX 6384
-uittShowReticle	[Si coché, afficher le réticule autour de la cible quand vous mettez la souris sur la cible.]
+uittShowReticle	[Si coché, affiche le réticule autour de la cible quand vous mettez la souris sur la cible.]
 
 // HASH_VALUE 200EB441EC195B51
 // INDEX 6385
-uiCurrentLocalAndUtcTime	[L'heure locale est %local, L'heure UTC est %utc.]
+uiCurrentLocalAndUtcTime	[L'heure locale est %local, l'heure UTC est %utc.]
 
 // HASH_VALUE 1B989391681BEB61
 // INDEX 6386
@@ -26898,11 +26898,11 @@ youTellPlayer	[vous dites à %name]
 
 // HASH_VALUE 5FC44FA59BD42F78
 // INDEX 6389
-uimwHands2	[MAINS #2]
+uimwHands2	[Mains #2]
 
 // HASH_VALUE B374A35AB0FA28BF
 // INDEX 6390
-uiRunShortcut2	[Exe. Raccourci #2]
+uiRunShortcut2	[Exe. raccourci #2]
 
 // HASH_VALUE D7506FD19A326FD0
 // INDEX 6391
@@ -26910,7 +26910,7 @@ uiActions2	[Actions #2]
 
 // HASH_VALUE 0CE3C4BAA2D6C481
 // INDEX 6392
-uiKeysActionsTitle2	[Raccourcis des Actions #2]
+uiKeysActionsTitle2	[Raccourcis des actions #2]
 
 // HASH_VALUE 2C08C0B02C08C0B0
 // INDEX 6393
@@ -26918,20 +26918,20 @@ uiThousandsSeparator	[ ]
 
 // HASH_VALUE FA309F21F9211A09
 // INDEX 6394
-uiRaceBold	[RACE : ]
+uiRaceBold	[Race : ]
 
 // HASH_VALUE 64636618A3BDC326
 // INDEX 6395
-uittFilterTP	[Filtre @{6F6F}Pactes de Téléportation\n
-	@{FFFF}Effectuez un clic-droit pour ne sélectionner que les @{6F6F}Pactes de Téléportation@{FFFF}.]
+uittFilterTP	[Filtre @{6F6F}Pactes de téléportation\n
+	@{FFFF}Effectuez un clic-droit pour ne sélectionner que les @{6F6F}pactes de téléportation@{FFFF}.]
 
 // HASH_VALUE 08D8B8FE2B893831
 // INDEX 6396
-uiShowOnlineOfflineNotifications	[Notifications de Connexions/Déconnexions]
+uiShowOnlineOfflineNotifications	[Notifications de connexions / déconnexions]
 
 // HASH_VALUE 4CD4D1CC173C6E8A
 // INDEX 6397
-uittShowOnlineOfflineNotifications	[Afficher les notifications de Connexions/Déconnexions pour les amis ou membre de la guilde.]
+uittShowOnlineOfflineNotifications	[Afficher les notifications de connexions / déconnexions pour les amis ou membre de la guilde.]
 
 // HASH_VALUE C5878CD4F49A9E18
 // INDEX 6398
@@ -26947,11 +26947,11 @@ uiDynColor0	[Canal dynamique 0]
 
 // HASH_VALUE D7E5C437EA19905C
 // INDEX 6401
-uiCCDDyn0	[Couleur des messages du 'Canal dynamique 0']
+uiCCDDyn0	[Couleur des messages du 'canal dynamique 0']
 
 // HASH_VALUE E0A73C8619718AA7
 // INDEX 6402
-uittChooseDynColor0	[Sélectionner la couleur des messages du Canal dynamique 0.]
+uittChooseDynColor0	[Sélectionner la couleur des messages du canal dynamique 0.]
 
 // HASH_VALUE E619A4D803E8A8AA
 // INDEX 6403
@@ -26963,7 +26963,7 @@ uiCCDDyn1	[Couleur des messages du 'Canal dynamique 1']
 
 // HASH_VALUE E0B73C8619718AA7
 // INDEX 6405
-uittChooseDynColor1	[Sélectionner la couleur des messages du Canal dynamique 1.]
+uittChooseDynColor1	[Sélectionner la couleur des messages du canal dynamique 1.]
 
 // HASH_VALUE E619A4D903E8A8AA
 // INDEX 6406
@@ -26971,11 +26971,11 @@ uiDynColor2	[Canal dynamique 2]
 
 // HASH_VALUE D7E5CC37EA19905C
 // INDEX 6407
-uiCCDDyn2	[Couleur des messages du 'Canal dynamique 2']
+uiCCDDyn2	[Couleur des messages du 'canal dynamique 2']
 
 // HASH_VALUE E0C73C8619718AA7
 // INDEX 6408
-uittChooseDynColor2	[Sélectionner la couleur des messages du Canal dynamique 2.]
+uittChooseDynColor2	[Sélectionner la couleur des messages du canal dynamique 2.]
 
 // HASH_VALUE E619A4DA03E8A8AA
 // INDEX 6409
@@ -26983,11 +26983,11 @@ uiDynColor3	[Canal dynamique 3]
 
 // HASH_VALUE D7E5D037EA19905C
 // INDEX 6410
-uiCCDDyn3	[Couleur des messages du 'Canal dynamique 3']
+uiCCDDyn3	[Couleur des messages du 'canal dynamique 3']
 
 // HASH_VALUE E0D73C8619718AA7
 // INDEX 6411
-uittChooseDynColor3	[Sélectionner la couleur des messages du Canal dynamique 3.]
+uittChooseDynColor3	[Sélectionner la couleur des messages du canal dynamique 3.]
 
 // HASH_VALUE E619A4DB03E8A8AA
 // INDEX 6412
@@ -26995,11 +26995,11 @@ uiDynColor4	[Canal dynamique 4]
 
 // HASH_VALUE D7E5D437EA19905C
 // INDEX 6413
-uiCCDDyn4	[Couleur des messages du 'Canal dynamique 4']
+uiCCDDyn4	[Couleur des messages du 'canal dynamique 4']
 
 // HASH_VALUE E0E73C8619718AA7
 // INDEX 6414
-uittChooseDynColor4	[Sélectionner la couleur des messages du Canal dynamique 4.]
+uittChooseDynColor4	[Sélectionner la couleur des messages du canal dynamique 4.]
 
 // HASH_VALUE E619A4DC03E8A8AA
 // INDEX 6415
@@ -27007,11 +27007,11 @@ uiDynColor5	[Canal dynamique 5]
 
 // HASH_VALUE D7E5D837EA19905C
 // INDEX 6416
-uiCCDDyn5	[Couleur des messages du 'Canal dynamique 5']
+uiCCDDyn5	[Couleur des messages du 'canal dynamique 5']
 
 // HASH_VALUE E0F73C8619718AA7
 // INDEX 6417
-uittChooseDynColor5	[Sélectionner la couleur des messages du Canal dynamique 5.]
+uittChooseDynColor5	[Sélectionner la couleur des messages du canal dynamique 5.]
 
 // HASH_VALUE E619A4DD03E8A8AA
 // INDEX 6418
@@ -27019,11 +27019,11 @@ uiDynColor6	[Canal dynamique 6]
 
 // HASH_VALUE D7E5DC37EA19905C
 // INDEX 6419
-uiCCDDyn6	[Couleur des messages du 'Canal dynamique 6']
+uiCCDDyn6	[Couleur des messages du 'canal dynamique 6']
 
 // HASH_VALUE E0073C8619718AA7
 // INDEX 6420
-uittChooseDynColor6	[Sélectionner la couleur des messages du Canal dynamique 6.]
+uittChooseDynColor6	[Sélectionner la couleur des messages du canal dynamique 6.]
 
 // HASH_VALUE E619A4DE03E8A8AA
 // INDEX 6421
@@ -27031,11 +27031,11 @@ uiDynColor7	[Canal dynamique 7]
 
 // HASH_VALUE D7E5E037EA19905C
 // INDEX 6422
-uiCCDDyn7	[Couleur des messages du 'Canal dynamique 7']
+uiCCDDyn7	[Couleur des messages du 'canal dynamique 7']
 
 // HASH_VALUE E0173C8619718AA7
 // INDEX 6423
-uittChooseDynColor7	[Sélectionner la couleur des messages du Canal dynamique 7.]
+uittChooseDynColor7	[Sélectionner la couleur des messages du canal dynamique 7.]
 
 // HASH_VALUE A735121BBB3AD1A5
 // INDEX 6424
@@ -27051,55 +27051,55 @@ uimUnlockItem	[Déverrouiller]
 
 // HASH_VALUE 16E88465D3567378
 // INDEX 6427
-uimSetTeamLeader	[Promouvoir Chef]
+uimSetTeamLeader	[Promouvoir chef]
 
 // HASH_VALUE C7E1BC268BF19C29
 // INDEX 6428
-uiKeyTILDE	[TILDE]
+uiKeyTILDE	[Tilde]
 
 // HASH_VALUE 4942A43A0B91EC2F
 // INDEX 6429
-uiKeySLASH	[SLASH]
+uiKeySLASH	[Slash]
 
 // HASH_VALUE 0643604105235C40
 // INDEX 6430
-uiKeyPERIOD	[POINT]
+uiKeyPERIOD	[Point]
 
 // HASH_VALUE 82F07C1E0BC1B822
 // INDEX 6431
-uiKeyBACKSLASH	[BARRE OBLIQUE INVERSÉE]
+uiKeyBACKSLASH	[Barre oblique inversée]
 
 // HASH_VALUE 4D80E02C9041EC2C
 // INDEX 6432
-uiKeyAPOSTROPHE	[APOSTROPHE]
+uiKeyAPOSTROPHE	[Apostrophe]
 
 // HASH_VALUE CA41D83C8980A41E
 // INDEX 6433
-uiKeySEMICOLON	[POINT-VIRGULE]
+uiKeySEMICOLON	[Point-virgule]
 
 // HASH_VALUE 409424485450B40C
 // INDEX 6434
-uiKeyRBRACKET	[PARENTHÈSE FERMANTE]
+uiKeyRBRACKET	[Parenthèse fermante]
 
 // HASH_VALUE 409424305450B40C
 // INDEX 6435
-uiKeyLBRACKET	[PARENTHÈSE OUVRANTE]
+uiKeyLBRACKET	[Parenthèse ouvrante]
 
 // HASH_VALUE C8C2DC2BCCC1E432
 // INDEX 6436
-uiKeyEQUALS	[EGAL]
+uiKeyEQUALS	[Égal]
 
 // HASH_VALUE 48D4141048D41410
 // INDEX 6437
-uiKeyDASH	[TIRET]
+uiKeyDASH	[Tiret]
 
 // HASH_VALUE FE501000FF300C01
 // INDEX 6438
-uiJoinLeagueProposal	[REJOINDRE LA LIGUE]
+uiJoinLeagueProposal	[Rejoindre la ligue]
 
 // HASH_VALUE 04E31C3D03A36344
 // INDEX 6439
-uiPvpPoints	[POINTS PVP]
+uiPvpPoints	[Points PvP]
 
 // HASH_VALUE 6B98909065484495
 // INDEX 6440
@@ -27107,7 +27107,7 @@ uiPvpTotal	[Total]
 
 // HASH_VALUE CD01881EC690942C
 // INDEX 6441
-uiOrganization	[FACTION]
+uiOrganization	[Faction]
 
 // HASH_VALUE 9F4850976B09B4A9
 // INDEX 6442
@@ -27119,23 +27119,23 @@ uiOrganization_0	[Non défini]
 
 // HASH_VALUE 22FAEC96E434B371
 // INDEX 6444
-uiPoints	[Points:]
+uiPoints	[Points :]
 
 // HASH_VALUE 5BD76F5861C46365
 // INDEX 6445
-uiOrganizationStatus	[Rang:]
+uiOrganizationStatus	[Rang :]
 
 // HASH_VALUE 67A9E49D2609E451
 // INDEX 6446
-uittOrganization	[Vous pouvez rejoindre une Faction en passant le rite associé et obtenir des avantages. Chaque Faction demande des renommées spécifiques pour passer le rite, le sage de la Faction pourra vous en dire plus.]
+uittOrganization	[Vous pouvez rejoindre une faction en passant le rite associé et obtenir des avantages. Chaque faction demande des renommées spécifiques pour passer le rite, le sage de la faction pourra vous en dire plus.]
 
 // HASH_VALUE 65C71C3EEC5A0FC8
 // INDEX 6447
-uiRpTags	[Tags Roleplay]
+uiRpTags	[Tags roleplay]
 
 // HASH_VALUE 011E7DD3846A697E
 // INDEX 6448
-uittRpTags	[Afficher tous les tags Roleplay au-dessus du personnage]
+uittRpTags	[Afficher tous les tags roleplay au-dessus du personnage]
 
 // HASH_VALUE 68DC145070582480
 // INDEX 6449
@@ -27147,7 +27147,7 @@ uiWindowNpcName	[Nom PNJ]
 
 // HASH_VALUE F926A4436B4D184B
 // INDEX 6451
-uittNpcName	[Afficher les noms des PNJs amicaux au-dessus du personnage]
+uittNpcName	[Afficher les noms des PNJ amicaux au-dessus du personnage]
 
 // HASH_VALUE 7F73C093A7248307
 // INDEX 6452
@@ -27155,7 +27155,7 @@ uiNpcTitle	[Titre PNJ]
 
 // HASH_VALUE CE3119F23A3FD1F4
 // INDEX 6453
-uittNpcTitle	[Afficher les titres des PNJs amicaux au-dessus du personnage]
+uittNpcTitle	[Afficher les titres des PNJ amicaux au-dessus du personnage]
 
 // HASH_VALUE C6C48E46D588B347
 // INDEX 6454
@@ -27167,7 +27167,7 @@ uittChooseLMFiberColor	[Choisissez une couleur pour le repère 'Fibre']
 
 // HASH_VALUE 9B4A6C691004BB09
 // INDEX 6456
-uiSelectShortcutBar2	[Choisir la Barre de Raccourci #2]
+uiSelectShortcutBar2	[Choisir la barre de raccourci #2]
 
 // HASH_VALUE 5854C7639701383B
 // INDEX 6457
@@ -27175,19 +27175,19 @@ uiFXAA	[Activer FXAA]
 
 // HASH_VALUE DC75700D1144549D
 // INDEX 6458
-uiVREnable	[Activer Réalité Virtuelle]
+uiVREnable	[Activer la réalité virtuelle]
 
 // HASH_VALUE EFCBC4603996C0AE
 // INDEX 6459
-uiVRGeneral	[Options de Réalité Virtuelle]
+uiVRGeneral	[Options de réalité virtuelle]
 
 // HASH_VALUE CF42883683C0EC33
 // INDEX 6460
-uigcVR	[REALITE VIRTUELLE]
+uigcVR	[Réalité virtuelle]
 
 // HASH_VALUE 9C58F47FED081B8E
 // INDEX 6461
-uigcFxAnisotropicFilter	[Filtrage Anisotrope :]
+uigcFxAnisotropicFilter	[Filtrage anisotrope :]
 
 // HASH_VALUE 6498F4386498F438
 // INDEX 6462
@@ -27203,7 +27203,7 @@ uittShowClock12h	[Si coché, utilise le système horaire sur 12 heures dans le r
 
 // HASH_VALUE 68F99C8C69A81273
 // INDEX 6465
-uiRadarUseCamera	[Le radar suit la rotation de la caméra]
+uiRadarUseCamera	[Le radar suit la rotation de la caméra.]
 
 // HASH_VALUE B83EBD58DE9C068F
 // INDEX 6466
@@ -27211,19 +27211,19 @@ uittRadarUseCamera	[Si coché, utilise la rotation de la caméra pour la vue du 
 
 // HASH_VALUE 82A1901C06A3F72E
 // INDEX 6467
-uiTotalPatch	[PATCH TOTAL]
+uiTotalPatch	[Patch total]
 
 // HASH_VALUE D091B40C4890BC25
 // INDEX 6468
-uiRequiredFiles	[FICHIERS REQUIS]
+uiRequiredFiles	[Fichiers requis]
 
 // HASH_VALUE 8C42E02F0C01D422
 // INDEX 6469
-uiLodValue	[NORMAL]
+uiLodValue	[Normal]
 
 // HASH_VALUE 6878DC2CC23A6CB6
 // INDEX 6470
-uiDebugProfileFillRate	[Profilage du Fillrate]
+uiDebugProfileFillRate	[Profilage du taux de remplissage]
 
 // HASH_VALUE 0F54678C93B4CBF6
 // INDEX 6471
@@ -27238,9 +27238,9 @@ uiNoFiles	[Aucun fichier...]
 // INDEX 6473
 uiByte	[o]
 
-// HASH_VALUE EBE4B481E866A442
+// HASH_VALUE AA699882DFD7A376
 // INDEX 6474
-uiCP_Name_Generator	[Générateur de nom]
+uiCP_Name_Generator	[Générateur de noms]
 
 // HASH_VALUE 6498541C641C14C8
 // INDEX 6475
