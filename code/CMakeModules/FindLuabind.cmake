@@ -10,53 +10,61 @@ MACRO(FIND_CORRECT_LUA_VERSION)
     INCLUDE(CheckDepends)
 
     # check for Lua 5.3
-    SET(LUA53_LIBRARY "liblua5.3")
-    CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA53_LIBRARY LUALIB_FOUND)
+    SET(LUA53_LIBRARIES liblua5.3 liblua-5.3 liblua.so.5.3)
+
+    FOREACH(_LIB ${LUA53_LIBRARIES})
+      CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA53_LIBRARY LUALIB_FOUND)
+      IF(LUALIB_FOUND)
+        MESSAGE(STATUS "Luabind is using Lua 5.3")
+        FIND_PACKAGE(Lua53 REQUIRED)
+        BREAK()
+      ENDIF()
+    ENDFOREACH()
 
     IF(NOT LUALIB_FOUND)
-      # fedora (v22+)
-      SET(LUA53_LIBRARY "liblua-5.3")
-      CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA53_LIBRARY LUALIB_FOUND)
+      # check for Lua 5.2
+      SET(LUA52_LIBRARIES liblua5.2 liblua-5.2 liblua.so.5.2)
+
+      FOREACH(_LIB ${LUA52_LIBRARIES})
+        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA52_LIBRARY LUALIB_FOUND)
+        IF(LUALIB_FOUND)
+          MESSAGE(STATUS "Luabind is using Lua 5.2")
+          FIND_PACKAGE(Lua52 REQUIRED)
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
     ENDIF()
 
-    IF(LUALIB_FOUND)
-      MESSAGE(STATUS "Luabind is using Lua 5.3")
-      FIND_PACKAGE(Lua53 REQUIRED)
-    ELSE()
-      # check for Lua 5.2
-      SET(LUA52_LIBRARY "liblua5.2")
-      CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA52_LIBRARY LUALIB_FOUND)
+    IF(NOT LUALIB_FOUND)
+      # check for Lua 5.1
+      SET(LUA51_LIBRARIES liblua5.1 liblua-5.1 liblua.so.5.1)
 
-      IF(NOT LUALIB_FOUND)
-        # fedora (v20)
-        SET(LUA52_LIBRARY "liblua-5.2")
-        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA52_LIBRARY LUALIB_FOUND)
-      ENDIF()
-
-      IF(LUALIB_FOUND)
-        MESSAGE(STATUS "Luabind is using Lua 5.2")
-        FIND_PACKAGE(Lua52 REQUIRED)
-      ELSE()
-        # check for Lua 5.1
-        SET(LUA51_LIBRARY "liblua5.1")
+      FOREACH(_LIB ${LUA51_LIBRARIES})
         CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA51_LIBRARY LUALIB_FOUND)
-
         IF(LUALIB_FOUND)
           MESSAGE(STATUS "Luabind is using Lua 5.1")
           FIND_PACKAGE(Lua51 REQUIRED)
-        ELSE()
-          # check for Lua 5.0
-          SET(LUA50_LIBRARY "liblua5.0")
-          CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA50_LIBRARY LUALIB_FOUND)
-
-          IF(LUALIB_FOUND)
-            MESSAGE(STATUS "Luabind is using Lua 5.0")
-            FIND_PACKAGE(Lua50 REQUIRED)
-          ELSE()
-            MESSAGE(FATAL_ERROR "Can't determine Lua version used by Luabind")
-          ENDIF()
+          BREAK()
         ENDIF()
-      ENDIF()
+      ENDFOREACH()
+    ENDIF()
+
+    IF(NOT LUALIB_FOUND)
+      # check for Lua 5.0
+      SET(LUA50_LIBRARIES liblua5.0 liblua-5.0 liblua.so.5.0)
+
+      FOREACH(_LIB ${LUA50_LIBRARIES})
+        CHECK_LINKED_LIBRARY(LUABIND_LIBRARY_RELEASE LUA50_LIBRARY LUALIB_FOUND)
+        IF(LUALIB_FOUND)
+          MESSAGE(STATUS "Luabind is using Lua 5.0")
+          FIND_PACKAGE(Lua50 REQUIRED)
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+    ENDIF()
+
+    IF(NOT LUALIB_FOUND)
+      MESSAGE(FATAL_ERROR "Can't determine Lua version used by Luabind")
     ENDIF()
   ELSE()
     # TODO: find a way to detect Lua version
