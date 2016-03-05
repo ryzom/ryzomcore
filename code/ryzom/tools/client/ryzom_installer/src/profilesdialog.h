@@ -19,6 +19,8 @@
 
 #include "ui_profiles.h"
 
+class CProfilesModel;
+
 class CProfilesDialog : public QDialog, public Ui::ProfilesDialog
 {
 	Q_OBJECT
@@ -32,6 +34,19 @@ private slots:
 
 	void onAddProfile();
 	void onDeleteProfile();
+	void onProfileClicked(const QModelIndex &index);
+
+	void displayProfile(int index);
+	void saveProfile(int index);
+	void deleteProfile(int index);
+	void addProfile();
+
+	void onExecutableBrowseClicked();
+
+private:
+	CProfilesModel *m_model;
+
+	int m_currentProfileIndex;
 };
 
 #endif
