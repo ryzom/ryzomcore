@@ -262,6 +262,7 @@ namespace NLGUI
 		dirt();
 		_Texts.clear();
 		_Textures.clear();
+		_Grayed.clear();
 	}
 
 	// ***************************************************************************
@@ -270,6 +271,7 @@ namespace NLGUI
 		dirt();
 		_Texts.push_back(make_pair((uint)_Texts.size(), text));
 		_Textures.push_back(std::string());
+		_Grayed.push_back(false);
 	}
 
 	// ***************************************************************************
@@ -292,9 +294,11 @@ namespace NLGUI
 			{
 				_Texts[t+1] = _Texts[t];
 				_Textures[t+1] = _Textures[t];
+				_Grayed[t+1] = _Grayed[t];
 			}
 			_Texts[i] = make_pair(i, text);
 			_Textures[i] = std::string();
+			_Grayed[i] = false;
 		}
 		else if(i==_Texts.size())
 			addText(text);
@@ -309,6 +313,24 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void	CDBGroupComboBox::setGrayed(uint i, bool g)
+	{
+		dirt();
+		if(i<_Grayed.size())
+			_Grayed[i] = g;
+	}
+
+	// ***************************************************************************
+	const bool	CDBGroupComboBox::getGrayed(uint i) const
+	{
+		if(i<_Grayed.size())
+			return _Grayed[i];
+		else
+			return false;
+	}
+
+
+	// ***************************************************************************
 	void	CDBGroupComboBox::removeText(uint nPos)
 	{
 		dirt();
@@ -316,6 +338,7 @@ namespace NLGUI
 		{
 			_Texts.erase( _Texts.begin()+nPos );
 			_Textures.erase( _Textures.begin()+nPos );
+			_Grayed.erase ( _Grayed.begin()+nPos );
 		}
 	}
 
@@ -364,7 +387,6 @@ namespace NLGUI
 		else
 			return null;
 	}
-
 
 	// ***************************************************************************
 	void		CDBGroupComboBox::setSelection(sint32 val)
@@ -619,6 +641,7 @@ namespace NLGUI
 				}
 				groupMenu->addLine(getText(i), "combo_box_select_end", toString(i),
 					"", std::string(), getTexture(i).toString(), checkable);
+				groupMenu->setGrayedLine(i, getGrayed(i));
 			}
 
 

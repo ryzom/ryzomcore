@@ -34,6 +34,7 @@ namespace NLGUI
 	class CCtrlButton;
 	class CCtrlScroll;
 	class CGroupList;
+	class CGroupMenu;
 	class CDBGroupComboBox;
 	class CGroupParagraph;
 
@@ -189,6 +190,7 @@ namespace NLGUI
 		std::string		DefaultFormTextGroup;
 		std::string		DefaultFormTextAreaGroup;
 		std::string		DefaultFormSelectGroup;
+		std::string		DefaultFormSelectBoxMenuGroup;
 		std::string		DefaultCheckBoxBitmapNormal;
 		std::string		DefaultCheckBoxBitmapPushed;
 		std::string		DefaultCheckBoxBitmapOver;
@@ -345,6 +347,7 @@ namespace NLGUI
 
 		// Add a combo box in the current paragraph
 		CDBGroupComboBox *addComboBox(const std::string &templateName, const char *name);
+		CGroupMenu *addSelectBox(const std::string &templateName, const char *name);
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
@@ -409,6 +412,10 @@ namespace NLGUI
 		double			_TimeoutValue;			// the timeout in seconds
 		double			_ConnectingTimeout;
 		sint			_RedirectsRemaining;
+		// Automatic page refresh
+		double			_LastRefreshTime;
+		double			_NextRefreshTime;
+		std::string		_RefreshUrl;
 
 		// minimal embeded lua script support
 		// Note : any embeded script is executed immediately after the closing
@@ -626,6 +633,10 @@ namespace NLGUI
 					TextArea = NULL;
 					Checkbox = NULL;
 					ComboBox = NULL;
+					SelectBox = NULL;
+					sbRBRef = NULL;
+					sbMultiple = false;
+					sbOptionDisabled = -1;
 					InitialSelection = 0;
 				}
 
@@ -643,6 +654,19 @@ namespace NLGUI
 
 				// Combobox group
 				CDBGroupComboBox *ComboBox;
+
+				// Combobox with multiple selection or display size >= 2
+				CGroupMenu *SelectBox;
+
+				// Single or multiple selections for SelectBox
+				bool sbMultiple;
+
+				// Marks OPTION element as disabled
+				// Only valid when parsing html
+				sint sbOptionDisabled;
+
+				// First radio button in SelectBox if single selection
+				CCtrlBaseButton *sbRBRef;
 
 				// select values (for the <select> tag)
 				std::vector<std::string> SelectValues;

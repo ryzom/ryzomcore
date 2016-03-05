@@ -124,7 +124,7 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 		}
 		else
 		{
-			nlwarning("PEM_read_bio_X509 failed...");
+			nlwarning("Unable to read PEM info");
 			res = CURLE_SSL_CACERT;
 		}
 
