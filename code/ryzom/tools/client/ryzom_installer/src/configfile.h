@@ -40,6 +40,8 @@ struct CServer
 
 extern const CServer NoServer;
 
+typedef QVector<CServer> CServers;
+
 struct CProfile
 {
 	CProfile()
@@ -57,6 +59,8 @@ struct CProfile
 };
 
 extern const CProfile NoProfile;
+
+typedef QVector<CProfile> CProfiles;
 
 /**
  * Config file management and other stuff related to location of files/directories.
@@ -94,9 +98,15 @@ public:
 
 	static CConfigFile* getInstance();
 
+	CServers getServers() const { return m_servers; }
+	void setServers(const CServers &servers) { m_servers = servers; }
+
 	int getServersCount() const;
 	const CServer& getServer(int i = -1) const;
 	const CServer& getServer(const QString &id) const;
+
+	CProfiles getProfiles() const { return m_profiles; }
+	void setProfiles(const CProfiles &profiles) { m_profiles = profiles; }
 
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
@@ -149,8 +159,8 @@ private:
 	int m_defaultServer;
 	int m_defaultProfile;
 
-	QVector<CServer> m_servers;
-	QVector<CProfile> m_profiles;
+	CServers m_servers;
+	CProfiles m_profiles;
 
 	QString m_installationDirectory;
 	QString m_srcDirectory;
