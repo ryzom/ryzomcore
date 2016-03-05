@@ -52,7 +52,7 @@ struct CProfile
 	QString name;
 	QString server;
 	QString executable;
-	QString parameters;
+	QString arguments;
 	QString comments;
 };
 
