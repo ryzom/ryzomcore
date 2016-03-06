@@ -27262,3 +27262,11 @@ uiCP_FirstName	[Prénom]
 // INDEX 6479
 uiCP_LastName	[Nom]
 
+// HASH_VALUE 6DA7FC912D38D095
+// INDEX 6480
+uiHorizontal	[Horizontale]
+
+// HASH_VALUE 749C54586C5834A4
+// INDEX 6481
+uiVertical	[Verticale]
+

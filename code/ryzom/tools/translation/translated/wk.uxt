@@ -27484,10 +27484,10 @@ uiNoFiles	[No Files...]
 // INDEX 6473
 uiByte	[B]
 
-// name generator title
-// HASH_VALUE EBE4B481E866A442
+// names generator title
+// HASH_VALUE AA699882DFD7A376
 // INDEX 6474
-uiCP_Name_Generator	[Name generator]
+uiCP_Name_Generator	[Names generator]
 
 // for the generate button
 // HASH_VALUE 6498541C641C14C8
@@ -27513,4 +27513,12 @@ uiCP_FirstName	[First name]
 // HASH_VALUE 6467007F5645D768
 // INDEX 6479
 uiCP_LastName	[Last name]
+
+// HASH_VALUE 6DA7FC912D38D095
+// INDEX 6480
+uiHorizontal	[Horizontal]
+
+// HASH_VALUE 749C54586C5834A4
+// INDEX 6481
+uiVertical	[Vertical]
 
