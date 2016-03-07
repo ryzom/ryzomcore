@@ -648,6 +648,7 @@ public :
 	 * display item infos
 	 */
 	void displayInLog(NLMISC::CLog &log);
+	bool getStats(const std::string &stats, std::string &final );
 
 	/// accessors to the action latency end date
 	inline NLMISC::TGameCycle getLatencyEndDate(){ return _LatencyEndDate; }
@@ -679,8 +680,19 @@ public :
 	/// set required skill level
 	inline void setRequiredSkillLevel2( uint16 l ) { _RequiredSkillLevel2 = l; }
 
-	bool getLockedByOwner() const { return _LockedByOwner; }
+	/// get Required Faction
+	inline const std::string & getRequiredFaction() const { return _RequiredFaction;}
+	/// set Required Faction
+	inline void setRequiredFaction(const std::string & str){ _RequiredFaction = str;}
+
+	inline bool getLockedByOwner() const { return _LockedByOwner; }
 	void setLockedByOwner(bool value);
+
+	inline bool getMovable() const { return _Movable; }
+	inline void setMovable(bool value) { _Movable = value; }
+
+	inline bool getUnMovable() const { return _UnMovable; }
+	inline void setUnMovable(bool value) { _UnMovable = value; }
 
 	/// get required stat
 	inline CHARACTERISTICS::TCharacteristics getRequiredCharac() const { return _RequiredCharac; }
@@ -945,6 +957,7 @@ private:
 
 	// required skill
 	bool				_UseNewSystemRequirement;
+	std::string			_RequiredFaction;
 	SKILLS::ESkills		_RequiredSkill;
 	uint16				_RequiredSkillLevel;
 	SKILLS::ESkills		_RequiredSkill2;
@@ -958,6 +971,8 @@ private:
 
 	ucstring			_CustomText;
 	bool                _LockedByOwner;
+	bool                _UnMovable;
+	bool                _Movable;
 	uint8               _PetIndex;
 	ucstring            _CustomName;
 };

@@ -30,9 +30,6 @@
 #include <shellapi.h>
 #endif
 
-// game share
-#include "game_share/ryzom_version.h"
-
 // Client
 #include "sheets_packer_init.h"
 

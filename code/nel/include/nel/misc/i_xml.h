@@ -25,8 +25,12 @@
 #include "types_nl.h"
 #include "stream.h"
 
-// Include from libxml2
-#include <libxml/parser.h>
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
+
+typedef struct _xmlParserCtxt xmlParserCtxt;
+typedef xmlParserCtxt *xmlParserCtxtPtr;
 
 namespace NLMISC {
 
@@ -124,11 +128,11 @@ public:
 
 	/** Get the first child node pointer of type. NULL if no node of type.
 	  */
-	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, xmlElementType type);
+	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, sint /* xmlElementType */ type);
 
 	/** Get the next child node pointer of type. NULL if no node of type.
 	  */
-	static xmlNodePtr getNextChildNode (xmlNodePtr last, xmlElementType type);
+	static xmlNodePtr getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ type);
 
 	/** Count number of sub node named with a given name for a given node.
 	  */
@@ -136,7 +140,7 @@ public:
 
 	/** Count number of sub node of type for a given node.
 	  */
-	static uint		countChildren (xmlNodePtr node, xmlElementType type);
+	static uint		countChildren (xmlNodePtr node, sint /* xmlElementType */ type);
 
 	/**
 	  * Read a property string

@@ -417,7 +417,7 @@ void CStringManagerModule::registerTableRequested(TSessionId sessionId,CObject* 
 	//for each entry of the local table
 	for(uint i=0;i<max;++i)
 	{
-		CObject* text = textsTable->getValue(i);
+		CObject* text = textsTable->getValueAtPos(i);
 		CObject* tmp = text->getAttr("Id");
 		nlassert(tmp);
 		std::string localId = tmp->toString();

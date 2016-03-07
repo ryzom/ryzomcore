@@ -113,7 +113,7 @@ CSmallStringManager::CSmallStringManager(CObject* textManager)
 		return;
 	}
 	CObject* texts = textManager->getAttr("Texts");
-	uint32 maxId = static_cast<uint32>(textManager->getAttr("MaxId")->toNumber());
+	uint32 maxId = static_cast<uint32>(textManager->getAttr("MaxId")->toInteger());
 	CObject* unused = textManager->getAttr("UnusedIds");
 	uint32 max = unused->getSize();
 
@@ -123,7 +123,7 @@ CSmallStringManager::CSmallStringManager(CObject* textManager)
 	//unused ids
 	for(uint32 i=0;i<max;i++)
 	{
-		uint32 id = static_cast<uint32>(unused->getValue(i)->toNumber());
+		uint32 id = static_cast<uint32>(unused->getValueAtPos(i)->toInteger());
 		_FreeIds.insert(id);
 	}
 
@@ -131,10 +131,10 @@ CSmallStringManager::CSmallStringManager(CObject* textManager)
 	max = texts->getSize();
 	for(uint32 i=0;i<max;i++)
 	{
-		CObject* entry = texts->getValue(i);
+		CObject* entry = texts->getValueAtPos(i);
 		std::string text = entry->getAttr("Text")->toString();
-		uint32 textId = static_cast<uint32>(entry->getAttr("TextId")->toNumber());
-		uint32 textCount = static_cast<uint32>(entry->getAttr("Count")->toNumber());
+		uint32 textId = static_cast<uint32>(entry->getAttr("TextId")->toInteger());
+		uint32 textCount = static_cast<uint32>(entry->getAttr("Count")->toInteger());
 		_StringToId.insert(std::pair<std::string, uint32>(text, textId));
 		_IdToString.insert( std::pair<uint32, std::pair<std::string, uint32> >(textId, std::pair<std::string, uint32>(text, textCount) ) );
 	}

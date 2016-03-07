@@ -1409,7 +1409,7 @@ bool	CDatabase::isReferenceUpToDate()
 		{
 			if (timestamp > _State.EndTimestamp)
 			{
-				CFile::moveFile((files[i]+".disabled").c_str(), files[i].c_str());
+				CFile::moveFile(files[i]+".disabled", files[i]);
 				continue;
 			}
 

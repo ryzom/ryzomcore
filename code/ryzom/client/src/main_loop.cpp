@@ -50,7 +50,6 @@
 #include "game_share/brick_types.h"
 #include "game_share/light_cycle.h"
 #include "game_share/time_weather_season/time_and_season.h"
-#include "game_share/ryzom_version.h"
 #include "game_share/bot_chat_types.h"
 // PACS
 #include "nel/pacs/u_global_position.h"
@@ -2016,7 +2015,7 @@ bool mainLoop()
 				}
 
 				// Temp for weather test
-				if (ClientCfg.ManualWeatherSetup && ContinentMngr.cur() && ContinentMngr.cur()->WeatherFunction)
+				if (ClientCfg.ManualWeatherSetup)
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
 					static float displayHourDelta = 0.04f; // static for edition during debug..

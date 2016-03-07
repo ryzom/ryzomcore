@@ -28,7 +28,7 @@ using NL3D::CDriverGL;
 #endif
 
 @interface CocoaWindowDelegate : NSObject
-#if defined(MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#ifdef NL_MAC_VERSION_10_6_UP
 <NSWindowDelegate>
 #endif
 {

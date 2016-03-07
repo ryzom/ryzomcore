@@ -74,9 +74,9 @@ namespace NLGUI
 		class IDeletionWatcher
 		{
 		public:
-			IDeletionWatcher(){}
-			virtual ~IDeletionWatcher(){}
-			virtual void onDeleted( const std::string &name ){}
+			IDeletionWatcher() {}
+			virtual ~IDeletionWatcher() {}
+			virtual void onDeleted( const std::string &/* name */) {}
 		};
 
 		enum EStrech

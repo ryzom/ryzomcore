@@ -37,11 +37,9 @@ static Atom XA_WM_DELETE_WINDOW = 0;
 
 namespace NLMISC {
 
-CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _driver(NULL)
+CUnixEventEmitter::CUnixEventEmitter ():_dpy(NULL), _win(0), _im(NULL), _ic(NULL), _driver(NULL)
 {
-	_im = 0;
-	_ic = 0;
-	_SelectionOwned=false;
+	_SelectionOwned = false;
 }
 
 CUnixEventEmitter::~CUnixEventEmitter()
@@ -84,26 +82,36 @@ void CUnixEventEmitter::createIM()
 
 	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
 
-	char *modifiers = XSetLocaleModifiers(getenv("XMODIFIERS"));
-
 	_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
-	if (_im)
+	if (_im == NULL)
 	{
-		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
-//		XSetICFocus(_ic);
-	}
-	else
-	{
-		_ic = 0;
-		nlwarning("XCreateIM failed");
-	}
+		XSetLocaleModifiers("@im=local");
+ 
+		_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
-	if (!_ic)
-	{
-		nlwarning("XCreateIC failed");
-	}
+		if (_im == NULL)
+		{
+			XSetLocaleModifiers("@im=");
 
+			_im = XOpenIM(_dpy, NULL, NULL, NULL);
+
+			if (_im == NULL)
+			{
+				nlwarning("XOpenIM failed");
+			}
+		}
+	}
+ 
+ 	if (_im)
+ 	{
+ 		_ic = XCreateIC(_im, XNInputStyle, XIMPreeditNothing | XIMStatusNothing, XNClientWindow, _win, XNFocusWindow, _win, NULL);
+
+		if (!_ic)
+		{
+			nlwarning("XCreateIC failed");
+		}
+	}
 #endif
 }
 
@@ -159,11 +167,7 @@ static Bool isMouseMoveEvent(Display *display, XEvent *event, XPointer arg)
 }
 
 #ifndef AltMask
-# ifdef NL_OS_MAC
-#  define AltMask     (8192)
-# else
 #  define AltMask     (Mod1Mask)
-# endif
 #endif
 
 TMouseButton getMouseButton (uint32 state)
@@ -194,33 +198,6 @@ TKey getKeyFromKeycode (uint keycode)
 	// keycodes are depending on system
 	switch (keycode)
 	{
-#ifdef NL_OS_MAC
-	/*
-		TODO use key mapping from driver/opengl/mac/cocoa_adapter.mm
-	*/
-	case 0x12: return Key1;
-	case 0x13: return Key2;
-	case 0x14: return Key3;
-	case 0x15: return Key4;
-	case 0x16: return Key6;
-	case 0x17: return Key5;
-	case 0x18: return KeyEQUALS;
-	case 0x19: return Key9;
-	case 0x1a: return Key7;
-	case 0x1c: return Key8;
-	case 0x1d: return Key0;
-	case 0x1e: return KeyRBRACKET;
-	case 0x21: return KeyLBRACKET;
-	case 0x27: return KeyAPOSTROPHE;
-	case 0x29: return KeySEMICOLON;
-	case 0x2a: return KeyBACKSLASH;
-	case 0x2b: return KeyCOMMA;
-	case 0x2c: return KeySLASH;
-	case 0x2f: return KeyPERIOD;
-//	case 0x5e: return KeyOEM_102;
-//	case 0x30: return KeyTILDE;
-//	case 0x3d: return KeyPARAGRAPH;
-#else
 	case 0x0a: return Key1;
 	case 0x0b: return Key2;
 	case 0x0c: return Key3;
@@ -271,7 +248,6 @@ TKey getKeyFromKeycode (uint keycode)
 	case 0x38: return KeyB;
 	case 0x39: return KeyN;
 	case 0x3a: return KeyM;
-#endif
 	default:
 //	nlwarning("missing keycode 0x%x %d '%c'", keycode, keycode, keycode);
 	break;
@@ -535,7 +511,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 		if (keyCode)
 		{
 			TKey key = getKeyFromKeySym(k);
-			if(key == KeyNOKEY)
+			if (key == KeyNOKEY)
 				key = getKeyFromKeycode(keyCode);
 
 			// search for key in map
@@ -548,12 +524,12 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 			_PressedKeys[key] = true;
 
 			// don't send a control character when deleting
-			if (key == KeyDELETE)
-				c = 0;
+			if (key == KeyDELETE) c = 0;
 		}
 
 		Text[c] = '\0';
-		if(c>0)
+
+		if (c > 0)
 		{
 #ifdef X_HAVE_UTF8_STRING
 			ucstring ucstr;

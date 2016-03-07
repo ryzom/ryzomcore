@@ -62,9 +62,12 @@ public:
 	void setWorldSize(float f) { _WorldSize = f; }
 	float getWorldSize() const { return (float)_WorldSize; }
 
+	void setUseCamera(bool b) { _UseCamera = b; }
+
 protected:
 
 	double _WorldSize;
+	bool   _UseCamera;
 
 	struct CRadarSpotDesc
 	{

@@ -312,8 +312,7 @@ namespace NLGUI
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"max_sizeparent" );
 		if (ptr)
 		{
-			string idparent = ptr.str();
-			idparent = NLMISC::strlwr(idparent);
+			string idparent = NLMISC::toLower(ptr.str());
 			if (idparent != "parent")
 			{
 				if (parentGroup)
@@ -1174,7 +1173,7 @@ namespace NLGUI
 	int CInterfaceGroup::luaGetNumGroups(CLuaState &ls)
 	{
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getNumGroups", 0);
-		ls.push((double) _ChildrenGroups.size());
+		ls.push((uint)_ChildrenGroups.size());
 		return 1;
 	}
 
@@ -1184,7 +1183,7 @@ namespace NLGUI
 		const char *funcName = "CInterfaceGroup::getGroup";
 		CLuaIHM::checkArgCount(ls, "CInterfaceGroup::getGroup", 1);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER);
-		uint index = (uint) ls.toNumber(1);
+		uint index = (uint) ls.toInteger(1);
 		if (index >= _ChildrenGroups.size())
 		{
 			CLuaIHM::fails(ls, "getGroup : try to index group %s, but there are only %d son groups", ls.toString(1), (int) _ChildrenGroups.size());
@@ -2140,7 +2139,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_ChildrenGroups[k]);
+				NLGUI::CInterfaceGroup *group = _ChildrenGroups[k];
+				const type_info &ti = typeid(*group);
 				typeName = ti.name();
 			}
 			nlinfo("Group %d, name = %s, type=%s", k,  _ChildrenGroups[k] ? _ChildrenGroups[k]->getId().c_str() : "???", typeName.c_str());
@@ -2156,7 +2156,8 @@ namespace NLGUI
 			std::string typeName = "???";
 			if (_ChildrenGroups[k])
 			{
-				const type_info &ti = typeid(*_EltOrder[k]);
+				NLGUI::CViewBase *view = _EltOrder[k];
+				const type_info &ti = typeid(*view);
 				typeName = ti.name();
 			}
 			CInterfaceElement *el = _EltOrder[k];
@@ -2545,13 +2546,13 @@ namespace NLGUI
 			(*itr)->onWidgetDeleted( e );
 	}
 
-	void CInterfaceGroup::moveBy( sint32 x, sint32 y )
+	void CInterfaceGroup::moveBy(sint32 x, sint32 y)
 	{
-		CInterfaceElement::moveBy( x, y );
+		CInterfaceElement::moveBy(x, y);
 
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
+			CViewBase *v = _EltOrder[i];
 			v->updateCoords();
 		}
 	}
@@ -2565,26 +2566,26 @@ namespace NLGUI
 		std::string oldId;
 
 		// Reparent children
-		for( sint32 i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CInterfaceElement *e = _EltOrder[ i ];
+			CInterfaceElement *e = _EltOrder[i];
 
 			oldId = e->getId();
 
-			e->setW( e->getWReal() );
-			e->setH( e->getHReal() );
-			e->setSizeRef( "" );
+			e->setW(e->getWReal());
+			e->setH(e->getHReal());
+			e->setSizeRef("");
 
-			e->setParent( p );
+			e->setParent(p);
 			
-			e->setParentPos( p );
-			e->setParentSize( p );
-			e->alignTo( p );
+			e->setParentPos(p);
+			e->setParentSize(p);
+			e->alignTo(p);
 
-			p->addElement( e );
-			e->setIdRecurse( e->getShortId() );
+			p->addElement(e);
+			e->setIdRecurse(e->getShortId());
 
-			CWidgetManager::getInstance()->onWidgetMoved( oldId, e->getId() );
+			CWidgetManager::getInstance()->onWidgetMoved(oldId, e->getId());
 		}
 
 		_EltOrder.clear();
@@ -2602,29 +2603,29 @@ namespace NLGUI
 		sint32 maxx = std::numeric_limits< sint32 >::min();
 		sint32 maxy = std::numeric_limits< sint32 >::min();
 
-		sint32 tlx,tly,brx,bry;
+		sint32 tlx, tly, brx, bry;
 
 		// Find the min and max coordinates of the elements
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
+			CViewBase *v = _EltOrder[i];
 
-			v->getHSCoords( Hotspot_TL, tlx, tly );
-			v->getHSCoords( Hotspot_BR, brx, bry );
+			v->getHSCoords(Hotspot_TL, tlx, tly);
+			v->getHSCoords(Hotspot_BR, brx, bry);
 
-			if( tlx < minx )
+			if (tlx < minx)
 				minx = tlx;
-			if( brx > maxx )
+			if (brx > maxx)
 				maxx = brx;
-			if( bry < miny )
+			if (bry < miny)
 				miny = bry;
-			if( tly > maxy )
+			if (tly > maxy)
 				maxy = tly;
 		}
 
 		// Set the position and the width and height based on these coords
-		setW( maxx - minx );
-		setH( maxy - miny );
+		setW(maxx - minx);
+		setH(maxy - miny);
 		_WReal = getW();
 		_HReal = getH();
 		_XReal = minx;
@@ -2633,10 +2634,10 @@ namespace NLGUI
 
 	void CInterfaceGroup::alignElements()
 	{
-		for( int i = 0; i < _EltOrder.size(); i++ )
+		for(uint i = 0; i < _EltOrder.size(); ++i)
 		{
-			CViewBase *v = _EltOrder[ i ];
-			v->alignTo( this );
+			CViewBase *v = _EltOrder[i];
+			v->alignTo(this);
 		}
 	}
 

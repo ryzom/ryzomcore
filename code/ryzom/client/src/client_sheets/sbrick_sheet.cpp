@@ -113,22 +113,22 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	// read icons
 	string Icon;
 	root.getValueByName (Icon, "Client.Icon" );
-	Icon = strlwr(Icon);
+	Icon = toLower(Icon);
 	IdIcon = ClientSheetsStrings.add(Icon);
 
 	string IconBack;
 	root.getValueByName (IconBack, "Client.IconBack" );
-	IconBack = strlwr(IconBack);
+	IconBack = toLower(IconBack);
 	IdIconBack = ClientSheetsStrings.add(IconBack);
 
 	string IconOver;
 	root.getValueByName (IconOver, "Client.IconOver" );
-	IconOver = strlwr(IconOver);
+	IconOver = toLower(IconOver);
 	IdIconOver = ClientSheetsStrings.add(IconOver);
 
 	string IconOver2;
 	root.getValueByName (IconOver2, "Client.IconOver2" );
-	IconOver2 = strlwr(IconOver2);
+	IconOver2 = toLower(IconOver2);
 	IdIconOver2 = ClientSheetsStrings.add(IconOver2);
 
 	root.getValueByName (IconColor, "Client.IconColor" );
@@ -381,8 +381,7 @@ void CSBrickSheet::build (const NLGEORGES::UFormElm &root)
 	for(i=0;i<listBrick.size();i++)
 	{
 		CSheetId	sheetId;
-		string	str= listBrick[i];
-		strlwr(str);
+		string	str= toLower(listBrick[i]);
 		if(str.find(".sbrick")==string::npos)
 			str+= ".sbrick";
 		sheetId.buildSheetId(str);

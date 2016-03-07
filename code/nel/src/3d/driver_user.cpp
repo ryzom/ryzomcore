@@ -1484,6 +1484,20 @@ void			CDriverUser::setAnisotropicFilter(sint filter)
 	_Driver->setAnisotropicFilter(filter);
 }
 
+uint			CDriverUser::getAnisotropicFilter() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilter();
+}
+
+uint			CDriverUser::getAnisotropicFilterMaximum() const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getAnisotropicFilterMaximum();
+}
+
 void			CDriverUser::forceTextureResize(uint divisor)
 {
 	NL3D_HAUTO_UI_DRIVER;
@@ -1522,6 +1536,12 @@ const char*		CDriverUser::getVideocardInformation ()
 	NL3D_HAUTO_UI_DRIVER;
 
 	return _Driver->getVideocardInformation ();
+}
+sint			CDriverUser::getTotalVideoMemory () const
+{
+	NL3D_HAUTO_UI_DRIVER;
+
+	return _Driver->getTotalVideoMemory ();
 }
 uint			CDriverUser::getNbTextureStages()
 {

@@ -169,25 +169,25 @@ namespace NLGUI
 		if( _ColSelR.getNodePtr() != NULL )
 			s = _ColSelR.getNodePtr()->getFullName();
 		else
-			s = "";
+			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolr", BAD_CAST s.c_str() );
 
 		if( _ColSelG.getNodePtr() != NULL )
 			s = _ColSelG.getNodePtr()->getFullName();
 		else
-			s = "";
+			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolg", BAD_CAST s.c_str() );
 
 		if( _ColSelB.getNodePtr() != NULL )
 			s = _ColSelB.getNodePtr()->getFullName();
 		else
-			s = "";
+			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcolb", BAD_CAST s.c_str() );
 
 		if( _ColSelA.getNodePtr() != NULL )
 			s = _ColSelA.getNodePtr()->getFullName();
 		else
-			s = "";
+			s.clear();
 		xmlSetProp( node, BAD_CAST "dbcola", BAD_CAST s.c_str() );
 
 		return node;

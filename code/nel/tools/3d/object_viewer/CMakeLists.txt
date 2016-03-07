@@ -2,8 +2,6 @@ FILE(GLOB SRC *.cpp *.h)
 
 ADD_LIBRARY(object_viewer_dll SHARED ${SRC} object_viewer.rc)
 
-INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(object_viewer_dll 
 							nelmisc
 							nel3d
@@ -15,7 +13,7 @@ NL_DEFAULT_PROPS(object_viewer_dll "NeL, Tools, 3D: Object Viewer DLL")
 NL_ADD_RUNTIME_FLAGS(object_viewer_dll)
 NL_ADD_LIB_SUFFIX(object_viewer_dll)
 
-ADD_DEFINITIONS(${LIBXML2_DEFINITIONS} ${MFC_DEFINITIONS} -DOBJECT_VIEWER_LIB_EXPORTS)
+ADD_DEFINITIONS(${MFC_DEFINITIONS} -DOBJECT_VIEWER_LIB_EXPORTS)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(object_viewer_dll ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.cpp)

@@ -65,9 +65,11 @@ class CPlayerSheet;
 enum TLightGroup
 {
 	LightGroupAlways = 0,
-	LightGroupDay,
-	LightGroupNight,
-	LightGroupFireworks,
+	LightGroupLandscapeDiffuse = 1,
+	LightGroupNightCycle = 2,
+	LightGroupDayCycle = 3,
+	LightGroupLandscapeAmbient = 4,
+	LightGroupFireworks
 };
 
 class CSeeds;
@@ -226,7 +228,7 @@ uint getCurrentColorDepth();
 bool isWindowMaximized();
 
 // get all supported video modes
-sint getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList);
+bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<std::string> &stringModeList, std::vector<std::string> &stringFreqList, sint &nFoundMode, sint &nFoundFreq);
 
 #endif // CL_MISC_H
 

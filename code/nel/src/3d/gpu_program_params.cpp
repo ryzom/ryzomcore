@@ -25,18 +25,19 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/gpu_program_params.h>
+#include "std3d.h"
+#include "nel/misc/types_nl.h"
+#include "nel/3d/gpu_program_params.h"
 
 // STL includes
 
 // NeL includes
 // #include <nel/misc/debug.h>
-#include <nel/misc/vector.h>
-#include <nel/misc/matrix.h>
+#include "nel/misc/vector.h"
+#include "nel/misc/matrix.h"
 
 // Project includes
-#include <nel/3d/driver.h>
+#include "nel/3d/driver.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -545,7 +546,7 @@ size_t CGPUProgramParams::getOffset(const std::string &name) const
 void CGPUProgramParams::freeOffset(size_t offset)
 {
 	uint index = getIndexByOffset(offset);
-	if (index != ~0)
+	if (index != std::numeric_limits<uint>::max())
 	{
 		if (m_Map.size() > index)
 		{

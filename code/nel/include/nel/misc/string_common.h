@@ -186,8 +186,8 @@ inline std::string toString(const uint16 &val) { return toString("%hu", val); }
 inline std::string toString(const sint16 &val) { return toString("%hd", val); }
 inline std::string toString(const uint32 &val) { return toString("%u", val); }
 inline std::string toString(const sint32 &val) { return toString("%d", val); }
-inline std::string toString(const uint64 &val) { return toString("%"NL_I64"u", val); }
-inline std::string toString(const sint64 &val) { return toString("%"NL_I64"d", val); }
+inline std::string toString(const uint64 &val) { return toString("%" NL_I64 "u", val); }
+inline std::string toString(const sint64 &val) { return toString("%" NL_I64 "d", val); }
 
 #ifdef NL_COMP_GCC
 #	if GCC_VERSION == 40102
@@ -195,24 +195,27 @@ inline std::string toString(const sint64 &val) { return toString("%"NL_I64"d", v
 // error fix for size_t? gcc 4.1.2 requested this type instead of size_t ...
 inline std::string toString(const long unsigned int &val)
 {
-	if (sizeof(long unsigned int) == 8)
-		return toString((uint64)val);
+#ifdef _LP64
+	return toString((uint64)val);
+#else
 	return toString((uint32)val);
+#endif
 }
 
 #	endif
 #endif
 
 #if (SIZEOF_SIZE_T) == 8
-inline std::string toString(const size_t &val) { return toString("%"NL_I64"u", val); }
+inline std::string toString(const size_t &val) { return toString("%" NL_I64 "u", val); }
 #else
 #ifdef NL_OS_MAC
 inline std::string toString(const size_t &val) { return toString("%u", val); }
 #endif
 #endif
+
 inline std::string toString(const float &val) { return toString("%f", val); }
 inline std::string toString(const double &val) { return toString("%lf", val); }
-inline std::string toString(const bool &val) { return toString("%u", val?1:0); }
+inline std::string toString(const bool &val) { return val ? "1":"0"; }
 inline std::string toString(const std::string &val) { return val; }
 
 // stl vectors of bool use bit reference and not real bools, so define the operator for bit reference
@@ -234,69 +237,58 @@ inline bool fromString(const std::string &str, uint8 &val) { char *end; long v; 
 inline bool fromString(const std::string &str, sint8 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > SCHAR_MAX || v < SCHAR_MIN || end == str.c_str()) { val = 0; return false; } else { val = (sint8)v; return true; } }
 inline bool fromString(const std::string &str, uint16 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > USHRT_MAX || v < 0 || end == str.c_str()) { val = 0; return false; } else { val = (uint16)v; return true; } }
 inline bool fromString(const std::string &str, sint16 &val) { char *end; long v; errno = 0; v = strtol(str.c_str(), &end, 10); if (errno || v > SHRT_MAX || v < SHRT_MIN || end == str.c_str()) { val = 0; return false; } else { val = (sint16)v; return true; } }
-inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(str.c_str(), "%"NL_I64"u", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const std::string &str, uint64 &val) { bool ret = sscanf(str.c_str(), "%" NL_I64 "u", &val) == 1; if (!ret) val = 0; return ret; }
+inline bool fromString(const std::string &str, sint64 &val) { bool ret = sscanf(str.c_str(), "%" NL_I64 "d", &val) == 1; if (!ret) val = 0; return ret; }
 inline bool fromString(const std::string &str, float &val) { bool ret = sscanf(str.c_str(), "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
 inline bool fromString(const std::string &str, double &val) { bool ret = sscanf(str.c_str(), "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
 
 inline bool fromString(const std::string &str, bool &val)
 {
-	if( str.length() == 1 )
+	if (str.length() == 1)
 	{
-		if( str[ 0 ] == '1' )
+		const char c = str[0];
+
+		switch(c)
+		{
+			case '1':
+			case 't':
+			case 'T':
+			case 'y':
+			case 'Y':
 			val = true;
-		else
-		if( str[ 0 ] == '0' )
+			break;
+
+			case '0':
+			case 'f':
+			case 'F':
+			case 'n':
+			case 'N':
 			val = false;
-		else
+			break;
+
+			default:
+			val = false;
 			return false;
+		}
 	}
 	else
 	{
-		if( str == "true" )
+		if (str == "true" || str == "yes")
+		{
 			val = true;
-		else
-		if( str == "false" )
+		}
+		else if (str == "false" || str == "no")
+		{
 			val = false;
+		}
 		else
+		{
+			val = false;
 			return false;
+		}
 	}
 
 	return true;
-}
-
-inline bool fromString(const char *str, uint32 &val) { if (strstr(str, "-") != NULL) { val = 0; return false; } char *end; unsigned long v; errno = 0; v = strtoul(str, &end, 10); if (errno || v > UINT_MAX || end == str) { val = 0; return false; } else { val = (uint32)v; return true; } }
-inline bool fromString(const char *str, sint32 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > INT_MAX || v < INT_MIN || end == str) { val = 0; return false; } else { val = (sint32)v; return true; } }
-inline bool fromString(const char *str, uint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > UCHAR_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint8)v; return true; } }
-inline bool fromString(const char *str, sint8 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SCHAR_MAX || v < SCHAR_MIN || end == str) { val = 0; return false; } else { val = (sint8)v; return true; } }
-inline bool fromString(const char *str, uint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > USHRT_MAX || v < 0 || end == str) { val = 0; return false; } else { val = (uint16)v; return true; } }
-inline bool fromString(const char *str, sint16 &val) { char *end; long v; errno = 0; v = strtol(str, &end, 10); if (errno || v > SHRT_MAX || v < SHRT_MIN || end == str) { val = 0; return false; } else { val = (sint16)v; return true; } }
-inline bool fromString(const char *str, uint64 &val) { bool ret = sscanf(str, "%"NL_I64"u", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const char *str, sint64 &val) { bool ret = sscanf(str, "%"NL_I64"d", &val) == 1; if (!ret) val = 0; return ret; }
-inline bool fromString(const char *str, float &val) { bool ret = sscanf(str, "%f", &val) == 1; if (!ret) val = 0.0f; return ret; }
-inline bool fromString(const char *str, double &val) { bool ret = sscanf(str, "%lf", &val) == 1; if (!ret) val = 0.0; return ret; }
-
-inline bool fromString(const char *str, bool &val)
-{
-	switch (str[0])
-	{
-	case '1':
-	case 't':
-	case 'y':
-	case 'T':
-	case 'Y':
-		val = true;
-		return true;
-	case '0':
-	case 'f':
-	case 'n':
-	case 'F':
-	case 'N':
-		val = false;
-		return true;
-	}
-
-	return false;
 }
 
 inline bool fromString(const std::string &str, std::string &val) { val = str; return true; }

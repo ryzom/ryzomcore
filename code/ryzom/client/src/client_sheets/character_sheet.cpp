@@ -126,7 +126,7 @@ void CCharacterSheet::readEquipment(const NLGEORGES::UFormElm &form, const strin
 	string itemName;
 	if(!form.getValueByName(itemName, string(key + ".Item").c_str() ))
 		debug(NLMISC::toString("Key '%s.Item' not found.", key.c_str()));
-	slot.IdItem = ClientSheetsStrings.add(NLMISC::strlwr(itemName));
+	slot.IdItem = ClientSheetsStrings.add(NLMISC::toLower(itemName));
 
 	// Get the texture.
 	if(!form.getValueByName(slot.Texture, string(key + ".Texture").c_str() ))
@@ -221,7 +221,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 		if(AnimSetBaseName.empty())
 			debug("AnimSetBaseName is Empty.");
 		else
-			NLMISC::strlwr(AnimSetBaseName); // Force the CASE in UPPER to not be CASE SENSITIVE.
+			AnimSetBaseName = NLMISC::toLower(AnimSetBaseName); // Force the CASE in UPPER to not be CASE SENSITIVE.
 	}
 	else
 		debug("Key '3d data.AnimSetBaseName' not found.");
@@ -235,7 +235,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 			debug("Automaton is Empty.");
 		// Lower Case
 		else
-			NLMISC::strlwr(Automaton);
+			Automaton = NLMISC::toLower(Automaton);
 	}
 	// Key not Found
 	else

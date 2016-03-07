@@ -4176,7 +4176,7 @@ NLMISC_COMMAND(loadMap,"load a complete set of primitive files","<map name>")
 		// check that the continent is active
 		CUsedContinent &uc = CUsedContinent::instance();
 		uint32 in = uc.getInstanceForContinent(continentName);
-		if (in == INVALID_AI_INSTANCE)
+		if (in == std::numeric_limits<uint32>::max())
 		{
 			log.displayNL("loadMap : while loading map '%s', can't load primitive '%s' coz continent '%s' is not active",
 				args[0].c_str(),
@@ -4216,7 +4216,7 @@ NLMISC_COMMAND(unloadMap,"unload a complete set of primitive files","<map name>"
 			// check that the continent is active
 			CUsedContinent &uc = CUsedContinent::instance();
 			uint32 in = uc.getInstanceForContinent(continentName);
-			if (in == INVALID_AI_INSTANCE)
+			if (in == std::numeric_limits<uint32>::max())
 			{
 				log.displayNL("unloadMap : while loading map '%s', can't load primitive '%s' coz continent '%s' is not active",
 					args[0].c_str(),

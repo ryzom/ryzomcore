@@ -41,39 +41,39 @@ namespace NLGUI
 
 		EBDPrivate()
 		{
-			for( int i = 0; i < TCOUNT; i++ )
+			for(sint i = 0; i < TCOUNT; ++i)
 			{
-				_Textures.push_back( new CViewBitmap( CViewBase::TCtorParam() ) );
+				_Textures.push_back(new CViewBitmap( CViewBase::TCtorParam()));
 			}
 		}
 
 		~EBDPrivate()
 		{
-			for( int i = 0; i < _Textures.size(); i++ )
-				delete _Textures[ i ];
+			for(uint i = 0; i < _Textures.size(); ++i)
+				delete _Textures[i];
 			_Textures.clear();
 		}
 
 		void draw()
 		{
-			for( int i = 0; i < _Textures.size(); i++ )
+			for(uint i = 0; i < _Textures.size(); ++i)
 			{
-				CViewBitmap *bm = _Textures[ i ];
+				CViewBitmap *bm = _Textures[i];
 				bm->draw();
 			}
 		}
 
 		void updateCoords()
 		{
-			for( int i = 0; i < _Textures.size(); i++ )
+			for(uint i = 0; i < _Textures.size(); ++i)
 			{
-				CViewBitmap *bm = _Textures[ i ];
+				CViewBitmap *bm = _Textures[i];
 				bm->fitTexture();
 			}
 
 			// W and H parameters depend on the sizes of the other textures
 			// Negative sizes mean that the sizes are that much smaller than the parent
-			sint32 w,h;
+			sint32 w, h;
 			h = _Textures[ TL ]->getHReal() + _Textures[ BL ]->getHReal();
 			h *= -1;
 			_Textures[ L ]->setH( h );
@@ -97,22 +97,22 @@ namespace NLGUI
 			_Textures[ BG ]->setW( w );
 			_Textures[ BG ]->setH( h );
 
-			for( int i = 0; i < _Textures.size(); i++ )
+			for(uint i = 0; i < _Textures.size(); ++i)
 			{
-				CViewBitmap *bm = _Textures[ i ];
+				CViewBitmap *bm = _Textures[i];
 				bm->updateCoords();
 			}
 		}
 
 		void setup( CInterfaceGroup *parent )
 		{
-			for( int i = 0; i < _Textures.size(); i++ )
+			for(uint i = 0; i < _Textures.size(); ++i)
 			{
-				CViewBitmap *bm = _Textures[ i ];
-				bm->setParent( parent );
-				bm->setParentPos( parent );
-				bm->setParentSize( parent );
-				bm->setEditorSelectable( false );
+				CViewBitmap *bm = _Textures[i];
+				bm->setParent(parent);
+				bm->setParentPos(parent);
+				bm->setParentSize(parent);
+				bm->setEditorSelectable(false);
 			}
 
 			_Textures[ TL ]->setPosRef( Hotspot_TL );

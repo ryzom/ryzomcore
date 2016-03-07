@@ -4,6 +4,7 @@ FILE(GLOB SRC *.cpp *.h)
 ADD_LIBRARY(georges_dll SHARED ${SRC} georges_edit.rc)
 
 INCLUDE_DIRECTORIES(${NEL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${LIBXML2_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(georges_dll nelmisc nelgeorges)
 NL_DEFAULT_PROPS(georges_dll "Ryzom, Tools, Georges: Georges Dll")

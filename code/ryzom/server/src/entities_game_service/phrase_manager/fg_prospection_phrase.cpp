@@ -17,7 +17,6 @@
 
 
 #include "stdpch.h"
-#include <functional>
 #include "fg_prospection_phrase.h"
 #include "nel/misc/common.h"
 #include "nel/misc/fast_floor.h"

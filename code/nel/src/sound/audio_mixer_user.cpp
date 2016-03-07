@@ -54,6 +54,7 @@
 #include "nel/sound/sound_bank.h"
 #include "nel/sound/group_controller.h"
 #include "nel/sound/containers.h"
+#include "nel/sound/audio_decoder.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -2689,21 +2690,30 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 	{
 		std::string artist;
 		std::string title;
-		if (_SoundDriver->getMusicInfo(filename, artist, title))
+
+		if (!_SoundDriver->getMusicInfo(filename, artist, title))
 		{
-			if (!title.empty())
-			{
-				if (!artist.empty()) result = artist + " - " + title;
-				else result = title;
-			}
-			else if (!artist.empty())
-			{
-				result = artist + " - " + CFile::getFilename(filename);
-			}
-			else result = CFile::getFilename(filename);
-			return true;
+			// use 3rd party libraries supported formats
+			IAudioDecoder::getInfo(filename, artist, title);
 		}
+
+		if (!title.empty())
+		{
+			if (!artist.empty()) result = artist + " - " + title;
+			else result = title;
+		}
+		else if (!artist.empty())
+		{
+			result = artist + " - " + CFile::getFilename(filename);
+		}
+		else
+		{
+			result = CFile::getFilename(filename);
+		}
+
+		return true;
 	}
+
 	result = "???";
 	return false;
 }
@@ -2751,7 +2761,14 @@ bool	CAudioMixerUser::isEventMusicEnded()
 /// Get audio/container extensions that are currently supported by nel or the used driver implementation.
 void CAudioMixerUser::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	_SoundDriver->getMusicExtensions(extensions);
+	if (_SoundDriver)
+	{
+		// add file formats supported by driver
+		_SoundDriver->getMusicExtensions(extensions);
+	}
+
+	// add 3rd party libraries support file formats
+	IAudioDecoder::getMusicExtensions(extensions);
 }
 
 /// Add a reverb environment

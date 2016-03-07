@@ -65,6 +65,7 @@
 #include "../far_tp.h"
 #include "nel/gui/interface_link.h"
 #include "../npc_icon.h"
+#include "user_agent.h"
 
 // Game Share
 #include "game_share/character_summary.h"
@@ -2911,6 +2912,7 @@ REGISTER_ACTION_HANDLER (CHandlerToggleInventory, "toggle_inventory");
 // ***************************************************************************
 
 #define GAME_CONFIG_DDX					"ui:interface:game_config:content:all"
+#define GAME_CONFIG_TREE_LIST			"ui:interface:game_config:content:sbtree:tree_list"
 
 static vector<UDriver::CMode> VideoModes;
 #define GAME_CONFIG_VIDEO_MODES_COMBO	"ui:interface:game_config:content:general:video_modes"
@@ -2930,6 +2932,10 @@ static vector<UDriver::CMode> VideoModes;
 // The combo for Texture Mode selected
 #define GAME_CONFIG_TEXTURE_MODE_COMBO	"ui:interface:game_config:content:general:texture_mode:combo"
 #define GAME_CONFIG_TEXTURE_MODE_DB		"UI:TEMP:TEXTURE_MODE"
+
+// Anisotropic Filtering controls
+#define GAME_CONFIG_ANISOTROPIC_COMBO	"ui:interface:game_config:content:fx:anisotropic_gr:anisotropic"
+#define GAME_CONFIG_ANISOTROPIC_DB		"UI:TEMP:ANISOTROPIC"
 
 // The 3 possible modes editable (NB: do not allow client.cfg HDEntityTexture==1 and DivideTextureSizeBy2=2
 enum	TTextureMode	{LowTextureMode= 0, NormalTextureMode= 1, HighTextureMode= 2};
@@ -2990,12 +2996,15 @@ public:
 		if (Driver == NULL) return;
 
 		VideoModes.clear();
-		vector<string> stringModeList;
+		vector<string> stringModeList, stringFreqList;
+		sint nFoundMode, nFoundFreq;
 
-		sint nFoundMode = getRyzomModes(VideoModes, stringModeList);
+		getRyzomModes(VideoModes, stringModeList, stringFreqList, nFoundMode, nFoundFreq);
 
 		// Initialize interface combo box
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// resolutions
 		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
 		if( pCB )
 		{
@@ -3003,10 +3012,22 @@ public:
 			for (sint j = 0; j < (sint)stringModeList.size(); j++)
 				pCB->addText(ucstring(stringModeList[j]));
 		}
+
+		// frequencies
+		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
+		if( pCB )
+		{
+			pCB->resetTexts();
+			for (sint j = 0; j < (sint)stringFreqList.size(); j++)
+				pCB->addText(ucstring(stringFreqList[j]));
+		}
+
 		// -1 is important to indicate we set this value in edit mode
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(-1);
-		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_MODE_DB )->setValue32(nFoundMode);
+
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_VIDEO_FREQ_DB )->setValue32(nFoundFreq);
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
 		if (pBut)
@@ -3017,7 +3038,7 @@ public:
 
 		// **** Init Texture Size Modes
 		// init the combo box, according to Texture Installed or not
-		pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
+		pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_TEXTURE_MODE_COMBO ));
 		if( pCB )
 		{
 			pCB->resetTexts();
@@ -3027,12 +3048,44 @@ public:
 				pCB->addText(CI18N::get("uigcHighTextureMode"));
 		}
 
+		// Anisotropic Filtering
+		pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_ANISOTROPIC_COMBO));
+
+		sint nAnisotropic = 0;
+
+		if (pCB)
+		{
+			sint maxAnisotropic = (sint)Driver->getAnisotropicFilterMaximum();
+
+			pCB->resetTexts();
+			pCB->addText(CI18N::get("uigcFxAnisotropicFilterNone"));
+
+			sint anisotropic = 2;
+			uint i = 1;
+
+			while (anisotropic <= maxAnisotropic)
+			{
+				pCB->addText(ucstring(NLMISC::toString("%dx", anisotropic)));
+
+				if (ClientCfg.AnisotropicFilter == anisotropic)
+					nAnisotropic = i;
+
+				anisotropic <<= 1;
+				++i;
+			}
+		}
+
+		// -1 is important to indicate we set this value in edit mode
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->setValue32(-1);
+		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->setValue32(nAnisotropic);
+
 		// VR_CONFIG
 		pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
 		if (pBut)
 		{
 			pBut->setPushed(ClientCfg.VREnable);
 		}
+
 		updateVRDevicesComboUI(ClientCfg.VREnable);
 
 		// init the mode in DB
@@ -3043,6 +3096,7 @@ public:
 			texMode= HighTextureMode;
 		else
 			texMode= NormalTextureMode;
+
 		// -1 is important to indicate we set this value in edit mode
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(-1);
 		NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_TEXTURE_MODE_DB )->setValue32(texMode);
@@ -3070,6 +3124,29 @@ public:
 		}
 
 		// **** Init Language : look in game_config.lua
+
+		// display or not VR page
+		NLGUI::CGroupTree* configTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_TREE_LIST));
+
+		if (configTree)
+		{
+			CGroupTree::SNode *rootNode = configTree->getRootNode();
+
+			if (rootNode)
+			{
+				CGroupTree::SNode *graphNode = rootNode->getNodeFromId("graph");
+
+				if (graphNode)
+				{
+					CGroupTree::SNode *vrNode = graphNode->getNodeFromId("vr");
+
+					if (vrNode)
+					{
+						vrNode->setShow(isStereoAvailable());
+					}
+				}
+			}
+		}
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigInit, "game_config_init");
@@ -3439,13 +3516,40 @@ class CHandlerGameConfigApply : public IActionHandler
 			}
 		}
 
+		// **** Apply Anisotropic Filtering
+		// read value from DB, it's a combo so value is the index of text
+		sint nAnisotropic = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_ANISOTROPIC_DB )->getValue32();
+
+		if (nAnisotropic >= 0)
+		{
+			sint anisotropic = 0;
+
+			// compute the real anisotropic value
+			if (nAnisotropic > 0)
+			{
+				anisotropic = 2;
+
+				for(sint i = 1; i < nAnisotropic; ++i)
+				{
+					anisotropic <<= 1;
+				}
+			}
+
+			if (ClientCfg.AnisotropicFilter != anisotropic)
+			{
+				ClientCfg.AnisotropicFilter = anisotropic;
+				ClientCfg.writeInt("AnisotropicFilter", ClientCfg.AnisotropicFilter);
+				requestReboot = true;
+			}
+		}
+
 		// *** Apply the Screen AR
 		// since already set in the config file, need only to bkup the current version
 		CHandlerGameConfigInit::BkupScreenAspectRatio= ClientCfg.ScreenAspectRatio;
 
 		// *** Apply the language code
 		// only if not in "work" language mode (else strange requestReboot)
-		if(ClientCfg.LanguageCode!="wk")
+		if (ClientCfg.LanguageCode!="wk")
 		{
 			sint newOne = NLGUI::CDBManager::getInstance()->getDbProp( GAME_CONFIG_LANGUAGE )->getValue32();
 			//string newVal = (newOne==2)?"de":(newOne==1)?"fr":"en";
@@ -3553,6 +3657,33 @@ class CHandlerGameConfigChangeScreenRatioMode : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioMode, "game_config_change_screen_ratio_mode");
+
+
+// ***************************************************************************
+class CHandlerGameConfigChangeAnisotropic : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		if (CInterfaceLink::isUpdatingAllLinks()) return; // don't want to trash the value in client.cfg at init, due to 'updateAllLinks' being called
+
+		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
+
+		// get values of anisotropic filtering
+		sint	oldAnisotropic = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_ANISOTROPIC_DB)->getOldValue32();
+		sint	anisotropic = NLGUI::CDBManager::getInstance()->getDbProp(GAME_CONFIG_ANISOTROPIC_DB)->getValue32();
+
+		// dirt the apply button of the DDX.
+		// don't do it at init!
+		if(oldAnisotropic != anisotropic && oldAnisotropic != -1 && anisotropic != -1)
+		{
+			CDDXManager *pDM = CDDXManager::getInstance();
+			CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+			if(pDDX)
+				pDDX->validateApplyButton();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeAnisotropic, "game_config_change_anisotropic");
 
 
 // ***************************************************************************
@@ -3917,7 +4048,7 @@ public:
 
 		// Get the sum of the bulk for this db branch
 		const double epsilon = 0.001;
-		sint32 val = sint32(CInventoryManager::getBranchBulk(dbBranch, 0, 10000) + epsilon);
+		float val = CInventoryManager::getBranchBulk(dbBranch, 0, 10000) + epsilon;
 
 		// Get the Max value
 		sint32	maxVal= 0;
@@ -3927,7 +4058,7 @@ public:
 
 		// Replace in the formated text
 		ucstring	str= CI18N::get("uittBulkFormat");
-		strFindReplace(str, "%v", toString(val) );
+		strFindReplace(str, "%v", toString("%.2f", val) );
 		strFindReplace(str, "%m", toString(maxVal) );
 		CWidgetManager::getInstance()->setContextHelpText(str);
 	}

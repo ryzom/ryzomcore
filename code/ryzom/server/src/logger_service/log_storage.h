@@ -246,7 +246,7 @@ public:
 			of.serial(*this);
 		}
 		// rename the 'tmp" into finale output file
-		NLMISC::CFile::moveFile(fileName.c_str(), (fileName+".tmp").c_str());
+		NLMISC::CFile::moveFile(fileName, fileName+".tmp");
 	}
 
 

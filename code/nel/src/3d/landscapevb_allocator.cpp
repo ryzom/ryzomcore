@@ -665,13 +665,13 @@ CVertexProgramLandscape::CVertexProgramLandscape(CLandscapeVBAllocator::TType ty
 void CVertexProgramLandscape::buildInfo()
 {
 	m_Idx.ProgramConstants0 = getUniformIndex("programConstants0");
-	nlassert(m_Idx.ProgramConstants0 != ~0);
+	nlassert(m_Idx.ProgramConstants0 != std::numeric_limits<uint>::max());
 	m_Idx.RefineCenter = getUniformIndex("refineCenter");
-	nlassert(m_Idx.RefineCenter != ~0);
+	nlassert(m_Idx.RefineCenter != std::numeric_limits<uint>::max());
 	m_Idx.TileDist = getUniformIndex("tileDist");
-	nlassert(m_Idx.TileDist != ~0);
+	nlassert(m_Idx.TileDist != std::numeric_limits<uint>::max());
 	m_Idx.PZBModelPosition = getUniformIndex("pzbModelPosition");
-	nlassert(m_Idx.PZBModelPosition != ~0);
+	nlassert(m_Idx.PZBModelPosition != std::numeric_limits<uint>::max());
 }
 
 } // NL3D

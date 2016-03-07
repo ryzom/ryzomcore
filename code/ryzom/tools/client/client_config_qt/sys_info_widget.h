@@ -28,10 +28,7 @@ class CSysInfoWidget : public QWidget, public Ui::sys_info_widget
 	Q_OBJECT
 public:
 	CSysInfoWidget( QWidget *parent = NULL );
-	~CSysInfoWidget();
-
-protected:
-	void changeEvent( QEvent *event );
+	virtual ~CSysInfoWidget();
 
 };
 

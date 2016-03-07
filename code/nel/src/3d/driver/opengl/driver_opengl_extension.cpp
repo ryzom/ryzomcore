@@ -519,6 +519,14 @@ PFNWGLMAKEASSOCIATEDCONTEXTCURRENTAMDPROC		nwglMakeAssociatedContextCurrentAMD;
 PFNWGLGETCURRENTASSOCIATEDCONTEXTAMDPROC		nwglGetCurrentAssociatedContextAMD;
 PFNWGLBLITCONTEXTFRAMEBUFFERAMDPROC				nwglBlitContextFramebufferAMD;
 
+// WGL_NV_gpu_affinity
+//====================
+PFNWGLENUMGPUSNVPROC							nwglEnumGpusNV;
+PFNWGLENUMGPUDEVICESNVPROC						nwglEnumGpuDevicesNV;
+PFNWGLCREATEAFFINITYDCNVPROC					nwglCreateAffinityDCNV;
+PFNWGLENUMGPUSFROMAFFINITYDCNVPROC				nwglEnumGpusFromAffinityDCNV;
+PFNWGLDELETEDCNVPROC							nwglDeleteDCNV;
+
 #elif defined(NL_OS_MAC)
 #elif defined(NL_OS_UNIX)
 
@@ -528,11 +536,14 @@ PFNGLXFREEMEMORYNVPROC						nglXFreeMemoryNV;
 // Swap control extensions
 PFNGLXSWAPINTERVALEXTPROC					nglXSwapIntervalEXT;
 
-PFNGLXSWAPINTERVALSGIPROC						nglXSwapIntervalSGI;
+PFNGLXSWAPINTERVALSGIPROC					nglXSwapIntervalSGI;
 
 PFNGLXSWAPINTERVALMESAPROC					nglXSwapIntervalMESA;
 PFNGLXGETSWAPINTERVALMESAPROC				nglXGetSwapIntervalMESA;
 
+// GLX_MESA_query_renderer
+// =======================
+PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC	nglXQueryCurrentRendererIntegerMESA;
 #endif
 
 #endif // USE_OPENGLES
@@ -1553,12 +1564,29 @@ static bool	setupATIMeminfo(const char *glext)
 void	registerGlExtensions(CGlExtensions &ext)
 {
 	H_AUTO_OGL(registerGlExtensions);
+
 	// OpenGL 1.2 ??
-	const char	*nglVersion= (const char *)glGetString (GL_VERSION);
-	sint	a=0, b=0;
-	// 1.2***  ???
-	sscanf(nglVersion, "%d.%d", &a, &b);
-	ext.Version1_2= (a==1 && b>=2) || (a>=2);
+	const char	*nglVersion = (const char *)glGetString (GL_VERSION);
+
+	if (nglVersion)
+	{
+		sint a = 0, b = 0;
+
+		// 1.2***  ???
+		sscanf(nglVersion, "%d.%d", &a, &b);
+		ext.Version1_2 = (a==1 && b>=2) || (a>=2);
+	}
+	else
+	{
+		nlwarning("3D: Unable to get GL_VERSION, OpenGL 1.2 should be supported on all recent GPU...");
+		ext.Version1_2 = true;
+	}
+
+	const char *vendor = (const char *) glGetString (GL_VENDOR);
+	const char *renderer = (const char *) glGetString (GL_RENDERER);
+
+	// Log GPU details
+	nlinfo("3D: OpenGL %s / %s / %s", nglVersion, vendor, renderer);
 
 	// Extensions.
 	const char	*glext= (const char*)glGetString(GL_EXTENSIONS);
@@ -1774,31 +1802,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 
 #ifndef USE_OPENGLES
 	ext.NVXGPUMemoryInfo = setupNVXGPUMemoryInfo(glext);
-
-	if (ext.NVXGPUMemoryInfo)
-	{
-//      GPU_MEMORY_INFO_EVICTION_COUNT_NVX;
-//      GPU_MEMORY_INFO_EVICTED_MEMORY_NVX;
-
-		GLint nDedicatedMemoryInKB = 0;
-		glGetIntegerv(GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &nDedicatedMemoryInKB);
-
-		GLint nTotalMemoryInKB = 0;
-		glGetIntegerv(GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &nTotalMemoryInKB);
-
-		GLint nCurAvailMemoryInKB = 0;
-		glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &nCurAvailMemoryInKB);
-
-		nlinfo("Memory: total: %d available: %d dedicated: %d", nTotalMemoryInKB, nCurAvailMemoryInKB, nDedicatedMemoryInKB);
-	}
-
 	ext.ATIMeminfo = setupATIMeminfo(glext);
-
-	if (ext.ATIMeminfo)
-	{
-		GLint nCurAvailMemoryInKB = 0;
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &nCurAvailMemoryInKB);
-	}
 #endif
 }
 
@@ -1840,7 +1844,23 @@ static bool	setupWGLAMDGPUAssociation(const char *glext)
 	return true;
 }
 
-// *********************************
+// ***************************************************************************
+static bool	setupWGLNVGPUAssociation(const char *glext)
+{
+	H_AUTO_OGL(setupWGLNVGPUAssociation);
+	CHECK_EXT("WGL_NV_gpu_affinity");
+
+#if !defined(USE_OPENGLES) && defined(NL_OS_WINDOWS)
+	CHECK_ADDRESS(PFNWGLENUMGPUSNVPROC, wglEnumGpusNV);
+	CHECK_ADDRESS(PFNWGLENUMGPUDEVICESNVPROC, wglEnumGpuDevicesNV);
+	CHECK_ADDRESS(PFNWGLCREATEAFFINITYDCNVPROC, wglCreateAffinityDCNV);
+	CHECK_ADDRESS(PFNWGLENUMGPUSFROMAFFINITYDCNVPROC, wglEnumGpusFromAffinityDCNV);
+	CHECK_ADDRESS(PFNWGLDELETEDCNVPROC, wglDeleteDCNV);
+#endif
+
+	return true;
+}
+
 static bool	setupGLXEXTSwapControl(const char	*glext)
 {
 	H_AUTO_OGL(setupGLXEXTSwapControl);
@@ -1875,6 +1895,19 @@ static bool	setupGLXMESASwapControl(const char	*glext)
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
 	CHECK_ADDRESS(PFNGLXSWAPINTERVALMESAPROC, glXSwapIntervalMESA);
 	CHECK_ADDRESS(PFNGLXGETSWAPINTERVALMESAPROC, glXGetSwapIntervalMESA);
+#endif
+
+	return true;
+}
+
+// *********************************
+static bool	setupGLXMESAQueryRenderer(const char	*glext)
+{
+	H_AUTO_OGL(setupGLXMESAQueryRenderer);
+	CHECK_EXT("GLX_MESA_query_renderer");
+
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	CHECK_ADDRESS(PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC, glXQueryCurrentRendererIntegerMESA);
 #endif
 
 	return true;
@@ -1954,16 +1987,29 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 
 	ext.WGLAMDGPUAssociation = setupWGLAMDGPUAssociation(glext);
 
-	if (ext.WGLAMDGPUAssociation)
+	ext.WGLNVGPUAffinity = setupWGLNVGPUAssociation(glext);
+
+	if (ext.WGLNVGPUAffinity)
 	{
-		GLuint uNoOfGPUs = nwglGetGPUIDsAMD(0, 0);
-		GLuint *uGPUIDs = new GLuint[uNoOfGPUs];
-		nwglGetGPUIDsAMD(uNoOfGPUs, uGPUIDs);
+		uint i = 0;
 
-		GLuint uTotalMemoryInMB = 0;
-		nwglGetGPUInfoAMD(uGPUIDs[0], WGL_GPU_RAM_AMD, GL_UNSIGNED_INT, sizeof(GLuint), &uTotalMemoryInMB);
+		HGPUNV hGPU;
 
-		delete [] uGPUIDs;
+		while(nwglEnumGpusNV(i, &hGPU))
+		{
+			uint j = 0;
+
+			PGPU_DEVICE lpGpuDevice = NULL;
+
+			while(nwglEnumGpuDevicesNV(hGPU, j, lpGpuDevice))
+			{
+				nlinfo("Device: %s - %s - flags: %u", lpGpuDevice->DeviceName, lpGpuDevice->DeviceString, lpGpuDevice->Flags);
+
+				++j;
+			}
+
+			++i;
+		}
 	}
 
 	return true;
@@ -2008,6 +2054,9 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 	ext.GLXEXTSwapControl= setupGLXEXTSwapControl(glext);
 	ext.GLXSGISwapControl= setupGLXSGISwapControl(glext);
 	ext.GLXMESASwapControl= setupGLXMESASwapControl(glext);
+
+	// check for renderer information
+	ext.GLXMESAQueryRenderer= setupGLXMESAQueryRenderer(glext);
 
 	return true;
 }

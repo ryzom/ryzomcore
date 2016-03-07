@@ -83,11 +83,11 @@ void CConfig::revertToDefault()
 
 		NLMISC::CConfigFile::CVar *src = dcf.getVarPtr( dst->Name );
 		if( ( src != NULL ) && !dst->Root &&
-				( ( src->Type == NLMISC::CConfigFile::CVar::T_INT ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_INT ) ||
-				  ( src->Type == NLMISC::CConfigFile::CVar::T_REAL ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_INT ) ||
-				  ( src->Type == NLMISC::CConfigFile::CVar::T_INT ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_REAL ) ||
-				  ( src->Type == NLMISC::CConfigFile::CVar::T_REAL ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_REAL ) ||
-				  ( src->Type == NLMISC::CConfigFile::CVar::T_STRING ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_STRING ) ) )
+				( (( src->Type == NLMISC::CConfigFile::CVar::T_INT ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_INT )) ||
+				  (( src->Type == NLMISC::CConfigFile::CVar::T_REAL ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_INT )) ||
+				  (( src->Type == NLMISC::CConfigFile::CVar::T_INT ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_REAL )) ||
+				  (( src->Type == NLMISC::CConfigFile::CVar::T_REAL ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_REAL )) ||
+				  (( src->Type == NLMISC::CConfigFile::CVar::T_STRING ) && ( dst->Type == NLMISC::CConfigFile::CVar::T_STRING )) ) )
 		{
 
 			if( src->Type == NLMISC::CConfigFile::CVar::T_INT )

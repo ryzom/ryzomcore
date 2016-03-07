@@ -610,7 +610,7 @@ uint32 CCharacterCL::buildEquipment(const CCharacterSheet::CEquipment &slot, SLO
 	{
 		// IS the item a valid one ?
 		CSheetId itemId;
-		if(itemId.buildSheetId(NLMISC::strlwr(slot.getItem())))
+		if(itemId.buildSheetId(NLMISC::toLower(slot.getItem())))
 		{
 			// Is it stored in the database ?
 			CEntitySheet *entitySheet = SheetMngr.get(itemId);
@@ -1098,7 +1098,7 @@ string CCharacterCL::automatonType() const	// virtual
 //-----------------------------------------------
 void CCharacterCL::computeAutomaton()
 {
-	_CurrentAutomaton = automatonType() + "_" + NLMISC::strlwr(MBEHAV::modeToString(_Mode)) + ".automaton";
+	_CurrentAutomaton = automatonType() + "_" + NLMISC::toLower(MBEHAV::modeToString(_Mode)) + ".automaton";
 }// computeAutomaton //
 
 
@@ -8369,7 +8369,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	// Display the Run Factor.
 	TextContext->printfAt(x, y, "(Walk)Run Factor: %f", runFactor());
 	y += lineStep;
-	// Display the current animation name(id)(offset)(nbloop) pour le channel MOVE.
+	// Display the current animation name(id)(offset)(nbloop) for channel MOVE.
 	TextContext->printfAt(x, y, "Current Animation: %s(%u)(%lf)(%u loops)", animId(MOVE)==std::numeric_limits<uint>::max()?"[NONE]":currentAnimationName().c_str(), animId(MOVE), animOffset(MOVE), _NbLoopAnim);
 	y += lineStep;
 	// First Pos
@@ -8388,14 +8388,8 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 		TextContext->printfAt(x, y, "Prim Pos: %f %f %f", primFinalPos.x, primFinalPos.y, primFinalPos.z);
 		y += lineStep;
 	}
-	// Skeleton Ptr
-	TextContext->printfAt(x, y, "Skel Ptr: %p", &_Skeleton);
-	y += lineStep;
-	// Animset Ptr
-	TextContext->printfAt(x, y, "AnimSet Ptr: %p", _CurrentAnimSet[MOVE]);
-	y += lineStep;
-	// Current State Ptr
-	TextContext->printfAt(x, y, "State Ptr: %p", _CurrentState);
+	// Skeleton Ptr, Animset Ptr and Current State Ptr
+	TextContext->printfAt(x, y, "Skel Ptr: %p - AnimSet Ptr: %p - State Ptr: %p", &_Skeleton, _CurrentAnimSet[MOVE], _CurrentState);
 	y += lineStep;
 	// Display the target mount and rider.
 	TextContext->printfAt(x, y, "Mount: %3u(Theoretical: %3u) Rider: %3u(Theoretical: %3u)", mount(), _TheoreticalMount, rider(), _TheoreticalRider);
@@ -8405,7 +8399,7 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 	if(isPlayer() || isUser())
 	{
 		SPropVisualA visualA = *(SPropVisualA *)(&prop);
-		TextContext->printfAt(x, y, "VPA: %"NL_I64"X : Chest(%d,%d) Legs(%d,%d) Arms(%d,%d) Hat(%d,%d) RH(%d) LH(%d)", prop,
+		TextContext->printfAt(x, y, "VPA: %" NL_I64 "X : Chest(%d,%d) Legs(%d,%d) Arms(%d,%d) Hat(%d,%d) RH(%d) LH(%d)", prop,
 			(uint)visualA.PropertySubData.JacketModel,	(uint)visualA.PropertySubData.JacketColor,
 			(uint)visualA.PropertySubData.TrouserModel,	(uint)visualA.PropertySubData.TrouserColor,
 			(uint)visualA.PropertySubData.ArmModel,		(uint)visualA.PropertySubData.ArmColor,
@@ -8414,29 +8408,29 @@ ADD_METHOD(void CCharacterCL::displayDebug(float x, float &y, float lineStep))	/
 			(uint)visualA.PropertySubData.WeaponLeftHand);
 	}
 	else
-		TextContext->printfAt(x, y, "VPA: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPA: %" NL_I64 "X", prop);
 	y += lineStep;
 	// VPB
 	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPB))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualB visualB = *(SPropVisualB *)(&prop);
-		TextContext->printfAt(x, y, "VPB: %"NL_I64"X : Hands(%d,%d) Feet(%d,%d).", prop,
+		TextContext->printfAt(x, y, "VPB: %" NL_I64 "X : Hands(%d,%d) Feet(%d,%d).", prop,
 			(uint)visualB.PropertySubData.HandsModel,	(uint)visualB.PropertySubData.HandsColor,
 			(uint)visualB.PropertySubData.FeetModel,	(uint)visualB.PropertySubData.FeetColor);
 	}
 	else
-		TextContext->printfAt(x, y, "VPB: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPB: %" NL_I64 "X", prop);
 	y += lineStep;
 	// VPC
 	prop = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", _Slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_VPC))->getValue64();
 	if(isPlayer() || isUser())
 	{
 		SPropVisualC visualC = *(SPropVisualC *)(&prop);
-		TextContext->printfAt(x, y, "VPC: %"NL_I64"X : EyesColor(%d) Tattoo(%d).", prop, visualC.PropertySubData.EyesColor, visualC.PropertySubData.Tattoo);
+		TextContext->printfAt(x, y, "VPC: %" NL_I64 "X : EyesColor(%d) Tattoo(%d).", prop, visualC.PropertySubData.EyesColor, visualC.PropertySubData.Tattoo);
 	}
 	else
-		TextContext->printfAt(x, y, "VPC: %"NL_I64"X", prop);
+		TextContext->printfAt(x, y, "VPC: %" NL_I64 "X", prop);
 	y += lineStep;
 }// displayDebug //
 

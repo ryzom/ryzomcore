@@ -1139,6 +1139,66 @@ public:
 };
 REGISTER_STEP_CONTENT(CActionLearnBrick, "learn_brick");
 
+
+// ---------------------------------------------------------------------------
+class CActionUnlearnBrick : public IStepContent
+{
+	string				_BotGiver;
+	vector<string>		_Bricks;
+	bool				_Group;
+
+	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = 0;
+	}
+public:
+	void init(CMissionData &md, IPrimitive *prim)
+	{
+		_BotGiver = md.getProperty(prim, "npc_name", true, false);
+		vector<string> vs;
+		vs = md.getPropertyArray(prim, "bricks", true, false);
+
+		for (uint i=0; i<vs.size(); ++i)
+		{
+			if (!vs[i].empty())
+				_Bricks.push_back(vs[i]);
+		}
+
+		string s;
+		s = md.getProperty(prim, "group", true, false);
+		_Group = (NLMISC::toLower(s) == "true");
+
+		IStepContent::init(md, prim);
+	}
+
+	string genCode(CMissionData &md)
+	{
+		string ret;
+
+//		if (_Bricks.empty())
+//			return ret;
+
+		ret = "unlearn_brick : ";
+		for (uint i=0; i<_Bricks.size(); ++i)
+		{
+			ret += _Bricks[i];
+			if (i < _Bricks.size()-1)
+				ret += "; ";
+		}
+
+		if (!_BotGiver.empty())
+			ret += " : "+_BotGiver;
+		if (_Group)
+			ret += " : group";
+		ret += NL;
+
+		return ret;
+	}
+};
+REGISTER_STEP_CONTENT(CActionUnlearnBrick, "unlearn_brick");
+
+
+
 // ---------------------------------------------------------------------------
 class CActionBotChat : public IStepContent
 {
@@ -1844,19 +1904,27 @@ struct TKillRaceInfo
 	TCompilerVarName	Quantity;
 };
 
+struct TKillPlayerInfo
+{
+	TCompilerVarName	ClanName;
+	TCompilerVarName	MinLevel;
+	TCompilerVarName	MaxLevel;
+	TCompilerVarName	Quantity;
+};
 
 class CContentKill : public CContentObjective
 {
-	vector<TKillFaunaInfo>	_KillFaunas;
-	vector<TKillRaceInfo>	_KillRaces;
-	TCompilerVarName		_KillGroup;
-	vector<TCompilerVarName> _KillNpcs;
-	TCompilerVarName		_KillNpcByNames;
-	TCompilerVarName		_KillNpcByNamesQuantity;
-	TCompilerVarName		_KillFactionName;
-	TCompilerVarName		_KillFactionQuantity;
-	vector<string>			_PredefVarName;
-	TCompilerVarName		_Place;
+	vector<TKillFaunaInfo>		_KillFaunas;
+	vector<TKillRaceInfo>		_KillRaces;
+	TCompilerVarName			_KillGroup;
+	vector<TCompilerVarName>	_KillNpcs;
+	TCompilerVarName			_KillNpcByNames;
+	TCompilerVarName			_KillNpcByNamesQuantity;
+	TCompilerVarName			_KillFactionName;
+	TCompilerVarName			_KillFactionQuantity;
+	vector<string>				_PredefVarName;
+	vector<TKillPlayerInfo>		_KillPlayers;
+	TCompilerVarName			_Place;
 
 
 	void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
@@ -1924,7 +1992,22 @@ class CContentKill : public CContentObjective
 			predef[0].resize(2);
 			predef[0][0] = _KillFactionName;
 			predef[0][1] = _KillFactionQuantity;
-
+		}
+		else if(!_KillPlayers.empty())
+		{
+			numEntry = _KillPlayers.size();
+			predef.resize(numEntry);
+			for (uint i=0; i<numEntry; ++i)
+			{
+				predef[i].resize(4*(i+1));
+				for (uint j=0; j<i+1; ++j)
+				{
+					predef[i][j*4]   = _KillPlayers[j].ClanName;
+					predef[i][j*4+1] = _KillPlayers[j].MinLevel;
+					predef[i][j*4+2] = _KillPlayers[j].MaxLevel;
+					predef[i][j*4+3] = _KillPlayers[j].Quantity;
+				}
+			}
 		}
 
 		// add optional place
@@ -1995,6 +2078,33 @@ public:
 			npcname.initWithText(toString("npc%u", i+1), STRING_MANAGER::bot, md, prim, vs[i]);
 			_KillNpcs.push_back(npcname);
 		}
+		vs = md.getPropertyArray(prim, "clan_name/min_level/max_level/quantity", true, false);
+		for (uint i=0; i<vs.size(); ++i)
+		{
+			vector<string> args;
+			explode(vs[i], string(" "), args, true);
+			if (args.size() != 4)
+			{
+				string err = toString("Invalid player clan infos in '%s', need <clan_name> <min_level> <max_level> <quantity>", vs[i].c_str());
+				throw EParseException(prim, err.c_str());
+			}
+			if (atoi(args[1].c_str()) >= atoi(args[2].c_str()))
+			{
+				string err = toString("Invalid player clan infos in '%s', need <min_level> lower than <max_level>", vs[i].c_str());
+				throw EParseException(prim, err.c_str());
+			}
+			if (atoi(args[3].c_str()) <= 0)
+			{
+				string err = toString("Invalid player clan infos in '%s', need <quantity> upper than 0", vs[i].c_str());
+				throw EParseException(prim, err.c_str());
+			}
+			TKillPlayerInfo kp;
+			kp.ClanName.initWithText(toString("clan%u", i+1), STRING_MANAGER::clan, md, prim, args[0]);			
+			kp.MinLevel.initWithText(toString("minlvl%u", i+1), STRING_MANAGER::integer, md, prim, args[1]);						
+			kp.MaxLevel.initWithText(toString("maxlvl%u", i+1), STRING_MANAGER::integer, md, prim, args[2]);
+			kp.Quantity.initWithText(toString("quantity%u", i+1), STRING_MANAGER::integer, md, prim, args[3]);
+			_KillPlayers.push_back(kp);
+		}
 
 		s = md.getProperty(prim, "npc_by_name/quantity", false, false);
 		if (!s.empty())
@@ -2053,6 +2163,12 @@ public:
 			check = true;
 		}
 		if (!_KillFactionName.empty())
+		{
+			if (check)
+				throw EParseException(prim, "Merging of multiple kill mode is forbidden !");
+			check = true;
+		}
+		if (!_KillPlayers.empty())
 		{
 			if (check)
 				throw EParseException(prim, "Merging of multiple kill mode is forbidden !");
@@ -2117,6 +2233,16 @@ public:
 		{
 			ret += "kill_faction : "+_KillFactionName+" "+_KillFactionQuantity;
 		}
+		else if (!_KillPlayers.empty())
+		{
+			ret += "kill_player : ";
+			for (uint i=0; i<_KillPlayers.size(); ++i)
+			{
+				ret += _KillPlayers[i].ClanName+" "+_KillPlayers[i].MinLevel+" "+_KillPlayers[i].MaxLevel+" "+_KillPlayers[i].Quantity;
+				if (i < _KillPlayers.size()-1)
+					{ret += "; ";}
+			}
+		}
 
 		if (!_Place.empty())
 			ret += " : "+_Place;
@@ -2129,6 +2255,30 @@ public:
 	}
 };
 REGISTER_STEP_CONTENT(CContentKill, "kill");
+
+
+/*
+class CContentKillFamedPlayer : public CContentObjective
+{
+	vector<TKillFamedPlayerInfo>	_Clans;
+
+	virtual void getPredefParam(uint32 &numEntry, CPhrase::TPredefParams &predef)
+	{
+		numEntry = _Clans.size();
+		predef.resize(numEntry);
+		for (uint i=0; i<numEntry; ++i)
+		{
+			predef[i].resize(4*(i+1));
+			for (uint j=0; j<i+1; ++j)
+			{
+				predef[i][j*4]   = _Clans[j].ClanName;
+				predef[i][j*4+1] = _Clans[j].MinLevel;
+				predef[i][j*4+2] = _Clans[j].MaxLevel;
+				predef[i][j*4+3] = _Clans[j].Quantity;
+			}
+		}
+	}
+*/
 
 class CContentTalkTo : public CContentObjective
 {

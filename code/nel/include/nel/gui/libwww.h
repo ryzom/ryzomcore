@@ -20,12 +20,10 @@
 #ifndef CL_LIB_WWW_H
 #define CL_LIB_WWW_H
 
-extern "C"
-{
-#include "WWWInit.h"
-}
+#include <curl/curl.h>
 
 #include "nel/misc/rgba.h"
+#include "nel/gui/libwww_types.h"
 
 namespace NLGUI
 {
@@ -35,13 +33,11 @@ namespace NLGUI
 
 	// ***************************************************************************
 
+	// Legacy function from libwww
+	SGML_dtd * HTML_dtd (void);
+
 	// Init the libwww
 	void initLibWWW();
-
-	// Get an url and setup a local domain
-	const std::string &setCurrentDomain(const std::string &url);
-
-	extern std::string CurrentCookie;
 
 	// ***************************************************************************
 
@@ -218,48 +214,57 @@ namespace NLGUI
 		HTML_ATTR(DIV,STYLE),
 	};
 
+	enum
+	{
+		HTML_ATTR(SPAN,CLASS) = 0,
+		HTML_ATTR(SPAN,ID),
+		HTML_ATTR(SPAN,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H1,CLASS) = 0,
+		HTML_ATTR(H1,ID),
+		HTML_ATTR(H1,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H2,CLASS) = 0,
+		HTML_ATTR(H2,ID),
+		HTML_ATTR(H2,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H3,CLASS) = 0,
+		HTML_ATTR(H3,ID),
+		HTML_ATTR(H3,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H4,CLASS) = 0,
+		HTML_ATTR(H4,ID),
+		HTML_ATTR(H4,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H5,CLASS) = 0,
+		HTML_ATTR(H5,ID),
+		HTML_ATTR(H5,STYLE),
+	};
+
+	enum
+	{
+		HTML_ATTR(H6,CLASS) = 0,
+		HTML_ATTR(H6,ID),
+		HTML_ATTR(H6,STYLE),
+	};
+
 
 	#undef HTML_ATTR
-
-	// ***************************************************************************
-
-	// A smart ptr for LibWWW strings
-	class C3WSmartPtr
-	{
-	public:
-		C3WSmartPtr ()
-		{
-			_Ptr = NULL;
-		}
-		C3WSmartPtr (const char *ptr)
-		{
-			_Ptr = ptr;
-		}
-		~C3WSmartPtr ()
-		{
-			clear();
-		}
-		void operator=(const char *str)
-		{
-			clear ();
-			_Ptr = str;
-		}
-		operator const char *() const
-		{
-			return _Ptr;
-		}
-		void clear()
-		{
-			if (_Ptr)
-			{
-				void *ptr = (void*)_Ptr;
-				HT_FREE(ptr);
-			}
-			_Ptr = NULL;
-		}
-	private:
-		const char *_Ptr;
-	};
 
 	// ***************************************************************************
 
@@ -273,15 +278,10 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void _VerifyLibWWW(const char *function, bool ok, const char *file, int line);
-	#define VerifyLibWWW(a,b) _VerifyLibWWW(a,(b)!=FALSE,__FILE__,__LINE__)
+	const std::string &setCurrentDomain(const std::string &uri);
+	void receiveCookies (CURL *curl, const std::string &domain, bool trusted);
+	void sendCookies(CURL *curl, const std::string &domain, bool trusted);
 
-	// ***************************************************************************
-
-	// Standard request terminator
-	int requestTerminater (HTRequest * request, HTResponse * response, void * param, int status) ;
-
-	// ***************************************************************************
 }
 
 #endif

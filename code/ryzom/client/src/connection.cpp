@@ -187,7 +187,7 @@ bool hasPrivilegeEG() { return (UserPrivileges.find(":EG:") != std::string::npos
 
 
 // Restore the video mode (fullscreen for example) after the connection (done in a window)
-void connectionRestaureVideoMode ()
+void connectionRestoreVideoMode ()
 {
 	// Setup full screen if we have to
 	UDriver::CMode mode;
@@ -213,11 +213,11 @@ void connectionRestaureVideoMode ()
 		(ClientCfg.Width != mode.Width) ||
 		(ClientCfg.Height != mode.Height)))
 	{
-		mode.Windowed = ClientCfg.Windowed;
-		mode.Depth    = uint8(ClientCfg.Depth);
-		mode.Width    = ClientCfg.Width;
-		mode.Height   = ClientCfg.Height;
-		mode.Frequency= ClientCfg.Frequency;
+		mode.Windowed	= ClientCfg.Windowed;
+		mode.Depth		= uint8(ClientCfg.Depth);
+		mode.Width		= ClientCfg.Width;
+		mode.Height		= ClientCfg.Height;
+		mode.Frequency	= ClientCfg.Frequency;
 		setVideoMode(mode);
 	}
 
@@ -342,7 +342,7 @@ bool connection (const string &cookie, const string &fsaddr)
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 		return true;
 	}
 
@@ -513,7 +513,7 @@ bool reconnection()
 		// init the string manager cache.
 		STRING_MANAGER::CStringManagerClient::instance()->initCache("", ClientCfg.LanguageCode);	// VOIR BORIS
 #endif
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 		return true;
 	}
 */
@@ -1266,10 +1266,10 @@ TInterfaceState globalMenu()
 	}
 
 
-	// Restaure video mode
+	// Restore video mode
 	if (ClientCfg.SelectCharacter == -1)
 	{
-		connectionRestaureVideoMode ();
+		connectionRestoreVideoMode ();
 	}
 
 	// Skip intro next time
@@ -2122,7 +2122,7 @@ public:
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_MAINLAND));
 		if (pList == NULL)
 		{
-			nlwarning("element "GROUP_LIST_MAINLAND" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_MAINLAND " not found probably bad outgame.xml");
 			return;
 		}
 
@@ -2315,7 +2315,7 @@ public:
 		List = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_KEYSET));
 		if (List == NULL)
 		{
-			nlwarning("element "GROUP_LIST_KEYSET" not found probably bad outgame.xml");
+			nlwarning("element " GROUP_LIST_KEYSET " not found probably bad outgame.xml");
 			return;
 		}
 
@@ -2682,7 +2682,7 @@ class CAHScenarioControl : public IActionHandler
 		// init current scenario name and parameters
 		if(!R2::getEditor().isInitialized())
 		{
-			ScenarioFileName = string("");
+			ScenarioFileName.clear();
 
 			// empty scenario
 			CInterfaceElement *result = scenarioWnd->findFromShortId(string("scenario_value_text"));
@@ -2950,7 +2950,7 @@ class CAHLoadScenario : public IActionHandler
 		}
 
 		// description
-		string description = string("");
+		string description;
 		result = scenarioWnd->findFromShortId(string("edit_small_description"));
 		if(result)
 		{

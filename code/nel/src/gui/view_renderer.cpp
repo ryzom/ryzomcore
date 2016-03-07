@@ -854,12 +854,11 @@ namespace NLGUI
 			return;
 		}
 		// Look if already existing
-		string sLwrGTName = strlwr(sGlobalTextureName);
+		string sLwrGTName = toLower(sGlobalTextureName);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = strlwr(ite->Name);
-			if (sText == sLwrGTName)
+			if (toLower(ite->Name) == sLwrGTName)
 				break;
 			ite++;
 		}
@@ -984,11 +983,11 @@ namespace NLGUI
 	 */
 	NL3D::UTexture *CViewRenderer::getGlobalTexture(const std::string &name)
 	{
-		string sLwrGTName = strlwr(name);
+		string sLwrGTName = NLMISC::toLower(name);
 		TGlobalTextureList::iterator ite = _GlobalTextures.begin();
 		while (ite != _GlobalTextures.end())
 		{
-			std::string sText = strlwr(ite->Name);
+			std::string sText = NLMISC::toLower(ite->Name);
 			if (sText == sLwrGTName)
 				break;
 			ite++;

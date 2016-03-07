@@ -25,8 +25,8 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/fxaa.h>
+#include "std3d.h"
+#include "nel/3d/fxaa.h"
 
 // STL includes
 
@@ -34,14 +34,14 @@
 // #include <nel/misc/debug.h>
 
 // Project includes
-#include <nel/3d/u_camera.h>
-#include <nel/3d/u_driver.h>
-#include <nel/3d/material.h>
-#include <nel/3d/texture_bloom.h>
-#include <nel/3d/texture_user.h>
-#include <nel/3d/driver_user.h>
-#include <nel/3d/u_texture.h>
-#include <nel/3d/render_target_manager.h>
+#include "nel/3d/u_camera.h"
+#include "nel/3d/u_driver.h"
+#include "nel/3d/material.h"
+#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_user.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/u_texture.h"
+#include "nel/3d/render_target_manager.h"
 
 using namespace std;
 // using namespace NLMISC;
@@ -54,7 +54,7 @@ namespace {
 
 } /* anonymous namespace */
 
-CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_PP(NULL), m_VP(NULL), m_Width(~0), m_Height(~0)
+CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), m_Width(~0), m_Height(~0)
 {
 	nldebug("3D: Create FXAA");
 

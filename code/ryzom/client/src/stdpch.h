@@ -116,6 +116,8 @@
 #include "game_share/msg_client_server.h"
 #include "game_share/action_target_slot.h"
 
+#include <libxml/parser.h>
+
 // Foutez pas d'include du client ici svp ! Grrr ! Hulud
 
 #ifdef NL_OS_WINDOWS

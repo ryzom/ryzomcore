@@ -514,6 +514,8 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 	CAIVector	movingVector;
 	double		fear=1.0f;
 
+	CAIEntityPhysical*	target = (CAIEntityPhysical*)spawnBot->getTarget();
+
 	FOREACH(it, std::vector<CAIEntityPhysical*>, botList)
 	{
 		CAIEntityPhysical	*const	entity=(*it);
@@ -565,6 +567,27 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 			
 			float score = (float)(entity->_AggroScore*slotCoef);
 			
+			if (target && target->getRyzomType() == RYZOMID::player)
+			{
+				if (entity != target)
+				{
+					CBotPlayer const* const ptarget = NLMISC::safe_cast<CBotPlayer const*>(target);
+					if (entity->getRyzomType() == RYZOMID::player)
+					{
+						CBotPlayer const* const player = NLMISC::safe_cast<CBotPlayer const*>(entity);
+						if ( ptarget && player && spawnBot->getAggroFor(entity->dataSetRow()) <= spawnBot->getAggroFor(ptarget->dataSetRow()) && (
+								ptarget->getCurrentTeamId() == CTEAM::InvalidTeamId ||
+								player->getCurrentTeamId() == CTEAM::InvalidTeamId ||
+								player->getCurrentTeamId() != ptarget->getCurrentTeamId()
+								)
+							)
+						{
+							score = 0;
+						}
+					}
+				}
+			}
+
 			if	(score>=BestChooseScore) // add distance and bot profile compatibility.
 			{
 				BestChooseScore=score;
@@ -583,7 +606,7 @@ bool CFightOrganizer::reorganizeIteration(CBot* bot)
 	{
 		_HaveEnnemy=true;
 		nlassert(ennemy->getRyzomType()!=debugCheckedType);
-		if	(((CAIEntityPhysical*)spawnBot->getTarget())==ennemy)
+		if	(target == ennemy)
 		{
 			return true;
 		}

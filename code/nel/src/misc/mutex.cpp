@@ -81,11 +81,7 @@ inline void LeaveMutex( void *handle )
 {
 	if (ReleaseMutex(handle) == 0)
 	{
-		//LPVOID lpMsgBuf;
-		//FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		//				 NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR) &lpMsgBuf, 0, NULL );*/
 		nlerror ("error while releasing the mutex (0x%x %d), %p", GetLastError(), GetLastError(), handle);
-		//LocalFree( lpMsgBuf );
 	}
 }
 
@@ -163,7 +159,7 @@ bool	CSharedMutex::createByName( const char *objectName )
 #ifdef NL_DEBUG
 	nlassert( _Mutex == NULL );
 #endif
-	_Mutex = (void *) CreateMutex( NULL, FALSE, objectName );
+	_Mutex = (void *) CreateMutexA( NULL, FALSE, objectName );
 	//nldebug( "Creating mutex %s: handle %p", objectName, _Mutex );
 	return ( _Mutex != NULL );
 }
@@ -677,7 +673,7 @@ void CFairMutex::debugEndEnter()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (entered) __asm int 3;
+		if (entered) __debugbreak();
 		entered = true;
 	}
 */
@@ -704,7 +700,7 @@ void CFairMutex::debugLeave()
 	if (_Mutex == (void*)0x88)
 	{
 		OutputDebugString (str);
-		if (!entered) __asm int 3;
+		if (!entered) __debugbreak();
 		entered = false;
 	}
 */

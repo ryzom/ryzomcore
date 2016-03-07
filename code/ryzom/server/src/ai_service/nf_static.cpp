@@ -241,7 +241,7 @@ void rndm_ff_f(CStateInstance* entity, CScriptStack& stack)
 	float min = stack.top();
 	
 	// Min value
-	static uint32 const maxLimit = ((uint32)~0U)>>1;
+	static uint32 const maxLimit = std::numeric_limits<uint32>::max()>>1;
 	double const rval = (double)CAIS::rand32(maxLimit)/(double)maxLimit; // [0-1[
 	float const value = (float)(rval * (max-min) + min);
 

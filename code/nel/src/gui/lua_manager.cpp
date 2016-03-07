@@ -33,8 +33,20 @@ namespace NLGUI
 
 	CLuaManager::~CLuaManager()
 	{
-		delete luaState;
-		luaState = NULL;
+		if (luaState)
+		{
+			delete luaState;
+			luaState = NULL;
+		}
+	}
+
+	void CLuaManager::releaseInstance()
+	{
+		if (instance)
+		{
+			delete instance;
+			instance = NULL;
+		}
 	}
 
 	bool CLuaManager::executeLuaScript( const std::string &luaScript, bool smallScript )
@@ -60,7 +72,8 @@ namespace NLGUI
 
 	void CLuaManager::ResetLuaState()
 	{
-		delete luaState;
+		if (luaState) delete luaState;
+
 		luaState = new CLuaState( debugLua );
 	}
 

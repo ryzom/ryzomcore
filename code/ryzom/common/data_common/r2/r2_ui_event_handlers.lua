@@ -832,7 +832,7 @@ function r2:onActChanged(previousAct, currentAct)
 	-- update the select bar
 	r2.SelectBar:touch()
 
-	if r2:isScenarioUpdating() == 1 then
+	if r2:isScenarioUpdating() then
 		return
 	end
 

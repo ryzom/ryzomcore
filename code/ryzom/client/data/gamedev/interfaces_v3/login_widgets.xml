@@ -955,6 +955,46 @@
  highlight_over="255 255 255 128"
  force_inside_screen="true"
 />
+	<!-- html <hr> element -->
+	<template name="html_hr"
+			  keep="true">
+		<group id="sep_gr"
+			   posref="ML ML"
+			   sizeref="w"
+			   w="0"
+			   h="0"
+			   child_resize_h="true"
+			   child_resize_hmargin="12">
+			<view type="bitmap"
+				  id="hr"
+				  posref="MM MM"
+				  sizeref="w"
+				  w="-2"
+				  h="2"
+				  inherit_gc_alpha="true"
+				  scale="true"
+				  texture="blank.tga"
+				  global_color="false" />
+		</group>
+	</template>
 
+	<template name="html_form_select_box_menu_widget"
+              keep="true"
+              id="sb">
+      <group type="menu"
+          id="#id"
+          posref="BL TL"
+          x="0"
+		  y="0"
+          mouse_pos="false"
+          space="2"
+          shadow="false"
+		  color="255 255 255 128"
+		  color_over="255 255 255 255"
+		  color_grayed="0 0 0 255"
+          fontsize="12"
+          highlight_over="255 255 255 128"
+          force_inside_screen="false"></group>
+	</template>
 
 </interface_config>

@@ -61,7 +61,7 @@ CSpecialPowerPhrase::CSpecialPowerPhrase()
 	_IsStatic = false;
 	_AddRecastTime = 0;
 	_PhraseType = BRICK_TYPE::SPECIAL_POWER;
-	_ConsumableFamilyId = (uint16)~0;
+	_ConsumableFamilyId = std::numeric_limits<uint16>::max();
 }
 
 //-----------------------------------------------

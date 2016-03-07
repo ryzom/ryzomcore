@@ -1413,8 +1413,7 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 
 	// avoid case problems
 	static std::string lwrLabel;
-	lwrLabel = label;
-	strlwr(lwrLabel);
+	lwrLabel = toLower(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1464,8 +1463,7 @@ const ucchar * CStringManagerClient::getSpecialDesc(const std::string &label)
 
 	// avoid case problems
 	static std::string	lwrLabel;
-	lwrLabel= label;
-	strlwr(lwrLabel);
+	lwrLabel = toLower(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1498,8 +1496,7 @@ const ucchar * CStringManagerClient::getSpecialDesc2(const std::string &label)
 
 	// avoid case problems
 	static std::string	lwrLabel;
-	lwrLabel= label;
-	strlwr(lwrLabel);
+	lwrLabel = toLower(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{
@@ -1703,8 +1700,7 @@ void CStringManagerClient::replaceSBrickName(NLMISC::CSheetId id, const ucstring
 
 	// avoid case problems
 	static std::string	lwrLabel;
-	lwrLabel= label;
-	strlwr(lwrLabel);
+	lwrLabel = toLower(label);
 
 	if (_SpecItem_MemoryCompressed)
 	{

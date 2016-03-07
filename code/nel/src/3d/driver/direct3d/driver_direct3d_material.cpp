@@ -818,7 +818,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 	if (_CurrentMaterial != &mat)
 	{
 		// Material has changed ?
-		// Restaure fog state to its current value
+		// Restore fog state to its current value
 		{
 			H_AUTO_D3D(CDriverD3D_setupMaterial_updateFog)
 			setRenderState (D3DRS_FOGENABLE, _FogEnabled?TRUE:FALSE);

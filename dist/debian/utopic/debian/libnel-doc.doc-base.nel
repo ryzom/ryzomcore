@@ -1,0 +1,9 @@
+Document: nel
+Title: NeL Reference Manual
+Author: Nevrax
+Abstract: This is a software platform for creating and running massively multi-user entertainment in a 3D environment over the Internet.
+Section: Programming/C
+
+Format: HTML
+Index: /usr/share/doc/libnel-doc/html/index.html
+Files: /usr/share/doc/libnel-doc/html/*.html

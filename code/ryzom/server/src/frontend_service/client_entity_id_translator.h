@@ -91,7 +91,7 @@ private:
 
 	struct CHash
 	{
-		enum { bucket_size = 4, min_buckets = 8, };
+		enum { bucket_size = 4, min_buckets = 8 };
 		size_t	operator () (const TEntityIndex& index) const { return index.getIndex(); }
 		bool operator() (const TEntityIndex& left, const TEntityIndex& right) { return left < right; }
 	};

@@ -53,9 +53,9 @@ void CMissionQueueManager::init()
 	
 	if (CFile::fileExists(sFilename))
 	{
-		static CPersistentDataRecord	pdr;
+		static CPersistentDataRecord pdr;
 		pdr.clear();
-		pdr.readFromTxtFile(sFilename.c_str());
+		pdr.readFromTxtFile(sFilename);
 		apply(pdr);
 	}
 	_InitOk = true;

@@ -52,12 +52,12 @@ void CAIActionsDataRecordPtr::clear()
 
 void CAIActionsDataRecordPtr::readFile(const std::string &fileName)
 {
-	_PdrPtr->readFromFile(fileName.c_str());
+	_PdrPtr->readFromFile(fileName);
 }
 
 void CAIActionsDataRecordPtr::writeFile(const std::string &fileName)
 {	
-	_PdrPtr->writeToFile(fileName.c_str());
+	_PdrPtr->writeToFile(fileName);
 }
 
 void CAIActionsDataRecordPtr::display()

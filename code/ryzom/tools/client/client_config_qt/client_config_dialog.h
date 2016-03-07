@@ -30,11 +30,10 @@ class CClientConfigDialog : public QDialog, public Ui::client_config_dialog
 
 public:
 	CClientConfigDialog( QWidget *parent = NULL );
-	~CClientConfigDialog();
+	virtual ~CClientConfigDialog();
 
 protected:
 	void closeEvent( QCloseEvent *event );
-	void changeEvent( QEvent *event );
 
 private slots:
 	//////////////////////////// Main dialog buttons /////////////////////

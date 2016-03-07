@@ -752,7 +752,7 @@ sint32			NLPACS::CGlobalRetriever::getIdentifier(const string &id) const
 
 const string	&NLPACS::CGlobalRetriever::getIdentifier(const NLPACS::UGlobalPosition &position) const
 {
-	static const string		nullString = string("");
+	static const string		nullString;
 
 	if (position.InstanceId == -1)
 		return nullString;
@@ -784,7 +784,7 @@ bool			NLPACS::CGlobalRetriever::buildInstance(const string &id, const NLMISC::C
 	const CRetrieverInstance	&instance = makeInstance(retrieverId, 0, CVector(position));
 
 	// check make instance success
-	if (&instance == NULL || instance.getInstanceId() == -1 || instance.getRetrieverId() != retrieverId)
+	if (instance.getInstanceId() == -1 || instance.getRetrieverId() != retrieverId)
 		return false;
 
 	// links new instance to its neighbors

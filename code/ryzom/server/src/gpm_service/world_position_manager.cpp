@@ -1473,7 +1473,7 @@ void	CWorldPositionManager::computeVision()
 			break;
 
 		cell->setVisionUpdateCycle(CTickEventHandler::getGameCycle());
-		H_TIME(ComputeCellVision, computeCellVision(cell, cellVisionArray, numEntities););
+		H_TIME(ComputeCellVision, computeCellVision(cell, cellVisionArray, numEntities, player->Entity););
 
 		CPlayerInfos	*plv;
 		for (plv=cell->getPlayersList(); plv!=NULL; plv=plv->Next)
@@ -1632,7 +1632,7 @@ TPlayerList::iterator	CWorldPositionManager::prioritizeVisionState(TPlayerList::
 /****************************************************************\
 						computeCellVision()
 \****************************************************************/
-void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities)
+void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entitiesSeenFromCell, uint &numEntities, CWorldEntity *player)
 {
 	STOP_IF(IsRingShard,"Illegal use of CWorldPositionManager on ring shard");
 	CVisionEntry*	fillPtr;				// entities pointer fill buffer
@@ -1656,7 +1656,7 @@ void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entiti
 	// First adds objects
 	fillPtr = entitiesSeenFromCell;
 	endPtr = entitiesSeenFromCell+MAX_SEEN_OBJECTS;
-	fillPtr = cell->addObjects(fillPtr, endPtr, centerCellMask, 0);
+	fillPtr = cell->addObjects(fillPtr, endPtr, centerCellMask, 0, cell->isIndoor(), player);
 
 	// if the cell has vision on other cells
 	if (!cell->isIndoor())
@@ -1706,7 +1706,7 @@ void	CWorldPositionManager::computeCellVision( CCell *cell, CVisionEntry* entiti
 
 	// then adds entities
 	endPtr = entitiesSeenFromCell+MAX_SEEN_ENTITIES;
-	fillPtr = cell->addEntities(fillPtr, endPtr, centerCellMask, 0);
+	fillPtr = cell->addEntities(fillPtr, endPtr, centerCellMask, 0, cell->isIndoor(), player);
 
 	// if the cell has vision on other cells
 	if (!cell->isIndoor())
@@ -1777,6 +1777,8 @@ void	CWorldPositionManager::setCellVisionToEntity( CWorldEntity *entity, CVision
 	// discard players if vision processing disabled
 	if (!infos->EnableVisionProcessing)
 		return;
+
+	infos->Indoor = entity->CellPtr != NULL && entity->CellPtr->isIndoor();
 
 	// update the player vision, new entities in vision are stored in inVision, old ones in outVision
 	static CPlayerVisionDelta	visionDelta;
@@ -1983,15 +1985,13 @@ void	CWorldPositionManager::computePlayerDeltaVision( CPlayerInfos *infos, CVisi
 		if (e->TempVisionState)
 		{
 			addToEntitiesIn(infos, e, visionDelta);
+			e->TempVisionState = false;
 		}
-
-		cellVision[i].Entity->TempVisionState = false;
 	}
 
 	// reset vision state for entities that were not checked (not enough slots)
 	for (; i<numEntities; ++i)
 		cellVision[i].Entity->TempVisionState = false;
-
 
 	// *** Prevent from splitting vision of controller/controlled entity.
 	// Ex: mounted mounts must not be visible if their rider is not visible.
@@ -2183,14 +2183,18 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 	// Get the proper speed
 	CMirrorPropValueRO<TYPE_RUNSPEED>	maxSpeed( TheDataset, entity->Index, DSPropertyCURRENT_RUN_SPEED );
 	float limitSpeedToUse = maxSpeed();
+	// Get the proper speed of master
+	CMirrorPropValueRO<TYPE_RUNSPEED>	maxSpeedMaster( TheDataset, master->Index, DSPropertyCURRENT_RUN_SPEED );
+	float mountWalkSpeed = maxSpeedMaster();
 	if ( entity != master )
 	{
 		// If the player is on a mount, handle the hunger of the mount
-		if ( (movVector.x > 0.001) && (movVector.y > 0.001) )
+	//	if ( (movVector.x > 0.001) && (movVector.y > 0.001) )
 		{
 			CMirrorPropValueRO<TYPE_WALKSPEED> walkSpeed( TheDataset, entity->Index, DSPropertyCURRENT_WALK_SPEED );
 			CSpeedLimit speedLimit( TheDataset, entity->Index );
 			limitSpeedToUse = speedLimit.getSpeedLimit( walkSpeed, maxSpeed );
+			mountWalkSpeed = walkSpeed;
 		}
 	}
 
@@ -2201,18 +2205,20 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 
 	// Check player speed
 	// only consider (x,y) motion for speed and position correction
-	if (master->PlayerInfos != NULL && master->PlayerInfos->CheckSpeed && CheckPlayerSpeed && fabs(movVector.x)+fabs(movVector.y) > maxDist)
+	if (master->PlayerInfos != NULL /*&& master->PlayerInfos->CheckSpeed && CheckPlayerSpeed && fabs(movVector.x)+fabs(movVector.y) > maxDist*/)
 	{
 		double		movNorm = sqr(movVector.x)+sqr(movVector.y); // already done if (entity != master) but here is a rare overspeed case
 
 		if (movNorm > sqr(maxDist))
 		{
-			if (VerboseSpeedAbuse)
-			{
-				nlwarning("CWorldPositionManager::movePlayer%s: limited speed (movNorm=%.2f, movMax=%.2f, maxSpeed=%.2f)", entity->Id.toString().c_str(), sqrt(movNorm), maxDist, limitSpeedToUse*0.001*SecuritySpeedFactor);
+			if (movNorm > sqr(5 * SecuritySpeedFactor * CTickEventHandler::getGameTimeStep() * ticksSinceLastUpdate)) {
+				movVector *= (maxDist / sqrt(movNorm));
+				nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
 			}
-
-			movVector *= (maxDist / sqrt(movNorm));
+			else
+			{
+				nlwarning("Player limitSpeed=%2.f, entitySpeed=%.2f, masterSpeed=%.2f", limitSpeedToUse, maxSpeed(), mountWalkSpeed);
+			}
 		}
 	}
 
@@ -2268,9 +2274,9 @@ void CWorldPositionManager::movePlayer(CWorldEntity *entity, sint32 x, sint32 y,
 		if (diff2d.sqrnorm() > 1.0 )
 		{
 			correctPos = true;
-			if (VerboseSpeedAbuse)
+			if (true/*VerboseSpeedAbuse*/)
 			{
-				nlwarning("CWorldPositionManager::movePlayer%s: corrected position: real=(%.1f,%.1f) targeted=(%.1f,%.1f)", master->Id.toString().c_str(), finalPos.x, finalPos.y, targetPos.x, targetPos.y);
+				nlwarning("PlayerAbuse %s real=(%.1f,%.1f) targeted=(%.1f,%.1f)", master->Id.toString().c_str(), finalPos.x, finalPos.y, targetPos.x, targetPos.y);
 			}
 		}
 

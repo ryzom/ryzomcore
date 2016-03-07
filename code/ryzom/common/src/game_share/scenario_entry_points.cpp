@@ -372,7 +372,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 
 			//entry points and package
 			TShortEntryPoints entryPoints;
-			std::string package = std::string("");
+			std::string package;
 			for(uint e=0; e<_EntryPoints.size(); e++)
 			{
 				const CEntryPoint & entryPoint = _EntryPoints[e];

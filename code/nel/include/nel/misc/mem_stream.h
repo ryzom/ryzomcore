@@ -728,7 +728,7 @@ inline	void		CMemStream::serial(uint64 &b)
 		}
 		else
 		{
-			writenumber( b, "%"NL_I64"u", 20 );
+			writenumber( b, "%" NL_I64 "u", 20 );
 		}
 	}
 	else
@@ -748,7 +748,7 @@ inline	void		CMemStream::serial(sint64 &b)
 		}
 		else
 		{
-			writenumber( b, "%"NL_I64"d", 20 );
+			writenumber( b, "%" NL_I64 "d", 20 );
 		}
 	}
 	else

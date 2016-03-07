@@ -606,11 +606,7 @@ namespace NLGUI
 		}
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"menu_r" );
-		if (prop)
-		{
-			string tmp = (const char *) prop;
-			_ListMenuRight = strlwr(tmp);
-		}
+		if (prop) _ListMenuRight = toLower((const char *) prop);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"max_historic" );
 		if (prop) fromString((const char*)prop, _MaxHistoric);
@@ -957,7 +953,6 @@ namespace NLGUI
 			maxPos = _CursorPos;
 		}
 
-		nlinfo("%d, %d", minPos, maxPos);
 		if (replace)
 		{
 			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);

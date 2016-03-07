@@ -532,7 +532,7 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		}
 		else
 		{
-			// Restaure fog state to its current value
+			// Restore fog state to its current value
 			_DriverGLStates.enableFog(_FogEnabled);
 		}
 

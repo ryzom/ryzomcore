@@ -233,18 +233,18 @@ namespace NLGUI
 
 	// ***************************************************************************
 	#define LUA_REGISTER_BASIC(_type_)															\
-	luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);													\
-	_type_ convert_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)						\
+	luabind::detail::yes_t is_user_defined(luabind::detail::by_value<_type_>);					\
+	_type_ convert_lua_to_cpp(lua_State* L, luabind::detail::by_value<_type_>, int index)		\
 	{																							\
-		return (_type_)lua_tonumber(L,    index);													\
+		return (_type_)lua_tointeger(L, index);													\
 	}																							\
-	int match_lua_to_cpp(lua_State* L,    luabind::detail::by_value<_type_>,    int index)								\
+	int match_lua_to_cpp(lua_State* L, luabind::detail::by_value<_type_>, int index)			\
 	{																							\
-		if (lua_isnumber(L,    index)) return 0; else return -1;									\
+		return lua_isnumber(L, index) ? 0:-1;													\
 	}																							\
-	void convert_cpp_to_lua(lua_State* L,    const  _type_& v)										\
+	void convert_cpp_to_lua(lua_State* L, const  _type_& v)										\
 	{																							\
-		lua_pushnumber(L,    (double)v);															\
+		lua_pushinteger(L, (lua_Integer)v);														\
 	}
 
 	// Basic LUA types
@@ -258,8 +258,6 @@ namespace NLGUI
 			LUA_REGISTER_BASIC(uint16)
 			LUA_REGISTER_BASIC(sint32)
 			LUA_REGISTER_BASIC(uint32)
-	//		LUA_REGISTER_BASIC(sint)
-	//		LUA_REGISTER_BASIC(uint)
 		}
 	}
 
@@ -942,8 +940,8 @@ namespace NLGUI
 		CLuaIHM::checkArgCount(ls,   "getWindowSize",   0);
 		uint32 w,   h;
 		CViewRenderer::getInstance()->getScreenSize(w,   h);
-		ls.push((double) w);
-		ls.push((double) h);
+		ls.push(w);
+		ls.push(h);
 		return 2;
 	}
 
@@ -974,8 +972,8 @@ namespace NLGUI
 		CIFile fs(CPath::lookup(textureName).c_str());
 		bitmap.load(fs);
 
-		ls.push((double) bitmap.getWidth());
-		ls.push((double) bitmap.getHeight());
+		ls.push(bitmap.getWidth());
+		ls.push(bitmap.getHeight());
 
 		return 2;
 	}
@@ -1098,7 +1096,7 @@ namespace NLGUI
 				ls.push(value.getBool());
 				break;
 			case CInterfaceExprValue::Integer:
-				ls.push((double)value.getInteger());
+				ls.push(value.getInteger());
 				break;
 			case CInterfaceExprValue::Double:
 				ls.push(value.getDouble());
@@ -1361,7 +1359,7 @@ namespace NLGUI
 		ls.newTable();
 		for(uint k = 0; k < files.size(); ++k)
 		{
-			ls.push((double) k);
+			ls.push(k);
 			ls.push(files[k]);
 			ls.setTable(-3);
 		}
@@ -1381,10 +1379,10 @@ namespace NLGUI
 				ls.push( (reflectedObject.*(property.GetMethod.GetBool))() );
 			break;
 			case CReflectedProperty::SInt32:
-				ls.push( (lua_Number)(reflectedObject.*(property.GetMethod.GetSInt32))() );
+				ls.push( (reflectedObject.*(property.GetMethod.GetSInt32))() );
 			break;
 			case CReflectedProperty::Float:
-				ls.push( (lua_Number)(reflectedObject.*(property.GetMethod.GetFloat))() );
+				ls.push( (reflectedObject.*(property.GetMethod.GetFloat))() );
 			break;
 			case CReflectedProperty::String:
 				ls.push( (reflectedObject.*(property.GetMethod.GetString))() );
@@ -1447,13 +1445,13 @@ namespace NLGUI
 				}
 			case CReflectedProperty::SInt32:
 				{
-					sint32	val= (sint32)ls.toNumber(stackIndex);
+					sint32	val= (sint32)ls.toInteger(stackIndex);
 					(target.*(property.SetMethod.SetSInt32))(val);
 					return;
 				}
 			case CReflectedProperty::UInt32:
 				{
-					uint32	val= (uint32)ls.toNumber(stackIndex);
+					uint32	val= (uint32)ls.toInteger(stackIndex);
 					(target.*(property.SetMethod.SetUInt32))(val);
 					return;
 				}
@@ -1474,7 +1472,7 @@ namespace NLGUI
 				{
 					ucstring val;
 					// Additionaly return of CInterfaceExpr may be std::string... test std string too
-					if(ls.isString() || ls.isNumber())
+					if(ls.isString() || ls.isNumber() || ls.isInteger())
 					{
 						std::string	str;
 						ls.toString(stackIndex,    str);
@@ -1535,7 +1533,7 @@ namespace NLGUI
 		for (uint e=0 ; e<__num__ ; e++) \
 		{ \
 			std::string str = __toStringFunc__((__enum__)e); \
-			std::string temp = __name__ + toString(".") + __toStringFunc__((__enum__)e) + " = " + toString("%d;", e); \
+			std::string temp = __name__ + toString(".") + __toStringFunc__((__enum__)e) + " = " + toString("%u;", e); \
 			ls.executeScript(temp); \
 		} \
 

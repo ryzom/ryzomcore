@@ -45,32 +45,32 @@ bool CDummyWindow::init(HINSTANCE hInstance, WNDPROC winProc)
 {
 	release();
 	static const char *INVISIBLE_WINDOW_CLASS = "nl_invisible_wnd_class";
-	WNDCLASSEX wc;
-	wc.cbSize = sizeof(WNDCLASSEX);
-	if (!GetClassInfoEx(hInstance, INVISIBLE_WINDOW_CLASS, &wc))
+	WNDCLASSEXA wc;
+	wc.cbSize = sizeof(WNDCLASSEXA);
+	if (!GetClassInfoExA(hInstance, INVISIBLE_WINDOW_CLASS, &wc))
 	{
-		wc.cbSize = sizeof(WNDCLASSEX);
+		wc.cbSize = sizeof(WNDCLASSEXA);
 		wc.style			= CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 		wc.lpfnWndProc		= nlDefaultWinProc;
 		wc.cbClsExtra		= 0;
 		wc.cbWndExtra		= 0;
 		wc.hInstance		= hInstance;
-		wc.hIcon			= 0;
-		wc.hCursor			= 0;
-		wc.hbrBackground	= 0;
-		wc.lpszMenuName		= 0;
+		wc.hIcon			= NULL;
+		wc.hCursor			= NULL;
+		wc.hbrBackground	= NULL;
+		wc.lpszMenuName		= NULL;
 		wc.lpszClassName	= INVISIBLE_WINDOW_CLASS;
-		wc.hIconSm			= 0;
-		RegisterClassEx(&wc);
+		wc.hIconSm			= NULL;
+		RegisterClassExA(&wc);
 	}
-    _HWnd = CreateWindow(INVISIBLE_WINDOW_CLASS, "", WS_POPUP,
+    _HWnd = CreateWindowA(INVISIBLE_WINDOW_CLASS, "", WS_POPUP,
                          CW_USEDEFAULT,CW_USEDEFAULT,
                          CW_USEDEFAULT,CW_USEDEFAULT,
                          NULL, 0,
                          hInstance, 0);
 	if (_HWnd)
 	{
-		if (winProc) SetWindowLongPtr(_HWnd, GWLP_WNDPROC, (LONG_PTR) winProc);
+		if (winProc) SetWindowLongPtrA(_HWnd, GWLP_WNDPROC, (LONG_PTR) winProc);
 		return true;
 	}
 	return false;

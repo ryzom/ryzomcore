@@ -1,0 +1,53 @@
+sudo: false
+language: cpp
+
+compiler:
+    - gcc
+
+os:
+    - linux
+matrix:
+    fast_finish: true
+env:
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=on -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=off"
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=on -DWITH_LUA53:BOOL=off"
+    - CMAKE_CONFIGURE_OPTIONS="-DWITH_NEL_TESTS:BOOL=off -DWITH_LUA51:BOOL=off -DWITH_LUA52:BOOL=off -DWITH_LUA53:BOOL=on"
+    - CMAKE_CONFIGURE_OPTIONS="-DCPPTEST_LIBRARY_DEBUG:STRING=/usr/lib/libcpptest.so"
+      CMAKE_BUILD_OPTIONS="--target nel_unit_test -- -j 2"
+      RUN="build/bin/nel_unit_test"
+
+addons:
+    apt:
+        packages:
+            - liblua5.1-0-dev
+            - liblua5.1-0-dbg
+            - liblua5.2-0-dev
+            - liblua5.2-0-dbg
+            - libluabind-dev
+            - libcpptest-dev
+            - libogg-dev
+            - libvorbis-dev
+            - libopenal-dev
+            - libgif-dev
+            - libfreetype6-dev
+            - libxml2-dev
+
+before_script:
+    - mkdir build
+    - cmake --version
+    - cmake -Hcode -Bbuild $CMAKE_CONFIGURE_OPTIONS
+    - cat build/CMakeCache.txt
+
+script:
+    - cmake --build build $CMAKE_BUILD_OPTIONS
+    - $RUN
+
+notifications:
+  irc:
+    channels:
+      - $NOTIFICATION_IRC_CHANNEL
+    template:
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+      - "Description : %{commit_message}"
+      - "Change view : %{compare_url}"
+      - "Build details : %{build_url}"

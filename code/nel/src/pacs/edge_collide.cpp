@@ -174,9 +174,9 @@ CRational64	CEdgeCollide::testPointMove(const CVector2f &start, const CVector2f 
 */
 /*
 	if (numerator != numeratorInt)
-		nlwarning("numerator(%f) != numeratorInt(%"NL_I64"d)", numerator, numeratorInt);
+		nlwarning("numerator(%f) != numeratorInt(%" NL_I64 "d)", numerator, numeratorInt);
 	if (denominator != denominatorInt)
-		nlwarning("denominator(%f) != denominatorInt(%"NL_I64"d)", denominator, denominatorInt);
+		nlwarning("denominator(%f) != denominatorInt(%" NL_I64 "d)", denominator, denominatorInt);
 */
 	return CRational64(numeratorInt, denominatorInt);
 }

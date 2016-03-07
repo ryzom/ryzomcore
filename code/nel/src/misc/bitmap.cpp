@@ -65,9 +65,9 @@ const uint32 CBitmap::bitPerPixels[ModeCount]=
 	16		// DsDt
 };
 
-const uint32 CBitmap::DXTC1HEADER = NL_MAKEFOURCC('D','X', 'T', '1');
-const uint32 CBitmap::DXTC3HEADER = NL_MAKEFOURCC('D','X', 'T', '3');
-const uint32 CBitmap::DXTC5HEADER = NL_MAKEFOURCC('D','X', 'T', '5');
+const uint32 CBitmap::DXTC1HEADER = NL_MAKEFOURCC('D', 'X', 'T', '1');
+const uint32 CBitmap::DXTC3HEADER = NL_MAKEFOURCC('D', 'X', 'T', '3');
+const uint32 CBitmap::DXTC5HEADER = NL_MAKEFOURCC('D', 'X', 'T', '5');
 
 
 #ifdef NEL_ALL_BITMAP_WHITE
@@ -83,6 +83,20 @@ void MakeWhite(CBitmap &bitmaps)
 	}
 }
 #endif // NEL_ALL_BITMAP_WHITE
+
+CBitmap::CBitmap()
+{
+	_MipMapCount = 1;
+	_Width = 0;
+	_Height = 0;
+	PixelFormat = RGBA;
+	_LoadGrayscaleAsAlpha = true;
+}
+
+CBitmap::~CBitmap()
+{
+
+}
 
 /*-------------------------------------------------------------------*\
 								load
@@ -133,6 +147,19 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 #endif // NEL_ALL_BITMAP_WHITE
 	}
 #endif // USE_JPEG
+
+#ifdef USE_GIF
+	if (fileType == GIF_HEADER)
+	{
+#ifdef NEL_ALL_BITMAP_WHITE
+		uint8 result = readGIF(f);
+		MakeWhite (*this);
+		return result;
+#else // NEL_ALL_BITMAP_WHITE
+		return readGIF(f);
+#endif // NEL_ALL_BITMAP_WHITE
+	}
+#endif // USE_GIF
 
 	// assuming it's TGA
 	NLMISC::IStream::TSeekOrigin origin= f.begin;
@@ -296,6 +323,155 @@ void	CBitmap::makeDummyFromBitField(const uint8	bitmap[1024])
 	}
 }
 
+/*-------------------------------------------------------------------*\
+								makeOpaque
+\*-------------------------------------------------------------------*/
+void	CBitmap::makeOpaque()
+{
+	if (_Width*_Height == 0) return;
+
+	uint pixelSize;
+
+	switch(PixelFormat)
+	{
+		case RGBA: pixelSize = 4; break;
+		case AlphaLuminance: pixelSize = 2; break;
+		case Alpha: pixelSize = 1; break;
+		default: return;
+	}
+
+	for(uint8 m = 0; m < _MipMapCount; ++m)
+	{
+		// get a pointer on original data
+		uint8 *data = _Data[m].getPtr();
+
+		// special case for only alpha values
+		if (pixelSize == 1)
+		{
+			memset(data, 255, _Data[m].size());
+		}
+		else
+		{
+			// end of data
+			uint8 *endData = data + _Data[m].size();
+
+			// first alpha
+			data += pixelSize - 1;
+
+			// replace all alpha values by 255
+			while(data < endData)
+			{
+				*data = 255;
+				data += pixelSize;
+			}
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+								isAlphaUniform
+\*-------------------------------------------------------------------*/
+bool	CBitmap::isAlphaUniform(uint8 *alpha) const
+{
+	uint32 size = _Data[0].size();
+
+	if (size == 0) return false;
+
+	uint pixelSize;
+
+	switch(PixelFormat)
+	{
+		// formats with alpha channel
+		case RGBA:
+		pixelSize = 4;
+		break;
+
+		case AlphaLuminance:
+		pixelSize = 2;
+		break;
+
+		case Alpha:
+		pixelSize = 1;
+		break;
+
+		// formats without alpha channel
+		case Luminance:
+		if (alpha) *alpha = 255;
+		return true;
+
+		default:
+		return false;
+	}
+
+	// get a pointer on original data
+	uint8 *data = (uint8*)_Data[0].getPtr();
+	uint8 *endData = data + size;
+
+	// first alpha
+	data += pixelSize - 1;
+
+	// first alpha value
+	uint8 value = *data;
+
+	// check if all alphas have the same value
+	while(data < endData && *data == value) data += pixelSize;
+
+	// texture can be converted if all alphas are 0 or 255
+	if (data >= endData)
+	{
+		// return the uniform value
+		if (alpha) *alpha = value;
+		return true;
+	}
+
+	return false;
+}
+
+
+/*-------------------------------------------------------------------*\
+								isGrayscale
+\*-------------------------------------------------------------------*/
+bool	CBitmap::isGrayscale() const
+{
+	// all grayscale formats or, al least, without color information
+	switch(PixelFormat)
+	{
+		case Luminance:
+		case AlphaLuminance:
+		case Alpha:
+		return true;
+
+		case RGBA:
+		break;
+
+		default:
+		// DXTC formats won't be managed at the moment
+		return false;
+	}
+
+	uint32 size = _Data[0].size();
+	if (size == 0) return false;
+
+	// get a pointer on original data
+	uint32 *data = (uint32*)_Data[0].getPtr();
+	uint32 *endData = (uint32*)((uint8*)data + size);
+
+	NLMISC::CRGBA *color = NULL;
+
+	// check if all alphas have the same value
+	while(data < endData)
+	{
+		color = (NLMISC::CRGBA*)data;
+
+		if (!color->isGray()) return false;
+
+		++data;
+	}
+
+	return true;
+}
+
 
 
 
@@ -315,7 +491,7 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 
 	uint32 size = 0;
 	f.serial(size); // size in Bytes of header(without "DDS")
-	 uint32 * _DDSSurfaceDesc = new uint32[size];
+	uint32 * _DDSSurfaceDesc = new uint32[size];
 	_DDSSurfaceDesc[0]= size;
 
 #ifdef NL_LITTLE_ENDIAN
@@ -346,6 +522,7 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 	// If no mipmap.
 	if(_MipMapCount==0)
 		_MipMapCount=1;
+
 	switch (_DDSSurfaceDesc[20])
 	{
 	case DXTC1HEADER:
@@ -378,17 +555,10 @@ uint8 CBitmap::readDDS(NLMISC::IStream &f, uint mipMapSkip)
 		(very) bad rendered with this fix	so we have to deactivate it the for moment
 */
 
-//#ifdef NL_OS_WINDOWS
-//	if(PixelFormat==DXTC1) //AlphaBitDepth
-//	{
-//		PixelFormat = DXTC1Alpha;
-//	}
-//#else
 	if(PixelFormat==DXTC1 && _DDSSurfaceDesc[21]>0) //AlphaBitDepth
 	{
 		PixelFormat = DXTC1Alpha;
 	}
-//#endif
 
 	if(PixelFormat!= DXTC1 && PixelFormat!= DXTC1Alpha && PixelFormat!= DXTC3 && PixelFormat!= DXTC5)
 	{
@@ -773,28 +943,27 @@ bool CBitmap::alphaToLuminance()
 \*-------------------------------------------------------------------*/
 bool CBitmap::alphaLuminanceToLuminance()
 {
-	uint32 i;
+	if (_Width*_Height == 0)  return false;
 
-	if(_Width*_Height == 0)  return false;
-
-	for(uint8 m= 0; m<_MipMapCount; m++)
+	for(uint8 m = 0; m<_MipMapCount; ++m)
 	{
 		CObjectVector<uint8> dataTmp;
 		dataTmp.resize(_Data[m].size()/2);
 		uint	dstId= 0;
 
-		for(i=0; i<_Data[m].size(); i+=2)
+		for(uint32 i=0; i<_Data[m].size(); i+=2)
 		{
-			dataTmp[dstId++]= 0;
-			dataTmp[dstId++]= 0;
-			dataTmp[dstId++]= 0;
 			dataTmp[dstId++]= _Data[m][i];
 		}
+
 		NLMISC::contReset(_Data[m]);
+
 		_Data[m].resize(0);
 		_Data[m] = dataTmp;
 	}
+
 	PixelFormat = Luminance;
+
 	return true;
 }
 
@@ -1623,7 +1792,7 @@ void CBitmap::releaseMipMaps()
 \*-------------------------------------------------------------------*/
 void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 {
-	nlassert(PixelFormat == RGBA);
+	nlassert(PixelFormat == RGBA || PixelFormat == Luminance);
 	bool needRebuild = false;
 
 	// Deleting mipmaps
@@ -1642,13 +1811,27 @@ void CBitmap::resample(sint32 nNewWidth, sint32 nNewHeight)
 
 	//logResample("Resample: 30");
 	CObjectVector<uint8> pDestui;
-	pDestui.resize(nNewWidth*nNewHeight*4);
-	//logResample("Resample: 40");
-	NLMISC::CRGBA *pDestRgba = (NLMISC::CRGBA*)&pDestui[0];
-	//logResample("Resample: 50");
 
-	resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
-	//logResample("Resample: 60");
+	if (PixelFormat == RGBA)
+	{
+		pDestui.resize(nNewWidth*nNewHeight*4);
+		//logResample("Resample: 40");
+		NLMISC::CRGBA *pDestRgba = (NLMISC::CRGBA*)&pDestui[0];
+		//logResample("Resample: 50");
+
+		resamplePicture32 ((NLMISC::CRGBA*)&_Data[0][0], pDestRgba, _Width, _Height, nNewWidth, nNewHeight);
+		//logResample("Resample: 60");
+	}
+	else if (PixelFormat == Luminance)
+	{
+		pDestui.resize(nNewWidth*nNewHeight);
+		//logResample("Resample: 40");
+		uint8 *pDestGray = &pDestui[0];
+		//logResample("Resample: 50");
+
+		resamplePicture8 (&_Data[0][0], pDestGray, _Width, _Height, nNewWidth, nNewHeight);
+		//logResample("Resample: 60");
+	}
 
 	NLMISC::contReset(_Data[0]); // free memory
 	//logResample("Resample: 70");
@@ -1964,6 +2147,230 @@ void CBitmap::resamplePicture32Fast (const NLMISC::CRGBA *pSrc, NLMISC::CRGBA *p
 }
 
 
+/*-------------------------------------------------------------------*\
+							resamplePicture32
+\*-------------------------------------------------------------------*/
+void CBitmap::resamplePicture8 (const uint8 *pSrc, uint8 *pDest,
+								 sint32 nSrcWidth, sint32 nSrcHeight,
+								 sint32 nDestWidth, sint32 nDestHeight)
+{
+	//logResample("RP8: 0 pSrc=%p pDest=%p, Src=%d x %d Dest=%d x %d", pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
+	if ((nSrcWidth<=0)||(nSrcHeight<=0)||(nDestHeight<=0)||(nDestHeight<=0))
+		return;
+
+	// If we're reducing it by 2, call the fast resample
+	if (((nSrcHeight / 2) == nDestHeight) && ((nSrcHeight % 2) == 0) &&
+		((nSrcWidth  / 2) == nDestWidth)  && ((nSrcWidth  % 2) == 0))
+	{
+		resamplePicture8Fast(pSrc, pDest, nSrcWidth, nSrcHeight, nDestWidth, nDestHeight);
+		return;
+	}
+
+	bool bXMag=(nDestWidth>=nSrcWidth);
+	bool bYMag=(nDestHeight>=nSrcHeight);
+	bool bXEq=(nDestWidth==nSrcWidth);
+	bool bYEq=(nDestHeight==nSrcHeight);
+	std::vector<float> pIterm (nDestWidth*nSrcHeight);
+
+	if (bXMag)
+	{
+		float fXdelta=(float)(nSrcWidth)/(float)(nDestWidth);
+		float *pItermPtr=&*pIterm.begin();
+		sint32 nY;
+		for (nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			float fX=0.f;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+			{
+				float fVirgule=fX-(float)floor(fX);
+				nlassert (fVirgule>=0.f);
+				float vColor;
+				if (fVirgule>=0.5f)
+				{
+					if (fX<(float)(nSrcWidth-1))
+					{
+						float vColor1 (pSrcLine[(sint32)floor(fX)]);
+						float vColor2 (pSrcLine[(sint32)floor(fX)+1]);
+						vColor=vColor1*(1.5f-fVirgule)+vColor2*(fVirgule-0.5f);
+					}
+					else
+						vColor = float(pSrcLine[(sint32)floor(fX)]);
+				}
+				else
+				{
+					if (fX>=1.f)
+					{
+						float vColor1 (pSrcLine[(sint32)floor(fX)]);
+						float vColor2 (pSrcLine[(sint32)floor(fX)-1]);
+						vColor = vColor1*(0.5f+fVirgule)+vColor2*(0.5f-fVirgule);
+					}
+					else
+						vColor = float (pSrcLine[(sint32)floor(fX)]);
+				}
+				*(pItermPtr++)=vColor;
+				fX+=fXdelta;
+			}
+			pSrc+=nSrcWidth;
+		}
+	}
+	else if (bXEq)
+	{
+		float *pItermPtr=&*pIterm.begin();
+		for (sint32 nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+				*(pItermPtr++) = float (pSrcLine[nX]);
+			pSrc+=nSrcWidth;
+		}
+	}
+	else
+	{
+		double fXdelta=(double)(nSrcWidth)/(double)(nDestWidth);
+		nlassert (fXdelta>1.f);
+		float *pItermPtr=&*pIterm.begin();
+		sint32 nY;
+		for (nY=0; nY<nSrcHeight; nY++)
+		{
+			const uint8 *pSrcLine=pSrc;
+			double fX=0.f;
+			sint32 nX;
+			for (nX=0; nX<nDestWidth; nX++)
+			{
+				float vColor = 0.f;
+				double fFinal=fX+fXdelta;
+				while ((fX<fFinal)&&((sint32)fX!=nSrcWidth))
+				{
+					double fNext=(double)floor (fX)+1.f;
+					if (fNext>fFinal)
+						fNext=fFinal;
+					vColor+=((float)(fNext-fX))* float (pSrcLine[(sint32)floor(fX)]);
+					fX=fNext;
+				}
+				fX = fFinal; // ensure fX == fFinal
+				vColor/=(float)fXdelta;
+				*(pItermPtr++)=vColor;
+			}
+			pSrc+=nSrcWidth;
+		}
+	}
+
+	if (bYMag)
+	{
+		double fYdelta=(double)(nSrcHeight)/(double)(nDestHeight);
+		sint32 nX;
+		for (nX=0; nX<nDestWidth; nX++)
+		{
+			double fY=0.f;
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				double fVirgule=fY-(double)floor(fY);
+				nlassert (fVirgule>=0.f);
+				float vColor;
+				if (fVirgule>=0.5f)
+				{
+					if (fY<(double)(nSrcHeight-1))
+					{
+						float vColor1=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+						float vColor2=pIterm[(((sint32)floor(fY))+1)*nDestWidth+nX];
+						vColor=vColor1*(1.5f-(float)fVirgule)+vColor2*((float)fVirgule-0.5f);
+					}
+					else
+						vColor=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+				}
+				else
+				{
+					if (fY>=1.f)
+					{
+						float vColor1=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+						float vColor2=pIterm[(((sint32)floor(fY))-1)*nDestWidth+nX];
+						vColor=vColor1*(0.5f+(float)fVirgule)+vColor2*(0.5f-(float)fVirgule);
+					}
+					else
+						vColor=pIterm[((sint32)floor(fY))*nDestWidth+nX];
+				}
+				pDest[nX+nY*nDestWidth]=vColor;
+				fY+=fYdelta;
+			}
+		}
+	}
+	else if (bYEq)
+	{
+		for (sint32 nX=0; nX<nDestWidth; nX++)
+		{
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				pDest[nX+nY*nDestWidth]=pIterm[nY*nDestWidth+nX];
+			}
+		}
+	}
+	else
+	{
+		double fYdelta=(double)(nSrcHeight)/(double)(nDestHeight);
+		nlassert (fYdelta>1.f);
+		sint32 nX;
+		for (nX=0; nX<nDestWidth; nX++)
+		{
+			double fY=0.f;
+			sint32 nY;
+			for (nY=0; nY<nDestHeight; nY++)
+			{
+				float vColor = 0.f;
+				double fFinal=fY+fYdelta;
+				while ((fY<fFinal)&&((sint32)fY!=nSrcHeight))
+				{
+					double fNext=(double)floor (fY)+1.f;
+					if (fNext>fFinal)
+						fNext=fFinal;
+					vColor+=((float)(fNext-fY))*pIterm[((sint32)floor(fY))*nDestWidth+nX];
+					fY=fNext;
+				}
+				vColor/=(float)fYdelta;
+				pDest[nX+nY*nDestWidth]=vColor;
+			}
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
+							resamplePicture8Fast
+\*-------------------------------------------------------------------*/
+void CBitmap::resamplePicture8Fast (const uint8 *pSrc, uint8 *pDest,
+									 sint32 nSrcWidth, sint32 nSrcHeight,
+									 sint32 nDestWidth, sint32 nDestHeight)
+{
+	// the image is divided by two : 1 pixel in dest = 4 pixels in src
+	// the resulting pixel in dest is an average of the four pixels in src
+
+	nlassert(nSrcWidth  % 2 == 0);
+	nlassert(nSrcHeight % 2 == 0);
+	nlassert(nSrcWidth  / 2 == nDestWidth);
+	nlassert(nSrcHeight / 2 == nDestHeight);
+
+	sint32 x, y, twoX, twoSrcWidthByY;
+
+	for (y=0 ; y<nDestHeight ; y++)
+	{
+		twoSrcWidthByY = 2*nSrcWidth*y;
+		for (x=0 ; x<nDestWidth ; x++)
+		{
+			twoX = 2*x;
+			pDest[x+y*nDestWidth] = (
+				(uint)pSrc[twoX   + twoSrcWidthByY             ]+
+				(uint)pSrc[twoX   + twoSrcWidthByY + nSrcWidth ]+
+				(uint)pSrc[twoX+1 + twoSrcWidthByY             ]+
+				(uint)pSrc[twoX+1 + twoSrcWidthByY + nSrcWidth ]+1)>>2;
+		}
+	}
+}
+
+
 
 /*-------------------------------------------------------------------*\
 							readTGA
@@ -1977,7 +2384,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	if(!f.isReading()) return 0;
 
-	uint32			size;
 	uint32			x,y;
 	sint32			slsize;
 	uint8			*scanline;
@@ -2001,13 +2407,11 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	// Determining whether file is in Original or New TGA format
 
-	bool newTgaFormat;
 	uint32 extAreaOffset;
 	uint32 devDirectoryOffset;
 	char signature[16];
 
 	f.seek (0, f.end);
-	newTgaFormat = false;
 	if (f.getPos() >= 26)
 	{
 		f.seek (-26, f.end);
@@ -2017,8 +2421,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 		{
 			f.serial(signature[i]);
 		}
-		if(strncmp(signature,"TRUEVISION-XFILE",16)==0)
-			newTgaFormat = true;
 	}
 
 
@@ -2057,7 +2459,6 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 
 	_Width = width;
 	_Height = height;
-	size = _Width * _Height * (imageDepth/8);
 
 	switch(imageType)
 	{
@@ -2204,7 +2605,7 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 		case 10:
 		{
 			uint8 packet;
-			uint8 pixel[4];
+			uint8 pixel[4] = {0};
 			uint32 imageSize = width*height;
 			uint32 readSize = 0;
 			uint8 upSideDown = ((desc & (1 << 5))==0);
@@ -2222,20 +2623,10 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 					}
 					for (i=0; i < (packet & 0x7F) + 1; i++)
 					{
-						if(imageDepth==32)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= pixel[3];
-						}
-						if(imageDepth==24)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= 0;
-						}
+						_Data[0][dstId++]= pixel[2];
+						_Data[0][dstId++]= pixel[1];
+						_Data[0][dstId++]= pixel[0];
+						_Data[0][dstId++]= pixel[3];
 					}
 				}
 				else	// packet Raw
@@ -2246,20 +2637,10 @@ uint8 CBitmap::readTGA( NLMISC::IStream &f)
 						{
 							f.serial(pixel[j]);
 						}
-						if(imageDepth==32)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= pixel[3];
-						}
-						if(imageDepth==24)
-						{
-							_Data[0][dstId++]= pixel[2];
-							_Data[0][dstId++]= pixel[1];
-							_Data[0][dstId++]= pixel[0];
-							_Data[0][dstId++]= 0;
-						}
+						_Data[0][dstId++]= pixel[2];
+						_Data[0][dstId++]= pixel[1];
+						_Data[0][dstId++]= pixel[0];
+						_Data[0][dstId++]= pixel[3];
 					}
   				}
 				readSize += (packet & 0x7F) + 1;
@@ -2388,7 +2769,6 @@ bool CBitmap::writeTGA( NLMISC::IStream &f, uint32 d, bool upsideDown)
 
 	for(y=0; y<(sint32)height; y++)
 	{
-
 		uint32 k=0;
 		if (PixelFormat == Alpha)
 		{
@@ -3149,6 +3529,25 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		}
 		while(!eof);
 	}
+	else if(fileType == GIF_HEADER)
+	{
+		// check second part of header ("7a" or "9a" in 'GIF89a')
+		uint16 s;
+		f.serial(s);
+		if (s != 0x6137 && s != 0x6139)
+		{
+			nlwarning("Invalid GIF header, expected GIF87a or GIF89a");
+			return;
+		}
+
+		uint16 lsWidth;
+		uint16 lsHeight;
+		f.serial(lsWidth);
+		f.serial(lsHeight);
+
+		retWidth = lsWidth;
+		retHeight = lsHeight;
+	}
 	// assuming it's TGA
 	else
 	{
@@ -3177,7 +3576,7 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 		f.serial(imageType);
 		if(imageType!=2 && imageType!=3 && imageType!=10 && imageType!=11)
 		{
-			nlwarning("Invalid TGA format, type %u in not supported (must be 2,3,10 or 11)", imageType);
+			nlwarning("Invalid TGA format, type %u in not supported (must be 2, 3, 10 or 11)", imageType);
 			return;
 		}
 		f.serial(tgaOrigin);

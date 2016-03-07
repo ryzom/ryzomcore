@@ -307,19 +307,19 @@ void CGroupHTMLAuth::addHTTPGetParams (string &url, bool trustedDomain)
 
 // ***************************************************************************
 
-void CGroupHTMLAuth::addHTTPPostParams (HTAssocList *formfields, bool trustedDomain)
+void CGroupHTMLAuth::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
 	if(!UserEntity) return;
 
 	uint32 cid = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
-	HTParseFormInput(formfields, ("shardid="+toString(CharacterHomeSessionId)).c_str());
-	HTParseFormInput(formfields, ("name="+UserEntity->getLoginName().toUtf8()).c_str());
-	HTParseFormInput(formfields, ("lang="+CI18N::getCurrentLanguageCode()).c_str());
-	HTParseFormInput(formfields, "ig=1");
+	formfields.add("shardid", toString(CharacterHomeSessionId));
+	formfields.add("name", UserEntity->getLoginName().toUtf8());
+	formfields.add("lang", CI18N::getCurrentLanguageCode());
+	formfields.add("ig", "1");
 	if (trustedDomain)
 	{
-		HTParseFormInput(formfields, ("cid="+toString(cid)).c_str());
-		HTParseFormInput(formfields, ("authkey="+getWebAuthKey()).c_str());
+		formfields.add("cid", toString(cid));
+		formfields.add("authkey", getWebAuthKey());
 	}
 }
 
@@ -365,7 +365,7 @@ void CGroupHTMLWebIG::addHTTPGetParams (string &url, bool trustedDomain)
 
 // ***************************************************************************
 
-void CGroupHTMLWebIG::addHTTPPostParams (HTAssocList *formfields, bool trustedDomain)
+void CGroupHTMLWebIG::addHTTPPostParams (SFormFields &formfields, bool trustedDomain)
 {
 	CGroupHTMLAuth::addHTTPPostParams(formfields, trustedDomain);
 }

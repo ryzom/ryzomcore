@@ -14,14 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <QtCore/QString>
-#include <QtGui/QListWidgetItem>
-#include <QtGui/QMessageBox>
-#include <QtCore/QDir>
-#include <string>
-#include <nel/3d/tile_bank.h>
-#include <nel/misc/stream.h>
-#include <nel/misc/file.h>
+#include "common.h"
 #include "tile_edit_dlg.h"
 #include "items_edit_dlg.h"
 #include "tile_browser_dlg.h"

@@ -299,7 +299,7 @@ void CClient::updatePong (sint64 pingTime, sint64 pongTime, uint32 pongNumber, u
 	}
 	else
 	{
-		fprintf (fp, "%"NL_I64"d\t%"NL_I64"d\t%"NL_I64"d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
+		fprintf (fp, "%" NL_I64 "d\t%" NL_I64 "d\t%" NL_I64 "d\t%d\n", pongTime, pingTime, (pongTime-pingTime), pongNumber);
 		fclose (fp);
 	}
 }
@@ -578,7 +578,7 @@ void handleReceivedPong (CClient *client, sint64 pongTime)
 		uint32 blockNumber = 0;
 		msgin.serial(blockNumber);
 
-//		nlinfo ("receive a pong from %s pongnb %d %"NL_I64"d", CurrentInMsg->AddrFrom.asString().c_str(), pongNumber, pongTime - pingTime);
+//		nlinfo ("receive a pong from %s pongnb %d %" NL_I64 "d", CurrentInMsg->AddrFrom.asString().c_str(), pongNumber, pongTime - pingTime);
 
 		client->updatePong (pingTime, pongTime, pongNumber, blockNumber);
 	}

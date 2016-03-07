@@ -469,6 +469,7 @@ CInterfaceManager::CInterfaceManager()
 	CGroupHTML::options.languageCode = ClientCfg.getHtmlLanguageCode();
 	CGroupHTML::options.appName = getUserAgentName();
 	CGroupHTML::options.appVersion = getUserAgentVersion();
+	CGroupHTML::options.curlMaxConnections = ClientCfg.CurlMaxConnections;
 
 	NLGUI::CDBManager::getInstance()->resizeBanks( NB_CDB_BANKS );
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
@@ -494,8 +495,8 @@ CInterfaceManager::CInterfaceManager()
 	CViewRenderer::getInstance()->checkNewScreenSize();
 	{
 		uint32 w,h;
-		CViewRenderer::getInstance()->getScreenSize( w, h );
-		CWidgetManager::getInstance()->setScreenWH( w, h );
+		CViewRenderer::getInstance()->getScreenSize(w, h);
+		CWidgetManager::getInstance()->setScreenWH(w, h);
 	}
 	CViewRenderer::getInstance()->init();
 
@@ -1446,9 +1447,6 @@ void CInterfaceManager::updateFrameEvents()
 		// Update contact list with incoming server string ids
 		PeopleInterraction.updateWaitingContacts();
 
-		// Connect and receive/send to the yubo chat
-		checkYuboChat();
-
 		// Update string if some waiting
 		CEncyclopediaManager::getInstance()->updateAllFrame();
 
@@ -1497,7 +1495,10 @@ void CInterfaceManager::updateFrameEvents()
 			{
 				if (pVT->getActive())
 				{
-					str = getTimestampHuman("%H:%M");
+					if (use12hClock())
+						str = getTimestampHuman("%I:%M %p");
+					else
+						str = getTimestampHuman("%H:%M");
 					pVT->setText(str);
 				}
 			}
@@ -1746,7 +1747,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		string	sFileNameBackup = sFileName+"backup";
 		if (CFile::fileExists(sFileNameBackup))
 			CFile::deleteFile(sFileNameBackup);
-		CFile::moveFile(sFileNameBackup.c_str(), sFileName.c_str());
+		CFile::moveFile(sFileNameBackup, sFileName);
 		nlwarning("Config loading failed : restore default");
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)
@@ -1760,6 +1761,8 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	// *** If saved resolution is different from the current one setuped, must fix positions in _Modes
 	if(lastInGameScreenResLoaded)
 	{
+		// Temporarily set screen to saved size so that positions are correctly calculated
+		CWidgetManager::getInstance()->setScreenWH(_LastInGameScreenW, _LastInGameScreenH);
 		// NB: we are typically InGame here (even though the _InGame flag is not yet set)
 		// Use the screen size of the config file. Don't update current UI, just _Modes
 		CWidgetManager::getInstance()->moveAllWindowsToNewScreenSize(ClientCfg.Width, ClientCfg.Height, false);
@@ -1950,8 +1953,14 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	nlctassert(CHARACTERISTICS::NUM_CHARACTERISTICS==8);
 	for (uint i=0; i<CHARACTERISTICS::NUM_CHARACTERISTICS; ++i)
 	{
-		NLMISC::CCDBNodeLeaf *node = _CurrentPlayerCharacLeaf[i] ? &*_CurrentPlayerCharacLeaf[i]
-			: &*(_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false));
+		if (!_CurrentPlayerCharacLeaf[i])
+			_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false);
+
+		NLMISC::CCDBNodeLeaf *node = NULL;
+
+		if (_CurrentPlayerCharacLeaf[i])
+			node = &*_CurrentPlayerCharacLeaf[i];
+
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
 	}
 
@@ -2011,6 +2020,9 @@ void CInterfaceManager::updateDesktops( uint32 newScreenW, uint32 newScreenH )
 			CWidgetManager::getInstance()->getNewWindowCoordToNewScreenSize(gcCont.X, gcCont.Y, gcCont.W, gcCont.H ,newScreenW, newScreenH);
 		}
 	}
+
+	_LastInGameScreenW = newScreenW;
+	_LastInGameScreenH = newScreenH;
 }
 
 class InvalidateTextVisitor : public CInterfaceElementVisitor
@@ -2268,7 +2280,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 	CRGBA color = CRGBA::White;
 
 
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 	{
 		mode = it->second.Mode;
@@ -2303,7 +2315,7 @@ void CInterfaceManager::displaySystemInfo(const ucstring &str, const string &cat
 CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 {
 	CRGBA col = CRGBA::White;
-	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(strlwr(cat));
+	map<string, CClientConfig::SSysInfoParam>::const_iterator it = ClientCfg.SystemInfoParams.find(toLower(cat));
 	if (it != ClientCfg.SystemInfoParams.end())
 		col = it->second.Color;
 	return col;
@@ -2482,7 +2494,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getViews()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getViews()[k]).name(), ig->getViews()[k]);
+					NLGUI::CViewBase *view = ig->getViews()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*view).name(), view);
 				}
 				else
 				{
@@ -2498,7 +2511,8 @@ void CInterfaceManager::dumpUI(bool /* indent */)
 				if (ig->getControls()[k])
 				{
 					info += id;
-					info += toString(", type = %s, address=0x%p", typeid(*ig->getControls()[k]).name(), ig->getControls()[k]);
+					NLGUI::CCtrlBase *control = ig->getControls()[k];
+					info += toString(", type = %s, address=0x%p", typeid(*control).name(), control);
 				}
 				else
 				{
@@ -2690,7 +2704,7 @@ void CInterfaceManager::log(const ucstring &str, const std::string &cat)
 	{
 		// Open file with the name of the player
 		const string fileName= "save/log_" + PlayerSelectedFileName + ".txt";
-		FILE *f = fopen(fileName.c_str(), "at");
+		FILE *f = nlfopen(fileName, "at");
 		if (f != NULL)
 		{
 			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpper(cat) + ") * " + str.toUtf8();
@@ -2890,6 +2904,32 @@ struct CEmoteEntry
 	}
 };
 
+static bool translateEmote(const std::string &id, ucstring &translatedName, std::string &commandName, std::string &commandNameAlt)
+{
+	if (CI18N::hasTranslation(id))
+	{
+		translatedName = CI18N::get(id);
+
+		// convert command to utf8 since emote translation can have strange chars
+		commandName = toLower(translatedName).toUtf8();
+
+		// replace all spaces by _
+		while (strFindReplace(commandName, " ", "_"));
+
+		// TODO: remove accents
+		commandNameAlt = commandName;
+
+		if (commandNameAlt == commandName) commandNameAlt.clear();
+
+		return true;
+	}
+
+	translatedName = id;
+	commandName = id;
+
+	return false;
+}
+
 // ***************************************************************************
 void CInterfaceManager::initEmotes()
 {
@@ -2970,6 +3010,10 @@ void CInterfaceManager::initEmotes()
 		CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 		nlassert(pMenu);
 
+		ucstring sTranslatedName;
+		std::string sCommandName;
+		std::string sCommandNameAlt;
+
 		// Add to the game context menu
 		// ----------------------------
 		for (i = 0; i < nbToken; ++i)
@@ -3007,8 +3051,10 @@ void CInterfaceManager::initEmotes()
 				}
 				else
 				{
+					translateEmote(sTmp, sTranslatedName, sCommandName, sCommandNameAlt);
+
 					// Create a line
-					pMenu->addLine ("/" + CI18N::get(sTmp), "emote",
+					pMenu->addLine (sTranslatedName + " (/" + ucstring::makeFromUtf8(sCommandName) + ")", "emote",
 						"nb="+toString(nEmoteNb)+"|behav="+toString(nBehav), sTmp);
 				}
 			}
@@ -3021,24 +3067,41 @@ void CInterfaceManager::initEmotes()
 			}
 		}
 
+		if (sTranslatedName.empty())
+			translateEmote(sName, sTranslatedName, sCommandName, sCommandNameAlt);
+
 		// Create new command
 		// ------------------
-		if (CI18N::hasTranslation(sName))
+		if (!sTranslatedName.empty())
 		{
-			CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
-
-			// convert command to utf8 since emote translation can have strange chars
-			string cmdName = (toLower(CI18N::get(sName))).toUtf8();
-			if(ICommand::exists(cmdName))
+			if(ICommand::exists(sCommandName))
 			{
-				nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), cmdName.c_str());
+				nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), sCommandName.c_str());
 			}
 			else
 			{
-				CEmoteCmd *pNewCmd = new CEmoteCmd(cmdName.c_str(), "", "");
+				CEmoteCmd *pNewCmd = new CEmoteCmd(sCommandName.c_str(), "", "");
 				pNewCmd->EmoteNb = nEmoteNb;
 				pNewCmd->Behaviour = nBehav;
 				_EmoteCmds.push_back(pNewCmd);
+
+				// add alternative command if defined
+				if (!sCommandNameAlt.empty())
+				{
+					if(ICommand::exists(sCommandNameAlt))
+					{
+						nlwarning("Translation for emote %s already exist: '%s' exist twice", sName.c_str(), sCommandName.c_str());
+					}
+					else
+					{
+						CEmoteCmd *pNewCmd = new CEmoteCmd(sCommandNameAlt.c_str(), "", "");
+						pNewCmd->EmoteNb = nEmoteNb;
+						pNewCmd->Behaviour = nBehav;
+						_EmoteCmds.push_back(pNewCmd);
+					}
+				}
+
+				CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 
 				// Quick-Emote too ?
 				for (i = 0; i< pMenu->getNumLine (); i++)
@@ -3047,7 +3110,7 @@ void CInterfaceManager::initEmotes()
 					{
 						// Yeah that's a quick emote too; set command
 						pMenu->addLineAtIndex (i,
-								"@{FFFF}/" + toLower(CI18N::get(sName)),
+								"@{FFFF}/" + ucstring::makeFromUtf8(sCommandName),
 								"emote", "nb="+toString(nEmoteNb)+"|behav="+toString(nBehav),
 								"", "", "", false, false, true);
 
@@ -3191,67 +3254,6 @@ CInterfaceElement *getInterfaceResource(const std::string &key)
 	return CWidgetManager::getInstance()->getElementFromId (key);
 }
 
-
-// ***************************************************************************
-void	CInterfaceManager::sendStringToYuboChat(const ucstring &str)
-{
-	// If the yubo chat really connected
-	if(_YuboChat.connected())
-	{
-		_YuboChat.send(str);
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::checkYuboChat()
-{
-	// flush the receive queue
-	if(_YuboChat.connected())
-	{
-		std::list<ucstring>		toReceive;
-		_YuboChat.receive(toReceive);
-		while(!toReceive.empty())
-		{
-			PeopleInterraction.ChatInput.YuboChat.displayMessage(toReceive.front(), CRGBA::White, 2, NULL);
-			toReceive.pop_front();
-		}
-	}
-}
-
-// ***************************************************************************
-void	CInterfaceManager::connectYuboChat()
-{
-	// force disconnection if was connected
-	_YuboChat.disconnect();
-
-	uint32 KlientChatPort = 0;
-
-	extern TSessionId HighestMainlandSessionId;
-	switch(HighestMainlandSessionId.asInt())
-	{
-	case 101: KlientChatPort = 6002; break;	// fr
-	case 102: KlientChatPort = 6003; break;	// de
-	case 103: KlientChatPort = 6001; break;	// en
-	case 301: KlientChatPort = 4000; break;	// yubo
-	default:
-		if(!ClientCfg.KlientChatPort.empty())
-			fromString(ClientCfg.KlientChatPort, KlientChatPort);
-		break;
-	}
-
-	// check if must reconnect
-	if(KlientChatPort != 0 && !_YuboChat.connected())
-	{
-		// NB: hard code url, to avoid "client.cfg trojan"
-		// (a client.cfg with an url pointing to a hacker site, to grab login/password)
-		extern std::string LoginLogin, LoginPassword;
-		_YuboChat.connect(string("chat.ryzom.com:")+toString(KlientChatPort), LoginLogin, LoginPassword);
-
-		// Inform the interface that the chat is present
-		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:YUBO_CHAT_PRESENT")->setValue32(1);
-	}
-}
-
 // ***************************************************************************
 std::vector<std::string>		CInterfaceManager::getInGameXMLInterfaceFiles()
 {
@@ -3313,11 +3315,17 @@ void		CInterfaceManager::getLuaValueInfo(std::string &str, sint index)
 
 	sint	type= ls.type(index);
 	if(type==LUA_TNIL)
+	{
 		str= "nil";
+	}
 	else if(type==LUA_TNUMBER)
-		str= NLMISC::toString(ls.toNumber(index));
+	{
+		str= NLMISC::toString(ls.isInteger(index) ? ls.toInteger(index):ls.toNumber(index));
+	}
 	else if(type==LUA_TBOOLEAN)
+	{
 		str= ls.toBoolean(index)?"true":"false";
+	}
 	else if(type==LUA_TSTRING)
 	{
 		ls.toString(index, str);
@@ -3681,6 +3689,14 @@ void CInterfaceManager::CServerToLocalAutoCopy::onLocalChange(ICDBNode *localNod
 			_UpdateList.push_back(node);
 		}
 	}
+}
+
+// ------------------------------------------------------------------------------------------------
+bool CInterfaceManager::use12hClock()
+{
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:SHOW_CLOCK_12H", false);
+
+	return (node && node->getValueBool());
 }
 
 // ------------------------------------------------------------------------------------------------

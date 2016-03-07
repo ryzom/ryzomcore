@@ -96,7 +96,7 @@ namespace NLMISC
 		nlassert(_Id == 0); // init done twice
 		release();
 		// create a system wide mutex
-		_SharedMemMutex = CreateMutex(NULL, FALSE, toString("NL_MUTEX_%d", (int) id).c_str());
+		_SharedMemMutex = CreateMutexA(NULL, FALSE, toString("NL_MUTEX_%d", (int) id).c_str());
 		if (!_SharedMemMutex) return false;
 		_Id = id;
 		return true;
@@ -197,7 +197,7 @@ namespace NLMISC
 					cds.lpData = (PVOID) msgOut.buffer();
 					for(;;)
 					{
-						LRESULT result = ::SendMessage(targetWindow, WM_COPYDATA, (WPARAM) _Parent->_LocalWindow.getWnd(), (LPARAM) &cds);
+						LRESULT result = ::SendMessageA(targetWindow, WM_COPYDATA, (WPARAM) _Parent->_LocalWindow.getWnd(), (LPARAM) &cds);
 						if (result) break;
 						// retry ...
 						Sleep(30);

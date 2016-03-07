@@ -564,6 +564,7 @@ namespace ENTITYLOC
 		void charConnected(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &charEId, uint32 lastDisconnectionDate)
 		{
 			TCharId charId = (TCharId)charEId.getShortId();
+			uint32 dynamicId = charEId.getDynamicId();
 
 			nldebug("ENTLOC : charConnected : character %u connected from '%s'", charId, sender->getModuleName().c_str());
 
@@ -577,10 +578,10 @@ namespace ENTITYLOC
 
 			TShardId shardId = locIt->second;
 
-			_charConnected(sender, charId, lastDisconnectionDate, shardId);
+			_charConnected(sender, charId, lastDisconnectionDate, shardId, dynamicId);
 		}
 
-		void _charConnected(NLNET::IModuleProxy *sender, uint32 charId, uint32 lastDisconnectionDate, uint32 shardId)
+		void _charConnected(NLNET::IModuleProxy *sender, uint32 charId, uint32 lastDisconnectionDate, uint32 shardId, uint32 dynamicId)
 		{
 			uint32 lastConnectionDate = CTime::getSecondsSince1970();
 
@@ -608,6 +609,7 @@ namespace ENTITYLOC
 
 					// update the last played date
 					character->setLastPlayedDate(lastConnectionDate);
+					character->setRRPAM(dynamicId);
 					character->update(_RingDB);
 				}
 
@@ -792,7 +794,7 @@ namespace ENTITYLOC
 //				return true;
 //			}
 
-			_charConnected(NULL, charId, CTime::getSecondsSince1970()-10, shardId);
+			_charConnected(NULL, charId, CTime::getSecondsSince1970()-10, shardId, 0);
 
 			return true;
 		}

@@ -2607,8 +2607,8 @@ CPSLocatedBindable *CPSLocated::unbind(uint index)
 	CPSLocatedBindable *lb = _LocatedBoundCont[index];
 	lb->setOwner(NULL);
 	_LocatedBoundCont.erase(_LocatedBoundCont.begin() + index);
-	return lb;
 	CHECK_PS_INTEGRITY
+	return lb;
 }
 
 /// ***************************************************************************************

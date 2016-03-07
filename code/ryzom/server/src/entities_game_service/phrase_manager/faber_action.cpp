@@ -119,6 +119,11 @@ public:
 		}
 
 		float successFactor = rollSuccessFactor( c, phrase, deltaLvl );
+
+		ITEMFAMILY::EItemFamily family	= phrase->getCraftedItemStaticForm()->Family;			
+		if( family==ITEMFAMILY::CRAFTING_TOOL || family==ITEMFAMILY::HARVEST_TOOL )
+			successFactor = 1.0f;
+
 		if( successFactor == 0.0f )
 		{
 			//Failure
@@ -281,7 +286,7 @@ public:
 						}
 						else
 						{
-							c->wearRightHandItem(phrase->getMps().size()/10);
+							c->wearRightHandItem((double)phrase->getMps().size()/10);
 
 							// report Xp Gain unless used tool is worned
 							PROGRESSIONPVE::CCharacterProgressionPVE::getInstance()->actionReport( report, true, false );

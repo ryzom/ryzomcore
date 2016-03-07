@@ -84,7 +84,7 @@ static void setPermanentBanFileMarker(const std::string &path, bool on)
 			// simply touch a file
 			COFile f(path);
 			#ifdef NL_OS_WINDOWS
-				SetFileAttributes(path.c_str(), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
+				SetFileAttributesW(utf8ToWide(path), FILE_ATTRIBUTE_HIDDEN|FILE_ATTRIBUTE_SYSTEM);
 			#endif
 		}
 		catch(const EStream &e)
@@ -141,7 +141,7 @@ static void markBNPFile(std::string &path)
 
 	uint32 nFileSize=CFile::getFileSize(path);
 	if (!nFileSize) return;
-	FILE *f = fopen(path.c_str(), "rb+");
+	FILE *f = nlfopen(path, "rb+");
 	if (!f) return;
 // Result
 	if (nlfseek64 (f, nFileSize-4, SEEK_SET) != 0)

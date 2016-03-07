@@ -97,16 +97,14 @@ void CTeleport::load(const std::string &/* filename */)
 				string destName;
 				if(tpElmt->getValueByName(destName, "name"))
 				{
-					// All in UPPER CASE to not be CASE SENSITIVE.
-					NLMISC::strlwr(destName);
-
 					// Get the position
 					CVector pos;
 					if(tpElmt->getValueByName(pos.x, "position.X")
 					&& tpElmt->getValueByName(pos.y, "position.Y")
 					&& tpElmt->getValueByName(pos.z, "position.Z"))
 					{
-						_Destinations.insert(make_pair(destName, pos));
+						// All in UPPER CASE to not be CASE SENSITIVE.
+						_Destinations.insert(make_pair(NLMISC::toLower(destName), pos));
 					}
 					else
 						nlwarning("CTeleport::load: Cannot find the one of the key 'position.X or Y or Z' for the element %d.", i);

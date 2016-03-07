@@ -321,14 +321,12 @@
 	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:USER_CHAT|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:UNIVERSE_CHAT|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:REGION_CHAT|value=0" />
-	<action handler="set" params="dblink=UI:SAVE:ISDETACHED:YUBO_CHAT|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:AROUND_ME|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:REGION_CHAT|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:TEAM_CHAT|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:GUILD_CHAT|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:UNIVERSE_CHAT|value=1" />
 	<action handler="set" params="dblink=UI:SAVE:ISENABLED:SYSTEM_INFO|value=1" />
-	<action handler="set" params="dblink=UI:SAVE:ISENABLED:YUBO_CHAT|value=1" />
 
 	<action handler="reset_virtual_desktop" params="vdesk=0" />
 	<action handler="reset_virtual_desktop" params="vdesk=1" />

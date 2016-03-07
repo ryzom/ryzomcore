@@ -208,7 +208,7 @@ void createOptionalCatUI()
 	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 	if (pList == NULL)
 	{
-		nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
+		nlwarning("element " GROUP_LIST_CAT " not found probably bad login_main.xml");
 		return;
 	}
 
@@ -899,7 +899,7 @@ bool login()
 	Actions.enable(true);
 	EditActions.enable(true);
 
-	if(ClientCfg.ConfigFile.exists("pPM->isVerboseLog()"))
+	if(ClientCfg.ConfigFile.exists("VerboseLog"))
 		pPM->setVerboseLog(ClientCfg.ConfigFile.getVar("VerboseLog").asInt() == 1);
 	if(pPM->isVerboseLog()) nlinfo("Using verbose log mode");
 
@@ -992,9 +992,16 @@ static void getPatchParameters(std::string &url, std::string &ver, std::vector<s
 {
 	if (ClientCfg.R2Mode)
 	{
-		patchURIs = R2PatchURLs;
-		url = R2BackupPatchURL;
-		ver = R2ServerVersion;
+		url = ClientCfg.PatchUrl;
+		ver = ClientCfg.PatchVersion;
+
+		// if PatchUrl is forced, don't use URLs returned by server
+		if (url.empty())
+		{
+			patchURIs = R2PatchURLs;
+			url = R2BackupPatchURL;
+			ver = R2ServerVersion;
+		}
 	}
 	else
 	{
@@ -1078,7 +1085,7 @@ void initShardDisplay()
 	CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_SHARD));
 	if (pList == NULL)
 	{
-		nlwarning("element "GROUP_LIST_SHARD" not found probably bad login_main.xml");
+		nlwarning("element " GROUP_LIST_SHARD " not found probably bad login_main.xml");
 		return;
 	}
 	/* // To test more servers
@@ -1296,7 +1303,7 @@ class CAHOnLogin : public IActionHandler
 		CGroupEditBox *pGEBPwd = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_EDITBOX_PASSWORD));
 		if ((pGEBLog == NULL) || (pGEBPwd == NULL))
 		{
-			nlwarning("element "CTRL_EDITBOX_LOGIN" or "CTRL_EDITBOX_PASSWORD" not found probably bad login_main.xml");
+			nlwarning("element " CTRL_EDITBOX_LOGIN " or " CTRL_EDITBOX_PASSWORD " not found probably bad login_main.xml");
 			return;
 		}
 
@@ -1580,7 +1587,7 @@ void initPatch()
 		CInterfaceGroup *pList = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(GROUP_LIST_CAT));
 		if (pList == NULL)
 		{
-			nlwarning("element "GROUP_LIST_CAT" not found probably bad login_main.xml");
+			nlwarning("element " GROUP_LIST_CAT " not found probably bad login_main.xml");
 			return;
 		}
 
@@ -1780,7 +1787,7 @@ class CAHReboot : public IActionHandler
 		}
 		catch (const std::exception &e)
 		{
-			im->messageBoxWithHelp(ucstring(e.what()), "ui:login", "login_quit");
+			im->messageBoxWithHelp(ucstring::makeFromUtf8(e.what()), "ui:login", "login_quit");
 		}
 	}
 };
@@ -1841,41 +1848,16 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
-			DWORD ret = 0;
-			LPVOID lpMsgBuf;
-			FormatMessage(
-				FORMAT_MESSAGE_ALLOCATE_BUFFER |
-				FORMAT_MESSAGE_FROM_SYSTEM |
-				FORMAT_MESSAGE_IGNORE_INSERTS,
-				NULL,
-				ret,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-				(LPTSTR) &lpMsgBuf,
-				0,
-				NULL
-			);
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			nlwarning("RegQueryValue for '%s' : %s", KeyName, lpMsgBuf);
-			// Free the buffer.
-			LocalFree( lpMsgBuf );
+			nlwarning("RegQueryValue for '%s' : %s", KeyName, NLMISC::formatErrorMessage(0).c_str());
 		}
 #else
 		// TODO: for Linux and Mac OS
 #endif
 
-		/*
-		if (sParams == "cfg_CreateAccountURL")
-		{
-			url = ClientCfg.CreateAccountURL;
-
-			if (!installTag.empty())
-			{
-				url += string("/?from=")+installTag;
-			}
-		}
-		else */if (sParams == "cfg_EditAccountURL")
+		if (sParams == "cfg_EditAccountURL")
 		{
 			url = ClientCfg.EditAccountURL;
 		}
@@ -1904,6 +1886,10 @@ class CAHOpenURL : public IActionHandler
 		{
 			url = ClientCfg.ConditionsTermsURL;
 		}
+		else if (sParams == "cfg_NamingPolicyURL")
+		{
+			url = ClientCfg.NamingPolicyURL;
+		}
 		else
 		{
 			nlwarning("no URL found");
@@ -1922,7 +1908,7 @@ class CAHOpenURL : public IActionHandler
 		url += "language=" + ClientCfg.LanguageCode;
 		openURL(url.c_str());
 
-		nlinfo("openURL %s",url.c_str());
+		nlinfo("openURL %s", url.c_str());
 	}
 };
 REGISTER_ACTION_HANDLER (CAHOpenURL, "open_url");
@@ -1945,7 +1931,10 @@ class CAHInitResLod : public IActionHandler
 		VideoModes.clear();
 		StringModeList.clear();
 
-		CurrentMode = getRyzomModes(VideoModes, StringModeList);
+		std::vector<std::string> stringFreqList;
+		sint currentFreq;
+
+		getRyzomModes(VideoModes, StringModeList, stringFreqList, CurrentMode, currentFreq);
 
 		// getRyzomModes() expects empty list, so we need to insert 'Windowed' after mode list is filled
 		StringModeList.insert(StringModeList.begin(), "uiConfigWindowed");
@@ -2183,7 +2172,6 @@ void initDataScan()
 	pPM->startScanDataThread();
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_DATASCAN);
 	NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:DATASCAN_RUNNING")->setValue32(1);
-
 }
 
 // ***************************************************************************
@@ -2452,7 +2440,7 @@ class CAHCreateAccountRules : public IActionHandler
 					if(Params==rules[i])
 					{
 						if(rulesGr)
-							rulesGr->setActive(text->getText() != ucstring(""));
+							rulesGr->setActive(!text->getText().empty());
 					}
 				}
 			}

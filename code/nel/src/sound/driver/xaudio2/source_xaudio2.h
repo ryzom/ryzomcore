@@ -41,6 +41,8 @@ private:
 	CSoundDriverXAudio2 *_SoundDriver;
 	/// Buffer that should be playing.
 	CBufferXAudio2 *_StaticBuffer;
+	/// Last buffer that was prepared for playing.
+	CBufferXAudio2 *_LastPreparedBuffer;
 	
 	// -- Pointers --
 	/// Source voice, can be NULL!

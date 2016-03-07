@@ -1,7 +1,8 @@
+#include "words_dicDlg.h"
+
 #include <QApplication>
 #include "nel/misc/app_context.h"
 #include "nel/misc/path.h"
-#include "words_dicDlg.h"
 
 #ifdef NL_OS_UNIX
 #include <stdlib.h>
@@ -9,6 +10,20 @@
 
 #ifndef NL_WORDS_DIC_CFG
 #define NL_WORDS_DIC_CFG "."
+#endif
+
+#ifdef QT_STATICPLUGIN
+
+#include <QtPlugin>
+
+#if defined(Q_OS_WIN32)
+	Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#elif defined(Q_OS_MAC)
+	Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#elif defined(Q_OS_UNIX)
+	Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
+
 #endif
 
 int main(int argc, char *argv[])

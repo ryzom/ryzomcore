@@ -20,8 +20,6 @@
 #include <nel/3d/u_text_context.h>
 #include <nel/gui/lua_ihm.h>
 
-#include "game_share/ryzom_version.h"
-
 #include "global.h"
 #include "client_cfg.h"
 #include "user_entity.h"
@@ -43,6 +41,9 @@
 #include "fog_map.h"
 #include "misc.h"
 #include "interface_v3/interface_manager.h"
+#include "actions_client.h"
+#include "user_agent.h"
+
 
 using namespace NLMISC;
 using namespace NL3D;
@@ -241,15 +242,7 @@ void displayDebug()
 	//-----------//
 	TextContext->setHotSpot(UTextContext::TopLeft);
 	line = 1.f;
-	string str;
-#if FINAL_VERSION
-	str = "FV";
-#else
-	str = "DEV";
-#endif
-	if(ClientCfg.ExtendedCommands)
-		str += "_E";
-	str += " "RYZOM_VERSION;
+	string str = getDisplayVersion();
 	TextContext->printfAt(0.f, line, "Version %s", str.c_str());
 
 	// TOP MIDDLE //
@@ -699,9 +692,26 @@ REGISTER_ACTION_HANDLER( CHandlerDebugUiDumpElementUnderMouse, "debug_ui_inspect
 //-----------------------------------------------
 #define DISP_TEXT(x, text)                    \
 	/* Display the text at the right place */ \
-	TextContext->printfAt(x, line, text);     \
+	TextContext->printfAt(x, line, std::string(text).c_str());     \
 	/* Change the line */                     \
 	line += lineStep;                         \
+
+//---------------------------------------------------
+// getActionKey :
+// Return action key binding as string.
+static std::string getActionKey(const char* name, const char* param = "")
+{
+	std::string category;
+
+	CActionsManager *pAM = &Actions;
+	const CActionsManager::TActionComboMap &acmap = pAM->getActionComboMap();
+
+	CActionsManager::TActionComboMap::const_iterator ite = acmap.find(CAction::CName(name, param));
+	if (ite != acmap.end())
+		return ite->second.toUCString().toString();
+
+	return CI18N::get("uiNotAssigned").toString();
+}
 
 //---------------------------------------------------
 // displayHelp :
@@ -720,54 +730,53 @@ void displayHelp()
 	// Set the text color
 	TextContext->setColor(ClientCfg.HelpFontColor);
 
-
 	line = 1.f;
 	TextContext->setHotSpot(UTextContext::TopLeft);
-	DISP_TEXT(0.0f, "SHIFT + F1 : This Menu")
-	DISP_TEXT(0.0f, "SHIFT + F2 : Display Debug Infos")
-	DISP_TEXT(0.0f, "SHIFT + F3 : Wire mode");
-	DISP_TEXT(0.0f, "SHIFT + F4 : Do not Render the Scene");
-	DISP_TEXT(0.0f, "SHIFT + F5 : Toogle Display OSD interfaces");
+	DISP_TEXT(0.0f, getActionKey("toggle_help") + " : This Menu");
+	DISP_TEXT(0.0f, getActionKey("display_infos") + " : Display Debug Infos");
+	DISP_TEXT(0.0f, getActionKey("render_mode") + " : Wire mode");
+	DISP_TEXT(0.0f, getActionKey("toggle_render") + " : Do not Render the Scene");
+	DISP_TEXT(0.0f, getActionKey("toggle_chat") + " : Toggle Display OSD interfaces");
 //	DISP_TEXT(0.0f, "SHIFT + F6 : Not used");
-	DISP_TEXT(0.0f, "SHIFT + F7 : Compass Mode (User/Camera)");
-	DISP_TEXT(0.0f, "SHIFT + F8 : Camera Mode (INSERT to change your position)");
-	DISP_TEXT(0.0f, "SHIFT + F9 : Free Mouse");
-	DISP_TEXT(0.0f, "SHIFT + F10 : Take a Screen Shot (+CTRL) for jpg");
+	DISP_TEXT(0.0f, getActionKey("change_compass_mode") + " : Compass Mode (User/Camera)");
+	DISP_TEXT(0.0f, getActionKey("toggle_fly") + " : Camera Mode (" + getActionKey("debug", "set_pos") + " to change your position)");
+	DISP_TEXT(0.0f, getActionKey("free_mouse") + " : Free Mouse");
+	DISP_TEXT(0.0f, getActionKey("screen_shot") + " : Take a Screen Shot (TGA), " + getActionKey("screen_shot_jpg") + " for jpg, " + getActionKey("screen_shot_png") + " for png");
 //	DISP_TEXT(0.0f, "SHIFT + F11 : Test");
-	DISP_TEXT(0.0f, "SHIFT + ESCAPE : Quit");
-	DISP_TEXT(0.0f, "SHIFT + C : First/Third Person View");
+	DISP_TEXT(0.0f, getActionKey("enter_modal", "group=ui:interface:quit_dialog") + " : Quit");
+	DISP_TEXT(0.0f, getActionKey("toggle_camera") + " : First/Third Person View");
 
 	line = 1.f;
 	TextContext->setHotSpot(UTextContext::TopRight);
-	DISP_TEXT(1.0f, "UP : FORWARD");
-	DISP_TEXT(1.0f, "DOWN : BACKWARD");
-	DISP_TEXT(1.0f, "LEFT : ROTATE LEFT");
-	DISP_TEXT(1.0f, "RIGHT : ROTATE RIGHT");
-	DISP_TEXT(1.0f, "CTRL + LEFT : STRAFE LEFT");
-	DISP_TEXT(1.0f, "CTRL + RIGHT : STRAFE RIGHT");
-	DISP_TEXT(1.0f, "END : Auto Walk");
-	DISP_TEXT(1.0f, "DELETE : Walk/Run");
-	DISP_TEXT(1.0f, "PG UP : Look Up");
-	DISP_TEXT(1.0f, "PG DOWN : Look Down");
-//	DISP_TEXT(1.0f, "CTRL + I : Inventory");
-//	DISP_TEXT(1.0f, "CTRL + C : Spells composition interface");
-//	DISP_TEXT(1.0f, "CTRL + S : Memorized Spells interface");
-	DISP_TEXT(1.0f, "CTRL + B : Show/Hide PACS Borders");
-	DISP_TEXT(1.0f, "CTRL + P : Player target himself");
-	DISP_TEXT(1.0f, "CTRL + D : Unselect target");
-	DISP_TEXT(1.0f, "CTRL + TAB : Next Chat Mode (say/shout");
-	DISP_TEXT(1.0f, "CTRL + R : Reload Client.cfg File");
+	DISP_TEXT(1.0f, getActionKey("forward") + " : FORWARD");
+	DISP_TEXT(1.0f, getActionKey("backward") + " : BACKWARD");
+	DISP_TEXT(1.0f, getActionKey("turn_left") + " : ROTATE LEFT");
+	DISP_TEXT(1.0f, getActionKey("turn_right") + " : ROTATE RIGHT");
+	DISP_TEXT(1.0f, getActionKey("strafe_left") + " : STRAFE LEFT");
+	DISP_TEXT(1.0f, getActionKey("strafe_right") + " : STRAFE RIGHT");
+	DISP_TEXT(1.0f, getActionKey("toggle_auto_walk") + " : Auto Walk");
+	DISP_TEXT(1.0f, getActionKey("toggle_run_walk") + " : Walk/Run");
+	DISP_TEXT(1.0f, getActionKey("look_up") + " : Look Up");
+	DISP_TEXT(1.0f, getActionKey("look_down") + " : Look Down");
+//	DISP_TEXT(1.0f, getActionKey("show_hide", "inventory") + " : Inventory");
+//	DISP_TEXT(1.0f, getActionKey("show_hide", "phrase_book") + " : Spells composition interface");
+//	DISP_TEXT(1.0f, getActionKey("show_hide", "gestionsets") + " : Memorized Spells interface");
+	DISP_TEXT(1.0f, getActionKey("pacs_borders") + " : Show/Hide PACS Borders");
+	DISP_TEXT(1.0f, getActionKey("self_target") + " : Player target himself");
+	DISP_TEXT(1.0f, getActionKey("no_target") + " : Unselect target");
+//	DISP_TEXT(1.0f, "CTRL + TAB : Next Chat Mode (say/shout");
+//	DISP_TEXT(1.0f, "CTRL + R : Reload Client.cfg File");
 //	DISP_TEXT(1.0f, "CTRL + N : Toggle Night / Day lighting");
-	DISP_TEXT(1.0f, "CTRL + F2 : Profile on / off");
-	DISP_TEXT(1.0f, "CTRL + F3 : Movie Shooter record / stop");
-	DISP_TEXT(1.0f, "CTRL + F4 : Movie Shooter replay");
-	DISP_TEXT(1.0f, "CTRL + F5 : Movie Shooter save");
+	DISP_TEXT(1.0f, getActionKey("profile") + " : Profile on / off");
+	DISP_TEXT(1.0f, getActionKey("toggle_movie_recorder") + " : Movie Shooter record / stop");
+	DISP_TEXT(1.0f, getActionKey("replay_movie") + " : Movie Shooter replay");
+	DISP_TEXT(1.0f, getActionKey("save_movie") + " : Movie Shooter save");
 #ifndef NL_USE_DEFAULT_MEMORY_MANAGER
-	DISP_TEXT(1.0f, "CTRL + F6 : Save memory stat report");
+	DISP_TEXT(1.0f, getActionKey("memory_report") + " : Save memory stat report");
 #endif // NL_USE_DEFAULT_MEMORY_MANAGER
-	DISP_TEXT(1.0f, "CTRL + F7 : Show / hide prim file");
-	DISP_TEXT(1.0f, "CTRL + F8 : Change prim file UP");
-	DISP_TEXT(1.0f, "CTRL + F9 : Change prim file DOWN");
+	DISP_TEXT(1.0f, getActionKey("toggle_primitive") + " : Show / hide prim file");
+	DISP_TEXT(1.0f, getActionKey("primitive_up") + " : Change prim file UP");
+	DISP_TEXT(1.0f, getActionKey("primitive_down") + " : Change prim file DOWN");
 
 	// No more shadow when displaying a text.
 	TextContext->setShaded(false);

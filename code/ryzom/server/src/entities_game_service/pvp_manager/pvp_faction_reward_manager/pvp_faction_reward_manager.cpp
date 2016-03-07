@@ -236,7 +236,7 @@ void CPVPFactionRewardManager::_totemFileCallback(const CFileDescription& fileDe
 	static CPersistentDataRecordRyzomStore pdr;
 	pdr.clear();
 	pdr.fromBuffer(dataStream);
-//	pdr.readFromFile( sFilePath.c_str() );
+//	pdr.readFromFile( sFilePath );
 
 	apply( pdr );
 }
@@ -261,7 +261,7 @@ bool CPVPFactionRewardManager::_LoadFromPDR()
 //
 //	static CPersistentDataRecordRyzomStore pdr;
 //	pdr.clear();
-//	pdr.readFromFile( sFilePath.c_str() );
+//	pdr.readFromFile( sFilePath );
 //
 //	if ( pdr.isEndOfData() )
 //	{

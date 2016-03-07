@@ -46,6 +46,7 @@ namespace R2
 
 		//get The propertyValue as number or 0 if not found
 		double getValueAsNumber(CObject* component, const std::string& attrName) const;
+		sint64 getValueAsInteger(CObject* component, const std::string& attrName) const;
 
 		const CObject* getPropertyValue(const CObject* component, const std::string& attrName) const;
 

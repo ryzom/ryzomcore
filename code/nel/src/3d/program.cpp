@@ -25,17 +25,19 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-#include <nel/misc/types_nl.h>
-#include <nel/3d/program.h>
+#include "std3d.h"
+
+#include "nel/misc/types_nl.h"
+#include "nel/3d/program.h"
 
 // STL includes
 
 // NeL includes
 // #include <nel/misc/debug.h>
-#include <nel/misc/string_mapper.h>
+#include "nel/misc/string_mapper.h"
 
 // Project includes
-#include <nel/3d/driver.h>
+#include "nel/3d/driver.h"
 
 using namespace std;
 // using namespace NLMISC;

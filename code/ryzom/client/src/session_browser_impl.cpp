@@ -65,6 +65,7 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 		game.setValue("checkRingAccess", luaCheckRingAccess);
 		game.setValue("getFileHeader", luaGetFileHeader);
 	}
+
 	if (!ClientCfg.Local)
 	{
 		CSessionBrowserImpl::getInstance().setAuthInfo(getCookie());
@@ -76,8 +77,8 @@ void CSessionBrowserImpl::init(CLuaState *ls)
 	_LastAuthorRating = 0;
 	_LastAMRating = 0;
 	_LastMasterlessRating = 0;
-	_LastRingPoints = string("");
-	_LastMaxRingPoints = string("");
+	_LastRingPoints.clear();
+	_LastMaxRingPoints.clear();
 }
 
 
@@ -194,7 +195,7 @@ int CSessionBrowserImpl::luaUpdateScenarioScores(CLuaState &ls)
 	if (R2::getEditor().getMode() != R2::CEditor::NotInitialized)
 	{
 		CSessionBrowserImpl::getInstance().setPlayerRating(getCharId(), R2::getEditor().getDMC().getEditionModule().getCurrentAdventureId(),
-			(uint32) ls.toNumber(1), (uint32) ls.toNumber(2), (uint32) ls.toNumber(3), (uint32) ls.toNumber(4), (uint32) ls.toNumber(5));
+			(uint32) ls.toInteger(1), (uint32) ls.toInteger(2), (uint32) ls.toInteger(3), (uint32) ls.toInteger(4), (uint32) ls.toInteger(5));
 	}
 
 	return 0;
@@ -210,7 +211,7 @@ int CSessionBrowserImpl::luaJoinRingSession(CLuaState &ls)
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CSessionBrowserImpl & sessionBrowser = CSessionBrowserImpl::getInstance();
-	sessionBrowser.joinSession(getCharId(), (TSessionId)(uint32) ls.toNumber(1), ClientCfg.ConfigFile.getVar("Application").asString(0));
+	sessionBrowser.joinSession(getCharId(), (TSessionId)(uint32) ls.toInteger(1), ClientCfg.ConfigFile.getVar("Application").asString(0));
 
 	if(!sessionBrowser.waitOneMessage(sessionBrowser.getMessageName("on_joinSessionResult")))
 	{
@@ -373,34 +374,36 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 			const RSMGR::TSessionDesc &sd = sessions[k];
 			_Lua->newTable();
 			CLuaObject session(*_Lua);
-			session.setValue("Id", (double) sd.getSessionId().asInt());
-			session.setValue("Owner", sd.getOwnerName());
-			session.setValue("Title", sd.getTitle());
-			session.setValue("Desc", sd.getDescription());
-			session.setValue("Level", (double) sd.getSessionLevel().getValue());
-			session.setValue("Language", sd.getLanguage());
+			session.setValue("Id",					sd.getSessionId().asInt());
+			session.setValue("Owner",				sd.getOwnerName());
+			session.setValue("Title",				sd.getTitle());
+			session.setValue("Desc",				sd.getDescription());
+			session.setValue("Level",				(uint32) sd.getSessionLevel().getValue());
+			session.setValue("Language",			sd.getLanguage());
+
 			uint flags = (sd.getAnimMode().getValue() == RSMGR::TAnimMode::am_dm ? (uint) 1 : 0) |
 						 (sd.getRequesterCharInvited()                           ? (uint) 2 : 0);
 			if(sd.getRequesterCharKicked())
 				flags = (uint) 4;
-			session.setValue("Flags", (double)  flags);
-			session.setValue("PlayerCount", (double)  sd.getNbConnectedPlayer());
-			session.setValue("AllowFreeTrial", (double)  sd.getAllowFreeTrial());
 
-			session.setValue("NbRating",			(double) sd.getNbRating());
-			session.setValue("RateFun",				(double) sd.getRateFun());
-			session.setValue("RateDifficulty",		(double) sd.getRateDifficulty());
-			session.setValue("RateAccessibility",	(double) sd.getRateAccessibility());
-			session.setValue("RateOriginality",		(double) sd.getRateOriginality());
-			session.setValue("RateDirection",		(double) sd.getRateDirection());
+			session.setValue("Flags",				flags);
+			session.setValue("PlayerCount",			sd.getNbConnectedPlayer());
+			session.setValue("AllowFreeTrial",		sd.getAllowFreeTrial());
 
-			session.setValue("ScenarioRRPTotal",	(double) sd.getScenarioRRPTotal());
+			session.setValue("NbRating",			sd.getNbRating());
+			session.setValue("RateFun",				sd.getRateFun());
+			session.setValue("RateDifficulty",		sd.getRateDifficulty());
+			session.setValue("RateAccessibility",	sd.getRateAccessibility());
+			session.setValue("RateOriginality",		sd.getRateOriginality());
+			session.setValue("RateDirection",		sd.getRateDirection());
 
-			session.setValue("AuthorRating",		(double) _LastAuthorRating);
+			session.setValue("ScenarioRRPTotal",	sd.getScenarioRRPTotal());
+
+			session.setValue("AuthorRating",		_LastAuthorRating);
 			if(sd.getAnimMode().getValue() == RSMGR::TAnimMode::am_dm)
-				session.setValue("OwnerRating",			(double) _LastAMRating);
+				session.setValue("OwnerRating",		_LastAMRating);
 			else
-				session.setValue("OwnerRating",	(double) _LastMasterlessRating);
+				session.setValue("OwnerRating",		_LastMasterlessRating);
 
 			// calculate the difference between local time and gmt
 			time_t rawtime;
@@ -418,9 +421,9 @@ void CSessionBrowserImpl::fill(const std::vector <RSMGR::TSessionDesc > &session
 
 			// convert GMT time value from server to local time
 			time_t adjustedTime= sd.getLaunchDate() + localTime - gmtTime;
-			session.setValue("LaunchDate", (double)  adjustedTime);
+			session.setValue("LaunchDate", (sint64)adjustedTime);
 
-			session.setValue("ScenarioType", (double)  sd.getOrientation().getValue());
+			session.setValue("ScenarioType", (uint32)sd.getOrientation().getValue());
 			session.push();
 			_Lua->rawSetI(-2, k +1); // set in session list
 		}
@@ -442,12 +445,12 @@ void CSessionBrowserImpl::playerRatingFill(bool scenarioRated, uint32 rateFun, u
 		_Lua->newTable();
 		CLuaObject scores(*_Lua);
 
-		scores.setValue("ScenarioRated",			(double) scenarioRated);
-		scores.setValue("RateFun",					(double) rateFun);
-		scores.setValue("RateDifficulty",			(double) rateDifficulty);
-		scores.setValue("RateAccessibility",		(double) rateAccessibility);
-		scores.setValue("RateOriginality",			(double) rateOriginality);
-		scores.setValue("RateDirection",			(double) rateDirection);
+		scores.setValue("ScenarioRated",			scenarioRated);
+		scores.setValue("RateFun",					rateFun);
+		scores.setValue("RateDifficulty",			rateDifficulty);
+		scores.setValue("RateAccessibility",		rateAccessibility);
+		scores.setValue("RateOriginality",			rateOriginality);
+		scores.setValue("RateDirection",			rateDirection);
 
 		scores.push();
 
@@ -469,13 +472,13 @@ void CSessionBrowserImpl::averageScoresFill(bool scenarioRated, uint32 rateFun, 
 		_Lua->newTable();
 		CLuaObject scores(*_Lua);
 
-		scores.setValue("ScenarioRated",			(double) scenarioRated);
-		scores.setValue("RateFun",					(double) rateFun);
-		scores.setValue("RateDifficulty",			(double) rateDifficulty);
-		scores.setValue("RateAccessibility",		(double) rateAccessibility);
-		scores.setValue("RateOriginality",			(double) rateOriginality);
-		scores.setValue("RateDirection",			(double) rateDirection);
-		scores.setValue("RRPTotal",					(double) rrpTotal);
+		scores.setValue("ScenarioRated",			scenarioRated);
+		scores.setValue("RateFun",					rateFun);
+		scores.setValue("RateDifficulty",			rateDifficulty);
+		scores.setValue("RateAccessibility",		rateAccessibility);
+		scores.setValue("RateOriginality",			rateOriginality);
+		scores.setValue("RateDirection",			rateDirection);
+		scores.setValue("RRPTotal",					rrpTotal);
 
 		scores.push();
 
@@ -560,13 +563,13 @@ void CSessionBrowserImpl::on_scenarioAverageScores(NLNET::TSockId /* from */, bo
 		_Lua->newTable();
 		CLuaObject scores(*_Lua);
 
-		scores.setValue("ScenarioRated",			(double) scenarioRated);
-		scores.setValue("RateFun",					(double) rateFun);
-		scores.setValue("RateDifficulty",			(double) rateDifficulty);
-		scores.setValue("RateAccessibility",		(double) rateAccessibility);
-		scores.setValue("RateOriginality",			(double) rateOriginality);
-		scores.setValue("RateDirection",			(double) rateDirection);
-		scores.setValue("RRPTotal",					(double) rrpTotal);
+		scores.setValue("ScenarioRated",			scenarioRated);
+		scores.setValue("RateFun",					rateFun);
+		scores.setValue("RateDifficulty",			rateDifficulty);
+		scores.setValue("RateAccessibility",		rateAccessibility);
+		scores.setValue("RateOriginality",			rateOriginality);
+		scores.setValue("RateDirection",			rateDirection);
+		scores.setValue("RRPTotal",					rrpTotal);
 
 		scores.push();
 
@@ -612,11 +615,11 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 			{
 				_Lua->newTable();
 				CLuaObject luaChar(*_Lua);
-				luaChar.setValue("Id",			(double) cd.getCharId());
+				luaChar.setValue("Id",			cd.getCharId());
 				luaChar.setValue("Char",		cd.getCharName());
 				luaChar.setValue("Guild",		cd.getGuildName());
-				luaChar.setValue("Race",		(double) cd.getRace().getValue());
-				luaChar.setValue("Religion",	(double) cd.getCult().getValue());
+				luaChar.setValue("Race",		(uint32) cd.getRace().getValue());
+				luaChar.setValue("Religion",	(uint32) cd.getCult().getValue());
 
 				string shardName = toString(cd.getShardId());
 				for(uint l = 0; l < Mainlands.size(); ++l)
@@ -630,7 +633,7 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 				luaChar.setValue("Shard",		shardName);
 				// note: we do 'level-1' because the TSessionLevel enum starts at 1
-				luaChar.setValue("Level",		(double) (cd.getLevel().getValue()-1));
+				luaChar.setValue("Level",		(uint32) (cd.getLevel().getValue()-1));
 				/*
 				uint32 flags = 0;
 				if (cd.getConnected()) { flags += 1; }
@@ -639,7 +642,7 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 				uint32 flags = cd.getConnected();
 				if (cd.getKicked()){ flags = 2; }
 
-				luaChar.setValue("Flags",		(double) flags);
+				luaChar.setValue("Flags",		flags);
 				luaChar.push();
  				_Lua->rawSetI(-2, k +1); // set in chars list
 			}
@@ -655,14 +658,14 @@ void CSessionBrowserImpl::charsFill(const std::vector <RSMGR::TCharDesc > &chars
 
 // ****************************************************************************
 
-inline double ecoRingPoints(const std::string & ecoPoints, const char * c)
+inline uint32 ecoRingPoints(const std::string & ecoPoints, const char * c)
 {
 	std::string::size_type cPlace = ecoPoints.find(c);
 	if(cPlace==string::npos)
 		return 0;
 	std::string::size_type sepPlace = ecoPoints.find(":", cPlace);
 	std::string points = ecoPoints.substr(cPlace+1, sepPlace);
-	double ret;
+	uint32 ret;
 	fromString(points, ret);
 	return ret;
 }
@@ -678,9 +681,9 @@ void CSessionBrowserImpl::ringStatsFill()
 
 		CLuaObject luaRingPoints(*_Lua);
 
-		luaRingPoints.setValue("AuthorRating",		(double) _LastAuthorRating);
-		luaRingPoints.setValue("AMRating",			(double) _LastAMRating);
-		luaRingPoints.setValue("MasterlessRating",	(double) _LastMasterlessRating);
+		luaRingPoints.setValue("AuthorRating",			_LastAuthorRating);
+		luaRingPoints.setValue("AMRating",				_LastAMRating);
+		luaRingPoints.setValue("MasterlessRating",		_LastMasterlessRating);
 
 		luaRingPoints.setValue("MaxBasicRingPoints",	ecoRingPoints(_LastMaxRingPoints, "A"));
 		luaRingPoints.setValue("BasicRingPoints",	    ecoRingPoints(_LastRingPoints, "A"));

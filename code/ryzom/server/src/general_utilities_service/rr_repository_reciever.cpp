@@ -477,7 +477,7 @@ void CRepositoryReceiver::fileEnd(NLNET::IModuleProxy *sender, const std::string
 
 	// rename the temp file
 	// note that the _receiveBeginFile() method will have removed any file that could be in the way...
-	bool renameOk= NLMISC::CFile::moveFile((_TargetDirectory+awaitedFileName).c_str(),rrTempFileName(_TargetDirectory,_EmitterName).c_str());
+	bool renameOk= NLMISC::CFile::moveFile(_TargetDirectory+awaitedFileName, rrTempFileName(_TargetDirectory,_EmitterName));
 	DROP_IF(!renameOk,"Failed to move tmp file ('"+rrTempFileName(_TargetDirectory,_EmitterName)+"') to : '"+fileNameRec+"'",return);
 
 	// setup the index entry for this file and force an index file write

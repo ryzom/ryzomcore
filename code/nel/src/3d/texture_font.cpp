@@ -47,11 +47,14 @@ const int NbLine[TEXTUREFONT_NBCATEGORY] = { 4, 6, 4, 1 }; // Based on textsize
 // ---------------------------------------------------------------------------
 inline uint32 CTextureFont::SLetterKey::getVal()
 {
-
+	// this limits Size to 6bits
+	// Large sizes already render wrong when many
+	// different glyphs are used due to limited texture atlas
+	uint8 eb = ((uint)Embolden) + ((uint)Oblique << 1);
 	if (FontGenerator == NULL)
-		return Char + ((Size&255)<<16);
+		return Char + ((Size&255)<<16) + (eb << 22);
 	else
-		return Char + ((Size&255)<<16) + ((FontGenerator->getUID()&0xFF)<<24);
+		return Char + ((Size&255)<<16) + (eb << 22) + ((FontGenerator->getUID()&0xFF)<<24);
 }
 
 // ---------------------------------------------------------------------------
@@ -86,6 +89,8 @@ CTextureFont::CTextureFont()
 			rLetter.Char = 0xffff;
 			rLetter.FontGenerator = NULL;
 			rLetter.Size= 0;
+			rLetter.Embolden = false;
+			rLetter.Oblique = false;
 
 			// The less recently used infos
 			if (j < Letters[i].size()-1)
@@ -164,7 +169,7 @@ void CTextureFont::rebuildLetter (sint cat, sint x, sint y)
 	sint posy = catTopY + y * Categories[cat];
 
 	uint32 pitch = 0;
-	uint8 *bitmap = rLetter.FontGenerator->getBitmap (	rLetter.Char, rLetter.Size,
+	uint8 *bitmap = rLetter.FontGenerator->getBitmap (	rLetter.Char, rLetter.Size, rLetter.Embolden, rLetter.Oblique,
 														rLetter.CharWidth, rLetter.CharHeight,
 														pitch, rLetter.Left, rLetter.Top,
 														rLetter.AdvX, rLetter.GlyphIndex );
@@ -303,7 +308,7 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k)
 	// \todo mat : Temp !!! Try to use freetype cache
 	uint32 nPitch, nGlyphIndex;
 	sint32 nLeft, nTop, nAdvX;
-	k.FontGenerator->getBitmap (k.Char, k.Size, width, height, nPitch, nLeft, nTop,
+	k.FontGenerator->getBitmap (k.Char, k.Size, k.Embolden, k.Oblique, width, height, nPitch, nLeft, nTop,
 														nAdvX, nGlyphIndex );
 
 	// Add 1 pixel space for black border to get correct category
@@ -323,6 +328,8 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k)
 	k2.Char = Back[cat]->Char;
 	k2.FontGenerator = Back[cat]->FontGenerator;
 	k2.Size = Back[cat]->Size;
+	k2.Embolden = Back[cat]->Embolden;
+	k2.Oblique = Back[cat]->Oblique;
 
 	itAccel	= Accel.find (k2.getVal());
 	if (itAccel != Accel.end())
@@ -336,6 +343,8 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k)
 	Back[cat]->Char = k.Char;
 	Back[cat]->FontGenerator = k.FontGenerator;
 	Back[cat]->Size = k.Size;
+	Back[cat]->Embolden = k.Embolden;
+	Back[cat]->Oblique = k.Oblique;
 	Back[cat]->CharWidth = width;
 	Back[cat]->CharHeight = height;
 	Back[cat]->Top = nTop;

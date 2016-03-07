@@ -29,6 +29,7 @@
 #include "system.h"
 
 #include <QtGui>
+#include <QMessageBox>
 
 CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	QDialog( parent )
@@ -74,6 +75,10 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	item = treeWidget->topLevelItem( 3 )->child( 1 );
 	item->setData( 0, Qt::UserRole, 7 );
 
+#ifndef Q_OS_WIN
+	// Hide Direct3D page under Linux and OS X
+	item->setHidden(true);
+#endif
 
 	CategoryStackedWidget->addWidget( new CGeneralSettingsWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CDisplaySettingsWidget( CategoryStackedWidget ) );
@@ -82,7 +87,11 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	CategoryStackedWidget->addWidget( new CSoundSettingsWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CSysInfoWidget( CategoryStackedWidget ) );
 	CategoryStackedWidget->addWidget( new CSysInfoOpenGLWidget( CategoryStackedWidget ) );
+
+#ifdef Q_OS_WIN
+	// Add Direct3D widget only under Windows
 	CategoryStackedWidget->addWidget( new CSysInfoD3DWidget( CategoryStackedWidget ) );
+#endif
 
 	for( sint32 i = 0; i < CategoryStackedWidget->count();  i++ )
 	{
@@ -108,26 +117,6 @@ void CClientConfigDialog::closeEvent( QCloseEvent *event )
 		event->accept();
 	else
 		event->ignore();
-}
-
-void CClientConfigDialog::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		int pageIndex = CategoryStackedWidget->currentIndex();
-		// Signals that are emitted on index change need to be disconnected, since retranslation cleans the widget
-		disconnect( treeWidget, SIGNAL( itemClicked( QTreeWidgetItem *, int ) ),
-					this, SLOT( onClickCategory( QTreeWidgetItem * ) ) );
-
-		retranslateUi( this );
-
-		connect( treeWidget, SIGNAL( itemClicked( QTreeWidgetItem *, int ) ),
-				 this, SLOT( onClickCategory( QTreeWidgetItem * ) ) );
-
-		CategoryStackedWidget->setCurrentIndex( pageIndex );
-	}
-
-	QDialog::changeEvent( event );
 }
 
 void CClientConfigDialog::onClickOK()
@@ -156,18 +145,14 @@ void CClientConfigDialog::onClickPlay()
 {
 	bool started = false;
 
-#ifdef WIN32
+#ifdef Q_OS_WIN32
 	started = QProcess::startDetached( "ryzom_client_r.exe" );
 	if( !started )
-		QProcess::startDetached( "ryzom_client_rd.exe" );
-	if( !started )
 		QProcess::startDetached( "ryzom_client_d.exe" );
+#elif defined(Q_OS_MAC)
+	started = QProcess::startDetached( "./Ryzom.app" );
 #else
-	started = QProcess::startDetached( "./ryzom_client_r" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_rd" );
-	if( !started )
-		QProcess::startDetached( "./ryzom_client_d" );
+	started = QProcess::startDetached( "./ryzom_client" );
 #endif
 
 	onClickOK();
@@ -180,14 +165,14 @@ void CClientConfigDialog::onClickCategory( QTreeWidgetItem *item )
 
 	static const char *iconNames[] =
 	{
-		":/resources/general_icon.bmp",
-		":/resources/display_icon.bmp",
-		":/resources/display_properties_icon.bmp",
-		":/resources/display_config_icon.bmp",
-		":/resources/sound_icon.bmp",
-		":/resources/general_icon.bmp",
-		":/resources/card_icon.bmp",
-		":/resources/card_icon.bmp"
+		":/resources/general_icon.png",
+		":/resources/display_icon.png",
+		":/resources/display_properties_icon.png",
+		":/resources/display_config_icon.png",
+		":/resources/sound_icon.png",
+		":/resources/general_icon.png",
+		":/resources/card_icon.png",
+		":/resources/card_icon.png"
 	};
 
 	sint32 index = item->data( 0, Qt::UserRole ).toInt();

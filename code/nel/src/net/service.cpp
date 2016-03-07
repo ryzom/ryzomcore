@@ -575,7 +575,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		if (haveLongArg("writepid"))
 		{
 			// use legacy C primitives
-			FILE *fp = fopen("pid.state", "wt");
+			FILE *fp = nlfopen("pid.state", "wt");
 			if (fp)
 			{
 				fprintf(fp, "%u", getpid());
@@ -600,7 +600,6 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		ListeningPort = servicePort;
 
-		// setReportEmailFunction ((void*)sendEmail);
 		// setDefaultEmailParams ("gw.nevrax.com", "", "cado@nevrax.com");
 
 
@@ -623,7 +622,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			else
 			{
 				// create the basic .cfg that link the default one
-				FILE *fp = fopen (cfn.c_str(), "w");
+				FILE *fp = nlfopen (cfn, "w");
 				if (fp == NULL)
 				{
 					nlerror ("SERVICE: Can't create config file '%s'", cfn.c_str());
@@ -838,7 +837,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			}
 		}
 
-		nlinfo ("SERVICE: Starting Service '%s' using NeL ("__DATE__" "__TIME__") compiled %s", _ShortName.c_str(), CompilationDate.c_str());
+		nlinfo ("SERVICE: Starting Service '%s' using NeL (" __DATE__ " " __TIME__ ") compiled %s", _ShortName.c_str(), CompilationDate.c_str());
 		nlinfo ("SERVICE: On OS: %s", CSystemInfo::getOS().c_str());
 
 		setExitStatus (EXIT_SUCCESS);
@@ -1169,7 +1168,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
-				CPath::addSearchPath (var->asString(i), true, false);
+				CPath::addSearchPath (NLMISC::expandEnvironmentVariables(var->asString(i)), true, false);
 			}
 		}
 
@@ -1177,7 +1176,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
-				CPath::addSearchPath (var->asString(i), false, false);
+				CPath::addSearchPath (NLMISC::expandEnvironmentVariables(var->asString(i)), false, false);
 			}
 		}
 
@@ -1802,7 +1801,7 @@ NLMISC_CATEGORISED_COMMAND(nel, serviceInfo, "display information about this ser
 
 	if(args.size() != 0) return false;
 
-	log.displayNL ("Service %s '%s' using NeL ("__DATE__" "__TIME__")", IService::getInstance()->getServiceLongName().c_str(), IService::getInstance()->getServiceUnifiedName().c_str());
+	log.displayNL ("Service %s '%s' using NeL (" __DATE__ " " __TIME__ ")", IService::getInstance()->getServiceLongName().c_str(), IService::getInstance()->getServiceUnifiedName().c_str());
 	log.displayNL ("Service listening port: %d", IService::getInstance()->ListeningPort.get());
 	log.displayNL ("Service running directory: '%s'", IService::getInstance()->RunningDirectory.c_str());
 	log.displayNL ("Service log directory: '%s'", IService::getInstance()->LogDirectory.c_str());

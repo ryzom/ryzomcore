@@ -205,6 +205,20 @@
 			<value value="10" hardtext="uiNumber10"/>
 		</parameter>
 	</action>
+	<action name="select_shortcut_bar_2"		hardtext="uiSelectShortcutBar2" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiShortcutBarNumber">
+			<value value="1" hardtext="uiNumber01"/>
+			<value value="2" hardtext="uiNumber02"/>
+			<value value="3" hardtext="uiNumber03"/>
+			<value value="4" hardtext="uiNumber04"/>
+			<value value="5" hardtext="uiNumber05"/>
+			<value value="6" hardtext="uiNumber06"/>
+			<value value="7" hardtext="uiNumber07"/>
+			<value value="8" hardtext="uiNumber08"/>
+			<value value="9" hardtext="uiNumber09"/>
+			<value value="10" hardtext="uiNumber10"/>
+		</parameter>
+	</action>
 	<action name="phrase_cancel_cast"		hardtext="uiCancelCast" contexts="game, r2ed_anim_test"/>
 </action_category>
 

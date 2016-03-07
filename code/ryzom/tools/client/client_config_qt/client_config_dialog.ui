@@ -31,7 +31,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="resources.qrc">:/resources/left_bitmap_0.bmp</pixmap>
+        <pixmap resource="resources.qrc">:/resources/left_bitmap_0.png</pixmap>
        </property>
       </widget>
      </item>
@@ -60,7 +60,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap resource="resources.qrc">:/resources/general_icon.bmp</pixmap>
+          <pixmap resource="resources.qrc">:/resources/general_icon.png</pixmap>
          </property>
         </widget>
        </item>
@@ -101,7 +101,7 @@
           </font>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-image: url(:/resources/top_right.bmp);</string>
+          <string notr="true">background-image: url(:/resources/top_right.png);</string>
          </property>
          <property name="text">
           <string>General</string>

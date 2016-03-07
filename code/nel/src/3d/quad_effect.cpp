@@ -56,18 +56,16 @@ void CQuadEffect::makeRasters(const TPoint2DVect &poly
 {
 
 	dest.clear();
-    const float epsilon = 10E-5f;
+	startY = 0.f;
 
 	sint size = (sint)poly.size();
+
+	if (!size) return;
+
+    const float epsilon = 10E-5f;
 	uint aelSize = 0; // size of active edge list
 
 	sint k; // loop counter
-
-
-
-	dest.clear();
-
-	if (!size) return;
 
 	static TEdgeList lel, ael; // the left edge list, and the active edge list
 	float highest = poly[0].y;
@@ -217,7 +215,8 @@ void CQuadEffect::makeRasters(const TPoint2DVect &poly
 
 		currY += quadHeight;
 
-	} while (size || aelSize);
+	}
+	while (size || aelSize);
 }
 
 //**

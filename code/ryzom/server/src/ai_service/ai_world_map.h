@@ -228,7 +228,7 @@ inline CAIMapSurfaceNeighbour::CAIMapSurfaceNeighbour(bool isNoGo)	// constructo
 	nlassert(isNoGo=true);	// by definition this code can't be executed with isNoGo false
 
 	_surface=NULL;
-	_distance=(uint16)-1;
+	_distance = std::numeric_limits<uint16>::max();
 	//bool _sameRegion=false;
 	memset(_direction,0,sizeof(_direction));
 }
@@ -240,7 +240,7 @@ inline CAIMapSurfaceNeighbour::CAIMapSurfaceNeighbour(bool isNoGo)	// constructo
 
 inline CAIMapSurface::CAIMapSurface(): _entityList(NULL)
 {
-	_regionId=~0;
+	_regionId=std::numeric_limits<uint>::max();
 	_cell=NULL;
 	_h=0;
 }

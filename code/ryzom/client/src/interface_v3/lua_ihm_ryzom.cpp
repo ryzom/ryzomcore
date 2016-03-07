@@ -220,15 +220,22 @@ static DECLARE_INTERFACE_USER_FCT(lua)
 	}
 	else if(type==LUA_TNUMBER)
 	{
-		// get and pop
-		double	val= ls.toNumber();
-		ls.pop();
-		// set double or integer?
-		if(val==floor(val))
-			result.setInteger(sint64(floor(val)));
+		if (ls.isInteger())
+		{
+			// get and pop
+			sint64	val= ls.toInteger();
+			ls.pop();
+			result.setInteger(val);
+			ok= true;
+		}
 		else
+		{
+			// get and pop
+			double	val= ls.toNumber();
+			ls.pop();
 			result.setDouble(val);
-		ok= true;
+			ok= true;
+		}
 	}
 	else if(type==LUA_TSTRING)
 	{
@@ -309,7 +316,7 @@ int CLuaIHMRyzom::luaClientCfgIndex(CLuaState &ls)
 	switch(v->Type)
 	{
 		case CConfigFile::CVar::T_REAL:
-			ls.push((double) v->asDouble());
+			ls.push(v->asDouble());
 			return 1;
 		break;
 		case CConfigFile::CVar::T_STRING:
@@ -318,7 +325,7 @@ int CLuaIHMRyzom::luaClientCfgIndex(CLuaState &ls)
 		break;
 		default: // handle both T_INT && T_BOOL
 		case CConfigFile::CVar::T_INT:
-			ls.push((double) v->asInt());
+			ls.push(v->asInt());
 			return 1;
 		break;
 	}
@@ -1003,7 +1010,7 @@ int CLuaIHMRyzom::hideAllNonSavableWindows(CLuaState &/* ls */)
 int CLuaIHMRyzom::getDesktopIndex(CLuaState &ls)
 {
 	//H_AUTO(Lua_CLuaIHM_getDesktopIndex)
-	ls.push((double) CInterfaceManager::getInstance()->getMode());
+	ls.push(CInterfaceManager::getInstance()->getMode());
 	return 1;
 }
 
@@ -1020,7 +1027,7 @@ int CLuaIHMRyzom::setLuaBreakPoint(CLuaState &ls)
 	#ifdef LUA_NEVRAX_VERSION
 		if (LuaDebuggerIDE)
 		{
-			LuaDebuggerIDE->setBreakPoint(ls.toString(1), (int) ls.toNumber(2));
+			LuaDebuggerIDE->setBreakPoint(ls.toString(1), (int) ls.toInteger(2));
 		}
 	#endif
 
@@ -1043,7 +1050,7 @@ int	CLuaIHMRyzom::getCharSlot(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_getCharSlot)
 	const char *funcName = "getCharSlot";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push(double(PlayerSelectedSlot));
+	ls.push(PlayerSelectedSlot);
 	return 1;
 }
 
@@ -1053,7 +1060,7 @@ int CLuaIHMRyzom::getServerSeason(CLuaState &ls)
 	const char *funcName = "getServerSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
 	extern uint8 ServerSeasonValue;
-	ls.push((double) ServerSeasonValue);
+	ls.push(ServerSeasonValue);
 	return 1;
 }
 
@@ -1062,7 +1069,7 @@ int CLuaIHMRyzom::computeCurrSeason(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_computeCurrSeason)
 	const char *funcName = "computeCurrSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push((double) (::computeCurrSeason() + 1));
+	ls.push((sint)(::computeCurrSeason() + 1));
 	return 1;
 }
 
@@ -1071,7 +1078,7 @@ int CLuaIHMRyzom::getAutoSeason(CLuaState &ls)
 	//H_AUTO(Lua_CLuaIHM_getAutoSeason)
 	const char *funcName = "getAutoSeason";
 	CLuaIHM::checkArgCount(ls, funcName, 0);
-	ls.push((double) (StartupSeason + 1));
+	ls.push((sint)(StartupSeason + 1));
 	return 1;
 }
 
@@ -1144,7 +1151,7 @@ int CLuaIHMRyzom::getPlayerDirection(CLuaState &ls)
 int CLuaIHMRyzom::getPlayerGender(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getPlayerGender", 0);
-	ls.push((lua_Number)(UserEntity->getGender()));
+	ls.push((uint8)UserEntity->getGender());
 	return 1;
 }
 
@@ -1210,7 +1217,7 @@ int CLuaIHMRyzom::getTargetGender(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getTargetGender", 0);
 	CCharacterCL* target = (CCharacterCL*)getTargetEntity();
 	if (!target) return (int)GSGENDER::unknown;
-	ls.push((lua_Number)(target->getGender()));
+	ls.push((uint8)target->getGender());
 	return 1;
 }
 
@@ -1344,14 +1351,14 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 	CLuaIHM::checkArgType(ls, "getSheet2idx", 2, LUA_TNUMBER);
 
 	const std::string & sheedtName = ls.toString(1);
-	uint32 slotId = (uint32)ls.toNumber(2);
+	uint32 slotId = (uint32)ls.toInteger(2);
 
 	NLMISC::CSheetId sheetId;
 
 	if (sheetId.buildSheetId(sheedtName))
 	{
 		uint32 idx = CVisualSlotManager::getInstance()->sheet2Index(sheetId, (SLOTTYPE::EVisualSlot)slotId);
-		ls.push((lua_Number)idx);
+		ls.push(idx);
 	}
 	else
 		return 0;
@@ -1362,7 +1369,7 @@ int CLuaIHMRyzom::getSheet2idx(CLuaState &ls)
 int CLuaIHMRyzom::getTargetSlot(CLuaState &ls)
 {
 	uint32 slot = (uint32)getTargetSlotNr();
-	ls.push((lua_Number)slot);
+	ls.push(slot);
 	return 1;
 }
 
@@ -1372,7 +1379,7 @@ int CLuaIHMRyzom::getSlotDataSetId(CLuaState &ls)
 	CLuaIHM::checkArgCount(ls, "getSlotDataSetId", 1);
 	CLuaIHM::checkArgType(ls, "getSlotDataSetId", 1, LUA_TNUMBER);
 
-	uint32 slot = (uint32)ls.toNumber(1);
+	uint32 slot = (uint32)ls.toInteger(1);
 	CEntityCL *e = getSlotEntity(slot);
 	string id = toString(e->dataSetId());
 	ls.push(id);
@@ -1394,7 +1401,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 		switch(v->Type)
 		{
 			case CConfigFile::CVar::T_REAL:
-				ls.push((double) v->asDouble());
+				ls.push(v->asDouble());
 				return 1;
 			break;
 			case CConfigFile::CVar::T_STRING:
@@ -1403,7 +1410,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 			break;
 			default: // handle both T_INT && T_BOOL
 			case CConfigFile::CVar::T_INT:
-				ls.push((double) v->asInt());
+				ls.push(v->asInt());
 				return 1;
 			break;
 		}
@@ -1420,7 +1427,7 @@ int CLuaIHMRyzom::getClientCfgVar(CLuaState &ls)
 		}
 		for(uint i = 0; i<v->IntValues.size(); i++)
 		{
-			result.setValue(toString(count).c_str(), (double)v->IntValues[i]);
+			result.setValue(toString(count).c_str(), (sint32)v->IntValues[i]);
 			count++;
 		}
 		for(uint i = 0; i<v->RealValues.size(); i++)
@@ -1514,9 +1521,9 @@ int	CLuaIHMRyzom::getIndexInDB(CLuaState &ls)
 
 	// get the index in db
 	if(pCS)
-		ls.push((double)pCS->getIndexInDB());
+		ls.push(pCS->getIndexInDB());
 	else
-		ls.push(0.0);
+		ls.push((sint)0);
 
 	return 1;
 }
@@ -1676,7 +1683,7 @@ int CLuaIHMRyzom::displayBubble(CLuaState &ls)
 		strs.push_back(it.nextKey().toString());
 	}
 	
-	InSceneBubbleManager.webIgChatOpen((uint32)ls.toNumber(1), ls.toString(2), strs, links);
+	InSceneBubbleManager.webIgChatOpen((uint32)ls.toInteger(1), ls.toString(2), strs, links);
 	
 	return 1;
 }
@@ -1745,10 +1752,10 @@ int CLuaIHMRyzom::getCompleteIslands(CLuaState &ls)
 		ls.newTable();
 		CLuaObject islandTable(ls);
 		islandTable.setValue("continent", island->Continent);
-		islandTable.setValue("xmin", (double)island->XMin);
-		islandTable.setValue("ymin", (double)island->YMin);
-		islandTable.setValue("xmax", (double)island->XMax);
-		islandTable.setValue("ymax", (double)island->YMax);
+		islandTable.setValue("xmin", island->XMin);
+		islandTable.setValue("ymin", island->YMin);
+		islandTable.setValue("xmax", island->XMax);
+		islandTable.setValue("ymax", island->YMax);
 
 		ls.newTable();
 		CLuaObject entrypointsTable(ls);
@@ -1758,8 +1765,8 @@ int CLuaIHMRyzom::getCompleteIslands(CLuaState &ls)
 			const CScenarioEntryPoints::CShortEntryPoint & entryPoint = island->EntryPoints[e];
 			ls.newTable();
 			CLuaObject entrypointTable(ls);
-			entrypointTable.setValue("x", (double)entryPoint.X);
-			entrypointTable.setValue("y", (double)entryPoint.Y);
+			entrypointTable.setValue("x", entryPoint.X);
+			entrypointTable.setValue("y", entryPoint.Y);
 
 			entrypointsTable.setValue(entryPoint.Location, entrypointTable);
 		}
@@ -1784,7 +1791,7 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 	CScenarioEntryPoints scenarioEntryPoints = CScenarioEntryPoints::getInstance();
 	uint32 id = scenarioEntryPoints.getIslandId(ls.toString(1));
-	ls.push((double)id);
+	ls.push(id);
 
 	return 1;
 }

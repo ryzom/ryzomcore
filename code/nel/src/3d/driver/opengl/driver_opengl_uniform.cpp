@@ -332,58 +332,58 @@ bool CDriverGL::setUniformDriver(TProgram program)
 	{
 		if (features.DriverFlags & CProgramFeatures::Matrices)
 		{
-			if (prog->getUniformIndex(CProgramIndex::ModelView) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelView) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelView), ModelView, Identity);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewInverse) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewInverse), ModelView, Inverse);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewTranspose), ModelView, Transpose);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewInverseTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewInverseTranspose), ModelView, InverseTranspose);
 			}
-			if (prog->getUniformIndex(CProgramIndex::Projection) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::Projection) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::Projection), Projection, Identity);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ProjectionInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionInverse) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionInverse), Projection, Inverse);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ProjectionTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionTranspose), Projection, Transpose);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ProjectionInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ProjectionInverseTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ProjectionInverseTranspose), Projection, InverseTranspose);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewProjection) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjection) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjection), ModelViewProjection, Identity);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverse) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverse) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverse), ModelViewProjection, Inverse);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionTranspose), ModelViewProjection, Transpose);
 			}
-			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverseTranspose) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverseTranspose) != std::numeric_limits<uint>::max())
 			{
 				setUniformMatrix(program, prog->getUniformIndex(CProgramIndex::ModelViewProjectionInverseTranspose), ModelViewProjection, InverseTranspose);
 			}
 		}
 		if (features.DriverFlags & CProgramFeatures::Fog)
 		{
-			if (prog->getUniformIndex(CProgramIndex::Fog) != ~0)
+			if (prog->getUniformIndex(CProgramIndex::Fog) != std::numeric_limits<uint>::max())
 			{
 				setUniformFog(program, prog->getUniformIndex(CProgramIndex::Fog));
 			}
@@ -494,7 +494,7 @@ void CDriverGL::setUniformParams(TProgram program, CGPUProgramParams &params)
 			const std::string &name = params.getNameByOffset(offset);
 			nlassert(!name.empty()); // missing both parameter name and index, code error
 			uint index = prog->getUniformIndex(name.c_str());
-			nlassert(index != ~0); // invalid parameter name
+			nlassert(index != std::numeric_limits<uint>::max()); // invalid parameter name
 			params.map(index, name);
 		}
 		

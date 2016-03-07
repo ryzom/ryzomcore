@@ -32,12 +32,12 @@ namespace NLMISC
 void CWin32Util::localizeWindow(HWND wnd)
 {
 	if (!wnd) return;
-	int textLength = GetWindowTextLength(wnd);
+	sint textLength = GetWindowTextLengthW(wnd);
 	if (textLength > 0)
 	{
-		std::vector<char> str(textLength + 1);
-		GetWindowText(wnd, &str[0], textLength + 1);
-		std::string winText(str.begin(), str.end() - 1);
+		wchar_t str[1024];
+		GetWindowTextW(wnd, str, 1024);
+		std::string winText = wideToUtf8(str);
 		if (CI18N::hasTranslation(winText))
 		{
 			SetWindowTextW(wnd, (const WCHAR *) CI18N::get(winText).c_str());

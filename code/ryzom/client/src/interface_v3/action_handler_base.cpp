@@ -311,8 +311,7 @@ class CAHMilkoMenuDoResetInterface : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string& Params)
 	{
 		// get param
-		string mode;
-		fromString(getParam(Params, "mode"), mode);
+		string mode = getParam(Params, "mode");
 
 		// run procedure
 		vector<string> v;

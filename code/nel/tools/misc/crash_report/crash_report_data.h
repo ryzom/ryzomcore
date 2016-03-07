@@ -20,8 +20,13 @@
 #ifndef RCERROR_DATA
 #define RCERROR_DATA
 
-#include <QString>
+#include <qglobal.h>
 
+#ifdef Q_COMPILER_RVALUE_REFS
+#undef Q_COMPILER_RVALUE_REFS
+#endif
+
+#include <QString>
 
 struct SCrashReportData
 {

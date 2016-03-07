@@ -1720,7 +1720,7 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 		pdr.clear();
 		{
 			H_AUTO(LoadCharacterNamesLoadFile);
-			pdr.readFromFile((*it).second.FileName.c_str());
+			pdr.readFromFile((*it).second.FileName);
 		}
 		CCharacterNameExtraction nameExtractor;
 		{
@@ -1760,25 +1760,25 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 //				// std read tst
 //				static CPersistentDataRecord pdrRead("");
 //				pdrRead.clear();
-//				pdrRead.readFromBinFile(files[i].c_str());
-//				pdrRead.writeToTxtFile((saveDir + "test/txt_read/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdrRead.readFromBinFile(files[i]);
+//				pdrRead.writeToTxtFile(saveDir + "test/txt_read/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //
 //				// read write tst (even with a bad used RyzomStore class)
 //				static CPersistentDataRecordRyzomStore pdr;
 //				pdr.clear();
-//				pdr.readFromBinFile(files[i].c_str());
+//				pdr.readFromBinFile(files[i]);
 //				TTime	t0= CTime::getLocalTime();
-//				pdr.writeToBinFile((saveDir + "test/bin_new/" + file).c_str());
+//				pdr.writeToBinFile(saveDir + "test/bin_new/" + file);
 //				TTime	t1= CTime::getLocalTime();
 //				nlinfo("resaved %s in %d ms", file.c_str(), uint32(t1-t0));
-//				pdr.writeToTxtFile((saveDir + "test/txt_before/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdr.writeToTxtFile(saveDir + "test/txt_before/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //			}
 //			// ReLoad
 //			{
 //				static CPersistentDataRecordRyzomStore pdr;
 //				pdr.clear();
-//				pdr.readFromBinFile((saveDir + "test/bin_new/" + file).c_str());
-//				pdr.writeToTxtFile((saveDir + "test/txt_after/" + CFile::getFilenameWithoutExtension(file) + ".txt").c_str(), CPersistentDataRecord::LINES_STRING);
+//				pdr.readFromBinFile(saveDir + "test/bin_new/" + file);
+//				pdr.writeToTxtFile(saveDir + "test/txt_after/" + CFile::getFilenameWithoutExtension(file) + ".txt", CPersistentDataRecord::LINES_STRING);
 //			}
 //		}
 //	}
@@ -1813,10 +1813,10 @@ NLMISC_COMMAND(loadCharacterNames,"load all character save games and extract nam
 //				{
 //					static CPersistentDataRecord pdr;
 //					pdr.clear();
-//					pdr.readFromFile(files[i].c_str());
+//					pdr.readFromFile(files[i]);
 //					string txtFile= files[i];
 //					strFindReplace(txtFile, ".bin", ".txt");
-//					pdr.writeToTxtFile(txtFile.c_str(), CPersistentDataRecord::LINES_STRING);
+//					pdr.writeToTxtFile(txtFile, CPersistentDataRecord::LINES_STRING);
 //				}
 //			}
 //		}
@@ -2233,9 +2233,11 @@ NLMISC_COMMAND(create_obj,"create a new object","<type>")
 	if( args.size() > 0 )
 	{
 		CWorldObjectLocation loc;
+		uint32 type;
 		uint16 quality = 0;
 		uint32 hp = 0;
-		WorldObjectManager.createObject(NLMISC::fromString(args[2].c_str()),loc,quality,hp);
+		NLMISC::fromString(args[0], type);
+		WorldObjectManager.createObject(type,loc,quality,hp);
 		return true;
 	}
 	return false;
@@ -3244,8 +3246,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getCharacterPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i])).c_str(),
-					allChars[i].c_str()
+					PlayerManager.getCharacterPath(userId, false)+CFile::getFilename(allChars[i]),
+					allChars[i]
 					);
 			}
 		}
@@ -3271,8 +3273,8 @@ NLMISC_COMMAND(moveCharAndOfflineCmdToHashTable, "Move all character and offline
 				CFile::createDirectory(PlayerManager.getOfflineCommandPath(userId, false));
 				// move the file
 				CFile::moveFile(
-					(PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i])).c_str(),
-					allCommands[i].c_str()
+					PlayerManager.getOfflineCommandPath(userId, false)+CFile::getFilename(allCommands[i]),
+					allCommands[i]
 					);
 			}
 		}

@@ -3645,7 +3645,7 @@ bool CServerEditionModule::checkScenario(CObject* scenario)
 		uint32 max = acts->getSize();
 		for(uint32 i = 0;i<max;i++)
 		{
-			CObject * act = acts->getValue(i);
+			CObject * act = acts->getValueAtPos(i);
 			CObject * npcs = act->findAttr("Npcs");
 			CObject * states = act->findAttr("AiStates");
 			if (states && states->isTable())
@@ -4022,14 +4022,14 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 	CObject* acts = hl->getAttr("Acts");
 	BOMB_IF(!acts || !acts->isTable() || actIndex >= acts->getSize(), "Invalid acts.", return false);
 
-	CObject* selectedAct = acts->getValue(actIndex);
+	CObject* selectedAct = acts->getValueAtPos(actIndex);
 	BOMB_IF(!selectedAct || !selectedAct->isString("LocationId"), "Invalid act.", return false);
 	std::string locationInstanceId = selectedAct->toString("LocationId");
 
 	uint32 firstLocationIndex = 0, lastLocationIndex = locations->getSize();
 	for (; firstLocationIndex != lastLocationIndex; ++firstLocationIndex)
 	{
-		CObject* location = locations->getValue(firstLocationIndex);
+		CObject* location = locations->getValueAtPos(firstLocationIndex);
 		if ( location && location->isString("InstanceId") && location->toString("InstanceId") == locationInstanceId )
 		{
 			locationId = firstLocationIndex;
@@ -4043,7 +4043,7 @@ bool CServerEditionModule::getPosition(TSessionId sessionId, double& x, double& 
 
 
 
-	CObject* firstLocation = locations->getValue(locationId);
+	CObject* firstLocation = locations->getValueAtPos(locationId);
 	BOMB_IF(!firstLocation || !firstLocation->isTable(), "Invalid location.", return false);
 
 	CObject* entryPointObj = firstLocation->getAttr("EntryPoint");

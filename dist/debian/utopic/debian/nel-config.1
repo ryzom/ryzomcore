@@ -1,0 +1,37 @@
+.TH nel-config 1 "26 Oct 2007"
+.SH NAME
+nel-config \- Get information about a libnel installation
+.SH SYNOPSIS
+.B nel-config [options]
+.SH DESCRIPTION
+.B nel-config
+displays information about a libnel installation.
+.SH OPTIONS
+.IP "--cflags"
+Set of compiler options (CFLAGS) to use when compiling files that use
+libnel. Currently that is only thw include path to the nel include files.
+.IP "--libs"
+Shows the complete set of libs and other linker options you will need in order
+to link your application with libnel.
+.IP "--prefix"
+This is the prefix used when libnel was installed. libnel is then installed
+in $prefix/lib and its header files are installed in $prefix/include and so
+on. The prefix is set with "configure \-\-prefix".
+.IP "--version"
+Outputs version information about the installed libnel.
+.SH "EXAMPLES"
+What linker options do I need when I link with libnel?
+
+  $ nel-config \-\-libs
+
+What compiler options do I need when I compile using libnel functions?
+
+  $ nel-config \-\-cflags
+
+What's the installed libnel version?
+
+  $ nel-config \-\-version
+.SH AUTHOR
+.PP
+This manual page was written by G\[:u]rkan Seng\[:u]n
+<gurkan@linuks.mine.nu>,for the Debian project (but may be used by others).

@@ -18,11 +18,14 @@
 #define NL_ACTION_HANDLER_H
 
 #include "nel/misc/types_nl.h"
-#include <libxml/parser.h>
-#include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/xml_auto_ptr.h"
+
 #include <map>
+
+// Forward declarations for libxml2
+typedef struct _xmlNode xmlNode;
+typedef xmlNode *xmlNodePtr;
 
 namespace NLGUI
 {

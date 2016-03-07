@@ -561,13 +561,13 @@ bool SExportOptions::loadcf (CConfigFile &cf)
 bool SExportOptions::save (FILE *f)
 {
 	fprintf (f,"\n// Export Options\n");
-	fprintf (f, "EXP_OutIGDir = \"%s\";\n",		OutIGDir);
-	fprintf (f, "EXP_ZoneWDir = \"%s\";\n",		InLandscapeDir);
-	fprintf (f, "EXP_SmallBank = \"%s\";\n",	LandBankFile);
-	fprintf (f, "EXP_FarBank = \"%s\";\n",		LandFarBankFile);
-	fprintf (f, "EXP_DisplaceDir = \"%s\";\n",	LandTileNoiseDir);
+	fprintf (f, "EXP_OutIGDir = \"%s\";\n",		OutIGDir.c_str());
+	fprintf (f, "EXP_ZoneWDir = \"%s\";\n",		InLandscapeDir.c_str());
+	fprintf (f, "EXP_SmallBank = \"%s\";\n",	LandBankFile.c_str());
+	fprintf (f, "EXP_FarBank = \"%s\";\n",		LandFarBankFile.c_str());
+	fprintf (f, "EXP_DisplaceDir = \"%s\";\n",	LandTileNoiseDir.c_str());
 	fprintf (f, "EXP_CellSize = %f;\n",			CellSize);
-	fprintf (f, "EXP_PrimFloraDir = \"%s\";\n", PrimFloraDir);
+	fprintf (f, "EXP_PrimFloraDir = \"%s\";\n", PrimFloraDir.c_str());
 	return true;
 }
 

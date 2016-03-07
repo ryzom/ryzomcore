@@ -520,7 +520,7 @@ void CGroundFXManager::update(const NLMISC::CVectorD &camPos)
 		}
 		if (!fxName.empty())
 		{
-			stdFXName = NLMISC::strlwr(NLMISC::CFile::getFilenameWithoutExtension(fxName));
+			stdFXName = NLMISC::toLower(NLMISC::CFile::getFilenameWithoutExtension(fxName));
 		}
 		// is an fx already attached to the entity ?
 		if (_SortedInstances[k]->HasFX)
@@ -881,8 +881,8 @@ NLMISC_COMMAND(gfxAdd, "gfxAdd", "<>")
 			break;
 		}
 	}
-	int category = 0;
-	uint32 form;
+	sint category = 0;
+	uint32 form = 0;
 	if (args.size() == 1)
 	{
 		if (fromString(args[0], category))

@@ -110,21 +110,29 @@ bool IAudioDecoder::getInfo(const std::string &filepath, std::string &artist, st
 		CIFile ifile; 
 		ifile.setCacheFileOnOpen(false); 
 		ifile.allowBNPCacheFileOnOpen(false);
-		ifile.open(lookup);
-		return CAudioDecoderVorbis::getInfo(&ifile, artist, title);
+		if (ifile.open(lookup))
+			return CAudioDecoderVorbis::getInfo(&ifile, artist, title);
+
+		nlwarning("Unable to open: '%s'", filepath.c_str());
 	}
 	else
 	{
 		nlwarning("Music file type unknown: '%s'", type_lower.c_str());
-		artist.clear(); title.clear();
-		return false;
 	}
+
+	artist.clear(); title.clear();
+	return false;
 }
 
 /// Get audio/container extensions that are currently supported by the nel sound library.
 void IAudioDecoder::getMusicExtensions(std::vector<std::string> &extensions)
 {
-	extensions.push_back("ogg");
+	// only add ogg format if not already in extensions list
+	if (std::find(extensions.begin(), extensions.end(), "ogg") == extensions.end())
+	{
+		extensions.push_back("ogg");
+	}
+
 	// extensions.push_back("wav"); // TODO: Easy.
 }
 

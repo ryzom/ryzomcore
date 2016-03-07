@@ -160,6 +160,7 @@ struct CClientConfig
 	string			CreateAccountURL;
 	string			EditAccountURL;
 	string			ConditionsTermsURL;
+	string			NamingPolicyURL;
 	string			BetaAccountURL;
 	string			ForgetPwdURL;
 	string			FreeTrialURL;
@@ -255,6 +256,8 @@ struct CClientConfig
 	bool			Fog;
 	/// Enable/Disable VSync
 	bool			WaitVBL;
+	/// Force or auto-detect video memory (in MiB)
+	sint			VideoMemory;
 
 	/// Timer mode. 0 : QueryPerformanceCounter, 1 : timeGetTime.
 	uint			TimerMode;
@@ -296,7 +299,6 @@ struct CClientConfig
 	std::string		PatchUrl;
 	std::string		PatchletUrl;
 	std::string		PatchVersion;
-	std::string		PatchServer;
 
 	std::string		RingReleaseNotePath;
 	std::string		ReleaseNotePath;
@@ -304,6 +306,7 @@ struct CClientConfig
 	std::string		WebIgMainDomain;
 	std::vector<string>	WebIgTrustedDomains;
 
+	sint32			CurlMaxConnections;
 
 	///////////////
 	// ANIMATION //
@@ -421,6 +424,8 @@ struct CClientConfig
 	sint			Sleep;
 	/// Force process priority
 	sint			ProcessPriority;
+	/// CPU Mask
+	sint			CPUMask;
 	// To show/hide the entities path
 	bool			ShowPath;
 	/// Draw the Boxes used for the selection.
@@ -765,7 +770,6 @@ struct CClientConfig
 
 	/// Allow Lua commands (commands beginning with Lua)
 	bool			AllowDebugLua;
-	bool			LoadLuaDebugger;
 
 	bool			LuaDebugInfoGotoButtonEnabled;
 	std::string		LuaDebugInfoGotoButtonTemplate;

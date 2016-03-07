@@ -1,6 +1,10 @@
 #include "stdpch.h"
 #include "login_patch.h"
 #include "client_cfg.h"
+#include "user_agent.h"
+
+#include "nel/misc/cmd_args.h"
+
 #include <locale.h>
 
 #ifdef NL_OS_WINDOWS
@@ -28,7 +32,8 @@ string	VersionName;
 string LoginLogin, LoginPassword;
 uint32 LoginShardId = 0xFFFFFFFF;
 
-bool useUtf8 = false;
+CCmdArgs Args;
+
 bool useEsc = false;
 
 #ifdef NL_OS_WINDOWS
@@ -38,9 +43,6 @@ sint attributes = 0;
 
 std::string convert(const ucstring &str)
 {
-	if (useUtf8)
-		return str.toUtf8();
-
 	return str.toString();
 }
 
@@ -91,28 +93,12 @@ void printDownload(const std::string &str)
 	// temporary modified string
 	std::string nstr = str;
 
-	uint length = 0;
+	uint length = (uint)nstr.length();
 
-	if (useUtf8)
+	if (length > maxLength)
 	{
-		ucstring ucstr;
-		ucstr.fromUtf8(nstr);
-		length = (uint)ucstr.length();
-		if (length > maxLength)
-		{
-			ucstr = ucstr.luabind_substr(length - maxLength + 3);
-			nstr = std::string("...") + ucstr.toUtf8();
-			length = maxLength;
-		}
-	}
-	else
-	{
-		length = (uint)nstr.length();
-		if (length > maxLength)
-		{
-			nstr = std::string("...") + nstr.substr(length - maxLength + 3);
-			length = maxLength;
-		}
+		nstr = std::string("...") + nstr.substr(length - maxLength + 3);
+		length = maxLength;
 	}
 
 	// add padding with spaces
@@ -142,10 +128,65 @@ void printDownload(const std::string &str)
 	fflush(stdout);
 }
 
+// hardcoded english translations to not depends on external files
+struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
+{
+	virtual void loadStringFile(const std::string &filename, ucstring &text)
+	{
+		text.fromUtf8(
+			"TheSagaOfRyzom	[Ryzom]\n"
+			"uiErrPatchApply	[Error: Patch process ended but the patch has not been successfully applied.]\n"
+			"uiErrChecking	[Error: Patch files failed - checking.]\n"
+			"uiByte	[B]\n"
+			"uiKb	[KiB]\n"
+			"uiMb	[MiB]\n"
+			"uiLoginGetFile	[Getting File:]\n"
+			"uiDLWithCurl	[Downloading File With Curl:]\n"
+			"uiDecompressing	[Decompressing File:]\n"
+			"uiCheckInt	[Checking Integrity:]\n"
+			"uiNoVersionFound	[No Version Found]\n"
+			"uiVersionFound	[Version Found:]\n"
+			"uiApplyingDelta	[Applying Delta:]\n"
+			"uiClientVersion	[Client Version]\n"
+			"uiServerVersion	[Server Version]\n"
+			"uiCheckingFile	[Checking File]\n"
+			"uiNeededPatches	[Required Patches:]\n"
+			"uiCheckInBNP	[Checking inside BNP:]\n"
+			"uiSHA1Diff	[Force BNP Unpacking: checksums do not correspond:]\n"
+			"uiCheckEndNoErr	[Checking file ended with no errors]\n"
+			"uiCheckEndWithErr	[Checking file ended with errors:]\n"
+			"uiPatchEndNoErr	[Patching file ended with no errors]\n"
+			"uiPatchEndWithErr	[Patch failed!]\n"
+			"uiPatchDiskFull	[Disk full!]\n"
+			"uiPatchWriteError	[Disk write error! (disk full?)]\n"
+			"uiProcessing	[Processing file:]\n"
+			"uiUnpack	[BNP Unpacking:]\n"
+			"uiUnpackErrHead	[Cannot read bnp header:]\n"
+			"uiChangeDate	[Changing the mod date:]\n"
+			"uiChgDateErr	[Cannot change file time:]\n"
+			"uiNowDate	[Now the date is:]\n"
+			"uiSetAttrib	[Set file attributes:]\n"
+			"uiAttribErr	[Cannot have read/write access:]\n"
+			"uiDelFile	[Delete file:]\n"
+			"uiDelErr	[Cannot delete file:]\n"
+			"uiDelNoFile	[Delete file (no file)]\n"
+			"uiRenameFile	[Rename File:]\n"
+			"uiRenameErr	[Cannot rename file:]\n"
+		);
+	}
+};
+
+
 int main(int argc, char *argv[])
 {
 	// init the Nel context
 	CApplicationContext appContext;
+
+	Args.setVersion(getDisplayVersion());
+	Args.setDescription("Ryzom client");
+	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
+
+	if (!Args.parse(argc, argv)) return 1;
 
 	// create logs in temporary directory
 	createDebug(CPath::getTemporaryDirectory().c_str(), true, true);
@@ -177,11 +218,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	// check if console supports utf-8
-	std::string lang = toLower(std::string(setlocale(LC_CTYPE, "")));
-	useUtf8 = (lang.find("utf8") != string::npos || lang.find("utf-8") != string::npos);
-	lang = lang.substr(0, 2);
-
 	// check if console supports colors
 	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
 	useEsc = (term.find("xterm") != string::npos || term.find("linux") != string::npos);
@@ -202,80 +238,33 @@ int main(int argc, char *argv[])
 	// load client.cfg or client_default.cfg
 	ClientCfg.init(config);
 
-	// check if PatchServer is defined
-	if (ClientCfg.PatchServer.empty())
+	// check if PatchUrl is defined
+	if (ClientCfg.PatchUrl.empty())
 	{
-		printError("PatchServer not defined in " + config);
+		printError("PatchUrl not defined in " + config);
 		return 1;
 	}
 
-	// set default paths
-	std::string dataPath = "./data/";
-	std::string rootPath = "./";
+	// allocate translations proxy
+	CClientPatcherTranslations *trans = new CClientPatcherTranslations();
 
-	// use custom data path if specified
-	if (!ClientCfg.DataPath.empty())
-	{
-		dataPath = CPath::standardizePath(ClientCfg.DataPath.front());
-		string::size_type pos = dataPath.rfind('/', dataPath.length()-2);
-		if (pos != string::npos)
-			rootPath = dataPath.substr(0, pos+1);
-	}
+	// use proxy
+	CI18N::setLoadProxy(trans);
 
-	std::string unpackPath = CPath::standardizePath(rootPath + "unpack");
+ 	// load english translations
+	CI18N::load("en");
 
-	// check if user can write in data directory
-	if (!CFile::isExists(unpackPath))
-	{
-		if (!CFile::createDirectoryTree(unpackPath))
-		{
-			printError("You don't have permission to create " + unpackPath);
-			return 1;
-		}
-	}
-	else
-	{
-		if (!CFile::createEmptyFile(unpackPath + "empty"))
-		{
-			printError("You don't have write permission in " + unpackPath);
-			return 1;
-		}
-
-		CFile::deleteFile(unpackPath + "empty");
-	}
-
-	// only use PreDataPath for looking paths
-	if (!ClientCfg.PreDataPath.empty())
-	{
-		for(uint i = 0; i < ClientCfg.PreDataPath.size(); ++i)
-		{
-			CPath::addSearchPath(ClientCfg.PreDataPath[i], true, false);
-		}
-	}
-
-	// add more search paths if translation is not found
-	if (!CPath::exists(lang + ".uxt"))
-	{
-		CPath::addSearchPath("patcher", true, false);
-#ifdef RYZOM_SHARE_PREFIX
-		CPath::addSearchPath(RYZOM_SHARE_PREFIX"/patcher", true, false);
-#endif
-	}
-
- 	// load translation
-	CI18N::load(lang);
+	// now translations are read, we don't need it anymore
+	delete trans;
 
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
 
-	// set the correct root path
-	pPM->setClientRootPath(rootPath);
-
-	// use PatchServer URL
+	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, ClientCfg.PatchServer, ClientCfg.PatchVersion);
+	pPM->init(patchURLs, ClientCfg.PatchUrl, ClientCfg.PatchVersion);
 	pPM->startCheckThread(true /* include background patchs */);
 
 	ucstring state;
@@ -385,6 +374,8 @@ int main(int argc, char *argv[])
 			printError(convert(CI18N::get("uiErrPatchApply")) + " " + error);
 			return 1;
 		}
+
+		pPM->executeBatchFile();
 	}
 
 /*
@@ -397,4 +388,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

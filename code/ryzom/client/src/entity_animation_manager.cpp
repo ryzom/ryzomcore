@@ -205,7 +205,7 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 	for (uint32 i = 0; i < pASLS->AnimSetList.size(); ++i)
 	{
 		CAnimationSet as;
-		string sTmp = strlwr(pASLS->AnimSetList[i].Name);
+		string sTmp = toLower(pASLS->AnimSetList[i].Name);
 		sTmp = sTmp.substr(0,sTmp.rfind('.'));
 		pair<map<string,CAnimationSet>::iterator, bool> it;
 		it = _AnimSet.insert(pair<string,CAnimationSet>(sTmp,as));

@@ -28,10 +28,7 @@ class CSysInfoOpenGLWidget : public QWidget, public Ui::sys_info_opengl_widget
 	Q_OBJECT
 public:
 	CSysInfoOpenGLWidget( QWidget *parent = NULL );
-	~CSysInfoOpenGLWidget();
-
-protected:
-	void changeEvent( QEvent *event );
+	virtual ~CSysInfoOpenGLWidget();
 
 };
 

@@ -1136,10 +1136,25 @@ bool CCombatPhrase::validate()
 		if(_MeleeCombat)
 		{
 			// check combat float mode
+			uint32 range;
+			if (!combatDefender || !combatDefender->getEntity())
+				return false;
+
 			CCharacter *character = PlayerManager.getChar(_Attacker->getEntityRowId());
-			if (character && !character->meleeCombatIsValid())
+			CCharacter *cdefender = PlayerManager.getChar(defender->getEntityRowId());
+			if ( defender->getId().getType() == RYZOMID::player )
 			{
-				if (!_TargetTooFarMsg)
+				if (character && character->hasMoved() && cdefender && cdefender->hasMoved())
+					range = 10000;
+				else
+					range = 3000;
+			}
+			else
+				range = 6000;
+				
+			if ((character && !character->meleeCombatIsValid()) ||  ! PHRASE_UTILITIES::testRange(*actingEntity, *defender, range ))
+			{
+				if (!_TargetTooFarMsg && (character && !character->meleeCombatIsValid()))
 				{
 					PHRASE_UTILITIES::sendSimpleMessage( _Attacker->getEntityRowId(), "BS_TARGET_TOO_FAR_OR");
 					_TargetTooFarMsg = true;
@@ -1488,11 +1503,26 @@ bool  CCombatPhrase::update()
 				if (_MeleeCombat )
 				{
 					debugStep = 18;
+					if (!combatDefender || !combatDefender->getEntity())
+						return false;
+					uint32 range;
+
 					CCharacter *character = dynamic_cast<CCharacter *> (actor);
-					if (character && !character->meleeCombatIsValid())
+					CCharacter *defender = dynamic_cast<CCharacter *> (combatDefender->getEntity());
+					if ( combatDefender->getEntity()->getId().getType() == RYZOMID::player )
+					{
+						if (character && character->hasMoved() && defender && defender->hasMoved() )
+							range = 10000;
+						else
+							range = 3000;
+					}
+					else
+						range = 6000;
+					
+					if ((character && !character->meleeCombatIsValid()) || !PHRASE_UTILITIES::testRange(*actor, *combatDefender->getEntity(), range))
 					{
 						debugStep = 19;
-						if (!_TargetTooFarMsg && !_Idle)
+						if (!_TargetTooFarMsg && !_Idle && (character && !character->meleeCombatIsValid()))
 						{
 							PHRASE_UTILITIES::sendSimpleMessage( actor->getId(), "BS_TARGET_TOO_FAR_OR");
 							_TargetTooFarMsg = true;

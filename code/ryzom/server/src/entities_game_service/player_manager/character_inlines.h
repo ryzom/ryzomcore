@@ -63,6 +63,16 @@ inline CHARACTER_TITLE::ECharacterTitle CCharacter::getTitle() const
 
 //------------------------------------------------------------------------------
 
+inline uint32 CCharacter::getScorePermanentModifiers(SCORES::TScores score) const
+{
+	return _ScorePermanentModifiers[score]; 
+}
+
+inline void CCharacter::setScorePermanentModifiers(SCORES::TScores score, uint32 value)
+{
+	_ScorePermanentModifiers[score] = value; 
+}
+
 inline bool CCharacter::getEnterFlag() const
 {
 	return _Enter; 
@@ -1045,6 +1055,12 @@ inline TSessionId CCharacter::getActiveAnimSessionId()
 inline TAIAlias CCharacter::getSelectedOutpost() const
 {
 	return _SelectedOutpost; 
+}
+
+// return true if character has moved
+inline bool CCharacter::hasMoved()
+{
+	return ( _EntityState.X() != _SavedPosX || _EntityState.Y() != _SavedPosY );
 }
 
 //------------------------------------------------------------------------------

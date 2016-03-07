@@ -38,6 +38,10 @@
 #	include <sys/types.h>
 #endif
 
+#if defined(NL_CPU_INTEL) && defined(NL_COMP_GCC)
+#include <x86intrin.h>
+#endif
+
 #include "string_common.h"
 
 #ifdef NL_OS_WINDOWS
@@ -65,20 +69,20 @@ namespace	NLMISC
 
 inline uint64 rdtsc()
 {
+#if defined(NL_COMP_GCC) && !defined(CLANG_VERSION) && (GCC_VERSION <= 40405)
+// for GCC versions that don't implement __rdtsc()
+#ifdef NL_CPU_X86_64
+	uint64 low, high;
+	__asm__ volatile("rdtsc" : "=a" (low), "=d" (high));
+	return low | (high << 32);
+#else
 	uint64 ticks;
-#	ifdef NL_OS_WINDOWS
-#	ifdef NL_NO_ASM
-		ticks = uint64(__rdtsc());
-#	else
-		// We should use the intrinsic code now. ticks = uint64(__rdtsc());
-		__asm	rdtsc
-		__asm	mov		DWORD PTR [ticks], eax
-		__asm	mov		DWORD PTR [ticks + 4], edx
-#	endif // NL_NO_ASM
-#	else
-		__asm__ volatile(".byte 0x0f, 0x31" : "=a" (ticks.low), "=d" (ticks.high));
-#	endif // NL_OS_WINDOWS
+	__asm__ volatile("rdtsc" : "=A" (ticks));
 	return ticks;
+#endif
+#else
+	return uint64(__rdtsc());
+#endif
 }
 
 #endif	// NL_CPU_INTEL
@@ -278,6 +282,13 @@ inline sint nlstricmp(const std::string &lhs, const std::string &rhs) { return s
 inline sint nlstricmp(const std::string &lhs, const char *rhs) { return stricmp(lhs.c_str(),rhs); }
 inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(lhs,rhs.c_str()); }
 
+// macros helper to convert UTF-8 std::string and wchar_t*
+#define wideToUtf8(str) (ucstring((ucchar*)str).toUtf8())
+#define utf8ToWide(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
+
+// wrapper for fopen to be able to open files with an UTF-8 filename
+FILE* nlfopen(const std::string &filename, const std::string &mode);
+
 /** Signed 64 bit fseek. Same interface as fseek
   */
 int		nlfseek64( FILE *stream, sint64 offset, int origin );
@@ -332,12 +343,18 @@ void itoaInt64 (sint64 number, char *str, sint64 base = 10);
 std::string bytesToHumanReadable (const std::string &bytes);
 std::string bytesToHumanReadable (uint64 bytes);
 
+/// Convert a number in bytes into a string that is easily readable by an human, for example 105123 -> "102kb"
+/// Using units array as string: 0 => B, 1 => KiB, 2 => MiB, 3 => GiB, etc...
+std::string bytesToHumanReadableUnits (uint64 bytes, const std::vector<std::string> &units);
+
 /// Convert a human readable into a bytes,  for example "102kb" -> 105123
 uint32 humanReadableToBytes (const std::string &str);
 
 /// Convert a time into a string that is easily readable by an human, for example 3600 -> "1h"
 std::string secondsToHumanReadable (uint32 time);
 
+/// Convert a UNIX timestamp to a formatted date in ISO format
+std::string timestampToHumanReadable(uint32 timestamp);
 
 /// Get a bytes or time in string format and convert it in seconds or bytes
 uint32 fromHumanReadable (const std::string &str);
@@ -348,6 +365,25 @@ std::string formatThousands(const std::string& s);
 /// This function executes a program in the background and returns instantly (used for example to launch services in AES).
 /// The program will be launched in the current directory
 bool launchProgram (const std::string &programName, const std::string &arguments, bool log = true);
+
+/// Same but with an array of strings for arguments
+bool launchProgramArray (const std::string &programName, const std::vector<std::string> &arguments, bool log = true);
+
+/// This function executes a program and wait for result (used for example for crash report).
+/// The program will be launched in the current directory
+sint launchProgramAndWaitForResult (const std::string &programName, const std::string &arguments, bool log = true);
+
+/// This function executes a program and returns output as a string
+std::string getCommandOutput(const std::string &command);
+
+/// This function replace all environment variables in a string by their content.
+/// Environment variables names can use both Windows (%NAME%) and UNIX syntax ($NAME)
+/// Authorized characters in names are A-Z, a-z, 0-9 and _
+std::string expandEnvironmentVariables(const std::string &s);
+
+/// Functions to convert a string with arguments to array or array to string (will espace strings with spaces)
+bool explodeArguments(const std::string &str, std::vector<std::string> &args);
+std::string joinArguments(const std::vector<std::string> &args);
 
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);

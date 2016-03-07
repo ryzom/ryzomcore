@@ -372,7 +372,7 @@ uint16	CSingleLayerCell::_MaskMap[16];
 
 void CSingleLayerCell::serial(NLMISC::IStream& f)
 {
-	f.serialCheck((uint16)'SL');
+	f.serialCheck(NELID16("SL"));
 
 	uint i;
 	for (i=0; i<16; ++i)
@@ -403,7 +403,7 @@ void CSingleLayerCell::serial(NLMISC::IStream& f)
 
 void CMultiLayerCell::serial(NLMISC::IStream& f)
 {
-	f.serialCheck((uint16)'ML');
+	f.serialCheck(NELID16("ML"));
 
 	uint slot;
 

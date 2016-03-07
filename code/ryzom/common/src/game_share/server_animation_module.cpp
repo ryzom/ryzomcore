@@ -609,9 +609,9 @@ public:
 	void setAttributeAsBool(const std::string & attrName, const std::string& propName)
 	{
 		CObject* attr = _Object->getAttr(attrName);
-		if (attr && attr->isNumber())
+		if (attr && attr->isInteger())
 		{
-			sint value = static_cast<sint>(attr->toNumber());
+			sint value = static_cast<sint>(attr->toInteger());
 			_Primitive->addPropertyByName(propName.c_str(), new CPropertyString(value?"true":"false"));
 		}
 	}
@@ -691,7 +691,7 @@ void CAttributeToProperty::setPrimPath()
 		points->VPoints.resize(last);
 		for ( ; first != last ; ++first )
 		{
-			CObject* pt = pts->getValue(first);
+			CObject* pt = pts->getValueAtPos(first);
 
 			attr = pt->getAttr("x");
 			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
@@ -721,7 +721,7 @@ void CAttributeToProperty::setPrimZone()
 		points->VPoints.resize(last);
 		for ( ; first != last ; ++first )
 		{
-			CObject* pt = pts->getValue(first);
+			CObject* pt = pts->getValueAtPos(first);
 
 			attr = pt->getAttr("x");
 			if (attr && attr->isNumber()) {	points->VPoints[first].x = static_cast<float>(attr->toNumber()); 	}
@@ -1093,7 +1093,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 	CObject* weight = action->getAttr("Weight");
 	if(weight)
 	{
-		uint32 w = (int)weight->toNumber();
+		uint32 w = (int)weight->toInteger();
 		std::string weightStr = toString(w);
 		pAction->addPropertyByName("Weight", new CPropertyString(weightStr));
 	}
@@ -1103,7 +1103,7 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 	uint32 nb =children->getSize();
 	for(uint32 i=0;i<nb;++i)
 	{
-		IPrimitive* tmp=getAction(children->getValue(i), prefix,scenarioId);
+		IPrimitive* tmp=getAction(children->getValueAtPos(i), prefix,scenarioId);
 		if (!tmp)
 		{
 			nlwarning("Error in action %s nb: %u", action->toString("Name").c_str(), i);
@@ -1381,7 +1381,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 	animSession->Acts[actId] = rtAct;
 
-	if ( act->isNumber("LocationId")
+	if ( act->isInteger("LocationId")
 		&& act->isString("Name")
 		&& act->isString("ActDescription")
 		&& act->isString("PreActDescription")
@@ -1390,7 +1390,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		rtAct->Name = act->toString("Name");
 		rtAct->ActDescription = act->toString("ActDescription");
 		rtAct->PreActDescription = act->toString("PreActDescription");
-		rtAct->LocationId = static_cast<uint32>(act->toNumber("LocationId"));
+		rtAct->LocationId = static_cast<uint32>(act->toInteger("LocationId"));
 	}
 	else
 	{
@@ -1466,7 +1466,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 	for ( ; firstAiState != lastAiState ; ++firstAiState)
 	{
-		CObject*  aiState = aiStates->getValue(firstAiState);
+		CObject*  aiState = aiStates->getValueAtPos(firstAiState);
 
 		std::string aiMovement = aiState->toString("AiMovement");
 
@@ -1508,9 +1508,9 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		a2pAiState.setAttributeAsStringArray("Keywords", "keywords");
 
 		bool isTriggerZone = false;
-		if ( aiState->isNumber("IsTriggerZone") )
+		if ( aiState->isInteger("IsTriggerZone") )
 		{
-			isTriggerZone = static_cast<uint32>(aiState->toNumber("IsTriggerZone")) == 1;
+			isTriggerZone = aiState->toInteger("IsTriggerZone") == 1;
 		}
 		if (isTriggerZone)
 		{
@@ -1532,7 +1532,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		uint32 firstChild(0), lastChild(children->getSize());
 		for ( ; firstChild != lastChild ; ++firstChild)
 		{
-			CObject* childName = children->getValue(firstChild);
+			CObject* childName = children->getValueAtPos(firstChild);
 			CObject* component = components.find(childName->toString());
 
 
@@ -1550,7 +1550,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 
 			npc_group->addPropertyByName("name", new CPropertyString(prefix+component->toString("Id")));
 			npc_group->addPropertyByName("ai_type", new CPropertyString("GROUP_NPC"));	// AJM
-			if (component->isNumber("AutoSpawn") && component->toNumber("AutoSpawn")==0)
+			if (component->isInteger("AutoSpawn") && component->toInteger("AutoSpawn")==0)
 			{
 				npc_group->addPropertyByName("autoSpawn", new CPropertyString("false"));
 			}
@@ -1597,7 +1597,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 			uint32 firstNpc(0), lastNpc(npcChild->getSize());
 			for ( ; firstNpc != lastNpc ; ++firstNpc)
 			{
-				CObject* objectNpcId = npcChild->getValue(firstNpc);
+				CObject* objectNpcId = npcChild->getValueAtPos(firstNpc);
 				std::string npcId ( objectNpcId->toString() );
 				CObject* objectNpc = components.find(npcId);
 
@@ -1740,9 +1740,9 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 				npc_bot->insertChild(npc_bot_alias);
 //				nlinfo("R2Anim: Bot %u %s", npc_bot_alias->getFullAlias(), std::string(prefix+objectNpc->toString("Id")).c_str());
 				uint32 dmProperty = 0;
-				if (objectNpc->isNumber("DmProperty"))
+				if (objectNpc->isInteger("DmProperty"))
 				{
-					dmProperty = static_cast< uint32 > (objectNpc->toNumber("DmProperty"));
+					dmProperty = static_cast< uint32 > (objectNpc->toInteger("DmProperty"));
 				}
 				CRtNpc* rtNpc =  new CRtNpc(npc_bot_alias->getFullAlias(), objectNpc, npc_group_alias->getFullAlias(), dmProperty);
 
@@ -1760,19 +1760,19 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 	for(;firstEvent!=lastEvent;++firstEvent)
 	{
 		//create the primitive event and its associated actions
-		IPrimitive* pEvent = getEvent(events->getValue(firstEvent), components, prefix, animSession->SessionId);
+		IPrimitive* pEvent = getEvent(events->getValueAtPos(firstEvent), components, prefix, animSession->SessionId);
 		if (!pEvent)
 		{
 			nlwarning("Error while generating primitive");
 			return false;
 		}
 		//insert the primitive event
-		CObject* eventObject = events->getValue(firstEvent);
+		CObject* eventObject = events->getValueAtPos(firstEvent);
 
 		bool isTriggerZone = false;
-		if ( eventObject->isNumber("IsTriggerZone") )
+		if ( eventObject->isInteger("IsTriggerZone") )
 		{
-			isTriggerZone = static_cast<uint32>(eventObject->toNumber("IsTriggerZone")) == 1;
+			isTriggerZone = static_cast<uint32>(eventObject->toInteger("IsTriggerZone")) == 1;
 		}
 		if (isTriggerZone)
 		{
@@ -1788,7 +1788,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 	CObject *weatherValue = act->getAttr("WeatherValue");
 	if (weatherValue)
 	{
-		animSession->Acts[actId]->WeatherValue = (uint16) weatherValue->toNumber();
+		animSession->Acts[actId]->WeatherValue = (uint16) weatherValue->toInteger();
 	}
 
 
@@ -1806,7 +1806,7 @@ bool CServerAnimationModule::translateActToPrimitive(CInstanceMap& components, C
 		uint32 firstnode = 0;
 		for (; firstnode != lastnode; ++firstnode)
 		{
-			CObject* node = tree->getValue(firstnode);
+			CObject* node = tree->getValueAtPos(firstnode);
 			if (!node
 				|| !node->isTable()
 				|| !node->isString("Name")
@@ -1898,10 +1898,10 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	uint32 firstPlotItem = 0;
 	for (; firstPlotItem != lastPlotItem; ++firstPlotItem)
 	{
-		CObject* plotItem = plotItems->getValue(firstPlotItem);
+		CObject* plotItem = plotItems->getValueAtPos(firstPlotItem);
 		if (!plotItem
 			|| !plotItem->isTable()
-			|| !plotItem->isNumber("SheetId")
+			|| !plotItem->isInteger("SheetId")
 			|| !plotItem->isString("Name")
 			|| !plotItem->isString("Description")
 			|| !plotItem->isString("Comment")
@@ -1911,7 +1911,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			return false;
 		}
 
-		uint32 sheetIdAsInt = static_cast<uint32>(plotItem->toNumber("SheetId"));
+		uint32 sheetIdAsInt = static_cast<uint32>(plotItem->toInteger("SheetId"));
 		CSheetId plotItemSheetId( sheetIdAsInt );
 
 
@@ -1955,10 +1955,10 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		uint32 firstLocation = 0;
 		for (; firstLocation != lastLocation; ++firstLocation)
 		{
-			CObject* location = locations->getValue(firstLocation);
+			CObject* location = locations->getValueAtPos(firstLocation);
 			if (!location
 				|| !location->isTable()
-				|| !location->isNumber("Season")
+				|| !location->isInteger("Season")
 				|| !location->isString("Island")
 				|| !location->isString("EntryPoint")
 
@@ -1969,7 +1969,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 			}
 
 			CRtLocation locationItem;
-			locationItem.Season = static_cast<uint8>(location->toNumber("Season"));
+			locationItem.Season = static_cast<uint8>(location->toInteger("Season"));
 			locationItem.Island = location->toString("Island");
 			locationItem.EntryPoint = location->toString("EntryPoint");
 			animSession->Locations.push_back(locationItem);
@@ -1991,7 +1991,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	for (; firstAct != lastAct ; ++firstAct)
 	{
 		//std::string key = acts->getKey(firstAct);
-		CObject* act= acts->getValue(firstAct);
+		CObject* act= acts->getValueAtPos(firstAct);
 		if (!act)
 		{
 			nlwarning("R2An: Can't make animation session, invalid RtAct");
@@ -2039,7 +2039,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 		{
 			string tmp = toString("r2.%04u.act%u.pdr.xml", sessionId.asInt(), first);
 			nldebug( "writing xml pdr file %s", tmp.c_str() );
-			animSession->Pdrs[first].writeToTxtFile( tmp.c_str() );
+			animSession->Pdrs[first].writeToTxtFile( tmp );
 		}
 	}
 
@@ -3697,7 +3697,7 @@ IPrimitive* CServerAnimationModule::getEvent(CObject* event,CInstanceMap& compon
 	//for each action of this event
 	for(;firstAction!=lastAction;++firstAction)
 	{
-		CObject * action_id = actions_id->getValue(firstAction);
+		CObject * action_id = actions_id->getValueAtPos(firstAction);
 		std::string id = action_id->toString();
 		CObject* action=components.find(id); // can be null?
 		if (!action)
@@ -3770,7 +3770,7 @@ void CServerAnimationModule::requestLoadTable(CAnimationSession* session)
 			msg.serial(size);
 			for(uint32 i=0;i<size;++i)
 			{
-				CObject* entry = textsTable->getValue(i);
+				CObject* entry = textsTable->getValueAtPos(i);
 				std::string tmp = entry->getAttr("Id")->toString();
 				msg.serial(tmp);
 				tmp = entry->getAttr("Text")->toString();

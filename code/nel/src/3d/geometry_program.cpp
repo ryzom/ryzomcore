@@ -23,9 +23,9 @@
 
 #include "std3d.h"
 
-#include <nel/3d/geometry_program.h>
+#include "nel/3d/geometry_program.h"
 
-#include <nel/3d/driver.h>
+#include "nel/3d/driver.h"
 
 namespace NL3D 
 {

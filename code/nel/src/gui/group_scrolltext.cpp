@@ -40,8 +40,11 @@ namespace NLGUI
 											_Settuped(false),
 											_InvertScrollBar(true),
 											_ListHeight(0),
+											_Scrolling(false),
+											_ScrollDistance(0),
+											_ClockMsgEventRegistered(false),
 											_StartHeight(0),
-											_EllapsedTime(0)										
+											_EllapsedTime(0)
 	{
 		_IsGroupScrollText = true;
 	}
@@ -166,16 +169,61 @@ namespace NLGUI
 				{
 					if (isIn(eventDesc.getX(), eventDesc.getY()))
 					{
-						sint32 h = _List->getMaxHReal() / 2;
+						// limit scroll to 100px with single wheel event
+						sint32 h = std::min(100, _List->getMaxHReal() / 2);
 						if (h == 0) h = 1;
-						_ScrollBar->moveTargetY(- eventDesc.getWheel() * h);
+
+						smoothScrollY(- eventDesc.getWheel() * h);
 						return true;
 					}
 				}
 			}
 		}
+
+		if (event.getType() == NLGUI::CEventDescriptor::system)
+		{
+			if (_Scrolling && _ScrollBar)
+			{
+				float dy = _ScrollDistance / 4;
+				if ((sint32) dy != 0)
+				{
+					_ScrollBar->moveTargetY(dy);
+					_ScrollDistance -= dy;
+				}
+				else
+				{
+					_Scrolling = false;
+					if (_ClockMsgEventRegistered)
+					{
+						_ClockMsgEventRegistered = false;
+						CWidgetManager::getInstance()->unregisterClockMsgTarget(this);
+					}
+				}
+			}
+		}
+
 		if (CInterfaceGroup::handleEvent(event)) return true;
 		return false;
+	}
+
+	//========================================================================
+	void CGroupScrollText::smoothScrollY(sint32 dy)
+	{
+		if (!_Scrolling)
+		{
+			_Scrolling = true;
+			_ScrollDistance = 0;
+
+			// register for clock tick event if not already done
+			CWidgetManager *pWM = CWidgetManager::getInstance();
+			if (!pWM->isClockMsgTarget(this))
+			{
+				pWM->registerClockMsgTarget(this);
+				_ClockMsgEventRegistered = true;
+			}
+		}
+
+		_ScrollDistance += dy;
 	}
 
 	//========================================================================

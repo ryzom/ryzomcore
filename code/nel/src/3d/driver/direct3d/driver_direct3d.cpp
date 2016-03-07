@@ -1243,23 +1243,23 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 
 	createCursors();
 
+	_WindowClass = "NLD3D" + toString(windowIcon);
+
 	// Register a window class
-	WNDCLASSW		wc;
+	WNDCLASSA		wc;
 
 	memset(&wc,0,sizeof(wc));
 	wc.style			= 0; // CS_HREDRAW | CS_VREDRAW ;//| CS_DBLCLKS;
 	wc.lpfnWndProc		= (WNDPROC)WndProc;
 	wc.cbClsExtra		= 0;
 	wc.cbWndExtra		= 0;
-	wc.hInstance		= GetModuleHandleW(NULL);
+	wc.hInstance		= GetModuleHandleA(NULL);
 	wc.hIcon			= (HICON)windowIcon;
 	wc.hCursor			= _DefaultCursor;
 	wc.hbrBackground	= WHITE_BRUSH;
-	_WindowClass = "NLD3D" + toString(windowIcon);
-	ucstring us = _WindowClass;
-	wc.lpszClassName	= (LPCWSTR)us.c_str();
+	wc.lpszClassName	= _WindowClass.c_str();
 	wc.lpszMenuName		= NULL;
-	if (!RegisterClassW(&wc))
+	if (!RegisterClassA(&wc))
 	{
 		DWORD error = GetLastError();
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
@@ -1806,7 +1806,7 @@ emptyProc CDriverD3D::getWindowProc()
 
 IDriver::TMessageBoxId CDriverD3D::systemMessageBox (const char* message, const char* title, TMessageBoxType type, TMessageBoxIcon icon)
 {
-	switch (::MessageBox (_HWnd, message, title, ((type==retryCancelType)?MB_RETRYCANCEL:
+	switch (::MessageBoxW (_HWnd, utf8ToWide(message), utf8ToWide(title), ((type==retryCancelType)?MB_RETRYCANCEL:
 		(type==yesNoCancelType)?MB_YESNOCANCEL:
 		(type==okCancelType)?MB_OKCANCEL:
 		(type==abortRetryIgnoreType)?MB_ABORTRETRYIGNORE:
@@ -1912,7 +1912,7 @@ bool CDriverD3D::clear2D(CRGBA rgba)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_TARGET, NL_D3DCOLOR_RGBA(rgba), 1.0f, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 	return result;
 }
@@ -1931,7 +1931,7 @@ bool CDriverD3D::clearZBuffer(float zval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_ARGB(0,0,0,0), zval, 0 ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	// NVidia driver 56.72 needs to reset the vertex buffer after a clear Z
@@ -1954,7 +1954,7 @@ bool CDriverD3D::clearStencilBuffer(sint stencilval)
 
 	bool result = _DeviceInterface->Clear( 0, NULL, D3DCLEAR_STENCIL, D3DCOLOR_ARGB(0,0,0,0), 1.0f, (unsigned long)stencilval ) == D3D_OK;
 
-	// Restaure the old viewport
+	// Restore the old viewport
 	setupViewport (oldViewport);
 
 	return result;
@@ -2099,6 +2099,24 @@ void CDriverD3D::setAnisotropicFilter(sint filter)
 	{
 		_AnisotropicFilter = filter;
 	}
+}
+
+// ***************************************************************************
+
+uint CDriverD3D::getAnisotropicFilter() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilter);
+
+	return _AnisotropicFilter;
+}
+
+// ***************************************************************************
+
+uint CDriverD3D::getAnisotropicFilterMaximum() const
+{
+	H_AUTO_D3D(CDriverD3D_getAnisotropicFilterMaximum);
+
+	return _MaxAnisotropy;
 }
 
 // ***************************************************************************
@@ -2309,13 +2327,13 @@ void CDriverD3D::setWindowIcon(const std::vector<NLMISC::CBitmap> &bitmaps)
 
 	if (winIconBig)
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconBig);
 	}
 	else
 	{
-		SendMessage(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
-		SendMessage(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 0 /* ICON_SMALL */, (LPARAM)winIconSmall);
+		SendMessageA(_HWnd, WM_SETICON, 1 /* ICON_BIG */, (LPARAM)winIconSmall);
 	}
 }
 
@@ -2363,6 +2381,7 @@ bool CDriverD3D::getAdapter(uint adapter, IDriver::CAdapter &desc) const
 			desc.Revision = identifier.Revision;
 			desc.SubSysId = identifier.SubSysId;
 			desc.VendorId = identifier.VendorId;
+			desc.VideoMemory = _Adapter == _adapter ? getTotalVideoMemory():-1;
 			return true;
 		}
 	}
@@ -2526,7 +2545,7 @@ bool CDriverD3D::reset (const GfxMode& mode)
 	_CurrentMaterial = NULL;
 	_CurrentMaterialInfo = NULL;
 
-	// Restaure non managed vertex buffer in system memory
+	// Restore non managed vertex buffer in system memory
 	ItVBDrvInfoPtrList iteVb = _VBDrvInfos.begin();
 	while (iteVb != _VBDrvInfos.end())
 	{
@@ -2852,6 +2871,17 @@ const char *CDriverD3D::getVideocardInformation ()
 	}
 	else
 		return "Can't get video card information";
+}
+
+// ***************************************************************************
+
+sint CDriverD3D::getTotalVideoMemory () const
+{
+	H_AUTO_D3D(CDriverD3D_getTotalVideoMemory);
+
+	// Can't use _DeviceInterface->GetAvailableTextureMem() because it's not reliable
+	// Returns 4 GiB instead of 2 with my GPU
+	return -1;
 }
 
 // ***************************************************************************

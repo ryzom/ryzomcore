@@ -23,22 +23,12 @@ CSysInfoOpenGLWidget::CSysInfoOpenGLWidget( QWidget *parent ) :
 	QWidget( parent )
 {
 	setupUi( this );
-	vendorLabel->setText( CSystem::GetInstance().openglInfo.vendor.c_str() );
-	rendererLabel->setText( CSystem::GetInstance().openglInfo.renderer.c_str() );
-	versionLabel->setText( CSystem::GetInstance().openglInfo.driverVersion.c_str() );
-	extensionsBox->setPlainText( CSystem::GetInstance().openglInfo.extensions.c_str() );
-
+	vendorLabel->setText(QString::fromUtf8(CSystem::GetInstance().openglInfo.vendor.c_str()));
+	rendererLabel->setText(QString::fromUtf8( CSystem::GetInstance().openglInfo.renderer.c_str()));
+	versionLabel->setText(QString::fromUtf8( CSystem::GetInstance().openglInfo.driverVersion.c_str()));
+	extensionsBox->setPlainText(QString::fromUtf8( CSystem::GetInstance().openglInfo.extensions.c_str()));
 }
 
 CSysInfoOpenGLWidget::~CSysInfoOpenGLWidget()
 {
-}
-
-void CSysInfoOpenGLWidget::changeEvent( QEvent *event )
-{
-	if( event->type() == QEvent::LanguageChange )
-	{
-		retranslateUi( this );
-	}
-	QWidget::changeEvent( event );
 }

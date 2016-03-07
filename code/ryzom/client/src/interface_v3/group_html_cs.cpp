@@ -70,7 +70,7 @@ void CGroupHTMLCS::addHTTPGetParams (string &url, bool /*trustedDomain*/)
 
 // ***************************************************************************
 
-void CGroupHTMLCS::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDomain*/)
+void CGroupHTMLCS::addHTTPPostParams (SFormFields &formfields, bool /*trustedDomain*/)
 {
 	std::vector<CParameter> parameters;
 	getParameters (parameters, false);
@@ -78,7 +78,7 @@ void CGroupHTMLCS::addHTTPPostParams (HTAssocList *formfields, bool /*trustedDom
 	uint i;
 	for (i=0; i<parameters.size(); i++)
 	{
-		HTParseFormInput(formfields, (parameters[i].Name+"="+parameters[i].Value).c_str());
+		formfields.add(parameters[i].Name, parameters[i].Value);
 	}
 }
 

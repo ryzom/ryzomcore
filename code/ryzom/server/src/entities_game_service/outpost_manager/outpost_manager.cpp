@@ -428,9 +428,9 @@ void COutpostManager::loadOutpostSaveFiles()
 //			else
 //			{
 //				// load dynamic data
-//				static CPersistentDataRecord	pdr;
+//				static CPersistentDataRecord pdr;
 //				pdr.clear();
-//				pdr.readFromBinFile(files[i].c_str());
+//				pdr.readFromBinFile(files[i]);
 //				outpost->apply( pdr );
 //				loadedOutposts.push_back( outpost );
 //			}
@@ -808,7 +808,7 @@ void COutpostManager::saveOutpost(NLMISC::CSmartPtr<COutpost> outpost)
 	else
 	{
 		H_AUTO( COutpostManagerSTORE_NO_BS )
-		pdr.writeToBinFile((Bsi.getLocalPath() + fileName).c_str());
+		pdr.writeToBinFile(Bsi.getLocalPath() + fileName);
 	}
 }
 

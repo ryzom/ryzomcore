@@ -666,12 +666,35 @@ bool screenshotZBuffer(const std::string &filename)
 	return true;
 }
 
+static std::string findNewScreenShotFileName(std::string filename)
+{
+	static char cstime[25];
+	time_t dtime;
+	time(&dtime);
+	struct tm *tms = localtime(&dtime);
+	if (tms)
+	{
+		strftime(cstime, 25, "%Y-%m-%d", tms);
+
+		std::string::size_type pos = filename.find_last_of('.');
+
+		// fallback if no extension is given
+		if (pos == std::string::npos)
+			filename = filename + "_" + cstime + "_";
+		else
+			filename = filename.substr(0, pos) + "_" + cstime + "_" + filename.substr(pos);
+	}
+
+	// screenshot_YYYY-MM-DD_000.jpg
+	return CFile::findNewFile(filename);
+}
+
 void screenShotTGA()
 {
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.tga");
+	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.tga");
 	COFile fs(filename);
 
 	if (!btm.writeTGA(fs, 24, false))
@@ -693,7 +716,7 @@ void screenShotPNG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.png");
+	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.png");
 	COFile fs(filename);
 
 	if (!btm.writePNG(fs, 24))
@@ -715,7 +738,7 @@ void screenShotJPG()
 	CBitmap btm;
 	getBuffer (btm);
 
-	string filename = CFile::findNewFile (ScreenshotsDirectory+"screenshot.jpg");
+	string filename = findNewScreenShotFileName(ScreenshotsDirectory+"screenshot.jpg");
 	COFile fs(filename);
 
 	if (!btm.writeJPG(fs))

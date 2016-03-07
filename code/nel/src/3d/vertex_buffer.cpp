@@ -166,7 +166,7 @@ CVertexBuffer::~CVertexBuffer()
 	 * ***********************************************/
 
 	if (DrvInfos)
-		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restaure memory when it will die
+		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -302,7 +302,7 @@ bool CVertexBuffer::setVertexFormat(uint32 flags)
 	initEx ();
 
 	// Force non resident
-	restaureNonResidentMemory();
+	restoreNonResidentMemory();
 
 	return (true);
 }
@@ -468,7 +468,7 @@ void CVertexBuffer::initEx ()
 		_Capacity = 0;
 
 	// Force non resident
-	restaureNonResidentMemory();
+	restoreNonResidentMemory();
 }
 
 // --------------------------------------------------
@@ -482,7 +482,7 @@ void CVertexBuffer::reserve(uint32 n)
 		_NbVerts=std::min (_NbVerts,_Capacity);
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -518,7 +518,7 @@ void	CVertexBuffer::deleteAllVertices()
 		}
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 
 		// Delete driver info
 		nlassert (DrvInfos == NULL);
@@ -725,7 +725,7 @@ void		CVertexBuffer::serialOldV1Minus(NLMISC::IStream &f, sint ver)
 	if(f.isReading())
 	{
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -979,7 +979,7 @@ void		CVertexBuffer::serialSubset(NLMISC::IStream &f, uint vertexStart, uint ver
 	if(f.isReading())
 	{
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -1029,7 +1029,7 @@ bool CVertexBuffer::setVertexColorFormat (TVertexColorType format)
 		_VertexColorFormat = (uint8)format;
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 	return true;
 }
@@ -1044,7 +1044,7 @@ void CVertexBuffer::setPreferredMemory (TPreferredMemory preferredMemory, bool k
 		_KeepLocalMemory = keepLocalMemory;
 
 		// Force non resident
-		restaureNonResidentMemory();
+		restoreNonResidentMemory();
 	}
 }
 
@@ -1110,12 +1110,12 @@ void CVertexBuffer::setLocation (TLocation newLocation)
 }
 
 // --------------------------------------------------
-void CVertexBuffer::restaureNonResidentMemory()
+void CVertexBuffer::restoreNonResidentMemory()
 {
 	setLocation (NotResident);
 
 	if (DrvInfos)
-		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restaure memory when it will die
+		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();

@@ -17,10 +17,6 @@
 #ifndef TILE_ROTATIONDLG_H
 #define TILE_ROTATIONDLG_H
 
-
-#include <QtGui/QtGui>
-#include <QtGui/QDialog>
-#include <QtGui/QButtonGroup>
 #include "ui_tile_rotation_qt.h"
 
 class CTile_rotation_dlg : public QDialog

@@ -190,8 +190,9 @@ public:
 
 		TParamInfo(const std::string &name, STRING_MANAGER::TParamType type, const std::string &compilerParam = "")
 			: ParamName(name),
-			ParamType(type),
-			CompilerParam(compilerParam)
+			CompilerParam(compilerParam),
+			ParamType(type)
+			
 		{
 		}
 	};
@@ -328,7 +329,7 @@ private:
 	std::string genPreRequisites();
 
 	// forbidden copy constructor !
-	CMissionData(const CMissionData &other)
+	CMissionData(const CMissionData &other):NLMISC::CRefCount()
 	{
 		nlstop;
 	}
@@ -388,6 +389,8 @@ private:
 	std::string					_ReqGrade;
 	std::string					_ReqTeamSize;
 	std::vector<std::string>	_ReqBrick;
+	std::string					_ReqCharacterAge;
+	std::string					_ReqMaxPlayerID;
 	std::string					_ReqSeason;
 //	bool						_ReqEncycloTasksDone;
 	std::string					_ReqEncyclo;

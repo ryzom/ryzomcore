@@ -34,6 +34,11 @@
 #		include <cpuid.h>
 #		define nlcpuid(regs, idx) __cpuid(idx, regs[0], regs[1], regs[2], regs[3])
 #	endif // NL_CPU_INTEL
+#	ifdef NL_OS_MAC
+#		include <sys/mount.h>
+#	else
+#		include <sys/vfs.h>
+#	endif
 #endif // NL_OS_WINDOWS
 
 #include "nel/misc/system_info.h"
@@ -185,11 +190,12 @@ string CSystemInfo::getOS()
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 	typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+	typedef LONG (WINAPI* pRtlGetVersion)(OSVERSIONINFOEXA*);
 
 	SYSTEM_INFO si;
 	PGNSI pGNSI;
 	PGPI pGPI;
-	OSVERSIONINFOEX osvi;
+	OSVERSIONINFOEXA osvi;
 	BOOL bOsVersionInfoEx;
 	const int BUFSIZE = 80;
 
@@ -197,15 +203,26 @@ string CSystemInfo::getOS()
 	// If that fails, try using the OSVERSIONINFO structure.
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
-	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	ZeroMemory(&osvi, sizeof(osvi));
+	osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-	bOsVersionInfoEx = GetVersionExA ((OSVERSIONINFO *) &osvi);
+	HMODULE hNtDll = GetModuleHandleA("ntdll.dll");
+	pRtlGetVersion RtlGetVersion = (pRtlGetVersion)GetProcAddress(hNtDll, "RtlGetVersion");
+ 
+	if (RtlGetVersion)
+	{
+		bOsVersionInfoEx = RtlGetVersion(&osvi) == 0;
+	}
 
 	if(!bOsVersionInfoEx)
 	{
-		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-		if (! GetVersionExA ( (OSVERSIONINFO *) &osvi) )
+		bOsVersionInfoEx = GetVersionExA ((OSVERSIONINFOA *) &osvi);
+	}
+
+	if(!bOsVersionInfoEx)
+	{
+		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
+		if (! GetVersionExA ( (OSVERSIONINFOA *) &osvi) )
 			return OSString+" Can't GetVersionEx()";
 	}
 
@@ -223,13 +240,24 @@ string CSystemInfo::getOS()
 	{
 		OSString = "Microsoft";
 
-		if ( osvi.dwMajorVersion > 6 )
+		if ( osvi.dwMajorVersion > 10 )
 		{
 			OSString += " Windows (not released)";
 		}
+		else if ( osvi.dwMajorVersion == 10 )
+		{
+			OSString += " Windows 10";
+		}
 		else if ( osvi.dwMajorVersion == 6 )
 		{
-			if ( osvi.dwMinorVersion == 2 )
+			if ( osvi.dwMinorVersion == 3 )
+			{
+				if( osvi.wProductType == VER_NT_WORKSTATION )
+					OSString += " Windows 8.1";
+				else
+					OSString += " Windows Server 2012 R2";
+			}
+			else if ( osvi.dwMinorVersion == 2 )
 			{
 				if( osvi.wProductType == VER_NT_WORKSTATION )
 					OSString += " Windows 8";
@@ -610,7 +638,7 @@ string CSystemInfo::getOS()
 			else  // Test for specific product on Windows NT 4.0 SP5 and earlier
 			{
 				HKEY hKey;
-				TCHAR szProductType[BUFSIZE];
+				char szProductType[BUFSIZE];
 				DWORD dwBufLen=BUFSIZE;
 				LONG lRet;
 
@@ -624,18 +652,18 @@ string CSystemInfo::getOS()
 
 				RegCloseKey( hKey );
 
-				if ( lstrcmpi( _T("WINNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "WINNT", szProductType) == 0 )
 					OSString += " Workstation";
-				if ( lstrcmpi( _T("LANMANNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "LANMANNT", szProductType) == 0 )
 					OSString += " Server";
-				if ( lstrcmpi( _T("SERVERNT"), szProductType) == 0 )
+				if ( lstrcmpiA( "SERVERNT", szProductType) == 0 )
 					OSString += " Advanced Server";
 			}
 		}
 
 		std::string servicePack;
 
-		if( osvi.dwMajorVersion == 4 && lstrcmpi( osvi.szCSDVersion, _T("Service Pack 6") ) == 0 )
+		if (osvi.dwMajorVersion == 4 && lstrcmpiA(osvi.szCSDVersion, "Service Pack 6") == 0 )
 		{
 			HKEY hKey;
 			LONG lRet;
@@ -740,7 +768,7 @@ string CSystemInfo::getProc ()
 	{
 		// get processor name
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("ProcessorNameString"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "ProcessorNameString", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString = value;
 		else
@@ -750,7 +778,7 @@ string CSystemInfo::getProc ()
 
 		// get processor identifier
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("Identifier"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "Identifier", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString += value;
 		else
@@ -760,7 +788,7 @@ string CSystemInfo::getProc ()
 
 		// get processor vendor
 		valueSize = 1024;
-		result = ::RegQueryValueEx (hKey, _T("VendorIdentifier"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "VendorIdentifier", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 			ProcString += value;
 		else
@@ -769,7 +797,7 @@ string CSystemInfo::getProc ()
 		ProcString += " / ";
 
 		// get processor frequency
-		result = ::RegQueryValueEx (hKey, _T("~MHz"), NULL, NULL, (LPBYTE)value, &valueSize);
+		result = ::RegQueryValueExA (hKey, "~MHz", NULL, NULL, (LPBYTE)value, &valueSize);
 		if (result == ERROR_SUCCESS)
 		{
 			uint32 freq = *(int *)value;
@@ -927,19 +955,8 @@ static bool DetectSSE()
 			// check OS support for SSE
 			try
 			{
-				#ifdef NL_OS_WINDOWS
-				#ifdef NL_NO_ASM
 				unsigned int tmp = _mm_getcsr();
 				nlunreferenced(tmp);
-				#else
-				__asm
-				{
-					xorps xmm0, xmm0  // Streaming SIMD Extension
-				}
-				#endif // NL_NO_ASM
-				#elif NL_OS_UNIX
-					__asm__ __volatile__ ("xorps %xmm0, %xmm0;");
-				#endif // NL_OS_UNIX
 			}
 			catch(...)
 			{
@@ -961,74 +978,10 @@ bool CSystemInfo::_HaveSSE = DetectSSE ();
 bool CSystemInfo::hasCPUID ()
 {
 	#ifdef NL_CPU_INTEL
-		 uint32 result = 0;
-		#ifdef NL_OS_WINDOWS
-		#ifdef NL_NO_ASM
-			sint32 CPUInfo[4] = {-1};
-			nlcpuid(CPUInfo, 0);
-			if (CPUInfo[3] != -1) result = 1;
-		#else
-		 __asm
-		 {
-			 pushad
-			 pushfd
-			 //	 If ID bit of EFLAGS can change, then cpuid is available
-			 pushfd
-			 pop  eax					// Get EFLAG
-			 mov  ecx,eax
-			 xor  eax,0x200000			// Flip ID bit
-			 push eax
-			 popfd						// Write EFLAGS
-			 pushfd
-			 pop  eax					// read back EFLAG
-			 xor  eax,ecx
-			 je   noCpuid				// no flip -> no CPUID instr.
-
-			 popfd						// restore state
-			 popad
-			 mov  result, 1
-			 jmp  CPUIDPresent
-
-			noCpuid:
-			 popfd					    // restore state
-			 popad
-			 mov result, 0
-			CPUIDPresent:
-		 }
-		#endif // NL_NO_ASM
-		#elif NL_OS_UNIX // NL_OS_WINDOWS
-			__asm__ __volatile__ (
-				/* Save Register */
-				"pushl  %%ebp;"
-				"pushl  %%ebx;"
-				"pushl  %%edx;"
-
-				/* Check if this CPU supports cpuid */
-				"pushf;"
-				"pushf;"
-				"popl   %%eax;"
-				"movl   %%eax, %%ebx;"
-				"xorl   $(1 << 21), %%eax;"	// CPUID bit
-				"pushl  %%eax;"
-				"popf;"
-				"pushf;"
-				"popl   %%eax;"
-				"popf;"                  	// Restore flags
-				"xorl   %%ebx, %%eax;"
-				"jz     NoCPUID;"
-				"movl   $1, %0;"
-				"jmp    CPUID;"
-
-			"NoCPUID:;"
-				"movl   $0, %0;"
-              		"CPUID:;"
-				"popl   %%edx;"
-				"popl   %%ebx;"
-				"popl   %%ebp;"
-
-				:"=a"(result)
-                	);
-		#endif // NL_OS_UNIX
+		uint32 result = 0;
+		sint32 CPUInfo[4] = {-1};
+		nlcpuid(CPUInfo, 0);
+		if (CPUInfo[3] != -1) result = 1;
 		return result == 1;
 	#else
 		return false;
@@ -1039,7 +992,7 @@ bool CSystemInfo::hasCPUID ()
 uint32 CSystemInfo::getCPUID()
 {
 #ifdef NL_CPU_INTEL
-	if(hasCPUID())
+	if (hasCPUID())
 	{
 		uint32 result = 0;
 		sint32 CPUInfo[4];
@@ -1095,49 +1048,24 @@ bool CSystemInfo::isNT()
 #endif
 }
 
-string CSystemInfo::availableHDSpace (const string &filename)
+uint64 CSystemInfo::availableHDSpace (const string &filename)
 {
+	std::string path = CFile::getPath(filename);
+
 #ifdef NL_OS_UNIX
-	string cmd = "df ";
-	if(filename.empty())
-		cmd += ".";
-	else
-		cmd += filename;
-	cmd += " >/tmp/nelhdfs";
-	sint error = system (cmd.c_str());
-	if (error)
-		nlwarning("'%s' failed with error code %d", cmd.c_str(), error);
+	struct stat stst;
+	struct statfs stfs;
 
-	int fd = open("/tmp/nelhdfs", O_RDONLY);
-	if (fd == -1)
-	{
-		return 0;
-	}
-	else
-	{
-		char buffer[4096+1];
-		int len = read(fd, buffer, sizeof(buffer)-1);
-		close(fd);
-		buffer[len] = '\0';
+	if (::stat(path.c_str(), &stst) == -1) return 0;
+	if (::statfs(path.c_str(), &stfs) == -1) return 0;
 
-		vector<string> splitted;
-		explode(string(buffer), string("\n"), splitted, true);
-
-		if(splitted.size() < 2)
-			return "NoInfo";
-
-		vector<string> sline;
-		explode(splitted[1], string(" "), sline, true);
-
-		if(sline.size() < 5)
-			return splitted[1];
-
-		string space = sline[3] + "000";
-		return bytesToHumanReadable(space);
-	}
+	return (uint64)(stfs.f_bavail * stst.st_blksize);
 #else
-	nlunreferenced(filename);
-	return "NoInfo";
+	ULARGE_INTEGER freeSpace = {0};
+	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);
+	if (!bRes) return 0;
+
+	return (uint64)freeSpace.QuadPart;
 #endif
 }
 
@@ -1419,6 +1347,7 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 						DWORD valueType;
 						char value[512];
 						DWORD size = 512;
+						string driverName;
 						if (RegQueryValueExA(baseKey, keyName.c_str(), NULL, &valueType, (unsigned char *)value, &size) == ERROR_SUCCESS)
 						{
 							// Null ?
@@ -1436,6 +1365,15 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 										{
 											if (value[0] != 0)
 											{
+												static const std::string s_systemRoot = "\\SystemRoot\\";
+
+												driverName = value;
+
+												if (driverName.substr(0, s_systemRoot.length()) == s_systemRoot)
+												{
+													driverName = driverName.substr(s_systemRoot.length());
+												}
+
 												ok = true;
 											}
 											else
@@ -1449,19 +1387,18 @@ bool CSystemInfo::getVideoInfo (std::string &deviceName, uint64 &driverVersion)
 								}
 
 								// Version dll link
-								HMODULE hmVersion = LoadLibrary (_T("version"));
+								HMODULE hmVersion = LoadLibraryA ("version.dll");
 								if (hmVersion)
 								{
-									BOOL (WINAPI* _GetFileVersionInfo)(LPTSTR, DWORD, DWORD, LPVOID) = NULL;
-									DWORD (WINAPI* _GetFileVersionInfoSize)(LPTSTR, LPDWORD) = NULL;
-									BOOL (WINAPI* _VerQueryValue)(const LPVOID, LPTSTR, LPVOID*, PUINT) = NULL;
+									BOOL (WINAPI* _GetFileVersionInfo)(LPSTR, DWORD, DWORD, LPVOID) = NULL;
+									DWORD (WINAPI* _GetFileVersionInfoSize)(LPSTR, LPDWORD) = NULL;
+									BOOL (WINAPI* _VerQueryValue)(const LPVOID, LPSTR, LPVOID*, PUINT) = NULL;
 									*(FARPROC*)&_GetFileVersionInfo = GetProcAddress(hmVersion, "GetFileVersionInfoA");
 									*(FARPROC*)&_GetFileVersionInfoSize = GetProcAddress(hmVersion, "GetFileVersionInfoSizeA");
 									*(FARPROC*)&_VerQueryValue = GetProcAddress(hmVersion, "VerQueryValueA");
 									if (_VerQueryValue && _GetFileVersionInfoSize && _GetFileVersionInfo)
 									{
 										// value got the path to the driver
-										string driverName = value;
 										if (atleastNT4)
 										{
 											nlverify (GetWindowsDirectoryA(value, 512) != 0);

@@ -27,8 +27,87 @@
 #ifdef NL_OS_WINDOWS
 #	include <winsock2.h>
 #	include <ws2tcpip.h>
+#	include <ws2ipdef.h>
 // for Windows 2000 compatibility
 #	include <wspiapi.h>
+
+#if !defined(NTDDI_VISTA) || (NTDDI_VERSION < NTDDI_VISTA)
+
+// inet_pton and inet_ntop not defined in winsock DLL before Vista
+
+// taken from http://stackoverflow.com/questions/13731243/what-is-the-windows-xp-equivalent-of-inet-pton-or-inetpton
+int inet_pton(int af, const char *src, void *dst)
+{
+	struct sockaddr_storage ss;
+	int size = sizeof(ss);
+	char src_copy[INET6_ADDRSTRLEN+1];
+
+	ZeroMemory(&ss, sizeof(ss));
+	// stupid non-const API
+	strncpy (src_copy, src, INET6_ADDRSTRLEN+1);
+	src_copy[INET6_ADDRSTRLEN] = 0;
+
+	if (WSAStringToAddress(src_copy, af, NULL, (struct sockaddr *)&ss, &size) == 0)
+	{
+		switch(af)
+		{
+			case AF_INET:
+			*(struct in_addr *)dst = ((struct sockaddr_in *)&ss)->sin_addr;
+			return 1;
+
+			case AF_INET6:
+			*(struct in6_addr *)dst = ((struct sockaddr_in6 *)&ss)->sin6_addr;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
+{
+	struct sockaddr_storage ss;
+	unsigned long s = size;
+
+	ZeroMemory(&ss, sizeof(ss));
+	ss.ss_family = af;
+
+	switch(af)
+	{
+		case AF_INET:
+		((struct sockaddr_in *)&ss)->sin_addr = *(struct in_addr *)src;
+		break;
+
+		case AF_INET6:
+		((struct sockaddr_in6 *)&ss)->sin6_addr = *(struct in6_addr *)src;
+		break;
+
+		default:
+		return NULL;
+	}
+	
+	// cannot directly use &size because of strict aliasing rules
+	return WSAAddressToString((struct sockaddr *)&ss, sizeof(ss), NULL, dst, &s) == 0 ? dst : NULL;
+}
+
+BOOLEAN IN6_IS_ADDR_UNSPECIFIED(CONST IN6_ADDR *a)
+{
+    //
+    // We can't use the in6addr_any variable, since that would
+    // require existing callers to link with a specific library.
+    //
+    return (BOOLEAN)((a->s6_words[0] == 0) &&
+                     (a->s6_words[1] == 0) &&
+                     (a->s6_words[2] == 0) &&
+                     (a->s6_words[3] == 0) &&
+                     (a->s6_words[4] == 0) &&
+                     (a->s6_words[5] == 0) &&
+                     (a->s6_words[6] == 0) &&
+                     (a->s6_words[7] == 0));
+}
+
+#endif
+
 #elif defined NL_OS_UNIX
 #	include <unistd.h>
 #	include <sys/socket.h>
@@ -58,19 +137,31 @@ bool CInetAddress::RetrieveNames = false;
 CInetAddress::CInetAddress()
 {
 	init();
+
+	// IPv4
 	_SockAddr->sin_port = 0; // same as htons(0)
 	memset( &_SockAddr->sin_addr, 0, sizeof(in_addr) ); // same as htonl(INADDR_ANY)
+
+	// IPv6
+	_SockAddr6->sin6_port = 0;
+	memset( &_SockAddr6->sin6_addr, 0, sizeof(in6_addr) ); // same as htonl(INADDR_ANY)
 }
 
 
 /*
- * Constructor with ip address, port=0
+ * Constructor with IPv4 address, port=0
  */
 CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 {
 	init();
+
+	// IPv4
 	_SockAddr->sin_port = 0;
 	memcpy( &_SockAddr->sin_addr, ip, sizeof(in_addr) );
+
+	// invalid IPv6
+	_SockAddr6->sin6_port = 0;
+	memset( &_SockAddr6->sin6_addr, 0, sizeof(in6_addr) );
 
 	// get the host name to be displayed
 	if(hostname)
@@ -81,6 +172,36 @@ CInetAddress::CInetAddress( const in_addr *ip, const char *hostname )
 	{
 		updateHostName();
 	}
+
+	_Valid = true;
+}
+
+
+/*
+ * Constructor with IPv6 address, port=0
+ */
+CInetAddress::CInetAddress( const in6_addr *ip, const char *hostname )
+{
+	init();
+
+	// IPv6
+	_SockAddr6->sin6_port = 0;
+	memcpy( &_SockAddr6->sin6_addr, ip, sizeof(in6_addr) );
+
+	// invalid IPv4
+	_SockAddr->sin_port = 0;
+	memset( &_SockAddr->sin_addr, 0, sizeof(in_addr) );
+
+	// get the host name to be displayed
+	if(hostname)
+	{
+		_HostName = hostname;
+	}
+	else
+	{
+		updateHostName();
+	}
+
 	_Valid = true;
 }
 
@@ -92,7 +213,20 @@ void CInetAddress::updateHostName()
 {
 	char host[NI_MAXHOST];
 
-	sint status = getnameinfo((struct sockaddr *) _SockAddr, sizeof (struct sockaddr), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV);
+	// if unable to resolve DNS, returns an error and use IP address instead
+	sint status = 1;
+	
+	// check if IPv4 is valid
+	if (_SockAddr->sin_addr.s_addr != 0)
+	{
+		// IPv4
+		status = getnameinfo((struct sockaddr *) _SockAddr, sizeof (sockaddr_in), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV | NI_NAMEREQD);
+	}
+	else if (!IN6_IS_ADDR_UNSPECIFIED(&_SockAddr6->sin6_addr))
+	{
+		// IPv6
+		status = getnameinfo((struct sockaddr *) _SockAddr6, sizeof (sockaddr_in6), host, NI_MAXHOST, NULL, 0, NI_NUMERICSERV | NI_NAMEREQD);
+	}
 
 	if ( status )
 	{
@@ -134,6 +268,7 @@ CInetAddress::CInetAddress( const CInetAddress& other )
 	init();
 	_HostName = other._HostName;
 	memcpy( _SockAddr, other._SockAddr, sizeof( *_SockAddr ) );
+	memcpy( _SockAddr6, other._SockAddr6, sizeof( *_SockAddr6 ) );
 	_Valid = other._Valid;
 }
 
@@ -145,6 +280,7 @@ CInetAddress& CInetAddress::operator=( const CInetAddress& other )
 {
 	_HostName = other._HostName;
 	memcpy( _SockAddr, other._SockAddr, sizeof( *_SockAddr ) );
+	memcpy( _SockAddr6, other._SockAddr6, sizeof( *_SockAddr6 ) );
 	_Valid = other._Valid;
 	return *this;
 }
@@ -185,9 +321,15 @@ void CInetAddress::init()
 
 	_Valid = false;
 
+	// IPv4
 	_SockAddr = new sockaddr_in;
+	memset(_SockAddr, 0, sizeof(sockaddr_in));
 	_SockAddr->sin_family = AF_INET;
-	memset( _SockAddr->sin_zero, 0, 8 );
+
+	// IPv6
+	_SockAddr6 = new sockaddr_in6;
+	memset(_SockAddr6, 0, sizeof(sockaddr_in6));
+	_SockAddr6->sin6_family = AF_INET6;
 }
 
 
@@ -197,6 +339,7 @@ void CInetAddress::init()
 CInetAddress::~CInetAddress()
 {
 	delete _SockAddr;
+	delete _SockAddr6;
 	// _Valid = false;
 }
 
@@ -225,12 +368,41 @@ void CInetAddress::setNameAndPort( const std::string& hostNameAndPort )
 /*
  * Resolves a name
  */
-CInetAddress& CInetAddress::setByName( const std::string& hostName )
+CInetAddress& CInetAddress::setByName(const std::string& hostName)
 {
-	// Try to convert directly for addresses such as a.b.c.d
-	in_addr iaddr;
-	iaddr.s_addr = inet_addr( hostName.c_str() );
-	if ( iaddr.s_addr == INADDR_NONE )
+	// invalid IPv4
+	memset(&_SockAddr->sin_addr, 0, sizeof(in_addr));
+
+	// invalid IPv6
+	memset(&_SockAddr6->sin6_addr, 0, sizeof(in6_addr));
+
+	// Try to convert directly for addresses such as a.b.c.d and a:b:c:d:e:f:g:h
+	in_addr ipv4;
+	sint res = inet_pton(AF_INET, hostName.c_str(), &ipv4);
+
+	if (res == 1)
+	{
+		// hostname is a valid IPv4
+		memcpy(&_SockAddr->sin_addr, &ipv4, sizeof(in_addr));
+	}
+	else
+	{
+		in6_addr ipv6;
+		res = inet_pton(AF_INET6, hostName.c_str(), &ipv6);
+
+		if (res == 1)
+		{
+			// hostname is a valid IPv6
+			memcpy(&_SockAddr6->sin6_addr, &ipv6, sizeof(in6_addr));
+		}
+	}
+
+	if (res == 1)
+	{
+		// use IPv4 or IPv6 as hostname
+		_HostName = hostName;
+	}
+	else
 	{
 		// Otherwise use the traditional DNS look-up
 		struct addrinfo hints;
@@ -249,6 +421,9 @@ CInetAddress& CInetAddress::setByName( const std::string& hostName )
 			throw ESocket( (string("Hostname resolution failed for ")+hostName).c_str() );
 		}
 
+		// hostname is valid, use it
+		_HostName = hostName;
+
 		struct addrinfo *p = res;
 
 		// process all addresses
@@ -260,20 +435,14 @@ CInetAddress& CInetAddress::setByName( const std::string& hostName )
 				// ipv4
 				struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
 
-				// convert the IP to a string
-				_HostName = string(inet_ntoa(ipv4->sin_addr));
 				memcpy( &_SockAddr->sin_addr, &ipv4->sin_addr, sizeof(in_addr) );
 			}
 			else if (p->ai_family == AF_INET6)
 			{
 				// ipv6
-				// TODO: modify class to be able to handle IPv6
+				struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
-				// struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-
-				// convert the IP to a string
-				// inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
-				// memcpy( &_SockAddr->sin_addr, &ipv6->sin_addr, sizeof(in_addr) );
+				memcpy( &_SockAddr6->sin6_addr, &ipv6->sin6_addr, sizeof(in6_addr) );
 			}
 
 			// process next address
@@ -283,11 +452,7 @@ CInetAddress& CInetAddress::setByName( const std::string& hostName )
 		// free the linked list
 		freeaddrinfo(res);
 	}
-	else
-	{
-		_HostName = hostName;
-		memcpy( &_SockAddr->sin_addr, &iaddr, sizeof(iaddr) );
-	}
+
 	_Valid = true;
 	return *this;
 }
@@ -296,10 +461,10 @@ CInetAddress& CInetAddress::setByName( const std::string& hostName )
 /*
  * Sets port
  */
-void CInetAddress::setPort( uint16 port )
+void CInetAddress::setPort(uint16 port)
 {
-	_SockAddr->sin_port = htons( port );
-
+	_SockAddr->sin_port = htons(port);
+	_SockAddr6->sin6_port = htons(port);
 }
 
 
@@ -308,7 +473,10 @@ void CInetAddress::setPort( uint16 port )
  */
 void CInetAddress::setSockAddr( const sockaddr_in* saddr )
 {
-	memcpy( _SockAddr, saddr, sizeof(*saddr) );
+	memcpy(_SockAddr, saddr, sizeof(*saddr) );
+
+	// invalid IPv6
+	memset(&_SockAddr6->sin6_addr, 0, sizeof(in6_addr));
 
 	// Get host name
 	// Warning: when it can't find it, it take more than 4 seconds
@@ -316,6 +484,28 @@ void CInetAddress::setSockAddr( const sockaddr_in* saddr )
 	{
 		updateHostName();
 	}
+
+	_Valid = true;
+}
+
+
+/* Sets internal socket address directly (contents is copied).
+ * It also retrieves the host name if CInetAddress::RetrieveNames is true.
+ */
+void CInetAddress::setSockAddr6( const sockaddr_in6* saddr6 )
+{
+	memcpy( _SockAddr6, saddr6, sizeof(*saddr6) );
+
+	// invalid IPv4
+	memset(&_SockAddr->sin_addr, 0, sizeof(in_addr));
+
+	// Get host name
+	// Warning: when it can't find it, it take more than 4 seconds
+	if ( CInetAddress::RetrieveNames )
+	{
+		updateHostName();
+	}
+
 	_Valid = true;
 }
 
@@ -330,11 +520,20 @@ bool CInetAddress::isValid() const
 
 
 /*
- * Returns internal socket address (read only)
+ * Returns internal IPv4 socket address (read only)
  */
 const sockaddr_in *CInetAddress::sockAddr() const
 {
 	return _SockAddr;
+}
+
+
+/*
+ * Returns internal IPv6 socket address (read only)
+ */
+const sockaddr_in6 *CInetAddress::sockAddr6() const
+{
+	return _SockAddr6;
 }
 
 
@@ -383,10 +582,13 @@ uint32 CInetAddress::internalNetAddress() const
  */
 string CInetAddress::ipAddress() const
 {
-	/*stringstream ss; // or use inet_ntoa
-	ss << inet_ntoa ( _SockAddr->sin_addr );
-	return ss.str();*/
-	const char *name = inet_ntoa ( _SockAddr->sin_addr );
+	// longer size is IPv6
+	char straddr[INET6_ADDRSTRLEN];
+	const char *name = inet_ntop(AF_INET, &_SockAddr->sin_addr, straddr, INET_ADDRSTRLEN);
+
+	// IPv4 is invalid, return IPv6
+	if (name == NULL || strcmp(name, "0.0.0.0") == 0) name = inet_ntop(AF_INET6, &_SockAddr6->sin6_addr, straddr, INET6_ADDRSTRLEN);
+
 	return name ? string (name) : "";
 }
 
@@ -414,9 +616,6 @@ uint16 CInetAddress::port() const
  */
 std::string CInetAddress::asString() const
 {
-//	stringstream ss;
-//	ss << hostName() << ":" << port() << " (" << ipAddress() << ")";
-//	return ss.str();
 	return hostName() + ":" + NLMISC::toString(port()) + " (" + ipAddress() + ")";
 }
 
@@ -426,9 +625,6 @@ std::string CInetAddress::asString() const
  */
 std::string CInetAddress::asIPString() const
 {
-//	stringstream ss;
-//	ss << ipAddress() << ":" << port();
-//	return ss.str();
 	return ipAddress() + ":" + NLMISC::toString(port());
 }
 
@@ -537,13 +733,9 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		else if (p->ai_family == AF_INET6)
 		{
 			// ipv6
-			// TODO: modify class to be able to handle IPv6
+			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
-			// struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
-
-			// convert the IP to a string
-			// inet_ntop(p->ai_family, addr, ipstr, sizeof(ipstr));
-			// memcpy( &_SockAddr->sin_addr, &ipv6->sin_addr, sizeof(in_addr) );
+			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
 		}
 
 		// process next address

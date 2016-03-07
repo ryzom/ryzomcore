@@ -1026,7 +1026,7 @@ namespace NLGUI
 	void CWidgetManager::reset()
 	{
 		setCurContextHelp( NULL );
-		
+
 		_ViewsUnderPointer.clear();
 		_CtrlsUnderPointer.clear();
 		_GroupsUnderPointer.clear();
@@ -1254,7 +1254,7 @@ namespace NLGUI
 												sint32 wParent, sint32 hParent )
 	{
 		CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
-		CInterfaceGroup *groupContextHelp = 
+		CInterfaceGroup *groupContextHelp =
 			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
 
 		uint32 _ScreenH, _ScreenW;
@@ -1383,7 +1383,7 @@ namespace NLGUI
 	{
 		if (!newCtrl) return;
 		if (!newCtrl->getInvalidCoords()) return;
-		
+
 		CInterfaceGroup *groupContextHelp =
 			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
 
@@ -1450,7 +1450,7 @@ namespace NLGUI
 
 
 				// **** resolve auto posref
-				uint clampCount = 
+				uint clampCount =
 					adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRef(),
 										newCtrl->getToolTipPosRef(), xParent, yParent,
 										wParent, hParent);
@@ -1458,7 +1458,7 @@ namespace NLGUI
 				if (clampCount != 0)
 				{
 					// try to fallback on alternate tooltip posref
-					uint altClampCount = 
+					uint altClampCount =
 						adjustTooltipPosition( newCtrl, win, newCtrl->getToolTipParentPosRefAlt(),
 												newCtrl->getToolTipPosRefAlt(), xParent, yParent,
 												wParent, hParent);
@@ -1722,8 +1722,8 @@ namespace NLGUI
 		// *** First detect from which screen position the window is the more sticked (borders or center)
 		// In X: best hotspot is left, middle or right?
 		sint32	posXToLeft= x;
-		sint32	posXToMiddle= x+w/2-screenW/2;
-		sint32	posXToRight= screenW-(x+w);
+		sint32	posXToMiddle= x+w/2-_ScreenW/2;
+		sint32	posXToRight= _ScreenW-(x+w);
 		sint32	bestXHotSpot= Hotspot_xL;
 		sint32	bestXPosVal= posXToLeft;
 		if(abs(posXToMiddle) < bestXPosVal)
@@ -1740,8 +1740,8 @@ namespace NLGUI
 		// Same In Y: best hotspot is bottom, middle or top?
 		// remember here that y is the top of window (relative to bottom of screen)
 		sint32	posYToBottom= y-h;
-		sint32	posYToMiddle= y-h/2-screenH/2;
-		sint32	posYToTop= screenH-y;
+		sint32	posYToMiddle= y-h/2-_ScreenH/2;
+		sint32	posYToTop= _ScreenH-y;
 		sint32	bestYHotSpot= Hotspot_Bx;
 		sint32	bestYPosVal= posYToBottom;
 		const	sint32	middleYWeight= 6;		// Avoid default Mission/Team/Map/ContactList positions to be considered as "middle"
@@ -1774,13 +1774,13 @@ namespace NLGUI
 	}
 
 	// ------------------------------------------------------------------------------------------------
-	void CWidgetManager::moveAllWindowsToNewScreenSize(sint32 newScreenW, sint32 newScreenH, bool fixCurrentUI)
+	void CWidgetManager::moveAllWindowsToNewScreenSize(uint32 newScreenW, uint32 newScreenH, bool fixCurrentUI)
 	{
 		std::vector< CWidgetManager::SMasterGroup > &_MasterGroups = getAllMasterGroup();
 		// If resolutions correctly setuped, and really different from new setup
-		if( screenW >0 && screenH>0 &&
+		if( _ScreenW >0 && _ScreenH>0 &&
 			newScreenW >0 && newScreenH>0 &&
-			( screenW != newScreenW || screenH != newScreenH)
+			( _ScreenW != newScreenW || _ScreenH != newScreenH)
 			)
 		{
 			// *** Do it for the Active Desktop (if wanted)
@@ -1790,13 +1790,13 @@ namespace NLGUI
 				for (uint nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 				{
 					CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
-					if(!rMG.Group || rMG.Group->getId()!="ui:interface")
+					if (!rMG.Group || rMG.Group->getId() != "ui:interface")
 						continue;
 
 					// For all priorities, but the worldspace one
 					for (uint8 nPriority = 0; nPriority < WIN_PRIORITY_MAX; nPriority++)
 					{
-						if(nPriority==WIN_PRIORITY_WORLD_SPACE)
+						if (nPriority==WIN_PRIORITY_WORLD_SPACE)
 							continue;
 
 						// For All windows (only layer 0 group container)
@@ -1842,8 +1842,8 @@ namespace NLGUI
 		// Now those are the last screen coordinates used for window position correction
 		if(newScreenW >0 && newScreenH>0)
 		{
-			screenW = newScreenW;
-			screenH = newScreenH;
+			_ScreenW = newScreenW;
+			_ScreenH = newScreenH;
 		}
 	}
 
@@ -1961,20 +1961,21 @@ namespace NLGUI
 			}
 			while (cb);
 		}
+		
 		// Check if screen size changed
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
 		CViewRenderer::getInstance()->getScreenSize (w, h);
-		if ((w != screenW) || (h != screenH))
+		if ((w != _ScreenW) || (h != _ScreenH))
 		{
 			// No Op if screen minimized
 			if(w!=0 && h!=0 && !CViewRenderer::getInstance()->isMinimized())
 			{
 				updateAllLocalisedElements ();
-				setScreenWH( w, h );
+				setScreenWH(w, h);
 			}
 		}
-
+		
 		// Update global color from database
 		if (!_RProp)
 		{
@@ -1983,6 +1984,7 @@ namespace NLGUI
 			_BProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:B");
 			_AProp = CDBManager::getInstance()->getDbProp("UI:SAVE:COLOR:A");
 		}
+
 		setGlobalColor(NLMISC::CRGBA(
 			(uint8)_RProp->getValue32(),
 			(uint8)_GProp->getValue32(),
@@ -1996,7 +1998,7 @@ namespace NLGUI
 		c.B = gc.B;
 		c.A = (uint8) (( (uint16) c.A * (uint16) getContentAlpha() ) >> 8);
 		setGlobalColorForContent( c );
-		
+
 		// Update global alphaS from database
 		updateGlobalAlphas();
 
@@ -2005,7 +2007,7 @@ namespace NLGUI
 			Computed String are rendered in on big drawQuads at last part of each layer
 		*/
 		CDBManager::getInstance()->flushObserverCalls();
-		
+
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -2073,18 +2075,18 @@ namespace NLGUI
 		}
 
 		// Draw the pointer and DND Item
-		if( getPointer() != NULL)
+		if (getPointer() != NULL)
 		{
-			if ( getPointer()->getActive())
+			if (getPointer()->getActive())
 				getPointer()->draw ();
 		}
 
-		if( CInterfaceElement::getEditorMode() )
+		if (CInterfaceElement::getEditorMode())
 		{
-			for( int i = 0; i < editorSelection.size(); i++ )
+			for(uint i = 0; i < editorSelection.size(); ++i)
 			{
-				CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-				if( e != NULL )
+				CInterfaceElement *e = getElementFromId(editorSelection[i]);
+				if (e != NULL)
 					e->drawHighlight();
 			}
 		}
@@ -2158,7 +2160,7 @@ namespace NLGUI
 	bool CWidgetManager::handleKeyboardEvent( const CEventDescriptor &evnt )
 	{
 		bool handled = false;
-		
+
 		CEventDescriptorKey &eventDesc = (CEventDescriptorKey&)evnt;
 
 		//_LastEventKeyDesc = eventDesc;
@@ -2541,7 +2543,7 @@ namespace NLGUI
 
 
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
-			{			
+			{
 				if (!handled)
 					if (pNewCurrentWnd != NULL)
 						pNewCurrentWnd->handleEvent(evnt);
@@ -2589,7 +2591,7 @@ namespace NLGUI
 				}
 
 				_CapturedView = NULL;
-				
+
 				if( CInterfaceElement::getEditorMode() )
 					stopDragging();
 			}
@@ -2621,6 +2623,10 @@ namespace NLGUI
 
 			// If the mouse is over a window, always consider the event is taken (avoid click behind)
 			handled|= isMouseOverWindow();
+
+			// If mouse click was not on interface and we have keyboard captured, then release keyboard
+			if (!handled && getCaptureKeyboard() != NULL && eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
+				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
 		}
 
 		return handled;
@@ -2634,7 +2640,7 @@ namespace NLGUI
 		if( eventDesc.getType() != CEventDescriptor::mouse )
 			return false;
 
-		const CEventDescriptorMouse &e = static_cast< const CEventDescriptorMouse& >( eventDesc );	
+		const CEventDescriptorMouse &e = static_cast< const CEventDescriptorMouse& >( eventDesc );
 
 		if( e.getEventTypeExtended() != CEventDescriptorMouse::mousemove )
 			return false;
@@ -2699,7 +2705,7 @@ namespace NLGUI
 
 		e->setParent( NULL );
 		draggedElement = e;
-				
+
 		return true;
 	}
 
@@ -2715,7 +2721,7 @@ namespace NLGUI
 				g = tw;
 
 			std::string oldid = e->getId();
-			
+
 			e->setParent( g );
 			e->setIdRecurse( e->getShortId() );
 			e->setParentPos( g );
@@ -2730,7 +2736,7 @@ namespace NLGUI
 			onWidgetMoved( oldid, e->getId() );
 		}
 	}
-	
+
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::movePointer (sint32 dx, sint32 dy)
 	{
@@ -2866,17 +2872,19 @@ namespace NLGUI
 	void CWidgetManager::unregisterClockMsgTarget(CCtrlBase *vb)
 	{
 		if (!vb) return;
-		std::vector<CCtrlBase*>::iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+		std::list<CCtrlBase*>::iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
 		if (it != _ClockMsgTargets.end())
 		{
-			_ClockMsgTargets.erase(it);
+			// instead of deleting, just mark as deleted incase we are inside iterating loop,
+			// it will be removed in sendClockTickEvent
+			(*it) = NULL;
 		}
 	}
 
 	// ***************************************************************************
 	bool CWidgetManager::isClockMsgTarget(CCtrlBase *vb) const
 	{
-		std::vector<CCtrlBase*>::const_iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
+		std::list<CCtrlBase*>::const_iterator it = std::find(_ClockMsgTargets.begin(), _ClockMsgTargets.end(), vb);
 		return it != _ClockMsgTargets.end();
 	}
 
@@ -2895,10 +2903,16 @@ namespace NLGUI
 		}
 
 		// and send clock tick msg to ctrl that are registered
-		std::vector<CCtrlBase*> clockMsgTarget = _ClockMsgTargets;
-		for(std::vector<CCtrlBase*>::iterator it = clockMsgTarget.begin(); it != clockMsgTarget.end(); ++it)
+		for(std::list<CCtrlBase*>::iterator it = _ClockMsgTargets.begin(); it != _ClockMsgTargets.end();)
 		{
-			(*it)->handleEvent(clockTick);
+			CCtrlBase* ctrl = *it;
+			if (ctrl)
+			{
+				ctrl->handleEvent(clockTick);
+				++it;
+			}
+			else
+				it = _ClockMsgTargets.erase(it);
 		}
 	}
 
@@ -3083,7 +3097,7 @@ namespace NLGUI
 		{
 			const SMasterGroup &mg = _MasterGroups[ i ];
 
-			std::vector< CInterfaceGroup* >::size_type j;			
+			std::vector< CInterfaceGroup* >::size_type j;
 			for( j = 0; j < mg.Group->getNumGroup(); j++ )
 			{
 				CInterfaceGroup *g = mg.Group->getGroup( j );
@@ -3098,8 +3112,8 @@ namespace NLGUI
 
 		return true;
 	}
-	
-	
+
+
 	// ***************************************************************************
 	void CWidgetManager::enableMouseHandling( bool handle )
 	{
@@ -3108,7 +3122,7 @@ namespace NLGUI
 		{
 			if(!getPointer())
 				return;
-			
+
 			// If Left captured, reset
 			if( getCapturePointerLeft() )
 				setCapturePointerLeft( NULL );
@@ -3116,12 +3130,12 @@ namespace NLGUI
 			// Same for Right
 			if( getCapturePointerRight() )
 				setCapturePointerRight( NULL );
-			
+
 			// Avoid any problem with modals
 			disableModalWindow();
 		}
 	}
-	
+
 	// ***************************************************************************
 	uint CWidgetManager::getUserDblClickDelay()
 	{
@@ -3129,11 +3143,11 @@ namespace NLGUI
 		NLMISC::CCDBNodeLeaf *pNL = CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
 		if( pNL != NULL )
 			nVal = pNL->getValue32();
-		
+
 		uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
 		return dbclickDelay;
 	}
-	
+
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::setupOptions()
 	{
@@ -3157,9 +3171,9 @@ namespace NLGUI
 			_SystemOptions[OptionTimeoutContext]= opt->getValue("context_timeout");
 			_SystemOptions[OptionTimeoutContextHtml]= opt->getValue("context_html_timeout");
 		}
-		
+
 	}
-	
+
 	// Get the alpha roll over speed
 	float CWidgetManager::getAlphaRolloverSpeed()
 	{
@@ -3173,7 +3187,7 @@ namespace NLGUI
 	{
 		_AlphaRolloverSpeedDB = NULL;
 	}
-	
+
 	void CWidgetManager::setContainerAlpha(uint8 alpha)
 	{
 		_ContainerAlpha = alpha;
@@ -3362,17 +3376,17 @@ namespace NLGUI
 	void CWidgetManager::getEditorSelection( std::vector< std::string > &selection )
 	{
 		selection.clear();
-		for( int i = 0; i < editorSelection.size(); i++ )
-			selection.push_back( editorSelection[ i ] );
+		for(uint i = 0; i < editorSelection.size(); ++i)
+			selection.push_back(editorSelection[i]);
 	}
 
 	void CWidgetManager::selectWidget( const std::string &name )
 	{
-		std::vector< std::string >::iterator itr 
+		std::vector< std::string >::iterator itr
 			= std::find( editorSelection.begin(), editorSelection.end(), name );
 
 		CInterfaceElement *e = getElementFromId( name );
-		
+
 		if( itr != editorSelection.end() )
 		{
 			// If multiselection is on unselect if already selected
@@ -3397,7 +3411,7 @@ namespace NLGUI
 				e->setEditorSelected( true );
 				editorSelection.push_back( name );
 			}
-				
+
 		}
 
 		notifySelectionWatchers();
@@ -3414,7 +3428,7 @@ namespace NLGUI
 		std::vector< IEditorSelectionWatcher* >::iterator itr = selectionWatchers.begin();
 		while( itr != selectionWatchers.end() )
 		{
-			(*itr)->selectionChanged();	
+			(*itr)->selectionChanged();
 			++itr;
 		}
 	}
@@ -3423,7 +3437,7 @@ namespace NLGUI
 	{
 		std::vector< IEditorSelectionWatcher* >::iterator itr =
 			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
-		
+
 		// We already have this watcher
 		if( itr != selectionWatchers.end() )
 			return;
@@ -3435,7 +3449,7 @@ namespace NLGUI
 	{
 		std::vector< IEditorSelectionWatcher* >::iterator itr =
 			std::find( selectionWatchers.begin(), selectionWatchers.end(), watcher );
-		
+
 		// We don't have this watcher
 		if( itr == selectionWatchers.end() )
 			return;
@@ -3465,7 +3479,7 @@ namespace NLGUI
 
 	void CWidgetManager::registerWidgetWatcher( IWidgetWatcher *watcher )
 	{
-		std::vector< IWidgetWatcher* >::const_iterator itr 
+		std::vector< IWidgetWatcher* >::const_iterator itr
 			= std::find( widgetWatchers.begin(), widgetWatchers.end(), watcher );
 		// already exists
 		if( itr != widgetWatchers.end() )
@@ -3516,7 +3530,7 @@ namespace NLGUI
 			g->addView( v );
 
 		onWidgetAdded( v->getId() );
-		
+
 		return v;
 	}
 
@@ -3525,11 +3539,11 @@ namespace NLGUI
 		std::vector< CInterfaceElement* > elms;
 
 		// Resolve the widget names
-		for( int i = 0; i < editorSelection.size(); i++ )
+		for(uint i = 0; i < editorSelection.size(); ++i)
 		{
-			CInterfaceElement *e = getElementFromId( editorSelection[ i ] );
-			if( e != NULL )
-				elms.push_back( e );
+			CInterfaceElement *e = getElementFromId(editorSelection[i]);
+			if (e != NULL)
+				elms.push_back(e);
 		}
 
 		editorSelection.clear();
@@ -3548,21 +3562,21 @@ namespace NLGUI
 		std::string oldId;
 
 		// Reparent the widgets to the new group
-		for( int i = 0; i < elms.size(); i++ )
+		for(uint i = 0; i < elms.size(); ++i)
 		{
-			CInterfaceElement *e = elms[ i ];
+			CInterfaceElement *e = elms[i];
 			oldId = e->getId();
 			CInterfaceGroup *p = e->getParent();
-			if( p != NULL )
-				p->takeElement( e );
+			if (p != NULL)
+				p->takeElement(e);
 
-			g->addElement( e );
-			e->setParent( g );
-			e->setParentPos( g );
-			e->setParentSize( g );
-			e->setIdRecurse( e->getShortId() );	
+			g->addElement(e);
+			e->setParent(g);
+			e->setParentPos(g);
+			e->setParentSize(g);
+			e->setIdRecurse(e->getShortId());
 
-			onWidgetMoved( oldId, e->getId() );
+			onWidgetMoved(oldId, e->getId());
 		}
 		elms.clear();
 
@@ -3572,9 +3586,9 @@ namespace NLGUI
 		g->alignElements();
 		// Align the new group to the top window
 		g->alignTo( getTopWindow() );
-		
+
 		g->setActive( true );
-		
+
 		return true;
 	}
 
@@ -3617,7 +3631,7 @@ namespace NLGUI
 	{
 		reset();
 
-		for( int i = 0; i < _MasterGroups.size(); i++ )
+		for(uint i = 0; i < _MasterGroups.size(); ++i)
 			delete _MasterGroups[i].Group;
 		_MasterGroups.clear();
 
@@ -3626,7 +3640,7 @@ namespace NLGUI
 
 		SMasterGroup mg;
 		mg.Group = root;
-		
+
 		root->setIdRecurse( project );
 		root->setW( 1024 );
 		root->setH( 768 );
@@ -3658,7 +3672,7 @@ namespace NLGUI
 		VariableData v;
 		v.type = "sint32";
 		v.value = "255";
-		
+
 		v.entry = "UI:SAVE:COLOR:R";
 		parser->setVariable( v );
 
@@ -3670,7 +3684,7 @@ namespace NLGUI
 
 		v.entry = "UI:SAVE:COLOR:A";
 		parser->setVariable( v );
-			
+
 		return true;
 	}
 
@@ -3710,7 +3724,7 @@ namespace NLGUI
 		_MouseOverWindow = false;
 		inGame = false;
 
-		setScreenWH( 0, 0 );
+		setScreenWH(0, 0);
 
 		_GroupSelection = false;
 		multiSelection = false;

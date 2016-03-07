@@ -215,7 +215,7 @@ void CGroupQuickHelp::setGroupTextSize (CInterfaceGroup *group, bool selected)
 
 extern CActionsContext ActionsContext;
 
-void CGroupQuickHelp::beginElement (uint element_number, const BOOL *present, const char **value)
+void CGroupQuickHelp::beginElement (uint element_number, const std::vector<bool> &present, const std::vector<const char *>&value)
 {
 	CGroupHTML::beginElement (element_number, present, value);
 

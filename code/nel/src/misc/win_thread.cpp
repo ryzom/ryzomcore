@@ -277,10 +277,10 @@ uint64 CWinThread::getCPUMask()
 
 std::string CWinThread::getUserName()
 {
-	char userName[512];
+	wchar_t userName[512];
 	DWORD size = 512;
-	GetUserName (userName, &size);
-	return (const char*)userName;
+	GetUserNameW (userName, &size);
+	return wideToUtf8(userName);
 }
 
 // **** Process
@@ -333,10 +333,10 @@ class CPSAPILib
 {
 public:
 	typedef BOOL  (WINAPI *EnumProcessesFunPtr)(DWORD *lpidProcess, DWORD cb, DWORD *cbNeeded);
-	typedef DWORD (WINAPI *GetModuleFileNameExAFunPtr)(HANDLE hProcess, HMODULE hModule, LPTSTR lpFilename, DWORD nSize);
+	typedef DWORD (WINAPI *GetModuleFileNameExWFunPtr)(HANDLE hProcess, HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
 	typedef BOOL  (WINAPI *EnumProcessModulesFunPtr)(HANDLE hProcess, HMODULE *lphModule, DWORD cb, LPDWORD lpcbNeeded);
 	EnumProcessesFunPtr		  EnumProcesses;
-	GetModuleFileNameExAFunPtr GetModuleFileNameExA;
+	GetModuleFileNameExWFunPtr GetModuleFileNameExW;
 	EnumProcessModulesFunPtr  EnumProcessModules;
 public:
 	CPSAPILib();
@@ -353,7 +353,7 @@ CPSAPILib::CPSAPILib()
 	_LoadFailed = false;
 	_PSAPILibHandle     = NULL;
 	EnumProcesses       = NULL;
-	GetModuleFileNameExA = NULL;
+	GetModuleFileNameExW = NULL;
 	EnumProcessModules  = NULL;
 }
 
@@ -373,7 +373,7 @@ bool CPSAPILib::init()
 	if (_LoadFailed) return false;
 	if (!_PSAPILibHandle)
 	{
-		_PSAPILibHandle = LoadLibrary("psapi.dll");
+		_PSAPILibHandle = LoadLibraryA("psapi.dll");
 		if (!_PSAPILibHandle)
 		{
 			nlwarning("couldn't load psapi.dll, possibly not supported by os");
@@ -381,10 +381,10 @@ bool CPSAPILib::init()
 			return false;
 		}
 		EnumProcesses		= (EnumProcessesFunPtr)		  GetProcAddress(_PSAPILibHandle, "EnumProcesses");
-		GetModuleFileNameExA = (GetModuleFileNameExAFunPtr) GetProcAddress(_PSAPILibHandle, "GetModuleFileNameExA");
+		GetModuleFileNameExW = (GetModuleFileNameExWFunPtr) GetProcAddress(_PSAPILibHandle, "GetModuleFileNameExW");
 		EnumProcessModules  = (EnumProcessModulesFunPtr)  GetProcAddress(_PSAPILibHandle, "EnumProcessModules");
 		if (!EnumProcesses ||
-			!GetModuleFileNameExA ||
+			!GetModuleFileNameExW ||
 			!EnumProcessModules
 		   )
 		{
@@ -453,12 +453,12 @@ bool CWinProcess::enumProcessModules(uint32 processId, std::vector<std::string> 
 	}
 	moduleNames.clear();
 	std::vector<std::string> resultModuleNames;
-	char moduleName[MAX_PATH + 1];
+	wchar_t moduleName[MAX_PATH + 1];
 	for (uint m = 0; m < prcModules.size(); ++m)
 	{
-		if (PSAPILib.GetModuleFileNameExA(hProcess, prcModules[m], moduleName, MAX_PATH))
+		if (PSAPILib.GetModuleFileNameExW(hProcess, prcModules[m], moduleName, MAX_PATH))
 		{
-			moduleNames.push_back(moduleName);
+			moduleNames.push_back(wideToUtf8(moduleName));
 		}
 	}
 	CloseHandle(hProcess);
@@ -563,7 +563,7 @@ public:
 		PROCESS_INFORMATION processInfo;
 		STARTUPINFO startupInfo = {0};
 		startupInfo.cb = sizeof(STARTUPINFO);
-		if (CreateProcess(programName.c_str(), const_cast<LPTSTR>(arguments.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo))
+		if (CreateProcessW(programName.c_str(), const_cast<LPTSTR>(arguments.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo))
 		{
 			WatchTask = new CProcessWatchTask(processInfo.hProcess);
 			WatchThread = IThread::create(WatchTask);

@@ -1384,7 +1384,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	uint32 timeStamp = 0;
 	if (! compressed)
 	{
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1491,7 +1491,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 	else
 	{
 		// Get Uncompressed File length (4 last byte of a gz)
-		FILE* file = fopen(filename.c_str(),"rb");
+		FILE* file = nlfopen(filename, "rb");
 		if (!file)
 		{
 			nlwarning("Try to open an invalid file %s (access error)", filename.c_str());
@@ -1510,6 +1510,10 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 		{
 			nlwarning("Error while reading %s", filename.c_str());
 		}
+
+#ifdef NL_BIG_ENDIAN
+		NLMISC_BSWAP32(uncompressedFileLength);
+#endif
 
 		fclose(file);
 
@@ -1649,7 +1653,7 @@ void CClientEditionModule::saveUserComponentFile(const std::string& filename, bo
 		if (!mustCompress)
 		{
 			{
-				FILE* output = fopen(uncompressedName.c_str(), "wb");
+				FILE* output = nlfopen(uncompressedName, "wb");
 				if (output)
 				{
 					fwrite(component->UncompressedData, sizeof(char) , component->UncompressedDataLength, output);
@@ -1869,8 +1873,8 @@ void CClientEditionModule::onKicked(NLNET::IModuleProxy * /* sender */, uint32 t
 {
 	//H_AUTO(R2_CClientEditionModule_onKicked)
 
-	R2::getEditor().getLua().push((double)timeBeforeDisconnection);
-	R2::getEditor().getLua().push((bool)mustKick);
+	R2::getEditor().getLua().push(timeBeforeDisconnection);
+	R2::getEditor().getLua().push(mustKick);
 	R2::getEditor().callEnvFunc( "onKicked", 2, 0);
 
 }
@@ -2019,9 +2023,9 @@ void CClientEditionModule::onAnimationModePlayConnected(NLNET::IModuleProxy * /*
 void CClientEditionModule::scheduleStartAct(NLNET::IModuleProxy * /* sender */, uint32 errorId, uint32 actId, uint32 nbSeconds)
 {
 	//H_AUTO(R2_CClientEditionModule_scheduleStartAct)
-	R2::getEditor().getLua().push((double)errorId);
-	R2::getEditor().getLua().push((double)actId);
-	R2::getEditor().getLua().push((double)nbSeconds);
+	R2::getEditor().getLua().push(errorId);
+	R2::getEditor().getLua().push(actId);
+	R2::getEditor().getLua().push(nbSeconds);
 	R2::getEditor().callEnvFunc( "onScheduleStartAct", 3, 0);
 
 }
@@ -2475,7 +2479,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 	}
 	if (CFile::fileExists(filename))
 	{
-		CFile::copyFile("save/r2_buffer.dat", filename.c_str());
+		CFile::copyFile("save/r2_buffer.dat", filename);
 	}
 }
 

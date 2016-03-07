@@ -117,7 +117,7 @@ public:
 		std::map<std::string, size_t>::const_iterator it = _EmoteIdMap.find(emoteId);
 		if (it!=_EmoteIdMap.end())
 			return (uint16)it->second;
-		return (uint16)~0;
+		return std::numeric_limits<uint16>::max();
 	}
 	MBEHAV::EBehaviour getEmoteBehav(const std::string& emoteId) const;
 	

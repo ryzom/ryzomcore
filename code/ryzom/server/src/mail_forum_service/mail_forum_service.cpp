@@ -274,7 +274,7 @@ void	CMailForumService::changeUserName(uint32 shardid, const string& oldName, co
 
 	uint	i;
 	for (i=0; i<files.size(); ++i)
-		CFile::moveFile((newdir+CFile::getFilename(files[i])).c_str(), files[i].c_str());
+		CFile::moveFile(newdir+CFile::getFilename(files[i]), files[i]);
 }
 
 
@@ -373,7 +373,7 @@ void CMailForumService::removeUser( uint32 shardid, string username )
 	}
 	while (CFile::isExists(userDelDir));
 
-	CFile::moveFile(userDelDir.c_str(), userDir.c_str());
+	CFile::moveFile(userDelDir, userDir);
 }
 
 // ****************************************************************************
@@ -392,7 +392,7 @@ void CMailForumService::removeGuild( uint32 shardid, string guildname )
 	}
 	while (CFile::isExists(guildDelDir));
 
-	CFile::moveFile(guildDelDir.c_str(), guildDir.c_str());
+	CFile::moveFile(guildDelDir, guildDir);
 }
 
 

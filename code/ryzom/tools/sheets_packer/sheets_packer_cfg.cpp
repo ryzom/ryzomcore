@@ -147,6 +147,7 @@ const std::string ConfigFileName = "sheets_packer.cfg";
 //---------------------------------------------------
 CClientConfig::CClientConfig()
 {
+	DumpVisualSlotsIndex = false;
 }// CClientConfig //
 
 
@@ -180,6 +181,8 @@ void setValues()
 	READ_STRING(OutputDataPath)
 	// Ligo primitive class
 	READ_STRING(LigoPrimitiveClass)
+	//Dump VisualSlots index
+	READ_BOOL(DumpVisualSlotsIndex)
 
 	/////////////
 	// FILTERS //

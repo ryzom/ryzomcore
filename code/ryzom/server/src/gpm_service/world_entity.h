@@ -357,6 +357,7 @@ public:
 		Entity = entity;
 
 		CheckSpeed = true;
+		Indoor = false;
 		EnableVisionProcessing = true;
 	}
 
@@ -415,6 +416,7 @@ public:
 	bool						EnableVisionProcessing;
 
 	bool						CheckSpeed;
+	bool						Indoor;
 
 	/// Who I can see flag field
 	uint32						WhoICanSee;

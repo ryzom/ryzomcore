@@ -3050,6 +3050,31 @@ void cbTeleportPlayer(NLNET::CMessage& msgin, const std::string &serviceName, NL
 	chr->teleportCharacter(x, y, z, true, true, t);
 }
 
+//---------------------------------------------------
+// trigger the webig
+//---------------------------------------------------
+void cbTriggerWebig(NLNET::CMessage& msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	H_AUTO(cbTriggerWebig);
+	string event;
+	msgin.serial( event );
+	uint32 nbPlayers;
+	msgin.serial( nbPlayers );
+	nlinfo("ok %s %d", event.c_str(), nbPlayers);
+	for ( uint i=0; i<nbPlayers; ++i )
+	{
+		// Access the source
+		TDataSetRow player;
+		msgin.serial( player );
+		CEntityId playerId = TheDataset.getEntityId(player);
+		nlinfo("NPC: TRIGGER EVENT KILLED : %s", playerId.toString().c_str());
+		CCharacter *chr = PlayerManager.getChar(playerId);
+		if (!chr)
+			continue;
+		chr->sendUrl(event, "");
+	}
+}
+
 
 //---------------------------------------------------
 /// Forage source position validation

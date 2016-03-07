@@ -79,8 +79,7 @@ using namespace std;
 #define LOG_IN_FILE NEL_LOG_IN_FILE
 
 // If true, debug system will trap crash even if the application is in debugger
-//static const bool TrapCrashInDebugger = false;
-static const bool TrapCrashInDebugger = true;
+static const bool TrapCrashInDebugger = false;
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -311,14 +310,14 @@ static DWORD __stdcall GetModuleBase(HANDLE hProcess, DWORD dwReturnAddress)
 			&memoryBasicInfo, sizeof(memoryBasicInfo)))
 		{
 			DWORD cch = 0;
-			char szFile[MAX_PATH] = { 0 };
+			wchar_t szFile[MAX_PATH] = { 0 };
 
-		 cch = GetModuleFileNameA((HINSTANCE)memoryBasicInfo.AllocationBase,
+			cch = GetModuleFileNameW((HINSTANCE)memoryBasicInfo.AllocationBase,
 								 szFile, MAX_PATH);
 
-		if (cch && (lstrcmpA(szFile, "DBFN")== 0))
-		{
-			 if (!SymLoadModule(hProcess,
+			if (cch && (lstrcmpA(szFile, "DBFN")== 0))
+			{
+				if (!SymLoadModule(hProcess,
 				   NULL, "MN",
 				   NULL, (DWORD) memoryBasicInfo.AllocationBase, 0))
 				{
@@ -528,9 +527,9 @@ public:
 			string progname;
 			if(!shortExc.empty() || !longExc.empty())
 			{
-				char name[1024];
-				GetModuleFileNameA (NULL, name, 1023);
-				progname = CFile::getFilename(name);
+				wchar_t name[1024];
+				GetModuleFileNameW (NULL, name, 1023);
+				progname = CFile::getFilename(wideToUtf8(name));
 				progname += " ";
 			}
 
@@ -716,7 +715,8 @@ public:
 			{
 				str = "<NoModule>";
 			}
-			str += toString("!0x%X", addr);
+
+			str += toString("!0x%p", (void*)addr);
 		}
 
 //
@@ -741,9 +741,8 @@ public:
 			{
 				str = "<NoModule>";
 			}
-			char tmp[32];
-			sprintf (tmp, "!0x%p", addr);
-			str += tmp;
+
+			str += toString("!0x%p", (void*)addr);
 		//}
 		str +=" DEBUG:"+toString("0x%p", addr);
 
@@ -865,18 +864,18 @@ public:
 					else if(type == "int")
 					{
 						if (!IsBadReadPtr(addr,sizeof(int)))
-							sprintf (tmp, "%d", *addr);
+							sprintf (tmp, "%p", (void *)(*addr));
 					}
 					else if (type == "char")
 					{
 						if (!IsBadReadPtr(addr,sizeof(char)))
 							if (nlisprint(*addr))
 							{
-								sprintf (tmp, "'%c'", *addr);
+								sprintf (tmp, "'%c'", (char)((*addr) & 0xFF));
 							}
 							else
 							{
-								sprintf (tmp, "%d", *addr);
+								sprintf (tmp, "%p", (void *)(*addr));
 							}
 					}
 					else if (type == "char*")
@@ -933,7 +932,7 @@ public:
 							if(*addr == 0)
 								sprintf (tmp, "<NULL>");
 							else
-								sprintf (tmp, "0x%p", *addr);
+								sprintf (tmp, "0x%p", (void *)*addr);
 						}
 					}
 
@@ -1172,12 +1171,12 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 			// Use an environment variable to share the value among the EXE and its child DLLs
 			// (otherwise there would be one distinct bool by module, and the last
 			// _set_se_translator would overwrite the previous ones)
-			const TCHAR *SE_TRANSLATOR_IN_MAIN_MODULE = _T("NEL_SE_TRANS");
-			TCHAR envBuf [2];
-			if ( GetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) == 0)
+			const char *SE_TRANSLATOR_IN_MAIN_MODULE = "NEL_SE_TRANS";
+			char envBuf [2];
+			if ( GetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, envBuf, 2 ) == 0)
 			{
 				_set_se_translator(exceptionTranslator);
-				SetEnvironmentVariable( SE_TRANSLATOR_IN_MAIN_MODULE, _T("1") );
+				SetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, "1" );
 			}
 		}
 #	endif // NL_OS_WINDOWS

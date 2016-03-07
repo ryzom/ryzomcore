@@ -251,7 +251,7 @@ void	uncbServiceIdentification(CMessage &msgin, TSockId from, CCallbackNetBase &
 	TServiceId	inSid;
 
 	if (from->appId () != AppIdDeadConnection)
-		AUTOCHECK_DISPLAY ("HNETL5: received a connect ident from an unknown connection 0x%"NL_I64"X", from->appId ());
+		AUTOCHECK_DISPLAY ("HNETL5: received a connect ident from an unknown connection 0x%" NL_I64 "X", from->appId ());
 
 	// recover the service name and id
 	msgin.serial(inSName);
@@ -362,7 +362,7 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 
 		if (uc == 0)
 		{
-			nlwarning ("HNETL5: Received a message from a service %hu that is not ready (bad appid? 0x%"NL_I64"X)", sid.get(), from->appId ());
+			nlwarning ("HNETL5: Received a message from a service %hu that is not ready (bad appid? 0x%" NL_I64 "X)", sid.get(), from->appId ());
 			return;
 		}
 		if((*itcb).second == 0)
@@ -1139,7 +1139,7 @@ void	CUnifiedNetwork::update(TTime timeout)
 		if ( remainingTime > prevRemainingTime )
 		{
 			// Restart at previousTime
-			nldebug( "Backward time sync detected (at least -%"NL_I64"d ms)", remainingTime - prevRemainingTime );
+			nldebug( "Backward time sync detected (at least -%" NL_I64 "d ms)", remainingTime - prevRemainingTime );
 			remainingTime = prevRemainingTime;
 			t0 = currentTime - (timeout - remainingTime);
 		}
@@ -1935,7 +1935,7 @@ void	CUnifiedNetwork::autoCheck()
 
 			for (j = 0; j < _IdCnx[i].Connections.size (); j++)
 			{
-				if (_IdCnx[i].Connections[j].valid() && !_IdCnx[i].Connections[j].IsServerConnection && _IdCnx[i].Connections[j].CbNetBase->connected () && _IdCnx[i].Connections[j].getAppId() != i) AUTOCHECK_DISPLAY ("HLNET5: sid %d bad appid %"NL_I64"X", i, _IdCnx[i].Connections[j].getAppId());
+				if (_IdCnx[i].Connections[j].valid() && !_IdCnx[i].Connections[j].IsServerConnection && _IdCnx[i].Connections[j].CbNetBase->connected () && _IdCnx[i].Connections[j].getAppId() != i) AUTOCHECK_DISPLAY ("HLNET5: sid %d bad appid %" NL_I64 "X", i, _IdCnx[i].Connections[j].getAppId());
 			}
 
 			for (j = 0; j < _IdCnx[i].NetworkConnectionAssociations.size (); j++)

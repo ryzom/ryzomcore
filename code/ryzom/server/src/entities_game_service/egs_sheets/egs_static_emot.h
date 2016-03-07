@@ -52,7 +52,7 @@ public:
 		std::map<std::string, size_t>::const_iterator it = _AnimIdMap.find(animId);
 		if (it!=_AnimIdMap.end())
 			return (uint16)it->second;
-		return (uint16)~0;
+		return std::numeric_limits<uint16>::max();
 	}
 	
 	/// Removed

@@ -38,6 +38,8 @@
 #include <iomanip>
 #include <iterator>
 
+#include <libxml/parser.h>
+
 #include "nel/misc/vector.h"
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"

@@ -260,7 +260,7 @@ void CFileContainer::getFileListByPath(const std::string &extension, const std::
 			{
 				string ext = SSMext.get(first->idExt);
 				string p = SSMpath.get(first->idPath);
-				
+
 				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);
@@ -681,11 +681,11 @@ std::string CPath::getCurrentPath ()
 
 std::string CFileContainer::getCurrentPath ()
 {
-	char buffer [1024];
-
 #ifdef NL_OS_WINDOWS
-	return standardizePath(_getcwd(buffer, 1024), false);
+	wchar_t buffer[1024];
+	return standardizePath(wideToUtf8(_wgetcwd(buffer, 1024)), false);
 #else
+	char buffer [1024];
 	return standardizePath(getcwd(buffer, 1024), false);
 #endif
 }
@@ -700,7 +700,7 @@ bool CFileContainer::setCurrentPath (const std::string &path)
 	int res;
 	//nldebug("Change current path to '%s' (current path is '%s')", path.c_str(), getCurrentPath().c_str());
 #ifdef NL_OS_WINDOWS
-	res = _chdir(path.c_str());
+	res = _wchdir(utf8ToWide(path));
 #else
 	res = chdir(path.c_str());
 #endif
@@ -756,11 +756,11 @@ std::string CFileContainer::getFullPath (const std::string &path, bool addFinalS
 
 
 #ifdef NL_OS_WINDOWS
-#	define dirent	WIN32_FIND_DATA
+#	define dirent	WIN32_FIND_DATAW
 #	define DIR		void
 
 static string sDir;
-static WIN32_FIND_DATA findData;
+static WIN32_FIND_DATAW findData;
 static HANDLE hFind;
 
 DIR *opendir (const char *path)
@@ -792,13 +792,12 @@ dirent *readdir (DIR *dir)
 	// first visit in this directory : FindFirstFile()
 	if (hFind == NULL)
 	{
-		string fullPath = CPath::standardizePath(sDir) + "*";
-		hFind = FindFirstFileA (fullPath.c_str(), &findData);
+		hFind = FindFirstFileW (utf8ToWide(CPath::standardizePath(sDir) + "*"), &findData);
 	}
 	// directory already visited : FindNextFile()
 	else
 	{
-		if (!FindNextFileA (hFind, &findData))
+		if (!FindNextFileW (hFind, &findData))
 			return NULL;
 	}
 
@@ -845,7 +844,7 @@ string getname (dirent *de)
 {
 	nlassert (de != NULL);
 #ifdef NL_OS_WINDOWS
-	return de->cFileName;
+	return wideToUtf8(de->cFileName);
 #else
 	return de->d_name;
 #endif // NL_OS_WINDOWS
@@ -1269,7 +1268,7 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 	// Open and read the big file header
 	nlassert(!_MemoryCompressed);
 
-	FILE *Handle = fopen (sBigFilename.c_str(), "rb");
+	FILE *Handle = nlfopen (sBigFilename, "rb");
 	if (Handle == NULL)
 	{
 		nlwarning ("PATH: CPath::addSearchBigFile(%s, %d, %d): can't open file, skip it", sBigFilename.c_str(), recurse, alternative);
@@ -1421,7 +1420,7 @@ void CFileContainer::addSearchXmlpackFile (const string &sXmlpackFilename, bool 
 	}
 	// Open and read the xmlpack file header
 
-	FILE *Handle = fopen (sXmlpackFilename.c_str(), "rb");
+	FILE *Handle = nlfopen (sXmlpackFilename, "rb");
 	if (Handle == NULL)
 	{
 		nlwarning ("PATH: CPath::addSearchXmlpackFile(%s, %d, %d): can't open file, skip it", sXmlpackFilename.c_str(), recurse, alternative);
@@ -1766,31 +1765,41 @@ std::string CFileContainer::getWindowsDirectory()
 	nlwarning("not a ms windows platform");
 	return "";
 #else
-	char winDir[MAX_PATH];
-	UINT numChar = ::GetWindowsDirectory(winDir, MAX_PATH);
+	wchar_t winDir[MAX_PATH];
+	UINT numChar = GetWindowsDirectoryW(winDir, MAX_PATH);
 	if (numChar > MAX_PATH || numChar == 0)
 	{
 		nlwarning("Couldn't retrieve windows directory");
 		return "";
 	}
-	return CPath::standardizePath(winDir);
+	return CPath::standardizePath(wideToUtf8(winDir));
 #endif
 }
 
-std::string CPath::getApplicationDirectory(const std::string &appName)
+std::string CPath::getApplicationDirectory(const std::string &appName, bool local)
 {
-	return getInstance()->_FileContainer.getApplicationDirectory(appName);
+	return getInstance()->_FileContainer.getApplicationDirectory(appName, local);
 }
 
-std::string CFileContainer::getApplicationDirectory(const std::string &appName)
+std::string CFileContainer::getApplicationDirectory(const std::string &appName, bool local)
 {
-	static std::string appPath;
+	static std::string appPaths[2];
+	std::string &appPath = appPaths[local ? 1 : 0];
 	if (appPath.empty())
 	{
 #ifdef NL_OS_WINDOWS
 		wchar_t buffer[MAX_PATH];
-		SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
-		appPath = CPath::standardizePath(ucstring((ucchar*)buffer).toUtf8());
+#ifdef CSIDL_LOCAL_APPDATA
+		if (local)
+		{
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_LOCAL_APPDATA, TRUE);
+		}
+		else
+#endif
+		{
+			SHGetSpecialFolderPathW(NULL, buffer, CSIDL_APPDATA, TRUE);
+		}
+		appPath = CPath::standardizePath(wideToUtf8(buffer));
 #elif defined(NL_OS_MAC)
 		appPath = CPath::standardizePath(getenv("HOME"));
 		appPath += "/Library/Application Support/";
@@ -1854,7 +1863,7 @@ std::string CFileContainer::getTemporaryDirectory()
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int CFile::getLastSeparator (const string &filename)
+std::string::size_type CFile::getLastSeparator (const string &filename)
 {
 	string::size_type pos = filename.find_last_of ('/');
 	if (pos == string::npos)
@@ -1865,7 +1874,7 @@ int CFile::getLastSeparator (const string &filename)
 			pos = filename.find_last_of ('@');
 		}
 	}
-	return (int)pos;
+	return pos;
 }
 
 string CFile::getFilename (const string &filename)
@@ -1908,7 +1917,7 @@ string CFile::getPath (const string &filename)
 bool CFile::isDirectory (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	DWORD res = GetFileAttributes(filename.c_str());
+	DWORD res = GetFileAttributesW(utf8ToWide(filename));
 	if (res == INVALID_FILE_ATTRIBUTES)
 	{
 		// nlwarning ("PATH: '%s' is not a valid file or directory name", filename.c_str ());
@@ -1931,7 +1940,7 @@ bool CFile::isDirectory (const string &filename)
 bool CFile::isExists (const string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return (GetFileAttributes(filename.c_str()) != INVALID_FILE_ATTRIBUTES);
+	return GetFileAttributesW(utf8ToWide(filename)) != INVALID_FILE_ATTRIBUTES;
 #else // NL_OS_WINDOWS
 	struct stat buf;
 	return stat (filename.c_str (), &buf) == 0;
@@ -1940,7 +1949,7 @@ bool CFile::isExists (const string &filename)
 
 bool CFile::createEmptyFile (const std::string& filename)
 {
-	FILE *file = fopen (filename.c_str(), "wb");
+	FILE *file = nlfopen (filename, "wb");
 
 	if (file)
 	{
@@ -1954,7 +1963,14 @@ bool CFile::createEmptyFile (const std::string& filename)
 bool CFile::fileExists (const string& filename)
 {
 	//H_AUTO(FileExists);
-	return ! ! fstream( filename.c_str(), ios::in );
+#ifdef NL_OS_WINDOWS
+	DWORD attr = GetFileAttributesW(utf8ToWide(filename));
+	// attributes are valid and file is not a directory
+	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY)) return false;
+	return true;
+#else
+	return access(filename.c_str(), R_OK) != -1;
+#endif
 }
 
 
@@ -2003,7 +2019,7 @@ uint32	CFile::getFileSize (const std::string &filename)
 	{
 #if defined (NL_OS_WINDOWS)
 		struct _stat buf;
-		int result = _stat (filename.c_str (), &buf);
+		int result = _wstat (utf8ToWide(filename), &buf);
 #elif defined (NL_OS_UNIX)
 		struct stat buf;
 		int result = stat (filename.c_str (), &buf);
@@ -2054,7 +2070,7 @@ uint32	CFile::getFileModificationDate(const std::string &filename)
 	// Use the WIN32 API to read the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFile(fn.c_str(), 0, 0, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(utf8ToWide(fn), 0, 0, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't get modification date on file '%s' : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2124,7 +2140,7 @@ bool	CFile::setFileModificationDate(const std::string &filename, uint32 modTime)
 	// Use the WIN32 API to set the file times in UTC
 
 	// create a file handle (this does not open the file)
-	HANDLE h = CreateFile(fn.c_str(), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+	HANDLE h = CreateFileW(utf8ToWide(fn), GENERIC_WRITE|GENERIC_READ, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 	if (h == INVALID_HANDLE_VALUE)
 	{
 		nlwarning("Can't set modification date on file '%s' (error accessing file) : %s", fn.c_str(), NLMISC::formatErrorMessage(NLMISC::getLastError()).c_str());
@@ -2209,10 +2225,10 @@ uint32	CFile::getFileCreationDate(const std::string &filename)
 
 #if defined (NL_OS_WINDOWS)
 	struct _stat buf;
-	int result = _stat (fn.c_str (), &buf);
+	int result = _wstat(utf8ToWide(fn), &buf);
 #elif defined (NL_OS_UNIX)
 	struct stat buf;
-	int result = stat (fn.c_str (), &buf);
+	int result = stat(fn.c_str (), &buf);
 #endif
 
 	if (result != 0) return 0;
@@ -2289,9 +2305,6 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	std::string sdest = CPath::standardizePath(dest,false);
 	std::string ssrc = CPath::standardizePath(src,false);
 
-//	return copyFile  ? CopyFile(dossrc.c_str(), dosdest.c_str(), failIfExists) != FALSE
-//					 : MoveFile(dossrc.c_str(), dosdest.c_str()) != FALSE;
-
 	if (progress) progress->progress(0.f);
 	if(copyFile)
 	{
@@ -2301,13 +2314,13 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 		{
 			totalSize = CFile::getFileSize(ssrc);
 		}
-		FILE *fp1 = fopen(ssrc.c_str(), "rb");
+		FILE *fp1 = nlfopen(ssrc, "rb");
 		if (fp1 == NULL)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read mode '%s'", ssrc.c_str());
 			return false;
 		}
-		FILE *fp2 = fopen(sdest.c_str(), "wb");
+		FILE *fp2 = nlfopen(sdest, "wb");
 		if (fp2 == NULL)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read write mode '%s'", sdest.c_str());
@@ -2346,25 +2359,15 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 	else
 	{
 #ifdef NL_OS_WINDOWS
-		if (MoveFile(ssrc.c_str(), sdest.c_str()) == 0)
+		if (MoveFileW(utf8ToWide(ssrc), utf8ToWide(sdest)) == 0)
 		{
-			LPVOID lpMsgBuf;
-			FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-					    FORMAT_MESSAGE_FROM_SYSTEM |
-						FORMAT_MESSAGE_IGNORE_INSERTS,
-						NULL,
-						GetLastError(),
-						MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-						(LPTSTR) &lpMsgBuf,
-						0,
-						NULL );
+			sint lastError = NLMISC::getLastError();
 			nlwarning ("PATH: CopyMoveFile error: can't link/move '%s' into '%s', error %u (%s)",
 				ssrc.c_str(),
 				sdest.c_str(),
-				GetLastError(),
-				lpMsgBuf);
+				lastError,
+				NLMISC::formatErrorMessage(lastError).c_str());
 
-			LocalFree(lpMsgBuf);
 			return false;
 		}
 #else
@@ -2390,15 +2393,15 @@ bool CFile::copyFile(const std::string &dest, const std::string &src, bool failI
 bool CFile::quickFileCompare(const std::string &fileName0, const std::string &fileName1)
 {
 	// make sure the files both exist
-	if (!fileExists(fileName0.c_str()) || !fileExists(fileName1.c_str()))
+	if (!fileExists(fileName0) || !fileExists(fileName1))
 		return false;
 
 	// compare time stamps
-	if (getFileModificationDate(fileName0.c_str()) != getFileModificationDate(fileName1.c_str()))
+	if (getFileModificationDate(fileName0) != getFileModificationDate(fileName1))
 		return false;
 
 	// compare file sizes
-	if (getFileSize(fileName0.c_str()) != getFileSize(fileName1.c_str()))
+	if (getFileSize(fileName0) != getFileSize(fileName1))
 		return false;
 
 	// everything matched so return true
@@ -2408,14 +2411,14 @@ bool CFile::quickFileCompare(const std::string &fileName0, const std::string &fi
 bool CFile::thoroughFileCompare(const std::string &fileName0, const std::string &fileName1,uint32 maxBufSize)
 {
 	// make sure the files both exist
-	if (!fileExists(fileName0.c_str()) || !fileExists(fileName1.c_str()))
+	if (!fileExists(fileName0) || !fileExists(fileName1))
 		return false;
 
 	// setup the size variable from file length of first file
-	uint32 fileSize=getFileSize(fileName0.c_str());
+	uint32 fileSize=getFileSize(fileName0);
 
 	// compare file sizes
-	if (fileSize != getFileSize(fileName1.c_str()))
+	if (fileSize != getFileSize(fileName1))
 		return false;
 
 	// allocate a couple of data buffers for our 2 files
@@ -2451,7 +2454,7 @@ bool CFile::thoroughFileCompare(const std::string &fileName0, const std::string 
 	return true;
 }
 
-bool CFile::moveFile(const char *dest,const char *src)
+bool CFile::moveFile(const std::string &dest, const std::string &src)
 {
 	return CopyMoveFile(dest, src, false);
 }
@@ -2459,7 +2462,7 @@ bool CFile::moveFile(const char *dest,const char *src)
 bool CFile::createDirectory(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
-	return _mkdir(filename.c_str())==0;
+	return _wmkdir(utf8ToWide(filename))==0;
 #else
 	// Set full permissions....
 	return mkdir(filename.c_str(), 0xFFFF)==0;
@@ -2546,65 +2549,150 @@ bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
 	return false;
 }
 
-std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory )
+std::string CPath::makePathAbsolute( const std::string &relativePath, const std::string &directory, bool simplify )
 {
 	if( relativePath.empty() )
 		return "";
 	if( directory.empty() )
 		return "";
 
+	std::string absolutePath;
+
 #ifdef NL_OS_WINDOWS
 	// Windows network address. Eg.: \\someshare\path
-	if( ( relativePath[ 0 ] == '\\' ) && ( relativePath[ 1 ] == '\\' ) )
-		return relativePath;
+	if ((relativePath[0] == '\\') && (relativePath[1] == '\\'))
+	{
+		absolutePath = relativePath;
+	}
 
 	// Normal Windows absolute path. Eg.: C:\something
 	//
-	if( isalpha( relativePath[ 0 ] ) && ( relativePath[ 1 ] == ':' ) && ( ( relativePath[ 2 ] == '\\' ) || ( relativePath[ 2 ] == '/' ) ) )
-		return relativePath;
-#else
-	// Unix filesystem absolute path
-	if( relativePath[ 0 ] == '/' )
-		return relativePath;
+	else if (isalpha(relativePath[0]) && (relativePath[1] == ':') && ((relativePath[2] == '\\') || (relativePath[2] == '/')))
+	{
+		absolutePath = relativePath;
+	}
+	else
+#endif
+	// Unix filesystem absolute path (works also under Windows)
+	if (relativePath[0] == '/')
+	{
+		absolutePath = relativePath;
+	}
+	else
+	{
+		// Add a slash to the directory if necessary.
+		// If the relative path starts with dots we need a slash.
+		// If the relative path starts with a slash we don't.
+		// If it starts with neither, we need a slash.
+		bool needSlash = true;
+		char c = relativePath[0];
+		if ((c == '\\') || (c == '/'))
+			needSlash = false;
 
+		bool hasSlash = false;
+		absolutePath = directory;
+		c = absolutePath[absolutePath.size() - 1];
+		if ((c == '\\') || (c == '/'))
+			hasSlash = true;
+
+		if (needSlash && !hasSlash)
+			absolutePath += '/';
+		else
+		if (hasSlash && !needSlash)
+			absolutePath.resize(absolutePath.size() - 1);
+
+		// Now build the new absolute path
+		absolutePath += relativePath;
+	}
+
+	absolutePath = standardizePath(absolutePath, true);
+
+	if (simplify)
+	{
+		// split all components path to manage parent directories
+		std::vector<std::string> tokens;
+		explode(absolutePath, std::string("/"), tokens, false);
+
+		std::vector<std::string> directoryParts;
+
+		// process all components
+		for(uint i = 0, len = tokens.size(); i < len; ++i)
+		{
+			std::string token = tokens[i];
+
+			// current directory
+			if (token != ".")
+			{
+				// parent directory
+				if (token == "..")
+				{
+					// remove last directory
+					directoryParts.pop_back();
+				}
+				else
+				{
+					// append directory
+					directoryParts.push_back(token);
+				}
+			}
+		}
+
+		if (!directoryParts.empty())
+		{
+			absolutePath = directoryParts[0];
+
+			// rebuild the whole absolute path
+			for(uint i = 1, len = directoryParts.size(); i < len; ++i)
+			{
+				if (!directoryParts[i].empty())
+					absolutePath += "/" + directoryParts[i];
+			}
+
+			// add trailing slash
+			absolutePath += "/";
+		}
+		else
+		{
+			// invalid path
+			absolutePath.clear();
+		}
+	}
+
+	return absolutePath;
+}
+
+bool CPath::isAbsolutePath(const std::string &path)
+{
+	if (path.empty()) return false;
+
+#ifdef NL_OS_WINDOWS
+	// Windows root of current disk. Eg.: "\" or
+	// Windows network address. Eg.: \\someshare\path
+	if (path[0] == '\\') return true;
+
+	// Normal Windows absolute path. Eg.: C:\something
+	if (path.length() > 2 && isalpha(path[0]) && (path[1] == ':' ) && ((path[2] == '\\') || (path[2] == '/' ))) return true;
 #endif
 
-	// Add a slash to the directory if necessary.
-	// If the relative path starts with dots we need a slash.
-	// If the relative path starts with a slash we don't.
-	// If it starts with neither, we need a slash.
-	bool needSlash = true;
-	char c = relativePath[ 0 ];
-	if( ( c == '\\' ) || ( c == '/' ) )
-		needSlash = false;
-	
-	bool hasSlash = false;
-	std::string npath = directory;
-	c = npath[ npath.size() - 1 ];
-	if( ( c == '\\' ) || ( c == '/' ) )
-		hasSlash = true;
+	// Unix filesystem absolute path (works also under Windows)
+	if (path[0] == '/') return true;
 
-	if( needSlash && !hasSlash )
-		npath += '/';
-	else
-	if( hasSlash && !needSlash )
-		npath.resize( npath.size() - 1 );
-	
-	// Now build the new absolute path
-	npath += relativePath;
-	npath = standardizePath( npath, false );
-
-	return npath;
+	return false;
 }
 
 bool CFile::setRWAccess(const std::string &filename)
 {
 #ifdef NL_OS_WINDOWS
+	ucstring ucFile;
+	ucFile.fromUtf8(filename);
+
+	wchar_t *wideFile = (wchar_t*)ucFile.c_str();
+
 	// if the file exists and there's no write access
-	if (_access (filename.c_str(), 00) == 0 && _access (filename.c_str(), 06) == -1)
+	if (_waccess (wideFile, 00) == 0 && _waccess (wideFile, 06) == -1)
 	{
 		// try to set the read/write access
-		if (_chmod (filename.c_str(), _S_IREAD | _S_IWRITE) == -1)
+		if (_wchmod (wideFile, _S_IREAD | _S_IWRITE) == -1)
 		{
 			if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
 			{
@@ -2639,15 +2727,14 @@ bool CFile::setRWAccess(const std::string &filename)
 	return true;
 }
 
-
-#ifdef NL_OS_WINDOWS
-#define unlink _unlink
-#endif
-
 bool CFile::deleteFile(const std::string &filename)
 {
 	setRWAccess(filename);
-	int res = unlink (filename.c_str());
+#ifdef NL_OS_WINDOWS
+	sint res = _wunlink(utf8ToWide(filename));
+#else
+	sint res = unlink(filename.c_str());
+#endif
 	if (res == -1)
 	{
 		if (INelContext::getInstance().getAlreadyCreateSharedAmongThreads())
@@ -2659,14 +2746,14 @@ bool CFile::deleteFile(const std::string &filename)
 	return true;
 }
 
-#ifdef NL_OS_WINDOWS
-#define rmdir _rmdir
-#endif
-
 bool CFile::deleteDirectory(const std::string &filename)
 {
 	setRWAccess(filename);
-	int res = rmdir (filename.c_str());
+#ifdef NL_OS_WINDOWS
+	sint res = _wrmdir(utf8ToWide(filename));
+#else
+	sint res = rmdir(filename.c_str());
+#endif
 	if (res == -1)
 	{
 		nlwarning ("PATH: Can't delete directory '%s': (errno %d) %s", filename.c_str(), errno, strerror(errno));

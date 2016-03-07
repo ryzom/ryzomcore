@@ -44,7 +44,7 @@
 #ifdef HAVE_LIBOVR_02
 
 #include "std3d.h"
-#include <nel/3d/stereo_ovr.h>
+#include "nel/3d/stereo_ovr.h"
 
 // STL includes
 #include <sstream>
@@ -55,13 +55,13 @@
 
 // NeL includes
 // #include <nel/misc/debug.h>
-#include <nel/3d/u_camera.h>
-#include <nel/3d/u_driver.h>
-#include <nel/3d/material.h>
-#include <nel/3d/texture_bloom.h>
-#include <nel/3d/texture_user.h>
-#include <nel/3d/driver_user.h>
-#include <nel/3d/u_texture.h>
+#include "nel/3d/u_camera.h"
+#include "nel/3d/u_driver.h"
+#include "nel/3d/material.h"
+#include "nel/3d/texture_bloom.h"
+#include "nel/3d/texture_user.h"
+#include "nel/3d/driver_user.h"
+#include "nel/3d/u_texture.h"
 
 // Project includes
 
@@ -301,15 +301,15 @@ public:
 		CPixelProgram::buildInfo();
 
 		m_OVRIndices.LensCenter = getUniformIndex("cLensCenter");
-		nlassert(m_OVRIndices.LensCenter != ~0);
+		nlassert(m_OVRIndices.LensCenter != std::numeric_limits<uint>::max());
 		m_OVRIndices.ScreenCenter = getUniformIndex("cScreenCenter");
-		nlassert(m_OVRIndices.ScreenCenter != ~0);
+		nlassert(m_OVRIndices.ScreenCenter != std::numeric_limits<uint>::max());
 		m_OVRIndices.Scale = getUniformIndex("cScale");
-		nlassert(m_OVRIndices.Scale != ~0);
+		nlassert(m_OVRIndices.Scale != std::numeric_limits<uint>::max());
 		m_OVRIndices.ScaleIn = getUniformIndex("cScaleIn");
-		nlassert(m_OVRIndices.ScaleIn != ~0);
+		nlassert(m_OVRIndices.ScaleIn != std::numeric_limits<uint>::max());
 		m_OVRIndices.HmdWarpParam = getUniformIndex("cHmdWarpParam");
-		nlassert(m_OVRIndices.HmdWarpParam != ~0);
+		nlassert(m_OVRIndices.HmdWarpParam != std::numeric_limits<uint>::max());
 	}
 
 	inline const COVRIndices &ovrIndices() { return m_OVRIndices; }

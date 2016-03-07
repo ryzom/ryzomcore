@@ -46,7 +46,6 @@
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/mode_and_behaviour.h"
-#include "game_share/ryzom_version.h"
 #include "game_share/brick_types.h"
 #include "game_share/time_weather_season/time_and_season.h"
 
@@ -100,6 +99,7 @@
 #include "far_tp.h"
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
+#include "user_agent.h"
 
 
 //
@@ -155,14 +155,6 @@ void releaseCommands()
 //////////////
 // COMMANDS //
 //////////////
-
-// connect to the support chat
-NLMISC_COMMAND(supportChat, "connect to the external support chat", "")
-{
-	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-	pIM->connectYuboChat();
-	return true;
-}
 
 // 'follow' : To Follow the target.
 NLMISC_COMMAND(follow, "Follow the target", "")
@@ -695,15 +687,15 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 		sys += "AttachedFile "+filename+" ";
 	}
 
-	sys += "ClientVersion "RYZOM_VERSION" ";
+	sys += NLMISC::toString("ClientVersion %s ", getVersion().c_str());
 
 	// for now, set the same version than client one
-	sys += "ShardVersion "RYZOM_VERSION" ";
+	sys += NLMISC::toString("ShardVersion %s ", getVersion().c_str());
 
 	if (ClientCfg.Local)
 		sys += "ShardName OFFLINE ";
 
-	FILE *fp = fopen (std::string(getLogDirectory() + "bug_report.txt").c_str(), "wb");
+	FILE *fp = nlfopen (getLogDirectory() + "bug_report.txt", "wb");
 	if (fp != NULL)
 	{
 		string res = addSlashR(getDebugInformation());
@@ -929,7 +921,7 @@ NLMISC_COMMAND(verbose, "Enable/Disable some Debug Information", "none or magic"
 	}
 	else
 	{
-		std::string type = NLMISC::strlwr(args[0]);
+		std::string type = NLMISC::toLower(args[0]);
 		if     (type == "none")
 			Verbose = VerboseNone;
 		else if(type == "magic")
@@ -1334,7 +1326,7 @@ NLMISC_COMMAND(ah, "Launch an action handler", "<ActionHandler> <AHparam>")
 	if (args.size() == 0)
 		return false;
 
-	if (!ClientCfg.AllowDebugLua && strlwr(args[0]) == "lua")
+	if (!ClientCfg.AllowDebugLua && toLower(args[0]) == "lua")
 	{
 		return false; // not allowed!!
 	}
@@ -1891,7 +1883,7 @@ NLMISC_COMMAND(pos, "Change the position of the user (in local only)", "<x, y, (
 	if(args.size() == 1)
 	{
 		string dest = args[0];
-		newPos = CTeleport::getPos(NLMISC::strlwr(dest));
+		newPos = CTeleport::getPos(NLMISC::toLower(dest));
 		if(newPos == CTeleport::Unknown)
 		{
 			//here we try to teleport to a bot destination
@@ -3913,20 +3905,12 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 }
 
 
-#if defined(NL_OS_WINDOWS)
 NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 {
 	if (args.size () != 1)
 		return false;
 
-	HINSTANCE result = ShellExecute(NULL, "open", args[0].c_str(), NULL,NULL, SW_SHOW);
-	if ((intptr_t)result > 32)
-		return true;
-	else
-	{
-		log.displayNL ("ShellExecute failed %d", (uint32)(intptr_t)result);
-		return false;
-	}
+	return openURL(args[0].c_str());
 }
 
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
@@ -3948,8 +3932,6 @@ NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
 
 	return true;
 }
-
-#endif // !FINAL_VERSION
 
 struct CItemSheetSort
 {

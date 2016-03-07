@@ -43,7 +43,7 @@ void readFromLua(const CLuaObject &table, const char *key, float &dest)
 }
 void readFromLua(const CLuaObject &table, const char *key, uint &dest)
 {
-	if (table[key].isNumber()) dest = (uint) table[key].toNumber();
+	if (table[key].isInteger()) dest = (uint) table[key].toInteger();
 }
 void readFromLua(const CLuaObject &table, const char *key, std::string &dest)
 {

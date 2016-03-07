@@ -243,7 +243,7 @@ bool		CIFile::open(const std::string &path, bool text)
 		_IsInXMLPackFile = false;
 		_BigFileOffset = 0;
 		_AlwaysOpened = false;
-		_F = fopen (path.c_str(), mode);
+		_F = nlfopen (path, mode);
 		if (_F != NULL)
 		{
 			/*
@@ -598,7 +598,7 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 			return false;
 	}
 
-	_F=fopen(fileToOpen.c_str(), mode);
+	_F = nlfopen(fileToOpen, mode);
 
 	return _F!=NULL;
 }
@@ -627,7 +627,7 @@ void	COFile::internalClose(bool success)
 					if (CFile::fileExists(_FileName))
 						CFile::deleteFile (_FileName);
 
-					if (CFile::moveFile (_FileName.c_str(), _TempFileName.c_str()))
+					if (CFile::moveFile(_FileName, _TempFileName))
 						break;
 					nlSleep (0);
 				}
@@ -791,7 +791,7 @@ NLMISC_CATEGORISED_COMMAND(nel, iFileAccessLogDisplay, "Display file access logs
 		while (atIt!=atItEnd)
 		{
 			uint64 delta= (*atIt-IFileAccessLogStartTime);
-			log.display("%"NL_I64"u,",delta);
+			log.display("%" NL_I64 "u,",delta);
 			++atIt;
 		}
 		log.displayNL("");

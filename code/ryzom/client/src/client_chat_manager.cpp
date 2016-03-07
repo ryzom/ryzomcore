@@ -1300,7 +1300,6 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 							pUserBut->setHardText(title.toUtf8());
 						}
 						break;
-					// NB: user chat cannot have yubo_chat target
 				}
 
 				pUserBut->setActive(true);
@@ -1371,7 +1370,7 @@ class CHandlerTalk : public IActionHandler
 				else
 				{
 					CInterfaceManager *im = CInterfaceManager::getInstance();
-					im->displaySystemInfo (ucstring(cmd+": ")+CI18N::get ("uiCommandNotExists"));
+					im->displaySystemInfo (ucstring::makeFromUtf8(cmd) + ": " + CI18N::get ("uiCommandNotExists"));
 				}
 			}
 			else
