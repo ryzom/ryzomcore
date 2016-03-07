@@ -346,6 +346,7 @@ namespace NLGUI
 
 		// set the minW of the RootMenu.
 		void	setMinW(sint32 minW);
+		void	setMinH(sint32 minH);
 
 		// Gray a line on the RootMenu
 		void	setGrayedLine(uint line, bool g);
