@@ -1414,7 +1414,8 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
 			throw Exception ("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str (), errno, strerror(errno));
 		}
-		curl_easy_setopt(curl, CURLOPT_FILE, fp);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
 		//CurrentFilesToGet++;
 
