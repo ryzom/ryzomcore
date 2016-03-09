@@ -293,7 +293,7 @@ std::string CI18N::getSystemLanguageCode ()
 					}
 					else
 					{
-						nlerror("Unable to convert CFStringRef to string");
+						nlwarning("Unable to convert CFStringRef to string");
 					}
 
 					delete [] tmp;
