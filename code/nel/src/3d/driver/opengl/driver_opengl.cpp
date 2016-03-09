@@ -1203,6 +1203,7 @@ sint CDriverGL::getTotalVideoMemory() const
 {
 	H_AUTO_OGL(CDriverGL_getTotalVideoMemory);
 
+#ifndef USE_OPENGLES
 	if (_Extensions.NVXGPUMemoryInfo)
 	{
 		GLint memoryInKiB = 0;
@@ -1304,6 +1305,10 @@ sint CDriverGL::getTotalVideoMemory() const
 			return memoryInMiB * 1024;
 		}
 	}
+#endif
+
+#else
+	// TODO: implement for OpenGL ES
 #endif
 
 	return -1;
