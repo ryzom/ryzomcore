@@ -306,11 +306,20 @@ std::string CI18N::getSystemLanguageCode ()
 				CFRelease(langCF);
 			}
 
-			// only keep language code if supported by NeL
-			if (!lang.empty() && isLanguageCodeSupported(lang))
+			if (!lang.empty())
 			{
-				s_cachedSystemLanguage = lang;
-				break;
+				// fix language code if country is specified
+				std::string::size_type pos = lang.find('-');
+
+				if (pos != std::string::npos)
+					lang = lang.substr(0, pos);
+
+				// only keep language code if supported by NeL
+				if (isLanguageCodeSupported(lang))
+				{
+					s_cachedSystemLanguage = lang;
+					break;
+				}
 			}
 		}
 
