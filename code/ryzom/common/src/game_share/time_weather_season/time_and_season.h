@@ -135,18 +135,11 @@ public:
 	{
 		_RyzomDay = 0;
 		_RyzomTime = 0.f;
-		_LocalTime = 0.0;
 		_TickOffset = 0;
 	}
 
 	// Update ryzom clock when tick occurs, local time must be given if localUpdateRyzomClock() and getLocalRyzomTime() is used
-	void updateRyzomClock( uint32 gameCyle, double localTime = 0 )
-	{
-		float hours = ( gameCyle + _TickOffset ) / float(RYZOM_HOURS_IN_TICKS);
-		_RyzomDay = ( (uint)hours / RYZOM_DAY_IN_HOUR ) - RYZOM_START_SPRING;
-		_RyzomTime = (float) fmod( hours, (float)RYZOM_DAY_IN_HOUR );
-		_LocalTime = localTime;
-	}
+	void updateRyzomClock(uint32 gameCyle);
 
 	// get ryzom time (synchronized with server)
 	inline float getRyzomTime() const { return _RyzomTime; }
@@ -202,7 +195,6 @@ private:
 
 	uint32				_RyzomDay;
 	float				_RyzomTime;
-	double				_LocalTime;
 	uint32				_TickOffset;
 };
 
