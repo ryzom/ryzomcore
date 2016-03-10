@@ -797,10 +797,10 @@ void initMainLoop()
 
 	{
 		// setup good day / season before ig are added.
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		StartupSeason =  CurrSeason = RT.getRyzomSeason();
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		updateDayNightCycleHour();
 		ManualSeasonValue = RT.getRyzomSeason();
 

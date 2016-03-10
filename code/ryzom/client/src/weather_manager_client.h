@@ -105,6 +105,8 @@ protected:
 	// from CWeatherManager
 	virtual void setupLoaded(CWeatherSetup *setup);
 private:
+	void                 manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season);
+	void                 manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season, const NLMISC::CMatrix &camMat, const class CContinent &continent);
 	typedef std::map<std::string, CPrecipitation> TPrecipitationMap;
 	// A vector of precipitation pointers
 	typedef std::vector<CPrecipitation *> TPrecipitationVect;

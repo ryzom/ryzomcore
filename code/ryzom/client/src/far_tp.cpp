@@ -1245,10 +1245,10 @@ void CFarTP::sendReady()
 	else
 	{
 		// Set season
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		DayNightCycleHour	= (float)RT.getRyzomTime();
 		CurrSeason = RT.getRyzomSeason();
-		RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+		RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 		DayNightCycleHour	= (float)RT.getRyzomTime();
 		ManualSeasonValue = RT.getRyzomSeason();
 
