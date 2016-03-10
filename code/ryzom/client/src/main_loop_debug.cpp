@@ -430,6 +430,9 @@ void displayDebug()
 				TextContext->printfAt(1.f, line, "TEST WEATHER FUNCTION");
 				line += lineStep;
 			}
+			// thunder
+			TextContext->printfAt(1.f, line, "Thunder level : %.02f", WeatherManager.getThunderLevel());
+			line += lineStep;
 			// season
 			TextContext->printfAt(1.f, line, "Season : %s", EGSPD::CSeason::toString(CurrSeason).c_str());
 			line += lineStep;
