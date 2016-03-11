@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "config.h"
 
+#include "nel/misc/common.h"
+#include "nel/misc/i18n.h"
+#include "nel/misc/path.h"
+
 CConfig::CConfig()
 {
 }
@@ -25,17 +29,50 @@ CConfig::~CConfig()
 {
 }
 
-bool CConfig::load( const char *fileName )
+bool CConfig::create(const std::string &configFileName, const std::string &defaultFileName)
+{
+	NLMISC::CFile::createDirectoryTree(NLMISC::CFile::getPath(configFileName));
+
+	// create the basic .cfg
+	FILE *fp = NLMISC::nlfopen(configFileName, "w");
+
+	if (fp == NULL) return false;
+
+	// store full path to default config file
+	fprintf(fp, "RootConfigFilename   = \"%s\";\n", defaultFileName.c_str());
+
+	// get current locale
+	std::string lang = NLMISC::CI18N::getSystemLanguageCode();
+
+	const std::vector<std::string> &languages = NLMISC::CI18N::getLanguageCodes();
+
+	// search if current locale is defined in language codes
+	for(uint i = 0; i < languages.size(); ++i)
+	{
+		if (lang == languages[i])
+		{
+			// store the language code in the config file
+			fprintf(fp, "LanguageCode         = \"%s\";\n", lang.c_str());
+			break;
+		}
+	}
+
+	fclose(fp);
+
+	return true;
+}
+
+bool CConfig::load(const std::string &fileName)
 {
 	try
 	{
-		cf.load( fileName );
+		cf.load(fileName);
 
-		std::string def = getString( "RootConfigFilename" );
-		if( def.compare( "" ) != 0 )
-			dcf.load( def );
+		std::string def = getString("RootConfigFilename");
+		if (!def.empty())
+			dcf.load(def);
 	}
-	catch( NLMISC::Exception &e )
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning( "%s", e.what() );
 		return false;
@@ -51,7 +88,7 @@ bool CConfig::reload()
 		cf.clear();
 		cf.reparse();
 	}
-	catch( NLMISC::Exception &e )
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning( "%s", e.what() );
 		return false;
@@ -112,7 +149,7 @@ bool CConfig::save()
 	{
 		cf.save();
 	}
-	catch( NLMISC::Exception &e )
+	catch (const NLMISC::Exception &e)
 	{
 		nlwarning( "%s", e.what() );
 		return false;

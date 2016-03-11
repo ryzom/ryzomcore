@@ -28,7 +28,7 @@
        <item>
         <widget class="QCheckBox" name="texcompressionCheckBox">
          <property name="text">
-          <string>Disable texture compression</string>
+          <string>Force texture compression</string>
          </property>
         </widget>
        </item>

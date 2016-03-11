@@ -27,7 +27,7 @@ CSysInfoWidget::CSysInfoWidget( QWidget *parent ) :
 	osLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.osName.c_str()));
 	cpuLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.cpuName.c_str()));
 
-	ramLabel->setText(QString(tr("%1 MB").arg(CSystem::GetInstance().sysInfo.totalRAM)));
+	ramLabel->setText(QString(tr("%1 MiB").arg(CSystem::GetInstance().sysInfo.totalRAM)));
 
 	gfxcardLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.videoDevice.c_str()));
 	gfxdriverLabel->setText(QString::fromUtf8(CSystem::GetInstance().sysInfo.videoDriverVersion.c_str()));

@@ -29,11 +29,19 @@ public:
 	~CConfig();
 
 	/**
+	 @brief  Create a config file.
+	 @param  fileName - The config file to create
+	 @param  defaultFileName - The default config file to use
+	 @return Returns true on success, returns false on failure.
+	*/
+	bool create(const std::string &fileName, const std::string &defaultFileName);
+
+	/**
 	 @brief  Loads a config file.
 	 @param  fileName - The file to load
 	 @return Returns true on success, returns false on failure.
 	*/
-	bool load( const char *fileName );
+	bool load(const std::string &fileName);
 
 	/**
 	 @brief  Reloads the contents of the config file
