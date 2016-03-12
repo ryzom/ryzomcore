@@ -47,6 +47,8 @@ struct CProfile
 	CProfile()
 	{
 		id = -1;
+		desktopShortcut = false;
+		menuShortcut = false;
 	}
 
 	int id;
@@ -56,6 +58,8 @@ struct CProfile
 	QString executable;
 	QString arguments;
 	QString comments;
+	bool desktopShortcut;
+	bool menuShortcut;
 };
 
 extern const CProfile NoProfile;

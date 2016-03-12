@@ -112,6 +112,8 @@ bool CConfigFile::load(const QString &filename)
 		profile.executable = settings.value("executable").toString();
 		profile.arguments = settings.value("arguments").toString();
 		profile.comments = settings.value("comments").toString();
+		profile.desktopShortcut = settings.value("desktop_shortcut").toBool();
+		profile.menuShortcut = settings.value("menu_shortcut").toBool();
 
 		settings.endGroup();
 	}
@@ -180,6 +182,8 @@ bool CConfigFile::save() const
 		settings.setValue("executable", profile.executable);
 		settings.setValue("arguments", profile.arguments);
 		settings.setValue("comments", profile.comments);
+		settings.setValue("desktop_shortcut", profile.desktopShortcut);
+		settings.setValue("menu_shortcut", profile.menuShortcut);
 
 		settings.endGroup();
 	}
