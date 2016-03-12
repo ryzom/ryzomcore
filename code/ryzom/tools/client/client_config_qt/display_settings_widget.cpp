@@ -166,7 +166,18 @@ void CDisplaySettingsWidget::updateVideoModes()
 
 	while(itr != iend)
 	{
-		videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+		if (itr->frequency)
+		{
+			videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+		}
+		else if (itr->width)
+		{
+			videomodeComboBox->addItem(QString("%1x%2 %3 bit").arg(itr->width).arg(itr->height).arg(itr->depth));
+		}
+		else
+		{
+			videomodeComboBox->addItem(tr("Auto"));
+		}
 
 		++itr;
 	}
