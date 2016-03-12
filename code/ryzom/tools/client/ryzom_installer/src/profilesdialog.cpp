@@ -97,7 +97,7 @@ void CProfilesDialog::displayProfile(int index)
 	profileIdLabel->setText(QString::number(profile.id));
 	accountEdit->setText(profile.account);
 	nameEdit->setText(profile.name);
-	serverComboBox->setCurrentIndex(0);
+	serverComboBox->setCurrentIndex(m_serversModel->getIndexFromServerID(profile.server));
 	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
 	argumentsEdit->setText(profile.arguments);
 	commentsEdit->setPlainText(profile.comments);
@@ -115,11 +115,10 @@ void CProfilesDialog::saveProfile(int index)
 	if (index < 0) return;
 
 	CProfile &profile = m_model->getProfiles()[index];
-
-	profileIdLabel->setText(QString::number(profile.id));
+	
 	profile.account = accountEdit->text();
 	profile.name = nameEdit->text();
-//	serverComboBox->setCurrentIndex(0);
+	profile.server = m_serversModel->getServerIDFromIndex(serverComboBox->currentIndex());
 	profile.arguments = argumentsEdit->text();
 	profile.comments = commentsEdit->toPlainText();
 }
