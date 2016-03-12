@@ -3,6 +3,12 @@
 
 #include "configfile.h"
 
+/**
+ * Profiles model
+ *
+ * \author Cedric 'Kervala' OCHS
+ * \date 2016
+ */
 class CProfilesModel : public QAbstractListModel
 {
 public:

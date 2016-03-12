@@ -19,6 +19,12 @@
 
 #include "ui_settings.h"
 
+/**
+ * Settings dialog
+ *
+ * \author Cedric 'Kervala' OCHS
+ * \date 2016
+ */
 class CSettingsDialog : public QDialog, public Ui::SettingsDialog
 {
 	Q_OBJECT

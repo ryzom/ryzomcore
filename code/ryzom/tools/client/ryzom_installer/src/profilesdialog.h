@@ -21,6 +21,12 @@
 
 class CProfilesModel;
 
+/**
+ * Dialog displayed when editing existing profiles.
+ *
+ * \author Cedric 'Kervala' OCHS
+ * \date 2016
+ */
 class CProfilesDialog : public QDialog, public Ui::ProfilesDialog
 {
 	Q_OBJECT
