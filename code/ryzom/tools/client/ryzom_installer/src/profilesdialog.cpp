@@ -17,6 +17,7 @@
 #include "stdpch.h"
 #include "profilesdialog.h"
 #include "profilesmodel.h"
+#include "serversmodel.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -32,16 +33,15 @@ CProfilesDialog::CProfilesDialog():QDialog(), m_currentProfileIndex(-1)
 	connect(executableBrowseButton, SIGNAL(clicked()), SLOT(onExecutableBrowseClicked()));
 
 	m_model = new CProfilesModel(this);
+	m_serversModel = new CServersModel(this);
 
 	profilesListView->setModel(m_model);
+	serverComboBox->setModel(m_serversModel);
 
-	QStringList servers;
-	servers << "Atys";
-	servers << "Yubo";
+	int index = m_model->getIndexFromProfileID(CConfigFile::getInstance()->getDefaultProfile());
 
-	QStringListModel *serversModel = new QStringListModel(servers, this);
-
-	serverComboBox->setModel(serversModel);
+	profilesListView->setCurrentIndex(m_model->index(index, 0));
+	displayProfile(index);
 }
 
 CProfilesDialog::~CProfilesDialog()

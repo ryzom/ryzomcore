@@ -20,6 +20,7 @@
 #include "ui_profiles.h"
 
 class CProfilesModel;
+class CServersModel;
 
 /**
  * Dialog displayed when editing existing profiles.
@@ -51,6 +52,7 @@ private slots:
 
 private:
 	CProfilesModel *m_model;
+	CServersModel *m_serversModel;
 
 	int m_currentProfileIndex;
 };
