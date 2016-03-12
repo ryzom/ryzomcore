@@ -37,6 +37,8 @@
 
 #endif
 
+NLMISC::CCmdArgs Args;
+
 int main(sint32 argc, char **argv)
 {
 	NLMISC::CApplicationContext applicationContext;
@@ -44,11 +46,10 @@ int main(sint32 argc, char **argv)
 	QApplication app(argc, argv);
 
 	// parse command-line arguments
-	NLMISC::CCmdArgs args;
-	args.setDescription("Ryzom Configuration");
-	args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
+	Args.setDescription("Ryzom Configuration");
+	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
 
-	if (!args.parse(argc, argv)) return 1;
+	if (!Args.parse(argc, argv)) return 1;
 
 	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
 	QPixmap pixmap(":/resources/splash_screen.png" );
@@ -82,16 +83,16 @@ int main(sint32 argc, char **argv)
 
 	// default paths
 	std::string ryzomDir = NLMISC::CPath::standardizePath(NLMISC::CPath::getApplicationDirectory("Ryzom"));
-	std::string currentDir = args.getStartupPath();
-	std::string executableDir = args.getProgramPath();
+	std::string currentDir = Args.getStartupPath();
+	std::string executableDir = Args.getProgramPath();
 
 	std::string configFilename = "client.cfg";
 	std::string configPath;
 
 	// search client.cfg file in config directory (Ryzom Installer)
-	if (args.haveArg("p"))
+	if (Args.haveArg("p"))
 	{
-		ryzomDir = NLMISC::CPath::standardizePath(ryzomDir + args.getArg("p").front());
+		ryzomDir = NLMISC::CPath::standardizePath(ryzomDir + Args.getArg("p").front());
 
 		// client.cfg is always in profile directory if using -p argument
 		configPath = ryzomDir + configFilename;

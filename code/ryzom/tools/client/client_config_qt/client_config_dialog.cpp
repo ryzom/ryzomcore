@@ -31,6 +31,10 @@
 #include <QtGui>
 #include <QMessageBox>
 
+#include "nel/misc/cmd_args.h"
+
+extern NLMISC::CCmdArgs Args;
+
 CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	QDialog( parent )
 {
