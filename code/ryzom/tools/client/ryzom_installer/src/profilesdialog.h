@@ -48,6 +48,8 @@ private slots:
 	void deleteProfile(int index);
 	void addProfile();
 
+	void updateExecutableVersion(int index);
+
 	void onExecutableBrowseClicked();
 
 private:

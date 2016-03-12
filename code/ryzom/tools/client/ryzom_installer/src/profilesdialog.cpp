@@ -93,6 +93,10 @@ void CProfilesDialog::displayProfile(int index)
 	argumentsEdit->setText(profile.arguments);
 	commentsEdit->setPlainText(profile.comments);
 	directoryPathLabel->setText(CConfigFile::getInstance()->getProfileDirectory());
+	desktopShortcutCheckBox->setChecked(profile.desktopShortcut);
+	menuShortcutCheckBox->setChecked(profile.menuShortcut);
+
+	updateExecutableVersion(index);
 
 	m_currentProfileIndex = index;
 }
@@ -123,6 +127,55 @@ void CProfilesDialog::addProfile()
 	// TODO: browse all folders in AppData/Roaming/Ryzom
 }
 
+void CProfilesDialog::updateExecutableVersion(int index)
+{
+	if (index < 0) return;
+
+	const CProfile &profile = m_model->getProfiles()[index];
+
+	QString executable = profile.executable;
+
+	// file empty, use default one
+	if (executable.isEmpty())
+	{
+		executable = CConfigFile::getInstance()->getInstallationDirectory() + "/" + profile.server + "/";
+
+#if defined(Q_OS_WIN32)
+		executable += "ryzom_client_r.exe";
+#elif defined(Q_OS_APPLE)
+		executable += "Ryzom.app/Contents/MacOS/Ryzom";
+#else
+		executable += "ryzom_client";
+#endif
+	}
+
+	// file doesn't exist
+	if (!QFile::exists(executable)) return;
+
+	// launch executable with --version argument
+	QProcess process;
+	process.setProcessChannelMode(QProcess::MergedChannels);
+	process.start(executable, QStringList() << "--version", QIODevice::ReadWrite);
+
+	if (!process.waitForStarted()) return;
+
+	QByteArray data;
+
+	// read all output
+	while (process.waitForReadyRead()) data.append(process.readAll());
+
+	// convert output to string
+	QString versionString = QString::fromUtf8(data);
+
+	// parse version from output
+	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
+
+	if (reg.indexIn(versionString) > -1)
+	{
+		executableVersionLabel->setText(reg.cap(2));
+	}
+}
+
 void CProfilesDialog::onExecutableBrowseClicked()
 {
 	if (m_currentProfileIndex < 0) return;
@@ -137,25 +190,5 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
 
-	QProcess process;
-	process.setProcessChannelMode(QProcess::MergedChannels);
-	process.start(profile.executable, QStringList() << "--version", QIODevice::ReadWrite);
-
-	if (!process.waitForStarted()) return;
-
-	QByteArray data;
-
-	while (process.waitForReadyRead()) data.append(process.readAll());
-
-	QString versionString = QString::fromUtf8(data);
-
-	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
-
-	if (reg.indexIn(versionString) > -1)
-	{
-		executableVersionLabel->setText(reg.cap(2));
-	}
-
-	// ryzom_client_dev_d.exe DEV 0.12.0.7331 (built on 2016-02-25 22:16:50)
-	// Copyright (C) 2004-2016 Winchgate and The Ryzom Core Community
+	updateExecutableVersion(m_currentProfileIndex);
 }
