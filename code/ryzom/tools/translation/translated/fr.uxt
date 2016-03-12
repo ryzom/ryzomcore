@@ -10913,11 +10913,11 @@ uiOpacity	[Opacité]
 
 // HASH_VALUE 8E5160388660241A
 // INDEX 2566
-uimChooseUIAlpha	[OPACITÉ DE LA FENÊTRE]
+uimChooseUIAlpha	[Opacité de la fenêtre]
 
 // HASH_VALUE 7DDE1B28C3BC5303
 // INDEX 2567
-uimLockUnlock	[VERROUILLER / DÉVERROUILLER]
+uimLockUnlock	[Verrouiller / déverrouiller]
 
 // HASH_VALUE 81AFD8300470172B
 // INDEX 2568
@@ -14579,7 +14579,7 @@ uiFontSize	[Taille de la police]
 
 // HASH_VALUE 5008E4244490540C
 // INDEX 3475
-uigcInSceneInterface	[EN SCÈNE]
+uigcInSceneInterface	[En scène]
 
 // HASH_VALUE 5050345450503454
 // INDEX 3476
