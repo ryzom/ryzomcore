@@ -90,10 +90,10 @@ void CDisplaySettingsWidget::load()
 		windowedRadioButton->setChecked( true );
 	}
 
-	widthLineEdit->setText( QString( "%1" ).arg( mode.width ) );
-	heightLineEdit->setText( QString( "%1" ).arg( mode.height ) );
-	xpositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionX" ) ) );
-	ypositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionY" ) ) );
+	widthLineEdit->setText(QString::number(mode.width));
+	heightLineEdit->setText(QString::number(mode.height));
+	xpositionLineEdit->setText(QString::number(s.config.getInt("PositionX")));
+	ypositionLineEdit->setText(QString::number(s.config.getInt("PositionY")));
 
 }
 
@@ -194,7 +194,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 	//| --------------------------------------|
 	//| Auto            | OpenGL modes        |
 	//| OpenGL          | OpenGL modes        |
-	//| Direct3D        | Direct3d modes      |
+	//| Direct3D        | Direct3D modes      |
 	//| --------------------------------------|
 	//
 	//
