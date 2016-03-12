@@ -149,15 +149,28 @@ void CClientConfigDialog::onClickPlay()
 {
 	bool started = false;
 
+	QStringList arguments;
+
+	if (Args.haveArg("p"))
+	{
+		arguments << "-p" << QString::fromUtf8(Args.getArg("p").front().c_str());
+	}
+
+	QString clientFullPath = QString::fromUtf8(Args.getProgramPath().c_str());
+
 #ifdef Q_OS_WIN32
-	started = QProcess::startDetached( "ryzom_client_r.exe" );
-	if( !started )
-		QProcess::startDetached( "ryzom_client_d.exe" );
-#elif defined(Q_OS_MAC)
-	started = QProcess::startDetached( "./Ryzom.app" );
+#ifdef _DEBUG
+	clientFullPath += "ryzom_client_d.exe";
 #else
-	started = QProcess::startDetached( "./ryzom_client" );
+	clientFullPath += "ryzom_client_r.exe";
 #endif
+#elif defined(Q_OS_MAC)
+	clientFullPath += "Ryzom";
+#else
+	clientFullPath += "ryzom_client";
+#endif
+
+	started = QProcess::startDetached(clientFullPath, arguments);
 
 	onClickOK();
 }
