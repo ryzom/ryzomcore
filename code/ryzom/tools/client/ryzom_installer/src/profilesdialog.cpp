@@ -79,6 +79,15 @@ void CProfilesDialog::onProfileClicked(const QModelIndex &index)
 
 void CProfilesDialog::displayProfile(int index)
 {
+	bool enabled = index > -1;
+
+	profileIdLabel->setEnabled(enabled);
+	accountEdit->setEnabled(enabled);
+	nameEdit->setEnabled(enabled);
+	serverComboBox->setEnabled(enabled);
+	argumentsEdit->setEnabled(enabled);
+	commentsEdit->setEnabled(enabled);
+
 	if (index < 0) return;
 
 	saveProfile(m_currentProfileIndex);
