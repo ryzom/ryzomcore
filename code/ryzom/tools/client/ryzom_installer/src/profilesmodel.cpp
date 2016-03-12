@@ -46,3 +46,20 @@ bool CProfilesModel::save() const
 
 	return true;
 }
+
+int CProfilesModel::getIndexFromProfileID(int profileId) const
+{
+	for(int i = 0; i < m_profiles.size(); ++i)
+	{
+		if (m_profiles[i].id == profileId) return i;
+	}
+
+	return -1;
+}
+
+int CProfilesModel::getProfileIDFromIndex(int index) const
+{
+	if (index < 0 || index >= m_profiles.size()) return -1;
+
+	return m_profiles[index].id;
+}
