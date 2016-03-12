@@ -96,6 +96,7 @@ void CProfilesDialog::displayProfile(int index)
 
 	const CProfile &profile = m_model->getProfiles()[index];
 
+	// update all widgets with content of profile
 	profileIdLabel->setText(QString::number(profile.id));
 	accountEdit->setText(profile.account);
 	nameEdit->setText(profile.name);
@@ -123,6 +124,8 @@ void CProfilesDialog::saveProfile(int index)
 	profile.server = m_serversModel->getServerIDFromIndex(serverComboBox->currentIndex());
 	profile.arguments = argumentsEdit->text();
 	profile.comments = commentsEdit->toPlainText();
+	profile.desktopShortcut = desktopShortcutCheckBox->isChecked();
+	profile.menuShortcut = menuShortcutCheckBox->isChecked();
 }
 
 void CProfilesDialog::deleteProfile(int index)
