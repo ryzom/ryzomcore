@@ -18,6 +18,7 @@
 
 #include "client_config_dialog.h"
 #include "system.h"
+#include "nel/misc/cmd_args.h"
 
 #include <QSplashScreen>
 
@@ -36,27 +37,117 @@
 
 #endif
 
+NLMISC::CCmdArgs Args;
+
 int main(sint32 argc, char **argv)
 {
 	NLMISC::CApplicationContext applicationContext;
 
 	QApplication app(argc, argv);
 
+	// parse command-line arguments
+	Args.setDescription("Ryzom Configuration");
+	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
+
+	if (!Args.parse(argc, argv)) return 1;
+
 	QApplication::setWindowIcon(QIcon(":/resources/welcome_icon.png"));
 	QPixmap pixmap(":/resources/splash_screen.png" );
 	QSplashScreen splash( pixmap );
-
 	splash.show();
 
-	QString locale = QLocale::system().name().left(2);
+	QLocale locale = QLocale::system();
 
+	// load application translations
 	QTranslator localTranslator;
-	if (localTranslator.load(QString(":/translations/ryzom_configuration_%1.qm").arg(locale)))
+	if (localTranslator.load(locale, "ryzom_configuration", "_", ":/translations"))
 	{
-		app.installTranslator(&localTranslator);
+		QApplication::installTranslator(&localTranslator);
 	}
 
-	CSystem::GetInstance().config.load( "client.cfg" );
+	// load Qt default translations
+	QTranslator qtTranslator;
+	if (qtTranslator.load(locale, "qt", "_", ":/translations"))
+	{
+		QApplication::installTranslator(&qtTranslator);
+	}
+
+	// Known cases:
+	// 1. Steam
+	// - Linux and Windows: all files in Steam folder
+	// - OS X: client.cfg in ~/Library/Application Support/Ryzom, client_default.cfg in Steam folder
+	// 2. Installer
+	// - Linux: client.cfg in ~/.ryzom/<config>/ client_default.cfg in ~/.ryzom/ryzom_live/
+	// - Windows: client.cfg in Roaming/Ryzom/<config>/ client_default.cfg in Local/Ryzom/ryzom_live/
+	// - OS X: client.cfg in ~/Library/Application Support/Ryzom/<config>/ client_default.cfg in ~/Library/Application Support/Ryzom/ryzom_live/
+
+	// default paths
+	std::string ryzomDir = NLMISC::CPath::standardizePath(NLMISC::CPath::getApplicationDirectory("Ryzom"));
+	std::string currentDir = Args.getStartupPath();
+	std::string executableDir = Args.getProgramPath();
+
+	std::string configFilename = "client.cfg";
+	std::string configPath;
+
+	// search client.cfg file in config directory (Ryzom Installer)
+	if (Args.haveArg("p"))
+	{
+		ryzomDir = NLMISC::CPath::standardizePath(ryzomDir + Args.getArg("p").front());
+
+		// client.cfg is always in profile directory if using -p argument
+		configPath = ryzomDir + configFilename;
+	}
+	else
+	{
+#ifdef NL_OS_MAC
+		// client.cfg is in ~/Library/Application Support/Ryzom under OS X
+		configPath = ryzomDir + configFilename;
+#else
+		// client.cfg is in current directory under other platforms
+		configPath = currentDir + configFilename;
+#endif
+	}
+
+	// if file doesn't exist, create it
+	if (!NLMISC::CFile::fileExists(configPath))
+	{
+		// we need the full path to client_default.cfg
+		std::string defaultConfigFilename = "client_default.cfg";
+		std::string defaultConfigPath;
+
+#ifdef NL_OS_MAC
+		// fix path inside bundle
+		defaultConfigPath = NLMISC::CPath::makePathAbsolute("../Resources", executableDir, true) + defaultConfigFilename;
+#else
+		// same path as executables
+		defaultConfigPath = executableDir + defaultConfigFilename;
+#endif
+
+		// test if default config exists in determined path
+		if (!NLMISC::CFile::fileExists(defaultConfigPath))
+		{
+			defaultConfigPath = currentDir + defaultConfigFilename;
+
+			// test if default config exists in current path
+			if (!NLMISC::CFile::fileExists(defaultConfigPath))
+			{
+				nlwarning("Unable to find %s", defaultConfigFilename.c_str());
+				return 1;
+			}
+		}
+
+		if (!CSystem::GetInstance().config.create(configPath, defaultConfigPath))
+		{
+			nlwarning("Unable to create %s", configPath.c_str());
+			return 1;
+		}
+	}
+
+	if (!CSystem::GetInstance().config.load(configPath))
+	{
+		nlwarning("Unable to load %s", configPath.c_str());
+		return 1;
+	}
 
 	CClientConfigDialog d;
 	d.show();

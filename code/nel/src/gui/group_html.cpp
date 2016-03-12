@@ -305,7 +305,7 @@ namespace NLGUI
 				return;
 			}
 
-			FILE *fp = nlfopen (tmpdest, "wb");
+			FILE *fp = nlfopen(tmpdest, "wb");
 			if (fp == NULL)
 			{
 				curl_easy_cleanup(curl);
@@ -316,7 +316,8 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
 
-			curl_easy_setopt(curl, CURLOPT_FILE, fp);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
 			curl_multi_add_handle(MultiCurl, curl);
 			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", "", style));
@@ -423,7 +424,8 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
-			curl_easy_setopt(curl, CURLOPT_FILE, fp);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
 			curl_multi_add_handle(MultiCurl, curl);
 			Curls.push_back(CDataDownload(curl, url, dest, fp, BnpType, NULL, script, md5sum));

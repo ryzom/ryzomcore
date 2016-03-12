@@ -1340,7 +1340,7 @@ bool mainLoop()
 			if (!ClientCfg.Local)
 			{
 				if(NetMngr.getCurrentServerTick() > LastGameCycle)
-					RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+					RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 			}
 			else if (ClientCfg.SimulateServerTick)
 			{
@@ -1348,7 +1348,7 @@ bool mainLoop()
 				uint numTicks = (uint) floor(SimulatedServerDate * 10);
 				SimulatedServerTick += numTicks;
 				SimulatedServerDate = (float)((double)SimulatedServerDate - (double) numTicks * 0.1);
-				RT.updateRyzomClock((uint32)SimulatedServerTick, ryzomGetLocalTime() * 0.001);
+				RT.updateRyzomClock((uint32)SimulatedServerTick);
 			}
 
 
@@ -2092,14 +2092,14 @@ bool mainLoop()
 						if (Actions.valide ("inc_hour"))
 						{
 							RT.increaseTickOffset( (uint32)(2000 * displayHourDelta) );
-							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 						}
 
 						// Ctrl-L decrease hour
 						if (Actions.valide ("dec_hour"))
 						{
 							RT.decreaseTickOffset( (uint32)(2000 * displayHourDelta) );
-							RT.updateRyzomClock(NetMngr.getCurrentServerTick(), ryzomGetLocalTime() * 0.001);
+							RT.updateRyzomClock(NetMngr.getCurrentServerTick());
 							CTimedFXManager::getInstance().setDate(CClientDate(RT.getRyzomDay(), (float) RT.getRyzomTime()));
 							if (IGCallbacks)
 							{

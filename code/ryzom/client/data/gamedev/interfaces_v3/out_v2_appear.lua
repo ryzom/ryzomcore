@@ -19,80 +19,80 @@ end
 -- tryker: given name 4500, FirstName 4335
 
 -- Fyros
-function outgame:getFyrosLastName()
-    local nbFyrosLastNames = 0;
-    for _ in pairs(fyrosLastNames) do nbFyrosLastNames = nbFyrosLastNames + 1 end
-
-    return fyrosLastNames[math.random(nbFyrosLastNames)]
-end
 function outgame:getFyrosFirstName()
     local nbFyrosFirstNames = 0;
     for _ in pairs(fyrosFirstNames) do nbFyrosFirstNames = nbFyrosFirstNames + 1 end
 
     return fyrosFirstNames[math.random(nbFyrosFirstNames)]
 end
+function outgame:getFyrosLastName()
+    local nbFyrosLastNames = 0;
+    for _ in pairs(fyrosLastNames) do nbFyrosLastNames = nbFyrosLastNames + 1 end
+
+    return fyrosLastNames[math.random(nbFyrosLastNames)]
+end
 
 -- Matis
-function outgame:getMatisLastName(sex)
+function outgame:getMatisFirstName(sex)
     local dbNameSex = getDbProp("UI:TEMP:NAME_SEX");
 
     if sex ~= nil then
         dbNameSex = sex;
     end
 
-    local LastName = ""
+    local FirstName = ""
     if tonumber( dbNameSex )== 1 then
-        local nbMatisMaleLastNames = 0;
-        for _ in pairs(matisMaleLastNames) do nbMatisMaleLastNames = nbMatisMaleLastNames + 1 end
-        LastName = matisMaleLastNames[math.random(nbMatisMaleLastNames)];
+        local nbMatisMaleFirstNames = 0;
+        for _ in pairs(matisMaleFirstNames) do nbMatisMaleFirstNames = nbMatisMaleFirstNames + 1 end
+        FirstName = matisMaleFirstNames[math.random(nbMatisMaleFirstNames)];
     else
-        local nbMatisFemaleLastNames = 0;
-        for _ in pairs(matisFemaleLastNames) do nbMatisFemaleLastNames = nbMatisFemaleLastNames + 1 end
-        LastName = matisFemaleLastNames[math.random(nbMatisFemaleLastNames)];
+        local nbMatisFemaleFirstNames = 0;
+        for _ in pairs(matisFemaleFirstNames) do nbMatisFemaleFirstNames = nbMatisFemaleFirstNames + 1 end
+        FirstName = matisFemaleFirstNames[math.random(nbMatisFemaleFirstNames)];
     end
 
-    return LastName;
+    return FirstName;
 end
 
-function outgame:getMatisFirstName()
+function outgame:getMatisLastName()
 
-    local nbMatisFirstNames = 0;
-    for _ in pairs(matisFirstNames) do nbMatisFirstNames = nbMatisFirstNames + 1 end
+    local nbMatisLastNames = 0;
+    for _ in pairs(matisLastNames) do nbMatisLastNames = nbMatisLastNames + 1 end
 
-    return matisFirstNames[math.random(nbMatisFirstNames)]
+    return matisLastNames[math.random(nbMatisLastNames)]
 end
 
 -- Tryker
-function outgame:getTrykerLastName()
-    local nbTrykerLastNames = 0;
-    for _ in pairs(trykerLastNames) do nbTrykerLastNames = nbTrykerLastNames + 1 end
-
-    return trykerLastNames[math.random(nbTrykerLastNames)]
-end
 function outgame:getTrykerFirstName()
     local nbTrykerFirstNames = 0;
     for _ in pairs(trykerFirstNames) do nbTrykerFirstNames = nbTrykerFirstNames + 1 end
 
     return trykerFirstNames[math.random(nbTrykerFirstNames)]
 end
+function outgame:getTrykerLastName()
+    local nbTrykerLastNames = 0;
+    for _ in pairs(trykerLastNames) do nbTrykerLastNames = nbTrykerLastNames + 1 end
+
+    return trykerLastNames[math.random(nbTrykerLastNames)]
+end
 
 -- Zoraï
-function outgame:getZoraiLastName()
-    local nbLastNamesOne = 0;
-    for _ in pairs(zoraiLastNamesOne) do nbLastNamesOne = nbLastNamesOne + 1 end
-    local lastNameOne = zoraiLastNamesOne[math.random(nbLastNamesOne)];
-
-    local nbLastNamesTwo = 0;
-    for _ in pairs(zoraiLastNamesTwo) do nbLastNamesTwo = nbLastNamesTwo + 1 end
-    local lastNameTwo = zoraiLastNamesTwo[math.random(nbLastNamesTwo)];
-
-    return lastNameOne .. "-" .. lastNameTwo
-end
 function outgame:getZoraiFirstName()
-    local nbFirstNames = 0;
-    for _ in pairs(zoraiFirstNames) do nbFirstNames = nbFirstNames + 1 end
+    local nbFirstNamesOne = 0;
+    for _ in pairs(zoraiFirstNamesOne) do nbFirstNamesOne = nbFirstNamesOne + 1 end
+    local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)];
 
-    return zoraiFirstNames[math.random(nbFirstNames)]
+    local nbFirstNamesTwo = 0;
+    for _ in pairs(zoraiFirstNamesTwo) do nbFirstNamesTwo = nbFirstNamesTwo + 1 end
+    local FirstNameTwo = zoraiFirstNamesTwo[math.random(nbFirstNamesTwo)];
+
+    return FirstNameOne .. "-" .. FirstNameTwo
+end
+function outgame:getZoraiLastName()
+    local nbLastNames = 0;
+    for _ in pairs(zoraiLastNames) do nbLastNames = nbLastNames + 1 end
+
+    return zoraiLastNames[math.random(nbLastNames)]
 end
 
 function outgame:procGenerateName()
@@ -114,25 +114,25 @@ function outgame:procGenerateName()
         lastName = self:getFyrosLastName()
         firstName = self:getFyrosFirstName()
         fullnameResult = lastName .. " " .. firstName
-        nameResult = lastName
+        nameResult = firstName
     elseif  tonumber( dbNameRace ) == 2 then
     -- Matis
         lastName = self:getMatisLastName()
         firstName = self:getMatisFirstName()
         fullnameResult = lastName .. " " .. firstName
-        nameResult = lastName
+        nameResult = firstName
     elseif  tonumber( dbNameRace ) == 3 then
     -- Tryker
         lastName = self:getTrykerLastName()
         firstName = self:getTrykerFirstName()
         fullnameResult = firstName .. " " .. lastName
-        nameResult = lastName
+        nameResult = firstName
     elseif  tonumber( dbNameRace ) == 4  then
     -- Zorai
         lastName = self:getZoraiLastName()
         firstName = self:getZoraiFirstName()
         fullnameResult = firstName .. " " .. lastName
-        nameResult = lastName
+        nameResult = firstName
     elseif  tonumber( dbNameRace ) == 5  then
     -- Maraudeurs
         -- lastName
@@ -170,7 +170,7 @@ function outgame:procGenerateName()
         end
 
         fullnameResult = lastName .. " " .. firstName
-        nameResult = lastName
+        nameResult = firstName
     end
 
     uiNameFull.hardtext = fullnameResult;
