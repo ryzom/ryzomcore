@@ -50,6 +50,8 @@ CProfilesDialog::~CProfilesDialog()
 
 void CProfilesDialog::accept()
 {
+	saveProfile(m_currentProfileIndex);
+
 	m_model->save();
 
 	QDialog::accept();
