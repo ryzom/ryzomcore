@@ -4057,7 +4057,6 @@ uiKeyF22	[F22]
 
 uiKeyF23	[F23]
 
-
 uiKeyF24	[F24]
 
 uiKeyNUMLOCK	[NUMLOCK]
@@ -4099,7 +4098,6 @@ uiKeyOEM_CLEAR	[OEM CLEAR]
 uiKeyCOMMA [COMMA]
 
 uiNumber00	[00]
-
 
 uiNumber01	[01]
 
@@ -13480,3 +13478,10 @@ uiCP_FirstName [First name]
 uiCP_LastName [Last name]
 uiHorizontal [Horizontal]
 uiVertical [Vertical]
+uiKeyMUTE [Mute]
+uiKeyPLAYPAUSE [Play / pause]
+uiKeyVOLUMEDOWN [Volume down]
+uiKeyVOLUMEUP [Volume up]
+uiKeyCALC [Calculator]
+uiKeyPARAGRAPH [Paragraph]
+uiKeyOEM_102 [OEM 102]
