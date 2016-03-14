@@ -42,7 +42,7 @@
        <item>
         <widget class="QCheckBox" name="softwareCheckBox">
          <property name="text">
-          <string>Software sound buffer ( may increase FPS )</string>
+          <string>Software sound buffer (may increase FPS)</string>
          </property>
         </widget>
        </item>

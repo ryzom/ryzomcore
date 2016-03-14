@@ -25,7 +25,7 @@
         <item>
          <widget class="QLabel" name="label">
           <property name="text">
-           <string>Specify if Ryzom is to be run in OpenGL or Direct3D.</string>
+           <string>Specify if Ryzom is to be run in OpenGL or Direct3D:</string>
           </property>
          </widget>
         </item>
@@ -78,7 +78,7 @@
       <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Specify a video mode</string>
+         <string>Specify a video mode:</string>
         </property>
        </widget>
       </item>

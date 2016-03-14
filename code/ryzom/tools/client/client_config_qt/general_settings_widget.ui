@@ -97,7 +97,7 @@
         <item>
          <widget class="QCheckBox" name="lowPriorityProcessCheckBox">
           <property name="text">
-           <string>Slow down the game ( process low priority )</string>
+           <string>Slow down the game (process low priority)</string>
           </property>
          </widget>
         </item>

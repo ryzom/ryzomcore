@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="en" sourcelanguage="en">
+<TS version="2.1" language="de" sourcelanguage="en">
 <context>
     <name>CClientConfigDialog</name>
     <message>
         <location filename="../client_config_dialog.cpp" line="251"/>
         <source>Ryzom configuration</source>
-        <translation>Ryzom configuration</translation>
+        <translation>Ryzom Konfiguration</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.cpp" line="252"/>
         <source>Are you sure you want to quit without saving the configuration?</source>
-        <translation>Are you sure you want to quit without saving the configuration?</translation>
+        <translation>Bist du sicher, dass du abbrechen willst, ohne die Konfiguration zu sichern?</translation>
     </message>
 </context>
 <context>
@@ -19,12 +19,12 @@
     <message>
         <location filename="../display_settings_details_widget.cpp" line="218"/>
         <source>Low</source>
-        <translation>Low</translation>
+        <translation>Niedrig</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.cpp" line="221"/>
         <source>Medium</source>
-        <translation>Medium</translation>
+        <translation>Mittel</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.cpp" line="224"/>
@@ -34,12 +34,12 @@
     <message>
         <location filename="../display_settings_details_widget.cpp" line="227"/>
         <source>High</source>
-        <translation>High</translation>
+        <translation>Hoch</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.cpp" line="240"/>
         <source>Low (32 MB)</source>
-        <translation>Low (32 MB)</translation>
+        <translation>Niedrig (32 MB)</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.cpp" line="244"/>
@@ -49,7 +49,7 @@
     <message>
         <location filename="../display_settings_details_widget.cpp" line="248"/>
         <source>High (128 MB)</source>
-        <translation>High (128 MB)</translation>
+        <translation>Hoch (128 MB)</translation>
     </message>
 </context>
 <context>
@@ -57,7 +57,8 @@
     <message>
         <location filename="../display_settings_widget.cpp" line="179"/>
         <source>Auto</source>
-        <translation>Auto</translation>
+        <translatorcomment>if too long, Auto is sufficient (just ugly, as in German the short form also means &quot;car&quot;)</translatorcomment>
+        <translation>Automatisch</translation>
     </message>
 </context>
 <context>
@@ -65,7 +66,8 @@
     <message>
         <location filename="../sound_settings_widget.cpp" line="92"/>
         <source>%1 tracks</source>
-        <translation>%1 tracks</translation>
+        <translatorcomment>audio-channels?</translatorcomment>
+        <translation>%1 Tonspuren</translation>
     </message>
 </context>
 <context>
@@ -81,33 +83,33 @@
     <message>
         <location filename="../client_config_dialog.ui" line="20"/>
         <source>Ryzom Configuration</source>
-        <translation>Ryzom Configuration</translation>
+        <translation>Ryzom-Konfiguration</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="107"/>
         <location filename="../client_config_dialog.ui" line="135"/>
         <source>General</source>
-        <translation>General</translation>
+        <translation>Allgemein</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="130"/>
         <source>Category</source>
-        <translation>Category</translation>
+        <translation>Kategorie</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="146"/>
         <source>Display</source>
-        <translation>Display</translation>
+        <translation>Anzeige</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="156"/>
         <source>Display details</source>
-        <translation>Display details</translation>
+        <translation>Anzeigedetails</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="161"/>
         <source>Display advanced</source>
-        <translation>Display advanced</translation>
+        <translation>Anzeige erweitert</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="167"/>
@@ -117,32 +119,32 @@
     <message>
         <location filename="../client_config_dialog.ui" line="178"/>
         <source>System information</source>
-        <translation>System information</translation>
+        <translation>System-Information</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="188"/>
         <source>OpenGL information</source>
-        <translation>OpenGL information</translation>
+        <translation>OpenGL-Information</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="193"/>
         <source>Direct3D information</source>
-        <translation>Direct3D information</translation>
+        <translation>Direct3D-Information</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="245"/>
         <source>Apply</source>
-        <translation>Apply</translation>
+        <translation>Anwenden</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="252"/>
         <source>Default</source>
-        <translation>Default</translation>
+        <translation>Standard</translation>
     </message>
     <message>
         <location filename="../client_config_dialog.ui" line="259"/>
         <source>Play Ryzom</source>
-        <translation>Play Ryzom</translation>
+        <translation>Ryzom spielen</translation>
     </message>
 </context>
 <context>
@@ -150,32 +152,32 @@
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="14"/>
         <source>Display advanced</source>
-        <translation>Display advanced</translation>
+        <translation>Anzeige erweitert</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="22"/>
         <source>Modify these settings only if you have trouble launching the game</source>
-        <translation>Modify these settings only if you have trouble launching the game</translation>
+        <translation>Modifiziere diese Einstellungen nur dann, wenn du Probleme mit dem Starten des Spiels hast</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="31"/>
         <source>Force texture compression</source>
-        <translation>Force texture compression</translation>
+        <translation>Erzwinge Textur-Kompression</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="38"/>
         <source>Disable vertex shaders</source>
-        <translation>Disable vertex shaders</translation>
+        <translation>Deaktiviere Vertex-Shader</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="45"/>
         <source>Disable AGP for vertices</source>
-        <translation>Disable AGP for vertices</translation>
+        <translation>Deaktiviere AGP für Vertexeckpunkte</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="52"/>
         <source>Disable pixel shaders</source>
-        <translation>Disable pixel shaders</translation>
+        <translation>Deaktiviere Pixel-Shader</translation>
     </message>
 </context>
 <context>
@@ -183,12 +185,12 @@
     <message>
         <location filename="../display_settings_details_widget.ui" line="14"/>
         <source>Display details</source>
-        <translation>Display details</translation>
+        <translation>Anzeigedetails</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="20"/>
         <source>Landscape</source>
-        <translation>Landscape</translation>
+        <translation>Landschaft</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="30"/>
@@ -196,7 +198,7 @@
         <location filename="../display_settings_details_widget.ui" line="196"/>
         <location filename="../display_settings_details_widget.ui" line="276"/>
         <source>Level of detail</source>
-        <translation>Level of detail</translation>
+        <translation>Detailstufe</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="94"/>
@@ -204,22 +206,22 @@
         <location filename="../display_settings_details_widget.ui" line="254"/>
         <location filename="../display_settings_details_widget.ui" line="334"/>
         <source>Low</source>
-        <translation>Low</translation>
+        <translation>Niedrig</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="106"/>
         <source>Characters</source>
-        <translation>Characters</translation>
+        <translation>Charaktere</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="186"/>
         <source>FX</source>
-        <translation>FX</translation>
+        <translation>FX Effekte</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="266"/>
         <source>Textures</source>
-        <translation>Textures</translation>
+        <translation>Texturen</translation>
     </message>
 </context>
 <context>
@@ -227,26 +229,27 @@
     <message>
         <location filename="../display_settings_widget.ui" line="14"/>
         <source>Display</source>
-        <translation>Display</translation>
+        <translation>Anzeige</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="20"/>
         <source>Driver</source>
-        <translation>Driver</translation>
+        <translation>Treiber</translation>
     </message>
     <message>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D.</source>
-        <translation type="vanished">Specify if Ryzom is to be run in OpenGL or Direct3D.</translation>
+        <translatorcomment>there&apos;s a period (full stop) at the end opposed to the other &quot;specify&quot;-sentece about full screen ending with a colon...</translatorcomment>
+        <translation type="obsolete">Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
-        <translation>Specify if Ryzom is to be run in OpenGL or Direct3D:</translation>
+        <translation>Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
         <source>Auto</source>
-        <translation>Auto</translation>
+        <translation>Automatisch</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="42"/>
@@ -261,51 +264,51 @@
     <message>
         <location filename="../display_settings_widget.ui" line="61"/>
         <source>Parameters</source>
-        <translation>Parameters</translation>
+        <translation>Parameter</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="67"/>
         <source>Specify if Ryzom is to be run in full screen or window mode:</source>
-        <translation>Specify if Ryzom is to be run in full screen or window mode:</translation>
+        <translation>Wähle, ob Ryzom im Vollbildmodus oder Fenstermodus laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="74"/>
         <source>Full screen</source>
-        <translation>Full screen</translation>
+        <translation>Vollbild</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
         <source>Specify a video mode:</source>
-        <translation>Specify a video mode:</translation>
+        <translation>Wähle eine Bildschirmauflösung:</translation>
     </message>
     <message>
         <source>Specify a video mode</source>
-        <translation type="vanished">Specify a video mode</translation>
+        <translation type="vanished">Wähle eine Bildschirmauflösung</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="104"/>
         <source>Windowed</source>
-        <translation>Windowed</translation>
+        <translation>Im Fenster</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="115"/>
         <source>Width</source>
-        <translation>Width</translation>
+        <translation>Breite</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="122"/>
         <source>Height</source>
-        <translation>Height</translation>
+        <translation>Höhe</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="129"/>
         <source>X position</source>
-        <translation>X position</translation>
+        <translation>X-Position</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="136"/>
         <source>Y position</source>
-        <translation>Y position</translation>
+        <translation>Y-Position</translation>
     </message>
 </context>
 <context>
@@ -313,51 +316,53 @@
     <message>
         <location filename="../general_settings_widget.ui" line="14"/>
         <source>Form</source>
-        <translation>Form</translation>
+        <translation>Formblatt</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="25"/>
         <source>Language</source>
-        <translation>Language</translation>
+        <translation>Sprache</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="33"/>
         <source>English</source>
-        <translation>English</translation>
+        <translation>Englisch</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="38"/>
         <source>French</source>
-        <translation>French</translation>
+        <translation>Französisch</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="43"/>
         <source>German</source>
-        <translation>German</translation>
+        <translation>Deutsch</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="48"/>
         <source>Hungarian</source>
-        <translation>Hungarian</translation>
+        <translation>Ungarisch</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="72"/>
         <source>Save config file when quitting the game</source>
-        <translation>Save config file when quitting the game</translation>
+        <translatorcomment>Do we need the &quot;file&quot; mentioned?</translatorcomment>
+        <translation>Speichere Konfigurationsdatei beim Beenden des Spiels</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="92"/>
         <source>Advanced</source>
-        <translation>Advanced</translation>
+        <translatorcomment>is it &quot;extended&quot; or rather &quot;progressed&quot; like &quot;further/better developed&quot;?</translatorcomment>
+        <translation>Erweitert</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
         <source>Slow down the game (process low priority)</source>
-        <translation>Slow down the game (process low priority)</translation>
+        <translation>Verlangsame Spiel (niedrige Prozesspriorität)</translation>
     </message>
     <message>
         <source>Slow down the game ( process low priority )</source>
-        <translation type="vanished">Slow down the game ( process low priority )</translation>
+        <translation type="vanished">Verlangsame das Spiel (niedrige Prozesspriorität)</translation>
     </message>
 </context>
 <context>
@@ -370,36 +375,38 @@
     <message>
         <location filename="../sound_settings_widget.ui" line="24"/>
         <source>Enable sound</source>
-        <translation>Enable sound</translation>
+        <translation>Aktiviere Sound</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="31"/>
         <source>Enable EAX</source>
-        <translation>Enable EAX</translation>
+        <translation>Aktiviere EAX Klangverarbeitung</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="38"/>
         <source>Enable FMod</source>
-        <translation>Enable FMod</translation>
+        <translation>Aktiviere FMod Audiotool</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
         <source>Software sound buffer (may increase FPS)</source>
-        <translation>Software sound buffer (may increase FPS)</translation>
+        <translation>Software Sound Buffer (kann FPS erhöhen)</translation>
     </message>
     <message>
         <source>Software sound buffer ( may increase FPS )</source>
-        <translation type="vanished">Software sound buffer ( may increase FPS )</translation>
+        <translation type="vanished">Software Sound Buffer (kann FPS erhöhen)</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="68"/>
         <source>Sound tracks</source>
-        <translation>Sound tracks</translation>
+        <translatorcomment>is this really about audio channels?</translatorcomment>
+        <translation>Tonspuren</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="117"/>
         <source>8 tracks</source>
-        <translation>8 tracks</translation>
+        <translatorcomment>8-track as in 8 audio channels, right? Or does it mean something else?</translatorcomment>
+        <translation>8 Spuren</translation>
     </message>
 </context>
 <context>
@@ -407,7 +414,7 @@
     <message>
         <location filename="../sys_info_d3d_widget.ui" line="14"/>
         <source>Direct3D information</source>
-        <translation>Direct3D information</translation>
+        <translation>Direct3D-Information</translation>
     </message>
     <message>
         <location filename="../sys_info_d3d_widget.ui" line="20"/>
@@ -417,17 +424,17 @@
     <message>
         <location filename="../sys_info_d3d_widget.ui" line="30"/>
         <source>Description</source>
-        <translation>Description</translation>
+        <translation>Beschreibung</translation>
     </message>
     <message>
         <location filename="../sys_info_d3d_widget.ui" line="65"/>
         <source>Driver</source>
-        <translation>Driver</translation>
+        <translation>Treiber</translation>
     </message>
     <message>
         <location filename="../sys_info_d3d_widget.ui" line="100"/>
         <source>Driver version</source>
-        <translation>Driver version</translation>
+        <translation>Treiber-Version</translation>
     </message>
 </context>
 <context>
@@ -435,7 +442,7 @@
     <message>
         <location filename="../sys_info_opengl_widget.ui" line="14"/>
         <source>OpenGL information</source>
-        <translation>OpenGL information</translation>
+        <translation>OpenGL-Information</translation>
     </message>
     <message>
         <location filename="../sys_info_opengl_widget.ui" line="20"/>
@@ -445,7 +452,7 @@
     <message>
         <location filename="../sys_info_opengl_widget.ui" line="28"/>
         <source>Vendor</source>
-        <translation>Vendor</translation>
+        <translation>Hersteller</translation>
     </message>
     <message>
         <location filename="../sys_info_opengl_widget.ui" line="63"/>
@@ -460,7 +467,7 @@
     <message>
         <location filename="../sys_info_opengl_widget.ui" line="148"/>
         <source>Extensions</source>
-        <translation>Extensions</translation>
+        <translation>Erweiterungen</translation>
     </message>
 </context>
 <context>
@@ -469,32 +476,33 @@
         <location filename="../sys_info_widget.ui" line="14"/>
         <location filename="../sys_info_widget.ui" line="20"/>
         <source>System information</source>
-        <translation>System information</translation>
+        <translation>System-Information</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="30"/>
         <source>Operating system</source>
-        <translation>Operating system</translation>
+        <translation>Betriebssystem</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="68"/>
         <source>CPU</source>
-        <translation>CPU</translation>
+        <translation>Prozessor</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="106"/>
         <source>Physical memory</source>
-        <translation>Physical memory</translation>
+        <translation>Physikalischer Speicher</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="135"/>
         <source>Video device</source>
-        <translation>Video device</translation>
+        <translatorcomment>seems to refer to the video card. Or is it something else?</translatorcomment>
+        <translation>Grafikkarte</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="173"/>
         <source>Video driver version</source>
-        <translation>Video driver version</translation>
+        <translation>Grafiktreiber-Version</translation>
     </message>
 </context>
 </TS>
