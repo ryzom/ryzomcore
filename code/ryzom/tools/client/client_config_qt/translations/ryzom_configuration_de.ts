@@ -238,10 +238,14 @@
         <translation>Treiber</translation>
     </message>
     <message>
-        <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D.</source>
         <translatorcomment>there&apos;s a period (full stop) at the end opposed to the other &quot;specify&quot;-sentece about full screen ending with a colon...</translatorcomment>
-        <translation type="unfinished">Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
+        <translation type="obsolete">Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
+    </message>
+    <message>
+        <location filename="../display_settings_widget.ui" line="28"/>
+        <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -275,8 +279,12 @@
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
+        <source>Specify a video mode:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Specify a video mode</source>
-        <translation>Wähle eine Bildschirmauflösung</translation>
+        <translation type="vanished">Wähle eine Bildschirmauflösung</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="104"/>
@@ -351,8 +359,12 @@
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
+        <source>Slow down the game (process low priority)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Slow down the game ( process low priority )</source>
-        <translation>Verlangsame das Spiel (niedrige Prozesspriorität)</translation>
+        <translation type="vanished">Verlangsame das Spiel (niedrige Prozesspriorität)</translation>
     </message>
 </context>
 <context>
@@ -379,8 +391,12 @@
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
+        <source>Software sound buffer (may increase FPS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Software sound buffer ( may increase FPS )</source>
-        <translation>Software Sound Buffer (kann FPS erhöhen)</translation>
+        <translation type="vanished">Software Sound Buffer (kann FPS erhöhen)</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="68"/>

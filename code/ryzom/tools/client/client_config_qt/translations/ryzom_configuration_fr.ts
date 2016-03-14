@@ -239,9 +239,13 @@
         <translation>Pilote</translation>
     </message>
     <message>
-        <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D.</source>
-        <translation>Spécifier si Ryzom doit utiliser OpenGL ou Direct3D.</translation>
+        <translation type="vanished">Spécifier si Ryzom doit utiliser OpenGL ou Direct3D.</translation>
+    </message>
+    <message>
+        <location filename="../display_settings_widget.ui" line="28"/>
+        <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
+        <translation>Spécifier si Ryzom doit utiliser OpenGL ou Direct3D :</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -275,8 +279,12 @@
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
+        <source>Specify a video mode:</source>
+        <translation>Spécifier une résolution :</translation>
+    </message>
+    <message>
         <source>Specify a video mode</source>
-        <translation>Spécifier une résolution</translation>
+        <translation type="vanished">Spécifier une résolution</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="104"/>
@@ -348,8 +356,12 @@
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
-        <source>Slow down the game ( process low priority )</source>
+        <source>Slow down the game (process low priority)</source>
         <translation>Ralentir le jeu (priorité basse du processus)</translation>
+    </message>
+    <message>
+        <source>Slow down the game ( process low priority )</source>
+        <translation type="vanished">Ralentir le jeu (priorité basse du processus)</translation>
     </message>
 </context>
 <context>
@@ -376,8 +388,12 @@
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
-        <source>Software sound buffer ( may increase FPS )</source>
+        <source>Software sound buffer (may increase FPS)</source>
         <translation>Tampons sonores logiciels (peut accroître la fluidité)</translation>
+    </message>
+    <message>
+        <source>Software sound buffer ( may increase FPS )</source>
+        <translation type="vanished">Tampons sonores logiciels (peut accroître la fluidité)</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="68"/>

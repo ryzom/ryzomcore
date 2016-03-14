@@ -235,9 +235,13 @@
         <translation>Driver</translation>
     </message>
     <message>
-        <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D.</source>
-        <translation>Specify if Ryzom is to be run in OpenGL or Direct3D.</translation>
+        <translation type="vanished">Specify if Ryzom is to be run in OpenGL or Direct3D.</translation>
+    </message>
+    <message>
+        <location filename="../display_settings_widget.ui" line="28"/>
+        <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
+        <translation>Specify if Ryzom is to be run in OpenGL or Direct3D:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -271,8 +275,12 @@
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
+        <source>Specify a video mode:</source>
+        <translation>Specify a video mode:</translation>
+    </message>
+    <message>
         <source>Specify a video mode</source>
-        <translation>Specify a video mode</translation>
+        <translation type="vanished">Specify a video mode</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="104"/>
@@ -344,8 +352,12 @@
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
+        <source>Slow down the game (process low priority)</source>
+        <translation>Slow down the game (process low priority)</translation>
+    </message>
+    <message>
         <source>Slow down the game ( process low priority )</source>
-        <translation>Slow down the game ( process low priority )</translation>
+        <translation type="vanished">Slow down the game ( process low priority )</translation>
     </message>
 </context>
 <context>
@@ -372,8 +384,12 @@
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
+        <source>Software sound buffer (may increase FPS)</source>
+        <translation>Software sound buffer (may increase FPS)</translation>
+    </message>
+    <message>
         <source>Software sound buffer ( may increase FPS )</source>
-        <translation>Software sound buffer ( may increase FPS )</translation>
+        <translation type="vanished">Software sound buffer ( may increase FPS )</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="68"/>
