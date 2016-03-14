@@ -27,11 +27,7 @@ SET(CLIENT_CONFIG_UIS
   sys_info_widget.ui
 )
 
-SET(CLIENT_CONFIG_TRANS
-  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_en.ts
-  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_fr.ts
-  ${CMAKE_CURRENT_SOURCE_DIR}/translations/ryzom_configuration_hu.ts
-)
+FILE(GLOB CLIENT_CONFIG_TRANS translations/*.ts)
 
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
 SET(CLIENT_CONFIG_RCS resources.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc )
@@ -47,6 +43,8 @@ IF(WITH_QT)
 
   ADD_DEFINITIONS(${QT_DEFINITIONS})
 ELSE()
+#  uncomment this line if you want to update original translations
+#  QT5_CREATE_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_UIS} ${SRC} ${CLIENT_CONFIG_TRANS})
   QT5_ADD_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_TRANS})
   QT5_ADD_RESOURCES(CLIENT_CONFIG_RC_SRCS ${CLIENT_CONFIG_RCS})
   QT5_WRAP_CPP(CLIENT_CONFIG_MOC_SRC ${CLIENT_CONFIG_HDR})
