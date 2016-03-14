@@ -51,8 +51,8 @@
 <!-- We start at 1 not 0. -->
 <variable entry="UI:TEMP:NAME_RACE"					type="sint64" value="1" />
 <!-- used for marauder names. -->
-<variable entry="UI:TEMP:NAME_SUB_RACE"				    type="sint64" value="1" />
-<variable entry="UI:TEMP:NAME_SUB_RACE2"				    type="sint64" value="1" />
+<variable entry="UI:TEMP:NAME_SUB_RACE_FIRST_NAME"	type="sint64" value="1" />
+<variable entry="UI:TEMP:NAME_SUB_RACE_LAST_NAME"	type="sint64" value="1" />
 <!-- you will have to change the max value of the slider too, since it seam not working to set it using that var directly. -->
 <variable entry="UI:TEMP:NAME_RACE_NB"				type="sint64" value="5" />
 <!-- We start at 1 not 0. -->
@@ -1307,120 +1307,121 @@
 	<ctrl style="valid_txt_button" id="cancel" posref="TM BM" posparent="submit" x="0" y="4" hardtext="uiCP_Name_Cancel"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_appear_name_cancel" />
-                    
-    <!-- Name Generator -->
-    
-    <!-- voir coter widgets.xml pour les template de checkbox et autre -->
-    
-    <view type="text" id="name_generator" x="0" y="-30" posparent="eb" posref="BM BM" multi_line="false" render_layer="4" 
-            fontsize="10" shadow="true" global_color="false" case="%case_first_string_letter_up" hardtext="uiCP_Name_Generator" 
-					on_active="proc" on_active_params="proc_init_name_generator" />    
-    <!-- Full  generated name with spaces and quote before being clean to match the login name pattern. -->
-    <view type="text" id="name_full" x="0" y="-15" posparent="eb" posref="BM BM" multi_line="false" render_layer="4" 
-            fontsize="14" color="200 200 200 255"  shadow="true" global_color="false" case="%case_first_string_letter_up" />    
 
-        <!-- Slider Name Race -->
-        <group id="name_race_slider" posparent="name_generator" posref="BM BM" x="0" y="-55" w="200" h="48" >     
-        
-            <view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
-            <view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
-            <view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+	<!-- Name Generator -->
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_back" posref="TL TL" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_race_sub_one" />
+	<!-- voir coter widgets.xml pour les template de checkbox et autre -->
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_next" posref="TR TR" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_race_add_one" />
-                
-            <view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_generator" posref="TL TL" x="0" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
-            <ctrl type="scroll" id="name_race_scroll" posparent="name_race_slider" posref="MM MM" x="0" y="0" w="160" h="32"
-                                vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_RACE" tracksize="40" 
-                                tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
-                                onscroll="proc" params="proc_appear_name_race_label_change" />
-        </group>
-        
-        <!-- Slider Name Sub Race -->
-        <group id="name_sub_race_slider" posparent="name_race_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >     
-        
-            <view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
-            <view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
-            <view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+	<view type="text" id="name_generator" x="0" y="-30" posparent="eb" posref="BM BM" multi_line="false" render_layer="4"
+			fontsize="10" shadow="true" global_color="false" case="%case_first_string_letter_up" hardtext="uiCP_Name_Generator"
+					on_active="proc" on_active_params="proc_init_name_generator" />
+	<!-- Full  generated name with spaces and quote before being clean to match the login name pattern. -->
+	<view type="text" id="name_full" x="0" y="-15" posparent="eb" posref="BM BM" multi_line="false" render_layer="4"
+			fontsize="14" color="200 200 200 255"  shadow="true" global_color="false" case="%case_first_string_letter_up" />
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_back" posref="TL TL" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sub_race_sub_one" />
+		<!-- Slider Name Race -->
+		<group id="name_race_slider" posparent="name_generator" posref="BM BM" x="0" y="-55" w="200" h="48" >
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_next" posref="TR TR" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sub_race_add_one" />
-                
-            <view type="text" id="lastName" case="%case_first_string_letter_up" posparent="name_sub_race_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_LastName" color="255 255 255 255" fontsize="11"/>
-            <view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
-            <ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race_slider" posref="MM MM" x="0" y="0" w="160" h="32"
-                                vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_SUB_RACE" tracksize="40" 
-                                tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
-                                onscroll="proc" params="proc_appear_name_sub_race_label_change" />   
-        </group>
-                <!-- Slider Name Sub Race2 -->
-        <group id="name_sub_race2_slider" posparent="name_sub_race_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >     
-        
-            <view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
-            <view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
-            <view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+			<view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
+			<view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
+			<view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_back" posref="TL TL" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sub_race2_sub_one" />
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_back" posref="TL TL" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_race_sub_one" />
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_next" posref="TR TR" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sub_race2_add_one" />
-                
-            <view type="text" id="firstName" case="%case_first_string_letter_up" posparent="name_sub_race2_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_FirstName" color="255 255 255 255" fontsize="11"/>
-            <view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race2_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
-            <ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race2_slider" posref="MM MM" x="0" y="0" w="160" h="32"
-                                vertical="false" align="L" min="1" max="4" value="UI:TEMP:NAME_SUB_RACE2" tracksize="40" 
-                                tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
-                                onscroll="proc" params="proc_appear_name_sub_race2_label_change" />   
-        </group>
-        <!-- Slider Name Sex -->
-        <group id="name_sex_slider" posparent="name_race_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >
-       
-            <view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
-            <view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
-            <view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_next" posref="TR TR" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_race_add_one" />
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_back" posref="TL TL" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sex_sub_one" />
+			<view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_generator" posref="TL TL" x="0" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
+			<ctrl type="scroll" id="name_race_scroll" posparent="name_race_slider" posref="MM MM" x="0" y="0" w="160" h="32"
+								vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_RACE" tracksize="40"
+								tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
+								onscroll="proc" params="proc_appear_name_race_label_change" />
+		</group>
 
-            <ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
-                color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
-                id="but_next" posref="TR TR" x="0" y="-6"
-                onclick_l="proc" params_l="proc_appear_name_sex_add_one" />
-                
-            <view type="text" id="name_sex" posparent="name_race_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_Sex_Male" case="%case_first_string_letter_up" color="255 255 255 255" fontsize="11"/>
-            <ctrl type="scroll" id="name_sex_scroll" posparent="name_sex_slider" posref="MM MM" x="0" y="0" w="160" h="32"
-                                vertical="false" align="L" min="1" max="2" value="UI:TEMP:NAME_SEX" tracksize="40" 
-                                tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
-                                onscroll="proc" params="proc_appear_name_sex_label_change" />
-                                
-        </group>
-        
-    <ctrl style="valid_txt_button" id="generate" posref="BM BM" posparent="name_race_slider" x="0" y="-100" hardtext="uiCP_Name_Generate"
-					onover="play_sound" params_over="name=specie_but_over"
-					onclick_l="proc" params_l="proc_appear_name_generate" />
+		<!-- Slider Name Sub Race First Name -->
+		<group id="name_sub_race_first_name_slider" posparent="name_race_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >
 
-    <!-- End Name Generator -->
+			<view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
+			<view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
+			<view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_back" posref="TL TL" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sub_race_first_name_sub_one" />
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_next" posref="TR TR" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sub_race_first_name_add_one" />
+
+			<view type="text" id="firstName" case="%case_first_string_letter_up" posparent="name_sub_race_first_name_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_FirstName" color="255 255 255 255" fontsize="11"/>
+			<view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race_first_name_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
+			<ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race_first_name_slider" posref="MM MM" x="0" y="0" w="160" h="32"
+								vertical="false" align="L" min="1" max="5" value="UI:TEMP:NAME_SUB_RACE_FIRST_NAME" tracksize="40"
+								tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
+								onscroll="proc" params="proc_appear_name_sub_race_first_name_label_change" />
+		</group>
+
+		<!-- Slider Name Sub Race Last Name -->
+		<group id="name_sub_race_last_name_slider" posparent="name_sub_race_first_name_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >
+
+			<view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
+			<view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
+			<view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_back" posref="TL TL" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sub_race_last_name_sub_one" />
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_next" posref="TR TR" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sub_race_last_name_add_one" />
+
+			<view type="text" id="lastName" case="%case_first_string_letter_up" posparent="name_sub_race_last_name_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_LastName" color="255 255 255 255" fontsize="11"/>
+			<view type="text" id="name_race" case="%case_first_string_letter_up" posparent="name_sub_race_last_name_slider" posref="TR TL" x="-100" y="0" hardtext="Fyros" color="255 255 255 255" fontsize="11"/>
+			<ctrl type="scroll" id="name_race_scroll" posparent="name_sub_race_last_name_slider" posref="MM MM" x="0" y="0" w="160" h="32"
+				vertical="false" align="L" min="1" max="4" value="UI:TEMP:NAME_SUB_RACE_LAST_NAME" tracksize="40"
+				tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
+				onscroll="proc" params="proc_appear_name_sub_race_last_name_label_change" />
+		</group>
+
+		<!-- Slider Name Sex -->
+		<group id="name_sex_slider" posparent="name_race_slider" posref="BM BM" x="0" y="-40" w="200" h="48" >
+
+			<view type="bitmap" id="left" posref="TL TL" texture="opt_on_l.tga" y="-6" />
+			<view type="bitmap" id="right" posref="TR TR" texture="opt_on_r.tga" y="-6" />
+			<view type="bitmap" id="middle" posref="TM TM" scale="true" sizeref="w" h="32" w="-64" y="-5" texture="opt_on_m.tga"/>
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_l_over.tga" tx_over="opt_on_l_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_back" posref="TL TL" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sex_sub_one" />
+
+			<ctrl type="button" button_type="push_button" tx_normal="blank.tga" tx_pushed="opt_on_r_over.tga" tx_over="opt_on_r_over.tga" scale="true" w="32" h="32"
+				color="0 0 0 0" col_over="255 255 255 128" col_pushed="255 255 255 255"
+				id="but_next" posref="TR TR" x="0" y="-6"
+				onclick_l="proc" params_l="proc_appear_name_sex_add_one" />
+
+			<view type="text" id="name_sex" posparent="name_race_slider" posref="TL TL" x="0" y="0" hardtext="uiCP_Sex_Male" case="%case_first_string_letter_up" color="255 255 255 255" fontsize="11"/>
+			<ctrl type="scroll" id="name_sex_scroll" posparent="name_sex_slider" posref="MM MM" x="0" y="0" w="160" h="32"
+				vertical="false" align="L" min="1" max="2" value="UI:TEMP:NAME_SEX" tracksize="40"
+				tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""
+				onscroll="proc" params="proc_appear_name_sex_label_change" />
+		</group>
+
+		<ctrl style="valid_txt_button" id="generate" posref="BM BM" posparent="name_race_slider" x="0" y="-100" hardtext="uiCP_Name_Generate"
+			onover="play_sound" params_over="name=specie_but_over"
+			onclick_l="proc" params_l="proc_appear_name_generate" />
+
+	<!-- End Name Generator -->
 </group>
 
 
@@ -1533,8 +1534,8 @@
 	<!-- Name generator init. -->
 	<action handler="set" params="target_property=ui:outgame:appear_name:name_sex_slider:name_sex_scroll:value|value=add(@UI:TEMP:CHAR3D:VPA:SEX,1)" />
 	<action handler="set" params="target_property=ui:outgame:appear_name:name_race_slider:name_race_scroll:value|value=add(@UI:TEMP:CHAR3D:PEOPLE,1)" />
-	<action handler="set" params="target_property=ui:outgame:appear_name:name_sub_race_slider:name_race_scroll:value|value=1" />
-	<action handler="set" params="target_property=ui:outgame:appear_name:name_sub_race2_slider:name_race_scroll:value|value=1" />
+	<action handler="set" params="target_property=ui:outgame:appear_name:name_sub_race_first_name_slider:name_race_scroll:value|value=1" />
+	<action handler="set" params="target_property=ui:outgame:appear_name:name_sub_race_last_name_slider:name_race_scroll:value|value=1" />
 
 	<action handler="set" params="dblink=UI:TEMP:NAME_SEX|value=add(@UI:TEMP:CHAR3D:VPA:SEX,1)" />
 	<action handler="set" params="dblink=UI:TEMP:NAME_RACE|value=add(@UI:TEMP:CHAR3D:PEOPLE,1)" />
@@ -1649,29 +1650,29 @@
 	<action handler="set" params="dblink=UI:TEMP:NAME_RACE|value=max(sub(@UI:TEMP:NAME_RACE,1),1)" />
 	<action handler="lua:outgame:procUpdateNameRaceLabel()" />
 </proc>
-<!-- Name Sub Race. --> 
-<proc id="proc_appear_name_sub_race_label_change">
-    <action handler="lua:outgame:procUpdateNameSubRaceLabel()" />
+<!-- Name Sub Race. -->
+<proc id="proc_appear_name_sub_race_first_name_label_change">
+	<action handler="lua:outgame:procUpdateNameSubRaceFirstNameLabel()" />
 </proc>
-<proc id="proc_appear_name_sub_race_add_one">
-	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE|value=min(add(@UI:TEMP:NAME_SUB_RACE,1),5)" />
-    <action handler="lua:outgame:procUpdateNameSubRaceLabel()" />
+<proc id="proc_appear_name_sub_race_first_name_add_one">
+	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_FIRST_NAME|value=min(add(@UI:TEMP:NAME_SUB_RACE_FIRST_NAME,1),5)" />
+	<action handler="lua:outgame:procUpdateNameSubRaceFirstNameLabel()" />
 </proc>
-<proc id="proc_appear_name_sub_race_sub_one">
-	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE|value=max(sub(@UI:TEMP:NAME_SUB_RACE,1),1)" />
-    <action handler="lua:outgame:procUpdateNameSubRaceLabel()" />
+<proc id="proc_appear_name_sub_race_first_name_sub_one">
+	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_FIRST_NAME|value=max(sub(@UI:TEMP:NAME_SUB_RACE_FIRST_NAME,1),1)" />
+	<action handler="lua:outgame:procUpdateNameSubRaceFirstNameLabel()" />
 </proc>
-<!-- Name Sub Race2. --> 
-<proc id="proc_appear_name_sub_race2_label_change">
-    <action handler="lua:outgame:procUpdateNameSubRace2Label()" />
+<!-- Name Sub Race2. -->
+<proc id="proc_appear_name_sub_race_last_name_label_change">
+	<action handler="lua:outgame:procUpdateNameSubRaceLastNameLabel()" />
 </proc>
-<proc id="proc_appear_name_sub_race2_add_one">
-	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE2|value=min(add(@UI:TEMP:NAME_SUB_RACE2,1),4)" />
-    <action handler="lua:outgame:procUpdateNameSubRace2Label()" />
+<proc id="proc_appear_name_sub_race_last_name_add_one">
+	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_LAST_NAME|value=min(add(@UI:TEMP:NAME_SUB_RACE_LAST_NAME,1),4)" />
+	<action handler="lua:outgame:procUpdateNameSubRaceLastNameLabel()" />
 </proc>
-<proc id="proc_appear_name_sub_race2_sub_one">
-	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE2|value=max(sub(@UI:TEMP:NAME_SUB_RACE2,1),1)" />
-    <action handler="lua:outgame:procUpdateNameSubRace2Label()" />
+<proc id="proc_appear_name_sub_race_last_name_sub_one">
+	<action handler="set" params="dblink=UI:TEMP:NAME_SUB_RACE_LAST_NAME|value=max(sub(@UI:TEMP:NAME_SUB_RACE_LAST_NAME,1),1)" />
+	<action handler="lua:outgame:procUpdateNameSubRaceLastNameLabel()" />
 </proc>
 <!-- End Name Generator. -->
 

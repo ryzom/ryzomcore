@@ -101,9 +101,9 @@ end
 function outgame:procGenerateName()
 	local uiNameFull = getUI("ui:outgame:appear_name:name_full");
 	local uiGenText = getUI("ui:outgame:appear_name:eb");
-    local dbNameRace = getDbProp("UI:TEMP:NAME_RACE");
-    local dbNameSubRace = getDbProp("UI:TEMP:NAME_SUB_RACE");
-    local dbNameSubRace2 = getDbProp("UI:TEMP:NAME_SUB_RACE2");
+	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE");
+	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME");
+	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME");
 
 	local nameResult = "";
 	local fullnameResult = "";
@@ -210,8 +210,8 @@ function outgame:procUpdateNameRaceLabel()
 
 	local uiNameSexSlider = getUI("ui:outgame:appear_name:name_sex_slider");
 
-	local uiNameSubRaceSlider = getUI("ui:outgame:appear_name:name_sub_race_slider");
-	local uiNameSubRace2Slider = getUI("ui:outgame:appear_name:name_sub_race2_slider");
+	local uiNameSubRaceFirstNameSlider = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider");
+	local uiNameSubRaceLastNameSlider = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider");
 
 	local uiNameGenerate = getUI("ui:outgame:appear_name:generate");
 	-- Show/Hide sex slider
@@ -224,15 +224,15 @@ function outgame:procUpdateNameRaceLabel()
 		uiNameSexSlider.active = false;
 	end
 
-    -- Show/Hide sub race slider
-    if tonumber(dbNameRace) == 5 then
-        uiNameSubRaceSlider.active = true;
-        uiNameSubRace2Slider.active = true;
-        uiNameGenerate.y = "-105"
-    else
-        uiNameSubRaceSlider.active = false;
-        uiNameSubRace2Slider.active = false;
-    end
+	-- Show/Hide sub race slider
+	if tonumber(dbNameRace) == 5 then
+		uiNameSubRaceFirstNameSlider.active = true;
+		uiNameSubRaceLastNameSlider.active = true;
+		uiNameGenerate.y = "-105"
+	else
+		uiNameSubRaceFirstNameSlider.active = false;
+		uiNameSubRaceLastNameSlider.active = false;
+	end
 
 	uiNameRaceText.hardtext = tostring(nameRaceType[tonumber(dbNameRace)]);
 end
@@ -246,16 +246,15 @@ function outgame:procUpdateNameSubRaceLabel()
 	local uiNameSubRaceText = getUI("ui:outgame:appear_name:name_sub_race_slider:name_race");
     local dbNameSubRace = getDbProp("UI:TEMP:NAME_SUB_RACE");
 
-
-	uiNameSubRaceText.hardtext= tostring(nameSubRaceType[tonumber(dbNameSubRace)]);
+	uiNameSubRaceFirstNameText.hardtext= tostring(nameSubRaceFirstNameType[tonumber(dbNameSubRaceFirstName)]);
 end
-function outgame:procUpdateNameSubRace2Label()
-    local nameSubRace2Type = { "Fyros", "Matis", "Tryker", "Zoraï" }
-	local uiNameSubRace2Text = getUI("ui:outgame:appear_name:name_sub_race2_slider:name_race");
-    local dbNameSubRace2 = getDbProp("UI:TEMP:NAME_SUB_RACE2");
 
+function outgame:procUpdateNameSubRaceLastNameLabel()
+	local nameSubRaceLastNameType = { "Fyros", "Matis", "Tryker", "Zoraï" }
+	local uiNameSubRaceLastNameText = getUI("ui:outgame:appear_name:name_sub_race_last_name_slider:name_race");
+	local dbNameSubRaceLastName = getDbProp("UI:TEMP:NAME_SUB_RACE_LAST_NAME");
 
-	uiNameSubRace2Text.hardtext= tostring(nameSubRace2Type[tonumber(dbNameSubRace2)]);
+	uiNameSubRaceLastNameText.hardtext= tostring(nameSubRaceLastNameType[tonumber(dbNameSubRaceLastName)]);
 end
 
 ------------------------------------------------------------------------------------------------------------
