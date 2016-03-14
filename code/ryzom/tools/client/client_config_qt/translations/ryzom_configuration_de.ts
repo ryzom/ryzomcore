@@ -216,8 +216,7 @@
     <message>
         <location filename="../display_settings_details_widget.ui" line="186"/>
         <source>FX</source>
-        <translatorcomment>Special effects?</translatorcomment>
-        <translation type="unfinished">FX</translation>
+        <translation>FX Effekte</translation>
     </message>
     <message>
         <location filename="../display_settings_details_widget.ui" line="266"/>
@@ -245,7 +244,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -280,7 +279,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
         <source>Specify a video mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle eine Bildschirmauflösung:</translation>
     </message>
     <message>
         <source>Specify a video mode</source>
@@ -317,8 +316,7 @@
     <message>
         <location filename="../general_settings_widget.ui" line="14"/>
         <source>Form</source>
-        <translatorcomment>form of what? Does it mean a mode? Figure? Category? Phrase? Shape? Format? Configuration? Can&apos;t find it in the current configuration program for Ryzom on Steam</translatorcomment>
-        <translation type="unfinished">Form</translation>
+        <translation>Formblatt</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="25"/>
@@ -360,7 +358,7 @@
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
         <source>Slow down the game (process low priority)</source>
-        <translation type="unfinished"></translation>
+        <translation>Verlangsame Spiel (niedrige Prozesspriorität)</translation>
     </message>
     <message>
         <source>Slow down the game ( process low priority )</source>
@@ -392,7 +390,7 @@
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
         <source>Software sound buffer (may increase FPS)</source>
-        <translation type="unfinished"></translation>
+        <translation>Software Sound Buffer (kann FPS erhöhen)</translation>
     </message>
     <message>
         <source>Software sound buffer ( may increase FPS )</source>
@@ -499,7 +497,7 @@
         <location filename="../sys_info_widget.ui" line="135"/>
         <source>Video device</source>
         <translatorcomment>seems to refer to the video card. Or is it something else?</translatorcomment>
-        <translation type="unfinished">Grafikkarte</translation>
+        <translation>Grafikkarte</translation>
     </message>
     <message>
         <location filename="../sys_info_widget.ui" line="173"/>
