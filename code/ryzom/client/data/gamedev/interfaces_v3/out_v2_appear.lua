@@ -20,90 +20,93 @@ end
 
 -- Fyros
 function outgame:getFyrosFirstName()
-    local nbFyrosFirstNames = 0;
-    for _ in pairs(fyrosFirstNames) do nbFyrosFirstNames = nbFyrosFirstNames + 1 end
+	local nbFyrosFirstNames = 0;
+	for _ in pairs(fyrosFirstNames) do nbFyrosFirstNames = nbFyrosFirstNames + 1 end
 
-    return fyrosFirstNames[math.random(nbFyrosFirstNames)]
+	return fyrosFirstNames[math.random(nbFyrosFirstNames)]
 end
-function outgame:getFyrosLastName()
-    local nbFyrosLastNames = 0;
-    for _ in pairs(fyrosLastNames) do nbFyrosLastNames = nbFyrosLastNames + 1 end
 
-    return fyrosLastNames[math.random(nbFyrosLastNames)]
+function outgame:getFyrosLastName()
+	local nbFyrosLastNames = 0;
+	for _ in pairs(fyrosLastNames) do nbFyrosLastNames = nbFyrosLastNames + 1 end
+
+	return fyrosLastNames[math.random(nbFyrosLastNames)]
 end
 
 -- Matis
 function outgame:getMatisFirstName(sex)
-    local dbNameSex = getDbProp("UI:TEMP:NAME_SEX");
+	-- 1 = male, 2 = female
+	local dbNameSex = getDbProp("UI:TEMP:NAME_SEX");
 
-    if sex ~= nil then
-        dbNameSex = sex;
-    end
+	if sex ~= nil then
+		dbNameSex = sex;
+	end
 
-    local FirstName = ""
-    if tonumber( dbNameSex )== 1 then
-        local nbMatisMaleFirstNames = 0;
-        for _ in pairs(matisMaleFirstNames) do nbMatisMaleFirstNames = nbMatisMaleFirstNames + 1 end
-        FirstName = matisMaleFirstNames[math.random(nbMatisMaleFirstNames)];
-    else
-        local nbMatisFemaleFirstNames = 0;
-        for _ in pairs(matisFemaleFirstNames) do nbMatisFemaleFirstNames = nbMatisFemaleFirstNames + 1 end
-        FirstName = matisFemaleFirstNames[math.random(nbMatisFemaleFirstNames)];
-    end
+	local FirstName = ""
+	if tonumber(dbNameSex) == 1 then
+		local nbMatisMaleFirstNames = 0;
+		for _ in pairs(matisMaleFirstNames) do nbMatisMaleFirstNames = nbMatisMaleFirstNames + 1 end
+		FirstName = matisMaleFirstNames[math.random(nbMatisMaleFirstNames)];
+	else
+		local nbMatisFemaleFirstNames = 0;
+		for _ in pairs(matisFemaleFirstNames) do nbMatisFemaleFirstNames = nbMatisFemaleFirstNames + 1 end
+		FirstName = matisFemaleFirstNames[math.random(nbMatisFemaleFirstNames)];
+	end
 
-    return FirstName;
+	return FirstName;
 end
 
 function outgame:getMatisLastName()
 
-    local nbMatisLastNames = 0;
-    for _ in pairs(matisLastNames) do nbMatisLastNames = nbMatisLastNames + 1 end
+	local nbMatisLastNames = 0;
+	for _ in pairs(matisLastNames) do nbMatisLastNames = nbMatisLastNames + 1 end
 
-    return matisLastNames[math.random(nbMatisLastNames)]
+	return matisLastNames[math.random(nbMatisLastNames)]
 end
 
 -- Tryker
 function outgame:getTrykerFirstName()
-    local nbTrykerFirstNames = 0;
-    for _ in pairs(trykerFirstNames) do nbTrykerFirstNames = nbTrykerFirstNames + 1 end
+	local nbTrykerFirstNames = 0;
+	for _ in pairs(trykerFirstNames) do nbTrykerFirstNames = nbTrykerFirstNames + 1 end
 
-    return trykerFirstNames[math.random(nbTrykerFirstNames)]
+	return trykerFirstNames[math.random(nbTrykerFirstNames)]
 end
-function outgame:getTrykerLastName()
-    local nbTrykerLastNames = 0;
-    for _ in pairs(trykerLastNames) do nbTrykerLastNames = nbTrykerLastNames + 1 end
 
-    return trykerLastNames[math.random(nbTrykerLastNames)]
+function outgame:getTrykerLastName()
+	local nbTrykerLastNames = 0;
+	for _ in pairs(trykerLastNames) do nbTrykerLastNames = nbTrykerLastNames + 1 end
+
+	return trykerLastNames[math.random(nbTrykerLastNames)]
 end
 
 -- Zoraï
 function outgame:getZoraiFirstName()
-    local nbFirstNamesOne = 0;
-    for _ in pairs(zoraiFirstNamesOne) do nbFirstNamesOne = nbFirstNamesOne + 1 end
-    local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)];
+	local nbFirstNamesOne = 0;
+	for _ in pairs(zoraiFirstNamesOne) do nbFirstNamesOne = nbFirstNamesOne + 1 end
+	local FirstNameOne = zoraiFirstNamesOne[math.random(nbFirstNamesOne)];
 
-    local nbFirstNamesTwo = 0;
-    for _ in pairs(zoraiFirstNamesTwo) do nbFirstNamesTwo = nbFirstNamesTwo + 1 end
-    local FirstNameTwo = zoraiFirstNamesTwo[math.random(nbFirstNamesTwo)];
+	local nbFirstNamesTwo = 0;
+	for _ in pairs(zoraiFirstNamesTwo) do nbFirstNamesTwo = nbFirstNamesTwo + 1 end
+	local FirstNameTwo = zoraiFirstNamesTwo[math.random(nbFirstNamesTwo)];
 
-    return FirstNameOne .. "-" .. FirstNameTwo
+	return FirstNameOne .. "-" .. FirstNameTwo
 end
 function outgame:getZoraiLastName()
-    local nbLastNames = 0;
-    for _ in pairs(zoraiLastNames) do nbLastNames = nbLastNames + 1 end
+	local nbLastNames = 0;
+	for _ in pairs(zoraiLastNames) do nbLastNames = nbLastNames + 1 end
 
-    return zoraiLastNames[math.random(nbLastNames)]
+	return zoraiLastNames[math.random(nbLastNames)]
 end
 
 function outgame:procGenerateName()
-    local uiNameFull = getUI("ui:outgame:appear_name:name_full");
+	local uiNameFull = getUI("ui:outgame:appear_name:name_full");
 	local uiGenText = getUI("ui:outgame:appear_name:eb");
     local dbNameRace = getDbProp("UI:TEMP:NAME_RACE");
     local dbNameSubRace = getDbProp("UI:TEMP:NAME_SUB_RACE");
     local dbNameSubRace2 = getDbProp("UI:TEMP:NAME_SUB_RACE2");
 
-    local nameResult = "";
-    local fullnameResult = "";
+	local nameResult = "";
+	local fullnameResult = "";
 
     -- Look at outgame:procUpdateNameRaceLabel() for the "race" list.
     -- fy ma try zo -->
@@ -175,31 +178,35 @@ function outgame:procGenerateName()
 
     uiNameFull.hardtext = fullnameResult;
 
-    nameResult = string.gsub(nameResult, "'", "");
-    nameResult = string.gsub(nameResult, " ", "");
-    nameResult = string.gsub(nameResult, "-", "");
-    nameResult = string.lower( nameResult );
-    nameResult = nameResult:gsub("^%l", string.upper);
-    uiGenText.input_string = nameResult;
+	uiNameFull.hardtext = fullnameResult;
+
+	nameResult = string.gsub(nameResult, "'", "");
+	nameResult = string.gsub(nameResult, " ", "");
+	nameResult = string.gsub(nameResult, "-", "");
+	nameResult = string.lower( nameResult );
+	nameResult = nameResult:gsub("^%l", string.upper);
+	uiGenText.input_string = nameResult;
 end
+
 -- Name sex slider update.
 function outgame:procUpdateNameSexLabel()
-    local nameSexType = { "uiCP_Sex_Male", "uiCP_Sex_Female" }
+	local nameSexType = { "uiCP_Sex_Male", "uiCP_Sex_Female" }
 	local uiNameSexText = getUI("ui:outgame:appear_name:name_sex_slider:name_sex");
-    local uiNameSex = getDbProp("UI:TEMP:NAME_SEX");
+	local uiNameSex = getDbProp("UI:TEMP:NAME_SEX");
 
-    tempstr = tostring(i18n.get(nameSexType[tonumber(uiNameSex)]));
-    tempstr = string.lower( tempstr );
-    tempstr = (tempstr:gsub("^%l", string.upper));
+	tempstr = tostring(i18n.get(nameSexType[tonumber(uiNameSex)]));
+	tempstr = string.lower(tempstr);
+	tempstr = (tempstr:gsub("^%l", string.upper));
 
-	uiNameSexText.hardtext= tempstr;
+	uiNameSexText.hardtext = tempstr;
 end
+
 -- Name race slider update.
 function outgame:procUpdateNameRaceLabel()
-    local nameRaceType = { "Fyros", "Matis", "Tryker", "Zoraï", "uiCP_Maraudeur" }
+	local nameRaceType = { "Fyros", "Matis", "Tryker", "Zoraï", "uiCP_Maraudeur" }
 
 	local uiNameRaceText = getUI("ui:outgame:appear_name:name_race_slider:name_race");
-    local dbNameRace = getDbProp("UI:TEMP:NAME_RACE");
+	local dbNameRace = getDbProp("UI:TEMP:NAME_RACE");
 
 	local uiNameSexSlider = getUI("ui:outgame:appear_name:name_sex_slider");
 
@@ -207,15 +214,15 @@ function outgame:procUpdateNameRaceLabel()
 	local uiNameSubRace2Slider = getUI("ui:outgame:appear_name:name_sub_race2_slider");
 
 	local uiNameGenerate = getUI("ui:outgame:appear_name:generate");
-    -- Show/Hide sex slider
+	-- Show/Hide sex slider
 
-    uiNameGenerate.y = "-50"
-    if tonumber(dbNameRace) == 2 then
-        uiNameSexSlider.active = true;
-        uiNameGenerate.y = "-65"
-    else
-        uiNameSexSlider.active = false;
-    end
+	uiNameGenerate.y = "-50"
+	if tonumber(dbNameRace) == 2 then
+		uiNameSexSlider.active = true;
+		uiNameGenerate.y = "-65"
+	else
+		uiNameSexSlider.active = false;
+	end
 
     -- Show/Hide sub race slider
     if tonumber(dbNameRace) == 5 then
@@ -227,8 +234,7 @@ function outgame:procUpdateNameRaceLabel()
         uiNameSubRace2Slider.active = false;
     end
 
-
-	uiNameRaceText.hardtext= tostring(nameRaceType[tonumber(dbNameRace)]);
+	uiNameRaceText.hardtext = tostring(nameRaceType[tonumber(dbNameRace)]);
 end
 
 
