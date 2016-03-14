@@ -1,7 +1,10 @@
 <RCC>
     <qresource prefix="/translations">
+        <file>ryzom_configuration_de.qm</file>
         <file>ryzom_configuration_en.qm</file>
+        <file>ryzom_configuration_es.qm</file>
         <file>ryzom_configuration_fr.qm</file>
         <file>ryzom_configuration_hu.qm</file>
+        <file>ryzom_configuration_ru.qm</file>
     </qresource>
 </RCC>
