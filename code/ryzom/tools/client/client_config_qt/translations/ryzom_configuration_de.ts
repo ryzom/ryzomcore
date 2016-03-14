@@ -172,7 +172,7 @@
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="45"/>
         <source>Disable AGP for vertices</source>
-        <translation>Deaktiviere AGP für Vertexeckpunkte</translation>
+        <translation>Deaktiviere AGP fÃ¼r Vertexeckpunkte</translation>
     </message>
     <message>
         <location filename="../display_settings_advanced_widget.ui" line="52"/>
@@ -241,7 +241,7 @@
         <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D.</source>
         <translatorcomment>there&apos;s a period (full stop) at the end opposed to the other &quot;specify&quot;-sentece about full screen ending with a colon...</translatorcomment>
-        <translation type="unfinished">Wähle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
+        <translation type="unfinished">WÃ¤hle, ob Ryzom in OpenGL oder Direct3D laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -266,7 +266,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="67"/>
         <source>Specify if Ryzom is to be run in full screen or window mode:</source>
-        <translation>Wähle, ob Ryzom im Vollbildmodus oder Fenstermodus laufen soll:</translation>
+        <translation>WÃ¤hle, ob Ryzom im Vollbildmodus oder Fenstermodus laufen soll:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="74"/>
@@ -276,7 +276,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
         <source>Specify a video mode</source>
-        <translation>Wähle eine Bildschirmauflösung</translation>
+        <translation>WÃ¤hle eine BildschirmauflÃ¶sung</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="104"/>
@@ -291,7 +291,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="122"/>
         <source>Height</source>
-        <translation>Höhe</translation>
+        <translation>HÃ¶he</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="129"/>
@@ -325,7 +325,7 @@
     <message>
         <location filename="../general_settings_widget.ui" line="38"/>
         <source>French</source>
-        <translation>Französisch</translation>
+        <translation>FranzÃ¶sisch</translation>
     </message>
     <message>
         <location filename="../general_settings_widget.ui" line="43"/>
@@ -352,7 +352,7 @@
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
         <source>Slow down the game ( process low priority )</source>
-        <translation>Verlangsame das Spiel (niedrige Prozesspriorität)</translation>
+        <translation>Verlangsame das Spiel (niedrige ProzessprioritÃ¤t)</translation>
     </message>
 </context>
 <context>
@@ -380,7 +380,7 @@
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
         <source>Software sound buffer ( may increase FPS )</source>
-        <translation>Software Sound Buffer (kann FPS erhöhen)</translation>
+        <translation>Software Sound Buffer (kann FPS erhÃ¶hen)</translation>
     </message>
     <message>
         <location filename="../sound_settings_widget.ui" line="68"/>
