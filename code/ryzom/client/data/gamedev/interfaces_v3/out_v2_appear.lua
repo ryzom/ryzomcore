@@ -108,75 +108,65 @@ function outgame:procGenerateName()
 	local nameResult = "";
 	local fullnameResult = "";
 
-    -- Look at outgame:procUpdateNameRaceLabel() for the "race" list.
-    -- fy ma try zo -->
-    local lastName = "test"
-    local firstName = "test2"
-    if  tonumber( dbNameRace ) == 1 then
-    -- Fyros
-        lastName = self:getFyrosLastName()
-        firstName = self:getFyrosFirstName()
-        fullnameResult = lastName .. " " .. firstName
-        nameResult = firstName
-    elseif  tonumber( dbNameRace ) == 2 then
-    -- Matis
-        lastName = self:getMatisLastName()
-        firstName = self:getMatisFirstName()
-        fullnameResult = lastName .. " " .. firstName
-        nameResult = firstName
-    elseif  tonumber( dbNameRace ) == 3 then
-    -- Tryker
-        lastName = self:getTrykerLastName()
-        firstName = self:getTrykerFirstName()
-        fullnameResult = firstName .. " " .. lastName
-        nameResult = firstName
-    elseif  tonumber( dbNameRace ) == 4  then
-    -- Zorai
-        lastName = self:getZoraiLastName()
-        firstName = self:getZoraiFirstName()
-        fullnameResult = firstName .. " " .. lastName
-        nameResult = firstName
-    elseif  tonumber( dbNameRace ) == 5  then
-    -- Maraudeurs
-        -- lastName
-        if tonumber(dbNameSubRace) == 1 then
-        -- Fyros
-            lastName = self:getFyrosLastName()
-        elseif  tonumber( dbNameSubRace ) == 2 then
-        -- Matis F
-            lastName = self:getMatisLastName(2)
-        elseif  tonumber( dbNameSubRace ) == 3 then
-        -- Matis M
-            lastName = self:getMatisLastName(1)
-        elseif  tonumber( dbNameSubRace ) == 4 then
-        -- Tryker
-            lastName = self:getTrykerLastName()
-        elseif  tonumber( dbNameSubRace ) == 5  then
-        -- Zorai
-            lastName = self:getZoraiLastName()
-        end
+	-- Look at outgame:procUpdateNameRaceLabel() for the "race" list.
+	-- fy ma try zo -->
+	local firstName = "test2"
+	local lastName = "test"
+	if  tonumber(dbNameRace) == 1 then
+	-- Fyros
+		firstName = self:getFyrosFirstName()
+		lastName = self:getFyrosLastName()
+	elseif  tonumber(dbNameRace) == 2 then
+	-- Matis
+		firstName = self:getMatisFirstName()
+		lastName = self:getMatisLastName()
+	elseif  tonumber(dbNameRace) == 3 then
+	-- Tryker
+		firstName = self:getTrykerFirstName()
+		lastName = self:getTrykerLastName()
+	elseif  tonumber(dbNameRace) == 4 then
+	-- Zorai
+		firstName = self:getZoraiFirstName()
+		lastName = self:getZoraiLastName()
+	elseif  tonumber(dbNameRace) == 5 then
+	-- Maraudeurs
 
-        -- firstName
-        if tonumber(dbNameSubRace2) == 1 then
-        -- Fyros
-            firstName = self:getFyrosFirstName()
-        elseif  tonumber( dbNameSubRace2 ) == 2 then
-        -- Matis
-            firstName = self:getMatisFirstName()
-            firstName = self:getMatisFirstName()
-        elseif  tonumber( dbNameSubRace2 ) == 3 then
-        -- Tryker
-            firstName = self:getTrykerFirstName()
-        elseif  tonumber( dbNameSubRace2 ) == 4  then
-        -- Zorai
-            firstName = self:getZoraiFirstName()
-        end
+		-- firstName
+		if tonumber(dbNameSubRaceFirstName) == 1 then
+		-- Fyros
+			firstName = self:getFyrosFirstName()
+		elseif  tonumber(dbNameSubRaceFirstName) == 2 then
+		-- Matis M
+			firstName = self:getMatisFirstName(1)
+		elseif  tonumber(dbNameSubRaceFirstName) == 3 then
+		-- Matis F
+			firstName = self:getMatisFirstName(2)
+		elseif  tonumber(dbNameSubRaceFirstName) == 4 then
+		-- Tryker
+			firstName = self:getTrykerFirstName()
+		elseif  tonumber(dbNameSubRaceFirstName) == 5 then
+		-- Zorai
+			firstName = self:getZoraiFirstName()
+		end
 
-        fullnameResult = lastName .. " " .. firstName
-        nameResult = firstName
-    end
+		-- lastName
+		if tonumber(dbNameSubRaceLastName) == 1 then
+		-- Fyros
+			lastName = self:getFyrosLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 2 then
+		-- Matis
+			lastName = self:getMatisLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 3 then
+		-- Tryker
+			lastName = self:getTrykerLastName()
+		elseif  tonumber(dbNameSubRaceLastName) == 4  then
+		-- Zorai
+			lastName = self:getZoraiLastName()
+		end
+	end
 
-    uiNameFull.hardtext = fullnameResult;
+	fullnameResult = firstName .. " " .. lastName
+	nameResult = firstName
 
 	uiNameFull.hardtext = fullnameResult;
 
@@ -241,10 +231,10 @@ end
 local matisF = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Female")) )):gsub("^%l", string.upper);
 local matisM = "Matis " .. (string.lower(tostring(i18n.get("uiCP_Sex_Male")) )):gsub("^%l", string.upper);
 
-function outgame:procUpdateNameSubRaceLabel()
-    local nameSubRaceType = { "Fyros", matisF, matisM, "Tryker", "Zoraï" }
-	local uiNameSubRaceText = getUI("ui:outgame:appear_name:name_sub_race_slider:name_race");
-    local dbNameSubRace = getDbProp("UI:TEMP:NAME_SUB_RACE");
+function outgame:procUpdateNameSubRaceFirstNameLabel()
+	local nameSubRaceFirstNameType = { "Fyros", matisM, matisF, "Tryker", "Zoraï" }
+	local uiNameSubRaceFirstNameText = getUI("ui:outgame:appear_name:name_sub_race_first_name_slider:name_race");
+	local dbNameSubRaceFirstName = getDbProp("UI:TEMP:NAME_SUB_RACE_FIRST_NAME");
 
 	uiNameSubRaceFirstNameText.hardtext= tostring(nameSubRaceFirstNameType[tonumber(dbNameSubRaceFirstName)]);
 end
