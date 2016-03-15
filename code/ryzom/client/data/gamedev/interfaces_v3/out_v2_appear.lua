@@ -113,22 +113,29 @@ function outgame:procGenerateName()
 	-- fy ma try zo -->
 	local firstName = "test2"
 	local lastName = "test"
+
+	-- Fyros and Matis are using "first name, last name" order
+	-- Trykers and Zoraïs are using "last name, first name" order
 	if  tonumber(dbNameRace) == 1 then
 	-- Fyros
 		firstName = self:getFyrosFirstName()
 		lastName = self:getFyrosLastName()
+		fullnameResult = firstName .. " " .. lastName
 	elseif  tonumber(dbNameRace) == 2 then
 	-- Matis
 		firstName = self:getMatisFirstName()
 		lastName = self:getMatisLastName()
+		fullnameResult = firstName .. " " .. lastName
 	elseif  tonumber(dbNameRace) == 3 then
 	-- Tryker
 		firstName = self:getTrykerFirstName()
 		lastName = self:getTrykerLastName()
+		fullnameResult = lastName .. " " .. firstName
 	elseif  tonumber(dbNameRace) == 4 then
 	-- Zorai
 		firstName = self:getZoraiFirstName()
 		lastName = self:getZoraiLastName()
+		fullnameResult = lastName .. " " .. firstName
 	elseif  tonumber(dbNameRace) == 5 then
 	-- Maraudeurs
 
@@ -164,9 +171,11 @@ function outgame:procGenerateName()
 		-- Zorai
 			lastName = self:getZoraiLastName()
 		end
+
+		fullnameResult = firstName .. " " .. lastName
 	end
 
-	fullnameResult = firstName .. " " .. lastName
+	-- always use first name for character name
 	nameResult = firstName
 
 	uiNameFull.hardtext = fullnameResult
