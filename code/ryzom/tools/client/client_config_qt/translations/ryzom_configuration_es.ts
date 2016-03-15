@@ -241,7 +241,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="28"/>
         <source>Specify if Ryzom is to be run in OpenGL or Direct3D:</source>
-        <translation type="unfinished"></translation>
+        <translation>Especificar si Ryzom debe ser ejecutado con OpenGL o Direct3D:</translation>
     </message>
     <message>
         <location filename="../display_settings_widget.ui" line="35"/>
@@ -276,7 +276,7 @@
     <message>
         <location filename="../display_settings_widget.ui" line="81"/>
         <source>Specify a video mode:</source>
-        <translation type="unfinished"></translation>
+        <translation>Especificar un modo de video:</translation>
     </message>
     <message>
         <source>Specify a video mode</source>
@@ -353,7 +353,7 @@
     <message>
         <location filename="../general_settings_widget.ui" line="100"/>
         <source>Slow down the game (process low priority)</source>
-        <translation type="unfinished"></translation>
+        <translation>Realentizar el juego (prioridad de procesamiento bajo)</translation>
     </message>
     <message>
         <source>Slow down the game ( process low priority )</source>
@@ -385,7 +385,7 @@
     <message>
         <location filename="../sound_settings_widget.ui" line="45"/>
         <source>Software sound buffer (may increase FPS)</source>
-        <translation type="unfinished"></translation>
+        <translation>Buffer de sonido software (puede aumentar los FPS)</translation>
     </message>
     <message>
         <source>Software sound buffer ( may increase FPS )</source>
