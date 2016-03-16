@@ -922,21 +922,23 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set RYZOM_CLIENT=\"%1\"\n";
 		contentPrefix += "set UNPACKPATH=\"%2\"\n";
 		contentPrefix += "set ROOTPATH=\"%3\"\n";
+		contentPrefix += "set STARTUPPATH=\"%4\"\n";
 		contentPrefix += toString("set UPGRADE_FILE=\"%%ROOTPATH%%\\%s\"\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
-		contentPrefix += "set LOGIN=%4\n";
-		contentPrefix += "set PASSWORD=%5\n";
-		contentPrefix += "set SHARDID=%6\n";
+		contentPrefix += "set LOGIN=%5\n";
+		contentPrefix += "set PASSWORD=%6\n";
+		contentPrefix += "set SHARDID=%7\n";
 #else
 		contentPrefix += "#!/bin/sh\n";
 		contentPrefix += "export RYZOM_CLIENT=$1\n";
 		contentPrefix += "export UNPACKPATH=$2\n";
 		contentPrefix += "export ROOTPATH=$3\n";
+		contentPrefix += "export STARTUPPATH=$4\n";
 		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
-		contentPrefix += "LOGIN=$4\n";
-		contentPrefix += "PASSWORD=$5\n";
-		contentPrefix += "SHARDID=$6\n";
+		contentPrefix += "LOGIN=$5\n";
+		contentPrefix += "PASSWORD=$6\n";
+		contentPrefix += "SHARDID=$7\n";
 #endif
 
 		contentPrefix += "\n";
@@ -958,7 +960,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// client shouldn't be in memory anymore else it couldn't be overwritten
-			contentSuffix += toString("start \"\" /D \"%%ROOTPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
 		}
 #else
 		if (wantRyzomRestart)
@@ -976,7 +978,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// change to previous client directory
-			contentSuffix += "cd \"$ROOTPATH\"\n\n";
+			contentSuffix += "cd \"$STARTUPPATH\"\n\n";
 
 			// launch new client
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
@@ -1017,29 +1019,31 @@ void CPatchManager::executeBatchFile()
 
 	std::string batchFilename;
 
+	std::vector<std::string> arguments;
+	
+	std::string startupPath = Args.getStartupPath();
+
+	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
 #ifdef NL_OS_WINDOWS
 	batchFilename = CPath::standardizeDosPath(ClientRootPath);
+
+	arguments.push_back(CPath::standardizeDosPath(RyzomFilename));
+	arguments.push_back(CPath::standardizeDosPath(ClientPatchPath));
+	arguments.push_back(CPath::standardizeDosPath(ClientRootPath));
+	arguments.push_back(CPath::standardizeDosPath(startupPath));
 #else
 	batchFilename = ClientRootPath;
+
+	arguments.push_back(RyzomFilename);
+	arguments.push_back(ClientPatchPath);
+	arguments.push_back(ClientRootPath);
+	arguments.push_back(startupPath);
 #endif
 
 	batchFilename += UpdateBatchFilename;
 
 	// make script executable
 	CFile::setRWAccess(batchFilename);
-
-	std::vector<std::string> arguments;
-
-	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path
-#ifdef NL_OS_WINDOWS
-	arguments.push_back(CPath::standardizeDosPath(RyzomFilename));
-	arguments.push_back(CPath::standardizeDosPath(ClientPatchPath));
-	arguments.push_back(CPath::standardizeDosPath(ClientRootPath));
-#else
-	arguments.push_back(RyzomFilename);
-	arguments.push_back(ClientPatchPath);
-	arguments.push_back(ClientRootPath);
-#endif
 
 	// append login, password and shard
 	if (!LoginLogin.empty())
