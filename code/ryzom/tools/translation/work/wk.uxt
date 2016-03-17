@@ -13485,3 +13485,6 @@ uiKeyVOLUMEUP [Volume up]
 uiKeyCALC [Calculator]
 uiKeyPARAGRAPH [Paragraph]
 uiKeyOEM_102 [OEM 102]
+
+// used to format dynamic chats filters
+uiFilterMenuDynamic	[%s @{T8}/%s]

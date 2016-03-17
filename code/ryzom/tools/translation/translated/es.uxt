@@ -7061,23 +7061,23 @@ uiFilterGuild	[GREMIO]
 
 // HASH_VALUE D21E035913A3BF71
 // INDEX 1700
-uiFilterMenuAround	[ALREDEDOR DE @{T8}/s]
+uiFilterMenuAround	[Alrededor de @{T8}/s]
 
 // HASH_VALUE 53C19C5E00E32743
 // INDEX 1701
-uiFilterMenuUniverse	[UNIVERSO @{T8}/u]
+uiFilterMenuUniverse	[Universo @{T8}/u]
 
 // HASH_VALUE E0DD804CC85218F0
 // INDEX 1702
-uiFilterMenuRegion	[REGIÓN @{T8}/r]
+uiFilterMenuRegion	[Región @{T8}/r]
 
 // HASH_VALUE 1ECFB04DCB621CE4
 // INDEX 1703
-uiFilterMenuTeam	[EQUIPO @{T8}/p]
+uiFilterMenuTeam	[Equipo @{T8}/p]
 
 // HASH_VALUE 9C4DCC438DC108DA
 // INDEX 1704
-uiFilterMenuGuild	[GREMIO @{T8}/g]
+uiFilterMenuGuild	[Gremio @{T8}/g]
 
 // HASH_VALUE E077D052719D1EAD
 // INDEX 1705

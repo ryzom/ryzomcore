@@ -248,7 +248,7 @@ SapCristal	[Sap Crystal]
 
 // HASH_VALUE A85654A521A9586D
 // INDEX 62
-SandCaravanner	[Sand Karavaneer]
+SandCaravanner	[Dune Caravaneer]
 
 // HASH_VALUE EA1C14386ED894BC
 // INDEX 63
@@ -305,23 +305,23 @@ agp_trouble	[The driver has failed to allocate AGP memory. This may result in pe
 
 // HASH_VALUE 5A56887FA8E007AF
 // INDEX 76
-can_t_load_the_display_driver	[Cannot load the display driver]
+can_t_load_the_display_driver	[Cannot load the display driver.]
 
 // HASH_VALUE D236BC3F590A766E
 // INDEX 77
-can_t_initialise_the_mouse	[Cannot initialize the mouse]
+can_t_initialise_the_mouse	[Cannot initialize the mouse.]
 
 // HASH_VALUE 1618E42EED39DF64
 // INDEX 78
-can_t_initialise_the_keyboard	[Cannot initialize the keyboard]
+can_t_initialise_the_keyboard	[Cannot initialize the keyboard.]
 
 // HASH_VALUE 553984846E949284
 // INDEX 79
-can_t_create_a_window_display	[Cannot create a window display]
+can_t_create_a_window_display	[Cannot create a window display.]
 
 // HASH_VALUE 58393B04E6548F6A
 // INDEX 80
-can_t_create_a_fullscreen_display	[Cannot create a fullscreen display]
+can_t_create_a_fullscreen_display	[Cannot create a fullscreen display.]
 
 // HASH_VALUE 701C9488701C9488
 // INDEX 81
@@ -721,7 +721,7 @@ bricktFABER	[Crafter]
 
 // HASH_VALUE EF1BBC91A3084494
 // INDEX 180
-bricktHARVEST	[Ranger]
+bricktHARVEST	[Harvest]
 
 // HASH_VALUE 60582450649894AC
 // INDEX 181
@@ -1337,7 +1337,7 @@ uiOnChecking	[CHECKING FILES FOR PATCH...]
 
 // HASH_VALUE FB21B433B2B1EC22
 // INDEX 334
-uiOnRelease	[RELEASE NOTES]
+uiOnRelease	[VERSION NOTES]
 
 // HASH_VALUE 48209C2B05607C06
 // INDEX 335
@@ -1413,7 +1413,7 @@ uiErrPatchApply	[Error: Patch process ended but the patch has not been successfu
 
 // HASH_VALUE 428B3D2BDA3B2CD2
 // INDEX 353
-uiErrChecking	[Error: Patch files failed - checking.]
+uiErrChecking	[ERROR: failure of the files update - checking.]
 
 // HASH_VALUE 8E9280411622E45F
 // INDEX 354
@@ -1433,11 +1433,11 @@ uiDLFailed	[Download from emergency server failed, patching is aborted]
 
 // HASH_VALUE 0DD314AEEB0A6833
 // INDEX 358
-uiDLURIFailed	[Download from URI failed (will try again):]
+uiDLURIFailed	[Download from URL failed (will try again):]
 
 // HASH_VALUE 9FEF11F92FE58883
 // INDEX 359
-uiNoMoreURI	[No more patch URI, try emergency patch server]
+uiNoMoreURI	[No more patch URL, try emergency patch server]
 
 // HASH_VALUE D126843FEAF6BF89
 // INDEX 360
@@ -1785,7 +1785,7 @@ uiEM_Alert	[ALERT]
 
 // HASH_VALUE 5014C40454D49454
 // INDEX 446
-uiEM_Altruist	[ALTRUIST]
+uiEM_Altruist	[ALTRUISTIC]
 
 // HASH_VALUE 9090E4084D90C00C
 // INDEX 447
@@ -2641,7 +2641,7 @@ uiEM_Sly	[SLY]
 
 // HASH_VALUE 4551B42E47D1BC22
 // INDEX 660
-uiEM_Smack	[SMACK]
+uiEM_Smack	[SLAP]
 
 // HASH_VALUE 4454D44C4454D44C
 // INDEX 661
@@ -3339,7 +3339,7 @@ uiFxDensityBloom	[Density]
 
 // HASH_VALUE B2D1AC8FB27D333E
 // INDEX 834
-uiFxTooltipBloom	[Your configuration does not support the Bloom effect. Try to update your drivers.]
+uiFxTooltipBloom	[Your configuration does not support the Bloom effect. Try updating your drivers.]
 
 // HASH_VALUE 6573D09729FA6452
 // INDEX 835
@@ -4566,11 +4566,11 @@ uittGetMoney	[TAKE]
 
 // HASH_VALUE FE51F742BE8F073C
 // INDEX 1140
-uiMoneyFromGuild	[TAKE MONEY FROM GUILD BANK]
+uiMoneyFromGuild	[TAKE DAPPERS FROM GUILD BANK]
 
 // HASH_VALUE 888FF822C3018E11
 // INDEX 1141
-uiMoneyToGuild	[GIVE MONEY TO GUILD BANK]
+uiMoneyToGuild	[GIVE DAPPERS TO GUILD BANK]
 
 // HASH_VALUE CD81B7290D72123C
 // INDEX 1142
@@ -4754,7 +4754,7 @@ uittOutpostStatus	[Current state of the Outpost]
 // HASH_VALUE 458F04DDFF6A6EAF
 // INDEX 1179
 uiOutpostCrash	[A server crash during the Attack or Defense Phase has canceled the Outpost war.\n
-	Any money spent on this war has been reimbursed to the guilds (i.e. the cost for declaring, for buying squads, etc.)]
+	Any dapper spent on this war has been reimbursed to the guilds (i.e. the cost for declaring, for buying squads, etc.)]
 
 // HASH_VALUE 8A709A3EBFB0A4E9
 // INDEX 1180
@@ -4777,7 +4777,7 @@ uiOutpostLvlMaxAttacker	[Max. Attacker Round Level: ]
 // HASH_VALUE 384FE58FF1A62CA0
 // INDEX 1184
 uittOutpostLvlMaxAttacker	[Maximum @{6F6F}Round Level@{FFFF} reached by the Attackers.\n
-	This is the @{6F6F}Maximum Round@{FFFF} level that the Attackers were able to achieve during their @{6F6F}Attack Phase@{FFFF}.\n
+	This is the maximum @{6F6F}Round Leve@{FFFF}} that the Attackers were able to achieve during their @{6F6F}Attack Phase@{FFFF}.\n
 	]
 
 // HASH_VALUE 48B1FA6555257053
@@ -4787,7 +4787,7 @@ uiOutpostLvlMaxDefender	[Max. Defender Round Level: ]
 // HASH_VALUE A9A5CF968DD5501D
 // INDEX 1186
 uittOutpostLvlMaxDefender	[Maximum @{6F6F}Round Level@{FFFF} reached by the Defenders.\n
-	This is the Maximum @{6F6F}Round Level@{FFFF} that the Defenders were able to achieve during their @{6F6F}Defense Phase@{FFFF}.\n
+	This is the maximum @{6F6F}Round Level@{FFFF} that the Defenders were able to achieve during their @{6F6F}Defense Phase@{FFFF}.\n
 	]
 
 // HASH_VALUE 2AC7623086A5DCAD
@@ -4888,7 +4888,7 @@ uiOutpostWarCost	[COST OF DECLARING: ]
 
 // HASH_VALUE CAF544A84E2694D6
 // INDEX 1207
-uiOutpostWarCostDesc	[Declaring war on an outpost costs the guild money (For example the squads have to be paid during the Defense rounds).\n
+uiOutpostWarCostDesc	[Declaring war on an outpost costs the guild dappers (For example the squads have to be paid during the Defense rounds).\n
 	 \n
 	The amount will be deducted from your Guild's coffers, or from your own purse.\n
 	]
@@ -4972,7 +4972,7 @@ uittOutpostSSquad	[Squads out and defending the outpost.\n
 
 // HASH_VALUE 08110B32CC11D70D
 // INDEX 1226
-uiOutpostTSquad	[READY SQUADS]
+uiOutpostTSquad	[PENDING SQUADS]
 
 // HASH_VALUE F1D1A88C0BDB046E
 // INDEX 1227
@@ -4994,7 +4994,7 @@ uiOutpostSSquadDuring	[During Round]
 
 // HASH_VALUE FE99BA6C4B31DDDE
 // INDEX 1231
-uittOutpostSSquadDuring	[Squads which appeared one by one during the Round]
+uittOutpostSSquadDuring	[Squads which will appear one by one during the Round]
 
 // HASH_VALUE DB499A35C8B08D6A
 // INDEX 1232
@@ -5032,9 +5032,9 @@ uiOutpostCapital	[WAR COFFER]
 
 // HASH_VALUE B3ECCE9347314BB9
 // INDEX 1239
-uiOutpostCapitalDoc	[The squads that you edit here do not cost the guild any money right away.\n
-	It only costs money when the squads come out for a round.\n
-	Nonetheless, if the guild does not have enough money to pay for a @{6F6F}squad spawn@{FFFF}, a default squad (much less powerful) will be used.\n
+uiOutpostCapitalDoc	[The squads that you edit here do not cost the guild any dappers right away.\n
+	It only costs dappers when the squads come out for a round.\n
+	Nonetheless, if the guild does not have enough dappers to pay for a @{6F6F}squad spawn@{FFFF}, a default squad (much less powerful) will be used.\n
 	You also can limit squad expenses @{6F6F}via Outpost@{FFFF} by changing the @{6F6F}Coffers@{FFFF} below.\n
 	Every time there is a @{6F6F}squad spawn@{FFFF}, both the Guild's and the Outpost's (if possible) @{6F6F}Coffers@{FFFF} decrease.\n
 	Every time a @{6F6F}squad@{FFFF} comes back alive (even if only partially), the Guild's and the Outpost's @{6F6F}Coffers@{FFFF} increase.\n
@@ -5537,8 +5537,8 @@ uiXpBonusInfo	[XP Bonus:    Level @{6F6F}%lvl@{FFFF} x @{6F6F}%count@{FFFF}]
 
 // HASH_VALUE 2D79EC806D00D1D6
 // INDEX 1361
-uittXpBonus	[An experience catalyzer is active; you receive a bonus to any XP you set using skills lower than the quality of the catalyzer.\n
-	Click here to deactivate it.]
+uittXpBonus	[A stack of catalyzers is active; you receive a bonus to any XP you get using skills lower than the quality of the catalyzer.\n
+	Free to play accounts only: Click here to deactivate it.]
 
 // HASH_VALUE E02A77CCC8F159E8
 // INDEX 1362
@@ -6075,7 +6075,7 @@ uiFame_tribe_woven_bridles	[Woven Bridles]
 
 // HASH_VALUE 5D739D0817C7B25B
 // INDEX 1477
-uittFameKOS	[Guards can kill you on sight.]
+uittFameKOS	[Guards will kill you on sight]
 
 // HASH_VALUE 159A5C875A391426
 // INDEX 1478
@@ -6540,12 +6540,12 @@ uiSapDesc	[@{6F6F}Sap@{FFFF}, \n
 // HASH_VALUE 0818382AFDB10CD9
 // INDEX 1572
 uiFocDesc	[@{6F6F}Focus@{FFFF}, \n
-	measure the character's ability to concentrate.]
+	measures the character's ability to concentrate.]
 
 // HASH_VALUE C5C5AADDE9B1CB06
 // INDEX 1573
 uiConsDesc	[@{6F6F}Constitution@{FFFF}, \n
-	measure the character's ability to engage in long-term periods of strenuous physical activity.]
+	measures the character's ability to engage in long-term periods of strenuous physical activity.]
 
 // HASH_VALUE B4C1EFCDAFE00362
 // INDEX 1574
@@ -6560,12 +6560,12 @@ uiStrDesc	[@{6F6F}Strength@{FFFF}, \n
 // HASH_VALUE 2CBDF588F00F8902
 // INDEX 1576
 uiDexDesc	[@{6F6F}Dexterity@{FFFF}, \n
-	measure how skilled a character is at doing fine work with their hands.]
+	a measure of how skilled a character is at doing fine work with their hands.]
 
 // HASH_VALUE EE7A5B01A1BEDC58
 // INDEX 1577
 uiMetaDesc	[@{6F6F}Metabolism@{FFFF}, \n
-	measure the rate at which a character's body can recover from injury.]
+	measures the rate at which a character's body can recover from injury.]
 
 // HASH_VALUE 9DF5C8519F10DD99
 // INDEX 1578
@@ -6848,7 +6848,7 @@ uiAscensorTeleportList	[DESTINATIONS]
 
 // HASH_VALUE 3E32C812CBF2B822
 // INDEX 1647
-uiTeleportLocation	[TELEPORT LOCACTIONS]
+uiTeleportLocation	[TELEPORT LOCATIONS]
 
 // HASH_VALUE 7FC236417613BC31
 // INDEX 1648
@@ -7061,23 +7061,23 @@ uiFilterGuild	[GUILD]
 
 // HASH_VALUE D21E035913A3BF71
 // INDEX 1700
-uiFilterMenuAround	[AROUND @{T8}/s]
+uiFilterMenuAround	[Around @{T8}/s]
 
 // HASH_VALUE 53C19C5E00E32743
 // INDEX 1701
-uiFilterMenuUniverse	[UNIVERSE @{T8}/u]
+uiFilterMenuUniverse	[Universe @{T8}/u]
 
 // HASH_VALUE E0DD804CC85218F0
 // INDEX 1702
-uiFilterMenuRegion	[REGION @{T8}/r]
+uiFilterMenuRegion	[Region @{T8}/r]
 
 // HASH_VALUE 1ECFB04DCB621CE4
 // INDEX 1703
-uiFilterMenuTeam	[TEAM @{T8}/p]
+uiFilterMenuTeam	[Team @{T8}/p]
 
 // HASH_VALUE 9C4DCC438DC108DA
 // INDEX 1704
-uiFilterMenuGuild	[GUILD @{T8}/g]
+uiFilterMenuGuild	[Guild @{T8}/g]
 
 // HASH_VALUE E077D052719D1EAD
 // INDEX 1705
@@ -8492,7 +8492,7 @@ uiInvEquipTitle	[EQUIPMENT]
 
 // HASH_VALUE 0D00103A0A41EC39
 // INDEX 2056
-uiMoneyTitle	[MONEY]
+uiMoneyTitle	[DAPPERS]
 
 // HASH_VALUE 4120300C01D0480B
 // INDEX 2057
@@ -8716,7 +8716,7 @@ uittPvPTagTimer	[\n
 // INDEX 2109
 uittPvPModeFlag	[@{6F6F}Faction PvP@{FFFF}\n
 	You are @{6F6F}PvP Tagged@{FFFF} and you have recently performed a PvP offensive action.\n
-	You are now @{6F6F}PvP Flagged@{FFFF}. As a result you are not able to perform all PvE actions and interactions with other players. eg: you cannot group with players from the opposite facion.\n
+	You are now @{6F6F}PvP Flagged@{FFFF}. As a result you are not able to perform all PvE actions and interactions with other players. eg: you cannot group with players from the opposite faction.\n
 	The flag will be removed in %temps.]
 
 // HASH_VALUE 00841A0EC6F3BC0E
@@ -8725,7 +8725,7 @@ uittPvPTime	[@{6F6F}%h h %m m %s s@{FFFF}]
 
 // HASH_VALUE 4B7FC42C020EF005
 // INDEX 2111
-uiSelMoney2Give	[SELECT MONEY TO GIVE]
+uiSelMoney2Give	[SELECT DAPPERS TO GIVE]
 
 // HASH_VALUE 48D0841444D0E404
 // INDEX 2112
@@ -8889,7 +8889,7 @@ uimwInventory	[INVENTORY]
 
 // HASH_VALUE 0D00103A0A41EC39
 // INDEX 2152
-uimwMoney	[MONEY]
+uimwMoney	[DAPPERS]
 
 // HASH_VALUE 50D0140850D01408
 // INDEX 2153
@@ -9429,7 +9429,7 @@ uiDescBM	[BUFFER CASTER - DESCRIPTION]
 
 // HASH_VALUE CE321F404850C42B
 // INDEX 2287
-uiDescH	[RANGER - DESCRIPTION]
+uiDescH	[HARVESTER - DESCRIPTION]
 
 // HASH_VALUE 8330D40FC8B1C83C
 // INDEX 2288
@@ -9469,7 +9469,7 @@ uiCarBM	[BUFFER CASTER - CHARACTERISTICS]
 
 // HASH_VALUE 4E1207278BF2C430
 // INDEX 2297
-uiCarH	[RANGER - CHARACTERISTICS]
+uiCarH	[HARVESTER - CHARACTERISTICS]
 
 // HASH_VALUE 46F08F198910C44E
 // INDEX 2298
@@ -10211,7 +10211,7 @@ uihelpItemCantSell	[@{F80B}This item cannot be sold to a merchant.@{FFFF}\n
 
 // HASH_VALUE A203D9DB12EA02AC
 // INDEX 2465
-uihelpItemCosmeticDontFit	[@{F80B}This cosmetic feature cannot be applied on you, because of your race or gender@{FFFF}\n
+uihelpItemCosmeticDontFit	[@{F80B}This cosmetic feature cannot be applied on you because of your race or gender@{FFFF}\n
 	]
 
 // HASH_VALUE 03E5545F85F4B4DE
@@ -10474,7 +10474,7 @@ uihelpItemCrystalSpell	[This item can be used to\n
 	\n
 	Then right-click on this crystal, and choose "Enchant Right Hand".\n
 	\n
-	Note that applying a Crystallized Spell overwrites any previous enchantment on the item and sets its sap load to 0.\n
+	Note that applying a Crystallized Spell overwrites any previous enchantment on the item.\n
 	\n
 	%cansell\n
 	%enchantment%custom_text]
@@ -10743,13 +10743,13 @@ uihelpPhraseBrickRequirement	[@{FFF9}@{HuittActionStanzaReq}Stanzas Required:@{H
 // HASH_VALUE 428D8631CC10708E
 // INDEX 2530
 uihelpPhraseNotCastableFormat	[@{FFFF}This is an action upgrade which teaches you some new stanzas.\n
-	You cannot memorize or cast it.\n
+	You cannot cast it nor put it into your action-bar.\n
 	@{FFFF}%desc%req]
 
 // HASH_VALUE 0F0F8DFF048A8EF8
 // INDEX 2531
 uihelpPhraseCharacteristic	[@{FFFF}This is an upgrade which increases some characteristics.\n
-	You cannot memorize or cast it.\n
+	You cannot cast it nor put it into your action-bar.\n
 	@{FFFF}%desc%req]
 
 // HASH_VALUE AFC850B7201BDDEA
@@ -12656,7 +12656,7 @@ uiInvertNames	[Toggle names]
 
 // HASH_VALUE 738710663076287B
 // INDEX 2996
-uiPlayer	[My Gauges]
+uiPlayer	[Player]
 
 // HASH_VALUE D36A9C4B6C15C7A4
 // INDEX 2997
@@ -12808,7 +12808,7 @@ uiWorkshop	[ACTIONS & INVENTORY]
 
 // HASH_VALUE 2D06909A22476C99
 // INDEX 3034
-uiMoney	[Money]
+uiMoney	[Dappers]
 
 // HASH_VALUE 70D8140870D81408
 // INDEX 3035
@@ -13947,15 +13947,15 @@ uiBotChatGuildRoleMaster	[GUILD ROLE MASTER]
 
 // HASH_VALUE 7038904D65E4A053
 // INDEX 3316
-uittPlayerMoney	[Your money]
+uittPlayerMoney	[Your dappers]
 
 // HASH_VALUE 118810F6F01976D3
 // INDEX 3317
-uittGuildMoney	[Your guild's money]
+uittGuildMoney	[Your guild's dappers]
 
 // HASH_VALUE B68EBC2A5690E428
 // INDEX 3318
-uiNotEnoughMoney	[NOT ENOUGH MONEY]
+uiNotEnoughMoney	[NOT ENOUGH DAPPERS]
 
 // HASH_VALUE 002F1B3942E01029
 // INDEX 3319
@@ -14187,7 +14187,7 @@ uiGuildXP	[GUILD XP:]
 
 // HASH_VALUE FF8F13094B10182E
 // INDEX 3376
-uiNotEnoughGuildMoney	[NOT ENOUGH GUILD MONEY]
+uiNotEnoughGuildMoney	[NOT ENOUGH GUILD DAPPERS]
 
 // HASH_VALUE 3DA1FC030C2E2F31
 // INDEX 3377
@@ -14377,7 +14377,7 @@ uiTips10	[Press 'CTRL - R' to reply to last Tell once.\n
 
 // HASH_VALUE 7850A32BC35E7EE6
 // INDEX 3422
-uiTips11	[Press SPACEBAR to select the enemies in front of you. Repeat to cycle through enemies.\n
+uiTips11	[Press SPACEBAR to select the enemy most directly in front of you.\n
 	Press CTRL + SPACEBAR to select friends in front of you.]
 
 // HASH_VALUE 8A801482C5765C81
@@ -14401,7 +14401,7 @@ uiTips15	[Press X to show or hide the main chat.\n
 // HASH_VALUE 9F538781E3CDB90A
 // INDEX 3427
 uiTips16	[Press M to show or hide the map.\n
-	You can place way points on the map and target them with the compass.]
+	You can place labeled location flags on the map and target them with the compass.]
 
 // HASH_VALUE 28F6D4546B54E872
 // INDEX 3428
@@ -14893,7 +14893,7 @@ uiRadar	[Radar]
 
 // HASH_VALUE 90A8F442AEC797B4
 // INDEX 3550
-uiGuildForum	[Forums]
+uiGuildForum	[Guild Forum]
 
 // HASH_VALUE CDBAC82A5AE85366
 // INDEX 3551
@@ -15794,31 +15794,31 @@ Expert_Range_Heavy_Weapon_Smith	[Expert Range Heavy Weaponsmith]
 
 // HASH_VALUE 2EA7A3A1EA2552A0
 // INDEX 3775
-Heavy_Armorer_Master	[Heavy Armorer Master]
+Heavy_Armorer_Master	[Master Heavy Armorer]
 
 // HASH_VALUE AB07B3A06785629F
 // INDEX 3776
-Light_Armorer_Master	[Light Armorer Master]
+Light_Armorer_Master	[Master Light Armorer]
 
 // HASH_VALUE 5759EC8997307C8D
 // INDEX 3777
-Medium_Armorer_Master	[Medium Armorer Master]
+Medium_Armorer_Master	[Master Medium Armorer]
 
 // HASH_VALUE A2395B98D3F43C5D
 // INDEX 3778
-Shield_Smith_Master	[Shieldsmith Master]
+Shield_Smith_Master	[Master Shieldsmith]
 
 // HASH_VALUE 6BCA80811216738D
 // INDEX 3779
-Jeweler_Master	[Jeweler Master]
+Jeweler_Master	[Master Jeweler]
 
 // HASH_VALUE 62142C94E1942F4B
 // INDEX 3780
-Melee_Weapon_Smith_Master	[Melee Weaponsmith Master]
+Melee_Weapon_Smith_Master	[Master Melee Weaponsmith]
 
 // HASH_VALUE 11755C3DE2084F9D
 // INDEX 3781
-Melee_Heavy_Weapon_Smith_Master	[Heavy Melee Weaponsmith Master]
+Melee_Heavy_Weapon_Smith_Master	[Master Heavy Melee Weaponsmith]
 
 // HASH_VALUE 11252443E3484F9D
 // INDEX 3782
@@ -15826,11 +15826,11 @@ Melee_Light_Weapon_Smith_Master	[Master Light Melee Weapon Smith]
 
 // HASH_VALUE 62F43099E1942F4D
 // INDEX 3783
-Range_Weapon_Smith_Master	[Range Weaponsmith Master]
+Range_Weapon_Smith_Master	[Master Range Weaponsmith]
 
 // HASH_VALUE 91954C4223084F9D
 // INDEX 3784
-Range_Heavy_Weapon_Smith_Master	[Heavy Range Weaponsmith Master]
+Range_Heavy_Weapon_Smith_Master	[ Master Heavy Range Weaponsmith]
 
 // HASH_VALUE EBA6935C563A9CAE
 // INDEX 3785
@@ -18778,7 +18778,7 @@ mpfam707	[Fyros Imperial Token]
 
 // HASH_VALUE 677857586645DB59
 // INDEX 4521
-mpfam708	[Zoraï Cho Token]
+mpfam708	[Zoraï Theocratic Token]
 
 // HASH_VALUE AAE8BF99DAE2AFA3
 // INDEX 4522
@@ -20720,7 +20720,7 @@ uiConfigOpenGL	[OpenGL]
 
 // HASH_VALUE 649C941064CC448C
 // INDEX 4924
-uiConfigDirect3D	[Direct3d]
+uiConfigDirect3D	[Direct3D]
 
 // HASH_VALUE 6C1C54046C1C5404
 // INDEX 4925
@@ -21315,7 +21315,7 @@ uiEulaContent	[RYZOM LICENCE\n
 	\n
 	3. REGISTERING AND OPENING AN ACCOUNT. This Contract allows you to use the procedure offered for registering your details to set up one (1) account enabling you to play Ryzom and/or Ryzom Ring over the Internet. The Internet connection is not provided by Winch Gate, and the User is solely responsible for payment of all charges enabling him/her to obtain, maintain and use the connection. Registration requires you to send information to Winch Gate, including information on your identity and the means of payment used. You guarantee that all the information you provide in the course of the registration procedure is true, and you undertake to inform Winch Gate of any change in this information, by using the update facility provided as part of your account.\n
 	\n
-	4. PERSONAL NATURE OF THE ACCOUNT. Use of the account is strictly personal. The account must not, even temporarily be shared with or otherwise extended to another person (whether free of charge or not), nor may it be used in any way (whether free of charge or not) that is extraneous to the proper normal use of the Game. The User is fully responsible for the use of his/her access account, and for the use made of his/her account by his/her underage child or by any other person who has access to it.\n
+	4. PERSONAL NATURE OF THE ACCOUNT. Use of the account is strictly personal. The account must not, even temporarily, be shared with or otherwise extended to another person (whether free of charge or not), nor may it be used in any way (whether free of charge or not) that is extraneous to the proper normal use of the Game. The User is fully responsible for the use of his/her access account, and for the use made of his/her account by his/her underage child or by any other person who has access to it.\n
 	\n
 	5. LOGIN AND PASSWORD. To get an account, you must choose a login to connect, and a password; these will enable you to access the account. This login and password are strictly personal and may not be used by anyone else; nor may you use the login and password of any other player. You are fully responsible for your choice of your login and password, for keeping them confidential, and for any use made of them by another person. Winch Gate declines all responsibility for any harm caused to your account by the unauthorized use of your login or password. If you lose your login or password, a charge may be made for supplying a new one.\n
 	\n
@@ -21913,7 +21913,7 @@ gn_class_arcane_apprentice	[Senior Elite Magician]
 
 // HASH_VALUE 24E91888A93924B0
 // INDEX 5211
-gn_class_arcane_master	[Veteran Elite Magicia]
+gn_class_arcane_master	[Veteran Elite Magician]
 
 // HASH_VALUE 242A1893E18B1897
 // INDEX 5212
@@ -22526,7 +22526,7 @@ uittNotEnoughMoney	[You don't have enough dappers to buy this.]
 
 // HASH_VALUE 923E66223C721EEB
 // INDEX 5363
-uittNotEnoughGuildMoney	[Your guild doesn't have enough money to buy this]
+uittNotEnoughGuildMoney	[Your guild doesn't have enough dappers to buy this]
 
 // HASH_VALUE 9EA0F87CB6A59313
 // INDEX 5364
@@ -23410,7 +23410,7 @@ uiLoadingString36	[Caffeinenating support team...]
 
 // HASH_VALUE C5047097A6340F71
 // INDEX 5566
-uiLoadingString37	[Equipping Mokoi ]
+uiLoadingString37	[For the latest gossip, try IRC.]
 
 // HASH_VALUE 8895244968FA2376
 // INDEX 5567
@@ -24009,7 +24009,7 @@ uiWelcomeTitle	[Welcome to Atys!]
 
 // HASH_VALUE 56E429B73958EE09
 // INDEX 5709
-uiWelcomeIntro	[The ever evolving organic planet like a gigantic plant basking in the light of its pulsating sun.]
+uiWelcomeIntro	[The ever-evolving organic planet is like a gigantic plant basking in the light of its pulsating sun.]
 
 // HASH_VALUE 5D3AA67CC8B6D41D
 // INDEX 5710
@@ -24348,7 +24348,7 @@ uittInfoHP	[@{6F6F}Hit points@{FFFF}:\n
 // HASH_VALUE 2ABB2BD8C07878B9
 // INDEX 5784
 uittInfoWeight	[@{6F6F}Weight@{FFFF}:\n
-	If the total weight is too high, your moving speed may be reduced.]
+	If the total weight is too high, your moving speed will be reduced.]
 
 // HASH_VALUE 6819F591D97250CB
 // INDEX 5785
@@ -25018,7 +25018,7 @@ uiRAP_EnlargeTooltip	[Enlarge the columns so that their content is fully visible
 // HASH_VALUE 1F4DC91D2FC75906
 // INDEX 5936
 uiRAP_FlagsTooltip	[A @{6F6F}CHECK@{FFFF} is displayed when the scenario owner has invited you to join the scenario.\n
-	An @{6F6F}EYE@{FFFF} icon indicate that the owner is present in this scenario. Click to sort by this criterion.]
+	An @{6F6F}EYE@{FFFF} icon indicates that the owner is present in this scenario. Click to sort by this criterion.]
 
 // HASH_VALUE 7DACB1DE78A79DE0
 // INDEX 5937
@@ -25553,23 +25553,23 @@ uiRingChooseScenario	[Choose a scenario.]
 // HASH_VALUE 50A91151AFCA7798
 // INDEX 6065
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Name	[@{6F6F}File Name\n
-	@{FFFF}File name of the scenario to load]
+	@{FFFF}File name of the scenario to load.]
 
 // HASH_VALUE 59BE229752871595
 // INDEX 6066
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Title	[@{6F6F}Title\n
-	@{FFFF} Title of the selected scenario]
+	@{FFFF} Title of the selected scenario.]
 
 // HASH_VALUE 60C8536472BD561B
 // INDEX 6067
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Description	[@{6F6F}Description\n
-	@{FFFF} Description of the selected scenario, as provided by the author]
+	@{FFFF} Description of the selected scenario, as provided by the author.]
 
 // HASH_VALUE B347D4DBDA147171
 // INDEX 6068
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Rules	[@{6F6F}Mastering\n
 	@{FFFF} Mastered means that the you will be the Adventure Master in the scenario\n
-	Masterless means that you will participate in the scenario as a player]
+	Masterless means that you will participate in the scenario as a player.]
 
 // HASH_VALUE FC2BD65951F97767
 // INDEX 6069
@@ -25579,7 +25579,7 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Level	[@{6F6F}Difficulty\n
 // HASH_VALUE AFBD81929D869A76
 // INDEX 6070
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Language	[@{6F6F}Language\n
-	@{FFFF} The language of the scenario, as declared by the scenario author]
+	@{FFFF} The language of the scenario, as declared by the scenario author.]
 
 // HASH_VALUE 66CEF50ED8DC276E
 // INDEX 6071
@@ -25701,11 +25701,11 @@ uiR2EDLoadScenario_InvalidFileName	[Invalid file name]
 
 // HASH_VALUE E082DD6A29896311
 // INDEX 6097
-uiR2EDLoadScenario_Yes	[You have sufficient knowledge of Atys]
+uiR2EDLoadScenario_Yes	[You have sufficient knowledge of Atys.]
 
 // HASH_VALUE 18577D9A4E0EA0E9
 // INDEX 6098
-uiR2EDLoadScenario_No	[You have INSUFFICIENT knowledge of Atys]
+uiR2EDLoadScenario_No	[You have INSUFFICIENT knowledge of Atys.]
 
 // HASH_VALUE AAC8204867A84443
 // INDEX 6099
@@ -26169,7 +26169,7 @@ uiBGD_PatchingFailed	[Patch failed. Please check your disk space and internet co
 
 // HASH_VALUE 5B64887497D8775D
 // INDEX 6208
-uiBGD_CheckSuccess	[File check finished]
+uiBGD_CheckSuccess	[File check finished.]
 
 // HASH_VALUE EAFA20514E42BBA3
 // INDEX 6209
@@ -26177,11 +26177,11 @@ uiBGD_Progress	[Patch progress: ]
 
 // HASH_VALUE 7F3B30F36D90E7CF
 // INDEX 6210
-uiBGD_PatchUpToDate	[Ryzom is up to date]
+uiBGD_PatchUpToDate	[Ryzom is up to date.]
 
 // HASH_VALUE 39907708AD43B943
 // INDEX 6211
-uiBGD_PatchError	[Patch error, please check your disk space and system settings and try again]
+uiBGD_PatchError	[Patch error, please check your disk space and system settings and try again.]
 
 // HASH_VALUE 1EF6CD9CD14C00BD
 // INDEX 6212
@@ -26189,7 +26189,7 @@ uiBGD_ProtocolError	[Game/Downloader communication Error. Please restart Ryzom o
 
 // HASH_VALUE 26A8FD55064E9186
 // INDEX 6213
-uiBGD_DownloaderDisconnected	[Ryzom Downloader stopped, please restart Ryzom]
+uiBGD_DownloaderDisconnected	[Ryzom Downloader stopped, please restart Ryzom.]
 
 // HASH_VALUE 1FD58B5C19984C77
 // INDEX 6214
@@ -26217,7 +26217,7 @@ uiBGD_FullPatchNeeded	[This feature can only be accessed after background patchi
 
 // HASH_VALUE A01CE7B6A9D03D43
 // INDEX 6220
-uiBGD_MainlandCharFullPatchNeeded	[This location that this character is at can only be accessed after background patching has finished. The background patching progress is indicated by the progress bar.]
+uiBGD_MainlandCharFullPatchNeeded	[The location that this character is at can only be accessed after background patching has finished. The background patching progress is indicated by the progress bar.]
 
 // HASH_VALUE 2B27D4766A97FC8C
 // INDEX 6221
@@ -26245,7 +26245,7 @@ uiBGD_NotUsed	[Not used]
 
 // HASH_VALUE F40D1B4F626F4271
 // INDEX 6227
-uiBGD_ShutdownFailed	[Failed to shutdown the Ryzom Downloader, you may need to restart your computer to solve the problem]
+uiBGD_ShutdownFailed	[Failed to shutdown the Ryzom Downloader, you may need to restart your computer to solve the problem.]
 
 // HASH_VALUE B703221C05EDDEEE
 // INDEX 6228
@@ -26253,7 +26253,7 @@ uiBGD_InGamePatchIncomplete	[Access to the Atys mainland and Ryzom Ring requires
 
 // HASH_VALUE 40DA4DB418F59CA7
 // INDEX 6229
-uiBGD_InGamePatchIncompleteBC	[Please wait for patching to finish]
+uiBGD_InGamePatchIncompleteBC	[Please wait for patching to finish.]
 
 // HASH_VALUE 0269C693E713F9B0
 // INDEX 6230
@@ -26289,11 +26289,11 @@ msgNoCastWhileMoving	[&CHK&You cannot cast a spell while moving.]
 
 // HASH_VALUE 6F54D08C97065FC9
 // INDEX 6238
-uiBGD_PatchStarting	[Ryzom patching has started]
+uiBGD_PatchStarting	[Ryzom patching has started.]
 
 // HASH_VALUE 45009C9D29D97616
 // INDEX 6239
-uiBGD_BackgroundPatchStarting	[Ryzom background patching has started]
+uiBGD_BackgroundPatchStarting	[Ryzom background patching has started.]
 
 // HASH_VALUE B79B42F4214FCE38
 // INDEX 6240
@@ -26475,11 +26475,11 @@ uiBGD_LoadVersionError	[Error: impossible to load version info. Please make sure
 
 // HASH_VALUE A989B04F04A80065
 // INDEX 6282
-uiBGD_LoadVersionInfo	[Loading Version Infos]
+uiBGD_LoadVersionInfo	[Loading Version Infos.]
 
 // HASH_VALUE E949573D6633C4C3
 // INDEX 6283
-uiBGD_LoadDownloadList	[Updating download list]
+uiBGD_LoadDownloadList	[Updating download list.]
 
 // HASH_VALUE 205C00EC705CF4A0
 // INDEX 6284
@@ -26558,7 +26558,7 @@ uiBGD_ContentInstallSuccess	[Ryzom has been installed successfully]
 
 // HASH_VALUE 9E1F03D60DC3E49B
 // INDEX 6302
-uiBGD_QuitInstallContent	[Do your realy want to quit the installation program.]
+uiBGD_QuitInstallContent	[Do your realy want to quit the installation program?]
 
 // HASH_VALUE 78E7ED45ECD4B47D
 // INDEX 6303
@@ -26606,7 +26606,7 @@ uiDeathWarningContent	[You are in a coma.\n
 	\n
 	The timer shows your life energy ebbing away. When it runs critically low the Divinities of Atys will resuscitate you at the point highlighted on the map.\n
 	\n
-	You may be healed by other players in order to avoid incurring the penalties associated with death, or press the RESPAWN button to call on the divinities immediately.]
+	You may be healed by other players in order to avoid incurring the penalties associated with death, or press the RESPAWN button to call on the Divinities immediately.]
 
 // HASH_VALUE A752DDE8C09704A2
 // INDEX 6314
@@ -27325,3 +27325,6 @@ uiKeyPARAGRAPH	[Paragraph]
 // INDEX 6488
 uiKeyOEM_102	[OEM 102]
 
+// HASH_VALUE 39C742C862CB934B
+// INDEX 6489
+uiFilterMenuDynamic	[%s @{T8}/%s]

@@ -7075,23 +7075,23 @@ uiFilterGuild	[GILDE]
 
 // HASH_VALUE D21E035913A3BF71
 // INDEX 1700
-uiFilterMenuAround	[UMGEBUNG @{T8}/s]
+uiFilterMenuAround	[Umgebung @{T8}/s]
 
 // HASH_VALUE 53C19C5E00E32743
 // INDEX 1701
-uiFilterMenuUniverse	[UNIVERSUM @{T8}/u]
+uiFilterMenuUniverse	[Universum @{T8}/u]
 
 // HASH_VALUE E0DD804CC85218F0
 // INDEX 1702
-uiFilterMenuRegion	[REGION @{T8}/r]
+uiFilterMenuRegion	[Region @{T8}/r]
 
 // HASH_VALUE 1ECFB04DCB621CE4
 // INDEX 1703
-uiFilterMenuTeam	[GRUPPE @{T8}/p]
+uiFilterMenuTeam	[Gruppe @{T8}/p]
 
 // HASH_VALUE 9C4DCC438DC108DA
 // INDEX 1704
-uiFilterMenuGuild	[GILDE @{T8}/g]
+uiFilterMenuGuild	[Gilde @{T8}/g]
 
 // HASH_VALUE E077D052719D1EAD
 // INDEX 1705
@@ -27283,4 +27283,68 @@ uiNoFiles	[Keine Dateien]
 // HASH_VALUE 4090240840902408
 // INDEX 6473
 uiByte	[B]
+
+// HASH_VALUE AA699882DFD7A376
+// INDEX 6474
+uiCP_Name_Generator	[Namensgenerator]
+
+// HASH_VALUE 6498541C641C14C8
+// INDEX 6475
+uiCP_Name_Generate	[Generiere]
+
+// HASH_VALUE 609C1434705844D4
+// INDEX 6476
+uiCP_Maraudeur	[Marodeure]
+
+// HASH_VALUE 92C6D489AAC438C4
+// INDEX 6477
+uiCP_Name_Policy	[Namensregeln]
+
+// HASH_VALUE E7473F9596B88799
+// INDEX 6478
+uiCP_FirstName	[Vorname]
+
+// HASH_VALUE 6467007F5645D768
+// INDEX 6479
+uiCP_LastName	[Nachname]
+
+// HASH_VALUE 6DA7FC912D38D095
+// INDEX 6480
+uiHorizontal	[Horizontal]
+
+// HASH_VALUE 749C54586C5834A4
+// INDEX 6481
+uiVertical	[Vertikal]
+
+// HASH_VALUE 641C5434641C5434
+// INDEX 6482
+uiKeyMUTE	[Stumm]
+
+// HASH_VALUE 3165F321EF51FEF1
+// INDEX 6483
+uiKeyPLAYPAUSE	[Abspielen / Pause]
+
+// HASH_VALUE 26C8EF962CB49073
+// INDEX 6484
+uiKeyVOLUMEDOWN	[Lautstärke leiser]
+
+// HASH_VALUE E828AC5B1985D0BD
+// INDEX 6485
+uiKeyVOLUMEUP	[Lautstärke höher]
+
+// HASH_VALUE E906D08868678C93
+// INDEX 6486
+uiKeyCALC	[Rechner]
+
+// HASH_VALUE 60C82889E9C9B49B
+// INDEX 6487
+uiKeyPARAGRAPH	[Paragraph]
+
+// HASH_VALUE ECEC8E017F3FDAE2
+// INDEX 6488
+uiKeyOEM_102	[Vergleichszeichen < >]
+
+// HASH_VALUE 39C742C862CB934B
+// INDEX 6489
+uiFilterMenuDynamic	[%s @{T8}/%s]
 

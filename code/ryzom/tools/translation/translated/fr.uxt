@@ -7057,23 +7057,23 @@ uiFilterGuild	[GUILDE]
 
 // HASH_VALUE D21E035913A3BF71
 // INDEX 1700
-uiFilterMenuAround	[ALENTOURS @{T8}/s]
+uiFilterMenuAround	[Alentours @{T12}/s]
 
 // HASH_VALUE 53C19C5E00E32743
 // INDEX 1701
-uiFilterMenuUniverse	[UNIVERS @{T8}/u]
+uiFilterMenuUniverse	[Univers @{T12}/u]
 
 // HASH_VALUE E0DD804CC85218F0
 // INDEX 1702
-uiFilterMenuRegion	[RÉGION @{T8}/r]
+uiFilterMenuRegion	[Région @{T12}/r]
 
 // HASH_VALUE 1ECFB04DCB621CE4
 // INDEX 1703
-uiFilterMenuTeam	[ÉQUIPE @{T8}/p]
+uiFilterMenuTeam	[Équipe @{T12}/p]
 
 // HASH_VALUE 9C4DCC438DC108DA
 // INDEX 1704
-uiFilterMenuGuild	[GUILDE @{T8}/g]
+uiFilterMenuGuild	[Guilde @{T12}/g]
 
 // HASH_VALUE E077D052719D1EAD
 // INDEX 1705
@@ -27297,4 +27297,8 @@ uiKeyPARAGRAPH	[Paragraphe]
 // HASH_VALUE ECEC8E017F3FDAE2
 // INDEX 6488
 uiKeyOEM_102	[OEM 102]
+
+// HASH_VALUE 39C742C862CB934B
+// INDEX 6489
+uiFilterMenuDynamic	[%s @{T12}/%s]
 
