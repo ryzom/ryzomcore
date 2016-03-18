@@ -5,8 +5,6 @@
 
 #include "nel/misc/cmd_args.h"
 
-#include <locale.h>
-
 #ifdef NL_OS_WINDOWS
 #include <windows.h>
 #endif
