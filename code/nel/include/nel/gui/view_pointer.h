@@ -71,13 +71,13 @@ namespace NLGUI
 	private:
 
 		/// Drawing helpers
-		virtual bool drawResizer(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawRotate(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawScale(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawColorPicker(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawLink(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawBrowse(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
-		virtual bool drawPan(CCtrlBase* pCB, NLMISC::CRGBA col){ return false; }
+		virtual bool drawResizer(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawRotate(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawScale(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawColorPicker(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawLink(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawBrowse(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
+		virtual bool drawPan(CCtrlBase* /* pCB */, NLMISC::CRGBA /* col */) { return false; }
 		virtual bool drawCustom(CCtrlBase* pCB);
 
 	protected:
