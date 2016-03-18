@@ -382,11 +382,9 @@ std::string CI18N::getSystemLanguageCode ()
 				}
 			}
 #else
-			std::string lang = NLMISC::toLower(lang);
-
 			// only keep 2 first characters
 			if (lang.size() > 1)
-				_SystemLanguageCode = lang.substr(0, 2);
+				_SystemLanguageCode = NLMISC::toLower(lang).substr(0, 2);
 #endif
 		}
 	}
