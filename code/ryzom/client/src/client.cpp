@@ -30,13 +30,6 @@
 #include <csignal>
 #endif
 
-#ifdef NL_OS_MAC
-#include <stdio.h>
-#include <sys/resource.h>
-#include "nel/misc/dynloadlib.h"
-#include "app_bundle_utils.h"
-#endif
-
 #include "nel/misc/debug.h"
 #include "nel/misc/command.h"
 #include "nel/net/tcp_sock.h"
@@ -226,23 +219,6 @@ int main(int argc, char **argv)
 	}
 #endif // TEST_CRASH_COUNTER
 
-#ifdef NL_OS_MAC
-	struct rlimit rlp, rlp2, rlp3;
-
-	getrlimit(RLIMIT_NOFILE, &rlp);
-
-	rlp2.rlim_cur = 1024;
-	rlp2.rlim_max = rlp.rlim_max;
-	setrlimit(RLIMIT_NOFILE, &rlp2);
-
-	getrlimit(RLIMIT_NOFILE, &rlp3);
-	nlinfo("rlimit before %d %d\n", rlp.rlim_cur, rlp.rlim_max);
-	nlinfo("rlimit after %d %d\n", rlp3.rlim_cur, rlp3.rlim_max);
-
-	// add the bundle's plugins path as library search path (for nel drivers)
-	CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
-#endif
-
 #if defined(NL_OS_WINDOWS)
 
 #ifdef TEST_CRASH_COUNTER
@@ -289,11 +265,11 @@ int main(int argc, char **argv)
 
 #else
 	// TODO for Linux : splashscreen
+#endif
 
 	// initialize log
 	initLog();
 
-#endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();

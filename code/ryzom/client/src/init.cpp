@@ -105,6 +105,12 @@ extern HINSTANCE HInstance;
 extern HWND SlashScreen;
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_OS_MAC
+#include <stdio.h>
+#include <sys/resource.h>
+#include "nel/misc/dynloadlib.h"
+#endif
+
 #include "app_bundle_utils.h"
 
 #include <new>
@@ -816,6 +822,43 @@ void initLog()
 
 	// Display the client version.
 	nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
+
+#ifdef NL_OS_MAC
+	struct rlimit rlp, rlp2, rlp3;
+
+	getrlimit(RLIMIT_NOFILE, &rlp);
+
+	rlim_t value = 1024;
+
+	rlp2.rlim_cur = std::min(value, rlp.rlim_max);
+	rlp2.rlim_max = rlp.rlim_max;
+	
+	if (setrlimit(RLIMIT_NOFILE, &rlp2))
+	{
+		if (errno == EINVAL)
+		{
+			nlwarning("Unable to set rlimit with error: the specified limit is invalid");
+		}
+		else if (errno == EPERM)
+		{
+			nlwarning("Unable to set rlimit with error: the limit specified would have raised the maximum limit value and the caller is not the super-user");
+		}
+		else
+		{
+			nlwarning("Unable to set rlimit with error: unknown error");
+		}
+	}
+
+	getrlimit(RLIMIT_NOFILE, &rlp3);
+	nlinfo("rlimit before %llu %llu", (uint64)rlp.rlim_cur, (uint64)rlp.rlim_max);
+	nlinfo("rlimit after %llu %llu", (uint64)rlp3.rlim_cur, (uint64)rlp3.rlim_max);
+
+	// add the bundle's plugins path as library search path (for nel drivers)
+	if (CFile::isExists(getAppBundlePath() + "/Contents/PlugIns/nel"))
+	{
+		CLibrary::addLibPath(getAppBundlePath() + "/Contents/PlugIns/nel/");
+	}
+#endif
 }
 
 //---------------------------------------------------
