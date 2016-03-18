@@ -2635,7 +2635,13 @@ public:
 					{
 						ucstring title;
 						STRING_MANAGER::CStringManagerClient::instance()->getDynString(textId, title);
-						pMenu->addLineAtIndex(5 + insertion_index, title+" @{T8}/"+s, "chat_target_selected", "dyn"+s, "dyn"+s);
+
+						// replace dynamic channel name and shortcut
+						ucstring res = CI18N::get("uiFilterMenuDynamic");
+						strFindReplace(res, "%channel", title);
+						strFindReplace(res, "%shortcut", s);
+
+						pMenu->addLineAtIndex(5 + insertion_index, res, "chat_target_selected", "dyn"+s, "dyn"+s);
 						insertion_index++;
 					}
 				}
