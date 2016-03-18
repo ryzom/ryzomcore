@@ -797,6 +797,28 @@ static bool addRyzomIconBitmap(const std::string &directory, vector<CBitmap> &bi
 #endif
 
 //---------------------------------------------------
+// initLog :
+// Initialize the client.log file
+//---------------------------------------------------
+void initLog()
+{
+	// Add a displayer for Debug Infos.
+	createDebug();
+
+	// Client.Log displayer
+	nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
+	CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
+	DebugLog->addDisplayer (ClientLogDisplayer);
+	InfoLog->addDisplayer (ClientLogDisplayer);
+	WarningLog->addDisplayer (ClientLogDisplayer);
+	ErrorLog->addDisplayer (ClientLogDisplayer);
+	AssertLog->addDisplayer (ClientLogDisplayer);
+
+	// Display the client version.
+	nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
+}
+
+//---------------------------------------------------
 // prelogInit :
 // Initialize the application before login
 // if the init fails, call nlerror
@@ -847,21 +869,6 @@ void prelogInit()
 		// Init XML Lib allocator
 		// Due to Bug #906, we disable the stl xml allocation
 		// nlverify (xmlMemSetup (XmlFree4NeL, XmlMalloc4NeL, XmlRealloc4NeL, XmlStrdup4NeL) == 0);
-
-		// Add a displayer for Debug Infos.
-		createDebug();
-
-		// Client.Log displayer
-		nlassert( !ErrorLog->getDisplayer("CLIENT.LOG") );
-		CFileDisplayer *ClientLogDisplayer = new CFileDisplayer(getLogDirectory() + "client.log", true, "CLIENT.LOG");
-		DebugLog->addDisplayer (ClientLogDisplayer);
-		InfoLog->addDisplayer (ClientLogDisplayer);
-		WarningLog->addDisplayer (ClientLogDisplayer);
-		ErrorLog->addDisplayer (ClientLogDisplayer);
-		AssertLog->addDisplayer (ClientLogDisplayer);
-
-		// Display the client version.
-		nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
 
 		// Init the debug memory
 		initDebugMemory();

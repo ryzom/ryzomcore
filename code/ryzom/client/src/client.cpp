@@ -289,6 +289,10 @@ int main(int argc, char **argv)
 
 #else
 	// TODO for Linux : splashscreen
+
+	// initialize log
+	initLog();
+
 #endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
