@@ -19,6 +19,8 @@
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/command.h"
 
+#include <locale.h>
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -84,6 +86,9 @@ void INelContext::contextReady()
 #endif // NL_OS_WINDOWS
 	_NelContext = this;
 	*(_getInstance()) = this;
+
+	// set numeric locale to C to avoid the use of decimal separators different of a dot
+	char *locale = setlocale(LC_NUMERIC, "C");
 
 	// register any pending thinks
 

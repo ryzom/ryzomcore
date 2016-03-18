@@ -316,6 +316,13 @@ CConfigFile::~CConfigFile ()
 
 void CConfigFile::load (const string &fileName, bool lookupPaths )
 {
+	char *locale = setlocale(LC_NUMERIC, NULL);
+
+	if (!locale || strcmp(locale, "C"))
+	{
+		nlerror("Numeric locale not defined to C, an external library possibly redefined it!");
+	}
+
 	if(fileName.empty())
 	{
 		nlwarning ("CF: Can't load a empty file name configfile");
@@ -597,8 +604,12 @@ bool CConfigFile::exists (const std::string &varName)
 
 void CConfigFile::save () const
 {
-	// Avoid any problem, Force Locale to default
-	setlocale(LC_ALL, "C");
+	char *locale = setlocale(LC_NUMERIC, NULL);
+
+	if (!locale || strcmp(locale, "C"))
+	{
+		nlerror("Numeric locale not defined to C, an external library possibly redefined it!");
+	}
 
 	FILE *fp = nlfopen (getFilename(), "w");
 	if (fp == NULL)

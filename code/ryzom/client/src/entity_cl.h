@@ -86,7 +86,7 @@ namespace NL3D
 
 class CEntitySheet;
 class CEntityCL;
-class CAttackInfo;
+struct CAttackInfo;
 
 class CItemSheet;
 

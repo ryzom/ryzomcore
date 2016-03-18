@@ -24,11 +24,6 @@
 // Include from libxml2
 #include <libxml/xmlerror.h>
 
-#if defined(NL_OS_WINDOWS) && defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 80
-#define USE_LOCALE_ATOF
-#include <locale.h>
-#endif
-
 using namespace std;
 
 #define NLMISC_READ_BUFFER_SIZE 1024
@@ -46,26 +41,10 @@ const char SEPARATOR = ' ';
 
 // ***************************************************************************
 
-#define readnumber(dest,thetype,digits,convfunc) \
+#define readnumber(dest,digits) \
 	string number_as_string; \
 	serialSeparatedBufferIn( number_as_string ); \
-	dest = (thetype)convfunc( number_as_string.c_str() );
-
-#ifdef USE_LOCALE_ATOF
-
-#define readnumberlocale(dest,thetype,digits,convfunc) \
-	string number_as_string; \
-	serialSeparatedBufferIn( number_as_string ); \
-	dest = (thetype)convfunc( number_as_string.c_str(), (_locale_t)_Locale );
-
-#define nl_atof _atof_l
-
-#else
-
-#define readnumberlocale(dest,thetype,digits,convfunc) readnumber(dest,thetype,digits,convfunc)
-#define nl_atof atof
-
-#endif
+	NLMISC::fromString(number_as_string, dest);
 
 // ***************************************************************************
 
@@ -91,13 +70,6 @@ CIXml::CIXml () : IStream (true /* Input mode */)
 	_ErrorString = "";
 	_TryBinaryMode = false;
 	_BinaryStream = NULL;
-
-#ifdef USE_LOCALE_ATOF
-	// create C numeric locale
-	_Locale = _create_locale(LC_NUMERIC, "C");
-#else
-	_Locale = NULL;
-#endif
 }
 
 // ***************************************************************************
@@ -113,13 +85,6 @@ CIXml::CIXml (bool tryBinaryMode) : IStream (true /* Input mode */)
 	_ErrorString = "";
 	_TryBinaryMode = tryBinaryMode;
 	_BinaryStream = NULL;
-
-#ifdef USE_LOCALE_ATOF
-	// create C numeric locale
-	_Locale = _create_locale(LC_NUMERIC, "C");
-#else
-	_Locale = NULL;
-#endif
 }
 
 // ***************************************************************************
@@ -128,10 +93,6 @@ CIXml::~CIXml ()
 {
 	// Release
 	release ();
-
-#ifdef USE_LOCALE_ATOF
-	if (_Locale) _free_locale((_locale_t)_Locale);
-#endif
 }
 
 // ***************************************************************************
@@ -468,7 +429,7 @@ void CIXml::serial(uint8 &b)
 	else
 	{
 		// Read the number
-		readnumber( b, uint8, 3, atoi );
+		readnumber( b, 3 );
 	}
 }
 
@@ -482,7 +443,7 @@ void CIXml::serial(sint8 &b)
 	}
 	else
 	{
-		readnumber( b, sint8, 4, atoi );
+		readnumber( b, 4 );
 	}
 }
 
@@ -496,7 +457,7 @@ void CIXml::serial(uint16 &b)
 	}
 	else
 	{
-		readnumber( b, uint16, 5, atoi );
+		readnumber( b, 5 );
 	}
 }
 
@@ -510,7 +471,7 @@ void CIXml::serial(sint16 &b)
 	}
 	else
 	{
-		readnumber( b, sint16, 6, atoi );
+		readnumber( b, 6 );
 	}
 }
 
@@ -529,7 +490,7 @@ void CIXml::serial(uint32 &b)
 	}
 	else
 	{
-		readnumber( b, uint32, 10, atoui );
+		readnumber( b, 10 );
 	}
 }
 
@@ -543,7 +504,7 @@ void CIXml::serial(sint32 &b)
 	}
 	else
 	{
-		readnumber( b, sint32, 11, atoi );
+		readnumber( b, 11 );
 	}
 }
 
@@ -557,7 +518,7 @@ void CIXml::serial(uint64 &b)
 	}
 	else
 	{
-		readnumber( b, uint64, 20, atoiInt64 );
+		readnumber( b, 20 );
 	}
 }
 
@@ -571,7 +532,7 @@ void CIXml::serial(sint64 &b)
 	}
 	else
 	{
-		readnumber( b, sint64, 20, atoiInt64 );
+		readnumber( b, 20 );
 	}
 }
 
@@ -585,7 +546,7 @@ void CIXml::serial(float &b)
 	}
 	else
 	{
-		readnumberlocale( b, float, 128, nl_atof );
+		readnumber( b, 128 );
 	}
 }
 
@@ -599,7 +560,7 @@ void CIXml::serial(double &b)
 	}
 	else
 	{
-		readnumberlocale( b, double, 128, nl_atof );
+		readnumber( b, 128 );
 	}
 }
 

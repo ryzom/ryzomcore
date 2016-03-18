@@ -127,6 +127,9 @@ public:
 	/// Returns the code of the language ("fr", "en", ...) defined on system
 	static std::string getSystemLanguageCode ();
 
+	/// Define the code of the language ("fr", "en", ...) defined on system
+	static bool setSystemLanguageCode (const std::string &languageCode);
+
 	/// Find a string in the selected language and return his association.
 	static const ucstring &get (const std::string &label);
 
@@ -230,6 +233,7 @@ private:
 
 	static std::vector<std::string>								_LanguageCodes;
 	static std::vector<ucstring>								_LanguageNames;
+	static std::string											_SystemLanguageCode;
 
 	static bool													_LanguagesNamesLoaded;
 
