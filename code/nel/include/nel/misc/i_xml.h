@@ -236,9 +236,6 @@ private:
 
 	// If not NULL, binary mode detected, use this stream in serials
 	IStream			*_BinaryStream;
-
-	// System dependant structure for locale
-	void*			_Locale;
 };
 
 
