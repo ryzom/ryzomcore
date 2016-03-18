@@ -274,6 +274,12 @@ int main(int argc, char **argv)
 	// initialize log
 	initLog();
 
+#ifdef RZ_USE_STEAM
+	CSteamClient steamClient;
+
+	if (steamClient.init())
+		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+#endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();
@@ -285,13 +291,6 @@ int main(int argc, char **argv)
 	RYZOM_TRY("Pre-Login Init")
 		prelogInit();
 	RYZOM_CATCH("Pre-Login Init")
-
-#ifdef RZ_USE_STEAM
-	CSteamClient steamClient;
-
-	if (steamClient.init())
-		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
-#endif
 
 	// Log the client and choose from shard
 	RYZOM_TRY("Login")
