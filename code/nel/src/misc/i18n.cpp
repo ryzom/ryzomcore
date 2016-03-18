@@ -329,7 +329,7 @@ std::string CI18N::getSystemLanguageCode ()
 
 #ifdef NL_OS_WINDOWS
 	// use user locale under Windows (since Vista)
-	if (_SystemLanguageCode.empty() && false)
+	if (_SystemLanguageCode.empty())
 	{
 		// GetUserDefaultLocaleName prototype
 		typedef int (WINAPI* GetUserDefaultLocaleNamePtr)(LPWSTR lpLocaleName, int cchLocaleName);
