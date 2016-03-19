@@ -18,6 +18,7 @@
 #include "nel/misc/types_nl.h"
 #include <time.h>
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/misc/sstring.h"
 #include "nel/misc/mutable_container.h"
 #include "nel/net/service.h"
@@ -195,7 +196,7 @@ namespace ADMIN
 
 			// read the persistent state file if any
 			string filename = CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString(), true)+ASPersistentStateFilename;
-			FILE *fp = fopen(filename.c_str(), "rt");
+			FILE *fp = nlfopen(filename, "rt");
 			if (fp != NULL)
 			{
 				char buffer[1024];
@@ -232,7 +233,7 @@ namespace ADMIN
 			if (_NeedToWriteStateFile)
 			{
 				string filename = CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString(), true)+ASPersistentStateFilename;
-				FILE *fp = fopen(filename.c_str(), "wt");
+				FILE *fp = nlfopen(filename, "wt");
 				if (fp != NULL)
 				{
 					CSString line;

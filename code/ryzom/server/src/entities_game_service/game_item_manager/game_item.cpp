@@ -2564,8 +2564,7 @@ void CGameItem::dumpGameItemStats( const string& fileName )
 {
 	if( !fileName.empty() )
 	{
-		FILE * f;
-		f = fopen(fileName.c_str(),"w");
+		FILE *f = nlfopen(fileName, "w");
 		
 		if(f)
 		{

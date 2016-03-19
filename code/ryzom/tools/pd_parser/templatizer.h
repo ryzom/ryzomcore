@@ -1009,7 +1009,7 @@ public:
 		std::string	result = ITemplatizerBloc::eval(env);
 
 		FILE*	f;
-		f = fopen(filename.c_str(), (clearfile == "true" ? "w" : "a"));
+		f = nlfopen(filename, (clearfile == "true" ? "w" : "a"));
 		if (f != NULL)
 		{
 			fwrite(result.c_str(), 1, result.size(), f);

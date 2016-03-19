@@ -409,7 +409,7 @@ void CRepositoryReceiver::fileList(NLNET::IModuleProxy *sender, uint32 version, 
 // 	_CurrentFileExpected= fileSize;
 // 	
 // 	// open the temp file
-// 	_CurrentFileHandle= fopen(rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName).c_str(),"wb");
+// 	_CurrentFileHandle= nlfopen(rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName), "wb");
 // 	BOMB_IF(_CurrentFileHandle==NULL,"Failed to open temporary file for writing: "+rrTempFileName(_TargetDirectories.patchDirectoryName(),_EmitterName),return);
 // }
 // 

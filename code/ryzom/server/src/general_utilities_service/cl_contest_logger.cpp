@@ -118,7 +118,7 @@ void CSession::log(const NLMISC::CSString& lang,const NLMISC::CSString& txt)
 		nlassert(!fileName.empty());
 
 		nlinfo("Opening new log file: %s",fileName.c_str());
-		_Files[lang]= fopen(fileName.c_str(),"wb");
+		_Files[lang]= nlfopen(fileName, "wb");
 		DROP_IF(_Files[lang]==NULL,"Failed to open log file for writing: "+fileName,return);
 	}
 	fprintf(_Files[lang],"%s\n",txt.c_str());

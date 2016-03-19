@@ -16,6 +16,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/debug.h>
+#include <nel/misc/common.h>
 #include <nel/misc/file.h>
 
 
@@ -51,7 +52,7 @@ sint main( sint argc, char ** argv )
 
 	// open the output file
 	string outputFilename = string(argv[1]) + ".out";
-	FILE * output = fopen(outputFilename.c_str(),"w");
+	FILE * output = nlfopen(outputFilename,"w");
 	if( output == NULL )
 	{
 		nlwarning("can't open the output file %s",outputFilename.c_str());

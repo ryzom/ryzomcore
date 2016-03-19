@@ -20,6 +20,7 @@
 #include "progress_dialog.h"
 #include <sys/timeb.h>
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -468,9 +469,13 @@ void CData_mirrorDlg::OnOK()
 			if (!LogDirectory.empty())
 			{
 				string sTmp = LogDirectory + "data_mirror.txt";
-				FILE *f = fopen(sTmp.c_str(),"at");
-				fprintf(f,"Modified file : %s\n", dest.c_str());
-				fclose(f);
+				FILE *f = nlfopen(sTmp ,"at");
+				
+				if (f)
+				{
+					fprintf(f,"Modified file : %s\n", dest.c_str());
+					fclose(f);
+				}
 			}
 		}
 
@@ -503,9 +508,12 @@ void CData_mirrorDlg::OnOK()
 			if (!LogDirectory.empty())
 			{
 				string sTmp = LogDirectory + "data_mirror.txt";
-				FILE *f = fopen(sTmp.c_str(),"at");
-				fprintf(f,"Added file : %s\n", dest.c_str());
-				fclose(f);
+				FILE *f = nlfopen(sTmp, "at");
+				if (f)
+				{
+					fprintf(f,"Added file : %s\n", dest.c_str());
+					fclose(f);
+				}
 			}
 		}
 
@@ -535,9 +543,13 @@ void CData_mirrorDlg::OnOK()
 			if (!LogDirectory.empty())
 			{
 				string sTmp = LogDirectory + "data_mirror.txt";
-				FILE *f = fopen(sTmp.c_str(),"at");
-				fprintf(f,"Removed file : %s\n", dest.c_str());
-				fclose(f);
+				FILE *f = nlfopen(sTmp, "at");
+				
+				if (f)
+				{
+					fprintf(f,"Removed file : %s\n", dest.c_str());
+					fclose(f);
+				}
 			}
 		}
 	}

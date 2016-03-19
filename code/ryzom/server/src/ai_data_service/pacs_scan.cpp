@@ -18,6 +18,7 @@
 #include "nel/misc/command.h"
 #include "nel/misc/variable.h"
 
+#include "nel/misc/common.h"
 #include "nel/misc/aabbox.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/vectord.h"
@@ -1979,7 +1980,7 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
 
 		if (outf == NULL)
 			return;
@@ -2095,8 +2096,8 @@ public:
 		CBMP4Image<2,2>::SHdr		imageHdr(imageWidth, imageHeight);
 		CBMP4Image<2,2>::SPalette	imagePalette;
 
-		FILE	*outf = fopen((OutputPath+name+".bmp").c_str(),"wb");
-		FILE	*outfh = fopen((OutputPath+name+"_hm.bmp").c_str(),"wb");
+		FILE	*outf = nlfopen(OutputPath+name+".bmp", "wb");
+		FILE	*outfh = nlfopen(OutputPath+name+"_hm.bmp", "wb");
 
 		if (outf == NULL)
 			return;
