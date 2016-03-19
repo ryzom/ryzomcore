@@ -103,7 +103,7 @@ public:
 	{
 		releaseError();
 
-		m_ErrorLog = nlfopen(errorLog, "wt");
+		m_ErrorLog = NLMISC::nlfopen(errorLog, "wt");
 		fwrite(s_ErrorHeader.c_str(), 1, s_ErrorHeader.length(), m_ErrorLog);
 		fwrite("\n", 1, 1, m_ErrorLog);
 		fflush(m_ErrorLog);
@@ -114,7 +114,7 @@ public:
 	{
 		releaseDepend();
 
-		m_DependLog = nlfopen(dependLog, "wt");
+		m_DependLog = NLMISC::nlfopen(dependLog, "wt");
 		fwrite(s_DependHeader.c_str(), 1, s_DependHeader.length(), m_DependLog);
 		fwrite("\n", 1, 1, m_DependLog);
 		// fflush(m_DependLog);
