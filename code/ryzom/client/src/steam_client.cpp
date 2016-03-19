@@ -302,13 +302,19 @@ bool CSteamClient::init()
 	filename = "libsteam_api.so";
 #endif
 
-	// try to load library
+	// try to load library with absolute path
 	_Handle = NLMISC::nlLoadLibrary(Args.getProgramPath() + filename);
 
 	if (!_Handle)
 	{
-		nlwarning("Unable to load Steam client");
-		return false;
+		// try to load library with relative path (will search in system paths)
+		_Handle = NLMISC::nlLoadLibrary(filename);
+
+		if (!_Handle)
+		{
+			nlwarning("Unable to load Steam client");
+			return false;
+		}
 	}
 
 	// load Steam functions
