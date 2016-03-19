@@ -312,12 +312,19 @@ int loadSceneMeta(CMeshUtilsContext &context)
 
 int importSceneAssimp(CMeshUtilsContext &context)
 {
+	std::vector<char> memFile;
+	{
+		NLMISC::CIFile ifile(context.Settings.SourceFilePath);
+		memFile.resize(ifile.getFileSize());
+		ifile.serialBuffer((uint8 *)&memFile[0], memFile.size());
+	}
+	std::string fileExt = NLMISC::CFile::getExtension(context.Settings.SourceFilePath);
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(context.Settings.SourceFilePath, 0
+	const aiScene *scene = importer.ReadFileFromMemory(&memFile[0], memFile.size(), 0
 		| aiProcess_Triangulate
 		| aiProcess_ValidateDataStructure
 		| aiProcess_GenNormals // Or GenSmoothNormals? TODO: Validate smoothness between material boundaries!
-		); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
+		, fileExt.c_str()); // aiProcess_SplitLargeMeshes | aiProcess_LimitBoneWeights
 	if (!scene)
 	{
 		const char *errs = importer.GetErrorString();

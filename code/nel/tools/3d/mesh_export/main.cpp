@@ -24,6 +24,24 @@
 #include <nel/3d/register_3d.h>
 #include <nel/3d/scene.h>
 
+#ifdef NL_OS_WINDOWS
+#define main nlMain
+int nlMain(int argc, char *argv[]);
+static std::vector<std::string> nlArgs;
+static std::vector<const char *> nlCArgs;
+int wmain(int argc, wchar_t *argv[])
+{
+	nlArgs.resize(argc);
+	nlCArgs.resize(argc);
+	for (int i = 0; i < argc; ++i)
+	{
+		nlArgs[i] = wideToUtf8(argv[i]);
+		nlCArgs[i] = nlArgs[i].c_str();
+	}
+	nlMain(argc, const_cast<char **>(&nlCArgs[0]));
+}
+#endif
+
 int main(int argc, char *argv[])
 {
 	NLMISC::CApplicationContext app;
