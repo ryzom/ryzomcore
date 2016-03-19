@@ -148,7 +148,7 @@ public:
 	CInterface3DCharacter();
 	virtual ~CInterface3DCharacter();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	virtual void checkCoords();
 
@@ -236,7 +236,7 @@ public:
 
 	virtual ~CInterface3DShape();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	NL3D::UInstance getShape() { return _Instance; }
 
@@ -295,7 +295,7 @@ public:
 
 	virtual ~CInterface3DIG();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	NL3D::UInstanceGroup *getIG() { return _IG; }
 
@@ -357,7 +357,7 @@ public:
 		_Dist = 0;
 	}
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 	float getFOV()				{ return _FOV; }
 	NLMISC::CVector getPos()	{ return _Pos; }
 	NLMISC::CVector getTarget() { return _Target; }
@@ -436,7 +436,7 @@ public:
 
 	virtual ~CInterface3DLight();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	float getPosX() const	{ return _Pos.x; }
 	float getPosY() const	{ return _Pos.y; }
@@ -498,7 +498,7 @@ public:
 
 	virtual ~CInterface3DFX();
 
-	virtual bool parse (xmlNodePtr cur, CInterface3DScene *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
 
 	virtual void checkCoords();
 
