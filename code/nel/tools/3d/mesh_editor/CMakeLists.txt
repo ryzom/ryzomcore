@@ -17,7 +17,6 @@ ADD_EXECUTABLE(nl_mesh_editor WIN32 ${SRC}
 	${HDRS}
 	${RSRC}
 	${RESOURCE_ADDED}
-	${PANOPLY_MAKER}
 	)
 
 IF(QT_STATIC)
@@ -30,6 +29,7 @@ TARGET_LINK_LIBRARIES(nl_mesh_editor
 	nelmisc
 	nel3d
 	nelsound
+	nelpipeline
 	shared_widgets
 	mesh_utils)
 
