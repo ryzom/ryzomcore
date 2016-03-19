@@ -38,29 +38,32 @@ void CDisplaySettingsDetailsWidget::load()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	landscapeSlider->setValue( getQuality( qualityToLandscapeThreshold, s.config.getFloat( "LandscapeThreshold" ) ) );
-	landscapeSlider->setValue( std::min( landscapeSlider->value(), getQuality( qualityToZFar, s.config.getFloat( "Vision" ) ) ) );
-	landscapeSlider->setValue( std::min( landscapeSlider->value(), getQuality( qualityToLandscapeTileNear, s.config.getFloat( "LandscapeTileNear" ) ) ) );
-	landscapeSlider->setValue( std::min( landscapeSlider->value(), getQuality( qualityToMicrovegetDensity, s.config.getFloat( "MicroVegetDensity" ) ) ) );
+	// landscape
+	landscapeSlider->setValue(getQualityPresetFloat("LandscapeTileNear"));
+	landscapeSlider->setValue(std::min(landscapeSlider->value(), getQualityPresetFloat("LandscapeThreshold")));
+	landscapeSlider->setValue(std::min(landscapeSlider->value(), getQualityPresetFloat("Vision")));
+	landscapeSlider->setValue(std::min(landscapeSlider->value(), getQualityPresetFloat("MicroVegetDensity")));
 
-	charactersSlider->setValue( getQuality( qualityToSkinNbMaxPoly, s.config.getInt( "SkinNbMaxPoly" ) ) );
-	charactersSlider->setValue( std::min( charactersSlider->value(), getQuality( qualityToNbMaxSkeletonNotCLod, s.config.getInt( "NbMaxSkeletonNotCLod" ) ) ) );
-	charactersSlider->setValue( std::min( charactersSlider->value(), getQuality( qualityToCharacterFarClip, s.config.getFloat( "CharacterFarClip" ) ) ) );
+	// FX
+	fxSlider->setValue(getQualityPresetInteger("FxNbMaxPoly"));
 
-	fxSlider->setValue( getQuality( qualityToFxNbMaxPoly, s.config.getInt( "FxNbMaxPoly" ) ) );
+	// characters
+	charactersSlider->setValue(getQualityPresetInteger("SkinNbMaxPoly"));
+	charactersSlider->setValue(std::min(charactersSlider->value(), getQualityPresetInteger("NbMaxSkeletonNotCLod")));
+	charactersSlider->setValue(std::min(charactersSlider->value(), getQualityPresetFloat("CharacterFarClip")));
 
-	int hdTextureInstalled = s.config.getInt( "HDTextureInstalled" );
-	if( hdTextureInstalled == 1 )
-		texturesSlider->setMaximum( QUALITY_NORMAL );
+	int hdTextureInstalled = s.config.getInt("HDTextureInstalled");
+	if (hdTextureInstalled == 1)
+		texturesSlider->setMaximum(QUALITY_NORMAL);
 	else
-		texturesSlider->setMaximum( QUALITY_MEDIUM );
+		texturesSlider->setMaximum(QUALITY_MEDIUM);
 
 	// Comment taken from the original config tool:
 	// NB: if the player changes its client.cfg, mixing HDEntityTexture=1 and DivideTextureSizeBy2=1, it will
 	// result to a low quality!
-	if( s.config.getInt( "DivideTextureSizeBy2" ) )
+	if (s.config.getInt("DivideTextureSizeBy2"))
 		texturesSlider->setValue( QUALITY_LOW );
-	else if( s.config.getInt( "HDEntityTexture" ) && ( hdTextureInstalled == 1 ) )
+	else if( s.config.getInt("HDEntityTexture") && ( hdTextureInstalled == 1 ) )
 		texturesSlider->setValue( QUALITY_NORMAL );
 	else
 		texturesSlider->setValue( QUALITY_MEDIUM );
@@ -70,38 +73,30 @@ void CDisplaySettingsDetailsWidget::save()
 {
 	CSystem &s = CSystem::GetInstance();
 
-	s.config.setFloat( "Vision", qualityToZFar[ landscapeSlider->value() ] );
-	s.config.setFloat( "LandscapeTileNear", qualityToLandscapeTileNear[ landscapeSlider->value() ] );
-	s.config.setFloat( "LandscapeThreshold", qualityToLandscapeThreshold[ landscapeSlider->value() ] );
+	// landscape
+	setFloatPreset("LandscapeTileNear", landscapeSlider->value());
+	setFloatPreset("LandscapeThreshold", landscapeSlider->value());
+	setFloatPreset("Vision", landscapeSlider->value());
+	setIntegerPreset("MicroVeget", landscapeSlider->value());
+	setFloatPreset("MicroVegetDensity", landscapeSlider->value());
 
-	if( landscapeSlider->value() > QUALITY_LOW )
-		s.config.setInt( "MicroVeget", 1 );
-	else
-		s.config.setInt( "MicroVeget", 0 );
+	// FX
+	setIntegerPreset("FxNbMaxPoly", fxSlider->value());
+	setIntegerPreset("Cloud", fxSlider->value());
+	setFloatPreset("CloudQuality", fxSlider->value());
+	setIntegerPreset("CloudUpdate", fxSlider->value());
+	setIntegerPreset("Shadows", fxSlider->value());
+	setIntegerPreset("FXAA", fxSlider->value());
+	setIntegerPreset("Bloom", fxSlider->value());
+	setIntegerPreset("SquareBloom", fxSlider->value());
+	setFloatPreset("DensityBloom", fxSlider->value());
 
-	s.config.setFloat( "MicroVegetDensity", qualityToMicrovegetDensity[ landscapeSlider->value() ] );
+	// characters
+	setIntegerPreset("SkinNbMaxPoly", charactersSlider->value());
+	setIntegerPreset("NbMaxSkeletonNotCLod", charactersSlider->value());
+	setFloatPreset("CharacterFarClip", charactersSlider->value());
 
-
-	s.config.setInt( "SkinNbMaxPoly", qualityToSkinNbMaxPoly[ charactersSlider->value() ] );
-	s.config.setInt( "NbMaxSkeletonNotCLod", qualityToNbMaxSkeletonNotCLod[ charactersSlider->value() ] );
-	s.config.setFloat( "CharacterFarClip", qualityToCharacterFarClip[ charactersSlider->value() ] );
-
-
-	s.config.setInt( "FxNbMaxPoly", qualityToFxNbMaxPoly[ fxSlider->value() ] );
-	if( fxSlider->value() > QUALITY_LOW )
-	{
-		s.config.setInt( "Shadows", 1 );
-		s.config.setInt( "Bloom", 1 );
-		s.config.setInt( "SquareBloom", 1 );
-	}
-	else
-	{
-		s.config.setInt( "Shadows", 0 );
-		s.config.setInt( "Bloom", 0 );
-		s.config.setInt( "SquareBloom", 0 );
-	}
-
-
+	// misc
 	if( texturesSlider->value() == QUALITY_NORMAL )
 		s.config.setInt( "HDEntityTexture", 1 );
 	else if( texturesSlider->value() == QUALITY_LOW )
@@ -144,71 +139,89 @@ void CDisplaySettingsDetailsWidget::onTexturesSliderChange( int value )
 	emit changed();
 }
 
-const float CDisplaySettingsDetailsWidget::qualityToZFar[ QUALITY_STEP ] =
+float CDisplaySettingsDetailsWidget::getPresetFloat(const std::string &variable, sint preset)
 {
-	200.0f,
-	400.0f,
-	500.0f,
-	800.0f
-};
+	CSystem &s = CSystem::GetInstance();
 
-const float CDisplaySettingsDetailsWidget::qualityToLandscapeTileNear[ QUALITY_STEP ] =
+	// preset name
+	std::string varName = variable + NLMISC::toString("_ps%d", preset);
+
+	return s.config.getFloat(varName.c_str());
+}
+
+int CDisplaySettingsDetailsWidget::getPresetInteger(const std::string &variable, sint preset)
 {
-	20.0f,
-	100.0f,
-	150.0f,
-	200.0f
-};
+	CSystem &s = CSystem::GetInstance();
 
-const float CDisplaySettingsDetailsWidget::qualityToLandscapeThreshold[ QUALITY_STEP ] =
+	// preset name
+	std::string varName = variable + NLMISC::toString("_ps%d", preset);
+
+	return s.config.getInt(varName.c_str());
+}
+
+void CDisplaySettingsDetailsWidget::setFloatPreset(const std::string &variable, int preset)
 {
-	100.0f,
-	1000.0f,
-	2000.0f,
-	3000.0f
-};
+	CSystem &s = CSystem::GetInstance();
 
+	// take value of the preset and set it to variable
+	s.config.setFloat(variable.c_str(), getPresetFloat(variable, preset));
+}
 
-const float CDisplaySettingsDetailsWidget::qualityToMicrovegetDensity[ QUALITY_STEP ] =
+void CDisplaySettingsDetailsWidget::setIntegerPreset(const std::string &variable, int preset)
 {
-	10.0f,
-	30.0f,
-	80.0f,
-	100.0f
-};
+	CSystem &s = CSystem::GetInstance();
 
+	// take value of the preset and set it to variable
+	s.config.setInt(variable.c_str(), getPresetInteger(variable, preset));
+}
 
-const sint32 CDisplaySettingsDetailsWidget::qualityToSkinNbMaxPoly[ QUALITY_STEP ] =
+int CDisplaySettingsDetailsWidget::getQualityPresetFloat(const std::string &variable)
 {
-	10000,
-	70000,
-	100000,
-	200000
-};
+	CSystem &s = CSystem::GetInstance();
 
-const sint32 CDisplaySettingsDetailsWidget::qualityToNbMaxSkeletonNotCLod[ QUALITY_STEP ] =
-{
-	10,
-	50,
-	125,
-	255
-};
+	float value = s.config.getFloat(variable.c_str());
 
-const float CDisplaySettingsDetailsWidget::qualityToCharacterFarClip[ QUALITY_STEP ] =
-{
-	50.0f,
-	100.0f,
-	200.0f,
-	500.0f
-};
+	// ascending order
+	if (getPresetFloat(variable, 0) < getPresetFloat(variable, QUALITY_STEP-1))
+	{
+		uint32 i = 0;
+		while((i < QUALITY_STEP) && (getPresetFloat(variable, i) < value) )
+			i++;
+		return i;
+	}
+	// descending order
+	else
+	{
+		uint32 i = 0;
+		while((i < QUALITY_STEP) && (getPresetFloat(variable, i) > value))
+			i++;
+		return i;
+	}
+}
 
-const sint32 CDisplaySettingsDetailsWidget::qualityToFxNbMaxPoly[ QUALITY_STEP ] =
+int CDisplaySettingsDetailsWidget::getQualityPresetInteger(const std::string &variable)
 {
-	2000,
-	10000,
-	20000,
-	50000
-};
+	CSystem &s = CSystem::GetInstance();
+
+	float value = s.config.getFloat(variable.c_str());
+
+	// ascending order
+	if (getPresetFloat(variable, 0) < getPresetFloat(variable, QUALITY_STEP-1))
+	{
+		uint32 i = 0;
+		while((i < QUALITY_STEP) && (getPresetFloat(variable, i) < value) )
+			i++;
+		return i;
+	}
+	// descending order
+	else
+	{
+		uint32 i = 0;
+		while((i < QUALITY_STEP) && (getPresetFloat(variable, i) > value))
+			i++;
+		return i;
+	}
+}
 
 QString CDisplaySettingsDetailsWidget::getQualityString( uint32 quality )
 {
@@ -245,7 +258,7 @@ QString CDisplaySettingsDetailsWidget::getTextureQualityString( uint32 quality )
 		break;
 
 	case TEXQUALITY_HIGH:
-		return tr( "High (128 MB)" );
+		return tr( "High (more than 128 MB)" );
 		break;
 
 	default:
