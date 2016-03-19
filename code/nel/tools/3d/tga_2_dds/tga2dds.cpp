@@ -18,6 +18,7 @@
 #include <iostream>
 
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/misc/bitmap.h"
 #include "nel/misc/path.h"
 #include "nel/misc/debug.h"
@@ -49,7 +50,7 @@ std::string getOutputFileName(const std::string &inputFileName);
 uint8 getType(const std::string &sFileNameDest)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest.c_str(),"rb");
+	FILE *f = nlfopen(sFileNameDest, "rb");
 	if(f==NULL)
 	{
 		return NOT_DEFINED;
@@ -105,7 +106,7 @@ uint8 getType(const std::string &sFileNameDest)
 bool sameType(const std::string &sFileNameDest, uint8 &algo, bool wantMipMap)
 {
 	uint32 dds;
-	FILE *f = fopen(sFileNameDest.c_str(),"rb");
+	FILE *f = nlfopen(sFileNameDest, "rb");
 	if(f==NULL)
 	{
 		return false;

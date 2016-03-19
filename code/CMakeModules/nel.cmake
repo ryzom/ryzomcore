@@ -872,7 +872,7 @@ MACRO(NL_SETUP_BUILD)
     ENDIF(ANDROID)
 
     IF(APPLE)
-      ADD_PLATFORM_FLAGS("-gdwarf-2")
+      ADD_PLATFORM_FLAGS("-gdwarf-2 -D_DARWIN_UNLIMITED_STREAMS")
     ENDIF(APPLE)
 
     # Fix "relocation R_X86_64_32 against.." error on x64 platforms

@@ -57,7 +57,7 @@ vector<CVectorSString> items;
 // check the items file (locSlot and item number coherence)
 int verifItemsFile (const char *filename)
 {
-	FILE *f = fopen(filename, "r");
+	FILE *f = nlfopen(filename, "r");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 
@@ -89,7 +89,7 @@ int verifItemsFile (const char *filename)
 // check csv file (locSlot and item number coherence)
 int verifCsvFile (const char *filename)
 {
-	FILE *f = fopen(filename, "r");
+	FILE *f = nlfopen(filename, "r");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 
@@ -165,7 +165,7 @@ int getItemsFromFile(const char *filename)
 // fill 'fields' structure with values from file
 int getFieldsFromFile(const char *filename)
 {
-	FILE *f = fopen(filename, "r");
+	FILE *f = nlfopen(filename, "r");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 
@@ -190,7 +190,7 @@ int getFieldsFromFile(const char *filename)
 // parse the file to count the number of items
 int getNbItemFromFile(const char *filename)
 {
-	FILE *f = fopen(filename, "r");
+	FILE *f = nlfopen(filename, "r");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 
@@ -214,7 +214,7 @@ int exportCsv(const char *filename)
 	nlassert(fields.size() != 0);
 
 	uint i, j;
-	FILE *f = fopen(filename, "w");
+	FILE *f = nlfopen(filename, "w");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 
@@ -241,7 +241,7 @@ int importCsv(const char *filename)
 	verifCsvFile(filename);
 
 	char buffer[1024];
-	FILE *f = fopen(filename, "r");
+	FILE *f = nlfopen(filename, "r");
 	if (f == NULL)
 		nlerror("Can't open file : %s", filename);
 

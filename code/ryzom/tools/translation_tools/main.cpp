@@ -71,6 +71,7 @@
 
 #include "nel/misc/app_context.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/common.h"
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
 #include "nel/misc/diff_tool.h"
@@ -325,7 +326,7 @@ int readLanguages()
 	else
 	{
 		// append to the existing file
-		FILE *fp = fopen(filename.c_str(), "ab");
+		FILE *fp = nlfopen(filename, "ab");
 
 		for (uint i=0; i<text.size(); ++i)
 		{

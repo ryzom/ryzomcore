@@ -23,6 +23,7 @@
 #include "CompilDialog.h"
 
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/ligo/primitive.h"
 #include "../mission_compiler_lib/mission_compiler.h"
 #include "nel/misc/config_file.h"
@@ -201,7 +202,7 @@ BOOL CMissionCompilerFeDlg::OnInitDialog()
 
 	if (NLMISC::CFile::fileExists(tmpPath))
 	{
-		FILE *f = fopen(tmpPath, "r");
+		FILE *f = nlfopen(tmpPath, "r");
 		if (f == NULL)
 		{
 			nlinfo("Can't open the file for reading !\n%s", tmpPath);
@@ -762,7 +763,7 @@ void CValidationFile::saveMissionValidationFile(string filename)
 		nlwarning("Can't find index file '%s' in search path, no mission will be valid", filename.c_str());
 		return;
 	}
-	FILE* file = fopen(pathName.c_str(), "w");
+	FILE* file = nlfopen(pathName, "w");
 	nlassert(file!=NULL);
 	
 	// AuthorizedStates

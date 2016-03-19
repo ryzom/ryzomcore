@@ -46,6 +46,7 @@
 #include "editor_primitive.h"
 #include "file_dialog_ex.h"
 #include "nel/misc/mem_stream.h"
+#include "nel/misc/common.h"
 
 #include <string>
 
@@ -4334,7 +4335,7 @@ void CMainFrame::OnMissionCompiler()
 		GetEnvironmentVariable("TMP", tmpPath, MAX_PATH);
 		strcat(tmpPath, "\\tmptool.txt");
 
-		FILE *f = fopen(tmpPath, "w");
+		FILE *f = nlfopen(tmpPath, "w");
 		if (f==NULL)
 			infoMessage("Can't open file for writing !\n%s", tmpPath);
 

@@ -20,6 +20,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/config_file.h>
 #include <nel/misc/debug.h>
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 #include <nel/misc/i18n.h>
 
@@ -743,7 +744,7 @@ void displayZones()
 \****************************************************************/
 void writeConfigFile(const char * configFileName)
 {
-	FILE * f = fopen(configFileName,"wt");
+	FILE * f = nlfopen(configFileName, "wt");
 
 	if(f==NULL)
 	{
@@ -801,7 +802,7 @@ void writeConfigFile(const char * configFileName)
 \****************************************************************/
 void initViewerConfig(const char * configFileName)
 {
-	FILE * f = fopen(configFileName,"rt");
+	FILE *f = nlfopen(configFileName, "rt");
 	if(f==NULL)
 	{
 		nlwarning("'%s' not found, default values used", configFileName);
