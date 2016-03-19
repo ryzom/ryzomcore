@@ -183,7 +183,7 @@ std::string CAIScriptDataManager::dirname()
 //	string fullfilename = dirname() + "/" + name + ".ai_script_data";
 //	if (!CFile::fileExists(fullfilename) || CFile::getFileSize(fullfilename)==0)
 //	{
-//		FILE* fp = fopen(fullfilename.c_str(), "w");
+//		FILE* fp = nlfopen(fullfilename, "w");
 //		if (fp)
 //		{
 //			fprintf(fp, "// This file contains data for the AI script\n");

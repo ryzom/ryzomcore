@@ -18,6 +18,7 @@
 // misc
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 #include <nel/misc/config_file.h>
 
@@ -567,9 +568,9 @@ int main( int argc, char ** argv )
 	// dump the list of extensions in a txt file
 	if( dumpExtensions )
 	{
-		FILE *  extListOutput;
 		string extListFileName = outputPath + "sheet_ext.txt";
-		if( !(extListOutput = fopen(extListFileName.c_str(),"w")) )
+		FILE *extListOutput = nlfopen(extListFileName, "w");
+		if (!extListOutput)
 		{
 			nlwarning("Can't open output file %s",extListFileName.c_str());
 			return 1;

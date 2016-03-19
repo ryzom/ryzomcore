@@ -2223,6 +2223,7 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 #endif
 
 	std::string currentPath = CPath::standardizePath(CPath::getCurrentPath());
+	std::string etcPath = CPath::standardizePath(getRyzomEtcPrefix());
 
 	// look in the current working directory first
 	if (CFile::isExists(currentPath + defaultConfigFileName))
@@ -2232,13 +2233,14 @@ bool CClientConfig::getDefaultConfigLocation(std::string& p_name) const
 	else if (CFile::isExists(Args.getStartupPath() + defaultConfigFileName))
 		p_name = Args.getStartupPath() + defaultConfigFileName;
 
-	// look in prefix path
+	// look in application directory
 	else if (CFile::isExists(defaultConfigPath + defaultConfigFileName))
 		p_name = defaultConfigPath + defaultConfigFileName;
 
-	// if some client_default.cfg was found return true
-	if (p_name.size())
-		return true;
+	// look in etc prefix path
+	else if (!etcPath.empty() && CFile::isExists(etcPath + defaultConfigFileName))
+		p_name = etcPath + defaultConfigFileName;
 
-	return false;
+	// if some client_default.cfg was found return true
+	return !p_name.empty();
 }

@@ -102,11 +102,11 @@ void CPlayer::checkCrashMarker()
 		if (!CFile::isExists(LastLoadFileName))
 		{
 			// create the file if needed
-			nlverify(LastLoad  = fopen(LastLoadFileName, "wb"));
+			nlverify(LastLoad  = nlfopen(LastLoadFileName, "wb"));
 			fclose(LastLoad);
 		}
 		
-		nlverify(LastLoad = fopen(LastLoadFileName, "r+b"));
+		nlverify(LastLoad = nlfopen(LastLoadFileName, "r+b"));
 		
 		// check 
 		uint32	lastBad[2];

@@ -19,6 +19,7 @@
 #include <time.h>
 #include "nel/misc/time_nl.h"
 #include "nel/misc/thread.h"
+#include "nel/misc/common.h"
 #include "nel/misc/random.h"
 #include "nel/misc/singleton.h"
 #include "nel/net/service.h"
@@ -926,7 +927,7 @@ public:
 
 		// prepare the output file
 		string outputFile = queryOptions.OutputPrefix+LogQueryResultFile.get();
-		FILE *fp = fopen(outputFile.c_str(), "wt");;
+		FILE *fp = nlfopen(outputFile, "wt");;
 		if (fp == NULL)
 		{
 			_QueryStatus.write(TThreadStatus(qs_push_state, "ErrorWritingQueryResult"));

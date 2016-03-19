@@ -27,6 +27,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/command.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 #include <nel/misc/diff_tool.h>
 #include <nel/misc/random.h>
@@ -862,7 +863,7 @@ void loadNomenclatureCodes( const char *title, const vector<string>& longNames, 
 	vector<string>::iterator iarg;
 	vector<string>::const_iterator ivs;
 
-	if ( (rulesFile = fopen( filename, "r" )) == NULL )
+	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1121,7 +1122,7 @@ void	loadCSVFile( const char *filename, TMapDeliveryCallback deliveryCallback, b
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (file = fopen( filename, "r" )) == NULL )
+	if ( (file = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1178,7 +1179,7 @@ void	loadCSVFile( const char *filename, TVectorDeliveryCallback deliveryCallback
 	vs args;
 	vs::iterator iarg;
 
-	if ( (file = fopen( filename, "r" )) == NULL )
+	if ( (file = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1217,7 +1218,7 @@ void loadValueFile( const char *filename, const vector<string>& keyStrings,
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (rulesFile = fopen( filename, "r" )) == NULL )
+	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1271,7 +1272,7 @@ void loadRulesFile( const char *filename, const vector<string>& keyStrings,
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (rulesFile = fopen( filename, "r" )) == NULL )
+	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1582,7 +1583,7 @@ void	loadTitles( const string& sourceWords, const string& sourceBase, const stri
 void	extractRawMaterialNames()
 {
 	loadCSVFile( ExtractNamesCsv.c_str(), readRMNames );
-	FILE *output = fopen( (CFile::getFilenameWithoutExtension( ExtractNamesCsv ) + "_output.csv").c_str(), "wt" );
+	FILE *output = nlfopen( CFile::getFilenameWithoutExtension( ExtractNamesCsv ) + "_output.csv", "wt" );
 	fprintf( output, "Code;Name\n" );
 	for ( mss::const_iterator iun=UniqueRMNamesAndSheetCodeHead.begin(); iun!=UniqueRMNamesAndSheetCodeHead.end(); ++iun )
 	{
@@ -2343,7 +2344,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		_File = fopen( filename.c_str(), "wt" );
+		_File = nlfopen( filename, "wt" );
 		fprintf( _File, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>" + title + "</title>\n</head><body>\n").c_str() );
 	}
 
@@ -2408,7 +2409,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		_File = fopen( filename.c_str(), "wt" );
+		_File = nlfopen( filename, "wt" );
 	}
 
 	///

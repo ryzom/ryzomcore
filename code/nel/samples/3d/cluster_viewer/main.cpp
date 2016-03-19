@@ -23,6 +23,7 @@
 #include "nel/misc/types_nl.h"
 
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 #include "nel/misc/bitmap.h"
 #include "nel/misc/events.h"
@@ -115,7 +116,7 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 	float posx, posy, posz;
 	float roti, rotj, rotk;
 	
-	FILE *f = fopen (CPath::lookup(ScriptName).c_str(),"rb");
+	FILE *f = nlfopen (CPath::lookup(ScriptName), "rb");
 	fseek (f, 0, SEEK_END);
 	uint file_size = ftell (f);
 	fseek (f, 0, SEEK_SET);

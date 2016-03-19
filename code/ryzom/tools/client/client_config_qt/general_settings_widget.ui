@@ -43,11 +43,6 @@
        <string>German</string>
       </property>
      </item>
-     <item>
-      <property name="text">
-       <string>Hungarian</string>
-      </property>
-     </item>
     </widget>
    </item>
    <item>
@@ -97,7 +92,7 @@
         <item>
          <widget class="QCheckBox" name="lowPriorityProcessCheckBox">
           <property name="text">
-           <string>Slow down the game ( process low priority )</string>
+           <string>Slow down the game (process low priority)</string>
           </property>
          </widget>
         </item>

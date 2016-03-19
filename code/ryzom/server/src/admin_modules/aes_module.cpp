@@ -19,6 +19,7 @@
 #include "nel/misc/singleton.h"
 #include <time.h>
 #include "nel/misc/path.h"
+#include "nel/misc/common.h"
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
 #include "nel/net/unified_network.h"
@@ -297,7 +298,7 @@ namespace ADMIN
 
 			// read the persistent state file if any
 			string filename = CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString(), true)+AESPersistentStateFilename;
-			FILE *fp = fopen(filename.c_str(), "rt");
+			FILE *fp = nlfopen(filename, "rt");
 			if (fp != NULL)
 			{
 				char buffer[1024];
@@ -567,7 +568,7 @@ namespace ADMIN
 				if (now > _LastNagiosReport+_NagiosReportDelay)
 				{
 					// write the nagios report
-					FILE *fp = fopen("aes_nagios_report.txt", "wt");
+					FILE *fp = nlfopen("aes_nagios_report.txt", "wt");
 					if (fp != NULL)
 					{
 						// output the current date
@@ -632,7 +633,7 @@ namespace ADMIN
 			{
 				/// The persistent service orders need to be saved
 				string filename = CPath::standardizePath(IService::getInstance()->SaveFilesDirectory.toString(), true)+AESPersistentStateFilename;
-				FILE *fp = fopen(filename.c_str(), "wt");
+				FILE *fp = nlfopen(filename, "wt");
 				if (fp != NULL)
 				{
 					{
@@ -801,7 +802,7 @@ namespace ADMIN
 		std::string getOfflineServiceState(const std::string& serviceAlias)
 		{
 			// open the file for reading
-			FILE* f= fopen(getServiceStateFileName(serviceAlias).c_str(),"rt");
+			FILE* f= nlfopen(getServiceStateFileName(serviceAlias), "rt");
 			if (f==NULL) return "STOPPED";
 
 			// setup a buffer to hold the text read from the file
@@ -825,7 +826,7 @@ namespace ADMIN
 		uint32 getOfflineServicePID(const std::string& serviceAlias)
 		{
 			// open the file for reading
-			FILE* f= fopen(getServicePIDFileName(serviceAlias).c_str(),"rt");
+			FILE* f = nlfopen(getServicePIDFileName(serviceAlias), "rt");
 			if (f==NULL) return 0;
 
 			// setup a buffer to hold the text read from the file
@@ -853,7 +854,7 @@ namespace ADMIN
 		uint32 getServiceStartLoopCounter(const std::string& serviceAlias)
 		{
 			// open the file for reading
-			FILE* f= fopen(getServiceLoopCounterFileName(serviceAlias).c_str(),"rt");
+			FILE* f= nlfopen(getServiceLoopCounterFileName(serviceAlias), "rt");
 			if (f==NULL) 
 				return 0;
 
@@ -936,7 +937,7 @@ namespace ADMIN
 			NLMISC::CFile::createDirectoryTree(path);
 
 			// open the file for writing
-			FILE* f= fopen(getServiceLaunchCtrlFileName(serviceAlias, path, deferred).c_str(),"wt");
+			FILE* f = nlfopen(getServiceLaunchCtrlFileName(serviceAlias, path, deferred).c_str(),"wt");
 			if (f==NULL) return false;
 
 			// write the text to the file

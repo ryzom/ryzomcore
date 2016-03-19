@@ -195,13 +195,17 @@ uint32 CAudioDecoderVorbis::getNextBytes(uint8 *buffer, uint32 minimum, uint32 m
 uint8 CAudioDecoderVorbis::getChannels()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	return (uint8)vi->channels;
+	if (vi) return (uint8)vi->channels;
+	nlwarning("ov_info returned NULL");
+	return 0;
 }
 
 uint CAudioDecoderVorbis::getSamplesPerSec()
 {
 	vorbis_info *vi = ov_info(&_OggVorbisFile, -1);
-	return (uint)vi->rate;
+	if (vi) return (uint)vi->rate;
+	nlwarning("ov_info returned NULL");
+	return 0;
 }
 
 uint8 CAudioDecoderVorbis::getBitsPerSample()

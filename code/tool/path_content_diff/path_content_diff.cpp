@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <nel/misc/common.h>
 #include <nel/misc/path.h>
 #include <nel/misc/debug.h>
 #include <nel/misc/file.h>
@@ -65,7 +66,7 @@ int main( int argc, char ** argv )
 	CPath::getPathContent(newPath, true, false, true, newPathContent);
 	
 	string outputFileName = CFile::findNewFile("path_content_diff.txt");
-	FILE *output = fopen (outputFileName.c_str(), "wt");
+	FILE *output = nlfopen(outputFileName, "wt");
 	if( output == NULL )
 	{
 		nlwarning("Can't open output file %s",outputFileName.c_str());

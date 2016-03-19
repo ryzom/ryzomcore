@@ -391,7 +391,7 @@ void CRepositoryReceiver::beginFile(NLNET::IModuleProxy *sender, const std::stri
 	_CurrentFileExpected= fileSize;
 	
 	// open the temp file
-	_CurrentFileHandle= fopen(rrTempFileName(_TargetDirectory,_EmitterName).c_str(),"wb");
+	_CurrentFileHandle= nlfopen(rrTempFileName(_TargetDirectory,_EmitterName), "wb");
 	BOMB_IF(_CurrentFileHandle==NULL,"Failed to open temporary file for writing: "+rrTempFileName(_TargetDirectory,_EmitterName),return);
 }
 

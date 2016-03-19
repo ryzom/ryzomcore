@@ -17,6 +17,7 @@
 #include "moulinette.h"
 #include "utils.h"
 #include "nel/misc/algo.h"
+#include "nel/misc/common.h"
 
 TRMItem currentDocItem;
 CRMData SortableData;
@@ -1279,7 +1280,7 @@ void ItemNamesSave()
 	CSString data, output;
 
 	FILE* file;
-	file = fopen( ITEM_WORDS_WK.c_str(), "rb" );
+	file = nlfopen( ITEM_WORDS_WK, "rb" );
 
 	char c;
 	fread( &c, 1, 1, file );

@@ -181,9 +181,6 @@ private:
 
 	// Error message
 	std::string		_ErrorString;
-
-	// System dependant structure for locale
-	void*			_Locale;
 };
 
 

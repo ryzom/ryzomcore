@@ -22,6 +22,7 @@
  */
 #include <nel/misc/types_nl.h>
 #include <nel/misc/stream.h>
+#include <nel/misc/common.h>
 #include <nel/misc/bit_set.h>
 #include <nel/misc/variable.h>
 
@@ -282,7 +283,7 @@ public:
 		if (_File != NULL)
 			return false;
 
-		_File = fopen(filename, mode);
+		_File = nlfopen(filename, mode);
 		if (_File == NULL)
 			return false;
 

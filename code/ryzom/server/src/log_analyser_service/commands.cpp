@@ -88,7 +88,7 @@ public:
 			NLMISC::CFile::deleteFile(_TmpFileName);
 		DROP_IF(NLMISC::CFile::fileExists(_TmpFileName),"Failed to delete file: "+_TmpFileName,return);
 
-		_File= fopen(_TmpFileName.c_str(),"wb");
+		_File = nlfopen(_TmpFileName,"wb");
 	}
 	
 	~CSimpleFileDisplayer()

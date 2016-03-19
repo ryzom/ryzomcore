@@ -90,10 +90,10 @@ void CDisplaySettingsWidget::load()
 		windowedRadioButton->setChecked( true );
 	}
 
-	widthLineEdit->setText( QString( "%1" ).arg( mode.width ) );
-	heightLineEdit->setText( QString( "%1" ).arg( mode.height ) );
-	xpositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionX" ) ) );
-	ypositionLineEdit->setText( QString( "%1" ).arg( s.config.getInt( "PositionY" ) ) );
+	widthLineEdit->setText(QString::number(mode.width));
+	heightLineEdit->setText(QString::number(mode.height));
+	xpositionLineEdit->setText(QString::number(s.config.getInt("PositionX")));
+	ypositionLineEdit->setText(QString::number(s.config.getInt("PositionY")));
 
 }
 
@@ -166,7 +166,18 @@ void CDisplaySettingsWidget::updateVideoModes()
 
 	while(itr != iend)
 	{
-		videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+		if (itr->frequency)
+		{
+			videomodeComboBox->addItem(QString("%1x%2 %3 bit @%4").arg(itr->width).arg(itr->height).arg(itr->depth).arg(itr->frequency));
+		}
+		else if (itr->width)
+		{
+			videomodeComboBox->addItem(QString("%1x%2 %3 bit").arg(itr->width).arg(itr->height).arg(itr->depth));
+		}
+		else
+		{
+			videomodeComboBox->addItem(tr("Auto"));
+		}
 
 		++itr;
 	}
@@ -183,7 +194,7 @@ uint32 CDisplaySettingsWidget::findVideoModeIndex( CVideoMode *mode )
 	//| --------------------------------------|
 	//| Auto            | OpenGL modes        |
 	//| OpenGL          | OpenGL modes        |
-	//| Direct3D        | Direct3d modes      |
+	//| Direct3D        | Direct3D modes      |
 	//| --------------------------------------|
 	//
 	//

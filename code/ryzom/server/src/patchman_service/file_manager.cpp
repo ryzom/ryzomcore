@@ -21,6 +21,7 @@
 // nel
 #include "nel/misc/variable.h"
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 
 // game share
 #include "game_share/utils.h"
@@ -599,7 +600,7 @@ namespace PATCHMAN
 //			nldebug("- Reading file data @offset: %d (%d bytes)",newFileEntry.StartOffset,fileSize);
 
 			// read in the file
-			FILE* inf= fopen(fileName.c_str(),"rb");
+			FILE* inf = nlfopen(fileName, "rb");
 			BOMB_IF(inf==NULL,"Failed to open input file for reading: "+fileName,return false);
 			uint32 bytesRead=(uint32)fread(&_CacheBuffer[newFileEntry.StartOffset],1,fileSize,inf);
 			fclose(inf);

@@ -20,6 +20,7 @@
 #include <iostream>
 #include "nel/misc/types_nl.h"
 #include "nel/misc/file.h"
+#include "nel/misc/common.h"
 #include "nel/3d/quad_tree.h"
 #include "nel/3d/zone.h"
 #include "nel/3d/landscape.h"
@@ -978,7 +979,7 @@ int main(sint argc, char **argv)
 	}
 
 #if WELD_LOG
-	fdbg = fopen("log.txt","wt");
+	fdbg = nlfopen("log.txt","wt");
 	fprintf(fdbg,"Center zone : %s\n",argv[1]);
 #endif
 
