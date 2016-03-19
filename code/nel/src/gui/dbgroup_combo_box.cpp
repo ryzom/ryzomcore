@@ -321,7 +321,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	const bool	CDBGroupComboBox::getGrayed(uint i) const
+	bool	CDBGroupComboBox::getGrayed(uint i) const
 	{
 		if(i<_Grayed.size())
 			return _Grayed[i];
