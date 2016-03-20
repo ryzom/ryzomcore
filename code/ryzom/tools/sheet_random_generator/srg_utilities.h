@@ -863,7 +863,7 @@ void loadNomenclatureCodes( const char *title, const vector<string>& longNames, 
 	vector<string>::iterator iarg;
 	vector<string>::const_iterator ivs;
 
-	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
+	if ( (rulesFile = NLMISC::nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1122,7 +1122,7 @@ void	loadCSVFile( const char *filename, TMapDeliveryCallback deliveryCallback, b
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (file = nlfopen( filename, "r" )) == NULL )
+	if ( (file = NLMISC::nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1179,7 +1179,7 @@ void	loadCSVFile( const char *filename, TVectorDeliveryCallback deliveryCallback
 	vs args;
 	vs::iterator iarg;
 
-	if ( (file = nlfopen( filename, "r" )) == NULL )
+	if ( (file = NLMISC::nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1218,7 +1218,7 @@ void loadValueFile( const char *filename, const vector<string>& keyStrings,
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
+	if ( (rulesFile = NLMISC::nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1272,7 +1272,7 @@ void loadRulesFile( const char *filename, const vector<string>& keyStrings,
 	vector<string> args;
 	vector<string>::iterator iarg;
 
-	if ( (rulesFile = nlfopen( filename, "r" )) == NULL )
+	if ( (rulesFile = NLMISC::nlfopen( filename, "r" )) == NULL )
 	{
 		nlwarning( "Can't find file %s", filename );
 	}
@@ -1583,7 +1583,7 @@ void	loadTitles( const string& sourceWords, const string& sourceBase, const stri
 void	extractRawMaterialNames()
 {
 	loadCSVFile( ExtractNamesCsv.c_str(), readRMNames );
-	FILE *output = nlfopen( CFile::getFilenameWithoutExtension( ExtractNamesCsv ) + "_output.csv", "wt" );
+	FILE *output = NLMISC::nlfopen( CFile::getFilenameWithoutExtension( ExtractNamesCsv ) + "_output.csv", "wt" );
 	fprintf( output, "Code;Name\n" );
 	for ( mss::const_iterator iun=UniqueRMNamesAndSheetCodeHead.begin(); iun!=UniqueRMNamesAndSheetCodeHead.end(); ++iun )
 	{
@@ -2344,7 +2344,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		_File = nlfopen( filename, "wt" );
+		_File = NLMISC::nlfopen( filename, "wt" );
 		fprintf( _File, ("<html><head>\n<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n<title>" + title + "</title>\n</head><body>\n").c_str() );
 	}
 
@@ -2409,7 +2409,7 @@ public:
 		if ( ! _Enabled )
 			return;
 
-		_File = nlfopen( filename, "wt" );
+		_File = NLMISC::nlfopen( filename, "wt" );
 	}
 
 	///

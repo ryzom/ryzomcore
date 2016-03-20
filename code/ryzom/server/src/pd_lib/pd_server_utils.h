@@ -283,7 +283,7 @@ public:
 		if (_File != NULL)
 			return false;
 
-		_File = nlfopen(filename, mode);
+		_File = NLMISC::nlfopen(filename, mode);
 		if (_File == NULL)
 			return false;
 
