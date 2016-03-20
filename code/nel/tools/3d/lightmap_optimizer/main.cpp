@@ -998,7 +998,7 @@ int main(int nNbArg, char **ppArgs)
 		ChDir (sExeDir);
 
 		// out a text file, with list of
-		FILE *out = nlfopen(ppArgs[4], "wt");
+		FILE *out = NLMISC::nlfopen(ppArgs[4], "wt");
 
 		if(!out)
 		{
