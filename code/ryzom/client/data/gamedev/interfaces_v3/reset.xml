@@ -91,7 +91,11 @@
 	<action handler="set" params="target='ui:interface:gestion_windows:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:gestion_windows:w')),2)" />
 	<action handler="set" params="target='ui:interface:gestion_windows:y'|value=add(getprop('ui:interface:gestion_windows:h'),div(sub(getprop('ui:interface:h'),getprop('ui:interface:gestion_windows:h')),2))" />
 	<action handler="set" params="target='ui:interface:gestion_windows:active'|value=@UI:TEMP:ACTIVE" />
-	
+
+	<!-- AppZone -->
+	<action handler="set" params="target='ui:interface:appzone:active'|value=1" />
+	<action handler="set" params="target='ui:interface:appzone:x'|value=div(sub(getprop('ui:interface:w'),getprop('ui:interface:appzone:w')),2)" />
+	<action handler="set" params="target='ui:interface:appzone:y'|value=add(getprop('ui:interface:appzone:h'),2)" />
 </proc>
 
 <proc id="proc_reset_interface">
