@@ -765,7 +765,7 @@ toolToolMaker	[Outil de création d'outils]
 
 // HASH_VALUE EA19107FE4B2E658
 // INDEX 191
-toolMeleeWeaponTool	[Outil de Création d'armes de mêlée]
+toolMeleeWeaponTool	[Outil de création d'armes de mêlée]
 
 // HASH_VALUE E546D4771C56E06C
 // INDEX 192
@@ -889,7 +889,7 @@ mpfq	[Bien %p]
 
 // HASH_VALUE B396C73030654FFA
 // INDEX 222
-mpfqQuite	[Très Bien %p]
+mpfqQuite	[Très bien %p]
 
 // HASH_VALUE 6914F36AAB34C391
 // INDEX 223
@@ -1017,7 +1017,7 @@ mpstat17	[Protection contre le Feu]
 
 // HASH_VALUE AC07A397E967CF92
 // INDEX 254
-mpstat18	[Protection contre les Ondes de Choc]
+mpstat18	[Protection contre les Ondes de choc]
 
 // HASH_VALUE ACC9848051C5D4AA
 // INDEX 255
@@ -1185,35 +1185,35 @@ mpstatItemQualifier25	[de résistance aux Primes Racines]
 
 // HASH_VALUE A3A16AB7AB88EC56
 // INDEX 296
-mpstatItemQualifier26	[de vitesse Élémentaire]
+mpstatItemQualifier26	[de vitesse élémentaire]
 
 // HASH_VALUE 22F4C8AFA3949C0D
 // INDEX 297
-mpstatItemQualifier27	[de puissance Élémentaire]
+mpstatItemQualifier27	[de puissance élémentaire]
 
 // HASH_VALUE 66D6F9F695A9A80F
 // INDEX 298
-mpstatItemQualifier28	[de vitesse Débilitante]
+mpstatItemQualifier28	[de vitesse débilitante]
 
 // HASH_VALUE A216A09E44081861
 // INDEX 299
-mpstatItemQualifier29	[de puissance Débilitante]
+mpstatItemQualifier29	[de puissance débilitante]
 
 // HASH_VALUE A4D6F9F695A9A80E
 // INDEX 300
-mpstatItemQualifier30	[de vitesse Neutralisante]
+mpstatItemQualifier30	[de vitesse neutralisante]
 
 // HASH_VALUE E016A09E44081860
 // INDEX 301
-mpstatItemQualifier31	[de puissance Neutralisante]
+mpstatItemQualifier31	[de puissance neutralisante]
 
 // HASH_VALUE 20632F838D25C418
 // INDEX 302
-mpstatItemQualifier32	[de vitesse Curative]
+mpstatItemQualifier32	[de vitesse curative]
 
 // HASH_VALUE 1F85B46C4578A417
 // INDEX 303
-mpstatItemQualifier33	[de puissance Curative]
+mpstatItemQualifier33	[de puissance curative]
 
 // HASH_VALUE 6418F40C6418F40C
 // INDEX 304
@@ -1233,7 +1233,7 @@ ptFire	[Feu]
 
 // HASH_VALUE A1075C8FA47754A5
 // INDEX 308
-ptShockwave	[Ondes de Choc]
+ptShockwave	[Ondes de choc]
 
 // HASH_VALUE 2E2700782D96FC97
 // INDEX 309
@@ -3729,7 +3729,7 @@ uittChooseLabColor	[Choisir la couleur de l'en-tête "Orientation"]
 
 // HASH_VALUE 46BB036084B05DC2
 // INDEX 931
-uittChooseMemColor	[Choisir la couleur de l'en-tête "Guilde & Equipe"]
+uittChooseMemColor	[Choisir la couleur de l'en-tête "Guilde & Équipe"]
 
 // HASH_VALUE E986833A969EB864
 // INDEX 932
@@ -5704,21 +5704,21 @@ uittFameAllegianceCiv4	[Vous avez prêté allégeance aux @{2F2F}Fyros@{FFFF}.\n
 // HASH_VALUE F3701FA45695A3EA
 // INDEX 1399
 uittFameAllegianceCiv5	[Vous avez prêté allégeance aux @{2F2F}Matis@{FFFF}.\n
-	Ceci vous permet d'avoir une renommée Matis plus grande, mais votre guilde doit aussi être d'allégeance Matis.\n
+	Ceci vous permet d'avoir une renommée Matis plus grande, mais votre guilde doit aussi être d'allégeance matis.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Matis@{FFFF} atteint 0.]
 
 // HASH_VALUE 9F69A500FA32081B
 // INDEX 1400
 uittFameAllegianceCiv6	[Vous avez prêté allégeance aux @{2F2F}Trykers@{FFFF}.\n
-	Ceci vous permet d'avoir une renommée Tryker plus grande, mais votre guilde doit aussi être d'allégeance Tryker.\n
+	Ceci vous permet d'avoir une renommée Tryker plus grande, mais votre guilde doit aussi être d'allégeance tryker.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Tryker@{FFFF} atteint 0.]
 
 // HASH_VALUE F8AF33A2D5666BFE
 // INDEX 1401
 uittFameAllegianceCiv7	[Vous avez prêté allégeance aux @{2F2F}Zoraïs@{FFFF}.\n
-	Ceci vous permet d'avoir une renommée Zoraï plus grande, mais votre guilde doit aussi être d'allégeance Zoraï.\n
+	Ceci vous permet d'avoir une renommée Zoraï plus grande, mais votre guilde doit aussi être d'allégeance zoraï.\n
 	Pour renier votre allégeance, vous pouvez aller voir un @{2F2F}magistrat@{FFFF} dans une capitale.\n
 	Vous perdrez automatiquement votre allégeance si votre renommée @{2F2F}Zoraï@{FFFF} atteint 0.]
 
@@ -5769,28 +5769,28 @@ uittFameAllegianceCivGuild1	[Votre guilde est @{2F2F}apatride@{FFFF}.\n
 // HASH_VALUE 48B5E21ED594D35A
 // INDEX 1408
 uittFameAllegianceCivGuild4	[Votre guilde a prêté allégeance aux @{2F2F}Fyros@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Fyros plus grande, et d'enrôler des membres d'allégeance Fyros ou Neutre (apatrides).\n
+	Cela lui permet d'avoir une renommée Fyros plus grande, et d'enrôler des membres d'allégeance fyros ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Fyros@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 0AB5CA14D1A21342
 // INDEX 1409
 uittFameAllegianceCivGuild5	[Votre guilde a prêté allégeance aux @{2F2F}Matis@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Matis plus grande, et d'enrôler des membres d'allégeance Matis ou Neutre (apatrides).\n
+	Cela lui permet d'avoir une renommée Matis plus grande, et d'enrôler des membres d'allégeance matis ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Matis@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 527303AF879765CE
 // INDEX 1410
 uittFameAllegianceCivGuild6	[Votre guilde a prêté allégeance aux @{2F2F}Trykers@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Tryker plus grande, et d'enrôler des membres d'allégeance Tryker ou Neutre (apatrides).\n
+	Cela lui permet d'avoir une renommée Tryker plus grande, et d'enrôler des membres d'allégeance tryker ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Tryker@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
 // HASH_VALUE 4D145A02D0B37350
 // INDEX 1411
 uittFameAllegianceCivGuild7	[Votre guilde a prêté allégeance aux @{2F2F}Zoraïs@{FFFF}.\n
-	Cela lui permet d'avoir une renommée Zoraï plus grande, et d'enrôler des membres d'allégeance Zoraï ou Neutre (apatrides).\n
+	Cela lui permet d'avoir une renommée Zoraï plus grande, et d'enrôler des membres d'allégeance zoraï ou Neutre (apatrides).\n
 	Pour renier son allégeance, le chef de guilde peut aller voir un @{2F2F}magistrat@{FFFF} de guilde dans une capitale.\n
 	Votre guilde perdra automatiquement son allégeance si sa renommée @{2F2F}Zoraï@{FFFF} atteint 0. Les membres auront alors une allégeance indéterminée.]
 
@@ -5884,7 +5884,7 @@ uiFame_tribe_beachcombers	[Déferlants]
 
 // HASH_VALUE 63266F61E5443E8A
 // INDEX 1430
-uiFame_tribe_black_circle	[Cercle Noir]
+uiFame_tribe_black_circle	[Cercle noir]
 
 // HASH_VALUE 6299CC93A9E6F0B5
 // INDEX 1431
@@ -5944,7 +5944,7 @@ uiFame_tribe_goo_heads	[Illuminés]
 
 // HASH_VALUE 67556F6D56E56F7F
 // INDEX 1445
-uiFame_tribe_green_seed	[Graines Vertes]
+uiFame_tribe_green_seed	[Graines vertes]
 
 // HASH_VALUE D468F810D8A85C6F
 // INDEX 1446
@@ -6016,11 +6016,11 @@ uiFame_tribe_sacred_sap	[Sève Sacrée]
 
 // HASH_VALUE 448B505B94DA7C4F
 // INDEX 1463
-uiFame_tribe_sap_gleaners	[Sèves Sèches]
+uiFame_tribe_sap_gleaners	[Sèves sèches]
 
 // HASH_VALUE D9A8DC6C1887837B
 // INDEX 1464
-uiFame_tribe_sap_slaves	[Esclaves de la Sève]
+uiFame_tribe_sap_slaves	[Esclaves de la sève]
 
 // HASH_VALUE 2398709DE739B4A7
 // INDEX 1465
@@ -6064,7 +6064,7 @@ uiFame_tribe_tutors	[Tuteurs]
 
 // HASH_VALUE 964B349BA5369B7D
 // INDEX 1475
-uiFame_tribe_water_breakers	[Dresseurs d'Eau]
+uiFame_tribe_water_breakers	[Dresseurs d'eau]
 
 // HASH_VALUE 1DA4D48A5C4617C9
 // INDEX 1476
@@ -6311,12 +6311,12 @@ uiPvPEffect_region_enchantedisle_Malus	[@{FE7F}Le foyer de l'Ile Enchanté @{FFF
 
 // HASH_VALUE 0B3FED53BD64ED63
 // INDEX 1527
-uiPvPEffect_region_thefount_Bonus	[@{FE7F}Le foyer de la Source @{FFFF}:\n
+uiPvPEffect_region_thefount_Bonus	[@{FE7F}Le foyer de la source @{FFFF}:\n
 	  Augmente la dextérité de @{2F2F}%n]
 
 // HASH_VALUE 49F4A45BF1E083F6
 // INDEX 1528
-uiPvPEffect_region_thefount_Malus	[@{FE7F}Le foyer de la Source @{FFFF}:\n
+uiPvPEffect_region_thefount_Malus	[@{FE7F}Le foyer de la source @{FFFF}:\n
 	  Réduit la dextérité de @{2F2F}%n]
 
 // HASH_VALUE 72242B6AE273F26C
@@ -6522,7 +6522,7 @@ uiPvPEffect_region_nexus_Malus	[@{FE7F}Le foyer du Nexus @{FFFF}:\n
 // HASH_VALUE AA1DC3C4FD396774
 // INDEX 1569
 uiHPDesc	[@{6F6F}HP@{FFFF},\n
-	les Points de Vie mesurent le montant des dommages qu'un personnage peut supporter avant de mourir.]
+	les Points de vie mesurent le montant des dommages qu'un personnage peut supporter avant de mourir.]
 
 // HASH_VALUE 08CF5A4F3BBC8D17
 // INDEX 1570
@@ -6567,7 +6567,7 @@ uiMetaDesc	[@{6F6F}Métabolisme@{FFFF},\n
 // HASH_VALUE 9DF5C8519F10DD99
 // INDEX 1578
 uiWisDesc	[@{6F6F}Sagesse@{FFFF},\n
-	détermine le temps de régénération de la Sève, l'énergie utilisée pour faire de la magie.]
+	détermine le temps de régénération de la sève, l'énergie utilisée pour faire de la magie.]
 
 // HASH_VALUE DFFD9B8BE269FBC5
 // INDEX 1579
@@ -8386,7 +8386,7 @@ uiMagicEditDifficulty	[Difficulté]
 
 // HASH_VALUE 5BCAE043B3D90C45
 // INDEX 2031
-uiMagicEditNotEnoughSap	[Attention ! Pas assez de Sève !]
+uiMagicEditNotEnoughSap	[Attention ! Pas assez de sève !]
 
 // HASH_VALUE 36B251FFFAE39E10
 // INDEX 2032
@@ -10229,7 +10229,7 @@ uihelpItemArmorFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origi
 	@{FFF9}@{HuittInfoArmorQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
 	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
 	@{FFF9}@{HuittInfoArmorType}Type d'armure :@{H}@{T22}@{FFFF}%armor %armor_bonus\n
@@ -10248,7 +10248,7 @@ uihelpItemMeleeWeaponFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T17}@{FFFF}
 	@{FFF9}@{HuittInfoWeaponQuality}Qualité :@{H}@{T17}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T17}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T17}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T17}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T17}@{FFFF}%hp / %hpmax\n
 	@{FFF9}@{HuittInfoWeaponSapLoad}Charge en Sève :@{H}@{T17}@{FFFF}%sap / %sapmax\n
 	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T17}@{FFFF}%skill\n
 	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T17}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
@@ -10270,7 +10270,7 @@ uihelpItemRangeWeaponFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}
 	@{FFF9}@{HuittInfoWeaponQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
 	@{FFF9}@{HuittInfoWeaponSapLoad}Charge en Sève :@{H}@{T12}@{FFFF}%sap / %sapmax\n
 	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T12}@{FFFF}%skill\n
 	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
@@ -10291,7 +10291,7 @@ uihelpItemAmmoFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%origin
 	@{FFF9}@{HuittInfoWeaponQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
 	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T12}@{FFFF}%skill\n
 	%cansell\n
 	@{FFF9}@{HuittInfoAmmoMagazine}Chargeur :@{H}@{T12}@{FFFF}%magazine\n
@@ -10385,7 +10385,7 @@ uihelpItemShieldFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%orig
 	@{FFF9}@{HuittInfoArmorQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
 	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T12}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
 	@{FFF9}@{HuittInfoShieldCat}Catégorie :@{H}@{T12}@{FFFF}%cat\n
@@ -10404,7 +10404,7 @@ uihelpItemCraftingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF
 	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
 	@{FFF9}@{HuittToolCraftType}Type d'outil :@{H}@{T14}@{FFFF}%tool\n
 	%cansell\n
 	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
@@ -10419,7 +10419,7 @@ uihelpItemHarvestToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}
 	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
 	%cansell\n
 	@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	%buffs\n
@@ -10433,7 +10433,7 @@ uihelpItemTamingToolFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T12}@{FFFF}%
 	@{FFF9}@{HuittInfoToolQuality}Qualité :@{H}@{T12}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T12}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T12}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T12}@{FFFF}%hp / %hpmax\n
 	@{FFF9}@{HuittInfoItemSkill}Compétence :@{H}@{T12}@{FFFF}%skill\n
 	%cansell\n
 	@{FFF9}Portée de la commande :@{T12}@{FFFF}%cmdrange\n
@@ -10447,7 +10447,7 @@ uihelpItemJewelFormat	[@{FFF9}@{HuittInfoOrigin}Origine :@{H}@{T14}@{FFFF}%origi
 	@{FFF9}@{HuittInfoJewelryQuality}Qualité :@{H}@{T14}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoWeight}Poids :@{H}@{T14}@{FFFF}%weight Kg\n
 	@{FFF9}@{HuittInfoBulk}Volume :@{H}@{T14}@{FFFF}%bulk\n
-	@{FFF9}@{HuittInfoHP}Points de Vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
+	@{FFF9}@{HuittInfoHP}Points de vie :@{H}@{T14}@{FFFF}%hp / %hpmax\n
 	%cansell@{FFF9}@{HuittInfoRequirement}Prérequis :@{H}@{T14}@{FFFF}%caracreq@{FFFF}%skillreq@{FFFF}%skillreq2\n
 	\n
 	%magic_protection%magic_resistance%buffs%desc%custom_text]
@@ -10748,7 +10748,7 @@ uihelpPhraseProcEnchantment	[@{FFFF}Avec cette action, vous pouvez utiliser l'en
 // HASH_VALUE 0B663B02619E27B2
 // INDEX 2533
 uihelpPactFormat	[@{FFF9}Niveau :@{T12}@{FFFF}%lvl\n
-	@{FFF9}Points de Vie consommés :@{T12}@{FFFF}%hp\n
+	@{FFF9}Points de vie consommés :@{T12}@{FFFF}%hp\n
 	@{FFF9}Endurance consommée :@{T12}@{FFFF}%sta\n
 	@{FFF9}Sève consommée :@{T12}@{FFFF}%sap\n
 	@{FFF9}Compétences consommées :@{T12}@{FFFF}%skill\n
@@ -12406,7 +12406,7 @@ region_hereticshovel	[Masure de l'Hérétique]
 
 // HASH_VALUE 2BFA2C144E17C8B4
 // INDEX 2937
-region_nland	[Forêt Matisienne]
+region_nland	[Forêt matis]
 
 // HASH_VALUE 2948B49724A9A0A3
 // INDEX 2938
@@ -13599,7 +13599,7 @@ uiBubbleTL	[En haut à droite]
 
 // HASH_VALUE B54C279E920E61A6
 // INDEX 3234
-uiTryton1	[Depuis plusieurs siècles, je voyage parmi les couloirs trop paisibles de Ryzom. Je fus témoin de la Poussée Verte d'Atys et de la naissance de l'hominité. J'assistai à leur lutte pour survivre dans un monde sans merci peuplé de plantes tueuses et de monstres rampants. Pire encore, retranchés dans leur ignorance primale, ils firent couler le sang par soif de pouvoir. Affaiblis par une guerre interraciale et reclus sur leur territoire suite à une ségrégation qu'ils s'étaient imposée, ils furent victimes d'une effroyable invasion de Kitins.]
+uiTryton1	[Depuis plusieurs siècles, je voyage parmi les couloirs trop paisibles de Ryzom. Je fus témoin de la Poussée verte d'Atys et de la naissance de l'hominité. J'assistai à leur lutte pour survivre dans un monde sans merci peuplé de plantes tueuses et de monstres rampants. Pire encore, retranchés dans leur ignorance primale, ils firent couler le sang par soif de pouvoir. Affaiblis par une guerre interraciale et reclus sur leur territoire suite à une ségrégation qu'ils s'étaient imposée, ils furent victimes d'une effroyable invasion de Kitins.]
 
 // HASH_VALUE DF28A0BE35A6586F
 // INDEX 3235
@@ -13770,7 +13770,7 @@ uittPhraseEditNewOptional	[Ajouter option]
 
 // HASH_VALUE 5746BC52D6E4AB51
 // INDEX 3276
-uittPhraseEditNewCredit	[AAjouter crédit]
+uittPhraseEditNewCredit	[Ajouter crédit]
 
 // HASH_VALUE F9D59C404BD6CC4E
 // INDEX 3277
@@ -14403,7 +14403,7 @@ Dodge	[Esquive]
 
 // HASH_VALUE A7323C8FD5E8F394
 // INDEX 3431
-MagicDefense	[Défense magique]
+MagicDefense	[Défense contre la magie]
 
 // HASH_VALUE 6C77A78BD888CF81
 // INDEX 3432
@@ -14507,7 +14507,7 @@ uiHP	[Vie]
 
 // HASH_VALUE 81CF12CA2FCAC592
 // INDEX 3457
-uittHP	[Affichez les points de Vie au-dessus du personnage.]
+uittHP	[Affichez les points de vie au-dessus du personnage.]
 
 // HASH_VALUE 4C5054504C505450
 // INDEX 3458
@@ -14639,7 +14639,7 @@ uiSAP	[Sève du personnage]
 
 // HASH_VALUE DF3C16CBBFAB2ADA
 // INDEX 3490
-uittSAP	[Afficher la barre de Sève du personnage au-dessus de lui]
+uittSAP	[Afficher la barre de sève du personnage au-dessus de lui]
 
 // HASH_VALUE A797BF3DDF08009C
 // INDEX 3491
@@ -14647,7 +14647,7 @@ uiFOC	[Concentration du personnage]
 
 // HASH_VALUE DFBD9AD6A191CEEC
 // INDEX 3492
-uittFocus	[Afficher la barre de Concentration du personnage au-dessus de lui]
+uittFocus	[Afficher la barre de concentration du personnage au-dessus de lui]
 
 // HASH_VALUE 698737366867538A
 // INDEX 3493
@@ -16128,7 +16128,7 @@ mpfam27	[Feuille de Carlea]
 
 // HASH_VALUE 2969382CE442B08E
 // INDEX 3862
-mpfam28	[Carapace Championne]
+mpfam28	[Carapace championne]
 
 // HASH_VALUE 1AE5E445A8F7C08A
 // INDEX 3863
@@ -16136,7 +16136,7 @@ mpfam30	[Bourgeon de Crocifissa]
 
 // HASH_VALUE 2FC76837E803B843
 // INDEX 3864
-mpfam31	[Carapace Mignonne]
+mpfam31	[Carapace mignonne]
 
 // HASH_VALUE A9255768D7B58383
 // INDEX 3865
@@ -16192,7 +16192,7 @@ mpfam44	[Peau de Gingo]
 
 // HASH_VALUE AD78643FA6C3F48A
 // INDEX 3878
-mpfam45	[Lin Magnifique]
+mpfam45	[Lin magnifique]
 
 // HASH_VALUE EBB78035E4234845
 // INDEX 3879
@@ -16224,7 +16224,7 @@ mpfam52	[Carapace de Héros]
 
 // HASH_VALUE 0E0A743F6EF59BA7
 // INDEX 3886
-mpfam53	[Carapace Cornée]
+mpfam53	[Carapace cornée]
 
 // HASH_VALUE 6DF4AB4E98F4C36C
 // INDEX 3887
@@ -16404,11 +16404,11 @@ mpfam98	[Champignon de Paddooa]
 
 // HASH_VALUE 1F53678422B76B62
 // INDEX 3931
-mpfam99	[Noeud de Bois de Patee]
+mpfam99	[Noeud de bois de Patee]
 
 // HASH_VALUE 2083678422C60358
 // INDEX 3932
-mpfam100	[Noeud de Bois de Patee]
+mpfam100	[Noeud de bois de Patee]
 
 // HASH_VALUE 29D8FC482726FFB0
 // INDEX 3933
@@ -16432,7 +16432,7 @@ mpfam107	[Peau de Ragus]
 
 // HASH_VALUE 638374426463C886
 // INDEX 3938
-mpfam109	[Sève Ardente]
+mpfam109	[Sève ardente]
 
 // HASH_VALUE 93778393264A2497
 // INDEX 3939
@@ -18792,7 +18792,7 @@ mpfam714	[Médaille du Mérite Karavan]
 
 // HASH_VALUE 92D31B96ABEB704B
 // INDEX 4528
-mpfam715	[Cristal de Sève]
+mpfam715	[Cristal de sève]
 
 // HASH_VALUE A3070C5ECDD2AFB4
 // INDEX 4529
@@ -18940,7 +18940,7 @@ mpfam751	[Gomme de Rubbarn modifiée]
 
 // HASH_VALUE 29E834214D63ACA2
 // INDEX 4565
-mpfam752	[Pollen d'Egiros modifié]
+mpfam752	[Pollen d'Égiros modifié]
 
 // HASH_VALUE 4E96D47763E88497
 // INDEX 4566
@@ -18956,7 +18956,7 @@ mpfam755	[Gomme de Rubbarn purifiée]
 
 // HASH_VALUE 12C678A125288C83
 // INDEX 4569
-mpfam756	[Pollen d'Egiros purifié]
+mpfam756	[Pollen d'Égiros purifié]
 
 // HASH_VALUE 708ADF59E705B4AF
 // INDEX 4570
@@ -19384,11 +19384,11 @@ uittForageTime	[Temps restant pour l'extraction]
 
 // HASH_VALUE 6BBAD4ABE2843044
 // INDEX 4676
-uittForageContent	[Contenu de la Source]
+uittForageContent	[Contenu de la source]
 
 // HASH_VALUE 23A79F965FF43058
 // INDEX 4677
-uittForageLife	[Vie de la Source]
+uittForageLife	[Vie de la source]
 
 // HASH_VALUE E295EB9AA4E7D8A0
 // INDEX 4678
@@ -19400,7 +19400,7 @@ uittForageKami	[Tolérance Kami dans cette zone]
 
 // HASH_VALUE 5EC0486AA3B48067
 // INDEX 4680
-uittQualityAbbrev	[de Qlt]
+uittQualityAbbrev	[de qualité]
 
 // HASH_VALUE D71A56541260A0AA
 // INDEX 4681
@@ -19900,7 +19900,7 @@ uiCP_Job_F1	[1- Dague\n
 // HASH_VALUE 40E73E605EC2B540
 // INDEX 4803
 uiCP_Job_M1	[1 - Amplificateur magique de niveau 10\n
-	2 - Action Dégât d'Acide 1]
+	2 - Action dégât d'acide 1]
 
 // HASH_VALUE 5A7A17E4438FD999
 // INDEX 4804
@@ -19923,7 +19923,7 @@ uiCP_Job_F2	[1- Dague\n
 // HASH_VALUE ED1E72C4E8AFEB0A
 // INDEX 4807
 uiCP_Job_M2	[1 - Amplificateur magique de niveau 10\n
-	2 - Action Dégât d'Acide 1\n
+	2 - Action dégât d'acide 1\n
 	3 - Action Peur 1]
 
 // HASH_VALUE A99CAAD8499430C9
@@ -19934,7 +19934,7 @@ uiCP_Job_G2	[1 - Pioche\n
 
 // HASH_VALUE 886490FD3F0A7D2F
 // INDEX 4809
-uiCP_Job_C2	[1 - Outil de Création d'armure\n
+uiCP_Job_C2	[1 - Outil de création d'armure\n
 	2 - 100 Matières premières génériques de qualité 10\n
 	3 - 1ère action pour créer une armure de votre race\n
 	4 - Plan de création de bottes\n
@@ -22199,7 +22199,7 @@ gn_matis_officer	[Officier Matis]
 
 // HASH_VALUE 261B94C1EA4A88BB
 // INDEX 5286
-gn_matis_voluteer	[Volontaire Matis]
+gn_matis_voluteer	[Milicien Matis]
 
 // HASH_VALUE E9DAB4A4ABF9A4A1
 // INDEX 5287
@@ -22219,7 +22219,7 @@ gn_zorai_officer	[Officier Zoraï]
 
 // HASH_VALUE 245AACCC6BFBC0BE
 // INDEX 5291
-gn_zorai_voluteer_f	[Volontaire Zoraï]
+gn_zorai_voluteer_f	[Milicien Zoraï]
 
 // HASH_VALUE 10F0B412CEB0AC10
 // INDEX 5292
@@ -22280,7 +22280,7 @@ uiTask7	[Tâche du rituel 7: Tâche donnée par PNJ...]
 
 // HASH_VALUE 245AACCC6BFBC0BE
 // INDEX 5306
-gn_zorai_voluteer_m	[Volontaire Zoraï]
+gn_zorai_voluteer_m	[Milicien Zoraï]
 
 // HASH_VALUE 3E67E4291FBB3642
 // INDEX 5307
@@ -22591,7 +22591,7 @@ uiProtect_Electricity	[Électricité]
 
 // HASH_VALUE A1075C8FAC79D4A5
 // INDEX 5382
-uiProtect_Shockwave	[Ondes de Choc]
+uiProtect_Shockwave	[Ondes de choc]
 
 // HASH_VALUE 049B1C4DD74B2041
 // INDEX 5383
@@ -22599,31 +22599,31 @@ uiProtect_MaxAbsorb	[Absorption max.]
 
 // HASH_VALUE 7259CAAC235FEE16
 // INDEX 5384
-uittProtect_Rot	[Absorption des dommages de Pourriture: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Rot	[Absorption des dommages de pourriture: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE CB53C08014A3833C
 // INDEX 5385
-uittProtect_Acid	[Absorption des dommages d'Acide: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Acid	[Absorption des dommages d'acide: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 0C53B980D4F39B4B
 // INDEX 5386
-uittProtect_Cold	[Absorption des dommages de Froid: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Cold	[Absorption des dommages de froid: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE A7CA8DB65D5E0B80
 // INDEX 5387
-uittProtect_Fire	[Absorption des dommages de Feu: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Fire	[Absorption des dommages de feu: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 6CC982F5CCA8356D
 // INDEX 5388
-uittProtect_Poison	[Absorption des dommages de Poison: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Poison	[Absorption des dommages de poison: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE C10039287A9472FB
 // INDEX 5389
-uittProtect_Electricity	[Absorption des dommages d'Électricité: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Electricity	[Absorption des dommages d'électricité: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 56A951A06FA9108A
 // INDEX 5390
-uittProtect_Shockwave	[Absorption des dommages d'Ondes de Choc: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Shockwave	[Absorption des dommages d'ondes de choc: @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE DB00AE336D4AC0AF
 // INDEX 5391
@@ -22642,7 +22642,7 @@ uiResistsTable	[RÉSISTANCES]
 // INDEX 5394
 uittMagicResistTable	[Les sorts des créatures et des personnages peuvent être complètement @{6F6F}résistés@{FFFF}.\n
 	Le @{6F6F}pourcentage de chance@{FFFF} de résistance dépend :\n
-	@{T4}- de la @{6F6F}puissance@{FFFF} du sort lancé si c'est un sort d'Affliction\n
+	@{T4}- de la @{6F6F}puissance@{FFFF} du sort lancé si c'est un sort d'affliction\n
 	@{T4}- du @{6F6F}niveau de compétence@{FFFF} du mage si c'est un sort élémentaire\n
 	@{T4}- de votre @{6F6F}score de résistance@{FFFF} dans le @{6F6F}domaine de magie@{FFFF} du sort lancé\n
 	@{T0}Votre @{6F6F}score de résistance@{FFFF} est la somme :\n
@@ -22675,7 +22675,7 @@ uiResist_PrimRoot	[Domaine des Prime Racines]
 // INDEX 5400
 uittResist_Desert	[Résistance contre les sorts du domaine de magie du Désert : @{6F6F}%v@{FFFF} %max\n
 	@{T4}- Chances de résister un sort de @{6F6F}magie élémentaire@{FFFF} de niveau @{6F6F}%eml@{FFFF} : @{6F6F}%emr%@{FFFF}\n
-	@{T4}- Chances de résister un sort de @{6F6F}magie d'Affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
+	@{T4}- Chances de résister un sort de @{6F6F}magie d'affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
 	@{T0}Ce domaine regroupe les types de magie suivant :\n
 	@{T4}- @{6F6F}Feu@{FFFF}\n
 	@{T4}- @{6F6F}Aveuglement@{FFFF}\n
@@ -22686,7 +22686,7 @@ uittResist_Desert	[Résistance contre les sorts du domaine de magie du Désert :
 // INDEX 5401
 uittResist_Forest	[Résistance contre les sorts du domaine de magie de la Forêt : @{6F6F}%v@{FFFF} %max\n
 	@{T4}- Chances de résister un sort de @{6F6F}magie élémentaire@{FFFF} de niveau @{6F6F}%eml@{FFFF} : @{6F6F}%emr%@{FFFF}\n
-	@{T4}- Chances de résister un sort de @{6F6F}magie d'Affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
+	@{T4}- Chances de résister un sort de @{6F6F}magie d'affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
 	@{T0}Ce domaine regroupe les types de magie suivant :\n
 	@{T4}- @{6F6F}Poison@{FFFF}\n
 	@{T4}- @{6F6F}Sommeil@{FFFF}\n
@@ -22697,10 +22697,10 @@ uittResist_Forest	[Résistance contre les sorts du domaine de magie de la Forêt
 // INDEX 5402
 uittResist_Lacustre	[Résistance contre les sorts du domaine de magie des Lacs : @{6F6F}%v@{FFFF} %max\n
 	@{T4}- Chances de résister un sort de @{6F6F}magie élémentaire@{FFFF} de niveau @{6F6F}%eml@{FFFF} : @{6F6F}%emr%@{FFFF}\n
-	@{T4}- Chances de résister un sort de @{6F6F}magie d'Affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
+	@{T4}- Chances de résister un sort de @{6F6F}magie d'affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
 	@{T0}Ce domaine regroupe les types de magie suivant :\n
 	@{T4}- @{6F6F}Froid@{FFFF}\n
-	@{T4}- @{6F6F}Onde de Choc@{FFFF}\n
+	@{T4}- @{6F6F}Onde de choc@{FFFF}\n
 	@{T4}- @{6F6F}Étourdissement@{FFFF}\n
 	]
 
@@ -22708,7 +22708,7 @@ uittResist_Lacustre	[Résistance contre les sorts du domaine de magie des Lacs :
 // INDEX 5403
 uittResist_Jungle	[Résistance contre les sorts du domaine de magie de la Jungle : @{6F6F}%v@{FFFF} %max\n
 	@{T4}- Chances de résister un sort de @{6F6F}magie élémentaire@{FFFF} de niveau @{6F6F}%eml@{FFFF} : @{6F6F}%emr%@{FFFF}\n
-	@{T4}- Chances de résister un sort de @{6F6F}magie d'Affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
+	@{T4}- Chances de résister un sort de @{6F6F}magie d'affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF} : @{6F6F}%amr%@{FFFF}\n
 	@{T0}Ce domaine regroupe les types de magie suivant :\n
 	@{T4}- @{6F6F}Électricité@{FFFF}\n
 	@{T4}- @{6F6F}Enracinement@{FFFF}\n
@@ -22719,7 +22719,7 @@ uittResist_Jungle	[Résistance contre les sorts du domaine de magie de la Jungle
 // INDEX 5404
 uittResist_PrimRoot	[Résistance contre les sorts du domaine de magie des Prime Racines : @{6F6F}%v@{FFFF} %max\n
 	@{T4}- Chances de résister un sort de @{6F6F}magie élémentaire@{FFFF} de niveau @{6F6F}%eml@{FFFF}: @{6F6F}%emr%@{FFFF}\n
-	@{T4}- Chances de résister un sort de @{6F6F}magie d'Affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF}: @{6F6F}%amr%@{FFFF}\n
+	@{T4}- Chances de résister un sort de @{6F6F}magie d'affliction@{FFFF} de niveau @{6F6F}%aml@{FFFF}: @{6F6F}%amr%@{FFFF}\n
 	@{T0}Ce domaine regroupe les types de magie suivant :\n
 	@{T4}- @{6F6F}Acide@{FFFF}\n
 	@{T4}- @{6F6F}Pourriture@{FFFF}\n
@@ -23579,19 +23579,19 @@ uiItemConsumableEffectModPrimaryRootForageSuccess	[Modifie votre compétence de 
 
 // HASH_VALUE 789B903E4FE50883
 // INDEX 5613
-uiItemConsumableEffectStaminaAura	[@{2F2F}Aura d'Endurance@{FFFF} de @{2F2F}%modifier@{FFFF}\n
+uiItemConsumableEffectStaminaAura	[@{2F2F}Aura d'endurance@{FFFF} de @{2F2F}%modifier@{FFFF}\n
 	 %minutes:%secondes min sur %radius m\n
 	Désactivations : cibles = %targetDisableTime sec, Joueur = %userDisableTime sec.]
 
 // HASH_VALUE 659C9459CECD5FFB
 // INDEX 5614
-uiItemConsumableEffectSapAura	[@{2F2F}Aura de Sève@{FFFF} de @{2F2F}%modifier@{FFFF}\n
+uiItemConsumableEffectSapAura	[@{2F2F}Aura de sève@{FFFF} de @{2F2F}%modifier@{FFFF}\n
 	 %minutes:%secondes min sur %radius m\n
 	Désactivations : cibles = %targetDisableTime sec, Joueur = %userDisableTime sec.]
 
 // HASH_VALUE 1B38899A63140B67
 // INDEX 5615
-uiItemConsumableEffectLifeAura	[@{2F2F}Aura de Vie@{FFFF} de @{2F2F}%modifier@{FFFF}\n
+uiItemConsumableEffectLifeAura	[@{2F2F}Aura de vie@{FFFF} de @{2F2F}%modifier@{FFFF}\n
 	 %minutes:%secondes min sur %radius m\n
 	Désactivations : Cibles = %targetDisableTime sec, Joueur = %userDisableTime sec.]
 
@@ -24022,47 +24022,47 @@ uittIdentityInfo	[Permet de connaître tout ce qui a été nécessaire pour déb
 
 // HASH_VALUE CC9875537F4EABA4
 // INDEX 5718
-uittIdentityHP	[@{6F6F}Points de Vie @{FFFF}: %n\n
-	Lorsque vos points de Vie tombent à 0, vous sombrez dans le coma et, si vous n'êtes pas rapidement soigné par vos amis, vous mourez.]
+uittIdentityHP	[@{6F6F}Points de vie @{FFFF}: %n\n
+	Lorsque vos points de vie tombent à 0, vous sombrez dans le coma et, si vous n'êtes pas rapidement soigné par vos amis, vous mourez.]
 
 // HASH_VALUE E62E03C44CC6CCDF
 // INDEX 5719
-uittIdentitySap	[@{6F6F}Points de Sève @{FFFF}: %n\n
-	Lorsque votre niveau de Sève est faible, vous ne pouvez pas jeter de sorts.]
+uittIdentitySap	[@{6F6F}Points de sève @{FFFF}: %n\n
+	Lorsque votre niveau de sève est faible, vous ne pouvez pas jeter de sorts.]
 
 // HASH_VALUE 96475BB346DF4BF2
 // INDEX 5720
-uittIdentitySta	[@{6F6F}Points d'Endurance @{FFFF}: %n\n
-	Lorsque votre niveau d'Endurance est faible, vous ne pouvez plus réaliser de coups spéciaux et devez vous contenter de l'attaque par défaut jusqu'à la régénération de votre Endurance.]
+uittIdentitySta	[@{6F6F}Points d'endurance @{FFFF}: %n\n
+	Lorsque votre niveau d'endurance est faible, vous ne pouvez plus réaliser de coups spéciaux et devez vous contenter de l'attaque par défaut jusqu'à la régénération de votre Endurance.]
 
 // HASH_VALUE 5429E1693D81762D
 // INDEX 5721
-uittIdentityFoc	[@{6F6F}Points de Concentration @{FFFF}: %n\n
-	Lorsque votre niveau de Concentration est faible, vous ne pouvez plus réaliser d'actions de forage.]
+uittIdentityFoc	[@{6F6F}Points de concentration @{FFFF}: %n\n
+	Lorsque votre niveau de concentration est faible, vous ne pouvez plus réaliser d'actions de forage.]
 
 // HASH_VALUE 98A8D5EC1A1065BF
 // INDEX 5722
 uittIdentityHPReg	[@{6F6F}Régénération Vie @{FFFF}: %n\n
-	Points de Vie régénérés en 10 secondes.]
+	Points de vie régénérés en 10 secondes.]
 
 // HASH_VALUE 0DA80D1162D9EB76
 // INDEX 5723
-uittIdentitySapReg	[@{6F6F}Régénération Sève @{FFFF}: %n\n
-	Points de Sève régénérés en 10 secondes.]
+uittIdentitySapReg	[@{6F6F}Régénération sève @{FFFF}: %n\n
+	Points de sève régénérés en 10 secondes.]
 
 // HASH_VALUE CBC3826C632A9CB8
 // INDEX 5724
-uittIdentityStaReg	[@{6F6F}Régénération Endurance @{FFFF}: %n\n
-	Points d'Endurance régénérés en 10 secondes.]
+uittIdentityStaReg	[@{6F6F}Régénération endurance @{FFFF}: %n\n
+	Points d'endurance régénérés en 10 secondes.]
 
 // HASH_VALUE 5D4AE956019C7A23
 // INDEX 5725
-uittIdentityFocReg	[@{6F6F}Régénération Concentration @{FFFF}: %n\n
-	Points de Concentration régénérés en 10 secondes.]
+uittIdentityFocReg	[@{6F6F}Régénération concentration @{FFFF}: %n\n
+	Points de concentration régénérés en 10 secondes.]
 
 // HASH_VALUE 45CB3DCB2618D3E3
 // INDEX 5726
-uittIdentityCons	[Détermine la valeur maximum de vos @{6F6F}points de Vie@{FFFF}.]
+uittIdentityCons	[Détermine la valeur maximum de vos @{6F6F}points de vie@{FFFF}.]
 
 // HASH_VALUE 0AF967701E2A651C
 // INDEX 5727
@@ -24078,7 +24078,7 @@ uittIdentityDex	[Détermine la valeur maximum de votre @{6F6F}Concentration@{FFF
 
 // HASH_VALUE 697AE7D97DF4582E
 // INDEX 5730
-uittIdentityMeta	[Détermine le taux de @{6F6F}régénération @{FFFF}de vos @{6F6F}points de Vie@{FFFF}.]
+uittIdentityMeta	[Détermine le taux de @{6F6F}régénération @{FFFF}de vos @{6F6F}points de vie@{FFFF}.]
 
 // HASH_VALUE 618C7912422282D3
 // INDEX 5731
@@ -24147,22 +24147,22 @@ uittGaugesActionBar	[Indique la progression de l'@{6F6F}action @{FFFF}en cours d
 // HASH_VALUE 4D1DFC058F6A8F05
 // INDEX 5746
 uittGaugesHP	[@{6F6F}Points de vie@{FFFF}:\n
-	Lorsque vos points de Vie tombent à 0, vous sombrez dans le coma et, si vous n'êtes pas rapidement soigné par vos amis, vous mourez.]
+	Lorsque vos points de vie tombent à 0, vous sombrez dans le coma et, si vous n'êtes pas rapidement soigné par vos amis, vous mourez.]
 
 // HASH_VALUE 3218DC16D5185B23
 // INDEX 5747
 uittGaugesSap	[@{6F6F}Points de sève@{FFFF}:\n
-	Lorsque votre niveau de Sève est faible, vous ne pouvez pas jeter de sorts.]
+	Lorsque votre niveau de sève est faible, vous ne pouvez pas jeter de sorts.]
 
 // HASH_VALUE BCFAB72720F87E38
 // INDEX 5748
-uittGaugesSta	[@{6F6F}Points d'Endurance@{FFFF}:\n
-	Lorsque votre niveau d'Endurance est faible, vous ne pouvez plus réaliser de coups spéciaux et devez vous contenter de l'attaque par défaut jusqu'à la régénération de votre Endurance.]
+uittGaugesSta	[@{6F6F}Points d'endurance@{FFFF}:\n
+	Lorsque votre niveau d'endurance est faible, vous ne pouvez plus réaliser de coups spéciaux et devez vous contenter de l'attaque par défaut jusqu'à la régénération de votre Endurance.]
 
 // HASH_VALUE 21A49D1370B3A93A
 // INDEX 5749
-uittGaugesFoc	[@{6F6F}Points de Concentration@{FFFF}:\n
-	Lorsque votre niveau de Concentration est faible, vous ne pouvez plus réaliser d'actions de forage.]
+uittGaugesFoc	[@{6F6F}Points de concentration@{FFFF}:\n
+	Lorsque votre niveau de concentration est faible, vous ne pouvez plus réaliser d'actions de forage.]
 
 // HASH_VALUE 1AC7CE1C76B16FB8
 // INDEX 5750
@@ -24288,8 +24288,8 @@ uittGuildMemberOffline	[Non connecté]
 
 // HASH_VALUE 2E70DEE13D796052
 // INDEX 5776
-uittTargetHp	[@{6F6F}Points de Vie @{FFFF}de la cible.\n
-	La cible meurt lorsque ses @{6F6F}points de Vie @{FFFF}tombent à 0.]
+uittTargetHp	[@{6F6F}Points de vie @{FFFF}de la cible.\n
+	La cible meurt lorsque ses @{6F6F}points de vie @{FFFF}tombent à 0.]
 
 // HASH_VALUE 9E118F8DA4E4C858
 // INDEX 5777
@@ -24379,17 +24379,17 @@ uittInfoArmorProtection	[@{6F6F}Protection @{FFFF}:\n
 // HASH_VALUE D0A9618CFFCA51BE
 // INDEX 5795
 uittInfoArmorSlash	[@{6F6F}Max vs coup tranchant @{FFFF}:\n
-	Points de Vie maximum absorbés pour un coup tranchant.]
+	Points de vie maximum absorbés pour un coup tranchant.]
 
 // HASH_VALUE CDBA2D92024ABDBD
 // INDEX 5796
 uittInfoArmorPierc	[@{6F6F}Max vs coup perforant @{FFFF}:\n
-	Points de Vie maximum absorbés pour un coup perforant.]
+	Points de vie maximum absorbés pour un coup perforant.]
 
 // HASH_VALUE 4FB40368338D138F
 // INDEX 5797
 uittInfoArmorBlunt	[@{6F6F}Max vs coup contondant @{FFFF}:\n
-	Points de Vie maximum absorbés pour un coup contondant.]
+	Points de vie maximum absorbés pour un coup contondant.]
 
 // HASH_VALUE 3AB07105106EBD5F
 // INDEX 5798
@@ -27298,7 +27298,12 @@ uiKeyPARAGRAPH	[Paragraphe]
 // INDEX 6488
 uiKeyOEM_102	[OEM 102]
 
-// HASH_VALUE 39C742C862CB934B
+// HASH_VALUE 61B9BCDD9CF5F488
 // INDEX 6489
-uiFilterMenuDynamic	[%s @{T12}/%s]
+uiFilterMenuDynamic	[%channel @{T12}/%shortcut]
+
+// displayed in System/Windows/Communication
+// HASH_VALUE 6588A87B1E781483
+// INDEX 6490
+uiwmAppZone	[AppZone]
 

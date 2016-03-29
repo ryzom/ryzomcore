@@ -27550,8 +27550,12 @@ uiKeyPARAGRAPH	[Paragraph]
 // INDEX 6488
 uiKeyOEM_102	[OEM 102]
 
-// used to format dynamic chats filters
-// HASH_VALUE 39C742C862CB934B
+// HASH_VALUE 61B9BCDD9CF5F488
 // INDEX 6489
-uiFilterMenuDynamic	[%s @{T8}/%s]
+uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
+
+// displayed in System/Windows/Communication
+// HASH_VALUE 6588A87B1E781483
+// INDEX 6490
+uiwmAppZone	[AppZone]
 

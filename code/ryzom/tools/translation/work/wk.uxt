@@ -13487,7 +13487,7 @@ uiKeyPARAGRAPH [Paragraph]
 uiKeyOEM_102 [OEM 102]
 
 // used to format dynamic chats filters
-uiFilterMenuDynamic	[%s @{T8}/%s]
+uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 // displayed in System/Windows/Communication
 uiwmAppZone [AppZone]
 
