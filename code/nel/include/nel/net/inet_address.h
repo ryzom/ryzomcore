@@ -32,6 +32,12 @@ struct in6_addr;
 #ifdef NL_OS_WINDOWS
 // automatically add the win socket library if you use nel network part
 #pragma comment(lib, "ws2_32.lib")
+
+// it seems that the default loop back address is not defined for ipv6
+#ifndef IN6ADDR_LOOPBACK_INIT
+#define IN6ADDR_LOOPBACK_INIT { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1 }
+#endif
+
 #endif
 
 namespace NLMISC
@@ -136,6 +142,9 @@ public:
 
 	/// Returns true if this CInetAddress is 127.0.0.1
 	bool is127001 () const;
+
+	/// Returns true if this CInetAddress is a loop back address
+	bool CInetAddress::isloopbackIPAddress () const;
 
 	/// Creates a CInetAddress object with local host address, port=0
 	static CInetAddress	localHost();
