@@ -405,8 +405,8 @@ IBackupServiceInterfaceImplementation::~IBackupServiceInterfaceImplementation()
 // backupInterfaceSingletonInstantiator
 //
 // This object provokes instantiation of our singleton at service startup
-// The instantiation of the signleton provokes registration in the singleton registry
-// menaing that the init() routine gets called properly in service init, etc.
+// The instantiation of the singleton provokes registration in the singleton registry
+// meaning that the init() routine gets called properly in service init, etc.
 //-------------------------------------------------------------------------------------------------
 
 class CBackupInterfaceSingletonInstantiator
