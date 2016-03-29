@@ -41,10 +41,10 @@ NLMISC::CCmdArgs Args;
 
 int main(sint32 argc, char **argv)
 {
-	NLMISC::CApplicationContext applicationContext;
-
 	QApplication app(argc, argv);
 
+	NLMISC::CApplicationContext applicationContext;
+	
 	// parse command-line arguments
 	Args.setDescription("Ryzom Configuration");
 	Args.addArg("p", "profile", "id", "Use this profile to determine what directory to use by default");
