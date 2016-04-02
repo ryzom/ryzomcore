@@ -190,13 +190,17 @@ int main(int argc, char **argv)
 	// no shard id in ring mode
 	std::string sLoginShardId;
 
-	if (Args.haveAdditionalArg("login") && Args.haveAdditionalArg("password"))
+	if (Args.haveAdditionalArg("login"))
 	{
 		LoginLogin = Args.getAdditionalArg("login").front();
-		LoginPassword = Args.getAdditionalArg("password").front();
 
-		if (Args.haveAdditionalArg("shard_id"))
-			sLoginShardId = Args.getAdditionalArg("shard_id").front();
+		if (Args.haveAdditionalArg("password"))
+		{
+			LoginPassword = Args.getAdditionalArg("password").front();
+
+			if (Args.haveAdditionalArg("shard_id"))
+				sLoginShardId = Args.getAdditionalArg("shard_id").front();
+		}
 	}
 
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))

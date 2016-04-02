@@ -246,22 +246,22 @@ void CLoginStateMachine::run()
 
 			if (!ClientCfg.TestBrowser)
 			{
-				if (LoginLogin.empty())
+				if (LoginPassword.empty())
 				{
-					if (LoginCustomParameters.empty())
+					if (!LoginCustomParameters.empty() && LoginLogin.empty())
 					{
-						// standard procedure
+						// alternate login procedure
 						SM_BEGIN_EVENT_TABLE
-							SM_EVENT(ev_init_done, st_login);
+							SM_EVENT(ev_init_done, st_alt_login);
 							SM_EVENT(ev_skip_all_login, st_ingame);
 							SM_EVENT(ev_quit, st_end);
 						SM_END_EVENT_TABLE
 					}
 					else
 					{
-						// alternate login procedure
+						// standard procedure
 						SM_BEGIN_EVENT_TABLE
-							SM_EVENT(ev_init_done, st_alt_login);
+							SM_EVENT(ev_init_done, st_login);
 							SM_EVENT(ev_skip_all_login, st_ingame);
 							SM_EVENT(ev_quit, st_end);
 						SM_END_EVENT_TABLE
