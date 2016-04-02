@@ -780,12 +780,12 @@ bool CInetAddress::is127001 () const
 
 bool CInetAddress::isLoopbackIPAddress () const
 {
-	const char *sIPAddress = ipAddress().c_str();
+	std::string sIPAddress = ipAddress();
 	
-	return	(strcmp(sIPAddress, "::") == 0) ||
-			(strcmp(sIPAddress, "::1") == 0) ||
-			(strcmp(sIPAddress, "127.0.0.1") == 0) ||
-			(strcmp(sIPAddress, "0:0:0:0:0:0:0:1") == 0);
+	return	(sIPAddress.compare("::") == 0) ||
+			(sIPAddress.compare("::1") == 0) ||
+			(sIPAddress.compare("127.0.0.1") == 0) ||
+			(sIPAddress.compare("0:0:0:0:0:0:0:1") == 0);
 }
 
 
