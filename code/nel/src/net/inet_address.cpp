@@ -700,6 +700,13 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		throw ESocket( "Unable to get local hostname" );
 	}
 
+	// for loopback ipv4
+	struct in_addr *psin_addrIPv4 = NULL;
+
+	// for loopback ipv6
+	struct in6_addr *psin_addrIPv6 = NULL;
+
+
 	// 2. Get address list
 	vector<CInetAddress> vect;
 
@@ -723,16 +730,27 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	while (p != NULL)
 	{
 		// check address family
-		if (p->ai_family == AF_INET)
-		{
-			// ipv4
+		if (p->ai_family == AF_INET){ // ipv4
+			// loopback ipv4
+			if(!psin_addrIPv4){ // add loopback address only once
+				struct in_addr *psin_addrIPv4 = new in_addr;
+				psin_addrIPv4->s_addr = htonl(INADDR_LOOPBACK);
+				vect.push_back(CInetAddress(psin_addrIPv4, localhost));
+			}
+			
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
 
 			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
+
 		}
-		else if (p->ai_family == AF_INET6)
-		{
-			// ipv6
+		else if (p->ai_family == AF_INET6){ // ipv6
+			// loopback ipv6
+			if(!psin_addrIPv6){ // add loopback address only once
+				struct in6_addr aLoopback6 = IN6ADDR_LOOPBACK_INIT;
+				psin_addrIPv6 = &aLoopback6;
+				vect.push_back(CInetAddress(psin_addrIPv6, localhost));
+			}
+
 			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
 			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
@@ -756,6 +774,16 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 bool CInetAddress::is127001 () const
 {
 	return (internalIPAddress () == htonl(0x7F000001));
+}
+
+bool CInetAddress::isloopbackIPAddress () const
+{
+	const char *sIPAddress = ipAddress().c_str();
+	
+	return	(strcmp(sIPAddress, "::") == 0) ||
+			(strcmp(sIPAddress, "::1") == 0) ||
+			(strcmp(sIPAddress, "127.0.0.1") == 0) ||
+			(strcmp(sIPAddress, "0:0:0:0:0:0:0:1") == 0);
 }
 
 
