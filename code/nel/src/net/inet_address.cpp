@@ -721,7 +721,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	if (status)
 	{
 		// will come here if the local hostname (/etc/hostname in Linux) is not the real name
-		throw ESocket( (string("Hostname resolution failed for ")+string(localhost)).c_str() );
+		throw ESocket( toString("Hostname resolution failed for %s", localhost).c_str() );
 	}
 
 	struct addrinfo *p = res;
@@ -767,7 +767,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 	if(vect.empty())
 	{
-		throw ESocket( (string("No network card detected for ")+string(localhost)).c_str() );
+		throw ESocket(toString("No network card detected for %s", localhost).c_str() );
 	}
 
 	return vect;
