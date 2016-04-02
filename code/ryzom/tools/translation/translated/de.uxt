@@ -27348,8 +27348,7 @@ uiKeyOEM_102	[Vergleichszeichen < >]
 // INDEX 6489
 uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 
-// displayed in System/Windows/Communication
 // HASH_VALUE 6588A87B1E781483
 // INDEX 6490
-uiwmAppZone	[AppZone]
+uimwAppZone	[AppZone]
 
