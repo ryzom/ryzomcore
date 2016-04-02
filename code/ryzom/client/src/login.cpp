@@ -1967,6 +1967,9 @@ class CAHOpenURL : public IActionHandler
 				url += "?";
 
 			url += "language=" + ClientCfg.LanguageCode;
+
+			if (!LoginCustomParameters.empty())
+				url += LoginCustomParameters;
 		}
 
 		openURL(url.c_str());
@@ -2391,6 +2394,10 @@ bool initCreateAccount()
 		CurlHttpClient.verifyServer(true); // set this to false if you need to connect to the test environment
 
 		std::string params = "language=" + lang;
+
+		if (!LoginCustomParameters.empty())
+			params += LoginCustomParameters;
+
 		if(!CurlHttpClient.sendGet(url, params, pPM->isVerboseLog()))
 		{
 			ucstring errorMessage("Can't send (error code 60)");
@@ -2580,6 +2587,9 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 
 			if(conditionsPushed)
 				params += "&TaC=1";
+
+			if (!LoginCustomParameters.empty())
+				params += LoginCustomParameters;
 
 			std::string md5 = results[0] + results[1] + "" + results[3];
 			md5 = NLMISC::getMD5((uint8*)md5.data(), (uint32)md5.size()).toString();
