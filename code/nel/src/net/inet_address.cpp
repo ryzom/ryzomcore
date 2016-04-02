@@ -700,13 +700,6 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		throw ESocket( "Unable to get local hostname" );
 	}
 
-	// for loopback ipv4
-	struct in_addr *psin_addrIPv4 = NULL;
-
-	// for loopback ipv6
-	struct in6_addr *psin_addrIPv6 = NULL;
-
-
 	// 2. Get address list
 	vector<CInetAddress> vect;
 
@@ -726,6 +719,12 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 	struct addrinfo *p = res;
 
+	// for loopback ipv4
+	bool IPv4LoopbackAdded = false;
+
+	// for loopback ipv6
+	bool IPv6LoopbackAdded = false;
+
 	// process all addresses
 	while (p != NULL)
 	{
@@ -733,10 +732,14 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		if (p->ai_family == AF_INET)
 		{
 			// loopback ipv4
-			if(!psin_addrIPv4){ // add loopback address only once
-				struct in_addr *psin_addrIPv4 = new in_addr;
-				psin_addrIPv4->s_addr = htonl(INADDR_LOOPBACK);
-				vect.push_back(CInetAddress(psin_addrIPv4, localhost));
+			if (!IPv4LoopbackAdded)
+			{
+				// add loopback address only once
+				struct in_addr psin_addrIPv4;
+				psin_addrIPv4.s_addr = htonl(INADDR_LOOPBACK);
+				vect.push_back(CInetAddress(&psin_addrIPv4, localhost));
+
+				IPv4LoopbackAdded = true;
 			}
 			
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
@@ -747,10 +750,13 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		else if (p->ai_family == AF_INET6)
 		{
 			// loopback ipv6
-			if(!psin_addrIPv6){ // add loopback address only once
-				struct in6_addr aLoopback6 = IN6ADDR_LOOPBACK_INIT;
-				psin_addrIPv6 = &aLoopback6;
-				vect.push_back(CInetAddress(psin_addrIPv6, localhost));
+			if (!IPv6LoopbackAdded)
+			{
+				// add loopback address only once
+				struct in6_addr psin_addrIPv6 = IN6ADDR_LOOPBACK_INIT;
+				vect.push_back(CInetAddress(&psin_addrIPv6, localhost));
+
+				IPv6LoopbackAdded = true;
 			}
 
 			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
