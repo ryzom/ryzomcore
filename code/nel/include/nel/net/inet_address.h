@@ -144,7 +144,7 @@ public:
 	bool is127001 () const;
 
 	/// Returns true if this CInetAddress is a loop back address
-	bool CInetAddress::isloopbackIPAddress () const;
+	bool isLoopbackIPAddress () const;
 
 	/// Creates a CInetAddress object with local host address, port=0
 	static CInetAddress	localHost();

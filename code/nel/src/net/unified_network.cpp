@@ -831,8 +831,9 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 		
 		uint j = 0;
 
-		if (!addr[i].isloopbackIPAddress ()){ // it 's loopback ip address, it s ok
-			
+		if (!addr[i].isLoopbackIPAddress())
+		{
+			// it's loopback ip address, it's ok
 			for (j = 0; j < laddr.size (); j++)
 			{
 				if (laddr[j].internalNetAddress () == addr[i].internalNetAddress ())
@@ -1789,7 +1790,7 @@ bool CUnifiedNetwork::isServiceLocal (TServiceId sid)
 	{
 		for (uint j = 0; j < _IdCnx[sid.get()].ExtAddress.size(); j++)
 		{
-			if (_IdCnx[sid.get()].ExtAddress[j].isloopbackIPAddress ())
+			if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress ())
 				return true;
 
 			if (_IdCnx[sid.get()].ExtAddress[j].internalIPAddress () == laddr[i].internalIPAddress ())

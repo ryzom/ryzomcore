@@ -776,7 +776,7 @@ bool CInetAddress::is127001 () const
 	return (internalIPAddress () == htonl(0x7F000001));
 }
 
-bool CInetAddress::isloopbackIPAddress () const
+bool CInetAddress::isLoopbackIPAddress () const
 {
 	const char *sIPAddress = ipAddress().c_str();
 	
