@@ -92,18 +92,18 @@ const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
 
 BOOLEAN IN6_IS_ADDR_UNSPECIFIED(CONST IN6_ADDR *a)
 {
-    //
-    // We can't use the in6addr_any variable, since that would
-    // require existing callers to link with a specific library.
-    //
-    return (BOOLEAN)((a->s6_words[0] == 0) &&
-                     (a->s6_words[1] == 0) &&
-                     (a->s6_words[2] == 0) &&
-                     (a->s6_words[3] == 0) &&
-                     (a->s6_words[4] == 0) &&
-                     (a->s6_words[5] == 0) &&
-                     (a->s6_words[6] == 0) &&
-                     (a->s6_words[7] == 0));
+	//
+	// We can't use the in6addr_any variable, since that would
+	// require existing callers to link with a specific library.
+	//
+	return (BOOLEAN)((a->s6_words[0] == 0) &&
+		(a->s6_words[1] == 0) &&
+		(a->s6_words[2] == 0) &&
+		(a->s6_words[3] == 0) &&
+		(a->s6_words[4] == 0) &&
+		(a->s6_words[5] == 0) &&
+		(a->s6_words[6] == 0) &&
+		(a->s6_words[7] == 0));
 }
 
 #endif
@@ -730,7 +730,8 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	while (p != NULL)
 	{
 		// check address family
-		if (p->ai_family == AF_INET){ // ipv4
+		if (p->ai_family == AF_INET)
+		{
 			// loopback ipv4
 			if(!psin_addrIPv4){ // add loopback address only once
 				struct in_addr *psin_addrIPv4 = new in_addr;
@@ -743,7 +744,8 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
 
 		}
-		else if (p->ai_family == AF_INET6){ // ipv6
+		else if (p->ai_family == AF_INET6)
+		{
 			// loopback ipv6
 			if(!psin_addrIPv6){ // add loopback address only once
 				struct in6_addr aLoopback6 = IN6ADDR_LOOPBACK_INIT;
