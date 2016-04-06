@@ -49,7 +49,8 @@ static uint8 INTERLACED_OFFSET[] = { 0, 4, 2, 1 };
 static uint8 INTERLACED_JUMP[] = { 8, 8, 4, 2 };
 #endif
 
-static int readGIFData(GifFileType *gif, GifByteType *data, int length){
+static int readGIFData(GifFileType *gif, GifByteType *data, int length)
+{
 	NLMISC::IStream *f = static_cast<NLMISC::IStream *>(gif->UserData);
 
 	if(!f->isReading()) return 0;

@@ -5882,9 +5882,11 @@ namespace NLGUI
 			{
 				const char* digits = (Type == "I" ? upper : lower);
 				uint8 i, d=0;
-				do {
+				do
+				{
 					uint32 num = number % 10;
-					if (num % 5 < 4){
+					if (num % 5 < 4)
+					{
 						for (i = num % 5; i > 0; i--)
 						{
 							ret.insert(ret.begin(), digits[d]);
@@ -5904,7 +5906,9 @@ namespace NLGUI
 					}
 					number /= 10;
 					d += 2;
-				} while (number > 0);
+				}
+				while (number > 0);
+
 				if (Type == "I")
 				{
 					ret = toUpper(ret);

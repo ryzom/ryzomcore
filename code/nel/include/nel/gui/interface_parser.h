@@ -72,10 +72,12 @@ namespace NLGUI
 				GroupChildren	= 4   /// module can parse when parsing the group children
 			};
 
-			IParserModule(){
+			IParserModule()
+			{
 				parser = NULL;
 				parsingStage = None;
 			}
+
 			virtual ~IParserModule(){}
 
 			bool canParseInStage( ParsingStage stage )
