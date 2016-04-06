@@ -40,7 +40,8 @@ namespace NLGUI
 		{
 			char c = toLower( s[ i ] );
 
-			switch( c ){
+			switch( c )
+			{
 				case 'l':
 					_Align &= ~1;
 					break;

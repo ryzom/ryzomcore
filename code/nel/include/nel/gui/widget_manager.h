@@ -71,7 +71,7 @@ namespace NLGUI
 		class IOnWidgetsDrawnHandler
 		{
 		public:
-			virtual ~IOnWidgetsDrawnHandler(){};
+			virtual ~IOnWidgetsDrawnHandler(){}
 			virtual void process() = 0;
 		};
 
