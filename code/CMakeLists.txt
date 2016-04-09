@@ -63,8 +63,8 @@ SET(NL_VERSION_PATCH 0)
 SET(YEAR "2004-${CURRENT_YEAR}")
 SET(AUTHOR "Winchgate and The Ryzom Core Community")
 
-SET(RYZOM_VERSION_MAJOR 2)
-SET(RYZOM_VERSION_MINOR 9)
+SET(RYZOM_VERSION_MAJOR 3)
+SET(RYZOM_VERSION_MINOR 0)
 SET(RYZOM_VERSION_PATCH 0)
 
 #-----------------------------------------------------------------------------
