@@ -161,7 +161,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- Compute the current Max Resist
 function game:getMagicResistMaxLevel()
-	local mlvl= self:getMagicResistBaseLevel() + getDbProp(formatUI('%player_resist_maxratio'));
+	local mlvl= 25 + self:getMagicResistBaseLevel() + getDbProp(formatUI('%player_resist_maxratio'));
 	return math.max(0,mlvl);
 end
 
