@@ -1040,6 +1040,13 @@ void CPatchManager::executeBatchFile()
 	arguments.push_back(startupPath);
 #endif
 
+	// log parameters passed to Ryzom client
+	nlinfo("Restarting Ryzom...");
+	nlinfo("RyzomFilename = %s", RyzomFilename.c_str());
+	nlinfo("ClientPatchPath = %s", ClientPatchPath.c_str());
+	nlinfo("ClientRootPath = %s", ClientRootPath.c_str());
+	nlinfo("StartupPath = %s", startupPath.c_str());
+
 	batchFilename += UpdateBatchFilename;
 
 	// make script executable
