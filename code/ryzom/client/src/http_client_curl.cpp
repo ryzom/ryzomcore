@@ -148,7 +148,7 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	curl_easy_setopt(_Curl, CURLOPT_SSL_VERIFYPEER, verify ? 1 : 0);
 	curl_easy_setopt(_Curl, CURLOPT_SSLCERTTYPE, "PEM");
 	// would allow to provide the CA in memory instead of using CURLOPT_CAINFO, but needs to include and link OpenSSL
-	if (curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function) == CURLE_NOT_BUILT_IN)
+	if (curl_easy_setopt(_Curl, CURLOPT_SSL_CTX_FUNCTION, *sslctx_function) != CURLE_OK)
 	{
 		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
 	}

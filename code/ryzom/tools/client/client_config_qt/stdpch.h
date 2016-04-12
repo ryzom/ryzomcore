@@ -17,14 +17,6 @@
 #ifndef STDPCH_H
 #define STDPCH_H
 
-#include <qglobal.h>
-
-#ifdef Q_COMPILER_RVALUE_REFS
-#undef Q_COMPILER_RVALUE_REFS
-#endif
-
-#include <string>
-
 #include <nel/misc/types_nl.h>
 #include <nel/misc/config_file.h>
 
