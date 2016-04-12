@@ -10,6 +10,6 @@ fi
 chmod +x "$ROOTPATH/ryzom_client"
 chmod +x "$ROOTPATH/crash_report"
 chmod +x "$ROOTPATH/ryzom_client_patcher"
-chmod +x "$ROOTPATH/ryzom_configuration"
+chmod +x "$ROOTPATH/ryzom_configuration_qt"
 
 exit 0

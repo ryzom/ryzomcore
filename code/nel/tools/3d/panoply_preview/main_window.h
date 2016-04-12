@@ -21,12 +21,6 @@
 // STL includes
 
 // Qt includes
-#include <qglobal.h>
-
-#ifdef Q_COMPILER_RVALUE_REFS
-#undef Q_COMPILER_RVALUE_REFS
-#endif
-
 #include <QMainWindow>
 
 // NeL includes

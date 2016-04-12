@@ -192,7 +192,7 @@ void CCDBSynchronised::write( const string& fileName )
 	if ( _DataStructRoot )
 	{
 		TWriteCallbackArg wca;
-		wca.F = fopen( fileName.c_str(),"w" );
+		wca.F = nlfopen(fileName, "w");
 		wca.Container = &_DataContainer;
 		ICDBStructNode::CTextId id;
 		_DataStructRoot->foreachLeafCall( cbWrite, id, &wca );

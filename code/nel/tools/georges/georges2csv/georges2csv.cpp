@@ -32,6 +32,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/command.h"
+#include "nel/misc/common.h"
 #include "nel/misc/path.h"
 //#include "nel/memory/memory_manager.h"
 #include "nel/misc/i18n.h"
@@ -685,12 +686,13 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 {
 	const uint			BUFFER_SIZE = 16*1024;
 	char			lineBuffer[BUFFER_SIZE];
-	FILE			*s;
 
 	vector<string>	fields;
 	vector<string>	args;
 
-	if ((s = fopen(file.c_str(), "r")) == NULL)
+	FILE *s = nlfopen(file, "r");
+	
+	if (s == NULL)
 	{
 		fprintf(stderr, "Can't find file %s to convert\n", file.c_str());
 		return;

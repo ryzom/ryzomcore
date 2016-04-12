@@ -3106,11 +3106,17 @@ bool CBitmap::blit(const CBitmap *src, sint32 x, sint32 y)
 // Private :
 float CBitmap::getColorInterp (float x, float y, float colorInXY00, float colorInXY10, float colorInXY01, float colorInXY11) const
 {
+	if (colorInXY00 == colorInXY10
+		&& colorInXY00 == colorInXY01
+		&& colorInXY00 == colorInXY11)
+		return colorInXY00; // Fix rounding error for alpha 255...
+
 	float res =	colorInXY00*(1.0f-x)*(1.0f-y) +
 				colorInXY10*(     x)*(1.0f-y) +
 				colorInXY01*(1.0f-x)*(     y) +
 				colorInXY11*(     x)*(     y);
-	clamp (res, 0.0f, 255.0f);
+	clamp(res, 0.0f, 255.0f);
+
 	return res;
 }
 

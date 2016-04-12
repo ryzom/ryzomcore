@@ -64,7 +64,7 @@ namespace NLGUI
 		uint			getTextPos(uint nId) const;
 		const ucstring	&getTexture(uint i) const;
 		void			setGrayed(uint i, bool g);
-		const bool		getGrayed(uint i) const;
+		bool			getGrayed(uint i) const;
 		void			removeText(uint nPos);
 		uint			getNumTexts() const {return (uint)_Texts.size();}
 		void			sortText();

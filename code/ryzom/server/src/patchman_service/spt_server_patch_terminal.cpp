@@ -20,6 +20,7 @@
 
 // nel
 #include "nel/misc/variable.h"
+#include "nel/misc/common.h"
 #include "nel/net/service.h"
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
@@ -775,7 +776,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		CSString cfgFileName= appDesc.CmdLine.firstWord()+".cfg";
 
 		string fileName = configDirectory+cfgFileName;
-		FILE *fp = fopen(fileName.c_str(), "wt");
+		FILE *fp = nlfopen(fileName, "wt");
 		nlassert(fp != NULL);
 		fwrite(appDesc.CfgFile.data(), appDesc.CfgFile.size(), 1, fp);
 		fclose(fp);
@@ -808,7 +809,7 @@ NLMISC_CLASS_COMMAND_IMPL(CServerPatchTerminal, depDevCfg)
 		batch << "start " << cmdLine;
 
 		fileName = DevConfigDirectory.get()+"/start_"+appDesc.ShardName+"_"+appDesc.StartOrder+"_"+appDesc.AppName+".bat";
-		fp = fopen(fileName.c_str(), "wt");
+		fp = nlfopen(fileName, "wt");
 		nlassert(fp != NULL);
 		fwrite(batch.data(), batch.size(), 1, fp);
 		fclose(fp);

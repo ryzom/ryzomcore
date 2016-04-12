@@ -791,7 +791,7 @@ void CGameItemManager::destroyItem( CGameItemPtr &ptr )
 //void CGameItemManager::dumpGameItemList( const string& fileName )
 //{
 //	FILE * f;
-//	f = fopen(fileName.c_str(),"w");
+//	f = nlfopen(fileName, "w");
 //	
 //	if(f)
 //	{

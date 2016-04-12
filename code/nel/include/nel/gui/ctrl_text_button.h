@@ -49,7 +49,7 @@ namespace NLGUI
 		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
 
 		// Init part
-		virtual bool parse (xmlNodePtr cur,CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
 
 		virtual void checkCoords();
 		virtual void updateCoords();

@@ -92,18 +92,18 @@ const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
 
 BOOLEAN IN6_IS_ADDR_UNSPECIFIED(CONST IN6_ADDR *a)
 {
-    //
-    // We can't use the in6addr_any variable, since that would
-    // require existing callers to link with a specific library.
-    //
-    return (BOOLEAN)((a->s6_words[0] == 0) &&
-                     (a->s6_words[1] == 0) &&
-                     (a->s6_words[2] == 0) &&
-                     (a->s6_words[3] == 0) &&
-                     (a->s6_words[4] == 0) &&
-                     (a->s6_words[5] == 0) &&
-                     (a->s6_words[6] == 0) &&
-                     (a->s6_words[7] == 0));
+	//
+	// We can't use the in6addr_any variable, since that would
+	// require existing callers to link with a specific library.
+	//
+	return (BOOLEAN)((a->s6_words[0] == 0) &&
+		(a->s6_words[1] == 0) &&
+		(a->s6_words[2] == 0) &&
+		(a->s6_words[3] == 0) &&
+		(a->s6_words[4] == 0) &&
+		(a->s6_words[5] == 0) &&
+		(a->s6_words[6] == 0) &&
+		(a->s6_words[7] == 0));
 }
 
 #endif
@@ -714,10 +714,16 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 	if (status)
 	{
 		// will come here if the local hostname (/etc/hostname in Linux) is not the real name
-		throw ESocket( (string("Hostname resolution failed for ")+string(localhost)).c_str() );
+		throw ESocket( toString("Hostname resolution failed for %s", localhost).c_str() );
 	}
 
 	struct addrinfo *p = res;
+
+	// for loopback ipv4
+	bool IPv4LoopbackAdded = false;
+
+	// for loopback ipv6
+	bool IPv6LoopbackAdded = false;
 
 	// process all addresses
 	while (p != NULL)
@@ -725,14 +731,34 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 		// check address family
 		if (p->ai_family == AF_INET)
 		{
-			// ipv4
+			// loopback ipv4
+			if (!IPv4LoopbackAdded)
+			{
+				// add loopback address only once
+				struct in_addr psin_addrIPv4;
+				psin_addrIPv4.s_addr = htonl(INADDR_LOOPBACK);
+				vect.push_back(CInetAddress(&psin_addrIPv4, localhost));
+
+				IPv4LoopbackAdded = true;
+			}
+			
 			struct sockaddr_in *ipv4 = (struct sockaddr_in *)p->ai_addr;
 
 			vect.push_back( CInetAddress( &ipv4->sin_addr, localhost ) );
+
 		}
 		else if (p->ai_family == AF_INET6)
 		{
-			// ipv6
+			// loopback ipv6
+			if (!IPv6LoopbackAdded)
+			{
+				// add loopback address only once
+				struct in6_addr psin_addrIPv6 = IN6ADDR_LOOPBACK_INIT;
+				vect.push_back(CInetAddress(&psin_addrIPv6, localhost));
+
+				IPv6LoopbackAdded = true;
+			}
+
 			struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)p->ai_addr;
 
 			vect.push_back( CInetAddress( &ipv6->sin6_addr, localhost ) );
@@ -747,7 +773,7 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 
 	if(vect.empty())
 	{
-		throw ESocket( (string("No network card detected for ")+string(localhost)).c_str() );
+		throw ESocket(toString("No network card detected for %s", localhost).c_str() );
 	}
 
 	return vect;
@@ -756,6 +782,16 @@ std::vector<CInetAddress> CInetAddress::localAddresses()
 bool CInetAddress::is127001 () const
 {
 	return (internalIPAddress () == htonl(0x7F000001));
+}
+
+bool CInetAddress::isLoopbackIPAddress () const
+{
+	std::string sIPAddress = ipAddress();
+	
+	return	(sIPAddress.compare("::") == 0) ||
+			(sIPAddress.compare("::1") == 0) ||
+			(sIPAddress.compare("127.0.0.1") == 0) ||
+			(sIPAddress.compare("0:0:0:0:0:0:0:1") == 0);
 }
 
 

@@ -1963,14 +1963,15 @@ bool CFile::createEmptyFile (const std::string& filename)
 bool CFile::fileExists (const string& filename)
 {
 	//H_AUTO(FileExists);
-#ifdef NL_OS_WINDOWS
-	DWORD attr = GetFileAttributesW(utf8ToWide(filename));
-	// attributes are valid and file is not a directory
-	if (attr == INVALID_FILE_ATTRIBUTES || (attr & FILE_ATTRIBUTE_DIRECTORY)) return false;
-	return true;
-#else
-	return access(filename.c_str(), R_OK) != -1;
-#endif
+	FILE *file = nlfopen(filename, "rb");
+
+	if (file)
+	{
+		fclose(file);
+		return true;
+	}
+
+	return false;
 }
 
 

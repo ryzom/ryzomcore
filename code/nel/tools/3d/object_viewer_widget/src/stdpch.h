@@ -29,12 +29,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 	#undef free
 #endif
 
-#include <qglobal.h>
-
-#ifdef Q_COMPILER_RVALUE_REFS
-#undef Q_COMPILER_RVALUE_REFS
-#endif
-
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
 

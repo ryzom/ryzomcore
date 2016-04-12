@@ -1091,7 +1091,10 @@
 
 		<instance template="win_button" id="webig"	color="UI:SAVE:WIN:COLORS:COM" text="uimwWebIG" posparent="fame" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:WEBIG"		win_name="webig" />
-		
+
+		<instance template="win_button" id="appzone"	color="UI:SAVE:WIN:COLORS:COM" text="uimwAppZone" posparent="webig" posref="BL TL" x="0" y="-4"
+			pushflag="UI:VARIABLES:ISACTIVE:APPZONE"	win_name="appzone" />
+
 	</group>
 	<view type="bitmap" id="com_ico_back" posparent="communication" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
 	<view type="bitmap" id="com_ico" posparent="com_ico_back" posref="MM MM" x="2" y="-2" texture="spe_com.tga" global_color="false" />

@@ -39,6 +39,7 @@
 // NeL includes
 #include <nel/misc/time_nl.h>
 #include <nel/misc/string_common.h>
+#include <nel/misc/common.h>
 
 // Project includes
 
@@ -102,7 +103,7 @@ public:
 	{
 		releaseError();
 
-		m_ErrorLog = fopen(errorLog.c_str(), "wt");
+		m_ErrorLog = NLMISC::nlfopen(errorLog, "wt");
 		fwrite(s_ErrorHeader.c_str(), 1, s_ErrorHeader.length(), m_ErrorLog);
 		fwrite("\n", 1, 1, m_ErrorLog);
 		fflush(m_ErrorLog);
@@ -113,7 +114,7 @@ public:
 	{
 		releaseDepend();
 
-		m_DependLog = fopen(dependLog.c_str(), "wt");
+		m_DependLog = NLMISC::nlfopen(dependLog, "wt");
 		fwrite(s_DependHeader.c_str(), 1, s_DependHeader.length(), m_DependLog);
 		fwrite("\n", 1, 1, m_DependLog);
 		// fflush(m_DependLog);

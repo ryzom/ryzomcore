@@ -828,17 +828,17 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 	for (uint i = 0; i < addr.size(); i++)
 	{
 		// first we have to look if we have a network that can established the connection
-
+		
 		uint j = 0;
-		// it s 127.0.0.1, it s ok
-		if (!addr[i].is127001 ())
+
+		if (!addr[i].isLoopbackIPAddress())
 		{
+			// it's loopback ip address, it's ok
 			for (j = 0; j < laddr.size (); j++)
 			{
 				if (laddr[j].internalNetAddress () == addr[i].internalNetAddress ())
 				{
-					// it's ok, we can try
-					break;
+					break; // it's ok, we can try
 				}
 			}
 
@@ -1272,8 +1272,7 @@ uint8 CUnifiedNetwork::findConnectionId (TServiceId sid, uint8 nid)
 	uint8 connectionId = _IdCnx[sid.get()].DefaultNetwork;
 
 	if (nid == 0xFF)
-	{
-		// it s often happen because they didn't set a good network configuration, so it s in debug to disable it easily
+	{	// default network
 		//nldebug ("HNETL5: nid %hu, will use the default connection %hu", (uint16)nid, (uint16)connectionId);
 	}
 	else if (nid >= _IdCnx[sid.get()].NetworkConnectionAssociations.size())
@@ -1294,8 +1293,12 @@ uint8 CUnifiedNetwork::findConnectionId (TServiceId sid, uint8 nid)
 
 	if (connectionId >= _IdCnx[sid.get()].Connections.size() || !_IdCnx[sid.get()].Connections[connectionId].valid() || !_IdCnx[sid.get()].Connections[connectionId].CbNetBase->connected())
 	{
-		// there's a problem with the selected connectionID, so try to find a valid one
-		nlwarning ("HNETL5: Can't find selected connection id %hu to send message to %s because connection is not valid or connected, find a valid connection id", (uint16)connectionId, _IdCnx[sid.get()].ServiceName.c_str ());
+		
+		if (nid != 0xFF)
+		{
+			// not a default network. There's a problem with the selected connectionID, so try to find a valid one
+			nlwarning ("HNETL5: Can't find selected connection id %hu to send message to %s because connection is not valid or connected, find a valid connection id", (uint16)connectionId, _IdCnx[sid.get()].ServiceName.c_str ());
+		}
 
 		for (connectionId = 0; connectionId < _IdCnx[sid.get()].Connections.size(); connectionId++)
 		{
@@ -1303,6 +1306,19 @@ uint8 CUnifiedNetwork::findConnectionId (TServiceId sid, uint8 nid)
 			{
 				// we found one at last, use this one
 				//nldebug ("HNETL5: Ok, we found a valid connectionid, use %hu",  (uint16)connectionId);
+				if (nid < _IdCnx[sid.get()].NetworkConnectionAssociations.size())
+				{
+					_IdCnx[sid.get()].NetworkConnectionAssociations[nid] = connectionId; // we set the preferred networkConnectionAssociation
+				}
+				else
+				{
+					if (nid == 0xFF)
+					{
+						_IdCnx[sid.get()].DefaultNetwork = connectionId;
+					}
+				}
+
+				nlwarning ("HNETL5: selected connection id %hu from network %hu to send message to %s", (uint16)connectionId, (uint16)nid, _IdCnx[sid.get()].ServiceName.c_str ());
 				break;
 			}
 		}
@@ -1782,7 +1798,7 @@ bool CUnifiedNetwork::isServiceLocal (TServiceId sid)
 	{
 		for (uint j = 0; j < _IdCnx[sid.get()].ExtAddress.size(); j++)
 		{
-			if (_IdCnx[sid.get()].ExtAddress[j].is127001 ())
+			if (_IdCnx[sid.get()].ExtAddress[j].isLoopbackIPAddress ())
 				return true;
 
 			if (_IdCnx[sid.get()].ExtAddress[j].internalIPAddress () == laddr[i].internalIPAddress ())

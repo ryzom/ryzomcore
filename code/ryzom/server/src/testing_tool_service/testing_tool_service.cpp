@@ -31,6 +31,7 @@
 // Nel
 #include "nel/misc/sheet_id.h"
 #include "nel/misc/command.h"
+#include "nel/misc/common.h"
 #include "nel/georges/u_form_elm.h"
 #include "nel/georges/u_form.h"
 #include "nel/georges/u_form_loader.h"
@@ -270,7 +271,7 @@ void CTestingTool::startTestSession( const std::string& sheet )
 //----------------------------------------------------------------
 void CTestingTool::testSessionProceed()
 {
-	_TestSessionReport = fopen( "testSessionReport.txt", "w+t" );
+	_TestSessionReport = nlfopen( "testSessionReport.txt", "w+t" );
 
 	fputs( "=====================================================================\n", _TestSessionReport );
 	fputs( "===================== NEW TEST SESSION STARTED ======================\n", _TestSessionReport );

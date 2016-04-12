@@ -17,6 +17,7 @@
 #include "mission_compiler.h"
 #include "step.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/common.h"
 #include "nel/ligo/primitive_utils.h"
 
 using namespace std;
@@ -876,7 +877,7 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 
 bool CMissionCompiler::includeText(const std::string filename, const std::string text)
 {
-	FILE *f = fopen(filename.c_str(), "r+");
+	FILE *f = nlfopen(filename, "r+");
 	if (f == NULL)
 		return false;
 

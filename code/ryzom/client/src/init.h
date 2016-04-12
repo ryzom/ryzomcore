@@ -27,6 +27,9 @@ namespace NLMISC
 	class IProgressCallback;
 }
 
+// Initialize the log
+void initLog();
+
 // Initialize the application before login step
 void prelogInit();
 

@@ -43,6 +43,7 @@ string					CI18N::_SelectedLanguageCode;
 CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
 vector<string>			CI18N::_LanguageCodes;
 vector<ucstring>		CI18N::_LanguageNames;
+std::string				CI18N::_SystemLanguageCode;
 bool CI18N::noResolution = false;
 
 void CI18N::setLoadProxy(ILoadProxy *loadProxy)
@@ -248,10 +249,8 @@ bool CI18N::isLanguageCodeSupported(const std::string &lang)
 
 std::string CI18N::getSystemLanguageCode ()
 {
-	static std::string s_cachedSystemLanguage;
-
-	if (!s_cachedSystemLanguage.empty())
-		return s_cachedSystemLanguage;
+	if (!_SystemLanguageCode.empty())
+		return _SystemLanguageCode;
 
 #ifdef NL_OS_MAC
 	// under OS X, locale is only defined in console, not in UI
@@ -317,7 +316,7 @@ std::string CI18N::getSystemLanguageCode ()
 				// only keep language code if supported by NeL
 				if (isLanguageCodeSupported(lang))
 				{
-					s_cachedSystemLanguage = lang;
+					_SystemLanguageCode = lang;
 					break;
 				}
 			}
@@ -328,21 +327,116 @@ std::string CI18N::getSystemLanguageCode ()
 	}
 #endif
 
-	// use system locale (works under Linux and Windows)
-	if (s_cachedSystemLanguage.empty())
+#ifdef NL_OS_WINDOWS
+	// use user locale under Windows (since Vista)
+	if (_SystemLanguageCode.empty())
 	{
-		std::string lang = NLMISC::toLower(std::string(setlocale(LC_CTYPE, "")));
+		// GetUserDefaultLocaleName prototype
+		typedef int (WINAPI* GetUserDefaultLocaleNamePtr)(LPWSTR lpLocaleName, int cchLocaleName);
 
-		// only keep 2 first characters
-		if (lang.size() > 1)
-			s_cachedSystemLanguage = lang.substr(0, 2);
+		// get pointer on GetUserDefaultLocaleName, kernel32.dll is always in memory so no need to call LoadLibrary
+		GetUserDefaultLocaleNamePtr nlGetUserDefaultLocaleName = (GetUserDefaultLocaleNamePtr)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetUserDefaultLocaleName");
+
+		// only use it if found
+		if (nlGetUserDefaultLocaleName)
+		{
+			// get user locale
+			wchar_t buffer[LOCALE_NAME_MAX_LENGTH];
+			sint res = nlGetUserDefaultLocaleName(buffer, LOCALE_NAME_MAX_LENGTH);
+
+			// convert wide string to std::string
+			std::string lang = wideToUtf8(buffer);
+
+			// only keep 2 first characters
+			if (lang.size() > 1)
+				_SystemLanguageCode = lang.substr(0, 2);
+		}
+	}
+#endif
+
+	// use system locale (works under OS X, Linux and Windows)
+	if (_SystemLanguageCode.empty())
+	{
+		// get default locale
+		char *locale = setlocale(LC_CTYPE, "");
+
+		if (locale)
+		{
+			std::string lang(locale);
+
+#ifdef NL_OS_WINDOWS
+			// be sure supported languages are initialized
+			initLanguages();
+
+			// locales names are different under Windows, for example: French_France.1252
+			for(uint i = 0; i < _LanguageNames.size(); ++i)
+			{
+				std::string name = _LanguageNames[i].toUtf8();
+
+				// so we compare the language name with the supported ones
+				if (lang.compare(0, name.length(), name) == 0)
+				{
+					// found, so use its code
+					_SystemLanguageCode = _LanguageCodes[i];
+					break;
+				}
+			}
+#else
+			// only keep 2 first characters
+			if (lang.size() > 1)
+				_SystemLanguageCode = NLMISC::toLower(lang).substr(0, 2);
+#endif
+		}
 	}
 
 	// english is default language
-	if (s_cachedSystemLanguage.empty())
-		s_cachedSystemLanguage = "en";
+	if (_SystemLanguageCode.empty())
+		_SystemLanguageCode = "en";
 
-	return s_cachedSystemLanguage;
+	return _SystemLanguageCode;
+}
+
+bool CI18N::setSystemLanguageCode (const std::string &languageCode)
+{
+	// be sure supported languages are initialized
+	initLanguages();
+
+	std::string lang = NLMISC::toLower(languageCode);
+
+	// specified language is really a code (2 characters)
+	if (lang.length() == 2)
+	{
+		// check if language code is supported
+		for(uint i = 0; i < _LanguageCodes.size(); ++i)
+		{
+			std::string code = NLMISC::toLower(_LanguageCodes[i]);
+
+			if (lang == code)
+			{
+				// found, so use it
+				_SystemLanguageCode = lang;
+				return true;
+			}
+		}
+	}
+	// specified language is something else
+	else
+	{
+		// check if language name is supported
+		for(uint i = 0; i < _LanguageNames.size(); ++i)
+		{
+			std::string name = NLMISC::toLower(_LanguageNames[i].toUtf8());
+
+			if (name == lang)
+			{
+				// found, so use its code
+				_SystemLanguageCode = _LanguageCodes[i];
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 void CI18N::removeCComment(ucstring &commentedString)

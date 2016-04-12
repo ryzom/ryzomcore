@@ -779,7 +779,8 @@ void initLoginScreen()
 
 	ClientApp = ClientCfg.ConfigFile.getVar("Application").asString(0);
 
-	string l = ClientCfg.LastLogin;
+	// give priority to login specified as argument
+	string l = !LoginLogin.empty() ? LoginLogin:ClientCfg.LastLogin;
 
 	if(!l.empty())
 	{

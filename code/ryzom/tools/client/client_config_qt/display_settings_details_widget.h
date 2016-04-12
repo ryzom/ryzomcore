@@ -58,30 +58,48 @@ private slots:
 
 private:
 	/**
-	 @brief  Looks up and returns the "quality" ( see the enums on the top), that belongs to the specified value.
-	 @param  table  -  The lookup table you want to use.
-	 @param  value  -  The value that we want to look up.
+	 @brief  Looks up and returns the "quality" ( see the enums on the top), that belongs to the specified float value.
+	 @param  variable  -  The config variable.
 	 @return Returns the "quality" that best fits the specified value.
 	*/
-	template< typename T >
-	int getQuality( const T *table, T value )
-	{
-		if( table[ 0 ] < table[ QUALITY_STEP - 1 ] )
-		{
-			uint32 i = 0;
-			while( ( i < QUALITY_STEP ) && ( table[ i ] < value ) )
-				i++;
-			return i;
-		}
-		else
-		{
-			uint32 i = 0;
-			while( ( i < QUALITY_STEP ) && ( table[ i ] > value ) )
-				i++;
-			return i;
-		}
-	}
+	int getQualityPresetFloat(const std::string &variable);
 
+	/**
+	 @brief  Looks up and returns the "quality" ( see the enums on the top), that belongs to the specified integer value.
+	 @param  variable  -  The config variable.
+	 @return Returns the "quality" that best fits the specified value.
+	*/
+	int getQualityPresetInteger(const std::string &variable);
+
+	/**
+	 @brief  Return the float value of the variable depending on the preset.
+	 @param  variable  -  The config variable.
+	 @param  preset  -  The preset to use (0-3).
+	 @return Returns the float value.
+	*/
+	float getPresetFloat(const std::string &variable, sint preset);
+
+	/**
+	 @brief  Return the integer value of the variable depending on the preset.
+	 @param  variable  -  The config variable.
+	 @param  preset  -  The preset to use (0-3).
+	 @return Returns the integer value.
+	*/
+	int getPresetInteger(const std::string &variable, sint preset);
+
+	/**
+	 @brief  Define the float value of the variable depending on the predefined preset.
+	 @param  variable  -  The config variable.
+	 @param  preset  -  The preset to use (0-3).
+	*/
+	void setFloatPreset(const std::string &variable, int preset);
+
+	/**
+	 @brief  Define the integer value of the variable depending on the predefined preset.
+	 @param  variable  -  The config variable.
+	 @param  preset  -  The preset to use (0-3).
+	*/
+	void setIntegerPreset(const std::string &variable, int preset);
 
 	/**
 	 @brief Retrieves the string that belongs to the specified quality.
@@ -97,22 +115,6 @@ private:
 	 @return Returns a string describing the texture quality, Returns an empty string if an invalid value is specified.
 	*/
 	static QString getTextureQualityString( uint32 quality );
-
-
-	///////////////////////// Landscape values ///////////////////////
-	static const float qualityToZFar[ QUALITY_STEP ];
-	static const float qualityToLandscapeTileNear[ QUALITY_STEP ];
-	static const float qualityToLandscapeThreshold[ QUALITY_STEP ];
-	static const float qualityToMicrovegetDensity[ QUALITY_STEP ];
-
-	//////////////////////// Character values ////////////////////////
-	static const sint32 qualityToSkinNbMaxPoly[ QUALITY_STEP ];
-	static const sint32 qualityToNbMaxSkeletonNotCLod[ QUALITY_STEP ];
-	static const float qualityToCharacterFarClip[ QUALITY_STEP ];
-
-	/////////////////////// FX values ////////////////////////////////
-	static const sint32 qualityToFxNbMaxPoly[ QUALITY_STEP ];
-
 };
 
 #endif // DISPLAYSETTINGSDETAILSWIDGET_H

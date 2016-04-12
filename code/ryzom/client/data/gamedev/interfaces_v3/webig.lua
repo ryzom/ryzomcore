@@ -180,7 +180,7 @@ function webig:doRemoveDbSheetQuantity(sheet_list, ctrl)
 	end
 end
 
---assert(nil, "RELOADABLE SCRIPT");
+--assert(nil, "RELOADABLE SCRIPT")
 
 
 
