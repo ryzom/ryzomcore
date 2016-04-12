@@ -348,7 +348,8 @@ IF(WITH_QT5)
       IF(WIN32)
         SET(QT_LIBRARIES ${QT_LIBRARIES}
           ${WINSDK_LIBRARY_DIR}/Crypt32.lib
-          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib)
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
+          ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
       ENDIF()
 
       # Core
