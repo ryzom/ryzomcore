@@ -267,27 +267,27 @@ function game:onDrawNpcWebPage()
       local available
       if config.Local == 1 then
          available = (NicoMagicURL ~= "")
-      else 
-         available = isDynStringAvailable(self.NpcWebPage.UrlTextId)         
+      else
+         available = isDynStringAvailable(self.NpcWebPage.UrlTextId)
       end
-		if(available) then			
+		if(available) then
 			local	ucUrl
 			if config.Local == 1 then
-				ucUrl = ucstring(NicoMagicURL) -- for test in local mode				
+				ucUrl = ucstring(NicoMagicURL) -- for test in local mode
 			else
 				ucUrl = getDynString(self.NpcWebPage.UrlTextId);
 			end
 			-- browse
 			local	uiStr= getUIId(getUICaller());
-			-- if the url 
+			-- if the url
 			local utf8Url = ucUrl:toUtf8()
-			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil			
+			local isRing = string.find(utf8Url, "ring_access_point=1") ~= nil
 			if isRing then
 				getUI("ui:interface:npc_web_browser").active = false
 				runAH(nil, "context_ring_sessions", "")
 				return
 			else
-				local hideWindow = string.find(utf8Url, "_hideWindow=1") ~= nil			
+				local hideWindow = string.find(utf8Url, "_hideWindow=1") ~= nil
 				if hideWindow then
 					getUI("ui:interface:npc_web_browser").active = false
 				end
@@ -336,14 +336,14 @@ function game:startNpcWebPage()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:closeNpcWebBrowserHeader()
 	local ui = getUI('ui:interface:npc_web_browser');
-	
+
 	-- save size
 	ui_npc_web_browser_h = ui.h;
 	ui_npc_web_browser_w = ui.w;
-	
+
 	-- reduce window size
 	ui.pop_min_h = 32;
 	ui.h = 0;
@@ -351,7 +351,7 @@ function game:closeNpcWebBrowserHeader()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:openNpcWebBrowserHeader()
 	local ui = getUI('ui:interface:npc_web_browser');
 	ui.pop_min_h = 96;
@@ -360,7 +360,7 @@ function game:openNpcWebBrowserHeader()
 	if (ui_npc_web_browser_h ~= nil) then
 		ui.h = ui_npc_web_browser_h;
 	end
-	
+
 	 if (ui_npc_web_browser_w ~= nil) then
 		ui.w = ui_npc_web_browser_w;
 	end
@@ -538,7 +538,7 @@ function game:updateFameBar(path)
 	uiMaxLimit.x = barX + barW * (fameMax + 100) / 200;
 
 	-- init bar3d
-	if (bar3dStart < bar3dLimit) then 
+	if (bar3dStart < bar3dLimit) then
 		uiBar3d.x= bar3dStart;
 		uiBar3d.w= bar3dLimit-bar3dStart;
 	else
@@ -553,7 +553,7 @@ function game:updateFameBarTT(path)
 	local	fameMax = getDbProp(path .. ':THRESHOLD');
 
 	local text = i18n.get('uittFameMaxPossible');
-	text = findReplaceAll(text, '%famemax', tostring(fameMax)); 
+	text = findReplaceAll(text, '%famemax', tostring(fameMax));
 	setContextHelpText(text);
 end
 
@@ -564,12 +564,12 @@ function game:getPvpEffects()
 	local i;
 	local hasBonus = false;
 	local hasMalus = false;
-	
+
 	local text = ''
 	local textBonus = '';
 	local textMalus = '';
 	local fmt;
-	
+
 	-- check every malus and bonus
 	for i=0, n do
 		local path = formatUI('SERVER:PVP_EFFECTS:#1', i);
@@ -611,7 +611,7 @@ function game:getPvpEffects()
 end
 
 ------------------------------------------------------------------------------------------------------------
-function game:getFactionName(id)	
+function game:getFactionName(id)
 	if (id == self.TPVPClan.Kami) then
 		return i18n.get('uiFameKami');
 	elseif (id == self.TPVPClan.Karavan) then
@@ -636,10 +636,10 @@ function game:getAllegiancePoints()
 	local civPoints 	= getDbProp(path .. ':CIV_POINTS');
 	local cult 			= getDbProp(path .. ':CULT');
 	local cultPoints 	= getDbProp(path .. ':CULT_POINTS');
-	
+
 	local text;
 	local uiGroup= getUICaller();
-	
+
 	-- civ allegiance
 	if (civ == self.TPVPClan.None or civ == self.TPVPClan.Neutral) then
 		text = i18n.get('uiPvpFameNoCivAllegiance');
@@ -647,9 +647,9 @@ function game:getAllegiancePoints()
 		text = i18n.get('uiPvpFameAllegiancePoints');
 		text = findReplaceAll(text, '%faction', self:getFactionName(civ));
 		text = findReplaceAll(text, '%points', tostring(civPoints));
-	end	
+	end
 	uiGroup.civ_allegiance_pts.uc_hardtext_format = text;
-	
+
 	-- cult allegiance
 	if (cult == self.TPVPClan.None or cult == self.TPVPClan.Neutral) then
 		text = i18n.get('uiPvpFameNoCultAllegiance');
@@ -698,11 +698,11 @@ function game:fameAllegianceTooltipCultGuild()
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:tooltipDeltaValue(base, max)
 	-- Calculate delta
 	local val = max - base;
-	
+
 	local text;
 	if (val == 0) then
 		text = concatUCString('@{FFFF}', tostring(max));
@@ -729,37 +729,37 @@ function game:tooltipDeltaValue(base, max)
 			text = concatUCString(text, ')');
 		end
 	end
-	
+
 	return text;
 
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:tooltipScore(dbBase, dbMax, ttFormat)
 	-- Get DB values
 	local base = getDbProp(dbBase);
 	local max = getDbProp(dbMax);
-	
+
 	-- Tooltip text
 	local fmt = i18n.get(ttFormat);
 	local text = self:tooltipDeltaValue(base, max);
 	fmt = findReplaceAll(fmt, "%n", text );
-	
+
 	-- Set tooltip
 	setContextHelpText(fmt);
 end
 
 ------------------------------------------------------------------------------------------------------------
--- 
+--
 function game:tooltipScoreEP(dbBase, dbMax, ttFormat, dbLvl, dbMod)
 	-- Defender level
 	local defLvl= getDbProp(formatUI(dbLvl));
 	defLvl = math.max(0, defLvl);
-	
+
 	-- Attacker level
 	local attLvl = getBaseSkillValueMaxChildren(getSkillIdFromName('SF'));
-	
+
 	-- Get DB values
 	local base = getDbProp(dbBase);
 	local max = getDbProp(dbMax);
@@ -774,7 +774,7 @@ function game:tooltipScoreEP(dbBase, dbMax, ttFormat, dbLvl, dbMod)
 	fmt = findReplaceAll(fmt, "%n", text );
 	fmt = findReplaceAll(fmt, "%l", tostring(attLvl));
 	fmt = findReplaceAll(fmt, "%p", textChance);
-	
+
 	-- Set tooltip
 	setContextHelpText(fmt);
 end
@@ -786,7 +786,7 @@ end
 ----------------------------------       RING STATS       ---------------------------------------------------
 -------------------------------------------------------------------------------------------------------------
 
-RingPlayerInfo = 
+RingPlayerInfo =
 {
 	WaitingInfo = false,
 	LastRefreshTime = 0,
@@ -810,7 +810,7 @@ end
 --
 function RingPlayerInfo:initRingStatPlayer()
 
-	setOnDraw(self:getWindow(), "RingPlayerInfo:onRingRatingPlayerDraw()")	
+	setOnDraw(self:getWindow(), "RingPlayerInfo:onRingRatingPlayerDraw()")
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -819,16 +819,16 @@ function RingPlayerInfo:onRingRatingPlayerDraw()
 
 	local timeInSec = nltime.getLocalTime() / 1000
 	if self.WaitingInfo then
-		if timeInSec - self.LastRefreshTime > self.WaitingPeriod then		
+		if timeInSec - self.LastRefreshTime > self.WaitingPeriod then
 			self.WaitingInfo = false
 			self.LastRefreshTime = nltime.getLocalTime() / 1000
-		else	
+		else
 			if not self.InfoReceived then
 				--debugInfo("No received info")
 			end
 		end
 	else
-		if timeInSec - self.LastRefreshTime > self.RefreshPeriod then		
+		if timeInSec - self.LastRefreshTime > self.RefreshPeriod then
 			self:refresh()
 		else
 			--debugInfo("pas de refresh")
@@ -844,7 +844,7 @@ function RingPlayerInfo:updatePendingRefresh()
 
 	if self.PendingRefresh then
 		local currTime = nltime.getLocalTime() / 1000
-		if currTime - self.LastRefreshQuerryTime > self.MinRefreshPeriod and game.getRingStats then			
+		if currTime - self.LastRefreshQuerryTime > self.MinRefreshPeriod and game.getRingStats then
 			self.LastRefreshQuerryTime = currTime
 			self.PendingRefresh = false
 			game.getRingStats()
@@ -924,10 +924,10 @@ end
 --
 function RingPlayerInfo:refresh()
 
-	self.PendingRefresh = true	
+	self.PendingRefresh = true
 	self.LastRefreshTime = nltime.getLocalTime() / 1000
 	self.WaitingInfo = true
-end	
+end
 
 --------------------------------------------------------------------------------------------------------------
 --
@@ -937,7 +937,7 @@ function RingPlayerInfo:tooltipEcosystemPoints(rp, maxRp, ttFormat)
 	local fmt = i18n.get(ttFormat);
 	fmt = findReplaceAll(fmt, "%n", rp );
 	fmt = findReplaceAll(fmt, "%p", maxRp );
-	
+
 	-- Set tooltip
 	return fmt;
 end
@@ -954,8 +954,8 @@ function RingPlayerInfo:updateRRPSLevel(dbVal, tooltip)
 	local	ui= getUICaller();
 	local	uiText= ui.val;
 
-	-- set the text 
-	uiText.uc_hardtext= tostring(val) 
+	-- set the text
+	uiText.uc_hardtext= tostring(val)
 
 	self:tooltipRRPs(dbVal, tooltip)
 end
@@ -970,7 +970,7 @@ function RingPlayerInfo:tooltipRRPs(dbBase, ttFormat)
 	local fmt = i18n.get(ttFormat);
 	local text = tostring(val)
 	fmt = findReplaceAll(fmt, "%n", text );
-	
+
 	-- Set tooltip
 	setContextHelpText(fmt);
 end
@@ -1013,7 +1013,7 @@ end
 --------------------------------------------------------------------------------------------------------------
 --
 function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
-	
+
 	local org = getDbProp(path.."1:VALUE")
 	getUICaller()[uiOrgText].uc_hardtext =  i18n.get('uiOrganization_' .. org)
 
@@ -1022,7 +1022,7 @@ function game:updateOrganization(path, uiOrgText, uiStatusText, uiPointsText)
 
 	local points = getDbProp(path.."3:VALUE")
 	getUICaller()[uiPointsText].uc_hardtext= points
-	
+
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -1033,10 +1033,10 @@ end
 
 
 --------------------------------------------------------------------------------------------------------------
-function game:popMissionList()		
-	local menu = getUI("ui:interface:mission_cb_menu")	
+function game:popMissionList()
+	local menu = getUI("ui:interface:mission_cb_menu")
 	enableModalWindow(getUICaller(), "ui:interface:mission_cb_menu")
-	self:updateMissionMenuSize()		
+	self:updateMissionMenuSize()
 end
 
 
@@ -1053,12 +1053,12 @@ function game:getMissionDbPath(missionIndex)
 		return "SERVER:GROUP:MISSIONS:" .. tostring(missionIndex - numMissions)
 	else
 		return "SERVER:MISSIONS:" .. tostring(missionIndex)
-	end	
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:getCurrMissionIndex()	
-	local result = getDbProp("UI:SAVE:MISSION_SELECTED")	
+function game:getCurrMissionIndex()
+	local result = getDbProp("UI:SAVE:MISSION_SELECTED")
 	return result
 end
 
@@ -1071,10 +1071,10 @@ end
 function game:updateCurrMissionComboBox()
 	local numMissions = tonumber(getDefine("ipj_nb_mission"))
 	local missionFound = false
-	local cb = getUI("ui:interface:info_player_journal:content:mission_combo")	
-	local missionList = getUI("ui:interface:info_player_journal:content:mission_list")	
+	local cb = getUI("ui:interface:info_player_journal:content:mission_combo")
+	local missionList = getUI("ui:interface:info_player_journal:content:mission_list")
 	for i = 0, numMissions - 1 do
-		if getDbProp("SERVER:MISSIONS:" .. i .. ":TITLE") ~= 0 
+		if getDbProp("SERVER:MISSIONS:" .. i .. ":TITLE") ~= 0
 		   or getDbProp("SERVER:GROUP:MISSIONS:" .. i .. ":TITLE") ~= 0 then
 			missionFound = true
 			break
@@ -1095,20 +1095,20 @@ function game:updateCurrMissionComboBox()
 	missionList.no_available_mission.active = false
 	cb.arrow.active = true
 	cb.select.active = true
-	local currMission = self:getCurrMissionIndex()	
+	local currMission = self:getCurrMissionIndex()
 
-	local dbPath = self:getMissionDbPath(currMission)	
-	--	
-	local selected = (currMission ~= -1) 
+	local dbPath = self:getMissionDbPath(currMission)
+	--
+	local selected = (currMission ~= -1)
 	if selected then
 		cb.mission_title.textid_dblink = dbPath .. ":TITLE"
 		selected = (tile ~= 0)
-	end	
+	end
 	cb.mission_ico.active = selected
 	cb.mission_title.active = selected
 	cb.no_selected_mission.active = not selected
 	missionList.no_selected_mission.active = not selected
-	if selected then		
+	if selected then
 		if getDbProp(dbPath .. ":FINISHED") == 0 then
 			cb.mission_ico.texture = runExpr("getMissionSmallIcon(" .. tostring(getDbProp(dbPath .. ":ICON") .. ")"))
 		elseif getDbProp(dbPath .. ":FINISHED") == 1 then
@@ -1116,17 +1116,17 @@ function game:updateCurrMissionComboBox()
 		else
 			cb.mission_ico.texture = "Small_Task_Failed.tga"
 		end
-	end	
+	end
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionSelected(index)	
+function game:onMissionSelected(index)
 	disableModalWindow()
 	self:updateCurrMissionComboBox()
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onGroupMissionSelected(index)	
+function game:onGroupMissionSelected(index)
 	disableModalWindow()
 	self:updateCurrMissionComboBox()
 end
@@ -1138,33 +1138,33 @@ function game:onMissionDBIndexChanged()
 	-- if selection was made from the list, update the other list
 	if missionIndex >= self:getGroupMissionFirstIndex() then
 		local groupMissionIndex = missionIndex - self:getGroupMissionFirstIndex()
-		getUI("ui:interface:info_player_journal:content:mission_list:b_group_title" .. tostring(groupMissionIndex)).pushed = true		
+		getUI("ui:interface:info_player_journal:content:mission_list:b_group_title" .. tostring(groupMissionIndex)).pushed = true
 		getUI("ui:interface:mission_cb_menu:mission_list:b_group_title" .. tostring(groupMissionIndex)).pushed = true
 	else
-		getUI("ui:interface:info_player_journal:content:mission_list:b_title" .. tostring(missionIndex)).pushed = true		
+		getUI("ui:interface:info_player_journal:content:mission_list:b_title" .. tostring(missionIndex)).pushed = true
 		getUI("ui:interface:mission_cb_menu:mission_list:b_title" .. tostring(missionIndex)).pushed = true
 	end
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionTitleChanged(index)			
+function game:onMissionTitleChanged(index)
 	-- if title is not nil then a new mission has been added -> if db initilization is over, then selected this new mission
-	if getDbProp(self:getMissionDbPath(index) .. ":TITLE") ~= 0 then		
-		if game.InGameDbInitialized or config.Local then			
+	if getDbProp(self:getMissionDbPath(index) .. ":TITLE") ~= 0 then
+		if game.InGameDbInitialized or config.Local then
 			self:setCurrentMission(index)
 		end
-	else		
+	else
 		self:updateCurrMissionComboBox()
 		self:updateMissionMenuSize()
 	end
 end
 --------------------------------------------------------------------------------------------------------------
-function game:onGroupMissionTitleChanged(index)			
-	if getDbProp(self:getMissionDbPath(index + 15) .. ":TITLE") ~= 0 then		
-		if game.InGameDbInitialized or config.Local then			
+function game:onGroupMissionTitleChanged(index)
+	if getDbProp(self:getMissionDbPath(index + 15) .. ":TITLE") ~= 0 then
+		if game.InGameDbInitialized or config.Local then
 			self:setCurrentMission(index + 15)
 		end
-	else		
+	else
 		self:updateCurrMissionComboBox()
 		self:updateMissionMenuSize()
 	end
@@ -1174,21 +1174,21 @@ end
 function game:updateMissionMenuSize()
 	local parentCB = getUI("ui:interface:info_player_journal:content:mission_combo")
 	local menu = getUI("ui:interface:mission_cb_menu")
-	if not menu.active then return end	
+	if not menu.active then return end
 	local maxNumMissions = 2 * self:getGroupMissionFirstIndex()
-	local missionCount = 0		
+	local missionCount = 0
 	for k = 0, maxNumMissions - 1 do
 		if getDbProp(self:getMissionDbPath(k) .. ":TITLE") ~= 0 then
-			missionCount = missionCount + 1						
+			missionCount = missionCount + 1
 		end
-	end	
+	end
 	menu.h = 8 + missionCount * 18
 	menu.y = 0
 	menu:updateCoords()
 	local y = parentCB.y_real - menu.h_real - 1
 	if y < 0 then
 		y = parentCB.y_real + parentCB.h_real + 1
-	end 
+	end
 	local scrW
 	local scrH
 	scrW, scrH = getWindowSize()
@@ -1197,7 +1197,7 @@ function game:updateMissionMenuSize()
 	end
 	menu.w = parentCB.w_real
 	menu.y = y
-	menu.x = parentCB.x_real	
+	menu.x = parentCB.x_real
 	menu.h = 8 + missionCount * 18
 	menu:invalidateCoords()
 end
@@ -1205,7 +1205,7 @@ end
 --------------------------------------------------------------------------------------------------------------
 --function game:updateMissionDescCloseButton(index)
 --	local dbPath = self:getMissionDbPath(index)
---	if index == self:getCurrMissionIndex() then			
+--	if index == self:getCurrMissionIndex() then
 --		local closeText = getUI("ui:interface:info_player_journal:content:desc:close")
 --		local button = getUI("ui:interface:info_player_journal:content:desc:uppart:over_icon")
 --		local finished = getDbProp(dbPath .. ":FINISHED")
@@ -1224,29 +1224,29 @@ end
 --end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionFinished(index)	
-	self:updateCurrMissionComboBox()	
+function game:onMissionFinished(index)
+	self:updateCurrMissionComboBox()
 	--self:updateMissionDescCloseButton(index)
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onGroupMissionFinished(index)	
+function game:onGroupMissionFinished(index)
 	self:updateCurrMissionComboBox()
 	--self:updateMissionDescCloseButton(index + game:getGroupMissionFirstIndex())
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:expandMissionList()	
-	local missionCB = getUI("ui:interface:info_player_journal:content:mission_combo")	
+function game:expandMissionList()
+	local missionCB = getUI("ui:interface:info_player_journal:content:mission_combo")
 	missionCB.active = not missionCB.active
 	self:updateMissionWindowLayout()
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:updateMissionWindowLayout()	
+function game:updateMissionWindowLayout()
 	if not isInRingMode() then
 		local missionCB = getUI("ui:interface:info_player_journal:content:mission_combo")
-		local missionList = getUI("ui:interface:info_player_journal:content:mission_list")	
+		local missionList = getUI("ui:interface:info_player_journal:content:mission_list")
 		local fake = getUI("ui:interface:info_player_journal:content:fake")
 		local sepBis = getUI("ui:interface:info_player_journal:content:separator_bis")
 		local desc = getUI("ui:interface:info_player_journal:content:desc")
@@ -1254,18 +1254,18 @@ function game:updateMissionWindowLayout()
 		local popMinH
 		local win = getUI("ui:interface:info_player_journal")
 
-		if missionCB.active then		
-			sepBis.active = false		
+		if missionCB.active then
+			sepBis.active = false
 			missionList.active = false
 			fake.sizeref=""
 			fake.y = -32
 			fake.h = 0
-			expanded = 0		
+			expanded = 0
 			desc.max_sizeref ="wh"
 			desc.max_h= -42
 			win.pop_min_h = 152 - win.content_y_offset
-		else		
-			sepBis.active =	true		
+		else
+			sepBis.active =	true
 			missionList.active = true
 			fake.sizeref="wh5"
 			fake.y = -8
@@ -1274,23 +1274,23 @@ function game:updateMissionWindowLayout()
 			desc.max_sizeref ="wh5"
 			desc.max_h=16
 			win.pop_min_h = 152 - win.content_y_offset
-		end	
+		end
 
-		local fixedEntry = getUI("ui:interface:info_player_journal:content:mission_fixed_entry")	
+		local fixedEntry = getUI("ui:interface:info_player_journal:content:mission_fixed_entry")
 		fixedEntry:updateCoords()
 		desc.max_h = desc.max_h - fixedEntry.h
 
 		setDbProp("UI:SAVE:EXPAND_MISSION_LIST", expanded)
-		getUI("ui:interface:info_player_journal"):invalidateCoords()	
+		getUI("ui:interface:info_player_journal"):invalidateCoords()
 	end
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionJournalOpened()	
+function game:onMissionJournalOpened()
 	local missionDesc = getUI("ui:interface:info_player_journal:content:desc")
-	missionDesc.active = getDbProp("UI:SAVE:MISSION_SELECTED") ~= -1	
+	missionDesc.active = getDbProp("UI:SAVE:MISSION_SELECTED") ~= -1
 
-	local expandList = getDbProp("UI:SAVE:EXPAND_MISSION_LIST")	
+	local expandList = getDbProp("UI:SAVE:EXPAND_MISSION_LIST")
 	self:updateMissionJournalMode()
 
 	if not isInRingMode() then
@@ -1304,9 +1304,9 @@ function game:onMissionJournalOpened()
 
 	self:updateMissionJournalHeader()
 	self:updateMissionWindowLayout()
-	self:updateMissionJournalFixedEntry()			
+	self:updateMissionJournalFixedEntry()
 
-	
+
 
 end
 
@@ -1315,12 +1315,12 @@ function game:updateMissionJournalHeader()
 	local win = getUI("ui:interface:info_player_journal")
 	local headerActive = getDbProp("UI:SAVE:MISSION_JOURNAL_HEADER_ACTIVE") ~= 0
 	win.header_active = headerActive
-	win.right_button_enabled = headerActive	
+	win.right_button_enabled = headerActive
 	if headerActive then
-		win.uc_title_opened = i18n.get("uiJournalTitle")		
+		win.uc_title_opened = i18n.get("uiJournalTitle")
 		win.content_y_offset = 0
 	else
-		win.uc_title_opened = ucstring("")		
+		win.uc_title_opened = ucstring("")
 		win.content_y_offset = win.header_opened.h_real + 3
 	end
 end
@@ -1329,13 +1329,13 @@ end
 --------------------------------------------------------------------------------------------------------------
 function game:updateMissionJournalFixedEntry()
 	-- update fixed entry text
-		
-	local fixedEntryRing = getUI("ui:interface:info_player_journal:no_available_missions:main:mission_fixed_entry")			
+
+	local fixedEntryRing = getUI("ui:interface:info_player_journal:no_available_missions:main:mission_fixed_entry")
 	local fixedEntryMain = getUI("ui:interface:info_player_journal:content:mission_fixed_entry")
-	
+
 	fixedEntryRing.active = game.InGameDbInitialized and isInRingMode()
-	fixedEntryMain.active = game.InGameDbInitialized and not isInRingMode()	
-	
+	fixedEntryMain.active = game.InGameDbInitialized and not isInRingMode()
+
 
 
 	local id = "uiFixedMissionEntry"
@@ -1346,22 +1346,22 @@ function game:updateMissionJournalFixedEntry()
 		end
 		if isPlayerFreeTrial() then
 			id = id .. "_Trial"
-		end			
+		end
 	else
-		if isInRingMode() then			
-			id = id .. "_R2"			
-		else			
+		if isInRingMode() then
+			id = id .. "_R2"
+		else
 			id = id .. "_Mainland_" .. getUserRace()
 		end
-	end	
+	end
 	fixedEntryMain.uc_hardtext = i18n.get(id)
 	fixedEntryRing.uc_hardtext = i18n.get(id)
-	
+
 	self:updateMissionWindowLayout()
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:setCurrentMission(index)	
+function game:setCurrentMission(index)
 	mw = getMissionWindow()
 	mw.active = game.InGameDbInitialized
 	if index < self:getGroupMissionFirstIndex() then
@@ -1372,7 +1372,7 @@ function game:setCurrentMission(index)
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionComboWheelUp()	
+function game:onMissionComboWheelUp()
 	local currMissionIndex = self:getCurrMissionIndex()
 	while currMissionIndex > 0 do
 		currMissionIndex = currMissionIndex - 1
@@ -1384,7 +1384,7 @@ function game:onMissionComboWheelUp()
 end
 
 --------------------------------------------------------------------------------------------------------------
-function game:onMissionComboWheelDown()	
+function game:onMissionComboWheelDown()
 	local currMissionIndex = self:getCurrMissionIndex()
 	local maxNumMission = 2 * self:getGroupMissionFirstIndex()
 	while currMissionIndex < (maxNumMission - 1) do
@@ -1399,37 +1399,37 @@ end
 
 
 --------------------------------------------------------------------------------------------------------------
-function game:toggleMissionJournalCaption()	
-	local dbPath = "UI:SAVE:MISSION_JOURNAL_HEADER_ACTIVE"	
+function game:toggleMissionJournalCaption()
+	local dbPath = "UI:SAVE:MISSION_JOURNAL_HEADER_ACTIVE"
 	setDbProp(dbPath, 1 - getDbProp(dbPath))
-	local win = getUI("ui:interface:info_player_journal")	
+	local win = getUI("ui:interface:info_player_journal")
 	self:updateMissionJournalHeader()
 	self:updateMissionWindowLayout()
 end
 
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ to tell that the main loop is about to begin
-function game:onMainLoopBegin()	
-	game.InGameDbInitialized = false			
+function game:onMainLoopBegin()
+	game.InGameDbInitialized = false
 	game.PrevSessionMission = getDbProp("UI:VARIABLES:MISSION_SELECTED_PREV_SESSION")
-	
+
 	debugInfo("onMainLoopBegin()")
 end
 
 
 --------------------------------------------------------------------------------------------------------------
 -- handler called by C++ to tell that all initial value have been set in the db
-function game:onInGameDbInitialized()	
+function game:onInGameDbInitialized()
 	game.InGameDbInitialized = true
-	-- if the journal is opened, force an update for the fixed entry text 
+	-- if the journal is opened, force an update for the fixed entry text
 	-- (says if we're in start island, paying account ...) need DB flags like
 	-- IS_NEWBIE & IS_TRIAL to be received
-	game:updateMissionJournalFixedEntry()	
-	-- If a mission was previously selected, restore it	
+	game:updateMissionJournalFixedEntry()
+	-- If a mission was previously selected, restore it
 	if game.PrevSessionMission ~= -1  then
-		self:setCurrentMission(game.PrevSessionMission)		
+		self:setCurrentMission(game.PrevSessionMission)
 	end
-	
+
 	game:setInfoPlayerCharacterRace()
 end
 
@@ -1437,7 +1437,7 @@ function game:onWebIgReady()
 	-- Call init webig
 	getUI("ui:interface:web_transactions:content:html"):browse("home")
 	getUI("ui:interface:webig:content:html"):browse("home")
-	
+
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1464,7 +1464,7 @@ end
 
 --------------------------------------------------------------------------------------------------------------
 -- ring journal on / off
-function game:setMissionJournalRingMode(isRing)	
+function game:setMissionJournalRingMode(isRing)
 	local journal = getUI("ui:interface:info_player_journal")
 	if isRing then
 		journal.content.expand_mission_list.active = false
@@ -1480,7 +1480,7 @@ function game:setMissionJournalRingMode(isRing)
 		journal.no_available_missions.active = true
 	else
 		journal.content.expand_mission_list.active = true
-		journal.no_available_missions.active = false; 
+		journal.no_available_missions.active = false;
 		journal.content.active = true;
 		--journal.content.mission_list.active = true;
 		journal.content.sv.active = true;
@@ -1494,8 +1494,8 @@ end
 --------------------------------------------------------------------------------------------------------------
 -- update mission journal depending on wether we're in the ring or not
 function game:updateMissionJournalMode()
-	--local isRing = r2~=nil and r2.Mode~=nil and r2.Mode=='r2ed_anim_test'	
-	game:setMissionJournalRingMode(isInRingMode())	
+	--local isRing = r2~=nil and r2.Mode~=nil and r2.Mode=='r2ed_anim_test'
+	game:setMissionJournalRingMode(isInRingMode())
 end
 
 
@@ -1521,22 +1521,22 @@ function game:onNewMissionStepAdded(stepIndex)
 	end
 
 	-- debugInfo("New Step")
-	if missionIndex < 15 then		
+	if missionIndex < 15 then
 		dbPath = "SERVER:MISSIONS:" .. tostring(missionIndex) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
-	else		
+	else
 		dbPath = "SERVER:GROUP:MISSIONS:" .. tostring(missionIndex - 15) .. ":GOALS:" .. tostring(stepIndex) .. ":TEXT"
-	end	
+	end
 	local stringID = getDbProp(dbPath)
 	if stringID ~= 0 then
 		-- debugInfo(tostring(stringID))
 		table.insert(remainingMissionTextIDs, stringID)
-		setOnDraw(missionWnd, "game:ensureLastMissionStepVisibility0()")	
-	else		
+		setOnDraw(missionWnd, "game:ensureLastMissionStepVisibility0()")
+	else
 	end
 end
 
 function game:ensureLastMissionStepVisibility0()
-	
+
 	local missing = false
 	for k, v in pairs(remainingMissionTextIDs) do
 		if not isDynStringAvailable(v) then
@@ -1545,54 +1545,54 @@ function game:ensureLastMissionStepVisibility0()
 		end
 	end
 	local missionWnd = getMissionWindow()
-	if not missing then		
+	if not missing then
 		remainingMissionTextIDs = {}
-		-- delay real update to newt frame		
-		setOnDraw(missionWnd, "game:ensureLastMissionStepVisibility1()")		
+		-- delay real update to newt frame
+		setOnDraw(missionWnd, "game:ensureLastMissionStepVisibility1()")
 	else
-		-- for debug : dump the list of remaining "dyn string"		
+		-- for debug : dump the list of remaining "dyn string"
 		--local stringList = "{"
 		--for k, v in remainingMissionTextIDs do
-		--	if not isDynStringAvailable(v) then				
+		--	if not isDynStringAvailable(v) then
 		--		stringList = stringList .. " " .. tostring(v)
 		--	end
 		--end
-		--stringList = stringList .. "}"		
+		--stringList = stringList .. "}"
 	end
 end
 
-function game:ensureLastMissionStepVisibility1()	
+function game:ensureLastMissionStepVisibility1()
 	local missionWnd = getMissionWindow()
-	local scrollBar = missionWnd:find("sv_desc")	
-	--scrollBar.trackPos = 20000 -- move upward	
+	local scrollBar = missionWnd:find("sv_desc")
+	--scrollBar.trackPos = 20000 -- move upward
 	--scrollBar:updateCoords()
-	--setOnDraw(missionWnd, "")	
-	local descWnd = missionWnd:find("desc")	
+	--setOnDraw(missionWnd, "")
+	local descWnd = missionWnd:find("desc")
 	local maxNumSteps = getDefine("ipj_nb_goal")
 	local topStep
-	for  stepIndex = 0, maxNumSteps -1 do		
+	for  stepIndex = 0, maxNumSteps -1 do
 		local currStep = descWnd["step" .. tostring(stepIndex)]
 		if currStep.active then
 			topStep = currStep
 		end
 	end
 	-- debugInfo("Found step : " .. topStep.hardtext)
-	if topStep == nil then 		
+	if topStep == nil then
 		return
-	end	
+	end
 
 	scrollBar:ensureVisible(topStep, "M", "M")
-	
+
 	--local wantedY = topStep.h_real / 2 - (descWnd.y_real - topStep.y_real)
-	--local wantedY = descWnd.y_real + descWnd.h_real - topStep.y_real	
-	--local offsetY = wantedY - descWnd.max_h_real / 2	
-	--if offsetY < 0 then offsetY = 0 end	
+	--local wantedY = descWnd.y_real + descWnd.h_real - topStep.y_real
+	--local offsetY = wantedY - descWnd.max_h_real / 2
+	--if offsetY < 0 then offsetY = 0 end
 	--descWnd.ofsy = offsetY
 	--descWnd:invalidateCoords()
 	--descWnd:updateCoords()
 
-	setOnDraw(missionWnd, "")			
-	
+	setOnDraw(missionWnd, "")
+
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -1606,9 +1606,9 @@ end
 
 function game:addRpJob(jobtype, id, value, rpjobs)
 	local base_path = "ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id..":rpjob_"..jobtype.."_infos_"..id
-	
+
 	local group = getUI("ui:interface:info_player_skills:content:rpjobs:rpjob_"..jobtype.."_"..id)
-	
+
 	if (value == nil) then
 		group.active = false
 	else
@@ -1618,16 +1618,16 @@ function game:addRpJob(jobtype, id, value, rpjobs)
 			group.active = false
 		else
 			group.active = true
-		
+
 			local echelon_value = rpjobs[sitem][1]
 			local quantity = rpjobs[sitem][2]
-			
+
 			local maxlevel = (echelon_value*6)-30
-			
+
 			if (quantity > maxlevel) then
 				quantity = maxlevel
 			end
-				
+
 			local base = getUI(base_path..":t")
 			base.hardtext = i18n.get(name):toUtf8()
 			local ui = getUI(base_path..":icon")
@@ -1657,7 +1657,7 @@ function game:getRPJobs()
 	rpjobs_elementary = {}
 	rpjobs_roleplay = {}
 	rpjobs = {}
-	
+
 	for i = 0, 499, 1 do
 		local sheet =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":SHEET")
 		if (sheet ~= 0) then
@@ -1665,7 +1665,7 @@ function game:getRPJobs()
 			if (string.sub(name, 0, 6) == "rpjob_") then
 				local quality =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUALITY")
 				local quantity =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUANTITY")
-				
+
 				if (name == "rpjob_advanced.sitem") then
 					table.insert(rpjobs_advanced, quality)
 				else
@@ -1688,7 +1688,7 @@ function game:getRPJobs()
 			end
 		end
 	end
-	
+
 	for id=1,2,1 do
 		game:addRpJob("advanced", id, rpjobs_advanced[id], rpjobs)
 	end
