@@ -278,6 +278,13 @@ int main(int argc, char **argv)
 	// initialize log
 	initLog();
 
+#ifdef NL_OS_MAC
+	for (sint i = 0; i < argc; ++i)
+	{
+		nlinfo("Argument %d: %s", i, argv[i]);
+	}
+#endif
+	
 #ifdef RZ_USE_STEAM
 	CSteamClient steamClient;
 
