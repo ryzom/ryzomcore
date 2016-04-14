@@ -211,13 +211,9 @@ int main(int argc, char **argv)
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
-		nlinfo("Current path 1: %s", currentPath.c_str());
-
 		// append profile ID to directory
 		if (Args.haveArg("p"))
 			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
-
-		nlinfo("Current path 2: %s", currentPath.c_str());
 
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 

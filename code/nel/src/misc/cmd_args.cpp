@@ -249,8 +249,6 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	{
 		std::string name = argv[i];
 
-		nlinfo("Argument %d: %s", i, name.c_str());
-
 #ifdef NL_OS_WINDOWS
 		// support / and - under Windows, arguments should be at least 2 characters
 		if (name.size() > 1 && (name[0] == '-' || name[0] == '/'))
