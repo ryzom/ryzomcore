@@ -250,7 +250,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	uint argc = argv.size();
 
 	// process each argument
-	for (sint i = 1; i < argc; i++)
+	for (uint i = 1; i < argc; i++)
 	{
 		std::string name = argv[i];
 
