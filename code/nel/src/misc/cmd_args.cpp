@@ -220,6 +220,11 @@ bool CCmdArgs::parse(int argc, char **argv)
 
 	for(sint i = 0; i < argc; ++i)
 	{
+#ifdef NL_OS_MAC
+		// get rid of -psn_* arguments under OS X
+		if (strncmp(argv[i], "-psn_", 5) == 0) continue;
+#endif
+
 		args.push_back(argv[i]);
 	}
 
@@ -245,7 +250,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	uint argc = argv.size();
 
 	// process each argument
-	for (sint i = 1; i < argc; i++)
+	for (uint i = 1; i < argc; i++)
 	{
 		std::string name = argv[i];
 
