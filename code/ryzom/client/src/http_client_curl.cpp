@@ -67,7 +67,7 @@ static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm 
 {
 	// look for certificate in search paths
 	string path = CPath::lookup(CAFilename);
-	nldebug("Cert path '%s'", path.c_str());
+	nlinfo("Cert path '%s'", path.c_str());
 
 	if (path.empty())
 	{
