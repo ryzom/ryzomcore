@@ -20,6 +20,7 @@
 #include <curl/curl.h>
 
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -91,6 +92,8 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
 	// get a BIO
 	BIO *bio = BIO_new_mem_buf(&buffer[0], file.getFileSize());
+	
+	char errorBuffer[1024];
 
 	if (bio)
 	{
@@ -113,8 +116,19 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 					// add our certificate to this store
 					if (X509_STORE_add_cert(store, itmp->x509) == 0)
 					{
-						nlwarning("Error adding certificate");
-						res = CURLE_SSL_CACERT;
+						uint errCode = ERR_get_error();
+
+						// ignore already in hash table errors
+						if (ERR_GET_LIB(errCode) != ERR_LIB_X509 || ERR_GET_REASON(errCode) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
+						{
+							ERR_error_string_n(errCode, errorBuffer, 1024);
+							nlwarning("Error adding certificate %s: %s", itmp->x509->name, errorBuffer);
+							res = CURLE_SSL_CACERT;
+						}
+					}
+					else
+					{
+						nlinfo("Added certificate %s", itmp->x509->name);
 					}
 				}
 			}
