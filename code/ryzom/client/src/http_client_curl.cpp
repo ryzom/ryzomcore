@@ -63,7 +63,7 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
 // ***************************************************************************
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm */)
 {
 	// look for certificate in search paths
 	string path = CPath::lookup(CAFilename);
