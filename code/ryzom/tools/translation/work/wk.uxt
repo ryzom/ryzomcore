@@ -2437,7 +2437,7 @@ A chaque round perdu, le @{6F6F}Niveau de Round@{FFFF} diminuera ainsi que le no
 uittOutpostAttackAfterWin
 [
 @{6F6F}Après Attaque@{FFFF}\n
-La guerre continue! \n
+La guerre continue!\n
 Les attaquants ont réussi à dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}Période d'Attaque@{FFFF}.\n
 Il faut attendre la fin de la phase d'attaque pour que les attaquants gagnent l'Avant-Poste.\n
 ]
@@ -2451,7 +2451,7 @@ L'avant-poste sera complètement libéré à la fin de la phase d'attaque.\n
 uittOutpostDefenseBefore
 [
 @{6F6F}Attente Défense@{FFFF}\n
-La guerre continue! \n
+La guerre continue!\n
 Les attaquants ont réussi à dépasser le @{6F6F}Seuil Minimum@{FFFF} fixé par les défenseurs pendant la @{6F6F}Période d'Attaque@{FFFF}.\n
 Ils ont temporairement pris le contrôle des escouades de l'avant poste.\n
 Ces escouades n'apparaîtront que pendant la @{6F6F}Période de Défense@{FFFF}.\n
@@ -3393,20 +3393,20 @@ uiPvPEffect_region_nexus_Malus			[@{FE7F}Le foyer du Nexus @{FFFF}:\n  Aucun eff
 //-------------------------------------------------------------------------------------------------------------------------------
 // New Descriptions tooltips
 
-uiHPDesc 	[@{6F6F}HP@{FFFF}, \nhit points measure the amount of damage a character can sustains before they pass out.]
-uiStaDesc 	[@{6F6F}Stamina@{FFFF}, \nuse by physical combat actions, stamina measures a character's current state of fatigue.]
-uiSapDesc 	[@{6F6F}Sap@{FFFF}, \nthe energy that allows a character to channel magical power.]
-uiFocDesc 	[@{6F6F}Focus@{FFFF}, \nmeasure the character's ability to concentrate.]
+uiHPDesc 	[@{6F6F}HP@{FFFF},\nhit points measure the amount of damage a character can sustains before they pass out.]
+uiStaDesc 	[@{6F6F}Stamina@{FFFF},\nuse by physical combat actions, stamina measures a character's current state of fatigue.]
+uiSapDesc 	[@{6F6F}Sap@{FFFF},\nthe energy that allows a character to channel magical power.]
+uiFocDesc 	[@{6F6F}Focus@{FFFF},\nmeasure the character's ability to concentrate.]
 
-uiConsDesc 	[@{6F6F}Constitution@{FFFF}, \nmeasure the character's ability to engage in long-term periods of strenuous physical activity.]
-uiIntDesc 	[@{6F6F}Intelligence@{FFFF}, \nthis is a measure of how well a character can focus their mental abilities.]
-uiStrDesc 	[@{6F6F}Strength@{FFFF}, \nstatistic measures the physical strength a character possess.]
-uiDexDesc 	[@{6F6F}Dexterity@{FFFF}, \nmeasure how skilled a character is at doing fine work with their hands.]
+uiConsDesc 	[@{6F6F}Constitution@{FFFF},\nmeasure the character's ability to engage in long-term periods of strenuous physical activity.]
+uiIntDesc 	[@{6F6F}Intelligence@{FFFF},\nthis is a measure of how well a character can focus their mental abilities.]
+uiStrDesc 	[@{6F6F}Strength@{FFFF},\nstatistic measures the physical strength a character possess.]
+uiDexDesc 	[@{6F6F}Dexterity@{FFFF},\nmeasure how skilled a character is at doing fine work with their hands.]
 
-uiMetaDesc 	[@{6F6F}Metabolism@{FFFF}, \nmeasure the rate at which a character's body can recover from injury.]
-uiWisDesc 	[@{6F6F}Wisdom@{FFFF}, \nis a measure of mental control. Wisdom is essential for any that wish to use Magic.]
-uiWBDesc 	[@{6F6F}Well Balanced@{FFFF}, \ncharacters that have a greater control over their physical state will have high Balance scores.]
-uiWillDesc 	[@{6F6F}Will@{FFFF}, \nthe ability to maintain a high level of concentration over longer periods of time is a character's will.]
+uiMetaDesc 	[@{6F6F}Metabolism@{FFFF},\nmeasure the rate at which a character's body can recover from injury.]
+uiWisDesc 	[@{6F6F}Wisdom@{FFFF},\nis a measure of mental control. Wisdom is essential for any that wish to use Magic.]
+uiWBDesc 	[@{6F6F}Well Balanced@{FFFF},\ncharacters that have a greater control over their physical state will have high Balance scores.]
+uiWillDesc 	[@{6F6F}Will@{FFFF},\nthe ability to maintain a high level of concentration over longer periods of time is a character's will.]
 //-------------------------------------------------------------------------------------------------------------------------------
 
 uiValues	[VALUES]
@@ -5655,7 +5655,7 @@ uihelpItemChargeSpell	[@{FFF9}Sap Load:@{T12}@{FFFF}%quality\n
 
 // HELP - ITEM - animals
 // **************
-uihelpItemAnimal	[This item represents \n
+uihelpItemAnimal	[This item represents\n
 	your animal #%petnumber.\n
 	\n
 	You can give or sell an animal through this item, but only if your animal's inventory is empty!\n
@@ -5854,7 +5854,7 @@ uihelpPhraseCrystalSpellFormat	[@{FFFF}--- Enchantment ---\n
 
 // replaced in %req, where possible
 uihelpPhraseRequirementHeader	[\n
-	@{FFFF}--- Requirements --- \n
+	@{FFFF}--- Requirements ---\n
 	@{FFF9}@{HuittActionSkillPoint}Skill Points Cost:@{H}@{T12}@{FFFF}%sp / %basesp\n
 	@{FFF9}@{HuittActionSkillReq}Skills required:@{H}\n
 	]
@@ -10695,7 +10695,7 @@ uiWebOnQuit	[FILL THE SURVEY]
 
 uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 	\n
-	The Fyros are a determined, loyal and fierce civilization who rank themselves among the greatest Atysian warriors. They are the offspring of a once despotic state whose society still rests on a strict code of honour and a common goal, namely the quest for the Great Dragon who has ravaged entire regions and threatens to rear its ugly head again and let loose all its hellfire (according to the sayings of the Karavan). \n
+	The Fyros are a determined, loyal and fierce civilization who rank themselves among the greatest Atysian warriors. They are the offspring of a once despotic state whose society still rests on a strict code of honour and a common goal, namely the quest for the Great Dragon who has ravaged entire regions and threatens to rear its ugly head again and let loose all its hellfire (according to the sayings of the Karavan).\n
 	In their dogged pursuit of this quest, the Fyros readily transgress Jena Law and Karavan interdiction concerning delving down into the bowels of Atys. Indeed, the search for the truth behind the Great Dragon has become a vehicle for their intellectual advancement, leading them to uncover as many mysterious relics as evils.\n
 	They have since rebuilt their towns and villages in the parched desert lands, where it is thought the Dragon is most likely to resurface. From these inhospitable dunes the Fyros strive to protect Atys, restore their Empire and develop their already extensive knowledge of the fabrication of fire-toughened tools and weaponry.\n
 	\n
@@ -10720,12 +10720,12 @@ uiAppear_Infos_Fyros	[THE FYROS CIVILIZATION\n
 
 uiAppear_Infos_Matis	[THE MATIS CIVILIZATION\n
 	\n
-	Highly cultivated aesthetes well versed in forest botany, the Matis are both a romantic and domineering race. They staunchly believe that, just as every particle of the universe has a function, every homin must strive for her or his true place in society. Their obsession with genetic mutations has made them Atysian Master Manipulators of plant and animal life. Their weaponry, armor and even familiar household items are living objects. \n
+	Highly cultivated aesthetes well versed in forest botany, the Matis are both a romantic and domineering race. They staunchly believe that, just as every particle of the universe has a function, every homin must strive for her or his true place in society. Their obsession with genetic mutations has made them Atysian Master Manipulators of plant and animal life. Their weaponry, armor and even familiar household items are living objects.\n
 	The Matis have taken root in forest areas of the new lands where they are able to find every living essence needed for experimentation. Their villages are sculpted into the majestic trees and their strange and wonderful gardens are a marvel to behold. They seek to rebuild their majestic kingdom of the ancient lands devastated during the kitin war, but their own intrigues often consume all their energy as each family vies for the crown. Further to this, in their natural concern for environmental quality they forever strive to perfect their knowledge of botany to better nurture plant life to prevent it ever waning.\n
 	\n
 	HISTORY\n
 	\n
-	Early Matis tribes, settling around the wooded region of Matia, came together to form a community headed by tribe leaders. But decision making was slow and quarrelsome leading to discontent among the people. Soon the physically imposing and charismatic leader, Zachini, emerged rallying enough support from prominent community members to step forward as sole leader. The monarchy was born. It was under Zachini rule that the Momos, primitive tribes, were hunted to extermination under the pretext that the inferior creatures menaced the living space of the Matis peoples. The Matis quickly extended their dominions to the extremities of the forest lands where they were kept in check by the Fyros whose audacious emperor, Dyros the Great, secured a water route from the lake lands to the desert through Matis territory. This 'intrusion' on Matis territory triggered the start of the war of civilizations. \n
+	Early Matis tribes, settling around the wooded region of Matia, came together to form a community headed by tribe leaders. But decision making was slow and quarrelsome leading to discontent among the people. Soon the physically imposing and charismatic leader, Zachini, emerged rallying enough support from prominent community members to step forward as sole leader. The monarchy was born. It was under Zachini rule that the Momos, primitive tribes, were hunted to extermination under the pretext that the inferior creatures menaced the living space of the Matis peoples. The Matis quickly extended their dominions to the extremities of the forest lands where they were kept in check by the Fyros whose audacious emperor, Dyros the Great, secured a water route from the lake lands to the desert through Matis territory. This 'intrusion' on Matis territory triggered the start of the war of civilizations.\n
 	\n
 	The intermittent skirmishes went on for over two hundred years coming to a head with the Fire of Coriolis. A great inferno spread across Fyros wastelands preventing Fyros reinforcements from rallying to the defence of outposts positioned along the water route. The Matis king, Aniro III, took advantage of the diversion created by the fire to send in his armies to isolate and capture the Fyros military outposts. They were then able to overrun the lake lands of the Trykers who consequently fell into Matis slavery. But Matis domination was short lived as Fyros reprisals and Tryker rebellion soon made the aristocratic warriors resort back to a defensive strategy to retain their former dominions.\n
 	\n
@@ -10734,10 +10734,10 @@ uiAppear_Infos_Matis	[THE MATIS CIVILIZATION\n
 	HOW THEY SEE:\n
 	\n
 	The Karavan\n
-	The Matis willingly see the Karavan as faithful servants of Jena who collect resources as offerings for the goddess to prepare for the future on a planet of fresh woodlands and pastures new. But most of all, they see them as a useful ally whose arms of power they would all too gladly learn to wield. \n
+	The Matis willingly see the Karavan as faithful servants of Jena who collect resources as offerings for the goddess to prepare for the future on a planet of fresh woodlands and pastures new. But most of all, they see them as a useful ally whose arms of power they would all too gladly learn to wield.\n
 	\n
 	The Kamis\n
-	They are suspicious of these creatures who are opposed to their Karavan Guardians. What is more, the Kamis condemn Matis genetic manipulation of plant life. \n
+	They are suspicious of these creatures who are opposed to their Karavan Guardians. What is more, the Kamis condemn Matis genetic manipulation of plant life.\n
 	\n
 	Elias Tryton\n
 	Some witnessed the 'apparition' of Elias who appeared in a shaft of light from the canopy. Elders claim he is in fact a messenger of Jena who sent him to allow them to take refuge in the Prime Roots from kitin onslaughts of some three generations ago.]
@@ -10776,7 +10776,7 @@ uiAppear_Infos_Zorai	[THE ZORAI CIVILIZATION\n
 	\n
 	HISTORY\n
 	\n
-	The first Zoraïs were a mysterious group of peoples who lived in the ancient jungles in the region known as Zoran south of the river Ti-aïn. It is not known exactly when the Zoraïs settled in the area but it was probably somewhere between 2199 and 2205. The first Zoraïs set up camp in the jungle where a tribe of them came into contact with Kami entities which they came to look upon as disciples of Jena, their Goddess. Given to mysticism, the Zoraïs built up mysterious cities centered around temples to Jena. The goo infested area they had claimed was not prized by other peoples and their civilization was able to quickly expand becoming a force to be reckoned with. Led by a dynasty of spiritual chieftains, they were able to annex jungle land easily fending off sporadic Fyros attacks on their impregnable temple cities. \n
+	The first Zoraïs were a mysterious group of peoples who lived in the ancient jungles in the region known as Zoran south of the river Ti-aïn. It is not known exactly when the Zoraïs settled in the area but it was probably somewhere between 2199 and 2205. The first Zoraïs set up camp in the jungle where a tribe of them came into contact with Kami entities which they came to look upon as disciples of Jena, their Goddess. Given to mysticism, the Zoraïs built up mysterious cities centered around temples to Jena. The goo infested area they had claimed was not prized by other peoples and their civilization was able to quickly expand becoming a force to be reckoned with. Led by a dynasty of spiritual chieftains, they were able to annex jungle land easily fending off sporadic Fyros attacks on their impregnable temple cities.\n
 	\n
 	Under the Cho dynasty they undertook a campaign of territorial expansion to house their ever increasing populations. They began to set up settlements to the north nearer to other homin civilizations. On witnessing what they saw as barbarous acts of cruelty they began the construction of a great wall delimiting their territory to preserve peace and harmony within and to keep undesirables out. This policy enabled them to steer clear of futile and soul destroying acts of violence and to keep out of the scourge of interracial warfare that continuously ravaged the ancient lands.\n
 	\n
@@ -10786,12 +10786,12 @@ uiAppear_Infos_Zorai	[THE ZORAI CIVILIZATION\n
 	HOW THEY SEE:\n
 	\n
 	The Karavan\n
-	 The Zoraïs see the Karavan as disciples of the initial teachings of Jena which did not account for the presence of the goo, hence the unreasonable Karavan interdictions regarding certain areas of the planet where the goo is thought to take its source. \n
+	 The Zoraïs see the Karavan as disciples of the initial teachings of Jena which did not account for the presence of the goo, hence the unreasonable Karavan interdictions regarding certain areas of the planet where the goo is thought to take its source.\n
 	\n
 	The Kamis\n
-	The Zoraïs believe that, created after the Karavan by Jena, the Kamis are the living embodiment of pure energy on Atys and must at all costs be protected. They believe themselves to be the chosen children of the Kamis because among the homins it is they who have most retained the pure energy. The Zoraïs may return to a state of 'purity' through Kamis worship and by endeavoring to keep as much pure energy as possible from leaking from their bodies as well as Atys. \n
+	The Zoraïs believe that, created after the Karavan by Jena, the Kamis are the living embodiment of pure energy on Atys and must at all costs be protected. They believe themselves to be the chosen children of the Kamis because among the homins it is they who have most retained the pure energy. The Zoraïs may return to a state of 'purity' through Kamis worship and by endeavoring to keep as much pure energy as possible from leaking from their bodies as well as Atys.\n
 	\n
-	Elias Tryton \n
+	Elias Tryton\n
 	The apparition of Elias is a manifestation of a great Kamis. He appeared in a halo of light some three generations ago to a chosen few to tell them how to lead homins from the kitin reign of terror through the rainbow to the relative safety of the Prime Roots. ]
 
 // MILKO INTERFACE
@@ -11307,19 +11307,19 @@ ter sa carte bancaire ou son moyen de paiement accepté à une date de renouvell
 	\n
 	7.SECURISATION DES PAIEMENTS. : La sécurisation des paiements par carte bancaire est assurée par le système de paiement fourni par la société Bibit Global Payment Services (www.bibit.com), prestataire spécialisé dans la sécurisation des paiements en ligne. Les informations relatives à votre carte bancaire (nom, type de carte, numéro et date d'expiration) sont transmises cryptées sous protocole SSL  directement au serveur de la société BIBIT, qui valide le paiement auprès des Institutions Bancaires. Les informations bancaires fournies seront utilisées à seule fin de procéder au traitement et à la facturation de votre paiement.\n
 	\n
-	8.LICENCE D'UTILISATION DE RYZOM. Le présent Contrat concède à l'Utilisateur un droit limité, non exclusif et révocable d'accéder, au travers d'un compte valide, au serveur du Jeu pour utiliser le Jeu conformément à sa destination et aux conditions des présentes, à l'exclusion de tout autre droit. Le présent Contrat vous autorise à installer et à utiliser une copie du Logiciel présent sur le CD-Rom sur un (1) seul ordinateur. Le Logiciel est « utilisé » sur un ordinateur lorsqu'il est chargé dans la mémoire temporaire (mémoire RAM) ou installé dans la mémoire permanente (par exemple, disque dur, CD-Rom ou autre unité de mémoire). Le logiciel ne peut être partagé ou utilisé concurremment sur différents ordinateurs. En cas d'installation sur un réseau, vous devez obtenir une licence pour chaque ordinateur sur lequel le Jeu est utilisé. Vous pouvez effectuer une (1) copie de sauvegarde ou d'archivage uniquement du CD-Rom, à l'exclusion de toute autre copie, de tout ou partie du CD-Rom ou du Jeu. Sous réserve des restrictions stipulées au présent Contrat, Winch Gate accorde à l'Utilisateur une licence non-exclusive et révocable d'utiliser le Jeu uniquement dans le but de jouer à Ryzom et/ou Ryzom Ring dans des conditions légitimes par l'intermédiaire d'un compte autorisé et entièrement payé ou dans le cadre d'une période d'essai valide. Toutes les autres utilisations du compte ou du Jeu sont interdites. En particulier, vous ne pouvez en aucun cas procéder à l'ingénierie inverse, décompiler ou désassembler le ou les logiciels constituant le Jeu. Vous ne pouvez non plus transférer tout ou partie du Jeu à un tiers. Vous ne pouvez louer, prêter ou vendre le Jeu. Tous les droits qui ne sont pas expressément accordés à l'Utilisateur par le présent Contrat sont réservés à Winch Gate. \n
+	8.LICENCE D'UTILISATION DE RYZOM. Le présent Contrat concède à l'Utilisateur un droit limité, non exclusif et révocable d'accéder, au travers d'un compte valide, au serveur du Jeu pour utiliser le Jeu conformément à sa destination et aux conditions des présentes, à l'exclusion de tout autre droit. Le présent Contrat vous autorise à installer et à utiliser une copie du Logiciel présent sur le CD-Rom sur un (1) seul ordinateur. Le Logiciel est « utilisé » sur un ordinateur lorsqu'il est chargé dans la mémoire temporaire (mémoire RAM) ou installé dans la mémoire permanente (par exemple, disque dur, CD-Rom ou autre unité de mémoire). Le logiciel ne peut être partagé ou utilisé concurremment sur différents ordinateurs. En cas d'installation sur un réseau, vous devez obtenir une licence pour chaque ordinateur sur lequel le Jeu est utilisé. Vous pouvez effectuer une (1) copie de sauvegarde ou d'archivage uniquement du CD-Rom, à l'exclusion de toute autre copie, de tout ou partie du CD-Rom ou du Jeu. Sous réserve des restrictions stipulées au présent Contrat, Winch Gate accorde à l'Utilisateur une licence non-exclusive et révocable d'utiliser le Jeu uniquement dans le but de jouer à Ryzom et/ou Ryzom Ring dans des conditions légitimes par l'intermédiaire d'un compte autorisé et entièrement payé ou dans le cadre d'une période d'essai valide. Toutes les autres utilisations du compte ou du Jeu sont interdites. En particulier, vous ne pouvez en aucun cas procéder à l'ingénierie inverse, décompiler ou désassembler le ou les logiciels constituant le Jeu. Vous ne pouvez non plus transférer tout ou partie du Jeu à un tiers. Vous ne pouvez louer, prêter ou vendre le Jeu. Tous les droits qui ne sont pas expressément accordés à l'Utilisateur par le présent Contrat sont réservés à Winch Gate.\n
 	\n
 	9.LICENCE GNU/GPL. Certaines sources du logiciel client de Ryzom (partie du logiciel située sur l'ordinateur de l'Utilisateur) ont été publiées par Winch Gate sous une Licence spécifique « GNU General Public License », dont le texte est accessible à l'adresse suivante : http://www.gnu.org/licenses/gpl-2.0.html. Leur utilisation est soumise aux termes de cette licence. Les sources concernées sont identifiées sur le site de Winch Gate à l'adresse dev.ryzom.com.\n
 	\n
 	10.VERSIONS ULTÉRIEURES – AMÉLIORATIONS. Ni ce Contrat ni votre compte ne vous donnent droit à une quelconque version ultérieure ou extension de Ryzom et/ou Ryzom Ring. Si Winch Gate peut mettre à jour ou améliorer le Jeu, Winch Gate n'a aucune obligation de vous fournir cette mise à jour ou amélioration. La fourniture gratuite par Winch Gate d'une mise à jour ou d'une amélioration ne vous donne aucun droit sur des mises à jour ou améliorations ultérieures.\n
 	\n
-	11.PROPRIÉTÉ DU JEU ET DE SES ÉLÉMENTS. Winch Gate est propriétaire exclusif de Ryzom et/ou Ryzom Ring, de l'ensemble des éléments propriétaires destinés à le faire fonctionner, et de l'ensemble des droits de propriété intellectuelle relatifs à ces éléments. Vous reconnaissez que Ryzom et son contenu sont protégés par copyright et par d'autres droits de propriété intellectuelle détenus par Winch Gate ou ses fournisseurs, et que vous ne bénéficiez d'aucun droit au delà des droits limités de licence vous sont expressément concédés aux termes de l'article 7 des présentes. Winch Gate est également propriétaire exclusif du compte de l'Utilisateur et des éléments créés ou utilisés par l'Utilisateur au travers de son compte, comprenant notamment les personnages, leur apparence, leurs caractéristiques, leur histoire, les objets créés ou fabriqués, les guildes, groupes et titres. L'Utilisateur concède également à Winch Gate le droit d'utiliser l'information transmise au serveur au moyen du compte (à l'exception des données personnelles et des messages adressés aux autres Utilisateurs) comme bon lui semble, y compris pour un usage commercial. \n
+	11.PROPRIÉTÉ DU JEU ET DE SES ÉLÉMENTS. Winch Gate est propriétaire exclusif de Ryzom et/ou Ryzom Ring, de l'ensemble des éléments propriétaires destinés à le faire fonctionner, et de l'ensemble des droits de propriété intellectuelle relatifs à ces éléments. Vous reconnaissez que Ryzom et son contenu sont protégés par copyright et par d'autres droits de propriété intellectuelle détenus par Winch Gate ou ses fournisseurs, et que vous ne bénéficiez d'aucun droit au delà des droits limités de licence vous sont expressément concédés aux termes de l'article 7 des présentes. Winch Gate est également propriétaire exclusif du compte de l'Utilisateur et des éléments créés ou utilisés par l'Utilisateur au travers de son compte, comprenant notamment les personnages, leur apparence, leurs caractéristiques, leur histoire, les objets créés ou fabriqués, les guildes, groupes et titres. L'Utilisateur concède également à Winch Gate le droit d'utiliser l'information transmise au serveur au moyen du compte (à l'exception des données personnelles et des messages adressés aux autres Utilisateurs) comme bon lui semble, y compris pour un usage commercial.\n
 	\n
-	12.INFORMATIONS ET DONNÉES TRANSMISES PAR L'UTILISATEUR. Les informations et données communiquées ou transmises par l'Utilisateur dans le cadre de l'utilisation de Ryzom ne doivent pas (a) violer les droits de tiers, y compris leurs droits de propriété intellectuelle, leur droit à l'image et leur droit à la vie privée; (b) violer une loi ou une réglementation quelconque; (c) contenir des propos diffamatoires, indécents, obscènes ou autrement préjudiciables aux mineurs; et (d) contenir des virus, chevaux de Troie, codes invalidants, vers, bombes logiques, ou autres instructions, programmes ou sous-programmes d'ordinateur destinés à causer ou qui causent des dommages aux données ou des interventions non autorisées sur les logiciels ou les serveurs de Ryzom et/ou Ryzom Ring. Nous pourrons prendre toute mesure en urgence sur votre compte (y compris la suspension ou l'annulation de celui-ci) si nous pensons (à notre seule discrétion) que cette utilisation contrevient aux interdictions ci-dessus. \n
+	12.INFORMATIONS ET DONNÉES TRANSMISES PAR L'UTILISATEUR. Les informations et données communiquées ou transmises par l'Utilisateur dans le cadre de l'utilisation de Ryzom ne doivent pas (a) violer les droits de tiers, y compris leurs droits de propriété intellectuelle, leur droit à l'image et leur droit à la vie privée; (b) violer une loi ou une réglementation quelconque; (c) contenir des propos diffamatoires, indécents, obscènes ou autrement préjudiciables aux mineurs; et (d) contenir des virus, chevaux de Troie, codes invalidants, vers, bombes logiques, ou autres instructions, programmes ou sous-programmes d'ordinateur destinés à causer ou qui causent des dommages aux données ou des interventions non autorisées sur les logiciels ou les serveurs de Ryzom et/ou Ryzom Ring. Nous pourrons prendre toute mesure en urgence sur votre compte (y compris la suspension ou l'annulation de celui-ci) si nous pensons (à notre seule discrétion) que cette utilisation contrevient aux interdictions ci-dessus.\n
 	\n
 	13.RÈGLES DE CONDUITE. Vous reconnaissez que le bon fonctionnement et le succès d'un Jeu de rôle en ligne comme Ryzom et/ou Ryzom Ring résulte d'un équilibre délicat que Winch Gate se doit de préserver. En conséquence, il est strictement interdit à l'Utilisateur : (a) d'utiliser un logiciel ou une méthode quelconque pour modifier le contenu ou les fonctionnalités du Jeu ; (b) de provoquer une surcharge du serveur ; (c) d'utiliser tout procédé facilitant la saisie de toute instruction à une cadence accélérée en comparaison avec le déroulement ordinaire de Jeu ; (d) de modifier l'interface utilisateur ou tout autre élément pour obtenir des objets, points d'expérience, devises, attributs de caractère, rangs, etc., ne résultant pas d'une utilisation normale du Jeu ; (e) d'acheter, de vendre ou de transférer des personnages ou des attributs de personnages du Jeu. En outre, l'Utilisateur doit à tout moment respecter le Code de conduite, les Politiques de Courtoisie et la Charte de nommage de Ryzom présents sur son site à l'adresse www.ryzom.com, dont le contenu est incorporé aux présentes par référence. Nous pourrons prendre toute mesure en urgence sur votre compte (y compris la suspension ou l'annulation de celui-ci) si nous pensons (à notre seule discrétion) que cette utilisation contrevient aux interdictions ci-dessus.\n
 	\n
-	14.INFORMATIONS PERSONNELLES / UTILISATEUR. Les engagements de Winch Gate concernant les données personnelles sont contenues dans la politique de protection des données personnelles présente sur le site Internet de Winch Gate à l'adresse www.ryzom.com, qui sont intégrées au présent Contrat par référence. Winch Gate n'est pas en mesure de s'assurer que les informations personnelles communiquées par l'Utilisateur à un autre Utilisateur dans le cadre du Jeu ne seront pas révélées aux tiers. Afin de permettre la mise à jour / patching du Jeu, vous autorisez Winch Gate (a) à extraire des données de profil de votre matériel informatique ; (b) à extraire de votre ordinateur l'information relative à la localisation du Jeu dans votre système de fichiers et à vos droits d'accès ; et (c) à télécharger des éléments du Jeu et des éléments nécessaires à son installation sur votre ordinateur utilisant votre compte. \n
+	14.INFORMATIONS PERSONNELLES / UTILISATEUR. Les engagements de Winch Gate concernant les données personnelles sont contenues dans la politique de protection des données personnelles présente sur le site Internet de Winch Gate à l'adresse www.ryzom.com, qui sont intégrées au présent Contrat par référence. Winch Gate n'est pas en mesure de s'assurer que les informations personnelles communiquées par l'Utilisateur à un autre Utilisateur dans le cadre du Jeu ne seront pas révélées aux tiers. Afin de permettre la mise à jour / patching du Jeu, vous autorisez Winch Gate (a) à extraire des données de profil de votre matériel informatique ; (b) à extraire de votre ordinateur l'information relative à la localisation du Jeu dans votre système de fichiers et à vos droits d'accès ; et (c) à télécharger des éléments du Jeu et des éléments nécessaires à son installation sur votre ordinateur utilisant votre compte.\n
 	\n
 	15.GARANTIE / LIMITATION DE RESPONSABILITÉ. Le CD-Rom, le Jeu et les services associés sont fournis « tels quels » par Winch Gate, sans autre garantie que les garanties légales d'ordre public minimum applicables au présent Contrat. Toute autre garantie, légale ou conventionnelle, est expressément exclue. Winch Gate produira ses meilleurs efforts afin de rendre le compte de l'Utilisateur accessible de manière permanente, sous réserve des interruptions dues à des interventions techniques et de maintenance. Cependant, Winch Gate ne saurait garantir un fonctionnement continu et sans erreur de ses services ou du Jeu, ni l'accès permanent des Utilisateurs à leur compte. En tout état de cause, la responsabilité de Winch Gate ne saurait être engagée en cas de dommages causés aux matériels et aux logiciels de l'Utilisateur lors de l'Utilisation du Jeu. A ce titre, il est rappelé aux Utilisateurs la nécessité de maintenir une configuration matérielle et logicielle correcte et conforme aux préconisations de Winch Gate, de procéder aux mises à jours régulières de leurs logiciels et à des sauvegardes régulières de leurs fichiers importants. Winch Gate ne saurait non plus être responsable du contenu des échanges entre joueurs et du comportement de ceux-ci. Si la responsabilité de Winch Gate venait à être engagée à un titre quelconque, cette responsabilité ne saurait être supérieure au montant cumulé des abonnements payés par l'Utilisateur.\n
 	\n
@@ -11327,11 +11327,11 @@ ter sa carte bancaire ou son moyen de paiement accepté à une date de renouvell
 	\n
 	17.RÉSILIATION PAR WINCH GATE. Winch Gate pourra résilier le présent Contrat et fermer sans préavis le compte de l'Utilisateur, immédiatement et sans sommation ni préavis, en cas de manquement, par l'Utilisateur, à l'une quelconque des ses obligations au terme du présent Contrat et ou de non respect par l'Utilisateur des conditions imposées par l'un des documents auxquels ce Contrat fait référence. Dans cette hypothèse, aucun remboursement ne sera dû à l'Utilisateur sur la partie de l'abonnement correspondant aux jours restant à courir jusqu'à la date expiration normale de la période d'abonnement en cours.\n
 	\n
-	18.RÉSILIATION PAR L'UTILISATEUR. L'Utilisateur peut mettre fin au présent Contrat et clôturer son compte à tout moment, sur notification adressée Winch Gate, par courrier ou dans les conditions indiquées lors de l'accès au compte. La résiliation prendra effet à l'expiration de la période d'abonnement en cours. Les sommes payées en contrepartie de l'abonnement en cours ne pourront être restituées, même si l'Utilisateur n'utilise pas son compte jusqu'à la date de résiliation. \n
+	18.RÉSILIATION PAR L'UTILISATEUR. L'Utilisateur peut mettre fin au présent Contrat et clôturer son compte à tout moment, sur notification adressée Winch Gate, par courrier ou dans les conditions indiquées lors de l'accès au compte. La résiliation prendra effet à l'expiration de la période d'abonnement en cours. Les sommes payées en contrepartie de l'abonnement en cours ne pourront être restituées, même si l'Utilisateur n'utilise pas son compte jusqu'à la date de résiliation.\n
 	\n
-	19.MODIFICATIONS DE LA LICENCE. Winch Gate se réserve le droit de modifier les termes du présent Contrat à tout moment. L'Utilisateur sera informé des modifications éventuelles apportées au Contrat lors de l'accès à son compte suivant ce changement. L'accès au Jeu vaudra alors acceptation des conditions du Contrat modifié, qui s'appliqueront immédiatement. \n
+	19.MODIFICATIONS DE LA LICENCE. Winch Gate se réserve le droit de modifier les termes du présent Contrat à tout moment. L'Utilisateur sera informé des modifications éventuelles apportées au Contrat lors de l'accès à son compte suivant ce changement. L'accès au Jeu vaudra alors acceptation des conditions du Contrat modifié, qui s'appliqueront immédiatement.\n
 	\n
-	20.PRÉCAUTIONS A PRENDRE / ÉPILEPSIE. Winch Gate vous rappelle qu'il est nécessaire d'éviter de jouer si vous êtes fatigué ou si vous manquez de sommeil. Assurez-vous que vous jouez dans une pièce bien éclairée en modérant la luminosité de votre écran. Lorsque vous utilisez un jeu vidéo susceptible d'être connecté à un écran, jouez à bonne distance de cet écran de télévision et aussi loin que le permet le cordon de raccordement. En cours d'utilisation, faites des pauses de dix à quinze minutes toutes les heures. De même, nous attirons votre attention sur le fait que certaines personnes sont susceptibles de faire des crises d'épilepsie comportant, le cas échéant, des pertes de conscience à la vue, notamment, de certains types de stimulations lumineuses fortes : succession rapide d'images ou répétition de figures géométriques simples, d'éclairs ou d'explosions. Ces personnes s'exposent à des crises lorsqu'elles jouent à certains jeux vidéo comportant de telles stimulations, alors même qu'elles n'ont pas d'antécédent médical ou n'ont jamais été sujettes elles-mêmes à des crises d'épilepsie. Si vous-même ou un membre de votre famille avez déjà présenté des symptômes liés à l'épilepsie (crise ou perte de conscience) en présence de stimulations lumineuses, consultez votre médecin avant toute utilisation. Les parents se doivent également d'être particulièrement attentifs à leurs enfants lorsqu'ils jouent avec des jeux vidéo. Si vous-même ou votre enfant présentez un des symptômes suivants : vertige, trouble de la vision, contraction des yeux ou des muscles, trouble de l'orientation, mouvement involontaire ou convulsion, perte momentanée de conscience, il faut cesser immédiatement de jouer et consulter un médecin. \n
+	20.PRÉCAUTIONS A PRENDRE / ÉPILEPSIE. Winch Gate vous rappelle qu'il est nécessaire d'éviter de jouer si vous êtes fatigué ou si vous manquez de sommeil. Assurez-vous que vous jouez dans une pièce bien éclairée en modérant la luminosité de votre écran. Lorsque vous utilisez un jeu vidéo susceptible d'être connecté à un écran, jouez à bonne distance de cet écran de télévision et aussi loin que le permet le cordon de raccordement. En cours d'utilisation, faites des pauses de dix à quinze minutes toutes les heures. De même, nous attirons votre attention sur le fait que certaines personnes sont susceptibles de faire des crises d'épilepsie comportant, le cas échéant, des pertes de conscience à la vue, notamment, de certains types de stimulations lumineuses fortes : succession rapide d'images ou répétition de figures géométriques simples, d'éclairs ou d'explosions. Ces personnes s'exposent à des crises lorsqu'elles jouent à certains jeux vidéo comportant de telles stimulations, alors même qu'elles n'ont pas d'antécédent médical ou n'ont jamais été sujettes elles-mêmes à des crises d'épilepsie. Si vous-même ou un membre de votre famille avez déjà présenté des symptômes liés à l'épilepsie (crise ou perte de conscience) en présence de stimulations lumineuses, consultez votre médecin avant toute utilisation. Les parents se doivent également d'être particulièrement attentifs à leurs enfants lorsqu'ils jouent avec des jeux vidéo. Si vous-même ou votre enfant présentez un des symptômes suivants : vertige, trouble de la vision, contraction des yeux ou des muscles, trouble de l'orientation, mouvement involontaire ou convulsion, perte momentanée de conscience, il faut cesser immédiatement de jouer et consulter un médecin.\n
 	\n
 	21.LOI APPLICABLE / DIVERS. Le présent Contrat est régi par la loi  française. L'application de la Convention des Nations Unies sur les contrats internationaux de vente de marchandises est expressément écartée. Tout litige relatif au présent Contrat sera soumis à la compétence exclusive des tribunaux compétents de Paris. Si l'une des clauses du présent Contrat venait à être jugée nulle ou non opposable à l'Utilisateur, cette nullité ou non opposabilité n'affecterait pas la validité ou l'opposabilité des autres clauses du Contrat. Le présent Contrat ne peut être cédé ni transféré par l'Utilisateur.]
 
@@ -12271,7 +12271,7 @@ uihelpItemConsumableFormat	[
 	@{FFF9}Temps de consommation (en sec.):@{T21}@{FFFF}%consumption_time\n
 	@{FFF9}Delai avant réutilisation (en min.):@{T21}@{FFFF}%overdose_timer\n
 	\n
-        \n
+	\n
 	@{FFFF}%consumable_effects%custom_text]
 
 uiItemConsumableEffectDownCharac	[Gives a malus of @{F22F}%charac@{FFFF} points(s) to your @{F2F}%bonus@{FFFF}\n
@@ -12623,7 +12623,7 @@ uittActionSuccessRateSF	[@{6F6F}Taux de réussite @{FFFF}:\nLe taux de réussite
 uittActionSuccessRateSM	[@{6F6F}Taux de réussite @{FFFF}:\nLe taux de réussite dépend des compétences des stanzas de magie utilisées.]
 uittActionSuccessRateSC	[@{6F6F}Taux de réussite @{FFFF}:\nLe taux de réussite dépend de votre compétence à créer différents objets.]
 uittActionSuccessRateSH	[@{6F6F}Taux de réussite @{FFFF}:\nLe taux de réussite dépend du lieu de récolte et des stanzas utilisées.]
-uittActionSkillPoint	[@{6F6F}Points de Compétence @{FFFF}:\n@{AAAF}Points manquants / Coût total \n@{FFFF}Quand vous maîtrisez toutes les stanzas d'une action, le premier chiffre est 0 et l'action est dégrisée dans la fenêtre de Progression des Actions.]
+uittActionSkillPoint	[@{6F6F}Points de Compétence @{FFFF}:\n@{AAAF}Points manquants / Coût total\n@{FFFF}Quand vous maîtrisez toutes les stanzas d'une action, le premier chiffre est 0 et l'action est dégrisée dans la fenêtre de Progression des Actions.]
 uittActionSkillReq	[@{6F6F}Compétences requises @{FFFF}:\nIndique précisément les compétences à développer et le niveau à atteindre dans ces compétences.\nLes prérequis non remplis sont en @{F80F}Orange@{FFFF}.]
 uittActionStanzaReq	[@{6F6F}Stanzas requises @{FFFF}:\nVous devez connaître les stanzas qui suivent avant de pouvoir apprendre cette action.\nLes prérequis non remplis sont en @{F80F}Orange@{FFFF}.]
 
@@ -12919,7 +12919,7 @@ uiR2EDApplyScenarioFilters	[Apply]
 uiRingLaunchScenarioTooltip			[Launch an animation session with the scenario that you have chosen.]
 uiRingDescriptionScenarioTooltip	[Describe the scenario that you will launch. It will be visible by all players at each Ring Terminal.]
 
-uiRingWarningFreeTrial				[FREE TRIAL LIMITATIONS:\n\nYou cannot join this Ring adventure with a free trial account.\n\nIn order to gain full access to Ryzom Ring you need to subscribe to Ryzom.\n\nTo upgrade your account see \nwww.ryzom.com\n]
+uiRingWarningFreeTrial				[FREE TRIAL LIMITATIONS:\n\nYou cannot join this Ring adventure with a free trial account.\n\nIn order to gain full access to Ryzom Ring you need to subscribe to Ryzom.\n\nTo upgrade your account see\nwww.ryzom.com\n]
 uiRingWarningInviteFreeTrial		[You cannot invite this player because he has a free trial account and this scenario is not allowed for free trial players.\n]
 
 uiRingWarningNewcomer				[You cannot invite this player because one of you two is a newcomer but not the other one.\n]
@@ -12939,13 +12939,13 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Level			[@{6F6F}Difficulty\n@{FF
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Language		[@{6F6F}Language\n@{FFFF} The language of the scenario, as declared by the scenario author]
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel		[@{6F6F}Requirements\n@{FFFF} Indicates wether you are permitted to load this scenario. One is only permitted to load scenarios that contain content that one has access to. One gains access to additional content by exploring the mainlands of Atys.]
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Author			[@{6F6F}Author\n@{FFFF} Author of the selected scenario. Between brackets is the rating given by the author to its own scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo		[@{6F6F}newbieLand Scenarios \n@{FFFF} WRITE ME]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun			[@{6F6F}Fun Rating \n@{FFFF} Fun rating for the selected scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty			[@{6F6F}Difficulty Rating \n@{FFFF} Difficulty rating for the selected scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility			[@{6F6F}Accessibility Rating \n@{FFFF} Accessibility rating for the selected scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality			[@{6F6F}Originality Rating \n@{FFFF} Originality rating for the selected scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction			[@{6F6F}Direction Rating \n@{FFFF} Direction rating for the selected scenario.]
-uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal			[@{6F6F}Ryzom Ring Points Total \n@{FFFF} Ryzom Ring Points Total for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo		[@{6F6F}newbieLand Scenarios\n@{FFFF} WRITE ME]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun			[@{6F6F}Fun Rating\n@{FFFF} Fun rating for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty			[@{6F6F}Difficulty Rating\n@{FFFF} Difficulty rating for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility			[@{6F6F}Accessibility Rating\n@{FFFF} Accessibility rating for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality			[@{6F6F}Originality Rating\n@{FFFF} Originality rating for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction			[@{6F6F}Direction Rating\n@{FFFF} Direction rating for the selected scenario.]
+uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal			[@{6F6F}Ryzom Ring Points Total\n@{FFFF} Ryzom Ring Points Total for the selected scenario.]
 
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_TreeInfo		[@{6F6F}Winch Gate Examples\n@{FFFF}Example scenarios supplied with Ryzom. These demonstrate some of the things that can be done with Ryzom Ring.\n@{6F6F}Pioneer Scenarios\n@{FFFF}Provided by other players and customer support, these are not vetted by Winch Gate. See ryzom.com/pioneer_program for more details.\n@{6F6F}My Files\n@{FFFF}The files that are in the 'My Scenarios' folder on your computer.]
 

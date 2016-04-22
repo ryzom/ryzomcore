@@ -4667,7 +4667,7 @@ uittOutpostAttackRound	[@{6F6F}Période d'attaque !@{FFFF}\n
 	À chaque round perdu, le @{6F6F}niveau de round@{FFFF} diminuera ainsi que le nombre d'escouades à éliminer.\n
 	]
 
-// HASH_VALUE C3CD3092CDC57722
+// HASH_VALUE 5167E5C13ECAD46A
 // INDEX 1163
 uittOutpostAttackAfterWin	[@{6F6F}Après attaque@{FFFF}\n
 	La guerre continue !\n
@@ -4683,7 +4683,7 @@ uittOutpostAttackAfterLoose	[@{6F6F}Après attaque@{FFFF}\n
 	L'avant-poste sera complètement libéré à la fin de la phase d'attaque.\n
 	]
 
-// HASH_VALUE FE5CECB92CB02670
+// HASH_VALUE 80AE5D25B48D6AF6
 // INDEX 1165
 uittOutpostDefenseBefore	[@{6F6F}Attente défense@{FFFF}\n
 	La guerre continue !\n
@@ -6519,62 +6519,62 @@ uiPvPEffect_region_nexus_Bonus	[@{FE7F}Le foyer du Nexus @{FFFF}:\n
 uiPvPEffect_region_nexus_Malus	[@{FE7F}Le foyer du Nexus @{FFFF}:\n
 	  Aucun effet]
 
-// HASH_VALUE AA1DC3C4FD396774
+// HASH_VALUE 1DFA698F6F1CEB87
 // INDEX 1569
 uiHPDesc	[@{6F6F}HP@{FFFF},\n
 	les Points de vie mesurent le montant des dommages qu'un personnage peut supporter avant de mourir.]
 
-// HASH_VALUE 08CF5A4F3BBC8D17
+// HASH_VALUE F5FDD1AB033CC0EE
 // INDEX 1570
 uiStaDesc	[@{6F6F}Endurance@{FFFF},\n
 	utilisée par les actions de combat physique, l'Endurance mesure l'état de fatigue d'un personnage.]
 
-// HASH_VALUE 57516E1B1624B27C
+// HASH_VALUE 2C1FD421622528DA
 // INDEX 1571
 uiSapDesc	[@{6F6F}Sève@{FFFF},\n
 	l'énergie qui permet à un personnage de canaliser des forces magiques.]
 
-// HASH_VALUE 0818382AFDB10CD9
+// HASH_VALUE C633F11DEEB020B7
 // INDEX 1572
 uiFocDesc	[@{6F6F}Concentration@{FFFF},\n
 	mesure la capacité d'un personnage à se focaliser sur une tâche précise.]
 
-// HASH_VALUE C5C5AADDE9B1CB06
+// HASH_VALUE B53F72F05B6AC409
 // INDEX 1573
 uiConsDesc	[@{6F6F}Constitution@{FFFF},\n
 	mesure la résistance physique d'un personnage.]
 
-// HASH_VALUE B4C1EFCDAFE00362
+// HASH_VALUE CACBF78CD4CA1DA6
 // INDEX 1574
 uiIntDesc	[@{6F6F}Intelligence@{FFFF},\n
 	mesure les facultés d'abstraction et la force mentale d'un personnage.]
 
-// HASH_VALUE 2D2E06E01D8CC946
+// HASH_VALUE 53F88E3BCEE9769C
 // INDEX 1575
 uiStrDesc	[@{6F6F}Force@{FFFF},\n
 	mesure la force physique d'un personnage.]
 
-// HASH_VALUE 2CBDF588F00F8902
+// HASH_VALUE 3D7762B2175118D9
 // INDEX 1576
 uiDexDesc	[@{6F6F}Dextérité@{FFFF},\n
 	mesure l'habileté manuelle d'un personnage.]
 
-// HASH_VALUE EE7A5B01A1BEDC58
+// HASH_VALUE D2BB0D83FCD3D9A7
 // INDEX 1577
 uiMetaDesc	[@{6F6F}Métabolisme@{FFFF},\n
 	mesure la rapidité avec laquelle un personnage peut se rétablir de ses blessures.]
 
-// HASH_VALUE 9DF5C8519F10DD99
+// HASH_VALUE 3B7F472AFA19751E
 // INDEX 1578
 uiWisDesc	[@{6F6F}Sagesse@{FFFF},\n
 	détermine le temps de régénération de la sève, l'énergie utilisée pour faire de la magie.]
 
-// HASH_VALUE DFFD9B8BE269FBC5
+// HASH_VALUE F75D672C48475E52
 // INDEX 1579
 uiWBDesc	[@{6F6F}Équilibre@{FFFF},\n
 	permet à un personnage de diminuer le temps nécessaire pour se reposer.]
 
-// HASH_VALUE C9E791CC1DBE5661
+// HASH_VALUE C92E4B6CD924CBB7
 // INDEX 1580
 uiWillDesc	[@{6F6F}Volonté@{FFFF},\n
 	mesure la capacité d'un personnage à maintenir un haut niveau de concentration durant une longue période de temps.]
@@ -6709,7 +6709,7 @@ uiSkillJobLVL	[Niv. : ]
 
 // HASH_VALUE 13B2403C13D33C3E
 // INDEX 1613
-uiStatusTitle	[ÉTAT]
+uiStatusTitle	[État]
 
 // HASH_VALUE 0AF2781B05A2A82D
 // INDEX 1614
@@ -8899,7 +8899,7 @@ uimwJewelry	[Bijoux]
 
 // HASH_VALUE 8A40982588C1BC21
 // INDEX 2156
-uimwPA	[ANIMAUX]
+uimwPA	[Animaux]
 
 // HASH_VALUE 8EE3BC39CBA3F82E
 // INDEX 2157
@@ -8919,7 +8919,7 @@ uimwRadar	[Radar]
 
 // HASH_VALUE 0AF2802B07C1BC1F
 // INDEX 2161
-uimwMap	[CARTE]
+uimwMap	[Carte]
 
 // HASH_VALUE 08F0D4144B50E812
 // INDEX 2162
@@ -8963,7 +8963,7 @@ uimwGuildChat	[CHAT DE LA GUILDE]
 
 // HASH_VALUE 88C1902A3A9EEBF8
 // INDEX 2172
-uimwMainChat	[CHAT PRINCIPAL]
+uimwMainChat	[Chat principal]
 
 // HASH_VALUE CF114F418A60E404
 // INDEX 2173
@@ -8983,15 +8983,15 @@ uimwTeamChat	[CHAT DE L'ÉQUIPE]
 
 // HASH_VALUE 4C5054504C505450
 // INDEX 2177
-uimwTeamList	[ÉQUIPE]
+uimwTeamList	[Équipe]
 
 // HASH_VALUE 4742AC133AA37C11
 // INDEX 2178
-uimwContactList	[LISTE DES CONTACTS]
+uimwContactList	[Liste des contacts]
 
 // HASH_VALUE 4450141844501418
 // INDEX 2179
-uimwFame	[RENOMMÉE]
+uimwFame	[Renommée]
 
 // HASH_VALUE 4408943444D05404
 // INDEX 2180
@@ -10482,7 +10482,7 @@ uihelpItemChargeSpell	[@{FFF9}Charge en Sève :@{T12}@{FFFF}%quality\n
 
 // HELP - ITEM - animals
 // **************
-// HASH_VALUE E83415184D022FA7
+// HASH_VALUE 88359CF16D5CFDBD
 // INDEX 2496
 uihelpItemAnimal	[Cet objet représente\n
 	votre animal n°#%petnumber.\n
@@ -10698,7 +10698,7 @@ uihelpPhraseCrystalSpellFormat	[@{FFFF}--- Enchantement ---\n
 	@{FFF9}Portée :@{T12}@{FFFF}%range\n
 	]
 
-// HASH_VALUE 9719881D178D7D81
+// HASH_VALUE D143C452681C513F
 // INDEX 2525
 uihelpPhraseRequirementHeader	[\n
 	@{FFFF}--- Prérequis---\n
@@ -12326,7 +12326,7 @@ uiNoGuild	[Aucun]
 
 // HASH_VALUE 8A40982588C1BC21
 // INDEX 2917
-uiBeast	[ANIMAUX]
+uiBeast	[Animaux]
 
 // HASH_VALUE ADE9908C2828DC8C
 // INDEX 2918
@@ -20044,7 +20044,7 @@ uiAppear_Infos5	[Infos aspect - actions]
 // INDEX 4834
 uiWebOnQuit	[Répondre au questionnaire]
 
-// HASH_VALUE E1C9F277D15BECEE
+// HASH_VALUE 8835A1BEF5B44A40
 // INDEX 4835
 uiAppear_Infos_Fyros	[LA CIVILISATION FYROS\n
 	\n
@@ -20128,7 +20128,7 @@ uiAppear_Infos_Fyros	[LA CIVILISATION FYROS\n
 	Que puis-je attendre d'Atys, notre monde ?\n
 	Atys abonde de matières premières, jeune homin, tant que tu respectes l'environnement tu pourras tirer profit des bienfaits en son sein. Lorsque tu te seras familiarisé avec le monde, tu apprendras à apprivoiser les étendues sauvages et à conquérir de nouvelles terres.]
 
-// HASH_VALUE 4DD020F174DAF28F
+// HASH_VALUE C49E1C470D78B970
 // INDEX 4836
 uiAppear_Infos_Matis	[LA CIVILISATION MATIS\n
 	\n
@@ -20283,7 +20283,7 @@ uiAppear_Infos_Tryker	[LA CIVILISATION TRYKER\n
 	Que puis-je attendre d'Atys, notre monde ?\n
 	Atys est une source de richesses naturelles, jeune homin. Tu apprendras en temps voulu comment en tirer profit. Lorsque tu te seras familiarisé avec le monde, tu apprendras comment s'organisent les terres et tu pourras alors découvrir de nouveaux lieux.]
 
-// HASH_VALUE 89DF5206BCA0DF71
+// HASH_VALUE 3C0E7C72556007F0
 // INDEX 4838
 uiAppear_Infos_Zorai	[LA CIVILISATION ZORAÏ\n
 	\n
@@ -21289,7 +21289,7 @@ uiEulaAccept	[J'ACCEPTE]
 // INDEX 5069
 uiEulaDecline	[JE REFUSE]
 
-// HASH_VALUE 7F1832C442FC5ED9
+// HASH_VALUE 53D27B9DDD3610E2
 // INDEX 5070
 uiEulaContent	[LICENCE RYZOM\n
 	\n
@@ -22223,7 +22223,7 @@ gn_zorai_voluteer_f	[Milicien Zoraï]
 
 // HASH_VALUE 10F0B412CEB0AC10
 // INDEX 5292
-uimwEncyclopedia	[ENCYCLOPÉDIE]
+uimwEncyclopedia	[Encyclopédie]
 
 // HASH_VALUE 10F0B412CEB0AC10
 // INDEX 5293
@@ -23507,7 +23507,7 @@ uiItemSpecialEffectFlyingTextISE_FORAGE_ADD_RM	[Bonus de récolte]
 // INDEX 5596
 uiItemSpecialEffectFlyingTextISE_FORAGE_NO_RISK	[Source sans risque]
 
-// HASH_VALUE ADCF037D8B34A964
+// HASH_VALUE A5CD835D83322944
 // INDEX 5597
 uihelpItemConsumableFormat	[@{FFF9}Consommation :@{T21}@{FFFF}%consumption_time sec\n
 	@{FFF9}réutilisable après :@{T21}@{FFFF}%overdose_timer_min min %overdose_timer_sec\n
@@ -23517,7 +23517,7 @@ uihelpItemConsumableFormat	[@{FFF9}Consommation :@{T21}@{FFFF}%consumption_time 
 
 // HASH_VALUE 3AE04726A243C91F
 // INDEX 5598
-uiItemConsumableEffectDownCharac	[Donne un malus de @{F22F}%bonus@{FFFF} sur @{FF2F}%charac@{FFFF} \n
+uiItemConsumableEffectDownCharac	[Donne un malus de @{F22F}%bonus@{FFFF} sur @{FF2F}%charac@{FFFF}\n
 	pendant %minutes min et %secondes sec.]
 
 // HASH_VALUE 356C7F1BA243C933
@@ -24531,7 +24531,7 @@ uittActionSuccessRateSC	[@{6F6F}Taux de réussite @{FFFF}:\n
 uittActionSuccessRateSH	[@{6F6F}Taux de réussite @{FFFF}:\n
 	Le taux de réussite dépend du lieu de récolte et des briques utilisées.]
 
-// HASH_VALUE 6272716CB11A7CC9
+// HASH_VALUE 3E26F9FD7FAAFC3B
 // INDEX 5824
 uittActionSkillPoint	[@{6F6F}Points de compétence @{FFFF}:\n
 	@{AAAF}Points manquants / coût total\n
@@ -25488,7 +25488,7 @@ uiRingLaunchScenarioTooltip	[Lance une session Ring avec le scénario que vous a
 // INDEX 6057
 uiRingDescriptionScenarioTooltip	[Décrit le scénario que vous allez lancer. Cela sera visible par tous les joueurs à chaque terminal Ring.]
 
-// HASH_VALUE 37A499AF454933EB
+// HASH_VALUE 84B0468E03833CAE
 // INDEX 6058
 uiRingWarningFreeTrial	[LIMITES DU COMPTE D'ESSAI:\n
 	\n
@@ -25567,37 +25567,37 @@ uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RingPointsLevel	[@{6F6F}Prérequ
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Author	[@{6F6F}Auteur\n
 	@{FFFF} Auteur du scénario sélectionné. Le nombre entre crochets est la note donnée au scénario par son propre auteur.]
 
-// HASH_VALUE 7D5B350CB5DF616F
+// HASH_VALUE 9EA0A0FD78FB3997
 // INDEX 6073
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_NewbieTreeInfo	[@{6F6F}Scenarii de la zone de départ\n
 	@{FFFF} M'ÉCRIRE]
 
-// HASH_VALUE F0009604F468F22A
+// HASH_VALUE 87960AF7A45D2658
 // INDEX 6074
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Fun	[@{6F6F}Note de divertissement\n
 	@{FFFF} Note le divertissement apporté par le scénario sélectionné.]
 
-// HASH_VALUE 5CC60FE247B6E541
+// HASH_VALUE CDB27963AD12DDA0
 // INDEX 6075
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Difficulty	[@{6F6F}Note de difficulté\n
 	@{FFFF} Note la difficulté du scénario sélectionné.]
 
-// HASH_VALUE C3A8D93AB4BF2DF7
+// HASH_VALUE D46FE1B7F50CEE11
 // INDEX 6076
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Accessibility	[@{6F6F}Note d'accessibilité\n
 	@{FFFF} Note l'accessibilité du scénario sélectionné.]
 
-// HASH_VALUE E63CECE3EAA44809
+// HASH_VALUE 3D328CC9DBB9483A
 // INDEX 6077
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Originality	[@{6F6F}Note d'originalité\n
 	@{FFFF} Note l'originalité du scénario sélectionné.]
 
-// HASH_VALUE EAB3000597E79860
+// HASH_VALUE 57E6B4C838791D1A
 // INDEX 6078
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_Direction	[@{6F6F}Note de clarté de consignes\n
 	@{FFFF} Note la clarté des consignes du scénario sélectionné.]
 
-// HASH_VALUE F9C96D1B8F3186FB
+// HASH_VALUE 585781307E13678D
 // INDEX 6079
 uiR2EdPropertyToolTip_LoadScenario_LoadScenario_RRPTotal	[@{6F6F}Total des points de Ring\n
 	@{FFFF} Points de Ring totaux pour le scénario sélectionné.]
@@ -27233,7 +27233,6 @@ uiFixedMissionEntry_Mainland_Unknwown	[Continent / Inconnu]
 // INDEX 6472
 uiNoFiles	[Aucun fichier...]
 
-// symbol of byte unit
 // HASH_VALUE 4090240840902408
 // INDEX 6473
 uiByte	[o]
