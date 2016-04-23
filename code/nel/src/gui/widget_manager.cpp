@@ -1258,7 +1258,7 @@ namespace NLGUI
 			getWindowForActiveMasterGroup(newCtrl->getContextHelpWindowName());
 
 		uint32 _ScreenH, _ScreenW;
-		CViewRenderer::getInstance()->getScreenSize( _ScreenH, _ScreenW );
+		CViewRenderer::getInstance()->getScreenSize( _ScreenW, _ScreenH );
 
 		if(ttPosRef==Hotspot_TTAuto || ttParentRef==Hotspot_TTAuto)
 		{
