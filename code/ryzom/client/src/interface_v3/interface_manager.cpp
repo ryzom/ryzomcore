@@ -1826,7 +1826,8 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 	COFile f;
 
-	if (!f.open(filename)) return false;
+	// using temporary file, so no f.close() unless its a success
+	if (!f.open(filename, false, false, true)) return false;
 
 	CInterfaceConfig ic;
 
@@ -1873,7 +1874,6 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		{
 			nlwarning("Config saving failed");
 			// couldn't save result so do not continue
-			f.close();
 			return false;
 		}
 
@@ -1929,14 +1929,14 @@ bool CInterfaceManager::saveConfig (const string &filename)
 			nlwarning("Bad user dyn chat saving");
 			return false;
 		}
+
+		f.close();
 	}
 	catch(const NLMISC::EStream &)
 	{
-		f.close();
 		nlwarning("Config saving failed.");
 		return false;
 	}
-	f.close();
 
 	ContinentMngr.serialFOWMaps();
 
@@ -2645,7 +2645,8 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 	try
 	{
 		COFile file;
-		if (file.open (filename))
+		// using temporary file, so no file.close() unless its a success
+		if (file.open (filename, false, false, true))
 		{
 			COXml xmlStream;
 			xmlStream.init (&file);
@@ -2675,8 +2676,7 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 	}
 	catch (const Exception &e)
 	{
-		nlwarning ("Error while writing the file %s : %s. Remove it.", filename.c_str(), e.what ());
-		CFile::deleteFile(filename);
+		nlwarning ("Error while writing the file %s : %s.", filename.c_str(), e.what ());
 	}
 	return ret;
 }
