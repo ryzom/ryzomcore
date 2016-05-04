@@ -86,7 +86,7 @@ CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 
 #ifdef RZ_USE_STEAM
 	// Hide Play Ryzom button if using Steam because we need to launch it from Steam
-	playRyzom->setHidden(true);
+	playButton->setHidden(true);
 #endif
 
 	CategoryStackedWidget->addWidget( new CGeneralSettingsWidget( CategoryStackedWidget ) );
