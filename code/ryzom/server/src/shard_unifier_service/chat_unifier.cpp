@@ -225,7 +225,7 @@ namespace CHATUNI
 			{
 				// no IOS for the hosting shard !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_no_ios_module);
-nldebug("sendFatTell : no module proxy for shard %u", hostShardId);
+				nldebug("sendFatTell : no module proxy for shard %u", hostShardId);
 				return;
 			}
 
@@ -235,7 +235,7 @@ nldebug("sendFatTell : no module proxy for shard %u", hostShardId);
 			{
 				// no character synchronizer to retrieve sender name !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_no_char_sync);
-nldebug("sendFarTell : can't finc character sync singleton");
+				nldebug("sendFarTell : can't finc character sync singleton");
 				return;
 			}
 
@@ -245,7 +245,7 @@ nldebug("sendFarTell : can't finc character sync singleton");
 			{
 				// no character synchronizer to retrieve sender name !
 				cucSender.recvFarTellFail(this, senderCharId, destName, TFailInfo::fi_sender_char_unknown);
-nldebug("sendFarTell : can't get character name from sender char id %s", senderCharId.toString().c_str());
+				nldebug("sendFarTell : can't get character name from sender char id %s", senderCharId.toString().c_str());
 				return;
 			}
 
