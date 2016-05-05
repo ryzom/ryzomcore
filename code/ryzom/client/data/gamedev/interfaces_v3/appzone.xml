@@ -212,7 +212,6 @@
              background_bitmap_view=""
              home=""
              browse_next_time="false"
-             timeout="5"
              form_text_area_group="edit_box_widget_multiline">
         <group id="black"
                posref="BR BR"
