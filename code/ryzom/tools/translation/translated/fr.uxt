@@ -6949,7 +6949,7 @@ uimRemove	[SUPPRIMER]
 
 // HASH_VALUE 41002B370C210010
 // INDEX 1673
-uimMoveTo	[DÉPLACER]
+uimMoveTo	[Déplacer]
 
 // HASH_VALUE C81227254C1ED00C
 // INDEX 1674
@@ -9127,7 +9127,7 @@ uimRefine	[Améliorer]
 
 // HASH_VALUE 4C90E4244C90E424
 // INDEX 2213
-uimBoldInfo	[INFOS]
+uimBoldInfo	[Infos]
 
 // HASH_VALUE 0F52F02F4CC3C033
 // INDEX 2214
@@ -26245,7 +26245,7 @@ uiCP_KeysetName_bi_wow_alike	[Autre 1]
 
 // HASH_VALUE 9181AE4143F379CE
 // INDEX 6233
-uiCP_KeysetTooltip_bi_wow_alike	[Pour les personnes habituées à la configuration des touches d'un autre MMO, celle peut éventuellement vous permettre de retrouver vos marques. Ceci ne s'applique qu'à Ryzom (La configuration du Ring reste la même).]
+uiCP_KeysetTooltip_bi_wow_alike	[Pour les personnes habituées à la configuration des touches d'un autre MMO, cela peut éventuellement vous permettre de retrouver vos marques. Ceci ne s'applique qu'à Ryzom (La configuration du Ring reste la même).]
 
 // HASH_VALUE 2957F04D21D5A0AF
 // INDEX 6234

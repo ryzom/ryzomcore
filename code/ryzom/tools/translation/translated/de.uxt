@@ -4669,7 +4669,7 @@ uittOutpostAttackBefore	[@{6F6F}Warten auf Angriff@{FFFF}\n
 // INDEX 1162
 uittOutpostAttackRound	[@{6F6F}Angriffsperiode!@{FFFF}\n
 	Die Angreifer müssen einen höchstmöglichen @{6F6F}Rundenstand@{FFFF} erreichen.\n
-	Sie müssen mindestens die angegebene @{6F6F}Mindestschwelle@{FFFF} erreichen, die der Außenposten zur Zeit hat.\n
+	Sie müssen die angegebene @{6F6F}Mindestschwelle@{FFFF} überschreiten, die der Außenposten zur Zeit hat.\n
 	Bei jeder gewonnenen Runde steigen das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu zerstörenden Truppen.\n
 	Bei jeder verlorenen Runde sinken das @{6F6F}Rundenlevel@{FFFF} und die Anzahl der zu zerstörenden Truppen.\n
 	]
@@ -4678,7 +4678,7 @@ uittOutpostAttackRound	[@{6F6F}Angriffsperiode!@{FFFF}\n
 // INDEX 1163
 uittOutpostAttackAfterWin	[@{6F6F}Nach dem Angriff@{FFFF}\n
 	Der Krieg geht weiter!\n
-	Die Angreifer haben es geschafft, die @{6F6F}Mindestschwelle@{FFFF} zu erreichen, die die Verteidiger während der @{6F6F}Angriffsperiode@{FFFF} festgelegt haben.\n
+	Die Angreifer haben es geschafft, die @{6F6F}Mindestschwelle@{FFFF} zu überschreiten, die die Verteidiger während der @{6F6F}Angriffsperiode@{FFFF} festgelegt haben.\n
 	Das Ende der Angriffsphase muss abgewartet werden, ehe die Angreifer den Außenposten gewinnen.\n
 	]
 
@@ -4693,8 +4693,6 @@ uittOutpostAttackAfterLoose	[@{6F6F}Nach Angriff@{FFFF}\n
 // HASH_VALUE 80AE5D25B48D6AF6
 // INDEX 1165
 uittOutpostDefenseBefore	[@{6F6F}Warten auf Verteidigung@{FFFF}\n
-	Der Krieg geht weiter!\n
-	Die Angreifer haben es geschafft, die nötige @{6F6F}Mindestschwelle@{FFFF} zu erreichen.\n
 	Sie haben vorübergehend die Kontrolle über die Truppen des Außenpostens übernommen.\n
 	Diese Truppen erscheinen erst während der @{6F6F}Verteidigungsperiode@{FFFF}.\n
 	Während dieser Periode müssen die Verteidiger den maximalen @{6F6F}Rundenlevel@{FFFF} der Angreifer erreichen, um den Außenposten zu halten.]
@@ -8903,7 +8901,7 @@ uimwHands	[HÄNDE UND AKTIONSLEISTE 1]
 
 // HASH_VALUE CB720C430F71F837
 // INDEX 2151
-uimwInventory	[Inventar]
+uimwInventory	[INVENTAR]
 
 // HASH_VALUE 0D00103A0A41EC39
 // INDEX 2152
@@ -9023,7 +9021,7 @@ uimwBars	[MEINE WERTE-ANZEIGE]
 
 // HASH_VALUE C3621C0B4C114744
 // INDEX 2181
-uimwBonusMalus	[BUFF / DEBUFF]
+uimwBonusMalus	[BUFFS / DEBUFFS]
 
 // HASH_VALUE 8B11903507628423
 // INDEX 2182
@@ -12673,7 +12671,7 @@ uiPlayer	[Meine Werte-Anzeige]
 
 // HASH_VALUE D36A9C4B6C15C7A4
 // INDEX 2997
-uiBonusMalus	[Buff / Debuff]
+uiBonusMalus	[Buffs / Debuffs]
 
 // HASH_VALUE EB27288CA3A73480
 // INDEX 2998
@@ -13073,7 +13071,7 @@ uiLight	[Licht]
 
 // HASH_VALUE ABE76848A5B2283E
 // INDEX 3097
-uiFreeMouse	[freier Mauszeiger]
+uiFreeMouse	[Freier Mauszeiger]
 
 // HASH_VALUE A9070F3B21451361
 // INDEX 3098
@@ -13522,7 +13520,7 @@ uiMailboxTitle	[Briefkasten]
 
 // HASH_VALUE 8C7064230801D836
 // INDEX 3208
-uimwMailbox	[Briefkasten]
+uimwMailbox	[BRIEFKASTEN]
 
 //Compass Waypoints
 // HASH_VALUE AE4860992787689C
@@ -22520,7 +22518,7 @@ uiPlaylistTitle	[PLAYLIST]
 
 // HASH_VALUE 1673A06395223B35
 // INDEX 5357
-uimwMP3Player	[MP3-Player]
+uimwMP3Player	[MP3-PLAYER]
 
 // HASH_VALUE E75984886189248F
 // INDEX 5358
@@ -24641,7 +24639,7 @@ uiUniverseChanelWarningAvoid	[Zeig diese Nachricht nicht mehr an.]
 
 // HASH_VALUE 6E75FF30933AF805
 // INDEX 5841
-uittBonusMalusWindow	[Buff / Debuff - Fenster]
+uittBonusMalusWindow	[Buffs / Debuffs - Fenster]
 
 // HASH_VALUE 4F1BFC426F18DFC5
 // INDEX 5842
@@ -27181,7 +27179,7 @@ uittRpTags	[Zeige alle Fraktions-Zeichen über dem Charakter]
 
 // HASH_VALUE 68DC145070582480
 // INDEX 6449
-uimwTaskBar	[Web-Taskleiste]
+uimwTaskBar	[WEB-TASKLEISTE]
 
 // HASH_VALUE 20D0043864581438
 // INDEX 6450
@@ -27345,5 +27343,5 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 
 // HASH_VALUE 6588A87B1E781483
 // INDEX 6490
-uimwAppZone	[AppZone]
+uimwAppZone	[APP-ZONE]
 
