@@ -125,25 +125,25 @@ bool CHttpClient::sendRequest(const std::string& methodWB, const std::string &ur
 // ***************************************************************************
 bool CHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendPost(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, string(), string(), params, verbose);
+	return sendRequest("POST", url, string(), string(), params, verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendPostWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, name, value, params, verbose);
+	return sendRequest("POST", url, name, value, params, verbose);
 }
 
 // ***************************************************************************
