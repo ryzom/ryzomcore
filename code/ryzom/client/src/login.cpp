@@ -2792,11 +2792,13 @@ string checkLogin(const string &login, const string &password, const string &cli
 
 	string res;
 
+	std::string url = ClientCfg.ConfigFile.getVar("StartupHost").asString() + ClientCfg.ConfigFile.getVar("StartupPage").asString();
+
 	// don't use login with alt method
 	if (!login.empty())
 	{
 		// ask server for salt
-		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=ask&login="+login+"&lg="+ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
+		if(!HttpClient.sendGet(url + "?cmd=ask&login=" + login + "&lg=" + ClientCfg.LanguageCode, "", pPM->isVerboseLog()))
 			return "Can't send (error code 60)";
 
 		if(pPM->isVerboseLog()) nlinfo("Sent request for password salt");
@@ -2840,13 +2842,14 @@ string checkLogin(const string &login, const string &password, const string &cli
 		if (!login.empty())
 		{
 			std::string	cryptedPassword = CCrypt::crypt(password, Salt);
-			if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"+"&lg="+ClientCfg.LanguageCode+customParameters))
+
+			if(!HttpClient.sendGet(url + "?cmd=login&login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=1" + "&lg=" + ClientCfg.LanguageCode + customParameters))
 				return "Can't send (error code 2)";
 		}
 		else
 		{
 			// don't send login and password if empty
-			if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&clientApplication="+clientApp+"&cp=1"+"&lg="+ClientCfg.LanguageCode+customParameters))
+			if(!HttpClient.sendGet(url + "?cmd=login&clientApplication=" + clientApp + "&cp=1" + "&lg=" + ClientCfg.LanguageCode + customParameters))
 				return "Can't send (error code 2)";
 		}
 
@@ -2926,7 +2929,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 	{
 		// standard ryzom login sequence
 		std::string	cryptedPassword = CCrypt::crypt(password, Salt);
-		if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+cryptedPassword+"&clientApplication="+clientApp+"&cp=1"))
+
+		if(!HttpClient.sendGet(url + "?login=" + login + "&password=" + cryptedPassword + "&clientApplication=" + clientApp + "&cp=1"))
 			return "Can't send (error code 2)";
 	/*
 		if(!send(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?login="+login+"&password="+password+"&clientApplication="+clientApp))
@@ -3021,7 +3025,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 // ***************************************************************************
 string selectShard(uint32 shardId, string &cookie, string &addr)
 {
-	cookie = addr = "";
+	cookie.clear();
+	addr.clear();
 
 	if(!HttpClient.connectToLogin()) return "Can't connect (error code 7)";
 
@@ -3031,7 +3036,10 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 
 	// send login + crypted password + client app and cp=1 (as crypted password)
 	std::string	cryptedPassword = CCrypt::crypt(LoginPassword, Salt);
-	if(!HttpClient.sendGet(ClientCfg.ConfigFile.getVar("StartupPage").asString()+"?cmd=login&shardid="+toString(shardId)+"&login="+LoginLogin+"&password="+cryptedPassword+"&clientApplication="+ClientApp+"&cp=1"))
+
+	std::string url = ClientCfg.ConfigFile.getVar("StartupHost").asString() + ClientCfg.ConfigFile.getVar("StartupPage").asString();
+
+	if(!HttpClient.sendGet(url + "?cmd=login&shardid=" + toString(shardId) + "&login=" + LoginLogin + "&password=" + cryptedPassword + "&clientApplication=" + ClientApp + "&cp=1"))
 		return "Can't send (error code 11)";
 
 	string res;

@@ -111,7 +111,7 @@ static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm 
 			{
 				X509_INFO *itmp = sk_X509_INFO_value(info, i);
 
-				if (itmp->x509)
+				if (itmp && itmp->x509)
 				{
 					// add our certificate to this store
 					if (X509_STORE_add_cert(store, itmp->x509) == 0)
@@ -189,7 +189,7 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	}
 
 	// Set POST params
-	if ((methodWB == "POST ") && (!postParams.empty()))
+	if ((methodWB == "POST") && (!postParams.empty()))
 	{
 		curl_easy_setopt(_Curl, CURLOPT_POSTFIELDS, postParams.c_str());
 	}
@@ -235,25 +235,25 @@ void CCurlHttpClient::pushReceivedData(uint8 *buffer, uint size)
 // ***************************************************************************
 bool CCurlHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPost(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, string(), string(), params, verbose);
+	return sendRequest("POST", url, string(), string(), params, verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPostWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, name, value, params, verbose);
+	return sendRequest("POST", url, name, value, params, verbose);
 }
 
 // ***************************************************************************
