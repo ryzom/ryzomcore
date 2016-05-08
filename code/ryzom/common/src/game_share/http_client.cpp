@@ -193,20 +193,21 @@ bool CHttpClient::receive(string &res, bool verbose)
 
 		if (_Sock.receive((uint8*)buf, size, false) == CSock::Ok)
 		{
-			if(verbose) nlinfo("Received OK %d bytes", size);
+			if (verbose) nlinfo("Received OK %d bytes", size);
 			buf[1023] = '\0';
 			res += (char*)buf;
 			//nlinfo("block received '%s'", buf);
 		}
 		else
 		{
-			if(verbose) nlinfo("Received CLOSE %d bytes", size);
+			if (verbose) nlinfo("Received CLOSE %d bytes", size);
 			buf[size] = '\0';
 			res += (char*)buf;
 			//nlwarning ("server connection closed");
 			break;
 		}
 	}
+
 	//nlinfo("all received '%s'", res.c_str());
 
 	// only keep content (delimited by two \r\n) and discard server headers
