@@ -111,7 +111,7 @@ static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm 
 			{
 				X509_INFO *itmp = sk_X509_INFO_value(info, i);
 
-				if (itmp->x509)
+				if (itmp && itmp->x509)
 				{
 					// add our certificate to this store
 					if (X509_STORE_add_cert(store, itmp->x509) == 0)
