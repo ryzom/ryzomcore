@@ -156,7 +156,7 @@ function domain_management_hook_return_global()
      }
 
      
-function api_key_management_hook_activate()
+function domain_management_hook_activate()
  {
     $dbl = new DBLayer( "lib" );
      $sql = "INSERT INTO `settings` (Setting) 
