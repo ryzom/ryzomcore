@@ -2938,7 +2938,8 @@ string checkLogin(const string &login, const string &password, const string &cli
 // ***************************************************************************
 string selectShard(uint32 shardId, string &cookie, string &addr)
 {
-	cookie = addr = "";
+	cookie.clear();
+	addr.clear();
 
 	if(!HttpClient.connectToLogin()) return "Can't connect (error code 7)";
 

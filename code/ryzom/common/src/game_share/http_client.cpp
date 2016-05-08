@@ -152,7 +152,7 @@ bool CHttpClient::receive(string &res, bool verbose)
 	nlassert(_Sock.connected());
 
 	uint32 size;
-	res = "";
+	res.clear();
 
 	uint8 buf[1024];
 
