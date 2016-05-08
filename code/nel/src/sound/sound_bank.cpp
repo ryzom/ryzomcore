@@ -363,7 +363,7 @@ CSound* CSoundBank::getSound(const NLMISC::CSheetId &sheetId)
 	if (sheetId.getShortId() >= _Sounds.size())
 	{
 		std::string sheetName = sheetId.toString();
-		nlwarning("NLSOUND: Sound sheet id '%s' exceeds loaded sound sheets", sheetName.c_str());
+		nldebug("NLSOUND: Sound sheet id '%s' exceeds loaded sound sheets", sheetName.c_str());
 		return NULL;
 	}
 
