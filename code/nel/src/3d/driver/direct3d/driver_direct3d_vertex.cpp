@@ -125,7 +125,7 @@ uint8	*CVBDrvInfosD3D::lock (uint begin, uint end, bool readOnly)
 				}
 				else
 				{
-					nlinfo("Buffer %s at %x is Locked", (*it)->VertexBufferPtr->getName().c_str(), (int) *it);
+					nlinfo("Buffer %s at %p is Locked", (*it)->VertexBufferPtr->getName().c_str(), *it);
 				}
 			}
 		}
