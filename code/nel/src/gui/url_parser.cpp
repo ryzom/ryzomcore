@@ -78,7 +78,7 @@ namespace NLGUI
 		pos = uri.find("?");
 		if (pos != npos)
 		{
-			query = uri.substr(pos + 1);
+			query = uri.substr(pos);
 			uri = uri.substr(0, pos);
 		}
 
@@ -210,7 +210,9 @@ namespace NLGUI
 			result += path;
 
 		if (!query.empty())
-			result += "?" + query;
+			if (query.find_first_of("?") != 0)
+				result += "?";
+			result += query;
 
 		if (!hash.empty())
 			result += "#" + hash;
