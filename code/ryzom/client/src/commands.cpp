@@ -5798,3 +5798,11 @@ NLMISC_COMMAND(time, "Shows information about the current time", "")
 	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
 	return true;
 }
+
+NLMISC_COMMAND(playedTime, "Display character played time", "")
+{
+	ucstring msg = CI18N::get("uiPlayedTime");
+	strFindReplace(msg, "%time", NLMISC::secondsToHumanReadable(CharPlayedTime));
+	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
+	return true;
+}
