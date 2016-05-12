@@ -261,11 +261,11 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 {
 	if (verbose)
 	{
-		nldebug("Receiving %u bytes", _ReceiveBuffer.size());
+		nldebug("Receiving %u bytes", (uint)_ReceiveBuffer.size());
 	}
 
 	res.clear();
-	if (_ReceiveBuffer.size())
+	if (!_ReceiveBuffer.empty())
 		res.assign((const char*)&(*(_ReceiveBuffer.begin())), _ReceiveBuffer.size());
 	_ReceiveBuffer.clear();
 	return true;

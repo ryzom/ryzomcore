@@ -193,14 +193,14 @@ bool CHttpClient::receive(string &res, bool verbose)
 
 		if (_Sock.receive((uint8*)buf, size, false) == CSock::Ok)
 		{
-			if (verbose) nlinfo("Received OK %d bytes", size);
+			if (verbose) nlinfo("Received OK %u bytes", size);
 			buf[1023] = '\0';
 			res += (char*)buf;
 			//nlinfo("block received '%s'", buf);
 		}
 		else
 		{
-			if (verbose) nlinfo("Received CLOSE %d bytes", size);
+			if (verbose) nlinfo("Received CLOSE %u bytes", size);
 			buf[size] = '\0';
 			res += (char*)buf;
 			//nlwarning ("server connection closed");
