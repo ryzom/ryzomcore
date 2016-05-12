@@ -27331,3 +27331,7 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 // INDEX 6490
 uimwAppZone	[AppZone]
 
+// HASH_VALUE E247C9AA295A5BE2
+// INDEX 6491
+uiPlayedTime	[You played %time with this character.]
+
