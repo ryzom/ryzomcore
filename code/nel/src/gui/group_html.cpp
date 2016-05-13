@@ -1166,7 +1166,7 @@ namespace NLGUI
 
 								pos = toLower(content).find("url=");
 								if (pos != string::npos)
-									_RefreshUrl = content.substr(pos + 4);
+									_RefreshUrl = getAbsoluteUrl(content.substr(pos + 4));
 							}
 
 							_NextRefreshTime += timeSec;
