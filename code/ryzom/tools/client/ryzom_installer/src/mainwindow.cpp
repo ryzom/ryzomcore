@@ -22,6 +22,7 @@
 #include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"
+#include "profilesmodel.h"
 
 #include "seven_zip.h"
 
@@ -69,6 +70,9 @@ CMainWindow::CMainWindow():QMainWindow(), m_archive(NULL), m_statusLabel(NULL)
 	connect(m_archive, SIGNAL(extractFail(QString)), SLOT(onExtractFail(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+
+	connect(playButton, SIGNAL(clicked()), SLOT(onPlayClicked()));
+	connect(configureButton, SIGNAL(clicked()), SLOT(onConfigureClicked()));
 
 	connect(actionAboutQt, SIGNAL(triggered()), SLOT(onAboutQt()));
 	connect(actionAbout, SIGNAL(triggered()), SLOT(onAbout()));
@@ -170,6 +174,8 @@ void CMainWindow::displayConfigurationsChoices()
 {
 	downloadFrame->setVisible(false);
 	configurationFrame->setVisible(true);
+
+	profilesComboBox->setModel(new CProfilesModel(this));
 }
 
 void CMainWindow::showEvent(QShowEvent *e)
@@ -212,6 +218,28 @@ void CMainWindow::onStopClicked()
 	{
 		m_archive->stop();
 	}
+}
+
+void CMainWindow::onPlayClicked()
+{
+	int profileIndex = profilesComboBox->currentIndex();
+
+	if (profileIndex < 0) return;
+
+	CProfile profile = CConfigFile::getInstance()->getProfile(profileIndex);
+
+	if (profile.executable.isEmpty()) return;
+
+	QStringList arguments;
+	arguments << "-p";
+	arguments << QString::number(profileIndex);
+	arguments << profile.arguments;
+
+	bool started = QProcess::startDetached(profile.executable, arguments);
+}
+
+void CMainWindow::onConfigureClicked()
+{
 }
 
 void CMainWindow::onProfiles()
@@ -391,6 +419,7 @@ void CMainWindow::onExtractSuccess(qint64 total)
 
 	resumeButton->setVisible(false);
 	stopButton->setVisible(false);
+}
 
 	processNextStep();
 }
