@@ -31,7 +31,6 @@ namespace NLGUI
 
 	/// store all cookies we receive and resent them depending of the domain
 	static std::map<std::string, std::map<std::string, std::string> > HTTPCookies;
-	std::string HTTPCurrentDomain;	// The current domain that will be used to get which cookies to send
 
 	// ***************************************************************************
 
@@ -332,24 +331,6 @@ namespace NLGUI
 		return dst;
 	}
 
-	// set current HTTPCurrentDomain for cookie selection, return new domain
-	const std::string &setCurrentDomain(const std::string &uri)
-	{
-		if (uri.find("http://") == 0)
-			HTTPCurrentDomain = uri.substr(7, uri.find("/", 7) - 7);
-		else
-		if (uri.find("https://") == 0)
-			HTTPCurrentDomain = uri.substr(8, uri.find("/", 8) - 8);
-		else
-		if (uri.find("//") == 0)
-			HTTPCurrentDomain = uri.substr(2, uri.find("/", 2) - 2);
-		else
-		if (uri.find("/") != std::string::npos)
-			HTTPCurrentDomain = uri.substr(0, uri.find("/") - 1);
-
-		return HTTPCurrentDomain;
-	}
-
 	// update HTTPCookies list
 	static void receiveCookie(const char *nsformat, const std::string &domain, bool trusted)
 	{
@@ -370,6 +351,9 @@ namespace NLGUI
 		{
 			chunks[0] = chunks[0].substr(10);
 		}
+
+		// make sure domain is lowercase
+		chunks[0] = toLower(chunks[0]);
 
 		if (chunks[0] != domain && chunks[0] != std::string("." + domain))
 		{

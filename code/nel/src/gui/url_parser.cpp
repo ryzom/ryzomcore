@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string>
-#include "nel/misc/types_nl.h"
+#include "nel/misc/common.h"
 #include "nel/gui/url_parser.h"
 
 using namespace std;
@@ -72,6 +71,24 @@ namespace NLGUI
 				uri = uri.substr(pos);
 			else
 				uri.clear();
+
+			// strip empty port from authority
+			if (authority.find_last_of(":") == authority.length() - 1)
+				authority = authority.substr(0, authority.length() - 1);
+
+			// extract host from user:pass@host:port
+			pos = authority.find("@");
+			if (pos != npos)
+				host = authority.substr(pos + 1);
+			else
+				host = authority.substr(2);
+
+			// case-insensitive
+			host = NLMISC::toLower(host);
+
+			pos = host.find(":");
+			if (pos != npos)
+				host = host.substr(0, pos);
 		}
 
 		// scan for query
