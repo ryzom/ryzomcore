@@ -66,7 +66,7 @@ namespace NLGUI
 		// scan for authority
 		if (uri.substr(0, 2) == "//")
 		{
-			pos = uri.find("/", 3);
+			pos = uri.find_first_of("/?", 2);
 			authority = uri.substr(0, pos);
 			if (pos != npos)
 				uri = uri.substr(pos);
