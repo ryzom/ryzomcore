@@ -3,8 +3,12 @@ IF(WITH_RYZOM_CLIENT)
 
   IF(WITH_QT OR WITH_QT5)
     ADD_SUBDIRECTORY(client_config_qt)
-    ADD_SUBDIRECTORY(ryzom_installer)
+
+    IF(WITH_RYZOM_INSTALLER)
+      ADD_SUBDIRECTORY(ryzom_installer)
+    ENDIF()
   ENDIF()
+
 ENDIF()
 
 IF(WITH_RYZOM_TOOLS)
