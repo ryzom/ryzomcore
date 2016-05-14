@@ -585,17 +585,49 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		return CreateProfile;
 	}
 
+	QString clientCfg = QString("%1/%2/client.cfg").arg(getProfileDirectory()).arg(profile.id);
+
 	// migration profile
-	if (!getSrcServerDirectory().isEmpty() && QFile::exists(getSrcProfileDirectory() + "/client.cfg") && !QFile::exists(QString("%1/%2/client.cfg").arg(getProfileDirectory()).arg(profile.name)))
+	if (!getSrcServerDirectory().isEmpty() && QFile::exists(getSrcProfileDirectory() + "/client.cfg") && !QFile::exists(clientCfg))
 	{
 		return CopyProfileFiles;
 	}
 
-	if (!QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk"))
+	if (shouldCreateDesktopShortcut())
 	{
 		// TODO: check they point to getClientFullPath()
 		return CreateShortcuts;
 	}
 
 	return Done;
+}
+
+bool CConfigFile::createDefaultProfile()
+{
+	CServer server = getServer(getDefaultServer());
+
+	CProfile profile;
+
+	profile.id = 0;
+	profile.executable = getClientFullPath();
+	profile.name = QString("Ryzom (%1)").arg(server.name);
+	profile.server = server.id;
+	profile.comments = "Default profile created by Ryzom Installer";
+
+#ifdef Q_OS_WIN32
+	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
+#endif
+
+	// TODO
+	// profile.menuShortcut
+
+	addProfile(profile);
+	save();
+
+	return true;
+}
+
+bool CConfigFile::createDefaultShortcuts()
+{
+	return true;
 }

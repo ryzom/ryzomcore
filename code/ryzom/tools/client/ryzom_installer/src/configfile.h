@@ -162,6 +162,9 @@ public:
 
 	InstallationStep getNextStep() const;
 
+	bool createDefaultProfile();
+	bool createDefaultShortcuts();
+
 private:
 	int m_defaultServer;
 	int m_defaultProfile;
