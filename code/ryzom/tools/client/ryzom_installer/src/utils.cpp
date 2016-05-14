@@ -47,6 +47,7 @@ wchar_t* qToWide(const QString &str)
 	return (wchar_t*)str.utf16();
 }
 
+#ifdef Q_OS_WIN32
 
 // CreateLink - Uses the Shell's IShellLink and IPersistFile interfaces
 //              to create and store a shortcut to the specified object.
@@ -180,3 +181,5 @@ HRESULT ResolveIt(HWND hwnd, const QString &linkFile, QString &path)
 
 	return hres;
 }
+
+#endif
