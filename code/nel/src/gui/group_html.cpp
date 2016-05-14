@@ -506,7 +506,7 @@ namespace NLGUI
 							}
 							else
 							{
-								receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+								receiveCookies(_CurlWWW->Request, _DocumentDomain, _TrustedDomain);
 
 								// redirect, get the location and try browse again
 								// we cant use curl redirection because 'addHTTPGetParams()' must be called on new destination
@@ -533,7 +533,7 @@ namespace NLGUI
 						}
 						else
 						{
-							receiveCookies(_CurlWWW->Request, HTTPCurrentDomain, _TrustedDomain);
+							receiveCookies(_CurlWWW->Request, _DocumentDomain, _TrustedDomain);
 
 							_RedirectsRemaining = DEFAULT_RYZOM_REDIRECT_LIMIT;
 
@@ -2548,6 +2548,7 @@ namespace NLGUI
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
 		_DocumentUrl = "";
+		_DocumentDomain = "";
 		_UrlFragment.clear();
 		_RefreshUrl.clear();
 		_NextRefreshTime = 0.0;
@@ -4657,8 +4658,11 @@ namespace NLGUI
 			string finalUrl;
 			bool isLocal = lookupLocalFile (finalUrl, _URL.c_str(), true);
 
-			// Save new url
 			_URL = finalUrl;
+
+			CUrlParser uri (_URL);
+			_TrustedDomain = isTrustedDomain(uri.host);
+			_DocumentDomain = uri.host;
 
 			// file is probably from bnp (ingame help)
 			if (isLocal)
@@ -4667,8 +4671,6 @@ namespace NLGUI
 			}
 			else
 			{
-				_TrustedDomain = isTrustedDomain(setCurrentDomain(finalUrl));
-
 				SFormFields formfields;
 				if (_PostNextTime)
 				{
@@ -4704,9 +4706,11 @@ namespace NLGUI
 		// Ref the form
 		CForm &form = _Forms[_PostFormId];
 
-		// Save new url
 		_URL = form.Action;
-		_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
+
+		CUrlParser uri(_URL);
+		_TrustedDomain = isTrustedDomain(uri.host);
+		_DocumentDomain = uri.host;
 
 		for (i=0; i<form.Entries.size(); i++)
 		{
@@ -4814,6 +4818,7 @@ namespace NLGUI
 	#endif
 
 		_TrustedDomain = true;
+		_DocumentDomain = "localhost";
 
 		// Stop previous browse, remove content
 		stopBrowse ();
@@ -4899,7 +4904,7 @@ namespace NLGUI
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 
 		// Cookies
-		sendCookies(curl, HTTPCurrentDomain, _TrustedDomain);
+		sendCookies(curl, _DocumentDomain, _TrustedDomain);
 
 		// Referer
 		if (!referer.empty())
@@ -4982,9 +4987,6 @@ namespace NLGUI
 	#ifdef LOG_DL
 		nlwarning("(%s) HTML download finished, content length %d, type '%s', code %d", _Id.c_str(), content.size(), type.c_str(), code);
 	#endif
-
-		// set trusted domain for parsing
-		_TrustedDomain = isTrustedDomain(setCurrentDomain(_URL));
 
 		// create <html> markup for image downloads
 		if (type.find("image/") == 0 && content.size() > 0)

@@ -39,7 +39,6 @@ namespace NLGUI
 	class CGroupParagraph;
 
 	extern std::string CurrentCookie;
-	extern std::string HTTPCurrentDomain;
 
 	// HTML group
 	/**
@@ -376,6 +375,7 @@ namespace NLGUI
 		std::string		_URL;
 		// Current URL
 		std::string		_DocumentUrl;
+		std::string		_DocumentDomain;
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url
