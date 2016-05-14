@@ -34,19 +34,57 @@
 
 #include <Windows.h>
 
+#ifndef FILE_ATTRIBUTE_READONLY
 #define FILE_ATTRIBUTE_READONLY            0x1
+#endif
+#ifndef FILE_ATTRIBUTE_HIDDEN
 #define FILE_ATTRIBUTE_HIDDEN              0x2
+#endif
+
+#ifndef FILE_ATTRIBUTE_SYSTEM
 #define FILE_ATTRIBUTE_SYSTEM              0x4
+#endif
+
+#ifndef FILE_ATTRIBUTE_DIRECTORY
 #define FILE_ATTRIBUTE_DIRECTORY          0x10
+#endif
+
+#ifndef FILE_ATTRIBUTE_ARCHIVE
 #define FILE_ATTRIBUTE_ARCHIVE            0x20
+#endif
+
+#ifndef FILE_ATTRIBUTE_DEVICE
 #define FILE_ATTRIBUTE_DEVICE             0x40
+#endif
+
+#ifndef FILE_ATTRIBUTE_NORMAL
 #define FILE_ATTRIBUTE_NORMAL             0x80
+#endif
+
+#ifndef FILE_ATTRIBUTE_TEMPORARY
 #define FILE_ATTRIBUTE_TEMPORARY         0x100
+#endif
+
+#ifndef FILE_ATTRIBUTE_SPARSE_FILE
 #define FILE_ATTRIBUTE_SPARSE_FILE       0x200
+#endif
+
+#ifndef FILE_ATTRIBUTE_REPARSE_POINT
 #define FILE_ATTRIBUTE_REPARSE_POINT     0x400
+#endif
+
+#ifndef FILE_ATTRIBUTE_COMPRESSED
 #define FILE_ATTRIBUTE_COMPRESSED        0x800
+#endif
+
+#ifndef FILE_ATTRIBUTE_OFFLINE
 #define FILE_ATTRIBUTE_OFFLINE          0x1000
+#endif
+
+#ifndef FILE_ATTRIBUTE_ENCRYPTED
 #define FILE_ATTRIBUTE_ENCRYPTED        0x4000
+#endif
+
 #define FILE_ATTRIBUTE_UNIX_EXTENSION   0x8000   /* trick for Unix */
 
 #define FILE_ATTRIBUTE_WINDOWS          0x5fff
