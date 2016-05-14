@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
 	if (step == CConfigFile::DisplayNoServerError)
 	{
-		// display error
+		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find installer.ini"));
 		return 1;
 	}
 
