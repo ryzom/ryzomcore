@@ -51,7 +51,8 @@ namespace NLGUI
 
 	public:
 		std::string scheme;
-		std::string domain;
+		std::string authority;
+		std::string host;
 		std::string path;
 		std::string query;
 		std::string hash;
