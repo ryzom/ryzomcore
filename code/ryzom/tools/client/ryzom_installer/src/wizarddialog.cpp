@@ -44,6 +44,8 @@ QString qBytesToHumanReadable(qint64 bytes)
 
 CWizardDialog::CWizardDialog():QDialog()
 {
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
 	setupUi(this);
 
 	currentDirectoryRadioButton->setVisible(false);
