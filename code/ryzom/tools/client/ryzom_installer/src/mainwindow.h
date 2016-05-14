@@ -66,6 +66,8 @@ public slots:
 	void onExtractSuccess(qint64 total);
 	void onExtractFail(const QString &error);
 
+	void onDone();
+
 protected:
 	void showEvent(QShowEvent *e);
 	void closeEvent(QCloseEvent *e);
@@ -73,6 +75,8 @@ protected:
 	void processNextStep();
 
 	void displayProgressBar();
+	void hideProgressBar();
+
 	void displayConfigurationsChoices();
 
 	QWinTaskbarButton *m_button;

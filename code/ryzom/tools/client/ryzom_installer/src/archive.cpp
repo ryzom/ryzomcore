@@ -460,6 +460,7 @@ bool CArchive::copyFiles(const FilesToCopy &files)
 	}
 
 	emit extractSuccess(totalSize);
+	emit done();
 
 	return true;
 }
@@ -619,6 +620,7 @@ bool CArchive::extract7z()
 	{
 		case SZ_OK:
 		emit extractSuccess(totalUncompressed);
+		emit done();
 		return true;
 
 		case SZ_ERROR_INTERRUPTED:
@@ -720,6 +722,7 @@ bool CArchive::extractZip()
 	}
 
 	emit extractSuccess(totalSize);
+	emit done();
 
 	return true;
 }
@@ -744,6 +747,7 @@ bool CArchive::progress(const std::string &filename, uint32 currentSize, uint32 
 	if (currentSize == totalSize)
 	{
 		emit extractSuccess((qint64)totalSize);
+		emit done();
 	}
 
 	return true;

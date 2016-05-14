@@ -68,6 +68,7 @@ CMainWindow::CMainWindow():QMainWindow(), m_archive(NULL), m_statusLabel(NULL)
 	connect(m_archive, SIGNAL(extractProgress(qint64, QString)), SLOT(onExtractProgress(qint64, QString)));
 	connect(m_archive, SIGNAL(extractSuccess(qint64)), SLOT(onExtractSuccess(qint64)));
 	connect(m_archive, SIGNAL(extractFail(QString)), SLOT(onExtractFail(QString)));
+	connect(m_archive, SIGNAL(done()), SLOT(onDone()));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
 
@@ -122,6 +123,7 @@ void CMainWindow::processNextStep()
 
 		case CConfigFile::ExtractDownloadedClient:
 		displayProgressBar();
+		// TODO
 		break;
 
 		case CConfigFile::CopyServerFiles:
@@ -145,11 +147,15 @@ void CMainWindow::processNextStep()
 		break;
 
 		case CConfigFile::CreateProfile:
-		displayProgressBar();
+		hideProgressBar();
+		config->createDefaultProfile();
+		onDone();
 		break;
 
 		case CConfigFile::CreateShortcuts:
-		displayProgressBar();
+		hideProgressBar();
+		config->createDefaultShortcuts();
+		onDone();
 		break;
 
 		default:
@@ -167,6 +173,15 @@ void CMainWindow::displayProgressBar()
 	configurationFrame->setVisible(false);
 
 	resumeButton->setVisible(true);
+	stopButton->setVisible(false);
+}
+
+void CMainWindow::hideProgressBar()
+{
+	downloadFrame->setVisible(false);
+	configurationFrame->setVisible(false);
+
+	resumeButton->setVisible(false);
 	stopButton->setVisible(false);
 }
 
@@ -421,6 +436,8 @@ void CMainWindow::onExtractSuccess(qint64 total)
 	stopButton->setVisible(false);
 }
 
+void CMainWindow::onDone()
+{
 	processNextStep();
 }
 

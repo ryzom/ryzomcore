@@ -61,6 +61,9 @@ signals:
 	// emitted when an error occurs
 	void extractFail(const QString &error);
 
+	// emitted when done and should process next step
+	void done();
+
 protected:
 
 	struct FileToCopy
