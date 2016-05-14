@@ -63,11 +63,11 @@ namespace NLGUI
 			}
 		}
 
-		// scan for domain
+		// scan for authority
 		if (uri.substr(0, 2) == "//")
 		{
 			pos = uri.find("/", 3);
-			domain = uri.substr(0, pos);
+			authority = uri.substr(0, pos);
 			if (pos != npos)
 				uri = uri.substr(pos);
 			else
@@ -99,11 +99,11 @@ namespace NLGUI
 
 		scheme = base.scheme;
 
-		// if we already have domain, then ignore base path
-		if (!domain.empty())
+		// if we already have authority, then ignore base path
+		if (!authority.empty())
 			return;
 
-		domain = base.domain;
+		authority = base.authority;
 		if (path.empty())
 		{
 			path = base.path;
@@ -190,7 +190,7 @@ namespace NLGUI
 
 	bool CUrlParser::isAbsolute() const
 	{
-		return !scheme.empty() && !domain.empty();
+		return !scheme.empty() && !authority.empty();
 	}
 
 	// serialize URL back to string
@@ -200,9 +200,9 @@ namespace NLGUI
 		if (!scheme.empty())
 			result += scheme + ":";
 
-		if (!domain.empty())
+		if (!authority.empty())
 		{
-			result += domain;
+			result += authority;
 		}
 
 		// path already has leading slash
