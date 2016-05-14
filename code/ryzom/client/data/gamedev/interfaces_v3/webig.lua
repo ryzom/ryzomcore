@@ -176,7 +176,7 @@ function webig:doRemoveDbSheetQuantity(sheet_list, ctrl)
 	if new_quantity >= current_quantity then
 		webig:deleteItem(db..":"..ctrl)
 	else
-		addDbProp(db..":"..ctrl..":QUANTITY", current_quantity-new_quantity)
+		addDbProp(db..":"..ctrl..":QUANTITY", new_quantity)
 	end
 end
 

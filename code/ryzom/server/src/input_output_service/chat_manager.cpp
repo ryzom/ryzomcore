@@ -488,7 +488,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 	{
 //		if( itCl->second->isMuted() )
 		CEntityId eid = TheDataset.getEntityId(sender);
-		if(_MutedUniverseUsers.find( eid ) != _MutedUniverseUsers.end())
+		if(_MutedUsers.find( eid ) != _MutedUsers.end())
 		{
 			nldebug("IOSCM:  chat The player %s:%x is universe muted",
 				TheDataset.getEntityId(sender).toString().c_str(),
@@ -650,7 +650,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr )
 					// If universal channel check if player muted
 					if (session->getChan()->UniversalChannel)
 					{
-						if(_MutedUsers.find( eid ) != _MutedUsers.end())
+						if(_MutedUniverseUsers.find( eid ) != _MutedUniverseUsers.end())
 						{
 							nldebug("IOSCM:  chat The player %s:%x is muted",
 								TheDataset.getEntityId(sender).toString().c_str(),

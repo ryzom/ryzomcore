@@ -6977,8 +6977,7 @@
            form_text_area_group="edit_box_widget_multiline"
            browse_refresh="#browse_refresh"
            browse_undo="#browse_undo"
-           browse_redo="#browse_redo"
-           timeout="10">
+           browse_redo="#browse_redo">
       <group id="black"
              posref="BR BR"
              sizeref="hw"

@@ -50,8 +50,8 @@ using namespace std;
 using namespace NLMISC;
 
 
-// Default timeout to connect a server
-#define DEFAULT_RYZOM_CONNECTION_TIMEOUT (30.0)
+// Default maximum time the request is allowed to take
+#define DEFAULT_RYZOM_CONNECTION_TIMEOUT (300.0)
 // Allow up to 10 redirects, then give up
 #define DEFAULT_RYZOM_REDIRECT_LIMIT (10)
 //
@@ -1166,7 +1166,7 @@ namespace NLGUI
 
 								pos = toLower(content).find("url=");
 								if (pos != string::npos)
-									_RefreshUrl = content.substr(pos + 4);
+									_RefreshUrl = getAbsoluteUrl(content.substr(pos + 4));
 							}
 
 							_NextRefreshTime += timeSec;

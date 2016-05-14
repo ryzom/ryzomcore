@@ -98,52 +98,81 @@ bool CHttpClient::send(const std::string& buffer, bool verbose)
 // ***************************************************************************
 bool CHttpClient::sendRequest(const std::string& methodWB, const std::string &url, const std::string &cookieName, const std::string &cookieValue, const std::string& postParams, bool verbose)
 {
-	// Remove the host from the URL
-	string path;
+	std::string path, host;
+
+	// Remove the protocol from the URL
 	if (url.substr(0, 7) == "http://")
 		path = url.substr(7);
 	else
 		path = url;
-	path = path.substr(path.find( "/" ));
+
+	std::string::size_type pos = path.find("/");
+
+	// Remove the host from the URL
+	if (pos != std::string::npos)
+	{
+		host = path.substr(0, pos);
+		path = path.substr(pos);
+	}
+	else
+	{
+		host = path;
+		path.clear();
+	}
+
+	// build HTTP request
+	std::string request;
+	request += methodWB + " " + path + " HTTP/1.1\r\n";
+	request += "Host: " + host + "\r\n";
 
 	// Send
 	if (cookieName.empty() && postParams.empty())
 	{
-		return send(methodWB + path + "\r\n", verbose);
+		request += "\r\n";
+
+		return send(request, verbose);
 	}
 	else
 	{
-		string cookieStr, postStr;
 		if (!cookieName.empty())
-			cookieStr = "Cookie: " + cookieName + "=" + cookieValue + "\r\n";
+			request += "Cookie: " + cookieName + "=" + cookieValue + "\r\n";
+
 		if (!postParams.empty())
-			postStr = "Content-Type: application/x-www-form-urlencoded\r\nContent-Length: " + toString(postParams.size()) + "\r\n\r\n" + postParams;
-		return send(methodWB + path + " HTTP/1.0\r\n" + cookieStr + postStr + "\r\n", verbose);
+		{
+			request += "Content-Type: application/x-www-form-urlencoded\r\n";
+			request += "Content-Length: " + toString(postParams.size()) + "\r\n";
+			request += "\r\n";
+			request += postParams;
+		}
+
+		request += "\r\n";
+
+		return send(request, verbose);
 	}
 }
 
 // ***************************************************************************
 bool CHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendPost(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, string(), string(), params, verbose);
+	return sendRequest("POST", url, string(), string(), params, verbose);
 }
 
 // ***************************************************************************
 bool CHttpClient::sendPostWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, name, value, params, verbose);
+	return sendRequest("POST", url, name, value, params, verbose);
 }
 
 // ***************************************************************************
@@ -152,7 +181,7 @@ bool CHttpClient::receive(string &res, bool verbose)
 	nlassert(_Sock.connected());
 
 	uint32 size;
-	res = "";
+	res.clear();
 
 	uint8 buf[1024];
 
@@ -164,21 +193,31 @@ bool CHttpClient::receive(string &res, bool verbose)
 
 		if (_Sock.receive((uint8*)buf, size, false) == CSock::Ok)
 		{
-			if(verbose) nlinfo("Received OK %d bytes", size);
+			if (verbose) nlinfo("Received OK %u bytes", size);
 			buf[1023] = '\0';
 			res += (char*)buf;
 			//nlinfo("block received '%s'", buf);
 		}
 		else
 		{
-			if(verbose) nlinfo("Received CLOSE %d bytes", size);
+			if (verbose) nlinfo("Received CLOSE %u bytes", size);
 			buf[size] = '\0';
 			res += (char*)buf;
 			//nlwarning ("server connection closed");
 			break;
 		}
 	}
+
 	//nlinfo("all received '%s'", res.c_str());
+
+	// only keep content (delimited by two \r\n) and discard server headers
+	std::string::size_type pos = res.find("\r\n\r\n");
+
+	if (pos != std::string::npos)
+	{
+		res = res.substr(pos + 4);
+	}
+
 	return true;
 }
 

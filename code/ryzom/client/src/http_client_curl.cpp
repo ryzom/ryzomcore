@@ -20,6 +20,7 @@
 #include <curl/curl.h>
 
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -62,11 +63,11 @@ bool CCurlHttpClient::authenticate(const std::string &user, const std::string &p
 const char *CAFilename = "ssl_ca_cert.pem"; // this is the certificate "Thawte Server CA"
 
 // ***************************************************************************
-static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
+static CURLcode sslctx_function(CURL * /* curl */, void *sslctx, void * /* parm */)
 {
 	// look for certificate in search paths
 	string path = CPath::lookup(CAFilename);
-	nldebug("Cert path '%s'", path.c_str());
+	nlinfo("Cert path '%s'", path.c_str());
 
 	if (path.empty())
 	{
@@ -91,6 +92,8 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 
 	// get a BIO
 	BIO *bio = BIO_new_mem_buf(&buffer[0], file.getFileSize());
+	
+	char errorBuffer[1024];
 
 	if (bio)
 	{
@@ -108,13 +111,24 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
 			{
 				X509_INFO *itmp = sk_X509_INFO_value(info, i);
 
-				if (itmp->x509)
+				if (itmp && itmp->x509)
 				{
 					// add our certificate to this store
 					if (X509_STORE_add_cert(store, itmp->x509) == 0)
 					{
-						nlwarning("Error adding certificate");
-						res = CURLE_SSL_CACERT;
+						uint errCode = ERR_get_error();
+
+						// ignore already in hash table errors
+						if (ERR_GET_LIB(errCode) != ERR_LIB_X509 || ERR_GET_REASON(errCode) != X509_R_CERT_ALREADY_IN_HASH_TABLE)
+						{
+							ERR_error_string_n(errCode, errorBuffer, 1024);
+							nlwarning("Error adding certificate %s: %s", itmp->x509->name, errorBuffer);
+							res = CURLE_SSL_CACERT;
+						}
+					}
+					else
+					{
+						nlinfo("Added certificate %s", itmp->x509->name);
 					}
 				}
 			}
@@ -175,7 +189,7 @@ bool CCurlHttpClient::sendRequest(const std::string& methodWB, const std::string
 	}
 
 	// Set POST params
-	if ((methodWB == "POST ") && (!postParams.empty()))
+	if ((methodWB == "POST") && (!postParams.empty()))
 	{
 		curl_easy_setopt(_Curl, CURLOPT_POSTFIELDS, postParams.c_str());
 	}
@@ -221,25 +235,25 @@ void CCurlHttpClient::pushReceivedData(uint8 *buffer, uint size)
 // ***************************************************************************
 bool CCurlHttpClient::sendGet(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), string(), string(), string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendGetWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("GET ", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
+	return sendRequest("GET", url + (params.empty() ? "" : ("?" + params)), name, value, string(), verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPost(const string &url, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, string(), string(), params, verbose);
+	return sendRequest("POST", url, string(), string(), params, verbose);
 }
 
 // ***************************************************************************
 bool CCurlHttpClient::sendPostWithCookie(const string &url, const string &name, const string &value, const string& params, bool verbose)
 {
-	return sendRequest("POST ", url, name, value, params, verbose);
+	return sendRequest("POST", url, name, value, params, verbose);
 }
 
 // ***************************************************************************
@@ -247,11 +261,11 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 {
 	if (verbose)
 	{
-		nldebug("Receiving %u bytes", _ReceiveBuffer.size());
+		nldebug("Receiving %u bytes", (uint)_ReceiveBuffer.size());
 	}
 
 	res.clear();
-	if (_ReceiveBuffer.size())
+	if (!_ReceiveBuffer.empty())
 		res.assign((const char*)&(*(_ReceiveBuffer.begin())), _ReceiveBuffer.size());
 	_ReceiveBuffer.clear();
 	return true;

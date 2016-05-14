@@ -569,7 +569,7 @@ void CLoginStateMachine::run()
 			break;
 		case st_disconnect:
 			// Far TP part 2: disconnect from the FS and unload shard-specific data (called from farTPmainLoop())
-			FarTP.disconnectFromPreviousShard();
+			// FarTP.disconnectFromPreviousShard();
 
 			SM_BEGIN_EVENT_TABLE
 				SM_EVENT(ev_connect, st_reconnect_fs);
@@ -1406,6 +1406,9 @@ void CFarTP::farTPmainLoop()
 {
 	ConnectionReadySent = false;
 	LoginSM.pushEvent(CLoginStateMachine::ev_far_tp_main_loop_entered);
+
+	disconnectFromPreviousShard();
+
 	uint nbRecoSelectCharReceived = 0;
 
 	bool welcomeWindow = true;

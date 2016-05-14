@@ -324,13 +324,19 @@ IF(WITH_QT5)
       ENDIF()
 
       # freetype is needed since Qt 5.5
-      IF(UNIX)
-        SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
-      ELSEIF(WIN32)
-        SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
-      ENDIF()
-      IF(EXISTS ${FREETYPE_LIB})
-        SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
+      FIND_PACKAGE(FreeType)
+
+      IF(FREETYPE_FOUND)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIBRARIES})
+      ELSE()
+        IF(UNIX)
+          SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/libqtfreetype.a")
+        ELSEIF(WIN32)
+          SET(FREETYPE_LIB "${QT_LIBRARY_DIR}/qtfreetype.lib")
+        ENDIF()
+        IF(EXISTS ${FREETYPE_LIB})
+          SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIB})
+        ENDIF()
       ENDIF()
 
       ADD_QT_PLUGIN(accessible qtaccessiblewidgets)
@@ -344,7 +350,8 @@ IF(WITH_QT5)
       IF(WIN32)
         SET(QT_LIBRARIES ${QT_LIBRARIES}
           ${WINSDK_LIBRARY_DIR}/Crypt32.lib
-          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib)
+          ${WINSDK_LIBRARY_DIR}/WS2_32.Lib
+          ${WINSDK_LIBRARY_DIR}/IPHlpApi.Lib)
       ENDIF()
 
       # Core
