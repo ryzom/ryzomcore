@@ -34,6 +34,7 @@ public:
 	bool extract(const QString &filename, const QString &dest);
 	bool copyServerFiles(const QString &src, const QString &dst);
 	bool copyProfileFiles(const QString &src, const QString &dst);
+	bool cleanServerFiles(const QString &directory);
 
 	void stop();
 	bool mustStop();

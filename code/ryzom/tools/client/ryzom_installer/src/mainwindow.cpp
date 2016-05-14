@@ -135,6 +135,11 @@ void CMainWindow::processNextStep()
 		m_archive->extract(config->getSrcServerClientBNPFullPath(), config->getInstallationDirectory() + "/" + server.id);
 		break;
 
+		case CConfigFile::CleanFiles:
+		hideProgressBar();
+		m_archive->cleanServerFiles(config->getInstallationDirectory() + "/" + server.id);
+		break;
+
 		case CConfigFile::CreateProfile:
 		displayProgressBar();
 		break;

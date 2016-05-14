@@ -87,6 +87,7 @@ public:
 		ExtractDownloadedClient,
 		CopyServerFiles,
 		CopyProfileFiles,
+		CleanFiles,
 		ExtractBnpClient,
 		CreateProfile,
 		CreateShortcuts,
@@ -144,6 +145,8 @@ public:
 	bool isRyzomInstalledIn(const QString &directory) const;
 	bool areRyzomDataInstalledIn(const QString &directory) const;
 	bool isRyzomClientInstalledIn(const QString &directory) const;
+	bool foundTemporaryFiles(const QString &directory) const;
+	bool shouldCreateDesktopShortcut() const;
 
 	// installation choices
 	bool use64BitsClient() const;

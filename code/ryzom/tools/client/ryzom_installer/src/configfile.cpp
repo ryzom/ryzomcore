@@ -420,11 +420,39 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	// client_default.cfg doesn't exist
 	if (!dir.exists("client_default.cfg")) return false;
 
-	if (!dir.exists(getServer().clientFilename)) return false;
+	QString clientFilename = getServer().clientFilename;
+
+	// check if client is defined and exists
+	if (!clientFilename.isEmpty() && !dir.exists(clientFilename)) return false;
 
 	// TODO: more checks
 
 	return true;
+}
+
+bool CConfigFile::foundTemporaryFiles(const QString &directory) const
+{
+	QDir dir(directory);
+
+	// directory doesn't exist
+	if (!dir.exists()) return false;
+
+	if (!dir.cd("data") && dir.exists()) return false;
+
+	// temporary files
+	if (!dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files).isEmpty()) return true;
+
+	// fonts directory is not needed anymore
+	if (dir.cd("fonts") && dir.exists()) return true;
+
+	return false;
+}
+
+bool CConfigFile::shouldCreateDesktopShortcut() const
+{
+	const CProfile &profile = getProfile();
+
+	return profile.desktopShortcut && !QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
 }
 
 QString CConfigFile::getClientFullPath() const
@@ -527,6 +555,11 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		// client is not extracted from BNP
 		if (!isRyzomClientInstalledIn(serverDirectory))
 		{
+			if (foundTemporaryFiles(serverDirectory))
+			{
+				return CleanFiles;
+			}
+
 			if (QFile::exists(getSrcServerClientBNPFullPath()))
 			{
 				return ExtractBnpClient;

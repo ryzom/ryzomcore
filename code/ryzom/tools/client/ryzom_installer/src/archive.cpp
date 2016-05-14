@@ -355,6 +355,34 @@ bool CArchive::copyProfileFiles()
 	return copyFiles(files);
 }
 
+bool CArchive::cleanServerFiles(const QString &directory)
+{
+	QDir dir(directory);
+
+	// directory doesn't exist
+	if (!dir.exists()) return false;
+
+	if (!dir.cd("data") && dir.exists()) return false;
+
+	// temporary files
+	QStringList files = dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files);
+
+	foreach(const QString &file, files)
+	{
+		dir.remove(file);
+	}
+
+	// fonts directory is not needed anymore
+	if (dir.cd("fonts") && dir.exists())
+	{
+		dir.removeRecursively();
+	}
+
+	emit done();
+
+	return true;
+}
+
 bool CArchive::copyServerFiles(const QString &src, const QString &dst)
 {
 	if (src.isEmpty() || dst.isEmpty()) return false;
