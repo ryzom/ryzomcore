@@ -32,7 +32,9 @@
 
 #include <sys/stat.h>
 
+#ifdef Q_OS_WIN
 #include <Windows.h>
+#endif
 
 #ifndef FILE_ATTRIBUTE_READONLY
 #define FILE_ATTRIBUTE_READONLY            0x1
