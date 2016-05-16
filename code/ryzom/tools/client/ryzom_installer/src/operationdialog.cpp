@@ -139,6 +139,10 @@ void COperationDialog::processNextStep()
 		createDefaultShortcuts();
 		break;
 
+		case CConfigFile::Done:
+		accept();
+		break;
+
 		default:
 		// cases already managed in main.cpp
 		break;
@@ -221,7 +225,7 @@ void COperationDialog::onProgressStop()
 	m_button->progress()->hide();
 #endif
 
-	close();
+	reject();
 }
 
 void COperationDialog::onProgressProgress(qint64 current, const QString &filename)
