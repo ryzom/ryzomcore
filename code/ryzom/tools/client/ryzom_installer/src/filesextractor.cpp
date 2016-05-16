@@ -111,7 +111,7 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 
 //	qDebug() << "attribs" << QByteArray::fromRawData((const char*)&fileAttributes, 4).toHex();
 
-#ifdef Q_OS_WIN1
+#ifdef Q_OS_WIN
 	SetFileAttributesW((wchar_t*)filename.utf16(), windowsAttributes);
 #else
 	const char *name = filename.toUtf8().constData();
