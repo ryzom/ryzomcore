@@ -147,8 +147,6 @@ void COperationDialog::processNextStep()
 		// cases already managed in main.cpp
 		break;
 	}
-
-	m_downloader->getHtmlPageContent(config->expandVariables(server.displayUrl));
 }
 
 void COperationDialog::showEvent(QShowEvent *e)
