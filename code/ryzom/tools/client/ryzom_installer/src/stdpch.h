@@ -25,6 +25,7 @@
 	#undef realloc
 #endif
 
+#ifdef _WIN32
 #include <qt_windows.h>
 #include <shlguid.h>
 #include <winnls.h>
@@ -32,15 +33,10 @@
 #include <objbase.h>
 #include <objidl.h>
 #include <strsafe.h>
+#endif
 
 #ifndef _DEBUG
 #define QT_NO_DEBUG_OUTPUT
-#endif
-
-#include <qglobal.h>
-
-#ifdef Q_COMPILER_RVALUE_REFS
-#undef Q_COMPILER_RVALUE_REFS
 #endif
 
 #include <QtCore/QtCore>
