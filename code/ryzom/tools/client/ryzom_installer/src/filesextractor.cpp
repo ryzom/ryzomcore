@@ -614,6 +614,7 @@ bool CFilesExtractor::extractBnp()
 		if (m_listener && m_listener->operationShouldStop())
 		{
 			// stopped
+			m_listener->operationStop();
 
 			return true;
 		}
