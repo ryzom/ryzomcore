@@ -358,8 +358,37 @@ void COperationDialog::extractBnpClient()
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
-	extractor.setDesinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	extractor.setDesinationDirectory(destinationDirectory);
 	extractor.exec();
+
+	QString upgradeScript = destinationDirectory + "/upgd_nl.";
+
+#ifdef Q_OS_WIN
+	upgradeScript += "bat";
+#else
+	upgradeScript += "sh";
+#endif
+
+	if (QFile::exists(upgradeScript))
+	{
+		QProcess process;
+
+		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(destinationDirectory + "/ryzom_client_r.exe"));
+		env.insert("UNPACKPATH", QDir::toNativeSeparators(destinationDirectory + "/unpack"));
+		env.insert("ROOTPATH", QDir::toNativeSeparators(destinationDirectory));
+		env.insert("STARTUPPATH", "");
+		process.setProcessEnvironment(env);
+
+		process.start(upgradeScript);
+
+		while (process.waitForFinished())
+		{
+			qDebug() << "waiting";
+		}
+	}
+
+	emit done();
 }
 
 void COperationDialog::cleanFiles()
