@@ -371,6 +371,48 @@ void COperationDialog::cleanFiles()
 	CFilesCleaner cleaner(this);
 	cleaner.setDirectory(config->getInstallationDirectory() + "/" + server.id);
 	cleaner.exec();
+
+	emit done();
+}
+
+bool COperationDialog::createDefaultProfile()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CServer server = config->getServer(config->getDefaultServerIndex());
+
+	m_currentOperation = QApplication::tr("Create default profile");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+
+	CProfile profile;
+
+	profile.id = "0";
+	profile.executable = config->getClientFullPath();
+	profile.name = QString("Ryzom (%1)").arg(server.name);
+	profile.server = server.id;
+	profile.comments = "Default profile created by Ryzom Installer";
+
+#ifdef Q_OS_WIN32
+//	C:\Users\Public\Desktop
+	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
+#endif
+
+	// TODO
+	// profile.menuShortcut
+
+	config->addProfile(profile);
+	config->save();
+
+	emit done();
+
+	return true;
+}
+
+bool COperationDialog::createDefaultShortcuts()
+{
+	emit done();
+
+	return true;
 }
 
 void COperationDialog::operationPrepare()
@@ -413,40 +455,4 @@ bool COperationDialog::operationShouldStop()
 	QMutexLocker locker(&m_abortingMutex);
 
 	return m_aborting;
-}
-
-bool COperationDialog::createDefaultProfile()
-{
-	CConfigFile *config = CConfigFile::getInstance();
-
-	CServer server = config->getServer(config->getDefaultServerIndex());
-
-	CProfile profile;
-
-	profile.id = 0;
-	profile.executable = config->getClientFullPath();
-	profile.name = QString("Ryzom (%1)").arg(server.name);
-	profile.server = server.id;
-	profile.comments = "Default profile created by Ryzom Installer";
-
-#ifdef Q_OS_WIN32
-	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
-#endif
-
-	// TODO
-	// profile.menuShortcut
-
-	config->addProfile(profile);
-	config->save();
-
-	onDone();
-
-	return true;
-}
-
-bool COperationDialog::createDefaultShortcuts()
-{
-	onDone();
-
-	return true;
 }
