@@ -24,7 +24,7 @@ QVariant CProfilesModel::data(const QModelIndex &index, int role) const
 
 	const CProfile &profile = m_profiles.at(index.row());
 
-	return QString("%1 (#%2)").arg(profile.name).arg(profile.id);
+	return tr("#%1: %2").arg(profile.id).arg(profile.name);
 }
 
 bool CProfilesModel::removeRows(int row, int count, const QModelIndex &parent)
