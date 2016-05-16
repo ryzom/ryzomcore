@@ -82,6 +82,8 @@ protected:
 	void processNextStep();
 
 	// operations
+	void downloadData();
+	void downloadClient();
 	void copyServerFiles();
 	void copyProfileFiles();
 	void extractBnpClient();

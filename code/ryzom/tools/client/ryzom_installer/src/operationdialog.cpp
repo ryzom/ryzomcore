@@ -97,7 +97,7 @@ void COperationDialog::processNextStep()
 		break;
 
 		case CConfigFile::DownloadData:
-		m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
+		downloadData();
 		break;
 
 		case CConfigFile::ExtractDownloadedData:
@@ -105,7 +105,7 @@ void COperationDialog::processNextStep()
 		break;
 
 		case CConfigFile::DownloadClient:
-		m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
+		downloadClient();
 		break;
 
 		case CConfigFile::ExtractDownloadedClient:
@@ -248,7 +248,33 @@ void COperationDialog::onProgressFail(const QString &error)
 
 void COperationDialog::onDone()
 {
-	processNextStep();
+	if (!operationShouldStop()) processNextStep();
+}
+
+void COperationDialog::downloadData()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Download data required for server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+
+	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
+}
+
+void COperationDialog::downloadClient()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Download client required for server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+
+	m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
 }
 
 void COperationDialog::copyServerFiles()
