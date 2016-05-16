@@ -410,10 +410,19 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
-	if (!dir.cd("data") && dir.exists()) return false;
+	if (!dir.cd("data") || !dir.exists()) return false;
 
 	// at least 200 BNP in data directory
 	if (dir.entryList(QStringList() << "*.bnp", QDir::Files).size() < 200) return false;
+
+	//  fonts.bnp is required
+	if (!dir.exists("fonts.bnp")) return false;
+
+	//  gamedev.bnp is required
+	if (!dir.exists("gamedev.bnp")) return false;
+
+	//  interfaces.bnp is required
+	if (!dir.exists("interfaces.bnp")) return false;
 
 	// TODO: more checks
 
@@ -550,16 +559,18 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	{
 		// user decided to copy files
 
-		// selected directory contains Ryzom files (shouldn't fail)
-		if (!areRyzomDataInstalledIn(getSrcServerDirectory()))
-		{
-			return ShowWizard;
-		}
-
 		// data are not copied
 		if (!areRyzomDataInstalledIn(serverDirectory))
 		{
-			return CopyServerFiles;
+			// selected directory contains Ryzom files (shouldn't fail)
+			if (areRyzomDataInstalledIn(getSrcServerDirectory()))
+			{
+				return CopyServerFiles;
+			}
+			else
+			{
+				return ShowWizard;
+			}
 		}
 
 		// client is not extracted from BNP
