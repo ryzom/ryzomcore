@@ -91,35 +91,40 @@
 
 bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 {
-	bool attrReadOnly = (fileAttributes & FILE_ATTRIBUTE_READONLY != 0);
-	bool attrHidden = (fileAttributes & FILE_ATTRIBUTE_HIDDEN != 0);
-	bool attrSystem = (fileAttributes & FILE_ATTRIBUTE_SYSTEM != 0);
-	bool attrDir = (fileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0);
-	bool attrArchive = (fileAttributes & FILE_ATTRIBUTE_ARCHIVE != 0);
-	bool attrDevice = (fileAttributes & FILE_ATTRIBUTE_DEVICE != 0);
-	bool attrNormal = (fileAttributes & FILE_ATTRIBUTE_NORMAL != 0);
-	bool attrTemp = (fileAttributes & FILE_ATTRIBUTE_TEMPORARY != 0);
-	bool attrSparceFile = (fileAttributes & FILE_ATTRIBUTE_SPARSE_FILE != 0);
-	bool attrReparsePoint = (fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT != 0);
-	bool attrCompressed = (fileAttributes & FILE_ATTRIBUTE_COMPRESSED != 0);
-	bool attrOffline = (fileAttributes & FILE_ATTRIBUTE_OFFLINE != 0);
-	bool attrEncrypted = (fileAttributes & FILE_ATTRIBUTE_ENCRYPTED != 0);
-	bool attrUnix = (fileAttributes & FILE_ATTRIBUTE_UNIX_EXTENSION != 0);
+	bool attrReadOnly = (fileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
+	bool attrHidden = (fileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
+	bool attrSystem = (fileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
+	bool attrDir = (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+	bool attrArchive = (fileAttributes & FILE_ATTRIBUTE_ARCHIVE) != 0;
+	bool attrDevice = (fileAttributes & FILE_ATTRIBUTE_DEVICE) != 0;
+	bool attrNormal = (fileAttributes & FILE_ATTRIBUTE_NORMAL) != 0;
+	bool attrTemp = (fileAttributes & FILE_ATTRIBUTE_TEMPORARY) != 0;
+	bool attrSparceFile = (fileAttributes & FILE_ATTRIBUTE_SPARSE_FILE) != 0;
+	bool attrReparsePoint = (fileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+	bool attrCompressed = (fileAttributes & FILE_ATTRIBUTE_COMPRESSED) != 0;
+	bool attrOffline = (fileAttributes & FILE_ATTRIBUTE_OFFLINE) != 0;
+	bool attrEncrypted = (fileAttributes & FILE_ATTRIBUTE_ENCRYPTED) != 0;
+	bool attrUnix = (fileAttributes & FILE_ATTRIBUTE_UNIX_EXTENSION) != 0;
 
 	uint32 unixAttributes = (fileAttributes & FILE_ATTRIBUTE_UNIX) >> 16;
 	uint32 windowsAttributes = fileAttributes & FILE_ATTRIBUTE_WINDOWS;
 
-	qDebug() << "attribs" << QByteArray::fromRawData((const char*)&fileAttributes, 4).toHex();
+//	qDebug() << "attribs" << QByteArray::fromRawData((const char*)&fileAttributes, 4).toHex();
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN1
 	SetFileAttributesW((wchar_t*)filename.utf16(), windowsAttributes);
 #else
 	const char *name = filename.toUtf8().constData();
 
+	mode_t current_umask = umask(0); // get and set the umask
+	umask(current_umask); // restore the umask
+	mode_t mask = 0777 & (~current_umask);
+
 	struct stat stat_info;
-	if (lstat(name, &stat_info)!=0)
+
+	if (lstat(name, &stat_info) != 0)
 	{
-		nlwarning("SetFileAttrib(%s,%d) : false-2-1", (const char *)name, fileAttributes);
+		nlwarning("Unable to get file attributes for %s", name);
 		return false;
 	}
 
@@ -127,45 +132,31 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 	{
 		stat_info.st_mode = unixAttributes;
 
-		if (S_ISLNK(stat_info.st_mode))
+		// ignore symbolic links
+		if (!S_ISLNK(stat_info.st_mode))
 		{
-			if (convert_to_symlink(name) != 0)
+			if (S_ISREG(stat_info.st_mode))
 			{
-				nlwarning("SetFileAttrib(%s,%d) : false-3",(const char *)name,fileAttributes);
-				return false;
+				chmod(name, stat_info.st_mode & mask);
+			}
+			else if (S_ISDIR(stat_info.st_mode))
+			{
+				// user/7za must be able to create files in this directory
+				stat_info.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
+				chmod(name, stat_info.st_mode & mask);
 			}
 		}
-		else if (S_ISREG(stat_info.st_mode))
-		{
-			nlwarning("##DBG chmod-2(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name, stat_info.st_mode & gbl_umask.mask);
-		}
-		else if (S_ISDIR(stat_info.st_mode))
-		{
-			// user/7za must be able to create files in this directory
-			stat_info.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
-			nlwarning("##DBG chmod-3(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name, stat_info.st_mode & gbl_umask.mask);
-		}
 	}
-	else if (!S_ISLNK(stat_info.st_mode))
+	else if (!S_ISLNK(stat_info.st_mode) && !S_ISDIR(stat_info.st_mode) && attrReadOnly)
 	{
 		// do not use chmod on a link
-
+		// Remark : FILE_ATTRIBUTE_READONLY ignored for directory.
 		// Only Windows Attributes
-		if( S_ISDIR(stat_info.st_mode))
-		{
-			// Remark : FILE_ATTRIBUTE_READONLY ignored for directory.
-			nlwarning("##DBG chmod-4(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name,stat_info.st_mode & gbl_umask.mask);
-		}
-		else
-		{
-			// octal!, clear write permission bits
-			if (fileAttributes & FILE_ATTRIBUTE_READONLY) stat_info.st_mode &= ~0222;
-			nlwarning("##DBG chmod-5(%s,%o)", (const char *)name, (unsigned)stat_info.st_mode & gbl_umask.mask);
-			chmod(name,stat_info.st_mode & gbl_umask.mask);
-		}
+
+		// octal!, clear write permission bits
+		stat_info.st_mode &= ~0222;
+
+		chmod(name, stat_info.st_mode & mask);
 	}
 #endif
 
