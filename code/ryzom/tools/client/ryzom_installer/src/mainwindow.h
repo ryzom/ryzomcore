@@ -38,9 +38,6 @@ public:
 	virtual ~CMainWindow();
 
 public slots:
-	void onResumeClicked();
-	void onStopClicked();
-
 	void onPlayClicked();
 	void onConfigureClicked();
 
@@ -48,40 +45,18 @@ public slots:
 	void onAbout();
 	void onAboutQt();
 
-	void onDownloadPrepare();
-	void onDownloadInit(qint64 current, qint64 total);
-	void onDownloadStart();
-	void onDownloadStop();
-	void onDownloadProgress(qint64 current);
-	void onDownloadSuccess(qint64 total);
-	void onDownloadFail(const QString &error);
-
 	void onHtmlPageContent(const QString &html);
 
-	void onExtractPrepare();
-	void onExtractInit(qint64 current, qint64 total);
-	void onExtractStart();
-	void onExtractStop();
-	void onExtractProgress(qint64 current, const QString &filename);
-	void onExtractSuccess(qint64 total);
-	void onExtractFail(const QString &error);
-
-	void onDone();
+	void onProfileChanged(int index);
 
 protected:
 	void showEvent(QShowEvent *e);
 	void closeEvent(QCloseEvent *e);
 
-	void processNextStep();
-
-	void displayProgressBar();
-	void hideProgressBar();
-
-	void displayConfigurationsChoices();
+	void updateProfiles();
 
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;
-	CArchive *m_archive;
 
 	QLabel *m_statusLabel;
 };

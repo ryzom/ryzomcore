@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "configfile.h"
 #include "wizarddialog.h"
+#include "operationdialog.h"
 
 #include "nel/misc/path.h"
 #include "nel/misc/ucstring.h"
@@ -98,10 +99,27 @@ int main(int argc, char *argv[])
 
 	if (displayMainWindow)
 	{
-		CMainWindow mainWindow;
-		mainWindow.show();
+		step = config.getNextStep();
 
-		return QApplication::exec();
+		if (step != CConfigFile::Done)
+		{
+			COperationDialog dialog;
+
+			if (!dialog.exec()) displayMainWindow = false;
+		}
+	}
+
+	if (displayMainWindow)
+	{
+		step = config.getNextStep();
+
+		if (step == CConfigFile::Done)
+		{
+			CMainWindow mainWindow;
+			mainWindow.show();
+
+			return QApplication::exec();
+		}
 	}
 
 	return 0;
