@@ -91,7 +91,10 @@ void COperationDialog::processNextStep()
 	// default profile
 	const CProfile &configuration = config->getProfile();
 
-	switch(config->getNextStep())
+	// long operations are done in a thread
+	CConfigFile::InstallationStep step = config->getNextStep();
+
+	switch(step)
 	{
 		case CConfigFile::DisplayNoServerError:
 		break;
