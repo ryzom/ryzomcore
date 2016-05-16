@@ -72,6 +72,7 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 	connect(this, SIGNAL(progress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
 	connect(this, SIGNAL(success(qint64)), SLOT(onProgressSuccess(qint64)));
 	connect(this, SIGNAL(fail(QString)), SLOT(onProgressFail(QString)));
+	connect(this, SIGNAL(done()), SLOT(onDone()));
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
@@ -308,6 +309,8 @@ void COperationDialog::copyServerFiles()
 	else
 	{
 	}
+
+	emit done();
 }
 
 void COperationDialog::copyProfileFiles()
@@ -342,6 +345,8 @@ void COperationDialog::copyProfileFiles()
 	else
 	{
 	}
+
+	emit done();
 }
 
 void COperationDialog::extractBnpClient()
