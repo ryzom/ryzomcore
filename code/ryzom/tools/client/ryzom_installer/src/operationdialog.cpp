@@ -42,6 +42,8 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 {
 	setupUi(this);
 
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
 #if defined(Q_OS_WIN32) && defined(QT_WINEXTRAS_LIB)
 	m_button = new QWinTaskbarButton(this);
 #endif
