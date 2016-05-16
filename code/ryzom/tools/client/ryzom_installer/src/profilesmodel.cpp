@@ -60,7 +60,7 @@ int CProfilesModel::getIndexFromProfileID(const QString &profileId) const
 
 QString CProfilesModel::getProfileIDFromIndex(int index) const
 {
-	if (index < 0 || index >= m_profiles.size()) return -1;
+	if (index < 0 || index >= m_profiles.size()) return "";
 
 	return m_profiles[index].id;
 }
