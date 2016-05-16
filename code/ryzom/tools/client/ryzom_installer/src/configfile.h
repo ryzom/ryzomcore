@@ -119,8 +119,11 @@ public:
 	int addProfile(const CProfile &profile);
 	void removeProfile(int i);
 
-	int getDefaultServer() const;
-	int getDefaultProfile() const;
+	int getDefaultServerIndex() const;
+	void setDefaultServerIndex(int index);
+
+	int getDefaultProfileIndex() const;
+	void setDefaultProfileIndex(int index);
 
 	bool isRyzomInstallerConfigured() const;
 
@@ -162,12 +165,9 @@ public:
 
 	InstallationStep getNextStep() const;
 
-	bool createDefaultProfile();
-	bool createDefaultShortcuts();
-
 private:
-	int m_defaultServer;
-	int m_defaultProfile;
+	int m_defaultServerIndex;
+	int m_defaultProfileIndex;
 
 	CServers m_servers;
 	CProfiles m_profiles;

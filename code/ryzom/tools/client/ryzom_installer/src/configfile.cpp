@@ -29,7 +29,7 @@ const CProfile NoProfile;
 
 CConfigFile *CConfigFile::s_instance = NULL;
 
-CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServer(0), m_defaultProfile(0), m_use64BitsClient(false)
+CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false)
 {
 	s_instance = this;
 
@@ -60,7 +60,7 @@ bool CConfigFile::load(const QString &filename)
 
 	settings.beginGroup("servers");
 	int serversCount = settings.value("size").toInt();
-	m_defaultServer = settings.value("default").toInt();
+	m_defaultServerIndex = settings.value("default").toInt();
 	settings.endGroup();
 	
 	m_servers.resize(serversCount);
@@ -94,7 +94,7 @@ bool CConfigFile::load(const QString &filename)
 
 	settings.beginGroup("profiles");
 	int profilesCounts = settings.value("size").toInt();
-	m_defaultProfile = settings.value("default").toInt();
+	m_defaultProfileIndex = settings.value("default").toInt();
 	settings.endGroup();
 	
 	m_profiles.resize(profilesCounts);
@@ -134,7 +134,7 @@ bool CConfigFile::save() const
 
 	settings.beginGroup("servers");
 	settings.setValue("size", m_servers.size());
-	settings.setValue("default", m_defaultServer);
+	settings.setValue("default", m_defaultServerIndex);
 	settings.endGroup();
 
 	for(int i = 0; i < m_servers.size(); ++i)
@@ -166,7 +166,7 @@ bool CConfigFile::save() const
 
 	settings.beginGroup("profiles");
 	settings.setValue("size", m_profiles.size());
-	settings.setValue("default", m_defaultProfile);
+	settings.setValue("default", m_defaultProfileIndex);
 	settings.endGroup();
 
 	for(int i = 0; i < m_profiles.size(); ++i)
@@ -203,7 +203,7 @@ int CConfigFile::getServersCount() const
 
 const CServer& CConfigFile::getServer(int i) const
 {
-	if (i < 0) i = m_defaultServer;
+	if (i < 0) i = m_defaultServerIndex;
 
 	if (i >= m_servers.size()) return NoServer;
 
@@ -228,7 +228,7 @@ int CConfigFile::getProfilesCount() const
 
 CProfile CConfigFile::getProfile(int i) const
 {
-	if (i < 0) i = m_defaultProfile;
+	if (i < 0) i = m_defaultProfileIndex;
 
 	if (i >= m_profiles.size()) return NoProfile;
 
@@ -259,14 +259,24 @@ bool CConfigFile::has64bitsOS()
 	return QSysInfo::currentCpuArchitecture() == "x86_64";
 }
 
-int CConfigFile::getDefaultProfile() const
+int CConfigFile::getDefaultServerIndex() const
 {
-	return m_defaultProfile;
+	return m_defaultServerIndex;
 }
 
-int CConfigFile::getDefaultServer() const
+void CConfigFile::setDefaultServerIndex(int index)
 {
-	return m_defaultServer;
+	m_defaultServerIndex = index;
+}
+
+int CConfigFile::getDefaultProfileIndex() const
+{
+	return m_defaultProfileIndex;
+}
+
+void CConfigFile::setDefaultProfileIndex(int index)
+{
+	m_defaultProfileIndex = index;
 }
 
 bool CConfigFile::isRyzomInstallerConfigured() const
@@ -600,34 +610,4 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	}
 
 	return Done;
-}
-
-bool CConfigFile::createDefaultProfile()
-{
-	CServer server = getServer(getDefaultServer());
-
-	CProfile profile;
-
-	profile.id = 0;
-	profile.executable = getClientFullPath();
-	profile.name = QString("Ryzom (%1)").arg(server.name);
-	profile.server = server.id;
-	profile.comments = "Default profile created by Ryzom Installer";
-
-#ifdef Q_OS_WIN32
-	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
-#endif
-
-	// TODO
-	// profile.menuShortcut
-
-	addProfile(profile);
-	save();
-
-	return true;
-}
-
-bool CConfigFile::createDefaultShortcuts()
-{
-	return true;
 }
