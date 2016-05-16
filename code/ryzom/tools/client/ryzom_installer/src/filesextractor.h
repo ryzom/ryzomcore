@@ -14,48 +14,40 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef STDPCH_H
-#define STDPCH_H
+#ifndef FILEXTRACTOR_H
+#define FILEXTRACTOR_H
 
-#if defined(_MSC_VER) && defined(_DEBUG)
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-	#undef realloc
-#endif
+class IOperationProgressListener;
 
-#ifdef _WIN32
-#include <qt_windows.h>
-#include <shlguid.h>
-#include <winnls.h>
-#include <shobjidl.h>
-#include <objbase.h>
-#include <objidl.h>
-#include <strsafe.h>
-#endif
+/**
+ * Files extractor
+ *
+ * \author Cedric 'Kervala' OCHS
+ * \date 2016
+ */
+class CFilesExtractor
+{
+public:
+	CFilesExtractor(IOperationProgressListener *listener);
+	virtual ~CFilesExtractor();
 
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
+	void setSourceFile(const QString &src);
+	void setDesinationDirectory(const QString &src);
 
-#include <QtCore/QtCore>
-#include <QtGui/QtGui>
-#include <QtNetwork/QtNetwork>
+	bool exec();
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#define USE_QT5
-#endif
+protected:
 
-#ifdef USE_QT5
-#include <QtWidgets/QtWidgets>
-#include <QtConcurrent/QtConcurrent>
-#endif
+	bool extract7z();
+	bool extractZip();
+	bool extractBnp();
 
-#include <string>
+	bool progress(const std::string &filename, uint32 currentFile, uint32 totalFiles);
 
-#include <nel/misc/types_nl.h>
-#include <nel/misc/config_file.h>
+	IOperationProgressListener *m_listener;
+
+	QString m_sourceFile;
+	QString m_destinationDirectory;
+};
 
 #endif
-

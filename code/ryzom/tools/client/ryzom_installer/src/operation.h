@@ -14,48 +14,24 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef STDPCH_H
-#define STDPCH_H
+#ifndef OPERATION_H
+#define OPERATION_H
 
-#if defined(_MSC_VER) && defined(_DEBUG)
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-	#undef realloc
-#endif
+class IOperationProgressListener
+{
+public:
+	virtual ~IOperationProgressListener() {}
 
-#ifdef _WIN32
-#include <qt_windows.h>
-#include <shlguid.h>
-#include <winnls.h>
-#include <shobjidl.h>
-#include <objbase.h>
-#include <objidl.h>
-#include <strsafe.h>
-#endif
+	virtual void operationPrepare() =0;
+	virtual void operationInit(qint64 current, qint64 total) =0;
+	virtual void operationStart() =0;
+	virtual void operationStop() =0;
+	virtual void operationProgress(qint64 current, const QString &filename) =0;
+	virtual void operationSuccess(qint64 total) =0;
+	virtual void operationFail(const QString &error) =0;
+	virtual void operationFinish() =0;
 
-#ifndef _DEBUG
-#define QT_NO_DEBUG_OUTPUT
-#endif
-
-#include <QtCore/QtCore>
-#include <QtGui/QtGui>
-#include <QtNetwork/QtNetwork>
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-#define USE_QT5
-#endif
-
-#ifdef USE_QT5
-#include <QtWidgets/QtWidgets>
-#include <QtConcurrent/QtConcurrent>
-#endif
-
-#include <string>
-
-#include <nel/misc/types_nl.h>
-#include <nel/misc/config_file.h>
+	virtual bool operationShouldStop() =0;
+};
 
 #endif
-

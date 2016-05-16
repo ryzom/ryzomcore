@@ -15,7 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "archive.h"
+#include "filesextractor.h"
+#include "operation.h"
 #include "utils.h"
 
 #include "nel/misc/big_file.h"
@@ -31,10 +32,6 @@
 #include "qzipreader.h"
 
 #include <sys/stat.h>
-
-#ifdef Q_OS_WIN
-#include <Windows.h>
-#endif
 
 #ifndef FILE_ATTRIBUTE_READONLY
 #define FILE_ATTRIBUTE_READONLY            0x1
@@ -244,20 +241,31 @@ public:
 	}
 };
 
-CArchive::CArchive(QObject *parent):QObject(parent), m_mustStop(false)
+CFilesExtractor::CFilesExtractor(IOperationProgressListener *listener):m_listener(listener)
 {
 }
 
-CArchive::~CArchive()
+CFilesExtractor::~CFilesExtractor()
 {
 }
 
-bool CArchive::extract(const QString &filename, const QString &dest)
+void CFilesExtractor::setSourceFile(const QString &src)
 {
-	m_filename = filename;
-	m_dest = dest;
+	m_sourceFile = src;
+}
 
-	QFile file(m_filename);
+void CFilesExtractor::setDesinationDirectory(const QString &dst)
+{
+	m_destinationDirectory = dst;
+}
+
+bool CFilesExtractor::exec()
+{
+	if (m_sourceFile.isEmpty() || m_destinationDirectory.isEmpty()) return false;
+
+	if (m_listener) m_listener->operationPrepare();
+
+	QFile file(m_sourceFile);
 
 	// open archive file to check format
 	if (!file.open(QFile::ReadOnly)) return false;
@@ -270,252 +278,37 @@ bool CArchive::extract(const QString &filename, const QString &dest)
 
 	// create destination directory
 	QDir dir;
-	dir.mkpath(dest);
-
-	QFuture<bool> future;
+	dir.mkpath(m_destinationDirectory);
 
 	// compare to supported formats and call the appropriate decompressor
 	if (header == "7z")
 	{
-		future = QtConcurrent::run(this, &CArchive::extract7z);
-	}
-	else if (header == "PK")
-	{
-		future = QtConcurrent::run(this, &CArchive::extractZip);
-	}
-	else if (QFileInfo(filename).suffix().toLower() == "bnp")
-	{
-		future = QtConcurrent::run(this, &CArchive::extractBnp);
-	}
-	else
-	{
-		qDebug() << "Unsupported format";
-		return false;
+		return extract7z();
 	}
 
-	return true;
+	if (header == "PK")
+	{
+		return extractZip();
+	}
+
+	if (QFileInfo(m_sourceFile).suffix().toLower() == "bnp")
+	{
+		return extractBnp();
+	}
+
+	qDebug() << "Unsupported format";
+	return false;
 }
 
-void CArchive::getFilesList(const QString &srcDir, const QString &dstDir, const QStringList &filter, FilesToCopy &files)
+bool CFilesExtractor::extract7z()
 {
-	QDir dir(srcDir);
-
-	QFileInfoList entries = dir.entryInfoList(filter);
-
-	foreach(const QFileInfo &entry, entries)
-	{
-		QString fullPath = entry.absoluteFilePath();
-
-		QString dstPath = dstDir + "/" + dir.relativeFilePath(fullPath);
-
-		if (entry.isDir())
-		{
-			QDir().mkpath(dstPath);
-
-			QDir subDir(fullPath);
-
-			QDirIterator it(subDir, QDirIterator::Subdirectories);
-
-			while (it.hasNext())
-			{
-				fullPath = it.next();
-
-				if (it.fileName().startsWith('.')) continue;
-
-				QFileInfo fileInfo = it.fileInfo();
-
-				dstPath = dstDir + "/" + dir.relativeFilePath(fullPath);
-
-				if (fileInfo.isDir())
-				{
-					QDir().mkpath(dstPath);
-				}
-				else
-				{
-					FileToCopy file;
-					file.filename = it.fileName();
-					file.src = it.filePath();
-					file.dst = dstPath;
-					file.size = it.fileInfo().size();
-					file.date = it.fileInfo().lastModified();
-
-					files << file;
-				}
-			}
-		}
-		else
-		{
-			FileToCopy file;
-			file.filename = entry.fileName();
-			file.src = entry.filePath();
-			file.dst = dstPath;
-			file.size = entry.size();
-			file.date = entry.lastModified();
-
-			files << file;
-		}
-	}
-}
-
-bool CArchive::copyServerFiles()
-{
-	emit extractPrepare();
-
-	FilesToCopy files;
-
-	QStringList serverFiles;
-	serverFiles << "cfg";
-	serverFiles << "data";
-	serverFiles << "examples";
-	serverFiles << "patch";
-	serverFiles << "unpack";
-	serverFiles << "client_default.cfg";
-
-	CArchive::getFilesList(m_filename, m_dest, serverFiles, files);
-
-	return copyFiles(files);
-}
-
-bool CArchive::copyProfileFiles()
-{
-	emit extractPrepare();
-
-	FilesToCopy files;
-
-	QStringList configFiles;
-	configFiles << "cache";
-	configFiles << "save";
-	configFiles << "user";
-	configFiles << "screenshots";
-	configFiles << "client.cfg";
-	configFiles << "*.log";
-
-	CArchive::getFilesList(m_filename, m_dest, configFiles, files);
-
-	return copyFiles(files);
-}
-
-bool CArchive::cleanServerFiles(const QString &directory)
-{
-	QDir dir(directory);
-
-	// directory doesn't exist
-	if (!dir.exists()) return false;
-
-	if (!dir.cd("data") && dir.exists()) return false;
-
-	// temporary files
-	QStringList files = dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files);
-
-	foreach(const QString &file, files)
-	{
-		dir.remove(file);
-	}
-
-	// fonts directory is not needed anymore
-	if (dir.cd("fonts") && dir.exists())
-	{
-		dir.removeRecursively();
-	}
-
-	emit done();
-
-	return true;
-}
-
-bool CArchive::copyServerFiles(const QString &src, const QString &dst)
-{
-	if (src.isEmpty() || dst.isEmpty()) return false;
-
-	m_filename = src;
-	m_dest = dst;
-
-	// create destination directory
-	QDir().mkpath(dst);
-
-	QFuture<bool> future = QtConcurrent::run(this, &CArchive::copyServerFiles);
-
-	return true;
-}
-
-bool CArchive::copyProfileFiles(const QString &src, const QString &dst)
-{
-	if (src.isEmpty() || dst.isEmpty()) return false;
-
-	m_filename = src;
-	m_dest = dst;
-
-	// create destination directory
-	QDir().mkpath(dst);
-
-	QFuture<bool> future = QtConcurrent::run(this, &CArchive::copyProfileFiles);
-
-	return true;
-}
-
-bool CArchive::copyFiles(const FilesToCopy &files)
-{
-	qint64 totalSize = 0;
-
-	foreach(const FileToCopy &file, files)
-	{
-		totalSize += file.size;
-
-		qDebug() << file.filename;
-	}
-
-	emit extractInit(0, totalSize);
-
-	emit extractStart();
-
-	qint64 processedSize = 0;
-
-	foreach(const FileToCopy &file, files)
-	{
-		if (mustStop())
-		{
-			emit extractStop();
-			return true;
-		}
-
-		emit extractProgress(processedSize, file.filename);
-
-		QFileInfo dstFileInfo(file.dst);
-
-		if (dstFileInfo.size() != file.size || dstFileInfo.lastModified() != file.date)
-		{
-			if (!QFile::copy(file.src, file.dst))
-			{
-				emit extractFail(tr("Unable to copy file %1").arg(file.src));
-				return false;
-			}
-
-			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(file.dst), file.date.toTime_t()))
-			{
-				qDebug() << "Unable to change date";
-			}
-		}
-
-		processedSize += file.size;
-	}
-
-	emit extractSuccess(totalSize);
-	emit done();
-
-	return true;
-}
-
-bool CArchive::extract7z()
-{
-	Q7zFile inFile(m_filename);
+	Q7zFile inFile(m_sourceFile);
 
 	if (!inFile.open())
 	{
-		emit extractFail(tr("Unable to open %1").arg(m_filename));
+		if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(m_sourceFile));
 		return false;
 	}
-
-	emit extractPrepare();
 
 	UInt16 *temp = NULL;
 	size_t tempSize = 0;
@@ -558,9 +351,11 @@ bool CArchive::extract7z()
 			if (!isDir) total += SzArEx_GetFileSize(&db, i);
 		}
 
-		emit extractInit(0, total);
-
-		emit extractStart();
+		if (m_listener)
+		{
+			m_listener->operationInit(0, total);
+			m_listener->operationStart();
+		}
 
 		// variables used for decompression
 		UInt32 blockIndex = 0xFFFFFFFF;
@@ -570,7 +365,7 @@ bool CArchive::extract7z()
 		// process each file in archive
 		for (UInt32 i = 0; i < db.NumFiles; ++i)
 		{
-			if (mustStop())
+			if (m_listener && m_listener->operationShouldStop())
 			{
 				res = SZ_ERROR_INTERRUPTED;
 				break;
@@ -602,7 +397,7 @@ bool CArchive::extract7z()
 
 			if (!isDir)
 			{
-				emit extractProgress(totalUncompressed, filename);
+				if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
 				res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
 					&offset, &outSizeProcessed, &allocImp, &allocTempImp);
@@ -610,7 +405,7 @@ bool CArchive::extract7z()
 				if (res != SZ_OK) break;
 			}
 
-			QString destPath = m_dest + '/' + path;
+			QString destPath = m_destinationDirectory + '/' + path;
 
 			QDir dir;
 
@@ -626,7 +421,7 @@ bool CArchive::extract7z()
 
 			if (!outFile.open(QFile::WriteOnly))
 			{
-				error = tr("Unable to open output file");
+				error = QApplication::tr("Unable to open output file");
 				res = SZ_ERROR_FAIL;
 				break;
 			}
@@ -635,7 +430,7 @@ bool CArchive::extract7z()
 
 			if (processedSize != outSizeProcessed)
 			{
-				error = tr("Unable to write output file");
+				error = QApplication::tr("Unable to write output file");
 				res = SZ_ERROR_FAIL;
 				break;
 			}
@@ -644,7 +439,7 @@ bool CArchive::extract7z()
 
 			totalUncompressed += SzArEx_GetFileSize(&db, i);
 
-			emit extractProgress(totalUncompressed, filename);
+			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
 			if (SzBitWithVals_Check(&db.Attribs, i))
 				Set7zFileAttrib(destPath, db.Attribs.Vals[i]);
@@ -659,24 +454,27 @@ bool CArchive::extract7z()
 	switch(res)
 	{
 		case SZ_OK:
-		emit extractSuccess(totalUncompressed);
-		emit done();
+		if (m_listener)
+		{
+			m_listener->operationSuccess(totalUncompressed);
+			m_listener->operationFinish();
+		}
 		return true;
 
 		case SZ_ERROR_INTERRUPTED:
-		emit extractStop();
+		if (m_listener) m_listener->operationStop();
 		return true;
 
 		case SZ_ERROR_UNSUPPORTED:
-		error = tr("7zip decoder doesn't support this archive");
+		error = QApplication::tr("7zip decoder doesn't support this archive");
 		break;
 
 		case SZ_ERROR_MEM:
-		error = tr("Unable to allocate memory");
+		error = QApplication::tr("Unable to allocate memory");
 		break;
 
 		case SZ_ERROR_CRC:
-		error = tr("7zip decoder doesn't support this archive");
+		error = QApplication::tr("7zip decoder doesn't support this archive");
 		break;
 
 		case SZ_ERROR_FAIL:
@@ -684,21 +482,19 @@ bool CArchive::extract7z()
 		break;
 
 		default:
-		error = tr("Error %1").arg(res);
+		error = QApplication::tr("Error %1").arg(res);
 	}
 
-	emit extractFail(error);
+	if (m_listener) m_listener->operationFail(error);
 
 	return false;
 }
 
-bool CArchive::extractZip()
+bool CFilesExtractor::extractZip()
 {
-	emit extractPrepare();
+	QZipReader reader(m_sourceFile);
 
-	QZipReader reader(m_filename);
-
-	QDir baseDir(m_dest);
+	QDir baseDir(m_destinationDirectory);
 
 	// create directories first
 	QList<QZipReader::FileInfo> allFiles = reader.fileInfoList();
@@ -709,17 +505,17 @@ bool CArchive::extractZip()
 	{
 		if (fi.isDir)
 		{
-			const QString absPath = m_dest + QDir::separator() + fi.filePath;
+			const QString absPath = m_destinationDirectory + QDir::separator() + fi.filePath;
 
 			if (!baseDir.mkpath(fi.filePath))
 			{
-				emit extractFail(tr("Unable to create directory %1").arg(absPath));
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to create directory %1").arg(absPath));
 				return false;
 			}
 
 			if (!QFile::setPermissions(absPath, fi.permissions))
 			{
-				emit extractFail(tr("Unable to set permissions of %1").arg(absPath));
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to set permissions of %1").arg(absPath));
 				return false;
 			}
 		}
@@ -727,20 +523,23 @@ bool CArchive::extractZip()
 		totalSize += fi.size;
 	}
 
-	emit extractInit(0, totalSize);
-	emit extractStart();
+	if (m_listener)
+	{
+		m_listener->operationInit(0, totalSize);
+		m_listener->operationStart();
+	}
 
 	// client won't use symbolic links so don't process them
 
 	foreach (const QZipReader::FileInfo &fi, allFiles)
 	{
-		const QString absPath = m_dest + QDir::separator() + fi.filePath;
+		const QString absPath = m_destinationDirectory + QDir::separator() + fi.filePath;
 
 		if (fi.isFile)
 		{
-			if (mustStop())
+			if (m_listener && m_listener->operationShouldStop())
 			{
-				emit extractStop();
+				m_listener->operationStop();
 				return true;
 			}
 
@@ -748,7 +547,7 @@ bool CArchive::extractZip()
 
 			if (!f.open(QIODevice::WriteOnly))
 			{
-				emit extractFail(tr("Unable to open %1").arg(absPath));
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(absPath));
 				return false;
 			}
 
@@ -757,58 +556,65 @@ bool CArchive::extractZip()
 			f.setPermissions(fi.permissions);
 			f.close();
 
-			emit extractProgress(currentSize, QFileInfo(absPath).fileName());
+			if (m_listener) m_listener->operationProgress(currentSize, QFileInfo(absPath).fileName());
 		}
 	}
 
-	emit extractSuccess(totalSize);
-	emit done();
+	if (m_listener)
+	{
+		m_listener->operationSuccess(totalSize);
+		m_listener->operationFinish();
+	}
 
 	return true;
 }
 
-bool CArchive::progress(const std::string &filename, uint32 currentSize, uint32 totalSize)
+bool CFilesExtractor::progress(const std::string &filename, uint32 currentSize, uint32 totalSize)
 {
-	if (mustStop())
+	if (m_listener && m_listener->operationShouldStop())
 	{
-		emit extractStop();
+		m_listener->operationStop();
 	
 		return false;
 	}
 
 	if (currentSize == 0)
 	{
-		emit extractInit(0, (qint64)totalSize);
-		emit extractStart();
+		if (m_listener)
+		{
+			m_listener->operationInit(0, (qint64)totalSize);
+			m_listener->operationStart();
+		}
 	}
 
-	emit extractProgress((qint64)currentSize, qFromUtf8(filename));
+	if (m_listener) m_listener->operationProgress((qint64)currentSize, qFromUtf8(filename));
 	
 	if (currentSize == totalSize)
 	{
-		emit extractSuccess((qint64)totalSize);
-		emit done();
+		if (m_listener)
+		{
+			m_listener->operationSuccess((qint64)totalSize);
+			m_listener->operationFinish();
+		}
 	}
 
 	return true;
 }
 
-bool CArchive::extractBnp()
+bool CFilesExtractor::extractBnp()
 {
 	QString error;
 
-	emit extractPrepare();
-
-	NLMISC::CBigFile::TUnpackProgressCallback cbMethod = NLMISC::CBigFile::TUnpackProgressCallback(this, &CArchive::progress);
+	NLMISC::CBigFile::TUnpackProgressCallback cbMethod = NLMISC::CBigFile::TUnpackProgressCallback(this, &CFilesExtractor::progress);
 
 	try
 	{
-		if (NLMISC::CBigFile::unpack(qToUtf8(m_filename), qToUtf8(m_dest), &cbMethod))
+		if (NLMISC::CBigFile::unpack(qToUtf8(m_sourceFile), qToUtf8(m_destinationDirectory), &cbMethod))
 		{
 			return true;
 		}
 
-		if (mustStop())
+		if (m_listener && m_listener->operationShouldStop())
 		{
 			// stopped
 
@@ -819,37 +625,22 @@ bool CArchive::extractBnp()
 	}
 	catch(const NLMISC::EDiskFullError &e)
 	{
-		error = tr("disk full");
+		error = QApplication::tr("disk full");
 	}
 	catch(const NLMISC::EWriteError &e)
 	{
-		error = tr("unable to write %1").arg(qFromUtf8(e.Filename));
+		error = QApplication::tr("unable to write %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const NLMISC::EReadError &e)
 	{
-		error = tr("unable to read %1").arg(qFromUtf8(e.Filename));
+		error = QApplication::tr("unable to read %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const std::exception &e)
 	{
-		error = tr("failed (%1)").arg(qFromUtf8(e.what()));
+		error = QApplication::tr("failed (%1)").arg(qFromUtf8(e.what()));
 	}
 
-	emit extractFail(tr("Unable to unpack %1 to %2: %3").arg(m_filename).arg(m_dest).arg(error));
+	if (m_listener) m_listener->operationFail(QApplication::tr("Unable to unpack %1 to %2: %3").arg(m_sourceFile).arg(m_destinationDirectory).arg(error));
 
 	return false;
 }
-
-void CArchive::stop()
-{
-	QMutexLocker locker(&m_mutex);
-
-	m_mustStop = true;
-}
-
-bool CArchive::mustStop()
-{
-	QMutexLocker locker(&m_mutex);
-
-	return m_mustStop;
-}
-

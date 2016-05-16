@@ -14,51 +14,54 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef FILESCOPIER_H
+#define FILESCOPIER_H
 
-#include "ui_mainwindow.h"
-
-class QWinTaskbarButton;
-class CDownloader;
-class CArchive;
+class IOperationProgressListener;
 
 /**
- * Main window
+ * Files copier
  *
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CMainWindow : public QMainWindow, public Ui::MainWindow
+class CFilesCopier
 {
-	Q_OBJECT
-
 public:
-	CMainWindow();
-	virtual ~CMainWindow();
+	CFilesCopier(IOperationProgressListener *listener);
+	virtual ~CFilesCopier();
 
-public slots:
-	void onPlayClicked();
-	void onConfigureClicked();
+	void setSourceDirectory(const QString &src);
+	void setDesinationDirectory(const QString &src);
 
-	void onProfiles();
-	void onAbout();
-	void onAboutQt();
+	void setIncludeFilter(const QStringList &filter);
+	void setExcludeFilter(const QStringList &filter);
 
-	void onHtmlPageContent(const QString &html);
-
-	void onProfileChanged(int index);
+	bool exec();
 
 protected:
-	void showEvent(QShowEvent *e);
-	void closeEvent(QCloseEvent *e);
 
-	void updateProfiles();
+	struct FileToCopy
+	{
+		QString filename;
+		QString src;
+		QString dst;
+		qint64 size;
+		uint date;
+	};
 
-	QWinTaskbarButton *m_button;
-	CDownloader *m_downloader;
+	typedef QList<FileToCopy> FilesToCopy;
 
-	QLabel *m_statusLabel;
+	void getFilesList(FilesToCopy &files);
+	bool copyFiles(const FilesToCopy &files);
+
+	IOperationProgressListener *m_listener;
+
+	QString m_sourceDirectory;
+	QString m_destinationDirectory;
+
+	QStringList m_includeFilter;
+	QStringList m_excludeFilter;
 };
 
 #endif
