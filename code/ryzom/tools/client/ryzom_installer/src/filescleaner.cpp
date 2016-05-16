@@ -73,7 +73,7 @@ bool CFilesCleaner::exec()
 		dir.removeRecursively();
 	}
 
-	if (m_listener) m_listener->operationFinish();
+	if (m_listener) m_listener->operationSuccess(files.size());
 
 	return true;
 }

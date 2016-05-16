@@ -457,7 +457,6 @@ bool CFilesExtractor::extract7z()
 		if (m_listener)
 		{
 			m_listener->operationSuccess(totalUncompressed);
-			m_listener->operationFinish();
 		}
 		return true;
 
@@ -563,7 +562,6 @@ bool CFilesExtractor::extractZip()
 	if (m_listener)
 	{
 		m_listener->operationSuccess(totalSize);
-		m_listener->operationFinish();
 	}
 
 	return true;
@@ -594,7 +592,6 @@ bool CFilesExtractor::progress(const std::string &filename, uint32 currentSize, 
 		if (m_listener)
 		{
 			m_listener->operationSuccess((qint64)totalSize);
-			m_listener->operationFinish();
 		}
 	}
 

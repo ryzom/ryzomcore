@@ -181,7 +181,6 @@ bool CFilesCopier::copyFiles(const FilesToCopy &files)
 	if (m_listener)
 	{
 		m_listener->operationSuccess(totalSize);
-		m_listener->operationFinish();
 	}
 
 	return true;

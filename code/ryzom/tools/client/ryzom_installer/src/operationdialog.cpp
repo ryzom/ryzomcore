@@ -382,11 +382,6 @@ void COperationDialog::operationFail(const QString &error)
 	emit fail(error);
 }
 
-void COperationDialog::operationFinish()
-{
-	emit done();
-}
-
 bool COperationDialog::operationShouldStop()
 {
 	QMutexLocker locker(&m_abortingMutex);
