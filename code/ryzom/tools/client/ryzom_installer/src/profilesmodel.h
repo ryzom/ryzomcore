@@ -25,8 +25,8 @@ public:
 
 	bool save() const;
 
-	int getIndexFromProfileID(int profileId) const;
-	int getProfileIDFromIndex(int index) const;
+	int getIndexFromProfileID(const QString &profileId) const;
+	QString getProfileIDFromIndex(int index) const;
 
 private:
 	CProfiles m_profiles;

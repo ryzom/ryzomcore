@@ -105,7 +105,7 @@ bool CConfigFile::load(const QString &filename)
 
 		settings.beginGroup(QString("profile_%1").arg(i));
 
-		profile.id = settings.value("id").toInt();
+		profile.id = settings.value("id").toString();
 		profile.name = settings.value("name").toString();
 		profile.account = settings.value("account").toString();
 		profile.server = settings.value("server").toString();
@@ -590,7 +590,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	}
 
 	// no default profile
-	if (profile.id < 0)
+	if (profile.id.isEmpty())
 	{
 		return CreateProfile;
 	}

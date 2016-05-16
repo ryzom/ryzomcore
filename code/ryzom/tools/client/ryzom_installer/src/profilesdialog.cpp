@@ -97,7 +97,7 @@ void CProfilesDialog::displayProfile(int index)
 	const CProfile &profile = m_model->getProfiles()[index];
 
 	// update all widgets with content of profile
-	profileIdLabel->setText(QString::number(profile.id));
+	profileIdLabel->setText(profile.id);
 	accountEdit->setText(profile.account);
 	nameEdit->setText(profile.name);
 	serverComboBox->setCurrentIndex(m_serversModel->getIndexFromServerID(profile.server));

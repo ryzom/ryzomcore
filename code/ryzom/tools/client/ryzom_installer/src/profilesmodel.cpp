@@ -48,7 +48,7 @@ bool CProfilesModel::save() const
 	return true;
 }
 
-int CProfilesModel::getIndexFromProfileID(int profileId) const
+int CProfilesModel::getIndexFromProfileID(const QString &profileId) const
 {
 	for(int i = 0; i < m_profiles.size(); ++i)
 	{
@@ -58,7 +58,7 @@ int CProfilesModel::getIndexFromProfileID(int profileId) const
 	return -1;
 }
 
-int CProfilesModel::getProfileIDFromIndex(int index) const
+QString CProfilesModel::getProfileIDFromIndex(int index) const
 {
 	if (index < 0 || index >= m_profiles.size()) return -1;
 
