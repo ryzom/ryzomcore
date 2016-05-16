@@ -38,7 +38,7 @@ CProfilesDialog::CProfilesDialog():QDialog(), m_currentProfileIndex(-1)
 	profilesListView->setModel(m_model);
 	serverComboBox->setModel(m_serversModel);
 
-	int index = m_model->getIndexFromProfileID(CConfigFile::getInstance()->getDefaultProfileIndex());
+	int index = CConfigFile::getInstance()->getDefaultProfileIndex();
 
 	profilesListView->setCurrentIndex(m_model->index(index, 0));
 	displayProfile(index);
