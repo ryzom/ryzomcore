@@ -286,8 +286,8 @@ void COperationDialog::copyServerFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &configuration = config->getProfile();
+	m_currentOperation = QApplication::tr("Copy client files needed for server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList serverFiles;
 	serverFiles << "cfg";
@@ -296,9 +296,6 @@ void COperationDialog::copyServerFiles()
 	serverFiles << "patch";
 	serverFiles << "unpack";
 	serverFiles << "client_default.cfg";
-
-	m_currentOperation = QApplication::tr("Copying client files needed for server %1...").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
@@ -322,6 +319,9 @@ void COperationDialog::copyProfileFiles()
 
 	// default profile
 	const CProfile &profile = config->getProfile();
+
+	m_currentOperation = QApplication::tr("Copy old profile to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList profileFiles;
 	profileFiles << "cache";
@@ -351,8 +351,10 @@ void COperationDialog::extractBnpClient()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &profile = config->getProfile();
+	m_currentOperation = QApplication::tr("Extract client to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+
+	QString destinationDirectory = config->getInstallationDirectory() + "/" + server.id;
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
@@ -367,8 +369,8 @@ void COperationDialog::cleanFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &profile = config->getProfile();
+	m_currentOperation = QApplication::tr("Clean obsolete files");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CFilesCleaner cleaner(this);
 	cleaner.setDirectory(config->getInstallationDirectory() + "/" + server.id);
