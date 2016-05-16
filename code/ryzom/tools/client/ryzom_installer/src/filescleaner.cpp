@@ -52,6 +52,8 @@ void CFilesCleaner::setDirectory(const QString &src)
 
 bool CFilesCleaner::exec()
 {
+	if (m_listener) m_listener->operationPrepare();
+
 	QDir dir(m_directory);
 
 	// directory doesn't exist
@@ -62,9 +64,21 @@ bool CFilesCleaner::exec()
 	// temporary files
 	QStringList files = dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files);
 
+	if (m_listener)
+	{
+		m_listener->operationInit(0, files.size());
+		m_listener->operationStart();
+	}
+
+	int filesCount = 0;
+
 	foreach(const QString &file, files)
 	{
 		dir.remove(file);
+
+		if (m_listener) m_listener->operationProgress(filesCount, file);
+
+		++filesCount;
 	}
 
 	// fonts directory is not needed anymore
@@ -73,7 +87,7 @@ bool CFilesCleaner::exec()
 		dir.removeRecursively();
 	}
 
-	if (m_listener) m_listener->operationFinish();
+	if (m_listener) m_listener->operationSuccess(files.size());
 
 	return true;
 }

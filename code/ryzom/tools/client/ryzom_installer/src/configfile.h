@@ -46,12 +46,11 @@ struct CProfile
 {
 	CProfile()
 	{
-		id = -1;
 		desktopShortcut = false;
 		menuShortcut = false;
 	}
 
-	int id;
+	QString id;
 	QString account;
 	QString name;
 	QString server;

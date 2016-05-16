@@ -82,6 +82,8 @@ protected:
 	void processNextStep();
 
 	// operations
+	void downloadData();
+	void downloadClient();
 	void copyServerFiles();
 	void copyProfileFiles();
 	void extractBnpClient();
@@ -97,7 +99,6 @@ protected:
 	virtual void operationProgress(qint64 current, const QString &filename);
 	virtual void operationSuccess(qint64 total);
 	virtual void operationFail(const QString &error);
-	virtual void operationFinish();
 
 	virtual bool operationShouldStop();
 

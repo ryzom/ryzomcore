@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>OperationDialog</class>
  <widget class="QDialog" name="OperationDialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Ryzom Installer</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

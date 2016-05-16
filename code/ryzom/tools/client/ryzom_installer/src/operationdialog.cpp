@@ -42,6 +42,8 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 {
 	setupUi(this);
 
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
 #if defined(Q_OS_WIN32) && defined(QT_WINEXTRAS_LIB)
 	m_button = new QWinTaskbarButton(this);
 #endif
@@ -70,6 +72,7 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 	connect(this, SIGNAL(progress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
 	connect(this, SIGNAL(success(qint64)), SLOT(onProgressSuccess(qint64)));
 	connect(this, SIGNAL(fail(QString)), SLOT(onProgressFail(QString)));
+	connect(this, SIGNAL(done()), SLOT(onDone()));
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
@@ -88,7 +91,10 @@ void COperationDialog::processNextStep()
 	// default profile
 	const CProfile &configuration = config->getProfile();
 
-	switch(config->getNextStep())
+	// long operations are done in a thread
+	CConfigFile::InstallationStep step = config->getNextStep();
+
+	switch(step)
 	{
 		case CConfigFile::DisplayNoServerError:
 		break;
@@ -97,7 +103,7 @@ void COperationDialog::processNextStep()
 		break;
 
 		case CConfigFile::DownloadData:
-		m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
+		downloadData();
 		break;
 
 		case CConfigFile::ExtractDownloadedData:
@@ -105,7 +111,7 @@ void COperationDialog::processNextStep()
 		break;
 
 		case CConfigFile::DownloadClient:
-		m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
+		downloadClient();
 		break;
 
 		case CConfigFile::ExtractDownloadedClient:
@@ -136,12 +142,14 @@ void COperationDialog::processNextStep()
 		createDefaultShortcuts();
 		break;
 
+		case CConfigFile::Done:
+		accept();
+		break;
+
 		default:
 		// cases already managed in main.cpp
 		break;
 	}
-
-	m_downloader->getHtmlPageContent(config->expandVariables(server.displayUrl));
 }
 
 void COperationDialog::showEvent(QShowEvent *e)
@@ -218,7 +226,7 @@ void COperationDialog::onProgressStop()
 	m_button->progress()->hide();
 #endif
 
-	close();
+	reject();
 }
 
 void COperationDialog::onProgressProgress(qint64 current, const QString &filename)
@@ -248,7 +256,33 @@ void COperationDialog::onProgressFail(const QString &error)
 
 void COperationDialog::onDone()
 {
-	processNextStep();
+	if (!operationShouldStop()) processNextStep();
+}
+
+void COperationDialog::downloadData()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Download data required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+
+	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
+}
+
+void COperationDialog::downloadClient()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Download client required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+
+	m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
 }
 
 void COperationDialog::copyServerFiles()
@@ -258,8 +292,8 @@ void COperationDialog::copyServerFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &configuration = config->getProfile();
+	m_currentOperation = QApplication::tr("Copy client files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList serverFiles;
 	serverFiles << "cfg";
@@ -268,9 +302,6 @@ void COperationDialog::copyServerFiles()
 	serverFiles << "patch";
 	serverFiles << "unpack";
 	serverFiles << "client_default.cfg";
-
-	m_currentOperation = QApplication::tr("Copying client files needed for server %1...").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
@@ -283,6 +314,8 @@ void COperationDialog::copyServerFiles()
 	else
 	{
 	}
+
+	emit done();
 }
 
 void COperationDialog::copyProfileFiles()
@@ -294,6 +327,9 @@ void COperationDialog::copyProfileFiles()
 
 	// default profile
 	const CProfile &profile = config->getProfile();
+
+	m_currentOperation = QApplication::tr("Copy old profile to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList profileFiles;
 	profileFiles << "cache";
@@ -314,6 +350,8 @@ void COperationDialog::copyProfileFiles()
 	else
 	{
 	}
+
+	emit done();
 }
 
 void COperationDialog::extractBnpClient()
@@ -323,13 +361,44 @@ void COperationDialog::extractBnpClient()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &profile = config->getProfile();
+	m_currentOperation = QApplication::tr("Extract client to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+
+	QString destinationDirectory = config->getInstallationDirectory() + "/" + server.id;
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
-	extractor.setDesinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	extractor.setDesinationDirectory(destinationDirectory);
 	extractor.exec();
+
+	QString upgradeScript = destinationDirectory + "/upgd_nl.";
+
+#ifdef Q_OS_WIN
+	upgradeScript += "bat";
+#else
+	upgradeScript += "sh";
+#endif
+
+	if (QFile::exists(upgradeScript))
+	{
+		QProcess process;
+
+		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(destinationDirectory + "/ryzom_client_r.exe"));
+		env.insert("UNPACKPATH", QDir::toNativeSeparators(destinationDirectory + "/unpack"));
+		env.insert("ROOTPATH", QDir::toNativeSeparators(destinationDirectory));
+		env.insert("STARTUPPATH", "");
+		process.setProcessEnvironment(env);
+
+		process.start(upgradeScript);
+
+		while (process.waitForFinished())
+		{
+			qDebug() << "waiting";
+		}
+	}
+
+	emit done();
 }
 
 void COperationDialog::cleanFiles()
@@ -339,12 +408,54 @@ void COperationDialog::cleanFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	// default profile
-	const CProfile &profile = config->getProfile();
+	m_currentOperation = QApplication::tr("Clean obsolete files");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CFilesCleaner cleaner(this);
 	cleaner.setDirectory(config->getInstallationDirectory() + "/" + server.id);
 	cleaner.exec();
+
+	emit done();
+}
+
+bool COperationDialog::createDefaultProfile()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CServer server = config->getServer(config->getDefaultServerIndex());
+
+	m_currentOperation = QApplication::tr("Create default profile");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+
+	CProfile profile;
+
+	profile.id = "0";
+	profile.executable = config->getClientFullPath();
+	profile.name = QString("Ryzom (%1)").arg(server.name);
+	profile.server = server.id;
+	profile.comments = "Default profile created by Ryzom Installer";
+
+#ifdef Q_OS_WIN32
+//	C:\Users\Public\Desktop
+	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
+#endif
+
+	// TODO
+	// profile.menuShortcut
+
+	config->addProfile(profile);
+	config->save();
+
+	emit done();
+
+	return true;
+}
+
+bool COperationDialog::createDefaultShortcuts()
+{
+	emit done();
+
+	return true;
 }
 
 void COperationDialog::operationPrepare()
@@ -382,50 +493,9 @@ void COperationDialog::operationFail(const QString &error)
 	emit fail(error);
 }
 
-void COperationDialog::operationFinish()
-{
-	emit done();
-}
-
 bool COperationDialog::operationShouldStop()
 {
 	QMutexLocker locker(&m_abortingMutex);
 
 	return m_aborting;
-}
-
-bool COperationDialog::createDefaultProfile()
-{
-	CConfigFile *config = CConfigFile::getInstance();
-
-	CServer server = config->getServer(config->getDefaultServerIndex());
-
-	CProfile profile;
-
-	profile.id = 0;
-	profile.executable = config->getClientFullPath();
-	profile.name = QString("Ryzom (%1)").arg(server.name);
-	profile.server = server.id;
-	profile.comments = "Default profile created by Ryzom Installer";
-
-#ifdef Q_OS_WIN32
-	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
-#endif
-
-	// TODO
-	// profile.menuShortcut
-
-	config->addProfile(profile);
-	config->save();
-
-	onDone();
-
-	return true;
-}
-
-bool COperationDialog::createDefaultShortcuts()
-{
-	onDone();
-
-	return true;
 }
