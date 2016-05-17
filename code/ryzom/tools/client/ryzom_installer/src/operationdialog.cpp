@@ -384,7 +384,7 @@ void COperationDialog::extractBnpClient()
 		QProcess process;
 
 		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(destinationDirectory + "/ryzom_client_r.exe"));
+		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(destinationDirectory + "/" + server.clientFilename));
 		env.insert("UNPACKPATH", QDir::toNativeSeparators(destinationDirectory + "/unpack"));
 		env.insert("ROOTPATH", QDir::toNativeSeparators(destinationDirectory));
 		env.insert("STARTUPPATH", "");
