@@ -1555,7 +1555,8 @@ void postlogInit()
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 					// leak the alocated sound manager...
-					SoundMngr = 0;
+					delete SoundMngr;
+					SoundMngr = NULL;
 				}
 
 				// Play Music just after the SoundMngr is inited

@@ -26,6 +26,8 @@ ELSE()
     SET(QT_LIBRARIES Qt5::WinExtras ${QT_LIBRARIES})
   ENDIF()
 
+#  uncomment this line if you want to update original translations
+#  QT5_CREATE_TRANSLATION(CLIENT_INSTALL_Q ${CLIENT_INSTALL_UIS} ${SRC} ${CLIENT_INSTALL_TRANS})
   QT5_ADD_TRANSLATION(CLIENT_INSTALL_QM ${CLIENT_INSTALL_TRANS})
   QT5_ADD_RESOURCES(CLIENT_INSTALL_RC_SRCS ${CLIENT_INSTALL_RCS})
   QT5_WRAP_CPP(CLIENT_INSTALL_MOC_SRC ${CLIENT_INSTALL_HDR})
@@ -42,7 +44,7 @@ ADD_EXECUTABLE(ryzom_installer_qt WIN32 ${SRC} ${CLIENT_INSTALL_MOC_SRC} ${CLIEN
 NL_DEFAULT_PROPS(ryzom_installer_qt "Ryzom, Tools: Ryzom Installer" )
 NL_ADD_RUNTIME_FLAGS(ryzom_installer_qt)
 NL_ADD_LIB_SUFFIX(ryzom_installer_qt)
-TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ryzom_sevenzip ${QT_LIBRARIES} ${OPENGL_gl_LIBRARY})
+TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ryzom_sevenzip ${QT_LIBRARIES})
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_installer_qt ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.cpp)
