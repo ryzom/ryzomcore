@@ -478,7 +478,7 @@ void releaseOutGame()
 	if(SoundMngr)
 	{
 		delete SoundMngr;
-		SoundMngr = 0;
+		SoundMngr = NULL;
 	}
 
 	// Delete the driver.
@@ -573,7 +573,7 @@ void release()
 	if(SoundMngr)
 	{
 		delete SoundMngr;
-		SoundMngr = 0;
+		SoundMngr = NULL;
 	}
 
 	// Release the Entities Animation Manager

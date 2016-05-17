@@ -329,7 +329,8 @@ void updateFromClientCfg()
 			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-				SoundMngr = 0;
+				delete SoundMngr;
+				SoundMngr = NULL;
 			}
 
 			// re-init with good SFX/Music Volume

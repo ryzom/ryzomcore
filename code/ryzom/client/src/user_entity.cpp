@@ -2381,7 +2381,7 @@ void CUserEntity::updateSound(const TTime &time)
 	H_AUTO_USE ( RZ_Client_Update_Sound );
 
 	// no sound manager, no need to update sound
-	if (SoundMngr == 0)
+	if (SoundMngr == NULL)
 		return;
 
 	if (!(StereoHMD && true)) // TODO: ClientCfg.Headphone
