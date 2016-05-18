@@ -98,6 +98,25 @@ void CMainWindow::onPlayClicked()
 
 void CMainWindow::onConfigureClicked()
 {
+	int profileIndex = profilesComboBox->currentIndex();
+
+	if (profileIndex < 0) return;
+
+	CProfile profile = CConfigFile::getInstance()->getProfile(profileIndex);
+
+	if (profile.server.isEmpty()) return;
+
+	CServer server = CConfigFile::getInstance()->getServer(profile.server);
+
+	if (server.configurationFilename.isEmpty()) return;
+
+	QStringList arguments;
+	arguments << "-p";
+	arguments << QString::number(profileIndex);
+
+	bool started = QProcess::startDetached(server.configurationFilename, arguments);
+
+	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
 }
 
 void CMainWindow::onProfiles()
