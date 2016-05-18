@@ -5806,3 +5806,10 @@ NLMISC_COMMAND(playedTime, "Display character played time", "")
 	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
 	return true;
 }
+
+NLMISC_COMMAND(version, "Display client version", "")
+{
+	ucstring msg = getDebugVersion();
+	CInterfaceManager::getInstance()->displaySystemInfo(msg, "AROUND");
+	return true;
+}
