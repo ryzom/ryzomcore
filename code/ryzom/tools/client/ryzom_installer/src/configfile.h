@@ -35,6 +35,7 @@ struct CServer
 	QString clientDownloadUrl;
 	QString clientDownloadFilename;
 	QString clientFilename;
+	QString configurationFilename;
 	QString comments;
 };
 

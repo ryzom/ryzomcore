@@ -82,10 +82,13 @@ bool CConfigFile::load(const QString &filename)
 		server.clientDownloadFilename = settings.value("client_download_filename").toString();
 #if defined(Q_OS_WIN)
 		server.clientFilename = settings.value("client_filename_windows").toString();
+		server.configurationFilename = settings.value("configuration_filename_windows").toString();
 #elif defined(Q_OS_MAC)
 		server.clientFilename = settings.value("client_filename_osx").toString();
+		server.configurationFilename = settings.value("configuration_filename_osx").toString();
 #else
 		server.clientFilename = settings.value("client_filename_linux").toString();
+		server.configurationFilename = settings.value("configuration_filename_linux").toString();
 #endif
 		server.comments = settings.value("comments").toString();
 
@@ -154,10 +157,13 @@ bool CConfigFile::save() const
 		settings.setValue("client_download_filename", server.clientDownloadFilename);
 #if defined(Q_OS_WIN)
 		settings.setValue("client_filename_windows", server.clientFilename);
+		settings.setValue("configuration_filename_windows", server.configurationFilename);
 #elif defined(Q_OS_MAC)
 		settings.setValue("client_filename_osx", server.clientFilename);
+		settings.setValue("configuration_filename_osx", server.configurationFilename);
 #else
 		settings.setValue("client_filename_linux", server.clientFilename);
+		settings.setValue("configuration_filename_linux", server.configurationFilename);
 #endif
 		settings.setValue("comments", server.comments);
 
@@ -342,7 +348,7 @@ QString CConfigFile::getClientArch() const
 #if defined(Q_OS_WIN)
 	return QString("win%1").arg(m_use64BitsClient ? 64:32);
 #elif defined(Q_OS_MAC)
-	// only 64 bits clients under OS X, becure there not any 32 bits OS X version anymore
+	// only 64 bits clients under OS X, because there not any 32 bits OS X version anymore
 	return "osx";
 #else
 	return QString("linux%1").arg(m_use64BitsClient ? 64:32);

@@ -124,6 +124,7 @@ bool CHttpClient::sendRequest(const std::string& methodWB, const std::string &ur
 	std::string request;
 	request += methodWB + " " + path + " HTTP/1.1\r\n";
 	request += "Host: " + host + "\r\n";
+	request += "Connection: close\r\n";
 
 	// Send
 	if (cookieName.empty() && postParams.empty())
