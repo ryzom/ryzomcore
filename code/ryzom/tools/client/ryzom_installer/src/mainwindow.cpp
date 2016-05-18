@@ -31,6 +31,8 @@ CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
 {
 	setupUi(this);
 
+	setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
+
 	// downloader
 	m_downloader = new CDownloader(this);
 
