@@ -348,7 +348,7 @@ QString CConfigFile::getClientArch() const
 #if defined(Q_OS_WIN)
 	return QString("win%1").arg(m_use64BitsClient ? 64:32);
 #elif defined(Q_OS_MAC)
-	// only 64 bits clients under OS X, becure there not any 32 bits OS X version anymore
+	// only 64 bits clients under OS X, because there not any 32 bits OS X version anymore
 	return "osx";
 #else
 	return QString("linux%1").arg(m_use64BitsClient ? 64:32);
