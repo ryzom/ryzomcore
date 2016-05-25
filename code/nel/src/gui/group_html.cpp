@@ -316,6 +316,11 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
 
+			std::string userAgent = options.appName + "/" + options.appVersion;
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
+
+			sendCookies(curl, _DocumentDomain, _TrustedDomain);
+
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
