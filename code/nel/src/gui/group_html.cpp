@@ -748,69 +748,6 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
-	{
-		if (_Browsing)
-		{
-			if (element_number == HTML_A)
-			{
-				registerAnchorName(MY_HTML_A);
-
-				// #fragment works with both ID and NAME so register both
-				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
-					_AnchorName.push_back(value[MY_HTML_A_NAME]);
-
-				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
-				{
-					string suri = value[MY_HTML_A_HREF];
-					if(suri.find("ah:") == 0)
-					{
-						if (_TrustedDomain)
-							_Link.push_back (suri);
-						else
-							_Link.push_back ("");
-					}
-					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
-					{
-						// Direct url (hack for lua beginElement)
-						_Link.push_back (suri.substr(1));
-					}
-					else
-					{
-						// convert href from "?key=val" into "http://domain.com/?key=val"
-						_Link.push_back(getAbsoluteUrl(suri));
-					}
-
-					for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
-					{
-						if (present[i] && value[i])
-						{
-							string title = value[i];
-						//	nlinfo("key %d = %s", i, title.c_str());
-						}
-					}
-					//nlinfo("key of TITLE is : %d", MY_HTML_A_Z_ACTION_PARAMS);
-					if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
-					{
-						string title = value[MY_HTML_A_Z_ACTION_PARAMS];
-						_LinkTitle.push_back(title);
-					}
-					else
-						_LinkTitle.push_back("");
-				}
-				else
-				{
-					_Link.push_back("");
-					_LinkTitle.push_back("");
-				}
-
-				
-			}
-		}
-	}
-
-	// ***************************************************************************
-
 	#define getCellsParameters(prefix,inherit) \
 	{\
 		CGroupHTML::CCellParams cellParams; \
@@ -1123,6 +1060,8 @@ namespace NLGUI
 				break;
 			case HTML_A:
 			{
+				registerAnchorName(MY_HTML_A);
+
 				CStyleParams style;
 				style.FontSize = getFontSize();
 				style.TextColor = LinkColor;
@@ -1138,12 +1077,36 @@ namespace NLGUI
 				_FontStrikeThrough.push_back(style.StrikeThrough);
 				_GlobalColor.push_back(LinkColorGlobalColor);
 				_A.push_back(true);
+				_Link.push_back ("");
+				_LinkTitle.push_back("");
+				_LinkClass.push_back("");
 
+				// #fragment works with both ID and NAME so register both
+				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
+					_AnchorName.push_back(value[MY_HTML_A_NAME]);
 				if (present[MY_HTML_A_TITLE] && value[MY_HTML_A_TITLE])
-					_LinkTitle.push_back(value[MY_HTML_A_TITLE]);
+					_LinkTitle.back() = value[MY_HTML_A_TITLE];
 				if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
-					_LinkClass.push_back(value[MY_HTML_A_CLASS]);
-
+					_LinkClass.back() = value[MY_HTML_A_CLASS];
+				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
+				{
+					string suri = value[MY_HTML_A_HREF];
+					if(suri.find("ah:") == 0)
+					{
+						if (_TrustedDomain)
+							_Link.back() = suri;
+					}
+					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
+					{
+						// Direct url (hack for lua beginElement)
+						_Link.back() = suri.substr(1);
+					}
+					else
+					{
+						// convert href from "?key=val" into "http://domain.com/?key=val"
+						_Link.back() = getAbsoluteUrl(suri);
+					}
+				}
 			}
 				break;
 			case HTML_DIV:
@@ -5412,15 +5375,11 @@ namespace NLGUI
 			value.insert(value.begin() + (uint)it.nextKey().toInteger(), buffer);
 		}
 
+		// ingame lua scripts from browser are using <a href="#http://..."> url scheme
+		// reason unknown
+		_LuaHrefHack = true;
 		beginElement(element_number, present, value);
-		if (element_number == HTML_A)
-		{
-			// ingame lua scripts from browser are using <a href="#http://..."> url scheme
-			// reason unknown
-			_LuaHrefHack = true;
-			addLink(element_number, present, value);
-			_LuaHrefHack = false;
-		}
+		_LuaHrefHack = false;
 
 		return 0;
 	}
