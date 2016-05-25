@@ -55,7 +55,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 		if (e == std::string::npos || e == 0)
 		{
 			tmp = allKind;
-			allKind="";
+			allKind.clear();
 		}
 		else
 		{
@@ -66,7 +66,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 		while(!tmp.empty() && tmp[0]==' ')
 		{
 			if(tmp.size()==1)
-				tmp="";
+				tmp.clear();
 			else
 				tmp = tmp.substr(1,tmp.size());
 		}
