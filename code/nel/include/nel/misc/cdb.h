@@ -122,7 +122,7 @@ public:
 		{
 			if (_Ids.empty()) return std::string("");
 			std::string str=_Ids[0];
-			for (unsigned i=1; i<_Ids.size(); i++)
+			for (uint i=1; i<_Ids.size(); i++)
 				str +=std::string(":")+ _Ids[i];
 			return str;
 		}
