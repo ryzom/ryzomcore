@@ -33,6 +33,7 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 {
 	s_instance = this;
 
+	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
 	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
 	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/installer.ini";
 }
@@ -52,7 +53,7 @@ bool CConfigFile::load(const QString &filename)
 	QSettings settings(filename, QSettings::IniFormat);
 
 	settings.beginGroup("common");
-	m_language = settings.value("language").toString();
+	m_language = settings.value("language", m_language).toString();
 	m_srcDirectory = settings.value("source_directory").toString();
 	m_installationDirectory = settings.value("installation_directory").toString();
 	m_use64BitsClient = settings.value("use_64bits_client").toBool();
@@ -391,6 +392,59 @@ QString CConfigFile::getOldInstallationDirectory()
 
 	// check default directory if registry key not found
 	return CConfigFile::has64bitsOS() ? "C:/Program Files (x86)/Ryzom":"C:/Program Files/Ryzom";
+#elif defined(Q_OS_MAC)
+	return "/Applications/Ryzom.app";
+#else
+	return QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.ryzom";
+#endif
+}
+
+QString CConfigFile::getOldInstallationLanguage()
+{
+	// HKEY_CURRENT_USER/SOFTWARE/Nevrax/RyzomInstall/InstallId=1917716796 (string)
+#if defined(Q_OS_WIN)
+	// NSIS previous official installer
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	if (settings.contains("Language"))
+	{
+		QString languageCode = settings.value("Language").toString();
+		// 1036 = French
+		return "";
+	}
+
+	return "en";
+#elif defined(Q_OS_MAC)
+	return "/Applications/Ryzom.app";
+#else
+	return QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.ryzom";
+#endif
+}
+
+QString CConfigFile::getNewInstallationLanguage()
+{
+	// HKEY_CURRENT_USER/SOFTWARE/Nevrax/RyzomInstall/InstallId=1917716796 (string)
+#if defined(Q_OS_WIN)
+	// NSIS previous official installer
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	if (settings.contains("Ryzom Install Path"))
+	{
+		return QDir::fromNativeSeparators(settings.value("Ryzom Install Path").toString());
+	}
+
+	// check default directory if registry key not found
+	return CConfigFile::has64bitsOS() ? "C:/Program Files (x86)/Ryzom" : "C:/Program Files/Ryzom";
 #elif defined(Q_OS_MAC)
 	return "/Applications/Ryzom.app";
 #else

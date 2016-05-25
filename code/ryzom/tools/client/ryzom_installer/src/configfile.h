@@ -145,6 +145,8 @@ public:
 	static QString getApplicationDirectory();
 	static QString getOldInstallationDirectory();
 	static QString getNewInstallationDirectory();
+	static QString getOldInstallationLanguage();
+	static QString getNewInstallationLanguage();
 
 	bool isRyzomInstalledIn(const QString &directory) const;
 	bool areRyzomDataInstalledIn(const QString &directory) const;
