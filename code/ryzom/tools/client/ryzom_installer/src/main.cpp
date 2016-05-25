@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
+	// TODO: parameters -u (uinstall) and -s (silent)
+
 	QApplication::setApplicationName("Ryzom");
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
