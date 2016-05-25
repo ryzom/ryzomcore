@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "mainwindow.h"
 #include "downloader.h"
-#include "wizarddialog.h"
 #include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"

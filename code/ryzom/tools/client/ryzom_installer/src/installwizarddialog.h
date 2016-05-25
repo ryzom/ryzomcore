@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef WIZARDDIALOG_H
-#define WIZARDDIALOG_H
+#ifndef INSTALLWIZARDDIALOG_H
+#define INSTALLWIZARDDIALOG_H
 
-#include "ui_wizard.h"
+#include "ui_installwizard.h"
 
 /**
  * Wizard displayed at first launch, that asks user to choose source and destination directories.
@@ -25,13 +25,13 @@
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CWizardDialog : public QDialog, public Ui::WizardDialog
+class CInstallWizardDialog : public QDialog, public Ui::InstallWizardDialog
 {
 	Q_OBJECT
 
 public:
-	CWizardDialog();
-	virtual ~CWizardDialog();
+	CInstallWizardDialog();
+	virtual ~CInstallWizardDialog();
 
 private slots:
 	void onShowAdvancedParameters(int state);
@@ -44,7 +44,6 @@ private:
 	void updateAnotherLocationText();
 	void updateDestinationText();
 
-	QString m_currentDirectory;
 	QString m_oldDirectory;
 	QString m_anotherDirectory;
 	QString m_dstDirectory;

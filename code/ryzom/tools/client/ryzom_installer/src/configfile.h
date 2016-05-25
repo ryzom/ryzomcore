@@ -80,7 +80,8 @@ public:
 	enum InstallationStep
 	{
 		DisplayNoServerError,
-		ShowWizard,
+		ShowInstallWizard,
+		ShowMigrateWizard,
 		DownloadData,
 		ExtractDownloadedData,
 		DownloadClient,

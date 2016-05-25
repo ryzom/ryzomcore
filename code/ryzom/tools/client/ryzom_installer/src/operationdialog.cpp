@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "operationdialog.h"
 #include "downloader.h"
-#include "wizarddialog.h"
 #include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"
@@ -99,7 +98,10 @@ void COperationDialog::processNextStep()
 		case CConfigFile::DisplayNoServerError:
 		break;
 
-		case CConfigFile::ShowWizard:
+		case CConfigFile::ShowMigrateWizard:
+		break;
+
+		case CConfigFile::ShowInstallWizard:
 		break;
 
 		case CConfigFile::DownloadData:

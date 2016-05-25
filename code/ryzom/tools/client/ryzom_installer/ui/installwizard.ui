@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WizardDialog</class>
- <widget class="QDialog" name="WizardDialog">
+ <class>InstallWizardDialog</class>
+ <widget class="QDialog" name="InstallWizardDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>402</width>
-    <height>464</height>
+    <height>435</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,9 +28,12 @@
      <property name="text">
       <string>Welcome to Ryzom Installer!
 
-This program will allow you to download, install, migrate, configure or manage Ryzom on your computer.
+This program will allow you to download, install, configure or manage Ryzom on your computer.
 
 Just follow the different steps and make your choice between the different propositions.</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::PlainText</enum>
      </property>
      <property name="alignment">
       <set>Qt::AlignJustify|Qt::AlignTop</set>
@@ -94,16 +97,6 @@ Just follow the different steps and make your choice between the different propo
          <string>Files will be installed from:</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QRadioButton" name="currentDirectoryRadioButton">
-           <property name="text">
-            <string>Current directory</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QRadioButton" name="oldDirectoryRadioButton">
            <property name="text">
@@ -213,7 +206,6 @@ Just follow the different steps and make your choice between the different propo
   </layout>
  </widget>
  <tabstops>
-  <tabstop>currentDirectoryRadioButton</tabstop>
   <tabstop>oldDirectoryRadioButton</tabstop>
   <tabstop>anotherLocationRadioButton</tabstop>
   <tabstop>anotherLocationBrowseButton</tabstop>
@@ -227,7 +219,7 @@ Just follow the different steps and make your choice between the different propo
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>WizardDialog</receiver>
+   <receiver>InstallWizardDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -243,7 +235,7 @@ Just follow the different steps and make your choice between the different propo
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>WizardDialog</receiver>
+   <receiver>InstallWizardDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

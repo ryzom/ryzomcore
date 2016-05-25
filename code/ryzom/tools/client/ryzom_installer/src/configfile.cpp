@@ -525,7 +525,22 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	// only show wizard if installation directory undefined
 	if (getInstallationDirectory().isEmpty())
 	{
-		return ShowWizard;
+		// if launched from current directory, it means we just patched files
+		QString currentDirectory = getCurrentDirectory();
+
+		if (!isRyzomInstalledIn(currentDirectory))
+		{
+			// Ryzom is in the same directory as Ryzom Installer
+			currentDirectory = getApplicationDirectory();
+
+			if (!isRyzomInstalledIn(currentDirectory))
+			{
+				currentDirectory.clear();
+			}
+		}
+
+		// install or migrate depending if Ryzom was found in current directory
+		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;
 	}
 
 	QString serverDirectory = getInstallationDirectory() + "/" + server.id;
@@ -575,7 +590,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			}
 			else
 			{
-				return ShowWizard;
+				return ShowInstallWizard;
 			}
 		}
 
