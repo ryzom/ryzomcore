@@ -186,7 +186,7 @@ bool			CVegetableVBAllocator::exceedMaxVertexInBufferHard(uint numAddVerts) cons
 uint			CVegetableVBAllocator::allocateVertex()
 {
 	// if no more free, allocate.
-	if( _VertexFreeMemory.size()==0 )
+	if( _VertexFreeMemory.empty() )
 	{
 		// enlarge capacity.
 		uint	newResize;

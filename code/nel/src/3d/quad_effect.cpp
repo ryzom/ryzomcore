@@ -229,7 +229,7 @@ void CQuadEffect::processPoly(const TPoint2DVect &poly
 	static TRasters rDest;
 	float currY;
 	makeRasters(poly, quadWidth, quadHeight, rDest, currY);
-	if (dest.size())
+	if (!dest.empty())
 	{
 		TRasters::const_iterator it, endIt = rDest.end();
 		for (it = rDest.begin(); it != endIt; ++it)

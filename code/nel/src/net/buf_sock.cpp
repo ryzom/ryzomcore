@@ -155,7 +155,7 @@ bool CBufSock::flush( uint *nbBytesRemaining )
 		{
 			SendFifo.front( tmpbuffer, size );
 		}
-		while ( ! SendFifo.empty() && ( (_ReadyToSendBuffer.size()==0) || (_ReadyToSendBuffer.size() +size < MaxTCPPacketSize) ) )
+		while ( ! SendFifo.empty() && ( _ReadyToSendBuffer.empty() || (_ReadyToSendBuffer.size() +size < MaxTCPPacketSize) ) )
 		{
 			// Compute the size and add it into the beginning of the buffer
 			netlen = htonl( (TBlockSize)size );
@@ -252,7 +252,7 @@ bool CBufSock::flush( uint *nbBytesRemaining )
 		}
 
 	}
-	while ( !SendFifo.empty() && _ReadyToSendBuffer.size()==0 );
+	while ( !SendFifo.empty() && _ReadyToSendBuffer.empty() );
 
 	return true;
 }

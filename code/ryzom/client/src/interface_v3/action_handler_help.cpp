@@ -1604,7 +1604,7 @@ void	getMagicBonus(CDBCtrlSheet *item, ucstring &itemText)
 	}
 
 	// append a \n before
-	if(mbInfo.size())
+	if(!mbInfo.empty())
 	{
 		// add spell level header
 		ucstring	spellRuleFmt= CI18N::get("uihelpItemMagicBonusHeader");

@@ -105,7 +105,7 @@ void			CPolygon::clip(const CPlane	 *planes, uint nPlanes)
 // ***************************************************************************
 void			CPolygon::clip(const std::vector<CPlane> &planes)
 {
-	if(planes.size()==0)
+	if(planes.empty())
 		return;
 	clip(&(*planes.begin()), (uint)planes.size());
 }

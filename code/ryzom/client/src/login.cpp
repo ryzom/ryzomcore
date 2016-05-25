@@ -978,7 +978,7 @@ bool login()
 void removeSpace(string &s)
 {
 	uint i = 0;
-	while (s.size()>0)
+	while (!s.empty())
 	{
 		if (s[i] == ' ')
 			s.erase(i, 1);

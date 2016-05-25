@@ -500,7 +500,7 @@ void	CWaterModel::traverseRender()
 		sint startY;
 		projPoly.computeBorders(rasters, startY);
 
-		if (rasters.size())
+		if (!rasters.empty())
 		{
 			//===========================//
 			// perform Water animation   //

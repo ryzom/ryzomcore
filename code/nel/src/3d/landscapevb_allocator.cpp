@@ -134,7 +134,7 @@ void			CLandscapeVBAllocator::resetReallocation()
 uint			CLandscapeVBAllocator::allocateVertex()
 {
 	// if no more free, allocate.
-	if( _VertexFreeMemory.size()==0 )
+	if( _VertexFreeMemory.empty() )
 	{
 		// enlarge capacity.
 		uint	newResize;

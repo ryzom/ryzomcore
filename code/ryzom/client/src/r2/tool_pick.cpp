@@ -63,14 +63,14 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 			allKind = allKind.substr(e+1,allKind.size());
 		}
 
-		while(tmp.size()>0 && tmp[0]==' ')
+		while(!tmp.empty() && tmp[0]==' ')
 		{
 			if(tmp.size()==1)
 				tmp="";
 			else
 				tmp = tmp.substr(1,tmp.size());
 		}
-		while(tmp.size()>0 && tmp[tmp.size()]==' ')
+		while(!tmp.empty() && tmp[tmp.size()]==' ')
 		{
 			if(tmp.size()==1)
 				tmp="";
@@ -98,7 +98,7 @@ void CToolPick::updateAfterRender()
 	_CandidateInstance = NULL;
 	CInstance *instanceUnder = checkInstanceUnderMouse();
 	bool ignoreInstanceUnder = false;
-	if(instanceUnder && _IgnoreInstances.size()>0)
+	if(instanceUnder && !_IgnoreInstances.empty())
 	{
 		for(uint i=0; i<_IgnoreInstances.size(); i++)
 		{

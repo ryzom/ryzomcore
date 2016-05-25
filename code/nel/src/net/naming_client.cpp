@@ -420,7 +420,7 @@ bool CNamingClient::lookup (const std::string &name, CInetAddress &addr)
 	vector<CInetAddress> addrs;
 	find (name, addrs);
 
-	if (addrs.size()==0)
+	if (addrs.empty())
 		return false;
 
 	nlassert (addrs.size()==1);
@@ -436,7 +436,7 @@ bool CNamingClient::lookup (TServiceId sid, CInetAddress &addr)
 	vector<CInetAddress> addrs;
 	find (sid, addrs);
 
-	if (addrs.size()==0)
+	if (addrs.empty())
 		return false;
 
 	nlassert (addrs.size()==1);
@@ -465,7 +465,7 @@ bool CNamingClient::lookupAlternate (const std::string &name, CInetAddress &addr
 	vector<CInetAddress> addrs;
 	find (name, addrs);
 
-	if (addrs.size()==0)
+	if (addrs.empty())
 		return false;
 
 	nlassert (addrs.size()==1);

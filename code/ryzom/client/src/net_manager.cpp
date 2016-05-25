@@ -2499,7 +2499,7 @@ void impulseRemoteAdmin (NLMISC::CBitMemStream &impulse)
 	}
 	else
 	{
-		if (strs.size()>0)
+		if (!strs.empty())
 		{
 			str = strs[0].substr(0,strs[0].size()-1);
 			// replace all spaces into underscore because space is a reserved char

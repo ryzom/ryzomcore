@@ -639,8 +639,8 @@ void CDBCtrlSheet::initSheet(const std::string &dbBranchId, const CCtrlSheetInfo
 {
 	H_AUTO ( RZ_CDBCtrlSheet_initSheet )
 
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (dbBranchId.size()>0));
-	nlassert((ctrlInfo._Type == SheetType_Macro) || (_Id.size()>0));
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !dbBranchId.empty());
+	nlassert((ctrlInfo._Type == SheetType_Macro) || !_Id.empty());
 
 	// init
 	*static_cast<CCtrlSheetInfo*>(this)= ctrlInfo;

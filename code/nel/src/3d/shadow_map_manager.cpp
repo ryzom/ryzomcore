@@ -705,7 +705,7 @@ void			CShadowMapManager::renderProject(CScene *scene)
 	}
 	driver->activeVertexBuffer (CopyQuads);
 
-	if (_ShadowCasters.size()>0)
+	if (!_ShadowCasters.empty())
 	{
 		// get the transform to compute shadow map.
 		CTransform	*sc= _ShadowCasters[0];

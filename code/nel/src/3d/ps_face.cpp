@@ -226,7 +226,7 @@ void CPSFace::step(TPSProcessPass pass)
 	else if (pass == PSMotion)
 	{
 
-		if (_PrecompBasis.size()) // do we use precomputed basis ?
+		if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 		{
 			// rotate all precomputed basis
 			for (CPSVector< CPlaneBasisPair >::V::iterator it = _PrecompBasis.begin(); it != _PrecompBasis.end(); ++it)
@@ -394,7 +394,7 @@ void CPSFace::deleteElement(uint32 index)
 	NL_PS_FUNC(CPSFace_deleteElement)
 	CPSQuad::deleteElement(index);
 	deletePlaneBasisElement(index);
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		// replace ourself by the last element...
 		_IndexInPrecompBasis[index] = _IndexInPrecompBasis[_Owner->getSize() - 1];
@@ -407,7 +407,7 @@ void CPSFace::resize(uint32 size)
 	NL_PS_FUNC(CPSFace_resize)
 	nlassert(size < (1 << 16));
 	resizePlaneBasis(size);
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		_IndexInPrecompBasis.resize(size);
 	}

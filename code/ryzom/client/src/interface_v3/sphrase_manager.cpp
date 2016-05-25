@@ -1346,7 +1346,7 @@ sint				CSPhraseManager::getPhraseSuccessRate(const CSPhraseCom &phrase)
 	CSBrickManager	*pBM= CSBrickManager::getInstance();
 	CSkillManager	*pSM= CSkillManager::getInstance();
 
-	if(phrase.Bricks.size()==0)
+	if(phrase.Bricks.empty())
 		return 0;
 	CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
 	if(!rootBrick)
@@ -1432,7 +1432,7 @@ sint				CSPhraseManager::getCraftPhraseSuccessRate(const CSPhraseCom &phrase, SK
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
 
-	if(phrase.Bricks.size()==0)
+	if(phrase.Bricks.empty())
 		return 0;
 
 	// take skill value of the skill
@@ -1450,7 +1450,7 @@ sint				CSPhraseManager::getForageExtractionPhraseSuccessRate(const CSPhraseCom 
 {
 	CSkillManager	*pSM= CSkillManager::getInstance();
 
-	if(phrase.Bricks.size()==0)
+	if(phrase.Bricks.empty())
 		return 0;
 
 	// take skill value of the skill
@@ -1505,7 +1505,7 @@ void				CSPhraseManager::getPhraseCastTime(const CSPhraseCom &phrase, uint32 tot
 	castTime= 0;
 	castTimeMalus= 0;
 
-	if(phrase.Bricks.size()==0)
+	if(phrase.Bricks.empty())
 		return;
 	CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
 	if(!rootBrick)
@@ -1576,7 +1576,7 @@ void				CSPhraseManager::getPhraseMagicRange(const CSPhraseCom &phrase, uint32 t
 	range= 0;
 	rangeMalus= 0;
 
-	if(phrase.Bricks.size()==0)
+	if(phrase.Bricks.empty())
 		return;
 	CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
 	if(!rootBrick)

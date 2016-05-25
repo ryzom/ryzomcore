@@ -407,9 +407,10 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 			rFactor*= 0.01f;
 			uint32		numVertices= (uint32)rBS.VertRefs.size();
 			// don't know why, but cases happen where deltaNorm not empty while deltaPos is
-			bool		hasPos= rBS.deltaPos.size()>0;
-			bool		hasNorm= rBS.deltaNorm.size()>0;
-			bool		hasUV= rBS.deltaUV.size()>0;
+			bool		hasPos = !rBS.deltaPos.empty();
+			bool		hasNorm = !rBS.deltaNorm.empty();
+			bool		hasUV = !rBS.deltaUV.empty();
+
 			for (j = 0; j < numVertices; ++j)
 			{
 				// Get the vertex Index in the VBufferFinal

@@ -1994,7 +1994,7 @@ void CPSConstraintMesh::deleteElement(uint32 index)
 	deleteSizeElement(index);
 	deletePlaneBasisElement(index);
 	// TODO : avoid code cuplication with CPSFace ...
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		// replace ourself by the last element...
 		_IndexInPrecompBasis[index] = _IndexInPrecompBasis[_Owner->getSize() - 1];
@@ -2011,7 +2011,7 @@ void CPSConstraintMesh::resize(uint32 size)
 	resizeSize(size);
 	resizePlaneBasis(size);
 	// TODO : avoid code cuplication with CPSFace ...
-	if (_PrecompBasis.size()) // do we use precomputed basis ?
+	if (!_PrecompBasis.empty()) // do we use precomputed basis ?
 	{
 		_IndexInPrecompBasis.resize(size);
 	}

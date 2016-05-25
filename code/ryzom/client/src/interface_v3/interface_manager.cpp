@@ -643,7 +643,7 @@ void CInterfaceManager::initLogin()
 	ActionsContext.addActionsManager(&EditActions, RZ_CATEGORY_EDIT);
 
 
-	if (ClientCfg.XMLLoginInterfaceFiles.size()==0)
+	if (ClientCfg.XMLLoginInterfaceFiles.empty())
 	{
 		nlinfo("no xml login config files in client.cfg");
 		return;
@@ -729,7 +729,7 @@ void CInterfaceManager::initOutGame()
 
 	//NLMEMORY::CheckHeap (true);
 
-	if (ClientCfg.XMLOutGameInterfaceFiles.size()==0)
+	if (ClientCfg.XMLOutGameInterfaceFiles.empty())
 	{
 		nlinfo("no xml outgame config files in client.cfg");
 		return;
@@ -889,7 +889,7 @@ void CInterfaceManager::initInGame()
 
 //	NLMEMORY::CheckHeap (true);
 
-	if (ClientCfg.XMLInterfaceFiles.size()==0)
+	if (ClientCfg.XMLInterfaceFiles.empty())
 	{
 		nlinfo("no xml config files in client.cfg");
 		return;

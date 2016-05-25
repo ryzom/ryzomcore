@@ -108,7 +108,7 @@ void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		if (f.isReading())
 		{
 			// Checks
-			nlassert (_DisplacementMap.size()>0);
+			nlassert (!_DisplacementMap.empty());
 
 			// Set first empty
 			_DisplacementMap[0].setEmpty ();
@@ -543,7 +543,7 @@ CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 		}
 	}
 
-	if (_DisplacementMap.size()==0 || _DisplacementMap[0]._TileNoiseMap)
+	if (_DisplacementMap.empty() || _DisplacementMap[0]._TileNoiseMap)
 		return NULL;
 
 	// Checks

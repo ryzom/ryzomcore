@@ -3021,7 +3021,7 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 	for (uint32 i = 0; i < rpm.RespawnPoints.size(); ++i)
 		_RespawnPos.push_back(rpm.RespawnPoints[i]);
 	// Ensure there is at least one respawn point
-//	nlassert(_RespawnPos.size()>0);
+//	nlassert(!_RespawnPos.empty());
 
 	// Choose the good map ! (select the first respawn point and check for first matching bounding box map
 	if (_MapMode != MapMode_Death) return;

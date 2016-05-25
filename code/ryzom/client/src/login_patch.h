@@ -370,7 +370,7 @@ private:
 			ServerPath = serverPath;
 			Available = true;
 
-			if (ServerPath.size()>0 && ServerPath[ServerPath.size()-1] != '/')
+			if (!ServerPath.empty() && ServerPath[ServerPath.size()-1] != '/')
 				ServerPath += '/';
 
 			std::string::size_type pos = ServerPath.find ("@");

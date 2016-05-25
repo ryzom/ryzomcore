@@ -425,7 +425,7 @@ void CScenarioEntryPoints::loadFromXMLFile()
 			}
 
 
-			if(entryPoints.size()>0)
+			if(!entryPoints.empty())
 			{
 				completeIsland.EntryPoints = entryPoints;
 				_CompleteIslands.push_back(completeIsland);

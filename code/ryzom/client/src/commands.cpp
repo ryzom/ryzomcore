@@ -672,7 +672,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 
 	sys = "Language "+CI18N::getCurrentLanguageName().toString() +" ";
 
-	if (args.size()>0)
+	if (!args.empty())
 	{
 		uint8 quality;
 		fromString(args[0], quality);
@@ -1205,9 +1205,9 @@ static bool talkInChan(uint32 nb,std::vector<std::string>args)
 	{
 		return false;
 	}
-	if(args.size()>0)
+	if(!args.empty())
 	{
-		std::string tmp="";
+		std::string tmp;
 		std::vector<std::string>::const_iterator first(args.begin()),last(args.end());
 
 		for(;first!=last;++first)

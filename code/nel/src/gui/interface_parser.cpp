@@ -193,7 +193,7 @@ namespace NLGUI
 		xmlKeepBlanksDefault(0);
 		//parse all interface files and build a single xml document
 		xmlNodePtr globalEnclosing;
-		nlassert (strings.size());
+		nlassert (!strings.empty());
 		CIXml read;
 		string nextFileName;
 		static const char *SCRIPT_AS_STRING = "<script as string>";

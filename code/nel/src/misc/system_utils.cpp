@@ -139,7 +139,7 @@ bool CSystemUtils::updateProgressBar(uint value, uint total)
 
 bool CSystemUtils::copyTextToClipboard(const ucstring &text)
 {
-	if (!text.size()) return false;
+	if (text.empty()) return false;
 
 	bool res = false;
 

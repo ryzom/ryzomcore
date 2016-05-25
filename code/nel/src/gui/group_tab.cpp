@@ -262,7 +262,7 @@ namespace NLGUI
 		{
 			tabB->setId(string("tab") + NLMISC::toString(_Buttons.size()));
 
-			if(_Buttons.size()==0)
+			if(_Buttons.empty())
 			{
 				tabB->setParentPos(NULL);
 				tabB->setParentPosRef(Hotspot_TL);
@@ -453,7 +453,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupTab::updateFirstTabButton()
 	{
-		if(!_HideOutTabs || (_Selection<0) || (_Buttons.size()==0) || (_Parent->getWReal()<0)
+		if(!_HideOutTabs || (_Selection<0) || _Buttons.empty() || (_Parent->getWReal()<0)
 			|| _FirstTabIndex>=(sint)_Buttons.size())
 			return;
 

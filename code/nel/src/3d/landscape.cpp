@@ -2859,7 +2859,7 @@ void			CLandscape::setupAutomaticLightDir(const CVector &lightDir)
 // ***************************************************************************
 CVector		CLandscape::getHeightFieldDeltaZ(float x, float y) const
 {
-	if(_HeightField.ZPatchs.size()==0)
+	if(_HeightField.ZPatchs.empty())
 		return CVector::Null;
 
 	// map to _HeightField coordinates.

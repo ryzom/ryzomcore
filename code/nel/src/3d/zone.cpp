@@ -1126,7 +1126,7 @@ void			CZone::refineAll()
 {
 	nlassert(Compiled);
 
-	if(Patchs.size()==0)
+	if(Patchs.empty())
 		return;
 
 	// DO NOT do a forceNoRenderClip(), to avoid big allocation of Near/Far VB vertices in driver.
@@ -1150,7 +1150,7 @@ void			CZone::averageTesselationVertices()
 {
 	nlassert(Compiled);
 
-	if(Patchs.size()==0)
+	if(Patchs.empty())
 		return;
 
 	// averageTesselationVertices of ALL patchs.
@@ -1250,8 +1250,10 @@ void			CZone::resetRenderFarAndDeleteVBFV()
 void			CZone::forceMergeAtTileLevel()
 {
 	CPatch		*pPatch=0;
-	if(Patchs.size()>0)
+
+	if (!Patchs.empty())
 		pPatch= &(*Patchs.begin());
+
 	for(sint n=(sint)Patchs.size();n>0;n--, pPatch++)
 	{
 		pPatch->forceMergeAtTileLevel();
@@ -1446,7 +1448,7 @@ void			CZone::applyHeightField(const CLandscape &landScape)
 	vector<CBezierPatch>	patchs;
 
 	// no patch, do nothing.
-	if(Patchs.size()==0)
+	if(Patchs.empty())
 		return;
 
 	// 0. Unpack patchs to Bezier Patchs.

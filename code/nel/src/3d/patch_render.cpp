@@ -1452,7 +1452,7 @@ void		CPatch::computeSoftwareGeomorphAndAlpha()
 	// Need only to fill CTessVertex, so do it only for FarVertices
 	// Hence Geomorph is done twice on edges of patches!!.
 	// If not too near for precise, fast compute of geomorph.
-	if( TessBlocks.size()==0 )
+	if( TessBlocks.empty() )
 	{
 		// Just update all vertices of master block.
 		computeGeomorphVertexList(MasterBlock.FarVertexList);
