@@ -26,7 +26,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
+CMainWindow::CMainWindow():QMainWindow()
 {
 	setupUi(this);
 
@@ -46,10 +46,6 @@ CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
 	connect(actionAbout, SIGNAL(triggered()), SLOT(onAbout()));
 
 	connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onProfileChanged(int)));
-
-	m_statusLabel = new QLabel();
-
-	statusBar()->addWidget(m_statusLabel);
 
 	updateProfiles();
 }

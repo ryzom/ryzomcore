@@ -130,11 +130,6 @@ p, li { white-space: pre-wrap; }
    <addaction name="menu_File"/>
    <addaction name="menu_Help"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="sizeGripEnabled">
-    <bool>false</bool>
-   </property>
-  </widget>
   <action name="actionAboutQt">
    <property name="text">
     <string>About Qt</string>
