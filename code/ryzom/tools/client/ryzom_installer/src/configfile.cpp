@@ -83,13 +83,19 @@ bool CConfigFile::load(const QString &filename)
 		server.clientDownloadFilename = settings.value("client_download_filename").toString();
 #if defined(Q_OS_WIN)
 		server.clientFilename = settings.value("client_filename_windows").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_windows").toString();
 		server.configurationFilename = settings.value("configuration_filename_windows").toString();
+		server.installerFilename = settings.value("installer_filename_windows").toString();
 #elif defined(Q_OS_MAC)
 		server.clientFilename = settings.value("client_filename_osx").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_osx").toString();
 		server.configurationFilename = settings.value("configuration_filename_osx").toString();
+		server.installerFilename = settings.value("installer_filename_osx").toString();
 #else
 		server.clientFilename = settings.value("client_filename_linux").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_linux").toString();
 		server.configurationFilename = settings.value("configuration_filename_linux").toString();
+		server.installerFilename = settings.value("installer_filename_linux").toString();
 #endif
 		server.comments = settings.value("comments").toString();
 
@@ -158,13 +164,19 @@ bool CConfigFile::save() const
 		settings.setValue("client_download_filename", server.clientDownloadFilename);
 #if defined(Q_OS_WIN)
 		settings.setValue("client_filename_windows", server.clientFilename);
+		settings.setValue("client_filename_old_windows", server.clientFilenameOld);
 		settings.setValue("configuration_filename_windows", server.configurationFilename);
+		settings.setValue("installer_filename_windows", server.installerFilename);
 #elif defined(Q_OS_MAC)
 		settings.setValue("client_filename_osx", server.clientFilename);
+		settings.setValue("client_filename_old_osx", server.clientFilenameOld);
 		settings.setValue("configuration_filename_osx", server.configurationFilename);
+		settings.setValue("installer_filename_osx", server.installerFilename);
 #else
 		settings.setValue("client_filename_linux", server.clientFilename);
+		settings.setValue("client_filename_old_linux", server.clientFilenameOld);
 		settings.setValue("configuration_filename_linux", server.configurationFilename);
+		settings.setValue("installer_filename_linux", server.installerFilename);
 #endif
 		settings.setValue("comments", server.comments);
 
@@ -475,8 +487,8 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 	// at least 200 BNP in data directory
 	if (dir.entryList(QStringList() << "*.bnp", QDir::Files).size() < 200) return false;
 
-	//  fonts.bnp is required
-	if (!dir.exists("fonts.bnp")) return false;
+	//  ryzom.ttf or fonts.bnp is required
+	if (!dir.exists("fonts/ryzom.ttf") && !dir.exists("fonts.bnp")) return false;
 
 	//  gamedev.bnp is required
 	if (!dir.exists("gamedev.bnp")) return false;
@@ -499,10 +511,19 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	// client_default.cfg doesn't exist
 	if (!dir.exists("client_default.cfg")) return false;
 
-	QString clientFilename = getServer().clientFilename;
+	// current server
+	CServer server = getServer();
 
-	// check if client is defined and exists
-	if (!clientFilename.isEmpty() && !dir.exists(clientFilename)) return false;
+	QString clientFilename = server.clientFilename;
+
+	// check if new client is defined and exists
+	if (!clientFilename.isEmpty() && !dir.exists(clientFilename))
+	{
+		clientFilename = server.clientFilenameOld;
+
+		// check if old client is defined and exists
+		if (!dir.exists(clientFilename)) return false;
+	}
 
 	// TODO: more checks
 
