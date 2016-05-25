@@ -52,8 +52,6 @@ CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
 	statusBar()->addWidget(m_statusLabel);
 
 	updateProfiles();
-
-//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 }
 
 CMainWindow::~CMainWindow()
