@@ -90,6 +90,7 @@ protected:
 	void cleanFiles();
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();
+	bool createAddRemoveEntry();
 
 	// from CFilesCopier
 	virtual void operationPrepare();

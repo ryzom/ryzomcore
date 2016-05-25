@@ -33,6 +33,10 @@
 #include <QtWinExtras/QWinTaskbarButton>
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -427,7 +431,7 @@ bool COperationDialog::createDefaultProfile()
 	CServer server = config->getServer(config->getDefaultServerIndex());
 
 	m_currentOperation = QApplication::tr("Create default profile");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+//	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CProfile profile;
 
@@ -448,6 +452,8 @@ bool COperationDialog::createDefaultProfile()
 	config->addProfile(profile);
 	config->save();
 
+	createAddRemoveEntry();
+
 	emit done();
 
 	return true;
@@ -456,6 +462,72 @@ bool COperationDialog::createDefaultProfile()
 bool COperationDialog::createDefaultShortcuts()
 {
 	emit done();
+
+	return true;
+}
+
+bool COperationDialog::createAddRemoveEntry()
+{
+	QString ff = QApplication::applicationFilePath();
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CFilesCopier copier(this);
+
+	const CServer &server = config->getServer();
+
+	QString oldInstallerFilename = server.clientFilenameOld;
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (QFile::exists(oldInstallerFullPath) && !QFile::exists(newInstallerFullPath))
+		{
+			QStringList filter;
+			filter << oldInstallerFilename;
+			filter << "msvcp100.dll";
+			filter << "msvcr100.dll";
+
+			copier.setIncludeFilter(filter);
+			copier.setDesinationDirectory(config->getInstallationDirectory());
+			copier.exec();
+
+			QFile::rename(oldInstallerFullPath, newInstallerFullPath);
+		}
+
+		if (QFile::exists(newInstallerFullPath))
+		{
+			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+
+			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
+
+			settings.setValue("Comments", "");
+			settings.setValue("DisplayIcon", QDir::toNativeSeparators(newInstallerFullPath) + ",0");
+			settings.setValue("DisplayName", "Ryzom");
+			settings.setValue("DisplayVersion", RYZOM_VERSION);
+			settings.setValue("EstimatedSize", 1500000); // TODO: compute real size
+			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
+			settings.setValue("InstallLocation", config->getInstallationDirectory());
+			settings.setValue("MajorVersion", versionTokens[0].toInt());
+			settings.setValue("MinorVersion", versionTokens[1].toInt());
+			settings.setValue("NoModify", 0);
+			settings.setValue("NoRemove", 0);
+			settings.setValue("NoRepair", 0);
+			settings.setValue("Publisher", AUTHOR);
+			settings.setValue("QuietUninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u -s");
+			settings.setValue("UninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u");
+			settings.setValue("URLUpdateInfo", "http://ryzom.fr/info");
+			settings.setValue("URLInfoAbout", "http://ryzom.fr/info2");
+			//	settings.setValue("sEstimatedSize2", 0);
+			settings.setValue("HelpLink", "http://ryzom.fr/support");
+			//	ModifyPath
+		}
+	}
+
+//	emit done();
 
 	return true;
 }
