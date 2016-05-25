@@ -338,14 +338,7 @@ namespace NLGUI
 	#ifdef LOG_DL
 		nlwarning("Init Image Download");
 	#endif
-	/*
-	// Get current flag
-	int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
-	// Turn on leak-checking bit
-	tmpFlag |= _CRTDBG_CHECK_ALWAYS_DF;
-	// Set flag to the new value
-	_CrtSetDbgFlag( tmpFlag );
-	*/
+
 		string pathName = "cache";
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
@@ -628,32 +621,6 @@ namespace NLGUI
 			curl_multi_cleanup(MultiCurl);
 	}
 
-	/*
-	void dolibcurltest()
-	{
-		nlwarning("start libcurl test");
-
-		initImageDownload();
-
-		addImageDownload("http://www.ryzom.com/en/");
-		addImageDownload("http://www.ryzom.com/fr/");
-		addImageDownload("http://www.ryzom.com/de/");
-
-		do
-		{
-			checkImageDownload();
-			nlwarning("continue to sleep");
-			nlSleep(300);
-		}
-		while(RunningCurls);
-
-		releaseImageDownload();
-
-		nlwarning("end libcurl test");
-	}
-	*/
-
-
 	class CGroupListAdaptor : public CInterfaceGroup
 	{
 	public:
@@ -726,10 +693,6 @@ namespace NLGUI
 
 			// Build a UTF8 string
 			string inputString(buf, buf+len);
-	//		inputString.resize (len);
-	//		uint i;
-	//		for (i=0; i<(uint)len; i++)
-	//			inputString[i] = buf[i];
 
 			if (_ParsingLua && _TrustedDomain)
 			{
@@ -747,7 +710,6 @@ namespace NLGUI
 			ucstring tmp;
 			tmp.reserve(len);
 			uint ucLen = (uint)inputUCString.size();
-			//uint ucLenWithoutSpace = 0;
 			for (uint i=0; i<ucLen; i++)
 			{
 				ucchar output;
@@ -768,22 +730,7 @@ namespace NLGUI
 				if (keep)
 				{
 					tmp.push_back(output);
-	/*
-					// Break if the string is more than 50 chars long without space
-					if (output != ucchar(' '))
-					{
-						ucLenWithoutSpace++;
-						if (ucLenWithoutSpace == 50)
-						{
-							tmp.push_back(ucchar(' '));
-							ucLenWithoutSpace = 0;
-						}
-					}
-					else
-					{
-						ucLenWithoutSpace = 0;
-					}
-	*/			}
+				}
 			}
 
 			if (!tmp.empty())
@@ -1199,7 +1146,6 @@ namespace NLGUI
 
 			}
 				break;
-
 			case HTML_DIV:
 			{
 				_BlockLevelElement.push_back(true);
@@ -1286,7 +1232,6 @@ namespace NLGUI
 				}
 			}
 				break;
-
 			case HTML_FONT:
 			{
 				bool found = false;
@@ -1602,9 +1547,6 @@ namespace NLGUI
 								getParagraph()->addChild (buttonGroup);
 								paragraphChange ();
 							}
-
-	//						addButton (CCtrlTextButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-	//							globalColor, "html_submit_form", param.c_str(), tooltip);
 						}
 						else if (type == "text")
 						{
@@ -5829,7 +5771,6 @@ namespace NLGUI
 	{
 		std::string ret;
 		sint32 number = Value;
-		bool upper = false;
 
 		if (Type == "disc")
 		{
