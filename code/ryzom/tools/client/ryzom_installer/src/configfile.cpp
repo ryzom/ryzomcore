@@ -673,18 +673,16 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			{
 				return ExtractBnpClient;
 			}
-			else
+
+			QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+
+			// when file is not finished, it has .part extension
+			if (!QFile::exists(clientFile))
 			{
-				QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
-
-				// when file is not finished, it has .part extension
-				if (!QFile::exists(clientFile))
-				{
-					return DownloadClient;
-				}
-
-				return ExtractDownloadedClient;
+				return DownloadClient;
 			}
+
+			return ExtractDownloadedClient;
 		}
 	}
 
