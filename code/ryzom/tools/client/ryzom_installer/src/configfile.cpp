@@ -696,6 +696,12 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		}
 	}
 
+	// if installer not found in installation directory, extract it from BNP
+	if (!QFile::exists(getInstallationDirectory() + "/" + server.installerFilename))
+	{
+		return CopyInstaller;
+	}
+
 	// no default profile
 	if (profile.id.isEmpty())
 	{

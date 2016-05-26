@@ -87,6 +87,7 @@ protected:
 	void copyServerFiles();
 	void copyProfileFiles();
 	void extractBnpClient();
+	void copyIntaller();
 	void cleanFiles();
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();

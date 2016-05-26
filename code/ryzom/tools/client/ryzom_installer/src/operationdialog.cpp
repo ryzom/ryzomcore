@@ -136,6 +136,10 @@ void COperationDialog::processNextStep()
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
+		case CConfigFile::CopyInstaller:
+		QtConcurrent::run(this, &COperationDialog::copyIntaller);
+		break;
+
 		case CConfigFile::CleanFiles:
 		QtConcurrent::run(this, &COperationDialog::cleanFiles);
 		break;
@@ -401,6 +405,53 @@ void COperationDialog::extractBnpClient()
 		while (process.waitForFinished())
 		{
 			qDebug() << "waiting";
+		}
+	}
+
+	emit done();
+}
+
+void COperationDialog::copyIntaller()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Copy installer to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
+
+	QString destinationDirectory = config->getInstallationDirectory();
+
+	// rename old client to installer
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = QApplication::applicationFilePath();
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (!QFile::exists(newInstallerFullPath))
+		{
+			QStringList filter;
+			filter << "msvcp100.dll";
+			filter << "msvcr100.dll";
+
+			CFilesCopier copier(this);
+			copier.setIncludeFilter(filter);
+			copier.addFile(oldInstallerFullPath);
+			copier.setSourceDirectory(config->getSrcServerDirectory());
+			copier.setDestinationDirectory(config->getInstallationDirectory());
+			copier.exec();
+
+			// copied file
+			oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
+
+			// rename old filename if different
+			if (oldInstallerFullPath != newInstallerFullPath)
+			{
+				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
+			}
 		}
 	}
 

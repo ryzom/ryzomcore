@@ -92,6 +92,7 @@ public:
 		CopyProfileFiles,
 		CleanFiles,
 		ExtractBnpClient,
+		CopyInstaller,
 		CreateProfile,
 		CreateShortcuts,
 		Done
