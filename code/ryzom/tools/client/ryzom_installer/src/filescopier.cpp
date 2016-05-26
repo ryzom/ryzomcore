@@ -38,7 +38,7 @@ void CFilesCopier::setSourceDirectory(const QString &src)
 	m_sourceDirectory = src;
 }
 
-void CFilesCopier::setDesinationDirectory(const QString &dst)
+void CFilesCopier::setDestinationDirectory(const QString &dst)
 {
 	m_destinationDirectory = dst;
 }

@@ -32,7 +32,7 @@ public:
 	virtual ~CFilesCopier();
 
 	void setSourceDirectory(const QString &src);
-	void setDesinationDirectory(const QString &src);
+	void setDestinationDirectory(const QString &src);
 
 	void setIncludeFilter(const QStringList &filter);
 

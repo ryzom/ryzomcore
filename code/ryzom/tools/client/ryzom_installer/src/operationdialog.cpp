@@ -319,7 +319,7 @@ void COperationDialog::copyServerFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
-	copier.setDesinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	copier.setDestinationDirectory(config->getInstallationDirectory() + "/" + server.id);
 	copier.setIncludeFilter(serverFiles);
 
 	if (copier.exec())
@@ -355,7 +355,7 @@ void COperationDialog::copyProfileFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcProfileDirectory());
-	copier.setDesinationDirectory(config->getProfileDirectory() + "/" + profile.id);
+	copier.setDestinationDirectory(config->getProfileDirectory() + "/" + profile.id);
 	copier.setIncludeFilter(profileFiles);
 
 	if (copier.exec())
