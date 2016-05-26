@@ -712,5 +712,12 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		return CreateShortcuts;
 	}
 
+#ifdef Q_OS_WIN
+	// check that Add/Remove entry is created under Windows
+	QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+
+	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
+#endif
+
 	return Done;
 }

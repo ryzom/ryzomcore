@@ -95,6 +95,7 @@ public:
 		CopyInstaller,
 		CreateProfile,
 		CreateShortcuts,
+		CreateAddRemoveEntry,
 		Done
 	};
 

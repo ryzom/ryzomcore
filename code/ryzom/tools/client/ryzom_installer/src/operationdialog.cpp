@@ -152,6 +152,10 @@ void COperationDialog::processNextStep()
 		createDefaultShortcuts();
 		break;
 
+		case CConfigFile::CreateAddRemoveEntry:
+		createAddRemoveEntry();
+		break;
+
 		case CConfigFile::Done:
 		accept();
 		break;
@@ -503,8 +507,6 @@ bool COperationDialog::createDefaultProfile()
 	config->addProfile(profile);
 	config->save();
 
-	createAddRemoveEntry();
-
 	emit done();
 
 	return true;
@@ -519,11 +521,7 @@ bool COperationDialog::createDefaultShortcuts()
 
 bool COperationDialog::createAddRemoveEntry()
 {
-	QString ff = QApplication::applicationFilePath();
-
 	CConfigFile *config = CConfigFile::getInstance();
-
-	CFilesCopier copier(this);
 
 	const CServer &server = config->getServer();
 
@@ -535,22 +533,9 @@ bool COperationDialog::createAddRemoveEntry()
 		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
-		if (QFile::exists(oldInstallerFullPath) && !QFile::exists(newInstallerFullPath))
-		{
-			QStringList filter;
-			filter << oldInstallerFilename;
-			filter << "msvcp100.dll";
-			filter << "msvcr100.dll";
-
-			copier.setIncludeFilter(filter);
-			copier.setDesinationDirectory(config->getInstallationDirectory());
-			copier.exec();
-
-			QFile::rename(oldInstallerFullPath, newInstallerFullPath);
-		}
-
 		if (QFile::exists(newInstallerFullPath))
 		{
+#ifdef Q_OS_WIN
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
 
 			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
@@ -575,10 +560,11 @@ bool COperationDialog::createAddRemoveEntry()
 			//	settings.setValue("sEstimatedSize2", 0);
 			settings.setValue("HelpLink", "http://ryzom.fr/support");
 			//	ModifyPath
+#endif
 		}
 	}
 
-//	emit done();
+	emit done();
 
 	return true;
 }
