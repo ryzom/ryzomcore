@@ -61,7 +61,7 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
 	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
 	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
-	connect(m_downloader, SIGNAL(downloadProgress(qint64)), SLOT(onProgressProgress(qint64)));
+	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
 	connect(m_downloader, SIGNAL(downloadSuccess(qint64)), SLOT(onProgressSuccess(qint64)));
 	connect(m_downloader, SIGNAL(downloadFail(QString)), SLOT(onProgressFail(QString)));
 
