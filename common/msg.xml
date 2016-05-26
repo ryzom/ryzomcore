@@ -1,0 +1,1165 @@
+<client_messages_description>
+  <branch name="TARGET">
+    <leaf name="PARTY" />
+    <leaf name="INVENTORY" />
+    <leaf name="FOLLOW"
+          sendto="AIS"
+          format=""
+          description="The client follows its target" />
+    <leaf name="NO_FOLLOW"
+          sendto="AIS"
+          format=""
+          description="The client stop following its target" />
+  </branch>
+  <branch name="CONNECTION">
+    <leaf name="USER_CHAR" />
+    <leaf name="NO_USER_CHAR" />
+    <leaf name="USER_CHARS"
+          description="The EGS send existing characters of player to client" />
+    <leaf name="CREATE_CHAR"
+          description="The client creates a character, type is $u32, and name is $s" />
+    <leaf name="SELECT_CHAR" />
+    <leaf name="DELETE_CHAR"
+          sendto="EGS"
+          format="u8"
+          description="The client delete a character, slot of character is $u8" />
+    <leaf name="RENAME_CHAR"
+          format="u8 s s"
+          description="The client rename a character, $u8 : slot of character $s : name $s : surname" />
+    <leaf name="ENTER"
+          sendto="EGS"
+          format=""
+          description="The client leave create/select interface and enter in game, at this point, the FE association uid = sid is made" />
+    <leaf name="READY"
+          description="The client is ready to enter the world" />
+    <leaf name="TIME_DATE_SYNCHRO"
+          description="The WOS send to client the tiem and date of server: server tick $u32 ryzom time $f ryzom day $u32" />
+    <leaf name="ASK_NAME"
+          description="Ask server if a name is not already present" />
+    <leaf name="VALID_NAME"
+          format="u8"
+          description="Server answer yes or no the name is already affected for a player" />
+    <leaf name="CREATE_CHAR_ERROR"
+          description="Server refuse character creation and fill and send to client a boolean structure with false for all parameters refused" />
+    <leaf name="RECONNECT"
+          description="Client quits the game and returns to the select character menu" />
+    <leaf name="SERVER_RECONNECT_OK"
+          description="Server acknowledges reconnection request" />
+    <leaf name="SHARD_ID" />
+    <leaf name="SERVER_QUIT_OK"
+          description="EGS send a force quit command to client" />
+    <leaf name="SERVER_QUIT_ABORT"
+          description="EGS send to client a msg to indicate a quit game command has been aborted" />
+    <leaf name="CLIENT_QUIT_REQUEST"
+          sendto="EGS"
+          format="b u32 u16"
+          description="client want to quit" />
+    <leaf name="MAIL_AVAILABLE" />
+    <leaf name="GUILD_MESSAGE_AVAILABLE" />
+    <leaf name="PERMANENT_BAN" />
+    <leaf name="UNBAN" />
+    <leaf name="FAR_TP"
+          description="EGS tells the client to connect elsewhere" />
+    <leaf name="RET_MAINLAND"
+          description="client quits a ring session" />
+  </branch>
+  <leaf name="DB_UPD_PLR" />
+  <leaf name="DB_UPD_INV"
+        description="EGS sends an inventory update to the client" />
+  <branch name="DB_INIT">
+    <leaf name="PLR" />
+    <leaf name="INV" />
+  </branch>
+  <branch name="DB_GROUP">
+    <leaf name="UPDATE_BANK" />
+    <leaf name="INIT_BANK" />
+    <leaf name="RESET_BANK" />
+  </branch>
+  <leaf name="POSITION"
+        sendto="GPMS"
+        format="s32 s32 s32 f"
+        usecycle="yes"
+        description="the client moves to ($i32,$i32,$i32) with heading $f" />
+  <branch name="HARVEST">
+    <leaf name="DEPOSIT"
+          sendto="EGS"
+          format="u16"
+          description="the client shearch a deposit for harvest/digging (param = skill used)" />
+    <leaf name="CORPSE" />
+    <leaf name="INTERRUPT" />
+    <leaf name="CLOSE_TEMP_INVENTORY"
+          description="the server force the client to close the temp inventory" />
+  </branch>
+  <leaf name="TRAINING"
+        sendto="EGS"
+        format=""
+        description="the client starts a training action" />
+  <branch name="JOB">
+    <leaf name="SET_JOB_STATUS"
+          sendto="EGS"
+          format="u8 u8"
+          description="player want change one of his job status (job, status)" />
+    <leaf name="SWAP_JOB_STATUS"
+          sendto="EGS"
+          format="u8 u8"
+          description="player want change one of his job status( job freezed, job actived)" />
+  </branch>
+  <branch name="CASTING">
+    <leaf name="BEGIN" />
+    <leaf name="INTERRUPT" />
+  </branch>
+  <branch name="FABER">
+    <leaf name="OPEN"
+          sendto="EGS"
+          format="" />
+    <leaf name="CLOSE"
+          sendto="EGS"
+          format="" />
+    <leaf name="EXECUTE"
+          sendto="EGS"
+          format="" />
+    <leaf name="SET_NUM_ITEM"
+          sendto="EGS"
+          format="u8" />
+    <leaf name="START_CREATE"
+          sendto="EGS"
+          format="u32" />
+    <leaf name="START_REPAIR"
+          sendto="EGS"
+          format="u16 u16" />
+    <leaf name="START_REFINE"
+          sendto="EGS"
+          format="u16 u16" />
+    <leaf name="SET_MP_QUALITY"
+          sendto="EGS"
+          format="u8 u8" />
+    <leaf name="SET_MP_REFINE"
+          sendto="EGS"
+          format="u32 u8" />
+    <!--    <leaf name="ADD_MP"                                     sendto="EGS"    format="u16 u16 u16 u8"/> -->
+    <!--    <leaf name="REMOVE_MP"                          sendto="EGS"    format="u8 u16"/> -->
+    <leaf name="SET_TOOL"
+          sendto="EGS"
+          format="u16 u16" />
+    <leaf name="RESET_TOOL"
+          sendto="EGS"
+          format="" />
+    <leaf name="INTERRUPT" />
+  </branch>
+  <branch name="COMBAT">
+    <leaf name="ENGAGE"
+          sendto="EGS"
+          format="" />
+    <leaf name="DISENGAGE"
+          sendto="EGS"
+          format="" />
+    <leaf name="DEFAULT_ATTACK"
+          sendto="EGS"
+          format="" />
+    <leaf name="ENGAGE_FAILED" />
+    <leaf name="VALIDATE_MELEE"
+          sendto="EGS"
+          format="u8"
+          description="the client validate or invalidate the melee combat (check position and orientation), validation flag $u8" />
+    <leaf name="PARRY"
+          sendto="EGS"
+          format=""
+          description="the client toggle chooses parry as his defense mode" />
+    <leaf name="DODGE"
+          sendto="EGS"
+          format=""
+          description="the client toggle chooses dodge as his defense mode" />
+    <leaf name="PROTECTED_SLOT"
+          sendto="EGS"
+          format="u8"
+          description="the client select a new slot to defend (or none)" />
+    <leaf name="FLYING_HP_DELTA"
+          description="add a flying text to an entity (u32 entity, u32 rgba, s16 delta)" />
+    <leaf name="FLYING_TEXT_ISE"
+          description="add a flying text to an entity (u32 entity, u32 rgba, u8 effect, s32 param)" />
+    <leaf name="FLYING_TEXT"
+          description="add a flying text to an entity (u32 entity, u8 type)" />
+  </branch>
+  <branch name="STRING">
+    <leaf name="TELL"
+          sendto="IOS"
+          format="s uc"
+          description="the client sends a tell to the character $e : $s" />
+    <leaf name="FAR_TELL"
+          description="the client receive a far tell from a player on another shard" />
+    <leaf name="CHAT"
+          sendto="IOS"
+          format="uc"
+          description="the client sends the chat message : $s" />
+    <leaf name="CHAT_TEAM"
+          sendto="IOS"
+          format="uc"
+          description="the client sends the chat message to his team: $s" />
+    <leaf name="ADD_DYN_STR" />
+    <leaf name="FILTER"
+          sendto="IOS"
+          format="u8"
+          description="the client adds/removes the chat filter $u8" />
+    <leaf name="CHAT_MODE"
+          sendto="IOS"
+          format="u8 u64"
+          description="the client selects the chat mode $u8 $64. second param is 0 or the dynamic chat Id (an eid)" />
+    <leaf name="CHAT2"
+          description="a npc send a predef message to the client : $s" />
+    <leaf name="TELL2"
+          description="a npc send a predef message to the client : $s" />
+    <leaf name="DYN_STRING"
+          description="system send a dyn string to the client system chat: $u32" />
+    <leaf name="DYN_STRING_GROUP"
+          description="system send a dyn string to the client gived group chat: $u32 $u16" />
+    <leaf name="AFK_TXT"
+          sendto="IOS"
+          format="uc"
+          description="the client sets an afk custom text" />
+  </branch>
+  <branch name="STUN">
+    <leaf name="STUN" />
+    <leaf name="WAKE_UP" />
+  </branch>
+  <branch name="SENTENCE">
+    <leaf name="EXECUTE"
+          sendto="EGS"
+          format="u8 s32" />
+    <leaf name="CANCEL"
+          sendto="EGS"
+          format="s32 u8" />
+    <leaf name="CANCEL_CURRENT"
+          sendto="EGS"
+          format="" />
+    <leaf name="CANCEL_ALL"
+          sendto="EGS"
+          format="" />
+    <leaf name="CLEAR"
+          sendto="EGS"
+          format="" />
+    <leaf name="MEMORIZE" />
+    <leaf name="FORGET"
+          sendto="EGS"
+          format="u8 s32" />
+    <leaf name="EVALUATE" />
+    <leaf name="ADD_BRICK"
+          sendto="EGS"
+          format="u16 u8 u8"
+          description="the client add brick (family $u16/index $u8/slot u8) in sentence" />
+    <leaf name="REMOVE_BRICK"
+          sendto="EGS"
+          format="u8" />
+    <leaf name="START" />
+    <leaf name="STOP" />
+  </branch>
+  <branch name="TEAM">
+    <leaf name="JOIN"
+          sendto="EGS"
+          format="" />
+    <leaf name="LEAVE"
+          sendto="EGS"
+          format="" />
+    <leaf name="INVITATION" />
+    <leaf name="JOIN_PROPOSAL"
+          sendto="EGS"
+          format="" />
+    <!--<leaf name="JOIN_PROPOSAL"/>-->
+    <leaf name="JOIN_PROPOSAL_DECLINE"
+          sendto="EGS"
+          format="" />
+    <leaf name="KICK"
+          sendto="EGS"
+          format="u8" />
+    <leaf name="SET_SUCCESSOR"
+          sendto="EGS"
+          format="u8" />
+    <!-- Sharing system -->
+    <leaf name="SHARE_OPEN"
+          format=""
+          description="the server wants the share interface to be opened" />
+    <leaf name="SHARE_VALID_ITEM"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client wants an item or phrase (item/phrase index, session id)" />
+    <leaf name="SHARE_INVALID_ITEM"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client do not wants an item or phrase anymore (item/phrase index, session id)" />
+    <leaf name="SHARE_VALID"
+          sendto="EGS"
+          format="u8"
+          description="the client wants to validate its selection (session id)" />
+    <leaf name="SHARE_INVALID"
+          format=""
+          description="the server invalidate the client selection" />
+    <leaf name="SHARE_CLOSE"
+          format=""
+          description="the server wants the share interface to be closed" />
+    <!-- Contact List -->
+    <leaf name="CONTACT_INIT"
+          format=""
+          description="the server initialize the 2 contacts lists (net_manager.cpp to see the message format)" />
+    <leaf name="CONTACT_ADD"
+          sendto="EGS"
+          format="uc u8"
+          description="the client wants to add a contact ($uc name $u8 list)" />
+    <leaf name="CONTACT_DEL"
+          sendto="EGS"
+          format="u32 u8"
+          description="the client wants to delete a contact ($u32 contactId $u8 list)" />
+    <leaf name="CONTACT_MOVE"
+          sendto="EGS"
+          format="u32 u8"
+          description="the client wants to move a contact from one list to the other ($u32 contactId $u8 listSrc)" />
+    <leaf name="CONTACT_CREATE"
+          format=""
+          description="the server create a contact" />
+    <leaf name="CONTACT_STATUS"
+          format=""
+          description="the server give the status of a contact" />
+    <leaf name="CONTACT_REMOVE"
+          format=""
+          description="the server removes a contact" />
+  </branch>
+  <branch name="ITEM">
+    <leaf name="DROP"
+          sendto="EGS"
+          format="u16 u16 u16" />
+    <leaf name="PICK_UP" />
+    <!-- this is directly treated in messages to send to EGS -->
+    <leaf name="PICK_UP_CLOSE"
+          sendto="EGS"
+          format="" />
+    <leaf name="SWAP"
+          sendto="EGS"
+          format="u16 u16 u16 u16 u16 u16" />
+    <leaf name="ACTIVATE_SHEATH"
+          sendto="EGS"
+          format="u8" />
+    <leaf name="HARVEST"
+          sendto="EGS"
+          format="u16 u16"
+          description="the client want harvest a founded Raw material(slot, quantity)" />
+    <leaf name="HARVEST_CLOSE"
+          sendto="EGS"
+          format="" />
+    <leaf name="GIVE"
+          sendto="EGS"
+          format="u16 u16 u16"
+          description="the client give an item to target (inventory, slot, quantity)" />
+    <leaf name="DESTROY"
+          sendto="EGS"
+          format="u16 u16 u16"
+          usecycle="no"
+          description="destroy the content of an inventory slot params : inventory, slot,quantity" />
+    <leaf name="EQUIP"
+          sendto="EGS"
+          format="u16 u16 u16"
+          description="the client equip character (equiped inventory, equiped inventory slot, bag slot)" />
+    <leaf name="UNEQUIP"
+          sendto="EGS"
+          format="u16 u16"
+          description="the client unequip character (equiped inventory, equiped inventory slot)" />
+    <leaf name="TEMP_TO_BAG"
+          sendto="EGS"
+          format="u16"
+          description="the client pick an item from temp inventory (temp inventory slot)" />
+    <leaf name="ALL_TEMP"
+          sendto="EGS"
+          format=""
+          description="the client pick all items from temp inventory" />
+    <leaf name="NO_TEMP"
+          sendto="EGS"
+          format=""
+          description="the client drop all items from temp inventory" />
+    <leaf name="ENCHANT"
+          sendto="EGS"
+          format="u8 u16"
+          description="the client wants to enchant the right hand item with the current one (inventory, slot)" />
+    <leaf name="OPEN_ROOM_INVENTORY"
+          sendto=""
+          description="EGS wants to open the user inventory" />
+    <leaf name="CLOSE_ROOM_INVENTORY"
+          sendto=""
+          description="EGS wants to close the user inventory" />
+    <leaf name="USE_ITEM"
+          sendto="EGS"
+          format="u16"
+          description="client wants to use teleport in the specified bag slot or consume an item to trigger its effect" />
+    <leaf name="STOP_USE_XP_CAT"
+          sendto="EGS"
+          format="b"
+          description="client wants to stop using xp catalyser" />
+  </branch>
+  <branch name="TP">
+    <leaf name="RESPAWN"
+          sendto="EGS"
+          format=""
+          description="teleport the player to his respawn point" />
+    <leaf name="BOT"
+          sendto="EGS"
+          format="s"
+          description="teleport the player near the bot" />
+    <leaf name="WANTED"
+          sendto="EGS"
+          format="s32 s32 s32" />
+    <leaf name="DEST" />
+    <leaf name="DEST_WITH_SEASON" />
+    <leaf name="ACK"
+          sendto="EGS"
+          format="" />
+    <leaf name="CORRECT" />
+  </branch>
+  <branch name="DEATH">
+    <leaf name="RESPAWN_POINT"
+          sendto="EGS"
+          format=""
+          description="server set the respawn points with a bool to know if the client needs to reset all known points first" />
+    <leaf name="ASK_RESPAWN"
+          sendto="EGS"
+          format="u16"
+          description="client wants to respawn somewhere (index of the respawn location wanted)" />
+    <leaf name="RESPAWN"
+          sendto="EGS"
+          format=""
+          description="server teleport the client to the respawn point choosen" />
+  </branch>
+  <branch name="ANIMALS">
+    <leaf name="BEAST"
+          sendto="EGS"
+          format="u8 u8"
+          description="client send a beast order(beast u8, order u8)" />
+    <leaf name="MOUNT_ABORT"
+          description="server refuse the client mount command" />
+  </branch>
+  <!--
+<branch name="TRADE">
+        <leaf name="NEXT_PAGE_ITEM"                     sendto="EGS"    format="u16"                                                            description="Client ask for the next trade page"/>
+        <leaf name="NEXT_PAGE_MISSION"                  sendto="EGS"    format="u16"                                                            description="Client ask for the next mission page"/>
+        <leaf name="NEXT_PAGE_MISSION_ITEM"     sendto="EGS"    format="u16"                                                            description="Client ask for the next mission item page"/>
+        <leaf name="BUY"                                        sendto="EGS"    format="u16 u8"/>
+        <leaf name="CHOOSE_ITEM_AS_MISSION_REWARD"      sendto="EGS"    format="u8"                                                     description="client want to do a mission to get a specific item"/>
+        <leaf name="QUERY_PRICE"                        sendto="EGS"    format="u16 u8"                                                         description="Client ask the sell price of an item to current shopkeeper, first param is botchat session, second is index of item in the inventory"/>
+        <leaf name="BUY_PRICE"/>
+        <leaf name="SELL"                                       sendto="EGS"    format="u8 u8"                                                          description="Client sell item in bag and quantity"/>
+</branch>
+-->
+  <branch name="EXCHANGE">
+    <leaf name="INVITATION" />
+    <leaf name="CLOSE_INVITATION"
+          description="message sent to the client to force his invitation popup to close" />
+    <leaf name="PROPOSAL"
+          sendto="EGS"
+          format="" />
+    <leaf name="ACCEPT_INVITATION"
+          sendto="EGS"
+          format="" />
+    <leaf name="DECLINE_INVITATION"
+          sendto="EGS"
+          format="" />
+    <leaf name="VALIDATE"
+          sendto="EGS"
+          format="u8" />
+    <leaf name="INVALIDATE"
+          sendto="EGS" />
+    <leaf name="END"
+          sendto="EGS"
+          format="" />
+    <leaf name="SEEDS"
+          sendto="EGS"
+          format="u64" />
+    <leaf name="ADD"
+          sendto="EGS"
+          format="u16 u16 u16"
+          description="add an item from the bag(index_in_bag index_in_exchange quantity)" />
+    <leaf name="REMOVE"
+          sendto="EGS"
+          format="u16"
+          description="remove an item from the exchange" />
+  </branch>
+  <branch name="DEBUG">
+    <leaf name="WHERE"
+          sendto="EGS"
+          format=""
+          description="client ask server send his server position" />
+    <leaf name="WHO"
+          sendto="EGS"
+          format="s"
+          description="client ask list of all clients connected to server" />
+    <leaf name="REPLY_WHERE"
+          description="server send to client his server position" />
+    <leaf name="SERVICES"
+          sendto="EGS"
+          format="" />
+    <leaf name="CMD"
+          format="b s s s"
+          description="the client wants to execute command : $b $s $s $s" />
+    <leaf name="PING"
+          sendto="EGS"
+          format="u32"
+          description="the client send a ping with tick game time of emission" />
+    <leaf name="COUNTER" />
+  </branch>
+  <!-- ****OUT OF DATE COMMANDS****
+<branch name="CHEAT">
+        <leaf name="GOD"                                        sendto="EGS"    format=""                                                                       description="the client want to be unkillable."/>
+        <leaf name="CREATE_ITEM_IN_BAG"         sendto="EGS"    format="u32 u16 u16"                                            description="the client ask to create item in hand sheetId (u32) , quantity (u16) and quality (u16)"/>
+        <leaf name="XP"                                         sendto="EGS"    format="u32 s s"                                                        description="the client want gain some XP(u32) in skill(s) and speciality(s)."/>
+        <leaf name="MONEY"                                      sendto="EGS"    format="s32 s32 s32 s32"                                        description="the client ask to earn some money (s32)(s32)(s32)(s32)."/>
+        <leaf name="LEARN_ALL_BRICKS"           sendto="EGS"    format=""                                                                       description="the client ask to learn all bricks"/>
+        <leaf name="SET_TIME"                           sendto="EGS"    format="f"                                                                      description="the client set RyzomTime f Time"/>
+        <leaf name="SET_DAY"                            sendto="EGS"    format="u32"                                                            description="the client set RyzomDay"/>
+        <leaf name="CREATE_CHARACTER"           sendto="EGS"    format="s u32 u32 u32 u16"                                      description="the client send create character commande ( s name, u32 race, u32 sex, u32 role and u16 level)."/>
+        <leaf name="LEARN_BRICK"                        sendto="EGS"    format="u32 u16"                                                        description="the client ask learn bricks for role (u32) at level(u16)"/>
+        <leaf name="LEARN_ALL_FABER_PLANS"      sendto="EGS"    format=""                                                                       description="the client want to learn all faber plans"/>
+        <leaf name="ADMIN"                                      sendto=""               format="s s"                                                            description="the client asks EGS to execute the command $s with arg $s"/>
+</branch>
+-->
+  <!-- Msg from Commands -->
+  <branch name="COMMAND">
+    <leaf name="EMOTE"
+          sendto="EGS"
+          format="u32 u16"
+          description="client send the emote (behaviour, phrase id) to play." />
+    <leaf name="CUSTOM_EMOTE"
+          sendto="EGS"
+          format="u32 uc"
+          description="client send the custom emote (behaviour, custom text) to play." />
+    <leaf name="WHERE"
+          sendto="EGS"
+          format=""
+          description="client send the where command" />
+    <leaf name="ADMIN"
+          sendto="EGS"
+          format="b s s"
+          description="client asks EGS to execute the command $s with arg $s" />
+    <leaf name="ADMIN_OFFLINE"
+          sendto="EGS"
+          format="s s s"
+          description="client asks EGS to execute on character $s (online or offline) the command $s with arg $s" />
+    <leaf name="REMOTE_ADMIN"
+          sendto="EGS"
+          format="u32 s"
+          description="server send the client a remote command" />
+    <leaf name="REMOTE_ADMIN_ANSWER"
+          sendto="EGS"
+          format="u32 s s"
+          description="client send the answer of the remote command" />
+    <leaf name="SIT"
+          sendto="EGS"
+          format="b"
+          description="client send to the server the sitting state" />
+    <leaf name="AFK"
+          sendto="EGS"
+          format="b"
+          description="AFK command is sent to EGS" />
+    <leaf name="RANDOM"
+          sendto="EGS"
+          format="s16 s16"
+          description="client asks EGS to roll a dice and tell result around" />
+    <leaf name="GUILDMOTD"
+          sendto="EGS"
+          format="s"
+          description="client asks EGS to set the guild message of the day" />
+  </branch>
+  <!-- MP Exotic Price Evaluation (discontinued) -->
+  <branch name="MP_EVAL">
+    <leaf name="SET_MP"
+          sendto="EGS"
+          format="u32"
+          description="the client set the sheet id of the MP exotic brick knowledge to eval" />
+    <leaf name="SET_MP_LEVEL"
+          sendto="EGS"
+          format="u8"
+          description="the client set the exact level of the MP to eval" />
+    <leaf name="SET_MARKET"
+          sendto="EGS"
+          format="u32"
+          description="the client set the sheet id of the market knowledge 's brick" />
+    <leaf name="EXECUTE"
+          sendto="EGS"
+          format=""
+          description="the client validate the evaluation" />
+  </branch>
+  <!-- bot chat -->
+  <branch name="BOTCHAT">
+    <leaf name="NEXT_PAGE_ITEM"
+          sendto="EGS"
+          format="u16"
+          description="Client ask for the next trade page" />
+    <leaf name="NEXT_PAGE_MISSION"
+          sendto="EGS"
+          format="u16"
+          description="Client ask for the next mission page" />
+    <!-- trade -->
+    <leaf name="START_TRADE_ITEM"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat trade item with the given session id" />
+    <leaf name="START_TRADE_TELEPORT"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat trade teleport with the given session id" />
+    <leaf name="START_TRADE_FACTION"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat trade of faction items with the given session id" />
+    <leaf name="START_TRADE_SKILL"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat skills  with the given session id" />
+    <leaf name="START_TRADE_PACT"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat pacts  with the given session id" />
+    <leaf name="START_TRADE_ACTION"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat actions  with the given session id" />
+    <leaf name="BUY"
+          sendto="EGS"
+          format="u16 u16"
+          description="Client buy object. param1: index in list. Param2: quantity" />
+    <leaf name="SELL"
+          sendto="EGS"
+          format="u8 u8 u16 u32"
+          description="Client sell item in: 1/ inventory id INVENTORIES::EInventory 2/ index 3/ quantity 4/ resale price" />
+    <leaf name="DESTROY_ITEM"
+          sendto="EGS"
+          format="u16 u16"
+          description="Client destroy an item in sell store. param1: index in list. Param2: quantity" />
+    <leaf name="REFRESH_TRADE_LIST"
+          sendto="EGS"
+          format=""
+          description="Client want refresh trade list from current Bot" />
+    <!-- trade filters -->
+    <leaf name="SET_FILTERS"
+          sendto="EGS"
+          format="u32 u32 u32 u32 u8 u8 u8 u8"
+          description="Client Set filter for trade list: 1/MinQuality 2/MaxQuality 3/MinPrice 4/MaxPrice 5/MinClass 6/MaxClass 7/ItemPart 8/ItemType, NoFilter = 0 ~0 0 ~0 0 0 RM_FABER_TYPE::Unknown values ITEM_TYPE::UNDEFINED" />
+    <!-- missions -->
+    <leaf name="START_CHOOSE_MISSION"
+          sendto="EGS"
+          format="u16"
+          description="start bot chat mission choice with the given session id" />
+    <leaf name="START_DYNAMIC_MISSION"
+          sendto="EGS"
+          format=""
+          description="start bot chat dynamic mission with the given session id" />
+    <leaf name="CONTINUE_MISSION"
+          sendto="EGS"
+          format="u8"
+          description="the user completed the mission, with no gift required" />
+    <leaf name="VALIDATE_PLAYER_GIFT"
+          sendto="EGS"
+          format=""
+          description="the user validate the gift he just made (server aknowledged the gift to be a valid one)" />
+    <leaf name="PICK_MISSION"
+          sendto="EGS"
+          format="u8"
+          description="message sent when a mission is accepted (from the static mission list)" />
+    <leaf name="DM_CHOICE"
+          sendto="EGS"
+          format="u8 u8 u8"
+          description="the three choices for dynamic mission selection" />
+    <leaf name="DM_ACCEPT"
+          sendto="EGS"
+          format=""
+          description="accept current dynamic mission" />
+    <!-- news -->
+    <leaf name="START_NEWS"
+          sendto="EGS"
+          format=""
+          description="start bot chat new page" />
+    <!-- guild -->
+    <leaf name="START_CREATE_GUILD"
+          sendto="EGS"
+          format=""
+          description="start bot chat page to create a guild" />
+    <!-- the bot chat window has been closed -->
+    <leaf name="END"
+          sendto="EGS"
+          format=""
+          description="end chat with a bot sent to EGS" />
+    <leaf name="FORCE_END"
+          description="force the end of the bot chat on the client side" />
+    <!-- duty related messages -->
+    <leaf name="START_CHOOSE_DUTY"
+          sendto="EGS"
+          format="u16"
+          description="client ask EGS for duty list ( param is session id )" />
+    <leaf name="NEXT_PAGE_DUTY"
+          sendto="EGS"
+          format="u16"
+          description="client ask EGS for next duty page ( param is session id )" />
+    <leaf name="DUTY_APPLY"
+          sendto="EGS"
+          format="u8"
+          description="client apply for a duty (param is the GLOBAL index of the duty)" />
+    <leaf name="DUTY_CANCEL_APPLY"
+          sendto="EGS"
+          format=""
+          description="client cancel apply for a duty" />
+    <!-- guild options related messages -->
+    <leaf name="START_TRADE_GUILD_OPTIONS"
+          sendto="EGS"
+          format="u16"
+          description="client ask EGS for guild option list ( param is session id )" />
+    <leaf name="BUY_GUILD_OPTION"
+          sendto="EGS"
+          format="u8"
+          description="client buy a guild option (param is the GLOBAL index of the option)" />
+    <leaf name="START_GUILD_RESEARCH"
+          sendto="EGS"
+          format="u16"
+          description="client ask EGS for a guild research list ( param is session id )" />
+    <leaf name="DESTROY_BUILDING"
+          sendto="EGS"
+          format=""
+          description="client destroy the building of his ZC" />
+    <leaf name="DYNCHAT_OPEN"
+          description="server wants to dynamically chat with the client (Bot UID, Bot Name, Vector of DynString)" />
+    <leaf name="DYNCHAT_CLOSE"
+          description="server wants to close dynamic chat (Bot UID)" />
+    <leaf name="DYNCHAT_SEND"
+          sendto="EGS"
+          format="u32 u8"
+          description="client answer to the server dynamic dialog (Bot UID, Answer Nb)" />
+  </branch>
+  <branch name="JOURNAL">
+    <leaf name="INIT_COMPLETED_MISSIONS"
+          description="a vector of text ids is sent to init the mission journal (vector(uint32) )" />
+    <leaf name="UPDATE_COMPLETED_MISSIONS"
+          description="a text id is sent to add a mission title to the mission journal (uint32)" />
+    <leaf name="MISSION_ABANDON"
+          sendto="EGS"
+          format="u8"
+          description="the client wants to abandon a mission (mission same as in database)" />
+    <leaf name="GROUP_MISSION_ABANDON"
+          sendto="EGS"
+          format="u8"
+          description="the client wants to abandon a team mission (mission same as in database)" />
+    <leaf name="ADD_COMPASS"
+          description="EGS adds a compass target for no list missions. Params X, Y, name. If the client already has the name, the coords are replaced" />
+    <leaf name="ADD_COMPASS_BOT"
+          description="Same for bots. Params X, Y, name, bot_datasetid" />
+    <leaf name="REMOVE_COMPASS"
+          description="EGS adds a compass target for no list missions. Params name" />
+    <leaf name="REMOVE_COMPASS_BOT"
+          description="Same for bots. Params name, bot_dataseetid" />
+  </branch>
+  <!-- String Manager related message -->
+  <branch name="STRING_MANAGER">
+    <leaf name="SET_LANGUAGE"
+          description="The client send the language code to use for this session." />
+    <leaf name="PHRASE_SEND"
+          description="The IOS send the prepared phrase to the client." />
+    <leaf name="STRING_RQ"
+          description="the client ask the string manager for an unknow string" />
+    <leaf name="STRING_RESP"
+          description="The IOS return the requested string yo the client." />
+    <leaf name="RELOAD_CACHE"
+          description="The IOS send it's initial cache time stamp or a new one at run time." />
+  </branch>
+  <!-- Guilds related message -->
+  <branch name="GUILD">
+    <leaf name="CREATE"
+          sendto="EGS"
+          format="uc u64 uc"
+          description="client wants to create a guild (name of new guild, guild icon descriptor, description of the guild)" />
+    <leaf name="ABORT_CREATION"
+          description="server forces the end of a guild create session" />
+    <leaf name="OPEN_GUILD_WINDOW"
+          sendto=""
+          format=""
+          description="the client just entered a guild, EGS ask the client to open the guild window" />
+    <leaf name="INVITATION"
+          sendto="EGS"
+          format="" />
+    <leaf name="ACCEPT_INVITATION"
+          sendto="EGS"
+          format="" />
+    <leaf name="REFUSE_INVITATION"
+          sendto="EGS"
+          format="" />
+    <leaf name="JOIN_PROPOSAL"
+          description="invitation sent to client (uint32 textId)" />
+    <leaf name="SET_GRADE"
+          sendto="EGS"
+          format="u16 u8 u8"
+          description="client change a member grade p1 is the member, p2 is the grade ( see GUILD_GRADES enum ), p3 is the state counter" />
+    <leaf name="SET_LEADER"
+          sendto="EGS"
+          format="u16 u8"
+          description="client leader in its guild wants to set the new leader specifying the name of the new leader p1 is the member, p2 is the state counter" />
+    <leaf name="KICK_MEMBER"
+          sendto="EGS"
+          format="u16 u8"
+          description="client (lead,ho,of) wants to kick member specifying its index. Last param is the counter" />
+    <leaf name="TELEPORT"
+          sendto="EGS"
+          format="u16"
+          description="client wants to teleport somewhere in guild flats" />
+    <leaf name="ASCENSOR"
+          description="Server requests the launch of ascensor interface" />
+    <leaf name="FIRST_ASCENSOR_PAGE"
+          sendto="EGS"
+          format="u16"
+          description="Client ask for the first ascensor page specifying the session id" />
+    <leaf name="NEXT_ASCENSOR_PAGE"
+          sendto="EGS"
+          format="u16"
+          description="Client ask for the next ascensor page specifying the session id" />
+    <leaf name="LEAVE_ASCENSOR"
+          description="Server requests the closing of ascensor interface" />
+    <leaf name="QUIT"
+          sendto="EGS"
+          format=""
+          description="Client wants to quit its guild" />
+    <!-- About the player -->
+    <leaf name="SET_PLAYER_TITLE"
+          sendto="EGS"
+          format="u8"
+          description="the client inform the server it has changed its character title (u8=new title(ECharacterTitle))" />
+    <leaf name="UPDATE_PLAYER_TITLE"
+          description="the server update some reserved titles" />
+    <leaf name="USE_FEMALE_TITLES"
+          format="b"
+          description="The EGS sends to client whether female titles are used" />
+    <!-- guild inventory management -->
+    <leaf name="PUT_MONEY"
+          sendto="EGS"
+          format="u64 u16"
+          description="put money in guild warehouse" />
+    <leaf name="TAKE_MONEY"
+          sendto="EGS"
+          format="u64 u16"
+          description="take money from guild warehouse" />
+    <leaf name="OPEN_INVENTORY"
+          sendto=""
+          format=""
+          description="open the guild inventory" />
+    <leaf name="CLOSE_INVENTORY"
+          sendto=""
+          format=""
+          description="close the guild inventory" />
+  </branch>
+  <branch name="OUTPOST">
+    <leaf name="GIVEUP_OUTPOST"
+          sendto="EGS"
+          format="u32"
+          description="Give up an outpost (outpostSHEET)" />
+    <!-- Select an outpost from a BotObject -->
+    <leaf name="SELECT"
+          sendto="EGS"
+          format="u32"
+          description="Select an outpost to display its state (outpostSHEET). = Fill OUTPOST_SELECTED DB" />
+    <leaf name="UNSELECT"
+          sendto="EGS"
+          format=""
+          description="Unselect any outpost display" />
+    <!-- War declaration -->
+    <leaf name="DECLARE_WAR_START"
+          sendto="EGS"
+          format="u32 u8"
+          description="The User try to Declare War to the outpost (outpostSHEET, startHourForAttackPeriod)" />
+    <leaf name="DECLARE_WAR_ACK"
+          description="The server answer to the client (bool ok, uint32 textId, uint32 resultStartAttackTime)" />
+    <leaf name="DECLARE_WAR_VALIDATE"
+          sendto="EGS"
+          format="u32 u8 u32"
+          description="The user confirms its Declare war (outpostSHEET, startHourForAttackPeriod, resultStartAttackTimeForCheck). NB: still can fail = sysinfo" />
+    <!-- Defender Setup -->
+    <leaf name="SET_DEF_PERIOD"
+          sendto="EGS"
+          format="u32 u8"
+          description="The defender changes the defense period of one of its Outpost (outpostSHEET, start hour for defense period)" />
+    <!-- squads management -->
+    <leaf name="SET_SQUAD"
+          sendto="EGS"
+          format="u32 u8 u8"
+          description="Set a training squad in a slot (outpostSHEET, slot, squadNUMBER_IN_SQUAD_SHOP_DB)" />
+    <leaf name="SET_SQUAD_SPAWN"
+          sendto="EGS"
+          format="u32 u8 u8"
+          description="Set spawn zone of a training squad (outpostSHEET, slot, spawn_index)" />
+    <leaf name="INSERT_SQUAD"
+          sendto="EGS"
+          format="u32 u8"
+          description="Insert a (default) training squad BEFORE the slot (outpostSHEET, slot)" />
+    <leaf name="REMOVE_SQUAD"
+          sendto="EGS"
+          format="u32 u8"
+          description="Remove a training squad in a slot (outpostSHEET, slot)" />
+    <leaf name="SET_SQUAD_CAPITAL"
+          sendto="EGS"
+          format="u32 u32"
+          description="Set the War Capital of the outpost (outpostSHEET, money)" />
+    <!-- pvp and engagement -->
+    <leaf name="CHOOSE_SIDE"
+          description="participate or not in outpost, choose side if participate (b playerGuildInConflict, b playerGuildIsAttacker, u32 defNameId, u32 attNameId)" />
+    <leaf name="SIDE_CHOSEN"
+          sendto="EGS"
+          format="b u8"
+          description="user chooses to participate or not in outpost conflict and on which side" />
+    <leaf name="BANISH_PLAYER"
+          sendto="EGS"
+          format=""
+          description="user want to banish the player he's targeting" />
+    <leaf name="BANISH_GUILD"
+          sendto="EGS"
+          format=""
+          description="user want to banish the guild of the player he's targeting" />
+    <!-- buildings management -->
+    <leaf name="BUY_BUILDING"
+          sendto="EGS"
+          format="u8 u8 u8"
+          description="Buy a new building (version, outpostnb, line)" />
+    <leaf name="DESTROY_BUILDING"
+          sendto="EGS"
+          format="u8 u8 u8 u8"
+          description="Destroy a building (version, outpostnb, list, line)" />
+  </branch>
+  <!-- SBricks related message -->
+  <branch name="PHRASE">
+    <!-- if the dest known sentence is memorized on server (memorized or DefaultAction/NextAction) it should be unmemorized -->
+    <leaf name="DELETE"
+          sendto="EGS"
+          format="u16"
+          description="the client delete a Known phrase" />
+    <leaf name="LEARN" />
+    <!-- "the client learn a phrase, replacing old one" (phraseId $u16 / phraseDesc $CSPhraseCom)-->
+    <leaf name="MEMORIZE" />
+    <!-- "the client Memorize a known phrase (MemoryTypeId $u8/ MemorySlotId $u8/ PhraseId $u16/ Phrase Desc $CSPhraseCom)" -->
+    <leaf name="FORGET"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client forget a Memorized phrase (MemoryTypeId / MemorySlotId)" />
+    <leaf name="EXECUTE"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client execute a Memorized phrase (MemoryTypeId / MemorySlotId)" />
+    <leaf name="EXECUTE_CYCLIC"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client execute set a cyclic Memorized phrase (MemoryTypeId / MemorySlotId)" />
+    <leaf name="EXECUTE_FABER" />
+    <!-- FaberPlanSheetId u32/ MemoryTypeId u8/ MemorySlotId u8 / vector<CItemFaberMsg> listOfMpSelectedForFaber -->
+    <!-- Impulse ServerToClient -->
+    <leaf name="DOWNLOAD" />
+    <!-- the server upload all Known Phrases and All Memorized Phrases to the client: vector<CSPhraseSlot> / vector<CSPhraseMemorySlot> -->
+    <!-- BotChat -->
+    <leaf name="BUY"
+          sendto="EGS"
+          format="u8 u16"
+          description="the client buy a botChat phrase (indexInBotChat, phraseId)" />
+    <leaf name="CONFIRM_BUY" />
+    <!-- server To client: confirm the buy of phraseId (phraseId $u16 / ok $bool) -->
+    <leaf name="BUY_SHEET"
+          sendto="EGS"
+          format="u32 u16"
+          description="the client buy a botChat phrase (phrase SheetId, phraseId). Nb: can be a charac phrase" />
+    <!-- Link -->
+    <leaf name="CANCEL_LINK"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client cancel a link $link_id/$counter" />
+    <!-- Cancel phrases -->
+    <leaf name="CANCEL_TOP"
+          sendto="EGS"
+          format=""
+          description="the client cancel it's top phrase" />
+    <leaf name="CANCEL_ALL"
+          sendto="EGS"
+          format=""
+          description="the client cancel all its phrases" />
+    <leaf name="CRISTALIZE"
+          sendto="EGS"
+          format="u8 u8"
+          description="the client cristalize a Memorized phrase (MemoryTypeId / MemorySlotId)" />
+    <leaf name="EXEC_CYCLIC_ACK"
+          description="server send an ack on cyclic phrase execution :$b $u8" />
+    <leaf name="EXEC_NEXT_ACK"
+          description="server send an ack on 'next' phrase execution :$b $u8" />
+  </branch>
+  <branch name="ITEM_INFO">
+    <leaf name="GET"
+          sendto="EGS"
+          format="u16"
+          description="the client ask for a special item info in a inventory slot: inventoryId(u8HIGH)/slotId(u8LOW)" />
+    <leaf name="SET"
+          description="Server answer to the previous message. A CItemInfos class is filled" />
+    <leaf name="REFRESH_VERSION"
+          description="Like set but contains only the version, no info required" />
+  </branch>
+  <branch name="MISSION_PREREQ">
+    <leaf name="GET"
+          sendto="EGS"
+          format="u8"
+          description="the client ask for prerequisit infos: slotId" />
+    <leaf name="SET"
+          description="Server answer to the previous message. A CPrerequisitInfos class is filled" />
+  </branch>
+  <branch name="MISSION">
+    <leaf name="ENTER_CRITICAL"
+          sendto="EGS"
+          format="b"
+          description="client answer yes/no to enter request (bool)" />
+    <leaf name="ASK_ENTER_CRITICAL"
+          description="EGS ask player if he wants to enter a mission critical part, player must answer wihtin 1 minute" />
+    <leaf name="CLOSE_ENTER_CRITICAL"
+          description="EGS tell client to close the 'enter critical' proposal window" />
+    <leaf name="WAKE"
+          sendto="EGS"
+          format="u8"
+          description="client wakes up for mission $u8 (mission same as in database)" />
+    <leaf name="GROUP_WAKE"
+          sendto="EGS"
+          format="u8"
+          description="client wakes up for group mission $u8 (mission same as in database)" />
+  </branch>
+  <branch name="DUEL">
+    <leaf name="ASK"
+          sendto="EGS"
+          format=""
+          description="client wants to duel its target" />
+    <leaf name="ACCEPT"
+          sendto="EGS"
+          format=""
+          description="client accept a duel" />
+    <leaf name="REFUSE"
+          sendto="EGS"
+          format=""
+          description="client refuses a duel" />
+    <leaf name="ABANDON"
+          sendto="EGS"
+          format=""
+          description="client abandon a duel" />
+    <leaf name="INVITATION"
+          description="invitation sent to client (uint32 textId)" />
+    <leaf name="CANCEL_INVITATION"
+          description="cancel invitation popup (no param)" />
+  </branch>
+  <branch name="PVP_CHALLENGE">
+    <leaf name="ASK"
+          sendto="EGS"
+          format=""
+          description="client wants to duel its target" />
+    <leaf name="ACCEPT"
+          sendto="EGS"
+          format=""
+          description="client accept a duel" />
+    <leaf name="REFUSE"
+          sendto="EGS"
+          format=""
+          description="client refuses a duel" />
+    <leaf name="ABANDON"
+          sendto="EGS"
+          format=""
+          description="client abandon a duel" />
+    <leaf name="INVITATION"
+          description="invitation sent to client (uint32 textId)" />
+    <leaf name="CANCEL_INVITATION"
+          description="cancel invitation popup (no param)" />
+  </branch>
+  <!-- ****OUT OF DATE COMMANDS****
+<branch name="PVP_VERSUS">
+        <leaf name="CLAN"                                       sendto="EGS"    format="u8" description="player choose a clan for this pvp zone, u8 = clan number, 0 = neutral, 1 clan 1, 2 clan 2" />
+        <leaf name="CHOOSE_CLAN"                        description="server ask to client choose a clan for pvp versus area where character enter: EGSPD::CPeople::TPeople clan1, clan2" />
+</branch>
+-->
+  <branch name="PVP">
+    <leaf name="PVP_TAG"
+          sendto="EGS"
+          format="u8"
+          description="client want set PVP_TAG to TRUE or FALSE" />
+    <leaf name="SET_NEUTRAL_ALLEGIANCE"
+          sendto="EGS"
+          format="u8"
+          description="client want set allegiance to neutral from indetermined status (u8 = PVP_CLAN::TPVPClan (game_share/pvp_clan.h))" />
+    <leaf name="SET_NEUTRAL_ALLEGIANCE_GUILD"
+          sendto="EGS"
+          format="u8"
+          description="client want set allegiance to neutral from indetermined status for his GUILD (u8 = PVP_CLAN::TPVPClan (game_share/pvp_clan.h))" />
+  </branch>
+  <branch name="PVP_FACTION">
+    <leaf name="PUSH_FACTION_WAR"
+          format="u8 u8"
+          description="a new faction war starts" />
+    <leaf name="POP_FACTION_WAR"
+          format="u8 u8"
+          description="a faction ends" />
+    <leaf name="FACTION_WARS"
+          description="a faction ends" />
+  </branch>
+  <branch name="ENCYCLOPEDIA">
+    <leaf name="UPDATE"
+          description="server update the encyclopedia (see msg_encyclopedia.cpp in game_share for the message format)" />
+    <leaf name="INIT"
+          description="server sends the whole encyclopedia to the client" />
+  </branch>
+  <branch name="USER">
+    <leaf name="BARS"
+          format="u8 s16 s16 s16 s16"
+          description="server update the players Bars (fast message) $msgNumber $hp $sap $sta $focus" />
+    <leaf name="POPUP"
+          format="u32 u32"
+          description="server display an important info message on the client (u32 titleDynString u32 textDynString)" />
+  </branch>
+  <branch name="EVENT">
+    <leaf name="SET_ITEM_CUSTOM_TEXT"
+          sendto="EGS"
+          format="u32 u32 uc"
+          description="set the cursom of the item in inventory $inventory in slot $slot to $text" />
+    <leaf name="DUMMY"
+          description="stupid server....." />
+  </branch>
+  <branch name="TOTEM">
+    <leaf name="BUILD"
+          sendto="EGS"
+          format=""
+          description="client has built a totem" />
+    <leaf name="DUMMY"
+          description="stupid server....." />
+  </branch>
+  <branch name="MODULE_GATEWAY">
+    <leaf name="FEOPEN"
+          description="The fe gateway route is open" />
+    <leaf name="GATEWAY_MSG"
+          description="the fe module gateway transport send a message to the client transport peer" />
+    <leaf name="FECLOSE"
+          description="The fe gateway route is closed" />
+  </branch>
+  <branch name="SEASON">
+    <leaf name="SET" />
+    <leaf name="DUMMY"
+          description="stupid server....." />
+  </branch>
+  <branch name="DM_GIFT">
+    <leaf name="BEGIN"
+          sendto="EGS"
+          format="" />
+    <!-- signal the server that a dm gift is about to occur with the current target -->
+    <leaf name="VALIDATE"
+          sendto="EGS"
+          format="u32 u8 u32 u8 u32 u8 u32 u8 u32 u8 u32 u8 u32 u8 u32 u8" />
+    <!-- send 8 slots of the DM gift (u32 sheet, u8 quantity) -->
+  </branch>
+  <branch name="RING_MISSION">
+    <leaf name="MISSION_RING_SELECT"
+          sendto="EGS"
+          format="u32"
+          description="client choose an action in ring mission (u8 = actionId)" />
+    <leaf name="DSS_DOWN" />
+  </branch>
+  <branch name="NPC_ICON">
+    <leaf name="GET_DESC"
+          description="client to server request" />
+    <leaf name="SET_DESC"
+          description="server response" />
+    <leaf name="SVR_EVENT_MIS_AVL"
+          description="server had an event that might change mission availability" />
+    <leaf name="SET_TIMER"
+          description="server sets a new timer period" />
+  </branch>
+</client_messages_description>

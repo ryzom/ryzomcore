@@ -1,0 +1,1665 @@
+<database_description>
+  <!-- Define bank superclass -->
+  <bank_superclass>
+    <bank name="PLR"
+          class="CCDBSynchronised" />
+    <bank name="GUILD"
+          class="CCDBGroup"
+          dbAccessor=".Database">
+      <include file="game_share/far_position.h" />
+      <verbatime>inline void _setProp(CCDBSynchronised &amp;db,
+      ICDBStructNode *node, TCharConnectionState value, bool
+      forceSending = false) { db.x_setProp(node, uint64(value),
+      forceSending); } inline void _getProp(const CCDBSynchronised
+      &amp;db, ICDBStructNode *node, TCharConnectionState
+      &amp;value) { value =
+      (TCharConnectionState)db.x_getProp(node); }</verbatime>
+    </bank>
+    <bank name="OUTPOST"
+          class="CCDBGroup"
+          dbAccessor=".Database" />
+  </bank_superclass>
+  <!-- Bank must be set for all and only first-level branches -->
+  <!-- For the client to work, this branch MUST remain at the top -->
+  <branch name="Entities"
+          bank="PLR"
+          clientonly="1">
+    <branch name="E"
+            count="256">
+      <leaf name="P"
+            count="28"
+            type="I64" />
+    </branch>
+  </branch>
+  <branch name="GameTime"
+          bank="PLR">
+    <leaf name="Hours"
+          type="I16" />
+  </branch>
+  <branch name="INTERFACES"
+          bank="PLR">
+    <leaf name="FLAGS"
+          type="I64" />
+    <leaf name="NB_BONUS_LANDMARKS"
+          type="I16" />
+  </branch>
+  <branch name="USER"
+          bank="PLR"
+          atom="1">
+    <leaf name="HAIR_TYPE"
+          type="I8" />
+    <leaf name="HAIR_COLOR"
+          type="I3" />
+    <leaf name="DEATH_XP_MALUS"
+          type="I8" />
+    <leaf name="IN_DUEL"
+          type="I1" />
+    <leaf name="IN_PVP_CHALLENGE"
+          type="I1" />
+    <leaf name="MOUNT_WALK_SPEED"
+          type="I16" />
+    <leaf name="MOUNT_RUN_SPEED"
+          type="I16" />
+    <leaf name="TEAM_MEMBER"
+          type="I1" />
+    <leaf name="TEAM_LEADER"
+          type="I1" />
+    <leaf name="OUTPOST_ADMIN"
+          type="I1" />
+    <leaf name="BERSERK"
+          type="I1" />
+    <leaf name="ACT_TSTART"
+          type="I32" />
+    <leaf name="ACT_TEND"
+          type="I32" />
+    <leaf name="ACT_TYPE"
+          type="I4" />
+    <leaf name="ACT_NUMBER"
+          type="I8" />
+    <leaf name="ACT_REFUSED_NUM"
+          type="I8" />
+    <leaf name="ACT_CANCELED_NUM"
+          type="I8" />
+    <leaf name="SPEED_FACTOR"
+          type="I8" />
+    <leaf name="SKILL_POINTS"
+          type="I32" />
+    <branch name="SKILL_POINTS_"
+            count="4">
+      <leaf name="VALUE"
+            type="I32" />
+    </branch>
+    <branch name="FACTION_POINTS_"
+            count="6">
+      <!-- game_share/pvp_clan.h (0 is BeginClans and size is EndClans-BeginClans+1 -->
+      <leaf name="VALUE"
+            type="I32" />
+    </branch>
+    <leaf name="IS_NEWBIE"
+          type="I1" />
+    <leaf name="IS_TRIAL"
+          type="I1" />
+    <branch name="RRPS_LEVELS"
+            count="6">
+      <leaf name="VALUE"
+            type="I32" />
+    </branch>
+    <branch name="NPC_CONTROL"
+            bank="PLR">
+      <leaf name="SHEET"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <leaf name="RUN"
+            type="I32" />
+      <leaf name="WALK"
+            type="I32" />
+    </branch>
+    <leaf name="DEFAULT_WEIGHT_HANDS"
+          type="I32" />
+    <leaf name="IS_INVISIBLE"
+          type="I1" />
+    <!-- Syncrhonisation COUNTER. must be at END of an atomic branch -->
+    <leaf name="COUNTER"
+          type="I4" />
+  </branch>
+  <branch name="DEFENSE"
+          bank="PLR">
+    <leaf name="DEFENSE_MODE"
+          type="I1" />
+    <!-- 0 = dodge, 1 = parry-->
+    <leaf name="PROTECTED_SLOT"
+          type="I3" />
+    <!-- 0=All, 1=head, 2=chest, 3=arms, 4=hands, 5=legs, 6=feet-->
+    <branch name="SLOTS">
+      <branch name=""
+              count="6">
+        <!-- 0=head, 1=chest, 2=arms, 3=hands, 4=legs, 5=feet-->
+        <leaf name="MODIFIER"
+              type="S8" />
+        <!-- modifier on defense (dodge or parry) on given slot (+-127)-->
+      </branch>
+    </branch>
+  </branch>
+  <branch name="FLAGS"
+          bank="PLR"
+          atom="1">
+
+    <branch name="BRICK_TICK_RANGE">
+      <!-- tick range for each power -->
+      <branch name=""
+              count="64">
+        <leaf name="TICK_RANGE"
+              type="I64" />
+        <!-- 32b for start tick and 32b for end tick -->
+      </branch>
+    </branch>
+
+    <leaf name="CRITICAL"
+          type="I8" />
+    <!-- counter to display flying texts : critical hit -->
+    <leaf name="PARRY"
+          type="I8" />
+    <!-- counter to display flying texts : parry -->
+    <leaf name="DODGE"
+          type="I8" />
+    <!-- counter to display flying texts : dodge -->
+  </branch>
+  <branch name="TARGET"
+          bank="PLR">
+    <!-- Don't put the whole TARGET branch atomic, because it will takes 34 extra bits each time a bar value change -->
+    <branch name="BARS"
+            atom="1">
+      <!-- Entity Unique Identifier. Put in the atomic branch for consistency -->
+      <!-- NB a UID invalid doesn't mean no target. It may be a Forage source -->
+      <leaf name="UID"
+            type="I20" />
+      <leaf name="HP"
+            type="S8" />
+      <leaf name="SAP"
+            type="I7" />
+      <leaf name="STA"
+            type="I7" />
+      <leaf name="FOCUS"
+            type="I7" />
+      <leaf name="PLAYER_LEVEL"
+            type="I8" />
+      <!-- for target players only (PVP) -->
+    </branch>
+    <!-- ContextMenu (Bot options etc...) -->
+    <branch name="CONTEXT_MENU"
+            atom="1">
+      <leaf name="PROGRAMMES"
+            type="I32" />
+      <!-- options for missions in the context menu -->
+      <branch name="MISSIONS_OPTIONS">
+        <branch name=""
+                count="8">
+          <leaf name="TITLE"
+                type="I32" />
+          <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
+          <leaf name="PLAYER_GIFT_NEEDED"
+                type="I1" />
+          <!-- want a player gift ? -->
+          <leaf name="PRIORITY"
+                type="I2" />
+          <!-- priority of the option : the higher it is, the higher the option will be displayed in the menu -->
+        </branch>
+      </branch>
+      <!-- A NPC may offer to view a webpage -->
+      <leaf name="WEB_PAGE_TITLE"
+            type="I32" />
+      <!-- a text ID of 0 means there's no WebPage -->
+      <leaf name="WEB_PAGE_URL"
+            type="I32" />
+      <!-- the URL text ID of the web page -->
+      <leaf name="OUTPOST"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <!-- outpost this bot give access to (sheet id inside) -->
+      <!-- Mission rings -->
+      <branch name="MISSION_RING">
+        <branch name=""
+                count="4">
+          <leaf name="TITLE"
+                type="I32" />
+          <!-- a text ID of 0 means there's no action. Text ID are reseted when a new character is targeted -->
+          <leaf name="ID"
+                type="I32" />
+          <!-- the id of the action if selected -->
+        </branch>
+      </branch>
+      <!-- Syncrhonisation COUNTER. must be at END of an atomic branch -->
+      <leaf name="COUNTER"
+            type="I4" />
+    </branch>
+    <leaf name="CONTEXT_VAL"
+          type="I16" />
+    <leaf name="AGGRESSIVE"
+          type="I3" />
+    <leaf name="FORCE_RATIO"
+          type="I4" />
+    <!-- TODO: remove this, use ForceRegion/ForceLevel in client creature sheets instead -->
+  </branch>
+  <branch name="GROUP"
+          bank="PLR">
+    <branch name=""
+            count="8"
+            atom="1">
+      <!-- Atomic, for correct Bar Management on client -->
+      <leaf name="PRESENT"
+            type="I1" />
+      <leaf name="UID"
+            type="I20" />
+      <!-- Entity Unique Identifier -->
+      <leaf name="NAME"
+            type="I32" />
+      <leaf name="HP"
+            type="S8" />
+      <leaf name="SAP"
+            type="I7" />
+      <leaf name="STA"
+            type="I7" />
+      <leaf name="POS"
+            type="I64" />
+    </branch>
+    <leaf name="LEADER_INDEX"
+          type="I4" />
+    <leaf name="SUCCESSOR_INDEX"
+          type="I4" />
+    <branch name="MISSIONS"
+            bank="PLR">
+      <branch name=""
+              count="15">
+        <!-- see game_share/mission_desc.h TMissionType -->
+        <leaf name="TYPE"
+              type="I2" />
+        <leaf name="ICON"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <!-- sheet id of a .mission_icon sheet -->
+        <leaf name="TITLE"
+              type="I32" />
+        <leaf name="DETAIL_TEXT"
+              type="I32" />
+        <!-- begin date in tick -->
+        <leaf name="BEGIN_DATE"
+              type="I32" />
+        <!-- end date in tick -->
+        <leaf name="END_DATE"
+              type="I32" />
+        <!-- true if the step are "OR" -->
+        <leaf name="OR_STEPS"
+              type="I1" />
+        <branch name="GOALS">
+          <branch name=""
+                  count="20">
+            <leaf name="TEXT"
+                  type="I32" />
+            <leaf name="NPC_ALIAS"
+                  type="I32" />
+          </branch>
+        </branch>
+        <!-- Targets -->
+        <branch name="TARGET"
+                count="8"
+                atom="1">
+          <leaf name="TITLE"
+                type="I32" />
+          <leaf name="X"
+                type="I32" />
+          <leaf name="Y"
+                type="I32" />
+        </branch>
+        <!-- Indicate if the mission is finished (0-not 1-success 2-failed) -->
+        <leaf name="FINISHED"
+              type="I2" />
+        <!-- Indicate if the mission is abandonnable -->
+        <leaf name="ABANDONNABLE"
+              type="I1" />
+        <!-- Indicate if the mission is paused (player set as 'sleeping' in a queue) -->
+        <leaf name="SLEEP"
+              type="I1" />
+        <!-- Historic -->
+        <branch name="HISTO">
+          <branch name=""
+                  count="30">
+            <leaf name="TEXT"
+                  type="I32" />
+          </branch>
+        </branch>
+      </branch>
+    </branch>
+  </branch>
+  <!-- Common Item Data : For correct HELP, all items must have this structure:
+                <leaf name="SHEET"                      type="I32"/>
+                <leaf name="QUALITY"            type="I10"/>
+                <leaf name="QUANTITY"           type="I10"/>
+                <leaf name="USER_COLOR"         type="I3"/>
+                <leaf name="LOCKED"                     type="I10"/>
+                <leaf name="WEIGHT"                     type="I16"/>
+                <leaf name="NAMEID"                     type="I32"/>
+                <leaf name="INFO_VERSION"       type="I8"/>
+                <leaf name="ENCHANT"            type="I10"/>
+                <leaf name="RM_CLASS_TYPE"              type="I3"/> RM_CLASS_TYPE enum
+                <leaf name="RM_FABER_STAT_TYPE" type="I5"/> RM_FABER_STAT_TYPE enum
+                <leaf name="PREREQUISIT_VALID"  type="I11"/>
+        -->
+  <!-- gift from animator (dm) to player -->
+  <branch name="DM_GIFT"
+          bank="PLR">
+    <leaf name="TEXT"
+          type="I32" />
+    <!-- caption of the gift window -->
+  </branch>
+  <!-- player trade & gift to bot -->
+  <branch name="EXCHANGE"
+          bank="PLR">
+    <leaf name="TEXT"
+          type="I32" />
+    <leaf name="ID"
+          type="I8" />
+    <leaf name="BEGUN"
+          type="I1" />
+    <leaf name="ACCEPTED"
+          type="I1" />
+    <leaf name="MONEY"
+          type="I64" />
+    <branch name="GIVE">
+      <branch name=""
+              count="8">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE -->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <branch name="RECEIVE">
+      <branch name=""
+              count="8">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <leaf name="FORCE_REFUSE"
+          type="I4" />
+    <!-- Syncrhonisation COUNTER. Should be at END of an atomic branch!!! but still works fine -->
+    <leaf name="COUNTER"
+          type="I4" />
+  </branch>
+  <branch name="INVENTORY"
+          bank="PLR">
+    <branch name="HAND">
+      <branch name=""
+              count="2">
+        <!-- 0 Right 1 Left -->
+        <leaf name="INDEX_IN_BAG"
+              type="I9" />
+        <!-- 0 nothing 1-500 index in bag from 0 to 499 -->
+      </branch>
+    </branch>
+    <branch name="BAG"
+            clientonly="1">
+      <branch name=""
+              count="500">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <leaf name="PRICE"
+              type="I32" />
+        <leaf name="RESALE_FLAG"
+              type="I2" />
+        <!-- TBotChatResaleFlag -->
+        <leaf name="WORNED"
+              type="I1" />
+        <!-- true if item is worned (show a red cross) -->
+      </branch>
+    </branch>
+    <!-- MAX_INVENTORY_ANIMAL -->
+    <branch name="PACK_ANIMAL"
+            count="4"
+            clientonly="1">
+      <branch name=""
+              count="500">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <leaf name="PRICE"
+              type="I32" />
+        <leaf name="RESALE_FLAG"
+              type="I2" />
+        <!-- TBotChatResaleFlag -->
+      </branch>
+    </branch>
+    <branch name="EQUIP">
+      <!-- jewelry + armor -->
+      <branch name=""
+              count="19">
+        <leaf name="INDEX_IN_BAG"
+              type="I9" />
+        <!-- same as hand -->
+      </branch>
+    </branch>
+    <branch name="TEMP">
+      <!-- used for harvest loot and bag full -->
+      <leaf name="TYPE"
+            type="I8" />
+      <!-- Type of temp inv see temp_inventory_mode in game_share -->
+      <branch name=""
+              count="16">
+        <!-- client/inventory_manager.h MAX_TEMPINV_ENTRIES and egs/player_inv_temp.h TempInvSize -->
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I12" />
+        <!-- for forage progress, max QL409 x10 -->
+        <leaf name="QUANTITY"
+              type="I12" />
+        <!-- for forage progress, max x409 x10 -->
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <!-- No LOCKED state -->
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+      <leaf name="ENABLE_TAKE"
+            type="I1" />
+      <!-- Used only in forage -->
+    </branch>
+    <!-- used to share items between team members (up to 8 players) 
+                        DO NOT FORGET if you modify this to do the the same modification in local database file -->
+    <branch name="SHARE">
+      <leaf name="SESSION"
+            type="I8" />
+      <!-- session id -->
+      <branch name=""
+              count="16">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+        <!-- Additionnal info -->
+        <leaf name="NB_MEMBER"
+              type="I4" />
+        <!-- Number of team member who wants this item or phrase -->
+        <leaf name="WANTED"
+              type="I1" />
+        <!-- Does the player wants this item or phrase ? -->
+        <leaf name="CHANCE"
+              type="I7" />
+        <!-- Chance in percentage the player has to obtain this item -->
+      </branch>
+      <branch name="TM_"
+              count="8">
+        <!-- all the team members -->
+        <leaf name="NAME"
+              type="TEXT" />
+        <leaf name="VALID"
+              type="I1" />
+        <!-- is the team member has validated its own selection ? -->
+      </branch>
+    </branch>
+    <branch name="ROOM">
+      <leaf name="SESSION"
+            type="I16" />
+      <leaf name="BULK_MAX"
+            type="I32" />
+      <leaf name="MONEY"
+            type="I64" />
+      <branch name=""
+              count="1000"
+              clientonly="1">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <leaf name="MONEY"
+          type="I64" />
+    <!-- Synchronisation COUNTER. Should be at END of an atomic branch!!! but still works fine without atomic -->
+    <leaf name="COUNTER"
+          type="I4" />
+  </branch>
+  <branch name="MODIFIERS"
+          bank="PLR">
+    <leaf name="TOTAL_MALUS_EQUIP"
+          type="I8" />
+    <!-- This is the malus ratio*50 (ie percentage/2) -->
+    <branch name="BONUS">
+      <branch name=""
+              count="12">
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="DISABLED"
+              type="I1" />
+        <leaf name="DISABLED_TIME"
+              type="I32" />
+      </branch>
+    </branch>
+    <branch name="MALUS">
+      <branch name=""
+              count="12">
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="DISABLED"
+              type="I1" />
+        <leaf name="DISABLED_TIME"
+              type="I32" />
+      </branch>
+    </branch>
+  </branch>
+  <branch name="DISABLE_CONSUMABLE"
+          bank="PLR">
+    <branch name=""
+            count="12">
+      <leaf name="FAMILY"
+            type="I16" />
+      <!-- Disable consumablel family -->
+      <leaf name="DISABLE_TIME"
+            type="I32" />
+      <!-- End date of diable time in tick -->
+    </branch>
+  </branch>
+  <!-- botchat texts -->
+  <branch name="BOTCHAT"
+          bank="PLR">
+    <!-- intro for player gift -->
+    <leaf name="PLAYER_GIFT"
+          type="I32" />
+    <!-- intro for guild creation -->
+    <leaf name="CREATE_GUILD"
+          type="I32" />
+    <!-- intro for trade window (pacts, action, item, or skills ..)-->
+    <leaf name="TRADE"
+          type="I32" />
+    <!-- intro for choose mission -->
+    <leaf name="CHOOSE_MISSION"
+          type="I32" />
+    <!-- intro before the reward of the mission -->
+    <!-- <leaf name="MISSION_END_REWARD" type="I32"/> -->
+    <!-- text of the mission end -->
+    <!-- <leaf name="MISSION_END" type="I32"/> -->
+    <!-- news for current bot -->
+    <!-- <leaf name="NEWS" type="I32"/> -->
+    <!-- choice dynamic missions -->
+    <branch name="DM_CHOICE"
+            count="3">
+      <leaf name="TITLE"
+            type="I32" />
+      <branch name=""
+              count="8">
+        <leaf name="TEXT"
+              type="I32" />
+      </branch>
+    </branch>
+    <!-- title of dynamic mission -->
+    <leaf name="DM_TITLE"
+          type="I32" />
+    <!-- description of dynamic mission -->
+    <leaf name="DM_DESCRIPTION"
+          type="I32" />
+    <!-- the rolemaster type on 2 bits -->
+    <leaf name="ROLEMASTER_TYPE"
+          type="I2" />
+  </branch>
+  <!-- Temporary structure to fill the huge list of guild to choose from in an ascensor -->
+  <branch name="ASCENSOR"
+          bank="PLR"
+          atom="1">
+    <leaf name="SESSION"
+          type="I16" />
+    <leaf name="PAGE_ID"
+          type="I6" />
+    <!-- current page ID -->
+    <leaf name="HAS_NEXT"
+          type="I1" />
+    <!-- are there pages left ? -->
+    <branch name=""
+            count="8">
+      <!-- 
+                        if high order bit == 0 : guild icon : 58 low order bits - back:3 bits, symbol:6 bits, Invert:1 bit, color1&2:24 bits each 
+                        if high order bit == 1 : low order bits = entry in the LIFT_ICONS::TLiftIcon enum
+                        -->
+      <leaf name="ICON"
+            type="I64" />
+      <leaf name="NAME"
+            type="I32" />
+    </branch>
+  </branch>
+  <branch name="CHOOSE_MISSIONS"
+          bank="PLR"
+          atom="1">
+    <leaf name="SESSION"
+          type="I16" />
+    <leaf name="PAGE_ID"
+          type="I6" />
+    <!-- current page ID -->
+    <leaf name="HAS_NEXT"
+          type="I1" />
+    <!-- are there pages left ? -->
+    <branch name=""
+            count="8">
+      <leaf name="ICON"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <!-- sheet id of a .mission_icon sheet -->
+      <leaf name="TEXT"
+            type="I32" />
+      <leaf name="DETAIL_TEXT"
+            type="I32" />
+      <leaf name="PREREQ_STATE"
+            type="I8" />
+      <!-- game_share/mission_desc.h/TPreReqState -->
+    </branch>
+  </branch>
+  <branch name="TRADING"
+          bank="PLR"
+          atom="1">
+    <leaf name="SESSION"
+          type="I16" />
+    <!-- current botchat session ID -->
+    <leaf name="PAGE_ID"
+          type="I7" />
+    <!-- current page ID -->
+    <leaf name="HAS_NEXT"
+          type="I1" />
+    <!-- are there pages left ? -->
+    <leaf name="ROLEMASTER_FLAGS"
+          type="I6" />
+    <!-- flags used to determine actions 'offered' by the rolemaster -->
+    <leaf name="ROLEMASTER_RACE"
+          type="I2" />
+    <!-- civ of actions offered by the rolemaster (0..3) -->
+    <leaf name="BUILDING_LOSS_WARNING"
+          type="I1" />
+    <!-- set if a warning saying "you're going to lose your old building" must be displayed -->
+    <leaf name="RAW_MATERIAL_SELLER"
+          type="I1" />
+    <!-- flag set to 1 for raw materials seller for setting appropriate filters -->
+    <leaf name="ITEM_TYPE_SELLER_BITFILED_0_63"
+          type="I64" />
+    <!-- bitfield define item type sell by bot, first 64 bits, cf TItemType -->
+    <leaf name="ITEM_TYPE_SELLER_BITFILED_64_127"
+          type="I64" />
+    <!-- bitfield define item type sell by bot, next 64 bits, cf TItemType -->
+    <leaf name="FAME_PRICE_FACTOR"
+          type="I16" />
+    <!-- 10000*factor to apply on item price, so if this value = 10000, factor is 1.0 -->
+    <branch name=""
+            count="8">
+      <!-- Common Item Data -->
+      <leaf name="SHEET"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <leaf name="QUALITY"
+            type="I10" />
+      <leaf name="QUANTITY"
+            type="I10" />
+      <!-- No LOCKED state -->
+      <leaf name="USER_COLOR"
+            type="I3" />
+      <leaf name="WEIGHT"
+            type="I16" />
+      <!-- weight. see DB_WEIGHT_SCALE-->
+      <leaf name="NAMEID"
+            type="I32" />
+      <!-- 0 or special name of item -->
+      <leaf name="INFO_VERSION"
+            type="I8" />
+      <leaf name="ENCHANT"
+            type="I10" />
+      <leaf name="RM_CLASS_TYPE"
+            type="I3" />
+      <leaf name="RM_FABER_STAT_TYPE"
+            type="I6" />
+      <leaf name="PREREQUISIT_VALID"
+            type="I1" />
+      <!-- Muti currency info -->
+      <leaf name="CURRENCY"
+            type="I4" />
+      <!-- The currency type RYMSG::TTradeCurrency -->
+      <leaf name="RRP_LEVEL"
+            type="I4" />
+      <!-- For rrp curency, specify the rrp level -->
+      <leaf name="MONEY_SHEET"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <!-- For item curency, specify the item sheet -->
+      <leaf name="BASE_SKILL"
+            type="I4" />
+      <!-- For skill curency, specify the base skill as in EGSPD::CSPType::TSPType -->
+      <leaf name="FACTION_TYPE"
+            type="I4" />
+      <!-- For price in faction point, as in game_share/pvp_clan.h -->
+      <leaf name="PRICE"
+            type="I32" />
+      <!-- The amount of the selected currency (dappers, number of item...) -->
+      <!-- Special Trade -->
+      <leaf name="PRICE_RETIRE"
+            type="I32" />
+      <leaf name="RESALE_TIME_LEFT"
+            type="I16" />
+      <leaf name="VENDOR_NAMEID"
+            type="TEXT" />
+      <!-- name id of player vendor -->
+      <leaf name="FACTION_POINT_PRICE"
+            type="I32" />
+      <!-- 0 for standard behaviour -->
+      <!-- 1 if the sheet id is the one of an item, and if we got a plan for that item in the slot -->
+      <!-- 2 if the slot is for a skill. In this case the sheet ID must be interpreted as an enum for that skill -->
+      <!-- These values are defined as an enum in game_share/trade_slot_type.h -->
+      <leaf name="SLOT_TYPE"
+            type="I2" />
+      <!-- see TBotChatSellerType -->
+      <leaf name="SELLER_TYPE"
+            type="I3" />
+    </branch>
+  </branch>
+  <branch name="BRICK_FAMILY"
+          bank="PLR">
+    <branch name=""
+            count="1024">
+      <leaf name="BRICKS"
+            type="I64" />
+    </branch>
+  </branch>
+  <branch name="FABER_PLANS"
+          bank="PLR">
+    <branch name=""
+            count="64">
+      <leaf name="KNOWN"
+            type="I64" />
+    </branch>
+  </branch>
+  <branch name="MISSIONS"
+          bank="PLR">
+    <branch name=""
+            count="15">
+      <!-- see game_share/mission_desc.h TMissionType -->
+      <leaf name="TYPE"
+            type="I2" />
+      <leaf name="ICON"
+            type="I32"
+            cppType="NLMISC::CSheetId" />
+      <!-- sheet id of a .mission_icon sheet -->
+      <leaf name="TITLE"
+            type="I32" />
+      <leaf name="DETAIL_TEXT"
+            type="I32" />
+      <!-- begin date in tick -->
+      <leaf name="BEGIN_DATE"
+            type="I32" />
+      <!-- end date in tick -->
+      <leaf name="END_DATE"
+            type="I32" />
+      <!-- true if the step are "OR" -->
+      <leaf name="OR_STEPS"
+            type="I1" />
+      <branch name="GOALS">
+        <branch name=""
+                count="20">
+          <leaf name="TEXT"
+                type="I32" />
+          <leaf name="NPC_ALIAS"
+                type="I32" />
+        </branch>
+      </branch>
+      <!-- Targets -->
+      <branch name="TARGET"
+              count="8"
+              atom="1">
+        <leaf name="TITLE"
+              type="I32" />
+        <leaf name="X"
+              type="I32" />
+        <leaf name="Y"
+              type="I32" />
+      </branch>
+      <!-- Indicate if the mission is finished (0-not 1-success 2-failed) -->
+      <leaf name="FINISHED"
+            type="I2" />
+      <!-- Indicate if the mission is abandonnable -->
+      <leaf name="ABANDONNABLE"
+            type="I1" />
+      <!-- Indicate if the mission is paused (player set as 'sleeping' in a queue) -->
+      <leaf name="SLEEP"
+            type="I1" />
+      <!-- Historic -->
+      <branch name="HISTO">
+        <branch name=""
+                count="30">
+          <leaf name="TEXT"
+                type="I32" />
+        </branch>
+      </branch>
+    </branch>
+  </branch>
+  <branch name="EXECUTE_PHRASE"
+          bank="PLR"
+          atom="1">
+    <!-- The index of the phrase in the spell book that is being executed right now -->
+    <leaf name="PHRASE"
+          type="I16" />
+    <!-- If not a phrase in the speel book, give the associated brick sheet id -->
+    <leaf name="SHEET"
+          type="I32"
+          cppType="NLMISC::CSheetId" />
+    <!-- When the NEXT_COUNTER reach the one on client, reset -->
+    <leaf name="NEXT_COUNTER"
+          type="I8" />
+    <!-- When the CYCLE_COUNTER reach the one on client, reset -->
+    <leaf name="CYCLE_COUNTER"
+          type="I8" />
+    <!-- LINKS -->
+    <branch name="LINK">
+      <branch name=""
+              count="10"
+              atom="1">
+        <!-- The Phrase Id -->
+        <leaf name="PHRASE"
+              type="I16" />
+        <leaf name="COUNTER"
+              type="I4" />
+        <!-- The cost each second -->
+        <leaf name="HP_COST"
+              type="I16" />
+        <leaf name="SAP_COST"
+              type="I16" />
+        <leaf name="STA_COST"
+              type="I16" />
+        <!-- Entity name -->
+        <leaf name="TARGET_NAME"
+              type="TEXT" />
+        <!-- Entity State -->
+        <leaf name="TARGET_HP"
+              type="I7" />
+        <leaf name="TARGET_SAP"
+              type="I7" />
+        <leaf name="TARGET_STA"
+              type="I7" />
+      </branch>
+    </branch>
+  </branch>
+  <branch name="GUILD"
+          bank="GUILD">
+    <leaf name="COUNTER"
+          type="I8" />
+    <leaf name="PROXY"
+          type="I1" />
+    <!-- Flat to indicate that the guild is 'proxified' from another EGS -->
+    <leaf name="NAME"
+          type="TEXT" />
+    <!-- Name of the guild the local player belongs to -->
+    <leaf name="DESCRIPTION"
+          type="TEXT" />
+    <!-- Description of the guild -->
+    <leaf name="ICON"
+          type="I64" />
+    <!-- Icon of the guild (look at guild_manager) -->
+    <leaf name="XP"
+          type="I32" />
+    <!-- Experience of the guild -->
+    <leaf name="CHARGE_POINTS"
+          type="I32" />
+    <!-- charge points of the guild -->
+    <leaf name="VILLAGE"
+          type="TEXT" />
+    <!-- village text id -->
+    <leaf name="PEOPLE"
+          type="I8" />
+    <!-- people affiliated with the guild-->
+    <leaf name="CREATION_DATE"
+          type="I32" />
+    <!-- creation date of the guild in ticks -->
+    <branch name="FAME">
+      <leaf name="CULT_ALLEGIANCE"
+            type="I3" />
+      <!-- Guild cult allegiance (CF TPVPClan enum (pvp_clan.h) -->
+      <leaf name="CIV_ALLEGIANCE"
+            type="I3" />
+      <!-- Guild civilization allegiance (CF TPVPClan enum (pvp_clan.h) -->
+      <branch name=""
+              count="6">
+        <!-- from fame.h & cpp -->
+        <leaf name="VALUE"
+              type="S8" />
+        <!-- current value -->
+        <leaf name="THRESHOLD"
+              type="S8" />
+        <!-- max threshold -->
+        <leaf name="TREND"
+              type="I8" />
+        <!-- Fame trend, (CF see fame_pd.h TFameTrend ) -->
+      </branch>
+    </branch>
+    <branch name="MEMBERS">
+      <!-- Guild Members -->
+      <branch name=""
+              count="256">
+        <leaf name="NAME"
+              type="TEXT" />
+        <!-- player name -->
+        <leaf name="GRADE"
+              type="I3" />
+        <!-- player grade-->
+        <leaf name="ONLINE"
+              type="I2"
+              cppType="TCharConnectionState" />
+        <!-- enum TCharConnectionState -->
+        <leaf name="ENTER_DATE"
+              type="I32" />
+        <!-- tick when player entered the guild-->
+      </branch>
+    </branch>
+    <branch name="INVENTORY">
+      <leaf name="SESSION"
+            type="I16" />
+      <leaf name="BULK_MAX"
+            type="I32" />
+      <leaf name="MONEY"
+            type="I64" />
+      <branch name=""
+              count="1000"
+              clientonly="1">
+        <!-- Common Item Data -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="QUALITY"
+              type="I10" />
+        <leaf name="QUANTITY"
+              type="I10" />
+        <leaf name="USER_COLOR"
+              type="I3" />
+        <leaf name="LOCKED"
+              type="I10" />
+        <leaf name="WEIGHT"
+              type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
+        <leaf name="NAMEID"
+              type="I32" />
+        <!-- 0 or special name of item -->
+        <leaf name="INFO_VERSION"
+              type="I8" />
+        <leaf name="ENCHANT"
+              type="I10" />
+        <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
+        <leaf name="RM_CLASS_TYPE"
+              type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE"
+              type="I6" />
+        <leaf name="PREREQUISIT_VALID"
+              type="I1" />
+      </branch>
+    </branch>
+    <branch name="OUTPOST">
+      <!-- true if this guild can cancel an outpost -->
+      <leaf name="CANDEL"
+            type="I1" />
+      <!-- outpost owned/challenged by the guild -->
+      <branch name="O"
+              count="16">
+        <!-- Outpost Ownage -->
+        <leaf name="OWNED"
+              type="I1" />
+        <!-- 1 if the outpost is owned by the guild, 0 if it is challenged -->
+        <!-- Outpost Desc/State -->
+        <leaf name="SHEET"
+              type="I32"
+              cppType="NLMISC::CSheetId" />
+        <leaf name="LEVEL"
+              type="I8" />
+        <!-- Outpost Level: 50, 100, 150 .... -->
+        <branch name="GUILD">
+          <leaf name="NAME"
+                type="TEXT" />
+          <!-- Name of the guild the outpost belongs to (or name of tribe) -->
+          <leaf name="ICON"
+                type="I64" />
+          <!-- Icon of the guild the outpost belongs to -->
+          <leaf name="TRIBE"
+                type="I1" />
+          <!-- True if the outpost is owned by a Tribe -->
+          <leaf name="NAME_ATT"
+                type="TEXT" />
+          <!-- Name of the guild that attacks the outpost. 0 if none -->
+        </branch>
+        <leaf name="STATUS"
+              type="I4" />
+        <!-- Outpost Status: OUTPOSTENUMS::TOutpostState -->
+        <leaf name="STATE_END_DATE"
+              type="I32" />
+        <!-- Server tick of the end of state -->
+        <leaf name="DISPLAY_CRASH"
+              type="I1" />
+        <!-- A crash has happened in the last war. Inform users -->
+        <leaf name="WARCOST"
+              type="I32" />
+        <!-- Dappers needed to declare war to this outpost -->
+        <!-- Round State -->
+        <leaf name="ROUND_LVL_THRESHOLD"
+              type="I8" />
+        <!-- The minimal threshold attack must exceed -->
+        <leaf name="ROUND_LVL_MAX_ATT"
+              type="I8" />
+        <!-- The max round level reached by attackers -->
+        <leaf name="ROUND_LVL_MAX_DEF"
+              type="I8" />
+        <!-- The max round level reached by defenders -->
+        <leaf name="ROUND_LVL_CUR"
+              type="I8" />
+        <!-- The current round level -->
+        <leaf name="ROUND_ID_CUR"
+              type="I8" />
+        <!-- The current round number -->
+        <leaf name="ROUND_ID_MAX"
+              type="I8" />
+        <!-- The max round in an attack/defense period -->
+        <!-- Time Setup -->
+        <leaf name="TIME_RANGE_DEF_WANTED"
+              type="I5" />
+        <!-- The start hour at wich the defender want to defend (0-24) -->
+        <leaf name="TIME_RANGE_DEF"
+              type="I32" />
+        <!-- The start time at wich the defender WILL defend (in sec from 1970, GMT) -->
+        <leaf name="TIME_RANGE_ATT"
+              type="I32" />
+        <!-- The start time at wich the attacker WILL attack (in sec from 1970, GMT) -->
+        <leaf name="TIME_RANGE_LENGTH"
+              type="I16" />
+        <!-- (In minutes). the length of an attack/defend period (120 for instance) -->
+        <!-- Squads -->
+        <branch name="SQUAD_SPAWN_ZONE">
+          <!-- list of zones where squads can be spawned -->
+          <branch name=""
+                  count="16">
+            <leaf name="X"
+                  type="S32" />
+            <leaf name="Y"
+                  type="S32" />
+          </branch>
+        </branch>
+        <branch name="SQUAD_SHOP">
+          <!-- list of squad that we can buy -->
+          <branch name=""
+                  count="16">
+            <leaf name="SHEET"
+                  type="I32"
+                  cppType="NLMISC::CSheetId" />
+          </branch>
+        </branch>
+        <branch name="SQUADS">
+          <!-- Squad -->
+          <!-- 24 max squads: The First 12th are the squads that spawn at start 
+                                                The second 12th are the one that spawn after
+                                        -->
+          <branch name="SP"
+                  count="24">
+            <!-- Spawned -->
+            <leaf name="SHEET"
+                  type="I32"
+                  cppType="NLMISC::CSheetId" />
+          </branch>
+          <branch name="T"
+                  count="24">
+            <!-- Training -->
+            <leaf name="SHEET"
+                  type="I32"
+                  cppType="NLMISC::CSheetId" />
+            <leaf name="SPAWN"
+                  type="I4" />
+            <!-- Index in SQUAD_SPAWN_ZONE list -->
+          </branch>
+        </branch>
+        <leaf name="SQUAD_CAPITAL"
+              type="I32" />
+        <!-- Money that can be spent by the guild -->
+        <!-- Buildings -->
+        <branch name="BUILDINGS">
+          <!-- list of buildings on the outpost -->
+          <branch name=""
+                  count="4">
+            <leaf name="SHEET"
+                  type="I32"
+                  cppType="NLMISC::CSheetId" />
+          </branch>
+        </branch>
+      </branch>
+    </branch>
+  </branch>
+  <!-- The outpost selected by the user on a NPC -->
+  <branch name="OUTPOST_SELECTED"
+          bank="OUTPOST"
+          atom="1">
+    <!-- System: Use atom="1" to be sure data are relevant for the player (SHEET and other data are sync). -->
+    <!-- Outpost Desc/State -->
+    <leaf name="SHEET"
+          type="I32"
+          cppType="NLMISC::CSheetId" />
+    <leaf name="LEVEL"
+          type="I8" />
+    <!-- Outpost Level: 50, 100, 150 .... -->
+    <branch name="GUILD">
+      <leaf name="NAME"
+            type="TEXT" />
+      <!-- Name of the guild the outpost belongs to (or name of tribe) -->
+      <leaf name="ICON"
+            type="I64" />
+      <!-- Icon of the guild the outpost belongs to -->
+      <leaf name="TRIBE"
+            type="I1" />
+      <!-- True if the outpost is owned by a Tribe -->
+      <leaf name="NAME_ATT"
+            type="TEXT" />
+      <!-- Name of the guild that attacks the outpost. 0 if none -->
+    </branch>
+    <leaf name="STATUS"
+          type="I4" />
+    <!-- Outpost Status: OUTPOSTENUMS::TOutpostState -->
+    <leaf name="STATE_END_DATE"
+          type="I32" />
+    <!-- Server tick of the end of state -->
+    <leaf name="DISPLAY_CRASH"
+          type="I1" />
+    <!-- A crash has happened in the last war. Inform users -->
+    <leaf name="WARCOST"
+          type="I32" />
+    <!-- Dappers needed to declare war to this outpost -->
+    <!-- Round State -->
+    <leaf name="ROUND_LVL_THRESHOLD"
+          type="I8" />
+    <!-- The minimal threshold attack must exceed -->
+    <leaf name="ROUND_LVL_MAX_ATT"
+          type="I8" />
+    <!-- The max round level reached by attackers -->
+    <leaf name="ROUND_LVL_MAX_DEF"
+          type="I8" />
+    <!-- The max round level reached by defenders -->
+    <leaf name="ROUND_LVL_CUR"
+          type="I8" />
+    <!-- The current round level -->
+    <leaf name="ROUND_ID_CUR"
+          type="I8" />
+    <!-- The current round number -->
+    <leaf name="ROUND_ID_MAX"
+          type="I8" />
+    <!-- The max round in an attack/defense period -->
+    <!-- Time Setup -->
+    <leaf name="TIME_RANGE_DEF_WANTED"
+          type="I5" />
+    <!-- The start hour at wich the defender want to defend (0-24) -->
+    <leaf name="TIME_RANGE_DEF"
+          type="I32" />
+    <!-- The start time at wich the defender WILL defend (in sec from 1970, GMT) -->
+    <leaf name="TIME_RANGE_ATT"
+          type="I32" />
+    <!-- The start time at wich the attacker WILL attack (in sec from 1970, GMT) -->
+    <leaf name="TIME_RANGE_LENGTH"
+          type="I16" />
+    <!-- (In minutes). the length of an attack/defend period (120 for instance) -->
+  </branch>
+  <branch name="CHARACTER_INFO"
+          bank="PLR">
+    <branch name="CHARACTERISTICS"
+            count="8">
+      <leaf name="VALUE"
+            type="I12" />
+    </branch>
+    <branch name="SCORES"
+            count="4">
+      <leaf name="Base"
+            type="I24" />
+      <leaf name="Max"
+            type="I24" />
+      <leaf name="BaseRegen"
+            type="I24" />
+      <leaf name="Regen"
+            type="I24" />
+    </branch>
+    <branch name="MAGIC_RESISTANCE">
+      <leaf name="MaxResistanceBonus"
+            type="I9" />
+      <branch name=""
+              count="5">
+        <leaf name="VALUE"
+              type="I9" />
+      </branch>
+    </branch>
+    <branch name="MAGIC_PROTECTION">
+      <leaf name="MaxProtectionClampValue"
+            type="I9" />
+      <leaf name="MaxAbsorptionFactor"
+            type="I9" />
+      <branch name=""
+              count="7">
+        <leaf name="VALUE"
+              type="I9" />
+      </branch>
+    </branch>
+    <branch name="DODGE">
+      <leaf name="Base"
+            type="I9" />
+      <leaf name="Current"
+            type="I9" />
+    </branch>
+    <branch name="PARRY">
+      <leaf name="Base"
+            type="I9" />
+      <leaf name="Current"
+            type="I9" />
+    </branch>
+    <branch name="SKILLS">
+      <branch name=""
+              count="225">
+        <leaf name="SKILL"
+              type="I12" />
+        <leaf name="BaseSKILL"
+              type="I12" />
+        <leaf name="PROGRESS_BAR"
+              type="I8" />
+      </branch>
+    </branch>
+    <branch name="XP_CATALYSER">
+      <leaf name="Level"
+            type="I12" />
+      <leaf name="Count"
+            type="I12" />
+    </branch>
+    <branch name="RING_XP_CATALYSER">
+      <leaf name="Level"
+            type="I12" />
+      <leaf name="Count"
+            type="I12" />
+    </branch>
+    <branch name="PVP_FACTION_TAG">
+      <leaf name="TAG_PVP"
+            type="I1" />
+      <leaf name="ACTIVATION_TIME"
+            type="I32" />
+      <leaf name="FLAG_PVP_TIME_LEFT"
+            type="I32" />
+      <leaf name="COUNTER"
+            type="I8" />
+    </branch>
+    <branch name="PVP_OUTPOST">
+      <leaf name="FLAG_PVP"
+            type="I1" />
+      <!-- 1 if the player is in a PVP outpost -->
+      <leaf name="RIGHT_TO_BANISH"
+            type="I1" />
+      <!-- 1 if the player has right to banish other players -->
+      <leaf name="ROUND_LVL_CUR"
+            type="I32" />
+      <!-- Current Round Level -->
+      <leaf name="ROUND_END_DATE"
+            type="I32" />
+      <!-- Server tick of the end of the round. 0 if there is no active Round -->
+      <leaf name="FLAG_PVP_TIME_END"
+            type="I32" />
+      <!-- Server tick of the end of the Outpost PVP activation. 0 if there is no counter (player in zone) -->
+    </branch>
+    <branch name="SUCCESS_MODIFIER">
+      <leaf name="DODGE"
+            type="S16" />
+      <leaf name="PARRY"
+            type="S16" />
+      <leaf name="CRAFT"
+            type="S16" />
+      <leaf name="MELEE"
+            type="S16" />
+      <leaf name="RANGE"
+            type="S16" />
+      <leaf name="MAGIC"
+            type="S16" />
+      <branch name="ECO">
+        <branch name=""
+                count="7">
+          <leaf name="FORAGE"
+                type="S16" />
+        </branch>
+      </branch>
+    </branch>
+  </branch>
+  <branch name="PACK_ANIMAL"
+          bank="PLR">
+    <!-- beasts -->
+    <!-- MAX_INVENTORY_ANIMAL -->
+    <branch name="BEAST"
+            count="4"
+            atomic="1">
+      <!-- Atomic, for correct Bar Management on client -->
+      <leaf name="UID"
+            type="I20" />
+      <!-- Entity Unique Identifier -->
+      <leaf name="TYPE"
+            type="I4" />
+      <!-- see ANIMAL_TYPE -->
+      <leaf name="STATUS"
+            type="I4" />
+      <!-- see ANIMAL_STATUS -->
+      <leaf name="HP"
+            type="I7" />
+      <leaf name="BULK_MAX"
+            type="I32" />
+      <leaf name="POS"
+            type="I64" />
+      <!-- X uint32 << 32 | Y uint32 -->
+      <leaf name="HUNGER"
+            type="I5" />
+      <leaf name="DESPAWN"
+            type="I7" />
+    </branch>
+  </branch>
+  <branch name="DEBUG_INFO"
+          bank="PLR">
+    <leaf name="Ping"
+          type="I32" />
+  </branch>
+  <!-- MP Exotic Evaluation -->
+  <branch name="MP_EVAL"
+          bank="PLR">
+    <leaf name="COST"
+          type="I32" />
+    <!-- Normal Success -->
+    <branch name="RESULT">
+      <leaf name="VALID"
+            type="I1" />
+      <leaf name="SMALL_SEED"
+            type="I32" />
+      <leaf name="MEDIUM_SEED"
+            type="I32" />
+      <leaf name="BIG_SEED"
+            type="I32" />
+      <leaf name="VERY_BIG_SEED"
+            type="I32" />
+      <leaf name="EXPIRY_DATE"
+            type="I32" />
+    </branch>
+    <!-- Critical Success -->
+    <branch name="RESULT_CRITICAL">
+      <leaf name="VALID"
+            type="I1" />
+      <leaf name="SMALL_SEED"
+            type="I32" />
+      <leaf name="MEDIUM_SEED"
+            type="I32" />
+      <leaf name="BIG_SEED"
+            type="I32" />
+      <leaf name="VERY_BIG_SEED"
+            type="I32" />
+      <leaf name="EXPIRY_DATE"
+            type="I32" />
+    </branch>
+  </branch>
+  <!-- Compass coordinates -->
+  <branch name="COMPASS"
+          bank="PLR">
+    <leaf name="HOME_POINT"
+          type="I64" />
+    <!-- X uint32 << 32 | Y uint32 -->
+    <leaf name="BIND_POINT"
+          type="I64" />
+    <!-- X uint32 << 32 | Y uint32 -->
+    <leaf name="TARGET"
+          type="I64" />
+    <!-- X uint32 << 32 | Y uint32 -->
+  </branch>
+  <!-- Fames values -->
+  <branch name="FAME"
+          bank="PLR">
+    <leaf name="CULT_ALLEGIANCE"
+          type="I3" />
+    <!-- Character cult allegiance (CF TPVPClan enum (pvp_clan.h) -->
+    <leaf name="CIV_ALLEGIANCE"
+          type="I3" />
+    <!-- Character civilization allegiance (CF TPVPClan enum (pvp_clan.h) -->
+    <leaf name="THRESHOLD_TRADE"
+          type="S8" />
+    <!-- value where trade doesn't work anymore -->
+    <leaf name="THRESHOLD_KOS"
+          type="S8" />
+    <!-- value where the guards kill you on sight -->
+    <branch name="PLAYER"
+            count="6">
+      <!-- from fame.h & cpp -->
+      <leaf name="VALUE"
+            type="S8" />
+      <!-- current value -->
+      <leaf name="THRESHOLD"
+            type="S8" />
+      <!-- max threshold -->
+      <leaf name="TREND"
+            type="I8" />
+      <!-- Fame trend, (CF see fame_pd.h TFameTrend ) -->
+    </branch>
+    <branch name="TRIBE"
+            count="53">
+      <leaf name="VALUE"
+            type="S8" />
+      <!-- current value -->
+      <leaf name="THRESHOLD"
+            type="S8" />
+      <!-- max threshold -->
+      <leaf name="TREND"
+            type="I8" />
+      <!-- Fame trend, (CF see fame_pd.h TFameTrend ) -->
+    </branch>
+  </branch>
+  <!-- Static general data -->
+  <branch name="STATIC_DATA"
+          bank="PLR">
+    <leaf name="BAG_BULK_MAX"
+          type="I32" />
+  </branch>
+  <!-- DynChat channels -->
+  <branch name="DYN_CHAT"
+          bank="PLR">
+    <branch name="CHANNEL"
+            count="8"
+            atom="1">
+      <leaf name="NAME"
+            type="I32" />
+      <!-- channel not available if anme is 0 -->
+      <leaf name="ID"
+            type="I64" />
+      <!-- unique ID of channel (eid) -->
+      <leaf name="WRITE_RIGHT"
+            type="I1" />
+    </branch>
+  </branch>
+  <!-- PvP Effects -->
+  <branch name="PVP_EFFECTS"
+          bank="PLR">
+    <!-- Faction points for PvP -->
+    <branch name="PVP_FACTION_POINTS">
+      <leaf name="CIV"
+            type="I8" />
+      <leaf name="CIV_POINTS"
+            type="I32" />
+      <leaf name="CULT"
+            type="I8" />
+      <leaf name="CULT_POINTS"
+            type="I32" />
+    </branch>
+    <!-- Bonus and malus for regions -->
+    <branch name=""
+            count="59">
+      <leaf name="ID"
+            type="I32" />
+      <leaf name="ISBONUS"
+            type="I1" />
+      <leaf name="PARAM"
+            type="I32" />
+    </branch>
+  </branch>
+  <!-- Weather -->
+  <branch name="WEATHER"
+          bank="PLR">
+    <leaf name="VALUE"
+          type="I16" />
+  </branch>
+</database_description>
