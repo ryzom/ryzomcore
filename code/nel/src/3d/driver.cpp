@@ -50,14 +50,14 @@ IDriver::~IDriver()
 	{
 		CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
 		TTexDrvInfoPtrMap &rTexDrvInfos = access.value();
-		nlassert( rTexDrvInfos.size() == 0 );
+		nlassert(rTexDrvInfos.empty());
 	}
 
-	nlassert(_TexDrvShares.size()==0);
-	nlassert(_MatDrvInfos.size()==0);
-	nlassert(_VBDrvInfos.size()==0);
-	nlassert(_IBDrvInfos.size()==0);
-	nlassert(_GPUPrgDrvInfos.size()==0);
+	nlassert(_TexDrvShares.empty());
+	nlassert(_MatDrvInfos.empty());
+	nlassert(_VBDrvInfos.empty());
+	nlassert(_IBDrvInfos.empty());
+	nlassert(_GPUPrgDrvInfos.empty());
 }
 
 

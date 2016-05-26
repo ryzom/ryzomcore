@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "operationdialog.h"
 #include "downloader.h"
-#include "wizarddialog.h"
 #include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"
@@ -32,6 +31,10 @@
 #if defined(Q_OS_WIN32) && defined(QT_WINEXTRAS_LIB)
 #include <QtWinExtras/QWinTaskbarProgress>
 #include <QtWinExtras/QWinTaskbarButton>
+#endif
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
 
 #ifdef DEBUG_NEW
@@ -58,7 +61,7 @@ COperationDialog::COperationDialog():QDialog(), m_aborting(false)
 	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
 	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
 	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
-	connect(m_downloader, SIGNAL(downloadProgress(qint64)), SLOT(onProgressProgress(qint64)));
+	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
 	connect(m_downloader, SIGNAL(downloadSuccess(qint64)), SLOT(onProgressSuccess(qint64)));
 	connect(m_downloader, SIGNAL(downloadFail(QString)), SLOT(onProgressFail(QString)));
 
@@ -99,7 +102,10 @@ void COperationDialog::processNextStep()
 		case CConfigFile::DisplayNoServerError:
 		break;
 
-		case CConfigFile::ShowWizard:
+		case CConfigFile::ShowMigrateWizard:
+		break;
+
+		case CConfigFile::ShowInstallWizard:
 		break;
 
 		case CConfigFile::DownloadData:
@@ -130,6 +136,10 @@ void COperationDialog::processNextStep()
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
+		case CConfigFile::CopyInstaller:
+		QtConcurrent::run(this, &COperationDialog::copyIntaller);
+		break;
+
 		case CConfigFile::CleanFiles:
 		QtConcurrent::run(this, &COperationDialog::cleanFiles);
 		break;
@@ -140,6 +150,10 @@ void COperationDialog::processNextStep()
 
 		case CConfigFile::CreateShortcuts:
 		createDefaultShortcuts();
+		break;
+
+		case CConfigFile::CreateAddRemoveEntry:
+		createAddRemoveEntry();
 		break;
 
 		case CConfigFile::Done:
@@ -305,7 +319,7 @@ void COperationDialog::copyServerFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
-	copier.setDesinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	copier.setDestinationDirectory(config->getInstallationDirectory() + "/" + server.id);
 	copier.setIncludeFilter(serverFiles);
 
 	if (copier.exec())
@@ -341,7 +355,7 @@ void COperationDialog::copyProfileFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcProfileDirectory());
-	copier.setDesinationDirectory(config->getProfileDirectory() + "/" + profile.id);
+	copier.setDestinationDirectory(config->getProfileDirectory() + "/" + profile.id);
 	copier.setIncludeFilter(profileFiles);
 
 	if (copier.exec())
@@ -401,6 +415,53 @@ void COperationDialog::extractBnpClient()
 	emit done();
 }
 
+void COperationDialog::copyIntaller()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// default server
+	const CServer &server = config->getServer();
+
+	m_currentOperation = QApplication::tr("Copy installer to new location");
+	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
+
+	QString destinationDirectory = config->getInstallationDirectory();
+
+	// rename old client to installer
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = QApplication::applicationFilePath();
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (!QFile::exists(newInstallerFullPath))
+		{
+			QStringList filter;
+			filter << "msvcp100.dll";
+			filter << "msvcr100.dll";
+
+			CFilesCopier copier(this);
+			copier.setIncludeFilter(filter);
+			copier.addFile(oldInstallerFullPath);
+			copier.setSourceDirectory(config->getSrcServerDirectory());
+			copier.setDestinationDirectory(config->getInstallationDirectory());
+			copier.exec();
+
+			// copied file
+			oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
+
+			// rename old filename if different
+			if (oldInstallerFullPath != newInstallerFullPath)
+			{
+				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
+			}
+		}
+	}
+
+	emit done();
+}
+
 void COperationDialog::cleanFiles()
 {
 	CConfigFile *config = CConfigFile::getInstance();
@@ -425,7 +486,7 @@ bool COperationDialog::createDefaultProfile()
 	CServer server = config->getServer(config->getDefaultServerIndex());
 
 	m_currentOperation = QApplication::tr("Create default profile");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+//	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CProfile profile;
 
@@ -453,6 +514,56 @@ bool COperationDialog::createDefaultProfile()
 
 bool COperationDialog::createDefaultShortcuts()
 {
+	emit done();
+
+	return true;
+}
+
+bool COperationDialog::createAddRemoveEntry()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CServer &server = config->getServer();
+
+	QString oldInstallerFilename = server.clientFilenameOld;
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (QFile::exists(newInstallerFullPath))
+		{
+#ifdef Q_OS_WIN
+			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+
+			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
+
+			settings.setValue("Comments", "");
+			settings.setValue("DisplayIcon", QDir::toNativeSeparators(newInstallerFullPath) + ",0");
+			settings.setValue("DisplayName", "Ryzom");
+			settings.setValue("DisplayVersion", RYZOM_VERSION);
+			settings.setValue("EstimatedSize", 1500000); // TODO: compute real size
+			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
+			settings.setValue("InstallLocation", config->getInstallationDirectory());
+			settings.setValue("MajorVersion", versionTokens[0].toInt());
+			settings.setValue("MinorVersion", versionTokens[1].toInt());
+			settings.setValue("NoModify", 0);
+			settings.setValue("NoRemove", 0);
+			settings.setValue("NoRepair", 0);
+			settings.setValue("Publisher", AUTHOR);
+			settings.setValue("QuietUninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u -s");
+			settings.setValue("UninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u");
+			settings.setValue("URLUpdateInfo", "http://ryzom.fr/info");
+			settings.setValue("URLInfoAbout", "http://ryzom.fr/info2");
+			//	settings.setValue("sEstimatedSize2", 0);
+			settings.setValue("HelpLink", "http://ryzom.fr/support");
+			//	ModifyPath
+#endif
+		}
+	}
+
 	emit done();
 
 	return true;

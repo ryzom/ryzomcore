@@ -33,6 +33,7 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 {
 	s_instance = this;
 
+	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
 	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
 	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/installer.ini";
 }
@@ -52,7 +53,7 @@ bool CConfigFile::load(const QString &filename)
 	QSettings settings(filename, QSettings::IniFormat);
 
 	settings.beginGroup("common");
-	m_language = settings.value("language").toString();
+	m_language = settings.value("language", m_language).toString();
 	m_srcDirectory = settings.value("source_directory").toString();
 	m_installationDirectory = settings.value("installation_directory").toString();
 	m_use64BitsClient = settings.value("use_64bits_client").toBool();
@@ -82,13 +83,19 @@ bool CConfigFile::load(const QString &filename)
 		server.clientDownloadFilename = settings.value("client_download_filename").toString();
 #if defined(Q_OS_WIN)
 		server.clientFilename = settings.value("client_filename_windows").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_windows").toString();
 		server.configurationFilename = settings.value("configuration_filename_windows").toString();
+		server.installerFilename = settings.value("installer_filename_windows").toString();
 #elif defined(Q_OS_MAC)
 		server.clientFilename = settings.value("client_filename_osx").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_osx").toString();
 		server.configurationFilename = settings.value("configuration_filename_osx").toString();
+		server.installerFilename = settings.value("installer_filename_osx").toString();
 #else
 		server.clientFilename = settings.value("client_filename_linux").toString();
+		server.clientFilenameOld = settings.value("client_filename_old_linux").toString();
 		server.configurationFilename = settings.value("configuration_filename_linux").toString();
+		server.installerFilename = settings.value("installer_filename_linux").toString();
 #endif
 		server.comments = settings.value("comments").toString();
 
@@ -157,13 +164,19 @@ bool CConfigFile::save() const
 		settings.setValue("client_download_filename", server.clientDownloadFilename);
 #if defined(Q_OS_WIN)
 		settings.setValue("client_filename_windows", server.clientFilename);
+		settings.setValue("client_filename_old_windows", server.clientFilenameOld);
 		settings.setValue("configuration_filename_windows", server.configurationFilename);
+		settings.setValue("installer_filename_windows", server.installerFilename);
 #elif defined(Q_OS_MAC)
 		settings.setValue("client_filename_osx", server.clientFilename);
+		settings.setValue("client_filename_old_osx", server.clientFilenameOld);
 		settings.setValue("configuration_filename_osx", server.configurationFilename);
+		settings.setValue("installer_filename_osx", server.installerFilename);
 #else
 		settings.setValue("client_filename_linux", server.clientFilename);
+		settings.setValue("client_filename_old_linux", server.clientFilenameOld);
 		settings.setValue("configuration_filename_linux", server.configurationFilename);
+		settings.setValue("installer_filename_linux", server.installerFilename);
 #endif
 		settings.setValue("comments", server.comments);
 
@@ -398,6 +411,51 @@ QString CConfigFile::getOldInstallationDirectory()
 #endif
 }
 
+QString CConfigFile::getOldInstallationLanguage()
+{
+#if defined(Q_OS_WIN)
+	// NSIS previous official installer
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	if (settings.contains("Language"))
+	{
+		QString languageCode = settings.value("Language").toString();
+
+		// 1036 = French (France), 1033 = English (USA), 1031 = German
+		if (languageCode == "1036") return "fr";
+		if (languageCode == "1031") return "de";
+		if (languageCode == "1033") return "en";
+	}
+#endif
+
+	return "";
+}
+
+QString CConfigFile::getNewInstallationLanguage()
+{
+#if defined(Q_OS_WIN)
+	// NSIS new official installer
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	if (settings.contains("Ryzom Install Path"))
+	{
+		return QDir::fromNativeSeparators(settings.value("Ryzom Install Path").toString());
+	}
+#endif
+
+	return "";
+}
+
 QString CConfigFile::getNewInstallationDirectory()
 {
 	return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
@@ -421,8 +479,8 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 	// at least 200 BNP in data directory
 	if (dir.entryList(QStringList() << "*.bnp", QDir::Files).size() < 200) return false;
 
-	//  fonts.bnp is required
-	if (!dir.exists("fonts.bnp")) return false;
+	//  ryzom.ttf or fonts.bnp is required
+	if (!dir.exists("fonts/ryzom.ttf") && !dir.exists("fonts.bnp")) return false;
 
 	//  gamedev.bnp is required
 	if (!dir.exists("gamedev.bnp")) return false;
@@ -445,10 +503,19 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	// client_default.cfg doesn't exist
 	if (!dir.exists("client_default.cfg")) return false;
 
-	QString clientFilename = getServer().clientFilename;
+	// current server
+	CServer server = getServer();
 
-	// check if client is defined and exists
-	if (!clientFilename.isEmpty() && !dir.exists(clientFilename)) return false;
+	QString clientFilename = server.clientFilename;
+
+	// check if new client is defined and exists
+	if (!clientFilename.isEmpty() && !dir.exists(clientFilename))
+	{
+		clientFilename = server.clientFilenameOld;
+
+		// check if old client is defined and exists
+		if (!dir.exists(clientFilename)) return false;
+	}
 
 	// TODO: more checks
 
@@ -525,7 +592,22 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	// only show wizard if installation directory undefined
 	if (getInstallationDirectory().isEmpty())
 	{
-		return ShowWizard;
+		// if launched from current directory, it means we just patched files
+		QString currentDirectory = getCurrentDirectory();
+
+		if (!isRyzomInstalledIn(currentDirectory))
+		{
+			// Ryzom is in the same directory as Ryzom Installer
+			currentDirectory = getApplicationDirectory();
+
+			if (!isRyzomInstalledIn(currentDirectory))
+			{
+				currentDirectory.clear();
+			}
+		}
+
+		// install or migrate depending if Ryzom was found in current directory
+		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;
 	}
 
 	QString serverDirectory = getInstallationDirectory() + "/" + server.id;
@@ -575,7 +657,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			}
 			else
 			{
-				return ShowWizard;
+				return ShowInstallWizard;
 			}
 		}
 
@@ -591,19 +673,23 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			{
 				return ExtractBnpClient;
 			}
-			else
+
+			QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+
+			// when file is not finished, it has .part extension
+			if (!QFile::exists(clientFile))
 			{
-				QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
-
-				// when file is not finished, it has .part extension
-				if (!QFile::exists(clientFile))
-				{
-					return DownloadClient;
-				}
-
-				return ExtractDownloadedClient;
+				return DownloadClient;
 			}
+
+			return ExtractDownloadedClient;
 		}
+	}
+
+	// if installer not found in installation directory, extract it from BNP
+	if (!QFile::exists(getInstallationDirectory() + "/" + server.installerFilename))
+	{
+		return CopyInstaller;
 	}
 
 	// no default profile
@@ -625,6 +711,13 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		// TODO: check they point to getClientFullPath()
 		return CreateShortcuts;
 	}
+
+#ifdef Q_OS_WIN
+	// check that Add/Remove entry is created under Windows
+	QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+
+	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
+#endif
 
 	return Done;
 }

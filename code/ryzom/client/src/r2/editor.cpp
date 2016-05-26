@@ -5808,7 +5808,7 @@ void CEditor::scenarioUpdated(CObject* highLevel, bool willTP, uint32 initialAct
 				playerPos.y <= ci.YMin ||
 				playerPos.y >= ci.YMax)
 			{
-				if(ci.EntryPoints.size()>0)
+				if(!ci.EntryPoints.empty())
 				{
 					const CScenarioEntryPoints::CShortEntryPoint & shortEntryPoint = ci.EntryPoints[0];
 					CVector dest((float) shortEntryPoint.X, (float) shortEntryPoint.Y, 0.f);

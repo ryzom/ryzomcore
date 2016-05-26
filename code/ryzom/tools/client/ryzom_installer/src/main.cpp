@@ -17,7 +17,8 @@
 #include "stdpch.h"
 #include "mainwindow.h"
 #include "configfile.h"
-#include "wizarddialog.h"
+#include "migratewizarddialog.h"
+#include "installwizarddialog.h"
 #include "operationdialog.h"
 
 #include "nel/misc/path.h"
@@ -57,6 +58,8 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
+	// TODO: parameters -u (uinstall) and -s (silent)
+
 	QApplication::setApplicationName("Ryzom");
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
@@ -89,12 +92,19 @@ int main(int argc, char *argv[])
 
 	bool displayMainWindow = true;
 
-	if (step == CConfigFile::ShowWizard)
+	if (step == CConfigFile::ShowMigrateWizard)
 	{
-		CWizardDialog dialog;
+		CMigrateWizardDialog dialog;
 
 		if (!dialog.exec()) displayMainWindow = false;
 	}
+	else if (step == CConfigFile::ShowInstallWizard)
+	{
+		CInstallWizardDialog dialog;
+
+		if (!dialog.exec()) displayMainWindow = false;
+	}
+
 
 	if (displayMainWindow)
 	{

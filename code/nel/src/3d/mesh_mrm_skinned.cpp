@@ -160,7 +160,7 @@ void	CMeshMRMSkinnedGeom::CLod::buildPrimitiveBlock(uint renderPass, const CInde
 static	NLMISC::CAABBoxExt	makeBBox(const std::vector<CVector>	&Vertices)
 {
 	NLMISC::CAABBox		ret;
-	nlassert(Vertices.size());
+	nlassert(!Vertices.empty());
 	ret.setCenter(Vertices[0]);
 	for(sint i=0;i<(sint)Vertices.size();i++)
 	{
@@ -211,7 +211,7 @@ void			CMeshMRMSkinnedGeom::build(CMesh::CMeshBuild &m,
 									uint numMaxMaterial, const CMRMParameters &params)
 {
 	// Empty geometry?
-	if(m.Vertices.size()==0 || m.Faces.size()==0)
+	if(m.Vertices.empty() || m.Faces.empty())
 	{
 		_VBufferFinal.clear();
 		_Lods.clear();
@@ -261,7 +261,7 @@ void			CMeshMRMSkinnedGeom::build(CMesh::CMeshBuild &m,
 	_LevelDetail.MaxFaceUsed= 0;
 	_LevelDetail.MinFaceUsed= 0;
 	// Count of primitive block
-	if(_Lods.size()>0)
+	if(!_Lods.empty())
 	{
 		uint	pb;
 		// Compute MinFaces.
@@ -421,7 +421,7 @@ void	CMeshMRMSkinnedGeom::applyGeomorph(std::vector<CMRMWedgeGeom>  &geoms, floa
 void	CMeshMRMSkinnedGeom::applyGeomorphWithVBHardPtr(std::vector<CMRMWedgeGeom>  &geoms, float alphaLod)
 {
 	// no geomorphs? quit.
-	if(geoms.size()==0)
+	if(geoms.empty())
 		return;
 
 	clamp(alphaLod, 0.f, 1.f);
@@ -579,7 +579,7 @@ inline sint	CMeshMRMSkinnedGeom::chooseLod(float alphaMRM, float &alphaLod)
 void	CMeshMRMSkinnedGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount, uint32 rdrFlags, float globalAlpha)
 {
 	nlassert(drv);
-	if(_Lods.size()==0)
+	if(_Lods.empty())
 		return;
 
 
@@ -597,7 +597,7 @@ void	CMeshMRMSkinnedGeom::render(IDriver *drv, CTransformShape *trans, float pol
 
 	// Render the choosen Lod.
 	CLod	&lod= _Lods[numLod];
-	if(lod.RdrPass.size()==0)
+	if(lod.RdrPass.empty())
 		return;
 
 
@@ -757,7 +757,7 @@ sint	CMeshMRMSkinnedGeom::renderSkinGroupGeom(CMeshMRMSkinnedInstance	*mi, float
 
 	// Render the choosen Lod.
 	CLod	&lod= _Lods[numLod];
-	if(lod.RdrPass.size()==0)
+	if(lod.RdrPass.empty())
 		// return no vertices added
 		return 0;
 

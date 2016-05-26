@@ -380,7 +380,7 @@ static void	applyArraySkinTangentSpaceT(uint numMatrixes, uint32 *infPtr, CMesh:
 void	CMeshMRMGeom::applySkinWithNormal(CLod &lod, const CSkeletonModel *skeleton)
 {
 	nlassert(_Skinned);
-	if(_SkinWeights.size()==0)
+	if(_SkinWeights.empty())
 		return;
 
 	// get vertexPtr / normalOff.
@@ -446,7 +446,7 @@ void	CMeshMRMGeom::applySkinWithTangentSpace(CLod &lod, const CSkeletonModel *sk
 	uint tangentSpaceTexCoord)
 {
 	nlassert(_Skinned);
-	if(_SkinWeights.size()==0)
+	if(_SkinWeights.empty())
 		return;
 
 	// get vertexPtr / normalOff / tangent space offset.
@@ -1468,7 +1468,7 @@ void		CMeshMRMGeom::applyArrayRawSkinNormal4(CRawVertexNormalSkin4 *src, uint8 *
 void	CMeshMRMGeom::applyRawSkinWithNormal(CLod &lod, CRawSkinNormalCache &rawSkinLod, const CSkeletonModel *skeleton, uint8 *vbHard, float alphaLod)
 {
 	nlassert(_Skinned);
-	if(_SkinWeights.size()==0)
+	if(_SkinWeights.empty())
 		return;
 
 	// Some assert

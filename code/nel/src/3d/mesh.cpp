@@ -52,7 +52,7 @@ namespace NL3D
 static	NLMISC::CAABBoxExt	makeBBox(const std::vector<CVector>	&Vertices)
 {
 	NLMISC::CAABBox		ret;
-	nlassert(Vertices.size());
+	nlassert(!Vertices.empty());
 	ret.setCenter(Vertices[0]);
 	for(sint i=0;i<(sint)Vertices.size();i++)
 	{
@@ -167,7 +167,7 @@ void	CMeshGeom::build (CMesh::CMeshBuild &m, uint numMaxMaterial)
 	sint	i;
 
 	// Empty geometry?
-	if(m.Vertices.size()==0 || m.Faces.size()==0)
+	if(m.Vertices.empty() || m.Faces.empty())
 	{
 		_VBuffer.setNumVertices(0);
 		_VBuffer.setName("CMeshGeom");
@@ -436,7 +436,7 @@ void	CMeshGeom::build (CMesh::CMeshBuild &m, uint numMaxMaterial)
 	}
 
 	// Set the vertex buffer preferred memory
-	bool avoidVBHard= _Skinned || ( _MeshMorpher && _MeshMorpher->BlendShapes.size()>0 );
+	bool avoidVBHard= _Skinned || ( _MeshMorpher && !_MeshMorpher->BlendShapes.empty() );
 	_VBuffer.setPreferredMemory (avoidVBHard?CVertexBuffer::RAMPreferred:CVertexBuffer::StaticPreferred, false);
 
 	// End!!
@@ -638,7 +638,7 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 	for(uint mb=0;mb<_MatrixBlocks.size();mb++)
 	{
 		CMatrixBlock	&mBlock= _MatrixBlocks[mb];
-		if(mBlock.RdrPass.size()==0)
+		if(mBlock.RdrPass.empty())
 			continue;
 
 		// Global alpha ?
@@ -790,7 +790,7 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	for(uint mb=0;mb<_MatrixBlocks.size();mb++)
 	{
 		CMatrixBlock	&mBlock= _MatrixBlocks[mb];
-		if(mBlock.RdrPass.size()==0)
+		if(mBlock.RdrPass.empty())
 			continue;
 
 		// Render all pass.
@@ -840,7 +840,7 @@ void	CMeshGeom::renderSimpleWithMaterial(IDriver *drv, const CMatrix &worldMatri
 	for(uint mb=0;mb<_MatrixBlocks.size();mb++)
 	{
 		CMatrixBlock	&mBlock= _MatrixBlocks[mb];
-		if(mBlock.RdrPass.size()==0)
+		if(mBlock.RdrPass.empty())
 			continue;
 
 		// Render all pass.
@@ -998,10 +998,10 @@ void	CMeshGeom::compileRunTime()
 	_PreciseClipping= _BBox.getRadius() >= NL3D_MESH_PRECISE_CLIP_THRESHOLD;
 
 	// Support MeshBlockRendering only if not skinned/meshMorphed.
-	bool	supportMeshBlockRendering= !_Skinned && _MeshMorpher->BlendShapes.size()==0;
+	bool	supportMeshBlockRendering= !_Skinned && _MeshMorpher->BlendShapes.empty();
 
 	// true only if one matrix block, and at least one rdrPass.
-	supportMeshBlockRendering= supportMeshBlockRendering && _MatrixBlocks.size()==1 && _MatrixBlocks[0].RdrPass.size()>0;
+	supportMeshBlockRendering= supportMeshBlockRendering && _MatrixBlocks.size()==1 && !_MatrixBlocks[0].RdrPass.empty();
 	if (supportMeshBlockRendering && _MeshVertexProgram)
 	{
 		supportMeshBlockRendering = supportMeshBlockRendering && _MeshVertexProgram->supportMeshBlockRendering();
@@ -1021,7 +1021,7 @@ void	CMeshGeom::compileRunTime()
 	if(supportMBRPerMaterial)
 		_SupportMBRFlags|= MBRSortPerMaterial;
 
-	bool avoidVBHard= _Skinned || ( _MeshMorpher && _MeshMorpher->BlendShapes.size()>0 );
+	bool avoidVBHard= _Skinned || ( _MeshMorpher && !_MeshMorpher->BlendShapes.empty() );
 	_VBuffer.setPreferredMemory (avoidVBHard?CVertexBuffer::RAMPreferred:CVertexBuffer::StaticPreferred, false);
 }
 

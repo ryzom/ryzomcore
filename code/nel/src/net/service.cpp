@@ -1460,7 +1460,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 						mdDisplayVars.clear ();
 						ICommand::execute(varName, logDisplayVars, true);
 						const std::deque<std::string>	&strs = mdDisplayVars.lockStrings();
-						if (strs.size()>0)
+						if (!strs.empty())
 						{
 							str += strs[0].substr(0,strs[0].size()-1);
 						}

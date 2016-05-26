@@ -540,7 +540,7 @@ bool			CPatchDLMContext::generate(CPatch *patch, CTextureDLM *textureDLM, CPatch
 #ifndef NL_DLM_TILE_RES
 
 	// retrieve patch tileColor pointer.
-	nlassert(_Patch->TileColors.size()>0);
+	nlassert(!_Patch->TileColors.empty());
 	CTileColor	*tileColor= &_Patch->TileColors[0];
 
 	// skip 1 tiles colors per column and per row
@@ -898,7 +898,7 @@ void			CPatchDLMContext::compileLighting(TCompileType compType, CRGBA modulateCt
 	if(! (_IsSrcTextureFullBlack && _IsDstTextureFullBlack) )
 	{
 		// if lightMap allocated
-		if(_LightMap.size()>0 && _DLMTexture)
+		if(!_LightMap.empty() && _DLMTexture)
 		{
 			// If the srcTexture is full black (ie no pointLight influence touch it),
 			if(_IsSrcTextureFullBlack)

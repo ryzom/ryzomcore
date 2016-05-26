@@ -38,7 +38,7 @@ void CFilesCopier::setSourceDirectory(const QString &src)
 	m_sourceDirectory = src;
 }
 
-void CFilesCopier::setDesinationDirectory(const QString &dst)
+void CFilesCopier::setDestinationDirectory(const QString &dst)
 {
 	m_destinationDirectory = dst;
 }
@@ -48,9 +48,9 @@ void CFilesCopier::setIncludeFilter(const QStringList &filter)
 	m_includeFilter = filter;
 }
 
-void CFilesCopier::setExcludeFilter(const QStringList &filter)
+void CFilesCopier::addFile(const QString &filename)
 {
-	m_excludeFilter = filter;
+	m_files << filename;
 }
 
 bool CFilesCopier::exec()
@@ -123,6 +123,24 @@ void CFilesCopier::getFilesList(FilesToCopy &files)
 			file.dst = dstPath;
 			file.size = entry.size();
 			file.date = entry.lastModified().toTime_t();
+
+			files << file;
+		}
+	}
+
+	// copy additional files
+	foreach(const QString &fullpath, m_files)
+	{
+		QFileInfo fileInfo(fullpath);
+
+		if (fileInfo.isFile())
+		{
+			FileToCopy file;
+			file.filename = fileInfo.fileName();
+			file.src = fileInfo.filePath();
+			file.dst = m_destinationDirectory + "/" + fileInfo.fileName();
+			file.size = fileInfo.size();
+			file.date = fileInfo.lastModified().toTime_t();
 
 			files << file;
 		}

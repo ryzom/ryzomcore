@@ -14,55 +14,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef FILESCOPIER_H
-#define FILESCOPIER_H
+#ifndef MIGRATEWIZARDDIALOG_H
+#define MIGRATEWIZARDDIALOG_H
 
-class IOperationProgressListener;
+#include "ui_migratewizard.h"
 
 /**
- * Files copier
+ * Wizard displayed at first launch, that asks user to choose source and destination directories.
  *
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CFilesCopier
+class CMigrateWizardDialog : public QDialog, public Ui::MigrateWizardDialog
 {
+	Q_OBJECT
+
 public:
-	CFilesCopier(IOperationProgressListener *listener);
-	virtual ~CFilesCopier();
+	CMigrateWizardDialog();
+	virtual ~CMigrateWizardDialog();
 
-	void setSourceDirectory(const QString &src);
-	void setDestinationDirectory(const QString &src);
+private slots:
+	void onShowAdvancedParameters(int state);
+	void onDestinationBrowseButtonClicked();
 
-	void setIncludeFilter(const QStringList &filter);
+	void accept();
 
-	void addFile(const QString &file);
+private:
+	void updateDestinationText();
 
-	bool exec();
-
-protected:
-
-	struct FileToCopy
-	{
-		QString filename;
-		QString src;
-		QString dst;
-		qint64 size;
-		uint date;
-	};
-
-	typedef QList<FileToCopy> FilesToCopy;
-
-	void getFilesList(FilesToCopy &files);
-	bool copyFiles(const FilesToCopy &files);
-
-	IOperationProgressListener *m_listener;
-
-	QString m_sourceDirectory;
-	QString m_destinationDirectory;
-
-	QStringList m_includeFilter;
-	QStringList m_files;
+	QString m_currentDirectory;
+	QString m_dstDirectory;
 };
 
 #endif

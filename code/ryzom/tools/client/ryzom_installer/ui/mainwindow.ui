@@ -2,13 +2,23 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>579</width>
-    <height>406</height>
-   </rect>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>547</width>
+    <height>386</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>547</width>
+    <height>386</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Ryzom Installer</string>
@@ -97,7 +107,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>579</width>
+     <width>547</width>
      <height>21</height>
     </rect>
    </property>
@@ -119,11 +129,6 @@ p, li { white-space: pre-wrap; }
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Help"/>
-  </widget>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="sizeGripEnabled">
-    <bool>false</bool>
-   </property>
   </widget>
   <action name="actionAboutQt">
    <property name="text">

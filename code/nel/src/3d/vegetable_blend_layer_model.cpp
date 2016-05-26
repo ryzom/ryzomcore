@@ -71,7 +71,7 @@ void	CVegetableBlendLayerModel::render(IDriver *driver)
 
 	nlassert(VegetableManager);
 
-	if(SortBlocks.size()==0)
+	if(SortBlocks.empty())
 		return;
 
 	// Setup VegetableManager renderState (like pre-setuped material)

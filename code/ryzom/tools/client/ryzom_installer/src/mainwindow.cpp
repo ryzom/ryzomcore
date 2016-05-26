@@ -17,7 +17,6 @@
 #include "stdpch.h"
 #include "mainwindow.h"
 #include "downloader.h"
-#include "wizarddialog.h"
 #include "profilesdialog.h"
 #include "configfile.h"
 #include "config.h"
@@ -27,7 +26,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
+CMainWindow::CMainWindow():QMainWindow()
 {
 	setupUi(this);
 
@@ -48,13 +47,7 @@ CMainWindow::CMainWindow():QMainWindow(), m_statusLabel(NULL)
 
 	connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onProfileChanged(int)));
 
-	m_statusLabel = new QLabel();
-
-	statusBar()->addWidget(m_statusLabel);
-
 	updateProfiles();
-
-//	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 }
 
 CMainWindow::~CMainWindow()

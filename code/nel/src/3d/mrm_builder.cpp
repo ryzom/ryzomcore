@@ -3119,7 +3119,7 @@ bool	CMRMBuilder::buildMRMSewingMeshes(const CMesh::CMeshBuild &mbuild, uint nWa
 {
 	nlassert(nWantedLods>=1);
 	nlassert(divisor>=1);
-	if(mbuild.Interfaces.size()==0)
+	if(mbuild.Interfaces.empty())
 		return false;
 	// must have same size
 	if(mbuild.InterfaceLinks.size()!=mbuild.Vertices.size())

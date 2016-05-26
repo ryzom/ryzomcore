@@ -57,8 +57,6 @@ protected:
 
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;
-
-	QLabel *m_statusLabel;
 };
 
 #endif

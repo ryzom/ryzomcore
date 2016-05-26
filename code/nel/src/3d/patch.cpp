@@ -604,7 +604,8 @@ void			CPatch::addRefTessBlocks()
 	uint	i;
 
 	TessBlockRefCount++;
-	if(TessBlocks.size()==0)
+
+	if (TessBlocks.empty())
 	{
 		// Allocate the tessblocks.
 		//==========
@@ -1629,7 +1630,7 @@ void			CPatch::serial(NLMISC::IStream &f)
 
 			// then just copy to TileColors.
 			TileColors.resize(tmpArray.size());
-			if(TileColors.size()>0)
+			if(!TileColors.empty())
 			{
 				memcpy(&TileColors[0], &tmpArray[0], TileColors.size()*sizeof(CTileColor));
 			}

@@ -28,6 +28,8 @@
  * \date 2016
  */
 
+QString qBytesToHumanReadable(qint64 bytes);
+
 // Convert a UTF-8 string to QString
 QString qFromUtf8(const std::string &str);
 

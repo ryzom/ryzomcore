@@ -35,7 +35,9 @@ struct CServer
 	QString clientDownloadUrl;
 	QString clientDownloadFilename;
 	QString clientFilename;
+	QString clientFilenameOld;
 	QString configurationFilename;
+	QString installerFilename;
 	QString comments;
 };
 
@@ -80,7 +82,8 @@ public:
 	enum InstallationStep
 	{
 		DisplayNoServerError,
-		ShowWizard,
+		ShowInstallWizard,
+		ShowMigrateWizard,
 		DownloadData,
 		ExtractDownloadedData,
 		DownloadClient,
@@ -89,8 +92,10 @@ public:
 		CopyProfileFiles,
 		CleanFiles,
 		ExtractBnpClient,
+		CopyInstaller,
 		CreateProfile,
 		CreateShortcuts,
+		CreateAddRemoveEntry,
 		Done
 	};
 
@@ -144,10 +149,14 @@ public:
 	static QString getApplicationDirectory();
 	static QString getOldInstallationDirectory();
 	static QString getNewInstallationDirectory();
+	static QString getOldInstallationLanguage();
+	static QString getNewInstallationLanguage();
 
+	// status of installation
 	bool isRyzomInstalledIn(const QString &directory) const;
 	bool areRyzomDataInstalledIn(const QString &directory) const;
 	bool isRyzomClientInstalledIn(const QString &directory) const;
+
 	bool foundTemporaryFiles(const QString &directory) const;
 	bool shouldCreateDesktopShortcut() const;
 

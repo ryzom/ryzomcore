@@ -1019,12 +1019,12 @@ void			CVegetableManager::reserveIgCompile(CVegetableInstanceGroup *ig, const CV
 	{
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= ig->_RdrPass[rdrPass];
 		nlassert(vegetRdrPass.TriangleIndices.getNumIndexes()==0);
-		nlassert(vegetRdrPass.TriangleLocalIndices.size()==0);
-		nlassert(vegetRdrPass.Vertices.size()==0);
-		nlassert(vegetRdrPass.LightedInstances.size()==0);
+		nlassert(vegetRdrPass.TriangleLocalIndices.empty());
+		nlassert(vegetRdrPass.Vertices.empty());
+		nlassert(vegetRdrPass.LightedInstances.empty());
 	}
 	// Do the same for all quadrants of the zsort rdrPass.
-	nlassert(ig->_TriangleQuadrantOrderArray.size()==0);
+	nlassert(ig->_TriangleQuadrantOrderArray.empty());
 	nlassert(ig->_TriangleQuadrantOrderNumTriangles==0);
 
 
@@ -2553,7 +2553,7 @@ bool		CVegetableManager::updateLightingIGPart()
 		}
 		CVegetableInstanceGroup::CVegetableRdrPass	&vegetRdrPass= _ULRootIg->_RdrPass[_ULCurrentIgRdrPass];
 
-		// if all instances are processed for this pass (especially if size()==0 !!)
+		// if all instances are processed for this pass (especially if empty() !!)
 		if(_ULCurrentIgInstance>= vegetRdrPass.LightedInstances.size())
 		{
 			// skip to the next rdrPass.

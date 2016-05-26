@@ -38,6 +38,8 @@ extern NLMISC::CCmdArgs Args;
 CClientConfigDialog::CClientConfigDialog( QWidget *parent ) :
 	QDialog( parent )
 {
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
 	setupUi( this );
 	connect( buttonBox->button( QDialogButtonBox::Cancel ), SIGNAL( clicked() ), this, SLOT( close() ) );
 	connect( buttonBox->button( QDialogButtonBox::Ok ), SIGNAL( clicked() ), this, SLOT( onClickOK() ) );

@@ -288,7 +288,7 @@ string CLoginClient::confirmConnection(sint32 shardId)
 	// S05: create and send the "CS" message with the shardid choice to the LS
 	//
 	
-	if (!ShardList.size())
+	if (ShardList.empty())
 	{
 		_LSCallbackClient->disconnect();
 		return "No shard available";
@@ -358,7 +358,7 @@ string CLoginClient::selectShardBegin(sint32 shardId)
 	ShardChooseShardReason = "";
 	ShardChooseShard = false;
 
-	if (!ShardList.size())
+	if (ShardList.empty())
 	{
 		_LSCallbackClient->disconnect();
 		delete _LSCallbackClient;

@@ -180,7 +180,7 @@ void		CMeshMRMGeom::CLod::optimizeTriangleOrder()
 static	NLMISC::CAABBoxExt	makeBBox(const std::vector<CVector>	&Vertices)
 {
 	NLMISC::CAABBox		ret;
-	nlassert(Vertices.size());
+	nlassert(!Vertices.empty());
 	ret.setCenter(Vertices[0]);
 	for(sint i=0;i<(sint)Vertices.size();i++)
 	{
@@ -236,7 +236,7 @@ void			CMeshMRMGeom::build(CMesh::CMeshBuild &m, std::vector<CMesh::CMeshBuild*>
 									uint numMaxMaterial, const CMRMParameters &params)
 {
 	// Empty geometry?
-	if(m.Vertices.size()==0 || m.Faces.size()==0)
+	if(m.Vertices.empty() || m.Faces.empty())
 	{
 		_VBufferFinal.setNumVertices(0);
 		_VBufferFinal.reserve(0);
@@ -308,7 +308,7 @@ void			CMeshMRMGeom::build(CMesh::CMeshBuild &m, std::vector<CMesh::CMeshBuild*>
 	_LevelDetail.MaxFaceUsed= 0;
 	_LevelDetail.MinFaceUsed= 0;
 	// Count of primitive block
-	if(_Lods.size()>0)
+	if (!_Lods.empty())
 	{
 		uint	pb;
 		// Compute MinFaces.
@@ -469,7 +469,7 @@ void	CMeshMRMGeom::applyGeomorph(std::vector<CMRMWedgeGeom>  &geoms, float alpha
 void	CMeshMRMGeom::applyGeomorphWithVBHardPtr(std::vector<CMRMWedgeGeom>  &geoms, float alphaLod, uint8 *vertexDestPtr)
 {
 	// no geomorphs? quit.
-	if(geoms.size()==0)
+	if(geoms.empty())
 		return;
 
 	clamp(alphaLod, 0.f, 1.f);
@@ -900,7 +900,7 @@ inline sint	CMeshMRMGeom::chooseLod(float alphaMRM, float &alphaLod)
 void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount, uint32 rdrFlags, float globalAlpha)
 {
 	nlassert(drv);
-	if(_Lods.size()==0)
+	if(_Lods.empty())
 		return;
 
 
@@ -922,7 +922,7 @@ void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCou
 
 	// Render the choosen Lod.
 	CLod	&lod= _Lods[numLod];
-	if(lod.RdrPass.size()==0)
+	if(lod.RdrPass.empty())
 		return;
 
 
@@ -1104,7 +1104,7 @@ void	CMeshMRMGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 {
 	H_AUTO( NL3D_MeshMRMGeom_renderSkin );
 
-	if(_Lods.size()==0)
+	if(_Lods.empty())
 		return;
 
 
@@ -1126,7 +1126,7 @@ void	CMeshMRMGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 
 	// Render the choosen Lod.
 	CLod	&lod= _Lods[numLod];
-	if(lod.RdrPass.size()==0)
+	if(lod.RdrPass.empty())
 		return;
 
 
@@ -1295,7 +1295,7 @@ sint	CMeshMRMGeom::renderSkinGroupGeom(CMeshMRMInstance	*mi, float alphaMRM, uin
 
 	// Render the choosen Lod.
 	CLod	&lod= _Lods[numLod];
-	if(lod.RdrPass.size()==0)
+	if(lod.RdrPass.empty())
 		// return no vertices added
 		return 0;
 
@@ -1942,7 +1942,7 @@ void	CMeshMRMGeom::loadFirstLod(NLMISC::IStream &f)
 
 
 	// If empty MRM, quit.
-	if(_LodInfos.size()==0)
+	if(_LodInfos.empty())
 		return;
 
 	/* If the version is <4, then SkinWeights are serialised per Lod.
@@ -2431,7 +2431,7 @@ void	CMeshMRMGeom::compileRunTime()
 	_PreciseClipping= _BBox.getRadius() >= NL3D_MESH_PRECISE_CLIP_THRESHOLD;
 
 	// Compute if can support SkinGrouping rendering
-	if(_Lods.size()==0 || !_Skinned)
+	if(_Lods.empty() || !_Skinned)
 	{
 		_SupportSkinGrouping= false;
 		_SupportShadowSkinGrouping= false;
@@ -2451,7 +2451,7 @@ void	CMeshMRMGeom::compileRunTime()
 	}
 
 	// Support MeshBlockRendering only if not skinned/meshMorphed.
-	_SupportMeshBlockRendering= !_Skinned && _MeshMorpher.BlendShapes.size()==0;
+	_SupportMeshBlockRendering= !_Skinned && _MeshMorpher.BlendShapes.empty();
 
 	// \todo yoyo: support later MeshVertexProgram
 	_SupportMeshBlockRendering= _SupportMeshBlockRendering && _MeshVertexProgram==NULL;
@@ -3367,7 +3367,7 @@ void		CMeshMRMGeom::updateRawSkinNormal(bool enabled, CMeshMRMInstance *mi, sint
 
 			// Case of MeshMorpher
 			//========
-			if(_MeshMorpher.BlendShapes.size()>0)
+			if(!_MeshMorpher.BlendShapes.empty())
 			{
 				skinLod.VertexRemap.resize((uint32)vertexFinalRemap.size());
 

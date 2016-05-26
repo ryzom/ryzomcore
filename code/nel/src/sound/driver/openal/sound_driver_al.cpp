@@ -197,7 +197,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	
 	// Remove the allocated (but not exported) source and buffer names-
 	// Release internal resources of all remaining ISource instances
-	if (_Sources.size())
+	if (!_Sources.empty())
 	{
 		nlwarning("AL: _Sources.size(): '%u'", (uint32)_Sources.size());
 		set<CSourceAL *>::iterator it(_Sources.begin()), end(_Sources.end());
@@ -206,7 +206,7 @@ CSoundDriverAL::~CSoundDriverAL()
 	}
 	if (!_Buffers.empty()) alDeleteBuffers(compactAliveNames(_Buffers, alIsBuffer), &*_Buffers.begin());	
 	// Release internal resources of all remaining IEffect instances
-	if (_Effects.size())
+	if (!_Effects.empty())
 	{
 		nlwarning("AL: _Effects.size(): '%u'", (uint32)_Effects.size());
 		set<CEffectAL *>::iterator it(_Effects.begin()), end(_Effects.end());

@@ -87,9 +87,11 @@ protected:
 	void copyServerFiles();
 	void copyProfileFiles();
 	void extractBnpClient();
+	void copyIntaller();
 	void cleanFiles();
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();
+	bool createAddRemoveEntry();
 
 	// from CFilesCopier
 	virtual void operationPrepare();

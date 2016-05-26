@@ -278,7 +278,7 @@ ICDBNode * CCDBNodeBranch::getNode (const CTextId& id, bool bCreate)
 		{
 			// Yoyo: must not be SERVER or LOCAL, cause definied through xml.
 			// This may cause some important crash error
-			//nlassert(id.size()>0);
+			//nlassert(!id.empty());
 			//nlassert(id.getElement(0)!="SERVER");
 			//nlassert(id.getElement(0)!="LOCAL");
 			ICDBNode *newNode;

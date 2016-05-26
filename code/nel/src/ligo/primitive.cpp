@@ -1218,7 +1218,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 		path.erase(0,2);
 	}
 
-	while (path.size()>0)
+	while (!path.empty())
 	{
 		if	(path.find("/")==0)
 		{

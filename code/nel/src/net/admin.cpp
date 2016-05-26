@@ -430,7 +430,7 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 			else
 			{
 
-				if (strs.size()>0)
+				if (!strs.empty())
 				{
 					str = strs[0].substr(0,strs[0].size()-1);
 					// replace all spaces into udnerscore because space is a reserved char
@@ -717,7 +717,7 @@ void updateAdmin()
 			ICommand::execute(Alarms[i].Name, logDisplayVars, true, false);
 			const std::deque<std::string>	&strs = mdDisplayVars.lockStrings();
 
-			if (strs.size()>0)
+			if (!strs.empty())
 			{
 				str = strs[0].substr(0,strs[0].size()-1);
 			}

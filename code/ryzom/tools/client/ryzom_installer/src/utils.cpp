@@ -17,6 +17,23 @@
 #include "stdpch.h"
 #include "utils.h"
 
+QString qBytesToHumanReadable(qint64 bytes)
+{
+	static std::vector<std::string> units;
+
+	if (units.empty())
+	{
+		units.push_back(QObject::tr("B").toUtf8().constData());
+		units.push_back(QObject::tr("KiB").toUtf8().constData());
+		units.push_back(QObject::tr("MiB").toUtf8().constData());
+		units.push_back(QObject::tr("GiB").toUtf8().constData());
+		units.push_back(QObject::tr("TiB").toUtf8().constData());
+		units.push_back(QObject::tr("PiB").toUtf8().constData());
+	}
+
+	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
+}
+
 QString qFromUtf8(const std::string &str)
 {
 	return QString::fromUtf8(str.c_str());

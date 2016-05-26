@@ -119,7 +119,7 @@ bool			CTextureDLM::canCreateLightMap(uint w, uint h)
 		return true;
 
 	// If empty, test if there is an empty block.
-	return _EmptyBlocks.size()>0;
+	return !_EmptyBlocks.empty();
 }
 
 
@@ -166,7 +166,7 @@ bool			CTextureDLM::createLightMap(uint w, uint h, uint &x, uint &y)
 	if(_FreeBlocks[lMapType]==NULL)
 	{
 		// list is empty => allocate a block from _EmptyBlocks.
-		nlassert(_EmptyBlocks.size()>0);
+		nlassert(!_EmptyBlocks.empty());
 
 		// pop a block from empty list
 		CBlock	*block= &_Blocks[_EmptyBlocks.back()];
