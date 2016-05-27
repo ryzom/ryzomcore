@@ -2293,11 +2293,11 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 	bool res = true;
 
 #ifdef USE_OPENGLES
-	res = eglSwapInterval(_EglDisplay, _Interval) == EGL_TRUE;
+	res = eglSwapInterval(_EglDisplay, interval) == EGL_TRUE;
 #elif defined(NL_OS_WINDOWS)
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		res = nwglSwapIntervalEXT(_Interval) == TRUE;
+		res = nwglSwapIntervalEXT(interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
 	[_ctx setValues:(GLint*)&interval forParameter:NSOpenGLCPSwapInterval];
