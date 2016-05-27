@@ -486,7 +486,6 @@ bool COperationDialog::createDefaultProfile()
 	CServer server = config->getServer(config->getDefaultServerIndex());
 
 	m_currentOperation = QApplication::tr("Create default profile");
-//	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CProfile profile;
 
@@ -539,9 +538,10 @@ bool COperationDialog::createAddRemoveEntry()
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
 
 			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
+			QString nativeFullPath = QDir::toNativeSeparators(newInstallerFullPath);
 
 			settings.setValue("Comments", "");
-			settings.setValue("DisplayIcon", QDir::toNativeSeparators(newInstallerFullPath) + ",0");
+			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", "Ryzom");
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
 			settings.setValue("EstimatedSize", 1500000); // TODO: compute real size
@@ -552,13 +552,12 @@ bool COperationDialog::createAddRemoveEntry()
 			settings.setValue("NoModify", 0);
 			settings.setValue("NoRemove", 0);
 			settings.setValue("NoRepair", 0);
-			settings.setValue("Publisher", AUTHOR);
-			settings.setValue("QuietUninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u -s");
-			settings.setValue("UninstallString", QDir::toNativeSeparators(newInstallerFullPath) + " -u");
-			settings.setValue("URLUpdateInfo", "http://ryzom.fr/info");
-			settings.setValue("URLInfoAbout", "http://ryzom.fr/info2");
-			//	settings.setValue("sEstimatedSize2", 0);
-			settings.setValue("HelpLink", "http://ryzom.fr/support");
+			if (!config->getProductPublisher().isEmpty()) settings.setValue("Publisher", config->getProductPublisher());
+			settings.setValue("QuietUninstallString", nativeFullPath + " -u -s");
+			settings.setValue("UninstallString", nativeFullPath + " -u");
+			if (!config->getProductUpdateUrl().isEmpty()) settings.setValue("URLUpdateInfo", config->getProductUpdateUrl());
+			if (!config->getProductAboutUrl().isEmpty()) settings.setValue("URLInfoAbout", config->getProductAboutUrl());
+			if (!config->getProductHelpUrl().isEmpty()) settings.setValue("HelpLink", config->getProductHelpUrl());
 			//	ModifyPath
 #endif
 		}
