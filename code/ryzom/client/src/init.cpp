@@ -1119,12 +1119,6 @@ void prelogInit()
 		if(ClientCfg.DisableTextureShdr)
 			Driver->disableHardwareTextureShader();
 
-		// Enable or disable VSync
-		if(ClientCfg.WaitVBL)
-			Driver->setSwapVBLInterval(1);
-		else
-			Driver->setSwapVBLInterval(0);
-
 		if (StereoDisplay) // VR_CONFIG // VR_DRIVER
 		{
 			// override mode TODO
@@ -1149,6 +1143,12 @@ void prelogInit()
 			// ExitClientError() call exit() so the code after is never called
 			return;
 		}
+
+		// Enable or disable VSync
+		if (ClientCfg.WaitVBL)
+			Driver->setSwapVBLInterval(1);
+		else
+			Driver->setSwapVBLInterval(0);
 
 		// initialize system utils class
 		CSystemUtils::init();
