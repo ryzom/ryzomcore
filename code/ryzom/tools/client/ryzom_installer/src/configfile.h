@@ -164,7 +164,7 @@ public:
 	bool use64BitsClient() const;
 	void setUse64BitsClient(bool on);
 
-	QString expandVariables(const QString &str);
+	QString expandVariables(const QString &str) const;
 
 	QString getClientArch() const;
 
@@ -173,6 +173,14 @@ public:
 	QString getSrcServerClientBNPFullPath() const;
 
 	InstallationStep getNextStep() const;
+
+	// product details
+	QString getProductName() const;
+	QString getProductPublisher() const;
+	QString getProductAboutUrl() const;
+	QString getProductUpdateUrl() const;
+	QString getProductHelpUrl() const;
+	QString getProductComments() const;
 
 private:
 	int m_defaultServerIndex;
@@ -188,6 +196,14 @@ private:
 
 	QString m_defaultConfigPath;
 	QString m_configPath;
+
+	// product
+	QString m_productName;
+	QString m_productPublisher;
+	QString m_productAboutUrl;
+	QString m_productUpdateUrl;
+	QString m_productHelpUrl;
+	QString m_productComments;
 
 	static CConfigFile *s_instance;
 };

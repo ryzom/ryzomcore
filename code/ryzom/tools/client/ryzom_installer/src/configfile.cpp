@@ -59,6 +59,15 @@ bool CConfigFile::load(const QString &filename)
 	m_use64BitsClient = settings.value("use_64bits_client").toBool();
 	settings.endGroup();
 
+	settings.beginGroup("product");
+	m_productName = settings.value("name").toString();
+	m_productPublisher = settings.value("publisher").toString();
+	m_productAboutUrl = settings.value("url_about").toString();
+	m_productUpdateUrl = settings.value("url_update").toString();
+	m_productHelpUrl = settings.value("url_help").toString();
+	m_productComments = settings.value("comments").toString();
+	settings.endGroup();
+
 	settings.beginGroup("servers");
 	int serversCount = settings.value("size").toInt();
 	m_defaultServerIndex = settings.value("default").toInt();
@@ -140,6 +149,15 @@ bool CConfigFile::save() const
 	settings.setValue("source_directory", m_srcDirectory);
 	settings.setValue("installation_directory", m_installationDirectory);
 	settings.setValue("use_64bits_client", m_use64BitsClient);
+	settings.endGroup();
+
+	settings.beginGroup("product");
+	settings.setValue("name", m_productName);
+	settings.setValue("publisher", m_productPublisher);
+	settings.setValue("url_about", m_productAboutUrl);
+	settings.setValue("url_update", m_productUpdateUrl);
+	settings.setValue("url_help", m_productHelpUrl);
+	settings.setValue("comments", m_productComments);
 	settings.endGroup();
 
 	settings.beginGroup("servers");
@@ -345,7 +363,7 @@ void CConfigFile::setUse64BitsClient(bool on)
 	m_use64BitsClient = on;
 }
 
-QString CConfigFile::expandVariables(const QString &str)
+QString CConfigFile::expandVariables(const QString &str) const
 {
 	QString res = str;
 
@@ -720,4 +738,34 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 #endif
 
 	return Done;
+}
+
+QString CConfigFile::getProductName() const
+{
+	return m_productName;
+}
+
+QString CConfigFile::getProductPublisher() const
+{
+	return m_productPublisher;
+}
+
+QString CConfigFile::getProductAboutUrl() const
+{
+	return expandVariables(m_productAboutUrl);
+}
+
+QString CConfigFile::getProductUpdateUrl() const
+{
+	return expandVariables(m_productUpdateUrl);
+}
+
+QString CConfigFile::getProductHelpUrl() const
+{
+	return expandVariables(m_productHelpUrl);
+}
+
+QString CConfigFile::getProductComments() const
+{
+	return m_productComments;
 }

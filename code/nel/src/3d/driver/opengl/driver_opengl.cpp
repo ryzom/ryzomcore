@@ -676,8 +676,8 @@ bool CDriverGL::setupDisplay()
 	}
 #endif
 
-	// Reset the vbl interval
-	setSwapVBLInterval(_Interval);
+	// Get initial VBL interval
+	_Interval = getSwapVBLInterval();
 
 	return true;
 }
@@ -2288,16 +2288,22 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 	H_AUTO_OGL(CDriverGL_setSwapVBLInterval);
 
 	if (!_Initialized)
+	{
+		nlwarning("OpenGL driver not initialized when calling setSwapVBLInterval");
 		return;
+	}
 
 	bool res = true;
 
+	// don't try to change VBL if interval didn't change
+	if (_Interval == interval) return;
+
 #ifdef USE_OPENGLES
-	res = eglSwapInterval(_EglDisplay, _Interval) == EGL_TRUE;
+	res = eglSwapInterval(_EglDisplay, interval) == EGL_TRUE;
 #elif defined(NL_OS_WINDOWS)
 	if(_Extensions.WGLEXTSwapControl)
 	{
-		res = nwglSwapIntervalEXT(_Interval) == TRUE;
+		res = nwglSwapIntervalEXT(interval) == TRUE;
 	}
 #elif defined(NL_OS_MAC)
 	[_ctx setValues:(GLint*)&interval forParameter:NSOpenGLCPSwapInterval];
