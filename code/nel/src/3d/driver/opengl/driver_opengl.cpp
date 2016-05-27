@@ -2295,6 +2295,9 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 
 	bool res = true;
 
+	// don't try to change VBL if interval didn't change
+	if (_Interval == interval) return;
+
 #ifdef USE_OPENGLES
 	res = eglSwapInterval(_EglDisplay, interval) == EGL_TRUE;
 #elif defined(NL_OS_WINDOWS)
