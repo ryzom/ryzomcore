@@ -2288,7 +2288,10 @@ void	CDriverGL::setSwapVBLInterval(uint interval)
 	H_AUTO_OGL(CDriverGL_setSwapVBLInterval);
 
 	if (!_Initialized)
+	{
+		nlwarning("OpenGL driver not initialized when calling setSwapVBLInterval");
 		return;
+	}
 
 	bool res = true;
 
