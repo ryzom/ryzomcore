@@ -676,8 +676,8 @@ bool CDriverGL::setupDisplay()
 	}
 #endif
 
-	// Reset the vbl interval
-	setSwapVBLInterval(_Interval);
+	// Get initial VBL interval
+	_Interval = getSwapVBLInterval();
 
 	return true;
 }
