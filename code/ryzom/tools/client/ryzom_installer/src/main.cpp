@@ -22,9 +22,6 @@
 #include "uninstallwizarddialog.h"
 #include "operationdialog.h"
 
-#include "nel/misc/path.h"
-#include "nel/misc/ucstring.h"
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -58,8 +55,6 @@ int main(int argc, char *argv[])
 	NLMISC::CApplicationContext appContext;
 
 	QApplication app(argc, argv);
-
-	// TODO: parameters -u (uinstall) and -s (silent)
 
 	QApplication::setApplicationName("Ryzom");
 	QApplication::setApplicationVersion(RYZOM_VERSION);
@@ -152,40 +147,31 @@ int main(int argc, char *argv[])
 	{
 		CMigrateWizardDialog dialog;
 
-		if (!dialog.exec()) displayMainWindow = false;
+		if (!dialog.exec()) return 1;
+
+		step = config.getNextStep();
 	}
 	else if (step == CConfigFile::ShowInstallWizard)
 	{
 		CInstallWizardDialog dialog;
 
-		if (!dialog.exec()) displayMainWindow = false;
-	}
+		if (!dialog.exec()) return 1;
 
-
-	if (displayMainWindow)
-	{
 		step = config.getNextStep();
-
-		if (step != CConfigFile::Done)
-		{
-			COperationDialog dialog;
-
-			if (!dialog.exec()) displayMainWindow = false;
-		}
 	}
-
-	if (displayMainWindow)
+	
+	if (step != CConfigFile::Done)
 	{
+		COperationDialog dialog;
+		dialog.setOperation(config.getSrcServerDirectory().isEmpty() ? COperationDialog::OperationInstall: COperationDialog::OperationMigrate);
+
+		if (!dialog.exec()) return 1;
+
 		step = config.getNextStep();
-
-		if (step == CConfigFile::Done)
-		{
-			CMainWindow mainWindow;
-			mainWindow.show();
-
-			return QApplication::exec();
-		}
 	}
 
-	return 0;
+	CMainWindow mainWindow;
+	mainWindow.show();
+
+	return QApplication::exec();
 }
