@@ -34,6 +34,33 @@ QString qBytesToHumanReadable(qint64 bytes)
 	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
 }
 
+qint64 getDirectorySize(const QString &directory)
+{
+	qint64 size = 0;
+	QDir dir(directory);
+
+	if (dir.exists())
+	{
+		QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+		for (int i = 0; i < list.size(); ++i)
+		{
+			QFileInfo fileInfo = list.at(i);
+
+			if (fileInfo.isDir())
+			{
+				size += getDirectorySize(fileInfo.absoluteFilePath());
+			}
+			else
+			{
+				size += fileInfo.size();
+			}
+		}
+	}
+
+	return size;
+}
+
 QString qFromUtf8(const std::string &str)
 {
 	return QString::fromUtf8(str.c_str());
