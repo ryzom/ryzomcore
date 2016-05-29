@@ -203,13 +203,18 @@ int main(int argc, char **argv)
 	{
 		std::string currentPath = CPath::getApplicationDirectory("Ryzom");
 
-		// append profile ID to directory
-		if (Args.haveArg("p"))
-			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
-
+		// create parent directory
 		if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
 
-		CPath::setCurrentPath(currentPath);
+		// append profile ID to directory
+		if (Args.haveArg("p"))
+		{
+			currentPath = NLMISC::CPath::standardizePath(currentPath) + Args.getArg("p").front();
+
+			if (!CFile::isExists(currentPath)) CFile::createDirectory(currentPath);
+		}
+
+		if (!CPath::setCurrentPath(currentPath)) return 1;
 	}
 
 #ifdef TEST_CRASH_COUNTER
