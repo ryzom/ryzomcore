@@ -35,7 +35,7 @@ class COperationDialog : public QDialog, public Ui::OperationDialog, public IOpe
 	Q_OBJECT
 
 public:
-	COperationDialog();
+	COperationDialog(QWidget *parent = NULL);
 	virtual ~COperationDialog();
 
 public slots:

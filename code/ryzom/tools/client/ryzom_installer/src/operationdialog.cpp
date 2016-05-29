@@ -41,7 +41,7 @@
 	#define new DEBUG_NEW
 #endif
 
-COperationDialog::COperationDialog():QDialog(), m_aborting(false)
+COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(false), m_operation(OperationNone)
 {
 	setupUi(this);
 

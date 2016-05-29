@@ -33,7 +33,7 @@ class CProfilesDialog : public QDialog, public Ui::ProfilesDialog
 	Q_OBJECT
 
 public:
-	CProfilesDialog();
+	CProfilesDialog(QWidget *parent = NULL);
 	virtual ~CProfilesDialog();
 
 private slots:

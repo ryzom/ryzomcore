@@ -23,7 +23,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CProfilesDialog::CProfilesDialog():QDialog(), m_currentProfileIndex(-1)
+CProfilesDialog::CProfilesDialog(QWidget *parent):QDialog(parent), m_currentProfileIndex(-1)
 {
 	setupUi(this);
 

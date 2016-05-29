@@ -119,7 +119,7 @@ void CMainWindow::onConfigureClicked()
 
 void CMainWindow::onProfiles()
 {
-	CProfilesDialog dialog;
+	CProfilesDialog dialog(this);
 
 	if (dialog.exec())
 	{
