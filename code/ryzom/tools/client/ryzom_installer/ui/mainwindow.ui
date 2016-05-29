@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>547</width>
+    <height>386</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
     <horstretch>0</horstretch>
@@ -117,6 +125,7 @@ p, li { white-space: pre-wrap; }
     </property>
     <addaction name="actionProfiles"/>
     <addaction name="actionDirectories"/>
+    <addaction name="actionUninstall"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -153,6 +162,11 @@ p, li { white-space: pre-wrap; }
   <action name="actionQuit">
    <property name="text">
     <string>&amp;Quit</string>
+   </property>
+  </action>
+  <action name="actionUninstall">
+   <property name="text">
+    <string>&amp;Uninstall</string>
    </property>
   </action>
  </widget>

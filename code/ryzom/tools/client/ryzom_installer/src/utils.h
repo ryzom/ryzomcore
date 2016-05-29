@@ -30,6 +30,8 @@
 
 QString qBytesToHumanReadable(qint64 bytes);
 
+qint64 getDirectorySize(const QString &directory);
+
 // Convert a UTF-8 string to QString
 QString qFromUtf8(const std::string &str);
 

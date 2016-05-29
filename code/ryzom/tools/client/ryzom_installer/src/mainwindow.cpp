@@ -18,6 +18,8 @@
 #include "mainwindow.h"
 #include "downloader.h"
 #include "profilesdialog.h"
+#include "uninstallwizarddialog.h"
+#include "operationdialog.h"
 #include "configfile.h"
 #include "config.h"
 #include "profilesmodel.h"
@@ -38,6 +40,7 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 
 	connect(playButton, SIGNAL(clicked()), SLOT(onPlayClicked()));
 	connect(configureButton, SIGNAL(clicked()), SLOT(onConfigureClicked()));
@@ -84,7 +87,7 @@ void CMainWindow::onPlayClicked()
 	QStringList arguments;
 	arguments << "-p";
 	arguments << QString::number(profileIndex);
-	arguments << profile.arguments;
+	arguments << profile.arguments.split(' ');
 
 	bool started = QProcess::startDetached(profile.executable, arguments);
 
@@ -116,11 +119,25 @@ void CMainWindow::onConfigureClicked()
 
 void CMainWindow::onProfiles()
 {
-	CProfilesDialog dialog;
+	CProfilesDialog dialog(this);
 
 	if (dialog.exec())
 	{
 		updateProfiles();
+	}
+}
+
+void CMainWindow::onUninstall()
+{
+	CUninstallWizardDialog dialog(this);
+
+	if (dialog.exec())
+	{
+		COperationDialog dialog(&dialog);
+
+		dialog.setOperation(COperationDialog::OperationUninstall);
+
+		dialog.exec();
 	}
 }
 

@@ -1537,15 +1537,6 @@ void postlogInit()
 			ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 			if(ClientCfg.SoundOn)
 			{
-				// tmp fix : it seems that, at this point, if the bg downloader window has focus and
-				// not the Ryzom one, then sound init fails
-				/*#ifdef NL_OS_WINDOWS
-					HWND hWnd = Driver->getDisplay ();
-					nlassert (hWnd);
-					ShowWindow(hWnd, SW_RESTORE);
-					SetForegroundWindow(hWnd);
-				#endif*/
-				// bg downloader not used anymore anyways
 				SoundMngr = new CSoundManager(&ProgressBar);
 				try
 				{
@@ -1554,7 +1545,6 @@ void postlogInit()
 				catch(const Exception &e)
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
-					// leak the alocated sound manager...
 					delete SoundMngr;
 					SoundMngr = NULL;
 				}

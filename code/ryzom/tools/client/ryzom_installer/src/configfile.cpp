@@ -29,7 +29,7 @@ const CProfile NoProfile;
 
 CConfigFile *CConfigFile::s_instance = NULL;
 
-CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false)
+CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
 {
 	s_instance = this;
 
@@ -56,7 +56,8 @@ bool CConfigFile::load(const QString &filename)
 	m_language = settings.value("language", m_language).toString();
 	m_srcDirectory = settings.value("source_directory").toString();
 	m_installationDirectory = settings.value("installation_directory").toString();
-	m_use64BitsClient = settings.value("use_64bits_client").toBool();
+	m_use64BitsClient = settings.value("use_64bits_client", true).toBool();
+	m_shouldUninstallOldClient = settings.value("should_uninstall_old_client", true).toBool();
 	settings.endGroup();
 
 	settings.beginGroup("product");
@@ -149,6 +150,7 @@ bool CConfigFile::save() const
 	settings.setValue("source_directory", m_srcDirectory);
 	settings.setValue("installation_directory", m_installationDirectory);
 	settings.setValue("use_64bits_client", m_use64BitsClient);
+	settings.setValue("should_uninstall_old_client", m_shouldUninstallOldClient);
 	settings.endGroup();
 
 	settings.beginGroup("product");
@@ -361,6 +363,16 @@ bool CConfigFile::use64BitsClient() const
 void CConfigFile::setUse64BitsClient(bool on)
 {
 	m_use64BitsClient = on;
+}
+
+bool CConfigFile::shouldUninstallOldClient() const
+{
+	return m_shouldUninstallOldClient;
+}
+
+void CConfigFile::setShouldUninstallOldClient(bool on)
+{
+	m_shouldUninstallOldClient = on;
 }
 
 QString CConfigFile::expandVariables(const QString &str) const
@@ -708,6 +720,11 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 	if (!QFile::exists(getInstallationDirectory() + "/" + server.installerFilename))
 	{
 		return CopyInstaller;
+	}
+
+	if (m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+	{
+		return UninstallOldClient;
 	}
 
 	// no default profile

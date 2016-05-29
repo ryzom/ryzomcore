@@ -14,49 +14,43 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef PROFILESDIALOG_H
-#define PROFILESDIALOG_H
+#ifndef UNINSTALLWIZARDDIALOG_H
+#define UNINSTALLWIZARDDIALOG_H
 
-#include "ui_profiles.h"
-
-class CProfilesModel;
-class CServersModel;
+#include "ui_uninstallwizard.h"
 
 /**
- * Dialog displayed when editing existing profiles.
+ * Wizard displayed at first launch, that asks user to choose source and destination directories.
  *
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CProfilesDialog : public QDialog, public Ui::ProfilesDialog
+class CUninstallWizardDialog : public QDialog, public Ui::UninstallWizardDialog
 {
 	Q_OBJECT
 
 public:
-	CProfilesDialog(QWidget *parent = NULL);
-	virtual ~CProfilesDialog();
+	CUninstallWizardDialog(QWidget *parent = NULL);
+	virtual ~CUninstallWizardDialog();
+
+	QVector<int> getSelectedServers() const;
+	QVector<int> getSelectedProfiles() const;
+
+	bool isInstallerSelected() const;
 
 private slots:
 	void accept();
-
-	void onAddProfile();
-	void onDeleteProfile();
-	void onProfileClicked(const QModelIndex &index);
-
-	void displayProfile(int index);
-	void saveProfile(int index);
-	void deleteProfile(int index);
-	void addProfile();
-
-	void updateExecutableVersion(int index);
-
-	void onExecutableBrowseClicked();
+	void onItemChanged(QStandardItem *item);
 
 private:
-	CProfilesModel *m_model;
-	CServersModel *m_serversModel;
+	void updateSizes();
+	void updateButtons();
 
-	int m_currentProfileIndex;
+	// key is original ID, value is row index
+	QMap<int, int> m_serversIndices;
+	QMap<int, int> m_profilesIndices;
+
+	int m_installerIndex;
 };
 
 #endif

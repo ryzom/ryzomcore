@@ -19,10 +19,8 @@
 #include "configfile.h"
 #include "migratewizarddialog.h"
 #include "installwizarddialog.h"
+#include "uninstallwizarddialog.h"
 #include "operationdialog.h"
-
-#include "nel/misc/path.h"
-#include "nel/misc/ucstring.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -58,8 +56,6 @@ int main(int argc, char *argv[])
 
 	QApplication app(argc, argv);
 
-	// TODO: parameters -u (uinstall) and -s (silent)
-
 	QApplication::setApplicationName("Ryzom");
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
@@ -90,46 +86,92 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	bool displayMainWindow = true;
+	// use product name from installer.ini
+	if (!config.getProductName().isEmpty()) QApplication::setApplicationName(config.getProductName());
+
+	// define commandline arguments
+	QCommandLineParser parser;
+//	parser.setApplicationDescription(DESCRIPTION);
+	parser.addHelpOption();
+	parser.addVersionOption();
+
+	// root, username and password are optional because they can be saved in settings file
+	QCommandLineOption uninstallOption(QStringList() << "u" << "uninstall", QApplication::tr("Uninstall"));
+	parser.addOption(uninstallOption);
+
+	QCommandLineOption silentOption(QStringList() << "s" << "silent", QApplication::tr("Silent mode"));
+	parser.addOption(silentOption);
+
+	// process the actual command line arguments given by the user
+	parser.process(app);
+
+	if (parser.isSet(uninstallOption))
+	{
+		QVector<int> selectedServers;
+		QVector<int> selectedProfiles;
+		bool selectedInstaller = true;
+
+		// add all servers by default
+		for (int i = 0; i < config.getServersCount(); ++i)
+		{
+			selectedServers << i;
+		}
+
+		// show uninstall wizard dialog if not in silent mode
+		if (!parser.isSet(silentOption))
+		{
+			CUninstallWizardDialog dialog;
+
+			if (dialog.exec())
+			{
+				selectedServers = dialog.getSelectedServers();
+				selectedProfiles = dialog.getSelectedProfiles();
+				selectedInstaller = dialog.isInstallerSelected();
+			}
+		}
+
+		{
+			COperationDialog dialog;
+
+			dialog.setOperation(COperationDialog::OperationUninstall);
+
+			// TODO: set all components to uninstall
+
+			if (dialog.exec()) return 0;
+		}
+
+		return 1;
+	}
 
 	if (step == CConfigFile::ShowMigrateWizard)
 	{
 		CMigrateWizardDialog dialog;
 
-		if (!dialog.exec()) displayMainWindow = false;
+		if (!dialog.exec()) return 1;
+
+		step = config.getNextStep();
 	}
 	else if (step == CConfigFile::ShowInstallWizard)
 	{
 		CInstallWizardDialog dialog;
 
-		if (!dialog.exec()) displayMainWindow = false;
-	}
+		if (!dialog.exec()) return 1;
 
-
-	if (displayMainWindow)
-	{
 		step = config.getNextStep();
-
-		if (step != CConfigFile::Done)
-		{
-			COperationDialog dialog;
-
-			if (!dialog.exec()) displayMainWindow = false;
-		}
 	}
-
-	if (displayMainWindow)
+	
+	if (step != CConfigFile::Done)
 	{
+		COperationDialog dialog;
+		dialog.setOperation(config.getSrcServerDirectory().isEmpty() ? COperationDialog::OperationInstall: COperationDialog::OperationMigrate);
+
+		if (!dialog.exec()) return 1;
+
 		step = config.getNextStep();
-
-		if (step == CConfigFile::Done)
-		{
-			CMainWindow mainWindow;
-			mainWindow.show();
-
-			return QApplication::exec();
-		}
 	}
 
-	return 0;
+	CMainWindow mainWindow;
+	mainWindow.show();
+
+	return QApplication::exec();
 }

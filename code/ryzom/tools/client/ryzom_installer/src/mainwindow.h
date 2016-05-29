@@ -42,6 +42,7 @@ public slots:
 	void onConfigureClicked();
 
 	void onProfiles();
+	void onUninstall();
 	void onAbout();
 	void onAboutQt();
 

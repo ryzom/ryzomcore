@@ -41,7 +41,7 @@
 	#define new DEBUG_NEW
 #endif
 
-COperationDialog::COperationDialog():QDialog(), m_aborting(false)
+COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(false), m_operation(OperationNone)
 {
 	setupUi(this);
 
@@ -84,7 +84,33 @@ COperationDialog::~COperationDialog()
 {
 }
 
+void COperationDialog::setOperation(Operation operation)
+{
+	m_operation = operation;
+}
+
 void COperationDialog::processNextStep()
+{
+	switch (m_operation)
+	{
+		case OperationMigrate:
+			processMigrateNextStep();
+			break;
+
+		case OperationInstall:
+			processInstallNextStep();
+			break;
+
+		case OperationUninstall:
+			processUninstallNextStep();
+			break;
+
+		default:
+			break;
+	}
+}
+
+void COperationDialog::processMigrateNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -132,16 +158,20 @@ void COperationDialog::processNextStep()
 		QtConcurrent::run(this, &COperationDialog::copyProfileFiles);
 		break;
 
+		case CConfigFile::CleanFiles:
+		QtConcurrent::run(this, &COperationDialog::cleanFiles);
+		break;
+
 		case CConfigFile::ExtractBnpClient:
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
 		case CConfigFile::CopyInstaller:
-		QtConcurrent::run(this, &COperationDialog::copyIntaller);
+		QtConcurrent::run(this, &COperationDialog::copyInstaller);
 		break;
 
-		case CConfigFile::CleanFiles:
-		QtConcurrent::run(this, &COperationDialog::cleanFiles);
+		case CConfigFile::UninstallOldClient:
+		uninstallOldClient();
 		break;
 
 		case CConfigFile::CreateProfile:
@@ -164,6 +194,14 @@ void COperationDialog::processNextStep()
 		// cases already managed in main.cpp
 		break;
 	}
+}
+
+void COperationDialog::processInstallNextStep()
+{
+}
+
+void COperationDialog::processUninstallNextStep()
+{
 }
 
 void COperationDialog::showEvent(QShowEvent *e)
@@ -415,7 +453,7 @@ void COperationDialog::extractBnpClient()
 	emit done();
 }
 
-void COperationDialog::copyIntaller()
+void COperationDialog::copyInstaller()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -458,6 +496,44 @@ void COperationDialog::copyIntaller()
 			}
 		}
 	}
+
+	emit done();
+}
+
+void COperationDialog::uninstallOldClient()
+{
+#ifdef Q_OS_WIN
+
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	// check if Ryzom 2.1.0 is installed
+	if (settings.contains("UninstallString"))
+	{
+		QString uninstaller = settings.value("UninstallString").toString();
+
+		if (!uninstaller.isEmpty() && QFile::exists(uninstaller))
+		{
+			QMessageBox::StandardButtons button = QMessageBox::question(this, tr("Uninstall old client"), tr("An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?"));
+
+			if (button == QMessageBox::Yes)
+			{
+				CConfigFile::getInstance()->setShouldUninstallOldClient(true);
+
+				QDesktopServices::openUrl(QUrl::fromLocalFile(uninstaller));
+			}
+			else
+			{
+				// don't ask this question anymore
+				CConfigFile::getInstance()->setShouldUninstallOldClient(false);
+			}
+		}
+	}
+#endif
 
 	emit done();
 }
