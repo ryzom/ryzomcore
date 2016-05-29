@@ -38,6 +38,16 @@ public:
 	COperationDialog(QWidget *parent = NULL);
 	virtual ~COperationDialog();
 
+	enum Operation
+	{
+		OperationNone,
+		OperationMigrate,
+		OperationInstall,
+		OperationUninstall
+	};
+
+	void setOperation(Operation operation);
+
 public slots:
 	void onAbortClicked();
 
@@ -80,6 +90,9 @@ protected:
 	void closeEvent(QCloseEvent *e);
 
 	void processNextStep();
+	void processMigrateNextStep();
+	void processInstallNextStep();
+	void processUninstallNextStep();
 
 	// operations
 	void downloadData();
@@ -113,6 +126,8 @@ protected:
 
 	QMutex m_abortingMutex;
 	bool m_aborting;
+
+	Operation m_operation;
 };
 
 #endif

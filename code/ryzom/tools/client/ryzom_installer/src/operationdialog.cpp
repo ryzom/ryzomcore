@@ -84,7 +84,33 @@ COperationDialog::~COperationDialog()
 {
 }
 
+void COperationDialog::setOperation(Operation operation)
+{
+	m_operation = operation;
+}
+
 void COperationDialog::processNextStep()
+{
+	switch (m_operation)
+	{
+		case OperationMigrate:
+			processMigrateNextStep();
+			break;
+
+		case OperationInstall:
+			processInstallNextStep();
+			break;
+
+		case OperationUninstall:
+			processUninstallNextStep();
+			break;
+
+		default:
+			break;
+	}
+}
+
+void COperationDialog::processMigrateNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -132,16 +158,20 @@ void COperationDialog::processNextStep()
 		QtConcurrent::run(this, &COperationDialog::copyProfileFiles);
 		break;
 
+		case CConfigFile::CleanFiles:
+		QtConcurrent::run(this, &COperationDialog::cleanFiles);
+		break;
+
 		case CConfigFile::ExtractBnpClient:
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
 		case CConfigFile::CopyInstaller:
-		QtConcurrent::run(this, &COperationDialog::copyIntaller);
+		QtConcurrent::run(this, &COperationDialog::copyInstaller);
 		break;
 
-		case CConfigFile::CleanFiles:
-		QtConcurrent::run(this, &COperationDialog::cleanFiles);
+		case CConfigFile::UninstallOldClient:
+		uninstallOldClient();
 		break;
 
 		case CConfigFile::CreateProfile:
@@ -164,6 +194,14 @@ void COperationDialog::processNextStep()
 		// cases already managed in main.cpp
 		break;
 	}
+}
+
+void COperationDialog::processInstallNextStep()
+{
+}
+
+void COperationDialog::processUninstallNextStep()
+{
 }
 
 void COperationDialog::showEvent(QShowEvent *e)
@@ -415,7 +453,7 @@ void COperationDialog::extractBnpClient()
 	emit done();
 }
 
-void COperationDialog::copyIntaller()
+void COperationDialog::copyInstaller()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
