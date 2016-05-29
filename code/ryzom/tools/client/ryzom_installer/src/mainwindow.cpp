@@ -87,7 +87,7 @@ void CMainWindow::onPlayClicked()
 	QStringList arguments;
 	arguments << "-p";
 	arguments << QString::number(profileIndex);
-	arguments << profile.arguments;
+	arguments << profile.arguments.split(' ');
 
 	bool started = QProcess::startDetached(profile.executable, arguments);
 
