@@ -93,6 +93,7 @@ public:
 		CleanFiles,
 		ExtractBnpClient,
 		CopyInstaller,
+		UninstallOldClient,
 		CreateProfile,
 		CreateShortcuts,
 		CreateAddRemoveEntry,
@@ -164,6 +165,9 @@ public:
 	bool use64BitsClient() const;
 	void setUse64BitsClient(bool on);
 
+	bool shouldUninstallOldClient() const;
+	void setShouldUninstallOldClient(bool on);
+
 	QString expandVariables(const QString &str) const;
 
 	QString getClientArch() const;
@@ -192,6 +196,7 @@ private:
 	QString m_installationDirectory;
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
+	bool m_shouldUninstallOldClient;
 	QString m_language;
 
 	QString m_defaultConfigPath;

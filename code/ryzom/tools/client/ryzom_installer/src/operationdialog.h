@@ -86,9 +86,10 @@ protected:
 	void downloadClient();
 	void copyServerFiles();
 	void copyProfileFiles();
-	void extractBnpClient();
-	void copyIntaller();
 	void cleanFiles();
+	void extractBnpClient();
+	void copyInstaller();
+	void uninstallOldClient();
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();
 	bool createAddRemoveEntry();

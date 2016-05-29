@@ -462,6 +462,44 @@ void COperationDialog::copyIntaller()
 	emit done();
 }
 
+void COperationDialog::uninstallOldClient()
+{
+#ifdef Q_OS_WIN
+
+#ifdef Q_OS_WIN64
+	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
+	QSettings settings("HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+#else
+	QSettings settings("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+#endif
+
+	// check if Ryzom 2.1.0 is installed
+	if (settings.contains("UninstallString"))
+	{
+		QString uninstaller = settings.value("UninstallString").toString();
+
+		if (!uninstaller.isEmpty() && QFile::exists(uninstaller))
+		{
+			QMessageBox::StandardButtons button = QMessageBox::question(this, tr("Uninstall old client"), tr("An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?"));
+
+			if (button == QMessageBox::Yes)
+			{
+				CConfigFile::getInstance()->setShouldUninstallOldClient(true);
+
+				QDesktopServices::openUrl(QUrl::fromLocalFile(uninstaller));
+			}
+			else
+			{
+				// don't ask this question anymore
+				CConfigFile::getInstance()->setShouldUninstallOldClient(false);
+			}
+		}
+	}
+#endif
+
+	emit done();
+}
+
 void COperationDialog::cleanFiles()
 {
 	CConfigFile *config = CConfigFile::getInstance();
