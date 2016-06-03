@@ -1938,6 +1938,25 @@ namespace NLGUI
 
 	void CViewRenderer::drawText (sint layerId, float x, float y, uint wordIndex, float xmin, float ymin, float xmax, float ymax, UTextContext &textContext)
 	{
+		xmin = xmin * _OneOverScreenW;
+		ymin = ymin * _OneOverScreenH;
+		xmax = xmax * _OneOverScreenW;
+		ymax = ymax * _OneOverScreenH;
+
+		if (_InterfaceScale != 1.0f && _InterfaceScale != 2.0f)
+		{
+			// align to screen pixel
+			x *= _OneOverScreenW * _ScreenW;
+			y *= _OneOverScreenH * _ScreenH;
+			x = floorf(x) * 1.f / (float) _ScreenW;
+			y = floorf(y) * 1.f / (float) _ScreenH;
+		}
+		else
+		{
+			x = floorf(x) * _OneOverScreenW;
+			y = floorf(y) * _OneOverScreenH;
+		}
+
 		if (_WorldSpaceTransformation)
 		{
 			textContext.printClipAtUnProjected(*getStringRenderBuffer(layerId), _CameraFrustum, _WorldSpaceMatrix, x, y, _CurrentZ, wordIndex, xmin, ymin, xmax, ymax);

@@ -232,12 +232,14 @@ namespace NLGUI
 		bool	_Embolden;
 		bool	_Oblique;
 		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
-		uint	_FontWidth;
+		float	_FontWidth;
 		// height of the font in pixel.
 		// use getFontHeight
-		uint	_FontHeight;
-		uint	_FontLegHeight;
+		float	_FontHeight;
+		float	_FontLegHeight;
 		float	_SpaceWidth;
+		/// last UI scale used to calculate font size
+		float	_Scale;
 		/// the text color
 		NLMISC::CRGBA _Color;
 		/// the shadow mode
@@ -333,8 +335,8 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear();
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, uint fontWidth);
-				void    addWord(const CWord &word, uint fontWidth);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth);
+				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
 				float	getSpaceWidth() const { return _SpaceWidth; }
