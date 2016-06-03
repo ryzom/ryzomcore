@@ -177,6 +177,12 @@ namespace NLGUI
 		void getScreenOOSize (float &oow, float &ooh);
 
 		/*
+		 * UI scaling
+		 */
+		void setInterfaceScale(float scale, sint32 width = 0, sint32 height = 0);
+		float getInterfaceScale() const { return _InterfaceScale; }
+
+		/*
 		 * is the Screen minimized?
 		 */
 		bool isMinimized() const {return _IsMinimized;}
@@ -526,6 +532,13 @@ namespace NLGUI
 		float		_OneOverScreenW, _OneOverScreenH;
 		bool		_IsMinimized;
 
+		// UI scaling
+		float		_InterfaceScale;
+		float		_InterfaceUserScale;
+		sint32		_InterfaceBaseW, _InterfaceBaseH;
+		sint32		_EffectiveScreenW, _EffectiveScreenH;
+
+		void updateInterfaceScale();
 
 		//map linking a uint to a bitmap. Used to display figurs
 		std::vector<sint32> _IndexesToTextureIds;
@@ -585,14 +598,12 @@ namespace NLGUI
 		static CViewRenderer *instance;
 		static NL3D::UDriver *driver;
 		static NL3D::UTextContext *textcontext;
-
 	public:
 		static NL3D::UTextContext* getTextContext(){ return textcontext; }
 
 		/// Set of hw cursor images
 		static std::set< std::string > *hwCursors;
 		static float hwCursorScale;
-
 	};
 
 

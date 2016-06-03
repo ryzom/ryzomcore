@@ -91,21 +91,52 @@ namespace NLGUI
 		if(w!=0 && h!=0)
 		{
 			_IsMinimized= false;
-			_ScreenW = w;
-			_ScreenH = h;
-			if(_ScreenW>0)
-				_OneOverScreenW = 1.0f / (float)_ScreenW;
-			else
-				_OneOverScreenW = 1000;
-			if(_ScreenH>0)
-				_OneOverScreenH = 1.0f / (float)_ScreenH;
-			else
-				_OneOverScreenH = 1000;
+			if (w != _ScreenW || h != _ScreenH)
+			{
+				_ScreenW = w;
+				_ScreenH = h;
+
+				updateInterfaceScale();
+			}
 		}
 		else
 		{
 			// Keep old coordinates (suppose resolution won't change, even if typically false wen we swithch from outgame to ingame)
 			_IsMinimized= true;
+		}
+	}
+
+	void CViewRenderer::updateInterfaceScale()
+	{
+		if(_ScreenW>0)
+			_OneOverScreenW = 1.0f / (float)_ScreenW;
+		else
+			_OneOverScreenW = 1000;
+		if(_ScreenH>0)
+			_OneOverScreenH = 1.0f / (float)_ScreenH;
+		else
+			_OneOverScreenH = 1000;
+
+		_InterfaceScale = _InterfaceUserScale;
+		if (_InterfaceBaseW > 0 && _InterfaceBaseH > 0)
+		{
+			float wRatio = (float)_ScreenW / _InterfaceBaseW;
+			float rRatio = (float)_ScreenH / _InterfaceBaseH;
+			_InterfaceScale *= std::min(wRatio, rRatio);
+		}
+
+		if (_InterfaceScale != 1.0f)
+		{
+			_OneOverScreenW *= _InterfaceScale;
+			_OneOverScreenH *= _InterfaceScale;
+
+			_EffectiveScreenW = sint(_ScreenW / _InterfaceScale);
+			_EffectiveScreenH = sint(_ScreenH / _InterfaceScale);
+		}
+		else
+		{
+			_EffectiveScreenW = _ScreenW;
+			_EffectiveScreenH = _ScreenH;
 		}
 	}
 
@@ -115,8 +146,8 @@ namespace NLGUI
 	 */
 	void CViewRenderer::getScreenSize (uint32 &w, uint32 &h)
 	{
-		w = _ScreenW;
-		h = _ScreenH;
+		w = _EffectiveScreenW;
+		h = _EffectiveScreenH;
 	}
 
 	/*
@@ -128,6 +159,20 @@ namespace NLGUI
 		ooh= _OneOverScreenH;
 	}
 
+	void CViewRenderer::setInterfaceScale(float scale, sint32 width/*=0*/, sint32 height/*=0*/)
+	{
+		// prevent #div/0
+		if (sint(scale*100) > 0)
+			_InterfaceUserScale = scale;
+		else
+			_InterfaceUserScale = 1.0f;
+
+		_InterfaceBaseW = width;
+		_InterfaceBaseH = height;
+
+		updateInterfaceScale();
+	}
+
 	void CViewRenderer::setup()
 	{
 		_ClipX = _ClipY = 0;
@@ -135,8 +180,10 @@ namespace NLGUI
 		_ClipH = 600;
 		_ScreenW = 800;
 		_ScreenH = 600;
-		_OneOverScreenW= 1.0f / (float)_ScreenW;
-		_OneOverScreenH= 1.0f / (float)_ScreenH;
+		_InterfaceScale = 1.0f;
+		_InterfaceUserScale = 1.0f;
+		_InterfaceBaseW = 0;
+		_InterfaceBaseH = 0;
 		_IsMinimized= false;
 		_WFigurTexture= 0;
 		_HFigurTexture= 0;
@@ -152,6 +199,8 @@ namespace NLGUI
 			_EmptyLayer[i]= true;
 		}
 		_BlankGlobalTexture  = NULL;
+
+		updateInterfaceScale();
 	}
 
 
