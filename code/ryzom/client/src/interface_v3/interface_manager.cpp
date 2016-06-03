@@ -475,6 +475,8 @@ CInterfaceManager::CInterfaceManager()
 	interfaceLinkUpdater = new CInterfaceLink::CInterfaceLinkUpdater();
 	_ScreenW = _ScreenH = 0;
 	_LastInGameScreenW = _LastInGameScreenH = 0;
+	_InterfaceScaleChanged = false;
+	_InterfaceScale = 1.0f;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -1982,6 +1984,14 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 			node = &*_CurrentPlayerCharacLeaf[i];
 
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
+	}
+
+	// update value change from ingame config window
+	// must update it here, right before widget manager checks it
+	if (_InterfaceScaleChanged)
+	{
+		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
+		_InterfaceScaleChanged = false;
 	}
 
 	CWidgetManager::getInstance()->drawViews( camera );

@@ -146,6 +146,9 @@ struct CClientConfig
 	/// Monitor Gamma [-1 ~ 1], default 0
 	float			Gamma;
 
+	// UI scaling
+	float			InterfaceScale;
+
 	// VR
 	bool			VREnable;
 	std::string		VRDisplayDevice;
