@@ -61,11 +61,6 @@ namespace NLGUI
 				}
 			}
 
-			if (element_number == HTML_A)
-			{
-				addLink(element_number, present, value);
-			}
-
 			beginElement(element_number, present, value);
 		}
 		else

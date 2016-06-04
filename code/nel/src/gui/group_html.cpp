@@ -316,6 +316,11 @@ namespace NLGUI
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
 			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
 
+			std::string userAgent = options.appName + "/" + options.appVersion;
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
+
+			sendCookies(curl, _DocumentDomain, _TrustedDomain);
+
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
@@ -338,14 +343,7 @@ namespace NLGUI
 	#ifdef LOG_DL
 		nlwarning("Init Image Download");
 	#endif
-	/*
-	// Get current flag
-	int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
-	// Turn on leak-checking bit
-	tmpFlag |= _CRTDBG_CHECK_ALWAYS_DF;
-	// Set flag to the new value
-	_CrtSetDbgFlag( tmpFlag );
-	*/
+
 		string pathName = "cache";
 		if ( ! CFile::isExists( pathName ) )
 			CFile::createDirectory( pathName );
@@ -628,32 +626,6 @@ namespace NLGUI
 			curl_multi_cleanup(MultiCurl);
 	}
 
-	/*
-	void dolibcurltest()
-	{
-		nlwarning("start libcurl test");
-
-		initImageDownload();
-
-		addImageDownload("http://www.ryzom.com/en/");
-		addImageDownload("http://www.ryzom.com/fr/");
-		addImageDownload("http://www.ryzom.com/de/");
-
-		do
-		{
-			checkImageDownload();
-			nlwarning("continue to sleep");
-			nlSleep(300);
-		}
-		while(RunningCurls);
-
-		releaseImageDownload();
-
-		nlwarning("end libcurl test");
-	}
-	*/
-
-
 	class CGroupListAdaptor : public CInterfaceGroup
 	{
 	public:
@@ -726,10 +698,6 @@ namespace NLGUI
 
 			// Build a UTF8 string
 			string inputString(buf, buf+len);
-	//		inputString.resize (len);
-	//		uint i;
-	//		for (i=0; i<(uint)len; i++)
-	//			inputString[i] = buf[i];
 
 			if (_ParsingLua && _TrustedDomain)
 			{
@@ -747,7 +715,6 @@ namespace NLGUI
 			ucstring tmp;
 			tmp.reserve(len);
 			uint ucLen = (uint)inputUCString.size();
-			//uint ucLenWithoutSpace = 0;
 			for (uint i=0; i<ucLen; i++)
 			{
 				ucchar output;
@@ -768,22 +735,7 @@ namespace NLGUI
 				if (keep)
 				{
 					tmp.push_back(output);
-	/*
-					// Break if the string is more than 50 chars long without space
-					if (output != ucchar(' '))
-					{
-						ucLenWithoutSpace++;
-						if (ucLenWithoutSpace == 50)
-						{
-							tmp.push_back(ucchar(' '));
-							ucLenWithoutSpace = 0;
-						}
-					}
-					else
-					{
-						ucLenWithoutSpace = 0;
-					}
-	*/			}
+				}
 			}
 
 			if (!tmp.empty())
@@ -797,69 +749,6 @@ namespace NLGUI
 	{\
 		if (present[prefix##_ID] && value[prefix##_ID]) \
 			_AnchorName.push_back(value[prefix##_ID]); \
-	}
-
-	// ***************************************************************************
-
-	void CGroupHTML::addLink (uint element_number, const std::vector<bool> &present, const std::vector<const char *> &value)
-	{
-		if (_Browsing)
-		{
-			if (element_number == HTML_A)
-			{
-				registerAnchorName(MY_HTML_A);
-
-				// #fragment works with both ID and NAME so register both
-				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
-					_AnchorName.push_back(value[MY_HTML_A_NAME]);
-
-				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
-				{
-					string suri = value[MY_HTML_A_HREF];
-					if(suri.find("ah:") == 0)
-					{
-						if (_TrustedDomain)
-							_Link.push_back (suri);
-						else
-							_Link.push_back ("");
-					}
-					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
-					{
-						// Direct url (hack for lua beginElement)
-						_Link.push_back (suri.substr(1));
-					}
-					else
-					{
-						// convert href from "?key=val" into "http://domain.com/?key=val"
-						_Link.push_back(getAbsoluteUrl(suri));
-					}
-
-					for(uint8 i = MY_HTML_A_ACCESSKEY; i < MY_HTML_A_Z_ACTION_SHORTCUT; i++)
-					{
-						if (present[i] && value[i])
-						{
-							string title = value[i];
-						//	nlinfo("key %d = %s", i, title.c_str());
-						}
-					}
-					//nlinfo("key of TITLE is : %d", MY_HTML_A_Z_ACTION_PARAMS);
-					if (present[MY_HTML_A_Z_ACTION_PARAMS] && value[MY_HTML_A_Z_ACTION_PARAMS])
-					{
-						string title = value[MY_HTML_A_Z_ACTION_PARAMS];
-						_LinkTitle.push_back(title);
-					}
-					else
-						_LinkTitle.push_back("");
-				}
-				else
-				{
-					_Link.push_back("");
-					_LinkTitle.push_back("");
-				}
-
-				
-			}
-		}
 	}
 
 	// ***************************************************************************
@@ -1176,6 +1065,8 @@ namespace NLGUI
 				break;
 			case HTML_A:
 			{
+				registerAnchorName(MY_HTML_A);
+
 				CStyleParams style;
 				style.FontSize = getFontSize();
 				style.TextColor = LinkColor;
@@ -1191,15 +1082,38 @@ namespace NLGUI
 				_FontStrikeThrough.push_back(style.StrikeThrough);
 				_GlobalColor.push_back(LinkColorGlobalColor);
 				_A.push_back(true);
+				_Link.push_back ("");
+				_LinkTitle.push_back("");
+				_LinkClass.push_back("");
 
+				// #fragment works with both ID and NAME so register both
+				if (present[MY_HTML_A_NAME] && value[MY_HTML_A_NAME])
+					_AnchorName.push_back(value[MY_HTML_A_NAME]);
 				if (present[MY_HTML_A_TITLE] && value[MY_HTML_A_TITLE])
-					_LinkTitle.push_back(value[MY_HTML_A_TITLE]);
+					_LinkTitle.back() = value[MY_HTML_A_TITLE];
 				if (present[MY_HTML_A_CLASS] && value[MY_HTML_A_CLASS])
-					_LinkClass.push_back(value[MY_HTML_A_CLASS]);
-
+					_LinkClass.back() = value[MY_HTML_A_CLASS];
+				if (present[MY_HTML_A_HREF] && value[MY_HTML_A_HREF])
+				{
+					string suri = value[MY_HTML_A_HREF];
+					if(suri.find("ah:") == 0)
+					{
+						if (_TrustedDomain)
+							_Link.back() = suri;
+					}
+					else if (_TrustedDomain && suri[0] == '#' && _LuaHrefHack)
+					{
+						// Direct url (hack for lua beginElement)
+						_Link.back() = suri.substr(1);
+					}
+					else
+					{
+						// convert href from "?key=val" into "http://domain.com/?key=val"
+						_Link.back() = getAbsoluteUrl(suri);
+					}
+				}
 			}
 				break;
-
 			case HTML_DIV:
 			{
 				_BlockLevelElement.push_back(true);
@@ -1286,7 +1200,6 @@ namespace NLGUI
 				}
 			}
 				break;
-
 			case HTML_FONT:
 			{
 				bool found = false;
@@ -1602,9 +1515,6 @@ namespace NLGUI
 								getParagraph()->addChild (buttonGroup);
 								paragraphChange ();
 							}
-
-	//						addButton (CCtrlTextButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-	//							globalColor, "html_submit_form", param.c_str(), tooltip);
 						}
 						else if (type == "text")
 						{
@@ -5470,15 +5380,11 @@ namespace NLGUI
 			value.insert(value.begin() + (uint)it.nextKey().toInteger(), buffer);
 		}
 
+		// ingame lua scripts from browser are using <a href="#http://..."> url scheme
+		// reason unknown
+		_LuaHrefHack = true;
 		beginElement(element_number, present, value);
-		if (element_number == HTML_A)
-		{
-			// ingame lua scripts from browser are using <a href="#http://..."> url scheme
-			// reason unknown
-			_LuaHrefHack = true;
-			addLink(element_number, present, value);
-			_LuaHrefHack = false;
-		}
+		_LuaHrefHack = false;
 
 		return 0;
 	}
@@ -5829,7 +5735,6 @@ namespace NLGUI
 	{
 		std::string ret;
 		sint32 number = Value;
-		bool upper = false;
 
 		if (Type == "disc")
 		{
