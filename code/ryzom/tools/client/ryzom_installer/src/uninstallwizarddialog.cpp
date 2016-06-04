@@ -85,15 +85,16 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	componentsTreeView->setModel(model);
 	componentsTreeView->resizeColumnToContents(0);
 
+	adjustSize();
+
+	// click signals
 	connect(uninstallButton, SIGNAL(clicked()), SLOT(accept()));
 	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
 	connect(model, SIGNAL(itemChanged(QStandardItem *)), SLOT(onItemChanged(QStandardItem *)));
 
-	adjustSize();
-
-	QtConcurrent::run(this, &CUninstallWizardDialog::updateSizes);
-
-	updateButtons();
+	// semi-hack to not update UI on another thread
+	connect(this, SIGNAL(updateSize(int, QString)), SLOT(onUpdateSize(int, QString)));
+	connect(this, SIGNAL(updateLayout()), SLOT(onUpdateLayout()));
 }
 
 CUninstallWizardDialog::~CUninstallWizardDialog()
@@ -193,10 +194,26 @@ void CUninstallWizardDialog::onItemChanged(QStandardItem * /* item */)
 	updateButtons();
 }
 
-void CUninstallWizardDialog::updateSizes()
+void CUninstallWizardDialog::onUpdateSize(int row, const QString &text)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
+	if (model == NULL) return;
 
+	QStandardItem *item = new QStandardItem(text);
+	model->setItem(row, 1, item);
+}
+
+void CUninstallWizardDialog::onUpdateLayout()
+{
+	componentsTreeView->resizeColumnToContents(1);
+
+	updateButtons();
+
+	adjustSize();
+}
+
+void CUninstallWizardDialog::updateSizes()
+{
 	CConfigFile *config = CConfigFile::getInstance();
 
 	// clients
@@ -208,8 +225,7 @@ void CUninstallWizardDialog::updateSizes()
 
 		qint64 bytes = getDirectorySize(config->getInstallationDirectory() + "/" + server.id);
 
-		QStandardItem *item = new QStandardItem(qBytesToHumanReadable(bytes));
-		model->setItem(it.value(), 1, item);
+		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
 		++it;
 	}
@@ -223,13 +239,12 @@ void CUninstallWizardDialog::updateSizes()
 
 		qint64 bytes = getDirectorySize(config->getProfileDirectory() + "/" + profile.id);
 
-		QStandardItem *item = new QStandardItem(qBytesToHumanReadable(bytes));
-		model->setItem(it.value(), 1, item);
+		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
 		++it;
 	}
 
-	componentsTreeView->resizeColumnToContents(1);
+	emit updateLayout();
 }
 
 void CUninstallWizardDialog::updateButtons()

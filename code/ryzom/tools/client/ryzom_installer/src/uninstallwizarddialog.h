@@ -37,13 +37,19 @@ public:
 	void setSelectedComponents(const SUninstallComponents &components);
 	SUninstallComponents getSelectedCompenents() const;
 
-	bool isInstallerSelected() const;
+signals:
+	void updateSize(int row, const QString &text);
+	void updateLayout();
 
 private slots:
 	void accept();
 	void onItemChanged(QStandardItem *item);
+	void onUpdateSize(int row, const QString &text);
+	void onUpdateLayout();
 
 private:
+	void showEvent(QShowEvent *event);
+
 	void updateSizes();
 	void updateButtons();
 
