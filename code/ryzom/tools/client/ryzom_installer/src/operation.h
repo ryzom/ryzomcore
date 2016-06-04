@@ -33,4 +33,17 @@ public:
 	virtual bool operationShouldStop() =0;
 };
 
+struct SUninstallComponents
+{
+	SUninstallComponents()
+	{
+		installer = true;
+	}
+
+	QVector<int> servers;
+	QVector<int> profiles;
+
+	bool installer;
+};
+
 #endif

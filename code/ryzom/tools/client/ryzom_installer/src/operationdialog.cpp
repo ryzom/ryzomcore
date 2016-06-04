@@ -89,6 +89,11 @@ void COperationDialog::setOperation(Operation operation)
 	m_operation = operation;
 }
 
+void COperationDialog::setUninstallComponents(const SUninstallComponents &components)
+{
+	m_components = components;
+}
+
 void COperationDialog::processNextStep()
 {
 	switch (m_operation)
@@ -202,6 +207,25 @@ void COperationDialog::processInstallNextStep()
 
 void COperationDialog::processUninstallNextStep()
 {
+	CConfigFile *config = CConfigFile::getInstance();
+
+	if (!m_components.servers.isEmpty())
+	{
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsServers);
+	}
+	else if (!m_components.profiles.isEmpty())
+	{
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
+	}
+	else if (m_components.installer)
+	{
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsInstaller);
+	}
+	else
+	{
+		// done
+		accept();
+	}
 }
 
 void COperationDialog::showEvent(QShowEvent *e)
@@ -642,6 +666,48 @@ bool COperationDialog::createAddRemoveEntry()
 	emit done();
 
 	return true;
+}
+
+void COperationDialog::deleteComponentsServers()
+{
+	m_currentOperation = QApplication::tr("Delete client files");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+
+//	connect(m_downloader, SIGNAL(downloadPrepare()), SLOT(onProgressPrepare()));
+//	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
+//	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
+//	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
+//	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
+
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	foreach(int serverIndex, m_components.servers)
+	{
+		const CServer &server = config->getServer(serverIndex);
+
+		QString path = config->getInstallationDirectory() + "/" + server.id;
+
+		QDir dir(path);
+		
+		if (!dir.exists() || !dir.removeRecursively())
+		{
+			emit onProgressFail(tr("Uninstall to delete files for client %1").arg(server.name));
+		}
+	}
+
+	emit onProgressSuccess(m_components.servers.size());
+	emit done();
+}
+
+void COperationDialog::deleteComponentsProfiles()
+{
+	emit done();
+}
+
+void COperationDialog::deleteComponentsInstaller()
+{
+	emit done();
 }
 
 void COperationDialog::operationPrepare()

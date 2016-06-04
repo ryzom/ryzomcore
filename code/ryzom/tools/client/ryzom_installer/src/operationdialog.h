@@ -47,6 +47,7 @@ public:
 	};
 
 	void setOperation(Operation operation);
+	void setUninstallComponents(const SUninstallComponents &components);
 
 public slots:
 	void onAbortClicked();
@@ -106,6 +107,9 @@ protected:
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();
 	bool createAddRemoveEntry();
+	void deleteComponentsServers();
+	void deleteComponentsProfiles();
+	void deleteComponentsInstaller();
 
 	// from CFilesCopier
 	virtual void operationPrepare();
@@ -128,6 +132,7 @@ protected:
 	bool m_aborting;
 
 	Operation m_operation;
+	SUninstallComponents m_components;
 };
 
 #endif

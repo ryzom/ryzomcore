@@ -44,6 +44,8 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 	model->setHorizontalHeaderLabels(columns);
 
+	QStandardItem *item = NULL;
+
 	// clients
 	for (int row = 0; row < serverCount; ++row)
 	{
@@ -53,9 +55,8 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 		{
 			m_serversIndices[row] = model->rowCount();
 
-			QStandardItem *item = new QStandardItem(tr("Client for %1").arg(server.name));
+			item = new QStandardItem(tr("Client for %1").arg(server.name));
 			item->setCheckable(true);
-			item->setCheckState(Qt::Checked);
 			model->appendRow(item);
 		}
 	}
@@ -69,7 +70,7 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 		const CProfile &profile = config->getProfile(row);
 
-		QStandardItem *item = new QStandardItem(tr("Profile #%1: %2").arg(profile.id).arg(profile.name));
+		item = new QStandardItem(tr("Profile #%1: %2").arg(profile.id).arg(profile.name));
 		item->setCheckable(true);
 		model->appendRow(item);
 
@@ -77,9 +78,8 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 	m_installerIndex = model->rowCount();
 
-	QStandardItem *item = new QStandardItem(tr("Ryzom Installer"));
+	item = new QStandardItem(tr("Ryzom Installer"));
 	item->setCheckable(true);
-	item->setCheckState(Qt::Checked);
 	model->appendRow(item);
 
 	componentsTreeView->setModel(model);
@@ -100,56 +100,87 @@ CUninstallWizardDialog::~CUninstallWizardDialog()
 {
 }
 
-QVector<int> CUninstallWizardDialog::getSelectedServers() const
+void CUninstallWizardDialog::showEvent(QShowEvent *event)
 {
-	QVector<int> res;
+	QDialog::showEvent(event);
 
+	QtConcurrent::run(this, &CUninstallWizardDialog::updateSizes);
+}
+
+void CUninstallWizardDialog::setSelectedComponents(const SUninstallComponents &components)
+{
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
-	if (model == NULL) return res;
+	if (model == NULL) return;
 
+	QStandardItem *item = NULL;
+
+	// servers
 	QMap<int, int>::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
 
 	while (it != iend)
 	{
-		QStandardItem *item = model->item(m_installerIndex);
+		item = model->item(it.value());
 
-		if (item && item->checkState() == Qt::Checked) res << it.value();
+		if (item) item->setCheckState(components.servers.indexOf(it.key()) > -1 ? Qt::Checked : Qt::Unchecked);
 
 		++it;
 	}
 
-	return res;
+	// profiles
+	it = m_profilesIndices.begin(), iend = m_profilesIndices.end();
+
+	while (it != iend)
+	{
+		item = model->item(it.value());
+
+		if (item) item->setCheckState(components.profiles.indexOf(it.key()) > -1 ? Qt::Checked : Qt::Unchecked);
+
+		++it;
+	}
+
+	// installer
+	item = model->item(m_installerIndex);
+	if (item) item->setCheckState(components.installer ? Qt::Checked : Qt::Unchecked);
 }
 
-QVector<int> CUninstallWizardDialog::getSelectedProfiles() const
+SUninstallComponents CUninstallWizardDialog::getSelectedCompenents() const
 {
-	QVector<int> res;
+	SUninstallComponents res;
 
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return res;
 
-	QMap<int, int>::const_iterator it = m_profilesIndices.begin(), iend = m_profilesIndices.end();
+	QStandardItem *item = NULL;
+
+	// servers
+	QMap<int, int>::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
 
 	while (it != iend)
 	{
-		QStandardItem *item = model->item(m_installerIndex);
+		item = model->item(it.value());
 
-		if (item && item->checkState() == Qt::Checked) res << it.value();
+		if (item && item->checkState() == Qt::Checked) res.servers << it.key();
 
 		++it;
 	}
 
+	// profiles
+	it = m_profilesIndices.begin(), iend = m_profilesIndices.end();
+
+	while (it != iend)
+	{
+		item = model->item(it.value());
+
+		if (item && item->checkState() == Qt::Checked) res.profiles << it.key();
+
+		++it;
+	}
+
+	// installer
+	item = model->item(m_installerIndex);
+	res.installer = item && item->checkState() == Qt::Checked;
+
 	return res;
-}
-
-bool CUninstallWizardDialog::isInstallerSelected() const
-{
-	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
-	if (model == NULL) return false;
-
-	QStandardItem *item = model->item(m_installerIndex);
-
-	return item && item->checkState() == Qt::Checked;
 }
 
 void CUninstallWizardDialog::accept()
