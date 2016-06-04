@@ -2374,11 +2374,33 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 #else
 		if (rename (ssrc.c_str(), sdest.c_str()) == -1)
 		{
-			nlwarning ("PATH: CopyMoveFile error: can't rename '%s' into '%s', error %u",
-				ssrc.c_str(),
-				sdest.c_str(),
-				errno);
-			return false;
+			// unable to move because file systems are different
+			if (errno == EXDEV)
+			{
+				// different file system, we need to copy and delete file manually
+				if (!CopyMoveFile(dest, src, true, failIfExists, progress)) return false;
+
+				// get modification time
+				uint32 modificationTime = CFile::getFileModificationDate(src);
+
+				// delete original file
+				if (!CFile::deleteFile(src)) return false;
+
+				// set same modification time
+				if (!CFile::setFileModificationDate(dest, modificationTime))
+				{
+					nlwarning("Unable to set modification time %s (%u) for %s", timestampToHumanReadable(modificationTime).c_str(), modificationTime, dest.c_str());
+				}
+			}
+			else
+			{
+				nlwarning("PATH: CopyMoveFile error: can't rename '%s' into '%s', error %u",
+					ssrc.c_str(),
+					sdest.c_str(),
+					errno);
+
+				return false;
+			}
 		}
 #endif
 	}
