@@ -18,6 +18,7 @@
 #define UNINSTALLWIZARDDIALOG_H
 
 #include "ui_uninstallwizard.h"
+#include "operation.h"
 
 /**
  * Wizard displayed at first launch, that asks user to choose source and destination directories.
@@ -33,16 +34,22 @@ public:
 	CUninstallWizardDialog(QWidget *parent = NULL);
 	virtual ~CUninstallWizardDialog();
 
-	QVector<int> getSelectedServers() const;
-	QVector<int> getSelectedProfiles() const;
+	void setSelectedComponents(const SUninstallComponents &components);
+	SUninstallComponents getSelectedCompenents() const;
 
-	bool isInstallerSelected() const;
+signals:
+	void updateSize(int row, const QString &text);
+	void updateLayout();
 
 private slots:
 	void accept();
 	void onItemChanged(QStandardItem *item);
+	void onUpdateSize(int row, const QString &text);
+	void onUpdateLayout();
 
 private:
+	void showEvent(QShowEvent *event);
+
 	void updateSizes();
 	void updateButtons();
 

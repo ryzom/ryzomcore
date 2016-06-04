@@ -129,15 +129,33 @@ void CMainWindow::onProfiles()
 
 void CMainWindow::onUninstall()
 {
-	CUninstallWizardDialog dialog(this);
+	CConfigFile *config = CConfigFile::getInstance();
+
+	SUninstallComponents components;
+
+	// add all servers by default
+	for (int i = 0; i < config->getServersCount(); ++i)
+	{
+		components.servers << i;
+	}
+
+	{
+		CUninstallWizardDialog dialog(this);
+
+		dialog.setSelectedComponents(components);
+
+		if (!dialog.exec()) return;
+
+		components = dialog.getSelectedCompenents();
+	}
+
+	COperationDialog dialog;
+
+	dialog.setOperation(COperationDialog::OperationUninstall);
+	dialog.setUninstallComponents(components);
 
 	if (dialog.exec())
 	{
-		COperationDialog dialog(&dialog);
-
-		dialog.setOperation(COperationDialog::OperationUninstall);
-
-		dialog.exec();
 	}
 }
 

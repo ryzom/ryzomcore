@@ -107,14 +107,12 @@ int main(int argc, char *argv[])
 
 	if (parser.isSet(uninstallOption))
 	{
-		QVector<int> selectedServers;
-		QVector<int> selectedProfiles;
-		bool selectedInstaller = true;
+		SUninstallComponents components;
 
 		// add all servers by default
 		for (int i = 0; i < config.getServersCount(); ++i)
 		{
-			selectedServers << i;
+			components.servers << i;
 		}
 
 		// show uninstall wizard dialog if not in silent mode
@@ -122,25 +120,22 @@ int main(int argc, char *argv[])
 		{
 			CUninstallWizardDialog dialog;
 
-			if (dialog.exec())
-			{
-				selectedServers = dialog.getSelectedServers();
-				selectedProfiles = dialog.getSelectedProfiles();
-				selectedInstaller = dialog.isInstallerSelected();
-			}
+			dialog.setSelectedComponents(components);
+
+			// TODO: check real return codes from Uninstallers
+			if (!dialog.exec()) return 1;
+
+			components = dialog.getSelectedCompenents();
 		}
 
-		{
-			COperationDialog dialog;
+		COperationDialog dialog;
 
-			dialog.setOperation(COperationDialog::OperationUninstall);
+		dialog.setOperation(COperationDialog::OperationUninstall);
+		dialog.setUninstallComponents(components);
 
-			// TODO: set all components to uninstall
+		// TODO: set all components to uninstall
 
-			if (dialog.exec()) return 0;
-		}
-
-		return 1;
+		return dialog.exec() ? 0 : 1;
 	}
 
 	if (step == CConfigFile::ShowMigrateWizard)
