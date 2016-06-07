@@ -1850,9 +1850,10 @@ namespace NLGUI
 	class InvalidateTextVisitor : public CInterfaceElementVisitor
 	{
 	public:
-		InvalidateTextVisitor( bool reset )
+		InvalidateTextVisitor( bool reset, bool invalidate )
 		{
 			this->reset = reset;
+			this->invalidate = invalidate;
 		}
 
 		void visitGroup( CInterfaceGroup *group )
@@ -1865,13 +1866,17 @@ namespace NLGUI
 				{
 					if( reset )
 						vt->resetTextIndex();
-					vt->updateTextContext();
+					if( invalidate )
+						vt->invalidateContent();
+					else
+						vt->updateTextContext();
 				}
 			}
 		}
 
 	private:
 		bool reset;
+		bool invalidate;
 	};
 
 	// ------------------------------------------------------------------------------------------------
@@ -1883,6 +1888,8 @@ namespace NLGUI
 		uint32 w, h;
 		CViewRenderer::getInstance()->checkNewScreenSize ();
 		CViewRenderer::getInstance()->getScreenSize (w, h);
+
+		bool scaleChanged = _InterfaceScale != CViewRenderer::getInstance()->getInterfaceScale();
 
 		// Update ui:* (limit the master containers to the height of the screen)
 		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
@@ -1902,7 +1909,7 @@ namespace NLGUI
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
-			InvalidateTextVisitor inv( false );
+			InvalidateTextVisitor inv( false, scaleChanged );
 
 			rMG.Group->visitGroupAndChildren( &inv );
 			rMG.Group->invalidateCoords ();
@@ -3725,6 +3732,7 @@ namespace NLGUI
 		inGame = false;
 
 		setScreenWH(0, 0);
+		_InterfaceScale = 1.0f;
 
 		_GroupSelection = false;
 		multiSelection = false;

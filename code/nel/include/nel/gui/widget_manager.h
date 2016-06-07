@@ -614,6 +614,7 @@ namespace NLGUI
 
 		uint32 _ScreenH;
 		uint32 _ScreenW;
+		float  _InterfaceScale;
 		
 		std::vector< CInterfaceAnim* > activeAnims;
 
