@@ -27,6 +27,8 @@
 
 #include "nel/misc/common.h"
 
+#include <limits>
+
 namespace CLFECOMMON {
 
 
@@ -230,7 +232,7 @@ const uint MAX_PROPERTIES_PER_ENTITY = NB_VISUAL_PROPERTIES;
 
 
 // Special constant for unassociating
-const TPropIndex PROPERTY_DISASSOCIATION = (TPropIndex)(~0)-1;
+const TPropIndex PROPERTY_DISASSOCIATION = std::numeric_limits<TPropIndex>::max()-1;
 
 
 // Names (debug info)
@@ -399,13 +401,13 @@ public:
 	bool							BranchHasPayload;
 
 	/// Constructor
-	TVPNodeBase() : VPParent(NULL), VPA(NULL), VPB(NULL), PropIndex(~0), BranchHasPayload(false) {}
+	TVPNodeBase() : VPParent(NULL), VPA(NULL), VPB(NULL), PropIndex(std::numeric_limits<TPropIndex>::max()), BranchHasPayload(false) {}
 	virtual ~TVPNodeBase() {}
 	/// Return true if the node is root of a tree
 	bool		isRoot() const { return VPParent == NULL; }
 
 	/// Return true if the node is leaf of a tree
-	bool		isLeaf() const { return PropIndex != (CLFECOMMON::TPropIndex)~0; }
+	bool		isLeaf() const { return PropIndex != std::numeric_limits<TPropIndex>::max(); }
 
 	/// Return the level of the node in a tree (root=1)
 	uint		getLevel() const
