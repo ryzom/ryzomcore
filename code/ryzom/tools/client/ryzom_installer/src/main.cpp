@@ -60,6 +60,8 @@ int main(int argc, char *argv[])
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
 
+	// TODO: if not launched from TEMP dir, copy files to TEMP, restart it and exit 
+
 	QLocale locale = QLocale::system();
 
 	// load application translations

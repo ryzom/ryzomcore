@@ -18,6 +18,7 @@
 #include "profilesdialog.h"
 #include "profilesmodel.h"
 #include "serversmodel.h"
+#include "operationdialog.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -133,6 +134,8 @@ void CProfilesDialog::deleteProfile(int index)
 	if (index < 0) return;
 
 	m_model->removeRow(index);
+
+	COperationDialog dialog;
 }
 
 void CProfilesDialog::addProfile()
