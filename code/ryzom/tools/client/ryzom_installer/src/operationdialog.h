@@ -107,6 +107,7 @@ protected:
 	bool createDefaultProfile();
 	bool createDefaultShortcuts();
 	bool createAddRemoveEntry();
+	bool deleteAddRemoveEntry();
 	void deleteComponentsServers();
 	void deleteComponentsProfiles();
 	void deleteComponentsInstaller();
