@@ -366,19 +366,34 @@ FIND_PATH(WINSDK_LIBRARY_DIR ComCtl32.lib
 )
 
 IF(WINSDK_UCRT_DIR)
-  # directory where UCRT headers are found
-  FIND_PATH(WINSDK_UCRT_INCLUDE_DIR corecrt.h
-    HINTS
-    ${WINSDK_UCRT_DIR}/Include/10.0.10056.0/ucrt
-    ${WINSDK_UCRT_DIR}/Include/10.0.10150.0/ucrt
-  )
+  # determine exact UCRT version
+  SET(WINSDK_UCRT_INCLUDE_ROOT_DIR ${WINSDK_UCRT_DIR}/Include)
+  SET(WINSDK_UCRT_LIB_ROOT_DIR ${WINSDK_UCRT_DIR}/Lib)
 
-  # directory where UCRT libraries are found
-  FIND_PATH(WINSDK_UCRT_LIBRARY_DIR ucrt.lib
-    HINTS
-    ${WINSDK_UCRT_DIR}/Lib/10.0.10056.0/ucrt/${WINSDK8_SUFFIX}
-    ${WINSDK_UCRT_DIR}/Lib/10.0.10150.0/ucrt/${WINSDK8_SUFFIX}
-  )
+  FILE(GLOB UCRT_SUBDIRS RELATIVE ${WINSDK_UCRT_INCLUDE_ROOT_DIR} ${WINSDK_UCRT_INCLUDE_ROOT_DIR}/*)
+  SET(UCRT_VERSION)
+
+  FOREACH(UCRT_SUBDIR ${UCRT_SUBDIRS})
+    IF(NOT UCRT_VERSION OR UCRT_SUBDIR VERSION_GREATER UCRT_VERSION)
+      SET(UCRT_VERSION ${UCRT_SUBDIR})
+    ENDIF()
+  ENDFOREACH()
+
+  IF(UCRT_VERSION)
+    MESSAGE(STATUS "Using Windows UCRT ${UCRT_VERSION}")
+
+    # directory where UCRT headers are found
+    FIND_PATH(WINSDK_UCRT_INCLUDE_DIR corecrt.h
+      HINTS
+      ${WINSDK_UCRT_INCLUDE_ROOT_DIR}/${UCRT_VERSION}/ucrt
+    )
+
+    # directory where UCRT libraries are found
+    FIND_PATH(WINSDK_UCRT_LIBRARY_DIR ucrt.lib
+      HINTS
+      ${WINSDK_UCRT_LIB_ROOT_DIR}/${UCRT_VERSION}/ucrt/${WINSDK8_SUFFIX}
+    )
+  ENDIF()
 ENDIF()
 
 # signtool is used to sign executables

@@ -668,45 +668,109 @@ bool COperationDialog::createAddRemoveEntry()
 	return true;
 }
 
+bool COperationDialog::deleteAddRemoveEntry()
+{
+#ifdef Q_OS_WIN
+	QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+	settings.remove("");
+#endif
+
+	emit done();
+
+	return true;
+}
+
 void COperationDialog::deleteComponentsServers()
 {
 	m_currentOperation = QApplication::tr("Delete client files");
 	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
-//	connect(m_downloader, SIGNAL(downloadPrepare()), SLOT(onProgressPrepare()));
-//	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
-//	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
-//	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
-//	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
-
+	emit prepare();
+	emit init(0, m_components.servers.size());
+	emit start();
 
 	CConfigFile *config = CConfigFile::getInstance();
 
+	int i = 0;
+
 	foreach(int serverIndex, m_components.servers)
 	{
+		if (operationShouldStop())
+		{
+			emit stop();
+			return;
+		}
+
 		const CServer &server = config->getServer(serverIndex);
+
+		emit progress(i++, server.name);
 
 		QString path = config->getInstallationDirectory() + "/" + server.id;
 
 		QDir dir(path);
 		
-		if (!dir.exists() || !dir.removeRecursively())
+		if (dir.exists() && !dir.removeRecursively())
 		{
-			emit onProgressFail(tr("Uninstall to delete files for client %1").arg(server.name));
+			emit fail(tr("Unable to delete files for client %1").arg(server.name));
+			return;
 		}
 	}
 
-	emit onProgressSuccess(m_components.servers.size());
+	emit success(m_components.servers.size());
 	emit done();
 }
 
 void COperationDialog::deleteComponentsProfiles()
 {
+	m_currentOperation = QApplication::tr("Delete profiles");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting profile %1...");
+
+	emit prepare();
+	emit init(0, m_components.servers.size());
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	int i = 0;
+
+	foreach(int profileIndex, m_components.profiles)
+	{
+		if (operationShouldStop())
+		{
+			emit stop();
+			return;
+		}
+
+		const CProfile &profile = config->getProfile(profileIndex);
+
+		emit progress(i++, profile.name);
+
+		QString path = config->getProfileDirectory() + "/" + profile.id;
+
+		QDir dir(path);
+
+		if (dir.exists() && !dir.removeRecursively())
+		{
+			emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
+			return;
+		}
+	}
+
+	emit success(m_components.servers.size());
 	emit done();
 }
 
 void COperationDialog::deleteComponentsInstaller()
 {
+	m_currentOperation = QApplication::tr("Delete installer");
+	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// TODO: delete installer
+
+	deleteAddRemoveEntry();
+
+	emit onProgressSuccess(m_components.servers.size());
 	emit done();
 }
 
