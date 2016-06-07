@@ -189,368 +189,141 @@ string CSystemInfo::getOS()
 #ifdef NL_OS_WINDOWS
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-	typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
-	typedef LONG (WINAPI* pRtlGetVersion)(OSVERSIONINFOEXA*);
+	typedef BOOL (WINAPI *PGetProductInfo)(DWORD, DWORD, DWORD, DWORD, PDWORD);
+	typedef LONG (WINAPI* PRtlGetVersion)(OSVERSIONINFOEXA*);
 
-	SYSTEM_INFO si;
-	PGNSI pGNSI;
-	PGPI pGPI;
-	OSVERSIONINFOEXA osvi;
-	BOOL bOsVersionInfoEx;
 	const int BUFSIZE = 80;
 
 	// Try calling GetVersionEx using the OSVERSIONINFOEX structure.
 	// If that fails, try using the OSVERSIONINFO structure.
 
+	SYSTEM_INFO si;
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
+
+	// RtlGetVersion always returns the right version
+	HMODULE hNtDll = GetModuleHandleA("ntdll.dll");
+	PRtlGetVersion pRtlGetVersion = (PRtlGetVersion)GetProcAddress(hNtDll, "RtlGetVersion");
+
+	BOOL bOsVersionInfoEx = 0;
+
+	// init OSVERSIONINFOEXA
+	OSVERSIONINFOEXA osvi;
 	ZeroMemory(&osvi, sizeof(osvi));
 	osvi.dwOSVersionInfoSize = sizeof(osvi);
 
-	HMODULE hNtDll = GetModuleHandleA("ntdll.dll");
-	pRtlGetVersion RtlGetVersion = (pRtlGetVersion)GetProcAddress(hNtDll, "RtlGetVersion");
- 
-	if (RtlGetVersion)
+	if (pRtlGetVersion)
 	{
-		bOsVersionInfoEx = RtlGetVersion(&osvi) == 0;
+		// try RtlGetVersion
+		bOsVersionInfoEx = pRtlGetVersion(&osvi) == 0;
 	}
 
-	if(!bOsVersionInfoEx)
+	if (!bOsVersionInfoEx)
 	{
+		// fall back to GetVersionExA
 		bOsVersionInfoEx = GetVersionExA ((OSVERSIONINFOA *) &osvi);
 	}
 
-	if(!bOsVersionInfoEx)
+	if (!bOsVersionInfoEx)
 	{
-		osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOA);
+		// fall back to GetVersionA struct
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOA);
 		if (! GetVersionExA ( (OSVERSIONINFOA *) &osvi) )
 			return OSString+" Can't GetVersionEx()";
 	}
 
 	// Call GetNativeSystemInfo if supported or GetSystemInfo otherwise.
 
-	pGNSI = (PGNSI) GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetNativeSystemInfo");
+	PGNSI pGNSI = (PGNSI) GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetNativeSystemInfo");
 
-	if (NULL != pGNSI)
+	if (pGNSI)
 		pGNSI(&si);
 	else
 		GetSystemInfo(&si);
 
-	// Test for the Windows NT product family.
-	if ( VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMajorVersion > 4 )
+	// Test for the Windows NT product family
+	if (VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMajorVersion > 4)
 	{
 		OSString = "Microsoft";
 
-		if ( osvi.dwMajorVersion > 10 )
+		if (osvi.dwMajorVersion > 10)
 		{
 			OSString += " Windows (not released)";
 		}
-		else if ( osvi.dwMajorVersion == 10 )
+		else if (osvi.dwMajorVersion == 10)
 		{
 			OSString += " Windows 10";
 		}
-		else if ( osvi.dwMajorVersion == 6 )
+		else if (osvi.dwMajorVersion == 6)
 		{
-			if ( osvi.dwMinorVersion == 3 )
+			if (osvi.dwMinorVersion == 3)
 			{
-				if( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 					OSString += " Windows 8.1";
 				else
 					OSString += " Windows Server 2012 R2";
 			}
-			else if ( osvi.dwMinorVersion == 2 )
+			else if (osvi.dwMinorVersion == 2)
 			{
-				if( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 					OSString += " Windows 8";
 				else
 					OSString += " Windows Server 2012";
 			}
-			else if ( osvi.dwMinorVersion == 1 )
+			else if (osvi.dwMinorVersion == 1)
 			{
-				if( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 					OSString += " Windows 7";
 				else
 					OSString += " Windows Server 2008 R2";
 			}
-			else if ( osvi.dwMinorVersion == 0 )
+			else if (osvi.dwMinorVersion == 0)
 			{
-				if( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 					OSString += " Windows Vista";
 				else
 					OSString += " Windows Server 2008";
 			}
 			else
 			{
-				OSString += " Windows (not released)";
+				OSString += " Windows (unknown)";
 			}
-
-			pGPI = (PGPI) GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetProductInfo");
-
-			DWORD dwType;
-			pGPI( osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.wServicePackMajor, osvi.wServicePackMinor, &dwType);
-
-			// Test for the specific product family.
-			switch( dwType )
-			{
-#ifdef PRODUCT_UNLICENSED
-			case PRODUCT_UNLICENSED:
-				OSString += " Unlicensed";
-				break;
-#endif
-#ifdef PRODUCT_ULTIMATE
-			case PRODUCT_ULTIMATE:
-				OSString += " Ultimate Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_BASIC
-			case PRODUCT_HOME_BASIC:
-				OSString += " Home Basic Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM
-			case PRODUCT_HOME_PREMIUM:
-				OSString += " Home Premium Edition";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE
-			case PRODUCT_ENTERPRISE:
-				OSString += " Enterprise Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_BASIC_N
-			case PRODUCT_HOME_BASIC_N:
-				OSString += " Home Basic N Edition";
-				break;
-#endif
-#ifdef PRODUCT_BUSINESS
-			case PRODUCT_BUSINESS:
-				OSString += " Business Edition";
-				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER
-			case PRODUCT_STANDARD_SERVER:
-				OSString += " Standard Edition";
-				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER
-			case PRODUCT_DATACENTER_SERVER:
-				OSString += " Datacenter Edition";
-				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER
-			case PRODUCT_SMALLBUSINESS_SERVER:
-				OSString += " Small Business Server";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER
-			case PRODUCT_ENTERPRISE_SERVER:
-				OSString += " Enterprise Edition";
-				break;
-#endif
-#ifdef PRODUCT_STARTER
-			case PRODUCT_STARTER:
-				OSString += " Starter Edition";
-				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_CORE
-			case PRODUCT_DATACENTER_SERVER_CORE:
-				OSString += " Datacenter Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_CORE
-			case PRODUCT_STANDARD_SERVER_CORE:
-				OSString += " Standard Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_CORE
-			case PRODUCT_ENTERPRISE_SERVER_CORE:
-				OSString += " Enterprise Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_IA64
-			case PRODUCT_ENTERPRISE_SERVER_IA64:
-				OSString += " Enterprise Edition for Itanium-based Systems";
-				break;
-#endif
-#ifdef PRODUCT_BUSINESS_N
-			case PRODUCT_BUSINESS_N:
-				OSString += " Business N Edition";
-				break;
-#endif
-#ifdef PRODUCT_WEB_SERVER
-			case PRODUCT_WEB_SERVER:
-				OSString += " Web Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_CLUSTER_SERVER
-			case PRODUCT_CLUSTER_SERVER:
-				OSString += " Cluster Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_SERVER
-			case PRODUCT_HOME_SERVER:
-				OSString += " Home Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_STORAGE_EXPRESS_SERVER
-			case PRODUCT_STORAGE_EXPRESS_SERVER:
-				OSString += " Storage Server Express Edition";
-				break;
-#endif
-#ifdef PRODUCT_STORAGE_STANDARD_SERVER
-			case PRODUCT_STORAGE_STANDARD_SERVER:
-				OSString += " Storage Server Standard Edition";
-				break;
-#endif
-#ifdef PRODUCT_STORAGE_WORKGROUP_SERVER
-			case PRODUCT_STORAGE_WORKGROUP_SERVER:
-				OSString += " Storage Server Workgroup Edition";
-				break;
-#endif
-#ifdef PRODUCT_STORAGE_ENTERPRISE_SERVER
-			case PRODUCT_STORAGE_ENTERPRISE_SERVER:
-				OSString += " Storage Server Enterprise Edition";
-				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS
-			case PRODUCT_SERVER_FOR_SMALLBUSINESS:
-				OSString += " Essential Server Solutions Edition";
-				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER_PREMIUM
-			case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
-				OSString += " Small Business Server Premium Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM_N
-			case PRODUCT_HOME_PREMIUM_N:
-				OSString += " Home Premium N Edition";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_N
-			case PRODUCT_ENTERPRISE_N:
-				OSString += " Enterprise N Edition";
-				break;
-#endif
-#ifdef PRODUCT_ULTIMATE_N
-			case PRODUCT_ULTIMATE_N:
-				OSString += " Ultimate N Edition";
-				break;
-#endif
-#ifdef PRODUCT_WEB_SERVER_CORE
-			case PRODUCT_WEB_SERVER_CORE:
-				OSString += " Web Server Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT
-			case PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT:
-				OSString += " Essential Business Server Management Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY
-			case PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY:
-				OSString += " Essential Business Server Security Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING
-			case PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING:
-				OSString += " Essential Business Server Messaging Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_SMALLBUSINESS_SERVER_PRIME
-			case PRODUCT_SMALLBUSINESS_SERVER_PRIME:
-				OSString += " Small Business Server Prime Edition";
-				break;
-#endif
-#ifdef PRODUCT_HOME_PREMIUM_SERVER
-			case PRODUCT_HOME_PREMIUM_SERVER:
-				OSString += " Home Premium Server Edition";
-				break;
-#endif
-#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS_V
-			case PRODUCT_SERVER_FOR_SMALLBUSINESS_V:
-				OSString += " Essential Server Solutions without Hyper-V Edition";
-				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_V
-			case PRODUCT_STANDARD_SERVER_V:
-				OSString += " Standard without Hyper-V Edition";
-				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_V
-			case PRODUCT_DATACENTER_SERVER_V:
-				OSString += " Datacenter without Hyper-V Edition";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_V
-			case PRODUCT_ENTERPRISE_SERVER_V:
-				OSString += " Enterprise without Hyper-V Edition";
-				break;
-#endif
-#ifdef PRODUCT_DATACENTER_SERVER_CORE_V
-			case PRODUCT_DATACENTER_SERVER_CORE_V:
-				OSString += " Datacenter without Hyper-V Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_STANDARD_SERVER_CORE_V
-			case PRODUCT_STANDARD_SERVER_CORE_V:
-				OSString += " Standard without Hyper-V Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_ENTERPRISE_SERVER_CORE_V
-			case PRODUCT_ENTERPRISE_SERVER_CORE_V:
-				OSString += " Enterprise without Hyper-V Edition (core installation)";
-				break;
-#endif
-#ifdef PRODUCT_HYPERV
-			case PRODUCT_HYPERV:
-				OSString += " Hyper-V Server Edition";
-				break;
-#endif
-			default:
-				OSString += toString(" Unknown Edition (0x%04x)", dwType);
-			}
-
-			if ( si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 )
-				OSString += " 64-bit";
-			else if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL )
-				OSString += " 32-bit";
 		}
-		else if ( osvi.dwMajorVersion == 5 )
+		else if (osvi.dwMajorVersion == 5)
 		{
-			if ( osvi.dwMinorVersion == 2 )
+			if (osvi.dwMinorVersion == 2)
 			{
-				if( GetSystemMetrics(89 /* SM_SERVERR2 */) )
+				if (GetSystemMetrics(89 /* SM_SERVERR2 */))
 					OSString += " Windows Server 2003 R2";
 #ifdef VER_SUITE_STORAGE_SERVER
-				else if ( osvi.wSuiteMask == VER_SUITE_STORAGE_SERVER )
+				else if (osvi.wSuiteMask == VER_SUITE_STORAGE_SERVER)
 					OSString += " Windows Storage Server 2003";
 #endif
 #ifdef VER_SUITE_WH_SERVER
-				else if ( osvi.wSuiteMask == VER_SUITE_WH_SERVER )
+				else if (osvi.wSuiteMask == VER_SUITE_WH_SERVER)
 					OSString += " Windows Home Server";
 #endif
-				else if( osvi.wProductType == VER_NT_WORKSTATION &&
+				else if (osvi.wProductType == VER_NT_WORKSTATION &&
 					si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 					OSString += " Windows XP Professional x64 Edition";
 				else
 					OSString += " Windows Server 2003";
 
 				// Test for the server type.
-				if ( osvi.wProductType != VER_NT_WORKSTATION )
+				if (osvi.wProductType != VER_NT_WORKSTATION)
 				{
-					if ( si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64 )
+					if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
 					{
-						if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						if (osvi.wSuiteMask & VER_SUITE_DATACENTER)
 							OSString += " Datacenter Edition for Itanium-based Systems";
-						else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
 							OSString += " Enterprise Edition for Itanium-based Systems";
 					}
 
-					else if ( si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64 )
+					else if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
 					{
-						if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						if (osvi.wSuiteMask & VER_SUITE_DATACENTER)
 							OSString += " Datacenter x64 Edition";
-						else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
 							OSString += " Enterprise x64 Edition";
 						else
 							OSString += " Standard x64 Edition";
@@ -558,18 +331,18 @@ string CSystemInfo::getOS()
 
 					else
 					{
-						if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+						if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
 							OSString += " Enterprise Edition";
 #ifdef VER_SUITE_DATACENTER
-						else if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+						else if (osvi.wSuiteMask & VER_SUITE_DATACENTER)
 							OSString += " Datacenter Edition";
 #endif
 #ifdef VER_SUITE_BLADE
-						else if ( osvi.wSuiteMask & VER_SUITE_BLADE )
+						else if (osvi.wSuiteMask & VER_SUITE_BLADE)
 							OSString += " Web Edition";
 #endif
 #ifdef VER_SUITE_COMPUTE_SERVER
-						else if ( osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER )
+						else if (osvi.wSuiteMask & VER_SUITE_COMPUTE_SERVER)
 							OSString += " Compute Cluster Edition";
 #endif
 						else
@@ -577,27 +350,27 @@ string CSystemInfo::getOS()
 					}
 				}
 			}
-			else if ( osvi.dwMinorVersion == 1 )
+			else if (osvi.dwMinorVersion == 1)
 			{
 				OSString += " Windows XP";
-				if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
+				if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
 					OSString += " Home Edition";
 				else
 					OSString += " Professional";
 			}
-			else if ( osvi.dwMinorVersion == 0 )
+			else if (osvi.dwMinorVersion == 0)
 			{
 				OSString += " Windows 2000";
 
-				if ( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 				{
 					OSString += " Professional";
 				}
 				else
 				{
-					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
+					if (osvi.wSuiteMask & VER_SUITE_DATACENTER)
 						OSString += " Datacenter Server";
-					else if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+					else if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
 						OSString += " Advanced Server";
 					else
 						OSString += " Server";
@@ -608,28 +381,28 @@ string CSystemInfo::getOS()
 				OSString += " Unknown Windows";
 			}
 		}
-		else if ( osvi.dwMajorVersion <= 4 )
+		else if (osvi.dwMajorVersion <= 4)
 		{
 			OSString += " Windows NT";
 
 			// Test for specific product on Windows NT 4.0 SP6 and later.
-			if( bOsVersionInfoEx )
+			if (bOsVersionInfoEx)
 			{
 				// Test for the workstation type.
-				if ( osvi.wProductType == VER_NT_WORKSTATION )
+				if (osvi.wProductType == VER_NT_WORKSTATION)
 				{
-					if( osvi.dwMajorVersion == 4 )
+					if (osvi.dwMajorVersion == 4 )
 						OSString += " Workstation 4.0";
-					else if( osvi.wSuiteMask & VER_SUITE_PERSONAL )
+					else if (osvi.wSuiteMask & VER_SUITE_PERSONAL)
 						OSString += " Home Edition";
 					else
 						OSString += " Professional";
 				}
 
 				// Test for the server type.
-				else if ( osvi.wProductType == VER_NT_SERVER )
+				else if (osvi.wProductType == VER_NT_SERVER)
 				{
-					if( osvi.wSuiteMask & VER_SUITE_ENTERPRISE )
+					if (osvi.wSuiteMask & VER_SUITE_ENTERPRISE)
 						OSString += " Server 4.0 Enterprise Edition";
 					else
 						OSString += " Server 4.0";
@@ -642,27 +415,585 @@ string CSystemInfo::getOS()
 				DWORD dwBufLen=BUFSIZE;
 				LONG lRet;
 
-				lRet = RegOpenKeyExA( HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey );
-				if( lRet != ERROR_SUCCESS )
+				lRet = RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey );
+				if (lRet != ERROR_SUCCESS)
 					return OSString + " Can't RegOpenKeyEx";
 
-				lRet = RegQueryValueExA( hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
-				if( (lRet != ERROR_SUCCESS) || (dwBufLen > BUFSIZE) )
+				lRet = RegQueryValueExA(hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
+				if ((lRet != ERROR_SUCCESS) || (dwBufLen > BUFSIZE))
 					return OSString + " Can't ReQueryValueEx";
 
-				RegCloseKey( hKey );
+				RegCloseKey(hKey);
 
-				if ( lstrcmpiA( "WINNT", szProductType) == 0 )
+				if (lstrcmpiA("WINNT", szProductType) == 0)
 					OSString += " Workstation";
-				if ( lstrcmpiA( "LANMANNT", szProductType) == 0 )
+
+				if (lstrcmpiA("LANMANNT", szProductType) == 0)
 					OSString += " Server";
-				if ( lstrcmpiA( "SERVERNT", szProductType) == 0 )
+
+				if (lstrcmpiA("SERVERNT", szProductType) == 0)
 					OSString += " Advanced Server";
 			}
 		}
 
+		PGetProductInfo pGetProductInfo = (PGetProductInfo)GetProcAddress(GetModuleHandleA("kernel32.dll"), "GetProductInfo");
+
+		DWORD dwType;
+
+		if (pGetProductInfo && pGetProductInfo(osvi.dwMajorVersion, osvi.dwMinorVersion, osvi.wServicePackMajor, osvi.wServicePackMinor, &dwType))
+		{
+			// Test for the specific product family.
+			switch (dwType)
+			{
+#ifdef PRODUCT_UNLICENSED
+			case PRODUCT_UNLICENSED:
+				OSString += " Unlicensed";
+				break;
+#endif
+#ifdef PRODUCT_ULTIMATE
+			case PRODUCT_ULTIMATE:
+				OSString += " Ultimate";
+				break;
+#endif
+#ifdef PRODUCT_HOME_BASIC
+			case PRODUCT_HOME_BASIC:
+				OSString += " Home Basic";
+				break;
+#endif
+#ifdef PRODUCT_HOME_PREMIUM
+			case PRODUCT_HOME_PREMIUM:
+				OSString += " Home Premium";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE
+			case PRODUCT_ENTERPRISE:
+				OSString += " Enterprise";
+				break;
+#endif
+#ifdef PRODUCT_HOME_BASIC_N
+			case PRODUCT_HOME_BASIC_N:
+				OSString += " Home Basic N";
+				break;
+#endif
+#ifdef PRODUCT_BUSINESS
+			case PRODUCT_BUSINESS:
+				OSString += " Business";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER
+			case PRODUCT_STANDARD_SERVER:
+				OSString += " Server Standard";
+				break;
+#endif
+#ifdef PRODUCT_DATACENTER_SERVER
+			case PRODUCT_DATACENTER_SERVER:
+				OSString += " Server Datacenter (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_SMALLBUSINESS_SERVER
+			case PRODUCT_SMALLBUSINESS_SERVER:
+				OSString += " Small Business Server";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_SERVER
+			case PRODUCT_ENTERPRISE_SERVER:
+				OSString += " Server Enterprise (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_STARTER
+			case PRODUCT_STARTER:
+				OSString += " Starter";
+				break;
+#endif
+#ifdef PRODUCT_DATACENTER_SERVER_CORE
+			case PRODUCT_DATACENTER_SERVER_CORE:
+				OSString += " Server Datacenter (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER_CORE
+			case PRODUCT_STANDARD_SERVER_CORE:
+				OSString += " Server Standard (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_SERVER_CORE
+			case PRODUCT_ENTERPRISE_SERVER_CORE:
+				OSString += " Server Enterprise (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_SERVER_IA64
+			case PRODUCT_ENTERPRISE_SERVER_IA64:
+				OSString += " Server Enterprise for Itanium-based Systems";
+				break;
+#endif
+#ifdef PRODUCT_BUSINESS_N
+			case PRODUCT_BUSINESS_N:
+				OSString += " Business N";
+				break;
+#endif
+#ifdef PRODUCT_WEB_SERVER
+			case PRODUCT_WEB_SERVER:
+				OSString += " Web Server (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_CLUSTER_SERVER
+			case PRODUCT_CLUSTER_SERVER:
+				OSString += " Server Hyper Core";
+				break;
+#endif
+#ifdef PRODUCT_HOME_SERVER
+			case PRODUCT_HOME_SERVER:
+				OSString += " Home Server";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_EXPRESS_SERVER
+			case PRODUCT_STORAGE_EXPRESS_SERVER:
+				OSString += " Storage Server Express";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_STANDARD_SERVER
+			case PRODUCT_STORAGE_STANDARD_SERVER:
+				OSString += " Storage Server Standard";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_WORKGROUP_SERVER
+			case PRODUCT_STORAGE_WORKGROUP_SERVER:
+				OSString += " Storage Server Workgroup";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_ENTERPRISE_SERVER
+			case PRODUCT_STORAGE_ENTERPRISE_SERVER:
+				OSString += " Storage Server Enterprise";
+				break;
+#endif
+#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS
+			case PRODUCT_SERVER_FOR_SMALLBUSINESS:
+				OSString += " Essential Server Solutions";
+				break;
+#endif
+#ifdef PRODUCT_SMALLBUSINESS_SERVER_PREMIUM
+			case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM:
+				OSString += " Small Business Server Premium";
+				break;
+#endif
+#ifdef PRODUCT_HOME_PREMIUM_N
+			case PRODUCT_HOME_PREMIUM_N:
+				OSString += " Home Premium N";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_N
+			case PRODUCT_ENTERPRISE_N:
+				OSString += " Enterprise N";
+				break;
+#endif
+#ifdef PRODUCT_ULTIMATE_N
+			case PRODUCT_ULTIMATE_N:
+				OSString += " Ultimate N";
+				break;
+#endif
+#ifdef PRODUCT_WEB_SERVER_CORE
+			case PRODUCT_WEB_SERVER_CORE:
+				OSString += " Web Server (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT
+			case PRODUCT_MEDIUMBUSINESS_SERVER_MANAGEMENT:
+				OSString += " Essential Business Server Management Server";
+				break;
+#endif
+#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY
+			case PRODUCT_MEDIUMBUSINESS_SERVER_SECURITY:
+				OSString += " Essential Business Server Security Server";
+				break;
+#endif
+#ifdef PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING
+			case PRODUCT_MEDIUMBUSINESS_SERVER_MESSAGING:
+				OSString += " Essential Business Server Messaging Server";
+				break;
+#endif
+#ifdef PRODUCT_SERVER_FOUNDATION
+			case PRODUCT_SERVER_FOUNDATION:
+				OSString += " Server Foundation";
+				break;
+#endif
+#ifdef PRODUCT_HOME_PREMIUM_SERVER
+			case PRODUCT_HOME_PREMIUM_SERVER:
+				OSString += " Home Server";
+				break;
+#endif
+#ifdef PRODUCT_SERVER_FOR_SMALLBUSINESS_V
+			case PRODUCT_SERVER_FOR_SMALLBUSINESS_V:
+				OSString += " Server without Hyper-V for Windows Essential Server Solutions";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER_V
+			case PRODUCT_STANDARD_SERVER_V:
+				OSString += " Server Standard without Hyper-V";
+				break;
+#endif
+#ifdef PRODUCT_DATACENTER_SERVER_V
+			case PRODUCT_DATACENTER_SERVER_V:
+				OSString += " Server Datacenter without Hyper-V (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_SERVER_V
+			case PRODUCT_ENTERPRISE_SERVER_V:
+				OSString += " Enterprise without Hyper-V (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_DATACENTER_SERVER_CORE_V
+			case PRODUCT_DATACENTER_SERVER_CORE_V:
+				OSString += " Datacenter without Hyper-V (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER_CORE_V
+			case PRODUCT_STANDARD_SERVER_CORE_V:
+				OSString += " Standard without Hyper-V (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_SERVER_CORE_V
+			case PRODUCT_ENTERPRISE_SERVER_CORE_V:
+				OSString += " Enterprise without Hyper-V (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_HYPERV
+			case PRODUCT_HYPERV:
+				OSString += " Hyper-V Server";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_EXPRESS_SERVER_CORE
+			case PRODUCT_STORAGE_EXPRESS_SERVER_CORE:
+				OSString += " Storage Server Express (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_STANDARD_SERVER_CORE
+			case PRODUCT_STORAGE_STANDARD_SERVER_CORE:
+				OSString += " Storage Server Standard (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_WORKGROUP_SERVER_CORE
+			case PRODUCT_STORAGE_WORKGROUP_SERVER_CORE:
+				OSString += " Storage Server Workgroup (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE
+			case PRODUCT_STORAGE_ENTERPRISE_SERVER_CORE:
+				OSString += " Storage Server Enterprise (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_STARTER_N
+			case PRODUCT_STARTER_N:
+				OSString += " Starter N Edition";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL
+			case PRODUCT_PROFESSIONAL:
+				OSString += " Professional";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_N
+			case PRODUCT_PROFESSIONAL_N:
+				OSString += " Professional N";
+				break;
+#endif
+#ifdef PRODUCT_SB_SOLUTION_SERVER
+			case PRODUCT_SB_SOLUTION_SERVER:
+				OSString += " Small Business Server";
+				break;
+#endif
+#ifdef PRODUCT_SERVER_FOR_SB_SOLUTIONS
+			case PRODUCT_SERVER_FOR_SB_SOLUTIONS:
+				OSString += " Server For Small Business Solutions";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER_SOLUTIONS
+			case PRODUCT_STANDARD_SERVER_SOLUTIONS:
+				OSString += " Server Solutions Premium";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE
+			case PRODUCT_STANDARD_SERVER_SOLUTIONS_CORE:
+				OSString += " Server Solutions Premium (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_SB_SOLUTION_SERVER_EM
+			case PRODUCT_SB_SOLUTION_SERVER_EM:
+				OSString += " Server For Small Business Solutions EM";
+				break;
+#endif
+#ifdef PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM
+			case PRODUCT_SERVER_FOR_SB_SOLUTIONS_EM:
+				OSString += " Server For Small Business Solutions EM";
+				break;
+#endif
+
+#ifdef PRODUCT_SOLUTION_EMBEDDEDSERVER
+			case PRODUCT_SOLUTION_EMBEDDEDSERVER:
+				OSString += " Solution Embedded Server (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE
+			case PRODUCT_SOLUTION_EMBEDDEDSERVER_CORE:
+				OSString += " Solution Embedded Server (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_EMBEDDED
+			case PRODUCT_PROFESSIONAL_EMBEDDED:
+				OSString += " Professional Embedded";
+				break;
+#endif
+#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT
+			case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMT:
+				OSString += " Essential Server Solution Management";
+				break;
+#endif
+#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL
+			case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDL:
+				OSString += " Essential Server Solution Additional";
+				break;
+#endif
+#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC
+			case PRODUCT_ESSENTIALBUSINESS_SERVER_MGMTSVC:
+				OSString += " Essential Server Solution Management SVC";
+				break;
+#endif
+#ifdef PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC
+			case PRODUCT_ESSENTIALBUSINESS_SERVER_ADDLSVC:
+				OSString += " Essential Server Solution Additional SVC";
+				break;
+#endif
+#ifdef PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE
+			case PRODUCT_SMALLBUSINESS_SERVER_PREMIUM_CORE:
+				OSString += " Small Business Server Premium (core installation)";
+				break;
+#endif
+#ifdef PRODUCT_CLUSTER_SERVER_V
+			case PRODUCT_CLUSTER_SERVER_V:
+				OSString += " Server Hyper Core V";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED
+			case PRODUCT_EMBEDDED:
+				OSString += " Embedded";
+				break;
+#endif
+#ifdef PRODUCT_STARTER_E
+			case PRODUCT_STARTER_E:
+				OSString += " Starter E";
+				break;
+#endif
+#ifdef PRODUCT_HOME_BASIC_E
+			case PRODUCT_HOME_BASIC_E:
+				OSString += " Home Basic E";
+				break;
+#endif
+#ifdef PRODUCT_HOME_PREMIUM_E
+			case PRODUCT_HOME_PREMIUM_E:
+				OSString += " Home Premium E";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_E
+			case PRODUCT_PROFESSIONAL_E:
+				OSString += " Professional E";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_E
+			case PRODUCT_ENTERPRISE_E:
+				OSString += " Enterprise E";
+				break;
+#endif
+#ifdef PRODUCT_ULTIMATE_E
+			case PRODUCT_ULTIMATE_E:
+				OSString += " Ultimate E";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_EVALUATION
+			case PRODUCT_ENTERPRISE_EVALUATION:
+				OSString += " Enterprise Evaluation";
+				break;
+#endif
+#ifdef PRODUCT_MULTIPOINT_STANDARD_SERVER
+			case PRODUCT_MULTIPOINT_STANDARD_SERVER:
+				OSString += " MultiPoint Server Standard (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_MULTIPOINT_PREMIUM_SERVER
+			case PRODUCT_MULTIPOINT_PREMIUM_SERVER:
+				OSString += " MultiPoint Server Premium (full installation)";
+				break;
+#endif
+#ifdef PRODUCT_STANDARD_EVALUATION_SERVER
+			case PRODUCT_STANDARD_EVALUATION_SERVER:
+				OSString += " Server Standard (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_DATACENTER_EVALUATION_SERVER
+			case PRODUCT_DATACENTER_EVALUATION_SERVER:
+				OSString += " Server Datacenter (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_ENTERPRISE_N_EVALUATION
+			case PRODUCT_ENTERPRISE_N_EVALUATION:
+				OSString += " Enterprise N (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_AUTOMOTIVE
+			case PRODUCT_EMBEDDED_AUTOMOTIVE:
+				OSString += " Embedded Automotive";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY_A
+			case PRODUCT_EMBEDDED_INDUSTRY_A:
+				OSString += " Embedded Industry A";
+				break;
+#endif
+#ifdef PRODUCT_THINPC
+			case PRODUCT_THINPC:
+				OSString += " Thin PC";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_A
+			case PRODUCT_EMBEDDED_A:
+				OSString += " Embedded A";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY
+			case PRODUCT_EMBEDDED_INDUSTRY:
+				OSString += " Embedded Industry";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_E
+			case PRODUCT_EMBEDDED_E:
+				OSString += " Embedded E";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY_E
+			case PRODUCT_EMBEDDED_INDUSTRY_E:
+				OSString += " Embedded Industry E";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY_A_E
+			case PRODUCT_EMBEDDED_INDUSTRY_A_E:
+				OSString += " Embedded Industry A E";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER
+			case PRODUCT_STORAGE_WORKGROUP_EVALUATION_SERVER:
+				OSString += " Storage Server Workgroup (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER
+			case PRODUCT_STORAGE_STANDARD_EVALUATION_SERVER:
+				OSString += " Storage Server Standard (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_CORE_ARM
+			case PRODUCT_CORE_ARM:
+				OSString += " RT";
+				break;
+#endif
+#ifdef PRODUCT_CORE_N
+			case PRODUCT_CORE_N:
+				OSString += " Home N";
+				break;
+#endif
+#ifdef PRODUCT_CORE_COUNTRYSPECIFIC
+			case PRODUCT_CORE_COUNTRYSPECIFIC:
+				OSString += " Home China";
+				break;
+#endif
+#ifdef PRODUCT_CORE_SINGLELANGUAGE
+			case PRODUCT_CORE_SINGLELANGUAGE:
+				OSString += " Home Single Language";
+				break;
+#endif
+#ifdef PRODUCT_CORE
+			case PRODUCT_CORE:
+				OSString += " Home";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_WMC
+			case PRODUCT_PROFESSIONAL_WMC:
+				OSString += " Professional with Media Center";
+				break;
+#endif
+#ifdef PRODUCT_MOBILE_CORE
+			case PRODUCT_MOBILE_CORE:
+				OSString += " Mobile";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY_EVAL
+			case PRODUCT_EMBEDDED_INDUSTRY_EVAL:
+				OSString += " Embedded Industry (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_INDUSTRY_E_EVAL
+			case PRODUCT_EMBEDDED_INDUSTRY_E_EVAL:
+				OSString += " Embedded Industry E (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_EVAL
+			case PRODUCT_EMBEDDED_EVAL:
+				OSString += " Embedded (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_EMBEDDED_E_EVAL
+			case PRODUCT_EMBEDDED_E_EVAL:
+				OSString += " Embedded E (evaluation installation)";
+				break;
+#endif
+#ifdef PRODUCT_CORE_SERVER
+			case PRODUCT_CORE_SERVER:
+				OSString += " Server";
+				break;
+#endif
+#ifdef PRODUCT_CLOUD_STORAGE_SERVER
+			case PRODUCT_CLOUD_STORAGE_SERVER:
+				OSString += " Server Could Storage";
+				break;
+#endif
+#ifdef PRODUCT_CORE_CONNECTED
+			case PRODUCT_CORE_CONNECTED:
+				OSString += " Home Connected";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_STUDENT
+			case PRODUCT_PROFESSIONAL_STUDENT:
+				OSString += " Professional Student";
+				break;
+#endif
+#ifdef PRODUCT_CORE_CONNECTED_N
+			case PRODUCT_CORE_CONNECTED_N:
+				OSString += " Home N Connected";
+				break;
+#endif
+#ifdef PRODUCT_PROFESSIONAL_STUDENT_N
+			case PRODUCT_PROFESSIONAL_STUDENT_N:
+				OSString += " Professional Student N";
+				break;
+#endif
+#ifdef PRODUCT_CORE_CONNECTED_SINGLELANGUAGE
+			case PRODUCT_CORE_CONNECTED_SINGLELANGUAGE:
+				OSString += " Home Single Language Connected";
+				break;
+#endif
+#ifdef PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC
+			case PRODUCT_CORE_CONNECTED_COUNTRYSPECIFIC:
+				OSString += " Home China Connected";
+				break;
+#endif
+			default:
+				OSString += toString(" Unknown Edition (0x%04x)", dwType);
+			}
+		}
+
+		if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+			OSString += " 64-bit";
+		else if (si.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
+			OSString += " 32-bit";
+
 		std::string servicePack;
 
+		// special case for Windows NT 4.0
 		if (osvi.dwMajorVersion == 4 && lstrcmpiA(osvi.szCSDVersion, "Service Pack 6") == 0 )
 		{
 			HKEY hKey;
@@ -690,6 +1021,7 @@ string CSystemInfo::getOS()
 		// Include build number
 		OSString += toString(" (Build %d)", osvi.dwBuildNumber & 0xFFFF);
 	}
+	// Windows 9x
 	else if ( VER_PLATFORM_WIN32_WINDOWS == osvi.dwPlatformId )
 	{
 		OSString = "Microsoft";
@@ -713,10 +1045,12 @@ string CSystemInfo::getOS()
 		else
 			OSString += " Windows 9x";
 	}
+	// Windows 3.1 with Win32s
 	else if ( VER_PLATFORM_WIN32s == osvi.dwPlatformId )
 	{
 		OSString = toString("Microsoft Windows %d.%d + Win32s", osvi.dwMajorVersion, osvi.dwMinorVersion);
 	}
+	// Unknown Windows version
 	else
 	{
 		OSString = toString("Microsoft Windows %d.%d", osvi.dwMajorVersion, osvi.dwMinorVersion);
