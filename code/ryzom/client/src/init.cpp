@@ -821,7 +821,10 @@ void initLog()
 	AssertLog->addDisplayer (ClientLogDisplayer);
 
 	// Display the client version.
-	nlinfo("RYZOM VERSION : %s", getDebugVersion().c_str());
+	nlinfo("RYZOM VERSION: %s", getDebugVersion().c_str());
+	nlinfo("Memory: %s/%s", bytesToHumanReadable(CSystemInfo::availablePhysicalMemory()).c_str(), bytesToHumanReadable(CSystemInfo::totalPhysicalMemory()).c_str());
+	nlinfo("OS: %s", CSystemInfo::getOS().c_str());
+	nlinfo("Processor: %s", CSystemInfo::getProc().c_str());
 
 #ifdef NL_OS_MAC
 	struct rlimit rlp, rlp2, rlp3;
