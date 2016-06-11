@@ -91,7 +91,7 @@ void CMainWindow::onPlayClicked()
 
 	QStringList arguments;
 	arguments << "-p";
-	arguments << QString::number(profileIndex);
+	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
 	bool started = QProcess::startDetached(executable, arguments);
@@ -115,7 +115,7 @@ void CMainWindow::onConfigureClicked()
 
 	QStringList arguments;
 	arguments << "-p";
-	arguments << QString::number(profileIndex);
+	arguments << profile.id;
 
 	bool started = QProcess::startDetached(executable, arguments);
 
