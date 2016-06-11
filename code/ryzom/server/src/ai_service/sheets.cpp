@@ -1122,7 +1122,8 @@ NLMISC_COMMAND(setSheetProperty,"change a value read from a sheet","<sheet> leve
 	}
 
 	// get the value
-	float val = (float)atof(args[2].c_str());
+	float val;
+	NLMISC::fromString(args[2], val);
 	if (val==0 && args[2]!="0" && args[2]!="0.0")
 	{
 		log.displayNL("'%s' is not a valid value",args[2].c_str());

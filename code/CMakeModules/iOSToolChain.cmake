@@ -177,26 +177,26 @@ ENDIF()
 # set the architecture for iOS - using ARCHS_STANDARD_32_BIT sets armv7,armv7s and appears to be XCode's standard.
 # The other value that works is ARCHS_UNIVERSAL_IPHONE_OS but that sets armv7 only
 IF(ARCHS)
-  SET(CMAKE_OSX_ARCHITECTURES ${ARCHS} CACHE string  "Build architecture for iOS")
+  SET(CMAKE_OSX_ARCHITECTURES ${ARCHS} CACHE STRING "Build architecture for iOS")
 ENDIF()
 
 # Set the find root to the iOS developer roots and to user defined paths
-set (CMAKE_FIND_ROOT_PATH ${CMAKE_IOS_DEVELOPER_ROOT} ${CMAKE_IOS_SDK_ROOT} ${CMAKE_PREFIX_PATH} ${CMAKE_INSTALL_PREFIX} $ENV{EXTERNAL_IOS_PATH} CACHE string  "iOS find search path root")
+SET(CMAKE_FIND_ROOT_PATH ${CMAKE_IOS_DEVELOPER_ROOT} ${CMAKE_IOS_SDK_ROOT} ${CMAKE_PREFIX_PATH} ${CMAKE_INSTALL_PREFIX} ${CMAKE_SOURCE_DIR}/external $ENV{EXTERNAL_IOS_PATH} CACHE STRING "iOS find search path root")
 
 # default to searching for frameworks first
-set (CMAKE_FIND_FRAMEWORK FIRST)
+SET(CMAKE_FIND_FRAMEWORK FIRST)
 
 # set up the default search directories for frameworks
-set (CMAKE_SYSTEM_FRAMEWORK_PATH
+SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   ${CMAKE_IOS_SDK_ROOT}/System/Library/Frameworks
   ${CMAKE_IOS_SDK_ROOT}/System/Library/PrivateFrameworks
   ${CMAKE_IOS_SDK_ROOT}/Developer/Library/Frameworks
 )
 
 # only search the iOS sdks, not the remainder of the host filesystem
-set (CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
-set (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 # determinate location for bin utils based on CMAKE_FIND_ROOT_PATH
 include(CMakeFindBinUtils)

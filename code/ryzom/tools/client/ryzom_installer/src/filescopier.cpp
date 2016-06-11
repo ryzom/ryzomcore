@@ -123,6 +123,7 @@ void CFilesCopier::getFilesList(FilesToCopy &files)
 			file.dst = dstPath;
 			file.size = entry.size();
 			file.date = entry.lastModified().toTime_t();
+			file.permissions = entry.permissions();
 
 			files << file;
 		}
@@ -141,6 +142,7 @@ void CFilesCopier::getFilesList(FilesToCopy &files)
 			file.dst = m_destinationDirectory + "/" + fileInfo.fileName();
 			file.size = fileInfo.size();
 			file.date = fileInfo.lastModified().toTime_t();
+			file.permissions = fileInfo.permissions();
 
 			files << file;
 		}
@@ -185,6 +187,11 @@ bool CFilesCopier::copyFiles(const FilesToCopy &files)
 			{
 				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to copy file %1").arg(file.src));
 				return false;
+			}
+
+			if (!QFile::setPermissions(file.dst, file.permissions))
+			{
+				qDebug() << "Unable to change permissions of " << file.dst;
 			}
 
 			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(file.dst), file.date))

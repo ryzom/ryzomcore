@@ -4473,7 +4473,8 @@ case 23:
 YY_RULE_SETUP
 #line 120 "ai_service/script_parser.lex"
 {				
-				const float f=(float)atof(yytext);
+				float f;
+				NLMISC::fromString(yytext, f);
 				INIT(*((size_t*)&f));
 				return TOKEN_NUMBER;
 			}

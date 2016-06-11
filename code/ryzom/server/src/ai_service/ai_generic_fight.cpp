@@ -137,8 +137,8 @@ NLMISC_COMMAND(fightDefaultRange, "Generic default fight range","")
 	{
 		if (args.size()==2)
 		{
-			CBotProfileFightHeal::fightDefaultMinRange = (float)atof(args[0].c_str());
-			CBotProfileFightHeal::fightDefaultMaxRange = (float)atof(args[1].c_str());
+			NLMISC::fromString(args[0], CBotProfileFightHeal::fightDefaultMinRange);
+			NLMISC::fromString(args[1], CBotProfileFightHeal::fightDefaultMaxRange);
 		}
 		log.displayNL("Generic default fight range is [%f;%f]", CBotProfileFightHeal::fightDefaultMinRange, CBotProfileFightHeal::fightDefaultMaxRange);
 		return true;

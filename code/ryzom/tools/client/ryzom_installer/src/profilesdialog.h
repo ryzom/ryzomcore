@@ -42,6 +42,7 @@ private slots:
 	void onAddProfile();
 	void onDeleteProfile();
 	void onProfileClicked(const QModelIndex &index);
+	void onProfileDirectoryClicked();
 
 	void displayProfile(int index);
 	void saveProfile(int index);

@@ -32,6 +32,7 @@ CProfilesDialog::CProfilesDialog(QWidget *parent):QDialog(parent), m_currentProf
 	connect(deleteButton, SIGNAL(clicked()), SLOT(onDeleteProfile()));
 	connect(profilesListView, SIGNAL(clicked(QModelIndex)), SLOT(onProfileClicked(QModelIndex)));
 	connect(executableBrowseButton, SIGNAL(clicked()), SLOT(onExecutableBrowseClicked()));
+	connect(directoryButton, SIGNAL(clicked()), SLOT(onProfileDirectoryClicked()));
 
 	m_model = new CProfilesModel(this);
 	m_serversModel = new CServersModel(this);
@@ -60,6 +61,7 @@ void CProfilesDialog::accept()
 
 void CProfilesDialog::onAddProfile()
 {
+	addProfile();
 }
 
 void CProfilesDialog::onDeleteProfile()
@@ -85,7 +87,6 @@ void CProfilesDialog::displayProfile(int index)
 	bool enabled = index > -1;
 
 	profileIdLabel->setEnabled(enabled);
-	accountEdit->setEnabled(enabled);
 	nameEdit->setEnabled(enabled);
 	serverComboBox->setEnabled(enabled);
 	argumentsEdit->setEnabled(enabled);
@@ -97,17 +98,28 @@ void CProfilesDialog::displayProfile(int index)
 
 	const CProfile &profile = m_model->getProfiles()[index];
 
+	QString executable = profile.executable;
+
+	if (executable.isEmpty())
+	{
+		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+	}
+
+	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+
 	// update all widgets with content of profile
 	profileIdLabel->setText(profile.id);
-	accountEdit->setText(profile.account);
 	nameEdit->setText(profile.name);
 	serverComboBox->setCurrentIndex(m_serversModel->getIndexFromServerID(profile.server));
-	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
+	executablePathLabel->setText(QFileInfo(executable).fileName());
 	argumentsEdit->setText(profile.arguments);
 	commentsEdit->setPlainText(profile.comments);
-	directoryPathLabel->setText(CConfigFile::getInstance()->getProfileDirectory());
+	directoryPathLabel->setText(profileDirectory);
 	desktopShortcutCheckBox->setChecked(profile.desktopShortcut);
 	menuShortcutCheckBox->setChecked(profile.menuShortcut);
+
+	// disable click on button if directory doesn't exist
+	directoryButton->setEnabled(QFile::exists(profileDirectory));
 
 	updateExecutableVersion(index);
 
@@ -116,11 +128,10 @@ void CProfilesDialog::displayProfile(int index)
 
 void CProfilesDialog::saveProfile(int index)
 {
-	if (index < 0) return;
+	if (index < 0 || index >= m_model->rowCount()) return;
 
 	CProfile &profile = m_model->getProfiles()[index];
 	
-	profile.account = accountEdit->text();
 	profile.name = nameEdit->text();
 	profile.server = m_serversModel->getServerIDFromIndex(serverComboBox->currentIndex());
 	profile.arguments = argumentsEdit->text();
@@ -135,12 +146,62 @@ void CProfilesDialog::deleteProfile(int index)
 
 	m_model->removeRow(index);
 
-	COperationDialog dialog;
+	// decrement profile index
+	--index;
+
+	// select row and update content
+	profilesListView->setCurrentIndex(m_model->index(index, 0));
+	displayProfile(index);
+
+	// TODO: delete files for delete profile
 }
 
 void CProfilesDialog::addProfile()
 {
-	// TODO: browse all folders in AppData/Roaming/Ryzom
+	int index = m_model->rowCount();
+
+	// append the new profile
+	m_model->insertRow(index);
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CProfile &profile = m_model->getProfiles()[index];
+	const CServer &server = config->getServer(config->getDefaultServerIndex());
+
+	int nextId = 0;
+
+	// search an ID that doesn't correspond to an existing profile directory
+	while (QFile::exists(config->getProfileDirectory() + "/" + QString::number(nextId))) ++nextId;
+
+	// increment this ID until not used in profiles
+	while(nextId < 100)
+	{
+		bool found = false;
+
+		// search if this ID is already used in existing profiles
+		foreach(const CProfile &p, m_model->getProfiles())
+		{
+			if (p.id == QString::number(nextId))
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) break;
+
+		// increment ID
+		++nextId;
+	}
+
+	// set default parameters
+	profile.id = QString::number(nextId);
+	profile.server = server.id;
+
+	profilesListView->setCurrentIndex(m_model->index(index, 0));
+	displayProfile(index);
+
+	// TODO: copy files to new server if files don't exist
 }
 
 void CProfilesDialog::updateExecutableVersion(int index)
@@ -154,19 +215,11 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable = CConfigFile::getInstance()->getInstallationDirectory() + "/" + profile.server + "/";
-
-#if defined(Q_OS_WIN32)
-		executable += "ryzom_client_r.exe";
-#elif defined(Q_OS_APPLE)
-		executable += "Ryzom.app/Contents/MacOS/Ryzom";
-#else
-		executable += "ryzom_client";
-#endif
+		executable += CConfigFile::getInstance()->getServerClientFullPath(profile.server);
 	}
 
 	// file doesn't exist
-	if (!QFile::exists(executable)) return;
+	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	// launch executable with --version argument
 	QProcess process;
@@ -198,13 +251,39 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
 
-	QString file = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), profile.executable, tr("Executables (*.exe)"));
+	QString executable = profile.executable;
 
-	if (file.isEmpty()) return;
+	if (executable.isEmpty())
+	{
+		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+	}
 
-	profile.executable = file;
+	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
 
-	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
+	if (executable.isEmpty()) return;
+
+	// don't need to save the new executable if the same as default one
+	if (executable == CConfigFile::getInstance()->getServerClientFullPath(profile.server))
+	{
+		profile.executable.clear();
+	}
+	else
+	{
+		profile.executable = executable;
+	}
+
+	executablePathLabel->setText(QFileInfo(executable).fileName());
 
 	updateExecutableVersion(m_currentProfileIndex);
+}
+
+void CProfilesDialog::onProfileDirectoryClicked()
+{
+	if (m_currentProfileIndex < 0) return;
+
+	const CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
+
+	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+
+	QDesktopServices::openUrl(QUrl::fromLocalFile(profileDirectory));
 }

@@ -219,7 +219,7 @@ DEFINE_ACTION(ContextRegion,CELLZNE)
 //		if (args[i+1].get(str))
 //		{
 //			if (!str.empty())
-//				value=atof(str.c_str());
+//				NLMISC::fromString(str, value);
 //		}
 //		levelEnergy.setLevelEnergyValue(value, i);
 //	}
@@ -241,7 +241,7 @@ DEFINE_ACTION(ContextGroupFamily,CZ_NRJ)
 		if (args[i].get(str))
 		{
 			if (!str.empty())
-				value=atof(str.c_str());
+				NLMISC::fromString(str, value);
 		}
 		groupFamily->setLevelEnergyValue(value, i);
 	}
@@ -268,7 +268,7 @@ DEFINE_ACTION(ContextGroupFamily,CZ_NRJ)
 //		if (args[i+1].get(str))
 //		{
 //			if (!str.empty())
-//				value=atof(str.c_str());
+//				NLMISC::fromString(str, value);
 //		}
 //		levelEnergy.setLevelEnergyValue(value, i);
 //	}

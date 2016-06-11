@@ -590,7 +590,6 @@ bool COperationDialog::createDefaultProfile()
 	CProfile profile;
 
 	profile.id = "0";
-	profile.executable = config->getClientFullPath();
 	profile.name = QString("Ryzom (%1)").arg(server.name);
 	profile.server = server.id;
 	profile.comments = "Default profile created by Ryzom Installer";
