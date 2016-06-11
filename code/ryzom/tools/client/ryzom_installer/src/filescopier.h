@@ -49,6 +49,7 @@ protected:
 		QString dst;
 		qint64 size;
 		uint date;
+		QFile::Permissions permissions;
 	};
 
 	typedef QList<FileToCopy> FilesToCopy;
