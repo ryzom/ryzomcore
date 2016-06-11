@@ -60,6 +60,7 @@ void CProfilesDialog::accept()
 
 void CProfilesDialog::onAddProfile()
 {
+	addProfile();
 }
 
 void CProfilesDialog::onDeleteProfile()
@@ -137,7 +138,50 @@ void CProfilesDialog::deleteProfile(int index)
 
 void CProfilesDialog::addProfile()
 {
-	// TODO: browse all folders in AppData/Roaming/Ryzom
+	int index = m_model->rowCount();
+
+	// append the new profile
+	m_model->insertRow(index);
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CProfile &profile = m_model->getProfiles()[index];
+	const CServer &server = config->getServer(config->getDefaultServerIndex());
+
+	int nextId = 0;
+
+	// search an ID that doesn't correspond to an existing profile directory
+	while (QFile::exists(config->getProfileDirectory() + "/" + QString::number(nextId))) ++nextId;
+
+	// increment this ID until not used in profiles
+	while(nextId < 100)
+	{
+		bool found = false;
+
+		// search if this ID is already used in existing profiles
+		foreach(const CProfile &p, m_model->getProfiles())
+		{
+			if (p.id == QString::number(nextId))
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) break;
+
+		// increment ID
+		++nextId;
+	}
+
+	// set default parameters
+	profile.id = QString::number(nextId);
+	profile.server = server.id;
+
+	profilesListView->setCurrentIndex(m_model->index(index, 0));
+	displayProfile(index);
+
+	// TODO: copy files to new server if files don't exist
 }
 
 void CProfilesDialog::updateExecutableVersion(int index)

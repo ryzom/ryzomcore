@@ -27,6 +27,21 @@ QVariant CProfilesModel::data(const QModelIndex &index, int role) const
 	return tr("#%1: %2").arg(profile.id).arg(profile.name);
 }
 
+bool CProfilesModel::insertRows(int row, int count, const QModelIndex &parent)
+{
+	if (row < 0) return false;
+
+	beginInsertRows(parent, row, row + count - 1);
+
+	// prepend empty profiles
+	CProfile profile;
+	m_profiles.insert(row, count, profile);
+
+	endInsertRows();
+
+	return true;
+}
+
 bool CProfilesModel::removeRows(int row, int count, const QModelIndex &parent)
 {
 	if (row < 0) return false;
