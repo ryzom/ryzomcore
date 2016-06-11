@@ -354,18 +354,18 @@ public:
 		if ( entity.AssociationBitsSent == currentAssociationBits )
 		{
 			//nlassertex(entity.Used, ("client=%d, entity=%d property=%d", clientId, entityId, property));
-			switch ( property )
+			if (property == CLFECOMMON::PROPERTY_DISASSOCIATION)
 			{
-			case CLFECOMMON::PROPERTY_DISASSOCIATION:
-				break;
-			case CLFECOMMON::PROPERTY_POSITION:
+				// don't do anything
+			}
+			else if (property == CLFECOMMON::PROPERTY_POSITION)
+			{
 				entity.Mileage = 0;
-				break;
-			default:
-				{
+			}
+			else
+			{
 				CPropertyEntry	&entry = entity.Properties[property];
 				entry.HasValue = false;
-				}
 			}
 			return true;
 		}
