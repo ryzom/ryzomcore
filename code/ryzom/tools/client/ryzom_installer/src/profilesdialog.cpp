@@ -32,6 +32,7 @@ CProfilesDialog::CProfilesDialog(QWidget *parent):QDialog(parent), m_currentProf
 	connect(deleteButton, SIGNAL(clicked()), SLOT(onDeleteProfile()));
 	connect(profilesListView, SIGNAL(clicked(QModelIndex)), SLOT(onProfileClicked(QModelIndex)));
 	connect(executableBrowseButton, SIGNAL(clicked()), SLOT(onExecutableBrowseClicked()));
+	connect(directoryButton, SIGNAL(clicked()), SLOT(onProfileDirectoryClicked()));
 
 	m_model = new CProfilesModel(this);
 	m_serversModel = new CServersModel(this);
@@ -97,6 +98,15 @@ void CProfilesDialog::displayProfile(int index)
 
 	const CProfile &profile = m_model->getProfiles()[index];
 
+	QString executable = profile.executable;
+
+	if (executable.isEmpty())
+	{
+		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+	}
+
+	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+
 	// update all widgets with content of profile
 	profileIdLabel->setText(profile.id);
 	nameEdit->setText(profile.name);
@@ -104,9 +114,12 @@ void CProfilesDialog::displayProfile(int index)
 	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
 	argumentsEdit->setText(profile.arguments);
 	commentsEdit->setPlainText(profile.comments);
-	directoryPathLabel->setText(CConfigFile::getInstance()->getProfileDirectory());
+	directoryPathLabel->setText(profileDirectory);
 	desktopShortcutCheckBox->setChecked(profile.desktopShortcut);
 	menuShortcutCheckBox->setChecked(profile.menuShortcut);
+
+	// disable click on button if directory doesn't exist
+	directoryButton->setEnabled(QFile::exists(profileDirectory));
 
 	updateExecutableVersion(index);
 
@@ -248,4 +261,15 @@ void CProfilesDialog::onExecutableBrowseClicked()
 	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
 
 	updateExecutableVersion(m_currentProfileIndex);
+}
+
+void CProfilesDialog::onProfileDirectoryClicked()
+{
+	if (m_currentProfileIndex < 0) return;
+
+	const CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
+
+	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+
+	QDesktopServices::openUrl(QUrl::fromLocalFile(profileDirectory));
 }
