@@ -80,16 +80,20 @@ void CMainWindow::onPlayClicked()
 
 	if (profileIndex < 0) return;
 
-	CProfile profile = CConfigFile::getInstance()->getProfile(profileIndex);
+	CConfigFile *config = CConfigFile::getInstance();
 
-	if (profile.executable.isEmpty()) return;
+	const CProfile &profile = config->getProfile(profileIndex);
+
+	QString executable = config->getProfileClientFullPath(profileIndex);
+
+	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	QStringList arguments;
 	arguments << "-p";
 	arguments << QString::number(profileIndex);
 	arguments << profile.arguments.split(' ');
 
-	bool started = QProcess::startDetached(profile.executable, arguments);
+	bool started = QProcess::startDetached(executable, arguments);
 
 	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
 }
@@ -100,19 +104,19 @@ void CMainWindow::onConfigureClicked()
 
 	if (profileIndex < 0) return;
 
-	CProfile profile = CConfigFile::getInstance()->getProfile(profileIndex);
+	CConfigFile *config = CConfigFile::getInstance();
 
-	if (profile.server.isEmpty()) return;
+	const CProfile &profile = config->getProfile(profileIndex);
 
-	CServer server = CConfigFile::getInstance()->getServer(profile.server);
+	QString executable = config->getServerConfigurationFullPath(profile.server);
 
-	if (server.configurationFilename.isEmpty()) return;
+	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	QStringList arguments;
 	arguments << "-p";
 	arguments << QString::number(profileIndex);
 
-	bool started = QProcess::startDetached(server.configurationFilename, arguments);
+	bool started = QProcess::startDetached(executable, arguments);
 
 	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
 }

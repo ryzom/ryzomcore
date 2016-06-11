@@ -171,7 +171,9 @@ public:
 
 	QString getClientArch() const;
 
-	QString getClientFullPath() const;
+	QString getProfileClientFullPath(int profileIndex = -1) const;
+	QString getServerClientFullPath(const QString &serverId = "") const;
+	QString getServerConfigurationFullPath(const QString &serverId = "") const;
 
 	QString getSrcServerClientBNPFullPath() const;
 

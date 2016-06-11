@@ -575,13 +575,33 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 	return profile.desktopShortcut && !QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
 }
 
-QString CConfigFile::getClientFullPath() const
+QString CConfigFile::getProfileClientFullPath(int profileIndex) const
 {
-	QString path = getProfile().executable;
+	const CProfile &profile = getProfile(profileIndex);
+
+	QString path = profile.executable;
 
 	if (!path.isEmpty()) return path;
 
-	return getInstallationDirectory() + "/" + getServer().id + "/" + getServer().clientFilename;
+	return getServerClientFullPath(profile.server);
+}
+
+QString CConfigFile::getServerClientFullPath(const QString &serverId) const
+{
+	const CServer &server = getServer(serverId);
+
+	if (server.clientFilename.isEmpty()) return "";
+
+	return getInstallationDirectory() + "/" + server.id + "/" + server.clientFilename;
+}
+
+QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) const
+{
+	const CServer &server = getServer(serverId);
+
+	if (server.configurationFilename.isEmpty()) return "";
+
+	return getInstallationDirectory() + "/" + server.id + "/" + server.configurationFilename;
 }
 
 QString CConfigFile::getSrcServerClientBNPFullPath() const

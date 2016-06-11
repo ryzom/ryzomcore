@@ -111,7 +111,7 @@ void CProfilesDialog::displayProfile(int index)
 	profileIdLabel->setText(profile.id);
 	nameEdit->setText(profile.name);
 	serverComboBox->setCurrentIndex(m_serversModel->getIndexFromServerID(profile.server));
-	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
+	executablePathLabel->setText(QFileInfo(executable).fileName());
 	argumentsEdit->setText(profile.arguments);
 	commentsEdit->setPlainText(profile.comments);
 	directoryPathLabel->setText(profileDirectory);
@@ -208,19 +208,11 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable = CConfigFile::getInstance()->getInstallationDirectory() + "/" + profile.server + "/";
-
-#if defined(Q_OS_WIN32)
-		executable += "ryzom_client_r.exe";
-#elif defined(Q_OS_APPLE)
-		executable += "Ryzom.app/Contents/MacOS/Ryzom";
-#else
-		executable += "ryzom_client";
-#endif
+		executable += CConfigFile::getInstance()->getServerClientFullPath(profile.server);
 	}
 
 	// file doesn't exist
-	if (!QFile::exists(executable)) return;
+	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	// launch executable with --version argument
 	QProcess process;
@@ -252,13 +244,28 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
 
-	QString file = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), profile.executable, tr("Executables (*.exe)"));
+	QString executable = profile.executable;
 
-	if (file.isEmpty()) return;
+	if (executable.isEmpty())
+	{
+		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+	}
 
-	profile.executable = file;
+	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
 
-	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
+	if (executable.isEmpty()) return;
+
+	// don't need to save the new executable if the same as default one
+	if (executable == CConfigFile::getInstance()->getServerClientFullPath(profile.server))
+	{
+		profile.executable.clear();
+	}
+	else
+	{
+		profile.executable = executable;
+	}
+
+	executablePathLabel->setText(QFileInfo(executable).fileName());
 
 	updateExecutableVersion(m_currentProfileIndex);
 }
