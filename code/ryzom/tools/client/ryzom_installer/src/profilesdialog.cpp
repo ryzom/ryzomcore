@@ -128,7 +128,7 @@ void CProfilesDialog::displayProfile(int index)
 
 void CProfilesDialog::saveProfile(int index)
 {
-	if (index < 0) return;
+	if (index < 0 || index >= m_model->rowCount()) return;
 
 	CProfile &profile = m_model->getProfiles()[index];
 	
@@ -146,7 +146,14 @@ void CProfilesDialog::deleteProfile(int index)
 
 	m_model->removeRow(index);
 
-	COperationDialog dialog;
+	// decrement profile index
+	--index;
+
+	// select row and update content
+	profilesListView->setCurrentIndex(m_model->index(index, 0));
+	displayProfile(index);
+
+	// TODO: delete files for delete profile
 }
 
 void CProfilesDialog::addProfile()
