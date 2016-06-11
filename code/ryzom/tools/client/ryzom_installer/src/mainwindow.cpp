@@ -41,6 +41,7 @@ CMainWindow::CMainWindow():QMainWindow()
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
+	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
 
 	connect(playButton, SIGNAL(clicked()), SLOT(onPlayClicked()));
 	connect(configureButton, SIGNAL(clicked()), SLOT(onConfigureClicked()));
@@ -161,6 +162,11 @@ void CMainWindow::onUninstall()
 	if (dialog.exec())
 	{
 	}
+}
+
+void CMainWindow::onQuit()
+{
+	close();
 }
 
 void CMainWindow::onAbout()

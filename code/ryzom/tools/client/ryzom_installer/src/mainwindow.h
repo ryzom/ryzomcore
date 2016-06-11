@@ -43,6 +43,8 @@ public slots:
 
 	void onProfiles();
 	void onUninstall();
+	void onQuit();
+
 	void onAbout();
 	void onAboutQt();
 
