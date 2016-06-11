@@ -127,7 +127,6 @@ bool CConfigFile::load(const QString &filename)
 
 		profile.id = settings.value("id").toString();
 		profile.name = settings.value("name").toString();
-		profile.account = settings.value("account").toString();
 		profile.server = settings.value("server").toString();
 		profile.executable = settings.value("executable").toString();
 		profile.arguments = settings.value("arguments").toString();
@@ -216,7 +215,6 @@ bool CConfigFile::save() const
 
 		settings.setValue("id", profile.id);
 		settings.setValue("name", profile.name);
-		settings.setValue("account", profile.account);
 		settings.setValue("server", profile.server);
 		settings.setValue("executable", profile.executable);
 		settings.setValue("arguments", profile.arguments);

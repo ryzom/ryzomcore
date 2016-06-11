@@ -54,7 +54,6 @@ struct CProfile
 	}
 
 	QString id;
-	QString account;
 	QString name;
 	QString server;
 	QString executable;

@@ -85,7 +85,6 @@ void CProfilesDialog::displayProfile(int index)
 	bool enabled = index > -1;
 
 	profileIdLabel->setEnabled(enabled);
-	accountEdit->setEnabled(enabled);
 	nameEdit->setEnabled(enabled);
 	serverComboBox->setEnabled(enabled);
 	argumentsEdit->setEnabled(enabled);
@@ -99,7 +98,6 @@ void CProfilesDialog::displayProfile(int index)
 
 	// update all widgets with content of profile
 	profileIdLabel->setText(profile.id);
-	accountEdit->setText(profile.account);
 	nameEdit->setText(profile.name);
 	serverComboBox->setCurrentIndex(m_serversModel->getIndexFromServerID(profile.server));
 	executablePathLabel->setText(QFileInfo(profile.executable).fileName());
@@ -120,7 +118,6 @@ void CProfilesDialog::saveProfile(int index)
 
 	CProfile &profile = m_model->getProfiles()[index];
 	
-	profile.account = accountEdit->text();
 	profile.name = nameEdit->text();
 	profile.server = m_serversModel->getServerIDFromIndex(serverComboBox->currentIndex());
 	profile.arguments = argumentsEdit->text();
