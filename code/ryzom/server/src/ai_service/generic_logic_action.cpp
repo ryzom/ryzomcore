@@ -1438,7 +1438,8 @@ public:
 
 		// try to parse a constant value
 //		var.Type = constant;
-//		double val = atof(str.c_str());
+//		double val;
+//		NLMISC::fromString(str, val);
 //		var.Value = float(val);
 //		return true;
 	}
