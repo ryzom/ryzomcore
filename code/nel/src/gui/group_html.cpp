@@ -55,6 +55,7 @@ using namespace NLMISC;
 // Allow up to 10 redirects, then give up
 #define DEFAULT_RYZOM_REDIRECT_LIMIT (10)
 //
+#define FONT_WEIGHT_NORMAL 400
 #define FONT_WEIGHT_BOLD 700
 
 namespace NLGUI
@@ -1417,14 +1418,24 @@ namespace NLGUI
 						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
 							tooltip = value[MY_HTML_INPUT_ALT];
 
+						// by default not inherited
+						CStyleParams style;
+						style.TextColor = TextColor;
+						style.FontSize = TextFontSize;
+						style.FontWeight = FONT_WEIGHT_NORMAL;
+						style.FontOblique = false;
+
+						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
+							getStyleParams(value[MY_HTML_INPUT_STYLE], style);
+
+						_TextColor.push_back(style.TextColor);
+						_FontSize.push_back(style.FontSize);
+						_FontWeight.push_back(style.FontWeight);
+						_FontOblique.push_back(style.FontOblique);
+
 						string type = toLower(value[MY_HTML_INPUT_TYPE]);
 						if (type == "image")
 						{
-							CStyleParams style;
-							// width, height from inline css
-							if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
-								getStyleParams(value[MY_HTML_INPUT_STYLE], style);
-							
 							// The submit button
 							string name;
 							string normal;
@@ -1632,6 +1643,11 @@ namespace NLGUI
 								_Forms.back().Entries.push_back (entry);
 							}
 						}
+
+						popIfNotEmpty(_FontSize);
+						popIfNotEmpty(_TextColor);
+						popIfNotEmpty(_FontWeight);
+						popIfNotEmpty(_FontOblique);
 					}
 				}
 				break;
@@ -1868,9 +1884,26 @@ namespace NLGUI
 				}
 				break;
 			case HTML_TEXTAREA:
+				_PRE.push_back(true);
+
 				// Got one form ?
 				if (!(_Forms.empty()))
 				{
+					// not inherited by default
+					CStyleParams style;
+					style.TextColor = TextColor;
+					style.FontWeight = FONT_WEIGHT_NORMAL;
+					style.FontOblique = false;
+					style.FontSize = TextFontSize;
+
+					if (present[MY_HTML_TEXTAREA_STYLE] && value[MY_HTML_TEXTAREA_STYLE])
+						getStyleParams(value[MY_HTML_TEXTAREA_STYLE], style);
+
+					_TextColor.push_back(style.TextColor);
+					_FontSize.push_back(style.FontSize);
+					_FontWeight.push_back(style.FontWeight);
+					_FontOblique.push_back(style.FontOblique);
+
 					// read general property
 					string templateName;
 
@@ -2187,7 +2220,14 @@ namespace NLGUI
 							entry.TextArea = textArea;
 							_Forms.back().Entries.push_back (entry);
 						}
+
+						popIfNotEmpty (_FontSize);
+						popIfNotEmpty (_FontWeight);
+						popIfNotEmpty (_FontOblique);
+						popIfNotEmpty (_TextColor);
 					}
+
+					popIfNotEmpty (_PRE);
 				}
 				break;
 			case HTML_TITLE:
@@ -3973,7 +4013,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint /* rows */, uint cols, bool multiLine, const ucstring &content, uint maxlength)
+	CInterfaceGroup *CGroupHTML::addTextArea(const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -3988,11 +4028,18 @@ namespace NLGUI
 		{
 			// Not added ?
 			std::vector<std::pair<std::string,std::string> > templateParams;
-			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*12)));
-			//templateParams.push_back (std::pair<std::string,std::string> ("h", toString (rows*12)));
+			templateParams.push_back (std::pair<std::string,std::string> ("w", toString (cols*getFontSize())));
 			templateParams.push_back (std::pair<std::string,std::string> ("id", name));
 			templateParams.push_back (std::pair<std::string,std::string> ("prompt", ""));
 			templateParams.push_back (std::pair<std::string,std::string> ("multiline", multiLine?"true":"false"));
+			templateParams.push_back (std::pair<std::string,std::string> ("fontsize", toString (getFontSize())));
+			templateParams.push_back (std::pair<std::string,std::string> ("color", getTextColor().toString()));
+			if (getFontWeight() >= FONT_WEIGHT_BOLD)
+				templateParams.push_back (std::pair<std::string,std::string> ("fontweight", "bold"));
+			if (getFontOblique())
+				templateParams.push_back (std::pair<std::string,std::string> ("fontstyle", "oblique"));
+			if (multiLine)
+				templateParams.push_back (std::pair<std::string,std::string> ("multi_min_line", toString(rows)));
 			templateParams.push_back (std::pair<std::string,std::string> ("want_return", multiLine?"true":"false"));
 			templateParams.push_back (std::pair<std::string,std::string> ("enter_recover_focus", "false"));
 			if (maxlength > 0)
@@ -5545,15 +5592,23 @@ namespace NLGUI
 		{
 			if (it->first == "font-size")
 			{
-				float tmp;
-				sint size = 0;
-				getPercentage (size, tmp, it->second.c_str());
-				if (size > 0)
-					style.FontSize = size;
+				if (it->second == "inherit")
+					style.FontSize = getFontSize();
+				else
+				{
+					float tmp;
+					sint size = 0;
+					getPercentage (size, tmp, it->second.c_str());
+					if (size > 0)
+						style.FontSize = size;
+				}
 			}
 			else
 			if (it->first == "font-style")
 			{
+				if (it->second == "inherit")
+					style.FontOblique = getFontOblique();
+				else
 				if (it->second == "italic" || it->second == "oblique")
 					style.FontOblique = true;
 			}
@@ -5562,6 +5617,9 @@ namespace NLGUI
 			{
 				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
 				uint weight = 400;
+				if (it->second == "inherit")
+					weight = getFontWeight();
+				else
 				if (it->second == "normal")
 					weight = 400;
 				else
@@ -5594,7 +5652,10 @@ namespace NLGUI
 			}
 			else
 			if (it->first == "color")
-				scanHTMLColor(it->second.c_str(), style.TextColor);
+				if (it->second == "inherit")
+					style.TextColor = getTextColor();
+				else
+					scanHTMLColor(it->second.c_str(), style.TextColor);
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
