@@ -194,7 +194,7 @@ void CMainWindow::onAbout()
 	QMessageBox::about(this,
 		tr("About %1").arg("Ryzom Installer"),
 		QString("Ryzom Installer %1").arg(QApplication::applicationVersion()) + br +
-		tr("Program to install, download and manage Ryzom configurations.") +
+		tr("Program to install, download and manage Ryzom profiles.") +
 		br+br+
 		tr("Author: %1").arg("Cedric 'Kervala' OCHS") + br +
 		tr("Copyright: %1").arg(COPYRIGHT) + br +
