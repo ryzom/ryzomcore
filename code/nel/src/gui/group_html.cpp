@@ -1884,6 +1884,8 @@ namespace NLGUI
 				}
 				break;
 			case HTML_TEXTAREA:
+				_PRE.push_back(true);
+
 				// Got one form ?
 				if (!(_Forms.empty()))
 				{
@@ -2224,6 +2226,8 @@ namespace NLGUI
 						popIfNotEmpty (_FontOblique);
 						popIfNotEmpty (_TextColor);
 					}
+
+					popIfNotEmpty (_PRE);
 				}
 				break;
 			case HTML_TITLE:
