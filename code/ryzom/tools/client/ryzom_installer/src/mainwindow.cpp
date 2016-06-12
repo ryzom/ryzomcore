@@ -51,6 +51,12 @@ CMainWindow::CMainWindow():QMainWindow()
 
 	connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onProfileChanged(int)));
 
+	// resize layout depending on content and constraints
+	adjustSize();
+
+	// fix height because to left bitmap
+	setFixedHeight(height());
+
 	updateProfiles();
 }
 
