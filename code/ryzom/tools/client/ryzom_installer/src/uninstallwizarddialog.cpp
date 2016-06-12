@@ -76,6 +76,7 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 	}
 
+	// installer
 	m_installerIndex = model->rowCount();
 
 	item = new QStandardItem(tr("Ryzom Installer"));
@@ -85,6 +86,7 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	componentsTreeView->setModel(model);
 	componentsTreeView->resizeColumnToContents(0);
 
+	// resize layout depending on content and constraints
 	adjustSize();
 
 	// click signals
@@ -105,6 +107,7 @@ void CUninstallWizardDialog::showEvent(QShowEvent *event)
 {
 	QDialog::showEvent(event);
 
+	// update size of all components sizes in a thread to not block interface
 	QtConcurrent::run(this, &CUninstallWizardDialog::updateSizes);
 }
 
@@ -199,6 +202,7 @@ void CUninstallWizardDialog::onUpdateSize(int row, const QString &text)
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
 
+	// set size for a component
 	QStandardItem *item = new QStandardItem(text);
 	model->setItem(row, 1, item);
 }
@@ -253,11 +257,11 @@ void CUninstallWizardDialog::updateButtons()
 
 	int checkedCount = 0;
 
-	// Uninstall button should be enabled only if at least one component is selected
 	for (int i = 0; i < model->rowCount(); ++i)
 	{
 		if (model->item(i)->checkState() == Qt::Checked) ++checkedCount;
 	}
 
+	// Uninstall button should be enabled only if at least one component is checked
 	uninstallButton->setEnabled(checkedCount > 0);
 }

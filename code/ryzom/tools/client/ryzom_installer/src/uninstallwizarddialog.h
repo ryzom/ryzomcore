@@ -21,7 +21,8 @@
 #include "operation.h"
 
 /**
- * Wizard displayed at first launch, that asks user to choose source and destination directories.
+ * Wizard displayed when uninstalling components from Add/Remove Program under Windows
+ * or when user clicks on Uninstall in main menu.
  *
  * \author Cedric 'Kervala' OCHS
  * \date 2016

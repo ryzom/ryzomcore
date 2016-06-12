@@ -199,7 +199,9 @@ void COperationDialog::processMigrateNextStep()
 
 void COperationDialog::processUpdateProfilesNextStep()
 {
-	// TODO: implement
+	// TODO: check all servers are downloaded
+	// TODO: delete profiles directories that are not used anymore
+	// TODO: create shortcuts
 }
 
 void COperationDialog::processInstallNextStep()
