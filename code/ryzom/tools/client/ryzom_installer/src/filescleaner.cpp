@@ -52,6 +52,8 @@ void CFilesCleaner::setDirectory(const QString &src)
 
 bool CFilesCleaner::exec()
 {
+	if (m_directory.isEmpty()) return false;
+
 	if (m_listener) m_listener->operationPrepare();
 
 	QDir dir(m_directory);

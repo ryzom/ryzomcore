@@ -502,6 +502,8 @@ bool CConfigFile::isRyzomInstalledIn(const QString &directory) const
 
 bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 {
+	if (directory.isEmpty()) return false;
+
 	QDir dir(directory);
 
 	// directory doesn't exist
@@ -528,6 +530,8 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 
 bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 {
+	if (directory.isEmpty()) return false;
+
 	QDir dir(directory);
 
 	// directory doesn't exist
@@ -557,6 +561,8 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 
 bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 {
+	if (directory.isEmpty()) return false;
+
 	QDir dir(directory);
 
 	// directory doesn't exist
