@@ -8,17 +8,7 @@ SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/server/src)
 
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(tools)
-
-IF(WITH_RYZOM_CLIENT)
-  IF(NOT WITH_GUI)
-    MESSAGE( FATAL_ERROR "The client cannot be built without the NeL GUI Library (WITH_GUI)")
-  ENDIF()
-
-  ADD_SUBDIRECTORY(client)
-ELSEIF(WITH_RYZOM_TOOLS)
-  # Need clientsheets lib for sheets packer tool
-  ADD_SUBDIRECTORY(client)
-ENDIF()
+ADD_SUBDIRECTORY(client)
 
 IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   # Need servershare for build packed collision tool
