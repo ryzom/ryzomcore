@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "uninstallwizarddialog.h"
+#include "uninstalldialog.h"
 #include "configfile.h"
 #include "utils.h"
 
@@ -26,7 +26,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent), m_installerIndex(-1)
+CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installerIndex(-1)
 {
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
@@ -102,19 +102,19 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	connect(this, SIGNAL(updateLayout()), SLOT(onUpdateLayout()));
 }
 
-CUninstallWizardDialog::~CUninstallWizardDialog()
+CUninstallDialog::~CUninstallDialog()
 {
 }
 
-void CUninstallWizardDialog::showEvent(QShowEvent *event)
+void CUninstallDialog::showEvent(QShowEvent *event)
 {
 	QDialog::showEvent(event);
 
 	// update size of all components sizes in a thread to not block interface
-	QtConcurrent::run(this, &CUninstallWizardDialog::updateSizes);
+	QtConcurrent::run(this, &CUninstallDialog::updateSizes);
 }
 
-void CUninstallWizardDialog::setSelectedComponents(const SUninstallComponents &components)
+void CUninstallDialog::setSelectedComponents(const SUninstallComponents &components)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
@@ -150,7 +150,7 @@ void CUninstallWizardDialog::setSelectedComponents(const SUninstallComponents &c
 	if (item) item->setCheckState(components.installer ? Qt::Checked : Qt::Unchecked);
 }
 
-SUninstallComponents CUninstallWizardDialog::getSelectedCompenents() const
+SUninstallComponents CUninstallDialog::getSelectedCompenents() const
 {
 	SUninstallComponents res;
 
@@ -190,17 +190,17 @@ SUninstallComponents CUninstallWizardDialog::getSelectedCompenents() const
 	return res;
 }
 
-void CUninstallWizardDialog::accept()
+void CUninstallDialog::accept()
 {
 	QDialog::accept();
 }
 
-void CUninstallWizardDialog::onItemChanged(QStandardItem * /* item */)
+void CUninstallDialog::onItemChanged(QStandardItem * /* item */)
 {
 	updateButtons();
 }
 
-void CUninstallWizardDialog::onUpdateSize(int row, const QString &text)
+void CUninstallDialog::onUpdateSize(int row, const QString &text)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
@@ -210,14 +210,14 @@ void CUninstallWizardDialog::onUpdateSize(int row, const QString &text)
 	model->setItem(row, 1, item);
 }
 
-void CUninstallWizardDialog::onUpdateLayout()
+void CUninstallDialog::onUpdateLayout()
 {
 	componentsTreeView->resizeColumnToContents(1);
 
 	updateButtons();
 }
 
-void CUninstallWizardDialog::updateSizes()
+void CUninstallDialog::updateSizes()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -252,7 +252,7 @@ void CUninstallWizardDialog::updateSizes()
 	emit updateLayout();
 }
 
-void CUninstallWizardDialog::updateButtons()
+void CUninstallDialog::updateButtons()
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;

@@ -18,7 +18,8 @@
 #include "mainwindow.h"
 #include "downloader.h"
 #include "profilesdialog.h"
-#include "uninstallwizarddialog.h"
+#include "settingsdialog.h"
+#include "uninstalldialog.h"
 #include "operationdialog.h"
 #include "configfile.h"
 #include "config.h"
@@ -173,7 +174,7 @@ void CMainWindow::onUninstall()
 	}
 
 	{
-		CUninstallWizardDialog dialog(this);
+		CUninstallDialog dialog(this);
 
 		dialog.setSelectedComponents(components);
 

@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UNINSTALLWIZARDDIALOG_H
-#define UNINSTALLWIZARDDIALOG_H
+#ifndef UNINSTALLDIALOG_H
+#define UNINSTALLDIALOG_H
 
-#include "ui_uninstallwizard.h"
+#include "ui_uninstalldialog.h"
 #include "operation.h"
 
 /**
@@ -27,13 +27,13 @@
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CUninstallWizardDialog : public QDialog, public Ui::UninstallWizardDialog
+class CUninstallDialog : public QDialog, public Ui::UninstallDialog
 {
 	Q_OBJECT
 
 public:
-	CUninstallWizardDialog(QWidget *parent = NULL);
-	virtual ~CUninstallWizardDialog();
+	CUninstallDialog(QWidget *parent = NULL);
+	virtual ~CUninstallDialog();
 
 	void setSelectedComponents(const SUninstallComponents &components);
 	SUninstallComponents getSelectedCompenents() const;

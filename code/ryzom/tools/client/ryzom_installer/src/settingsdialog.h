@@ -17,7 +17,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "ui_settings.h"
+#include "ui_settingsdialog.h"
 
 /**
  * Settings dialog

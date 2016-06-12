@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef MIGRATEWIZARDDIALOG_H
-#define MIGRATEWIZARDDIALOG_H
+#ifndef MIGRATEDIALOG_H
+#define MIGRATEDIALOG_H
 
-#include "ui_migratewizard.h"
+#include "ui_migratedialog.h"
 
 /**
  * Wizard displayed at first launch, that asks user to choose source and destination directories.
@@ -25,13 +25,13 @@
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CMigrateWizardDialog : public QDialog, public Ui::MigrateWizardDialog
+class CMigrateDialog : public QDialog, public Ui::MigrateDialog
 {
 	Q_OBJECT
 
 public:
-	CMigrateWizardDialog();
-	virtual ~CMigrateWizardDialog();
+	CMigrateDialog();
+	virtual ~CMigrateDialog();
 
 private slots:
 	void onShowAdvancedParameters(int state);

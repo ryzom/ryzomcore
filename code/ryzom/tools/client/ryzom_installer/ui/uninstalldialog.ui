@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>UninstallWizardDialog</class>
- <widget class="QDialog" name="UninstallWizardDialog">
+ <class>UninstallDialog</class>
+ <widget class="QDialog" name="UninstallDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
