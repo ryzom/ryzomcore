@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "operation.h"
 #include "downloader.h"
 
 #include "nel/misc/system_info.h"
@@ -24,9 +25,9 @@
 	#define new DEBUG_NEW
 #endif
 
-CDownloader::CDownloader(QObject *parent):QObject(parent), m_manager(NULL), m_reply(NULL), m_timer(NULL),
+CDownloader::CDownloader(QObject *parent, IOperationProgressListener *listener):QObject(parent), m_listener(listener), m_manager(NULL), m_reply(NULL), m_timer(NULL),
 	m_offset(0), m_size(0), m_supportsAcceptRanges(false), m_supportsContentRange(false),
-	m_downloadAfterHead(false), m_aborted(false), m_file(NULL)
+	m_downloadAfterHead(false), m_file(NULL)
 {
 	m_manager = new QNetworkAccessManager(this);
 	m_timer = new QTimer(this);
@@ -60,7 +61,7 @@ bool CDownloader::prepareFile(const QString &url, const QString &fullPath)
 
 	m_downloadAfterHead = false;
 
-	emit downloadPrepare();
+	if (m_listener) m_listener->operationPrepare();
 
 	m_fullPath = fullPath;
 	m_url = url;
@@ -82,15 +83,6 @@ bool CDownloader::getFile()
 	m_downloadAfterHead = true;
 
 	getFileHead();
-
-	return true;
-}
-
-bool CDownloader::stop()
-{
-	if (!m_reply) return false;
-
-	m_reply->abort();
 
 	return true;
 }
@@ -154,12 +146,12 @@ void CDownloader::getFileHead()
 			if (checkDownloadedFile())
 			{
 				// file is already downloaded
-				emit downloadSuccess(m_size);
+				if (m_listener) m_listener->operationSuccess(m_size);
 			}
 			else
 			{
 				// or has wrong size
-				emit downloadFail(tr("File (%1B) is larger than expected (%2B)").arg(m_offset).arg(m_size));
+				if (m_listener) m_listener->operationFail(tr("File (%1B) is larger than expected (%2B)").arg(m_offset).arg(m_size));
 			}
 
 			return;
@@ -189,13 +181,13 @@ void CDownloader::downloadFile()
 	if (freeSpace < m_size - m_offset)
 	{
 		// we have not enough free disk space to continue download
-		emit downloadFail(tr("You only have %1 bytes left on device, but %2 bytes are required.").arg(freeSpace).arg(m_size - m_offset));
+		if (m_listener) m_listener->operationFail(tr("You only have %1 bytes left on device, but %2 bytes are required.").arg(freeSpace).arg(m_size - m_offset));
 		return;
 	}
 
 	if (!openFile())
 	{
-		emit downloadFail(tr("Unable to write file"));
+		if (m_listener) m_listener->operationFail(tr("Unable to write file"));
 		return;
 	}
 
@@ -214,7 +206,7 @@ void CDownloader::downloadFile()
 	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(onDownloadProgress(qint64, qint64)));
 	connect(m_reply, SIGNAL(readyRead()), SLOT(onDownloadRead()));
 
-	emit downloadStart();
+	if (m_listener) m_listener->operationStart();
 
 	startTimer();
 }
@@ -230,7 +222,7 @@ void CDownloader::onTimeout()
 {
 	qDebug() << "Timeout";
 
-	emit downloadFail(tr("Timeout"));
+	if (m_listener) m_listener->operationFail(tr("Timeout"));
 }
 
 void CDownloader::onHtmlPageFinished()
@@ -267,7 +259,7 @@ void CDownloader::onHeadFinished()
 	{
 		if (redirection.isEmpty())
 		{
-			emit downloadFail(tr("Redirection URL is not defined"));
+			if (m_listener) m_listener->operationFail(tr("Redirection URL is not defined"));
 			return;
 		}
 
@@ -289,7 +281,7 @@ void CDownloader::onHeadFinished()
 	else if (status == 200)
 	{
 		// update size
-		emit downloadInit(0, m_size);
+		if (m_listener) m_listener->operationInit(0, m_size);
 
 		if (!m_supportsAcceptRanges && acceptRanges == "bytes")
 		{
@@ -321,7 +313,7 @@ void CDownloader::onHeadFinished()
 			m_size = regexp.cap(3).toLongLong();
 
 			// update offset and size
-			emit downloadInit(m_offset, m_size);
+			if (m_listener) m_listener->operationInit(m_offset, m_size);
 		}
 		else
 		{
@@ -332,7 +324,7 @@ void CDownloader::onHeadFinished()
 	// other status
 	else
 	{
-		emit downloadFail(tr("Wrong status code: %1").arg(status));
+		if (m_listener) m_listener->operationFail(tr("Wrong status code: %1").arg(status));
 		return;
 	}
 
@@ -356,28 +348,29 @@ void CDownloader::onDownloadFinished()
 
 	closeFile();
 
-	if (m_aborted)
+	if (m_listener && m_listener->operationShouldStop())
 	{
-		m_aborted = false;
-		emit downloadStop();
+		m_listener->operationStop();
 	}
 	else
 	{
 		bool ok = NLMISC::CFile::setFileModificationDate(m_fullPath.toUtf8().constData(), m_lastModified.toTime_t());
 
-		emit downloadSuccess(m_size);
+		if (m_listener) m_listener->operationSuccess(m_size);
 	}
 }
 
 void CDownloader::onError(QNetworkReply::NetworkError error)
 {
+	if (!m_listener) return;
+
 	if (error == QNetworkReply::OperationCanceledError)
 	{
-		m_aborted = true;
+		 m_listener->operationStop();
 	}
 	else
 	{
-		emit downloadFail(tr("Network error: %1").arg(error));
+		m_listener->operationFail(tr("Network error: %1").arg(error));
 	}
 }
 
@@ -385,7 +378,12 @@ void CDownloader::onDownloadProgress(qint64 current, qint64 total)
 {
 	stopTimer();
 
-	emit downloadProgress(m_offset + current);
+	if (!m_listener) return;
+
+	m_listener->operationProgress(m_offset + current, ""); // TODO: put file
+
+	// abort download
+	if (m_listener->operationShouldStop() && m_reply) m_reply->abort();
 }
 
 void CDownloader::onDownloadRead()

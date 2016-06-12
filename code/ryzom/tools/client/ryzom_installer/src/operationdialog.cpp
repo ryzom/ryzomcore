@@ -55,15 +55,7 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 //	connect(stopButton, SIGNAL(clicked()), SLOT(onStopClicked()));
 
 	// downloader
-	m_downloader = new CDownloader(this);
-
-	connect(m_downloader, SIGNAL(downloadPrepare()), SLOT(onProgressPrepare()));
-	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
-	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
-	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
-	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
-	connect(m_downloader, SIGNAL(downloadSuccess(qint64)), SLOT(onProgressSuccess(qint64)));
-	connect(m_downloader, SIGNAL(downloadFail(QString)), SLOT(onProgressFail(QString)));
+	m_downloader = new CDownloader(this, this);
 
 	connect(operationButtonBox, SIGNAL(clicked(QAbstractButton*)), SLOT(onAbortClicked()));
 

@@ -35,7 +35,7 @@ CMainWindow::CMainWindow():QMainWindow()
 	setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
 	// downloader
-	m_downloader = new CDownloader(this);
+	m_downloader = new CDownloader(this, NULL);
 
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
