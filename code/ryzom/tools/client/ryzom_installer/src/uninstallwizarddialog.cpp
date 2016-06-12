@@ -89,6 +89,9 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	// resize layout depending on content and constraints
 	adjustSize();
 
+	// fix height because to left bitmap
+	setFixedHeight(height());
+
 	// click signals
 	connect(uninstallButton, SIGNAL(clicked()), SLOT(accept()));
 	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
@@ -212,8 +215,6 @@ void CUninstallWizardDialog::onUpdateLayout()
 	componentsTreeView->resizeColumnToContents(1);
 
 	updateButtons();
-
-	adjustSize();
 }
 
 void CUninstallWizardDialog::updateSizes()
