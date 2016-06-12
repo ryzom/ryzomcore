@@ -85,17 +85,21 @@ void CMainWindow::onPlayClicked()
 
 	const CProfile &profile = config->getProfile(profileIndex);
 
+	// get full path of client executable
 	QString executable = config->getProfileClientFullPath(profileIndex);
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
+	// create arguments list
 	QStringList arguments;
 	arguments << "-p";
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
+	// launch the game with all arguments
 	bool started = QProcess::startDetached(executable, arguments);
 
+	// define this profile as default one
 	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
 }
 
