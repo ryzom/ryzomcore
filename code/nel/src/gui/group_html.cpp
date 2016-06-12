@@ -5588,15 +5588,23 @@ namespace NLGUI
 		{
 			if (it->first == "font-size")
 			{
-				float tmp;
-				sint size = 0;
-				getPercentage (size, tmp, it->second.c_str());
-				if (size > 0)
-					style.FontSize = size;
+				if (it->second == "inherit")
+					style.FontSize = getFontSize();
+				else
+				{
+					float tmp;
+					sint size = 0;
+					getPercentage (size, tmp, it->second.c_str());
+					if (size > 0)
+						style.FontSize = size;
+				}
 			}
 			else
 			if (it->first == "font-style")
 			{
+				if (it->second == "inherit")
+					style.FontOblique = getFontOblique();
+				else
 				if (it->second == "italic" || it->second == "oblique")
 					style.FontOblique = true;
 			}
@@ -5605,6 +5613,9 @@ namespace NLGUI
 			{
 				// https://developer.mozilla.org/en-US/docs/Web/CSS/font-weight
 				uint weight = 400;
+				if (it->second == "inherit")
+					weight = getFontWeight();
+				else
 				if (it->second == "normal")
 					weight = 400;
 				else
@@ -5637,7 +5648,10 @@ namespace NLGUI
 			}
 			else
 			if (it->first == "color")
-				scanHTMLColor(it->second.c_str(), style.TextColor);
+				if (it->second == "inherit")
+					style.TextColor = getTextColor();
+				else
+					scanHTMLColor(it->second.c_str(), style.TextColor);
 			else
 			if (it->first == "text-decoration" || it->first == "text-decoration-line")
 			{
