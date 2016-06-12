@@ -117,11 +117,12 @@
  color="255 255 255 255"
  sizeref_eb="w"
  render_layer="0"
+ multi_min_line="0"
 >
 	<group id="#id" posref="#posref" x="#x" y="#y" posparent="#posparent" child_resize_h="#child_resize_h" sizeref="#sizeref" w="#w" h="#h" render_layer="#render_layer">
 		<group type="edit_box" sizeref="#sizeref_eb" w="-16" id="eb" posref="TL TL" x="8" y="-8" child_resize_h="#child_resize_h" onenter="#onenter" params="#params" onchange="#onchange" onchange_params="#onchange_params" max_num_chars="#max_num_chars" prompt="#prompt" enter_loose_focus="#enter_loose_focus" enter_recover_focus="#enter_recover_focus" entry_type="#entry_type"  reset_focus_on_hide="#reset_focus_on_hide" menu_r="#menu_r" max_historic="#max_historic" want_return="#want_return" backup_father_container_pos="#backup_father_container_pos" render_layer="#render_layer">
 			<view type="bitmap" id="bg" scale="true" sizeref="hw" h="0" w="0" texture="log_eb_m.tga" inherit_gc_alpha="false" render_layer="#render_layer"/>
-			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false" render_layer="#render_layer"/>
+			<view id="edit_text" type="text" x="#text_x" y="#text_y" posref="#text_ref" multi_line="#multi_line" multi_line_space="0" multi_min_line="#multi_min_line" fontsize="#fontsize" color="#color" shadow="true" hardtext="" global_color="false" render_layer="#render_layer"/>
 		</group>
 	
 		<!-- border around the list -->
