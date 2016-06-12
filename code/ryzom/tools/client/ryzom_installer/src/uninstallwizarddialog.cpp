@@ -94,7 +94,7 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 	// click signals
 	connect(uninstallButton, SIGNAL(clicked()), SLOT(accept()));
-	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
+	connect(cancelButton, SIGNAL(clicked()), SLOT(reject()));
 	connect(model, SIGNAL(itemChanged(QStandardItem *)), SLOT(onItemChanged(QStandardItem *)));
 
 	// semi-hack to not update UI on another thread
@@ -255,6 +255,7 @@ void CUninstallWizardDialog::updateSizes()
 void CUninstallWizardDialog::updateButtons()
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
+	if (model == NULL) return;
 
 	int checkedCount = 0;
 
