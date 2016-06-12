@@ -110,6 +110,7 @@ void CFilesCopier::getFilesList(FilesToCopy &files)
 					file.dst = dstPath;
 					file.size = it.fileInfo().size();
 					file.date = it.fileInfo().lastModified().toTime_t();
+					file.permissions = it.fileInfo().permissions();
 
 					files << file;
 				}
