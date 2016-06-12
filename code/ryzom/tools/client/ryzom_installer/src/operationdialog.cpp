@@ -95,7 +95,7 @@ void COperationDialog::processNextStep()
 			break;
 
 		case OperationUpdateProfiles:
-			processUpgradeProfilesNextStep();
+			processUpdateProfilesNextStep();
 			break;
 
 		case OperationInstall:
