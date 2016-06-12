@@ -42,6 +42,7 @@ public slots:
 	void onConfigureClicked();
 
 	void onProfiles();
+	void onSettings();
 	void onUninstall();
 	void onQuit();
 

@@ -30,8 +30,11 @@ class CSettingsDialog : public QDialog, public Ui::SettingsDialog
 	Q_OBJECT
 
 public:
-	CSettingsDialog();
+	CSettingsDialog(QWidget *parent = NULL);
 	virtual ~CSettingsDialog();
+
+public slots:
+	void onInstallationDirectoryButtonClicked();
 
 private slots:
 	void accept();

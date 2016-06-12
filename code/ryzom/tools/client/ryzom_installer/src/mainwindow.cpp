@@ -41,6 +41,7 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
 
@@ -158,6 +159,32 @@ void CMainWindow::onProfiles()
 		{
 			// aborted
 		}
+	}
+}
+
+void CMainWindow::onSettings()
+{
+	bool updated = false;
+
+	{
+		CSettingsDialog dialog(this);
+
+		if (dialog.exec())
+		{
+			updated = true;
+		}
+	}
+
+	if (updated)
+	{
+//		COperationDialog dialog(this);
+
+//		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+
+//		if (!dialog.exec())
+//		{
+			// aborted
+//		}
 	}
 }
 

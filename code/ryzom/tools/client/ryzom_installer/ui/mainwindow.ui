@@ -118,7 +118,7 @@ p, li { white-space: pre-wrap; }
      <string>&amp;Settings</string>
     </property>
     <addaction name="actionProfiles"/>
-    <addaction name="actionDirectories"/>
+    <addaction name="actionSettings"/>
     <addaction name="actionUninstall"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -148,9 +148,9 @@ p, li { white-space: pre-wrap; }
     <string>&amp;Profiles</string>
    </property>
   </action>
-  <action name="actionDirectories">
+  <action name="actionSettings">
    <property name="text">
-    <string>&amp;Directories</string>
+    <string>&amp;Settings</string>
    </property>
   </action>
   <action name="actionQuit">
