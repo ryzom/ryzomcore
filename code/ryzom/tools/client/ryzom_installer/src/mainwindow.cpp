@@ -18,7 +18,8 @@
 #include "mainwindow.h"
 #include "downloader.h"
 #include "profilesdialog.h"
-#include "uninstallwizarddialog.h"
+#include "settingsdialog.h"
+#include "uninstalldialog.h"
 #include "operationdialog.h"
 #include "configfile.h"
 #include "config.h"
@@ -35,11 +36,12 @@ CMainWindow::CMainWindow():QMainWindow()
 	setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
 
 	// downloader
-	m_downloader = new CDownloader(this);
+	m_downloader = new CDownloader(this, NULL);
 
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
 
@@ -50,6 +52,12 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(actionAbout, SIGNAL(triggered()), SLOT(onAbout()));
 
 	connect(profilesComboBox, SIGNAL(currentIndexChanged(int)), SLOT(onProfileChanged(int)));
+
+	// resize layout depending on content and constraints
+	adjustSize();
+
+	// fix height because to left bitmap
+	setFixedHeight(height());
 
 	updateProfiles();
 }
@@ -85,17 +93,21 @@ void CMainWindow::onPlayClicked()
 
 	const CProfile &profile = config->getProfile(profileIndex);
 
+	// get full path of client executable
 	QString executable = config->getProfileClientFullPath(profileIndex);
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
+	// create arguments list
 	QStringList arguments;
 	arguments << "-p";
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
+	// launch the game with all arguments
 	bool started = QProcess::startDetached(executable, arguments);
 
+	// define this profile as default one
 	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
 }
 
@@ -124,11 +136,55 @@ void CMainWindow::onConfigureClicked()
 
 void CMainWindow::onProfiles()
 {
-	CProfilesDialog dialog(this);
+	bool updated = false;
 
-	if (dialog.exec())
 	{
-		updateProfiles();
+		CProfilesDialog dialog(this);
+
+		if (dialog.exec())
+		{
+			updateProfiles();
+
+			updated = true;
+		}
+	}
+
+	if (updated)
+	{
+		COperationDialog dialog(this);
+
+		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+
+		if (!dialog.exec())
+		{
+			// aborted
+		}
+	}
+}
+
+void CMainWindow::onSettings()
+{
+	bool updated = false;
+
+	{
+		CSettingsDialog dialog(this);
+
+		if (dialog.exec())
+		{
+			updated = true;
+		}
+	}
+
+	if (updated)
+	{
+//		COperationDialog dialog(this);
+
+//		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+
+//		if (!dialog.exec())
+//		{
+			// aborted
+//		}
 	}
 }
 
@@ -145,7 +201,7 @@ void CMainWindow::onUninstall()
 	}
 
 	{
-		CUninstallWizardDialog dialog(this);
+		CUninstallDialog dialog(this);
 
 		dialog.setSelectedComponents(components);
 
@@ -176,9 +232,9 @@ void CMainWindow::onAbout()
 	QMessageBox::about(this,
 		tr("About %1").arg("Ryzom Installer"),
 		QString("Ryzom Installer %1").arg(QApplication::applicationVersion()) + br +
-		tr("Program to install, download and manage Ryzom configurations.") +
+		tr("Program to install, download and manage Ryzom profiles.") +
 		br+br+
-		tr("Author: %1").arg("Cedric 'Kervala' OCHS") + br +
+		tr("Author: %1").arg("C&eacute;dric 'Kervala' OCHS") + br +
 		tr("Copyright: %1").arg(COPYRIGHT) + br +
 		tr("Support: %1").arg("<a href=\"https://bitbucket.org/ryzom/ryzomcore/issues?status=new&status=open\">Ryzom Core on Bitbucket</a>"));
 }

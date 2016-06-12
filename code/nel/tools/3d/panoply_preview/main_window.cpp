@@ -74,7 +74,7 @@ CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *p
 	createStatusBar();
 
 	m_PanoplyPreview = new CPanoplyPreview(this);
-    setCentralWidget(m_PanoplyPreview);
+	setCentralWidget(m_PanoplyPreview);
 	
 	createDockWindows();
 }

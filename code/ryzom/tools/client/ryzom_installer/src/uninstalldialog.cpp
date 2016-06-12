@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "uninstallwizarddialog.h"
+#include "uninstalldialog.h"
 #include "configfile.h"
 #include "utils.h"
 
@@ -26,7 +26,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent), m_installerIndex(-1)
+CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installerIndex(-1)
 {
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
@@ -76,6 +76,7 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 
 	}
 
+	// installer
 	m_installerIndex = model->rowCount();
 
 	item = new QStandardItem(tr("Ryzom Installer"));
@@ -85,11 +86,15 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	componentsTreeView->setModel(model);
 	componentsTreeView->resizeColumnToContents(0);
 
+	// resize layout depending on content and constraints
 	adjustSize();
+
+	// fix height because to left bitmap
+	setFixedHeight(height());
 
 	// click signals
 	connect(uninstallButton, SIGNAL(clicked()), SLOT(accept()));
-	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
+	connect(cancelButton, SIGNAL(clicked()), SLOT(reject()));
 	connect(model, SIGNAL(itemChanged(QStandardItem *)), SLOT(onItemChanged(QStandardItem *)));
 
 	// semi-hack to not update UI on another thread
@@ -97,18 +102,19 @@ CUninstallWizardDialog::CUninstallWizardDialog(QWidget *parent):QDialog(parent),
 	connect(this, SIGNAL(updateLayout()), SLOT(onUpdateLayout()));
 }
 
-CUninstallWizardDialog::~CUninstallWizardDialog()
+CUninstallDialog::~CUninstallDialog()
 {
 }
 
-void CUninstallWizardDialog::showEvent(QShowEvent *event)
+void CUninstallDialog::showEvent(QShowEvent *event)
 {
 	QDialog::showEvent(event);
 
-	QtConcurrent::run(this, &CUninstallWizardDialog::updateSizes);
+	// update size of all components sizes in a thread to not block interface
+	QtConcurrent::run(this, &CUninstallDialog::updateSizes);
 }
 
-void CUninstallWizardDialog::setSelectedComponents(const SUninstallComponents &components)
+void CUninstallDialog::setSelectedComponents(const SUninstallComponents &components)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
@@ -144,7 +150,7 @@ void CUninstallWizardDialog::setSelectedComponents(const SUninstallComponents &c
 	if (item) item->setCheckState(components.installer ? Qt::Checked : Qt::Unchecked);
 }
 
-SUninstallComponents CUninstallWizardDialog::getSelectedCompenents() const
+SUninstallComponents CUninstallDialog::getSelectedCompenents() const
 {
 	SUninstallComponents res;
 
@@ -184,35 +190,34 @@ SUninstallComponents CUninstallWizardDialog::getSelectedCompenents() const
 	return res;
 }
 
-void CUninstallWizardDialog::accept()
+void CUninstallDialog::accept()
 {
 	QDialog::accept();
 }
 
-void CUninstallWizardDialog::onItemChanged(QStandardItem * /* item */)
+void CUninstallDialog::onItemChanged(QStandardItem * /* item */)
 {
 	updateButtons();
 }
 
-void CUninstallWizardDialog::onUpdateSize(int row, const QString &text)
+void CUninstallDialog::onUpdateSize(int row, const QString &text)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
 
+	// set size for a component
 	QStandardItem *item = new QStandardItem(text);
 	model->setItem(row, 1, item);
 }
 
-void CUninstallWizardDialog::onUpdateLayout()
+void CUninstallDialog::onUpdateLayout()
 {
 	componentsTreeView->resizeColumnToContents(1);
 
 	updateButtons();
-
-	adjustSize();
 }
 
-void CUninstallWizardDialog::updateSizes()
+void CUninstallDialog::updateSizes()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -247,17 +252,18 @@ void CUninstallWizardDialog::updateSizes()
 	emit updateLayout();
 }
 
-void CUninstallWizardDialog::updateButtons()
+void CUninstallDialog::updateButtons()
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
+	if (model == NULL) return;
 
 	int checkedCount = 0;
 
-	// Uninstall button should be enabled only if at least one component is selected
 	for (int i = 0; i < model->rowCount(); ++i)
 	{
 		if (model->item(i)->checkState() == Qt::Checked) ++checkedCount;
 	}
 
+	// Uninstall button should be enabled only if at least one component is checked
 	uninstallButton->setEnabled(checkedCount > 0);
 }

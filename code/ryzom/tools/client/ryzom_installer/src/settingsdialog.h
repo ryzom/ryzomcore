@@ -17,7 +17,7 @@
 #ifndef SETTINGSDIALOG_H
 #define SETTINGSDIALOG_H
 
-#include "ui_settings.h"
+#include "ui_settingsdialog.h"
 
 /**
  * Settings dialog
@@ -30,8 +30,11 @@ class CSettingsDialog : public QDialog, public Ui::SettingsDialog
 	Q_OBJECT
 
 public:
-	CSettingsDialog();
+	CSettingsDialog(QWidget *parent = NULL);
 	virtual ~CSettingsDialog();
+
+public slots:
+	void onInstallationDirectoryButtonClicked();
 
 private slots:
 	void accept();

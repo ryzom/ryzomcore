@@ -57,6 +57,7 @@ bool CProfilesModel::removeRows(int row, int count, const QModelIndex &parent)
 
 bool CProfilesModel::save() const
 {
+	CConfigFile::getInstance()->backupProfiles();
 	CConfigFile::getInstance()->setProfiles(m_profiles);
 	CConfigFile::getInstance()->save();
 

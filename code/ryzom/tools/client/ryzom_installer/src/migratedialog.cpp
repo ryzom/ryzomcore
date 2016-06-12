@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
-#include "installwizarddialog.h"
+#include "migratedialog.h"
 #include "configfile.h"
 #include "utils.h"
 
@@ -26,28 +26,25 @@
 	#define new DEBUG_NEW
 #endif
 
-CInstallWizardDialog::CInstallWizardDialog():QDialog()
+CMigrateDialog::CMigrateDialog():QDialog()
 {
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
 	setupUi(this);
 
-	oldDirectoryRadioButton->setVisible(false);
+	// if launched from current directory, it means we just patched files
+	m_currentDirectory = CConfigFile::getInstance()->getCurrentDirectory();
 
-	// enable download radio button by default
-	internetRadioButton->setChecked(true);
-
-	m_oldDirectory = CConfigFile::getInstance()->getOldInstallationDirectory();
-
-	// found a previous installation
-	if (CConfigFile::getInstance()->areRyzomDataInstalledIn(m_oldDirectory))
+	if (!CConfigFile::getInstance()->isRyzomInstalledIn(m_currentDirectory))
 	{
-		oldDirectoryRadioButton->setText(tr("Old installation: %1").arg(m_oldDirectory));
-		oldDirectoryRadioButton->setVisible(true);
-		oldDirectoryRadioButton->setChecked(true);
-	}
+		// Ryzom is in the same directory as Ryzom Installer
+		m_currentDirectory = CConfigFile::getInstance()->getApplicationDirectory();
 
-	updateAnotherLocationText();
+		if (!CConfigFile::getInstance()->isRyzomInstalledIn(m_currentDirectory))
+		{
+			m_currentDirectory.clear();
+		}
+	}
 
 	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
 
@@ -68,11 +65,11 @@ CInstallWizardDialog::CInstallWizardDialog():QDialog()
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
-	internetRadioButton->setText(tr("Internet (%1 to download)").arg(qBytesToHumanReadable(server.dataCompressedSize)));
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
-	connect(anotherLocationBrowseButton, SIGNAL(clicked()), SLOT(onAnotherLocationBrowseButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
+	connect(continueButton, SIGNAL(clicked()), SLOT(accept()));
+	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
 
 	// TODO: if found a folder with initial data, get its total size and check if at least that size is free on the disk
 
@@ -82,41 +79,18 @@ CInstallWizardDialog::CInstallWizardDialog():QDialog()
 	connect(advancedCheckBox, SIGNAL(stateChanged(int)), SLOT(onShowAdvancedParameters(int)));
 }
 
-CInstallWizardDialog::~CInstallWizardDialog()
+CMigrateDialog::~CMigrateDialog()
 {
 }
 
-void CInstallWizardDialog::onShowAdvancedParameters(int state)
+void CMigrateDialog::onShowAdvancedParameters(int state)
 {
 	advancedFrame->setVisible(state != Qt::Unchecked);
 
 	adjustSize();
 }
 
-void CInstallWizardDialog::onAnotherLocationBrowseButtonClicked()
-{
-	QString directory;
-	
-	for(;;)
-	{
-		directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where is installed Ryzom"));
-
-		if (directory.isEmpty()) return;
-
-		if (CConfigFile::getInstance()->isRyzomInstalledIn(directory)) break;
-
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to find Ryzom"), tr("Unable to find Ryzom in selected directory. Please choose another one or cancel."));
-	}
-
-	m_anotherDirectory = directory;
-
-	// if we browse to a Ryzom installation, we want to use it
-	anotherLocationRadioButton->setChecked(true);
-
-	updateAnotherLocationText();
-}
-
-void CInstallWizardDialog::onDestinationBrowseButtonClicked()
+void CMigrateDialog::onDestinationBrowseButtonClicked()
 {
 	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where to install Ryzom"));
 
@@ -127,17 +101,12 @@ void CInstallWizardDialog::onDestinationBrowseButtonClicked()
 	updateDestinationText();
 }
 
-void CInstallWizardDialog::updateAnotherLocationText()
-{
-	anotherLocationRadioButton->setText(tr("Another location: %1").arg(m_anotherDirectory.isEmpty() ? tr("Undefined"):m_anotherDirectory));
-}
-
-void CInstallWizardDialog::updateDestinationText()
+void CMigrateDialog::updateDestinationText()
 {
 	destinationLabel->setText(m_dstDirectory);
 }
 
-void CInstallWizardDialog::accept()
+void CMigrateDialog::accept()
 {
 	// check free disk space
 	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
@@ -150,19 +119,7 @@ void CInstallWizardDialog::accept()
 		return;
 	}
 
-	if (oldDirectoryRadioButton->isChecked())
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_oldDirectory);
-	}
-	else if (anotherLocationRadioButton->isChecked())
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_anotherDirectory);
-	}
-	else
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory("");
-	}
-
+	CConfigFile::getInstance()->setSrcServerDirectory(m_currentDirectory);
 	CConfigFile::getInstance()->setInstallationDirectory(m_dstDirectory);
 	CConfigFile::getInstance()->setUse64BitsClient(clientArch64RadioButton->isChecked());
 	CConfigFile::getInstance()->save();

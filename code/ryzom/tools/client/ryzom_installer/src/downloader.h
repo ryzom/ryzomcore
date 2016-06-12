@@ -17,6 +17,8 @@
 #ifndef DOWNLOADER_H
 #define DOWNLOADER_H
 
+class IOperationProgressListener;
+
 /**
  * Files downloader, please note that only one file can be downloaded at once.
  *
@@ -28,41 +30,19 @@ class CDownloader : public QObject
 	Q_OBJECT
 
 public:
-	CDownloader(QObject *parent);
+	CDownloader(QObject *parent, IOperationProgressListener *listener);
 	virtual ~CDownloader();
 
 	bool getHtmlPageContent(const QString &url);
 
 	bool prepareFile(const QString &url, const QString &fullPath);
 	bool getFile();
-	bool stop();
 
 	bool supportsResume() const { return m_supportsAcceptRanges && m_supportsContentRange; }
 
 	bool isDownloading() const { return m_file != NULL; }
 
 signals:
-	// emitted when requesting real URL
-	void downloadPrepare();
-
-	// emitted when we got the initial (local) and total (remote) size of file
-	void downloadInit(qint64 current, qint64 total);
-
-	// emitted when we begin to download
-	void downloadStart();
-
-	// emitted when the download stopped
-	void downloadStop();
-
-	// emittd when downloading
-	void downloadProgress(qint64 current);
-
-	// emitted when the whole file is downloaded
-	void downloadSuccess(qint64 total);
-
-	// emitted when an error occurs
-	void downloadFail(const QString &error);
-
 	void htmlPageContent(const QString &html);
 
 private slots:
@@ -75,6 +55,8 @@ private slots:
 	void onDownloadRead();
 
 protected:
+	IOperationProgressListener *m_listener;
+
 	void startTimer();
 	void stopTimer();
 
@@ -102,7 +84,6 @@ protected:
 	bool m_supportsContentRange;
 
 	bool m_downloadAfterHead;
-	bool m_aborted;
 
 	QFile *m_file;
 };

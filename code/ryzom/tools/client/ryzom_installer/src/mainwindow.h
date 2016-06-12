@@ -38,13 +38,17 @@ public:
 	virtual ~CMainWindow();
 
 public slots:
+	// main window buttons
 	void onPlayClicked();
 	void onConfigureClicked();
 
+	// settings menu
 	void onProfiles();
+	void onSettings();
 	void onUninstall();
 	void onQuit();
 
+	// help menu
 	void onAbout();
 	void onAboutQt();
 

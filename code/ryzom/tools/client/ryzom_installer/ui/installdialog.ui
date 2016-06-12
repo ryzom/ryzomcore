@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>InstallWizardDialog</class>
- <widget class="QDialog" name="InstallWizardDialog">
+ <class>InstallDialog</class>
+ <widget class="QDialog" name="InstallDialog">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -219,7 +219,7 @@ Just follow the different steps and make your choice between the different propo
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>InstallWizardDialog</receiver>
+   <receiver>InstallDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -235,7 +235,7 @@ Just follow the different steps and make your choice between the different propo
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>InstallWizardDialog</receiver>
+   <receiver>InstallDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

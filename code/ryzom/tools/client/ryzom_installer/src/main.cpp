@@ -17,9 +17,9 @@
 #include "stdpch.h"
 #include "mainwindow.h"
 #include "configfile.h"
-#include "migratewizarddialog.h"
-#include "installwizarddialog.h"
-#include "uninstallwizarddialog.h"
+#include "migratedialog.h"
+#include "installdialog.h"
+#include "uninstalldialog.h"
 #include "operationdialog.h"
 
 #ifdef HAVE_CONFIG_H
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 		// show uninstall wizard dialog if not in silent mode
 		if (!parser.isSet(silentOption))
 		{
-			CUninstallWizardDialog dialog;
+			CUninstallDialog dialog;
 
 			dialog.setSelectedComponents(components);
 
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
 	if (step == CConfigFile::ShowMigrateWizard)
 	{
-		CMigrateWizardDialog dialog;
+		CMigrateDialog dialog;
 
 		if (!dialog.exec()) return 1;
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 	}
 	else if (step == CConfigFile::ShowInstallWizard)
 	{
-		CInstallWizardDialog dialog;
+		CInstallDialog dialog;
 
 		if (!dialog.exec()) return 1;
 

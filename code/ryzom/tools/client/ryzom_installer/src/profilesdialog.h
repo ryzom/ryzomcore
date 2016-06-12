@@ -17,7 +17,7 @@
 #ifndef PROFILESDIALOG_H
 #define PROFILESDIALOG_H
 
-#include "ui_profiles.h"
+#include "ui_profilesdialog.h"
 
 class CProfilesModel;
 class CServersModel;

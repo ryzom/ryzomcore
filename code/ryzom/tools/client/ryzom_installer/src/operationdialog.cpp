@@ -55,15 +55,7 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 //	connect(stopButton, SIGNAL(clicked()), SLOT(onStopClicked()));
 
 	// downloader
-	m_downloader = new CDownloader(this);
-
-	connect(m_downloader, SIGNAL(downloadPrepare()), SLOT(onProgressPrepare()));
-	connect(m_downloader, SIGNAL(downloadInit(qint64, qint64)), SLOT(onProgressInit(qint64, qint64)));
-	connect(m_downloader, SIGNAL(downloadStart()), SLOT(onProgressStart()));
-	connect(m_downloader, SIGNAL(downloadStop()), SLOT(onProgressStop()));
-	connect(m_downloader, SIGNAL(downloadProgress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
-	connect(m_downloader, SIGNAL(downloadSuccess(qint64)), SLOT(onProgressSuccess(qint64)));
-	connect(m_downloader, SIGNAL(downloadFail(QString)), SLOT(onProgressFail(QString)));
+	m_downloader = new CDownloader(this, this);
 
 	connect(operationButtonBox, SIGNAL(clicked(QAbstractButton*)), SLOT(onAbortClicked()));
 
@@ -100,6 +92,10 @@ void COperationDialog::processNextStep()
 	{
 		case OperationMigrate:
 			processMigrateNextStep();
+			break;
+
+		case OperationUpdateProfiles:
+			processUpdateProfilesNextStep();
 			break;
 
 		case OperationInstall:
@@ -201,8 +197,16 @@ void COperationDialog::processMigrateNextStep()
 	}
 }
 
+void COperationDialog::processUpdateProfilesNextStep()
+{
+	// TODO: check all servers are downloaded
+	// TODO: delete profiles directories that are not used anymore
+	// TODO: create shortcuts
+}
+
 void COperationDialog::processInstallNextStep()
 {
+	// TODO: implement
 }
 
 void COperationDialog::processUninstallNextStep()
@@ -465,6 +469,21 @@ void COperationDialog::extractBnpClient()
 		env.insert("ROOTPATH", QDir::toNativeSeparators(destinationDirectory));
 		env.insert("STARTUPPATH", "");
 		process.setProcessEnvironment(env);
+
+		// permissions to execute script
+		QFileDevice::Permissions permissions;
+		permissions |= QFileDevice::ExeOther;
+		permissions |= QFileDevice::ExeOwner;
+		permissions |= QFileDevice::ExeUser;
+		permissions |= QFileDevice::ReadOther;
+		permissions |= QFileDevice::ReadOwner;
+		permissions |= QFileDevice::ReadUser;
+		permissions |= QFileDevice::WriteOwner;
+
+		if (!QFile::setPermissions(upgradeScript, permissions))
+		{
+			qDebug() << "Unable to set executable flag to" << upgradeScript;
+		}
 
 		process.start(upgradeScript);
 

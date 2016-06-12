@@ -14,11 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UNINSTALLWIZARDDIALOG_H
-#define UNINSTALLWIZARDDIALOG_H
+#ifndef INSTALLDIALOG_H
+#define INSTALLDIALOG_H
 
-#include "ui_uninstallwizard.h"
-#include "operation.h"
+#include "ui_installdialog.h"
 
 /**
  * Wizard displayed at first launch, that asks user to choose source and destination directories.
@@ -26,38 +25,28 @@
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CUninstallWizardDialog : public QDialog, public Ui::UninstallWizardDialog
+class CInstallDialog : public QDialog, public Ui::InstallDialog
 {
 	Q_OBJECT
 
 public:
-	CUninstallWizardDialog(QWidget *parent = NULL);
-	virtual ~CUninstallWizardDialog();
-
-	void setSelectedComponents(const SUninstallComponents &components);
-	SUninstallComponents getSelectedCompenents() const;
-
-signals:
-	void updateSize(int row, const QString &text);
-	void updateLayout();
+	CInstallDialog();
+	virtual ~CInstallDialog();
 
 private slots:
+	void onShowAdvancedParameters(int state);
+	void onAnotherLocationBrowseButtonClicked();
+	void onDestinationBrowseButtonClicked();
+
 	void accept();
-	void onItemChanged(QStandardItem *item);
-	void onUpdateSize(int row, const QString &text);
-	void onUpdateLayout();
 
 private:
-	void showEvent(QShowEvent *event);
+	void updateAnotherLocationText();
+	void updateDestinationText();
 
-	void updateSizes();
-	void updateButtons();
-
-	// key is original ID, value is row index
-	QMap<int, int> m_serversIndices;
-	QMap<int, int> m_profilesIndices;
-
-	int m_installerIndex;
+	QString m_oldDirectory;
+	QString m_anotherDirectory;
+	QString m_dstDirectory;
 };
 
 #endif

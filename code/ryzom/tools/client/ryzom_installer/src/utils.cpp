@@ -37,23 +37,27 @@ QString qBytesToHumanReadable(qint64 bytes)
 qint64 getDirectorySize(const QString &directory)
 {
 	qint64 size = 0;
-	QDir dir(directory);
 
-	if (dir.exists())
+	if (!directory.isEmpty())
 	{
-		QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+		QDir dir(directory);
 
-		for (int i = 0; i < list.size(); ++i)
+		if (dir.exists())
 		{
-			QFileInfo fileInfo = list.at(i);
+			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
-			if (fileInfo.isDir())
+			for (int i = 0; i < list.size(); ++i)
 			{
-				size += getDirectorySize(fileInfo.absoluteFilePath());
-			}
-			else
-			{
-				size += fileInfo.size();
+				QFileInfo fileInfo = list.at(i);
+
+				if (fileInfo.isDir())
+				{
+					size += getDirectorySize(fileInfo.absoluteFilePath());
+				}
+				else
+				{
+					size += fileInfo.size();
+				}
 			}
 		}
 	}

@@ -1,10 +1,18 @@
-# Need clientsheets lib for sheets packer tool
-ADD_SUBDIRECTORY(client_sheets)
+IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT)
+  # Need clientsheets lib for sheets packer tool
+  ADD_SUBDIRECTORY(client_sheets)
+ENDIF()
 
-# Need seven_zip lib for patch_gen tool
-ADD_SUBDIRECTORY(seven_zip)
+IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_CLIENT OR WITH_RYZOM_INSTALLER)
+  # Need seven_zip lib for patch_gen tool
+  ADD_SUBDIRECTORY(seven_zip)
+ENDIF()
 
 IF(WITH_RYZOM_CLIENT)
+  IF(NOT WITH_GUI)
+    MESSAGE(FATAL_ERROR "The client cannot be built without the NeL GUI Library (WITH_GUI)")
+  ENDIF()
+
   # Patch should never be enabled on Steam
   IF(WITH_RYZOM_STEAM)
     ADD_DEFINITIONS(-DRZ_USE_STEAM)

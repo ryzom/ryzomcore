@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef INSTALLWIZARDDIALOG_H
-#define INSTALLWIZARDDIALOG_H
+#ifndef MIGRATEDIALOG_H
+#define MIGRATEDIALOG_H
 
-#include "ui_installwizard.h"
+#include "ui_migratedialog.h"
 
 /**
  * Wizard displayed at first launch, that asks user to choose source and destination directories.
@@ -25,27 +25,24 @@
  * \author Cedric 'Kervala' OCHS
  * \date 2016
  */
-class CInstallWizardDialog : public QDialog, public Ui::InstallWizardDialog
+class CMigrateDialog : public QDialog, public Ui::MigrateDialog
 {
 	Q_OBJECT
 
 public:
-	CInstallWizardDialog();
-	virtual ~CInstallWizardDialog();
+	CMigrateDialog();
+	virtual ~CMigrateDialog();
 
 private slots:
 	void onShowAdvancedParameters(int state);
-	void onAnotherLocationBrowseButtonClicked();
 	void onDestinationBrowseButtonClicked();
 
 	void accept();
 
 private:
-	void updateAnotherLocationText();
 	void updateDestinationText();
 
-	QString m_oldDirectory;
-	QString m_anotherDirectory;
+	QString m_currentDirectory;
 	QString m_dstDirectory;
 };
 
