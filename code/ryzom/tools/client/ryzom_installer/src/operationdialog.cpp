@@ -102,6 +102,10 @@ void COperationDialog::processNextStep()
 			processMigrateNextStep();
 			break;
 
+		case OperationUpdateProfiles:
+			processUpgradeProfilesNextStep();
+			break;
+
 		case OperationInstall:
 			processInstallNextStep();
 			break;
@@ -201,8 +205,14 @@ void COperationDialog::processMigrateNextStep()
 	}
 }
 
+void COperationDialog::processUpdateProfilesNextStep()
+{
+	// TODO: implement
+}
+
 void COperationDialog::processInstallNextStep()
 {
+	// TODO: implement
 }
 
 void COperationDialog::processUninstallNextStep()

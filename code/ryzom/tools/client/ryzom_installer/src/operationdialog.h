@@ -42,6 +42,7 @@ public:
 	{
 		OperationNone,
 		OperationMigrate,
+		OperationUpdateProfiles,
 		OperationInstall,
 		OperationUninstall
 	};
@@ -92,6 +93,7 @@ protected:
 
 	void processNextStep();
 	void processMigrateNextStep();
+	void processUpdateProfilesNextStep();
 	void processInstallNextStep();
 	void processUninstallNextStep();
 

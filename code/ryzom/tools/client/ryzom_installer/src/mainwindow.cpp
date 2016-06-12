@@ -124,11 +124,29 @@ void CMainWindow::onConfigureClicked()
 
 void CMainWindow::onProfiles()
 {
-	CProfilesDialog dialog(this);
+	bool updated = false;
 
-	if (dialog.exec())
 	{
-		updateProfiles();
+		CProfilesDialog dialog(this);
+
+		if (dialog.exec())
+		{
+			updateProfiles();
+
+			updated = true;
+		}
+	}
+
+	if (updated)
+	{
+		COperationDialog dialog(this);
+
+		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+
+		if (!dialog.exec())
+		{
+			// aborted
+		}
 	}
 }
 
