@@ -468,6 +468,21 @@ void COperationDialog::extractBnpClient()
 		env.insert("STARTUPPATH", "");
 		process.setProcessEnvironment(env);
 
+		// permissions to execute script
+		QFileDevice::Permissions permissions;
+		permissions |= QFileDevice::ExeOther;
+		permissions |= QFileDevice::ExeOwner;
+		permissions |= QFileDevice::ExeUser;
+		permissions |= QFileDevice::ReadOther;
+		permissions |= QFileDevice::ReadOwner;
+		permissions |= QFileDevice::ReadUser;
+		permissions |= QFileDevice::WriteOwner;
+
+		if (!QFile::setPermissions(upgradeScript, permissions))
+		{
+			qDebug() << "Unable to set executable flag to" << upgradeScript;
+		}
+
 		process.start(upgradeScript);
 
 		while (process.waitForFinished())
