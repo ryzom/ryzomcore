@@ -75,6 +75,7 @@ namespace NLGUI
 		_MultiLineMaxWOnly = false;
 		_MultiLineClipEndSpace = false;
 		_LastMultiLineMaxW = 0;
+		_MultiMinLine = 0;
 		_MultiMaxLine = 0;
 		_Index = 0xFFFFFFFF;
 
@@ -305,6 +306,11 @@ namespace NLGUI
 			return toString( _MultiMaxLine );
 		}
 		else
+		if( name == "multi_min_line" )
+		{
+			return toString( _MultiMinLine );
+		}
+		else
 		if( name == "underlined" )
 		{
 			return toString( _Underlined );
@@ -479,6 +485,14 @@ namespace NLGUI
 			return true;
 		}
 		else
+		if( name == "multi_min_line" )
+		{
+			uint32 i;
+			if( fromString( value, i ) )
+				_MultiMinLine = i;
+			return true;
+		}
+		else
 		if( name == "underlined" )
 		{
 			bool b;
@@ -621,6 +635,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "multi_line_space", BAD_CAST toString( _MultiLineSpace ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_line_maxw_only", BAD_CAST toString( _MultiLineMaxWOnly ).c_str() );
 		xmlSetProp( node, BAD_CAST "multi_max_line", BAD_CAST toString( _MultiMaxLine ).c_str() );
+		xmlSetProp( node, BAD_CAST "multi_min_line", BAD_CAST toString( _MultiMinLine ).c_str() );
 		xmlSetProp( node, BAD_CAST "underlined", BAD_CAST toString( _Underlined ).c_str() );
 		xmlSetProp( node, BAD_CAST "strikethrough", BAD_CAST toString( _StrikeThrough ).c_str() );
 		xmlSetProp( node, BAD_CAST "case_mode", BAD_CAST toString( uint32( _CaseMode ) ).c_str() );
@@ -740,6 +755,11 @@ namespace NLGUI
 		_MultiMaxLine = 0;
 		if (prop)
 			fromString((const char*)prop, _MultiMaxLine);
+
+		prop = (char*) xmlGetProp( cur, (xmlChar*)"multi_min_line" );
+		_MultiMinLine = 0;
+		if (prop)
+			fromString((const char*)prop, _MultiMinLine);
 
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"underlined" );
 		_Underlined = false;
@@ -980,6 +1000,13 @@ namespace NLGUI
 			y += (float)_FontLegHeight * ooh;
 
 			sint y_line = _YReal+_FontLegHeight-2;
+
+			if (_MultiMinLine > _Lines.size())
+			{
+				uint dy = getMultiMinOffsetY();
+				y += dy * ooh;
+				y_line += dy;
+			}
 
 			// special selection code
 			if(_TextSelection)
@@ -1358,6 +1385,19 @@ namespace NLGUI
 	uint CViewText::getFontLegHeight() const
 	{
 		return _FontLegHeight;
+	}
+
+	// ***************************************************************************
+	uint CViewText::getMultiMinOffsetY() const
+	{
+		uint dy = 0;
+		if (_MultiMinLine > _Lines.size())
+		{
+			// first line is always present even if _Lines is empty
+			uint nbLines = _MultiMinLine - std::max((sint)1, (sint)_Lines.size());
+			dy = nbLines * _FontHeight + (nbLines - 1) * _MultiLineSpace;
+		}
+		return dy;
 	}
 
 	// ***************************************************************************
@@ -1836,6 +1876,10 @@ namespace NLGUI
 			_W = (sint)rTotalW;
 			_H = std::max(_FontHeight, uint(_FontHeight * _Lines.size() + std::max(0, sint(_Lines.size()) - 1) * _MultiLineSpace));
 
+			// See if we should pretend to have at least X lines
+			if (_MultiMinLine > 1)
+				_H = std::max(_H, sint(_FontHeight * _MultiMinLine + (_MultiMinLine - 1) * _MultiLineSpace));
+
 			// Compute tooltips size
 			if (_Tooltips.size() > 0)
 			for (uint i=0 ; i<_Lines.size() ; ++i)
@@ -2118,11 +2162,13 @@ namespace NLGUI
 		//
 		if (_MultiLine)
 		{
+			uint dy = getMultiMinOffsetY();
+
 			uint charIndex = 0;
 			// special case for end of text
 			if (index == (sint) _Text.length())
 			{
-				y = 0;
+				y = dy;
 				if (_Lines.empty())
 				{
 					x = 0;
@@ -2142,7 +2188,7 @@ namespace NLGUI
 				{
 					// should display the character at the end of previous line
 					CLine &currLine = *_Lines[i - 1];
-					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - i));
+					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - i) + dy);
 					x = (sint) (currLine.getWidth() + currLine.getEndSpaces() * currLine.getSpaceWidth());
 					sint nMaxWidth = getCurrentMultiLineMaxW();
 					x = std::min(x, nMaxWidth);
@@ -2153,7 +2199,7 @@ namespace NLGUI
 				if ((sint) newCharIndex > index)
 				{
 					// ok, this line contains the character, now, see which word contains it.
-					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - 1 - i));
+					y = (sint) ((_FontHeight + _MultiLineSpace) * (_Lines.size() - 1 - i) + dy);
 					// see if the index is in the spaces at the end of line
 					if (index - charIndex >= currLine.getNumChars())
 					{
@@ -2252,6 +2298,7 @@ namespace NLGUI
 		uint      charPos = 0;
 		if (_MultiLine)
 		{
+			y -= getMultiMinOffsetY();
 			// seek the line
 			float py = 0.f;
 			if (py > y)

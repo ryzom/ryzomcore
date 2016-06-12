@@ -94,6 +94,7 @@ namespace NLGUI
 		void setMultiLineClipEndSpace (bool state);	// use it for multiline edit box for instance
 		void setFirstLineX (uint firstLineX);
 		void setMultiMaxLine(uint l) { _MultiMaxLine = l; }
+		void setMultiMinLine(uint l) { _MultiMinLine = l; }
 
 		// Force only a subset of letter to be displayed. Default is 0/0xFFFFFFFF
 		void enableStringSelection(uint start, uint end);
@@ -114,6 +115,8 @@ namespace NLGUI
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
 		uint32			getMultiMaxLine() const { return _MultiMaxLine; }
+		uint32			getMultiMinLine() const { return _MultiMinLine; }
+		uint32			getMultiMinOffsetY() const;
 
 		// get current Hint font width, in pixels
 		uint            getFontWidth() const;
@@ -259,6 +262,7 @@ namespace NLGUI
 		sint		_MultiLineSpace;
 		sint		_LastMultiLineMaxW;
 		uint32		_MultiMaxLine;
+		uint32		_MultiMinLine;
 
 
 		/// FormatTag handling
