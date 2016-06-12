@@ -107,12 +107,15 @@
        <property name="text">
         <string>Uninstall</string>
        </property>
+       <property name="default">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="quitButton">
+      <widget class="QPushButton" name="cancelButton">
        <property name="text">
-        <string>Quit</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
