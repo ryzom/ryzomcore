@@ -258,6 +258,11 @@ const CServer& CConfigFile::getServer(const QString &id) const
 	return getServer();
 }
 
+void CConfigFile::backupProfiles()
+{
+	m_backupProfiles = m_profiles;
+}
+
 int CConfigFile::getProfilesCount() const
 {
 	return m_profiles.size();

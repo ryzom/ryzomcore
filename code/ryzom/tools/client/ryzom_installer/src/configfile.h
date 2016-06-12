@@ -118,6 +118,9 @@ public:
 	CProfiles getProfiles() const { return m_profiles; }
 	void setProfiles(const CProfiles &profiles) { m_profiles = profiles; }
 
+	CProfiles getBackupProfiles() const { return m_backupProfiles; }
+	void backupProfiles();
+
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
 	void setProfile(int i, const CProfile &profile);
@@ -193,6 +196,7 @@ private:
 
 	CServers m_servers;
 	CProfiles m_profiles;
+	CProfiles m_backupProfiles;
 
 	QString m_installationDirectory;
 	QString m_srcDirectory;
