@@ -49,9 +49,10 @@ void normalisePackageDescriptionFileName(std::string& fileName)
 
 void GeneratePatch(const std::string& srcFileName,const std::string& destFileName,const std::string& patchFileName)
 {
-	std::string cmd="xdelta delta";
-	cmd+=" "+srcFileName+" "+destFileName+" "+patchFileName;
-	nlinfo("executing system command: %s",cmd.c_str());
+	std::string cmd = toString("xdelta delta %s %s %s", srcFileName.c_str(), destFileName.c_str(), patchFileName.c_str());
+
+	nlinfo("Executing system command: %s", cmd.c_str());
+
 #ifdef NL_OS_WINDOWS
 	_spawnlp(_P_WAIT, "xdelta.exe", "xdelta.exe", "delta", srcFileName.c_str(), destFileName.c_str(), patchFileName.c_str(), NULL);
 #else // NL_OS_WINDOWS
@@ -65,9 +66,10 @@ void GeneratePatch(const std::string& srcFileName,const std::string& destFileNam
 
 void ApplyPatch(const std::string& srcFileName,const std::string& destFileName,const std::string& patchFileName=std::string())
 {
-	std::string cmd="xdelta patch";
-	cmd+=" "+patchFileName+" "+srcFileName+" "+destFileName;
-	nlinfo("executing system command: %s",cmd.c_str());
+	std::string cmd = toString("xdelta patch %s %s %s", patchFileName.c_str(), srcFileName.c_str(), destFileName.c_str());
+
+	nlinfo("Executing system command: %s", cmd.c_str());
+
 #ifdef NL_OS_WINDOWS
 	_spawnlp(_P_WAIT, "xdelta.exe", "xdelta.exe", "patch",patchFileName.c_str(), srcFileName.c_str(), destFileName.c_str(), NULL);
 #else // NL_OS_WINDOWS
