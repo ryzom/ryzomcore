@@ -421,8 +421,7 @@ void COperationDialog::downloadData()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
 	m_currentOperation = QApplication::tr("Download data required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
@@ -439,8 +438,7 @@ void COperationDialog::downloadClient()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
 	m_currentOperation = QApplication::tr("Download client required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
@@ -476,7 +474,7 @@ void COperationDialog::copyDataFiles()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
 	m_currentOperation = QApplication::tr("Copy data files required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");

@@ -126,6 +126,7 @@ protected:
 
 	OperationType m_operation;
 	SUninstallComponents m_components;
+	QString m_currentServerId;
 };
 
 #endif
