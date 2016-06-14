@@ -705,7 +705,7 @@ bool COperationDialog::createDefaultProfile()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	CServer server = config->getServer(config->getDefaultServerIndex());
+	CServer server = config->getServer();
 
 	m_currentOperation = QApplication::tr("Create default profile");
 
