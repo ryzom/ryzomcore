@@ -708,7 +708,7 @@ void COperationDialog::deleteComponentsServers()
 
 	int i = 0;
 
-	foreach(int serverIndex, m_components.servers)
+	foreach(const QString &serverId, m_components.servers)
 	{
 		if (operationShouldStop())
 		{
@@ -716,7 +716,7 @@ void COperationDialog::deleteComponentsServers()
 			return;
 		}
 
-		const CServer &server = config->getServer(serverIndex);
+		const CServer &server = config->getServer(serverId);
 
 		emit progress(i++, server.name);
 
@@ -747,7 +747,7 @@ void COperationDialog::deleteComponentsProfiles()
 
 	int i = 0;
 
-	foreach(int profileIndex, m_components.profiles)
+	foreach(const QString &profileId, m_components.profiles)
 	{
 		if (operationShouldStop())
 		{
@@ -755,7 +755,7 @@ void COperationDialog::deleteComponentsProfiles()
 			return;
 		}
 
-		const CProfile &profile = config->getProfile(profileIndex);
+		const CProfile &profile = config->getProfile(profileId);
 
 		emit progress(i++, profile.name);
 

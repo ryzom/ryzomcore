@@ -197,7 +197,7 @@ void CMainWindow::onUninstall()
 	// add all servers by default
 	for (int i = 0; i < config->getServersCount(); ++i)
 	{
-		components.servers << i;
+		components.servers << config->getServer(i).id;
 	}
 
 	{

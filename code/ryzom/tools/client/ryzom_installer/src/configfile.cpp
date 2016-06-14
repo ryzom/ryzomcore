@@ -277,6 +277,17 @@ CProfile CConfigFile::getProfile(int i) const
 	return m_profiles.at(i);
 }
 
+CProfile CConfigFile::getProfile(const QString &id) const
+{
+	for (int i = 0; i < m_profiles.size(); ++i)
+	{
+		if (m_profiles[i].id == id) return m_profiles[i];
+	}
+
+	// default profile
+	return getProfile();
+}
+
 void CConfigFile::setProfile(int i, const CProfile &profile)
 {
 	m_profiles[i] = profile;

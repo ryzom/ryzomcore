@@ -40,8 +40,8 @@ struct SUninstallComponents
 		installer = true;
 	}
 
-	QVector<int> servers;
-	QVector<int> profiles;
+	QStringList servers;
+	QStringList profiles;
 
 	bool installer;
 };

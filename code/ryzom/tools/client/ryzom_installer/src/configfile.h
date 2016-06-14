@@ -106,6 +106,7 @@ public:
 
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
+	CProfile getProfile(const QString &id) const;
 	void setProfile(int i, const CProfile &profile);
 	int addProfile(const CProfile &profile);
 	void removeProfile(int i);

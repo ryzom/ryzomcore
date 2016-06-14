@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 		// add all servers by default
 		for (int i = 0; i < config.getServersCount(); ++i)
 		{
-			components.servers << i;
+			components.servers << config.getServer(i).id;
 		}
 
 		// show uninstall wizard dialog if not in silent mode
