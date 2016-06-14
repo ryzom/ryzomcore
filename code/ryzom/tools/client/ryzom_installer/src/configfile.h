@@ -17,8 +17,11 @@
 #ifndef CONFIGFILE_H
 #define CONFIGFILE_H
 
-struct CServer
+#include "operation.h"
+
+class CServer
 {
+public:
 	CServer()
 	{
 		dataCompressedSize = 0;
@@ -39,14 +42,18 @@ struct CServer
 	QString configurationFilename;
 	QString installerFilename;
 	QString comments;
+
+	// helpers
+	QString getDirectory() const;
 };
 
 extern const CServer NoServer;
 
 typedef QVector<CServer> CServers;
 
-struct CProfile
+class CProfile
 {
+public:
 	CProfile()
 	{
 		desktopShortcut = false;
@@ -61,6 +68,9 @@ struct CProfile
 	QString comments;
 	bool desktopShortcut;
 	bool menuShortcut;
+
+	// helpers
+	QString getDirectory() const;
 };
 
 extern const CProfile NoProfile;
@@ -78,27 +88,6 @@ class CConfigFile : public QObject
 	Q_OBJECT
 
 public:
-	enum InstallationStep
-	{
-		DisplayNoServerError,
-		ShowInstallWizard,
-		ShowMigrateWizard,
-		DownloadData,
-		ExtractDownloadedData,
-		DownloadClient,
-		ExtractDownloadedClient,
-		CopyServerFiles,
-		CopyProfileFiles,
-		CleanFiles,
-		ExtractBnpClient,
-		CopyInstaller,
-		UninstallOldClient,
-		CreateProfile,
-		CreateShortcuts,
-		CreateAddRemoveEntry,
-		Done
-	};
-
 	CConfigFile(QObject *parent = NULL);
 	virtual ~CConfigFile();
 
@@ -123,9 +112,11 @@ public:
 
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
+	CProfile getProfile(const QString &id) const;
 	void setProfile(int i, const CProfile &profile);
 	int addProfile(const CProfile &profile);
 	void removeProfile(int i);
+	void removeProfile(const QString &id);
 
 	int getDefaultServerIndex() const;
 	void setDefaultServerIndex(int index);
@@ -180,7 +171,7 @@ public:
 
 	QString getSrcServerClientBNPFullPath() const;
 
-	InstallationStep getNextStep() const;
+	OperationStep getInstallNextStep() const;
 
 	// product details
 	QString getProductName() const;

@@ -38,16 +38,7 @@ public:
 	COperationDialog(QWidget *parent = NULL);
 	virtual ~COperationDialog();
 
-	enum Operation
-	{
-		OperationNone,
-		OperationMigrate,
-		OperationUpdateProfiles,
-		OperationInstall,
-		OperationUninstall
-	};
-
-	void setOperation(Operation operation);
+	void setOperation(OperationType operation);
 	void setUninstallComponents(const SUninstallComponents &components);
 
 public slots:
@@ -92,15 +83,16 @@ protected:
 	void closeEvent(QCloseEvent *e);
 
 	void processNextStep();
-	void processMigrateNextStep();
-	void processUpdateProfilesNextStep();
 	void processInstallNextStep();
 	void processUninstallNextStep();
+	void processUpdateProfilesNextStep();
 
 	// operations
 	void downloadData();
+	void extractDownloadedData();
 	void downloadClient();
-	void copyServerFiles();
+	void extractDownloadedClient();
+	void copyDataFiles();
 	void copyProfileFiles();
 	void cleanFiles();
 	void extractBnpClient();
@@ -134,8 +126,9 @@ protected:
 	QMutex m_abortingMutex;
 	bool m_aborting;
 
-	Operation m_operation;
+	OperationType m_operation;
 	SUninstallComponents m_components;
+	QString m_currentServerId;
 };
 
 #endif

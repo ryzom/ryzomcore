@@ -55,8 +55,10 @@ private:
 	void updateButtons();
 
 	// key is original ID, value is row index
-	QMap<int, int> m_serversIndices;
-	QMap<int, int> m_profilesIndices;
+	typedef QMap<QString, int> IDIndicesMap;
+
+	IDIndicesMap m_serversIndices;
+	IDIndicesMap m_profilesIndices;
 
 	int m_installerIndex;
 };

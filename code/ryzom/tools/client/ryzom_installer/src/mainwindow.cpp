@@ -153,7 +153,7 @@ void CMainWindow::onProfiles()
 	{
 		COperationDialog dialog(this);
 
-		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+		dialog.setOperation(OperationUpdateProfiles);
 
 		if (!dialog.exec())
 		{
@@ -197,7 +197,7 @@ void CMainWindow::onUninstall()
 	// add all servers by default
 	for (int i = 0; i < config->getServersCount(); ++i)
 	{
-		components.servers << i;
+		components.servers << config->getServer(i).id;
 	}
 
 	{
@@ -212,7 +212,7 @@ void CMainWindow::onUninstall()
 
 	COperationDialog dialog;
 
-	dialog.setOperation(COperationDialog::OperationUninstall);
+	dialog.setOperation(OperationUninstall);
 	dialog.setUninstallComponents(components);
 
 	if (dialog.exec())

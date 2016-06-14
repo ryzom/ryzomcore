@@ -27,6 +27,16 @@
 const CServer NoServer;
 const CProfile NoProfile;
 
+QString CServer::getDirectory() const
+{
+	return CConfigFile::getInstance()->getInstallationDirectory() + "/" + id;
+}
+
+QString CProfile::getDirectory() const
+{
+	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
+}
+
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
@@ -277,6 +287,17 @@ CProfile CConfigFile::getProfile(int i) const
 	return m_profiles.at(i);
 }
 
+CProfile CConfigFile::getProfile(const QString &id) const
+{
+	for (int i = 0; i < m_profiles.size(); ++i)
+	{
+		if (m_profiles[i].id == id) return m_profiles[i];
+	}
+
+	// default profile
+	return getProfile();
+}
+
 void CConfigFile::setProfile(int i, const CProfile &profile)
 {
 	m_profiles[i] = profile;
@@ -292,8 +313,14 @@ int CConfigFile::addProfile(const CProfile &profile)
 void CConfigFile::removeProfile(int i)
 {
 	m_profiles.removeAt(i);
+}
 
-	// TODO: decalle all profiles and move files
+void CConfigFile::removeProfile(const QString &id)
+{
+	for (int i = 0; i < m_profiles.size(); ++i)
+	{
+		if (m_profiles[i].id == id) removeProfile(i);
+	}
 }
 
 bool CConfigFile::has64bitsOS()
@@ -603,7 +630,7 @@ QString CConfigFile::getServerClientFullPath(const QString &serverId) const
 
 	if (server.clientFilename.isEmpty()) return "";
 
-	return getInstallationDirectory() + "/" + server.id + "/" + server.clientFilename;
+	return server.getDirectory() + "/" + server.clientFilename;
 }
 
 QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) const
@@ -612,7 +639,7 @@ QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) con
 
 	if (server.configurationFilename.isEmpty()) return "";
 
-	return getInstallationDirectory() + "/" + server.id + "/" + server.configurationFilename;
+	return server.getDirectory() + "/" + server.configurationFilename;
 }
 
 QString CConfigFile::getSrcServerClientBNPFullPath() const
@@ -620,7 +647,7 @@ QString CConfigFile::getSrcServerClientBNPFullPath() const
 	return QString("%1/unpack/exedll_%2.bnp").arg(getSrcServerDirectory()).arg(getClientArch());
 }
 
-CConfigFile::InstallationStep CConfigFile::getNextStep() const
+OperationStep CConfigFile::getInstallNextStep() const
 {
 	// get last used profile
 	const CProfile &profile = getProfile();
@@ -669,7 +696,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;
 	}
 
-	QString serverDirectory = getInstallationDirectory() + "/" + server.id;
+	QString serverDirectory = server.getDirectory();
 
 	if (getSrcServerDirectory().isEmpty())
 	{
@@ -712,7 +739,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			// selected directory contains Ryzom files (shouldn't fail)
 			if (areRyzomDataInstalledIn(getSrcServerDirectory()))
 			{
-				return CopyServerFiles;
+				return CopyDataFiles;
 			}
 			else
 			{

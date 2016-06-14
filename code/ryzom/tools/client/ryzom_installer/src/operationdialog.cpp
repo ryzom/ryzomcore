@@ -51,9 +51,6 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	m_button = new QWinTaskbarButton(this);
 #endif
 
-//	connect(resumeButton, SIGNAL(clicked()), SLOT(onResumeClicked()));
-//	connect(stopButton, SIGNAL(clicked()), SLOT(onStopClicked()));
-
 	// downloader
 	m_downloader = new CDownloader(this, this);
 
@@ -76,7 +73,7 @@ COperationDialog::~COperationDialog()
 {
 }
 
-void COperationDialog::setOperation(Operation operation)
+void COperationDialog::setOperation(OperationType operation)
 {
 	m_operation = operation;
 }
@@ -91,15 +88,12 @@ void COperationDialog::processNextStep()
 	switch (m_operation)
 	{
 		case OperationMigrate:
-			processMigrateNextStep();
+		case OperationInstall:
+			processInstallNextStep();
 			break;
 
 		case OperationUpdateProfiles:
 			processUpdateProfilesNextStep();
-			break;
-
-		case OperationInstall:
-			processInstallNextStep();
 			break;
 
 		case OperationUninstall:
@@ -111,7 +105,7 @@ void COperationDialog::processNextStep()
 	}
 }
 
-void COperationDialog::processMigrateNextStep()
+void COperationDialog::processInstallNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -122,77 +116,69 @@ void COperationDialog::processMigrateNextStep()
 	const CProfile &configuration = config->getProfile();
 
 	// long operations are done in a thread
-	CConfigFile::InstallationStep step = config->getNextStep();
+	OperationStep step = config->getInstallNextStep();
 
 	switch(step)
 	{
-		case CConfigFile::DisplayNoServerError:
-		break;
-
-		case CConfigFile::ShowMigrateWizard:
-		break;
-
-		case CConfigFile::ShowInstallWizard:
-		break;
-
-		case CConfigFile::DownloadData:
+		case DownloadData:
 		downloadData();
 		break;
 
-		case CConfigFile::ExtractDownloadedData:
-		// TODO
+		case ExtractDownloadedData:
+		QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
 		break;
 
-		case CConfigFile::DownloadClient:
+		case DownloadClient:
 		downloadClient();
 		break;
 
-		case CConfigFile::ExtractDownloadedClient:
-		// TODO
+		case ExtractDownloadedClient:
+		QtConcurrent::run(this, &COperationDialog::extractDownloadedClient);
 		break;
 
-		case CConfigFile::CopyServerFiles:
-		QtConcurrent::run(this, &COperationDialog::copyServerFiles);
+		case CopyDataFiles:
+		QtConcurrent::run(this, &COperationDialog::copyDataFiles);
 		break;
 
-		case CConfigFile::CopyProfileFiles:
+		case CopyProfileFiles:
 		QtConcurrent::run(this, &COperationDialog::copyProfileFiles);
 		break;
 
-		case CConfigFile::CleanFiles:
+		case CleanFiles:
 		QtConcurrent::run(this, &COperationDialog::cleanFiles);
 		break;
 
-		case CConfigFile::ExtractBnpClient:
+		case ExtractBnpClient:
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
-		case CConfigFile::CopyInstaller:
+		case CopyInstaller:
 		QtConcurrent::run(this, &COperationDialog::copyInstaller);
 		break;
 
-		case CConfigFile::UninstallOldClient:
+		case UninstallOldClient:
 		uninstallOldClient();
 		break;
 
-		case CConfigFile::CreateProfile:
+		case CreateProfile:
 		createDefaultProfile();
 		break;
 
-		case CConfigFile::CreateShortcuts:
+		case CreateShortcuts:
 		createDefaultShortcuts();
 		break;
 
-		case CConfigFile::CreateAddRemoveEntry:
+		case CreateAddRemoveEntry:
 		createAddRemoveEntry();
 		break;
 
-		case CConfigFile::Done:
+		case Done:
 		accept();
 		break;
 
 		default:
 		// cases already managed in main.cpp
+		qDebug() << "Shouldn't happen, step" << step;
 		break;
 	}
 }
@@ -202,11 +188,99 @@ void COperationDialog::processUpdateProfilesNextStep()
 	// TODO: check all servers are downloaded
 	// TODO: delete profiles directories that are not used anymore
 	// TODO: create shortcuts
-}
 
-void COperationDialog::processInstallNextStep()
-{
-	// TODO: implement
+	QStringList serversToUpdate;
+	QStringList profilesToDelete;
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// append all old profiles
+	foreach(const CProfile &profile, config->getBackupProfiles())
+	{
+		if (QFile::exists(profile.getDirectory())) profilesToDelete << profile.id;
+	}
+
+	const CServer &defaultServer = config->getServer();
+
+	foreach(const CProfile &profile, config->getProfiles())
+	{
+		const CServer &server = config->getServer(profile.server);
+
+		QString serverDirectory = server.getDirectory();
+
+		// check if Ryzom is installed in new server directory
+		if (server.id != defaultServer.id && !config->isRyzomInstalledIn(serverDirectory) && serversToUpdate.indexOf(server.id) == -1)
+		{
+			serversToUpdate << server.id;
+		}
+
+		// remove profiles that still exist
+		profilesToDelete.removeAll(profile.id);
+	}
+
+	if (!profilesToDelete.isEmpty())
+	{
+		m_components.profiles << profilesToDelete;
+
+		// delete profiles in another thread
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
+
+		return;
+	}
+
+	// servers files to download/update
+	foreach(const QString &serverId, serversToUpdate)
+	{
+		const CServer &server = config->getServer(serverId);
+
+		// data
+		if (!config->areRyzomDataInstalledIn(server.getDirectory()))
+		{
+			QString dataFile = config->getInstallationDirectory() + "/" + server.dataDownloadFilename;
+
+			// archive already downloaded
+			if (QFile::exists(dataFile))
+			{
+				// make server current
+				m_currentServerId = server.id;
+
+				// uncompress it
+				QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
+				return;
+			}
+
+			// data download URLs are different, can't copy data from default server
+			if (server.dataDownloadUrl != defaultServer.dataDownloadUrl)
+			{
+				// download it
+				// TODO
+
+				return;
+			}
+
+			// same data used
+
+			// copy them
+			// TODO
+			return;
+		}
+
+		// client
+		if (!config->isRyzomClientInstalledIn(server.getDirectory()))
+		{
+			// client download URLs are different, can't copy client from default server
+			if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
+			{
+				if (QFile::exists(""))
+					downloadData();
+				return;
+			}
+		}
+		else
+		{
+			QString clientFile = config->getInstallationDirectory() + "/" + server.clientDownloadFilename;
+		}
+	}
 }
 
 void COperationDialog::processUninstallNextStep()
@@ -343,8 +417,7 @@ void COperationDialog::downloadData()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
 	m_currentOperation = QApplication::tr("Download data required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
@@ -352,12 +425,16 @@ void COperationDialog::downloadData()
 	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
 }
 
+void COperationDialog::extractDownloadedData()
+{
+	// TODO: implement
+}
+
 void COperationDialog::downloadClient()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
 	m_currentOperation = QApplication::tr("Download client required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
@@ -365,14 +442,37 @@ void COperationDialog::downloadClient()
 	m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
 }
 
-void COperationDialog::copyServerFiles()
+void COperationDialog::extractDownloadedClient()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CServer &server = config->getServer(m_currentServerId);
+
+	m_currentOperation = QApplication::tr("Extract data files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+
+	CFilesExtractor extractor(this);
+	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.clientDownloadFilename);
+	extractor.setDestinationDirectory(server.getDirectory());
+
+	if (extractor.exec())
+	{
+	}
+	else
+	{
+	}
+
+	emit done();
+}
+
+void COperationDialog::copyDataFiles()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
 	// default server
-	const CServer &server = config->getServer();
+	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Copy client files required by server %1").arg(server.name);
+	m_currentOperation = QApplication::tr("Copy data files required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList serverFiles;
@@ -381,11 +481,10 @@ void COperationDialog::copyServerFiles()
 	serverFiles << "examples";
 	serverFiles << "patch";
 	serverFiles << "unpack";
-	serverFiles << "client_default.cfg";
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
-	copier.setDestinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	copier.setDestinationDirectory(server.getDirectory());
 	copier.setIncludeFilter(serverFiles);
 
 	if (copier.exec())
@@ -421,7 +520,7 @@ void COperationDialog::copyProfileFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcProfileDirectory());
-	copier.setDestinationDirectory(config->getProfileDirectory() + "/" + profile.id);
+	copier.setDestinationDirectory(profile.getDirectory());
 	copier.setIncludeFilter(profileFiles);
 
 	if (copier.exec())
@@ -444,11 +543,11 @@ void COperationDialog::extractBnpClient()
 	m_currentOperation = QApplication::tr("Extract client to new location");
 	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
 
-	QString destinationDirectory = config->getInstallationDirectory() + "/" + server.id;
+	QString destinationDirectory = server.getDirectory();
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
-	extractor.setDesinationDirectory(destinationDirectory);
+	extractor.setDestinationDirectory(destinationDirectory);
 	extractor.exec();
 
 	QString upgradeScript = destinationDirectory + "/upgd_nl.";
@@ -592,7 +691,7 @@ void COperationDialog::cleanFiles()
 	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CFilesCleaner cleaner(this);
-	cleaner.setDirectory(config->getInstallationDirectory() + "/" + server.id);
+	cleaner.setDirectory(server.getDirectory());
 	cleaner.exec();
 
 	emit done();
@@ -602,7 +701,7 @@ bool COperationDialog::createDefaultProfile()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	CServer server = config->getServer(config->getDefaultServerIndex());
+	CServer server = config->getServer();
 
 	m_currentOperation = QApplication::tr("Create default profile");
 
@@ -631,6 +730,10 @@ bool COperationDialog::createDefaultProfile()
 
 bool COperationDialog::createDefaultShortcuts()
 {
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CServer server = config->getServer();
+
 	emit done();
 
 	return true;
@@ -711,7 +814,7 @@ void COperationDialog::deleteComponentsServers()
 
 	int i = 0;
 
-	foreach(int serverIndex, m_components.servers)
+	foreach(const QString &serverId, m_components.servers)
 	{
 		if (operationShouldStop())
 		{
@@ -719,18 +822,21 @@ void COperationDialog::deleteComponentsServers()
 			return;
 		}
 
-		const CServer &server = config->getServer(serverIndex);
+		const CServer &server = config->getServer(serverId);
 
 		emit progress(i++, server.name);
 
-		QString path = config->getInstallationDirectory() + "/" + server.id;
+		QString path = server.getDirectory();
 
-		QDir dir(path);
-		
-		if (dir.exists() && !dir.removeRecursively())
+		if (!path.isEmpty())
 		{
-			emit fail(tr("Unable to delete files for client %1").arg(server.name));
-			return;
+			QDir dir(path);
+
+			if (dir.exists() && !dir.removeRecursively())
+			{
+				emit fail(tr("Unable to delete files for client %1").arg(server.name));
+				return;
+			}
 		}
 	}
 
@@ -750,7 +856,7 @@ void COperationDialog::deleteComponentsProfiles()
 
 	int i = 0;
 
-	foreach(int profileIndex, m_components.profiles)
+	foreach(const QString &profileId, m_components.profiles)
 	{
 		if (operationShouldStop())
 		{
@@ -758,20 +864,29 @@ void COperationDialog::deleteComponentsProfiles()
 			return;
 		}
 
-		const CProfile &profile = config->getProfile(profileIndex);
+		const CProfile &profile = config->getProfile(profileId);
 
 		emit progress(i++, profile.name);
 
-		QString path = config->getProfileDirectory() + "/" + profile.id;
+		QString path = profile.getDirectory();
 
-		QDir dir(path);
-
-		if (dir.exists() && !dir.removeRecursively())
+		if (!path.isEmpty())
 		{
-			emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
-			return;
+			QDir dir(path);
+
+			if (dir.exists() && !dir.removeRecursively())
+			{
+				emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
+				return;
+			}
 		}
+
+		// delete profile
+		config->removeProfile(profileId);
 	}
+
+	// clear list of all profiles to uninstall
+	m_components.profiles.clear();
 
 	emit success(m_components.servers.size());
 	emit done();

@@ -105,7 +105,7 @@ void CProfilesDialog::displayProfile(int index)
 		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
 	}
 
-	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+	QString profileDirectory = profile.getDirectory();
 
 	// update all widgets with content of profile
 	profileIdLabel->setText(profile.id);
@@ -283,7 +283,7 @@ void CProfilesDialog::onProfileDirectoryClicked()
 
 	const CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
 
-	QString profileDirectory = CConfigFile::getInstance()->getProfileDirectory() + "/" + profile.id;
+	QString profileDirectory = profile.getDirectory();
 
 	QDesktopServices::openUrl(QUrl::fromLocalFile(profileDirectory));
 }

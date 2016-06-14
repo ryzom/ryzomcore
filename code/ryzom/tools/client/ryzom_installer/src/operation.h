@@ -40,10 +40,40 @@ struct SUninstallComponents
 		installer = true;
 	}
 
-	QVector<int> servers;
-	QVector<int> profiles;
+	QStringList servers;
+	QStringList profiles;
 
 	bool installer;
+};
+
+enum OperationStep
+{
+	DisplayNoServerError,
+	ShowInstallWizard,
+	ShowMigrateWizard,
+	DownloadData,
+	ExtractDownloadedData,
+	DownloadClient,
+	ExtractDownloadedClient,
+	CopyDataFiles,
+	CopyProfileFiles,
+	CleanFiles,
+	ExtractBnpClient,
+	CopyInstaller,
+	UninstallOldClient,
+	CreateProfile,
+	CreateShortcuts,
+	CreateAddRemoveEntry,
+	Done
+};
+
+enum OperationType
+{
+	OperationNone,
+	OperationMigrate,
+	OperationUpdateProfiles,
+	OperationInstall,
+	OperationUninstall
 };
 
 #endif

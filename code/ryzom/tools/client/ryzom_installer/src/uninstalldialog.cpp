@@ -51,9 +51,9 @@ CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installer
 	{
 		const CServer &server = config->getServer(row);
 
-		if (QFile::exists(config->getInstallationDirectory() + "/" + server.id))
+		if (QFile::exists(server.getDirectory()))
 		{
-			m_serversIndices[row] = model->rowCount();
+			m_serversIndices[server.id] = model->rowCount();
 
 			item = new QStandardItem(tr("Client for %1").arg(server.name));
 			item->setCheckable(true);
@@ -66,9 +66,9 @@ CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installer
 	// profiles
 	for (int row = 0; row < profilesCount; ++row)
 	{
-		m_profilesIndices[row] = model->rowCount();
-
 		const CProfile &profile = config->getProfile(row);
+
+		m_profilesIndices[profile.id] = model->rowCount();
 
 		item = new QStandardItem(tr("Profile #%1: %2").arg(profile.id).arg(profile.name));
 		item->setCheckable(true);
@@ -122,7 +122,7 @@ void CUninstallDialog::setSelectedComponents(const SUninstallComponents &compone
 	QStandardItem *item = NULL;
 
 	// servers
-	QMap<int, int>::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
+	IDIndicesMap::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
 
 	while (it != iend)
 	{
@@ -160,7 +160,7 @@ SUninstallComponents CUninstallDialog::getSelectedCompenents() const
 	QStandardItem *item = NULL;
 
 	// servers
-	QMap<int, int>::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
+	IDIndicesMap::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
 
 	while (it != iend)
 	{
@@ -222,13 +222,13 @@ void CUninstallDialog::updateSizes()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	// clients
-	QMap<int, int>::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
+	IDIndicesMap::const_iterator it = m_serversIndices.begin(), iend = m_serversIndices.end();
 
 	while(it != iend)
 	{
 		const CServer &server = config->getServer(it.key());
 
-		qint64 bytes = getDirectorySize(config->getInstallationDirectory() + "/" + server.id);
+		qint64 bytes = getDirectorySize(server.getDirectory());
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
@@ -242,7 +242,7 @@ void CUninstallDialog::updateSizes()
 	{
 		const CProfile &profile = config->getProfile(it.key());
 
-		qint64 bytes = getDirectorySize(config->getProfileDirectory() + "/" + profile.id);
+		qint64 bytes = getDirectorySize(profile.getDirectory());
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 

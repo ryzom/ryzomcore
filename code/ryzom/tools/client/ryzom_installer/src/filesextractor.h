@@ -32,7 +32,7 @@ public:
 	virtual ~CFilesExtractor();
 
 	void setSourceFile(const QString &src);
-	void setDesinationDirectory(const QString &src);
+	void setDestinationDirectory(const QString &src);
 
 	bool exec();
 
