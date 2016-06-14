@@ -620,7 +620,7 @@ QString CConfigFile::getSrcServerClientBNPFullPath() const
 	return QString("%1/unpack/exedll_%2.bnp").arg(getSrcServerDirectory()).arg(getClientArch());
 }
 
-CConfigFile::InstallationStep CConfigFile::getNextStep() const
+OperationStep CConfigFile::getInstallNextStep() const
 {
 	// get last used profile
 	const CProfile &profile = getProfile();
@@ -712,7 +712,7 @@ CConfigFile::InstallationStep CConfigFile::getNextStep() const
 			// selected directory contains Ryzom files (shouldn't fail)
 			if (areRyzomDataInstalledIn(getSrcServerDirectory()))
 			{
-				return CopyServerFiles;
+				return CopyDataFiles;
 			}
 			else
 			{

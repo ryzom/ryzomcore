@@ -153,7 +153,7 @@ void CMainWindow::onProfiles()
 	{
 		COperationDialog dialog(this);
 
-		dialog.setOperation(COperationDialog::OperationUpdateProfiles);
+		dialog.setOperation(OperationUpdateProfiles);
 
 		if (!dialog.exec())
 		{
@@ -212,7 +212,7 @@ void CMainWindow::onUninstall()
 
 	COperationDialog dialog;
 
-	dialog.setOperation(COperationDialog::OperationUninstall);
+	dialog.setOperation(OperationUninstall);
 	dialog.setUninstallComponents(components);
 
 	if (dialog.exec())

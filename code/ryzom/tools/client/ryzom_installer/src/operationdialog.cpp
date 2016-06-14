@@ -76,7 +76,7 @@ COperationDialog::~COperationDialog()
 {
 }
 
-void COperationDialog::setOperation(Operation operation)
+void COperationDialog::setOperation(OperationType operation)
 {
 	m_operation = operation;
 }
@@ -126,73 +126,65 @@ void COperationDialog::processMigrateNextStep()
 
 	switch(step)
 	{
-		case CConfigFile::DisplayNoServerError:
-		break;
-
-		case CConfigFile::ShowMigrateWizard:
-		break;
-
-		case CConfigFile::ShowInstallWizard:
-		break;
-
-		case CConfigFile::DownloadData:
+		case DownloadData:
 		downloadData();
 		break;
 
-		case CConfigFile::ExtractDownloadedData:
-		// TODO
+		case ExtractDownloadedData:
+		QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
 		break;
 
-		case CConfigFile::DownloadClient:
+		case DownloadClient:
 		downloadClient();
 		break;
 
-		case CConfigFile::ExtractDownloadedClient:
-		// TODO
+		case ExtractDownloadedClient:
+		QtConcurrent::run(this, &COperationDialog::extractDownloadedClient);
 		break;
 
-		case CConfigFile::CopyServerFiles:
-		QtConcurrent::run(this, &COperationDialog::copyServerFiles);
+		case CopyDataFiles:
+		QtConcurrent::run(this, &COperationDialog::copyDataFiles);
 		break;
 
-		case CConfigFile::CopyProfileFiles:
+		case CopyProfileFiles:
 		QtConcurrent::run(this, &COperationDialog::copyProfileFiles);
 		break;
 
-		case CConfigFile::CleanFiles:
+		case CleanFiles:
 		QtConcurrent::run(this, &COperationDialog::cleanFiles);
 		break;
 
-		case CConfigFile::ExtractBnpClient:
+		case ExtractBnpClient:
 		QtConcurrent::run(this, &COperationDialog::extractBnpClient);
 		break;
 
-		case CConfigFile::CopyInstaller:
+		case CopyInstaller:
 		QtConcurrent::run(this, &COperationDialog::copyInstaller);
 		break;
 
-		case CConfigFile::UninstallOldClient:
+		case UninstallOldClient:
 		uninstallOldClient();
 		break;
 
-		case CConfigFile::CreateProfile:
+		case CreateProfile:
 		createDefaultProfile();
 		break;
 
-		case CConfigFile::CreateShortcuts:
+		case CreateShortcuts:
 		createDefaultShortcuts();
 		break;
 
-		case CConfigFile::CreateAddRemoveEntry:
+		case CreateAddRemoveEntry:
 		createAddRemoveEntry();
 		break;
 
-		case CConfigFile::Done:
+		case Done:
 		accept();
 		break;
 
 		default:
 		// cases already managed in main.cpp
+		qDebug() << "Shouldn't happen, step" << step;
 		break;
 	}
 }
@@ -350,6 +342,11 @@ void COperationDialog::downloadData()
 	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
 
 	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
+}
+
+void COperationDialog::extractDownloadedData()
+{
+	// TODO: implement
 }
 
 void COperationDialog::downloadClient()

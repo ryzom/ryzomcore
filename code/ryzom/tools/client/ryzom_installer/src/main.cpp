@@ -80,9 +80,9 @@ int main(int argc, char *argv[])
 
 	// instanciate ConfigFile
 	CConfigFile config;
-	CConfigFile::InstallationStep step = config.load() ? config.getNextStep():CConfigFile::DisplayNoServerError;
+	OperationStep step = config.load() ? config.getInstallNextStep():DisplayNoServerError;
 
-	if (step == CConfigFile::DisplayNoServerError)
+	if (step == DisplayNoServerError)
 	{
 		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find installer.ini"));
 		return 1;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
 		COperationDialog dialog;
 
-		dialog.setOperation(COperationDialog::OperationUninstall);
+		dialog.setOperation(OperationUninstall);
 		dialog.setUninstallComponents(components);
 
 		// TODO: set all components to uninstall
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 		return dialog.exec() ? 0 : 1;
 	}
 
-	if (step == CConfigFile::ShowMigrateWizard)
+	if (step == ShowMigrateWizard)
 	{
 		CMigrateDialog dialog;
 
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
 		step = config.getNextStep();
 	}
-	else if (step == CConfigFile::ShowInstallWizard)
+	else if (step == ShowInstallWizard)
 	{
 		CInstallDialog dialog;
 
@@ -157,10 +157,10 @@ int main(int argc, char *argv[])
 		step = config.getNextStep();
 	}
 	
-	if (step != CConfigFile::Done)
+	if (step != Done)
 	{
 		COperationDialog dialog;
-		dialog.setOperation(config.getSrcServerDirectory().isEmpty() ? COperationDialog::OperationInstall: COperationDialog::OperationMigrate);
+		dialog.setOperation(config.getSrcServerDirectory().isEmpty() ? OperationInstall:OperationMigrate);
 
 		if (!dialog.exec()) return 1;
 

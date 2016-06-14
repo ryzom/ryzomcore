@@ -17,8 +17,11 @@
 #ifndef CONFIGFILE_H
 #define CONFIGFILE_H
 
-struct CServer
+#include "operation.h"
+
+class CServer
 {
+public:
 	CServer()
 	{
 		dataCompressedSize = 0;
@@ -45,8 +48,9 @@ extern const CServer NoServer;
 
 typedef QVector<CServer> CServers;
 
-struct CProfile
+class CProfile
 {
+public:
 	CProfile()
 	{
 		desktopShortcut = false;
@@ -78,27 +82,6 @@ class CConfigFile : public QObject
 	Q_OBJECT
 
 public:
-	enum InstallationStep
-	{
-		DisplayNoServerError,
-		ShowInstallWizard,
-		ShowMigrateWizard,
-		DownloadData,
-		ExtractDownloadedData,
-		DownloadClient,
-		ExtractDownloadedClient,
-		CopyServerFiles,
-		CopyProfileFiles,
-		CleanFiles,
-		ExtractBnpClient,
-		CopyInstaller,
-		UninstallOldClient,
-		CreateProfile,
-		CreateShortcuts,
-		CreateAddRemoveEntry,
-		Done
-	};
-
 	CConfigFile(QObject *parent = NULL);
 	virtual ~CConfigFile();
 
@@ -180,7 +163,7 @@ public:
 
 	QString getSrcServerClientBNPFullPath() const;
 
-	InstallationStep getNextStep() const;
+	OperationStep getInstallNextStep() const;
 
 	// product details
 	QString getProductName() const;
