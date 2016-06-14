@@ -51,9 +51,6 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	m_button = new QWinTaskbarButton(this);
 #endif
 
-//	connect(resumeButton, SIGNAL(clicked()), SLOT(onResumeClicked()));
-//	connect(stopButton, SIGNAL(clicked()), SLOT(onStopClicked()));
-
 	// downloader
 	m_downloader = new CDownloader(this, this);
 
@@ -191,7 +188,6 @@ void COperationDialog::processUpdateProfilesNextStep()
 	// TODO: check all servers are downloaded
 	// TODO: delete profiles directories that are not used anymore
 	// TODO: create shortcuts
-}
 
 	QStringList serversToUpdate;
 	QStringList profilesToDelete;
@@ -734,6 +730,10 @@ bool COperationDialog::createDefaultProfile()
 
 bool COperationDialog::createDefaultShortcuts()
 {
+	CConfigFile *config = CConfigFile::getInstance();
+
+	CServer server = config->getServer();
+
 	emit done();
 
 	return true;
