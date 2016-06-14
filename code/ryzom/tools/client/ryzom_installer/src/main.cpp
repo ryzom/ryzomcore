@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
 		if (!dialog.exec()) return 1;
 
-		step = config.getNextStep();
+		step = config.getInstallNextStep();
 	}
 	else if (step == ShowInstallWizard)
 	{
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
 		if (!dialog.exec()) return 1;
 
-		step = config.getNextStep();
+		step = config.getInstallNextStep();
 	}
 	
 	if (step != Done)
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 		if (!dialog.exec()) return 1;
 
-		step = config.getNextStep();
+		step = config.getInstallNextStep();
 	}
 
 	CMainWindow mainWindow;

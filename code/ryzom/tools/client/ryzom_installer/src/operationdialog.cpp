@@ -91,15 +91,12 @@ void COperationDialog::processNextStep()
 	switch (m_operation)
 	{
 		case OperationMigrate:
-			processMigrateNextStep();
+		case OperationInstall:
+			processInstallNextStep();
 			break;
 
 		case OperationUpdateProfiles:
 			processUpdateProfilesNextStep();
-			break;
-
-		case OperationInstall:
-			processInstallNextStep();
 			break;
 
 		case OperationUninstall:
@@ -111,7 +108,7 @@ void COperationDialog::processNextStep()
 	}
 }
 
-void COperationDialog::processMigrateNextStep()
+void COperationDialog::processInstallNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -122,7 +119,7 @@ void COperationDialog::processMigrateNextStep()
 	const CProfile &configuration = config->getProfile();
 
 	// long operations are done in a thread
-	CConfigFile::InstallationStep step = config->getNextStep();
+	OperationStep step = config->getInstallNextStep();
 
 	switch(step)
 	{

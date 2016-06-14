@@ -83,8 +83,6 @@ protected:
 	void closeEvent(QCloseEvent *e);
 
 	void processNextStep();
-	void processMigrateNextStep();
-	void processUpdateProfilesNextStep();
 	void processInstallNextStep();
 	void processUninstallNextStep();
 	void processUpdateProfilesNextStep();
