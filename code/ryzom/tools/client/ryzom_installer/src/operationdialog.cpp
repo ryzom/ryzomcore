@@ -481,7 +481,7 @@ void COperationDialog::copyDataFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = QApplication::tr("Copy client files required by server %1").arg(server.name);
+	m_currentOperation = QApplication::tr("Copy data files required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
 
 	QStringList serverFiles;
@@ -490,7 +490,6 @@ void COperationDialog::copyDataFiles()
 	serverFiles << "examples";
 	serverFiles << "patch";
 	serverFiles << "unpack";
-	serverFiles << "client_default.cfg";
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
