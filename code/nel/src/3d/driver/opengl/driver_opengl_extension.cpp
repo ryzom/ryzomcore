@@ -1991,24 +1991,29 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 
 	if (ext.WGLNVGPUAffinity)
 	{
-		uint i = 0;
+		uint gpuIndex = 0;
 
 		HGPUNV hGPU;
 
-		while(nwglEnumGpusNV(i, &hGPU))
+		// list all GPUs
+		while (nwglEnumGpusNV(gpuIndex, &hGPU))
 		{
 			uint j = 0;
 
-			PGPU_DEVICE lpGpuDevice = NULL;
+			_GPU_DEVICE gpuDevice;
+			gpuDevice.cb = sizeof(gpuDevice);
 
-			while(nwglEnumGpuDevicesNV(hGPU, j, lpGpuDevice))
+			// list all devices connected to GPU
+			while(nwglEnumGpuDevicesNV(hGPU, j, &gpuDevice))
 			{
-				nlinfo("Device: %s - %s - flags: %u", lpGpuDevice->DeviceName, lpGpuDevice->DeviceString, lpGpuDevice->Flags);
+				nlinfo("Device: %s - %s - flags: %u - rect: (%u,%u)-(%u,%u)", gpuDevice.DeviceName, gpuDevice.DeviceString, (uint)gpuDevice.Flags,
+					(uint)gpuDevice.rcVirtualScreen.left, (uint)gpuDevice.rcVirtualScreen.top,
+					(uint)gpuDevice.rcVirtualScreen.right, (uint)gpuDevice.rcVirtualScreen.bottom);
 
 				++j;
 			}
 
-			++i;
+			++gpuIndex;
 		}
 	}
 
