@@ -196,9 +196,98 @@ void COperationDialog::processUpdateProfilesNextStep()
 	// TODO: create shortcuts
 }
 
-void COperationDialog::processInstallNextStep()
-{
-	// TODO: implement
+	QStringList serversToUpdate;
+	QStringList profilesToDelete;
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	// append all old profiles
+	foreach(const CProfile &profile, config->getBackupProfiles())
+	{
+		if (QFile::exists(profile.getDirectory())) profilesToDelete << profile.id;
+	}
+
+	const CServer &defaultServer = config->getServer();
+
+	foreach(const CProfile &profile, config->getProfiles())
+	{
+		const CServer &server = config->getServer(profile.server);
+
+		QString serverDirectory = server.getDirectory();
+
+		// check if Ryzom is installed in new server directory
+		if (server.id != defaultServer.id && !config->isRyzomInstalledIn(serverDirectory) && serversToUpdate.indexOf(server.id) == -1)
+		{
+			serversToUpdate << server.id;
+		}
+
+		// remove profiles that still exist
+		profilesToDelete.removeAll(profile.id);
+	}
+
+	if (!profilesToDelete.isEmpty())
+	{
+		m_components.profiles << profilesToDelete;
+
+		// delete profiles in another thread
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
+
+		return;
+	}
+
+	// servers files to download/update
+	foreach(const QString &serverId, serversToUpdate)
+	{
+		const CServer &server = config->getServer(serverId);
+
+		// data
+		if (!config->areRyzomDataInstalledIn(server.getDirectory()))
+		{
+			QString dataFile = config->getInstallationDirectory() + "/" + server.dataDownloadFilename;
+
+			// archive already downloaded
+			if (QFile::exists(dataFile))
+			{
+				// make server current
+				m_currentServerId = server.id;
+
+				// uncompress it
+				QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
+				return;
+			}
+
+			// data download URLs are different, can't copy data from default server
+			if (server.dataDownloadUrl != defaultServer.dataDownloadUrl)
+			{
+				// download it
+				// TODO
+
+				return;
+			}
+
+			// same data used
+
+			// copy them
+			// TODO
+			return;
+		}
+
+		// client
+		if (!config->isRyzomClientInstalledIn(server.getDirectory()))
+		{
+			// client download URLs are different, can't copy client from default server
+			if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
+			{
+				if (QFile::exists(""))
+					downloadData();
+				return;
+			}
+		}
+		else
+		{
+			QString clientFile = config->getInstallationDirectory() + "/" + server.clientDownloadFilename;
+		}
+	}
 }
 
 void COperationDialog::processUninstallNextStep()

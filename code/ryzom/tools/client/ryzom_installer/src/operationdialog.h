@@ -87,6 +87,7 @@ protected:
 	void processUpdateProfilesNextStep();
 	void processInstallNextStep();
 	void processUninstallNextStep();
+	void processUpdateProfilesNextStep();
 
 	// operations
 	void downloadData();
