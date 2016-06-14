@@ -722,12 +722,15 @@ void COperationDialog::deleteComponentsServers()
 
 		QString path = server.getDirectory();
 
-		QDir dir(path);
-		
-		if (dir.exists() && !dir.removeRecursively())
+		if (!path.isEmpty())
 		{
-			emit fail(tr("Unable to delete files for client %1").arg(server.name));
-			return;
+			QDir dir(path);
+
+			if (dir.exists() && !dir.removeRecursively())
+			{
+				emit fail(tr("Unable to delete files for client %1").arg(server.name));
+				return;
+			}
 		}
 	}
 
@@ -761,10 +764,15 @@ void COperationDialog::deleteComponentsProfiles()
 
 		QString path = profile.getDirectory();
 
-		if (dir.exists() && !dir.removeRecursively())
+		if (!path.isEmpty())
 		{
-			emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
-			return;
+			QDir dir(path);
+
+			if (dir.exists() && !dir.removeRecursively())
+			{
+				emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
+				return;
+			}
 		}
 
 		// delete profile
