@@ -313,8 +313,14 @@ int CConfigFile::addProfile(const CProfile &profile)
 void CConfigFile::removeProfile(int i)
 {
 	m_profiles.removeAt(i);
+}
 
-	// TODO: decalle all profiles and move files
+void CConfigFile::removeProfile(const QString &id)
+{
+	for (int i = 0; i < m_profiles.size(); ++i)
+	{
+		if (m_profiles[i].id == id) removeProfile(i);
+	}
 }
 
 bool CConfigFile::has64bitsOS()

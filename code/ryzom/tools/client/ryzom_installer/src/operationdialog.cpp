@@ -766,6 +766,9 @@ void COperationDialog::deleteComponentsProfiles()
 			emit fail(tr("Unable to delete files for profile %1").arg(profile.name));
 			return;
 		}
+
+		// delete profile
+		config->removeProfile(profileId);
 	}
 
 	emit success(m_components.servers.size());

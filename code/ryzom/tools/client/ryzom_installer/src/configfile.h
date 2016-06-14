@@ -116,6 +116,7 @@ public:
 	void setProfile(int i, const CProfile &profile);
 	int addProfile(const CProfile &profile);
 	void removeProfile(int i);
+	void removeProfile(const QString &id);
 
 	int getDefaultServerIndex() const;
 	void setDefaultServerIndex(int index);
