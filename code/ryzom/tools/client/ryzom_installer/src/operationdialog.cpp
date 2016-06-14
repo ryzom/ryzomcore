@@ -885,6 +885,9 @@ void COperationDialog::deleteComponentsProfiles()
 		config->removeProfile(profileId);
 	}
 
+	// clear list of all profiles to uninstall
+	m_components.profiles.clear();
+
 	emit success(m_components.servers.size());
 	emit done();
 }
