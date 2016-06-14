@@ -42,6 +42,9 @@ public:
 	QString configurationFilename;
 	QString installerFilename;
 	QString comments;
+
+	// helpers
+	QString getDirectory() const;
 };
 
 extern const CServer NoServer;
@@ -65,6 +68,9 @@ public:
 	QString comments;
 	bool desktopShortcut;
 	bool menuShortcut;
+
+	// helpers
+	QString getDirectory() const;
 };
 
 extern const CProfile NoProfile;

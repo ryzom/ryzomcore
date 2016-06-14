@@ -51,7 +51,7 @@ CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installer
 	{
 		const CServer &server = config->getServer(row);
 
-		if (QFile::exists(config->getInstallationDirectory() + "/" + server.id))
+		if (QFile::exists(server.getDirectory()))
 		{
 			m_serversIndices[server.id] = model->rowCount();
 
@@ -228,7 +228,7 @@ void CUninstallDialog::updateSizes()
 	{
 		const CServer &server = config->getServer(it.key());
 
-		qint64 bytes = getDirectorySize(config->getInstallationDirectory() + "/" + server.id);
+		qint64 bytes = getDirectorySize(server.getDirectory());
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
@@ -242,7 +242,7 @@ void CUninstallDialog::updateSizes()
 	{
 		const CProfile &profile = config->getProfile(it.key());
 
-		qint64 bytes = getDirectorySize(config->getProfileDirectory() + "/" + profile.id);
+		qint64 bytes = getDirectorySize(profile.getDirectory());
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 

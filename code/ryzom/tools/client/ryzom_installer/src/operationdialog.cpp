@@ -382,7 +382,7 @@ void COperationDialog::copyServerFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcServerDirectory());
-	copier.setDestinationDirectory(config->getInstallationDirectory() + "/" + server.id);
+	copier.setDestinationDirectory(server.getDirectory());
 	copier.setIncludeFilter(serverFiles);
 
 	if (copier.exec())
@@ -418,7 +418,7 @@ void COperationDialog::copyProfileFiles()
 
 	CFilesCopier copier(this);
 	copier.setSourceDirectory(config->getSrcProfileDirectory());
-	copier.setDestinationDirectory(config->getProfileDirectory() + "/" + profile.id);
+	copier.setDestinationDirectory(profile.getDirectory());
 	copier.setIncludeFilter(profileFiles);
 
 	if (copier.exec())
@@ -441,7 +441,7 @@ void COperationDialog::extractBnpClient()
 	m_currentOperation = QApplication::tr("Extract client to new location");
 	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
 
-	QString destinationDirectory = config->getInstallationDirectory() + "/" + server.id;
+	QString destinationDirectory = server.getDirectory();
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
@@ -589,7 +589,7 @@ void COperationDialog::cleanFiles()
 	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
 
 	CFilesCleaner cleaner(this);
-	cleaner.setDirectory(config->getInstallationDirectory() + "/" + server.id);
+	cleaner.setDirectory(server.getDirectory());
 	cleaner.exec();
 
 	emit done();
@@ -720,7 +720,7 @@ void COperationDialog::deleteComponentsServers()
 
 		emit progress(i++, server.name);
 
-		QString path = config->getInstallationDirectory() + "/" + server.id;
+		QString path = server.getDirectory();
 
 		QDir dir(path);
 		
@@ -759,9 +759,7 @@ void COperationDialog::deleteComponentsProfiles()
 
 		emit progress(i++, profile.name);
 
-		QString path = config->getProfileDirectory() + "/" + profile.id;
-
-		QDir dir(path);
+		QString path = profile.getDirectory();
 
 		if (dir.exists() && !dir.removeRecursively())
 		{

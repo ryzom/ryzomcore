@@ -27,6 +27,16 @@
 const CServer NoServer;
 const CProfile NoProfile;
 
+QString CServer::getDirectory() const
+{
+	return CConfigFile::getInstance()->getInstallationDirectory() + "/" + id;
+}
+
+QString CProfile::getDirectory() const
+{
+	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
+}
+
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
@@ -614,7 +624,7 @@ QString CConfigFile::getServerClientFullPath(const QString &serverId) const
 
 	if (server.clientFilename.isEmpty()) return "";
 
-	return getInstallationDirectory() + "/" + server.id + "/" + server.clientFilename;
+	return server.getDirectory() + "/" + server.clientFilename;
 }
 
 QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) const
@@ -623,7 +633,7 @@ QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) con
 
 	if (server.configurationFilename.isEmpty()) return "";
 
-	return getInstallationDirectory() + "/" + server.id + "/" + server.configurationFilename;
+	return server.getDirectory() + "/" + server.configurationFilename;
 }
 
 QString CConfigFile::getSrcServerClientBNPFullPath() const
@@ -680,7 +690,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;
 	}
 
-	QString serverDirectory = getInstallationDirectory() + "/" + server.id;
+	QString serverDirectory = server.getDirectory();
 
 	if (getSrcServerDirectory().isEmpty())
 	{
