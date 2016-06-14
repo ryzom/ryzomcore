@@ -448,7 +448,7 @@ void COperationDialog::extractBnpClient()
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
-	extractor.setDesinationDirectory(destinationDirectory);
+	extractor.setDestinationDirectory(destinationDirectory);
 	extractor.exec();
 
 	QString upgradeScript = destinationDirectory + "/upgd_nl.";

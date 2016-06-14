@@ -245,7 +245,7 @@ void CFilesExtractor::setSourceFile(const QString &src)
 	m_sourceFile = src;
 }
 
-void CFilesExtractor::setDesinationDirectory(const QString &dst)
+void CFilesExtractor::setDestinationDirectory(const QString &dst)
 {
 	m_destinationDirectory = dst;
 }
