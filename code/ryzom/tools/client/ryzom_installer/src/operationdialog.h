@@ -89,8 +89,10 @@ protected:
 
 	// operations
 	void downloadData();
+	void extractDownloadedData();
 	void downloadClient();
-	void copyServerFiles();
+	void extractDownloadedClient();
+	void copyDataFiles();
 	void copyProfileFiles();
 	void cleanFiles();
 	void extractBnpClient();
