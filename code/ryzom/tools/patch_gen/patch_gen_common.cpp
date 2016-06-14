@@ -53,7 +53,7 @@ void GeneratePatch(const std::string& srcFileName,const std::string& destFileNam
 	cmd+=" "+srcFileName+" "+destFileName+" "+patchFileName;
 	nlinfo("executing system command: %s",cmd.c_str());
 #ifdef NL_OS_WINDOWS
-	_spawnlp(_P_WAIT, "xdelta.exe","xdelta.exe","delta",srcFileName.c_str(),destFileName.c_str(),patchFileName.c_str(),NULL);
+	_spawnlp(_P_WAIT, "xdelta.exe", "xdelta.exe", "delta", srcFileName.c_str(), destFileName.c_str(), patchFileName.c_str(), NULL);
 #else // NL_OS_WINDOWS
 	// xdelta-1.x behaves like "diff" and returns 0 for identical files, 1 for different files, 2 for errors
 	sint error = system (cmd.c_str());
@@ -69,7 +69,7 @@ void ApplyPatch(const std::string& srcFileName,const std::string& destFileName,c
 	cmd+=" "+patchFileName+" "+srcFileName+" "+destFileName;
 	nlinfo("executing system command: %s",cmd.c_str());
 #ifdef NL_OS_WINDOWS
-	_spawnlp(_P_WAIT, "xdelta.exe","xdelta.exe","patch",patchFileName.c_str(),srcFileName.c_str(),destFileName.c_str(),NULL);
+	_spawnlp(_P_WAIT, "xdelta.exe", "xdelta.exe", "patch",patchFileName.c_str(), srcFileName.c_str(), destFileName.c_str(), NULL);
 #else // NL_OS_WINDOWS
 	// xdelta-1.x behaves like "diff" and returns 0 for identical files, 1 for different files, 2 for errors
 	sint error = system (cmd.c_str());
