@@ -405,12 +405,12 @@
 				 onclick_l="new_macro_new_cmd" />
 		
 		
-		<group id="cmds" type="list" posref="BR TR" posparent="sep" x="0" y="-22" over="true" >
-<!--
-			<instance template="macro_command" id="cmd1" posref="TL TL" />
-			<instance template="macro_command" id="cmd2" posparent="cmd1" posref="BL TL" />
--->
+	<group id="cmds" x="0" y="-22" over="true" sizeref="w" posref="TL TL" posparent="sep" child_resize_h="true" child_resize_hmargin="4">
+		<group id="macros" x="10" y="-4" sizeref="w" posref="TL TL" child_resize_h="true" max_h="300" >
+			<group id="list" type="list" x="0" y="0" posref="TL TL" />
 		</group>
+		<ctrl style="skin_scroll" id="sv" posref="TL TL" y="-4" target="macros" />
+	</group>
 		
 		<instance template="button_ok_cancel" posparent="cmds" posref="BR TR" x="0" y="-4" 
 					onclick_ok="new_macro_ok" 

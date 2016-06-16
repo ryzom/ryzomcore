@@ -182,7 +182,7 @@ private:
 #define	NEWMACRO_TITLE_EDIT						"uiEditMacro"
 #define CTRL_NEWMACRO_ICON						"ui:interface:new_macro:content:icon"
 #define GROUP_NEWMACRO_EDIT_NAME				"ui:interface:new_macro:content:edit_name"
-#define GROUP_NEWMACRO_COMMANDS					"ui:interface:new_macro:content:cmds"
+#define GROUP_NEWMACRO_COMMANDS					"ui:interface:new_macro:content:cmds:macros:list"
 #define	VIEW_NEWMACRO_KEY						"ui:interface:new_macro:content:macro_key"
 #define TEMPLATE_NEWMACRO_COMMAND				"macro_command"
 #define TEMPLATE_NEWMACRO_COMMAND_TEXT			"macro_name"
