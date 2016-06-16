@@ -107,7 +107,7 @@ bool CSystemUtils::updateProgressBar(uint value, uint total)
 #ifdef TASKBAR_PROGRESS
 	if (s_window == NULL)
 	{
-		nlwarning("No window has be set with CSystemUtils::setWindow(), progress bar can't be displayed");
+		nldebug("No window has be set with CSystemUtils::setWindow(), progress bar can't be displayed");
 		return false;
 	}
 
