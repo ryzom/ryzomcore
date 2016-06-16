@@ -2006,9 +2006,12 @@ bool registerWGlExtensions(CGlExtensions &ext, HDC hDC)
 			// list all devices connected to GPU
 			while(nwglEnumGpuDevicesNV(hGPU, j, &gpuDevice))
 			{
-				nlinfo("Device: %s - %s - flags: %u - rect: (%u,%u)-(%u,%u)", gpuDevice.DeviceName, gpuDevice.DeviceString, (uint)gpuDevice.Flags,
-					(uint)gpuDevice.rcVirtualScreen.left, (uint)gpuDevice.rcVirtualScreen.top,
-					(uint)gpuDevice.rcVirtualScreen.right, (uint)gpuDevice.rcVirtualScreen.bottom);
+				nlinfo("Device: %s / %s / flags: %u", gpuDevice.DeviceName, gpuDevice.DeviceString, (uint)gpuDevice.Flags);
+
+				if (gpuDevice.Flags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
+				{
+					nlinfo("Virtual screen: (%d,%d)-(%d,%d)", (sint)gpuDevice.rcVirtualScreen.left, (sint)gpuDevice.rcVirtualScreen.top, (sint)gpuDevice.rcVirtualScreen.right, (sint)gpuDevice.rcVirtualScreen.bottom);
+				}
 
 				++j;
 			}
