@@ -31,6 +31,7 @@ CProfilesDialog::CProfilesDialog(QWidget *parent):QDialog(parent), m_currentProf
 	connect(addButton, SIGNAL(clicked()), SLOT(onAddProfile()));
 	connect(deleteButton, SIGNAL(clicked()), SLOT(onDeleteProfile()));
 	connect(profilesListView, SIGNAL(clicked(QModelIndex)), SLOT(onProfileClicked(QModelIndex)));
+	connect(executableDefaultButton, SIGNAL(clicked()), SLOT(onExecutableDefaultClicked()));
 	connect(executableBrowseButton, SIGNAL(clicked()), SLOT(onExecutableBrowseClicked()));
 	connect(directoryButton, SIGNAL(clicked()), SLOT(onProfileDirectoryClicked()));
 
@@ -241,8 +242,19 @@ void CProfilesDialog::updateExecutableVersion(int index)
 
 	if (reg.indexIn(versionString) > -1)
 	{
-		executableVersionLabel->setText(reg.cap(2));
+		executablePathLabel->setText(QString("%1 (%2)").arg(QFileInfo(executable).fileName()).arg(reg.cap(2)));
 	}
+}
+
+void CProfilesDialog::onExecutableDefaultClicked()
+{
+	if (m_currentProfileIndex < 0) return;
+
+	CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
+
+	profile.executable.clear();
+
+	updateExecutableVersion(m_currentProfileIndex);
 }
 
 void CProfilesDialog::onExecutableBrowseClicked()
