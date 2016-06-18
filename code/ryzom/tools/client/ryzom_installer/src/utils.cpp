@@ -111,22 +111,22 @@ wchar_t* qToWide(const QString &str)
 //                Shell link, stored in the Comment field of the link
 //                properties.
 
-HRESULT CreateLink(const QString &pathObj, const QString &pathLink, const QString &desc)
+bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
 {
 	IShellLinkW* psl;
 
 	// Get a pointer to the IShellLink interface. It is assumed that CoInitialize
 	// has already been called.
-	HRESULT hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (LPVOID*)&psl);
+	HRESULT hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
 	if (SUCCEEDED(hres))
 	{
 		IPersistFile* ppf;
 
 		// Set the path to the shortcut target and add the description.
-		psl->SetPath(qToWide(pathObj));
+		psl->SetPath(qToWide(QDir::toNativeSeparators(pathObj)));
 		psl->SetDescription(qToWide(desc));
-		psl->SetArguments(L"--profil ");
-		psl->SetWorkingDirectory(L"");
+		psl->SetArguments(qToWide(arguments));
+		psl->SetWorkingDirectory(qToWide(QDir::toNativeSeparators(workingDir)));
 
 		// Query IShellLink for the IPersistFile interface, used for saving the
 		// shortcut in persistent storage.
@@ -138,12 +138,12 @@ HRESULT CreateLink(const QString &pathObj, const QString &pathLink, const QStrin
 			// for success.
 
 			// Save the link by calling IPersistFile::Save.
-			hres = ppf->Save(qToWide(pathLink), TRUE);
+			hres = ppf->Save(qToWide(QDir::toNativeSeparators(pathLink)), TRUE);
 			ppf->Release();
 		}
 		psl->Release();
 	}
-	return hres;
+	return SUCCEEDED(hres);
 }
 
 // ResolveIt - Uses the Shell's IShellLink and IPersistFile interfaces
@@ -163,7 +163,7 @@ HRESULT CreateLink(const QString &pathObj, const QString &pathLink, const QStrin
 //                Shell link, stored in the Comment field of the link
 //                properties.
 
-HRESULT ResolveIt(HWND hwnd, const QString &linkFile, QString &path)
+bool ResolveLink(const QWidget &window, const QString &linkFile, QString &path)
 {
 	IShellLinkW* psl;
 	WIN32_FIND_DATAW wfd;
@@ -186,12 +186,12 @@ HRESULT ResolveIt(HWND hwnd, const QString &linkFile, QString &path)
 			// for success.
 
 			// Load the shortcut.
-			hres = ppf->Load(qToWide(linkFile), STGM_READ);
+			hres = ppf->Load(qToWide(QDir::toNativeSeparators(linkFile)), STGM_READ);
 
 			if (SUCCEEDED(hres))
 			{
 				// Resolve the link.
-				hres = psl->Resolve(hwnd, 0);
+				hres = psl->Resolve((HWND)window.winId(), 0);
 
 				if (SUCCEEDED(hres))
 				{
@@ -210,7 +210,7 @@ HRESULT ResolveIt(HWND hwnd, const QString &linkFile, QString &path)
 						if (SUCCEEDED(hres))
 						{
 							// Handle success
-							path = qFromWide(szGotPath);
+							path = QDir::fromNativeSeparators(qFromWide(szGotPath));
 						}
 						else
 						{
@@ -227,7 +227,19 @@ HRESULT ResolveIt(HWND hwnd, const QString &linkFile, QString &path)
 		psl->Release();
 	}
 
-	return hres;
+	return SUCCEEDED(hres);
+}
+
+#else
+
+bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
+{
+	return false;
+}
+
+bool ResolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)
+{
+	return false;
 }
 
 #endif

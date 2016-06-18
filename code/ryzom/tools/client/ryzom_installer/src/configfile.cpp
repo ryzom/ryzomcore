@@ -45,7 +45,7 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 
 	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
 	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
-	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/installer.ini";
+	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/installer.ini";
 }
 
 CConfigFile::~CConfigFile()
@@ -608,9 +608,24 @@ bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 
 bool CConfigFile::shouldCreateDesktopShortcut() const
 {
+#ifdef Q_OS_WIN32
 	const CProfile &profile = getProfile();
 
-	return profile.desktopShortcut && !QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
+	return profile.desktopShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk"));
+#else
+	return false;
+#endif
+}
+
+bool CConfigFile::shouldCreateMenuShortcut() const
+{
+#ifdef Q_OS_WIN32
+	const CProfile &profile = getProfile();
+
+	return profile.menuShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom/Ryzom.lnk"));
+#else
+	return false;
+#endif
 }
 
 QString CConfigFile::getProfileClientFullPath(int profileIndex) const
@@ -704,7 +719,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 
 		// downloaded files are kept in server directory
 		QString dataFile = getInstallationDirectory() + "/" + server.dataDownloadFilename;
-		QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+		QString clientFile = getInstallationDirectory() + "/" + expandVariables(server.clientDownloadFilename);
 
 		// data are not copied
 		if (!areRyzomDataInstalledIn(serverDirectory))
@@ -760,7 +775,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 				return ExtractBnpClient;
 			}
 
-			QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+			QString clientFile = getInstallationDirectory() + "/" + expandVariables(server.clientDownloadFilename);
 
 			// when file is not finished, it has .part extension
 			if (!QFile::exists(clientFile))
@@ -799,8 +814,12 @@ OperationStep CConfigFile::getInstallNextStep() const
 
 	if (shouldCreateDesktopShortcut())
 	{
-		// TODO: check they point to getClientFullPath()
-		return CreateShortcuts;
+		return CreateDesktopShortcut;
+	}
+
+	if (shouldCreateMenuShortcut())
+	{
+		return CreateMenuShortcut;
 	}
 
 #ifdef Q_OS_WIN

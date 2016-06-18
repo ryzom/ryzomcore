@@ -147,6 +147,8 @@ void CDownloader::getFileHead()
 			{
 				// file is already downloaded
 				if (m_listener) m_listener->operationSuccess(m_size);
+
+				emit downloadDone();
 			}
 			else
 			{
@@ -339,6 +341,10 @@ void CDownloader::onHeadFinished()
 			downloadFile();
 		}
 	}
+	else
+	{
+		emit downloadPrepared();
+	}
 }
 
 void CDownloader::onDownloadFinished()
@@ -357,6 +363,8 @@ void CDownloader::onDownloadFinished()
 		bool ok = NLMISC::CFile::setFileModificationDate(m_fullPath.toUtf8().constData(), m_lastModified.toTime_t());
 
 		if (m_listener) m_listener->operationSuccess(m_size);
+
+		emit downloadDone();
 	}
 }
 
@@ -380,7 +388,7 @@ void CDownloader::onDownloadProgress(qint64 current, qint64 total)
 
 	if (!m_listener) return;
 
-	m_listener->operationProgress(m_offset + current, ""); // TODO: put file
+	m_listener->operationProgress(m_offset + current, m_url);
 
 	// abort download
 	if (m_listener->operationShouldStop() && m_reply) m_reply->abort();

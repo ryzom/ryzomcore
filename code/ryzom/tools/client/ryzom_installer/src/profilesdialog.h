@@ -51,6 +51,7 @@ private slots:
 
 	void updateExecutableVersion(int index);
 
+	void onExecutableDefaultClicked();
 	void onExecutableBrowseClicked();
 
 private:

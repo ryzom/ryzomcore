@@ -42,7 +42,11 @@ public:
 
 	bool isDownloading() const { return m_file != NULL; }
 
+	QString getFileFullPath() const { return m_fullPath; }
+
 signals:
+	void downloadPrepared();
+	void downloadDone();
 	void htmlPageContent(const QString &html);
 
 private slots:

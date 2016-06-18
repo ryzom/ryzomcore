@@ -44,6 +44,9 @@ public:
 public slots:
 	void onAbortClicked();
 
+	void onDownloadPrepared();
+	void onDownloadDone();
+
 	void onProgressPrepare();
 	void onProgressInit(qint64 current, qint64 total);
 	void onProgressStart();
@@ -99,7 +102,8 @@ protected:
 	void copyInstaller();
 	void uninstallOldClient();
 	bool createDefaultProfile();
-	bool createDefaultShortcuts();
+	bool createClientDesktopShortcut(int profileIndex);
+	bool createClientMenuShortcut(int profileIndex);
 	bool createAddRemoveEntry();
 	bool deleteAddRemoveEntry();
 	void deleteComponentsServers();
@@ -116,6 +120,8 @@ protected:
 	virtual void operationFail(const QString &error);
 
 	virtual bool operationShouldStop();
+
+	void renamePartFile();
 
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;
