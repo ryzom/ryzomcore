@@ -704,7 +704,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 
 		// downloaded files are kept in server directory
 		QString dataFile = getInstallationDirectory() + "/" + server.dataDownloadFilename;
-		QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+		QString clientFile = getInstallationDirectory() + "/" + expandVariables(server.clientDownloadFilename);
 
 		// data are not copied
 		if (!areRyzomDataInstalledIn(serverDirectory))
@@ -760,7 +760,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 				return ExtractBnpClient;
 			}
 
-			QString clientFile = getInstallationDirectory() + "/" + server.clientDownloadFilename;
+			QString clientFile = getInstallationDirectory() + "/" + expandVariables(server.clientDownloadFilename);
 
 			// when file is not finished, it has .part extension
 			if (!QFile::exists(clientFile))

@@ -278,7 +278,7 @@ void COperationDialog::processUpdateProfilesNextStep()
 		}
 		else
 		{
-			QString clientFile = config->getInstallationDirectory() + "/" + server.clientDownloadFilename;
+			QString clientFile = config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename);
 		}
 	}
 }
@@ -452,7 +452,7 @@ void COperationDialog::extractDownloadedClient()
 	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
 
 	CFilesExtractor extractor(this);
-	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.clientDownloadFilename);
+	extractor.setSourceFile(config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename));
 	extractor.setDestinationDirectory(server.getDirectory());
 
 	if (extractor.exec())
