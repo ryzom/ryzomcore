@@ -658,7 +658,7 @@ void COperationDialog::copyInstaller()
 			CFilesCopier copier(this);
 			copier.setIncludeFilter(filter);
 			copier.addFile(oldInstallerFullPath);
-			copier.setSourceDirectory(config->getSrcServerDirectory());
+			copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
 			copier.setDestinationDirectory(config->getInstallationDirectory());
 			copier.exec();
 
