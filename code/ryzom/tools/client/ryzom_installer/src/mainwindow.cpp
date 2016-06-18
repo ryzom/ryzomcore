@@ -92,6 +92,7 @@ void CMainWindow::onPlayClicked()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
 
 	// get full path of client executable
 	QString executable = config->getProfileClientFullPath(profileIndex);
@@ -104,8 +105,8 @@ void CMainWindow::onPlayClicked()
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
-	// launch the game with all arguments
-	bool started = QProcess::startDetached(executable, arguments);
+	// launch the game with all arguments and from server root directory (to use right data)
+	bool started = QProcess::startDetached(executable, arguments, server.getDirectory());
 
 	// define this profile as default one
 	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
