@@ -440,8 +440,8 @@ void COperationDialog::downloadData()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Download data required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+	m_currentOperation = tr("Download data required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = tr("Downloading %1...");
 
 	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
 }
@@ -452,8 +452,8 @@ void COperationDialog::extractDownloadedData()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Extract data files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+	m_currentOperation = tr("Extract data files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = tr("Extracting %1...");
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.dataDownloadFilename);
@@ -475,8 +475,8 @@ void COperationDialog::downloadClient()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Download client required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Downloading %1...");
+	m_currentOperation = tr("Download client required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = tr("Downloading %1...");
 
 	m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
 }
@@ -487,8 +487,8 @@ void COperationDialog::extractDownloadedClient()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Extract client files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+	m_currentOperation = tr("Extract client files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = tr("Extracting %1...");
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename));
@@ -511,8 +511,8 @@ void COperationDialog::copyDataFiles()
 	// default server
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Copy data files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
+	m_currentOperation = tr("Copy data files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = tr("Copying %1...");
 
 	QStringList serverFiles;
 	serverFiles << "cfg";
@@ -546,8 +546,8 @@ void COperationDialog::copyProfileFiles()
 	// default profile
 	const CProfile &profile = config->getProfile();
 
-	m_currentOperation = QApplication::tr("Copy old profile to new location");
-	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
+	m_currentOperation = tr("Copy old profile to new location");
+	m_currentOperationProgressFormat = tr("Copying %1...");
 
 	QStringList profileFiles;
 	profileFiles << "cache";
@@ -579,8 +579,8 @@ void COperationDialog::extractBnpClient()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = QApplication::tr("Extract client to new location");
-	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+	m_currentOperation = tr("Extract client to new location");
+	m_currentOperationProgressFormat = tr("Extracting %1...");
 
 	QString destinationDirectory = server.getDirectory();
 
@@ -641,8 +641,8 @@ void COperationDialog::copyInstaller()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = QApplication::tr("Copy installer to new location");
-	m_currentOperationProgressFormat = QApplication::tr("Copying %1...");
+	m_currentOperation = tr("Copy installer to new location");
+	m_currentOperationProgressFormat = tr("Copying %1...");
 
 	QString destinationDirectory = config->getInstallationDirectory();
 
@@ -728,8 +728,8 @@ void COperationDialog::cleanFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = QApplication::tr("Clean obsolete files");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+	m_currentOperation = tr("Clean obsolete files");
+	m_currentOperationProgressFormat = tr("Deleting %1...");
 
 	CFilesCleaner cleaner(this);
 	cleaner.setDirectory(server.getDirectory());
@@ -744,7 +744,7 @@ bool COperationDialog::createDefaultProfile()
 
 	CServer server = config->getServer();
 
-	m_currentOperation = QApplication::tr("Create default profile");
+	m_currentOperation = tr("Create default profile");
 
 	CProfile profile;
 
@@ -912,8 +912,8 @@ bool COperationDialog::deleteAddRemoveEntry()
 
 void COperationDialog::deleteComponentsServers()
 {
-	m_currentOperation = QApplication::tr("Delete client files");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+	m_currentOperation = tr("Delete client files");
+	m_currentOperationProgressFormat = tr("Deleting %1...");
 
 	emit prepare();
 	emit init(0, m_components.servers.size());
@@ -955,8 +955,8 @@ void COperationDialog::deleteComponentsServers()
 
 void COperationDialog::deleteComponentsProfiles()
 {
-	m_currentOperation = QApplication::tr("Delete profiles");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting profile %1...");
+	m_currentOperation = tr("Delete profiles");
+	m_currentOperationProgressFormat = tr("Deleting profile %1...");
 
 	emit prepare();
 	emit init(0, m_components.servers.size());
@@ -1003,8 +1003,8 @@ void COperationDialog::deleteComponentsProfiles()
 
 void COperationDialog::deleteComponentsInstaller()
 {
-	m_currentOperation = QApplication::tr("Delete installer");
-	m_currentOperationProgressFormat = QApplication::tr("Deleting %1...");
+	m_currentOperation = tr("Delete installer");
+	m_currentOperationProgressFormat = tr("Deleting %1...");
 
 	CConfigFile *config = CConfigFile::getInstance();
 
