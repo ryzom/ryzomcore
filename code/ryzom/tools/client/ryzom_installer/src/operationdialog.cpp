@@ -21,6 +21,7 @@
 #include "configfile.h"
 #include "config.h"
 #include "profilesmodel.h"
+#include "utils.h"
 
 #include "filescopier.h"
 #include "filesextractor.h"
@@ -167,8 +168,12 @@ void COperationDialog::processInstallNextStep()
 		createDefaultProfile();
 		break;
 
-		case CreateShortcuts:
-		createDefaultShortcuts();
+		case CreateDesktopShortcut:
+		createClientDesktopShortcut(0);
+		break;
+
+		case CreateMenuShortcut:
+		createClientMenuShortcut(0);
 		break;
 
 		case CreateAddRemoveEntry:
@@ -673,6 +678,8 @@ void COperationDialog::copyInstaller()
 		}
 	}
 
+	// TODO: create shortcuts for installer
+
 	emit done();
 }
 
@@ -745,14 +752,42 @@ bool COperationDialog::createDefaultProfile()
 	profile.name = QString("Ryzom (%1)").arg(server.name);
 	profile.server = server.id;
 	profile.comments = "Default profile created by Ryzom Installer";
+	profile.desktopShortcut = false;
+	profile.menuShortcut = false;
 
 #ifdef Q_OS_WIN32
-//	C:\Users\Public\Desktop
-	profile.desktopShortcut = QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
-#endif
+	QStringList paths;
 
-	// TODO
-	// profile.menuShortcut
+	// desktop
+
+	// Windows XP
+	paths << "C:/Documents and Settings/All Users/Desktop";
+	// since Windows Vista
+	paths << "C:/Users/Public/Desktop";
+	// new location
+	paths << QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+
+	foreach(const QString &path, paths)
+	{
+		if (QFile::exists(path + "/Ryzom.lnk")) profile.desktopShortcut = true;
+	}
+
+	paths.clear();
+
+	// start menu
+
+	// Windows XP
+	paths << "C:/Documents and Settings/All Users/Start Menu/Programs";
+	// since Windows Vista
+	paths << "C:/ProgramData/Microsoft/Windows/Start Menu/Programs";
+	// new location
+	paths << QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+
+	foreach(const QString &path, paths)
+	{
+		if (QFile::exists(path + "/Ryzom/Ryzom.lnk")) profile.menuShortcut = true;
+	}
+#endif
 
 	config->addProfile(profile);
 	config->save();
@@ -762,11 +797,51 @@ bool COperationDialog::createDefaultProfile()
 	return true;
 }
 
-bool COperationDialog::createDefaultShortcuts()
+bool COperationDialog::createClientDesktopShortcut(int profileIndex)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	CServer server = config->getServer();
+	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
+
+	m_currentOperation = tr("Create desktop shortcut for profile %1").arg(profile.id);
+
+#ifdef Q_OS_WIN32
+	if (profile.desktopShortcut)
+	{
+		QString shortcut = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk";
+		CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
+	}
+#endif
+
+	emit done();
+
+	return true;
+}
+
+bool COperationDialog::createClientMenuShortcut(int profileIndex)
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
+
+	m_currentOperation = tr("Create menu shortcut for profile %1").arg(profile.id);
+
+#ifdef Q_OS_WIN32
+	if (profile.menuShortcut)
+	{
+		QString path = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom";
+
+		QDir dir;
+
+		if (dir.mkpath(path))
+		{
+			QString shortcut = path + "/Ryzom.lnk";
+			CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
+		}
+	}
+#endif
 
 	emit done();
 

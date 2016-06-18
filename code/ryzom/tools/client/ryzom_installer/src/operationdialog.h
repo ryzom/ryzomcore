@@ -102,7 +102,8 @@ protected:
 	void copyInstaller();
 	void uninstallOldClient();
 	bool createDefaultProfile();
-	bool createDefaultShortcuts();
+	bool createClientDesktopShortcut(int profileIndex);
+	bool createClientMenuShortcut(int profileIndex);
 	bool createAddRemoveEntry();
 	bool deleteAddRemoveEntry();
 	void deleteComponentsServers();

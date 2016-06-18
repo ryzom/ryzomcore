@@ -608,9 +608,24 @@ bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 
 bool CConfigFile::shouldCreateDesktopShortcut() const
 {
+#ifdef Q_OS_WIN32
 	const CProfile &profile = getProfile();
 
-	return profile.desktopShortcut && !QFile::exists(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk");
+	return profile.desktopShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk"));
+#else
+	return false;
+#endif
+}
+
+bool CConfigFile::shouldCreateMenuShortcut() const
+{
+#ifdef Q_OS_WIN32
+	const CProfile &profile = getProfile();
+
+	return profile.menuShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom/Ryzom.lnk"));
+#else
+	return false;
+#endif
 }
 
 QString CConfigFile::getProfileClientFullPath(int profileIndex) const
@@ -799,8 +814,12 @@ OperationStep CConfigFile::getInstallNextStep() const
 
 	if (shouldCreateDesktopShortcut())
 	{
-		// TODO: check they point to getClientFullPath()
-		return CreateShortcuts;
+		return CreateDesktopShortcut;
+	}
+
+	if (shouldCreateMenuShortcut())
+	{
+		return CreateMenuShortcut;
 	}
 
 #ifdef Q_OS_WIN

@@ -48,4 +48,7 @@ QString qFromWide(const wchar_t *str);
 
 wchar_t* qToWide(const QString &str);
 
+bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc);
+bool ResolveLink(const QWidget &window, const QString &pathLink, QString &pathObj);
+
 #endif
