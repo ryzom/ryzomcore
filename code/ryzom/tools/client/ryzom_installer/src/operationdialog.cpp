@@ -443,7 +443,25 @@ void COperationDialog::downloadData()
 
 void COperationDialog::extractDownloadedData()
 {
-	// TODO: implement
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CServer &server = config->getServer(m_currentServerId);
+
+	m_currentOperation = QApplication::tr("Extract data files required by server %1").arg(server.name);
+	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
+
+	CFilesExtractor extractor(this);
+	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.dataDownloadFilename);
+	extractor.setDestinationDirectory(server.getDirectory());
+
+	if (extractor.exec())
+	{
+	}
+	else
+	{
+	}
+
+	emit done();
 }
 
 void COperationDialog::downloadClient()
