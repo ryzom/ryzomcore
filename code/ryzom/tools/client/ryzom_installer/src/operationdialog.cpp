@@ -54,6 +54,9 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	// downloader
 	m_downloader = new CDownloader(this, this);
 
+	connect(m_downloader, SIGNAL(downloadPrepared()), SLOT(onDownloadPrepared()));
+	connect(m_downloader, SIGNAL(downloadDone()), SLOT(onDownloadDone()));
+
 	connect(operationButtonBox, SIGNAL(clicked(QAbstractButton*)), SLOT(onAbortClicked()));
 
 	// operations
@@ -341,6 +344,19 @@ void COperationDialog::onAbortClicked()
 
 	QMutexLocker locker(&m_abortingMutex);
 	m_aborting = true;
+}
+
+void COperationDialog::onDownloadPrepared()
+{
+	// actually download the file
+	m_downloader->getFile();
+}
+
+void COperationDialog::onDownloadDone()
+{
+	renamePartFile();
+
+	emit done();
 }
 
 void COperationDialog::onProgressPrepare()
@@ -947,4 +963,17 @@ bool COperationDialog::operationShouldStop()
 	QMutexLocker locker(&m_abortingMutex);
 
 	return m_aborting;
+}
+
+void COperationDialog::renamePartFile()
+{
+	QString partFile = m_downloader->getFileFullPath();
+
+	QString finalFile = partFile;
+	finalFile.remove(".part");
+
+	if (partFile != finalFile)
+	{
+		QFile::rename(partFile, finalFile);
+	}
 }
