@@ -482,7 +482,7 @@ void COperationDialog::extractDownloadedClient()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = QApplication::tr("Extract data files required by server %1").arg(server.name);
+	m_currentOperation = QApplication::tr("Extract client files required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = QApplication::tr("Extracting %1...");
 
 	CFilesExtractor extractor(this);
