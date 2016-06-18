@@ -45,7 +45,7 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 
 	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
 	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
-	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + "/installer.ini";
+	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/installer.ini";
 }
 
 CConfigFile::~CConfigFile()
