@@ -107,6 +107,7 @@ protected:
 	bool createClientMenuShortcut(const QString &profileId);
 
 	bool createAddRemoveEntry();
+	bool updateAddRemoveEntry();
 	bool deleteAddRemoveEntry();
 
 	void addComponentsServers();

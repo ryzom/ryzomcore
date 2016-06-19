@@ -975,6 +975,37 @@ bool COperationDialog::createAddRemoveEntry()
 	return true;
 }
 
+bool COperationDialog::updateAddRemoveEntry()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CServer &server = config->getServer();
+
+	QString oldInstallerFilename = server.clientFilenameOld;
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (QFile::exists(newInstallerFullPath))
+		{
+#ifdef Q_OS_WIN
+			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+			QStringList versionTokens = QApplication::applicationVersion().split('.');
+
+			settings.setValue("DisplayVersion", QApplication::applicationVersion());
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("MajorVersion", versionTokens[0].toInt());
+			settings.setValue("MinorVersion", versionTokens[1].toInt());
+#endif
+		}
+	}
+
+	return true;
+}
+
 bool COperationDialog::deleteAddRemoveEntry()
 {
 #ifdef Q_OS_WIN
