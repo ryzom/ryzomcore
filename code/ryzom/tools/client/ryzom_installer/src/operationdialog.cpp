@@ -1067,7 +1067,19 @@ void COperationDialog::deleteComponentsInstaller()
 
 	deleteAddRemoveEntry();
 
-	emit onProgressSuccess(m_components.servers.size());
+	// delete menu
+	QString path = config->getMenuDirectory();
+
+	if (!path.isEmpty())
+	{
+		QDir dir(path);
+
+		dir.removeRecursively();
+	}
+
+	// TODO:
+
+	emit onProgressSuccess(1);
 	emit done();
 }
 
