@@ -1065,6 +1065,23 @@ void COperationDialog::deleteComponentsServers()
 	emit done();
 }
 
+void COperationDialog::addComponentsProfiles()
+{
+	m_currentOperation = tr("Add profiles");
+	m_currentOperationProgressFormat = tr("Adding profile %1...");
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	foreach(const QString &profileId, m_addComponents.profiles)
+	{
+		CProfile &profile = config->getProfile(profileId);
+
+		if (profile.desktopShortcut) createClientDesktopShortcut(profile.id);
+
+		if (profile.menuShortcut) createClientMenuShortcut(profile.id);
+	}
+}
+
 void COperationDialog::deleteComponentsProfiles()
 {
 	m_currentOperation = tr("Delete profiles");
