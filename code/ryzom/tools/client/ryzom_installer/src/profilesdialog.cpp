@@ -103,7 +103,7 @@ void CProfilesDialog::displayProfile(int index)
 
 	if (executable.isEmpty())
 	{
-		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+		executable = profile.getClientFullPath();
 	}
 
 	QString profileDirectory = profile.getDirectory();
@@ -216,7 +216,7 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable += CConfigFile::getInstance()->getServerClientFullPath(profile.server);
+		executable += CConfigFile::getInstance()->getServer(profile.server).getClientFullPath();
 	}
 
 	// file doesn't exist
@@ -264,18 +264,16 @@ void CProfilesDialog::onExecutableBrowseClicked()
 	CProfile &profile = m_model->getProfiles()[m_currentProfileIndex];
 
 	QString executable = profile.executable;
+	QString defaultExecutable = CConfigFile::getInstance()->getServer(profile.server).getClientFullPath();
 
-	if (executable.isEmpty())
-	{
-		executable = CConfigFile::getInstance()->getServerClientFullPath(profile.server);
-	}
+	if (executable.isEmpty()) executable = defaultExecutable;
 
 	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
 
 	if (executable.isEmpty()) return;
 
 	// don't need to save the new executable if the same as default one
-	if (executable == CConfigFile::getInstance()->getServerClientFullPath(profile.server))
+	if (executable == defaultExecutable)
 	{
 		profile.executable.clear();
 	}

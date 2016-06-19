@@ -45,6 +45,8 @@ public:
 
 	// helpers
 	QString getDirectory() const;
+	QString getClientFullPath() const;
+	QString getConfigurationFullPath() const;
 };
 
 extern const CServer NoServer;
@@ -71,6 +73,9 @@ public:
 
 	// helpers
 	QString getDirectory() const;
+	QString getClientFullPath() const;
+	QString getClientDesktopLinkFullPath() const;
+	QString getClientMenuLinkFullPath() const;
 };
 
 extern const CProfile NoProfile;
@@ -135,6 +140,9 @@ public:
 	QString getProfileDirectory() const;
 	QString getSrcProfileDirectory() const;
 
+	QString getDesktopDirectory() const;
+	QString getMenuDirectory() const;
+
 	static bool has64bitsOS();
 
 	// default directories
@@ -166,9 +174,8 @@ public:
 
 	QString getClientArch() const;
 
-	QString getProfileClientFullPath(int profileIndex = -1) const;
-	QString getServerClientFullPath(const QString &serverId = "") const;
-	QString getServerConfigurationFullPath(const QString &serverId = "") const;
+	QString getInstallerFullPath() const;
+	QString getInstallerMenuLinkFullPath() const;
 
 	QString getSrcServerClientBNPFullPath() const;
 
