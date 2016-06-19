@@ -90,6 +90,12 @@ void COperationDialog::setUninstallComponents(const SComponents &components)
 
 void COperationDialog::processNextStep()
 {
+	if (operationShouldStop())
+	{
+		reject();
+		return;
+	}
+
 	switch (m_operation)
 	{
 		case OperationMigrate:
@@ -473,7 +479,7 @@ void COperationDialog::onProgressFail(const QString &error)
 
 void COperationDialog::onDone()
 {
-	if (!operationShouldStop()) processNextStep();
+	processNextStep();
 }
 
 void COperationDialog::downloadData()
