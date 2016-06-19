@@ -949,7 +949,7 @@ bool COperationDialog::createAddRemoveEntry()
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", 1500000); // TODO: compute real size
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
