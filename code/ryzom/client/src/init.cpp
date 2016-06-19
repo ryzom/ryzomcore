@@ -1154,7 +1154,6 @@ void prelogInit()
 			Driver->setSwapVBLInterval(0);
 
 		// initialize system utils class
-		CSystemUtils::init();
 		CSystemUtils::setWindow(Driver->getDisplay());
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
