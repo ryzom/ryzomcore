@@ -865,11 +865,11 @@ bool COperationDialog::createDefaultProfile()
 	return true;
 }
 
-bool COperationDialog::createClientDesktopShortcut(int profileIndex)
+bool COperationDialog::createClientDesktopShortcut(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CProfile &profile = config->getProfile(profileIndex);
+	const CProfile &profile = config->getProfile(profileId);
 	const CServer &server = config->getServer(profile.server);
 
 	m_currentOperation = tr("Create desktop shortcut for profile %1").arg(profile.id);
@@ -877,8 +877,16 @@ bool COperationDialog::createClientDesktopShortcut(int profileIndex)
 #ifdef Q_OS_WIN32
 	if (profile.desktopShortcut)
 	{
-		QString shortcut = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk";
-		CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
+		QString executable = profile.getClientFullPath();
+		QString shortcut = profile.getClientDesktopLinkFullPath();
+		QString workingDir = server.getDirectory();
+
+		QString arguments = QString("--profile %1").arg(profile.id);
+
+		// append custom arguments
+		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
+
+		createLink(executable, shortcut, arguments, workingDir, profile.comments);
 	}
 #endif
 
@@ -887,11 +895,11 @@ bool COperationDialog::createClientDesktopShortcut(int profileIndex)
 	return true;
 }
 
-bool COperationDialog::createClientMenuShortcut(int profileIndex)
+bool COperationDialog::createClientMenuShortcut(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CProfile &profile = config->getProfile(profileIndex);
+	const CProfile &profile = config->getProfile(profileId);
 	const CServer &server = config->getServer(profile.server);
 
 	m_currentOperation = tr("Create menu shortcut for profile %1").arg(profile.id);
@@ -899,15 +907,16 @@ bool COperationDialog::createClientMenuShortcut(int profileIndex)
 #ifdef Q_OS_WIN32
 	if (profile.menuShortcut)
 	{
-		QString path = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom";
+		QString executable = profile.getClientFullPath();
+		QString shortcut = profile.getClientMenuLinkFullPath();
+		QString workingDir = server.getDirectory();
 
-		QDir dir;
+		QString arguments = QString("--profile %1").arg(profile.id);
 
-		if (dir.mkpath(path))
-		{
-			QString shortcut = path + "/Ryzom.lnk";
-			CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
-		}
+		// append custom arguments
+		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
+
+		createLink(executable, shortcut, arguments, workingDir, profile.comments);
 	}
 #endif
 

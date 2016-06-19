@@ -102,8 +102,10 @@ protected:
 	void copyInstaller();
 	void uninstallOldClient();
 	bool createDefaultProfile();
-	bool createClientDesktopShortcut(int profileIndex);
-	bool createClientMenuShortcut(int profileIndex);
+
+	bool createClientDesktopShortcut(const QString &profileId);
+	bool createClientMenuShortcut(const QString &profileId);
+
 	bool createAddRemoveEntry();
 	bool deleteAddRemoveEntry();
 
