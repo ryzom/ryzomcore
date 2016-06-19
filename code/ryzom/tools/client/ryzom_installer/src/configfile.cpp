@@ -667,11 +667,21 @@ bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 
 	if (!dir.cd("data") && dir.exists()) return false;
 
+	QStringList filter;
+	filter << "*.string_cache";
+
+	if (dir.exists("packed_sheets.bnp"))
+	{
+		filter << "*.packed_sheets";
+		filter << "*.packed";
+		filter << "*.pem";
+	}
+
 	// temporary files
-	if (!dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files).isEmpty()) return true;
+	if (!dir.entryList(filter, QDir::Files).isEmpty()) return true;
 
 	// fonts directory is not needed anymore
-	if (dir.cd("fonts") && dir.exists()) return true;
+	if (dir.exists("fonts.bnp") && dir.cd("fonts") && dir.exists()) return true;
 
 	return false;
 }
