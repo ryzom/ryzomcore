@@ -111,7 +111,7 @@ wchar_t* qToWide(const QString &str)
 //                Shell link, stored in the Comment field of the link
 //                properties.
 
-bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
+bool createLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
 {
 	IShellLinkW* psl;
 
@@ -163,7 +163,7 @@ bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &
 //                Shell link, stored in the Comment field of the link
 //                properties.
 
-bool ResolveLink(const QWidget &window, const QString &linkFile, QString &path)
+bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 {
 	IShellLinkW* psl;
 	WIN32_FIND_DATAW wfd;
@@ -232,14 +232,65 @@ bool ResolveLink(const QWidget &window, const QString &linkFile, QString &path)
 
 #else
 
-bool CreateLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
+bool createLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
 {
+	// TODO: create .desktop file under Linux
+
 	return false;
 }
 
-bool ResolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)
+bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)
 {
 	return false;
 }
 
 #endif
+
+bool copyInstallerExecutable(const QString &destination)
+{
+	QString path = QApplication::applicationDirPath();
+
+	QStringList files;
+#ifdef Q_OS_WIN
+
+	// VC++ runtimes
+#if _MSC_VER == 1900
+	files << "msvcp140.dll";
+	files << "msvcr140.dll";
+#else _MSC_VER == 1600
+	files << "msvcp100.dll";
+	files << "msvcr100.dll";
+#endif
+
+#else
+#endif
+
+	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+
+	foreach(const QString &file, files)
+	{
+		// convert to absolute path
+		QString srcPath = path + "/" + file;
+		QString dstPath = destination + "/" + file;
+
+		if (QFile::exists(srcPath))
+		{
+			if (QFile::exists(dstPath))
+			{
+				if (!QFile::remove(dstPath))
+				{
+					qDebug() << "Unable to delete" << dstPath;
+				}
+			}
+
+			if (!QFile::copy(srcPath, dstPath))
+			{
+				qDebug() << "Unable to copy" << srcPath << "to" << dstPath;
+
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
