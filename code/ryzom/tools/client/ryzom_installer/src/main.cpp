@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 
 	if (parser.isSet(uninstallOption))
 	{
-		SUninstallComponents components;
+		SComponents components;
 
 		// add all servers by default
 		for (int i = 0; i < config.getServersCount(); ++i)

@@ -35,8 +35,8 @@ public:
 	CUninstallDialog(QWidget *parent = NULL);
 	virtual ~CUninstallDialog();
 
-	void setSelectedComponents(const SUninstallComponents &components);
-	SUninstallComponents getSelectedCompenents() const;
+	void setSelectedComponents(const SComponents &components);
+	SComponents getSelectedCompenents() const;
 
 signals:
 	void updateSize(int row, const QString &text);

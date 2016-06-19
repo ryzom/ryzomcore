@@ -193,7 +193,7 @@ void CMainWindow::onUninstall()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	SUninstallComponents components;
+	SComponents components;
 
 	// add all servers by default
 	for (int i = 0; i < config->getServersCount(); ++i)
