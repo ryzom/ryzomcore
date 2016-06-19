@@ -746,8 +746,6 @@ void COperationDialog::copyInstaller()
 		createLink(executable, shortcut, "", "", desc);
 	}
 
-	// TODO: create shortcuts for installer
-
 	emit done();
 }
 
