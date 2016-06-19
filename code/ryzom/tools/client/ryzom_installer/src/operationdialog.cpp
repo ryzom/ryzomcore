@@ -724,6 +724,26 @@ void COperationDialog::copyInstaller()
 				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
 			}
 		}
+
+		// create menu directory if defined
+		QString path = config->getMenuDirectory();
+
+		if (!path.isEmpty())
+		{
+			QDir dir;
+
+			if (!dir.mkpath(path))
+			{
+				qDebug() << "Unable to create directory" << path;
+			}
+		}
+
+		// create installer link in menu
+		QString executable = newInstallerFullPath;
+		QString shortcut = config->getInstallerMenuLinkFullPath();
+		QString desc = "Ryzom Installer";
+
+		createLink(executable, shortcut, "", "", desc);
 	}
 
 	// TODO: create shortcuts for installer
