@@ -22,6 +22,7 @@
 #include "config.h"
 #include "profilesmodel.h"
 #include "utils.h"
+#include "nel/misc/path.h"
 
 #include "filescopier.h"
 #include "filesextractor.h"
@@ -82,13 +83,19 @@ void COperationDialog::setOperation(OperationType operation)
 	m_operation = operation;
 }
 
-void COperationDialog::setUninstallComponents(const SUninstallComponents &components)
+void COperationDialog::setUninstallComponents(const SComponents &components)
 {
-	m_components = components;
+	m_removeComponents = components;
 }
 
 void COperationDialog::processNextStep()
 {
+	if (operationShouldStop())
+	{
+		reject();
+		return;
+	}
+
 	switch (m_operation)
 	{
 		case OperationMigrate:
@@ -191,21 +198,28 @@ void COperationDialog::processInstallNextStep()
 	}
 }
 
-void COperationDialog::processUpdateProfilesNextStep()
+void COperationDialog::updateAddRemoveComponents()
 {
-	// TODO: check all servers are downloaded
-	// TODO: delete profiles directories that are not used anymore
-	// TODO: create shortcuts
-
 	QStringList serversToUpdate;
+
 	QStringList profilesToDelete;
+	QStringList profilesToAdd;
 
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// append all old profiles
+	foreach(const CProfile &profile, config->getProfiles())
+	{
+		// append all new profiles
+		profilesToAdd << profile.id;
+	}
+
 	foreach(const CProfile &profile, config->getBackupProfiles())
 	{
-		if (QFile::exists(profile.getDirectory())) profilesToDelete << profile.id;
+		// append all old profiles
+		profilesToDelete << profile.id;
+
+		// remove profiles that didn't exist
+		profilesToAdd.removeAll(profile.id);
 	}
 
 	const CServer &defaultServer = config->getServer();
@@ -226,84 +240,118 @@ void COperationDialog::processUpdateProfilesNextStep()
 		profilesToDelete.removeAll(profile.id);
 	}
 
-	if (!profilesToDelete.isEmpty())
-	{
-		m_components.profiles << profilesToDelete;
+	// update components to remove
+	m_removeComponents.profiles << profilesToDelete;
+	m_removeComponents.installer = false;
 
+	// update components to add
+	m_addComponents.profiles << profilesToAdd;
+	m_addComponents.servers << serversToUpdate;
+	m_addComponents.installer = false;
+}
+
+void COperationDialog::processUpdateProfilesNextStep()
+{
+	// for "update profiles" operations, we set installer to false when components are updated,
+	// since we're not using this variable
+	if (m_addComponents.installer && m_removeComponents.installer)
+	{
+		updateAddRemoveComponents();
+	}
+	// TODO: check all servers are downloaded
+	// TODO: delete profiles directories that are not used anymore
+	// TODO: create shortcuts
+
+
+	if (!m_removeComponents.profiles.isEmpty())
+	{
 		// delete profiles in another thread
 		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
-
 		return;
 	}
 
-	// servers files to download/update
-	foreach(const QString &serverId, serversToUpdate)
+	if (!m_addComponents.profiles.isEmpty())
 	{
-		const CServer &server = config->getServer(serverId);
+		// add profiles in another thread
+		QtConcurrent::run(this, &COperationDialog::addComponentsProfiles);
+		return;
+	}
 
-		// data
-		if (!config->areRyzomDataInstalledIn(server.getDirectory()))
+	if (!m_addComponents.servers.isEmpty())
+	{
+		CConfigFile *config = CConfigFile::getInstance();
+		const CServer &defaultServer = config->getServer();
+
+		// servers files to download/update
+		foreach(const QString &serverId, m_addComponents.servers)
 		{
-			QString dataFile = config->getInstallationDirectory() + "/" + server.dataDownloadFilename;
+			const CServer &server = config->getServer(serverId);
 
-			// archive already downloaded
-			if (QFile::exists(dataFile))
+			// data
+			if (!config->areRyzomDataInstalledIn(server.getDirectory()))
 			{
-				// make server current
-				m_currentServerId = server.id;
+				QString dataFile = config->getInstallationDirectory() + "/" + server.dataDownloadFilename;
 
-				// uncompress it
-				QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
-				return;
-			}
+				// archive already downloaded
+				if (QFile::exists(dataFile))
+				{
+					// make server current
+					m_currentServerId = server.id;
 
-			// data download URLs are different, can't copy data from default server
-			if (server.dataDownloadUrl != defaultServer.dataDownloadUrl)
-			{
-				// download it
-				// TODO
+					// uncompress it
+					QtConcurrent::run(this, &COperationDialog::extractDownloadedData);
+					return;
+				}
 
-				return;
-			}
-
-			// same data used
-
-			// copy them
-			// TODO
-			return;
-		}
-
-		// client
-		if (!config->isRyzomClientInstalledIn(server.getDirectory()))
-		{
-			// client download URLs are different, can't copy client from default server
-			if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
-			{
-				if (QFile::exists(""))
+				// data download URLs are different, can't copy data from default server
+				if (server.dataDownloadUrl != defaultServer.dataDownloadUrl)
+				{
+					// download it
 					downloadData();
+					return;
+				}
+
+				// same data used
+
+				// copy them
+				// TODO
 				return;
 			}
-		}
-		else
-		{
-			QString clientFile = config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename);
+
+			// client
+			if (!config->isRyzomClientInstalledIn(server.getDirectory()))
+			{
+				// client download URLs are different, can't copy client from default server
+				if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
+				{
+					if (QFile::exists(""))
+						downloadData();
+					return;
+				}
+			}
+			else
+			{
+				QString clientFile = config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename);
+			}
 		}
 	}
+
+	updateAddRemoveEntry();
 }
 
 void COperationDialog::processUninstallNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	if (!m_components.servers.isEmpty())
+	if (!m_removeComponents.servers.isEmpty())
 	{
 		QtConcurrent::run(this, &COperationDialog::deleteComponentsServers);
 	}
-	else if (!m_components.profiles.isEmpty())
+	else if (!m_removeComponents.profiles.isEmpty())
 	{
 		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
 	}
-	else if (m_components.installer)
+	else if (m_removeComponents.installer)
 	{
 		QtConcurrent::run(this, &COperationDialog::deleteComponentsInstaller);
 	}
@@ -431,7 +479,7 @@ void COperationDialog::onProgressFail(const QString &error)
 
 void COperationDialog::onDone()
 {
-	if (!operationShouldStop()) processNextStep();
+	processNextStep();
 }
 
 void COperationDialog::downloadData()
@@ -676,9 +724,27 @@ void COperationDialog::copyInstaller()
 				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
 			}
 		}
-	}
 
-	// TODO: create shortcuts for installer
+		// create menu directory if defined
+		QString path = config->getMenuDirectory();
+
+		if (!path.isEmpty())
+		{
+			QDir dir;
+
+			if (!dir.mkpath(path))
+			{
+				qDebug() << "Unable to create directory" << path;
+			}
+		}
+
+		// create installer link in menu
+		QString executable = newInstallerFullPath;
+		QString shortcut = config->getInstallerMenuLinkFullPath();
+		QString desc = "Ryzom Installer";
+
+		createLink(executable, shortcut, "", "", desc);
+	}
 
 	emit done();
 }
@@ -797,11 +863,11 @@ bool COperationDialog::createDefaultProfile()
 	return true;
 }
 
-bool COperationDialog::createClientDesktopShortcut(int profileIndex)
+bool COperationDialog::createClientDesktopShortcut(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CProfile &profile = config->getProfile(profileIndex);
+	const CProfile &profile = config->getProfile(profileId);
 	const CServer &server = config->getServer(profile.server);
 
 	m_currentOperation = tr("Create desktop shortcut for profile %1").arg(profile.id);
@@ -809,8 +875,16 @@ bool COperationDialog::createClientDesktopShortcut(int profileIndex)
 #ifdef Q_OS_WIN32
 	if (profile.desktopShortcut)
 	{
-		QString shortcut = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk";
-		CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
+		QString executable = profile.getClientFullPath();
+		QString shortcut = profile.getClientDesktopLinkFullPath();
+		QString workingDir = server.getDirectory();
+
+		QString arguments = QString("--profile %1").arg(profile.id);
+
+		// append custom arguments
+		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
+
+		createLink(executable, shortcut, arguments, workingDir, profile.comments);
 	}
 #endif
 
@@ -819,11 +893,11 @@ bool COperationDialog::createClientDesktopShortcut(int profileIndex)
 	return true;
 }
 
-bool COperationDialog::createClientMenuShortcut(int profileIndex)
+bool COperationDialog::createClientMenuShortcut(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CProfile &profile = config->getProfile(profileIndex);
+	const CProfile &profile = config->getProfile(profileId);
 	const CServer &server = config->getServer(profile.server);
 
 	m_currentOperation = tr("Create menu shortcut for profile %1").arg(profile.id);
@@ -831,15 +905,16 @@ bool COperationDialog::createClientMenuShortcut(int profileIndex)
 #ifdef Q_OS_WIN32
 	if (profile.menuShortcut)
 	{
-		QString path = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom";
+		QString executable = profile.getClientFullPath();
+		QString shortcut = profile.getClientMenuLinkFullPath();
+		QString workingDir = server.getDirectory();
 
-		QDir dir;
+		QString arguments = QString("--profile %1").arg(profile.id);
 
-		if (dir.mkpath(path))
-		{
-			QString shortcut = path + "/Ryzom.lnk";
-			CreateLink(config->getProfileClientFullPath(), shortcut, QString("--profile %1 %2").arg(profile.id).arg(profile.arguments), server.getDirectory(), "Default Ryzom client");
-		}
+		// append custom arguments
+		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
+
+		createLink(executable, shortcut, arguments, workingDir, profile.comments);
 	}
 #endif
 
@@ -872,9 +947,9 @@ bool COperationDialog::createAddRemoveEntry()
 
 			settings.setValue("Comments", "");
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
-			settings.setValue("DisplayName", "Ryzom");
+			settings.setValue("DisplayName", QApplication::applicationName());
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", 1500000); // TODO: compute real size
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
@@ -898,6 +973,37 @@ bool COperationDialog::createAddRemoveEntry()
 	return true;
 }
 
+bool COperationDialog::updateAddRemoveEntry()
+{
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CServer &server = config->getServer();
+
+	QString oldInstallerFilename = server.clientFilenameOld;
+	QString newInstallerFilename = server.installerFilename;
+
+	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	{
+		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
+		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
+
+		if (QFile::exists(newInstallerFullPath))
+		{
+#ifdef Q_OS_WIN
+			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
+			QStringList versionTokens = QApplication::applicationVersion().split('.');
+
+			settings.setValue("DisplayVersion", QApplication::applicationVersion());
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("MajorVersion", versionTokens[0].toInt());
+			settings.setValue("MinorVersion", versionTokens[1].toInt());
+#endif
+		}
+	}
+
+	return true;
+}
+
 bool COperationDialog::deleteAddRemoveEntry()
 {
 #ifdef Q_OS_WIN
@@ -916,14 +1022,14 @@ void COperationDialog::deleteComponentsServers()
 	m_currentOperationProgressFormat = tr("Deleting %1...");
 
 	emit prepare();
-	emit init(0, m_components.servers.size());
+	emit init(0, m_removeComponents.servers.size());
 	emit start();
 
 	CConfigFile *config = CConfigFile::getInstance();
 
 	int i = 0;
 
-	foreach(const QString &serverId, m_components.servers)
+	foreach(const QString &serverId, m_removeComponents.servers)
 	{
 		if (operationShouldStop())
 		{
@@ -949,8 +1055,29 @@ void COperationDialog::deleteComponentsServers()
 		}
 	}
 
-	emit success(m_components.servers.size());
+	emit success(m_removeComponents.servers.size());
+
+	// clear list of all servers to uninstall
+	m_removeComponents.servers.clear();
+
 	emit done();
+}
+
+void COperationDialog::addComponentsProfiles()
+{
+	m_currentOperation = tr("Add profiles");
+	m_currentOperationProgressFormat = tr("Adding profile %1...");
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	foreach(const QString &profileId, m_addComponents.profiles)
+	{
+		CProfile &profile = config->getProfile(profileId);
+
+		if (profile.desktopShortcut) createClientDesktopShortcut(profile.id);
+
+		if (profile.menuShortcut) createClientMenuShortcut(profile.id);
+	}
 }
 
 void COperationDialog::deleteComponentsProfiles()
@@ -959,13 +1086,13 @@ void COperationDialog::deleteComponentsProfiles()
 	m_currentOperationProgressFormat = tr("Deleting profile %1...");
 
 	emit prepare();
-	emit init(0, m_components.servers.size());
+	emit init(0, m_removeComponents.servers.size());
 
 	CConfigFile *config = CConfigFile::getInstance();
 
 	int i = 0;
 
-	foreach(const QString &profileId, m_components.profiles)
+	foreach(const QString &profileId, m_removeComponents.profiles)
 	{
 		if (operationShouldStop())
 		{
@@ -990,14 +1117,17 @@ void COperationDialog::deleteComponentsProfiles()
 			}
 		}
 
+		// TODO: delete links
+
 		// delete profile
 		config->removeProfile(profileId);
 	}
 
-	// clear list of all profiles to uninstall
-	m_components.profiles.clear();
+	emit success(m_removeComponents.profiles.size());
 
-	emit success(m_components.servers.size());
+	// clear list of all profiles to uninstall
+	m_removeComponents.profiles.clear();
+
 	emit done();
 }
 
@@ -1012,7 +1142,19 @@ void COperationDialog::deleteComponentsInstaller()
 
 	deleteAddRemoveEntry();
 
-	emit onProgressSuccess(m_components.servers.size());
+	// delete menu
+	QString path = config->getMenuDirectory();
+
+	if (!path.isEmpty())
+	{
+		QDir dir(path);
+
+		dir.removeRecursively();
+	}
+
+	// TODO:
+
+	emit onProgressSuccess(1);
 	emit done();
 }
 

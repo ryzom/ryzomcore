@@ -17,21 +17,6 @@
 #include "stdpch.h"
 #include "filescleaner.h"
 #include "operation.h"
-#include "utils.h"
-
-#include "nel/misc/big_file.h"
-#include "nel/misc/callback.h"
-#include "nel/misc/file.h"
-#include "nel/misc/path.h"
-
-#include "7z.h"
-#include "7zAlloc.h"
-#include "7zBuf.h"
-#include "7zCrc.h"
-
-#include "qzipreader.h"
-
-#include <sys/stat.h>
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -63,8 +48,18 @@ bool CFilesCleaner::exec()
 
 	if (!dir.cd("data") && dir.exists()) return false;
 
+	QStringList filter;
+	filter << "*.string_cache";
+
+	if (dir.exists("packed_sheets.bnp"))
+	{
+		filter << "*.packed_sheets";
+		filter << "*.packed";
+		filter << "*.pem";
+	}
+
 	// temporary files
-	QStringList files = dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files);
+	QStringList files = dir.entryList(filter, QDir::Files);
 
 	if (m_listener)
 	{
@@ -83,8 +78,8 @@ bool CFilesCleaner::exec()
 		++filesCount;
 	}
 
-	// fonts directory is not needed anymore
-	if (dir.cd("fonts") && dir.exists())
+	// fonts directory is not needed anymore if fonts.bnp exists
+	if (dir.exists("fonts.bnp") && dir.cd("fonts") && dir.exists())
 	{
 		dir.removeRecursively();
 	}

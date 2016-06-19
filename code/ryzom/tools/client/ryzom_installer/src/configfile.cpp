@@ -32,9 +32,50 @@ QString CServer::getDirectory() const
 	return CConfigFile::getInstance()->getInstallationDirectory() + "/" + id;
 }
 
+QString CServer::getClientFullPath() const
+{
+	if (clientFilename.isEmpty()) return "";
+
+	return getDirectory() + "/" + clientFilename;
+}
+
+QString CServer::getConfigurationFullPath() const
+{
+	if (configurationFilename.isEmpty()) return "";
+
+	return getDirectory() + "/" + configurationFilename;
+}
+
 QString CProfile::getDirectory() const
 {
 	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
+}
+
+QString CProfile::getClientFullPath() const
+{
+	if (!executable.isEmpty()) return executable;
+
+	const CServer &s = CConfigFile::getInstance()->getServer(server);
+
+	return s.getClientFullPath();
+}
+
+QString CProfile::getClientDesktopLinkFullPath() const
+{
+#ifdef Q_OS_WIN32
+	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
+#else
+	return "";
+#endif
+}
+
+QString CProfile::getClientMenuLinkFullPath() const
+{
+#ifdef Q_OS_WIN32
+	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
+#else
+	return "";
+#endif
 }
 
 CConfigFile *CConfigFile::s_instance = NULL;
@@ -323,6 +364,16 @@ void CConfigFile::removeProfile(const QString &id)
 	}
 }
 
+QString CConfigFile::getDesktopDirectory() const
+{
+	return QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+}
+
+QString CConfigFile::getMenuDirectory() const
+{
+	return QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/" + QApplication::applicationName();
+}
+
 bool CConfigFile::has64bitsOS()
 {
 	return QSysInfo::currentCpuArchitecture() == "x86_64";
@@ -380,9 +431,28 @@ QString CConfigFile::getProfileDirectory() const
 
 QString CConfigFile::getSrcProfileDirectory() const
 {
-	if (QFile::exists(getSrcServerDirectory() + "/client.cfg")) return getSrcServerDirectory();
+	QString filename = "client.cfg";
 
-	return qFromUtf8(NLMISC::CPath::getApplicationDirectory("Ryzom"));
+	QStringList paths;
+
+	// same path as client
+	paths << getSrcServerDirectory();
+
+	// profile path root
+	paths << getProfileDirectory();
+
+#if !defined(Q_OS_WIN32) && !defined(Q_OS_MAC)
+	// specific path under Linux
+	paths << QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.ryzom";
+#endif
+
+	// search config file in these locations
+	foreach(const QString &path, paths)
+	{
+		if (QFile::exists(path + "/" + filename)) return path;
+	}
+
+	return "";
 }
 
 bool CConfigFile::use64BitsClient() const
@@ -597,21 +667,33 @@ bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 
 	if (!dir.cd("data") && dir.exists()) return false;
 
+	QStringList filter;
+	filter << "*.string_cache";
+
+	if (dir.exists("packed_sheets.bnp"))
+	{
+		filter << "*.packed_sheets";
+		filter << "*.packed";
+		filter << "*.pem";
+	}
+
 	// temporary files
-	if (!dir.entryList(QStringList() << "*.string_cache" << "*.packed_sheets" << "*.packed" << "*.pem", QDir::Files).isEmpty()) return true;
+	if (!dir.entryList(filter, QDir::Files).isEmpty()) return true;
 
 	// fonts directory is not needed anymore
-	if (dir.cd("fonts") && dir.exists()) return true;
+	if (dir.exists("fonts.bnp") && dir.cd("fonts") && dir.exists()) return true;
 
 	return false;
 }
 
 bool CConfigFile::shouldCreateDesktopShortcut() const
 {
-#ifdef Q_OS_WIN32
 	const CProfile &profile = getProfile();
 
-	return profile.desktopShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation) + "/Ryzom.lnk"));
+	if (!profile.desktopShortcut) return false;
+
+#ifdef Q_OS_WIN32
+	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientDesktopLinkFullPath()));
 #else
 	return false;
 #endif
@@ -619,42 +701,29 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 bool CConfigFile::shouldCreateMenuShortcut() const
 {
-#ifdef Q_OS_WIN32
 	const CProfile &profile = getProfile();
 
-	return profile.menuShortcut && !NLMISC::CFile::isExists(qToUtf8(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/Ryzom/Ryzom.lnk"));
+	if (!profile.menuShortcut) return false;
+
+#ifdef Q_OS_WIN32
+	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientMenuLinkFullPath()));
 #else
 	return false;
 #endif
 }
 
-QString CConfigFile::getProfileClientFullPath(int profileIndex) const
+QString CConfigFile::getInstallerFullPath() const
 {
-	const CProfile &profile = getProfile(profileIndex);
-
-	QString path = profile.executable;
-
-	if (!path.isEmpty()) return path;
-
-	return getServerClientFullPath(profile.server);
+	return QApplication::applicationFilePath();
 }
 
-QString CConfigFile::getServerClientFullPath(const QString &serverId) const
+QString CConfigFile::getInstallerMenuLinkFullPath() const
 {
-	const CServer &server = getServer(serverId);
-
-	if (server.clientFilename.isEmpty()) return "";
-
-	return server.getDirectory() + "/" + server.clientFilename;
-}
-
-QString CConfigFile::getServerConfigurationFullPath(const QString &serverId) const
-{
-	const CServer &server = getServer(serverId);
-
-	if (server.configurationFilename.isEmpty()) return "";
-
-	return server.getDirectory() + "/" + server.configurationFilename;
+#ifdef Q_OS_WIN32
+	return QString("%1/%2/%2 Installer.lnk").arg(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)).arg(QApplication::applicationName());
+#else
+	return "";
+#endif
 }
 
 QString CConfigFile::getSrcServerClientBNPFullPath() const

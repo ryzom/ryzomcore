@@ -33,9 +33,9 @@ public:
 	virtual bool operationShouldStop() =0;
 };
 
-struct SUninstallComponents
+struct SComponents
 {
-	SUninstallComponents()
+	SComponents()
 	{
 		installer = true;
 	}

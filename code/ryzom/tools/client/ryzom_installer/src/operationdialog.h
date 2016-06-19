@@ -39,7 +39,7 @@ public:
 	virtual ~COperationDialog();
 
 	void setOperation(OperationType operation);
-	void setUninstallComponents(const SUninstallComponents &components);
+	void setUninstallComponents(const SComponents &components);
 
 public slots:
 	void onAbortClicked();
@@ -102,13 +102,24 @@ protected:
 	void copyInstaller();
 	void uninstallOldClient();
 	bool createDefaultProfile();
-	bool createClientDesktopShortcut(int profileIndex);
-	bool createClientMenuShortcut(int profileIndex);
+
+	bool createClientDesktopShortcut(const QString &profileId);
+	bool createClientMenuShortcut(const QString &profileId);
+
 	bool createAddRemoveEntry();
+	bool updateAddRemoveEntry();
 	bool deleteAddRemoveEntry();
+
+	void addComponentsServers();
 	void deleteComponentsServers();
+
+	void addComponentsProfiles();
 	void deleteComponentsProfiles();
+
+	void addComponentsInstaller();
 	void deleteComponentsInstaller();
+
+	void updateAddRemoveComponents();
 
 	// from CFilesCopier
 	virtual void operationPrepare();
@@ -133,7 +144,8 @@ protected:
 	bool m_aborting;
 
 	OperationType m_operation;
-	SUninstallComponents m_components;
+	SComponents m_addComponents;
+	SComponents m_removeComponents;
 	QString m_currentServerId;
 };
 

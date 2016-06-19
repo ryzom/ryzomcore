@@ -95,7 +95,7 @@ void CMainWindow::onPlayClicked()
 	const CServer &server = config->getServer(profile.server);
 
 	// get full path of client executable
-	QString executable = config->getProfileClientFullPath(profileIndex);
+	QString executable = profile.getClientFullPath();
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
@@ -121,8 +121,9 @@ void CMainWindow::onConfigureClicked()
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
 
-	QString executable = config->getServerConfigurationFullPath(profile.server);
+	QString executable = server.getConfigurationFullPath();
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
@@ -193,7 +194,7 @@ void CMainWindow::onUninstall()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	SUninstallComponents components;
+	SComponents components;
 
 	// add all servers by default
 	for (int i = 0; i < config->getServersCount(); ++i)

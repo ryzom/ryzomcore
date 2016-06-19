@@ -114,7 +114,7 @@ void CUninstallDialog::showEvent(QShowEvent *event)
 	QtConcurrent::run(this, &CUninstallDialog::updateSizes);
 }
 
-void CUninstallDialog::setSelectedComponents(const SUninstallComponents &components)
+void CUninstallDialog::setSelectedComponents(const SComponents &components)
 {
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return;
@@ -150,9 +150,9 @@ void CUninstallDialog::setSelectedComponents(const SUninstallComponents &compone
 	if (item) item->setCheckState(components.installer ? Qt::Checked : Qt::Unchecked);
 }
 
-SUninstallComponents CUninstallDialog::getSelectedCompenents() const
+SComponents CUninstallDialog::getSelectedCompenents() const
 {
-	SUninstallComponents res;
+	SComponents res;
 
 	QStandardItemModel *model = qobject_cast<QStandardItemModel*>(componentsTreeView->model());
 	if (model == NULL) return res;
