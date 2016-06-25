@@ -813,6 +813,30 @@ namespace NLGUI
 		return src;
 	}
 
+	static float hueToRgb(float m1, float m2, float h)
+	{
+		if (h < 0) h += 1.0f;
+		if (h > 1) h -= 1.0f;
+		if (h*6 < 1.0f) return m1 + (m2 - m1)*h*6;
+		if (h*2 < 1.0f) return m2;
+		if (h*3 < 2.0f) return m1 + (m2 - m1) * (2.0f/3.0f - h)*6;
+		return m1;
+	}
+
+	static void hslToRgb(float h, float s, float l, CRGBA &result)
+	{
+		float m1, m2;
+		if (l <= 0.5f)
+			m2 = l * (s + 1.0f);
+		else
+			m2 = l + s - l * s;
+		m1 = l*2 - m2;
+
+		result.R = 255 * hueToRgb(m1, m2, h + 1.0f/3.0f);
+		result.G = 255 * hueToRgb(m1, m2, h);
+		result.B = 255 * hueToRgb(m1, m2, h - 1.0f/3.0f);
+	}
+
 	class CNameToCol
 	{
 	public:
@@ -1061,6 +1085,51 @@ namespace NLGUI
 				}
 				else
 					result.A = 255;
+
+				dest = result;
+				return true;
+			}
+
+			return false;
+		}
+
+		if (strnicmp(src, "hsl(", 4) == 0 || strnicmp(src, "hsla(", 5) == 0)
+		{
+			src += 4;
+			if (*src == '(') src++;
+
+			vector<string> parts;
+			NLMISC::splitString(src, ",", parts);
+			if (parts.size() >= 3)
+			{
+				sint tmpv;
+				float h, s, l;
+				// hue
+				if (!fromString(parts[0], tmpv)) return false;
+				tmpv = ((tmpv % 360) + 360) % 360;
+				h = (float) tmpv / 360.0f;
+
+				// saturation
+				if (!getPercentage(tmpv, s, parts[1].c_str())) return false;
+				clamp(s, 0.0f, 1.0f);
+
+				// lightness
+				if (!getPercentage(tmpv, l, parts[2].c_str())) return false;
+				clamp(l, 0.0f, 1.0f);
+
+				CRGBA result;
+				hslToRgb(h, s, l, result);
+
+				// A
+				if (parts.size() == 4)
+				{
+					float tmpf;
+					if (!fromString(parts[3], tmpf)) return false;
+					if (parts[3].find_first_of("%") != std::string::npos)
+						tmpf /= 100;
+					clamp(tmpf, 0.0f, 1.0f);
+					result.A = 255 * tmpf;
+				}
 
 				dest = result;
 				return true;
