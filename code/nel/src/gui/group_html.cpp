@@ -975,6 +975,37 @@ namespace NLGUI
 		if (*src == '#')
 		{
 			++src;
+			if (strlen(src) == 3 || strlen(src) == 4)
+			{
+				bool hasAlpha = (strlen(src) == 4);
+				// check RGB for valid hex
+				if (isHexa(src[0]) && isHexa(src[1]) && isHexa(src[2]))
+				{
+					// check optional A for valid hex
+					if (hasAlpha && !isHexa(src[3])) return false;
+
+					dest.R = convertHexa(src[0]);
+					dest.G = convertHexa(src[1]);
+					dest.B = convertHexa(src[2]);
+
+					dest.R = dest.R << 4 | dest.R;
+					dest.G = dest.G << 4 | dest.G;
+					dest.B = dest.B << 4 | dest.B;
+
+					if (hasAlpha)
+					{
+						dest.A = convertHexa(src[3]);
+						dest.A = dest.A << 4 | dest.A;
+					}
+					else
+						dest.A = 255;
+
+					return true;
+				}
+
+				return false;
+			}
+
 			CRGBA result;
 			src = scanColorComponent(src, result.R); if (!src) return false;
 			src = scanColorComponent(src, result.G); if (!src) return false;
