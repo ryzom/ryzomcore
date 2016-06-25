@@ -1019,7 +1019,56 @@ namespace NLGUI
 			dest = result;
 			return true;
 		}
-		else
+
+		if (strnicmp(src, "rgb(", 4) == 0 || strnicmp(src, "rgba(", 5) == 0)
+		{
+			src += 4;
+			if (*src == '(') src++;
+
+			vector<string> parts;
+			NLMISC::splitString(src, ",", parts);
+			if (parts.size() >= 3)
+			{
+				CRGBA result;
+				sint tmpv;
+				float tmpf;
+
+				// R
+				if (getPercentage(tmpv, tmpf, parts[0].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.R = tmpv;
+
+				// G
+				if (getPercentage(tmpv, tmpf, parts[1].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.G = tmpv;
+
+				// B
+				if (getPercentage(tmpv, tmpf, parts[2].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.B = tmpv;
+
+				// A
+				if (parts.size() == 4)
+				{
+					if (!fromString(parts[3], tmpf)) return false;
+					if (parts[3].find_first_of("%") != std::string::npos)
+						tmpf /= 100;
+
+					tmpv = 255 * tmpf;
+					clamp(tmpv, 0, 255);
+					result.A = tmpv;
+				}
+				else
+					result.A = 255;
+
+				dest = result;
+				return true;
+			}
+
+			return false;
+		}
+
 		{
 			// slow but should suffice for now
 			for(uint k = 0; k < sizeofarray(htmlColorNameToRGBA); ++k)
