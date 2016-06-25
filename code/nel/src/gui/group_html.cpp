@@ -762,7 +762,7 @@ namespace NLGUI
 			cellParams = _CellParams.back(); \
 		} \
 		if (present[prefix##_BGCOLOR] && value[prefix##_BGCOLOR]) \
-			cellParams.BgColor = getColor (value[prefix##_BGCOLOR]); \
+			scanHTMLColor(value[prefix##_BGCOLOR], cellParams.BgColor); \
 		if (present[prefix##_L_MARGIN] && value[prefix##_L_MARGIN]) \
 			fromString(value[prefix##_L_MARGIN], cellParams.LeftMargin); \
 		if (present[prefix##_NOWRAP]) \
@@ -811,6 +811,30 @@ namespace NLGUI
 		value += convertHexa(*src++);
 		intensity = value;
 		return src;
+	}
+
+	static float hueToRgb(float m1, float m2, float h)
+	{
+		if (h < 0) h += 1.0f;
+		if (h > 1) h -= 1.0f;
+		if (h*6 < 1.0f) return m1 + (m2 - m1)*h*6;
+		if (h*2 < 1.0f) return m2;
+		if (h*3 < 2.0f) return m1 + (m2 - m1) * (2.0f/3.0f - h)*6;
+		return m1;
+	}
+
+	static void hslToRgb(float h, float s, float l, CRGBA &result)
+	{
+		float m1, m2;
+		if (l <= 0.5f)
+			m2 = l * (s + 1.0f);
+		else
+			m2 = l + s - l * s;
+		m1 = l*2 - m2;
+
+		result.R = 255 * hueToRgb(m1, m2, h + 1.0f/3.0f);
+		result.G = 255 * hueToRgb(m1, m2, h);
+		result.B = 255 * hueToRgb(m1, m2, h - 1.0f/3.0f);
 	}
 
 	class CNameToCol
@@ -975,6 +999,37 @@ namespace NLGUI
 		if (*src == '#')
 		{
 			++src;
+			if (strlen(src) == 3 || strlen(src) == 4)
+			{
+				bool hasAlpha = (strlen(src) == 4);
+				// check RGB for valid hex
+				if (isHexa(src[0]) && isHexa(src[1]) && isHexa(src[2]))
+				{
+					// check optional A for valid hex
+					if (hasAlpha && !isHexa(src[3])) return false;
+
+					dest.R = convertHexa(src[0]);
+					dest.G = convertHexa(src[1]);
+					dest.B = convertHexa(src[2]);
+
+					dest.R = dest.R << 4 | dest.R;
+					dest.G = dest.G << 4 | dest.G;
+					dest.B = dest.B << 4 | dest.B;
+
+					if (hasAlpha)
+					{
+						dest.A = convertHexa(src[3]);
+						dest.A = dest.A << 4 | dest.A;
+					}
+					else
+						dest.A = 255;
+
+					return true;
+				}
+
+				return false;
+			}
+
 			CRGBA result;
 			src = scanColorComponent(src, result.R); if (!src) return false;
 			src = scanColorComponent(src, result.G); if (!src) return false;
@@ -988,7 +1043,101 @@ namespace NLGUI
 			dest = result;
 			return true;
 		}
-		else
+
+		if (strnicmp(src, "rgb(", 4) == 0 || strnicmp(src, "rgba(", 5) == 0)
+		{
+			src += 4;
+			if (*src == '(') src++;
+
+			vector<string> parts;
+			NLMISC::splitString(src, ",", parts);
+			if (parts.size() >= 3)
+			{
+				CRGBA result;
+				sint tmpv;
+				float tmpf;
+
+				// R
+				if (getPercentage(tmpv, tmpf, parts[0].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.R = tmpv;
+
+				// G
+				if (getPercentage(tmpv, tmpf, parts[1].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.G = tmpv;
+
+				// B
+				if (getPercentage(tmpv, tmpf, parts[2].c_str())) tmpv = 255 * tmpf;
+				clamp(tmpv, 0, 255);
+				result.B = tmpv;
+
+				// A
+				if (parts.size() == 4)
+				{
+					if (!fromString(parts[3], tmpf)) return false;
+					if (parts[3].find_first_of("%") != std::string::npos)
+						tmpf /= 100;
+
+					tmpv = 255 * tmpf;
+					clamp(tmpv, 0, 255);
+					result.A = tmpv;
+				}
+				else
+					result.A = 255;
+
+				dest = result;
+				return true;
+			}
+
+			return false;
+		}
+
+		if (strnicmp(src, "hsl(", 4) == 0 || strnicmp(src, "hsla(", 5) == 0)
+		{
+			src += 4;
+			if (*src == '(') src++;
+
+			vector<string> parts;
+			NLMISC::splitString(src, ",", parts);
+			if (parts.size() >= 3)
+			{
+				sint tmpv;
+				float h, s, l;
+				// hue
+				if (!fromString(parts[0], tmpv)) return false;
+				tmpv = ((tmpv % 360) + 360) % 360;
+				h = (float) tmpv / 360.0f;
+
+				// saturation
+				if (!getPercentage(tmpv, s, parts[1].c_str())) return false;
+				clamp(s, 0.0f, 1.0f);
+
+				// lightness
+				if (!getPercentage(tmpv, l, parts[2].c_str())) return false;
+				clamp(l, 0.0f, 1.0f);
+
+				CRGBA result;
+				hslToRgb(h, s, l, result);
+
+				// A
+				if (parts.size() == 4)
+				{
+					float tmpf;
+					if (!fromString(parts[3], tmpf)) return false;
+					if (parts[3].find_first_of("%") != std::string::npos)
+						tmpf /= 100;
+					clamp(tmpf, 0.0f, 1.0f);
+					result.A = 255 * tmpf;
+				}
+
+				dest = result;
+				return true;
+			}
+
+			return false;
+		}
+
 		{
 			// slow but should suffice for now
 			for(uint k = 0; k < sizeofarray(htmlColorNameToRGBA); ++k)
@@ -1237,8 +1386,9 @@ namespace NLGUI
 				{
 					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
 					{
-						CRGBA bgColor = getColor (value[HTML_BODY_BGCOLOR]);
-						setBackgroundColor (bgColor);
+						CRGBA bgColor;
+						if (scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor))
+							setBackgroundColor (bgColor);
 					}
 					
 					string style;
@@ -1777,7 +1927,7 @@ namespace NLGUI
 					if (present[MY_HTML_TABLE_BORDER] && value[MY_HTML_TABLE_BORDER])
 						fromString(value[MY_HTML_TABLE_BORDER], table->Border);
 					if (present[MY_HTML_TABLE_BORDERCOLOR] && value[MY_HTML_TABLE_BORDERCOLOR])
-						table->BorderColor = getColor (value[MY_HTML_TABLE_BORDERCOLOR]);
+						scanHTMLColor(value[MY_HTML_TABLE_BORDERCOLOR], table->BorderColor);
 					if (present[MY_HTML_TABLE_CELLSPACING] && value[MY_HTML_TABLE_CELLSPACING])
 						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
