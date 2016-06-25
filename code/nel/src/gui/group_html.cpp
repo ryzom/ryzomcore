@@ -762,7 +762,7 @@ namespace NLGUI
 			cellParams = _CellParams.back(); \
 		} \
 		if (present[prefix##_BGCOLOR] && value[prefix##_BGCOLOR]) \
-			cellParams.BgColor = getColor (value[prefix##_BGCOLOR]); \
+			scanHTMLColor(value[prefix##_BGCOLOR], cellParams.BgColor); \
 		if (present[prefix##_L_MARGIN] && value[prefix##_L_MARGIN]) \
 			fromString(value[prefix##_L_MARGIN], cellParams.LeftMargin); \
 		if (present[prefix##_NOWRAP]) \
@@ -1237,8 +1237,9 @@ namespace NLGUI
 				{
 					if (present[HTML_BODY_BGCOLOR] && value[HTML_BODY_BGCOLOR])
 					{
-						CRGBA bgColor = getColor (value[HTML_BODY_BGCOLOR]);
-						setBackgroundColor (bgColor);
+						CRGBA bgColor;
+						if (scanHTMLColor(value[HTML_BODY_BGCOLOR], bgColor))
+							setBackgroundColor (bgColor);
 					}
 					
 					string style;
@@ -1777,7 +1778,7 @@ namespace NLGUI
 					if (present[MY_HTML_TABLE_BORDER] && value[MY_HTML_TABLE_BORDER])
 						fromString(value[MY_HTML_TABLE_BORDER], table->Border);
 					if (present[MY_HTML_TABLE_BORDERCOLOR] && value[MY_HTML_TABLE_BORDERCOLOR])
-						table->BorderColor = getColor (value[MY_HTML_TABLE_BORDERCOLOR]);
+						scanHTMLColor(value[MY_HTML_TABLE_BORDERCOLOR], table->BorderColor);
 					if (present[MY_HTML_TABLE_CELLSPACING] && value[MY_HTML_TABLE_CELLSPACING])
 						fromString(value[MY_HTML_TABLE_CELLSPACING], table->CellSpacing);
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
