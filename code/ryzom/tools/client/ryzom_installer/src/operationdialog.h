@@ -116,8 +116,8 @@ protected:
 	void addComponentsProfiles();
 	void deleteComponentsProfiles();
 
-	void addComponentsInstaller();
 	void deleteComponentsInstaller();
+	void deleteComponentsDownloadedFiles();
 
 	void updateAddRemoveComponents();
 

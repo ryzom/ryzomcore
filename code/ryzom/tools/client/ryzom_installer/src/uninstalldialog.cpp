@@ -79,7 +79,14 @@ CUninstallDialog::CUninstallDialog(QWidget *parent):QDialog(parent), m_installer
 	// installer
 	m_installerIndex = model->rowCount();
 
-	item = new QStandardItem(tr("Ryzom Installer"));
+	item = new QStandardItem(tr("Installer"));
+	item->setCheckable(true);
+	model->appendRow(item);
+
+	// downloaded files
+	m_downloadedFilesIndex = model->rowCount();
+
+	item = new QStandardItem(tr("Downloaded Files"));
 	item->setCheckable(true);
 	model->appendRow(item);
 
@@ -148,6 +155,10 @@ void CUninstallDialog::setSelectedComponents(const SComponents &components)
 	// installer
 	item = model->item(m_installerIndex);
 	if (item) item->setCheckState(components.installer ? Qt::Checked : Qt::Unchecked);
+
+	// downloaded files
+	item = model->item(m_downloadedFilesIndex);
+	if (item) item->setCheckState(components.downloadedFiles ? Qt::Checked : Qt::Unchecked);
 }
 
 SComponents CUninstallDialog::getSelectedCompenents() const
@@ -186,6 +197,10 @@ SComponents CUninstallDialog::getSelectedCompenents() const
 	// installer
 	item = model->item(m_installerIndex);
 	res.installer = item && item->checkState() == Qt::Checked;
+
+	// downloaded files
+	item = model->item(m_downloadedFilesIndex);
+	res.downloadedFiles = item && item->checkState() == Qt::Checked;
 
 	return res;
 }

@@ -2718,9 +2718,18 @@ namespace NLGUI
 		TextContext->setOblique (_Oblique);
 
 		// Letter size
-		UTextContext::CStringInfo si = TextContext->getStringInfo(ucstring("|")); // for now we can't now that directly from UTextContext
-		_FontHeight = (uint) si.StringHeight; // + (_Shadow?(_ShadowOutline?2:1):0);
-		_FontLegHeight = (uint) si.StringLine; // + (_Shadow?(_ShadowOutline?2:1):0);
+		ucstring chars;
+		// instead of using the height of "|" that depends on font,
+		// we're using 2 characters:
+		// - "_" that should be the character with the lowest part
+		// - A with an accent for the highest part
+		chars.fromUtf8("_\xc3\x84");
+
+		// for now we can't know that directly from UTextContext
+		UTextContext::CStringInfo si = TextContext->getStringInfo(chars);
+		// add a padding of 1 pixel else the top will be truncated
+		_FontHeight = (uint) si.StringHeight+1;
+		_FontLegHeight = (uint) si.StringLine;
 
 		// Space width
 		si = TextContext->getStringInfo(ucstring(" "));

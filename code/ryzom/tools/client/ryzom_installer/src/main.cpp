@@ -61,23 +61,6 @@ int main(int argc, char *argv[])
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
 
-#if defined(Q_OS_WIN) && !defined(_DEBUG)
-	QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-
-	// check if launched from TEMP directory
-	if (QApplication::applicationDirPath() != tempPath)
-	{
-		// copy installer and required files to TEMP directory
-		if (copyInstallerExecutable(tempPath))
-		{
-			QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
-
-			// launch copy in TEMP directory with same arguments
-			if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
-		}
-	}
-#endif
-
 	QLocale locale = QLocale::system();
 
 	// load application translations
@@ -125,6 +108,23 @@ int main(int argc, char *argv[])
 
 	if (parser.isSet(uninstallOption))
 	{
+#if defined(Q_OS_WIN) && !defined(_DEBUG)
+		QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+
+		// check if launched from TEMP directory
+		if (QApplication::applicationDirPath() != tempPath)
+		{
+			// copy installer and required files to TEMP directory
+			if (copyInstallerExecutable(tempPath))
+			{
+				QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+
+				// launch copy in TEMP directory with same arguments
+				if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
+			}
+		}
+#endif
+
 		SComponents components;
 
 		// add all servers by default

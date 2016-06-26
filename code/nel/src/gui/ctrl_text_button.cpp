@@ -43,8 +43,8 @@ namespace NLGUI
 		_BmpLeftW= _BmpMiddleW= _BmpRightW= _BmpH= 0;
 		_WMargin= 0;
 		_WMin= 0;
-		_TextX= -2;
-		_TextY= -2;
+		_TextX= 0;
+		_TextY= 0;
 		_Setuped= false;
 		_ViewText= NULL;
 		_IsViewTextId= false;
@@ -602,7 +602,7 @@ namespace NLGUI
 		_WMin= max(_WMin, _BmpLeftW + _BmpMiddleW + _BmpRightW);
 
 		// TextY
-		_TextY= -2;
+		_TextY= 0;
 		prop = (char*) xmlGetProp( cur, (xmlChar*)"text_y" );
 		if (prop)
 		{

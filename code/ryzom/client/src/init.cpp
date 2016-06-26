@@ -46,9 +46,6 @@
 // Ligo.
 #include "nel/ligo/ligo_config.h"
 
-// Std.
-#include <fstream>
-#include <sstream>
 // Client
 #include "init.h"
 #include "input.h"
@@ -578,14 +575,12 @@ void listStereoDisplayDevices(std::vector<NL3D::CStereoDeviceInfo> &devices)
 	IStereoDisplay::listDevices(devices);
 	for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 	{
-		std::stringstream name;
-		name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-		std::stringstream fullname;
-		fullname << std::string("[") << name.str() << "] [" << it->Serial << "]";
-		nlinfo("VR [C]: Stereo Display: %s", name.str().c_str());
+		std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+		std::string fullname = toString("[%s] [%s]", name.c_str(), it->Serial.c_str());
+		nlinfo("VR [C]: Stereo Display: %s", name.c_str());
 		if (cache)
 		{
-			VRDeviceCache.push_back(std::pair<std::string, std::string>(name.str(), it->Serial)); // VR_CONFIG
+			VRDeviceCache.push_back(std::pair<std::string, std::string>(name, it->Serial)); // VR_CONFIG
 		}
 	}
 }
@@ -623,9 +618,8 @@ void initStereoDisplayDevice()
 		{
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
 			{
-				std::stringstream name;
-				name << IStereoDisplay::getLibraryName(it->Library) << " - " << it->Manufacturer << " - " << it->ProductName;
-				if (name.str() == ClientCfg.VRDisplayDevice)
+				std::string name = toString("%s - %s - %s", IStereoDisplay::getLibraryName(it->Library), it->Manufacturer.c_str(), it->ProductName.c_str());
+				if (name == ClientCfg.VRDisplayDevice)
 					deviceInfo = &(*it);
 				if (ClientCfg.VRDisplayDeviceId == it->Serial)
 					break;
