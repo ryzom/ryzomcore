@@ -862,11 +862,6 @@ OperationStep CConfigFile::getInstallNextStep() const
 		return CopyInstaller;
 	}
 
-	if (m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
-	{
-		return UninstallOldClient;
-	}
-
 	// no default profile
 	if (profile.id.isEmpty())
 	{
@@ -897,6 +892,11 @@ OperationStep CConfigFile::getInstallNextStep() const
 
 	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
 #endif
+
+	if (m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+	{
+		return UninstallOldClient;
+	}
 
 	return Done;
 }
