@@ -38,12 +38,14 @@ struct SComponents
 	SComponents()
 	{
 		installer = true;
+		downloadedFiles = true;
 	}
 
 	QStringList servers;
 	QStringList profiles;
 
 	bool installer;
+	bool downloadedFiles;
 };
 
 enum OperationStep

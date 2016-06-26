@@ -61,6 +61,7 @@ private:
 	IDIndicesMap m_profilesIndices;
 
 	int m_installerIndex;
+	int m_downloadedFilesIndex;
 };
 
 #endif

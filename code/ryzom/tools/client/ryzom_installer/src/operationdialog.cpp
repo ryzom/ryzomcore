@@ -243,11 +243,13 @@ void COperationDialog::updateAddRemoveComponents()
 	// update components to remove
 	m_removeComponents.profiles << profilesToDelete;
 	m_removeComponents.installer = false;
+	m_removeComponents.downloadedFiles = false;
 
 	// update components to add
 	m_addComponents.profiles << profilesToAdd;
 	m_addComponents.servers << serversToUpdate;
 	m_addComponents.installer = false;
+	m_addComponents.downloadedFiles = false;
 }
 
 void COperationDialog::processUpdateProfilesNextStep()
@@ -350,6 +352,10 @@ void COperationDialog::processUninstallNextStep()
 	else if (!m_removeComponents.profiles.isEmpty())
 	{
 		QtConcurrent::run(this, &COperationDialog::deleteComponentsProfiles);
+	}
+	else if (m_removeComponents.downloadedFiles)
+	{
+		QtConcurrent::run(this, &COperationDialog::deleteComponentsDownloadedFiles);
 	}
 	else if (m_removeComponents.installer)
 	{
@@ -1153,6 +1159,43 @@ void COperationDialog::deleteComponentsInstaller()
 	}
 
 	// TODO:
+
+	// reset it once it's done
+	m_removeComponents.installer = false;
+
+	emit onProgressSuccess(1);
+	emit done();
+}
+
+void COperationDialog::deleteComponentsDownloadedFiles()
+{
+	m_currentOperation = tr("Delete downloaded files");
+	m_currentOperationProgressFormat = tr("Deleting %1...");
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	QString path = config->getInstallationDirectory();
+
+	QDir dir(path);
+
+	QStringList filter;
+	filter << "*.7z";
+	filter << "*.bnp";
+	filter << "*.zip";
+	filter << "*.part";
+
+	QStringList files = dir.entryList(filter, QDir::Files);
+
+	foreach(const QString &file, files)
+	{
+		if (!QFile::remove(file))
+		{
+			qDebug() << "Unable to delete" << file;
+		}
+	}
+
+	// reset it once it's done
+	m_removeComponents.downloadedFiles = false;
 
 	emit onProgressSuccess(1);
 	emit done();
