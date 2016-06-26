@@ -927,7 +927,7 @@ public:
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
 				if (pSel->isForageSource())
-					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, ~0, ~0, true);
+					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };
