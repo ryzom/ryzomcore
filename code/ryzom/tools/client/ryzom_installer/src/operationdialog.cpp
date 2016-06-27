@@ -1078,7 +1078,7 @@ void COperationDialog::addComponentsProfiles()
 
 	foreach(const QString &profileId, m_addComponents.profiles)
 	{
-		CProfile &profile = config->getProfile(profileId);
+		const CProfile &profile = config->getProfile(profileId);
 
 		if (profile.desktopShortcut) createClientDesktopShortcut(profile.id);
 
