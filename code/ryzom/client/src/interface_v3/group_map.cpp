@@ -2511,7 +2511,12 @@ CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucst
 	// Save the config file each time a user landmark is created
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	uint8 currMode = pIM->getMode();
-	pIM->saveConfig ("save/interface_" + PlayerSelectedFileName + ".icfg");
+	std::string filename = "save/interface_" + PlayerSelectedFileName + ".icfg";
+	if (!CFile::fileExists(filename) && CFile::fileExists("save/shared_interface.icfg"))
+	{
+		filename = "save/shared_interface.icfg";
+	}
+	pIM->saveConfig (filename);
 	if (currMode != pIM->getMode())
 	{
 		pIM->setMode(currMode);
