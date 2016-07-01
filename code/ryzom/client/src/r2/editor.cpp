@@ -2149,6 +2149,14 @@ void CEditor::loadKeySet(const std::string &keySet)
 		// Load the user key file
 		xmlFilesToParse.push_back (userKeyFileName);
 	}
+	else
+	{
+		std::string filename = "save/shared_" + keySet + ".xml";
+		if (CFile::fileExists(filename) && CFile::getFileSize(filename) > 0)
+		{
+			xmlFilesToParse.push_back(filename);
+		}
+	}
 	// Load the default key (but don't replace existings bounds, see keys.xml "key_def_no_replace")
 	xmlFilesToParse.push_back (keySet + ".xml");
 
@@ -2179,7 +2187,13 @@ void CEditor::saveCurrentKeySet()
 	CHECK_EDITOR
 	std::string prefix = getKeySetPrefix(getMode());
 	if (prefix.empty()) return;
-	getUI().saveKeys ("save/" + prefix + "_" + PlayerSelectedFileName + ".xml");
+
+	std::string filename = "save/" + prefix + "_" + PlayerSelectedFileName + ".xml";
+	std::string sharedfile ="save/shared_" + prefix + ".xml";
+	if (!CFile::fileExists(filename) && CFile::fileExists(sharedfile))
+		filename = sharedfile;
+
+	getUI().saveKeys (filename);
 }
 
 // *********************************************************************************************************
@@ -2844,7 +2858,12 @@ bool CEditor::loadUIConfig(const std::string &prefix)
 {
 	//H_AUTO(R2_CEditor_loadUIConfig)
 	CHECK_EDITOR
-	return  getUI().loadConfig("save/" + prefix + PlayerSelectedFileName + ".icfg");
+
+	std::string filename = "save/" + prefix + PlayerSelectedFileName + ".icfg";
+	if (!CFile::fileExists(filename))
+		filename = "save/shared_" + prefix + ".icfg";
+
+	return  getUI().loadConfig(filename);
 }
 
 // *********************************************************************************************************
@@ -2871,7 +2890,13 @@ void CEditor::saveUIConfig()
 			}
 		}
 	}
-	getUI().saveConfig("save/" + getUIPrefix(_Mode) + PlayerSelectedFileName + ".icfg");
+
+	std::string filename = "save/" + getUIPrefix(_Mode) + PlayerSelectedFileName + ".icfg";
+	std::string sharedfile = "save/shared_" + getUIPrefix(_Mode) + ".icfg";
+	if (!CFile::fileExists(filename) && CFile::fileExists(sharedfile))
+		filename = sharedfile;
+
+	getUI().saveConfig(filename);
 }
 
 // *********************************************************************************************************
