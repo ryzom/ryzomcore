@@ -628,7 +628,7 @@
 	<!-- TITLE -->
 	
 	<group id="title" w="292" h="46" y="-6" x="-272" posref="TR TR">
-		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="-4" hardtext="uiCP_title1"/>
+		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_title1"/>
 		<view type="text" id="title2" posref="BM BM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_selection"/>
 	</group>
 	
@@ -723,7 +723,7 @@
 
 				<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
 				<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
-				<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
+				<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="0" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
 				<ctrl style="skin_scroll" id="scroll_bar" />
 			</group>
 		</group>
@@ -778,7 +778,7 @@
 
 <group type="menu" id="r2ed_editor_menu"
 	options="menu_back"  
-	text_y="-2"
+	text_y="0"
 	color="255 255 255 255"
 	fontsize="16"
 	shadow="true"

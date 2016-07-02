@@ -48,7 +48,7 @@
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="12" color="135 243 28 255" />
 
     <instance template="edit_box_log" id="eb_password" posparent="txt_pas" posref="BM TM" w="240" h="26" fontsize="12" x="0" y="-4"
-    text_ref="BM BM" text_y="-2"
+    text_ref="BM BM" text_y="0"
     reset_focus_on_hide="false"  max_historic="0" entry_type="password"
     onenter="on_login" params=""
     prompt="" enter_loose_focus="true" multi_line="false" max_num_chars="20" color="135 243 28 255" />
@@ -113,8 +113,8 @@
 	<!-- EXIT BUTTON -->
     <ctrl style="log_button" id="but_exit" posparent="windows" posref="BR BR" y="6" onclick_l="login_quit" hardtext="uiExitLogin" />
 	<!-- Textes -->
-    <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
-    <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="0" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
+    <view type="text" id="title_res" posparent="res_win" posref="TL BL" y="2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGResolution" />
+    <view type="text" id="title_lod" posparent="lod_win" posref="TL BL" y="2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiLOGLod" />
 
     <view type="text" id="res_value" posparent="res_win" posref="MM MM" y="0" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiResValue" />
     <view type="text" id="lod_value" posparent="lod_win" posref="MM MM" y="0" color="135 243 28 255" fontsize="10" shadow="true" hardtext="uiLodValue" />
@@ -187,7 +187,7 @@
     <view type="bitmap" id="kami" posparent="window" posref="TR TR" x="-50" y="-24" texture="log_kami.tga" global_color="false" render_layer="-1" />
 
     <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
     <!-- SERVER SELECTION -->
     <instance template="server_box" id="server_win" posparent="window" posref="ML ML" w="612" h="338" x="8" y="0" />
@@ -291,7 +291,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
     <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
 
     <!-- Window -->
@@ -346,7 +346,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
     <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
     <!-- Window -->
     <instance template="server_box" id="global_win" posparent="bl" posref="TM TM" w="400" h="22" x="-14" y="-240" />
@@ -403,7 +403,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
     <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
 
     <!-- patch -->
@@ -511,7 +511,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
   <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
   <!-- EXIT BUTTON -->
-  <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+  <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
   <!-- WINDOW -->
   <instance template="server_box" id="eula_win" posparent="window" posref="MM MM" w="612" h="338" x="-24" y="0" />
@@ -556,7 +556,7 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <instance template="log_box" id="window" y="-8" posref="MM MM" w="800" h="440" />
 
     <!-- EXIT BUTTON -->
-    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-20" onclick_l="login_quit" hardtext="uiExitLogin" />
+    <ctrl style="log_button" id="but_exit" posparent="window" posref="TR TR" y="-18" onclick_l="login_quit" hardtext="uiExitLogin" />
 
 
     <!-- Window -->

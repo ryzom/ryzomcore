@@ -1294,7 +1294,7 @@
 									max_chars_size="252" menu_r="" max_historic="" entry_type="alpha">
 
 		<instance template="job_border" id="bord" posref="MM MM" />
-		<view type="text" id="edit_text" x="0" y="-2" posref="MM MM" multi_line="false" render_layer="4"
+		<view type="text" id="edit_text" x="0" y="0" posref="MM MM" multi_line="false" render_layer="4"
 			fontsize="20" shadow="true" global_color="false" case="%case_first_string_letter_up" />
 	</group>
 
@@ -2049,19 +2049,19 @@
 			<instance template="outgame_black_back" id="back" />
 		</group>
 
-		<ctrl style="opt_button" id="fyros_but" posref="TL TL" x="60" y="-88" hardtext="uiCP_Specie_Fyros"
+		<ctrl style="opt_button" id="fyros_but" posref="TL TL" x="60" y="-88" text_y="15" hardtext="uiCP_Specie_Fyros"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_specie|0"/>
 
-		<ctrl style="opt_button" id="matis_but" posparent="fyros_but" posref="BL TL" hardtext="uiCP_Specie_Matis"
+		<ctrl style="opt_button" id="matis_but" posparent="fyros_but" posref="BL TL" text_y="15" hardtext="uiCP_Specie_Matis"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_specie|1"/>
 
-		<ctrl style="opt_button" id="tryker_but" posparent="matis_but" posref="BL TL" hardtext="uiCP_Specie_Tryker"
+		<ctrl style="opt_button" id="tryker_but" posparent="matis_but" posref="BL TL" text_y="15" hardtext="uiCP_Specie_Tryker"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_specie|2"/>
 
-		<ctrl style="opt_button" id="zorai_but" posparent="tryker_but" posref="BL TL" hardtext="uiCP_Specie_Zorai"
+		<ctrl style="opt_button" id="zorai_but" posparent="tryker_but" posref="BL TL" text_y="15" hardtext="uiCP_Specie_Zorai"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_specie|3"/>
 
@@ -2091,11 +2091,11 @@
 			<instance template="outgame_black_back" id="back" />
 		</group>
 
-		<ctrl style="opt_button" id="male_but" posref="TL TL" x="20" y="-88" hardtext="uiCP_Sex_Male"
+		<ctrl style="opt_button" id="male_but" posref="TL TL" x="20" y="-88" text_y="15" hardtext="uiCP_Sex_Male"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_sex|0"/>
 
-		<ctrl style="opt_button" id="female_but" posparent="male_but" posref="BL TL" hardtext="uiCP_Sex_Female"
+		<ctrl style="opt_button" id="female_but" posparent="male_but" posref="BL TL" text_y="15" hardtext="uiCP_Sex_Female"
 					onover="play_sound" params_over="name=specie_but_over"
 					onclick_l="proc" params_l="proc_select_sex|1"/>
 
@@ -2117,7 +2117,7 @@
 
 		<!-- Height -->
 		<instance template="slider" id="bk1" posref="TL TL" x="20" y="-88" w="180" h="48" />
-		<view type="text" id="title1" posparent="bk1" posref="TL TL" x="16" y="2" hardtext="uiHeight" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="title1" posparent="bk1" posref="TL TL" x="16" y="4" hardtext="uiHeight" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="scroll1" posparent="bk1" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:CHARACTERHEIGHT" tracksize="40"
 							onscrollend="proc" params="CP_Camera_Face"
@@ -2125,7 +2125,7 @@
 
 		<!-- Torso -->
 		<instance template="slider" id="bk2" posparent="bk1" posref="BL TL" w="180" h="48" />
-		<view type="text" id="title2" posparent="bk2" posref="TL TL" x="16" y="2" hardtext="uiTorso" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="title2" posparent="bk2" posref="TL TL" x="16" y="4" hardtext="uiTorso" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="scroll2" posparent="bk2" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:TORSOWIDTH" tracksize="40"
 							onscroll="" params=""
@@ -2133,7 +2133,7 @@
 
 		<!-- Arms -->
 		<instance template="slider" id="bk3" posparent="bk2" posref="BL TL" w="180" h="48" />
-		<view type="text" id="title3" posparent="bk3" posref="TL TL" x="16" y="2" hardtext="uiArms" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="title3" posparent="bk3" posref="TL TL" x="16" y="4" hardtext="uiArms" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="scroll3" posparent="bk3" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:ARMSWIDTH" tracksize="40"
 							onscroll="" params=""
@@ -2141,7 +2141,7 @@
 
 		<!-- Legs -->
 		<instance template="slider" id="bk4" posparent="bk3" posref="BL TL" w="180" h="48" />
-		<view type="text" id="title4" posparent="bk4" posref="TL TL" x="16" y="2" hardtext="uiLegs" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="title4" posparent="bk4" posref="TL TL" x="16" y="4" hardtext="uiLegs" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="scroll4" posparent="bk4" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:LEGSWIDTH" tracksize="40"
 							onscroll="" params=""
@@ -2150,7 +2150,7 @@
 
 		<!-- Breast -->
 		<instance template="slider" id="bk5" posparent="bk4" posref="BL TL" w="180" h="48" active="false" />
-		<view type="text" id="title5" posparent="bk5" posref="TL TL" x="16" y="2" hardtext="uiBreasts" color="255 255 255 255" fontsize="10" active="false" />
+		<view type="text" id="title5" posparent="bk5" posref="TL TL" x="16" y="4" hardtext="uiBreasts" color="255 255 255 255" fontsize="10" active="false" />
 		<ctrl type="scroll" id="scroll5" posparent="bk5" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="14" value="UI:TEMP:CHAR3D:VPC:BREASTSIZE" tracksize="40"
 							onscroll="" params=""
@@ -2216,14 +2216,14 @@
 
 
 		<!-- TITLES Des SLIDERS -->
-		<view type="text" id="face1" posparent="pos1" posref="TL TL" x="16" y="2" hardtext="uiFace1Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face2" posparent="pos2" posref="TL TL" x="16" y="2" hardtext="uiFace2Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face3" posparent="pos3" posref="TL TL" x="16" y="2" hardtext="uiFace3Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face4" posparent="pos4" posref="TL TL" x="16" y="2" hardtext="uiFace4Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face5" posparent="pos5" posref="TL TL" x="16" y="2" hardtext="uiFace5Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face6" posparent="pos6" posref="TL TL" x="16" y="2" hardtext="uiFace6Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face7" posparent="pos7" posref="TL TL" x="16" y="2" hardtext="uiFace7Fy" color="255 255 255 255" fontsize="11"/>
-		<view type="text" id="face8" posparent="pos8" posref="TL TL" x="16" y="2" hardtext="uiFace8Fy" color="255 255 255 255" fontsize="11"/>
+		<view type="text" id="face1" posparent="pos1" posref="TL TL" x="2" y="4" hardtext="uiFace1Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face2" posparent="pos2" posref="TL TL" x="2" y="4" hardtext="uiFace2Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face3" posparent="pos3" posref="TL TL" x="2" y="4" hardtext="uiFace3Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face4" posparent="pos4" posref="TL TL" x="2" y="4" hardtext="uiFace4Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face5" posparent="pos5" posref="TL TL" x="2" y="4" hardtext="uiFace5Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face6" posparent="pos6" posref="TL TL" x="2" y="4" hardtext="uiFace6Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face7" posparent="pos7" posref="TL TL" x="2" y="4" hardtext="uiFace7Fy" color="255 255 255 255" fontsize="10"/>
+		<view type="text" id="face8" posparent="pos8" posref="TL TL" x="2" y="4" hardtext="uiFace8Fy" color="255 255 255 255" fontsize="10"/>
 
 		<!--
 		<view type="bitmap" id="branch" posref="BL BL" texture="branch.tga" color="255 255 255 255" global_color="false" />
@@ -2237,28 +2237,28 @@
 
 		<!-- HAIRCUT -->
 		<instance template="but_slider" id="haircut" posparent="pos1" posref="TL TL" x="-516" y="0" w="180" h="48" value="UI:TEMP:HAIRCUT" max="6" />
-		<view type="text" id="hair1" posparent="haircut" posref="TL TL" x="16" y="2" hardtext="uiHaircut" color="255 255 255 255" fontsize="11"/>
+		<view type="text" id="hair1" posparent="haircut" posref="TL TL" x="16" y="4" hardtext="uiHaircut" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="hair2" posparent="haircut" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="6" value="UI:TEMP:HAIRCUT" tracksize="40"
 							tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""/>
 
 		<!-- HAIR COLOR -->
 		<instance template="but_slider" id="haircolor" posparent="pos2" posref="TL TL" x="-516" y="0" w="180" h="48" value="UI:TEMP:CHAR3D:VPA:HATCOLOR" max="5" />
-		<view type="text" id="haircol1" posparent="haircolor" posref="TL TL" x="16" y="2" hardtext="uiHairColor" color="255 255 255 255" fontsize="11"/>
+		<view type="text" id="haircol1" posparent="haircolor" posref="TL TL" x="16" y="4" hardtext="uiHairColor" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="haircol2" posparent="haircolor" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="5" value="UI:TEMP:CHAR3D:VPA:HATCOLOR" tracksize="40"
 							tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""/>
 
 		<!-- TATOOS -->
 		<instance template="but_slider" id="tatoos" posparent="pos3" posref="TL TL" x="-516" y="0" w="180" h="48" value="UI:TEMP:CHAR3D:VPC:TATTOO" max="31" />
-		<view type="text" id="tatoo1" posparent="tatoos" posref="TL TL" x="16" y="2" hardtext="uiTatoos" color="255 255 255 255" fontsize="11"/>
+		<view type="text" id="tatoo1" posparent="tatoos" posref="TL TL" x="16" y="4" hardtext="uiTatoos" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="tatoo2" posparent="tatoos" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="31" value="UI:TEMP:CHAR3D:VPC:TATTOO" tracksize="40"
 							tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""/>
 
 		<!-- EYES -->
 		<instance template="but_slider" id="eyes" posparent="pos4" posref="TL TL" x="-516" y="0" w="180" h="48" value="UI:TEMP:CHAR3D:VPC:EYESCOLOR" max="7" />
-		<view type="text" id="eyes1" posparent="eyes" posref="TL TL" x="16" y="2" hardtext="uiEyes" color="255 255 255 255" fontsize="11"/>
+		<view type="text" id="eyes1" posparent="eyes" posref="TL TL" x="16" y="4" hardtext="uiEyes" color="255 255 255 255" fontsize="10"/>
 		<ctrl type="scroll" id="eyes2" posparent="eyes" posref="MM MM" x="0" y="0" w="140" h="32"
 							vertical="false" align="L" min="0" max="7" value="UI:TEMP:CHAR3D:VPC:EYESCOLOR" tracksize="40"
 							tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""/>
@@ -2306,9 +2306,9 @@
 			</group>
 
 			<!-- Bonus 1 -->
-			<instance template="slider" id="bp1" posref="TL TL" x="20" y="-96" w="180" h="48" />
-			<view type="text" id="title1" posparent="bp1" posref="TL TL" x="16" y="2" hardtext="uiCP_BP1" color="255 255 255 255" fontsize="10"/>
-			<view type="text" id="info1" posparent="title1" posref="MR ML" x="0" y="1" hardtext="uiCP_JOB1" color="255 255 255 255" fontsize="11"/>
+			<instance template="slider" id="bp1" posref="TL TL" x="15" y="-90" w="180" h="48" />
+			<view type="text" id="title1" posparent="bp1" posref="TL TL" x="0" y="2" hardtext="uiCP_BP1" color="255 255 255 255" fontsize="10"/>
+			<view type="text" id="info1" posparent="title1" posref="MR ML" x="5" y="1" hardtext="uiCP_JOB1" color="255 255 255 255" fontsize="11"/>
 			<ctrl type="scroll" id="scroll1" posparent="bp1" posref="MM MM" x="0" y="0" w="140" h="32"
 								vertical="false" align="L" min="0" max="3" value="UI:TEMP:JOB_POINT1" tracksize="40"
 								tx_topright="" tx_middle="slider_m.tga" tx_bottomleft=""/>
@@ -2335,13 +2335,13 @@
 				<view type="text" id="desc_title" posparent="icons_back" posref="TL BL" hardtext="uiCP_BP_Des" color="140 162 107 255" fontsize="13" x="0" y="4" />
 
 				<!-- Pack description -->
-				<view type="text" id="pack_F" posref="TR TL" hardtext="uiCP_Job_F1" fontsize="10" x="12" y="-10" posparent="icons_back"
+				<view type="text" id="pack_F" posref="TR TL" hardtext="uiCP_Job_F1" fontsize="10" x="12" y="-5" posparent="icons_back"
 					line_maxw="450" multi_line="true" multi_line_space="0"/>
-				<view type="text" id="pack_M" posref="TR TL" hardtext="uiCP_Job_M1" fontsize="10" x="12" y="-66" posparent="icons_back"
+				<view type="text" id="pack_M" posref="TR TL" hardtext="uiCP_Job_M1" fontsize="10" x="12" y="-61" posparent="icons_back"
 					line_maxw="450" multi_line="true" multi_line_space="0"/>
-				<view type="text" id="pack_G" posref="TR TL" hardtext="uiCP_Job_G1" fontsize="10" x="12" y="-122" posparent="icons_back"
+				<view type="text" id="pack_G" posref="TR TL" hardtext="uiCP_Job_G1" fontsize="10" x="12" y="-117" posparent="icons_back"
 					line_maxw="450" multi_line="true" multi_line_space="0"/>
-				<view type="text" id="pack_C" posref="TR TL" hardtext="uiCP_Job_C1" fontsize="10" x="12" y="-178" posparent="icons_back"
+				<view type="text" id="pack_C" posref="TR TL" hardtext="uiCP_Job_C1" fontsize="10" x="12" y="-173" posparent="icons_back"
 					line_maxw="450" multi_line="true" multi_line_space="0"/>
 
 
@@ -2397,8 +2397,8 @@
 
 			<group id="result" posparent="desc" posref="TL TL" y="0" sizeref="w" h="96" >
 
-				<view type="text" id="title1" posref="TL TL" hardtext="uiCP_Title" color="140 162 107 255" fontsize="13" x="16" y="-12"/>
-				<view type="text" id="title2" posref="BR BL" hardtext="uiCP_Refugee" 	color="255 255 255 255" fontsize="15" x="0" posparent="title1" />
+				<view type="text" id="title1" posref="TL TL" hardtext="uiCP_Title" color="140 162 107 255" fontsize="13" x="16" y="-10"/>
+				<view type="text" id="title2" posref="BR BL" hardtext="uiCP_Refugee" 	color="255 255 255 255" fontsize="15" y="-2" x="0" posparent="title1" />
 
 				<view type="text" id="title3" 		posparent="title1"	posref="BL TL" 	hardtext="uiCP_Pack" 	fontsize="13" color="140 162 107 255" y="-8"/>
 				<view type="text" id="res" 			posparent="title3"	posref="TR TL" 	hardtext="uiCP_Res_F" 	fontsize="13" color="255 255 255 255" x="8" multi_line="true" multi_line_space="0" />
@@ -2467,7 +2467,7 @@
 	<!-- TITLE -->
 
 	<group id="title" w="292" h="46" y="-6" x="-272" posref="TR TR">
-		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="-4" hardtext="uiCP_title1"/>
+		<view type="text" id="title1" posref="TM TM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_title1"/>
 		<view type="text" id="title2" posref="BM BM" global_color="false" render_layer="2" fontsize="20" shadow="true" y="0" hardtext="uiCP_creation"/>
 	</group>
 

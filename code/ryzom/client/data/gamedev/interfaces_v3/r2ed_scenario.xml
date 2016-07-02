@@ -103,7 +103,7 @@
 	<group id="#id" w="#w" h="#h" posparent="#posparent" posref="#posref" x="#x" y="#y" >
 
 		<ctrl type="text_button" button_type="toggle_button" id="button" x="0" y="0" posref="TL TL" posparent="parent"
-		 text_y="-2" hardtext="#hardtext" wmin="40" h="10"
+		 text_y="0" hardtext="#hardtext" wmin="40" h="10"
 		 tx_normal="Quit_button_pushed" tx_pushed="Quit_button_pushed" tx_over="Quit_button_pushed"
 		 fontsize="12" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 		 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
@@ -1052,7 +1052,7 @@
 
 
 		<ctrl style="button_ok" id="ok" active="true" x="0" y="-10" posref="BR TR" posparent="label_gr"
-		 text_y="-2" onclick_l="lua" params_l="r2:showFilteredScenarios()" hardtext="OK" fontsize="10" />
+		 text_y="0" onclick_l="lua" params_l="r2:showFilteredScenarios()" hardtext="OK" fontsize="10" />
 
 	</group>
 </group>
