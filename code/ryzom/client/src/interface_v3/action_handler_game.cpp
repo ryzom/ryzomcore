@@ -3450,20 +3450,8 @@ class CHandlerGameConfigApply : public IActionHandler
 				{
 					uint32 width, height;
 					Driver->getWindowSize(width, height);
-
-					// window is too large
-					if (width >= screenMode.Width || height >= screenMode.Height)
-					{
-						// choose a smaller size
-						w = 1024;
-						h = 768;
-					}
-					else
-					{
-						// take previous mode
-						w = width;
-						h = height;
-					}
+					w = width;
+					h = height;
 				}
 
 				ClientCfg.Width = w;
