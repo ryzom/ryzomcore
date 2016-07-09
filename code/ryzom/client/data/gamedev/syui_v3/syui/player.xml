@@ -120,7 +120,7 @@
             maxval=""
             val_bar=""
             tooltip="">
-	<group id="#id"
+    <group id="#id"
            posparent="#posparent"
            posref="#posref"
            w="#w"
@@ -151,7 +151,7 @@
       <view type="text_number"
             id="max"
             posref="MR MR"
-            x="-6" 
+            x="-6"
             y="-4"
             color="255 255 255 255"
             shadow="true"
@@ -220,7 +220,7 @@
   <!-- ************** -->
   <!-- CURRENT ACTION -->
   <!-- ************** -->
-  <!-- Must pass through an other DB, to allow multiple isntances of the action bar template -->
+  <!-- Must pass through an other DB, to allow multiple instances of the action bar template -->
   <variable entry="UI:PHRASE:ACT_BAR_LEN"
             type="sint32"
             value="0" />

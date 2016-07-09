@@ -930,7 +930,7 @@
         </group>
         <link expr="@UI:TEMP:VID_MODE"
               action="game_config_change_vid_mode" />
-		<group type="combo_box"
+        <group type="combo_box"
                id="video_freqs"
                w="60"
                h="20"
