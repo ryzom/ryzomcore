@@ -71,7 +71,7 @@
             posparent="parent"
             posref="TL TL"
             h="16"
-			id="">
+            id="">
     <group type="container"
            id="#id"
            w="294"
@@ -133,7 +133,7 @@
             h="0"
             tooltip="uittFriendsOnline"
             tooltip_parent="win" />
-	</group>
+    </group>
   </template>
   <!-- **************** -->
   <!-- *  GUILD MAIN  * -->
@@ -156,14 +156,14 @@
          on_active_params="guild_proc_active"
          on_deactive="proc"
          on_deactive_params="guild_proc_deactive">
-	<group id="bstatus"
+    <group id="bstatus"
            x="0"
            y="0"
            h="0"
-		   value=""
+           value=""
            posref="TL TL">
-	  <link expr="depends(@UI:VARIABLES:PING)" action="lua" params="game:updateGLinvB()" />
-	</group>
+           <link expr="depends(@UI:VARIABLES:PING)" action="lua" params="game:updateGLinvB()" />
+    </group>
     <group id="header_closed"
            x="0"
            y="0"
@@ -194,9 +194,9 @@
               params_r=""
               onclick_l="set"
               params_l="target='ui:interface:guild:w'|value=330" />
-		<ctrl style="tab_button_new"
+        <ctrl style="tab_button_new"
               id="tab1"
-			  posparent="tab0"
+              posparent="tab0"
               group="content:tab_guild"
               hardtext="uiGuildMembers"
               onclick_r=""
