@@ -196,7 +196,7 @@
 		<group id="sequence_content" posref="TL TL" sizeref="wh" x="0" w="0" y="0" h="0" >
 			
 			<ctrl style="button_ok" id="new_button" x="0" y="-10" posref="TL TL" posparent="parent"
-			 text_y="-2" onclick_l="lua" params_l="#new_elt" hardtext="#new_elt_text" />
+			 text_y="0" onclick_l="lua" params_l="#new_elt" hardtext="#new_elt_text" />
 
 			<group id="mi_group" posparent="new_button" posref="BL BL" x="0" y="0" 
 			 sizeparent="parent" sizeref="w5" w="0" h="0" />
@@ -333,7 +333,7 @@
  seq_color="" over_seq_color="" repeat_seq="" right_seq="" left_seq="" on_change="" >
 
 	<ctrl style="button_ok" id="new_sequence_button" posref="TL TL" x="30" y="-15"
-	 text_y="-2" onclick_l="lua" params_l="#new_seq" hardtext="#new_seq_text" />
+	 text_y="0" onclick_l="lua" params_l="#new_seq" hardtext="#new_seq_text" />
 
 	<group id="sequence_menu" x="30" y="-40" sizeref="wh" w="-60" h="-90" posparent="parent" posref="TL TL" >		
 		<group type="tab" id="sequence_tabs" hide_out_tabs="true" child_resize_w="true" 

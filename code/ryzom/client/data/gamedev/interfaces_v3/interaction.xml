@@ -110,7 +110,7 @@
           posparent="jauges"
           posref="TL TL"
           x="0"
-          y="-1"
+          y="0"
           sizeref="wh3"
           w="0"
           h="0" />
@@ -246,7 +246,7 @@
             posref="MM MM"
             posparent="slot_force"
             x="0"
-            y="-2"
+            y="0"
             color="255 255 255 255"
             fontsize="10"
             shadow="true"
@@ -364,7 +364,7 @@
             id="b_life"
             posref="TL TL"
             x="0"
-            y="-2"
+            y="0"
             texture="slot_jauge.tga"
             inherit_gc_alpha="false" />
       <instance template="jauge_score_target"
@@ -543,7 +543,7 @@
               posparent="add_contact_eb"
               posref="BR TR"
               x="0"
-              y="-2"
+              y="0"
               onclick_ok="add_contact"
               onclick_ok_param=""
               onclick_cancel="leave_modal"
@@ -603,7 +603,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"
@@ -665,7 +665,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"
@@ -806,7 +806,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"
@@ -1577,7 +1577,7 @@
       </group>
       <!--            
                 <group id="header_opened" x="0" y="0" w="160" child_resize_h="true" child_resize_hmargin="4" posref="TL TL" >
-                        <view type="bar3" id="jauges" posref="TR TR" y="-2" mini="true" x="-16"
+                        <view type="bar3" id="jauges" posref="TR TR" y="0" mini="true" x="-16"
                                                                 color1="%sta_color" value1="UI:VARIABLES:BARS:TEAM:#team_mate_index:STA"        range1="UI:CONST:127" 
                                                                 color2="%sap_color"     value2="UI:VARIABLES:BARS:TEAM:#team_mate_index:SAP"            range2="UI:CONST:127"
                                                                 color3="%hp_color" color3_negative="%hp_color_neg" value3="UI:VARIABLES:BARS:TEAM:#team_mate_index:HP"  range3="UI:CONST:127" />
@@ -1589,7 +1589,7 @@
                                                 
                         <! - chat box - >
                         <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
-                        <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-2" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="contact_entry" backup_father_container_pos="true"/>
+                        <instance template="edit_box_widget" id="ebw" posref="BR TR" y="0" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="contact_entry" backup_father_container_pos="true"/>
                                                 
                         <! - links to display lead or successor - >
                         <link expr="eq(@SERVER:GROUP:LEADER_INDEX, #team_mate_index)" target="lead:active"/>
@@ -1648,7 +1648,7 @@
               id="blocked"
               posref="MR MR"
               x="-20"
-              y="-2"
+              y="0"
               texture="w_answer_16_cancel.tga"
               global_color="false"
               active="false" />
@@ -1735,7 +1735,7 @@
               id="blocked"
               posref="MR MR"
               x="-50"
-              y="-2"
+              y="0"
               texture="w_answer_16_cancel.tga"
               global_color="false"
               active="false" />
@@ -1792,7 +1792,7 @@
               y="0"
               posref="MR MR"
               posparent="parent"
-              text_y="-2"
+              text_y="0"
               onclick_l="lua"
               params_l="validMessageBox(i18n.get('uiAddTellerToIgnoreListWarning'), 'add_teller_to_ignore_list', 'id=ui:interface:#id', '', '' ,'ui:interface')"
               hardtext="uiAddTellerToIgnoreList"
@@ -1806,7 +1806,7 @@
               y="0"
               posref="ML MR"
               posparent="ignore"
-              text_y="-2"
+              text_y="0"
               onclick_l="add_teller_to_friend_list"
               params_l=""
               hardtext="uiAddTellerToFriends"
@@ -1820,7 +1820,7 @@
               y="0"
               posref="ML MR"
               posparent="new_friend"
-              text_y="-2"
+              text_y="0"
               onclick_l="invite_to_ring_session"
               params_l=""
               hardtext="uiInviteToRingSession"
@@ -1844,7 +1844,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"
@@ -2065,7 +2065,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"
@@ -3021,7 +3021,7 @@
 
         <group id="header_opened" x="0" y="0" w="160" h="13" posref="TL TL" child_resize_h="true" child_resize_hmargin="8" >
                 <instance template="chat_box" id="cb" posref="TR TR" sizeref="w" y="-8" w="0" h="64" min_height="64" max_height="1600"/>
-                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="-2" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="debug_console_entry" backup_father_container_pos="true"/>
+                <instance template="edit_box_widget" id="ebw" posref="BR TR" y="0" posparent="cb" child_resize_h="true" sizeref="w" w="-10" onenter="debug_console_entry" backup_father_container_pos="true"/>
         </group>
 
         <group id="content" x="0" y="0" h="0" posref="TL TL" >
@@ -3091,7 +3091,7 @@
         <instance template="edit_box_widget"
                   id="ebw"
                   posref="BR TR"
-                  y="-2"
+                  y="0"
                   posparent="cb"
                   child_resize_h="true"
                   sizeref="w"

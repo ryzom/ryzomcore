@@ -420,7 +420,7 @@
 
 		<!-- NAME OF SPELL -->
 		<instance template="edit_box_widget"  id="eb_spell_name" posref="TR BR" x="4" w="216" y="-54" h="20" child_resize="false"
-				text_x="0" text_y="-2" text_ref="ML ML"
+				text_x="0" text_y="0" text_ref="ML ML"
 				fontsize="12" multi_line="false" max_num_chars="20" 
 				enter_loose_focus="true" enter_recover_focus="false" prompt="" reset_focus_on_hide="true" onchange="phrase_change_name" />
 		<view type="text" id="text_spell_name" posparent="eb_spell_name" posref="TL BL" x="0" y="-2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseEditName" />

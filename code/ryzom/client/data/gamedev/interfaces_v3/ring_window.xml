@@ -1077,15 +1077,15 @@
 		<group id="valid_scenario_control" sizeref="w" child_resize_h="true" w="0" posparent="invite_team" 
 		 posref="BL TL" x="0" y="-5" >	
 			
-			<ctrl style="button_ok" id="ok_button" x="-50" y="0" posref="TM TM" text_y="-2"
+			<ctrl style="button_ok" id="ok_button" x="-50" y="0" posref="TM TM" text_y="0"
 			 onclick_l="load_scenario" params_l="" hardtext="uittOK" wmin="100" 
 			 tooltip="uiRingLaunchScenarioTooltip"
 			 tooltip_parent="win" />
 
-			<ctrl style="button_ok" id="cancel_button" x="10" y="0" posparent="ok_button" posref="BR BL" text_y="-2"
+			<ctrl style="button_ok" id="cancel_button" x="10" y="0" posparent="ok_button" posref="BR BL" text_y="0"
 			 onclick_l="proc" params_l="scenario_control_close" hardtext="uittCancel" wmin="100" />
 
-			<ctrl style="button_ok" id="load_button" x="10" y="0" posref="TL TL" text_y="-2" 
+			<ctrl style="button_ok" id="load_button" x="10" y="0" posref="TL TL" text_y="0" 
 			 onclick_l="lua" params_l="GameR2Loading:displayLoadingWindow()" hardtext="uiR2EDChooseScenario" wmin="100" /> 
 	
 		</group>
@@ -1650,10 +1650,10 @@
 			<instance template="score_template" id="direction_rate" x="0"  y="-13" posref="BL TL" posparent="originality_rate" 
 			 hardtext="uiRAP_RateDirection" />
 
-			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="0"
 				onclick_l="lua" params_l="ScenarioScores:updateScores()" hardtext="uittOK" wmin="50" />
 
-			<ctrl style="button_ok" id="cancel" x="-30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+			<ctrl style="button_ok" id="cancel" x="-30" y="15" posref="BM BM" posparent="parent" text_y="0"
 				onclick_l="lua" params_l="ScenarioScores:getWindow().active=false" hardtext="uittCancel" wmin="50" />
 
 		</group>
@@ -1679,7 +1679,7 @@
 			<instance template="average_score_template" id="direction_rate" x="0"  y="-13" posref="BL TL" posparent="originality_rate" 
 			 hardtext="uiRAP_RateDirection" />
 
-			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="-2"
+			<ctrl style="button_ok" id="ok" x="30" y="15" posref="BM BM" posparent="parent" text_y="0"
 				onclick_l="lua" params_l="getUI('ui:interface:r2ed_scenario_scores').active=false" hardtext="uittOK" wmin="50" />
 
 		</group>

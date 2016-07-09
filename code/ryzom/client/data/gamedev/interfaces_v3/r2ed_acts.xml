@@ -12,7 +12,7 @@
 	 child_resize_h="true" child_resize_hmargin="0" >
 
 		<ctrl type="text_button" button_type="toggle_button" id="eco_button" x="10" y="0" posref="TL TL" 
-		 text_y="-2" onclick_l="lua" params_l="#params_l" hardtext="#hardtext" wmin="#wmin" 
+		 text_y="0" onclick_l="lua" params_l="#params_l" hardtext="#hardtext" wmin="#wmin" 
 		 tx_normal="#tx_ecosystem" tx_pushed="#tx_ecosystem_pushed" tx_over="#tx_ecosystem"
 		 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 		 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
@@ -256,7 +256,7 @@
 			<group id="previous_location_gr" posparent="parent" posref="TL TL" x="10" y="-5" sizeref="wh" w="-20" h="-15" >
 
 				<ctrl type="text_button" button_type="toggle_button" id="new_previous_title" x="0" y="0" posref="TL TL" 
-				 text_y="-2" hardtext="Choose new or previous location" wmin="170" 
+				 text_y="0" hardtext="Choose new or previous location" wmin="170" 
 				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
 				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
@@ -347,7 +347,7 @@
 			<group id="choose_island" posparent="parent" posref="TL TL" x="10" y="-5" sizeref="w" w="-20" h="203" >
 
 				<ctrl type="text_button" button_type="toggle_button" id="choose_island_title" x="0" y="0" posref="TL TL" 
-				 text_y="-2" hardtext="Choose island" wmin="170" 
+				 text_y="0" hardtext="Choose island" wmin="170" 
 				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
 				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
@@ -456,7 +456,7 @@
 			<group id="island_images" x="190" y="-218" w="-200" sizeref="wh" h="-218" posref="TL TL" >
 
 				<ctrl type="text_button" button_type="toggle_button" id="card_title" x="0" y="0" posref="TL TL" 
-				 text_y="-2" hardtext="Island zoom" wmin="170" 
+				 text_y="0" hardtext="Island zoom" wmin="170" 
 				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
 				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 
@@ -535,7 +535,7 @@
 			<group id="island_season" x="10" y="-218" w="170" sizeref="h" h="-258" posref="TL TL" >
 
 				<ctrl type="text_button" button_type="toggle_button" id="season_title" x="0" y="0" posref="TL TL" 
-				 text_y="-2" hardtext="uiR2EDSeason" wmin="170" 
+				 text_y="0" hardtext="uiR2EDSeason" wmin="170" 
 				 tx_normal="Quit_button_normal" tx_pushed="Quit_button_normal" tx_over="Quit_button_normal"
 				 fontsize="10" shadow="true" case_mode="%case_upper" wmargin="8" global_color="false" force_text_over="true"
 				 global_color_normal="false" global_color_over="false" global_color_pushed="false" 

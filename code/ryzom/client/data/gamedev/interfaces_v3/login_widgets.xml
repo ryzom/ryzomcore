@@ -598,8 +598,8 @@
 <template name="button_ok_cancel" id="ok_cancel" ok_text="uittOK" cancel_text="uittCancel" posparent="parent" posref="BM TM" 
 	onclick_ok="" onclick_ok_param="" onclick_cancel="" onclick_cancel_param="" x="0" y="0" keep="true" >
 	<group id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="button_ok" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick_ok" params_l="#onclick_ok_param" hardtext="#ok_text" />
-		<ctrl style="button_cancel" x="4" posparent="ok" text_y="-2" posref ="TR TL" onclick_l="#onclick_cancel" params_l="#onclick_cancel_param" hardtext="#cancel_text" />
+		<ctrl style="button_ok" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick_ok" params_l="#onclick_ok_param" hardtext="#ok_text" />
+		<ctrl style="button_cancel" x="4" posparent="ok" text_y="0" posref ="TR TL" onclick_l="#onclick_cancel" params_l="#onclick_cancel_param" hardtext="#cancel_text" />
 	</group>
 </template>
 
@@ -614,7 +614,7 @@
 <template name="html_text_button" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" active="true" wmin="0">
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y" active="#active">
-		<ctrl style="log_spe_but" id="button" wmin="#wmin" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="log_spe_but" id="button" wmin="#wmin" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
@@ -623,7 +623,7 @@
 <template name="html_text_button_look2" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" >
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="log_button" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="log_button" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
@@ -632,7 +632,7 @@
 <template name="html_text_button_look3" id="" text="" posparent="parent" posref="TL TL"
 	onclick="" onclick_param="" x="0" y="0" keep="true" >
 	<group type="html_input_offset" y_offset="-8" id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
-		<ctrl style="server_note" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="-2" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
+		<ctrl style="server_note" id="button" wmin="0" x="0" y="0" posref="TL TL" text_y="0" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" color="255 255 255 200"/>
 	</group>
 </template>
 
