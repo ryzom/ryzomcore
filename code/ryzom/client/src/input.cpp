@@ -179,9 +179,9 @@ void	SetMouseCursor (bool updatePos)
 		// Get the last cursor
 		float x = 0.5f, y = 0.5f;
 
-		// Window size
-		uint width = Driver->getWindowWidth();
-		uint height = Driver->getWindowHeight();
+		// Screen size
+		uint width, height;
+		CViewRenderer::getInstance()->getScreenSize(width, height);
 
 		// Update the interface pointer
 		CInterfaceManager *instance = CInterfaceManager::getInstance();
