@@ -104,6 +104,9 @@ void updateFromClientCfg()
 	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
 		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
 
+	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
+
 	//---------------------------------------------------
 	if (ClientCfg.WaitVBL != LastClientCfg.WaitVBL)
 	{

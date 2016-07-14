@@ -301,6 +301,7 @@ CClientConfig::CClientConfig()
 	Gamma				= 0.f;						// Default Monitor Gamma.
 
 	InterfaceScale		= 1.0f;                     // Resize UI
+	BilinearUI			= false;
 
 	VREnable			= false;
 	VRDisplayDevice		= "Auto";
@@ -839,6 +840,7 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(InterfaceScale);
 	// 50% smaller / 2x bigger
 	clamp(ClientCfg.InterfaceScale, 0.5f, 2.0f);
+	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");
 	if (varPtr)

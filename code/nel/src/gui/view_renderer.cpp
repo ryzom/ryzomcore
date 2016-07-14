@@ -199,6 +199,7 @@ namespace NLGUI
 			_EmptyLayer[i]= true;
 		}
 		_BlankGlobalTexture  = NULL;
+		_Bilinear = false;
 
 		updateInterfaceScale();
 	}
@@ -1279,7 +1280,7 @@ namespace NLGUI
 					_Material.setTexture(0, ite->Texture);
 
 					// Special Case if _WorldSpaceTransformation and _WorldSpaceScale, enable bilinear
-					if(_WorldSpaceTransformation && _WorldSpaceScale)
+					if(_Bilinear || (_WorldSpaceTransformation && _WorldSpaceScale))
 						ite->Texture->setFilterMode(UTexture::Linear, UTexture::LinearMipMapOff);
 
 					// draw quads and empty list
@@ -1296,7 +1297,7 @@ namespace NLGUI
 					}
 
 					// Special Case if _WorldSpaceTransformation and _WorldSpaceScale, reset
-					if(_WorldSpaceTransformation && _WorldSpaceScale)
+					if(_Bilinear || (_WorldSpaceTransformation && _WorldSpaceScale))
 						ite->Texture->setFilterMode(UTexture::Nearest, UTexture::NearestMipMapOff);
 				}
 				if (!layer.FilteredAlphaBlendedQuads.empty() ||

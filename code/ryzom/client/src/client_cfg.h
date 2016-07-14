@@ -148,6 +148,7 @@ struct CClientConfig
 
 	// UI scaling
 	float			InterfaceScale;
+	bool			BilinearUI;
 
 	// VR
 	bool			VREnable;

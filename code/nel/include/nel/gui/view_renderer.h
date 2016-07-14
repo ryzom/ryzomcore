@@ -181,6 +181,7 @@ namespace NLGUI
 		 */
 		void setInterfaceScale(float scale, sint32 width = 0, sint32 height = 0);
 		float getInterfaceScale() const { return _InterfaceScale; }
+		void setBilinearFiltering(bool b) { _Bilinear = b; }
 
 		/*
 		 * is the Screen minimized?
@@ -537,6 +538,7 @@ namespace NLGUI
 		float		_InterfaceUserScale;
 		sint32		_InterfaceBaseW, _InterfaceBaseH;
 		sint32		_EffectiveScreenW, _EffectiveScreenH;
+		bool		_Bilinear;
 
 		void updateInterfaceScale();
 

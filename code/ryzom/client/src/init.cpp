@@ -1317,6 +1317,7 @@ void prelogInit()
 
 		CInterfaceManager::getInstance();
 		CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
 
 		// Yoyo: initialize NOW the InputHandler for Event filtering.
 		CInputHandlerManager *InputHandlerManager = CInputHandlerManager::getInstance();
