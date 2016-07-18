@@ -1,4 +1,3 @@
-
 <interface_config>
-<command name="event" action="launch_help" params="help_container=ui:interface:cs_browser|url=http://app.ryzom.com/event_tools/"/>
+
 </interface_config>

@@ -192,8 +192,8 @@
 			<ctrl type="button" id="center" button_type="push_button" posparent="zoom_out" posref="TR TL" y="0"  x="4" tx_normal="w_center_map.tga" tx_pushed="W_button_16_over.tga" tx_over="W_button_16_over.tga"
 				onclick_l="map_center" params_l="map=ui:interface:map:content:map_content:actual_map" tooltip="uittCenter" />						
 
-			<view type="text" id="time" x="12" y="0" posparent="center" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
-			<view type="text" id="weather" x="8" y="-16" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			<view type="text" id="time" x="12" y="-1" posparent="center" posref="MR ML" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
+			<view type="text" id="weather" x="8" y="-18" posref="TL TL" color="255 255 255 255" fontsize="12" shadow="true" hardtext="" />
 			
 			<instance template="box_widget" id="back" posref="TL TL" sizeref="wh" w="-2" h="-32" x="1" y="-32" render_layer="0" />
 			
@@ -383,7 +383,7 @@
 			
 			<ctrl style="button_ok" id="respawn" posparent="center" x="16" posref="TR TL" onclick_l="respawn_map_valid" params_l="map=ui:interface:respawn_map:content:map_content:actual_map" hardtext="uiRespawn"/>
 
-			<group id="timer" posparent="respawn" posref="TR TL" x="8" y="-2" child_resize_h="true" child_resize_w="true">
+			<group id="timer" posparent="respawn" posref="TR TL" x="8" y="-5" child_resize_h="true" child_resize_w="true">
 				<view type="bar" id="b" ultra_mini="true" posref="TL TL" value="%player_hp_percent" range="%player_percent_max" color="255 255 255 255" color_negative="255 255 255 255" />
 				<view type="text" id="t" posparent="b" posref="TR TL" x="4" color="255 255 255 255" fontsize="8" shadow="true" hardtext="" />
 			</group>

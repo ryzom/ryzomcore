@@ -6652,7 +6652,7 @@
             posparent="button"
             posref="MR ML"
             x="4"
-            y="0"
+            y="-3"
             color="255 255 255 255"
             fontsize="#fontsize"
             shadow="true"
