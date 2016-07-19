@@ -496,7 +496,7 @@ namespace NLGUI
 	/*
 	 * drawBitmap
 	 */
-	void CViewRenderer::drawRotFlipBitmap (sint layerId, sint32 x, sint32 y, sint32 width, sint32 height,
+	void CViewRenderer::drawRotFlipBitmap (sint layerId, float x, float y, float width, float height,
 										   uint8 rot, bool flipv, sint32 nTxId, const CRGBA &col)
 	{
 		if (width <= 0 || height <= 0) return;

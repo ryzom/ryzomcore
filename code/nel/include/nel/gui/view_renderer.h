@@ -192,7 +192,7 @@ namespace NLGUI
 		 * drawBitmap : this is the interface with all the views
 		 *
 		 */
-		void drawRotFlipBitmap (sint layerId, sint32 x, sint32 y, sint32 width, sint32 height, uint8 rot, bool flipv,
+		void drawRotFlipBitmap (sint layerId, float x, float y, float width, float height, uint8 rot, bool flipv,
 						sint32 nTxId, const NLMISC::CRGBA &col = NLMISC::CRGBA(255,255,255,255));
 
 		/*
