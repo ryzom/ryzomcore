@@ -1083,10 +1083,10 @@ namespace NLGUI
 
 					// Draw a line
 					if (_Underlined)
-						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1, 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1.0f / rVR.getInterfaceScale(), 0, false, rVR.getBlankTextureId(), col);
 
 					if (_StrikeThrough)
-						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line + (_FontHeight / 2), line_width, 1, 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line + (_FontHeight / 2), line_width, 1.0f / rVR.getInterfaceScale(), 0, false, rVR.getBlankTextureId(), col);
 
 					// skip word
 					px += currWord.Info.StringWidth;
