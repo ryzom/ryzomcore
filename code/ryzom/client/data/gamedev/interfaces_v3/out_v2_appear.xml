@@ -1740,7 +1740,7 @@
 </proc>
 
 
-<group type="modal" id="appear_infos1" x="0" y="0" w="824" h="768" posref="TR TR" render_layer="1"
+<group type="modal" id="appear_infos1" x="74" y="0" w="824" h="768" posref="MM MM" render_layer="1"
 					mouse_pos="false" escapable="false" exit_click_out="true" savable="false"
  display="false"
 >
@@ -1765,7 +1765,7 @@
 					onclick_l="proc" params_l="proc_charsel_infos"/>
 </group>
 
-<group type="modal" id="appear_infos2" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+<group type="modal" id="appear_infos2" x="-74" y="-68" w="698" h="652" posref="MM MM" render_layer="1"
 					mouse_pos="false" escapable="false" exit_click_out="true"
  display="false"
 >
@@ -1778,7 +1778,7 @@
 					onclick_l="proc" params_l="proc_charsel_infos"/>
 </group>
 
-<group type="modal" id="appear_infos3" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+<group type="modal" id="appear_infos3" x="-74" y="-68" w="698" h="652" posref="MM MM" render_layer="1"
 					mouse_pos="false" escapable="false" exit_click_out="true"
 	display="false"
 >
@@ -1791,7 +1791,7 @@
 					onclick_l="proc" params_l="proc_charsel_infos"/>
 </group>
 
-<group type="modal" id="appear_infos4" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+<group type="modal" id="appear_infos4" x="-74" y="-68" w="698" h="652" posref="MM MM" render_layer="1"
 					mouse_pos="false" escapable="false" exit_click_out="true"
 					display="false"
 >
@@ -1804,7 +1804,7 @@
 					onclick_l="proc" params_l="proc_charsel_infos"/>
 </group>
 
-<group type="modal" id="appear_infos5" x="-74" y="-68" w="698" h="652" posref="TR TR" render_layer="1"
+<group type="modal" id="appear_infos5" x="-74" y="-68" w="698" h="652" posref="MM MM" render_layer="1"
 					mouse_pos="false" escapable="false" exit_click_out="true"
 					display="false"
 >

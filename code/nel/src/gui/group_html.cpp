@@ -4387,7 +4387,6 @@ namespace NLGUI
 			ctrlButton->setToolTipParent(TTMouse);
 			ctrlButton->setToolTipParentPosRef(Hotspot_TTAuto);
 			ctrlButton->setToolTipPosRef(Hotspot_TTAuto);
-			ctrlButton->setActionOnLeftClickParams(tooltip);
 		}
 
 		getParagraph()->addChild (ctrlButton);
