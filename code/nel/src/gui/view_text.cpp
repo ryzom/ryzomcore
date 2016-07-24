@@ -61,6 +61,7 @@ namespace NLGUI
 
 		_FontSize = 12 +
 			CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont ).getValSInt32();
+		_FontName.clear();
 		_Embolden = false;
 		_Oblique = false;
 		_Color = CRGBA(255,255,255,255);
@@ -135,7 +136,7 @@ namespace NLGUI
 	CViewText::~CViewText()
 	{
 		if (_Index != 0xFFFFFFFF)
-			CViewRenderer::getTextContext()->erase (_Index);
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
 		clearLines();
 
 		if (!_Setuped)
@@ -149,7 +150,7 @@ namespace NLGUI
 	CViewText &CViewText::operator=(const CViewText &vt)
 	{
 		if (_Index != 0xFFFFFFFF)
-			CViewRenderer::getTextContext()->erase (_Index);
+			CViewRenderer::getTextContext(_FontName)->erase (_Index);
 
 		// Create database entries
 		_Active = vt._Active;
@@ -961,7 +962,7 @@ namespace NLGUI
 		if (rVR.isMinimized())
 			return;
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 
 		// *** get current color
@@ -985,8 +986,6 @@ namespace NLGUI
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
 			if (_Lines.size() == 0) return;
-
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
 
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
@@ -1259,6 +1258,24 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewText::setFontName(const std::string &name)
+	{
+		if (_FontName == name)
+			return;
+
+		if (_FontName.length() > 0)
+		{
+			if (_Index != 0xFFFFFFFF)
+				CViewRenderer::getTextContext(_FontName)->erase (_Index);
+			clearLines();
+		}
+
+		_FontName = name;
+		computeFontSize ();
+		invalidateContent();
+	}
+
+	// ***************************************************************************
 	void CViewText::setFontSize (sint nFontSize)
 	{
 		_FontSize = nFontSize + CWidgetManager::getInstance()->getSystemOption( CWidgetManager::OptionAddCoefFont).getValSInt32();
@@ -1401,6 +1418,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::flushWordInLine(ucstring &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		// create a new line?
 		if(!linePushed)
 		{
@@ -1408,7 +1426,7 @@ namespace NLGUI
 			linePushed= true;
 		}
 		// Append to the last line
-		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth);
+		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext);
 		// reset the word
 		ucCurrentWord = ucstring("");
 	}
@@ -1444,7 +1462,7 @@ namespace NLGUI
 				rWidthCurrentLine= max(rWidthCurrentLine, (float)wordFormat.TabX*_FontWidth);
 			}
 
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 			// Parse the letter
 			{
@@ -1490,6 +1508,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::addDontClipWordLine(std::vector<CWord> &currLine)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		// create a new line
 		_Lines.push_back(TLineSPtr(new CLine));
 
@@ -1504,7 +1523,7 @@ namespace NLGUI
 				if(currLine[i].Format!=lineWordFormat)
 				{
 					// add the current lineWord to the line.
-					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth);
+					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
 					// get new lineWordFormat
 					lineWordFormat= currLine[i].Format;
 					// and clear
@@ -1519,7 +1538,7 @@ namespace NLGUI
 			}
 
 			if(!lineWord.empty())
-				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth);
+				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
 
 			// clear
 			currLine.clear();
@@ -1529,6 +1548,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::updateTextContextMultiLineJustified(uint nMaxWidth, bool expandSpaces)
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		UTextContext::CStringInfo si;
 		//
 		TCharPos currPos = 0;
@@ -1622,7 +1642,7 @@ namespace NLGUI
 				// Get the word value.
 				wordValue = _Text.substr(spaceEnd, wordEnd - spaceEnd);
 				// compute width of word
-				si = CViewRenderer::getTextContext()->getStringInfo(wordValue);
+				si = TextContext->getStringInfo(wordValue);
 
 				// compute size of spaces/Tab + word
 				newLineWidth = lineWidth + numSpaces * _SpaceWidth;
@@ -1679,7 +1699,7 @@ namespace NLGUI
 					{
 						uint maxNumSpaces = std::max(1U, (uint) (nMaxWidth / _SpaceWidth));
 						CWord spaceWord; // a word with only spaces in it
-						spaceWord.build (ucstring (""), maxNumSpaces);
+						spaceWord.build (ucstring (""), *TextContext, maxNumSpaces);
 						spaceWord.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						_Lines.back()->addWord(spaceWord, _FontWidth);
@@ -1701,14 +1721,14 @@ namespace NLGUI
 						for(currChar = 0; currChar < wordValue.length(); ++currChar)
 						{
 							oneChar = wordValue[currChar];
-							si = CViewRenderer::getTextContext()->getStringInfo(oneChar);
+							si = TextContext->getStringInfo(oneChar);
 							if ((uint) (px + si.StringWidth / _Scale) > nMaxWidth) break;
 							px += si.StringWidth / _Scale;
 						}
 						currChar = std::max((uint) 1, currChar); // must fit at least one character otherwise there's an infinite loop
 						wordValue = _Text.substr(spaceEnd, currChar);
 						CWord word;
-						word.build(wordValue, numSpaces);
+						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						float roomForSpaces = (float) nMaxWidth - word.Info.StringWidth;
@@ -1743,7 +1763,7 @@ namespace NLGUI
 					if (!wordValue.empty() || numSpaces != 0)
 					{
 						CWord word;
-						word.build(wordValue, numSpaces);
+						word.build(wordValue, *TextContext, numSpaces);
 						word.Format= wordFormat;
 						// update line width
 						_Lines.back()->addWord(word, _FontWidth);
@@ -1823,7 +1843,7 @@ namespace NLGUI
 		if (_Scale != CViewRenderer::getInstance()->getInterfaceScale())
 			computeFontSize();
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
@@ -1857,13 +1877,13 @@ namespace NLGUI
 			{
 				while (_Lines.size() > _MultiMaxLine)
 				{
-					_Lines.back()->clear();
+					_Lines.back()->clear(*TextContext);
 					_Lines.pop_back();
 				}
 				_Lines.pop_back();
 				CViewText::CLine *endLine = new CViewText::CLine;
 				CViewText::CWord w;
-				w.build(string("..."));
+				w.build(string("..."), *TextContext);
 				endLine->addWord(w, _FontWidth);
 				_Lines.push_back(TLineSPtr(endLine));
 			}
@@ -2153,7 +2173,7 @@ namespace NLGUI
 	void CViewText::getCharacterPositionFromIndex(sint index, bool cursorAtPreviousLineEnd, sint &x, sint &y, sint &height) const
 	{
 		NLMISC::clamp(index, 0, (sint) _Text.length());
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
@@ -2260,7 +2280,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// Tool fct : From a word and a x coordinate, give the matching character index
-	static uint getCharacterIndex(const ucstring &textValue, float x)
+	static uint getCharacterIndex(const ucstring &textValue, float x, NL3D::UTextContext &textContext)
 	{
 		float px = 0.f;
 		float sw;
@@ -2271,7 +2291,7 @@ namespace NLGUI
 		{
 			// get character width
 			singleChar[0] = textValue[i];
-			si = CViewRenderer::getTextContext()->getStringInfo(singleChar);
+			si = textContext.getStringInfo(singleChar);
 			sw = si.StringWidth / CViewRenderer::getInstance()->getInterfaceScale();
 			px += sw / CViewRenderer::getInstance()->getInterfaceScale();
 			 // the character is at the i - 1 position
@@ -2289,7 +2309,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::getCharacterIndexFromPosition(sint x, sint y, uint &index, bool &cursorAtPreviousLineEnd) const
 	{
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 		// setup the text context
 		TextContext->setHotSpot (UTextContext::BottomLeft);
@@ -2370,7 +2390,7 @@ namespace NLGUI
 					else
 					{
 						// the coord is in the word itself
-						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, (float) x - (px + spacesWidth));
+						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, (float) x - (px + spacesWidth), *TextContext);
 						cursorAtPreviousLineEnd = false;
 						return;
 					}
@@ -2395,7 +2415,7 @@ namespace NLGUI
 				index = 0;
 				return;
 			}
-			index = getCharacterIndex(_Text, (float) x);
+			index = getCharacterIndex(_Text, (float) x, *TextContext);
 			return;
 		}
 	}
@@ -2433,15 +2453,16 @@ namespace NLGUI
 				quadSize--;
 		}
 		// select what quad to skip
-		CViewRenderer::getTextContext()->setStringSelection(stringId, quadStart, quadSize);
+		CViewRenderer::getTextContext(_FontName)->setStringSelection(stringId, quadStart, quadSize);
 	}
 
 	// ***************************************************************************
 	void CViewText::clearLines()
 	{
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		for(uint k = 0; k < _Lines.size(); ++k)
 		{
-			_Lines[k]->clear();
+			_Lines[k]->clear(*TextContext);
 		}
 		_Lines.clear();
 	}
@@ -2495,10 +2516,10 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth)
+	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
 	{
 		CWord word;
-		word.build(text, numSpaces);
+		word.build(text, textContext, numSpaces);
 		word.Format= wordFormat;
 		addWord(word, fontWidth);
 	}
@@ -2520,12 +2541,12 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::clear()
+	void CViewText::CLine::clear(NL3D::UTextContext &textContext)
 	{
 		for(uint k = 0; k < _Words.size(); ++k)
 		{
 			if (_Words[k].Index != 0xffffffff)
-				CViewRenderer::getTextContext()->erase(_Words[k].Index);
+				textContext.erase(_Words[k].Index);
 		}
 		_Words.clear();
 		_NumChars = 0;
@@ -2542,13 +2563,12 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CWord::build(const ucstring &text, uint numSpaces/*=0*/)
+	void CViewText::CWord::build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces)
 	{
 		Text = text;
 		NumSpaces = numSpaces;
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
-		Index = TextContext->textPush(text);
-		Info = TextContext->getStringInfo(Index);
+		Index = textContext.textPush(text);
+		Info = textContext.getStringInfo(Index);
 		Info.StringWidth /= CViewRenderer::getInstance()->getInterfaceScale();
 	}
 
@@ -2570,7 +2590,7 @@ namespace NLGUI
 		static const ucstring lineFeedStr("\n");
 		float maxWidth = 0;
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
@@ -2657,7 +2677,7 @@ namespace NLGUI
 		// If we can't clip the words, return the size of the largest word
 		else if ((_TextMode == DontClipWord) || (_TextMode == Justified))
 		{
-			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+			NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
 			TextContext->setShaded (_Shadow);
 			TextContext->setShadeOutline (_ShadowOutline);
@@ -2717,7 +2737,7 @@ namespace NLGUI
 	{
 		_Scale = CViewRenderer::getInstance()->getInterfaceScale();
 
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);
 		TextContext->setShadeOutline (_ShadowOutline);
@@ -2735,6 +2755,13 @@ namespace NLGUI
 
 		// for now we can't know that directly from UTextContext
 		UTextContext::CStringInfo si = TextContext->getStringInfo(chars);
+
+		// font generator changes unknown glyphs to dot '.'. use fallback if it looks odd
+		if (_FontSize > (si.StringHeight + si.StringLine))
+		{
+			chars.fromUtf8("|");
+			si = TextContext->getStringInfo(chars);
+		}
 		// add a padding of 1 pixel else the top will be truncated
 		_FontHeight = (si.StringHeight / _Scale) + 1;
 		_FontLegHeight = si.StringLine / _Scale;
@@ -3089,7 +3116,7 @@ namespace NLGUI
 		}
 
 		// convert in ULetterColors
-		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext();
+		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		ULetterColors * letterColors = TextContext->createLetterColors();
 		for(uint i=0; i<tempLetterColors.size(); i++)
 		{

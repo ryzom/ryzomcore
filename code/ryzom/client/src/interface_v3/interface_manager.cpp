@@ -1574,6 +1574,10 @@ void CInterfaceManager::setupOptions()
 	if ((!sFont.empty()) && (Driver != NULL))
 		resetTextContext(sFont.c_str(), true);
 	// Continue to parse the rest of the interface
+
+	sFont = wm->getSystemOption (CWidgetManager::OptionMonospaceFont).getValStr();
+	if ((!sFont.empty()) && (Driver != NULL))
+		CViewRenderer::registerFont("monospace", sFont);
 }
 
 // ------------------------------------------------------------------------------------------------

@@ -25,6 +25,8 @@
            value="basic.ttf" /> -->
     <param name="font"
            value="ryzom.ttf" />
+    <param name="monospace_font"
+           value="ryzom_monospace.ttf" />
     <param name="add_coef_font"
            value="0" />
     <param name="mul_coef_anim"

@@ -80,6 +80,7 @@ namespace NLGUI
 		/// Set
 
 		void setText (const ucstring &text);
+		void setFontName (const std::string &name);
 		void setFontSize (sint nFontSize);
 		void setEmbolden (bool nEmbolden);
 		void setOblique (bool nOblique);
@@ -104,6 +105,7 @@ namespace NLGUI
 
 		ucstring		getText() const		{ return _Text; }
 		sint			getFontSize() const;
+		std::string		getFontName() const { return _FontName; }
 		bool			getEmbolden() 		{ return _Embolden; }
 		bool			getOblique() 		{ return _Oblique; }
 		NLMISC::CRGBA	getColor()			{ return _Color; }
@@ -227,6 +229,8 @@ namespace NLGUI
 		uint _Index;
 		/// info on the computed String associated to this text control
 		NL3D::UTextContext::CStringInfo _Info;
+		/// Font name to get TextContext
+		std::string _FontName;
 		/// the font size
 		sint	_FontSize;
 		bool	_Embolden;
@@ -322,7 +326,7 @@ namespace NLGUI
 				CFormatInfo							Format;
 			public:
 				// build from a string, using the current text context
-				void build(const ucstring &text, uint numSpaces= 0);
+				void build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
 		};
 		typedef std::vector<CWord> TWordVect;
 
@@ -333,9 +337,9 @@ namespace NLGUI
 				// ctor
 				CLine();
 				// Clear the line & remove text contexts
-				void clear();
+				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
 				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }

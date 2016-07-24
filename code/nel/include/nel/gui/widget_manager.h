@@ -442,6 +442,7 @@ namespace NLGUI
 			OptionTimeoutMessages,
 			OptionTimeoutContext,
 			OptionTimeoutContextHtml,
+			OptionMonospaceFont,
 			NumSystemOptions
 		};
 		

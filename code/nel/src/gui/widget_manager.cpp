@@ -3177,6 +3177,7 @@ namespace NLGUI
 			_SystemOptions[OptionTimeoutMessages]= opt->getValue("messages_timeout");
 			_SystemOptions[OptionTimeoutContext]= opt->getValue("context_timeout");
 			_SystemOptions[OptionTimeoutContextHtml]= opt->getValue("context_html_timeout");
+			_SystemOptions[OptionMonospaceFont]= opt->getValue("monospace_font");
 		}
 
 	}
