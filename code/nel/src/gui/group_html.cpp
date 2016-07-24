@@ -1218,6 +1218,7 @@ namespace NLGUI
 				registerAnchorName(MY_HTML_A);
 
 				CStyleParams style;
+				style.FontFamily = getFontFamily();
 				style.FontSize = getFontSize();
 				style.TextColor = LinkColor;
 				style.Underlined = true;
@@ -1226,6 +1227,7 @@ namespace NLGUI
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
 					getStyleParams(value[HTML_A_STYLE], style);
 
+				_FontFamily.push_back(style.FontFamily);
 				_FontSize.push_back(style.FontSize);
 				_TextColor.push_back(style.TextColor);
 				_FontUnderlined.push_back(style.Underlined);
@@ -1568,7 +1570,7 @@ namespace NLGUI
 						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
 							tooltip = value[MY_HTML_INPUT_ALT];
 
-						// by default not inherited
+						// by default not inherited, font family defaults to system font
 						CStyleParams style;
 						style.TextColor = TextColor;
 						style.FontSize = TextFontSize;
@@ -1579,6 +1581,7 @@ namespace NLGUI
 							getStyleParams(value[MY_HTML_INPUT_STYLE], style);
 
 						_TextColor.push_back(style.TextColor);
+						_FontFamily.push_back(style.FontFamily);
 						_FontSize.push_back(style.FontSize);
 						_FontWeight.push_back(style.FontWeight);
 						_FontOblique.push_back(style.FontOblique);
@@ -1794,6 +1797,7 @@ namespace NLGUI
 							}
 						}
 
+						popIfNotEmpty(_FontFamily);
 						popIfNotEmpty(_FontSize);
 						popIfNotEmpty(_TextColor);
 						popIfNotEmpty(_FontWeight);
@@ -2039,7 +2043,7 @@ namespace NLGUI
 				// Got one form ?
 				if (!(_Forms.empty()))
 				{
-					// not inherited by default
+					// not inherited by default, font family defaults to system font
 					CStyleParams style;
 					style.TextColor = TextColor;
 					style.FontWeight = FONT_WEIGHT_NORMAL;
@@ -2050,6 +2054,7 @@ namespace NLGUI
 						getStyleParams(value[MY_HTML_TEXTAREA_STYLE], style);
 
 					_TextColor.push_back(style.TextColor);
+					_FontFamily.push_back(style.FontFamily);
 					_FontSize.push_back(style.FontSize);
 					_FontWeight.push_back(style.FontWeight);
 					_FontOblique.push_back(style.FontOblique);
@@ -2136,6 +2141,7 @@ namespace NLGUI
 				{
 					CStyleParams style;
 					style.TextColor = getTextColor();
+					style.FontFamily = getFontFamily();
 					style.FontSize = getFontSize();
 					style.FontWeight = getFontWeight();
 					style.FontOblique = getFontOblique();
@@ -2146,6 +2152,7 @@ namespace NLGUI
 						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
 
 					_TextColor.push_back(style.TextColor);
+					_FontFamily.push_back(style.FontFamily);
 					_FontSize.push_back(style.FontSize);
 					_FontWeight.push_back(style.FontWeight);
 					_FontOblique.push_back(style.FontOblique);
@@ -2300,6 +2307,7 @@ namespace NLGUI
 				popIfNotEmpty (_FontSize);
 			break;
 			case HTML_A:
+				popIfNotEmpty (_FontFamily);
 				popIfNotEmpty (_FontSize);
 				popIfNotEmpty (_TextColor);
 				popIfNotEmpty (_FontUnderlined);
@@ -2371,6 +2379,7 @@ namespace NLGUI
 							_Forms.back().Entries.push_back (entry);
 						}
 
+						popIfNotEmpty (_FontFamily);
 						popIfNotEmpty (_FontSize);
 						popIfNotEmpty (_FontWeight);
 						popIfNotEmpty (_FontOblique);
@@ -2537,6 +2546,7 @@ namespace NLGUI
 				}
 				break;
 			case HTML_SPAN:
+				popIfNotEmpty (_FontFamily);
 				popIfNotEmpty (_FontSize);
 				popIfNotEmpty (_FontWeight);
 				popIfNotEmpty (_FontOblique);
@@ -4008,6 +4018,7 @@ namespace NLGUI
 				// Compatible with current parameters ?
 				if (!skipLine &&
 					(getTextColor() == _CurrentViewLink->getColor()) &&
+					(getFontFamily() == _CurrentViewLink->getFontName()) &&
 					(getFontSize() == (uint)_CurrentViewLink->getFontSize()) &&
 					(getFontUnderlined() == _CurrentViewLink->getUnderlined()) &&
 					(getFontStrikeThrough() == _CurrentViewLink->getStrikeThrough()) &&
@@ -4072,6 +4083,7 @@ namespace NLGUI
 					}
 					newLink->setText(tmpStr);
 					newLink->setColor(getTextColor());
+					newLink->setFontName(getFontFamily());
 					newLink->setFontSize(getFontSize());
 					newLink->setEmbolden(embolden);
 					newLink->setOblique(getFontOblique());
@@ -5760,6 +5772,17 @@ namespace NLGUI
 				else
 				if (it->second == "italic" || it->second == "oblique")
 					style.FontOblique = true;
+			}
+			else
+			if (it->first == "font-family")
+			{
+				if (it->second == "inherit")
+					style.FontFamily = getFontFamily();
+				else
+				if (it->second == "monospace")
+					style.FontFamily = "monospace";
+				else
+					style.FontFamily = "";
 			}
 			else
 			if (it->first == "font-weight")

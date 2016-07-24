@@ -77,7 +77,7 @@ namespace NLGUI
 		class CStyleParams
 		{
 		public:
-			CStyleParams () : TextColor(255,255,255,255)
+			CStyleParams () : FontFamily(""), TextColor(255,255,255,255)
 			{
 				FontSize=10;
 				FontWeight=400;
@@ -92,6 +92,7 @@ namespace NLGUI
 			uint FontSize;
 			uint FontWeight;
 			bool FontOblique;
+			std::string FontFamily;
 			NLMISC::CRGBA TextColor;
 			bool Underlined;
 			bool StrikeThrough;
@@ -506,6 +507,15 @@ namespace NLGUI
 			if (_GlobalColor.empty())
 				return false;
 			return _GlobalColor.back();
+		}
+
+		// Current font name
+		std::vector<std::string>	_FontFamily;
+		inline const char* getFontFamily() const
+		{
+			if (_FontFamily.empty())
+				return "";
+			return _FontFamily.back().c_str();
 		}
 
 		// Current font size
