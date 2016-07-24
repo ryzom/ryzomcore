@@ -586,8 +586,12 @@ namespace NLGUI
 		static NL3D::UDriver *driver;
 		static NL3D::UTextContext *textcontext;
 
+		typedef CHashMap< std::string, NL3D::UTextContext* > TFontsList;
+		static TFontsList fonts;
+
 	public:
-		static NL3D::UTextContext* getTextContext(){ return textcontext; }
+		static NL3D::UTextContext* getTextContext(const std::string &name="");
+		static bool registerFont(const std::string &name, const std::string &font);
 
 		/// Set of hw cursor images
 		static std::set< std::string > *hwCursors;
