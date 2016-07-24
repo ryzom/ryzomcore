@@ -34,6 +34,7 @@ namespace NLGUI
 	NL3D::UTextContext* CViewRenderer::textcontext    = NULL;
 	std::set< std::string >* CViewRenderer::hwCursors = NULL;
 	float CViewRenderer::hwCursorScale                = 1.0f;
+	CViewRenderer::TFontsList CViewRenderer::fonts;
 
 	CViewRenderer::CViewRenderer()
 	{
@@ -214,15 +215,63 @@ namespace NLGUI
 			ite++;
 		}
 
+		TFontsList::iterator iteFonts = fonts.begin();
+		while (iteFonts != fonts.end())
+		{
+			driver->deleteTextContext(iteFonts->second);
+			++iteFonts;
+		}
+
 		_GlobalTextures.clear();
 		_SImages.clear();
 		_SImageIterators.clear();
 		_TextureMap.clear();
 		_IndexesToTextureIds.clear();
+		fonts.clear();
 	}
 
 	NL3D::UDriver* CViewRenderer::getDriver(){
 		return driver;
+	}
+
+	// ***************************************************************************
+	NL3D::UTextContext* CViewRenderer::getTextContext(const std::string &name)
+	{
+		if (name.size() > 0 && fonts.count(name) > 0)
+			return fonts[name];
+
+		return textcontext;
+	}
+
+	// ***************************************************************************
+	bool CViewRenderer::registerFont(const std::string &name, const std::string &font)
+	{
+		nlassert(driver != NULL);
+
+		// free existing font
+		if (fonts.count(name) > 0)
+			driver->deleteTextContext(fonts[name]);
+
+		std::string fontFile = CPath::lookup(font, false);
+		if (fontFile.size() == 0)
+		{
+			nlwarning("Font file '%s' not found", font.c_str());
+			return false;
+		}
+
+		NL3D::UTextContext *context;
+		context = driver->createTextContext(fontFile);
+		if (context == NULL)
+		{
+			nlwarning("Cannot create a TextContext with font '%s'.", font.c_str());
+			return false;
+		}
+
+		context->setKeep800x600Ratio(false);
+
+		fonts[name] = context;
+
+		return true;
 	}
 
 	void CViewRenderer::setTextContext(NL3D::UTextContext *textcontext)
