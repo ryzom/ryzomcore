@@ -1914,7 +1914,29 @@ namespace NLGUI
 				newParagraph(PBeginSpace);
 				break;
 			case HTML_PRE:
-				_PRE.push_back(true);
+				{
+					CStyleParams style;
+					style.TextColor = getTextColor();
+					style.FontFamily = "monospace";
+					style.FontSize = getFontSize();
+					style.FontWeight = getFontWeight();
+					style.FontOblique = getFontOblique();
+					style.Underlined = getFontUnderlined();
+					style.StrikeThrough = getFontStrikeThrough();
+
+					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
+						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
+
+					_TextColor.push_back(style.TextColor);
+					_FontFamily.push_back(style.FontFamily);
+					_FontSize.push_back(style.FontSize);
+					_FontWeight.push_back(style.FontWeight);
+					_FontOblique.push_back(style.FontOblique);
+					_FontUnderlined.push_back(style.Underlined);
+					_FontStrikeThrough.push_back(style.StrikeThrough);
+
+					_PRE.push_back(true);
+				}
 				break;
 			case HTML_TABLE:
 				{
@@ -2333,6 +2355,13 @@ namespace NLGUI
 				endParagraph();
 				break;
 			case HTML_PRE:
+				popIfNotEmpty (_FontFamily);
+				popIfNotEmpty (_FontSize);
+				popIfNotEmpty (_FontWeight);
+				popIfNotEmpty (_FontOblique);
+				popIfNotEmpty (_TextColor);
+				popIfNotEmpty (_FontUnderlined);
+				popIfNotEmpty (_FontStrikeThrough);
 				popIfNotEmpty (_PRE);
 				break;
 			case HTML_DIV:
