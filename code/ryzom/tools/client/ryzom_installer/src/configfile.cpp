@@ -144,8 +144,25 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 {
 	s_instance = this;
 
-	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
-	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
+	// only keep language ISO 639 code
+	m_language = QLocale::system().name().left(2);
+
+	// it won't be found if run with uninstall flag, but since we already have a local installer.ini...
+	QString configFile = getCurrentDirectory() + "/installer.ini";
+
+	if (!QFile::exists(configFile))
+	{
+		configFile = QApplication::applicationDirPath() + "/installer.ini";
+
+		if (!QFile::exists(configFile))
+		{
+			configFile.clear();
+		}
+	}
+
+	m_defaultConfigPath = configFile;
+
+	// the config file we'll write
 	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/installer.ini";
 }
 
