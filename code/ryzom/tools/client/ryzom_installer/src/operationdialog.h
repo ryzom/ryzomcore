@@ -103,8 +103,7 @@ protected:
 	void uninstallOldClient();
 	bool createDefaultProfile();
 
-	bool createClientDesktopShortcut(const QString &profileId);
-	bool createClientMenuShortcut(const QString &profileId);
+	bool createProfileShortcuts(const QString &profileId);
 
 	bool createAddRemoveEntry();
 	bool updateAddRemoveEntry();

@@ -175,12 +175,8 @@ void COperationDialog::processInstallNextStep()
 		createDefaultProfile();
 		break;
 
-		case CreateDesktopShortcut:
-		createClientDesktopShortcut(0);
-		break;
-
-		case CreateMenuShortcut:
-		createClientMenuShortcut(0);
+		case CreateProfileShortcuts:
+		createProfileShortcuts(0);
 		break;
 
 		case CreateAddRemoveEntry:
@@ -869,60 +865,15 @@ bool COperationDialog::createDefaultProfile()
 	return true;
 }
 
-bool COperationDialog::createClientDesktopShortcut(const QString &profileId)
+bool COperationDialog::createProfileShortcuts(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileId);
-	const CServer &server = config->getServer(profile.server);
 
-	m_currentOperation = tr("Create desktop shortcut for profile %1").arg(profile.id);
+	m_currentOperation = tr("Create shortcuts for profile %1").arg(profile.id);
 
-#ifdef Q_OS_WIN32
-	if (profile.desktopShortcut)
-	{
-		QString executable = profile.getClientFullPath();
-		QString shortcut = profile.getClientDesktopLinkFullPath();
-		QString workingDir = server.getDirectory();
-
-		QString arguments = QString("--profile %1").arg(profile.id);
-
-		// append custom arguments
-		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
-
-		createLink(executable, shortcut, arguments, workingDir, profile.comments);
-	}
-#endif
-
-	emit done();
-
-	return true;
-}
-
-bool COperationDialog::createClientMenuShortcut(const QString &profileId)
-{
-	CConfigFile *config = CConfigFile::getInstance();
-
-	const CProfile &profile = config->getProfile(profileId);
-	const CServer &server = config->getServer(profile.server);
-
-	m_currentOperation = tr("Create menu shortcut for profile %1").arg(profile.id);
-
-#ifdef Q_OS_WIN32
-	if (profile.menuShortcut)
-	{
-		QString executable = profile.getClientFullPath();
-		QString shortcut = profile.getClientMenuLinkFullPath();
-		QString workingDir = server.getDirectory();
-
-		QString arguments = QString("--profile %1").arg(profile.id);
-
-		// append custom arguments
-		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
-
-		createLink(executable, shortcut, arguments, workingDir, profile.comments);
-	}
-#endif
+	profile.createShortcuts();
 
 	emit done();
 
@@ -1080,9 +1031,7 @@ void COperationDialog::addComponentsProfiles()
 	{
 		const CProfile &profile = config->getProfile(profileId);
 
-		if (profile.desktopShortcut) createClientDesktopShortcut(profile.id);
-
-		if (profile.menuShortcut) createClientMenuShortcut(profile.id);
+		profile.createShortcuts();
 	}
 }
 

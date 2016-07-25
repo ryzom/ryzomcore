@@ -60,22 +60,82 @@ QString CProfile::getClientFullPath() const
 	return s.getClientFullPath();
 }
 
-QString CProfile::getClientDesktopLinkFullPath() const
+QString CProfile::getClientDesktopShortcutFullPath() const
 {
 #ifdef Q_OS_WIN32
 	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
-#else
+#elif defined(Q_OS_MAC)
 	return "";
+#else
+	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".desktop";
 #endif
 }
 
-QString CProfile::getClientMenuLinkFullPath() const
+QString CProfile::getClientMenuShortcutFullPath() const
 {
 #ifdef Q_OS_WIN32
 	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
-#else
+#elif defined(Q_OS_MAC)
 	return "";
+#else
+	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".desktop";
 #endif
+}
+
+void CProfile::createShortcuts() const
+{
+	const CServer &s = CConfigFile::getInstance()->getServer(server);
+
+	QString executable = getClientFullPath();
+	QString workingDir = s.getDirectory();
+
+	QString arguments = QString("--profile %1").arg(id);
+
+	// append custom arguments
+	if (!arguments.isEmpty()) arguments += QString(" %1").arg(arguments);
+
+	QString icon;
+
+#ifdef Q_OS_WIN32
+	icon = executable;
+#else
+	// TODO: Linux icon
+#endif
+
+	if (desktopShortcut)
+	{
+		QString shortcut = getClientDesktopShortcutFullPath();
+
+		// create desktop shortcut
+		createLink(shortcut, name, executable, arguments, icon, workingDir);
+	}
+
+	if (menuShortcut)
+	{
+		QString shortcut = getClientMenuShortcutFullPath();
+
+		// create menu shortcut
+		createLink(shortcut, name, executable, arguments, icon, workingDir);
+	}
+}
+
+void CProfile::deleteShortcuts() const
+{
+	// delete desktop shortcut
+	QString link = getClientDesktopShortcutFullPath();
+
+	if (QFile::exists(link)) QFile::remove(link);
+
+	// delete menu shortcut
+	link = getClientMenuShortcutFullPath();
+
+	if (QFile::exists(link)) QFile::remove(link);
+}
+
+void CProfile::updateShortcuts() const
+{
+	deleteShortcuts();
+	createShortcuts();
 }
 
 CConfigFile *CConfigFile::s_instance = NULL;
@@ -692,11 +752,9 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 	if (!profile.desktopShortcut) return false;
 
-#ifdef Q_OS_WIN32
-	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientDesktopLinkFullPath()));
-#else
-	return false;
-#endif
+	QString shortcut = profile.getClientDesktopShortcutFullPath();
+
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
 bool CConfigFile::shouldCreateMenuShortcut() const
@@ -705,11 +763,9 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 	if (!profile.menuShortcut) return false;
 
-#ifdef Q_OS_WIN32
-	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientMenuLinkFullPath()));
-#else
-	return false;
-#endif
+	QString shortcut = profile.getClientMenuShortcutFullPath();
+
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
 QString CConfigFile::getInstallerFullPath() const
@@ -876,14 +932,9 @@ OperationStep CConfigFile::getInstallNextStep() const
 		return CopyProfileFiles;
 	}
 
-	if (shouldCreateDesktopShortcut())
+	if (shouldCreateDesktopShortcut() || shouldCreateMenuShortcut())
 	{
-		return CreateDesktopShortcut;
-	}
-
-	if (shouldCreateMenuShortcut())
-	{
-		return CreateMenuShortcut;
+		return CreateProfileShortcuts;
 	}
 
 #ifdef Q_OS_WIN
