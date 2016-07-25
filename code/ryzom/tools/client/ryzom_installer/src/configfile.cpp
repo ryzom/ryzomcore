@@ -542,6 +542,11 @@ QString CConfigFile::expandVariables(const QString &str) const
 	res.replace("$TIMESTAMP", QString::number(QDateTime::currentDateTime().toTime_t()));
 	res.replace("$LANG", m_language);
 	res.replace("$ARCH", getClientArch());
+	res.replace("$PRODUCT_NAME", m_productName);
+	res.replace("$PRODUCT_PUBLISHER", m_productPublisher);
+	res.replace("$PRODUCT_ABOUT_URL", m_productAboutUrl);
+	res.replace("$PRODUCT_HELP_URL", m_productHelpUrl);
+	res.replace("$PRODUCT_COMMENTS", m_productComments);
 
 	return res;
 }
