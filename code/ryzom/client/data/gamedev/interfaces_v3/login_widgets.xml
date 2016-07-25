@@ -182,7 +182,7 @@
 <style style="log_button" type="text_button" button_type="push_button" 
 		tx_normal="log_but" tx_pushed="log_but_over" tx_over="log_but_over" wmargin="48"
 		color="255 255 255 255" col_over="255 255 255 255" col_pushed="255 255 255 255"
-		text_y="-3" fontsize="10" shadow="true"
+		text_y="0" fontsize="10" shadow="true"
 		text_color_normal="255 255 255 160" 
 	    text_color_pushed="255 255 255 255" 
 	    text_color_over="255 255 255 255" 
