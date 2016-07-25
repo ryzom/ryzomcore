@@ -699,9 +699,6 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
-	// client_default.cfg doesn't exist
-	if (!dir.exists("client_default.cfg")) return false;
-
 	// current server
 	CServer server = getServer();
 
@@ -714,9 +711,18 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 
 		// check if old client is defined and exists
 		if (!dir.exists(clientFilename)) return false;
-	}
 
-	// TODO: more checks
+		// client 2.1-
+	}
+	else
+	{
+		// client 3.0+
+
+		// client_default.cfg doesn't exist
+		if (!dir.exists("client_default.cfg")) return false;
+
+		// TODO: more checks
+	}
 
 	return true;
 }
