@@ -234,6 +234,9 @@ void COperationDialog::updateAddRemoveComponents()
 
 		// remove profiles that still exist
 		profilesToDelete.removeAll(profile.id);
+
+		// delete all shortcuts, they'll be recreated later
+		profile.deleteShortcuts();
 	}
 
 	// update components to remove
@@ -256,10 +259,9 @@ void COperationDialog::processUpdateProfilesNextStep()
 	{
 		updateAddRemoveComponents();
 	}
+
 	// TODO: check all servers are downloaded
 	// TODO: delete profiles directories that are not used anymore
-	// TODO: create shortcuts
-
 
 	if (!m_removeComponents.profiles.isEmpty())
 	{
@@ -275,9 +277,10 @@ void COperationDialog::processUpdateProfilesNextStep()
 		return;
 	}
 
+	CConfigFile *config = CConfigFile::getInstance();
+
 	if (!m_addComponents.servers.isEmpty())
 	{
-		CConfigFile *config = CConfigFile::getInstance();
 		const CServer &defaultServer = config->getServer();
 
 		// servers files to download/update
@@ -332,6 +335,12 @@ void COperationDialog::processUpdateProfilesNextStep()
 				QString clientFile = config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename);
 			}
 		}
+	}
+
+	// recreate shortcuts
+	foreach(const CProfile &profile, config->getProfiles())
+	{
+		profile.createShortcuts();
 	}
 
 	updateAddRemoveEntry();
@@ -1010,6 +1019,17 @@ void COperationDialog::deleteComponentsServers()
 				return;
 			}
 		}
+
+		// delete all links to clients
+		for (int i = 0; i < config->getProfilesCount(); ++i)
+		{
+			const CProfile &profile = config->getProfile(i);
+
+			if (profile.server == serverId)
+			{
+				profile.deleteShortcuts();
+			}
+		}
 	}
 
 	emit success(m_removeComponents.servers.size());
@@ -1072,7 +1092,7 @@ void COperationDialog::deleteComponentsProfiles()
 			}
 		}
 
-		// TODO: delete links
+		profile.deleteShortcuts();
 
 		// delete profile
 		config->removeProfile(profileId);
