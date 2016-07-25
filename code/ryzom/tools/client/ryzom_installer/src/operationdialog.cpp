@@ -175,12 +175,8 @@ void COperationDialog::processInstallNextStep()
 		createDefaultProfile();
 		break;
 
-		case CreateDesktopShortcut:
-		createClientDesktopShortcut(0);
-		break;
-
-		case CreateMenuShortcut:
-		createClientMenuShortcut(0);
+		case CreateProfileShortcuts:
+		createProfileShortcuts(0);
 		break;
 
 		case CreateAddRemoveEntry:
@@ -238,6 +234,9 @@ void COperationDialog::updateAddRemoveComponents()
 
 		// remove profiles that still exist
 		profilesToDelete.removeAll(profile.id);
+
+		// delete all shortcuts, they'll be recreated later
+		profile.deleteShortcuts();
 	}
 
 	// update components to remove
@@ -260,10 +259,9 @@ void COperationDialog::processUpdateProfilesNextStep()
 	{
 		updateAddRemoveComponents();
 	}
+
 	// TODO: check all servers are downloaded
 	// TODO: delete profiles directories that are not used anymore
-	// TODO: create shortcuts
-
 
 	if (!m_removeComponents.profiles.isEmpty())
 	{
@@ -279,9 +277,10 @@ void COperationDialog::processUpdateProfilesNextStep()
 		return;
 	}
 
+	CConfigFile *config = CConfigFile::getInstance();
+
 	if (!m_addComponents.servers.isEmpty())
 	{
-		CConfigFile *config = CConfigFile::getInstance();
 		const CServer &defaultServer = config->getServer();
 
 		// servers files to download/update
@@ -336,6 +335,12 @@ void COperationDialog::processUpdateProfilesNextStep()
 				QString clientFile = config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename);
 			}
 		}
+	}
+
+	// recreate shortcuts
+	foreach(const CProfile &profile, config->getProfiles())
+	{
+		profile.createShortcuts();
 	}
 
 	updateAddRemoveEntry();
@@ -747,9 +752,16 @@ void COperationDialog::copyInstaller()
 		// create installer link in menu
 		QString executable = newInstallerFullPath;
 		QString shortcut = config->getInstallerMenuLinkFullPath();
-		QString desc = "Ryzom Installer";
+		QString name = "Ryzom Installer";
+		QString icon;
 
-		createLink(executable, shortcut, "", "", desc);
+#ifdef Q_OS_WIN32
+		icon = executable;
+#else
+		// TODO: Linux icon
+#endif
+
+		createLink(shortcut, name, executable, "", icon, "");
 	}
 
 	emit done();
@@ -869,60 +881,15 @@ bool COperationDialog::createDefaultProfile()
 	return true;
 }
 
-bool COperationDialog::createClientDesktopShortcut(const QString &profileId)
+bool COperationDialog::createProfileShortcuts(const QString &profileId)
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
 	const CProfile &profile = config->getProfile(profileId);
-	const CServer &server = config->getServer(profile.server);
 
-	m_currentOperation = tr("Create desktop shortcut for profile %1").arg(profile.id);
+	m_currentOperation = tr("Create shortcuts for profile %1").arg(profile.id);
 
-#ifdef Q_OS_WIN32
-	if (profile.desktopShortcut)
-	{
-		QString executable = profile.getClientFullPath();
-		QString shortcut = profile.getClientDesktopLinkFullPath();
-		QString workingDir = server.getDirectory();
-
-		QString arguments = QString("--profile %1").arg(profile.id);
-
-		// append custom arguments
-		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
-
-		createLink(executable, shortcut, arguments, workingDir, profile.comments);
-	}
-#endif
-
-	emit done();
-
-	return true;
-}
-
-bool COperationDialog::createClientMenuShortcut(const QString &profileId)
-{
-	CConfigFile *config = CConfigFile::getInstance();
-
-	const CProfile &profile = config->getProfile(profileId);
-	const CServer &server = config->getServer(profile.server);
-
-	m_currentOperation = tr("Create menu shortcut for profile %1").arg(profile.id);
-
-#ifdef Q_OS_WIN32
-	if (profile.menuShortcut)
-	{
-		QString executable = profile.getClientFullPath();
-		QString shortcut = profile.getClientMenuLinkFullPath();
-		QString workingDir = server.getDirectory();
-
-		QString arguments = QString("--profile %1").arg(profile.id);
-
-		// append custom arguments
-		if (!profile.arguments.isEmpty()) arguments += QString(" %1").arg(profile.arguments);
-
-		createLink(executable, shortcut, arguments, workingDir, profile.comments);
-	}
-#endif
+	profile.createShortcuts();
 
 	emit done();
 
@@ -1059,6 +1026,17 @@ void COperationDialog::deleteComponentsServers()
 				return;
 			}
 		}
+
+		// delete all links to clients
+		for (int i = 0; i < config->getProfilesCount(); ++i)
+		{
+			const CProfile &profile = config->getProfile(i);
+
+			if (profile.server == serverId)
+			{
+				profile.deleteShortcuts();
+			}
+		}
 	}
 
 	emit success(m_removeComponents.servers.size());
@@ -1080,9 +1058,7 @@ void COperationDialog::addComponentsProfiles()
 	{
 		const CProfile &profile = config->getProfile(profileId);
 
-		if (profile.desktopShortcut) createClientDesktopShortcut(profile.id);
-
-		if (profile.menuShortcut) createClientMenuShortcut(profile.id);
+		profile.createShortcuts();
 	}
 }
 
@@ -1123,7 +1099,7 @@ void COperationDialog::deleteComponentsProfiles()
 			}
 		}
 
-		// TODO: delete links
+		profile.deleteShortcuts();
 
 		// delete profile
 		config->removeProfile(profileId);

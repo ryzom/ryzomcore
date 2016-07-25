@@ -97,21 +97,7 @@ wchar_t* qToWide(const QString &str)
 
 #ifdef Q_OS_WIN32
 
-// CreateLink - Uses the Shell's IShellLink and IPersistFile interfaces
-//              to create and store a shortcut to the specified object.
-//
-// Returns the result of calling the member functions of the interfaces.
-//
-// Parameters:
-// lpszPathObj  - Address of a buffer that contains the path of the object,
-//                including the file name.
-// lpszPathLink - Address of a buffer that contains the path where the
-//                Shell link is to be stored, including the file name.
-// lpszDesc     - Address of a buffer that contains a description of the
-//                Shell link, stored in the Comment field of the link
-//                properties.
-
-bool createLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
+bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
 	IShellLinkW* psl;
 
@@ -123,8 +109,9 @@ bool createLink(const QString &pathObj, const QString &pathLink, const QString &
 		IPersistFile* ppf;
 
 		// Set the path to the shortcut target and add the description.
-		psl->SetPath(qToWide(QDir::toNativeSeparators(pathObj)));
-		psl->SetDescription(qToWide(desc));
+		psl->SetPath(qToWide(QDir::toNativeSeparators(executable)));
+		psl->SetIconLocation(qToWide(QDir::toNativeSeparators(icon)), 0);
+		psl->SetDescription(qToWide(name));
 		psl->SetArguments(qToWide(arguments));
 		psl->SetWorkingDirectory(qToWide(QDir::toNativeSeparators(workingDir)));
 
@@ -138,30 +125,13 @@ bool createLink(const QString &pathObj, const QString &pathLink, const QString &
 			// for success.
 
 			// Save the link by calling IPersistFile::Save.
-			hres = ppf->Save(qToWide(QDir::toNativeSeparators(pathLink)), TRUE);
+			hres = ppf->Save(qToWide(QDir::toNativeSeparators(link)), TRUE);
 			ppf->Release();
 		}
 		psl->Release();
 	}
 	return SUCCEEDED(hres);
 }
-
-// ResolveIt - Uses the Shell's IShellLink and IPersistFile interfaces
-//             to retrieve the path and description from an existing shortcut.
-//
-// Returns the result of calling the member functions of the interfaces.
-//
-// Parameters:
-// hwnd         - A handle to the parent window. The Shell uses this window to
-//                display a dialog box if it needs to prompt the user for more
-//                information while resolving the link.
-// lpszLinkFile - Address of a buffer that contains the path of the link,
-//                including the file name.
-// lpszPath     - Address of a buffer that receives the path of the link
-//                target, including the file name.
-// lpszDesc     - Address of a buffer that receives the description of the
-//                Shell link, stored in the Comment field of the link
-//                properties.
 
 bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 {
@@ -232,11 +202,35 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 
 #else
 
-bool createLink(const QString &pathObj, const QString &pathLink, const QString &arguments, const QString &workingDir, const QString &desc)
+bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
-	// TODO: create .desktop file under Linux
+	// open template
+	QFile file(":/templates/template.desktop");
 
-	return false;
+	if (!file.open(QFile::ReadOnly)) return false;
+
+	QString data = QString::fromUtf8(file.readAll());
+
+	file.close();
+
+	// build command
+	QString command = executable;
+	if (!arguments.isEmpty()) command += " " + arguments;
+
+	// replace strings
+	data.replace("$NAME", name);
+	data.replace("$COMMAND", command);
+	data.replace("$ICON", icon);
+
+	// write file
+	file.setFileName(link);
+
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	file.write(data.toUtf8());
+	file.close();
+
+	return true;
 }
 
 bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)

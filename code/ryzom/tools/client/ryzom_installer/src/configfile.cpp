@@ -60,22 +60,82 @@ QString CProfile::getClientFullPath() const
 	return s.getClientFullPath();
 }
 
-QString CProfile::getClientDesktopLinkFullPath() const
+QString CProfile::getClientDesktopShortcutFullPath() const
 {
 #ifdef Q_OS_WIN32
 	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
-#else
+#elif defined(Q_OS_MAC)
 	return "";
+#else
+	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".desktop";
 #endif
 }
 
-QString CProfile::getClientMenuLinkFullPath() const
+QString CProfile::getClientMenuShortcutFullPath() const
 {
 #ifdef Q_OS_WIN32
 	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
-#else
+#elif defined(Q_OS_MAC)
 	return "";
+#else
+	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".desktop";
 #endif
+}
+
+void CProfile::createShortcuts() const
+{
+	const CServer &s = CConfigFile::getInstance()->getServer(server);
+
+	QString executable = getClientFullPath();
+	QString workingDir = s.getDirectory();
+
+	QString arguments = QString("--profile %1").arg(id);
+
+	// append custom arguments
+	if (!arguments.isEmpty()) arguments += QString(" %1").arg(arguments);
+
+	QString icon;
+
+#ifdef Q_OS_WIN32
+	icon = executable;
+#else
+	// TODO: Linux icon
+#endif
+
+	if (desktopShortcut)
+	{
+		QString shortcut = getClientDesktopShortcutFullPath();
+
+		// create desktop shortcut
+		createLink(shortcut, name, executable, arguments, icon, workingDir);
+	}
+
+	if (menuShortcut)
+	{
+		QString shortcut = getClientMenuShortcutFullPath();
+
+		// create menu shortcut
+		createLink(shortcut, name, executable, arguments, icon, workingDir);
+	}
+}
+
+void CProfile::deleteShortcuts() const
+{
+	// delete desktop shortcut
+	QString link = getClientDesktopShortcutFullPath();
+
+	if (QFile::exists(link)) QFile::remove(link);
+
+	// delete menu shortcut
+	link = getClientMenuShortcutFullPath();
+
+	if (QFile::exists(link)) QFile::remove(link);
+}
+
+void CProfile::updateShortcuts() const
+{
+	deleteShortcuts();
+	createShortcuts();
 }
 
 CConfigFile *CConfigFile::s_instance = NULL;
@@ -84,8 +144,25 @@ CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(
 {
 	s_instance = this;
 
-	m_language = QLocale::system().name().left(2); // only keep language ISO 639 code
-	m_defaultConfigPath = QApplication::applicationDirPath() + "/installer.ini";
+	// only keep language ISO 639 code
+	m_language = QLocale::system().name().left(2);
+
+	// it won't be found if run with uninstall flag, but since we already have a local installer.ini...
+	QString configFile = getCurrentDirectory() + "/installer.ini";
+
+	if (!QFile::exists(configFile))
+	{
+		configFile = QApplication::applicationDirPath() + "/installer.ini";
+
+		if (!QFile::exists(configFile))
+		{
+			configFile.clear();
+		}
+	}
+
+	m_defaultConfigPath = configFile;
+
+	// the config file we'll write
 	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/installer.ini";
 }
 
@@ -482,6 +559,11 @@ QString CConfigFile::expandVariables(const QString &str) const
 	res.replace("$TIMESTAMP", QString::number(QDateTime::currentDateTime().toTime_t()));
 	res.replace("$LANG", m_language);
 	res.replace("$ARCH", getClientArch());
+	res.replace("$PRODUCT_NAME", m_productName);
+	res.replace("$PRODUCT_PUBLISHER", m_productPublisher);
+	res.replace("$PRODUCT_ABOUT_URL", m_productAboutUrl);
+	res.replace("$PRODUCT_HELP_URL", m_productHelpUrl);
+	res.replace("$PRODUCT_COMMENTS", m_productComments);
 
 	return res;
 }
@@ -634,9 +716,6 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
-	// client_default.cfg doesn't exist
-	if (!dir.exists("client_default.cfg")) return false;
-
 	// current server
 	CServer server = getServer();
 
@@ -649,9 +728,18 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 
 		// check if old client is defined and exists
 		if (!dir.exists(clientFilename)) return false;
-	}
 
-	// TODO: more checks
+		// client 2.1-
+	}
+	else
+	{
+		// client 3.0+
+
+		// client_default.cfg doesn't exist
+		if (!dir.exists("client_default.cfg")) return false;
+
+		// TODO: more checks
+	}
 
 	return true;
 }
@@ -692,11 +780,9 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 	if (!profile.desktopShortcut) return false;
 
-#ifdef Q_OS_WIN32
-	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientDesktopLinkFullPath()));
-#else
-	return false;
-#endif
+	QString shortcut = profile.getClientDesktopShortcutFullPath();
+
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
 bool CConfigFile::shouldCreateMenuShortcut() const
@@ -705,11 +791,9 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 	if (!profile.menuShortcut) return false;
 
-#ifdef Q_OS_WIN32
-	return !NLMISC::CFile::isExists(qToUtf8(profile.getClientMenuLinkFullPath()));
-#else
-	return false;
-#endif
+	QString shortcut = profile.getClientMenuShortcutFullPath();
+
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
 QString CConfigFile::getInstallerFullPath() const
@@ -876,14 +960,9 @@ OperationStep CConfigFile::getInstallNextStep() const
 		return CopyProfileFiles;
 	}
 
-	if (shouldCreateDesktopShortcut())
+	if (shouldCreateDesktopShortcut() || shouldCreateMenuShortcut())
 	{
-		return CreateDesktopShortcut;
-	}
-
-	if (shouldCreateMenuShortcut())
-	{
-		return CreateMenuShortcut;
+		return CreateProfileShortcuts;
 	}
 
 #ifdef Q_OS_WIN

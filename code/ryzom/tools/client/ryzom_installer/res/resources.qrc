@@ -5,4 +5,7 @@
     <qresource prefix="/icons">
         <file>ryzom.ico</file>
     </qresource>
+    <qresource prefix="/templates">
+        <file>template.desktop</file>
+    </qresource>
 </RCC>

@@ -246,11 +246,12 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_SYMBOLS             "Keep debug symbols in binaries"                OFF)
 
-  IF(WIN32)
+  # only enable STLport for VC++ 2010 and less
+  IF(WIN32 AND MSVC_VERSION LESS 1600)
     OPTION(WITH_STLPORT           "With STLport support."                         ON )
-  ELSE(WIN32)
+  ELSE()
     OPTION(WITH_STLPORT           "With STLport support."                         OFF)
-  ENDIF(WIN32)
+  ENDIF()
 
   OPTION(BUILD_DASHBOARD          "Build to the CDash dashboard"                  OFF)
 

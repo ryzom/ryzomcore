@@ -74,8 +74,12 @@ public:
 	// helpers
 	QString getDirectory() const;
 	QString getClientFullPath() const;
-	QString getClientDesktopLinkFullPath() const;
-	QString getClientMenuLinkFullPath() const;
+	QString getClientDesktopShortcutFullPath() const;
+	QString getClientMenuShortcutFullPath() const;
+
+	void createShortcuts() const;
+	void deleteShortcuts() const;
+	void updateShortcuts() const;
 };
 
 extern const CProfile NoProfile;
