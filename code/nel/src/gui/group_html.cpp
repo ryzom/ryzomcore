@@ -1924,8 +1924,8 @@ namespace NLGUI
 					style.Underlined = getFontUnderlined();
 					style.StrikeThrough = getFontStrikeThrough();
 
-					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
-						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
+					if (present[HTML_PRE_STYLE] && value[HTML_PRE_STYLE])
+						getStyleParams(value[HTML_PRE_STYLE], style);
 
 					_TextColor.push_back(style.TextColor);
 					_FontFamily.push_back(style.FontFamily);
