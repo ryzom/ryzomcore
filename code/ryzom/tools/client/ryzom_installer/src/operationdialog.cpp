@@ -752,9 +752,16 @@ void COperationDialog::copyInstaller()
 		// create installer link in menu
 		QString executable = newInstallerFullPath;
 		QString shortcut = config->getInstallerMenuLinkFullPath();
-		QString desc = "Ryzom Installer";
+		QString name = "Ryzom Installer";
+		QString icon;
 
-		createLink(executable, shortcut, "", "", desc);
+#ifdef Q_OS_WIN32
+		icon = executable;
+#else
+		// TODO: Linux icon
+#endif
+
+		createLink(shortcut, name, executable, "", icon, "");
 	}
 
 	emit done();
