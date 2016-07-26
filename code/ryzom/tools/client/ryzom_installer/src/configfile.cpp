@@ -97,9 +97,11 @@ void CProfile::createShortcuts() const
 	QString icon;
 
 #ifdef Q_OS_WIN32
+	// under Windows, icon is included in executable
 	icon = executable;
 #else
-	// TODO: Linux icon
+	// icon is in the same directory as client
+	icon = s.getDirectory() + "/ryzom_client.png";
 #endif
 
 	if (desktopShortcut)
