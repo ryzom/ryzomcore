@@ -718,6 +718,7 @@ void COperationDialog::copyInstaller()
 			QStringList filter;
 			filter << "msvcp100.dll";
 			filter << "msvcr100.dll";
+			filter << "ryzom_installer.png";
 
 			CFilesCopier copier(this);
 			copier.setIncludeFilter(filter);
@@ -756,9 +757,11 @@ void COperationDialog::copyInstaller()
 		QString icon;
 
 #ifdef Q_OS_WIN32
+		// under Windows, icon is included in executable
 		icon = executable;
 #else
-		// TODO: Linux icon
+		// icon is in the same directory as installer
+		icon = config->getInstallationDirectory() + "/ryzom_installer.png";
 #endif
 
 		createLink(shortcut, name, executable, "", icon, "");
