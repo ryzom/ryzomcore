@@ -455,6 +455,11 @@ QString CConfigFile::getMenuDirectory() const
 
 bool CConfigFile::has64bitsOS()
 {
+#ifdef Q_OS_WIN32
+	// 64 bits only supported under Vista and up
+	if (QSysInfo::windowsVersion() < QSysInfo::WV_VISTA) return false;
+#endif
+
 	return QSysInfo::currentCpuArchitecture() == "x86_64";
 }
 

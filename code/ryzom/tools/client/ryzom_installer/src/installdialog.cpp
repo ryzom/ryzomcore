@@ -54,7 +54,6 @@ CInstallDialog::CInstallDialog():QDialog()
 	updateDestinationText();
 
 	// check whether OS architecture is 32 or 64 bits
-	// TODO: 64 bits client only supported under Vista+
 	if (CConfigFile::has64bitsOS())
 	{
 		clientArchGroupBox->setVisible(true);
