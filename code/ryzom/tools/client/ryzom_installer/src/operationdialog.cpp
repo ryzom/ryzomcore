@@ -715,13 +715,8 @@ void COperationDialog::copyInstaller()
 
 		if (!QFile::exists(newInstallerFullPath))
 		{
-			QStringList filter;
-			filter << "msvcp100.dll";
-			filter << "msvcr100.dll";
-			filter << "ryzom_installer.png";
-
 			CFilesCopier copier(this);
-			copier.setIncludeFilter(filter);
+			copier.setIncludeFilter(config->getInstallerRequiredFiles());
 			copier.addFile(oldInstallerFullPath);
 			copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
 			copier.setDestinationDirectory(config->getInstallationDirectory());

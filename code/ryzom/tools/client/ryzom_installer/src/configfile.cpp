@@ -831,6 +831,51 @@ QString CConfigFile::getInstallerMenuLinkFullPath() const
 #endif
 }
 
+QStringList CConfigFile::getInstallerRequiredFiles() const
+{
+	// list of all files required by installer (and its executable too)
+	QStringList files;
+
+#ifdef Q_OS_WIN
+
+	// VC++ runtimes
+#if _MSC_VER == 1900
+	// VC++ 2015
+	files << "msvcp140.dll";
+	files << "msvcr140.dll";
+#elif _MSC_VER == 1800
+	// VC++ 2013
+	files << "msvcp120.dll";
+	files << "msvcr120.dll";
+#elif _MSC_VER == 1700
+	// VC++ 2012
+	files << "msvcp110.dll";
+	files << "msvcr110.dll";
+#elif _MSC_VER == 1600
+	// VC++ 2010
+	files << "msvcp100.dll";
+	files << "msvcr100.dll";
+#elif _MSC_VER == 1500
+	// VC++ 2008
+	files << "msvcp90.dll";
+	files << "msvcr90.dll";
+#else
+	// unsupported compiler
+#endif
+
+#elif defined(Q_OS_MAC)
+	// TODO: for OS X
+#else
+	// icon under Linux
+	files << "ryzom_installer.png";
+#endif
+
+	// include current executable
+	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+
+	return files;
+}
+
 QString CConfigFile::getSrcServerClientBNPFullPath() const
 {
 	return QString("%1/unpack/exedll_%2.bnp").arg(getSrcServerDirectory()).arg(getClientArch());

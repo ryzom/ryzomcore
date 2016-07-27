@@ -181,6 +181,8 @@ public:
 	QString getInstallerFullPath() const;
 	QString getInstallerMenuLinkFullPath() const;
 
+	QStringList getInstallerRequiredFiles() const;
+
 	QString getSrcServerClientBNPFullPath() const;
 
 	OperationStep getInstallNextStep() const;
