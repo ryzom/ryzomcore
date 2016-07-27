@@ -819,7 +819,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 QString CConfigFile::getInstallerFullPath() const
 {
-	return QApplication::applicationFilePath();
+	return QApplication::applicationDirPath();
 }
 
 QString CConfigFile::getInstallerMenuLinkFullPath() const
