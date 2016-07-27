@@ -655,9 +655,11 @@ QString CConfigFile::getOldInstallationLanguage()
 	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
 #endif
 
-	if (settings.contains("Language"))
+	QString key = "Language";
+
+	if (settings.contains(key))
 	{
-		QString languageCode = settings.value("Language").toString();
+		QString languageCode = settings.value(key).toString();
 
 		// 1036 = French (France), 1033 = English (USA), 1031 = German
 		if (languageCode == "1036") return "fr";
@@ -673,16 +675,18 @@ QString CConfigFile::getNewInstallationLanguage()
 {
 #if defined(Q_OS_WIN)
 	// NSIS new official installer
-#ifdef Q_OS_WIN64
-	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#else
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#endif
+	QSettings settings("HKEY_CURRENT_USER\\Software\\Winch Gate\\Ryzom", QSettings::NativeFormat);
 
-	if (settings.contains("Ryzom Install Path"))
+	QString key = "Language";
+
+	if (settings.contains(key))
 	{
-		return QDir::fromNativeSeparators(settings.value("Ryzom Install Path").toString());
+		QString languageCode = settings.value(key).toString();
+
+		// 1036 = French (France), 1033 = English (USA), 1031 = German
+		if (languageCode == "1036") return "fr";
+		if (languageCode == "1031") return "de";
+		if (languageCode == "1033") return "en";
 	}
 #endif
 
@@ -691,6 +695,19 @@ QString CConfigFile::getNewInstallationLanguage()
 
 QString CConfigFile::getNewInstallationDirectory()
 {
+#if defined(Q_OS_WIN)
+	// NSIS new official installer
+	QSettings settings("HKEY_CURRENT_USER\\Software\\Winch Gate\\Ryzom", QSettings::NativeFormat);
+
+	QString key = "Ryzom Install Path";
+
+	if (settings.contains(key))
+	{
+		return QDir::fromNativeSeparators(settings.value(key).toString());
+	}
+#endif
+
+	// default location
 	return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
