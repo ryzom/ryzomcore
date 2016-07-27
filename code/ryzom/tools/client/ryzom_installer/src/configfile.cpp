@@ -165,9 +165,7 @@ CConfigFile::~CConfigFile()
 bool CConfigFile::load()
 {
 	// load default values
-	load(m_defaultConfigPath);
-
-	return load(m_configPath);
+	return load(m_defaultConfigPath) || load(m_configPath);
 }
 
 bool CConfigFile::load(const QString &filename)
