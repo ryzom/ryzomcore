@@ -1118,8 +1118,6 @@ void COperationDialog::deleteComponentsInstaller()
 
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// TODO: delete installer
-
 	deleteAddRemoveEntry();
 
 	// delete menu
@@ -1132,7 +1130,22 @@ void COperationDialog::deleteComponentsInstaller()
 		dir.removeRecursively();
 	}
 
-	// TODO:
+	path = config->getInstallerFullPath();
+	QStringList files = config->getInstallerRequiredFiles();
+
+	foreach(const QString &file, files)
+	{
+		QString fullPath = path + "/" + file;
+
+		// delete file
+		if (!QFile::remove(fullPath))
+		{
+#ifdef Q_OS_WIN32
+			// under Windows, a running executable is locked, so we need to delete it later
+			MoveFileExW(qToWide(QDir::toNativeSeparators(fullPath)), NULL, MOVEFILE_DELAY_UNTIL_REBOOT);
+#endif
+		}
+	}
 
 	// reset it once it's done
 	m_removeComponents.installer = false;
