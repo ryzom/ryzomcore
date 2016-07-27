@@ -142,30 +142,19 @@ void CProfile::updateShortcuts() const
 
 CConfigFile *CConfigFile::s_instance = NULL;
 
-CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
+CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
+	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
 {
 	s_instance = this;
 
 	// only keep language ISO 639 code
 	m_language = QLocale::system().name().left(2);
 
-	// it won't be found if run with uninstall flag, but since we already have a local installer.ini...
-	QString configFile = getCurrentDirectory() + "/installer.ini";
-
-	if (!QFile::exists(configFile))
-	{
-		configFile = QApplication::applicationDirPath() + "/installer.ini";
-
-		if (!QFile::exists(configFile))
-		{
-			configFile.clear();
-		}
-	}
-
-	m_defaultConfigPath = configFile;
+	// default config file in included in resources
+	m_defaultConfigPath = ":/templates/ryzom_installer.ini";
 
 	// the config file we'll write
-	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/installer.ini";
+	m_configPath = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + "/ryzom_installer.ini";
 }
 
 CConfigFile::~CConfigFile()
@@ -175,13 +164,30 @@ CConfigFile::~CConfigFile()
 
 bool CConfigFile::load()
 {
-	return load(m_configPath) || load(m_defaultConfigPath);
+	// load default values
+	return load(m_defaultConfigPath) || load(m_configPath);
 }
 
 bool CConfigFile::load(const QString &filename)
 {
+	if (!QFile::exists(filename)) return false;
+
 	QSettings settings(filename, QSettings::IniFormat);
 
+	int defaultVersion = m_version;
+	int currentVersion = settings.value("version", 0).toInt();
+
+	bool useDefaultValues = defaultVersion > currentVersion;
+
+	// set default version from default config
+	if (defaultVersion == -1) m_version = currentVersion;
+
+	if (useDefaultValues)
+	{
+		// TODO: make a backup of custom installer.ini
+	}
+
+	// custom choices, always keep them
 	settings.beginGroup("common");
 	m_language = settings.value("language", m_language).toString();
 	m_srcDirectory = settings.value("source_directory").toString();
@@ -190,58 +196,62 @@ bool CConfigFile::load(const QString &filename)
 	m_shouldUninstallOldClient = settings.value("should_uninstall_old_client", true).toBool();
 	settings.endGroup();
 
-	settings.beginGroup("product");
-	m_productName = settings.value("name").toString();
-	m_productPublisher = settings.value("publisher").toString();
-	m_productAboutUrl = settings.value("url_about").toString();
-	m_productUpdateUrl = settings.value("url_update").toString();
-	m_productHelpUrl = settings.value("url_help").toString();
-	m_productComments = settings.value("comments").toString();
-	settings.endGroup();
-
-	settings.beginGroup("servers");
-	int serversCount = settings.value("size").toInt();
-	m_defaultServerIndex = settings.value("default").toInt();
-	settings.endGroup();
-	
-	m_servers.resize(serversCount);
-
-	for(int i = 0; i < serversCount; ++i)
+	if (!useDefaultValues)
 	{
-		CServer &server = m_servers[i];
-
-		settings.beginGroup(QString("server_%1").arg(i));
-
-		server.id = settings.value("id").toString();
-		server.name = settings.value("name").toString();
-		server.displayUrl = settings.value("display_url").toString();
-		server.dataDownloadUrl = settings.value("data_download_url").toString();
-		server.dataDownloadFilename = settings.value("data_download_filename").toString();
-		server.dataCompressedSize = settings.value("data_compressed_size").toULongLong();
-		server.dataUncompressedSize = settings.value("data_uncompressed_size").toULongLong();
-		server.clientDownloadUrl = settings.value("client_download_url").toString();
-		server.clientDownloadFilename = settings.value("client_download_filename").toString();
-#if defined(Q_OS_WIN)
-		server.clientFilename = settings.value("client_filename_windows").toString();
-		server.clientFilenameOld = settings.value("client_filename_old_windows").toString();
-		server.configurationFilename = settings.value("configuration_filename_windows").toString();
-		server.installerFilename = settings.value("installer_filename_windows").toString();
-#elif defined(Q_OS_MAC)
-		server.clientFilename = settings.value("client_filename_osx").toString();
-		server.clientFilenameOld = settings.value("client_filename_old_osx").toString();
-		server.configurationFilename = settings.value("configuration_filename_osx").toString();
-		server.installerFilename = settings.value("installer_filename_osx").toString();
-#else
-		server.clientFilename = settings.value("client_filename_linux").toString();
-		server.clientFilenameOld = settings.value("client_filename_old_linux").toString();
-		server.configurationFilename = settings.value("configuration_filename_linux").toString();
-		server.installerFilename = settings.value("installer_filename_linux").toString();
-#endif
-		server.comments = settings.value("comments").toString();
-
+		settings.beginGroup("product");
+		m_productName = settings.value("name").toString();
+		m_productPublisher = settings.value("publisher").toString();
+		m_productAboutUrl = settings.value("url_about").toString();
+		m_productUpdateUrl = settings.value("url_update").toString();
+		m_productHelpUrl = settings.value("url_help").toString();
+		m_productComments = settings.value("comments").toString();
 		settings.endGroup();
+
+		settings.beginGroup("servers");
+		int serversCount = settings.value("size").toInt();
+		m_defaultServerIndex = settings.value("default").toInt();
+		settings.endGroup();
+
+		m_servers.resize(serversCount);
+
+		for (int i = 0; i < serversCount; ++i)
+		{
+			CServer &server = m_servers[i];
+
+			settings.beginGroup(QString("server_%1").arg(i));
+
+			server.id = settings.value("id").toString();
+			server.name = settings.value("name").toString();
+			server.displayUrl = settings.value("display_url").toString();
+			server.dataDownloadUrl = settings.value("data_download_url").toString();
+			server.dataDownloadFilename = settings.value("data_download_filename").toString();
+			server.dataCompressedSize = settings.value("data_compressed_size").toULongLong();
+			server.dataUncompressedSize = settings.value("data_uncompressed_size").toULongLong();
+			server.clientDownloadUrl = settings.value("client_download_url").toString();
+			server.clientDownloadFilename = settings.value("client_download_filename").toString();
+#if defined(Q_OS_WIN)
+			server.clientFilename = settings.value("client_filename_windows").toString();
+			server.clientFilenameOld = settings.value("client_filename_old_windows").toString();
+			server.configurationFilename = settings.value("configuration_filename_windows").toString();
+			server.installerFilename = settings.value("installer_filename_windows").toString();
+#elif defined(Q_OS_MAC)
+			server.clientFilename = settings.value("client_filename_osx").toString();
+			server.clientFilenameOld = settings.value("client_filename_old_osx").toString();
+			server.configurationFilename = settings.value("configuration_filename_osx").toString();
+			server.installerFilename = settings.value("installer_filename_osx").toString();
+#else
+			server.clientFilename = settings.value("client_filename_linux").toString();
+			server.clientFilenameOld = settings.value("client_filename_old_linux").toString();
+			server.configurationFilename = settings.value("configuration_filename_linux").toString();
+			server.installerFilename = settings.value("installer_filename_linux").toString();
+#endif
+			server.comments = settings.value("comments").toString();
+
+			settings.endGroup();
+		}
 	}
 
+	// custom choices, always keep them
 	settings.beginGroup("profiles");
 	int profilesCounts = settings.value("size").toInt();
 	m_defaultProfileIndex = settings.value("default").toInt();
@@ -273,6 +283,8 @@ bool CConfigFile::load(const QString &filename)
 bool CConfigFile::save() const
 {
 	QSettings settings(m_configPath, QSettings::IniFormat);
+
+	settings.setValue("version", m_version);
 
 	settings.beginGroup("common");
 	settings.setValue("language", m_language);
@@ -641,9 +653,11 @@ QString CConfigFile::getOldInstallationLanguage()
 	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
 #endif
 
-	if (settings.contains("Language"))
+	QString key = "Language";
+
+	if (settings.contains(key))
 	{
-		QString languageCode = settings.value("Language").toString();
+		QString languageCode = settings.value(key).toString();
 
 		// 1036 = French (France), 1033 = English (USA), 1031 = German
 		if (languageCode == "1036") return "fr";
@@ -659,16 +673,18 @@ QString CConfigFile::getNewInstallationLanguage()
 {
 #if defined(Q_OS_WIN)
 	// NSIS new official installer
-#ifdef Q_OS_WIN64
-	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#else
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#endif
+	QSettings settings("HKEY_CURRENT_USER\\Software\\Winch Gate\\Ryzom", QSettings::NativeFormat);
 
-	if (settings.contains("Ryzom Install Path"))
+	QString key = "Language";
+
+	if (settings.contains(key))
 	{
-		return QDir::fromNativeSeparators(settings.value("Ryzom Install Path").toString());
+		QString languageCode = settings.value(key).toString();
+
+		// 1036 = French (France), 1033 = English (USA), 1031 = German
+		if (languageCode == "1036") return "fr";
+		if (languageCode == "1031") return "de";
+		if (languageCode == "1033") return "en";
 	}
 #endif
 
@@ -677,6 +693,19 @@ QString CConfigFile::getNewInstallationLanguage()
 
 QString CConfigFile::getNewInstallationDirectory()
 {
+#if defined(Q_OS_WIN)
+	// NSIS new official installer
+	QSettings settings("HKEY_CURRENT_USER\\Software\\Winch Gate\\Ryzom", QSettings::NativeFormat);
+
+	QString key = "Ryzom Install Path";
+
+	if (settings.contains(key))
+	{
+		return QDir::fromNativeSeparators(settings.value(key).toString());
+	}
+#endif
+
+	// default location
 	return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
 }
 
@@ -805,7 +834,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 QString CConfigFile::getInstallerFullPath() const
 {
-	return QApplication::applicationFilePath();
+	return QApplication::applicationDirPath();
 }
 
 QString CConfigFile::getInstallerMenuLinkFullPath() const
@@ -815,6 +844,51 @@ QString CConfigFile::getInstallerMenuLinkFullPath() const
 #else
 	return "";
 #endif
+}
+
+QStringList CConfigFile::getInstallerRequiredFiles() const
+{
+	// list of all files required by installer (and its executable too)
+	QStringList files;
+
+#ifdef Q_OS_WIN
+
+	// VC++ runtimes
+#if _MSC_VER == 1900
+	// VC++ 2015
+	files << "msvcp140.dll";
+	files << "msvcr140.dll";
+#elif _MSC_VER == 1800
+	// VC++ 2013
+	files << "msvcp120.dll";
+	files << "msvcr120.dll";
+#elif _MSC_VER == 1700
+	// VC++ 2012
+	files << "msvcp110.dll";
+	files << "msvcr110.dll";
+#elif _MSC_VER == 1600
+	// VC++ 2010
+	files << "msvcp100.dll";
+	files << "msvcr100.dll";
+#elif _MSC_VER == 1500
+	// VC++ 2008
+	files << "msvcp90.dll";
+	files << "msvcr90.dll";
+#else
+	// unsupported compiler
+#endif
+
+#elif defined(Q_OS_MAC)
+	// TODO: for OS X
+#else
+	// icon under Linux
+	files << "ryzom_installer.png";
+#endif
+
+	// include current executable
+	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+
+	return files;
 }
 
 QString CConfigFile::getSrcServerClientBNPFullPath() const

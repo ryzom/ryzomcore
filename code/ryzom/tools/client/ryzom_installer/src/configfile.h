@@ -181,6 +181,8 @@ public:
 	QString getInstallerFullPath() const;
 	QString getInstallerMenuLinkFullPath() const;
 
+	QStringList getInstallerRequiredFiles() const;
+
 	QString getSrcServerClientBNPFullPath() const;
 
 	OperationStep getInstallNextStep() const;
@@ -194,6 +196,7 @@ public:
 	QString getProductComments() const;
 
 private:
+	int m_version;
 	int m_defaultServerIndex;
 	int m_defaultProfileIndex;
 

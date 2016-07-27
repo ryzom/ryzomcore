@@ -7,5 +7,6 @@
     </qresource>
     <qresource prefix="/templates">
         <file>template.desktop</file>
+        <file>ryzom_installer.ini</file>
     </qresource>
 </RCC>

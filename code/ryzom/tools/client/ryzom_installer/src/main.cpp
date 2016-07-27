@@ -47,6 +47,39 @@
 	#define new DEBUG_NEW
 #endif
 
+// copy all specified files from current directory to destination directory
+bool copyInstallerFiles(const QStringList &files, const QString &destination)
+{
+	QString path = QApplication::applicationDirPath();
+
+	foreach(const QString &file, files)
+	{
+		// convert to absolute path
+		QString srcPath = path + "/" + file;
+		QString dstPath = destination + "/" + file;
+
+		if (QFile::exists(srcPath))
+		{
+			if (QFile::exists(dstPath))
+			{
+				if (!QFile::remove(dstPath))
+				{
+					qDebug() << "Unable to delete" << dstPath;
+				}
+			}
+
+			if (!QFile::copy(srcPath, dstPath))
+			{
+				qDebug() << "Unable to copy" << srcPath << "to" << dstPath;
+
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 int main(int argc, char *argv[])
 {
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -115,7 +148,7 @@ int main(int argc, char *argv[])
 		if (QApplication::applicationDirPath() != tempPath)
 		{
 			// copy installer and required files to TEMP directory
-			if (copyInstallerExecutable(tempPath))
+			if (copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
 			{
 				QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
 
