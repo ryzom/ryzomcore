@@ -194,6 +194,7 @@ public:
 	QString getProductComments() const;
 
 private:
+	int m_version;
 	int m_defaultServerIndex;
 	int m_defaultProfileIndex;
 
