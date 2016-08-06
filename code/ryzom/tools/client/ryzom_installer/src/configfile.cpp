@@ -184,7 +184,8 @@ bool CConfigFile::load(const QString &filename)
 
 	if (useDefaultValues)
 	{
-		// TODO: make a backup of custom installer.ini
+		// make a backup of custom ryzom_installer.ini
+		QFile::copy(filename, filename + ".bak");
 	}
 
 	// custom choices, always keep them
