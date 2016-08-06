@@ -116,16 +116,16 @@ int main(int argc, char *argv[])
 
 	if (step == DisplayNoServerError)
 	{
-		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find installer.ini"));
+		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find ryzom_installer.ini"));
 		return 1;
 	}
 
-	// use product name from installer.ini
+	// use product name from ryzom_installer.ini
 	if (!config.getProductName().isEmpty()) QApplication::setApplicationName(config.getProductName());
 
 	// define commandline arguments
 	QCommandLineParser parser;
-//	parser.setApplicationDescription(DESCRIPTION);
+	parser.setApplicationDescription(QApplication::tr("Instalation and launcher tool for Ryzom"));
 	parser.addHelpOption();
 	parser.addVersionOption();
 
