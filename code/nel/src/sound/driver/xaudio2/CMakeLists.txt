@@ -30,7 +30,7 @@ NL_TARGET_DRIVER(nel_drv_xaudio2_win ${SRC})
 
 INCLUDE_DIRECTORIES(BEFORE ${DXSDK_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(nel_drv_xaudio2_win nelmisc nelsnd_lowlevel ${DXSDK_XAUDIO_LIBRARY} ${DXSDK_GUID_LIBRARY})
+TARGET_LINK_LIBRARIES(nel_drv_xaudio2_win nelmisc nelsnd_lowlevel ${DXSDK_XAUDIO_LIBRARY})
 
 NL_DEFAULT_PROPS(nel_drv_xaudio2_win "NeL, Driver, Sound: XAudio2")
 NL_ADD_RUNTIME_FLAGS(nel_drv_xaudio2_win)
