@@ -1224,12 +1224,13 @@ void CPlayerService::initConfigFileVars()
 
 	CConfigFile::CVar *varMaxNbObjects = ConfigFile.getVarPtr("NbObjectsLimit");
 	if ( varMaxNbObjects )
-		MaxNbObjects= varMaxNbPlayers->asInt();
+		MaxNbObjects = varMaxNbObjects->asInt();
 	else
 		MaxNbObjects = 1000;
+
 	CConfigFile::CVar *varMaxNbNpcSpawnedByEGS = ConfigFile.getVarPtr("NbNpcSpawnedByEGSLimit");
 	if ( varMaxNbNpcSpawnedByEGS )
-		MaxNbNpcSpawnedByEGS = varMaxNbPlayers->asInt();
+		MaxNbNpcSpawnedByEGS = varMaxNbNpcSpawnedByEGS->asInt();
 	else
 		MaxNbNpcSpawnedByEGS = 50;
 	CConfigFile::CVar *varMaxNbForageSources = ConfigFile.getVarPtr("NbForageSourcesLimit");
