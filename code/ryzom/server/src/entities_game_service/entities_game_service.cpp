@@ -1223,12 +1223,12 @@ void CPlayerService::initConfigFileVars()
 		MaxNbGuilds = 1000;
 
 	CConfigFile::CVar *varMaxNbObjects = ConfigFile.getVarPtr("NbObjectsLimit");
-	if ( varMaxNbPlayers )
+	if ( varMaxNbObjects )
 		MaxNbObjects= varMaxNbPlayers->asInt();
 	else
 		MaxNbObjects = 1000;
 	CConfigFile::CVar *varMaxNbNpcSpawnedByEGS = ConfigFile.getVarPtr("NbNpcSpawnedByEGSLimit");
-	if ( varMaxNbPlayers )
+	if ( varMaxNbNpcSpawnedByEGS )
 		MaxNbNpcSpawnedByEGS = varMaxNbPlayers->asInt();
 	else
 		MaxNbNpcSpawnedByEGS = 50;
