@@ -1223,25 +1223,29 @@ void CPlayerService::initConfigFileVars()
 		MaxNbGuilds = 1000;
 
 	CConfigFile::CVar *varMaxNbObjects = ConfigFile.getVarPtr("NbObjectsLimit");
-	if ( varMaxNbPlayers )
-		MaxNbObjects= varMaxNbPlayers->asInt();
+	if ( varMaxNbObjects )
+		MaxNbObjects = varMaxNbObjects->asInt();
 	else
 		MaxNbObjects = 1000;
+
 	CConfigFile::CVar *varMaxNbNpcSpawnedByEGS = ConfigFile.getVarPtr("NbNpcSpawnedByEGSLimit");
-	if ( varMaxNbPlayers )
-		MaxNbNpcSpawnedByEGS = varMaxNbPlayers->asInt();
+	if ( varMaxNbNpcSpawnedByEGS )
+		MaxNbNpcSpawnedByEGS = varMaxNbNpcSpawnedByEGS->asInt();
 	else
 		MaxNbNpcSpawnedByEGS = 50;
+
 	CConfigFile::CVar *varMaxNbForageSources = ConfigFile.getVarPtr("NbForageSourcesLimit");
 	if ( varMaxNbForageSources )
 		MaxNbForageSources = varMaxNbForageSources->asInt();
 	else
 		MaxNbForageSources = 2000;
+
 	CConfigFile::CVar *varMaxNbToxicClouds = ConfigFile.getVarPtr("NbToxicCloudsLimit");
 	if ( varMaxNbToxicClouds )
 		MaxNbToxicClouds = varMaxNbToxicClouds->asInt();
 	else
 		MaxNbToxicClouds = 1000;
+
 	nlinfo( "NbPlayersLimit=%u NbObjectsLimit=%u NbNpcSpawnedByEGSLimit=%u NbForageSourcesLimit=%u NbToxicCloudsLimit=%u NbGuildLimit=%u", MaxNbPlayers, MaxNbObjects, MaxNbNpcSpawnedByEGS, MaxNbForageSources, MaxNbToxicClouds, MaxNbGuilds );
 
 	CConfigFile::CVar *varExportDepositContents = ConfigFile.getVarPtr("ExportDepositContents");
