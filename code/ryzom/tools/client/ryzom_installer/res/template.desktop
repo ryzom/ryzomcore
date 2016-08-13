@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=$NAME
+Type=Application
+GenericName=MMORPG
+Exec=$COMMAND
+Icon=$ICON
+Terminal=false
+Hidden=false
+Categories=Game;RolePlaying;

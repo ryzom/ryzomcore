@@ -22,6 +22,7 @@
 #	include <eax.h>
 #endif
 
+#include <initguid.h>
 #include <dsound.h>
 
 #include <iostream>

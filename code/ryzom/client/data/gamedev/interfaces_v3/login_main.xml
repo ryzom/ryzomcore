@@ -354,19 +354,19 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <instance template="server_box" id="opt_win"	posparent="nonopt_win" posref="BM TM" w="400" h="206" y="-30" />
 
     <!-- Textes -->
-    <view type="text" id="title" posparent="global_win" posref="TM BM" y="24" color="255 255 255 255"
+    <view type="text" id="title" posparent="global_win" posref="TM BM" y="2" color="255 255 255 255"
     fontsize="12" shadow="true" hardtext="uiOnPatchDetail" />
 
     <view type="text" id="opt_txt" posparent="opt_win" posref="TL BL" y="1" color="255 255 255 255"
     fontsize="10" shadow="true" hardtext="uiOnPatchOpt" />
 
     <group id="global_patch" w="382" h="22" posparent="global_win" posref="MM MM" >
-      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiTotalPatch" />
-      <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
+      <view type="text" id="name" posref="ML ML" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiTotalPatch" />
+      <view type="text" id="size" posref="MR MR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
     </group>
       <group id="nonopt_patch" w="382" h="22" posparent="nonopt_win" posref="MM MM" >
-      <view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiRequiredFiles" />
-      <view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
+      <view type="text" id="name" posref="ML ML" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiRequiredFiles" />
+      <view type="text" id="size" posref="MR MR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext="...Kbs" />
     </group>
 
     <!-- Categories -->
@@ -412,12 +412,12 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
     <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="global_win:active,patch_win:active"/>
 
     <group id="global_patch" w="582" h="22" posparent="global_win" posref="MM MM" >
-    	<view type="text" id="name" posref="BL BL" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="TOTAL PATCH" />
-    	<view type="text" id="size" posref="BR BR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext=".../...Kbs" />
+    	<view type="text" id="name" posref="ML ML" fontsize="12" x="2" y="0" color="135 243 28 255" shadow="true" hardtext="uiTotalPatch" />
+    	<view type="text" id="size" posref="MR MR" fontsize="12" x="-8" y="0" color="135 243 28 255" shadow="true" hardtext=".../...Kbs" />
     </group>
     <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="global_patch:active"/>
 
-    <view type="text" id="progress" posref="TL TL" posparent="patch_win" fontsize="12" x="8" y="-8" color="135 243 28 255" shadow="true"/>
+    <view type="text" id="progress" posref="TL TL" posparent="patch_win" fontsize="12" x="8" y="-4" color="135 243 28 255" shadow="true"/>
     <view type="text" id="state" posparent="progress" posref="TR TL" w="520" x="4" y="0" line_maxw="520" color="135 243 28 255"
     fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_normal"/>
     <link expr="eq(@UI:VARIABLES:SCREEN,4)" target="progress:active,state:active"/>
@@ -434,9 +434,9 @@ on_enter="leave_modal" options="no_bordure" mouse_pos="false" exit_key_pushed="t
 
 
     <!-- Release Note -->
-    <instance template="server_box" id="release_win"	posparent="bl" posref="TM TM" w="600" h="324" x="-14" y="-282" />
+    <instance template="server_box" id="release_win" posparent="bl" posref="TM TM" w="600" h="324" x="-14" y="-282" />
 
-    <view type="text" id="release_title" posref="TM BM" posparent="release_win" fontsize="10" y="-2" color="255 255 255 255"
+    <view type="text" id="release_title" posref="TM BM" posparent="release_win" fontsize="10" y="0" color="255 255 255 255"
     hardtext="uiOnRelease" shadow="true"/>
 
 <!--

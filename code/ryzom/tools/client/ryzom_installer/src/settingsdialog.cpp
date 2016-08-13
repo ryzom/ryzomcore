@@ -28,6 +28,10 @@ CSettingsDialog::CSettingsDialog(QWidget *parent):QDialog(parent)
 
 	CConfigFile *config = CConfigFile::getInstance();
 
+	m_installationDirectory = config->getInstallationDirectory();
+
+	updateInstallationDirectoryLabel();
+
 	// only 64 bits OS can switch between 32 and 64 bits
 	use64bitsClientsCheckBox->setEnabled(config->has64bitsOS());
 
@@ -47,6 +51,11 @@ CSettingsDialog::~CSettingsDialog()
 {
 }
 
+QString CSettingsDialog::getInstallationDirectory() const
+{
+	return m_installationDirectory;
+}
+
 void CSettingsDialog::accept()
 {
 	// TODO: add save code
@@ -56,11 +65,16 @@ void CSettingsDialog::accept()
 
 void CSettingsDialog::onInstallationDirectoryButtonClicked()
 {
-	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where to install Ryzom"));
+	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where to install Ryzom"), m_installationDirectory);
 
 	if (directory.isEmpty()) return;
 
-//	m_dstDirectory = directory;
+	m_installationDirectory = directory;
 
-//	updateDestinationText();
+	updateInstallationDirectoryLabel();
+}
+
+void CSettingsDialog::updateInstallationDirectoryLabel()
+{
+	installationDirectoryLabel->setText(m_installationDirectory);
 }

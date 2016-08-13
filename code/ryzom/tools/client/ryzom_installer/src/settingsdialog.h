@@ -33,11 +33,18 @@ public:
 	CSettingsDialog(QWidget *parent = NULL);
 	virtual ~CSettingsDialog();
 
+	QString getInstallationDirectory() const;
+
 public slots:
 	void onInstallationDirectoryButtonClicked();
 
 private slots:
 	void accept();
+
+private:
+	void updateInstallationDirectoryLabel();
+
+	QString m_installationDirectory;
 };
 
 #endif

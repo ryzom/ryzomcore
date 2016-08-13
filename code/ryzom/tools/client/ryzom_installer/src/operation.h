@@ -64,8 +64,7 @@ enum OperationStep
 	CopyInstaller,
 	UninstallOldClient,
 	CreateProfile,
-	CreateDesktopShortcut,
-	CreateMenuShortcut,
+	CreateProfileShortcuts,
 	CreateAddRemoveEntry,
 	Done
 };

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>428</width>
     <height>150</height>
    </rect>
   </property>
@@ -15,25 +15,36 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="use64bitsClientsCheckBox">
+       <property name="text">
+        <string>Use 64 bits client</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="installationDirectoryLabelTitle">
+       <property name="text">
+        <string>Base location of Ryzom files:</string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="languageLabel">
        <property name="text">
         <string>Language</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="languageComboBox"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label">
+     <item row="2" column="2">
+      <widget class="QPushButton" name="oldDirectoryButton">
        <property name="text">
-        <string>Base location of Ryzom files: %1</string>
+        <string>Browse...</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
+     <item row="1" column="2">
       <widget class="QPushButton" name="installationDirectoryButton">
        <property name="text">
         <string>Browse...</string>
@@ -41,25 +52,28 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="oldDirectoryLabelTitle">
        <property name="text">
-        <string>Location of source Ryzom files: %1</string>
+        <string>Location of source Ryzom files:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="installationDirectoryLabel">
+       <property name="text">
+        <string>D:\Ryzom</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QLabel" name="oldDirectoryLabel">
        <property name="text">
-        <string>Browse...</string>
+        <string>E:\Ryzom</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="use64bitsClientsCheckBox">
-       <property name="text">
-        <string>Use 64 bits client</string>
-       </property>
-      </widget>
+     <item row="0" column="2">
+      <widget class="QComboBox" name="languageComboBox"/>
      </item>
     </layout>
    </item>

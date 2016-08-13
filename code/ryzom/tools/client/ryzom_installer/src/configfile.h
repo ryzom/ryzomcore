@@ -74,8 +74,12 @@ public:
 	// helpers
 	QString getDirectory() const;
 	QString getClientFullPath() const;
-	QString getClientDesktopLinkFullPath() const;
-	QString getClientMenuLinkFullPath() const;
+	QString getClientDesktopShortcutFullPath() const;
+	QString getClientMenuShortcutFullPath() const;
+
+	void createShortcuts() const;
+	void deleteShortcuts() const;
+	void updateShortcuts() const;
 };
 
 extern const CProfile NoProfile;
@@ -177,6 +181,8 @@ public:
 	QString getInstallerFullPath() const;
 	QString getInstallerMenuLinkFullPath() const;
 
+	QStringList getInstallerRequiredFiles() const;
+
 	QString getSrcServerClientBNPFullPath() const;
 
 	OperationStep getInstallNextStep() const;
@@ -190,6 +196,7 @@ public:
 	QString getProductComments() const;
 
 private:
+	int m_version;
 	int m_defaultServerIndex;
 	int m_defaultProfileIndex;
 
