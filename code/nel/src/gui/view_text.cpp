@@ -99,6 +99,7 @@ namespace NLGUI
 
 		_AutoClamp = false;
 		_ClampRight = true; // clamp on the right of the text
+		_OverflowText = "...";
 
 		_LetterColors = NULL;
 		_Setuped= false;
@@ -1880,12 +1881,15 @@ namespace NLGUI
 					_Lines.back()->clear(*TextContext);
 					_Lines.pop_back();
 				}
-				_Lines.pop_back();
-				CViewText::CLine *endLine = new CViewText::CLine;
-				CViewText::CWord w;
-				w.build(string("..."), *TextContext, _Scale);
-				endLine->addWord(w, _FontWidth);
-				_Lines.push_back(TLineSPtr(endLine));
+				if (_OverflowText.size() > 0)
+				{
+					_Lines.pop_back();
+					CViewText::CLine *endLine = new CViewText::CLine;
+					CViewText::CWord w;
+					w.build(_OverflowText, *TextContext, _Scale);
+					endLine->addWord(w, _FontWidth);
+					_Lines.push_back(TLineSPtr(endLine));
+				}
 			}
 
 			// Calculate size
@@ -1947,10 +1951,20 @@ namespace NLGUI
 				UTextContext::CStringInfo si;
 				ucstring	ucCurrentLine;
 				ucCurrentLine.reserve(_Text.size());
+
 				// Append ... to the end of line
-				si = TextContext->getStringInfo (ucstring("..."));
-				float		dotWidth= si.StringWidth / _Scale;
-				float		rWidthCurrentLine = 0, rWidthLetter;
+				float dotWidth;
+				if (_OverflowText.size() > 0)
+				{
+					si = TextContext->getStringInfo (ucstring(_OverflowText));
+					dotWidth = si.StringWidth / _Scale;
+				}
+				else
+				{
+					dotWidth = 0.0f;
+				}
+
+				float rWidthCurrentLine = 0, rWidthLetter;
 				// for all the text
 				if (_ClampRight)
 				{
@@ -1974,7 +1988,10 @@ namespace NLGUI
 					}
 
 					// Add the dots
-					ucCurrentLine+= "...";
+					if (_OverflowText.size() > 0)
+					{
+						ucCurrentLine += _OverflowText;
+					}
 				}
 				else
 				{
@@ -1998,7 +2015,10 @@ namespace NLGUI
 					}
 
 					// Add the dots
-					ucCurrentLine = "..." + ucCurrentLine;
+					if (_OverflowText.size() > 0)
+					{
+						ucCurrentLine = _OverflowText + ucCurrentLine;
+					}
 				}
 
 				// And so setup this trunc text

@@ -90,6 +90,7 @@ namespace NLGUI
 		void setShadowOutline (bool bShadowOutline);
 		void setShadowColor (const NLMISC::CRGBA &color);
 		void setLineMaxW (sint nMaxW, bool invalidate=true);
+		void setOverflowText(const ucstring &text) { _OverflowText = text; }
 		void setMultiLine (bool bMultiLine);
 		void setMultiLineSpace (sint nMultiLineSpace);
 		void setMultiLineMaxWOnly (bool state);
@@ -114,6 +115,7 @@ namespace NLGUI
 		bool			getShadowOutline()	{ return _ShadowOutline; }
 		NLMISC::CRGBA	getShadowColor()	{ return _ShadowColor; }
 		sint			getLineMaxW()		const { return _LineMaxW; }
+		ucstring		getOverflowText()	const { return _OverflowText; }
 		bool			getMultiLine() const		{ return _MultiLine; }
 		sint			getMultiLineSpace()	const	{ return _MultiLineSpace; }
 		bool			getMultiLineMaxWOnly()	const	{ return _MultiLineMaxWOnly; }
@@ -259,6 +261,7 @@ namespace NLGUI
 		sint32		_LineMaxW;
 		/// For single line, true if the text is clamped (ie displayed with "...")
 		bool		_SingleLineTextClamped;
+		ucstring	_OverflowText;
 
 		/// Multiple lines handling
 		bool		 _MultiLine;
