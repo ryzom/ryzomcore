@@ -2293,7 +2293,7 @@ namespace NLGUI
 			singleChar[0] = textValue[i];
 			si = textContext.getStringInfo(singleChar);
 			sw = si.StringWidth / CViewRenderer::getInstance()->getInterfaceScale();
-			px += sw / CViewRenderer::getInstance()->getInterfaceScale();
+			px += sw;
 			 // the character is at the i - 1 position
 			if (px > x)
 			{
