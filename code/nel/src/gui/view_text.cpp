@@ -80,7 +80,7 @@ namespace NLGUI
 		_MultiMaxLine = 0;
 		_Index = 0xFFFFFFFF;
 
-		_Scale = 1.0f;
+		_Scale = CWidgetManager::getInstance()->getInterfaceScale();
 		_FontWidth= 0;
 		_FontHeight = 0;
 		_FontLegHeight = 0;
@@ -113,6 +113,8 @@ namespace NLGUI
 	:CViewBase(param)
 	{
 		setupDefault ();
+
+		CWidgetManager::getInstance()->registerInterfaceScaleWatcher(this);
 	}
 
 	///constructor
@@ -130,11 +132,15 @@ namespace NLGUI
 		_ShadowOutline = ShadowOutline;
 		setText(Text);
 		computeFontSize ();
+
+		CWidgetManager::getInstance()->registerInterfaceScaleWatcher(this);
 	}
 
 	// ***************************************************************************
 	CViewText::~CViewText()
 	{
+		CWidgetManager::getInstance()->unregisterInterfaceScaleWatcher(this);
+
 		if (_Index != 0xFFFFFFFF)
 			CViewRenderer::getTextContext(_FontName)->erase (_Index);
 		clearLines();
@@ -893,9 +899,6 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::checkCoords ()
 	{
-		if (_Scale != CViewRenderer::getInstance()->getInterfaceScale())
-			invalidateContent();
-
 		if ((_MultiLine)&&(_Parent != NULL))
 		{
 			// If never setuped, and if text is not empty
@@ -1840,9 +1843,6 @@ namespace NLGUI
 	// ***************************************************************************
 	void CViewText::updateTextContext ()
 	{
-		if (_Scale != CViewRenderer::getInstance()->getInterfaceScale())
-			computeFontSize();
-
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 
 		TextContext->setHotSpot (UTextContext::BottomLeft);
@@ -2733,10 +2733,19 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	void CViewText::onInterfaceScaleChanged()
+	{
+		_Scale = CWidgetManager::getInstance()->getInterfaceScale();
+
+		computeFontSize ();
+		invalidateContent();
+
+		CViewBase::onInterfaceScaleChanged();
+	}
+
+	// ***************************************************************************
 	void CViewText::computeFontSize ()
 	{
-		_Scale = CViewRenderer::getInstance()->getInterfaceScale();
-
 		NL3D::UTextContext *TextContext = CViewRenderer::getTextContext(_FontName);
 		TextContext->setHotSpot (UTextContext::BottomLeft);
 		TextContext->setShaded (_Shadow);

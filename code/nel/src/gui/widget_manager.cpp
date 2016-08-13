@@ -1850,10 +1850,9 @@ namespace NLGUI
 	class InvalidateTextVisitor : public CInterfaceElementVisitor
 	{
 	public:
-		InvalidateTextVisitor( bool reset, bool invalidate )
+		InvalidateTextVisitor( bool reset)
 		{
 			this->reset = reset;
-			this->invalidate = invalidate;
 		}
 
 		void visitGroup( CInterfaceGroup *group )
@@ -1866,17 +1865,13 @@ namespace NLGUI
 				{
 					if( reset )
 						vt->resetTextIndex();
-					if( invalidate )
-						vt->invalidateContent();
-					else
-						vt->updateTextContext();
+					vt->updateTextContext();
 				}
 			}
 		}
 
 	private:
 		bool reset;
-		bool invalidate;
 	};
 
 	// ------------------------------------------------------------------------------------------------
@@ -1889,8 +1884,6 @@ namespace NLGUI
 		CViewRenderer::getInstance()->checkNewScreenSize ();
 		CViewRenderer::getInstance()->getScreenSize (w, h);
 
-		bool scaleChanged = _InterfaceScale != CViewRenderer::getInstance()->getInterfaceScale();
-
 		// Update ui:* (limit the master containers to the height of the screen)
 		for (nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); nMasterGroup++)
 		{
@@ -1899,6 +1892,13 @@ namespace NLGUI
 			rMG.Group->setH (h);
 		}
 		CViewRenderer::getInstance()->setClipWindow(0, 0, w, h);
+
+		bool scaleChanged = _InterfaceScale != CViewRenderer::getInstance()->getInterfaceScale();
+		if (scaleChanged)
+		{
+			_InterfaceScale = CViewRenderer::getInstance()->getInterfaceScale();
+			notifyInterfaceScaleWatchers();
+		}
 
 		// If all conditions are OK, move windows so they fit correctly with new screen size
 		// Do this work only InGame when Config is loaded
@@ -1909,7 +1909,7 @@ namespace NLGUI
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 
-			InvalidateTextVisitor inv( false, scaleChanged );
+			InvalidateTextVisitor inv( false);
 
 			rMG.Group->visitGroupAndChildren( &inv );
 			rMG.Group->invalidateCoords ();
@@ -3697,6 +3697,42 @@ namespace NLGUI
 	}
 
 
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::notifyInterfaceScaleWatchers()
+	{
+		std::vector< IInterfaceScaleWatcher* >::iterator itr = scaleWatchers.begin();
+		while( itr != scaleWatchers.end() )
+		{
+			(*itr)->onInterfaceScaleChanged();
+			++itr;
+		}
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::registerInterfaceScaleWatcher( IInterfaceScaleWatcher *watcher )
+	{
+		std::vector< IInterfaceScaleWatcher* >::const_iterator itr
+			= std::find( scaleWatchers.begin(), scaleWatchers.end(), watcher );
+
+		if( itr != scaleWatchers.end() )
+			return;
+
+		scaleWatchers.push_back( watcher );
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	void CWidgetManager::unregisterInterfaceScaleWatcher( IInterfaceScaleWatcher *watcher )
+	{
+		std::vector< IInterfaceScaleWatcher* >::iterator itr
+			= std::find( scaleWatchers.begin(), scaleWatchers.end(), watcher );
+
+		if( itr == scaleWatchers.end() )
+			return;
+
+		scaleWatchers.erase( itr );
+	}
+
+	// ------------------------------------------------------------------------------------------------
 	CWidgetManager::CWidgetManager()
 	{
 		LinkHack();

@@ -70,6 +70,7 @@ namespace NLGUI
 		virtual void checkCoords();
 		virtual void updateCoords();
 		virtual	void onAddToGroup();
+		virtual void onInterfaceScaleChanged();
 
 		/// From CInterfaceElement
 		sint32	getMaxUsedW() const;

@@ -49,6 +49,7 @@ namespace NLGUI
 	class CProcedure;
 	class IEditorSelectionWatcher;
 	class IWidgetAdditionWatcher;
+	class IInterfaceScaleWatcher;
 
 	/**
 	 GUI Widget Manager
@@ -530,6 +531,11 @@ namespace NLGUI
 		bool unGroupSelection();
 		void setMultiSelection( bool b ){ multiSelection = b; }
 
+		float getInterfaceScale() const { return _InterfaceScale; }
+		void notifyInterfaceScaleWatchers();
+		void registerInterfaceScaleWatcher(IInterfaceScaleWatcher *watcher);
+		void unregisterInterfaceScaleWatcher(IInterfaceScaleWatcher *watcher);
+
 		bool createNewGUI( const std::string &project, const std::string &window );
 				
 	private:
@@ -623,6 +629,7 @@ namespace NLGUI
 		std::vector< IOnWidgetsDrawnHandler* > onWidgetsDrawnHandlers;
 		std::vector< IEditorSelectionWatcher* > selectionWatchers;
 		std::vector< IWidgetWatcher* > widgetWatchers;
+		std::vector< IInterfaceScaleWatcher* > scaleWatchers;
 		
 		std::vector< std::string > editorSelection;
 		bool _GroupSelection;
