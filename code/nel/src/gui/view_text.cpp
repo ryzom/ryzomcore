@@ -1082,10 +1082,10 @@ namespace NLGUI
 
 					// Draw a line
 					if (_Underlined)
-						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1.0f / rVR.getInterfaceScale(), 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line, line_width, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
 
 					if (_StrikeThrough)
-						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line + (_FontHeight / 2), line_width, 1.0f / rVR.getInterfaceScale(), 0, false, rVR.getBlankTextureId(), col);
+						rVR.drawRotFlipBitmap (_RenderLayer, (sint)floorf(px), y_line + (_FontHeight / 2), line_width, 1.0f / _Scale, 0, false, rVR.getBlankTextureId(), col);
 
 					// skip word
 					px += currWord.Info.StringWidth;
@@ -1426,7 +1426,7 @@ namespace NLGUI
 			linePushed= true;
 		}
 		// Append to the last line
-		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext);
+		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext, _Scale);
 		// reset the word
 		ucCurrentWord = ucstring("");
 	}
@@ -1523,7 +1523,7 @@ namespace NLGUI
 				if(currLine[i].Format!=lineWordFormat)
 				{
 					// add the current lineWord to the line.
-					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
+					_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext, _Scale);
 					// get new lineWordFormat
 					lineWordFormat= currLine[i].Format;
 					// and clear
@@ -1538,7 +1538,7 @@ namespace NLGUI
 			}
 
 			if(!lineWord.empty())
-				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext);
+				_Lines.back()->addWord(lineWord, 0, lineWordFormat, _FontWidth, *TextContext, _Scale);
 
 			// clear
 			currLine.clear();
@@ -1699,7 +1699,7 @@ namespace NLGUI
 					{
 						uint maxNumSpaces = std::max(1U, (uint) (nMaxWidth / _SpaceWidth));
 						CWord spaceWord; // a word with only spaces in it
-						spaceWord.build (ucstring (""), *TextContext, maxNumSpaces);
+						spaceWord.build (ucstring (""), *TextContext, _Scale, maxNumSpaces);
 						spaceWord.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						_Lines.back()->addWord(spaceWord, _FontWidth);
@@ -1728,7 +1728,7 @@ namespace NLGUI
 						currChar = std::max((uint) 1, currChar); // must fit at least one character otherwise there's an infinite loop
 						wordValue = _Text.substr(spaceEnd, currChar);
 						CWord word;
-						word.build(wordValue, *TextContext, numSpaces);
+						word.build(wordValue, *TextContext, _Scale, numSpaces);
 						word.Format= wordFormat;
 						_Lines.push_back(TLineSPtr(new CLine));
 						float roomForSpaces = (float) nMaxWidth - word.Info.StringWidth;
@@ -1763,7 +1763,7 @@ namespace NLGUI
 					if (!wordValue.empty() || numSpaces != 0)
 					{
 						CWord word;
-						word.build(wordValue, *TextContext, numSpaces);
+						word.build(wordValue, *TextContext, _Scale, numSpaces);
 						word.Format= wordFormat;
 						// update line width
 						_Lines.back()->addWord(word, _FontWidth);
@@ -1883,7 +1883,7 @@ namespace NLGUI
 				_Lines.pop_back();
 				CViewText::CLine *endLine = new CViewText::CLine;
 				CViewText::CWord w;
-				w.build(string("..."), *TextContext);
+				w.build(string("..."), *TextContext, _Scale);
 				endLine->addWord(w, _FontWidth);
 				_Lines.push_back(TLineSPtr(endLine));
 			}
@@ -2280,7 +2280,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 	// Tool fct : From a word and a x coordinate, give the matching character index
-	static uint getCharacterIndex(const ucstring &textValue, float x, NL3D::UTextContext &textContext)
+	static uint getCharacterIndex(const ucstring &textValue, float x, NL3D::UTextContext &textContext, float scale)
 	{
 		float px = 0.f;
 		float sw;
@@ -2292,7 +2292,7 @@ namespace NLGUI
 			// get character width
 			singleChar[0] = textValue[i];
 			si = textContext.getStringInfo(singleChar);
-			sw = si.StringWidth / CViewRenderer::getInstance()->getInterfaceScale();
+			sw = si.StringWidth / scale;
 			px += sw;
 			 // the character is at the i - 1 position
 			if (px > x)
@@ -2390,7 +2390,7 @@ namespace NLGUI
 					else
 					{
 						// the coord is in the word itself
-						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, (float) x - (px + spacesWidth), *TextContext);
+						index = charPos + currWord.NumSpaces + getCharacterIndex(currWord.Text, (float) x - (px + spacesWidth), *TextContext, _Scale);
 						cursorAtPreviousLineEnd = false;
 						return;
 					}
@@ -2415,7 +2415,7 @@ namespace NLGUI
 				index = 0;
 				return;
 			}
-			index = getCharacterIndex(_Text, (float) x, *TextContext);
+			index = getCharacterIndex(_Text, (float) x, *TextContext, _Scale);
 			return;
 		}
 	}
@@ -2516,10 +2516,10 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext)
+	void CViewText::CLine::addWord(const ucstring &text, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext, float scale)
 	{
 		CWord word;
-		word.build(text, textContext, numSpaces);
+		word.build(text, textContext, scale, numSpaces);
 		word.Format= wordFormat;
 		addWord(word, fontWidth);
 	}
@@ -2563,13 +2563,13 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::CWord::build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces)
+	void CViewText::CWord::build(const ucstring &text, NL3D::UTextContext &textContext, float scale, uint numSpaces)
 	{
 		Text = text;
 		NumSpaces = numSpaces;
 		Index = textContext.textPush(text);
 		Info = textContext.getStringInfo(Index);
-		Info.StringWidth /= CViewRenderer::getInstance()->getInterfaceScale();
+		Info.StringWidth /= scale;
 	}
 
 	// ***************************************************************************

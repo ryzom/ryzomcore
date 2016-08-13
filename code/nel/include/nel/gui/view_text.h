@@ -326,7 +326,7 @@ namespace NLGUI
 				CFormatInfo							Format;
 			public:
 				// build from a string, using the current text context
-				void build(const ucstring &text, NL3D::UTextContext &textContext, uint numSpaces= 0);
+				void build(const ucstring &text, NL3D::UTextContext &textContext, float scale, uint numSpaces= 0);
 		};
 		typedef std::vector<CWord> TWordVect;
 
@@ -339,7 +339,7 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
+				void	addWord(const ucstring &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext, float scale);
 				void    addWord(const CWord &word, float fontWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
