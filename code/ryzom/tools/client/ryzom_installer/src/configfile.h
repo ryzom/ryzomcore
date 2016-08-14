@@ -18,73 +18,8 @@
 #define CONFIGFILE_H
 
 #include "operation.h"
-
-class CServer
-{
-public:
-	CServer()
-	{
-		dataCompressedSize = 0;
-		dataUncompressedSize = 0;
-	}
-
-	QString id;
-	QString name;
-	QString displayUrl;
-	QString dataDownloadUrl;
-	QString dataDownloadFilename;
-	qint64 dataCompressedSize;
-	qint64 dataUncompressedSize;
-	QString clientDownloadUrl;
-	QString clientDownloadFilename;
-	QString clientFilename;
-	QString clientFilenameOld;
-	QString configurationFilename;
-	QString installerFilename;
-	QString comments;
-
-	// helpers
-	QString getDirectory() const;
-	QString getClientFullPath() const;
-	QString getConfigurationFullPath() const;
-};
-
-extern const CServer NoServer;
-
-typedef QVector<CServer> CServers;
-
-class CProfile
-{
-public:
-	CProfile()
-	{
-		desktopShortcut = false;
-		menuShortcut = false;
-	}
-
-	QString id;
-	QString name;
-	QString server;
-	QString executable;
-	QString arguments;
-	QString comments;
-	bool desktopShortcut;
-	bool menuShortcut;
-
-	// helpers
-	QString getDirectory() const;
-	QString getClientFullPath() const;
-	QString getClientDesktopShortcutFullPath() const;
-	QString getClientMenuShortcutFullPath() const;
-
-	void createShortcuts() const;
-	void deleteShortcuts() const;
-	void updateShortcuts() const;
-};
-
-extern const CProfile NoProfile;
-
-typedef QVector<CProfile> CProfiles;
+#include "server.h"
+#include "profile.h"
 
 /**
  * Config file management and other stuff related to location of files/directories.
