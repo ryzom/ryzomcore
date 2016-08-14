@@ -542,6 +542,15 @@ CCtrlDraggable(param)
 	_ItemRMClassType= NULL;
 	_ItemRMFaberStatType= NULL;
 	_NotifyAnimEndTime = 0;
+
+	_SheetText = NULL;
+	_QualityText = NULL;
+	_QuantityText = NULL;
+	_SapText = NULL;
+
+	_QualityTextValue = -1;
+	_QuantityTextValue = -1;
+	_SapTextValue = -1;
 }
 
 // ----------------------------------------------------------------------------
@@ -560,6 +569,30 @@ CDBCtrlSheet::~CDBCtrlSheet()
 		if (Driver)
 			Driver->deleteTextureFile(_GuildSymb);
 		_GuildSymb = NULL;
+	}
+
+	if (_SheetText)
+	{
+		delete _SheetText;
+		_SheetText = NULL;
+	}
+
+	if (_QualityText)
+	{
+		delete _QualityText;
+		_QualityText = NULL;
+	}
+
+	if (_QuantityText)
+	{
+		delete _QuantityText;
+		_QuantityText = NULL;
+	}
+
+	if (_SapText)
+	{
+		delete _SapText;
+		_SapText = NULL;
 	}
 
 	// ensure erase static
@@ -1020,6 +1053,19 @@ void CDBCtrlSheet::updateCoords ()
 		}
 	}
 	CInterfaceElement::updateCoords();
+
+	if (getActive())
+	{
+		// updateCoords() is called to apply possible UI scale change to font
+		if (_SheetText)
+			_SheetText->updateCoords();
+		if (_QualityText)
+			_QualityText->updateCoords();
+		if (_QuantityText)
+			_QuantityText->updateCoords();
+		if (_SapText)
+			_SapText->updateCoords();
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -1733,81 +1779,106 @@ sint32	CDBCtrlSheet::getSPhraseId() const
 // ***************************************************************************
 void CDBCtrlSheet::resetCharBitmaps()
 {
-	_CharBitmaps.clear();
+	if (_SheetText)
+		_SheetText->setActive(false);
+	if (_QualityText)
+		_QualityText->setActive(false);
+	if (_QuantityText)
+		_QuantityText->setActive(false);
+	if (_SapText)
+		_SapText->setActive(false);
+}
+
+CViewText* CDBCtrlSheet::createViewText(const std::string &id, sint fontSize)
+{
+	CViewText *text = new CViewText(CViewBase::TCtorParam());
+	text->setActive(false);
+	text->setId(getId() + ":" + id);
+	// icon slot does not inherit from CInterfaceGroup and cannot be used as parent
+	text->setParent(_Parent);
+	text->setParentPos(_ParentPos);
+	text->setParentPosRef(_ParentPosRef);
+	text->setFontSize(fontSize);
+	text->setShadow(true);
+	text->setColor(CRGBA::White);
+	text->setOverflowText(ucstring(""));
+	text->setModulateGlobalColor(false);
+	text->setMultiLineSpace(0);
+	text->setMultiLineMaxWOnly(true);
+	text->setMultiLine(false);
+
+	return text;
 }
 
 // ***************************************************************************
 void CDBCtrlSheet::setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar, bool topDown)
 {
 	// Use the optString for the Macro name
-	_OptString = toLower(_OptString);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-	_CharBitmaps.clear();
-
 	if(maxLine<=0)
+	{
+		if (_SheetText)
+			_SheetText->setActive(false);
 		return;
-
-	uint h = rVR.getTypoTextureH('a');
-	sint lineNb = 0;
-	sint curLineSize = 0;
-	uint i;
-	uint xChar= 0;
-	for (i = 0; i < _OptString.size(); ++i)
-	{
-		char c = _OptString[i];
-		sint32 w = rVR.getTypoTextureW(c);
-		if ((curLineSize + w) > maxW || (sint32)xChar>=maxWChar)
-		{
-			lineNb ++;
-			if (lineNb == maxLine) break;
-			curLineSize = 0;
-			xChar = 0;
-		}
-		sint32 id = rVR.getTypoTextureId(c);
-		if (id != -1)
-		{
-			CCharBitmap		bmp;
-			bmp.X= curLineSize;
-			bmp.Y= lineNb;
-			bmp.Id= id;
-			_CharBitmaps.push_back(bmp);
-		}
-		curLineSize += w;
-		++xChar;
 	}
 
-	if (lineNb == maxLine) lineNb = maxLine-1;
+	if (!_SheetText)
+		_SheetText = createViewText("opt", 8);
 
-	for (i = 0; i < _CharBitmaps.size(); ++i)
-	{
-		_CharBitmaps[i].Y = (lineNb - _CharBitmaps[i].Y)*h;
-	}
-
-	// if topDown, revert Y
+	_SheetText->setX(0);
 	if (topDown)
 	{
-		for (i = 0; i < _CharBitmaps.size(); ++i)
-		{
-			_CharBitmaps[i].Y = _IconH - _CharBitmaps[i].Y - h;
-		}
+		_SheetText->setY(_IconH);
+		_SheetText->setPosRef(Hotspot_TL);
 	}
+	else
+		_SheetText->setPosRef(Hotspot_BL);
+
+	_SheetText->setActive(true);
+
+	ucstring txt;
+	txt.fromUtf8(_OptString);
+	_SheetText->setText(txt);
+	_SheetText->setLineMaxW(maxW);
+	_SheetText->setMultiLine(maxLine > 1);
+
+	_SheetText->updateTextContext();
 }
 
 // ***************************************************************************
 void CDBCtrlSheet::displayCharBitmaps(sint32 rdrLayer, sint32 x, sint32 y, CRGBA color)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-	for (uint i = 0; i < _CharBitmaps.size(); ++i)
+	if (_SheetText)
 	{
-		rVR.draw11RotFlipBitmap (rdrLayer, x+_CharBitmaps[i].X, y+_CharBitmaps[i].Y, 0, false,
-								_CharBitmaps[i].Id, color);
+		sint32 ClipX, ClipY, ClipW, ClipH;
+		rVR.getClipWindow (ClipX, ClipY, ClipW, ClipH);
+
+		// clip region is bbox from parent
+		if (isIn(ClipX, ClipY, ClipW, ClipH))
+		{
+			// position text over icon
+			sint32 sx = x + _SheetText->getX();
+			sint32 sy = y + _SheetText->getY();
+			if (_SheetText->getPosRef() & Hotspot_Tx)
+				sy -= _SheetText->getHReal();
+
+			_SheetText->setRenderLayer(rdrLayer);
+			_SheetText->setXReal(sx);
+			_SheetText->setYReal(sy);
+
+			_SheetText->setColor(color);
+
+			// set clip area over icon  to hide oversize text
+			rVR.setClipWindow(sx, sy, _WReal-2, _HReal-2);
+			_SheetText->draw();
+			rVR.setClipWindow (ClipX, ClipY, ClipW, ClipH);
+		}
 	}
 }
-
 
 // ***************************************************************************
 void CDBCtrlSheet::draw()
@@ -2128,7 +2199,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 			if (_DispQuality != -1)
 			{
 				// For pact sheets, the quality gives the level of the sheet
-				drawNumber(x+1, y+1, wSheet, hSheet, numberColor, _DispQuality+1);
+				drawQuality(x+1, y+1, wSheet, hSheet, numberColor, _DispQuality+1);
 			}
 		break;
 		case CCtrlSheetInfo::SheetType_Skill:
@@ -2183,7 +2254,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 				// Draw Quality. -1 for lookandfeel. Draw it with global color
 				if (_DispQuality != -1)
 				{
-					drawNumber(x-1,y+1,wSheet, hSheet, numberColor, _DispQuality);
+					drawQuality(x-1,y+1, wSheet, hSheet, numberColor, _DispQuality);
 				}
 				// Draw Quantity
 				if (_UseQuantity && _DispQuantity>-1)
@@ -2200,7 +2271,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					{
 						quantity -= getLockValuePtr()->getValue32();
 					}
-					drawNumber(x+1+crossW, y+1, wSheet, hSheet, curSheetColor, quantity, false);
+					drawQuantity(x+1+crossW, y+1, wSheet, hSheet, curSheetColor, quantity);
 				}
 				// Is the item enchanted ?
 				sint32 enchant = _Enchant.getSInt32();
@@ -2209,7 +2280,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 					// Yes draw the additionnal bitmap and the charge (number of enchanted spell we can launch with the enchanted item)
 					enchant--;
 					rVR.draw11RotFlipBitmap (_RenderLayer+2, x, y, 0, false, rVR.getSystemTextureId(CViewRenderer::ItemEnchantedTexture), curSheetColor);
-					drawNumber(x+1, y-2+hSheet-rVR.getFigurTextureH(), wSheet, hSheet, numberColor, enchant, false);
+					drawSap(x+1, y+1, wSheet, hSheet, numberColor, enchant);
 				}
 
 				// if a raw material for example, must add special icon text.
@@ -2472,7 +2543,10 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 				// Draw Quality. -1 for lookandfeel.
 				if( _ActualType == CCtrlSheetInfo::SheetType_SBrick )
 				{
-					if (_UseQuality && _MustDisplayLevel) drawNumber(px-1,py+1,BrickSheetWidth, BrickSheetHeight, curSheetColor, _DispLevel);
+					if (_UseQuality && _MustDisplayLevel)
+					{
+						drawQuality(px-1, py+1, BrickSheetWidth, BrickSheetHeight, curSheetColor, _DispLevel);
+					}
 				}
 				else
 				{
@@ -2540,51 +2614,63 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 }
 
 // ----------------------------------------------------------------------------
-sint32 CDBCtrlSheet::drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSheet */, CRGBA color, sint32 value, bool rightAlign)
+sint32 CDBCtrlSheet::drawQuality(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSheet */, CRGBA color, sint32 value)
 {
-	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CViewRenderer &rVR = *CViewRenderer::getInstance();
-	sint32	wDigit= rVR.getFigurTextureW();
-	sint32	hDigit= rVR.getFigurTextureH();
+	if (!_QualityText)
+		_QualityText = createViewText("quality", 7);
 
-	sint32 totalWidth = 0;
-
-	if (value > -1)
+	if (_QualityTextValue != value)
 	{
-		// compute start pos
-		sint32	units = value;
-		sint32	pos;
-		if(rightAlign)
-			pos= wSheet-wDigit;
-		else
-		{
-			// compute number of digits to display
-			pos= 0;
-			uint	numDigits= 0;
-			do
-			{
-				units = units / 10;
-				numDigits++;
-			}
-			while (units != 0);
-			// so pos is:
-			pos= numDigits*wDigit - wDigit;
-		}
-		// display digits
-		units = value;
-		do
-		{
-			sint32 unitsID = rVR.getFigurTextureId (units % 10);
-			// decal layer because must drawn after Items/Brick in DXTC
-			rVR.drawRotFlipBitmap (_RenderLayer+2, x+pos, y, wDigit, hDigit, 0, false, unitsID, color);
-			units = units / 10;
-			pos-= wDigit;
-			totalWidth += wDigit;
-		}
-		while (units != 0);
-		return totalWidth;
+		_QualityText->setText(toString(value));
+		_QualityText->updateTextContext();
+		_QualityTextValue = value;
 	}
-	return -1;
+	_QualityText->setActive(true);
+	_QualityText->setRenderLayer(_RenderLayer + 2);
+	_QualityText->setXReal(x + wSheet - _QualityText->getW());
+	_QualityText->setYReal(y);
+	_QualityText->setColor(color);
+	_QualityText->draw();
+}
+
+// ----------------------------------------------------------------------------
+sint32 CDBCtrlSheet::drawQuantity(sint32 x, sint32 y, sint32 wSheet, sint32 /* hSheet */, CRGBA color, sint32 value)
+{
+	if (!_QuantityText)
+		_QuantityText = createViewText(getId() + ":quantity", 7);
+
+	if (_QuantityTextValue != value)
+	{
+		_QuantityText->setText(toString(value));
+		_QuantityText->updateTextContext();
+		_QuantityTextValue = value;
+	}
+	_QuantityText->setActive(true);
+	_QuantityText->setRenderLayer(_RenderLayer + 2);
+	_QuantityText->setXReal(x);
+	_QuantityText->setYReal(y);
+	_QuantityText->setColor(color);
+	_QuantityText->draw();
+}
+
+// ----------------------------------------------------------------------------
+sint32 CDBCtrlSheet::drawSap(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, CRGBA color, sint32 value)
+{
+	if (!_SapText)
+		_SapText = createViewText(getId() + ":sap", 8);
+
+	if (_SapTextValue != value)
+	{
+		_SapText->setText(toString(value));
+		_SapText->updateTextContext();
+		_SapTextValue = value;
+	}
+	_SapText->setActive(true);
+	_SapText->setRenderLayer(_RenderLayer + 2);
+	_SapText->setXReal(x);
+	_SapText->setYReal(y + hSheet - _SapText->getH());
+	_SapText->setColor(color);
+	_SapText->draw();
 }
 
 // ----------------------------------------------------------------------------
