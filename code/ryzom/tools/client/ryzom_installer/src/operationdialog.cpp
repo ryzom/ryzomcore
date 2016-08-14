@@ -1135,7 +1135,7 @@ void COperationDialog::deleteComponentsInstaller()
 		dir.removeRecursively();
 	}
 
-	path = config->getInstallerFullPath();
+	path = config->getInstallerOriginalDirPath();
 	QStringList files = config->getInstallerRequiredFiles();
 
 	foreach(const QString &file, files)
@@ -1143,7 +1143,7 @@ void COperationDialog::deleteComponentsInstaller()
 		QString fullPath = path + "/" + file;
 
 		// delete file
-		if (!QFile::remove(fullPath))
+		if (QFile::exists(fullPath) && !QFile::remove(fullPath))
 		{
 #ifdef Q_OS_WIN32
 			// under Windows, a running executable is locked, so we need to delete it later

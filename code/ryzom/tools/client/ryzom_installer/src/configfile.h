@@ -113,7 +113,11 @@ public:
 
 	QString getClientArch() const;
 
-	QString getInstallerFullPath() const;
+	QString getInstallerCurrentFilePath() const;
+	QString getInstallerCurrentDirPath() const;
+	QString getInstallerOriginalFilePath() const;
+	QString getInstallerOriginalDirPath() const;
+
 	QString getInstallerMenuLinkFullPath() const;
 
 	QStringList getInstallerRequiredFiles() const;

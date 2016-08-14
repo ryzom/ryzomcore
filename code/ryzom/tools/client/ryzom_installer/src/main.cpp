@@ -120,6 +120,24 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+#if defined(Q_OS_WIN) && !defined(_DEBUG)
+	// under Windows, Ryzom Installer should always be copied in TEMP directory
+	QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+
+	// check if launched from TEMP directory
+	if (step == Done && QApplication::applicationDirPath() != tempPath)
+	{
+		// copy installer and required files to TEMP directory
+		if (copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
+		{
+			QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+
+			// launch copy in TEMP directory with same arguments
+			if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
+		}
+	}
+#endif
+
 	// use product name from ryzom_installer.ini
 	if (!config.getProductName().isEmpty()) QApplication::setApplicationName(config.getProductName());
 
@@ -141,23 +159,6 @@ int main(int argc, char *argv[])
 
 	if (parser.isSet(uninstallOption))
 	{
-#if defined(Q_OS_WIN) && !defined(_DEBUG)
-		QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-
-		// check if launched from TEMP directory
-		if (QApplication::applicationDirPath() != tempPath)
-		{
-			// copy installer and required files to TEMP directory
-			if (copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
-			{
-				QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
-
-				// launch copy in TEMP directory with same arguments
-				if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
-			}
-		}
-#endif
-
 		SComponents components;
 
 		// add all servers by default

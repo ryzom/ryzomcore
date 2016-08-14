@@ -722,9 +722,26 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
-QString CConfigFile::getInstallerFullPath() const
+QString CConfigFile::getInstallerCurrentFilePath() const
 {
+	// installer is always run from TEMP under Windows
+	return QApplication::applicationFilePath();
+}
+
+QString CConfigFile::getInstallerCurrentDirPath() const
+{
+	// installer is always run from TEMP under Windows
 	return QApplication::applicationDirPath();
+}
+
+QString CConfigFile::getInstallerOriginalFilePath() const
+{
+	return getInstallerOriginalDirPath() + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+}
+
+QString CConfigFile::getInstallerOriginalDirPath() const
+{
+	return m_installationDirectory;
 }
 
 QString CConfigFile::getInstallerMenuLinkFullPath() const
