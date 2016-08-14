@@ -920,7 +920,7 @@ bool COperationDialog::createAddRemoveEntry()
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
@@ -965,7 +965,7 @@ bool COperationDialog::updateAddRemoveEntry()
 			QStringList versionTokens = QApplication::applicationVersion().split('.');
 
 			settings.setValue("DisplayVersion", QApplication::applicationVersion());
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
 			settings.setValue("MinorVersion", versionTokens[1].toInt());
 #endif
