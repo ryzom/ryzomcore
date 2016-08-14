@@ -713,23 +713,25 @@ void COperationDialog::copyInstaller()
 		QString oldInstallerFullPath = QApplication::applicationFilePath();
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
-		if (!QFile::exists(newInstallerFullPath))
+		// always copy new installers
+		CFilesCopier copier(this);
+		copier.setIncludeFilter(config->getInstallerRequiredFiles());
+		copier.addFile(oldInstallerFullPath);
+		copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
+		copier.setDestinationDirectory(config->getInstallationDirectory());
+		copier.exec();
+
+		// copied file
+		oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
+
+		// rename old filename if different
+		if (oldInstallerFullPath != newInstallerFullPath)
 		{
-			CFilesCopier copier(this);
-			copier.setIncludeFilter(config->getInstallerRequiredFiles());
-			copier.addFile(oldInstallerFullPath);
-			copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
-			copier.setDestinationDirectory(config->getInstallationDirectory());
-			copier.exec();
+			// delete previous installer
+			QFile::remove(newInstallerFullPath);
 
-			// copied file
-			oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
-
-			// rename old filename if different
-			if (oldInstallerFullPath != newInstallerFullPath)
-			{
-				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
-			}
+			// rename new installer with final name
+			QFile::rename(oldInstallerFullPath, newInstallerFullPath);
 		}
 
 		// create menu directory if defined
