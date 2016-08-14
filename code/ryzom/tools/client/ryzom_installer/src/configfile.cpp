@@ -49,7 +49,12 @@ CConfigFile::~CConfigFile()
 bool CConfigFile::load()
 {
 	// load default values
-	return load(m_defaultConfigPath) || load(m_configPath);
+	if (!load(m_defaultConfigPath)) return false;
+
+	// ignore return value, since we'll always have valid values
+	load(m_configPath);
+
+	return true;
 }
 
 bool CConfigFile::load(const QString &filename)
