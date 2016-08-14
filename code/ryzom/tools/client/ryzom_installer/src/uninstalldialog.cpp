@@ -264,6 +264,11 @@ void CUninstallDialog::updateSizes()
 		++it;
 	}
 
+	// downloaded files
+	qint64 bytes = getDirectorySize(config->getInstallationDirectory(), false);
+
+	emit updateSize(m_downloadedFilesIndex, qBytesToHumanReadable(bytes));
+
 	emit updateLayout();
 }
 
