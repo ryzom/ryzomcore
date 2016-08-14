@@ -713,23 +713,25 @@ void COperationDialog::copyInstaller()
 		QString oldInstallerFullPath = QApplication::applicationFilePath();
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
-		if (!QFile::exists(newInstallerFullPath))
+		// always copy new installers
+		CFilesCopier copier(this);
+		copier.setIncludeFilter(config->getInstallerRequiredFiles());
+		copier.addFile(oldInstallerFullPath);
+		copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
+		copier.setDestinationDirectory(config->getInstallationDirectory());
+		copier.exec();
+
+		// copied file
+		oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
+
+		// rename old filename if different
+		if (oldInstallerFullPath != newInstallerFullPath)
 		{
-			CFilesCopier copier(this);
-			copier.setIncludeFilter(config->getInstallerRequiredFiles());
-			copier.addFile(oldInstallerFullPath);
-			copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
-			copier.setDestinationDirectory(config->getInstallationDirectory());
-			copier.exec();
+			// delete previous installer
+			QFile::remove(newInstallerFullPath);
 
-			// copied file
-			oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
-
-			// rename old filename if different
-			if (oldInstallerFullPath != newInstallerFullPath)
-			{
-				QFile::rename(oldInstallerFullPath, newInstallerFullPath);
-			}
+			// rename new installer with final name
+			QFile::rename(oldInstallerFullPath, newInstallerFullPath);
 		}
 
 		// create menu directory if defined
@@ -796,6 +798,9 @@ void COperationDialog::uninstallOldClient()
 				// don't ask this question anymore
 				CConfigFile::getInstance()->setShouldUninstallOldClient(false);
 			}
+
+			// save the choice
+			CConfigFile::getInstance()->save();
 		}
 	}
 #endif
@@ -920,7 +925,7 @@ bool COperationDialog::createAddRemoveEntry()
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
@@ -965,7 +970,7 @@ bool COperationDialog::updateAddRemoveEntry()
 			QStringList versionTokens = QApplication::applicationVersion().split('.');
 
 			settings.setValue("DisplayVersion", QApplication::applicationVersion());
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory()));
+			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
 			settings.setValue("MinorVersion", versionTokens[1].toInt());
 #endif
@@ -1130,7 +1135,7 @@ void COperationDialog::deleteComponentsInstaller()
 		dir.removeRecursively();
 	}
 
-	path = config->getInstallerFullPath();
+	path = config->getInstallerOriginalDirPath();
 	QStringList files = config->getInstallerRequiredFiles();
 
 	foreach(const QString &file, files)
@@ -1138,7 +1143,7 @@ void COperationDialog::deleteComponentsInstaller()
 		QString fullPath = path + "/" + file;
 
 		// delete file
-		if (!QFile::remove(fullPath))
+		if (QFile::exists(fullPath) && !QFile::remove(fullPath))
 		{
 #ifdef Q_OS_WIN32
 			// under Windows, a running executable is locked, so we need to delete it later

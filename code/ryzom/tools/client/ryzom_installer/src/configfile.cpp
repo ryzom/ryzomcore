@@ -24,122 +24,6 @@
 	#define new DEBUG_NEW
 #endif
 
-const CServer NoServer;
-const CProfile NoProfile;
-
-QString CServer::getDirectory() const
-{
-	return CConfigFile::getInstance()->getInstallationDirectory() + "/" + id;
-}
-
-QString CServer::getClientFullPath() const
-{
-	if (clientFilename.isEmpty()) return "";
-
-	return getDirectory() + "/" + clientFilename;
-}
-
-QString CServer::getConfigurationFullPath() const
-{
-	if (configurationFilename.isEmpty()) return "";
-
-	return getDirectory() + "/" + configurationFilename;
-}
-
-QString CProfile::getDirectory() const
-{
-	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
-}
-
-QString CProfile::getClientFullPath() const
-{
-	if (!executable.isEmpty()) return executable;
-
-	const CServer &s = CConfigFile::getInstance()->getServer(server);
-
-	return s.getClientFullPath();
-}
-
-QString CProfile::getClientDesktopShortcutFullPath() const
-{
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".desktop";
-#endif
-}
-
-QString CProfile::getClientMenuShortcutFullPath() const
-{
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".desktop";
-#endif
-}
-
-void CProfile::createShortcuts() const
-{
-	const CServer &s = CConfigFile::getInstance()->getServer(server);
-
-	QString executable = getClientFullPath();
-	QString workingDir = s.getDirectory();
-
-	QString arguments = QString("--profile %1").arg(id);
-
-	// append custom arguments
-	if (!arguments.isEmpty()) arguments += QString(" %1").arg(arguments);
-
-	QString icon;
-
-#ifdef Q_OS_WIN32
-	// under Windows, icon is included in executable
-	icon = executable;
-#else
-	// icon is in the same directory as client
-	icon = s.getDirectory() + "/ryzom_client.png";
-#endif
-
-	if (desktopShortcut)
-	{
-		QString shortcut = getClientDesktopShortcutFullPath();
-
-		// create desktop shortcut
-		createLink(shortcut, name, executable, arguments, icon, workingDir);
-	}
-
-	if (menuShortcut)
-	{
-		QString shortcut = getClientMenuShortcutFullPath();
-
-		// create menu shortcut
-		createLink(shortcut, name, executable, arguments, icon, workingDir);
-	}
-}
-
-void CProfile::deleteShortcuts() const
-{
-	// delete desktop shortcut
-	QString link = getClientDesktopShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
-
-	// delete menu shortcut
-	link = getClientMenuShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
-}
-
-void CProfile::updateShortcuts() const
-{
-	deleteShortcuts();
-	createShortcuts();
-}
-
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
@@ -165,7 +49,12 @@ CConfigFile::~CConfigFile()
 bool CConfigFile::load()
 {
 	// load default values
-	return load(m_defaultConfigPath) || load(m_configPath);
+	if (!load(m_defaultConfigPath)) return false;
+
+	// ignore return value, since we'll always have valid values
+	load(m_configPath);
+
+	return true;
 }
 
 bool CConfigFile::load(const QString &filename)
@@ -833,9 +722,26 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
-QString CConfigFile::getInstallerFullPath() const
+QString CConfigFile::getInstallerCurrentFilePath() const
 {
+	// installer is always run from TEMP under Windows
+	return QApplication::applicationFilePath();
+}
+
+QString CConfigFile::getInstallerCurrentDirPath() const
+{
+	// installer is always run from TEMP under Windows
 	return QApplication::applicationDirPath();
+}
+
+QString CConfigFile::getInstallerOriginalFilePath() const
+{
+	return getInstallerOriginalDirPath() + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+}
+
+QString CConfigFile::getInstallerOriginalDirPath() const
+{
+	return m_installationDirectory;
 }
 
 QString CConfigFile::getInstallerMenuLinkFullPath() const
@@ -1022,8 +928,20 @@ OperationStep CConfigFile::getInstallNextStep() const
 		}
 	}
 
+	QString installerDst = getInstallationDirectory() + "/" + server.installerFilename;
+
 	// if installer not found in installation directory, extract it from BNP
-	if (!QFile::exists(getInstallationDirectory() + "/" + server.installerFilename))
+	if (QFile::exists(installerDst))
+	{
+		QString installerSrc = getInstallerCurrentFilePath();
+
+		// copy it too if destination one if older than new one
+		uint64 srcDate = QFileInfo(installerSrc).lastModified().toTime_t();
+		uint64 dstDate = QFileInfo(installerDst).lastModified().toTime_t();
+
+		if (srcDate > dstDate) return CopyInstaller;
+	}
+	else
 	{
 		return CopyInstaller;
 	}

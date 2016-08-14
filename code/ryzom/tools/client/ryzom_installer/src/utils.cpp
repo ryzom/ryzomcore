@@ -34,7 +34,7 @@ QString qBytesToHumanReadable(qint64 bytes)
 	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
 }
 
-qint64 getDirectorySize(const QString &directory)
+qint64 getDirectorySize(const QString &directory, bool recursize)
 {
 	qint64 size = 0;
 
@@ -52,7 +52,7 @@ qint64 getDirectorySize(const QString &directory)
 
 				if (fileInfo.isDir())
 				{
-					size += getDirectorySize(fileInfo.absoluteFilePath());
+					if (recursize) size += getDirectorySize(fileInfo.absoluteFilePath(), true);
 				}
 				else
 				{

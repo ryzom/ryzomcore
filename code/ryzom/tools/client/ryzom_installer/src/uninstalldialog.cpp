@@ -243,7 +243,7 @@ void CUninstallDialog::updateSizes()
 	{
 		const CServer &server = config->getServer(it.key());
 
-		qint64 bytes = getDirectorySize(server.getDirectory());
+		qint64 bytes = getDirectorySize(server.getDirectory(), true);
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
@@ -257,12 +257,17 @@ void CUninstallDialog::updateSizes()
 	{
 		const CProfile &profile = config->getProfile(it.key());
 
-		qint64 bytes = getDirectorySize(profile.getDirectory());
+		qint64 bytes = getDirectorySize(profile.getDirectory(), true);
 
 		emit updateSize(it.value(), qBytesToHumanReadable(bytes));
 
 		++it;
 	}
+
+	// downloaded files
+	qint64 bytes = getDirectorySize(config->getInstallationDirectory(), false);
+
+	emit updateSize(m_downloadedFilesIndex, qBytesToHumanReadable(bytes));
 
 	emit updateLayout();
 }

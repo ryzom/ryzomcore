@@ -11,6 +11,8 @@
  */
 class CProfilesModel : public QAbstractListModel
 {
+	Q_OBJECT
+
 public:
 	CProfilesModel(QObject *parent);
 	CProfilesModel(const CProfiles &profiles, QObject *parent);
