@@ -51,7 +51,7 @@ bool CFilesCleaner::exec()
 	QStringList filter;
 	filter << "*.string_cache";
 
-	if (dir.exists("packed_sheets.bnp"))
+	if (dir.exists("packedsheets.bnp"))
 	{
 		filter << "*.packed_sheets";
 		filter << "*.packed";
