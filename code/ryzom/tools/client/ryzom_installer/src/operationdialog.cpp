@@ -798,6 +798,9 @@ void COperationDialog::uninstallOldClient()
 				// don't ask this question anymore
 				CConfigFile::getInstance()->setShouldUninstallOldClient(false);
 			}
+
+			// save the choice
+			CConfigFile::getInstance()->save();
 		}
 	}
 #endif
