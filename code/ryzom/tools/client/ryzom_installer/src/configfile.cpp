@@ -911,8 +911,20 @@ OperationStep CConfigFile::getInstallNextStep() const
 		}
 	}
 
+	QString installerDst = getInstallationDirectory() + "/" + server.installerFilename;
+
 	// if installer not found in installation directory, extract it from BNP
-	if (!QFile::exists(getInstallationDirectory() + "/" + server.installerFilename))
+	if (QFile::exists(installerDst))
+	{
+		QString installerSrc = getInstallerCurrentFilePath();
+
+		// copy it too if destination one if older than new one
+		uint64 srcDate = QFileInfo(installerSrc).lastModified().toTime_t();
+		uint64 dstDate = QFileInfo(installerDst).lastModified().toTime_t();
+
+		if (srcDate > dstDate) return CopyInstaller;
+	}
+	else
 	{
 		return CopyInstaller;
 	}
