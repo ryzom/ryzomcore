@@ -215,6 +215,12 @@ int main(int argc, char *argv[])
 		if (!dialog.exec()) return 1;
 
 		step = config.getInstallNextStep();
+
+		if (step == Done)
+		{
+			// restart Installer, so it could be copied in TEMP and allowed to update itself
+			if (QProcess::startDetached(QApplication::applicationFilePath(), QApplication::arguments())) return 0;
+		}
 	}
 
 	CMainWindow mainWindow;
