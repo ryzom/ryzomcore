@@ -34,6 +34,8 @@ using namespace NL3D;
 
 extern UDriver	*Driver;
 
+static const std::string MediaPlayerDirectory("music/");
+
 CMusicPlayer MusicPlayer;
 
 // ***************************************************************************
@@ -170,7 +172,47 @@ void CMusicPlayer::update ()
 }
 
 // ***************************************************************************
+static void addFromPlaylist(const std::string &playlist, std::vector<std::string> &filenames)
+{
+	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
+	// Add playlist
+	uint i;
+	// Get the path of the playlist
+	string basePlaylist = CFile::getPath (playlist);
+	FILE *file = nlfopen (playlist, "r");
+
+	bool useUtf8 = CFile::getExtension(playlist) == "m3u8";
+	if (file)
+	{
+		char line[512];
+		while (fgets (line, 512, file))
+		{
+			string lineStr = trim(std::string(line));
+
+			// id a UTF-8 BOM header is present, parse as UTF-8
+			if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
+				useUtf8 = true;
+
+			if (!useUtf8)
+			{
+				lineStr = ucstring(line).toUtf8();
+				lineStr = trim(lineStr);
+			}
+
+			// Not a comment line
+			if (lineStr[0] != '#')
+			{
+				std::string filepath = CFile::getPath(lineStr);
+				std::string filename = CFile::getFilename(lineStr);
+				filenames.push_back (CPath::makePathAbsolute(filepath, basePlaylist)+filename);
+			}
+		}
+		fclose (file);
+	}
+}
+
+// ***************************************************************************
 class CMusicPlayerPlaySongs: public IActionHandler
 {
 public:
@@ -187,192 +229,82 @@ public:
 			// no format supported
 			if (extensions.empty()) return;
 
-#ifdef NL_OS_WINDOWS
-			// Backup the current directory
-			string currentPath = CPath::getCurrentPath ();
-
-			// Hardware mouse
-			bool wasHardware = IsMouseCursorHardware ();
-			InitMouseWithCursor (true);
-			Driver->showCursor (true);
-
 			bool oggSupported = false;
 			bool mp3Supported = false;
 
+			std::string message;
 			for(uint i = 0; i < extensions.size(); ++i)
 			{
 				if (extensions[i] == "ogg")
 				{
 					oggSupported = true;
+					message += " ogg";
 				}
 				else if (extensions[i] == "mp3")
 				{
 					mp3Supported = true;
+					message += " mp3";
 				}
 			}
+			message += " m3u m3u8";
+			nlinfo("Media player supports: '%s'", message.substr(1).c_str());
 
-			std::vector<std::string> filters;
+			// Recursive scan for files from media directory
+			vector<string> filesToProcess;
+			string newPath = CPath::standardizePath(MediaPlayerDirectory);
+			CPath::getPathContent (newPath, true, false, true, filesToProcess);
 
-			// supported formats
-			filters.push_back("All Supported Files"); // TODO: translate
+			uint i;
+			std::vector<std::string> filenames;
+			std::vector<std::string> playlists;
 
-			std::string filter;
-			if (mp3Supported) filter += "*.mp3;*.mp2;*.mp1;";
-			if (oggSupported) filter += "*.ogg;";
-			filter += "*.m3u;*.m3u8";
-
-			filters.push_back(filter);
-
-			// mp3 format
-			if (mp3Supported)
+			for (i = 0; i < filesToProcess.size(); ++i)
 			{
-				filters.push_back("MPEG Audio Files (*.mp3;*.mp2;*.mp1)");
-				filters.push_back("*.mp3;*.mp2;*.mp1");
+				std::string ext = toLower(CFile::getExtension(filesToProcess[i]));
+				if (ext == "ogg")
+				{
+					if (oggSupported)
+						filenames.push_back(filesToProcess[i]);
+				}
+				else if (ext == "mp3" || ext == "mp2" || ext == "mp1")
+				{
+					if (mp3Supported)
+						filenames.push_back(filesToProcess[i]);
+				}
+				else if (ext == "m3u" || ext == "m3u8")
+				{
+					playlists.push_back(filesToProcess[i]);
+				}
 			}
 
-			// ogg format
-			if (oggSupported)
+			// Sort songs by filename
+			sort (filenames.begin(), filenames.end());
+
+			// Add songs from playlists
+			for (i = 0; i < playlists.size(); ++i)
 			{
-				filters.push_back("Vorbis Files (*.ogg)");
-				filters.push_back("*.ogg");
+				addFromPlaylist(filesToProcess[i], filenames);
 			}
 
-			// playlist
-			filters.push_back("Playlist Files (*.m3u;*.m3u8)");
-			filters.push_back("*.m3u;*.m3u8");
-
-			// all files
-			filters.push_back("All Files (*.*)");
-			filters.push_back("*.*");
-
-			filters.push_back("");
-
-			static wchar_t szFilter[1024] = { '\0' };
-
-			uint offset = 0;
-
-			for(uint i = 0; i < filters.size(); ++i)
+			// Build the songs array
+			std::vector<CMusicPlayer::CSongs> songs;
+			for (i=0; i<filenames.size(); i++)
 			{
-				wcscpy(szFilter + offset, utf8ToWide(filters[i]));
+				// '@' in filenames are reserved for .bnp files
+				// and sound system fails to open such file
+				if (filenames[i].find("@") != string::npos)
+				{
+					nlwarning("Ignore media file containing '@' in name: '%s'", filenames[i].c_str());
+					continue;
+				}
 
-				// move offset to string length + 1 for \0
-				offset += filters[i].length() + 1;
+				CMusicPlayer::CSongs song;
+				song.Filename = filenames[i];
+				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title);
+				songs.push_back (song);
 			}
 
-			// Filename buffer
-			wchar_t buffer[1024];
-			buffer[0]=0;
-
-			OPENFILENAMEW ofn;
-			memset (&ofn, 0, sizeof(OPENFILENAME));
-			ofn.lStructSize = sizeof(OPENFILENAME);
-			ofn.hwndOwner = Driver ? Driver->getDisplay():NULL;
-			ofn.hInstance = HInstance;
-			ofn.lpstrFilter = szFilter;
-			ofn.nFilterIndex = 0;
-			ofn.lpstrFile = buffer;
-			ofn.nMaxFile = sizeof(buffer);
-			ofn.lpstrTitle = (wchar_t*)NLMISC::CI18N::get("uiPlaySongs").c_str();
-			ofn.Flags = OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT|OFN_ENABLESIZING|OFN_EXPLORER;
-
-			if (Driver)
-				Driver->beginDialogMode();
-
-			if (GetOpenFileNameW (&ofn))
-			{
-				bool useUtf8 = false;
-
-				// Skip the directory name
-				const wchar_t *bufferPtr = buffer;
-
-				// Multi filename ?
-				string path;
-				if (ofn.nFileOffset>wcslen(buffer))
-				{
-					// Backup the path and point to the next filename
-					path = wideToUtf8(buffer);
-					path += "\\";
-					bufferPtr += wcslen(bufferPtr)+1;
-				}
-
-				// Get selected files and playlists
-				std::vector<std::string> filenames;
-				std::vector<std::string> playlists;
-				while (*bufferPtr)
-				{
-					// Concat the directory name with the filename
-					std::string ext = toLower(CFile::getExtension(wideToUtf8(bufferPtr)));
-					if (ext == "m3u" || ext == "m3u8")
-					{
-						playlists.push_back (path + wideToUtf8(bufferPtr));
-					}
-					else
-					{
-						filenames.push_back (path + wideToUtf8(bufferPtr));
-					}
-
-					bufferPtr += wcslen(bufferPtr) + 1;
-				}
-
-				// Sort songs by filename
-				sort (filenames.begin(), filenames.end());
-
-				static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
-
-				// Add playlist
-				uint i;
-				for (i=0; i<playlists.size(); i++)
-				{
-					// Get the path of the playlist
-					string basePlaylist = CFile::getPath (playlists[i]);
-					FILE *file = nlfopen (playlists[i], "r");
-
-					bool useUtf8 = CFile::getExtension(playlists[i]) == "m3u8";
-
-					if (file)
-					{
-						char line[512];
-						while (fgets (line, 512, file))
-						{
-							// Not a comment line
-							string lineStr = trim(std::string(line));
-
-							// id a UTF-8 BOM header is present, parse as UTF-8
-							if (!useUtf8 && lineStr.length() >= 3 && memcmp(line, utf8Header, 3) == 0)
-								useUtf8 = true;
-
-							if (!useUtf8) lineStr = ucstring(line).toUtf8();
-
-							if (lineStr[0] != '#')
-								filenames.push_back (CPath::makePathAbsolute(lineStr, basePlaylist));
-						}
-						fclose (file);
-					}
-				}
-
-				// Build the songs array
-				std::vector<CMusicPlayer::CSongs> songs;
-				for (i=0; i<filenames.size(); i++)
-				{
-					CMusicPlayer::CSongs song;
-					song.Filename = filenames[i];
-					SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title);
-					songs.push_back (song);
-				}
-
-				MusicPlayer.playSongs(songs);
-			}
-
-			if (Driver)
-				Driver->endDialogMode();
-
-			// Restore mouse
-			InitMouseWithCursor (wasHardware);
-			Driver->showCursor (wasHardware);
-
-			// Restore current path
-			CPath::setCurrentPath (currentPath.c_str());
-#endif // NL_OS_WINDOWS
+			MusicPlayer.playSongs(songs);
 		}
 		else if (Params == "previous")
 			MusicPlayer.previous();
