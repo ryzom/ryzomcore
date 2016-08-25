@@ -8,7 +8,7 @@
   <variable entry="UI:SAVE:RADARZOOM"
             type="sint64"
             value="1" />
-  <variable entry="UI:TEMP:VOLUME"
+  <variable entry="UI:SAVE:MP3_VOLUME"
             type="sint64"
             value="255" />
   <!--******************-->
@@ -58,9 +58,9 @@
           onclick_l="leave_modal"
           params_l="" />
   </group>
-  <link expr="@UI:TEMP:VOLUME"
+  <link expr="@UI:SAVE:MP3_VOLUME"
         action="music_player"
-        params="volume=@UI:TEMP:VOLUME" />
+        params="volume=@UI:SAVE:MP3_VOLUME" />
   <group id="mp3_player"
          type="container_windows"
          w="206"
@@ -199,7 +199,7 @@
               min="0"
               max="255"
               tracksize="8"
-              value="UI:TEMP:VOLUME"
+              value="UI:SAVE:MP3_VOLUME"
               tx_topright="w_scroll_R.tga"
               tx_middle="w_scroll_l123_m.tga"
               tx_bottomleft="w_scroll_L.tga"
