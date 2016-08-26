@@ -822,8 +822,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 						batchRelativeDstPath = CPath::standardizeDosPath(batchRelativeDstPath);
 
 						// use DSTPATH and SRCPATH variables and append filenames
-						string realDstPath = toString("%%ROOTPATH%%\"\\%s\"", batchRelativeDstPath.c_str());
-						string realSrcPath = toString("%%UNPACKPATH%%\"\\%s\"", FileName.c_str());
+						string realDstPath = toString("\"%%ROOTPATH%%\\%s\"", batchRelativeDstPath.c_str());
+						string realSrcPath = toString("\"%%UNPACKPATH%%\\%s\"", FileName.c_str());
 
 						content += toString(":loop%u\n", nblab);
 						content += toString("attrib -r -a -s -h %s\n", realDstPath.c_str());
@@ -872,7 +872,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			if (!succeeded)
 			{
 #ifdef NL_OS_WINDOWS
-				patchContent += toString("del %%ROOTPATH%%\"\\patch\\%s\"\n", vFileList[i].c_str());
+				patchContent += toString("del \"%%ROOTPATH%%\\patch\\%s\"\n", vFileList[i].c_str());
 #else
 				patchContent += toString("rm -f \"$ROOTPATH/patch/%s\"\n", vFileList[i].c_str());
 #endif
@@ -886,8 +886,8 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 			content += patchContent;
 
-			content += "rd /Q /S %%ROOTPATH%%\"\\patch\"\n";
-			content += "if exist %%ROOTPATH%%\"\\patch\" goto looppatch\n";
+			content += "rd /Q /S \"%%ROOTPATH%%\\patch\"\n";
+			content += "if exist \"%%ROOTPATH%%\\patch\" goto looppatch\n";
 #else
 			content += "rm -rf \"$ROOTPATH/patch\"\n";
 #endif
@@ -919,10 +919,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		//use bat if windows if not use sh
 #ifdef NL_OS_WINDOWS
 		contentPrefix += "@echo off\n";
-		contentPrefix += "set RYZOM_CLIENT=%1\n";
-		contentPrefix += "set UNPACKPATH=%2\n";
-		contentPrefix += "set ROOTPATH=%3\n";
-		contentPrefix += "set STARTUPPATH=%4\n";
+		contentPrefix += "set RYZOM_CLIENT=%~1\n";
+		contentPrefix += "set UNPACKPATH=%~2\n";
+		contentPrefix += "set ROOTPATH=%~3\n";
+		contentPrefix += "set STARTUPPATH=%~4\n";
 		contentPrefix += toString("set UPGRADE_FILE=%%ROOTPATH%%\\%s\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
 		contentPrefix += "set LOGIN=%5\n";
@@ -955,12 +955,12 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 
 #ifdef NL_OS_WINDOWS
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
-		contentSuffix += "if exist %UPGRADE_FILE% call %UPGRADE_FILE%\n";
+		contentSuffix += "if exist \"%UPGRADE_FILE%\" call \"%UPGRADE_FILE%\"\n";
 
 		if (wantRyzomRestart)
 		{
 			// client shouldn't be in memory anymore else it couldn't be overwritten
-			contentSuffix += toString("start \"\" /D %%STARTUPPATH%% %%RYZOM_CLIENT%% %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
 		}
 #else
 		if (wantRyzomRestart)
