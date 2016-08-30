@@ -2684,7 +2684,7 @@ float	CAudioMixerUser::getMusicLength()
 }
 
 // ***************************************************************************
-bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &result)
+bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &result, float &length)
 {
 	if (_SoundDriver)
 	{
@@ -2694,7 +2694,7 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 		if (!_SoundDriver->getMusicInfo(filename, artist, title))
 		{
 			// use 3rd party libraries supported formats
-			IAudioDecoder::getInfo(filename, artist, title);
+			IAudioDecoder::getInfo(filename, artist, title, length);
 		}
 
 		if (!title.empty())
@@ -2715,6 +2715,7 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 	}
 
 	result = "???";
+	length = 0;
 	return false;
 }
 
