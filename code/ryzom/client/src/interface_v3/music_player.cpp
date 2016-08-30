@@ -34,6 +34,12 @@ using namespace NL3D;
 
 extern UDriver	*Driver;
 
+// xml element ids
+#define MP3_PLAYER_PLAYLIST_LIST "ui:interface:playlist:content:songs:list"
+#define TEMPLATE_PLAYLIST_SONG "playlist_song"
+#define TEMPLATE_PLAYLIST_SONG_TITLE "title"
+#define TEMPLATE_PLAYLIST_SONG_DURATION "duration"
+
 static const std::string MediaPlayerDirectory("music/");
 
 CMusicPlayer MusicPlayer;
@@ -48,26 +54,75 @@ CMusicPlayer::CMusicPlayer ()
 
 
 // ***************************************************************************
-
 void CMusicPlayer::playSongs (const std::vector<CSongs> &songs)
 {
 	_Songs = songs;
-	_CurrentSong = 0;
+
+	// reset song index if out of bounds
+	if (_CurrentSong > _Songs.size())
+		_CurrentSong = 0;
+
+	CGroupList *pList = dynamic_cast<CGroupList *>(CWidgetManager::getInstance()->getElementFromId(MP3_PLAYER_PLAYLIST_LIST));
+	if (pList)
+	{
+		pList->clearGroups();
+		pList->setDynamicDisplaySize(true);
+		for (uint i=0; i < _Songs.size(); ++i)
+		{
+			uint min = (sint32)(_Songs[i].Length / 60) % 60;
+			uint sec = (sint32)(_Songs[i].Length) % 60;
+			uint hour = _Songs[i].Length / 3600;
+			std::string duration(toString("%02d:%02d", min, sec));
+			if (hour > 0)
+				duration = toString("%02d:", hour) + duration;
+
+			vector< pair<string, string> > vParams;
+			vParams.push_back(pair<string, string>("id", "s" + toString(i)));
+			vParams.push_back(pair<string, string>("index", toString(i)));
+			CInterfaceGroup *pNew = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_PLAYLIST_SONG, pList->getId(), vParams);
+			if (pNew)
+			{
+				CViewText *pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_TITLE));
+				if (pVT)
+				{
+					ucstring title;
+					title.fromUtf8(_Songs[i].Title);
+					pVT->setText(title);
+				}
+
+				pVT = dynamic_cast<CViewText *>(pNew->getView(TEMPLATE_PLAYLIST_SONG_DURATION));
+				if (pVT)
+				{
+					pVT->setText(duration);
+				}
+
+				pNew->setParent(pList);
+				pList->addChild(pNew);
+			}
+		}
+		pList->invalidateCoords();
+	}
 
 	// If pause, stop, else play will resume
 	if (_State == Paused)
 		_State = Stopped;
-
-	play ();
 }
 
 
 // ***************************************************************************
 
-void CMusicPlayer::play ()
+void CMusicPlayer::play (sint index)
 {
 	if(!SoundMngr)
 		return;
+
+	if (index >= 0 && index < _Songs.size())
+	{
+		if (_State == Paused)
+			stop();
+
+		_CurrentSong = index;
+	}
 
 	if (!_Songs.empty())
 	{
@@ -300,7 +355,7 @@ public:
 
 				CMusicPlayer::CSongs song;
 				song.Filename = filenames[i];
-				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title);
+				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);
 				songs.push_back (song);
 			}
 
@@ -329,6 +384,14 @@ public:
 						SoundMngr->setUserMusicVolume (value);
 					}
 				}
+			}
+
+			string song = getParam(Params, "song");
+			if (!song.empty())
+			{
+				sint index=0;
+				fromString(song, index);
+				MusicPlayer.play(index);
 			}
 		}
 	}
