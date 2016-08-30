@@ -13492,3 +13492,5 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 uimwAppZone [AppZone]
 // message displayed when player type /playedTime
 uiPlayedTime [You played %time with this character.]
+uiPlaylistRefresh [Refresh]
+
