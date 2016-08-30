@@ -283,7 +283,7 @@ public:
 			// Add songs from playlists
 			for (i = 0; i < playlists.size(); ++i)
 			{
-				addFromPlaylist(filesToProcess[i], filenames);
+				addFromPlaylist(playlists[i], filenames);
 			}
 
 			// Build the songs array
