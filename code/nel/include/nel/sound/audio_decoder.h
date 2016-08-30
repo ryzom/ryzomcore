@@ -67,7 +67,7 @@ public:
 	static IAudioDecoder *createAudioDecoder(const std::string &type, NLMISC::IStream *stream, bool loop);
 
 	/// Get information on a music file (only artist and title at the moment).
-	static bool getInfo(const std::string &filepath, std::string &artist, std::string &title);
+	static bool getInfo(const std::string &filepath, std::string &artist, std::string &title, float &length);
 	
 	/// Get audio/container extensions that are currently supported by the nel sound library.
 	static void getMusicExtensions(std::vector<std::string> &extensions);
