@@ -87,7 +87,7 @@ Var STARTMENU_FOLDER
 
 !insertmacro MUI_PAGE_INSTFILES
 
-!define MUI_FINISHPAGE_RUN "$INSTDIR\client_ryzom_rd.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${Executable}"
 
 !insertmacro MUI_PAGE_FINISH
 
@@ -169,7 +169,7 @@ Section
 
   ;Client, configuration and misc files
   File "${SrcDir}\client_default.cfg"
-  File "${SrcDir}\client_ryzom_rd.exe"
+  File "${SrcDir}\${Executable}"
   File "${SrcDir}\configure.bat"
   File "${SrcDir}\d3dcompiler_43.dll"
   File "${SrcDir}\d3dx9_43.dll"
@@ -236,7 +236,7 @@ Section "Uninstall"
 
   ;Client, configuration and misc files
   Delete "$INSTDIR\client_default.cfg"
-  Delete "$INSTDIR\client_ryzom_rd.exe"
+  Delete "$INSTDIR\${Executable}"
   Delete "$INSTDIR\configure.bat"
   Delete "$INSTDIR\d3dcompiler_43.dll"
   Delete "$INSTDIR\d3dx9_43.dll"
