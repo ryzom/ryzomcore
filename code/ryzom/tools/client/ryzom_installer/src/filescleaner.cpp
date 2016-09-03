@@ -46,7 +46,7 @@ bool CFilesCleaner::exec()
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
-	if (!dir.cd("data") && dir.exists()) return false;
+	if (!dir.cd("data")) return false;
 
 	QStringList filter;
 	filter << "*.string_cache";
@@ -79,7 +79,7 @@ bool CFilesCleaner::exec()
 	}
 
 	// fonts directory is not needed anymore if fonts.bnp exists
-	if (dir.exists("fonts.bnp") && dir.cd("fonts") && dir.exists())
+	if (dir.exists("fonts.bnp") && dir.cd("fonts"))
 	{
 		dir.removeRecursively();
 	}
