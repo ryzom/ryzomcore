@@ -1676,7 +1676,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	// Check pixel program
 	// Disable feature ???
 	if (!ext.DisableHardwarePixelProgram)
-	{		
+	{
 		ext.ARBFragmentProgram = setupARBFragmentProgram(glext);	
 		ext.NVFragmentProgram2 = setupNVFragmentProgram2(glext);
 		ext.ARBFragmentShader = setupARBFragmentShader(glext);
@@ -1685,6 +1685,7 @@ void	registerGlExtensions(CGlExtensions &ext)
 	{
 		ext.ARBFragmentProgram = false;
 		ext.NVFragmentProgram2 = false;
+		ext.ARBFragmentShader = false;
 	}
 
 	ext.OESDrawTexture = setupOESDrawTexture(glext);
