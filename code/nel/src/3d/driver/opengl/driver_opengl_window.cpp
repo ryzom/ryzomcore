@@ -1486,7 +1486,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		[[CocoaApplicationDelegate alloc] initWithDriver:this];
 
 	// set the application delegate, this will handle window/app close events
-	[NSApp setDelegate:(id<NSFileManagerDelegate>)appDelegate];
+	[NSApp setDelegate:(id<NSApplicationDelegate>)appDelegate];
 
 	// bind the close button of the window to applicationShouldTerminate
 	id closeButton = [cocoa_window standardWindowButton:NSWindowCloseButton];
