@@ -201,6 +201,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static std::string getRegionByAlias(uint32 alias);
+	static sint getGroundZ(uint32 x, sint32 y);
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 	static void	tell(const ucstring &player, const ucstring &msg);
