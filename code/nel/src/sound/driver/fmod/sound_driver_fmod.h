@@ -116,7 +116,7 @@ public:
 	 *  \param artist returns the song artist (empty if not available)
 	 *  \param title returns the title (empty if not available)
 	 */
-	virtual bool getMusicInfo(const std::string &filepath, std::string &artist, std::string &title);
+	virtual bool getMusicInfo(const std::string &filepath, std::string &artist, std::string &title, float &length);
 
 	// also check that the channel still exist (avoid any free problem)
 	void markMusicChannelEnded(void *stream, CMusicChannelFMod *musicChannel);

@@ -2691,7 +2691,7 @@ bool	CAudioMixerUser::getSongTitle(const std::string &filename, std::string &res
 		std::string artist;
 		std::string title;
 
-		if (!_SoundDriver->getMusicInfo(filename, artist, title))
+		if (!_SoundDriver->getMusicInfo(filename, artist, title, length))
 		{
 			// use 3rd party libraries supported formats
 			IAudioDecoder::getInfo(filename, artist, title, length);
