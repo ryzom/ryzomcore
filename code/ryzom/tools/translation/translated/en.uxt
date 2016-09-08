@@ -2445,7 +2445,7 @@ uiEM_Pleased	[Pleased]
 
 // HASH_VALUE CD71F441CCD2083B
 // INDEX 611
-uiEM_Point	[Poing]
+uiEM_Point	[Point]
 
 // HASH_VALUE CC41B81FC561B83A
 // INDEX 612
@@ -2453,7 +2453,7 @@ uiEM_Pointback	[Point Back]
 
 // HASH_VALUE 4EA2E444CA03E03B
 // INDEX 613
-uiEM_Pointfront	[Poing Front]
+uiEM_Pointfront	[Point Front]
 
 // HASH_VALUE CCD2E82F0A41E03A
 // INDEX 614
@@ -2461,7 +2461,7 @@ uiEM_Pointleft	[Point Left]
 
 // HASH_VALUE 4CB1F435CB721035
 // INDEX 615
-uiEM_Pointright	[Poing Right]
+uiEM_Pointright	[Point Right]
 
 // HASH_VALUE C8D2B44049138C44
 // INDEX 616
@@ -14087,11 +14087,11 @@ uiRename	[RENAME]
 
 // HASH_VALUE 04D370123E71CC24
 // INDEX 3351
-uiCreateUserLM	[CREATE LANDMARK]
+uiCreateUserLM	[Create Landmark]
 
 // HASH_VALUE 8B04AC48FE634E3B
 // INDEX 3352
-uiCreateUserLMAtUserPos	[CREATE LANDMARK AT CURRENT LOCATION]
+uiCreateUserLMAtUserPos	[Create Landmark at Current Location]
 
 // HASH_VALUE 086F0F3E7E60DC28
 // INDEX 3353
@@ -27331,7 +27331,11 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 // INDEX 6490
 uimwAppZone	[AppZone]
 
-// HASH_VALUE E247C9AA295A5BE2
+// HASH_VALUE 27273D41B0FA7DD2
 // INDEX 6491
-uiPlayedTime	[You played %time with this character.]
+uiPlayedTime	[You played with this character for %time.]
+
+// HASH_VALUE EB1A8C8F22674C92
+// INDEX 6492
+uiPlaylistRefresh	[Refresh]
 

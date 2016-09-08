@@ -15396,7 +15396,7 @@ Bowman	[Bogenschütze]
 
 // HASH_VALUE B0665F80EE744AB1
 // INDEX 3672
-Heavy_Bowman	[Schwerer Bogenschütze]
+Heavy_Bowman	[Kriegsbogenschütze]
 
 // HASH_VALUE 67F9448CA8590CBF
 // INDEX 3673
@@ -15404,7 +15404,7 @@ Pistoleer	[Pistolenschütze]
 
 // HASH_VALUE 6BA7BC5E9B98D3AB
 // INDEX 3674
-Heavy_Artilleryman	[Schwerer Artillerist]
+Heavy_Artilleryman	[Kriegs-Artillerist]
 
 // HASH_VALUE 9F8AD881AD37DCB5
 // INDEX 3675
@@ -15464,7 +15464,7 @@ Master_Bowman	[Meister-Bogenschütze]
 
 // HASH_VALUE 27080F9150D67847
 // INDEX 3689
-Master_Heavy_Bowman	[Schwerer Meister-Bogenschütze]
+Master_Heavy_Bowman	[Meister-Kriegsbogenschütze]
 
 // HASH_VALUE F0FCA46C60B0BCA2
 // INDEX 3690
@@ -15472,7 +15472,7 @@ Master_Pistoleer	[Meister-Pistolenschütze]
 
 // HASH_VALUE B07AF0898F26486B
 // INDEX 3691
-Master_Heavy_Artilleryman	[Großer Meister-Artillerist]
+Master_Heavy_Artilleryman	[Meister-Kriegsartillerist]
 
 // HASH_VALUE 2C690840A2F524AD
 // INDEX 3692
@@ -23349,7 +23349,7 @@ uiLoadingString20	[Riesenfische und Unterwasser-Ungeheuer ziehen sich in ferne g
 
 // HASH_VALUE 86E4AC9E5A742C23
 // INDEX 5550
-uiLoadingString21	[SPsykoplas werden mit Rätseln zum Hirnrunzeln gebracht...]
+uiLoadingString21	[Psykoplas werden mit Rätseln zum Hirnrunzeln gebracht...]
 
 // HASH_VALUE CD0616F57A127246
 // INDEX 5551
@@ -23409,7 +23409,7 @@ uiLoadingString35	[Fyros werden mit Sandflöhen in den Schuhen in kampflustige S
 
 // HASH_VALUE 23B5B3719B486459
 // INDEX 5565
-uiLoadingString36	[GSlavenis bekommen ausgeleierte Sprungfedern ausgetauscht...]
+uiLoadingString36	[Slavenis bekommen ausgeleierte Sprungfedern ausgetauscht...]
 
 // HASH_VALUE C5047097A6340F71
 // INDEX 5566
@@ -27344,4 +27344,8 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 // HASH_VALUE 6588A87B1E781483
 // INDEX 6490
 uimwAppZone	[APP-ZONE]
+
+// HASH_VALUE 27273D41B0FA7DD2
+// INDEX 6491
+uiPlayedTime	[Du hast diesen Charakter %time lang gespielt.]
 

@@ -27328,3 +27328,7 @@ uiFilterMenuDynamic	[%channel @{T8}/%shortcut]
 // INDEX 6490
 uimwAppZone	[AppZone]
 
+// HASH_VALUE 27273D41B0FA7DD2
+// INDEX 6491
+uiPlayedTime	[Has jugado con este personaje %time.]
+
