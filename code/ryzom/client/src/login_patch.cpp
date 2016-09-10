@@ -73,9 +73,6 @@
 //
 
 
-static std::vector<std::string> ForceMainlandPatchCategories;
-static std::vector<std::string> ForceRemovePatchCategories;
-
 using namespace std;
 using namespace NLMISC;
 
@@ -157,36 +154,6 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	_AsyncDownloader = NULL;
 	_StateListener = NULL;
 	_StartRyzomAtEnd = true;
-
-	// only download binaries for current platform
-	ForceRemovePatchCategories.clear();
-	ForceRemovePatchCategories.push_back("main_exedll");
-#if defined(NL_OS_WIN64)
-	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_linux32");
-	ForceRemovePatchCategories.push_back("main_exedll_linux64");
-	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#elif defined(NL_OS_WIN32)
-	ForceRemovePatchCategories.push_back("main_exedll_win64");
-	ForceRemovePatchCategories.push_back("main_exedll_linux32");
-	ForceRemovePatchCategories.push_back("main_exedll_linux64");
-	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#elif defined(NL_OS_MAC)
-	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win64");
-	ForceRemovePatchCategories.push_back("main_exedll_linux32");
-	ForceRemovePatchCategories.push_back("main_exedll_linux64");
-#elif defined(NL_OS_UNIX) && defined(_LP64)
-	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win64");
-	ForceRemovePatchCategories.push_back("main_exedll_linux32");
-	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#else
-	ForceRemovePatchCategories.push_back("main_exedll_win32");
-	ForceRemovePatchCategories.push_back("main_exedll_win64");
-	ForceRemovePatchCategories.push_back("main_exedll_linux64");
-	ForceRemovePatchCategories.push_back("main_exedll_osx");
-#endif
 }
 
 // ****************************************************************************
@@ -1249,35 +1216,71 @@ void CPatchManager::readDescFile(sint32 nVersion)
 		}
 	}
 
-	// tmp for debug : flag some categories as 'Mainland'
+	// patch category for current platform
+	std::string platformPatchCategory;
+
+#if defined(NL_OS_WIN64)
+	platformPatchCategory = "main_exedll_win64";
+#elif defined(NL_OS_WIN32)
+	platformPatchCategory = "main_exedll_win32";
+#elif defined(NL_OS_MAC)
+	platformPatchCategory = "main_exedll_osx";
+#elif defined(NL_OS_UNIX) && defined(_LP64)
+	platformPatchCategory = "main_exedll_linux64";
+#else
+	platformPatchCategory = "main_exedll_linux32";
+#endif
+
+	// check if we are using main_exedll or specific main_exedll_* for platform
+	bool foundPlatformPatchCategory = false;
+
 	for (cat = 0; cat < DescFile.getCategories().categoryCount(); ++cat)
 	{
-		if (std::find(ForceMainlandPatchCategories.begin(), ForceMainlandPatchCategories.end(),
-			DescFile.getCategories().getCategory(cat).getName()) != ForceMainlandPatchCategories.end())
+		CBNPCategory &category = const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat));
+
+		if (category.getName() == platformPatchCategory)
 		{
-			const_cast<CBNPCategory &>(DescFile.getCategories().getCategory(cat)).setOptional(true);
+			foundPlatformPatchCategory = true;
+			break;
 		}
 	}
 
-	CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
-
-	for(cat = 0; cat < DescFile.getCategories().categoryCount();)
+	if (foundPlatformPatchCategory)
 	{
-		const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
+		std::vector<std::string> forceRemovePatchCategories;
 
-		if (std::find(ForceRemovePatchCategories.begin(), ForceRemovePatchCategories.end(),
-			bnpCat.getName()) != ForceRemovePatchCategories.end())
+		// only download binaries for current platform
+		forceRemovePatchCategories.push_back("main_exedll");
+		forceRemovePatchCategories.push_back("main_exedll_win32");
+		forceRemovePatchCategories.push_back("main_exedll_win64");
+		forceRemovePatchCategories.push_back("main_exedll_linux32");
+		forceRemovePatchCategories.push_back("main_exedll_linux64");
+		forceRemovePatchCategories.push_back("main_exedll_osx");
+
+		// remove current platform category from remove list
+		forceRemovePatchCategories.erase(std::remove(forceRemovePatchCategories.begin(),
+			forceRemovePatchCategories.end(), platformPatchCategory), forceRemovePatchCategories.end());
+
+		CBNPFileSet &bnpFS = const_cast<CBNPFileSet &>(DescFile.getFiles());
+
+		for (cat = 0; cat < DescFile.getCategories().categoryCount();)
 		{
-			for(uint file = 0; file < bnpCat.fileCount(); ++file)
+			const CBNPCategory &bnpCat = DescFile.getCategories().getCategory(cat);
+
+			if (std::find(forceRemovePatchCategories.begin(), forceRemovePatchCategories.end(),
+				bnpCat.getName()) != forceRemovePatchCategories.end())
 			{
-				std::string fileName = bnpCat.getFile(file);
-				bnpFS.removeFile(fileName);
+				for (uint file = 0; file < bnpCat.fileCount(); ++file)
+				{
+					std::string fileName = bnpCat.getFile(file);
+					bnpFS.removeFile(fileName);
+				}
+				const_cast<CBNPCategorySet &>(DescFile.getCategories()).deleteCategory(cat);
 			}
-			const_cast<CBNPCategorySet &>(DescFile.getCategories()).deleteCategory(cat);
-		}
-		else
-		{
-			++cat;
+			else
+			{
+				++cat;
+			}
 		}
 	}
 }
