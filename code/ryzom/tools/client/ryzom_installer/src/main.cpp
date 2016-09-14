@@ -86,6 +86,11 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+#ifdef Q_OS_WIN
+	// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
+	CoInitialize(NULL);
+#endif
+
 	NLMISC::CApplicationContext appContext;
 
 	QApplication app(argc, argv);
@@ -218,8 +223,10 @@ int main(int argc, char *argv[])
 
 		if (step == Done)
 		{
+#if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself
 			if (QProcess::startDetached(QApplication::applicationFilePath(), QApplication::arguments())) return 0;
+#endif
 		}
 	}
 

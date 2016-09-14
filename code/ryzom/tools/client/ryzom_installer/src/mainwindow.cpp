@@ -41,6 +41,11 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+
+	// remove debug options
+	actionSettings->setVisible(false);
+	actionUninstall->setVisible(false);
+
 	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
@@ -60,6 +65,7 @@ CMainWindow::CMainWindow():QMainWindow()
 	setFixedHeight(height());
 
 	updateProfiles();
+	updateButtons();
 }
 
 CMainWindow::~CMainWindow()
@@ -81,6 +87,28 @@ void CMainWindow::closeEvent(QCloseEvent *e)
 void CMainWindow::updateProfiles()
 {
 	profilesComboBox->setModel(new CProfilesModel(this));
+}
+
+void CMainWindow::updateButtons()
+{
+	int profileIndex = profilesComboBox->currentIndex();
+
+	if (profileIndex < 0) return;
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	const CProfile &profile = config->getProfile(profileIndex);
+	const CServer &server = config->getServer(profile.server);
+
+	// get full path of client executable
+	QString executable = profile.getClientFullPath();
+
+	playButton->setEnabled(!executable.isEmpty() && QFile::exists(executable));
+
+	// get full path of configuration executable
+	executable = server.getConfigurationFullPath();
+
+	configureButton->setEnabled(!executable.isEmpty() && QFile::exists(executable));
 }
 
 void CMainWindow::onPlayClicked()
@@ -123,6 +151,7 @@ void CMainWindow::onConfigureClicked()
 	const CProfile &profile = config->getProfile(profileIndex);
 	const CServer &server = config->getServer(profile.server);
 
+	// get full path of configuration executable
 	QString executable = server.getConfigurationFullPath();
 
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
@@ -262,4 +291,6 @@ void CMainWindow::onProfileChanged(int profileIndex)
 
 	// load changelog
 	m_downloader->getHtmlPageContent(config->expandVariables(server.displayUrl));
+
+	updateButtons();
 }
