@@ -92,7 +92,7 @@ void COperationDialog::processNextStep()
 {
 	if (operationShouldStop())
 	{
-		reject();
+		rejectDelayed();
 		return;
 	}
 
@@ -184,7 +184,7 @@ void COperationDialog::processInstallNextStep()
 		break;
 
 		case Done:
-		accept();
+		acceptDelayed();
 		break;
 
 		default:
@@ -253,6 +253,8 @@ void COperationDialog::updateAddRemoveComponents()
 
 void COperationDialog::processUpdateProfilesNextStep()
 {
+	m_currentOperation = tr("Update profiles");
+
 	// for "update profiles" operations, we set installer to false when components are updated,
 	// since we're not using this variable
 	if (m_addComponents.installer && m_removeComponents.installer)
@@ -344,6 +346,8 @@ void COperationDialog::processUpdateProfilesNextStep()
 	}
 
 	updateAddRemoveEntry();
+
+	acceptDelayed();
 }
 
 void COperationDialog::processUninstallNextStep()
@@ -369,7 +373,7 @@ void COperationDialog::processUninstallNextStep()
 	else
 	{
 		// done
-		accept();
+		acceptDelayed();
 	}
 }
 
@@ -460,7 +464,7 @@ void COperationDialog::onProgressStop()
 	m_button->progress()->hide();
 #endif
 
-	reject();
+	rejectDelayed();
 }
 
 void COperationDialog::onProgressProgress(qint64 current, const QString &filename)
@@ -1246,4 +1250,16 @@ void COperationDialog::renamePartFile()
 	{
 		QFile::rename(partFile, finalFile);
 	}
+}
+
+void COperationDialog::acceptDelayed()
+{
+	// wait 500ms before to call accept()
+	QTimer::singleShot(500, this, SLOT(accept()));
+}
+
+void COperationDialog::rejectDelayed()
+{
+	// wait 500ms before to call reject()
+	QTimer::singleShot(500, this, SLOT(reject()));
 }

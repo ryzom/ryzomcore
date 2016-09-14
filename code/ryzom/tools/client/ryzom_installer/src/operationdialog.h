@@ -133,6 +133,10 @@ protected:
 
 	void renamePartFile();
 
+	// hacks to prevent an infinite loop
+	void acceptDelayed();
+	void rejectDelayed();
+
 	QWinTaskbarButton *m_button;
 	CDownloader *m_downloader;
 
