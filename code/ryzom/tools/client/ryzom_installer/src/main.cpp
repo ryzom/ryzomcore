@@ -86,6 +86,11 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+#ifdef Q_OS_WIN
+	// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
+	CoInitialize(NULL);
+#endif
+
 	NLMISC::CApplicationContext appContext;
 
 	QApplication app(argc, argv);
