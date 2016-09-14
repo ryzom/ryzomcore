@@ -41,6 +41,11 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(m_downloader, SIGNAL(htmlPageContent(QString)), SLOT(onHtmlPageContent(QString)));
 
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
+
+	// remove debug options
+	actionSettings->setVisible(false);
+	actionUninstall->setVisible(false);
+
 	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
 	connect(actionQuit, SIGNAL(triggered()), SLOT(onQuit()));
