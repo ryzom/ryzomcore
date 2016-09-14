@@ -109,6 +109,9 @@ public:
 	bool shouldUninstallOldClient() const;
 	void setShouldUninstallOldClient(bool on);
 
+	bool uninstallingOldClient() const;
+	void setUninstallingOldClient(bool on);
+
 	QString expandVariables(const QString &str) const;
 
 	QString getClientArch() const;
@@ -147,6 +150,7 @@ private:
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
 	bool m_shouldUninstallOldClient;
+	bool m_uninstallingOldClient;
 	QString m_language;
 
 	QString m_defaultConfigPath;

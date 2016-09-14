@@ -27,7 +27,8 @@
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
-	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
+	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true),
+	m_uninstallingOldClient(false)
 {
 	s_instance = this;
 
@@ -459,6 +460,16 @@ bool CConfigFile::shouldUninstallOldClient() const
 void CConfigFile::setShouldUninstallOldClient(bool on)
 {
 	m_shouldUninstallOldClient = on;
+}
+
+bool CConfigFile::uninstallingOldClient() const
+{
+	return m_uninstallingOldClient;
+}
+
+void CConfigFile::setUninstallingOldClient(bool on)
+{
+	m_uninstallingOldClient = on;
 }
 
 QString CConfigFile::expandVariables(const QString &str) const
@@ -972,7 +983,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
 #endif
 
-	if (m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+	if (!m_uninstallingOldClient && m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
 	{
 		return UninstallOldClient;
 	}
