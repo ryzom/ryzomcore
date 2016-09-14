@@ -223,8 +223,10 @@ int main(int argc, char *argv[])
 
 		if (step == Done)
 		{
+#if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself
 			if (QProcess::startDetached(QApplication::applicationFilePath(), QApplication::arguments())) return 0;
+#endif
 		}
 	}
 
