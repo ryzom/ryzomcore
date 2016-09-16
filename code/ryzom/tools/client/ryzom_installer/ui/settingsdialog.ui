@@ -19,7 +19,7 @@
      <item row="3" column="0">
       <widget class="QCheckBox" name="use64bitsClientsCheckBox">
        <property name="text">
-        <string>Use 64 bits client</string>
+        <string>Use 64 bit client</string>
        </property>
       </widget>
      </item>

@@ -28,9 +28,9 @@
      <property name="text">
       <string>Welcome to Ryzom Installer!
 
-This program will allow you to download, install, configure or manage Ryzom on your computer.
+This program will allow you to download, install, configure and manage Ryzom on your computer.
 
-Just follow the different steps and make your choice between the different propositions.</string>
+Just follow the  different steps and make your choice between the options presented.</string>
      </property>
      <property name="textFormat">
       <enum>Qt::PlainText</enum>
@@ -134,7 +134,7 @@ Just follow the different steps and make your choice between the different propo
          <item>
           <widget class="QRadioButton" name="internetRadioButton">
            <property name="text">
-            <string>Internet (%1 GiB to download)</string>
+            <string>Internet (%1 to download)</string>
            </property>
           </widget>
          </item>
@@ -167,13 +167,13 @@ Just follow the different steps and make your choice between the different propo
       <item>
        <widget class="QGroupBox" name="clientArchGroupBox">
         <property name="title">
-         <string>Do you prefer to use a 64 or 32 bits client?</string>
+         <string>Do you prefer to use a 64 or 32 bit client?</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
           <widget class="QRadioButton" name="clientArch64RadioButton">
            <property name="text">
-            <string>64 bits (recommended)</string>
+            <string>64 bit (recommended)</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -183,7 +183,7 @@ Just follow the different steps and make your choice between the different propo
          <item>
           <widget class="QRadioButton" name="clientArch32RadioButton">
            <property name="text">
-            <string>32 bits</string>
+            <string>32 bit</string>
            </property>
           </widget>
          </item>

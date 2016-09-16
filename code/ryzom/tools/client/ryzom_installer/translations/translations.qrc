@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/translations">
         <file>ryzom_installer_de.qm</file>
-        <file>ryzom_installer_en.qm</file>
         <file>ryzom_installer_es.qm</file>
         <file>ryzom_installer_fr.qm</file>
         <file>ryzom_installer_ru.qm</file>

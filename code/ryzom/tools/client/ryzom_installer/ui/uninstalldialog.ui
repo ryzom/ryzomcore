@@ -34,7 +34,7 @@
        <item>
         <widget class="QLabel" name="messageLabel">
          <property name="text">
-          <string>You're about to uninstall some or all components of Ryzom. Please check each component you want to remove (warning, it can't be reverted).</string>
+          <string>You're about to uninstall some or all components of Ryzom. Please check each component you want to remove (Warning, it cannot be undone).</string>
          </property>
          <property name="textFormat">
           <enum>Qt::PlainText</enum>
