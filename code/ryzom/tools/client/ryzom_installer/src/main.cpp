@@ -80,6 +80,26 @@ bool copyInstallerFiles(const QStringList &files, const QString &destination)
 	return true;
 }
 
+#ifdef Q_OS_WIN
+class CCOMHelper
+{
+	bool m_mustUninit;
+
+public:
+	CCOMHelper()
+	{
+		// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
+		m_mustUninit = SUCCEEDED(CoInitialize(NULL));
+	}
+
+	~CCOMHelper()
+	{
+		// only call CoUninitialize if CoInitialize succeeded
+		if (m_mustUninit) CoUninitialize();
+	}
+};
+#endif
+
 int main(int argc, char *argv[])
 {
 #if defined(_MSC_VER) && defined(_DEBUG)
@@ -87,8 +107,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef Q_OS_WIN
-	// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
-	CoInitialize(NULL);
+	CCOMHelper comHelper;
 #endif
 
 	NLMISC::CApplicationContext appContext;
