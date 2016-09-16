@@ -76,12 +76,21 @@ namespace NLMISC {
 
 nlWindow CSystemUtils::s_window = EmptyWindow;
 
+#ifdef NL_OS_WINDOWS
+static bool s_mustUninit = false;
+#endif
+
 bool CSystemUtils::init()
 {
 #ifdef NL_OS_WINDOWS
 	// initialize COM
-	HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	if (FAILED(hr)) return false;
+	if (!s_mustUninit)
+	{
+		HRESULT hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+		if (FAILED(hr)) return false;
+
+		s_mustUninit = true;
+	}
 #endif
 
 	return true;
@@ -91,7 +100,12 @@ bool CSystemUtils::uninit()
 {
 #ifdef NL_OS_WINDOWS
 	// uninitialize COM
-	CoUninitialize();
+	if (s_mustUninit)
+	{
+		CoUninitialize();
+
+		s_mustUninit = false;
+	}
 #endif
 
 	return true;
