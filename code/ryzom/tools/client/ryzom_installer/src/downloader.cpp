@@ -153,7 +153,7 @@ void CDownloader::getFileHead()
 			else
 			{
 				// or has wrong size
-				if (m_listener) m_listener->operationFail(tr("File (%1B) is larger than expected (%2B)").arg(m_offset).arg(m_size));
+				if (m_listener) m_listener->operationFail(tr("File is larger (%1B) than expected (%2B)").arg(m_offset).arg(m_size));
 			}
 
 			return;
@@ -183,7 +183,7 @@ void CDownloader::downloadFile()
 	if (freeSpace < m_size - m_offset)
 	{
 		// we have not enough free disk space to continue download
-		if (m_listener) m_listener->operationFail(tr("You only have %1 bytes left on device, but %2 bytes are required.").arg(freeSpace).arg(m_size - m_offset));
+		if (m_listener) m_listener->operationFail(tr("You only have %1 bytes left on the device, but %2 bytes are needed.").arg(freeSpace).arg(m_size - m_offset));
 		return;
 	}
 
@@ -326,7 +326,7 @@ void CDownloader::onHeadFinished()
 	// other status
 	else
 	{
-		if (m_listener) m_listener->operationFail(tr("Wrong status code: %1").arg(status));
+		if (m_listener) m_listener->operationFail(tr("Incorrect status code: %1").arg(status));
 		return;
 	}
 

@@ -98,7 +98,7 @@ void CInstallDialog::onAnotherLocationBrowseButtonClicked()
 	
 	for(;;)
 	{
-		directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where is installed Ryzom"));
+		directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where Ryzom is currently installed."));
 
 		if (directory.isEmpty()) return;
 
@@ -117,7 +117,7 @@ void CInstallDialog::onAnotherLocationBrowseButtonClicked()
 
 void CInstallDialog::onDestinationBrowseButtonClicked()
 {
-	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where to install Ryzom"));
+	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"));
 
 	if (directory.isEmpty()) return;
 

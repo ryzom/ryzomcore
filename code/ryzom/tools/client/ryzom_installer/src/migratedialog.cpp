@@ -91,7 +91,7 @@ void CMigrateDialog::onShowAdvancedParameters(int state)
 
 void CMigrateDialog::onDestinationBrowseButtonClicked()
 {
-	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where to install Ryzom"));
+	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"));
 
 	if (directory.isEmpty()) return;
 
