@@ -17,6 +17,9 @@
 #ifndef DOWNLOADER_H
 #define DOWNLOADER_H
 
+#include <QtCore/QtCore>
+#include <QtNetwork/QtNetwork>
+
 class IOperationProgressListener;
 
 /**

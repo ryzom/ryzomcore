@@ -17,6 +17,8 @@
 #ifndef OPERATION_H
 #define OPERATION_H
 
+#include <QtCore/QtCore>
+
 class IOperationProgressListener
 {
 public:

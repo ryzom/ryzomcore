@@ -20,6 +20,8 @@
 #include "ui_uninstalldialog.h"
 #include "operation.h"
 
+class QStandardItem;
+
 /**
  * Wizard displayed when uninstalling components from Add/Remove Program under Windows
  * or when user clicks on Uninstall in main menu.
