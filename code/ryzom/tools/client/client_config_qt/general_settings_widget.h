@@ -20,6 +20,8 @@
 #include "ui_general_settings_widget.h"
 #include "widget_base.h"
 
+#include "nel/misc/types_nl.h"
+
 class QTranslator;
 
 /**
