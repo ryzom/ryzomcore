@@ -1,6 +1,9 @@
 #ifndef TILESMODEL_H
 #define TILESMODEL_H
 
+#include <QtCore/QtCore>
+#include <QtGui/QtGui>
+
 class TileModel
 {
 
