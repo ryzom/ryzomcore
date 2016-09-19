@@ -793,14 +793,14 @@ void COperationDialog::uninstallOldClient()
 
 			if (button == QMessageBox::Yes)
 			{
+				// to not ask twice
+				CConfigFile::getInstance()->setUninstallingOldClient(true);
+
 				// remember the choice
 				CConfigFile::getInstance()->setShouldUninstallOldClient(true);
 
 				// launch old uninstaller
 				QDesktopServices::openUrl(QUrl::fromLocalFile(uninstaller));
-
-				// to not ask twice
-				CConfigFile::getInstance()->setUninstallingOldClient(true);
 			}
 			else
 			{
