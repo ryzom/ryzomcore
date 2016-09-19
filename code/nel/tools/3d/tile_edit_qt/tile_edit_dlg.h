@@ -19,6 +19,8 @@
 
 #include "ui_tile_edit_qt.h"
 
+#include <QtCore/QtCore>
+
 class QCheckBox;
 class QPushButton;
 class QLineEdit;
