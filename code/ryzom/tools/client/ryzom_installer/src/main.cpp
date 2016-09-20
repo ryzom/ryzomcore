@@ -122,14 +122,14 @@ int main(int argc, char *argv[])
 
 	// load application translations
 	QTranslator localTranslator;
-	if (localTranslator.load(locale, "ryzom_installer", "_", "translations"))
+	if (localTranslator.load(locale, "ryzom_installer", "_", ":/translations"))
 	{
 		QApplication::installTranslator(&localTranslator);
 	}
 
 	// load Qt default translations
 	QTranslator qtTranslator;
-	if (qtTranslator.load(locale, "qt", "_", "translations"))
+	if (qtTranslator.load(locale, "qtbase", "_", ":/translations"))
 	{
 		QApplication::installTranslator(&qtTranslator);
 	}
