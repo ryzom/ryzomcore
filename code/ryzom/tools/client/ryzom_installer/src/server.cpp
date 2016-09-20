@@ -42,3 +42,8 @@ QString CServer::getConfigurationFullPath() const
 
 	return getDirectory() + "/" + configurationFilename;
 }
+
+QString CServer::getDefaultClientConfigFullPath() const
+{
+	return getDirectory() + "/client_default.cfg";
+}

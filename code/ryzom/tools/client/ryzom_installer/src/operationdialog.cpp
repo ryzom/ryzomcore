@@ -888,6 +888,8 @@ bool COperationDialog::createDefaultProfile()
 	config->addProfile(profile);
 	config->save();
 
+	profile.createClientConfig();
+
 	emit done();
 
 	return true;
@@ -1071,6 +1073,7 @@ void COperationDialog::addComponentsProfiles()
 		const CProfile &profile = config->getProfile(profileId);
 
 		profile.createShortcuts();
+		profile.createClientConfig();
 	}
 }
 

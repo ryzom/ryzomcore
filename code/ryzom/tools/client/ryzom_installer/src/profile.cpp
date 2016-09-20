@@ -118,3 +118,55 @@ void CProfile::updateShortcuts() const
 	deleteShortcuts();
 	createShortcuts();
 }
+
+bool CProfile::createClientConfig() const
+{
+	// where to search and put client.cfg
+	QString directory = getDirectory();
+	QString filename = directory + "/client.cfg";
+
+	const CServer &s = CConfigFile::getInstance()->getServer(server);
+
+	// create the 2 initial lines of client.cfg
+	QString rootConfigFilenameLine = QString("RootConfigFilename = \"%1\";").arg(s.getDefaultClientConfigFullPath());
+	QString languageCodeline = QString("LanguageCode = \"%1\";\n").arg(CConfigFile::getInstance()->getLanguage());
+
+	QString content;
+
+	QFile file(filename);
+
+	if (file.open(QFile::ReadOnly))
+	{
+		// read while content as UTF-8 text
+		content = QString::fromUtf8(file.readAll());
+
+		// search the end of the first line
+		int pos = content.indexOf('\n');
+
+		if (pos > 0)
+		{
+			// don't remove the \r under Windows
+			if (content[pos - 1] == '\r') pos--;
+
+			// update RootConfigFilename to be sure it points on right client_default.cfg
+			content = content.mid(pos);
+			content.prepend(rootConfigFilenameLine);
+		}
+
+		file.close();
+	}
+	else
+	{
+		// create initial client.cfg
+		content += rootConfigFilenameLine + "\n";
+		content += languageCodeline + "\n";
+	}
+
+	// write the new content of client.cfg
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	file.write(content.toUtf8());
+	file.close();
+
+	return true;
+}

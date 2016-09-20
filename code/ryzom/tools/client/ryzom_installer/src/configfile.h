@@ -54,6 +54,8 @@ public:
 	CProfiles getBackupProfiles() const { return m_backupProfiles; }
 	void backupProfiles();
 
+	QString getLanguage() const { return m_language; }
+
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
 	CProfile getProfile(const QString &id) const;

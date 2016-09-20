@@ -46,6 +46,8 @@ public:
 	void createShortcuts() const;
 	void deleteShortcuts() const;
 	void updateShortcuts() const;
+
+	bool createClientConfig() const;
 };
 
 extern const CProfile NoProfile;
