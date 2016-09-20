@@ -10,7 +10,6 @@
 !define RegistryCat "HKCU"
 !define RegistryKey "Software\${Company}\${GenericProduct}"
 !define Executable "ryzom_installer_qt_r.exe"
-!define DstDir "Output"
 !define SrcDir "RyzomInstaller"
 !define Installer "ryzom_installer.exe"
 
@@ -22,7 +21,7 @@ XPStyle on
 
 ;Name and file
 Name "${Product}"
-OutFile "${DstDir}\${Installer}"
+OutFile "${Installer}"
 
 ;Default installation folder
 InstallDir "$LOCALAPPDATA\${GenericProduct}"
