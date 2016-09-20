@@ -1193,16 +1193,18 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 	QDir dir(path);
 
 	QStringList filter;
+	filter << "*.log";
 	filter << "*.7z";
 	filter << "*.bnp";
 	filter << "*.zip";
 	filter << "*.part";
+	filter << "ryzom_installer_uninstalling_old_client";
 
 	QStringList files = dir.entryList(filter, QDir::Files);
 
 	foreach(const QString &file, files)
 	{
-		if (!QFile::remove(file))
+		if (!QFile::remove(dir.filePath(file)))
 		{
 			qDebug() << "Unable to delete" << file;
 		}
