@@ -15,7 +15,7 @@
 !define Installer "ryzom_installer.exe"
 
 ;Properly display all languages (Installer will not work on Windows 95, 98 or ME!)
-Unicode true
+;Unicode true
 
 ;New XP style
 XPStyle on
