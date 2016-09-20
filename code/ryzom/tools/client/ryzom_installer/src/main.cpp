@@ -149,8 +149,23 @@ int main(int argc, char *argv[])
 	QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
 	// check if launched from TEMP directory
-	if (step == Done && QApplication::applicationDirPath() != tempPath)
+	if (step == Done && !QApplication::applicationDirPath().startsWith(tempPath))
 	{
+		// try to delete all temporary installers
+		QDir tempDir(tempPath);
+
+		QStringList filter;
+		filter << "ryzom_installer_*";
+
+		QStringList dirs = tempDir.entryList(filter, QDir::Dirs);
+
+		foreach(const QString &dir, dirs)
+		{
+			QDir(dir).removeRecursively();
+		}
+
+		tempPath += QString("/ryzom_installer_%1").arg(QDateTime::currentMSecsSinceEpoch());
+
 		// copy installer and required files to TEMP directory
 		if (copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
 		{
