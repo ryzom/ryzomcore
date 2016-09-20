@@ -553,9 +553,11 @@ void COperationDialog::extractDownloadedClient()
 	m_currentOperation = tr("Extract client files required by server %1").arg(server.name);
 	m_currentOperationProgressFormat = tr("Extracting %1...");
 
+	QString destinationDirectory = server.getDirectory();
+
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename));
-	extractor.setDestinationDirectory(server.getDirectory());
+	extractor.setDestinationDirectory(destinationDirectory);
 
 	if (extractor.exec())
 	{
@@ -563,6 +565,8 @@ void COperationDialog::extractDownloadedClient()
 	else
 	{
 	}
+
+	launchUpgradeScript(destinationDirectory, server.clientFilename);
 
 	emit done();
 }
@@ -652,7 +656,14 @@ void COperationDialog::extractBnpClient()
 	extractor.setDestinationDirectory(destinationDirectory);
 	extractor.exec();
 
-	QString upgradeScript = destinationDirectory + "/upgd_nl.";
+	launchUpgradeScript(destinationDirectory, server.clientFilename);
+
+	emit done();
+}
+
+void COperationDialog::launchUpgradeScript(const QString &directory, const QString &executable)
+{
+	QString upgradeScript = directory + "/upgd_nl.";
 
 #ifdef Q_OS_WIN
 	upgradeScript += "bat";
@@ -665,9 +676,9 @@ void COperationDialog::extractBnpClient()
 		QProcess process;
 
 		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(destinationDirectory + "/" + server.clientFilename));
-		env.insert("UNPACKPATH", QDir::toNativeSeparators(destinationDirectory + "/unpack"));
-		env.insert("ROOTPATH", QDir::toNativeSeparators(destinationDirectory));
+		env.insert("RYZOM_CLIENT", QDir::toNativeSeparators(directory + "/" + executable));
+		env.insert("UNPACKPATH", QDir::toNativeSeparators(directory + "/unpack"));
+		env.insert("ROOTPATH", QDir::toNativeSeparators(directory));
 		env.insert("STARTUPPATH", "");
 		process.setProcessEnvironment(env);
 
@@ -694,7 +705,6 @@ void COperationDialog::extractBnpClient()
 		}
 	}
 
-	emit done();
 }
 
 void COperationDialog::copyInstaller()
