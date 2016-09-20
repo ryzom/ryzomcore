@@ -6,5 +6,9 @@
         <file>ryzom_configuration_fr.qm</file>
         <file>ryzom_configuration_hu.qm</file>
         <file>ryzom_configuration_ru.qm</file>
+        <file>qtbase_de.qm</file>
+        <file>qtbase_es.qm</file>
+        <file>qtbase_fr.qm</file>
+        <file>qtbase_ru.qm</file>
     </qresource>
 </RCC>

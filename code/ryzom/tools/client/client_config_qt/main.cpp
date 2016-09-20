@@ -67,7 +67,7 @@ int main(sint32 argc, char **argv)
 
 	// load Qt default translations
 	QTranslator qtTranslator;
-	if (qtTranslator.load(locale, "qt", "_", ":/translations"))
+	if (qtTranslator.load(locale, "qtbase", "_", ":/translations"))
 	{
 		QApplication::installTranslator(&qtTranslator);
 	}

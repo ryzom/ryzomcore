@@ -47,6 +47,7 @@ public:
 	QString getDirectory() const;
 	QString getClientFullPath() const;
 	QString getConfigurationFullPath() const;
+	QString getDefaultClientConfigFullPath() const;
 };
 
 extern const CServer NoServer;

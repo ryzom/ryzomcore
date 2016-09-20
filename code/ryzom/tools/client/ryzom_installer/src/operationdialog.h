@@ -132,6 +132,7 @@ protected:
 	virtual bool operationShouldStop();
 
 	void renamePartFile();
+	void launchUpgradeScript(const QString &directory, const QString &executable);
 
 	// hacks to prevent an infinite loop
 	void acceptDelayed();
