@@ -152,7 +152,6 @@ private:
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
 	bool m_shouldUninstallOldClient;
-	bool m_uninstallingOldClient;
 	QString m_language;
 
 	QString m_defaultConfigPath;

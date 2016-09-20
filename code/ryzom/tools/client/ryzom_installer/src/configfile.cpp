@@ -27,8 +27,7 @@
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
-	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true),
-	m_uninstallingOldClient(false)
+	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
 {
 	s_instance = this;
 
@@ -464,12 +463,29 @@ void CConfigFile::setShouldUninstallOldClient(bool on)
 
 bool CConfigFile::uninstallingOldClient() const
 {
-	return m_uninstallingOldClient;
+	return QFile::exists(getInstallationDirectory() + "/ryzom_installer_uninstalling_old_client");
 }
 
 void CConfigFile::setUninstallingOldClient(bool on)
 {
-	m_uninstallingOldClient = on;
+	QString filename = getInstallationDirectory() + "/ryzom_installer_uninstalling_old_client";
+
+	if (on)
+	{
+		// writing a file to avoid asking several times when relaunching installer
+		QFile file(filename);
+
+		if (file.open(QFile::WriteOnly))
+		{
+			file.write("empty");
+			file.close();
+		}
+	}
+	else
+	{
+		// deleting the temporary file
+		if (QFile::exists(filename)) QFile::remove(filename);
+	}
 }
 
 QString CConfigFile::expandVariables(const QString &str) const
@@ -983,7 +999,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
 #endif
 
-	if (!m_uninstallingOldClient && m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+	if (!uninstallingOldClient() && m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
 	{
 		return UninstallOldClient;
 	}

@@ -161,13 +161,16 @@ int main(int argc, char *argv[])
 
 		foreach(const QString &dir, dirs)
 		{
-			QDir(dir).removeRecursively();
+			// delete each directory
+			QDir dirToRemove(tempDir);
+			dirToRemove.cd(dir);
+			dirToRemove.removeRecursively();
 		}
 
 		tempPath += QString("/ryzom_installer_%1").arg(QDateTime::currentMSecsSinceEpoch());
 
 		// copy installer and required files to TEMP directory
-		if (copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
+		if (QDir().mkdir(tempPath) && copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
 		{
 			QString tempFile = tempPath + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
 
