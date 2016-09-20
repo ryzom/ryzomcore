@@ -43,8 +43,10 @@ CMainWindow::CMainWindow():QMainWindow()
 	connect(actionProfiles, SIGNAL(triggered()), SLOT(onProfiles()));
 
 	// remove debug options
+#ifndef _DEBUG
 	actionSettings->setVisible(false);
 	actionUninstall->setVisible(false);
+#endif
 
 	connect(actionSettings, SIGNAL(triggered()), SLOT(onSettings()));
 	connect(actionUninstall, SIGNAL(triggered()), SLOT(onUninstall()));
