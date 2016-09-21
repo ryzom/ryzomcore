@@ -65,19 +65,19 @@ void CProfile::createShortcuts() const
 {
 	const CServer &s = CConfigFile::getInstance()->getServer(server);
 
-	QString executable = getClientFullPath();
+	QString exe = getClientFullPath();
 	QString workingDir = s.getDirectory();
 
-	QString arguments = QString("--profile %1").arg(id);
+	QString profileArguments = QString("--profile %1").arg(id);
 
 	// append custom arguments
-	if (!arguments.isEmpty()) arguments += QString(" %1").arg(arguments);
+	if (!arguments.isEmpty()) profileArguments += QString(" %1").arg(arguments);
 
 	QString icon;
 
 #ifdef Q_OS_WIN32
 	// under Windows, icon is included in executable
-	icon = executable;
+	icon = exe;
 #else
 	// icon is in the same directory as client
 	icon = s.getDirectory() + "/ryzom_client.png";
@@ -88,7 +88,7 @@ void CProfile::createShortcuts() const
 		QString shortcut = getClientDesktopShortcutFullPath();
 
 		// create desktop shortcut
-		createLink(shortcut, name, executable, arguments, icon, workingDir);
+		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
 	}
 
 	if (menuShortcut)
@@ -96,7 +96,7 @@ void CProfile::createShortcuts() const
 		QString shortcut = getClientMenuShortcutFullPath();
 
 		// create menu shortcut
-		createLink(shortcut, name, executable, arguments, icon, workingDir);
+		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
 	}
 }
 
