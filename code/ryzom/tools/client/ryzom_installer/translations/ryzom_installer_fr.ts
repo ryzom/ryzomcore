@@ -559,9 +559,9 @@ This program will migrate Ryzom version 2.1 to 3.0. Your files will be updated, 
 Just press Continue button and follow the different steps until everything is done.</source>
         <translation>Bienvenue dans l&apos;Installateur de Ryzom !
 
-Ce programme vous permettra de télécharger, installer, configurer et gérer Ryzom sur votre ordinateur.
+Ce programme vous permettra de migrer Ryzom de la version 2.1 à 3.0. Vos fichiers seront mis à jour, nettoyés et déplacés vers un nouvel emplacement.
 
-Vous n&apos;avez qu&apos;à suivre les différentes étapes et faire un choix entre les différentes options proposées. </translation>
+Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étapes jusqu&apos;à la fin. </translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="61"/>
