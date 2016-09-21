@@ -5501,6 +5501,19 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
+	int CGroupHTML::luaRenderHtml(CLuaState &ls)
+	{
+		const char *funcName = "renderHtml";
+		CLuaIHM::checkArgCount(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		std::string html = ls.toString(1);
+
+		renderHtmlString(html);
+
+		return 0;
+	}
+
+	// ***************************************************************************
 	int CGroupHTML::luaInsertText(CLuaState &ls)	
 	{
 		const char *funcName = "insertText";
