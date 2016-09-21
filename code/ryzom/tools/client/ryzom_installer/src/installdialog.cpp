@@ -79,6 +79,8 @@ CInstallDialog::CInstallDialog():QDialog()
 	onShowAdvancedParameters(Qt::Unchecked);
 
 	connect(advancedCheckBox, SIGNAL(stateChanged(int)), SLOT(onShowAdvancedParameters(int)));
+
+	raise();
 }
 
 CInstallDialog::~CInstallDialog()

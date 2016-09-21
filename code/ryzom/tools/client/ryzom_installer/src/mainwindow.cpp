@@ -68,6 +68,8 @@ CMainWindow::CMainWindow():QMainWindow()
 
 	updateProfiles();
 	updateButtons();
+
+	raise();
 }
 
 CMainWindow::~CMainWindow()

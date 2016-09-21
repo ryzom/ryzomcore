@@ -76,6 +76,8 @@ CMigrateDialog::CMigrateDialog():QDialog()
 	onShowAdvancedParameters(Qt::Unchecked);
 
 	connect(advancedCheckBox, SIGNAL(stateChanged(int)), SLOT(onShowAdvancedParameters(int)));
+
+	raise();
 }
 
 CMigrateDialog::~CMigrateDialog()

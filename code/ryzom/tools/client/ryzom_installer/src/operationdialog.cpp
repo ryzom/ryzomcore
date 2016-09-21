@@ -72,6 +72,8 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	connect(this, SIGNAL(done()), SLOT(onDone()));
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	raise();
 }
 
 COperationDialog::~COperationDialog()
