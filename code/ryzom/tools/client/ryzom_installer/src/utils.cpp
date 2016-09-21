@@ -31,7 +31,7 @@ QString qBytesToHumanReadable(qint64 bytes)
 		units.push_back(QObject::tr("PiB").toUtf8().constData());
 	}
 
-	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
+	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
 qint64 getDirectorySize(const QString &directory, bool recursize)
