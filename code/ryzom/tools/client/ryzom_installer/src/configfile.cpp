@@ -466,7 +466,7 @@ bool CConfigFile::uninstallingOldClient() const
 	return QFile::exists(getInstallationDirectory() + "/ryzom_installer_uninstalling_old_client");
 }
 
-void CConfigFile::setUninstallingOldClient(bool on)
+void CConfigFile::setUninstallingOldClient(bool on) const
 {
 	QString filename = getInstallationDirectory() + "/ryzom_installer_uninstalling_old_client";
 
@@ -999,9 +999,19 @@ OperationStep CConfigFile::getInstallNextStep() const
 	if (!settings.contains("InstallLocation")) return CreateAddRemoveEntry;
 #endif
 
-	if (!uninstallingOldClient() && m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+	if (m_shouldUninstallOldClient && !getSrcServerDirectory().isEmpty())
 	{
-		return UninstallOldClient;
+		// if old client must be uninstalled
+		if (!uninstallingOldClient() && QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+		{
+			return UninstallOldClient;
+		}
+
+		// if old client has been uninstalled
+		if (uninstallingOldClient() && !QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
+		{
+			setUninstallingOldClient(false);
+		}
 	}
 
 	return Done;

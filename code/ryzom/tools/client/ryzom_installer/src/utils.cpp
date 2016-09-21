@@ -31,7 +31,7 @@ QString qBytesToHumanReadable(qint64 bytes)
 		units.push_back(QObject::tr("PiB").toUtf8().constData());
 	}
 
-	return QString::fromUtf8(NLMISC::bytesToHumanReadable(bytes).c_str());
+	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
 qint64 getDirectorySize(const QString &directory, bool recursize)
@@ -99,6 +99,8 @@ wchar_t* qToWide(const QString &str)
 
 bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
+	CCOMHelper comHelper;
+
 	IShellLinkW* psl;
 
 	// Get a pointer to the IShellLink interface. It is assumed that CoInitialize
@@ -135,6 +137,8 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 
 bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 {
+	CCOMHelper comHelper;
+
 	IShellLinkW* psl;
 	WIN32_FIND_DATAW wfd;
 
@@ -239,3 +243,21 @@ bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathOb
 }
 
 #endif
+
+CCOMHelper::CCOMHelper()
+{
+#ifdef Q_OS_WIN
+	// to fix the bug with QFileDialog::getExistingDirectory hanging under Windows
+	m_mustUninit = SUCCEEDED(CoInitialize(NULL));
+#else
+	m_mustUninit = false;
+#endif
+}
+
+CCOMHelper::~CCOMHelper()
+{
+#ifdef Q_OS_WIN
+	// only call CoUninitialize if CoInitialize succeeded
+	if (m_mustUninit) CoUninitialize();
+#endif
+}
