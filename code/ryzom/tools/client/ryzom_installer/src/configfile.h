@@ -112,7 +112,7 @@ public:
 	void setShouldUninstallOldClient(bool on);
 
 	bool uninstallingOldClient() const;
-	void setUninstallingOldClient(bool on);
+	void setUninstallingOldClient(bool on) const;
 
 	QString expandVariables(const QString &str) const;
 
