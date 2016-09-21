@@ -44,7 +44,7 @@ NL_ADD_LIB_SUFFIX( ryzom_configuration_qt )
 TARGET_LINK_LIBRARIES( ryzom_configuration_qt nelmisc nel3d ${QT_LIBRARIES} ${OPENGL_gl_LIBRARY})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_configuration_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_configuration_qt ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.cpp)
 ENDIF()
 
 INSTALL(TARGETS ryzom_configuration_qt RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client)
