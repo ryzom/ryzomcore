@@ -253,6 +253,7 @@ namespace NLGUI
 		int luaEndElement(CLuaState &ls);
 		int luaShowDiv(CLuaState &ls);
 		int luaParseHtml(CLuaState &ls);
+		int luaRenderHtml(CLuaState &ls);
 
 		REFLECT_EXPORT_START(CGroupHTML, CGroupScrollText)
 			REFLECT_LUA_METHOD("browse", luaBrowse)
@@ -265,6 +266,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("endElement", luaEndElement)
 			REFLECT_LUA_METHOD("showDiv", luaShowDiv)
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
+			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
 			REFLECT_STRING("url", getURL, setURL)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
