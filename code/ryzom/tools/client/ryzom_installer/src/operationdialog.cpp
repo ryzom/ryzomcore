@@ -638,6 +638,9 @@ void COperationDialog::copyProfileFiles()
 	{
 	}
 
+	// correct path to client_default.cfg
+	profile.createClientConfig();
+
 	emit done();
 }
 
@@ -899,8 +902,6 @@ bool COperationDialog::createDefaultProfile()
 
 	config->addProfile(profile);
 	config->save();
-
-	profile.createClientConfig();
 
 	emit done();
 
