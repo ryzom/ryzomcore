@@ -1,36 +1,13 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${NEL_INCLUDE_DIR})
 
-FILE(GLOB SRC *.cpp *.h resources/*.rc)
+FILE(GLOB SRC src/*.cpp src/*.h resources/*.rc)
 
-SET(CLIENT_CONFIG_HDR
-  client_config_dialog.h
-  display_settings_advanced_widget.h
-  display_settings_details_widget.h
-  display_settings_widget.h
-  general_settings_widget.h
-  sound_settings_widget.h
-  sys_info_d3d_widget.h
-  sys_info_opengl_widget.h
-  sys_info_widget.h
-  widget_base.h
-)
-
-SET(CLIENT_CONFIG_UIS
-  client_config_dialog.ui
-  display_settings_advanced_widget.ui
-  display_settings_details_widget.ui
-  display_settings_widget.ui
-  general_settings_widget.ui
-  sound_settings_widget.ui
-  sys_info_d3d_widget.ui
-  sys_info_opengl_widget.ui
-  sys_info_widget.ui
-)
-
+FILE(GLOB CLIENT_CONFIG_HDR src/*.h)
+FILE(GLOB CLIENT_CONFIG_UIS ui/*.ui)
 FILE(GLOB CLIENT_CONFIG_TRANS translations/*.ts)
 
 CONFIGURE_FILE(translations/translations.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc COPYONLY)
-SET(CLIENT_CONFIG_RCS resources.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc )
+SET(CLIENT_CONFIG_RCS resources/resources.qrc ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc )
 
 IF(WITH_QT)
   INCLUDE_DIRECTORIES(${QT_INCLUDES})
@@ -44,7 +21,7 @@ IF(WITH_QT)
   ADD_DEFINITIONS(${QT_DEFINITIONS})
 ELSE()
 #  uncomment this line if you want to update original translations
-#  QT5_CREATE_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_UIS} ${SRC} ${CLIENT_CONFIG_TRANS})
+#  QT5_CREATE_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_UIS} ${SRC} ${CLIENT_CONFIG_TRANS} OPTIONS -I ${CMAKE_CURRENT_SOURCE_DIR})
   QT5_ADD_TRANSLATION(CLIENT_CONFIG_QM ${CLIENT_CONFIG_TRANS})
   QT5_ADD_RESOURCES(CLIENT_CONFIG_RC_SRCS ${CLIENT_CONFIG_RCS})
   QT5_WRAP_CPP(CLIENT_CONFIG_MOC_SRC ${CLIENT_CONFIG_HDR})

@@ -170,7 +170,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="432"/>
         <source>%p% (%v/%m KiB)</source>
-        <translation>%p% (%v/%m KiO)</translation>
+        <translation>%p% (%v/%m Kio)</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="492"/>
@@ -405,7 +405,9 @@ This program will allow you to download, install, configure and manage Ryzom on 
 
 Just follow the  different steps and make your choice between the options presented.</source>
         <translation>Bienvenue dans l&apos;Installateur de Ryzom !
+
 Ce programme vous permettra de télécharger, installer, configurer et gérer Ryzom sur votre ordinateur.
+
 Vous n&apos;avez qu&apos;à suivre les différentes étapes et faire un choix entre les différentes options proposées. </translation>
     </message>
     <message>

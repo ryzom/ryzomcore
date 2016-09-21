@@ -72,6 +72,8 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	connect(this, SIGNAL(done()), SLOT(onDone()));
 
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	raise();
 }
 
 COperationDialog::~COperationDialog()
@@ -636,6 +638,9 @@ void COperationDialog::copyProfileFiles()
 	{
 	}
 
+	// correct path to client_default.cfg
+	profile.createClientConfig();
+
 	emit done();
 }
 
@@ -897,8 +902,6 @@ bool COperationDialog::createDefaultProfile()
 
 	config->addProfile(profile);
 	config->save();
-
-	profile.createClientConfig();
 
 	emit done();
 
