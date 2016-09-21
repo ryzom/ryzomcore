@@ -1088,6 +1088,11 @@ void COperationDialog::addComponentsProfiles()
 		profile.createShortcuts();
 		profile.createClientConfig();
 	}
+
+	// clear list of all servers to uninstall
+	m_addComponents.profiles.clear();
+
+	emit done();
 }
 
 void COperationDialog::deleteComponentsProfiles()
