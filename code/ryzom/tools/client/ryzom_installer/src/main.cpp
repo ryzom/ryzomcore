@@ -114,6 +114,34 @@ int main(int argc, char *argv[])
 		QApplication::installTranslator(&qtTranslator);
 	}
 
+	// define commandline arguments
+	QCommandLineParser parser;
+	parser.setApplicationDescription(QApplication::tr("Instalation and launcher tool for Ryzom"));
+	parser.addHelpOption();
+
+	QCommandLineOption uninstallOption(QStringList() << "u" << "uninstall", QApplication::tr("Uninstall"));
+	parser.addOption(uninstallOption);
+
+	QCommandLineOption silentOption(QStringList() << "s" << "silent", QApplication::tr("Silent mode"));
+	parser.addOption(silentOption);
+
+	QCommandLineOption versionOption(QStringList() << "v" << "version", QApplication::tr("Version"));
+	parser.addOption(versionOption);
+
+	QCommandLineOption installOption(QStringList() << "i" << "install", QApplication::tr("Install itself"));
+	parser.addOption(installOption);
+
+	// process the actual command line arguments given by the user
+	parser.process(app);
+
+	// don't need to load config file for version
+	if (parser.isSet(versionOption))
+	{
+		printf("Ryzom Installer %s (built on %s)\nCopyright (C) %s\n", RYZOM_VERSION, BUILD_DATE, COPYRIGHT);
+
+		return 0;
+	}
+
 	// instanciate ConfigFile
 	CConfigFile config;
 	OperationStep step = config.load() ? config.getInstallNextStep():DisplayNoServerError;
@@ -162,22 +190,6 @@ int main(int argc, char *argv[])
 
 	// use product name from ryzom_installer.ini
 	if (!config.getProductName().isEmpty()) QApplication::setApplicationName(config.getProductName());
-
-	// define commandline arguments
-	QCommandLineParser parser;
-	parser.setApplicationDescription(QApplication::tr("Instalation and launcher tool for Ryzom"));
-	parser.addHelpOption();
-	parser.addVersionOption();
-
-	// root, username and password are optional because they can be saved in settings file
-	QCommandLineOption uninstallOption(QStringList() << "u" << "uninstall", QApplication::tr("Uninstall"));
-	parser.addOption(uninstallOption);
-
-	QCommandLineOption silentOption(QStringList() << "s" << "silent", QApplication::tr("Silent mode"));
-	parser.addOption(silentOption);
-
-	// process the actual command line arguments given by the user
-	parser.process(app);
 
 	if (parser.isSet(uninstallOption))
 	{
