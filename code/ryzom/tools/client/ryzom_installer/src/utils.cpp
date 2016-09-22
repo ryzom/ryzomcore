@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "utils.h"
 
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 QString qBytesToHumanReadable(qint64 bytes)
 {
 	static std::vector<std::string> units;
@@ -243,6 +247,66 @@ bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathOb
 }
 
 #endif
+
+QString getVersionFromExecutable(const QString &path)
+{
+	// launch executable with --version argument
+	QProcess process;
+	process.setProcessChannelMode(QProcess::MergedChannels);
+	process.start(path, QStringList() << "--version", QIODevice::ReadWrite);
+
+	if (!process.waitForStarted()) return "";
+
+	QByteArray data;
+
+	// read all output
+	while (process.waitForReadyRead()) data.append(process.readAll());
+
+	QString versionString = QString::fromUtf8(data);
+
+	// parse version from output (client)
+	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
+	if (reg.indexIn(versionString) > -1) return reg.cap(2);
+
+	// parse version from output (other tools)
+	reg.setPattern("([A-Za-z_ ]+) ([0-9.]+)");
+	if (reg.indexIn(versionString) > -1) return reg.cap(2);
+
+#ifdef Q_OS_WIN
+	// try to parse version of executable in resources
+	DWORD verHandle = NULL;
+	uint size = 0;
+	VS_FIXEDFILEINFO *verInfo = NULL;
+
+	// get size to be allocated
+	uint32_t verSize = GetFileVersionInfoSizeW(qToWide(path), &verHandle);
+	if (!verSize) return "";
+
+	// allocate buffer
+	QScopedArrayPointer<char> verData(new char[verSize]);
+
+	// get pointer on version structure
+	if (!GetFileVersionInfoW(qToWide(path), verHandle, verSize, &verData[0])) return "";
+
+	// get pointer on version
+	if (!VerQueryValueA(&verData[0], "\\", (void**)&verInfo, &size)) return "";
+
+	// check if version is right
+	if (size && verInfo && verInfo->dwSignature == 0xfeef04bd)
+	{
+		// Doesn't matter if you are on 32 bit or 64 bit,
+		// DWORD is always 32 bits, so first two revision numbers
+		// come from dwFileVersionMS, last two come from dwFileVersionLS
+		return QString("%1.%2.%3.%4")
+			.arg((verInfo->dwFileVersionMS >> 16) & 0xffff)
+			.arg((verInfo->dwFileVersionMS >> 0) & 0xffff)
+			.arg((verInfo->dwFileVersionLS >> 16) & 0xffff)
+			.arg((verInfo->dwFileVersionLS >> 0) & 0xffff);
+	}
+#endif
+
+	return "";
+}
 
 CCOMHelper::CCOMHelper()
 {
