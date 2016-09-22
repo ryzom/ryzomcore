@@ -46,6 +46,10 @@ NL_ADD_RUNTIME_FLAGS(ryzom_installer_qt)
 NL_ADD_LIB_SUFFIX(ryzom_installer_qt)
 TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ryzom_sevenzip ${QT_LIBRARIES})
 
+IF(WIN32)
+  TARGET_LINK_LIBRARIES(ryzom_installer_qt nelmisc ${WINSDK_LIBRARY_DIR}/Version.lib)
+ENDIF()
+
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_installer_qt ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.cpp)
 ENDIF()
