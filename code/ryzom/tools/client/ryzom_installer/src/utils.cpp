@@ -260,17 +260,20 @@ QString getVersionFromExecutable(const QString &path)
 	QByteArray data;
 
 	// read all output
-	while (process.waitForReadyRead()) data.append(process.readAll());
+	while (process.waitForReadyRead(1000)) data.append(process.readAll());
 
-	QString versionString = QString::fromUtf8(data);
+	if (!data.isEmpty())
+	{
+		QString versionString = QString::fromUtf8(data);
 
-	// parse version from output (client)
-	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
-	if (reg.indexIn(versionString) > -1) return reg.cap(2);
+		// parse version from output (client)
+		QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
+		if (reg.indexIn(versionString) > -1) return reg.cap(2);
 
-	// parse version from output (other tools)
-	reg.setPattern("([A-Za-z_ ]+) ([0-9.]+)");
-	if (reg.indexIn(versionString) > -1) return reg.cap(2);
+		// parse version from output (other tools)
+		reg.setPattern("([A-Za-z_ ]+) ([0-9.]+)");
+		if (reg.indexIn(versionString) > -1) return reg.cap(2);
+	}
 
 #ifdef Q_OS_WIN
 	// try to parse version of executable in resources
