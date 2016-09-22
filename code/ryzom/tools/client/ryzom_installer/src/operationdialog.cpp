@@ -492,6 +492,13 @@ void COperationDialog::onProgressSuccess(qint64 total)
 void COperationDialog::onProgressFail(const QString &error)
 {
 	QMessageBox::critical(this, tr("Error"), error);
+
+	{
+		QMutexLocker locker(&m_abortingMutex);
+		m_aborting = true;
+	}
+
+	processNextStep();
 }
 
 void COperationDialog::onDone()

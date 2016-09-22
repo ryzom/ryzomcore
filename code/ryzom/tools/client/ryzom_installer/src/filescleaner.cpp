@@ -51,11 +51,13 @@ bool CFilesCleaner::exec()
 	QStringList filter;
 	filter << "*.string_cache";
 
+	// certificate should be in gamedev.bnp now
+	filter << "*.pem";
+
 	if (dir.exists("packedsheets.bnp"))
 	{
 		filter << "*.packed_sheets";
 		filter << "*.packed";
-		filter << "*.pem";
 	}
 
 	// temporary files
