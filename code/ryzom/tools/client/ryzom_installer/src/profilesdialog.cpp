@@ -19,6 +19,7 @@
 #include "profilesmodel.h"
 #include "serversmodel.h"
 #include "operationdialog.h"
+#include "utils.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -222,27 +223,12 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	// file doesn't exist
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
-	// launch executable with --version argument
-	QProcess process;
-	process.setProcessChannelMode(QProcess::MergedChannels);
-	process.start(executable, QStringList() << "--version", QIODevice::ReadWrite);
-
-	if (!process.waitForStarted()) return;
-
-	QByteArray data;
-
-	// read all output
-	while (process.waitForReadyRead()) data.append(process.readAll());
-
 	// convert output to string
-	QString versionString = QString::fromUtf8(data);
+	QString versionString = getVersionFromExecutable(executable);
 
-	// parse version from output
-	QRegExp reg("([A-Za-z0-1_.]+) ((DEV|FV) ([0-9.]+))");
-
-	if (reg.indexIn(versionString) > -1)
+	if (!versionString.isEmpty())
 	{
-		executablePathLabel->setText(QString("%1 (%2)").arg(QFileInfo(executable).fileName()).arg(reg.cap(2)));
+		executablePathLabel->setText(QString("%1 (%2)").arg(QFileInfo(executable).fileName()).arg(versionString));
 	}
 }
 
