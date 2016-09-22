@@ -51,6 +51,8 @@ wchar_t* qToWide(const QString &str);
 bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir);
 bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj);
 
+QString getVersionFromExecutable(const QString &path);
+
 class CCOMHelper
 {
 	bool m_mustUninit;

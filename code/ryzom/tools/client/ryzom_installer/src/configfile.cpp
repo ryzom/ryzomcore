@@ -749,6 +749,26 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
 }
 
+bool CConfigFile::shouldCopyInstaller() const
+{
+	const CProfile &p = getProfile();
+	const CServer &s = getServer(p.server);
+
+	QString installerDst = getInstallationDirectory() + "/" + s.installerFilename;
+
+	// if installer not found in installation directory, extract it from BNP
+	if (!QFile::exists(installerDst)) return true;
+
+	QString installedVersion = getVersionFromExecutable(installerDst);
+	QString newVersion = QApplication::applicationVersion();
+
+	QVersionNumber installedVer = QVersionNumber::fromString(installedVersion);
+	QVersionNumber newVer = QVersionNumber::fromString(newVersion);
+
+	// if version is greater, copy it
+	return newVer > installedVer;
+}
+
 QString CConfigFile::getInstallerCurrentFilePath() const
 {
 	// installer is always run from TEMP under Windows
@@ -955,23 +975,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 		}
 	}
 
-	QString installerDst = getInstallationDirectory() + "/" + server.installerFilename;
-
-	// if installer not found in installation directory, extract it from BNP
-	if (QFile::exists(installerDst))
-	{
-		QString installerSrc = getInstallerCurrentFilePath();
-
-		// copy it too if destination one if older than new one
-		uint64 srcDate = QFileInfo(installerSrc).lastModified().toTime_t();
-		uint64 dstDate = QFileInfo(installerDst).lastModified().toTime_t();
-
-		if (srcDate > dstDate) return CopyInstaller;
-	}
-	else
-	{
-		return CopyInstaller;
-	}
+	if (shouldCopyInstaller()) return CopyInstaller;
 
 	// no default profile
 	if (profile.id.isEmpty())
