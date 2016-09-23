@@ -35,21 +35,9 @@ using namespace std;
 using namespace NLMISC;
 
 // ***************************************************************************
-//char sExeDir[MAX_PATH];
-std::string sExeDir;
-NLMISC::CApplicationContext _ApplicationContext;
-
-void outString (const string &sText)
+void outString(const string &sText)
 {
-	std::string sCurDir = CPath::getCurrentPath();
-	CPath::setCurrentPath(sExeDir.c_str());
-	//char sCurDir[MAX_PATH];
-	//GetCurrentDirectory (MAX_PATH, sCurDir);
-	//SetCurrentDirectory (sExeDir);
-	NLMISC::createDebug ();
-	NLMISC::InfoLog->displayRaw(sText.c_str());
-	//SetCurrentDirectory (sCurDir);
-	CPath::setCurrentPath(sCurDir.c_str());
+	printf("%s\n", sText.c_str());
 }
 
 // ***************************************************************************
@@ -230,7 +218,7 @@ int main(int argc, char **argv)
 
 		if( !CFile::isDirectory(sDir) )
 		{
-			outString (string("ERROR : directory ") + sDir + " does not exist\n");
+			outString(toString("ERROR: directory %s does not exist", sDir.c_str()));
 			return -1;
 		}
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
@@ -256,7 +244,7 @@ int main(int argc, char **argv)
 
 			if (pBtmp->getPixelFormat() != CBitmap::RGBA)
 			{
-				nlwarning("Converting %s to RGBA (32 bits), originally using %u bits...", AllMapNames[i].c_str(), (uint)colors);
+				outString(toString("Converting %s to RGBA (32 bits), originally using %u bits...", AllMapNames[i].c_str(), (uint)colors));
 				pBtmp->convertToType(CBitmap::RGBA);
 			}
 
@@ -266,7 +254,7 @@ int main(int argc, char **argv)
 		{
 			if (pBtmp) delete pBtmp;
 
-			outString (string("ERROR :") + e.what());
+			outString(toString("ERROR : %s", e.what()));
 			return -1;
 		}
 	}
@@ -363,24 +351,11 @@ int main(int argc, char **argv)
 		fmtName += ".tga";
 	if (outTga.open(fmtName))
 	{
-		std::string ext;
-		if (toLower(fmtName).find(".png") != string::npos)
-		{
-			ext = "png";
-			GlobalTexture.writePNG (outTga, 32);
-		}
-		else
-		{
-			ext = "tga";
-			GlobalTexture.writeTGA (outTga, 32);
-		}
-
-		outTga.close();
-		outString (toString("Writing %s file : %s\n", ext.c_str(), fmtName.c_str()));
+		outString(toString("Writing %s", fmtName.c_str()));
 	}
 	else
 	{
-		outString (string("ERROR: Cannot write tga file : ") + fmtName + "\n");
+		outString(toString("ERROR: Unable to write %s", fmtName.c_str()));
 	}
 
 	// Write UV text file
@@ -399,11 +374,12 @@ int main(int argc, char **argv)
 												UVMax[i].U, UVMax[i].V);
 			}
 			fclose (f);
-			outString (string("Writing UV file : ") + fmtName + "\n");
+
+			outString(toString("Writing UV file %s", fmtName.c_str()));
 		}
 		else
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
+			outString(toString("ERROR: Cannot write UV file %s", fmtName.c_str()));
 		}
 	}
 	else // build as a subset
@@ -424,8 +400,7 @@ int main(int argc, char **argv)
 
 		if (f == NULL)
 		{
-			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
-//			fclose (iFile);
+			outString(toString("ERROR: Unable to write UV file %s", fmtName.c_str()));
 			return -1;
 		}
 
@@ -467,7 +442,7 @@ int main(int argc, char **argv)
 		}	
 //		fclose (iFile);
 		fclose (f);
-		outString (string("Writing UV file : ") + fmtName + "\n");
+		outString(toString("Writing UV file: %s", fmtName.c_str()));
 	}
 	
 	return 0;
