@@ -174,6 +174,30 @@ void enlargeCanvas(NLMISC::CBitmap &b)
 	b = b2;
 }
 
+bool writeFileDependingOnFilename(const std::string &filename, CBitmap &bitmap)
+{
+	NLMISC::COFile out;
+
+	if (out.open(filename))
+	{
+		if (toLower(filename).find(".png") != string::npos)
+		{
+			bitmap.writePNG(out, 32);
+		}
+		else
+		{
+			bitmap.writeTGA(out, 32);
+		}
+
+		out.close();
+
+		return true;
+	}
+
+	return false;
+}
+
+
 // ***************************************************************************
 // main
 // ***************************************************************************
@@ -325,13 +349,7 @@ int main(int argc, char **argv)
 	}
 
 	// Write global texture file
-	//SetCurrentDirectory (sExeDir);
-	CPath::setCurrentPath(sExeDir.c_str());
-
-	NLMISC::COFile outTga;
-	if (fmtName.rfind('.') == string::npos)
-		fmtName += ".tga";
-	if (outTga.open(fmtName))
+	if (writeFileDependingOnFilename(fmtName, GlobalTexture))
 	{
 		outString(toString("Writing %s", fmtName.c_str()));
 	}
@@ -345,7 +363,7 @@ int main(int argc, char **argv)
 	{
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = nlfopen(fmtName, "wt");
 		if (f != NULL)
 		{
 			for (sint i = 0; i < mapSize; ++i)
