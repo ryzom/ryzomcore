@@ -46,7 +46,7 @@ const	uint32	posStep= 4;
 
 // ***************************************************************************
 // Try all position to put pSrc in pDst
-bool tryAllPos (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 &y)
+bool tryAllPos(NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 &y)
 {
 	uint32 i, j;
 	CObjectVector<uint8> &rSrcPix = pSrc->getPixels();
@@ -86,7 +86,7 @@ bool tryAllPos (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 &x, sint32 
 }
 
 // ***************************************************************************
-void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
+void putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 {
 	dst[0] = src[0];
 	dst[1] = src[1];
@@ -98,7 +98,7 @@ void	putPixel(uint8 *dst, uint8 *src, bool alphaTransfert)
 }
 
 // ***************************************************************************
-bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
+bool putIn(NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bool alphaTransfert=true)
 {
 	uint8 *rSrcPix = &pSrc->getPixels()[0];
 	uint8 *rDstPix = &pDst->getPixels()[0];
@@ -145,18 +145,17 @@ bool putIn (NLMISC::CBitmap *pSrc, NLMISC::CBitmap *pDst, sint32 x, sint32 y, bo
 }
 
 // ***************************************************************************
-string getBaseName (const string &fullname)
+string getBaseName(const string &fullname)
 {
-	string sTmp2;
+	string basename;
 	string::size_type pos = fullname.rfind('_');
-	if (pos != string::npos)
-		sTmp2 = fullname.substr(0, pos+1);
-	return sTmp2;
+	if (pos != string::npos) basename = fullname.substr(0, pos+1);
+	return basename;
 }
 
 // ***************************************************************************
 // resize the bitmap to the next power of 2 and preserve content
-void enlargeCanvas (NLMISC::CBitmap &b)
+void enlargeCanvas(NLMISC::CBitmap &b)
 {
 	sint32 nNewWidth = b.getWidth(), nNewHeight = b.getHeight();
 	if (nNewWidth > nNewHeight)
@@ -221,6 +220,7 @@ int main(int argc, char **argv)
 			outString(toString("ERROR: directory %s does not exist", sDir.c_str()));
 			return -1;
 		}
+
 		CPath::getPathContent(sDir, false, false, true, AllMapNames);
 	}
 
@@ -238,7 +238,8 @@ int main(int argc, char **argv)
 		{
 			pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
-			if (!inFile.open( AllMapNames[i] )) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
+
+			if (!inFile.open(AllMapNames[i])) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
 
 			uint8 colors = pBtmp->load(inFile);
 
@@ -288,6 +289,7 @@ int main(int argc, char **argv)
 	vector<NLMISC::CUV> UVMin, UVMax;
 	UVMin.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
 	UVMax.resize (mapSize, NLMISC::CUV(0.0f, 0.0f));
+
 	for (sint i = 0; i < mapSize; ++i)
 	{
 		sint32 x, y;
@@ -297,40 +299,20 @@ int main(int argc, char **argv)
 			enlargeCanvas (GlobalTexture);
 			enlargeCanvas (GlobalMask);
 		}
+
 		putIn (AllMaps[i], &GlobalTexture, x, y);
 		putIn (AllMaps[i], &GlobalMask, x, y, false);
+
 		UVMin[i].U = (float)x;
 		UVMin[i].V = (float)y;
 		UVMax[i].U = (float)x+AllMaps[i]->getWidth();
 		UVMax[i].V = (float)y+AllMaps[i]->getHeight();
 
-		/* // Do not remove this is useful for debugging
-		{
-			NLMISC::COFile outTga;
-			string fmtName = ppArgs[1];
-			if (fmtName.rfind('.') == string::npos)
-				fmtName += ".tga";
-			if (outTga.open(fmtName))
-			{
-				GlobalTexture.writeTGA (outTga, 32);
-				outTga.close();
-			}
-		}
-		{
-			NLMISC::COFile outTga;
-			string fmtName = ppArgs[1];
-			if (fmtName.rfind('.') == string::npos)
-				fmtName += "_msk.tga";
-			else
-				fmtName = fmtName.substr(0,fmtName.rfind('.')) + "_msk.tga";
-			if (outTga.open(fmtName))
-			{
-				GlobalMask.writeTGA (outTga, 32);
-				outTga.close();
-			}
-		}*/
-
-
+#if 0
+		// Do not remove this is useful for debugging
+		writeFileDependingOnFilename(fmtName.substr(0, fmtName.rfind('.')) + "_txt.png", GlobalTexture);
+		writeFileDependingOnFilename(fmtName.substr(0, fmtName.rfind('.')) + "_msk.png", GlobalMask);
+#endif
 	}
 
 	// Convert UV from pixel to ratio
@@ -369,10 +351,10 @@ int main(int argc, char **argv)
 			for (sint i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				string fileName= CFile::getFilename(AllMapNames[i]);
-				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", fileName.c_str(), UVMin[i].U, UVMin[i].V, 
-												UVMax[i].U, UVMax[i].V);
+				string fileName = CFile::getFilename(AllMapNames[i]);
+				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", fileName.c_str(), UVMin[i].U, UVMin[i].V, UVMax[i].U, UVMax[i].V);
 			}
+
 			fclose (f);
 
 			outString(toString("Writing UV file %s", fmtName.c_str()));
@@ -387,7 +369,8 @@ int main(int argc, char **argv)
 		// Load existing uv file
 		CIFile iFile;
 		string filename = CPath::lookup (existingUVfilename, false);
-		if( (filename == "") || (!iFile.open(filename)) )
+
+		if( filename.empty() || !iFile.open(filename) )
 		{
 			outString(toString("ERROR: Unable to open %s", existingUVfilename.c_str()));
 			return -1;
@@ -440,7 +423,6 @@ int main(int argc, char **argv)
 					UVMax[i].U, UVMax[i].V);
 			}
 		}	
-//		fclose (iFile);
 		fclose (f);
 		outString(toString("Writing UV file: %s", fmtName.c_str()));
 	}
