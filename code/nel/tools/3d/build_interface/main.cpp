@@ -24,8 +24,7 @@
 #include "nel/misc/log.h"
 #include "nel/misc/path.h"
 #include "nel/misc/uv.h"
-
-//#include "windows.h"
+#include "nel/misc/cmd_args.h"
 
 #include <vector>
 #include <string>
@@ -191,57 +190,44 @@ void enlargeCanvas (NLMISC::CBitmap &b)
 // ***************************************************************************
 // main
 // ***************************************************************************
-int main(int nNbArg, char **ppArgs)
+int main(int argc, char **argv)
 {
-	//GetCurrentDirectory (MAX_PATH, sExeDir);
-	sExeDir = CPath::getCurrentPath();
+	CApplicationContext applicationContext;
 
-	if (nNbArg < 3)
-	{
-		outString ("ERROR : Wrong number of arguments\n");
-		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
-		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
-		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
-		return -1;
-	}
+	// Parse Command Line.
+	NLMISC::CCmdArgs args;
+
+	args.setDescription("Build a huge interface texture from several small elements to optimize video memory usage.");
+	args.addArg("s", "subset", "existing_uv_txt_name", "Build a subset of an existing interface definition while preserving the existing texture ids, to support freeing up VRAM by switching to the subset without rebuilding the entire interface.");
+	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
+	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
+
+	if (!args.parse(argc, argv)) return 1;
 	
 	// build as a subset of existing interface
 	bool buildSubset = false;
 	string existingUVfilename;
-	list<string> inputDirs;
-	for ( uint i=1; (sint)i<nNbArg; ++i )
+
+	if (args.haveArg("s"))
 	{
-		if ( ppArgs[i][0] == '-' )
-		{
-			switch ( ppArgs[i][1] )
-			{
-			case 'S':
-			case 's':
-				buildSubset = true;
-				existingUVfilename = string( ppArgs[i]+2 );
-				break;
-			default:
-				break;
-			}
-		}
-		else
-			inputDirs.push_back(ppArgs[i]);
+		buildSubset = true;
+		existingUVfilename = args.getArg("s").front();
 	}
 
-	string fmtName;
-	uint iNumDirs =  (uint)inputDirs.size(); 
-	if( iNumDirs )
-	{
-		fmtName = inputDirs.front();
-		inputDirs.pop_front();
-		--iNumDirs;
-	}
+	std::vector<std::string> inputDirs = args.getAdditionalArg("input_path");
+
+	string fmtName = args.getAdditionalArg("output_filename").front();
+
+	// append PNG extension if no one provided
+	if (fmtName.rfind('.') == string::npos) fmtName += ".png";
+
 	vector<string> AllMapNames;
-	list<string>::iterator it = inputDirs.begin();
-	list<string>::iterator itEnd = inputDirs.end();
+	vector<string>::iterator it = inputDirs.begin(), itEnd = inputDirs.end();
+
 	while( it != itEnd )
 	{
 		string sDir = *it++;
+
 		if( !CFile::isDirectory(sDir) )
 		{
 			outString (string("ERROR : directory ") + sDir + " does not exist\n");
@@ -427,14 +413,15 @@ int main(int nNbArg, char **ppArgs)
 		string filename = CPath::lookup (existingUVfilename, false);
 		if( (filename == "") || (!iFile.open(filename)) )
 		{
-			outString (string("ERROR : could not open file ") + existingUVfilename + "\n");
+			outString(toString("ERROR: Unable to open %s", existingUVfilename.c_str()));
 			return -1;
 		}
 		
 		// Write subset UV text file
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = fopen (fmtName.c_str(), "wt");
+		FILE *f = nlfopen(fmtName, "wt");
+
 		if (f == NULL)
 		{
 			outString (string("ERROR: Cannot write UV file : ") + fmtName + "\n");
