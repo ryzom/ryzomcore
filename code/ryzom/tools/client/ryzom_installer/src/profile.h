@@ -37,6 +37,9 @@ public:
 	bool desktopShortcut;
 	bool menuShortcut;
 
+	void loadFromSettings(const QSettings &settings);
+	void saveToSettings(QSettings &settings) const;
+
 	// helpers
 	QString getDirectory() const;
 	QString getClientFullPath() const;

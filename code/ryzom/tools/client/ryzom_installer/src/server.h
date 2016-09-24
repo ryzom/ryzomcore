@@ -31,6 +31,7 @@ public:
 	QString id;
 	QString name;
 	QString displayUrl;
+	QString filesListUrl;
 	QString dataDownloadUrl;
 	QString dataDownloadFilename;
 	qint64 dataCompressedSize;
@@ -42,6 +43,9 @@ public:
 	QString configurationFilename;
 	QString installerFilename;
 	QString comments;
+
+	void loadFromSettings(const QSettings &settings);
+	void saveToSettings(QSettings &settings) const;
 
 	// helpers
 	QString getDirectory() const;
