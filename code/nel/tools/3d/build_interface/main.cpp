@@ -263,9 +263,11 @@ int main(int argc, char **argv)
 			pBtmp = new NLMISC::CBitmap;
 			NLMISC::CIFile inFile;
 
-			if (!inFile.open(AllMapNames[i])) throw NLMISC::Exception("Unable to open " + AllMapNames[i]);
+			if (!inFile.open(AllMapNames[i])) throw NLMISC::Exception(toString("Unable to open %s", AllMapNames[i].c_str()));
 
 			uint8 colors = pBtmp->load(inFile);
+
+			if (!colors) throw NLMISC::Exception(toString("%s is not a bitmap", AllMapNames[i].c_str()));
 
 			if (pBtmp->getPixelFormat() != CBitmap::RGBA)
 			{
