@@ -16,12 +16,12 @@
     <message>
         <location filename="../src/downloader.cpp" line="192"/>
         <source>Unable to write file</source>
-        <translation>Kann Datei nicht schreiben</translation>
+        <translation>Datei kann nicht geschrieben werden</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="227"/>
         <source>Timeout</source>
-        <translation>Timeout</translation>
+        <translation>Zeitüberschreitung</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="264"/>
@@ -31,7 +31,7 @@
     <message>
         <location filename="../src/downloader.cpp" line="329"/>
         <source>Incorrect status code: %1</source>
-        <translation>Falscher Status Code: %1</translation>
+        <translation>Falscher Status-Code: %1</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="381"/>
@@ -107,12 +107,12 @@
     <message>
         <location filename="../src/mainwindow.cpp" line="266"/>
         <source>Program to install, download and manage Ryzom profiles.</source>
-        <translation>Programm um Ryzom-Profile zu installieren, herunterzuladen und zu verwalten.</translation>
+        <translation>Programm, um Ryzom-Profile zu installieren, herunterzuladen und zu verwalten.</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="268"/>
         <source>Author: %1</source>
-        <translation>Author: %1</translation>
+        <translation>Autor: %1</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="269"/>
@@ -164,7 +164,7 @@
         <location filename="../src/operationdialog.cpp" line="407"/>
         <source>Warning, this server doesn&apos;t support resume! If you stop download now, you won&apos;t be able to resume it later.
 Are you sure to abort download?</source>
-        <translation>Warnung, dieser Server unterstützt kein Fortsetzen! Wenn du jetzt den Download abbrichst. wirst du nicht in der Lage sein ihn später wieder fortzusetzen. Willst du den Download wirklich abbrechen?</translation>
+        <translation>Warnung: dieser Server unterstützt kein Fortsetzen! Wenn du jetzt den Download abbrichst, wirst du nicht in der Lage sein, ihn später wieder fortzusetzen. Willst du den Download wirklich abbrechen?</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="432"/>
@@ -208,7 +208,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="553"/>
         <source>Extract client files required by server %1</source>
-        <translation>Entpacke Client Dateien, die vom Server %1 benötigt werden</translation>
+        <translation>Entpacke Client-Dateien, die vom Server %1 benötigt werden</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="577"/>
@@ -245,7 +245,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="792"/>
         <source>An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?</source>
-        <translation>Eine ältere Version von Ryzom wurde auf diesem System gefunden, möchtest du sie deinstallieren um Festplattenspeicher zu sparen?</translation>
+        <translation>Eine ältere Version von Ryzom wurde auf diesem System gefunden, möchtest du sie deinstallieren, um Festplattenspeicher zu sparen?</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="827"/>
@@ -273,7 +273,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="1006"/>
         <source>Delete client files</source>
-        <translation>Lösche Client Dateien</translation>
+        <translation>Lösche Client-Dateien</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1037"/>
@@ -653,7 +653,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/profilesdialog.ui" line="79"/>
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="86"/>
