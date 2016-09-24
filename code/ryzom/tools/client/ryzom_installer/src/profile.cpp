@@ -25,6 +25,30 @@
 
 const CProfile NoProfile;
 
+void CProfile::loadFromSettings(const QSettings &settings)
+{
+	id = settings.value("id").toString();
+	name = settings.value("name").toString();
+	server = settings.value("server").toString();
+	executable = settings.value("executable").toString();
+	arguments = settings.value("arguments").toString();
+	comments = settings.value("comments").toString();
+	desktopShortcut = settings.value("desktop_shortcut").toBool();
+	menuShortcut = settings.value("menu_shortcut").toBool();
+}
+
+void CProfile::saveToSettings(QSettings &settings) const
+{
+	settings.setValue("id", id);
+	settings.setValue("name", name);
+	settings.setValue("server", server);
+	settings.setValue("executable", executable);
+	settings.setValue("arguments", arguments);
+	settings.setValue("comments", comments);
+	settings.setValue("desktop_shortcut", desktopShortcut);
+	settings.setValue("menu_shortcut", menuShortcut);
+}
+
 QString CProfile::getDirectory() const
 {
 	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;

@@ -109,34 +109,7 @@ bool CConfigFile::load(const QString &filename)
 			CServer &server = m_servers[i];
 
 			settings.beginGroup(QString("server_%1").arg(i));
-
-			server.id = settings.value("id").toString();
-			server.name = settings.value("name").toString();
-			server.displayUrl = settings.value("display_url").toString();
-			server.dataDownloadUrl = settings.value("data_download_url").toString();
-			server.dataDownloadFilename = settings.value("data_download_filename").toString();
-			server.dataCompressedSize = settings.value("data_compressed_size").toULongLong();
-			server.dataUncompressedSize = settings.value("data_uncompressed_size").toULongLong();
-			server.clientDownloadUrl = settings.value("client_download_url").toString();
-			server.clientDownloadFilename = settings.value("client_download_filename").toString();
-#if defined(Q_OS_WIN)
-			server.clientFilename = settings.value("client_filename_windows").toString();
-			server.clientFilenameOld = settings.value("client_filename_old_windows").toString();
-			server.configurationFilename = settings.value("configuration_filename_windows").toString();
-			server.installerFilename = settings.value("installer_filename_windows").toString();
-#elif defined(Q_OS_MAC)
-			server.clientFilename = settings.value("client_filename_osx").toString();
-			server.clientFilenameOld = settings.value("client_filename_old_osx").toString();
-			server.configurationFilename = settings.value("configuration_filename_osx").toString();
-			server.installerFilename = settings.value("installer_filename_osx").toString();
-#else
-			server.clientFilename = settings.value("client_filename_linux").toString();
-			server.clientFilenameOld = settings.value("client_filename_old_linux").toString();
-			server.configurationFilename = settings.value("configuration_filename_linux").toString();
-			server.installerFilename = settings.value("installer_filename_linux").toString();
-#endif
-			server.comments = settings.value("comments").toString();
-
+			server.loadFromSettings(settings);
 			settings.endGroup();
 		}
 	}
@@ -154,16 +127,7 @@ bool CConfigFile::load(const QString &filename)
 		CProfile &profile = m_profiles[i];
 
 		settings.beginGroup(QString("profile_%1").arg(i));
-
-		profile.id = settings.value("id").toString();
-		profile.name = settings.value("name").toString();
-		profile.server = settings.value("server").toString();
-		profile.executable = settings.value("executable").toString();
-		profile.arguments = settings.value("arguments").toString();
-		profile.comments = settings.value("comments").toString();
-		profile.desktopShortcut = settings.value("desktop_shortcut").toBool();
-		profile.menuShortcut = settings.value("menu_shortcut").toBool();
-
+		profile.loadFromSettings(settings);
 		settings.endGroup();
 	}
 
@@ -203,34 +167,7 @@ bool CConfigFile::save() const
 		const CServer &server = m_servers[i];
 
 		settings.beginGroup(QString("server_%1").arg(i));
-
-		settings.setValue("id", server.id);
-		settings.setValue("name", server.name);
-		settings.setValue("display_url", server.displayUrl);
-		settings.setValue("data_download_url", server.dataDownloadUrl);
-		settings.setValue("data_download_filename", server.dataDownloadFilename);
-		settings.setValue("data_compressed_size", server.dataCompressedSize);
-		settings.setValue("data_uncompressed_size", server.dataUncompressedSize);
-		settings.setValue("client_download_url", server.clientDownloadUrl);
-		settings.setValue("client_download_filename", server.clientDownloadFilename);
-#if defined(Q_OS_WIN)
-		settings.setValue("client_filename_windows", server.clientFilename);
-		settings.setValue("client_filename_old_windows", server.clientFilenameOld);
-		settings.setValue("configuration_filename_windows", server.configurationFilename);
-		settings.setValue("installer_filename_windows", server.installerFilename);
-#elif defined(Q_OS_MAC)
-		settings.setValue("client_filename_osx", server.clientFilename);
-		settings.setValue("client_filename_old_osx", server.clientFilenameOld);
-		settings.setValue("configuration_filename_osx", server.configurationFilename);
-		settings.setValue("installer_filename_osx", server.installerFilename);
-#else
-		settings.setValue("client_filename_linux", server.clientFilename);
-		settings.setValue("client_filename_old_linux", server.clientFilenameOld);
-		settings.setValue("configuration_filename_linux", server.configurationFilename);
-		settings.setValue("installer_filename_linux", server.installerFilename);
-#endif
-		settings.setValue("comments", server.comments);
-
+		server.saveToSettings(settings);
 		settings.endGroup();
 	}
 
@@ -244,16 +181,7 @@ bool CConfigFile::save() const
 		const CProfile &profile = m_profiles[i];
 
 		settings.beginGroup(QString("profile_%1").arg(i));
-
-		settings.setValue("id", profile.id);
-		settings.setValue("name", profile.name);
-		settings.setValue("server", profile.server);
-		settings.setValue("executable", profile.executable);
-		settings.setValue("arguments", profile.arguments);
-		settings.setValue("comments", profile.comments);
-		settings.setValue("desktop_shortcut", profile.desktopShortcut);
-		settings.setValue("menu_shortcut", profile.menuShortcut);
-
+		profile.saveToSettings(settings);
 		settings.endGroup();
 	}
 

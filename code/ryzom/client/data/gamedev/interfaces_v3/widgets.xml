@@ -1767,7 +1767,7 @@
             name="uiOpen"
             handler="item_text_display"
             params="ui:interface:edit_custom" />
-   <separator />
+    <separator />
     <!-- Move to an Animal -->
     <action id="move"
             name="uimMoveTo">
