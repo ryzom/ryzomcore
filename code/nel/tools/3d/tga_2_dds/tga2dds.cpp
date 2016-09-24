@@ -311,6 +311,9 @@ int main(int argc, char **argv)
 	if (args.haveArg("o"))
 		OptOutputFileName = args.getArg("o").front();
 
+	if (args.haveArg("m"))
+		OptMipMap = true;
+
 	if (args.haveArg("a"))
 	{
 		std::string strAlgo = args.getArg("a").front();

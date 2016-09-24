@@ -308,7 +308,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="1130"/>
         <source>Delete installer</source>
-        <translation>Lösche installer</translation>
+        <translation>Lösche Installer</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1173"/>
@@ -327,13 +327,13 @@ Are you sure to abort download?</source>
         <location filename="../src/profilesdialog.cpp" line="70"/>
         <source>You&apos;re going to delete a profile, files won&apos;t be deleted and you&apos;ll have to do that manually.
 Are you sure to delete this profile?</source>
-        <translation>Du bist dabei ein Profil zu löschen, es werden keine Dateien gelöscht, das musst du manuell tun.
+        <translation>Du bist dabei, ein Profil zu löschen. Es werden keine Dateien gelöscht, das musst du manuell tun.
 Bist du sicher, dass du dieses Profil löschen willst?</translation>
     </message>
     <message>
         <location filename="../src/profilesdialog.cpp" line="271"/>
         <source>Please choose Ryzom client executable to launch</source>
-        <translation>Bitte wähle die ausführbare Datei um den Ryzom Client zu starten</translation>
+        <translation>Bitte wähle die ausführbare Datei, um den Ryzom-Client zu starten</translation>
     </message>
     <message>
         <location filename="../src/profilesdialog.cpp" line="271"/>
@@ -395,7 +395,7 @@ Bist du sicher, dass du dieses Profil löschen willst?</translation>
     <message>
         <location filename="../ui/installdialog.ui" line="17"/>
         <source>Ryzom Installer</source>
-        <translation>Ryzom Installationsprogramm</translation>
+        <translation>Ryzom-Installationsprogramm</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="29"/>
@@ -404,11 +404,11 @@ Bist du sicher, dass du dieses Profil löschen willst?</translation>
 This program will allow you to download, install, configure and manage Ryzom on your computer.
 
 Just follow the  different steps and make your choice between the options presented.</source>
-        <translation>Willkommen zum Ryzom Installationsprogramm!
+        <translation>Willkommen zum Ryzom-Installationsprogramm!
 
-Dieses Programm wird es dir ermöglichen Ryzom auf deinen Computer herunterzuladen, zu installieren, zu konfigurieren und zu verwalten.
+Dieses Programm wird es dir ermöglichen, Ryzom auf deinen Computer herunterzuladen, zu installieren, zu konfigurieren und zu verwalten.
 
-Folge den verschiedenen Schritten und wähle aus den Optionen die dir angeboten werden.</translation>
+Folge den verschiedenen Schritten und wähle aus den Optionen, die dir angeboten werden.</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="64"/>
@@ -444,7 +444,7 @@ Folge den verschiedenen Schritten und wähle aus den Optionen die dir angeboten 
     <message>
         <location filename="../ui/installdialog.ui" line="147"/>
         <source>Files will be installed to (requires 10 GiB):</source>
-        <translation>Dateien werden installiert nach (benötigt 10GiB):</translation>
+        <translation>Dateien werden installiert nach (benötigt 10 GiB):</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="153"/>
@@ -454,7 +454,7 @@ Folge den verschiedenen Schritten und wähle aus den Optionen die dir angeboten 
     <message>
         <location filename="../ui/installdialog.ui" line="170"/>
         <source>Do you prefer to use a 64 or 32 bit client?</source>
-        <translation>Möchtest du einen 64 bit oder 32 bit Client verwenden?</translation>
+        <translation>Möchtest du einen 64 bit oder 32 bit-Client verwenden?</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="176"/>
@@ -472,7 +472,7 @@ Folge den verschiedenen Schritten und wähle aus den Optionen die dir angeboten 
     <message>
         <location filename="../ui/mainwindow.ui" line="26"/>
         <source>Ryzom Installer</source>
-        <translation>Ryzom Installationsprogramm</translation>
+        <translation>Ryzom-Installationsprogramm</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="48"/>
@@ -544,7 +544,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui/migratedialog.ui" line="17"/>
         <source>Ryzom Installer</source>
-        <translation>Ryzom Installationsprogramm</translation>
+        <translation>Ryzom-Installationsprogramm</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="26"/>
@@ -553,7 +553,7 @@ p, li { white-space: pre-wrap; }
 This program will migrate Ryzom version 2.1 to 3.0. Your files will be updated, cleaned and moved to a new location.
 
 Just press Continue button and follow the different steps until everything is done.</source>
-        <translation>Willkommen zum Ryzom Installationsprogramm!
+        <translation>Willkommen zum Ryzom-Installationsprogramm!
 
 Dieses Programm wird Ryzom 2.1 zu Ryzom 3.0 migrieren. Deine Dateien werden aktualisiert, gesäubert und an einen neuen Ort verschoben werden.
 
@@ -582,7 +582,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/migratedialog.ui" line="117"/>
         <source>Do you prefer to use a 64 or 32 bit client?</source>
-        <translation>Möchtest du einen 64 bit oder 32 bit Client verwenden?</translation>
+        <translation>Möchtest du einen 64 bit oder 32 bit-Client verwenden?</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="123"/>
@@ -610,17 +610,17 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/operationdialog.ui" line="35"/>
         <source>Ryzom Installer</source>
-        <translation>Ryzom Installationsprogramm</translation>
+        <translation>Ryzom-Installationsprogramm</translation>
     </message>
     <message>
         <location filename="../ui/operationdialog.ui" line="41"/>
         <source>Operation</source>
-        <translation>Vorgang</translation>
+        <translation>Verarbeitung</translation>
     </message>
     <message>
         <location filename="../ui/operationdialog.ui" line="48"/>
         <source>Operation progress</source>
-        <translation>Vorgangsfortschritt</translation>
+        <translation>Verarbeitungsfortschritt</translation>
     </message>
 </context>
 <context>
@@ -733,7 +733,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/profilesdialog.ui" line="217"/>
         <source>Start Menu</source>
-        <translation>Start Menü</translation>
+        <translation>Start-Menü</translation>
     </message>
 </context>
 <context>
@@ -783,7 +783,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
         <location filename="../src/filesextractor.cpp" line="459"/>
         <location filename="../src/filesextractor.cpp" line="467"/>
         <source>7zip decoder doesn&apos;t support this archive</source>
-        <translation>7zip decoder unterstützt dieses Archiv nicht</translation>
+        <translation>7zip-Decoder unterstützt dieses Archiv nicht</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="463"/>
@@ -879,7 +879,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/settingsdialog.ui" line="22"/>
         <source>Use 64 bit client</source>
-        <translation>Benutze 64 Client</translation>
+        <translation>Benutze 64 bit-Client</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="29"/>
@@ -900,7 +900,7 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/settingsdialog.ui" line="57"/>
         <source>Location of source Ryzom files:</source>
-        <translation>Ort der Ryzom Quelldateien:</translation>
+        <translation>Ort der Ryzom-Quelldateien:</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="64"/>
@@ -918,12 +918,12 @@ Drücke Weiter und folge den verschiedenen Schritten bis zum Ende.</translation>
     <message>
         <location filename="../ui/uninstalldialog.ui" line="17"/>
         <source>Ryzom Installer</source>
-        <translation>Ryzom Installationsprogramm</translation>
+        <translation>Ryzom-Installationsprogramm</translation>
     </message>
     <message>
         <location filename="../ui/uninstalldialog.ui" line="37"/>
         <source>You&apos;re about to uninstall some or all components of Ryzom. Please check each component you want to remove (Warning, it cannot be undone).</source>
-        <translation>Du bist dabei einige oder alle Komponenten von Ryzom zu deinstallieren. Bitte überprüfe jede Komponente, die du entfernen möchtest (Warnung: dies kann nicht rückgängig gemacht werden).</translation>
+        <translation>Du bist dabei, einige oder alle Komponenten von Ryzom zu deinstallieren. Bitte überprüfe jede Komponente, die du entfernen möchtest (Warnung: dies kann nicht rückgängig gemacht werden).</translation>
     </message>
     <message>
         <location filename="../ui/uninstalldialog.ui" line="66"/>
