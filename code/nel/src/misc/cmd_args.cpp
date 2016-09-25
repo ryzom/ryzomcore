@@ -418,7 +418,7 @@ void CCmdArgs::displayHelp()
 
 	if (!_Description.empty())
 	{
-		printf("\n%s", _Description.c_str());
+		printf("\n%s\n", _Description.c_str());
 	}
 
 	printf("\nWhere options are:\n");
