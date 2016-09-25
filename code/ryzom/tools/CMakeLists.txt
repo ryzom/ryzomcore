@@ -43,9 +43,6 @@ ADD_SUBDIRECTORY(server)
 #test_files
 #build_data
 
-# Folders with subfolders, TODO
-#client
-
 # folders not handled yet.
 #connection_stats
 #reynolds

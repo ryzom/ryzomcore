@@ -13,6 +13,8 @@ ADD_SUBDIRECTORY(client)
 IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   # Need servershare for build packed collision tool
   # Need aishare for build wmap tool
-  FIND_PACKAGE(MySQL REQUIRED)
-  ADD_SUBDIRECTORY(server)
+  FIND_PACKAGE(MySQL)
+  IF(MYSQL_FOUND)
+    ADD_SUBDIRECTORY(server)
+  ENDIF()
 ENDIF()
