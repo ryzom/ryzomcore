@@ -31,6 +31,10 @@
 #include <nel/misc/bit_mem_stream.h>
 #include <nel/misc/mem_stream.h>
 #include <nel/misc/sheet_id.h>
+#include <nel/misc/debug.h>
+#include <nel/misc/cmd_args.h>
+#include <nel/ligo/ligo_config.h>
+#include <nel/ligo/primitive_utils.h>
 
 #ifdef NL_OS_WINDOWS
 #define NOMINMAX

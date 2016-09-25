@@ -57,6 +57,17 @@ static uint32 Version = 1;	// Client Version.
 //---------------------------------------------------
 int main(int argc, char **argv)
 {
+	CApplicationContext applicationContext;
+
+	// Parse Command Line.
+	NLMISC::CCmdArgs args;
+
+	args.setDescription("Pack all sheets needed by client. All parameters must be defined in sheets_packer.cfg and there is no parameters from command-line.");
+
+	if (!args.parse(argc, argv)) return 1;
+
+	CFileDisplayer  *fd = NULL;
+
 	/////////////////////////////////
 	// Initialize the application. //
 	try
