@@ -283,7 +283,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="1064"/>
         <source>Add profiles</source>
-        <translation>Ajouter les profils</translation>
+        <translation>Ajouter des profils</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1065"/>
@@ -525,7 +525,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui/mainwindow.ui" line="143"/>
         <source>About...</source>
-        <translation>À propos...</translation>
+        <translation>À propos de...</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="148"/>
@@ -632,7 +632,7 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
     <message>
         <location filename="../ui/profilesdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation>Dialog</translation>
+        <translation>Dialogue</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="24"/>
@@ -787,7 +787,7 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
         <location filename="../src/filesextractor.cpp" line="459"/>
         <location filename="../src/filesextractor.cpp" line="467"/>
         <source>7zip decoder doesn&apos;t support this archive</source>
-        <translation>Le décodeur 7zip ne supporte pas cette archive</translation>
+        <translation>Le décodeur 7zip n&apos;est pas compatible avec cette archive</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="463"/>
@@ -878,7 +878,7 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
     <message>
         <location filename="../ui/settingsdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation>Dialog</translation>
+        <translation>Dialogue</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="22"/>
@@ -927,7 +927,7 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
     <message>
         <location filename="../ui/uninstalldialog.ui" line="37"/>
         <source>You&apos;re about to uninstall some or all components of Ryzom. Please check each component you want to remove (Warning, it cannot be undone).</source>
-        <translation>Vous êtes sur le point de désinstaller certains ou tous les composants de Ryzom. Veuillez cocher tous les composants que vous voulez supprimer (attention, ça ne peut être annulé).</translation>
+        <translation>Vous êtes sur le point de désinstaller certains ou tous les composants de Ryzom. Veuillez cocher tous les composants que vous voulez supprimer (Attention, ceci ne peut pas être annulé).</translation>
     </message>
     <message>
         <location filename="../ui/uninstalldialog.ui" line="66"/>
