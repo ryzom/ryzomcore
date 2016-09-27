@@ -3139,7 +3139,7 @@ uigcScreenRatioCustom	[Personnalisé]
 // INDEX 784
 uigcttScreenRatio	[L'@{6F6F}Aspect Ratio@{FFFF} de votre moniteur.\n
 	Changez si vous n'avez pas un moniteur standard 4/3.\n
-	NB: ne prenez pas en compte la résolution en pixels (même si vous êtes en fenêtré). Ryzom s'en occupe.]
+	NB : ne prenez pas en compte la résolution en pixels (même si vous êtes en fenêtré). Ryzom s'en occupe.]
 
 // HASH_VALUE 5050241C50D09420
 // INDEX 785
@@ -4832,7 +4832,7 @@ uittOutpostDefHourError	[@{6F6F}Horaire de défense@{FFFF}\n
 
 // HASH_VALUE A0B52418EF5A9327
 // INDEX 1195
-uittOutpostDefHourCannotEdit	[Vous ne pouvez modifier la période de défense que si:\n
+uittOutpostDefHourCannotEdit	[Vous ne pouvez modifier la période de défense que si :\n
 	- vous êtes un officier de la guilde qui défend l'avant-poste\n
 	- l'état de l'avant-poste est en @{6F6F}paix@{FFFF}, ou en @{6F6F}déclaration de guerre@{FFFF}\n
 	]
@@ -5016,14 +5016,14 @@ uittOutpostTSquadDuring	[Escouades qui apparaîtront une à une pendant le round
 uiOutpostSquadEditDef	[Vous défendez cet avant-poste.\n
 	Pendant la @{6F6F}période d'attaque@{FFFF}, des escouades vont sortir pour défendre cet avant-poste.\n
 	Dans cette fenêtre, vous pouvez voir les escouades sorties ainsi que changer les escouades qui sortiront.\n
-	Note: Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
+	Note : Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
 
 // HASH_VALUE C24385362A0BC5BD
 // INDEX 1237
 uiOutpostSquadEditAtt	[Vous attaquez cet avant-poste.\n
 	Pendant la @{6F6F}période de défense@{FFFF}, des escouades vont sortir pour contrer les défenseurs qui essaieront de récupérer cet avant-poste.\n
 	Dans cette fenêtre, vous pouvez voir les escouades sorties ainsi que changer les escouades qui sortiront.\n
-	Note: Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
+	Note : Seuls les officiers supérieurs et le chef de guilde peuvent éditer les escouades.]
 
 // HASH_VALUE 3F6F38EC4351C039
 // INDEX 1238
@@ -5058,7 +5058,7 @@ uiOutpostChangeCapital	[Modifier le capital]
 // HASH_VALUE 0B48E9436F6E2255
 // INDEX 1244
 uittPvpOutpostOutOfZone	[Vous participez à une guerre d'avant-poste.\n
-	Vous êtes sortis de la zone, vous serez encore flaggué PVP pour un moment. Si vous faites l'une des actions suivantes, le timer redémarrera:\n
+	Vous êtes sortis de la zone, vous serez encore flaggué PVP pour un moment. Si vous faites l'une des actions suivantes, le chronomètre redémarrera :\n
 	@{T4}- Soigner un allié.\n
 	@{T4}- Attaquer un ennemi.\n
 	@{T4}- Rentrer dans la zone de l'avant-poste.]
@@ -5532,7 +5532,7 @@ uiFocBarDisplay	[Affichage Concentration]
 
 // HASH_VALUE EB5042B44A367EE6
 // INDEX 1360
-uiXpBonusInfo	[Bonus d'expérience:    Lvl@{6F6F}%lvl@{FFFF}    x@{6F6F}%count@{FFFF}]
+uiXpBonusInfo	[Bonus d'expérience :    Lvl@{6F6F}%lvl@{FFFF}    x@{6F6F}%count@{FFFF}]
 
 // HASH_VALUE 2D79EC806D00D1D6
 // INDEX 1361
@@ -10062,7 +10062,7 @@ uihelpItemFocusMalus	[@{FFF9}Pénalité Concentration :@{T21}@{F44F}%val\n
 
 // HASH_VALUE F0AA55011CAF7807
 // INDEX 2434
-uihelpMagicProtectFormatHeader	[@{FFF9}@{HuittInfoProt}Protections:@{H}\n
+uihelpMagicProtectFormatHeader	[@{FFF9}@{HuittInfoProt}Protections :@{H}\n
 	]
 
 // HASH_VALUE D94F70517B78674A
@@ -10072,12 +10072,12 @@ uihelpMagicProtectFormat	[@{T4}@{FFF9}%t:@{T18}@{FFFF}+%v%\n
 
 // HASH_VALUE ED2AD1F20B1DE4B3
 // INDEX 2436
-uihelpMagicProtectMaxAbsorbFormat	[@{T4}@{FFF9}Max absorbés:@{T18}@{FFFF}+%v\n
+uihelpMagicProtectMaxAbsorbFormat	[@{T4}@{FFF9}Max absorbés :@{T18}@{FFFF}+%v\n
 	]
 
 // HASH_VALUE FCD4C98932A028D0
 // INDEX 2437
-uihelpMagicResistFormatHeader	[@{FFF9}@{HuittInfoResist}Résistances:@{H}\n
+uihelpMagicResistFormatHeader	[@{FFF9}@{HuittInfoResist}Résistances :@{H}\n
 	]
 
 // HASH_VALUE D94F7047B478674A
@@ -12034,11 +12034,11 @@ uiBotChatPrice	[Prix : ]
 
 // HASH_VALUE DEB2060E5EB9C0A1
 // INDEX 2844
-uiBotChatFactionType	[Faction: ]
+uiBotChatFactionType	[Faction : ]
 
 // HASH_VALUE C7D186455AC47621
 // INDEX 2845
-uiBotChatFactionPointPrice	[. Points: ]
+uiBotChatFactionPointPrice	[. Points : ]
 
 // HASH_VALUE 6698829CC29474AE
 // INDEX 2846
@@ -12046,7 +12046,7 @@ uiBotChatRetirePrice	[. Prix de rachat : ]
 
 // HASH_VALUE 681400B8208C54B4
 // INDEX 2847
-uiBotChatTime	[. Temps: ]
+uiBotChatTime	[. Temps : ]
 
 // HASH_VALUE 73DC6ACDC6DC351A
 // INDEX 2848
@@ -20886,11 +20886,11 @@ uiDesktopNotIn32	[Pour exécuter Ryzom en mode fenêtre, le bureau doit être co
 
 // HASH_VALUE 6694E8FCD8E528A4
 // INDEX 4969
-uiPhraseLevelFmt	[Niveau Requis: %d]
+uiPhraseLevelFmt	[Niveau Requis : %d]
 
 // HASH_VALUE A1A9B419D995D468
 // INDEX 4970
-uiPhraseSectionFmt	[Niveau Requis %min-%max:]
+uiPhraseSectionFmt	[Niveau Requis %min-%max :]
 
 // HASH_VALUE EA668B7899D6738D
 // INDEX 4971
@@ -22227,7 +22227,7 @@ uimwEncyclopedia	[Encyclopédie]
 
 // HASH_VALUE 10F0B412CEB0AC10
 // INDEX 5293
-uiEncyclopedia	[ENCYCLOPÉDIE]
+uiEncyclopedia	[Encyclopédie]
 
 // HASH_VALUE A79A55E425442C20
 // INDEX 5294
@@ -22252,31 +22252,31 @@ uiRite	[RITE : Rite donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F7E
 // INDEX 5299
-uiTask1	[Tâche du rituel 1: Tâche donnée par PNJ...]
+uiTask1	[Tâche du rituel 1 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F7F
 // INDEX 5300
-uiTask2	[Tâche du rituel 2: Tâche donnée par PNJ...]
+uiTask2	[Tâche du rituel 2 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F80
 // INDEX 5301
-uiTask3	[Tâche du rituel 3: Tâche donnée par PNJ...]
+uiTask3	[Tâche du rituel 3 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F81
 // INDEX 5302
-uiTask4	[Tâche du rituel 4: Tâche donnée par PNJ...]
+uiTask4	[Tâche du rituel 4 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F82
 // INDEX 5303
-uiTask5	[Tâche du rituel 5: Tâche donnée par PNJ...]
+uiTask5	[Tâche du rituel 5 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F83
 // INDEX 5304
-uiTask6	[Tâche du rituel 6: Tâche donnée par PNJ...]
+uiTask6	[Tâche du rituel 6 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 26EF7898DE522F84
 // INDEX 5305
-uiTask7	[Tâche du rituel 7: Tâche donnée par PNJ...]
+uiTask7	[Tâche du rituel 7 : Tâche donnée par PNJ...]
 
 // HASH_VALUE 245AACCC6BFBC0BE
 // INDEX 5306
@@ -22599,31 +22599,31 @@ uiProtect_MaxAbsorb	[Absorption max.]
 
 // HASH_VALUE 7259CAAC235FEE16
 // INDEX 5384
-uittProtect_Rot	[Absorption des dommages de pourriture: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Rot	[Absorption des dommages de pourriture : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE CB53C08014A3833C
 // INDEX 5385
-uittProtect_Acid	[Absorption des dommages d'acide: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Acid	[Absorption des dommages d'acide : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 0C53B980D4F39B4B
 // INDEX 5386
-uittProtect_Cold	[Absorption des dommages de froid: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Cold	[Absorption des dommages de froid : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE A7CA8DB65D5E0B80
 // INDEX 5387
-uittProtect_Fire	[Absorption des dommages de feu: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Fire	[Absorption des dommages de feu : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 6CC982F5CCA8356D
 // INDEX 5388
-uittProtect_Poison	[Absorption des dommages de poison: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Poison	[Absorption des dommages de poison : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE C10039287A9472FB
 // INDEX 5389
-uittProtect_Electricity	[Absorption des dommages d'électricité: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Electricity	[Absorption des dommages d'électricité : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE 56A951A06FA9108A
 // INDEX 5390
-uittProtect_Shockwave	[Absorption des dommages d'ondes de choc: @{6F6F}%v%@{FFFF} %max]
+uittProtect_Shockwave	[Absorption des dommages d'ondes de choc : @{6F6F}%v%@{FFFF} %max]
 
 // HASH_VALUE DB00AE336D4AC0AF
 // INDEX 5391
@@ -22648,8 +22648,8 @@ uittMagicResistTable	[Les sorts des créatures et des personnages peuvent être 
 	@{T0}Votre @{6F6F}score de résistance@{FFFF} est la somme :\n
 	@{T4}- du maximum entre vos niveaux de compétences en @{6F6F}combat, magie et forage/2@{FFFF}\n
 	@{T4}- des bonus de @{6F6F}résistance des bijoux@{FFFF} dans le domaine de magie concerné\n
-	@{T4}- d'un bonus dépendant de @{6F6F}votre race@{FFFF} (ex: +10 en Désert pour les Fyros)\n
-	@{T4}- d'un malus dépendant de @{6F6F}l'écosystème@{FFFF} dans lequel vous vous trouvez (ex: -10 en Désert si vous êtes dans le désert)]
+	@{T4}- d'un bonus dépendant de @{6F6F}votre race@{FFFF} (ex : +10 en Désert pour les Fyros)\n
+	@{T4}- d'un malus dépendant de @{6F6F}l'écosystème@{FFFF} dans lequel vous vous trouvez (ex : -10 en Désert si vous êtes dans le désert)]
 
 // HASH_VALUE CC25343C56C9D2F7
 // INDEX 5395
@@ -25490,13 +25490,13 @@ uiRingDescriptionScenarioTooltip	[Décrit le scénario que vous allez lancer. Ce
 
 // HASH_VALUE 84B0468E03833CAE
 // INDEX 6058
-uiRingWarningFreeTrial	[LIMITES DU COMPTE D'ESSAI:\n
+uiRingWarningFreeTrial	[LIMITES DU COMPTE D'ESSAI :\n
 	\n
 	Vous ne pouvez pas rejoindre ce scénario Ring avec un compte d'essai.\n
 	\n
 	Afin d'obtenir l'accès complet au Ring, il faut vous abonner à Ryzom.\n
 	\n
-	Pour vous abonner, visitez:\n
+	Pour vous abonner, visitez :\n
 	www.ryzom.com\n
 	]
 
@@ -26590,7 +26590,7 @@ uiDeathWarningAvoid	[Ne plus jamais afficher ce message.]
 
 // HASH_VALUE D963345468890479
 // INDEX 6315
-uiScreenShotPNG	[Capture d'écran PNG]
+uiScreenShotPNG	[Capture d'écran (PNG)]
 
 // HASH_VALUE C7272835423B4BEB
 // INDEX 6316
