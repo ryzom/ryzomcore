@@ -30,11 +30,16 @@
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="329"/>
+        <source>File is not available, please retry later (status code: %1)</source>
+        <translation>Le fichier est indisponible, veuillez réessayer ultérieurement (code de statut : %1) </translation>
+    </message>
+    <message>
+        <location filename="../src/downloader.cpp" line="336"/>
         <source>Incorrect status code: %1</source>
         <translation>Code de statut incorrect : %1</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="381"/>
+        <location filename="../src/downloader.cpp" line="388"/>
         <source>Network error: %1</source>
         <translation>Erreur réseau : %1</translation>
     </message>
@@ -57,42 +62,42 @@
         <translation>Les fichiers seront installés dans (%1 nécessaires) :</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="101"/>
+        <location filename="../src/installdialog.cpp" line="103"/>
         <source>Please choose directory where Ryzom is currently installed.</source>
         <translation>Veuillez choisir le répertoire où Ryzom est actuellement installé.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="107"/>
+        <location filename="../src/installdialog.cpp" line="109"/>
         <source>Unable to find Ryzom</source>
         <translation>Impossible de trouver Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="107"/>
+        <location filename="../src/installdialog.cpp" line="109"/>
         <source>Unable to find Ryzom in selected directory. Please choose another one or cancel.</source>
         <translation>Impossible de trouver Ryzom dans le répertoire sélectionné. Veuillez en choisir un autre ou annuler.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="120"/>
+        <location filename="../src/installdialog.cpp" line="122"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Veuillez choisir le répertoire où Ryzom sera installé</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="131"/>
+        <location filename="../src/installdialog.cpp" line="133"/>
         <source>Another location: %1</source>
         <translation>Autre emplacement : %1</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="131"/>
+        <location filename="../src/installdialog.cpp" line="133"/>
         <source>Undefined</source>
         <translation>Non défini</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="148"/>
+        <location filename="../src/installdialog.cpp" line="150"/>
         <source>Not enough free disk space</source>
         <translation>Espace disque insuffisant</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="148"/>
+        <location filename="../src/installdialog.cpp" line="150"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Vous ne disposez pas assez d&apos;espace libre sur ce disque, veuillez en libérer ou choisir un répertoire sur un autre disque.</translation>
     </message>
@@ -100,27 +105,27 @@
 <context>
     <name>CMainWindow</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="264"/>
+        <location filename="../src/mainwindow.cpp" line="268"/>
         <source>About %1</source>
         <translation>À propos de %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="266"/>
+        <location filename="../src/mainwindow.cpp" line="270"/>
         <source>Program to install, download and manage Ryzom profiles.</source>
         <translation>Programme pour installer, télécharger et gérer les profils de Ryzom.</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="268"/>
+        <location filename="../src/mainwindow.cpp" line="272"/>
         <source>Author: %1</source>
         <translation>Auteur : %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="269"/>
+        <location filename="../src/mainwindow.cpp" line="273"/>
         <source>Copyright: %1</source>
         <translation>Copyright : %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="270"/>
+        <location filename="../src/mainwindow.cpp" line="274"/>
         <source>Support: %1</source>
         <translation>Assistance : %1</translation>
     </message>
@@ -133,17 +138,17 @@
         <translation>Les fichiers seront installés dans (%1 nécessaires) :</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="94"/>
+        <location filename="../src/migratedialog.cpp" line="96"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Veuillez choisir le répertoire où installer Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="117"/>
+        <location filename="../src/migratedialog.cpp" line="119"/>
         <source>Not enough free disk space</source>
         <translation>Espace disque insuffisant</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="117"/>
+        <location filename="../src/migratedialog.cpp" line="119"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Vous ne disposez pas assez d&apos;espace libre sur ce disque, veuillez en libérer ou choisir un répertoire sur un autre disque.</translation>
     </message>
@@ -151,192 +156,246 @@
 <context>
     <name>COperationDialog</name>
     <message>
-        <location filename="../src/operationdialog.cpp" line="256"/>
         <source>Update profiles</source>
-        <translation>Mettre à jour les profils</translation>
+        <translation type="vanished">Mettre à jour les profils</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="407"/>
+        <location filename="../src/operationdialog.cpp" line="258"/>
+        <source>Updating profiles...</source>
+        <translation>Mise à jour des profils...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="409"/>
         <source>Confirmation</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="407"/>
+        <location filename="../src/operationdialog.cpp" line="409"/>
         <source>Warning, this server doesn&apos;t support resume! If you stop download now, you won&apos;t be able to resume it later.
 Are you sure to abort download?</source>
         <translation>Attention, ce serveur ne supporte pas la reprise de téléchargement ! Si vous arrêtez le téléchargement maintenant, vous ne pourrez pas le poursuivre ultérieurement.
 Êtes-vous sûr d&apos;interrompre le téléchargement ?</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="432"/>
+        <location filename="../src/operationdialog.cpp" line="434"/>
         <source>%p% (%v/%m KiB)</source>
         <translation>%p% (%v/%m Kio)</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="492"/>
+        <location filename="../src/operationdialog.cpp" line="494"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="506"/>
+        <location filename="../src/operationdialog.cpp" line="515"/>
+        <source>Downloading data required by server %1...</source>
+        <translation>Téléchargement des données nécessaires pour le serveur %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="526"/>
+        <source>Extracting data required by server %1...</source>
+        <translation>Extraction des données nécessaires pour le serveur %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="548"/>
+        <source>Downloading client required by server %1...</source>
+        <translation>Téléchargement du client nécessaire pour le serveur %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="559"/>
+        <source>Extracting client required by server %1...</source>
+        <translation>Extraction du client nécessaire pour le serveur %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="586"/>
+        <source>Copying data required by server %1...</source>
+        <translation>Copie des données nécessaires pour le serveur %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="620"/>
+        <source>Copying old profile to new location...</source>
+        <translation>Copie de l&apos;ancien profil vers un nouvel emplacement...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="655"/>
+        <source>Extracting client to new location...</source>
+        <translation>Extraction du client vers un nouvel emplacement...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="722"/>
+        <source>Copying installer to new location...</source>
+        <translation>Copie de l&apos;installateur vers un nouvel emplacement...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="841"/>
+        <source>Cleaning obsolete files...</source>
+        <translation>Nettoyage des fichiers obsolètes...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="856"/>
+        <source>Creating default profile...</source>
+        <translation>Création du profil par défaut...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="915"/>
+        <source>Creating shortcuts for profile %1...</source>
+        <translation>Création des raccourcis pour le profil %1...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="1019"/>
+        <source>Deleting client...</source>
+        <translation>Suppression du client...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="1076"/>
+        <source>Adding profiles...</source>
+        <translation>Ajout des profils...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="1096"/>
+        <source>Deleting profiles...</source>
+        <translation>Suppression des profils...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="1146"/>
+        <source>Deleting installer...</source>
+        <translation>Suppression de l&apos;installateur...</translation>
+    </message>
+    <message>
+        <location filename="../src/operationdialog.cpp" line="1188"/>
+        <source>Deleting downloaded files...</source>
+        <translation>Suppression des fichiers téléchargés...</translation>
+    </message>
+    <message>
         <source>Download data required by server %1</source>
-        <translation>Télécharge les données nécessaires pour le serveur %1</translation>
+        <translation type="vanished">Télécharge les données nécessaires pour le serveur %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="507"/>
-        <location filename="../src/operationdialog.cpp" line="542"/>
         <source>Downloading %1...</source>
-        <translation>Téléchargement de %1 en cours...</translation>
+        <translation type="vanished">Téléchargement de %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="518"/>
         <source>Extract data files required by server %1</source>
-        <translation>Extraire les fichiers de données nécessaires pour le serveur %1</translation>
+        <translation type="vanished">Extraire les fichiers de données nécessaires pour le serveur %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="519"/>
-        <location filename="../src/operationdialog.cpp" line="554"/>
-        <location filename="../src/operationdialog.cpp" line="646"/>
         <source>Extracting %1...</source>
-        <translation>Extration de %1 en cours...</translation>
+        <translation type="vanished">Exctration de %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="541"/>
         <source>Download client required by server %1</source>
-        <translation>Télécharger le client nécessaire pour le serveur %1</translation>
+        <translation type="vanished">Télécharger le client nécessaire pour le serveur %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="553"/>
         <source>Extract client files required by server %1</source>
-        <translation>Extraire les fichiers du client nécessaire pour le serveur %1</translation>
+        <translation type="vanished">Extraire les fichiers du client nécessaire pour le serveur %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="577"/>
         <source>Copy data files required by server %1</source>
-        <translation>Copier les fichiers de données nécessaires pour le serveur %1</translation>
+        <translation type="vanished">Copier les fichiers de données nécessaires pour le serveur %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="578"/>
-        <location filename="../src/operationdialog.cpp" line="613"/>
-        <location filename="../src/operationdialog.cpp" line="708"/>
         <source>Copying %1...</source>
-        <translation>Copie de %1 en cours...</translation>
+        <translation type="vanished">Copie de %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="612"/>
         <source>Copy old profile to new location</source>
-        <translation>Copier l&apos;ancien profil vers un nouvel emplacement</translation>
+        <translation type="vanished">Copier l&apos;ancien profil vers un nouvel emplacement</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="645"/>
         <source>Extract client to new location</source>
-        <translation>Extraire le client vers un nouvel emplacement</translation>
+        <translation type="vanished">Extraire le client vers un nouvel emplacement</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="707"/>
         <source>Copy installer to new location</source>
-        <translation>Copier l&apos;installateur vers un nouvel emplacement</translation>
+        <translation type="vanished">Copier l&apos;installateur vers un nouvel emplacement</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="792"/>
+        <location filename="../src/operationdialog.cpp" line="806"/>
         <source>Uninstall old client</source>
         <translation>Désinstaller l&apos;ancien client</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="792"/>
+        <location filename="../src/operationdialog.cpp" line="806"/>
         <source>An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?</source>
         <translation>Une ancienne version de Ryzom a été détectée sur ce système, souhaitez-vous la désinstaller afin de libérer de l&apos;espace disque ?</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="827"/>
         <source>Clean obsolete files</source>
-        <translation>Nettoyer les fichiers obsolètes</translation>
+        <translation type="vanished">Nettoyer les fichiers obsolètes</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="828"/>
-        <location filename="../src/operationdialog.cpp" line="1007"/>
-        <location filename="../src/operationdialog.cpp" line="1131"/>
-        <location filename="../src/operationdialog.cpp" line="1174"/>
         <source>Deleting %1...</source>
-        <translation>Suppression de %1 en cours...</translation>
+        <translation type="vanished">Suppression de %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="843"/>
         <source>Create default profile</source>
-        <translation>Créer le profil par défaut</translation>
+        <translation type="vanished">Créer le profil par défaut</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="902"/>
         <source>Create shortcuts for profile %1</source>
-        <translation>Créer les raccourcis pour le profil %1</translation>
+        <translation type="vanished">Créer les raccourcis pour le profil %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1006"/>
         <source>Delete client files</source>
-        <translation>Supprimer les fichiers du client</translation>
+        <translation type="vanished">Supprimer les fichiers du client</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1037"/>
+        <location filename="../src/operationdialog.cpp" line="1049"/>
         <source>Unable to delete files for client %1</source>
         <translation>Impossible de supprimer les fichiers du client %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1064"/>
         <source>Add profiles</source>
-        <translation>Ajouter des profils</translation>
+        <translation type="vanished">Ajouter des profils</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1065"/>
         <source>Adding profile %1...</source>
-        <translation>Ajout du profil %1 en cours...</translation>
+        <translation type="vanished">Ajout du profil %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1079"/>
         <source>Delete profiles</source>
-        <translation>Supprimer les profils</translation>
+        <translation type="vanished">Supprimer les profils</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1080"/>
         <source>Deleting profile %1...</source>
-        <translation>Suppression du profil %1 en cours...</translation>
+        <translation type="vanished">Suppression du profil %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1109"/>
+        <location filename="../src/operationdialog.cpp" line="1125"/>
         <source>Unable to delete files for profile %1</source>
         <translation>Impossible de supprimer les fichiers du profil %1</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1130"/>
         <source>Delete installer</source>
-        <translation>Supprimer l&apos;installateur</translation>
+        <translation type="vanished">Supprimer l&apos;installateur</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1173"/>
         <source>Delete downloaded files</source>
-        <translation>Supprimer les fichiers téléchargés</translation>
+        <translation type="vanished">Supprimer les fichiers téléchargés</translation>
     </message>
 </context>
 <context>
     <name>CProfilesDialog</name>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="70"/>
+        <location filename="../src/profilesdialog.cpp" line="71"/>
         <source>Confirmation</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="70"/>
+        <location filename="../src/profilesdialog.cpp" line="71"/>
         <source>You&apos;re going to delete a profile, files won&apos;t be deleted and you&apos;ll have to do that manually.
 Are you sure to delete this profile?</source>
         <translation>Vous êtes sur le point de supprimer un profil, les fichiers ne seront pas supprimés et vous devrez le faire manuellement.
 Êtes-vous sûr de supprimer ce profil ?</translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="271"/>
+        <location filename="../src/profilesdialog.cpp" line="257"/>
         <source>Please choose Ryzom client executable to launch</source>
         <translation>Veuillez choisir l&apos;exécutable du client de Ryzom à lancer</translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="271"/>
+        <location filename="../src/profilesdialog.cpp" line="257"/>
         <source>Executables (*.exe)</source>
         <translation>Exécutables (*.exe)</translation>
     </message>
@@ -743,29 +802,39 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
 <context>
     <name>QApplication</name>
     <message>
-        <location filename="../src/main.cpp" line="124"/>
+        <location filename="../src/main.cpp" line="151"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="124"/>
+        <location filename="../src/main.cpp" line="151"/>
         <source>Unable to find ryzom_installer.ini</source>
         <translation>Impossible de trouver ryzom_installer.ini</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="151"/>
+        <location filename="../src/main.cpp" line="119"/>
         <source>Instalation and launcher tool for Ryzom</source>
         <translation>Outil d&apos;installation et lanceur pour Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="156"/>
+        <location filename="../src/main.cpp" line="122"/>
         <source>Uninstall</source>
         <translation>Désinstaller</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="159"/>
+        <location filename="../src/main.cpp" line="125"/>
         <source>Silent mode</source>
         <translation>Mode silencieux</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="128"/>
+        <source>Version</source>
+        <translation>Version</translation>
+    </message>
+    <message>
+        <location filename="../src/main.cpp" line="131"/>
+        <source>Install itself</source>
+        <translation>S&apos;auto-installer</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="300"/>
@@ -843,32 +912,32 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/utils.cpp" line="26"/>
+        <location filename="../src/utils.cpp" line="30"/>
         <source>B</source>
         <translation>o</translation>
     </message>
     <message>
-        <location filename="../src/utils.cpp" line="27"/>
+        <location filename="../src/utils.cpp" line="31"/>
         <source>KiB</source>
         <translation>Kio</translation>
     </message>
     <message>
-        <location filename="../src/utils.cpp" line="28"/>
+        <location filename="../src/utils.cpp" line="32"/>
         <source>MiB</source>
         <translation>Mio</translation>
     </message>
     <message>
-        <location filename="../src/utils.cpp" line="29"/>
+        <location filename="../src/utils.cpp" line="33"/>
         <source>GiB</source>
         <translation>Gio</translation>
     </message>
     <message>
-        <location filename="../src/utils.cpp" line="30"/>
+        <location filename="../src/utils.cpp" line="34"/>
         <source>TiB</source>
         <translation>Tio</translation>
     </message>
     <message>
-        <location filename="../src/utils.cpp" line="31"/>
+        <location filename="../src/utils.cpp" line="35"/>
         <source>PiB</source>
         <translation>Pio</translation>
     </message>
