@@ -639,20 +639,28 @@ bool CConfigFile::foundTemporaryFiles(const QString &directory) const
 	QStringList filter;
 	filter << "*.string_cache";
 
+	// certificate should be in gamedev.bnp now
+	filter << "*.pem";
+
+	// only .ref files should be there
+	filter << "exedll*.bnp";
+
 	if (dir.exists("packedsheets.bnp"))
 	{
 		filter << "*.packed_sheets";
 		filter << "*.packed";
-		filter << "*.pem";
 	}
 
 	// temporary files
 	if (!dir.entryList(filter, QDir::Files).isEmpty()) return true;
 
-	// fonts directory is not needed anymore
-	if (dir.exists("fonts.bnp") && !dir.cd("fonts")) return true;
+	// temporary directories
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-	return false;
+	// fonts directory is not needed anymore if fonts.bnp exists
+	if (!dir.exists("fonts.bnp")) dirs.removeAll("fonts");
+
+	return !dirs.isEmpty();
 }
 
 bool CConfigFile::shouldCreateDesktopShortcut() const
