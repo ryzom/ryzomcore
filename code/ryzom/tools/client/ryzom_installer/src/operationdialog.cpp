@@ -255,7 +255,7 @@ void COperationDialog::updateAddRemoveComponents()
 
 void COperationDialog::processUpdateProfilesNextStep()
 {
-	m_currentOperation = tr("Update profiles");
+	m_currentOperation = tr("Updating profiles...");
 
 	// for "update profiles" operations, we set installer to false when components are updated,
 	// since we're not using this variable
@@ -471,7 +471,7 @@ void COperationDialog::onProgressStop()
 
 void COperationDialog::onProgressProgress(qint64 current, const QString &filename)
 {
-	operationProgressLabel->setText(m_currentOperationProgressFormat.arg(filename));
+	operationProgressLabel->setText(filename);
 
 	operationProgressBar->setValue(current / 1024);
 
@@ -512,8 +512,7 @@ void COperationDialog::downloadData()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = tr("Download data required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = tr("Downloading %1...");
+	m_currentOperation = tr("Downloading data required by server %1...").arg(server.name);
 
 	m_downloader->prepareFile(config->expandVariables(server.dataDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.dataDownloadFilename) + ".part");
 }
@@ -524,8 +523,7 @@ void COperationDialog::extractDownloadedData()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = tr("Extract data files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = tr("Extracting %1...");
+	m_currentOperation = tr("Extracting data required by server %1...").arg(server.name);
 
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.dataDownloadFilename);
@@ -547,8 +545,7 @@ void COperationDialog::downloadClient()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = tr("Download client required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = tr("Downloading %1...");
+	m_currentOperation = tr("Downloading client required by server %1...").arg(server.name);
 
 	m_downloader->prepareFile(config->expandVariables(server.clientDownloadUrl), config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename) + ".part");
 }
@@ -559,8 +556,7 @@ void COperationDialog::extractDownloadedClient()
 
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = tr("Extract client files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = tr("Extracting %1...");
+	m_currentOperation = tr("Extracting client required by server %1...").arg(server.name);
 
 	QString destinationDirectory = server.getDirectory();
 
@@ -587,8 +583,7 @@ void COperationDialog::copyDataFiles()
 	// default server
 	const CServer &server = config->getServer(m_currentServerId);
 
-	m_currentOperation = tr("Copy data files required by server %1").arg(server.name);
-	m_currentOperationProgressFormat = tr("Copying %1...");
+	m_currentOperation = tr("Copying data required by server %1...").arg(server.name);
 
 	QStringList serverFiles;
 	serverFiles << "cfg";
@@ -622,8 +617,7 @@ void COperationDialog::copyProfileFiles()
 	// default profile
 	const CProfile &profile = config->getProfile();
 
-	m_currentOperation = tr("Copy old profile to new location");
-	m_currentOperationProgressFormat = tr("Copying %1...");
+	m_currentOperation = tr("Copying old profile to new location...");
 
 	QStringList profileFiles;
 	profileFiles << "cache";
@@ -658,8 +652,7 @@ void COperationDialog::extractBnpClient()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = tr("Extract client to new location");
-	m_currentOperationProgressFormat = tr("Extracting %1...");
+	m_currentOperation = tr("Extracting client to new location...");
 
 	QString destinationDirectory = server.getDirectory();
 
@@ -726,8 +719,7 @@ void COperationDialog::copyInstaller()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = tr("Copy installer to new location");
-	m_currentOperationProgressFormat = tr("Copying %1...");
+	m_currentOperation = tr("Copying installer to new location...");
 
 	QString destinationDirectory = config->getInstallationDirectory();
 
@@ -846,8 +838,7 @@ void COperationDialog::cleanFiles()
 	// default server
 	const CServer &server = config->getServer();
 
-	m_currentOperation = tr("Clean obsolete files");
-	m_currentOperationProgressFormat = tr("Deleting %1...");
+	m_currentOperation = tr("Cleaning obsolete files...");
 
 	CFilesCleaner cleaner(this);
 	cleaner.setDirectory(server.getDirectory());
@@ -862,7 +853,7 @@ bool COperationDialog::createDefaultProfile()
 
 	CServer server = config->getServer();
 
-	m_currentOperation = tr("Create default profile");
+	m_currentOperation = tr("Creating default profile...");
 
 	CProfile profile;
 
@@ -921,7 +912,7 @@ bool COperationDialog::createProfileShortcuts(const QString &profileId)
 
 	const CProfile &profile = config->getProfile(profileId);
 
-	m_currentOperation = tr("Create shortcuts for profile %1").arg(profile.id);
+	m_currentOperation = tr("Creating shortcuts for profile %1...").arg(profile.id);
 
 	profile.createShortcuts();
 
@@ -1025,8 +1016,7 @@ bool COperationDialog::deleteAddRemoveEntry()
 
 void COperationDialog::deleteComponentsServers()
 {
-	m_currentOperation = tr("Delete client files");
-	m_currentOperationProgressFormat = tr("Deleting %1...");
+	m_currentOperation = tr("Deleting client...");
 
 	emit prepare();
 	emit init(0, m_removeComponents.servers.size());
@@ -1083,8 +1073,7 @@ void COperationDialog::deleteComponentsServers()
 
 void COperationDialog::addComponentsProfiles()
 {
-	m_currentOperation = tr("Add profiles");
-	m_currentOperationProgressFormat = tr("Adding profile %1...");
+	m_currentOperation = tr("Adding profiles...");
 
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -1104,8 +1093,7 @@ void COperationDialog::addComponentsProfiles()
 
 void COperationDialog::deleteComponentsProfiles()
 {
-	m_currentOperation = tr("Delete profiles");
-	m_currentOperationProgressFormat = tr("Deleting profile %1...");
+	m_currentOperation = tr("Deleting profiles...");
 
 	emit prepare();
 	emit init(0, m_removeComponents.servers.size());
@@ -1155,8 +1143,7 @@ void COperationDialog::deleteComponentsProfiles()
 
 void COperationDialog::deleteComponentsInstaller()
 {
-	m_currentOperation = tr("Delete installer");
-	m_currentOperationProgressFormat = tr("Deleting %1...");
+	m_currentOperation = tr("Deleting installer...");
 
 	CConfigFile *config = CConfigFile::getInstance();
 
@@ -1198,8 +1185,7 @@ void COperationDialog::deleteComponentsInstaller()
 
 void COperationDialog::deleteComponentsDownloadedFiles()
 {
-	m_currentOperation = tr("Delete downloaded files");
-	m_currentOperationProgressFormat = tr("Deleting %1...");
+	m_currentOperation = tr("Deleting downloaded files...");
 
 	CConfigFile *config = CConfigFile::getInstance();
 

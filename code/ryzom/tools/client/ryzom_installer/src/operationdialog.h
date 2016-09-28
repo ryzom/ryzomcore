@@ -142,7 +142,6 @@ protected:
 	CDownloader *m_downloader;
 
 	QString m_currentOperation;
-	QString m_currentOperationProgressFormat;
 
 	QMutex m_abortingMutex;
 	bool m_aborting;
