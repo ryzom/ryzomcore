@@ -6,12 +6,12 @@
     <message>
         <location filename="../src/downloader.cpp" line="156"/>
         <source>File is larger (%1B) than expected (%2B)</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер файла больше (%1Б) чем ожидалось (%2Б)</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="186"/>
         <source>You only have %1 bytes left on the device, but %2 bytes are needed.</source>
-        <translation type="unfinished"></translation>
+        <translation>На диске осталось всего %1 байт, в то время как требуется %2 байт.</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="192"/>
@@ -31,12 +31,12 @@
     <message>
         <location filename="../src/downloader.cpp" line="329"/>
         <source>File is not available, please retry later (status code: %1)</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл недоступен, пожалуйста, попробуйте позднее (код состояния: %1)</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="336"/>
         <source>Incorrect status code: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Некорректный код состояния: %1</translation>
     </message>
     <message>
         <location filename="../src/downloader.cpp" line="388"/>
@@ -49,12 +49,12 @@
     <message>
         <location filename="../src/installdialog.cpp" line="45"/>
         <source>Old installation: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Предыдущая установка: %1</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="70"/>
         <source>Internet (%1 to download)</source>
-        <translation type="unfinished"></translation>
+        <translation>Интернет (%1 для загрузки)</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="71"/>
@@ -84,12 +84,12 @@
     <message>
         <location filename="../src/installdialog.cpp" line="133"/>
         <source>Another location: %1</source>
-        <translation type="unfinished">Другое местоположение: %1</translation>
+        <translation>Другое местоположение: %1</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="133"/>
         <source>Undefined</source>
-        <translation type="unfinished">Не определено</translation>
+        <translation>Не определено</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="150"/>
@@ -99,7 +99,7 @@
     <message>
         <location filename="../src/installdialog.cpp" line="150"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
-        <translation type="unfinished"></translation>
+        <translation>Недостаточно свободного места на выбранном диске, пожалуйста освободите место на диске или выберите директорию на другом диске.</translation>
     </message>
 </context>
 <context>
@@ -112,7 +112,7 @@
     <message>
         <location filename="../src/mainwindow.cpp" line="270"/>
         <source>Program to install, download and manage Ryzom profiles.</source>
-        <translation type="unfinished">Программа для установки, загрузки и управления профилями Ryzom.</translation>
+        <translation>Программа для установки, загрузки и управления профилями Ryzom.</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="272"/>
@@ -150,7 +150,7 @@
     <message>
         <location filename="../src/migratedialog.cpp" line="119"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
-        <translation type="unfinished"></translation>
+        <translation>Недостаточно свободного места на выбранном диске, пожалуйста освободите место на диске или выберите директорию на другом диске.</translation>
     </message>
 </context>
 <context>
@@ -158,7 +158,7 @@
     <message>
         <location filename="../src/operationdialog.cpp" line="258"/>
         <source>Updating profiles...</source>
-        <translation type="unfinished"></translation>
+        <translation>Обновление профилей...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="409"/>
@@ -184,82 +184,82 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="515"/>
         <source>Downloading data required by server %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузка данных, необходимых серверу %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="526"/>
         <source>Extracting data required by server %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечение данных, необходимых серверу %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="548"/>
         <source>Downloading client required by server %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Загрузка клиента, необходимого серверу %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="559"/>
         <source>Extracting client required by server %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечение файлов клиента, необходимых серверу %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="586"/>
         <source>Copying data required by server %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование данных, необходимых серверу %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="620"/>
         <source>Copying old profile to new location...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование предыдущего профиля в новое местоположение...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="655"/>
         <source>Extracting client to new location...</source>
-        <translation type="unfinished"></translation>
+        <translation>Извлечение файлов клиента в новое местоположение...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="722"/>
         <source>Copying installer to new location...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование инсталлятора в новое местоположение...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="841"/>
         <source>Cleaning obsolete files...</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление устаревших файлов...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="856"/>
         <source>Creating default profile...</source>
-        <translation type="unfinished"></translation>
+        <translation>Создание профиля по умолчанию...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="915"/>
         <source>Creating shortcuts for profile %1...</source>
-        <translation type="unfinished"></translation>
+        <translation>Создание ярлыков для профиля %1...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1019"/>
         <source>Deleting client...</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление клиента...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1076"/>
         <source>Adding profiles...</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавление профилей...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1096"/>
         <source>Deleting profiles...</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление профилей...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1146"/>
         <source>Deleting installer...</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление инсталлятора...</translation>
     </message>
     <message>
         <location filename="../src/operationdialog.cpp" line="1188"/>
         <source>Deleting downloaded files...</source>
-        <translation type="unfinished"></translation>
+        <translation>Удаление загруженных файлов...</translation>
     </message>
     <message>
         <source>Download data required by server %1</source>
@@ -301,7 +301,7 @@ Are you sure to abort download?</source>
     <message>
         <location filename="../src/operationdialog.cpp" line="806"/>
         <source>An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?</source>
-        <translation type="unfinished"></translation>
+        <translation>В системе обнаружена предыдущая версия Ryzom, вы хотите удалить ее чтобы освободить место на диске?</translation>
     </message>
     <message>
         <source>Deleting %1...</source>
@@ -365,7 +365,7 @@ Are you sure to abort download?</source>
         <location filename="../src/profilesdialog.cpp" line="71"/>
         <source>You&apos;re going to delete a profile, files won&apos;t be deleted and you&apos;ll have to do that manually.
 Are you sure to delete this profile?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы собираетесь удалить профиль, файлы профиля не будут удалены автоматически и их необходимо удалить вручную. Вы уверены, что хотите удалить этот профиль?</translation>
     </message>
     <message>
         <location filename="../src/profilesdialog.cpp" line="257"/>
@@ -404,7 +404,7 @@ Are you sure to delete this profile?</source>
     <message>
         <location filename="../src/uninstalldialog.cpp" line="43"/>
         <source>Size</source>
-        <translation>Hfpvth</translation>
+        <translation>Размер</translation>
     </message>
     <message>
         <location filename="../src/uninstalldialog.cpp" line="58"/>
@@ -441,7 +441,11 @@ Are you sure to delete this profile?</source>
 This program will allow you to download, install, configure and manage Ryzom on your computer.
 
 Just follow the  different steps and make your choice between the options presented.</source>
-        <translation type="unfinished"></translation>
+        <translation>Добро пожаловать в инсталлятор Ryzom!
+
+Эта программа позволит загрузить, установить и настроить Ryzom на вашем компьютере.
+
+Нажмите кнопку &quot;Продолжить&quot; и выберите необходимые вам действия.</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="64"/>
@@ -456,23 +460,23 @@ Just follow the  different steps and make your choice between the options presen
     <message>
         <location filename="../ui/installdialog.ui" line="103"/>
         <source>Old installation: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Предыдущая установка: %1</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="118"/>
         <source>Another location: %1</source>
-        <translation type="unfinished">Другое местоположение: %1</translation>
+        <translation>Другое местоположение: %1</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="128"/>
         <location filename="../ui/installdialog.ui" line="160"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть...</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="137"/>
         <source>Internet (%1 to download)</source>
-        <translation type="unfinished"></translation>
+        <translation>Интернет (%1 для загрузки)</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="147"/>
@@ -523,7 +527,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <location filename="../ui/mainwindow.ui" line="83"/>
         <source>Atys</source>
-        <translation type="unfinished"></translation>
+        <translation>Atys</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="91"/>
@@ -586,17 +590,21 @@ p, li { white-space: pre-wrap; }
 This program will migrate Ryzom version 2.1 to 3.0. Your files will be updated, cleaned and moved to a new location.
 
 Just press Continue button and follow the different steps until everything is done.</source>
-        <translation type="unfinished"></translation>
+        <translation>Добро пожаловать в инсталлятор Ryzom!
+
+Эта программа осуществит миграцию Ryzom с версии 2.1 на версию 3.0. Устаревшие файлы будут удалены, остальные файлы будут обновлены и перемещены в новое местоположение.
+
+Нажмите кнопку &quot;Продолжить&quot; и следуйте инструкциям инсталлятора до завершения его работы.</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="61"/>
         <source>Show advanced parameters (expert)</source>
-        <translation type="unfinished">Показать расширенные параметры</translation>
+        <translation>Показать расширенные параметры</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="94"/>
         <source>Files will be installed to (requires 10 GiB):</source>
-        <translation type="unfinished">Файлы будут установлены в (требуется 10 Гб):</translation>
+        <translation>Файлы будут установлены в (требуется 10 ГиБ):</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="100"/>
@@ -606,7 +614,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/migratedialog.ui" line="107"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть...</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="117"/>
@@ -644,12 +652,12 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/operationdialog.ui" line="41"/>
         <source>Operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Действие</translation>
     </message>
     <message>
         <location filename="../ui/operationdialog.ui" line="48"/>
         <source>Operation progress</source>
-        <translation type="unfinished"></translation>
+        <translation>Ход выполнения действия</translation>
     </message>
 </context>
 <context>
@@ -657,7 +665,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/profilesdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="24"/>
@@ -697,7 +705,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/profilesdialog.ui" line="104"/>
         <source>Atys</source>
-        <translation type="unfinished"></translation>
+        <translation>Atys</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="109"/>
@@ -717,17 +725,17 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/profilesdialog.ui" line="133"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>По умолчанию</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="140"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть...</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="149"/>
         <source>Arguments:</source>
-        <translation type="unfinished"></translation>
+        <translation>Аргументы:</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="159"/>
@@ -780,7 +788,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/main.cpp" line="119"/>
         <source>Instalation and launcher tool for Ryzom</source>
-        <translation type="unfinished"></translation>
+        <translation>Программа установки и запуска Ryzom</translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="122"/>
@@ -795,12 +803,12 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/main.cpp" line="128"/>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Версия</translation>
     </message>
     <message>
         <location filename="../src/main.cpp" line="131"/>
         <source>Install itself</source>
-        <translation type="unfinished"></translation>
+        <translation>Установится</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="300"/>
@@ -811,12 +819,12 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/filesextractor.cpp" line="415"/>
         <source>Unable to open output file</source>
-        <translation type="unfinished">Невозможно открыть выходной файл</translation>
+        <translation>Невозможно открыть выходной файл</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="424"/>
         <source>Unable to write output file</source>
-        <translation type="unfinished">Невозможно записать выходной файл</translation>
+        <translation>Невозможно записать выходной файл</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="459"/>
@@ -827,7 +835,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/filesextractor.cpp" line="463"/>
         <source>Unable to allocate memory</source>
-        <translation type="unfinished">Невозможно выделить память</translation>
+        <translation>Невозможно выделить память</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="475"/>
@@ -842,7 +850,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/filesextractor.cpp" line="508"/>
         <source>Unable to set permissions of %1</source>
-        <translation type="unfinished">Невозможно назначить права %1</translation>
+        <translation>Невозможно назначить права объекта %1</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="617"/>
@@ -862,7 +870,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/filesextractor.cpp" line="629"/>
         <source>failed (%1)</source>
-        <translation type="unfinished">неуспешно (%1)</translation>
+        <translation>неуспешно (%1)</translation>
     </message>
     <message>
         <location filename="../src/filesextractor.cpp" line="632"/>
@@ -885,27 +893,27 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/utils.cpp" line="31"/>
         <source>KiB</source>
-        <translation>Кб</translation>
+        <translation>КиБ</translation>
     </message>
     <message>
         <location filename="../src/utils.cpp" line="32"/>
         <source>MiB</source>
-        <translation>Мб</translation>
+        <translation>МиБ</translation>
     </message>
     <message>
         <location filename="../src/utils.cpp" line="33"/>
         <source>GiB</source>
-        <translation>Гб</translation>
+        <translation>ГиБ</translation>
     </message>
     <message>
         <location filename="../src/utils.cpp" line="34"/>
         <source>TiB</source>
-        <translation>Тб</translation>
+        <translation>ТиБ</translation>
     </message>
     <message>
         <location filename="../src/utils.cpp" line="35"/>
         <source>PiB</source>
-        <translation>Пб</translation>
+        <translation>ПиБ</translation>
     </message>
 </context>
 <context>
@@ -913,7 +921,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/settingsdialog.ui" line="14"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="22"/>
@@ -923,7 +931,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/settingsdialog.ui" line="29"/>
         <source>Base location of Ryzom files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Базовое местоположение файлов Ryzom:</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="36"/>
@@ -934,12 +942,12 @@ Just press Continue button and follow the different steps until everything is do
         <location filename="../ui/settingsdialog.ui" line="43"/>
         <location filename="../ui/settingsdialog.ui" line="50"/>
         <source>Browse...</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть...</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="57"/>
         <source>Location of source Ryzom files:</source>
-        <translation type="unfinished"></translation>
+        <translation>Местоположение исходных файлов Ryzom:</translation>
     </message>
     <message>
         <location filename="../ui/settingsdialog.ui" line="64"/>
@@ -962,7 +970,7 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../ui/uninstalldialog.ui" line="37"/>
         <source>You&apos;re about to uninstall some or all components of Ryzom. Please check each component you want to remove (Warning, it cannot be undone).</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы собираетесь удалить некоторые или все компоненты Ryzom. Пожалуйста, отметьте каждый компонент, который вы хотите удалить (Внимание, удаление необратимо).</translation>
     </message>
     <message>
         <location filename="../ui/uninstalldialog.ui" line="66"/>
