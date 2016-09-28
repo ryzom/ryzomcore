@@ -91,7 +91,7 @@ void CDownloader::startTimer()
 {
 	stopTimer();
 
-	m_timer->setInterval(5000);
+	m_timer->setInterval(30000);
 	m_timer->setSingleShot(true);
 	m_timer->start();
 }

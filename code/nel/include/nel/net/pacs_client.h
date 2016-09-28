@@ -48,7 +48,7 @@ public:
 	/// Constructor
 	CPacsClient()
 	{
-		// No connexion
+		// No connection
 		_Server=NULL;
 	}
 
@@ -567,7 +567,7 @@ static TCallbackItem PacsCallbackArray[] =
 
 inline 	bool CPacsClient::connect ()
 {
-	// Create a connexion
+	// Create a connection
 	_Server = new CCallbackClient;
 
 	// Look up for PACS service

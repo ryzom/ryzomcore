@@ -238,6 +238,9 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 	file.write(data.toUtf8());
 	file.close();
 
+	// set executable flags to .desktop
+	QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+
 	return true;
 }
 

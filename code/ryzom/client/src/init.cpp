@@ -1213,6 +1213,12 @@ void prelogInit()
 
 		if (bitmaps.empty())
 		{
+			// check if an icon is present in same directory as executable
+			addRyzomIconBitmap(Args.getProgramPath(), bitmaps);
+		}
+
+		if (bitmaps.empty())
+		{
 			// check if an icon is present in current directory
 			addRyzomIconBitmap(".", bitmaps);
 		}

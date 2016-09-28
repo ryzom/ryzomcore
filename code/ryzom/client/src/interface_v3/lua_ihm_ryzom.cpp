@@ -390,7 +390,7 @@ void CLuaIHMRyzom::RegisterRyzomFunctions( NLGUI::CLuaState &ls )
 	mt.setValue("__newindex", luaClientCfgNewIndex);
 	globals.setNil("__cfmt"); // remove temp metatable
 
-	ls.registerFunc( "getUI", getUI );
+	ls.registerFunc("getUI", getUI);
 	ls.registerFunc("validMessageBox",    validMessageBox);
 	ls.registerFunc("getUICaller",    getUICaller);
 	ls.registerFunc("getUI",    getUI);

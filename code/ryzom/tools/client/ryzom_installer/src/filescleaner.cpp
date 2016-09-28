@@ -60,12 +60,21 @@ bool CFilesCleaner::exec()
 		filter << "*.packed";
 	}
 
+	// only .ref files should be there
+	filter << "exedll*.bnp";
+
 	// temporary files
 	QStringList files = dir.entryList(filter, QDir::Files);
 
+	// temporary directories
+	QStringList dirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+	// fonts directory is not needed anymore if fonts.bnp exists
+	if (!dir.exists("fonts.bnp")) dirs.removeAll("fonts");
+
 	if (m_listener)
 	{
-		m_listener->operationInit(0, files.size());
+		m_listener->operationInit(0, files.size() + dirs.size());
 		m_listener->operationStart();
 	}
 
@@ -80,13 +89,20 @@ bool CFilesCleaner::exec()
 		++filesCount;
 	}
 
-	// fonts directory is not needed anymore if fonts.bnp exists
-	if (dir.exists("fonts.bnp") && dir.cd("fonts"))
+	foreach(const QString &d, dirs)
 	{
-		dir.removeRecursively();
+		if (dir.cd(d))
+		{
+			dir.removeRecursively();
+			dir.cdUp();
+		}
+
+		if (m_listener) m_listener->operationProgress(filesCount, d);
+
+		++filesCount;
 	}
 
-	if (m_listener) m_listener->operationSuccess(files.size());
+	if (m_listener) m_listener->operationSuccess(files.size() + dirs.size());
 
 	return true;
 }
