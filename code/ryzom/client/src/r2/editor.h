@@ -527,8 +527,8 @@ public:
 	CInstance *getInstanceUnderPos(float x, float y, float distSelection, bool &isPlayerUnderCursor);
 	// helper : test intersection between an entity and a ray
 	static float preciseEntityIntersectionTest(CEntityCL &entity, const NLMISC::CVector &worldRayStart, const NLMISC::CVector &worldRayDir);
-	// Tmp show the connexion window and display a msg in it. An empty msg will close the window
-	static void connexionMsg(const std::string &stringId);
+	// Tmp show the connection window and display a msg in it. An empty msg will close the window
+	static void connectionMsg(const std::string &stringId);
 	TEntityCustomSelectBoxMap &getEntityCustomSelectBoxMap() { return _EntityCustomSelectBoxMap; }
 	// from a pointer on an entity, retrieve its local selection bbox (possibly redefined in r2_ui_custom_boxes_data.lua
 	const NLMISC::CAABBox &getLocalSelectBox(CEntityCL &entity) const;
@@ -955,7 +955,7 @@ private:
 
 	bool _ClearingContent;
 
-	std::string _ConnexionMsg;
+	std::string _ConnectionMsg;
 	static std::string _ScenarioToLoadWhenEntreringIntoAnimation;
 	static bool _IsStartingScenario; // the scenario is an animation scenario launch from the ring access point
 

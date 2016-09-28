@@ -539,7 +539,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 
 	if (operationName == "ADV_CONN")
 	{
-		CEditor::connexionMsg("");
+		CEditor::connectionMsg("");
 		CClientMessageAdventureUserConnection  bodyConnection;
 		nlRead(message,serial,bodyConnection);
 		onRingAccessUpdated(0, bodyConnection.RingAccess);
@@ -1048,7 +1048,7 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 
 			this->connectAnimationModePlay();
 
-			CEditor::connexionMsg("");
+			CEditor::connectionMsg("");
 
 			if (_CharMode == TCharMode::Dm)
 			{
@@ -1069,7 +1069,7 @@ void CClientEditionModule::startScenario(class NLNET::IModuleProxy * proxy, bool
 	}
 	else
 	{
-		CEditor::connexionMsg("uiR2EDR2StartTestError");
+		CEditor::connectionMsg("uiR2EDR2StartTestError");
 		requestReconnection();
 	}
 
@@ -1190,12 +1190,8 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 
 		}
 
-
-
-		CEditor::connexionMsg(connectionState);
-
+		CEditor::connectionMsg(connectionState);
 	}
-
 }
 
 bool CClientEditionModule::requestStartScenario()
@@ -1204,7 +1200,7 @@ bool CClientEditionModule::requestStartScenario()
 
 	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
 
-	CEditor::connexionMsg("uimR2EDGoToDMMode");
+	CEditor::connectionMsg("uimR2EDGoToDMMode");
 
 	R2::getEditor().getLua().executeScriptNoThrow("r2.Version.save(\"save/r2_buffer.dat\")");
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);

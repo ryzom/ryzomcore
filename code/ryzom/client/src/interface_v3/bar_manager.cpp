@@ -203,8 +203,7 @@ void		CBarManager::initInGame()
 		i++;
 	nlassert(i==MaxTeamMember);
 
-
-	// *** create connexion to the Local Output database
+	// *** create connection to the Local Output database
 	for(i=0;i<_EntryBars[TeamMemberType].size();i++)
 	{
 		// don't connect FOCUS, since not setuped by SERVER
@@ -243,7 +242,7 @@ void		CBarManager::initInGame()
 	_EntryScoreFlags[TargetType]= HpFlag | SapFlag | StaFlag | FocusFlag;	// all
 
 
-	// *** create connexion for User Bar mgt
+	// *** create connection for User Bar mgt
 	// user now can only manage 4 scores
 	nlctassert(SCORES::NUM_SCORES==4);
 	// Input max values
@@ -308,7 +307,7 @@ void		CBarManager::addEntry(TEntryType type, uint entryId, uint dataSetId)
 	// Add me to list of entries
 	CBarDataEntry	&bde= entryArray[entryId];
 	bde.DataSetId= dataSetId;
-	// Add the entry connexion to map by DataSetId
+	// Add the entry connection to map by DataSetId
 	CBarDataUID		&barUID= _UIDBars[dataSetId];
 	barUID.EntryId[type].insert(entryId);
 
@@ -340,7 +339,7 @@ void		CBarManager::delEntry(TEntryType type, uint entryId)
 	{
 		// then unconnect this from the map by UID
 		_UIDBars[dataSetId].EntryId[type].erase(entryId);
-		// if no more connexion are made to this UID
+		// if no more connection are made to this UID
 		if(_UIDBars[dataSetId].noMoreEntry())
 		{
 			// erase it
