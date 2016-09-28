@@ -213,6 +213,7 @@ void		CBarManager::initInGame()
 			"PRESENT",
 			"HP", "SAP", "STA", "");
 	}
+
 	for(i=0;i<_EntryBars[AnimalType].size();i++)
 	{
 		// don't connect STA, SAP and FOCUS for animal, since they don't have
@@ -222,6 +223,7 @@ void		CBarManager::initInGame()
 			"STATUS",
 			"HP", "", "", "");
 	}
+
 	nlassert(_EntryBars[TargetType].size()==1);
 	_EntryBars[TargetType][0].connectDB(
 		"SERVER:TARGET:BARS:",
