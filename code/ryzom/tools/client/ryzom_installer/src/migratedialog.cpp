@@ -46,9 +46,8 @@ CMigrateDialog::CMigrateDialog():QDialog()
 		}
 	}
 
-	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
-
-	updateDestinationText();
+	// update default destination
+	onDestinationDefaultButtonClicked();
 
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
@@ -66,6 +65,7 @@ CMigrateDialog::CMigrateDialog():QDialog()
 
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
+	connect(destinationDefaultButton, SIGNAL(clicked()), SLOT(onDestinationDefaultButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
 	connect(continueButton, SIGNAL(clicked()), SLOT(accept()));
 	connect(quitButton, SIGNAL(clicked()), SLOT(reject()));
@@ -89,6 +89,13 @@ void CMigrateDialog::onShowAdvancedParameters(int state)
 	advancedFrame->setVisible(state != Qt::Unchecked);
 
 	adjustSize();
+}
+
+void CMigrateDialog::onDestinationDefaultButtonClicked()
+{
+	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
+
+	updateDestinationText();
 }
 
 void CMigrateDialog::onDestinationBrowseButtonClicked()

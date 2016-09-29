@@ -49,9 +49,8 @@ CInstallDialog::CInstallDialog():QDialog()
 
 	updateAnotherLocationText();
 
-	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
-
-	updateDestinationText();
+	// update default destination
+	onDestinationDefaultButtonClicked();
 
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
@@ -71,6 +70,7 @@ CInstallDialog::CInstallDialog():QDialog()
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
 	connect(anotherLocationBrowseButton, SIGNAL(clicked()), SLOT(onAnotherLocationBrowseButtonClicked()));
+	connect(destinationDefaultButton, SIGNAL(clicked()), SLOT(onDestinationDefaultButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
 
 	// TODO: if found a folder with initial data, get its total size and check if at least that size is free on the disk
@@ -115,6 +115,13 @@ void CInstallDialog::onAnotherLocationBrowseButtonClicked()
 	anotherLocationRadioButton->setChecked(true);
 
 	updateAnotherLocationText();
+}
+
+void CInstallDialog::onDestinationDefaultButtonClicked()
+{
+	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
+
+	updateDestinationText();
 }
 
 void CInstallDialog::onDestinationBrowseButtonClicked()
