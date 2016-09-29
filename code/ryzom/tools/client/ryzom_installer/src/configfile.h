@@ -38,6 +38,7 @@ public:
 	bool load();
 	bool load(const QString &filename);
 	bool save() const;
+	bool remove();
 
 	static CConfigFile* getInstance();
 

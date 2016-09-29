@@ -188,6 +188,11 @@ bool CConfigFile::save() const
 	return true;
 }
 
+bool CConfigFile::remove()
+{
+	return QFile::remove(m_configPath);
+}
+
 CConfigFile* CConfigFile::getInstance()
 {
 	return s_instance;
