@@ -152,17 +152,15 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 		psl->SetArguments(qToWide(arguments));
 		psl->SetWorkingDirectory(qToWide(QDir::toNativeSeparators(workingDir)));
 
-		// Query IShellLink for the IPersistFile interface, used for saving the
-		// shortcut in persistent storage.
+		// Query IShellLink for the IPersistFile interface, used for saving the shortcut in persistent storage.
 		hres = psl->QueryInterface(IID_IPersistFile, (LPVOID*)&ppf);
 
 		if (SUCCEEDED(hres))
 		{
-			// Add code here to check return value from MultiByteWideChar
-			// for success.
+			QString path(link + ".lnk");
 
 			// Save the link by calling IPersistFile::Save.
-			hres = ppf->Save(qToWide(QDir::toNativeSeparators(link)), TRUE);
+			hres = ppf->Save(qToWide(QDir::toNativeSeparators(path)), TRUE);
 			ppf->Release();
 		}
 		psl->Release();
@@ -261,8 +259,10 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 	data.replace("$COMMAND", command);
 	data.replace("$ICON", icon);
 
+	QString path(link + ".desktop");
+
 	// write file
-	file.setFileName(link);
+	file.setFileName(path);
 
 	if (!file.open(QFile::WriteOnly)) return false;
 

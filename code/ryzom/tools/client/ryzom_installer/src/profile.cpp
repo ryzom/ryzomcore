@@ -65,24 +65,12 @@ QString CProfile::getClientFullPath() const
 
 QString CProfile::getClientDesktopShortcutFullPath() const
 {
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".desktop";
-#endif
+	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name;
 }
 
 QString CProfile::getClientMenuShortcutFullPath() const
 {
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".desktop";
-#endif
+	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name;
 }
 
 void CProfile::createShortcuts() const

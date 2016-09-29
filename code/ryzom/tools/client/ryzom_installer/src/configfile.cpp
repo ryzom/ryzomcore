@@ -729,11 +729,8 @@ QString CConfigFile::getInstallerOriginalDirPath() const
 
 QString CConfigFile::getInstallerMenuLinkFullPath() const
 {
-#ifdef Q_OS_WIN32
-	return QString("%1/%2/%2 Installer.lnk").arg(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)).arg(QApplication::applicationName());
-#else
-	return "";
-#endif
+	// don't put extension
+	return QString("%1/%2/%2 Installer").arg(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)).arg(QApplication::applicationName());
 }
 
 QStringList CConfigFile::getInstallerRequiredFiles() const
