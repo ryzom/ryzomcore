@@ -49,9 +49,8 @@ CInstallDialog::CInstallDialog():QDialog()
 
 	updateAnotherLocationText();
 
-	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
-
-	updateDestinationText();
+	// update default destination
+	onDestinationDefaultButtonClicked();
 
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
@@ -71,6 +70,7 @@ CInstallDialog::CInstallDialog():QDialog()
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
 	connect(anotherLocationBrowseButton, SIGNAL(clicked()), SLOT(onAnotherLocationBrowseButtonClicked()));
+	connect(destinationDefaultButton, SIGNAL(clicked()), SLOT(onDestinationDefaultButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
 
 	// TODO: if found a folder with initial data, get its total size and check if at least that size is free on the disk
@@ -117,9 +117,16 @@ void CInstallDialog::onAnotherLocationBrowseButtonClicked()
 	updateAnotherLocationText();
 }
 
+void CInstallDialog::onDestinationDefaultButtonClicked()
+{
+	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
+
+	updateDestinationText();
+}
+
 void CInstallDialog::onDestinationBrowseButtonClicked()
 {
-	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"));
+	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"), m_dstDirectory);
 
 	if (directory.isEmpty()) return;
 
@@ -148,6 +155,40 @@ void CInstallDialog::accept()
 	if (freeSpace < server.dataUncompressedSize)
 	{
 	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
+		return;
+	}
+
+	// create directory if doesn't exist
+	bool succeedsToWrite = QDir().mkpath(m_dstDirectory);
+
+	// if unable to create directory, don't expect to write a file in it
+	if (succeedsToWrite)
+	{
+		// check if directory is writable by current user
+		QFile file(m_dstDirectory + "/writable_test_for_ryzom_installer.txt");
+
+		if (file.open(QFile::WriteOnly))
+		{
+			file.close();
+
+			// remove it
+			file.remove();
+		}
+		else
+		{
+			succeedsToWrite = false;
+		}
+	}
+
+	if (!succeedsToWrite)
+	{
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to write in directory"), tr("You don't have the permission to write in this directory with your current user account, please choose another directory."));
+		return;
+	}
+
+	if (!isDirectoryEmpty(m_dstDirectory, true))
+	{
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
 		return;
 	}
 

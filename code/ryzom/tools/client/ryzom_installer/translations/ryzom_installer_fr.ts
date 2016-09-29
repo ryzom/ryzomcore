@@ -52,12 +52,12 @@
         <translation>Ancienne installation : %1</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="70"/>
+        <location filename="../src/installdialog.cpp" line="69"/>
         <source>Internet (%1 to download)</source>
         <translation>Internet (%1 à télécharger)</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="71"/>
+        <location filename="../src/installdialog.cpp" line="70"/>
         <source>Files will be installed to (requires %1):</source>
         <translation>Les fichiers seront installés dans (%1 nécessaires) :</translation>
     </message>
@@ -77,29 +77,53 @@
         <translation>Impossible de trouver Ryzom dans le répertoire sélectionné. Veuillez en choisir un autre ou annuler.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="122"/>
+        <location filename="../src/installdialog.cpp" line="129"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Veuillez choisir le répertoire où Ryzom sera installé</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="133"/>
+        <location filename="../src/installdialog.cpp" line="140"/>
         <source>Another location: %1</source>
         <translation>Autre emplacement : %1</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="133"/>
+        <location filename="../src/installdialog.cpp" line="140"/>
         <source>Undefined</source>
         <translation>Non défini</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="150"/>
+        <location filename="../src/installdialog.cpp" line="157"/>
         <source>Not enough free disk space</source>
         <translation>Espace disque insuffisant</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="150"/>
+        <location filename="../src/installdialog.cpp" line="157"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Vous ne disposez pas assez d&apos;espace libre sur ce disque, veuillez en libérer ou choisir un répertoire sur un autre disque.</translation>
+    </message>
+    <message>
+        <location filename="../src/installdialog.cpp" line="185"/>
+        <source>Unable to write in directory</source>
+        <translation>Impossible d&apos;écrire dans le répertoire</translation>
+    </message>
+    <message>
+        <location filename="../src/installdialog.cpp" line="185"/>
+        <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
+        <translation>Vous n&apos;avez pas la permission d&apos;écrire dans ce répertoire avec votre compte utilisateur courant, veuillez en choisir un autre.</translation>
+    </message>
+    <message>
+        <location filename="../src/installdialog.cpp" line="191"/>
+        <source>Directory not empty</source>
+        <translation>Répertoire non vide</translation>
+    </message>
+    <message>
+        <location filename="../src/installdialog.cpp" line="191"/>
+        <source>This directory is not empty, please choose another one.</source>
+        <translation>Ce répertoire n&apos;est pas vide, veuillez en choisir un autre.</translation>
+    </message>
+    <message>
+        <source>This directory is not empty, please choose or create another directory.</source>
+        <translation type="vanished">Ce répertoire n&apos;est pas vide, veuillez en choisir un autre.</translation>
     </message>
 </context>
 <context>
@@ -133,24 +157,48 @@
 <context>
     <name>CMigrateDialog</name>
     <message>
-        <location filename="../src/migratedialog.cpp" line="67"/>
+        <location filename="../src/migratedialog.cpp" line="66"/>
         <source>Files will be installed to (requires %1):</source>
         <translation>Les fichiers seront installés dans (%1 nécessaires) :</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="96"/>
+        <location filename="../src/migratedialog.cpp" line="103"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Veuillez choisir le répertoire où installer Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="119"/>
+        <location filename="../src/migratedialog.cpp" line="126"/>
         <source>Not enough free disk space</source>
         <translation>Espace disque insuffisant</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="119"/>
+        <location filename="../src/migratedialog.cpp" line="126"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Vous ne disposez pas assez d&apos;espace libre sur ce disque, veuillez en libérer ou choisir un répertoire sur un autre disque.</translation>
+    </message>
+    <message>
+        <location filename="../src/migratedialog.cpp" line="154"/>
+        <source>Unable to write in directory</source>
+        <translation>Impossible d&apos;écrire dans le répertoire</translation>
+    </message>
+    <message>
+        <location filename="../src/migratedialog.cpp" line="154"/>
+        <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
+        <translation>Vous n&apos;avez pas la permission d&apos;écrire dans ce répertoire avec votre compte utilisateur courant, veuillez en choisir un autre.</translation>
+    </message>
+    <message>
+        <location filename="../src/migratedialog.cpp" line="160"/>
+        <source>Directory not empty</source>
+        <translation>Répertoire non vide</translation>
+    </message>
+    <message>
+        <location filename="../src/migratedialog.cpp" line="160"/>
+        <source>This directory is not empty, please choose another one.</source>
+        <translation>Ce répertoire n&apos;est pas vide, veuillez en choisir un autre.</translation>
+    </message>
+    <message>
+        <source>This directory is not empty, please choose or create another directory.</source>
+        <translation type="vanished">Ce répertoire n&apos;est pas vide, veuillez en choisir un autre.</translation>
     </message>
 </context>
 <context>
@@ -160,109 +208,109 @@
         <translation type="vanished">Mettre à jour les profils</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="258"/>
+        <location filename="../src/operationdialog.cpp" line="261"/>
         <source>Updating profiles...</source>
         <translation>Mise à jour des profils...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="409"/>
+        <location filename="../src/operationdialog.cpp" line="412"/>
         <source>Confirmation</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="409"/>
+        <location filename="../src/operationdialog.cpp" line="412"/>
         <source>Warning, this server doesn&apos;t support resume! If you stop download now, you won&apos;t be able to resume it later.
 Are you sure to abort download?</source>
         <translation>Attention, ce serveur ne supporte pas la reprise de téléchargement ! Si vous arrêtez le téléchargement maintenant, vous ne pourrez pas le poursuivre ultérieurement.
 Êtes-vous sûr d&apos;interrompre le téléchargement ?</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="434"/>
+        <location filename="../src/operationdialog.cpp" line="437"/>
         <source>%p% (%v/%m KiB)</source>
         <translation>%p% (%v/%m Kio)</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="494"/>
+        <location filename="../src/operationdialog.cpp" line="497"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="515"/>
+        <location filename="../src/operationdialog.cpp" line="518"/>
         <source>Downloading data required by server %1...</source>
         <translation>Téléchargement des données nécessaires pour le serveur %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="526"/>
+        <location filename="../src/operationdialog.cpp" line="529"/>
         <source>Extracting data required by server %1...</source>
         <translation>Extraction des données nécessaires pour le serveur %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="548"/>
+        <location filename="../src/operationdialog.cpp" line="551"/>
         <source>Downloading client required by server %1...</source>
         <translation>Téléchargement du client nécessaire pour le serveur %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="559"/>
+        <location filename="../src/operationdialog.cpp" line="562"/>
         <source>Extracting client required by server %1...</source>
         <translation>Extraction du client nécessaire pour le serveur %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="586"/>
+        <location filename="../src/operationdialog.cpp" line="589"/>
         <source>Copying data required by server %1...</source>
         <translation>Copie des données nécessaires pour le serveur %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="620"/>
+        <location filename="../src/operationdialog.cpp" line="623"/>
         <source>Copying old profile to new location...</source>
         <translation>Copie de l&apos;ancien profil vers un nouvel emplacement...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="655"/>
+        <location filename="../src/operationdialog.cpp" line="658"/>
         <source>Extracting client to new location...</source>
         <translation>Extraction du client vers un nouvel emplacement...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="722"/>
+        <location filename="../src/operationdialog.cpp" line="725"/>
         <source>Copying installer to new location...</source>
         <translation>Copie de l&apos;installateur vers un nouvel emplacement...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="841"/>
+        <location filename="../src/operationdialog.cpp" line="844"/>
         <source>Cleaning obsolete files...</source>
         <translation>Nettoyage des fichiers obsolètes...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="856"/>
+        <location filename="../src/operationdialog.cpp" line="859"/>
         <source>Creating default profile...</source>
         <translation>Création du profil par défaut...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="915"/>
+        <location filename="../src/operationdialog.cpp" line="918"/>
         <source>Creating shortcuts for profile %1...</source>
         <translation>Création des raccourcis pour le profil %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1019"/>
+        <location filename="../src/operationdialog.cpp" line="1022"/>
         <source>Deleting client...</source>
         <translation>Suppression du client...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1076"/>
+        <location filename="../src/operationdialog.cpp" line="1079"/>
         <source>Adding profiles...</source>
         <translation>Ajout des profils...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1096"/>
+        <location filename="../src/operationdialog.cpp" line="1099"/>
         <source>Deleting profiles...</source>
         <translation>Suppression des profils...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1146"/>
+        <location filename="../src/operationdialog.cpp" line="1149"/>
         <source>Deleting installer...</source>
         <translation>Suppression de l&apos;installateur...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1188"/>
+        <location filename="../src/operationdialog.cpp" line="1191"/>
         <source>Deleting downloaded files...</source>
         <translation>Suppression des fichiers téléchargés...</translation>
     </message>
@@ -311,12 +359,12 @@ Are you sure to abort download?</source>
         <translation type="vanished">Copier l&apos;installateur vers un nouvel emplacement</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="806"/>
+        <location filename="../src/operationdialog.cpp" line="809"/>
         <source>Uninstall old client</source>
         <translation>Désinstaller l&apos;ancien client</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="806"/>
+        <location filename="../src/operationdialog.cpp" line="809"/>
         <source>An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?</source>
         <translation>Une ancienne version de Ryzom a été détectée sur ce système, souhaitez-vous la désinstaller afin de libérer de l&apos;espace disque ?</translation>
     </message>
@@ -341,7 +389,7 @@ Are you sure to abort download?</source>
         <translation type="vanished">Supprimer les fichiers du client</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1049"/>
+        <location filename="../src/operationdialog.cpp" line="1052"/>
         <source>Unable to delete files for client %1</source>
         <translation>Impossible de supprimer les fichiers du client %1</translation>
     </message>
@@ -362,7 +410,7 @@ Are you sure to abort download?</source>
         <translation type="vanished">Suppression du profil %1 en cours...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1125"/>
+        <location filename="../src/operationdialog.cpp" line="1128"/>
         <source>Unable to delete files for profile %1</source>
         <translation>Impossible de supprimer les fichiers du profil %1</translation>
     </message>
@@ -480,52 +528,52 @@ Vous n&apos;avez qu&apos;à suivre les différentes étapes et faire un choix en
         <translation>Les fichiers seront installés à partir de :</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="103"/>
         <source>Old installation: %1</source>
-        <translation>Ancienne installation : %1</translation>
+        <translation type="vanished">Ancienne installation : %1</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="118"/>
         <source>Another location: %1</source>
-        <translation>Autre emplacement : %1</translation>
+        <translation type="vanished">Autre emplacement : %1</translation>
     </message>
     <message>
         <location filename="../ui/installdialog.ui" line="128"/>
-        <location filename="../ui/installdialog.ui" line="160"/>
+        <location filename="../ui/installdialog.ui" line="167"/>
         <source>Browse...</source>
         <translation>Parcourir...</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="137"/>
         <source>Internet (%1 to download)</source>
-        <translation>Internet (%1 à télécharger)</translation>
+        <translation type="vanished">Internet (%1 à télécharger)</translation>
     </message>
     <message>
         <source>Internet (%1 GiB to download)</source>
         <translation type="vanished">Internet (%1 à télécharger)</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="147"/>
         <source>Files will be installed to (requires 10 GiB):</source>
-        <translation>Les fichiers seront installés dans (10 Gio nécessaires) :</translation>
+        <translation type="vanished">Les fichiers seront installés dans (10 Gio nécessaires) :</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="153"/>
         <source>c:\</source>
-        <translation>c:\</translation>
+        <translation type="vanished">c:\</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="170"/>
+        <location filename="../ui/installdialog.ui" line="160"/>
+        <source>Default</source>
+        <translation>Défaut</translation>
+    </message>
+    <message>
+        <location filename="../ui/installdialog.ui" line="177"/>
         <source>Do you prefer to use a 64 or 32 bit client?</source>
         <translation>Préférez-vous utiliser un client 64 ou 32 bits ?</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="176"/>
+        <location filename="../ui/installdialog.ui" line="183"/>
         <source>64 bit (recommended)</source>
         <translation>64 bits (recommandé)</translation>
     </message>
     <message>
-        <location filename="../ui/installdialog.ui" line="186"/>
+        <location filename="../ui/installdialog.ui" line="193"/>
         <source>32 bit</source>
         <translation>32 bits</translation>
     </message>
@@ -538,66 +586,65 @@ Vous n&apos;avez qu&apos;à suivre les différentes étapes et faire un choix en
         <translation>Installateur de Ryzom</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="48"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+        <translation type="vanished">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="83"/>
+        <location filename="../ui/mainwindow.ui" line="86"/>
         <source>Atys</source>
         <translation>Atys</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="91"/>
+        <location filename="../ui/mainwindow.ui" line="94"/>
         <source>Play</source>
         <translation>Jouer</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="98"/>
+        <location filename="../ui/mainwindow.ui" line="101"/>
         <source>Configure</source>
         <translation>Configurer</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="118"/>
-        <location filename="../ui/mainwindow.ui" line="153"/>
+        <location filename="../ui/mainwindow.ui" line="121"/>
+        <location filename="../ui/mainwindow.ui" line="156"/>
         <source>&amp;Settings</source>
         <translation>&amp;Préférences</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="128"/>
+        <location filename="../ui/mainwindow.ui" line="131"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="138"/>
+        <location filename="../ui/mainwindow.ui" line="141"/>
         <source>About Qt</source>
         <translation>À propos de Qt</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="143"/>
+        <location filename="../ui/mainwindow.ui" line="146"/>
         <source>About...</source>
         <translation>À propos de...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="148"/>
+        <location filename="../ui/mainwindow.ui" line="151"/>
         <source>&amp;Profiles</source>
         <translation>&amp;Profils</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="158"/>
+        <location filename="../ui/mainwindow.ui" line="161"/>
         <source>&amp;Quit</source>
         <translation>&amp;Quitter</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.ui" line="163"/>
+        <location filename="../ui/mainwindow.ui" line="166"/>
         <source>&amp;Uninstall</source>
         <translation>&amp;Désinstaller</translation>
     </message>
@@ -628,42 +675,45 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
         <translation>Afficher les paramètres avancés (expert)</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="94"/>
         <source>Files will be installed to (requires 10 GiB):</source>
-        <translation>Les fichiers seront installés dans (10 Gio nécessaires) :</translation>
+        <translation type="vanished">Les fichiers seront installés dans (10 Gio nécessaires) :</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="100"/>
         <source>c:\</source>
-        <translation>c:\</translation>
+        <translation type="vanished">c:\</translation>
     </message>
     <message>
         <location filename="../ui/migratedialog.ui" line="107"/>
+        <source>Default</source>
+        <translation>Défaut</translation>
+    </message>
+    <message>
+        <location filename="../ui/migratedialog.ui" line="114"/>
         <source>Browse...</source>
         <translation>Parcourir...</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="117"/>
+        <location filename="../ui/migratedialog.ui" line="124"/>
         <source>Do you prefer to use a 64 or 32 bit client?</source>
         <translation>Préférez-vous utiliser un client 64 ou 32 bits ?</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="123"/>
+        <location filename="../ui/migratedialog.ui" line="130"/>
         <source>64 bit (recommended)</source>
         <translation>64 bits (recommandé)</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="133"/>
+        <location filename="../ui/migratedialog.ui" line="140"/>
         <source>32 bit</source>
         <translation>32 bits</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="161"/>
+        <location filename="../ui/migratedialog.ui" line="168"/>
         <source>Continue</source>
         <translation>Suivant</translation>
     </message>
     <message>
-        <location filename="../ui/migratedialog.ui" line="168"/>
+        <location filename="../ui/migratedialog.ui" line="175"/>
         <source>Quit</source>
         <translation>Quitter</translation>
     </message>
@@ -671,17 +721,17 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
 <context>
     <name>OperationDialog</name>
     <message>
-        <location filename="../ui/operationdialog.ui" line="35"/>
+        <location filename="../ui/operationdialog.ui" line="29"/>
         <source>Ryzom Installer</source>
         <translation>Installateur de Ryzom</translation>
     </message>
     <message>
-        <location filename="../ui/operationdialog.ui" line="41"/>
+        <location filename="../ui/operationdialog.ui" line="35"/>
         <source>Operation</source>
         <translation>Opération</translation>
     </message>
     <message>
-        <location filename="../ui/operationdialog.ui" line="48"/>
+        <location filename="../ui/operationdialog.ui" line="42"/>
         <source>Operation progress</source>
         <translation>Progression de l&apos;opération</translation>
     </message>
@@ -714,9 +764,8 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
         <translation>Profil :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="79"/>
         <source>0</source>
-        <translation>0</translation>
+        <translation type="vanished">0</translation>
     </message>
     <message>
         <location filename="../ui/profilesdialog.ui" line="86"/>
@@ -729,72 +778,70 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
         <translation>Serveur :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="104"/>
+        <location filename="../ui/profilesdialog.ui" line="107"/>
         <source>Atys</source>
         <translation>Atys</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="109"/>
+        <location filename="../ui/profilesdialog.ui" line="112"/>
         <source>Yubo</source>
         <translation>Yubo</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="117"/>
+        <location filename="../ui/profilesdialog.ui" line="120"/>
         <source>Executable:</source>
         <translation>Exécutable :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="126"/>
         <source>ryzom_client_r.exe</source>
-        <translation>ryzom_client_r.exe</translation>
+        <translation type="vanished">ryzom_client_r.exe</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="133"/>
+        <location filename="../ui/profilesdialog.ui" line="136"/>
         <source>Default</source>
         <translation>Défaut</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="140"/>
+        <location filename="../ui/profilesdialog.ui" line="143"/>
         <source>Browse...</source>
         <translation>Parcourir...</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="149"/>
+        <location filename="../ui/profilesdialog.ui" line="152"/>
         <source>Arguments:</source>
         <translation>Arguments :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="159"/>
+        <location filename="../ui/profilesdialog.ui" line="162"/>
         <source>Comments:</source>
         <translation>Commentaires :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="176"/>
+        <location filename="../ui/profilesdialog.ui" line="179"/>
         <source>Directory:</source>
         <translation>Répertoire :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="185"/>
         <source>~/.ryzom/0</source>
-        <translation>~/.ryzom/0</translation>
+        <translation type="vanished">~/.ryzom/0</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="192"/>
+        <location filename="../ui/profilesdialog.ui" line="195"/>
         <source>Open</source>
         <translation>Ouvrir</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="201"/>
+        <location filename="../ui/profilesdialog.ui" line="204"/>
         <source>Create shortcuts:</source>
         <translation>Créer les raccourcis :</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="210"/>
+        <location filename="../ui/profilesdialog.ui" line="213"/>
         <source>Desktop</source>
         <translation>Bureau</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="217"/>
+        <location filename="../ui/profilesdialog.ui" line="220"/>
         <source>Start Menu</source>
         <translation>Menu Démarrer</translation>
     </message>
@@ -976,14 +1023,12 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
         <translation>Emplacement des fichiers sources de Ryzom :</translation>
     </message>
     <message>
-        <location filename="../ui/settingsdialog.ui" line="64"/>
         <source>D:\Ryzom</source>
-        <translation>D:\Ryzom</translation>
+        <translation type="vanished">D:\Ryzom</translation>
     </message>
     <message>
-        <location filename="../ui/settingsdialog.ui" line="71"/>
         <source>E:\Ryzom</source>
-        <translation>E:\Ryzom</translation>
+        <translation type="vanished">E:\Ryzom</translation>
     </message>
 </context>
 <context>

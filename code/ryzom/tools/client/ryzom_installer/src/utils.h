@@ -30,6 +30,8 @@
 
 QString qBytesToHumanReadable(qint64 bytes);
 
+bool isDirectoryEmpty(const QString &directory, bool recursize);
+
 qint64 getDirectorySize(const QString &directory, bool recursize);
 
 // Convert a UTF-8 string to QString
