@@ -1179,6 +1179,9 @@ void COperationDialog::deleteComponentsInstaller()
 		}
 	}
 
+	// delete configuration file
+	config->remove();
+
 	// reset it once it's done
 	m_removeComponents.installer = false;
 
