@@ -76,7 +76,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="profileIdLabel">
          <property name="text">
-          <string>0</string>
+          <string notr="true">0</string>
          </property>
         </widget>
        </item>
@@ -99,6 +99,9 @@
        </item>
        <item row="2" column="1">
         <widget class="QComboBox" name="serverComboBox">
+         <property name="currentText">
+          <string notr="true">Atys</string>
+         </property>
          <item>
           <property name="text">
            <string>Atys</string>
@@ -123,7 +126,7 @@
          <item>
           <widget class="QLabel" name="executablePathLabel">
            <property name="text">
-            <string>ryzom_client_r.exe</string>
+            <string notr="true">ryzom_client_r.exe</string>
            </property>
           </widget>
          </item>
@@ -182,7 +185,7 @@
          <item>
           <widget class="QLabel" name="directoryPathLabel">
            <property name="text">
-            <string>~/.ryzom/0</string>
+            <string notr="true">~/.ryzom/0</string>
            </property>
           </widget>
          </item>

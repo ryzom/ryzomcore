@@ -51,6 +51,9 @@
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
+     <property name="format">
+      <string notr="true">%p%</string>
+     </property>
     </widget>
    </item>
    <item>

@@ -61,14 +61,14 @@
      <item row="1" column="1">
       <widget class="QLabel" name="installationDirectoryLabel">
        <property name="text">
-        <string>D:\Ryzom</string>
+        <string notr="true">D:\Ryzom</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLabel" name="oldDirectoryLabel">
        <property name="text">
-        <string>E:\Ryzom</string>
+        <string notr="true">E:\Ryzom</string>
        </property>
       </widget>
      </item>
