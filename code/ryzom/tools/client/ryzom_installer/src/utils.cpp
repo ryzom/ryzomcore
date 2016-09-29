@@ -38,6 +38,37 @@ QString qBytesToHumanReadable(qint64 bytes)
 	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
+bool isDirectoryEmpty(const QString &directory, bool recursize)
+{
+	bool res = true;
+
+	if (!directory.isEmpty())
+	{
+		QDir dir(directory);
+
+		if (dir.exists())
+		{
+			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+			for (int i = 0; i < list.size(); ++i)
+			{
+				QFileInfo fileInfo = list.at(i);
+
+				if (fileInfo.isDir())
+				{
+					if (recursize) if (!isDirectoryEmpty(fileInfo.absoluteFilePath(), true)) return false;
+				}
+				else
+				{
+					return false;
+				}
+			}
+		}
+	}
+
+	return res;
+}
+
 qint64 getDirectorySize(const QString &directory, bool recursize)
 {
 	qint64 size = 0;

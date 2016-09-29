@@ -158,6 +158,40 @@ void CInstallDialog::accept()
 		return;
 	}
 
+	// create directory if doesn't exist
+	bool succeedsToWrite = QDir().mkpath(m_dstDirectory);
+
+	// if unable to create directory, don't expect to write a file in it
+	if (succeedsToWrite)
+	{
+		// check if directory is writable by current user
+		QFile file(m_dstDirectory + "/writable_test_for_ryzom_installer.txt");
+
+		if (file.open(QFile::WriteOnly))
+		{
+			file.close();
+
+			// remove it
+			file.remove();
+		}
+		else
+		{
+			succeedsToWrite = false;
+		}
+	}
+
+	if (!succeedsToWrite)
+	{
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to write in directory"), tr("You don't have the permission to write in this directory with your current user account, please choose another directory."));
+		return;
+	}
+
+	if (!isDirectoryEmpty(m_dstDirectory, true))
+	{
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
+		return;
+	}
+
 	if (oldDirectoryRadioButton->isChecked())
 	{
 		CConfigFile::getInstance()->setSrcServerDirectory(m_oldDirectory);
