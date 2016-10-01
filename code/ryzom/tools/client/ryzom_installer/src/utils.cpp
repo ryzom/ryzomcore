@@ -286,9 +286,9 @@ QString appendLinkExtension(const QString &link)
 {
 	QString extension;
 
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32)
 	extension = ".lnk";
-#elif Q_OS_MAC
+#elif defined(Q_OS_MAC)
 	// TODO
 #else
 	extension = ".desktop";
