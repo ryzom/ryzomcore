@@ -282,6 +282,24 @@ bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathOb
 
 #endif
 
+QString appendLinkExtension(const QString &link)
+{
+	QString extension;
+
+#ifdef Q_OS_WIN32
+	extension = ".lnk";
+#elif Q_OS_MAC
+	// TODO
+#else
+	extension = ".desktop";
+#endif
+
+	// already the good extension
+	if (link.indexOf(extension) > -1) return link;
+
+	return link + extension;
+}
+
 QString getVersionFromExecutable(const QString &path)
 {
 	// launch executable with --version argument

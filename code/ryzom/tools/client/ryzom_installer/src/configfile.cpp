@@ -676,7 +676,7 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 	QString shortcut = profile.getClientDesktopShortcutFullPath();
 
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
 }
 
 bool CConfigFile::shouldCreateMenuShortcut() const
@@ -687,7 +687,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 	QString shortcut = profile.getClientMenuShortcutFullPath();
 
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
 }
 
 bool CConfigFile::shouldCopyInstaller() const
