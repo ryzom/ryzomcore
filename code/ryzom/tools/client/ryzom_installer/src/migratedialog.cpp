@@ -119,9 +119,8 @@ void CMigrateDialog::accept()
 	// check free disk space
 	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
 
-	const CServer &server = CConfigFile::getInstance()->getServer();
-
-	if (freeSpace < server.dataUncompressedSize)
+	// compare with exact size of current directory
+	if (freeSpace < getDirectorySize(m_currentDirectory, true))
 	{
 	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
 		return;

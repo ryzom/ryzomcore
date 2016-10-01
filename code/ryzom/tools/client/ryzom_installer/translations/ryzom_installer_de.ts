@@ -104,22 +104,22 @@
     <message>
         <location filename="../src/installdialog.cpp" line="185"/>
         <source>Unable to write in directory</source>
-        <translation type="unfinished"></translation>
+        <translation>In das Verzeichnis konnte nicht geschrieben werden</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="185"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du hast nicht die Berechtigungen, um mit deinem derzeitigen Benutzer-Konto in dieses Verzeichnis zu schreiben, bitte wähle ein anderes Verzeichnis.</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="191"/>
         <source>Directory not empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnist ist nicht leer</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="191"/>
         <source>This directory is not empty, please choose another one.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dieses Verzeichnis ist nicht leer, bitte wähle ein anderes.</translation>
     </message>
 </context>
 <context>
@@ -175,22 +175,22 @@
     <message>
         <location filename="../src/migratedialog.cpp" line="154"/>
         <source>Unable to write in directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Kann nicht in dieses Verzeichnis schreiben</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="154"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>Du hast nicht die Berechtigungen, mit deinem derzeitigen Benutzer-Konto in dieses Verzeichnis zu schreiben, bitte wähle ein anderes Verzeichnis.</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="160"/>
         <source>Directory not empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Verzeichnis ist nicht leer</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="160"/>
         <source>This directory is not empty, please choose another one.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dieses Verzeichnis ist nicht leer, bitte wähle ein anderes.</translation>
     </message>
 </context>
 <context>

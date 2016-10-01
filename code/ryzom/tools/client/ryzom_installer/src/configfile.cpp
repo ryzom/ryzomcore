@@ -676,7 +676,7 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 	QString shortcut = profile.getClientDesktopShortcutFullPath();
 
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
 }
 
 bool CConfigFile::shouldCreateMenuShortcut() const
@@ -687,7 +687,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 	QString shortcut = profile.getClientMenuShortcutFullPath();
 
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(shortcut));
+	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
 }
 
 bool CConfigFile::shouldCopyInstaller() const
@@ -749,7 +749,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 #if _MSC_VER == 1900
 	// VC++ 2015
 	files << "msvcp140.dll";
-	files << "msvcr140.dll";
+	files << "vcrunrime140.dll";
 #elif _MSC_VER == 1800
 	// VC++ 2013
 	files << "msvcp120.dll";
