@@ -749,7 +749,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 #if _MSC_VER == 1900
 	// VC++ 2015
 	files << "msvcp140.dll";
-	files << "msvcr140.dll";
+	files << "vcrunrime140.dll";
 #elif _MSC_VER == 1800
 	// VC++ 2013
 	files << "msvcp120.dll";
