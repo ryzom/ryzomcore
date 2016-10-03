@@ -991,10 +991,13 @@ bool COperationDialog::updateAddRemoveEntry()
 		{
 #ifdef Q_OS_WIN
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
-			QStringList versionTokens = QApplication::applicationVersion().split('.');
 
-			settings.setValue("DisplayVersion", QApplication::applicationVersion());
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
+			QString version = QApplication::applicationVersion();
+
+			settings.setValue("DisplayVersion", version);
+			settings.setValue("EstimatedSize", (quint32)(getDirectorySize(config->getInstallationDirectory(), true) / 1024)); // size if in KiB
+
+			QStringList versionTokens = version.split('.');
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
 			settings.setValue("MinorVersion", versionTokens[1].toInt());
 #endif
