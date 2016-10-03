@@ -1012,8 +1012,6 @@ bool COperationDialog::deleteAddRemoveEntry()
 	settings.remove("");
 #endif
 
-	emit done();
-
 	return true;
 }
 
@@ -1189,7 +1187,7 @@ void COperationDialog::deleteComponentsInstaller()
 	// reset it once it's done
 	m_removeComponents.installer = false;
 
-	emit onProgressSuccess(1);
+	emit success(1);
 	emit done();
 }
 
@@ -1224,7 +1222,7 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 	// reset it once it's done
 	m_removeComponents.downloadedFiles = false;
 
-	emit onProgressSuccess(1);
+	emit success(1);
 	emit done();
 }
 
