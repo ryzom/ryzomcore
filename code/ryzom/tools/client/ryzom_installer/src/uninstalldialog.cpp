@@ -265,7 +265,24 @@ void CUninstallDialog::updateSizes()
 	}
 
 	// downloaded files
-	qint64 bytes = getDirectorySize(config->getInstallationDirectory(), false);
+	qint64 bytes = 0;
+	
+	QDir dir(config->getInstallationDirectory());
+
+	QStringList filters;
+
+	filters << "*.log";
+	filters << "*.7z";
+	filters << "*.bnp";
+	filters << "*.zip";
+	filters << "*.part";
+
+	QFileInfoList downloadedFiles = dir.entryInfoList(filters, QDir::Files);
+
+	foreach(const QFileInfo &info, downloadedFiles)
+	{
+		bytes += info.size();
+	}
 
 	emit updateSize(m_downloadedFilesIndex, qBytesToHumanReadable(bytes));
 
