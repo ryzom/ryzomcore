@@ -104,22 +104,22 @@
     <message>
         <location filename="../src/installdialog.cpp" line="185"/>
         <source>Unable to write in directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно осуществить запись в директорию</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="185"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>У вашего текущего пользоввателя нет права записи в эту директорию, пожалуйста, выберите другую директорию.</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="191"/>
         <source>Directory not empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Директория не является пустой</translation>
     </message>
     <message>
         <location filename="../src/installdialog.cpp" line="191"/>
         <source>This directory is not empty, please choose another one.</source>
-        <translation type="unfinished"></translation>
+        <translation>Эта директория не является пустой, пожалуйста, выберите другую.</translation>
     </message>
 </context>
 <context>
@@ -175,22 +175,22 @@
     <message>
         <location filename="../src/migratedialog.cpp" line="154"/>
         <source>Unable to write in directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно осуществить запись в директорию</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="154"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
-        <translation type="unfinished"></translation>
+        <translation>У вашего текущего пользоввателя нет права записи в эту директорию, пожалуйста, выберите другую директорию.</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="160"/>
         <source>Directory not empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Директория не является пустой</translation>
     </message>
     <message>
         <location filename="../src/migratedialog.cpp" line="160"/>
         <source>This directory is not empty, please choose another one.</source>
-        <translation type="unfinished"></translation>
+        <translation>Эта директория не является пустой, пожалуйста, выберите другую.</translation>
     </message>
 </context>
 <context>
