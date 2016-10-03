@@ -771,14 +771,9 @@ void COperationDialog::copyInstaller()
 		// create menu directory if defined
 		QString path = config->getMenuDirectory();
 
-		if (!path.isEmpty())
+		if (!path.isEmpty() && !QDir().mkpath(path))
 		{
-			QDir dir;
-
-			if (!dir.mkpath(path))
-			{
-				qDebug() << "Unable to create directory" << path;
-			}
+			qDebug() << "Unable to create directory" << path;
 		}
 
 		// create installer link in menu

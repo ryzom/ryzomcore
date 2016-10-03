@@ -245,13 +245,15 @@ void CMainWindow::onUninstall()
 		components = dialog.getSelectedCompenents();
 	}
 
-	COperationDialog dialog;
-
-	dialog.setOperation(OperationUninstall);
-	dialog.setUninstallComponents(components);
-
-	if (dialog.exec())
 	{
+		COperationDialog dialog(this);
+
+		dialog.setOperation(OperationUninstall);
+		dialog.setUninstallComponents(components);
+
+		if (dialog.exec())
+		{
+		}
 	}
 }
 
