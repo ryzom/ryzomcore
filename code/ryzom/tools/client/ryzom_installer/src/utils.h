@@ -50,9 +50,11 @@ QString qFromWide(const wchar_t *str);
 
 wchar_t* qToWide(const QString &str);
 
-bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir);
-bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj);
-QString appendLinkExtension(const QString &link);
+bool shortcutExists(const QString &shortcut);
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir);
+bool removeShortcut(const QString &shortcut);
+bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pathObj);
+QString appendShortcutExtension(const QString &shortcut);
 
 QString getVersionFromExecutable(const QString &path);
 

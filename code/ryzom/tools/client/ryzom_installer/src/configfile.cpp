@@ -18,8 +18,6 @@
 #include "configfile.h"
 #include "utils.h"
 
-#include "nel/misc/path.h"
-
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -674,9 +672,7 @@ bool CConfigFile::shouldCreateDesktopShortcut() const
 
 	if (!profile.desktopShortcut) return false;
 
-	QString shortcut = profile.getClientDesktopShortcutFullPath();
-
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
+	return !shortcutExists(profile.getClientDesktopShortcutFullPath());
 }
 
 bool CConfigFile::shouldCreateMenuShortcut() const
@@ -685,9 +681,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 	if (!profile.menuShortcut) return false;
 
-	QString shortcut = profile.getClientMenuShortcutFullPath();
-
-	return !shortcut.isEmpty() && !NLMISC::CFile::isExists(qToUtf8(appendLinkExtension(shortcut)));
+	return !shortcutExists(profile.getClientMenuShortcutFullPath());
 }
 
 bool CConfigFile::shouldCopyInstaller() const
@@ -732,10 +726,16 @@ QString CConfigFile::getInstallerOriginalDirPath() const
 	return m_installationDirectory;
 }
 
-QString CConfigFile::getInstallerMenuLinkFullPath() const
+QString CConfigFile::getInstallerMenuShortcutFullPath() const
 {
 	// don't put extension
-	return QString("%1/%2/%2 Installer").arg(QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)).arg(QApplication::applicationName());
+	return QString("%1/%2 Installer").arg(CConfigFile::getInstance()->getMenuDirectory()).arg(QApplication::applicationName());
+}
+
+QString CConfigFile::getInstallerDesktopShortcutFullPath() const
+{
+	// don't put extension
+	return QString("%1/%2 Installer").arg(CConfigFile::getInstance()->getDesktopDirectory()).arg(QApplication::applicationName());
 }
 
 QStringList CConfigFile::getInstallerRequiredFiles() const

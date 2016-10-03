@@ -770,7 +770,7 @@ void COperationDialog::copyInstaller()
 
 		// create installer link in menu
 		QString executable = newInstallerFullPath;
-		QString shortcut = config->getInstallerMenuLinkFullPath();
+		QString shortcut = config->getInstallerMenuShortcutFullPath();
 		QString name = "Ryzom Installer";
 		QString icon;
 
@@ -782,7 +782,7 @@ void COperationDialog::copyInstaller()
 		icon = config->getInstallationDirectory() + "/ryzom_installer.png";
 #endif
 
-		createLink(shortcut, name, executable, "", icon, "");
+		createShortcut(shortcut, name, executable, "", icon, "");
 	}
 
 	emit done();
@@ -1178,6 +1178,10 @@ void COperationDialog::deleteComponentsInstaller()
 #endif
 		}
 	}
+
+	// delete installer shortcuts
+	removeShortcut(config->getInstallerMenuShortcutFullPath());
+	removeShortcut(config->getInstallerDesktopShortcutFullPath());
 
 	// delete configuration file
 	config->remove();
