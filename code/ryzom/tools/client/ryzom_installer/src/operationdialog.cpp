@@ -949,7 +949,7 @@ bool COperationDialog::createAddRemoveEntry()
 
 			QString nativeFullPath = QDir::toNativeSeparators(newInstallerFullPath);
 
-			settings.setValue("Comments", "");
+			settings.setValue("Comments", config->getProductComments());
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
 			settings.setValue("DisplayVersion", RYZOM_VERSION);
