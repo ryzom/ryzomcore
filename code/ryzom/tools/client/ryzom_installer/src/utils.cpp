@@ -17,6 +17,8 @@
 #include "stdpch.h"
 #include "utils.h"
 
+#include "nel/misc/path.h"
+
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
 #endif
@@ -130,9 +132,14 @@ wchar_t* qToWide(const QString &str)
 	return (wchar_t*)str.utf16();
 }
 
+bool shortcutExists(const QString &shortcut)
+{
+	return !shortcut.isEmpty() && NLMISC::CFile::isExists(qToUtf8(appendShortcutExtension(shortcut)));
+}
+
 #ifdef Q_OS_WIN32
 
-bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
 	CCOMHelper comHelper;
 
@@ -141,9 +148,10 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 	// Get a pointer to the IShellLink interface. It is assumed that CoInitialize
 	// has already been called.
 	HRESULT hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (LPVOID*)&psl);
+
 	if (SUCCEEDED(hres))
 	{
-		IPersistFile* ppf;
+		IPersistFile* ppf = NULL;
 
 		// Set the path to the shortcut target and add the description.
 		psl->SetPath(qToWide(QDir::toNativeSeparators(executable)));
@@ -157,18 +165,20 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 
 		if (SUCCEEDED(hres))
 		{
-			QString path(link + ".lnk");
+			QString path(shortcut + ".lnk");
 
 			// Save the link by calling IPersistFile::Save.
 			hres = ppf->Save(qToWide(QDir::toNativeSeparators(path)), TRUE);
 			ppf->Release();
 		}
+
 		psl->Release();
 	}
+
 	return SUCCEEDED(hres);
 }
 
-bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
+bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &path)
 {
 	CCOMHelper comHelper;
 
@@ -193,7 +203,7 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 			// for success.
 
 			// Load the shortcut.
-			hres = ppf->Load(qToWide(QDir::toNativeSeparators(linkFile)), STGM_READ);
+			hres = ppf->Load(qToWide(QDir::toNativeSeparators(shortcut)), STGM_READ);
 
 			if (SUCCEEDED(hres))
 			{
@@ -239,7 +249,7 @@ bool resolveLink(const QWidget &window, const QString &linkFile, QString &path)
 
 #else
 
-bool createLink(const QString &link, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
 	// open template
 	QFile file(":/templates/template.desktop");
@@ -259,7 +269,7 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 	data.replace("$COMMAND", command);
 	data.replace("$ICON", icon);
 
-	QString path(link + ".desktop");
+	QString path(shortcut + ".desktop");
 
 	// write file
 	file.setFileName(path);
@@ -275,14 +285,29 @@ bool createLink(const QString &link, const QString &name, const QString &executa
 	return true;
 }
 
-bool resolveLink(const QWidget &window, const QString &pathLink, QString &pathObj)
+bool resolveShortcut(const QWidget &window, const QString &pathLink, QString &pathObj)
 {
 	return false;
 }
 
 #endif
 
-QString appendLinkExtension(const QString &link)
+bool removeShortcut(const QString &shortcut)
+{
+	// empty links are invalid
+	if (shortcut.isEmpty()) return false;
+
+	// append extension if missing
+	QString fullPath = appendShortcutExtension(shortcut);
+
+	// link doesn't exist
+	if (!NLMISC::CFile::isExists(qToUtf8(fullPath))) return false;
+
+	// remove it
+	return QFile::remove(fullPath);
+}
+
+QString appendShortcutExtension(const QString &shortcut)
 {
 	QString extension;
 
@@ -295,9 +320,9 @@ QString appendLinkExtension(const QString &link)
 #endif
 
 	// already the good extension
-	if (link.indexOf(extension) > -1) return link;
+	if (shortcut.indexOf(extension) > -1) return shortcut;
 
-	return link + extension;
+	return shortcut + extension;
 }
 
 QString getVersionFromExecutable(const QString &path)

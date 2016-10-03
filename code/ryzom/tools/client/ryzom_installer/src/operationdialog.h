@@ -147,6 +147,8 @@ protected:
 	bool m_aborting;
 
 	OperationType m_operation;
+	OperationStep m_operationStep;
+	int m_operationStepCounter;
 	SComponents m_addComponents;
 	SComponents m_removeComponents;
 	QString m_currentServerId;

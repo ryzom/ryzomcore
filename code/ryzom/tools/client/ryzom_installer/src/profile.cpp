@@ -100,7 +100,7 @@ void CProfile::createShortcuts() const
 		QString shortcut = getClientDesktopShortcutFullPath();
 
 		// create desktop shortcut
-		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
+		createShortcut(shortcut, name, exe, profileArguments, icon, workingDir);
 	}
 
 	if (menuShortcut)
@@ -108,21 +108,17 @@ void CProfile::createShortcuts() const
 		QString shortcut = getClientMenuShortcutFullPath();
 
 		// create menu shortcut
-		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
+		createShortcut(shortcut, name, exe, profileArguments, icon, workingDir);
 	}
 }
 
 void CProfile::deleteShortcuts() const
 {
 	// delete desktop shortcut
-	QString link = getClientDesktopShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
+	removeShortcut(getClientDesktopShortcutFullPath());
 
 	// delete menu shortcut
-	link = getClientMenuShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
+	removeShortcut(getClientMenuShortcutFullPath());
 }
 
 void CProfile::updateShortcuts() const
