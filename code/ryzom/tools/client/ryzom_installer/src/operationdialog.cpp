@@ -43,7 +43,8 @@
 	#define new DEBUG_NEW
 #endif
 
-COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(false), m_operation(OperationNone)
+COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(false), m_operation(OperationNone),
+	m_operationStep(DisplayNoServerError), m_operationStepCounter(0)
 {
 	setupUi(this);
 
@@ -133,6 +134,21 @@ void COperationDialog::processInstallNextStep()
 
 	// long operations are done in a thread
 	OperationStep step = config->getInstallNextStep();
+
+	if (step == m_operationStep)
+	{
+		++m_operationStepCounter;
+	}
+	else
+	{
+		m_operationStep = step;
+		m_operationStepCounter = 0;
+	}
+
+	if (m_operationStepCounter > 10)
+	{
+		qDebug() << "possible infinite loop" << m_operationStep << m_operationStepCounter;
+	}
 
 	switch(step)
 	{
