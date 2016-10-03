@@ -735,15 +735,12 @@ void COperationDialog::copyInstaller()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
-
 	m_currentOperation = tr("Copying installer to new location...");
 
 	QString destinationDirectory = config->getInstallationDirectory();
 
 	// rename old client to installer
-	QString newInstallerFilename = server.installerFilename;
+	QString newInstallerFilename = config->getInstallerFilename();
 
 	if (!newInstallerFilename.isEmpty())
 	{
@@ -944,14 +941,10 @@ bool COperationDialog::createAddRemoveEntry()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CServer &server = config->getServer();
+	QString newInstallerFilename = config->getInstallerFilename();
 
-	QString oldInstallerFilename = server.clientFilenameOld;
-	QString newInstallerFilename = server.installerFilename;
-
-	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	if (!newInstallerFilename.isEmpty())
 	{
-		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
 		if (QFile::exists(newInstallerFullPath))
@@ -959,7 +952,6 @@ bool COperationDialog::createAddRemoveEntry()
 #ifdef Q_OS_WIN
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
 
-			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
 			QString nativeFullPath = QDir::toNativeSeparators(newInstallerFullPath);
 
 			settings.setValue("Comments", "");
@@ -994,14 +986,10 @@ bool COperationDialog::updateAddRemoveEntry()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CServer &server = config->getServer();
+	QString newInstallerFilename = config->getInstallerFilename();
 
-	QString oldInstallerFilename = server.clientFilenameOld;
-	QString newInstallerFilename = server.installerFilename;
-
-	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	if (!newInstallerFilename.isEmpty())
 	{
-		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
 		if (QFile::exists(newInstallerFullPath))
