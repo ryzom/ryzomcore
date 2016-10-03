@@ -116,6 +116,8 @@ public:
 	bool uninstallingOldClient() const;
 	void setUninstallingOldClient(bool on) const;
 
+	QString getInstallerFilename() const { return m_installerFilename; }
+
 	QString expandVariables(const QString &str) const;
 
 	QString getClientArch() const;
@@ -155,6 +157,7 @@ private:
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
 	bool m_shouldUninstallOldClient;
+	QString m_installerFilename;
 	QString m_language;
 
 	QString m_defaultConfigPath;

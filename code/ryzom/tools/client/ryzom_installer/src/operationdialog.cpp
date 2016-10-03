@@ -735,15 +735,12 @@ void COperationDialog::copyInstaller()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
-
 	m_currentOperation = tr("Copying installer to new location...");
 
 	QString destinationDirectory = config->getInstallationDirectory();
 
 	// rename old client to installer
-	QString newInstallerFilename = server.installerFilename;
+	QString newInstallerFilename = config->getInstallerFilename();
 
 	if (!newInstallerFilename.isEmpty())
 	{
@@ -774,14 +771,9 @@ void COperationDialog::copyInstaller()
 		// create menu directory if defined
 		QString path = config->getMenuDirectory();
 
-		if (!path.isEmpty())
+		if (!path.isEmpty() && !QDir().mkpath(path))
 		{
-			QDir dir;
-
-			if (!dir.mkpath(path))
-			{
-				qDebug() << "Unable to create directory" << path;
-			}
+			qDebug() << "Unable to create directory" << path;
 		}
 
 		// create installer link in menu
@@ -944,14 +936,10 @@ bool COperationDialog::createAddRemoveEntry()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CServer &server = config->getServer();
+	QString newInstallerFilename = config->getInstallerFilename();
 
-	QString oldInstallerFilename = server.clientFilenameOld;
-	QString newInstallerFilename = server.installerFilename;
-
-	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	if (!newInstallerFilename.isEmpty())
 	{
-		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
 		if (QFile::exists(newInstallerFullPath))
@@ -959,18 +947,13 @@ bool COperationDialog::createAddRemoveEntry()
 #ifdef Q_OS_WIN
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
 
-			QStringList versionTokens = QString(RYZOM_VERSION).split('.');
 			QString nativeFullPath = QDir::toNativeSeparators(newInstallerFullPath);
 
-			settings.setValue("Comments", "");
+			settings.setValue("Comments", config->getProductComments());
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
-			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
-			settings.setValue("MajorVersion", versionTokens[0].toInt());
-			settings.setValue("MinorVersion", versionTokens[1].toInt());
 			settings.setValue("NoModify", 0);
 			settings.setValue("NoRemove", 0);
 			settings.setValue("NoRepair", 0);
@@ -985,6 +968,8 @@ bool COperationDialog::createAddRemoveEntry()
 		}
 	}
 
+	updateAddRemoveEntry();
+
 	emit done();
 
 	return true;
@@ -994,24 +979,23 @@ bool COperationDialog::updateAddRemoveEntry()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	const CServer &server = config->getServer();
+	QString newInstallerFilename = config->getInstallerFilename();
 
-	QString oldInstallerFilename = server.clientFilenameOld;
-	QString newInstallerFilename = server.installerFilename;
-
-	if (!oldInstallerFilename.isEmpty() && !newInstallerFilename.isEmpty())
+	if (!newInstallerFilename.isEmpty())
 	{
-		QString oldInstallerFullPath = config->getSrcServerDirectory() + "/" + oldInstallerFilename;
 		QString newInstallerFullPath = config->getInstallationDirectory() + "/" + newInstallerFilename;
 
 		if (QFile::exists(newInstallerFullPath))
 		{
 #ifdef Q_OS_WIN
 			QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
-			QStringList versionTokens = QApplication::applicationVersion().split('.');
 
-			settings.setValue("DisplayVersion", QApplication::applicationVersion());
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
+			QString version = QApplication::applicationVersion();
+
+			settings.setValue("DisplayVersion", version);
+			settings.setValue("EstimatedSize", (quint32)(getDirectorySize(config->getInstallationDirectory(), true) / 1024)); // size if in KiB
+
+			QStringList versionTokens = version.split('.');
 			settings.setValue("MajorVersion", versionTokens[0].toInt());
 			settings.setValue("MinorVersion", versionTokens[1].toInt());
 #endif
@@ -1027,8 +1011,6 @@ bool COperationDialog::deleteAddRemoveEntry()
 	QSettings settings("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Ryzom", QSettings::NativeFormat);
 	settings.remove("");
 #endif
-
-	emit done();
 
 	return true;
 }
@@ -1205,7 +1187,7 @@ void COperationDialog::deleteComponentsInstaller()
 	// reset it once it's done
 	m_removeComponents.installer = false;
 
-	emit onProgressSuccess(1);
+	emit success(1);
 	emit done();
 }
 
@@ -1240,7 +1222,7 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 	// reset it once it's done
 	m_removeComponents.downloadedFiles = false;
 
-	emit onProgressSuccess(1);
+	emit success(1);
 	emit done();
 }
 

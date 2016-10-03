@@ -4,6 +4,7 @@
     </qresource>
     <qresource prefix="/icons">
         <file>ryzom.ico</file>
+        <file>ryzom_installer.png</file>
     </qresource>
     <qresource prefix="/templates">
         <file>template.desktop</file>

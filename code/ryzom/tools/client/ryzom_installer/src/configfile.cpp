@@ -82,6 +82,18 @@ bool CConfigFile::load(const QString &filename)
 	m_installationDirectory = settings.value("installation_directory").toString();
 	m_use64BitsClient = settings.value("use_64bits_client", true).toBool();
 	m_shouldUninstallOldClient = settings.value("should_uninstall_old_client", true).toBool();
+
+	if (!useDefaultValues)
+	{
+#if defined(Q_OS_WIN)
+		m_installerFilename = settings.value("installer_filename_windows").toString();
+#elif defined(Q_OS_MAC)
+		m_installerFilename = settings.value("installer_filename_osx").toString();
+#else
+		m_installerFilename = settings.value("installer_filename_linux").toString();
+#endif
+	}
+
 	settings.endGroup();
 
 	if (!useDefaultValues)
@@ -129,6 +141,9 @@ bool CConfigFile::load(const QString &filename)
 		settings.endGroup();
 	}
 
+	// save file with new values
+	if (useDefaultValues) save();
+
 	return !m_servers.isEmpty();
 }
 
@@ -144,6 +159,15 @@ bool CConfigFile::save() const
 	settings.setValue("installation_directory", m_installationDirectory);
 	settings.setValue("use_64bits_client", m_use64BitsClient);
 	settings.setValue("should_uninstall_old_client", m_shouldUninstallOldClient);
+
+#if defined(Q_OS_WIN)
+	settings.setValue("installer_filename_windows", m_installerFilename);
+#elif defined(Q_OS_MAC)
+	settings.setValue("installer_filename_osx", m_installerFilename);
+#else
+	settings.setValue("installer_filename_linux", m_installerFilename);
+#endif
+
 	settings.endGroup();
 
 	settings.beginGroup("product");
@@ -686,10 +710,7 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 
 bool CConfigFile::shouldCopyInstaller() const
 {
-	const CProfile &p = getProfile();
-	const CServer &s = getServer(p.server);
-
-	QString installerDst = getInstallationDirectory() + "/" + s.installerFilename;
+	QString installerDst = getInstallationDirectory() + "/" + m_installerFilename;
 
 	// if installer not found in installation directory, extract it from BNP
 	if (!QFile::exists(installerDst)) return true;

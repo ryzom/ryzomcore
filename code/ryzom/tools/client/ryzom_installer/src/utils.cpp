@@ -229,9 +229,6 @@ bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pa
 							// Handle success
 							path = QDir::fromNativeSeparators(qFromWide(szGotPath));
 						}
-						else
-						{
-						}
 					}
 				}
 			}

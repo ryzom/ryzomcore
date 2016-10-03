@@ -41,7 +41,6 @@ public:
 	QString clientFilename;
 	QString clientFilenameOld;
 	QString configurationFilename;
-	QString installerFilename;
 	QString comments;
 
 	void loadFromSettings(const QSettings &settings);

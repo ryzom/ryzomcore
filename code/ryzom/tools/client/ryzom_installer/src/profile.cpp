@@ -99,16 +99,28 @@ void CProfile::createShortcuts() const
 	{
 		QString shortcut = getClientDesktopShortcutFullPath();
 
+		// make sure directory exists
+		QDir().mkpath(CConfigFile::getInstance()->getDesktopDirectory());
+
 		// create desktop shortcut
-		createShortcut(shortcut, name, exe, profileArguments, icon, workingDir);
+		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
+		{
+			qDebug() << "Unable to create desktop directory";
+		}
 	}
 
 	if (menuShortcut)
 	{
 		QString shortcut = getClientMenuShortcutFullPath();
 
+		// make sure directory exists
+		QDir().mkpath(CConfigFile::getInstance()->getMenuDirectory());
+
 		// create menu shortcut
-		createShortcut(shortcut, name, exe, profileArguments, icon, workingDir);
+		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
+		{
+			qDebug() << "Unable to create shortcut for client in menu";
+		}
 	}
 }
 
