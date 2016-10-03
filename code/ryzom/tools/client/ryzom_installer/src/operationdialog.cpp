@@ -952,12 +952,8 @@ bool COperationDialog::createAddRemoveEntry()
 			settings.setValue("Comments", config->getProductComments());
 			settings.setValue("DisplayIcon", nativeFullPath + ",0");
 			settings.setValue("DisplayName", QApplication::applicationName());
-			settings.setValue("DisplayVersion", RYZOM_VERSION);
-			settings.setValue("EstimatedSize", getDirectorySize(config->getInstallationDirectory(), true));
 			settings.setValue("InstallDate", QDateTime::currentDateTime().toString("Ymd"));
 			settings.setValue("InstallLocation", config->getInstallationDirectory());
-			settings.setValue("MajorVersion", versionTokens[0].toInt());
-			settings.setValue("MinorVersion", versionTokens[1].toInt());
 			settings.setValue("NoModify", 0);
 			settings.setValue("NoRemove", 0);
 			settings.setValue("NoRepair", 0);
@@ -971,6 +967,8 @@ bool COperationDialog::createAddRemoveEntry()
 #endif
 		}
 	}
+
+	updateAddRemoveEntry();
 
 	emit done();
 
