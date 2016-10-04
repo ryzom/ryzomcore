@@ -122,7 +122,7 @@ void CMigrateDialog::accept()
 	// compare with exact size of current directory
 	if (freeSpace < getDirectorySize(m_currentDirectory, true))
 	{
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
 		return;
 	}
 
@@ -154,10 +154,14 @@ void CMigrateDialog::accept()
 		return;
 	}
 
-	if (!isDirectoryEmpty(m_dstDirectory, true))
+	// if reinstalling in same directory, don't check if directory is empty
+	if (m_dstDirectory != CConfigFile::getInstance()->getNewInstallationDirectory())
 	{
-		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
-		return;
+		if (!isDirectoryEmpty(m_dstDirectory, true))
+		{
+			QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
+			return;
+		}
 	}
 
 	CConfigFile::getInstance()->setSrcServerDirectory(m_currentDirectory);
