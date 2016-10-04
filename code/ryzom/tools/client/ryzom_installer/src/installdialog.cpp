@@ -106,7 +106,7 @@ void CInstallDialog::onAnotherLocationBrowseButtonClicked()
 
 		if (CConfigFile::getInstance()->isRyzomInstalledIn(directory)) break;
 
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to find Ryzom"), tr("Unable to find Ryzom in selected directory. Please choose another one or cancel."));
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to find Ryzom"), tr("Unable to find Ryzom in selected directory. Please choose another one or cancel."));
 	}
 
 	m_anotherDirectory = directory;
@@ -154,7 +154,7 @@ void CInstallDialog::accept()
 
 	if (freeSpace < server.dataUncompressedSize)
 	{
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
 		return;
 	}
 
@@ -186,10 +186,14 @@ void CInstallDialog::accept()
 		return;
 	}
 
-	if (!isDirectoryEmpty(m_dstDirectory, true))
+	// if reinstalling in same directory, don't check if directory is empty
+	if (m_dstDirectory != CConfigFile::getInstance()->getNewInstallationDirectory())
 	{
-		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
-		return;
+		if (!isDirectoryEmpty(m_dstDirectory, true))
+		{
+			QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
+			return;
+		}
 	}
 
 	if (oldDirectoryRadioButton->isChecked())
