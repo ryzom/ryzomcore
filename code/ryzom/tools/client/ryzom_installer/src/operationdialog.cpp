@@ -237,6 +237,9 @@ void COperationDialog::updateAddRemoveComponents()
 
 		// remove profiles that didn't exist
 		profilesToAdd.removeAll(profile.id);
+
+		// delete all shortcuts, we'll recreate them later
+		profile.deleteShortcuts();
 	}
 
 	const CServer &defaultServer = config->getServer();
@@ -360,7 +363,7 @@ void COperationDialog::processUpdateProfilesNextStep()
 		}
 	}
 
-	// recreate shortcuts
+	// recreate all shortcuts
 	foreach(const CProfile &profile, config->getProfiles())
 	{
 		profile.createShortcuts();

@@ -169,6 +169,12 @@ bool createShortcut(const QString &shortcut, const QString &name, const QString 
 
 			// Save the link by calling IPersistFile::Save.
 			hres = ppf->Save(qToWide(QDir::toNativeSeparators(path)), TRUE);
+
+			if (FAILED(hres))
+			{
+				qDebug() << "Unable to create shortcut" << path;
+			}
+
 			ppf->Release();
 		}
 
