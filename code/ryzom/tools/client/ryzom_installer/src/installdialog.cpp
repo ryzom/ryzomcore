@@ -32,23 +32,6 @@ CInstallDialog::CInstallDialog():QDialog()
 
 	setupUi(this);
 
-	oldDirectoryRadioButton->setVisible(false);
-
-	// enable download radio button by default
-	internetRadioButton->setChecked(true);
-
-	m_oldDirectory = CConfigFile::getInstance()->getOldInstallationDirectory();
-
-	// found a previous installation
-	if (CConfigFile::getInstance()->areRyzomDataInstalledIn(m_oldDirectory))
-	{
-		oldDirectoryRadioButton->setText(tr("Old installation: %1").arg(m_oldDirectory));
-		oldDirectoryRadioButton->setVisible(true);
-		oldDirectoryRadioButton->setChecked(true);
-	}
-
-	updateAnotherLocationText();
-
 	// update default destination
 	onDestinationDefaultButtonClicked();
 
@@ -66,10 +49,8 @@ CInstallDialog::CInstallDialog():QDialog()
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
-	internetRadioButton->setText(tr("Internet (%1 to download)").arg(qBytesToHumanReadable(server.dataCompressedSize)));
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
-	connect(anotherLocationBrowseButton, SIGNAL(clicked()), SLOT(onAnotherLocationBrowseButtonClicked()));
 	connect(destinationDefaultButton, SIGNAL(clicked()), SLOT(onDestinationDefaultButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
 
@@ -94,29 +75,6 @@ void CInstallDialog::onShowAdvancedParameters(int state)
 	adjustSize();
 }
 
-void CInstallDialog::onAnotherLocationBrowseButtonClicked()
-{
-	QString directory;
-	
-	for(;;)
-	{
-		directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where Ryzom is currently installed."));
-
-		if (directory.isEmpty()) return;
-
-		if (CConfigFile::getInstance()->isRyzomInstalledIn(directory)) break;
-
-		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to find Ryzom"), tr("Unable to find Ryzom in selected directory. Please choose another one or cancel."));
-	}
-
-	m_anotherDirectory = directory;
-
-	// if we browse to a Ryzom installation, we want to use it
-	anotherLocationRadioButton->setChecked(true);
-
-	updateAnotherLocationText();
-}
-
 void CInstallDialog::onDestinationDefaultButtonClicked()
 {
 	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
@@ -133,11 +91,6 @@ void CInstallDialog::onDestinationBrowseButtonClicked()
 	m_dstDirectory = directory;
 
 	updateDestinationText();
-}
-
-void CInstallDialog::updateAnotherLocationText()
-{
-	anotherLocationRadioButton->setText(tr("Another location: %1").arg(m_anotherDirectory.isEmpty() ? tr("Undefined"):m_anotherDirectory));
 }
 
 void CInstallDialog::updateDestinationText()
@@ -196,18 +149,8 @@ void CInstallDialog::accept()
 		}
 	}
 
-	if (oldDirectoryRadioButton->isChecked())
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_oldDirectory);
-	}
-	else if (anotherLocationRadioButton->isChecked())
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_anotherDirectory);
-	}
-	else
-	{
-		CConfigFile::getInstance()->setSrcServerDirectory("");
-	}
+	// always download data
+	CConfigFile::getInstance()->setSrcServerDirectory("");
 
 	CConfigFile::getInstance()->setInstallationDirectory(m_dstDirectory);
 	CConfigFile::getInstance()->setUse64BitsClient(clientArch64RadioButton->isChecked());

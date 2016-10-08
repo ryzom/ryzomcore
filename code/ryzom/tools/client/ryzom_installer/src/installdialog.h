@@ -35,18 +35,14 @@ public:
 
 private slots:
 	void onShowAdvancedParameters(int state);
-	void onAnotherLocationBrowseButtonClicked();
 	void onDestinationDefaultButtonClicked();
 	void onDestinationBrowseButtonClicked();
 
 	void accept();
 
 private:
-	void updateAnotherLocationText();
 	void updateDestinationText();
 
-	QString m_oldDirectory;
-	QString m_anotherDirectory;
 	QString m_dstDirectory;
 };
 
