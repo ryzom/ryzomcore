@@ -1221,7 +1221,7 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 #if defined(NL_OS_WIN64)
 	platformPatchCategory = "main_exedll_win64";
-#elif defined(NL_OS_WIN32)
+#elif defined(NL_OS_WINDOWS)
 	platformPatchCategory = "main_exedll_win32";
 #elif defined(NL_OS_MAC)
 	platformPatchCategory = "main_exedll_osx";
