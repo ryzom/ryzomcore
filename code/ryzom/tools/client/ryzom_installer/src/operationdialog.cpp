@@ -788,9 +788,17 @@ void COperationDialog::copyInstaller()
 #ifdef Q_OS_WIN32
 		// under Windows, icon is included in executable
 		icon = executable;
+#elif defined(Q_OS_MAC)
+		// everything is in bundle
 #else
 		// icon is in the same directory as installer
 		icon = config->getInstallationDirectory() + "/ryzom_installer.png";
+
+		// create icon if not exists
+		if (!QFile::exists(icon) && !writeResource(":/icons/ryzom.png", icon))
+		{
+			qDebug() << "Unable to create" << icon;
+		}
 #endif
 
 		createShortcut(shortcut, name, executable, "", icon, "");
@@ -1072,6 +1080,9 @@ void COperationDialog::deleteComponentsServers()
 	// clear list of all servers to uninstall
 	m_removeComponents.servers.clear();
 
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
+
 	emit done();
 }
 
@@ -1142,6 +1153,9 @@ void COperationDialog::deleteComponentsProfiles()
 	// clear list of all profiles to uninstall
 	m_removeComponents.profiles.clear();
 
+	// delete profiles directory if all files have been deleted
+	if (isDirectoryEmpty(config->getProfileDirectory(), true)) QDir(config->getProfileDirectory()).removeRecursively();
+
 	emit done();
 }
 
@@ -1190,6 +1204,9 @@ void COperationDialog::deleteComponentsInstaller()
 	// reset it once it's done
 	m_removeComponents.installer = false;
 
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
+
 	emit success(1);
 	emit done();
 }
@@ -1224,6 +1241,9 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 
 	// reset it once it's done
 	m_removeComponents.downloadedFiles = false;
+
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
 
 	emit success(1);
 	emit done();

@@ -791,15 +791,18 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 	// unsupported compiler
 #endif
 
+	// include current executable
+	files << QFileInfo(QApplication::applicationFilePath()).fileName();
 #elif defined(Q_OS_MAC)
-	// TODO: for OS X
+	// everything is in a directory
+	files << "Ryzom Installer.app";
 #else
 	// icon under Linux
 	files << "ryzom_installer.png";
-#endif
 
 	// include current executable
 	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+#endif
 
 	return files;
 }
