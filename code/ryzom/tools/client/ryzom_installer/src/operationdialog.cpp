@@ -1074,6 +1074,9 @@ void COperationDialog::deleteComponentsServers()
 	// clear list of all servers to uninstall
 	m_removeComponents.servers.clear();
 
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
+
 	emit done();
 }
 
@@ -1144,6 +1147,9 @@ void COperationDialog::deleteComponentsProfiles()
 	// clear list of all profiles to uninstall
 	m_removeComponents.profiles.clear();
 
+	// delete profiles directory if all files have been deleted
+	if (isDirectoryEmpty(config->getProfileDirectory(), true)) QDir(config->getProfileDirectory()).removeRecursively();
+
 	emit done();
 }
 
@@ -1192,6 +1198,9 @@ void COperationDialog::deleteComponentsInstaller()
 	// reset it once it's done
 	m_removeComponents.installer = false;
 
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
+
 	emit success(1);
 	emit done();
 }
@@ -1226,6 +1235,9 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 
 	// reset it once it's done
 	m_removeComponents.downloadedFiles = false;
+
+	// delete Ryzom directory if all files have been deleted
+	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
 
 	emit success(1);
 	emit done();
