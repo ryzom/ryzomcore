@@ -102,6 +102,21 @@ bool isDirectoryEmpty(const QString &directory, bool recursize)
 	return res;
 }
 
+bool isDirectoryWritable(const QString &directory)
+{
+	// check if directory is writable by current user
+	QFile file(directory + "/writable_test_for_ryzom_installer.txt");
+
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	file.close();
+
+	// remove it
+	file.remove();
+
+	return true;
+}
+
 qint64 getDirectorySize(const QString &directory, bool recursize)
 {
 	qint64 size = 0;

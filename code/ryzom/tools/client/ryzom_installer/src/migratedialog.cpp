@@ -133,16 +133,7 @@ void CMigrateDialog::accept()
 	if (succeedsToWrite)
 	{
 		// check if directory is writable by current user
-		QFile file(m_dstDirectory + "/writable_test_for_ryzom_installer.txt");
-
-		if (file.open(QFile::WriteOnly))
-		{
-			file.close();
-
-			// remove it
-			file.remove();
-		}
-		else
+		if (!isDirectoryWritable(m_dstDirectory))
 		{
 			succeedsToWrite = false;
 		}
