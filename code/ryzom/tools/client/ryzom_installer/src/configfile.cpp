@@ -593,6 +593,11 @@ bool CConfigFile::areRyzomDataInstalledIn(const QString &directory) const
 
 	QDir dir(directory);
 
+#ifdef Q_OS_MAC
+	// under OS X, data are in Ryzom.app/Contents/Resources
+	if (!dir.cd("Ryzom.app") || !dir.cd("Contents") || !dir.cd("Resources")) return false;
+#endif
+
 	// directory doesn't exist
 	if (!dir.exists()) return false;
 
@@ -642,6 +647,11 @@ bool CConfigFile::isRyzomClientInstalledIn(const QString &directory) const
 	else
 	{
 		// client 3.0+
+
+#ifdef Q_OS_MAC
+		// under OS X, client_default.cfg is in Ryzom.app/Contents/Resources
+		if (!dir.cd("Ryzom.app") || !dir.cd("Contents") || !dir.cd("Resources")) return false;
+#endif
 
 		// client_default.cfg doesn't exist
 		if (!dir.exists("client_default.cfg")) return false;
