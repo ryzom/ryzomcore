@@ -467,6 +467,10 @@ bool CFilesExtractor::extract7z()
 		error = QApplication::tr("7zip decoder doesn't support this archive");
 		break;
 
+		case SZ_ERROR_INPUT_EOF:
+		error = QApplication::tr("Errors in 7z file");
+		break;
+
 		case SZ_ERROR_FAIL:
 		// error already defined
 		break;

@@ -547,9 +547,16 @@ void COperationDialog::extractDownloadedData()
 
 	m_currentOperation = tr("Extracting data required by server %1...").arg(server.name);
 
+	QString dest = server.getDirectory();
+
+#ifdef Q_OS_MAC
+	// under OS X, data should be uncompressed in Ryzom.app/Contents/Resources
+	dest += "/Ryzom.app/Contents/Resources";
+#endif
+
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.dataDownloadFilename);
-	extractor.setDestinationDirectory(server.getDirectory());
+	extractor.setDestinationDirectory(dest);
 
 	if (extractor.exec())
 	{
