@@ -16,6 +16,7 @@
 
 #include "stdpch.h"
 #include "utils.h"
+#include "configfile.h"
 
 #include "nel/misc/path.h"
 
@@ -38,6 +39,36 @@ QString qBytesToHumanReadable(qint64 bytes)
 	}
 
 	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
+}
+
+QString nameToId(const QString &name)
+{
+	QString res;
+
+	// only allows simple characters
+	QRegExp allowedCharacters("^[0-9a-zA-Z-]$");
+
+	for (int i = 0, len = name.length(); i < len; ++i)
+	{
+		if (allowedCharacters.indexIn(name.at(i)) > -1)
+		{
+			// allowed character
+			res += name[i];
+		}
+		else
+		{
+			// not allowed, replace by a space
+			res += " ";
+		}
+	}
+
+	// simplify all spaces
+	res = res.simplified();
+
+	// replace spaces by minus
+	res.replace(" ", "-");
+
+	return res;
 }
 
 bool isDirectoryEmpty(const QString &directory, bool recursize)
@@ -250,37 +281,89 @@ bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pa
 	return SUCCEEDED(hres);
 }
 
+#elif defined(NL_OS_MAC)
+
+bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
+{
+	QString appPath(shortcut + ".app");
+
+	// directories
+	QString contentsPath(appPath + "/Contents");
+	QString binaryPath(contentsPath + "/MacOS");
+	QString dataPath(contentsPath + "/Resources");
+
+	// files
+	QString binaryFile(binaryPath + "/shortcut.sh");
+	QString iconFile(dataPath + "/ryzom.icns");
+	QString pkgInfoFile(contentsPath + "/PkgInfo");
+	QString plistFile(contentsPath + "/Info.plist");
+
+	// silently create directories
+	QDir().mkpath(binaryPath);
+	QDir().mkpath(dataPath);
+
+	if (!isDirectoryWritable(binaryPath) || !isDirectoryWritable(dataPath)) return false;
+
+	// write icon
+	if (!writeResource(":/icons/ryzom.icns", iconFile)) return false;
+
+	// write PkgInfo
+	if (!writeResource(":/templates/PkgInfo", pkgInfoFile)) return false;
+
+	// variables
+	QMap<QString, QString> strings;
+
+	// build command
+	QString command = QString("open \"%1\"").arg(executable);
+	if (!arguments.isEmpty()) command += " --args " + arguments;
+
+	strings.clear();
+	strings["COMMAND"] = command;
+
+	// write shortcut.sh
+	if (!writeResourceWithTemplates(":/templates/shortcut.sh", binaryFile, strings)) return false;
+
+	// set executable flags to .sh
+	QFile::setPermissions(binaryFile, QFile::permissions(binaryFile) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+
+	CConfigFile *config = CConfigFile::getInstance();
+
+	strings.clear();
+	strings["NAME"] = name;
+	strings["COPYRIGHT"] = config->getProductPublisher();
+	strings["VERSION"] = QApplication::applicationVersion();
+	strings["IDENTIFIER"] = "com.winchgate.Ryzom-" + nameToId(name);
+
+	// write Info.plist
+	if (!writeResourceWithTemplates(":/templates/Info.plist", plistFile, strings)) return false;
+
+	return true;
+}
+
+bool resolveShortcut(const QWidget &window, const QString &pathLink, QString &pathObj)
+{
+	return false;
+}
+
 #else
 
 bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir)
 {
-	// open template
-	QFile file(":/templates/template.desktop");
-
-	if (!file.open(QFile::ReadOnly)) return false;
-
-	QString data = QString::fromUtf8(file.readAll());
-
-	file.close();
-
 	// build command
 	QString command = executable;
 	if (!arguments.isEmpty()) command += " " + arguments;
 
-	// replace strings
-	data.replace("$NAME", name);
-	data.replace("$COMMAND", command);
-	data.replace("$ICON", icon);
+	// variables
+	QMap<QString, QString> strings;
+	strings["NAME"] = name;
+	strings["COMMAND"] = command;
+	strings["ICON"] = icon;
 
+	// destination file
 	QString path(shortcut + ".desktop");
 
-	// write file
-	file.setFileName(path);
-
-	if (!file.open(QFile::WriteOnly)) return false;
-
-	file.write(data.toUtf8());
-	file.close();
+	// replace strings
+	if (!writeResourceWithTemplates(":/templates/template.desktop", path, strings)) return false;
 
 	// set executable flags to .desktop
 	QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
@@ -307,7 +390,13 @@ bool removeShortcut(const QString &shortcut)
 	if (!NLMISC::CFile::isExists(qToUtf8(fullPath))) return false;
 
 	// remove it
+#if defined(Q_OS_MAC)
+	// under OS X, it's a directory
+	return QDir(fullPath).removeRecursively();
+#else
+	// a file under other platforms
 	return QFile::remove(fullPath);
+#endif
 }
 
 QString appendShortcutExtension(const QString &shortcut)
@@ -317,7 +406,7 @@ QString appendShortcutExtension(const QString &shortcut)
 #if defined(Q_OS_WIN32)
 	extension = ".lnk";
 #elif defined(Q_OS_MAC)
-	// TODO
+	extension = ".app";
 #else
 	extension = ".desktop";
 #endif
@@ -389,6 +478,75 @@ QString getVersionFromExecutable(const QString &path)
 #endif
 
 	return "";
+}
+
+bool writeResource(const QString &resource, const QString &path)
+{
+	// all resources start with :/
+	if (!resource.startsWith(":/")) return false;
+
+	// open resource
+	QFile file(resource);
+
+	// unable to open it
+	if (!file.open(QFile::ReadOnly)) return false;
+
+	QByteArray data(file.readAll());
+
+	file.close();
+
+	// write file
+	file.setFileName(path);
+
+	// unable to write it
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	// problem writting
+	if (file.write(data) != data.length()) return false;
+
+	file.close();
+
+	return true;
+}
+
+bool writeResourceWithTemplates(const QString &resource, const QString &path, const QMap<QString, QString> &strings)
+{
+	// all resources start with :/
+	if (!resource.startsWith(":/")) return false;
+
+	// open resource
+	QFile file(resource);
+
+	// unable to open it
+	if (!file.open(QFile::ReadOnly)) return false;
+
+	// data are UTF-8 text
+	QString data = QString::fromUtf8(file.readAll());
+
+	file.close();
+
+	// write file
+	file.setFileName(path);
+
+	// unable to write it
+	if (!file.open(QFile::WriteOnly)) return false;
+
+	// replace strings
+	QMap<QString, QString>::ConstIterator it = strings.begin(), iend = strings.end();
+
+	while (it != iend)
+	{
+		// replace variables with their value
+		data.replace("$" + it.key(), it.value());
+
+		++it;
+	}
+
+	// write
+	file.write(data.toUtf8());
+	file.close();
+
+	return true;
 }
 
 CCOMHelper::CCOMHelper()

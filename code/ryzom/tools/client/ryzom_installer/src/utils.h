@@ -29,6 +29,7 @@
  */
 
 QString qBytesToHumanReadable(qint64 bytes);
+QString nameToId(const QString &name);
 
 bool isDirectoryEmpty(const QString &directory, bool recursize);
 
@@ -57,6 +58,8 @@ bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pa
 QString appendShortcutExtension(const QString &shortcut);
 
 QString getVersionFromExecutable(const QString &path);
+bool writeResource(const QString &resource, const QString &path);
+bool writeResourceWithTemplates(const QString &resource, const QString &path, const QMap<QString, QString> &strings);
 
 class CCOMHelper
 {

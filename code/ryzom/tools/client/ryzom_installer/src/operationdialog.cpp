@@ -788,6 +788,8 @@ void COperationDialog::copyInstaller()
 #ifdef Q_OS_WIN32
 		// under Windows, icon is included in executable
 		icon = executable;
+#elif defined(Q_OS_MAC)
+		// everything is in bundle
 #else
 		// icon is in the same directory as installer
 		icon = config->getInstallationDirectory() + "/ryzom_installer.png";
