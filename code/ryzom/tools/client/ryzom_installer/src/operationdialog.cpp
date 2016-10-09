@@ -793,6 +793,12 @@ void COperationDialog::copyInstaller()
 #else
 		// icon is in the same directory as installer
 		icon = config->getInstallationDirectory() + "/ryzom_installer.png";
+
+		// create icon if not exists
+		if (!QFile::exists(icon) && !writeResource(":/icons/ryzom.png", icon))
+		{
+			qDebug() << "Unable to create" << icon;
+		}
 #endif
 
 		createShortcut(shortcut, name, executable, "", icon, "");
