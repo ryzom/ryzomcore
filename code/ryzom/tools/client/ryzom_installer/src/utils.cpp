@@ -329,8 +329,8 @@ bool createShortcut(const QString &shortcut, const QString &name, const QString 
 	QMap<QString, QString> strings;
 
 	// build command
-	QString command = QString("open \"%1\"").arg(executable);
-	if (!arguments.isEmpty()) command += " --args " + arguments;
+	QString command = QString("exec \"%1\"").arg(executable);
+	if (!arguments.isEmpty()) command += " " + arguments;
 
 	strings.clear();
 	strings["COMMAND"] = command;
