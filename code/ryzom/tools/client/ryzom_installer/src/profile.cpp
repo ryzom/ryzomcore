@@ -145,6 +145,9 @@ bool CProfile::createClientConfig() const
 	QString directory = getDirectory();
 	QString filename = directory + "/client.cfg";
 
+	// create directory
+	QDir().mkpath(directory);
+
 	const CServer &s = CConfigFile::getInstance()->getServer(server);
 
 	// create the 2 initial lines of client.cfg
