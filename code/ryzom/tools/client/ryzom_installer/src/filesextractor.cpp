@@ -291,6 +291,26 @@ bool CFilesExtractor::exec()
 	return false;
 }
 
+static uint32 convertWindowsFileTimeToUnixTimestamp(const CNtfsFileTime &nt)
+{
+	// first, convert it into second since jan1, 1601
+	uint64 t = nt.Low | (uint64(nt.High) << 32);
+
+	// offset to convert Windows file times to UNIX timestamp
+	uint64 offset = UINT64_CONSTANT(116444736000000000);
+
+	// adjust time base to unix epoch base
+	t -= offset;
+
+	// convert the resulting time into seconds
+	t /= 10;	// microsec
+	t /= 1000;	// millisec
+	t /= 1000;	// sec
+
+	// return the resulting time
+	return uint32(t);
+}
+
 bool CFilesExtractor::extract7z()
 {
 	Q7zFile inFile(m_sourceFile);
@@ -432,8 +452,22 @@ bool CFilesExtractor::extract7z()
 
 			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
+			// set attrinbutes
 			if (SzBitWithVals_Check(&db.Attribs, i))
+			{
 				Set7zFileAttrib(destPath, db.Attribs.Vals[i]);
+			}
+
+			// set modification time
+			if (SzBitWithVals_Check(&db.MTime, i))
+			{
+				char buffer[1024];
+
+				if (!NLMISC::CFile::setFileModificationDate(qToUtf8(destPath), convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i])))
+				{
+					qDebug() << "Unable to change date of " << destPath;
+				}
+			}
 		}
 
 		IAlloc_Free(&allocImp, outBuffer);
@@ -549,6 +583,12 @@ bool CFilesExtractor::extractZip()
 
 			f.setPermissions(fi.permissions);
 			f.close();
+
+			// set the right modification date
+			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(absPath), fi.lastModified.toTime_t()))
+			{
+				qDebug() << "Unable to change date of " << absPath;
+			}
 
 			if (m_listener) m_listener->operationProgress(currentSize, QFileInfo(absPath).fileName());
 		}
