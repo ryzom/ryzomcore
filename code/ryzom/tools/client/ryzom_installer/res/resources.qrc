@@ -12,5 +12,6 @@
         <file>ryzom_installer.ini</file>
         <file>Info.plist</file>
         <file>PkgInfo</file>
+        <file>shortcut.sh</file>
     </qresource>
 </RCC>
