@@ -502,7 +502,7 @@ bool CFilesExtractor::extract7z()
 		break;
 
 		case SZ_ERROR_INPUT_EOF:
-		error = QApplication::tr("Errors in 7z file");
+		error = QApplication::tr("File %1 is corrupted, unable to uncompress it").arg(m_sourceFile);
 		break;
 
 		case SZ_ERROR_FAIL:
