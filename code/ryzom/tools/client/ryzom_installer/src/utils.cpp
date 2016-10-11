@@ -81,6 +81,7 @@ bool isDirectoryEmpty(const QString &directory, bool recursize)
 
 		if (dir.exists())
 		{
+			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
 			for (int i = 0; i < list.size(); ++i)
@@ -89,10 +90,12 @@ bool isDirectoryEmpty(const QString &directory, bool recursize)
 
 				if (fileInfo.isDir())
 				{
+					// don't consider empty directories as files, but process it recursively if required
 					if (recursize) if (!isDirectoryEmpty(fileInfo.absoluteFilePath(), true)) return false;
 				}
 				else
 				{
+					// we found a file, directory is not empty
 					return false;
 				}
 			}
@@ -127,6 +130,7 @@ qint64 getDirectorySize(const QString &directory, bool recursize)
 
 		if (dir.exists())
 		{
+			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
 			for (int i = 0; i < list.size(); ++i)
