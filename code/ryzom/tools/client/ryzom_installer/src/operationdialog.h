@@ -40,6 +40,7 @@ public:
 
 	void setOperation(OperationType operation);
 	void setUninstallComponents(const SComponents &components);
+	void setCurrentServerId(const QString &serverId) { m_currentServerId = serverId; }
 
 public slots:
 	void onAbortClicked();
