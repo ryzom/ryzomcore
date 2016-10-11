@@ -36,6 +36,11 @@ CInstallDialog::CInstallDialog():QDialog()
 	onDestinationDefaultButtonClicked();
 
 #ifdef Q_OS_MAC
+	// only 64 bits for OS X
+	clientArchGroupBox->setVisible(false);
+	clientArch64RadioButton->setChecked(true);
+	clientArch32RadioButton->setChecked(false);
+#else
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
 	{
@@ -50,12 +55,7 @@ CInstallDialog::CInstallDialog():QDialog()
 		clientArchGroupBox->setVisible(false);
 		clientArch64RadioButton->setChecked(false);
 		clientArch32RadioButton->setChecked(true);
-	}
-#else
-	// only 64 bits for OS X
-	clientArchGroupBox->setVisible(false);
-	clientArch64RadioButton->setChecked(true);
-	clientArch32RadioButton->setChecked(false);
+}
 #endif
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
