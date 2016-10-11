@@ -49,6 +49,29 @@ void CProfile::saveToSettings(QSettings &settings) const
 	settings.setValue("menu_shortcut", menuShortcut);
 }
 
+bool CProfile::isValid(QString &error) const
+{
+	QRegExp idReg("^[0-9a-z_]+$");
+
+	if (!idReg.exactMatch(id))
+	{
+		error = QApplication::tr("Profile ID %1 is using invalid characters (only lowercase letters, numbers and underscore are allowed)").arg(id);
+		return false;
+	}
+
+	QRegExp nameReg("[/\\\\<>?*:.%|\"]");
+
+	int pos = nameReg.indexIn(name);
+
+	if (pos > -1)
+	{
+		error = QApplication::tr("Profile name %1 is using invalid character %2 at position %3").arg(name).arg(name[pos]).arg(pos);
+		return false;
+	}
+
+	return true;
+}
+
 QString CProfile::getDirectory() const
 {
 	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
@@ -105,7 +128,7 @@ void CProfile::createShortcuts() const
 		// create desktop shortcut
 		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
 		{
-			qDebug() << "Unable to create desktop directory";
+			qDebug() << "Unable to create desktop shortcut";
 		}
 	}
 
