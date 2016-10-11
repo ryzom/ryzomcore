@@ -126,12 +126,6 @@ void COperationDialog::processInstallNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
-
-	// default profile
-	const CProfile &configuration = config->getProfile();
-
 	// long operations are done in a thread
 	OperationStep step = config->getInstallNextStep();
 
@@ -352,8 +346,10 @@ void COperationDialog::processUpdateProfilesNextStep()
 				if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
 				{
 					if (QFile::exists(""))
+					{
 						downloadData();
-					return;
+						return;
+					}
 				}
 			}
 			else
@@ -558,12 +554,7 @@ void COperationDialog::extractDownloadedData()
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + server.dataDownloadFilename);
 	extractor.setDestinationDirectory(dest);
 
-	if (extractor.exec())
-	{
-	}
-	else
-	{
-	}
+	if (!extractor.exec()) return;
 
 	emit done();
 }
@@ -593,12 +584,7 @@ void COperationDialog::extractDownloadedClient()
 	extractor.setSourceFile(config->getInstallationDirectory() + "/" + config->expandVariables(server.clientDownloadFilename));
 	extractor.setDestinationDirectory(destinationDirectory);
 
-	if (extractor.exec())
-	{
-	}
-	else
-	{
-	}
+	if (!extractor.exec()) return;
 
 	launchUpgradeScript(destinationDirectory, server.clientFilename);
 
@@ -626,12 +612,7 @@ void COperationDialog::copyDataFiles()
 	copier.setDestinationDirectory(server.getDirectory());
 	copier.setIncludeFilter(serverFiles);
 
-	if (copier.exec())
-	{
-	}
-	else
-	{
-	}
+	if (!copier.exec()) return;
 
 	emit done();
 }
@@ -661,12 +642,7 @@ void COperationDialog::copyProfileFiles()
 	copier.setDestinationDirectory(profile.getDirectory());
 	copier.setIncludeFilter(profileFiles);
 
-	if (copier.exec())
-	{
-	}
-	else
-	{
-	}
+	if (!copier.exec()) return;
 
 	// correct path to client_default.cfg
 	profile.createClientConfig();
@@ -688,7 +664,8 @@ void COperationDialog::extractBnpClient()
 	CFilesExtractor extractor(this);
 	extractor.setSourceFile(config->getSrcServerClientBNPFullPath());
 	extractor.setDestinationDirectory(destinationDirectory);
-	extractor.exec();
+
+	if (!extractor.exec()) return;
 
 	launchUpgradeScript(destinationDirectory, server.clientFilename);
 

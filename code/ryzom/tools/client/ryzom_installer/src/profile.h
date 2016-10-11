@@ -40,6 +40,8 @@ public:
 	void loadFromSettings(const QSettings &settings);
 	void saveToSettings(QSettings &settings) const;
 
+	bool isValid(QString &error) const;
+
 	// helpers
 	QString getDirectory() const;
 	QString getClientFullPath() const;

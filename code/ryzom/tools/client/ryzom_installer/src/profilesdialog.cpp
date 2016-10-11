@@ -56,6 +56,21 @@ void CProfilesDialog::accept()
 {
 	saveProfile(m_currentProfileIndex);
 
+	const CProfiles &profiles = m_model->getProfiles();
+
+	// check if profiles are valid
+	foreach(const CProfile &profile, profiles)
+	{
+		QString error;
+
+		if (!profile.isValid(error))
+		{
+			// display an error message
+			QMessageBox::critical(this, tr("Error"), error);
+			return;
+		}
+	}
+
 	m_model->save();
 
 	QDialog::accept();

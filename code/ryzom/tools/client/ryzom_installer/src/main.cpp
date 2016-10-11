@@ -216,6 +216,7 @@ int main(int argc, char *argv[])
 
 		COperationDialog dialog;
 
+		dialog.setCurrentServerId(config.getProfile().server);
 		dialog.setOperation(OperationUninstall);
 		dialog.setUninstallComponents(components);
 
@@ -244,6 +245,7 @@ int main(int argc, char *argv[])
 	if (step != Done)
 	{
 		COperationDialog dialog;
+		dialog.setCurrentServerId(config.getProfile().server);
 		dialog.setOperation(config.getSrcServerDirectory().isEmpty() ? OperationInstall:OperationMigrate);
 
 		if (!dialog.exec()) return 1;

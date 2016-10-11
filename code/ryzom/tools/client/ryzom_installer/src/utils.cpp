@@ -41,36 +41,6 @@ QString qBytesToHumanReadable(qint64 bytes)
 	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
-QString nameToId(const QString &name)
-{
-	QString res;
-
-	// only allows simple characters
-	QRegExp allowedCharacters("^[0-9a-zA-Z-]$");
-
-	for (int i = 0, len = name.length(); i < len; ++i)
-	{
-		if (allowedCharacters.indexIn(name.at(i)) > -1)
-		{
-			// allowed character
-			res += name[i];
-		}
-		else
-		{
-			// not allowed, replace by a space
-			res += " ";
-		}
-	}
-
-	// simplify all spaces
-	res = res.simplified();
-
-	// replace spaces by minus
-	res.replace(" ", "-");
-
-	return res;
-}
-
 bool isDirectoryEmpty(const QString &directory, bool recursize)
 {
 	bool res = true;
@@ -81,18 +51,21 @@ bool isDirectoryEmpty(const QString &directory, bool recursize)
 
 		if (dir.exists())
 		{
+			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
-			for (int i = 0; i < list.size(); ++i)
+			for (int i = 0, len = list.size(); i < len; ++i)
 			{
 				QFileInfo fileInfo = list.at(i);
 
 				if (fileInfo.isDir())
 				{
+					// don't consider empty directories as files, but process it recursively if required
 					if (recursize) if (!isDirectoryEmpty(fileInfo.absoluteFilePath(), true)) return false;
 				}
 				else
 				{
+					// we found a file, directory is not empty
 					return false;
 				}
 			}
@@ -127,6 +100,7 @@ qint64 getDirectorySize(const QString &directory, bool recursize)
 
 		if (dir.exists())
 		{
+			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
 			for (int i = 0; i < list.size(); ++i)
@@ -343,11 +317,11 @@ bool createShortcut(const QString &shortcut, const QString &name, const QString 
 
 	CConfigFile *config = CConfigFile::getInstance();
 
+	// HTML escape values because they'll be in a XML file
 	strings.clear();
-	strings["NAME"] = name;
-	strings["COPYRIGHT"] = config->getProductPublisher();
+	strings["NAME"] = name.toHtmlEscaped();
+	strings["COPYRIGHT"] = config->getProductPublisher().toHtmlEscaped();
 	strings["VERSION"] = QApplication::applicationVersion();
-	strings["IDENTIFIER"] = "com.winchgate.Ryzom-" + nameToId(name);
 
 	// write Info.plist
 	if (!writeResourceWithTemplates(":/templates/Info.plist", plistFile, strings)) return false;

@@ -28,40 +28,61 @@
  * \date 2016
  */
 
+// convert a size in bytes to a QString with larger unit (KiB, MiB, etc...)
 QString qBytesToHumanReadable(qint64 bytes);
-QString nameToId(const QString &name);
 
+// return true is the specified directory is empty (has no file inside) (and all its subdirectories if recursize is true)
 bool isDirectoryEmpty(const QString &directory, bool recursize);
+
+// check if specified directory is writable
 bool isDirectoryWritable(const QString &directory);
 
+// return the total size in bytes of specified directtory (and all its subdirectories if recursize is true)
 qint64 getDirectorySize(const QString &directory, bool recursize);
 
-// Convert a UTF-8 string to QString
+// convert a UTF-8 string to QString
 QString qFromUtf8(const std::string &str);
 
-// Convert a QString to UTF-8 string
+// convert a QString to UTF-8 string
 std::string qToUtf8(const QString &str);
 
-// Convert a UTF-16 string to QString
+// convert an UTF-16 string to QString
 QString qFromUtf16(const ucstring &str);
 
-// Convert a QString to UTF-16 string
+// convert a QString to UTF-16 string
 ucstring qToUtf16(const QString &str);
 
+// convert an wchar_t* to QString
 QString qFromWide(const wchar_t *str);
 
+// convert an QString to wchar_t*
 wchar_t* qToWide(const QString &str);
 
+// check if a shortcut already exists (the extension will be added)
 bool shortcutExists(const QString &shortcut);
+
+// create a shortcut with the native format of the current platform
 bool createShortcut(const QString &shortcut, const QString &name, const QString &executable, const QString &arguments, const QString &icon, const QString &workingDir);
+
+// remove a shortcut (the extension will be added)
 bool removeShortcut(const QString &shortcut);
+
+// return the real path of shortcut
 bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pathObj);
+
+// append the shortcut of current platform to specified path
 QString appendShortcutExtension(const QString &shortcut);
 
+// launch an executable with --version parameter and parse version string
 QString getVersionFromExecutable(const QString &path);
+
+// write a resource in QRC to disk
 bool writeResource(const QString &resource, const QString &path);
+
+// write a resource in QRC to disk and replace all variables by specified values
 bool writeResourceWithTemplates(const QString &resource, const QString &path, const QMap<QString, QString> &strings);
 
+// a little helper class to unintialize COM after using it
 class CCOMHelper
 {
 	bool m_mustUninit;
