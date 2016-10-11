@@ -54,7 +54,7 @@ bool isDirectoryEmpty(const QString &directory, bool recursize)
 			// process all files and directories excepted parent and current ones
 			QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 
-			for (int i = 0; i < list.size(); ++i)
+			for (int i = 0, len = list.size(); i < len; ++i)
 			{
 				QFileInfo fileInfo = list.at(i);
 
