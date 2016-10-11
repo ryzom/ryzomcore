@@ -317,11 +317,11 @@ bool createShortcut(const QString &shortcut, const QString &name, const QString 
 
 	CConfigFile *config = CConfigFile::getInstance();
 
+	// HTML escape values because they'll be in a XML file
 	strings.clear();
-	strings["NAME"] = name;
-	strings["COPYRIGHT"] = config->getProductPublisher();
+	strings["NAME"] = name.toHtmlEscaped();
+	strings["COPYRIGHT"] = config->getProductPublisher().toHtmlEscaped();
 	strings["VERSION"] = QApplication::applicationVersion();
-	strings["IDENTIFIER"] = "com.winchgate.Ryzom-" + nameToId(name);
 
 	// write Info.plist
 	if (!writeResourceWithTemplates(":/templates/Info.plist", plistFile, strings)) return false;
