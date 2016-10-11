@@ -126,12 +126,6 @@ void COperationDialog::processInstallNextStep()
 {
 	CConfigFile *config = CConfigFile::getInstance();
 
-	// default server
-	const CServer &server = config->getServer();
-
-	// default profile
-	const CProfile &configuration = config->getProfile();
-
 	// long operations are done in a thread
 	OperationStep step = config->getInstallNextStep();
 
