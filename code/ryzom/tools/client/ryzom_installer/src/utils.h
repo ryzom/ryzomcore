@@ -30,7 +30,6 @@
 
 // convert a size in bytes to a QString with larger unit (KiB, MiB, etc...)
 QString qBytesToHumanReadable(qint64 bytes);
-QString nameToId(const QString &name);
 
 // return true is the specified directory is empty (has no file inside) (and all its subdirectories if recursize is true)
 bool isDirectoryEmpty(const QString &directory, bool recursize);

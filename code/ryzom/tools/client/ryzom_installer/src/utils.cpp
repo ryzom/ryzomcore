@@ -41,36 +41,6 @@ QString qBytesToHumanReadable(qint64 bytes)
 	return QString::fromUtf8(NLMISC::bytesToHumanReadableUnits(bytes, units).c_str());
 }
 
-QString nameToId(const QString &name)
-{
-	QString res;
-
-	// only allows simple characters
-	QRegExp allowedCharacters("^[0-9a-zA-Z-]$");
-
-	for (int i = 0, len = name.length(); i < len; ++i)
-	{
-		if (allowedCharacters.indexIn(name.at(i)) > -1)
-		{
-			// allowed character
-			res += name[i];
-		}
-		else
-		{
-			// not allowed, replace by a space
-			res += " ";
-		}
-	}
-
-	// simplify all spaces
-	res = res.simplified();
-
-	// replace spaces by minus
-	res.replace(" ", "-");
-
-	return res;
-}
-
 bool isDirectoryEmpty(const QString &directory, bool recursize)
 {
 	bool res = true;
