@@ -346,8 +346,10 @@ void COperationDialog::processUpdateProfilesNextStep()
 				if (server.clientDownloadUrl == defaultServer.clientDownloadUrl)
 				{
 					if (QFile::exists(""))
+					{
 						downloadData();
-					return;
+						return;
+					}
 				}
 			}
 			else
