@@ -11,5 +11,6 @@ chmod +x "$ROOTPATH/ryzom_client"
 chmod +x "$ROOTPATH/crash_report"
 chmod +x "$ROOTPATH/ryzom_client_patcher"
 chmod +x "$ROOTPATH/ryzom_configuration_qt"
+chmod +x "$ROOTPATH/ryzom_installer_qt"
 
 exit 0
