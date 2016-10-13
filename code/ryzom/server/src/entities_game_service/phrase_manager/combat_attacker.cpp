@@ -130,7 +130,8 @@ CCombatWeapon::CCombatWeapon(CGameItemPtr itemPtr)
 	// weapon hit rate is in hit/10s and we use ticks/hits....
 	if (itemPtr->hitRate() != 0)
 	{
-		LatencyInTicks = uint16( (10.0f / itemPtr->hitRate())  / CTickEventHandler::getGameTimeStep());
+	    //getGameTimeStep() is actually a double and hitRate() a float, so the precision difference will make a cast of the result fail (for example, with hitRate() == 10.0f, the cast will give a value of 9 and not 10
+	    LatencyInTicks = uint16 ( (10.0f / itemPtr->hitRate() )  / float(CTickEventHandler::getGameTimeStep()) );
 	}
 	
 	Quality = (uint16)itemPtr->recommended();
