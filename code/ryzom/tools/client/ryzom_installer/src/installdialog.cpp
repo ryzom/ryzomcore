@@ -40,7 +40,9 @@ CInstallDialog::CInstallDialog():QDialog()
 	clientArchGroupBox->setVisible(false);
 	clientArch64RadioButton->setChecked(true);
 	clientArch32RadioButton->setChecked(false);
-#else
+#elif defined(Q_OS_WIN32)
+	// both 32 and 64 bits are working under Windows 64 bits
+
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
 	{
@@ -55,7 +57,22 @@ CInstallDialog::CInstallDialog():QDialog()
 		clientArchGroupBox->setVisible(false);
 		clientArch64RadioButton->setChecked(false);
 		clientArch32RadioButton->setChecked(true);
-}
+	}
+#else
+	// only use the current architecture for Linux
+
+	clientArchGroupBox->setVisible(false);
+
+#ifdef _LP64
+	// only 64 bits is available
+	clientArch64RadioButton->setChecked(true);
+	clientArch32RadioButton->setChecked(false);
+#else
+	// only 32 bits is available
+	clientArch64RadioButton->setChecked(false);
+	clientArch32RadioButton->setChecked(true);
+#endif
+
 #endif
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
