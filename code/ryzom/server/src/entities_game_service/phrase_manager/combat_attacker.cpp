@@ -131,7 +131,7 @@ CCombatWeapon::CCombatWeapon(CGameItemPtr itemPtr)
 	if (itemPtr->hitRate() != 0)
 	{
 	    //getGameTimeStep() is actually a double and hitRate() a float, so the precision difference will make a cast of the result fail (for example, with hitRate() == 10.0f, the cast will give a value of 9 and not 10
-	    LatencyInTicks = uint16 ( (10.0f / itemPtr->hitRate() )  / float(CTickEventHandler::getGameTimeStep()) );
+	    LatencyInTicks = uint16 ( (10.0f / uint16(itemPtr->hitRate()) )  / float(CTickEventHandler::getGameTimeStep()) );
 	}
 	
 	Quality = (uint16)itemPtr->recommended();
