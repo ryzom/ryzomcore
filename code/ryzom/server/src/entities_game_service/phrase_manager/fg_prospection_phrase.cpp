@@ -716,7 +716,7 @@ void CFgProspectionPhrase::apply()
 	MBEHAV::CBehaviour behav = player->getBehaviour(); // keep arguments
 	behav.Behaviour = MBEHAV::PROSPECTING_END;
 	PHRASE_UTILITIES::sendUpdateBehaviour( _ActorRowId, behav );
-	_LatencyEndDate =(float)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
+	_LatencyEndDate =(double)ForageSourceSpawnDelay.get(); // wait a short time before spawning the source(s) (to let animation/fx time)
 }
 
 

@@ -130,8 +130,7 @@ CCombatWeapon::CCombatWeapon(CGameItemPtr itemPtr)
 	// weapon hit rate is in hit/10s and we use ticks/hits....
 	if (itemPtr->hitRate() != 0)
 	{
-	    //getGameTimeStep() is actually a double and hitRate() a float, so the precision difference will make a cast of the result fail (for example, with hitRate() == 10.0f, the cast will give a value of 9 and not 10
-	    LatencyInTicks =  (10.0f / itemPtr->hitRate() )  / float(CTickEventHandler::getGameTimeStep());
+	    LatencyInTicks =  (10.0f / itemPtr->hitRate() )  / CTickEventHandler::getGameTimeStep();
 	}
 	
 	Quality = (uint16)itemPtr->recommended();
@@ -298,7 +297,7 @@ void CCombatAttackerAI::initFromRowId( const TDataSetRow &rowId )
 		_RightHandWeapon.Damage = (float)form->getCreatureDamagePerHit() * BotDamageFactor;
 		
 		_RightHandWeapon.DmgType = DMGTYPE::SLASHING;
-		_RightHandWeapon.LatencyInTicks = (float)form->getAttackLatency();
+		_RightHandWeapon.LatencyInTicks = (double)form->getAttackLatency();
 		_RightHandWeapon.Family = ITEMFAMILY::MELEE_WEAPON;
 		_RightHandWeapon.Skill = BarehandCombatSkill;
 		_RightHandWeapon.SabrinaCost = (uint16)_SkillValue;
@@ -417,7 +416,7 @@ void CCombatAttackerNpc::initFromRowId( const TDataSetRow &rowId )
 	{
 		// get speed, dmg type, skill and family
 		_RightHandWeapon = CCombatWeapon(entity->getRightHandItem());
-		_RightHandWeapon.LatencyInTicks = (float)form->getAttackLatency();
+		_RightHandWeapon.LatencyInTicks = (double)form->getAttackLatency();
 
 		// check ammo 
 		if (entity->getAmmoItem() != NULL && entity->getAmmoItem()->getStaticForm() != NULL && entity->getAmmoItem()->getStaticForm()->Family == ITEMFAMILY::AMMO)
@@ -427,7 +426,7 @@ void CCombatAttackerNpc::initFromRowId( const TDataSetRow &rowId )
 	}
 	else
 	{
-		_RightHandWeapon.LatencyInTicks = (float)form->getAttackLatency();
+		_RightHandWeapon.LatencyInTicks = (double)form->getAttackLatency();
 		_RightHandWeapon.Family = ITEMFAMILY::MELEE_WEAPON;
 		_RightHandWeapon.Skill = BarehandCombatSkill;
 		_RightHandWeapon.DmgType = DMGTYPE::BLUNT;

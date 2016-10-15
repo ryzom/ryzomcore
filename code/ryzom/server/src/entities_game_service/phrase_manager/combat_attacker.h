@@ -92,7 +92,7 @@ public:
 	/************************************************************************/
 	/* do not forget to update the operator= if attributes change
 	/************************************************************************/
-	float					LatencyInTicks;
+	double					LatencyInTicks;
 	float					Damage;	
 	uint16					Quality;
 	DMGTYPE::EDamageType	DmgType;

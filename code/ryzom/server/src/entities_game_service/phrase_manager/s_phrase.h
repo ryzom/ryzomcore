@@ -98,7 +98,7 @@ public:
 	inline NLMISC::TGameCycle applyDate() const { return _ApplyDate; }
 
 	/// get latency end date
-	inline float latencyEndDate() const { return _LatencyEndDate; }
+	inline double latencyEndDate() const { return _LatencyEndDate; }
 
 	/**
 	 * build the phrase from bricks, actor and main target
@@ -207,7 +207,7 @@ protected:
 	/// apply date
 	NLMISC::TGameCycle		_ApplyDate;
 	/// latency end date
-	float		_LatencyEndDate;
+	double		_LatencyEndDate;
 	///	index in client phrase book (0 = not in the phrase book)
 	uint16					_PhraseBookIndex;
 	///	next counter

@@ -1566,7 +1566,7 @@ bool CMagicPhrase::launch()
 	// add post cast latency, only for non instant cast
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 	if (_DivineInterventionOccured||_ShootAgainOccured?_BaseCastingTime:_CastingTime)
-		_LatencyEndDate = (float)time + PostCastLatency + _PostCastTime;
+		_LatencyEndDate = (double)time + PostCastLatency + _PostCastTime;
 	else
 		_LatencyEndDate = 0.0f + _PostCastTime;
 

@@ -1843,14 +1843,14 @@ bool CCombatPhrase::launch()
 	}
 	
 	// get weapon latency
-	float latency;
+	double latency;
 	if(_LeftWeapon.LatencyInTicks != 0)
 	{
-		latency = float(_HitRateModifier + std::max( float(MinTwoWeaponsLatency.get()), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max( double(MinTwoWeaponsLatency.get()), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
 	}
 	else
 	{
-		latency = float(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
 	}
 
 	// check for madness effect
@@ -2183,7 +2183,7 @@ bool CCombatPhrase::launch()
 	}
 	else
 	{
-	    _LatencyEndDate = (float)time + latency;
+	    _LatencyEndDate = (double)time + latency;
 	}
     nlwarning("_LatencyEndDate : %f, latency: %f", _LatencyEndDate, latency);
 	// compute the apply date
