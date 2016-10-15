@@ -56,7 +56,7 @@ public:
 		_Idle = false;
 		_ExecutionEndDate = 0;
 		_ApplyDate = ~0; // ensure apply() never called before launch()
-		_LatencyEndDate = 0; // by default, time between apply() and end() is immediate
+		_LatencyEndDate = 0.0f; // by default, time between apply() and end() is immediate
 		_PhraseBookIndex = 0;
 		_NextCounter = 0;
 		_IsStatic = false;
@@ -98,7 +98,7 @@ public:
 	inline NLMISC::TGameCycle applyDate() const { return _ApplyDate; }
 
 	/// get latency end date
-	inline NLMISC::TGameCycle latencyEndDate() const { return _LatencyEndDate; }
+	inline float latencyEndDate() const { return _LatencyEndDate; }
 
 	/**
 	 * build the phrase from bricks, actor and main target
@@ -207,7 +207,7 @@ protected:
 	/// apply date
 	NLMISC::TGameCycle		_ApplyDate;
 	/// latency end date
-	NLMISC::TGameCycle		_LatencyEndDate;
+	float		_LatencyEndDate;
 	///	index in client phrase book (0 = not in the phrase book)
 	uint16					_PhraseBookIndex;
 	///	next counter
