@@ -2185,7 +2185,6 @@ bool CCombatPhrase::launch()
 	{
 	    _LatencyEndDate = (double)time + latency;
 	}
-    nlwarning("_LatencyEndDate : %f, latency: %f", _LatencyEndDate, latency);
 	// compute the apply date
 	if (_Targets[0].Target!=NULL && actingEntity->getEntityRowId() == _Targets[0].Target->getEntityRowId())
 	{
