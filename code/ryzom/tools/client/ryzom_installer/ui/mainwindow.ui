@@ -57,12 +57,6 @@ p, li { white-space: pre-wrap; }
     </item>
     <item>
      <widget class="QFrame" name="configurationFrame">
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
       <layout class="QHBoxLayout" name="configurationLayout" stretch="1,0,0">
        <property name="leftMargin">
         <number>0</number>

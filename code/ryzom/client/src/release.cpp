@@ -556,6 +556,7 @@ void release()
 
 	// restore screensaver state
 	CSystemUtils::enableScreensaver(LastScreenSaverEnabled);
+	CSystemUtils::uninit();
 
 	// release PACS primitives
 	deletePrimitiveBlocks();
@@ -662,9 +663,6 @@ void release()
 	CLuaManager::releaseInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
-
-
-
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

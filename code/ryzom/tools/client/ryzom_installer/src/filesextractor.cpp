@@ -91,6 +91,8 @@
 
 bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 {
+	if (filename.isEmpty()) return false;
+
 	bool attrReadOnly = (fileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 	bool attrHidden = (fileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
 	bool attrSystem = (fileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
@@ -114,7 +116,7 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 #ifdef Q_OS_WIN
 	SetFileAttributesW((wchar_t*)filename.utf16(), windowsAttributes);
 #else
-	const char *name = filename.toUtf8().constData();
+	std::string name = filename.toUtf8().constData();
 
 	mode_t current_umask = umask(0); // get and set the umask
 	umask(current_umask); // restore the umask
@@ -122,9 +124,9 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 
 	struct stat stat_info;
 
-	if (lstat(name, &stat_info) != 0)
+	if (lstat(name.c_str(), &stat_info) != 0)
 	{
-		nlwarning("Unable to get file attributes for %s", name);
+		nlwarning("Unable to get file attributes for %s", name.c_str());
 		return false;
 	}
 
@@ -137,13 +139,13 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		{
 			if (S_ISREG(stat_info.st_mode))
 			{
-				chmod(name, stat_info.st_mode & mask);
+				chmod(name.c_str(), stat_info.st_mode & mask);
 			}
 			else if (S_ISDIR(stat_info.st_mode))
 			{
 				// user/7za must be able to create files in this directory
 				stat_info.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
-				chmod(name, stat_info.st_mode & mask);
+				chmod(name.c_str(), stat_info.st_mode & mask);
 			}
 		}
 	}
@@ -156,7 +158,7 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		// octal!, clear write permission bits
 		stat_info.st_mode &= ~0222;
 
-		chmod(name, stat_info.st_mode & mask);
+		chmod(name.c_str(), stat_info.st_mode & mask);
 	}
 #endif
 
