@@ -13,4 +13,11 @@ chmod +x "$ROOTPATH/ryzom_client_patcher"
 chmod +x "$ROOTPATH/ryzom_configuration_qt"
 chmod +x "$ROOTPATH/ryzom_installer_qt"
 
+# copy Ryzom Installer if present in parent directory
+if [ -e "$ROOTPATH/../ryzom_installer_qt" ]
+then
+	rm -f "$ROOTPATH/../ryzom_installer_qt"
+  cp -a "$ROOTPATH/ryzom_installer_qt" "$ROOTPATH/.."
+fi
+
 exit 0
