@@ -300,7 +300,7 @@ IF(WITH_QT5)
 
         ADD_QT_LIBRARY(XcbQpa)
         ADD_QT_LIBRARY(PlatformSupport)
-        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb -lGL)
+        SET(QT_LIBRARIES ${QT_LIBRARIES} -lX11-xcb -lXi -lSM -lICE -lxcb -lGL -lxcb-glx)
         IF(EXISTS "${QT_LIBRARY_DIR}/libxcb-static.a")
           SET(QT_LIBRARIES ${QT_LIBRARIES} "${QT_LIBRARY_DIR}/libxcb-static.a")
         ENDIF()
