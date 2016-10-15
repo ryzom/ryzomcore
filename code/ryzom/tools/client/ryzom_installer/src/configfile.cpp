@@ -307,7 +307,16 @@ QString CConfigFile::getDesktopDirectory() const
 
 QString CConfigFile::getMenuDirectory() const
 {
-	return QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation) + "/" + QApplication::applicationName();
+	QString applicationLocation;
+
+#ifdef O_OS_MAC
+	// QStandardPaths::ApplicationsLocation returns read-only location so fix it, will be installed in ~/Applications
+	applicationLocation = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/Applications";
+#else
+	applicationLocation = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+#endif
+
+	return applicationLocation + "/" + QApplication::applicationName();
 }
 
 bool CConfigFile::has64bitsOS()
