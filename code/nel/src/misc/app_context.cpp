@@ -72,9 +72,6 @@ INelContext::~INelContext()
 
 	CInstanceCounterLocalManager::releaseInstance();
 
-	// uninit some systems stuff
-	CSystemUtils::uninit();
-
 	_NelContext = NULL;
 	*(_getInstance()) = NULL;
 }
@@ -93,9 +90,6 @@ void INelContext::contextReady()
 
 	// set numeric locale to C to avoid the use of decimal separators different of a dot
 	char *locale = setlocale(LC_NUMERIC, "C");
-
-	// init some systems stuff
-	CSystemUtils::init();
 
 	// register any pending thinks
 
