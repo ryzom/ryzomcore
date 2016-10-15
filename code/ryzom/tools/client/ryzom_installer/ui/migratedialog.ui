@@ -66,12 +66,6 @@ Just press Continue button and follow the different steps until everything is do
    </item>
    <item>
     <widget class="QFrame" name="advancedFrame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
      <layout class="QVBoxLayout" name="advancedMainLayout">
       <property name="spacing">
        <number>6</number>
