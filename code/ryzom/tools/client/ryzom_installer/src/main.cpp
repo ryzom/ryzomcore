@@ -252,7 +252,14 @@ int main(int argc, char *argv[])
 
 		step = config.getInstallNextStep();
 
-		if (step == Done)
+		if (step == LaunchInstalledInstaller)
+		{
+#ifndef _DEBUG
+			// restart more recent installed Installer version
+			if (QProcess::startDetached(config.getInstallerOriginalFilePath(), QApplication::arguments())) return 0;
+#endif
+		}
+		else if (step == Done)
 		{
 #if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself

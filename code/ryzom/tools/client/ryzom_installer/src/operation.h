@@ -64,6 +64,7 @@ enum OperationStep
 	CleanFiles,
 	ExtractBnpClient,
 	CopyInstaller,
+	LaunchInstalledInstaller,
 	UninstallOldClient,
 	CreateProfile,
 	CreateProfileShortcuts,

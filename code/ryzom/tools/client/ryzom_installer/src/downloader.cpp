@@ -356,6 +356,8 @@ void CDownloader::onHeadFinished()
 
 void CDownloader::onDownloadFinished()
 {
+	int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+
 	m_reply->deleteLater();
 	m_reply = NULL;
 
@@ -367,11 +369,18 @@ void CDownloader::onDownloadFinished()
 	}
 	else
 	{
-		bool ok = NLMISC::CFile::setFileModificationDate(m_fullPath.toUtf8().constData(), m_lastModified.toTime_t());
+		if (QFileInfo(m_fullPath).size() == m_size)
+		{
+			bool ok = NLMISC::CFile::setFileModificationDate(m_fullPath.toUtf8().constData(), m_lastModified.toTime_t());
 
-		if (m_listener) m_listener->operationSuccess(m_size);
+			if (m_listener) m_listener->operationSuccess(m_size);
 
-		emit downloadDone();
+			emit downloadDone();
+		}
+		else
+		{
+			m_listener->operationFail(tr("HTTP error: %1").arg(status));
+		}
 	}
 }
 
@@ -382,10 +391,6 @@ void CDownloader::onError(QNetworkReply::NetworkError error)
 	if (error == QNetworkReply::OperationCanceledError)
 	{
 		 m_listener->operationStop();
-	}
-	else
-	{
-		m_listener->operationFail(tr("Network error: %1").arg(error));
 	}
 }
 

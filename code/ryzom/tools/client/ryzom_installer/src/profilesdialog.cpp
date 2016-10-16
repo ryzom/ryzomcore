@@ -269,7 +269,18 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	if (executable.isEmpty()) executable = defaultExecutable;
 
-	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
+	QString filter;
+
+#ifdef Q_OS_WIN32
+	filter = tr("Executables (*.exe)");
+#else
+	filter = tr("Executables (*)");
+#endif
+
+	QFileDialog open;
+	open.setFilter(QDir::Executable | QDir::NoDotAndDotDot | QDir::Files);
+
+	executable = open.getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, filter);
 
 	if (executable.isEmpty()) return;
 

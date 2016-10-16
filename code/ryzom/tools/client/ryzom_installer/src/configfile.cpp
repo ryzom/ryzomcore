@@ -727,12 +727,13 @@ bool CConfigFile::shouldCreateMenuShortcut() const
 	return !shortcutExists(profile.getClientMenuShortcutFullPath());
 }
 
-bool CConfigFile::shouldCopyInstaller() const
+int CConfigFile::compareInstallersVersion() const
 {
+	// returns 0 if same version, 1 if current installer is more recent, -1 if installed installer is more recent
 	QString installerDst = getInstallationDirectory() + "/" + m_installerFilename;
 
-	// if installer not found in installation directory, extract it from BNP
-	if (!QFile::exists(installerDst)) return true;
+	// if installer not found in installation directory
+	if (!QFile::exists(installerDst)) return 1;
 
 	QString installedVersion = getVersionFromExecutable(installerDst);
 	QString newVersion = QApplication::applicationVersion();
@@ -740,8 +741,11 @@ bool CConfigFile::shouldCopyInstaller() const
 	QVersionNumber installedVer = QVersionNumber::fromString(installedVersion);
 	QVersionNumber newVer = QVersionNumber::fromString(newVersion);
 
-	// if version is greater, copy it
-	return newVer > installedVer;
+	// same version
+	if (newVer == installedVer) return 0;
+
+	// if version is greater or lower
+	return newVer > installedVer ? 1:-1;
 }
 
 QString CConfigFile::getInstallerCurrentFilePath() const
@@ -756,12 +760,15 @@ QString CConfigFile::getInstallerCurrentDirPath() const
 	return QApplication::applicationDirPath();
 }
 
-QString CConfigFile::getInstallerOriginalFilePath() const
+QString CConfigFile::getInstallerInstalledFilePath() const
 {
-	return getInstallerOriginalDirPath() + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+	// return an empty string, if no Installer filename in config
+	if (m_installerFilename.isEmpty()) return "";
+
+	return getInstallerInstalledDirPath() + "/" + m_installerFilename;
 }
 
-QString CConfigFile::getInstallerOriginalDirPath() const
+QString CConfigFile::getInstallerInstalledDirPath() const
 {
 	return m_installationDirectory;
 }
@@ -956,7 +963,18 @@ OperationStep CConfigFile::getInstallNextStep() const
 		}
 	}
 
-	if (shouldCopyInstaller()) return CopyInstaller;
+	// current installer more recent than installed one
+	switch (compareInstallersVersion())
+	{
+		// current installer more recent, copy it
+		case 1: return CopyInstaller;
+
+		// current installer older, launch the more recent installer
+		case -1: return LaunchInstalledInstaller;
+
+		// continue only if 0
+		default: break;
+	}
 
 	// no default profile
 	if (profile.id.isEmpty())
