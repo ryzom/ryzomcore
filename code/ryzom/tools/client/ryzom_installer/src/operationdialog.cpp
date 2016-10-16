@@ -199,6 +199,7 @@ void COperationDialog::processInstallNextStep()
 		break;
 
 		case Done:
+		case LaunchInstalledInstaller:
 		acceptDelayed();
 		break;
 

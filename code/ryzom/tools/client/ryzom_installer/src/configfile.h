@@ -104,7 +104,7 @@ public:
 	bool foundTemporaryFiles(const QString &directory) const;
 	bool shouldCreateDesktopShortcut() const;
 	bool shouldCreateMenuShortcut() const;
-	bool shouldCopyInstaller() const;
+	int compareInstallersVersion() const;
 
 	// installation choices
 	bool use64BitsClient() const;
