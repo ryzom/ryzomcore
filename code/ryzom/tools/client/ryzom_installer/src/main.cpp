@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
 		{
 #ifndef _DEBUG
 			// restart more recent installed Installer version
-			if (QProcess::startDetached(config.getInstallerOriginalFilePath(), QApplication::arguments())) return 0;
+			if (QProcess::startDetached(config.getInstallerInstalledFilePath(), QApplication::arguments())) return 0;
 #endif
 		}
 		else if (step == Done)
