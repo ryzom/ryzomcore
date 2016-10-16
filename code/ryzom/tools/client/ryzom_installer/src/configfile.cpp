@@ -756,12 +756,15 @@ QString CConfigFile::getInstallerCurrentDirPath() const
 	return QApplication::applicationDirPath();
 }
 
-QString CConfigFile::getInstallerOriginalFilePath() const
+QString CConfigFile::getInstallerInstalledFilePath() const
 {
-	return getInstallerOriginalDirPath() + "/" + QFileInfo(QApplication::applicationFilePath()).fileName();
+	// return an empty string, if no Installer filename in config
+	if (m_installerFilename.isEmpty()) return "";
+
+	return getInstallerInstalledDirPath() + "/" + m_installerFilename;
 }
 
-QString CConfigFile::getInstallerOriginalDirPath() const
+QString CConfigFile::getInstallerInstalledDirPath() const
 {
 	return m_installationDirectory;
 }

@@ -124,8 +124,8 @@ public:
 
 	QString getInstallerCurrentFilePath() const;
 	QString getInstallerCurrentDirPath() const;
-	QString getInstallerOriginalFilePath() const;
-	QString getInstallerOriginalDirPath() const;
+	QString getInstallerInstalledFilePath() const;
+	QString getInstallerInstalledDirPath() const;
 
 	QString getInstallerMenuShortcutFullPath() const;
 	QString getInstallerDesktopShortcutFullPath() const;
