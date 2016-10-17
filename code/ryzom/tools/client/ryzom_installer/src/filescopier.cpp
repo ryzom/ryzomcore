@@ -63,71 +63,62 @@ bool CFilesCopier::exec()
 
 	FilesToCopy files;
 
+	// create the list of files to copy
 	CFilesCopier::getFilesList(files);
 
+	// copy them
 	return copyFiles(files);
 }
 
-void CFilesCopier::getFilesList(FilesToCopy &files)
+void CFilesCopier::getFile(const QFileInfo &fileInfo, const QDir &srcDir, FilesToCopy &files) const
 {
-	QDir dir(m_sourceDirectory);
+	// full path to file
+	QString fullPath = fileInfo.absoluteFilePath();
 
-	QFileInfoList entries = dir.entryInfoList(m_includeFilter);
+	// full path where to copy file
+	QString dstPath = m_destinationDirectory + "/" + srcDir.relativeFilePath(fullPath);
+
+	if (fileInfo.isDir())
+	{
+		// create directory
+		QDir().mkpath(dstPath);
+
+		QDir subDir(fullPath);
+
+		// get list of all files in directory
+		QFileInfoList entries = subDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+
+		// proces seach file recursively
+		foreach(const QFileInfo &entry, entries)
+		{
+			getFile(entry, srcDir, files);
+		}
+	}
+	else
+	{
+		// add the file to list with all useful information
+		FileToCopy file;
+		file.filename = fileInfo.fileName();
+		file.src = fileInfo.filePath();
+		file.dst = dstPath;
+		file.size = fileInfo.size();
+		file.date = fileInfo.lastModified().toTime_t();
+		file.permissions = fileInfo.permissions();
+
+		files << file;
+	}
+}
+
+void CFilesCopier::getFilesList(FilesToCopy &files) const
+{
+	QDir srcDir(m_sourceDirectory);
+
+	// only copy all files from filter
+	QFileInfoList entries = srcDir.entryInfoList(m_includeFilter);
 
 	foreach(const QFileInfo &entry, entries)
 	{
-		QString fullPath = entry.absoluteFilePath();
-
-		QString dstPath = m_destinationDirectory + "/" + dir.relativeFilePath(fullPath);
-
-		if (entry.isDir())
-		{
-			QDir().mkpath(dstPath);
-
-			QDir subDir(fullPath);
-
-			QDirIterator it(subDir, QDirIterator::Subdirectories);
-
-			while (it.hasNext())
-			{
-				fullPath = it.next();
-
-				if (it.fileName().startsWith('.')) continue;
-
-				QFileInfo fileInfo = it.fileInfo();
-
-				dstPath = m_destinationDirectory + "/" + dir.relativeFilePath(fullPath);
-
-				if (fileInfo.isDir())
-				{
-					QDir().mkpath(dstPath);
-				}
-				else
-				{
-					FileToCopy file;
-					file.filename = it.fileName();
-					file.src = it.filePath();
-					file.dst = dstPath;
-					file.size = it.fileInfo().size();
-					file.date = it.fileInfo().lastModified().toTime_t();
-					file.permissions = it.fileInfo().permissions();
-
-					files << file;
-				}
-			}
-		}
-		else
-		{
-			FileToCopy file;
-			file.filename = entry.fileName();
-			file.src = entry.filePath();
-			file.dst = dstPath;
-			file.size = entry.size();
-			file.date = entry.lastModified().toTime_t();
-			file.permissions = entry.permissions();
-
-			files << file;
-		}
+		getFile(entry, srcDir, files);
 	}
 
 	// copy additional files
@@ -135,18 +126,7 @@ void CFilesCopier::getFilesList(FilesToCopy &files)
 	{
 		QFileInfo fileInfo(fullpath);
 
-		if (fileInfo.isFile())
-		{
-			FileToCopy file;
-			file.filename = fileInfo.fileName();
-			file.src = fileInfo.filePath();
-			file.dst = m_destinationDirectory + "/" + fileInfo.fileName();
-			file.size = fileInfo.size();
-			file.date = fileInfo.lastModified().toTime_t();
-			file.permissions = fileInfo.permissions();
-
-			files << file;
-		}
+		getFile(fileInfo, srcDir, files);
 	}
 }
 
