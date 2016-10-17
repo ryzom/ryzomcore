@@ -312,7 +312,7 @@ QString CConfigFile::getMenuDirectory() const
 {
 	QString applicationLocation;
 
-#ifdef O_OS_MAC
+#ifdef Q_OS_MAC
 	// QStandardPaths::ApplicationsLocation returns read-only location so fix it, will be installed in ~/Applications
 	applicationLocation = QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/Applications";
 #else
