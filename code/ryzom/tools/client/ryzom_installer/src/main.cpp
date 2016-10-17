@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
 		// copy installer and required files to TEMP directory
 		if (QDir().mkdir(tempPath) && copyInstallerFiles(config.getInstallerRequiredFiles(), tempPath))
 		{
-			QString tempFile = tempPath + "/" + QFileInfo(getInstallerCurrentFilePath()).fileName();
+			QString tempFile = tempPath + "/" + QFileInfo(config.getInstallerCurrentFilePath()).fileName();
 
 			// launch copy in TEMP directory with same arguments
 			if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
