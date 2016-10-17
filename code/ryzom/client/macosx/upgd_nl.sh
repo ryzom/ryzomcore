@@ -19,14 +19,14 @@ SIGNPATH=$CONTENTSPATH/_CodeSignature
 # uncompress Ryzom
 if [ -e "$ROOTPATH/Ryzom.zip" ]
 then
-  unzip -o "$ROOTPATH/Ryzom.zip" -d "$CONTENTSPATH/.."
+  unzip -o "$ROOTPATH/Ryzom.zip" -d "$CONTENTSPATH/../.."
 fi
 
 # only uncompress Ryzom Installer if found in parent directory
-if [ -e "$ROOTPATH/RyzomInstaller.zip" ] && [ -d "$CONTENTSPATH/../../Ryzom Installer.app" ]
+if [ -e "$ROOTPATH/RyzomInstaller.zip" ] && [ -d "$CONTENTSPATH/../../../Ryzom Installer.app" ]
 then
-  rm -rf "$CONTENTSPATH/../../Ryzom Installer.app"
-  unzip -o "$ROOTPATH/RyzomInstaller.zip" -d "$CONTENTSPATH/../.."
+  rm -rf "$CONTENTSPATH/../../../Ryzom Installer.app"
+  unzip -o "$ROOTPATH/RyzomInstaller.zip" -d "$CONTENTSPATH/../../.."
 fi
 
 exit 0
