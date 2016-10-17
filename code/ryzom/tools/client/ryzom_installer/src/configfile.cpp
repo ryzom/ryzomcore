@@ -752,7 +752,19 @@ QString CConfigFile::getInstallerCurrentFilePath() const
 QString CConfigFile::getInstallerCurrentDirPath() const
 {
 	// installer is always run from TEMP under Windows
-	return QApplication::applicationDirPath();
+	QString appDir = QApplication::applicationDirPath();
+
+#ifdef Q_OS_MAC
+	QDir dir(appDir);
+	dir.cdUp(); // .. = Contents
+	dir.cdUp(); // .. = .app
+	dir.cdUp(); // .. = <parent>
+
+	// return absolute path
+	appDir = dir.absolutePath();
+#endif
+
+	return appDir;
 }
 
 QString CConfigFile::getInstallerInstalledFilePath() const
