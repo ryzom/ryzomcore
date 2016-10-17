@@ -256,14 +256,14 @@ int main(int argc, char *argv[])
 		{
 #ifndef _DEBUG
 			// restart more recent installed Installer version
-			if (QProcess::startDetached(config.getInstallerInstalledFilePath(), QApplication::arguments())) return 0;
+			if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
 #endif
 		}
 		else if (step == Done)
 		{
 #if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself
-			if (QProcess::startDetached(QApplication::applicationFilePath(), QApplication::arguments())) return 0;
+			if (QProcess::startDetached(QApplication::applicationFilePath())) return 0;
 #endif
 		}
 	}
