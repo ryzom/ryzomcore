@@ -54,7 +54,9 @@ protected:
 
 	typedef QList<FileToCopy> FilesToCopy;
 
-	void getFilesList(FilesToCopy &files);
+	void getFile(const QFileInfo &info, const QDir &srcDir, FilesToCopy &files) const;
+	void getFilesList(FilesToCopy &files) const;
+
 	bool copyFiles(const FilesToCopy &files);
 
 	IOperationProgressListener *m_listener;

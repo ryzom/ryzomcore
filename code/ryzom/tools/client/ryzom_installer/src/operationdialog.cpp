@@ -729,18 +729,28 @@ void COperationDialog::copyInstaller()
 
 	// rename old client to installer
 
-	QString oldInstallerFullPath = QApplication::applicationFilePath();
+	QString oldInstallerFullPath = config->getInstallerCurrentFilePath();
 	QString newInstallerFullPath = config->getInstallerInstalledFilePath();
 
 	if (!newInstallerFullPath.isEmpty())
 	{
+		QString srcDir = config->getSrcServerDirectory();
+
+		if (srcDir.isEmpty()) srcDir = config->getInstallerCurrentDirPath();
+
 		// always copy new installers
 		CFilesCopier copier(this);
 		copier.setIncludeFilter(config->getInstallerRequiredFiles());
+#ifdef Q_OS_WIN32
 		copier.addFile(oldInstallerFullPath);
-		copier.setSourceDirectory(config->getSrcServerDirectory().isEmpty() ? QApplication::applicationDirPath():config->getSrcServerDirectory());
+#endif
+		copier.setSourceDirectory(srcDir);
 		copier.setDestinationDirectory(config->getInstallationDirectory());
-		copier.exec();
+
+		if (!copier.exec()) return;
+
+#ifdef Q_OS_WIN32
+		// only happens under Windows in Debug or when migrating
 
 		// copied file
 		oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
@@ -754,6 +764,7 @@ void COperationDialog::copyInstaller()
 			// rename new installer with final name
 			QFile::rename(oldInstallerFullPath, newInstallerFullPath);
 		}
+#endif
 
 		// create menu directory if defined
 		QString path = config->getMenuDirectory();

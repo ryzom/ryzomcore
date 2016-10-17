@@ -106,22 +106,25 @@ bool CConfigFile::load(const QString &filename)
 		m_productHelpUrl = settings.value("url_help").toString();
 		m_productComments = settings.value("comments").toString();
 		settings.endGroup();
+	}
 
-		settings.beginGroup("servers");
-		int serversCount = settings.value("size").toInt();
-		m_defaultServerIndex = settings.value("default").toInt();
+	settings.beginGroup("servers");
+	int serversCount = settings.value("size").toInt();
+	m_defaultServerIndex = settings.value("default").toInt();
+	settings.endGroup();
+
+	// only resize if added servers in local ryzom_installer.ini
+	int oldServersCount = m_servers.size();
+
+	if (serversCount > oldServersCount) m_servers.resize(serversCount);
+
+	for (int i = oldServersCount; i < serversCount; ++i)
+	{
+		CServer &server = m_servers[i];
+
+		settings.beginGroup(QString("server_%1").arg(i));
+		server.loadFromSettings(settings);
 		settings.endGroup();
-
-		m_servers.resize(serversCount);
-
-		for (int i = 0; i < serversCount; ++i)
-		{
-			CServer &server = m_servers[i];
-
-			settings.beginGroup(QString("server_%1").arg(i));
-			server.loadFromSettings(settings);
-			settings.endGroup();
-		}
 	}
 
 	// custom choices, always keep them
@@ -492,11 +495,6 @@ QString CConfigFile::getParentDirectory()
 	return current.absolutePath();
 }
 
-QString CConfigFile::getApplicationDirectory()
-{
-	return QApplication::applicationDirPath();
-}
-
 QString CConfigFile::getOldInstallationDirectory()
 {
 	// HKEY_CURRENT_USER/SOFTWARE/Nevrax/RyzomInstall/InstallId=1917716796 (string)
@@ -757,7 +755,19 @@ QString CConfigFile::getInstallerCurrentFilePath() const
 QString CConfigFile::getInstallerCurrentDirPath() const
 {
 	// installer is always run from TEMP under Windows
-	return QApplication::applicationDirPath();
+	QString appDir = QApplication::applicationDirPath();
+
+#ifdef Q_OS_MAC
+	QDir dir(appDir);
+	dir.cdUp(); // .. = Contents
+	dir.cdUp(); // .. = .app
+	dir.cdUp(); // .. = <parent>
+
+	// return absolute path
+	appDir = dir.absolutePath();
+#endif
+
+	return appDir;
 }
 
 QString CConfigFile::getInstallerInstalledFilePath() const
@@ -818,7 +828,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 #endif
 
 	// include current executable
-	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+	files << QFileInfo(getInstallerCurrentFilePath()).fileName();
 #elif defined(Q_OS_MAC)
 	// everything is in a directory
 	files << "Ryzom Installer.app";
@@ -827,7 +837,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 	files << "ryzom_installer.png";
 
 	// include current executable
-	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+	files << QFileInfo(getInstallerCurrentFilePath()).fileName();
 #endif
 
 	return files;
@@ -875,7 +885,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 		if (!isRyzomInstalledIn(currentDirectory))
 		{
 			// Ryzom is in the same directory as Ryzom Installer
-			currentDirectory = getApplicationDirectory();
+			currentDirectory = getInstallerCurrentDirPath();
 
 			if (!isRyzomInstalledIn(currentDirectory))
 			{
@@ -972,8 +982,8 @@ OperationStep CConfigFile::getInstallNextStep() const
 		// current installer older, launch the more recent installer
 		case -1: return LaunchInstalledInstaller;
 
-		// continue only if 0
-		default: break;
+		// continue only if 0 and launched Installer is the installed one
+		default: if (getInstallerCurrentDirPath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
 	}
 
 	// no default profile

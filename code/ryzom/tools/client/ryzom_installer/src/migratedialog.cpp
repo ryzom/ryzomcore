@@ -38,7 +38,7 @@ CMigrateDialog::CMigrateDialog():QDialog()
 	if (!CConfigFile::getInstance()->isRyzomInstalledIn(m_currentDirectory))
 	{
 		// Ryzom is in the same directory as Ryzom Installer
-		m_currentDirectory = CConfigFile::getInstance()->getApplicationDirectory();
+		m_currentDirectory = CConfigFile::getInstance()->getInstallerCurrentDirPath();
 
 		if (!CConfigFile::getInstance()->isRyzomInstalledIn(m_currentDirectory))
 		{
