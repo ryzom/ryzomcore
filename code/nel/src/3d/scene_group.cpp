@@ -451,7 +451,6 @@ void CInstanceGroup::serial (NLMISC::IStream& f)
 		_PointLightArray.clear();
 	}
 
-
 	if (version >= 2)
 		f.serial(_GlobalPos);
 
