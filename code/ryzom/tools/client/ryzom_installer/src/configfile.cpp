@@ -979,8 +979,8 @@ OperationStep CConfigFile::getInstallNextStep() const
 		// current installer older, launch the more recent installer
 		case -1: return LaunchInstalledInstaller;
 
-		// continue only if 0
-		default: break;
+		// continue only if 0 and launched Installer is the installed one
+		default: if (getInstallerCurrentDirPath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
 	}
 
 	// no default profile
