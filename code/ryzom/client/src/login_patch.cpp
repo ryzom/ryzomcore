@@ -933,7 +933,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// wait until client not in memory anymore
-			contentSuffix += toString("until ! pgrep \"%s\" > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+			contentSuffix += toString("until ! pgrep -x \"%s\" > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
 		}
 
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
