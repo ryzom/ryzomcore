@@ -434,19 +434,29 @@ bool CFilesExtractor::extract7z()
 
 			if (!outFile.open(QFile::WriteOnly))
 			{
-				error = QApplication::tr("Unable to open output file");
+				error = QApplication::tr("Unable to open output file %1").arg(destPath);
 				res = SZ_ERROR_FAIL;
 				break;
 			}
 
-			size_t processedSize = outFile.write((const char*)(outBuffer + offset), outSizeProcessed);
-
-			if (processedSize != outSizeProcessed)
+			qint64 currentSizeToProcess = outSizeProcessed;
+			
+			do
 			{
-				error = QApplication::tr("Unable to write output file");
-				res = SZ_ERROR_FAIL;
-				break;
+				qint64 currentProcessedSize = outFile.write((const char*)(outBuffer + offset), currentSizeToProcess);
+
+				// errors only occur when returned size is -1
+				if (currentProcessedSize < 0)
+				{
+					error = QApplication::tr("Unable to write output file %1").arg(destPath);
+					res = SZ_ERROR_FAIL;
+					break;
+				}
+
+				offset += currentProcessedSize;
+				currentSizeToProcess -= currentProcessedSize;
 			}
+			while (currentSizeToProcess > 0);
 
 			outFile.close();
 
