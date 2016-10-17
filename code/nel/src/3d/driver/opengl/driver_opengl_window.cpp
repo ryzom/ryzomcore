@@ -343,8 +343,13 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
 	nlunreferenced(windowIcon);
+
+	// autorelease pool for memory management
+	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+
+	// init the application object
+	[NSApplication sharedApplication];
 
 #elif defined (NL_OS_UNIX)
 
@@ -486,6 +491,7 @@ bool CDriverGL::unInit()
 #elif defined(NL_OS_MAC)
 
 	// nothing to do
+	[_autoreleasePool release];
 
 #elif defined (NL_OS_UNIX)
 
@@ -1466,6 +1472,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 
 #elif defined(NL_OS_MAC)
 
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// finish the application launching
+	[NSApp finishLaunching];
+
 	// describe how the window should look like and behave
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
 		NSMiniaturizableWindowMask | NSResizableWindowMask;
@@ -1642,6 +1654,7 @@ bool CDriverGL::destroyWindow()
 	}
 
 #elif defined(NL_OS_MAC)
+
 #elif defined(NL_OS_UNIX)
 
 	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
@@ -1664,6 +1677,8 @@ bool CDriverGL::destroyWindow()
 		[[containerView() window] release];
 		[containerView() release];
 		[_glView release];
+
+		[_autoreleasePool release];
 	}
 
 	_ctx = nil;
