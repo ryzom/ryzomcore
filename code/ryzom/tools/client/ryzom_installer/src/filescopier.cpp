@@ -166,7 +166,7 @@ bool CFilesCopier::copyFiles(const FilesToCopy &files)
 
 			if (!QFile::copy(file.src, file.dst))
 			{
-				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to copy file %1").arg(file.src));
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to copy file %1 to %2").arg(file.src).arg(file.dst));
 				return false;
 			}
 
