@@ -167,7 +167,7 @@ void CClientConfigDialog::onClickPlay()
 	clientFullPath += "ryzom_client_r.exe";
 #endif
 #elif defined(Q_OS_MAC)
-	clientFullPath += "Ryzom.app";
+	clientFullPath += "Ryzom";
 #else
 	clientFullPath += "ryzom_client";
 #endif
