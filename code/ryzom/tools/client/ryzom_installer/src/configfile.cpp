@@ -983,7 +983,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 		case -1: return LaunchInstalledInstaller;
 
 		// continue only if 0 and launched Installer is the installed one
-		default: if (getInstallerCurrentDirPath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
+		default: if (getInstallerCurrentFilePath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
 	}
 
 	// no default profile
