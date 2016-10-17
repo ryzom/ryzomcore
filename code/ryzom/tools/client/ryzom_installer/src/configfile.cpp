@@ -492,11 +492,6 @@ QString CConfigFile::getParentDirectory()
 	return current.absolutePath();
 }
 
-QString CConfigFile::getApplicationDirectory()
-{
-	return QApplication::applicationDirPath();
-}
-
 QString CConfigFile::getOldInstallationDirectory()
 {
 	// HKEY_CURRENT_USER/SOFTWARE/Nevrax/RyzomInstall/InstallId=1917716796 (string)
@@ -818,7 +813,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 #endif
 
 	// include current executable
-	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+	files << QFileInfo(getInstallerCurrentFilePath()).fileName();
 #elif defined(Q_OS_MAC)
 	// everything is in a directory
 	files << "Ryzom Installer.app";
@@ -827,7 +822,7 @@ QStringList CConfigFile::getInstallerRequiredFiles() const
 	files << "ryzom_installer.png";
 
 	// include current executable
-	files << QFileInfo(QApplication::applicationFilePath()).fileName();
+	files << QFileInfo(getInstallerCurrentFilePath()).fileName();
 #endif
 
 	return files;
@@ -875,7 +870,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 		if (!isRyzomInstalledIn(currentDirectory))
 		{
 			// Ryzom is in the same directory as Ryzom Installer
-			currentDirectory = getApplicationDirectory();
+			currentDirectory = getInstallerCurrentDirPath();
 
 			if (!isRyzomInstalledIn(currentDirectory))
 			{

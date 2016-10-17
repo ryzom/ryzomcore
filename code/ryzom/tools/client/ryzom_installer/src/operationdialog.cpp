@@ -729,7 +729,7 @@ void COperationDialog::copyInstaller()
 
 	// rename old client to installer
 
-	QString oldInstallerFullPath = QApplication::applicationFilePath();
+	QString oldInstallerFullPath = config->getInstallerCurrentFilePath();
 	QString newInstallerFullPath = config->getInstallerInstalledFilePath();
 
 	if (!newInstallerFullPath.isEmpty())
