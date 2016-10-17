@@ -106,22 +106,25 @@ bool CConfigFile::load(const QString &filename)
 		m_productHelpUrl = settings.value("url_help").toString();
 		m_productComments = settings.value("comments").toString();
 		settings.endGroup();
+	}
 
-		settings.beginGroup("servers");
-		int serversCount = settings.value("size").toInt();
-		m_defaultServerIndex = settings.value("default").toInt();
+	settings.beginGroup("servers");
+	int serversCount = settings.value("size").toInt();
+	m_defaultServerIndex = settings.value("default").toInt();
+	settings.endGroup();
+
+	// only resize if added servers in local ryzom_installer.ini
+	int oldServersCount = m_servers.size();
+
+	if (serversCount > oldServersCount) m_servers.resize(serversCount);
+
+	for (int i = oldServersCount; i < serversCount; ++i)
+	{
+		CServer &server = m_servers[i];
+
+		settings.beginGroup(QString("server_%1").arg(i));
+		server.loadFromSettings(settings);
 		settings.endGroup();
-
-		m_servers.resize(serversCount);
-
-		for (int i = 0; i < serversCount; ++i)
-		{
-			CServer &server = m_servers[i];
-
-			settings.beginGroup(QString("server_%1").arg(i));
-			server.loadFromSettings(settings);
-			settings.endGroup();
-		}
 	}
 
 	// custom choices, always keep them
