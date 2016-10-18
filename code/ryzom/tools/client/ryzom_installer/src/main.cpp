@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
 	// check if launched from TEMP directory
-	if (step == Done && !QApplication::applicationDirPath().startsWith(tempPath))
+	if (step == Done && !config.getInstallerCurrentDirPath().startsWith(tempPath))
 	{
 		// try to delete all temporary installers
 		QDir tempDir(tempPath);
