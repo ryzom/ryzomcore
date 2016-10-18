@@ -974,29 +974,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 	}
 
 	// current installer more recent than installed one
-	switch (compareInstallersVersion())
-	{
-		// current installer more recent, copy it
-		case 1: return CopyInstaller;
-
-		// current installer older, launch the more recent installer
-		case -1: return LaunchInstalledInstaller;
-
-		// continue only if 0 and launched Installer is the installed one
-		default:
-		{
-#ifdef Q_OS_WIN32
-			QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-
-			// check if launched from TEMP directory
-			bool rightPath = getInstallerCurrentDirPath().startsWith(tempPath);
-#else
-			bool rightPath = false;
-#endif
-
-			if (!rightPath && getInstallerCurrentFilePath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
-		}
-	}
+	if (compareInstallersVersion() == 1) return CopyInstaller;
 
 	// no default profile
 	if (profile.id.isEmpty())
@@ -1036,6 +1014,31 @@ OperationStep CConfigFile::getInstallNextStep() const
 		if (uninstallingOldClient() && !QFile::exists(getSrcServerDirectory() + "/Uninstall.exe"))
 		{
 			setUninstallingOldClient(false);
+		}
+	}
+
+	// current installer more recent than installed one
+	switch (compareInstallersVersion())
+	{
+		// current installer more recent, copy it
+		case 1: break;
+
+		// current installer older, launch the more recent installer
+		case -1: return LaunchInstalledInstaller;
+
+		// continue only if 0 and launched Installer is the installed one
+		default:
+		{
+#ifdef Q_OS_WIN32
+			QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+
+			// check if launched from TEMP directory
+			bool rightPath = getInstallerCurrentDirPath().startsWith(tempPath);
+#else
+			bool rightPath = false;
+#endif
+
+			if (!rightPath && getInstallerCurrentFilePath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
 		}
 	}
 

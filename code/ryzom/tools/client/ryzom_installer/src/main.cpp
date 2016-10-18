@@ -241,6 +241,8 @@ int main(int argc, char *argv[])
 
 		step = config.getInstallNextStep();
 	}
+
+	bool restartInstaller = false;
 	
 	if (step != Done)
 	{
@@ -254,18 +256,23 @@ int main(int argc, char *argv[])
 
 		if (step == LaunchInstalledInstaller)
 		{
-#ifndef _DEBUG
 			// restart more recent installed Installer version
-			if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
-#endif
+			restartInstaller = true;
 		}
 		else if (step == Done)
 		{
 #if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself
-			if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
+			restartInstaller = true;
 #endif
 		}
+	}
+
+	if (restartInstaller)
+	{
+#ifndef _DEBUG
+		if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
+#endif
 	}
 
 	CMainWindow mainWindow;
