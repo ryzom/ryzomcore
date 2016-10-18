@@ -75,8 +75,18 @@ void CFilesCopier::getFile(const QFileInfo &fileInfo, const QDir &srcDir, FilesT
 	// full path to file
 	QString fullPath = fileInfo.absoluteFilePath();
 
+	QString relativePath = srcDir.relativeFilePath(fullPath);
+
+	QFileInfo relativeFileInfo(relativePath);
+
+	// correct absolute path
+	if (relativeFileInfo.isAbsolute())
+	{
+		relativePath = relativeFileInfo.fileName();
+	}
+
 	// full path where to copy file
-	QString dstPath = m_destinationDirectory + "/" + srcDir.relativeFilePath(fullPath);
+	QString dstPath = m_destinationDirectory + "/" + relativePath;
 
 	if (fileInfo.isDir())
 	{
