@@ -147,6 +147,14 @@ void CMigrateDialog::accept()
 	// check free disk space
 	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
 
+	if (freeSpace == 0)
+	{
+		QString error = qFromUtf8(NLMISC::formatErrorMessage(NLMISC::getLastError()));
+
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Error"), tr("Error '%1' occured when trying to check free disk space on %2.").arg(error).arg(m_dstDirectory));
+		return;
+	}
+
 	// compare with exact size of current directory
 	if (freeSpace < getDirectorySize(m_currentDirectory, true))
 	{
