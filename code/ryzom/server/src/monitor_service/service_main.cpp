@@ -379,8 +379,12 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 		{
 			if (!Clients[i]->BadLogin) // don't allow new login attempt while thisflag is set
 			{
+				// escape login
+				char esccapedLogin[100];
+				size_t len = mysql_real_escape_string(DatabaseConnection, esccapedLogin, login.c_str(), login.length());
+
 				// make a db request to to db to see if password is valid
-				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", login.c_str());
+				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", esccapedLogin);
 				int result = mysql_query(DatabaseConnection, queryStr.c_str());
 				if (result == 0)
 				{
