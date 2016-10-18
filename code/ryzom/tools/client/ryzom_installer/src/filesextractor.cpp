@@ -408,28 +408,53 @@ bool CFilesExtractor::extract7z()
 			QString path = QString::fromUtf16(temp);
 			QString filename = QFileInfo(path).fileName();
 
-			if (!isDir)
-			{
-				if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
-
-				res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
-					&offset, &outSizeProcessed, &allocImp, &allocTempImp);
-
-				if (res != SZ_OK) break;
-			}
-
 			QString destPath = m_destinationDirectory + '/' + path;
 
-			QDir dir;
+			// get uncompressed size
+			quint64 uncompressedSize = SzArEx_GetFileSize(&db, i);
+
+			// get modification time
+			quint32 modificationTime = 0;
+
+			if (SzBitWithVals_Check(&db.MTime, i))
+			{
+				modificationTime = convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i]);
+			}
 
 			if (isDir)
 			{
-				dir.mkpath(destPath);
+				QDir().mkpath(destPath);
 				continue;
 			}
 
-			dir.mkpath(QFileInfo(destPath).absolutePath());
+			// check if file exists
+			if (QFile::exists(destPath))
+			{
+				QFileInfo currentFileInfo(destPath);
 
+				// skip file if same size and same modification date
+				if (currentFileInfo.lastModified().toTime_t() == modificationTime && currentFileInfo.size() == uncompressedSize)
+				{
+					// update progress
+					totalUncompressed += uncompressedSize;
+
+					if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
+
+					continue;
+				}
+			}
+
+			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
+
+			res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
+				&offset, &outSizeProcessed, &allocImp, &allocTempImp);
+
+			if (res != SZ_OK) break;
+
+			// create file directory
+			QDir().mkpath(QFileInfo(destPath).absolutePath());
+
+			// create file
 			QFile outFile(destPath);
 
 			if (!outFile.open(QFile::WriteOnly))
@@ -446,10 +471,7 @@ bool CFilesExtractor::extract7z()
 				qint64 currentProcessedSize = outFile.write((const char*)(outBuffer + offset), currentSizeToProcess);
 
 				// errors only occur when returned size is -1
-				if (currentProcessedSize < 0)
-				{
-					break;
-				}
+				if (currentProcessedSize < 0) break;
 
 				offset += currentProcessedSize;
 				currentSizeToProcess -= currentProcessedSize;
@@ -465,25 +487,20 @@ bool CFilesExtractor::extract7z()
 
 			outFile.close();
 
-			totalUncompressed += SzArEx_GetFileSize(&db, i);
+			totalUncompressed += uncompressedSize;
 
 			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
-			// set attrinbutes
+			// set attributes
 			if (SzBitWithVals_Check(&db.Attribs, i))
 			{
 				Set7zFileAttrib(destPath, db.Attribs.Vals[i]);
 			}
 
 			// set modification time
-			if (SzBitWithVals_Check(&db.MTime, i))
+			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(destPath), modificationTime))
 			{
-				char buffer[1024];
-
-				if (!NLMISC::CFile::setFileModificationDate(qToUtf8(destPath), convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i])))
-				{
-					qDebug() << "Unable to change date of " << destPath;
-				}
+				qDebug() << "Unable to change date of " << destPath;
 			}
 		}
 
