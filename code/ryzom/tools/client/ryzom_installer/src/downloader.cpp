@@ -17,6 +17,7 @@
 #include "stdpch.h"
 #include "operation.h"
 #include "downloader.h"
+#include "utils.h"
 
 #include "nel/misc/system_info.h"
 #include "nel/misc/path.h"
@@ -179,6 +180,16 @@ void CDownloader::getFileHead()
 void CDownloader::downloadFile()
 {
 	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_fullPath.toUtf8().constData());
+
+	if (freeSpace == 0)
+	{
+		if (m_listener)
+		{
+			QString error = qFromUtf8(NLMISC::formatErrorMessage(NLMISC::getLastError()));
+			m_listener->operationFail(tr("Error '%1' occured when trying to check free disk space on %2.").arg(error).arg(m_fullPath));
+		}
+		return;
+	}
 
 	if (freeSpace < m_size - m_offset)
 	{
