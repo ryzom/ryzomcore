@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 	QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
 
 	// check if launched from TEMP directory
-	if (step == Done && !QApplication::applicationDirPath().startsWith(tempPath))
+	if (step == Done && !config.getInstallerCurrentDirPath().startsWith(tempPath))
 	{
 		// try to delete all temporary installers
 		QDir tempDir(tempPath);
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
 		{
 #if defined(Q_OS_WIN) && !defined(_DEBUG)
 			// restart Installer, so it could be copied in TEMP and allowed to update itself
-			if (QProcess::startDetached(QApplication::applicationFilePath())) return 0;
+			if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
 #endif
 		}
 	}

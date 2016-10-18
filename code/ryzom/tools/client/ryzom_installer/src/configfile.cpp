@@ -983,7 +983,19 @@ OperationStep CConfigFile::getInstallNextStep() const
 		case -1: return LaunchInstalledInstaller;
 
 		// continue only if 0 and launched Installer is the installed one
-		default: if (getInstallerCurrentFilePath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
+		default:
+		{
+#ifdef Q_OS_WIN32
+			QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+
+			// check if launched from TEMP directory
+			bool rightPath = getInstallerCurrentDirPath().startsWith(tempPath);
+#else
+			bool rightPath = false;
+#endif
+
+			if (!rightPath && getInstallerCurrentFilePath() != getInstallerInstalledFilePath() && QFile::exists(getInstallerInstalledFilePath())) return LaunchInstalledInstaller;
+		}
 	}
 
 	// no default profile

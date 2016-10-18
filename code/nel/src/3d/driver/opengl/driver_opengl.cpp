@@ -622,7 +622,7 @@ bool CDriverGL::setupDisplay()
 	checkForPerPixelLightingSupport();
 
 #ifndef USE_OPENGLES
-	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
+	// if EXTVertexShader is used, bind the standard GL arrays, and allocate constant
 	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
 		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
