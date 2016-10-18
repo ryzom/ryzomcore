@@ -948,7 +948,12 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			contentSuffix += "cd \"$STARTUPPATH\"\n\n";
 
 			// launch new client
+#ifdef NL_OS_MAC
+			// use exec command under OS X
+			contentSuffix += toString("exec \"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+#else
 			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+#endif
 		}
 #endif
 
