@@ -448,8 +448,6 @@ bool CFilesExtractor::extract7z()
 				// errors only occur when returned size is -1
 				if (currentProcessedSize < 0)
 				{
-					error = QApplication::tr("Unable to write output file %1").arg(destPath);
-					res = SZ_ERROR_FAIL;
 					break;
 				}
 
@@ -457,6 +455,13 @@ bool CFilesExtractor::extract7z()
 				currentSizeToProcess -= currentProcessedSize;
 			}
 			while (currentSizeToProcess > 0);
+
+			if (offset != outSizeProcessed)
+			{
+				error = QApplication::tr("Unable to write output file %1 (%2 bytes written but expecting %3 bytes)").arg(destPath).arg(offset).arg(outSizeProcessed);
+				res = SZ_ERROR_FAIL;
+				break;
+			}
 
 			outFile.close();
 
