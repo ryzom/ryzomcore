@@ -137,11 +137,19 @@ void CMainWindow::onPlayClicked()
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	// launch the game with all arguments and from server root directory (to use right data)
 	bool started = QProcess::startDetached(executable, arguments, server.getDirectory());
 
 	// define this profile as default one
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onConfigureClicked()
@@ -164,9 +172,17 @@ void CMainWindow::onConfigureClicked()
 	arguments << "-p";
 	arguments << profile.id;
 
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	bool started = QProcess::startDetached(executable, arguments);
 
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onProfiles()

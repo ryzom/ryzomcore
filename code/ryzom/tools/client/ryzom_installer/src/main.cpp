@@ -271,6 +271,11 @@ int main(int argc, char *argv[])
 	if (restartInstaller)
 	{
 #ifndef _DEBUG
+#ifndef Q_OS_WIN32
+		// fix executable permissions under UNIX
+		QFile::setPermissions(config.getInstallerInstalledFilePath(), QFile::permissions(config.getInstallerInstalledFilePath()) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 		if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
 #endif
 	}
