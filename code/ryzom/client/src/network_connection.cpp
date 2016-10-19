@@ -2756,7 +2756,16 @@ void	CNetworkConnection::sendSystemDisconnection()
 	uint32	length = message.length();
 
 	if (_Connection.connected())
-		_Connection.send (message.buffer(), length);
+	{
+		try
+		{
+			_Connection.send(message.buffer(), length);
+		}
+		catch (const ESocket &e)
+		{
+			nlwarning("Socket exception: %s", e.what());
+		}
+	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 
