@@ -19,6 +19,10 @@
 
 #include "operation.h"
 
+class CServer;
+
+typedef QVector<CServer> CServers;
+
 class CServer
 {
 public:
@@ -44,6 +48,8 @@ public:
 	QString comments;
 
 	void loadFromSettings(const QSettings &settings);
+	void loadFromServers(const CServers &servers);
+	void loadFromServer(const CServer &server);
 	void saveToSettings(QSettings &settings) const;
 
 	// helpers
@@ -54,7 +60,5 @@ public:
 };
 
 extern const CServer NoServer;
-
-typedef QVector<CServer> CServers;
 
 #endif

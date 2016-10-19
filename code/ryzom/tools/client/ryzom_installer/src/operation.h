@@ -31,6 +31,7 @@ public:
 	virtual void operationProgress(qint64 current, const QString &filename) =0;
 	virtual void operationSuccess(qint64 total) =0;
 	virtual void operationFail(const QString &error) =0;
+	virtual void operationContinue() = 0;
 
 	virtual bool operationShouldStop() =0;
 };

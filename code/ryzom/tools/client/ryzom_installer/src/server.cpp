@@ -52,6 +52,38 @@ void CServer::loadFromSettings(const QSettings &settings)
 	comments = settings.value("comments").toString();
 }
 
+void CServer::loadFromServers(const CServers &servers)
+{
+	foreach(const CServer &server, servers)
+	{
+		if (server.id == id)
+		{
+			// found the same server
+			loadFromServer(server);
+			break;
+		}
+	}
+}
+
+void CServer::loadFromServer(const CServer &server)
+{
+	// copy all members
+	id = server.id;
+	name = server.name;
+	displayUrl = server.displayUrl;
+	filesListUrl = server.filesListUrl;
+	dataDownloadUrl = server.dataDownloadUrl;
+	dataDownloadFilename = server.dataDownloadFilename;
+	dataCompressedSize = server.dataCompressedSize;
+	dataUncompressedSize = server.dataUncompressedSize;
+	clientDownloadUrl = server.clientDownloadUrl;
+	clientDownloadFilename = server.clientDownloadFilename;
+	clientFilename = server.clientFilename;
+	clientFilenameOld = server.clientFilenameOld;
+	configurationFilename = server.configurationFilename;
+	comments = server.comments;
+}
+
 void CServer::saveToSettings(QSettings &settings) const
 {
 	settings.setValue("id", id);

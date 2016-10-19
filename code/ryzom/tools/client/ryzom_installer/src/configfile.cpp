@@ -114,16 +114,26 @@ bool CConfigFile::load(const QString &filename)
 	settings.endGroup();
 
 	// only resize if added servers in local ryzom_installer.ini
-	int oldServersCount = m_servers.size();
+	CServers defaultServers = m_servers;
 
-	if (serversCount > oldServersCount) m_servers.resize(serversCount);
+	m_servers.resize(serversCount);
 
-	for (int i = oldServersCount; i < serversCount; ++i)
+	for (int i = 0; i < serversCount; ++i)
 	{
+		settings.beginGroup(QString("server_%1").arg(i));
+
 		CServer &server = m_servers[i];
 
-		settings.beginGroup(QString("server_%1").arg(i));
-		server.loadFromSettings(settings);
+		if (useDefaultValues)
+		{
+			// search server with same ID and use these values
+			server.loadFromServers(defaultServers);
+		}
+		else
+		{
+			server.loadFromSettings(settings);
+		}
+
 		settings.endGroup();
 	}
 
