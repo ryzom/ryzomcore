@@ -388,9 +388,13 @@ void CDownloader::onDownloadFinished()
 
 			emit downloadDone();
 		}
+		else if (status == 206)
+		{
+			if (m_listener) m_listener->operationContinue();
+		}
 		else
 		{
-			m_listener->operationFail(tr("HTTP error: %1").arg(status));
+			if (m_listener) m_listener->operationFail(tr("HTTP error: %1").arg(status));
 		}
 	}
 }
