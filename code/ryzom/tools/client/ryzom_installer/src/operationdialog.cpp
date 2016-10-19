@@ -725,23 +725,18 @@ void COperationDialog::copyInstaller()
 
 	m_currentOperation = tr("Copying installer to new location...");
 
-	QString destinationDirectory = config->getInstallationDirectory();
-
-	// rename old client to installer
-
-	QString oldInstallerFullPath = config->getInstallerCurrentFilePath();
 	QString newInstallerFullPath = config->getInstallerInstalledFilePath();
 
 	if (!newInstallerFullPath.isEmpty())
 	{
-		QString srcDir = config->getSrcServerDirectory();
-
-		if (srcDir.isEmpty()) srcDir = config->getInstallerCurrentDirPath();
+		QString destinationDirectory = config->getInstallationDirectory();
+		QString oldInstallerFullPath = config->getInstallerCurrentFilePath();
+		QString srcDir = config->getInstallerCurrentDirPath();
 
 		// always copy new installers
 		CFilesCopier copier(this);
 		copier.setIncludeFilter(config->getInstallerRequiredFiles());
-#ifdef Q_OS_WIN32
+#ifndef Q_OS_MAC
 		copier.addFile(oldInstallerFullPath);
 #endif
 		copier.setSourceDirectory(srcDir);
@@ -749,9 +744,7 @@ void COperationDialog::copyInstaller()
 
 		if (!copier.exec()) return;
 
-#ifdef Q_OS_WIN32
-		// only happens under Windows in Debug or when migrating
-
+#ifndef Q_OS_MAC
 		// copied file
 		oldInstallerFullPath = config->getInstallationDirectory() + "/" + QFileInfo(oldInstallerFullPath).fileName();
 
