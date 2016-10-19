@@ -295,7 +295,7 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	auto_ptr<uint8> outProps = auto_ptr<uint8>(new uint8[outPropsSize]);
 
 	// compress with best compression and other default settings
-	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 24, 3, 0, 2, 32, 1);
+	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);
 
 	switch(res)
 	{
