@@ -408,6 +408,14 @@ QString appendShortcutExtension(const QString &shortcut)
 
 QString getVersionFromExecutable(const QString &path)
 {
+	// check if file exists
+	if (!QFile::exists(path)) return "";
+
+#ifndef Q_OS_WIN32
+	// fix executable permissions under UNIX
+	QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	// launch executable with --version argument
 	QProcess process;
 	process.setProcessChannelMode(QProcess::MergedChannels);

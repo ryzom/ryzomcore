@@ -137,6 +137,10 @@ void CMainWindow::onPlayClicked()
 	arguments << profile.id;
 	arguments << profile.arguments.split(' ');
 
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	// launch the game with all arguments and from server root directory (to use right data)
 	bool started = QProcess::startDetached(executable, arguments, server.getDirectory());
 
@@ -163,6 +167,10 @@ void CMainWindow::onConfigureClicked()
 	QStringList arguments;
 	arguments << "-p";
 	arguments << profile.id;
+
+#ifndef Q_OS_WIN32
+	QFile::setPermissions(executable, QFile::permissions(executable) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
 
 	bool started = QProcess::startDetached(executable, arguments);
 

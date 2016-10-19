@@ -172,6 +172,11 @@ void CClientConfigDialog::onClickPlay()
 	clientFullPath += "ryzom_client";
 #endif
 
+#ifndef Q_OS_WIN32
+	// fix executable permissions under UNIX
+	QFile::setPermissions(clientFullPath, QFile::permissions(clientFullPath) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+#endif
+
 	started = QProcess::startDetached(clientFullPath, arguments);
 
 	onClickOK();
