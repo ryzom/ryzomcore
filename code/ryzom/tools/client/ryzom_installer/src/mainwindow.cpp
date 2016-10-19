@@ -145,7 +145,11 @@ void CMainWindow::onPlayClicked()
 	bool started = QProcess::startDetached(executable, arguments, server.getDirectory());
 
 	// define this profile as default one
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onConfigureClicked()
@@ -174,7 +178,11 @@ void CMainWindow::onConfigureClicked()
 
 	bool started = QProcess::startDetached(executable, arguments);
 
-	CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+	if (started)
+	{
+		CConfigFile::getInstance()->setDefaultProfileIndex(profileIndex);
+		CConfigFile::getInstance()->save();
+	}
 }
 
 void CMainWindow::onProfiles()
