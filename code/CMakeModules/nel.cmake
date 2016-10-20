@@ -333,6 +333,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_CLIENT_UAC    "Ask to run as Administrator"                   OFF)
   OPTION(WITH_RYZOM_PATCH         "Enable Ryzom in-game patch support"            OFF)
   OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)
+  OPTION(WITH_RYZOM_SANDBOX       "Enable Sandbox under OS X"                     OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
