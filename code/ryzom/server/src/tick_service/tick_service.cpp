@@ -418,7 +418,7 @@ void CTickService::checkTockReceived()
 			_TickSendTime = oldTime + dt;
 		}
 
-		//nlinfo( " %"NL_I64"u  %"NL_I64"u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );		
+		//nlinfo( " %" NL_I64 "u  %" NL_I64 "u", (TTime)((_TickSendTime-oldTime)*1000), (TTime)((d2-oldTime)*1000) );		
 
 		// broadcast the tick
 		broadcastTick();

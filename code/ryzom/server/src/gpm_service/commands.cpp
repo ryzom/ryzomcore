@@ -602,7 +602,7 @@ NLMISC_COMMAND(trackEntity, "get track of an entity position", "id")
 	uint		creatorId;
 	uint		dynamicId;
 
-	if (sscanf(args[0].c_str(), "(%"NL_I64"x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
+	if (sscanf(args[0].c_str(), "(%" NL_I64 "x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
 		return false;
 
 	eid.setShortId( id );

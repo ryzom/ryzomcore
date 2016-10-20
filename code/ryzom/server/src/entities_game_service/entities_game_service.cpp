@@ -3864,7 +3864,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp(entry);
-				log.displayNL("For player %s, buffer %s : value %"NL_I64"d", id.toString().c_str(), entry.c_str(), value );
+				log.displayNL("For player %s, buffer %s : value %" NL_I64 "d", id.toString().c_str(), entry.c_str(), value );
 			}
 			catch (const CCDBSynchronised::ECDBNotFound &)
 			{
@@ -3904,7 +3904,7 @@ NLMISC_COMMAND( db, "Display or set the value of a property in the database", "<
 			try
 			{
 				sint64 value = e->_PropertyDatabase.x_getProp( entry );
-				log.displayNL( "%"NL_I64"d", value );
+				log.displayNL( "%" NL_I64 "d", value );
 				res = true;
 			}
 			catch (const CCDBSynchronised::ECDBNotFound& )
@@ -4005,7 +4005,7 @@ NLMISC_COMMAND(displayMoney," display_seed","<entity id(id:type:crea:dyn)>")
 		CCharacter *e = PlayerManager.getChar(id);
 		if( e )
 		{
-			log.displayNL("displayMoney: %"NL_I64"%u", e->getMoney() );
+			log.displayNL("displayMoney: %" NL_I64 "%u", e->getMoney() );
 		}
 		else
 		{
