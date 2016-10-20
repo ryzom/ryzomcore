@@ -144,18 +144,21 @@ int main(int argc, char *argv[])
 
 	// instanciate ConfigFile
 	CConfigFile config;
-	OperationStep step = config.load() ? config.getInstallNextStep():DisplayNoServerError;
 
-	if (step == DisplayNoServerError)
-	{
-		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find ryzom_installer.ini"));
-		return 1;
-	}
+	bool res = config.load();
 
 	// init log
 	CLogHelper logHelper(config.getInstallationDirectory());
 
 	nlinfo("Launched %s", Q2C(config.getInstallerCurrentFilePath()));
+
+	OperationStep step = res ? config.getInstallNextStep():DisplayNoServerError;
+
+	if (res == DisplayNoServerError)
+	{
+		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find ryzom_installer.ini"));
+		return 1;
+	}
 
 #if defined(Q_OS_WIN) && !defined(_DEBUG)
 	// under Windows, Ryzom Installer should always be copied in TEMP directory
