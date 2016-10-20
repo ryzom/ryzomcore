@@ -277,7 +277,7 @@ void CDownloader::onHeadFinished()
 	}
 
 	// redirection
-	if (status == 302)
+	if (status == 302 || status == 307)
 	{
 		if (redirection.isEmpty())
 		{
