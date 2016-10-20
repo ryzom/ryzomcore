@@ -894,7 +894,7 @@ void CObjectInteger::inPlaceCopy(const CObjectInteger &src)
 }
 
 
-std::string CObjectInteger::doToString() const { return NLMISC::toString("%" NL_I64 "d", _Value); }
+std::string CObjectInteger::doToString() const { return NLMISC::toString(_Value); }
 
 void CObjectInteger::doSerialize(std::string& out,  CSerializeContext& /* context */) const
 {

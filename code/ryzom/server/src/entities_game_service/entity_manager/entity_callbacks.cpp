@@ -1180,7 +1180,7 @@ void cbDeleteChar( CMessage& msgin, const std::string &serviceName, NLNET::TServ
 	CPlayer* player = PlayerManager.getPlayer( userId );
 	if ( player == NULL )
 	{
-		nlwarning("invalid user %"NL_I64"u %u %hu", longUserId,userId,(uint16)characterIndex);
+		nlwarning("invalid user %" NL_I64 "u %u %hu", longUserId,userId,(uint16)characterIndex);
 		return;
 	}
 

@@ -76,7 +76,6 @@ protected:
 	bool checkDownloadedFile();
 
 	QNetworkAccessManager *m_manager;
-	QNetworkReply *m_reply;
 	QTimer *m_timer;
 
 	QString m_url;

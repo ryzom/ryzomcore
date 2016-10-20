@@ -73,6 +73,8 @@ enum OperationStep
 	Done
 };
 
+QString stepToString(OperationStep);
+
 enum OperationType
 {
 	OperationNone,

@@ -268,7 +268,7 @@ void	CTable::displayRow(RY_PDS::TRowIndex row, NLMISC::CLog* log, bool displayHe
 		(rowaccess.mapped() ? ", mapped" : ""),
 		(rowaccess.dirty() ? ", dirty" : ""));
 
-	log->displayNL("row %d: %d bytes, flags=[%s] (map=%016"NL_I64"X, dirtstamp=%08X)", row, _RowSize, flagstr.c_str(), (rowaccess.mapped() ? rowaccess.key() : (uint64)0), rowaccess.dirtyStamp());
+	log->displayNL("row %d: %d bytes, flags=[%s] (map=%016" NL_I64 "X, dirtstamp=%08X)", row, _RowSize, flagstr.c_str(), (rowaccess.mapped() ? rowaccess.key() : (uint64)0), rowaccess.dirtyStamp());
 
 	if (displayHeader)
 	{
@@ -495,11 +495,11 @@ bool	CTable::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 
 	if (!_TableBuffer.mapRow(index, key))
 	{
-		PDS_WARNING("mapRow(): failed to map '%s' to '%016"NL_I64"X'", index.toString().c_str(), key);
+		PDS_WARNING("mapRow(): failed to map '%s' to '%016" NL_I64 "X'", index.toString().c_str(), key);
 		return false;
 	}
 
-	PDS_FULL_DEBUG("Mapped '%s' to key '%016"NL_I64"X'", index.toString().c_str(), key);
+	PDS_FULL_DEBUG("Mapped '%s' to key '%016" NL_I64 "X'", index.toString().c_str(), key);
 
 	return true;
 }
@@ -535,11 +535,11 @@ bool	CTable::unmapRow(uint64 key)
 
 	if (!_TableBuffer.unmapRow(index, key))
 	{
-		PDS_WARNING("mapRow(): failed to unmap '%s' to '%016"NL_I64"X'", index.toString().c_str(), key);
+		PDS_WARNING("mapRow(): failed to unmap '%s' to '%016" NL_I64 "X'", index.toString().c_str(), key);
 		return false;
 	}
 
-	PDS_FULL_DEBUG("Unmapped '%s' of key '%016"NL_I64"X'", index.toString().c_str(), key);
+	PDS_FULL_DEBUG("Unmapped '%s' of key '%016" NL_I64 "X'", index.toString().c_str(), key);
 
 	return true;
 }

@@ -349,7 +349,7 @@ string	CDatabase::getValue(const CLocatePath::TLocatePath &path)
 	if (path[node].Name[0] == '$')
 	{
 		uint64	key;
-		if (sscanf(path[node].Name.c_str()+1, "%"NL_I64"X", &key) != 1)
+		if (sscanf(path[node].Name.c_str()+1, "%" NL_I64 "X", &key) != 1)
 		{
 			PDS_WARNING("getValue(): unable to select mapped row '%s'", path[node].Name.c_str());
 			return "";
@@ -575,7 +575,7 @@ bool	CDatabase::mapRow(const RY_PDS::CObjectIndex &index, uint64 key)
 	bool	success = table->mapRow(index, key);
 
 	if (success)
-		PDS_FULL_DEBUG("mapped '%016"NL_I64"X' to '%s' successfully", key, index.toString().c_str());
+		PDS_FULL_DEBUG("mapped '%016" NL_I64 "X' to '%s' successfully", key, index.toString().c_str());
 
 	return success;
 }
@@ -605,7 +605,7 @@ bool	CDatabase::unmapRow(RY_PDS::TTableIndex tableIndex, uint64 key)
 	bool	success = table->unmapRow(key);
 
 	if (success)
-		PDS_FULL_DEBUG("unmapped '%016"NL_I64"X' successfully", key);
+		PDS_FULL_DEBUG("unmapped '%016" NL_I64 "X' successfully", key);
 
 	return success;
 }
@@ -890,7 +890,7 @@ bool	CDatabase::set(RY_PDS::TTableIndex table, RY_PDS::TRowIndex row, RY_PDS::TC
 	case PDS_sint64:
 		{
 			uint64	data;
-			sscanf(value.c_str(), "%016"NL_I64"d", &data);
+			sscanf(value.c_str(), "%016" NL_I64 "d", &data);
 			return set(table, row, column, sizeof(data), &data);
 		}
 		break;

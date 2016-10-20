@@ -563,3 +563,51 @@ CCOMHelper::~CCOMHelper()
 	if (m_mustUninit) CoUninitialize();
 #endif
 }
+
+CLogHelper::CLogHelper(const QString &logPath)
+{
+	// disable nldebug messages in logs in Release
+#ifdef NL_RELEASE
+	NLMISC::DisableNLDebug = true;
+#endif
+
+	// don't create a file for the moment, we'll create it manually
+	NLMISC::createDebug(NULL, false);
+
+	// ryzom_installer.Log displayer
+	NLMISC::CFileDisplayer *LogDisplayer = new NLMISC::CFileDisplayer(qToUtf8(logPath) + "/ryzom_installer.log", true, "DEFAULT_FD");
+	NLMISC::DebugLog->addDisplayer(LogDisplayer);
+	NLMISC::InfoLog->addDisplayer(LogDisplayer);
+	NLMISC::WarningLog->addDisplayer(LogDisplayer);
+	NLMISC::ErrorLog->addDisplayer(LogDisplayer);
+	NLMISC::AssertLog->addDisplayer(LogDisplayer);
+
+	std::string type;
+
+#ifdef NL_RELEASE
+	type = "RELEASE";
+#else
+	type = "DEBUG";
+#endif
+
+	// Display installer version
+	nlinfo("RYZOM INSTALLER VERSION: %s (%s)", Q2C(QApplication::applicationVersion()), type.c_str());
+	nlinfo("Memory: %s/%s", NLMISC::bytesToHumanReadable(NLMISC::CSystemInfo::availablePhysicalMemory()).c_str(), NLMISC::bytesToHumanReadable(NLMISC::CSystemInfo::totalPhysicalMemory()).c_str());
+	nlinfo("OS: %s", NLMISC::CSystemInfo::getOS().c_str());
+	nlinfo("Processor: %s", NLMISC::CSystemInfo::getProc().c_str());
+}
+
+CLogHelper::~CLogHelper()
+{
+	NLMISC::IDisplayer *LogDisplayer = NLMISC::ErrorLog->getDisplayer("DEFAULT_FD");
+
+	if (LogDisplayer)
+	{
+		NLMISC::DebugLog->removeDisplayer(LogDisplayer);
+		NLMISC::InfoLog->removeDisplayer(LogDisplayer);
+		NLMISC::WarningLog->removeDisplayer(LogDisplayer);
+		NLMISC::ErrorLog->removeDisplayer(LogDisplayer);
+		NLMISC::AssertLog->removeDisplayer(LogDisplayer);
+		delete LogDisplayer;
+	}
+}

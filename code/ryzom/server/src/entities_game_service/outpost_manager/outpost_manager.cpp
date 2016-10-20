@@ -757,7 +757,7 @@ void COutpostManager::saveAll()
 	}
 
 	TTime endTime = NLMISC::CTime::getLocalTime();
-	nldebug("Saved all outposts in %"NL_I64"d ms.", (endTime-startTime));
+	nldebug("Saved all outposts in %" NL_I64 "d ms.", (endTime-startTime));
 }
 
 //----------------------------------------------------------------------------

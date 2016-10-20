@@ -316,7 +316,7 @@ inline TCoord	CVisionProvider::calcDistance( CClientHost *client, TCLEntityId sl
 	//{
 	//	pos2x = getAbsoluteCoordinateFrom64( vlastposx );
 	//	pos2y = getAbsoluteCoordinateFrom64( vlastposy );
-	//	//nlinfo( "lastpos: %d %d, vlastpos: %"NL_I64"u %"NL_I64"u", pos2x, pos2y, vlastposx, vlastposy );
+	//	//nlinfo( "lastpos: %d %d, vlastpos: %" NL_I64 "u %" NL_I64 "u", pos2x, pos2y, vlastposx, vlastposy );
 /*#ifdef NL_DEBUG
 		TCoord d = (TCoord)(abs(pos1x-pos2x) + abs(pos1y-pos2y));
 		if ( d < 0 )
@@ -757,7 +757,7 @@ NLMISC_COMMAND( displayEntityInfoById, "Display the properties of an entity, by 
 	uint		type;
 	uint		creatorId;
 	uint		dynamicId;
-	if (sscanf(args[0].c_str(), "(%"NL_I64"x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
+	if (sscanf(args[0].c_str(), "(%" NL_I64 "x:%x:%x:%x)", &id, &type, &creatorId, &dynamicId) != 4)
 		return false;
 	eid.setShortId( id );
 	eid.setType( type );

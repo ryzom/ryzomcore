@@ -501,7 +501,7 @@ retry_pending_command:
 //
 //			for (uint i=0; i<graphDatas.getDatas().size(); ++i)
 //			{
-//				nldebug("  At %10"NL_I64"u	%f", 
+//				nldebug("  At %10" NL_I64 "u	%f", 
 //					graphDatas.getDatas()[i].getSampleTick(), 
 //					graphDatas.getDatas()[i].getValue());
 //			}
@@ -869,7 +869,7 @@ retry_pending_command:
 				{
 					// output this sample
 					uint32 date = startTime + uint32((buffer.Datas[i].SampleTick - startMilli)/1000);
-					ret.push_back(toString("%u : %"NL_I64"u : %f %f %f", date, buffer.Datas[i].SampleTick, minSample, meanSample/nbMergedSample, maxSample));
+					ret.push_back(toString("%u : %" NL_I64 "u : %f %f %f", date, buffer.Datas[i].SampleTick, minSample, meanSample/nbMergedSample, maxSample));
 					lastSampleTick = buffer.Datas[i].SampleTick;
 
 					minSample = DBL_MAX;

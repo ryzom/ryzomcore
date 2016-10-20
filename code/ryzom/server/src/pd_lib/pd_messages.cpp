@@ -247,7 +247,7 @@ void	CDbMessage::getHRContent(const CDBDescriptionParser& description, std::stri
 			if (getTable() >= db.Tables.size())
 				return;
 			const CTableNode&	table = db.Tables[getTable()];
-			result = NLMISC::toString("%-12s: %s %"NL_I64"X %s", "LoadRow", table.Name.c_str(), asUint64(), asEntityId().toString().c_str());
+			result = NLMISC::toString("%-12s: %s %" NL_I64 "X %s", "LoadRow", table.Name.c_str(), asUint64(), asEntityId().toString().c_str());
 		}
 		break;
 

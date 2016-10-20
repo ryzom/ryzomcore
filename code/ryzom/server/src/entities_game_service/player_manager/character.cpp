@@ -5271,7 +5271,7 @@ void CCharacter::teleportCharacter( sint32 x, sint32 y, sint32 z, bool teleportW
 	uint64 NOT_TELEPORTING_FLAG= (((uint64)0x12345678)<<32)| (uint64)0x87654321;
 	if ( _WhoSeesMeBeforeTP != NOT_TELEPORTING_FLAG )
 	{
-		nlwarning("INVISIBILITY (teleportCharacter) Player %s already being Tp as _WhoSeesMeBeforeTp is = %"NL_I64"u and WhoSeesMe = %"NL_I64"u", _Id.toString().c_str(), _WhoSeesMeBeforeTP, whoSeesMe.getValue() );
+		nlwarning("INVISIBILITY (teleportCharacter) Player %s already being Tp as _WhoSeesMeBeforeTp is = %" NL_I64 "u and WhoSeesMe = %" NL_I64 "u", _Id.toString().c_str(), _WhoSeesMeBeforeTP, whoSeesMe.getValue() );
 		nlwarning("INVISIBILITY (teleportCharacter) Current Coordinates :(%d, %d, %d) TP coordinates : (%d, %d, %d)", x,y,z);
 	}
 	else
@@ -19371,7 +19371,7 @@ bool CCharacter::setGuildId( uint32 guildId )
 		_GuildId = guildId;
 
 #ifdef HAVE_MONGO
-		CMongo::update("users", toString("{'game.cid':%"NL_I64"u}", _Id.getShortId()), toString("{$set:{'game.guildId':%d}}", guildId));
+		CMongo::update("users", toString("{'game.cid':%" NL_I64 "u}", _Id.getShortId()), toString("{$set:{'game.guildId':%d}}", guildId));
 #endif
 
 		return true;
@@ -20375,7 +20375,7 @@ void CCharacter::setIntangibleEndDate(NLMISC::TGameCycle date)
 void CCharacter::setWhoSeesMeBeforeTP(const uint64 &whoSeesMe)
 {
 	uint64 NOT_TELEPORTING_FLAG= (((uint64)0x12345678)<<32)| (uint64)0x87654321;
-	BOMB_IF(_WhoSeesMeBeforeTP != NOT_TELEPORTING_FLAG && whoSeesMe != NOT_TELEPORTING_FLAG , NLMISC::toString("Failing to set _WhoSeesMeBeforeTP old value=%"NL_I64"x  new value =%"NL_I64"x", _WhoSeesMeBeforeTP, whoSeesMe), return  );
+	BOMB_IF(_WhoSeesMeBeforeTP != NOT_TELEPORTING_FLAG && whoSeesMe != NOT_TELEPORTING_FLAG , NLMISC::toString("Failing to set _WhoSeesMeBeforeTP old value=%" NL_I64 "x  new value =%" NL_I64 "x", _WhoSeesMeBeforeTP, whoSeesMe), return  );
 	_WhoSeesMeBeforeTP= whoSeesMe;
 }
 
