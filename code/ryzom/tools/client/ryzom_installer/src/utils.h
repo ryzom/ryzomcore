@@ -58,6 +58,8 @@ QString qFromWide(const wchar_t *str);
 // convert an QString to wchar_t*
 wchar_t* qToWide(const QString &str);
 
+#define Q2C(x) qToUtf8(x).c_str()
+
 // check if a shortcut already exists (the extension will be added)
 bool shortcutExists(const QString &shortcut);
 
@@ -90,6 +92,14 @@ class CCOMHelper
 public:
 	CCOMHelper();
 	~CCOMHelper();
+};
+
+// a little helper class to init/uninit log
+class CLogHelper
+{
+public:
+	CLogHelper(const QString &logPath);
+	~CLogHelper();
 };
 
 #endif

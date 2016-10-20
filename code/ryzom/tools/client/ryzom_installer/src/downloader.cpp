@@ -272,6 +272,8 @@ void CDownloader::onHeadFinished()
 	{
 		if (redirection.isEmpty())
 		{
+			nlwarning("No redirection defined");
+
 			if (m_listener) m_listener->operationFail(tr("Redirection URL is not defined"));
 			return;
 		}
@@ -298,6 +300,8 @@ void CDownloader::onHeadFinished()
 
 		if (!m_supportsAcceptRanges && acceptRanges == "bytes")
 		{
+			nlinfo("Server supports resume for %s", Q2C(url));
+
 			// server supports resume, part 1
 			m_supportsAcceptRanges = true;
 
@@ -309,6 +313,7 @@ void CDownloader::onHeadFinished()
 		// server doesn't support resume or
 		// we requested range, but server always returns 200
 		// download from the beginning
+		nlwarning("Server doesn't support resume, download %s from the beginning", Q2C(url));
 	}
 	
 	// we requested with a range
@@ -327,10 +332,12 @@ void CDownloader::onHeadFinished()
 
 			// update offset and size
 			if (m_listener) m_listener->operationInit(m_offset, m_size);
+
+			nlinfo("Server supports resume for %s: offset %" NL_I64 "d, size %" NL_I64 "d", Q2C(url), m_offset, m_size);
 		}
 		else
 		{
-			qDebug() << "Unable to parse";
+			nlwarning("Unable to parse %s", Q2C(contentRange));
 		}
 	}
 

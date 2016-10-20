@@ -54,8 +54,10 @@
 
 #include <string>
 
-#include <nel/misc/types_nl.h>
-#include <nel/misc/config_file.h>
+#include "nel/misc/types_nl.h"
+#include "nel/misc/debug.h"
+#include "nel/misc/path.h"
+#include "nel/misc/system_info.h"
 
 #endif
 

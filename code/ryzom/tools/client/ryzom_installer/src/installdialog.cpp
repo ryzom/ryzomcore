@@ -132,17 +132,18 @@ void CInstallDialog::accept()
 	// check free disk space
 	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
 
+	// shouldn't happen
 	if (freeSpace == 0)
 	{
-		QString error = qFromUtf8(NLMISC::formatErrorMessage(NLMISC::getLastError()));
+		int error = NLMISC::getLastError();
 
-		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Error"), tr("Error '%1' occured when trying to check free disk space on %2.").arg(error).arg(m_dstDirectory));
-		return;
+		nlwarning("Error '%s' (%d) occured when trying to check free disk space on %s, continue anyway", NLMISC::formatErrorMessage(error).c_str(), error, Q2C(m_dstDirectory));
 	}
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
-	if (freeSpace < server.dataUncompressedSize)
+	// compare with exact size of current directory
+	if (freeSpace && freeSpace < server.dataUncompressedSize)
 	{
 		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
 		return;
