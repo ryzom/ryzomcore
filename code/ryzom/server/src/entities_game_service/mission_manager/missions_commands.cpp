@@ -1011,7 +1011,7 @@ NLMISC_COMMAND(getMoney, "get money of player", "<uid>")
 {
 	GET_ACTIVE_CHARACTER
 
-	string value = toString("%"NL_I64"u", c->getMoney());
+	string value = toString(c->getMoney());
 
 	log.displayNL(value.c_str());
 

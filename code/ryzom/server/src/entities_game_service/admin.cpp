@@ -1002,7 +1002,7 @@ ENTITY_VARIABLE(Money, "Money")
 
 	if (get)
 	{
-		value = toString("%"NL_I64"u", c->getMoney());
+		value = toString(c->getMoney());
 	}
 	else
 	{
@@ -1054,7 +1054,7 @@ ENTITY_VARIABLE(MoneyGuild, "MoneyGuild")
 
 	if (get)
 	{
-		value = toString("%"NL_I64"u", guild->getMoney());
+		value = toString(guild->getMoney());
 	}
 	else
 	{
