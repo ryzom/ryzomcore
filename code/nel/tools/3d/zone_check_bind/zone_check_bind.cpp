@@ -419,13 +419,13 @@ int main(int argc, char* argv[])
 
 	float weldThreshold, middleEdgeWeldThreshold;
 
-	if (::sscanf(argv[2], "%f", &weldThreshold) != 1)
+	if (!fromString(argv[2], weldThreshold))
 	{
 		nlinfo("invalid weldThreshold");
 		return -1;
 	}
 
-	if (::sscanf(argv[3], "%f", &middleEdgeWeldThreshold) != 1)
+	if (!fromString(argv[3], middleEdgeWeldThreshold))
 	{
 		nlinfo("invalid middleEdgeWeldThreshold");
 		return -1;
