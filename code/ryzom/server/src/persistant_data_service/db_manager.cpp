@@ -1217,7 +1217,7 @@ NLMISC_COMMAND(dumpToXml, "dump the content of an object into an xml file", "<da
 
 		if (id == NLMISC::CEntityId::Unknown)
 		{
-			if (sscanf(args[1].c_str(), "%"NL_I64"u", &key) != 1)
+			if (!fromString(args[1], key))
 			{
 				log.displayNL("id '%s' is not recognized as an EntityId, an ObjectIndex nor a 64 bits raw key", args[1].c_str());
 				return false;
