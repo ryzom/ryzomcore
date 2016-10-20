@@ -26,7 +26,7 @@
 	#define new DEBUG_NEW
 #endif
 
-CDownloader::CDownloader(QObject *parent, IOperationProgressListener *listener):QObject(parent), m_listener(listener), m_manager(NULL), m_reply(NULL), m_timer(NULL),
+CDownloader::CDownloader(QObject *parent, IOperationProgressListener *listener):QObject(parent), m_listener(listener), m_manager(NULL), m_timer(NULL),
 	m_offset(0), m_size(0), m_supportsAcceptRanges(false), m_supportsContentRange(false),
 	m_downloadAfterHead(false), m_file(NULL)
 {
@@ -169,10 +169,10 @@ void CDownloader::getFileHead()
 		request.setRawHeader("Range", QString("bytes=%1-").arg(m_offset).toLatin1());
 	}
 
-	m_reply = m_manager->head(request);
+	QNetworkReply *reply = m_manager->head(request);
 
-	connect(m_reply, SIGNAL(finished()), SLOT(onHeadFinished()));
-	connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(onError(QNetworkReply::NetworkError)));
+	connect(reply, SIGNAL(finished()), SLOT(onHeadFinished()));
+	connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(onError(QNetworkReply::NetworkError)));
 
 	startTimer();
 }
@@ -212,12 +212,12 @@ void CDownloader::downloadFile()
 		request.setRawHeader("Range", QString("bytes=%1-%2").arg(m_offset).arg(m_size-1).toLatin1());
 	}
 
-	m_reply = m_manager->get(request);
+	QNetworkReply *reply = m_manager->get(request);
 
-	connect(m_reply, SIGNAL(finished()), SLOT(onDownloadFinished()));
-	connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(onError(QNetworkReply::NetworkError)));
-	connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(onDownloadProgress(qint64, qint64)));
-	connect(m_reply, SIGNAL(readyRead()), SLOT(onDownloadRead()));
+	connect(reply, SIGNAL(finished()), SLOT(onDownloadFinished()));
+	connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(onError(QNetworkReply::NetworkError)));
+	connect(reply, SIGNAL(downloadProgress(qint64, qint64)), SLOT(onDownloadProgress(qint64, qint64)));
+	connect(reply, SIGNAL(readyRead()), SLOT(onDownloadRead()));
 
 	if (m_listener) m_listener->operationStart();
 
@@ -254,18 +254,27 @@ void CDownloader::onHeadFinished()
 {
 	stopTimer();
 
-	int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
 
-	QString redirection = m_reply->header(QNetworkRequest::LocationHeader).toString();
+	int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+	QString url = reply->url().toString();
 
-	m_size = m_reply->header(QNetworkRequest::ContentLengthHeader).toInt();
-	m_lastModified = m_reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toUTC();
+	QString redirection = reply->header(QNetworkRequest::LocationHeader).toString();
 
-	QString acceptRanges = QString::fromLatin1(m_reply->rawHeader("Accept-Ranges"));
-	QString contentRange = QString::fromLatin1(m_reply->rawHeader("Content-Range"));
+	m_size = reply->header(QNetworkRequest::ContentLengthHeader).toInt();
+	m_lastModified = reply->header(QNetworkRequest::LastModifiedHeader).toDateTime().toUTC();
 
-	m_reply->deleteLater();
-	m_reply = NULL;
+	QString acceptRanges = QString::fromLatin1(reply->rawHeader("Accept-Ranges"));
+	QString contentRange = QString::fromLatin1(reply->rawHeader("Content-Range"));
+
+	reply->deleteLater();
+
+	nlinfo("HTTP status code %d on HEAD for %s", status, Q2C(url));
+
+	if (!redirection.isEmpty())
+	{
+		nlinfo("Redirected to %s", Q2C(redirection));
+	}
 
 	// redirection
 	if (status == 302)
@@ -374,10 +383,14 @@ void CDownloader::onHeadFinished()
 
 void CDownloader::onDownloadFinished()
 {
-	int status = m_reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
 
-	m_reply->deleteLater();
-	m_reply = NULL;
+	int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+	QString url = reply->url().toString();
+
+	reply->deleteLater();
+
+	nlwarning("Download finished with HTTP status code %d when downloading %s", status, Q2C(url));
 
 	closeFile();
 
@@ -408,6 +421,10 @@ void CDownloader::onDownloadFinished()
 
 void CDownloader::onError(QNetworkReply::NetworkError error)
 {
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+
+	nlwarning("Network error %s (%d) when downloading %s", Q2C(reply->errorString()), error, Q2C(m_url));
+
 	if (!m_listener) return;
 
 	if (error == QNetworkReply::OperationCanceledError)
@@ -422,13 +439,17 @@ void CDownloader::onDownloadProgress(qint64 current, qint64 total)
 
 	if (!m_listener) return;
 
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+
 	m_listener->operationProgress(m_offset + current, m_url);
 
 	// abort download
-	if (m_listener->operationShouldStop() && m_reply) m_reply->abort();
+	if (m_listener->operationShouldStop() && reply) reply->abort();
 }
 
 void CDownloader::onDownloadRead()
 {
-	if (m_file) m_file->write(m_reply->readAll());
+	QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+
+	if (m_file && reply) m_file->write(reply->readAll());
 }
