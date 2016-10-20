@@ -47,7 +47,7 @@ bool CDownloader::getHtmlPageContent(const QString &url)
 	if (url.isEmpty()) return false;
 
 	QNetworkRequest request(url);
-	request.setHeader(QNetworkRequest::UserAgentHeader, "Ryzom Installer/1.0");
+	request.setHeader(QNetworkRequest::UserAgentHeader, QString("Ryzom Installer/%1").arg(QApplication::applicationVersion()));
 
 	QNetworkReply *reply = m_manager->get(request);
 
