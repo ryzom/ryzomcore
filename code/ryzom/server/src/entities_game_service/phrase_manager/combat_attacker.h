@@ -111,7 +111,7 @@ public:
 private:
 	void init()
 	{
-		LatencyInTicks = 0.0f;
+		LatencyInTicks = 0.0;
 		Damage = 0;
 		Quality = 0;
 		DmgType = DMGTYPE::UNDEFINED;

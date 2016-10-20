@@ -56,7 +56,7 @@ public:
 		_Idle = false;
 		_ExecutionEndDate = 0;
 		_ApplyDate = ~0; // ensure apply() never called before launch()
-		_LatencyEndDate = 0.0f; // by default, time between apply() and end() is immediate
+		_LatencyEndDate = 0.0; // by default, time between apply() and end() is immediate
 		_PhraseBookIndex = 0;
 		_NextCounter = 0;
 		_IsStatic = false;

@@ -382,7 +382,7 @@ void CCombatPhrase::init()
 	_CriticalHit					= false;
 	
 	_ExecutionEndDate				= 0;
-	_LatencyEndDate					= 0.0f;
+	_LatencyEndDate					= 0.0;
 
 	_SabrinaCost					= 0;
 	_SabrinaRelativeCost			= 1.0f;
@@ -892,7 +892,7 @@ bool CCombatPhrase::evaluate()
 	_NotEnoughStaminaMsg = false;
 	_NotEnoughHpMsg		= false;
 	_DisengageOnEnd		= false;
-	_LatencyEndDate		= 0.0f;
+	_LatencyEndDate		= 0.0;
 	_ExecutionEndDate	= 0;
 
 	return true;
@@ -1702,7 +1702,7 @@ bool CCombatPhrase::launch()
 {
 	H_AUTO(CCombatPhrase_launch);
 	
-	_LatencyEndDate = 0.0f;
+	_LatencyEndDate = 0.0;
 	_ApplyDate = 0;
 
 	if ( !_Attacker ) 
@@ -2183,7 +2183,7 @@ bool CCombatPhrase::launch()
 	}
 	else
 	{
-	    _LatencyEndDate = (double)time + latency;
+		_LatencyEndDate = (double)time + latency;
 	}
 	// compute the apply date
 	if (_Targets[0].Target!=NULL && actingEntity->getEntityRowId() == _Targets[0].Target->getEntityRowId())

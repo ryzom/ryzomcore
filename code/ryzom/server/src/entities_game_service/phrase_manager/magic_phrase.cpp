@@ -1568,7 +1568,7 @@ bool CMagicPhrase::launch()
 	if (_DivineInterventionOccured||_ShootAgainOccured?_BaseCastingTime:_CastingTime)
 		_LatencyEndDate = (double)time + PostCastLatency + _PostCastTime;
 	else
-		_LatencyEndDate = 0.0f + _PostCastTime;
+		_LatencyEndDate = 0.0 + _PostCastTime;
 
 	// compute the apply date
 	if ( !_Targets.empty()  && _ActorRowId != _Targets[0].getId())
@@ -1898,7 +1898,7 @@ void CMagicPhrase::enchantPhrase(CCharacter * user,float successFactor)
 
 	_Targets.resize(1);
 //	user->setActionFlag( RYZOMACTIONFLAGS::Attacks, true );
-	_LatencyEndDate = 0.0f;//time + _HitRateModifier + weapon.LatencyInTicks + ammo.SpeedInTicks ;
+	_LatencyEndDate = 0.0;//time + _HitRateModifier + weapon.LatencyInTicks + ammo.SpeedInTicks ;
 	// _BeingProcessed = false;
 
 } // enchantPhrase //

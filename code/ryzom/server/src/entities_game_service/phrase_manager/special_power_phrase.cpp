@@ -758,7 +758,7 @@ bool CSpecialPowerPhrase::launch()
 //-----------------------------------------------
 void CSpecialPowerPhrase::apply()
 {
-	_LatencyEndDate = 0.0f;
+	_LatencyEndDate = 0.0;
 
 	// TODO
 	// apply effect
