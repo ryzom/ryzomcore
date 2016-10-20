@@ -350,13 +350,6 @@ void CDownloader::onHeadFinished()
 		}
 	}
 
-	// error when download is not yet ready
-	else if (status == 307)
-	{
-		if (m_listener) m_listener->operationFail(tr("File is not available, please retry later (status code: %1)").arg(status));
-		return;
-	}
-
 	// other status
 	else
 	{
