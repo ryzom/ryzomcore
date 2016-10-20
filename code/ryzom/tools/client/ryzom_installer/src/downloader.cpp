@@ -47,7 +47,7 @@ bool CDownloader::getHtmlPageContent(const QString &url)
 	if (url.isEmpty()) return false;
 
 	QNetworkRequest request(url);
-	request.setHeader(QNetworkRequest::UserAgentHeader, "Ryzom Installer/1.0");
+	request.setHeader(QNetworkRequest::UserAgentHeader, QString("Ryzom Installer/%1").arg(QApplication::applicationVersion()));
 
 	QNetworkReply *reply = m_manager->get(request);
 
@@ -76,7 +76,7 @@ bool CDownloader::getFile()
 {
 	if (m_fullPath.isEmpty() || m_url.isEmpty())
 	{
-		qDebug() << "You forget to call prepareFile before";
+		nlwarning("You forget to call prepareFile before");
 
 		return false;
 	}
@@ -233,7 +233,7 @@ bool CDownloader::checkDownloadedFile()
 
 void CDownloader::onTimeout()
 {
-	qDebug() << "Timeout";
+	nlwarning("Timeout");
 
 	if (m_listener) m_listener->operationFail(tr("Timeout"));
 }
@@ -350,13 +350,6 @@ void CDownloader::onHeadFinished()
 		}
 	}
 
-	// error when download is not yet ready
-	else if (status == 307)
-	{
-		if (m_listener) m_listener->operationFail(tr("File is not available, please retry later (status code: %1)").arg(status));
-		return;
-	}
-
 	// other status
 	else
 	{
@@ -368,7 +361,7 @@ void CDownloader::onHeadFinished()
 	{
 		if (checkDownloadedFile())
 		{
-			qDebug() << "same date and size";
+			nlwarning("Same date and size");
 		}
 		else
 		{
