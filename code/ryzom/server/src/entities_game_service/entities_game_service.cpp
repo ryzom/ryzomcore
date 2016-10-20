@@ -1618,7 +1618,7 @@ nlassert(nodeLeaf->getType() == ICDBStructNode::TEXT);
 // {
 // 	if( args.size() == 0 )
 // 		return false;
-// 
+//
 // 	NLMEMORY::StatisticsReport( args[0].c_str(), args.size() > 1 );
 // 	return true;
 //}
@@ -3873,7 +3873,7 @@ NLMISC_COMMAND(displayDatabaseEntry," display a database entry value","<entity i
 		}
 		else
 		{
-			log.displayNL("Unknown entity %s ",id.toString().c_str());
+			log.displayNL("Unknown entity %s ", id.toString().c_str());
 		}
 		return true;
 	}
