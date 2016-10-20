@@ -279,7 +279,7 @@ void CTimedActionPhrase::apply()
 	// keep a ptr on this to prevent it to be deleted when timed action is deconnection
 	CSPhrasePtr selfPtr = this;
 
-	_LatencyEndDate = 0.0f;
+	_LatencyEndDate = 0.0;
 
 	CEntityBase *actor = CEntityBaseManager::getEntityBasePtr(_ActorRowId);
 	if (!actor)
