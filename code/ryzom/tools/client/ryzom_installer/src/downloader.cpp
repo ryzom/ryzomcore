@@ -76,7 +76,7 @@ bool CDownloader::getFile()
 {
 	if (m_fullPath.isEmpty() || m_url.isEmpty())
 	{
-		qDebug() << "You forget to call prepareFile before";
+		nlwarning("You forget to call prepareFile before");
 
 		return false;
 	}
@@ -233,7 +233,7 @@ bool CDownloader::checkDownloadedFile()
 
 void CDownloader::onTimeout()
 {
-	qDebug() << "Timeout";
+	nlwarning("Timeout");
 
 	if (m_listener) m_listener->operationFail(tr("Timeout"));
 }
@@ -368,7 +368,7 @@ void CDownloader::onHeadFinished()
 	{
 		if (checkDownloadedFile())
 		{
-			qDebug() << "same date and size";
+			nlwarning("Same date and size");
 		}
 		else
 		{
