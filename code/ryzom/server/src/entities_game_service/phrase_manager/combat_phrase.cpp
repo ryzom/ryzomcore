@@ -2177,7 +2177,7 @@ bool CCombatPhrase::launch()
 	
 	// set latency end date
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	if(_LatencyEndDate > 0) 
+	if (_LatencyEndDate > 0) 
 	{
 		_LatencyEndDate += latency;
 	}
