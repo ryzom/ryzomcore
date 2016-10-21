@@ -16,9 +16,6 @@
 
 #include "stdpch.h"
 #include "migratedialog.h"
-
-#ifdef Q_OS_WIN32
-
 #include "configfile.h"
 #include "utils.h"
 
@@ -179,5 +176,3 @@ void CMigrateDialog::accept()
 
 	QDialog::accept();
 }
-
-#endif
