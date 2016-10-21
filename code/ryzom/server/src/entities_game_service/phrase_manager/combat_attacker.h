@@ -92,7 +92,7 @@ public:
 	/************************************************************************/
 	/* do not forget to update the operator= if attributes change
 	/************************************************************************/
-	uint16					LatencyInTicks;
+	double					LatencyInTicks;
 	float					Damage;	
 	uint16					Quality;
 	DMGTYPE::EDamageType	DmgType;
@@ -111,7 +111,7 @@ public:
 private:
 	void init()
 	{
-		LatencyInTicks = 0;
+		LatencyInTicks = 0.0;
 		Damage = 0;
 		Quality = 0;
 		DmgType = DMGTYPE::UNDEFINED;

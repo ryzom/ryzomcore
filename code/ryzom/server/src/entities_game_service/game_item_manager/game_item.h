@@ -651,9 +651,9 @@ public :
 	bool getStats(const std::string &stats, std::string &final );
 
 	/// accessors to the action latency end date
-	inline NLMISC::TGameCycle getLatencyEndDate(){ return _LatencyEndDate; }
+	inline double getLatencyEndDate(){ return _LatencyEndDate; }
 
-	inline void setLatencyEndDate( NLMISC::TGameCycle latencyEndDate ){ _LatencyEndDate = latencyEndDate; }
+	inline void setLatencyEndDate( double latencyEndDate ){ _LatencyEndDate = latencyEndDate; }
 
 	/// set the max sap load craft parameter
 	inline void setMaxSapLoad(float value)
@@ -950,7 +950,7 @@ private:
 	/// string associated with this item
 	std::string			_PhraseId;
 	/// tick when the proc will be available again
-	NLMISC::TGameCycle	_LatencyEndDate;
+	double	_LatencyEndDate;
 	/// image of the item in bag / equipment
 //	uint16				_SlotImage;
 	NLMISC::TGameCycle	_TotalSaleCycle;

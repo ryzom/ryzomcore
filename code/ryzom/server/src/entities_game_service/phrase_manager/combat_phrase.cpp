@@ -382,7 +382,7 @@ void CCombatPhrase::init()
 	_CriticalHit					= false;
 	
 	_ExecutionEndDate				= 0;
-	_LatencyEndDate					= 0;
+	_LatencyEndDate					= 0.0;
 
 	_SabrinaCost					= 0;
 	_SabrinaRelativeCost			= 1.0f;
@@ -892,7 +892,7 @@ bool CCombatPhrase::evaluate()
 	_NotEnoughStaminaMsg = false;
 	_NotEnoughHpMsg		= false;
 	_DisengageOnEnd		= false;
-	_LatencyEndDate		= 0;
+	_LatencyEndDate		= 0.0;
 	_ExecutionEndDate	= 0;
 
 	return true;
@@ -1702,7 +1702,7 @@ bool CCombatPhrase::launch()
 {
 	H_AUTO(CCombatPhrase_launch);
 	
-	_LatencyEndDate = 0;
+	_LatencyEndDate = 0.0;
 	_ApplyDate = 0;
 
 	if ( !_Attacker ) 
@@ -1843,14 +1843,14 @@ bool CCombatPhrase::launch()
 	}
 	
 	// get weapon latency
-	float latency;
+	double latency;
 	if(_LeftWeapon.LatencyInTicks != 0)
 	{
-		latency = float(_HitRateModifier + std::max( MinTwoWeaponsLatency.get(), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max( double(MinTwoWeaponsLatency.get()), std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks)) + _Ammo.LatencyInTicks);
 	}
 	else
 	{
-		latency = float(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
+		latency = double(_HitRateModifier + std::max(_RightWeapon.LatencyInTicks, _LeftWeapon.LatencyInTicks) + _Ammo.LatencyInTicks);
 	}
 
 	// check for madness effect
@@ -2177,8 +2177,14 @@ bool CCombatPhrase::launch()
 	
 	// set latency end date
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
-	_LatencyEndDate = time + (NLMISC::TGameCycle)latency;
-
+	if(_LatencyEndDate > 0) 
+	{
+		_LatencyEndDate += latency;
+	}
+	else
+	{
+		_LatencyEndDate = (double)time + latency;
+	}
 	// compute the apply date
 	if (_Targets[0].Target!=NULL && actingEntity->getEntityRowId() == _Targets[0].Target->getEntityRowId())
 	{
@@ -2322,8 +2328,8 @@ bool CCombatPhrase::launchAttack(CEntityBase * actingEntity, bool rightHand, boo
 			// now we use the weapon speed factor as a divisor of wear per action 
 			// (a weapon twice as fast will wear twice as slow)
 			nlassert(ReferenceWeaponLatencyForWear > 0);
-			const uint16 latency = (rightHand ? _RightWeapon.LatencyInTicks : _LeftWeapon.LatencyInTicks);
-			const float wearFactor = (float)latency / (float)ReferenceWeaponLatencyForWear;
+			const float latency = (rightHand ? _RightWeapon.LatencyInTicks : _LeftWeapon.LatencyInTicks);
+			const float wearFactor = latency / (float)ReferenceWeaponLatencyForWear;
 			
 			if (rightHand)
 			{
@@ -3365,7 +3371,7 @@ void CCombatPhrase::stop()
 		CCharacter *character = PlayerManager.getChar(_Attacker->getEntityRowId());
 		if (character)
 		{
-			character->dateOfNextAllowedAction( _LatencyEndDate );
+			character->dateOfNextAllowedAction((NLMISC::TGameCycle)_LatencyEndDate );
 		}
 	}
 
