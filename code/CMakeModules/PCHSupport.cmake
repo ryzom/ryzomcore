@@ -33,17 +33,29 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   SET(PCH_ARCHS)
 
   SET(_FLAGS)
-  LIST(APPEND _FLAGS ${CMAKE_CXX_FLAGS})
 
+  # C++ flags
+  SET(_FLAG ${CMAKE_CXX_FLAGS})
+  SEPARATE_ARGUMENTS(_FLAG)
+
+  LIST(APPEND _FLAGS ${_FLAG})
+
+  # C++ config flags
   STRING(TOUPPER "${CMAKE_BUILD_TYPE}" _UPPER_BUILD)
-  LIST(APPEND _FLAGS " ${CMAKE_CXX_FLAGS_${_UPPER_BUILD}}")
+
+  SET(_FLAG ${CMAKE_CXX_FLAGS_${_UPPER_BUILD}})
+  SEPARATE_ARGUMENTS(_FLAG)
+
+  LIST(APPEND _FLAGS ${_FLAG})
 
   GET_TARGET_PROPERTY(_targetType ${_target} TYPE)
 
   SET(_USE_PIC OFF)
 
   IF(${_targetType} STREQUAL "SHARED_LIBRARY" OR ${_targetType} STREQUAL "MODULE_LIBRARY")
-    LIST(APPEND _FLAGS " ${CMAKE_SHARED_LIBRARY_CXX_FLAGS}")
+    SET(_FLAG ${CMAKE_SHARED_LIBRARY_CXX_FLAGS})
+    SEPARATE_ARGUMENTS(_FLAG)
+    LIST(APPEND _FLAGS ${_FLAG})
   ELSE()
     GET_TARGET_PROPERTY(_pic ${_target} POSITION_INDEPENDENT_CODE)
     IF(_pic)
@@ -53,7 +65,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
   GET_DIRECTORY_PROPERTY(DIRINC INCLUDE_DIRECTORIES)
   FOREACH(item ${DIRINC})
-    LIST(APPEND _FLAGS " -I\"${item}\"")
+    LIST(APPEND _FLAGS -I"${item}")
   ENDFOREACH()
 
   # NOTE: As cmake files (eg FindQT4) may now use generator expressions around their defines that evaluate
@@ -92,18 +104,18 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
   GET_TARGET_PROPERTY(oldProps ${_target} COMPILE_FLAGS)
   IF(oldProps)
-    LIST(APPEND _FLAGS " ${oldProps}")
+    LIST(APPEND _FLAGS ${oldProps})
   ENDIF()
 
   GET_TARGET_PROPERTY(oldPropsBuild ${_target} COMPILE_FLAGS_${_UPPER_BUILD})
   IF(oldPropsBuild)
-    LIST(APPEND _FLAGS " ${oldPropsBuild}")
+    LIST(APPEND _FLAGS ${oldPropsBuild})
   ENDIF()
 
   GET_TARGET_PROPERTY(DIRINC ${_target} INCLUDE_DIRECTORIES)
   IF(DIRINC)
     FOREACH(item ${DIRINC})
-      LIST(APPEND _FLAGS " -I\"${item}\"")
+      LIST(APPEND _FLAGS -I"${item}")
     ENDFOREACH()
   ENDIF()
 
@@ -130,7 +142,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
 
         IF(_DIRS)
           FOREACH(item ${_DIRS})
-            LIST(APPEND GLOBAL_DEFINITIONS " -I\"${item}\"")
+            LIST(APPEND GLOBAL_DEFINITIONS -I"${item}")
           ENDFOREACH()
         ENDIF()
 
@@ -159,24 +171,21 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
     ENDIF()
 
     IF(_USE_PIC)
-      LIST(APPEND _FLAGS " ${CMAKE_CXX_COMPILE_OPTIONS_PIC}")
+      LIST(APPEND _FLAGS ${CMAKE_CXX_COMPILE_OPTIONS_PIC})
     ENDIF()
   ENDIF()
 
   IF(CMAKE_VERSION VERSION_LESS "3.3.0")
     GET_DIRECTORY_PROPERTY(_directory_flags DEFINITIONS)
     GET_DIRECTORY_PROPERTY(_directory_definitions DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
-    LIST(APPEND _FLAGS " ${_directory_flags}")
-    LIST(APPEND _FLAGS " ${_directory_definitions}")
+    LIST(APPEND _FLAGS ${_directory_flags})
+    LIST(APPEND _FLAGS ${_directory_definitions})
   ENDIF()
 
   # Format definitions
   IF(MSVC)
     # Fix path with space
     SEPARATE_ARGUMENTS(_FLAGS UNIX_COMMAND "${_FLAGS}")
-  ELSE()
-    STRING(REGEX REPLACE " +" " " _FLAGS ${_FLAGS})
-    SEPARATE_ARGUMENTS(_FLAGS)
   ENDIF()
 
   # Already in list form and items may contain non-leading spaces that should not be split on
@@ -238,6 +247,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
   ENDIF()
 
   IF(PCH_FLAGS)
+    LIST(REMOVE_ITEM PCH_FLAGS "")
     LIST(REMOVE_DUPLICATES PCH_FLAGS)
   ENDIF()
 ENDMACRO()
