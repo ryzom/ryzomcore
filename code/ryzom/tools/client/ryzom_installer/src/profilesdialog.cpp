@@ -94,7 +94,7 @@ void CProfilesDialog::onDeleteProfile()
 
 void CProfilesDialog::onProfileClicked(const QModelIndex &index)
 {
-	qDebug() << "clicked on" << index;
+	nlwarning("Clicked on profile %d", index.row());
 
 	displayProfile(index.row());
 }

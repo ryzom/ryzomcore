@@ -128,7 +128,7 @@ void CProfile::createShortcuts() const
 		// create desktop shortcut
 		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
 		{
-			qDebug() << "Unable to create desktop shortcut";
+			nlwarning("Unable to create desktop shortcut");
 		}
 	}
 
@@ -142,7 +142,7 @@ void CProfile::createShortcuts() const
 		// create menu shortcut
 		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
 		{
-			qDebug() << "Unable to create shortcut for client in menu";
+			nlwarning("Unable to create shortcut for client in menu");
 		}
 	}
 }

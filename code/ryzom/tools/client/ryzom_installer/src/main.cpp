@@ -64,13 +64,13 @@ bool copyInstallerFiles(const QStringList &files, const QString &destination)
 			{
 				if (!QFile::remove(dstPath))
 				{
-					qDebug() << "Unable to delete" << dstPath;
+					nlwarning("Unable to delete %s", Q2C(dstPath));
 				}
 			}
 
 			if (!QFile::copy(srcPath, dstPath))
 			{
-				qDebug() << "Unable to copy" << srcPath << "to" << dstPath;
+				nlwarning("Unable to copy %s to %s", Q2C(srcPath), Q2C(dstPath));
 
 				return false;
 			}
@@ -248,12 +248,15 @@ int main(int argc, char *argv[])
 	if (step == ShowMigrateWizard)
 	{
 		nlinfo("Display migration dialog");
-
+#ifdef Q_OS_WIN32
 		CMigrateDialog dialog;
 
 		if (!dialog.exec()) return 1;
 
 		step = config.getInstallNextStep();
+#else
+		nlwarning("Migration disabled under Linux and OS X");
+#endif
 	}
 	else if (step == ShowInstallWizard)
 	{
@@ -307,6 +310,8 @@ int main(int argc, char *argv[])
 #endif
 
 		if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
+
+		nlwarning("Unable to restart Installer %s", Q2C(config.getInstallerInstalledFilePath()));
 #endif
 	}
 

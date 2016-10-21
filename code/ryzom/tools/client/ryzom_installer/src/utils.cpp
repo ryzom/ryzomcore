@@ -192,7 +192,7 @@ bool createShortcut(const QString &shortcut, const QString &name, const QString 
 
 			if (FAILED(hres))
 			{
-				qDebug() << "Unable to create shortcut" << path;
+				nlwarning("Unable to create shortcut %s", Q2C(path));
 			}
 
 			ppf->Release();
