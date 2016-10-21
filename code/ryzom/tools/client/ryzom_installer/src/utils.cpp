@@ -409,11 +409,18 @@ QString appendShortcutExtension(const QString &shortcut)
 QString getVersionFromExecutable(const QString &path)
 {
 	// check if file exists
-	if (!QFile::exists(path)) return "";
+	if (!QFile::exists(path))
+	{
+		nlwarning("Unable to find %s", Q2C(path));
+		return "";
+	}
 
 #ifndef Q_OS_WIN32
 	// fix executable permissions under UNIX
-	QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
+	if (!QFile::setPermissions(path, QFile::permissions(path) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther))
+	{
+		nlwarning("Unable to set executable permissions to %s", Q2C(path));
+	}
 #endif
 
 	// launch executable with --version argument
@@ -421,14 +428,22 @@ QString getVersionFromExecutable(const QString &path)
 	process.setProcessChannelMode(QProcess::MergedChannels);
 	process.start(path, QStringList() << "--version", QIODevice::ReadWrite);
 
-	if (!process.waitForStarted()) return "";
+	if (!process.waitForStarted())
+	{
+		nlwarning("Unable to start %s", Q2C(path));
+		return "";
+	}
 
 	QByteArray data;
 
 	// read all output
 	while (process.waitForReadyRead(1000)) data.append(process.readAll());
 
-	if (!data.isEmpty())
+	if (data.isEmpty())
+	{
+		nlwarning("%s --version didn't return any data", Q2C(path));
+	}
+	else
 	{
 		QString versionString = QString::fromUtf8(data);
 
