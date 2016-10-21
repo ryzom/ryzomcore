@@ -17,6 +17,8 @@
 #ifndef MIGRATEDIALOG_H
 #define MIGRATEDIALOG_H
 
+#if defined(Q_OS_WIN32) || defined(Q_MOC_RUN)
+
 #include "ui_migratedialog.h"
 
 /**
@@ -46,5 +48,7 @@ private:
 	QString m_currentDirectory;
 	QString m_dstDirectory;
 };
+
+#endif
 
 #endif

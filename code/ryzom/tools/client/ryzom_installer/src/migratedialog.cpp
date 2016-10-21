@@ -16,6 +16,9 @@
 
 #include "stdpch.h"
 #include "migratedialog.h"
+
+#ifdef Q_OS_WIN32
+
 #include "configfile.h"
 #include "utils.h"
 
@@ -49,12 +52,6 @@ CMigrateDialog::CMigrateDialog():QDialog()
 	// update default destination
 	onDestinationDefaultButtonClicked();
 
-#ifdef Q_OS_MAC
-	// only 64 bits for OS X
-	clientArchGroupBox->setVisible(false);
-	clientArch64RadioButton->setChecked(true);
-	clientArch32RadioButton->setChecked(false);
-#elif defined(Q_OS_WIN32)
 	// both 32 and 64 bits are working under Windows 64 bits
 
 	// check whether OS architecture is 32 or 64 bits
@@ -72,22 +69,6 @@ CMigrateDialog::CMigrateDialog():QDialog()
 		clientArch64RadioButton->setChecked(false);
 		clientArch32RadioButton->setChecked(true);
 	}
-#else
-	// only use the current architecture for Linux
-
-	clientArchGroupBox->setVisible(false);
-
-#ifdef _LP64
-	// only 64 bits is available
-	clientArch64RadioButton->setChecked(true);
-	clientArch32RadioButton->setChecked(false);
-#else
-	// only 32 bits is available
-	clientArch64RadioButton->setChecked(false);
-	clientArch32RadioButton->setChecked(true);
-#endif
-
-#endif
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
@@ -198,3 +179,5 @@ void CMigrateDialog::accept()
 
 	QDialog::accept();
 }
+
+#endif
