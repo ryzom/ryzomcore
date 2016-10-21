@@ -182,12 +182,12 @@ bool CFilesCopier::copyFiles(const FilesToCopy &files)
 
 			if (!QFile::setPermissions(file.dst, file.permissions))
 			{
-				qDebug() << "Unable to change permissions of " << file.dst;
+				nlwarning("Unable to change permissions of %s", Q2C(file.dst));
 			}
 
 			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(file.dst), file.date))
 			{
-				qDebug() << "Unable to change date of " << file.dst;
+				nlwarning("Unable to change date of %s", Q2C(file.dst));
 			}
 		}
 

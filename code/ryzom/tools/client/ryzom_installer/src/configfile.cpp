@@ -505,59 +505,6 @@ QString CConfigFile::getParentDirectory()
 	return current.absolutePath();
 }
 
-QString CConfigFile::getOldInstallationDirectory()
-{
-	// HKEY_CURRENT_USER/SOFTWARE/Nevrax/RyzomInstall/InstallId=1917716796 (string)
-#if defined(Q_OS_WIN)
-	// NSIS previous official installer
-#ifdef Q_OS_WIN64
-	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#else
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#endif
-
-	if (settings.contains("Ryzom Install Path"))
-	{
-		return QDir::fromNativeSeparators(settings.value("Ryzom Install Path").toString());
-	}
-
-	// check default directory if registry key not found
-	return CConfigFile::has64bitsOS() ? "C:/Program Files (x86)/Ryzom":"C:/Program Files/Ryzom";
-#elif defined(Q_OS_MAC)
-	return "/Applications/Ryzom.app";
-#else
-	return QStandardPaths::writableLocation(QStandardPaths::HomeLocation) + "/.ryzom";
-#endif
-}
-
-QString CConfigFile::getOldInstallationLanguage()
-{
-#if defined(Q_OS_WIN)
-	// NSIS previous official installer
-#ifdef Q_OS_WIN64
-	// use WOW6432Node in 64 bits (64 bits OS and 64 bits Installer) because Ryzom old installer was in 32 bits
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\WOW6432Node\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#else
-	QSettings settings("HKEY_LOCAL_MACHINE\\Software\\Nevrax\\Ryzom", QSettings::NativeFormat);
-#endif
-
-	QString key = "Language";
-
-	if (settings.contains(key))
-	{
-		QString languageCode = settings.value(key).toString();
-
-		// 1036 = French (France), 1033 = English (USA), 1031 = German
-		if (languageCode == "1036") return "fr";
-		if (languageCode == "1031") return "de";
-		if (languageCode == "1033") return "en";
-	}
-#endif
-
-	return "";
-}
-
 QString CConfigFile::getNewInstallationLanguage()
 {
 #if defined(Q_OS_WIN)
@@ -745,6 +692,9 @@ int CConfigFile::compareInstallersVersion() const
 
 	QString installedVersion = getVersionFromExecutable(installerDst);
 
+	// if unable to get version, copy it
+	if (installedVersion.isEmpty()) return 1;
+
 	nlinfo("%s version is %s", Q2C(installerDst), Q2C(installedVersion));
 
 	QString newVersion = QApplication::applicationVersion();
@@ -892,8 +842,13 @@ OperationStep CConfigFile::getInstallNextStep() const
 	// only show wizard if installation directory undefined
 	if (getInstallationDirectory().isEmpty())
 	{
+		QString currentDirectory;
+
+#ifdef Q_OS_WIN32
+		// only under Windows
+
 		// if launched from current directory, it means we just patched files
-		QString currentDirectory = getCurrentDirectory();
+		currentDirectory = getCurrentDirectory();
 
 		if (!isRyzomInstalledIn(currentDirectory))
 		{
@@ -905,6 +860,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 				currentDirectory.clear();
 			}
 		}
+#endif
 
 		// install or migrate depending if Ryzom was found in current directory
 		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;

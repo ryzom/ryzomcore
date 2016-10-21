@@ -289,7 +289,7 @@ bool CFilesExtractor::exec()
 		return extractBnp();
 	}
 
-	qDebug() << "Unsupported format";
+	nlwarning("Unsupported format");
 	return false;
 }
 
@@ -319,6 +319,8 @@ bool CFilesExtractor::extract7z()
 
 	if (!inFile.open())
 	{
+		nlwarning("Unable to open %s", Q2C(m_sourceFile));
+
 		if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(m_sourceFile));
 		return false;
 	}
@@ -451,14 +453,21 @@ bool CFilesExtractor::extract7z()
 
 			if (res != SZ_OK) break;
 
+			QString destSubPath = QFileInfo(destPath).absolutePath();
+
 			// create file directory
-			QDir().mkpath(QFileInfo(destPath).absolutePath());
+			if (!QDir().mkpath(destSubPath))
+			{
+				nlwarning("Unable to create directory %s", Q2C(destSubPath));
+			}
 
 			// create file
 			QFile outFile(destPath);
 
 			if (!outFile.open(QFile::WriteOnly))
 			{
+				nlwarning("Unable to open file %s", Q2C(destPath));
+
 				error = QApplication::tr("Unable to open output file %1").arg(destPath);
 				res = SZ_ERROR_FAIL;
 				break;
@@ -480,6 +489,8 @@ bool CFilesExtractor::extract7z()
 
 			if (offset != outSizeProcessed)
 			{
+				nlwarning("Unable to write output file %s (%u bytes written but expecting %u bytes)", Q2C(destPath), (uint32)offset, (uint32)outSizeProcessed);
+
 				error = QApplication::tr("Unable to write output file %1 (%2 bytes written but expecting %3 bytes)").arg(destPath).arg(offset).arg(outSizeProcessed);
 				res = SZ_ERROR_FAIL;
 				break;
@@ -500,7 +511,7 @@ bool CFilesExtractor::extract7z()
 			// set modification time
 			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(destPath), modificationTime))
 			{
-				qDebug() << "Unable to change date of " << destPath;
+				nlwarning("Unable to change date of %s", Q2C(destPath));
 			}
 		}
 
@@ -571,12 +582,16 @@ bool CFilesExtractor::extractZip()
 
 			if (!baseDir.mkpath(fi.filePath))
 			{
-				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to create directory %1").arg(absPath));
+				nlwarning("Unable to create directory %s", Q2C(fi.filePath));
+
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to create directory %1").arg(fi.filePath));
 				return false;
 			}
 
 			if (!QFile::setPermissions(absPath, fi.permissions))
 			{
+				nlwarning("Unable to change permissions of %s", Q2C(absPath));
+
 				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to set permissions of %1").arg(absPath));
 				return false;
 			}
@@ -609,19 +624,25 @@ bool CFilesExtractor::extractZip()
 
 			if (!f.open(QIODevice::WriteOnly))
 			{
+				nlwarning("Unable to open %s", Q2C(absPath));
+
 				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(absPath));
 				return false;
 			}
 
 			currentSize += f.write(reader.fileData(fi.filePath));
 
-			f.setPermissions(fi.permissions);
+			if (!f.setPermissions(fi.permissions))
+			{
+				nlwarning("Unable to change permissions of %s", Q2C(absPath));
+			}
+
 			f.close();
 
 			// set the right modification date
 			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(absPath), fi.lastModified.toTime_t()))
 			{
-				qDebug() << "Unable to change date of " << absPath;
+				nlwarning("Unable to change date of %s", Q2C(absPath));
 			}
 
 			if (m_listener) m_listener->operationProgress(currentSize, QFileInfo(absPath).fileName());
@@ -692,18 +713,26 @@ bool CFilesExtractor::extractBnp()
 	}
 	catch(const NLMISC::EDiskFullError &e)
 	{
+		nlwarning("Disk full when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("disk full");
 	}
 	catch(const NLMISC::EWriteError &e)
 	{
+		nlwarning("Write error when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("unable to write %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const NLMISC::EReadError &e)
 	{
+		nlwarning("Read error when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("unable to read %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const std::exception &e)
 	{
+		nlwarning("Unknown exception when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("failed (%1)").arg(qFromUtf8(e.what()));
 	}
 

@@ -141,7 +141,7 @@ void COperationDialog::processInstallNextStep()
 
 	if (m_operationStepCounter > 10)
 	{
-		qDebug() << "possible infinite loop" << m_operationStep << m_operationStepCounter;
+		nlwarning("Possible infinite loop, step %s %d times", Q2C(stepToString(m_operationStep)), m_operationStepCounter);
 	}
 
 	switch(step)
@@ -205,7 +205,8 @@ void COperationDialog::processInstallNextStep()
 
 		default:
 		// cases already managed in main.cpp
-		qDebug() << "Shouldn't happen, step" << step;
+		nlwarning("Shouldn't happen, step %s", Q2C(stepToString(step)));
+
 		break;
 	}
 }
@@ -706,14 +707,14 @@ void COperationDialog::launchUpgradeScript(const QString &directory, const QStri
 
 		if (!QFile::setPermissions(upgradeScript, permissions))
 		{
-			qDebug() << "Unable to set executable flag to" << upgradeScript;
+			nlwarning("Unable to set executable flag to %s", Q2C(upgradeScript));
 		}
 
 		process.start(upgradeScript);
 
 		while (process.waitForFinished())
 		{
-			qDebug() << "waiting";
+			nlwarning("Waiting end of %s", Q2C(upgradeScript));
 		}
 	}
 
@@ -764,7 +765,7 @@ void COperationDialog::copyInstaller()
 
 		if (!path.isEmpty() && !QDir().mkpath(path))
 		{
-			qDebug() << "Unable to create directory" << path;
+			nlwarning("Unable to create directory %s", Q2C(path));
 		}
 
 		// create installer link in menu
@@ -785,7 +786,7 @@ void COperationDialog::copyInstaller()
 		// create icon if not exists
 		if (!QFile::exists(icon) && !writeResource(":/icons/ryzom.png", icon))
 		{
-			qDebug() << "Unable to create" << icon;
+			nlwarning("Unable to create icon %s", Q2C(icon));
 		}
 #endif
 
@@ -1215,7 +1216,7 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 	{
 		if (!QFile::remove(dir.filePath(file)))
 		{
-			qDebug() << "Unable to delete" << file;
+			nlwarning("Unable to delete file %s", Q2C(file));
 		}
 	}
 

@@ -90,9 +90,7 @@ public:
 	// default directories
 	static QString getCurrentDirectory();
 	static QString getParentDirectory();
-	static QString getOldInstallationDirectory();
 	static QString getNewInstallationDirectory();
-	static QString getOldInstallationLanguage();
 	static QString getNewInstallationLanguage();
 
 	// status of installation
