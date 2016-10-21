@@ -692,6 +692,9 @@ int CConfigFile::compareInstallersVersion() const
 
 	QString installedVersion = getVersionFromExecutable(installerDst);
 
+	// if unable to get version, copy it
+	if (installedVersion.isEmpty()) return 1;
+
 	nlinfo("%s version is %s", Q2C(installerDst), Q2C(installedVersion));
 
 	QString newVersion = QApplication::applicationVersion();
