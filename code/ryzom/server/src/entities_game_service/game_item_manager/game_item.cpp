@@ -1085,7 +1085,7 @@ void CGameItem::resetEnchantment()
 	_SapLoad = 0;
 	_Enchantment.clear();
 	contReset( _Enchantment );
-	_LatencyEndDate = 0;
+	_LatencyEndDate = 0.0;
 
 	if (getInventory() != NULL)
 		getInventory()->onItemChanged(getInventorySlot(), INVENTORIES::TItemChangeFlags(INVENTORIES::itc_enchant));
@@ -1351,7 +1351,7 @@ void CGameItem::clear()
 	_Destroyable = true;
 	_Dropable = true;
 //	_SlotImage = 0xFFFF;
-	_LatencyEndDate = 0;
+	_LatencyEndDate = 0.0;
 //	_Parent = NULL;
 	_Inventory = NULL;
 	_InventorySlot = INVENTORIES::INVALID_INVENTORY_SLOT;
