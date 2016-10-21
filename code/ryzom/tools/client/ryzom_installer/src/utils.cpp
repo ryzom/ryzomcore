@@ -426,7 +426,7 @@ QString getVersionFromExecutable(const QString &path)
 	// launch executable with --version argument
 	QProcess process;
 	process.setProcessChannelMode(QProcess::MergedChannels);
-	process.start(path, QStringList() << "--version", QIODevice::ReadWrite);
+	process.start(path, QStringList() << "--version", QIODevice::ReadOnly);
 
 	if (!process.waitForStarted())
 	{
