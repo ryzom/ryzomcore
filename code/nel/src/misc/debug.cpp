@@ -1429,22 +1429,27 @@ int getLastError()
 std::string formatErrorMessage(int errorCode)
 {
 #ifdef NL_OS_WINDOWS
-	LPVOID lpMsgBuf;
-	FormatMessage(
+	LPVOID lpMsgBuf = NULL;
+	DWORD len = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER |
 		FORMAT_MESSAGE_FROM_SYSTEM |
 		FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
 		errorCode,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-		(LPTSTR) &lpMsgBuf,
+		(LPWSTR) &lpMsgBuf,
 		0,
 		NULL
 	);
 
-	string ret = (char*)lpMsgBuf;
+	// empty buffer, an error occured
+	if (len == 0) return toString("FormatMessage returned error %d", getLastError());
+
+	// convert wchar_t* to std::string
+	string ret = wideToUtf8(lpMsgBuf);
+
 	// Free the buffer.
-	LocalFree( lpMsgBuf );
+	LocalFree(lpMsgBuf);
 
 	return ret;
 #else
