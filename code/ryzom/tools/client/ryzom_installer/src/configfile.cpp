@@ -839,8 +839,13 @@ OperationStep CConfigFile::getInstallNextStep() const
 	// only show wizard if installation directory undefined
 	if (getInstallationDirectory().isEmpty())
 	{
+		QString currentDirectory;
+
+#ifdef Q_OS_WIN32
+		// only under Windows
+
 		// if launched from current directory, it means we just patched files
-		QString currentDirectory = getCurrentDirectory();
+		currentDirectory = getCurrentDirectory();
 
 		if (!isRyzomInstalledIn(currentDirectory))
 		{
@@ -852,6 +857,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 				currentDirectory.clear();
 			}
 		}
+#endif
 
 		// install or migrate depending if Ryzom was found in current directory
 		return currentDirectory.isEmpty() ? ShowInstallWizard:ShowMigrateWizard;
