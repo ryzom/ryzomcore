@@ -615,7 +615,7 @@ public:
 	/**
 	 * Extended version of blit. The destinaion of the blit is 'this' bitmap
 	 * Source and dest rect are clamped as necessary.
-	 * For now, only RGBA is uspported (an asertion occurs otherwise)
+	 * For now, only RGBA is supported (an asertion occurs otherwise)
 	 * mipmap are not updated.
 	 * IMPORTANT : copy to self is not handled correctly
 	 */
