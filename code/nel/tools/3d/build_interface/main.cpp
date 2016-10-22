@@ -477,7 +477,7 @@ int main(int argc, char **argv)
 	{
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = nlfopen(fmtName, "wt");
+		FILE *f = nlfopen(fmtName, "wb");
 		if (f != NULL)
 		{
 			for (sint i = 0; i < mapSize; ++i)
@@ -511,7 +511,7 @@ int main(int argc, char **argv)
 		// Write subset UV text file
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
-		FILE *f = nlfopen(fmtName, "wt");
+		FILE *f = nlfopen(fmtName, "wb");
 
 		if (f == NULL)
 		{
