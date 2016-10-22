@@ -426,7 +426,7 @@
 		<view type="text" id="text_spell_name" posparent="eb_spell_name" posref="TL BL" x="0" y="-2" color="255 255 255 255" fontsize="10" shadow="true" hardtext="uiPhraseEditName" />
 
 		<!-- INFOS -->
-		<group id="infos" w="256" h="80" posparent="back" posref="BL TL" x="0" y="-4" >
+		<group id="infos" w="256" h="90" posparent="back" posref="BL TL" x="0" y="-4" >
 
 			<!-- Sabrina Cost -->
 			<view type="text" id="totaltext" posref="TL TL" fontsize="12" global_color="true" shadow="true" color="255 255 255 255" hardtext="uiPhraseTotal" />
