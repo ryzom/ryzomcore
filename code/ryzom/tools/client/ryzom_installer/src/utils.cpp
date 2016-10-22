@@ -586,6 +586,9 @@ CLogHelper::CLogHelper(const QString &logPath)
 	NLMISC::DisableNLDebug = true;
 #endif
 
+	// define process name before enabling log
+	NLMISC::CLog::setProcessName("ryzom_installer");
+
 	// don't create a file for the moment, we'll create it manually
 	NLMISC::createDebug(NULL, false);
 
