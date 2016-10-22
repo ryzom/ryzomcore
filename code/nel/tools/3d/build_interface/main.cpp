@@ -531,17 +531,27 @@ int main(int argc, char **argv)
 				continue;
 			}
 
+			sTGAname = toLower(string(tgaName));
+
+			// search position of extension
+			std::string tgaExt = CFile::getExtension(sTGAname);
+
+			// remove extension
+			sTGAname = CFile::getFilenameWithoutExtension(sTGAname);
+
 			sint i;
 			
-			sTGAname = toLower(string(tgaName));
 			string findTGAName;
 			for (i = 0; i < mapSize; ++i)
 			{
 				// get the string whitout path
-				findTGAName = toLower(CFile::getFilename(AllMapNames[i]));
+				findTGAName = toLower(CFile::getFilenameWithoutExtension(AllMapNames[i]));
 				if( findTGAName == sTGAname )
 					break;
 			}
+
+			// append extension
+			sTGAname += "." + tgaExt;
 			
 			if( i == mapSize )
 			{
