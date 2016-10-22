@@ -350,6 +350,9 @@ int main(int argc, char **argv)
 		UVMax[i].V = UVMax[i].V / (float)GlobalTexture.getHeight();
 	}
 
+	// make sure transparent pixels are black
+	GlobalTexture.makeTransparentPixelsBlack();
+
 	// Write global texture file
 	if (writeFileDependingOnFilename(fmtName, GlobalTexture))
 	{

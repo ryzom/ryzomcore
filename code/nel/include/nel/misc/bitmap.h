@@ -376,6 +376,12 @@ public:
 
 
 	/**
+	* Make fully transparent pixels (alpha 0) black.
+	*/
+	void	makeTransparentPixelsBlack();
+
+
+	/**
 	 * Return if the bitmap has uniform alpha values for all pixels.
 	 * \param alpha return the uniform value if return is true
 	 * \return uniform or not

@@ -370,6 +370,51 @@ void	CBitmap::makeOpaque()
 
 
 /*-------------------------------------------------------------------*\
+					makeTransparentPixelsBlack
+\*-------------------------------------------------------------------*/
+void	CBitmap::makeTransparentPixelsBlack()
+{
+	if (_Width*_Height == 0) return;
+
+	uint pixelSize;
+
+	switch (PixelFormat)
+	{
+		case RGBA: pixelSize = 4; break;
+		case AlphaLuminance: pixelSize = 2; break;
+		default: return;
+	}
+
+	uint colorsSize = pixelSize - 1;
+
+	for (uint8 m = 0; m < _MipMapCount; ++m)
+	{
+		// get a pointer on original data
+		uint8 *data = _Data[m].getPtr();
+
+		// end of data
+		uint8 *endData = data + _Data[m].size();
+
+		// first alpha
+		data += pixelSize - 1;
+
+		// replace all alpha values by 255
+		while (data < endData)
+		{
+			// fully transparent pixel
+			if (*data == 0)
+			{
+				// make colors black
+				memset(data - colorsSize, 0, colorsSize);
+			}
+
+			data += pixelSize;
+		}
+	}
+}
+
+
+/*-------------------------------------------------------------------*\
 								isAlphaUniform
 \*-------------------------------------------------------------------*/
 bool	CBitmap::isAlphaUniform(uint8 *alpha) const
