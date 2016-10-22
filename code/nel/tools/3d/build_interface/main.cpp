@@ -215,7 +215,7 @@ int main(int argc, char **argv)
 	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
 
 	if (!args.parse(argc, argv)) return 1;
-	
+
 	// build as a subset of existing interface
 	bool buildSubset = false;
 	string existingUVfilename;
@@ -561,8 +561,7 @@ int main(int argc, char **argv)
 			else
 			{
 				// present in subset: use new uv's
-				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", sTGAname.c_str(), UVMin[i].U, UVMin[i].V, 
-					UVMax[i].U, UVMax[i].V);
+				fprintf (f, "%s %.12f %.12f %.12f %.12f\n", sTGAname.c_str(), UVMin[i].U, UVMin[i].V, UVMax[i].U, UVMax[i].V);
 			}
 		}	
 		fclose (f);
