@@ -209,6 +209,7 @@ int main(int argc, char **argv)
 	NLMISC::CCmdArgs args;
 
 	args.setDescription("Build a huge interface texture from several small elements to optimize video memory usage.");
+	args.addArg("f", "format", "format", "Output format (png or tga)");
 	args.addArg("s", "subset", "existing_uv_txt_name", "Build a subset of an existing interface definition while preserving the existing texture ids, to support freeing up VRAM by switching to the subset without rebuilding the entire interface.");
 	args.addArg("x", "extract", "", "Extract all interface elements from <output_filename> to <input_path>.");
 	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
@@ -229,12 +230,26 @@ int main(int argc, char **argv)
 	// extract all interface elements
 	bool extractElements = args.haveArg("x");
 
+	// output format
+	std::string outputFormat;
+
+	if (args.haveArg("f"))
+	{
+		outputFormat = args.getArg("f").front();
+
+		if (outputFormat != "png" && outputFormat != "tga")
+		{
+			outString(toString("ERROR: Format %s not supported, only png and tga formats are", outputFormat.c_str()));
+			return -1;
+		}
+	}
+
 	std::vector<std::string> inputDirs = args.getAdditionalArg("input_path");
 
 	string fmtName = args.getAdditionalArg("output_filename").front();
 
 	// append PNG extension if no one provided
-	if (fmtName.rfind('.') == string::npos) fmtName += ".png";
+	if (fmtName.rfind('.') == string::npos) fmtName += "." + (outputFormat.empty() ? "png":outputFormat);
 
 	if (extractElements)
 	{
@@ -323,6 +338,14 @@ int main(int argc, char **argv)
 
 				sTGAname = inputDirs.front() + "/" + tgaName;
 
+				// force specific format instead of using original one
+				if (!outputFormat.empty())
+				{
+					sTGAname = sTGAname.substr(0, sTGAname.rfind('.'));
+					sTGAname += "." + outputFormat;
+				}
+
+				// write the file
 				if (writeFileDependingOnFilename(sTGAname, bitmap))
 				{
 					outString(toString("Writing file %s", sTGAname.c_str()));
