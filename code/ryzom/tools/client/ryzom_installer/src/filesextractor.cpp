@@ -289,7 +289,7 @@ bool CFilesExtractor::exec()
 		return extractBnp();
 	}
 
-	nlwarning("Unsupported format");
+	nlwarning("Unsupported format for file %s", Q2C(m_sourceFile));
 	return false;
 }
 
