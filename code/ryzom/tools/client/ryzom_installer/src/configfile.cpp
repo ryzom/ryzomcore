@@ -83,6 +83,9 @@ bool CConfigFile::load(const QString &filename)
 	m_use64BitsClient = settings.value("use_64bits_client", true).toBool();
 	m_shouldUninstallOldClient = settings.value("should_uninstall_old_client", true).toBool();
 
+	// fix problems when src directory doesn't exist anymore
+	if (!m_srcDirectory.isEmpty() && QFile::exists(m_srcDirectory)) m_srcDirectory.clear();
+
 	if (!useDefaultValues)
 	{
 #if defined(Q_OS_WIN)
