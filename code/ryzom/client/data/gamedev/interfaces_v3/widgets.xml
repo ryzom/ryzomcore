@@ -230,7 +230,7 @@
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="false">
- 
+
       <group id="right"
              child_resize_w="true"
 			 child_resize_h="true"
@@ -347,7 +347,7 @@
             render_layer="1"
             texture=""
             global_color="false" />
-			
+
         <view type="bitmap"
               id="win_top"
 			  posparent="info2"
@@ -455,7 +455,7 @@
               color="128 128 128 255"
               global_color="false" />
       </group>
-      
+
 	  <ctrl type="sheet"
             id="guild_logo"
             posref="TL TR"
@@ -484,7 +484,7 @@
             render_layer="2"
             texture=""
             global_color="false" />
-   
+
         <group id="right_pvp"
                posref="TR TL"
                posparent="right"
@@ -746,7 +746,7 @@
            opened="true"
            child_resize_w="true"
            child_resize_h="true"
-   
+
            win_priority="%win_priority_world_space"
            posref="BL BM"
            use_cursor="true">
@@ -1028,9 +1028,9 @@
   <!-- NOT USED FOR THE MOMENT !!!
 <template name="3dbulle_R" id="" >
         <group id="#id" type="container" header_active="false" options="no_bordure" openable="false" savable="false" resizer="true" movable="false" right_button="false" opened="true" child_resize_w="true" w="0" max_w="256" min_w="48" h="48" >
-        
+
                 <group id="header_opened" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" max_w="256" min_w="48" max_h="256" min_h="48" posref="TL TL" >
-                                                                
+
                         <group id="window" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" posref="TL TL" >
                                 <view type="bitmap" id="win_M" posref="MM MM" scale="true" sizeref="wh" w="-10" h="-10" texture="Bulle_M.tga" global_color="false"/>
                                 <view type="bitmap" id="win_T" posparent="win_M" posref="TL BL" scale="true" sizeref="w" w="0" h="5" texture="Bulle_T.tga" global_color="false"/>
@@ -1041,19 +1041,19 @@
                                 <view type="bitmap" id="win_TR" posref="TR TR" texture="Bulle_TR.tga" global_color="false"/>
                                 <view type="bitmap" id="win_BL" posref="BL BL" texture="Bulle_BL.tga" global_color="false"/>
                                 <view type="bitmap" id="win_BR" posref="BR BR" texture="Bulle_BR.tga" global_color="false"/>
-                                
-                                <view type="text" id="text" posref="TL TL" x="5" y="-5" hardtext="#hardtext" 
-                                        fontsize="12" justification="justified" color="0 0 0 255" global_color="false" 
+
+                                <view type="text" id="text" posref="TL TL" x="5" y="-5" hardtext="#hardtext"
+                                        fontsize="12" justification="justified" color="0 0 0 255" global_color="false"
                                         multi_line="true" multi_line_space="0" line_maxw="160" multi_line_maxw_only="true" />
                                 <! - Yoyo: Fake to have minimum bubble size - >
                                 <group id="min_w" posparent="text" posref="TL TL" x="0" y="0" w="48" h="14" />
-                                
+
                         </group>
-                        
+
                         <view type="bitmap" id="win_talk" posref="BL TL" x="24" y="2" posparent="window" texture="Bulle_Say_R.tga" global_color="false"/>
-                
+
                 </group>
-                
+
         </group>
 </template>
 -->
@@ -1249,7 +1249,7 @@
       </group>
     </group>
   </template>
-  <!-- *  Bulle de dialogue dynamique a gauche du perso 
+  <!-- *  Bulle de dialogue dynamique a gauche du perso
                 textid of the views are updated by code * -->
   <style style="dynchat_desc"
          type="text"
@@ -1938,13 +1938,13 @@
 <proc id="test_can_drop"> -->
   <!-- If the item is from the inventory, can drop if it is an item -->
   <!--
-        <action handler="isitem"        params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'inventory_selection')"/>       
+        <action handler="isitem"        params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'inventory_selection')"/>
         -->
   <!-- If the items comes from a bot inventory, can drop on an empty slot only. The source must also be an item -->
   <!--
         <action handler="itemtoemptyslottest"  params="@0" cond="eq(getSheetSelectionGroup(getDraggedSheet()), 'buy_selection')"/>
         -->
-  <!--    
+  <!--
 </proc>
 -->
   <proc id="test_can_drop">
@@ -2414,7 +2414,7 @@
   <!-- ********** -->
   <!-- *  SETS  * -->
   <!-- ********** -->
-  <!-- test if drop can be done depending on the mode 
+  <!-- test if drop can be done depending on the mode
         Param 0 is src=... (filled by code)
 -->
   <proc id="slot_can_drop">
@@ -2426,7 +2426,7 @@
             params="@0|test_empty=true" />
   </proc>
   <!-- Exemple of ifthenelse function
-        <view type="text" id="notabene" posparent="handr" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" /> 
+        <view type="text" id="notabene" posparent="handr" posref="MM MM" color="255 255 255 255" fontsize="12" shadow="true" hardtext="0" />
         <link expr="ifthenelse(isRangeWeapon (@%set_base:#setnumber:%set_r),str('RW'),str('.'))" target="notabene:hardtext" />
 -->
   <!-- template for border inside of a group -->
@@ -4112,7 +4112,7 @@
           texture="ico_heal.tga"
           global_color="false"
           posref="BL TL"
-          posparent="text" 
+          posparent="text"
           active="true"/>
     <view type="bitmap"
           id="sta_buff"
@@ -4282,7 +4282,7 @@
           posparent="text"
           xcost="230"
           line_maxw="185"
-          multi_line_maxw_only="true" 
+          multi_line_maxw_only="true"
           param_deltax="13"
           sizeref="none"
           child_resize_w="true"
@@ -4290,7 +4290,7 @@
           global_color="false"/>
 
   </group>
-  
+
   <!-- Over Text used for SingleLine TextView that are clamped (group_tree, keys interface....) -->
   <group id="over_extend_view_text"
          child_resize_w="true"
@@ -4654,7 +4654,7 @@
             params="dblink=%inventory_open_value|value=isOpen('ui:interface:inventory')" />
     <!-- force to open the inventory -->
     <!-- <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbags|open='true'"/>
-        <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbag1|open='true'"/>    
+        <action handler="set_open" cond="le(1,@%bag_nb)" params="target=ui:interface:userbag1|open='true'"/>
         <action handler="set_open" cond="le(2,@%bag_nb)" params="target=ui:interface:userbag2|open='true'"/>
         <action handler="set_open" cond="le(3,@%bag_nb)" params="target=ui:interface:userbag3|open='true'"/>
         <action handler="set_open" cond="le(4,@%bag_nb)" params="target=ui:interface:userbag4|open='true'"/>
@@ -4678,7 +4678,7 @@
         <action handler="set_open" cond="and(eq(@%bag2_touched, 0), le(2,@%bag_nb))" params="target=ui:interface:userbag2|open=@@%bag2_open_value"/>
         <action handler="set_open" cond="and(eq(@%bag3_touched, 0), le(3,@%bag_nb))" params="target=ui:interface:userbag3|open=@@%bag3_open_value"/>
         <action handler="set_open" cond="and(eq(@%bag4_touched, 0), le(4,@%bag_nb))" params="target=ui:interface:userbag4|open=@@%bag4_open_value"/>
-        <action handler="set_open" cond="and(eq(@%bags_touched, 0), le(1,@%bag_nb))" params="target=ui:interface:userbags|open=@@%bags_open_value"/>    
+        <action handler="set_open" cond="and(eq(@%bags_touched, 0), le(1,@%bag_nb))" params="target=ui:interface:userbags|open=@@%bags_open_value"/>
         <action handler="set_open" cond="eq(@%player_touched, 0)" params="target=ui:interface:player|open=@@%player_open_value"/>
         <action handler="set_open" cond="eq(@%money_touched, 0)" params="target=ui:interface:usermoney|open=@@%money_open_value"/>-->
     <action handler="set_open"
@@ -4822,7 +4822,7 @@
   <!-- ******************* -->
   <!-- *    STYLES       * -->
   <!-- ******************* -->
-  <!-- Common Style of a Modal Container. user should define 
+  <!-- Common Style of a Modal Container. user should define
         - the "modal_parent" window
         - and the "on_enter" ActionHandler to support all "Modal Container"     aspects.
 -->
@@ -5626,7 +5626,7 @@
             child_resize_w="false"
             child_resize_wmargin="0"
             line_maxw="170"
-            multi_line_maxw_only="false" 
+            multi_line_maxw_only="false"
             xcost="215"
             auto_grayed="false"
             global_color="true">
@@ -5835,7 +5835,7 @@
               tooltip="uittKeepInfo"
               onclick_l="help_keep"
               params_l="#index" />
-        <!--            
+        <!--
                         <ctrl style="text_button_16" button_type="toggle_button" id="keep" posref="MR MR" x="-16" y="1" wmargin="8" hardtext="uiKeepInfoButton" tooltip="uittKeepInfo" onclick_l="help_keep" params_l="#index" />
                         -->
       </group>
@@ -6011,9 +6011,9 @@
                        far="4.0" />
               </scene3d>
             </group>
-            
+
             <!-- Item preview 3D window -->
-            
+
             <group id="item_preview"
                    posref="TL TL"
                    sizeref="w"
@@ -6021,12 +6021,12 @@
                    h="300"
                    x="0"
                    y="-60">
-              
-              <scene3d id="scene_item_preview" 
+
+              <scene3d id="scene_item_preview"
                        sizeref="wh"
                        w="-2"
                        h="-2"
-                       posref="TL TL" 
+                       posref="TL TL"
                        x="1"
                        curcam="cam_item_preview"
                        user_interaction="true"
@@ -6048,19 +6048,19 @@
                              rot="0.0 0.0 -60.0"
                              anim="1" />
                 <camera id="cam_item_preview"
-                        fov="5" 
+                        fov="5"
                         pos="0.0 -40.0 0.0"
-                        target="0.0 0.0 -0.85" 
+                        target="0.0 0.0 -0.85"
                         roll="0" />
 
                 <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
                 <light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />
 
               </scene3d>
-              
+
             </group>
-            
-          </group>          
+
+          </group>
           <ctrl style="skin_scroll"
                 id="sv"
                 posref="TL TL"
@@ -6844,7 +6844,7 @@
           posref="MR MR"
           x="-4"
           texture="W_arrow_down_2.tga" />
-    <!-- SYSTEM 
+    <!-- SYSTEM
         <view type="text" id="text" posref="ML ML" x="2" />-->
     <group id="text_group"
            posparent="parent"
