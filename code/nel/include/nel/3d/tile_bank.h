@@ -320,7 +320,7 @@ public:
 	// For edition: change the tileVegetableDesc. NB: only the TileVegetableDescFileName is serialised.
 	void setTileVegetableDesc (const CTileVegetableDesc	&tvd);
 	/** try to load the vegetable tile desc associated with the fileName (nlinfo() if can't)
-	 *	lookup into CPath. no-op if string=="".
+	 *	lookup into CPath. no-op if string empty
 	 */
 	void loadTileVegetableDesc();
 

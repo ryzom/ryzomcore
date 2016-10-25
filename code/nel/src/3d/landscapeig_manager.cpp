@@ -174,7 +174,7 @@ UInstanceGroup *CLandscapeIGManager::loadZoneIG(const std::string &name)
 {
 	NL3D_HAUTO_LAND_MNGR_LOAD_ZONEIG
 
-	if(name=="")
+	if(name.empty())
 		return NULL;
 
 	// try to find this InstanceGroup.
@@ -232,7 +232,7 @@ void	CLandscapeIGManager::unloadArrayZoneIG(const std::vector<std::string> &name
 void	CLandscapeIGManager::unloadZoneIG(const std::string &name)
 {
 	NL3D_HAUTO_LAND_MNGR_UNLOAD_ZONEIG
-	if(name=="")
+	if(name.empty())
 		return;
 
 	// try to find this InstanceGroup.
@@ -255,7 +255,7 @@ void	CLandscapeIGManager::unloadZoneIG(const std::string &name)
 // ***************************************************************************
 bool	CLandscapeIGManager::isIGAddedToScene(const std::string &name) const
 {
-	if(name=="")
+	if(name.empty())
 		return false;
 
 	// try to find this InstanceGroup.
@@ -272,7 +272,7 @@ bool	CLandscapeIGManager::isIGAddedToScene(const std::string &name) const
 // ***************************************************************************
 UInstanceGroup	*CLandscapeIGManager::getIG(const std::string &name) const
 {
-	if(name=="")
+	if(name.empty())
 		return NULL;
 
 	// try to find this InstanceGroup.

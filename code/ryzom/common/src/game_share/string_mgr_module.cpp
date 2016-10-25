@@ -469,7 +469,7 @@ static std::string formatString(std::string str,std::vector<float> args)
 void CStringManagerModule::translateAndForwardWithArg(TDataSetRow senderId,CChatGroup::TGroupType groupType,std::string id,TSessionId sessionId,std::vector<float>& args)
 {
 	std::string text = getValue(sessionId.asInt(), id );
-	if (text!="")
+	if (!text.empty())
 	{
 		std::string toSend = formatString(text,args);
 		send(senderId,groupType,toSend);

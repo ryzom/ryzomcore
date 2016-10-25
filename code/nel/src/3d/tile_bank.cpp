@@ -264,7 +264,7 @@ sint CTileBank::getNumBitmap (CTile::TBitmap bitmap) const
 		if (!_TileVector[i].isFree())
 		{
 			const std::string &str=_TileVector[i].getRelativeFileName (bitmap);
-			if (str!="")
+			if (!str.empty())
 			{
 				std::vector<char> vect (str.length()+1);
 				memcpy (&*vect.begin(), str.c_str(), str.length()+1);
@@ -583,7 +583,7 @@ void CTileBank::removeDisplacementMap (uint mapId)
 			if (mapId==_DisplacementMap.size()-1)
 			{
 				// Resize the array ?
-				while ((mapId>0)&&(_DisplacementMap[mapId]._FileName==""))
+				while ((mapId>0)&&(_DisplacementMap[mapId]._FileName.empty()))
 					_DisplacementMap.resize (mapId--);
 			}
 		}
@@ -608,7 +608,7 @@ uint CTileBank::getDisplacementMap (const string &fileName)
 	for (noiseTile=0; noiseTile<_DisplacementMap.size(); noiseTile++)
 	{
 		// Same name ?
-		if (_DisplacementMap[noiseTile]._FileName=="")
+		if (_DisplacementMap[noiseTile]._FileName.empty())
 			break;
 	}
 	if (noiseTile==_DisplacementMap.size())
@@ -1433,7 +1433,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 	while (ite!=_Tile128.end())
 	{
 		// If the file name is valid
-		if (bank.getTile (*ite)->getRelativeFileName(type)!="")
+		if (!bank.getTile (*ite)->getRelativeFileName(type).empty())
 		{
 			// Don't delete,
 			bDelete=false;
@@ -1450,7 +1450,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 	while (ite!=_Tile256.end())
 	{
 		// If the file name is valid
-		if (bank.getTile (*ite)->getRelativeFileName(type)!="")
+		if (!bank.getTile (*ite)->getRelativeFileName(type).empty())
 		{
 			// Don't delete,
 			bDelete=false;
@@ -1474,7 +1474,7 @@ void CTileSet::deleteBordersIfLast (const CTileBank& bank, CTile::TBitmap type)
 		if (nTile!=-1)
 		{
 			// If the file name is valid
-			if (bank.getTile (nTile)->getRelativeFileName(type)!="")
+			if (!bank.getTile (nTile)->getRelativeFileName(type).empty())
 			{
 				// Don't delete,
 				bDelete=false;
@@ -1564,7 +1564,7 @@ const CTileVegetableDesc	&CTileSet::getTileVegetableDesc() const
 // ***************************************************************************
 void CTileSet::loadTileVegetableDesc()
 {
-	if(_TileVegetableDescFileName!="")
+	if(!_TileVegetableDescFileName.empty())
 	{
 		try
 		{
