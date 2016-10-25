@@ -993,7 +993,7 @@ void CDisplayerVisualEntity::updateName()
 		else
 			actName = act->toString("Title"); //obsolete
 
-		if(actName!=firstPart && actName!="")
+		if(actName!=firstPart && !actName.empty())
 			actName = firstPart+":"+actName;
 	}
 	else

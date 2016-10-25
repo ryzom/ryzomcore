@@ -171,7 +171,7 @@ public:
 		// hide every static fxs
 		void hideStaticFXs();
 
-		// Create the loading instance. return false if shapeName!="" while still fails to load. else return true.
+		// Create the loading instance. return false if shapeName is not empty while still fails to load. else return true.
 		bool createLoading(const std::string &shapeName, const std::string &stickPoint=std::string(""), sint texture=-1, bool clearIfFail= true);
 
 		// Apply Colors

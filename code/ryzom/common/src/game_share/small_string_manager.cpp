@@ -225,7 +225,7 @@ void CStringTableManager::setValue(uint32 tableId,const std::string& localId, co
 	if(found2!=localTable->end())
 	{
 		std::string oldValue = _StringMgr.getString(found2->second);
-		if (oldValue=="") nlwarning("error! no string %u in string manager! ",found2->second);
+		if (oldValue.empty()) nlwarning("error! no string %u in string manager! ",found2->second);
 		_StringMgr.unregisterString(oldValue);
 		found2->second = _StringMgr.registerString(value);
 	}

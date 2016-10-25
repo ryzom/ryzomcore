@@ -2661,7 +2661,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 					for(uint i=0; i<errors.size(); i++)
 					{
 						string comment = parseCommentError(res, errors[i]);
-						if(comment!="")
+						if(!comment.empty())
 							error += "- " + comment + "\n";
 					}
 

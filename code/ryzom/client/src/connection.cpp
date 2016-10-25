@@ -2798,7 +2798,7 @@ class CAHScenarioControl : public IActionHandler
 
 				// description
 				string description = sessionBrowser._LastDescription;
-				if(description!="")
+				if(!description.empty())
 				{
 					result = scenarioWnd->findFromShortId(string("edit_small_description"));
 					if(result)

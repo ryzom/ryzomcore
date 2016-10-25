@@ -1797,7 +1797,7 @@ void				CAudioMixerUser::addSource( CSourceCommon *source )
 	_Sources.insert( source );
 
 //	_profile(( "AM: ADDSOURCE, SOUND: %d, TRACK: %p, NAME=%s", source->getSound(), source->getTrack(),
-//			source->getSound() && (source->getSound()->getName()!="") ? source->getSound()->getName().c_str() : "" ));
+//			source->getSound() && (!source->getSound()->getName().empty()) ? source->getSound()->getName().c_str() : "" ));
 
 }
 
