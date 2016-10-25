@@ -2267,7 +2267,10 @@ bool CDriverD3D::getCurrentScreenMode(GfxMode &gfxMode)
 // ***************************************************************************
 void CDriverD3D::setWindowTitle(const ucstring &title)
 {
-	SetWindowTextW(_HWnd,(WCHAR*)title.c_str());
+	if (!SetWindowTextW(_HWnd, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 // ***************************************************************************

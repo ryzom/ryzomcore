@@ -40,7 +40,10 @@ void CWin32Util::localizeWindow(HWND wnd)
 		std::string winText = wideToUtf8(str);
 		if (CI18N::hasTranslation(winText))
 		{
-			SetWindowTextW(wnd, (const WCHAR *) CI18N::get(winText).c_str());
+			if (!SetWindowTextW(wnd, (const WCHAR *) CI18N::get(winText).c_str()))
+			{
+				nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+			}
 		}
 	}
 	HWND currSon = GetWindow(wnd, GW_CHILD);

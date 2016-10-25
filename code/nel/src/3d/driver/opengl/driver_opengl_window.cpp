@@ -2314,7 +2314,10 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowTextW(_win, (WCHAR*)title.c_str());
+	if (!SetWindowTextW(_win, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 
 #elif defined(NL_OS_MAC)
 

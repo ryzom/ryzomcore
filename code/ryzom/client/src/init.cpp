@@ -257,7 +257,10 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ());
+				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				{
+					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+				}
 			}
 			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
