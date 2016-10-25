@@ -217,8 +217,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
 						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
@@ -234,8 +239,13 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						ucstring ucs;
 						// convert the text from UTF-8 to unicode
 						ucs.fromUtf8(cwd->_History[cwd->_PosInHistory]);
+
 						// set the text as unicode string
-						SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str());
+						if (!SetWindowTextW(cwd->_HInputEdit, (LPCWSTR)ucs.c_str()))
+						{
+							nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+						}
+
 						SendMessageA (cwd->_HInputEdit, EM_SETSEL, (WPARAM)ucs.size(), (LPARAM)ucs.size());
 					}
 				}
@@ -352,7 +362,10 @@ void CWinDisplayer::setTitleBar (const string &titleBar)
 
 	nldebug("SERVICE: Set title bar to '%s'", wn.c_str());
 
-	SetWindowTextW (_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str());
+	if (!SetWindowTextW(_HWnd, (LPWSTR)ucstring::makeFromUtf8(wn).c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 }
 
 void CWinDisplayer::open (string titleBar, bool iconified, sint x, sint y, sint w, sint h, sint hs, sint fs, const std::string &fn, bool ww, CLog *log)
