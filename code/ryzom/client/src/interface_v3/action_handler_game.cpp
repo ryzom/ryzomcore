@@ -2481,14 +2481,22 @@ class CAHAddShape : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string sShape = getParam(Params, "shape");
-		if(sShape.empty())
+
+		if (sShape.empty())
 		{
 			nlwarning("Command 'add_shape': need at least the parameter shape.");
 			return;
 		}
+
 		if (!Scene)
 		{
 			nlwarning("No scene available");
+			return;
+		}
+
+		if (!UserEntity)
+		{
+			nlwarning("UserEntity not yet defined, possibly called runAH from Lua");
 			return;
 		}
 
