@@ -29,7 +29,7 @@ TARGET_LINK_LIBRARIES(ryzom_client_patcher
 IF(APPLE)
   FIND_LIBRARY(FOUNDATION_LIBRARY Foundation)
   TARGET_LINK_LIBRARIES(ryzom_client_patcher ${FOUNDATION_LIBRARY})
-ENDIF(APPLE)
+ENDIF()
 
 ADD_DEFINITIONS(${CURL_DEFINITIONS})
 
@@ -38,6 +38,6 @@ NL_ADD_RUNTIME_FLAGS(ryzom_client_patcher)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_client_patcher ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.h ${CMAKE_SOURCE_DIR}/ryzom/client/src/stdpch.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS ryzom_client_patcher RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client)

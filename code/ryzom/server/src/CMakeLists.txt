@@ -47,4 +47,4 @@ ADD_SUBDIRECTORY(general_utilities_service)
 #simulation_service
 #testing_tool_service
 
-ENDIF(WITH_RYZOM_SERVER)
+ENDIF()

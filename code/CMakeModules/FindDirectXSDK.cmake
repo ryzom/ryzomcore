@@ -8,7 +8,7 @@
 IF(DXSDK_DIR)
   # Already in cache, be silent
   SET(DXSDK_FIND_QUIETLY TRUE)
-ENDIF(DXSDK_DIR)
+ENDIF()
 
 FIND_PATH(DXSDK_DIR
   "Include/dxsdkver.h"
