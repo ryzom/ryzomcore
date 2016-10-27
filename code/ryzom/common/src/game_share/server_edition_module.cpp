@@ -5320,7 +5320,6 @@ bool CServerEditionModule::hibernateSessionImpl  (TSessionId sessionId, std::str
 	//(*) Remove animation Session and kill AI Instance
 	if (animationSessionExist)
 	{
-
 		stopTest(sessionId);
 	}
 

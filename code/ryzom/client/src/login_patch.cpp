@@ -1416,6 +1416,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			// file not found, delete local file
 			throw Exception ("curl init failed");
 		}
+
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *) progress);
@@ -1427,12 +1428,15 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
+
 		FILE *fp = nlfopen (dest, "wb");
+
 		if (fp == NULL)
 		{
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
 			throw Exception ("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str (), errno, strerror(errno));
 		}
+
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 

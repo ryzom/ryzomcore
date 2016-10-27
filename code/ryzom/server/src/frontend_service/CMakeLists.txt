@@ -26,6 +26,6 @@ NL_ADD_RUNTIME_FLAGS(ryzom_frontend_service)
 
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(ryzom_frontend_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
-ENDIF(WITH_PCH)
+ENDIF()
 
 INSTALL(TARGETS ryzom_frontend_service RUNTIME DESTINATION sbin COMPONENT services)

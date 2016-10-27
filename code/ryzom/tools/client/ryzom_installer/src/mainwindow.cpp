@@ -91,6 +91,7 @@ void CMainWindow::closeEvent(QCloseEvent *e)
 void CMainWindow::updateProfiles()
 {
 	profilesComboBox->setModel(new CProfilesModel(this));
+	profilesComboBox->setCurrentIndex(CConfigFile::getInstance()->getDefaultProfileIndex());
 }
 
 void CMainWindow::updateButtons()
