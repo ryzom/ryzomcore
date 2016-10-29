@@ -442,8 +442,15 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 			processMessage(event, &server);
 		}
 
-		// forward the event to the cocoa application
-		[NSApp sendEvent:event];
+		@try
+		{
+			// forward the event to the cocoa application
+			[NSApp sendEvent:event];
+		}
+		@catch(NSException *e)
+		{
+			nlwarning("Exception when sending event: %s", [[e reason] UTF8String]);
+		}
 	}
 
 	_server = &server;
