@@ -21,7 +21,7 @@
 
 namespace STRING_MANAGER
 {
-	const ucstring		nl("\r\n");
+	const ucstring		nl("\n");
 
 
 	struct TStringInfo

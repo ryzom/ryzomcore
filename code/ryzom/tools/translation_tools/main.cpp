@@ -190,7 +190,7 @@ bool readPhraseFile1(const std::string &filename, vector<TPhrase> &phrases, bool
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_CRLF);	
+	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_LF);	
 	verifyVersion(doc, 1);
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -199,7 +199,7 @@ bool readPhraseFile2(const std::string &filename, vector<TPhrase> &phrases, bool
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, doc, false, false, false, CI18N::LINE_FMT_LF);
 	verifyVersion(doc, 2);
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -352,7 +352,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_LF);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
 				LOG("Diff file [%s] is not translated, merging it later.\n", CFile::getFilename(diffs[i]).c_str());
@@ -679,7 +679,7 @@ void cleanComment(const std::string & filename)
 	ucstring text;
 	uint nbOldValue=0;
 
-	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_LF);
 
 	ucstring newText;
 	ucstring::size_type last = 0;
@@ -800,7 +800,7 @@ int mergeStringDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -840,7 +840,7 @@ bool mergePhraseDiff(vector<TPhrase> &phrases, const string &language, bool only
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_LF);
 			verifyVersion(text, 1);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
@@ -1164,7 +1164,7 @@ int mergePhraseDiff(int argc, char *argv[], int version)
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -1333,7 +1333,7 @@ int mergeClauseDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile(historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename), filename);
 		}
@@ -1358,7 +1358,7 @@ bool mergeWorksheetDiff(const std::string filename, TWorksheet &sheet, bool only
 		if (onlyTranslated)
 		{
 			ucstring text;
-			CI18N::readTextFile(fileList[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(fileList[i], text, false, false, false, CI18N::LINE_FMT_LF);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
 				LOG("Diff file [%s] is not translated, merging it later.\n", CFile::getFilename(fileList[i]).c_str());
@@ -1666,7 +1666,7 @@ int makeWorksheetDiff(int argc, char *argv[], const std::string &additionFilenam
 
 		string fn(CFile::getFilenameWithoutExtension(referenceFilename)), ext(CFile::getExtension(referenceFilename));
 		std::string diffName(diffDir+fn+"_diff_"+diffVersion+"."+ext);
-		CI18N::writeTextFile(diffName, str, false);
+		CI18N::writeTextFile(diffName, str);
 		
 	}
 
@@ -1691,9 +1691,9 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 		// there is no translated file yet, build one from the working file.
 		ucstring str;
 		string addfn = addDir+additionFile;
-		CI18N::readTextFile(addfn, str, false, false, false, CI18N::LINE_FMT_CRLF);
+		CI18N::readTextFile(addfn, str, false, false, false, CI18N::LINE_FMT_LF);
 		str = str.substr(0, str.find(nl)+2);
-		CI18N::writeTextFile(transDir+filename, str, false);
+		CI18N::writeTextFile(transDir+filename, str);
 		// reread the file.
 		bool res = loadExcelSheet(transDir+filename, translated);
 		nlassert(res);
@@ -1711,7 +1711,7 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 	{
 		// backup the original file
 		ucstring old;
-		CI18N::readTextFile(transDir+filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+		CI18N::readTextFile(transDir+filename, old, false, true, false, CI18N::LINE_FMT_LF);
 		if (old != str)
 		{
 			string fn(CFile::getFilenameWithoutExtension(filename)), ext(CFile::getExtension(filename));
@@ -1720,7 +1720,7 @@ int mergeWorksheetDiff(int argc, char *argv[], const std::string &filename, cons
 	}
 
 	if (translated.size() > 0)
-		CI18N::writeTextFile(transDir+filename, str, false);
+		CI18N::writeTextFile(transDir+filename, str);
 
 	return 0;
 }
@@ -1865,7 +1865,7 @@ void cropLines(const std::string &filename, uint32 nbLines)
 
 	LOG("Cropping %u lines from file '%s'\n", nbLines, filename.c_str());
 
-	CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_LF);
 
 	string text = utext.toUtf8();
 
@@ -1881,7 +1881,7 @@ void cropLines(const std::string &filename, uint32 nbLines)
 
 	utext.fromUtf8(text);
 
-	CI18N::writeTextFile(filename, utext, true);
+	CI18N::writeTextFile(filename, utext);
 }
 
 
@@ -1910,7 +1910,7 @@ int	makeWork()
 			// change #include "*_en.txt" into #include "*_wk.txt"
 			ucstring	utext;
 
-			CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, utext, false, false, false, CI18N::LINE_FMT_LF);
 			string text = utext.toUtf8();
 
 			bool	changedFile = false;
@@ -1943,7 +1943,7 @@ int	makeWork()
 			if (changedFile)
 			{
 				utext.fromUtf8(text);
-				CI18N::writeTextFile(filename, utext, true);
+				CI18N::writeTextFile(filename, utext);
 			}
 
 			// change filename
@@ -2348,7 +2348,7 @@ void patchWorkFile(vector<TPhrase> &updatedPhrase, const std::string & filename)
 {
 	ucstring text;
 	if ( updatedPhrase.empty() ) { return; }
-	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, text, false, false, false, CI18N::LINE_FMT_LF);
 	vector<TPhrase>::const_iterator first(updatedPhrase.begin());
 	vector<TPhrase>::const_iterator last(updatedPhrase.end());
 	for (; first != last; ++first)
@@ -2489,7 +2489,7 @@ bool mergePhraseDiff2(vector<TPhrase> &phrases, const string &language, bool onl
 		{
 			// Check if the diff is translated
 			ucstring text;
-			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(diffs[i], text, false, false, false, CI18N::LINE_FMT_LF);
 			verifyVersion(text, 2);
 			if (text.find(ucstring("DIFF NOT TRANSLATED")) != ucstring::npos)
 			{
@@ -2947,7 +2947,7 @@ void preprocessTextFile(const std::string &filename,
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		CI18N::readTextBuffer((uint8*)&text[0], (uint)text.size(), result, false);
+		CI18N::readTextBuffer((uint8*)&text[0], (uint)text.size(), result);
 
 	
 
@@ -3029,7 +3029,7 @@ int mergePhraseDiff(int argc, char *argv[])
 		{
 			// backup the original file
 			ucstring old;
-			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_CRLF);
+			CI18N::readTextFile(filename, old, false, true, false, CI18N::LINE_FMT_LF);
 			if (old != str)
 				CFile::moveFile((historyDir+CFile::getFilenameWithoutExtension(filename)+"_"+diffVersion+"."+CFile::getExtension(filename)).c_str(), filename.c_str());
 		}
