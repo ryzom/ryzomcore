@@ -479,14 +479,14 @@ void CStringManagerModule::translateAndForwardWithArg(TDataSetRow senderId,CChat
 void CStringManagerModule::translateAndForward(TDataSetRow senderId,CChatGroup::TGroupType groupType,std::string id,TSessionId sessionId)
 {
 	std::string toSend = getValue(sessionId.asInt(), id);
-	if(toSend != "")
+	if(!toSend.empty())
 		send(senderId,groupType,toSend);
 }
 
 
 void CStringManagerModule::send(TDataSetRow& senderId,CChatGroup::TGroupType groupType,const std::string& toSend)
 {
-	if(toSend != "")
+	if(!toSend.empty())
 	{
 		ucstring uStr;
 		uStr.fromUtf8(toSend);

@@ -1121,7 +1121,7 @@ void CInstanceGroup::setClusterSystemForInstances(CInstanceGroup *pIG)
 void CInstanceGroup::getDynamicPortals (std::vector<std::string> &names)
 {
 	for (uint32 i = 0; i < _Portals.size(); ++i)
-		if (_Portals[i].getName() != "")
+		if (!_Portals[i].getName().empty())
 			names.push_back (_Portals[i].getName());
 }
 

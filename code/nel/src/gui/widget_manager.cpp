@@ -442,7 +442,7 @@ namespace NLGUI
 			if (sZeStart[sZeStart.size()-1] == ':')
 				sZeStart = sZeStart.substr(0, sZeStart.size()-1);
 
-			while (sZeStart != "")
+			while (!sZeStart.empty())
 			{
 				if (sEltId[0] == ':')
 					sTmp = sZeStart	+ sEltId;

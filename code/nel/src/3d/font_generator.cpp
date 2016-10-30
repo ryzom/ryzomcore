@@ -457,7 +457,7 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 		nlerror ("FT_New_Face() failed with file '%s': %s", fontFileName.c_str(), getFT2Error(error));
 	}
 
-	if (fontExFileName != "")
+	if (!fontExFileName.empty())
 	{
 		error = FT_Attach_File (_Face, fontExFileName.c_str ());
 		if (error)

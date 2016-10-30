@@ -1069,7 +1069,7 @@ void GenerateSpecialItem( int numMP, const CSString& nomMP, const MPCraftStats& 
 void	parseSpecialAttributes(const CSString &specialAttributes, MPCraftStats &craftStats, CExtraInfo &extraInfo)
 {
 	// evaluate DropOrSell according to CraftStats: can DropOrSell if it is a MP Craft
-	extraInfo.DropOrSell= craftStats.Craft != "";
+	extraInfo.DropOrSell= !craftStats.Craft.empty();
 
 	// parse attributes
 	vector<string> strArray;

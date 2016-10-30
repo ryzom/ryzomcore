@@ -1178,7 +1178,7 @@ void CScreenshotIslands::loadIslands()
 			}
 		
 			// write the processed proximity map to an output file
-			if(fileName != "")
+			if(!fileName.empty())
 			{
 				writeProximityBufferToTgaFile(fileName, cleanBuffer, zones[i].getZoneWidth(), zones[i].getZoneHeight());
 				_TempFileNames.push_back(fileName);

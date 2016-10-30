@@ -507,7 +507,7 @@ void impulseShardId(NLMISC::CBitMemStream &impulse)
 
 	string	webHost;
 	impulse.serial(webHost);
-	if (webHost != "")
+	if (!webHost.empty())
 	{
 		WebServer = webHost;
 	}

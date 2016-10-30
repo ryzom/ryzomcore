@@ -125,7 +125,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 			std::string str = propClass->toString();
 
 
-			while (!toRet && str != "")
+			while (!toRet && !str.empty())
 			{
 				CObjectGenerator* generator = _Factory->getGenerator(str);
 

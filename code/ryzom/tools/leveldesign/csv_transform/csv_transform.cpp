@@ -167,7 +167,7 @@ public:
 		//---------------------------------------------------------------------------------------------
 		// housekeeping
 
-		if (outputName!="")
+		if (!outputName.empty())
 			flush(outputName);
 	}
 
@@ -258,7 +258,7 @@ private:
 					if (i>=cols.size() 
 						|| i>=lastTblCols.size() 
 						|| cols[i]!=lastTblCols[i] 
-						|| (cols[i]!="" && !headerIsOpen[tblColumnNames[i]]))
+						|| (!cols[i].empty() && !headerIsOpen[tblColumnNames[i]]))
 					{
 						CSString s=headers[tblColumnNames[i]];
 						for (uint32 j=1;j<cols.size()&&j<tblColumnNames.size();++j)
@@ -302,7 +302,7 @@ private:
 		}
 		else if (keyword=="output")
 		{
-			if (outputName!="")
+			if (!outputName.empty())
 			{
 				flush(outputName);
 			}
@@ -399,7 +399,7 @@ private:
 		{
 			// do nothing
 		}
-		else if (keyword=="")
+		else if (keyword.empty())
 		{
 			mode=DEFAULT;
 			closeFooters();

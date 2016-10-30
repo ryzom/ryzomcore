@@ -27,7 +27,7 @@ using namespace NLMISC;
 // ---------------------------------------------------------------------------
 void CTools::mkdir (const string &dirName)
 {
-	if (dirName == "")
+	if (dirName.empty())
 		return;
 	// Does the directory exist ?
 	string newDir = pwd();

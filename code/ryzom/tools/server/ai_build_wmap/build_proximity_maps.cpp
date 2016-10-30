@@ -669,7 +669,7 @@ NLMISC_COMMAND(pacsBuildProximityMap,"build a set of proximity maps from a cwmap
 	// load the collision map file and generate our buffer from it
 	CProximityMapBuffer buffer;
 	string	ext = CFile::getExtension(name);
-	if (ext == "")
+	if (ext.empty())
 		ext = "cwmap2";
 	string fileName= OutputPath+CFile::getFilenameWithoutExtension(name)+"."+ext;
 	nlinfo("Building proximity map: Loading cwmap2 file: %s",fileName.c_str());
