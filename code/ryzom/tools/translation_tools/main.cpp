@@ -703,7 +703,7 @@ void cleanComment(const std::string & filename)
 		}				
 	}
 	text = newText;
-	newText = ucstring("");
+	newText.clear();
 	last = 0;
 	while ( last != ucstring::npos)
 	{

@@ -38,7 +38,7 @@ void CTools::mkdir (const string &dirName)
 	}
 	SetCurrentDirectory (newDir.c_str());
 	// Create upper levels
-	newDir = "";
+	newDir.clear();
 	string::size_type pos = dirName.rfind('\\');
 	if (pos != string::npos)
 	{

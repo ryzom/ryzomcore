@@ -1430,7 +1430,7 @@ namespace NLGUI
 		// Append to the last line
 		_Lines.back()->addWord(ucCurrentWord, 0, wordFormat, _FontWidth, *TextContext);
 		// reset the word
-		ucCurrentWord = ucstring("");
+		ucCurrentWord.clear();
 	}
 
 

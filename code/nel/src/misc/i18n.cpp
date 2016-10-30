@@ -1109,7 +1109,7 @@ void CI18N::_readTextFile(const string &filename,
 			temp.append(result.begin()+lastPos, result.end());
 			result.swap(temp);
 
-			temp = "";
+			temp.clear();
 
 			// second loop with the '\n'
 			pos = 0;

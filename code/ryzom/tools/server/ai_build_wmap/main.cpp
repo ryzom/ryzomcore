@@ -86,7 +86,7 @@ sint	main(sint argc, char **argv)
 			if (cmd != "")
 			{
 				commands.push_back(cmd);
-				cmd = "";
+				cmd.clear();
 			}
 		}
 		else
