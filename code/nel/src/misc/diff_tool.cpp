@@ -154,7 +154,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		if (!CI18N::parseLabel(first, last, si.Identifier))
 		{
 			uint32 line = countLine(text, first);
-			nlwarning("DT: Fatal : In '%s', line %u: Invalid label after '%s'\n",
+			nlwarning("DT: Fatal : In '%s', line %u: Invalid label after '%s'",
 				filename.c_str(),
 				line,
 				lastLabel.c_str());
@@ -167,7 +167,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		if (!CI18N::parseMarkedString(openMark, closeMark, first, last, si.Text))
 		{
 			uint32 line = countLine(text, first);
-			nlwarning("DT: Fatal : In '%s', line %u: Invalid text value for label %s\n",
+			nlwarning("DT: Fatal : In '%s', line %u: Invalid text value for label %s",
 				filename.c_str(),
 				line,
 				lastLabel.c_str());
@@ -181,7 +181,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 			if (!CI18N::parseMarkedString(openMark, closeMark, first, last, si.Text2))
 			{
 				uint32 line = countLine(text, first);
-				nlwarning("DT: Fatal: In '%s' line %u: Invalid text2 value label %s\n",
+				nlwarning("DT: Fatal: In '%s' line %u: Invalid text2 value label %s",
 					filename.c_str(),
 					line,
 					lastLabel.c_str());
