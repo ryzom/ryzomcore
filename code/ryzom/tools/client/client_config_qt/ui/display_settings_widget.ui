@@ -7,62 +7,58 @@
     <x>0</x>
     <y>0</y>
     <width>391</width>
-    <height>429</height>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Display</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
     <widget class="QGroupBox" name="driverGroupBox">
      <property name="title">
       <string>Driver</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Specify if Ryzom is to be run in OpenGL or Direct3D:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="autoRadioButton">
-          <property name="text">
-           <string>Auto</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="openglRadioButton">
-          <property name="text">
-           <string>OpenGL</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="direct3dRadioButton">
-          <property name="text">
-           <string>Direct3D</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QLabel" name="videoDriverLabel">
+        <property name="text">
+         <string>Specify if Ryzom is to be run in OpenGL or Direct3D:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="autoRadioButton">
+        <property name="text">
+         <string>Auto</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="openglRadioButton">
+        <property name="text">
+         <string>OpenGL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="direct3dRadioButton">
+        <property name="text">
+         <string>Direct3D</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item>
     <widget class="QGroupBox" name="parametersGroupBox">
      <property name="title">
       <string>Parameters</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="windowedLabel">
         <property name="text">
          <string>Specify if Ryzom is to be run in full screen or window mode:</string>
         </property>
@@ -76,7 +72,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="videoModeLabel">
         <property name="text">
          <string>Specify a video mode:</string>
         </property>
@@ -86,19 +82,6 @@
        <widget class="QComboBox" name="videomodeComboBox"/>
       </item>
       <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>34</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QRadioButton" name="windowedRadioButton">
         <property name="text">
          <string>Windowed</string>
@@ -106,54 +89,46 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="text">
-             <string>Width</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Height</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_6">
-            <property name="text">
-             <string>X position</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Y position</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+       <layout class="QFormLayout" name="windowFormLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="widthLabel">
+          <property name="text">
+           <string>Width</string>
+          </property>
+         </widget>
         </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout">
-          <item>
-           <widget class="QLineEdit" name="widthLineEdit"/>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="heightLineEdit"/>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="xpositionLineEdit"/>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="ypositionLineEdit"/>
-          </item>
-         </layout>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="widthLineEdit"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="heightLabel">
+          <property name="text">
+           <string>Height</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="heightLineEdit"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="xLabel">
+          <property name="text">
+           <string>X position</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLineEdit" name="xpositionLineEdit"/>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="yLabel">
+          <property name="text">
+           <string>Y position</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLineEdit" name="ypositionLineEdit"/>
         </item>
        </layout>
       </item>
