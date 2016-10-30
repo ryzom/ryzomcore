@@ -254,7 +254,8 @@ int importCsv(const char *filename)
 		do
 		{
 			fields.push_back(s.splitTo(';', true));
-		} while (s != "");
+		}
+		while (!s.empty());
 	}
 
 	// read values for each item
@@ -278,7 +279,8 @@ int importCsv(const char *filename)
 		{
 			val = s.splitTo(';', true);
 			items[n].push_back(val);
-		} while (s != "");
+		}
+		while (!s.empty());
 	}
 
 	fclose(f);
@@ -376,7 +378,7 @@ void updateItemField(CVectorSString &lines, uint itemIndex, uint fieldIndex, uin
 		if (pos == string::npos)
 			continue;
 
-		if (val != "")
+		if (!val.empty())
 		{
 			// check if the attribute is the right one and not included in another one
 			// for example: Protection is in ProtectionFactor
@@ -507,7 +509,7 @@ int main(int argc, char *argv[])
 	}
 
 	// create a .csv file
-	if (scriptFile != "")
+	if (!scriptFile.empty())
 	{
 		if (CFile::getFilename(scriptFile) == scriptFile)
 			scriptFile = curDir + scriptFile;
@@ -545,7 +547,7 @@ int main(int argc, char *argv[])
 	}
 
 	// create a .txt file
-	if (csvFile != "")
+	if (!csvFile.empty())
 	{
 		if (CFile::getFilename(csvFile) == csvFile)
 			csvFile = curDir + csvFile;

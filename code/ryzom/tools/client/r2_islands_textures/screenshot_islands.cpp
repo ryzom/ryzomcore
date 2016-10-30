@@ -1158,7 +1158,7 @@ void CScreenshotIslands::loadIslands()
 			TBuffer cleanBuffer;
 			processProximityBuffer(zoneBuffer, zones[i].getZoneWidth(), cleanBuffer);
 
-			string fileName = string("");
+			string fileName;
 			list< string >::const_iterator itIsland(continent.Islands.begin()), lastIsland(continent.Islands.end());
 			for( ; itIsland != lastIsland ; ++itIsland)
 			{
@@ -1178,7 +1178,7 @@ void CScreenshotIslands::loadIslands()
 			}
 		
 			// write the processed proximity map to an output file
-			if(fileName != "")
+			if(!fileName.empty())
 			{
 				writeProximityBufferToTgaFile(fileName, cleanBuffer, zones[i].getZoneWidth(), zones[i].getZoneHeight());
 				_TempFileNames.push_back(fileName);

@@ -745,11 +745,11 @@ int extractBotNames(int argc, char *argv[])
 	// saving the modified files
 
 	ucstring s = prepareExcelSheet(botNames);
-	CI18N::writeTextFile(workBotNamesFile.asString(), s, false);
+	CI18N::writeTextFile(workBotNamesFile.asString(), s);
 	s = prepareExcelSheet(transBotNames);
-	CI18N::writeTextFile(transBotNamesFile.asString(), s, false);
+	CI18N::writeTextFile(transBotNamesFile.asString(), s);
 	s = prepareExcelSheet(fcts);
-	CI18N::writeTextFile(workTitleFile.asString(), s, false);
+	CI18N::writeTextFile(workTitleFile.asString(), s);
 
 	return 0;
 }

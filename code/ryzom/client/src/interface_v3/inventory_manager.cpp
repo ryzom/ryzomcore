@@ -2504,13 +2504,13 @@ class CHandlerInvCanDropTo : public IActionHandler
 		if (pCSDst != NULL)
 		{
 			// If we want to drop something on a reference slot (hand or equip)
-			if (pInv->getDBIndexPath(pCSDst) != "")
+			if (!pInv->getDBIndexPath(pCSDst).empty())
 			{
 				// We must drag'n'drop an item
 				if (pCSSrc && pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
 				if (pCSDst && pCSDst->getType() == CCtrlSheetInfo::SheetType_Item)
 				{
-					if (pInv->getDBIndexPath(pCSSrc) != "")
+					if (!pInv->getDBIndexPath(pCSSrc).empty())
 					{
 						// The item dragged comes from a slot check if this is the good type
 						if (pCSDst->canDropItem(pCSSrc))

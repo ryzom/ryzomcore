@@ -743,7 +743,7 @@ void CI18N::_readTextFile(const string &filename,
 
 	// Transform the string in ucstring according to format header
 	if (!text.empty())
-		readTextBuffer((uint8*)&text[0], (uint)text.size(), result, forceUtf8);
+		readTextBuffer((uint8*)&text[0], (uint)text.size(), result);
 
 	if (preprocess)
 	{
@@ -1109,7 +1109,7 @@ void CI18N::_readTextFile(const string &filename,
 			temp.append(result.begin()+lastPos, result.end());
 			result.swap(temp);
 
-			temp = "";
+			temp.clear();
 
 			// second loop with the '\n'
 			pos = 0;
@@ -1137,28 +1137,13 @@ void CI18N::_readTextFile(const string &filename,
 	}
 }
 
-void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8)
+void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result)
 {
 	static uint8 utf16Header[] = { 0xffu, 0xfeu };
 	static uint8 utf16RevHeader[] = { 0xfeu, 0xffu };
 	static uint8 utf8Header[] = { 0xefu, 0xbbu, 0xbfu };
 
-	if (forceUtf8)
-	{
-		if (size>=3 &&
-			buffer[0]==utf8Header[0] &&
-			buffer[1]==utf8Header[1] &&
-			buffer[2]==utf8Header[2]
-			)
-		{
-			// remove utf8 header
-			buffer+= 3;
-			size-=3;
-		}
-		string text((char*)buffer, size);
-		result.fromUtf8(text);
-	}
-	else if (size>=3 &&
+	if (size>=3 &&
 			 buffer[0]==utf8Header[0] &&
 			 buffer[1]==utf8Header[1] &&
 			 buffer[2]==utf8Header[2]
@@ -1211,10 +1196,9 @@ void CI18N::readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forc
 	}
 	else
 	{
-		// hum.. ascii read ?
-		// so, just do a direct conversion
+		// all text files without BOM are now parsed as UTF-8 by default
 		string text((char*)buffer, size);
-		result = text;
+		result.fromUtf8(text);
 	}
 }
 

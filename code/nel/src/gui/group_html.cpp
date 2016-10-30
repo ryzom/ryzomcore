@@ -572,7 +572,7 @@ namespace NLGUI
 							curl_easy_cleanup(it->curl);
 
 							string tmpfile = it->dest + ".tmp";
-							if(res != CURLE_OK || r < 200 || r >= 300 || ((it->md5sum != "") && (it->md5sum != getMD5(tmpfile).toString())))
+							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
 							{
 								NLMISC::CFile::deleteFile(tmpfile.c_str());
 							}

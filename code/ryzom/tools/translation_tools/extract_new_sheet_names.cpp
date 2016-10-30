@@ -315,7 +315,7 @@ void	extractNewWords(string workSheetFileName, string columnId, IWordListBuilder
 		ucstring s = prepareExcelSheet(workSheet);
 		try
 		{
-			CI18N::writeTextFile(workSheetFileName.c_str(), s, false);
+			CI18N::writeTextFile(workSheetFileName.c_str(), s);
 		}
 		catch (const Exception &e)
 		{

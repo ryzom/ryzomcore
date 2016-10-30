@@ -642,42 +642,42 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 
 	// Ok set parameters from options first and with CFG if no options set
 
-	if (_Options->OutIGDir == "")
+	if (_Options->OutIGDir.empty())
 		_OutIGDir = CTools::normalizePath (ContinentCFG.OutIGDir);
 	else
 		_OutIGDir = CTools::normalizePath (_Options->OutIGDir);
 
-	if (_Options->LandFile == "")
+	if (_Options->LandFile.empty())
 		_LandFile			= ContinentCFG.LandFile;
 	else
 		_LandFile			= _Options->LandFile;
 
-	if (_Options->DfnDir == "")
+	if (_Options->DfnDir.empty())
 		_DfnDir				= ContinentCFG.DfnDir;
 	else
 		_DfnDir				= _Options->DfnDir;
 
-	if (_Options->GameElemDir == "")
+	if (_Options->GameElemDir.empty())
 		_GameElemDir		= ContinentCFG.GameElemDir;
 	else
 		_GameElemDir		= _Options->GameElemDir;
 
-	if (_Options->InLandscapeDir == "")
+	if (_Options->InLandscapeDir.empty())
 		_InLandscapeDir		= ContinentCFG.LandZoneWDir;		// Directory where to get .zonew files
 	else
 		_InLandscapeDir		= _Options->InLandscapeDir;
 
-	if (_Options->LandFarBankFile == "")
+	if (_Options->LandFarBankFile.empty())
 		_LandBankFile		= ContinentCFG.LandBankFile;		// The .smallbank file associated with the landscape
 	else
 		_LandBankFile		= _Options->LandBankFile;
 
-	if (_Options->LandFarBankFile == "")
+	if (_Options->LandFarBankFile.empty())
 		_LandFarBankFile	= ContinentCFG.LandFarBankFile;		// The .farbank file
 	else
 		_LandFarBankFile	= _Options->LandFarBankFile;
 
-	if (_Options->LandTileNoiseDir == "")
+	if (_Options->LandTileNoiseDir.empty())
 		_LandTileNoiseDir	= ContinentCFG.LandTileNoiseDir;	// Directory where to get displacement map
 	else
 		_LandTileNoiseDir	= _Options->LandTileNoiseDir;

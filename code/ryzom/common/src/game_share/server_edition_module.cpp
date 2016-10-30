@@ -2813,7 +2813,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 				else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
 				else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 				else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
-				else if (first->first == "MissionTag" && first->second != "") { missionTag = first->second; }
+				else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 			}
 //			info.setMissionTag(missionTag);
 			info.setSessionAnimatorCharId( ownerCharId);
@@ -3863,7 +3863,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 					else if (first->first == "Rules" ) { info.setDMLess( first->second != "Mastered"); }
 					else if (first->first == "NevraxScenario" && first->second == "1") { nevraxScenario = true; }
 					else if (first->first == "TrialAllowed" && first->second == "1") { trialAllowed = true; }
-					else if (first->first == "MissionTag" && first->second != "") { missionTag = first->second; }
+					else if (first->first == "MissionTag" && !first->second.empty()) { missionTag = first->second; }
 				}
 
 				info.setSessionAnimatorCharId( charId);

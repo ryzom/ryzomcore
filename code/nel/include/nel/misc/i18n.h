@@ -162,11 +162,8 @@ public:
 	 *	EF,BB, BF.
 	 *	16 bits encoding can be recognized by the official header :
 	 *	FF, FE, witch can be reversed if the data are MSB first.
-	 *
-	 *	Optionally, you can force the reader to consider the file as
-	 *	UTF-8 encoded.
 	 */
-	static void readTextBuffer(uint8 *buffer, uint size, ucstring &result, bool forceUtf8 = false);
+	static void readTextBuffer(uint8 *buffer, uint size, ucstring &result);
 
 	/** Remove any C style comment from the passed string.
 	 */

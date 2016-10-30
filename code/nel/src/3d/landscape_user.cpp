@@ -213,9 +213,9 @@ void	CLandscapeUser::refreshAllZonesAround(const CVector &pos, float radius, std
 		refreshZonesAround (pos, radius, za, zr);
 
 		// some zone added or removed??
-		if(za != "")
+		if(!za.empty())
 			zonesAdded.push_back(za);
-		if(zr != "")
+		if(!zr.empty())
 			zonesRemoved.push_back(zr);
 
 		_ZoneManager.checkZonesAround ((uint)pos.x, (uint)(-pos.y), (uint)radius);

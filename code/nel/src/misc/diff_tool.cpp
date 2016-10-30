@@ -117,7 +117,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 */
 	ucstring text;
 
-	CI18N::readTextFile(filename, text, false, false, true, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, text, false, false, true, CI18N::LINE_FMT_LF);
 //	CI18N::readTextBuffer(buffer, size, text);
 //	delete [] buffer;
 
@@ -154,7 +154,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		if (!CI18N::parseLabel(first, last, si.Identifier))
 		{
 			uint32 line = countLine(text, first);
-			nlwarning("DT: Fatal : In '%s', line %u: Invalid label after '%s'\n",
+			nlwarning("DT: Fatal : In '%s', line %u: Invalid label after '%s'",
 				filename.c_str(),
 				line,
 				lastLabel.c_str());
@@ -167,7 +167,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 		if (!CI18N::parseMarkedString(openMark, closeMark, first, last, si.Text))
 		{
 			uint32 line = countLine(text, first);
-			nlwarning("DT: Fatal : In '%s', line %u: Invalid text value for label %s\n",
+			nlwarning("DT: Fatal : In '%s', line %u: Invalid text value for label %s",
 				filename.c_str(),
 				line,
 				lastLabel.c_str());
@@ -181,7 +181,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 			if (!CI18N::parseMarkedString(openMark, closeMark, first, last, si.Text2))
 			{
 				uint32 line = countLine(text, first);
-				nlwarning("DT: Fatal: In '%s' line %u: Invalid text2 value label %s\n",
+				nlwarning("DT: Fatal: In '%s' line %u: Invalid text2 value label %s",
 					filename.c_str(),
 					line,
 					lastLabel.c_str());
@@ -313,7 +313,7 @@ bool readPhraseFile(const std::string &filename, vector<TPhrase> &phrases, bool 
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, true, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, doc, false, false, true, CI18N::LINE_FMT_LF);
 
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -577,7 +577,7 @@ ucstring preparePhraseFile(const vector<TPhrase> &phrases, bool removeDiffCommen
 				if (!c.Comments.empty())
 				{
 					ucstring comment = tabLines(1, c.Comments);
-					ret += comment; // + '\r'+'\n';
+					ret += comment; // + '\n';
 				}
 				if (!c.Conditions.empty())
 				{
@@ -626,7 +626,7 @@ bool loadExcelSheet(const string filename, TWorksheet &worksheet, bool checkUniq
 	fp.close();
 
 	ucstring str;
-	CI18N::readTextFile(filename, str, false, false, false, CI18N::LINE_FMT_CRLF);
+	CI18N::readTextFile(filename, str, false, false, false, CI18N::LINE_FMT_LF);
 
 	if (!readExcelSheet(str, worksheet, checkUnique))
 		return false;
@@ -646,6 +646,8 @@ bool readExcelSheet(const ucstring &str, TWorksheet &worksheet, bool checkUnique
 	strArray[strArray.size()-1]= 0;
 	memcpy(&strArray[0], &str[0], str.size()*sizeof(ucchar));
 
+	// size of new line characters
+	size_t sizeOfNl = nl.length();
 
 	// **** Build array of lines. just point to strArray, and fill 0 where appropriated
 	vector<ucchar*> lines;
@@ -660,10 +662,10 @@ bool readExcelSheet(const ucstring &str, TWorksheet &worksheet, bool checkUnique
 //			nldebug("Found line : [%s]", ucstring(&strArray[lastPos]).toString().c_str());
 			lines.push_back(&strArray[lastPos]);
 		}
-		lastPos = pos + 2;
+		lastPos = pos + sizeOfNl;
 	}
 
-	// Must add last line if no \r\n ending
+	// Must add last line if no \n ending
 	if (lastPos < str.size())
 	{
 		pos= str.size();

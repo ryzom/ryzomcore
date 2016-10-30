@@ -288,6 +288,8 @@ void CConfig::setString( const char *key, const std::string &value )
 	}
 	else
 	{
-		nlwarning( "Couldn't find key %s in %s.", key, cf.getFilename().c_str() );
+		NLMISC::CConfigFile::CVar var;
+		var.forceAsString(value);
+		cf.insertVar(key, var);
 	}
 }

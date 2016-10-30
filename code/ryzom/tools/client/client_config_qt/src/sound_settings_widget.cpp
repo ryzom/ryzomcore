@@ -25,11 +25,16 @@ CSoundSettingsWidget::CSoundSettingsWidget( QWidget *parent ) :
 	setupUi( this );
 	load();
 
+	connect(autoRadioButton, SIGNAL(clicked(bool)), this, SLOT(onSomethingChanged()));
+	connect(openalRadioButton, SIGNAL(clicked(bool)), this, SLOT(onSomethingChanged()));
+	connect(fmodRadioButton, SIGNAL(clicked(bool)), this, SLOT(onSomethingChanged()));
+	connect(xaudio2RadioButton, SIGNAL(clicked(bool)), this, SLOT(onSomethingChanged()));
+	connect(directsoundRadioButton, SIGNAL(clicked(bool)), this, SLOT(onSomethingChanged()));
+
 	connect( tracksSlider, SIGNAL( valueChanged( int ) ), this, SLOT( onTracksSliderChange() ) );
 	connect( soundCheckBox, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( eaxCheckBox, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( softwareCheckBox, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
-	connect( fmodCheckBox, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 }
 
 CSoundSettingsWidget::~CSoundSettingsWidget()
@@ -64,8 +69,38 @@ void CSoundSettingsWidget::load()
 
 	updateTracksLabel();
 
-	if( s.config.getString( "DriverSound" ).compare( "FMod" ) == 0 )
-		fmodCheckBox->setChecked( true );
+	std::string soundDriver = NLMISC::toLower(s.config.getString("DriverSound"));
+
+#ifdef Q_OS_WIN32
+	fmodRadioButton->setEnabled(true);
+	xaudio2RadioButton->setEnabled(true);
+	directsoundRadioButton->setEnabled(true);
+#else
+	fmodRadioButton->setEnabled(false);
+	xaudio2RadioButton->setEnabled(false);
+	directsoundRadioButton->setEnabled(false);
+#endif
+
+	if (soundDriver.compare("openal") == 0)
+	{
+		openalRadioButton->setChecked(true);
+	}
+	else if (soundDriver.compare("fmod") == 0)
+	{
+		fmodRadioButton->setChecked(true);
+	}
+	else if (soundDriver.compare("xaudio2") == 0)
+	{
+		xaudio2RadioButton->setChecked(true);
+	}
+	else if (soundDriver.compare("directsound") == 0)
+	{
+		directsoundRadioButton->setChecked(true);
+	}
+	else
+	{
+		autoRadioButton->setChecked(true);
+	}
 }
 
 void CSoundSettingsWidget::save()
@@ -83,8 +118,18 @@ void CSoundSettingsWidget::save()
 
 	s.config.setInt( "MaxTrack", tracksSlider->value() * 4 );
 
-	if( fmodCheckBox->isChecked() )
-		s.config.setString( "DriverSound", std::string( "FMod" ) );
+	if (openalRadioButton->isChecked())
+		s.config.setString("DriverSound", std::string("OpenAL"));
+#ifdef Q_OS_WIN32
+	else if (fmodRadioButton->isChecked())
+		s.config.setString("DriverSound", std::string("FMod"));
+	else if (xaudio2RadioButton->isChecked())
+		s.config.setString("DriverSound", std::string("XAudio2"));
+	else if (directsoundRadioButton->isChecked())
+		s.config.setString("DriverSound", std::string("DirectSound"));
+#endif
+	else
+		s.config.setString("DriverSound", std::string("Auto"));
 }
 
 void CSoundSettingsWidget::updateTracksLabel()
