@@ -1158,7 +1158,7 @@ void CScreenshotIslands::loadIslands()
 			TBuffer cleanBuffer;
 			processProximityBuffer(zoneBuffer, zones[i].getZoneWidth(), cleanBuffer);
 
-			string fileName = string("");
+			string fileName;
 			list< string >::const_iterator itIsland(continent.Islands.begin()), lastIsland(continent.Islands.end());
 			for( ; itIsland != lastIsland ; ++itIsland)
 			{

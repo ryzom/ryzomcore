@@ -346,7 +346,7 @@ static CLuaString lstr_isNil("isNil");
 void CLuaIHMRyzom::createLuaEnumTable(CLuaState &ls, const std::string &str)
 {
 	//H_AUTO(Lua_CLuaIHM_createLuaEnumTable)
-	std::string path = "", script, p;
+	std::string path, script, p;
 	CSString s = str;
 	// Create table recursively (ex: 'game.TPVPClan' will check/create the table 'game' and 'game.TPVPClan')
 	p = s.splitTo('.', true);
