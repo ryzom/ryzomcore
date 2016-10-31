@@ -108,7 +108,7 @@ void CDisplaySettingsDetailsWidget::onLandscapeSliderChange( int value )
 	if( ( value < 0 ) || ( value > 3 ) )
 		return;
 
-	landscapeLabel->setText( getQualityString( value ) );
+	landscapeValLabel->setText( getQualityString( value ) );
 	emit changed();
 }
 
@@ -117,7 +117,7 @@ void CDisplaySettingsDetailsWidget::onCharactersSliderChange( int value )
 	if( ( value < 0 ) || ( value > 3 ) )
 		return;
 
-	characterLabel->setText( getQualityString( value ) );
+	characterValLabel->setText( getQualityString( value ) );
 	emit changed();
 }
 
@@ -126,7 +126,7 @@ void CDisplaySettingsDetailsWidget::onFXSliderChange( int value )
 	if( ( value < 0 ) || ( value > 3 ) )
 		return;
 
-	fxLabel->setText( getQualityString( value ) );
+	fxValLabel->setText( getQualityString( value ) );
 	emit changed();
 }
 
@@ -135,7 +135,7 @@ void CDisplaySettingsDetailsWidget::onTexturesSliderChange( int value )
 	if( ( value < 0 ) || ( value > 3 ) )
 		return;
 
-	textureLabel->setText( getTextureQualityString( value ) );
+	texturesValLabel->setText( getTextureQualityString( value ) );
 	emit changed();
 }
 
