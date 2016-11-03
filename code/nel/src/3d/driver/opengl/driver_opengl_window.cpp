@@ -1677,8 +1677,6 @@ bool CDriverGL::destroyWindow()
 		[[containerView() window] release];
 		[containerView() release];
 		[_glView release];
-
-		[_autoreleasePool release];
 	}
 
 	_ctx = nil;
