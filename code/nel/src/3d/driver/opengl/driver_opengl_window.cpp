@@ -490,7 +490,6 @@ bool CDriverGL::unInit()
 
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
 	[_autoreleasePool release];
 
 #elif defined (NL_OS_UNIX)
@@ -1460,7 +1459,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		pos = 0;
 		hwndParent = NULL;
 	}
-	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle, 
+	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle,
 		pos, pos, mode.Width, mode.Height, hwndParent, NULL, GetModuleHandle(NULL), NULL);
 
 	if (window == EmptyWindow)
@@ -1677,8 +1676,6 @@ bool CDriverGL::destroyWindow()
 		[[containerView() window] release];
 		[containerView() release];
 		[_glView release];
-
-		[_autoreleasePool release];
 	}
 
 	_ctx = nil;
