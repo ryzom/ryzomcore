@@ -25,7 +25,7 @@
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
-	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
+	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_installerCopied(false), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
 {
 	s_instance = this;
 
@@ -945,8 +945,8 @@ OperationStep CConfigFile::getInstallNextStep() const
 		}
 	}
 
-	// current installer more recent than installed one
-	if (compareInstallersVersion() == 1) return CopyInstaller;
+	// current installer more recent than installed one and not already copied
+	if (!m_installerCopied && compareInstallersVersion() == 1) return CopyInstaller;
 
 	// no default profile
 	if (profile.id.isEmpty())
@@ -992,7 +992,7 @@ OperationStep CConfigFile::getInstallNextStep() const
 	// current installer more recent than installed one
 	switch (compareInstallersVersion())
 	{
-		// current installer more recent, copy it
+		// current installer more recent, should be already copied
 		case 1: break;
 
 		// current installer older, launch the more recent installer

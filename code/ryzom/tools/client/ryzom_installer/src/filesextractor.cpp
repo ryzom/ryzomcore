@@ -462,7 +462,7 @@ bool CFilesExtractor::extract7z()
 			}
 
 			// create file
-			QFile outFile(destPath);
+			QSaveFile outFile(destPath);
 
 			if (!outFile.open(QFile::WriteOnly))
 			{
@@ -496,7 +496,7 @@ bool CFilesExtractor::extract7z()
 				break;
 			}
 
-			outFile.close();
+			outFile.commit();
 
 			totalUncompressed += uncompressedSize;
 
@@ -620,7 +620,7 @@ bool CFilesExtractor::extractZip()
 				return true;
 			}
 
-			QFile f(absPath);
+			QSaveFile f(absPath);
 
 			if (!f.open(QIODevice::WriteOnly))
 			{
@@ -637,7 +637,7 @@ bool CFilesExtractor::extractZip()
 				nlwarning("Unable to change permissions of %s", Q2C(absPath));
 			}
 
-			f.close();
+			f.commit();
 
 			// set the right modification date
 			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(absPath), fi.lastModified.toTime_t()))

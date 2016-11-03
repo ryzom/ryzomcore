@@ -57,6 +57,9 @@ public:
 
 	QString getLanguage() const { return m_language; }
 
+	bool getInstallerCopied() const { return m_installerCopied; }
+	void setInstallerCopied(bool copied) { m_installerCopied = copied; }
+
 	int getProfilesCount() const;
 	CProfile getProfile(int i = -1) const;
 	CProfile getProfile(const QString &id) const;
@@ -145,6 +148,7 @@ private:
 	int m_version;
 	int m_defaultServerIndex;
 	int m_defaultProfileIndex;
+	bool m_installerCopied;
 
 	CServers m_servers;
 	CProfiles m_profiles;
