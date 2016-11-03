@@ -194,6 +194,9 @@ bool CFilesCopier::copyFiles(const FilesToCopy &files)
 		processedSize += file.size;
 	}
 
+	// wait 1 second to be sure all files have been copied (because to disk cache)
+	QThread::sleep(1);
+
 	if (m_listener)
 	{
 		m_listener->operationSuccess(totalSize);
