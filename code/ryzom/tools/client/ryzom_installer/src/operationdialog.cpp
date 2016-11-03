@@ -791,6 +791,9 @@ void COperationDialog::copyInstaller()
 #endif
 
 		createShortcut(shortcut, name, executable, "", icon, "");
+
+		// installer already copied, don't need to copy it again
+		config->setInstallerCopied(true);
 	}
 
 	emit done();
