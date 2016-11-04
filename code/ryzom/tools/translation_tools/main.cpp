@@ -2329,8 +2329,7 @@ bool sortTransPhrase()
 			}
 		}
 
-
-		nlinfo("Updating hashcode of phrase file for %s.\n", Languages[l].c_str());
+		nlinfo("Updating hashcode of phrase file for %s.", Languages[l].c_str());
 		// build the diff file for each language.
 		ucstring str = preparePhraseFile(phrases2, false);
 		std::string pharseName(transDir+refFile);
@@ -2414,7 +2413,6 @@ int updatePhraseWork()
 	uint lastFile = (uint)outputResult.size();
 	for (; firstFile != lastFile ; ++firstFile)
 	{
-
 		ucstring doc = outputResult[firstFile].first;
 		std::vector<TPhrase> phrases;
 		readPhraseFileFromString(outputResult[firstFile].first,  outputResult[firstFile].second, phrases, true);
@@ -2446,7 +2444,7 @@ int updatePhraseWork()
 							firstClause->HashValue = clauseHashValue;
 						}
 						updatedPhrases.push_back(transPhrase);
-						updatedPhrases.back().Comments= ucstring("");
+						updatedPhrases.back().Comments.clear();
 					}
 				}
 			}
@@ -2984,6 +2982,7 @@ void preprocessTextFile(const std::string &filename,
 					subFilename.clear();
 				}
 			}
+
 			preprocessTextFile(subFilename, outputResult);
 		}
 		else
@@ -2993,8 +2992,6 @@ void preprocessTextFile(const std::string &filename,
 		lastPos = pos;
 
 	}
-
-
 
 	outputResult.push_back( std::pair<ucstring, std::string> ( current, fullName ) );
 }
