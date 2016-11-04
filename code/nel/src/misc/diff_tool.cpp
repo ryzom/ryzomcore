@@ -416,7 +416,11 @@ bool readPhraseFileFromString(ucstring const& doc, const std::string &filename, 
 						phrase.Clauses.size()+1);
 					return false;
 				}
-				clause.Conditions += "(" + cond + ") ";
+
+				// only prepend a space if required
+				if (!clause.Conditions.empty()) clause.Conditions += " ";
+
+				clause.Conditions += "(" + cond + ")";
 				CI18N::skipWhiteSpace(first, last, &clause.Comments);
 			}
 
