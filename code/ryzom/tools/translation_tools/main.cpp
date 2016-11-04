@@ -2972,12 +2972,16 @@ void preprocessTextFile(const std::string &filename,
 
 			ucstring name = line.substr(firstFilename +1, lastFilename - firstFilename  -1);
 			string subFilename = name.toString();
+
+			if (!CFile::fileExists(subFilename))
 			{
-				CIFile testFile;
-				if (!testFile.open(subFilename))
-				{
 				// try to open the include file relative to current file
-					subFilename = CFile::getPath(filename)+subFilename;
+				subFilename = CFile::getPath(filename)+subFilename;
+
+				if (!CFile::fileExists(subFilename))
+				{
+					nlwarning("Unable to open %s", subFilename.c_str());
+					subFilename.clear();
 				}
 			}
 			preprocessTextFile(subFilename, outputResult);
