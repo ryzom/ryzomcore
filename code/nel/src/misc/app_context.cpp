@@ -18,7 +18,6 @@
 #include "nel/misc/app_context.h"
 #include "nel/misc/dynloadlib.h"
 #include "nel/misc/command.h"
-#include "nel/misc/system_utils.h"
 
 #include <locale.h>
 

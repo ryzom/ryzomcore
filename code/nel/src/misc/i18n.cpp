@@ -516,9 +516,11 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 			// store the final '*'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// store the final '/'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// and a new line.
 			storeComments->push_back('\r');
 			storeComments->push_back('\n');

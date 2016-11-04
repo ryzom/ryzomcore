@@ -419,6 +419,7 @@ bool readPhraseFileFromString(ucstring const& doc, const std::string &filename, 
 				clause.Conditions += "(" + cond + ") ";
 				CI18N::skipWhiteSpace(first, last, &clause.Comments);
 			}
+
 			if (first == last)
 			{
 				nlwarning("DT: in '%s': Found end of file in non closed block for phrase %s\n",

@@ -151,8 +151,6 @@ void showUsage(char *exeName)
 	LOG("Reference language is always the first language in languages.txt\n");
 }
 
-
-
 void verifyVersion(ucstring& doc, int versionId)
 {
 	ucstring version1("// DIFF_VERSION 1\r\n");
@@ -2218,7 +2216,6 @@ ucstring preparePhraseFile2(const vector<TPhrase> &phrases, bool removeDiffComme
 					ret += cond + nl;
 				}
 				ret += '\t';
-//				ucstring text = CI18N::makeMarkedString('[', ']', c.Text);
 
 				ucstring text = CI18N::makeMarkedString('[', ']', c.Text);;
 				ucstring text2;
@@ -2340,6 +2337,7 @@ bool sortTransPhrase()
 		CFile::createDirectoryTree( CFile::getPath(pharseName) );
 		CI18N::writeTextFile(pharseName, str);
 	}
+
 	return true;
 }
 
@@ -2471,7 +2469,7 @@ int updatePhraseWork()
 	}
 
 	updatePhraseHashValue(validPhraseHashValue, saveDir);
-	updateClauseHashValue(validClauseHashValue,  saveDir);
+	updateClauseHashValue(validClauseHashValue, saveDir);
 	return 0;
 }
 
