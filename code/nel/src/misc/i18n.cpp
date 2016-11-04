@@ -502,17 +502,30 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 		if (storeComments && *it == '/' && it+1 != last && *(it+1) == '/')
 		{
 			// found a one line C comment. Store it until end of line.
-			while (it != last && *it != '\n')
+			while (it != last && (*it != '\n' && *it != '\r'))
 				storeComments->push_back(*it++);
+
 			// store the final '\n'
 			if (it != last)
-				storeComments->push_back(*it++);
+				storeComments->push_back('\n');
 		}
 		else if (storeComments && *it == '/' && it+1 != last && *(it+1) == '*')
 		{
 			// found a multi line C++ comment. store until we found the closing '*/'
-			while (it != last && !(*it == '*' && it+1 != last && *(it+1) == '/'))
-				storeComments->push_back(*it++);
+			while (it != last && !(*it == '*' && it + 1 != last && *(it + 1) == '/'))
+			{
+				// don't put \r
+				if (*it == '\r')
+				{
+					// skip it
+					++it;
+				}
+				else
+				{
+					storeComments->push_back(*it++);
+				}
+			}
+
 			// store the final '*'
 			if (it != last)
 				storeComments->push_back(*it++);
@@ -522,7 +535,6 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 				storeComments->push_back(*it++);
 
 			// and a new line.
-			storeComments->push_back('\r');
 			storeComments->push_back('\n');
 		}
 		else

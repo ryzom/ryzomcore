@@ -153,9 +153,9 @@ void showUsage(char *exeName)
 
 void verifyVersion(ucstring& doc, int versionId)
 {
-	ucstring version1("// DIFF_VERSION 1\r\n");
+	ucstring version1("// DIFF_VERSION 1\n");
 	ucstring::size_type version1Size = version1.size();
-	ucstring version2("// DIFF_VERSION 2\r\n");
+	ucstring version2("// DIFF_VERSION 2\n");
 	ucstring::size_type version2Size = version2.size();
 
 	switch (versionId)
@@ -1071,7 +1071,7 @@ int makePhraseDiff(int argc, char *argv[])
 		{
 			LOG("Writing difference file for language %s\n", Languages[l].c_str());
 			ucstring text;
-			text += "// DIFF_VERSION 1\r\n";
+			text += "// DIFF_VERSION 1\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
 			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
@@ -2805,7 +2805,7 @@ int makePhraseDiff2(int argc, char *argv[])
 		{
 			LOG("Writing difference file for language %s\n", Languages[l].c_str());
 			ucstring text;
-			text += "// DIFF_VERSION 2\r\n";
+			text += "// DIFF_VERSION 2\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
 			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
