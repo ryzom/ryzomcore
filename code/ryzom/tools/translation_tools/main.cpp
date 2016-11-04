@@ -698,7 +698,7 @@ void cleanComment(const std::string & filename)
 			ucstring toAdd = text.substr(last, size);
 			newText += toAdd;
 			ucstring::size_type commentEnd = text.find(ucstring("*/"), commentBegin);
-			if (commentEnd != ucstring::npos) { commentEnd += 4; }
+			if (commentEnd != ucstring::npos) { commentEnd += 2 + nl.size(); }
 			last = commentEnd;
 			++nbOldValue;
 		}
