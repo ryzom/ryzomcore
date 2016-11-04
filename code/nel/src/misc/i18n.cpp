@@ -656,7 +656,6 @@ bool CI18N::parseMarkedString(ucchar openMark, ucchar closeMark, ucstring::const
 
 void CI18N::readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -666,7 +665,7 @@ void CI18N::readTextFile(const string &filename,
 	TReadContext readContext;
 
 	// call the inner function
-	_readTextFile(filename, result, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+	_readTextFile(filename, result, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 
 	if (!readContext.IfStack.empty())
 	{
@@ -709,7 +708,6 @@ void CI18N::skipLine(ucstring::const_iterator &it, ucstring::const_iterator end,
 
 void CI18N::_readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -819,7 +817,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -873,7 +871,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}

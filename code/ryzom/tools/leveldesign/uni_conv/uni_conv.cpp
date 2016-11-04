@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	}
 
 	ucstring	str;
-	CI18N::readTextFile(inputFile, str, false, false, false);
+	CI18N::readTextFile(inputFile, str, false, false);
 
 	if (outMode == ASCII)
 	{
