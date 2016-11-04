@@ -432,6 +432,7 @@ public:
 	{
 		// nothing to do
 	}
+
 	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 			TStringInfo si = context.Addition[addIndex];
@@ -442,6 +443,7 @@ public:
 			nlinfo("Added %s at %u", si.Identifier.c_str(), addIndex);
 			context.Diff.push_back(si);
 	}
+
 	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 		TStringInfo si = context.Reference[refIndex];
@@ -453,6 +455,7 @@ public:
 		nlinfo("Removed %s at %u", si.Identifier.c_str(), addIndex);
 		context.Diff.push_back(si);
 	}
+
 	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context)
 	{
 		TStringInfo si = context.Addition[addIndex];
@@ -472,11 +475,9 @@ public:
 		sprintf(temp, "// DIFF SWAP %u %u   (swaping %s and %s)", newIndex, refIndex, context.Reference[newIndex].Identifier.c_str(), context.Reference[refIndex].Identifier.c_str());
 //		sprintf(temp, "// DIFF SWAP %u %u", newIndex, refIndex);
 
-		si.Comments = ucstring(temp) + nl +nl;
+		si.Comments = ucstring(temp) + nl + nl;
 		context.Diff.push_back(si);
 	}
-
-
 };
 
 
@@ -660,7 +661,7 @@ int makeStringDiff(int argc, char *argv[])
 			ucstring str = prepareStringFile(diff, false);
 
 			// add the tag for non translation
-			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
 			std::string diffName(diffDir+Languages[l]+"_diff_"+diffVersion+".uxt");
 			CI18N::writeTextFile(diffName, str);
@@ -991,7 +992,7 @@ public:
 		ucstring tempT = preparePhraseFile(tempV, false);
 		CI18N::removeCComment(tempT);
 		phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
-		phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
+		phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : [" + nl) + tabLines(1, tempT) + nl + "] */" + nl;
 		phrase.Comments = phrase.Comments + chg;
 
 		nlinfo("Changed %s at %u", phrase.Identifier.c_str(), addIndex);
@@ -1075,7 +1076,7 @@ int makePhraseDiff(int argc, char *argv[])
 			text += "// DIFF_VERSION 1\r\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
-			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 			CI18N::writeTextFile(diffDir+"phrase_"+Languages[l]+"_diff_"+diffVersion+".txt", text);
 		}
 	}
@@ -1270,7 +1271,7 @@ int makeClauseDiff(int argc, char *argv[])
 			ucstring str = prepareStringFile(diff, false);
 
 			// add the tag for non translation
-			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			str += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 
 			std::string diffName(diffDir+"clause_"+Languages[l]+"_diff_"+diffVersion+".txt");
 			CI18N::writeTextFile(diffName, str);
@@ -1662,7 +1663,7 @@ int makeWorksheetDiff(int argc, char *argv[], const std::string &additionFilenam
 		ucstring str = prepareExcelSheet(diff);
 
 		// add the tag for non translation
-		str += ucstring ("REMOVE THE FOLOWING TWO LINE WHEN TRANSLATION IS DONE")+nl+ucstring("DIFF NOT TRANSLATED")+nl;
+		str += ucstring ("REMOVE THE FOLOWING TWO LINE WHEN TRANSLATION IS DONE") + nl + ucstring("DIFF NOT TRANSLATED") + nl;
 
 		string fn(CFile::getFilenameWithoutExtension(referenceFilename)), ext(CFile::getExtension(referenceFilename));
 		std::string diffName(diffDir+fn+"_diff_"+diffVersion+"."+ext);
@@ -2701,7 +2702,7 @@ void CMakePhraseDiff2::onChanged(uint addIndex, uint refIndex, TPhraseDiffContex
 	ucstring tempT = preparePhraseFile(tempV, false);
 	CI18N::removeCComment(tempT);
 	phrase.Comments = ucstring("// DIFF CHANGED ") + toString(addIndex) + nl + phrase.Comments;
-	phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : ["+nl) + tabLines(1, tempT) +nl + "] */" + nl;
+	phrase.Comments = phrase.Comments + ucstring("/* OLD VALUE : [" + nl) + tabLines(1, tempT) + nl + "] */" + nl;
 	phrase.Comments = phrase.Comments + chg;
 
 	nlinfo("Changed %s at %u", phrase.Identifier.c_str(), addIndex);
@@ -2809,7 +2810,7 @@ int makePhraseDiff2(int argc, char *argv[])
 			text += "// DIFF_VERSION 2\r\n";
 			text += preparePhraseFile(diff, false);
 			// add the tag for non translation
-			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE")+nl+ucstring("// DIFF NOT TRANSLATED")+nl;
+			text += nl + ucstring ("// REMOVE THE FOLOWING LINE WHEN TRANSLATION IS DONE") + nl + ucstring("// DIFF NOT TRANSLATED") + nl;
 			CI18N::writeTextFile(diffDir+"phrase_"+Languages[l]+"_diff_"+diffVersion+".txt", text);
 		}
 	}
