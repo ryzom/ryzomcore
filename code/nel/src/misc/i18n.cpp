@@ -502,25 +502,39 @@ void CI18N::skipWhiteSpace(ucstring::const_iterator &it, ucstring::const_iterato
 		if (storeComments && *it == '/' && it+1 != last && *(it+1) == '/')
 		{
 			// found a one line C comment. Store it until end of line.
-			while (it != last && *it != '\n')
+			while (it != last && (*it != '\n' && *it != '\r'))
 				storeComments->push_back(*it++);
+
 			// store the final '\n'
 			if (it != last)
-				storeComments->push_back(*it++);
+				storeComments->push_back('\n');
 		}
 		else if (storeComments && *it == '/' && it+1 != last && *(it+1) == '*')
 		{
 			// found a multi line C++ comment. store until we found the closing '*/'
-			while (it != last && !(*it == '*' && it+1 != last && *(it+1) == '/'))
-				storeComments->push_back(*it++);
+			while (it != last && !(*it == '*' && it + 1 != last && *(it + 1) == '/'))
+			{
+				// don't put \r
+				if (*it == '\r')
+				{
+					// skip it
+					++it;
+				}
+				else
+				{
+					storeComments->push_back(*it++);
+				}
+			}
+
 			// store the final '*'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// store the final '/'
 			if (it != last)
 				storeComments->push_back(*it++);
+
 			// and a new line.
-			storeComments->push_back('\r');
 			storeComments->push_back('\n');
 		}
 		else
@@ -656,7 +670,6 @@ bool CI18N::parseMarkedString(ucchar openMark, ucchar closeMark, ucstring::const
 
 void CI18N::readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -666,7 +679,7 @@ void CI18N::readTextFile(const string &filename,
 	TReadContext readContext;
 
 	// call the inner function
-	_readTextFile(filename, result, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+	_readTextFile(filename, result, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 
 	if (!readContext.IfStack.empty())
 	{
@@ -709,7 +722,6 @@ void CI18N::skipLine(ucstring::const_iterator &it, ucstring::const_iterator end,
 
 void CI18N::_readTextFile(const string &filename,
 						 ucstring &result,
-						 bool forceUtf8,
 						 bool fileLookup,
 						 bool preprocess,
 						 TLineFormat lineFmt,
@@ -819,7 +831,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}
@@ -873,7 +885,7 @@ void CI18N::_readTextFile(const string &filename,
 									subFilename.c_str());
 
 								ucstring inserted;
-								_readTextFile(subFilename, inserted, forceUtf8, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
+								_readTextFile(subFilename, inserted, fileLookup, preprocess, lineFmt, warnIfIncludesNotFound, readContext);
 								final += inserted;
 							}
 						}

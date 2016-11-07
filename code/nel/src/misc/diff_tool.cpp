@@ -117,7 +117,7 @@ bool loadStringFile(const std::string filename, vector<TStringInfo> &stringInfos
 */
 	ucstring text;
 
-	CI18N::readTextFile(filename, text, false, false, true, CI18N::LINE_FMT_LF);
+	CI18N::readTextFile(filename, text, false, true, CI18N::LINE_FMT_LF);
 //	CI18N::readTextBuffer(buffer, size, text);
 //	delete [] buffer;
 
@@ -313,7 +313,7 @@ bool readPhraseFile(const std::string &filename, vector<TPhrase> &phrases, bool 
 {
 	ucstring doc;
 
-	CI18N::readTextFile(filename, doc, false, false, true, CI18N::LINE_FMT_LF);
+	CI18N::readTextFile(filename, doc, false, true, CI18N::LINE_FMT_LF);
 
 	return readPhraseFileFromString(doc, filename, phrases, forceRehash);
 }
@@ -416,9 +416,14 @@ bool readPhraseFileFromString(ucstring const& doc, const std::string &filename, 
 						phrase.Clauses.size()+1);
 					return false;
 				}
-				clause.Conditions += "(" + cond + ") ";
+
+				// only prepend a space if required
+				if (!clause.Conditions.empty()) clause.Conditions += " ";
+
+				clause.Conditions += "(" + cond + ")";
 				CI18N::skipWhiteSpace(first, last, &clause.Comments);
 			}
+
 			if (first == last)
 			{
 				nlwarning("DT: in '%s': Found end of file in non closed block for phrase %s\n",
@@ -626,7 +631,7 @@ bool loadExcelSheet(const string filename, TWorksheet &worksheet, bool checkUniq
 	fp.close();
 
 	ucstring str;
-	CI18N::readTextFile(filename, str, false, false, false, CI18N::LINE_FMT_LF);
+	CI18N::readTextFile(filename, str, false, false, CI18N::LINE_FMT_LF);
 
 	if (!readExcelSheet(str, worksheet, checkUnique))
 		return false;

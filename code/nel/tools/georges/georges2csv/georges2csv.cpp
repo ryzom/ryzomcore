@@ -550,7 +550,7 @@ void executeScriptBuf(const string &text)
 void executeScriptFile(const string &filename)
 {
 	ucstring	temp;
-	CI18N::readTextFile(filename, temp, false, false, false);
+	CI18N::readTextFile(filename, temp, false, false);
 
 	if (temp.empty())
 	{

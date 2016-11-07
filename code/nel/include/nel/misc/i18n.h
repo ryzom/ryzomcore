@@ -144,12 +144,10 @@ public:
 	 *	16 bits encoding can be recognized by the official header :
 	 *	FF, FE, witch can be reversed if the data are MSB first.
 	 *
-	 *	Optionally, you can force the reader to consider the file as
-	 *	UTF-8 encoded.
 	 *	Optionally, you can ask the reader to interpret #include commands.
 	 */
 	static void readTextFile(const std::string &filename,
-								ucstring &result, bool forceUtf8 = false,
+								ucstring &result,
 								bool fileLookup = true,
 								bool preprocess = false,
 								TLineFormat lineFmt = LINE_FMT_NO_CARE,
@@ -259,7 +257,7 @@ private:
 
 	/// The internal read function, it does the real job of readTextFile
 	static void _readTextFile(const std::string &filename,
-								ucstring &result, bool forceUtf8,
+								ucstring &result,
 								bool fileLookup,
 								bool preprocess,
 								TLineFormat lineFmt,

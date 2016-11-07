@@ -98,6 +98,10 @@ int main(int argc, char *argv[])
 	QApplication::setApplicationVersion(RYZOM_VERSION);
 	QApplication::setWindowIcon(QIcon(":/icons/ryzom.ico"));
 
+	// remove first argument because it's not really an argument
+	QStringList args = QApplication::arguments();
+	args.removeFirst();
+
 	QLocale locale = QLocale::system();
 
 	// load application translations
@@ -199,7 +203,7 @@ int main(int argc, char *argv[])
 			nlinfo("Launching %s", Q2C(tempFile));
 
 			// launch copy in TEMP directory with same arguments
-			if (QProcess::startDetached(tempFile, QApplication::arguments())) return 0;
+			if (QProcess::startDetached(tempFile, args, tempPath)) return 0;
 
 			nlwarning("Unable to launch %s", Q2C(tempFile));
 		}
@@ -309,7 +313,7 @@ int main(int argc, char *argv[])
 		QFile::setPermissions(config.getInstallerInstalledFilePath(), QFile::permissions(config.getInstallerInstalledFilePath()) | QFile::ExeGroup | QFile::ExeUser | QFile::ExeOther);
 #endif
 
-		if (QProcess::startDetached(config.getInstallerInstalledFilePath())) return 0;
+		if (QProcess::startDetached(config.getInstallerInstalledFilePath(), args, config.getInstallationDirectory())) return 0;
 
 		nlwarning("Unable to restart Installer %s", Q2C(config.getInstallerInstalledFilePath()));
 #endif
