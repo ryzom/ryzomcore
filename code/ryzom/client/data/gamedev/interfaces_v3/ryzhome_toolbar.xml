@@ -1,5 +1,7 @@
 <interface_config>
-webig_ryzhome_list_item<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+<root id="interface" x="0" y="0" w="800" h="600" active="true" />
+
+ <lua file="ryzhome_toolbar.lua" />
 
  <style style="button_over"
 	type="button"

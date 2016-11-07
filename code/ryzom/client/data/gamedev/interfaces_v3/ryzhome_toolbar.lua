@@ -1,17 +1,8 @@
-
-if getUI("ui:interface:webig_ryzhome_toolbar") == nil then
-	local f = io.open("user/ryzhome_toolbar.xml", "r")
-	local xml = f:read("*a")
-	parseInterfaceFromString(xml)
-end
-
-if RyzhomeBar == nil then
-	RyzhomeBar = {
-		id = "ui:interface:webig_ryzhome_toolbar",
-		saveuri = "http://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
-		selectedPage = 1
-	}
-end
+RyzhomeBar = {
+	id = "ui:interface:webig_ryzhome_toolbar",
+	saveuri = "http://app.ryzom.com/app_ryzhome/index.php?action=toolbar_save",
+	selectedPage = 1
+}
 
 function RyzhomeBar:close()
 	getUI("ui:interface:webig_ryzhome_toolbar").active=false
@@ -112,7 +103,7 @@ function RyzhomeBar:listItems()
 	RyzhomeBar.recently_removed_item = false
 
 	local framewin = getUI("ui:interface:webig_ryzhome_list_item")
-	framewin.opened=true
+	--framewin.opened=true
 	framewin.active=true
 	if framewin.x == 0 and framewin.y == 0 then
 		local ui = getUI("ui:interface")
