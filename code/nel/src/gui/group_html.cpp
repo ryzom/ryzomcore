@@ -2444,6 +2444,7 @@ namespace NLGUI
 				}
 				break;
 			case HTML_OPTION:
+				if (!(_Forms.empty()) && !(_Forms.back().Entries.empty()))
 				{
 					// insert the parsed text into the select control
 					CDBGroupComboBox *cb = _Forms.back().Entries.back().ComboBox;
