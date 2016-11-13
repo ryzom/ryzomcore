@@ -401,7 +401,7 @@ void CDownloader::onDownloadFinished()
 
 			emit downloadDone();
 		}
-		else if (status == 206)
+		else if (status >= 200 && status < 300)
 		{
 			if (m_listener) m_listener->operationContinue();
 		}
