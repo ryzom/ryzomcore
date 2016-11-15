@@ -49,13 +49,13 @@ public:
 	  * This file will try to open the file ligo class description file (XML) using the LigoClass as file name.
 	  * It will try first to load directly the file and then to lookup the file in NLMISC::CPath.
 	  */
-	bool readConfigFile (const char *fileName, bool parsePrimitiveComboContent);
+	bool readConfigFile (const std::string &fileName, bool parsePrimitiveComboContent);
 
 	/**
 	  * This file will read the file ligo class description file (XML) using the LigoClass as file name.
 	  * It will try first to load directly the file and then to lookup the file in NLMISC::CPath.
 	  */
-	bool readPrimitiveClass (const char *fileName, bool parsePrimitiveComboContent);
+	bool readPrimitiveClass (const std::string &fileName, bool parsePrimitiveComboContent);
 
 	bool reloadIndexFile(const std::string &indexFileName = std::string());
 
@@ -100,7 +100,7 @@ public:
 	/// Build a standard human readable alias string
 	std::string			aliasToString(uint32 fullAlias);
 	/// Read a standard human readable alias string
-	uint32				aliasFromString(std::string fullAlias);
+	uint32				aliasFromString(const std::string &fullAlias);
 
 
 	// Get a primitive class
