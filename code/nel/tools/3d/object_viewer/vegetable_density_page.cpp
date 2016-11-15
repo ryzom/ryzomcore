@@ -223,7 +223,7 @@ void		CVegetableDensityPage::updateViewAngleMax()
 void		CVegetableDensityPage::updateAngleMinFromEditText()
 {
 	// get angles edited.
-	char	stmp[256];
+	TCHAR	stmp[256];
 	AngleMinEdit.GetWindowText(stmp, 256);
 	float	angleMin;
 	NLMISC::fromString(stmp, angleMin);
@@ -247,7 +247,7 @@ void		CVegetableDensityPage::updateAngleMinFromEditText()
 void		CVegetableDensityPage::updateAngleMaxFromEditText()
 {
 	// get angles edited.
-	char	stmp[256];
+	TCHAR	stmp[256];
 	AngleMaxEdit.GetWindowText(stmp, 256);
 	float	angleMax;
 	NLMISC::fromString(stmp, angleMax);
@@ -320,7 +320,7 @@ BOOL CVegetableDensityPage::OnInitDialog()
 
 	
 	// Init ShapeName
-	StaticVegetableShape.SetWindowText("");
+	StaticVegetableShape.SetWindowText(_T(""));
 
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -477,12 +477,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 void CVegetableDensityPage::OnChangeEditAngleMin() 
@@ -515,8 +515,9 @@ void CVegetableDensityPage::OnChangeEditAngleMax()
 // ***************************************************************************
 void CVegetableDensityPage::OnButtonVegetableBrowse() 
 {
-	CFileDialog fd(TRUE, "veget", "*.veget", 0, NULL, this) ;
-	fd.m_ofn.lpstrTitle= "Open Vegetable Shape";
+	CFileDialog fd(TRUE, _T("veget"), _T("*.veget"), 0, NULL, this) ;
+	fd.m_ofn.lpstrTitle = _T("Open Vegetable Shape");
+
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path

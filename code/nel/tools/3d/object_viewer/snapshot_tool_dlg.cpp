@@ -42,7 +42,7 @@
 
 
 
-#define NEL_OV_SNAPSHOT_TOOL_REGKEY "Software\\Nevrax\\nel\\object_viewer\\snapshot_dlg"
+#define NEL_OV_SNAPSHOT_TOOL_REGKEY _T("Software\\Nevrax\\nel\\object_viewer\\snapshot_dlg")
 
 
 using namespace NLMISC;

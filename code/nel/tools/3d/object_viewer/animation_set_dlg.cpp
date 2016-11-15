@@ -81,12 +81,12 @@ void CAnimationSetDlg::OnAddAnimation ()
 	if (instance != 0xffffffff)
 	{
 		// Create a dialog
-		static char BASED_CODE szFilter[] = 
-			"NeL Animation Files (*.anim)\0*.anim\0"
-			"All Files (*.*)\0*.*\0\0";
+		static TCHAR BASED_CODE szFilter[] = 
+			_T("NeL Animation Files (*.anim)\0*.anim\0")
+			_T("All Files (*.*)\0*.*\0\0");
 
 		// Filename buffer
-		char buffer[65535];
+		TCHAR buffer[65535];
 		buffer[0]=0;
 
 		OPENFILENAME openFile;
@@ -98,7 +98,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 		openFile.lpstrFile = buffer;
 		openFile.nMaxFile = 65535;
 		openFile.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT|OFN_ENABLESIZING|OFN_EXPLORER;
-		openFile.lpstrDefExt = "*.anim";
+		openFile.lpstrDefExt = _T("*.anim");
 		
 
 		if (GetOpenFileName(&openFile))
@@ -107,7 +107,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 			try
 			{
 				// Filename pointer
-				char *c=buffer;
+				TCHAR *c=buffer;
 
 				// Read the path
 				CString path = buffer;

@@ -336,13 +336,13 @@ void		CVegetableDlg::clearVegetables()
 
 
 // ***************************************************************************
-bool		CVegetableDlg::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const char *title)
+bool		CVegetableDlg::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const TCHAR *title)
 {
 	vegetSet.clear();
 	bool	ok= false;
 
-	CFileDialog fd(TRUE, ".vegetset", "*.vegetset", 0, NULL, this) ;
-	fd.m_ofn.lpstrTitle= title;
+	CFileDialog fd(TRUE, _T(".vegetset"), _T("*.vegetset"), 0, NULL, this) ;
+	fd.m_ofn.lpstrTitle = title;
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::CIFile	f;
@@ -361,13 +361,13 @@ bool		CVegetableDlg::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const 
 			catch(NLMISC::EStream &)
 			{
 				ok= false;
-				MessageBox("Failed to load file!");
+				MessageBox(_T("Failed to load file!"));
 			}
 		}
 		else
 		{
 			ok= false;
-			MessageBox("Failed to open file!");
+			MessageBox(_T("Failed to open file!"));
 		}
 	}
 
@@ -540,7 +540,7 @@ void CVegetableDlg::OnButtonVegetableClear()
 	if(_Vegetables.size()==0)
 		return;
 
-	if( MessageBox("Clear all the list?", "Clear List", MB_OKCANCEL | MB_ICONWARNING | MB_APPLMODAL)==IDOK )
+	if( MessageBox(_T("Clear all the list?"), _T("Clear List"), MB_OKCANCEL | MB_ICONWARNING | MB_APPLMODAL)==IDOK )
 	{
 		clearVegetables();
 
@@ -605,8 +605,8 @@ void CVegetableDlg::OnButtonVegetableRemove()
 // ***************************************************************************
 void CVegetableDlg::OnButtonVegetableLoadDesc() 
 {
-	CFileDialog fd(TRUE, ".vegetdesc", "*.vegetdesc", 0, NULL, this) ;
-	fd.m_ofn.lpstrTitle= "Open Vegetable Descriptor";
+	CFileDialog fd(TRUE, _T(".vegetdesc"), _T("*.vegetdesc"), 0, NULL, this) ;
+	fd.m_ofn.lpstrTitle = _T("Open Vegetable Descriptor");
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::CIFile	f;
@@ -631,12 +631,12 @@ void CVegetableDlg::OnButtonVegetableLoadDesc()
 			}
 			catch(NLMISC::EStream &)
 			{
-				MessageBox("Failed to load file!");
+				MessageBox(_T("Failed to load file!"));
 			}
 		}
 		else
 		{
-			MessageBox("Failed to open file!");
+			MessageBox(_T("Failed to open file!"));
 		}
 	}
 
@@ -666,12 +666,12 @@ void CVegetableDlg::OnButtonVegetableSaveDesc()
 				}
 				catch(NLMISC::EStream &)
 				{
-					MessageBox("Failed to save file!");
+					MessageBox(_T("Failed to save file!"));
 				}
 			}
 			else
 			{
-				MessageBox("Failed to open file for write!");
+				MessageBox(_T("Failed to open file for write!"));
 			}
 		}
 	}
@@ -684,7 +684,7 @@ void CVegetableDlg::OnButtonVegetableLoadSet()
 {
 	NL3D::CTileVegetableDesc	vegetSet;
 	// if succes to load the vegetSet
-	if(loadVegetableSet(vegetSet, "Load Vegetable Set"))
+	if(loadVegetableSet(vegetSet, _T("Load Vegetable Set")))
 	{
 		// Delete all vegetables.
 		clearVegetables();
@@ -702,7 +702,7 @@ void CVegetableDlg::OnButtonVegetableAppendSet()
 {
 	NL3D::CTileVegetableDesc	vegetSet;
 	// if succes to load the vegetSet
-	if(loadVegetableSet(vegetSet, "Append Vegetable Set"))
+	if(loadVegetableSet(vegetSet, _T("Append Vegetable Set")))
 	{
 		// Do not Delete any vegetables.
 		// build them from list.
@@ -737,12 +737,12 @@ void CVegetableDlg::OnButtonVegetableSaveSet()
 			}
 			catch(NLMISC::EStream &)
 			{
-				MessageBox("Failed to save file!");
+				MessageBox(_T("Failed to save file!"));
 			}
 		}
 		else
 		{
-			MessageBox("Failed to open file for write!");
+			MessageBox(_T("Failed to open file for write!"));
 		}
 	}
 	

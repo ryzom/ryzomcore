@@ -304,7 +304,7 @@ void CWaterPoolEditor::OnAddPool()
 	{
 		if (_Wpm->hasPool(cpi.PoolID) )
 		{
-			MessageBox("Pool already exists", "error");
+			MessageBox(_T("Pool already exists"), _T("error"));
 		}
 		else
 		{
@@ -324,7 +324,7 @@ void CWaterPoolEditor::OnDeletePool()
 	UpdateData();
 	if (m_PoolList.GetCount() == 1)
 	{
-		MessageBox("Must have at least one water pool", "error");
+		MessageBox(_T("Must have at least one water pool"), _T("error"));
 	}
 	else
 	{
@@ -350,8 +350,8 @@ void CWaterPoolEditor::OnSelchangeMapSize()
 
 void CWaterPoolEditor::OnLoadPool() 
 {	
-	static char BASED_CODE szFilter[] = "NeL Water Pool Files (*.wpf)|*.wpf||";
-	CFileDialog fileDlg( TRUE, ".wpf", "*.wpf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Water Pool Files (*.wpf)|*.wpf||");
+	CFileDialog fileDlg( TRUE, _T(".wpf"), _T("*.wpf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{				
 		try
@@ -388,8 +388,8 @@ void CWaterPoolEditor::OnLoadPool()
 
 void CWaterPoolEditor::OnSavePool() 
 {
-	static char BASED_CODE szFilter[] = "NeL Water Pool Files (*.wpf)|*.wpf||";
-	CFileDialog fileDlg( TRUE, ".wpf", "*.wpf", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL Water Pool Files (*.wpf)|*.wpf||");
+	CFileDialog fileDlg( TRUE, _T(".wpf"), _T("*.wpf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{				
 		try

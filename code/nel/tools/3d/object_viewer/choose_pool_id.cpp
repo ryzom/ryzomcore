@@ -60,7 +60,7 @@ void CChoosePoolID::OnOK()
 	}
 	else
 	{
-		MessageBox("Invalid value", "error", MB_OK);
+		MessageBox(_T("Invalid value"), _T("error"), MB_OK);
 	}
 }
 

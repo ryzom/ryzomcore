@@ -833,7 +833,7 @@ void CSkeletonScaleDlg::OnSsdButtonSave()
 	}
 	else
 	{
-		MessageBox("Failed to open file for write!");
+		MessageBox(_T("Failed to open file for write!"));
 	}
 }
 
@@ -866,7 +866,7 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 		}
 		else
 		{
-			MessageBox("Failed to open file for write!");
+			MessageBox(_T("Failed to open file for write!"));
 		}
 	}
 }
@@ -907,7 +907,7 @@ bool CSkeletonScaleDlg::saveCurrentInStream(NLMISC::IStream &f)
 	}
 	catch(NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 

@@ -203,7 +203,7 @@ void CVegetableNoiseValueDlg::OnReleasedcaptureSliderVegetableScaleNoise(NMHDR* 
 	// And reset 
 	SliderNoiseValue.SetPos(NL_VEGETABLE_EDIT_SLIDER_NVS_SIZE/2);
 	_EnteringScalerSlider= false;
-	StaticScaleMarker.SetWindowText("100%");
+	StaticScaleMarker.SetWindowText(_T("100%"));
 	
 	// Must update display.
 	_VegetableRefresh->refreshVegetableDisplay();

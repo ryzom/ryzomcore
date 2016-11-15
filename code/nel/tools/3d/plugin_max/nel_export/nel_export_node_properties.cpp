@@ -2332,11 +2332,11 @@ INT_PTR CALLBACK MiscDialogCallback (
 					break;
 					case IDOK:
 						{
-							currentParam->FloatingObject=SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
+							currentParam->FloatingObject = SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
 
 							// Ligoscape
 							currentParam->LigoSymmetry = SendMessage (GetDlgItem (hwndDlg, IDC_LIGO_SYMMETRY), BM_GETCHECK, 0, 0);
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), tmp, 512);
 							currentParam->LigoRotate = tmp;
 
@@ -2365,7 +2365,7 @@ INT_PTR CALLBACK MiscDialogCallback (
 							// Skeleton Scale
 							currentParam->ExportBoneScale= SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), tmp, 512);
-							currentParam->ExportBoneScaleNameExt= tmp;
+							currentParam->ExportBoneScaleNameExt = wideToUtf8(tmp);
 
 							// remanence
 							currentParam->UseRemanence = SendMessage (GetDlgItem (hwndDlg, IDC_USE_REMANENCE), BM_GETCHECK, 0, 0);

@@ -22,11 +22,11 @@
 // CChooseName dialog
 
 
-CChooseName::CChooseName(const char *initialName, CWnd* pParent /*=NULL*/)
+CChooseName::CChooseName(const TCHAR *initialName, CWnd* pParent /*=NULL*/)
 	: CDialog(CChooseName::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CChooseName)
-	m_Name = _T(initialName);
+	m_Name = initialName;
 	//}}AFX_DATA_INIT
 }
 

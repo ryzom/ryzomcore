@@ -36,15 +36,15 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet = false;
-	char tempFileName[MAX_PATH] = { 0 };  
-	char tempPathBuffer[MAX_PATH] = { 0 };
+	TCHAR tempFileName[MAX_PATH] = { 0 };  
+	TCHAR tempPathBuffer[MAX_PATH] = { 0 };
 	
 	try
 	{		
-		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
+		DWORD dwRetVal = GetTempPath(MAX_PATH, tempPathBuffer);
 		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
 			nlerror("GetTempPath failed");
-		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
+		UINT uRetVal = GetTempFileName(tempPathBuffer, _T("_nel_export_mesh_"), 0, tempFileName);
 		if (uRetVal == 0)
 			nlerror("GetTempFileName failed");
 
