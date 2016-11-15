@@ -3080,12 +3080,11 @@ int injectClause()
 			vector<TClause>::iterator lastClause( first->Clauses.end());
 			for ( ; firstClause != lastClause; ++firstClause)
 			{
-				uint64 hashValue = CI18N::makeHash(firstClause->Text);
 				vector<TStringInfo>::iterator firstRefClause(clauses.begin());
 				vector<TStringInfo>::iterator lastRefClause(clauses.end());
 				for ( ; firstRefClause != lastRefClause ; ++firstRefClause)
 				{
-					if (hashValue == firstRefClause->HashValue && firstClause->Text != firstRefClause->Text)
+					if (firstClause->Identifier == firstRefClause->Identifier && firstClause->Text != firstRefClause->Text)
 					{
 						firstClause->Text = firstRefClause->Text;
 						firstClause->HashValue = CI18N::makeHash(firstClause->Text);
