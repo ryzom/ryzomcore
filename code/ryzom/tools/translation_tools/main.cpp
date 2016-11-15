@@ -3073,9 +3073,9 @@ int injectClause()
 
 		vector<TPhrase>::iterator first(phrases.begin());
 		vector<TPhrase>::iterator last(phrases.end());
+
 		for ( ; first != last; ++first)
 		{
-
 			vector<TClause>::iterator firstClause( first->Clauses.begin());
 			vector<TClause>::iterator lastClause( first->Clauses.end());
 			for ( ; firstClause != lastClause; ++firstClause)
@@ -3091,7 +3091,6 @@ int injectClause()
 						firstClause->HashValue = CI18N::makeHash(firstClause->Text);
 						firstRefClause->HashValue = firstClause->HashValue;
 
-
 						nlinfo("update clause %s from clause file %s.", firstClause->Identifier.c_str(), clausePath.c_str());
 					}
 				}
@@ -3106,7 +3105,6 @@ int injectClause()
 		str = prepareStringFile(clauses, true);
 		CI18N::writeTextFile(desDir + clausePath, str);
 	}
-
 
 	return 0;
 }
