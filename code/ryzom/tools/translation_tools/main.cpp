@@ -383,7 +383,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 				nlassertex(diffInfo.Index2 < strings.size(), ("Index %u out of max Range %u", diffInfo.Index2, strings.size()));
 				swap(strings[diffInfo.Index1], strings[diffInfo.Index2]);
 				// remove the swap from the comments
-				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+2);
+				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+nl.length());
 				if (!diff[j].Comments.empty())
 					j--;
 				break;
