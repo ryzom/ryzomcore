@@ -18,6 +18,8 @@ NL_DEFAULT_PROPS(nel_patch_edit "MAX Plugin: NeL Patch Editor")
 NL_ADD_RUNTIME_FLAGS(nel_patch_edit)
 NL_ADD_LIB_SUFFIX(nel_patch_edit)
 
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+
 IF(WITH_PCH)
   ADD_NATIVE_PRECOMPILED_HEADER(nel_patch_edit ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.cpp)
 ENDIF()

@@ -19,7 +19,9 @@ SET_TARGET_PROPERTIES(ligoscape_utility PROPERTIES SUFFIX ".dlx")
 NL_DEFAULT_PROPS(ligoscape_utility "MAX Plugin: Ligoscape Utility")
 NL_ADD_RUNTIME_FLAGS(ligoscape_utility)
 NL_ADD_LIB_SUFFIX(ligoscape_utility)
-  
+
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+
 INSTALL(TARGETS ligoscape_utility RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 INSTALL(FILES ligoscript.txt DESTINATION maxplugin/docs)
 INSTALL(DIRECTORY scripts/

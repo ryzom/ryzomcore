@@ -18,4 +18,6 @@ NL_DEFAULT_PROPS(nel_patch_converter "MAX Plugin: NeL Patch Converter")
 NL_ADD_RUNTIME_FLAGS(nel_patch_converter)
 NL_ADD_LIB_SUFFIX(nel_patch_converter)
 
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+
 INSTALL(TARGETS nel_patch_converter RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
