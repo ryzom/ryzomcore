@@ -127,14 +127,14 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	col.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
 	col.fmt = LVCFMT_LEFT;
 	col.cx = 140;
-	col.pszText = "bank names";
-	col.cchTextMax = sizeof("bank names");
+	col.pszText = _T("bank names");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(0, &col);
 
 	col.fmt = LVCFMT_RIGHT;
 	col.cx = 50;
-	col.pszText = "size";
-	col.cchTextMax = sizeof("size");
+	col.pszText = _T("size");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(1, &col);
 
 }
