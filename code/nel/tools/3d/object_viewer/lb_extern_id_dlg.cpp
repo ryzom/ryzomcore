@@ -55,10 +55,10 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CLBExternIDDlg message handlers
 
-BOOL CLBExternIDDlg::OnInitDialog() 
+BOOL CLBExternIDDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-		
+
 	GetDlgItem(IDC_ID_VALUE)->EnableWindow(_ID != 0);
 	((CButton *) GetDlgItem(IDC_ENABLE_EXTERN_ID))->SetCheck(_ID != 0 ? 1 : 0);
 
@@ -70,17 +70,17 @@ BOOL CLBExternIDDlg::OnInitDialog()
 			#ifdef NL_LITTLE_ENDIAN
 				val[k] = (unsigned char) (_ID >> ((3 - k) << 3));
 			#else
-				val[k] = (unsigned char) (_ID >> (k << 3));				
+				val[k] = (unsigned char) (_ID >> (k << 3));
 			#endif
 		}
-		val[4] = '\0';		
+		val[4] = '\0';
 		GetDlgItem(IDC_ID_VALUE)->SetWindowText(val);
 
 	}
 	else
 	{
 		_ID = 0;
-	}	
+	}
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -90,14 +90,14 @@ static uint32 StringToID(const char *buf)
 {
 	uint32 id;
 	#ifdef NL_LITTLE_ENDIAN
-		id = ((uint32) buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3]);		
+		id = ((uint32) buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | (buf[3]);
 	#else
-		id = *(uint32 *) buf;		
+		id = *(uint32 *) buf;
 	#endif
 	return id;
 }
 
-void CLBExternIDDlg::OnEnableExternId() 
+void CLBExternIDDlg::OnEnableExternId()
 {
 	if (_ID == 0)
 	{
@@ -110,11 +110,11 @@ void CLBExternIDDlg::OnEnableExternId()
 		GetDlgItem(IDC_ID_VALUE)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ID_VALUE)->SetWindowText("");		
 		_ID = 0;
-	}		
+	}
 }
 
-void CLBExternIDDlg::OnChangeIdValue() 
-{	
+void CLBExternIDDlg::OnChangeIdValue()
+{
 	if (!((CButton *) GetDlgItem(IDC_ENABLE_EXTERN_ID))->GetCheck()) return;
 	char buf[6];
 	::memset(buf, 0, 6);
@@ -133,7 +133,7 @@ void CLBExternIDDlg::OnChangeIdValue()
 	else
 	{
 		GetDlgItem(IDOK)->EnableWindow(FALSE);
-		GetDlgItem(IDC_ENABLE_EXTERN_ID)->EnableWindow(FALSE);	
+		GetDlgItem(IDC_ENABLE_EXTERN_ID)->EnableWindow(FALSE);
 	}
 
 }
