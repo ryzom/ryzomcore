@@ -225,8 +225,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			CStatic *s = new CStatic;
 			pushWnd(s);
 			_MotionBlurWnd.push_back(s);
-			s->Create("Fake motion blur coeff.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Fake motion blur coeff."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			mbc->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -239,7 +239,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			s = new CStatic;
 			pushWnd(s);
 			_MotionBlurWnd.push_back(s);
-			s->Create("Fake motion blur threshold.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fake motion blur threshold."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			mbc->GetClientRect(&rect);
@@ -262,8 +262,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			rc->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Radius cut.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Radius cut."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 
 
@@ -279,7 +279,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb segs", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Nb segs"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			snbs->GetClientRect(&rect);
@@ -293,7 +293,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			uvd->init(xPos + 140, yPos, this);
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture U factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Texture U factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -312,8 +312,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbf->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb fan lights :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Nb fan lights :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -327,7 +327,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbf->init(xPos + 140, yPos, this);
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Phase smoothnes:", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Phase smoothnes:"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -340,7 +340,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbfp->init(xPos + 140, yPos, this);
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Fan light speed :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fan light speed :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -353,7 +353,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbfp->init(xPos + 140, yPos, this);
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Fan light intensity:", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fan light intensity:"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -390,10 +390,10 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbs->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb segs :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
-			s->ShowWindow(SW_SHOW);	
-			
+			s->Create(_T("Nb segs :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
+			s->ShowWindow(SW_SHOW);
+
 			nbs->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 
@@ -475,8 +475,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			uvd->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture U factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Texture U factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -488,7 +488,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			uvd->init(xPos + 140, yPos, this);
 			s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture V factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Texture V factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
@@ -508,8 +508,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			sd->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Seg Duration :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Seg Duration :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			sd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -749,12 +749,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 //***************************************************************************************************************************
@@ -773,8 +773,8 @@ void CLocatedBindableDialog::updateZBias()
 		CString caption;
 		CString mess;
 		caption.LoadString(IDS_CAPTION_ERROR);
-		mess.LoadString(IDS_BAD_ZBIAS);				
-		m_ZBias.SetWindowText("0.00");
+		mess.LoadString(IDS_BAD_ZBIAS);
+		m_ZBias.SetWindowText(_T("0.00"));
 		MessageBox((LPCTSTR) mess, (LPCTSTR) caption, MB_ICONERROR);
 		NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable)->setZBias(0);
 		updateModifiedFlag();

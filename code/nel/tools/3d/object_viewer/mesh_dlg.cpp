@@ -90,7 +90,7 @@ void CMeshDlg::touchPSState()
 void CMeshDlg::OnBrowseShape() 
 {
 	
-	CFileDialog fd(TRUE, ".shape", "*.shape", 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
@@ -238,7 +238,7 @@ BOOL CMeshDlg::EnableWindow( BOOL bEnable)
 ///==================================================================
 void CMeshDlg::updateMeshErrorString()
 {
-	GetDlgItem(IDC_MESH_ERROR)->SetWindowText("");
+	GetDlgItem(IDC_MESH_ERROR)->SetWindowText(_T(""));
 	NL3D::CPSConstraintMesh *cm = dynamic_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 	if (!cm) return;
 	std::vector<sint> numVerts;

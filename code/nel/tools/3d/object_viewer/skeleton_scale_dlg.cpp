@@ -216,8 +216,8 @@ void		CSkeletonScaleDlg::setSkeletonToEdit(NL3D::CSkeletonModel *skel, const std
 	{
 		_ScaleSliders[i]->SetRange(0, NL_SSD_SLIDER_SIZE);
 		_ScaleSliders[i]->SetPos(NL_SSD_SLIDER_SIZE/2);
-		*_ScaleEdits[i]= "";
-		_StaticScaleMarkers[i]->SetWindowText("100%");
+		_ScaleEdits[i]->Empty();
+		_StaticScaleMarkers[i]->SetWindowText(_T("100%"));
 	}
 	// ensure no problem with scale and ALT-TAB
 	_SliderEdited= SidNone;
@@ -338,7 +338,7 @@ void		CSkeletonScaleDlg::onSliderReleased(TScaleId sid)
 	
 	// And reset the slider
 	_ScaleSliders[_SliderEdited]->SetPos(NL_SSD_SLIDER_SIZE/2);
-	_StaticScaleMarkers[_SliderEdited]->SetWindowText("100%");
+	_StaticScaleMarkers[_SliderEdited]->SetWindowText(_T("100%"));
 	_SliderEdited= SidNone;
 
 	// push an undo/redo only at release of slide. push the value of scale before slide
@@ -592,12 +592,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 
@@ -1236,7 +1236,7 @@ void CSkeletonScaleDlg::OnSsdButtonSaveScale()
 		}
 		else
 		{
-			MessageBox("Failed to open file for write!");
+			MessageBox(_T("Failed to open file for write!"));
 		}
 	}
 }
@@ -1262,7 +1262,7 @@ void CSkeletonScaleDlg::OnSsdButtonLoadScale()
 		}
 		else
 		{
-			MessageBox("Failed to open file for read!");
+			MessageBox(_T("Failed to open file for read!"));
 		}
 	}
 }
@@ -1309,7 +1309,7 @@ bool	CSkeletonScaleDlg::saveSkelScaleInStream(NLMISC::IStream &f)
 	}
 	catch(NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 	
@@ -1355,7 +1355,7 @@ bool	CSkeletonScaleDlg::loadSkelScaleFromStream(NLMISC::IStream &f)
 	}
 	catch(NLMISC::EStream &)
 	{
-		MessageBox("Failed to save file!");
+		MessageBox(_T("Failed to save file!"));
 		return false;
 	}
 	

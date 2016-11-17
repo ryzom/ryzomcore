@@ -178,7 +178,7 @@ void CSoundSystem::play(const string &soundName)
 		}
 		else
 		{
-			MessageBox(NULL, "Can't play the sound (perhaps it's contextual sound)", "warning", MB_OK|MB_ICONWARNING );			
+			MessageBox(NULL, _T("Can't play the sound (perhaps it's contextual sound)"), _T("warning"), MB_OK|MB_ICONWARNING );			
 		}
 	}	
 }
@@ -198,7 +198,7 @@ USource *CSoundSystem::create(const std::string &soundName)
 		}	
 		else
 		{
-			MessageBox(NULL, "Can't play the sound (perhaps it's contextual sound)", "warning", MB_OK|MB_ICONWARNING );			
+			MessageBox(NULL, _T("Can't play the sound (perhaps it's contextual sound)"), _T("warning"), MB_OK|MB_ICONWARNING );
 		}	return NULL;
 	}
 	return NULL;

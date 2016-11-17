@@ -109,7 +109,7 @@ void CSnapshotToolDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 //****************************************************************************************
-void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const char *name, CString &dest, const CString &defaultStr)
+void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString &dest, const CString &defaultStr)
 {	
 	DWORD type;
 	DWORD size;
@@ -132,7 +132,7 @@ void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const char *name, CString &
 
 
 //****************************************************************************************
-template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const char *name, T &dest, const U &defaultValue)
+template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const TCHAR *name, T &dest, const U &defaultValue)
 {	
 	if (hKey == 0)
 	{
@@ -163,8 +163,9 @@ void CSnapshotToolDlg::fromRegistry()
 {
 	HKEY hKey = 0;
 	RegOpenKeyEx(HKEY_CURRENT_USER, NEL_OV_SNAPSHOT_TOOL_REGKEY, 0, KEY_READ, &hKey);					
-	stringFromRegistry(hKey, "InputPath", m_InputPath, "");
-	stringFromRegistry(hKey, "OutputPath", m_OutputPath, "");
+	stringFromRegistry(hKey, _T("InputPath"), m_InputPath, "");
+	stringFromRegistry(hKey, _T("OutputPath"), m_OutputPath, "");
+
 	CString filters;
 	stringFromRegistry(hKey, "Filters", filters, "*.shape");
 	std::string stdFilters((LPCTSTR) filters);
@@ -176,19 +177,19 @@ void CSnapshotToolDlg::fromRegistry()
 		m_Filters.AddString(filterList[k].c_str());
 	}	
 	
-	integralTypeFromRegistry(hKey, "RecurseSubFolder", (int &) m_RecurseSubFolder, FALSE);
-	integralTypeFromRegistry(hKey, "DumpTextureSets", (int &) m_DumpTextureSets, TRUE);
-	integralTypeFromRegistry(hKey, "PostFixViewName", (int &) m_PostFixViewName, TRUE);
-	integralTypeFromRegistry(hKey, "ViewBack", (int &) m_ViewBack, FALSE);
-	integralTypeFromRegistry(hKey, "ViewBottom", (int &) m_ViewBottom, FALSE);
-	integralTypeFromRegistry(hKey, "ViewFront", (int &) m_ViewFront, TRUE);
-	integralTypeFromRegistry(hKey, "ViewLeft", (int &) m_ViewLeft, FALSE);
-	integralTypeFromRegistry(hKey, "ViewRight", (int &) m_ViewRight, FALSE);
-	integralTypeFromRegistry(hKey, "ViewTop", (int &) m_ViewTop, FALSE);
-	integralTypeFromRegistry(hKey, "OutputWidth", m_OutputWidth, 128);
-	integralTypeFromRegistry(hKey, "OutputHeight", m_OutputHeight, 128);	
-	integralTypeFromRegistry(hKey, "Format", m_Format, 0);
-	integralTypeFromRegistry(hKey, "OutputPathOption", m_OutputPathOption, 1);	
+	integralTypeFromRegistry(hKey, _T("RecurseSubFolder"), (int &) m_RecurseSubFolder, FALSE);
+	integralTypeFromRegistry(hKey, _T("DumpTextureSets"), (int &) m_DumpTextureSets, TRUE);
+	integralTypeFromRegistry(hKey, _T("PostFixViewName"), (int &) m_PostFixViewName, TRUE);
+	integralTypeFromRegistry(hKey, _T("ViewBack"), (int &) m_ViewBack, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewBottom"), (int &) m_ViewBottom, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewFront"), (int &) m_ViewFront, TRUE);
+	integralTypeFromRegistry(hKey, _T("ViewLeft"), (int &) m_ViewLeft, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewRight"), (int &) m_ViewRight, FALSE);
+	integralTypeFromRegistry(hKey, _T("ViewTop"), (int &) m_ViewTop, FALSE);
+	integralTypeFromRegistry(hKey, _T("OutputWidth"), m_OutputWidth, 128);
+	integralTypeFromRegistry(hKey, _T("OutputHeight"), m_OutputHeight, 128);
+	integralTypeFromRegistry(hKey, _T("Format"), m_Format, 0);
+	integralTypeFromRegistry(hKey, _T("OutputPathOption"), m_OutputPathOption, 1);
 	UpdateData(FALSE);
 	updateUIEnabledState();
 }
@@ -200,8 +201,8 @@ void CSnapshotToolDlg::toRegistry()
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, NEL_OV_SNAPSHOT_TOOL_REGKEY, &hKey)==ERROR_SUCCESS)
 	{		
-		RegSetValueEx(hKey, "InputPath", 0, REG_SZ, (unsigned char *) (LPCTSTR) m_InputPath, m_InputPath.GetLength() + 1);
-		RegSetValueEx(hKey, "OutputPath", 0, REG_SZ, (unsigned char *) (LPCTSTR) m_OutputPath, m_OutputPath.GetLength() + 1);
+		RegSetValueEx(hKey, _T("InputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_InputPath, m_InputPath.GetLength() + 1);
+		RegSetValueEx(hKey, _T("OutputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_OutputPath, m_OutputPath.GetLength() + 1);
 		CString filters;
 		for (uint k = 0; k < (uint) m_Filters.GetCount(); ++k)
 		{
@@ -210,7 +211,8 @@ void CSnapshotToolDlg::toRegistry()
 			m_Filters.GetText(k, filter);
 			filters += filter;			
 		}
-		RegSetValueEx(hKey, "Filters", 0, REG_SZ, (unsigned char *) (LPCTSTR) filters, filters.GetLength() + 1);
+
+		RegSetValueEx(hKey, _T("Filters"), 0, REG_SZ, (BYTE*) (LPCTSTR) filters, filters.GetLength() + 1);
 		DWORD recurseSubFolder = m_RecurseSubFolder;
 		DWORD dumpTextureSets = m_DumpTextureSets;
 		DWORD views [] = 
@@ -227,19 +229,19 @@ void CSnapshotToolDlg::toRegistry()
 		DWORD format = m_Format;
 		DWORD outputPathOption = m_OutputPathOption;
 		DWORD postFixViewName = m_PostFixViewName;
-		integralTypeFromRegistry(hKey, "PostFixViewName", (int &) m_PostFixViewName, TRUE);
-		RegSetValueEx(hKey, "ViewBack", 0, REG_DWORD, (const BYTE *) &m_ViewBack, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewBottom", 0, REG_DWORD, (const BYTE *) &m_ViewBottom, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewFront", 0, REG_DWORD, (const BYTE *) &m_ViewFront, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewLeft", 0, REG_DWORD, (const BYTE *) &m_ViewLeft, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewRight", 0, REG_DWORD, (const BYTE *) &m_ViewRight, sizeof(DWORD));
-		RegSetValueEx(hKey, "ViewTop", 0, REG_DWORD, (const BYTE *) &m_ViewTop, sizeof(DWORD));
-		RegSetValueEx(hKey, "RecurseSubFolder", 0, REG_DWORD, (const BYTE *) &recurseSubFolder, sizeof(DWORD));
-		RegSetValueEx(hKey, "DumpTextureSets", 0, REG_DWORD, (const BYTE *) &dumpTextureSets, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputWidth", 0, REG_DWORD, (const BYTE *) &width, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputHeight", 0, REG_DWORD, (const BYTE *) &height, sizeof(DWORD));		
-		RegSetValueEx(hKey, "Format", 0, REG_DWORD, (const BYTE *) &format, sizeof(DWORD));
-		RegSetValueEx(hKey, "OutputPathOption", 0, REG_DWORD, (const BYTE *) &outputPathOption, sizeof(DWORD));
+		integralTypeFromRegistry(hKey, _T("PostFixViewName"), (int &) m_PostFixViewName, TRUE);
+		RegSetValueEx(hKey, _T("ViewBack"), 0, REG_DWORD, (const BYTE *) &m_ViewBack, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewBottom"), 0, REG_DWORD, (const BYTE *) &m_ViewBottom, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewFront"), 0, REG_DWORD, (const BYTE *) &m_ViewFront, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewLeft"), 0, REG_DWORD, (const BYTE *) &m_ViewLeft, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewRight"), 0, REG_DWORD, (const BYTE *) &m_ViewRight, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("ViewTop"), 0, REG_DWORD, (const BYTE *) &m_ViewTop, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("RecurseSubFolder"), 0, REG_DWORD, (const BYTE *) &recurseSubFolder, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("DumpTextureSets"), 0, REG_DWORD, (const BYTE *) &dumpTextureSets, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputWidth"), 0, REG_DWORD, (const BYTE *) &width, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputHeight"), 0, REG_DWORD, (const BYTE *) &height, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("Format"), 0, REG_DWORD, (const BYTE *) &format, sizeof(DWORD));
+		RegSetValueEx(hKey, _T("OutputPathOption"), 0, REG_DWORD, (const BYTE *) &outputPathOption, sizeof(DWORD));
 	}
 }
 

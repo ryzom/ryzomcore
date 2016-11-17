@@ -22,24 +22,24 @@
 #endif // _MSC_VER > 1000
 
 
-#define REGKEY_OBJ_VIEW "Software\\Nevrax\\nel\\object_viewer"
-#define REGKEY_OBJ_VIEW_OPENGL_WND "Software\\Nevrax\\nel\\object_viewer\\opengl_wnd"
-#define REGKEY_OBJ_VIEW_SCENE_DLG "Software\\Nevrax\\nel\\object_viewer\\scene_dlg"
-#define REGKEY_OBJ_VIEW_ANIMATION_DLG "Software\\Nevrax\\nel\\object_viewer\\animation_dlg"
-#define REGKEY_OBJ_VIEW_ANIMATION_SET_DLG "Software\\Nevrax\\nel\\object_viewer\\animation_set_dlg"
-#define REGKEY_OBJ_VIEW_SLOT_DLG "Software\\Nevrax\\nel\\object_viewer\\slot_dlg"
-#define REGKEY_OBJ_PARTICLE_DLG "Software\\Nevrax\\nel\\object_viewer\\particle_dlg"
-#define REGKEY_OBJ_DAYNIGHT_DLG "Software\\Nevrax\\nel\\object_viewer\\daynight_dlg"
-#define REGKEY_OBJ_WATERPOOL_DLG "Software\\Nevrax\\nel\\object_viewer\\daynight_dlg"
-#define REGKEY_OBJ_VIEW_VEGETABLE_DLG "Software\\Nevrax\\nel\\object_viewer\\vegetable_dlg"
-#define REGKEY_OBJ_GLOBAL_WIND_DLG "Software\\Nevrax\\nel\\object_viewer\\global_wind_dlg"
-#define REGKEY_OBJ_SOUND_ANIM_DLG "Software\\Nevrax\\nel\\object_viewer\\sound_anim_dlg"
-#define REGKEY_OBJ_LIGHT_GROUP_DLG "Software\\Nevrax\\nel\\object_viewer\\light_group_dlg"
-#define REGKEY_CHOOSE_FRAME_DELAY_DLG "Software\\Nevrax\\nel\\object_viewer\\choose_frame_delay_dlg"
-#define REGKEY_CHOOSE_BG_COLOR_DLG "Software\\Nevrax\\nel\\object_viewer\\choose_bg_color_dlg"
-#define REGKEY_CHOOSE_SUN_COLOR_DLG "Software\\Nevrax\\nel\\object_viewer\\choose_sun_color_dlg"
-#define REGKEY_SKELETON_SCALE_DLG "Software\\Nevrax\\nel\\object_viewer\\skeleton_scale_dlg"
-#define REGKEY_TUNE_MRM_DLG "Software\\Nevrax\\nel\\object_viewer\\tune_mrm_dlg"
+#define REGKEY_OBJ_VIEW _T("Software\\Nevrax\\nel\\object_viewer")
+#define REGKEY_OBJ_VIEW_OPENGL_WND _T("Software\\Nevrax\\nel\\object_viewer\\opengl_wnd")
+#define REGKEY_OBJ_VIEW_SCENE_DLG _T("Software\\Nevrax\\nel\\object_viewer\\scene_dlg")
+#define REGKEY_OBJ_VIEW_ANIMATION_DLG _T("Software\\Nevrax\\nel\\object_viewer\\animation_dlg")
+#define REGKEY_OBJ_VIEW_ANIMATION_SET_DLG _T("Software\\Nevrax\\nel\\object_viewer\\animation_set_dlg")
+#define REGKEY_OBJ_VIEW_SLOT_DLG _T("Software\\Nevrax\\nel\\object_viewer\\slot_dlg")
+#define REGKEY_OBJ_PARTICLE_DLG _T("Software\\Nevrax\\nel\\object_viewer\\particle_dlg")
+#define REGKEY_OBJ_DAYNIGHT_DLG _T("Software\\Nevrax\\nel\\object_viewer\\daynight_dlg")
+#define REGKEY_OBJ_WATERPOOL_DLG _T("Software\\Nevrax\\nel\\object_viewer\\daynight_dlg")
+#define REGKEY_OBJ_VIEW_VEGETABLE_DLG _T("Software\\Nevrax\\nel\\object_viewer\\vegetable_dlg")
+#define REGKEY_OBJ_GLOBAL_WIND_DLG _T("Software\\Nevrax\\nel\\object_viewer\\global_wind_dlg")
+#define REGKEY_OBJ_SOUND_ANIM_DLG _T("Software\\Nevrax\\nel\\object_viewer\\sound_anim_dlg")
+#define REGKEY_OBJ_LIGHT_GROUP_DLG _T("Software\\Nevrax\\nel\\object_viewer\\light_group_dlg")
+#define REGKEY_CHOOSE_FRAME_DELAY_DLG _T("Software\\Nevrax\\nel\\object_viewer\\choose_frame_delay_dlg")
+#define REGKEY_CHOOSE_BG_COLOR_DLG _T("Software\\Nevrax\\nel\\object_viewer\\choose_bg_color_dlg")
+#define REGKEY_CHOOSE_SUN_COLOR_DLG _T("Software\\Nevrax\\nel\\object_viewer\\choose_sun_color_dlg")
+#define REGKEY_SKELETON_SCALE_DLG _T("Software\\Nevrax\\nel\\object_viewer\\skeleton_scale_dlg")
+#define REGKEY_TUNE_MRM_DLG _T("Software\\Nevrax\\nel\\object_viewer\\tune_mrm_dlg")
 
 
 
@@ -650,8 +650,8 @@ private:
 	void	drawNamedMatrix(const NLMISC::CMatrix &matrix, const std::string &name, NLMISC::CRGBA color, float textZOffset, float testSize);
 };
 
-void setRegisterWindowState (const CWnd *pWnd, const char* keyName);
-void getRegisterWindowState (CWnd *pWnd, const char* keyName, bool resize);
+void setRegisterWindowState (const CWnd *pWnd, const TCHAR* keyName);
+void getRegisterWindowState (CWnd *pWnd, const TCHAR* keyName, bool resize);
 
 /** display a localized message box. Caption an message text are retrieved from the string table
   * \param parentWindow    Pointer to initiator of the message box
@@ -661,7 +661,7 @@ void getRegisterWindowState (CWnd *pWnd, const char* keyName, bool resize);
   * \return				   Same value than ::MessageBox
   */
 int localizedMessageBox(HWND parentWindow, int messageStringID, int captionStringID, UINT nType);
-int localizedMessageBox(HWND parentWindow, const char *message, int captionStringID, UINT nType);
+int localizedMessageBox(HWND parentWindow, const TCHAR *message, int captionStringID, UINT nType);
 
 // Return a string from the string table
 CString getStrRsc(uint stringID);

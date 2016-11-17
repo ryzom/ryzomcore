@@ -165,7 +165,7 @@ void CParticleTreeCtrl::rebuildLocatedInstance(CParticleWorkspace::CNode &node)
 			CNodeType *newNt = new CNodeType(loc,  k);
 			_NodeTypes.push_back(newNt);
 			// bind located instance icon
-			InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,  "instance",  PSIconLocatedInstance,  PSIconLocatedInstance,  0,  0,  (LPARAM) newNt,  currLocated,  TVI_LAST);
+			InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,  _T("instance"),  PSIconLocatedInstance,  PSIconLocatedInstance,  0,  0,  (LPARAM) newNt,  currLocated,  TVI_LAST);
 		}
 		currLocated = GetNextItem(currLocated,  TVGN_NEXT);
 	}
@@ -995,8 +995,8 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 		case IDM_MERGE_PS:
 		{			
 			_ParticleDlg->StartStopDlg->stop();
-			static char BASED_CODE szFilter[] = "ps & shapes files(*.ps;*.shape)|*.ps; *.shape||";
-			CFileDialog fd( TRUE,  ".ps",  "*.ps;*.shape",  0,  szFilter);
+			static TCHAR BASED_CODE szFilter[] = _T("ps & shapes files(*.ps;*.shape)|*.ps; *.shape||");
+			CFileDialog fd( TRUE,  _T(".ps"),  _T("*.ps;*.shape"),  0,  szFilter);
 			
 			if (fd.DoModal() == IDOK)
 			{
@@ -1198,7 +1198,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 		}				
 		if (!nt->Loc->bind(toCreate))
 		{
-			MessageBox("The system is flagged with 'No max Nb steps',  or uses the preset 'Spell FX'. System must have finite duration. Can't add object. To solve this,  set a limited life time for the father.",  "Error",  MB_ICONEXCLAMATION);
+			MessageBox(_T("The system is flagged with 'No max Nb steps',  or uses the preset 'Spell FX'. System must have finite duration. Can't add object. To solve this,  set a limited life time for the father."), _T("Error"),  MB_ICONEXCLAMATION);
 			delete toCreate;
 			if (createLocAndBindable)
 			{			
@@ -1528,11 +1528,11 @@ std::string CParticleTreeCtrl::computeCaption(CParticleWorkspace &workspace)
 //****************************************************************************************************************
 void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 {
-	static const char BASED_CODE szFilter[] = "NeL Particle systems (*.ps)|*.ps||";
-	CFileDialog fd(TRUE,  ".ps",  "*.ps",  OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST,  szFilter,  this);	
+	static const TCHAR BASED_CODE szFilter[] = _T("NeL Particle systems (*.ps)|*.ps||");
+	CFileDialog fd(TRUE,  _T(".ps"), _T("*.ps"),  OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST,  szFilter,  this);	
 	const uint MAX_NUM_CHAR = 65536;
-	char filenamesBuf[MAX_NUM_CHAR];
-	strcpy(filenamesBuf, "*.ps");
+	TCHAR filenamesBuf[MAX_NUM_CHAR];
+	_tcscpy(filenamesBuf, _T("*.ps"));
 	fd.m_ofn.lpstrFile = filenamesBuf;
 	fd.m_ofn.nMaxFile = MAX_NUM_CHAR - 1;
 	if (fd.DoModal() == IDOK)
@@ -1744,7 +1744,7 @@ void CParticleTreeCtrl::OnBeginlabeledit(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				if (!nt->PS->isLoaded())
 				{
-					pEdit->SetWindowText("");
+					pEdit->SetWindowText(_T(""));
 					//localizedMessageBox(*this, IDS_CANT_CHANGE_PS_NAME, IDS_ERROR, MB_OK|MB_ICONEXCLAMATION);
 				}
 				else

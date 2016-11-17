@@ -210,7 +210,7 @@ void CStartStopParticleSystem::updateUIFromState()
 	if (!getCurrPS())
 	{	
 		GetDlgItem(IDC_ACTIVE_PS)->SetWindowText(getStrRsc(IDS_NO_ACTIVE_PS));
-		GetDlgItem(IDC_STICK_BONE)->SetWindowText("");
+		GetDlgItem(IDC_STICK_BONE)->SetWindowText(_T(""));
 		GetDlgItem(IDC_ENABLE_AUTO_COUNT)->EnableWindow(FALSE);
 		GetDlgItem(IDC_RESET_COUNT)->EnableWindow(FALSE);
 		((CButton *) GetDlgItem(IDC_ENABLE_AUTO_COUNT))->SetCheck(0);
@@ -235,7 +235,7 @@ void CStartStopParticleSystem::updateUIFromState()
 		}
 		else
 		{
-			GetDlgItem(IDC_STICK_BONE)->SetWindowText("");
+			GetDlgItem(IDC_STICK_BONE)->SetWindowText(_T(""));
 		}		
 		GetDlgItem(IDC_ACTIVE_PS)->SetWindowText(_ActiveNode->getFilename().c_str());
 		GetDlgItem(IDC_ENABLE_AUTO_COUNT)->EnableWindow(TRUE);

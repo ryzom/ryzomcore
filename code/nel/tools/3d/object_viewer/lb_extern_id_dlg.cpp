@@ -64,7 +64,7 @@ BOOL CLBExternIDDlg::OnInitDialog()
 
 	if (_ID)
 	{
-		char val[5];
+		TCHAR val[5];
 		for (uint k = 0; k < 4; ++k)
 		{
 			#ifdef NL_LITTLE_ENDIAN
@@ -102,13 +102,13 @@ void CLBExternIDDlg::OnEnableExternId()
 	if (_ID == 0)
 	{
 		GetDlgItem(IDC_ID_VALUE)->EnableWindow(TRUE);
-		_ID = StringToID("NONE");		
-		GetDlgItem(IDC_ID_VALUE)->SetWindowText("NONE");		
+		_ID = StringToID("NONE");
+		GetDlgItem(IDC_ID_VALUE)->SetWindowText(_T("NONE"));
 	}
 	else
 	{
 		GetDlgItem(IDC_ID_VALUE)->EnableWindow(FALSE);
-		GetDlgItem(IDC_ID_VALUE)->SetWindowText("");		
+		GetDlgItem(IDC_ID_VALUE)->SetWindowText(_T(""));
 		_ID = 0;
 	}
 }
@@ -116,15 +116,15 @@ void CLBExternIDDlg::OnEnableExternId()
 void CLBExternIDDlg::OnChangeIdValue()
 {
 	if (!((CButton *) GetDlgItem(IDC_ENABLE_EXTERN_ID))->GetCheck()) return;
-	char buf[6];
+	TCHAR buf[6];
 	::memset(buf, 0, 6);
 	GetDlgItem(IDC_ID_VALUE)->GetWindowText(buf, 6);
 	_ID = StringToID(buf);	
 	if (_ID)
 	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);
-		GetDlgItem(IDC_ENABLE_EXTERN_ID)->EnableWindow(TRUE);		
-		if (::strlen(buf) > 4)
+		GetDlgItem(IDC_ENABLE_EXTERN_ID)->EnableWindow(TRUE);
+		if (::_tcslen(buf) > 4)
 		{
 			buf[4] = '\0';
 			GetDlgItem(IDC_ID_VALUE)->SetWindowText(buf);

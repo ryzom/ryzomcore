@@ -46,9 +46,9 @@ CPSMoverDlg::CPSMoverDlg(CParticleWorkspace::CNode *ownerNode, CWnd *parent, NL3
 
 	const NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	
-	m_X.Format("%.3g", pos.x);
-	m_Y.Format("%.3g", pos.y);
-	m_Z.Format("%.3g", pos.z);
+	m_X.Format(_T("%.3g"), pos.x);
+	m_Y.Format(_T("%.3g"), pos.y);
+	m_Z.Format(_T("%.3g"), pos.z);
 
 	//{{AFX_DATA_INIT(CPSMoverDlg)
 	//}}AFX_DATA_INIT
@@ -84,9 +84,9 @@ void CPSMoverDlg::updatePosition(void)
 	UpdateData();
 	const NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	
-	m_X.Format("%.3g", pos.x);
-	m_Y.Format("%.3g", pos.y);
-	m_Z.Format("%.3g", pos.z);
+	m_X.Format(_T("%.3g"), pos.x);
+	m_Y.Format(_T("%.3g"), pos.y);
+	m_Z.Format(_T("%.3g"), pos.z);
 
 	UpdateData(FALSE);
 }
@@ -127,7 +127,7 @@ void CPSMoverDlg::OnUpdateXpos()
 	}
 	else
 	{
-		MessageBox("invalid entry", "error");
+		MessageBox(_T("invalid entry"), _T("error"));
 	}
 	UpdateData(FALSE);
 }
@@ -144,7 +144,7 @@ void CPSMoverDlg::OnUpdateYpos()
 	}
 	else
 	{
-		MessageBox("invalid entry", "error");
+		MessageBox(_T("invalid entry"), _T("error"));
 	}
 	UpdateData(FALSE);	
 }
@@ -161,7 +161,7 @@ void CPSMoverDlg::OnUpdateZpos()
 	}
 	else
 	{
-		MessageBox("invalid entry", "error");
+		MessageBox(_T("invalid entry"), _T("error"));
 	}
 	UpdateData(FALSE);	
 }
@@ -235,7 +235,7 @@ void CPSMoverDlg::createScaleControls(void)
 		_Scale->init(100 + xPos, yPos, this);
 
 		_ScaleText = new CStatic;
-		_ScaleText ->Create("Scale : ", SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
+		_ScaleText ->Create(_T("Scale : "), SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
 		_ScaleText ->ShowWindow(SW_SHOW);
 
 		_Scale->GetClientRect(&r);
@@ -254,7 +254,7 @@ void CPSMoverDlg::createScaleControls(void)
 		_XScale->GetClientRect(&r);
 
 		_XScaleText = new CStatic;
-		_XScaleText ->Create("x Scale : ", SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
+		_XScaleText ->Create(_T("x Scale : "), SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
 		_XScaleText ->ShowWindow(SW_SHOW);
 
 		yPos += r.bottom;
@@ -269,7 +269,7 @@ void CPSMoverDlg::createScaleControls(void)
 		
 
 		_YScaleText = new CStatic;
-		_YScaleText ->Create("y Scale : ", SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
+		_YScaleText ->Create(_T("y Scale : "), SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
 		_YScaleText ->ShowWindow(SW_SHOW);
 
 		yPos += r.bottom;
@@ -283,7 +283,7 @@ void CPSMoverDlg::createScaleControls(void)
 		_ZScale->GetClientRect(&r);
 		
 		_ZScaleText = new CStatic;
-		_ZScaleText ->Create("z Scale : ", SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
+		_ZScaleText ->Create(_T("z Scale : "), SS_LEFT, CRect(xPos, yPos + 10, xPos + 60, yPos + 32), this);
 		_ZScaleText ->ShowWindow(SW_SHOW);
 	}
 

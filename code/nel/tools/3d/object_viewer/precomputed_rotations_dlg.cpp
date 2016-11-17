@@ -133,7 +133,7 @@ void CPrecomputedRotationsDlg::OnUpdateMinRotSpeed()
 	}
 	else
 	{
-		MessageBox("invalid value !!");
+		MessageBox(_T("invalid value !!"));
 	}
 	UpdateData(FALSE);
 	updateModifiedFlag();
@@ -153,7 +153,7 @@ void CPrecomputedRotationsDlg::OnUpdateMaxRotSpeed()
 	}
 	else
 	{
-		MessageBox("invalid value !!");
+		MessageBox(_T("invalid value !!"));
 	}
 	UpdateData(FALSE);
 	updateModifiedFlag();
@@ -178,7 +178,7 @@ void CPrecomputedRotationsDlg::OnUpdateNbModels()
 	}
 	else
 	{
-		MessageBox("invalid value !!");
+		MessageBox(_T("invalid value !!"));
 	}
 	UpdateData(FALSE);
 	updateModifiedFlag();

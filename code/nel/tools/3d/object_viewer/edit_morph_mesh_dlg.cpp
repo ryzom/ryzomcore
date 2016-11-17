@@ -81,7 +81,7 @@ void CEditMorphMeshDlg::init(CWnd *pParent)
 //====================================================================
 bool CEditMorphMeshDlg::getShapeNameFromDlg(std::string &name)
 {
-	CFileDialog fd(TRUE, ".shape", "*.shape", 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path

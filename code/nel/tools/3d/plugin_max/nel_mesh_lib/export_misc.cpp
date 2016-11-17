@@ -1111,7 +1111,7 @@ static void restoreDecimalSeparator()
 
 
 ///=======================================================================
-float toFloatMax(const char *src)
+float toFloatMax(const TCHAR *src)
 {
 	float result = 0.f;
 	if (toFloatMax(src, result)) return result;
@@ -1119,7 +1119,7 @@ float toFloatMax(const char *src)
 }
 
 
-bool		toFloatMax(const char *src, float &dest)
+bool toFloatMax(const TCHAR *src, float &dest)
 {	
 	setDecimalSeparatorAsPoint();
 	std::string str(src);

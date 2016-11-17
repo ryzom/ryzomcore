@@ -683,7 +683,7 @@ END_MESSAGE_MAP()
 		{		
 			
 			CString out;
-			out.Format("%g",  Scheme->getValue(index) );
+			out.Format(_T("%g"),  Scheme->getValue(index) );
 			dc->TextOut(x + 10, y + 4, out);
 		}
 		CEditAttribDlg *newDialog(const std::string &id, IPSWrapperFloat *wrapper) 
@@ -896,7 +896,7 @@ END_MESSAGE_MAP()
 		{		
 			
 			CString out;
-			out.Format("%d",  Scheme->getValue(index) );
+			out.Format(_T("%d"),  Scheme->getValue(index) );
 			dc->TextOut(x + 10, y + 4, out);
 		}
 		CEditAttribDlg *newDialog(const std::string &id, IPSWrapperUInt *wrapper) 
@@ -1085,7 +1085,7 @@ END_MESSAGE_MAP()
 		{		
 			
 			CString out;
-			out.Format("%d",  Scheme->getValue(index) );
+			out.Format(_T("%d"),  Scheme->getValue(index) );
 			dc->TextOut(x + 10, y + 4, out);
 		}
 		CEditAttribDlg *newDialog(const std::string &id, IPSWrapper<sint32> *wrapper) 

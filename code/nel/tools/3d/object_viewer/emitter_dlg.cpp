@@ -129,11 +129,11 @@ void CEmitterDlg::OnSelchangeEmittedType()
 	{
 		if (_Emitter->getOwner()->getOwner()->getBehaviourType() == NL3D::CParticleSystem::SpellFX || _Emitter->getOwner()->getOwner()->getBypassMaxNumIntegrationSteps())
 		{		
-			MessageBox("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', and thus, should have a finite duration. This operation create a loop in the system, and so is forbidden.", "Error", MB_ICONEXCLAMATION);
+			MessageBox(_T("Can't perform operation : the system is flagged with 'No max nb steps' or uses the preset 'Spell FX', and thus, should have a finite duration. This operation create a loop in the system, and so is forbidden."), _T("Error"), MB_ICONEXCLAMATION);
 		}
 		else
 		{
-			MessageBox("Loops with emitters are forbidden.", "Error", MB_ICONEXCLAMATION);
+			MessageBox(_T("Loops with emitters are forbidden."), _T("Error"), MB_ICONEXCLAMATION);
 		}
 		initEmittedType();
 	}	
@@ -267,7 +267,7 @@ BOOL CEmitterDlg::OnInitDialog()
 
 		CStatic *s = new CStatic;
 		pushWnd(s);
-		s->Create("Radius :", SS_LEFT, CRect(posX, posY + 10 , posX + 70, posY + 32), this);
+		s->Create(_T("Radius :"), SS_LEFT, CRect(posX, posY + 10 , posX + 70, posY + 32), this);
 		s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 		s->ShowWindow(SW_SHOW);
 

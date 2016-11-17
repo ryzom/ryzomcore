@@ -289,7 +289,7 @@ void CVegetableCopyDlg::OnOK()
 	}
 	else
 	{
-		MessageBox("Select a  vegetable to copy first", "Error", MB_OK | MB_ICONWARNING);
+		MessageBox(_T("Select a  vegetable to copy first"), _T("Error"), MB_OK | MB_ICONWARNING);
 	}
 }
 

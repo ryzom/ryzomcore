@@ -198,8 +198,9 @@ void		CVegetableDensityPage::updateViewAngleMin()
 	sint	pos= (sint)(angle/(NLMISC::Pi/2) * NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	NLMISC::clamp(pos, -NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE, NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	AngleMinSlider.SetPos(pos);
-	char	stmp[256];
-	sprintf(stmp, "%.2f", (double)(angle*180/NLMISC::Pi));
+
+	CString	stmp;
+	stmp.Format(_T("%.2f"), (double)(angle*180/NLMISC::Pi));
 	AngleMinEdit.SetWindowText(stmp);
 }
 
@@ -213,8 +214,9 @@ void		CVegetableDensityPage::updateViewAngleMax()
 	sint	pos= (sint)(angle/(NLMISC::Pi/2) * NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	NLMISC::clamp(pos, -NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE, NL_VEGETABLE_EDIT_ANGLE_SLIDER_SIZE);
 	AngleMaxSlider.SetPos(pos);
-	char	stmp[256];
-	sprintf(stmp, "%.2f", (double)(angle*180/NLMISC::Pi));
+
+	CString	stmp;
+	stmp.Format(_T("%.2f"), (double)(angle * 180 / NLMISC::Pi));
 	AngleMaxEdit.SetWindowText(stmp);
 }
 

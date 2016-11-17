@@ -281,7 +281,7 @@ std::string CObjectViewer::getModulePath() const
 	HMODULE hModule = AfxGetInstanceHandle();
 	nlassert(hModule); // shouldn't be null now anymore in any case
 	nlassert(hModule != GetModuleHandle(NULL)); // if this is dll, the module handle can't be same as exe
-	char sModulePath[256];
+	TCHAR sModulePath[256];
 	int res = GetModuleFileName(hModule, sModulePath, 256); nlassert(res);
 	nldebug("Object viewer module path is '%s'", sModulePath);
 	_splitpath (sModulePath, SDrive, SDir, NULL, NULL);
@@ -654,7 +654,7 @@ bool CObjectViewer::initUI (HWND parent)
 
 	// Create the window
 	_MainFrame->CFrameWnd::Create (AfxRegisterWndClass(0, 0, NULL, hIcon), 
-		"NeL object viewer", 0x00cfc000, /*WS_OVERLAPPEDWINDOW,*/ CFrameWnd::rectDefault, parentWndPtr,
+		_T("NeL object viewer"), 0x00cfc000, /*WS_OVERLAPPEDWINDOW,*/ CFrameWnd::rectDefault, parentWndPtr,
 		MAKEINTRESOURCE(IDR_OBJECT_VIEWER_MENU), 0x00000300 /*WS_EX_ACCEPTFILES*/ /*|WS_EX_CLIENTEDGE*/);
 
 	// Detach the hwnd
@@ -1316,13 +1316,13 @@ void CObjectViewer::go ()
 			{
 				if(_VegetableLandscape != NULL)
 				{
-					char vegetMsgBar[1024];
-					sprintf (vegetMsgBar, "%d", _VegetableLandscape->Landscape.getNumVegetableFaceRendered());
+					CString vegetMsgBar;
+					vegetMsgBar.Format(_T("%u"), _VegetableLandscape->Landscape.getNumVegetableFaceRendered());
 					_VegetableDlg->StaticPolyCount.SetWindowText(vegetMsgBar);
 				}
 				else
 				{
-					_VegetableDlg->StaticPolyCount.SetWindowText("0");
+					_VegetableDlg->StaticPolyCount.SetWindowText(_T("0"));
 				}
 			}
 
@@ -1564,23 +1564,23 @@ void CObjectViewer::releaseUI ()
 
 // ***************************************************************************
 
-void setRegisterWindowState (const CWnd *pWnd, const char* keyName)
+void setRegisterWindowState (const CWnd *pWnd, const TCHAR* keyName)
 {
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, keyName, &hKey)==ERROR_SUCCESS)
 	{
 		RECT rect;
 		pWnd->GetWindowRect (&rect);
-		RegSetValueEx(hKey, "Left", 0, REG_DWORD, (LPBYTE)&rect.left, 4);
-		RegSetValueEx(hKey, "Right", 0, REG_DWORD, (LPBYTE)&rect.right, 4);
-		RegSetValueEx(hKey, "Top", 0, REG_DWORD, (LPBYTE)&rect.top, 4);
-		RegSetValueEx(hKey, "Bottom", 0, REG_DWORD, (LPBYTE)&rect.bottom, 4);
+		RegSetValueEx(hKey, _T("Left"), 0, REG_DWORD, (LPBYTE)&rect.left, 4);
+		RegSetValueEx(hKey, _T("Right"), 0, REG_DWORD, (LPBYTE)&rect.right, 4);
+		RegSetValueEx(hKey, _T("Top"), 0, REG_DWORD, (LPBYTE)&rect.top, 4);
+		RegSetValueEx(hKey, _T("Bottom"), 0, REG_DWORD, (LPBYTE)&rect.bottom, 4);
 	}
 }
 
 // ***************************************************************************
 
-void getRegisterWindowState (CWnd *pWnd, const char* keyName, bool resize)
+void getRegisterWindowState (CWnd *pWnd, const TCHAR* keyName, bool resize)
 {
 	HKEY hKey;
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, keyName, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
@@ -1588,10 +1588,10 @@ void getRegisterWindowState (CWnd *pWnd, const char* keyName, bool resize)
 		DWORD len=4;
 		DWORD type;
 		RECT rect;
-		RegQueryValueEx (hKey, "Left", 0, &type, (LPBYTE)&rect.left, &len);
-		RegQueryValueEx (hKey, "Right", 0, &type, (LPBYTE)&rect.right, &len);
-		RegQueryValueEx (hKey, "Top", 0, &type, (LPBYTE)&rect.top, &len);
-		RegQueryValueEx (hKey, "Bottom", 0, &type, (LPBYTE)&rect.bottom, &len);
+		RegQueryValueEx (hKey, _T("Left"), 0, &type, (LPBYTE)&rect.left, &len);
+		RegQueryValueEx (hKey, _T("Right"), 0, &type, (LPBYTE)&rect.right, &len);
+		RegQueryValueEx (hKey, _T("Top"), 0, &type, (LPBYTE)&rect.top, &len);
+		RegQueryValueEx (hKey, _T("Bottom"), 0, &type, (LPBYTE)&rect.bottom, &len);
 
 		// Set window pos
 		pWnd->SetWindowPos (NULL, rect.left, rect.top, rect.right-rect.left, rect.bottom-rect.top, SWP_NOOWNERZORDER|SWP_NOZORDER|
@@ -2380,7 +2380,7 @@ IObjectViewer* IObjectViewer::getInterface (int version)
 	// Check version number
 	if (version!=OBJECT_VIEWER_VERSION)
 	{
-		MessageBox (NULL, "Bad version of object_viewer.dll.", "NeL object viewer", MB_ICONEXCLAMATION|MB_OK);
+		MessageBox (NULL, _T("Bad version of object_viewer.dll."), _T("NeL object viewer"), MB_ICONEXCLAMATION|MB_OK);
 		return NULL;
 	}
 	else
@@ -2628,9 +2628,9 @@ void CObjectViewer::evalSoundTrack (float lastTime, float currentTime)
 					{
 						CEdit *edit = (CEdit*) _SoundAnimDlg->GetDlgItem(tab[i]);
 						nlassert(edit);
-						char str[1024];
+						TCHAR str[1024];
 						edit->GetLine(0, str, 1024);
-						SoundContext.Args[i] = atoi (str);
+						SoundContext.Args[i] = _ttoi (str);
 					}
 
 					// get the position of the skel if a skel is available
@@ -3113,7 +3113,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			// Load The Bank files (copied from CLandscapeUser :) ).
 			// ================
 			// progress
-			dlgProgress.ProgressText.SetWindowText("Loading TileBanks...");
+			dlgProgress.ProgressText.SetWindowText(_T("Loading TileBanks..."));
 			dlgProgress.ProgressBar.SetPos(0);
 			// load
 			CIFile bankFile(CPath::lookup(_VegetableLandscapeTileBank));
@@ -3140,7 +3140,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			if(CNELU::Driver)
 			{
 				// progress
-				dlgProgress.ProgressText.SetWindowText("Loading Tiles...");
+				dlgProgress.ProgressText.SetWindowText(_T("Loading Tiles..."));
 				dlgProgress.ProgressBar.SetPos(0);
 
 				// count nbText to load.
@@ -3195,7 +3195,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			bool	zoneLoaded= false;
 			CAABBox	landscapeBBox;
 			// progress
-			dlgProgress.ProgressText.SetWindowText("Loading Zones...");
+			dlgProgress.ProgressText.SetWindowText(_T("Loading Zones..."));
 			dlgProgress.ProgressBar.SetPos(0);
 			uint	nbZones= (uint)_VegetableLandscapeZoneNames.size();
 			for(uint i=0; i<nbZones;i++)
@@ -3891,7 +3891,7 @@ int localizedMessageBox(HWND parentWindow, int messageStringID, int captionStrin
 	// TODO : replace older call to ::MessageBox in the object viewer with that function
 }
 
-int localizedMessageBox(HWND parentWindow, const char *message, int captionStringID, UINT nType)
+int localizedMessageBox(HWND parentWindow, const TCHAR *message, int captionStringID, UINT nType)
 {
 	CString caption;	
 	caption.LoadString(captionStringID);	
@@ -3907,7 +3907,7 @@ CString getStrRsc(uint stringID)
 
 bool browseFolder(const CString &caption, CString &destFolder, HWND parent)
 {
-	char chosenPath[MAX_PATH];
+	TCHAR chosenPath[MAX_PATH];
 	// browse folder	
 	BROWSEINFO bi;		
 	bi.hwndOwner = parent;

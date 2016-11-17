@@ -107,7 +107,7 @@ BOOL CPickSound::OnInitDialog()
 void CPickSound::OnSelchange() 
 {
 	UpdateData();
-	char str[1024];
+	TCHAR str[1024];
 	nlassert(m_NameList.GetTextLen(m_NameList.GetCurSel()) < 1024);
 	
 	m_NameList.GetText(m_NameList.GetCurSel(), str);

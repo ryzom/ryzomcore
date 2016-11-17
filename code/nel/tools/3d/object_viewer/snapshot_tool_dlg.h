@@ -137,7 +137,7 @@ private:
 	void fromRegistry();
 	// Save the options chosen in the snapshot tool ui into the registry.
 	void toRegistry();
-	void stringFromRegistry(HKEY hKey, const char *name, CString &dest, const CString &defaultStr);
+	void stringFromRegistry(HKEY hKey, const TCHAR *name, CString &dest, const CString &defaultStr);
 	void updateUIEnabledState();
 
 	static void setCamFromView(uint view, NL3D::CCamera *cam, const NLMISC::CAABBox &bbox);

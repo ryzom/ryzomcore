@@ -332,13 +332,13 @@ void CTextureAnimDlg::CGradientInterface::CTextureWrapper::set(NL3D::ITexture *t
 
 		if (t->getWidth() != tex->getWidth() || t->getHeight() != tex->getHeight())
 		{
-			::MessageBox(NULL, "All textures must have the same size !", "error", MB_OK);
+			::MessageBox(NULL, _T("All textures must have the same size !"), _T("error"), MB_OK);
 			return;
 		}
 
 		if (t->PixelFormat != tex->PixelFormat)
 		{
-			::MessageBox(NULL, "All textures must have the same pixel format !", "error", MB_OK);
+			::MessageBox(NULL, _T("All textures must have the same pixel format !"), _T("error"), MB_OK);
 			return;
 		}
 	}

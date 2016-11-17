@@ -93,8 +93,8 @@ void CSchemeBankDlg::buildList()
 
 void CSchemeBankDlg::OnSaveBank() 
 {
-	static char BASED_CODE szFilter[] = "scheme bank files(*.scb)|*.scb||";
-	CFileDialog fd( FALSE, NULL, "default.scb", 0, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("scheme bank files(*.scb)|*.scb||");
+	CFileDialog fd( FALSE, NULL, _T("default.scb"), 0, szFilter);
 	
 	if (fd.DoModal() == IDOK)
 	{
@@ -124,8 +124,8 @@ void CSchemeBankDlg::OnSaveBank()
 
 void CSchemeBankDlg::OnLoadBank() 
 {
-	static char BASED_CODE szFilter[] = "scheme bank files(*.scb)|*.scb||";
-	CFileDialog fd( TRUE, NULL, "*.scb", 0, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("scheme bank files(*.scb)|*.scb||");
+	CFileDialog fd( TRUE, NULL, _T("*.scb"), 0, szFilter);
 	
 	if (fd.DoModal() == IDOK)
 	{

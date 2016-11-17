@@ -67,7 +67,7 @@ bool CSoundAnimView::registerClass()
 	_WndClass = AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW, ::LoadCursor(NULL, IDC_ARROW), (HBRUSH) ::GetStockObject(WHITE_BRUSH));
 
 	// Do some additional initialization of static veriables
-	_Font.CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
+	_Font.CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, _T("Arial"));
 	_FillBrush.CreateSolidBrush(RGB(230, 245, 245));
 	_MarkerBrush.CreateSolidBrush(RGB(0, 0, 0));
 	_SelectBrush.CreateSolidBrush(RGB(0, 210, 210));
@@ -113,7 +113,7 @@ void CSoundAnimView::Create(CObjectViewer* objView, CAnimationDlg* animDlg, CSou
 	}
 
 
-	CWnd::Create((LPCTSTR) _WndClass, "Sound Animation", WS_CHILD | WS_VISIBLE, rect, (CWnd*) sndDlg, ++_WndId);
+	CWnd::Create((LPCTSTR) _WndClass, _T("Sound Animation"), WS_CHILD | WS_VISIBLE, rect, (CWnd*) sndDlg, ++_WndId);
 }
 
 // ********************************************************

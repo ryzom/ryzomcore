@@ -132,8 +132,8 @@ void CAnimationSetDlg::OnAddAnimation ()
 				while (*c)
 				{
 					// File name
-					char filename[256];
-					char *ptr=filename;
+					TCHAR filename[256];
+					TCHAR *ptr=filename;
 
 					// Read a file name
 					while (*c)
@@ -173,8 +173,8 @@ void CAnimationSetDlg::OnAddSkelWt()
 	if (instance != CB_ERR)
 	{
 		// TODO: Add your control notification handler code here
-		static char BASED_CODE szFilter[] = "NeL Skeleton Weight Template Files (*.swt)|*.swt|All Files (*.*)|*.*||";
-		CFileDialog fileDlg( TRUE, ".swt", "*.swt", OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+		static TCHAR BASED_CODE szFilter[] = _T("NeL Skeleton Weight Template Files (*.swt)|*.swt|All Files (*.*)|*.*||");
+		CFileDialog fileDlg( TRUE, _T(".swt"), _T("*.swt"), OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 		if (fileDlg.DoModal()==IDOK)
 		{
 			// Open the file
@@ -372,7 +372,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.PlayList.size(); i++)
 			{
 				// Insert an intem
-				char text[512];
+				TCHAR text[512];
 				PlayList.GetText( i, text);
 				object->Saved.PlayList[i] = text;
 			}

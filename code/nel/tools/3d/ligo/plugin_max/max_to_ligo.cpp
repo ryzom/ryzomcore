@@ -124,17 +124,17 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			TCHAR sDrive[256];
+			TCHAR sDir[256];
+			_tsplitpath (sModulePath, sDrive, sDir, NULL, NULL);
+			_tmakepath (sModulePath, sDrive, sDir, _T("ligoscape"), _T(".cfg"));
 
 			try
 			{

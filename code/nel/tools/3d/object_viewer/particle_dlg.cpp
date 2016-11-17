@@ -563,8 +563,8 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 void CParticleDlg::OnLoadPSWorkspace() 
 {
 	checkModifiedWorkSpace();
-	static const char BASED_CODE szFilter[] = "particle workspaces(*.pws)|*.pws||";
-	CFileDialog fd( TRUE, ".pws", "*.pws", 0, szFilter);
+	static const TCHAR BASED_CODE szFilter[] = _T("particle workspaces(*.pws)|*.pws||");
+	CFileDialog fd( TRUE, _T(".pws"), _T("*.pws"), 0, szFilter);
 	INT_PTR result = fd.DoModal();
 	if (result != IDOK) return;
 	loadWorkspace((LPCTSTR) fd.GetPathName());

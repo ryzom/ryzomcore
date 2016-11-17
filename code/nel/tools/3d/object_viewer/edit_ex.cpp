@@ -74,7 +74,7 @@ float		CEditEx::getFloat() const
 
 std::string CEditEx::getString() const
 {
-	char buf[128];
+	TCHAR buf[128];
 	GetWindowText(buf, sizeof(buf));
 	return std::string(buf);
 }
@@ -82,28 +82,28 @@ std::string CEditEx::getString() const
 void		CEditEx::setSInt(sint value)
 {
 	nlassert(_Type == SIntType);
-	char buf[16];
-	sprintf(buf, "%d", (int) value);
+	TCHAR buf[16];
+	_tcprintf(buf, "%d", (int) value);
 	setString(buf);
 }
 
 void		CEditEx::setUInt(uint value)
 {
 	nlassert(_Type == UIntType);
-	char buf[16];
-	sprintf(buf, "%d", (int) value);
+	TCHAR buf[16];
+	_tcprintf(buf, "%d", (int) value);
 	setString(buf);
 }
 
 void		CEditEx::setFloat(float value)
 {
 	nlassert(_Type == FloatType);
-	char buf[16];
-	sprintf(buf, "%g", (double) value);
+	TCHAR buf[16];
+	_tcprintf(buf, "%g", (double) value);
 	setString(buf);
 }
 
-void CEditEx::setString(const char *value)
+void CEditEx::setString(const TCHAR *value)
 {
 	SetWindowText(value);
 }
@@ -121,7 +121,7 @@ void CEditEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		}
 		else
 		{
-			MessageBox("Invalid value", "Error", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(_T("Invalid value"), _T("Error"), MB_OK | MB_ICONEXCLAMATION);
 		}
 	}	
 	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);

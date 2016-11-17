@@ -227,7 +227,7 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 		rv->init(posX + 140, posY, this);
 		CStatic *s = new CStatic;
 		pushWnd(s);
-		s->Create("Radial viscosity : ", SS_LEFT, CRect(posX, posY, posX + 139, posY + 32), this);
+		s->Create(_T("Radial viscosity : "), SS_LEFT, CRect(posX, posY, posX + 139, posY + 32), this);
 		s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));		
 		s->ShowWindow(SW_SHOW);
 
@@ -243,7 +243,7 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 
 		s = new CStatic;			
 		pushWnd(s);
-		s->Create("Tangential Viscosity : ", SS_LEFT, CRect(posX, posY, posX + 139, posY + 32), this);
+		s->Create(_T("Tangential Viscosity : "), SS_LEFT, CRect(posX, posY, posX + 139, posY + 32), this);
 		s->ShowWindow(SW_SHOW);
 
 		tv->GetClientRect(&r);
@@ -273,7 +273,7 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 		rv->init(posX + 140, posY, this);
 		CStatic *s = new CStatic;
 		pushWnd(s);
-		s->Create("Parametric factor : ", SS_LEFT, CRect(posX, posY, posX + 139, posY + 40), this);
+		s->Create(_T("Parametric factor : "), SS_LEFT, CRect(posX, posY, posX + 139, posY + 40), this);
 		s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));		
 		s->ShowWindow(SW_SHOW);
 
