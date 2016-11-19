@@ -21,45 +21,47 @@
 
 #include <windows.h>
 
-
-const char *CLoginRegistry::AppRegEntry = "Software\\Nevrax\\RyzomInstall";
-static const char *LoginStepKeyHandle = "LoginStep";
-static const char *InstallIdKeyHandle = "InstallId";
+static const wchar_t *AppRegEntry = L"Software\\Nevrax\\RyzomInstall";
+static const wchar_t *LoginStepKeyHandle = L"LoginStep";
+static const wchar_t *InstallIdKeyHandle = L"InstallId";
 
 //===========================================================================================
 std::string CLoginRegistry::getProductInstallId()
 {
-
-
 	// read value
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, AppRegEntry, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, AppRegEntry, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 	{
 		const uint keyMaxLength = 1024;
 		DWORD	dwType  = 0L;
 		DWORD	dwSize	= keyMaxLength;
-		char	buffer[keyMaxLength];
-		if(RegQueryValueEx(hKey, InstallIdKeyHandle, NULL, &dwType, (unsigned char *) buffer, &dwSize) == ERROR_SUCCESS && dwType == REG_SZ)
+		wchar_t	buffer[keyMaxLength];
+		if (RegQueryValueExW(hKey, InstallIdKeyHandle, NULL, &dwType, (BYTE *) buffer, &dwSize) == ERROR_SUCCESS && dwType == REG_SZ)
 		{
 			RegCloseKey(hKey);
-			return buffer;
+			return wideToUtf8(buffer);
 		}
 		RegCloseKey(hKey);
 	}
+
 	DWORD dwDisp;
+
 	// do not exist, create a new key
-	if(RegCreateKeyEx(HKEY_CURRENT_USER, AppRegEntry, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, AppRegEntry, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp) == ERROR_SUCCESS)
     {
 		srand((uint32)nl_time(0));
 		uint32 r = rand();
 		r <<= 16;
 		r |= rand();
+
 		std::string id = NLMISC::toString(r);
-		if (RegSetValueEx(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) id.c_str(), (DWORD)(id.size())+1) == ERROR_SUCCESS)
+
+		if (RegSetValueExW(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) utf8ToWice(id), (DWORD)(id.size())+1) == ERROR_SUCCESS)
 		{
 			return id;
 		}
 	}
+
 	return "";
 }
 
@@ -67,17 +69,18 @@ std::string CLoginRegistry::getProductInstallId()
 uint CLoginRegistry::getLoginStep()
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, AppRegEntry, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, AppRegEntry, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD loginStep = 0;
 		DWORD type;
 		DWORD dataSize = sizeof(DWORD);
-		RegQueryValueEx (hKey, LoginStepKeyHandle, 0, &type, (LPBYTE) &loginStep, &dataSize);
+		RegQueryValueExW(hKey, LoginStepKeyHandle, 0, &type, (LPBYTE) &loginStep, &dataSize);
 		if (type == REG_DWORD && dataSize == sizeof(DWORD))
 		{
 			return (uint) loginStep;
 		}
 	}
+
 	return 0;
 }
 
@@ -86,10 +89,10 @@ void CLoginRegistry::setLoginStep(uint step)
 {
 	HKEY hKey;
 	DWORD dwDisp;
-	if(RegCreateKeyEx(HKEY_CURRENT_USER, AppRegEntry, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp) == ERROR_SUCCESS)
+	if (RegCreateKeyExW(HKEY_CURRENT_USER, AppRegEntry, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, &dwDisp) == ERROR_SUCCESS)
 	{
 		DWORD loginStep = step;
-		RegSetValueEx(hKey, LoginStepKeyHandle, 0L, REG_DWORD, (const BYTE *) &loginStep, sizeof(DWORD));
+		RegSetValueExW(hKey, LoginStepKeyHandle, 0L, REG_DWORD, (const BYTE *) &loginStep, sizeof(DWORD));
 	}
 }
 
