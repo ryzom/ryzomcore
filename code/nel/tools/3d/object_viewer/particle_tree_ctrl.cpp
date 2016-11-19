@@ -1037,7 +1037,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 						return false;
 					}
 				}
-				catch(NLMISC::EStream &e)
+				catch(const NLMISC::EStream &e)
 				{
 					MessageBox(utf8ToTStr(e.what()),  getStrRsc(IDS_ERROR),  MB_OK|MB_ICONEXCLAMATION);
 					return TRUE;

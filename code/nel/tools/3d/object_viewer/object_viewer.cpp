@@ -534,7 +534,7 @@ void CObjectViewer::loadConfigFile()
 		if (var = cf.getVarPtr("cloud_wind_speed"))
 			_CSS.WindSpeed = var->asFloat();
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		::MessageBox (NULL, utf8ToTStr(e.what()), _T("Objectviewer.cfg"), MB_OK|MB_ICONEXCLAMATION);
 	}
@@ -822,7 +822,7 @@ bool CObjectViewer::initUI (HWND parent)
 		{
 			iF.serial(SchemeManager);
 		}
-		catch (NLMISC::EStream &e)
+		catch (const NLMISC::EStream &e)
 		{
 			std::string msg = toString("Unable to load the default scheme bank file : %s", e.what());
 			::MessageBox(NULL, utf8ToTStr(msg), _T("Object Viewer"), MB_ICONEXCLAMATION);
@@ -1896,7 +1896,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igFilename)
 			// Append the ig.
 			addInstanceGroup(ig);
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// clean
 			delete ig;
@@ -1961,7 +1961,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 				// Add the shape
 				shapeSkel=streamShape.getShapePointer();
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 
@@ -2014,7 +2014,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std:
 				// Add the shape
 				shapeMesh=streamShape.getShapePointer();
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				continue;
@@ -3219,7 +3219,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			_VegetableCollisionManager->setLandscape(&_VegetableLandscape->Landscape);
 			_VegetableCollisionEntity= _VegetableCollisionManager->createEntity();
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			// close the progress dialog
 			dlgProgress.DestroyWindow();
@@ -3776,7 +3776,7 @@ void		CObjectViewer::shootScene()
 						break;
 					}
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					std::string message = toString("Error during writing of the file %s: %s", filenamefinal.c_str(), e.what());
 					_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);

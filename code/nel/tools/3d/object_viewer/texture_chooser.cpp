@@ -192,7 +192,7 @@ void CTextureChooser::OnBrowseTexture()
 			_Texture = tf;
 			textureToBitmap();
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			MessageBox(utf8ToTStr(e.what()), _T("error loading texture"));
 		}		

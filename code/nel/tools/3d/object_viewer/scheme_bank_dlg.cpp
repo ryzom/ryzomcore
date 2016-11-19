@@ -107,7 +107,7 @@ void CSchemeBankDlg::OnSaveBank()
 			iF.open(tStrToUtf8(fd.GetFileName()));
 			iF.serial(SchemeManager);			
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			std::string message = NLMISC::toString("Error saving scheme bank : %s", e.what());
 			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
@@ -134,7 +134,7 @@ void CSchemeBankDlg::OnLoadBank()
 			iF.serial(sm);
 			SchemeManager.swap(sm);
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			std::string message = NLMISC::toString("Error loading scheme bank : %s", e.what());
 			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);

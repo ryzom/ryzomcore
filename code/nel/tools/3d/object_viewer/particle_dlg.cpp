@@ -419,7 +419,7 @@ bool CParticleDlg::savePSAs(HWND parent, CParticleWorkspace::CNode &psNode ,cons
 		psNode.setModified(false);
 		setStatusBarText(CString(fullPath.c_str()) + " " + getStrRsc(IDS_SAVED));
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		if (askToContinueWhenError)
 		{		
@@ -468,7 +468,7 @@ bool CParticleDlg::loadPS(HWND parent, CParticleWorkspace::CNode &psNode, TLoadP
 			setStatusBarText(CString(psNode.getFullPath().c_str()) + " " + getStrRsc(IDS_LOADED));
 		}
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		switch(behav)
 		{
@@ -547,7 +547,7 @@ void CParticleDlg::OnCreateNewPsWorkspace()
 			{		
 				newPW->save();
 			}
-			catch(NLMISC::EStream &e)
+			catch(const NLMISC::EStream &e)
 			{
 				MessageBox(utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 			}
@@ -583,7 +583,7 @@ void CParticleDlg::loadWorkspace(const std::string &fullPath)
 		newPW->load();
 		setStatusBarText(CString(newPW->getFilename().c_str()) + " " + getStrRsc(IDS_LOADED));
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		MessageBox(utf8ToTStr(e.what()), getStrRsc(IDS_ERROR), MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));
@@ -633,7 +633,7 @@ void CParticleDlg::saveWorkspaceStructure()
 		_PW->save();		
 		setStatusBarText(CString(_PW->getFilename().c_str()) + " " + getStrRsc(IDS_SAVED));
 	}
-	catch(NLMISC::EStream &e)
+	catch(const NLMISC::EStream &e)
 	{
 		localizedMessageBox(*this, utf8ToTStr(e.what()), IDS_ERROR, MB_ICONEXCLAMATION);
 		setStatusBarText(CString(e.what()));

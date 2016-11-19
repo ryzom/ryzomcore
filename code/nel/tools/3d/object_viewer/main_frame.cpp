@@ -590,7 +590,7 @@ void CMainFrame::OnFileLoadconfig()
 					}
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
@@ -762,7 +762,7 @@ void CMainFrame::OnFileSaveconfig()
 			{
 				ObjView->serial(file);
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}

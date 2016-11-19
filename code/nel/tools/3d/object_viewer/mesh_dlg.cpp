@@ -112,7 +112,7 @@ void CMeshDlg::OnBrowseShape()
 			m_ShapeName = (std::string(fname) + ext).c_str();
 			touchPSState();			
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
 			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
 		}		

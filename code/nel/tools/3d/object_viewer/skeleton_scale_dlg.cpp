@@ -1310,7 +1310,7 @@ bool	CSkeletonScaleDlg::saveSkelScaleInStream(NLMISC::IStream &f)
 		sint32	ver= f.serialVersion(0);
 		f.serialCont(boneScales);
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		MessageBox(_T("Failed to save file!"));
 		return false;
@@ -1356,7 +1356,7 @@ bool	CSkeletonScaleDlg::loadSkelScaleFromStream(NLMISC::IStream &f)
 		// and update display
 		refreshTextViews();
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		MessageBox(_T("Failed to save file!"));
 		return false;
