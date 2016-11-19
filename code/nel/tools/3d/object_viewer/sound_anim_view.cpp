@@ -216,8 +216,8 @@ void CSoundAnimView::save()
 				filename.append(anim->getName()).append(".sound_anim");
 
 				// Create a dialog
-				char BASED_CODE szFilter[] = "NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||";
-				CFileDialog fileDlg( FALSE, ".sound_anim", filename.c_str(), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+				TCHAR BASED_CODE szFilter[] = _T("NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||");
+				CFileDialog fileDlg( FALSE, _T(".sound_anim"), utf8ToTStr(filename), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 
 				if (fileDlg.DoModal() == IDOK)
 				{

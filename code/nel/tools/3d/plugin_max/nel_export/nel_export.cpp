@@ -364,7 +364,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 									// Error message
 									char sErrorMsg[512];
 									sprintf (sErrorMsg, "Error exporting the vegetable %s in the file\n%s", pNode->GetName(), sSavePath);
-									MessageBox (hWnd, sErrorMsg, "NeL export", MB_OK|MB_ICONEXCLAMATION);
+									MessageBox (hWnd, sErrorMsg, _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 								}
 							}
 						}

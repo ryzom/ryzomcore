@@ -3667,8 +3667,8 @@ float		CObjectViewer::getGlobalWindPower() const
 
 void		CObjectViewer::shootScene() 
 {
-	static const char BASED_CODE szFilter[] = "Targa Files (*.tga)|*.tga|Jpeg Files (*.jpg)|*.jpg|All Files (*.*)|*.*||";
-	CFileDialog fileDlg ( FALSE, ".tga", "*.tga", OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+	static const TCHAR BASED_CODE szFilter[] = _T("PNG Files (*.png)|*.png|Targa Files (*.tga)|*.tga|Jpeg Files (*.jpg)|*.jpg|All Files (*.*)|*.*||");
+	CFileDialog fileDlg ( FALSE, _T(".tga"), _T("*.tga"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal () == IDOK)
 	{
 		// Choose the size

@@ -1532,7 +1532,7 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 		if (primClass->Type == CPrimitiveClass::Bitmap)
 		{
 			// Create a dialog file
-			CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, 
+			CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
 				(primClass->FileType+" (*."+primClass->FileExtension+")|*."+primClass->FileExtension+"|All Files (*.*)|*.*||").c_str (), getMainFrame ());
 			if (dialog.DoModal() == IDOK)
 			{
