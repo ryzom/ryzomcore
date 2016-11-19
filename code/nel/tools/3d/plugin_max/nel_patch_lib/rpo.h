@@ -209,7 +209,7 @@ class RPO : public PatchObject
 		void GetClassName(TSTR& s) {s.FromUTF8("Rykol Patch Object");}
 		
 		RefTargetHandle Clone ( RemapDir &remap );
-		RefResult NotifyRefChanged (Interval changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message);
+		RefResult NotifyRefChanged (const Interval& changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message, BOOL propagate);
 
 		int NumSubs() 
 		{ 

@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
 	// define commandline arguments
 	QCommandLineParser parser;
-	parser.setApplicationDescription(QApplication::tr("Instalation and launcher tool for Ryzom"));
+	parser.setApplicationDescription(QApplication::tr("Installation and launcher tool for Ryzom"));
 	parser.addHelpOption();
 
 	QCommandLineOption uninstallOption(QStringList() << "u" << "uninstall", QApplication::tr("Uninstall"));
