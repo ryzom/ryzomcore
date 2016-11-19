@@ -1901,9 +1901,9 @@ void CPSEmitter::resize(uint32 size)
 }
 
 ///==========================================================================
-void CPSEmitter::bounceOccured(uint32 index, TAnimationTime timeToNextSimStep)
+void CPSEmitter::bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep)
 {
-	NL_PS_FUNC(CPSEmitter_bounceOccured)
+	NL_PS_FUNC(CPSEmitter_bounceOccurred)
 	// TODO : avoid duplication with deleteElement
 	if (_EmittedType && _EmissionType == CPSEmitter::onBounce)
 	{
@@ -2797,7 +2797,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 					startPos = _Owner->getParametricInfos()[k].Pos;
 				}
 				float currTime = _Owner->getTime()[k];
-				_Owner->getTime()[k] = 0.f; // when emit occured, time was 0
+				_Owner->getTime()[k] = 0.f; // when emit occurred, time was 0
 				sint32 nbToGenerate = (sint32) (emitLOD * *numToEmitPtr);
 				if (nbToGenerate > 0)
 				{
@@ -2830,7 +2830,7 @@ void CPSEmitter::doEmitOnce(uint firstInstanceIndex)
 				startPos = _Owner->getParametricInfos()[k].Pos;
 			}
 			float currTime = _Owner->getTime()[k];
-			_Owner->getTime()[k] = 0.f; // when emit occured, time was 0
+			_Owner->getTime()[k] = 0.f; // when emit occurred, time was 0
 			processEmitConsistent(startPos, k, nbToGenerate, _Owner->getAgeInSeconds(k) / CParticleSystem::RealEllapsedTimeRatio);
 			// restore time & pos
 			_Owner->getTime()[k] = currTime;

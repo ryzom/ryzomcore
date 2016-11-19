@@ -317,9 +317,9 @@ public:
 	
 
 private:
-	/// an event affecting outpost state occured
+	/// an event affecting outpost state occurred
 	void eventTriggered(OUTPOSTENUMS::TOutpostEvent event, void* eventParams = NULL);
-	/// an event affecting outpost state occured and has not been handled
+	/// an event affecting outpost state occurred and has not been handled
 	/// WARNING: it should only be called from eventTriggered
 	void eventException(OUTPOSTENUMS::TOutpostEvent event, void* eventParams);
 	

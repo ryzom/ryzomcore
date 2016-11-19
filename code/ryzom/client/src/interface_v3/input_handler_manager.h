@@ -88,7 +88,7 @@ public:
 	/**
 	 * read the input config file.
 	 * \param fileName : name of the config file
-	 * \return true if no error occured
+	 * \return true if no error occurred
 	 */
 	bool	readInputConfigFile(const std::string & fileName);
 

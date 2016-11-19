@@ -1587,7 +1587,7 @@ bool	CDatabase::buildDelta(const CTimestamp& starttime, const CTimestamp& endtim
 //			}
 //			catch (const Exception& e)
 //			{
-//				PDS_WARNING("buildDelta(): exception occured while saving straight log : %s", e.what());
+//				PDS_WARNING("buildDelta(): exception occurred while saving straight log : %s", e.what());
 //			}
 //		}
 //		else

@@ -568,7 +568,7 @@ bool CDriverD3D::setupMaterial(CMaterial &mat)
 							if (_PixelProgram)
 							{
 								#ifdef NL_DEBUG_D3D
-									// Check, should not occured
+									// Check, should not occur
 									nlassertex (_PixelShader, ("STOP : no pixel shader available. Can't render this material."));
 								#endif // NL_DEBUG_D3D
 

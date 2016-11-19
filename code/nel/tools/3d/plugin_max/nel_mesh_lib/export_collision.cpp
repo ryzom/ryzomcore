@@ -263,7 +263,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 	// report warnings
 	if (!warnings.empty())
 	{
-		string	message = "Warning(s) occured during collision export\n(defective links may result) error";
+		string	message = "Warning(s) occurred during collision export\n(defective links may result) error";
 		for (i=0; i<warnings.size(); ++i)
 			message += string("\n")+warnings[i];
 
@@ -290,7 +290,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 	// report warnings
 	if (!errors.empty())
 	{
-		string	message = "Error(s) occured during collision export\n(edge issues)";
+		string	message = "Error(s) occurred during collision export\n(edge issues)";
 		for (i=0; i<errors.size(); ++i)
 			message += string("\nERROR: ")+errors[i];
 
@@ -314,7 +314,7 @@ CCollisionMeshBuild*	CExportNel::createCollisionMeshBuild(std::vector<INode *> &
 		pCollisionMeshBuild = NULL;
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return pCollisionMeshBuild;
 }
 

@@ -1442,7 +1442,7 @@ std::string formatErrorMessage(int errorCode)
 		NULL
 	);
 
-	// empty buffer, an error occured
+	// empty buffer, an error occurred
 	if (len == 0) return toString("FormatMessage returned error %d", getLastError());
 
 	// convert wchar_t* to std::string

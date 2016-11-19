@@ -451,7 +451,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 				(
 					-- Error
 					nlerror("ERROR exporting 'shape': can't open the file " + inputMaxFile)
-					nlerror("FAIL Mysterious error occured")
+					nlerror("FAIL Mysterious error occurred")
 					NelForceQuitRightNow()
 				)
 			)
@@ -559,7 +559,7 @@ catch
 (
 	-- Error
 	nlerror("ERROR Fatal error exporting 'shape' in folder %MaxSourceDirectory%")
-	nlerror("FAIL Fatal error occured")
+	nlerror("FAIL Fatal error occurred")
 	NelForceQuitRightNow()
 	removeRunningTag = false
 )
@@ -584,7 +584,7 @@ if (removeRunningTag) then
 )
 else
 (
-	nlerror("FAIL One or more issues occured")
+	nlerror("FAIL One or more issues occurred")
 	NelForceQuitRightNow()
 )
 

@@ -270,7 +270,7 @@ uint getPixelFormatSize (D3DFORMAT destFormat)
 	case D3DFMT_DXT3: bits=8; break;
 	case D3DFMT_DXT4: bits=8; break;
 	case D3DFMT_DXT5: bits=8; break;
-	default: nlstop; break;	// unkown pixel format
+	default: nlstop; break;	// unknown pixel format
 	}
 	return bits;
 }

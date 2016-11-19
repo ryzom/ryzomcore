@@ -865,7 +865,7 @@ Vous n&apos;avez qu&apos;à cliquer sur Suivant et suivre les différentes étap
     </message>
     <message>
         <location filename="../src/main.cpp" line="119"/>
-        <source>Instalation and launcher tool for Ryzom</source>
+        <source>Installation and launcher tool for Ryzom</source>
         <translation>Outil d&apos;installation et lanceur pour Ryzom</translation>
     </message>
     <message>

@@ -375,7 +375,7 @@ fn runNelMaxExportSub inputMaxFile retryCount =
 				(
 					-- Error
 					nlerror("ERROR exporting '%PreGenFileExtension%': can't open the file " + inputMaxFile)
-					nlerror("FAIL Mysterious error occured")
+					nlerror("FAIL Mysterious error occurred")
 					NelForceQuitRightNow()
 				)
 			)

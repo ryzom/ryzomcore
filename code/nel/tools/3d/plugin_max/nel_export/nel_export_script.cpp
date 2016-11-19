@@ -873,7 +873,7 @@ Value* get_file_modification_date_cf (Value** arg_list, int count)
 	check_arg_count(NeLGetFileModificationDate , 1, count);
 	
 	// Check to see if the arguments match up to what we expect
-	char *message = "date NeLGetFileModificationDate [filename] - If an error occured, returns undefined.";
+	char *message = "date NeLGetFileModificationDate [filename] - If an error occurred, returns undefined.";
 	
 	//type_check
 	type_check (arg_list[0], String, message);
@@ -911,7 +911,7 @@ Value* set_file_modification_date_cf (Value** arg_list, int count)
 	check_arg_count(NeLSetFileModificationDate , 2, count);
 	
 	// Check to see if the arguments match up to what we expect
-	char *message = "bool NeLSetFileModificationDate [filename] [date] - If an error occured, returns false.";
+	char *message = "bool NeLSetFileModificationDate [filename] [date] - If an error occurred, returns false.";
 	
 	//type_check
 	type_check (arg_list[0], String, message);

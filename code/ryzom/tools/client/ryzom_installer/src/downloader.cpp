@@ -186,7 +186,7 @@ void CDownloader::downloadFile()
 		if (m_listener)
 		{
 			QString error = qFromUtf8(NLMISC::formatErrorMessage(NLMISC::getLastError()));
-			m_listener->operationFail(tr("Error '%1' occured when trying to check free disk space on %2.").arg(error).arg(m_fullPath));
+			m_listener->operationFail(tr("Error '%1' occurred when trying to check free disk space on %2.").arg(error).arg(m_fullPath));
 		}
 		return;
 	}

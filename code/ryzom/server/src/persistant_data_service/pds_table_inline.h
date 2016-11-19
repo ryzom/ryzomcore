@@ -630,7 +630,7 @@ inline bool	CTable::CDataAccessor::setIndex(const RY_PDS::CObjectIndex &index)
 
 /*
  * Get data as a Set
- * Return an accessor on a set, which is valid only if not issue occured
+ * Return an accessor on a set, which is valid only if not issue occurred
  * Thus, you are able to modify the list own your own, add/remove items...
  */
 inline RY_PDS::CSetMap::CAccessor	CTable::CDataAccessor::getSet()
@@ -655,7 +655,7 @@ inline RY_PDS::CSetMap::CAccessor	CTable::CDataAccessor::getSet()
 
 /*
  * Get data as a Set
- * Return an accessor on a set, which is valid only if not issue occured
+ * Return an accessor on a set, which is valid only if not issue occurred
  */
 inline const RY_PDS::CSetMap::CAccessor	CTable::CDataAccessor::getSet() const
 {

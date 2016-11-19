@@ -1898,7 +1898,7 @@ void CPlayerService::release()
 //---------------------------------------------------
 void cbConnection( const std::string &serviceName, NLNET::TServiceId serviceId, void *arg )
 {
-	// inform player about the service event that occured
+	// inform player about the service event that occurred
 #if !FINAL_VERSION
 	PlayerManager.broadcastMessage( 1, 0, 0, string("System event : Service UP : ")+serviceName);
 #endif

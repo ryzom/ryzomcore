@@ -927,7 +927,7 @@ end
 ------------------------------------------------------------------------------------------------------------
 -- get a form from its name
 function r2:getForm(name)
-	assert(name) -- why is nam nil???
+	assert(name) -- why is name nil???
 	return getUI("ui:interface:r2ed_form_" .. name)
 end
 

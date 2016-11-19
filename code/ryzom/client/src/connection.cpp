@@ -902,7 +902,7 @@ void updateBGDownloaderUI()
 	}
 	if (prevSuccess != LuaBGDSuccessFlag)
 	{
-		nlwarning("Some scipt error occured");
+		nlwarning("Some scipt error occurred");
 	}
 }
 

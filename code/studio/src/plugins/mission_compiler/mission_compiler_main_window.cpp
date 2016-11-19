@@ -95,7 +95,7 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	}
 	catch( NLMISC::Exception &e )
 	{
-		nlinfo( "Exception occured during Mission Compiler LIGO startup: %s", e.what() );
+		nlinfo( "Exception occurred during Mission Compiler LIGO startup: %s", e.what() );
 	}
 
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;

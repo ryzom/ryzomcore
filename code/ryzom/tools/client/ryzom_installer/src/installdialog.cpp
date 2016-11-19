@@ -137,7 +137,7 @@ void CInstallDialog::accept()
 	{
 		int error = NLMISC::getLastError();
 
-		nlwarning("Error '%s' (%d) occured when trying to check free disk space on %s, continue anyway", NLMISC::formatErrorMessage(error).c_str(), error, Q2C(m_dstDirectory));
+		nlwarning("Error '%s' (%d) occurred when trying to check free disk space on %s, continue anyway", NLMISC::formatErrorMessage(error).c_str(), error, Q2C(m_dstDirectory));
 	}
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
