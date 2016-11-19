@@ -84,8 +84,8 @@ void CSchemeBankDlg::buildList()
 	SchemeManager.getSchemes(_Type, schemes);
 	for (TSchemeVect::const_iterator it = schemes.begin(); it != schemes.end(); ++it)
 	{
-		int index = m_SchemeList.AddString(it->first.c_str());
-		m_SchemeList.SetItemData(index, (unsigned long) it->second);
+		int index = m_SchemeList.AddString(utf8ToTStr(it->first));
+		m_SchemeList.SetItemData(index, (DWORD_PTR) it->second);
 	}
 
 	UpdateData(FALSE);
@@ -98,25 +98,19 @@ void CSchemeBankDlg::OnSaveBank()
 	
 	if (fd.DoModal() == IDOK)
 	{
-		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
-
 		// Add search path for the texture
-		_splitpath (fd.GetPathName(), drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
 		
 		try
 		{
 			NLMISC::COFile iF;
-			iF.open(std::string( (LPCTSTR) fd.GetFileName()));
+			iF.open(tStrToUtf8(fd.GetFileName()));
 			iF.serial(SchemeManager);			
 		}
 		catch (std::exception &e)
 		{
-			MessageBox(("Error saving scheme bank :" + std::string(e.what())).c_str(), "Object viewer", MB_ICONEXCLAMATION | MB_OK);
+			std::string message = NLMISC::toString("Error saving scheme bank : %s", e.what());
+			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
 			return;
 		}		
 	}	
@@ -129,27 +123,21 @@ void CSchemeBankDlg::OnLoadBank()
 	
 	if (fd.DoModal() == IDOK)
 	{
-		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
-
 		// Add search path for the texture
-		_splitpath (fd.GetPathName(), drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath(NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
 
 		CSchemeManager sm;
 		try
 		{
 			NLMISC::CIFile iF;
-			iF.open(NLMISC::CPath::lookup(std::string((LPCTSTR) fd.GetFileName())));
+			iF.open(NLMISC::CPath::lookup(tStrToUtf8(fd.GetFileName())));
 			iF.serial(sm);
 			SchemeManager.swap(sm);
 		}
 		catch (std::exception &e)
 		{
-			MessageBox(("Error loading scheme bank :" + std::string(e.what())).c_str(), "Object viewer", MB_ICONEXCLAMATION | MB_OK);
+			std::string message = NLMISC::toString("Error loading scheme bank : %s", e.what());
+			MessageBox(utf8ToTStr(message), _T("Object viewer"), MB_ICONEXCLAMATION | MB_OK);
 			return;
 		}
 		buildList();
@@ -179,7 +167,7 @@ void CSchemeBankDlg::OnRename()
 		SchemeManager.rename(scheme, cn.getName());
 		int curSel = m_SchemeList.GetCurSel();
 		m_SchemeList.DeleteString(curSel);
-		int insertedPos = m_SchemeList.InsertString(curSel, cn.getName().c_str());
+		int insertedPos = m_SchemeList.InsertString(curSel, utf8ToTStr(cn.getName()));
 		m_SchemeList.SetCurSel(insertedPos);
 		m_SchemeList.Invalidate();
 	}	

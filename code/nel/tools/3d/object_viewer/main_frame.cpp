@@ -574,7 +574,7 @@ void CMainFrame::OnFileLoadconfig()
 	{
 		// Open the file
 		CIFile file;
-		if (file.open ((const char*)fileDlg.GetPathName()))
+		if (file.open(tStrToUtf8(fileDlg.GetPathName())))
 		{
 			try
 			{
@@ -592,7 +592,7 @@ void CMainFrame::OnFileLoadconfig()
 			}
 			catch (Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		else
@@ -685,7 +685,7 @@ void CMainFrame::OnFileOpen()
 			if (name.Find(_T(".ig")) != -1)
 			{
 				// Load the instance group
-				if (ObjView->loadInstanceGroup (name))
+				if (ObjView->loadInstanceGroup (tStrToUtf8(name)))
 				{
 					// Reset the camera
 					OnResetCamera();
@@ -697,7 +697,7 @@ void CMainFrame::OnFileOpen()
 			else
 			{
 				// Add it in the array
-				meshFilename.push_back ((const char*)name);
+				meshFilename.push_back (tStrToUtf8(name));
 			}
 		}
 
@@ -710,7 +710,7 @@ void CMainFrame::OnFileOpen()
 			if (fileDlg2.DoModal()==IDOK)
 			{
 				// Load the shape with a skeleton
-				if (ObjView->loadMesh (meshFilename, fileDlg2.GetPathName()))
+				if (ObjView->loadMesh (meshFilename, tStrToUtf8(fileDlg2.GetPathName())))
 				{
 					// Reset the camera
 					OnResetCamera();
@@ -756,7 +756,7 @@ void CMainFrame::OnFileSaveconfig()
 		}
 		// Open the file
 		COFile file;
-		if (file.open ((const char*)fileDlg.GetPathName()))
+		if (file.open (tStrToUtf8(fileDlg.GetPathName())))
 		{
 			try
 			{
@@ -764,7 +764,7 @@ void CMainFrame::OnFileSaveconfig()
 			}
 			catch (Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		else
@@ -832,7 +832,7 @@ void CMainFrame::OnViewSetmovespeed()
 	if (valueDlg.DoModal ()==IDOK)
 	{
 		// Get deflaut value
-		sscanf ((const char*)valueDlg.Value, "%f", &MoveSpeed);
+		NLMISC::fromString(tStrToUtf8(valueDlg.Value), MoveSpeed);
 	}
 }
 
@@ -1392,9 +1392,10 @@ void CMainFrame::OnViewSetSceneRotation()
 	if (sceneRotDlg.DoModal() == IDOK)
 	{
 		// read value.
-		_LastSceneRotX= (float)atof(sceneRotDlg.RotX);
-		_LastSceneRotY= (float)atof(sceneRotDlg.RotY);
-		_LastSceneRotZ= (float)atof(sceneRotDlg.RotZ);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotX), _LastSceneRotX);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotY), _LastSceneRotY);
+		NLMISC::fromString(tStrToUtf8(sceneRotDlg.RotZ), _LastSceneRotZ);
+
 		float	rotx= degToRad(_LastSceneRotX);
 		float	roty= degToRad(_LastSceneRotY);
 		float	rotz= degToRad(_LastSceneRotZ);
@@ -1441,7 +1442,8 @@ void CMainFrame::OnUpdateSceneCamera(CCmdUI* pCmdUI)
 	{
 		CInstanceInfo *instance = ObjView->getInstance (ObjView->getCameraInstance (pCmdUI->m_nID - ID_SCENE_CAMERA_FIRST));
 		nlassert (instance->Camera);
-		pCmdUI->SetText (("Camera "+instance->Saved.ShapeFilename).c_str ());
+		std::string text = NLMISC::toString("Camera %s", instance->Saved.ShapeFilename.c_str());
+		pCmdUI->SetText(utf8ToTStr(text));
 	}
 	else
 	{

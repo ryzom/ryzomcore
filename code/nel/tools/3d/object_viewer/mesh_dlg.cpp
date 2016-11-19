@@ -114,7 +114,7 @@ void CMeshDlg::OnBrowseShape()
 		}
 		catch (NLMISC::Exception &e)
 		{
-			MessageBox(e.what(), "shape loading error");
+			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
 		}		
 		updateMeshErrorString();
 	}

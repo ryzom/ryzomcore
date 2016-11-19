@@ -119,15 +119,17 @@ void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString 
 		dest = defaultStr;
 		return;
 	}
-	std::string tmpDest;
-	tmpDest.resize(size);	
-	result = RegQueryValueEx(hKey, name, NULL, &type, (unsigned char *) &tmpDest[0], &size);
+
+	std::auto_ptr<TCHAR> tmpDest(new TCHAR[size]);
+	result = RegQueryValueEx(hKey, name, NULL, &type, (BYTE*)tmpDest.get(), &size);
+
 	if (result != ERROR_SUCCESS)
 	{
 		dest = defaultStr;
 		return;
 	}
-	dest = tmpDest.c_str();
+
+	dest = *tmpDest;
 }
 
 
@@ -167,14 +169,15 @@ void CSnapshotToolDlg::fromRegistry()
 	stringFromRegistry(hKey, _T("OutputPath"), m_OutputPath, "");
 
 	CString filters;
-	stringFromRegistry(hKey, "Filters", filters, "*.shape");
-	std::string stdFilters((LPCTSTR) filters);
+	stringFromRegistry(hKey, _T("Filters"), filters, "*.shape");
+
 	std::vector<std::string> filterList;
-	NLMISC::splitString(stdFilters, ",", filterList);
+	NLMISC::splitString(tStrToUtf8(filters), ",", filterList);
+
 	m_Filters.ResetContent();
 	for (uint k = 0; k < filterList.size(); ++k)
 	{
-		m_Filters.AddString(filterList[k].c_str());
+		m_Filters.AddString(utf8ToTStr(filterList[k]));
 	}	
 	
 	integralTypeFromRegistry(hKey, _T("RecurseSubFolder"), (int &) m_RecurseSubFolder, FALSE);
@@ -405,7 +408,7 @@ void CSnapshotToolDlg::OnGo()
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_INPUT_PATH), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
 	}
-	if (!NLMISC::CFile::isDirectory(LPCTSTR(m_InputPath)))
+	if (!NLMISC::CFile::isDirectory(tStrToUtf8(m_InputPath)))
 	{
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_INPUT_PATH_NOT_FOUND), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
@@ -415,13 +418,13 @@ void CSnapshotToolDlg::OnGo()
 		MessageBox(getStrRsc(IDS_SNAPSHOT_EMPTY_OUTPUT_PATH), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 		return;
 	}
-	if (m_OutputPathOption == OutputPath_Custom && !NLMISC::CFile::isDirectory(LPCTSTR(m_OutputPath)))
+	if (m_OutputPathOption == OutputPath_Custom && !NLMISC::CFile::isDirectory(tStrToUtf8(m_OutputPath)))
 	{
 		if (MessageBox(getStrRsc(IDS_SNAPSHOT_CREATE_OUTPUT_DIRECTORY), getStrRsc(IDS_OBJECT_VIEWER), MB_OKCANCEL) != IDOK)
 		{
 			return;
 		}
-		if(!NLMISC::CFile::createDirectoryTree(LPCTSTR(m_OutputPath)))
+		if(!NLMISC::CFile::createDirectoryTree(tStrToUtf8(m_OutputPath)))
 		{
 			MessageBox(getStrRsc(IDS_SNAPSHOT_OUTPUT_PATH_CREATION_FAILED), getStrRsc(IDS_OBJECT_VIEWER), MB_ICONEXCLAMATION);
 			return;
@@ -442,7 +445,7 @@ void CSnapshotToolDlg::OnGo()
 	m_Log.ResetContent();
 	m_Log.AddString(getStrRsc(IDS_GETTING_PATH_CONTENT));
 	std::vector<std::string> files;
-	CPath::getPathContent((LPCTSTR) m_InputPath, m_RecurseSubFolder == TRUE, false, true, files);
+	CPath::getPathContent(tStrToUtf8(m_InputPath), m_RecurseSubFolder == TRUE, false, true, files);
 	if (files.empty())
 	{
 		m_Log.AddString(getStrRsc(IDS_SNAPSHOT_NO_FILES_FOUND));
@@ -456,7 +459,7 @@ void CSnapshotToolDlg::OnGo()
 			CString wildCard;
 			m_Filters.GetText(l, wildCard);
 			wildCard.MakeLower();
-			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), (LPCTSTR) wildCard))
+			if (testWildCard(toLower(NLMISC::CFile::getFilename(files[k])).c_str(), tStrToUtf8(wildCard).c_str()))
 			{
 				_FilteredFiles.push_back(files[k]);
 				break;
@@ -598,7 +601,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 		try
 		{
 			CShapeStream ss;
-			m_Log.AddString(_FilteredFiles[0].c_str());
+			m_Log.AddString(utf8ToTStr(_FilteredFiles[0]));
 			CIFile stream(_FilteredFiles[0]);
 			ss.serial(stream);
 			nlassert(ss.getShapePointer());
@@ -706,10 +709,10 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 							switch(m_OutputPathOption)
 							{
 								case OutputPath_Custom: // custom output path
-									outputFilename = LPCTSTR(m_OutputPath) + std::string("\\") + NLMISC::CFile::getFilename(outputFilename);
+									outputFilename = tStrToUtf8(m_OutputPath) + "\\" + NLMISC::CFile::getFilename(outputFilename);
 								break;
 								case OutputPath_SameAsInput: // Input path
-									outputFilename = LPCTSTR(m_InputPath) + std::string("\\") + NLMISC::CFile::getFilename(outputFilename);
+									outputFilename = tStrToUtf8(m_InputPath) + "\\" + NLMISC::CFile::getFilename(outputFilename);
 								break;
 								case OutputPath_CurrShapeDirectory: // current path
 									// no op

@@ -234,19 +234,19 @@ public:
 	void releaseUI ();
 
 	// Set single animtion.
-	void setSingleAnimation (NL3D::CAnimation*	pAnim, const char* name, uint instance);
+	void setSingleAnimation (NL3D::CAnimation*	pAnim, const std::string &name, uint instance);
 
 	// Set automatic animation
 	void setAutoAnimation (NL3D::CAnimationSet* pAnimSet);
 
 	// Add a mesh
-	uint addMesh (NL3D::IShape* pMeshShape, const char* meshName, uint skelIndex, const char* bindSkelName = NULL, bool createInstance = true);
+	uint addMesh(NL3D::IShape* pMeshShape, const std::string &meshName, uint skelIndex, const char* bindSkelName = NULL, bool createInstance = true);
 
 	// Add a camera
-	uint addCamera (const NL3D::CCameraInfo &cameraInfo, const char* cameraName);
+	uint addCamera (const NL3D::CCameraInfo &cameraInfo, const std::string &cameraName);
 
 	// Add a skel  
-	uint addSkel (NL3D::IShape* pSkelShape, const char* skelName);
+	uint addSkel (NL3D::IShape* pSkelShape, const std::string &skelName);
 
 	// remove all instances from the scene
 	void		 removeAllInstancesFromScene();
@@ -262,10 +262,10 @@ public:
 	void shuffleTextureSet();
 
 	// Load a mesh
-	bool loadMesh (std::vector<std::string> &meshFilename, const char* skeleton="");
+	bool loadMesh (std::vector<std::string> &meshFilename, const std::string &skeleton = "");
 
 	// Load an instance group
-	bool loadInstanceGroup(const char *igFilename);
+	bool loadInstanceGroup(const std::string &igFilename);
 
 	// Set ambient color
 	void setAmbientColor (const NLMISC::CRGBA& color);
@@ -289,7 +289,7 @@ public:
 	uint getNumInstance () const;
 
 	// Add an animation
-	void addAnimation (NL3D::CAnimation* anim, const char* filename, const char* name, uint instance);
+	void addAnimation (NL3D::CAnimation* anim, const std::string &filename, const std::string &name, uint instance);
 
 	// Update all objects that depend on the animation set
 	void refreshAnimationListeners();
@@ -308,10 +308,10 @@ public:
 	CChooseFrameDelay *getFrameDelayDlg() const { return _ChooseFrameDelayDlg; }
 
 	// Load animation
-	void loadAnimation (const char* fileName, uint instance);
+	void loadAnimation(const std::string &fileName, uint instance);
 
 	// Load a skeleton template
-	void loadSWT (const char* fileName, uint instance);
+	void loadSWT(const std::string &fileName, uint instance);
 
 
 	/// Not exported
@@ -387,7 +387,7 @@ public:
 	/// inherited from CObjectViewerInterface
 	void setWaterPoolManager(NL3D::CWaterPoolManager &wpm) { _Wpm = &wpm; }
 
-	NL3D::CWaterPoolManager &getWaterPoolManager() { return *_Wpm; }
+	NL3D::CWaterPoolManager &getWaterPoolManager() const { return *_Wpm; }
 
 	// Reload textures
 	void reloadTextures ();

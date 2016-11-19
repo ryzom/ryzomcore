@@ -165,19 +165,19 @@ void CMultiTexDlg::readValues(bool alternate)
 	char buf[128];
 	if (!alternate)
 	{
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(0).x); GetDlgItem(IDC_U_SPEED_1)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(0).y); GetDlgItem(IDC_V_SPEED_1)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(1).x); GetDlgItem(IDC_U_SPEED_2)->SetWindowText(buf);
-		sprintf(buf, "%.3f", _MTP->getScrollSpeed(1).y); GetDlgItem(IDC_V_SPEED_2)->SetWindowText(buf);
+		GetDlgItem(IDC_U_SPEED_1)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(0).x)));
+		GetDlgItem(IDC_V_SPEED_1)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(0).y)));
+		GetDlgItem(IDC_U_SPEED_2)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(1).x)));
+		GetDlgItem(IDC_V_SPEED_2)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getScrollSpeed(1).y)));
 	}
 	else
 	{
 		if (_MTP->isAlternateTexEnabled())
 		{
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(0).x); GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(0).y); GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(1).x); GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText(buf);
-			sprintf(buf, "%.3f", _MTP->getAlternateScrollSpeed(1).y); GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(buf);
+			GetDlgItem(IDC_U_SPEED_1_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(0).x)));
+			GetDlgItem(IDC_V_SPEED_1_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(0).y)));
+			GetDlgItem(IDC_U_SPEED_2_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(1).x)));
+			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getAlternateScrollSpeed(1).y)));
 		}
 		else
 		{
@@ -187,7 +187,6 @@ void CMultiTexDlg::readValues(bool alternate)
 			GetDlgItem(IDC_V_SPEED_2_ALTERNATE)->SetWindowText(_T(""));
 		}
 	}
-	sprintf(buf, "%.3f", _MTP->getBumpFactor()); GetDlgItem(IDC_BUMP_FACTOR)->SetWindowText(buf);
 
 }
 

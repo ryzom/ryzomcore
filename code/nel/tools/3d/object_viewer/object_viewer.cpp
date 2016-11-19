@@ -284,9 +284,10 @@ std::string CObjectViewer::getModulePath() const
 	TCHAR sModulePath[256];
 	int res = GetModuleFileName(hModule, sModulePath, 256); nlassert(res);
 	nldebug("Object viewer module path is '%s'", sModulePath);
-	_splitpath (sModulePath, SDrive, SDir, NULL, NULL);
-	_makepath (sModulePath, SDrive, SDir, "object_viewer", ".cfg");
-	return sModulePath;
+
+	std::string path = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
+
+	return NLMISC::CPath::standardizeDosPath(path) + "object_viewer.cfg";
 }
 
 
@@ -535,7 +536,7 @@ void CObjectViewer::loadConfigFile()
 	}
 	catch (Exception& e)
 	{
-		::MessageBox (NULL, e.what(), "Objectviewer.cfg", MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox (NULL, utf8ToTStr(e.what()), _T("Objectviewer.cfg"), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -615,14 +616,14 @@ bool CObjectViewer::initUI (HWND parent)
 	// The windows path
 	uint dSize = ::GetWindowsDirectory(NULL, 0);
 	nlverify(dSize);
-	char *wd = new char[dSize];	
+
+	TCHAR *wd = new TCHAR[dSize];	
 	nlverify(::GetWindowsDirectory(wd, dSize));
-	_FontPath=wd;
-	_FontPath+="\\fonts\\arial.ttf";
+	_FontPath = tStrToUtf8(wd) + "\\fonts\\arial.ttf";
+	delete[] wd;
 
 	// The font generator
 	_FontGenerator = NL3D::newCFontGenerator ( _FontPath );
-	delete[] wd;
 
 	// The viewport
 	CViewport viewport;
@@ -823,7 +824,8 @@ bool CObjectViewer::initUI (HWND parent)
 		}
 		catch (NLMISC::EStream &e)
 		{
-			::MessageBox(NULL, ("Unable to load the default scheme bank file : "  + std::string(e.what())).c_str(), "Object Viewer", MB_ICONEXCLAMATION);
+			std::string msg = toString("Unable to load the default scheme bank file : %s", e.what());
+			::MessageBox(NULL, utf8ToTStr(msg), _T("Object Viewer"), MB_ICONEXCLAMATION);
 		}
 	}
 	iF.close();
@@ -838,7 +840,8 @@ bool CObjectViewer::initUI (HWND parent)
 		}
 		catch (Exception& e)
 		{
-			::MessageBox (NULL, (std::string("error while loading default.ovcgf : ") + e.what()).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = toString("Error while loading default.ovcgf : %s", e.what());
+			::MessageBox (NULL, utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}
 
@@ -1286,7 +1289,6 @@ void CObjectViewer::go ()
 			sint64 timeDiff = newTime - lastTime;
 			float fps = timeDiff > 0 ? (float)(1.0 / NLMISC::CTime::ticksToSecond (newTime-lastTime)) : 1000.0f;
 			lastTime=newTime;
-			char msgBar[1024];
 			uint nbPlayingSources, nbSources;
 			if (CSoundSystem::getAudioMixer())
 			{
@@ -1299,17 +1301,19 @@ void CObjectViewer::go ()
 			}
 
 			// Display std info.
-			sprintf (msgBar, "%s - Nb tri: %d -Texture used (Mo): %5.2f - Texture allocated (Mo): %5.2f - Distance: %5.0f - Sounds: %d/%d - Fps: %03.1f",
-				_Direct3d?"Direct3d":"OpenGL",
-							in.NLines+in.NPoints+in.NQuads*2+in.NTriangles+in.NTriangleStrips, (float)CNELU::Driver->getUsedTextureMemory () / (float)(1024*1024), 
-							(float)CNELU::Driver->profileAllocatedTextureMemory () / (float)(1024*1024), 
-							(_SceneCenter-CNELU::Camera->getMatrix().getPos()).norm(),						 
-							nbPlayingSources,
-							nbSources,
-							fps
-							);
+			std::string msgBar = toString("%s - Nb tri: %u - Texture used (MiB): %5.2f - Texture allocated (MiB): %5.2f - Distance: %5.0f - Sounds: %u/%u - Fps: %03.1f",
+				_Direct3d ? "Direct3d":"OpenGL",
+				in.NLines+in.NPoints+in.NQuads*2+in.NTriangles+in.NTriangleStrips,
+				(float)CNELU::Driver->getUsedTextureMemory () / (float)(1024*1024), 
+				(float)CNELU::Driver->profileAllocatedTextureMemory () / (float)(1024*1024), 
+				(_SceneCenter-CNELU::Camera->getMatrix().getPos()).norm(),						 
+				nbPlayingSources,
+				nbSources,
+				fps
+				);
+
 			// Display
-			_MainFrame->StatusBar.SetWindowText (msgBar);
+			_MainFrame->StatusBar.SetWindowText (utf8ToTStr(msgBar));
 
 			// Display Vegetable info.
 			if(_VegetableDlg!=NULL)
@@ -1790,9 +1794,8 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 						else
 						{
 							// Error message
-							char message[512];
-							smprintf (message, 512, "File not found %s", readed[i].ShapeFilename.c_str());
-							_MainFrame->MessageBox (message, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+							std::string message = toString("File not found %s", readed[i].ShapeFilename.c_str());
+							_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 
 							// Stop loading
 							break;
@@ -1826,9 +1829,8 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 				catch (Exception &e)
 				{
 					// Error message
-					char message[512];
-					smprintf (message, 512, "Error loading shape %s: %s", readed[i].ShapeFilename.c_str(), e.what());
-					_MainFrame->MessageBox (message, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+					std::string message = toString("Error loading shape %s: %s", readed[i].ShapeFilename.c_str(), e.what());
+					_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 
 					// Stop loading
 					break;
@@ -1872,20 +1874,12 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 
 // ***************************************************************************
 
-bool CObjectViewer::loadInstanceGroup(const char *igFilename)
+bool CObjectViewer::loadInstanceGroup(const std::string &igFilename)
 {
 	//AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// Add to the path
-	char drive[256];
-	char dir[256];
-	char path[256];
-
 	// Add search path for the mesh
-	_splitpath (igFilename, drive, dir, NULL, NULL);
-	_makepath (path, drive, dir, NULL, NULL);
-	CPath::addSearchPath (path);
-
+	CPath::addSearchPath (NLMISC::CFile::getPath(igFilename));
 	
 	// Open a file
 	CIFile file;
@@ -1906,16 +1900,15 @@ bool CObjectViewer::loadInstanceGroup(const char *igFilename)
 		{
 			// clean
 			delete ig;
-			_MainFrame->MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			return false;
 		}
 	}
 	else
 	{
 		// Create a message
-		char msg[512];
-		_snprintf (msg, 512, "Can't open the file %s for reading.", igFilename);
-		_MainFrame->MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = toString("Can't open the file %s for reading.", igFilename.c_str());
+		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		return false;
 	}
 
@@ -1928,21 +1921,16 @@ bool CObjectViewer::loadInstanceGroup(const char *igFilename)
 
 // ***************************************************************************
 
-bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char* skeleton)
+bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const std::string &skeleton)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 	// Add to the path
-	char drive[256];
-	char dir[256];
-	char path[256];
 
 	// Add search path for the skeleton
-	if (skeleton)
+	if (skeleton.empty())
 	{
-		_splitpath (skeleton, drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
-		CPath::addSearchPath (path);
+		CPath::addSearchPath (NLMISC::CFile::getPath(skeleton));
 	}
 
 	// Open a file
@@ -1957,7 +1945,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char
 	bool skelError=false;
 
 	// Continue ?
-	if (skeleton&&(strcmp (skeleton, "")!=0))
+	if (!skeleton.empty())
 	{
 
 		// Open a file
@@ -1975,7 +1963,7 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char
 			}
 			catch (Exception& e)
 			{
-				_MainFrame->MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 
 				// error
 				skelError=true;
@@ -1984,9 +1972,8 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char
 		else
 		{
 			// Create a message
-			char msg[512];
-			_snprintf (msg, 512, "Can't open the file %s for reading.", meshFilename);
-			_MainFrame->MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = NLMISC::toString("Can't open the file %s for reading.", skeleton.c_str());
+			_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 
 			// error
 			skelError=true;
@@ -2007,12 +1994,10 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char
 	for (uint i=0; i<meshFilename.size(); i++)
 	{
 		// Filename
-		const char *fileName = meshFilename[i].c_str();
+		const std::string fileName = meshFilename[i];
 
 		// Add search path for the mesh
-		_splitpath (fileName, drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
-		CPath::addSearchPath (path);
+		CPath::addSearchPath (NLMISC::CFile::getPath(fileName));
 
 		// Shape pointer
 		IShape *shapeMesh=NULL;
@@ -2031,16 +2016,15 @@ bool CObjectViewer::loadMesh (std::vector<std::string> &meshFilename, const char
 			}
 			catch (Exception& e)
 			{
-				_MainFrame->MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				_MainFrame->MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				continue;
 			}
 		}
 		else
 		{
 			// Create a message
-			char msg[512];
-			_snprintf (msg, 512, "Can't open the file %s for reading.", fileName);
-			_MainFrame->MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
+			_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			continue;
 		}
 
@@ -2097,7 +2081,7 @@ void CObjectViewer::resetCamera ()
 
 // ***************************************************************************
 
-uint CObjectViewer::addMesh (NL3D::IShape* pMeshShape, const char* meshName, uint skelIndex, const char* bindSkelName, bool createInstance)
+uint CObjectViewer::addMesh (NL3D::IShape* pMeshShape, const std::string &meshName, uint skelIndex, const char* bindSkelName, bool createInstance)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -2195,8 +2179,7 @@ uint CObjectViewer::addMesh (NL3D::IShape* pMeshShape, const char* meshName, uin
 						listBones.push_back (transformSkel->Bones[bone].getBoneName());
 
 					// Get name of the mesh
-					char nameMesh[512];
-					_splitpath (meshName, NULL, NULL, nameMesh, NULL);
+					std::string nameMesh = NLMISC::CFile::getFilenameWithoutExtension(meshName);
 
 					// Select a bones
 					std::string message = "Select a bone to stick " + string (nameMesh);
@@ -2280,7 +2263,7 @@ bool CObjectViewer::isSkeletonPresent() const
 
 // ***************************************************************************
 
-uint CObjectViewer::addCamera (const NL3D::CCameraInfo &cameraInfo, const char* cameraName)
+uint CObjectViewer::addCamera (const NL3D::CCameraInfo &cameraInfo, const std::string &cameraName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -2315,7 +2298,7 @@ uint CObjectViewer::addCamera (const NL3D::CCameraInfo &cameraInfo, const char* 
 
 // ***************************************************************************
 
-uint CObjectViewer::addSkel (NL3D::IShape* pSkelShape, const char* skelName)
+uint CObjectViewer::addSkel (NL3D::IShape* pSkelShape, const std::string &skelName)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -2398,7 +2381,7 @@ void IObjectViewer::releaseInterface (IObjectViewer* view)
 
 // ***************************************************************************
 
-void CObjectViewer::setSingleAnimation (NL3D::CAnimation* pAnim, const char* name, uint instance)
+void CObjectViewer::setSingleAnimation (NL3D::CAnimation* pAnim, const std::string &name, uint instance)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -2408,7 +2391,7 @@ void CObjectViewer::setSingleAnimation (NL3D::CAnimation* pAnim, const char* nam
 		_SelectedObject = instance;
 
 		// Add the animation
-		addAnimation (pAnim, (name+std::string(".anim")).c_str(), name, instance);
+		addAnimation (pAnim, name + ".anim", name, instance);
 
 		// Add the animation to the animationSet
 		_AnimationSetDlg->UpdateData (TRUE);
@@ -2866,7 +2849,7 @@ void CObjectViewer::enableDynamicObjectLightingTest(NLPACS::CGlobalRetriever *gl
 			if (!_ObjectLightTestShape.empty())
 			{			
 				string	str= string("Path not found for Light Test Shape: ") + _ObjectLightTestShape;
-				::MessageBox(NULL, str.c_str(), "Dynamic Object Light Test", MB_OK|MB_ICONEXCLAMATION);
+				::MessageBox(NULL, utf8ToTStr(str.c_str()), _T("Dynamic Object Light Test"), MB_OK|MB_ICONEXCLAMATION);
 			}
 			// disable.
 			_ObjectLightTest= NULL;
@@ -3241,7 +3224,7 @@ bool		CObjectViewer::createVegetableLandscape()
 			// close the progress dialog
 			dlgProgress.DestroyWindow();
 
-			MessageBox(_MainFrame->m_hWnd, e.what(), "Failed to Load landscape", MB_OK | MB_APPLMODAL);
+			MessageBox(_MainFrame->m_hWnd, utf8ToTStr(e.what()), _T("Failed to Load landscape"), MB_OK | MB_APPLMODAL);
 
 			// remove first possibly created collisions objects.
 			if(_VegetableCollisionEntity)
@@ -3536,10 +3519,10 @@ void CObjectViewer::refreshAnimationListeners()
 }
 
 // ***************************************************************************
-void CObjectViewer::addAnimation (NL3D::CAnimation* anim, const char* filename, const char* name, uint instance)
+void CObjectViewer::addAnimation(NL3D::CAnimation* anim, const std::string &filename, const std::string &name, uint instance)
 {
 	// Add an animation
-	uint id = _ListInstance[instance]->AnimationSet.addAnimation (name, anim);
+	uint id = _ListInstance[instance]->AnimationSet.addAnimation (name.c_str(), anim);
 	_ListInstance[instance]->Saved.AnimationFileName.push_back (filename);
 
 	// Rebuild the animationSet
@@ -3553,15 +3536,14 @@ void CObjectViewer::addAnimation (NL3D::CAnimation* anim, const char* filename, 
 }
 
 // ***************************************************************************
-void CObjectViewer::loadAnimation (const char* fileName, uint instance)
+void CObjectViewer::loadAnimation(const std::string &fileName, uint instance)
 {
 	// Open the file
 	CIFile file;
 	if (file.open (fileName))
 	{
 		// Get the animation name
-		char name[256];
-		_splitpath (fileName, NULL, NULL, name, NULL);
+		std::string name = NLMISC::CFile::getFilenameWithoutExtension(fileName);
 
 		// Make an animation
 		CAnimation *anim=new CAnimation;
@@ -3575,22 +3557,20 @@ void CObjectViewer::loadAnimation (const char* fileName, uint instance)
 	else
 	{
 		// Create a message
-		char msg[512];
-		_snprintf (msg, 512, "Can't open the file %s for reading.", fileName);
-		_MainFrame->MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
+		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
 // ***************************************************************************
-void CObjectViewer::loadSWT (const char* fileName, uint instance)
+void CObjectViewer::loadSWT (const std::string &fileName, uint instance)
 {
 	// Open the file
 	CIFile file;
 	if (file.open (fileName))
 	{
 		// Get the animation name
-		char name[256];
-		_splitpath (fileName, NULL, NULL, name, NULL);
+		std::string name = NLMISC::CFile::getFilenameWithoutExtension(fileName);
 
 		// Get the skeleton pointer
 		CSkeletonWeight* skel=new CSkeletonWeight;
@@ -3599,7 +3579,7 @@ void CObjectViewer::loadSWT (const char* fileName, uint instance)
 		skel->serial (file);
 
 		// Add an animation
-		_ListInstance[instance]->AnimationSet.addSkeletonWeight (name, skel);
+		_ListInstance[instance]->AnimationSet.addSkeletonWeight (name.c_str(), skel);
 
 		// Add the filename in the list
 		_ListInstance[instance]->Saved.SWTFileName.push_back (fileName);
@@ -3607,9 +3587,8 @@ void CObjectViewer::loadSWT (const char* fileName, uint instance)
 	else
 	{
 		// Create a message
-		char msg[512];
-		_snprintf (msg, 512, "Can't open the file %s for reading.", fileName);
-		_MainFrame->MessageBox (msg, "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("Can't open the file %s for reading.", fileName.c_str());
+		_MainFrame->MessageBox (utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -3712,8 +3691,8 @@ void		CObjectViewer::shootScene()
 			CNELU::Driver->setupViewport (CViewport ());
 
 			// The file name
-			string filename = NLMISC::CFile::getFilenameWithoutExtension ((const char*)fileDlg.GetPathName ());
-			string extension = NLMISC::CFile::getExtension ((const char*)fileDlg.GetPathName ());
+			string filename = NLMISC::CFile::getFilenameWithoutExtension(tStrToUtf8(fileDlg.GetPathName()));
+			string extension = NLMISC::CFile::getExtension (tStrToUtf8(fileDlg.GetPathName()));
 
 			// The file name without extension
 			bool jpeg = toLower (extension) == "jpg";
@@ -3792,13 +3771,15 @@ void		CObjectViewer::shootScene()
 					}
 					else
 					{
-						_MainFrame->MessageBox (("Can't open the file "+filenamefinal+" for writing.").c_str (), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+						std::string message = toString("Can't open the file %s for writing.", filenamefinal.c_str());
+						_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 						break;
 					}
 				}
 				catch (Exception &e)
 				{
-					_MainFrame->MessageBox (("Error during writing of the file "+filenamefinal+" : "+(string)e.what ()).c_str (), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+					std::string message = toString("Error during writing of the file %s: %s", filenamefinal.c_str(), e.what());
+					_MainFrame->MessageBox (utf8ToTStr(message), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 					break;
 				}
 			}
@@ -3815,7 +3796,7 @@ void CObjectViewer::drawFXUserMatrix()
 	{	
 		CString fxUserMatrix;
 		fxUserMatrix.LoadString(IDS_FX_USER_MATRIX);
-		fxUserMatrixStr = (LPCTSTR) fxUserMatrix;
+		fxUserMatrixStr = tStrToUtf8(fxUserMatrix);
 		stringRetrieved = true;
 	}
 	nlassert(_ParticleDlg);
@@ -3830,7 +3811,7 @@ void CObjectViewer::drawFXMatrix()
 	{	
 		CString fx;
 		fx.LoadString(IDS_FX_MATRIX);
-		fxStr = (LPCTSTR) fx;
+		fxStr = tStrToUtf8(fx);
 		stringRetrieved = true;
 	}
 	drawNamedMatrix(_ParticleDlg->getPSWorldMatrix(), fxStr, NLMISC::CRGBA::Blue, -0.2f, 10.f);
@@ -3844,7 +3825,7 @@ void CObjectViewer::drawSceneMatrix()
 	{	
 		CString sceneMatrix;
 		sceneMatrix.LoadString(IDS_SCENE_MATRIX);
-		sceneMatrixStr = (LPCTSTR) sceneMatrix;
+		sceneMatrixStr = tStrToUtf8(sceneMatrix);
 		stringRetrieved = true;
 	}
 	drawNamedMatrix(_SceneRoot->getMatrix(), sceneMatrixStr, NLMISC::CRGBA::White, 0.f, 10.f);

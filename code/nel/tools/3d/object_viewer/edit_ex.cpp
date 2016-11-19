@@ -76,7 +76,7 @@ std::string CEditEx::getString() const
 {
 	TCHAR buf[128];
 	GetWindowText(buf, sizeof(buf));
-	return std::string(buf);
+	return tStrToUtf8(buf);
 }
 
 void		CEditEx::setSInt(sint value)
@@ -130,21 +130,25 @@ void CEditEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 bool CEditEx::isValid()
 {
-	int iValue;
-	float fValue;
 	switch(_Type)
 	{
 		case SIntType:
-			return sscanf(getString().c_str(), "%d", &iValue) == 1;
-		break;
+		{
+			sint value;
+			return NLMISC::fromString(getString(), value);
+		}
 		case UIntType:
-			return sscanf(getString().c_str(), "%d", &iValue) == 1 && iValue >= 0;
-		break;
+		{
+			uint value;
+			return NLMISC::fromString(getString(), value);
+		}
 		case FloatType:
-			return sscanf(getString().c_str(), "%f", &fValue) == 1;
-		break;
-		default:
-			return true;	
-		break;
+		{
+			float value;
+			return NLMISC::fromString(getString(), value);
+		}
+		default: break;
 	}
+
+	return true;
 }

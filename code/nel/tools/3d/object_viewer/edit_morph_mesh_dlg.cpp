@@ -101,7 +101,7 @@ bool CEditMorphMeshDlg::getShapeNameFromDlg(std::string &name)
 		NLMISC::CPath::addSearchPath (path);
 		*/
 
-		name = fd.GetPathName();
+		name = tStrToUtf8(fd.GetPathName());
 		
 		return true;
 	}
@@ -135,7 +135,7 @@ void CEditMorphMeshDlg::OnAdd()
 		_CM->setShapes(&shapeNames[0], (uint)shapeNames.size());
 		std::vector<sint> numVerts;
 		_CM->getShapeNumVerts(numVerts);		
-		m_MeshList.AddString(getShapeDescStr(index, numVerts[index]).c_str());
+		m_MeshList.AddString(utf8ToTStr(getShapeDescStr(index, numVerts[index])));
 		GetDlgItem(IDC_REMOVE)->EnableWindow(TRUE);
 	}
 	touchPSState();
@@ -265,7 +265,7 @@ void CEditMorphMeshDlg::updateMeshList()
 	m_MeshList.ResetContent();
 	for (uint k = 0; k < _CM->getNumShapes(); ++k)
 	{	
-		m_MeshList.AddString(getShapeDescStr(k, numVerts[k]).c_str());		
+		m_MeshList.AddString(utf8ToTStr(getShapeDescStr(k, numVerts[k])));
 	}
 	m_MeshList.SetCurSel(0);
 	updateValidFlag();
@@ -322,12 +322,12 @@ std::string CEditMorphMeshDlg::getShapeDescStr(uint shapeIndex, sint numVerts) c
 	{	
 		CString verts;
 		verts.LoadString(IDS_VERTICES);
-		std::string msg = _CM->getShape(shapeIndex) + " (" + NLMISC::toString(numVerts) + " " + (LPCTSTR) verts + ")";
+		std::string msg = _CM->getShape(shapeIndex) + " (" + NLMISC::toString(numVerts) + " " + tStrToUtf8(verts) + ")";
 		return msg;
 	}
 	else
 	{		
-		std::string result =  _CM->getShape(shapeIndex) + " (" + (LPCTSTR) CMeshDlg::getShapeErrorString(numVerts) + ")";
+		std::string result =  _CM->getShape(shapeIndex) + " (" + tStrToUtf8(CMeshDlg::getShapeErrorString(numVerts)) + ")";
 		return result;
 	}
 }

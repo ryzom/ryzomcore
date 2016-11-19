@@ -147,7 +147,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 					CString name = path + filename;
 
 					// Load the animation
-					_ObjView->loadAnimation (name, instance);
+					_ObjView->loadAnimation (tStrToUtf8(name), instance);
 
 					// Touch the channel mixer
 					_ObjView->reinitChannels ();
@@ -158,7 +158,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 			}
 			catch (Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ void CAnimationSetDlg::OnAddSkelWt()
 					CString filename=fileDlg.GetNextPathName(pos);
 
 					// Load the animation
-					_ObjView->loadSWT (filename, instance);
+					_ObjView->loadSWT (tStrToUtf8(filename), instance);
 
 					// Touch the channel mixer
 					_ObjView->reinitChannels  ();
@@ -199,7 +199,7 @@ void CAnimationSetDlg::OnAddSkelWt()
 			}
 			catch (Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -233,9 +233,8 @@ void CAnimationSetDlg::refresh (BOOL update)
 		uint i;
 		for (i=0; i<_ObjView->getNumInstance (); i++)
 		{
-			char name[512];
-			_splitpath (_ObjView->getInstance (i)->Saved.ShapeFilename.c_str(), NULL, NULL, name, NULL);
-			EditedObject.InsertString (-1, name);
+			std::string name = NLMISC::CFile::getFilenameWithoutExtension(_ObjView->getInstance(i)->Saved.ShapeFilename);
+			EditedObject.InsertString (-1, utf8ToTStr(name));
 		}
 
 		// Get edited object
@@ -270,7 +269,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				CAnimation *anim = object->AnimationSet.getAnimation (object->AnimationSet.getAnimationIdByName (name));
 
 				// Insert an intem
-				HTREEITEM item=Tree.InsertItem (name);
+				HTREEITEM item=Tree.InsertItem(utf8ToTStr(name));
 				Tree.SetItemData (item, i);
 				nlassert (item!=NULL);
 
@@ -281,7 +280,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				while (ite!=setString.end())
 				{
 					// Add this string
-					HTREEITEM newItem = Tree.InsertItem (ite->c_str(), item);
+					HTREEITEM newItem = Tree.InsertItem (utf8ToTStr(*ite), item);
 					Tree.SetItemData (newItem, 0xffffffff);
 
 					// Get the track
@@ -296,19 +295,16 @@ void CAnimationSetDlg::refresh (BOOL update)
 						keyTrack->getKeysInRange (track->getBeginTime ()-1, track->getEndTime ()+1, keys);
 
 						// Print track info
-						char name[512];
-						_snprintf (name, 512, "%s (%f - %f) %d keys", typeid(*track).name(), track->getBeginTime (), track->getEndTime (), keys.size());
-						HTREEITEM keyItem = Tree.InsertItem (name, newItem);
-						Tree.SetItemData (keyItem, 0xffffffff);
+						name = toString("%s (%f - %f) %u keys", typeid(*track).name(), track->getBeginTime(), track->getEndTime(), (uint32)keys.size());
 					}
 					else
 					{
 						// Print track info
-						char name[512];
-						_snprintf (name, 512, "%s (%f - %f)", typeid(*track).name(), track->getBeginTime (), track->getEndTime ());
-						HTREEITEM keyItem = Tree.InsertItem (name, newItem);
-						Tree.SetItemData (keyItem, 0xffffffff);
+						name = toString("%s (%f - %f)", typeid(*track).name(), track->getBeginTime(), track->getEndTime());
 					}
+
+					HTREEITEM keyItem = Tree.InsertItem(utf8ToTStr(name), newItem);
+					Tree.SetItemData(keyItem, 0xffffffff);
 
 					ite++;
 				}
@@ -325,7 +321,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight (object->AnimationSet.getSkeletonWeightIdByName (name));
 
 				// Insert an intem
-				HTREEITEM item=SkelTree.InsertItem (name);
+				HTREEITEM item=SkelTree.InsertItem(utf8ToTStr(name));
 				nlassert (item!=NULL);
 
 				// Get number of node in this skeleton weight
@@ -334,11 +330,10 @@ void CAnimationSetDlg::refresh (BOOL update)
 				// Add the nodein the tree
 				for (uint n=0; n<numNode; n++)
 				{
-					char percent[512];
-					sprintf (percent, "%s (%f%%)", swt->getNodeName (n).c_str(), swt->getNodeWeight(n)*100);
+					std::string percent = toString("%s (%f%%)", swt->getNodeName(n).c_str(), swt->getNodeWeight(n)*100);
 
 					// Add this string
-					SkelTree.InsertItem (percent, item);
+					SkelTree.InsertItem (utf8ToTStr(percent), item);
 				}
 			}
 
@@ -346,7 +341,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.PlayList.size(); i++)
 			{
 				// Insert an intem
-				int item=PlayList.InsertString (-1, object->Saved.PlayList[i].c_str());
+				int item=PlayList.InsertString (-1, utf8ToTStr(object->Saved.PlayList[i]));
 				nlassert (item!=LB_ERR);
 			}
 		}
@@ -374,7 +369,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				// Insert an intem
 				TCHAR text[512];
 				PlayList.GetText( i, text);
-				object->Saved.PlayList[i] = text;
+				object->Saved.PlayList[i] = tStrToUtf8(text);
 			}
 
 			CDialog::UpdateData (update);

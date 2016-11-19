@@ -355,7 +355,7 @@ void CAttribDlg::init(HBITMAP bitmap, sint x, sint y, CWnd *pParent)
 	for (uint k = 0; k < getNumScheme(); ++k)
 	{	
 
-		m_Scheme.InsertString(k, getSchemeName(k).c_str());
+		m_Scheme.InsertString(k, utf8ToTStr(getSchemeName(k)));
 
 	}
 

@@ -326,8 +326,8 @@ Value* export_transition_cf (Value** arg_list, int count)
 
 	// The second arg
 	string matFilename[2];
-	matFilename[0] = arg_list[2]->to_string();
-	matFilename[1] = arg_list[3]->to_string();
+	matFilename[0] = tStrToUtf8(arg_list[2]->to_string());
+	matFilename[1] = tStrToUtf8(arg_list[3]->to_string());
 
 	// The third arg
 	bool checkOnly = (arg_list[4]->to_bool() != FALSE);
@@ -700,7 +700,7 @@ Value* check_zone_with_material_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The fourth arg
 	bool errorInDialog = (arg_list[2]->to_bool() != FALSE);
@@ -834,7 +834,7 @@ Value* check_zone_with_transition_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The second arg
 	int transitionNumber = arg_list[2]->to_int();
@@ -1002,7 +1002,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The thrid arg
 	Array *array = (Array*)arg_list[2];
@@ -1047,8 +1047,8 @@ Value* export_zone_cf (Value** arg_list, int count)
 			type_check (cell->get(2), String, message);
 
 			// Get the strings
-			categories[i].first = cell->get(1)->to_string();
-			categories[i].second = cell->get(2)->to_string();
+			categories[i].first = tStrToUtf8(cell->get(1)->to_string());
+			categories[i].second = tStrToUtf8(cell->get(2)->to_string());
 		}
 
 		// Get a Object pointer
@@ -1369,7 +1369,7 @@ Value* get_error_string_cf (Value** arg_list, int count)
 	int errorCode = arg_list[0]->to_int()-1;
 
 	// Error code
-	return new String ((char*)CLigoError::getStringError ((CLigoError::TError)errorCode));
+	return new String (utf8ToTStr(CLigoError::getStringError ((CLigoError::TError)errorCode)));
 }
 
 // ***************************************************************************
@@ -1384,10 +1384,10 @@ Value* set_directory_cf (Value** arg_list, int count)
 	type_check(arg_list[0], String, message);
 
 	// The first arg
-	const char *dir = arg_list[0]->to_string();
+	const std::string dir = tStrToUtf8(arg_list[0]->to_string());
 
 	// Set the directory
-	return (chdir (dir)==0)?&true_value:&false_value;
+	return (chdir (dir.c_str())==0)?&true_value:&false_value;
 }
 
 // ***************************************************************************
@@ -1876,7 +1876,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The thrid arg
 	int xMin = arg_list[2]->to_int();

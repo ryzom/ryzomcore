@@ -120,7 +120,7 @@ void CPSMoverDlg::OnUpdateXpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float x;
-	if (::sscanf(m_X, "%f", &x) == 1)
+	if (NLMISC::fromString(tStrToUtf8(m_X), x))
 	{
 		pos.x = x;
 		updateListener();
@@ -137,7 +137,7 @@ void CPSMoverDlg::OnUpdateYpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float y;
-	if (::sscanf(m_Y, "%f", &y) == 1)
+	if (NLMISC::fromString(tStrToUtf8(m_Y), y))
 	{
 		pos.y = y;
 		updateListener();
@@ -154,7 +154,7 @@ void CPSMoverDlg::OnUpdateZpos()
 	UpdateData();
 	NLMISC::CVector &pos = _EditedLocated->getPos()[_EditedLocatedIndex];
 	float z;
-	if (::sscanf(m_Z, "%f", &z) == 1)
+	if (NLMISC::fromString(tStrToUtf8(m_Z), z))
 	{
 		pos.z = z;
 		updateListener();		

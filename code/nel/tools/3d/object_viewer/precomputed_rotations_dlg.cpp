@@ -124,7 +124,7 @@ void CPrecomputedRotationsDlg::OnUpdateMinRotSpeed()
 	nlassert(_RotatedParticle);
 	UpdateData();
 	float newValue, valueMin, valueMax;
-	if (sscanf(m_RotSpeedMin, "%f", &newValue) == 1)
+	if (NLMISC::fromString(tStrToUtf8(m_RotSpeedMin), newValue))
 	{
 		uint32 nbModels = _RotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
 		valueMin = newValue;
@@ -144,7 +144,7 @@ void CPrecomputedRotationsDlg::OnUpdateMaxRotSpeed()
 	nlassert(_RotatedParticle);
 	UpdateData();
 	float newValue, valueMin, valueMax;
-	if (sscanf(m_RotSpeedMax, "%f", &newValue) == 1)
+	if (NLMISC::fromString(tStrToUtf8(m_RotSpeedMax), newValue))
 	{
 		uint32 nbModels = _RotatedParticle->checkHintRotateTheSame(valueMin, valueMax);
 		valueMax = newValue;
@@ -165,7 +165,7 @@ void CPrecomputedRotationsDlg::OnUpdateNbModels()
 	UpdateData();
 	float valueMin, valueMax;
 	sint32 newNbModels;
-	bool valid = (sscanf(m_NbModels, "%d", &newNbModels) == 1 && newNbModels > 0);
+	bool valid = (NLMISC::fromString(tStrToUtf8(m_NbModels), newNbModels) && newNbModels > 0);
 	if (dynamic_cast<NL3D::CPSConstraintMesh *>(_RotatedParticle))
 	{
 		valid &= (newNbModels < NL3D::ConstraintMeshMaxNumPrerotatedModels);

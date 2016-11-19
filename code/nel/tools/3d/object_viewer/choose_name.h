@@ -32,7 +32,7 @@ class CChooseName : public CDialog
 {
 // Construction
 public:
-	CChooseName(const TCHAR *initialName, CWnd* pParent = NULL);   // standard constructor
+	CChooseName(const CString &initialName, CWnd* pParent = NULL);   // standard constructor
 
 	std::string getName();
 

@@ -213,7 +213,7 @@ HTREEITEM CParticleTreeCtrl::buildTreeFromPS(CParticleWorkspace::CNode &node,  H
 	if (node.isLoaded())
 	{	
 		// bind particle system icon
-		HTREEITEM psRoot =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT, computeCaption(node).c_str(),  PSIconParticleSystem,  PSIconParticleSystem,  0,  0,  NULL,  rootHandle,  prevSibling);
+		HTREEITEM psRoot =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT, utf8ToTStr(computeCaption(node)),  PSIconParticleSystem,  PSIconParticleSystem,  0,  0,  NULL,  rootHandle,  prevSibling);
 		// set the param (doesn't seems to work during first creation)
 		SetItemData(psRoot,  (LPARAM) nt);
 		// now,  create each located		
@@ -228,7 +228,7 @@ HTREEITEM CParticleTreeCtrl::buildTreeFromPS(CParticleWorkspace::CNode &node,  H
 	else
 	{
 		// bind a bitmap that say that the PS hasn't been loaded
-		HTREEITEM psRoot =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT, computeCaption(node).c_str(),  PSIconParticleSystemNotLoaded,  PSIconParticleSystemNotLoaded,  0,  0,  NULL,  rootHandle,  prevSibling);
+		HTREEITEM psRoot =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT, utf8ToTStr(computeCaption(node)),  PSIconParticleSystemNotLoaded,  PSIconParticleSystemNotLoaded,  0,  0,  NULL,  rootHandle,  prevSibling);
 		SetItemData(psRoot,  (LPARAM) nt);
 		return psRoot;
 	}
@@ -242,7 +242,7 @@ void CParticleTreeCtrl::buildTreeFromWorkSpace(CParticleWorkspace &ws)
 	CNodeType *nt = new CNodeType(&ws);
 	_NodeTypes.push_back(nt);
 	// bind particle system icon
-	HTREEITEM rootHandle =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT,  computeCaption(ws).c_str(),  PSIconWorkspace,  PSIconWorkspace,  0,  0,  NULL,  NULL,  TVI_LAST);
+	HTREEITEM rootHandle =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT, utf8ToTStr(computeCaption(ws)),  PSIconWorkspace,  PSIconWorkspace,  0,  0,  NULL,  NULL,  TVI_LAST);
 	// set the param (doesn't seems to work during first creation)
 	SetItemData(rootHandle,  (LPARAM) nt);
 	// now,  create each particle system
@@ -259,7 +259,7 @@ void CParticleTreeCtrl::createNodeFromLocated(NL3D::CPSLocated *loc,  HTREEITEM 
 	CNodeType *nt = new CNodeType(loc);
 	_NodeTypes.push_back(nt);
 	// bind located icon
-	HTREEITEM nodeHandle =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM |TVIF_TEXT,  loc->getName().c_str() ,  PSIconLocated,  PSIconLocated,  0,  0,  (LPARAM) nt,  rootHandle,  TVI_LAST);
+	HTREEITEM nodeHandle =  InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM |TVIF_TEXT, utf8ToTStr(loc->getName()) ,  PSIconLocated,  PSIconLocated,  0,  0,  (LPARAM) nt,  rootHandle,  TVI_LAST);
 	// now,  insert each object that is bound to the located	
 	for (uint l = 0; l < loc->getNbBoundObjects(); ++l)
 	{
@@ -273,7 +273,7 @@ void CParticleTreeCtrl::createNodeFromLocatedBindable(NL3D::CPSLocatedBindable *
 	// we ordered the image so that they match the type for a located bindable (force,  particles,  collision zones...)
 	CNodeType *nt = new CNodeType(lb);
 	_NodeTypes.push_back(nt);
-	InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT ,  lb->getName().c_str() ,  lb->getType(),  lb->getType(),  PSIconForce,  PSIconForce,  (LPARAM) nt,  rootHandle,  TVI_LAST);
+	InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT , utf8ToTStr(lb->getName()) ,  lb->getType(),  lb->getType(),  PSIconForce,  PSIconForce,  (LPARAM) nt,  rootHandle,  TVI_LAST);
 }
 
 
@@ -1002,23 +1002,19 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			{
 				CParticleWorkspace::CNode *ownerNode = getOwnerNode(nt);
 				nlassert(ownerNode);				
-				// Add to the path
-				char drive[256];
-				char dir[256];
-				char path[256];
+
 				// Add search path for the texture
-				_splitpath (fd.GetPathName(),  drive,  dir,  NULL,  NULL);
-				_makepath (path,  drive,  dir,  NULL,  NULL);
-				NLMISC::CPath::addSearchPath (path);				
+				NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
+
 				std::auto_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
 				CParticleSystemModel *psm  = NULL;
 				try
 				{					
 					NL3D::CShapeStream ss;
 					NLMISC::CIFile inputFile;
-					inputFile.open((LPCTSTR) fd.GetPathName());
+					inputFile.open(tStrToUtf8(fd.GetPathName()));
 					ss.serial(inputFile);
-					std::string shapeName = NLMISC::CFile::getFilename((LPCTSTR) fd.GetPathName());
+					std::string shapeName = NLMISC::CFile::getFilename(tStrToUtf8(fd.GetPathName()));
 					sb->add(shapeName, ss.getShapePointer());
 					NL3D::CShapeBank *oldSB = CNELU::Scene->getShapeBank();
 					CNELU::Scene->setShapeBank(sb.get());
@@ -1043,7 +1039,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 				}
 				catch(NLMISC::EStream &e)
 				{
-					MessageBox(e.what(),  getStrRsc(IDS_ERROR),  MB_OK|MB_ICONEXCLAMATION);
+					MessageBox(utf8ToTStr(e.what()),  getStrRsc(IDS_ERROR),  MB_OK|MB_ICONEXCLAMATION);
 					return TRUE;
 				}							
 				ownerNode->setResetAutoCountFlag(false);								
@@ -1099,11 +1095,11 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			{			
 				_ParticleDlg->StartStopDlg->stop();
 				std::string fileName = nt->PS->getFilename();
-				static char BASED_CODE szFilter[] = "ps & shapes files(*.ps;*.shape)|*.ps; *.shape||";
-				CFileDialog fd(FALSE,  ".ps",  fileName.c_str(),  OFN_OVERWRITEPROMPT,  szFilter, this);				
+				static TCHAR BASED_CODE szFilter[] = _T("ps & shapes files(*.ps;*.shape)|*.ps; *.shape||");
+				CFileDialog fd(FALSE,  _T(".ps"), utf8ToTStr(fileName),  OFN_OVERWRITEPROMPT,  szFilter, this);
 				if (fd.DoModal() == IDOK)
 				{
-					_ParticleDlg->savePSAs(*this, *nt->PS, (LPCTSTR) fd.GetPathName(), false);
+					_ParticleDlg->savePSAs(*this, *nt->PS, tStrToUtf8(fd.GetPathName()), false);
 				}
 			}
 		}
@@ -1253,7 +1249,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 		}
 		getOwnerNode(nt)->setModified(true);
 		// TODO : an enum for CPSLocatedBindable::getType would be better...
-		InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,  toCreate->getName().c_str(),  toCreate->getType(),  toCreate->getType(),  0,  0,  (LPARAM) newNt,  father,  lastSon);		
+		InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT, utf8ToTStr(toCreate->getName()),  toCreate->getType(),  toCreate->getType(),  0,  0,  (LPARAM) newNt,  father,  lastSon);
 		touchPSState(nt);		
 		Invalidate();		
 		_ParticleDlg->StartStopDlg->resetAutoCount(getOwnerNode(nt));
@@ -1284,7 +1280,7 @@ std::pair<CParticleTreeCtrl::CNodeType *,  HTREEITEM> CParticleTreeCtrl::createL
 	CNodeType *newNt = new CNodeType(loc);
 	_NodeTypes.push_back(newNt);
 	// insert item in tree
-	HTREEITEM insertedItem = InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,  name.c_str(),  PSIconLocated,  PSIconLocated,  0,  0,  (LPARAM) newNt,  headItem,  TVI_LAST);
+	HTREEITEM insertedItem = InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT, utf8ToTStr(name),  PSIconLocated,  PSIconLocated,  0,  0,  (LPARAM) newNt,  headItem,  TVI_LAST);
 	touchPSState(newNt);	
 	return std::make_pair(newNt,  insertedItem);
 }
@@ -1303,7 +1299,7 @@ void CParticleTreeCtrl::OnEndlabeledit(NMHDR* pNMHDR,  LRESULT* pResult)
 		{
 			case CNodeType::workspace:
 			{
-				nt->WS->setName(std::string(info->item.pszText));
+				nt->WS->setName(tStrToUtf8(info->item.pszText));
 				workspaceModifiedFlagChanged(*nt->WS); // change name (this may be called twice because of the modification callback, but this doesn't matter)
 			}
 			break;
@@ -1315,10 +1311,10 @@ void CParticleTreeCtrl::OnEndlabeledit(NMHDR* pNMHDR,  LRESULT* pResult)
 				}
 				else
 				{				
-					nt->PS->getPSPointer()->setName(std::string(info->item.pszText));
+					nt->PS->getPSPointer()->setName(tStrToUtf8(info->item.pszText));
 					nt->PS->setModified(true);
 				}
-				this->SetItemText(info->item.hItem,  computeCaption(*nt->PS).c_str());
+				this->SetItemText(info->item.hItem, utf8ToTStr(computeCaption(*nt->PS)));
 			}
 			break;
 			case CNodeType::located:
@@ -1326,7 +1322,7 @@ void CParticleTreeCtrl::OnEndlabeledit(NMHDR* pNMHDR,  LRESULT* pResult)
 				nlassert(getOwnerNode(nt));
 				getOwnerNode(nt)->setModified(true);
 				this->SetItemText(info->item.hItem,  info->item.pszText);
-				nt->Loc->setName(std::string(info->item.pszText));
+				nt->Loc->setName(tStrToUtf8(info->item.pszText));
 			}
 			break;
 			case CNodeType::locatedBindable:
@@ -1334,7 +1330,7 @@ void CParticleTreeCtrl::OnEndlabeledit(NMHDR* pNMHDR,  LRESULT* pResult)
 				nlassert(getOwnerNode(nt));
 				getOwnerNode(nt)->setModified(true);
 				this->SetItemText(info->item.hItem,  info->item.pszText);
-				nt->Bind->setName(std::string(info->item.pszText));
+				nt->Bind->setName(tStrToUtf8(info->item.pszText));
 			}
 			break;
 		}
@@ -1470,7 +1466,7 @@ void CParticleTreeCtrl::updateCaption(CParticleWorkspace::CNode &node)
 	HTREEITEM item = getTreeItem(&node);
 	if (!item) return;
 	// update name of ps to dipslay a star in front of it (this tells that the ps has been modified)
-	SetItemText(item,  computeCaption(node).c_str());	
+	SetItemText(item, utf8ToTStr(computeCaption(node)));
 }
 
 //****************************************************************************************************************
@@ -1547,7 +1543,7 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 		while (pos)
 		{
 			CString path = fd.GetNextPathName(pos);						
-			CParticleWorkspace::CNode *node = pws.addNode((LPCTSTR) path);
+			CParticleWorkspace::CNode *node = pws.addNode(tStrToUtf8(path));
 			if (!node)
 			{
 				if (diplayNodeAlreadyInserted)
@@ -1560,7 +1556,7 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 					}
 					else
 					{
-						MessageBox(NLMISC::CFile::getFilename((LPCTSTR)path).c_str() + getStrRsc(IDS_PS_ALREADY_INSERTED), getStrRsc(IDS_ERROR), MB_OK|MB_ICONEXCLAMATION);
+						MessageBox(CString(utf8ToTStr(NLMISC::CFile::getFilename(tStrToUtf8(path)))) + getStrRsc(IDS_PS_ALREADY_INSERTED), getStrRsc(IDS_ERROR), MB_OK|MB_ICONEXCLAMATION);
 					}
 				}								
 				continue;				
@@ -1595,7 +1591,7 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 			}
 		}
 		// update modified state
-		SetItemText(GetRootItem(), computeCaption(pws).c_str());
+		SetItemText(GetRootItem(), utf8ToTStr(computeCaption(pws)));
 	}
 	
 }
@@ -1738,7 +1734,7 @@ void CParticleTreeCtrl::OnBeginlabeledit(NMHDR* pNMHDR, LRESULT* pResult)
 		switch (nt->Type)
 		{
 			case CNodeType::workspace:
-				pEdit->SetWindowText(nt->WS->getName().c_str());
+				pEdit->SetWindowText(utf8ToTStr(nt->WS->getName()));
 			break;
 			case CNodeType::particleSystem:
 			{
@@ -1749,18 +1745,18 @@ void CParticleTreeCtrl::OnBeginlabeledit(NMHDR* pNMHDR, LRESULT* pResult)
 				}
 				else
 				{				
-					pEdit->SetWindowText(nt->PS->getPSPointer()->getName().c_str());
+					pEdit->SetWindowText(utf8ToTStr(nt->PS->getPSPointer()->getName()));
 				}				
 			}
 			break;
 			case CNodeType::located:
 			{				
-				pEdit->SetWindowText(nt->Loc->getName().c_str());
+				pEdit->SetWindowText(utf8ToTStr(nt->Loc->getName()));
 			}
 			break;
 			case CNodeType::locatedBindable:
 			{
-				pEdit->SetWindowText(nt->Bind->getName().c_str());
+				pEdit->SetWindowText(utf8ToTStr(nt->Bind->getName()));
 			}
 			break;
 		}
@@ -1857,10 +1853,10 @@ void CParticleTreeCtrl::updateAllCaptions()
 		switch(nt->Type)
 		{
 			case CNodeType::particleSystem:
-				SetItemText(curr, computeCaption(*nt->PS).c_str());
+				SetItemText(curr, utf8ToTStr(computeCaption(*nt->PS)));
 			break;
 			case CNodeType::workspace:
-				SetItemText(curr, computeCaption(*nt->WS).c_str());
+				SetItemText(curr, utf8ToTStr(computeCaption(*nt->WS)));
 			break;
 			case CNodeType::located:			
 			case CNodeType::locatedBindable:			

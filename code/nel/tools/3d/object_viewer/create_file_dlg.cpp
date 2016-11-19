@@ -72,7 +72,7 @@ BOOL CCreateFileDlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();	
 	SetWindowText((LPCTSTR) _Title);
-	GetDlgItem(IDC_LOCATION)->SetWindowText(_DefaultBasePath.c_str());
+	GetDlgItem(IDC_LOCATION)->SetWindowText(utf8ToTStr(_DefaultBasePath));
 	if (!_DefaultBasePath.empty())
 	{
 		GetDlgItem(IDC_FILENAME)->SetFocus();
@@ -90,10 +90,10 @@ void CCreateFileDlg::OnOK()
 {
 	CString filename;
 	GetDlgItem(IDC_FILENAME)->GetWindowText(filename);
-	_Filename = (LPCTSTR) filename;
+	_Filename = tStrToUtf8(filename);
 	CString location;
 	GetDlgItem(IDC_LOCATION)->GetWindowText(location);
-	_Path = (LPCTSTR) location;	
+	_Path = tStrToUtf8(location);
 	if (_Path.empty())
 	{
 		localizedMessageBox(*this, IDS_EMPTY_PATH, IDS_ERROR, MB_ICONEXCLAMATION);

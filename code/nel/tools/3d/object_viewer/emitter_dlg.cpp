@@ -85,7 +85,7 @@ void CEmitterDlg::initEmittedType()
 		NL3D::CPSLocated *loc = dynamic_cast<NL3D::CPSLocated *>(ps->getProcess(k));
 		if (loc) // is this a located
 		{
-			m_EmittedTypeCtrl.AddString(loc->getName().c_str());
+			m_EmittedTypeCtrl.AddString(utf8ToTStr(loc->getName()));
 			_LocatedList.push_back(loc);			
 			if (loc == _Emitter->getEmittedType())
 			{

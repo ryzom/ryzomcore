@@ -221,7 +221,7 @@ void CSoundAnimView::save()
 
 				if (fileDlg.DoModal() == IDOK)
 				{
-					filename = (const char*) fileDlg.GetPathName();
+					filename = tStrToUtf8(fileDlg.GetPathName());
 				}
 				else
 				{
@@ -236,7 +236,7 @@ void CSoundAnimView::save()
 			}
 			catch (Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}

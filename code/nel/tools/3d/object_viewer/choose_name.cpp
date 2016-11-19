@@ -22,7 +22,7 @@
 // CChooseName dialog
 
 
-CChooseName::CChooseName(const TCHAR *initialName, CWnd* pParent /*=NULL*/)
+CChooseName::CChooseName(const CString &initialName, CWnd* pParent /*=NULL*/)
 	: CDialog(CChooseName::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CChooseName)
@@ -33,7 +33,7 @@ CChooseName::CChooseName(const TCHAR *initialName, CWnd* pParent /*=NULL*/)
 
 std::string CChooseName::getName()
 {
-	return std::string(m_Name);
+	return tStrToUtf8(m_Name);
 }
 
 void CChooseName::DoDataExchange(CDataExchange* pDX)

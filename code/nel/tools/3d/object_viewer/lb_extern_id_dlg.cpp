@@ -119,7 +119,7 @@ void CLBExternIDDlg::OnChangeIdValue()
 	TCHAR buf[6];
 	::memset(buf, 0, 6);
 	GetDlgItem(IDC_ID_VALUE)->GetWindowText(buf, 6);
-	_ID = StringToID(buf);	
+	_ID = StringToID(tStrToUtf8(buf).c_str());
 	if (_ID)
 	{
 		GetDlgItem(IDOK)->EnableWindow(TRUE);

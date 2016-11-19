@@ -455,26 +455,24 @@ void CSlotDlg::OnSetSkeleton()
 
 void CSlotDlg::setWindowName ()
 {
-	char tmp[512];
-	_snprintf (tmp, 512, "Slot %d : ", Id);
+	std::string tmp = NLMISC::toString("Slot %d : ", Id);
+
 	if (isEmpty())
-		strcat (tmp, "empty");
+		tmp += "empty";
 	else
-		strcat (tmp, getSlotInformation ()->Animation .c_str());
+		tmp += getSlotInformation ()->Animation;
 
 	CSlotInfo *information = getSlotInformation ();
 	if (information)
 	{
 		std::string SkeletonName = information->Skeleton;
-		if (SkeletonName != "")	
+		if (!SkeletonName.empty())	
 		{
-			strcat (tmp, " (");
-			strcat (tmp, SkeletonName.c_str());
-			strcat (tmp, ")");
+			tmp += " (" + SkeletonName + ")";
 		}
 	}
 
-	GetDlgItem (IDC_SLOT_NAME)->SetWindowText (tmp);
+	GetDlgItem (IDC_SLOT_NAME)->SetWindowText (utf8ToTStr(tmp));
 }
 
 // ***************************************************************************

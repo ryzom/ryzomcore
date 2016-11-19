@@ -100,7 +100,7 @@ void CVegetableDensityPage::setVegetableToEdit(NL3D::CVegetable *vegetable)
 	{
 		// Init ShapeName
 		// ----------
-		StaticVegetableShape.SetWindowText(_Vegetable->ShapeName.c_str());
+		StaticVegetableShape.SetWindowText(utf8ToTStr(_Vegetable->ShapeName));
 
 		// init Creation Distance.
 		// ----------
@@ -228,7 +228,7 @@ void		CVegetableDensityPage::updateAngleMinFromEditText()
 	TCHAR	stmp[256];
 	AngleMinEdit.GetWindowText(stmp, 256);
 	float	angleMin;
-	NLMISC::fromString(stmp, angleMin);
+	NLMISC::fromString(tStrToUtf8(stmp), angleMin);
 	NLMISC::clamp(angleMin, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMin= (float)sin(angleMin*NLMISC::Pi/180.f);
@@ -252,7 +252,7 @@ void		CVegetableDensityPage::updateAngleMaxFromEditText()
 	TCHAR	stmp[256];
 	AngleMaxEdit.GetWindowText(stmp, 256);
 	float	angleMax;
-	NLMISC::fromString(stmp, angleMax);
+	NLMISC::fromString(tStrToUtf8(stmp), angleMax);
 	NLMISC::clamp(angleMax, -90, 90);
 	// make a sinus, because 90 => 1, and -90 =>-1
 	float	cosAngleMax= (float)sin(angleMax*NLMISC::Pi/180.f);
@@ -523,22 +523,19 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
+		std::string fileName = tStrToUtf8(fd.GetFileName());
 
 		// Add search path for the .veget
-		_splitpath (fd.GetPathName(), drive, dir, NULL, NULL);
-		_makepath (path, drive, dir, NULL, NULL);
+		std::string path = NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName()));
 		NLMISC::CPath::addSearchPath (path);
 
 		try
 		{
 			// verify the file can be opened.
-			NLMISC::CPath::lookup((const char*)fd.GetFileName());
+			NLMISC::CPath::lookup(fileName);
 
 			// update shapeName and view
-			_Vegetable->ShapeName= std::string(fd.GetFileName());
+			_Vegetable->ShapeName = fileName;
 			StaticVegetableShape.SetWindowText(fd.GetFileName());
 
 			// update the name in the list-box
@@ -549,7 +546,7 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 		}
 		catch (NLMISC::EPathNotFound &ep)
 		{
-			MessageBox(ep.what(), "Can't open file");
+			MessageBox(utf8ToTStr(ep.what()), _T("Can't open file"));
 		}
 	}
 }

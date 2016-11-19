@@ -160,22 +160,22 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 
 // ***************************************************************************
 
-void CMaxToLigo::errorMessage (const char *msg, const char *title, Interface& it, bool dialog)
+void CMaxToLigo::errorMessage(const std::string &msg, const std::string &title, Interface& it, bool dialog)
 {
 	// Text or dialog ?
 	if (dialog)
 	{
 		// Dialog message
-		MessageBox (it.GetMAXHWnd(), msg, title, MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (it.GetMAXHWnd(), utf8ToTStr(msg), utf8ToTStr(title), MB_OK|MB_ICONEXCLAMATION);
 	}
 	else
 	{
 		// Text message
-		mprintf ((string(msg) + "\n").c_str());
+		mprintf (utf8ToTStr(msg + "\n"));
 	}
 
 	// Output in log
-	nlwarning ("LIGO ERROR : %s", msg);
+	nlwarning ("LIGO ERROR : %s", msg.c_str());
 }
 
 // ***************************************************************************
