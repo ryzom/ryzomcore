@@ -911,7 +911,7 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # Fix "relocation R_X86_64_32 against.." error on x64 platforms
-    IF(TARGET_X64 AND WITH_STATIC AND NOT WITH_STATIC_DRIVERS AND NOT MINGW)
+    IF(NOT MINGW)
       ADD_PLATFORM_FLAGS("-fPIC")
     ENDIF()
 
