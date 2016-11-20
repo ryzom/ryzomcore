@@ -56,7 +56,12 @@ std::string CLoginRegistry::getProductInstallId()
 
 		std::string id = NLMISC::toString(r);
 
-		if (RegSetValueExW(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) utf8ToWice(id), (DWORD)(id.size())+1) == ERROR_SUCCESS)
+		// copy wide string to a buffer
+		const uint keyMaxLength = 16;
+		wchar_t	buffer[keyMaxLength];
+		wcscpy(buffer, utf8ToWide(id));
+
+		if (RegSetValueExW(hKey, InstallIdKeyHandle, 0L, REG_SZ, (const BYTE *) buffer, (DWORD)(wcslen(buffer)*2+2)) == ERROR_SUCCESS)
 		{
 			return id;
 		}
