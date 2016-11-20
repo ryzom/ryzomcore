@@ -67,7 +67,7 @@ bool CSoundAnimView::registerClass()
 	_WndClass = AfxRegisterWndClass(CS_VREDRAW | CS_HREDRAW, ::LoadCursor(NULL, IDC_ARROW), (HBRUSH) ::GetStockObject(WHITE_BRUSH));
 
 	// Do some additional initialization of static veriables
-	_Font.CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, "Arial");
+	_Font.CreateFont(14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_SWISS, _T("Arial"));
 	_FillBrush.CreateSolidBrush(RGB(230, 245, 245));
 	_MarkerBrush.CreateSolidBrush(RGB(0, 0, 0));
 	_SelectBrush.CreateSolidBrush(RGB(0, 210, 210));
@@ -113,7 +113,7 @@ void CSoundAnimView::Create(CObjectViewer* objView, CAnimationDlg* animDlg, CSou
 	}
 
 
-	CWnd::Create((LPCTSTR) _WndClass, "Sound Animation", WS_CHILD | WS_VISIBLE, rect, (CWnd*) sndDlg, ++_WndId);
+	CWnd::Create((LPCTSTR) _WndClass, _T("Sound Animation"), WS_CHILD | WS_VISIBLE, rect, (CWnd*) sndDlg, ++_WndId);
 }
 
 // ********************************************************
@@ -216,12 +216,12 @@ void CSoundAnimView::save()
 				filename.append(anim->getName()).append(".sound_anim");
 
 				// Create a dialog
-				char BASED_CODE szFilter[] = "NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||";
-				CFileDialog fileDlg( FALSE, ".sound_anim", filename.c_str(), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+				TCHAR BASED_CODE szFilter[] = _T("NeL Sound Animations (*.sound_anim)|*.sound_anim|All Files (*.*)|*.*||");
+				CFileDialog fileDlg( FALSE, _T(".sound_anim"), utf8ToTStr(filename), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 
 				if (fileDlg.DoModal() == IDOK)
 				{
-					filename = (const char*) fileDlg.GetPathName();
+					filename = tStrToUtf8(fileDlg.GetPathName());
 				}
 				else
 				{
@@ -234,9 +234,9 @@ void CSoundAnimView::save()
 			{
 				CSoundAnimManager::instance()->saveAnimation(anim, filename);
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -328,7 +328,7 @@ void CSoundAnimView::refresh(BOOL update)
 					else
 						soundAnim = animManager->findAnimation(name);
 				}
-				catch (exception& e)
+				catch (const exception& e)
 				{
 					nlwarning("Couldn't find sound animation <%s>: %s", name.c_str(), e.what());
 					needCreate = true;

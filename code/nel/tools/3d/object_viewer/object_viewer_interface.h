@@ -69,25 +69,25 @@ public:
 	virtual void releaseUI () = 0;
 
 	// Add a mesh
-	virtual uint addMesh (NL3D::IShape* pMeshShape, const char* meshName, uint skelIndex, const char* bindSkelName = NULL, bool createInstance = true) = 0;
+	virtual uint addMesh(NL3D::IShape* pMeshShape, const std::string &meshName, uint skelIndex, const char* bindSkelName = NULL, bool createInstance = true) = 0;
 
 	// Add a skel
-	virtual uint addSkel (NL3D::IShape* pSkelShape, const char* skelName) = 0;
+	virtual uint addSkel (NL3D::IShape* pSkelShape, const std::string &skelName) = 0;
 
 	// Add a camera
-	virtual uint addCamera (const NL3D::CCameraInfo &cameraInfo, const char* cameraName) = 0;
+	virtual uint addCamera (const NL3D::CCameraInfo &cameraInfo, const std::string &cameraName) = 0;
 
 	// remove all the instance from the scene
 	virtual void					 removeAllInstancesFromScene() = 0;
 
 	// Load a mesh
-	virtual bool loadMesh (std::vector<std::string> &meshFilename, const char* skeleton) = 0;
+	virtual bool loadMesh (std::vector<std::string> &meshFilename, const std::string &skeleton) = 0;
 
 	// Load a shape
 	virtual void resetCamera () = 0;
 
 	// Set single animation
-	virtual void setSingleAnimation (NL3D::CAnimation* pAnim, const char* name, uint instance) = 0;
+	virtual void setSingleAnimation (NL3D::CAnimation* pAnim, const std::string &name, uint instance) = 0;
 
 	// Set automatic animation
 	virtual void setAutoAnimation (NL3D::CAnimationSet* pAnimSet) = 0;

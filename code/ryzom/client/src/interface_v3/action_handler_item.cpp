@@ -329,7 +329,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 		// remove infos waiter (if not already canceled)
 		getInventory().removeItemInfoWaiter(this);
 		_CurrItemSheet = NULL;
-		WindowName = "";
+		WindowName.clear();
 
 		// hide the dialog
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();

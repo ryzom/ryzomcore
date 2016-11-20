@@ -663,7 +663,7 @@ Just press Continue button and follow the different steps until everything is do
     </message>
     <message>
         <location filename="../src/main.cpp" line="119"/>
-        <source>Instalation and launcher tool for Ryzom</source>
+        <source>Installation and launcher tool for Ryzom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

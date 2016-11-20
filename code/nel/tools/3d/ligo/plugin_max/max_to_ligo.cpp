@@ -124,17 +124,17 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			TCHAR sDrive[256];
+			TCHAR sDir[256];
+			_tsplitpath (sModulePath, sDrive, sDir, NULL, NULL);
+			_tmakepath (sModulePath, sDrive, sDir, _T("ligoscape"), _T(".cfg"));
 
 			try
 			{
@@ -144,7 +144,7 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
 				char msg[512];
@@ -160,22 +160,22 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 
 // ***************************************************************************
 
-void CMaxToLigo::errorMessage (const char *msg, const char *title, Interface& it, bool dialog)
+void CMaxToLigo::errorMessage(const std::string &msg, const std::string &title, Interface& it, bool dialog)
 {
 	// Text or dialog ?
 	if (dialog)
 	{
 		// Dialog message
-		MessageBox (it.GetMAXHWnd(), msg, title, MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (it.GetMAXHWnd(), utf8ToTStr(msg), utf8ToTStr(title), MB_OK|MB_ICONEXCLAMATION);
 	}
 	else
 	{
 		// Text message
-		mprintf ((string(msg) + "\n").c_str());
+		mprintf (utf8ToTStr(msg + "\n"));
 	}
 
 	// Output in log
-	nlwarning ("LIGO ERROR : %s", msg);
+	nlwarning ("LIGO ERROR : %s", msg.c_str());
 }
 
 // ***************************************************************************

@@ -933,7 +933,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						if ( idm==dirmapDirs.end() )
 						{
 							nlinfo( "Directory mapping not found for %s (index %u)", filebase.c_str(), letterIndex );
-							dirbase = ""; // put into root
+							dirbase.clear(); // put into root
 						}
 					}
 					else
@@ -953,7 +953,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		{
 
 			// Load sheet (skip if failed)
-			dirbase = "";
+			dirbase.clear();
 			filename = (*it).second; // whole path
 			form = (CForm*)formLoader->loadForm( filename.c_str() );
 			if (form == NULL)

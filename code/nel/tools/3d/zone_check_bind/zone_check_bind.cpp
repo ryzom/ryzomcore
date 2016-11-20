@@ -89,7 +89,7 @@ typedef CQuadGrid<CPatchVertexInfo>   TPVQuadGrid;
 
 /** Load the given zone (name without extension)
   * return a pointer to the zone, or NULL if not found
-  * Throw an exception if a read error occured
+  * Throw an exception if a read error occurred
   */
 static CZone *LoadZone(uint16 xPos, uint16 yPos, std::string zoneExt)
 {

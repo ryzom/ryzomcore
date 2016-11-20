@@ -520,7 +520,7 @@ bool CObject::getShortestName(std::string &instanceId, std::string &attrName, si
 	if (isTable() && getAttr("InstanceId"))
 	{
 		instanceId = getAttr("InstanceId")->toString();
-		attrName = "";
+		attrName.clear();
 		position = -1;
 		return true;
 	}

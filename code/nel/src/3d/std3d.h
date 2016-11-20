@@ -34,6 +34,7 @@
 #include <functional>
 #include <iostream>
 #include <limits>
+#include <iterator>
 
 #include "nel/misc/rgba.h"
 #include "nel/misc/debug.h"

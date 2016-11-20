@@ -864,12 +864,8 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 						CGeorgesEditDoc *doc = View->GetDocument ();
 						if (doc)
 						{
-							// Build the filter string
-							char filter[512];
-							smprintf (filter, 512, "Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|");
-
 							// Open the dialog
-							CFileDialog dlgFile (TRUE, "*.dfn", "*.dfn", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, theApp.m_pMainWnd);
+							CFileDialog dlgFile (TRUE, _T("*.dfn"), _T("*.dfn"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|"), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
@@ -1182,7 +1178,7 @@ void CFormDialog::getDfnName (string &result) const
 		result = (*extension == '.') ? extension+1 : extension;
 	}
 	else
-		result = "";
+		result.clear();
 }
 
 // ***************************************************************************
@@ -2350,7 +2346,7 @@ void CColorEdit::getValue (std::string &result)
 	}
 	else
 	{
-		result = "";
+		result.clear();
 	}
 }
 
@@ -2807,7 +2803,7 @@ void CIconWidget::onOk ()
 
 void CIconWidget::getValue (std::string &result)
 {
-	result = "";
+	result.clear();
 }
 
 // ***************************************************************************

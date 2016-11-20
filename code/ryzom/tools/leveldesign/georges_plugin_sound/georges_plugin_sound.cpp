@@ -47,7 +47,7 @@ __declspec( dllexport ) IEditPlugin *IGeorgesEditGetInterface (int version, NLGE
 		{
 			return new CSoundPlugin(globalInterface);
 		}
-		catch (std::exception &e)
+		catch (const std::exception &e)
 		{
 			string reason = e.what();
 			MessageBox (NULL, reason.c_str(), "Sound plugin", MB_OK);

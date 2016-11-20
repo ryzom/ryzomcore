@@ -1761,7 +1761,7 @@ ITrack* CExportNel::buildATrack (CAnimation& animation, Control& c, TNelValueTyp
 			}
 			else
 			{
-				MessageBox (NULL, "Warning: no pos track exported!", "Tmp NEL", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, _T("Warning: no pos track exported!"), _T("Tmp NEL"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}

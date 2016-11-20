@@ -3875,7 +3875,7 @@ void CPrimTexture::buildFromFile(const std::string &filename)
 			_Width = (uint) width;
 			_Height = (uint) height;
 		}
-		catch (NLMISC::EStream)
+		catch (const NLMISC::EStream &)
 		{
 			nlwarning("Couldn't retrieve size for %s", filename.c_str());
 		}

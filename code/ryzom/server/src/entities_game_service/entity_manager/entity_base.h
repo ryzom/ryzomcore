@@ -353,7 +353,7 @@ public:
 	 *	Set the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the new value for the variable
-	 * \return true if the value has been set, false if an error occured
+	 * \return true if the value has been set, false if an error occurred
 	 */
 	bool setValue( const std::string& var, const std::string& value );
 
@@ -361,7 +361,7 @@ public:
 	 *	Modify the value of a var
 	 * \param var is the name of the variable
 	 * \param value is the modification value
-	 * \return true if the value has been changed, false if an error occured
+	 * \return true if the value has been changed, false if an error occurred
 	 */
 	bool modifyValue( const std::string& var, const std::string& value );
 

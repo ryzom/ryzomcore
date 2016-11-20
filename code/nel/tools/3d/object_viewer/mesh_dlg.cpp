@@ -90,7 +90,7 @@ void CMeshDlg::touchPSState()
 void CMeshDlg::OnBrowseShape() 
 {
 	
-	CFileDialog fd(TRUE, ".shape", "*.shape", 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
@@ -112,9 +112,9 @@ void CMeshDlg::OnBrowseShape()
 			m_ShapeName = (std::string(fname) + ext).c_str();
 			touchPSState();			
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
-			MessageBox(e.what(), "shape loading error");
+			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
 		}		
 		updateMeshErrorString();
 	}
@@ -166,7 +166,7 @@ void CMeshDlg::updateForMorph()
 		}
 		else
 		{
-			m_ShapeName = "";
+			m_ShapeName.Empty();
 		}
 	}
 	updateMeshErrorString();
@@ -238,7 +238,7 @@ BOOL CMeshDlg::EnableWindow( BOOL bEnable)
 ///==================================================================
 void CMeshDlg::updateMeshErrorString()
 {
-	GetDlgItem(IDC_MESH_ERROR)->SetWindowText("");
+	GetDlgItem(IDC_MESH_ERROR)->SetWindowText(_T(""));
 	NL3D::CPSConstraintMesh *cm = dynamic_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 	if (!cm) return;
 	std::vector<sint> numVerts;

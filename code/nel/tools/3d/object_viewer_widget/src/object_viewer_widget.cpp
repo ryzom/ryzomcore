@@ -502,7 +502,7 @@ namespace NLQT
 		// load and set search paths from config
 		//Modules::config().configSearchPaths();
 
-		_CurrentInstance = "";
+		_CurrentInstance.clear();
 
 		nlinfo("Scene cleared");
 	}

@@ -2089,10 +2089,10 @@ namespace NLGUI
 						templateName = value[MY_HTML_TEXTAREA_Z_INPUT_TMPL];
 
 					// Get the string name
-					_TextAreaName = "";
+					_TextAreaName.clear();
 					_TextAreaRow = 1;
 					_TextAreaCols = 10;
-					_TextAreaContent = "";
+					_TextAreaContent.clear();
 					_TextAreaMaxLength = 1024;
 					if (present[MY_HTML_TEXTAREA_NAME] && value[MY_HTML_TEXTAREA_NAME])
 						_TextAreaName = value[MY_HTML_TEXTAREA_NAME];
@@ -2112,7 +2112,7 @@ namespace NLGUI
 					if(!_TitlePrefix.empty())
 						_TitleString = _TitlePrefix + " - ";
 					else
-						_TitleString = "";
+						_TitleString.clear();
 					_Title = true;
 				}
 				break;
@@ -2144,10 +2144,10 @@ namespace NLGUI
 				endParagraph();
 				break;
 			case HTML_OBJECT:
-				_ObjectType = "";
-				_ObjectData = "";
-				_ObjectMD5Sum = "";
-				_ObjectAction = "";
+				_ObjectType.clear();
+				_ObjectData.clear();
+				_ObjectMD5Sum.clear();
+				_ObjectAction.clear();
 				if (present[HTML_OBJECT_TYPE] && value[HTML_OBJECT_TYPE])
 					_ObjectType = value[HTML_OBJECT_TYPE];
 				if (present[HTML_OBJECT_DATA] && value[HTML_OBJECT_DATA])
@@ -2369,7 +2369,7 @@ namespace NLGUI
 				{
 					endParagraph();
 				}
-				_DivName = "";
+				_DivName.clear();
 				popIfNotEmpty (_Divs);
 				popIfNotEmpty (_BlockLevelElement);
 				break;
@@ -2614,7 +2614,7 @@ namespace NLGUI
 							{
 								CLuaManager::getInstance().executeLuaScript("\nlocal __ALLREADYDL__=true\n"+_ObjectScript, true);
 							}
-							_ObjectScript = "";
+							_ObjectScript.clear();
 						}
 					}
 					_Object = false;
@@ -2632,7 +2632,7 @@ namespace NLGUI
 		{
 			// we receive an embeded lua script
 			_ParsingLua = _TrustedDomain; // Only parse lua if TrustedDomain
-			_LuaScript = "";
+			_LuaScript.clear();
 		}
 	}
 
@@ -2687,8 +2687,6 @@ namespace NLGUI
 		_LI = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
-		_DocumentUrl = "";
-		_DocumentDomain = "";
 		_UrlFragment.clear();
 		_RefreshUrl.clear();
 		_NextRefreshTime = 0.0;
@@ -2741,7 +2739,6 @@ namespace NLGUI
 		DefaultCheckBoxBitmapOver =		"checkbox_over.tga";
 		DefaultRadioButtonBitmapNormal = "w_radiobutton.png";
 		DefaultRadioButtonBitmapPushed = "w_radiobutton_pushed.png";
-		DefaultRadioButtonBitmapOver =	"";
 		DefaultBackgroundBitmapView =	"bg";
 		clearContext();
 
@@ -5825,7 +5822,7 @@ namespace NLGUI
 				if (it->second == "monospace")
 					style.FontFamily = "monospace";
 				else
-					style.FontFamily = "";
+					style.FontFamily.clear();
 			}
 			else
 			if (it->first == "font-weight")

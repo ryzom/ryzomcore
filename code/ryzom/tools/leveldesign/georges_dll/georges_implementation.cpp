@@ -454,7 +454,7 @@ BOOL CGeorgesImpl::PreTranslateMessage (MSG *pMsg)
 	{
 		ploader->SetTypPredef( _sxfilename, vsx );
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfilename + ")";
 		theApp.m_pMainWnd->MessageBox(tmp.c_str(), "Georges_Lib", MB_ICONERROR | MB_OK);
@@ -515,7 +515,7 @@ void CGeorgesImpl::MakeTyp( const std::string& filename, TType type, TUI ui, con
 			// Write
 			t.write (outputXml.getDocument ());
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning ("Error during writing file '%s' : ", filename.c_str (), e.what ());
 		}
@@ -581,7 +581,7 @@ void CGeorgesImpl::LoadDocument( const std::string& _sxfullname )
 	{
 		theApp.OpenDocumentFile(_sxfullname.c_str());
 	}
-	catch (NLMISC::Exception &e)
+	catch (const NLMISC::Exception &e)
 	{
 		std::string tmp = std::string(e.what()) + "(" + _sxfullname + ")";
 		theApp.m_pMainWnd->MessageBox(tmp.c_str(), "Georges_Lib", MB_ICONERROR | MB_OK);

@@ -175,7 +175,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 
 		// Get the bank name
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			// Open the bank
 			CIFile file;
@@ -191,9 +191,9 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					// Ok
 					loaded = true;
 				}
-				catch (EStream& stream)
+				catch (const EStream& e)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, stream.what(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -202,7 +202,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		if (loaded == false)
 		{
 			nlwarning ("Can't load any tile bank. Select on with the tile_utility plug-in");
-			mprintf ("Can't load any tile bank. Select on with the tile_utility plug-in");
+			mprintf (_T("Can't load any tile bank. Select on with the tile_utility plug-in"));
 			return false;
 		}
 	}
@@ -398,7 +398,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					icv=getCommonVertex(pPM,idstpatch,isrcpatch,&orderdstvtx);			
 					if (icv==-1)
 					{
-						mprintf ("Invalid bind");
+						mprintf (_T("Invalid bind"));
 						nlwarning ("Invalid bind");
 						return false;
 					}
@@ -422,7 +422,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf ("Invalid bind");
+							mprintf (_T("Invalid bind"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -439,7 +439,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 						icv=getCommonVertex(pPM,idstpatch,isrcpatch);			
 						if (icv==-1)
 						{
-							mprintf ("Invalid bind");
+							mprintf (_T("Invalid bind"));
 							nlwarning ("Invalid bind");
 							return false;
 						}
@@ -451,7 +451,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					isrcedge=getEdge(pPM,srcpatch,srcpatch->v[nv],icv);
 					if (isrcedge==-1)
 					{
-						mprintf ("Invalid edge");
+						mprintf (_T("Invalid edge"));
 						nlwarning ("Invalid bind");
 						return false;
 					}
@@ -595,7 +595,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 		sym.invert ();
 		if (!CPatchInfo::transform (patchinfo, zoneSymmetry, bank, symmetry, rotate, snapCell, weldThreshold, sym))
 		{
-			mprintf ("Can't transform the zone");
+			mprintf (_T("Can't transform the zone"));
 			nlwarning ("Invalid bind");
 			return false;
 		}

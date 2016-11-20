@@ -200,7 +200,7 @@ namespace R2
 			clientEid.setType(RYZOMID::player);
 
 			userPriv =":DEV:";
-			extendedPriv = "";
+			extendedPriv.clear();
 			return true;
 		}
 

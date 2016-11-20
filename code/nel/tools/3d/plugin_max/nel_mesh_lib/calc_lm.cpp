@@ -2436,7 +2436,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 		{
 			string sTmp = "Placement";
 			gOptions.FeedBack->setLine (3, sTmp);
-			sTmp = "";
+			sTmp.clear();
 			for(i=4;i<10;++i)
 				gOptions.FeedBack->setLine (i, sTmp);
 			gOptions.FeedBack->update ();
@@ -2628,7 +2628,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 						pLightMap->writeTGA (f, 32);
 					}
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					if (gOptions.FeedBack != NULL)
 					{

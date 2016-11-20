@@ -774,7 +774,7 @@ bool CGroupMap::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup)
 		{
 			SMap island;
 			island.Name = completeIslands[k].Island;
-			island.ContinentName = ""; // no access to world map for now ...
+			island.ContinentName.clear(); // no access to world map for now ...
 			island.MinX = (float) completeIslands[k].XMin;
 			island.MinY = (float) completeIslands[k].YMin;
 			island.MaxX = (float) completeIslands[k].XMax;

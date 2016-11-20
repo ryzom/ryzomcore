@@ -134,7 +134,7 @@ void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		nlassert (f.isReading());
 
 		// Reset _AbsPath
-		_AbsPath="";
+		_AbsPath.clear();
 
 		// Remove diffuse and additive in transition
 		uint tileCount=(uint)getTileCount ();
@@ -782,7 +782,7 @@ void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 		_Flags=0;
 
 		// Initialize alpha name
-		_BitmapName[alpha]="";
+		_BitmapName[alpha].clear();
 
 		// Read free flag
 		f.serial (tmp);
@@ -804,7 +804,7 @@ void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 // ***************************************************************************
 void CTile::clearTile (CTile::TBitmap type)
 {
-	_BitmapName[type]="";
+	_BitmapName[type].clear();
 }
 
 
@@ -1521,7 +1521,7 @@ void CTileSet::setDisplacement (TDisplacement displacement, const std::string& f
 // ***************************************************************************
 void CTileSet::cleanUnusedData ()
 {
-	_Name="";
+	_Name.clear();
 	_ChildName.clear();
 	_Border128[0].reset ();
 	_Border128[1].reset ();
@@ -1853,14 +1853,12 @@ CTileNoise::CTileNoise ()
 {
 	// Not loaded
 	_TileNoiseMap=NULL;
-	_FileName="";
 }
 // ***************************************************************************
 CTileNoise::CTileNoise (const CTileNoise &src)
 {
 	// Default ctor
 	_TileNoiseMap=NULL;
-	_FileName="";
 
 	// Copy
 	*this=src;
@@ -1932,7 +1930,7 @@ void CTileNoise::reset()
 	}
 
 	// Erase filename
-	_FileName="";
+	_FileName.clear();
 }
 // ***************************************************************************
 

@@ -137,7 +137,7 @@ Value* export_material_cf (Value** arg_list, int count)
 	check_arg_count(export_material, 4, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoExportMaterial [Object] [Filename] [CheckOnly] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoExportMaterial [Object] [Filename] [CheckOnly] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Boolean, message);
@@ -306,7 +306,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 	check_arg_count(export_transition, 6, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoExportTransition [Object array (count=9)] [Output filename] [First material filename] [Second material filename] [CheckOnly] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoExportTransition [Object array (count=9)] [Output filename] [First material filename] [Second material filename] [CheckOnly] [Error in dialog]");
 	type_check(arg_list[0], Array, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], String, message);
@@ -326,8 +326,8 @@ Value* export_transition_cf (Value** arg_list, int count)
 
 	// The second arg
 	string matFilename[2];
-	matFilename[0] = arg_list[2]->to_string();
-	matFilename[1] = arg_list[3]->to_string();
+	matFilename[0] = tStrToUtf8(arg_list[2]->to_string());
+	matFilename[1] = tStrToUtf8(arg_list[3]->to_string());
 
 	// The third arg
 	bool checkOnly = (arg_list[4]->to_bool() != FALSE);
@@ -427,7 +427,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 							// Serial
 							materials[mat].serial (inputXml);
 						}
-						catch (Exception &e)
+						catch (const Exception &e)
 						{
 							// Error message
 							char tmp[2048];
@@ -541,7 +541,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 											ok = false;
 										}
 									}
-									catch (Exception &e)
+									catch (const Exception &e)
 									{
 										// Error message
 										char tmp[512];
@@ -595,7 +595,7 @@ Value* get_error_zone_template_cf (Value** arg_list, int count)
 	check_arg_count(get_error_zone_template, 4, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoGetErrorZoneTemplate [Array error codes] [Array vertex id] [Array messages] [Error index]";
+	TCHAR *message = _T("NeLLigoGetErrorZoneTemplate [Array error codes] [Array vertex id] [Array messages] [Error index]");
 	type_check(arg_list[0], Array, message);
 	type_check(arg_list[1], Array, message);
 	type_check(arg_list[2], Array, message);
@@ -637,7 +637,7 @@ Value* get_error_zone_template_cf (Value** arg_list, int count)
 		vertexId->append (Integer::intern (id+1));
 
 		// Append messages
-		messages->append (new String("[LIGO DEBUG] Opened edge"));
+		messages->append (new String(_T("[LIGO DEBUG] Opened edge")));
 	}
 
 	// Return the main error message
@@ -687,7 +687,7 @@ Value* check_zone_with_material_cf (Value** arg_list, int count)
 	check_arg_count(check_zone_with_template, 3, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoCheckZoneWithMaterial [Object] [Material filename] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoCheckZoneWithMaterial [Object] [Material filename] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Boolean, message);
@@ -700,7 +700,7 @@ Value* check_zone_with_material_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The fourth arg
 	bool errorInDialog = (arg_list[2]->to_bool() != FALSE);
@@ -778,7 +778,7 @@ Value* check_zone_with_material_cf (Value** arg_list, int count)
 								CMaxToLigo::errorMessage (tmp, "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 							}
 						}
-						catch (Exception &e)
+						catch (const Exception &e)
 						{
 							// Error message
 							char tmp[512];
@@ -820,7 +820,7 @@ Value* check_zone_with_transition_cf (Value** arg_list, int count)
 	check_arg_count(check_zone_with_template, 4, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoCheckZoneWithTransition [Object] [Transition filename] [Transition number: 0~8] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoCheckZoneWithTransition [Object] [Transition filename] [Transition number: 0~8] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Integer, message);
@@ -834,7 +834,7 @@ Value* check_zone_with_transition_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The second arg
 	int transitionNumber = arg_list[2]->to_int();
@@ -901,7 +901,7 @@ Value* check_zone_with_transition_cf (Value** arg_list, int count)
 							CMaxToLigo::errorMessage (tmp, "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error message
 						char tmp[512];
@@ -987,7 +987,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 	check_arg_count(check_zone_with_template, 5, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoExportZone [Object] [Ligozone filename] [Category Array] [Error in dialog] [Snapshot]";
+	TCHAR *message = _T("NeLLigoExportZone [Object] [Ligozone filename] [Category Array] [Error in dialog] [Snapshot]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Array, message);
@@ -1002,7 +1002,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The thrid arg
 	Array *array = (Array*)arg_list[2];
@@ -1047,8 +1047,8 @@ Value* export_zone_cf (Value** arg_list, int count)
 			type_check (cell->get(2), String, message);
 
 			// Get the strings
-			categories[i].first = cell->get(1)->to_string();
-			categories[i].second = cell->get(2)->to_string();
+			categories[i].first = tStrToUtf8(cell->get(1)->to_string());
+			categories[i].second = tStrToUtf8(cell->get(2)->to_string());
 		}
 
 		// Get a Object pointer
@@ -1313,7 +1313,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 													CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
 												}
 											}
-											catch (Exception &e)
+											catch (const Exception &e)
 											{
 												// Error message
 												char tmp[512];
@@ -1324,7 +1324,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 									}
 								}
 							}
-							catch (Exception &e)
+							catch (const Exception &e)
 							{
 								// Error message
 								char tmp[512];
@@ -1362,14 +1362,14 @@ Value* get_error_string_cf (Value** arg_list, int count)
 	check_arg_count(get_error_string, 1, count);
 
 	// Checks arg
-	char *message = "NeLLigoGetErrorString [error code]";
+	TCHAR *message = _T("NeLLigoGetErrorString [error code]");
 	type_check(arg_list[0], Integer, message);
 
 	// The first arg
 	int errorCode = arg_list[0]->to_int()-1;
 
 	// Error code
-	return new String ((char*)CLigoError::getStringError ((CLigoError::TError)errorCode));
+	return new String (utf8ToTStr(CLigoError::getStringError ((CLigoError::TError)errorCode)));
 }
 
 // ***************************************************************************
@@ -1380,14 +1380,14 @@ Value* set_directory_cf (Value** arg_list, int count)
 	check_arg_count(set_directory, 1, count);
 
 	// Checks arg
-	char *message = "NeLLigoDirectory [path]";
+	TCHAR *message = _T("NeLLigoDirectory [path]");
 	type_check(arg_list[0], String, message);
 
 	// The first arg
-	const char *dir = arg_list[0]->to_string();
+	const std::string dir = tStrToUtf8(arg_list[0]->to_string());
 
 	// Set the directory
-	return (chdir (dir)==0)?&true_value:&false_value;
+	return (chdir (dir.c_str())==0)?&true_value:&false_value;
 }
 
 // ***************************************************************************
@@ -1398,7 +1398,7 @@ Value* get_zone_mask_cf (Value** arg_list, int count)
 	check_arg_count(check_zone_with_template, 5, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoGetZoneMask [Object] [Mask Array] [Width Array] [Height Array] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoGetZoneMask [Object] [Mask Array] [Width Array] [Height Array] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], Array, message);
 	type_check(arg_list[2], Array, message);
@@ -1558,7 +1558,7 @@ Value* get_zone_size_cf (Value** arg_list, int count)
 	check_arg_count(check_zone_with_template, 6, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoGetZoneMask [Object] [minx Array] [maxy Array] [miny Array] [maxy Array] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoGetZoneMask [Object] [minx Array] [maxy Array] [miny Array] [maxy Array] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], Array, message);
 	type_check(arg_list[2], Array, message);
@@ -1835,7 +1835,7 @@ bool MakeSnapShot (NLMISC::CBitmap &snapshot, const NL3D::CTileBank &tileBank, c
 			CMaxToLigo::errorMessage ("Can't initialise opengl offscreen renderer", "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Error
 		char tmp[512];
@@ -1859,7 +1859,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 	check_arg_count(NeLLigoMakeSnapShot, 7, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NeLLigoMakeSnapShot [Object] [Snapshot filename] [xMin] [xMax] [yMin] [yMax] [Error in dialog]";
+	TCHAR *message = _T("NeLLigoMakeSnapShot [Object] [Snapshot filename] [xMin] [xMax] [yMin] [yMax] [Error in dialog]");
 	type_check(arg_list[0], MAXNode, message);
 	type_check(arg_list[1], String, message);
 	type_check(arg_list[2], Integer, message);
@@ -1876,7 +1876,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	string fileName = arg_list[1]->to_string();
+	string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The thrid arg
 	int xMin = arg_list[2]->to_int();
@@ -2042,7 +2042,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 												CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
 											}
 										}
-										catch (Exception &e)
+										catch (const Exception &e)
 										{
 											// Error message
 											char tmp[512];
@@ -2068,7 +2068,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 							}
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error message
 						char tmp[512];

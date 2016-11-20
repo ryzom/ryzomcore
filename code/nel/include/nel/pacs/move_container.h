@@ -282,7 +282,7 @@ private:
 	// Free world image pointers
 	void						freeWorldImage (CPrimitiveWorldImage *worldImage);
 
-	// Called by CMovePrimitive when a change occured on the primitive BB
+	// Called by CMovePrimitive when a change occurred on the primitive BB
 	void						changed (CMovePrimitive* primitive, uint8 worldImage);
 
 	// Remove the collisionable primitive from the modified list

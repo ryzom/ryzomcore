@@ -449,7 +449,7 @@ void CStringManagerModule::unregisterTableRequested(TSessionId sessionId)
 static std::string formatString(std::string str,std::vector<float> args)
 {
 	uint32 size = (uint32)args.size();
-	std::string ret="";
+	std::string ret;
 	{
 		std::string::size_type pos = 0;
 		CSString cstring(str);

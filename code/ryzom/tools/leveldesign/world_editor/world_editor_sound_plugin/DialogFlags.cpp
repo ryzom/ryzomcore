@@ -118,7 +118,7 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	for (uint i =0; i<NLSOUND::UAudioMixer::TBackgroundFlags::NB_BACKGROUND_FLAGS; ++i)
 	{
 		static_cast<CButton*>(GetDlgItem(BG_FLAG_ID[i]))->SetCheck(flags.Flags[i] ? 1 : 0);
-		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(_Mixer->getBackgroundFlagName(i).c_str());
+		GetDlgItem(BG_FLAG_ID[i])->SetWindowText(utf8ToTStr(_Mixer->getBackgroundFlagName(i)));
 	}
 
 
@@ -127,14 +127,14 @@ void CDialogFlags::init(CSoundPlugin *plugin)
 	col.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
 	col.fmt = LVCFMT_LEFT;
 	col.cx = 140;
-	col.pszText = "bank names";
-	col.cchTextMax = sizeof("bank names");
+	col.pszText = _T("bank names");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(0, &col);
 
 	col.fmt = LVCFMT_RIGHT;
 	col.cx = 50;
-	col.pszText = "size";
-	col.cchTextMax = sizeof("size");
+	col.pszText = _T("size");
+	col.cchTextMax = _tcslen(col.pszText)+1;
 	_SbList.InsertColumn(1, &col);
 
 }

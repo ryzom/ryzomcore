@@ -1525,7 +1525,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(nel, string, AvailableHDSpace, "Hard drive space 
 	if (get)
 	{
 		*pointer = (CSystemInfo::availableHDSpace(location));
-		location = "";
+		location.clear();
 	}
 	else
 	{

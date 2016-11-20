@@ -34,12 +34,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 
@@ -221,14 +221,16 @@ void CParticleSystemEdit::updateDieOnEventParams()
 		ew = FALSE;
 	}
 	GetDlgItem(IDC_APPLY_AFTER_DELAY)->EnableWindow(ew);
-	char out[128];
+	
+	CString out;
+
 	if (_Node->getPSPointer()->getDelayBeforeDeathConditionTest() >= 0)
 	{	
-		sprintf(out, "%.2g", _Node->getPSPointer()->getDelayBeforeDeathConditionTest());
+		out.Format(_T("%.2g"), _Node->getPSPointer()->getDelayBeforeDeathConditionTest());
 	}
 	else
 	{
-		strcpy(out,"???");
+		out = _T("???");
 	}
 	GetDlgItem(IDC_APPLY_AFTER_DELAY)->SetWindowText(out);
 	((CButton *) GetDlgItem(IDC_AUTO_DELAY))->SetCheck(autoDelay ? 1 : 0);
@@ -269,9 +271,9 @@ void CParticleSystemEdit::updatePrecomputedBBoxParams()
 	
 	if (!ew)
 	{
-		m_BBoxX = "";
-		m_BBoxY = "";
-		m_BBoxZ = "";
+		m_BBoxX.Empty();
+		m_BBoxY.Empty();
+		m_BBoxZ.Empty();
 	}
 	else
 	{
@@ -394,13 +396,14 @@ void CParticleSystemEdit::OnEnableSlowDown()
 void CParticleSystemEdit::updateBBoxFromText()
 {
 	NLMISC::CVector h;
-	char inX[128], inY[128], inZ[128];
+	TCHAR inX[128], inY[128], inZ[128];
 	m_BBoxXCtrl.GetWindowText(inX, 128);
 	m_BBoxYCtrl.GetWindowText(inY, 128);
 	m_BBoxZCtrl.GetWindowText(inZ, 128);
-	if (sscanf(inX, "%f", &h.x) == 1
-		&& sscanf(inY, "%f", &h.y) == 1
-		&& sscanf(inZ, "%f", &h.z) == 1
+
+	if (_tcscanf(inX, "%f", &h.x) == 1
+		&& _tcscanf(inY, "%f", &h.y) == 1
+		&& _tcscanf(inZ, "%f", &h.z) == 1
 	   )
 	{
 		NLMISC::CAABBox b;
@@ -409,7 +412,7 @@ void CParticleSystemEdit::updateBBoxFromText()
 	}
 	else
 	{
-		MessageBox("Invalid entry","error", MB_OK);
+		MessageBox(_T("Invalid entry"), _T("error"), MB_OK);
 	}
 }
 
@@ -456,11 +459,12 @@ void CParticleSystemEdit::OnDieWhenOutOfFrustum()
 void CParticleSystemEdit::OnChangeApplyAfterDelay() 
 {
 	if (_Node->getPSPointer()->getAutoComputeDelayBeforeDeathConditionTest()) return;
-	//
-	char in[128];	
-	GetDlgItem(IDC_APPLY_AFTER_DELAY)->GetWindowText(in, 128);		
+
+	TCHAR in[128];
+	GetDlgItem(IDC_APPLY_AFTER_DELAY)->GetWindowText(in, 128);
+
 	float value;
-	if (sscanf(in, "%f", &value) == 1)
+	if (_tcscanf(in, "%f", &value) == 1)
 	{
 		if (_Node->getPSPointer()->getDelayBeforeDeathConditionTest() != value)
 		{
@@ -728,7 +732,7 @@ void CParticleSystemEdit::OnEnableLoadBalancing()
 	UpdateData(TRUE);
 	if (m_EnableLoadBalancing == FALSE)
 	{
-		int result = MessageBox("Are you sure ?", "Load balancing on/off", MB_OKCANCEL);
+		int result = MessageBox(_T("Are you sure ?"), _T("Load balancing on/off"), MB_OKCANCEL);
 		if (result == IDOK)
 		{
 			_Node->getPSPointer()->enableLoadBalancing(false);
@@ -791,7 +795,7 @@ void CParticleSystemEdit::OnBypassMaxNumSteps()
 	UpdateData(TRUE);
 	if (m_BypassMaxNumSteps && !_Node->getPSPointer()->canFinish())
 	{		
-		MessageBox("The system must have a finite duration for this setting! Please check that.", "error", MB_ICONEXCLAMATION);
+		MessageBox(_T("The system must have a finite duration for this setting! Please check that."), _T("error"), MB_ICONEXCLAMATION);
 		return;
 	}
 	_Node->getPSPointer()->setBypassMaxNumIntegrationSteps(m_BypassMaxNumSteps != FALSE);	

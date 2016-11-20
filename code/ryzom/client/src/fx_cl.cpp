@@ -205,7 +205,7 @@ void CFxCL::updateVisualPropertyPos(const NLMISC::TGameCycle &/* gameCycle */, c
 
 		if (_Instance.getPos() != prevPos)
 		{
-			// a move or init occured -> must update cluster system
+			// a move or init occurred -> must update cluster system
 			UGlobalPosition gPos;
 			if( _Primitive )
 			{

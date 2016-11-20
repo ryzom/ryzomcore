@@ -141,7 +141,7 @@ const CObject *CPropertyAccessor::getPropertyValue(const CObject* componentParam
 				}
 				else
 				{
-					str ="";
+					str.clear();
 				}
 
 			}

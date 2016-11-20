@@ -1148,7 +1148,7 @@ static DECLARE_INTERFACE_USER_FCT(getOutpostBuildingDesc)
 	if (pOBS && pOBS->OBType == COutpostBuildingSheet::OB_Empty)
 	{
 		// Don't display description if the building is an empty slot
-		name = "";
+		name.clear();
 	}
 	else
 	{

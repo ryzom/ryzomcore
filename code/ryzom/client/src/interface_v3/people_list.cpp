@@ -133,7 +133,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	if (chat)
 	{
 		CChatWindowDesc chatDesc = *chat;
-		chatDesc.FatherContainer = "";
+		chatDesc.FatherContainer.clear();
 		_ChatWindow = getChatWndMgr().createChatWindow(chatDesc);
 		if (!_ChatWindow)
 		{

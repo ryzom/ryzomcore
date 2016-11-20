@@ -298,7 +298,7 @@ bool mode2Anim(MBEHAV::EMode mode, string &result)
 			// No animset for the mode.
 			else
 			{
-				mode2AnimArray[i] = "";
+				mode2AnimArray[i].clear();
 				nlwarning("mode2Anim: no animset associated to the mode %d'%s'.", i, modeName.c_str());
 			}
 		}

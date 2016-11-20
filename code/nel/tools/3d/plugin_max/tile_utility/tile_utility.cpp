@@ -302,7 +302,7 @@ void Tile_utility::Load (const std::string& path)
 			SetBankPathName (path);
 		}
 	}
-	catch (EStream stream)
+	catch (const EStream &stream)
 	{
 		char tmp[1024];
 		sprintf (tmp, "Error while loading %s:\n\n%s", path, stream.what());
@@ -443,7 +443,7 @@ bool Tile_utility::SetupMaterial () const
 			mtl->SetShininess (0.0, t);
 			mtl->SetSpecular (Color (0,0,0), t);
 
-			if ((tile->getRelativeFileName(CTile::diffuse)!="")||(tile->getRelativeFileName(CTile::additive)!=""))
+			if (!tile->getRelativeFileName(CTile::diffuse).empty() || !tile->getRelativeFileName(CTile::additive).empty())
 			{
 				bActive=true;
 				Texmap* rgb=(Texmap*)GetRGBAddDesc()->Create (FALSE);
@@ -452,7 +452,7 @@ bool Tile_utility::SetupMaterial () const
 				mtl->SetSubTexmap (ID_DI, rgb);
 				mtl->SubTexmapOn (ID_DI);
 
-				if (tile->getRelativeFileName(CTile::diffuse)!="")
+				if (!tile->getRelativeFileName(CTile::diffuse).empty())
 				{
 					// New BitmapTex
 					BitmapTex* tex=NewDefaultBitmapTex();
@@ -472,7 +472,7 @@ bool Tile_utility::SetupMaterial () const
 					mtl->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 				}
 
-				if (tile->getRelativeFileName(CTile::additive)!="")
+				if (!tile->getRelativeFileName(CTile::additive).empty())
 				{
 					// New BitmapTex
 					BitmapTex* tex=NewDefaultBitmapTex();

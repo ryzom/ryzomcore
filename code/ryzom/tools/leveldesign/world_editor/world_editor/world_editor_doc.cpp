@@ -96,8 +96,8 @@ bool CWorldEditorDoc::newDocument ()
 
 	PropertiesDialogs.clear();
 
-	_DataDir = "";
-	_Context = "";
+	_DataDir.clear();
+	_Context.clear();
 	
 	// Erase all editable root primitive
 	CDatabaseList::iterator ite = _DataHierarchy.begin();
@@ -372,7 +372,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -415,7 +415,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -436,7 +436,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 				clearModifications ();
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			theApp.errorMessage ("Error reading file %s : %s", filename, e.what ());
 		
@@ -578,7 +578,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -646,7 +646,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -720,7 +720,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 				// Last time
 				file.close ();
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				theApp.errorMessage ("Error writing file %s : %s", lpszPathName, e.what ());
 
@@ -1423,7 +1423,7 @@ void CWorldEditorDoc::initPrimitiveParameters (const CPrimitiveClass &primClass,
 								}
 								else
 								{
-									str->StringArray[i] = "";
+									str->StringArray[i].clear();
 								}
 							}
 							primitive.addPropertyByName (parameter.Name.c_str (), str);
@@ -1532,7 +1532,7 @@ const NLLIGO::IPrimitive *CWorldEditorDoc::createPrimitive (const CDatabaseLocat
 		if (primClass->Type == CPrimitiveClass::Bitmap)
 		{
 			// Create a dialog file
-			CFileDialogEx dialog (BASE_REGISTRY_KEY, "image", TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, 
+			CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("image"), TRUE, primClass->FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
 				(primClass->FileType+" (*."+primClass->FileExtension+")|*."+primClass->FileExtension+"|All Files (*.*)|*.*||").c_str (), getMainFrame ());
 			if (dialog.DoModal() == IDOK)
 			{
@@ -1674,7 +1674,7 @@ void CWorldEditorDoc::updateFiles ()
 						// Last time
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -1710,7 +1710,7 @@ void CWorldEditorDoc::updateFiles ()
 							theApp.errorMessage ("Can't open file %s for reading.", _DataHierarchy[i].Filename.c_str ());
 						}
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -2149,7 +2149,7 @@ bool CWorldEditorDoc::updateDefaultValuesInternal (NLLIGO::IPrimitive &primitive
 							primitive.removePropertyByName (_class->Parameters[i].Name.c_str ());
 
 							// Set the value
-							result[j] = "";
+							result[j].clear();
 
 							// Add the new property array
 							primitive.addPropertyByName (_class->Parameters[i].Name.c_str (), new CPropertyStringArray (result));

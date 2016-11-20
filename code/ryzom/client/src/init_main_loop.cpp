@@ -1191,7 +1191,7 @@ void initMainLoop()
 	}
 	else
 	{
-		nmsg = "";
+		nmsg.clear();
 		ProgressBar.newMessage (nmsg);
 		ProgressBar.newMessage (nmsg);
 	}

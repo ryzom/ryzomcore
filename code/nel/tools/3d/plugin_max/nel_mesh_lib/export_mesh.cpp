@@ -116,7 +116,7 @@ CMesh::CMeshBuild*	CExportNel::createMeshBuild(INode& node, TimeValue tvTime, CM
 		}
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return pMeshBuild;
 }
 
@@ -467,7 +467,7 @@ NL3D::IShape *CExportNel::buildShape (INode& node, TimeValue time, const TInodeP
 		retShape->setDistMax (distmax);
 	}
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return retShape;
 }
 
@@ -1421,7 +1421,7 @@ IMeshGeom *CExportNel::buildMeshGeom (INode& node, TimeValue time, const TInodeP
 	if (InfoLog)
 		InfoLog->display("End of %s \n", node.GetName());
 
-	// Return the shape pointer or NULL if an error occured.
+	// Return the shape pointer or NULL if an error occurred.
 	return meshGeom;
 }
 

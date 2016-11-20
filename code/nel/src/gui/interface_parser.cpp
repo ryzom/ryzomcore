@@ -665,7 +665,7 @@ namespace NLGUI
 			if (strchr(ptr, '#') != NULL)
 			{
 				string LastProp = ptr.str();
-				string NewProp ="";
+				string NewProp;
 				string RepProp;
 
 				while (LastProp.size() > 0)
@@ -709,7 +709,7 @@ namespace NLGUI
 					else
 					{
 						NewProp += LastProp;
-						LastProp = "";
+						LastProp.clear();
 					}
 				}
 				xmlSetProp(node,props->name, (const xmlChar*)NewProp.c_str());

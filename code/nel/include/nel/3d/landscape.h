@@ -716,7 +716,7 @@ private:
 	bool			_RefineMode;
 	float			_FarTransition;
 	uint			_TileMaxSubdivision;
-	// For VertexProgram. true if change has occured in threshold since the last render().
+	// For VertexProgram. true if change has occurred in threshold since the last render().
 	float			_VPThresholdChange;
 
 	/// \name VertexBuffer mgt.

@@ -550,7 +550,6 @@ uint	CIFile::getDbgStreamSize() const
 COFile::COFile() : IStream(false)
 {
 	_F=NULL;
-	_FileName = "";
 }
 
 // ======================================================================================================

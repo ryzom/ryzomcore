@@ -383,7 +383,7 @@ bool mergeStringDiff(vector<TStringInfo> &strings, const string &language, const
 				nlassertex(diffInfo.Index2 < strings.size(), ("Index %u out of max Range %u", diffInfo.Index2, strings.size()));
 				swap(strings[diffInfo.Index1], strings[diffInfo.Index2]);
 				// remove the swap from the comments
-				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+2);
+				diff[j].Comments = diff[j].Comments.substr(diff[j].Comments.find(nl)+nl.length());
 				if (!diff[j].Comments.empty())
 					j--;
 				break;
@@ -3073,24 +3073,22 @@ int injectClause()
 
 		vector<TPhrase>::iterator first(phrases.begin());
 		vector<TPhrase>::iterator last(phrases.end());
+
 		for ( ; first != last; ++first)
 		{
-
 			vector<TClause>::iterator firstClause( first->Clauses.begin());
 			vector<TClause>::iterator lastClause( first->Clauses.end());
 			for ( ; firstClause != lastClause; ++firstClause)
 			{
-				uint64 hashValue = CI18N::makeHash(firstClause->Text);
 				vector<TStringInfo>::iterator firstRefClause(clauses.begin());
 				vector<TStringInfo>::iterator lastRefClause(clauses.end());
 				for ( ; firstRefClause != lastRefClause ; ++firstRefClause)
 				{
-					if (hashValue == firstRefClause->HashValue && firstClause->Text != firstRefClause->Text)
+					if (firstClause->Identifier == firstRefClause->Identifier && firstClause->Text != firstRefClause->Text)
 					{
 						firstClause->Text = firstRefClause->Text;
 						firstClause->HashValue = CI18N::makeHash(firstClause->Text);
 						firstRefClause->HashValue = firstClause->HashValue;
-
 
 						nlinfo("update clause %s from clause file %s.", firstClause->Identifier.c_str(), clausePath.c_str());
 					}
@@ -3106,7 +3104,6 @@ int injectClause()
 		str = prepareStringFile(clauses, true);
 		CI18N::writeTextFile(desDir + clausePath, str);
 	}
-
 
 	return 0;
 }

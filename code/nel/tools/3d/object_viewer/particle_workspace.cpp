@@ -100,8 +100,8 @@ void CParticleWorkspace::CNode::stickPSToSkeleton(NL3D::CSkeletonModel *skel,
 void CParticleWorkspace::CNode::unstickPSFromSkeleton()
 {
 	nlassert(_WS);
-	_ParentSkelName = "";
-	_ParentBoneName = "";
+	_ParentSkelName.clear();
+	_ParentBoneName.clear();
 	if (!_PSM) return;
 	if (_ParentSkel)
 	{

@@ -1270,7 +1270,7 @@ static void ARBVertexProgramDumpWriteMask(uint mask, std::string &out)
 	H_AUTO_OGL(ARBVertexProgramDumpWriteMask)
 	if (mask == 0xf)
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -1286,7 +1286,7 @@ static void ARBVertexProgramDumpSwizzle(const CVPSwizzle &swz, std::string &out)
 	H_AUTO_OGL(ARBVertexProgramDumpSwizzle)
 	if (swz.isIdentity())
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";

@@ -175,7 +175,6 @@ void LoadSceneScript (const char *ScriptName, CScene* pScene, vector<SDispCS> &D
 			if (ITemp != NULL)
 			{
 				SDispCS dcsTemp;
-				dcsTemp.Name = "";
 				for (sint32 i = 0; i < (1+nNbPlus); ++i)
 					dcsTemp.Name += "   ";
 				dcsTemp.Name += nameIG;

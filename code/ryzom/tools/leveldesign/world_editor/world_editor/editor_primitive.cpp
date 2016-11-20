@@ -925,7 +925,7 @@ NL3D::CTextureBlank *CPrimBitmap::getTexture () const
 					theApp.errorMessage ("Can't read bitmap %s", filename.c_str ());
 				}
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				theApp.errorMessage ("Error reading bitmap %s : %s", filename.c_str (), e.what ());
 			}

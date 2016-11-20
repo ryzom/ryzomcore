@@ -50,7 +50,7 @@ class PO2RPO : public Modifier {
 		HWND hRollup;
 
 		// From Animatable
-		TCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+		MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
 
 		//From Modifier
 		//TODO: Add the channels that the modifier needs to perform its modification

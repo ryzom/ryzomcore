@@ -28,7 +28,7 @@
 using namespace NLMISC;
 using namespace std;
 
-string CIconWnd::IconPath = "";
+string CIconWnd::IconPath;
 
 
 CIconWnd::CIconWnd()

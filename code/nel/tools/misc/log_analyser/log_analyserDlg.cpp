@@ -188,7 +188,7 @@ BOOL CLog_analyserDlg::OnInitDialog()
 		cf.load( "log_analyser.cfg" );
 		LogDateString = cf.getVar( "LogDateString" ).asString().c_str();
 	}
-	catch ( EConfigFile& )
+	catch (const EConfigFile& )
 	{*/
 	LogDateString = "Log Starting [";
 	AnalyseFunc = NULL;
@@ -517,7 +517,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 		view->Filenames = filenames;
 	}
 
-	view->LogSessionStartDate = "";
+	view->LogSessionStartDate.Empty();
 	LogSessionsDialog.clear();
 
 	if ( ((CButton*)GetDlgItem( IDC_CheckSessions ))->GetCheck() == 1 )

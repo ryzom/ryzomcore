@@ -453,7 +453,7 @@ public:
 		string shortExc, longExc, subject;
 		string addr, ext;
 		ULONG_PTR skipNFirst = 0;
-		_Reason = "";
+		_Reason.clear();
 
 		if (m_pexp == NULL)
 		{
@@ -491,25 +491,25 @@ public:
 			case EXCEPTION_STACK_OVERFLOW            : shortExc="Stack Overflow"; longExc="Stack overflow. Can occur during errant recursion, or when a function creates a particularly large array on the stack"; break;
 			case EXCEPTION_INVALID_DISPOSITION       : shortExc="Invalid Disposition"; longExc="Whatever number the exception filter returned, it wasn't a value the OS knows about"; break;
 			case EXCEPTION_GUARD_PAGE                : shortExc="Guard Page"; longExc="Memory Allocated as PAGE_GUARD by VirtualAlloc() has been accessed"; break;
-			case EXCEPTION_INVALID_HANDLE            : shortExc="Invalid Handle"; longExc=""; break;
+			case EXCEPTION_INVALID_HANDLE            : shortExc="Invalid Handle"; longExc.clear(); break;
 			case CONTROL_C_EXIT                      : shortExc="Control-C"; longExc="Lets the debugger know the user hit Ctrl-C. Seemingly for console apps only"; break;
 			case STATUS_NO_MEMORY                    : shortExc="No Memory"; longExc="Called by HeapAlloc() if you specify HEAP_GENERATE_EXCEPTIONS and there is no memory or heap corruption";
 				ext = ", unable to allocate ";
 				ext += toString ("%d bytes", m_pexp->ExceptionRecord->ExceptionInformation [0]);
 				break;
-			case STATUS_WAIT_0                       : shortExc="Wait 0"; longExc=""; break;
-			case STATUS_ABANDONED_WAIT_0             : shortExc="Abandoned Wait 0"; longExc=""; break;
+			case STATUS_WAIT_0                       : shortExc="Wait 0"; longExc.clear(); break;
+			case STATUS_ABANDONED_WAIT_0             : shortExc="Abandoned Wait 0"; longExc.clear(); break;
 			case STATUS_USER_APC                     : shortExc="User APC"; longExc="A user APC was delivered to the current thread before the specified Timeout interval expired"; break;
-			case STATUS_TIMEOUT                      : shortExc="Timeout"; longExc=""; break;
-			case STATUS_PENDING                      : shortExc="Pending"; longExc=""; break;
-			case STATUS_SEGMENT_NOTIFICATION         : shortExc="Segment Notification"; longExc=""; break;
-			case STATUS_FLOAT_MULTIPLE_FAULTS        : shortExc="Float Multiple Faults"; longExc=""; break;
-			case STATUS_FLOAT_MULTIPLE_TRAPS         : shortExc="Float Multiple Traps"; longExc=""; break;
+			case STATUS_TIMEOUT                      : shortExc="Timeout"; longExc.clear(); break;
+			case STATUS_PENDING                      : shortExc="Pending"; longExc.clear(); break;
+			case STATUS_SEGMENT_NOTIFICATION         : shortExc="Segment Notification"; longExc.clear(); break;
+			case STATUS_FLOAT_MULTIPLE_FAULTS        : shortExc="Float Multiple Faults"; longExc.clear(); break;
+			case STATUS_FLOAT_MULTIPLE_TRAPS         : shortExc="Float Multiple Traps"; longExc.clear(); break;
 #ifdef NL_COMP_VC6
-			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc=""; break;
+			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc.clear(); break;
 #endif
 			case 0xE06D7363                          : shortExc="Microsoft C++ Exception"; longExc="Microsoft C++ Exception"; break;	// cpp exception
-			case 0xACE0ACE                           : shortExc=""; longExc="";
+			case 0xACE0ACE                           : shortExc.clear(); longExc.clear();
 				if (m_pexp->ExceptionRecord->NumberParameters == 1)
 					skipNFirst = m_pexp->ExceptionRecord->ExceptionInformation [0];
 				break;	// just want the stack
@@ -824,7 +824,7 @@ public:
 		// replace param with the value of the stack for this param
 
 		string parse = str;
-		str = "";
+		str.clear();
 		uint pos2 = 0;
 		sint stop = 0;
 
@@ -943,7 +943,7 @@ public:
 						str += tmp;
 					}
 					str += parse[i];
-					type = "";
+					type.clear();
 				}
 				else
 				{
@@ -1442,7 +1442,7 @@ std::string formatErrorMessage(int errorCode)
 		NULL
 	);
 
-	// empty buffer, an error occured
+	// empty buffer, an error occurred
 	if (len == 0) return toString("FormatMessage returned error %d", getLastError());
 
 	// convert wchar_t* to std::string

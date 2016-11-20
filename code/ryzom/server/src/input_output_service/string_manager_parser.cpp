@@ -620,7 +620,7 @@ bool CStringManager::parseBlock(const ucstring &block, CPhrase &phrase)
 					TParamId *pparamId;
 					if (!findParam(phrase, rep[k].ParamName, pparamId))
 					{
-						nlwarning("Text in clause %d use parameter [%s] that is unkown in block", count, rep[k].ParamName.c_str());
+						nlwarning("Text in clause %d use parameter [%s] that is unknown in block", count, rep[k].ParamName.c_str());
 						return false;
 					}
 				}

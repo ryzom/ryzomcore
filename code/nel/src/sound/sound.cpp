@@ -92,7 +92,7 @@ CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& fo
 		}
 		else
 		{
-			nlassertex(false, ("SoundType unsuported : %s", dfnName.c_str()));
+			nlassertex(false, ("SoundType unsupported: %s", dfnName.c_str()));
 		}
 
 	}

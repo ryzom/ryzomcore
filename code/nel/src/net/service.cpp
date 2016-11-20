@@ -1453,7 +1453,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 						}
 
 						if (dispName.empty())
-							str = "";
+							str.clear();
 						else
 							str = dispName + ": ";
 

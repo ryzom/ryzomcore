@@ -77,8 +77,8 @@ BOOL CChooseVegetSet::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	
-	if (FileName != "")
-		Name.SetWindowText (FileName.c_str());
+	if (!FileName.empty())
+		Name.SetWindowText (utf8ToTStr(FileName));
 	else
 		Name.SetWindowText ("Browse...");
 
@@ -88,6 +88,6 @@ BOOL CChooseVegetSet::OnInitDialog()
 
 void CChooseVegetSet::OnReset() 
 {
-	FileName = "";
-	Name.SetWindowText ("Browse...");
+	FileName.clear();
+	Name.SetWindowText (_T("Browse..."));
 }

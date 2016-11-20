@@ -134,7 +134,7 @@ COXml::COXml () : IStream (false /* Output mode */)
 	_CurrentNode = NULL;
 
 	// Content string
-	_ContentString = "";
+	_ContentString.clear();
 
 	// Push begin
 	_PushBegin = false;
@@ -160,7 +160,7 @@ bool COXml::init (IStream *stream, const char *version)
 	if (!stream->isReading())
 	{
 		// Set error handler
-		_ErrorString = "";
+		_ErrorString.clear();
 		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncWrite);
 
 		// Set XML mode
@@ -179,7 +179,7 @@ bool COXml::init (IStream *stream, const char *version)
 		_CurrentNode = NULL;
 
 		// Content string
-		_ContentString = "";
+		_ContentString.clear();
 
 		// Push begin
 		_PushBegin = false;

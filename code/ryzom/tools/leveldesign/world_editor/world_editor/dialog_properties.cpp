@@ -1121,7 +1121,7 @@ bool CDialogProperties::CWidget::toParameter (const CDatabaseLocatorPointer &loc
 				// Get the value
 				string value;
 				/* todo hulud remove if (Default)
-					value = "";
+					value.clear();
 				else*/
 					getValue (value);
 
@@ -1150,7 +1150,7 @@ void CDialogProperties::CWidget::getValue (std::string &result) const
 		else if (CheckBox.GetCheck() == 0)
 			result = "false";
 		else
-			result = "";
+			result.clear();
 	}
 	else if (Parameter.Type == CPrimitiveClass::CParameter::ConstString)
 	{
@@ -1192,7 +1192,7 @@ void CDialogProperties::CWidget::getValue (std::vector<std::string> &result) con
 			if (*strP == '\n')
 			{
 				result.push_back (dst);
-				dst = "";
+				dst.clear();
 			}
 			else if (*strP != '\r')
 			{
@@ -1390,10 +1390,10 @@ void CDialogProperties::CWidget::getFilename (string &result)
 		{
 			CString cstr;
 			ListEditBox.GetText (sel, cstr);
-			result = (const char*)cstr;
+			result = tStrToUtf8(cstr);
 		}
 		else
-			result = "";
+			result.clear();
 	}
 	else
 	{
@@ -1659,7 +1659,7 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 						std::vector<std::string> result;
 						widget->getValue (result);
 						uint i;
-						string text = "";
+						string text;
 						for (i=0; i<result.size(); i++)
 						{
 							text += result[i];
@@ -3186,7 +3186,7 @@ BOOL CDialogProperties::PreTranslateMessage(MSG* pMsg)
 
 void CDialogProperties::setDefaultValue (CWidget *widget, string &value)
 {
-	value = "";
+	value.clear();
 	bool foundOne = false;
 	widget->MultipleValues = false;
 	string fromWhere;
@@ -3225,7 +3225,7 @@ void CDialogProperties::setDefaultValue (CWidget *widget, string &value)
 							}
 							if (widget->FromWhere != fromWhere)
 							{
-								widget->FromWhere = "";
+								widget->FromWhere.clear();
 							}
 						}
 						else
@@ -3287,7 +3287,7 @@ void CDialogProperties::setDefaultValue (CWidget *widget, std::vector<std::strin
 							}
 							if (widget->FromWhere != fromWhere)
 							{
-								widget->FromWhere = "";
+								widget->FromWhere.clear();
 							}
 						}
 						else
@@ -3483,7 +3483,7 @@ BOOL CMyComboBox::PreTranslateMessage( MSG* pMsg )
 		// Erase key buffer ?
 		sint64 time = NLMISC::CTime::getLocalTime ();
 		if (time - _LastStrokeTime > COMBO_STROKE_DELAI)
-			_LastString = "";
+			_LastString.clear();
 
 		// Add this char
 		_LastString.push_back (tolower((TCHAR) pMsg->wParam));

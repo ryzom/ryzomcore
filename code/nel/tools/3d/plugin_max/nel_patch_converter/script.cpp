@@ -284,7 +284,7 @@ Value* import_zone_cf (Value** arg_list, int count)
 			// Redraw the viewports
 			ip->RedrawViews(ip->GetTime());
        	}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error message
 			errorMessage (("Error when loading file "+filename+": "+e.what()).c_str(), "NeL import zone", *ip, dialog);
@@ -1627,7 +1627,7 @@ load_bank_cf(Value** arg_list, int count)
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
 	std::string bankName = GetBankPathName ();
-	if (bankName!="")
+	if (!bankName.empty())
 	{
 		try
 		{
@@ -1649,7 +1649,7 @@ load_bank_cf(Value** arg_list, int count)
 				mprintf ("Error: can't open bank file %s\n", bankName.c_str());
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			// Error message
 			mprintf ("Error: %s\n", e.what());

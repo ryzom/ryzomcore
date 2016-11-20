@@ -23,7 +23,6 @@
 
 #include <nel/ligo/primitive_class.h>
 #include <nel/ligo/zone_region.h>
-#include <hash_set>
 
 #if _MSC_VER > 1000
 #pragma once

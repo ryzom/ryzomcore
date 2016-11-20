@@ -434,7 +434,6 @@ class CBankManager
 public:
 	CBankManager ()
 	{
-		_lastPath="";
 	}
 	const NL3D::CTileBank& getBank (std::string& path=GetBankPathName ())
 	{
@@ -449,7 +448,7 @@ public:
 					_bank.serial (file);
 				}
 			}
-			catch (NLMISC::EStream& excp)
+			catch (const NLMISC::EStream& excp)
 			{
 				MessageBox (NULL, excp.what(), "Load error", MB_OK|MB_ICONEXCLAMATION);
 			}

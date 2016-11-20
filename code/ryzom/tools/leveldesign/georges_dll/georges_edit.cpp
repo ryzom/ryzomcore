@@ -586,7 +586,7 @@ bool CGeorgesEditApp::loadCfg ()
 		if (superuser)
 			Superuser = superuser->asInt () != 0;
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		char message[512];
 		smprintf (message, 512, "Can't load georges.cfg config file.");
@@ -647,14 +647,14 @@ bool CGeorgesEditApp::saveCfg ()
 		{
 			cf.save ();
 		}
-		catch (Exception &)
+		catch (const Exception &)
 		{
 			char message[512];
 			smprintf (message, 512, "Can't save georges.cfg config file.");
 			outputError (message);
 		}
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		char message[512];
 		smprintf (message, 512, "Can't load georges.cfg config file.");
@@ -1197,7 +1197,7 @@ bool CGeorgesEditApp::SerialIntoMemStream (const char *formName, CGeorgesEditDoc
 		// Ok
 		return true;
 	}
-	catch (Exception &)
+	catch (const Exception &)
 	{
 		nlstop;
 	}
@@ -1454,7 +1454,7 @@ bool CGeorgesEditApp::SerialFromMemStream (const char *formName, CGeorgesEditDoc
 			return true;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("Error while paste: %s", e.what());
 	}

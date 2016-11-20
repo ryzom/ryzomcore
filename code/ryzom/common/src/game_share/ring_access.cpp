@@ -349,7 +349,7 @@ std::string CRingAccess::upgradeRingAccess(const std::string& defaultValue, cons
 	}
 
 	// return the new value as string
-	std::string toRet ="";
+	std::string toRet;
 	{
 
 		std::map<std::string, int>::const_iterator first(defaultMap.begin()), last(defaultMap.end());

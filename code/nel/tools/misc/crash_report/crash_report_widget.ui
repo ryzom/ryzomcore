@@ -20,7 +20,7 @@
    <item row="0" column="0" colspan="2">
     <widget class="QLabel" name="descrLabel">
      <property name="text">
-      <string>What were you doing when the crash occured?</string>
+      <string>What were you doing when the crash occurred?</string>
      </property>
     </widget>
    </item>

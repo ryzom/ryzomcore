@@ -2332,11 +2332,11 @@ INT_PTR CALLBACK MiscDialogCallback (
 					break;
 					case IDOK:
 						{
-							currentParam->FloatingObject=SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
+							currentParam->FloatingObject = SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
 
 							// Ligoscape
 							currentParam->LigoSymmetry = SendMessage (GetDlgItem (hwndDlg, IDC_LIGO_SYMMETRY), BM_GETCHECK, 0, 0);
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), tmp, 512);
 							currentParam->LigoRotate = tmp;
 
@@ -2365,7 +2365,7 @@ INT_PTR CALLBACK MiscDialogCallback (
 							// Skeleton Scale
 							currentParam->ExportBoneScale= SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), tmp, 512);
-							currentParam->ExportBoneScaleNameExt= tmp;
+							currentParam->ExportBoneScaleNameExt = wideToUtf8(tmp);
 
 							// remanence
 							currentParam->UseRemanence = SendMessage (GetDlgItem (hwndDlg, IDC_USE_REMANENCE), BM_GETCHECK, 0, 0);
@@ -2650,7 +2650,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 		{
 			// Get a string
 			std::string nameLod=CExportNel::getScriptAppData (node, NEL3D_APPDATA_LOD_NAME+name, "");
-			if (nameLod!="")
+			if (!nameLod.empty())
 			{
 				param.ListLodName.push_back (nameLod);
 			}
@@ -2854,7 +2854,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				param.SoundGroup = DIFFERENT_VALUE_STRING;
 			if (CExportNel::getScriptAppData(node, NEL3D_APPDATA_ENV_FX, "no fx") != param.EnvironmentFX)
 			{
-				param.EnvironmentFX = "";
+				param.EnvironmentFX.clear();
 			}
 
 			if ( param.LightGroup != CExportNel::getScriptAppData (node, NEL3D_APPDATA_LM_LIGHT_GROUP, 0) )
@@ -2871,7 +2871,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_IGNAME, "")!=param.InstanceGroupName)
 				param.InstanceGroupName = DIFFERENT_VALUE_STRING;
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_INTERFACE_FILE, "")!=param.InterfaceFileName)
-				param.InterfaceFileName = "";
+				param.InterfaceFileName.clear();
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_INTERFACE_THRESHOLD, 0.1f)!=param.InterfaceThreshold)
 				param.InterfaceThreshold = -1;
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS, 0)!=param.GetInterfaceNormalsFromSceneObjects)
@@ -2942,7 +2942,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			{
 				// Get a string
 				std::string nameLod=CExportNel::getScriptAppData (node, NEL3D_APPDATA_LOD_NAME+name, "");
-				if (nameLod!="")
+				if (!nameLod.empty())
 				{
 					tmplist.push_back (nameLod);
 				}

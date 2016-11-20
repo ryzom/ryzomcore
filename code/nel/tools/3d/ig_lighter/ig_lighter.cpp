@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
 			CGlobalRetriever	*globalRetriever= NULL;
 			uint32		grFileDate= 0;
 			uint32		rbankFileDate= 0;
-			if( grFile!="" && rbankFile!="" )
+			if( !grFile.empty() && !rbankFile.empty())
 			{
 				CIFile	fin;
 				// serial the retrieverBank. Exception if not found.

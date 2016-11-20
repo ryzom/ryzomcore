@@ -1092,9 +1092,9 @@ private:
 
 /** replacment for sprintf scanf (because of localisation in max)
   */
-float		toFloatMax(const char *src);
+float		toFloatMax(const TCHAR *src);
 // Same as to float max, but returns true if succeed
-bool		toFloatMax(const char *src, float &dest);
+bool		toFloatMax(const TCHAR *src, float &dest);
 std::string toStringMax(float value);
 std::string toStringMax(int value);
 

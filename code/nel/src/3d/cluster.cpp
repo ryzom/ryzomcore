@@ -319,7 +319,7 @@ void CCluster::serial (NLMISC::IStream&f)
 			// write the env fx name
 			std::string envFxName = CStringMapper::unmap(_EnvironmentFxId);
 			if (envFxName == "no fx")
-				envFxName = "";
+				envFxName.clear();
 			f.serial(envFxName);
 		}
 

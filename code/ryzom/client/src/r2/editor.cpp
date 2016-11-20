@@ -168,7 +168,7 @@ bool ReloadUIFlag = true; // by default, CEditor loads its own UI
 bool ResetScenarioWanted = false;
 bool ReloadScenarioWanted = false;
 bool ConnectionWanted = false;
-std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation="";
+std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation;
 bool CEditor::_IsStartingScenario=false;
 
 // *********************************************************************************************************

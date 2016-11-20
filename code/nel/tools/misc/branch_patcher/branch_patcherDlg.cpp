@@ -688,8 +688,8 @@ void CBranch_patcherDlg::OnButtonExtractTokens()
 		m_TargetDirLabel = "Target Dir";
 		m_SrcDir = SrcDirBackup;
 		m_DestDir = TargetDirBackup;
-		m_Filename = "";
-		((CButton*)GetDlgItem( IDC_ButtonExtractTokens ))->SetWindowText( "Enter Tokens" );
+		m_Filename.Empty();
+		((CButton*)GetDlgItem( IDC_ButtonExtractTokens ))->SetWindowText( _T("Enter Tokens") );
 		GetDlgItem( IDC_TopText )->ShowWindow( SW_SHOW );
 		GetDlgItem( IDC_ButtonClearTokens )->EnableWindow( TRUE );
 		GetDlgItem( IDC_ButtonPatch )->ShowWindow( SW_SHOW );
@@ -703,8 +703,8 @@ void CBranch_patcherDlg::OnButtonExtractTokens()
 
 void CBranch_patcherDlg::OnButtonClearTokens() 
 {
-	Token1 = "";
-	Token2 = "";
+	Token1.Empty();
+	Token2.Empty();
 	displayTokens();
 }
 

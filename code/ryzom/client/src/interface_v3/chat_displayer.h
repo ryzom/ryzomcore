@@ -69,7 +69,7 @@ public:
 		}
 		else
 		{
-			str = "";
+			str.clear();
 			mode = CInterfaceManager::InfoMsg;
 		}
 

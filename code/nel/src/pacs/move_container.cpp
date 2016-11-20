@@ -43,7 +43,7 @@ Doc:
 	// Collisionnable primitives
 	Each primitive must be moved first with the move() method.
 	Their moves are evaluate all at once. All the collisions found are time sorted in a time orderin table (_TimeOT).
-	While the table is not empty, the first collision occured in time is solved and
+	While the table is not empty, the first collision occurred in time is solved and
 	If a collision is found, reaction() is called.
 
 

@@ -98,7 +98,7 @@ public:
 		}
 
 		// init the operator list box
-		static const char *ops[] = { "selectArg1", "selectArg2", "modulate", "add", "subtract" } ;
+		static const TCHAR *ops[] = { _T("selectArg1"), _T("selectArg2"), _T("modulate"), _T("add"), _T("subtract") };
 		for (k = 0 ; k < (uint) NL3D::CPSBinOp::last ; ++k)
 		{
 			// SchemeWrapper[k].S reference the atriobute maker being edited

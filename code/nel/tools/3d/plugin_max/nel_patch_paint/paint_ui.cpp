@@ -168,7 +168,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		std::string fileName=bank.getAbsPath()+bank.getTile (set->getTile128(0))->getRelativeFileName (CTile::diffuse);
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			MainBitmap=new CTextureFile (fileName);
@@ -193,7 +193,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -218,7 +218,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -250,10 +250,10 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		// Get the name
 		std::string fileName = bank.getDisplacementMap(dispTile);
 		if (fileName=="EmptyDisplacementMap")
-			fileName="";
+			fileName.clear();
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			DisplaceBitmap[displace]=new CTextureFile (bank.getAbsPath()+fileName);
@@ -440,7 +440,7 @@ void LoadKeyCfg ()
 					// Get value
 					PainterKeys[key]=value.asInt ();
 				}
-				catch (EConfigFile &e)
+				catch (const EConfigFile &e)
 				{
 					// Something goes wrong... catch that
 					const char* what=e.what();
@@ -489,7 +489,7 @@ void LoadVarCfg ()
 					LightDirection.z = light_direction.asFloat (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -504,7 +504,7 @@ void LoadVarCfg ()
 					LightDiffuse.B = light_diffuse.asInt (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -519,7 +519,7 @@ void LoadVarCfg ()
 					LightAmbiant.B = light_ambiant.asInt (2);
 				}
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -529,7 +529,7 @@ void LoadVarCfg ()
 				CConfigFile::CVar &light_multiply= cf.getVar ("LightMultiply");
 				LightMultiply = light_multiply.asFloat ();
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 
@@ -539,7 +539,7 @@ void LoadVarCfg ()
 				CConfigFile::CVar &zoom_speed= cf.getVar ("ZoomSpeed");
 				ZoomSpeed = zoom_speed.asFloat ();
 			}
-			catch (EConfigFile &)
+			catch (const EConfigFile &)
 			{
 			}
 		}

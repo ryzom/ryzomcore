@@ -1113,6 +1113,9 @@ void	CPSConstraintMesh::getShapesNames(std::string *shapesNames) const
 	{
 		const_cast<CPSConstraintMesh *>(this)->update();
 	}
+#ifdef NL_COMP_VC14
+	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), stdext::make_unchecked_array_iterator(shapesNames));
+#else
 	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), shapesNames);
 }
 

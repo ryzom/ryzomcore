@@ -1897,7 +1897,7 @@ int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ul
 	if (d != t)
 	{
 		// In the case of progress = 1, don't update because, this will be called in case of error to signal the end of the download, though
-		// no download actually occured. Instead, we set progress to 1.f at the end of downloadWithCurl if everything went fine
+		// no download actually occurred. Instead, we set progress to 1.f at the end of downloadWithCurl if everything went fine
 		return validateProgress(foo, t, d, ultotal, ulnow);
 	}
 	return 0;

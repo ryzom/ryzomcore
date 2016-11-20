@@ -183,7 +183,7 @@ extern UCamera					MainCam;
 ////////////
 // STATIC //
 ////////////
-const std::string CCharacterCL::_EmptyString = "";
+const std::string CCharacterCL::_EmptyString;
 const uint8	 CCharacterCL::_BadHairIndex = 0xFF;
 
 H_AUTO_DECL ( RZ_Client_Character_CL_Update_Pos_Combat_Float )

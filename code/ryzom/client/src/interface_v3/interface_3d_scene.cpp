@@ -792,7 +792,7 @@ bool CInterface3DCharacter::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 		return false;
 
 	CXMLAutoPtr ptr((const char*)xmlGetProp (cur, (xmlChar*)"dblink"));
-	_DBLink = "";
+	_DBLink.clear();
 	if (ptr) _DBLink = (const char *)ptr;
 
 	CVector pos(0,0,0), rot(0,0,0);

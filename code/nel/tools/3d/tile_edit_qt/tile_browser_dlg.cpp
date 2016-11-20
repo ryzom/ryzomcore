@@ -421,7 +421,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 
 				// Transition to patch
 				CTileSetTransition* trans=tileBankBrowser.getTileSet (tileSetIndex)->getTransition (transition);
-				if (tileBankBrowser.getTile (trans->getTile())->getRelativeFileName (CTile::alpha)=="")
+				if (tileBankBrowser.getTile (trans->getTile())->getRelativeFileName (CTile::alpha).empty())
 				{
 					// Continue ?
 					int ok;
@@ -465,7 +465,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 
 				// Transition to patch
 				//CTileSetTransition* trans=tileBankBrowser.getTileSet (tileSetIndex)->getTransition (transition);
-				//if (tileBankBrowser.getTile (trans->getTile())->getRelativeFileName ((CTile::TBitmap)tileTextureButtonGroup->checkedId())=="")
+				//if (tileBankBrowser.getTile (trans->getTile())->getRelativeFileName ((CTile::TBitmap)tileTextureButtonGroup->checkedId()).empty())
 				//{
 				//	// Try to load a tile with a file name like /tiletransition0.tga
 				//	char sName2[256];
@@ -543,7 +543,7 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 				else
 					error=true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				const char *toto=e.what ();
 				error=true;
@@ -592,7 +592,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 			else
 				error=true;
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			const char *toto=e.what ();
 			error=true;

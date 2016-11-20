@@ -336,7 +336,7 @@ protected:
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
 	virtual void					resize(uint32 size);
-	virtual void					bounceOccured(uint32 index, TAnimationTime timeToNextSimStep);
+	virtual void					bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep);
 	void							updateMaxCountVect();
 
 

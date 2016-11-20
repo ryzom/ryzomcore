@@ -246,7 +246,7 @@ bool CXDPFileReader::readBool(bool &val)
 bool CXDPFileReader::readString(std::string &s)
 {
 	uint32 nLen;
-	s = "";
+	s.clear();
 	if (!readUInt(nLen)) return false;
 	for (uint32 i = 0; i < nLen; ++i)
 	{
@@ -452,8 +452,8 @@ bool CXDeltaPatch::load(const string &sFilename)
 	uint32 nFromNameLen = vHeader[1] >> 16;
 	uint32 nToNameLen = vHeader[1] & 0xffff;
 
-	_FromName = "";
-	_ToName = "";
+	_FromName.clear();
+	_ToName.clear();
 
 	for (i = 0; i < nFromNameLen; ++i)
 	{
@@ -738,7 +738,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		*/
 		return ApplyResult_Error;
 	}
-	errorMsg = "";
+	errorMsg.clear();
 	return ApplyResult_Ok;
 }
 

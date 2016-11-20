@@ -364,7 +364,7 @@ bool				CVisionProvider::addPair( TClientId clientid, const TEntityIndex& entity
 	//TEMP
 	//flog.displayRawNL( "ADD C%hu E%u, slot %hu, id %s", clientid, entityindex, slot, CFrontEndPropertyReceiver::getEntity(entityindex)->id.toString().c_str() );
 
-	/* 1. Associate Entity Index to a new TCLEntityId (or get exiting association if this new association occured before a dissociation acknowledge from the client)
+	/* 1. Associate Entity Index to a new TCLEntityId (or get exiting association if this new association occurred before a dissociation acknowledge from the client)
 	 */
 
 	if ( slot < MAX_SEEN_ENTITIES_PER_CLIENT )

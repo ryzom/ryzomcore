@@ -39,7 +39,7 @@ CLigoConfig::CLigoConfig()
 
 // ***************************************************************************
 
-bool CLigoConfig::readConfigFile (const char *fileName, bool parsePrimitiveComboContent)
+bool CLigoConfig::readConfigFile (const std::string &fileName, bool parsePrimitiveComboContent)
 {
 	// The CF
 	CConfigFile cf;
@@ -73,7 +73,7 @@ bool CLigoConfig::readConfigFile (const char *fileName, bool parsePrimitiveCombo
 
 // ***************************************************************************
 
-bool CLigoConfig::readPrimitiveClass (const char *_fileName, bool parsePrimitiveComboContent)
+bool CLigoConfig::readPrimitiveClass (const std::string &_fileName, bool parsePrimitiveComboContent)
 {
 	// File exist ?
 	string filename = _fileName;
@@ -785,7 +785,7 @@ std::string CLigoConfig::aliasToString(uint32 fullAlias)
 
 }
 
-uint32 CLigoConfig::aliasFromString(std::string fullAlias)
+uint32 CLigoConfig::aliasFromString(const std::string &fullAlias)
 {
 	uint32 staticPart;
 	uint32 dynPart;

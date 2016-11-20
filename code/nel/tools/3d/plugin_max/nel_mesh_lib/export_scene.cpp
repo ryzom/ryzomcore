@@ -715,7 +715,7 @@ void CExportNel::buildScene (NL3D::CScene &scene, NL3D::CShapeBank &shapeBank, I
 			sTmp += pNode->GetName();
 			if (progress)
 				progress->setLine (0, sTmp);
-			sTmp = "";
+			sTmp.clear();
 			for (uint32 i = 1; i < 10; ++i) 
 			{
 				if (progress)

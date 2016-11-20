@@ -93,9 +93,9 @@ MissionCompilerMainWindow::MissionCompilerMainWindow(QWidget *parent) :
 	try{
 		m_ligoConfig.readPrimitiveClass(NLMISC::CPath::lookup("world_editor_classes.xml").c_str(), false);
 	}
-	catch( NLMISC::Exception &e )
+	catch(const NLMISC::Exception &e)
 	{
-		nlinfo( "Exception occured during Mission Compiler LIGO startup: %s", e.what() );
+		nlinfo( "Exception occurred during Mission Compiler LIGO startup: %s", e.what() );
 	}
 
 	NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig = &m_ligoConfig;

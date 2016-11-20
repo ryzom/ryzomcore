@@ -1770,7 +1770,7 @@ void				CAudioMixerUser::update()
 			str += tmp;
 		}
 		nldebug((string("Status1: ")+str).c_str());
-		str = "";
+		str.clear();
 		for (i=_NbTracks/2; i<_NbTracks; ++i)
 		{
 			sprintf(tmp, "[%2u]%8p ", i, _Tracks[i]->getSource());

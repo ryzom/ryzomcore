@@ -73,7 +73,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 		while(!tmp.empty() && tmp[tmp.size()]==' ')
 		{
 			if(tmp.size()==1)
-				tmp="";
+				tmp.clear();
 			else
 				tmp = tmp.substr(0,tmp.size()-1);
 		}

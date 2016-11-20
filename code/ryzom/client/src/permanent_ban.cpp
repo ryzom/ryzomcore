@@ -25,8 +25,8 @@
 using namespace NLMISC;
 
 
-#define REGKEY_RYZOM_PATH "Software\\Nevrax\\ryzom"
-#define REGKEY_PERMANENT_BAN "PB"
+#define REGKEY_RYZOM_PATH L"Software\\Nevrax\\ryzom"
+#define REGKEY_PERMANENT_BAN L"PB"
 
 
 // ************************************************************
@@ -36,10 +36,11 @@ static void setPermanentBanRegistryKey(bool on)
 	nlinfo("Not implemented");
 #else
 	HKEY hKey;
-	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_RYZOM_PATH, &hKey)==ERROR_SUCCESS)
+	if (RegCreateKeyW(HKEY_CURRENT_USER, REGKEY_RYZOM_PATH, &hKey)==ERROR_SUCCESS)
 	{
 		DWORD permanentBan = on ? 1 : 0;
-		LONG result = RegSetValueEx(hKey, REGKEY_PERMANENT_BAN, 0, REG_DWORD, (LPBYTE)&permanentBan, 4);
+		LONG result = RegSetValueExW(hKey, REGKEY_PERMANENT_BAN, 0, REG_DWORD, (LPBYTE)&permanentBan, 4);
+
 		if (result != ERROR_SUCCESS)
 		{
 			nlwarning("pb key not created");
@@ -59,17 +60,20 @@ static bool getPermanentBanRegistryKey()
 	return false; // not implemented
 #else
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_RYZOM_PATH, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
+	if (RegOpenKeyExW(HKEY_CURRENT_USER, REGKEY_RYZOM_PATH, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD permanentBan;
 		DWORD type;
 		DWORD dataSize = sizeof(DWORD);
-		RegQueryValueEx (hKey, REGKEY_PERMANENT_BAN, 0, &type, (LPBYTE)&permanentBan, &dataSize);
+
+		RegQueryValueExW(hKey, REGKEY_PERMANENT_BAN, 0, &type, (LPBYTE)&permanentBan, &dataSize);
+
 		if (type == REG_DWORD && dataSize == sizeof(DWORD))
 		{
 			return permanentBan != 0;
 		}
 	}
+	
 	return false;
 #endif
 }

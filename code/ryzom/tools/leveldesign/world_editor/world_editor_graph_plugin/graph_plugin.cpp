@@ -209,7 +209,7 @@ void CGraphPlugin::refreshPrimitives()
 			}
 			AfxMessageBox(err.c_str());
 		}
-		catch (exception e) //catch a possible exception from getRootFileName
+		catch (const exception &e) //catch a possible exception from getRootFileName
 		{
 			AfxMessageBox(e.what());
 		}
@@ -939,7 +939,7 @@ void CGraphPlugin::doSelection(const string& primPath)
 
 			_PluginAccess->setCurrentSelection(resSet);
 
-		}catch(exception e){
+		}catch(const exception &e){
 			GraphDlg->MessageBox(e.what());
 		}
 	}
