@@ -849,6 +849,9 @@ MACRO(NL_SETUP_BUILD)
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT -fno-strict-aliasing")
 
+    # hardening
+    ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
+
     IF(NOT WITH_LOW_MEMORY)
       ADD_PLATFORM_FLAGS("-pipe")
     ENDIF()
@@ -859,6 +862,12 @@ MACRO(NL_SETUP_BUILD)
 
     IF(WITH_WARNINGS)
       ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
+    ELSE()
+      # Check wrong formats in printf-like functions
+      ADD_PLATFORM_FLAGS("-Wformat -Werror=format-security")
+
+      # Don't display invalid or unused command lines arguments by default (often too verbose)
+      ADD_PLATFORM_FLAGS("-Wno-invalid-command-line-argument -Wno-unused-command-line-argument")
     ENDIF()
 
     IF(ANDROID)
@@ -868,7 +877,7 @@ MACRO(NL_SETUP_BUILD)
       ADD_PLATFORM_FLAGS("-Wa,--noexecstack")
 
       IF(TARGET_ARM)
-        ADD_PLATFORM_FLAGS("-fpic -fstack-protector")
+        ADD_PLATFORM_FLAGS("-fpic")
         ADD_PLATFORM_FLAGS("-D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__")
 
         IF(TARGET_ARMV7)
@@ -893,7 +902,7 @@ MACRO(NL_SETUP_BUILD)
         ADD_PLATFORM_FLAGS("-fpic -finline-functions -fmessage-length=0 -fno-inline-functions-called-once -fgcse-after-reload -frerun-cse-after-loop -frename-registers")
         SET(RELEASE_CFLAGS "${RELEASE_CFLAGS} -funswitch-loops -finline-limit=300")
       ENDIF()
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now")
+      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-z,noexecstack")
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -L${PLATFORM_ROOT}/usr/lib")
     ENDIF()
 
@@ -908,9 +917,15 @@ MACRO(NL_SETUP_BUILD)
 
     SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -ftemplate-depth-48")
 
+    # hardening
+    ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
+
     IF(NOT APPLE)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")
     ENDIF()
+
+    # hardening
+    SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
 
     IF(WITH_SYMBOLS)
       SET(NL_RELEASE_CFLAGS "${NL_RELEASE_CFLAGS} -g")
