@@ -479,7 +479,7 @@ void CMissionCompilerFeDlg::compile(BOOL publish)
 				mc.publishFiles(ServerPathPrim[i], ServerPathText[i], LocalTextPath);
 			}
 		}
-		catch(EParseException e)
+		catch(const EParseException &e)
 		{
 			string msg;
 			msg + "\r\n";
@@ -695,7 +695,7 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 
 		system((string("\"C:\\Program Files\\Beyond Compare 2\\bc2.exe\" ")+string(tmp)+"/compiled_mission.script "+ReferenceScript).c_str());
 	}
-	catch(EParseException e)
+	catch(const EParseException &e)
 	{
 		string msg = "In primitive ";
 		msg += buildPrimPath(e.Primitive) +" : "+e.Why;

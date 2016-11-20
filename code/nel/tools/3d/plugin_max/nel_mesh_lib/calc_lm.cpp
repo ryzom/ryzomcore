@@ -2628,7 +2628,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 						pLightMap->writeTGA (f, 32);
 					}
 				}
-				catch(Exception &e)
+				catch(const Exception &e)
 				{
 					if (gOptions.FeedBack != NULL)
 					{

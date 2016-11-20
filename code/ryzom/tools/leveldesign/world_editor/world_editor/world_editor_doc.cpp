@@ -372,7 +372,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -415,7 +415,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 									}
 								}
 							}
-							catch (Exception& e)
+							catch (const Exception& e)
 							{
 								theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 							}
@@ -436,7 +436,7 @@ bool CWorldEditorDoc::loadDocument (const char *filename)
 				clearModifications ();
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			theApp.errorMessage ("Error reading file %s : %s", filename, e.what ());
 		
@@ -578,7 +578,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -646,7 +646,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error writing file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -720,7 +720,7 @@ BOOL CWorldEditorDoc::OnSaveDocument(LPCTSTR lpszPathName)
 				// Last time
 				file.close ();
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				theApp.errorMessage ("Error writing file %s : %s", lpszPathName, e.what ());
 
@@ -1674,7 +1674,7 @@ void CWorldEditorDoc::updateFiles ()
 						// Last time
 						_DataHierarchy[i].LastModifedTime = NLMISC::CFile::getFileModificationDate (_DataHierarchy[i].Filename);
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}
@@ -1710,7 +1710,7 @@ void CWorldEditorDoc::updateFiles ()
 							theApp.errorMessage ("Can't open file %s for reading.", _DataHierarchy[i].Filename.c_str ());
 						}
 					}
-					catch (Exception& e)
+					catch (const Exception& e)
 					{
 						theApp.errorMessage ("Error reading file %s : %s", _DataHierarchy[i].Filename.c_str (), e.what ());
 					}

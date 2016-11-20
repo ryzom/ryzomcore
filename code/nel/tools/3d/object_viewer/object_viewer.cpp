@@ -318,7 +318,7 @@ void CObjectViewer::loadConfigFile()
 			for (uint i=0; i<(uint)search_pathes.size(); i++)
 				CPath::addSearchPath (search_pathes.asString(i));
 		}
-		catch(EUnknownVar &)
+		catch(const EUnknownVar &)
 		{}
 
 		try
@@ -328,7 +328,7 @@ void CObjectViewer::loadConfigFile()
 			for (uint i=0; i<(uint)recursive_search_pathes.size(); i++)
 				CPath::addSearchPath (recursive_search_pathes.asString(i), true, false);
 		}
-		catch(EUnknownVar &)
+		catch(const EUnknownVar &)
 		{}
 
 		// Add extension remapping
@@ -345,7 +345,7 @@ void CObjectViewer::loadConfigFile()
 					CPath::remapExtension(extensions_remapping.asString(i), extensions_remapping.asString(i+1), true);
 			}
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 		}
 	
@@ -382,7 +382,7 @@ void CObjectViewer::loadConfigFile()
 			for (uint i=0; i<(uint)var.size(); i++)
 				CSoundSystem::addSampleBank(var.asString(i).c_str());*/
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			//::MessageBox(NULL, "warning : 'sample_path' or 'packed_sheet_path' variable not defined.\nSound will not work properly.", "Objectviewer.cfg", MB_OK|MB_ICONEXCLAMATION);
 		}
@@ -393,7 +393,7 @@ void CObjectViewer::loadConfigFile()
 			CConfigFile::CVar &camera_focal = cf.getVar("camera_focal");
 			_CameraFocal = camera_focal.asFloat();
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 		}
 
@@ -404,7 +404,7 @@ void CObjectViewer::loadConfigFile()
 			CConfigFile::CVar &var = cf.getVar("scene_light_enabled");
 			_SceneLightEnabled = var.asInt() !=0 ;
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			_SceneLightEnabled= false;
 		}
@@ -415,7 +415,7 @@ void CObjectViewer::loadConfigFile()
 			_SceneLightSunAmbiant.G = var.asInt(1);
 			_SceneLightSunAmbiant.B = var.asInt(2);
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			_SceneLightSunAmbiant= NLMISC::CRGBA::Black;
 		}
@@ -426,7 +426,7 @@ void CObjectViewer::loadConfigFile()
 			_SceneLightSunDiffuse.G = var.asInt(1);
 			_SceneLightSunDiffuse.B = var.asInt(2);
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			_SceneLightSunDiffuse= NLMISC::CRGBA::White;
 		}
@@ -437,7 +437,7 @@ void CObjectViewer::loadConfigFile()
 			_SceneLightSunSpecular.G = var.asInt(1);
 			_SceneLightSunSpecular.B = var.asInt(2);
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			_SceneLightSunSpecular= NLMISC::CRGBA::White;
 		}
@@ -449,7 +449,7 @@ void CObjectViewer::loadConfigFile()
 			_SceneLightSunDir.z = var.asFloat(2);
 			_SceneLightSunDir.normalize();
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			_SceneLightSunDir.set(0, 1, -1);
 			_SceneLightSunDir.normalize();
@@ -459,7 +459,7 @@ void CObjectViewer::loadConfigFile()
 			CConfigFile::CVar &var = cf.getVar("object_light_test");
 			_ObjectLightTestShape= var.asString();
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 		}		
 
@@ -481,7 +481,7 @@ void CObjectViewer::loadConfigFile()
 			}
 			CNELU::Scene->setAutomaticAnimationSet(as.release());
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 			//::MessageBox(NULL, "No automatic animation path specified, please set 'automatic_animation_path'", "warning", MB_OK);
 			nlwarning("No automatic animation path specified");
@@ -493,7 +493,7 @@ void CObjectViewer::loadConfigFile()
 			CConfigFile::CVar &var = cf.getVar("character_scale_pos");
 			_CharacterScalePos= var.asFloat();
 		}
-		catch (EUnknownVar &)
+		catch (const EUnknownVar &)
 		{
 		}		
 
@@ -838,7 +838,7 @@ bool CObjectViewer::initUI (HWND parent)
 		{
 			serial (iF);
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			std::string msg = toString("Error while loading default.ovcgf : %s", e.what());
 			::MessageBox (NULL, utf8ToTStr(msg), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
@@ -1826,7 +1826,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 					for (uint slot=0; slot<NL3D::CChannelMixer::NumAnimationSlot; slot++)
 						_ListInstance[instance]->Saved.SlotInfo[slot] = readed[i].SlotInfo[slot];
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					// Error message
 					std::string message = toString("Error loading shape %s: %s", readed[i].ShapeFilename.c_str(), e.what());
@@ -2899,7 +2899,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		for (uint i=0; i<(uint)zones.size(); i++)
 			_VegetableLandscapeZoneNames.push_back(zones.asString(i).c_str());
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLandscapeTileBank.clear();
 		_VegetableLandscapeTileFarBank.clear();
@@ -2917,7 +2917,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		// clamp to avoid divide/0.
 		_VegetableLandscapeThreshold= max(_VegetableLandscapeThreshold, 0.001f);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLandscapeThreshold= 0.003f;
 	}
@@ -2927,7 +2927,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &tileNear= cf.getVar("veget_landscape_tile_near");
 		_VegetableLandscapeTileNear= tileNear.asFloat();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLandscapeTileNear= 50;
 	}
@@ -2939,7 +2939,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		_VegetableLandscapeAmbient.G= color.asInt(1);
 		_VegetableLandscapeAmbient.B= color.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLandscapeAmbient.set(80, 80, 80);
 	}
@@ -2951,7 +2951,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		_VegetableLandscapeDiffuse.G= color.asInt(1);
 		_VegetableLandscapeDiffuse.B= color.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLandscapeDiffuse.set(255, 255, 255);
 	}
@@ -2961,7 +2961,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &var= cf.getVar("veget_landscape_snap_height");
 		_VegetableSnapHeight= var.asFloat();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableSnapHeight= 1.70f;
 	}
@@ -2976,7 +2976,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &var= cf.getVar("veget_texture");
 		_VegetableTexture= var.asString();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableTexture= "";
 	}
@@ -2989,7 +2989,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		_VegetableAmbient.G= color.asInt(1);
 		_VegetableAmbient.B= color.asInt(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableAmbient.set(80, 80, 80);
 	}
@@ -3002,7 +3002,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		sint	G= color.asInt(1) - _VegetableAmbient.G;	clamp(G, 0, 255);	_VegetableDiffuse.G= G;
 		sint	B= color.asInt(2) - _VegetableAmbient.B;	clamp(B, 0, 255);	_VegetableDiffuse.B= B;
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		sint	R= 255 - _VegetableAmbient.R;	clamp(R, 0, 255);	_VegetableDiffuse.R= R;
 		sint	G= 255 - _VegetableAmbient.G;	clamp(G, 0, 255);	_VegetableDiffuse.G= G;
@@ -3017,7 +3017,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		_VegetableLightDir.z= var.asFloat(2);
 		_VegetableLightDir.normalize();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableLightDir.set(0, 1, -1);
 		_VegetableLightDir.normalize();
@@ -3031,7 +3031,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		_VegetableWindDir.y= var.asFloat(1);
 		_VegetableWindDir.z= var.asFloat(2);
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableWindDir.x= 0.5f;
 		_VegetableWindDir.y= 0.5f;
@@ -3043,7 +3043,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &var= cf.getVar("veget_wind_freq");
 		_VegetableWindFreq= var.asFloat();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableWindFreq= 0.5;
 	}
@@ -3053,7 +3053,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &var= cf.getVar("veget_wind_power");
 		_VegetableWindPower= var.asFloat();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableWindPower= 1;
 	}
@@ -3063,7 +3063,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 		CConfigFile::CVar &var= cf.getVar("veget_wind_bend_min");
 		_VegetableWindBendMin= var.asFloat();
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 		_VegetableWindBendMin= 0;
 	}
@@ -3863,7 +3863,6 @@ uint CObjectViewer::getNumCamera () const
 
 int localizedMessageBox(HWND parentWindow, int messageStringID, int captionStringID, UINT nType)
 {
-	
 	CString caption;
 	CString mess;
 	caption.LoadString(captionStringID);

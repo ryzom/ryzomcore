@@ -1409,7 +1409,7 @@ void Browse::OnExportBorder()
 				else
 					error=true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				const char *toto=e.what ();
 				error=true;
@@ -1454,7 +1454,7 @@ void Browse::OnImportBorder()
 			else
 				error=true;
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			const char *toto=e.what ();
 			error=true;

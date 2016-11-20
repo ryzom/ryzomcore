@@ -168,7 +168,7 @@ BOOL CWorldEditorApp::InitInstance()
 		// set the primitive context
 		CPrimitiveContext::instance().CurrentLigoConfig = &Config;
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		::MessageBox (NULL, e.what(), "Warning", MB_OK|MB_ICONEXCLAMATION);
 
@@ -588,7 +588,7 @@ bool CWorldEditorApp::initPath (const char *filename, CSplashScreen &splashScree
 				syntaxError (filename, root, "Wrong root node, should be NEL_WORLD_EDITOR_CONFIG");
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			errorMessage ("File read error (%s):%s", filename, e.what ());
 		}

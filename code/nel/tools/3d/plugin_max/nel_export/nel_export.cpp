@@ -737,7 +737,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 							}	
 							theIP->RedrawViews(time);
 						}
-						catch(std::exception &e)
+						catch(const std::exception &e)
 						{							
 							::MessageBox(hWnd, e.what(), "Error", MB_OK | MB_ICONEXCLAMATION);
 						}						

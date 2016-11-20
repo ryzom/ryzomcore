@@ -358,7 +358,7 @@ bool		CVegetableDlg::loadVegetableSet(NL3D::CTileVegetableDesc &vegetSet, const 
 				// bkup fileName.
 				_LastVegetSetName= (const char*)fd.GetFileName();
 			}
-			catch(NLMISC::EStream &)
+			catch(const NLMISC::EStream &)
 			{
 				ok= false;
 				MessageBox(_T("Failed to load file!"));
@@ -629,7 +629,7 @@ void CVegetableDlg::OnButtonVegetableLoadDesc()
 				// update 3D view
 				refreshVegetableDisplay();
 			}
-			catch(NLMISC::EStream &)
+			catch(const NLMISC::EStream &)
 			{
 				MessageBox(_T("Failed to load file!"));
 			}
@@ -664,7 +664,7 @@ void CVegetableDlg::OnButtonVegetableSaveDesc()
 					// save the vegetable
 					f.serial(veget);
 				}
-				catch(NLMISC::EStream &)
+				catch(const NLMISC::EStream &)
 				{
 					MessageBox(_T("Failed to save file!"));
 				}
@@ -735,7 +735,7 @@ void CVegetableDlg::OnButtonVegetableSaveSet()
 				// save the vegetable set
 				f.serial(vegetSet);
 			}
-			catch(NLMISC::EStream &)
+			catch(const NLMISC::EStream &)
 			{
 				MessageBox(_T("Failed to save file!"));
 			}

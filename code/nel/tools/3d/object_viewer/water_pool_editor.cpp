@@ -378,7 +378,7 @@ void CWaterPoolEditor::OnLoadPool()
 				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
-		catch (NLMISC::Exception& e)
+		catch (const NLMISC::Exception& e)
 		{
 			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
 		}
@@ -415,7 +415,7 @@ void CWaterPoolEditor::OnSavePool()
 				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
-		catch (NLMISC::Exception& e)
+		catch (const NLMISC::Exception& e)
 		{
 			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
 		}

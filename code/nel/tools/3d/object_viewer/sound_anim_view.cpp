@@ -328,7 +328,7 @@ void CSoundAnimView::refresh(BOOL update)
 					else
 						soundAnim = animManager->findAnimation(name);
 				}
-				catch (exception& e)
+				catch (const exception& e)
 				{
 					nlwarning("Couldn't find sound animation <%s>: %s", name.c_str(), e.what());
 					needCreate = true;

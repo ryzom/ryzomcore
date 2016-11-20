@@ -675,7 +675,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 		}
 	
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		errorMessage (e.what ());
 	}
@@ -728,7 +728,7 @@ void CPlugin::connectDisconnect()
 				CInetAddress addr(_SHost+":48888");
 				_Client->connect(addr);
 			}
-			catch(ESocket &e)
+			catch(const ESocket &e)
 			{
 				errorMessage (e.what ());
 				return;
@@ -777,7 +777,7 @@ void CPlugin::connectDisconnect()
 		}
 		updateConnectionState();
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		errorMessage (e.what ());
 		delete _Client;

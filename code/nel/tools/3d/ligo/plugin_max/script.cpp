@@ -427,7 +427,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 							// Serial
 							materials[mat].serial (inputXml);
 						}
-						catch (Exception &e)
+						catch (const Exception &e)
 						{
 							// Error message
 							char tmp[2048];
@@ -541,7 +541,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 											ok = false;
 										}
 									}
-									catch (Exception &e)
+									catch (const Exception &e)
 									{
 										// Error message
 										char tmp[512];
@@ -778,7 +778,7 @@ Value* check_zone_with_material_cf (Value** arg_list, int count)
 								CMaxToLigo::errorMessage (tmp, "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 							}
 						}
-						catch (Exception &e)
+						catch (const Exception &e)
 						{
 							// Error message
 							char tmp[512];
@@ -901,7 +901,7 @@ Value* check_zone_with_transition_cf (Value** arg_list, int count)
 							CMaxToLigo::errorMessage (tmp, "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error message
 						char tmp[512];
@@ -1313,7 +1313,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 													CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
 												}
 											}
-											catch (Exception &e)
+											catch (const Exception &e)
 											{
 												// Error message
 												char tmp[512];
@@ -1324,7 +1324,7 @@ Value* export_zone_cf (Value** arg_list, int count)
 									}
 								}
 							}
-							catch (Exception &e)
+							catch (const Exception &e)
 							{
 								// Error message
 								char tmp[512];
@@ -1835,7 +1835,7 @@ bool MakeSnapShot (NLMISC::CBitmap &snapshot, const NL3D::CTileBank &tileBank, c
 			CMaxToLigo::errorMessage ("Can't initialise opengl offscreen renderer", "NeL Ligo check zone", *MAXScript_interface, errorInDialog);
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Error
 		char tmp[512];
@@ -2042,7 +2042,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 												CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
 											}
 										}
-										catch (Exception &e)
+										catch (const Exception &e)
 										{
 											// Error message
 											char tmp[512];
@@ -2068,7 +2068,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 							}
 						}
 					}
-					catch (Exception &e)
+					catch (const Exception &e)
 					{
 						// Error message
 						char tmp[512];

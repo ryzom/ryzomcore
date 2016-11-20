@@ -858,7 +858,7 @@ void CMainFrame::uninit ()
 		fileOut.serial(_Environnement);
 		fileOut.close();
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		MessageBox (e.what(), "Warning");
 	}
@@ -1441,7 +1441,7 @@ struct CViewerConfig
 			}
 
 		}
-		catch (EConfigFile &e)
+		catch (const EConfigFile &e)
 		{
 			printf ("Problem in config file : %s\n", e.what ());
 		}
@@ -4163,7 +4163,7 @@ bool CMainFrame::buildNLBitmapFromTGARsc(HRSRC bm, HMODULE hm, NLMISC::CBitmap &
 		ms.seek(0, NLMISC::IStream::begin);
 		tmpBitmap.load(ms);
 	}
-	catch(EStream &)
+	catch(const EStream &)
 	{
 		return false;
 	}

@@ -520,7 +520,7 @@ bool CActionImportPrimitive::redo ()
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			theApp.errorMessage ("Error reading the file (%s) : (%s).", _Filename.c_str (), e.what ());
 			return false;
@@ -610,7 +610,7 @@ bool CActionLoadPrimitive::redo ()
 				return false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			theApp.errorMessage ("Error reading the file (%s) : (%s).", _Filename.c_str (), e.what ());
 			return false;
@@ -2488,7 +2488,7 @@ bool CActionAddLandscape::redo ()
 				result = false;
 			}
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			getMainFrame ()->terminateLoadingDialog ();
 			theApp.errorMessage ("Error reading file %s : %s", _Filename.c_str (), e.what ());

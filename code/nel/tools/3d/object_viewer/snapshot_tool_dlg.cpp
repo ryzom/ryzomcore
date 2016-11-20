@@ -735,7 +735,7 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 			}
 			sb.reset();
 		}
-		catch(std::exception &e)
+		catch(const std::exception &e)
 		{
 			nlwarning(e.what());
 			

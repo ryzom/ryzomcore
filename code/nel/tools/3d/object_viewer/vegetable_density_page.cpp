@@ -544,7 +544,7 @@ void CVegetableDensityPage::OnButtonVegetableBrowse()
 			// update 3D view
 			_VegetableDlg->refreshVegetableDisplay();
 		}
-		catch (NLMISC::EPathNotFound &ep)
+		catch (const NLMISC::EPathNotFound &ep)
 		{
 			MessageBox(utf8ToTStr(ep.what()), _T("Can't open file"));
 		}

@@ -355,7 +355,7 @@ NLMISC::CBitmap *CDataBase::loadBitmap (const std::string &fileName)
 			nlwarning ("Bitmap not found : %s", fileName.c_str());
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		pBitmap->makeDummy();
 		theApp.errorMessage ("Error while loading bitmap %s : %s", fileName.c_str(), e.what());

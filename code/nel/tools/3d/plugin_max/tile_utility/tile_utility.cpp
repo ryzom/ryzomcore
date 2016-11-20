@@ -302,7 +302,7 @@ void Tile_utility::Load (const std::string& path)
 			SetBankPathName (path);
 		}
 	}
-	catch (EStream stream)
+	catch (const EStream &stream)
 	{
 		char tmp[1024];
 		sprintf (tmp, "Error while loading %s:\n\n%s", path, stream.what());

@@ -118,7 +118,7 @@ NL3D::CParticleSystemProcess	*DupPSLocated(const CParticleSystemProcess *in)
 			return newPS->detach(index);			
 		}
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning (e.what());
 		return NULL;
@@ -154,7 +154,7 @@ NL3D::CPSLocatedBindable	*DupPSLocatedBindable(CPSLocatedBindable *in)
 			return loc->unbind(subIndex);
 		}
 	}
-	catch (NLMISC::EStream &e)
+	catch (const NLMISC::EStream &e)
 	{
 		nlwarning (e.what());
 		return NULL;

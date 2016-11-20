@@ -188,7 +188,7 @@ BOOL CLog_analyserDlg::OnInitDialog()
 		cf.load( "log_analyser.cfg" );
 		LogDateString = cf.getVar( "LogDateString" ).asString().c_str();
 	}
-	catch ( EConfigFile& )
+	catch (const EConfigFile& )
 	{*/
 	LogDateString = "Log Starting [";
 	AnalyseFunc = NULL;

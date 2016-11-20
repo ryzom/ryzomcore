@@ -409,7 +409,7 @@ bool CPaintColor::loadBrush (const char *brushFileName)
 			return false;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Error message
 		MessageBox ((HWND)CNELU::Driver->getDisplay(), e.what(), "NeL Painter", MB_OK|MB_ICONEXCLAMATION);

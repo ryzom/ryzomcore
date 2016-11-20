@@ -904,7 +904,7 @@ bool CSkeletonScaleDlg::saveCurrentInStream(NLMISC::IStream &f)
 		ss.serial(f);
 		delete skelShape;
 	}
-	catch(NLMISC::EStream &)
+	catch(const NLMISC::EStream &)
 	{
 		MessageBox(_T("Failed to save file!"));
 		return false;

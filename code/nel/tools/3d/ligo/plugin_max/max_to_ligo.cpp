@@ -144,7 +144,7 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
 				char msg[512];

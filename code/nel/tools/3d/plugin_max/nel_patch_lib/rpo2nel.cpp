@@ -191,7 +191,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 					// Ok
 					loaded = true;
 				}
-				catch (EStream& stream)
+				catch (const EStream& e)
 				{
 					MessageBox (NULL, stream.what(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}

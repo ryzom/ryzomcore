@@ -101,7 +101,7 @@ static bool loadPic(const string &path, std::vector<NLMISC::CBGRA> &tampon, uint
 			return true;
 		}
 	}
-	catch (NLMISC::Exception& ) { }
+	catch (const NLMISC::Exception& ) { }
 	return false;
 }
 

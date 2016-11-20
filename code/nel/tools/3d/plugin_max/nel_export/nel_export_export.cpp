@@ -233,7 +233,7 @@ bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time
 				// All is good
 				bRet=true;
 			}
-			catch (Exception &e)
+			catch (const Exception &e)
 			{
 				// Message box
 				const char *message = e.what();
@@ -340,7 +340,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 						bRet = false;
 					}
 				}
-				catch (Exception& e)
+				catch (const Exception& e)
 				{
 					if (_ErrorInDialog)
 						MessageBox (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
@@ -408,7 +408,7 @@ bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time
 			// All is good
 			bRet=true;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			nlwarning (e.what());
 		}

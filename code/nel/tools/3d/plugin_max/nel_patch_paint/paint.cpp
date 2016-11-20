@@ -3990,7 +3990,7 @@ void EPM_PaintCMode::DoPaint ()
 					bank.serial (file);
 					bank.computeXRef ();
 				}
-				catch (EStream& stream)
+				catch (const EStream& stream)
 				{
 					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
 				}
@@ -4075,7 +4075,7 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
 				char msg[512];
@@ -4370,7 +4370,7 @@ DWORD WINAPI myThread (LPVOID vData)
 
 		delete pData;
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		MessageBox (NULL, e.what(), "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
 	}

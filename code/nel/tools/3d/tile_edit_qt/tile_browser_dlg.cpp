@@ -543,7 +543,7 @@ void CTile_browser_dlg::on_exportBorderPushButton_clicked()
 				else
 					error=true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				const char *toto=e.what ();
 				error=true;
@@ -592,7 +592,7 @@ void CTile_browser_dlg::on_importBorderPushButton_clicked()
 			else
 				error=true;
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			const char *toto=e.what ();
 			error=true;

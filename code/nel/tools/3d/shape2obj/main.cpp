@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 		// Add the shape
 		shapeMesh = streamShape.getShapePointer();
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		cout << "Error : " << e.what() << endl;
 

@@ -156,7 +156,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 					refresh (TRUE);
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
@@ -197,7 +197,7 @@ void CAnimationSetDlg::OnAddSkelWt()
 					refresh (TRUE);
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}

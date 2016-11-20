@@ -508,7 +508,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			return TRUE;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -534,7 +534,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			return TRUE;
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -623,7 +623,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 				return FALSE;
 			}
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading Type file: %s", e.what());
@@ -815,7 +815,7 @@ BOOL CGeorgesEditDoc::OnSaveDocument(LPCTSTR lpszPathName)
 			}
 
 		}
-		catch (Exception &e)
+		catch (const Exception &e)
 		{
 			char message[512];
 			smprintf (message, 512, "Error while loading file: %s", e.what());

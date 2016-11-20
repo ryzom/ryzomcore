@@ -112,7 +112,7 @@ Value* export_shape_cf (Value** arg_list, int count)
 		if (theCNelExport.exportMesh (sPath, *node, ip->GetTime()))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportShape) %s", e.what());
 	}
@@ -187,7 +187,7 @@ Value* export_shape_ex_cf (Value** arg_list, int count)
 		if (theCNelExport.exportMesh (sPath.c_str(), *node, ip->GetTime()))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportShapeEx) %s", e.what());
 	}
@@ -231,7 +231,7 @@ Value* export_skeleton_cf (Value** arg_list, int count)
 		if (theCNelExport.exportSkeleton (sPath, node, ip->GetTime()))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportSkeleton) %s", e.what());
 	}
@@ -302,7 +302,7 @@ Value* export_animation_cf (Value** arg_list, int count)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportAnimation) %s", e.what());
 	}
@@ -360,7 +360,7 @@ Value* export_ig_cf (Value** arg_list, int count)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportInstanceGroup) %s", e.what());
 	}
@@ -419,7 +419,7 @@ Value* export_skeleton_weight_cf (Value** arg_list, int count)
 			}
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportSkeletonWeight) %s", e.what());
 	}
@@ -445,7 +445,7 @@ Value* view_shape_cf (Value** arg_list, int count)
 
 		theCNelExport.viewMesh (ip->GetTime());		
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR %s", e.what());
 	}
@@ -555,7 +555,7 @@ Value* export_vegetable_cf (Value** arg_list, int count)
 		if (theCNelExport.exportVegetable (sPath, *node, ip->GetTime()))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportVegetable) %s", e.what());
 	}
@@ -648,7 +648,7 @@ Value* export_collision_cf (Value** arg_list, int count)
 		if (theCNelExport.exportCollision (sPath.c_str(), nodes, time))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportCollision) %s", e.what());
 	}
@@ -705,7 +705,7 @@ Value* export_pacs_primitives_cf (Value** arg_list, int count)
 		if (theCNelExport.exportPACSPrimitives (sPath.c_str(), nodes, time))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportPACSPrimitives) %s", e.what());
 	}
@@ -752,7 +752,7 @@ Value* export_lod_character_cf (Value** arg_list, int count)
 		if (theCNelExport.exportLodCharacter (sPath, *node, ip->GetTime()))
 			ret = &true_value;
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		nlwarning ("ERROR (NelExportLodCharacter) %s", e.what());
 	}

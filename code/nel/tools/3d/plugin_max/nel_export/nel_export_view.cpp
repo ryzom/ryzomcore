@@ -128,7 +128,7 @@ void regsiterOVPath ()
 		for (uint i=0; i<(uint)search_pathes.size(); i++)
 			CPath::addSearchPath (search_pathes.asString(i));
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{}
 
 	try
@@ -138,7 +138,7 @@ void regsiterOVPath ()
 		for (uint i=0; i<(uint)recursive_search_pathes.size(); i++)
 			CPath::addSearchPath (recursive_search_pathes.asString(i), true, false);
 	}
-	catch(EUnknownVar &)
+	catch(const EUnknownVar &)
 	{}
 
 	// Add extension remapping
@@ -155,7 +155,7 @@ void regsiterOVPath ()
 				CPath::remapExtension(extensions_remapping.asString(i), extensions_remapping.asString(i+1), true);
 		}
 	}
-	catch (EUnknownVar &)
+	catch (const EUnknownVar &)
 	{
 	}
 }

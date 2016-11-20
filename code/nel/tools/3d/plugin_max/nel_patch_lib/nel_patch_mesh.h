@@ -449,7 +449,7 @@ public:
 					_bank.serial (file);
 				}
 			}
-			catch (NLMISC::EStream& excp)
+			catch (const NLMISC::EStream& excp)
 			{
 				MessageBox (NULL, excp.what(), "Load error", MB_OK|MB_ICONEXCLAMATION);
 			}
