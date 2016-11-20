@@ -366,7 +366,7 @@ ENDMACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)
 MACRO(ADD_PLATFORM_FLAGS _FLAGS)
   SET(PLATFORM_CFLAGS "${PLATFORM_CFLAGS} ${_FLAGS}")
   SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} ${_FLAGS}")
-ENDMACRO(ADD_PLATFORM_FLAGS)
+ENDMACRO()
 
 MACRO(NL_SETUP_BUILD)
 
@@ -389,9 +389,13 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
   ENDIF()
 
-  SET(HOST_CPU ${CMAKE_HOST_SYSTEM_PROCESSOR})
+  IF(CMAKE_CXX_LIBRARY_ARCHITECTURE)
+    SET(HOST_CPU ${CMAKE_CXX_LIBRARY_ARCHITECTURE})
+  ELSE()
+    SET(HOST_CPU ${CMAKE_HOST_SYSTEM_PROCESSOR})
+  ENDIF()
 
-  IF(HOST_CPU MATCHES "(amd|AMD)64")
+  IF(HOST_CPU MATCHES "(amd|AMD|x86_)64")
     SET(HOST_CPU "x86_64")
   ELSEIF(HOST_CPU MATCHES "i.86")
     SET(HOST_CPU "x86")
@@ -401,10 +405,10 @@ MACRO(NL_SETUP_BUILD)
 
   # If not specified, use the same CPU as host
   IF(NOT TARGET_CPU)
-    SET(TARGET_CPU ${CMAKE_SYSTEM_PROCESSOR})
+    SET(TARGET_CPU ${HOST_CPU})
   ENDIF()
 
-  IF(TARGET_CPU MATCHES "(amd|AMD)64")
+  IF(TARGET_CPU MATCHES "(amd|AMD|x86_)64")
     SET(TARGET_CPU "x86_64")
   ELSEIF(TARGET_CPU MATCHES "i.86")
     SET(TARGET_CPU "x86")
@@ -412,7 +416,7 @@ MACRO(NL_SETUP_BUILD)
 
   IF(${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
     SET(CLANG ON)
-    MESSAGE(STATUS "Using Clang compiler")
+    MESSAGE(STATUS "Using Clang ${CMAKE_CXX_COMPILER_VERSION} compiler")
   ENDIF()
 
   IF(CMAKE_GENERATOR MATCHES "Xcode")
@@ -473,6 +477,9 @@ MACRO(NL_SETUP_BUILD)
       SET(TARGET_X86 1)
     ELSEIF(TARGET_CPU STREQUAL "x86")
       SET(TARGET_X86 1)
+    ELSEIF(TARGET_CPU STREQUAL "arm64")
+      SET(TARGET_ARM 1)
+      SET(TARGET_ARM64 1)
     ELSEIF(TARGET_CPU STREQUAL "armv7s")
       SET(TARGET_ARM 1)
       SET(TARGET_ARMV7S 1)
@@ -492,6 +499,10 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     IF(TARGET_ARM)
+      IF(TARGET_ARM64)
+        ADD_PLATFORM_FLAGS("-DHAVE_ARM64")
+      ENDIF()
+
       IF(TARGET_ARMV7S)
         ADD_PLATFORM_FLAGS("-DHAVE_ARMV7S")
       ENDIF()
@@ -540,10 +551,6 @@ MACRO(NL_SETUP_BUILD)
   ENDIF()
 
   IF(MSVC)
-    IF(MSVC_VERSION EQUAL "1700" AND NOT MSVC11)
-      SET(MSVC11 ON)
-    ENDIF()
-
     # Ignore default include paths
     ADD_PLATFORM_FLAGS("/X")
 
@@ -554,31 +561,31 @@ MACRO(NL_SETUP_BUILD)
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC12)
-      ADD_PLATFORM_FLAGS("/Gy- /MP /Zm1000")
+      ADD_PLATFORM_FLAGS("/Gy-")
       # /Ox is working with VC++ 2013, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC11)
-      ADD_PLATFORM_FLAGS("/Gy- /MP /Zm1000")
+      ADD_PLATFORM_FLAGS("/Gy-")
       # /Ox is working with VC++ 2012, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC10)
-      ADD_PLATFORM_FLAGS("/Gy- /MP /Zm1000")
+      ADD_PLATFORM_FLAGS("/Gy-")
       # /Ox is working with VC++ 2010, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC90)
-      ADD_PLATFORM_FLAGS("/Gy- /MP /Zm1000")
+      ADD_PLATFORM_FLAGS("/Gy-")
       # don't use a /O[012x] flag if you want custom optimizations
       SET(RELEASE_CFLAGS "/Ob2 /Oi /Ot /Oy /GT /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Ob1 /GF- ${DEBUG_CFLAGS}")
     ELSEIF(MSVC80)
-      ADD_PLATFORM_FLAGS("/Gy- /Wp64 /Zm1000")
+      ADD_PLATFORM_FLAGS("/Gy- /Wp64")
       # don't use a /O[012x] flag if you want custom optimizations
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
@@ -587,16 +594,19 @@ MACRO(NL_SETUP_BUILD)
       MESSAGE(FATAL_ERROR "Can't determine compiler version ${MSVC_VERSION}")
     ENDIF()
 
-    ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /DWIN32 /D_WINDOWS /wd4250")
+    ADD_PLATFORM_FLAGS("/D_CRT_SECURE_NO_DEPRECATE /D_CRT_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_WIN32 /DWIN32 /D_WINDOWS /wd4250")
+
+    # huge PCH
+    ADD_PLATFORM_FLAGS("/Zm1000")
 
     IF(TARGET_X64)
       # Fix a bug with Intellisense
       ADD_PLATFORM_FLAGS("/D_WIN64")
       # Fix a compilation error for some big C++ files
-      SET(RELEASE_CFLAGS "${RELEASE_CFLAGS} /bigobj")
+      ADD_PLATFORM_FLAGS("/bigobj")
     ELSE()
       # Allows 32 bits applications to use 3 GB of RAM
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} /LARGEADDRESSAWARE")
+      ADD_PLATFORM_LINKFLAGS("/LARGEADDRESSAWARE")
     ENDIF()
 
     # Exceptions are only set for C++
@@ -919,7 +929,7 @@ MACRO(NL_SETUP_BUILD)
     SET(NL_DEBUG_CFLAGS "-g -DNL_DEBUG -D_DEBUG ${NL_DEBUG_CFLAGS}")
     SET(NL_RELEASE_CFLAGS "-DNL_RELEASE -DNDEBUG -O3 ${NL_RELEASE_CFLAGS}")
   ENDIF()
-ENDMACRO(NL_SETUP_BUILD)
+ENDMACRO()
 
 MACRO(NL_SETUP_BUILD_FLAGS)
   SET(CMAKE_C_FLAGS ${PLATFORM_CFLAGS} CACHE STRING "" FORCE)
