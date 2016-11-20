@@ -1117,6 +1117,7 @@ void	CPSConstraintMesh::getShapesNames(std::string *shapesNames) const
 	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), stdext::make_unchecked_array_iterator(shapesNames));
 #else
 	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), shapesNames);
+#endif
 }
 
 

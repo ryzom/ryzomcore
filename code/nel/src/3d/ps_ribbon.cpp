@@ -1469,6 +1469,7 @@ void CPSRibbon::getShape(CVector *shape) const
 	std::copy(_Shape.begin(), _Shape.end(), stdext::make_unchecked_array_iterator(shape));
 #else
 	std::copy(_Shape.begin(), _Shape.end(), shape);
+#endif
 }
 
 ///==================================================================================================================
