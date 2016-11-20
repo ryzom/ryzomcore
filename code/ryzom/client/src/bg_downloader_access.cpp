@@ -213,7 +213,7 @@ void CBGDownloaderAccess::resumeBackgroundDownload()
 //=====================================================
 void CBGDownloaderAccess::CDownloadCoTask::run()
 {
-	Parent->_ErrorMsg = "";
+	Parent->_ErrorMsg.clear();
 	try
 	{
 		// don't restart downloader before

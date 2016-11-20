@@ -765,7 +765,7 @@ namespace NLGUI
 			rVR.getTextureSizeFromId(id,  _XExtend,  dummy);
 		else
 			// if not found,  reset,  to avoid errors
-			_ArboXExtend= "";
+			_ArboXExtend.clear();
 	}
 
 	// ----------------------------------------------------------------------------

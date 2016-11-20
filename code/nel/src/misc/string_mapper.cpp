@@ -33,8 +33,7 @@ CStringMapper	CStringMapper::_GlobalMapper;
 // ****************************************************************************
 CStringMapper::CStringMapper()
 {
-	_EmptyId = new string;
-	*_EmptyId = "";
+	_EmptyId = new string();
 }
 
 // ****************************************************************************

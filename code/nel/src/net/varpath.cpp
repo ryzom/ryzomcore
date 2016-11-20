@@ -167,7 +167,7 @@ void CVarPath::decode ()
 			if (val == "=")
 			{
 				srv += val + RawVarPath.substr (TokenPos);
-				var = "";
+				var.clear();
 			}
 			else
 				var = RawVarPath.substr (TokenPos);

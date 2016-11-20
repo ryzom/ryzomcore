@@ -491,7 +491,7 @@ void CDriverGL::showCursor(bool b)
 	}
 	else
 	{
-		_CurrName = "";
+		_CurrName.clear();
 	}
 
 	// update current hardware icon to avoid to have the plain arrow

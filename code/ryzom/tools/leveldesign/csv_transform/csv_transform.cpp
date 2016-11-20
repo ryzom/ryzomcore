@@ -314,21 +314,21 @@ private:
 			mode=PARA;
 			closeFooters();
 			paraName=rest;
-			paras[paraName] = "";
+			paras[paraName].clear();
 		}
 		else if (keyword=="header")
 		{
 			mode=HEADER;
 			closeFooters();
 			paraName=rest;
-			headers[paraName] = "";
+			headers[paraName].clear();
 		}
 		else if (keyword=="footer")
 		{
 			mode=FOOTER;
 			closeFooters();
 			paraName=rest;
-			footers[paraName] = "";
+			footers[paraName].clear();
 		}
 		else if (keyword=="file_header")
 		{

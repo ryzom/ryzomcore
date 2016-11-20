@@ -85,7 +85,9 @@ void CPrecomputedRotationsDlg::updateFromReader(void)
 	}
 	else
 	{
-		m_NbModels = m_RotSpeedMin = m_RotSpeedMax = "";
+		m_NbModels.Empty();
+		m_RotSpeedMin.Empty();
+		m_RotSpeedMax.Empty();
 	}
 
 	UpdateData(FALSE);

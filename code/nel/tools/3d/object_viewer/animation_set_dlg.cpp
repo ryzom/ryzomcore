@@ -117,7 +117,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 					c[path.GetLength()+1]=0;
 
 					// Path is empty
-					path = "";
+					path.Empty();
 				}
 				else
 				{

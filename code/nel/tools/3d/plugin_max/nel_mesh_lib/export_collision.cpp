@@ -391,7 +391,7 @@ void	CExportNel::computeCollisionRetrieverFromScene(TimeValue time,
 	// Default: empty retrieverBank/globalRetriever
 	retrieverBank= NULL;
 	globalRetriever= NULL;
-	retIgName= "";
+	retIgName.clear();
 
 	// get list of nodes from scene
 	std::vector<INode*>	nodes;

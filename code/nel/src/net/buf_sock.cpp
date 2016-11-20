@@ -84,7 +84,7 @@ CBufSock::~CBufSock()
 	delete Sock; // the socket disconnects automatically if needed
 
 	// destroy the structur to be sure that other people will not access to this anymore
-	AuthorizedCallback = "";
+	AuthorizedCallback.clear();
 	Sock = NULL;
 	_KnowConnected = false;
 	_LastFlushTime = 0;

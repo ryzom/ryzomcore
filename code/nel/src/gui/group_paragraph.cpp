@@ -337,7 +337,7 @@ namespace NLGUI
 			if( fromString( value, i ) )
 			{
 				_TextId = i;
-				_HardText = "";
+				_HardText.clear();
 			}
 			onTextChanged();
 			return;

@@ -160,7 +160,7 @@ void CContextSound::init()
 	uint	contextArgIndex[SoundContextNbArgs];
 	bool	useRandom = false;
 	bool	parseArg = false;
-	_BaseName = "";
+	_BaseName.clear();
 
 	//nldebug("Init the context sound %s", _PatternName.c_str());
 
@@ -190,7 +190,7 @@ void CContextSound::init()
 					nlassertex(nbJoker < SoundContextNbArgs, ("Error will trying to play ContextSound '%s'", _Name.toString().c_str()/*CStringMapper::unmap(_Name).c_str()*/));
 					fromString(index, contextArgIndex[nbJoker++]);
 					parseArg = false;
-					index = "";
+					index.clear();
 				}
 			}
 			else if (*first == 'r')

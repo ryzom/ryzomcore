@@ -1157,8 +1157,8 @@ void CPlugin::infoMessage (const char *format, ... )
 void CPlugin::updateConnectionState()
 {			
 	_DialogFlag->UpdateData ();
-	_DialogFlag->Sent = "";
-	_DialogFlag->Received = "";
+	_DialogFlag->Sent.Empty();
+	_DialogFlag->Received.Empty();
 	_DialogFlag->DownloadValue = (toString("%.1f kB/s", _DialogFlag->Download/1024.0)).c_str();
 	if (!_Client || !_Client->connected())
 	{

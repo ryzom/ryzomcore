@@ -3979,7 +3979,7 @@ void EPM_PaintCMode::DoPaint ()
 
 
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			CIFile file;
 			if (file.open (sName))

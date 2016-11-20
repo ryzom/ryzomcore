@@ -159,7 +159,7 @@ void CFileHeader::read (xmlNodePtr root)
 	}
 
 	// Look for the comment node
-	Comments = "";
+	Comments.clear();
 	xmlNodePtr node = CIXml::getFirstChildNode (root, "COMMENTS");
 	if (node)
 	{
@@ -181,7 +181,7 @@ void CFileHeader::read (xmlNodePtr root)
 	}
 
 	// Look for the log node
-	Log = "";
+	Log.clear();
 	node = CIXml::getFirstChildNode (root, "LOG");
 	if (node)
 	{

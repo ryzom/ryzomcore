@@ -946,11 +946,11 @@ std::string		CExportNel::getAnimatedLight (INode *node)
 {
 	std::string		ret = CExportNel::getScriptAppData (node, NEL3D_APPDATA_LM_ANIMATED_LIGHT, NEL3D_APPDATA_LM_ANIMATED_LIGHT_DEFAULT);
 	if (ret == "Sun")
-		ret = "";
+		ret.clear();
 	if (ret == "GlobalLight")
-		ret = "";
+		ret.clear();
 	if (ret == "(Use NelLight Modifier)")
-		ret = "";
+		ret.clear();
 
 	return ret;
 }

@@ -139,9 +139,9 @@ void CCreateFileDlg::OnOK()
 
 void CCreateFileDlg::OnCancel()
 {
-	_Filename = "";
-	_Path = "";
-	_FullPath = "";
+	_Filename.clear();
+	_Path.clear();
+	_FullPath.clear();
 	CDialog::OnCancel();
 }
 

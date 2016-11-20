@@ -1110,7 +1110,7 @@ static void dumpWriteMask(uint mask, std::string &out)
 {
 	if (mask == 0xf)
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -1125,7 +1125,7 @@ static void dumpSwizzle(const CVPSwizzle &swz, std::string &out)
 {
 	if (swz.isIdentity())
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";

@@ -156,7 +156,7 @@ LRESULT CALLBACK WndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					string str;
 					while (*pos2 != '\0')
 					{
-						str = "";
+						str.clear();
 
 						// get the string
 						while (*pos2 != '\0' && *pos2 != '\n')

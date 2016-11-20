@@ -175,7 +175,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 
 		// Get the bank name
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			// Open the bank
 			CIFile file;

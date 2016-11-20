@@ -502,7 +502,7 @@ void		CSkeletonScaleDlg::refreshTextViewWithScale(TScaleId sid, float scale, flo
 	// if different values selected, diff
 	if(diff)
 	{
-		*_ScaleEdits[sid]= "";
+		_ScaleEdits[sid]->Empty();
 	}
 	// else display text
 	else

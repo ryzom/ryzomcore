@@ -179,7 +179,7 @@ void CFindPrimitiveDlg::OnFindNext()
 
 		// Init locator
 		_Locator.getRoot (0);
-		PrimitiveName = "";
+		PrimitiveName.Empty();
 	}
 	UpdateData (FALSE);
 }

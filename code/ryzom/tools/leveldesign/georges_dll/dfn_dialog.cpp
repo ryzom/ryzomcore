@@ -378,9 +378,9 @@ void CDfnEditListCtrl::getNewItemText (uint item, uint subItem, std::string &ret
 	else if (subItem == 2)
 		ret = theApp.DefaultType;
 	else if (subItem == 3)
-		ret = "";
+		ret.clear();
 	else if (subItem == 4)
-		ret = "";
+		ret.clear();
 }
 
 // ***************************************************************************

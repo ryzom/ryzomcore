@@ -546,7 +546,7 @@ unsigned long Browse::MyControllingFunction( void* pParam )
 						rot = tileBank2.getTile (index)->getRotAlpha ();
 				}
 				else
-					path = "";
+					path.clear();
 			}
 			break;
 		case 3:
@@ -576,7 +576,7 @@ unsigned long Browse::MyControllingFunction( void* pParam )
 			break;
 		}
 
-		if ((path!="") && _LoadBitmap(tileBank2.getAbsPath() + path, pBmp, *bits, pAlpha, rot))
+		if (!path.empty() && _LoadBitmap(tileBank2.getAbsPath() + path, pBmp, *bits, pAlpha, rot))
 		{			
 			*ld=1;
 			int iFV,iLV; br->m_ctrl.GetVisibility(iFV, iLV, br->m_128x128);
@@ -633,7 +633,7 @@ void Browse::Init()
 		value=256;
 		type=REG_SZ;
 		if (RegQueryValueEx(regkey,REGKEY_LASTPATH,0,&type,(unsigned char *)&sWindowpl,&value)!=ERROR_SUCCESS)
-			m_ctrl.LastPath="";
+			m_ctrl.LastPath.clear();
 		else
 			m_ctrl.LastPath=(const char*)sWindowpl;
 		value=4;
@@ -916,7 +916,7 @@ void Browse::OnBatchLoad ()
 
 				// Transition to patch
 				CTileSetTransition* trans=tileBank2.getTileSet (land)->getTransition (transition);
-				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (CTile::alpha)=="")
+				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (CTile::alpha).empty())
 				{
 					// Continue ?
 					int ok;
@@ -958,7 +958,7 @@ void Browse::OnBatchLoad ()
 
 				// Transition to patch
 				CTileSetTransition* trans=tileBank2.getTileSet (land)->getTransition (transition);
-				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (m_ctrl.Texture==1?CTile::diffuse:CTile::additive)=="")
+				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (m_ctrl.Texture==1?CTile::diffuse:CTile::additive).empty())
 				{
 					// Try to load a tile with a file name like /tiletransition0.tga
 					char sName2[256];

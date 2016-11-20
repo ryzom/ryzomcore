@@ -928,7 +928,7 @@ bool CStringPostProcessRemoveName::cbIDStringReceived(ucstring &inOut)
 		}
 	}
 	else
-		inOut = "";
+		inOut.clear();
 
 	return true;
 }

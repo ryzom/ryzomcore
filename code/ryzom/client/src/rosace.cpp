@@ -493,7 +493,7 @@ CRosace::~CRosace()
 void CRosace::init()
 {
 	_Mode = CRosacePage::CursorAngleMode;
-	_Selected = "";
+	_Selected.clear();
 }// init //
 
 //-----------------------------------------------

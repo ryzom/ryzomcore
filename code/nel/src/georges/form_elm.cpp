@@ -1512,7 +1512,7 @@ const char* CFormElm::tokenize (const char *name, string &str, uint &/* errorInd
 		return name+1;
 	}
 
-	str = "";
+	str.clear();
 	while ( (*name != '.') && (*name != '[') && (*name != ']') && (*name != 0) )
 	{
 		// Add a char
@@ -2066,7 +2066,7 @@ void CFormElmStruct::getFormName (std::string &result, const CFormElm *child) co
 	// Reset the result
 	if (child == NULL)
 	{
-		result = "";
+		result.clear();
 		result.reserve (50);
 	}
 
@@ -2723,7 +2723,7 @@ void CFormElmArray::getFormName (std::string &result, const CFormElm *child) con
 	// Reset the result
 	if (child == NULL)
 	{
-		result = "";
+		result.clear();
 		result.reserve (50);
 	}
 
@@ -3067,7 +3067,7 @@ void CFormElmAtom::getFormName (std::string &result, const CFormElm *child) cons
 {
 	// Must be NULL
 	nlassert (child == NULL);
-	result = "";
+	result.clear();
 	result.reserve (50);
 
 	// Get parent form name

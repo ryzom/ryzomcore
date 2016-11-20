@@ -135,7 +135,6 @@ struct CViewerConfig
 		LandscapeThreshold = 0.001f;
 		LandscapeNoise = true;
 
-		HeightFieldName= "";
 		HeightFieldMaxZ= 100;
 		HeightFieldOriginX= 16000;
 		HeightFieldOriginY= -24000;
@@ -344,7 +343,7 @@ void displayZones()
 	CBitmap		heightBitmap;
 	CIFile file(ViewerCfg.HeightFieldName);
 
-	if( ViewerCfg.HeightFieldName!="" && heightBitmap.load(file) )
+	if( !ViewerCfg.HeightFieldName.empty() && heightBitmap.load(file) )
 	{
 		CHeightMap	heightMap;
 		heightMap.buildFromBitmap(heightBitmap);
@@ -373,7 +372,7 @@ void displayZones()
 		nlerror (tmp.c_str());
 	}
 
-	if ((Landscape->Landscape.TileBank.getAbsPath ()=="")&&(ViewerCfg.TilesPath!=""))
+	if ((Landscape->Landscape.TileBank.getAbsPath ().empty())&&(!ViewerCfg.TilesPath.empty()))
 		Landscape->Landscape.TileBank.setAbsPath (ViewerCfg.TilesPath + "/");
 
 	if (ViewerCfg.UseDDS)

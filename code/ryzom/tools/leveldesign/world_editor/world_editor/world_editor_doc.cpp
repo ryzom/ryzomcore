@@ -96,8 +96,8 @@ bool CWorldEditorDoc::newDocument ()
 
 	PropertiesDialogs.clear();
 
-	_DataDir = "";
-	_Context = "";
+	_DataDir.clear();
+	_Context.clear();
 	
 	// Erase all editable root primitive
 	CDatabaseList::iterator ite = _DataHierarchy.begin();
@@ -1423,7 +1423,7 @@ void CWorldEditorDoc::initPrimitiveParameters (const CPrimitiveClass &primClass,
 								}
 								else
 								{
-									str->StringArray[i] = "";
+									str->StringArray[i].clear();
 								}
 							}
 							primitive.addPropertyByName (parameter.Name.c_str (), str);
@@ -2149,7 +2149,7 @@ bool CWorldEditorDoc::updateDefaultValuesInternal (NLLIGO::IPrimitive &primitive
 							primitive.removePropertyByName (_class->Parameters[i].Name.c_str ());
 
 							// Set the value
-							result[j] = "";
+							result[j].clear();
 
 							// Add the new property array
 							primitive.addPropertyByName (_class->Parameters[i].Name.c_str (), new CPropertyStringArray (result));

@@ -1031,12 +1031,12 @@ namespace NLGUI
 			if (posid > 0)
 				idTmp = idTmp.substr (0, posid);
 			else
-				idTmp = "";
+				idTmp.clear();
 
 			if (poslid > 0)
 				lidTmp = lidTmp.substr (0, poslid);
 			else
-				lidTmp = "";
+				lidTmp.clear();
 		}
 		return true;
 	}

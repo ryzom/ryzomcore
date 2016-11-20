@@ -543,7 +543,7 @@ void CAnimationSession::updateActPositionDescriptions(TActPositionDescriptions& 
 		{
 			actPositionDescription.Name = act->Name;
 			actPositionDescription.Season = 0;
-			actPositionDescription.Island = "";
+			actPositionDescription.Island.clear();
 			actPositionDescription.LocationId = 0;
 		}
 		actPositionDescriptions.push_back(actPositionDescription);

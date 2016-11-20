@@ -498,7 +498,7 @@ void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
 void CFormDfn::CEntry::setDfnPointer ()
 {
 	TypeElement = EntryVirtualDfn;
-	Filename = "";
+	Filename.clear();
 	Type = NULL;
 	Dfn = NULL;
 }

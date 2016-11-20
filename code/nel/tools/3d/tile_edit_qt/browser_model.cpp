@@ -149,7 +149,7 @@ void TileInfo::Init(int id, TileType tileType)
 bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 {
 	bool bRes=true;
-	if (!loaded && getRelativeFileName (Diffuse, index)!="")
+	if (!loaded && !getRelativeFileName (Diffuse, index).empty())
 	{
 		path = fixPath(tileBankBrowser.getAbsPath() + getRelativeFileName (Diffuse, index));
 		
@@ -164,7 +164,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			loaded=1;
 	}
-	if (!nightLoaded && getRelativeFileName (Additive, index)!="")
+	if (!nightLoaded && !getRelativeFileName (Additive, index).empty())
 	{
 		nightPath = fixPath(tileBankBrowser.getAbsPath() + getRelativeFileName (Additive, index));
 		if (!loadPixmapBuffer( nightPath, nightBits, Alpha, 0))
@@ -175,7 +175,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			nightLoaded=1;
 	}
-	if (!alphaLoaded && getRelativeFileName (::Alpha, index)!="")
+	if (!alphaLoaded && !getRelativeFileName (::Alpha, index).empty())
 	{
 		alphaPath = fixPath(tileBankBrowser.getAbsPath() + getRelativeFileName (::Alpha, index));
 		if (!loadPixmapBuffer( alphaPath, alphaBits, NULL, tileBankBrowser.getTile (index)->getRotAlpha ()))
@@ -234,7 +234,7 @@ const std::string TileInfo::getRelativeFileName (TileTexture texture, int index)
 
 			//TODO titegus: remove MAGIC STRING "EmptyDisplacementMap" in Nel \tile_bank.cpp\void CTileNoise::setEmpty () or add an IsEmpty() method !!!!
 			if (currentPath == "EmptyDisplacementMap")
-				currentPath = "";
+				currentPath.clear();
 		}	
 	}
 

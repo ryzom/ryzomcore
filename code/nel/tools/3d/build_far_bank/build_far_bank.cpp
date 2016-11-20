@@ -271,7 +271,7 @@ int main (int argc, char **argv)
 						bool _256=(type==CTileBank::_256x256);
 
 						// Diffuse bitmap filled ?
-						if (pTile->getRelativeFileName (CTile::diffuse)!="")
+						if (!pTile->getRelativeFileName (CTile::diffuse).empty())
 						{
 							// File exist ?
 							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::diffuse), false);
@@ -302,7 +302,7 @@ int main (int argc, char **argv)
 						}
 
 						// Additive bitmap filled ?
-						if (pTile->getRelativeFileName (CTile::additive)!="")
+						if (!pTile->getRelativeFileName (CTile::additive).empty())
 						{
 							// File exist ?
 							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::additive), false);
@@ -333,7 +333,7 @@ int main (int argc, char **argv)
 						}
 
 						// Alpha bitmap filled ?
-						if (pTile->getRelativeFileName (CTile::alpha)!="")
+						if (!pTile->getRelativeFileName (CTile::alpha).empty())
 						{
 							// File exist ?
 							string tileFilename = bank.getAbsPath()+CPath::standardizePath(pTile->getRelativeFileName (CTile::alpha), false);

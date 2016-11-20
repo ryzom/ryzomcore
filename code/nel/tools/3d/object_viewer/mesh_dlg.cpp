@@ -166,7 +166,7 @@ void CMeshDlg::updateForMorph()
 		}
 		else
 		{
-			m_ShapeName = "";
+			m_ShapeName.Empty();
 		}
 	}
 	updateMeshErrorString();

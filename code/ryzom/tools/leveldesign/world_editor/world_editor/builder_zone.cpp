@@ -428,10 +428,10 @@ void CBuilderZone::calcMask()
 CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 {
 	// Set Current Filter
-	_FilterType1 = STRING_UNUSED; _FilterValue1 = "";
-	_FilterType2 = STRING_UNUSED; _FilterValue2 = "";
-	_FilterType3 = STRING_UNUSED; _FilterValue3 = "";
-	_FilterType4 = STRING_UNUSED; _FilterValue4 = "";
+	_FilterType1 = STRING_UNUSED;
+	_FilterType2 = STRING_UNUSED;
+	_FilterType3 = STRING_UNUSED;
+	_FilterType4 = STRING_UNUSED;
 	_FilterOperator2 = 0;
 	_FilterOperator3 = 0;
 	_FilterOperator4 = 0;
@@ -450,7 +450,6 @@ CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 	_ApplyCycleSelection = 0;
 	_NotPropagate = false;
 	_Force = false;
-	_LastPathName = "";
 	_ToolsZone = NULL;
 }
 
@@ -1647,7 +1646,7 @@ string CBuilderZone::getZoneName (sint32 x, sint32 y)
 			return sRet;
 		}
 	}
-	sRet = "";
+	sRet.clear();
 	return sRet;
 }
 

@@ -432,7 +432,7 @@ int TileList::setDisplacement (int tile, const std::string& name)
 	if (RemovePath (troncated, tileBank2.getAbsPath ().c_str()))
 	{
 		// load it
-		if (troncated!="")
+		if (!troncated.empty())
 		{
 			// not loaded
 			theListDisplacement[tile].loaded=0;
@@ -670,7 +670,7 @@ const std::string& TileInfo::getRelativeFileName (CTile::TBitmap type, int index
 bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 {
 	bool bRes=true;
-	if (!loaded && getRelativeFileName (CTile::diffuse, index)!="")
+	if (!loaded && !getRelativeFileName (CTile::diffuse, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::diffuse, index), &BmpInfo, Bits, Alpha, 0))
 		{
@@ -680,7 +680,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			loaded=1;
 	}
-	if (!nightLoaded && getRelativeFileName (CTile::additive, index)!="")
+	if (!nightLoaded && !getRelativeFileName (CTile::additive, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::additive, index), &nightBmpInfo, nightBits, Alpha, 0))
 		{
@@ -690,7 +690,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			nightLoaded=1;
 	}
-	if (!alphaLoaded && getRelativeFileName (CTile::alpha, index)!="")
+	if (!alphaLoaded && !getRelativeFileName (CTile::alpha, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::alpha, index), &alphaBmpInfo, alphaBits, NULL, 
 			tileBank2.getTile (index)->getRotAlpha ()))
@@ -1205,7 +1205,7 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 			if (index!=-1)
 				pth = i->getRelativeFileName ((CTile::TBitmap)(Texture-1), index);
 			else
-				pth = "";
+				pth.clear();
 		}
 		break;
 	case 3:

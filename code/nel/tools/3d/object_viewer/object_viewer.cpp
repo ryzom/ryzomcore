@@ -1623,7 +1623,7 @@ void CObjectViewer::resetSlots (uint instance)
 
 	// Set no animation in slot UI
 	for (uint j=0; j<NL3D::CChannelMixer::NumAnimationSlot; j++)
-		_ListInstance[instance]->Saved.SlotInfo[j].Animation = "";
+		_ListInstance[instance]->Saved.SlotInfo[j].Animation.clear();
 
 	// Reset the animation list
 	_ListInstance[instance]->Saved.AnimationFileName.clear ();
@@ -1743,7 +1743,7 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 		{
 			if (ver <=3)
 			{			
-				ParticleWorkspaceFilename = "";
+				ParticleWorkspaceFilename.clear();
 			}
 			// First instance
 			uint firstInstance = (uint)_ListInstance.size();
@@ -1786,9 +1786,9 @@ void CObjectViewer::serial (NLMISC::IStream& f)
 							{
 								// Add the mesh
 								if (readed[i].SkeletonId != 0xffffffff)
-									instance = addMesh (serialShape.getShapePointer(), readed[i].ShapeFilename.c_str(), readed[i].SkeletonId + firstInstance, (readed[i].BindBoneName=="")?NULL:readed[i].BindBoneName.c_str());
+									instance = addMesh (serialShape.getShapePointer(), readed[i].ShapeFilename.c_str(), readed[i].SkeletonId + firstInstance, (readed[i].BindBoneName.empty())?NULL:readed[i].BindBoneName.c_str());
 								else
-									instance = addMesh (serialShape.getShapePointer(), readed[i].ShapeFilename.c_str(), 0xffffffff, (readed[i].BindBoneName=="")?NULL:readed[i].BindBoneName.c_str());
+									instance = addMesh (serialShape.getShapePointer(), readed[i].ShapeFilename.c_str(), 0xffffffff, (readed[i].BindBoneName.empty())?NULL:readed[i].BindBoneName.c_str());
 							}
 						}
 						else
@@ -2151,7 +2151,7 @@ uint CObjectViewer::addMesh (NL3D::IShape* pMeshShape, const std::string &meshNa
 			{
 				// Bind bone name
 				uint bindBone = 0xffffffff;
-				std::string boneName = "";
+				std::string boneName;
 
 				// Name is passed, look for bone 
 				if (bindSkelName)
@@ -2400,7 +2400,7 @@ void CObjectViewer::setSingleAnimation (NL3D::CAnimation* pAnim, const std::stri
 
 		// Set the animation in the first slot
 		_ListInstance[instance]->Saved.SlotInfo[0].Animation = name;
-		_ListInstance[instance]->Saved.SlotInfo[0].Skeleton = "";
+		_ListInstance[instance]->Saved.SlotInfo[0].Skeleton.clear();
 		_ListInstance[instance]->Saved.SlotInfo[0].Offset = 0;
 		_ListInstance[instance]->Saved.SlotInfo[0].StartTime = (int)(pAnim->getBeginTime()*_AnimationDlg->Speed);
 		_ListInstance[instance]->Saved.SlotInfo[0].EndTime = (int)(pAnim->getEndTime()*_AnimationDlg->Speed);
@@ -2978,7 +2978,7 @@ void		CObjectViewer::loadVegetableLandscapeCfg(NLMISC::CConfigFile &cf)
 	}
 	catch (const EUnknownVar &)
 	{
-		_VegetableTexture= "";
+		_VegetableTexture.clear();
 	}
 
 	// vegetable ambient
@@ -3088,7 +3088,7 @@ bool		CObjectViewer::createVegetableLandscape()
 
 		try
 		{
-			if(_VegetableLandscapeTileBank=="")
+			if(_VegetableLandscapeTileBank.empty())
 			{
 				throw Exception("Landscape CFG not fully defined");
 			}

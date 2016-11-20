@@ -1627,7 +1627,7 @@ load_bank_cf(Value** arg_list, int count)
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
 	std::string bankName = GetBankPathName ();
-	if (bankName!="")
+	if (!bankName.empty())
 	{
 		try
 		{

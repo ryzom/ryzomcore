@@ -652,7 +652,7 @@ void CMainFrame::OnFileOpen()
 			c[path.GetLength()+1]=0;
 
 			// Path is empty
-			path = "";
+			path.Empty();
 		}
 		else
 		{
@@ -745,7 +745,7 @@ void CMainFrame::OnFileSaveconfig()
 	CFileDialog fileDlg( FALSE, _T(".ovcgf"), _T("*.ovcgf"), OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 	if (fileDlg.DoModal()==IDOK)
 	{		
-		ObjView->ParticleWorkspaceFilename = "";
+		ObjView->ParticleWorkspaceFilename.clear();
 		CParticleWorkspace *pw = ObjView->getParticleDialog()->getParticleWorkspace();
 		if (pw && pw->getNumNode() != 0)
 		{

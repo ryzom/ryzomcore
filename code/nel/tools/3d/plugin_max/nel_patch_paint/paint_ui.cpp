@@ -168,7 +168,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		std::string fileName=bank.getAbsPath()+bank.getTile (set->getTile128(0))->getRelativeFileName (CTile::diffuse);
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			MainBitmap=new CTextureFile (fileName);
@@ -193,7 +193,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -218,7 +218,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 				std::string fileName=bank.getAbsPath()+pTile->getRelativeFileName (CTile::diffuse);
 
 				// Valid name?
-				if (fileName!="")
+				if (!fileName.empty())
 				{
 					// Create it
 					if (GroupBitmap[group]==NULL)
@@ -250,10 +250,10 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 		// Get the name
 		std::string fileName = bank.getDisplacementMap(dispTile);
 		if (fileName=="EmptyDisplacementMap")
-			fileName="";
+			fileName.clear();
 
 		// Valid name?
-		if (fileName!="")
+		if (!fileName.empty())
 		{
 			// Create it
 			DisplaceBitmap[displace]=new CTextureFile (bank.getAbsPath()+fileName);

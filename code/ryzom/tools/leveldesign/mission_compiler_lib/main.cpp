@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 			::fclose(fp);
 
 			// TODO: set diff program in .cfg
-			std::string compareApp = "";
+			std::string compareApp;
 			std::string command = NLMISC::toString("%s %s/compiled_mission.script test_compilateur.script", compareApp.c_str(), tmp);
 			sint error = system(command.c_str());
 

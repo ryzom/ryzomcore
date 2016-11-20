@@ -225,7 +225,7 @@ void CStartStopParticleSystem::updateUIFromState()
 		GetDlgItem(IDC_BROWSE_ANIM)->EnableWindow(FALSE);
 		GetDlgItem(IDC_DISPLAY_HELPERS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_CLEAR_ANIM)->EnableWindow(FALSE);
-		m_TriggerAnim = "";
+		m_TriggerAnim.Empty();
 	}
 	else
 	{	
@@ -1033,7 +1033,7 @@ void CStartStopParticleSystem::OnBrowseAnim()
 void CStartStopParticleSystem::OnClearAnim() 
 {
 	// TODO: Add your control notification handler code here
-	m_TriggerAnim = "";
+	m_TriggerAnim.Empty();
 	_ActiveNode->setTriggerAnim("");	
 	_ParticleDlg->ParticleTreeCtrl->updateCaption(*_ActiveNode);
 	UpdateData(FALSE);

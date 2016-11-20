@@ -1178,7 +1178,7 @@ void CFormDialog::getDfnName (string &result) const
 		result = (*extension == '.') ? extension+1 : extension;
 	}
 	else
-		result = "";
+		result.clear();
 }
 
 // ***************************************************************************
@@ -2346,7 +2346,7 @@ void CColorEdit::getValue (std::string &result)
 	}
 	else
 	{
-		result = "";
+		result.clear();
 	}
 }
 
@@ -2803,7 +2803,7 @@ void CIconWidget::onOk ()
 
 void CIconWidget::getValue (std::string &result)
 {
-	result = "";
+	result.clear();
 }
 
 // ***************************************************************************

@@ -271,9 +271,9 @@ void CParticleSystemEdit::updatePrecomputedBBoxParams()
 	
 	if (!ew)
 	{
-		m_BBoxX = "";
-		m_BBoxY = "";
-		m_BBoxZ = "";
+		m_BBoxX.Empty();
+		m_BBoxY.Empty();
+		m_BBoxZ.Empty();
 	}
 	else
 	{

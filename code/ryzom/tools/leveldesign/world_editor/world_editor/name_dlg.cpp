@@ -231,8 +231,8 @@ void CNameDlg::updateAssignBox()
 	}
 	else
 	{
-		m_assignGn = "";
-		m_assignIg = "";
+		m_assignGn.Empty();
+		m_assignIg.Empty();
 	}
 	
 	checkNewGn();
@@ -282,7 +282,8 @@ void CNameDlg::OnBtnReset()
 	m_botNames.Data.clear();
 
 	// clear assign box fields
-	m_assignGn = m_assignIg = "";
+	m_assignGn.Empty();
+	m_assignIg.Empty();
 	
 	// load worksheets
 	STRING_MANAGER::loadExcelSheet(m_dataDir + "bot_names.txt", m_botNames, true);

@@ -853,8 +853,8 @@ bool CScenarioValidator::setScenarioToLoad( const std::string& filename, CScenar
 		// Scenario without header
 		if (_ScenarioBody.size() < headerLen ||_ScenarioBody.substr(0, headerLen) != header )
 		{
-			md5 = "";
-			signature = "";
+			md5.clear();
+			signature.clear();
 			inf.close();
 			return true;
 		}
@@ -1108,8 +1108,8 @@ bool CUserComponentValidator::setUserComponentToLoad( const std::string& filenam
 		// Scenario without header
 		if (_UserComponentBody.size() < headerLen ||_UserComponentBody.substr(0, headerLen) != header )
 		{
-			md5 = "";
-			signature = "";
+			md5.clear();
+			signature.clear();
 			inf.close();
 			return true;
 		}

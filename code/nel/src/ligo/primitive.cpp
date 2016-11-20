@@ -1240,7 +1240,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 		if (indexStr==string::npos)
 		{
 			childName=path;
-			path="";
+			path.clear();
 		}
 		else
 		{
@@ -1664,7 +1664,7 @@ bool IPrimitive::read (xmlNodePtr xmlNode, const char *filename, uint version, C
 	if (commentNode)
 	{
 		 if (!CIXml::getContentString(_UnparsedProperties, commentNode))
-			_UnparsedProperties = "";
+			_UnparsedProperties.clear();
 	}
 
 	// Read the expanded flag

@@ -293,7 +293,7 @@ void		CVegetableDlg::CVegetableDesc::initVegetable(const NL3D::CVegetable &veget
 void		CVegetableDlg::CVegetableDesc::updateVegetableName()
 {
 	// Build the vegetable Name according to the ShapeName
-	if(Vegetable->ShapeName=="")
+	if(Vegetable->ShapeName.empty())
 	{
 		VegetableName= NL_DefaultVegetName;
 	}
@@ -385,7 +385,7 @@ void		CVegetableDlg::buildVegetableSet(NL3D::CTileVegetableDesc &vegetSet, bool 
 	for(uint i=0;i<_Vegetables.size();i++)
 	{
 		// if don't want to keep <default> ShapeNames, skip them.
-		if(!keepDefaultShapeName && _Vegetables[i].Vegetable->ShapeName=="")
+		if(!keepDefaultShapeName && _Vegetables[i].Vegetable->ShapeName.empty())
 			continue;
 		// if don't want to keep hiden vegetables, skip them.
 		if(!keepHiden && !_Vegetables[i].Visible)

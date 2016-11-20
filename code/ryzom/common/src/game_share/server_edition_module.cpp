@@ -486,7 +486,7 @@ using namespace R2;
 //----------------- <CKeysHolder> --------------------------------------------
 void CKeysHolder::resetPolicies()
 {
-	_CurrentKey = "";
+	_CurrentKey.clear();
 	_Keys.clear();
 }
 
@@ -2128,7 +2128,7 @@ void CServerEditionModule::onScenarioUploadAsked(NLNET::IModuleProxy *senderModu
 	TSessionId sessionId = found->second;
 
 	scenario->setHighLevel( scenarioHl );
-	getSession(sessionId)->RingAccess = "";
+	getSession(sessionId)->RingAccess.clear();
 	scenario->setInitialActIndex(1);
 	if (mustBroadCast)
 	{
@@ -2819,7 +2819,7 @@ void CServerEditionModule::createSession(NLNET::IModuleProxy *sender, TCharId ow
 			info.setSessionAnimatorCharId( ownerCharId);
 			if ( !nevraxScenario )
 			{
-				missionTag = "";
+				missionTag.clear();
 				trialAllowed = false;
 			}
 
@@ -2976,11 +2976,11 @@ void CServerEditionModule::resetSession(NLNET::IModuleProxy *sender, TSessionId 
 		return;
 	}
 
-	session->RingAccess = "";
+	session->RingAccess.clear();
 	if (!reconnect) // reset
 	{
 		scenario->setHighLevel( 0 );
-		getSession(sessionId)->RingAccess = "";
+		getSession(sessionId)->RingAccess.clear();
 
 		scenario->setMode(0);
 
@@ -3869,7 +3869,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 				info.setSessionAnimatorCharId( charId);
 				if ( !nevraxScenario )
 				{
-					missionTag = "";
+					missionTag.clear();
 					trialAllowed = false;
 				}
 
@@ -5581,7 +5581,7 @@ const NLNET::TModuleProxyPtr * CServerEditionModule::getClientProxyPtr(TCharId c
 
 void CServerEditionModule::getTpContext(TCharId charId, std::string& tpCancelTextId, R2::TTeleportContext& tpContext)
 {
-	tpCancelTextId = "";
+	tpCancelTextId.clear();
 	tpContext = R2::TPContext_Unknown;
 
 	TSessionId sessionId = getSessionIdByCharId(charId);
@@ -5967,13 +5967,13 @@ void CServerEditionModule::addKeyPolicy(NLNET::IModuleProxy *sender, const std::
 	std::string key = keyName;
 	if (key == "EMPTY")
 	{
-		key = "";
+		key.clear();
 	}
 
 	std::string privateKey = privateKeyValue;
 	if (privateKey == "EMPTY")
 	{
-		privateKey = "";
+		privateKey.clear();
 	}
 
 	_KeysHolder->addKeyPolicy(key, privateKey, p);

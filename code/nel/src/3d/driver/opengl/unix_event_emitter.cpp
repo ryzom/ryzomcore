@@ -626,7 +626,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case SelectionClear:
 		_SelectionOwned = false;
-		_CopiedString = "";
+		_CopiedString.clear();
 		break;
 	case SelectionNotify:
 	{

@@ -206,7 +206,7 @@ void InitCreatureMP()
 				{
 					code = ligneN.firstWord();
 					nom = ligneM.firstWord();
-					ligneN = "";
+					ligneN.clear();
 				}
 
 				// save items to generate for each new creature name found
@@ -1166,7 +1166,7 @@ void NewMP( CSString& ligne )
 			special = ligne;
 			if ( !special.firstWord().empty() )
 				specialNames.insert( special );
-			ligne = "";
+			ligne.clear();
 		}
 		else
 		{

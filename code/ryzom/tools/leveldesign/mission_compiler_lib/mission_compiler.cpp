@@ -278,7 +278,7 @@ bool GenderExtractor::parseMarkup(const std::string& literal, const std::string 
 	bool changed = false;
 	std::string oldPhrase = literal;
 	
-	newPhrase = "";
+	newPhrase.clear();
 	do 
 	{
 		std::string before;

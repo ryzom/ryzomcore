@@ -517,7 +517,7 @@ CViewDialog *CLog_analyserDlg::onAddCommon( const vector<CString>& filenames )
 		view->Filenames = filenames;
 	}
 
-	view->LogSessionStartDate = "";
+	view->LogSessionStartDate.Empty();
 	LogSessionsDialog.clear();
 
 	if ( ((CButton*)GetDlgItem( IDC_CheckSessions ))->GetCheck() == 1 )

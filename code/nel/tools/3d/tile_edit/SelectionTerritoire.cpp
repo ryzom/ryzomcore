@@ -577,7 +577,7 @@ void SelectionTerritoire::OnPath()
 							const std::string& bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 							// not empty ?
-							if (bitmapPath!="")
+							if (!bitmapPath.empty())
 							{
 								// Check the path
 								if (CheckPath (bitmapPath, path)==false)
@@ -648,7 +648,7 @@ void SelectionTerritoire::OnPath()
 								std::string bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 								// not empty ?
-								if (bitmapPath!="")
+								if (!bitmapPath.empty())
 								{
 									// Remove the absolute path
 									bool res=RemovePath (bitmapPath, path);
@@ -668,7 +668,7 @@ void SelectionTerritoire::OnPath()
 						std::string bitmapPath=tileBank.getDisplacementMap (noise);
 
 						// not empty ?
-						if (bitmapPath!="")
+						if (!bitmapPath.empty())
 						{
 							// Remove the absolute path
 							bool res=RemovePath (bitmapPath, path);

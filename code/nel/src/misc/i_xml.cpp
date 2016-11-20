@@ -67,7 +67,6 @@ CIXml::CIXml () : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = false;
 	_BinaryStream = NULL;
 }
@@ -82,7 +81,6 @@ CIXml::CIXml (bool tryBinaryMode) : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = tryBinaryMode;
 	_BinaryStream = NULL;
 }
@@ -116,7 +114,7 @@ void CIXml::release ()
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
+	_ErrorString.clear();
 
 	resetPtrTable();
 }
@@ -195,7 +193,7 @@ bool CIXml::init (IStream &stream)
 		}
 
 		// Set error handler
-		_ErrorString = "";
+		_ErrorString.clear();
 		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncRead);
 
 		// Ask to get debug info
@@ -319,7 +317,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 						// If no more node, empty string
 						if (_CurrentNode == NULL)
 						{
-							value = "";
+							value.clear();
 							_ContentStringIndex = 0;
 							_ContentString.erase ();
 							return;

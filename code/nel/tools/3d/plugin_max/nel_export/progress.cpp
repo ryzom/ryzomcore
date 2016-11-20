@@ -66,7 +66,7 @@ INT_PTR CALLBACK CalculatingDialogCallback (
 				SendMessage (GetDlgItem (hwndDlg, IDC_STATICTIMELEFT), WM_SETTEXT, 0, (long)temp);
 				SendMessage (GetDlgItem (hwndDlg, IDC_BUTTONCANCEL), WM_PAINT, 0, 0);
 			}
-			string all = "";
+			string all;
 			for (uint32 i = 0; i < 14; ++i)
 				all += pClass->sInfoProgress[i] + "\n";
 			SendMessage (GetDlgItem (hwndDlg, IDC_STATICINFO), WM_SETTEXT, 0, (long)all.c_str());

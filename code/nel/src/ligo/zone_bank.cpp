@@ -88,7 +88,7 @@ void CZoneBankElement::convertSize()
 	}
 	fromString(sTmp, _SizeX);
 
-	++i; sTmp = "";
+	++i; sTmp.clear();
 	for (; i < sizeString.size(); ++i)
 	{
 		sTmp += sizeString[i];

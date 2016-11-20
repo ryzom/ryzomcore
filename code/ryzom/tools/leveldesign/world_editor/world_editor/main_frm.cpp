@@ -812,7 +812,7 @@ void CMainFrame::displayStatusBarInfo ()
 	if (Selection.size())
 		sTmp = getDocument()->getPathOfSelectedPrimitive();
 	else
-		sTmp = "";
+		sTmp.clear();
 	
 	m_wndStatusBar.SetPaneText (6, sTmp.c_str());
 }
@@ -1293,7 +1293,6 @@ struct CViewerConfig
 		LandscapeTileNear = 50.0f;
 		LandscapeThreshold = 0.001f;
 
-		HeightFieldName= "";
 		HeightFieldMaxZ= 100;
 		HeightFieldOriginX= 16000;
 		HeightFieldOriginY= -24000;

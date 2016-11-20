@@ -159,7 +159,7 @@ void CMessageRecorder::recordNext( sint64 updatecounter, TNetworkEvent event, TS
 void CMessageRecorder::stopRecord()
 {
 	_File.close();
-	_Filename = "";
+	_Filename.clear();
 }
 
 
@@ -395,7 +395,7 @@ TNetworkEvent CMessageRecorder::replayConnectionAttempt( const CInetAddress& add
 void CMessageRecorder::stopReplay()
 {
 	_File.close();
-	_Filename = "";
+	_Filename.clear();
 }
 
 

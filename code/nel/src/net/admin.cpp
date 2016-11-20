@@ -381,7 +381,7 @@ void serviceGetView (uint32 rid, const string &rawvarpath, TAdminViewResult &ans
 	if (CCommandRegistry::getInstance().isNamedCommandHandler(varpath.Destination[0].first))
 	{
 		varpath.Destination[0].first += "."+varpath.Destination[0].second;
-		varpath.Destination[0].second = "";
+		varpath.Destination[0].second.clear();
 	}
 
 	if (varpath.isFinal())

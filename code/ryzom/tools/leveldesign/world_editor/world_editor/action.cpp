@@ -191,13 +191,13 @@ bool CActionLigoResize::redo ()
 			// By default
 			data.PosX = 0;
 			data.PosY = 0;
-			data.ZoneName = "";
+			data.ZoneName.clear();
 			data.Rot = 0;
 			data.Flip = 0;
-			data.SharingMatNames[0] = "";
-			data.SharingMatNames[1] = "";
-			data.SharingMatNames[2] = "";
-			data.SharingMatNames[3] = "";
+			data.SharingMatNames[0].clear();
+			data.SharingMatNames[1].clear();
+			data.SharingMatNames[2].clear();
+			data.SharingMatNames[3].clear();
 			data.SharingCutEdges[0] = 0;
 			data.SharingCutEdges[1] = 0;
 			data.SharingCutEdges[2] = 0;

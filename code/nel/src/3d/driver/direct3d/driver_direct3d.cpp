@@ -1265,7 +1265,7 @@ bool CDriverD3D::init (uintptr_t windowIcon, emptyProc exitFunc)
 		if (error != ERROR_CLASS_ALREADY_EXISTS)
 		{
 			nlwarning("CDriverD3D::init: Can't register window class %s (error code %i)", _WindowClass.c_str(), (sint)error);
-			_WindowClass = "";
+			_WindowClass.clear();
 			return false;
 		}
 	}

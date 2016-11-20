@@ -451,8 +451,8 @@ void CModalContainerEditCmd::setTitle(const std::string &uistr)
 void CModalContainerEditCmd::activate()
 {
 	CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
-	CurrentEditCmdLine.ActionName.Name = "";
-	CurrentEditCmdLine.ActionName.Argu = "";
+	CurrentEditCmdLine.ActionName.Name.clear();
+	CurrentEditCmdLine.ActionName.Argu.clear();
 	CurrentEditCmdNb = -1;
 	Win->setActive(true);
 	Win->launch();
@@ -618,7 +618,7 @@ void CModalContainerEditCmd::activateFrom (const std::string &cmdName, const std
 			(((noParam == nbRealParam-1) && (rP.Type != CBaseAction::CParameter::Hidden)) && (i == (pBA->Parameters.size()-1))))
 		{
 			sTmp = curStr;
-			curStr = "";
+			curStr.clear();
 		}
 		else
 		{
@@ -807,7 +807,7 @@ void CModalContainerEditCmd::validCurrentCommand()
 
 	// Build couple (name,param) that define a command
 	CurrentEditCmdLine.ActionName.Name = rBA.Name;
-	CurrentEditCmdLine.ActionName.Argu = "";
+	CurrentEditCmdLine.ActionName.Argu.clear();
 	uint noParam = 0;
 	for (uint i = 0; i < rBA.Parameters.size(); ++i)
 	{

@@ -170,7 +170,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 			rWork.NameZoneAdded = ite->ZoneToAddName;
 			rWork.ZoneRemoved = false;
 			rWork.IdZoneToRemove = 0;
-			rWork.NameZoneRemoved = "";
+			rWork.NameZoneRemoved.clear();
 			rWork.Zone = const_cast<CZone*>(ite->Zone);
 			_LoadedZones.push_back (ite->ZoneToAddId);
 
@@ -187,7 +187,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 	{
 		_RemovingZone = false;
 		rWork.ZoneAdded = false;
-		rWork.NameZoneAdded = "";
+		rWork.NameZoneAdded.clear();
 		rWork.ZoneRemoved = true;
 		rWork.IdZoneToRemove = _IdZoneToRemove;
 		rWork.NameZoneRemoved = getZoneNameFromId(_IdZoneToRemove);

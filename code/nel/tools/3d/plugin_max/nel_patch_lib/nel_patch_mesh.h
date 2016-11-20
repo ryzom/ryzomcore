@@ -434,7 +434,6 @@ class CBankManager
 public:
 	CBankManager ()
 	{
-		_lastPath="";
 	}
 	const NL3D::CTileBank& getBank (std::string& path=GetBankPathName ())
 	{

@@ -369,7 +369,7 @@ void CNelExport::viewMesh (TimeValue time)
 			string sTmp = "Object Name: ";
 			sTmp += pNode->GetName();
 			ProgBar.setLine (0, sTmp);
-			sTmp = "";
+			sTmp.clear();
 			for (uint32 i = 1; i < 10; ++i) 
 				ProgBar.setLine (i, sTmp);
 			sTmp = "Last Error";
@@ -582,8 +582,8 @@ void CNelExport::viewMesh (TimeValue time)
 					NLMISC::clamp(slInfo.CellSurfaceLightSize, 0.001f, 1000000.f);
 					slInfo.CellRaytraceDeltaZ= theExportSceneStruct.SurfaceLightingDeltaZ;
 					// no more add any prefix to the colision identifier.
-					slInfo.ColIdentifierPrefix= "";
-					slInfo.ColIdentifierSuffix= "";
+					slInfo.ColIdentifierPrefix.clear();
+					slInfo.ColIdentifierSuffix.clear();
 					// Build RetrieverBank and GlobalRetriever from collisions in scene
 					_ExportNel->computeCollisionRetrieverFromScene(time, slInfo.RetrieverBank, slInfo.GlobalRetriever, 
 						slInfo.ColIdentifierPrefix.c_str(), slInfo.ColIdentifierSuffix.c_str(), slInfo.IgFileName);

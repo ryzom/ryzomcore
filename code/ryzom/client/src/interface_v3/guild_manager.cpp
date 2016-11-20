@@ -278,7 +278,7 @@ void CGuildManager::update()
 		// Guild stuff
 		uint32 oldName = _Guild.NameID;
 		_Guild.NameID = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME")->getValue32();
-		_Guild.Name = "";
+		_Guild.Name.clear();
 		_InGuild = (_Guild.NameID != 0);
 		if (!_InGuild)
 			closeAllInterfaces();

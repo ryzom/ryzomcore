@@ -33,8 +33,6 @@ struct CMainlandSummary
 {
 	CMainlandSummary(): Id(0)
 	{
-		Name = "";
-		Description = "";
 		LanguageCode = "en";
 		Online = false;
 	}

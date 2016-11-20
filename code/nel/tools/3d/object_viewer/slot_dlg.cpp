@@ -420,7 +420,7 @@ void CSlotDlg::OnSetAnimation()
 			updateScrollBar ();
 		}
 		else
-			getSlotInformation ()->Animation = "";
+			getSlotInformation ()->Animation.clear();
 	}
 	refresh (TRUE);
 }
@@ -444,7 +444,7 @@ void CSlotDlg::OnSetSkeleton()
 		if (select.Selection!=-1)
 			getSlotInformation ()->Skeleton = vectString[select.Selection].c_str();
 		else
-			getSlotInformation ()->Skeleton = "";
+			getSlotInformation ()->Skeleton.clear();
 
 		setWindowName ();
 		Invalidate ();

@@ -38,7 +38,7 @@ using namespace std;
 /////////////
 // METHODS //
 /////////////
-const string CGenderInfo::UnknownItemName = "";
+const string CGenderInfo::UnknownItemName;
 
 // description of a visual slot that must be read by CGenderInfo
 struct	CSlotInfo

@@ -70,7 +70,7 @@ void CActionHistoric::cancelAction()
 	_NewAction = NULL;
 	_NewActionIsPending = false;
 	_SubActionCount = 1;
-	_NewActionName = "";
+	_NewActionName.clear();
 	getEditor().callEnvMethod("onCancelActionInHistoric", 0, 0);
 }
 
