@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
 	bool res = config.load();
 
 	// init log
-	CLogHelper logHelper(config.getInstallationDirectory());
+	CLogHelper logHelper(config.getInstallationDirectory().isEmpty() ? config.getNewInstallationDirectory():config.getInstallationDirectory());
 
 	nlinfo("Launched %s", Q2C(config.getInstallerCurrentFilePath()));
 
