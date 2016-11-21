@@ -406,7 +406,7 @@ QString appendShortcutExtension(const QString &shortcut)
 	return shortcut + extension;
 }
 
-QString getVersionFromExecutable(const QString &path)
+QString getVersionFromExecutable(const QString &path, const QString &workingDirectory)
 {
 	// check if file exists
 	if (!QFile::exists(path))
@@ -426,6 +426,7 @@ QString getVersionFromExecutable(const QString &path)
 	// launch executable with --version argument
 	QProcess process;
 	process.setProcessChannelMode(QProcess::MergedChannels);
+	process.setWorkingDirectory(workingDirectory);
 	process.start(path, QStringList() << "--version", QIODevice::ReadOnly);
 
 	if (!process.waitForStarted())

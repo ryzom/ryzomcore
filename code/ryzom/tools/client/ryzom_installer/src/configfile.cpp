@@ -693,7 +693,7 @@ int CConfigFile::compareInstallersVersion() const
 	// if installer not found in installation directory
 	if (!QFile::exists(installerDst)) return 1;
 
-	QString installedVersion = getVersionFromExecutable(installerDst);
+	QString installedVersion = getVersionFromExecutable(installerDst, getInstallationDirectory());
 
 	// if unable to get version, copy it
 	if (installedVersion.isEmpty()) return 1;
