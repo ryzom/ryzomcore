@@ -869,9 +869,6 @@ MACRO(NL_SETUP_BUILD)
     ELSE()
       # Check wrong formats in printf-like functions
       ADD_PLATFORM_FLAGS("-Wformat -Werror=format-security")
-
-      # Don't display invalid or unused command lines arguments by default (often too verbose)
-      ADD_PLATFORM_FLAGS("-Wno-invalid-command-line-argument -Wno-unused-command-line-argument")
     ENDIF()
 
     IF(ANDROID)
