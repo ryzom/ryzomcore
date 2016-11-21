@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
 	OperationStep step = res ? config.getInstallNextStep():DisplayNoServerError;
 
-	if (res == DisplayNoServerError)
+	if (step == DisplayNoServerError)
 	{
 		QMessageBox::critical(NULL, QApplication::tr("Error"), QApplication::tr("Unable to find ryzom_installer.ini"));
 		return 1;
