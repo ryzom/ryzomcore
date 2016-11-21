@@ -478,6 +478,22 @@ template <class T> void explode (const T &src, const T &sep, std::vector<T> &res
 	while(pos != std::string::npos);
 }
 
+/** Join a string (or ucstring) from a vector of strings with *sep* as separator. If sep can be more than 1 char, in this case,
+* we find the entire sep to separator (it s not a set of possible separator)
+*/
+template <class T, class U> void join(const std::vector<T>& strings, const U& separator, T &res)
+{
+	res.clear();
+
+	for (uint i = 0, len = strings.size(); i<len; ++i)
+	{
+		// add in separators before all but the first string
+		if (!res.empty()) res += separator;
+
+		// append next string
+		res += strings[i];
+	}
+}
 
 /* All the code above is used to add our types (uint8, ...) in the stringstream (used by the toString() function).
  * So we can use stringstream operator << and >> with all NeL simple types (except for ucchar and ucstring)
