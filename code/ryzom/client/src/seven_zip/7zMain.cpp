@@ -323,7 +323,7 @@ static void ConvertFileTimeToString(const CNtfsFileTime *nt, char *s)
   UIntToStr_2(s, sec); s[2] = 0;
 }
 
-void PrintError(char *sz)
+void PrintError(const char *sz)
 {
   printf("\nERROR: %s\n", sz);
 }
