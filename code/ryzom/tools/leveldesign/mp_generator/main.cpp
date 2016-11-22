@@ -1279,15 +1279,23 @@ void ItemNamesSave()
 	printf( "-- SAVING ITEM NAMES --\n");
 	CSString data, output;
 
-	FILE* file;
-	file = nlfopen( ITEM_WORDS_WK, "rb" );
+	FILE *file = nlfopen( ITEM_WORDS_WK, "rb" );
 
 	char c;
-	fread( &c, 1, 1, file );
+	if (fread(&c, 1, 1, file) != 1)
+	{
+		nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
+		return;
+	}
+
 	while ( !feof( file ) )
 	{
 		data += toString( "%c", c );
-		fread( &c, 1, 1, file );
+		if (fread(&c, 1, 1, file) != 1)
+		{
+			nlwarning("Unable to read 1 byte from %s", ITEM_WORDS_WK.c_str());
+			return;
+		}
 	}
 
 	fclose( file );

@@ -137,7 +137,7 @@ void CLocatedTargetDlg::OnRemoveTarget()
 		m_Targets.DeleteString(indexs[k] - k);
 		int l = m_AvailableTargets.AddString(utf8ToTStr(loc->getName()));
 	
-		m_AvailableTargets.SetItemData(l, (DWORD) loc);
+		m_AvailableTargets.SetItemData(l, (DWORD_PTR) loc);
 	}
 	UpdateData(FALSE);	
 	updateModifiedFlag();

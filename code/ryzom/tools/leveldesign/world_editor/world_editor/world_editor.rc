@@ -934,7 +934,7 @@ IDC_COPY                CURSOR  DISCARDABLE     "res\\copy.cur"
 IDC_SELECT              CURSOR  DISCARDABLE     "res\\select.cur"
 IDC_SELECT_COPY         CURSOR  DISCARDABLE     "res\\select_copy.cur"
 IDC_INSERT_POINT        CURSOR  DISCARDABLE     "res\\insert_point.cur"
-IDC_HAND                CURSOR  DISCARDABLE     "res\\hand.cur"
+IDC_HAND1                CURSOR  DISCARDABLE     "res\\hand.cur"
 IDC_ZOOM                CURSOR  DISCARDABLE     "res\\zoom.cur"
 IDC_RADIUS              CURSOR  DISCARDABLE     "res\\radius.cur"
 

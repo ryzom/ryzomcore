@@ -53,7 +53,7 @@ bool CDatabaseConfig::init(const std::string &asset)
 	TPathString configPath = rootPath + "/database.cfg";
 	while (!CFile::fileExists(configPath))
 	{
-		int sep = CFile::getLastSeparator(rootPath);
+		std::string::size_type sep = CFile::getLastSeparator(rootPath);
 		if (sep == string::npos)
 			return false;
 

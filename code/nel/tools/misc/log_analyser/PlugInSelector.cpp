@@ -87,7 +87,7 @@ BOOL CPlugInSelector::OnInitDialog()
 }
 
 
-int getLastSeparator (const string &filename)
+std::string::size_type getLastSeparator (const string &filename)
 {
 	string::size_type pos = filename.find_last_of ('/');
 	if (pos == string::npos)
