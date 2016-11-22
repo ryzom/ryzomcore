@@ -1271,7 +1271,7 @@ ITexture* CExportNel::buildATexture (Texmap& texmap, CMaterialDesc &remap3dsTexC
 		else // standard texture
 		{
 			srcTex = new CTextureFile;
-			std::string mapName = pBitmap->GetMapName();
+			std::string mapName = tStrToUtf8(pBitmap->GetMapName());
 			static_cast<CTextureFile *>(srcTex)->setFileName (ConvertTexFileName(mapName, _AbsolutePath));
 		}
 

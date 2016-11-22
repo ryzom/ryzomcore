@@ -498,8 +498,8 @@ void CPlugin::serverParamsReceived(const CServerParams &sp)
 		{
 			CMessage msg;
 			msg.setType("AUTHENT");
-			std::string login = (LPCTSTR)dl.m_Login;
-			std::string password = (LPCTSTR)dl.m_Password;
+			std::string login = tStrToUtf8(dl.m_Login);
+			std::string password = tStrToUtf8(dl.m_Password);
 			sint ver = msg.serialVersion(0);
 			msg.serial(login);
 			msg.serial(password);
@@ -719,7 +719,7 @@ void CPlugin::connectDisconnect()
 			nlassert (_DialogFlag);
 			_DialogFlag->UpdateData (TRUE);
 
-			_SHost = (const char*)_DialogFlag->ShardCtrl.getCurrString();
+			_SHost = tStrToUtf8(_DialogFlag->ShardCtrl.getCurrString());
 
 			_DialogFlag->ShardCtrl.onOK();
 			
@@ -1189,7 +1189,7 @@ void CPlugin::updateConnectionState()
 				// Change the text
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_DISCONNECT));
 				_DialogFlag->State = (LPCTSTR) (getStringRsc(IDS_CONNECTED_TO) + _SHost.c_str());
-				_DialogFlag->Sent = (toString ((uint32)_Client->getBytesSent ()) + (LPCTSTR) getStringRsc(IDS_BYTE_SENT)).c_str();
+				_DialogFlag->Sent = CString(utf8ToTStr(toString (_Client->getBytesSent ()))) + getStringRsc(IDS_BYTE_SENT);
 				//_DialogFlag->Received = (toString ((uint32)_Client->getBytesReceived ()) + " bytes received").c_str();
 				_DialogFlag->Received = (toString("%.1f", bandwidth/1024.0) + " kB/s").c_str();
 				_DialogFlag->DownloadValue = (toString("%.1f kB/s", _DialogFlag->Download/1024.0)).c_str();
@@ -1198,12 +1198,12 @@ void CPlugin::updateConnectionState()
 			break;
 			case WaitingServerParams:				
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_CANCEL_CONNECT));
-				_DialogFlag->State = (LPCTSTR) (getStringRsc(IDS_WAITING_SERVER_PARAMS) + _SHost.c_str());
+				_DialogFlag->State = getStringRsc(IDS_WAITING_SERVER_PARAMS) + utf8ToTStr(_SHost);
 			break;
 			case WaitingLoginConfirmation:
 			{
 				_DialogFlag->ConnectCtrl.SetWindowText (getStringRsc(IDS_CANCEL_CONNECT));				
-				std::string label = (LPCTSTR) getStringRsc(IDS_WAITING_LOGIN_CONFIRMATION) +_SHost;
+				std::string label = tStrToUtf8(getStringRsc(IDS_WAITING_LOGIN_CONFIRMATION)) + _SHost;
 				switch((NLMISC::CTime::getLocalTime() / 200) % 4)
 				{
 					case 0: label+= "-";  break;

@@ -3992,7 +3992,7 @@ void EPM_PaintCMode::DoPaint ()
 				}
 				catch (const EStream& stream)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, utf8ToTStr(stream.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}

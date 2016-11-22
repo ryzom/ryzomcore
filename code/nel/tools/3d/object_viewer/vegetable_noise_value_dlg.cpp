@@ -154,7 +154,7 @@ BOOL CVegetableNoiseValueDlg::OnInitDialog()
 
 
 	// Set the name.
-	NoiseValueName.SetWindowText(_TitleName.c_str());
+	NoiseValueName.SetWindowText(utf8ToTStr(_TitleName));
 
 
 	// if previously setuped, setup now the noiseValue.
@@ -264,7 +264,5 @@ void CVegetableNoiseValueDlg::applyScaleSlider(sint scrollValue)
 	_RandValue->updateValueFromReader();
 
 	// update marker text
-	char	str[256];
-	sprintf(str, "%d%%", (sint)(factor*100));
-	StaticScaleMarker.SetWindowText(str);
+	StaticScaleMarker.SetWindowText(utf8ToTStr(NLMISC::toString("%d%%", (sint)(factor * 100))));
 }

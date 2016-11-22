@@ -843,13 +843,13 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 		return;
 
 	// choose the file
-	CFileDialog fd(FALSE, "skel", _SkeletonFileName.c_str(), OFN_OVERWRITEPROMPT, "SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||", this) ;
-	fd.m_ofn.lpstrTitle= "Save As Skeleton";
+	CFileDialog fd(FALSE, _T("skel"), utf8ToTStr(_SkeletonFileName), OFN_OVERWRITEPROMPT, _T("SkelFiles (*.skel)|*.skel|All Files (*.*)|*.*||"), this) ;
+	fd.m_ofn.lpstrTitle = _T("Save As Skeleton");
 	if (fd.DoModal() == IDOK)
 	{
 		NLMISC::COFile	f;
 		
-		if( f.open((const char*)fd.GetPathName()) )
+		if( f.open(tStrToUtf8(fd.GetPathName())) )
 		{
 			if(saveCurrentInStream(f))
 			{
@@ -859,7 +859,7 @@ void CSkeletonScaleDlg::OnSsdButtonSaveas()
 			}
 
 			// bkup the valid fileName (new file edited)
-			_SkeletonFileName= (const char*)fd.GetPathName();
+			_SkeletonFileName= tStrToUtf8(fd.GetPathName());
 			_StaticFileName= _SkeletonFileName.c_str();
 			UpdateData(FALSE);
 		}

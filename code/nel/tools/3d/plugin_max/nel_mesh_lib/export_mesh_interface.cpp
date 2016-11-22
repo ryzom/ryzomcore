@@ -316,7 +316,7 @@ static void AddNodeToQuadGrid(const NLMISC::CAABBox &delimiter, TNodeFaceQG &des
 	{
 		if (delimiter.intersect(nodeBBox))
 		{
-			nldebug((std::string("Adding ") + node.GetName() + std::string(" to mesh interface quad grid")).c_str());
+			nldebug("Adding %s to mesh interface quad grid", tStrToUtf8(node.GetName()).c_str());
 			// add this node tris
 			ObjectState os = node.EvalWorldState(time);
 			Object *obj = os.obj;	
@@ -581,7 +581,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 		string newName = "NelAutoMergeRenamedTmp" + toString (i);
 		string originalName = (*lib)[i]->GetName ();
 		renameMap.insert (map<string, string>::value_type (newName, originalName));
-		(*lib)[i]->SetName (newName.c_str ());
+		(*lib)[i]->SetName (utf8ToTStr(newName));
 	}
 
 	// Merge the interface project
@@ -614,7 +614,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 			string newName = "NelAutoMergeRenamed" + toString (i);
 			string originalName = (*lib)[i]->GetName ();
 			renameMap.insert (map<string, string>::value_type (newName, originalName));
-			(*lib)[i]->SetName (newName.c_str ());
+			(*lib)[i]->SetName (utf8ToTStr(newName));
 		}
 	}
 
@@ -627,7 +627,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 		if (ite != renameMap.end ())
 		{
 			// Rename the material with its original name
-			(*lib)[i]->SetName (ite->second.c_str ());
+			(*lib)[i]->SetName (utf8ToTStr(ite->second));
 		}
 	}
 

@@ -265,7 +265,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (paramDef.int_name, sName)==0)
+			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// ok, return this subanim
 #if MAX_VERSION_MAJOR >= 14
@@ -332,7 +332,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 			ParamDef& paramDef=param->GetParamDef(id);
 
 			// Good name?
-			if (strcmp (paramDef.int_name, sName)==0)
+			if (strcmp (tStrToUtf8(paramDef.int_name).c_str(), sName)==0)
 			{
 				// Check this value is good type
 				ParamType2 paramType = param->GetParameterType(id);
@@ -372,7 +372,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 						break;
 						case TYPE_FILENAME:
 						case TYPE_STRING:
-							*(std::string*)pValue = param->GetStr (id, tvTime);
+							*(std::string*)pValue = tStrToUtf8(param->GetStr (id, tvTime));
 							bRes = TRUE;
 						break;
 						case TYPE_FILENAME_TAB:
@@ -382,7 +382,7 @@ bool getValueByNameUsingParamBlock2Internal (Animatable& node, const char* sName
 							uint total = param->Count (id);
 							rTab.resize(total);
 							for( uint i = 0; i < total; ++i )
-								rTab[i] = param->GetStr (id, tvTime, i);
+								rTab[i] = tStrToUtf8(param->GetStr (id, tvTime, i));
 							bRes = TRUE;
 						}
 						break;
@@ -511,8 +511,8 @@ std::string	CExportNel::getName (MtlBase& mtl)
 std::string	CExportNel::getName(INode& node)
 {
 	// Return its name
-	MCHAR* name = node.GetName();
-	return std::string(name);
+	const MCHAR* name = node.GetName();
+	return tStrToUtf8(name);
 }
 
 // --------------------------------------------------
@@ -549,7 +549,7 @@ std::string		CExportNel::getNelObjectName (INode& node)
 		}
 		else
 		{
-			return node.GetName();
+			return tStrToUtf8(node.GetName());
 		}
 	}
 	else
@@ -571,19 +571,19 @@ std::string		CExportNel::getNelObjectName (INode& node)
 				}
 				else
 				{
-					return node.GetName();
+					return tStrToUtf8(node.GetName());
 				}
 			}
 			else
 			{
 				// Extract the node name
-				return node.GetName();
+				return tStrToUtf8(node.GetName());
 			}
 		}
 		else
 		{		
 			// Extract the node name
-			return node.GetName();
+			return tStrToUtf8(node.GetName());
 		}
 	}
 }
@@ -763,17 +763,17 @@ bool CExportNel::hasLightMap (INode& node, TimeValue time)
 
 // --------------------------------------------------
 
-void CExportNel::outputErrorMessage (const char *message)
+void CExportNel::outputErrorMessage(const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBox (_Ip->GetMAXHWnd(), message, _ErrorTitle.c_str(), MB_OK|MB_ICONEXCLAMATION);
+		MessageBoxW (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (message);
-	mprintf ("\n");
+	mprintf (utf8ToTStr(message));
+	mprintf (_T("\n"));
 
 	nlwarning ("Error in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message);
+	nlwarning (message.c_str());
 }
 
 // --------------------------------------------------

@@ -2338,24 +2338,24 @@ INT_PTR CALLBACK MiscDialogCallback (
 							currentParam->LigoSymmetry = SendMessage (GetDlgItem (hwndDlg, IDC_LIGO_SYMMETRY), BM_GETCHECK, 0, 0);
 							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), tmp, 512);
-							currentParam->LigoRotate = tmp;
+							currentParam->LigoRotate = tStrToUtf8(tmp);
 
 							// SWT
 							currentParam->SWT = SendMessage (GetDlgItem (hwndDlg, IDC_SWT), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_SWT_WEIGHT), tmp, 512);
-							currentParam->SWTWeight = tmp;
+							currentParam->SWTWeight = tStrToUtf8(tmp);
 
 							// Radial normals
 							for (uint smoothGroup=0; smoothGroup<NEL3D_RADIAL_NORMAL_COUNT; smoothGroup++)
 							{
 								HWND edit = GetDlgItem (hwndDlg, IDC_RADIAL_NORMAL_29+smoothGroup);
 								GetWindowText (edit, tmp, 512);
-								currentParam->RadialNormals[smoothGroup]=tmp;
+								currentParam->RadialNormals[smoothGroup] = tStrToUtf8(tmp);
 							}
 
 							// mesh interfaces
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_FILE), tmp, 512);
-							currentParam->InterfaceFileName=tmp;
+							currentParam->InterfaceFileName = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD), tmp, 512);
 							if (strlen(tmp) != 0)
 								currentParam->InterfaceThreshold = toFloatMax(tmp);							
@@ -2365,7 +2365,7 @@ INT_PTR CALLBACK MiscDialogCallback (
 							// Skeleton Scale
 							currentParam->ExportBoneScale= SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), tmp, 512);
-							currentParam->ExportBoneScaleNameExt = wideToUtf8(tmp);
+							currentParam->ExportBoneScaleNameExt = tStrToUtf8(tmp);
 
 							// remanence
 							currentParam->UseRemanence = SendMessage (GetDlgItem (hwndDlg, IDC_USE_REMANENCE), BM_GETCHECK, 0, 0);
@@ -2373,7 +2373,7 @@ INT_PTR CALLBACK MiscDialogCallback (
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SLICE_NUMBER), tmp, 512);
 							uint rsn;
-							if (sscanf(tmp, "%d", &rsn) == 1)
+							if (NLMISC::fromString(tStrToUtf8(tmp), rsn))
 							{
 								currentParam->RemanenceSliceNumber = rsn;
 							}

@@ -172,7 +172,7 @@ void CGraphPlugin::refreshPrimitives()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(utf8ToTStr(msg));
 			}
 			else
 			{
@@ -207,11 +207,11 @@ void CGraphPlugin::refreshPrimitives()
 				
 				err = toString("%s : %s", primName.c_str(), e.Why.c_str());
 			}
-			AfxMessageBox(err.c_str());
+			AfxMessageBox(utf8ToTStr(err));
 		}
 		catch (const exception &e) //catch a possible exception from getRootFileName
 		{
-			AfxMessageBox(e.what());
+			AfxMessageBox(utf8ToTStr(e.what()));
 		}
 	}
 	else
@@ -254,7 +254,7 @@ void CGraphPlugin::refreshMachine()
 		{
 			string msg("Can't write script file '");
 			msg += tmpPath+"/lang.dot'";
-			AfxMessageBox(msg.c_str());
+			AfxMessageBox(utf8ToTStr(msg));
 		}
 		else
 		{
@@ -298,7 +298,7 @@ void CGraphPlugin::refreshMachine()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(utf8ToTStr(msg));
 			}
 			else
 			{
@@ -938,9 +938,10 @@ void CGraphPlugin::doSelection(const string& primPath)
 			selectPrimByPath(rootNode,primPath,resSet);
 
 			_PluginAccess->setCurrentSelection(resSet);
-
-		}catch(const exception &e){
-			GraphDlg->MessageBox(e.what());
+		}
+		catch(const exception &e)
+		{
+			GraphDlg->MessageBox(utf8ToTStr(e.what()));
 		}
 	}
 }

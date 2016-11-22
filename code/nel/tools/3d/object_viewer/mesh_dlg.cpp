@@ -162,7 +162,7 @@ void CMeshDlg::updateForMorph()
 		GetDlgItem(IDC_SHAPE_NAME)->EnableWindow(!enable);
 		if (!enable)
 		{
-			m_ShapeName = cm->getShape().c_str();
+			m_ShapeName = utf8ToTStr(cm->getShape());
 		}
 		else
 		{

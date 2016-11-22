@@ -698,8 +698,8 @@ void CMissionCompilerFeDlg::OnSpecialRuncompilertest()
 	catch(const EParseException &e)
 	{
 		string msg = "In primitive ";
-		msg += buildPrimPath(e.Primitive) +" : "+e.Why;
-		AfxMessageBox(msg.c_str());
+		msg += buildPrimPath(e.Primitive) + ": " + e.Why;
+		AfxMessageBox(utf8ToTStr(msg));
 	}
 	
 }

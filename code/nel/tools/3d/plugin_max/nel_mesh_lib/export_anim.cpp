@@ -605,7 +605,7 @@ void CExportNel::addMorphTracks (NL3D::CAnimation& animation, INode& node, const
 		if (pNode == NULL)
 			continue;
 		std::string name = parentName;
-		name += pNode->GetName();
+		name += tStrToUtf8(pNode->GetName());
 		name += "MorphFactor";
 		
 		IParamBlock *pb = (IParamBlock*)(pMorphMod->SubAnim (i+1));

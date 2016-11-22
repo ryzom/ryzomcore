@@ -367,7 +367,7 @@ void CNelExport::viewMesh (TimeValue time)
 			INode* pNode=_Ip->GetSelNode (nNode);
 
 			string sTmp = "Object Name: ";
-			sTmp += pNode->GetName();
+			sTmp += tStrToUtf8(pNode->GetName());
 			ProgBar.setLine (0, sTmp);
 			sTmp.clear();
 			for (uint32 i = 1; i < 10; ++i) 
@@ -412,7 +412,7 @@ void CNelExport::viewMesh (TimeValue time)
 						if (pShape)
 						{
 							// Add the shape in the view
-							uint instance = view->addMesh (pShape, pNode->GetName(), iteSkelShape->second.SkeletonInstance);
+							uint instance = view->addMesh (pShape, tStrToUtf8(pNode->GetName()).c_str(), iteSkelShape->second.SkeletonInstance);
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;

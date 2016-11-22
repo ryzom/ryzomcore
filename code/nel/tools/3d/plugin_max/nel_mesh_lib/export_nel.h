@@ -667,8 +667,8 @@ public:
 	static void						setScriptAppData (Animatable *node, uint32 id, NLMISC::CRGBA val);
 	
 	// Output error message
-	void							outputErrorMessage (const char *message);
-	void							outputWarningMessage (const char *message);
+	void							outputErrorMessage (const std::string &message);
+	void							outputWarningMessage(const std::string &message);
 
 
 	// Get an appData VertexProgram WindTree (ensure same default values for all retrieve).

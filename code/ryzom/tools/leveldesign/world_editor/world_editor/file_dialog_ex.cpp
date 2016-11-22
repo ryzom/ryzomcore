@@ -37,9 +37,9 @@ CFileDialogEx::CFileDialogEx(LPCTSTR lpszRegistryPath, LPCTSTR lpszFileType,BOOL
 							 LPCTSTR lpszDefExt, LPCTSTR lpszFileName, DWORD dwFlags, LPCTSTR lpszFilter, CWnd* pParentWnd) :
 		CFileDialog(bOpenFileDialog, lpszDefExt, lpszFileName, dwFlags, lpszFilter, pParentWnd)
 {
-	_RegistryPath = lpszRegistryPath;
+	_RegistryPath = tStrToUtf8(lpszRegistryPath);
 	_RegistryPath += "\\CFileDialogEx";
-	_FileType = lpszFileType;
+	_FileType = tStrToUtf8(lpszFileType);
 }
 
 // ***************************************************************************
@@ -58,10 +58,10 @@ INT_PTR CFileDialogEx::DoModal ()
 	path[0] = 0;
 	HKEY hKey;
 	DWORD type = REG_SZ;
-	DWORD size = 512;
-	if (RegCreateKey (HKEY_CURRENT_USER, _RegistryPath.c_str (), &hKey) == ERROR_SUCCESS)
+	DWORD size = 512 * sizeof(TCHAR);
+	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
 	{
-		if (RegQueryValueEx (hKey, _FileType.c_str (), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
+		if (RegQueryValueEx (hKey, utf8ToTStr(_FileType), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
 			m_ofn.lpstrInitialDir = path;
 	}
 
@@ -73,9 +73,9 @@ INT_PTR CFileDialogEx::DoModal ()
 	if ((result = CFileDialog::DoModal ()) == IDOK)
 	{
 		// Update the path
-		std::string newPath = (const char *)GetPathName ();
+		std::string newPath = tStrToUtf8(GetPathName ());
 		newPath = NLMISC::CFile::getPath (newPath);
-		RegSetValueEx (hKey, _FileType.c_str (), 0, REG_SZ, (LPBYTE)newPath.c_str (), newPath.size ()+1);
+		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)newPath.c_str (), newPath.size ()+1);
 
 		// Update the path list
 		set<string> oldPath;
@@ -83,15 +83,15 @@ INT_PTR CFileDialogEx::DoModal ()
 		for (i=0; i<PATH_REMEBERED_SIZE; i++)
 		{
 			size = 512;
-			if (RegQueryValueEx (hKey, toString (i).c_str (), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
-				oldPath.insert (path);
+			if (RegQueryValueEx (hKey, utf8ToTStr(toString(i)), 0, &type, (LPBYTE)path, &size) == ERROR_SUCCESS)
+				oldPath.insert (tStrToUtf8(path));
 		}
 		oldPath.insert (newPath);
 		set<string>::const_iterator ite = oldPath.begin ();
 		uint index = 0;
 		while (ite != oldPath.end ())
 		{
-			RegSetValueEx (hKey, toString (index).c_str (), 0, REG_SZ, (LPBYTE)ite->c_str (), ite->size ()+1);
+			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)ite->c_str (), ite->size ()+1);
 			ite++;
 			index++;
 		}
@@ -153,13 +153,13 @@ BOOL CFileDialogEx::OnInitDialog()
 	HKEY hKey;
 	DWORD type = REG_SZ;
 	DWORD size;
-	if (RegCreateKey (HKEY_CURRENT_USER, _RegistryPath.c_str (), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(_RegistryPath), &hKey) == ERROR_SUCCESS)
 	{
 		uint i;
 		for (i=0; i<PATH_REMEBERED_SIZE; i++)
 		{
-			size = 512;
-			if (RegQueryValueEx (hKey, toString (i).c_str (), 0, &type, (LPBYTE)text, &size) == ERROR_SUCCESS)
+			size = 512 * sizeof(TCHAR);
+			if (RegQueryValueEx (hKey, utf8ToTStr(toString(i)), 0, &type, (LPBYTE)text, &size) == ERROR_SUCCESS)
 				combo.InsertString (-1, text);
 		}
 		if (m_ofn.lpstrInitialDir)

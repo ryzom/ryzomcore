@@ -139,7 +139,7 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 			try
 			{
 				// Load the config file
-				config.readConfigFile (sModulePath, false);
+				config.readConfigFile (tStrToUtf8(sModulePath), false);
 
 				// ok
 				return true;

@@ -99,7 +99,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 			{
 				// Open a file
 				COFile file;
-				if (file.open(tempFileName))
+				if (file.open(tStrToUtf8(tempFileName)))
 				{
 					try
 					{

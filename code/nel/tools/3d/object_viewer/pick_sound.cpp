@@ -159,7 +159,7 @@ void CPickSound::OnDblclkList()
 	stopCurrSource();
 	CString sName;
 	m_NameList.GetText(curSel, sName);
-	_CurrSource = CSoundSystem::create(std::string( (LPCTSTR) sName));	
+	_CurrSource = CSoundSystem::create(tStrToUtf8(sName));
 }
 
 //========================================================================================

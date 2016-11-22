@@ -130,7 +130,7 @@ bool CDataBase::init (const string &Path, CZoneBank &zb)
 	string sDirBackup = NLMISC::CPath::getCurrentPath();
 
 	// "Path" can be relative to the doc path so we have to be first in the doc path
-	string s2 = NLMISC::CFile::getPath ((LPCTSTR)getMainFrame()->getDocument()->GetPathName());
+	string s2 = NLMISC::CFile::getPath (tStrToUtf8(getMainFrame()->getDocument()->GetPathName()));
 	NLMISC::CPath::setCurrentPath(s2.c_str());
 	string ss = NLMISC::CPath::getFullPath(Path);
 	NLMISC::CPath::setCurrentPath (ss.c_str());
@@ -622,8 +622,8 @@ bool CBuilderZone::refresh ()
 			if (!_ZoneRegions[_ZoneRegionSelected]->init (&_ZoneBank, this, error))
 			{
 				unload (_ZoneRegionSelected);
-				MessageBox (NULL, ("Cannot add this zone :\n"+error).c_str(), 
-							"Error", MB_ICONERROR|MB_OK);
+				std::string msg = NLMISC::toString("Cannot add this zone :\n%s", error.c_str());
+				MessageBox (NULL, utf8ToTStr(msg), _T("Error"), MB_ICONERROR|MB_OK);
 				return false;
 			}
 
@@ -1601,7 +1601,7 @@ bool CBuilderZone::initZoneBank (const string &sPathName)
 	// TODO: replace by NeL methods
 	TCHAR sDirBackup[512];
 	GetCurrentDirectory (512, sDirBackup);
-	SetCurrentDirectory (sPathName.c_str());
+	SetCurrentDirectory (utf8ToTStr(sPathName));
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 	hFind = FindFirstFile (_T("*.ligozone"), &findData);
@@ -1612,7 +1612,7 @@ bool CBuilderZone::initZoneBank (const string &sPathName)
 		if (!((_tcscmp (findData.cFileName, _T(".")) == 0) || (_tcscmp (findData.cFileName, _T("..")) == 0)))
 		{
 			string error;
-			if (!_ZoneBank.addElement (findData.cFileName, error))
+			if (!_ZoneBank.addElement (tStrToUtf8(findData.cFileName), error))
 				theApp.errorMessage (error.c_str());
 		}
 		if (FindNextFile (hFind, &findData) == 0)

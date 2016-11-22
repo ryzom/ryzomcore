@@ -417,9 +417,8 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, "Load error", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
+		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;

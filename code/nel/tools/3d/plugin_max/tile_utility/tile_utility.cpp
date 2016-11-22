@@ -197,7 +197,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 						ofn.lpTemplateName=0;
 						if (GetOpenFileName(&ofn))
 						{
-							theTile_utility.Load (sPath);
+							theTile_utility.Load (tStrToUtf8(sPath));
 							theTile_utility.SetLand (theTile_utility.Land);
 							theTile_utility.SetupUI ();
 						}
@@ -291,9 +291,8 @@ void Tile_utility::Load (const std::string& path)
 		CIFile file;
 		if (!file.open (path))
 		{
-			char tmp[1024];
-			sprintf (tmp, "File not found: %s", path);
-			MessageBox (NULL, tmp, "Error..", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("File not found: %s", path.c_str());
+			MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 		}
 		else
 		{
@@ -304,9 +303,8 @@ void Tile_utility::Load (const std::string& path)
 	}
 	catch (const EStream &stream)
 	{
-		char tmp[1024];
-		sprintf (tmp, "Error while loading %s:\n\n%s", path, stream.what());
-		MessageBox (NULL, tmp, "Error..", MB_OK|MB_ICONEXCLAMATION);
+		std::string tmp = toString("Error while loading %s:\n\n%s", path.c_str(), stream.what());
+		MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -461,7 +459,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (const_cast<char*>((Bank.getAbsPath()+tile->getRelativeFileName(CTile::diffuse)).c_str()));
+					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::diffuse)));
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (0, tex);
@@ -481,7 +479,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (const_cast<char*>((Bank.getAbsPath()+tile->getRelativeFileName(CTile::additive)).c_str()));
+					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::additive)));
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (1, tex);

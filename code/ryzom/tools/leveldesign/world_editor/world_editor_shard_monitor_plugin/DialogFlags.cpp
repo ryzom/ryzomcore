@@ -301,7 +301,7 @@ void CDialogFlags::setCurrentEntityDisplayMode(TEntityDisplayMode edm)
 void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, (REGKEY_ENTITY_DISPLAY_INFO + regId).c_str(), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, KEY_QUERY_VALUE, &hKey) == ERROR_SUCCESS)
 	{
 		DWORD index  = 0;
 		for(;;)
@@ -338,14 +338,14 @@ void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos
 void CDialogFlags::saveEntityDisplayInfoToRegistry(const TEntityDisplayInfoVect &infos, const std::string &regId)
 {
 	HKEY hKey;
-	if (RegCreateKeyEx(HKEY_CURRENT_USER, (REGKEY_ENTITY_DISPLAY_INFO + regId).c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
+	if (RegCreateKeyEx(HKEY_CURRENT_USER, utf8ToTStr(tStrToUtf8(REGKEY_ENTITY_DISPLAY_INFO) + regId), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, NULL) == ERROR_SUCCESS)
 	{
 		for(uint k = 0; k < infos.size(); ++k)
 		{
 			char colorStr[128];
 			CRGBA color = infos[k].Color;
 			sprintf(colorStr, "%d, %d, %d, visible = %d", (int) color.R, (int) color.G, (int) color.B, (int) (infos[k].Visible ? 1 : 0));
-			LONG result = RegSetValueEx(hKey, toString((int) infos[k].Value).c_str(), 0, REG_SZ, (const BYTE *) colorStr, strlen(colorStr));
+			LONG result = RegSetValueEx(hKey, utf8ToTStr(toString(infos[k].Value)), 0, REG_SZ, (const BYTE *) colorStr, strlen(colorStr));
 			if (result  != ERROR_SUCCESS)
 			{
 				nlwarning("Couldn't write registry key for entity % color", infos[k].Name);

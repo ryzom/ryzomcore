@@ -325,14 +325,14 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 						// Name of the node
 						char sNodeMsg[256];
-						nlwarning (sNodeMsg, "Save %s model...", pNode->GetName());
+						nlwarning (sNodeMsg, "Save %s model...", tStrToUtf8(pNode->GetName()).c_str());
 
 						// It is a zone ?
 						if (RPO::isZone (*pNode, time))
 						{
 							// Save path
 							char sSavePath[256];
-							strcpy (sSavePath, pNode->GetName());
+							strcpy (sSavePath, tStrToUtf8(pNode->GetName()).c_str());
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
@@ -342,24 +342,22 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 								if (!theCNelExport.exportZone (sSavePath, *pNode, time))
 								{
 									// Error message
-									char sErrorMsg[512];
-									sprintf (sErrorMsg, "Error exporting the zone %s in the file\n%s", pNode->GetName(), sSavePath);
-									MessageBox (hWnd, sErrorMsg, "NeL export", MB_OK|MB_ICONEXCLAMATION);
+									std::string sErrorMsg = toString("Error exporting the zone %s in the file\n%s", tStrToUtf8(pNode->GetName()).c_str(), sSavePath);
+									MessageBox (hWnd, utf8ToTStr(sErrorMsg), L"NeL export", MB_OK|MB_ICONEXCLAMATION);
 								}
 							}
 						}
 						else if (CExportNel::isVegetable (*pNode, time))
 						{
 							// Save path
-							char sSavePath[256];
-							strcpy (sSavePath, pNode->GetName());
+							std::string sSavePath = tStrToUtf8(pNode->GetName());
 
 							// Choose a file to export
 							if (!CExportNel::getScriptAppData (pNode, NEL3D_APPDATA_DONTEXPORT, 0))
-							if (theCNelExport.SelectFileForSave(hWnd, sNodeMsg, vegetableFilter, sSavePath))
+							if (theCNelExport.SelectFileForSave(hWnd, sNodeMsg, vegetableFilter, sSavePath.c_str()))
 							{
 								// Export the mesh
-								if (!theCNelExport.exportVegetable (sSavePath, *pNode, time))
+								if (!theCNelExport.exportVegetable (sSavePath.c_str(), *pNode, time))
 								{
 									// Error message
 									char sErrorMsg[512];

@@ -159,8 +159,8 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 	// fill the box thta tells us what the target are
 	for(k = 0; k < nbTarg; ++k)
 	{
-		m_Targets.AddString(_LBTarget->getTarget(k)->getName().c_str() );
-		m_Targets.SetItemData(k, (DWORD) _LBTarget->getTarget(k) );
+		m_Targets.AddString(utf8ToTStr(_LBTarget->getTarget(k)->getName()));
+		m_Targets.SetItemData(k, (DWORD_PTR) _LBTarget->getTarget(k));
 		targetSet.insert(_LBTarget->getTarget(k));
 	};
 
@@ -179,8 +179,8 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 		{
 			if (targetSet.find(loc) == targetSet.end())
 			{
-				int l = m_AvailableTargets.AddString(loc->getName().c_str() );				
-				m_AvailableTargets.SetItemData(l, (DWORD) loc );				
+				int l = m_AvailableTargets.AddString(utf8ToTStr(loc->getName()));
+				m_AvailableTargets.SetItemData(l, (DWORD_PTR) loc);
 			}
 		}
 	}

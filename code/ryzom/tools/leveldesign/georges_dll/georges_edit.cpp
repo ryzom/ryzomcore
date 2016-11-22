@@ -477,9 +477,9 @@ void CGeorgesEditApp::OnAppAbout()
 void CGeorgesEditApp::outputError (const char* message)
 {
 	if (m_pMainWnd)
-		m_pMainWnd->MessageBox (message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		m_pMainWnd->MessageBox (utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 	else
-		MessageBox (NULL, message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 }
 
 void CGeorgesEditApp::getConfigFilePath (std::string &output)
