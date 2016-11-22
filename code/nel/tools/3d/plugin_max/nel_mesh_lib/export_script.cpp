@@ -125,7 +125,7 @@ float CExportNel::getScriptAppData (Animatable *node, uint32 id, float def)
 
 	// String to int
 	float value = 0.f;
-	if (toFloatMax((const char*)ap->data, value))
+	if (toFloatMax((const TCHAR*)ap->data, value))
 		return value;
 	else
 		return def;

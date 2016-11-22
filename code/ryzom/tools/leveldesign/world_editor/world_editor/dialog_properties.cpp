@@ -49,8 +49,8 @@ using namespace NLMISC;
 
 #define STRING_SELECT_COMBOBOX_ID 9
 
-#define DIFFERENT_VALUE_STRING "<different values>"
-#define DIFFERENT_VALUE_MULTI_STRING "<diff>"
+#define DIFFERENT_VALUE_STRING _T("<different values>")
+#define DIFFERENT_VALUE_MULTI_STRING _T("<diff>")
 
 //CDialogProperties PropertyDialog;
 std::list<CDialogProperties*> PropertiesDialogs;
@@ -327,12 +327,12 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 			buttonRect.right = buttonRect.left + FILE_BUTTON_WIDTH;
 			
 			// Create an edit box
-			nlverify (widget.CheckBox.Create ("Select", BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
+			nlverify (widget.CheckBox.Create (_T("Select"), BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
 			widget.CheckBox.SetFont (GetFont ());
 		}
 
 		// Create the label
-		widget.Static.Create ("", WS_VISIBLE, widgetPos, &m_PropertyCont);
+		widget.Static.Create (_T(""), WS_VISIBLE, widgetPos, &m_PropertyCont);
 		widget.Static.SetFont (GetFont ());
 
 		// Next position
@@ -372,11 +372,11 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		// we insert an empty string in case of a default value
 		if (!widget.Parameter.SortEntries)
 		{
-			widget.ComboBox.InsertString( -1, "");
+			widget.ComboBox.InsertString( -1, _T(""));
 		}
 		else
 		{
-			widget.ComboBox.AddString("");
+			widget.ComboBox.AddString(_T(""));
 		}
 		if (ite != widget.Parameter.ComboValues.end ())
 		{
@@ -431,7 +431,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		widgetPos.bottom = widgetPos.top + EDIT_HEIGHT;
 
 		// Create an edit box
-		nlverify (widget.EditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|(enabled?0:ES_READONLY), widgetPos, &m_PropertyCont, id));
+		nlverify (widget.EditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""), WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|(enabled?0:ES_READONLY), widgetPos, &m_PropertyCont, id));
 		widget.EditBox.SetFont (GetFont ());
 		if (widget.Parameter.FileExtension != "")
 		{
@@ -440,7 +440,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 			buttonRect.right = buttonRect.left + FILE_BUTTON_WIDTH;
 			
 			// Create an edit box
-			nlverify (widget.CheckBox.Create ("Open...", BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
+			nlverify (widget.CheckBox.Create (_T("Open..."), BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
 			widget.CheckBox.SetFont (GetFont ());
 		}
 	}
@@ -452,12 +452,12 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		// Create an edit box
 		if (widget.Parameter.DisplayHS)
 		{
-			nlverify (widget.MultiLineEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", 
+			nlverify (widget.MultiLineEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""),
 				WS_VSCROLL|WS_HSCROLL|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL|(enabled?0:ES_READONLY), widgetPos, &m_PropertyCont, id));
 		}
 		else
 		{
-			nlverify (widget.MultiLineEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), "", 
+			nlverify (widget.MultiLineEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("EDIT"), _T(""),
 				WS_VSCROLL|ES_MULTILINE|ES_WANTRETURN|WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_AUTOHSCROLL|ES_AUTOVSCROLL|(enabled?0:ES_READONLY), widgetPos, &m_PropertyCont, id));
 		}
 
@@ -478,7 +478,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 			RECT buttonRect = widgetPos;
 			
 			// Create an edit box
-			nlverify (widget.CheckBox.Create ("Edit...", BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
+			nlverify (widget.CheckBox.Create (_T("Edit..."), BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
 			widget.CheckBox.SetFont (GetFont ());
 		}
 	}
@@ -488,7 +488,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		widgetPos.bottom = widgetPos.top + widget.Parameter.WidgetHeight;
 
 		// Create an edit box
-		nlverify (widget.ListEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("LISTBOX"), "", WS_VSCROLL|WS_CHILD|WS_VISIBLE|WS_TABSTOP|LBS_NOTIFY|(enabled?0:WS_DISABLED), widgetPos, &m_PropertyCont, id));
+		nlverify (widget.ListEditBox.CreateEx (WS_EX_CLIENTEDGE, _T("LISTBOX"), _T(""), WS_VSCROLL|WS_CHILD|WS_VISIBLE|WS_TABSTOP|LBS_NOTIFY|(enabled?0:WS_DISABLED), widgetPos, &m_PropertyCont, id));
 
 		// Resize the column
 		RECT listRect;
@@ -498,7 +498,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 		widget.ListEditBox.StringSelectComboBox.ResetContent ();
 		std::map<std::string, CPrimitiveClass::CParameter::CConstStringValue>::iterator ite = widget.Parameter.ComboValues.find (doc->getContext ().c_str());
 		// we insert an empty string in case of a default value
-		widget.ListEditBox.StringSelectComboBox.InsertString( -1, "");
+		widget.ListEditBox.StringSelectComboBox.InsertString( -1, _T(""));
 		if (ite != widget.Parameter.ComboValues.end ())
 		{
 			vector<string>	PathList;
@@ -565,7 +565,7 @@ void CDialogProperties::addWidget (const CPrimitiveClass::CParameter &parameter,
 
 		// Create an edit box
 		//nlverify (widget.CheckBox.Create ("Open...", BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP, buttonRect, this, id));
-		nlverify (widget.CheckBox.Create ("View...", BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
+		nlverify (widget.CheckBox.Create (_T("View..."), BS_PUSHBUTTON|WS_VISIBLE|WS_TABSTOP|(enabled?0:WS_DISABLED), buttonRect, &m_PropertyCont, id));
 		widget.CheckBox.SetFont (GetFont ());
 	}
 
@@ -661,7 +661,7 @@ BOOL CDialogProperties::OnInitDialog()
 //	m_PropertyFrame.ClientToScreen(&contRect);
 	// leave 16 px for the scroll bar
 	contRect.right-=16;
-	m_PropertyCont.Create("", 0, contRect, &m_PropertyFrame);
+	m_PropertyCont.Create(_T(""), 0, contRect, &m_PropertyFrame);
 //	m_PropertyCont.SetCursor()
 
 	m_PropertyCont.ShowWindow(SW_SHOW);

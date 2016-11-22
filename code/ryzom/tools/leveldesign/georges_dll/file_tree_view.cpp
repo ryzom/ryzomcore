@@ -51,7 +51,7 @@ bool CFileTreeCtrl::create( const RECT& rect, CWnd* pParentWnd, UINT nID )
 	LPCTSTR className = AfxRegisterWndClass( 0 ); 
 	// Create this window
 
-	if (CWnd::Create (className, "empty", WS_CHILD, rect, pParentWnd, nID ))
+	if (CWnd::Create (className, _T("empty"), WS_CHILD, rect, pParentWnd, nID ))
 
 
 #if defined(NL_COMP_VC) && NL_COMP_VC_VERSION >= 80

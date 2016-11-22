@@ -36,7 +36,7 @@
 #include "nel/ligo/ligo_config.h"
 
 // Base registry key
-#define BASE_REGISTRY_KEY "Software\\Nevrax\\NeL World Editor"
+#define BASE_REGISTRY_KEY _T("Software\\Nevrax\\NeL World Editor")
 
 /////////////////////////////////////////////////////////////////////////////
 // CWorldEditorApp:

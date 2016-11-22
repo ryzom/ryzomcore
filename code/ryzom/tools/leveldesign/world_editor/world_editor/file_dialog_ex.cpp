@@ -54,7 +54,7 @@ END_MESSAGE_MAP()
 INT_PTR CFileDialogEx::DoModal ()
 {
 	// Get the path
-	char path[512];
+	TCHAR path[512];
 	path[0] = 0;
 	HKEY hKey;
 	DWORD type = REG_SZ;
@@ -122,7 +122,7 @@ BOOL CFileDialogEx::OnCommand( WPARAM wParam, LPARAM lParam )
 			::GetDlgItemText (parent, edt1, s, MAX_PATH);
 			
 			// Replace with the directory name
-			::SendMessage (parent, CDM_SETCONTROLTEXT, edt1, (LPARAM)(const char*)text);
+			::SendMessage (parent, CDM_SETCONTROLTEXT, edt1, (LPARAM)(LPCTSTR)text);
 			
 			// Click on the OK button
 			::SendMessage (parent, WM_COMMAND, IDOK, 0);
@@ -148,7 +148,7 @@ BOOL CFileDialogEx::OnInitDialog()
 	combo.Attach (::GetDlgItem (*this, IDC_DIRLIST));
 
 	// Insert the strings
-	char text[512];
+	TCHAR text[512];
 	text[0] = 0;
 	HKEY hKey;
 	DWORD type = REG_SZ;

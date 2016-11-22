@@ -73,18 +73,18 @@ CDialogFlags::CDialogFlags(CWnd* pParent /*=NULL*/)
 	{
 		CEntityDisplayInfo di[] = 
 		{
-			CEntityDisplayInfo(RYZOMID::building,	   "Building",	         NLMISC::CRGBA(192, 0, 0)),
-			CEntityDisplayInfo(RYZOMID::creature,	   "Creature",           NLMISC::CRGBA(255, 127, 0), 2, 0),
-			CEntityDisplayInfo(RYZOMID::deposit,       "Deposit",	         NLMISC::CRGBA(0, 255, 0)),
-			CEntityDisplayInfo(RYZOMID::flora,		   "Flora",              NLMISC::CRGBA(255, 127, 0)),
-			CEntityDisplayInfo(RYZOMID::forageSource,  "Forage Source",	     NLMISC::CRGBA(0, 255, 0)),		
-			CEntityDisplayInfo(RYZOMID::mount,		   "Mount",	             NLMISC::CRGBA(127, 63, 0), 3, 0),
-			CEntityDisplayInfo(RYZOMID::npc,		   "NPC", 	             NLMISC::CRGBA(255, 0, 0), 1, 0),	
-			CEntityDisplayInfo(RYZOMID::object,		   "Object",	         NLMISC::CRGBA(192, 255, 255)),
-			CEntityDisplayInfo(RYZOMID::pack_animal,   "Pack Animal",        NLMISC::CRGBA(127, 63, 0), 3, 0),
-			CEntityDisplayInfo(RYZOMID::player,		   "Player",	         NLMISC::CRGBA(127, 127, 255), 0, 0),
-			CEntityDisplayInfo(RYZOMID::fx_entity,     "FX Entity",			 NLMISC::CRGBA(0, 255, 0)),
-			CEntityDisplayInfo(RYZOMID::unknown,       "Unknown",	         NLMISC::CRGBA(127, 127, 127)),
+			CEntityDisplayInfo(RYZOMID::building,	   _T("Building"),	         NLMISC::CRGBA(192, 0, 0)),
+			CEntityDisplayInfo(RYZOMID::creature,	   _T("Creature"),           NLMISC::CRGBA(255, 127, 0), 2, 0),
+			CEntityDisplayInfo(RYZOMID::deposit,       _T("Deposit"),	         NLMISC::CRGBA(0, 255, 0)),
+			CEntityDisplayInfo(RYZOMID::flora,		   _T("Flora"),              NLMISC::CRGBA(255, 127, 0)),
+			CEntityDisplayInfo(RYZOMID::forageSource,  _T("Forage Source"),	     NLMISC::CRGBA(0, 255, 0)),
+			CEntityDisplayInfo(RYZOMID::mount,		   _T("Mount"),	             NLMISC::CRGBA(127, 63, 0), 3, 0),
+			CEntityDisplayInfo(RYZOMID::npc,		   _T("NPC"), 	             NLMISC::CRGBA(255, 0, 0), 1, 0),
+			CEntityDisplayInfo(RYZOMID::object,		   _T("Object"),	         NLMISC::CRGBA(192, 255, 255)),
+			CEntityDisplayInfo(RYZOMID::pack_animal,   _T("Pack Animal"),        NLMISC::CRGBA(127, 63, 0), 3, 0),
+			CEntityDisplayInfo(RYZOMID::player,		   _T("Player"),	         NLMISC::CRGBA(127, 127, 255), 0, 0),
+			CEntityDisplayInfo(RYZOMID::fx_entity,     _T("FX Entity"),			 NLMISC::CRGBA(0, 255, 0)),
+			CEntityDisplayInfo(RYZOMID::unknown,       _T("Unknown"),	         NLMISC::CRGBA(127, 127, 127)),
 		};
 		initDisplayInfo(di, sizeofarray(di), _EntityDisplayInfo[EntityType]);
 	}
@@ -92,10 +92,10 @@ CDialogFlags::CDialogFlags(CWnd* pParent /*=NULL*/)
 	{
 		CEntityDisplayInfo di[] = 
 		{
-			CEntityDisplayInfo(0,	   "Dead",	         NLMISC::CRGBA(255, 0, 0)),
-			CEntityDisplayInfo(1,	   "Weak",	         NLMISC::CRGBA(255, 255, 0)),
-			CEntityDisplayInfo(2,	   "Full shape",     NLMISC::CRGBA(0, 255, 0)),
-			CEntityDisplayInfo(3,	   "No Hit Points",  NLMISC::CRGBA(127, 127, 127)),
+			CEntityDisplayInfo(0,	   _T("Dead"),	         NLMISC::CRGBA(255, 0, 0)),
+			CEntityDisplayInfo(1,	   _T("Weak"),	         NLMISC::CRGBA(255, 255, 0)),
+			CEntityDisplayInfo(2,	   _T("Full shape"),     NLMISC::CRGBA(0, 255, 0)),
+			CEntityDisplayInfo(3,	   _T("No Hit Points"),  NLMISC::CRGBA(127, 127, 127)),
 		};
 		initDisplayInfo(di, sizeofarray(di), _EntityDisplayInfo[EntityHitPoints]);
 	}
@@ -103,9 +103,9 @@ CDialogFlags::CDialogFlags(CWnd* pParent /*=NULL*/)
 	{
 		CEntityDisplayInfo di[] = 
 		{
-			CEntityDisplayInfo(0,	   "Dead",	         NLMISC::CRGBA(255, 0, 0)),
-			CEntityDisplayInfo(1,	   "Alive",	         NLMISC::CRGBA(0, 0, 255)),		
-			CEntityDisplayInfo(2,	   "No Hit Points",  NLMISC::CRGBA(127, 127, 127)),
+			CEntityDisplayInfo(0,	   _T("Dead"),	         NLMISC::CRGBA(255, 0, 0)),
+			CEntityDisplayInfo(1,	   _T("Alive"),	         NLMISC::CRGBA(0, 0, 255)),
+			CEntityDisplayInfo(2,	   _T("No Hit Points"),  NLMISC::CRGBA(127, 127, 127)),
 		};
 		initDisplayInfo(di, sizeofarray(di), _EntityDisplayInfo[EntityAlive]);
 	}
@@ -113,19 +113,19 @@ CDialogFlags::CDialogFlags(CWnd* pParent /*=NULL*/)
 	{
 		CEntityDisplayInfo di[] = 
 		{
-			CEntityDisplayInfo(MBEHAV::UNKNOWN_MODE,  "Unknown", NLMISC::CRGBA(127, 127, 127)),
-			CEntityDisplayInfo(MBEHAV::NORMAL,        "Normal", NLMISC::CRGBA(255, 255, 255)),
-			CEntityDisplayInfo(MBEHAV::COMBAT_FLOAT,  "Combat float",  NLMISC::CRGBA(255, 0, 0), 0, 1),
-			CEntityDisplayInfo(MBEHAV::COMBAT,        "Combat",  NLMISC::CRGBA(255, 0, 0), 0, 1),
-			CEntityDisplayInfo(MBEHAV::SWIM,          "Swim",  NLMISC::CRGBA(0, 0, 255)),
-			CEntityDisplayInfo(MBEHAV::SIT,           "Sit",  NLMISC::CRGBA(0, 255, 255)),
-			CEntityDisplayInfo(MBEHAV::MOUNT_NORMAL,  "Mount Normal",  NLMISC::CRGBA(192, 128, 0)),
-			CEntityDisplayInfo(MBEHAV::MOUNT_SWIM,    "Mount Swim",  NLMISC::CRGBA(0, 0, 255)),
-			CEntityDisplayInfo(MBEHAV::EAT,           "Eat",  NLMISC::CRGBA(0, 255, 0)),
-			CEntityDisplayInfo(MBEHAV::ALERT,         "Alert",  NLMISC::CRGBA(255, 127, 0)),
-			CEntityDisplayInfo(MBEHAV::HUNGRY,        "Hungry",  NLMISC::CRGBA(255, 255, 0)),
-			CEntityDisplayInfo(MBEHAV::DEATH,         "Death",  NLMISC::CRGBA(0, 0, 0)),
-			CEntityDisplayInfo(MBEHAV::SWIM_DEATH,    "SwimDeath",  NLMISC::CRGBA(0, 0, 0))
+			CEntityDisplayInfo(MBEHAV::UNKNOWN_MODE,  _T("Unknown"), NLMISC::CRGBA(127, 127, 127)),
+			CEntityDisplayInfo(MBEHAV::NORMAL,        _T("Normal"), NLMISC::CRGBA(255, 255, 255)),
+			CEntityDisplayInfo(MBEHAV::COMBAT_FLOAT,  _T("Combat float"),  NLMISC::CRGBA(255, 0, 0), 0, 1),
+			CEntityDisplayInfo(MBEHAV::COMBAT,        _T("Combat"),  NLMISC::CRGBA(255, 0, 0), 0, 1),
+			CEntityDisplayInfo(MBEHAV::SWIM,          _T("Swim"),  NLMISC::CRGBA(0, 0, 255)),
+			CEntityDisplayInfo(MBEHAV::SIT,           _T("Sit"),  NLMISC::CRGBA(0, 255, 255)),
+			CEntityDisplayInfo(MBEHAV::MOUNT_NORMAL,  _T("Mount Normal"),  NLMISC::CRGBA(192, 128, 0)),
+			CEntityDisplayInfo(MBEHAV::MOUNT_SWIM,    _T("Mount Swim"),  NLMISC::CRGBA(0, 0, 255)),
+			CEntityDisplayInfo(MBEHAV::EAT,           _T("Eat"),  NLMISC::CRGBA(0, 255, 0)),
+			CEntityDisplayInfo(MBEHAV::ALERT,         _T("Alert"),  NLMISC::CRGBA(255, 127, 0)),
+			CEntityDisplayInfo(MBEHAV::HUNGRY,        _T("Hungry"),  NLMISC::CRGBA(255, 255, 0)),
+			CEntityDisplayInfo(MBEHAV::DEATH,         _T("Death"),  NLMISC::CRGBA(0, 0, 0)),
+			CEntityDisplayInfo(MBEHAV::SWIM_DEATH,    _T("SwimDeath"),  NLMISC::CRGBA(0, 0, 0))
 		};
 		initDisplayInfo(di, sizeofarray(di), _EntityDisplayInfo[EntityMode]);
 	}		
@@ -213,7 +213,7 @@ BOOL CDialogFlags::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ENTITY_ICONS_TGA), "TGA");
+	HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ENTITY_ICONS_TGA), _T("TGA"));
 	if (rsc != NULL)
 	{
 		NLMISC::CBitmap bm;
@@ -247,7 +247,7 @@ BOOL CDialogFlags::OnInitDialog()
 	::CRect shardListRect;
 	GetDlgItem(IDC_SHARD_LIST_PLACEMENT)->GetWindowRect(shardListRect);
 	ScreenToClient(&shardListRect);
-	ShardCtrl.create(WS_CHILD|WS_TABSTOP, shardListRect, this, 0, REGKEY_BASE_PATH "\\shard_list", 10);
+	ShardCtrl.create(WS_CHILD|WS_TABSTOP, shardListRect, this, 0, REGKEY_BASE_PATH _T("\\shard_list"), 10);
 	ShardCtrl.ShowWindow (SW_SHOW);	
 	CFont* font = GetFont ();
 	ShardCtrl.SetFont(font);
@@ -295,7 +295,7 @@ void CDialogFlags::setCurrentEntityDisplayMode(TEntityDisplayMode edm)
 
 
 
-#define REGKEY_ENTITY_DISPLAY_INFO REGKEY_BASE_PATH "\\entity_display_info\\"
+#define REGKEY_ENTITY_DISPLAY_INFO REGKEY_BASE_PATH _T("\\entity_display_info\\")
 
 //******************************************************************************************************
 void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos, const std::string &regId)
@@ -306,13 +306,13 @@ void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos
 		DWORD index  = 0;
 		for(;;)
 		{
-			char valueStr[256] = { 0 };
+			TCHAR valueStr[256] = { 0 };
 			BYTE dataStr[256] = { 0 };
 			DWORD valueSize = sizeofarray(valueStr);
 			DWORD dataSize = sizeofarray(dataStr);
 			LONG result = RegEnumValue(hKey, index, valueStr, &valueSize, NULL, NULL, dataStr, &dataSize);
 			if (result != ERROR_SUCCESS) break;
-			uint value = (uint) atoi(valueStr);
+			uint value = (uint) _ttoi(valueStr);
 			for(uint k = 0; k < infos.size(); ++k)
 			{
 				if (infos[k].Value == value)

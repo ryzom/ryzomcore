@@ -242,7 +242,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 			if (!dmwarn)
 			{
 				dmwarn = true;
-				MessageBox(NULL, "Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank.", "NeL Patch Paint", MB_OK | MB_ICONWARNING);
+				MessageBox(NULL, _T("Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank."), _T("NeL Patch Paint"), MB_OK | MB_ICONWARNING);
 			}
 			continue; // with next displace
 		}

@@ -90,7 +90,7 @@ BOOL CDfnDialog::OnInitDialog()
 
 	// Create the type combo
 	setStaticSize (currentPos);
-	LabelParents.Create ("Parents:", WS_VISIBLE, currentPos, this);
+	LabelParents.Create (_T("Parents:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelParents);
 	getNextPosLabel (currentPos);
 
@@ -105,7 +105,7 @@ BOOL CDfnDialog::OnInitDialog()
 
 	// Create the type combo
 	setStaticSize (currentPos);
-	LabelStruct.Create ("Structure:", WS_VISIBLE, currentPos, this);
+	LabelStruct.Create (_T("Structure:"), WS_VISIBLE, currentPos, this);
 	initWidget (LabelStruct);
 	getNextPosLabel (currentPos);
 
@@ -210,10 +210,10 @@ void CDfnDialog::getFromDocument (const NLGEORGES::CFormDfn &dfn)
 				Struct.ListCtrl.SetItemText (elm, 4, dfn.getEntry (elm).getFilenameExt ().c_str());
 				break;
 			case UFormDfn::EntryDfn:
-				Struct.ListCtrl.SetItemText (elm, 1, dfn.getEntry (elm).getArrayFlag () ? "Dfn array" : "Dfn");
+				Struct.ListCtrl.SetItemText (elm, 1, dfn.getEntry (elm).getArrayFlag () ? _T("Dfn array") : _T("Dfn"));
 				break;
 			case UFormDfn::EntryVirtualDfn:
-				Struct.ListCtrl.SetItemText (elm, 1, "Virtual Dfn");
+				Struct.ListCtrl.SetItemText (elm, 1, _T("Virtual Dfn"));
 				break;
 			}
 			Struct.ListCtrl.SetItemText (elm, 2, dfn.getEntry (elm).getFilename ().c_str());
@@ -435,15 +435,15 @@ void CDfnEditListCtrl::onItemChanged (uint item, uint subItem)
 				Dialog->Struct.ListCtrl.SetItemText (item, 2, theApp.DefaultDfn.c_str ());
 
 			// Clear default value
-			Dialog->Struct.ListCtrl.SetItemText (item, 3, "");
+			Dialog->Struct.ListCtrl.SetItemText (item, 3, _T(""));
 		}
 		else if (type == "Virtual Dfn")
 		{
 			// Clear the value
-			Dialog->Struct.ListCtrl.SetItemText (item, 2, "");
+			Dialog->Struct.ListCtrl.SetItemText (item, 2, _T(""));
 
 			// Clear default value
-			Dialog->Struct.ListCtrl.SetItemText (item, 3, "");
+			Dialog->Struct.ListCtrl.SetItemText (item, 3, _T(""));
 		}
 	}
 }

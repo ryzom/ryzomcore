@@ -186,7 +186,7 @@ void CGraphPlugin::refreshPrimitives()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 			}
 
 			while (missionTreeRoot->getParent()!=NULL) 
@@ -268,7 +268,7 @@ void CGraphPlugin::refreshMachine()
 
 			//currently using output.png as the input file...
 			if(!createBitmap(tmpPath))
-				AfxMessageBox("BEWARE: the image couldn't be loaded.");
+				AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 		}
 		
 			while (missionTreeRoot->getParent()!=NULL) 
@@ -312,8 +312,8 @@ void CGraphPlugin::refreshMachine()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
-			}	
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
+			}
 
 			while (missionTreeRoot->getParent()!=NULL) 
 			{
@@ -323,7 +323,7 @@ void CGraphPlugin::refreshMachine()
 		}
 		else
 		{
-			AfxMessageBox("The selected node could not be processed.");
+			AfxMessageBox(_T("The selected node could not be processed."));
 		}
 
 	}

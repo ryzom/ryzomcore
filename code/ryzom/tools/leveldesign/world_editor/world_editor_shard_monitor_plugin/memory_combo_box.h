@@ -45,7 +45,7 @@ public:
 
 	void onOK ();
 	void onCancel ();
-	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount);
+	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount);
 	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId);
 	void setRegisterAdress (const char *registerAdress);
 	void clearCommand ();

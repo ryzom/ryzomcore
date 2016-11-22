@@ -43,7 +43,7 @@ CMemoryComboBox::~CMemoryComboBox()
 
 // ***************************************************************************
 
-void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount)
+void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount)
 {
 	// Register a window
 	Id = nId;
@@ -52,7 +52,7 @@ void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT 
 	LPCTSTR clas = AfxRegisterWndClass (0);
 	if (clas)
 	{
-		if (Create (clas, "MemoryComboBox", style, rect, parent, nId))
+		if (Create (clas, _T("MemoryComboBox"), style, rect, parent, nId))
 		{
 			// Create the combo box
 			RECT comboRect;
@@ -582,12 +582,12 @@ LRESULT CMemoryComboBox::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			int curSel = _ComboBox.GetCurSel ();
 			if ((curSel == -1) || ((uint)curSel<Commands.size()))
 			{
-				_ComboBox.GetWindowText ((char*)lParam, wParam);
+				_ComboBox.GetWindowText ((TCHAR*)lParam, wParam);
 				return _ComboBox.GetWindowTextLength ();
 			}
 			else
 			{
-				_ComboBox.GetLBText (curSel, (char*)lParam);
+				_ComboBox.GetLBText (curSel, (TCHAR*)lParam);
 				return _ComboBox.GetLBTextLen (curSel);
 			}
 		}

@@ -609,8 +609,7 @@ bool CBuilderZone::refresh ()
 								if ((sZone != STRING_UNUSED)&&(sZone != STRING_OUT_OF_BOUND))
 								{
 									unload (_ZoneRegionSelected);
-									MessageBox (NULL, "Cannot add this zone because it overlaps existing ones", 
-												"Error", MB_ICONERROR|MB_OK);
+									MessageBox (NULL, _T("Cannot add this zone because it overlaps existing ones"), _T("Error"), MB_ICONERROR|MB_OK);
 									return false;
 								}
 							}
@@ -1599,17 +1598,18 @@ void CBuilderZone::del (const CVector &worldPos)
 // ---------------------------------------------------------------------------
 bool CBuilderZone::initZoneBank (const string &sPathName)
 {
-	char sDirBackup[512];
+	// TODO: replace by NeL methods
+	TCHAR sDirBackup[512];
 	GetCurrentDirectory (512, sDirBackup);
 	SetCurrentDirectory (sPathName.c_str());
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
-	hFind = FindFirstFile ("*.ligozone", &findData);
+	hFind = FindFirstFile (_T("*.ligozone"), &findData);
 	
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		// If the name of the file is not . or .. then its a valid entry in the DataBase
-		if (!((strcmp (findData.cFileName, ".") == 0) || (strcmp (findData.cFileName, "..") == 0)))
+		if (!((_tcscmp (findData.cFileName, _T(".")) == 0) || (_tcscmp (findData.cFileName, _T("..")) == 0)))
 		{
 			string error;
 			if (!_ZoneBank.addElement (findData.cFileName, error))

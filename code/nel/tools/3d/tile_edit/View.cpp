@@ -438,14 +438,14 @@ int TileList::setDisplacement (int tile, const std::string& name)
 			theListDisplacement[tile].loaded=0;
 
 			if (!_LoadBitmap(tileBank2.getAbsPath() + troncated, &theListDisplacement[tile].BmpInfo, theListDisplacement[tile].Bits, NULL, 0))
-				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), "Can't load file", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
 			else
 			{
 				// Check the size
 				if ((theListDisplacement[tile].BmpInfo.bmiHeader.biWidth!=32)||(-theListDisplacement[tile].BmpInfo.bmiHeader.biHeight!=32))
 				{
 					// Error message
-					MessageBox (NULL, "Invalid size: displacement map must be 32x32 8 bits.", troncated.c_str(),
+					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), troncated.c_str(),
 						MB_OK|MB_ICONEXCLAMATION);
 
 					// Free the bitmap

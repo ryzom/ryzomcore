@@ -1012,7 +1012,7 @@ void CPlugin::displayCloseUp(CDisplay &display)
 	{	
 		static bool createFailed = false;
 		if (createFailed) return;
-		HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ENTITY_ICONS_TGA), "TGA");
+		HRSRC rsc = FindResource(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDR_ENTITY_ICONS_TGA), _T("TGA"));
 		if (rsc == NULL)
 		{
 			createFailed = true;
