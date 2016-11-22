@@ -1142,22 +1142,6 @@ int CExportNel::getVertMapChannel (Texmap& texmap, Matrix3& channelMatrix, TimeV
 // get the absolute or relative path from a texture filename
 static std::string 	ConvertTexFileName(const std::string &path, bool _AbsolutePath)
 {
-	/*// File name, maxlen 256 under windows
-	char sFileName[512];
-	strcpy (sFileName, src);
-
-	// Let absolute path ?
-	if (!_AbsolutePath)
-	{
-		// Decompose bitmap file name
-		char sName[256];
-		char sExt[256];
-		_splitpath (sFileName, NULL, NULL, sName, sExt);
-
-		// Make the final path
-		_makepath (sFileName, NULL, NULL, sName, sExt);
-	}
-	return std::string(sFileName);*/
 	if (_AbsolutePath)
 	{
 		return path;

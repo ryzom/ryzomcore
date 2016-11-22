@@ -561,13 +561,10 @@ std::string		CExportNel::getNelObjectName (INode& node)
 			ad = obj->GetAppDataChunk (MAXSCRIPT_UTILITY_CLASS_ID, UTILITY_CLASS_ID, NEL3D_APPDATA_INSTANCE_SHAPE);
 			if (ad&&ad->data)
 			{
-				if (::strlen((const char *) ad->data) != 0)
+				if (_tcslen((const TCHAR *) ad->data) != 0)
 				{				
 					// get file name only
-					char fName[_MAX_FNAME];
-					char ext[_MAX_FNAME];
-					::_splitpath((const char*)ad->data, NULL, NULL, fName, ext) ;						
-					return std::string(fName + std::string(ext));
+					return NLMISC::CFile::getFilename(tStrToUtf8((const TCHAR*)ad->data));
 				}
 				else
 				{

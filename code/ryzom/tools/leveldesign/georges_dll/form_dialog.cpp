@@ -1173,9 +1173,7 @@ void CFormDialog::getDfnName (string &result) const
 	{
 		// Get the DFN filename
 		CString str = doc->GetPathName ();
-		char extension[512];
-		_splitpath (str, NULL, NULL, NULL, extension);
-		result = (*extension == '.') ? extension+1 : extension;
+		result NLMISC::CFile::getExtension(tStrToUtf8(str));
 	}
 	else
 		result.clear();

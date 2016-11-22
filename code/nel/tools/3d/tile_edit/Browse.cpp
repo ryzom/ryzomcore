@@ -889,11 +889,11 @@ void Browse::OnBatchLoad ()
 
 	if (sFile.DoModal()==IDOK)
 	{
-		char sDrive[256];
-		char sPath[256];
-		char sName[256];
-		char sExt[256];
-		_splitpath (sFile.GetPathName(), sDrive, sPath, sName, sExt);
+		std::string fullPath = tStrToUtf8(sFile.GetPathName());
+
+		std::string path = NLMISC::CFile::getPath(fullPath);
+		std::string filename = NLMISC::CFile::getFilenameWithoutExtension(fullPath);
+		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
 		// look for some numbers..
 		char *sNumber=sName+strlen(sName)-1;
@@ -925,11 +925,9 @@ void Browse::OnBatchLoad ()
 					for (int rot=0; rot<4; rot++)
 					{
 						// Try to load a tile with a file name like /tiletransition0.tga
-						char sName2[256];
-						char sFinal[256];
-						sprintf (sName2, "%s%02d", sName, (int)transition);
-						_makepath (sFinal, sDrive, sPath, sName2, sExt);
-						FILE *pFile=fopen (sFinal, "rb");
+						std::string sFinal = path + toString("%s%02d.%s", filename.c_str(), (int)transition, ext.c_str());
+
+						FILE *pFile = nlfopen (sFinal, "rb");
 
 						// Close the file and add the tile if opened
 						if (pFile)
@@ -961,11 +959,9 @@ void Browse::OnBatchLoad ()
 				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (m_ctrl.Texture==1?CTile::diffuse:CTile::additive).empty())
 				{
 					// Try to load a tile with a file name like /tiletransition0.tga
-					char sName2[256];
-					char sFinal[256];
-					sprintf (sName2, "%s%02d", sName, (int)transition);
-					_makepath (sFinal, sDrive, sPath, sName2, sExt);
-					FILE *pFile=fopen (sFinal, "rb");
+					std::string sFinal = path + toString("%s%02d.%s", filename.c_str(), (int)transition, ext.c_str());
+
+					FILE *pFile = nlfopen (sFinal, "rb");
 
 					// Close the file and add the tile if opened
 					if (pFile)

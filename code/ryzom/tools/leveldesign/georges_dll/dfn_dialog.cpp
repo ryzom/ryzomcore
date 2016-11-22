@@ -420,19 +420,17 @@ void CDfnEditListCtrl::onItemChanged (uint item, uint subItem)
 		{
 			CString str;
 			str = Dialog->Struct.ListCtrl.GetItemText (item, 2);
-			char ext[MAX_PATH];
-			_splitpath (str, NULL, NULL, NULL, ext);
-			if (stricmp (ext, ".typ") != 0)
-				Dialog->Struct.ListCtrl.SetItemText (item, 2, theApp.DefaultType.c_str ());
+			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(str));
+			if (ext == "typ")
+				Dialog->Struct.ListCtrl.SetItemText (item, 2, utf8ToTStr(theApp.DefaultType));
 		}
 		else if ((type == "Dfn") || (type == "Dfn array"))
 		{
 			CString str;
 			str = Dialog->Struct.ListCtrl.GetItemText (item, 2);
-			char ext[MAX_PATH];
-			_splitpath (str, NULL, NULL, NULL, ext);
-			if (stricmp (ext, ".dfn") != 0)
-				Dialog->Struct.ListCtrl.SetItemText (item, 2, theApp.DefaultDfn.c_str ());
+			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(str));
+			if (ext == "dfn")
+				Dialog->Struct.ListCtrl.SetItemText (item, 2, utf8ToTStr(theApp.DefaultDfn));
 
 			// Clear default value
 			Dialog->Struct.ListCtrl.SetItemText (item, 3, _T(""));

@@ -262,8 +262,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.AnimationFileName.size(); i++)
 			{
 				// Get the animation name
-				char name[512];
-				_splitpath (object->Saved.AnimationFileName[i].c_str(), NULL, NULL, name, NULL);
+				std::string name = NLMISC::CFile::getFilenameWithoutExtension(object->Saved.AnimationFileName[i]);
 
 				// Get the animation pointer
 				CAnimation *anim = object->AnimationSet.getAnimation (object->AnimationSet.getAnimationIdByName (name));
@@ -314,8 +313,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.SWTFileName.size(); i++)
 			{
 				// Get the animation name
-				char name[512];
-				_splitpath (object->Saved.SWTFileName[i].c_str(), NULL, NULL, name, NULL);
+				std::string name = NLMISC::CFile::getFilenameWithoutExtension(object->Saved.SWTFileName[i]);
 
 				// Get the animation pointer
 				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight (object->AnimationSet.getSkeletonWeightIdByName (name));

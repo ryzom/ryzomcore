@@ -94,22 +94,17 @@ void CMeshDlg::OnBrowseShape()
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
-		char fname[256];
-		char ext[256];
-
+		std::string fullPath = tStrToUtf8(fd.GetPathName());
+		std::string fname = NLMISC::CFile::getFilenameWithoutExtension(fullPath);
+		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
 		// Add search path for the texture
-		_splitpath (fd.GetPathName(), drive, dir, fname, ext);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(fullPath));
 
 		try
 		{		
-			_ShapeParticle->setShape(std::string(fname) + ext);		
-			m_ShapeName = (std::string(fname) + ext).c_str();
+			_ShapeParticle->setShape(fname + "." + ext);		
+			m_ShapeName = utf8ToTStr(fname + "." + ext);
 			touchPSState();			
 		}
 		catch (const NLMISC::Exception &e)

@@ -403,11 +403,9 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return stricmp (pItemInfo1->displayName.c_str(), pItemInfo2->displayName.c_str());
 		if (pfileTreeCtrl->_ArrangeMode == CFileTreeCtrl::ByType)
 		{
-			char ext1[_MAX_EXT];
-			_splitpath (pItemInfo1->displayName.c_str(), NULL, NULL, NULL, ext1);
-			char ext2[_MAX_EXT];
-			_splitpath (pItemInfo2->displayName.c_str(), NULL, NULL, NULL, ext2);
-			int res = stricmp (ext1, ext2);
+			std::string ext1 = NLMISC::CFile::getExtension(pItemInfo1->displayName);
+			std::string ext2 = NLMISC::CFile::getExtension(pItemInfo2->displayName);
+			int res = stricmp (ext1.c_str(), ext2.c_str());
 			if ( res == 0)
 				return stricmp (pItemInfo1->displayName.c_str(), pItemInfo2->displayName.c_str());
 			else

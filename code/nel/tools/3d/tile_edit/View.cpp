@@ -1283,11 +1283,10 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 			&*bits->begin(),bmpinf,DIB_RGB_COLORS,SRCCOPY);
 	}
 			
-	char temp[100];
-	char Name[256]; Name[0] = 0;
+	std::string Name;
 	if (InfoTexte==2)
 	{
-		_splitpath(pth.c_str(),temp,temp,Name,temp);		
+		Name = NLMISC::CFile::getFilenameWithoutExtension(pth);
 	}
 	else if (InfoTexte==3)
 	{
@@ -1295,12 +1294,20 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 	}
 	else if (InfoTexte==1)
 	{
-		sprintf(Name,"%d",i->id);
+		Name = NLMISC::toString("%d", i->id);
 	}
 	rect_txt.top = pt.y + sizetile_y + spacing_tile_text;
 	rect_txt.bottom += rect_txt.top + sizetext_y;
 	rect_txt.left -= spacing_x;
-	pDC->DrawText(Name,(int)strlen(Name),&rect_txt,DT_CENTER | DT_SINGLELINE);
+
+#ifdef _UNICODE
+	ucstring tmp;
+	tmp.fromUtf8(Name);
+#else
+	std::string tmp = Name;
+#endif
+
+	pDC->DrawText((LPCTSTR)tmp.c_str(), (int)tmp.length(), &rect_txt,DT_CENTER | DT_SINGLELINE);
 
 	// Restore the device context
 	pDC->SetBkColor( clrBk );
@@ -1537,15 +1544,12 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					CString str = load.GetNextPathName(p);
 
-					char sDrive[256];
-					char sPath[256];
-					_splitpath (str, sDrive, sPath, NULL, NULL);
-					LastPath=string (sDrive)+string (sPath);
+					LastPath = NLMISC::CFile::getPath(tStrToUtf8(str));
 
-					if (str!=CString(""))
+					if (!str.IsEmpty())
 					{
 						int index=0;
-						const char *pathname = (LPCTSTR)str;
+						std::string pathname = tStrToUtf8(str);
 
 						// Add mode, to the end of the list
 						if (id==ID_MENU_ADD)

@@ -366,18 +366,15 @@ void Tile_utility::SetupUI ()
 		if (Bank.getLandCount())
 		{
 			// Button text
-			char sName[256];
-			_splitpath (Path.c_str(), NULL, NULL, sName, NULL);
-			char *sName2=sName;
-			if (*sName2)
-				*sName2=toupper (*sName2);
-			sName2++;
-			while (*sName2)
+			std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(Path));
+
+			if (!name.empty())
 			{
-				*sName2=tolower (*sName2);
-				sName2++;
+				std::string upName = toUpper(name);
+				name[0] = upName[0];
 			}
-			SetWindowText (hwnd, sName);
+
+			SetWindowText (hwnd, utf8ToTStr(name));
 
 			// Static text
 			TCHAR sTmp[256];

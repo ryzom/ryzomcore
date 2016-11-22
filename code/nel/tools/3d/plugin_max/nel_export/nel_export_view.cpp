@@ -111,15 +111,13 @@ void regsiterOVPath ()
 	if (!hModule) { ::MessageBox(NULL, "'hModule' failed at '" __FUNCTION__ "' in file '" __FILE__ " on line " NL_MACRO_TO_STR(__LINE__), "NeL Export", MB_OK | MB_ICONERROR); return; }
 	char sModulePath[256];
 	int res = GetModuleFileName(hModule, sModulePath, 256);
-	if (!res) { ::MessageBox(NULL, "'res' failed at '" __FUNCTION__ "' in file '" __FILE__ " on line " NL_MACRO_TO_STR(__LINE__), "NeL Export", MB_OK | MB_ICONERROR); return; }
-	char SDrive[512];
-	char SDir[512];
-	_splitpath (sModulePath, SDrive, SDir, NULL, NULL);
-	_makepath (sModulePath, SDrive, SDir, "object_viewer", ".cfg");
+	if (!res) { ::MessageBox(NULL, _T("'res' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
+
+	std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "object_viewer.cfg";
 
 	// Load the config file
 	CConfigFile cf;
-	cf.load (sModulePath);
+	cf.load (modulePath);
 
 	try
 	{
