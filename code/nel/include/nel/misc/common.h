@@ -291,7 +291,7 @@ inline sint nlstricmp(const char *lhs, const std::string &rhs) { return stricmp(
 #define tStrToUtf8(str) (ucstring((ucchar*)(LPCWSTR)str).toUtf8())
 #define utf8ToTStr(str) ((wchar_t*)ucstring::makeFromUtf8(str).c_str())
 #else
-#define tStrToUtf8(str) ((LPCSTR)str)
+#define tStrToUtf8(str) (std::string((LPCSTR)str))
 #define utf8ToTStr(str) (str.c_str())
 #endif
 
