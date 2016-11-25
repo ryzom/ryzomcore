@@ -165,9 +165,8 @@ BOOL CWaterPoolEditor::OnInitDialog()
 
 int CWaterPoolEditor::addPool(uint32 ID)
 {
-	char poolId[128];
-	sprintf(poolId, "%d (%s)", ID, _Wpm->getPoolByID(ID).getName().c_str());
-	int index = m_PoolList.AddString(poolId);
+	std::string poolId = NLMISC::toString("%d (%s)", ID, _Wpm->getPoolByID(ID).getName().c_str());
+	int index = m_PoolList.AddString(utf8ToTStr(poolId));
 	nlassert(index != LB_ERR);
 	m_PoolList.SetItemData(index, ID);
 	return index;
@@ -358,7 +357,7 @@ void CWaterPoolEditor::OnLoadPool()
 		{
 			NLMISC::CIXml iXml;
 			NLMISC::CIFile iF;
-			if (iF.open((LPCTSTR) fileDlg.GetPathName()))
+			if (iF.open(tStrToUtf8(fileDlg.GetPathName())))
 			{
 				if (iXml.init (iF))
 				{
@@ -370,17 +369,17 @@ void CWaterPoolEditor::OnLoadPool()
 				else
 				{
 					iF.close();
-					MessageBox (("Unable to init xml stream from file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);	
+					MessageBox (utf8ToTStr(NLMISC::toString("Unable to init xml stream from file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 			else
 			{
-				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(NLMISC::toString("Unable to open file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		catch (const NLMISC::Exception& e)
 		{
-			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}	
 }
@@ -396,7 +395,7 @@ void CWaterPoolEditor::OnSavePool()
 		{
 			NLMISC::COXml oXml;
 			NLMISC::COFile oF;
-			if (oF.open((LPCTSTR) fileDlg.GetPathName()))
+			if (oF.open(tStrToUtf8(fileDlg.GetPathName())))
 			{
 				if (oXml.init (&oF))
 				{
@@ -407,17 +406,17 @@ void CWaterPoolEditor::OnSavePool()
 				else
 				{
 					oF.close();
-					MessageBox (("Unable to init xml stream from file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);	
+					MessageBox (utf8ToTStr(NLMISC::toString("Unable to init xml stream from file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 			else
 			{
-				MessageBox (("Unable to open file : " + std::string((LPCTSTR) fileDlg.GetPathName())).c_str(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(NLMISC::toString("Unable to open file: %s", tStrToUtf8(fileDlg.GetPathName()).c_str())), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 		catch (const NLMISC::Exception& e)
 		{
-			MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 		}
 	}
 	

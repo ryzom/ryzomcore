@@ -175,7 +175,7 @@ void CFindPrimitiveDlg::OnFindNext()
 	}
 	else
 	{
-		MessageBox ("End of the document", "Find a primitive...", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (_T("End of the document"), _T("Find a primitive..."), MB_OK|MB_ICONEXCLAMATION);
 
 		// Init locator
 		_Locator.getRoot (0);

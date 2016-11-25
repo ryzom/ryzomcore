@@ -172,7 +172,7 @@ void CGraphPlugin::refreshPrimitives()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(utf8ToTStr(msg));
 			}
 			else
 			{
@@ -186,7 +186,7 @@ void CGraphPlugin::refreshPrimitives()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 			}
 
 			while (missionTreeRoot->getParent()!=NULL) 
@@ -207,11 +207,11 @@ void CGraphPlugin::refreshPrimitives()
 				
 				err = toString("%s : %s", primName.c_str(), e.Why.c_str());
 			}
-			AfxMessageBox(err.c_str());
+			AfxMessageBox(utf8ToTStr(err));
 		}
 		catch (const exception &e) //catch a possible exception from getRootFileName
 		{
-			AfxMessageBox(e.what());
+			AfxMessageBox(utf8ToTStr(e.what()));
 		}
 	}
 	else
@@ -254,7 +254,7 @@ void CGraphPlugin::refreshMachine()
 		{
 			string msg("Can't write script file '");
 			msg += tmpPath+"/lang.dot'";
-			AfxMessageBox(msg.c_str());
+			AfxMessageBox(utf8ToTStr(msg));
 		}
 		else
 		{
@@ -268,7 +268,7 @@ void CGraphPlugin::refreshMachine()
 
 			//currently using output.png as the input file...
 			if(!createBitmap(tmpPath))
-				AfxMessageBox("BEWARE: the image couldn't be loaded.");
+				AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
 		}
 		
 			while (missionTreeRoot->getParent()!=NULL) 
@@ -298,7 +298,7 @@ void CGraphPlugin::refreshMachine()
 			{
 				string msg("Can't write script file '");
 				msg += tmpPath+"/lang.dot'";
-				AfxMessageBox(msg.c_str());
+				AfxMessageBox(utf8ToTStr(msg));
 			}
 			else
 			{
@@ -312,8 +312,8 @@ void CGraphPlugin::refreshMachine()
 
 				//currently using output.png as the input file...
 				if(!createBitmap(tmpPath))
-					AfxMessageBox("BEWARE: the image couldn't be loaded.");
-			}	
+					AfxMessageBox(_T("BEWARE: the image couldn't be loaded."));
+			}
 
 			while (missionTreeRoot->getParent()!=NULL) 
 			{
@@ -323,7 +323,7 @@ void CGraphPlugin::refreshMachine()
 		}
 		else
 		{
-			AfxMessageBox("The selected node could not be processed.");
+			AfxMessageBox(_T("The selected node could not be processed."));
 		}
 
 	}
@@ -938,9 +938,10 @@ void CGraphPlugin::doSelection(const string& primPath)
 			selectPrimByPath(rootNode,primPath,resSet);
 
 			_PluginAccess->setCurrentSelection(resSet);
-
-		}catch(const exception &e){
-			GraphDlg->MessageBox(e.what());
+		}
+		catch(const exception &e)
+		{
+			GraphDlg->MessageBox(utf8ToTStr(e.what()));
 		}
 	}
 }

@@ -123,7 +123,7 @@ void CMigrateDialog::updateDestinationText()
 void CMigrateDialog::accept()
 {
 	// check free disk space
-	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
+	qint64 freeSpace = CConfigFile::getInstance()->ignoreFreeDiskSpaceChecks() ? 0:NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
 
 	// shouldn't happen
 	if (freeSpace == 0)

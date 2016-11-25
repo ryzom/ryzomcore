@@ -76,7 +76,7 @@ bool resolveShortcut(const QWidget &window, const QString &shortcut, QString &pa
 QString appendShortcutExtension(const QString &shortcut);
 
 // launch an executable with --version parameter and parse version string
-QString getVersionFromExecutable(const QString &path);
+QString getVersionFromExecutable(const QString &path, const QString &workingDirectory);
 
 // write a resource in QRC to disk
 bool writeResource(const QString &resource, const QString &path);

@@ -386,12 +386,8 @@ void SelectionTerritoire::OnSelect()
 				list2->AddString(tileBank.getTileSet(i)->getName().c_str());
 			}
 
-			char drive[256],name[256],path[256],ext[256];
-			_splitpath(temp,drive,path,name,ext);
-			MainFileName = name;
-			MainFileName += ext;
-			DefautPath = drive;
-			DefautPath += path;
+			MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
+			DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
 			
 			MainFileOk = 1;
 			CButton *button = (CButton*)GetDlgItem(IDC_ADD_TERRITOIRE);
@@ -468,12 +464,10 @@ void SelectionTerritoire::OnSaveAs()
 		button->EnableWindow(true);
 
 		// Create a file name
-		char drive[256],name[256],path[256],ext[256];
-		_splitpath(sFile.GetPathName(), drive, path, name, ext);
-		MainFileName = name;
-		MainFileName += ext;
-		DefautPath = drive;
-		DefautPath += path;
+		std::string temp = tStrToUtf8(sFile.GetPathName());
+	
+		MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
+		DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
 	}
 }
 

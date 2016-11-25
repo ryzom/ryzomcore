@@ -447,7 +447,7 @@ public:
 	bool publishFiles(const std::string &serverPathPrim, const std::string &serverPathText, const std::string &localPathText);
 
 	/// Search for text in the file : add it if it's not in
-	bool includeText(const std::string filename, const std::string text);
+	bool includeText(const std::string &filename, const std::string &text);
 	
 	/// Parse the pre requisite node of a mission.
 	bool parsePreRequisite(CMissionData &md, NLLIGO::IPrimitive *preReq);

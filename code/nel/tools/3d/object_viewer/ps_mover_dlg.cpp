@@ -178,8 +178,8 @@ BOOL CPSMoverDlg::OnInitDialog()
 	{
 		if (dynamic_cast<NL3D::IPSMover *>(_EditedLocated->getBoundObject(k)))
 		{
-			uint insertedLine = m_SubComponentCtrl.AddString(_EditedLocated->getBoundObject(k)->getName().c_str());
-			m_SubComponentCtrl.SetItemData(insertedLine, (DWORD) _EditedLocated->getBoundObject(k));
+			uint insertedLine = m_SubComponentCtrl.AddString(utf8ToTStr(_EditedLocated->getBoundObject(k)->getName()));
+			m_SubComponentCtrl.SetItemData(insertedLine, (DWORD_PTR) _EditedLocated->getBoundObject(k));
 			++nbCandidates;			
 		}
 	}

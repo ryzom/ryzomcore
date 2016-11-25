@@ -529,9 +529,9 @@ int main( int argc, char ** argv )
 	readFormId( outputFileName );
 
 	// output path
-	sint lastSeparator = CFile::getLastSeparator(outputFileName);
+	std::string::size_type lastSeparator = CFile::getLastSeparator(outputFileName);
 	string outputPath;
-	if( lastSeparator != -1 )
+	if( lastSeparator != std::string::npos )
 	{
 		outputPath = outputFileName.substr(0,lastSeparator+1);
 	}

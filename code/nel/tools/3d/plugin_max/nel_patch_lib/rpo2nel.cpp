@@ -193,7 +193,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 				}
 				catch (const EStream& e)
 				{
-					MessageBox (NULL, stream.what(), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, utf8ToTStr(e.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -253,25 +253,22 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 	if (!patchError.empty())
 	{
 		// Make an error message
-		char error[2098];
-		smprintf (error, 2098, "Error: triple edge detected in ");
+		std::string error = "Error: triple edge detected in ";
 
 		// For each error
 		set<uint>::iterator ite=patchError.begin();
 		while (ite!=patchError.end())
 		{
 			// Sub error message
-			char subError[512];
-			smprintf (subError, 512, "patch %d ", (*ite)+1);
-			strcat (error, subError);
+			error += toString("patch %d ", (*ite)+1);
 
 			// Next error
 			ite++;
 		}
 
 		// Show the message
-		mprintf (error);
-		nlwarning (error);
+		mprintf (utf8ToTStr(error));
+		nlwarning (error.c_str());
 
 		// Error
 		return false;
@@ -612,7 +609,7 @@ bool RPatchMesh::exportZone(INode* pNode, PatchMesh* pPM, NL3D::CZone& zone, CZo
 			uint i;
 			for (i=0; i<error.Errors.size (); i++)
 			{
-				mprintf (error.Errors[i].c_str ());
+				mprintf (utf8ToTStr(error.Errors[i]));
 			}
 			return false;
 		}

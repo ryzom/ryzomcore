@@ -212,8 +212,8 @@ namespace NLNET
 			{
 				// name is more deep, need to resurse
 				parts.erase(parts.begin());
-				CSString subName;
-				subName.join(reinterpret_cast<CVectorSString&>(parts), ".");
+				std::string subName;
+				join(parts, ".", subName);
 				sub->setParam(subName, value);
 			}
 			else

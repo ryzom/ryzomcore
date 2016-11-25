@@ -65,7 +65,7 @@ bool CProjectConfig::init(const std::string &asset, Flags flags, bool partial)
 	TPathString configPath = rootPath + "/nel.cfg";
 	while (!CFile::fileExists(configPath))
 	{
-		int sep = CFile::getLastSeparator(rootPath);
+		std::string::size_type sep = CFile::getLastSeparator(rootPath);
 		if (sep == string::npos)
 			return false;
 
@@ -82,7 +82,7 @@ bool CProjectConfig::init(const std::string &asset, Flags flags, bool partial)
 	
 	std::vector<TPathString> configRootPaths;
 	TPathString projectConfigPath;
-	uint32 projectConfigModification;
+	uint32 projectConfigModification = 0;
 	std::string projectName;
 	if (partial)
 	{

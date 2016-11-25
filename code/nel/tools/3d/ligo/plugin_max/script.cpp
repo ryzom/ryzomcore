@@ -151,7 +151,7 @@ Value* export_material_cf (Value** arg_list, int count)
 	nlassert (node);
 
 	// The second arg
-	const char *fileName = arg_list[1]->to_string();
+	const std::string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The third arg
 	bool checkOnly = (arg_list[2]->to_bool() != FALSE);
@@ -204,12 +204,7 @@ Value* export_material_cf (Value** arg_list, int count)
 							{
 
 								// Make a name for the zone
-								char drive[512];
-								char dir[512];
-								char name[512];
-								char path[512];
-								_splitpath (fileName, drive, dir, name, NULL);
-								_makepath (path, drive, dir, name, ".zone");
+								std::string path = CFile::getPath(fileName) + CFile::getFilenameWithoutExtension(fileName) + ".zone";
 
 								// Ok ?
 								bool ok = true;
@@ -322,7 +317,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 	nlassert (is_array(nodes));
 
 	// The second arg
-	const char *fileName = arg_list[1]->to_string();
+	std::string fileName = tStrToUtf8(arg_list[1]->to_string());
 
 	// The second arg
 	string matFilename[2];
@@ -505,10 +500,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 											for (zone=0; zone<CTransition::TransitionZoneCount; zone++)
 											{
 												// Final path
-												char path[512];
-												_splitpath (fileName, drive, dir, path, NULL);
-												sprintf (name, "%s-%d", path, zone);
-												_makepath (path, drive, dir, name, ".zone");
+												std::string path = CFile::getPath(fileName) + toString("%s-%u", CFile::getFilenameWithoutExtension(fileName).c_str(), zone) + ".zone";
 
 												// Another the stream
 												COFile outputfile2;
@@ -1072,30 +1064,17 @@ Value* export_zone_cf (Value** arg_list, int count)
 				else
 				{
 					// Build a filename
-					char drive[512];
-					char path[512];
-					char finalpath[512];
-					char name[512];
-					char ext[512];
-					_splitpath (fileName.c_str(), drive, path, name, ext);
+					std::string path = NLMISC::CFile::getPath(fileName);
+					std::string name = NLMISC::CFile::getFilenameWithoutExtension(fileName);
 
 					// Build the zone filename
-					char outputFilenameZone[512];
-					strcpy (finalpath, path);
-					strcat (finalpath, "zones\\");
-					_makepath (outputFilenameZone, drive, finalpath, name, ".zone");
+					std::string outputFilenameZone = path + "zones/" + name + ".zone";
 
 					// Build the snap shot filename
-					char outputFilenameSnapShot[512];
-					strcpy (finalpath, path);
-					strcat (finalpath, "zoneBitmaps\\");
-					_makepath (outputFilenameSnapShot, drive, finalpath, name, ".tga");
+					std::string outputFilenameSnapShot = path + "zonesBitmaps/" + name + ".tga";
 
 					// Build the ligozone filename
-					char outputFilenameLigozone[512];
-					strcpy (finalpath, path);
-					strcat (finalpath, "zoneLigos\\");
-					_makepath (outputFilenameLigozone, drive, finalpath, name, ".ligozone");
+					std::string outputFilenameLigozone = path + "zoneLigos/" + name + ".ligozone";
 
 					// Build the zone
 					CZone zone;
@@ -1179,12 +1158,12 @@ Value* export_zone_cf (Value** arg_list, int count)
 									if (weWantToMakeASnapshot)
 									{
 										CIFile fileFarBank;
-										char drive[512];
-										char path[512];
-										char name[512];
-										char farBankPathName[512];
-										_splitpath (GetBankPathName ().c_str (), drive, path, name, NULL);
-										_makepath (farBankPathName, drive, path, name, "farbank");
+
+										std::string path = NLMISC::CFile::getPath(GetBankPathName());
+										std::string name = NLMISC::CFile::getFilenameWithoutExtension(GetBankPathName());
+
+										std::string farBankPathName = path + name + ".farbank";
+
 										if (fileFarBank.open (farBankPathName))
 										{
 											// Create an xml stream
@@ -1908,11 +1887,9 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 			else
 			{
 				// Build a filename
-				char drivetga[512];
-				char pathtga[512];
-				char nametga[512];
-				char exttga[512];
-				_splitpath (fileName.c_str(), drivetga, pathtga, nametga, exttga);
+				std::string nametga = CFile::getFilenameWithoutExtension(fileName);
+				std::string pathtga = CFile::getPath(fileName);
+
 
 				// Build the zone
 				CZone zone;
@@ -1956,12 +1933,9 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 						if (tileBank != NULL)
 						{
 							CIFile fileFarBank;
-							char drive[512];
-							char path[512];
-							char name[512];
-							char farBankPathName[512];
-							_splitpath (GetBankPathName ().c_str (), drive, path, name, NULL);
-							_makepath (farBankPathName, drive, path, name, "farbank");
+							std::string name = CFile::getFilenameWithoutExtension(GetBankPathName());
+							std::string farBankPathName = CFile::getPath(GetBankPathName()) + name + ".farbank";
+
 							if (fileFarBank.open (farBankPathName))
 							{
 								// Create an xml stream
@@ -1974,8 +1948,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 								if (MakeSnapShot (snapshot, *tileBank, *tileFarBank, xMin, xMax, yMin, yMax, config, errorInDialog))
 								{
 									// Build the snap shot filename
-									char outputFilenameSnapShot[512];
-									_makepath (outputFilenameSnapShot, drivetga, pathtga, nametga, ".tga");
+									std::string outputFilenameSnapShot = pathtga + nametga + ".tga";
 
 									// Output the snap shot
 									COFile outputSnapShot;
@@ -2014,12 +1987,14 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 											bankElm.addCategory (strlwr (categories[j].first), strlwr (categories[j].second));
 										}
 
+										// Catch exception
+#if 0
 										// Write the zone
 										COFile outputLigoZone;
+										std::string outputFilenameSnapShot = pathtga + nametga + ".tga";
 										_makepath (outputFilenameSnapShot, drivetga, pathtga, nametga, ".ligozone");
 
-										// Catch exception
-										/*try
+										try
 										{
 											// Open the selected zone file
 											if (outputLigoZone.open (outputFilenameSnapShot))
@@ -2048,7 +2023,8 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 											char tmp[512];
 											smprintf (tmp, 512, "Error while loading the file %s : %s", fileName, e.what());
 											CMaxToLigo::errorMessage (tmp, "NeL Ligo export zone", *MAXScript_interface, errorInDialog);
-										}*/
+										}
+#endif
 									}
 									else
 									{

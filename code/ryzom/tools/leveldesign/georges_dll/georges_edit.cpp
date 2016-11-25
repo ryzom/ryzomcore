@@ -477,20 +477,15 @@ void CGeorgesEditApp::OnAppAbout()
 void CGeorgesEditApp::outputError (const char* message)
 {
 	if (m_pMainWnd)
-		m_pMainWnd->MessageBox (message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		m_pMainWnd->MessageBox (utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 	else
-		MessageBox (NULL, message, "Georges Edit", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, utf8ToTStr(message), _T("Georges Edit"), MB_OK|MB_ICONEXCLAMATION);
 }
 
 void CGeorgesEditApp::getConfigFilePath (std::string &output)
 {
 	// Get the config file path
-	char sDrive[MAX_PATH];
-	char sDir[MAX_PATH];
-	char sPath[MAX_PATH];
-	_splitpath (theApp.ExePath.c_str (), sDrive, sDir, NULL, NULL);
-	_makepath (sPath, sDrive, sDir, "georges", ".cfg");
-	output = sPath;
+	output = NLMISC::CFile::getPath(theApp.ExePath) + "georges.cfg";
 }
 
 bool CGeorgesEditApp::loadCfg ()
@@ -962,12 +957,7 @@ void CGeorgesEditApp::gotoURL (LPCTSTR url)
 
 void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd) 
 {
-	char drive[512];
-	char dir[512];
-	char path[512];
-	_splitpath (ExePath.c_str (), drive, dir, NULL, NULL);
-	_makepath (path, drive, dir, "georges_edit", ".html");
-	gotoURL (path);
+	gotoURL(utf8ToTStr(NLMISC::CFile::getPath(ExePath) + "georges_edit.html"));
 }
 
 void CGeorgesEditApp::OnViewRefresh() 
@@ -1478,9 +1468,8 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (6, name.size ()-8);
 
 		// Get the extension
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, NULL, ext);
-		string dfnName = string (ext+1) + ".dfn";
+		std::string ext = NLMISC::CFile::getExtension(name);
+		string dfnName = ext + ".dfn";
 
 		// Get the doc template
 		CMultiDocTemplate *docTemplate = getFormDocTemplate (dfnName.c_str ());
@@ -1541,18 +1530,15 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (8, name.size ()-10);
 
 		// Get the extension
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, NULL, ext);
-		string dfnName = string (ext+1) + ".dfn";
+		std::string ext = NLMISC::CFile::getExtension(name);
+		string dfnName = ext + ".dfn";
 
 		// Create a document
 		CGeorgesEditDocForm *doc = (CGeorgesEditDocForm*)createDocument (dfnName.c_str (), "");
 		if (doc)
 		{
-			char nameFile[MAX_PATH];
-			char extFile[MAX_PATH];
-			_splitpath (name.c_str (), NULL, NULL, nameFile, extFile);
-			doc->addParent ((string (nameFile) + extFile).c_str ());
+			std::string nameFile = NLMISC::CFile::getFilename(name);
+			doc->addParent (nameFile.c_str());
 			doc->updateDocumentStructure ();
 			doc->UpdateAllViews (NULL);
 		}
@@ -1570,11 +1556,7 @@ BOOL CGeorgesEditApp::OnDDECommand(LPTSTR lpszCommand)
 		name = name.substr (10, name.size ()-12);
 
 		// Get the extension
-		char name2[MAX_PATH];
-		char ext[MAX_PATH];
-		_splitpath (name.c_str (), NULL, NULL, name2, ext);
-		string dfnName = name2;
-		dfnName += ext;
+		std::string dfnName = NLMISC::CFile::getFilename(name);
 
 		// Create a document
 		CGeorgesEditDocForm *doc = (CGeorgesEditDocForm*)createDocument (dfnName.c_str (), "");

@@ -188,6 +188,7 @@ void CMultiTexDlg::readValues(bool alternate)
 		}
 	}
 
+	GetDlgItem(IDC_BUMP_FACTOR)->SetWindowText(utf8ToTStr(NLMISC::toString("%.3f", _MTP->getBumpFactor())));
 }
 
 
@@ -205,7 +206,6 @@ void CMultiTexDlg::writeValues(bool alternate)
 {
 	TCHAR u1[10], u2[10], v1[10], v2[10];
 	NLMISC::CVector2f vs1, vs2;
-
 
 	if (!alternate)
 	{

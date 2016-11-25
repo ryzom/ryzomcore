@@ -181,13 +181,9 @@ bool CGeorgesEditDocForm::initDocument (const char *dfnName, bool newElement)
 	}
 
 	// Set file name and title
-	char name[512];
-	char ext[512];
-	_splitpath (dfnName, NULL, NULL, name, ext);
-	string name2 = (const char*)(name);
-	name2 = strlwr (name2);
-	SetPathName ( ("*."+name2).c_str(), FALSE);
-	SetTitle ( ("New "+name2+" form").c_str() );
+	std::string name2 = toLower(NLMISC::CFile::getFilenameWithoutExtension(dfnName));
+	SetPathName (utf8ToTStr("*." + name2), FALSE);
+	SetTitle (utf8ToTStr("New " + name2 + " form"));
 
 	// TMp
 	if (newElement)
@@ -547,9 +543,9 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 		try
 		{
 			// Check form
-			char ext[MAX_PATH];
-			_splitpath (lpszPathName, NULL, NULL, NULL, ext);
-			string extLower = strlwr (string (ext));
+			std::string ext = NLMISC::CFile::getExtension(tStrToUtf8(lpszPathName));
+			string extLower = toLower(ext);
+
 			if (!extLower.empty ())
 			{
 				string dfnName = extLower.substr (1, string::npos)  + ".dfn";
@@ -1090,10 +1086,7 @@ void CGeorgesEditDoc::getDfnFilename (std::string &dfnName)
 
 	// Get the DFN filename
 	CString str = GetPathName ();
-	char extension[512];
-	_splitpath (str, NULL, NULL, NULL, extension);
-	dfnName = extension+1;
-	dfnName += ".dfn";
+	dfnName = NLMISC::CFile::getExtension(tStrToUtf8(str)) + ".dfn";
 }
 
 // ***************************************************************************

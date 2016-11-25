@@ -43,16 +43,16 @@ CMemoryComboBox::~CMemoryComboBox()
 
 // ***************************************************************************
 
-void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const char *registerAdress, int memoryCount)
+void CMemoryComboBox::create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount)
 {
 	// Register a window
 	Id = nId;
-	RegisterAdress = registerAdress;
+	RegisterAdress = tStrToUtf8(registerAdress);
 	MemoryCount = memoryCount;
 	LPCTSTR clas = AfxRegisterWndClass (0);
 	if (clas)
 	{
-		if (Create (clas, "MemoryComboBox", style, rect, parent, nId))
+		if (Create (clas, _T("MemoryComboBox"), style, rect, parent, nId))
 		{
 			// Create the combo box
 			RECT comboRect;
@@ -95,16 +95,16 @@ bool CMemoryComboBox::getMemory (int slot, std::string &ret)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegOpenKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
+	if (RegOpenKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Get the value
 		char strSrc[512];
 		smprintf (strSrc, 512, "%d", slot);
-		char str[512];
-		long size = 512;
-		if (RegQueryValue (hKey, strSrc, str, &size) == ERROR_SUCCESS)
+		TCHAR str[512];
+		long size = 512*sizeof(TCHAR);
+		if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 		{
-			ret = str;
+			ret = tStrToUtf8(str);
 
 			// Close
 			RegCloseKey (hKey);
@@ -124,7 +124,7 @@ void CMemoryComboBox::scrollDown (int start, int end)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegCreateKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Scroll down the list
 		for (int i=end-1; i>start; i--)
@@ -132,14 +132,14 @@ void CMemoryComboBox::scrollDown (int start, int end)
 			// Get the old value
 			char strSrc[512];
 			smprintf (strSrc, 512, "%d", i-1);
-			char str[512];
-			long size = 512;
-			if (RegQueryValue (hKey, strSrc, str, &size) == ERROR_SUCCESS)
+			TCHAR str[512];
+			long size = 512 * sizeof(TCHAR);
+			if (RegQueryValue (hKey, utf8ToTStr(strSrc), str, &size) == ERROR_SUCCESS)
 			{
 				// Set the value
 				char strDst[512];
 				smprintf (strDst, 512, "%d", i);
-				RegSetValue (hKey, strDst, REG_SZ, str, size);
+				RegSetValue (hKey, utf8ToTStr(strDst), REG_SZ, str, size);
 			} 
 		}
 
@@ -154,10 +154,10 @@ void CMemoryComboBox::writeStringInRegistry (const std::string &str)
 {
 	// Open the key
 	HKEY hKey;
-	if (RegCreateKey (HKEY_CURRENT_USER, RegisterAdress.c_str (), &hKey) == ERROR_SUCCESS)
+	if (RegCreateKey (HKEY_CURRENT_USER, utf8ToTStr(RegisterAdress), &hKey) == ERROR_SUCCESS)
 	{
 		// Set the value
-		RegSetValue (hKey, "0", REG_SZ, str.c_str (), str.size ());
+		RegSetValue (hKey, _T("0"), REG_SZ, utf8ToTStr(str), str.size ());
 
 		// Close
 		RegCloseKey (hKey);
@@ -364,7 +364,7 @@ void CMemoryComboBox::pushString ()
 {
 	CString str;
 	GetWindowText (str);
-	pushString((LPCTSTR) str);
+	pushString(tStrToUtf8(str));
 }
 
 
@@ -428,7 +428,7 @@ void CMemoryComboBox::pushString (const std::string &str)
 			if (i == (int)(itemCount+Commands.size()+ StaticStrings.size()))
 			{
 				// Insert the sting
-				_ComboBox.InsertString (Commands.size()+ StaticStrings.size(), str.c_str());
+				_ComboBox.InsertString (Commands.size()+ StaticStrings.size(), utf8ToTStr(str));
 			}
 		}
 	}
@@ -449,7 +449,7 @@ void CMemoryComboBox::refreshStrings ()
 	int count = Commands.size();
 	for (i=0; i<StaticStrings.size(); i++)
 	{
-		_ComboBox.InsertString (count, StaticStrings[i].c_str ());
+		_ComboBox.InsertString (count, utf8ToTStr(StaticStrings[i]));
 		count++;
 	}
 
@@ -458,7 +458,7 @@ void CMemoryComboBox::refreshStrings ()
 		std::string ret;
 		if (getMemory (i, ret))
 		{
-			_ComboBox.InsertString (count, ret.c_str ());
+			_ComboBox.InsertString (count, utf8ToTStr(ret));
 			count++;
 		}
 	}
@@ -497,7 +497,7 @@ void CMemoryComboBox::clearCommand ()
 
 void CMemoryComboBox::addLabelCommands (uint i)
 {
-	_ComboBox.InsertString (i, Commands[i].Label.c_str ());
+	_ComboBox.InsertString (i, utf8ToTStr(Commands[i].Label));
 }
 
 // ***************************************************************************
@@ -582,12 +582,12 @@ LRESULT CMemoryComboBox::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 			int curSel = _ComboBox.GetCurSel ();
 			if ((curSel == -1) || ((uint)curSel<Commands.size()))
 			{
-				_ComboBox.GetWindowText ((char*)lParam, wParam);
+				_ComboBox.GetWindowText ((TCHAR*)lParam, wParam);
 				return _ComboBox.GetWindowTextLength ();
 			}
 			else
 			{
-				_ComboBox.GetLBText (curSel, (char*)lParam);
+				_ComboBox.GetLBText (curSel, (TCHAR*)lParam);
 				return _ComboBox.GetLBTextLen (curSel);
 			}
 		}
@@ -684,11 +684,11 @@ BOOL CMemoryComboBox::PreTranslateMessage(MSG* pMsg)
 					{
 						CString str;
 						_ComboBox.GetWindowText (str);
-						string str2 = str;
+						string str2 = tStrToUtf8(str);
 						if ((!str2.empty ()) && (str2.find ('.') == string::npos))
 						{
 							str2 += "." + _Extension;
-							_ComboBox.SetWindowText (str2.c_str ());
+							_ComboBox.SetWindowText (utf8ToTStr(str2));
 						}
 					}
 
@@ -739,7 +739,7 @@ CString CMemoryComboBox::getCurrString() const
 // ***************************************************************************
 void CMemoryComboBox::setCurSel(const std::string &value)
 {
-	int index = _ComboBox.FindStringExact(0, value.c_str());
+	int index = _ComboBox.FindStringExact(0, utf8ToTStr(value));
 	if (index != CB_ERR)
 	{
 		_ComboBox.SetCurSel(index);

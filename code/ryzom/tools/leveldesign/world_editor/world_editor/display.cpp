@@ -3400,7 +3400,7 @@ void CDisplay::updateCursor ()
 
 		// Moved with middle click ?
 		case DragView:
-			cursor = theApp.LoadCursor (MAKEINTRESOURCE(IDC_HAND));
+			cursor = theApp.LoadCursor (MAKEINTRESOURCE(IDC_HAND1));
 			break;
 
 		// Moved with left click ?

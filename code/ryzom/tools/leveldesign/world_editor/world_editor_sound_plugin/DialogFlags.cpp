@@ -225,19 +225,20 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 	c = _SbList.GetItemCount();
 	for (i=0; i<SampleBanks.size(); ++i)
 	{
+		std::string temp = toString("%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
+
 		if (i < c)
 		{
 			// update the item
-			char temp[1024];
-			sprintf(temp, "%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
+			TCHAR temp2[1024];
 
-			char temp2[1024];
 			_SbList.GetItemText(i, 0, temp2, 1024);
-			if (strcmp(SampleBanks[i].first.c_str(), temp2) != 0)
-				_SbList.SetItemText(i, 0, SampleBanks[i].first.c_str());
+			if (_tcscmp(utf8ToTStr(SampleBanks[i].first), temp2) != 0)
+				_SbList.SetItemText(i, 0, utf8ToTStr(SampleBanks[i].first));
+
 			_SbList.GetItemText(i, 1, temp2, 1024);
-			if (strcmp(temp, temp2) != 0)
-				_SbList.SetItemText(i, 1, temp);
+			if (_tcscmp(utf8ToTStr(temp), temp2) != 0)
+				_SbList.SetItemText(i, 1, utf8ToTStr(temp));
 		}
 		else
 		{

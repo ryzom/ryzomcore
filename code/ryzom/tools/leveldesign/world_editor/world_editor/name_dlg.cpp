@@ -248,8 +248,8 @@ void CNameDlg::OnBtnAssign()
 
 	// get strings
 	ucstring id;
-	std::string gn = m_assignGn;
-	std::string ig = m_assignIg;
+	std::string gn = tStrToUtf8(m_assignGn);
+	std::string ig = tStrToUtf8(m_assignIg);
 
 	for (uint i=0 ; i<sel.size() ; i++)
 	{
@@ -265,7 +265,7 @@ void CNameDlg::OnBtnAssign()
 			uint n = m_idList.GetTextLen(i);
 			m_idList.GetText(i, str.GetBuffer(n));
 			str.ReleaseBuffer();
-			id = str;
+			id.fromUtf8(tStrToUtf8(str));
 		}
 
 		// assign name to selected id

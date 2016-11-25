@@ -84,21 +84,9 @@ bool CEditMorphMeshDlg::getShapeNameFromDlg(std::string &name)
 	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
-		// Add to the path
-		/*
-		char drive[256];
-		char dir[256];
-		char path[256];
-		char fname[256];
-		char ext[256];
-		*/
-
-
 		// Add search path for the texture
 		/*
-		_splitpath (fd.GetPathName(), drive, dir, fname, ext);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName()));
 		*/
 
 		name = tStrToUtf8(fd.GetPathName());

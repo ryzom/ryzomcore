@@ -317,7 +317,7 @@ inline void CEditableRangeT<float>::value2CString(float value, CString &dest)
 
 inline const TCHAR *CEditableRangeT<float>::string2value(const CString &value, float &result)
 {			
-	if (sscanf((LPCTSTR) value, "%f", &result) == 1)
+	if (NLMISC::fromString(tStrToUtf8(value), result))
 	{			
 		return NULL;
 	}
@@ -343,8 +343,8 @@ inline void CEditableRangeT<uint32>::value2CString(uint32 value, CString &dest)
 
 inline const TCHAR *CEditableRangeT<uint32>::string2value(const CString &value, uint32 &result)
 {			
-	uint32 tmp;
-	if (sscanf((LPCTSTR) value, "%d", &tmp) == 1)
+	sint32 tmp;
+	if (NLMISC::fromString(tStrToUtf8(value), tmp))
 	{
 		if (strchr((LPCTSTR) value, '-'))
 		{
@@ -379,8 +379,8 @@ inline void CEditableRangeT<sint32>::value2CString(sint32 value, CString &dest)
 
 inline const TCHAR *CEditableRangeT<sint32>::string2value(const CString &value, sint32 &result)
 {			
-	uint32 tmp;
-	if (sscanf((LPCTSTR) value, "%d", &tmp) == 1)
+	sint32 tmp;
+	if (NLMISC::fromString(tStrToUtf8(value), tmp))
 	{				
 		result = tmp;
 		return NULL;				

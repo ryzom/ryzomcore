@@ -226,20 +226,21 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	if (index < 0) return;
 
 	const CProfile &profile = m_model->getProfiles()[index];
+	const CServer &server = CConfigFile::getInstance()->getServer(profile.server);
 
 	QString executable = profile.executable;
 
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable += CConfigFile::getInstance()->getServer(profile.server).getClientFullPath();
+		executable = server.getClientFullPath();
 	}
 
 	// file doesn't exist
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	// convert output to string
-	QString versionString = getVersionFromExecutable(executable);
+	QString versionString = getVersionFromExecutable(executable, server.getDirectory());
 
 	if (!versionString.isEmpty())
 	{

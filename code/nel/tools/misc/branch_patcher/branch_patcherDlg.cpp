@@ -669,7 +669,7 @@ void CBranch_patcherDlg::OnButtonExtractTokens()
 		m_SrcDirLabel = "Enter Token 1";
 		m_TargetDirLabel = "Enter Token 2";
 		m_Filename = "The tokens above were extracted from the directories.";
-		((CButton*)GetDlgItem( IDC_ButtonExtractTokens ))->SetWindowText( "Store Tokens" );
+		((CButton*)GetDlgItem( IDC_ButtonExtractTokens ))->SetWindowText( _T("Store Tokens") );
 		GetDlgItem( IDC_TopText )->ShowWindow( SW_HIDE );
 		GetDlgItem( IDC_ButtonClearTokens )->EnableWindow( FALSE );
 		GetDlgItem( IDC_ButtonPatch )->ShowWindow( SW_HIDE );

@@ -25,7 +25,8 @@
 CConfigFile *CConfigFile::s_instance = NULL;
 
 CConfigFile::CConfigFile(QObject *parent):QObject(parent), m_version(-1),
-	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_installerCopied(false), m_use64BitsClient(false), m_shouldUninstallOldClient(true)
+	m_defaultServerIndex(0), m_defaultProfileIndex(0), m_installerCopied(false), m_use64BitsClient(false),
+	m_shouldUninstallOldClient(true), m_ignoreFreeDiskSpaceChecks(false)
 {
 	s_instance = this;
 
@@ -82,6 +83,7 @@ bool CConfigFile::load(const QString &filename)
 	m_installationDirectory = settings.value("installation_directory").toString();
 	m_use64BitsClient = settings.value("use_64bits_client", true).toBool();
 	m_shouldUninstallOldClient = settings.value("should_uninstall_old_client", true).toBool();
+	m_ignoreFreeDiskSpaceChecks = settings.value("ignore_free_disk_space_checks", false).toBool();
 
 	// fix problems when src directory doesn't exist anymore
 	if (!m_srcDirectory.isEmpty() && QFile::exists(m_srcDirectory)) m_srcDirectory.clear();
@@ -175,6 +177,7 @@ bool CConfigFile::save() const
 	settings.setValue("installation_directory", m_installationDirectory);
 	settings.setValue("use_64bits_client", m_use64BitsClient);
 	settings.setValue("should_uninstall_old_client", m_shouldUninstallOldClient);
+	settings.setValue("ignore_free_disk_space_checks", m_ignoreFreeDiskSpaceChecks);
 
 #if defined(Q_OS_WIN)
 	settings.setValue("installer_filename_windows", m_installerFilename);
@@ -441,6 +444,16 @@ void CConfigFile::setShouldUninstallOldClient(bool on)
 	m_shouldUninstallOldClient = on;
 }
 
+bool CConfigFile::ignoreFreeDiskSpaceChecks() const
+{
+	return m_ignoreFreeDiskSpaceChecks;
+}
+
+void CConfigFile::setIgnoreFreeDiskSpaceChecks(bool on)
+{
+	m_ignoreFreeDiskSpaceChecks = on;
+}
+
 bool CConfigFile::uninstallingOldClient() const
 {
 	return QFile::exists(getInstallationDirectory() + "/ryzom_installer_uninstalling_old_client");
@@ -693,7 +706,7 @@ int CConfigFile::compareInstallersVersion() const
 	// if installer not found in installation directory
 	if (!QFile::exists(installerDst)) return 1;
 
-	QString installedVersion = getVersionFromExecutable(installerDst);
+	QString installedVersion = getVersionFromExecutable(installerDst, getInstallationDirectory());
 
 	// if unable to get version, copy it
 	if (installedVersion.isEmpty()) return 1;

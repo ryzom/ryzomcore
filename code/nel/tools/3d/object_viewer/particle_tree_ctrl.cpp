@@ -852,8 +852,8 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			nt = new CNodeType(nt->Loc,  objIndex);
 			_NodeTypes.push_back(nt);
 			// insert the element in the tree
-			HTREEITEM root = InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT,  "instance",  PSIconLocatedInstance,  PSIconLocatedInstance,  0,  0,  (LPARAM) nt,  GetSelectedItem(),  TVI_LAST);
-			SetItemData(root, (DWORD) nt);
+			HTREEITEM root = InsertItem(TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_PARAM | TVIF_TEXT, _T("instance"),  PSIconLocatedInstance,  PSIconLocatedInstance,  0,  0,  (LPARAM) nt,  GetSelectedItem(),  TVI_LAST);
+			SetItemData(root, (DWORD_PTR) nt);
 			Invalidate();
 		}
 		break;

@@ -417,9 +417,8 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, "Load error", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
+		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -438,14 +437,14 @@ int TileList::setDisplacement (int tile, const std::string& name)
 			theListDisplacement[tile].loaded=0;
 
 			if (!_LoadBitmap(tileBank2.getAbsPath() + troncated, &theListDisplacement[tile].BmpInfo, theListDisplacement[tile].Bits, NULL, 0))
-				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), "Can't load file", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
 			else
 			{
 				// Check the size
 				if ((theListDisplacement[tile].BmpInfo.bmiHeader.biWidth!=32)||(-theListDisplacement[tile].BmpInfo.bmiHeader.biHeight!=32))
 				{
 					// Error message
-					MessageBox (NULL, "Invalid size: displacement map must be 32x32 8 bits.", troncated.c_str(),
+					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), troncated.c_str(),
 						MB_OK|MB_ICONEXCLAMATION);
 
 					// Free the bitmap
@@ -1284,11 +1283,10 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 			&*bits->begin(),bmpinf,DIB_RGB_COLORS,SRCCOPY);
 	}
 			
-	char temp[100];
-	char Name[256]; Name[0] = 0;
+	std::string Name;
 	if (InfoTexte==2)
 	{
-		_splitpath(pth.c_str(),temp,temp,Name,temp);		
+		Name = NLMISC::CFile::getFilenameWithoutExtension(pth);
 	}
 	else if (InfoTexte==3)
 	{
@@ -1296,12 +1294,20 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 	}
 	else if (InfoTexte==1)
 	{
-		sprintf(Name,"%d",i->id);
+		Name = NLMISC::toString("%d", i->id);
 	}
 	rect_txt.top = pt.y + sizetile_y + spacing_tile_text;
 	rect_txt.bottom += rect_txt.top + sizetext_y;
 	rect_txt.left -= spacing_x;
-	pDC->DrawText(Name,(int)strlen(Name),&rect_txt,DT_CENTER | DT_SINGLELINE);
+
+#ifdef _UNICODE
+	ucstring tmp;
+	tmp.fromUtf8(Name);
+#else
+	std::string tmp = Name;
+#endif
+
+	pDC->DrawText((LPCTSTR)tmp.c_str(), (int)tmp.length(), &rect_txt,DT_CENTER | DT_SINGLELINE);
 
 	// Restore the device context
 	pDC->SetBkColor( clrBk );
@@ -1538,15 +1544,12 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					CString str = load.GetNextPathName(p);
 
-					char sDrive[256];
-					char sPath[256];
-					_splitpath (str, sDrive, sPath, NULL, NULL);
-					LastPath=string (sDrive)+string (sPath);
+					LastPath = NLMISC::CFile::getPath(tStrToUtf8(str));
 
-					if (str!=CString(""))
+					if (!str.IsEmpty())
 					{
 						int index=0;
-						const char *pathname = (LPCTSTR)str;
+						std::string pathname = tStrToUtf8(str);
 
 						// Add mode, to the end of the list
 						if (id==ID_MENU_ADD)

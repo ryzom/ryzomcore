@@ -242,7 +242,7 @@ void CTileSetCont::build (CTileBank& bank, uint tileSet)
 			if (!dmwarn)
 			{
 				dmwarn = true;
-				MessageBox(NULL, "Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank.", "NeL Patch Paint", MB_OK | MB_ICONWARNING);
+				MessageBox(NULL, _T("Tile bank not loaded, or bad tile bank. Missing a displacement tile. Use the tile bank utility to load the correct tilebank."), _T("NeL Patch Paint"), MB_OK | MB_ICONWARNING);
 			}
 			continue; // with next displace
 		}
@@ -409,24 +409,17 @@ void LoadKeyCfg ()
 	HMODULE hModule = hInstance;
 	if (hModule)
 	{
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		if (res)
 		{
-			// split path
-			char drive[256];
-			char dir[256];
-			_splitpath (sModulePath, drive, dir, NULL, NULL);
-
 			// Make a new path
-			char cgfPath[256];
-			_makepath (cgfPath, drive, dir, "keys", ".cfg");
-
+			std::string cfgPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 
 			// Load and parse "test.txt" file
-			cf.load (cgfPath);
+			cf.load (cfgPath);
 			
 			// For each keys
 			for (uint key=0; key<KeyCounter; key++)
@@ -458,23 +451,18 @@ void LoadVarCfg ()
 	HMODULE hModule = hInstance;
 	if (hModule)
 	{
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		if (res)
 		{
-			// split path
-			char drive[256];
-			char dir[256];
-			_splitpath (sModulePath, drive, dir, NULL, NULL);
-
 			// Make a new path
 			char cgfPath[256];
-			_makepath (cgfPath, drive, dir, "keys", ".cfg");
+			std::string cfgPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath)) + "keys.cfg";
 	
 			CConfigFile cf;
 
 			// Load and parse "test.txt" file
-			cf.load (cgfPath);
+			cf.load (cfgPath);
 			
 			// go
 			try

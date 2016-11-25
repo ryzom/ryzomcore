@@ -1387,13 +1387,10 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	std::string path = CFile::getPath(filename);
 
 #ifdef NL_OS_UNIX
-	struct stat stst;
 	struct statfs stfs;
+	if (::statfs(path.c_str(), &stfs) != 0) return 0;
 
-	if (::stat(path.c_str(), &stst) == -1) return 0;
-	if (::statfs(path.c_str(), &stfs) == -1) return 0;
-
-	return (uint64)(stfs.f_bavail * stst.st_blksize);
+	return (uint64)(stfs.f_bavail * stfs.f_bsize);
 #else
 	ULARGE_INTEGER freeSpace = {0};
 	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);

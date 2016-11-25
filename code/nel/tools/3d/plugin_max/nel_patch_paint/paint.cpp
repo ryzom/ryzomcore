@@ -3992,7 +3992,7 @@ void EPM_PaintCMode::DoPaint ()
 				}
 				catch (const EStream& stream)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, utf8ToTStr(stream.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -4058,20 +4058,18 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
+
 			try
 			{
 				// Load the config file
-				config.readConfigFile (sModulePath, false);
+				config.readConfigFile (modulePath, false);
 				// ok
 				return true;
 			}
