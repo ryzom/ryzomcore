@@ -104,8 +104,8 @@ public:
 			// SchemeWrapper[k].S reference the atriobute maker being edited
 			if 	(_EditedScheme->supportOp( (NL3D::CPSBinOp::BinOp) k))
 			{
-				sint index = m_BinOp.AddString(ops[k]) ;
-				m_BinOp.SetItemData(index, k) ;
+				sint index = m_BinOp.AddString(ops[k]);
+				m_BinOp.SetItemData(index, k);
 				if ((uint) _EditedScheme->getOp() == k)
 				{
 					m_BinOp.SetCurSel(k) ;

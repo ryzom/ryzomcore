@@ -2372,11 +2372,13 @@ INT_PTR CALLBACK MiscDialogCallback (
 							currentParam->RemanenceShiftingTexture = SendMessage (GetDlgItem (hwndDlg, IDC_REMANENCE_SHIFTING_TEXTURE), BM_GETCHECK, 0, 0);
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SLICE_NUMBER), tmp, 512);
+
 							uint rsn;
 							if (NLMISC::fromString(tStrToUtf8(tmp), rsn))
 							{
 								currentParam->RemanenceSliceNumber = rsn;
 							}
+
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SAMPLING_PERIOD), tmp, 512);
 							toFloatMax(tmp, currentParam->RemanenceSamplingPeriod);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_ROLLUP_RATIO), tmp, 512);

@@ -111,8 +111,10 @@ void CMeshDlg::OnBrowseShape()
 		{
 			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
 		}		
+
 		updateMeshErrorString();
 	}
+
 	UpdateData(FALSE);
 }
 

@@ -220,6 +220,7 @@ void CParticleSystemEdit::updateDieOnEventParams()
 	{
 		ew = FALSE;
 	}
+
 	GetDlgItem(IDC_APPLY_AFTER_DELAY)->EnableWindow(ew);
 	
 	CString out;
@@ -232,6 +233,7 @@ void CParticleSystemEdit::updateDieOnEventParams()
 	{
 		out = _T("???");
 	}
+
 	GetDlgItem(IDC_APPLY_AFTER_DELAY)->SetWindowText(out);
 	((CButton *) GetDlgItem(IDC_AUTO_DELAY))->SetCheck(autoDelay ? 1 : 0);
 }

@@ -35,8 +35,8 @@ enum { po2rpo_params };
 //TODO: Add enums for various parameters
 enum {	pb_spin,};
 
-static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2RPODesc, 
-	P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF, 
+static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2RPODesc,
+	P_AUTO_CONSTRUCT + P_AUTO_UI, PBLOCK_REF,
 	//rollout
 	IDD_PANEL, IDS_PARAMS, 0, 0, NULL,
 	// params
@@ -67,11 +67,11 @@ PO2RPO::~PO2RPO()
 
 Interval PO2RPO::LocalValidity(TimeValue t)
 {
-	// if being edited, return NEVER forces a cache to be built 
+	// if being edited, return NEVER forces a cache to be built
 	// after previous modifier.
 	if (TestAFlag(A_MOD_BEING_EDITED))
 	{
-		return NEVER;  
+		return NEVER;
 	}
 	//TODO: Return the validity interval of the modifier
 	return NEVER;
@@ -81,7 +81,7 @@ Interval PO2RPO::LocalValidity(TimeValue t)
 
 RefTargetHandle PO2RPO::Clone(RemapDir& remap)
 {
-	PO2RPO* newmod = new PO2RPO();	
+	PO2RPO* newmod = new PO2RPO();
 	//TODO: Add the cloning code here
 	newmod->ReplaceReference(0,pblock->Clone(remap));
 	return(newmod);
@@ -90,7 +90,7 @@ RefTargetHandle PO2RPO::Clone(RemapDir& remap)
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 static int done=0;
-void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *node) 
+void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *node)
 {
 /*
 	if (!done)
@@ -121,12 +121,12 @@ void PO2RPO::ModifyObject(TimeValue t, ModContext &mc, ObjectState * os, INode *
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 extern HINSTANCE hInstance;
-INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
+INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) 
+	switch (message)
 	{
 		// -----
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 		{
 			// Get the module path
 			HMODULE hModule = hInstance;
@@ -214,7 +214,7 @@ void PO2RPO::BeginEditParams( IObjParam *ip, ULONG flags,Animatable *prev )
 void PO2RPO::EndEditParams( IObjParam *ip, ULONG flags,Animatable *next)
 {
 	//PO2RPODesc.EndEditParams(ip, this, flags, next);
-	ip->DeleteRollupPage(hRollup);		
+	ip->DeleteRollupPage(hRollup);
 	this->ip = NULL;
 }
 
@@ -230,21 +230,21 @@ RefResult PO2RPO::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget,P
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From Object
-BOOL PO2RPO::HasUVW() 
-{ 
+BOOL PO2RPO::HasUVW()
+{
 	//TODO: Return whether the object has UVW coordinates or not
-	return TRUE; 
+	return TRUE;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void PO2RPO::SetGenUVW(BOOL sw) 
-{  
-	if (sw==HasUVW()) 
+void PO2RPO::SetGenUVW(BOOL sw)
+{
+	if (sw==HasUVW())
 	{
 		return;
 	}
-	//TODO: Set the plugin internal value to sw				
+	//TODO: Set the plugin internal value to sw
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
