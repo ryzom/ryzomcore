@@ -18,6 +18,7 @@
 #include "operation.h"
 #include "downloader.h"
 #include "utils.h"
+#include "configfile.h"
 
 #include "nel/misc/system_info.h"
 #include "nel/misc/path.h"
@@ -179,7 +180,7 @@ void CDownloader::getFileHead()
 
 void CDownloader::downloadFile()
 {
-	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_fullPath.toUtf8().constData());
+	qint64 freeSpace = CConfigFile::getInstance()->ignoreFreeDiskSpaceChecks() ? 0:NLMISC::CSystemInfo::availableHDSpace(m_fullPath.toUtf8().constData());
 
 	if (freeSpace == 0)
 	{

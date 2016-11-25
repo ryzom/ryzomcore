@@ -113,6 +113,9 @@ public:
 	bool shouldUninstallOldClient() const;
 	void setShouldUninstallOldClient(bool on);
 
+	bool ignoreFreeDiskSpaceChecks() const;
+	void setIgnoreFreeDiskSpaceChecks(bool on);
+
 	bool uninstallingOldClient() const;
 	void setUninstallingOldClient(bool on) const;
 
@@ -158,6 +161,7 @@ private:
 	QString m_srcDirectory;
 	bool m_use64BitsClient;
 	bool m_shouldUninstallOldClient;
+	bool m_ignoreFreeDiskSpaceChecks;
 	QString m_installerFilename;
 	QString m_language;
 
