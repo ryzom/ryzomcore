@@ -199,6 +199,7 @@ struct CClientConfig
 	uint			FreeLookAcceleration;
 	float			FreeLookSmoothingPeriod;
 	bool			FreeLookInverted;
+	bool			FreeLookTablet;
 	// true if camera is centered when user casts a spell
 	bool			AutomaticCamera;
 	bool			DblClickMode;
