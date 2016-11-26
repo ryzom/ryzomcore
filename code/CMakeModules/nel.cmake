@@ -926,7 +926,12 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # hardening
-    SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
+    SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-z,relro -Wl,-z,now")
+    
+    IF(NOT APPLE)
+      # hardening
+      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions")
+    ENDIF()
 
     IF(WITH_SYMBOLS)
       SET(NL_RELEASE_CFLAGS "${NL_RELEASE_CFLAGS} -g")
