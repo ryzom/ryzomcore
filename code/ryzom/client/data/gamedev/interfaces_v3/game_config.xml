@@ -2689,6 +2689,13 @@
                   posref="BL TL"
                   x="0"
                   y="-2" />
+        <instance template="tgcw_checkbox"
+                  id="tablet"
+                  text="uiMouseTablet"
+                  posparent="dbl"
+                  posref="BL TL"
+                  x="0"
+                  y="-2" />
         <view style="sgc_title2"
               type="text"
               id="inter"
@@ -3832,6 +3839,11 @@
                type="cfg"
                widget="boolbut"
                link="DblClickMode"
+               realtime="true" />
+        <param ui="mouse:tablet:c"
+               type="cfg"
+               widget="boolbut"
+               link="FreeLookTablet"
                realtime="true" />
         <param ui="mouse:dcspeed:c"
                type="db"
