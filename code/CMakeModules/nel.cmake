@@ -925,12 +925,9 @@ MACRO(NL_SETUP_BUILD)
       SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")
     ENDIF()
 
-    # hardening
-    SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-z,relro -Wl,-z,now")
-    
     IF(NOT APPLE)
       # hardening
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions")
+      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
     ENDIF()
 
     IF(WITH_SYMBOLS)
