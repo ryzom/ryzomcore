@@ -1120,8 +1120,6 @@ void	CPSConstraintMesh::getShapesNames(std::string *shapesNames) const
 #endif
 }
 
-
-
 //====================================================================================
 void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
 {
@@ -1131,7 +1129,6 @@ void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
 	_Touched = 1;
 	_ValidBuild = 0;
 }
-
 
 //====================================================================================
 const std::string          &CPSConstraintMesh::getShape(uint index) const

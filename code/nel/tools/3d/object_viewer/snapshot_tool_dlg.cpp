@@ -114,6 +114,7 @@ void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString 
 	DWORD type;
 	DWORD size;
 	LONG result = RegQueryValueEx(hKey, name, NULL, &type, NULL, &size);
+
 	if (type != REG_SZ || result != ERROR_SUCCESS || size == 0)
 	{
 		dest = defaultStr;
@@ -144,18 +145,22 @@ template <class T, class U> void integralTypeFromRegistry(HKEY hKey, const TCHAR
 	DWORD type;
 	DWORD size;
 	LONG result = RegQueryValueEx(hKey, name, NULL, &type, NULL, &size);
+
 	if (type != REG_DWORD || result != ERROR_SUCCESS || size == 0)
 	{
 		dest = (T) defaultValue;
 		return;
 	}		
+
 	DWORD value;
 	result = RegQueryValueEx(hKey, name, NULL, &type, LPBYTE(&value), &size);
+
 	if (result != ERROR_SUCCESS)
 	{
 		dest = defaultValue;
 		return;
 	}
+
 	dest = (T) value;
 }
 
@@ -175,6 +180,7 @@ void CSnapshotToolDlg::fromRegistry()
 	NLMISC::splitString(tStrToUtf8(filters), ",", filterList);
 
 	m_Filters.ResetContent();
+
 	for (uint k = 0; k < filterList.size(); ++k)
 	{
 		m_Filters.AddString(utf8ToTStr(filterList[k]));
@@ -430,7 +436,6 @@ void CSnapshotToolDlg::OnGo()
 			return;
 		}
 	}
-
 
 	// make sure that the screen can contains the window client area
 	RECT desktopSize;

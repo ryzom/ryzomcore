@@ -1296,6 +1296,7 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 	{
 		Name = NLMISC::toString("%d", i->id);
 	}
+
 	rect_txt.top = pt.y + sizetile_y + spacing_tile_text;
 	rect_txt.bottom += rect_txt.top + sizetext_y;
 	rect_txt.left -= spacing_x;

@@ -4,42 +4,46 @@
 <context>
     <name>CDownloader</name>
     <message>
-        <location filename="../src/downloader.cpp" line="156"/>
+        <location filename="../src/downloader.cpp" line="158"/>
         <source>File is larger (%1B) than expected (%2B)</source>
         <translation>Размер файла больше (%1Б) чем ожидалось (%2Б)</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="186"/>
+        <location filename="../src/downloader.cpp" line="190"/>
+        <source>Error &apos;%1&apos; occurred when trying to check free disk space on %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/downloader.cpp" line="198"/>
         <source>You only have %1 bytes left on the device, but %2 bytes are needed.</source>
         <translation>На диске осталось всего %1 байт, в то время как требуется %2 байт.</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="192"/>
+        <location filename="../src/downloader.cpp" line="204"/>
         <source>Unable to write file</source>
         <translation>Невозможно записать файл</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="227"/>
+        <location filename="../src/downloader.cpp" line="239"/>
         <source>Timeout</source>
         <translation>Тайм-аут</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="264"/>
+        <location filename="../src/downloader.cpp" line="287"/>
         <source>Redirection URL is not defined</source>
         <translation>URL перенаправления не определен</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="329"/>
         <source>File is not available, please retry later (status code: %1)</source>
-        <translation>Файл недоступен, пожалуйста, попробуйте позднее (код состояния: %1)</translation>
+        <translation type="vanished">Файл недоступен, пожалуйста, попробуйте позднее (код состояния: %1)</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="336"/>
+        <location filename="../src/downloader.cpp" line="357"/>
         <source>Incorrect status code: %1</source>
         <translation>Некорректный код состояния: %1</translation>
     </message>
     <message>
-        <location filename="../src/downloader.cpp" line="382"/>
+        <location filename="../src/downloader.cpp" line="411"/>
         <source>HTTP error: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -59,7 +63,7 @@
         <translation type="vanished">Интернет (%1 для загрузки)</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="80"/>
+        <location filename="../src/installdialog.cpp" line="81"/>
         <source>Files will be installed to (requires %1):</source>
         <translation>Файлы будут установлены в (требуется %1):</translation>
     </message>
@@ -76,7 +80,7 @@
         <translation type="vanished">Невозможно найти Ryzom в выбранной директории. Пожалуйста, выберите другую директорию или отмену.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="115"/>
+        <location filename="../src/installdialog.cpp" line="116"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Пожалуйста, выберите директорию для установки Ryzom</translation>
     </message>
@@ -89,32 +93,32 @@
         <translation type="vanished">Не определено</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="138"/>
+        <location filename="../src/installdialog.cpp" line="148"/>
         <source>Not enough free disk space</source>
         <translation>Недостаточно свободного места</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="138"/>
+        <location filename="../src/installdialog.cpp" line="148"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Недостаточно свободного места на выбранном диске, пожалуйста освободите место на диске или выберите директорию на другом диске.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="157"/>
+        <location filename="../src/installdialog.cpp" line="167"/>
         <source>Unable to write in directory</source>
         <translation>Невозможно осуществить запись в директорию</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="157"/>
+        <location filename="../src/installdialog.cpp" line="167"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
         <translation>У вашего текущего пользоввателя нет права записи в эту директорию, пожалуйста, выберите другую директорию.</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="166"/>
+        <location filename="../src/installdialog.cpp" line="176"/>
         <source>Directory not empty</source>
         <translation>Директория не является пустой</translation>
     </message>
     <message>
-        <location filename="../src/installdialog.cpp" line="166"/>
+        <location filename="../src/installdialog.cpp" line="176"/>
         <source>This directory is not empty, please choose another one.</source>
         <translation>Эта директория не является пустой, пожалуйста, выберите другую.</translation>
     </message>
@@ -122,27 +126,27 @@
 <context>
     <name>CMainWindow</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="270"/>
+        <location filename="../src/mainwindow.cpp" line="287"/>
         <source>About %1</source>
         <translation>О %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="272"/>
+        <location filename="../src/mainwindow.cpp" line="289"/>
         <source>Program to install, download and manage Ryzom profiles.</source>
         <translation>Программа для установки, загрузки и управления профилями Ryzom.</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="274"/>
+        <location filename="../src/mainwindow.cpp" line="291"/>
         <source>Author: %1</source>
         <translation>Автор: %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="275"/>
+        <location filename="../src/mainwindow.cpp" line="292"/>
         <source>Copyright: %1</source>
         <translation>Копирайт: %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="276"/>
+        <location filename="../src/mainwindow.cpp" line="293"/>
         <source>Support: %1</source>
         <translation>Поддержка: %1</translation>
     </message>
@@ -150,42 +154,42 @@
 <context>
     <name>CMigrateDialog</name>
     <message>
-        <location filename="../src/migratedialog.cpp" line="94"/>
+        <location filename="../src/migratedialog.cpp" line="72"/>
         <source>Files will be installed to (requires %1):</source>
         <translation>Файлы будут установлены в (требуется %1):</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="131"/>
+        <location filename="../src/migratedialog.cpp" line="109"/>
         <source>Please choose directory to install Ryzom in</source>
         <translation>Пожалуйста, выберете директорию для установки Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="153"/>
+        <location filename="../src/migratedialog.cpp" line="139"/>
         <source>Not enough free disk space</source>
         <translation>Недостаточно свободного места</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="153"/>
+        <location filename="../src/migratedialog.cpp" line="139"/>
         <source>You don&apos;t have enough free space on this disk, please make more space or choose a directory on another disk.</source>
         <translation>Недостаточно свободного места на выбранном диске, пожалуйста освободите место на диске или выберите директорию на другом диске.</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="172"/>
+        <location filename="../src/migratedialog.cpp" line="158"/>
         <source>Unable to write in directory</source>
         <translation>Невозможно осуществить запись в директорию</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="172"/>
+        <location filename="../src/migratedialog.cpp" line="158"/>
         <source>You don&apos;t have the permission to write in this directory with your current user account, please choose another directory.</source>
         <translation>У вашего текущего пользоввателя нет права записи в эту директорию, пожалуйста, выберите другую директорию.</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="181"/>
+        <location filename="../src/migratedialog.cpp" line="167"/>
         <source>Directory not empty</source>
         <translation>Директория не является пустой</translation>
     </message>
     <message>
-        <location filename="../src/migratedialog.cpp" line="181"/>
+        <location filename="../src/migratedialog.cpp" line="167"/>
         <source>This directory is not empty, please choose another one.</source>
         <translation>Эта директория не является пустой, пожалуйста, выберите другую.</translation>
     </message>
@@ -193,108 +197,108 @@
 <context>
     <name>COperationDialog</name>
     <message>
-        <location filename="../src/operationdialog.cpp" line="275"/>
+        <location filename="../src/operationdialog.cpp" line="276"/>
         <source>Updating profiles...</source>
         <translation>Обновление профилей...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="428"/>
+        <location filename="../src/operationdialog.cpp" line="429"/>
         <source>Confirmation</source>
         <translation>Подтверждение</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="428"/>
+        <location filename="../src/operationdialog.cpp" line="429"/>
         <source>Warning, this server doesn&apos;t support resume! If you stop download now, you won&apos;t be able to resume it later.
 Are you sure to abort download?</source>
         <translation>Внимание, данный сервер не поддерживает возобновление загрузки! Если вы сейчас прервете загрузку, вы не сможете возобновить ее позднее. Вы уверены, что хотите прервать загрузку?</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="453"/>
+        <location filename="../src/operationdialog.cpp" line="454"/>
         <source>%p% (%v/%m KiB)</source>
         <translation>%p% (%v/%m Кб)</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="513"/>
+        <location filename="../src/operationdialog.cpp" line="514"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="534"/>
+        <location filename="../src/operationdialog.cpp" line="535"/>
         <source>Downloading data required by server %1...</source>
         <translation>Загрузка данных, необходимых серверу %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="545"/>
+        <location filename="../src/operationdialog.cpp" line="546"/>
         <source>Extracting data required by server %1...</source>
         <translation>Извлечение данных, необходимых серверу %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="569"/>
+        <location filename="../src/operationdialog.cpp" line="570"/>
         <source>Downloading client required by server %1...</source>
         <translation>Загрузка клиента, необходимого серверу %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="580"/>
+        <location filename="../src/operationdialog.cpp" line="581"/>
         <source>Extracting client required by server %1...</source>
         <translation>Извлечение файлов клиента, необходимых серверу %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="602"/>
+        <location filename="../src/operationdialog.cpp" line="603"/>
         <source>Copying data required by server %1...</source>
         <translation>Копирование данных, необходимых серверу %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="631"/>
+        <location filename="../src/operationdialog.cpp" line="632"/>
         <source>Copying old profile to new location...</source>
         <translation>Копирование предыдущего профиля в новое местоположение...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="661"/>
+        <location filename="../src/operationdialog.cpp" line="662"/>
         <source>Extracting client to new location...</source>
         <translation>Извлечение файлов клиента в новое местоположение...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="726"/>
+        <location filename="../src/operationdialog.cpp" line="727"/>
         <source>Copying installer to new location...</source>
         <translation>Копирование инсталлятора в новое местоположение...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="847"/>
+        <location filename="../src/operationdialog.cpp" line="855"/>
         <source>Cleaning obsolete files...</source>
         <translation>Удаление устаревших файлов...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="862"/>
+        <location filename="../src/operationdialog.cpp" line="870"/>
         <source>Creating default profile...</source>
         <translation>Создание профиля по умолчанию...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="921"/>
+        <location filename="../src/operationdialog.cpp" line="929"/>
         <source>Creating shortcuts for profile %1...</source>
         <translation>Создание ярлыков для профиля %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1007"/>
+        <location filename="../src/operationdialog.cpp" line="1015"/>
         <source>Deleting client...</source>
         <translation>Удаление клиента...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1067"/>
+        <location filename="../src/operationdialog.cpp" line="1075"/>
         <source>Adding profiles...</source>
         <translation>Добавление профилей...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1087"/>
+        <location filename="../src/operationdialog.cpp" line="1095"/>
         <source>Deleting profiles...</source>
         <translation>Удаление профилей...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1140"/>
+        <location filename="../src/operationdialog.cpp" line="1148"/>
         <source>Deleting installer...</source>
         <translation>Удаление инсталлятора...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1192"/>
+        <location filename="../src/operationdialog.cpp" line="1200"/>
         <source>Deleting downloaded files...</source>
         <translation>Удаление загруженных файлов...</translation>
     </message>
@@ -331,12 +335,12 @@ Are you sure to abort download?</source>
         <translation type="vanished">Копирование %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="812"/>
+        <location filename="../src/operationdialog.cpp" line="820"/>
         <source>Uninstall old client</source>
         <translation>Удалить предыдущую версию клиента</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="812"/>
+        <location filename="../src/operationdialog.cpp" line="820"/>
         <source>An old version of Ryzom has been detected on this system, would you like to uninstall it to save space disk?</source>
         <translation>В системе обнаружена предыдущая версия Ryzom, вы хотите удалить ее чтобы освободить место на диске?</translation>
     </message>
@@ -357,7 +361,7 @@ Are you sure to abort download?</source>
         <translation type="vanished">Удалить файлы клиента</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1037"/>
+        <location filename="../src/operationdialog.cpp" line="1045"/>
         <source>Unable to delete files for client %1</source>
         <translation>Невозможно удалить файлы клиента %1</translation>
     </message>
@@ -378,7 +382,7 @@ Are you sure to abort download?</source>
         <translation type="vanished">Удаление профиля %1...</translation>
     </message>
     <message>
-        <location filename="../src/operationdialog.cpp" line="1116"/>
+        <location filename="../src/operationdialog.cpp" line="1124"/>
         <source>Unable to delete files for profile %1</source>
         <translation>Невозможно удалить файлы профиля %1</translation>
     </message>
@@ -410,17 +414,17 @@ Are you sure to delete this profile?</source>
         <translation>Вы собираетесь удалить профиль, файлы профиля не будут удалены автоматически и их необходимо удалить вручную. Вы уверены, что хотите удалить этот профиль?</translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="277"/>
+        <location filename="../src/profilesdialog.cpp" line="278"/>
         <source>Executables (*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="283"/>
+        <location filename="../src/profilesdialog.cpp" line="284"/>
         <source>Please choose Ryzom client executable to launch</source>
         <translation>Пожалуйста, выберете исполняемый файл для запуска клиента Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/profilesdialog.cpp" line="275"/>
+        <location filename="../src/profilesdialog.cpp" line="276"/>
         <source>Executables (*.exe)</source>
         <translation>Исполняемые файлы (*.exe)</translation>
     </message>
@@ -730,7 +734,7 @@ Just press Continue button and follow the different steps until everything is do
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="72"/>
+        <location filename="../ui/profilesdialog.ui" line="75"/>
         <source>Profile:</source>
         <translation>Профиль:</translation>
     </message>
@@ -739,27 +743,27 @@ Just press Continue button and follow the different steps until everything is do
         <translation type="vanished">0</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="86"/>
+        <location filename="../ui/profilesdialog.ui" line="89"/>
         <source>Name:</source>
         <translation>Имя:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="96"/>
+        <location filename="../ui/profilesdialog.ui" line="99"/>
         <source>Server:</source>
         <translation>Сервер:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="107"/>
+        <location filename="../ui/profilesdialog.ui" line="110"/>
         <source>Atys</source>
         <translation>Atys</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="112"/>
+        <location filename="../ui/profilesdialog.ui" line="115"/>
         <source>Yubo</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="120"/>
+        <location filename="../ui/profilesdialog.ui" line="123"/>
         <source>Executable:</source>
         <translation>Исполняемый файл:</translation>
     </message>
@@ -768,27 +772,27 @@ Just press Continue button and follow the different steps until everything is do
         <translation type="vanished">ryzom_client_r.exe</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="136"/>
+        <location filename="../ui/profilesdialog.ui" line="139"/>
         <source>Default</source>
         <translation>По умолчанию</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="143"/>
+        <location filename="../ui/profilesdialog.ui" line="146"/>
         <source>Browse...</source>
         <translation>Открыть...</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="152"/>
+        <location filename="../ui/profilesdialog.ui" line="155"/>
         <source>Arguments:</source>
         <translation>Аргументы:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="162"/>
+        <location filename="../ui/profilesdialog.ui" line="165"/>
         <source>Comments:</source>
         <translation>Комментарии:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="179"/>
+        <location filename="../ui/profilesdialog.ui" line="182"/>
         <source>Directory:</source>
         <translation>Директория:</translation>
     </message>
@@ -797,22 +801,22 @@ Just press Continue button and follow the different steps until everything is do
         <translation type="vanished">~/.ryzom/0</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="195"/>
+        <location filename="../ui/profilesdialog.ui" line="198"/>
         <source>Open</source>
         <translation>Открыть</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="204"/>
+        <location filename="../ui/profilesdialog.ui" line="207"/>
         <source>Create shortcuts:</source>
         <translation>Создать ярлыки:</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="213"/>
+        <location filename="../ui/profilesdialog.ui" line="216"/>
         <source>Desktop</source>
         <translation>Рабочий стол</translation>
     </message>
     <message>
-        <location filename="../ui/profilesdialog.ui" line="220"/>
+        <location filename="../ui/profilesdialog.ui" line="223"/>
         <source>Start Menu</source>
         <translation>меню Пуск</translation>
     </message>
@@ -820,116 +824,123 @@ Just press Continue button and follow the different steps until everything is do
 <context>
     <name>QApplication</name>
     <message>
-        <location filename="../src/main.cpp" line="151"/>
+        <location filename="../src/main.cpp" line="163"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="151"/>
+        <location filename="../src/main.cpp" line="163"/>
         <source>Unable to find ryzom_installer.ini</source>
         <translation>Невозможно найти ryzom_installer.ini</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="119"/>
+        <location filename="../src/main.cpp" line="123"/>
         <source>Installation and launcher tool for Ryzom</source>
         <translation>Программа установки и запуска Ryzom</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="122"/>
+        <location filename="../src/main.cpp" line="126"/>
         <source>Uninstall</source>
         <translation>Удалить</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="125"/>
+        <location filename="../src/main.cpp" line="129"/>
         <source>Silent mode</source>
         <translation>Фоновый режим (silent mode)</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="128"/>
+        <location filename="../src/main.cpp" line="132"/>
         <source>Version</source>
         <translation>Версия</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="131"/>
+        <location filename="../src/main.cpp" line="135"/>
         <source>Install itself</source>
         <translation>Установится</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="322"/>
-        <location filename="../src/filesextractor.cpp" line="580"/>
+        <location filename="../src/filesextractor.cpp" line="324"/>
+        <location filename="../src/filesextractor.cpp" line="629"/>
         <source>Unable to open %1</source>
         <translation>Невозможно открыть %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="437"/>
         <source>Unable to open output file</source>
-        <translation>Невозможно открыть выходной файл</translation>
+        <translation type="vanished">Невозможно открыть выходной файл</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="446"/>
         <source>Unable to write output file</source>
-        <translation>Невозможно записать выходной файл</translation>
+        <translation type="vanished">Невозможно записать выходной файл</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="495"/>
-        <location filename="../src/filesextractor.cpp" line="503"/>
+        <location filename="../src/filesextractor.cpp" line="471"/>
+        <source>Unable to open output file %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/filesextractor.cpp" line="494"/>
+        <source>Unable to write output file %1 (%2 bytes written but expecting %3 bytes)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/filesextractor.cpp" line="538"/>
+        <location filename="../src/filesextractor.cpp" line="546"/>
         <source>7zip decoder doesn&apos;t support this archive</source>
         <translation>Архиватор 7zip не поддерживает данный тип архива</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="499"/>
+        <location filename="../src/filesextractor.cpp" line="542"/>
         <source>Unable to allocate memory</source>
         <translation>Невозможно выделить память</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="507"/>
+        <location filename="../src/filesextractor.cpp" line="550"/>
         <source>File %1 is corrupted, unable to uncompress it</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="515"/>
+        <location filename="../src/filesextractor.cpp" line="558"/>
         <source>Error %1</source>
         <translation>Ошибка %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="542"/>
+        <location filename="../src/filesextractor.cpp" line="587"/>
         <source>Unable to create directory %1</source>
         <translation>Невозможно создать директорию %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="548"/>
+        <location filename="../src/filesextractor.cpp" line="595"/>
         <source>Unable to set permissions of %1</source>
         <translation>Невозможно назначить права объекта %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="663"/>
+        <location filename="../src/filesextractor.cpp" line="718"/>
         <source>disk full</source>
         <translation>диск переполнен</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="667"/>
+        <location filename="../src/filesextractor.cpp" line="724"/>
         <source>unable to write %1</source>
         <translation>невозможно записать %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="671"/>
+        <location filename="../src/filesextractor.cpp" line="730"/>
         <source>unable to read %1</source>
         <translation>невозможно прочитать %1</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="675"/>
+        <location filename="../src/filesextractor.cpp" line="736"/>
         <source>failed (%1)</source>
         <translation>неуспешно (%1)</translation>
     </message>
     <message>
-        <location filename="../src/filesextractor.cpp" line="678"/>
+        <location filename="../src/filesextractor.cpp" line="739"/>
         <source>Unable to unpack %1 to %2: %3</source>
         <translation>Невозможно разархивировать %1 в %2: %3</translation>
     </message>
     <message>
-        <location filename="../src/filescopier.cpp" line="189"/>
         <source>Unable to copy file %1</source>
-        <translation>Невозможно скопировать файл %1</translation>
+        <translation type="vanished">Невозможно скопировать файл %1</translation>
     </message>
     <message>
         <location filename="../src/profile.cpp" line="58"/>
@@ -939,6 +950,11 @@ Just press Continue button and follow the different steps until everything is do
     <message>
         <location filename="../src/profile.cpp" line="68"/>
         <source>Profile name %1 is using invalid character %2 at position %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/filescopier.cpp" line="179"/>
+        <source>Unable to copy file %1 to %2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

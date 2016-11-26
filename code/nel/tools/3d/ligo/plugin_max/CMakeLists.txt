@@ -4,17 +4,17 @@ ADD_LIBRARY(ligoscape_utility SHARED ligoscape_utility.rc ${SRC} ligoscape_utili
 
 INCLUDE_DIRECTORIES(${MAXSDK_INCLUDE_DIR})
 
-TARGET_LINK_LIBRARIES(ligoscape_utility 
-							nelmisc 
+TARGET_LINK_LIBRARIES(ligoscape_utility
+							nelmisc
 							nelligo
 							nel3d
 							nelpacs
-							${MAXSDK_LIBRARIES} 
-							nel_patch_lib 
+							${MAXSDK_LIBRARIES}
+							nel_patch_lib
 							nel_mesh_lib
 							nel_3dsmax_shared
 							comctl32)
-							
+
 SET_TARGET_PROPERTIES(ligoscape_utility PROPERTIES SUFFIX ".dlx")
 NL_DEFAULT_PROPS(ligoscape_utility "MAX Plugin: Ligoscape Utility")
 NL_ADD_RUNTIME_FLAGS(ligoscape_utility)

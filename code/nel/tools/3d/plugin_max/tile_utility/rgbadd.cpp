@@ -371,19 +371,19 @@ RefResult RGBAdd::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget,
 		case REFMSG_CHANGE:
 			ivalid.SetEmpty();
 			if (hTarget == pblock) 
-				{
-			// see if this message came from a changing parameter in the pblock,
-			// if so, limit rollout update to the changing item and update any active viewport texture
+			{
+				// see if this message came from a changing parameter in the pblock,
+				// if so, limit rollout update to the changing item and update any active viewport texture
 				ParamID changing_param = pblock->LastNotifyParamID();
 				RGBAdd_param_blk.InvalidateUI(changing_param);
-			// notify our dependents that we've changed
+				// notify our dependents that we've changed
 				// NotifyChanged();  //DS this is redundant
-				}
+			}
 
 			break;
-		}
-	return(REF_SUCCEED);
 	}
+	return(REF_SUCCEED);
+}
 
 
 #define MTL_HDR_CHUNK 0x4000

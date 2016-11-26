@@ -199,12 +199,15 @@ void		CSkeletonScaleDlg::setSkeletonToEdit(NL3D::CSkeletonModel *skel, const std
 	{
 		for(uint i=0;i<_SkeletonModel->Bones.size();i++)
 		{
-			const std::string		tabStr= "   ";
-			std::string		name= _SkeletonModel->Bones[i].getBoneName();
+			const std::string tabStr = "   ";
+			std::string name = _SkeletonModel->Bones[i].getBoneName();
+
 			// append a tab for easy hierarchy
-			uint	boneId= i;
+			uint boneId = i;
+
 			while((boneId=_SkeletonModel->Bones[boneId].getFatherId())!=-1)
-				name= tabStr + name;
+				name = tabStr + name;
+
 			// append to the list
 			_BoneList.AddString(utf8ToTStr(name));
 		}
@@ -1222,7 +1225,7 @@ void CSkeletonScaleDlg::OnSsdButtonSaveScale()
 		return;
 	
 	// choose the file
-	std::string	defaultFileName= _SkeletonFileName;
+	std::string	defaultFileName = _SkeletonFileName;
 	NLMISC::strFindReplace(defaultFileName, ".skel", ".scale");
 
 	CFileDialog fd(FALSE, _T("scale"), utf8ToTStr(defaultFileName), OFN_OVERWRITEPROMPT, _T("SkelScaleFiles (*.scale)|*.scale|All Files (*.*)|*.*||"), this) ;

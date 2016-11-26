@@ -29,7 +29,7 @@ extern HINSTANCE hInstance;
 using namespace NLMISC;
 using namespace NL3D;
 
-class Tile_utility : public UtilityObj 
+class Tile_utility : public UtilityObj
 {
 public:
 		HWND			hPanel;
@@ -44,8 +44,8 @@ public:
 
 		void Init(HWND hWnd);
 		void Destroy(HWND hWnd);
-		
-		void DeleteThis() { }		
+
+		void DeleteThis() { }
 
 		void Load (const std::string& path);
 		void SetLand (sint land);
@@ -55,7 +55,7 @@ public:
 
 		//Constructor/Destructor
 		Tile_utility();
-		~Tile_utility();		
+		~Tile_utility();
 };
 
 CTileBank	Tile_utility::Bank;
@@ -64,11 +64,11 @@ std::string		Tile_utility::Path;
 
 static Tile_utility theTile_utility;
 
-class Tile_utilityClassDesc:public ClassDesc2 
+class Tile_utilityClassDesc:public ClassDesc2
 {
 	public:
 	int 			IsPublic() {return 1;}
-	void *			Create(BOOL loading = FALSE) 
+	void *			Create(BOOL loading = FALSE)
 	{
 		return &theTile_utility;
 	}
@@ -85,7 +85,7 @@ ClassDesc2* GetTile_utilityDesc() {return &Tile_utilityDesc;}
 
 static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (msg) 
+	switch (msg)
 	{
 	case WM_INITDIALOG:
 		{
@@ -159,12 +159,12 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_MOUSEMOVE:
-		theTile_utility.ip->RollupMouseMessage(hWnd,msg,wParam,lParam); 
+		theTile_utility.ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
 		break;
 	case WM_COMMAND:
 		{
 			int id = LOWORD(wParam);
-			switch (id) 
+			switch (id)
 			{
 				case IDC_BANK_PATH:
 					{
@@ -240,7 +240,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 Tile_utility::Tile_utility()
 {
 	iu = NULL;
-	ip = NULL;	
+	ip = NULL;
 	hPanel = NULL;
 	Bank.clear();
 	Land=0;
@@ -252,7 +252,7 @@ Tile_utility::~Tile_utility()
 
 }
 
-void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu) 
+void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = iu;
 	this->ip = ip;
@@ -264,8 +264,8 @@ void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu)
 		0);
 	SetupUI ();
 }
-	
-void Tile_utility::EndEditParams(Interface *ip,IUtil *iu) 
+
+void Tile_utility::EndEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = NULL;
 	this->ip = NULL;
@@ -319,7 +319,7 @@ void Tile_utility::SetLand (sint land)
 		Land=0;
 	SetBankTileSetSet (Land);
 }
-	
+
 void Tile_utility::SetupUI ()
 {
 	// Clear combo box
@@ -333,7 +333,7 @@ void Tile_utility::SetupUI ()
 		// Enable combo box
 		if (Bank.getLandCount())
 			EnableWindow (hCombo, TRUE);
-		else 
+		else
 			EnableWindow (hCombo, FALSE);
 	}
 

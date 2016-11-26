@@ -36,11 +36,11 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet = false;
-	TCHAR tempFileName[MAX_PATH] = { 0 };  
+	TCHAR tempFileName[MAX_PATH] = { 0 };
 	TCHAR tempPathBuffer[MAX_PATH] = { 0 };
-	
+
 	try
-	{		
+	{
 		DWORD dwRetVal = GetTempPath(MAX_PATH, tempPathBuffer);
 		if (dwRetVal > MAX_PATH || (dwRetVal == 0))
 			nlerror("GetTempPath failed");
@@ -85,7 +85,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					skeletonShape = NULL;
 				}
 			}
-			
+
 			DWORD t = timeGetTime();
 			if (InfoLog)
 				InfoLog->display("Beg buildShape %s \n", node.GetName());
@@ -93,7 +93,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 			IShape *pShape = _ExportNel->buildShape(node, time, mapIdPtr, true);
 			if (InfoLog)
 				InfoLog->display("End buildShape in %d ms \n", timeGetTime()-t);
-			
+
 			// Conversion success ?
 			if (pShape)
 			{
@@ -105,7 +105,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 					{
 						// Create a streamable shape
 						CShapeStream shapeStream(pShape);
-						
+
 						// Serial the shape
 						shapeStream.serial(file);
 
@@ -250,9 +250,9 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 {
 	// Result to return
 	bool bRet=false;
-	char tempFileName[MAX_PATH] = { 0 };  
+	char tempFileName[MAX_PATH] = { 0 };
 	char tempPathBuffer[MAX_PATH] = { 0 };
-	
+
 	try
 	{
 		DWORD dwRetVal = GetTempPathA(MAX_PATH, tempPathBuffer);
@@ -261,19 +261,19 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 		UINT uRetVal = GetTempFileNameA(tempPathBuffer, TEXT("_nel_export_mesh_"), 0, tempFileName);
 		if (uRetVal == 0)
 			nlerror("GetTempFileName failed");
-		
+
 		// Create an animation file
 		CAnimation animFile;
 
 		// For each node to export
 		for (uint n=0; n<vectNode.size(); n++)
-		{				
+		{
 			// Get name
 			std::string nodeName="";
 
 			// Get NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME
 			int prefixe = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME, 0);
-			
+
 			// Set the name only if it is a scene animation
 			if (scene || prefixe)
 			{
@@ -290,7 +290,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 			bool root = vectNode[n]->GetParentNode () == _Ip->GetRootNode();
 
 			// Add animation
-			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);		
+			_ExportNel->addAnimation (animFile, *vectNode[n], nodeName.c_str(), root);
 		}
 
 		if (vectNode.size())
@@ -401,7 +401,7 @@ bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time
 		{
 			// Create a streamable shape
 			CShapeStream shapeStream (skeletonShape);
-			
+
 			// Serial the shape
 			shapeStream.serial (file);
 

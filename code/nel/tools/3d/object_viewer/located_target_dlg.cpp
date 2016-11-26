@@ -185,7 +185,6 @@ BOOL CLocatedTargetDlg::OnInitDialog()
 		}
 	}
 
-
 	const sint posX = 5;
 	sint posY = 180;
 

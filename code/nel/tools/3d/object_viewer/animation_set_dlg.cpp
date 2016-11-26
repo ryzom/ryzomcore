@@ -287,6 +287,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 
 					// Keyframer ?
 					UTrackKeyframer *keyTrack=dynamic_cast<UTrackKeyframer *>(track);
+
 					if (keyTrack)
 					{
 						// Get number of keys
@@ -316,7 +317,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				std::string name = NLMISC::CFile::getFilenameWithoutExtension(object->Saved.SWTFileName[i]);
 
 				// Get the animation pointer
-				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight (object->AnimationSet.getSkeletonWeightIdByName (name));
+				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight(object->AnimationSet.getSkeletonWeightIdByName(name));
 
 				// Insert an intem
 				HTREEITEM item=SkelTree.InsertItem(utf8ToTStr(name));

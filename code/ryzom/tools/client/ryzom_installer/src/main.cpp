@@ -232,8 +232,8 @@ int main(int argc, char *argv[])
 
 			dialog.setSelectedComponents(components);
 
-			// TODO: check real return codes from Uninstallers
-			if (!dialog.exec()) return 1;
+			// exit if press Cancel button or close dialog
+			if (!dialog.exec()) return 0;
 
 			components = dialog.getSelectedCompenents();
 		}

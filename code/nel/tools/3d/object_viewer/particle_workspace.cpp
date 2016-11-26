@@ -386,6 +386,7 @@ CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filena
 	{
 		relativePath = resultPath;
 	}
+
 	if (relativePath.size() >= 2)
 	{
 		if (relativePath[0] == '\\' && relativePath[1] != '\\')
@@ -393,6 +394,7 @@ CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filena
 			relativePath = relativePath.substr(1);
 		}
 	}
+
 	CNode *newNode = new CNode;
 	newNode->init(this);
 	newNode->setRelativePath(relativePath);
