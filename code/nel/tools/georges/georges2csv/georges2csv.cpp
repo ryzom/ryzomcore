@@ -179,7 +179,7 @@ void setOutputFile(const CSString &filename)
 {
 	if (Outf!=NULL)
 		fclose(Outf);
-	Outf=fopen(filename.c_str(), "wt");
+	Outf = nlfopen(filename.c_str(), "wt");
 	if (Outf == NULL)
 	{
 		fprintf(stderr, "Can't open output file '%s' ! aborting.", filename.c_str());

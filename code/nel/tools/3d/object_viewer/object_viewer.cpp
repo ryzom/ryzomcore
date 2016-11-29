@@ -93,8 +93,7 @@ using namespace NLPACS;
 
 				
 
-static char SDrive[256];
-static char SDir[256];
+static std::string SPath;
 
 uint SkeletonUsedForSound = 0xFFFFFFFF;
 CSoundContext SoundContext;
@@ -285,9 +284,9 @@ std::string CObjectViewer::getModulePath() const
 	int res = GetModuleFileName(hModule, sModulePath, 256); nlassert(res);
 	nldebug("Object viewer module path is '%s'", sModulePath);
 
-	std::string path = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
+	SPath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
 
-	return NLMISC::CPath::standardizeDosPath(path) + "object_viewer.cfg";
+	return SPath + "object_viewer.cfg";
 }
 
 
@@ -812,7 +811,6 @@ bool CObjectViewer::initUI (HWND parent)
 	// Enable sum of vram
 	CNELU::Driver->enableUsedTextureMemorySum ();
 
-	char sModulePath[256];
 	// load the scheme bank if one is present		
 	CIFile iF;
 	::_makepath (sModulePath, SDrive, SDir, "default", ".scb");		
@@ -831,8 +829,9 @@ bool CObjectViewer::initUI (HWND parent)
 	iF.close();
 	
 	// try to load a default config file for the viewer (for anitmation and particle edition setup)
-	::_makepath (sModulePath, SDrive, SDir, "default", ".ovcgf");
-	if (iF.open (sModulePath))
+	path = SPath + "default.ovcgf";
+
+	if (iF.open (path))
 	{
 		try
 		{

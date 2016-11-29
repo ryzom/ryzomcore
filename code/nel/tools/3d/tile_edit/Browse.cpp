@@ -895,12 +895,12 @@ void Browse::OnBatchLoad ()
 		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
 		// look for some numbers..
-		char *sNumber=sName+strlen(sName)-1;
-		while ((sNumber>sName)&&(*sNumber>='0')&&(*sNumber<='9'))
+		std::string::size_type pos = filename.find_last_not_of("0123456789");
+
+		if (pos != std::string::npos)
 		{
-			sNumber--;
+			filename = filename.substr(0, pos + 1);
 		}
-		sNumber[1]=0;
 
 		bool rotate=false;
 
@@ -1396,7 +1396,7 @@ void Browse::OnExportBorder()
 			try
 			{
 				COFile file;
-				if (file.open ((const char*)pathName))
+				if (file.open (tStrToUtf8(pathName)))
 				{
 					// Export
 					bitmap.writeTGA (file, 32);
@@ -1439,7 +1439,7 @@ void Browse::OnImportBorder()
 		try
 		{
 			CIFile file;
-			if (file.open ((const char*)pathName))
+			if (file.open (tStrToUtf8(pathName)))
 			{
 				// Export
 				bitmap.load (file);

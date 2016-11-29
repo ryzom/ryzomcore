@@ -1115,7 +1115,7 @@ int main (int argc, char**argv)
 							outString ("REMOVE " + CFile::getFilename (igFilename) + "                                              \n");
 
 							// Remove it
-							if (remove (igFilename.c_str ()) != 0)
+							if (!CFile::deleteFile(igFilename))
 							{
 								// Error in the log
 								nlwarning ("Error : Can't remove the file (%s)", igFilename.c_str ());

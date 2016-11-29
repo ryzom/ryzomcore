@@ -48,6 +48,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"
+#include "nel/misc/path.h"
 
 // Include from libxml2
 #include <libxml/parser.h>

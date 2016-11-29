@@ -548,7 +548,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			if (!extLower.empty ())
 			{
-				string dfnName = extLower.substr (1, string::npos)  + ".dfn";
+				string dfnName = extLower + ".dfn";
 
 				// Check if the file is handled
 				if (theApp.getFormDocTemplate (dfnName.c_str ()) == NULL)

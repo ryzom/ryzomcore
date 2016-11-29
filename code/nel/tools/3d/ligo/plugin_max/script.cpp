@@ -262,8 +262,8 @@ Value* export_material_cf (Value** arg_list, int count)
 								// Remove the files
 								if (!ok)
 								{
-									remove (fileName);
-									remove (path);
+									CFile::deleteFile(fileName);
+									CFile::deleteFile(path);
 								}
 							}
 						}
@@ -549,7 +549,7 @@ Value* export_transition_cf (Value** arg_list, int count)
 										for (uint file=0; file<createdfiles.size(); file++)
 										{
 											// Removing files
-											remove (createdfiles[file].c_str ());
+											CFile::deleteFile(createdfiles[file]);
 										}
 									}
 								}
@@ -1991,8 +1991,7 @@ Value* make_snapshot_cf (Value** arg_list, int count)
 #if 0
 										// Write the zone
 										COFile outputLigoZone;
-										std::string outputFilenameSnapShot = pathtga + nametga + ".tga";
-										_makepath (outputFilenameSnapShot, drivetga, pathtga, nametga, ".ligozone");
+										std::string outputFilenameSnapShot = pathtga + nametga + ".ligozone";
 
 										try
 										{
