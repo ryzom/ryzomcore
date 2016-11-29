@@ -70,17 +70,17 @@ BOOL CAboutDialog::OnInitDialog()
 				{
 					uint *versionTab;
 					uint versionSize;
-					if (VerQueryValue (pInfo, "\\", (void**)&versionTab,  &versionSize))
+					if (VerQueryValue (pInfo, _T("\\"), (void**)&versionTab,  &versionSize))
 					{
 						// Get the pointer on the structure
 						VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
 
  						// Setup version number
-						char version[512];
-						sprintf (version, "Version %d.%d.%d.%d", 
-							info->dwFileVersionMS>>16, 
-							info->dwFileVersionMS&0xffff, 
-							info->dwFileVersionLS>>16,  
+						TCHAR version[512];
+						_stprintf (version, _T("Version %d.%d.%d.%d"),
+							info->dwFileVersionMS>>16,
+							info->dwFileVersionMS&0xffff,
+							info->dwFileVersionLS>>16,
 							info->dwFileVersionLS&0xffff);
 						GetDlgItem (IDC_VERSION)->SetWindowText (version);
 					}

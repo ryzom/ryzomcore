@@ -120,7 +120,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 								{
  									// Setup version number
 									TCHAR version[512];
-									_tcprintf (version, "Version %d.%d.%d.%d",
+									_stprintf (version, _T("Version %d.%d.%d.%d"),
 										info->dwFileVersionMS>>16,
 										info->dwFileVersionMS&0xffff,
 										info->dwFileVersionLS>>16,
@@ -378,9 +378,9 @@ void Tile_utility::SetupUI ()
 
 			// Static text
 			TCHAR sTmp[256];
-			_tcprintf (sTmp, "%d diffuse tiles.", Bank.getNumBitmap (CTile::diffuse));
+			_stprintf (sTmp, _T("%d diffuse tiles."), Bank.getNumBitmap (CTile::diffuse));
 			SetWindowText (hwndStatic1, sTmp);
-			_tcprintf (sTmp, "%d additive tiles.", Bank.getNumBitmap (CTile::additive));
+			_stprintf (sTmp, _T("%d additive tiles."), Bank.getNumBitmap (CTile::additive));
 			SetWindowText (hwndStatic2, sTmp);
 		}
 		else

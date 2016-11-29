@@ -775,17 +775,17 @@ void CExportNel::outputErrorMessage(const std::string &message)
 
 // --------------------------------------------------
 
-void CExportNel::outputWarningMessage (const char *message)
+void CExportNel::outputWarningMessage (const std::string &message)
 {
 	if (_ErrorInDialog)
 	{
-		MessageBox (_Ip->GetMAXHWnd(), message, _ErrorTitle.c_str(), MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
 	mprintf (message);
 	mprintf ("\n");
 
 	nlwarning ("Warning in max file %s : ", _Ip->GetCurFilePath());
-	nlwarning (message);
+	nlwarning (message.c_str());
 }
 
 // --------------------------------------------------
@@ -819,7 +819,7 @@ void CExportNel::addChildLodNode (std::set<INode*> &lodListToExclude, INode *cur
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (lodName.c_str());
+			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
 			if (lodNode)
 			{
 				// Insert it in the set
@@ -850,7 +850,7 @@ void CExportNel::addParentLodNode (INode &child, std::set<INode*> &lodListToExcl
 		if (lodName != "")
 		{
 			// Get the lod by name
-			INode *lodNode = _Ip->GetINodeByName (lodName.c_str());
+			INode *lodNode = _Ip->GetINodeByName (utf8ToTStr(lodName));
 			if (lodNode == &child)
 			{
 				// Insert it in the set
@@ -1111,12 +1111,23 @@ static void restoreDecimalSeparator()
 float toFloatMax(const TCHAR *src)
 {
 	float result = 0.f;
+	if (toFloatMax(tStrToUtf8(src), result)) return result;
+	return 0.f;
+}
+
+float toFloatMax(const std::string &src)
+{
+	float result = 0.f;
 	if (toFloatMax(src, result)) return result;
 	return 0.f;
 }
 
-
 bool toFloatMax(const TCHAR *src, float &dest)
+{
+	return toFloatMax(tStrToUtf8(src), dest);
+}
+
+bool toFloatMax(const std::string &src, float &dest)
 {	
 	setDecimalSeparatorAsPoint();
 	std::string str(src);

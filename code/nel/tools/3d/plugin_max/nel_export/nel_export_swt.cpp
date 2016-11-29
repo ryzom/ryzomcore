@@ -27,7 +27,7 @@
 using namespace NL3D;
 using namespace NLMISC;
 
-bool CNelExport::exportSWT(const char *sPath, std::vector<INode*>& vectNode)
+bool CNelExport::exportSWT(const std::string &sPath, std::vector<INode*>& vectNode)
 {
 	float rPosValue;
 	float rRotValue;
@@ -55,15 +55,15 @@ bool CNelExport::exportSWT(const char *sPath, std::vector<INode*>& vectNode)
 
 			// Store them in the temporary list
 			aSWNodes.resize(nNumNode+3);
-			aSWNodes[nNumNode].Name = pNode->GetName();
+			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getRotQuatValueName();
 			aSWNodes[nNumNode].Weight = rRotValue;
 			++nNumNode;
-			aSWNodes[nNumNode].Name = pNode->GetName();
+			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getPosValueName ();
 			aSWNodes[nNumNode].Weight = rPosValue;
 			++nNumNode;
-			aSWNodes[nNumNode].Name = pNode->GetName();
+			aSWNodes[nNumNode].Name = tStrToUtf8(pNode->GetName());
 			aSWNodes[nNumNode].Name += std::string (".")+ITransformable::getScaleValueName();
 			aSWNodes[nNumNode].Weight = rScaleValue;
 			++nNumNode;

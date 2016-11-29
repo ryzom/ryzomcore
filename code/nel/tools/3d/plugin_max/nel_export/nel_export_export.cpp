@@ -32,7 +32,7 @@ using namespace NLMISC;
 
 // --------------------------------------------------
 
-bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportMesh (const std::string &sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet = false;
@@ -213,7 +213,7 @@ bool CNelExport::exportMesh (const char *sPath, INode& node, TimeValue time)
 
 // --------------------------------------------------
 
-bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportVegetable (const std::string &sPath, INode& node, TimeValue time)
 {
 	bool bRet=false;
 
@@ -246,7 +246,7 @@ bool CNelExport::exportVegetable (const char *sPath, INode& node, TimeValue time
 
 // --------------------------------------------------
 
-bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene)
+bool CNelExport::exportAnim (const std::string &sPath, std::vector<INode*>& vectNode, TimeValue time, bool scene)
 {
 	// Result to return
 	bool bRet=false;
@@ -343,7 +343,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 				catch (const Exception& e)
 				{
 					if (_ErrorInDialog)
-						MessageBox (NULL, e.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+						MessageBox (NULL, utf8ToTStr(e.what()), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 					else
 						nlwarning ("ERROR : %s", e.what ());
 				}
@@ -351,9 +351,9 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 			else
 			{
 				if (_ErrorInDialog)
-					MessageBox (NULL, "Can't open the file for writing.", "NeL export", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, _T("Can't open the file for writing."), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 				else
-					nlwarning ("ERROR : Can't open the file (%s) for writing", tempFileName);
+					nlwarning ("ERROR : Can't open the file (%s) for writing", tempFileName.c_str());
 				if (_TerminateOnFileOpenIssues)
 					nelExportTerminateProcess();
 			}
@@ -383,7 +383,7 @@ bool CNelExport::exportAnim (const char *sPath, std::vector<INode*>& vectNode, T
 
 // --------------------------------------------------
 
-bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time)
+bool CNelExport::exportSkeleton	(const std::string &sPath, INode* pNode, TimeValue time)
 {
 	// Result to return
 	bool bRet=false;
@@ -422,7 +422,7 @@ bool CNelExport::exportSkeleton	(const char *sPath, INode* pNode, TimeValue time
 
 // --------------------------------------------------
 
-bool CNelExport::exportLodCharacter (const char *sPath, INode& node, TimeValue time)
+bool CNelExport::exportLodCharacter (const std::string &sPath, INode& node, TimeValue time)
 {
 	// Result to return
 	bool bRet=false;

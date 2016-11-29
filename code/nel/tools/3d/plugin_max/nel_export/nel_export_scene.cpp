@@ -59,7 +59,7 @@ bool CNelExport::exportInstanceGroup(string filename, vector<INode*>& vectNode)
 			catch (const Exception &c)
 			{
 				// Cannot save the file
-				MessageBox (NULL, c.what(), "NeL export", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, utf8ToTStr(c.what()), _T("NeL export"), MB_OK|MB_ICONEXCLAMATION);
 				return false;
 			}
 		}

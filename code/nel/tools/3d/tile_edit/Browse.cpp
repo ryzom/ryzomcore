@@ -778,7 +778,7 @@ void Browse::OnCancel()
 	// TODO: Add your control notification handler code here
 	if (thread_actif) return;
 
-	if (::MessageBox (NULL, "Are you sure you want to cancel?", "Cancel", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+	if (::MessageBox (NULL, _T("Are you sure you want to cancel?"), _T("Cancel"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 	{
 		this->SendMessage(WM_CLOSE);
 		CDialog::OnCancel();
@@ -884,8 +884,7 @@ void Browse::OnChangeVariety()
 
 void Browse::OnBatchLoad ()
 {
-	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 
 	if (sFile.DoModal()==IDOK)
 	{
@@ -904,7 +903,8 @@ void Browse::OnBatchLoad ()
 		sNumber[1]=0;
 
 		bool rotate=false;
-		if (::MessageBox (NULL, "Do you want to use rotation to reuse alpha tiles ?", "Import rotated tiles", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+
+		if (::MessageBox (NULL, _T("Do you want to use rotation to reuse alpha tiles ?"), _T("Import rotated tiles"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 			rotate=true;
 
 		for (int i=0; i<CTileSet::count; i++)
@@ -1360,8 +1360,7 @@ void Browse::OnSubgroup11()
 void Browse::OnExportBorder() 
 {
 	// Select a file
-	CFileDialog sFile (false, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (false, NULL, NULL, OFN_ENABLESIZING, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
@@ -1415,9 +1414,8 @@ void Browse::OnExportBorder()
 			if (error)
 			{
 				// Error message
-				char tmp[512];
-				sprintf (tmp, "Can't write bitmap %s", (const char*)pathName);
-				MessageBox (tmp, "Export border", MB_OK|MB_ICONEXCLAMATION);
+				std::string tmp = toString("Can't write bitmap %s", tStrToUtf8(pathName).c_str());
+				MessageBox (utf8ToTStr(tmp), _T("Export border"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -1426,8 +1424,7 @@ void Browse::OnExportBorder()
 void Browse::OnImportBorder() 
 {
 	// Select a file
-	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,_T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
@@ -1460,9 +1457,8 @@ void Browse::OnImportBorder()
 		if (error)
 		{
 			// Error message
-			char tmp[512];
-			sprintf (tmp, "Can't read bitmap %s", (const char*)pathName);
-			MessageBox (tmp, "Import border", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("Can't read bitmap %s", tStrToUtf8(pathName).c_str());
+			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		// Get pixel
@@ -1485,9 +1481,8 @@ void Browse::OnImportBorder()
 		else
 		{
 			// Error message
-			char tmp[512];
-			sprintf (tmp, "The bitmap must have a size of 128x128 (%s)", (const char*)pathName);
-			MessageBox (tmp, "Import border", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("The bitmap must have a size of 128x128 (%s)", tStrToUtf8(pathName).c_str());
+			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		// 256 or 128 ?
@@ -1496,6 +1491,6 @@ void Browse::OnImportBorder()
 		tileBank2.getTileSet (land)->setBorder (m_ctrl.Texture==1?CTile::diffuse:CTile::additive, border);
 
 		// Message
-		MessageBox ("The border has been changed.", "Import border", MB_OK|MB_ICONINFORMATION);
+		MessageBox (_T("The border has been changed."), _T("Import border"), MB_OK|MB_ICONINFORMATION);
 	}
 }

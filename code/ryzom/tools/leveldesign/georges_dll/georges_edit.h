@@ -38,7 +38,7 @@
 // See georges_edit.cpp for the implementation of this class
 //
 
-#define GEORGES_EDIT_BASE_REG_KEY "Software\\Nevrax\\Georges Edit"
+#define GEORGES_EDIT_BASE_REG_KEY _T("Software\\Nevrax\\Georges Edit")
 #define GEORGES_EDIT_BROWSE_LABEL "--- Browse..."
 
 extern const char* TypeFilter;

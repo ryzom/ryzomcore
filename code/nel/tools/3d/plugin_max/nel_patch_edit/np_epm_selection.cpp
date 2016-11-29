@@ -262,7 +262,7 @@ void EditPatchMod::SelectSubPatch(int index)
 		
 		patchData->BeginEdit(t);
 		if (theHold.Holding()) 
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SelectSubComponent"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SelectSubComponent")));
 
 		patch->patchSel.Set(index);
 
@@ -311,7 +311,7 @@ void EditPatchMod::SelectSubPatch(int index)
 		
 		patchData->BeginEdit(t);
 		if (theHold.Holding()) 
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SelectSubComponent"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SelectSubComponent")));
 		
 		switch (selLevel)
 		{
@@ -636,7 +636,7 @@ void EditPatchMod::ClearSelection(int selLevel)
 		patchData->BeginEdit(ip->GetTime());
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "ClearSelection"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("ClearSelection")));
 		}
 		
 		switch (selLevel)
@@ -744,7 +744,7 @@ void EditPatchMod::SelectAll(int selLevel)
 		patchData->BeginEdit(ip->GetTime());
 		if (theHold.Holding())
 		{
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "SelectAll"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("SelectAll")));
 		}
 		
 		switch (selLevel)
@@ -813,7 +813,7 @@ void EditPatchMod::InvertSelection(int selLevel)
 		
 		patchData->BeginEdit(ip->GetTime());
 		if (theHold.Holding())
-			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "InvertSelection"));
+			theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("InvertSelection")));
 		
 		switch (selLevel)
 		{
@@ -1004,7 +1004,7 @@ void EditPatchMod::ChangeSelPatches(int type)
 		{
 			altered = holdNeeded = TRUE;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "ChangeSelPatches"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("ChangeSelPatches")));
 			// Call the vertex type change function
 			ChangePatchType(patch, -1, type);
 			patchData->UpdateChanges(patch, rpatch, FALSE);
@@ -1077,7 +1077,7 @@ void EditPatchMod::ChangeSelVerts(int type)
 		{
 			altered = holdNeeded = TRUE;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "ChangeSelVerts"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("ChangeSelVerts")));
 			// Call the vertex type change function
 			patch->ChangeVertType(-1, type);
 			patchData->UpdateChanges(patch, rpatch, FALSE);

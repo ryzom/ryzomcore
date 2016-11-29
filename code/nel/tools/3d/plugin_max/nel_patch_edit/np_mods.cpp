@@ -70,7 +70,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 //------------------------------------------------------
 __declspec( dllexport ) const TCHAR *LibDescription() 
 { 
-	return "NeL Patch Edit"; 
+	return _T("NeL Patch Edit");
 }
 
 /// MUST CHANGE THIS NUMBER WHEN ADD NEW CLASS

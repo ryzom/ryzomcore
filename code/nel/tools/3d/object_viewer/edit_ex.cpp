@@ -83,7 +83,7 @@ void		CEditEx::setSInt(sint value)
 {
 	nlassert(_Type == SIntType);
 	TCHAR buf[16];
-	_tcprintf(buf, "%d", (int) value);
+	_stprintf(buf, _T("%d"), (int) value);
 	setString(buf);
 }
 
@@ -91,7 +91,7 @@ void		CEditEx::setUInt(uint value)
 {
 	nlassert(_Type == UIntType);
 	TCHAR buf[16];
-	_tcprintf(buf, "%d", (int) value);
+	_stprintf(buf, _T("%d"), (int) value);
 	setString(buf);
 }
 
@@ -99,7 +99,7 @@ void		CEditEx::setFloat(float value)
 {
 	nlassert(_Type == FloatType);
 	TCHAR buf[16];
-	_tcprintf(buf, "%g", (double) value);
+	_stprintf(buf, _T("%g"), (double) value);
 	setString(buf);
 }
 

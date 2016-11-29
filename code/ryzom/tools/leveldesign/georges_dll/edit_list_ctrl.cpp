@@ -45,7 +45,7 @@ bool CEditListCtrl::create (DWORD wStyle, RECT &rect, CWnd *parent, uint dialog_
 	LPCTSTR className = AfxRegisterWndClass( 0 ); 
 
 	// Create this window
-	if (CWnd::Create (className, "empty", WS_CHILD|wStyle, rect, parent, dialog_index))
+	if (CWnd::Create (className, _T("empty"), WS_CHILD|wStyle, rect, parent, dialog_index))
 	{
 		RECT subRect;
 		subRect.left = 0;
@@ -122,11 +122,11 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 				// Insert an item at the end
 				string text;
 				getNewItemText (ListCtrl.GetItemCount (), 0, text);
-				ListCtrl.InsertItem (ListCtrl.GetItemCount (), text.c_str ());
+				ListCtrl.InsertItem (ListCtrl.GetItemCount (), utf8ToTStr(text));
 				for (uint i=1; i<ColumnCount; i++)
 				{
 					getNewItemText (ListCtrl.GetItemCount ()-1, i, text);
-					ListCtrl.SetItemText (ListCtrl.GetItemCount ()-1, i, text.c_str ());
+					ListCtrl.SetItemText (ListCtrl.GetItemCount ()-1, i, utf8ToTStr(text));
 				}
 				ListCtrl.SetItemState (ListCtrl.GetItemCount ()-1, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 
@@ -431,7 +431,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	{
 		// Move the editbox
 		Edit.SetWindowPos (NULL, subItemRect.left, subItemRect.top, subItemRect.right-subItemRect.left, subItemRect.bottom-subItemRect.top, SWP_SHOWWINDOW);
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 		Edit.SetWindowText (tmp);
 		Edit.SetSel( 0, -1);
@@ -440,7 +440,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	else if (editMode == EditFixedCombo)
 	{
 		// Get item string
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 
 		// Get the combo string
@@ -450,8 +450,8 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 		getComboBoxStrings (Item, SubItem, retStrings);
 		for (uint i=0; i<retStrings.size (); i++)
 		{
-			Combo.InsertString (-1, retStrings[i].c_str());
-			if (retStrings[i] == tmp)
+			Combo.InsertString (-1, utf8ToTStr(retStrings[i]));
+			if (retStrings[i] == tStrToUtf8(tmp))
 				Combo.SetCurSel (i);
 		}
 
@@ -465,7 +465,7 @@ void CEditListCtrl::editItem (uint item, uint subitem)
 	else if (editMode == EditMemCombo)
 	{
 		// Get item string
-		char tmp[512];
+		TCHAR tmp[512];
 		ListCtrl.GetItemText (Item, SubItem, tmp, 512);
 
 		// Get the combo strings
@@ -508,7 +508,7 @@ void CEditListCtrl::OnSetFocus( CWnd* pOldWnd )
 	}
 }
 
-void CEditListCtrl::insertColumn (uint id, const char *name)
+void CEditListCtrl::insertColumn (uint id, const TCHAR *name)
 {
 	ListCtrl.InsertColumn (id, name);
 	ColumnCount++;

@@ -133,7 +133,7 @@ INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			if (hModule)
 			{
 				// Get module file name
-				char moduldeFileName[512];
+				TCHAR moduldeFileName[512];
 				if (GetModuleFileName (hModule, moduldeFileName, 512))
 				{
 					// Get version info size
@@ -141,49 +141,49 @@ INT_PTR CALLBACK DlgProc_Panel(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 					uint versionInfoSize=GetFileVersionInfoSize (moduldeFileName, &doomy);
 					if (versionInfoSize)
 					{
-						// Alloc the buffer
-						char *buffer=new char[versionInfoSize];
+						// Alloc the buffer (size in bytes)
+						uint8_t *buffer = new uint8_t[versionInfoSize];
 
 						// Find the verion resource
 						if (GetFileVersionInfo(moduldeFileName, 0, versionInfoSize, buffer))
 						{
 							uint *versionTab;
 							uint versionSize;
-							if (VerQueryValue (buffer, "\\", (void**)&versionTab,  &versionSize))
+							if (VerQueryValue (buffer, _T("\\"), (void**)&versionTab,  &versionSize))
 							{
 								// Get the pointer on the structure
 								VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
 								if (info)
 								{
  									// Setup version number
-									char version[512];
-									sprintf (version, "Version %d.%d.%d.%d", 
-										info->dwFileVersionMS>>16, 
-										info->dwFileVersionMS&0xffff, 
-										info->dwFileVersionLS>>16,  
+									TCHAR version[512];
+									_stprintf (version, _T("Version %d.%d.%d.%d"),
+										info->dwFileVersionMS>>16,
+										info->dwFileVersionMS&0xffff,
+										info->dwFileVersionLS>>16,
 										info->dwFileVersionLS&0xffff);
 									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), version);
 								}
 								else
-									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VS_FIXEDFILEINFO * is NULL");
+									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VS_FIXEDFILEINFO * is NULL"));
 							}
 							else
-								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VerQueryValue failed");
+								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VerQueryValue failed"));
 						}
 						else
-							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfo failed");
+							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfo failed"));
 
 						// Free the buffer
 						delete [] buffer;
 					}
 					else
-						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfoSize failed");
+						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfoSize failed"));
 				}
 				else
-					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetModuleFileName failed");
+					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetModuleFileName failed"));
 			}
 			else
-				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "hInstance NULL");
+				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("hInstance NULL"));
 		}
 
 		// -----

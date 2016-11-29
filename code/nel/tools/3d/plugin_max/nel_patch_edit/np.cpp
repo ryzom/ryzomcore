@@ -642,7 +642,7 @@ void EditPatchMod::DoVertWeld()
 		{
 			hadSel = TRUE;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoVertWeld"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoVertWeld")));
 			// Call the patch weld function
 			if (patch->Weld(weldThreshold))
 			{
@@ -716,7 +716,7 @@ void EditPatchMod::DoVertReset ()
 		{
 			hadSel = TRUE;
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoVertReset"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoVertReset")));
 			// Call the patch weld function
 			ResetVert (patch);
 			patchData->UpdateChanges(patch, rpatch);
