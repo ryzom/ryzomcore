@@ -33,9 +33,10 @@
 #include "nel/misc/stream.h"
 
 // From ligo library
-#include "nel/../../src/ligo/zone_template.h"
+#include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_config.h"
-#include "nel/../../src/ligo/ligo_error.h"
+#include "nel/ligo/ligo_error.h"
+#include "nel/misc/path.h"
 
 using namespace std;
 using namespace NLMISC;

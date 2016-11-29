@@ -80,9 +80,9 @@ namespace std
 #include "nel/misc/config_file.h"
 
 // From ligo library
-#include "nel/../../src/ligo/zone_template.h"
+#include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_config.h"
-#include "nel/../../src/ligo/ligo_error.h"
+#include "nel/ligo/ligo_error.h"
 #include "nel/../../src/ligo/ligo_material.h"
 #include "nel/../../src/ligo/transition.h"
 #include "nel/ligo/zone_bank.h"
