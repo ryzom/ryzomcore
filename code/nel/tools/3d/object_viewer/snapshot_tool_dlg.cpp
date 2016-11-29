@@ -224,15 +224,6 @@ void CSnapshotToolDlg::toRegistry()
 		RegSetValueEx(hKey, _T("Filters"), 0, REG_SZ, (BYTE*) (LPCTSTR) filters, filters.GetLength() + 1);
 		DWORD recurseSubFolder = m_RecurseSubFolder;
 		DWORD dumpTextureSets = m_DumpTextureSets;
-		DWORD views [] = 
-		{ 
-			m_ViewBack,
-			m_ViewBottom,
-			m_ViewFront,
-			m_ViewLeft,
-			m_ViewRight,
-			m_ViewTop
-		};
 		DWORD width = (DWORD) m_OutputWidth;
 		DWORD height = (DWORD) m_OutputHeight;		
 		DWORD format = m_Format;
@@ -710,7 +701,25 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 							{
 								outputFilename += "_" + viewToString(viewIndex);
 							}
-							outputFilename += (m_Format == OutputFormat_Tga ? ".tga" : ".jpg");
+
+							std::string ext;
+							switch (m_Format)
+							{
+							case OutputFormat_Tga:
+								ext = "tga";
+								break;
+							case OutputFormat_Png:
+								ext = "png";
+								break;
+							case OutputFormat_Jpg:
+								ext = "jpg";
+								break;
+							default:
+								nlerror("Unsupported format %d", m_Format);
+								break;
+							}
+							outputFilename += "." + ext;
+
 							switch(m_OutputPathOption)
 							{
 								case OutputPath_Custom: // custom output path
@@ -724,9 +733,14 @@ void CSnapshotToolDlg::OnTimer(UINT_PTR nIDEvent)
 								break;
 							}
 							COFile output(outputFilename);
+
 							if (m_Format == OutputFormat_Tga)
 							{
 								snapshot.writeTGA(output);
+							}
+							else if (m_Format == OutputFormat_Png)
+							{
+								snapshot.writePNG(output);
 							}
 							else
 							{
