@@ -107,11 +107,11 @@ namespace NLGUI
 		{
 			return NLMISC::CPath::lookup(fileName,   false);
 		}
-		static void shellExecute(const char *operation,   const char *fileName,   const char *parameters)
+		static void shellExecute(const std::string &operation, const std::string &fileName, const std::string &parameters)
 		{
 		#if !FINAL_VERSION
 			#ifdef NL_OS_WINDOWS
-				ShellExecute(NULL,   operation,   fileName,   parameters,  NULL,   SW_SHOWDEFAULT);
+				ShellExecuteW(NULL, utf8ToWide(operation), utf8ToWide(fileName), utf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
 			#endif
 		#endif
 		}
