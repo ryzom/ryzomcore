@@ -2128,7 +2128,7 @@ void appendLightmapLog (COFile &outputLog, const char *lightmapName, const vecto
 		
 		outputLog.serialBuffer ((uint8*)text.c_str(), text.size());
 	}
-	catch (exception &e)
+	catch (const exception &e)
 	{
 		nlwarning ("Error writing the file : %s", e.what());
 	}

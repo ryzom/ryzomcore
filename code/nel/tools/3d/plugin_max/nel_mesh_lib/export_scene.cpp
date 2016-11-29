@@ -458,7 +458,7 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 									delete ss.getShapePointer();
 									ss.setShapePointer(NULL);
 								}
-								catch (NLMISC::Exception &e)
+								catch (const NLMISC::Exception &e)
 								{
 									nlwarning(e.what());									
 								}

@@ -250,7 +250,7 @@ Value* export_material_cf (Value** arg_list, int count)
 										ok = false;
 									}
 								}
-								catch (Exception &e)
+								catch (const Exception &e)
 								{
 									// Error message
 									char tmp[512];
