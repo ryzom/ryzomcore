@@ -1450,37 +1450,40 @@ static bool openDocWithExtension (const std::string &document, const std::string
 		{
 			lstrcatW(key, L"\\shell\\open\\command");
 
+			// get the command used to open a file with this extension
 			if (GetRegKey(HKEY_CLASSES_ROOT, key, key) == ERROR_SUCCESS)
 			{
-				char *pos = strstr(key, "\"%1\"");
+				std::string program = wideToUtf8(key);
 
-				if (pos == NULL)
+				// empty program
+				if (program.empty()) return false;
+
+				if (program[0] == '"')
 				{
-					// No quotes found
-					// Check for %1, without quotes
-					pos = strstr(key, "%1");
-		
-					if (pos == NULL)
+					// program is quoted
+					std::string::size_type pos = program.find('"', 1);
+
+					if (pos != std::string::npos)
 					{
-						// No parameter at all...
-						pos = key+lstrlenA(key)-1;
-					}
-					else
-					{
-						// Remove the parameter
-						*pos = '\0';
+						// take part before next quote
+						program = program.substr(1, pos - 1);
 					}
 				}
 				else
 				{
-					// Remove the parameter
-					*pos = '\0';
+					// program has a parameter
+					std::string::size_type pos = program.find(' ', 1);
+
+					if (pos != std::string::npos)
+					{
+						// take part before first space
+						program = program.substr(0, pos);
+					}
 				}
 
-				lstrcatA(pos, " ");
-				lstrcatA(pos, document);
-				int res = WinExec(key, SW_SHOWDEFAULT);
-				return (res>31);
+				// create process
+				PROCESS_INFORMATION pi;
+				return createProcess(program, document, false, pi);
 			}
 		}
 	}
