@@ -105,11 +105,11 @@ class CNelExportClassDesc:public ClassDesc2
 	public:
 	int 			IsPublic() {return 1;}
 	void *			Create(BOOL loading = FALSE);
-	const TCHAR *	ClassName() {return _T("NeL Export");}
+	const MCHAR *	ClassName() {return _M("NeL Export");}
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return CNELEXPORT_CLASS_ID;}
-	const TCHAR* 	Category() {return _T("NeL Tools");}
-	const TCHAR*	InternalName() { return _T("NeL export and view"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR* 	Category() {return _M("NeL Tools");}
+	const MCHAR*	InternalName() { return _M("NeL export and view"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }				// returns owning module handle
 };
 

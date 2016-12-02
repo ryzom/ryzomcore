@@ -63,11 +63,11 @@ def_visible_primitive ( set_file_modification_date, 	"NeLSetFileModificationDate
 def_visible_primitive ( force_quit_on_msg_displayer,		"NelForceQuitOnMsgDisplayer");
 def_visible_primitive ( force_quit_right_now,		"NelForceQuitRightNow");
 
-char *sExportShapeErrorMsg = "NeLExportShape [Object] [Filename.shape]";
-char *sExportShapeExErrorMsg = "NeLExportShapeEx [Object] [Filename.shape] [bShadow] [bExportLighting] [sLightmapPath] [nLightingLimit] [fLumelSize] [nOverSampling] [bExcludeNonSelected] [bShowLumel]";
-char *sExportAnimationErrorMsg = "NelExportAnimation [node array] [Filename.anim] [bool_scene_animation]";
-char *sExportCollisionErrorMsg = "NelExportCollision [node array] [output directory]";
-char *sExportPACSPrimitivesErrorMsg = "NelExportPACSPrimitves [node array] [output filename]";
+MCHAR *sExportShapeErrorMsg = _M("NeLExportShape [Object] [Filename.shape]");
+MCHAR *sExportShapeExErrorMsg = _M("NeLExportShapeEx [Object] [Filename.shape] [bShadow] [bExportLighting] [sLightmapPath] [nLightingLimit] [fLumelSize] [nOverSampling] [bExcludeNonSelected] [bShowLumel]");
+MCHAR *sExportAnimationErrorMsg = _M("NelExportAnimation [node array] [Filename.anim] [bool_scene_animation]");
+MCHAR *sExportCollisionErrorMsg = _M("NelExportCollision [node array] [output directory]");
+MCHAR *sExportPACSPrimitivesErrorMsg = _M("NelExportPACSPrimitves [node array] [output filename]");
 
 extern CExportNelOptions theExportSceneStruct;
 
@@ -207,8 +207,8 @@ Value* export_skeleton_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check (arg_list[0], MAXNode, "NelExportSkeleton [root node] [Filename]");
-	type_check (arg_list[1], String, "NelExportSkeleton [root node] [Filename]");
+	type_check (arg_list[0], MAXNode, _M("NelExportSkeleton [root node] [Filename]"));
+	type_check (arg_list[1], String, _M("NelExportSkeleton [root node] [Filename]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -298,7 +298,7 @@ Value* export_animation_cf (Value** arg_list, int count)
 			else
 			{
 				// Error message
-				mprintf ("Error exporting animation %s in the file\n%s\n", (*vectNode.begin())->GetName(), sPath);
+				mprintf (_M("Error exporting animation %s in the file\n%s\n"), (*vectNode.begin())->GetName(), utf8ToTStr(sPath));
 			}
 		}
 	}
@@ -321,8 +321,8 @@ Value* export_ig_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check (arg_list[0], Array, "NelExportInstanceGroup [Object array] [Filename]");
-	type_check (arg_list[1], String, "NelExportInstanceGroup [Object array] [Filename]");
+	type_check (arg_list[0], Array, _M("NelExportInstanceGroup [Object array] [Filename]"));
+	type_check (arg_list[1], String, _M("NelExportInstanceGroup [Object array] [Filename]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -342,7 +342,7 @@ Value* export_ig_cf (Value** arg_list, int count)
 			// Check each value in the array
 			uint i;
 			for (i=0; i<(uint)array->size; i++)
-				type_check (array->get (i+1), MAXNode, "NelExportInstanceGroup [Object array] [Filename]");
+				type_check (array->get (i+1), MAXNode, _M("NelExportInstanceGroup [Object array] [Filename]"));
 
 			// Create a STL array
 			if (array->size)
@@ -380,8 +380,8 @@ Value* export_skeleton_weight_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check (arg_list[0], Array, "NelExportSkeletonWeight [Object array] [Filename]");
-	type_check (arg_list[1], String, "NelExportSkeletonWeight [Object array] [Filename]");
+	type_check (arg_list[0], Array, _M("NelExportSkeletonWeight [Object array] [Filename]"));
+	type_check (arg_list[1], String, _M("NelExportSkeletonWeight [Object array] [Filename]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -401,7 +401,7 @@ Value* export_skeleton_weight_cf (Value** arg_list, int count)
 			// Check each value in the array
 			uint i;
 			for (i=0; i<(uint)array->size; i++)
-				type_check (array->get (i+1), MAXNode, "NelExportSkeletonWeight [Object array] [Filename]");
+				type_check (array->get (i+1), MAXNode, _M("NelExportSkeletonWeight [Object array] [Filename]"));
 
 			// Create a STL array
 			if (array->size)
@@ -462,8 +462,8 @@ Value* test_file_date_cf (Value** arg_list, int count)
 	// Make sure we have the correct number of arguments (2)
 	check_arg_count(view_shape, 2, count);
 
-	type_check (arg_list[0], String, "NeLTestFileDate [DestFilename] [SrcFilename]");
-	type_check (arg_list[1], String, "NeLTestFileDate [DestFilename] [SrcFilename]");
+	type_check (arg_list[0], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
+	type_check (arg_list[1], String, _M("NeLTestFileDate [DestFilename] [SrcFilename]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;
@@ -526,7 +526,7 @@ Value* export_vegetable_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	char *message = "NelExportVegetable [node] [filename] [dialog error]";
+	MCHAR *message = _M("NelExportVegetable [node] [filename] [dialog error]");
 	type_check (arg_list[0], MAXNode, message);
 	type_check (arg_list[1], String, message);
 	type_check (arg_list[2], Boolean, message);
@@ -723,7 +723,7 @@ Value* export_lod_character_cf (Value** arg_list, int count)
 	check_arg_count(export_lod_character, 3, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NelExportLodCharacter [node] [filename] [dialog error]";
+	MCHAR *message = _M("NelExportLodCharacter [node] [filename] [dialog error]");
 	type_check (arg_list[0], MAXNode, message);
 	type_check (arg_list[1], String, message);
 	type_check (arg_list[2], Boolean, message);
@@ -771,7 +771,7 @@ Value* node_properties_cf (Value** arg_list, int count)
 	check_arg_count(export_lod_character, 2, count);
 
 	// Check to see if the arguments match up to what we expect
-	char *message = "NelNodeProperties [node_array] [dialog error]";
+	MCHAR *message = _M("NelNodeProperties [node_array] [dialog error]");
 
 	//type_check (arg_list[0], MAXNode, message);
 	type_check (arg_list[0], Array, message);
@@ -787,7 +787,7 @@ Value* node_properties_cf (Value** arg_list, int count)
 	uint i;
 	for (i=0; i<(uint)array->size; i++)
 	{
-		type_check (array->get (i+1), MAXNode, "NelNodeProperties [node_array] [dialog error]");
+		type_check (array->get (i+1), MAXNode, _M("NelNodeProperties [node_array] [dialog error]"));
 
 		// Add to the array of nodes
 		nodes.insert (array->get (i+1)->to_node());
@@ -830,7 +830,7 @@ Value* mirror_physique_cf (Value** arg_list, int count)
 	check_arg_count(NelMirrorPhysique , 3, count);
 	
 	// Check to see if the arguments match up to what we expect
-	char *message = "NelMirrorPhysique [node] [vert_list_in] [threshold]";
+	MCHAR *message = _M("NelMirrorPhysique [node] [vert_list_in] [threshold]");
 	
 	//type_check
 	type_check (arg_list[0], MAXNode, message);
@@ -873,7 +873,7 @@ Value* get_file_modification_date_cf (Value** arg_list, int count)
 	check_arg_count(NeLGetFileModificationDate , 1, count);
 	
 	// Check to see if the arguments match up to what we expect
-	char *message = "date NeLGetFileModificationDate [filename] - If an error occurred, returns undefined.";
+	MCHAR *message = _M("date NeLGetFileModificationDate [filename] - If an error occurred, returns undefined.");
 	
 	//type_check
 	type_check (arg_list[0], String, message);
@@ -911,7 +911,7 @@ Value* set_file_modification_date_cf (Value** arg_list, int count)
 	check_arg_count(NeLSetFileModificationDate , 2, count);
 	
 	// Check to see if the arguments match up to what we expect
-	char *message = "bool NeLSetFileModificationDate [filename] [date] - If an error occurred, returns false.";
+	MCHAR *message = _M("bool NeLSetFileModificationDate [filename] [date] - If an error occurred, returns false.");
 	
 	//type_check
 	type_check (arg_list[0], String, message);

@@ -781,8 +781,8 @@ void CExportNel::outputWarningMessage (const std::string &message)
 	{
 		MessageBox (_Ip->GetMAXHWnd(), utf8ToTStr(message), utf8ToTStr(_ErrorTitle), MB_OK|MB_ICONEXCLAMATION);
 	}
-	mprintf (message);
-	mprintf ("\n");
+	mprintf (utf8ToTStr(message));
+	mprintf (_M("\n"));
 
 	nlwarning ("Warning in max file %s : ", _Ip->GetCurFilePath());
 	nlwarning (message.c_str());

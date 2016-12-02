@@ -752,7 +752,7 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
+		const MCHAR *GetObjectName() { return GetString(IDS_TH_EDITPATCH); }
 		void ActivateSubobjSel(int level, XFormModes& modes );
 		int NeedUseSubselButton() { return 0; }
 		void SelectSubPatch(int index);
@@ -929,10 +929,10 @@ class EditPatchClassDesc:public ClassDesc {
 	{ 
 		return new EditPatchMod; 
 	}
-	const TCHAR *	ClassName() { return "NeL Edit"; }
+	const MCHAR *	ClassName() { return _M("NeL Edit"); }
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return Class_ID(0x4dd14a3c, 0x4ac23c0c); }
-	const TCHAR* 	Category() { return "NeL Tools";}
+	const MCHAR* 	Category() { return _M("NeL Tools");}
 	void			ResetClassParams(BOOL fileReset);
 	};
 

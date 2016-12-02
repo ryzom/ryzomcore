@@ -890,9 +890,9 @@ Value *turn_patch_cf (Value** arg_list, int count)
 
 	// Check to see if the arguments match up to what we expect
 	// We want to use 'TurnAllTexturesOn <object to use>'
-	type_check(arg_list[0], MAXNode, "RykolTurnPatch [Node] [Modifier] [Patch]");
-    type_check(arg_list[1], MAXModifier, "RykolTurnPatch [Node] [Modifier] [Patch]"); 
-	type_check(arg_list[2], Integer, "RykolTurnPatch [Node] [Modifier] [Patch]");
+	type_check(arg_list[0], MAXNode, _M("RykolTurnPatch [Node] [Modifier] [Patch]"));
+	type_check(arg_list[1], MAXModifier, _M("RykolTurnPatch [Node] [Modifier] [Patch]"));
+	type_check(arg_list[2], Integer, _M("RykolTurnPatch [Node] [Modifier] [Patch]"));
 
 	// Get a good interface pointer
 	Interface *ip = MAXScript_interface;

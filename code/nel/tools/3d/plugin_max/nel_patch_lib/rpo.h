@@ -83,14 +83,14 @@ class RPO : public PatchObject
 		int HitTest(TimeValue t, INode* inode, int type, int crossing, int flags, IPoint2 *p, ViewExp *vpt);
 		void Snap(TimeValue t, INode* inode, SnapInfo *snap, IPoint2 *p, ViewExp *vpt);
 		//TODO: Return the name that will appear in the history browser (modifier stack)
-		const MCHAR *GetObjectName() { return _T("Rykol Patch Object");}
+		const MCHAR *GetObjectName() { return _M("Rykol Patch Object");}
 		
 		void GetWorldBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 		void GetLocalBoundBox(TimeValue t, INode *mat, ViewExp *vpt, Box3& box );
 
 		void GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel );
 		//TODO: Return the default name of the node when it is created.
-		void InitNodeName(TSTR& s) { s.FromUTF8("Rykol Patch Object"); }
+		void InitNodeName(TSTR& s) { s = _M("Rykol Patch Object"); }
 		
 		// From Object
 		BOOL HasUVW();

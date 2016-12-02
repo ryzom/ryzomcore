@@ -276,7 +276,7 @@ void EditPatchMod::SetSelTess(int nU, int nV)
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Tile count in U and V change");
+		theHold.Accept(_M("Tile count in U and V change"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);
@@ -453,7 +453,7 @@ void EditPatchMod::setSmoothFlags (bool smooth)
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Tile count in U and V change");
+		theHold.Accept(_M("Tile count in U and V change"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);
@@ -589,7 +589,7 @@ void EditPatchMod::BalanceSelPatch ()
 	}	
 	
 	if (holdNeeded)
-		theHold.Accept("Balance tile");
+		theHold.Accept(_M("Balance tile"));
 	else 
 	{
 		ip->DisplayTempPrompt(GetString(IDS_TH_NOPATCHESSEL), PROMPT_TIME);

@@ -90,13 +90,13 @@ class addSubLodNodeHitCallBack : public HitByNameDlgCallback
 public:
 	INodeTab	NodeTab;
 private:
-	virtual TCHAR *dialogTitle()
+	virtual const MCHAR *dialogTitle()
 	{
-		return "Select sub lod objects to add";
+		return _M("Select sub lod objects to add");
 	}
-	virtual TCHAR *buttonText()
+	virtual const MCHAR *buttonText()
 	{
-		return "Add";
+		return _M("Add");
 	}
 	virtual BOOL singleSelect()
 	{

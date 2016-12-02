@@ -43,9 +43,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return new RPO;
 	}
-	const TCHAR *	ClassName() 
+	const MCHAR *	ClassName() 
 	{
-		return _T("RklPatch");
+		return _M("RklPatch");
 	}
 	SClass_ID		SuperClassID() 
 	{
@@ -55,9 +55,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return RYKOLPATCHOBJ_CLASS_ID;
 	}
-	const TCHAR* 	Category() 
+	const MCHAR* 	Category() 
 	{
-		return _T("Rykol Tools");
+		return _M("Rykol Tools");
 	}
 };
 

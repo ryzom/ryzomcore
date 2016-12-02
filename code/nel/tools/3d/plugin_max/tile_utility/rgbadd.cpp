@@ -107,10 +107,10 @@ class RGBAddClassDesc:public ClassDesc2 {
 	const TCHAR *	ClassName() { return GetString(IDS_DS_RGBMULT_CDESC); } // mjm - 2.3.99
 	SClass_ID		SuperClassID() { return TEXMAP_CLASS_ID; }
 	Class_ID 		ClassID() { return RGBAddClassID; }
-	const TCHAR* 	Category() { return TEXMAP_CAT_COMP;  }
+	const MCHAR* 	Category() { return TEXMAP_CAT_COMP;  }
 // JBW: new descriptor data accessors added.  Note that the 
 //      internal name is hardwired since it must not be localized.
-	const TCHAR*	InternalName() { return _T("RGBAdd"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR*	InternalName() { return _M("RGBAdd"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }			// returns owning module handle
 	};
 

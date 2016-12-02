@@ -75,8 +75,8 @@ class Tile_utilityClassDesc:public ClassDesc2
 	const TCHAR *	ClassName() {return _T("NeL Tile Bank");}
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return TILE_UTILITY_CLASS_ID;}
-	const TCHAR* 	Category() {return _T("NeL Tools");}
-	const TCHAR*	InternalName() { return _T("NeL tile bank utility"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR* 	Category() {return _M("NeL Tools");}
+	const MCHAR*	InternalName() { return _M("NeL tile bank utility"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }				// returns owning module handle
 };
 

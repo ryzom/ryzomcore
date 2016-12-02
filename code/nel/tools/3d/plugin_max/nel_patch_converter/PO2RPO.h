@@ -50,7 +50,7 @@ class PO2RPO : public Modifier {
 		HWND hRollup;
 
 		// From Animatable
-		MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
+		const MCHAR *GetObjectName() { return GetString(IDS_CLASS_NAME); }
 
 		//From Modifier
 		//TODO: Add the channels that the modifier needs to perform its modification
@@ -115,11 +115,11 @@ class PO2RPOClassDesc:public ClassDesc2 {
 		return new PO2RPO();
 	}
 
-	const TCHAR *	ClassName() {return "NeL Convert";}
+	const MCHAR *	ClassName() {return _M("NeL Convert");}
 	SClass_ID		SuperClassID() {return OSM_CLASS_ID;}
 	Class_ID		ClassID() {return PO2RPO_CLASS_ID;}
-	const TCHAR* 	Category() {return "NeL Tools";}
-	const TCHAR*	InternalName() { return _T("PatchObjectToNelPatchObject"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR* 	Category() {return _M("NeL Tools");}
+	const MCHAR*	InternalName() { return _M("PatchObjectToNelPatchObject"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }				// returns owning module handle
 };
 

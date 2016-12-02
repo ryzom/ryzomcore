@@ -482,7 +482,7 @@ class PaintPatchMod : public Modifier
 		void BeginEditParams( IObjParam  *ip, ULONG flags, Animatable *prev );
 		void EndEditParams( IObjParam *ip, ULONG flags, Animatable *next );
 		RefTargetHandle Clone(RemapDir& remap = DefaultRemapDir());
-		TCHAR *GetObjectName() { return "NeL Patch Painter"; }
+		const MCHAR *GetObjectName() { return _M("NeL Patch Painter"); }
 		
 		void RescaleWorldUnits(float f);
 
@@ -500,10 +500,10 @@ class EditPatchClassDesc:public ClassDesc {
 	{ 
 		return new PaintPatchMod; 
 	}
-	const TCHAR *	ClassName() { return "NeL Painter"; }
+	const MCHAR *	ClassName() { return _M("NeL Painter"); }
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return Class_ID(0xc49560f, 0x3c3d68e7); }
-	const TCHAR* 	Category() { return "NeL Tools";}
+	const MCHAR* 	Category() { return _M("NeL Tools");}
 	void			ResetClassParams(BOOL fileReset);
 	};
 

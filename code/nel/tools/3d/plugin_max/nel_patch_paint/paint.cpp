@@ -4034,7 +4034,7 @@ void EPM_PaintCMode::DoPaint ()
 			patchData->SetFlag(EPD_BEENDONE, TRUE);
 		}
 
-		theHold.Accept("Patch change");
+		theHold.Accept(_M("Patch change"));
 
 		nodes.DisposeTemporary();
 		pobj->ClearPatchDataFlag(mcList, EPD_BEENDONE);
