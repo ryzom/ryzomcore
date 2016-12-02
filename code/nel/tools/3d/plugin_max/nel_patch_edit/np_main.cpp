@@ -160,8 +160,7 @@ void EditPatchMod::BeginEditParams(IObjParam *ip, ULONG flags, Animatable *prev)
 	*/
 	if (selLevel == EP_PATCH)
 	{
-		hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF),
-			PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
+		hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF), PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
 	}
 	else
 		hSurfPanel = NULL;

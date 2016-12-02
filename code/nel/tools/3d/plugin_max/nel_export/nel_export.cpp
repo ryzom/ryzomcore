@@ -26,7 +26,7 @@
 #include "nel_export_scene.h"
 
 
- 
+
 using namespace NL3D;
 using namespace NLMISC;
 
@@ -66,25 +66,29 @@ INT_PTR CALLBACK OptionsDialogCallback (
   LPARAM lParam  // second message parameter
 )
 {
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
 			CenterWindow( hwndDlg, theCNelExport._Ip->GetMAXHWnd() );
 			ShowWindow( hwndDlg, TRUE );
+
 			// Initialize from theExportSceneStruct
 			if( theExportSceneStruct.bExcludeNonSelected )
 				SendMessage( GetDlgItem(hwndDlg,IDC_EXCLUDE), BM_SETCHECK, BST_CHECKED, 0 );
 			else
 				SendMessage( GetDlgItem(hwndDlg,IDC_EXCLUDE), BM_SETCHECK, BST_UNCHECKED, 0 );
+
 			if( theExportSceneStruct.bExportLighting )
 				SendMessage( GetDlgItem(hwndDlg,IDC_CHECKEXPORTLIGHTING), BM_SETCHECK, BST_CHECKED, 0 );
 			else
 				SendMessage( GetDlgItem(hwndDlg,IDC_CHECKEXPORTLIGHTING), BM_SETCHECK, BST_UNCHECKED, 0 );
+
 			if( theExportSceneStruct.OutputLightmapLog )
 				SendMessage( GetDlgItem(hwndDlg,IDC_CHECKOUTPUTLIGHTMAPLOG), BM_SETCHECK, BST_CHECKED, 0 );
 			else
 				SendMessage( GetDlgItem(hwndDlg,IDC_CHECKOUTPUTLIGHTMAPLOG), BM_SETCHECK, BST_UNCHECKED, 0 );
+
 			if( theExportSceneStruct.bShadow)
 				SendMessage( GetDlgItem(hwndDlg,IDC_SHADOW), BM_SETCHECK, BST_CHECKED, 0 );
 			else
@@ -94,6 +98,7 @@ INT_PTR CALLBACK OptionsDialogCallback (
 
 			if( theExportSceneStruct.nExportLighting == 0 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIONORMALEXPORTLIGHTING), BM_SETCHECK, BST_CHECKED, 0 );
+
 			if( theExportSceneStruct.nExportLighting == 1 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIORADIOSITYEXPORTLIGHTING), BM_SETCHECK, BST_CHECKED, 0 );
 
@@ -101,17 +106,21 @@ INT_PTR CALLBACK OptionsDialogCallback (
 
 			if( theExportSceneStruct.nOverSampling == 1 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS1), BM_SETCHECK, BST_CHECKED, 0 );
+
 			if( theExportSceneStruct.nOverSampling == 2 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS2), BM_SETCHECK, BST_CHECKED, 0 );
+
 			if( theExportSceneStruct.nOverSampling == 4 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS3), BM_SETCHECK, BST_CHECKED, 0 );
+
 			if( theExportSceneStruct.nOverSampling == 8 )
 				SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS4), BM_SETCHECK, BST_CHECKED, 0 );
+
 			if( theExportSceneStruct.bShowLumel )
 				SendMessage( GetDlgItem(hwndDlg,IDC_SHOWLUMEL), BM_SETCHECK, BST_CHECKED, 0 );
 			else
 				SendMessage( GetDlgItem(hwndDlg,IDC_SHOWLUMEL), BM_SETCHECK, BST_UNCHECKED, 0 );
-			
+
 			if( theExportSceneStruct.bExportBgColor )
 				SendMessage( GetDlgItem(hwndDlg,IDC_EXPORT_BG_COLOR), BM_SETCHECK, BST_CHECKED, 0 );
 			else
@@ -131,7 +140,7 @@ INT_PTR CALLBACK OptionsDialogCallback (
 
 		case WM_COMMAND:
 			if( HIWORD(wParam) == BN_CLICKED )
-			switch (LOWORD(wParam)) 
+			switch (LOWORD(wParam))
 			{
 				case IDC_BUTTONEXPORTLIGHTING:
 				{
@@ -153,14 +162,17 @@ INT_PTR CALLBACK OptionsDialogCallback (
 						theExportSceneStruct.bExcludeNonSelected = true;
 					else
 						theExportSceneStruct.bExcludeNonSelected = false;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_SHADOW), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.bShadow = true;
 					else
 						theExportSceneStruct.bShadow = false;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_CHECKEXPORTLIGHTING), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.bExportLighting = true;
 					else
 						theExportSceneStruct.bExportLighting = false;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_CHECKOUTPUTLIGHTMAPLOG), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.OutputLightmapLog = true;
 					else
@@ -172,6 +184,7 @@ INT_PTR CALLBACK OptionsDialogCallback (
 
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIONORMALEXPORTLIGHTING), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nExportLighting = 0;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIORADIOSITYEXPORTLIGHTING), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nExportLighting = 1;
 
@@ -180,16 +193,21 @@ INT_PTR CALLBACK OptionsDialogCallback (
 
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS1), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nOverSampling = 1;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS2), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nOverSampling = 2;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS3), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nOverSampling = 4;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_RADIOSS4), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.nOverSampling = 8;
+
 					if( SendMessage( GetDlgItem(hwndDlg,IDC_SHOWLUMEL), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
 						theExportSceneStruct.bShowLumel = true;
 					else
 						theExportSceneStruct.bShowLumel = false;
+
 					theExportSceneStruct.bExportBgColor = ( SendMessage( GetDlgItem(hwndDlg,IDC_EXPORT_BG_COLOR), BM_GETCHECK, 0, 0 ) == BST_CHECKED );
 
 					// SurfaceLighting
@@ -212,9 +230,9 @@ INT_PTR CALLBACK OptionsDialogCallback (
 			EndDialog(hwndDlg,1);
 		break;
 
-		case WM_DESTROY:						
+		case WM_DESTROY:
 		break;
-	
+
 		default:
 		return FALSE;
 	}
@@ -228,7 +246,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 	setlocale (LC_NUMERIC, "English");
 
 	BOOL ret = TRUE;
-	switch (msg) 
+	switch (msg)
 	{
 		case WM_INITDIALOG:
 			{
@@ -312,7 +330,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 					// Get time
 					TimeValue time=theCNelExport._Ip->GetTime();
-					
+
 					// Get node count
 					int nNumSelNode=theCNelExport._Ip->GetSelNodeCount();
 
@@ -430,7 +448,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 					// Get time
 					TimeValue time=theCNelExport._Ip->GetTime();
-					
+
 					// Get node count
 					uint nNumSelNode=theCNelExport._Ip->GetSelNodeCount();
 
@@ -465,7 +483,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 			// ---
 			case ID_SAVECOLLISION:
 				{
-					
+
 
 					// Init the exporter
 					nlassert (theIP);
@@ -473,7 +491,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 
 					// Get time
 					TimeValue time=theCNelExport._Ip->GetTime();
-					
+
 					// Get node count
 					int nNumSelNode=theCNelExport._Ip->GetSelNodeCount();
 
@@ -537,12 +555,12 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 					// Init the exporter
 					nlassert (theIP);
 					theCNelExport.init (false, true, theIP, true);
-					
+
 					uint nNumSelNode = theCNelExport._Ip->GetSelNodeCount();
 
 					// Save all selected objects
 					if (nNumSelNode)
-					{		
+					{
 						std::vector<INode*> vectNode;
 						theCNelExport.getSelectedNode (vectNode);
 						nlassert (vectNode.size()!=0);
@@ -583,7 +601,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 							COFile outputFile;
 							if( outputFile.open(sConfigFileName) )
 								theExportSceneStruct.serial( outputFile );
-						}							
+						}
 						// EXPORT THE SCENE
 						// theCNelExport.exportScene( vectNode );
 					}
@@ -595,7 +613,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 					// Init the exporter
 					nlassert (theIP);
 					theCNelExport.init (false, true, theIP, true);
-					
+
 					// Build a seleted set
 					std::set<INode*> listNode;
 
@@ -618,13 +636,13 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 					// Init the exporter
 					nlassert (theIP);
 					theCNelExport.init (false, true, theIP, true);
-					
+
 					uint nNumSelNode = theCNelExport._Ip->GetSelNodeCount();
 
 					// done in dllentry registerSerial3d();
-					// All the selected nodes are considered as a scene					
+					// All the selected nodes are considered as a scene
 					if( nNumSelNode > 0 )
-					{		
+					{
 						std::vector<INode*> vectNode;
 						theCNelExport.getSelectedNode (vectNode);
 						nlassert (vectNode.size()!=0);
@@ -650,7 +668,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 					// Init the exporter
 					nlassert (theIP);
 					theCNelExport.init (false, true, theIP, true);
-					
+
 					uint nNumSelNode = theCNelExport._Ip->GetSelNodeCount();
 					if (nNumSelNode!=1)
 					{
@@ -679,13 +697,13 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 					}
 				}
 				break;
-				case ID_TEST_INTERFACE_MESH:					
-				{										
-					nlassert (theIP);					
+				case ID_TEST_INTERFACE_MESH:
+				{
+					nlassert (theIP);
 					theCNelExport.init (false, true, theIP, true);
 					// Get time
 					TimeValue time = theCNelExport._Ip->GetTime();
-					
+
 					// Get node count
 					uint nNumSelNode=theCNelExport._Ip->GetSelNodeCount();
 
@@ -701,9 +719,9 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 							return ret;
 						}
 
-						// create a mem displayer, that will receive errors						
+						// create a mem displayer, that will receive errors
 						try
-						{								
+						{
 							// test all nodes
 							for(std::vector<INode*>::iterator it = vectNode.begin(); it != vectNode.end(); ++it)
 							{
@@ -712,8 +730,8 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 								{
 									::MessageBox(NULL, _T("Unable to bind interface of mesh %s"), (*it)->GetName(), MB_OK | MB_ICONEXCLAMATION);
 									break;
-								}									
-							}	
+								}
+							}
 							theIP->RedrawViews(time);
 						}
 						catch(const std::exception &e)
@@ -722,14 +740,14 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						}
 					}
 				}
-				break;									
+				break;
 			}
-			
+
 			break;
 		case WM_LBUTTONDOWN:
 		case WM_LBUTTONUP:
 		case WM_MOUSEMOVE:
-			theCNelExport._Ip->RollupMouseMessage(hWnd,msg,wParam,lParam); 
+			theCNelExport._Ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
 			break;
 
 		default:
@@ -747,7 +765,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 //--- CNelExport -------------------------------------------------------
 CNelExport::CNelExport() : _ErrorInDialog(true), _TerminateOnFileOpenIssues(false)
 {
-	_Ip = NULL;	
+	_Ip = NULL;
 	theHPanel = NULL;
 }
 
@@ -756,7 +774,7 @@ CNelExport::~CNelExport()
 
 }
 
-void CNelExport::BeginEditParams(Interface *_Ip,IUtil *iu) 
+void CNelExport::BeginEditParams(Interface *_Ip,IUtil *iu)
 {
 	theIP = _Ip;
 	if (_ExportNel)
@@ -768,8 +786,8 @@ void CNelExport::BeginEditParams(Interface *_Ip,IUtil *iu)
 	theHBar		= GetDlgItem(theHPanel,ID_BAR);
 	SendMessage(theHBar,PBM_SETPOS,0,0);
 }
-	
-void CNelExport::EndEditParams(Interface *_Ip,IUtil *iu) 
+
+void CNelExport::EndEditParams(Interface *_Ip,IUtil *iu)
 {
 	this->_Ip = NULL;
 	if (_ExportNel)
@@ -813,7 +831,8 @@ void CNelExport::initOptions()
 	if( CFile::fileExists(sConfigFileName) )
 	{
 		// Serial the configuration
-		try {
+		try
+		{
 			CIFile inputFile;
 			if( inputFile.open(sConfigFileName) )
 			{
@@ -838,7 +857,7 @@ void CNelExport::init (bool view, bool errorInDialog, Interface *ip, bool loadSt
 
 	// Create a new nelexport
 	_Ip = ip;
-	
+
 	// Load the options
 	if (loadStruct)
 		theCNelExport.initOptions();

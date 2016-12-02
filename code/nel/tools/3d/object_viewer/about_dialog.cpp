@@ -48,10 +48,10 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CAboutDialog message handlers
 
-BOOL CAboutDialog::OnInitDialog() 
+BOOL CAboutDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	
+
 	// Get the module path
 	HMODULE hModule = AfxGetInstanceHandle();
 	nlassert(hModule); // shouldn't be null now anymore in any case
@@ -73,7 +73,7 @@ BOOL CAboutDialog::OnInitDialog()
 					if (VerQueryValue (pInfo, _T("\\"), (void**)&versionTab,  &versionSize))
 					{
 						// Get the pointer on the structure
-						VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
+						VS_FIXEDFILEINFO *info = (VS_FIXEDFILEINFO*)versionTab;
 
  						// Setup version number
 						TCHAR version[512];

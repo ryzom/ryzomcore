@@ -1885,7 +1885,7 @@ bool CObjectViewer::loadInstanceGroup(const std::string &igFilename)
 	if (file.open (igFilename))
 	{		
 		// Shape pointer
-		NL3D::CInstanceGroup	*ig= new NL3D::CInstanceGroup;	
+		NL3D::CInstanceGroup *ig = new NL3D::CInstanceGroup;	
 
 		try
 		{

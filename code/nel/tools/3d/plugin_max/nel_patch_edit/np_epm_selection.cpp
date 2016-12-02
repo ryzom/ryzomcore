@@ -71,18 +71,15 @@ void EditPatchMod::RefreshSelType()
 		*/
 		if (selLevel == EP_PATCH)
 		{
-			hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF),
-				PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
+			hSurfPanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_SURF), PatchSurfDlgProc, GetString(IDS_TH_SURFACEPROPERTIES), (LPARAM) this, rsSurf ? 0 : APPENDROLL_CLOSED);
 		}
 		if (selLevel == EP_TILE)
 		{
-			hTilePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_TILE),
-				PatchTileDlgProc, "Tile Properties", (LPARAM) this, rsTile ? 0 : APPENDROLL_CLOSED);
+			hTilePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_TILE), PatchTileDlgProc, _M("Tile Properties"), (LPARAM) this, rsTile ? 0 : APPENDROLL_CLOSED);
 		}
 		if (selLevel == EP_EDGE)
 		{
-			hEdgePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_EDGE),
-				PatchEdgeDlgProc, "Edge Properties", (LPARAM) this, rsEdge ? 0 : APPENDROLL_CLOSED);
+			hEdgePanel = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_EDPATCH_EDGE), PatchEdgeDlgProc, _M("Edge Properties"), (LPARAM) this, rsEdge ? 0 : APPENDROLL_CLOSED);
 		}
 		SetSurfDlgEnables();
 		SetTileDlgEnables();
