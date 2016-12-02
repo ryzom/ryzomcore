@@ -761,7 +761,8 @@ static bool createProcess(const std::string &programName, const std::string &arg
 		sProgramName = new wchar_t[MAX_PATH];
 		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
 
-		args = arguments;
+		// important! we need to specify the executable full path as first argument
+		args = toString("\"%s\" ", programName.c_str()) + arguments;
 	}
 
 	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
