@@ -1416,17 +1416,17 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 }
 
 #ifdef NL_OS_WINDOWS
-LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
+LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
 {
 	HKEY hkey;
-	LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
+	LONG retval = RegOpenKeyExW(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
 
 	if (retval == ERROR_SUCCESS)
 	{
 		long datasize = MAX_PATH;
-		char data[MAX_PATH];
-		RegQueryValueA(hkey, NULL, data, &datasize);
-		lstrcpyA(retdata,data);
+		wchar_t data[MAX_PATH];
+		RegQueryValueW(hkey, NULL, data, &datasize);
+		lstrcpyW(retdata, data);
 		RegCloseKey(hkey);
 	}
 
@@ -1438,16 +1438,17 @@ static bool openDocWithExtension (const char *document, const char *ext)
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
-	HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL, NULL, SW_SHOWDEFAULT);
+	HINSTANCE result = ShellExecuteW(NULL, L"open", utf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
 
 	// If it failed, get the .htm regkey and lookup the program
 	if ((uintptr_t)result <= HINSTANCE_ERROR)
 	{
-		char key[MAX_PATH + MAX_PATH];
+		wchar_t key[MAX_PATH + MAX_PATH];
 
-		if (GetRegKey(HKEY_CLASSES_ROOT, ext, key) == ERROR_SUCCESS)
+		// get the type of the extension
+		if (GetRegKey(HKEY_CLASSES_ROOT, utf8ToWide("." + ext), key) == ERROR_SUCCESS)
 		{
-			lstrcatA(key, "\\shell\\open\\command");
+			lstrcatW(key, L"\\shell\\open\\command");
 
 			if (GetRegKey(HKEY_CLASSES_ROOT, key, key) == ERROR_SUCCESS)
 			{
