@@ -1434,7 +1434,7 @@ LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
 }
 #endif // NL_OS_WINDOWS
 
-static bool openDocWithExtension (const char *document, const char *ext)
+static bool openDocWithExtension (const std::string &document, const std::string &ext)
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
@@ -1552,18 +1552,18 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	return false;
 }
 
-bool openURL (const char *url)
+bool openURL(const std::string &url)
 {
 	return openDocWithExtension(url, "htm");
 }
 
-bool openDoc (const char *document)
+bool openDoc(const std::string &document)
 {
 	// get extension from document fullpath
 	string ext = CFile::getExtension(document);
 
 	// try to open document
-	return openDocWithExtension(document, ext.c_str());
+	return openDocWithExtension(document, ext);
 }
 
 } // NLMISC

@@ -690,10 +690,10 @@ inline int nlisprint(int c)
 #endif
 
 // Open an url in a browser
-bool openURL (const char *url);
+bool openURL (const std::string &url);
 
 // Open a document
-bool openDoc (const char *document);
+bool openDoc (const std::string &document);
 
 // AntiBug method that return an epsilon if x==0, else x
 inline float	favoid0(float x)
