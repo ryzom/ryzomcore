@@ -813,8 +813,8 @@ bool CObjectViewer::initUI (HWND parent)
 
 	// load the scheme bank if one is present		
 	CIFile iF;
-	::_makepath (sModulePath, SDrive, SDir, "default", ".scb");		
-	if (iF.open(sModulePath))
+	std::string path = SPath + "default.scb";
+	if (iF.open(path))
 	{
 		try
 		{

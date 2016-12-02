@@ -151,22 +151,22 @@ BOOL CEditListCtrl::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 						item = ListCtrl.GetNextSelectedItem(pos);
 						string text;
 						getNewItemText (item, 0, text);
-						ListCtrl.InsertItem (item, text.c_str ());
+						ListCtrl.InsertItem (item, utf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (item, i, text);
-							ListCtrl.SetItemText (item, i, text.c_str ());
+							ListCtrl.SetItemText (item, i, utf8ToTStr(text));
 						}
 					}
 					else
 					{
 						string text;
 						getNewItemText (0, 0, text);
-						ListCtrl.InsertItem (0, text.c_str ());
+						ListCtrl.InsertItem (0, utf8ToTStr(text));
 						for (uint i=1; i<ColumnCount; i++)
 						{
 							getNewItemText (0, i, text);
-							ListCtrl.SetItemText (0, i, text.c_str ());
+							ListCtrl.SetItemText (0, i, utf8ToTStr(text));
 						}
 						ListCtrl.SetItemState (0, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 					}
@@ -311,8 +311,11 @@ LRESULT CMyListCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				std::string		defDir;
 				Ctrl->getBrowseInfo (Ctrl->Item, Ctrl->SubItem, defExt, defFilename, defDir, filter);
 
-				CFileDialog dlgFile (TRUE, defExt.c_str (), defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter.c_str (), theApp.m_pMainWnd);
-				dlgFile.m_ofn.lpstrInitialDir = defDir.c_str ();
+				TCHAR buffer[MAX_PATH];
+				_tcscpy(buffer, utf8ToTStr(defDir));
+
+				CFileDialog dlgFile (TRUE, utf8ToTStr(defExt), utf8ToTStr(defFilename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, utf8ToTStr(filter), theApp.m_pMainWnd);
+				dlgFile.m_ofn.lpstrInitialDir = buffer;
 				Ctrl->OnBrowse = true;
 				if (dlgFile.DoModal () == IDOK)
 				{

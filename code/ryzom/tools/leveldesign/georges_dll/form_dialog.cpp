@@ -770,7 +770,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 					colorEdit->Edit.GetWindowText (str);
 
 					sint r, g, b;
-					if (sscanf (str, "%d,%d,%d", &r, &g, &b) == 3)
+					if (_stscanf (str, _T("%d,%d,%d"), &r, &g, &b) == 3)
 					{
 						clamp (r, 0, 255);
 						clamp (g, 0, 255);
@@ -1352,18 +1352,18 @@ void IFormWidget::updateLabel ()
 						if (node->getForm () == doc->getFormPtr ())
 						{
 							// The node exist
-							Label.SetWindowText (SavedLabel.c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel));
 						}
 						else
 						{
 							// The node exist in the parent form
-							Label.SetWindowText ((SavedLabel+" (in parent form)").c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel + " (in parent form)"));
 						}
 					}	
 					else
 					{
 						// The node is empty
-						Label.SetWindowText ((SavedLabel+" (undefined)").c_str());
+						Label.SetWindowText (utf8ToTStr(SavedLabel + " (undefined)"));
 					}
 				}
 
@@ -1509,10 +1509,10 @@ void IFormWidget::onOpenSelected ()
 	string str;
 	getValue (str);
 
-	std::string str2=CPath::lookup (str.c_str (), false, false);
+	std::string str2 = CPath::lookup (str, false, false);
 	if (str2.empty())
-		str2 = str.c_str ();
-	theApp.OpenDocumentFile (str2.c_str ());
+		str2 = str;
+	theApp.OpenDocumentFile (utf8ToTStr(str2));
 }
 
 // ***************************************************************************

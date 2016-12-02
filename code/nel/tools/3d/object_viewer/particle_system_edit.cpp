@@ -403,9 +403,9 @@ void CParticleSystemEdit::updateBBoxFromText()
 	m_BBoxYCtrl.GetWindowText(inY, 128);
 	m_BBoxZCtrl.GetWindowText(inZ, 128);
 
-	if (_tcscanf(inX, "%f", &h.x) == 1
-		&& _tcscanf(inY, "%f", &h.y) == 1
-		&& _tcscanf(inZ, "%f", &h.z) == 1
+	if (_stscanf(inX, _T("%f"), &h.x) == 1
+		&& _stscanf(inY, _T("%f"), &h.y) == 1
+		&& _stscanf(inZ, _T("%f"), &h.z) == 1
 	   )
 	{
 		NLMISC::CAABBox b;
@@ -466,7 +466,7 @@ void CParticleSystemEdit::OnChangeApplyAfterDelay()
 	GetDlgItem(IDC_APPLY_AFTER_DELAY)->GetWindowText(in, 128);
 
 	float value;
-	if (_tcscanf(in, "%f", &value) == 1)
+	if (_stscanf(in, _T("%f"), &value) == 1)
 	{
 		if (_Node->getPSPointer()->getDelayBeforeDeathConditionTest() != value)
 		{

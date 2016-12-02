@@ -361,11 +361,11 @@ void SelectionTerritoire::OnSelect()
 	{
 		POSITION p = sFile.GetStartPosition();
 		CString str = sFile.GetNextPathName(p);
-		char *temp = str.GetBuffer(256);
-		if (temp)
+		std::string temp = tStrToUtf8(str);
+		if (!temp.empty())
 		{
 			CIFile stream;
-			if (stream.open ((const char*)str))
+			if (stream.open (temp))
 			{
 				list->ResetContent ();
 				list2->ResetContent ();
@@ -377,13 +377,13 @@ void SelectionTerritoire::OnSelect()
 			for (i=0; i<tileBank.getLandCount(); i++)
 			{
 				// Add to the list
-				list->AddString(tileBank.getLand(i)->getName().c_str());
+				list->AddString(utf8ToTStr(tileBank.getLand(i)->getName()));
 			}
 
 			for (i=0; i<tileBank.getTileSetCount(); i++)
 			{
 				// Add to the list
-				list2->AddString(tileBank.getTileSet(i)->getName().c_str());
+				list2->AddString(utf8ToTStr(tileBank.getTileSet(i)->getName()));
 			}
 
 			MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
@@ -400,7 +400,7 @@ void SelectionTerritoire::OnSelect()
 			button->EnableWindow(true);
 
 			// Change the bouton text path
-			GetDlgItem (IDC_PATH)->SetWindowText (tileBank.getAbsPath().c_str());
+			GetDlgItem (IDC_PATH)->SetWindowText (utf8ToTStr(tileBank.getAbsPath()));
 		}
 	}
 
