@@ -26,7 +26,6 @@
  */
 
 #include "std3d.h"
-#include "nel/misc/types_nl.h"
 #include "nel/3d/gpu_program_params.h"
 
 // STL includes
@@ -44,14 +43,14 @@ using namespace std;
 
 namespace NL3D {
 
+const size_t CGPUProgramParams::s_End = -1;
+
 CGPUProgramParams::CGPUProgramParams() : m_First(s_End), m_Last(s_End)
 {
-	
 }
 
 CGPUProgramParams::~CGPUProgramParams()
 {
-	
 }
 
 void CGPUProgramParams::copy(CGPUProgramParams *params)
