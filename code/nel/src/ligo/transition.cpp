@@ -18,8 +18,9 @@
 #include "transition.h"
 
 // Ligo include
-#include "zone_template.h"
-#include "ligo_error.h"
+#include "nel/ligo/zone_template.h"
+#include "nel/ligo/ligo_error.h"
+
 #include "ligo_material.h"
 
 namespace NLLIGO

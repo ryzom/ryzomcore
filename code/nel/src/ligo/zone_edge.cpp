@@ -18,7 +18,7 @@
 // Ligo include
 #include "zone_edge.h"
 #include "nel/ligo/ligo_config.h"
-#include "ligo_error.h"
+#include "nel/ligo/ligo_error.h"
 
 // NeL include
 #include "nel/misc/matrix.h"

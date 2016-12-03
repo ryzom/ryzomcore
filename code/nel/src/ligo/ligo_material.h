@@ -18,7 +18,7 @@
 #define NL_MATERIAL_LIGO_H
 
 #include "nel/misc/types_nl.h"
-#include "zone_template.h"
+#include "nel/ligo/zone_template.h"
 
 // NeL include
 //#include "3d/zone.h"
