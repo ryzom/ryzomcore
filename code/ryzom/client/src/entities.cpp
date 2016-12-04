@@ -1949,7 +1949,26 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 	}
 	return NULL;
 }
-
+//-----------------------------------------------
+// getEntityBySheetName :
+// Return an entity based on its sheet name
+//-----------------------------------------------
+CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
+{
+	if (!sheet.empty())
+	{
+		uint i;
+		const CSheetId& sheetRef = NLMISC::CSheetId(sheet);
+		const uint count = (uint)_Entities.size();
+		for (i=0; i<count; i++)
+		{
+			if(_Entities[i])
+				if(_Entities[i]->sheetId() == sheetRef)
+					return _Entities[i];
+		}
+	}
+	return NULL;
+}
 //-----------------------------------------------
 // managePACSTriggers :
 // Manage PACS Triggers.
