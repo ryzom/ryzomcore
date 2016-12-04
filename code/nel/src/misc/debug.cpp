@@ -23,7 +23,9 @@
 #	include <tchar.h>
 #	include <imagehlp.h>
 #	pragma comment(lib, "imagehlp.lib")
-#	define getcwd(_a, _b) (_getcwd(_a,_b))
+#	ifndef getcwd
+#		define getcwd(_a, _b) (_getcwd(_a,_b))
+#	endif
 #	ifdef NL_OS_WIN64
 #		define DWORD_TYPE DWORD64
 #	else
