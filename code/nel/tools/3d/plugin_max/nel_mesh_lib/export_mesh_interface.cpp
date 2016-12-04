@@ -579,7 +579,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	{
 		// Rename the material
 		string newName = "NelAutoMergeRenamedTmp" + toString (i);
-		string originalName = (*lib)[i]->GetName ();
+		string originalName = (*lib)[i]->GetName ().ToUTF8();
 		renameMap.insert (map<string, string>::value_type (newName, originalName));
 		(*lib)[i]->SetName (utf8ToTStr(newName));
 	}
@@ -604,7 +604,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name in the map ?
-		string key = (*lib)[i]->GetName ();
+		string key = (*lib)[i]->GetName ().ToUTF8();
 		map<string, string>::iterator ite = renameMap.find (key);
 
 		// Not found ? This is a merged material
@@ -612,7 +612,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 		{
 			// Rename the material
 			string newName = "NelAutoMergeRenamed" + toString (i);
-			string originalName = (*lib)[i]->GetName ();
+			string originalName = (*lib)[i]->GetName ().ToUTF8();
 			renameMap.insert (map<string, string>::value_type (newName, originalName));
 			(*lib)[i]->SetName (utf8ToTStr(newName));
 		}
@@ -622,7 +622,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name
-		string key = (*lib)[i]->GetName ();
+		string key = (*lib)[i]->GetName ().ToUTF8();
 		map<string, string>::iterator ite = renameMap.find (key);
 		if (ite != renameMap.end ())
 		{

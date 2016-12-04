@@ -768,7 +768,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = (const char*)name;
+		materialInfo.MaterialName = name.ToUTF8();
 	}
 	else
 	{
@@ -1120,7 +1120,7 @@ void CExportNel::buildAMaterial (NL3D::CMaterial& material, CMaxMaterialInfo& ma
 
 		// Set material name		
 		TSTR name=mtl.GetName();
-		materialInfo.MaterialName = (const char*)name;
+		materialInfo.MaterialName = name.ToUTF8();
 	}
 }
 
