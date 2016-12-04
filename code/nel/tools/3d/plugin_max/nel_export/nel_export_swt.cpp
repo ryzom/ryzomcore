@@ -70,7 +70,7 @@ bool CNelExport::exportSWT(const std::string &sPath, std::vector<INode*>& vectNo
 		}
 	}
 
-	if (aSWNodes.size())
+	if (!aSWNodes.empty())
 	{
 		CSkeletonWeight sw;
 		COFile file;
