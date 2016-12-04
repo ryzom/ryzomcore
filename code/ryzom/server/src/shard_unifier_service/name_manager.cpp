@@ -789,7 +789,7 @@ bool CNameManager::loadAccountNamesFromDatabase()
 	query << "SELECT user_id, user_name FROM ring_users";
 	BOMB_IF(!_Database->query(query), "Failed to load account names from the database", return false);
 
-	auto_ptr<CUseResult> result = _Database->useResult();
+	unique_ptr<CUseResult> result(_Database->useResult());
 
 	while (result->fetchRow())
 	{
@@ -986,7 +986,7 @@ bool CNameManager::loadCharacterNamesFromDatabase()
 	query << "SELECT char_id, char_name, home_mainland_session_id FROM characters";
 	BOMB_IF(!_Database->query(query), "Failed to load character names from the database", return false);
 
-	auto_ptr<CUseResult> result = _Database->useResult();
+	unique_ptr<CUseResult> result(_Database->useResult());
 
 	while (result->fetchRow())
 	{

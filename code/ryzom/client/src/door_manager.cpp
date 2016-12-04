@@ -273,7 +273,7 @@ void CDoorManager::loadedCallback (NL3D::UInstanceGroup *ig)
 		sShapeName = CPath::lookup(sShapeName,false);
 		if (!sShapeName.empty())
 		{
-			std::auto_ptr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(sShapeName));
+			std::unique_ptr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(sShapeName));
 			NLPACS::UPrimitiveBlock *pPB = pb.release();
 
 			bool bDoorDetectPresent = false;

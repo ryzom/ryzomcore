@@ -105,9 +105,9 @@ CMaterial		&CMaterial::operator=(const CMaterial &mat)
 	// copy texture matrix if there.
 	if (mat._TexUserMat.get())
 	{
-	    std::auto_ptr<CUserTexMat> texMatClone( new CUserTexMat(*(mat._TexUserMat))); // make cpy
+	    std::unique_ptr<CUserTexMat> texMatClone( new CUserTexMat(*(mat._TexUserMat))); // make cpy
 	    //std::swap(texMatClone, _TexUserMat); // swap with old
-	    _TexUserMat = texMatClone;
+		_TexUserMat = std::move(texMatClone);
 	}
 	else
 	{
@@ -265,9 +265,9 @@ void		CMaterial::serial(NLMISC::IStream &f)
 
 		if ((_Flags & IDRV_MAT_USER_TEX_MAT_ALL)) // are there user textrue coordinates matrix ?
 		{
-			std::auto_ptr<CUserTexMat> newPtr(new CUserTexMat); // create new
+			std::unique_ptr<CUserTexMat> newPtr(new CUserTexMat); // create new
 			//std::swap(_TexUserMat, newPtr); // replace old
-			_TexUserMat = newPtr;
+			_TexUserMat = std::move(newPtr);
 		}
 	}
 

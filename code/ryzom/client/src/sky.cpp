@@ -294,7 +294,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 		// load the bitmap
 		std::string path = CPath::lookup(filename, false);
 		if (path.empty()) return NULL;
-		std::auto_ptr<CBitmap> bm(new CBitmap);
+		std::unique_ptr<CBitmap> bm(new CBitmap);
 		try
 		{
 			CIFile f;

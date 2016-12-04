@@ -202,7 +202,7 @@ void CParticleWorkspace::CNode::createEmptyPS()
 	NL3D::CParticleSystem emptyPS;	
 	NL3D::CParticleSystemShape *pss = new NL3D::CParticleSystemShape;
 	pss->buildFromPS(emptyPS);	
-	std::auto_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
+	std::unique_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
 	std::string shapeName = NLMISC::CFile::getFilename(_RelativePath);
 	sb->add(shapeName, pss);
 	NL3D::CShapeBank *oldSB = NL3D::CNELU::Scene->getShapeBank();
@@ -298,7 +298,7 @@ bool CParticleWorkspace::CNode::loadPS()
 	// collapse name
 	inputFile.open(getFullPath());
 	ss.serial(inputFile);
-	std::auto_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
+	std::unique_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
 	std::string shapeName = NLMISC::CFile::getFilename(_RelativePath);
 	sb->add(shapeName, ss.getShapePointer());
 	NL3D::CShapeBank *oldSB = NL3D::CNELU::Scene->getShapeBank();

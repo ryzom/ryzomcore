@@ -293,7 +293,7 @@ void	CContinentContainer::initPacsPrim(const string &path)
 			if (_PacsPrimMap.find(ppName) != _PacsPrimMap.end())
 				continue;
 
-			std::auto_ptr<UPrimitiveBlock>	pb(UPrimitiveBlock::createPrimitiveBlockFromFile(CPath::lookup(fileNames[k], false)));
+			std::unique_ptr<UPrimitiveBlock>	pb(UPrimitiveBlock::createPrimitiveBlockFromFile(CPath::lookup(fileNames[k], false)));
 			UPrimitiveBlock*	ptr = pb.release();
 			if (ptr != NULL)
 			{

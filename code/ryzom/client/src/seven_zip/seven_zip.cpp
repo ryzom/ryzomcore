@@ -196,13 +196,13 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate input buffer for props
-	auto_ptr<uint8> propsBuffer = auto_ptr<uint8>(new uint8[LZMA_PROPS_SIZE]);
+	unique_ptr<uint8[]> propsBuffer(new uint8[LZMA_PROPS_SIZE]);
 
 	// size of LZMA content
 	inSize -= LZMA_PROPS_SIZE + 8;
 
 	// allocate input buffer for lzma data
-	auto_ptr<uint8> inBuffer = auto_ptr<uint8>(new uint8[inSize]);
+	unique_ptr<uint8[]> inBuffer(new uint8[inSize]);
 
 	uint64 fileSize = 0;
 
@@ -224,7 +224,7 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate the output buffer
-	auto_ptr<uint8> outBuffer = auto_ptr<uint8>(new uint8[fileSize]);
+	unique_ptr<uint8[]> outBuffer(new uint8[fileSize]);
 
 	// in and out file sizes
 	SizeT outProcessed = (SizeT)fileSize;
@@ -273,7 +273,7 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	}
 
 	// allocate input buffer
-	auto_ptr<uint8> inBuffer = auto_ptr<uint8>(new uint8[inSize]);
+	unique_ptr<uint8[]> inBuffer(new uint8[inSize]);
 
 	try
 	{
@@ -288,11 +288,11 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 
 	// allocate output buffer
 	size_t outSize = (11 * inSize / 10) + 65536; // worst case = 1.1 * size + 64K
-	auto_ptr<uint8> outBuffer = auto_ptr<uint8>(new uint8[outSize]);
+	unique_ptr<uint8[]> outBuffer(new uint8[outSize]);
 
 	// allocate buffer for props
 	size_t outPropsSize = LZMA_PROPS_SIZE;
-	auto_ptr<uint8> outProps = auto_ptr<uint8>(new uint8[outPropsSize]);
+	unique_ptr<uint8[]> outProps(new uint8[outPropsSize]);
 
 	// compress with best compression and other default settings
 	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);
