@@ -223,7 +223,7 @@ Animatable*	CExportNel::getSubAnimByName (Animatable& node, const char* sName)
 		TSTR sSubName=node.SubAnimName(nSub);
 
 		// Good name?
-		if (strcmp (sSubName, sName)==0)
+		if (strcmp (sSubName.ToUTF8(), sName)==0)
 		{
 			// ok, return this subanim
 			return node.SubAnim(nSub);
@@ -288,7 +288,7 @@ Control* CExportNel::getControlerByName (Animatable& node, const char* sName)
 		{
 			// Sub anim name
 			TSTR name=node.SubAnimName (s);
-			if (strcmp (name, sName)==0)
+			if (strcmp (name.ToUTF8(), sName)==0)
 			{
 				// Get the controller pointer of this sub anim
 				Control* c=GetControlInterface (node.SubAnim(s));
@@ -502,7 +502,7 @@ std::string	CExportNel::getName (MtlBase& mtl)
 	// Return its name
 	TSTR name;
 	name=mtl.GetName();
-	return std::string (name);
+	return std::string((const char*)name.ToUTF8());
 }
 
 // --------------------------------------------------

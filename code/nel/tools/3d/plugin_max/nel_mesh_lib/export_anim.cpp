@@ -185,7 +185,7 @@ void CExportNel::addSSSTrack(CSSSBuild	&ssBuilder, INode& node)
             if(note)
             {
 				CSSSBuild::CKey		ks;
-				ks.Value = std::string(note->note);
+				ks.Value = note->note.ToUTF8();
 				ks.Time= CExportNel::convertTime (note->time);
 				bs.Track.push_back(ks);
             }
@@ -224,7 +224,7 @@ NL3D::CTrackKeyFramerConstString*		CExportNel::buildFromNoteTrack(INode& node)
 				{
 					firstDate = CExportNel::convertTime (note->time);
 				}				
-				ks.Value = std::string(note->note);
+				ks.Value = note->note.ToUTF8();
 				lastDate = CExportNel::convertTime (note->time);
 				st->addKey(ks , lastDate );
 				

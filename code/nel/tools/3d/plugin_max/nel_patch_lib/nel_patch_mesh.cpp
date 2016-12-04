@@ -2261,9 +2261,18 @@ BOOL RPatchMesh::SubObjectHitTest (GraphicsWindow *gw, Material *ma, HitRegion *
 		gw->setRndLimits(gw->getRndLimits() & ~GW_BACKCULL);
 		bRet=mesh.SubObjectHitTest (gw, ma, hr, nFlags, list);
 
+#if MAX_VERSION_MAJOR < 19
 		MeshSubHitRec *rec=list.First();
+
 		while (rec)
 		{
+#else
+		MeshSubHitRec::Iterator it = list.begin(), iend = list.end();
+
+		while(it != iend)
+		{
+			MeshSubHitRec *rec = &*it;
+#endif
 			if (flags&SUBHIT_PATCH_SELONLY)
 			{
 				int otot=0;
@@ -2284,7 +2293,11 @@ BOOL RPatchMesh::SubObjectHitTest (GraphicsWindow *gw, Material *ma, HitRegion *
 			hitList.AddHit (rec->dist, &patch, nRemapedIndex, PATCH_HIT_TILE);
 
 			// Next hit
-			rec=rec->Next();
+#if MAX_VERSION_MAJOR < 19
+			rec = rec->Next();
+#else
+			++it;
+#endif
 		}
 	}
 
