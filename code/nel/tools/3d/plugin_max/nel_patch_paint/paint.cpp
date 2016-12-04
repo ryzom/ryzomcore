@@ -4360,7 +4360,7 @@ DWORD WINAPI myThread (LPVOID vData)
 			//========
 			CNELU::release();
 		}
-		catch (EDru& druExcept)
+		catch (const EDru& druExcept)
 		{
 			MessageBox (NULL, utf8ToTStr(druExcept.what()), _T("NeL driver utility"), MB_OK|MB_ICONEXCLAMATION);
 		}
