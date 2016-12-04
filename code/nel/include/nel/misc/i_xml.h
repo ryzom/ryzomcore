@@ -171,6 +171,11 @@ public:
 	  */
 	static bool		getContentString (std::string &result, xmlNodePtr node);
 
+	/**
+	  * Release meory used by libxml2, to only call before exit.
+	  */
+	static void		releaseLibXml();
+
 private:
 
 	/// From IStream

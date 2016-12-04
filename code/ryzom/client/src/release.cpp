@@ -664,6 +664,7 @@ void release()
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
 	CViewRenderer::release();
+	CIXml::releaseLibXml();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");
