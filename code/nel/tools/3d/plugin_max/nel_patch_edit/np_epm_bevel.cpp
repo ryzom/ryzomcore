@@ -52,11 +52,13 @@ int EPM_BevelMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2 m
 	case MOUSE_MOVE:
 		if (point == 1)
 			{
-			p0 = vpt->MapScreenToView(om, float(-200));
+			p0 = vpt->MapScreenToView(om, -200.f);
+
 			// sca 1999.02.24: find worldspace point with om's x value and m's y value
 			m2.x = om.x;
 			m2.y = m.y;
-			p1 = vpt->MapScreenToView(m2, float(-200));
+			p1 = vpt->MapScreenToView(m2, -200.f);
+
 			amount = Length(p1 - p0);
 			ln = IsDlgButtonChecked(po->hOpsPanel, IDC_EM_EXTYPE_B);					
 			if (om.y < m.y)
@@ -70,14 +72,16 @@ int EPM_BevelMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2 m
 				ReleaseISpinner(spin);
 				}
 			ip->RedrawViews(ip->GetTime(), REDRAW_INTERACTIVE);
-			}
+		}
 		else if (point == 2)
-			{
-			p0 = vpt->MapScreenToView(om, float(-200));
+		{
+			p0 = vpt->MapScreenToView(om, -200.f);
+
 			// sca 1999.02.24: find worldspace point with om's x value and m's y value
 			m2.x = om.x;
 			m2.y = m.y;
-			p1 = vpt->MapScreenToView(m2, float(-200));
+			p1 = vpt->MapScreenToView(m2, -200.f);
+
 			if (IsDlgButtonChecked(po->hOpsPanel, IDC_EP_SM_SMOOTH))
 				ln = 0;					
 			else if (IsDlgButtonChecked(po->hOpsPanel, IDC_EP_SM_SMOOTH2))

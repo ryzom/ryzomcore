@@ -43,11 +43,13 @@ int EPM_ExtrudeMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2
 		break;
 
 	case MOUSE_MOVE:
-		p0 = vpt->MapScreenToView(om, float(-200));
+		p0 = vpt->MapScreenToView(om, -200.f);
+
 		// sca 1999.02.24: Find m's projection in om's vertical axis:
 		m2.x = om.x;
 		m2.y = m.y;
-		p1 = vpt->MapScreenToView(m2, float(-200));
+		p1 = vpt->MapScreenToView(m2, -200.f);
+
 		amount = Length(p1 - p0);
 		if (m.y > om.y)
 			amount *= -1.0f;
