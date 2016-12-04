@@ -49,7 +49,7 @@ using namespace std;
 
 NLMISC_COMMAND( forceMissionProgress,"debug command used to trigger debug commands","<user>" )
 {
-	if (args.empty() || args.size() > 3)
+	if (args.size() != 1)
 		return false;
 	CEntityId id;
 	id.fromString( args[0].c_str() );
