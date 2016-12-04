@@ -38,9 +38,17 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 	vl.parser = new Parser;
 	vl.source = new StringStream (utf8ToTStr(script));
 	vl.source->log_to(NULL);
+
+#if MAX_VERSION_MAJOR < 19
 	save_current_frames();
+#endif
+
 	try
 	{
+#if MAX_VERSION_MAJOR >= 19
+		ScopedSaveCurrentFrames currentFrames;
+#endif
+
 		vl.source->flush_whitespace();
 		vl.code = vl.parser->compile_all(vl.source);
 		vl.result = vl.code->eval();
@@ -66,11 +74,16 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 	}
 	catch (...)
 	{
+#if MAX_VERSION_MAJOR < 19
 		restore_current_frames();
+#endif
 		result=FALSE;
 		vl.source->close();
 	}
+
+#if MAX_VERSION_MAJOR < 19
 	pop_value_locals();
+#endif
 	return (result!=FALSE);
 }
 

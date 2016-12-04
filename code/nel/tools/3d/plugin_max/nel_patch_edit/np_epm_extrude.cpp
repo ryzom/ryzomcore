@@ -13,7 +13,11 @@
 
 int EPM_ExtrudeMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2 m) 
 {	
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
 	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	Point3 p0, p1;
 	ISpinnerControl *spin;
 	BOOL ln;
@@ -66,8 +70,11 @@ int EPM_ExtrudeMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2
 		break;
 	}
 
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
+
 	return TRUE;
 }
 

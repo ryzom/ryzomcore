@@ -4095,10 +4095,13 @@ DWORD WINAPI myThread (LPVOID vData)
 		nlassert (pData->eproc->ip);
 
 		// Viewport parameters
-		ViewExp*	vp;
 		Matrix3		affineTM;
 		float		minx,maxx,miny,maxy;
-		vp=pData->eproc->ip->GetActiveViewport();
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp *vp = &pData->eproc->ip->GetActiveViewExp();
+#else
+		ViewExp *vp = pData->eproc->ip->GetActiveViewport();
+#endif
 		vp->GetAffineTM(affineTM);
 		if ( vp->IsPerspView() )
 		{
@@ -4584,7 +4587,11 @@ int EPM_PaintMouseProc::proc(
 			int flags, 
 			IPoint2 m)
 {
-	ViewExp *vpt = ip->GetViewport(hwnd);	
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
+	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	int res = TRUE;
 	static PatchMesh *shape1 = NULL;
 	static int poly1, tile1, tile2, mesh1, mesh2, seg1;
@@ -4613,8 +4620,10 @@ int EPM_PaintMouseProc::proc(
 			break;
 	}
 
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
 
 	return res;
 }

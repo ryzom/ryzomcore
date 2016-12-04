@@ -35,8 +35,13 @@ int EditPatchMod::RememberPatchThere(HWND hWnd, IPoint2 m)
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
 	
 	// See if we're over a patch
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hWnd);
+#else
 	ViewExp *vpt = ip->GetViewport(hWnd);
+#endif
 	GraphicsWindow *gw = vpt->getGW();
+
 	HitRegion hr;
 	MakeHitRegion(hr, HITTYPE_POINT, 1, 4, &m);
 	gw->setHitRegion(&hr);
@@ -110,8 +115,12 @@ int EditPatchMod::RememberPatchThere(HWND hWnd, IPoint2 m)
 finish:
 	nodes.DisposeTemporary();
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
+
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
+
 	return result;
 }
 
@@ -185,8 +194,13 @@ int EditPatchMod::RememberVertThere(HWND hWnd, IPoint2 m)
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
 	
 	// See if we're over a vertex
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hWnd);
+#else
 	ViewExp *vpt = ip->GetViewport(hWnd);
+#endif
 	GraphicsWindow *gw = vpt->getGW();
+
 	HitRegion hr;
 	MakeHitRegion(hr, HITTYPE_POINT, 1, 4, &m);
 	gw->setHitRegion(&hr);
@@ -260,8 +274,11 @@ int EditPatchMod::RememberVertThere(HWND hWnd, IPoint2 m)
 finish:
 	nodes.DisposeTemporary();
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
+
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
 	return result;
 }
 

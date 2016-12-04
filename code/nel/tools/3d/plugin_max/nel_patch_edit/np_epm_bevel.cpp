@@ -12,8 +12,12 @@
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 int EPM_BevelMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2 m) 
-{	
+{
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
 	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	Point3 p0, p1;
 	ISpinnerControl *spin;
 	int ln, ln2;
@@ -114,8 +118,11 @@ int EPM_BevelMouseProc::proc(HWND hwnd, int msg, int point, int flags, IPoint2 m
 		break;
 	}
 
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
+
 	return TRUE;
 }
 

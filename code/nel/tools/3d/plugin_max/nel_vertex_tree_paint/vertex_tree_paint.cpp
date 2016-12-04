@@ -854,10 +854,17 @@ void	VertexPaint::fillSelectionGradientColor()
 	// Get Matrix to viewport.
 	Matrix3		viewMat;
 	{
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp *ve = &GetCOREInterface()->GetActiveViewExp();
+#else
 		ViewExp *ve = GetCOREInterface()->GetActiveViewport();
+#endif
 		// The affine TM transforms from world coords to view coords
 		ve->GetAffineTM(viewMat);
+
+#if MAX_VERSION_MAJOR < 19
 		GetCOREInterface()->ReleaseViewport(ve);
+#endif
 	}
 
 

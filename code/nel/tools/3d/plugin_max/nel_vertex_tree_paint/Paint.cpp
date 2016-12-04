@@ -103,7 +103,11 @@ void PaintMouseProc::DoPainting(HWND hWnd, IPoint2 m)
 		}
 
 		VertexPaintData* d = (VertexPaintData*)mc->localData;
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp*	pView = &GetCOREInterface()->GetViewExp(hWnd);
+#else
 		ViewExp*	pView = GetCOREInterface()->GetViewport(hWnd);
+#endif
 		Mesh*		mesh = 	d->GetMesh();
 
 		if (mesh) {
@@ -158,7 +162,9 @@ void PaintMouseProc::DoPainting(HWND hWnd, IPoint2 m)
 				}
 			}
 
+#if MAX_VERSION_MAJOR < 19
 			GetCOREInterface()->ReleaseViewport(pView);
+#endif
 			}
 		else {
 			SetCursor(hNoPaintCursor);
@@ -186,7 +192,11 @@ void PaintMouseProc::DoPickColor(HWND hWnd, IPoint2 m)
 		SetCursor(hDropperCursor);
 		TriObject *pTri = (TriObject *) os.obj;
 
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp*	pView = &GetCOREInterface()->GetViewExp(hWnd);
+#else
 		ViewExp*	pView = GetCOREInterface()->GetViewport(hWnd);
+#endif
 		Mesh*		mesh = &pTri->mesh;
 
 		if (mesh) {
@@ -234,7 +244,9 @@ void PaintMouseProc::DoPickColor(HWND hWnd, IPoint2 m)
 				}
 			}
 
+#if MAX_VERSION_MAJOR < 19
 			GetCOREInterface()->ReleaseViewport(pView);
+#endif
 			}
 		}
 	else {
