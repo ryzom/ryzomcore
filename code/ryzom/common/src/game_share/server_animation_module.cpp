@@ -1002,30 +1002,38 @@ IPrimitive* CServerAnimationModule::getAction(CObject* action, const std::string
 
 			if(param.splitLines(result) )
 			{
-				if (result.size() == 0)
-				{
-					nlwarning("ERROR: npc_say but no parameters !!! %d in session ", scenarioId.asInt());
-				}
+				std::vector<std::string> res;
 
-				if(result.size()>=1)
+				if (result.empty())
 				{
-					NLMISC::CSString name(result[0]);
-					if(name.find(":",0)!=string::npos)
+					nlwarning("ERROR: npc_say but no parameters !!! %u in session ", scenarioId.asInt());
+				}
+				else
+				{
+					res.resize(result.size());
+
+					if (result.size() >= 1)
 					{
-						result[0] = prefix+result[0];
+						std::string name(result[0]);
+
+						if (name.find(":", 0) != string::npos)
+						{
+							res[0] = prefix + name;
+						}
+
+						if (result.size() >= 2)
+						{
+							res[1] = toString("DSS_%u %s", scenarioId.asInt(), result[1].c_str());
+
+							for (uint32 i = 2, len = result.size(); i<len; ++i)
+							{
+								res[i] = prefix + result[i];
+							}
+						}
 					}
 				}
 
-				if(result.size()>=2)
-					result[1] = "DSS_"+toString(scenarioId)+" "+result[1].c_str();
-				if(result.size()>=3)
-				{
-					for(uint32 i=2;i<result.size();++i)
-					{
-						result[i] = prefix + result[i];
-					}
-				}
-				pAction->addPropertyByName("parameters", new CPropertyStringArray( (std::vector<std::string> &)result ));
+				pAction->addPropertyByName("parameters", new CPropertyStringArray(res));
 			}
 
 		}
