@@ -143,7 +143,8 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	CheckThread = NULL;
 	InstallThread = NULL;
 	ScanDataThread = NULL;
-	thread = NULL;
+	DownloadThread = NULL;
+	Thread = NULL;
 
 	LogSeparator = "\n";
 	ValidDescFile = false;
@@ -364,7 +365,7 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -375,9 +376,9 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 	CheckThread = new CCheckThread(includeBackgroundPatch);
 	nlassert (CheckThread != NULL);
 
-	thread = IThread::create (CheckThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (CheckThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -402,11 +403,11 @@ bool CPatchManager::isCheckThreadEnded(bool &ok)
 // ****************************************************************************
 void CPatchManager::stopCheckThread()
 {
-	if(CheckThread && thread)
+	if(CheckThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete CheckThread;
 		CheckThread = NULL;
 	}
@@ -534,7 +535,7 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -622,9 +623,9 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 	}
 
 	// Launch the thread
-	thread = IThread::create (PatchThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (PatchThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -685,11 +686,11 @@ bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateL
 // ****************************************************************************
 void CPatchManager::stopPatchThread()
 {
-	if(PatchThread && thread)
+	if(PatchThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete PatchThread;
 		PatchThread = NULL;
 	}
@@ -1944,7 +1945,7 @@ void CPatchManager::startScanDataThread()
 		nlwarning ("scan data thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -1962,9 +1963,9 @@ void CPatchManager::startScanDataThread()
 	ScanDataThread = new CScanDataThread();
 	nlassert (ScanDataThread != NULL);
 
-	thread = IThread::create (ScanDataThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (ScanDataThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -1989,11 +1990,11 @@ bool CPatchManager::isScanDataThreadEnded(bool &ok)
 // ****************************************************************************
 void CPatchManager::stopScanDataThread()
 {
-	if(ScanDataThread && thread)
+	if(ScanDataThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete ScanDataThread;
 		ScanDataThread = NULL;
 	}
@@ -3044,18 +3045,18 @@ IAsyncDownloader* CPatchManager::getAsyncDownloader() const
 // ****************************************************************************
 void CPatchManager::startInstallThread(const std::vector<CInstallThreadEntry>& entries)
 {
-	CInstallThread* installThread = new CInstallThread(entries);
-	thread = IThread::create (installThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	InstallThread = new CInstallThread(entries);
+	Thread = IThread::create (InstallThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 void CPatchManager::startDownloadThread(const std::vector<CInstallThreadEntry>& entries)
 {
-	CDownloadThread* downloadThread = new CDownloadThread(entries);
-	thread = IThread::create (downloadThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	DownloadThread = new CDownloadThread(entries);
+	Thread = IThread::create (DownloadThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 
