@@ -1705,8 +1705,20 @@ namespace NLGUI
 			void	*ptr= ls.newUserData(sizeof(CReflectableLuaRef));
 			nlassert(ptr);
 			//ls.dumpStack();
-			// initialize it,    and copy the given element
+
+// disable memory leaks detection for placement new
+#ifdef new
+	#undef new
+#endif
+
+			// initialize it, and copy the given element
 			new (ptr) CReflectableLuaRef(pRPT);
+
+// reenable memory leaks detection for placement new
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 			// Assign to this user data the __ui_metatable
 			//ls.dumpStack();
 			ls.push(IHM_LUA_METATABLE);			// userdata   "__ui_metatable"
