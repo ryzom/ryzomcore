@@ -603,7 +603,7 @@ void release()
 
 		// Delete the driver.
 		delete Driver;
-		Driver = 0;
+		Driver = NULL;
 	}
 
 	NetMngr.getConnection().close();
