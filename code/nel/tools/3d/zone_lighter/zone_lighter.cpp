@@ -160,7 +160,7 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 				}
 				catch(const NLMISC::Exception &)
 				{
-					nlwarning ("Error while loading instance group %s\n", igName.c_str());	
+					nlwarning ("Error while loading instance group %s", igName.c_str());	
 					continue;
 				}								
 				inputFile.close();
