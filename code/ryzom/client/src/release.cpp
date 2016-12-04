@@ -663,6 +663,7 @@ void release()
 	CLuaManager::releaseInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
+	CViewRenderer::release();
 
 #if FINAL_VERSION
 	// openURL ("http://www.ryzomcore.org/exit/");
