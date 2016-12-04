@@ -29,6 +29,7 @@
 
  ****************************************************************************/
 
+#include "stdpch.h"
 #include "nel/gui/libwww_types.h"
 
 #ifdef DEBUG_NEW
