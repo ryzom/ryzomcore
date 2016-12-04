@@ -119,6 +119,7 @@ CSessionBrowser::~CSessionBrowser()
 	_CommThread->wait();
 
 	// ok, we can leave
+	delete _CommThread;
 }
 
 /** Set auth info */
