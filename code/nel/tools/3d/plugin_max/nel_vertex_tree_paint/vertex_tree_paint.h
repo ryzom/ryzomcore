@@ -161,9 +161,7 @@ public:
 		Animatable* SubAnim(int i);
 		TSTR SubAnimName(int i);
 
-		RefResult NotifyRefChanged( Interval changeInt,RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message);
-
+		RefResult NotifyRefChanged(const Interval& changeInt,RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
 		
 		CreateMouseCallBack* GetCreateMouseCallBack() {return NULL;}
 		void BeginEditParams(IObjParam *ip, ULONG flags,Animatable *prev);

@@ -87,8 +87,7 @@ class PO2RPO : public Modifier {
 		void GetClassName(TSTR& s) {s = GetString(IDS_CLASS_NAME);}
 		
 		RefTargetHandle Clone( RemapDir &remap );
-		RefResult NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, 
-			PartID& partID,  RefMessage message);
+		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID,  RefMessage message, BOOL propagate);
 
 		int NumSubs() { return 0; }
 		TSTR SubAnimName(int i) { return GetString(IDS_PARAMS); }

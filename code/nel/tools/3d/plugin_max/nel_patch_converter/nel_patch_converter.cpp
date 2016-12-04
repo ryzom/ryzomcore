@@ -220,8 +220,8 @@ void PO2RPO::EndEditParams( IObjParam *ip, ULONG flags,Animatable *next)
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-//From ReferenceMaker 
-RefResult PO2RPO::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget,PartID& partID,  RefMessage message) 
+//From ReferenceMaker
+RefResult PO2RPO::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
 {
 	//TODO: Add code to handle the various reference changed messages
 	return REF_SUCCEED;

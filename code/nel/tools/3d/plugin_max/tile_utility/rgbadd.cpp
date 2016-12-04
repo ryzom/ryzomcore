@@ -85,8 +85,7 @@ class RGBAdd: public Texmap {
 		int RemapRefOnLoad(int iref); 
 
 		RefTargetHandle Clone(RemapDir &remap = DefaultRemapDir());
-		RefResult NotifyRefChanged( Interval changeInt, RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message );
+		RefResult NotifyRefChanged(const Interval &changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
 
 		// IO
 		IOResult Save(ISave *isave);
@@ -365,9 +364,10 @@ TSTR RGBAdd::SubAnimName(int i) {
 		}
 	}
 
-RefResult RGBAdd::NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, 
-   PartID& partID, RefMessage message ) {
-	switch (message) {
+RefResult RGBAdd::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate)
+{
+	switch (message)
+	{
 		case REFMSG_CHANGE:
 			ivalid.SetEmpty();
 			if (hTarget == pblock) 

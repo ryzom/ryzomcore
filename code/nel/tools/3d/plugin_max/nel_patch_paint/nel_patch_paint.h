@@ -422,8 +422,7 @@ class PaintPatchMod : public Modifier
 		static bool		automaticLighting;
 		static bool		lockBorders;
 
-		RefResult NotifyRefChanged( Interval changeInt,RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message ) { return REF_SUCCEED; }
+		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate) { return REF_SUCCEED; }
 
 		bool includeMeshes;
 		bool preloadTiles;

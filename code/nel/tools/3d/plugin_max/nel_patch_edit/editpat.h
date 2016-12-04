@@ -574,9 +574,8 @@ class EditPatchMod : public Modifier, IPatchOps, IPatchSelect, ISubMtlAPI, Attac
 		static bool		additiveTile;
 		static bool		automaticLighting;
 
-		RefResult NotifyRefChanged( Interval changeInt,RefTargetHandle hTarget, 
-		   PartID& partID, RefMessage message ) { return REF_SUCCEED; }
-		
+		RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate) { return REF_SUCCEED; }
+
 		int selLevel;
 
 		// RB:named sel sets
