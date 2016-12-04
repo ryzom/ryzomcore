@@ -40,12 +40,12 @@ static ParamBlockDesc2 po2rpo_param_blk ( po2rpo_params, _T("params"),  0, &PO2R
 	//rollout
 	IDD_PANEL, IDS_PARAMS, 0, 0, NULL,
 	// params
-	pb_spin, 			_T("spin"), 		TYPE_FLOAT, 	P_ANIMATABLE, 	IDS_SPIN, 
-		p_default, 		0.1f, 
-		p_range, 		0.0f,1000.0f, 
-		p_ui, 			TYPE_SPINNER,		EDITTYPE_FLOAT, IDC_EDIT,	IDC_SPIN, 0.01f, 
-		end,
-	end
+	pb_spin, 			_T("spin"), 		TYPE_FLOAT, 	P_ANIMATABLE, 	IDS_SPIN,
+		p_default, 		0.1f,
+		p_range, 		0.0f,1000.0f,
+		p_ui, 			TYPE_SPINNER,		EDITTYPE_FLOAT, IDC_EDIT,	IDC_SPIN, 0.01f,
+		p_end,
+	p_end
 	);
 
 IObjParam *PO2RPO::ip			= NULL;
