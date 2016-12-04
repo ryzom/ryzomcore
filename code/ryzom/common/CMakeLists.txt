@@ -1,4 +1,7 @@
-ADD_SUBDIRECTORY(src)
+# only compile game_share for Ryzom client, server and tools
+IF(WITH_RYZOM_CLIENT OR WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
+  ADD_SUBDIRECTORY(src)
+ENDIF()
 
 #ADD_CUSTOM_COMMAND(OUTPUT "${CMAKE_BINARY_DIR}/share/data_common.bnp"
 #  COMMAND bnp_make -p ${CMAKE_CURRENT_SOURCE_DIR}/data_common ${CMAKE_BINARY_DIR}/share > /dev/null)
