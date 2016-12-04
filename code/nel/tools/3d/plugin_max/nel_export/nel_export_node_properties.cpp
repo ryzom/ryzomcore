@@ -508,37 +508,37 @@ INT_PTR CALLBACK AccelDialogCallback (
 			{
 				for (uint i=0; _MaterialNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LONG)(_MaterialNames[i]));
-					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LONG)(_MaterialNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
 				}
 			}
 			{
 				for (uint i =0; _EnvironmentNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LONG)(_EnvironmentNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LPARAM)(_EnvironmentNames[i]));
 				}
 			}
 			{
 				std::set<std::string>::iterator first(_KnownSoundGroups.begin()), last(_KnownSoundGroups.end());
 				for (; first != last; ++first)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LONG)(first->c_str()));
+					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LPARAM)(first->c_str()));
 				}
 			}
 			// set the combo and edit box
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LONG)(currentParam->OcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OcclusionModel.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LONG)(currentParam->OpenOcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OpenOcclusionModel.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LONG)(currentParam->EnvironmentFX.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LPARAM)(currentParam->EnvironmentFX.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LONG)(currentParam->SoundGroup.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LPARAM)(currentParam->SoundGroup.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
@@ -1497,7 +1497,7 @@ void	lmcCopyFrom(CLodDialogBoxParam *currentParam, HWND parentDlg)
 
 	// **** launch the choosing dialog
 	paramLMCFrom.reset();
-	if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_LMC_CHOOSE_FROM), parentDlg, LMCCopyFromDialogCallback, (long)&paramLMCFrom)==IDOK
+	if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_LMC_CHOOSE_FROM), parentDlg, LMCCopyFromDialogCallback, (LPARAM)&paramLMCFrom)==IDOK
 		&& paramLMCFrom.SelectionDone)
 	{
 		// **** Apply to the current setup
@@ -3050,7 +3050,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			ite++;
 		}
 
-		if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_NODE_PROPERTIES), _Ip->GetMAXHWnd(), LodDialogCallback, (long)&param)==IDOK)
+		if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_NODE_PROPERTIES), _Ip->GetMAXHWnd(), LodDialogCallback, (LPARAM)&param)==IDOK)
 		{
 			// Next node
 			ite=listNode.begin();

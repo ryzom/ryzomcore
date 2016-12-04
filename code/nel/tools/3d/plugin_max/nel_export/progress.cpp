@@ -119,7 +119,7 @@ void CProgressBar::initProgressBar( sint32 nNbMesh, Interface &ip)
 										MAKEINTRESOURCE(IDD_CALCULATING),
 										NULL,//ip.GetMAXHWnd(), 
 										CalculatingDialogCallback,
-										(long)this );
+										(LPARAM)this );
 }
 
 // -----------------------------------------------------------------------------------------------

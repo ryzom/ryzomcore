@@ -1171,8 +1171,8 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 
 									if (res != MATRIX_RETURNED)
 									{
-										nlwarning("res != MATRIX_RETURNED; res = %i; boneIndex = %i / %i", res, boneIndex, count);
-										nlwarning("bone = %i", (uint32)(void *)bone);
+										nlwarning("res != MATRIX_RETURNED; res = %d; boneIndex = %u / %u", res, boneIndex, count);
+										nlwarning("bone = %p", bone);
 										std::string boneName = getName (*bone);
 										nlwarning("boneName = %s", boneName.c_str());
 										nlassert(false);
