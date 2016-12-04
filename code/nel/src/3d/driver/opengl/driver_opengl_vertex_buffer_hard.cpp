@@ -167,7 +167,7 @@ uint			CVertexArrayRangeNVidia::sizeAllocated() const
 
 
 // ***************************************************************************
-void			CVertexArrayRangeNVidia::free()
+void			CVertexArrayRangeNVidia::freeBlock()
 {
 	H_AUTO_OGL(CVertexArrayRangeNVidia_free)
 	// release the ptr.
@@ -244,7 +244,7 @@ void			*CVertexArrayRangeNVidia::allocateVB(uint32 size)
 void			CVertexArrayRangeNVidia::freeVB(void	*ptr)
 {
 	H_AUTO_OGL(CVertexArrayRangeNVidia_freeVB)
-	_HeapMemory.free(ptr);
+	_HeapMemory.freeBlock(ptr);
 }
 
 
@@ -545,7 +545,7 @@ uint					CVertexArrayRangeATI::sizeAllocated() const
 	return _VertexArraySize;
 }
 // ***************************************************************************
-void					CVertexArrayRangeATI::free()
+void					CVertexArrayRangeATI::freeBlock()
 {
 	H_AUTO_OGL(CVertexArrayRangeATI_free)
 	// release the ptr.
@@ -623,7 +623,7 @@ void			*CVertexArrayRangeATI::allocateVB(uint32 size)
 void			CVertexArrayRangeATI::freeVB(void	*ptr)
 {
 	H_AUTO_OGL(CVertexArrayRangeATI_freeVB)
-	_HeapMemory.free(ptr);
+	_HeapMemory.freeBlock(ptr);
 }
 
 
@@ -853,7 +853,7 @@ bool CVertexArrayRangeMapObjectATI::allocate(uint32 size, CVertexBuffer::TPrefer
 }
 
 // ***************************************************************************
-void CVertexArrayRangeMapObjectATI::free()
+void CVertexArrayRangeMapObjectATI::freeBlock()
 {
 	H_AUTO_OGL(CVertexArrayRangeMapObjectATI_free)
 	_SizeAllocated = 0;
@@ -1205,7 +1205,7 @@ bool CVertexArrayRangeARB::allocate(uint32 size, CVertexBuffer::TPreferredMemory
 }
 
 // ***************************************************************************
-void CVertexArrayRangeARB::free()
+void CVertexArrayRangeARB::freeBlock()
 {
 	H_AUTO_OGL(CVertexArrayRangeARB_free)
 	_SizeAllocated = 0;

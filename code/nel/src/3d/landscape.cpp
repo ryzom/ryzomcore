@@ -3216,37 +3216,37 @@ void				CLandscape::deleteTessFace(CTessFace *f)
 	// for refine() mgt, must remove from refine priority list, or from the temp rootTessFaceToUpdate list.
 	f->unlinkInPList();
 
-	TessFaceAllocator.free(f);
+	TessFaceAllocator.freeBlock(f);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessVertex(CTessVertex *v)
 {
-	TessVertexAllocator.free(v);
+	TessVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessNearVertex(CTessNearVertex *v)
 {
-	TessNearVertexAllocator.free(v);
+	TessNearVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessFarVertex(CTessFarVertex *v)
 {
-	TessFarVertexAllocator.free(v);
+	TessFarVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTileMaterial(CTileMaterial *tm)
 {
-	TileMaterialAllocator.free(tm);
+	TileMaterialAllocator.freeBlock(tm);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTileFace(CTileFace *tf)
 {
-	TileFaceAllocator.free(tf);
+	TileFaceAllocator.freeBlock(tf);
 }
 
 

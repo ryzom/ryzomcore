@@ -65,7 +65,7 @@ public:
 	 */
 	void			*allocate(uint size);
 	/// free a block allocated with alloate(). no-op if NULL. nlstop() if don't find this block.
-	void			free(void *ptr);
+	void			freeBlock(void *ptr);
 
 
 // *********************

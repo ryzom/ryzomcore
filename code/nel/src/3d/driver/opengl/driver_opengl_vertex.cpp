@@ -1713,9 +1713,9 @@ void			CDriverGL::resetVertexArrayRange()
 
 	// After, Clear the 2 vertexArrayRange, if any.
 	if(_AGPVertexArrayRange)
-		_AGPVertexArrayRange->free();
+		_AGPVertexArrayRange->freeBlock();
 	if(_VRAMVertexArrayRange)
-		_VRAMVertexArrayRange->free();
+		_VRAMVertexArrayRange->freeBlock();
 }
 
 

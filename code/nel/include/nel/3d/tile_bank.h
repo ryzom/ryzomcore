@@ -140,7 +140,7 @@ public:
 
 private:
 	void	clearTile (CTile::TBitmap type);
-	void	free ()
+	void	freeBlock ()
 	{
 		nlassert ((_Flags&=NL3D_CTILE_FREE_FLAG)==0);
 		_Flags|=NL3D_CTILE_FREE_FLAG;

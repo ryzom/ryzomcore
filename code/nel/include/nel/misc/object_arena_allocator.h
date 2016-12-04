@@ -49,7 +49,7 @@ public:
 	  */
 	void *alloc(uint size);
 	// free an object that has previously been allocated with alloc. size should be remembered by the caller.
-	void free(void *);
+	void freeBlock(void *);
 	// get the number of allocated objects
 	uint getNumAllocatedBlocks() const;
 #	ifdef NL_DEBUG
