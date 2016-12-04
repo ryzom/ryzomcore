@@ -603,7 +603,7 @@ void release()
 
 		// Delete the driver.
 		delete Driver;
-		Driver = 0;
+		Driver = NULL;
 	}
 
 	NetMngr.getConnection().close();
@@ -663,6 +663,7 @@ void release()
 	CLuaManager::releaseInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
+	CViewRenderer::release();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

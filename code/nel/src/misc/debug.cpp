@@ -23,7 +23,9 @@
 #	include <tchar.h>
 #	include <imagehlp.h>
 #	pragma comment(lib, "imagehlp.lib")
-#	define getcwd(_a, _b) (_getcwd(_a,_b))
+#	ifndef getcwd
+#		define getcwd(_a, _b) (_getcwd(_a,_b))
+#	endif
 #	ifdef NL_OS_WIN64
 #		define DWORD_TYPE DWORD64
 #	else
@@ -178,7 +180,7 @@ void nlFatalError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -197,7 +199,7 @@ void nlError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 

@@ -18,7 +18,7 @@
 #include "ligo_material.h"
 
 // Ligo include
-#include "ligo_error.h"
+#include "nel/ligo/ligo_error.h"
 
 //using namespace NL3D;
 

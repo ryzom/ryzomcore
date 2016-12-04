@@ -102,14 +102,14 @@ void regsiterOVPath ()
 //#ifdef NL_DEBUG_FAST
 //	HMODULE hModule = GetModuleHandle("object_viewer_dll_df.dll");
 #if defined (NL_DEBUG)
-	HMODULE hModule = GetModuleHandle("object_viewer_dll_d.dll");
+	HMODULE hModule = GetModuleHandle(_T("object_viewer_dll_d.dll"));
 //#elif defined (NL_RELEASE_DEBUG)
 //	HMODULE hModule = GetModuleHandle("object_viewer_dll_rd.dll");
 #else
 	HMODULE hModule = GetModuleHandle("object_viewer_dll_r.dll");
 #endif
-	if (!hModule) { ::MessageBox(NULL, "'hModule' failed at '" __FUNCTION__ "' in file '" __FILE__ " on line " NL_MACRO_TO_STR(__LINE__), "NeL Export", MB_OK | MB_ICONERROR); return; }
-	char sModulePath[256];
+	if (!hModule) { ::MessageBox(NULL, _T("'hModule' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
+	TCHAR sModulePath[256];
 	int res = GetModuleFileName(hModule, sModulePath, 256);
 	if (!res) { ::MessageBox(NULL, _T("'res' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
 
@@ -174,7 +174,7 @@ void CNelExport::viewMesh (TimeValue time)
 	// Check wether there's not an instance currently running
 	if (view->isInstanceRunning())
 	{
-		::MessageBox(NULL, "An instance of the viewer is currently running, please close it :)", "NeL Export", MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox(NULL, _T("An instance of the viewer is currently running, please close it :)"), _T("NeL Export"), MB_OK|MB_ICONEXCLAMATION);
 		return;
 	}
 
@@ -191,7 +191,7 @@ void CNelExport::viewMesh (TimeValue time)
 		// Init it
 		if (!view->initUI())
 		{
-			::MessageBox(NULL, "Failed to initialize object viewer ui, this may be a driver init issue, check your log.log files", "NeL Export", MB_OK|MB_ICONEXCLAMATION);
+			::MessageBox(NULL, _T("Failed to initialize object viewer ui, this may be a driver init issue, check your log.log files"), _T("NeL Export"), MB_OK|MB_ICONEXCLAMATION);
 			IObjectViewer::releaseInterface(view);
 			return;
 		}
@@ -300,7 +300,7 @@ void CNelExport::viewMesh (TimeValue time)
 							_ExportNel->buildSkeletonShape (*skelShape, *skeletonRoot, &(iteSkeleton->second), mapId, time);
 
 							// Add the shape in the view
-							uint instance = view->addSkel (skelShape, skeletonRoot->GetName());
+							uint instance = view->addSkel (skelShape, tStrToUtf8(skeletonRoot->GetName()));
 
 							// Add tracks
 							CAnimation *anim=new CAnimation;

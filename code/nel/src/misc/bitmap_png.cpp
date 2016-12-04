@@ -91,7 +91,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 		// free all of the memory associated with the png_ptr and info_ptr
 		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		// if we get here, we had a problem reading the file
-		nlwarning("failed to setjump");
+		nlwarning("Error while reading PNG");
 		return 0;
 	}
 
@@ -241,6 +241,21 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	return imageDepth;
 }
 
+// small helper to avoid local variables
+static bool writePNGSetJmp(png_struct *png_ptr)
+{
+	if (setjmp(png_jmpbuf(png_ptr)))
+	{
+		// free all of the memory associated with the png_ptr
+		png_destroy_write_struct(&png_ptr, (png_info**)NULL);
+		// if we get here, we had a problem writing the file
+		nlwarning("Error while writing PNG");
+		return false;
+	}
+
+	return true;
+}
+
 /*-------------------------------------------------------------------*\
 							writePNG
 \*-------------------------------------------------------------------*/
@@ -274,12 +289,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 		return false;
 	}
 
-	if (setjmp(png_jmpbuf(png_ptr)))
-	{
-		png_destroy_write_struct( &png_ptr, (png_info**)NULL );
-		nlwarning("couldn't set setjmp");
-		return false;
-	}
+	if (!writePNGSetJmp(png_ptr)) return false;
 
 	// set the write function
 	png_set_write_fn(png_ptr, (void*)&f, writePNGData, NULL);

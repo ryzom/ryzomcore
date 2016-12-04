@@ -149,7 +149,7 @@ void EditPatchMod::ChangeRememberedPatch(int type)
 			
 			theHold.Begin();
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "ChangeRememberedPatch"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("ChangeRememberedPatch")));
 			// Call the patch type change function
 			ChangePatchType(patch, rememberedIndex, type);
 			patchData->UpdateChanges(patch, rpatch, FALSE);
@@ -299,7 +299,7 @@ void EditPatchMod::ChangeRememberedVert(int type)
 			
 			theHold.Begin();
 			if (theHold.Holding())
-				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "ChangeRememberedVert"));
+				theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("ChangeRememberedVert")));
 			// Call the vertex type change function
 			patch->ChangeVertType(rememberedIndex, type);
 			patchData->UpdateChanges(patch, rpatch, FALSE);

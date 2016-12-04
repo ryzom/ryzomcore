@@ -502,7 +502,7 @@ namespace NLGUI
 
 		const CEventDescriptorKey& getLastKeyEvent() const{ return lastKeyEvent; }
 
-		IParser* getParser() const{ return parser; }
+		IParser* getParser() const{ return _Parser; }
 
 		/// Retrieves the Id of the currently selected widgets
 		void getEditorSelection( std::vector< std::string > &selection );
@@ -536,7 +536,7 @@ namespace NLGUI
 		CWidgetManager();
 		~CWidgetManager();
 
-		IParser *parser;
+		IParser *_Parser;
 
 		static CWidgetManager *instance;
 		std::vector< SMasterGroup > _MasterGroups;

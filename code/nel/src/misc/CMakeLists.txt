@@ -42,18 +42,18 @@ FILE(GLOB NLMISC_MATH
 	plane.cpp ../../include/nel/misc/plane.h
 	../../include/nel/misc/plane_inline.h
 	polygon.cpp ../../include/nel/misc/polygon.h
-	quad.cpp ../../include/nel/misc/quad.h
+	../../include/nel/misc/quad.h
 	quat.cpp ../../include/nel/misc/quat.h
 	rect.cpp ../../include/nel/misc/rect.h
 	rgba.cpp ../../include/nel/misc/rgba.h
 	triangle.cpp ../../include/nel/misc/triangle.h
-	uv.cpp ../../include/nel/misc/uv.h
+	../../include/nel/misc/uv.h
 	vector*.cpp ../../include/nel/misc/vector*.h
 	aabbox.cpp ../../include/nel/misc/aabbox.h
 	algo.cpp ../../include/nel/misc/algo.h
 	bsphere.cpp ../../include/nel/misc/bsphere.h
 	fast_floor.cpp ../../include/nel/misc/fast_floor.h
-	geom_ext.cpp ../../include/nel/misc/geom_ext.h
+	../../include/nel/misc/geom_ext.h
 	line.cpp ../../include/nel/misc/line.h
 	matrix.cpp ../../include/nel/misc/matrix.h
 )
@@ -70,7 +70,6 @@ FILE(GLOB NLMISC_PLATFORM
 	inter_window_msg_queue.cpp ../../include/nel/misc/inter_window_msg_queue.h
 	system_*.cpp ../../include/nel/misc/system_*.h
 	win32_util.cpp ../../include/nel/misc/win32_util.h
-	win_tray.cpp ../../include/nel/misc/win_tray.h
 )
 
 FILE(GLOB NLMISC_GENERIC
@@ -80,7 +79,7 @@ FILE(GLOB NLMISC_GENERIC
 	../../include/nel/misc/callback.h
 	*_allocator.cpp ../../include/nel/misc/*_allocator.h
 	../../include/nel/misc/enum_bitset.h
-	fast_id_map.cpp ../../include/nel/misc/fast_id_map.h
+	../../include/nel/misc/fast_id_map.h
 	hierarchical_timer.cpp ../../include/nel/misc/hierarchical_timer.h
 	../../include/nel/misc/historic.h
 	../../include/nel/misc/mutable_container.h
@@ -92,11 +91,11 @@ FILE(GLOB NLMISC_GENERIC
 	bit_set.cpp ../../include/nel/misc/bit_set.h
 	stop_watch.cpp ../../include/nel/misc/stop_watch.h
 	../../include/nel/misc/twin_map.h
-	object_vector.cpp ../../include/nel/misc/object_vector.h
+	../../include/nel/misc/object_vector.h
 	../../include/nel/misc/singleton.h
 	speaker_listener.cpp ../../include/nel/misc/speaker_listener.h
 	../../include/nel/misc/static_map.h
-	stl_block_list.cpp ../../include/nel/misc/stl_block_list.h
+	../../include/nel/misc/stl_block_list.h
 )
 
 FILE(GLOB NLMISC_UTILITY
@@ -118,7 +117,7 @@ FILE(GLOB NLMISC_UTILITY
 	progress_callback.cpp ../../include/nel/misc/progress_callback.h
 	sheet_id.cpp ../../include/nel/misc/sheet_id.h
 	variable.cpp ../../include/nel/misc/variable.h
-	value_smoother.cpp ../../include/nel/misc/value_smoother.h
+	../../include/nel/misc/value_smoother.h
 )
 
 FILE(GLOB NLMISC_STRING

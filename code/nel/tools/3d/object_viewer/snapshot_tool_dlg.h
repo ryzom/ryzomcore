@@ -42,20 +42,21 @@ public:
 
 	enum 
 	{
-		OutputFormat_Tga = 0,
+		OutputFormat_Tga,
+		OutputFormat_Png,
 		OutputFormat_Jpg
 	};
 
 	enum
 	{
-		OutputPath_Custom = 0,
+		OutputPath_Custom,
 		OutputPath_SameAsInput,
 		OutputPath_CurrShapeDirectory,
 	};
 
 	enum
 	{
-		SnapshotAngle_Front = 0,
+		SnapshotAngle_Front,
 		SnapshotAngle_Right,
 		SnapshotAngle_Left,
 		SnapshotAngle_Top,

@@ -29,11 +29,10 @@
 #include "nel/3d/particle_system_shape.h"
 #include "nel/3d/particle_system_model.h"
 #include "nel/3d/ps_iterator.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
-
-
-
 
 namespace NL3D
 {

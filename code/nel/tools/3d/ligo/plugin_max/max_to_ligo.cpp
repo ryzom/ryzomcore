@@ -33,9 +33,10 @@
 #include "nel/misc/stream.h"
 
 // From ligo library
-#include "nel/../../src/ligo/zone_template.h"
+#include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_config.h"
-#include "nel/../../src/ligo/ligo_error.h"
+#include "nel/ligo/ligo_error.h"
+#include "nel/misc/path.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -131,15 +132,12 @@ bool CMaxToLigo::loadLigoConfigFile (CLigoConfig& config, Interface& it, bool di
 		if (res)
 		{
 			// Path
-			TCHAR sDrive[256];
-			TCHAR sDir[256];
-			_tsplitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_tmakepath (sModulePath, sDrive, sDir, _T("ligoscape"), _T(".cfg"));
+			std::string path = NLMISC::CFile::getPath(tStrToUtf8(sModulePath) + "ligoscape.cfg");
 
 			try
 			{
 				// Load the config file
-				config.readConfigFile (tStrToUtf8(sModulePath), false);
+				config.readConfigFile (path, false);
 
 				// ok
 				return true;

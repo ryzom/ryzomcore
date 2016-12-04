@@ -21,6 +21,8 @@
 #include "nel/3d/texture_file.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/3d/clip_trav.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/fast_mem.h"
 
 

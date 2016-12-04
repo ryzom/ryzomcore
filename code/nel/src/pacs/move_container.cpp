@@ -1304,8 +1304,8 @@ void CMoveContainer::freeAllOTInfo ()
 {
 	H_AUTO (NLPACS_Free_All_OT_Info);
 
-	_AllocOTDynamicInfo.free ();
-	_AllocOTStaticInfo.free ();
+	_AllocOTDynamicInfo.freeBlock ();
+	_AllocOTStaticInfo.freeBlock ();
 }
 
 // ***************************************************************************

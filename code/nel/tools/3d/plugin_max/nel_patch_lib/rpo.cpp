@@ -43,9 +43,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return new RPO;
 	}
-	const TCHAR *	ClassName() 
+	const MCHAR *	ClassName() 
 	{
-		return _T("RklPatch");
+		return _M("RklPatch");
 	}
 	SClass_ID		SuperClassID() 
 	{
@@ -55,9 +55,9 @@ class RPOClassDesc:public ClassDesc
 	{
 		return RYKOLPATCHOBJ_CLASS_ID;
 	}
-	const TCHAR* 	Category() 
+	const MCHAR* 	Category() 
 	{
-		return _T("Rykol Tools");
+		return _M("Rykol Tools");
 	}
 };
 
@@ -304,10 +304,10 @@ void RPO::GetDeformBBox(TimeValue t, Box3& box, Matrix3 *tm, BOOL useSel )
 // ------------------------------------------------------------------------------------------------------------------------------------------------
 
 //From ReferenceMaker
-RefResult RPO::NotifyRefChanged( Interval changeInt, RefTargetHandle hTarget,PartID& partID, RefMessage message )
+RefResult RPO::NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget,PartID& partID, RefMessage message, BOOL propagate )
 {
 	//TODO: Implement, if the object makes references to other things
-	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message);
+	//return PatchObject::NotifyRefChanged( changeInt, hTarget, partID, message, propagate);
 	return(REF_SUCCEED);
 }
 

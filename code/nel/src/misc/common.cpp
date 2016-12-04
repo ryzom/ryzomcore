@@ -761,7 +761,8 @@ static bool createProcess(const std::string &programName, const std::string &arg
 		sProgramName = new wchar_t[MAX_PATH];
 		wcscpy(sProgramName, (wchar_t*)ucProgramName.c_str());
 
-		args = arguments;
+		// important! we need to specify the executable full path as first argument
+		args = toString("\"%s\" ", programName.c_str()) + arguments;
 	}
 
 	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
@@ -1416,17 +1417,17 @@ NLMISC_CATEGORISED_COMMAND(nel, killProgram, "kill a program given the pid", "<p
 }
 
 #ifdef NL_OS_WINDOWS
-LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
+LONG GetRegKey(HKEY key, LPCWSTR subkey, LPWSTR retdata)
 {
 	HKEY hkey;
-	LONG retval = RegOpenKeyExA(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
+	LONG retval = RegOpenKeyExW(key, subkey, 0, KEY_QUERY_VALUE, &hkey);
 
 	if (retval == ERROR_SUCCESS)
 	{
 		long datasize = MAX_PATH;
-		char data[MAX_PATH];
-		RegQueryValueA(hkey, NULL, data, &datasize);
-		lstrcpyA(retdata,data);
+		wchar_t data[MAX_PATH];
+		RegQueryValueW(hkey, NULL, data, &datasize);
+		lstrcpyW(retdata, data);
 		RegCloseKey(hkey);
 	}
 
@@ -1434,52 +1435,56 @@ LONG GetRegKey(HKEY key, LPCSTR subkey, LPSTR retdata)
 }
 #endif // NL_OS_WINDOWS
 
-static bool openDocWithExtension (const char *document, const char *ext)
+static bool openDocWithExtension (const std::string &document, const std::string &ext)
 {
 #ifdef NL_OS_WINDOWS
 	// First try ShellExecute()
-	HINSTANCE result = ShellExecuteA(NULL, "open", document, NULL, NULL, SW_SHOWDEFAULT);
+	HINSTANCE result = ShellExecuteW(NULL, L"open", utf8ToWide(document), NULL, NULL, SW_SHOWDEFAULT);
 
 	// If it failed, get the .htm regkey and lookup the program
 	if ((uintptr_t)result <= HINSTANCE_ERROR)
 	{
-		char key[MAX_PATH + MAX_PATH];
+		wchar_t key[MAX_PATH + MAX_PATH];
 
-		if (GetRegKey(HKEY_CLASSES_ROOT, ext, key) == ERROR_SUCCESS)
+		// get the type of the extension
+		if (GetRegKey(HKEY_CLASSES_ROOT, utf8ToWide("." + ext), key) == ERROR_SUCCESS)
 		{
-			lstrcatA(key, "\\shell\\open\\command");
+			lstrcatW(key, L"\\shell\\open\\command");
 
+			// get the command used to open a file with this extension
 			if (GetRegKey(HKEY_CLASSES_ROOT, key, key) == ERROR_SUCCESS)
 			{
-				char *pos = strstr(key, "\"%1\"");
+				std::string program = wideToUtf8(key);
 
-				if (pos == NULL)
+				// empty program
+				if (program.empty()) return false;
+
+				if (program[0] == '"')
 				{
-					// No quotes found
-					// Check for %1, without quotes
-					pos = strstr(key, "%1");
-		
-					if (pos == NULL)
+					// program is quoted
+					std::string::size_type pos = program.find('"', 1);
+
+					if (pos != std::string::npos)
 					{
-						// No parameter at all...
-						pos = key+lstrlenA(key)-1;
-					}
-					else
-					{
-						// Remove the parameter
-						*pos = '\0';
+						// take part before next quote
+						program = program.substr(1, pos - 1);
 					}
 				}
 				else
 				{
-					// Remove the parameter
-					*pos = '\0';
+					// program has a parameter
+					std::string::size_type pos = program.find(' ', 1);
+
+					if (pos != std::string::npos)
+					{
+						// take part before first space
+						program = program.substr(0, pos);
+					}
 				}
 
-				lstrcatA(pos, " ");
-				lstrcatA(pos, document);
-				int res = WinExec(key, SW_SHOWDEFAULT);
-				return (res>31);
+				// create process
+				PROCESS_INFORMATION pi;
+				return createProcess(program, document, false, pi);
 			}
 		}
 	}
@@ -1551,18 +1556,18 @@ static bool openDocWithExtension (const char *document, const char *ext)
 	return false;
 }
 
-bool openURL (const char *url)
+bool openURL(const std::string &url)
 {
 	return openDocWithExtension(url, "htm");
 }
 
-bool openDoc (const char *document)
+bool openDoc(const std::string &document)
 {
 	// get extension from document fullpath
 	string ext = CFile::getExtension(document);
 
 	// try to open document
-	return openDocWithExtension(document, ext.c_str());
+	return openDocWithExtension(document, ext);
 }
 
 } // NLMISC

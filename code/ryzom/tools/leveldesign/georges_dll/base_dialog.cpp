@@ -254,10 +254,10 @@ void CBaseDialog::onOpenSelected()
 void CBaseDialog::registerLastControl ()
 {
 	RECT rect = {0, 0, 0, 0};
-	DummyStatic0.Create ("Coucou", WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 30);
+	DummyStatic0.Create (_T("Coucou"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 30);
 	DummyStatic0.Dlg = this;
 	DummyStatic0.Index = 0;
-	DummyStatic1.Create ("Coucou", WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 31);
+	DummyStatic1.Create (_T("Coucou"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 31);
 	DummyStatic1.Dlg = this;
 	DummyStatic1.Index = 1;
 }

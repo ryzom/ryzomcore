@@ -223,7 +223,7 @@ BOOL CGeorgesEditDocForm::OnNewDocument()
 		string defFilename = theApp.RootSearchPath;
 		defFilename += "*.dfn";
 
-		CFileDialog dlgFile (TRUE, "*.dfn", defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
+		CFileDialog dlgFile (TRUE, _T("*.dfn"), defFilename.c_str (), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, DfnFilter, theApp.m_pMainWnd);
 		if (dlgFile.DoModal () == IDOK)
 		{
 			if (initDocument (dlgFile.GetFileName (), true))
@@ -548,7 +548,7 @@ BOOL CGeorgesEditDoc::OnOpenDocument(LPCTSTR lpszPathName)
 
 			if (!extLower.empty ())
 			{
-				string dfnName = extLower.substr (1, string::npos)  + ".dfn";
+				string dfnName = extLower + ".dfn";
 
 				// Check if the file is handled
 				if (theApp.getFormDocTemplate (dfnName.c_str ()) == NULL)

@@ -69,7 +69,7 @@ public:
 	bool			allocate(uint numVertices, uint &indexStart);
 
 	/// free a subset of the VB. nlstop if subset not found...
-	void			free(uint indexStart);
+	void			freeBlock(uint indexStart);
 
 	// @}
 

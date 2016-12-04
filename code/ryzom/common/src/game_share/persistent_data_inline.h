@@ -18,6 +18,20 @@
 // inlines CPersistentDataRecord
 //-----------------------------------------------------------------------------
 
+union C64BitParts
+{
+	struct
+	{
+		uint32	i32_1;
+		uint32	i32_2;
+	};
+
+	sint64 s64;
+	uint64 u64;
+	double d;
+	float f;
+};
+
 inline void CPersistentDataRecord::addString(const std::string& name,uint16 &result)
 {
 	// check whether the value of 'result' is already correct
@@ -96,11 +110,8 @@ inline void CPersistentDataRecord::push(TToken token,sint32 val)
 inline void CPersistentDataRecord::push(TToken token,sint64 val)
 {
 	// create a union for splitting the i64 value into 2 32bit parts and map the union onto the input value
-	struct C64BitParts
-	{
-		uint32	i32_1;
-		uint32	i32_2;
-	} &valueInBits= *(C64BitParts*)&val;
+	C64BitParts valueInBits;
+	valueInBits.s64 = val;
 
 	// make sure the token is valid
 	#ifdef NL_DEBUG
@@ -153,11 +164,8 @@ inline void CPersistentDataRecord::push(TToken token,uint32 val)
 inline void CPersistentDataRecord::push(TToken token,uint64 val)
 {
 	// create a union for splitting the i64 value into 2 32bit parts and map the union onto the input value
-	struct C64BitParts
-	{
-		uint32	i32_1;
-		uint32	i32_2;
-	} &valueInBits= *(C64BitParts*)&val;
+	C64BitParts valueInBits;
+	valueInBits.u64 = val;
 
 	// make sure the token is valid
 	#ifdef NL_DEBUG
@@ -173,6 +181,9 @@ inline void CPersistentDataRecord::push(TToken token,uint64 val)
 
 inline void CPersistentDataRecord::push(TToken token,float val)
 {
+	C64BitParts valueInBits;
+	valueInBits.f = val;
+
 	// make sure the token is valid
 	#ifdef NL_DEBUG
 	BOMB_IF( ((token<<3)>>3)!= token, "Invalid token - Insufficient numeric precision", return);
@@ -180,17 +191,14 @@ inline void CPersistentDataRecord::push(TToken token,float val)
 
 	// store the token and value to the relavent data buffers
 	_TokenTable.push_back((token<<3)+CArg::FLOAT_TOKEN);
-	_ArgTable.push_back(*(sint32*)&val);
+	_ArgTable.push_back(valueInBits.i32_1);
 }
 
 inline void CPersistentDataRecord::push(TToken token,double val)
 {
 	// create a union for splitting the i64 value into 2 32bit parts and map the union onto the input value
-	struct C64BitParts
-	{
-		uint32	i32_1;
-		uint32	i32_2;
-	} &valueInBits= *(C64BitParts*)&val;
+	C64BitParts valueInBits;
+	valueInBits.d = val;
 
 	// make sure the token is valid
 	#ifdef NL_DEBUG

@@ -21,6 +21,7 @@
 //
 #include "nel/3d/texture_cube.h"
 #include "nel/3d/texture_blank.h"
+#include "nel/3d/animation_time.h"
 
 
 namespace NL3D

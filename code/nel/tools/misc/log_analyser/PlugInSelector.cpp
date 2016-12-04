@@ -131,10 +131,10 @@ void CPlugInSelector::OnSelchangeList1()
 	if ( ! LibInst )
 	{
 		CString s;
-		char msg [300];
+		TCHAR msg [300];
 		FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg, 299, NULL );
-		s.Format( "Can't load %s: %s", dllName, msg );
+		s.Format(_T("Can't load %s: %s"), dllName, msg );
 		AfxMessageBox( s );
 		AnalyseFunc = NULL;
 		return;
@@ -144,7 +144,7 @@ void CPlugInSelector::OnSelchangeList1()
 	TInfoFunc infoFunc = (TInfoFunc)GetProcAddress( LibInst, "getInfoString" );
 	if ( ! infoFunc )
 	{
-		AfxMessageBox( "Can't find function getInfoString in dll" );
+		AfxMessageBox( _T("Can't find function getInfoString in dll") );
 		return;
 	}
 	GetDlgItem( IDC_GROUP_INFO )->SetWindowText( getFilename( string(dllName)).c_str() );
@@ -154,7 +154,7 @@ void CPlugInSelector::OnSelchangeList1()
 	AnalyseFunc = (TAnalyseFunc)GetProcAddress( LibInst, "doAnalyse" );
 	if ( ! AnalyseFunc )
 	{
-		AfxMessageBox( "Can't find function doAnalyse in dll" );
+		AfxMessageBox( _T("Can't find function doAnalyse in dll") );
 		return;
 	}
 

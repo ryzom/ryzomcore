@@ -243,7 +243,7 @@ void CTileBank::freeTile (int tileIndex)
 	nlassert (tileIndex<(sint)_TileVector.size());
 
 	// Free
-	_TileVector[tileIndex].free();
+	_TileVector[tileIndex].freeBlock();
 
 	// Resize tile table
 	int i;

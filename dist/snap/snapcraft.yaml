@@ -1,0 +1,55 @@
+name: ryzom
+version: "3.0.2"
+summary: Ryzom science-fantasy MMORPG
+description: |
+  Ryzom is a science-fantasy MMORPG.
+grade: devel # stable
+confinement: strict
+
+apps:
+  ryzom:
+    command: desktop-launch $SNAP/bin/ryzom_installer_qt
+    plugs:
+        - home
+        - unity7
+        - x11
+        - opengl
+
+parts:
+  ryzom:
+    source: https://bitbucket.org/ryzom/ryzomcore
+    source-type: hg
+    source-branch: compatibility-develop
+    source-subdir: code
+    plugin: cmake
+    configflags:
+        - -DCMAKE_BUILD_TYPE=Release
+        - -DWITH_3D=OFF
+        - -DWITH_GUI=OFF
+        - -DWITH_NET=OFF
+        - -DWITH_PACS=OFF
+        - -DWITH_GEORGES=OFF
+        - -DWITH_LIGO=OFF
+        - -DWITH_LOGIC=OFF
+        - -DWITH_SOUND=OFF
+        - -DWITH_RYZOM_SERVER=OFF
+        - -DWITH_RYZOM_TOOLS=OFF
+        - -DWITH_RYZOM_CLIENT=OFF
+        - -DWITH_RYZOM_INSTALLER=ON
+        - -DWITH_NEL_TESTS=OFF
+        - -DWITH_NEL_TOOLS=OFF
+        - -DWITH_NEL_SAMPLES=OFF
+        - -DWITH_QT5=ON
+        - -DWITH_STATIC=ON
+        - -DWITH_INSTALL_LIBRARIES=OFF
+        - -DRYZOM_GAMES_PREFIX=bin
+    build-packages:
+        - zlib1g-dev
+        - libpng-dev
+        - libjpeg8-dev
+        - qttools5-dev-tools
+    stage-packages:
+        - libqt5widgets5
+        
+    after: [desktop-qt5]
+

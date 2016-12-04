@@ -441,11 +441,11 @@ bool CFileTreeCtrl::enumObjects(HTREEITEM hParentItem,IShellFolder* pParentFolde
 			pParentFolder->GetAttributesOf(1, (LPCITEMIDLIST*)&pidl, &pItemInfo->dwFlags);
 
 			// Convert display name in file system path
-			char name[MAX_PATH];
+			TCHAR name[MAX_PATH];
 			nlverify ( SHGetPathFromIDList ( pidl, name ) );
 
 			// Save it
-			pItemInfo->displayName = name;
+			pItemInfo->displayName = tStrToUtf8(name);
 
 			// Is a folder ?
 			bool folder = (pItemInfo->dwFlags&SFGAO_FOLDER) !=0;
@@ -720,7 +720,7 @@ bool CFileTreeCtrl::getCurrentFilename (std::string &result)
 	if (curSel)
 	{
 		CString str = _TreeCtrl.GetItemText (curSel);
-		result = str;
+		result = tStrToUtf8(str);
 		return true;
 	}
 	return false;

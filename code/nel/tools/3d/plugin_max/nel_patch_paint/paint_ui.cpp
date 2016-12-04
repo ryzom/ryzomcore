@@ -7,7 +7,7 @@
 #include "nel/3d/texture_mem.h"
 #include "nel/misc/config_file.h"
 
-#define REGKEY_EDIT_PATCH "Software\\Nevrax\\Ryzom\\edit_patch"
+#define REGKEY_EDIT_PATCH _T("Software\\Nevrax\\Ryzom\\edit_patch")
 
 /*-------------------------------------------------------------------*/
 
@@ -318,9 +318,8 @@ void getColors (COLORREF *array)
 		{
 			DWORD len=4;
 			DWORD type;
-			char regName[100];
-			smprintf (regName, 100, "Color%d", i);
-			RegQueryValueEx (hKey, regName, 0, &type, (LPBYTE)(array+i), &len);
+			std::string regName = toString("Color%u", i);
+			RegQueryValueEx (hKey, utf8ToTStr(regName), 0, &type, (LPBYTE)(array+i), &len);
 		}
 		RegCloseKey (hKey);
 	}
@@ -337,9 +336,8 @@ void setColors (const COLORREF *array)
 		for (uint i=0; i<16; i++)
 		{
 			DWORD len=4;
-			char regName[100];
-			smprintf (regName, 100, "Color%d", i);
-			RegSetValueEx (hKey, regName, 0, REG_DWORD, (LPBYTE)(array+i), 4);
+			std::string regName = toString("Color%u", i);
+			RegSetValueEx (hKey, utf8ToTStr(regName), 0, REG_DWORD, (LPBYTE)(array+i), 4);
 		}
 		RegCloseKey (hKey);
 	}

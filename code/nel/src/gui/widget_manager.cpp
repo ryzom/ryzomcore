@@ -37,6 +37,10 @@
 #include "nel/misc/events.h"
 #include "nel/gui/root_group.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	void LinkHack();
@@ -462,7 +466,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement* CWidgetManager::getElementFromDefine( const std::string &defineId )
 	{
-		return getElementFromId( parser->getDefine( defineId ) );
+		return getElementFromId( _Parser->getDefine( defineId ) );
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2109,8 +2113,6 @@ namespace NLGUI
 
 		bool handled = false;
 
-		CViewPointer *_Pointer = static_cast< CViewPointer* >( getPointer() );
-
 		if( evnt.getType() == CEventDescriptor::system )
 		{
 			handleSystemEvent( evnt );
@@ -3272,7 +3274,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::startAnim( const std::string &animId )
 	{
-		CInterfaceAnim *pIT = parser->getAnim( animId );
+		CInterfaceAnim *pIT = _Parser->getAnim( animId );
 		if( pIT == NULL )
 			return;
 
@@ -3298,7 +3300,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::stopAnim( const std::string &animId )
 	{
-		CInterfaceAnim *pIT = parser->getAnim( animId );
+		CInterfaceAnim *pIT = _Parser->getAnim( animId );
 
 		for( uint i = 0; i < activeAnims.size(); ++i )
 			if( activeAnims[ i ] == pIT )
@@ -3321,7 +3323,7 @@ namespace NLGUI
 	void CWidgetManager::runProcedure( const std::string &procName, CCtrlBase *pCaller,
 		const std::vector< std::string> &paramList )
 	{
-		CProcedure *procp = parser->getProc( procName );
+		CProcedure *procp = _Parser->getProc( procName );
 		if( procp == NULL )
 			return;
 
@@ -3357,7 +3359,7 @@ namespace NLGUI
 	void CWidgetManager::setProcedureAction( const std::string &procName, uint actionIndex,
 		const std::string &ah, const std::string &params )
 	{
-		CProcedure *procp = parser->getProc( procName );
+		CProcedure *procp = _Parser->getProc( procName );
 		if( procp == NULL )
 			return;
 
@@ -3697,7 +3699,7 @@ namespace NLGUI
 
 		CReflectableRegister::registerClasses();
 
-		parser = IParser::createParser();
+		_Parser = IParser::createParser();
 
 		_Pointer = NULL;
 		curContextHelp = NULL;
@@ -3738,6 +3740,9 @@ namespace NLGUI
 		{
 			delete _MasterGroups[i].Group;
 		}
+
+		delete _Parser;
+		_Parser = NULL;
 
 		_Pointer = NULL;
 		curContextHelp = NULL;

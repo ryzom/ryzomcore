@@ -96,7 +96,7 @@ BOOL CDfnDialog::OnInitDialog()
 
 	setListSize (currentPos, SmallWidget, ParentHeight);
 	Parents.create (WS_TABSTOP, currentPos, this, LtParents);
-	Parents.insertColumn (0, "Parent Dfn");
+	Parents.insertColumn (0, _T("Parent Dfn"));
 	Parents.Dialog = this;
 	Parents.recalcColumn ();
 	initWidget (Parents);
@@ -111,11 +111,11 @@ BOOL CDfnDialog::OnInitDialog()
 
 	setListSize (currentPos, Width, DfnHeight);
 	Struct.create (WS_TABSTOP, currentPos, this, LtStruct);
-	Struct.insertColumn (0, "Name");
-	Struct.insertColumn (1, "Type");
-	Struct.insertColumn (2, "Value");
-	Struct.insertColumn (3, "Default");
-	Struct.insertColumn (4, "FilenameExt");
+	Struct.insertColumn (0, _T("Name"));
+	Struct.insertColumn (1, _T("Type"));
+	Struct.insertColumn (2, _T("Value"));
+	Struct.insertColumn (3, _T("Default"));
+	Struct.insertColumn (4, _T("FilenameExt"));
 	Struct.Dialog = this;
 	Struct.recalcColumn ();
 	initWidget (Struct);
@@ -342,7 +342,7 @@ void CDfnEditListCtrl::getMemComboBoxProp (uint item, uint subItem, std::string 
 	if (subItem == 0)
 	{
 		browse = false;
-		regAdr = GEORGES_EDIT_BASE_REG_KEY"\\Label MemCombo";
+		regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\Label MemCombo"));
 	}
 	else if (subItem == 2)
 	{
@@ -351,19 +351,19 @@ void CDfnEditListCtrl::getMemComboBoxProp (uint item, uint subItem, std::string 
 		// Get type string
 		string type = tStrToUtf8(ListCtrl.GetItemText (item, 1));
 		if ((type == "Type") || (type == "Type array"))
-			regAdr = GEORGES_EDIT_BASE_REG_KEY"\\Type MemCombo";
+			regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\Type MemCombo"));
 		else if ((type == "Dfn") || (type == "Dfn array"))
-			regAdr = GEORGES_EDIT_BASE_REG_KEY"\\Dfn MemCombo";
+			regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\Dfn MemCombo"));
 	}
 	else if (subItem == 3)
 	{
 		browse = false;
-		regAdr = GEORGES_EDIT_BASE_REG_KEY"\\Default MemCombo";
+		regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\Default MemCombo"));
 	}
 	else if (subItem == 3)
 	{
 		browse = false;
-		regAdr = GEORGES_EDIT_BASE_REG_KEY"\\FilenameExt MemCombo";
+		regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\FilenameExt MemCombo"));
 	}
 }
 
@@ -609,7 +609,7 @@ CEditListCtrl::TItemEdit CDfnParentEditListCtrl::getItemEditMode (uint item, uin
 void CDfnParentEditListCtrl::getMemComboBoxProp (uint item, uint subItem, std::string &regAdr, bool &browse)
 {
 	browse = true;
-	regAdr = GEORGES_EDIT_BASE_REG_KEY"\\Dfn MemCombo";
+	regAdr = tStrToUtf8(GEORGES_EDIT_BASE_REG_KEY _T("\\Dfn MemCombo"));
 }
 
 // ***************************************************************************

@@ -346,7 +346,7 @@ inline const TCHAR *CEditableRangeT<uint32>::string2value(const CString &value, 
 	sint32 tmp;
 	if (NLMISC::fromString(tStrToUtf8(value), tmp))
 	{
-		if (strchr((LPCTSTR) value, '-'))
+		if (value.Find(_T("-")) > -1)
 		{
 			return _T("negative values not allowed");
 		}

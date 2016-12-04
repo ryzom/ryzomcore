@@ -19,6 +19,7 @@
 #include "nel/3d/coarse_mesh_build.h"
 
 #include "nel/3d/mesh.h"
+#include "nel/3d/debug_vb.h"
 
 using namespace NLMISC;
 

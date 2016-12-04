@@ -17,6 +17,10 @@
 #include "stdpch.h"
 #include "nel/gui/input_handler.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	CInputHandler::CInputHandler()

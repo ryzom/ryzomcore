@@ -1303,12 +1303,12 @@ public:
 			if (pMCM->EditCmd->CurrentEditCmdNb != -1) // Edit mode ?
 			{
 				pMCM->CurrentEditMacro.delCommand(pMCM->EditCmd->CurrentEditCmdNb);
-				pMCM->CurrentEditMacro.addCommand (pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str(),
+				pMCM->CurrentEditMacro.addCommand (pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name, pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu,
 													pMCM->EditCmd->CurrentEditCmdNb);
 			}
 			else
 			{
-				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name.c_str(),pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu.c_str());
+				pMCM->CurrentEditMacro.addCommand(pMCM->EditCmd->CurrentEditCmdLine.ActionName.Name, pMCM->EditCmd->CurrentEditCmdLine.ActionName.Argu);
 			}
 			CAHManager::getInstance()->runActionHandler("new_macro_open", pCaller);
 			pMCM->EditCmd->deactivate();

@@ -53,7 +53,7 @@ float bindWhere[BIND_COUNT]=
 
 #define RK_APPDATA_TILEFILE 0
 #define RK_APPDATA_LAND 1
-#define REGKEY_TILEDIT "Software\\Nevrax\\Ryzom\\Tile_Edit"
+#define REGKEY_TILEDIT _T("Software\\Nevrax\\Ryzom\\Tile_Edit")
 
 //#define CHECK_VALIDITY		// check validity
 
@@ -103,11 +103,11 @@ std::string GetBankPathName ()
 	HKEY hKey;
 	if (RegOpenKeyEx(HKEY_CURRENT_USER, REGKEY_TILEDIT, 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
-		char path[256];
-		DWORD len=256;
+		TCHAR path[256];
+		DWORD len=256 * sizeof(TCHAR);
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Bank Path", 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
-			return std::string (path);
+		if (RegQueryValueEx(hKey, _T("Bank Path"), 0, &type, (LPBYTE)path, &len)==ERROR_SUCCESS)
+			return tStrToUtf8(path);
 		RegCloseKey (hKey);
 	}
 	return "";
@@ -121,7 +121,7 @@ int GetBankTileSetSet ()
 		int tileSetSet;
 		DWORD len=256;
 		DWORD type;
-		if (RegQueryValueEx(hKey, "Tileset Set", 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
+		if (RegQueryValueEx(hKey, _T("Tileset Set"), 0, &type, (LPBYTE)&tileSetSet, &len)==ERROR_SUCCESS)
 			return tileSetSet;
 		RegCloseKey (hKey);
 	}
@@ -143,7 +143,7 @@ void SetBankTileSetSet (int tileSetSet)
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Tileset Set", 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
+		RegSetValueEx(hKey, _T("Tileset Set"), 0, REG_DWORD, (LPBYTE)&tileSetSet, 4);
 		RegCloseKey (hKey);
 	}
 }

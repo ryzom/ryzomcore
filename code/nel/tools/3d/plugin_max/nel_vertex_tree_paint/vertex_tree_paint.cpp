@@ -41,10 +41,10 @@ class VertexPaintClassDesc :public ClassDesc
 public:
 	int 			IsPublic() { return 1; }
 	void *			Create(BOOL loading = FALSE) { return new VertexPaint(); }
-	const TCHAR *	ClassName() { return GetString(IDS_CLASS_NAME); }
+	const MCHAR *	ClassName() { return GetString(IDS_CLASS_NAME); }
 	SClass_ID		SuperClassID() { return OSM_CLASS_ID; }
 	Class_ID		ClassID() { return VERTEX_TREE_PAINT_CLASS_ID; }
-	const TCHAR* 	Category() { return GetString(IDS_CATEGORY); }
+	const MCHAR* 	Category() { return GetString(IDS_CATEGORY); }
 	void			ResetClassParams(BOOL fileReset) {}
 };
 

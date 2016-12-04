@@ -284,7 +284,7 @@ int EditPatchMod::DoAttach(INode *node, PatchMesh *attPatch, RPatchMesh *rattPat
 
 	// Start a restore object...
 	if (theHold.Holding())
-		theHold.Put(new PatchRestore(patchData, this, patch, rpatch, "DoAttach"));
+		theHold.Put(new PatchRestore(patchData, this, patch, rpatch, _T("DoAttach")));
 
 	// Do the attach
 	patch->Attach(attPatch, mat2Offset);

@@ -92,6 +92,10 @@ Compilation is VERY SLOW
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
 {
@@ -107,11 +111,11 @@ namespace NLGUI
 		{
 			return NLMISC::CPath::lookup(fileName,   false);
 		}
-		static void shellExecute(const char *operation,   const char *fileName,   const char *parameters)
+		static void shellExecute(const std::string &operation, const std::string &fileName, const std::string &parameters)
 		{
 		#if !FINAL_VERSION
 			#ifdef NL_OS_WINDOWS
-				ShellExecute(NULL,   operation,   fileName,   parameters,  NULL,   SW_SHOWDEFAULT);
+				ShellExecuteW(NULL, utf8ToWide(operation), utf8ToWide(fileName), utf8ToWide(parameters), NULL, SW_SHOWDEFAULT);
 			#endif
 		#endif
 		}
@@ -1701,8 +1705,20 @@ namespace NLGUI
 			void	*ptr= ls.newUserData(sizeof(CReflectableLuaRef));
 			nlassert(ptr);
 			//ls.dumpStack();
-			// initialize it,    and copy the given element
+
+// disable memory leaks detection for placement new
+#ifdef new
+	#undef new
+#endif
+
+			// initialize it, and copy the given element
 			new (ptr) CReflectableLuaRef(pRPT);
+
+// reenable memory leaks detection for placement new
+#ifdef DEBUG_NEW
+	#define new DEBUG_NEW
+#endif
+
 			// Assign to this user data the __ui_metatable
 			//ls.dumpStack();
 			ls.push(IHM_LUA_METATABLE);			// userdata   "__ui_metatable"

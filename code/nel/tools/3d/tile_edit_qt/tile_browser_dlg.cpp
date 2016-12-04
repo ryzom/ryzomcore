@@ -434,7 +434,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 						QString batchNumber = transitionNumber.rightJustified(2, '0');
 						QString nextBaseName = baseName + batchNumber;
 						QString nextFileName = QDir::toNativeSeparators(fi.absolutePath()) + QDir::separator() + nextBaseName + QString(".") + fi.suffix();
-						FILE *pFile=fopen (nextFileName.toUtf8().constData(), "rb");
+						FILE *pFile = nlfopen (nextFileName.toUtf8().constData(), "rb");
 
 						// Close the file and add the tile if opened
 						if (pFile)
@@ -471,8 +471,7 @@ void CTile_browser_dlg::on_batchLoadPushButton_clicked()
 				//	char sName2[256];
 				//	char sFinal[256];
 				//	sprintf (sName2, "%s%02d", sName, (int)transition);
-				//	_makepath (sFinal, sDrive, sPath, sName2, sExt);
-				//	FILE *pFile=fopen (sFinal, "rb");
+				//	FILE *pFile = nlfopen (sFinal, "rb");
 
 				//	// Close the file and add the tile if opened
 				//	if (pFile)

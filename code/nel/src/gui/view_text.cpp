@@ -32,6 +32,10 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 typedef std::string::size_type TCharPos; // index of a chracter in a string
 
 REGISTER_UI_CLASS(CViewText)

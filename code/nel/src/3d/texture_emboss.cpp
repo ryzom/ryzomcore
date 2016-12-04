@@ -17,6 +17,8 @@
 #include "std3d.h"
 #include "nel/3d/texture_emboss.h"
 
+using namespace NLMISC;
+
 namespace NL3D {
 
 // ***********************************************************************************************************

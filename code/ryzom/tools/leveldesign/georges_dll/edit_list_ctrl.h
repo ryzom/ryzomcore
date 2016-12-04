@@ -105,7 +105,7 @@ public:
 	void	onCancel ();
 	void	editItem (uint item, uint subitem);
 	void	notifyParentChange ();
-	void	insertColumn (uint id, const char*name);
+	void	insertColumn (uint id, const TCHAR* name);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -49,6 +49,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 // Default maximum time the request is allowed to take
 #define DEFAULT_RYZOM_CONNECTION_TIMEOUT (300.0)

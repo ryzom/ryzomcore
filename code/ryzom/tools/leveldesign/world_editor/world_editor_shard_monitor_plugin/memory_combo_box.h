@@ -47,9 +47,9 @@ public:
 	void onCancel ();
 	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId, const TCHAR *registerAdress, int memoryCount);
 	void create (DWORD style, const RECT &rect, CWnd *parent, UINT nId);
-	void setRegisterAdress (const char *registerAdress);
+	void setRegisterAdress(const std::string &registerAdress);
 	void clearCommand ();
-	void addCommand (const char* commandLabel, uint commandId);
+	void addCommand (const std::string &commandLabel, uint commandId);
 	void clearStaticStrings ();
 	void addStaticStrings (const char* strings);
 	uint getCommandCount () const;

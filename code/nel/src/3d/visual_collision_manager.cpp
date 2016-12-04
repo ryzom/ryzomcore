@@ -98,7 +98,7 @@ CVisualTileDescNode		*CVisualCollisionManager::newVisualTileDescNode()
 // ***************************************************************************
 void					CVisualCollisionManager::deleteVisualTileDescNode(CVisualTileDescNode *ptr)
 {
-	_TileDescNodeAllocator.free(ptr);
+	_TileDescNodeAllocator.freeBlock(ptr);
 }
 
 // ***************************************************************************
@@ -110,7 +110,7 @@ CPatchQuadBlock			*CVisualCollisionManager::newPatchQuadBlock()
 // ***************************************************************************
 void					CVisualCollisionManager::deletePatchQuadBlock(CPatchQuadBlock *ptr)
 {
-	_PatchQuadBlockAllocator.free(ptr);
+	_PatchQuadBlockAllocator.freeBlock(ptr);
 }
 
 

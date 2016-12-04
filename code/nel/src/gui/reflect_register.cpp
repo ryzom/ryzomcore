@@ -49,6 +49,10 @@
 #include "nel/gui/group_html.h"
 #include "nel/gui/group_header.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	void CReflectableRegister::registerClasses()

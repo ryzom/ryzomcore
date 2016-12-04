@@ -147,6 +147,10 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cm
 int main(int argc, char **argv)
 #endif
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
@@ -402,6 +406,10 @@ int main(int argc, char **argv)
 #if FINAL_VERSION || defined (TEST_CRASH_COUNTER)
 	quitCrashReport ();
 #endif // FINAL_VERSION
+
+	// delete all logs and displayers when we're not using logs macros anymore
+	destroyDebug();
+	CLog::releaseProcessName();
 
 	// delete the Nel context
 	delete appContext;

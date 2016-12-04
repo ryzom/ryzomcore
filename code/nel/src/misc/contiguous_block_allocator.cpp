@@ -90,7 +90,7 @@ void *CContiguousBlockAllocator::alloc(uint numBytes)
 }
 
 // *********************************************************************************************************
-void CContiguousBlockAllocator::free(void *block, uint numBytes)
+void CContiguousBlockAllocator::freeBlock(void *block, uint numBytes)
 {
 	if (!block) return;
 	#ifdef NL_DEBUG

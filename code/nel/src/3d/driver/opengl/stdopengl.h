@@ -17,7 +17,12 @@
 #ifndef STDOPENGL_H
 #define STDOPENGL_H
 
-#include "nel/misc/types_nl.h"
+#if defined(_MSC_VER) && defined(_DEBUG)
+	#define _CRTDBG_MAP_ALLOC
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+#endif
 
 #include <cstdlib>
 #include <cstdio>
@@ -34,6 +39,8 @@
 #include <utility>
 #include <deque>
 #include <limits>
+
+#include "nel/misc/types_nl.h"
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN

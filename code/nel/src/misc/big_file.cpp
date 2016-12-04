@@ -45,8 +45,16 @@ void CBigFile::releaseInstance()
 // ***************************************************************************
 CBigFile::CThreadFileArray::CThreadFileArray()
 {
-	_CurrentId= 0;
+	_CurrentId = 0;
 }
+
+// ***************************************************************************
+CBigFile::CThreadFileArray::~CThreadFileArray()
+{
+	vector<CHandleFile>		*ptr = (vector<CHandleFile>*)_TDS.getPointer();
+	if (ptr) delete ptr;
+}
+
 // ***************************************************************************
 uint32						CBigFile::CThreadFileArray::allocate()
 {
@@ -186,8 +194,21 @@ void CBigFile::remove (const std::string &sBigFileName)
 			fclose (handle.File);
 			handle.File= NULL;
 		}
-		delete [] rbnp.FileNames;
+
 		_BNPs.erase (it);
+	}
+}
+
+CBigFile::BNP::BNP() : FileNames(NULL), ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0)
+{
+}
+
+CBigFile::BNP::~BNP()
+{
+	if (FileNames)
+	{
+		delete[] FileNames;
+		FileNames = NULL;
 	}
 }
 

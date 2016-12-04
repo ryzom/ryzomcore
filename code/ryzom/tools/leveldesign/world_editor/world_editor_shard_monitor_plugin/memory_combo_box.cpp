@@ -466,7 +466,7 @@ void CMemoryComboBox::refreshStrings ()
 
 // ***************************************************************************
 
-void CMemoryComboBox::setRegisterAdress (const char *registerAdress)
+void CMemoryComboBox::setRegisterAdress(const std::string &registerAdress)
 {
 	RegisterAdress = registerAdress;
 	refreshStrings ();
@@ -474,7 +474,7 @@ void CMemoryComboBox::setRegisterAdress (const char *registerAdress)
 
 // ***************************************************************************
 
-void CMemoryComboBox::addCommand (const char* commandLabel, uint commandId)
+void CMemoryComboBox::addCommand(const std::string &commandLabel, uint commandId)
 {
 	Commands.push_back (CCommand ());
 	Commands[Commands.size()-1].Label = commandLabel;

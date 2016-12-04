@@ -97,7 +97,7 @@ void *CObjectArenaAllocator::alloc(uint size)
 }
 
 // *****************************************************************************************************************
-void CObjectArenaAllocator::free(void *block)
+void CObjectArenaAllocator::freeBlock(void *block)
 {
 	if (!block) return;
 	uint8 *realBlock = (uint8 *) block - NL_DEFAULT_MEMORY_ALIGNMENT; // sizeof(uint); // a uint is used at start of block to give its size
@@ -114,7 +114,7 @@ void CObjectArenaAllocator::free(void *block)
 	}
 	uint entry = ((size + (_Granularity - 1)) / _Granularity);
 	nlassert(entry < _ObjectSizeToAllocator.size());
-	_ObjectSizeToAllocator[entry]->free(realBlock);
+	_ObjectSizeToAllocator[entry]->freeBlock(realBlock);
 	#ifdef NL_DEBUG
 		std::map<void *, uint>::iterator it = _MemBlockToAllocID.find(realBlock);
 		nlassert(it != _MemBlockToAllocID.end());

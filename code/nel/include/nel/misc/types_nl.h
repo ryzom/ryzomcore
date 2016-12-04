@@ -386,17 +386,17 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 #include <stdlib.h>
 #include <intrin.h>
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return _aligned_malloc(size, alignment); }
-inline void aligned_free(void *ptr) { _aligned_free(ptr); }
+#define aligned_malloc(size, alignment) _aligned_malloc(size, alignment)
+#define aligned_free(ptr) _aligned_free(ptr)
 #elif defined(NL_OS_MAC)
 #include <stdlib.h>
 // under Mac OS X, malloc is already aligned for SSE and Altivec (16 bytes alignment)
-inline void *aligned_malloc(size_t size, size_t /* alignment */) { return malloc(size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) malloc(size)
+#define aligned_free(ptr) free(ptr)
 #else
 #include <malloc.h>
-inline void *aligned_malloc(size_t size, size_t alignment) { return memalign(alignment, size); }
-inline void aligned_free(void *ptr) { free(ptr); }
+#define aligned_malloc(size, alignment) memalign(alignment, size)
+#define aligned_free(ptr) free(ptr)
 #endif /* NL_COMP_ */
 
 

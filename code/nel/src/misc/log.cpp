@@ -615,8 +615,12 @@ void CLog::releaseProcessName()
 	{
 		INelContext::getInstance().releaseSingletonPointer("NLMISC::CLog::_ProcessName", _ProcessName);
 	}
-	delete _ProcessName;
-	_ProcessName = NULL;
+
+	if (_ProcessName)
+	{
+		delete _ProcessName;
+		_ProcessName = NULL;
+	}
 }
 
 } // NLMISC

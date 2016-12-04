@@ -65,7 +65,7 @@ void	CGlobalWindDlg::updateView()
 
 	// update Power.
 	a= _ObjViewer->getGlobalWindPower();
-	_tcprintf(str, "%.2f", a);
+	_stprintf(str, _T("%.2f"), a);
 	StaticPower.SetWindowText(str);
 	NLMISC::clamp(a, 0.f, 1.f);
 	SliderPower.SetPos((sint)(a*NL_GLOBAL_WIND_SLIDER_RANGE));
@@ -117,7 +117,7 @@ void CGlobalWindDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 		a= (float)nPos / NL_GLOBAL_WIND_SLIDER_RANGE;
 		_ObjViewer->setGlobalWindPower(a);
-		_tcprintf(str, "%.2f", a);
+		_stprintf(str, _T("%.2f"), a);
 		StaticPower.SetWindowText(str);
 	}
 	else

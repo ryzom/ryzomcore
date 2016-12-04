@@ -35,7 +35,7 @@ extern void LoadImages();
 
 INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	static char string[64];
+	static TCHAR string[64];
 	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	ICustToolbar *iToolbar;
 	if (!ep && message != WM_INITDIALOG)
@@ -50,7 +50,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			if (hModule)
 			{
 				// Get module file name
-				char moduldeFileName[512];
+				TCHAR moduldeFileName[512];
 				if (GetModuleFileName (hModule, moduldeFileName, 512))
 				{
 					// Get version info size
@@ -59,22 +59,22 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					if (versionInfoSize)
 					{
 						// Alloc the buffer
-						char *buffer=new char[versionInfoSize];
+						TCHAR *buffer = new TCHAR[versionInfoSize];
 
 						// Find the verion resource
 						if (GetFileVersionInfo(moduldeFileName, 0, versionInfoSize, buffer))
 						{
 							uint *versionTab;
 							uint versionSize;
-							if (VerQueryValue (buffer, "\\", (void**)&versionTab,  &versionSize))
+							if (VerQueryValue (buffer, _T("\\"), (void**)&versionTab,  &versionSize))
 							{
 								// Get the pointer on the structure
 								VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
 								if (info)
 								{
  									// Setup version number
-									char version[512];
-									sprintf (version, "Version %d.%d.%d.%d", 
+									TCHAR version[512];
+									_stprintf(version, _T("Version %d.%d.%d.%d"),
 										info->dwFileVersionMS>>16, 
 										info->dwFileVersionMS&0xffff, 
 										info->dwFileVersionLS>>16,  
@@ -82,25 +82,25 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 									SetWindowText (GetDlgItem (hDlg, IDC_VERSION), version);
 								}
 								else
-									SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "VS_FIXEDFILEINFO * is NULL");
+									SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("VS_FIXEDFILEINFO * is NULL"));
 							}
 							else
-								SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "VerQueryValue failed");
+								SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("VerQueryValue failed"));
 						}
 						else
-							SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "GetFileVersionInfo failed");
+							SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("GetFileVersionInfo failed"));
 
 						// Free the buffer
 						delete [] buffer;
 					}
 					else
-						SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "GetFileVersionInfoSize failed");
+						SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("GetFileVersionInfoSize failed"));
 				}
 				else
-					SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "GetModuleFileName failed");
+					SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("GetModuleFileName failed"));
 			}
 			else
-				SetWindowText (GetDlgItem (hDlg, IDC_VERSION), "GetModuleHandle failed");
+				SetWindowText (GetDlgItem (hDlg, IDC_VERSION), _T("GetModuleHandle failed"));
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSelectPanel = hDlg;
@@ -122,7 +122,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			CheckDlgButton(hDlg, IDC_LOCK_HANDLES, lockedHandles);
 			ep->SetSelDlgEnables();
 
-			sprintf(string,"%s - %s",__DATE__,__TIME__);
+			_stprintf(string, _T("%s - %s"), _T(__DATE__), _T(__TIME__));
 			SetDlgItemText(hDlg,ID_VERSION,string);
 		 	return TRUE;
 			}
@@ -224,7 +224,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 					lpttt->lpszText = GetString(IDS_TH_PATCH);
 					break;
 				case EP_TILE:
-					lpttt->lpszText = "Tile";
+					lpttt->lpszText = _T("Tile");
 					break;
 				}
 			}
