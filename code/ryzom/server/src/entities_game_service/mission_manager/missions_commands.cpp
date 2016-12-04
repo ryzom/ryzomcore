@@ -530,7 +530,7 @@ NLMISC_COMMAND(removeMission,"Remove mission of character","<character_id> <miss
 }
 
 //-----------------------------------------------
-// removeMission
+// addMission
 //-----------------------------------------------
 NLMISC_COMMAND(addMission,"Add mission to character","<character_id> <Mission giver Alias> <mission alias>")
 {
