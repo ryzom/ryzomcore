@@ -221,7 +221,7 @@ bool CAnimationSet::loadFromFiles(const std::string &path, bool recurse /* = tru
 			{
 				NLMISC::CIFile	iFile;
 				iFile.open(anims[k]);
-				std::auto_ptr<CAnimation> anim(new CAnimation);
+				std::unique_ptr<CAnimation> anim(new CAnimation);
 				anim->serial(iFile);
 				addAnimation(NLMISC::CFile::getFilenameWithoutExtension(anims[k]).c_str(), anim.release());
 				iFile.close();

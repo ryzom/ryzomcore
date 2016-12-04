@@ -377,7 +377,7 @@ void CToolSelectMove::commitAction(CInstance &instance)
 						if (_AutoGroup.getGroupingCandidate())
 						{
 							newCopy.push();
-							std::auto_ptr<CObject> desc(CComLuaModule::getObjectFromLua(ls.getStatePointer()));
+							std::unique_ptr<CObject> desc(CComLuaModule::getObjectFromLua(ls.getStatePointer()));
 							_AutoGroup.group(desc.get(), _FinalPos);
 						}
 						else

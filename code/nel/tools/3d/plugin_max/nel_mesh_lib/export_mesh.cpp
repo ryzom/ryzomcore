@@ -1180,7 +1180,7 @@ void CExportNel::getBSMeshBuild (std::vector<CMesh::CMeshBuild*> &bsList, INode 
 			convertMatrix(finalSpace, node.GetNodeTM(time));
 
 	CMeshBase::CMeshBaseBuild *dummyMBB = NULL;		
-	std::auto_ptr<CMesh::CMeshBuild> baseMB(createMeshBuild (node, time, dummyMBB, finalSpace));
+	std::unique_ptr<CMesh::CMeshBuild> baseMB(createMeshBuild (node, time, dummyMBB, finalSpace));
 	delete dummyMBB;
 	dummyMBB = NULL;
 	if (baseMB.get() == NULL) return;

@@ -1006,7 +1006,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 				// Add search path for the texture
 				NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
 
-				std::auto_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
+				std::unique_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
 				CParticleSystemModel *psm  = NULL;
 				try
 				{					

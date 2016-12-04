@@ -193,7 +193,7 @@ bool CTextureCube::isSelectable() const
 ITexture *CTextureCube::buildNonSelectableVersion(uint index)
 {
 	if (!isSelectable()) return this;
-	std::auto_ptr<CTextureCube> tc(new CTextureCube);
+	std::unique_ptr<CTextureCube> tc(new CTextureCube);
 
 	// copy basic texture parameters
 	(ITexture &) *tc.get() = (ITexture &) *this; // invoke ITexture = op for basics parameters

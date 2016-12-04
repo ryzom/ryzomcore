@@ -318,7 +318,7 @@ UAnimation* UAnimation::createAnimation (const char* sPath)
 	NL3D_HAUTO_UI_ANIMATION;
 
 	// Allocate an animation
-	std::auto_ptr<CAnimation> anim (new CAnimation);
+	std::unique_ptr<CAnimation> anim (new CAnimation);
 
 	// Read it
 	NLMISC::CIFile file;

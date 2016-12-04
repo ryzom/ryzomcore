@@ -105,7 +105,7 @@ NL3D::CParticleSystemModel *CParticleEditor::getModelFromPS(NL3D::CParticleSyste
 void CParticleEditor::loadWorkspace(const std::string &fullPath)
 {
 	// Add to the path
-	std::auto_ptr<CParticleWorkspace> newPW(new CParticleWorkspace);
+	std::unique_ptr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(fullPath);
 
 	// save empty workspace

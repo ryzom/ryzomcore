@@ -469,7 +469,7 @@ void CObjectViewer::loadConfigFile()
 		try
 		{
 			CConfigFile::CVar &var = cf.getVar("automatic_animation_path");
-			std::auto_ptr<CAnimationSet> as(new CAnimationSet);
+			std::unique_ptr<CAnimationSet> as(new CAnimationSet);
 			//
 			bool loadingOk = as->loadFromFiles(var.asString(),true ,"anim",true);	
 			//

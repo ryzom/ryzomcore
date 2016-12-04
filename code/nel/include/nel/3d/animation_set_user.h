@@ -93,7 +93,7 @@ public:
 	uint addAnimation (const char* fileName, const char* animName, bool displayMissingFileWarning  = true)
 	{
 		// Allocate an animation
-		std::auto_ptr<CAnimation> anim (new CAnimation);
+		std::unique_ptr<CAnimation> anim (new CAnimation);
 
 		// Read it
 		NLMISC::CIFile file;
@@ -130,7 +130,7 @@ public:
 	virtual uint addSkeletonWeight (const char* fileName, const char* skelName)
 	{
 		// Allocate an animation
-		std::auto_ptr<CSkeletonWeight> skeletonWeight (new CSkeletonWeight);
+		std::unique_ptr<CSkeletonWeight> skeletonWeight (new CSkeletonWeight);
 
 		// Read it
 		NLMISC::CIFile file;

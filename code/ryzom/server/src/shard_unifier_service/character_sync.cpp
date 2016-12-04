@@ -1307,7 +1307,7 @@ namespace CHARSYNC
 					query << " AND session_type = 'st_edit'";
 					if (_RingDB.query(query) )
 					{
-						std::auto_ptr<CStoreResult> result = auto_ptr<CStoreResult>(_RingDB.storeResult());
+						std::unique_ptr<CStoreResult> result(_RingDB.storeResult());
 
 						bool sessionClosed = false;
 						if (!result->getNumRows() == 0)
@@ -1389,7 +1389,7 @@ namespace CHARSYNC
 //					return true;
 //				}
 //
-//				std::auto_ptr<CStoreResult> result = std::auto_ptr<CStoreResult>(_RingDB.storeResult());
+//				std::unique_ptr<CStoreResult> result(_RingDB.storeResult());
 //
 //				result->fetchRow();
 //				result->getField(0, dstUserId);

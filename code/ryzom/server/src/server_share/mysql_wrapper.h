@@ -108,8 +108,8 @@ namespace MSW
 			return uint32(mysql_affected_rows(_MysqlContext));
 		}
 
-		std::auto_ptr<CStoreResult>		storeResult();
-		std::auto_ptr<CUseResult>		useResult();
+		std::unique_ptr<CStoreResult>		storeResult();
+		std::unique_ptr<CUseResult>		useResult();
 
 	};
 
