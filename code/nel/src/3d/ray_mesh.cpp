@@ -19,6 +19,8 @@
 #include "nel/3d/ray_mesh.h"
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/fast_mem.h"
+#include "nel/misc/plane.h"
+
 #include "nel/3d/matrix_3x4.h"
 
 using namespace NLMISC;

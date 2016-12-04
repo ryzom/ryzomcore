@@ -20,6 +20,7 @@
 #include "nel/3d/particle_system.h"
 #include "nel/3d/ps_macro.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/debug_vb.h"
 
 namespace NL3D
 {

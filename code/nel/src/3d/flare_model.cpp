@@ -26,8 +26,9 @@
 #include "nel/3d/occlusion_query.h"
 #include "nel/3d/mesh.h"
 #include "nel/3d/viewport.h"
-#include "nel/misc/common.h"
+#include "nel/3d/debug_vb.h"
 
+#include "nel/misc/common.h"
 
 
 namespace NL3D {

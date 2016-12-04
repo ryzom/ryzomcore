@@ -19,6 +19,7 @@
 
 #include "nel/3d/vegetablevb_allocator.h"
 #include "nel/3d/vegetable_def.h"
+#include "nel/3d/debug_vb.h"
 
 
 using namespace std;

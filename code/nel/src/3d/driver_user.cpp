@@ -33,6 +33,8 @@
 #include "nel/3d/water_env_map_user.h"
 #include "nel/3d/water_pool_manager.h"
 #include "nel/3d/u_camera.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/event_emitter.h"
 

@@ -19,8 +19,9 @@
 #include "nel/3d/play_list_user.h"
 #include "nel/3d/animation_set_user.h"
 #include "nel/3d/u_transform.h"
-#include "nel/misc/hierarchical_timer.h"
+#include "nel/3d/transform.h"
 
+#include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/debug.h"
 
 using namespace NLMISC;

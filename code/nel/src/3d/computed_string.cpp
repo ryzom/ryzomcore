@@ -22,6 +22,7 @@
 #include "nel/3d/material.h"
 #include "nel/3d/frustum.h"
 #include "nel/3d/viewport.h"
+#include "nel/3d/debug_vb.h"
 
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/debug.h"

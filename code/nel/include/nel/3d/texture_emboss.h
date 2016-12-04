@@ -54,16 +54,16 @@ public:
 	bool					isSharingEnabled() const { return !_DisableSharing; }
 
 	// set the ambiant/ diffuse color to be added to the embossed texture
-	void					setAmbient(CRGBA ambient) { _Ambient = ambient; touch(); }
-	void					setDiffuse(CRGBA diffuse) { _Diffuse = diffuse; touch(); }
+	void					setAmbient(NLMISC::CRGBA ambient) { _Ambient = ambient; touch(); }
+	void					setDiffuse(NLMISC::CRGBA diffuse) { _Diffuse = diffuse; touch(); }
 	// Set the direction of light (usually should be normalized). The bitmap is in the x,y plane
 	void					setLightDir(const NLMISC::CVector &lightDir) { _LightDir = lightDir; touch(); }
 	// set a factor for the slope
 	void                    setSlopeFactor(float factor) { _SlopeFactor = factor; touch(); }
 	//
-	CRGBA					getAmbient() const { return _Ambient; }
-	CRGBA					getDiffuse() const { return _Diffuse; }
-	const CVector		   &getLightDir() const { return _LightDir; }
+	NLMISC::CRGBA			getAmbient() const { return _Ambient; }
+	NLMISC::CRGBA			getDiffuse() const { return _Diffuse; }
+	const NLMISC::CVector   &getLightDir() const { return _LightDir; }
 	float					getSlopeFactor() const { return _SlopeFactor; }
 
 
@@ -75,8 +75,8 @@ protected:
 	// inherited from ITexture. Generate this bumpmap pixels
 	virtual void doGenerate(bool async = false);
 	NLMISC::CSmartPtr<ITexture> _HeightMap;
-	CRGBA						_Ambient;
-	CRGBA						_Diffuse;
+	NLMISC::CRGBA				_Ambient;
+	NLMISC::CRGBA				_Diffuse;
 	NLMISC::CVector				_LightDir;
 	bool						_DisableSharing;
 	float						_SlopeFactor;
