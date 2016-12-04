@@ -29,12 +29,5 @@ namespace NLMISC
 //CPtrInfo() {Ptr=NULL; RefCount=0x7FFFFFFF; IsNullPtrInfo=true;}
 CRefCount::CPtrInfoBase		CRefCount::NullPtrInfo= {NULL, 0x7FFFFFFF, true};
 
-
-// must not be static
-void	dummy_to_avoid_stupid_4768_smart_ptr_cpp()
-{
-}
-
-
 }
 
