@@ -103,13 +103,11 @@ void CIXml::release ()
 		// Free it
 		xmlClearParserCtxt (_Parser);
 		xmlFreeParserCtxt (_Parser);
-		// commented due to the bug #857 xmlCleanupParser ();
 
 		_Parser = NULL;
 	}
 
 	// Not initialized
-	_Parser = NULL;
 	_CurrentElement = NULL;
 	_CurrentNode = NULL;
 	_PushBegin = false;
@@ -1142,6 +1140,11 @@ bool CIXml::getContentString (std::string &result, xmlNodePtr node)
 }
 
 // ***************************************************************************
+
+void CIXml::releaseLibXml()
+{
+	xmlCleanupParser();
+}
 
 } // NLMISC
 
