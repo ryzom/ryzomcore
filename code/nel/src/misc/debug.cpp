@@ -180,7 +180,7 @@ void nlFatalError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 
@@ -199,7 +199,7 @@ void nlError (const char *format, ...)
 	char *str;
 	NLMISC_CONVERT_VARGS (str, format, 256/*NLMISC::MaxCStringSize*/);
 
-	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer==0 );
+	INelContext::getInstance().setDebugNeedAssert( NLMISC::DefaultMsgBoxDisplayer == NULL );
 
 	NLMISC::ErrorLog->displayNL (str);
 
