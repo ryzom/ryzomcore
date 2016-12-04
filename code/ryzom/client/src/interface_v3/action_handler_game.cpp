@@ -2438,7 +2438,7 @@ class CAHTarget : public IActionHandler
 			if (entity == NULL)
 			{
 				//Get the entity with a sheetName
-				entity = EntitiesMngr.getEntityBySheetName(entityName);
+				entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
 			}
 			
 			if (entity)

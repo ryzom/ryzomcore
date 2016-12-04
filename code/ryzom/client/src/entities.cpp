@@ -1953,12 +1953,12 @@ CEntityCL *CEntityManager::getEntityByCompressedIndex(TDataSetIndex compressedIn
 // getEntityBySheetName :
 // Return an entity based on its sheet name
 //-----------------------------------------------
-CEntityCL *CEntityManager::getEntityBySheetName (const ucstring &sheet) const
+CEntityCL *CEntityManager::getEntityBySheetName (const std::string &sheet) const
 {
 	if (!sheet.empty())
 	{
 		uint i;
-		const CSheetId& sheetRef = NLMISC::CSheetId(sheet.toUtf8());
+		const CSheetId& sheetRef = NLMISC::CSheetId(sheet);
 		const uint count = (uint)_Entities.size();
 		for (i=0; i<count; i++)
 		{
