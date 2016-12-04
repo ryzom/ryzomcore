@@ -393,6 +393,10 @@ int main(int argc, char **argv)
 	quitCrashReport ();
 #endif // FINAL_VERSION
 
+	// delete all logs and displayers when we're not using logs macros anymore
+	destroyDebug();
+	CLog::releaseProcessName();
+
 	// delete the Nel context
 	delete appContext;
 
