@@ -19,6 +19,10 @@
 #include "nel/misc/events.h"
 #include "nel/gui/event_descriptor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 

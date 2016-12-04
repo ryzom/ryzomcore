@@ -37,6 +37,10 @@
 #include "nel/misc/events.h"
 #include "nel/gui/root_group.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	void LinkHack();

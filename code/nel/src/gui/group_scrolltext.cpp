@@ -25,6 +25,10 @@
 #include "nel/misc/i18n.h"
 #include "nel/gui/widget_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupScrollText, std::string, "scroll_text");
 
 namespace NLGUI

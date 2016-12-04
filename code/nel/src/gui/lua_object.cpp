@@ -20,6 +20,10 @@
 #include "nel/gui/lua_ihm.h"
 #include "nel/gui/lua_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 

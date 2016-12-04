@@ -17,6 +17,9 @@
 #include "stdmisc.h"
 #include "nel/misc/cdb_check_sum.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLMISC{
 

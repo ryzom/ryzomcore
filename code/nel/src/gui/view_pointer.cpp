@@ -27,6 +27,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CViewPointer, std::string, "generic_pointer");
 
 namespace NLGUI

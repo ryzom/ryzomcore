@@ -24,6 +24,10 @@
 using namespace std;
 using NLMISC::CCDBNodeLeaf;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CViewTextID, std::string, "text_id");
 
 namespace NLGUI

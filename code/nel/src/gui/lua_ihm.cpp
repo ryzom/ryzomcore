@@ -92,6 +92,10 @@ Compilation is VERY SLOW
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // declare ostream << operator for ucstring -> registration of ucstring iin luabind will build a 'tostring' function from it
 std::ostream &operator<<(std::ostream &str, const ucstring &value)
 {
