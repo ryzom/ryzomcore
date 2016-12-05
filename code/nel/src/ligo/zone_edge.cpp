@@ -16,7 +16,7 @@
 
 #include "stdligo.h"
 // Ligo include
-#include "zone_edge.h"
+#include "nel/ligo/zone_edge.h"
 #include "nel/ligo/ligo_config.h"
 #include "nel/ligo/ligo_error.h"
 
