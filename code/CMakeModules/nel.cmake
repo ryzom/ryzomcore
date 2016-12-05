@@ -840,9 +840,9 @@ MACRO(NL_SETUP_BUILD)
 
         # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
         # minimum target is now OS X 10.7
-        ADD_PLATFORM_FLAGS("-stdlib=libc++")
-        
-        SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
+        SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")
+
+        ADD_PLATFORM_LINKFLAGS("-Wl,-headerpad_max_install_names")
 
         IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
           ADD_PLATFORM_LINKFLAGS("-Wl,-search_paths_first")
