@@ -17,10 +17,7 @@ apps:
 
 parts:
   ryzom:
-    source: https://bitbucket.org/ryzom/ryzomcore
-    source-type: hg
-    source-branch: compatibility-develop
-    source-subdir: code
+    source: ../../code
     plugin: cmake
     configflags:
         - -DCMAKE_BUILD_TYPE=Release
