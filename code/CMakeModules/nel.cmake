@@ -939,6 +939,14 @@ MACRO(NL_SETUP_BUILD)
     # hardening
     ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
 
+    # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
+    IF(WITH_WARNINGS)
+      ADD_PLATFORM_FLAGS("-Wstack-protector")
+    ENDIF()
+
+    # Fix undefined reference to `__stack_chk_fail' error
+    ADD_PLATFORM_LINKFLAGS("-lc")
+
     IF(NOT APPLE)
       ADD_PLATFORM_LINKFLAGS("-Wl,--no-undefined -Wl,--as-needed")
     ENDIF()
