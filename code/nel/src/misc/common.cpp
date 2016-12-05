@@ -1518,7 +1518,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 	if (!CFile::fileExists(command))
 	{
-		if (strcmp(ext, "htm") == 0)
+		if (ext == "htm")
 		{
 			command = "/etc/alternatives/x-www-browser";
 
