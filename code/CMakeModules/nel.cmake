@@ -875,11 +875,14 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     IF(WITH_WARNINGS)
-      ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
+      ADD_PLATFORM_FLAGS("-Wall -W")
     ELSE()
       # Check wrong formats in printf-like functions
       ADD_PLATFORM_FLAGS("-Wformat -Werror=format-security")
     ENDIF()
+
+    # never display these warnings because they are minor
+    ADD_PLATFORM_FLAGS("-Wno-unused-parameter")
 
     IF(ANDROID)
       ADD_PLATFORM_FLAGS("--sysroot=${PLATFORM_ROOT}")
