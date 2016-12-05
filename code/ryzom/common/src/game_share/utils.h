@@ -76,7 +76,7 @@ inline ucstring capitalize(const ucstring & s)
 #define MACRO_CONCAT2(a,b) CONCAT(a,b)
 #define MACRO_TOTXT(a) #a
 #define MACRO_TOTXT2(a) TOTXT(a)
-#define __FILE_LINE__ __FILE__ ":"TOTXT2(__LINE__)":"
+#define __FILE_LINE__ __FILE__ ":" TOTXT2(__LINE__) ":"
 
 
 //-------------------------------------------------------------------------------------------------

@@ -434,6 +434,11 @@ MACRO(NL_SETUP_BUILD)
     MESSAGE(STATUS "Generating NMake project")
   ENDIF()
 
+  IF(CMAKE_GENERATOR MATCHES "Ninja")
+    SET(NINJA ON)
+    MESSAGE(STATUS "Generating Ninja project")
+  ENDIF()
+
   # If target and host CPU are the same
   IF("${HOST_CPU}" STREQUAL "${TARGET_CPU}" AND NOT CMAKE_CROSSCOMPILING)
     # x86-compatible CPU
@@ -794,7 +799,7 @@ MACRO(NL_SETUP_BUILD)
 
               ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SYSROOT}")
               ADD_PLATFORM_FLAGS("${XARCH}-miphoneos-version-min=${IOS_VERSION}")
-              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
+              ADD_PLATFORM_LINKFLAGS("${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
             ENDIF()
 
             IF(TARGET_ARMV7)
@@ -804,7 +809,7 @@ MACRO(NL_SETUP_BUILD)
 
               ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SYSROOT}")
               ADD_PLATFORM_FLAGS("${XARCH}-miphoneos-version-min=${IOS_VERSION}")
-              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
+              ADD_PLATFORM_LINKFLAGS("${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
             ENDIF()
 
             IF(TARGET_ARMV6)
@@ -814,7 +819,7 @@ MACRO(NL_SETUP_BUILD)
 
               ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SYSROOT}")
               ADD_PLATFORM_FLAGS("${XARCH}-miphoneos-version-min=${IOS_VERSION}")
-              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
+              ADD_PLATFORM_LINKFLAGS("${XARCH}-Wl,-iphoneos_version_min,${IOS_VERSION}")
             ENDIF()
           ENDIF()
 
@@ -826,7 +831,7 @@ MACRO(NL_SETUP_BUILD)
             ADD_PLATFORM_FLAGS("${XARCH}-isysroot${CMAKE_IOS_SIMULATOR_SYSROOT}")
             ADD_PLATFORM_FLAGS("${XARCH}-mios-simulator-version-min=${IOS_VERSION}")
             IF(CMAKE_OSX_DEPLOYMENT_TARGET)
-              SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} ${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+              ADD_PLATFORM_LINKFLAGS("${XARCH}-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
             ENDIF()
           ENDIF()
         ELSE()
@@ -835,18 +840,18 @@ MACRO(NL_SETUP_BUILD)
             IF(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "10.7")
               MESSAGE(FATAL_ERROR "Minimum target for OS X is 10.7 but you're using ${CMAKE_OSX_DEPLOYMENT_TARGET}")
             ENDIF()
-            SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            ADD_PLATFORM_LINKFLAGS("-Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
           ENDIF()
         ENDIF()
 
         # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
         # minimum target is now OS X 10.7
-        ADD_PLATFORM_FLAGS("-stdlib=libc++")
-        
-        SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
+        SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -stdlib=libc++")
+
+        ADD_PLATFORM_LINKFLAGS("-Wl,-headerpad_max_install_names")
 
         IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
-          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-search_paths_first")
+          ADD_PLATFORM_LINKFLAGS("-Wl,-search_paths_first")
         ENDIF()
       ENDIF()
     ELSE()
@@ -860,7 +865,7 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # use c++0x standard to use std::unique_ptr and std::shared_ptr
-    ADD_PLATFORM_FLAGS("-std=c++0x")
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -std=c++0x")
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
@@ -876,11 +881,14 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     IF(WITH_WARNINGS)
-      ADD_PLATFORM_FLAGS("-Wall -W -Wpointer-arith -Wsign-compare -Wno-deprecated-declarations -Wno-multichar -Wno-unused")
+      ADD_PLATFORM_FLAGS("-Wall -W")
     ELSE()
       # Check wrong formats in printf-like functions
       ADD_PLATFORM_FLAGS("-Wformat -Werror=format-security")
     ENDIF()
+
+    # never display these warnings because they are minor
+    ADD_PLATFORM_FLAGS("-Wno-unused-parameter")
 
     IF(ANDROID)
       ADD_PLATFORM_FLAGS("--sysroot=${PLATFORM_ROOT}")
@@ -894,7 +902,7 @@ MACRO(NL_SETUP_BUILD)
 
         IF(TARGET_ARMV7)
           ADD_PLATFORM_FLAGS("-march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16")
-          SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -march=armv7-a -Wl,--fix-cortex-a8")
+          ADD_PLATFORM_LINKFLAGS("-march=armv7-a -Wl,--fix-cortex-a8")
         ELSEIF(TARGET_ARMV5)
           ADD_PLATFORM_FLAGS("-march=armv5te -mtune=xscale -msoft-float")
         ENDIF()
@@ -914,8 +922,8 @@ MACRO(NL_SETUP_BUILD)
         ADD_PLATFORM_FLAGS("-fpic -finline-functions -fmessage-length=0 -fno-inline-functions-called-once -fgcse-after-reload -frerun-cse-after-loop -frename-registers")
         SET(RELEASE_CFLAGS "${RELEASE_CFLAGS} -funswitch-loops -finline-limit=300")
       ENDIF()
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-z,noexecstack")
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -L${PLATFORM_ROOT}/usr/lib")
+      ADD_PLATFORM_LINKFLAGS("-Wl,-z,noexecstack")
+      ADD_PLATFORM_LINKFLAGS("-L${PLATFORM_ROOT}/usr/lib")
     ENDIF()
 
     IF(APPLE)
@@ -932,13 +940,21 @@ MACRO(NL_SETUP_BUILD)
     # hardening
     ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
 
+    # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
+    IF(WITH_WARNINGS)
+      ADD_PLATFORM_FLAGS("-Wstack-protector")
+    ENDIF()
+
+    # Fix undefined reference to `__stack_chk_fail' error
+    ADD_PLATFORM_LINKFLAGS("-lc")
+
     IF(NOT APPLE)
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,--no-undefined -Wl,--as-needed")
+      ADD_PLATFORM_LINKFLAGS("-Wl,--no-undefined -Wl,--as-needed")
     ENDIF()
 
     IF(NOT APPLE)
       # hardening
-      SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
+      ADD_PLATFORM_LINKFLAGS("-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
     ENDIF()
 
     IF(WITH_SYMBOLS)
