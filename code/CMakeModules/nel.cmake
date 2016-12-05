@@ -433,6 +433,11 @@ MACRO(NL_SETUP_BUILD)
     MESSAGE(STATUS "Generating NMake project")
   ENDIF()
 
+  IF(CMAKE_GENERATOR MATCHES "Ninja")
+    SET(NINJA ON)
+    MESSAGE(STATUS "Generating Ninja project")
+  ENDIF()
+
   # If target and host CPU are the same
   IF("${HOST_CPU}" STREQUAL "${TARGET_CPU}" AND NOT CMAKE_CROSSCOMPILING)
     # x86-compatible CPU
