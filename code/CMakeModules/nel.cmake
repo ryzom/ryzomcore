@@ -859,7 +859,7 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # use c++0x standard to use std::unique_ptr and std::shared_ptr
-    ADD_PLATFORM_FLAGS("-std=c++0x")
+    SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} -std=c++0x")
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
