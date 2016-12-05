@@ -83,8 +83,8 @@ namespace std
 #include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_config.h"
 #include "nel/ligo/ligo_error.h"
-#include "nel/../../src/ligo/ligo_material.h"
-#include "nel/../../src/ligo/transition.h"
+#include "nel/ligo/ligo_material.h"
+#include "nel/ligo/transition.h"
 #include "nel/ligo/zone_bank.h"
 
 #include "max_to_ligo.h"
