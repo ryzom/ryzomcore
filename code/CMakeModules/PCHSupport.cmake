@@ -28,15 +28,12 @@ ELSE()
 ENDIF()
 
 MACRO(APPEND_DEFINITION _NAME _VAL)
-  # value is not empty
-  IF(${_VAL})
-    IF(CMAKE_VERSION VERSION_LESS "2.8.12")
-      # don't support logical expressions, append definition
-      LIST(APPEND ${_NAME} "-D${_VAL}")
-    ELSE()
-      # support logical expressions, use them
-      LIST(APPEND ${_NAME} "$<$<BOOL:${_VAL}>:-D$<JOIN:${_VAL},-D>>")
-    ENDIF()
+  IF(CMAKE_VERSION VERSION_LESS "2.8.12")
+    # don't support logical expressions, append definition
+    LIST(APPEND ${_NAME} "-D${_VAL}")
+  ELSE()
+    # support logical expressions, use them
+    LIST(APPEND ${_NAME} "$<$<BOOL:${_VAL}>:-D$<JOIN:${_VAL},-D>>")
   ENDIF()
 ENDMACRO()
 
@@ -197,7 +194,7 @@ MACRO(PCH_SET_COMPILE_FLAGS _target)
         LIST(APPEND _FLAGS "${item}")
       ENDFOREACH()
     ENDIF()
-    
+
     GET_DIRECTORY_PROPERTY(_DIRECTORY_DEFINITIONS DIRECTORY ${CMAKE_SOURCE_DIR} DEFINITIONS)
 
     IF(_DIRECTORY_DEFINITIONS)
