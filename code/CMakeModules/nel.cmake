@@ -832,10 +832,17 @@ MACRO(NL_SETUP_BUILD)
         ELSE()
           # Always force -mmacosx-version-min to override environement variable
           IF(CMAKE_OSX_DEPLOYMENT_TARGET)
+            IF(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS "10.7")
+              MESSAGE(FATAL_ERROR "Minimum target for OS X is 10.7 but you're using ${CMAKE_OSX_DEPLOYMENT_TARGET}")
+            ENDIF()
             SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-macosx_version_min,${CMAKE_OSX_DEPLOYMENT_TARGET}")
           ENDIF()
         ENDIF()
 
+        # use libc++ under OX X to be able to use new C++ features (and else it'll use GCC 4.2.1 STL)
+        # minimum target is now OS X 10.7
+        ADD_PLATFORM_FLAGS("-stdlib=libc++")
+        
         SET(PLATFORM_LINKFLAGS "${PLATFORM_LINKFLAGS} -Wl,-headerpad_max_install_names")
 
         IF(HAVE_FLAG_SEARCH_PATHS_FIRST)
@@ -851,6 +858,9 @@ MACRO(NL_SETUP_BUILD)
         ADD_PLATFORM_FLAGS("-m64")
       ENDIF()
     ENDIF()
+
+    # use c++0x standard to use std::unique_ptr and std::shared_ptr
+    ADD_PLATFORM_FLAGS("-std=c++0x")
 
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 

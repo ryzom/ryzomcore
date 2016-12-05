@@ -715,8 +715,13 @@ int CConfigFile::compareInstallersVersion() const
 
 	QString newVersion = QApplication::applicationVersion();
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))	
 	QVersionNumber installedVer = QVersionNumber::fromString(installedVersion);
 	QVersionNumber newVer = QVersionNumber::fromString(newVersion);
+#else
+	QString installedVer = installedVersion;
+	QString newVer = newVersion;
+#endif
 
 	// same version
 	if (newVer == installedVer) return 0;

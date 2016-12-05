@@ -42,11 +42,14 @@ parts:
         - -DRYZOM_GAMES_PREFIX=bin
     build-packages:
         - zlib1g-dev
-        - libpng-dev
+        - libpng12-dev
         - libjpeg8-dev
         - qttools5-dev-tools
+        - libxml2-dev
+        - libssl-dev
+        - libqt5opengl5-dev
     stage-packages:
         - libqt5widgets5
-        
+        - libqt5opengl5
     after: [desktop-qt5]
 
