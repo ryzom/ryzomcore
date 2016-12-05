@@ -2751,7 +2751,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		setWindowStyle(EWSFullscreen);
 
 		// set the back buffer manually to match the desired rendering resolution
-		GLint dim[2]   = { width, height };
+		GLint dim[2]   = { (GLint)width, (GLint)height };
 		CGLError error = CGLSetParameter(
 			(CGLContextObj)[_ctx CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);
