@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "ligo_material.h"
+#include "nel/ligo/ligo_material.h"
 
 // Ligo include
 #include "nel/ligo/ligo_error.h"

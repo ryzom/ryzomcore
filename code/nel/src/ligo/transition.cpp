@@ -15,13 +15,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdligo.h"
-#include "transition.h"
+#include "nel/ligo/transition.h"
 
 // Ligo include
 #include "nel/ligo/zone_template.h"
 #include "nel/ligo/ligo_error.h"
-
-#include "ligo_material.h"
+#include "nel/ligo/ligo_material.h"
 
 namespace NLLIGO
 {

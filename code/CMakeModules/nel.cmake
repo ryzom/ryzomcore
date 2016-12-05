@@ -852,7 +852,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF()
     ENDIF()
 
-    ADD_PLATFORM_FLAGS("-D_REENTRANT -fno-strict-aliasing")
+    ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
     # hardening
     ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
