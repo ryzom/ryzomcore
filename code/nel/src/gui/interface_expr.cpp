@@ -749,7 +749,7 @@ namespace NLGUI
 		std::string str;
 		for (;;)
 		{
-			if (expr == '\0')
+			if (*expr == '\0')
 			{
 				nlwarning("CInterfaceExprValue::evalString : end of buffer encountered in a string");
 				return NULL;

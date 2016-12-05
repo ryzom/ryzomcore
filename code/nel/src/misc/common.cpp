@@ -1493,7 +1493,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 		return true;
 	}
 #elif defined(NL_OS_MAC)
-	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)document, strlen(document), kCFStringEncodingUTF8, NULL);
+	CFURLRef url = CFURLCreateWithBytes(NULL, (const UInt8 *)document.c_str(), document.length(), kCFStringEncodingUTF8, NULL);
 
 	if (url)
 	{
@@ -1502,7 +1502,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 		if (res != 0)
 		{
-			nlwarning("LSOpenCFURLRef %s returned %d", document, (sint)res);
+			nlwarning("LSOpenCFURLRef %s returned %d", document.c_str(), (sint)res);
 			return false;
 		}
 
@@ -1510,7 +1510,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 	}
 	else
 	{
-		nlwarning("Unable to create URL from %s", document);
+		nlwarning("Unable to create URL from %s", document.c_str());
 		return false;
 	}
 #else

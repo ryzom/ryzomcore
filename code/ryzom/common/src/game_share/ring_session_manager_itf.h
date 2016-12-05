@@ -1666,12 +1666,11 @@ namespace RSMGR
 			sf_shard28 = 1<<28,
 			sf_shard29 = 1<<29,
 			sf_shard30 = 1<<30,
-			sf_shard31 = 1<<31,
 
 			invalid_val,
 
 			/// Number of enumerated values
-			nb_enum_items = 32
+			nb_enum_items = 31
 		};
 
 
@@ -1709,7 +1708,6 @@ namespace RSMGR
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard28)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard29)
 				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard30)
-				NL_STRING_CONVERSION_TABLE_ENTRY(sf_shard31)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
 			};
 			static NLMISC::CStringConversion<TValues>

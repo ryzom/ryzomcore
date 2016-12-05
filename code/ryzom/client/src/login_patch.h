@@ -34,6 +34,7 @@ class CPatchThread;
 class CCheckThread;
 class CScanDataThread;
 class CInstallThread;
+class CDownloadThread;
 
 
 // Useful for using an external downloader (BitTorrent) use of interface with CGameDownloader from client_background_rd.exe using as install program
