@@ -920,39 +920,7 @@ LONG GetRegKey(HKEY key, LPCTSTR subkey, LPTSTR retdata)
 
 void CGeorgesEditApp::gotoURL (LPCTSTR url)
 {
-    char key[MAX_PATH + MAX_PATH];
-
-    // First try ShellExecute()
-    HINSTANCE result = ShellExecute(NULL, "open", url, NULL,NULL, SW_SHOW);
-
-    // If it failed, get the .htm regkey and lookup the program
-    if ((UINT)result <= HINSTANCE_ERROR) {
-
-        if (GetRegKey(HKEY_CLASSES_ROOT, ".htm", key) == ERROR_SUCCESS) 
-		{
-            lstrcat(key, "\\shell\\open\\command");
-
-            if (GetRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS) 
-			{
-                char *pos;
-                pos = strstr(key, "\"%1\"");
-                if (pos == NULL) 
-				{                     // No quotes found
-                    pos = strstr(key, "%1");       // Check for %1, without quotes 
-                    if (pos == NULL)                   // No parameter at all...
-                        pos = key+lstrlen(key)-1;
-                    else
-                        *pos = '\0';                   // Remove the parameter
-                }
-                else
-                    *pos = '\0';                       // Remove the parameter
-
-                lstrcat(pos, " ");
-                lstrcat(pos, url);
-                result = (HINSTANCE) WinExec(key, SW_SHOW);
-            }
-        }
-    }
+	NLMISC::openURL(tStrToUtf8(url));
 }
 
 void CGeorgesEditApp::WinHelp(DWORD dwData, UINT nCmd) 
