@@ -8852,7 +8852,7 @@ void CCharacterCL::animIndex(TAnimationType channel, CAnimation::TAnimId index)
 	else
 	{
 		// Check the AnimSet needed to get the animation Id.
-		CHECK(_CurrentAnimSet[channel]);
+		CHECK(_CurrentAnimSet[channel] != NULL);
 		// Get the Pointer on the animation state, if Null, return empty
 		const CAnimationState *animStatePtr = _CurrentAnimSet[channel]->getAnimationState( (animState(channel)==CAnimationStateSheet::Emote)?_SubStateKey:animState(channel));
 		if(animStatePtr == 0)
