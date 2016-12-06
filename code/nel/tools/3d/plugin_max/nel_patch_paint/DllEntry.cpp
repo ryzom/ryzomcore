@@ -64,7 +64,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 __declspec( dllexport ) const TCHAR *
 LibDescription() 
 { 
-	return "NeL patch painter"; 
+	return _T("NeL patch painter");
 }
 
 
