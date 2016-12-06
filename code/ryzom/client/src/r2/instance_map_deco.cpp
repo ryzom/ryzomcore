@@ -386,7 +386,7 @@ void CInstanceMapDeco::onUpdate(CGroupMap &groupMap)
 			}
 			float size = CV_MapEntityFarArrowSize.get();
 			// TMP TMP
-			size = size;
+//			size = size;
 			float bias = 1.f;
 			dir.normalize();
 			CVector2f winInter;

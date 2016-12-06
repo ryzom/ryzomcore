@@ -223,7 +223,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSurfPanel = hDlg;
-			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
 			if (!ep->settingViewportTess  && ep->settingDisp && ep->GetProdTess().type == TESS_SET)
 				ep->settingDisp = FALSE;
 			TessApprox t;

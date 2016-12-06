@@ -724,7 +724,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 									nlassert (node);
 
 									// Insert in the map
-									weightMap.insert (std::map<float, INode*>::value_type (1, node));
+									weightMap.insert (std::map<float, INode*>::value_type (1.f, node));
 								}
 							}
 

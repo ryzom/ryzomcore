@@ -589,10 +589,10 @@ void EditPatchMod::UpdateSelectDisplay()
 				for (j = 0; j < thePatch->tileSel.GetSize(); j++)
 					if (thePatch->tileSel[j])
 						break;
-				buf.printf("Tile %d Selected", j + 1);
+				buf.printf(_T("Tile %d Selected"), j + 1);
 			}
 			else
-				buf.printf("%d Tiles Selected", num);
+				buf.printf(_T("%d Tiles Selected"), num);
 		}
 	break;
 	}
@@ -733,7 +733,7 @@ void EditPatchMod::DoVertReset ()
 	}
 	
 	ResolveTopoChanges();
-	theHold.Accept("Reset Vertex");
+	theHold.Accept(_M("Reset Vertex"));
 	/*if (holdNeeded)
 	{
 		ResolveTopoChanges();

@@ -501,8 +501,11 @@ bool CDriverGL::unInit()
 	// restore default X errors handler
 	XSetErrorHandler(NULL);
 
-	XCloseDisplay(_dpy);
-	_dpy = NULL;
+	if (_dpy)
+	{
+		XCloseDisplay(_dpy);
+		_dpy = NULL;
+	}
 
 #endif // NL_OS_UNIX
 
