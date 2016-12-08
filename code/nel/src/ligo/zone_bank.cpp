@@ -493,32 +493,25 @@ void CZoneBank::reset ()
 	_Selection.clear ();
 }
 
-#ifdef NL_OS_WINDOWS
 // ---------------------------------------------------------------------------
 bool CZoneBank::initFromPath(const std::string &sPathName, std::string &error)
 {
-	char sDirBackup[512];
-	GetCurrentDirectory (512, sDirBackup);
-	SetCurrentDirectory (sPathName.c_str());
-	WIN32_FIND_DATA findData;
-	HANDLE hFind;
-	hFind = FindFirstFile ("*.ligozone", &findData);
+	std::vector<std::string> files;
+	NLMISC::CPath::getPathContent(sPathName, false, false, true, files);
 
-	while (hFind != INVALID_HANDLE_VALUE)
+	for (uint i = 0, len = files.size(); i < len; ++i)
 	{
-		// If the name of the file is not . or .. then its a valid entry in the DataBase
-		if (!((strcmp (findData.cFileName, ".") == 0) || (strcmp (findData.cFileName, "..") == 0)))
+		std::string ext = NLMISC::CFile::getExtension(files[i]);
+
+		if (ext == "ligozone")
 		{
-			if (!addElement (findData.cFileName, error))
+			if (!addElement(NLMISC::CFile::getFilename(files[i]), error))
 				return false;
 		}
-		if (FindNextFile (hFind, &findData) == 0)
-			break;
 	}
-	SetCurrentDirectory (sDirBackup);
+
 	return true;
 }
-#endif // NL_OS_WINDOWS
 
 // ---------------------------------------------------------------------------
 bool CZoneBank::addElement (const std::string &elementName, std::string &error)
