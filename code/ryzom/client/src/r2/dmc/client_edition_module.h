@@ -1169,7 +1169,7 @@ private:
 	uint32 _MaxNpcs;
 	uint32 _MaxStaticObjects;
 
-	std::unique_ptr<R2::CEmoteBehavior> _Emotes;
+	std::auto_ptr<R2::CEmoteBehavior> _Emotes;
 
 
 	CEditorConfig* _ClientEditorConfig;

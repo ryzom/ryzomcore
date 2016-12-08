@@ -207,7 +207,7 @@ namespace MFS
 
 					BOMB_IF(!_RingDb.query(query), ("Database error, no guild forum notification"), break;);
 
-					unique_ptr<MSW::CStoreResult> result(_RingDb.storeResult());
+					auto_ptr<MSW::CStoreResult> result = _RingDb.storeResult();
 
 					BOMB_IF(result->getNumRows() != 1, ("Database error, no guild forum notification"), break;);
 
@@ -229,7 +229,7 @@ namespace MFS
 			string query = "SELECT COUNT(*) FROM mfs_mail WHERE date > '"+MSW::encodeDate(lastDisconnectionDate)+"' AND status = 'ms_new' AND erase_series = 0";
 			BOMB_IF(!_RingDb.query(query), ("Database error, no mail notification"), return;);
 
-			unique_ptr<MSW::CStoreResult> result(_RingDb.storeResult());
+			auto_ptr<MSW::CStoreResult> result = _RingDb.storeResult();
 
 			BOMB_IF(result->getNumRows() != 1, ("Database error, no mail notification"), return;);
 

@@ -237,22 +237,22 @@ namespace MSW
 	}
 
 
-	std::unique_ptr<CStoreResult>		CConnection::storeResult()
+	std::auto_ptr<CStoreResult>		CConnection::storeResult()
 	{
 		H_AUTO(CConnection_storeResult);
 		MYSQL_RES *res = mysql_store_result(_MysqlContext);
 
-		std::unique_ptr<CStoreResult> sr(new CStoreResult(res));
+		std::auto_ptr<CStoreResult> sr = std::auto_ptr<CStoreResult>(new CStoreResult(res));
 
 		return sr;
 	}
 
-	std::unique_ptr<CUseResult>		CConnection::useResult()
+	std::auto_ptr<CUseResult>		CConnection::useResult()
 	{
 		H_AUTO(CConnection_useResult);
 		MYSQL_RES *res = mysql_use_result(_MysqlContext);
 
-		std::unique_ptr<CUseResult> sr(new CUseResult(res));
+		std::auto_ptr<CUseResult> sr = std::auto_ptr<CUseResult>(new CUseResult(res));
 
 		return sr;
 	}

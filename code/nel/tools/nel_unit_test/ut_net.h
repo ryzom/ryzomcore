@@ -28,9 +28,9 @@ struct CUTNet : public Test::Suite
 {
 	CUTNet()
 	{
-		add(unique_ptr<Test::Suite>(new CUTNetLayer3));
-		add(unique_ptr<Test::Suite>(new CUTNetMessage));
-		add(unique_ptr<Test::Suite>(new CUTNetModule));
+		add(auto_ptr<Test::Suite>(new CUTNetLayer3));
+		add(auto_ptr<Test::Suite>(new CUTNetMessage));
+		add(auto_ptr<Test::Suite>(new CUTNetModule));
 		// Add a line here when adding a new test CLASS
 	}
 };

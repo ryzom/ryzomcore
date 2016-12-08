@@ -590,7 +590,7 @@ protected:
 		void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
 	};
 
-	typedef std::unique_ptr<CGlobalTexAnims> PGlobalTexAnims;
+	typedef std::auto_ptr<CGlobalTexAnims> PGlobalTexAnims;
 	PGlobalTexAnims						   _GlobalTexAnims;
 	float								   _GlobalAnimDate;
 

@@ -264,7 +264,7 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 	else
 	{
 		// other is a standalone entity -> create a new group
-		std::unique_ptr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
+		std::auto_ptr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
 		if (!newGroup.get())
 		{
 			nlwarning("Syntax error in r2_features_npc_group.lua.");

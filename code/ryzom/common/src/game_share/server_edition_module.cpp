@@ -2215,7 +2215,7 @@ void CServerEditionModule::onNodeSetAsked(NLNET::IModuleProxy *senderModuleProxy
 
 	value2.uncompress();
 	CObject* value = value2.getData();
-	std::unique_ptr<CObject> autoDelete(value);
+	std::auto_ptr<CObject> autoDelete(value);
 
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
@@ -5116,7 +5116,7 @@ bool CServerEditionModule::wakeUpSession(TSessionId sessionId, TCharId ownerChar
 
 void CServerEditionModule::wakeUpSessionImpl(CEditionSession* session)
 {
-	std::unique_ptr<CEditionSession> sessionPtr(session);
+	std::auto_ptr<CEditionSession> sessionPtr(session);
 	TSessionId sessionId = sessionPtr->SessionId;
 
 	TSessions::iterator found = _Sessions.find(sessionId);

@@ -132,7 +132,7 @@ namespace R2 {
 			client->onScenarioUploaded(server, _Value.get());
 		}
 	private:
-		std::unique_ptr<R2::CObject> _Value;
+		std::auto_ptr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgSet: public IServerAnswerMsg
@@ -148,7 +148,7 @@ namespace R2 {
 	private:
 		std::string _InstanceId;
 		std::string _AttrName;
-		std::unique_ptr<R2::CObject> _Value;
+		std::auto_ptr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgInserted: public IServerAnswerMsg
@@ -166,7 +166,7 @@ namespace R2 {
 		std::string _AttrName;
 		sint32 _Position;
 		std::string _Key;
-		std::unique_ptr<R2::CObject> _Value;
+		std::auto_ptr<R2::CObject> _Value;
 	};
 
 	class CServerAnswerMsgErased: public IServerAnswerMsg
@@ -1140,7 +1140,7 @@ void CClientEditionModule::startingScenario(class NLNET::IModuleProxy * /* serve
 			_Factory->setMaxId("RtEntryText", 0);
 			_Factory->setMaxId("RtPlotItem", 0);
 
-			std::unique_ptr<CObject> rtDataPtr(  _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg) );
+			std::auto_ptr<CObject> rtDataPtr(  _Client->getComLuaModule().translateFeatures(hlScenario , errorMsg) );
 			rtData.setData(rtDataPtr.get());
 
 			if (rtDataPtr.get())
@@ -2351,7 +2351,7 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 		return;
 	}
 
-	unique_ptr<CUserComponentValidator> userComponentToLoad(found->second);
+	auto_ptr<CUserComponentValidator> userComponentToLoad(found->second);
 	_UserComponentToLoad.erase(found);
 
 	if (!ok)
@@ -2383,7 +2383,7 @@ void CClientEditionModule::saveScenarioFileAccepted(NLNET::IModuleProxy *senderM
 		return;
 	}
 
-	unique_ptr<CScenarioValidator> scenarioToSave(found->second);
+	auto_ptr<CScenarioValidator> scenarioToSave(found->second);
 	_ScenarioToSave.erase(found);
 
 	if (ok)
@@ -2498,7 +2498,7 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 		return;
 	}
 
-	unique_ptr<CScenarioValidator> scenarioToLoad(found->second);
+	auto_ptr<CScenarioValidator> scenarioToLoad(found->second);
 	_ScenarioToLoad.erase(found);
 
 	if (!ok)

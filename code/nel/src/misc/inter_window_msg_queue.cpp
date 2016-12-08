@@ -268,7 +268,7 @@ namespace NLMISC
 			typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 			// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 			// else, this is one of the way recommended by microsoft to solve the problem.
-			std::unique_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+			std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 			CMsgQueueIdent msgQueueIdent(ownerWindow, localId, foreignId);
 			if (messageQueueMap->value().count(msgQueueIdent))
 			{
@@ -368,7 +368,7 @@ namespace NLMISC
 			typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 			// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 			// else, this is one of the way recommended by microsoft to solve the problem.
-			std::unique_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+			std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 			TMessageQueueMap::iterator it = messageQueueMap->value().find(CMsgQueueIdent(_LocalWindow.getWnd(), _LocalWindow.getId(), _ForeignWindow.getId()));
 			nlassert(it != messageQueueMap->value().end());
 			messageQueueMap->value().erase(it);
@@ -408,7 +408,7 @@ namespace NLMISC
 					typedef CSynchronized<TMessageQueueMap>::CAccessor TAccessor;
 					// NB : use a 'new' instead of an automatic object here, because I got an 'INTERNAL COMPILER ERROR' compiler file 'msc1.cpp', line 1794
 					// else, this is one of the way recommended by microsoft to solve the problem.
-					std::unique_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
+					std::auto_ptr<TAccessor> messageQueueMap(new TAccessor(&_MessageQueueMap));
 					TMessageQueueMap::iterator it = messageQueueMap->value().find(CMsgQueueIdent(hwnd, toId, fromId));
 					if (it != messageQueueMap->value().end())
 					{

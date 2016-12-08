@@ -145,7 +145,7 @@ CQueryParser::TParserResult CQueryParser::parseQuery(const std::string &queryStr
 			return pr;
 		}
 
-		unique_ptr<TQueryNode> rootNode(parseExpr(first, queryStr.end()));
+		auto_ptr<TQueryNode> rootNode(parseExpr(first, queryStr.end()));
 
 		// make sure we have consumed all the stream
 		iterator rew = first;

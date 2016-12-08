@@ -382,7 +382,7 @@ namespace LS
 			CSString query;
 			query << "SELECT UId FROM user WHERE GMId = "<<userId<<"";
 			BOMB_IF(!_NelDb.query(query), "on_login : Failed to request in database", loginResult(from, userId, "", 6, "Failed request"); return);
-			unique_ptr<CStoreResult> result(_NelDb.storeResult());
+			auto_ptr<CStoreResult> result = auto_ptr<CStoreResult>(_NelDb.storeResult());
 			for (uint32 i=0; i!=result->getNumRows(); ++i)
 			{
 				result->fetchRow();

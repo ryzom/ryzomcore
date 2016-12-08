@@ -39,7 +39,7 @@ static void buildRemanenceError(CExportNel *en, INode &node, const char *mess)
 //=============================================================================================
 NL3D::IShape *CExportNel::buildRemanence(INode& node, TimeValue time)
 {
-	std::unique_ptr<CSegRemanenceShape> srs(new CSegRemanenceShape);
+	std::auto_ptr<CSegRemanenceShape> srs(new CSegRemanenceShape);
 	uint  numSlices = getScriptAppData (&node, NEL3D_APPDATA_REMANENCE_SLICE_NUMBER, 2);
 	float samplingPeriod = getScriptAppData (&node, NEL3D_APPDATA_REMANENCE_SAMPLING_PERIOD, 0.02f);
 	float rollupRatio    = getScriptAppData (&node, NEL3D_APPDATA_REMANENCE_ROLLUP_RATIO, 1.f);

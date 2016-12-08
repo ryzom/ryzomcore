@@ -36,7 +36,7 @@ CPSRibbon::TVBMap CPSRibbon::_VBMaps[16];
 static ITexture *CreateGradientTexture()
 {
 	NL_PS_FUNC(CreateGradientTexture)
-	std::unique_ptr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
+	std::auto_ptr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
 												   sizeof(GradientB2W),
 												   false, /* dont delete */
 												   false, /* not a file */

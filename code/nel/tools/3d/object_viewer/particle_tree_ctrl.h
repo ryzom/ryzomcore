@@ -182,8 +182,8 @@ private:
 	// Matching infos for each nodes in the CTreeCtrl
 	std::vector<CNodeType *> _NodeTypes;
 	//
-	std::unique_ptr<NL3D::CPSLocated>			_LocatedCopy;
-	std::unique_ptr<NL3D::CPSLocatedBindable>	_LocatedBindableCopy;
+	std::auto_ptr<NL3D::CPSLocated>			_LocatedCopy;
+	std::auto_ptr<NL3D::CPSLocatedBindable> _LocatedBindableCopy;
 	//
 	DECLARE_MESSAGE_MAP()
 	// from CParticleWorkspace::IModificationCallback

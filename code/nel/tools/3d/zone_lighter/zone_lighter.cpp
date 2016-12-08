@@ -153,7 +153,7 @@ static void loadIGFromVillage(const NLGEORGES::UFormElm *villageItem, const std:
 			if (inputFile.open (nameLookup))
 			{
 				// New ig
-				std::unique_ptr<CInstanceGroup> group(new CInstanceGroup);
+				std::auto_ptr<CInstanceGroup> group(new CInstanceGroup);
 				try
 				{
 					group->serial (inputFile);

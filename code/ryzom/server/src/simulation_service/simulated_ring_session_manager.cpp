@@ -114,7 +114,7 @@ namespace RSMGR
 		list<uint32> sessionIds;
 		{
 			// scope the result to make it destroyed at scope end
-			unique_ptr<MSW::CUseResult> result(_RingDb.useResult());
+			auto_ptr<MSW::CUseResult> result(_RingDb.useResult());
 
 			// for each open session, put it in the locked state
 			while (result->fetchRow())
@@ -1313,7 +1313,7 @@ namespace RSMGR
 
 		set<uint32> sessionToClose;
 
-		unique_ptr<MSW::CUseResult> result(_RingDb.useResult());
+		auto_ptr<MSW::CUseResult> result = _RingDb.useResult();
 
 		while (result->fetchRow())
 		{

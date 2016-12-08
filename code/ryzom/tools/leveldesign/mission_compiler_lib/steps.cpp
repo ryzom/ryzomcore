@@ -741,7 +741,7 @@ public:
 //		_TalkToMenu.initPhrase(md, prim, temp);
 
 		_TalkToObjective = NULL;
-		std::unique_ptr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
+		std::auto_ptr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
 		if (!temp.empty())
 		{
 			talkToObjective.reset(new CStepDynChatTalkTo(md, prim, "talk_to_"));

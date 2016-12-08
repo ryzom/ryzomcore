@@ -1190,7 +1190,7 @@ public:
 	struct TParserResult
 	{
 		/// The query tree
-		mutable std::unique_ptr<TQueryNode> QueryTree;
+		mutable std::auto_ptr<TQueryNode> QueryTree;
 
 		/// Option to extract full context with selected logs
 		bool		FullContext;
