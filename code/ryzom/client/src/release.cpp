@@ -669,6 +669,7 @@ void release()
 	CWidgetManager::release();
 	CViewRenderer::release();
 	CIXml::releaseLibXml();
+	CCoTask::releaseInstance();
 
 #if FINAL_VERSION
 	// openURL ("http://www.ryzomcore.org/exit/");
