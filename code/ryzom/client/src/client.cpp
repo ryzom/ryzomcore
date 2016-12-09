@@ -309,6 +309,16 @@ int main(int argc, char **argv)
 			//ICommand::execute("iFileAccessLogStop",*NLMISC::InfoLog);
 			//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
+
+			release();
+
+			// delete all logs and displayers when we're not using logs macros anymore
+			destroyDebug();
+			CLog::releaseProcessName();
+
+			// delete the Nel context
+			delete appContext;
+
 			return EXIT_SUCCESS;
 		}
 	}
