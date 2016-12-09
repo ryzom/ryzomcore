@@ -32,6 +32,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define	TGA8	8
 #define	TGA16	16

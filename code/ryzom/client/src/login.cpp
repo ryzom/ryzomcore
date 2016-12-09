@@ -71,6 +71,10 @@ using namespace NLNET;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 extern bool SetMousePosFirstTime;

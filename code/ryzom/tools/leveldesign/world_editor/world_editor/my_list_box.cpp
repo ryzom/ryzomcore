@@ -21,6 +21,10 @@
 #include "world_editor.h"
 #include "my_list_box.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define COMBO_REAL_HEIGHT 300
 
 // ***************************************************************************

@@ -65,6 +65,10 @@ using namespace NLNET;
 // Macros
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 //
 // RYZOM_TRY and RYZOM_CATCH aim is to catch differently in dev and final version
 //    In final version, we catch everything and nlerror the problem to display a NeL message box

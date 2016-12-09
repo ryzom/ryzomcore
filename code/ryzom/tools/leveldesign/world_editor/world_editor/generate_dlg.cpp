@@ -22,6 +22,10 @@
 #include "resource.h"
 #include "generate_dlg.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CGenerateDlg dialog
 

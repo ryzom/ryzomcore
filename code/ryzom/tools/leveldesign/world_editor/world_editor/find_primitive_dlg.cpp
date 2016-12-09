@@ -26,6 +26,10 @@
 
 using namespace NLLIGO;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 CString CFindPrimitiveDlg::Property = _T("");
 CString CFindPrimitiveDlg::Value = _T("");
 CString CFindPrimitiveDlg::ReplaceText = _T("");

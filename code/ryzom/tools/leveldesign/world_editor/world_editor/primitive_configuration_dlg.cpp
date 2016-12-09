@@ -25,6 +25,10 @@
 
 using namespace NLLIGO;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 // CPrimitiveConfigurationDlg dialog
 // ***************************************************************************

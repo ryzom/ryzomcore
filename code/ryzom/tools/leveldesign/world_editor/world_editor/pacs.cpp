@@ -27,6 +27,10 @@ using namespace NLMISC;
 using namespace NLLIGO;
 using namespace NLPACS;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 CPacsManager PacsManager;

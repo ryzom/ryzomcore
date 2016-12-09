@@ -72,6 +72,9 @@ using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // EXTERN //

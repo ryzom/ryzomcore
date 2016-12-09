@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "editpat.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #define DBGWELD_DUMPx

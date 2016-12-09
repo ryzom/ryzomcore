@@ -22,6 +22,10 @@
 #include "nel/ligo/ligo_error.h"
 #include "nel/ligo/ligo_material.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLLIGO
 {
 

@@ -33,6 +33,10 @@ using namespace std;
 using namespace NLLIGO;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 #define SCROLLING_STEPS	2	// parameter to finetune the scroller

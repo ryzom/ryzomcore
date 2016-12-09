@@ -159,6 +159,9 @@ using namespace NLPACS;
 using namespace NLNET;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 

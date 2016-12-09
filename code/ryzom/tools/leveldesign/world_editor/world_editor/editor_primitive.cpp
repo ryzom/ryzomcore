@@ -27,6 +27,10 @@ using namespace NLLIGO;
 using namespace NL3D;
 using namespace NLGEORGES;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 /*

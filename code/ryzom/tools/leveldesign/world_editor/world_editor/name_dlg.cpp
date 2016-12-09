@@ -25,6 +25,9 @@
 #include "nel/misc/path.h"
 #include "nel/misc/config_file.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CNameDlg dialog

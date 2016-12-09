@@ -28,6 +28,10 @@ using namespace std;
 
 const uint32 NLLIGO_PRIMITIVE_VERSION = 1;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLLIGO
 {
 
