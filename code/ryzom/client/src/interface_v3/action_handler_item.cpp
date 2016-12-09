@@ -429,8 +429,6 @@ static	CDBCtrlSheet	*CurrentStackDst= NULL;
 static	TStackMode		CurrentStackMode;
 
 
-static void putStackableInventoryItemToExchange(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
-static void putStackableExchangedItemToInventory(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
 static void validateStackItem(CDBCtrlSheet *src, CDBCtrlSheet *dest, sint32 quantity, TStackMode stackMode);
 
 

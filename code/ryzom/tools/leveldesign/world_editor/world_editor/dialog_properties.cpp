@@ -1671,8 +1671,9 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 								text += "\n";
 						}
 						CConfigFile::CVar *var = getMainFrame ()->getConfigFile().getVarPtr ("TextEditor");
-						char windows[512];
-						GetWindowsDirectory (windows, sizeof (windows));
+
+						std::string windows = CPath::getWindowsDirectory();
+
 						if (EditExternalText (var?var->asString():windows+string ("/notepad.exe"), text, widget->Parameter.FileExtension.c_str ()))
 						{
 							widget->Default = false;
