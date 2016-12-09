@@ -51,7 +51,7 @@ void CPacsManager::loadPacs()
 	string currentPath = CPath::getCurrentPath();
 
 	// "Path" can be relative to the doc path so we have to be first in the doc path
-	string s2 = NLMISC::CFile::getPath ((LPCTSTR)getMainFrame()->getDocument()->GetPathName());
+	string s2 = NLMISC::CFile::getPath (tStrToUtf8(getMainFrame()->getDocument()->GetPathName()));
 	CPath::setCurrentPath(s2.c_str());
 	string ss = CPath::getFullPath(path);
 	CPath::setCurrentPath (ss.c_str());

@@ -124,7 +124,7 @@ void CMyListBox::OnLButtonDblClk(UINT nFlags, CPoint point)
 	_SelectAfter = GetCurSel();
 	if ((_EditingItem == LB_ERR) || bOutside)
 	{
-		_EditingItem = InsertString (-1, "");
+		_EditingItem = InsertString (-1, _T(""));
 		_DeleteItIfCancel = true;
 	}
 	else
