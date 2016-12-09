@@ -255,8 +255,19 @@ MACRO(USE_CURRENT_WINSDK)
         SET(WINSDK_VERSION "6.0A")
       ENDIF()
     ELSEIF(MSVC80)
-      IF(NOT MSVC_EXPRESS)
-        # TODO: fix this version
+      SET(WINSDK_MSVC80_COMPATIBLES "7.1" "7.1A" "7.0" "7.0A" "6.1" "6.0" "6.0A" "5.2A")
+
+      # look for each Windows SDK supported by VC++ 2005 (7.1 is the latest)
+      FOREACH(_VERSION ${WINSDK_DETECTED_VERSIONS})
+        # look if this version of Windows SDK is installed
+        LIST(FIND WINSDK_MSVC80_COMPATIBLES ${_VERSION} _FOUND)
+        IF(NOT _FOUND EQUAL -1)
+          SET(WINSDK_VERSION "${_VERSION}")
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+
+      IF(NOT MSVC_EXPRESS AND NOT WINSDK_VERSION)
         SET(WINSDK_VERSION "5.2A")
       ENDIF()
     ELSE()
