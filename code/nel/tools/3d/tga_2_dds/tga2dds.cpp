@@ -300,6 +300,7 @@ int main(int argc, char **argv)
 		"\n"
 		"  default : DXTC1 if 24 bits, DXTC5 if 32 bits."
 		);
+	args.addArg("g", "grayscale", "", "Don't load grayscape images as alpha but as grayscale");
 	args.addArg("m", "mipmap", "", "Create MipMap");
 	args.addArg("r", "reduce", "FACTOR", "Reduce the bitmap size before compressing\n  FACTOR is 0, 1, 2, 3, 4, 5, 6, 7 or 8");
 	args.addAdditionalArg("input", "PNG or TGA files to convert", false);
@@ -309,6 +310,7 @@ int main(int argc, char **argv)
 	string OptOutputFileName;
 	uint8 OptAlgo = NOT_DEFINED;
 	bool OptMipMap = false;
+	bool OptGrayscale = false;
 	uint Reduce = 0;
 
 	if (args.haveArg("o"))
@@ -316,6 +318,9 @@ int main(int argc, char **argv)
 
 	if (args.haveArg("m"))
 		OptMipMap = true;
+
+	if (args.haveArg("g"))
+		OptGrayscale = true;
 
 	if (args.haveArg("a"))
 	{
@@ -365,12 +370,17 @@ int main(int argc, char **argv)
 		{
 			return 0;
 		}
+
 		NLMISC::CIFile input;
 		if(!input.open(inputFileName))
 		{
 			cerr<<"Can't open input file " << inputFileName << endl;
 			return 1;
 		}
+
+		// allow to load an image as grayscale instead of alpha
+		if (OptGrayscale) picTga.loadGrayscaleAsAlpha(false);
+
 		uint8 imageDepth = picTga.load(input);
 		if(imageDepth==0)
 		{
