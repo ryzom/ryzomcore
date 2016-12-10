@@ -152,7 +152,7 @@ void xmlGenericErrorFuncWrite (void *ctx, const char *msg, ...)
 
 // ***************************************************************************
 
-bool COXml::init (IStream *stream, const char *version)
+bool COXml::init (IStream *stream, const std::string &version)
 {
 	resetPtrTable();
 
@@ -201,7 +201,7 @@ COXml::~COXml ()
 
 // ***************************************************************************
 
-void COXml::serialSeparatedBufferOut( const char *value )
+void COXml::serialSeparatedBufferOut( const std::string &value )
 {
 	nlassert( ! isReading() );
 
@@ -218,7 +218,7 @@ void COXml::serialSeparatedBufferOut( const char *value )
 				if (_AttribPresent)
 				{
 					// Set the attribute
-					xmlSetProp (_CurrentNode, (const xmlChar*)_AttribName.c_str(), (const xmlChar*)value);
+					xmlSetProp (_CurrentNode, (const xmlChar*)_AttribName.c_str(), (const xmlChar*)value.c_str());
 
 					// The attribute has been used
 					_AttribPresent = false;
@@ -349,7 +349,8 @@ void COXml::serialBit(bool &bit)
 #ifndef NL_OS_CYGWIN
 void COXml::serial(char &b)
 {
-	char tmp[2] = {b , 0};
+	std::string tmp;
+	tmp += b;
 	serialSeparatedBufferOut( tmp );
 }
 #endif // NL_OS_CYGWIN
@@ -364,7 +365,7 @@ void COXml::serial(std::string &b)
 	if (_PushBegin)
 	{
 		// Only serial the string
-		serialSeparatedBufferOut( b.c_str() );
+		serialSeparatedBufferOut( b );
 	}
 	else
 	{
@@ -372,7 +373,7 @@ void COXml::serial(std::string &b)
 		xmlPush ("S");
 
 		// Serial the string
-		serialSeparatedBufferOut( b.c_str() );
+		serialSeparatedBufferOut( b );
 
 		// Close the node
 		xmlPop ();
@@ -415,7 +416,7 @@ void COXml::serialBuffer(uint8 *buf, uint len)
 
 // ***************************************************************************
 
-bool COXml::xmlPushBeginInternal (const char *nodeName)
+bool COXml::xmlPushBeginInternal (const std::string &nodeName)
 {
 	nlassert( ! isReading() );
 
@@ -439,7 +440,7 @@ bool COXml::xmlPushBeginInternal (const char *nodeName)
 				}
 
 				// Create the first node
-				_CurrentNode=xmlNewDocNode (_Document, NULL, (const xmlChar*)nodeName, NULL);
+				_CurrentNode=xmlNewDocNode (_Document, NULL, (const xmlChar*)nodeName.c_str(), NULL);
 				xmlDocSetRootElement (_Document, _CurrentNode);
 
 				// Return NULL if error
@@ -451,7 +452,7 @@ bool COXml::xmlPushBeginInternal (const char *nodeName)
 				flushContentString ();
 
 				// Create a new node
-				_CurrentNode=xmlNewChild (_CurrentNode, NULL, (const xmlChar*)nodeName, NULL);
+				_CurrentNode=xmlNewChild (_CurrentNode, NULL, (const xmlChar*)nodeName.c_str(), NULL);
 
 				// Return NULL if error
 				nlassert (_CurrentNode);
@@ -543,7 +544,7 @@ bool COXml::xmlPopInternal ()
 
 // ***************************************************************************
 
-bool COXml::xmlSetAttribInternal (const char *attribName)
+bool COXml::xmlSetAttribInternal (const std::string &attribName)
 {
 	nlassert( ! isReading() );
 
@@ -608,7 +609,7 @@ bool COXml::xmlBreakLineInternal ()
 
 // ***************************************************************************
 
-bool COXml::xmlCommentInternal (const char *comment)
+bool COXml::xmlCommentInternal (const std::string &comment)
 {
 	nlassert( ! isReading() );
 
@@ -619,7 +620,7 @@ bool COXml::xmlCommentInternal (const char *comment)
 		if ( _CurrentNode != NULL)
 		{
 			// Add a comment node
-			xmlNodePtr commentPtr = xmlNewComment ((const xmlChar *)comment);
+			xmlNodePtr commentPtr = xmlNewComment ((const xmlChar *)comment.c_str());
 
 			// Add the node
 			xmlAddChild (_CurrentNode, commentPtr);
@@ -665,15 +666,9 @@ void COXml::flush ()
 
 // ***************************************************************************
 
-bool COXml::isStringValidForProperties (const char *str)
+bool COXml::isStringValidForProperties (const std::string &str)
 {
-	while (*str)
-	{
-		if (*str == '\n')
-			return false;
-		str++;
-	}
-	return true;
+	return str.find('\n') == std::string::npos;
 }
 
 // ***************************************************************************

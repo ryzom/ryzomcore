@@ -645,7 +645,7 @@ class CActionSetPrimitivePropertyString : public IAction
 public:
 
 	// Constructor
-	CActionSetPrimitivePropertyString (const CDatabaseLocatorPointer &locator, const char *propertyName, const char *newValue, bool _default);
+	CActionSetPrimitivePropertyString (const CDatabaseLocatorPointer &locator, const std::string &propertyName, const std::string &newValue, bool _default);
 
 private:
 
@@ -668,7 +668,7 @@ class CActionSetPrimitivePropertyStringArray : public IAction
 public:
 
 	// Constructor
-	CActionSetPrimitivePropertyStringArray (const CDatabaseLocatorPointer &locator, const char *propertyName, const std::vector<std::string> &newValue, bool _default);
+	CActionSetPrimitivePropertyStringArray (const CDatabaseLocatorPointer &locator, const std::string &propertyName, const std::vector<std::string> &newValue, bool _default);
 
 private:
 

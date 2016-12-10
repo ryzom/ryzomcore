@@ -724,7 +724,7 @@ public:
 	  * xmlSerial() serial a values into a node.
 	  */
 	template<class T>
-	void xmlSerial (T& value0, const char *nodeName)
+	void xmlSerial (T& value0, const std::string &nodeName)
 	{
 		// Open the node
 		xmlPush (nodeName);
@@ -736,7 +736,7 @@ public:
 		xmlPop ();
 	}
 	template<class T>
-	void xmlSerial (T& value0, T& value1, const char *nodeName)
+	void xmlSerial (T& value0, T& value1, const std::string &nodeName)
 	{
 		// Open the node
 		xmlPush (nodeName);
@@ -748,7 +748,7 @@ public:
 		xmlPop ();
 	}
 	template<class T>
-	void xmlSerial (T& value0, T& value1, T& value2, const char *nodeName)
+	void xmlSerial (T& value0, T& value1, T& value2, const std::string &nodeName)
 	{
 		// Open the node
 		xmlPush (nodeName);
@@ -760,7 +760,7 @@ public:
 		xmlPop ();
 	}
 	template<class T>
-	void xmlSerial (T& value0, T& value1, T& value2, T& value3, const char *nodeName)
+	void xmlSerial (T& value0, T& value1, T& value2, T& value3, const std::string &nodeName)
 	{
 		// Open the node
 		xmlPush (nodeName);
@@ -778,7 +778,7 @@ public:
 	  * \name is the name of the node to open
 	  * \return true if you can open the node, false if the stream is between a xmlPushBegin() and a xmlPushEnd() call.
 	  */
-	bool xmlPush (const char *name)
+	bool xmlPush (const std::string &name)
 	{
 		// XML Mode ?
 		if (_XML)
@@ -802,7 +802,7 @@ public:
 	  * \name is the name of the node to open
 	  * \return true if you can open the node header, false if the stream is between a xmlPushBegin() and a xmlPushEnd() call.
 	  */
-	bool xmlPushBegin (const char *name)
+	bool xmlPushBegin (const std::string &name)
 	{
 		// XML Mode ?
 		if (_XML)
@@ -854,7 +854,7 @@ public:
 	  * \param name is the name of the node header attribute serialised.
 	  * \return true if the attribute name have been set, false if the node header is not open (the call is not between xmlPushBegin and xmlPushEnd)
 	  */
-	bool xmlSetAttrib (const char *name)
+	bool xmlSetAttrib (const std::string &name)
 	{
 		// XML Mode ?
 		if (_XML)
@@ -888,7 +888,7 @@ public:
 	  *
 	  * \return true if the comment is added, return false if no node is opened.
 	  */
-	bool xmlComment (const char *comment)
+	bool xmlComment (const std::string &comment)
 	{
 		// XML Mode ?
 		if (_XML)
@@ -910,7 +910,7 @@ protected:
 	void setXMLMode (bool on);
 
 	/// xmlPushBegin implementation
-	virtual bool		xmlPushBeginInternal (const char * /* name */) { return true; };
+	virtual bool		xmlPushBeginInternal (const std::string &/* name */) { return true; };
 
 	/// xmlPushEnd implementation
 	virtual bool		xmlPushEndInternal () { return true; };
@@ -919,13 +919,13 @@ protected:
 	virtual bool		xmlPopInternal () { return true; };
 
 	/// xmlBreakLine implementation
-	virtual bool		xmlSetAttribInternal (const char * /* name */) { return true; };
+	virtual bool		xmlSetAttribInternal (const std::string &/* name */) { return true; };
 
 	/// xmlBreakLine implementation
 	virtual bool		xmlBreakLineInternal () { return true; };
 
 	/// xmlComment implementation
-	virtual	bool		xmlCommentInternal (const char * /* comment */) { return true; };
+	virtual	bool		xmlCommentInternal (const std::string &/* comment */) { return true; };
 
 	/**
 	 * for Deriver: reset the PtrTable in the stream.
