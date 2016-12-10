@@ -1147,7 +1147,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			{
 				float value;		
 				int dummy; // to avoid non numeric characters at the end
-				if (sscanf ((LPCTSTR)(valueDlg.Value + "\n0"),  "%f\n%d",  &value,  &dummy) == 2)
+				if (_stscanf((LPCTSTR)(valueDlg.Value + _T("\n0")), _T("%f\n%d"), &value, &dummy) == 2)
 				{
 					nlassert(getOwnerNode(nt)->getPSPointer());
 					getOwnerNode(nt)->getPSPointer()->setZBias(-value);

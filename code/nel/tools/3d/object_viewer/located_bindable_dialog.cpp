@@ -764,7 +764,7 @@ void CLocatedBindableDialog::updateZBias()
 	m_ZBias.GetWindowText(value);
 	float zbias = 0.f;
 	int dummy; // to test if end of string as no not wanted extra characters
-	if (sscanf((LPCTSTR) (value + "\n0"), "%f\n%d", &zbias, &dummy) == 2)
+	if (_stscanf((LPCTSTR)(value + _T("\n0")), _T("%f\n%d"), &zbias, &dummy) == 2)
 	{
 		NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable)->setZBias(-zbias);
 	}
