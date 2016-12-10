@@ -213,6 +213,12 @@ public:
 	static CInterfaceManager &getUI();
 	// Get mouse  position
 	static void getMousePos(sint32 &x, sint32 &y) ;
+	// Get if mouse are clicked down and position of last down click
+	static void getMouseDown(bool &down, sint32 &x, sint32 &y);
+	// Get if mouse are middle clicked down and position of last down click
+	static void getMouseMiddleDown(bool &down, sint32 &x, sint32 &y);
+	// Get if mouse are right clicked down and position of last down click
+	static void getMouseRightDown(bool &down, sint32 &x, sint32 &y);
 	// Get mouse x position
 	static sint32 getMouseX();
 	// Get mouse y position

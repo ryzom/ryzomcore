@@ -1507,3 +1507,44 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 
 	return nFoundStringMode > -1;
 }
+
+// Get float value from string. Return true if the value is relatif ( src = "+15.5" for example )
+bool getRelativeFloatFromString(const std::string src, float &dst)
+{
+	dst = 0;
+	if (src.empty())
+		return false;
+	
+	if (src[0] == '+')
+		return fromString(src.substr(1), dst);
+	else
+		fromString(src, dst);
+	
+	return false;
+}
+
+bool updateVector(const string part, CVector &dst, float value, bool add /* = false */)
+{
+	string p = part;
+	if (part.size() > 1)
+		p = part.substr(part.size()-1, 1);
+		
+	if (add)
+	{
+		if (p == "x")
+			dst.x += value;
+		else if (p == "y")
+			dst.y += value;
+		else if (p == "z")
+			dst.z += value;
+	}
+	else 
+	{
+		if (p == "x")
+			dst.x = value;
+		else if (p == "y")
+			dst.y = value;
+		else if (p == "z")
+			dst.z = value;
+	}
+}

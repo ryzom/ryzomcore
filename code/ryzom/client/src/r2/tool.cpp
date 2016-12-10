@@ -166,6 +166,47 @@ void CTool::getMousePos(sint32 &x, sint32 &y)
 }
 
 // ***************************************************************
+void CTool::getMouseDown(bool &down, sint32 &x, sint32 &y)
+{
+	down = false;
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerDown(x, y);
+}
+
+// ***************************************************************
+void CTool::getMouseMiddleDown(bool &down, sint32 &x, sint32 &y)
+{
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerMiddleDown(x, y);
+}
+
+// ***************************************************************
+void CTool::getMouseRightDown(bool &down, sint32 &x, sint32 &y)
+{
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerMiddleDown(x, y);
+}
+
+
+// ***************************************************************
 sint32 CTool::getMouseX()
 {
 	//H_AUTO(R2_CTool_getMouseX)
@@ -331,6 +372,7 @@ bool CTool::raytrace(const NLMISC::CVector &segmentStart, const NLMISC::CVector 
 	{
 		if (Landscape)
 		{
+			nlinfo("landscape=%d,%d", segmentStart.x, segmentStart.y);
 			// use a shortest distance for collision manager (for speed)
 			CVector segmentEnd = segmentStart + 100.f * dir;
 			float dist = Landscape->getRayCollision(segmentStart, segmentEnd);
@@ -443,16 +485,27 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 
 	const CScenarioEntryPoints::CCompleteIsland *islandDesc = getEditor().getIslandCollision().getCurrIslandDesc();
 	if (!islandDesc) return false;
-
+	
+	nlinfo("have island");
+	
 	sint mapX = (sint) (x - islandDesc->XMin);
 	sint mapY = (sint) (y - islandDesc->YMin);
+	
+	nlinfo("mapX,mapY=%d,%d island=%d,%d-%d,%d", mapX, mapY, islandDesc->XMin, islandDesc->YMin, islandDesc->XMax, islandDesc->YMax);
 	if (mapX < 0 || mapY < 0 || mapX >= (islandDesc->XMax - islandDesc->XMin) || mapY >= (islandDesc->YMax - islandDesc->YMin)) return false;
 	sint hmZ = heightMap(mapX, mapY);
+	nlinfo("HeightMap = %d", hmZ);
 	if (hmZ >= 0x7ffe) return false; // not an accessible pos
+	
+	nlinfo("accessible pos");
+	
 	if (!isIslandValidPos(heightMap, *islandDesc, x + 0.5f, y) ||
 		!isIslandValidPos(heightMap, *islandDesc, x - 0.5f, y) ||
 		!isIslandValidPos(heightMap, *islandDesc, x, y + 0.5f) ||
 		!isIslandValidPos(heightMap, *islandDesc, x, y - 0.5f)) return false;
+		
+	nlinfo("valid pos");
+		
 	float z = 1.f + 2.f * hmZ;
 	// this is a possibly valid position
 	// compute nearest surface from here, and see if not far from the intersection
@@ -471,6 +524,9 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 	inter1Found = inter1Found && normal1.z >= minAngleSin;
 	inter2Found = inter2Found && normal2.z >= minAngleSin;
 	if (!inter1Found && !inter2Found) return false;
+	
+		nlinfo("inter foud");
+	
 	if (inter1Found && inter2Found)
 	{
 		// because z in heightmap in usually a 'ceil' of real height, tends to favor surface below
@@ -487,6 +543,7 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 	{
 		inter = inter2;
 	}
+	nlinfo("inter = %d,%d", inter.x, inter.y);
 	return true;
 }
 
@@ -516,6 +573,7 @@ CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldV
 		{
 			CVector delta = bias * (cardinals[k].x * worldViewRay.Right + cardinals[k].y * worldViewRay.Up);
 			found = raytrace(worldViewRay.Origin + delta, worldViewRay.Dir, inter);
+			nlinfo("found");
 		}
 		if	(!found)
 		{
@@ -527,10 +585,12 @@ CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldV
 	const CArray2D<sint16> &heightMap = getEditor().getIslandCollision().getHeightMap();
 	if (!heightMap.empty())
 	{
+		nlinfo("okidoi : %d, %d", inter.x, inter.y);
 		// if heightmap is present, use it because it gives us more reliable information
 		CVector surfPos;
 		if (!computeNearestValidSurfaceFromHeightMap(inter.x, inter.y, surfPos)) return InvalidPacsPos;
 		static volatile float threshold = 2.f;
+		nlinfo("found");
 		return (inter - surfPos).norm() < threshold ? ValidPacsPos : InvalidPacsPos;
 	}
 
@@ -541,6 +601,7 @@ CTool::TRayIntersectionType CTool::computeLandscapeRayIntersection(const CWorldV
 	}
 	else
 	{
+		nlinfo("GR");
 		// see if pacs collisions are ok at that pos
 		NLPACS::UGlobalPosition dummyPos;
 		return getPacsType(inter, 2.f, dummyPos);
@@ -900,6 +961,5 @@ NLMISC::CRGBA CTool::getInvalidPosColor()
 				 0.5f + 0.5f * (float) cos(NLMISC::Pi * fmod((double) T1, duration) / duration));
 
 }
-
 
 } // R2
