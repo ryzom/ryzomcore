@@ -276,16 +276,7 @@ void CParticleWorkspace::CNode::savePSAs(const std::string &fullPath) throw(NLMI
 std::string CParticleWorkspace::CNode::getFullPath() const
 {
 	nlassert(_WS);
-	char fullPath[MAX_PATH];
-	std::string basePath = NLMISC::CPath::standardizeDosPath(_WS->getPath());
-	if (PathCombine(fullPath, basePath.c_str(), _RelativePath.c_str()))
-	{	
-		return fullPath;
-	}
-	else
-	{
-		return _RelativePath.c_str();
-	}
+	return NLMISC::CPath::makePathAbsolute(_RelativePath, _WS->getPath(), true);
 }
 
 //***********************************************************************************************
@@ -374,17 +365,19 @@ CParticleWorkspace::CNode *CParticleWorkspace::addNode(const std::string &filena
 	for(uint k = 0; k < _Nodes.size(); ++k)
 	{
 		if (NLMISC::nlstricmp(_Nodes[k]->getFilename(), fileName) == 0) return NULL;		
-	}	
-	char resultPath[MAX_PATH];
+	}
+
+	// TODO: replace with NeL methods
+	TCHAR resultPath[MAX_PATH];
 	std::string dosPath = NLMISC::CPath::standardizeDosPath(getPath());
 	std::string relativePath;
-	if (!PathRelativePathTo(resultPath, dosPath.c_str(), FILE_ATTRIBUTE_DIRECTORY, filenameWithFullPath.c_str(), 0))
+	if (!PathRelativePathTo(resultPath, utf8ToTStr(dosPath), FILE_ATTRIBUTE_DIRECTORY, utf8ToTStr(filenameWithFullPath), 0))
 	{
 		relativePath = filenameWithFullPath; 
 	}
 	else
 	{
-		relativePath = resultPath;
+		relativePath = tStrToUtf8(resultPath);
 	}
 
 	if (relativePath.size() >= 2)
