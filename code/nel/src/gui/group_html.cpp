@@ -4625,34 +4625,21 @@ namespace NLGUI
 		result = url;
 		string tmp;
 
-		// folder used for images cache
-		static const string cacheDir = "cache";
-
-		string::size_type protocolPos = toLower(result).find("://");
-
-		if (protocolPos != string::npos)
+		if (toLower(result).find("file:") == 0 && result.size() > 5)
 		{
-			// protocol present, it's an url so file must be searched in cache folder
-			// TODO: case of special characters & and ?
-			result = cacheDir + result.substr(protocolPos+2);
-
-			// if the file is already cached, use it
-			if (CFile::fileExists(result)) tmp = result;
+			result = result.substr(5, result.size()-5);
 		}
-		else
+		else if (result.find("://") != string::npos || result.find("//") == 0)
 		{
-			// Url is a file ?
-			if (toLower(result).find("file:") == 0)
-			{
-				result = result.substr(5, result.size()-5);
-			}
+			// http://, https://, etc or protocol-less url "//domain.com/image.png"
+			return false;
+		}
 
-			tmp = CPath::lookup (CFile::getFilename(result), false, false, false);
-			if (tmp.empty())
-			{
-				// try to find in local directory
-				tmp = CPath::lookup (result, false, false, true);
-			}
+		tmp = CPath::lookup (CFile::getFilename(result), false, false, false);
+		if (tmp.empty())
+		{
+			// try to find in local directory
+			tmp = CPath::lookup (result, false, false, true);
 		}
 
 		if (!tmp.empty())
