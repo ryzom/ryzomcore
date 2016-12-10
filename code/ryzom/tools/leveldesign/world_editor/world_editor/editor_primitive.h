@@ -452,7 +452,7 @@ public:
 	CPrimBitmap ();
 
 	// Init
-	void			init (const char *filename);
+	void			init (const std::string &filename);
 
 	// \name From IClassable
 	NLMISC_DECLARE_CLASS (CPrimBitmap)

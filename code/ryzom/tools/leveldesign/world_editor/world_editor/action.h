@@ -54,7 +54,7 @@ class CActionAddLandscape : public IAction
 {
 public:
 	// Landscape name
-	CActionAddLandscape (const char *name);
+	CActionAddLandscape (const std::string &name);
 
 private:
 
@@ -150,7 +150,7 @@ class CActionImportPrimitive : public IAction
 public:
 
 	// Constructor
-	CActionImportPrimitive (const char *oldPrimFile);
+	CActionImportPrimitive (const std::string &oldPrimFile);
 
 private:
 
@@ -169,7 +169,7 @@ class CActionLoadPrimitive : public IAction
 public:
 
 	// Constructor
-	CActionLoadPrimitive (const char *oldPrimFile);
+	CActionLoadPrimitive (const std::string &oldPrimFile);
 
 private:
 
@@ -622,7 +622,7 @@ class CActionAddPrimitiveByClass : public IAction
 public:
 
 	// Constructor
-	CActionAddPrimitiveByClass (const CDatabaseLocator &locator, const char *className, const NLMISC::CVector &initPos, float deltaPos,
+	CActionAddPrimitiveByClass (const CDatabaseLocator &locator, const std::string &className, const NLMISC::CVector &initPos, float deltaPos,
 								const std::vector<NLLIGO::CPrimitiveClass::CInitParameters>	initParameters);
 
 private:

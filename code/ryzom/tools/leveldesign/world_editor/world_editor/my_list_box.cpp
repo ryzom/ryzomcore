@@ -66,10 +66,10 @@ BOOL CMyListBox::OnCommand(WPARAM wParam, LPARAM lParam)
 		{
 		case CBN_SELENDOK:
 			{
-				CString str;
+				std::string str;
 				getWindowTextUTF8 (StringSelectComboBox, str);
 				DeleteString(_EditingItem);
-				InsertString(_EditingItem, str);
+				InsertString(_EditingItem, utf8ToTStr(str));
 				SetCurSel (_SelectAfter);
 				_EditingItem = LB_ERR;
 				notifyParent ();

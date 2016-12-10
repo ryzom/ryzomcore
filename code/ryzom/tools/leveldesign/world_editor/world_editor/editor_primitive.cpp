@@ -886,7 +886,7 @@ CPrimBitmap::CPrimBitmap ()
 
 // ***************************************************************************
 
-void CPrimBitmap::init (const char *filename)
+void CPrimBitmap::init (const std::string &filename)
 {
 	// Set the name
 	removePropertyByName ("filename");
@@ -926,12 +926,12 @@ NL3D::CTextureBlank *CPrimBitmap::getTexture () const
 				}
 				else
 				{
-					theApp.errorMessage ("Can't read bitmap %s", filename.c_str ());
+					theApp.errorMessage ("Can't read bitmap %s", filename.c_str());
 				}
 			}
 			catch (const Exception &e)
 			{
-				theApp.errorMessage ("Error reading bitmap %s : %s", filename.c_str (), e.what ());
+				theApp.errorMessage ("Error reading bitmap %s : %s", filename.c_str(), e.what ());
 			}
 		}
 	}

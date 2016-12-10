@@ -915,11 +915,11 @@ bool CDialogProperties::CWidget::fromParameter (const IProperty *property, const
 						updateBoolean ();
 						break;
 					case  CPrimitiveClass::CParameter::ConstString:
-						if (Parameter.Editable || ComboBox.SelectString(-1 ,propString->String.c_str ()) == CB_ERR)
+						if (Parameter.Editable || ComboBox.SelectString(-1, utf8ToTStr(propString->String)) == CB_ERR)
 						{
-							ComboBox.SetWindowText(propString->String.c_str ());
-							ComboBox.InsertString( -1, propString->String.c_str());
-							ComboBox.SelectString(-1 ,propString->String.c_str ());
+							ComboBox.SetWindowText(utf8ToTStr(propString->String));
+							ComboBox.InsertString( -1, utf8ToTStr(propString->String));
+							ComboBox.SelectString(-1, utf8ToTStr(propString->String));
 						}
 						OriginalString = propString->String.c_str();
 						updateCombo ();
@@ -953,7 +953,7 @@ bool CDialogProperties::CWidget::fromParameter (const IProperty *property, const
 							updateBoolean ();
 							break;
 						case  CPrimitiveClass::CParameter::ConstString:
-							ComboBox.SelectString(-1 ,result.c_str ());
+							ComboBox.SelectString(-1, utf8ToTStr(result));
 							OriginalString = result.c_str();
 							updateCombo ();
 							break;
@@ -1159,18 +1159,14 @@ void CDialogProperties::CWidget::getValue (std::string &result) const
 	else if (Parameter.Type == CPrimitiveClass::CParameter::ConstString)
 	{
 		// Get the text
-		CString str;
-		getWindowTextUTF8 (ComboBox, str);
-		result = (const char*)str;
+		getWindowTextUTF8 (ComboBox, result);
 	}
 	else
 	{
 		nlassert (Parameter.Type == CPrimitiveClass::CParameter::String);
 
 		// Get the text
-		CString str;
-		getWindowTextUTF8 (EditBox, str);
-		result = (const char*)str;
+		getWindowTextUTF8 (EditBox, result);
 	}
 }
 
@@ -1183,29 +1179,23 @@ void CDialogProperties::CWidget::getValue (std::vector<std::string> &result) con
 
 	// Get the string
 	result.clear ();
-	CString str;
 	if (Parameter.Type == CPrimitiveClass::CParameter::StringArray)
 	{
-		getWindowTextUTF8 (MultiLineEditBox, str);
+		std::string temp;
+		getWindowTextUTF8 (MultiLineEditBox, temp);
 //		MultiLineEditBox.UnloadText(str);
-		const char *strP = str;
-		string dst;
-		while (*strP)
+
+		// remove \r
+		temp = removeSlashR(temp);
+
+		// append each line to result
+		explode(temp, std::string("\n"), result);
+		
+		// remove the last line if empty
+		if (!result.empty() && result.back().empty())
 		{
-			// New line ?
-			if (*strP == '\n')
-			{
-				result.push_back (dst);
-				dst.clear();
-			}
-			else if (*strP != '\r')
-			{
-				dst += *strP;
-			}
-			strP++;
+			result.resize(result.size() - 1);
 		}
-		if (!dst.empty())
-			result.push_back (dst);
 	}
 	else
 	{
@@ -1216,7 +1206,7 @@ void CDialogProperties::CWidget::getValue (std::vector<std::string> &result) con
 		{
 			CString str;
 			ListEditBox.GetText( i, str);
-			result[i] = (const char*)str;
+			result[i] = tStrToUtf8(str);
 		}
 	}
 }
@@ -1292,7 +1282,7 @@ void CDialogProperties::CWidget::updateCombo ()
 		DialogProperties->setDefaultValue (this, value);
 		if (value != "")
 		{
-			int index = ComboBox.FindString (-1, value.c_str());
+			int index = ComboBox.FindString (-1, utf8ToTStr(value));
 			if (index != CB_ERR)
 				ComboBox.SetCurSel (index);
 		}
@@ -1370,9 +1360,9 @@ bool CDialogProperties::isModified()
 		// special case for editable combo box
 		if ((*iteWid).Parameter.Type == CPrimitiveClass::CParameter::ConstString)
 		{
-			CString	text;
+			std::string text;
 			getWindowTextUTF8 ((*iteWid).ComboBox, text);
-			if ((*iteWid).OriginalString.c_str() != text)
+			if ((*iteWid).OriginalString != text)
 			{
 				return true;
 			}
@@ -1631,17 +1621,22 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 					/* todo hulud remove
 					CString oldValue;
 					widget->EditBox.GetWindowText (oldValue);*/
-					CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("default"), TRUE, widget->Parameter.FileExtension.c_str (), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, 
+					CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("default"), TRUE, utf8ToTStr(widget->Parameter.FileExtension), NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
 						utf8ToTStr(widget->Parameter.FileExtension+" (*."+widget->Parameter.FileExtension+")|*."+widget->Parameter.FileExtension+"|All Files (*.*)|*.*||"), getMainFrame ());
-					if (widget->Parameter.Folder != "")
+
+					TCHAR temp[MAX_PATH];
+
+					if (!widget->Parameter.Folder.empty())
 					{
-						dialog.m_ofn.lpstrInitialDir = widget->Parameter.Folder.c_str();
+						_tcscpy_s(temp, MAX_PATH, utf8ToTStr(widget->Parameter.Folder));
+						dialog.m_ofn.lpstrInitialDir = temp;
 					}
+
 					if (dialog.DoModal() == IDOK)
 					{
 						CString str;
 						str = dialog.GetFileTitle();
-						setWindowTextUTF8 (widget->EditBox, str);
+						setWindowTextUTF8 (widget->EditBox, tStrToUtf8(str));
 
 			/* todo hulud remove
 						if ((const char*)oldValue != str)
@@ -1708,15 +1703,15 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 							if (!filename.empty ())
 							{
 								// Open the file
-								if (!openFile (filename.c_str ()))
+								if (!openDoc (filename))
 									// Error
-									theApp.errorMessage ("Can't open the file %s", filename.c_str ());
+									theApp.errorMessage ("Can't open the file %s", filename.c_str());
 							}
 							else
 							{
 								// Error
 								widget->getFilename (filename);
-								theApp.errorMessage ("Can't find the file %s", filename.c_str ());
+								theApp.errorMessage ("Can't find the file %s", filename.c_str());
 							}
 						}
 					}
@@ -1772,9 +1767,9 @@ BOOL CDialogProperties::OnCommand(WPARAM wParam, LPARAM lParam)
 					widget->EditBox.GetWindowText (oldValue);*/
 
 					// String NULL ?
-					CString text;
+					std::string text;
 					getWindowTextUTF8 (widget->EditBox, text);
-					widget->Default = (text == "");
+					widget->Default = text.empty();
 
 					// Default ?
 					if (widget->Default)
