@@ -133,7 +133,10 @@ void SetBankPathName (const std::string& path)
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Bank Path", 0, REG_SZ, (LPBYTE)path.c_str(), path.length()+1);
+		TCHAR buffer[MAX_PATH];
+		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(path));
+
+		RegSetValueEx(hKey, _T("Bank Path"), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer)+1)*sizeof(TCHAR));
 		RegCloseKey (hKey);
 	}
 }

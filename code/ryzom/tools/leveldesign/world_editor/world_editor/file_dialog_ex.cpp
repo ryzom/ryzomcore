@@ -75,17 +75,10 @@ INT_PTR CFileDialogEx::DoModal ()
 		// Update the path
 		std::string newPath = NLMISC::CFile::getPath (tStrToUtf8(GetPathName()));
 
-#ifdef _UNICODE
-		ucstring tmp;
-		tmp.fromUtf8(newPath);
-		const uint cs = 2;
-#else
-		std::stringg tmp = newPath;
-		const uint cs = 1;
-#endif
-		uint length = (tmp.length() + 1) * cs;
+		TCHAR buffer[MAX_PATH];
+		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(newPath));
 
-		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)tmp.c_str(), length);
+		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 
 		// Update the path list
 		set<string> oldPath;
@@ -101,14 +94,9 @@ INT_PTR CFileDialogEx::DoModal ()
 		uint index = 0;
 		while (ite != oldPath.end ())
 		{
-#ifdef _UNICODE
-			tmp.fromUtf8(*ite);
-#else
-			tmp = *ite;
-#endif
-			length = (tmp.length() + 1) * cs;
+			_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(*ite));
 
-			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)tmp.c_str (), length);
+			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 			ite++;
 			index++;
 		}

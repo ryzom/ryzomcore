@@ -176,7 +176,7 @@ bool CExportDlg::callChoosePathDlg(CString &dest) const
 	bi.lpfn = expBrowseCallbackProc;
 
 	TCHAR sDir[512];
-	_tcscpy(sDir, (LPCTSTR)RefZoneDir);
+	_tcscpy_s(sDir, 512, (LPCTSTR)RefZoneDir);
 	bi.lParam = (LPARAM)sDir;
 
 	bi.iImage = 0;

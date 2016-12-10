@@ -210,8 +210,8 @@ void CSnapshotToolDlg::toRegistry()
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, NEL_OV_SNAPSHOT_TOOL_REGKEY, &hKey)==ERROR_SUCCESS)
 	{		
-		RegSetValueEx(hKey, _T("InputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_InputPath, m_InputPath.GetLength() + 1);
-		RegSetValueEx(hKey, _T("OutputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_OutputPath, m_OutputPath.GetLength() + 1);
+		RegSetValueEx(hKey, _T("InputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_InputPath, (m_InputPath.GetLength() + 1) * sizeof(TCHAR));
+		RegSetValueEx(hKey, _T("OutputPath"), 0, REG_SZ, (BYTE*) (LPCTSTR) m_OutputPath, (m_OutputPath.GetLength() + 1) * sizeof(TCHAR));
 		CString filters;
 		for (uint k = 0; k < (uint) m_Filters.GetCount(); ++k)
 		{
@@ -221,7 +221,7 @@ void CSnapshotToolDlg::toRegistry()
 			filters += filter;			
 		}
 
-		RegSetValueEx(hKey, _T("Filters"), 0, REG_SZ, (BYTE*) (LPCTSTR) filters, filters.GetLength() + 1);
+		RegSetValueEx(hKey, _T("Filters"), 0, REG_SZ, (BYTE*) (LPCTSTR) filters, (filters.GetLength() + 1) * sizeof(TCHAR));
 		DWORD recurseSubFolder = m_RecurseSubFolder;
 		DWORD dumpTextureSets = m_DumpTextureSets;
 		DWORD width = (DWORD) m_OutputWidth;

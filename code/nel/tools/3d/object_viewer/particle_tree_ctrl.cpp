@@ -1526,6 +1526,7 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 {
 	static const TCHAR BASED_CODE szFilter[] = _T("NeL Particle systems (*.ps)|*.ps||");
 	CFileDialog fd(TRUE,  _T(".ps"), _T("*.ps"),  OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST,  szFilter,  this);	
+
 	const uint MAX_NUM_CHAR = 65536;
 	TCHAR filenamesBuf[MAX_NUM_CHAR];
 	_tcscpy_s(filenamesBuf, MAX_NUM_CHAR, _T("*.ps"));
