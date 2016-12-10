@@ -62,7 +62,8 @@ INT_PTR CALLBACK CalculatingDialogCallback (
 																		(((uint32)TimeLeft)/60)%60,
 																		(((uint32)TimeLeft))%60 );
 				if (pClass->bCancelCalculation)
-					_tcscpy (temp, _T("INTERRUPTED - Finishing current object..."));
+					_tcscpy_s (temp, 256, _T("INTERRUPTED - Finishing current object..."));
+
 				SendMessage (GetDlgItem (hwndDlg, IDC_STATICTIMELEFT), WM_SETTEXT, 0, (LPARAM)temp);
 				SendMessage (GetDlgItem (hwndDlg, IDC_BUTTONCANCEL), WM_PAINT, 0, 0);
 			}

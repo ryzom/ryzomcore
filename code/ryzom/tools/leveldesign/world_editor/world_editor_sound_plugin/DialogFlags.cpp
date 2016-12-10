@@ -225,7 +225,11 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 	c = _SbList.GetItemCount();
 	for (i=0; i<SampleBanks.size(); ++i)
 	{
-		std::string temp = toString("%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
+		TCHAR temp[1024];
+		_stprintf(temp, _T("%6.2f"), SampleBanks[i].second / (1024.0f*1024.0f));
+
+		TCHAR bankName[1024];
+		_tcscpy_s(bankName, 1024, utf8ToTStr(SampleBanks[i].first));
 
 		if (i < c)
 		{
@@ -233,12 +237,12 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 			TCHAR temp2[1024];
 
 			_SbList.GetItemText(i, 0, temp2, 1024);
-			if (_tcscmp(utf8ToTStr(SampleBanks[i].first), temp2) != 0)
-				_SbList.SetItemText(i, 0, utf8ToTStr(SampleBanks[i].first));
+			if (_tcscmp(bankName, temp2) != 0)
+				_SbList.SetItemText(i, 0, bankName);
 
 			_SbList.GetItemText(i, 1, temp2, 1024);
-			if (_tcscmp(utf8ToTStr(temp), temp2) != 0)
-				_SbList.SetItemText(i, 1, utf8ToTStr(temp));
+			if (_tcscmp(temp, temp2) != 0)
+				_SbList.SetItemText(i, 1, temp);
 		}
 		else
 		{
@@ -247,13 +251,11 @@ void CDialogFlags::OnTimer(UINT_PTR nIDEvent)
 			lvi.mask =  LVIF_TEXT;
 			lvi.iItem = i;
 			lvi.iSubItem = 0;
-			lvi.pszText = (char*) SampleBanks[i].first.c_str();
+			lvi.pszText = bankName;
 			_SbList.InsertItem(&lvi);
 
 			lvi.iItem = i;
 			lvi.iSubItem = 1;
-			char temp[1024];
-			sprintf(temp, "%6.2f", SampleBanks[i].second / (1024.0f*1024.0f));
 			lvi.pszText = temp;
 			_SbList.InsertItem(&lvi);
 		}

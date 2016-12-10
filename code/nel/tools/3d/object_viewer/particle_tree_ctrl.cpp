@@ -1528,7 +1528,8 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 	CFileDialog fd(TRUE,  _T(".ps"), _T("*.ps"),  OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST,  szFilter,  this);	
 	const uint MAX_NUM_CHAR = 65536;
 	TCHAR filenamesBuf[MAX_NUM_CHAR];
-	_tcscpy(filenamesBuf, _T("*.ps"));
+	_tcscpy_s(filenamesBuf, MAX_NUM_CHAR, _T("*.ps"));
+
 	fd.m_ofn.lpstrFile = filenamesBuf;
 	fd.m_ofn.nMaxFile = MAX_NUM_CHAR - 1;
 	if (fd.DoModal() == IDOK)

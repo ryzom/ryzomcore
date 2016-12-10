@@ -312,7 +312,7 @@ LRESULT CMyListCtrl::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				Ctrl->getBrowseInfo (Ctrl->Item, Ctrl->SubItem, defExt, defFilename, defDir, filter);
 
 				TCHAR buffer[MAX_PATH];
-				_tcscpy(buffer, utf8ToTStr(defDir));
+				_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(defDir));
 
 				CFileDialog dlgFile (TRUE, utf8ToTStr(defExt), utf8ToTStr(defFilename), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, utf8ToTStr(filter), theApp.m_pMainWnd);
 				dlgFile.m_ofn.lpstrInitialDir = buffer;
