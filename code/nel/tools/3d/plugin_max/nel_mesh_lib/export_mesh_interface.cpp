@@ -20,7 +20,7 @@
 
 #include <set>
 #include <vector>
-
+#include <iterator>
 
 #include "nel/misc/line.h"
 #include "nel/misc/polygon.h"

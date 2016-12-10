@@ -74,7 +74,7 @@ template <class TPtr, class TKey, class TResourceFinder> SMART_INLINE void	CReso
 // Cons - dest.
 template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPtr, TKey, TResourceFinder>::CResourcePtr()
 {
-	pinf o= &CRefCount::NullPtrInfo;
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	REF_TRACE("Smart()");
