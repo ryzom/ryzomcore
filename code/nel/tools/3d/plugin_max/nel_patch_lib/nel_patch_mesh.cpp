@@ -1975,7 +1975,7 @@ IOResult RPatchMesh::Load(ILoad *iload)
 			for (i=0; i<nSize; i++)
 			{
 				bool bBinded;
-				typeBind nType;
+				uint /* typeBind */ nType;
 				uint nEdge;
 				uint nPatch;
 				uint nBefore;
@@ -2116,7 +2116,7 @@ IOResult RPatchMesh::Save(ISave *isave)
 		uint nAfter=getUIVertex (i).Binding.nAfter;
 		uint nAfter2=getUIVertex (i).Binding.nAfter2;
 		uint nT=getUIVertex (i).Binding.nT;
-		typeBind nType=(typeBind)getUIVertex (i).Binding.nType;
+		uint /* typeBind */ nType=(uint /* typeBind */)getUIVertex (i).Binding.nType;
 		uint nPrimVert=getUIVertex (i).Binding.nPrimVert;
 
 		isave->Write(&bBinded, sizeof (bool), &nb);
