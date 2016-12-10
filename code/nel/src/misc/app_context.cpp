@@ -124,6 +124,27 @@ CApplicationContext::CApplicationContext()
 	contextReady();
 }
 
+CApplicationContext::~CApplicationContext()
+{
+#ifdef NL_DEBUG
+	TSingletonRegistry::iterator it = _SingletonRegistry.begin(), iend = _SingletonRegistry.end();
+
+	while (it != iend)
+	{
+		// can't use nldebug there because it'll create new displayers
+		std::string message = toString("Instance '%s' still allocated at %p", it->first.c_str(), it->second);
+
+#ifdef NL_OS_WINDOWS
+		OutputDebugStringW(utf8ToWide(message));
+#else
+		printf("%s\n", message.c_str());
+#endif
+
+		++it;
+	}
+#endif
+}
+
 void *CApplicationContext::getSingletonPointer(const std::string &singletonName)
 {
 	TSingletonRegistry::iterator it(_SingletonRegistry.find(singletonName));
