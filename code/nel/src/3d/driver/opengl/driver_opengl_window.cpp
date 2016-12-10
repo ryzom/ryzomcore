@@ -477,18 +477,18 @@ bool CDriverGL::unInit()
 	// Restore monitor color parameters
 	if (_NeedToRestoreGammaRamp)
 	{
-		HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
+		HDC dc = CreateDCA("DISPLAY", NULL, NULL, NULL);
 		if (dc)
 		{
-			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
-				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
+			if (!SetDeviceGammaRamp(dc, _GammaRampBackuped))
+				nlwarning("(CDriverGL::release): SetDeviceGammaRamp failed");
 
 			// Release the DC
-			ReleaseDC (NULL, dc);
+			ReleaseDC(NULL, dc);
 		}
 		else
 		{
-			nlwarning ("(CDriverGL::release): can't create DC");
+			nlwarning("(CDriverGL::release): can't create DC");
 		}
 	}
 

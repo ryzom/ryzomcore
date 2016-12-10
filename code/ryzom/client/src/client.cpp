@@ -183,13 +183,12 @@ int main(int argc, char **argv)
 	Args.addArg("", "release", "", "Crash client after init");
 #endif // TEST_CRASH_COUNTER
 
+	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 #ifdef NL_OS_WINDOWS
 	if (!Args.parse(cmdline)) return 1;
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
-
-	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 
 	// no shard id in ring mode
 	std::string sLoginShardId;
