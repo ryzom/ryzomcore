@@ -117,7 +117,7 @@ RPO::RPO(PatchObject& pPO) : PatchObject(pPO)
 
 RPO::~RPO()
 {
-	if (((~GetChannelLocks()))&PART_TOPO)
+	if ( (~((PartID)GetChannelLocks())) & PART_TOPO )
 	{
 		delete rpatch;
 		rpatch=NULL;
