@@ -67,7 +67,7 @@ static void usage()
 	exit(0);
 }
 
-static unique_ptr<Test::Output> cmdline(int argc, char* argv[])
+static CUniquePtr<Test::Output> cmdline(int argc, char* argv[])
 {
 	if (argc > 2)
 		usage(); // will not return
@@ -102,7 +102,7 @@ static unique_ptr<Test::Output> cmdline(int argc, char* argv[])
 		}
 	}
 
-	return unique_ptr<Test::Output>(output);
+	return CUniquePtr<Test::Output>(output);
 }
 
 // Main test program
@@ -134,12 +134,12 @@ int main(int argc, char *argv[])
 	{
 		Test::Suite ts;
 
-		ts.add(unique_ptr<Test::Suite>(new CUTMisc));
-		ts.add(unique_ptr<Test::Suite>(new CUTNet));
-		ts.add(unique_ptr<Test::Suite>(new CUTLigo));
+		ts.add(CUniquePtr<Test::Suite>(new CUTMisc));
+		ts.add(CUniquePtr<Test::Suite>(new CUTNet));
+		ts.add(CUniquePtr<Test::Suite>(new CUTLigo));
 		// Add a line here when adding a new test MODULE
 
-		unique_ptr<Test::Output> output(cmdline(argc, argv));
+		CUniquePtr<Test::Output> output(cmdline(argc, argv));
 		noerrors = ts.run(*output);
 
 		Test::HtmlOutput* const html = dynamic_cast<Test::HtmlOutput*>(output.get());

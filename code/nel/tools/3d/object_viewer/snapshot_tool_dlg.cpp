@@ -121,7 +121,7 @@ void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString 
 		return;
 	}
 
-	std::unique_ptr<TCHAR[]> tmpDest(new TCHAR[size]);
+	CUniquePtr<TCHAR[]> tmpDest(new TCHAR[size]);
 	result = RegQueryValueEx(hKey, name, NULL, &type, (BYTE*)tmpDest.get(), &size);
 
 	if (result != ERROR_SUCCESS)
@@ -130,7 +130,7 @@ void CSnapshotToolDlg::stringFromRegistry(HKEY hKey, const TCHAR *name, CString 
 		return;
 	}
 
-	dest = *tmpDest;
+	dest = tmpDest.get();
 }
 
 

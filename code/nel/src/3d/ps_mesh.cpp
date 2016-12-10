@@ -1533,7 +1533,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 			{
 				PGlobalTexAnims newPtr(new CGlobalTexAnims); // create new
 				//std::swap(_GlobalTexAnims, newPtr);			 // replace old
-				_GlobalTexAnims = std::move(newPtr);
+				_GlobalTexAnims = CUniquePtrMove(newPtr);
 				f.serial(*_GlobalTexAnims);
 			}
 
@@ -2352,7 +2352,7 @@ void  CPSConstraintMesh::setTexAnimType(TTexAnimType type)
 		{
 			PGlobalTexAnims newPtr(new CGlobalTexAnims);
 			//std::swap(_GlobalTexAnims, newPtr);
-			_GlobalTexAnims = std::move(newPtr);
+			_GlobalTexAnims = CUniquePtrMove(newPtr);
 			_GlobalAnimationEnabled = 1;
 		}
 		break;

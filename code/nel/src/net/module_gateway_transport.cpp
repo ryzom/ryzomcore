@@ -72,7 +72,7 @@ namespace NLNET
 		friend class CL3ServerRoute;
 	public:
 		/// The callback server that receive connection and dispatch message
-		unique_ptr<CCallbackServer>			_CallbackServer;
+		CUniquePtr<CCallbackServer>			_CallbackServer;
 
 		/// A static mapper to retrieve transport from the CCallbackServer pointer
 		typedef map<CCallbackNetBase*, CGatewayL3ServerTransport*>	TDispatcherIndex;
@@ -224,7 +224,7 @@ namespace NLNET
 				throw ETransportError("openServer : The server is already open");
 
 			// create a new callback server
-			unique_ptr<CCallbackServer> cbs(new CCallbackServer());
+			CUniquePtr<CCallbackServer> cbs(new CCallbackServer());
 
 			// register the callbacks
 			cbs->setConnectionCallback(cbConnection, static_cast<IGatewayTransport*>(this));
@@ -234,7 +234,7 @@ namespace NLNET
 			// open the server
 			cbs->init(port);
 
-			_CallbackServer = std::move(cbs);
+			_CallbackServer = CUniquePtrMove(cbs);
 
 			// register it in the dispatcher
 			_DispatcherIndex.insert(make_pair(_CallbackServer.get(), this));
@@ -673,7 +673,7 @@ namespace NLNET
 				_FreeRoutesIds.pop_back();
 			}
 
-			unique_ptr<CL3ClientRoute> route(new CL3ClientRoute(this, addr, connId));
+			CUniquePtr<CL3ClientRoute> route(new CL3ClientRoute(this, addr, connId));
 
 			// set the callbacks
 			route->CallbackClient.setDisconnectionCallback(cbDisconnection, static_cast<IGatewayTransport*>(this));

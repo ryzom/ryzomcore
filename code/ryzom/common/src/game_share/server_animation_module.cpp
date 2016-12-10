@@ -362,7 +362,7 @@ public:
 	typedef std::map<uint32, TCharacterInfo> TCharacterInfos;
 
 public:
-	std::unique_ptr<CObject> RtData;
+	CUniquePtr<CObject> RtData;
 	TScenarioHeaderSerializer ScenarioHeader;
 	TSessionId SessionId;
 	//vector<userId>

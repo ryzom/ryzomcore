@@ -692,7 +692,7 @@ private:
 	{
 		NLMISC::CMatrix		TexMat[IDRV_MAT_MAXTEXTURES];
 	};
-	std::unique_ptr<CUserTexMat>	_TexUserMat;		 // user texture matrix
+	CUniquePtr<CUserTexMat>	_TexUserMat;		 // user texture matrix
 
 public:
 	// Private. For Driver only.

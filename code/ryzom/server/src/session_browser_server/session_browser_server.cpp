@@ -642,7 +642,7 @@ public:
 
 			return;
 		}
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 		if (result->getNumRows() != 1)
 		{
 			nlinfo("Client from '%s' submited auth cookie '%s' for user %u, but DB return %u row instead of 1",
@@ -726,7 +726,7 @@ public:
 			query << "SELECT session_id, kicked";
 			query << " FROM session_participant WHERE char_id = "<< charId;
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
-			unique_ptr<CStoreResult> result(_RingDB.storeResult());	
+			CUniquePtr<CStoreResult> result(_RingDB.storeResult());	
 			uint32 row = result->getNumRows();
 			uint32 index = 0;
 
@@ -757,7 +757,7 @@ public:
 		query << " FROM characters WHERE char_id = "<<charId;
 
 		BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 		BOMB_IF(result->getNumRows() != 1, "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 		result->fetchRow();
 		uint32 guildId;
@@ -831,7 +831,7 @@ public:
 
 
 		BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
-		unique_ptr<CStoreResult> result2(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result2(_RingDB.storeResult());
 //		BOMB_IF(result->getNumFields() != 1, "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
 
 		// parse the result set and build the return vector
@@ -917,7 +917,7 @@ public:
 			query << " WHERE current_status='cs_online'";
 			query << " AND current_session="<< sd.getSessionId();
 			BOMB_IF(!_RingDB.query(query), "error", CSessionBrowserServerWebItf::_CallbackServer->disconnect(from); return);
-			unique_ptr<CStoreResult> result3(_RingDB.storeResult());
+			CUniquePtr<CStoreResult> result3(_RingDB.storeResult());
 			BOMB_IF(result2->getNumRows()<1,"Expected 1 result from SQL nbPlayers request but retrieved none",return);
 			uint32 nbPlayers;
 			result3->fetchRow();
@@ -960,7 +960,7 @@ public:
 		query << " AND ring_users.user_id = characters.user_id";
 
 		BOMB_IF(!_RingDB.query(query), "getCharList : error executing request in database", charList(from, charId, sessionId, vector <TCharDesc>()); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		vector <TCharDesc> charDescs;
 		charDescs.resize(result->getNumRows());
@@ -1044,7 +1044,7 @@ public:
 		CSString query;
 		query << "SELECT home_mainland_session_id, current_session FROM characters WHERE char_id = "<<charId;
 		BOMB_IF(!_RingDB.query(query), "invitedCharacterByName : failed request in database", invokeResult(from, charId >> 4, 103, "Database request failed"); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		BOMB_IF (result->getNumRows() == 0, "invitedCharacterByName : can't find char "<<charId<<" in the characters table", invokeResult(from, charId >> 4, 100, "Owner requester character"); return);
 		result->fetchRow();
@@ -1064,7 +1064,7 @@ public:
 		query << "SELECT char_id FROM characters WHERE char_name = '"<<shortName<<"' AND home_mainland_session_id = "<<invitedCharHome.asInt();
 
 		BOMB_IF(!_RingDB.query(query), "invitedCharacterByName : failed request 2 in database", invokeResult(from, charId >> 4, 103, "Database request failed"); return);
-		result = unique_ptr<CStoreResult>(_RingDB.storeResult());
+		result = CUniquePtr<CStoreResult>(_RingDB.storeResult());
 
 		BOMB_IF (result->getNumRows() == 0, "invitedCharacterByName : can't find invited char '"<<shortName<<"' from shard "<<invitedCharHome.asInt()<<" in the characters table", invokeResult(from, charId >> 4, 104, "Invited char not found"); return);
 		result->fetchRow();
@@ -1097,7 +1097,7 @@ public:
 		query << " WHERE char_id = "<<charId<<" AND session_log.id = "<<sessionId;
 
 		BOMB_IF(!_RingDB.query(query), "getRingRatings : failed request in database", playerRatings(from, charId, false, 0,0,0,0,0); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		if (result->getNumRows() == 0)
 		{
@@ -1133,7 +1133,7 @@ public:
 		query << " GROUP BY session_log.id";
 
 		BOMB_IF(!_RingDB.query(query), "getScessionAverageScores : failed request in database", sessionAverageScores(from, false, 0,0,0,0,0, 0); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		if (result->getNumRows() == 0)
 		{
@@ -1178,7 +1178,7 @@ public:
 		query << " GROUP BY scenario.id";
 
 		BOMB_IF(!_RingDB.query(query), "getScenarioAverageScores : failed request in database", scenarioAverageScores(from, false, 0,0,0,0,0,0); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 		
 		if (result->getNumRows() == 0)
 		{
@@ -1219,7 +1219,7 @@ public:
 		CSString query;
 		query << "SELECT rrp_am, rrp_masterless, rrp_author FROM characters WHERE char_id = "<<charId;
 		BOMB_IF(!_RingDB.query(query), "getRingRatings : failed request in database", ringRatings(from, charId, 0, 0, 0); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		BOMB_IF (result->getNumRows() == 0, "getRingRatings : can't find char "<<charId<<" in the characters table", ringRatings(from, charId, 0, 0, 0); return);
 		result->fetchRow();
@@ -1240,7 +1240,7 @@ public:
 		CSString query;
 		query << "SELECT ring_access FROM characters WHERE char_id = "<<charId;
 		BOMB_IF(!_RingDB.query(query), "on_getRingPoints: failed request in database", ringPoints(from, charId, "", MaxRingPoints); return);
-		unique_ptr<CStoreResult> result(_RingDB.storeResult());
+		CUniquePtr<CStoreResult> result(_RingDB.storeResult());
 
 		BOMB_IF (result->getNumRows() == 0, "on_getRingPoints : can't find char "<<charId<<" in the characters table", ringPoints(from, charId, "", MaxRingPoints); return);
 		result->fetchRow();

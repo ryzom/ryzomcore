@@ -250,7 +250,7 @@ namespace NLNET
 
 			// now, load the library
 			string fullName = NLMISC::CPath::standardizePath(path)+CLibrary::makeLibName(shortName);
-			std::unique_ptr<TModuleLibraryInfo>	mli(new TModuleLibraryInfo);
+			CUniquePtr<TModuleLibraryInfo>	mli(new TModuleLibraryInfo);
 			if (!mli->LibraryHandler.loadLibrary(fullName, false, true, true))
 			{
 				nlwarning("CModuleManager : failed to load the library '%s' in '%s'",
@@ -399,7 +399,7 @@ namespace NLNET
 			IModuleFactory *mf = it->second;
 			// sanity check
 			nlassert(mf->getModuleClassName() == className);
-			std::unique_ptr<IModule> module(mf->createModule());
+			CUniquePtr<IModule> module(mf->createModule());
 			if (module.get() == NULL)
 			{
 				nlwarning("createModule : factory failed to create a module instance for class '%s'", className.c_str());
@@ -623,7 +623,7 @@ namespace NLNET
 			const std::string &moduleManifest,
 			TModuleId foreignModuleId)
 		{
-			std::unique_ptr<CModuleProxy> modProx(new CModuleProxy(localModule, ++_LastGeneratedId, moduleClassName, moduleFullyQualifiedName, moduleManifest));
+			CUniquePtr<CModuleProxy> modProx(new CModuleProxy(localModule, ++_LastGeneratedId, moduleClassName, moduleFullyQualifiedName, moduleManifest));
 			modProx->_Gateway = gateway;
 			modProx->_Route = route;
 			modProx->_Distance = distance;

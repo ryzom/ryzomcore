@@ -2393,7 +2393,7 @@ namespace RSMGR
 	protected:
 
 		/// the callback server adaptor
-		std::unique_ptr<ICallbackServerAdaptor>	_CallbackServer;
+		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
 		{
@@ -2464,12 +2464,12 @@ namespace RSMGR
 			if (replacementAdaptor == NULL)
 			{
 				// use default callback server
-				_CallbackServer = std::unique_ptr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
+				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackServer = std::unique_ptr<ICallbackServerAdaptor>(replacementAdaptor);
+				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(replacementAdaptor);
 			}
 		}
 
@@ -3858,7 +3858,7 @@ namespace RSMGR
 	protected:
 
 		/// the callback client adaptor
-		std::unique_ptr < ICallbackClientAdaptor >	_CallbackClient;
+		CUniquePtr < ICallbackClientAdaptor >	_CallbackClient;
 
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
@@ -3922,12 +3922,12 @@ namespace RSMGR
 			if (adaptorReplacement == NULL)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = std::unique_ptr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = std::unique_ptr < ICallbackClientAdaptor >(adaptorReplacement);
+				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(adaptorReplacement);
 			}
 		}
 

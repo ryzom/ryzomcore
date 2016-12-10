@@ -162,7 +162,7 @@
 #	define NL_COMP_GCC
 #endif
 
-#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__)
+#if defined(_HAS_CPP0X) || defined(__GXX_EXPERIMENTAL_CXX0X__) || (defined(NL_COMP_VC_VERSION) && NL_COMP_VC_VERSION >= 110)
 #	define NL_ISO_CPP0X_AVAILABLE
 #endif
 
@@ -430,30 +430,40 @@ extern void operator delete[](void *p) throw();
 #		define CHashSet ::std::hash_set
 #		define CHashMultiMap ::std::hash_multimap
 #	endif // _STLP_HASH_MAP
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
+#elif defined(NL_ISO_CPP0X_AVAILABLE) || (defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
+#	include <unordered_map>
+#	include <unordered_set>
+#	define CHashMap ::std::unordered_map
+#	define CHashSet ::std::unordered_set
+#	define CHashMultiMap ::std::unordered_multimap
+#	define CUniquePtr ::std::unique_ptr
+#	define CUniquePtrMove ::std::move
 #elif defined(NL_ISO_STDTR1_AVAILABLE) // use std::tr1 for CHash* classes, if available (gcc 4.1+ and VC9 with TR1 feature pack)
 #	include NL_ISO_STDTR1_HEADER(unordered_map)
 #	include NL_ISO_STDTR1_HEADER(unordered_set)
 #	define CHashMap NL_ISO_STDTR1_NAMESPACE::unordered_map
 #	define CHashSet NL_ISO_STDTR1_NAMESPACE::unordered_set
 #	define CHashMultiMap NL_ISO_STDTR1_NAMESPACE::unordered_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 70 && NL_COMP_VC_VERSION <= 90) // VC7 through 9
 #	include <hash_map>
 #	include <hash_set>
 #	define CHashMap stdext::hash_map
 #	define CHashSet stdext::hash_set
 #	define CHashMultiMap stdext::hash_multimap
-#elif defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100)
-#	include <unordered_map>
-#	include <unordered_set>
-#	define CHashMap ::std::unordered_map
-#	define CHashSet ::std::unordered_set
-#	define CHashMultiMap ::std::unordered_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 #elif defined(NL_COMP_GCC) // GCC4
 #	include <ext/hash_map>
 #	include <ext/hash_set>
 #	define CHashMap ::__gnu_cxx::hash_map
 #	define CHashSet ::__gnu_cxx::hash_set
 #	define CHashMultiMap ::__gnu_cxx::hash_multimap
+#	define CUniquePtr ::std::auto_ptr
+#	define CUniquePtrMove
 
 namespace __gnu_cxx {
 

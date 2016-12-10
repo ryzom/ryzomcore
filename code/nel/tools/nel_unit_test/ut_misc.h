@@ -37,20 +37,20 @@ struct CUTMisc : public Test::Suite
 {
 	CUTMisc()
 	{
-		add(unique_ptr<Test::Suite>(new CUTMiscCoTask));
-		add(unique_ptr<Test::Suite>(new CUTMiscCommand));
-		add(unique_ptr<Test::Suite>(new CUTMiscCommon));
-		add(unique_ptr<Test::Suite>(new CUTMiscConfigFile));
-		add(unique_ptr<Test::Suite>(new CUTMiscDebug));
-		add(unique_ptr<Test::Suite>(new CUTMiscDynLibLoad));
-		add(unique_ptr<Test::Suite>(new CUTMiscFile));
-		add(unique_ptr<Test::Suite>(new CUTMiscPackFile));
-		add(unique_ptr<Test::Suite>(new CUTMiscSingleton));
-		add(unique_ptr<Test::Suite>(new CUTMiscSString));
-		add(unique_ptr<Test::Suite>(new CUTMiscStream));
-		add(unique_ptr<Test::Suite>(new CUTMiscVariable));
-		add(unique_ptr<Test::Suite>(new CUTMiscTypes));
-		add(unique_ptr<Test::Suite>(new CUTMiscStringCommon));
+		add(CUniquePtr<Test::Suite>(new CUTMiscCoTask));
+		add(CUniquePtr<Test::Suite>(new CUTMiscCommand));
+		add(CUniquePtr<Test::Suite>(new CUTMiscCommon));
+		add(CUniquePtr<Test::Suite>(new CUTMiscConfigFile));
+		add(CUniquePtr<Test::Suite>(new CUTMiscDebug));
+		add(CUniquePtr<Test::Suite>(new CUTMiscDynLibLoad));
+		add(CUniquePtr<Test::Suite>(new CUTMiscFile));
+		add(CUniquePtr<Test::Suite>(new CUTMiscPackFile));
+		add(CUniquePtr<Test::Suite>(new CUTMiscSingleton));
+		add(CUniquePtr<Test::Suite>(new CUTMiscSString));
+		add(CUniquePtr<Test::Suite>(new CUTMiscStream));
+		add(CUniquePtr<Test::Suite>(new CUTMiscVariable));
+		add(CUniquePtr<Test::Suite>(new CUTMiscTypes));
+		add(CUniquePtr<Test::Suite>(new CUTMiscStringCommon));
 		// Add a line here when adding a new test CLASS
 	}
 };

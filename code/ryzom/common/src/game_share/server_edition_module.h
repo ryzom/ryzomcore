@@ -541,7 +541,7 @@ namespace R2
 		private:
 			std::set<TSessionId> _Sessions;
 
-			std::unique_ptr<CUserComponent> _Component;
+			CUniquePtr<CUserComponent> _Component;
 		};
 
 		struct CHashKeyMD5Less : public std::binary_function<NLMISC::CHashKeyMD5, NLMISC::CHashKeyMD5, bool>
@@ -637,7 +637,7 @@ namespace R2
 		CTaskList<NLMISC::TTime> _RingAccessTasks; // Remove people that do not belong here
 		TOverrideRingAccess _OverrideRingAccess; //Ring access for dev
 		bool _MustUpdateOverrideRingAcess;
-		std::unique_ptr<CIdRecycle> _IdRecycle;
+		CUniquePtr<CIdRecycle> _IdRecycle;
 
 		TKicked _Kicked;
 		//
