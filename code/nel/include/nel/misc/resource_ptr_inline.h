@@ -61,7 +61,7 @@ template <class TPtr, class TKey, class TResourceFinder> SMART_INLINE void	CReso
 			if(pinfo->Ptr)
 			{
 				// Inform the Object that no more CResourcePtr points on it.
-				((TPtr*)(pinfo->Ptr))->pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+				((TPtr*)(pinfo->Ptr))->pinfo = &CRefCount::NullPtrInfo;
 			}
 			// Then delete the pinfo.
 			delete pinfo;
@@ -74,7 +74,7 @@ template <class TPtr, class TKey, class TResourceFinder> SMART_INLINE void	CReso
 // Cons - dest.
 template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPtr, TKey, TResourceFinder>::CResourcePtr()
 {
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinf o= &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	REF_TRACE("Smart()");
@@ -95,7 +95,7 @@ template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPt
 		pinfo->RefCount++;
 	}
 	else
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 
 	REF_TRACE("Smart(TPtr*)");
 }
@@ -117,7 +117,7 @@ template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPt
 	REF_TRACE("~Smart()");
 
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 }
 
@@ -142,7 +142,7 @@ template <class TPtr, class TKey, class TResourceFinder> CResourcePtr<TPtr, TKey
 	else
 	{
 		unRef();
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 	}
 
 
@@ -179,7 +179,7 @@ template <class TPtr, class TKey, class TResourceFinder> void	CResourcePtr<T>::k
 
 	// First, release the refptr.
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	// Then delete the pointer.
@@ -196,7 +196,7 @@ template <class TPtr, class TKey, class TResourceFinder> inline CResourcePtr<TPt
 
 	// Refresh the Ptr.
 	Ptr= (TPtr*)pinfo->Ptr;
-	if (pinfo != static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo))
+	if (pinfo != &CRefCount::NullPtrInfo)
 	{
 		// Does the pointer has been deleted ?
 		if (Ptr == NULL)
@@ -310,7 +310,7 @@ template <class TPtr, class TKey, class TResourceFinder> void	CStaticResourcePtr
 
 	// First, release the refptr.
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	// Then delete the pointer.
