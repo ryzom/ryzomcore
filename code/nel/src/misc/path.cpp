@@ -2523,7 +2523,7 @@ bool CFile::createDirectoryTree(const std::string &filename)
 	return lastResult;
 }
 
-bool CPath::makePathRelative (const char *basePath, std::string &relativePath)
+bool CPath::makePathRelative (const std::string &basePath, std::string &relativePath)
 {
 	// Standard path with final slash
 	string tmp = standardizePath (basePath, true);
