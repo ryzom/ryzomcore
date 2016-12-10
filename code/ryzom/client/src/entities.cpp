@@ -1766,7 +1766,7 @@ void CEntityManager::dumpXML(class NLMISC::IStream &f)
 			// Add a comment
 //			f.xmlComment();//toString("Describ the entity in the slot %d.", i).c_str());
 			// Start the opening of a new node named Identity
-			f.xmlPush(toString("Entity%d", i).c_str());
+			f.xmlPush(toString("Entity%d", i));
 
 				if(_Entities[i])
 				{
