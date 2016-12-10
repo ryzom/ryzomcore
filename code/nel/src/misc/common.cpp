@@ -1535,7 +1535,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 	if (command.empty())
 	{
-		nlwarning("Unable to open %s", document);
+		nlwarning("Unable to open %s", document.c_str());
 		return false;
 	}
 
