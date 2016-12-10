@@ -128,7 +128,7 @@ BOOL CWorldEditorApp::InitInstance()
 	splashScreen.addLine(string("Exe path"));
 	
 	// Exe path
-	ExePath = GetCommandLine ();
+	ExePath = tStrToUtf8(GetCommandLine ());
 	if (ExePath.size()>0)
 	{
 		if (ExePath[0] == '\"')
@@ -170,7 +170,7 @@ BOOL CWorldEditorApp::InitInstance()
 	}
 	catch (const Exception& e)
 	{
-		::MessageBox (NULL, e.what(), "Warning", MB_OK|MB_ICONEXCLAMATION);
+		::MessageBox (NULL, utf8ToTStr(e.what()), _T("Warning"), MB_OK|MB_ICONEXCLAMATION);
 
 		// Can't found the module put some default values
 		Config.CellSize = 160.0f;
@@ -218,7 +218,7 @@ BOOL CWorldEditorApp::InitInstance()
 
 	// Enable DDE Execute open
 	EnableShellOpen();
-	RegDeleteKey (HKEY_CLASSES_ROOT, "Worldeditor.Document\\DefaultIcon");				
+	RegDeleteKey (HKEY_CLASSES_ROOT, _T("Worldeditor.Document\\DefaultIcon"));
 	RegisterShellFileTypes(TRUE);
 
 	// Parse command line for standard shell commands, DDE, file open
@@ -286,13 +286,13 @@ BOOL CWorldEditorApp::InitInstance()
 
 	CMenu* menu = new CMenu();
 	menu->CreatePopupMenu();
-	dynamic_menu->InsertMenu(6, MF_BYPOSITION | MF_POPUP, (UINT)menu->GetSafeHmenu(), "Plugins");
+	dynamic_menu->InsertMenu(6, MF_BYPOSITION | MF_POPUP, (UINT_PTR)menu->GetSafeHmenu(), _T("Plugins"));
 
 	for(uint k=0;k<Plugins.size();k++)
 	{
 		IPluginCallback* test=Plugins[k];
 		string retest=test->getName();
-		menu->InsertMenu( k, MF_BYPOSITION | MF_POPUP, ID_WINDOWS_PLUGINS+1 + k, retest.c_str() );
+		menu->InsertMenu( k, MF_BYPOSITION | MF_POPUP, ID_WINDOWS_PLUGINS+1 + k, utf8ToTStr(retest) );
 		menu->CheckMenuItem(ID_WINDOWS_PLUGINS+1 +k, MF_CHECKED);				
 	}
 	
@@ -444,7 +444,7 @@ bool CWorldEditorApp::yesNoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	return MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_YESNO|MB_ICONQUESTION) == IDYES;
+	return MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_YESNO|MB_ICONQUESTION) == IDYES;
 }
 
 void CWorldEditorApp::errorMessage (const char *format, ... )
@@ -463,7 +463,7 @@ void CWorldEditorApp::errorMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_OK|MB_ICONEXCLAMATION);
+	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_OK|MB_ICONEXCLAMATION);
 }
 
 void CWorldEditorApp::infoMessage (const char *format, ... )
@@ -482,10 +482,10 @@ void CWorldEditorApp::infoMessage (const char *format, ... )
 		strcpy(buffer, "Unknown error");
 	}
 
-	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, buffer, "NeL World Editor", MB_OK|MB_ICONINFORMATION);
+	MessageBox (m_pMainWnd?m_pMainWnd->m_hWnd:NULL, utf8ToTStr(buffer), _T("NeL World Editor"), MB_OK|MB_ICONINFORMATION);
 }
 
-void CWorldEditorApp::syntaxError (const char *filename, xmlNodePtr xmlNode, const char *format, ...)
+void CWorldEditorApp::syntaxError (const std::string &filename, xmlNodePtr xmlNode, const char *format, ...)
 {
 	char buffer[1024];
 
@@ -501,10 +501,10 @@ void CWorldEditorApp::syntaxError (const char *filename, xmlNodePtr xmlNode, con
 		strcpy(buffer, "Unknown error");
 	}
 
-	errorMessage ("(%s), node (%s), line (%d) :\n%s", filename, xmlNode->name, (int)xmlNode->content, buffer);
+	errorMessage ("(%s), node (%s), line (%d) :\n%s", filename.c_str(), xmlNode->name, (int)xmlNode->line, buffer);
 }
 
-bool CWorldEditorApp::getPropertyString (std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
+bool CWorldEditorApp::getPropertyString (std::string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &propName)
 {
 	// Call the CIXml version
 	if (!CIXml::getPropertyString (result, xmlNode, propName))
@@ -516,7 +516,7 @@ bool CWorldEditorApp::getPropertyString (std::string &result, const char *filena
 	return true;
 }
 
-bool CWorldEditorApp::initPath (const char *filename, CSplashScreen &splashScreen)
+bool CWorldEditorApp::initPath (const std::string &filename, CSplashScreen &splashScreen)
 {
 	// The context strings
 	set<string> contextStrings;
@@ -630,16 +630,16 @@ class CMainFrame *getMainFrame ()
 
 // ***************************************************************************
 
-std::string standardizePath (const char *str)
+std::string standardizePath (const std::string &str)
 {
-	return NLMISC::strlwr (NLMISC::CPath::standardizePath (str, true));
+	return NLMISC::toLower(NLMISC::CPath::standardizePath (str, true));
 }
 
 // ***************************************************************************
 
-std::string formatString (const char *str)
+std::string formatString (const std::string &str)
 {
-	string copy = NLMISC::strlwr (str);
+	string copy = NLMISC::toLower(str);
 	return copy;
 }
 
@@ -679,9 +679,9 @@ void invalidateLeftView ()
 
 // ***************************************************************************
 
-std::string numberize (const char *oldString, uint value)
+std::string numberize (const std::string &oldString, uint value)
 {
-	int i=strlen (oldString)-1;
+	int i = oldString.length()-1;
 	while ((i>=0) && (((oldString[i]<='9') && (oldString[i]>='0')) || (oldString[i]==' ')))
 	{
 		// again
@@ -723,52 +723,6 @@ bool getZoneNameFromXY (sint32 x, sint32 y, std::string &zoneName)
 	return true;
 }
 
-// ***************************************************************************
-
-bool openFile (const char *filename)
-{
-    char key[MAX_PATH + MAX_PATH];
-
-	// Extension
-	string extension = NLMISC::CFile::getExtension (filename);
-
-    // First try ShellExecute()
-    HINSTANCE result = ShellExecute(NULL, "open", filename, NULL,NULL, SW_SHOW);
-
-    // If it failed, get the .htm regkey and lookup the program
-    if ((UINT)result <= HINSTANCE_ERROR) 
-	{
-
-        if (getRegKey(HKEY_CLASSES_ROOT, ("."+extension).c_str (), key) == ERROR_SUCCESS) 
-		{
-            lstrcat(key, "\\shell\\open\\command");
-
-            if (getRegKey(HKEY_CLASSES_ROOT,key,key) == ERROR_SUCCESS) 
-			{
-                char *pos;
-                pos = strstr(key, "\"%1\"");
-                if (pos == NULL) 
-				{                     // No quotes found
-                    pos = strstr(key, "%1");       // Check for %1, without quotes 
-                    if (pos == NULL)                   // No parameter at all...
-                        pos = key+lstrlen(key)-1;
-                    else
-                        *pos = '\0';                   // Remove the parameter
-                }
-                else
-                    *pos = '\0';                       // Remove the parameter
-
-                lstrcat(pos, " ");
-                lstrcat(pos, filename);
-                result = (HINSTANCE) WinExec(key, SW_SHOW);
-				return ((UINT)result) >= 31;
-            }
-        }
-    }
-	else
-		return true;
-	return false;
-}
 
 // ***************************************************************************
 
@@ -780,7 +734,7 @@ uint getRegKey(HKEY key, LPCTSTR subkey, LPTSTR retdata)
     if (retval == ERROR_SUCCESS) 
 	{
         long datasize = MAX_PATH;
-        char data[MAX_PATH];
+        TCHAR data[MAX_PATH];
         RegQueryValue(hkey, NULL, data, &datasize);
         lstrcpy(retdata,data);
         RegCloseKey(hkey);
@@ -832,21 +786,9 @@ void CMyLigoConfig::errorMessage (const char *format, ... )
 
 // ***************************************************************************
 
-void setEditTextMultiLine (CEdit &edit, const char *text)
+void setEditTextMultiLine (CEdit &edit, const std::string &text)
 {
-	string temp;
-	uint size = strlen (text);
-	temp.reserve (2*size);
-	bool previousR=false;
-	for (uint c=0; c<size; c++)
-	{
-		if ((text[c] == '\n') && (!previousR))
-			temp += "\r\n";
-		else
-			temp += text[c];
-		previousR = (text[c] == '\r');
-	}
-	setWindowTextUTF8 (edit, temp.c_str ());
+	setWindowTextUTF8(edit, NLMISC::addSlashR(text));
 }	
 
 // ***************************************************************************
@@ -864,45 +806,6 @@ void setEditTextMultiLine (CEdit &edit, const std::vector<std::string> &vect)
 	setEditTextMultiLine (edit, temp.c_str());
 }
 
-/*
-void setEditTextMultiLine (ColorEditWnd &edit, const char *text)
-{
-	string temp;
-	uint size = strlen (text);
-	temp.reserve (2*size);
-	bool previousR=false;
-	for (uint c=0; c<size; c++)
-	{
-		if ((text[c] == '\n') && (!previousR))
-			temp += "\r\n";
-		else
-			temp += text[c];
-		previousR = (text[c] == '\r');
-	}
-	edit.LoadText(CString(temp.c_str()));
-}	
-
-void setEditTextMultiLine (ColorEditWnd &edit, const std::vector<std::string> &vect)
-{
-	string temp;
-	uint i;
-	for (i=0; i<vect.size (); i++)
-	{
-		temp += vect[i];
-		if (i != (vect.size ()-1))
-			temp += "\n";
-	}
-	edit.LoadText(CString(temp.c_str()));
-}	
-*/
-// ***************************************************************************
-
-/*void setEditTextMultiLine (CListBox &listBox, const char *text)
-{
-	listBox.ResetContent();
-	nlverify (listBox.InsertString( -1, text) !=  LB_ERR);
-}*/
-
 // ***************************************************************************
 
 void setEditTextMultiLine (CListBox &listBox, const std::vector<std::string> &vect)
@@ -910,12 +813,12 @@ void setEditTextMultiLine (CListBox &listBox, const std::vector<std::string> &ve
 	listBox.ResetContent();
 	uint i;
 	for (i=0; i<vect.size (); i++)
-		nlverify (listBox.InsertString( -1, vect[i].c_str()) !=  LB_ERR);
+		nlverify (listBox.InsertString( -1, utf8ToTStr(vect[i])) !=  LB_ERR);
 }
 
 // ***************************************************************************
 
-bool setWindowTextUTF8 (HWND hwnd, const char *textUtf8)
+bool setWindowTextUTF8 (HWND hwnd, const std::string &textUtf8)
 {
 	ucstring str;
 
@@ -925,7 +828,7 @@ bool setWindowTextUTF8 (HWND hwnd, const char *textUtf8)
 
 // ***************************************************************************
 
-bool getWindowTextUTF8 (HWND hwnd, CString &textUtf8)
+bool getWindowTextUTF8 (HWND hwnd, std::string &textUtf8)
 {
 	ucstring text;
 	text.resize (GetWindowTextLengthW (hwnd));
@@ -940,7 +843,7 @@ bool getWindowTextUTF8 (HWND hwnd, CString &textUtf8)
 
 // ***************************************************************************
 
-HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, HTREEITEM hParent, HTREEITEM hInsertAfter)
+HTREEITEM insertItemUTF8 (HWND hwnd, const std::string &textUtf8, HTREEITEM hParent, HTREEITEM hInsertAfter)
 {
 	ucstring str;
 	str.fromUtf8 (textUtf8);
@@ -954,7 +857,7 @@ HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, HTREEITEM hParent, HT
 
 // ***************************************************************************
 
-HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, int nImage, int nSelectedImage, HTREEITEM hParent, HTREEITEM hInsertAfter)
+HTREEITEM insertItemUTF8 (HWND hwnd, const std::string &textUtf8, int nImage, int nSelectedImage, HTREEITEM hParent, HTREEITEM hInsertAfter)
 {
 	ucstring str;
 	str.fromUtf8 (textUtf8);
@@ -970,10 +873,10 @@ HTREEITEM insertItemUTF8 (HWND hwnd, const char *textUtf8, int nImage, int nSele
 
 // ***************************************************************************
 
-bool setItemTextUTF8 ( HWND hwnd, HTREEITEM hItem, LPCTSTR lpszItem )
+bool setItemTextUTF8 ( HWND hwnd, HTREEITEM hItem, const std::string &sitem )
 {
 	ucstring str;
-	str.fromUtf8 (lpszItem);
+	str.fromUtf8 (sitem);
 	TVITEMW item;
 	item.mask = TVIF_TEXT;
 	item.pszText = (WCHAR*)str.c_str();
@@ -995,8 +898,8 @@ bool isPrimitiveVisible (const NLLIGO::IPrimitive *primitive)
 
 void CWorldEditorApp::OnFileOpen() 
 {
-	static char BASED_CODE szFilter[] = "NeL World Editor Files (*.worldedit)|*.worldedit|All Files (*.*)|*.*||";
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "worldedit", TRUE, "worldedit", NULL, 0, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL World Editor Files (*.worldedit)|*.worldedit|All Files (*.*)|*.*||");
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("worldedit"), TRUE, _T("worldedit"), NULL, 0, szFilter);
 	if (dialog.DoModal() == IDOK)
 	{
 		CDocument &doc = *getDocument ();
@@ -1024,8 +927,8 @@ void CWorldEditorApp::OnFileSave()
 
 void CWorldEditorApp::OnFileSaveAs() 
 {
-	static char BASED_CODE szFilter[] = "NeL World Editor Files (*.worldedit)|*.worldedit|All Files (*.*)|*.*||";
-	CFileDialogEx dialog (BASE_REGISTRY_KEY, "worldedit", FALSE, "worldedit", NULL, 0, szFilter);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL World Editor Files (*.worldedit)|*.worldedit|All Files (*.*)|*.*||");
+	CFileDialogEx dialog (BASE_REGISTRY_KEY, _T("worldedit"), FALSE, _T("worldedit"), NULL, 0, szFilter);
 	if (dialog.DoModal() == IDOK)
 	{
 		CWorldEditorDoc &doc = *getDocument ();

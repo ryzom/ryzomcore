@@ -3221,7 +3221,7 @@ static void *yy_flex_alloc( size )
 yy_size_t size;
 #endif
 	{
-	return (void *) malloc( size ); // TODO: delete
+	return (void *) malloc( size );
 	}
 
 #ifdef YY_USE_PROTOS

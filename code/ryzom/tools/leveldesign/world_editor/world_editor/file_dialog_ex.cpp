@@ -73,9 +73,12 @@ INT_PTR CFileDialogEx::DoModal ()
 	if ((result = CFileDialog::DoModal ()) == IDOK)
 	{
 		// Update the path
-		std::string newPath = tStrToUtf8(GetPathName ());
-		newPath = NLMISC::CFile::getPath (newPath);
-		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)newPath.c_str (), newPath.size ()+1);
+		std::string newPath = NLMISC::CFile::getPath (tStrToUtf8(GetPathName()));
+
+		TCHAR buffer[MAX_PATH];
+		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(newPath));
+
+		RegSetValueEx (hKey, utf8ToTStr(_FileType), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 
 		// Update the path list
 		set<string> oldPath;
@@ -91,7 +94,9 @@ INT_PTR CFileDialogEx::DoModal ()
 		uint index = 0;
 		while (ite != oldPath.end ())
 		{
-			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)ite->c_str (), ite->size ()+1);
+			_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(*ite));
+
+			RegSetValueEx (hKey, utf8ToTStr(toString(index)), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer) + 1) * sizeof(TCHAR));
 			ite++;
 			index++;
 		}

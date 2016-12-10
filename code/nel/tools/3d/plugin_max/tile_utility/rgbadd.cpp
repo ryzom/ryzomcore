@@ -70,8 +70,8 @@ class RGBAdd: public Texmap {
 
 		Class_ID ClassID() {	return RGBAddClassID; }
 		SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-		void GetClassName(TSTR& s) { s= "RGB Additive"; }  
-		void DeleteThis() { delete this; }	
+		void GetClassName(TSTR& s) { s= _T("RGB Additive"); }
+		void DeleteThis() { delete this; }
 
 		int NumSubs() { return NSUBTEX+1; }  
 		Animatable* SubAnim(int i);

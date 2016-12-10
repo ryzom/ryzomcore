@@ -25,9 +25,13 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #pragma warning (disable : 4786)
 
-BOOL CALLBACK EnumResLangProc(HMODULE hModule, LPCSTR lpszType, LPCSTR lpszName, WORD wIDLanguage, 
+BOOL CALLBACK EnumResLangProc(HMODULE hModule, LPCTSTR lpszType, LPCTSTR lpszName, WORD wIDLanguage, 
 							  LONG_PTR lParam)
 {
 	set<HRSRC> *iconNames = (set<HRSRC>*)lParam;
@@ -96,7 +100,7 @@ void CImageListEx::addResourceIcon (const char *filename)
 		int height = imageInfo.rcImage.bottom - imageInfo.rcImage.top;
 		
 		// Load the icon
-		HICON handle = (HICON) LoadImage (NULL, filename, IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
+		HICON handle = (HICON) LoadImage (NULL, utf8ToTStr(filename), IMAGE_ICON, width, height, LR_COLOR|LR_LOADFROMFILE);
 		if (handle)
 		{
 			// Copy the icon

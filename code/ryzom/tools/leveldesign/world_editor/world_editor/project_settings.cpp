@@ -76,20 +76,20 @@ void CProjectSettings::OnBrowse()
 	UpdateData ();
 
 	BROWSEINFO	bi;
-	char		str[MAX_PATH];
+	TCHAR		str[MAX_PATH];
 	ITEMIDLIST*	pidl;
-	char sTemp[1024];
+	TCHAR sTemp[1024];
 
 	bi.hwndOwner = this->m_hWnd;
 	bi.pidlRoot = NULL;
 	bi.pidlRoot = NULL;
 	bi.pszDisplayName = sTemp;
-	bi.lpszTitle = "Choose the data directory for this project";
+	bi.lpszTitle = _T("Choose the data directory for this project");
 	bi.ulFlags = 0;
 	bi.lpfn = dataDirBrowseCallbackProc;
 
-	char sDir[512];
-	strcpy(sDir, DataDirectory);
+	TCHAR sDir[512];
+	_tcscpy(sDir, DataDirectory);
 	bi.lParam = (LPARAM)sDir;
 
 	bi.iImage = 0;
@@ -114,9 +114,9 @@ void CProjectSettings::OnOK()
 	// Get the document
 	CWorldEditorDoc *doc = getDocument ();
 
-	CString str;
+	std::string str;
 	getWindowTextUTF8 (Context, str);
-	doc->setContext ((const char*)str);
+	doc->setContext (str);
 }
 
 // ***************************************************************************
@@ -133,11 +133,11 @@ BOOL CProjectSettings::OnInitDialog()
 	for (uint i=0; i<contexts.size (); i++)
 	{
 		// Add the string
-		Context.InsertString (-1, contexts[i].c_str());
+		Context.InsertString (-1, utf8ToTStr(contexts[i]));
 	}
 
 	// Select the string 
-	Context.SelectString (-1, doc->getContext ().c_str ());
+	Context.SelectString (-1, utf8ToTStr(doc->getContext ()));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

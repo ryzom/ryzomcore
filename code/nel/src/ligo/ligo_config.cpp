@@ -508,13 +508,13 @@ bool CLigoConfig::canBeRoot (const NLLIGO::IPrimitive &child)
 
 // ***************************************************************************
 
-bool CLigoConfig::getPropertyString (std::string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
+bool CLigoConfig::getPropertyString(std::string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &propName)
 {
 	// Call the CIXml version
 	if (!CIXml::getPropertyString (result, xmlNode, propName))
 	{
 		// Output a formated error
-		syntaxError (filename, xmlNode, "Missing XML node property (%s)", propName);
+		syntaxError (filename, xmlNode, "Missing XML node property (%s)", propName.c_str());
 		return false;
 	}
 	return true;
@@ -522,7 +522,7 @@ bool CLigoConfig::getPropertyString (std::string &result, const char *filename, 
 
 // ***************************************************************************
 
-void CLigoConfig::syntaxError (const char *filename, xmlNodePtr xmlNode, const char *format, ...)
+void CLigoConfig::syntaxError (const std::string &filename, xmlNodePtr xmlNode, const char *format, ...)
 {
 	va_list args;
 	va_start( args, format );
@@ -530,7 +530,7 @@ void CLigoConfig::syntaxError (const char *filename, xmlNodePtr xmlNode, const c
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	errorMessage ("(%s), node (%s), line (%p) :\n%s", filename, xmlNode->name, xmlNode->content, buffer);
+	errorMessage ("(%s), node (%s), line (%p) :\n%s", filename.c_str(), xmlNode->name, xmlNode->content, buffer);
 }
 
 // ***************************************************************************
@@ -589,7 +589,7 @@ const CPrimitiveClass *CLigoConfig::getPrimitiveClass (const IPrimitive &primiti
 
 // ***************************************************************************
 
-const CPrimitiveClass *CLigoConfig::getPrimitiveClass (const char *className) const
+const CPrimitiveClass *CLigoConfig::getPrimitiveClass(const std::string &className) const
 {
 	std::map<std::string, CPrimitiveClass>::const_iterator ite = _PrimitiveClasses.find (className);
 	if (ite != _PrimitiveClasses.end ())

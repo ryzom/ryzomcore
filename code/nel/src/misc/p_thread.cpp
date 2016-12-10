@@ -50,8 +50,11 @@ struct CPMainThread : public CPThread
 
 	~CPMainThread()
 	{
-		if(pthread_key_delete(threadSpecificKey) != 0)
-			throw EThread("cannot delete thread specific storage key.");
+		if (pthread_key_delete(threadSpecificKey) != 0)
+		{
+			nlwarning("cannot delete thread specific storage key.");
+			// throw EThread("cannot delete thread specific storage key.");
+		}
 	}
 };
 

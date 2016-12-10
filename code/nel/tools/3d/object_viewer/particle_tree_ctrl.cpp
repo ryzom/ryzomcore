@@ -1006,7 +1006,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 				// Add search path for the texture
 				NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(tStrToUtf8(fd.GetPathName())));
 
-				std::auto_ptr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
+				CUniquePtr<NL3D::CShapeBank> sb(new NL3D::CShapeBank);
 				CParticleSystemModel *psm  = NULL;
 				try
 				{					
@@ -1147,7 +1147,7 @@ BOOL CParticleTreeCtrl::OnCmdMsg(UINT nID,  int nCode,  void* pExtra,  AFX_CMDHA
 			{
 				float value;		
 				int dummy; // to avoid non numeric characters at the end
-				if (sscanf ((LPCTSTR)(valueDlg.Value + "\n0"),  "%f\n%d",  &value,  &dummy) == 2)
+				if (_stscanf((LPCTSTR)(valueDlg.Value + _T("\n0")), _T("%f\n%d"), &value, &dummy) == 2)
 				{
 					nlassert(getOwnerNode(nt)->getPSPointer());
 					getOwnerNode(nt)->getPSPointer()->setZBias(-value);
@@ -1526,9 +1526,11 @@ void CParticleTreeCtrl::insertNewPS(CParticleWorkspace &pws)
 {
 	static const TCHAR BASED_CODE szFilter[] = _T("NeL Particle systems (*.ps)|*.ps||");
 	CFileDialog fd(TRUE,  _T(".ps"), _T("*.ps"),  OFN_ALLOWMULTISELECT|OFN_FILEMUSTEXIST,  szFilter,  this);	
+
 	const uint MAX_NUM_CHAR = 65536;
 	TCHAR filenamesBuf[MAX_NUM_CHAR];
-	_tcscpy(filenamesBuf, _T("*.ps"));
+	_tcscpy_s(filenamesBuf, MAX_NUM_CHAR, _T("*.ps"));
+
 	fd.m_ofn.lpstrFile = filenamesBuf;
 	fd.m_ofn.nMaxFile = MAX_NUM_CHAR - 1;
 	if (fd.DoModal() == IDOK)

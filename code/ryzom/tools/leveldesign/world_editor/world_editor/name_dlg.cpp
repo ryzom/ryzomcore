@@ -25,6 +25,9 @@
 #include "nel/misc/path.h"
 #include "nel/misc/config_file.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CNameDlg dialog
@@ -85,7 +88,7 @@ BOOL CNameDlg::OnInitDialog()
 
 	// print the data directory
 	CWnd* pWnd = GetDlgItem(IDC_NAME_DIR);
-	pWnd->SetWindowText(("Data directory: " + m_dataDir).c_str());
+	pWnd->SetWindowText(CString(_T("Data directory: ")) + utf8ToTStr(m_dataDir));
 
 	// tab stops to simulate multi-columns edit boxes
 	int tab_stop1[1] = {160};
@@ -153,18 +156,18 @@ void CNameDlg::updateSearchList()
 		{
 			// no filter
 			m_listToName.insert(std::make_pair(j, i));
-			m_searchList.InsertString(j++, s.c_str());
+			m_searchList.InsertString(j++, utf8ToTStr(s));
 		}
 		else
 		{
-			std::string filter(m_nameFilter.LockBuffer());
+			std::string filter(tStrToUtf8(m_nameFilter.LockBuffer()));
 			m_nameFilter.UnlockBuffer();
 
 			// filter
 			if (NLMISC::toLower(ig).find(NLMISC::toLower(filter)) != std::string::npos)
 			{
 				m_listToName.insert(std::make_pair(j, i));
-				m_searchList.InsertString(j++, s.c_str());
+				m_searchList.InsertString(j++, utf8ToTStr(s));
 			}
 		}
 	}	
@@ -211,7 +214,7 @@ void CNameDlg::updateSelectList()
 			m_listToId.insert(std::make_pair(i, row));
 		}
 
-		m_idList.InsertString(i++, s.c_str());
+		m_idList.InsertString(i++, utf8ToTStr(s));
 	}
 }
 
@@ -356,19 +359,19 @@ void CNameDlg::checkNewGn()
 {
 	// print a message if a new gn will be added to the list
 	CWnd* pWnd = GetDlgItem(IDC_NAME_NEWGN);
-	std::string s = m_assignGn;
+	std::string s = tStrToUtf8(m_assignGn);
 	uint rowIndex;
 	if (s == "")
 	{
-		pWnd->SetWindowText(" ");
+		pWnd->SetWindowText(_T(" "));
 	}
 	else if (!m_fcts.findRow(0, s, rowIndex))
 	{
-		pWnd->SetWindowText("new gn !");
+		pWnd->SetWindowText(_T("new gn !"));
 	}
 	else
 	{
-		pWnd->SetWindowText(" ");
+		pWnd->SetWindowText(_T(" "));
 		// auto-fill ig field
 		m_assignIg = m_fcts.getData(rowIndex, 1).toString().c_str();
 	}

@@ -888,7 +888,11 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # never display these warnings because they are minor
-    ADD_PLATFORM_FLAGS("-Wno-unused-parameter -Wno-unused-private-field -Wno-unused-local-typedef -Wno-unused-variable")
+    ADD_PLATFORM_FLAGS("-Wno-unused-parameter -Wno-unused-variable -Wunused-function -Wunused-value")
+
+    IF(CLANG)
+      ADD_PLATFORM_FLAGS("-Wno-unused-private-field -Wno-unused-local-typedef")
+    ENDIF()
 
     IF(ANDROID)
       ADD_PLATFORM_FLAGS("--sysroot=${PLATFORM_ROOT}")

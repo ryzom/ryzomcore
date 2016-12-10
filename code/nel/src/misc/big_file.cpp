@@ -339,6 +339,9 @@ bool CBigFile::BNP::readHeader(FILE *file)
 			it++;
 		}
 
+		if (FileNames)
+			delete[] FileNames;
+
 		FileNames = new char[nSize];
 		memset(FileNames, 0, nSize);
 		Files.resize(nNb);

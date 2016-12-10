@@ -318,7 +318,7 @@ void CDialogFlags::loadEntityDisplayInfoToRegistry(TEntityDisplayInfoVect &infos
 				if (infos[k].Value == value)
 				{
 					int r, g, b, visible;
-					if (sscanf((const char *) dataStr, "%d, %d, %d, visible = %d", &r, &g, &b, &visible) == 4)
+					if (_stscanf((const TCHAR *) dataStr, _T("%d, %d, %d, visible = %d"), &r, &g, &b, &visible) == 4)
 					{
 						infos[k].Color = CRGBA(r, g, b);
 						infos[k].Visible = visible != 0;
@@ -342,10 +342,14 @@ void CDialogFlags::saveEntityDisplayInfoToRegistry(const TEntityDisplayInfoVect 
 	{
 		for(uint k = 0; k < infos.size(); ++k)
 		{
-			char colorStr[128];
 			CRGBA color = infos[k].Color;
-			sprintf(colorStr, "%d, %d, %d, visible = %d", (int) color.R, (int) color.G, (int) color.B, (int) (infos[k].Visible ? 1 : 0));
-			LONG result = RegSetValueEx(hKey, utf8ToTStr(toString(infos[k].Value)), 0, REG_SZ, (const BYTE *) colorStr, strlen(colorStr));
+
+			TCHAR colorStr[32];
+			_stprintf_s(colorStr, 32, _T("%d, %d, %d, visible = %d"), (int) color.R, (int) color.G, (int) color.B, (int) (infos[k].Visible ? 1 : 0));
+
+			TCHAR id[16];
+
+			LONG result = RegSetValueEx(hKey, _itot(infos[k].Value, id, 10), 0, REG_SZ, (const BYTE *)colorStr, (_tcslen(colorStr) + 1)*sizeof(TCHAR));
 			if (result  != ERROR_SUCCESS)
 			{
 				nlwarning("Couldn't write registry key for entity % color", infos[k].Name);

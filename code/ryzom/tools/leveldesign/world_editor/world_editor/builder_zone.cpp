@@ -698,7 +698,7 @@ uint32 CBuilderZone::countZones ()
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshot (const std::string &fileName, uint sizeSource, bool grayscale)
 {
 	const CZoneRegion *pBZR = &(getDocument ()->getZoneRegion (_ZoneRegionSelected));
 	sint32 nMinX = pBZR->getMinX();
@@ -712,7 +712,7 @@ void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool graysca
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshotCustom (const char *fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshotCustom (const std::string &fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
 {
 	if (_ZoneRegions.size() == 0)
 		return;

@@ -32,6 +32,9 @@ using namespace NLNET;
 using namespace NLGEORGES;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC::CMemDisplayer *TmpDebugDisplayer = NULL;
 //NLMISC::CLog		  *TmpDebugLogger = NULL;

@@ -765,7 +765,8 @@ static bool createProcess(const std::string &programName, const std::string &arg
 		args = toString("\"%s\" ", programName.c_str()) + arguments;
 	}
 
-	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
+	// or 0 for a window
+	BOOL res = CreateProcessW(sProgramName, utf8ToWide(args), NULL, NULL, FALSE, CREATE_DEFAULT_ERROR_MODE | CREATE_NO_WINDOW, NULL, NULL /* current dir */, &si, &pi);
 
 	if (sProgramName)
 	{
@@ -1012,20 +1013,32 @@ sint launchProgramAndWaitForResult(const std::string &programName, const std::st
 	if (!createProcess(programName, arguments, log, pi)) return -1;
 
 	// Successfully created the process.  Wait for it to finish.
-	WaitForSingleObject(pi.hProcess, INFINITE);
+	DWORD ret = WaitForSingleObject(pi.hProcess, INFINITE);
 
-	// Get the exit code.
-	DWORD exitCode = 0;
-	BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
+	if (ret == WAIT_OBJECT_0)
+	{
+		// Get the exit code.
+		DWORD exitCode = 0;
+		BOOL ok = GetExitCodeProcess(pi.hProcess, &exitCode);
 
-	//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
+		//nldebug("LAUNCH: Successful launch '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 
-	if (ok) return (sint)exitCode;
+		if (ok) return (sint)exitCode;
+	}
 
 	if (log)
-		nlwarning("LAUNCH: Failed launched '%s' with arg '%s'", programName.c_str(), arguments.c_str());
+	{
+		std::string error = toString((uint)ret);
+
+		if (ret == WAIT_FAILED)
+		{
+			error += "(" + formatErrorMessage(getLastError()) +")";
+		}
+
+		nlwarning("LAUNCH: Failed launched '%s' with arg '%s' and error: %s", programName.c_str(), arguments.c_str(), error.c_str());
+	}
 
 	return -1;
 #else
@@ -1535,7 +1548,7 @@ static bool openDocWithExtension (const std::string &document, const std::string
 
 	if (command.empty())
 	{
-		nlwarning("Unable to open %s", document);
+		nlwarning("Unable to open %s", document.c_str());
 		return false;
 	}
 

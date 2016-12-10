@@ -574,7 +574,7 @@ void CParticleDlg::OnLoadPSWorkspace()
 void CParticleDlg::loadWorkspace(const std::string &fullPath)
 {
 	// Add to the path
-	std::auto_ptr<CParticleWorkspace> newPW(new CParticleWorkspace);
+	CUniquePtr<CParticleWorkspace> newPW(new CParticleWorkspace);
 	newPW->init(_ObjView, fullPath, _ObjView->getFontManager(), _ObjView->getFontGenerator());
 	newPW->setModificationCallback(ParticleTreeCtrl);
 	// save empty workspace

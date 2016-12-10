@@ -134,7 +134,7 @@ SMART_INLINE void	CRefPtr<T>::unRef() const
 			if(pinfo->Ptr)
 			{
 				// Inform the Object that no more CRefPtr points on it.
-				pinfo->Ptr->pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+				pinfo->Ptr->pinfo = &CRefCount::NullPtrInfo;
 			}
 			// Then delete the pinfo.
 			delete pinfo;
@@ -148,7 +148,7 @@ SMART_INLINE void	CRefPtr<T>::unRef() const
 // Cons - dest.
 template <class T> inline CRefPtr<T>::CRefPtr()
 {
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	REF_TRACE("Smart()");
@@ -170,7 +170,7 @@ template <class T> inline CRefPtr<T>::CRefPtr(T *v)
 #endif
 	}
 	else
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 
 	REF_TRACE("Smart(T*)");
 }
@@ -187,7 +187,7 @@ template <class T> inline CRefPtr<T>::~CRefPtr(void)
 	REF_TRACE("~Smart()");
 
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 }
 
@@ -216,7 +216,7 @@ template <class T> CRefPtr<T> &CRefPtr<T>::operator=(T *v)
 	else
 	{
 		unRef();
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 	}
 
 
@@ -250,7 +250,7 @@ template <class T> void	CRefPtr<T>::kill()
 
 	// First, release the refptr.
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	// Then delete the pointer.
@@ -316,7 +316,7 @@ SMART_INLINE void	CVirtualRefPtr<T>::unRef() const
 			if(pinfo->Ptr)
 			{
 				// Inform the Object that no more CVirtualRefPtr points on it.
-				pinfo->Ptr->pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+				pinfo->Ptr->pinfo = &CRefCount::NullPtrInfo;
 			}
 			// Then delete the pinfo.
 			delete pinfo;
@@ -330,7 +330,7 @@ SMART_INLINE void	CVirtualRefPtr<T>::unRef() const
 // Cons - dest.
 template <class T> inline CVirtualRefPtr<T>::CVirtualRefPtr()
 {
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	REF_TRACE("Smart()");
@@ -352,7 +352,7 @@ template <class T> inline CVirtualRefPtr<T>::CVirtualRefPtr(T *v)
 #endif
 	}
 	else
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 
 	REF_TRACE("Smart(T*)");
 }
@@ -370,7 +370,7 @@ template <class T> inline CVirtualRefPtr<T>::~CVirtualRefPtr(void)
 	REF_TRACE("~Smart()");
 
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 }
 
@@ -399,7 +399,7 @@ template <class T> CVirtualRefPtr<T> &CVirtualRefPtr<T>::operator=(T *v)
 	else
 	{
 		unRef();
-		pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+		pinfo = &CRefCount::NullPtrInfo;
 	}
 
 
@@ -435,7 +435,7 @@ template <class T> void	CVirtualRefPtr<T>::kill()
 
 	// First, release the refptr.
 	unRef();
-	pinfo= static_cast<CRefCount::CPtrInfo*>(&CRefCount::NullPtrInfo);
+	pinfo = &CRefCount::NullPtrInfo;
 	Ptr= NULL;
 
 	// Then delete the pointer.

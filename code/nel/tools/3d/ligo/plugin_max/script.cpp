@@ -94,6 +94,10 @@ using namespace NLMISC;
 using namespace NLLIGO;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // APP DATA
 #define NEL3D_APPDATA_LIGO_USE_BOUNDINGBOX	((uint32)1342141818)
 

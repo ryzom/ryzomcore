@@ -318,7 +318,7 @@ void CDisplay::init (CMainFrame *pMF)
 		}
 	}
 
-	SetCurrentDirectory (pMF->_ExeDir.c_str());
+	SetCurrentDirectory (utf8ToTStr(pMF->_ExeDir));
 }
 
 // ***************************************************************************
@@ -3554,7 +3554,7 @@ void CDisplay::DrawCollisionTexture(sint32 count, float x1, float y1)
 				string dir = getDocument ()->getDataDir ();
 				if (dir.empty()) dir = _MainFrame->_ExeDir;
 				dir += "\\collisionmap\\";
-				SetCurrentDirectory (dir.c_str());
+				SetCurrentDirectory (utf8ToTStr(dir));
 
 				if(NLMISC::CFile::fileExists(Name+".tga") || NLMISC::CFile::fileExists(Name+".png"))
 				{

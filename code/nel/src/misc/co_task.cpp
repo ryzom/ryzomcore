@@ -213,6 +213,16 @@ namespace NLMISC
 			return _ThreadMainFiber.getPointer();
 		}
 #endif
+
+		static void releaseInstance()
+		{
+			if (_Instance)
+			{
+				NLMISC::INelContext::getInstance().releaseSingletonPointer("CCurrentCoTask", _Instance);
+				delete _Instance;
+				_Instance = NULL;
+			}
+		}
 	};
 
 	NLMISC_SAFE_SINGLETON_IMPL(CCurrentCoTask);
@@ -558,6 +568,11 @@ namespace NLMISC
 			if (currTime - startTime >= milliseconds) break;
 			yield();
 		}
+	}
+
+	void CCoTask::releaseInstance()
+	{
+		CCurrentCoTask::releaseInstance();
 	}
 
 } // namespace NLMISC

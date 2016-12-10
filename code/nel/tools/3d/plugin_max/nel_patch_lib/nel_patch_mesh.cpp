@@ -133,7 +133,10 @@ void SetBankPathName (const std::string& path)
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_TILEDIT, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Bank Path", 0, REG_SZ, (LPBYTE)path.c_str(), path.length()+1);
+		TCHAR buffer[MAX_PATH];
+		_tcscpy_s(buffer, MAX_PATH, utf8ToTStr(path));
+
+		RegSetValueEx(hKey, _T("Bank Path"), 0, REG_SZ, (LPBYTE)buffer, (_tcslen(buffer)+1)*sizeof(TCHAR));
 		RegCloseKey (hKey);
 	}
 }
@@ -1972,7 +1975,7 @@ IOResult RPatchMesh::Load(ILoad *iload)
 			for (i=0; i<nSize; i++)
 			{
 				bool bBinded;
-				typeBind nType;
+				uint /* typeBind */ nType;
 				uint nEdge;
 				uint nPatch;
 				uint nBefore;
@@ -2113,7 +2116,7 @@ IOResult RPatchMesh::Save(ISave *isave)
 		uint nAfter=getUIVertex (i).Binding.nAfter;
 		uint nAfter2=getUIVertex (i).Binding.nAfter2;
 		uint nT=getUIVertex (i).Binding.nT;
-		typeBind nType=(typeBind)getUIVertex (i).Binding.nType;
+		uint /* typeBind */ nType=(uint /* typeBind */)getUIVertex (i).Binding.nType;
 		uint nPrimVert=getUIVertex (i).Binding.nPrimVert;
 
 		isave->Write(&bBinded, sizeof (bool), &nb);

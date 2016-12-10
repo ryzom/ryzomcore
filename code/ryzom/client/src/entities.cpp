@@ -72,6 +72,9 @@ using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // EXTERN //
@@ -1763,7 +1766,7 @@ void CEntityManager::dumpXML(class NLMISC::IStream &f)
 			// Add a comment
 //			f.xmlComment();//toString("Describ the entity in the slot %d.", i).c_str());
 			// Start the opening of a new node named Identity
-			f.xmlPush(toString("Entity%d", i).c_str());
+			f.xmlPush(toString("Entity%d", i));
 
 				if(_Entities[i])
 				{

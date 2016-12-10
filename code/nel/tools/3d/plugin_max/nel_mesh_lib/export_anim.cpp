@@ -34,6 +34,10 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 static Class_ID DefNoteTrackClassID(NOTETRACK_CLASS_ID, 0);
 
 #define BOOL_CONTROL_CLASS_ID 0x984b8d27

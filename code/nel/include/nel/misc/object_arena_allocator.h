@@ -83,8 +83,10 @@ private:
 #	define NL_USES_DEFAULT_ARENA_OBJECT_ALLOCATOR \
 		void *operator new(size_t size) { return NLMISC::CObjectArenaAllocator::getDefaultAllocator().alloc((uint) size); }\
 		void *operator new(size_t size, int _BlockUse, char const* _FileName, int _LineNumber) { return NLMISC::CObjectArenaAllocator::getDefaultAllocator().alloc((uint) size); }\
+		void *operator new(size_t size, char const* _FileName, int _LineNumber) { return NLMISC::CObjectArenaAllocator::getDefaultAllocator().alloc((uint) size); }\
 		void operator delete(void *block) { NLMISC::CObjectArenaAllocator::getDefaultAllocator().freeBlock(block); }\
-		void operator delete(void *block, int _BlockUse, char const* _FileName, int _LineNumber) { NLMISC::CObjectArenaAllocator::getDefaultAllocator().freeBlock(block); }
+		void operator delete(void *block, int _BlockUse, char const* _FileName, int _LineNumber) { NLMISC::CObjectArenaAllocator::getDefaultAllocator().freeBlock(block); } \
+		void operator delete(void *block, char const* _FileName, int _LineNumber) { NLMISC::CObjectArenaAllocator::getDefaultAllocator().freeBlock(block); }
 
 }
 
