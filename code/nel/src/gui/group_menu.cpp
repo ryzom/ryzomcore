@@ -381,6 +381,22 @@ namespace NLGUI
 		return true;
 	}
 
+	// ------------------------------------------------------------------------------------------------
+	CViewBitmap *CGroupSubMenu::createIcon(CInterfaceElement *parentPos, const string &texture)
+	{
+		// Add an icon to the line
+		CViewBitmap *pVB = new CViewBitmap(CViewBase::TCtorParam());
+		pVB->setSerializable( false );
+		pVB->setParent (this);
+		pVB->setParentPos (parentPos);
+		pVB->setParentPosRef (Hotspot_ML);
+		pVB->setPosRef (Hotspot_MR);
+		pVB->setTexture(texture);
+		pVB->setModulateGlobalColor(false);
+		pVB->setX (-2);
+		addView (pVB);
+		return pVB;
+	}
 
 	// ------------------------------------------------------------------------------------------------
 	CViewBitmap *CGroupSubMenu::createCheckBox(bool checked)
@@ -1226,13 +1242,22 @@ namespace NLGUI
 			pV->setCheckBox(checkBox);
 		}
 
+		CViewBitmap *icon = NULL;
+		if (!texture.empty())
+		{	
+			if (_GroupList->getNumChildren() == 1)
+				pV->setX(20);
+			icon = createIcon(pV, texture);
+		}
+		
+
 		tmp.ViewText = pV;
 		tmp.Separator = NULL;
 		tmp.AHName = ah;
 		tmp.AHParams = params;
 		tmp.Cond = cond;
 		tmp.CheckBox = checkBox;
-		tmp.RightArrow = NULL;
+		tmp.RightArrow = icon;
 		if (id.empty())
 			tmp.Id = NLMISC::toString (_Lines.size());
 		else
@@ -1772,7 +1797,23 @@ namespace NLGUI
 		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4));
 		return 0;
 	}
-
+	
+		// ------------------------------------------------------------------------------------------------
+	int CGroupSubMenu::luaAddIconLine(CLuaState &ls)
+	{
+		const char *funcName = "addIconLine";
+		CLuaIHM::checkArgCount(ls, funcName, 5);
+		CLuaIHM::checkArgTypeUCString(ls, funcName, 1);
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING);
+		ucstring arg1;
+		nlverify(CLuaIHM::getUCStringOnStack(ls, 1, arg1));
+		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
+		return 0;
+	}
+ 
 	// ------------------------------------------------------------------------------------------------
 	int CGroupSubMenu::luaAddLineAtIndex(CLuaState &ls)
 	{
