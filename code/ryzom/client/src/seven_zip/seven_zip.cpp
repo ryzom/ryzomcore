@@ -196,26 +196,26 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate input buffer for props
-	CUniquePtr<uint8[]> propsBuffer(new uint8[LZMA_PROPS_SIZE]);
+	std::vector<uint8> propsBuffer(LZMA_PROPS_SIZE);
 
 	// size of LZMA content
 	inSize -= LZMA_PROPS_SIZE + 8;
 
 	// allocate input buffer for lzma data
-	CUniquePtr<uint8[]> inBuffer(new uint8[inSize]);
+	std::vector<uint8> inBuffer(inSize);
 
 	uint64 fileSize = 0;
 
 	try
 	{
 		// read props
-		inStream.serialBuffer(propsBuffer.get(), LZMA_PROPS_SIZE);
+		inStream.serialBuffer(&propsBuffer[0], LZMA_PROPS_SIZE);
 
 		// read uncompressed size
 		inStream.serial(fileSize);
 
 		// read lzma content
-		inStream.serialBuffer(inBuffer.get(), inSize);
+		inStream.serialBuffer(&inBuffer[0], inSize);
 	}
 	catch(const EReadError &e)
 	{
@@ -224,14 +224,14 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	}
 
 	// allocate the output buffer
-	CUniquePtr<uint8[]> outBuffer(new uint8[fileSize]);
+	std::vector<uint8> outBuffer(fileSize);
 
 	// in and out file sizes
 	SizeT outProcessed = (SizeT)fileSize;
 	SizeT inProcessed = (SizeT)inSize;
 
 	// decompress the file in memory
-	sint res = LzmaUncompress(outBuffer.get(), &outProcessed, inBuffer.get(), &inProcessed, propsBuffer.get(), LZMA_PROPS_SIZE);
+	sint res = LzmaUncompress(&outBuffer[0], &outProcessed, &inBuffer[0], &inProcessed, &propsBuffer[0], LZMA_PROPS_SIZE);
 
 	if (res != 0 || outProcessed != fileSize)
 	{
@@ -245,7 +245,7 @@ bool unpackLZMA(const std::string &lzmaFile, const std::string &destFileName)
 	try
 	{
 		// write content
-		outStream.serialBuffer(outBuffer.get(), (uint)fileSize);
+		outStream.serialBuffer(&outBuffer[0], (uint)fileSize);
 	}
 	catch(const EFile &e)
 	{
@@ -273,12 +273,12 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	}
 
 	// allocate input buffer
-	CUniquePtr<uint8[]> inBuffer(new uint8[inSize]);
+	std::vector<uint8> inBuffer(inSize);
 
 	try
 	{
 		// read file in buffer
-		inStream.serialBuffer(inBuffer.get(), inSize);
+		inStream.serialBuffer(&inBuffer[0], inSize);
 	}
 	catch(const EReadError &e)
 	{
@@ -288,11 +288,11 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 
 	// allocate output buffer
 	size_t outSize = (11 * inSize / 10) + 65536; // worst case = 1.1 * size + 64K
-	CUniquePtr<uint8[]> outBuffer(new uint8[outSize]);
+	std::vector<uint8> outBuffer(outSize);
 
 	// allocate buffer for props
 	size_t outPropsSize = LZMA_PROPS_SIZE;
-	CUniquePtr<uint8[]> outProps(new uint8[outPropsSize]);
+	std::vector<uint8> outProps(outPropsSize);
 
 	// compress with best compression and other default settings
 	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);

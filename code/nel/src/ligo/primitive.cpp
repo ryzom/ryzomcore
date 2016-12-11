@@ -63,7 +63,7 @@ void XMLError (xmlNodePtr xmlNode, const std::string &filename, const char *form
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	Error (filename, "node (%s), line (%p) : %s", xmlNode->name, xmlNode->content, buffer);
+	Error (filename, "node (%s), line (%d) : %s", xmlNode->name, xmlNode->line, buffer);
 }
 
 
@@ -76,7 +76,7 @@ xmlNodePtr GetFirstChildNode (xmlNodePtr xmlNode, const std::string &filename, c
 	if (result) return result;
 
 	// Output a formated error
-	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName);
+	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName.c_str());
 	return NULL;
 }
 
@@ -88,7 +88,7 @@ bool GetPropertyString (string &result, const std::string &filename, xmlNodePtr 
 	if (!CIXml::getPropertyString (result, xmlNode, propName))
 	{
 		// Output a formated error
-		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName);
+		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName.c_str());
 		return false;
 	}
 	return true;
@@ -204,14 +204,14 @@ bool GetNodeString (string &result, const std::string &filename, xmlNodePtr xmlN
 	xmlNodePtr node = CIXml::getFirstChildNode (xmlNode, nodeName);
 	if (!node)
 	{
-		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName.c_str());
 		return false;
 	}
 
 	// Get the node string
 	if (!CIXml::getContentString (result, node))
 	{
-		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName.c_str());
 		return false;
 	}
 
@@ -1282,7 +1282,7 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, const IPro
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1303,7 +1303,7 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, IProperty 
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1461,7 +1461,7 @@ bool IPrimitive::removeProperty (uint index)
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1503,7 +1503,7 @@ bool IPrimitive::getChild (const IPrimitive *&result, uint childId) const
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1519,7 +1519,7 @@ bool IPrimitive::getChild (IPrimitive *&result, uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1553,7 +1553,7 @@ bool IPrimitive::removeChild (uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -2510,7 +2510,7 @@ bool CPrimitives::read (xmlNodePtr xmlNode, const std::string &filename, CLigoCo
 			}
 			else
 			{
-				Error (filename, "CPrimitives::read : Unknown file version (%d)", version);
+				Error (filename, "CPrimitives::read : Unknown file version (%u)", version);
 				return false;
 			}
 		}
