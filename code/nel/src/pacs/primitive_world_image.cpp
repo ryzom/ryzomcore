@@ -1421,7 +1421,7 @@ void CPrimitiveWorldImage::setGlobalPosition (const UGlobalPosition& pos, CMoveC
 void CPrimitiveWorldImage::setGlobalPosition (const NLMISC::CVectorD& pos, CMoveContainer& container, CMovePrimitive &primitive, uint8 worldImage, bool keepZ /*= false*/, UGlobalPosition::TType type /* =UGlobalPosition::Unspecified*/)
 {
 	// Cast type
-	nlassert (dynamic_cast<const CMoveContainer*>(&container));
+	nlassert (dynamic_cast<const CMoveContainer*>(&container) != NULL);
 	const CMoveContainer *cont=(const CMoveContainer*)&container;
 
 	// Get the retriever
