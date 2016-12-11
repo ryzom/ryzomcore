@@ -1282,7 +1282,7 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, const IPro
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1303,7 +1303,7 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, IProperty 
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1461,7 +1461,7 @@ bool IPrimitive::removeProperty (uint index)
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1503,7 +1503,7 @@ bool IPrimitive::getChild (const IPrimitive *&result, uint childId) const
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1519,7 +1519,7 @@ bool IPrimitive::getChild (IPrimitive *&result, uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1553,7 +1553,7 @@ bool IPrimitive::removeChild (uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -2510,7 +2510,7 @@ bool CPrimitives::read (xmlNodePtr xmlNode, const std::string &filename, CLigoCo
 			}
 			else
 			{
-				Error (filename, "CPrimitives::read : Unknown file version (%d)", version);
+				Error (filename, "CPrimitives::read : Unknown file version (%u)", version);
 				return false;
 			}
 		}
