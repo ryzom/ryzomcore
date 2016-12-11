@@ -76,7 +76,7 @@ xmlNodePtr GetFirstChildNode (xmlNodePtr xmlNode, const std::string &filename, c
 	if (result) return result;
 
 	// Output a formated error
-	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName);
+	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName.c_str());
 	return NULL;
 }
 
@@ -88,7 +88,7 @@ bool GetPropertyString (string &result, const std::string &filename, xmlNodePtr 
 	if (!CIXml::getPropertyString (result, xmlNode, propName))
 	{
 		// Output a formated error
-		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName);
+		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName.c_str());
 		return false;
 	}
 	return true;
@@ -204,14 +204,14 @@ bool GetNodeString (string &result, const std::string &filename, xmlNodePtr xmlN
 	xmlNodePtr node = CIXml::getFirstChildNode (xmlNode, nodeName);
 	if (!node)
 	{
-		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName.c_str());
 		return false;
 	}
 
 	// Get the node string
 	if (!CIXml::getContentString (result, node))
 	{
-		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName.c_str());
 		return false;
 	}
 
