@@ -295,7 +295,7 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 	std::vector<uint8> outProps(outPropsSize);
 
 	// compress with best compression and other default settings
-	sint res = LzmaCompress(outBuffer.get(), &outSize, inBuffer.get(), inSize, outProps.get(), &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);
+	sint res = LzmaCompress(&outBuffer[0], &outSize, &inBuffer[0], inSize, &outProps[0], &outPropsSize, 9, 1 << 27, -1, -1, -1, -1, 1);
 
 	switch(res)
 	{
@@ -314,14 +314,14 @@ bool packLZMA(const std::string &srcFileName, const std::string &lzmaFileName)
 			try
 			{
 				// write props
-				outStream.serialBuffer(outProps.get(), (uint)outPropsSize);
+				outStream.serialBuffer(&outProps[0], (uint)outPropsSize);
 
 				// write uncompressed size
 				uint64 uncompressSize = inSize;
 				outStream.serial(uncompressSize);
 
 				// write content
-				outStream.serialBuffer(outBuffer.get(), (uint)outSize);
+				outStream.serialBuffer(&outBuffer[0], (uint)outSize);
 			}
 			catch(const EFile &e)
 			{
