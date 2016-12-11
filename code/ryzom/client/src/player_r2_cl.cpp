@@ -121,9 +121,6 @@ CPlayerR2CL::~CPlayerR2CL()
 
 CGenderInfo * CPlayerR2CL::getGenderInfo()
 {
-	string propName = toString("SERVER:Entities:E%d:P%d", _Slot, CLFECOMMON::PROPERTY_VPB);
-	sint64 vA = NLGUI::CDBManager::getInstance()->getDbProp(propName)->getValue64();
-	SPropVisualA visualA = *(SPropVisualA *)(&vA);
 	EGSPD::CPeople::TPeople ePeople = _Sheet->Race;
 	bool bMale = (_Sheet->Gender == GSGENDER::male);
 

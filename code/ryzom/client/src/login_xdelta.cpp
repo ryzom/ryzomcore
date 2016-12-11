@@ -525,7 +525,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	}
 
 	SXDeltaCtrl::SSourceInfo *pFromSource = NULL;
-	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
+//	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
 
 	if (_Ctrl.SourceInfo.size() > 0)
     {
@@ -533,7 +533,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 
 		if (rInfo.IsData)
 		{
-			pDataSource = &rInfo;
+//			pDataSource = &rInfo;
 		}
 		else
 		{

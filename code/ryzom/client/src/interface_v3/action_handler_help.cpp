@@ -284,7 +284,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	// If some free window possible, search which to take
 	sint	newIndexWindow= -1;
-	bool	mustPlace= true;
 	bool	mustAddToActiveWindows= true;
 	// if an active window is not in KeepMode, get it.
 	for(i=0;i<_ActiveWindows.size();i++)
@@ -293,7 +292,6 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		if(!_InfoWindows[_ActiveWindows[i]].KeepMode && forceKeepWindow!=(sint)_ActiveWindows[i])
 		{
 			newIndexWindow= _ActiveWindows[i];
-			mustPlace= false;
 			mustAddToActiveWindows= false;
 			break;
 		}
