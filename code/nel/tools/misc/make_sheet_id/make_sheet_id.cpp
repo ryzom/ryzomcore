@@ -164,7 +164,9 @@ void readFormId( string& outputFileName )
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
 				if( itFT == FileTypeToId.end() )
 				{
-					FileTypeToId.insert( std::pair<std::string, uint8>(fileType,fid.FormIDInfos.Type) );
+					uint8 type = (uint8)fid.FormIDInfos.Type;
+
+					FileTypeToId.insert( std::pair<std::string, uint8>(fileType, type) );
 				}
 			}
 			else
