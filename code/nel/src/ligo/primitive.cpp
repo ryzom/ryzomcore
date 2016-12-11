@@ -63,7 +63,7 @@ void XMLError (xmlNodePtr xmlNode, const std::string &filename, const char *form
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	Error (filename, "node (%s), line (%p) : %s", xmlNode->name, xmlNode->content, buffer);
+	Error (filename, "node (%s), line (%d) : %s", xmlNode->name, xmlNode->line, buffer);
 }
 
 
