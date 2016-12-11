@@ -116,7 +116,7 @@ void CMusicPlayer::play (sint index)
 	if(!SoundMngr)
 		return;
 
-	if (index >= 0 && index < _Songs.size())
+	if (index >= 0 && index < (sint)_Songs.size())
 	{
 		if (_State == Paused)
 			stop();
