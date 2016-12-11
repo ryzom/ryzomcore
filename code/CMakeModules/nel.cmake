@@ -888,9 +888,11 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # never display these warnings because they are minor
-    ADD_PLATFORM_FLAGS("-Wno-unused-parameter -Wno-unused-variable -Wunused-function -Wunused-value")
+    ADD_PLATFORM_FLAGS("-Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-value")
 
-    IF(CLANG)
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "6.0.0")
+      ADD_PLATFORM_FLAGS("-Wno-unused-local-typedefs")
+    ELSEIF(CLANG)
       ADD_PLATFORM_FLAGS("-Wno-unused-private-field -Wno-unused-local-typedef")
     ENDIF()
 

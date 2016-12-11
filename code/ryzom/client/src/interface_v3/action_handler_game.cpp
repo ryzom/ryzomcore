@@ -3204,17 +3204,20 @@ class CHandlerGameConfigMode : public IActionHandler
 				bool bFound = false;
 				string tmp = toString(VideoModes[i].Frequency);
 				for (j = 0; j < (sint)stringFreqList.size(); ++j)
+				{
 					if (stringFreqList[j] == tmp)
 					{
 						bFound = true;
 						break;
 					}
-					if (!bFound)
-					{
-						stringFreqList.push_back(tmp);
-						if (ClientCfg.Frequency == VideoModes[i].Frequency)
-							nFoundFreq = j;
-					}
+				}
+
+				if (!bFound)
+				{
+					stringFreqList.push_back(tmp);
+					if (ClientCfg.Frequency == VideoModes[i].Frequency)
+						nFoundFreq = j;
+				}
 			}
 		}
 		if (nFoundFreq == -1) nFoundFreq = 0;

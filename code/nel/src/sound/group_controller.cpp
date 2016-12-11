@@ -62,7 +62,7 @@ CGroupController::~CGroupController()
 
 void CGroupController::addSource(CSourceCommon *source)
 {
-	nlassert(this);
+	nlassert(this != NULL);
 
 	m_Sources.insert(source);
 	increaseSources();

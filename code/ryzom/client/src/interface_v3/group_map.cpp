@@ -840,13 +840,13 @@ bool CGroupMap::getCtrlsUnder (sint32 x, sint32 y, sint32 clipX, sint32 clipY, s
 		(y < (clipY + clipH))))
 		return false;
 
-	bool bFound = false;
+//	bool bFound = false;
 	for (uint32 i = 0; i < _PolyButtons.size(); ++i)
 	{
 		if (_PolyButtons[i]->contains(CVector2f((float)x,(float)y)))
 		{
 			vICL.push_back(_PolyButtons[i]);
-			bFound = true;
+//			bFound = true;
 		}
 	}
 	return CInterfaceGroup::getCtrlsUnder(x, y, clipX, clipY, clipW, clipH, vICL);

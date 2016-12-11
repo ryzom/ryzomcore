@@ -262,7 +262,6 @@ void CInstanceMapDeco::onPreRender(CGroupMap &groupMap)
 		{
 			_Orient->setActive(true);
 			_Orient->setColorRGBA(CRGBA(255, 255, 255, (uint8) (255 * _OrientBlendFactor)));
-			CVector2f worldPos = getWorldPos();
 			sint32 x;
 			sint32 y;
 			groupMap.worldToWindowSnapped(x, y, getWorldPos());

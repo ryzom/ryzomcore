@@ -228,15 +228,21 @@ namespace NLGUI
 
 		// path already has leading slash
 		if (!path.empty())
+		{
 			result += path;
+		}
 
 		if (!query.empty())
-			if (query.find_first_of("?") != 0)
-				result += "?";
+		{
+			if (query.find_first_of("?") != 0) result += "?";
+
 			result += query;
+		}
 
 		if (!hash.empty())
+		{
 			result += "#" + hash;
+		}
 
 		return result;
 	}
