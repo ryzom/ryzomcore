@@ -169,7 +169,7 @@ std::string getStringCategory(const ucstring &src, ucstring &dest, bool alwaysAd
 std::string getStringCategoryIfAny(const ucstring &src, ucstring &dest);
 
 bool getRelativeFloatFromString(const std::string src, float &dst);
-bool updateVector(const std::string part, NLMISC::CVector &dst, float value, bool add = false);
+void updateVector(const std::string part, NLMISC::CVector &dst, float value, bool add = false);
 
 // Number of shortcut
 #define RYZOM_MAX_SHORTCUT 20

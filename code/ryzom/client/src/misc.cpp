@@ -1523,7 +1523,7 @@ bool getRelativeFloatFromString(const std::string src, float &dst)
 	return false;
 }
 
-bool updateVector(const string part, CVector &dst, float value, bool add /* = false */)
+void updateVector(const string part, CVector &dst, float value, bool add /* = false */)
 {
 	string p = part;
 	if (part.size() > 1)
