@@ -2011,7 +2011,6 @@ namespace NLGUI
 								it = styles.find("background-image");
 								if (it != styles.end())
 								{
-									nlinfo("found background-image %s", it->second.c_str());
 									string image = (*it).second;
 									string::size_type texExt = toLower(image).find("url(");
 									// Url image

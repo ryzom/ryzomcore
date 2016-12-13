@@ -548,7 +548,6 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 		if (_LastRemovedInstance != -1)
 		{
 			idx = _LastRemovedInstance;
-			nlinfo("OK adding to index : %d", idx);
 			_ShapeInstances[idx].Instance = instance;
 			_ShapeInstances[idx].Primitive = primitive;
 			_ShapeInstances[idx].ContextText = text;
@@ -562,7 +561,6 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 		}
 		else
 		{
-			nlinfo("OK url, text = %s, %s", url.c_str(), text.c_str());
 			CShapeInstanceReference instref = CShapeInstanceReference(instance, text, url, !text.empty() || !url.empty());
 			instref.Primitive = primitive;
 			idx = _ShapeInstances.size();
@@ -585,11 +583,15 @@ bool CEntityManager::deleteInstance(uint32 idx)
 	{
 		PACS->removePrimitive(primitive);
 	}
-	_ShapeInstances[idx].Primitive = NULL;
-	_ShapeInstances[idx].Deleted = true;
-	_ShapeInstances[idx].LastDeleted = _LastRemovedInstance;
-	_LastRemovedInstance = idx;
-		
+	
+	if (!_ShapeInstances[idx].Deleted)
+	{
+		_ShapeInstances[idx].Primitive = NULL;
+		_ShapeInstances[idx].Deleted = true;
+		_ShapeInstances[idx].LastDeleted = _LastRemovedInstance;
+		_LastRemovedInstance = idx;
+	}
+
 	return true;
 }
 
@@ -741,8 +743,6 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 	
 	for (uint32 i=0; i < keys.size(); i++)
 	{
-		nlinfo("Setup [%s] with [%s]", keys[i].c_str(), values[i].c_str());
-		
 		string param = keys[i];
 		if (param == "transparency")
 		{
@@ -915,15 +915,23 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 			//= _ShapeInstances[i].SelectionBox;
 			if(!_ShapeInstances[i].Instance.empty()) {
 				_ShapeInstances[i].Instance.getShapeAABBox(bbox);
+				CVector bbox_min;
+				CVector bbox_max;
+				
 				if (bbox.getCenter() == CVector::Null)
 				{
-					bbox.setMinMax(CVector(-0.3f, -0.3f, -0.3f)+_ShapeInstances[i].Instance.getPos(), CVector(0.3f, 0.3f, 0.3f)+_ShapeInstances[i].Instance.getPos());
+					bbox_min = CVector(-0.5f, -0.5f, -0.5f);
+					bbox_max = CVector(-0.5f, -0.5f, -0.5f);
 				}
 				else
 				{
-					bbox.setMinMax((bbox.getMin()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox.getMax()*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
+					bbox_min = bbox.getMin();
+					bbox_max = bbox.getMax();
 				}
-				if(bbox.intersect(pos, pos+dir*50.0f))
+				
+				bbox.setMinMax((bbox_min*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox_max*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
+				
+				if(bbox.intersect(pos, pos+dir*100.0f))
 				{
 					float dist = (bbox.getCenter()-pos).norm();
 					if (dist < bestDist)

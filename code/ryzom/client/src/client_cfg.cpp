@@ -1046,7 +1046,7 @@ void CClientConfig::setValues()
 
 	/////////////////////////
 	// NEW PATCHING SYSTEM //
-	READ_BOOL_DEV(PatchWanted)
+	READ_BOOL_FV(PatchWanted)
 
 #ifdef RZ_USE_CUSTOM_PATCH_SERVER
 	READ_STRING_FV(PatchUrl)

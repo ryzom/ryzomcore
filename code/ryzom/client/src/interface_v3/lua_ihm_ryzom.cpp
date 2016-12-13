@@ -1204,8 +1204,20 @@ int CLuaIHMRyzom::getShapeIdAt(CLuaState &ls)
 	
 	uint32 x = (uint32)ls.toInteger(1);
 	uint32 y = (uint32)ls.toInteger(2);	
+	
+	uint32 w, h;
+	CViewRenderer &viewRender = *CViewRenderer::getInstance();
+	viewRender.getScreenSize(w, h);
+	if(x >= w || y >= h) {
+		ls.push(-1);
+		return 1;
+	}
+
+	float cursX = (float)x/(float)w;
+	float cursY = (float)y/(float)h;
+	
 	sint32 instance_idx;
-	EntitiesMngr.getShapeInstanceUnderPos(x, y, instance_idx);
+	EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY, instance_idx);
 	ls.push(instance_idx);
 	
 	return 1;
@@ -2177,7 +2189,6 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 		UMovePrimitive *primitive = instref.Primitive;
 		if (primitive)
 		{
-			nlinfo("ok");
 			NLMISC::CAABBox bbox;
 			instance.getShapeAABBox(bbox);
 
@@ -2188,11 +2199,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 			primitive->setPrimitiveType(UMovePrimitive::_2DOrientedBox);
 			primitive->setSize((bbox.getMax().x - bbox.getMin().x)*scale, (bbox.getMax().y - bbox.getMin().y)*scale);
 			primitive->setHeight((bbox.getMax().z - bbox.getMin().z)*scale);
-			//primitive->setSize(9.0f, 9.0f);
-			//primitive->setHeight(12.0f);
-			
-			nlinfo("%f, %f, %f", (bbox.getMax().x - bbox.getMin().x)*scale, (bbox.getMax().y - bbox.getMin().y)*scale, (bbox.getMax().z - bbox.getMin().z)*scale );
-			
+
 			primitive->setCollisionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
 			primitive->setOcclusionMask(MaskColPlayer | MaskColNpc | MaskColDoor);
 			primitive->setObstacle(true);
