@@ -26,6 +26,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -1710,9 +1713,9 @@ void			CDriverGL::resetVertexArrayRange()
 
 	// After, Clear the 2 vertexArrayRange, if any.
 	if(_AGPVertexArrayRange)
-		_AGPVertexArrayRange->free();
+		_AGPVertexArrayRange->freeBlock();
 	if(_VRAMVertexArrayRange)
-		_VRAMVertexArrayRange->free();
+		_VRAMVertexArrayRange->freeBlock();
 }
 
 

@@ -230,21 +230,9 @@ BOOL CBaseDialog::PreTranslateMessage(MSG* pMsg)
 	return CDialog::PreTranslateMessage(pMsg);
 }
 
-void CBaseDialog::setEditTextMultiLine (CEdit &edit, const char *text)
+void CBaseDialog::setEditTextMultiLine (CEdit &edit, const std::string &text)
 {
-	string temp;
-	uint size = strlen (text);
-	temp.reserve (2*size);
-	bool previousR=false;
-	for (uint c=0; c<size; c++)
-	{
-		if ((text[c] == '\n') && (!previousR))
-			temp += "\r\n";
-		else
-			temp += text[c];
-		previousR = (text[c] == '\r');
-	}
-	edit.SetWindowText (temp.c_str ());
+	edit.SetWindowText (utf8ToTStr(addSlashR(text)));
 }	
 
 void CBaseDialog::onOpenSelected() 
@@ -254,10 +242,10 @@ void CBaseDialog::onOpenSelected()
 void CBaseDialog::registerLastControl ()
 {
 	RECT rect = {0, 0, 0, 0};
-	DummyStatic0.Create ("Coucou", WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 30);
+	DummyStatic0.Create (_T("Coucou"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 30);
 	DummyStatic0.Dlg = this;
 	DummyStatic0.Index = 0;
-	DummyStatic1.Create ("Coucou", WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 31);
+	DummyStatic1.Create (_T("Coucou"), WS_CHILD|WS_VISIBLE|WS_TABSTOP, rect, this, 31);
 	DummyStatic1.Dlg = this;
 	DummyStatic1.Index = 1;
 }

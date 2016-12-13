@@ -69,6 +69,10 @@ using namespace NLNET;
 // Macros
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 //
 // RYZOM_TRY and RYZOM_CATCH aim is to catch differently in dev and final version
 //    In final version, we catch everything and nlerror the problem to display a NeL message box
@@ -147,6 +151,10 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE /* hPrevInstance */, LPSTR cm
 int main(int argc, char **argv)
 #endif
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+	_CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
+
 	// init the Nel context
 	CApplicationContext *appContext = new CApplicationContext;
 
@@ -179,13 +187,12 @@ int main(int argc, char **argv)
 	Args.addArg("", "release", "", "Crash client after init");
 #endif // TEST_CRASH_COUNTER
 
+	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 #ifdef NL_OS_WINDOWS
 	if (!Args.parse(cmdline)) return 1;
 #else
 	if (!Args.parse(argc, argv)) return 1;
 #endif
-
-	// extract the 2 or 3 first param (argv[1], argv[2] and argv[3]) it must be <login> <password> [shardId]
 
 	// no shard id in ring mode
 	std::string sLoginShardId;
@@ -315,6 +322,16 @@ int main(int argc, char **argv)
 			//ICommand::execute("iFileAccessLogStop",*NLMISC::InfoLog);
 			//ICommand::execute("iFileAccessLogClear",*NLMISC::InfoLog);
 #endif
+
+			release();
+
+			// delete all logs and displayers when we're not using logs macros anymore
+			destroyDebug();
+			CLog::releaseProcessName();
+
+			// delete the Nel context
+			delete appContext;
+
 			return EXIT_SUCCESS;
 		}
 	}
@@ -402,6 +419,10 @@ int main(int argc, char **argv)
 #if FINAL_VERSION || defined (TEST_CRASH_COUNTER)
 	quitCrashReport ();
 #endif // FINAL_VERSION
+
+	// delete all logs and displayers when we're not using logs macros anymore
+	destroyDebug();
+	CLog::releaseProcessName();
 
 	// delete the Nel context
 	delete appContext;

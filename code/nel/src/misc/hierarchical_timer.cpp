@@ -1082,7 +1082,7 @@ NLMISC_CATEGORISED_COMMAND(nel,displayMeasures, "display hierarchical timer", "[
 	}
 
 	sint	depth = 0;
-	bool	hasDepth = (sscanf(args[0].c_str(), "%d", &depth) == 1 || (args.size() > 1 && sscanf(args[1].c_str(), "%d", &depth) == 1));
+	bool	hasDepth = (fromString(args[0], depth) || (args.size() > 1 && fromString(args[1], depth)));
 
 	CASE_DISPLAYMEASURES(NoSort, -3)
 	CASE_DISPLAYMEASURES(TotalTime, -2)

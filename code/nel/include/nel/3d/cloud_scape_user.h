@@ -22,6 +22,7 @@ namespace NL3D
 class UDriver;
 class UCamera;
 class CCloudScape;
+class CScene;
 
 /// implementation of UWaterInstance methods
 class CCloudScapeUser : public UCloudScape

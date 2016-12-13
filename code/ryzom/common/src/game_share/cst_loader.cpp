@@ -227,7 +227,7 @@ void CSTLoader::generateDerivedClasses(const std::list< std::pair<std::string, T
 					content += "new Bool(" + (*it_val);
 					break;
 				default:
-					content += "ERROR: unsuported type " + toString((uint)(*it_def).second) + "\n";
+					content += "ERROR: unsupported type " + toString((uint)(*it_def).second) + "\n";
 					break;
 			}
 			content += ");\n";

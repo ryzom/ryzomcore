@@ -22,5 +22,7 @@ NL_DEFAULT_PROPS(nel_patch_paint "MAX Plugin: NeL Patch Painter")
 NL_ADD_RUNTIME_FLAGS(nel_patch_paint)
 NL_ADD_LIB_SUFFIX(nel_patch_paint)
 
+ADD_DEFINITIONS(${MAXSDK_DEFINITIONS})
+
 INSTALL(TARGETS nel_patch_paint RUNTIME DESTINATION maxplugin/plugins LIBRARY DESTINATION ${NL_LIB_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT libraries)
 INSTALL(FILES keys.cfg DESTINATION maxplugin/plugins )

@@ -546,7 +546,7 @@ unsigned long Browse::MyControllingFunction( void* pParam )
 						rot = tileBank2.getTile (index)->getRotAlpha ();
 				}
 				else
-					path = "";
+					path.clear();
 			}
 			break;
 		case 3:
@@ -576,7 +576,7 @@ unsigned long Browse::MyControllingFunction( void* pParam )
 			break;
 		}
 
-		if ((path!="") && _LoadBitmap(tileBank2.getAbsPath() + path, pBmp, *bits, pAlpha, rot))
+		if (!path.empty() && _LoadBitmap(tileBank2.getAbsPath() + path, pBmp, *bits, pAlpha, rot))
 		{			
 			*ld=1;
 			int iFV,iLV; br->m_ctrl.GetVisibility(iFV, iLV, br->m_128x128);
@@ -633,7 +633,7 @@ void Browse::Init()
 		value=256;
 		type=REG_SZ;
 		if (RegQueryValueEx(regkey,REGKEY_LASTPATH,0,&type,(unsigned char *)&sWindowpl,&value)!=ERROR_SUCCESS)
-			m_ctrl.LastPath="";
+			m_ctrl.LastPath.clear();
 		else
 			m_ctrl.LastPath=(const char*)sWindowpl;
 		value=4;
@@ -778,7 +778,7 @@ void Browse::OnCancel()
 	// TODO: Add your control notification handler code here
 	if (thread_actif) return;
 
-	if (::MessageBox (NULL, "Are you sure you want to cancel?", "Cancel", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+	if (::MessageBox (NULL, _T("Are you sure you want to cancel?"), _T("Cancel"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 	{
 		this->SendMessage(WM_CLOSE);
 		CDialog::OnCancel();
@@ -884,27 +884,27 @@ void Browse::OnChangeVariety()
 
 void Browse::OnBatchLoad ()
 {
-	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 
 	if (sFile.DoModal()==IDOK)
 	{
-		char sDrive[256];
-		char sPath[256];
-		char sName[256];
-		char sExt[256];
-		_splitpath (sFile.GetPathName(), sDrive, sPath, sName, sExt);
+		std::string fullPath = tStrToUtf8(sFile.GetPathName());
+
+		std::string path = NLMISC::CFile::getPath(fullPath);
+		std::string filename = NLMISC::CFile::getFilenameWithoutExtension(fullPath);
+		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
 		// look for some numbers..
-		char *sNumber=sName+strlen(sName)-1;
-		while ((sNumber>sName)&&(*sNumber>='0')&&(*sNumber<='9'))
+		std::string::size_type pos = filename.find_last_not_of("0123456789");
+
+		if (pos != std::string::npos)
 		{
-			sNumber--;
+			filename = filename.substr(0, pos + 1);
 		}
-		sNumber[1]=0;
 
 		bool rotate=false;
-		if (::MessageBox (NULL, "Do you want to use rotation to reuse alpha tiles ?", "Import rotated tiles", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+
+		if (::MessageBox (NULL, _T("Do you want to use rotation to reuse alpha tiles ?"), _T("Import rotated tiles"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 			rotate=true;
 
 		for (int i=0; i<CTileSet::count; i++)
@@ -916,7 +916,7 @@ void Browse::OnBatchLoad ()
 
 				// Transition to patch
 				CTileSetTransition* trans=tileBank2.getTileSet (land)->getTransition (transition);
-				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (CTile::alpha)=="")
+				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (CTile::alpha).empty())
 				{
 					// Continue ?
 					int ok;
@@ -925,11 +925,9 @@ void Browse::OnBatchLoad ()
 					for (int rot=0; rot<4; rot++)
 					{
 						// Try to load a tile with a file name like /tiletransition0.tga
-						char sName2[256];
-						char sFinal[256];
-						sprintf (sName2, "%s%02d", sName, (int)transition);
-						_makepath (sFinal, sDrive, sPath, sName2, sExt);
-						FILE *pFile=fopen (sFinal, "rb");
+						std::string sFinal = path + toString("%s%02d.%s", filename.c_str(), (int)transition, ext.c_str());
+
+						FILE *pFile = nlfopen (sFinal, "rb");
 
 						// Close the file and add the tile if opened
 						if (pFile)
@@ -958,14 +956,12 @@ void Browse::OnBatchLoad ()
 
 				// Transition to patch
 				CTileSetTransition* trans=tileBank2.getTileSet (land)->getTransition (transition);
-				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (m_ctrl.Texture==1?CTile::diffuse:CTile::additive)=="")
+				if (tileBank2.getTile (trans->getTile())->getRelativeFileName (m_ctrl.Texture==1?CTile::diffuse:CTile::additive).empty())
 				{
 					// Try to load a tile with a file name like /tiletransition0.tga
-					char sName2[256];
-					char sFinal[256];
-					sprintf (sName2, "%s%02d", sName, (int)transition);
-					_makepath (sFinal, sDrive, sPath, sName2, sExt);
-					FILE *pFile=fopen (sFinal, "rb");
+					std::string sFinal = path + toString("%s%02d.%s", filename.c_str(), (int)transition, ext.c_str());
+
+					FILE *pFile = nlfopen (sFinal, "rb");
 
 					// Close the file and add the tile if opened
 					if (pFile)
@@ -1364,8 +1360,7 @@ void Browse::OnSubgroup11()
 void Browse::OnExportBorder() 
 {
 	// Select a file
-	CFileDialog sFile (false, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (false, NULL, NULL, OFN_ENABLESIZING, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
@@ -1401,7 +1396,7 @@ void Browse::OnExportBorder()
 			try
 			{
 				COFile file;
-				if (file.open ((const char*)pathName))
+				if (file.open (tStrToUtf8(pathName)))
 				{
 					// Export
 					bitmap.writeTGA (file, 32);
@@ -1409,7 +1404,7 @@ void Browse::OnExportBorder()
 				else
 					error=true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				const char *toto=e.what ();
 				error=true;
@@ -1419,9 +1414,8 @@ void Browse::OnExportBorder()
 			if (error)
 			{
 				// Error message
-				char tmp[512];
-				sprintf (tmp, "Can't write bitmap %s", (const char*)pathName);
-				MessageBox (tmp, "Export border", MB_OK|MB_ICONEXCLAMATION);
+				std::string tmp = toString("Can't write bitmap %s", tStrToUtf8(pathName).c_str());
+				MessageBox (utf8ToTStr(tmp), _T("Export border"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -1430,8 +1424,7 @@ void Browse::OnExportBorder()
 void Browse::OnImportBorder() 
 {
 	// Select a file
-	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,
-		"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
+	CFileDialog sFile (true, NULL, NULL, OFN_ENABLESIZING,_T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Get the border of the bank
@@ -1446,7 +1439,7 @@ void Browse::OnImportBorder()
 		try
 		{
 			CIFile file;
-			if (file.open ((const char*)pathName))
+			if (file.open (tStrToUtf8(pathName)))
 			{
 				// Export
 				bitmap.load (file);
@@ -1454,7 +1447,7 @@ void Browse::OnImportBorder()
 			else
 				error=true;
 		}
-		catch (Exception& e)
+		catch (const Exception& e)
 		{
 			const char *toto=e.what ();
 			error=true;
@@ -1464,9 +1457,8 @@ void Browse::OnImportBorder()
 		if (error)
 		{
 			// Error message
-			char tmp[512];
-			sprintf (tmp, "Can't read bitmap %s", (const char*)pathName);
-			MessageBox (tmp, "Import border", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("Can't read bitmap %s", tStrToUtf8(pathName).c_str());
+			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		// Get pixel
@@ -1489,9 +1481,8 @@ void Browse::OnImportBorder()
 		else
 		{
 			// Error message
-			char tmp[512];
-			sprintf (tmp, "The bitmap must have a size of 128x128 (%s)", (const char*)pathName);
-			MessageBox (tmp, "Import border", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("The bitmap must have a size of 128x128 (%s)", tStrToUtf8(pathName).c_str());
+			MessageBox (utf8ToTStr(tmp), _T("Import border"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		// 256 or 128 ?
@@ -1500,6 +1491,6 @@ void Browse::OnImportBorder()
 		tileBank2.getTileSet (land)->setBorder (m_ctrl.Texture==1?CTile::diffuse:CTile::additive, border);
 
 		// Message
-		MessageBox ("The border has been changed.", "Import border", MB_OK|MB_ICONINFORMATION);
+		MessageBox (_T("The border has been changed."), _T("Import border"), MB_OK|MB_ICONINFORMATION);
 	}
 }

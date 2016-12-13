@@ -36,6 +36,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -195,18 +198,6 @@ CDriverGL::CDriverGL()
 	_glView             = nil;
 	_backBufferHeight   = 0;
 	_backBufferWidth    = 0;
-
-	// autorelease pool for memory management
-	_autoreleasePool = [[NSAutoreleasePool alloc] init];
-
-	// init the application object
-	[NSApplication sharedApplication];
-
-	// create the menu in the top screen bar
-	setupApplicationMenu();
-
-	// finish the application launching
-	[NSApp finishLaunching];
 
 #elif defined (NL_OS_UNIX)
 
@@ -373,10 +364,6 @@ CDriverGL::~CDriverGL()
 {
 	H_AUTO_OGL(CDriverGL_CDriverGLDtor)
 	release();
-
-#if defined(NL_OS_MAC)
-	[_autoreleasePool release];
-#endif
 }
 
 // --------------------------------------------------
@@ -638,7 +625,7 @@ bool CDriverGL::setupDisplay()
 	checkForPerPixelLightingSupport();
 
 #ifndef USE_OPENGLES
-	// if EXTVertexShader is used, bind  the standard GL arrays, and allocate constant
+	// if EXTVertexShader is used, bind the standard GL arrays, and allocate constant
 	if (!_Extensions.NVVertexProgram && !_Extensions.ARBVertexProgram && _Extensions.EXTVertexShader)
 	{
 		_EVSPositionHandle	= nglBindParameterEXT(GL_CURRENT_VERTEX_EXT);
@@ -941,13 +928,6 @@ bool CDriverGL::swapBuffers()
 	SwapBuffers(_hDC);
 
 #elif defined(NL_OS_MAC)
-
-	// TODO: maybe do this somewhere else?
-	if(_DestroyWindow)
-	{
-		[_autoreleasePool release];
-		_autoreleasePool = [[NSAutoreleasePool alloc] init];
-	}
 
 	[_ctx flushBuffer];
 

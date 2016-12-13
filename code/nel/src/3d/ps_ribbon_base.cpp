@@ -20,6 +20,8 @@
 #include "nel/3d/ps_ribbon_base.h"
 #include "nel/3d/particle_system.h"
 
+using namespace NLMISC;
+
 namespace NL3D
 {
 

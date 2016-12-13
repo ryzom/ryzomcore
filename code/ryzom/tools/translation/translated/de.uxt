@@ -6024,7 +6024,7 @@ uiFame_tribe_root_tappers	[Unterwasserwurzel-Extrahierer]
 
 // HASH_VALUE E4832439E1C3A07C
 // INDEX 1462
-uiFame_tribe_sacred_sap	[Heiliges Sap]
+uiFame_tribe_sacred_sap	[Heiliger Sap]
 
 // HASH_VALUE 448B505B94DA7C4F
 // INDEX 1463
@@ -10496,13 +10496,13 @@ uihelpItemChargeSpell	[@{FFF9}Sapladung: @{T12}@{FFFF}%quality\n
 	@{FFF9}@{HuittInfoBulk}Volumen: @{H}@{T12}@{FFFF}%bulk\n
 	\n
 	Mit diesem Gegenstand kann man\n
-	das Sap einer verzauberten Waffe wieder aufladen.\n
+	den Sap einer verzauberten Waffe wieder aufladen.\n
 	\n
 	Nimm die aufzuladende Waffe in die rechte Hand.\n
 	\n
 	Rechtsklicke dann auf die Ladung und wähle 'RECHTE HAND WIEDER AUFLADEN'.\n
 	\n
-	Die Sapladung und ihr Maximum können mit einem Rechtsklick auf den Gegenstand unter 'Info' eingesehen werden.\n
+	Die Sap-Ladung und ihr Maximum können mit einem Rechtsklick auf den Gegenstand unter 'Info' eingesehen werden.\n
 	%cansell%custom_text]
 
 // HASH_VALUE 88359CF16D5CFDBD
@@ -10705,7 +10705,7 @@ uihelpPhraseEnchantmentFormat	[\n
 	\n
 	@{FFF9}Aktionen und Zauber auf verzauberten Gegenständen gelingen immer.\n
 	@{FFF9}Zauberdauer: @{T12}@{FFFF}%duration seconds\n
-	@{FFF9}Sapverbrauch: @{T12}@{FFFF}%energy_cost\n
+	@{FFF9}Sap-Verbrauch: @{T12}@{FFFF}%energy_cost\n
 	@{FFF9}Lebensverbrauch: @{T12}@{FFFF}%hp_cost\n
 	@{FFF9}Reichweite: @{T12}@{FFFF}%range\n
 	]
@@ -10719,7 +10719,7 @@ uihelpPhraseCrystalSpellFormat	[@{FFFF}--- Verzauberung ---\n
 	\n
 	@{FFF9}Aktionen und Zauber auf verzauberten Gegenständen gelingen immer.\n
 	@{FFF9}Zauberdauer: @{T12}@{FFFF}%duration Sekunden\n
-	@{FFF9}Sapverbrauch: @{T12}@{FFFF}%energy_cost\n
+	@{FFF9}Sap-Verbrauch: @{T12}@{FFFF}%energy_cost\n
 	@{FFF9}Lebensverbrauch: @{T12}@{FFFF}%hp_cost\n
 	@{FFF9}Reichweite: @{T12}@{FFFF}%range\n
 	]
@@ -15689,15 +15689,15 @@ Range_Weapon_Smith_Apprentice	[Fernkampfwaffen-Schmiedelehrling]
 
 // HASH_VALUE 9FC3009098F72FBE
 // INDEX 3745
-Heavy_Armorer	[Schwerer Ausrüster]
+Heavy_Armorer	[Schmied für schwere Rüstungen]
 
 // HASH_VALUE 1D63FC8619E707BF
 // INDEX 3746
-Light_Armorer	[Leichter Ausrüster]
+Light_Armorer	[Hersteller von leichten Rüstungen]
 
 // HASH_VALUE EDE9B8925E431847
 // INDEX 3747
-Medium_Armorer	[Mittelschwerer Ausrüster]
+Medium_Armorer	[Schmied für mittelschwere Rüstungen]
 
 // HASH_VALUE A075787F1BE16898
 // INDEX 3748
@@ -15713,11 +15713,11 @@ Melee_Weapon_Smith	[Nahkampfwaffenschmied]
 
 // HASH_VALUE 8E25BC6AE8653A8E
 // INDEX 3751
-Melee_Heavy_Weapon_Smith	[Schwerer Nahkampfwaffenschmied]
+Melee_Heavy_Weapon_Smith	[Schmied für schwere Nahkampfwaffen]
 
 // HASH_VALUE 8ED58470EAE53A8E
 // INDEX 3752
-Melee_Light_Weapon_Smith	[Leichter Nahkampfwaffenschmied]
+Melee_Light_Weapon_Smith	[Fortgeschrittener Schmied für leichte Nahkampfwaffen]
 
 // HASH_VALUE E8177C7E8FA32362
 // INDEX 3753
@@ -15725,19 +15725,19 @@ Range_Weapon_Smith	[Fernkampfwaffenschmied]
 
 // HASH_VALUE 8E659C74E8653A8E
 // INDEX 3754
-Range_Heavy_Weapon_Smith	[Schwerer Fernkampfwaffenschmied]
+Range_Heavy_Weapon_Smith	[Schmied für schwere Fernkampfwaffen]
 
 // HASH_VALUE 2499EC49946ECCAE
 // INDEX 3755
-Advanced_Heavy_Armorer	[Fortgeschrittener Schwerer Ausrüster]
+Advanced_Heavy_Armorer	[Fortgeschrittener Schmied für schwere Rüstungen]
 
 // HASH_VALUE A5D9FC49956EB8A0
 // INDEX 3756
-Advanced_Light_Armorer	[Fortgeschrittener Leichter Ausrüster]
+Advanced_Light_Armorer	[Fortgeschrittener Hersteller von leichten Rüstungen]
 
 // HASH_VALUE E7A9680679998CAC
 // INDEX 3757
-Advanced_Medium_Armorer	[Fortgeschrittener Mittelschwerer Ausrüster]
+Advanced_Medium_Armorer	[Fortgeschrittener Schmied für mittelschwere Rüstungen]
 
 // HASH_VALUE 28B94C15D817C39F
 // INDEX 3758
@@ -15753,11 +15753,11 @@ Advanced_Melee_Weapon_Smith	[Fortgeschrittener Nahkampfwaffenschmied]
 
 // HASH_VALUE D90A089EA0443446
 // INDEX 3761
-Advanced_Melee_Heavy_Weapon_Smith	[Fortgeschrittener Schwerer Nahkampfwaffenschmied]
+Advanced_Melee_Heavy_Weapon_Smith	[Fortgeschrittener Schmied für schwere Nahkampfwaffen]
 
 // HASH_VALUE 982920A2A1443446
 // INDEX 3762
-Advanced_Melee_Light_Weapon_Smith	[Fortgeschrittener Leichter Nahkampfwaffenschmied]
+Advanced_Melee_Light_Weapon_Smith	[Fortgeschrittener Schmied für leichte Nahkampfwaffen]
 
 // HASH_VALUE 1E0A302FE4A37BA7
 // INDEX 3763
@@ -15765,59 +15765,59 @@ Advanced_Range_Weapon_Smith	[Fortgeschrittener Fernkampfwaffenschmied]
 
 // HASH_VALUE 59CA1C9EA0443448
 // INDEX 3764
-Advanced_Range_Heavy_Weapon_Smith	[Fortgeschrittener Schwerer Fernkampf-Waffenschmied]
+Advanced_Range_Heavy_Weapon_Smith	[Fortgeschrittener Schmied für schwere Fernkampfwaffen]
 
 // HASH_VALUE 65C6008B24973C3C
 // INDEX 3765
-Expert_Heavy_Armorer	[Schwerer Rüstungsexperte]
+Expert_Heavy_Armorer	[Erfahrener Schmied für schwere Rüstungen]
 
 // HASH_VALUE 25E5188FE4B65440
 // INDEX 3766
-Expert_Light_Armorer	[Leichter Rüstungsexperte]
+Expert_Light_Armorer	[Erfahrener Hersteller von leichten Rüstungen]
 
 // HASH_VALUE 170BF87C65E3FB9E
 // INDEX 3767
-Expert_Medium_Armorer	[Mittelschwerer Rüstungsexperte]
+Expert_Medium_Armorer	[Erfahrener Schmied für mittelschwere Rüstungen]
 
 // HASH_VALUE DF18D78AE453A7B7
 // INDEX 3768
-Expert_Shield_Smith	[Schildschmied-Experte]
+Expert_Shield_Smith	[Erfahrener Schildschmied]
 
 // HASH_VALUE 2DDA047FE6B3A43C
 // INDEX 3769
-Expert_Jeweler	[Juwelierexperte]
+Expert_Jeweler	[Erfahrener Juwelier]
 
 // HASH_VALUE D6CA6482D035AC4A
 // INDEX 3770
-Expert_Melee_Weapon_Smith	[Nahkampfwaffenschmied-Experte]
+Expert_Melee_Weapon_Smith	[Erfahrener Nahkampfwaffenschmied]
 
 // HASH_VALUE E294F78ED7E54860
 // INDEX 3771
-Expert_Melee_Heavy_Weapon_Smith	[ Schwerer Nahkampfwaffenschmied-Experte]
+Expert_Melee_Heavy_Weapon_Smith	[Erfahrener Schmied für schwere Nahkampfwaffen]
 
 // HASH_VALUE E294E38058255860
 // INDEX 3772
-Expert_Melee_Light_Weapon_Smith	[Leichter Nahkampfwaffenschmied-Experte]
+Expert_Melee_Light_Weapon_Smith	[Erfahrener Schmied für leichte Nahkampfwaffen]
 
 // HASH_VALUE D6EA6C7E1135AC4A
 // INDEX 3773
-Expert_Range_Weapon_Smith	[Fernkampfwaffenschmied-Experte]
+Expert_Range_Weapon_Smith	[Erfahrener Fernkampfwaffenschmied]
 
 // HASH_VALUE E2B4FF8A18E54860
 // INDEX 3774
-Expert_Range_Heavy_Weapon_Smith	[Schwerer Fernkampfwaffenschmied-Experte]
+Expert_Range_Heavy_Weapon_Smith	[Erfahrener Schmied für schwere Fernkampfwaffen]
 
 // HASH_VALUE 2EA7A3A1EA2552A0
 // INDEX 3775
-Heavy_Armorer_Master	[Schwerer Rüstungsmeister]
+Heavy_Armorer_Master	[Meister-Schmied schwerer Rüstungen]
 
 // HASH_VALUE AB07B3A06785629F
 // INDEX 3776
-Light_Armorer_Master	[Leichter Rüstungsmeister]
+Light_Armorer_Master	[Meister-Hersteller leichter Rüstungen]
 
 // HASH_VALUE 5759EC8997307C8D
 // INDEX 3777
-Medium_Armorer_Master	[Mittelschwerer Rüstungsmeister]
+Medium_Armorer_Master	[Meister-Schmied mittelschwerer Rüstungen]
 
 // HASH_VALUE A2395B98D3F43C5D
 // INDEX 3778
@@ -15833,11 +15833,11 @@ Melee_Weapon_Smith_Master	[Nahkampfwaffenschmied-Meister]
 
 // HASH_VALUE 11755C3DE2084F9D
 // INDEX 3781
-Melee_Heavy_Weapon_Smith_Master	[Schwerer Nahkampfwaffenschmied-Meister]
+Melee_Heavy_Weapon_Smith_Master	[Meisterschmied schwerer Nahkampfwaffen]
 
 // HASH_VALUE 11252443E3484F9D
 // INDEX 3782
-Melee_Light_Weapon_Smith_Master	[Leichter Nahkampfwaffenschmied-Meister]
+Melee_Light_Weapon_Smith_Master	[Meisterschmied leichter Nahkampfwaffen]
 
 // HASH_VALUE 62F43099E1942F4D
 // INDEX 3783
@@ -15845,7 +15845,7 @@ Range_Weapon_Smith_Master	[Fernkampfwaffenschmied-Meiste]
 
 // HASH_VALUE 91954C4223084F9D
 // INDEX 3784
-Range_Heavy_Weapon_Smith_Master	[Schwerer Fernkampfwaffenschmied-Meister]
+Range_Heavy_Weapon_Smith_Master	[Meisterschmied schwerer Fernkampfwaffen]
 
 // HASH_VALUE EBA6935C563A9CAE
 // INDEX 3785
@@ -15869,7 +15869,7 @@ Jungle_Forager	[Dschungelernter]
 
 // HASH_VALUE F2583CD8EAFADCA8
 // INDEX 3790
-Lacustre_Forager	[Seelandernter]
+Lacustre_Forager	[Seenlandernter]
 
 // HASH_VALUE 52EA78461D24AF91
 // INDEX 3791
@@ -15897,23 +15897,23 @@ Advanced_Prime_Roots_Forager	[Fortgeschrittener Urwurzelernter]
 
 // HASH_VALUE 561AFC816124FB9C
 // INDEX 3797
-Expert_Desert_Forager	[Wüstenernte-Experte]
+Expert_Desert_Forager	[Erfahrener Wüstenernter]
 
 // HASH_VALUE 961AF88BE114239E
 // INDEX 3798
-Expert_Forest_Forager	[Waldernte-Experte]
+Expert_Forest_Forager	[Erfahrener Waldlandernter]
 
 // HASH_VALUE D53AE89162D33B93
 // INDEX 3799
-Expert_Jungle_Forager	[Dschungelernte-Experte]
+Expert_Jungle_Forager	[Erfahrener Dschungelernter]
 
 // HASH_VALUE 29DBEC64C443AFC1
 // INDEX 3800
-Expert_Lacustre_Forager	[Seenlandernte-Experte]
+Expert_Lacustre_Forager	[Erfahrener Seenlandernter]
 
 // HASH_VALUE 61331C90E5357871
 // INDEX 3801
-Expert_Prime_Roots_Forager	[Urwurzelernte-Experte]
+Expert_Prime_Roots_Forager	[Erfahrener Urwurzelernter]
 
 // HASH_VALUE 1A2A6C9821B3138F
 // INDEX 3802
@@ -16461,7 +16461,7 @@ mpfam107	[Ragus-Leder]
 
 // HASH_VALUE 638374426463C886
 // INDEX 3938
-mpfam109	[Entflammtes Sap]
+mpfam109	[Entflammter Sap]
 
 // HASH_VALUE 93778393264A2497
 // INDEX 3939
@@ -16905,15 +16905,15 @@ mpfam225	[Trockenes Moos]
 
 // HASH_VALUE 6BA9848A20A40760
 // INDEX 4049
-mpfam226	[Frisches Sonnwendlig]
+mpfam226	[Frischer Sonnwendlig]
 
 // HASH_VALUE E7089488A084075C
 // INDEX 4050
-mpfam227	[Getrocknetes Sonnwendlig]
+mpfam227	[Getrockneter Sonnwendlig]
 
 // HASH_VALUE A232183FE6C8B0A1
 // INDEX 4051
-mpfam228	[Blühendes Sonnwendlig]
+mpfam228	[Blühender Sonnwendlig]
 
 // HASH_VALUE 27134B89E1861365
 // INDEX 4052
@@ -16933,11 +16933,11 @@ mpfam232	[Getrocknete lockere Erde]
 
 // HASH_VALUE 2C66EC58D0B28398
 // INDEX 4056
-mpfam233	[Frisches modifiziertes Sap]
+mpfam233	[Frischer modifizierter Sap]
 
 // HASH_VALUE A986EC56D0724B98
 // INDEX 4057
-mpfam234	[Getrocknetes modifiziertes Sap]
+mpfam234	[Getrockneter modifizierter Sap]
 
 // HASH_VALUE E8F814599A97AB5E
 // INDEX 4058
@@ -17117,15 +17117,15 @@ mpfam278	[Kincher-Fleisch]
 
 // HASH_VALUE EBC7847957A8C85B
 // INDEX 4102
-mpfam279	[Kipucka Inneres]
+mpfam279	[Kipucka-Fleisch]
 
 // HASH_VALUE 8B581032EC845B90
 // INDEX 4103
-mpfam280	[Kiban Inneres]
+mpfam280	[Kiban-Fleisch]
 
 // HASH_VALUE 8CA92040AAC49387
 // INDEX 4104
-mpfam281	[Kipee Inneres]
+mpfam281	[Kipee-Fleisch]
 
 // HASH_VALUE 6187A86317E2CC79
 // INDEX 4105
@@ -17405,7 +17405,7 @@ mpfam352	[Rendor-Kralle]
 
 // HASH_VALUE A2667F9C5E93F85E
 // INDEX 4174
-mpfam353	[Wombai-Knochen]
+mpfam353	[Wombaї-Knochen]
 
 // HASH_VALUE A3963C6A1D31548E
 // INDEX 4175
@@ -17445,7 +17445,7 @@ mpfam362	[Rendor-Panzer]
 
 // HASH_VALUE A1076B9861536059
 // INDEX 4184
-mpfam363	[Wombai-Haut]
+mpfam363	[Wombaї-Haut]
 
 // HASH_VALUE 9F079F82A1D25C5A
 // INDEX 4185
@@ -17509,7 +17509,7 @@ mpfam378	[Messab-Huf]
 
 // HASH_VALUE A8896C9DDEA35C3D
 // INDEX 4200
-mpfam379	[Wombai-Leder]
+mpfam379	[Wombaї-Leder]
 
 // HASH_VALUE 62B8AF89E623686B
 // INDEX 4201
@@ -17601,7 +17601,7 @@ mpfam401	[Ploderos-Fleisch]
 
 // HASH_VALUE 20074B92DEF36051
 // INDEX 4223
-mpfam402	[Wombai-Fleisch]
+mpfam402	[Wombaї-Fleisch]
 
 // HASH_VALUE D578245285082470
 // INDEX 4224
@@ -17681,7 +17681,7 @@ mpfam421	[Ploderos-Schädel]
 
 // HASH_VALUE 1F74F47A5BA0DC84
 // INDEX 4243
-mpfam422	[Wombai-Schädel]
+mpfam422	[Wombaї-Schädel]
 
 // HASH_VALUE 2687906DD6588C5B
 // INDEX 4244
@@ -17753,7 +17753,7 @@ mpfam441	[Ploderos-Blut]
 
 // HASH_VALUE D9A4DC7BD1D0C485
 // INDEX 4261
-mpfam442	[Wombai-Blut]
+mpfam442	[Wombaї-Blut]
 
 // HASH_VALUE E626745F54684853
 // INDEX 4262
@@ -17809,7 +17809,7 @@ mpfam455	[Shalah-Haar]
 
 // HASH_VALUE 1ED5C4709801AC7A
 // INDEX 4275
-mpfam456	[Wombai-Haar]
+mpfam456	[Wombaї-Haar]
 
 // HASH_VALUE 9E75F45D5851C484
 // INDEX 4276
@@ -18661,19 +18661,19 @@ mpfam674	[Vorax-Haut]
 
 // HASH_VALUE 1DE40C511E63809E
 // INDEX 4488
-mpfam675	[Wombai-Auge]
+mpfam675	[Wombaї-Auge]
 
 // HASH_VALUE D548C08766D42091
 // INDEX 4489
-mpfam676	[Wombai-Becken]
+mpfam676	[Wombaї-Becken]
 
 // HASH_VALUE 5D94C47F99C0AC89
 // INDEX 4490
-mpfam677	[Wombai-Wirbel]
+mpfam677	[Wombaї-Wirbel]
 
 // HASH_VALUE 53C7C48E6565548D
 // INDEX 4491
-mpfam678	[Wombai-Rüssel]
+mpfam678	[Wombaї-Rüssel]
 
 // HASH_VALUE 6112477993B7344C
 // INDEX 4492
@@ -18789,11 +18789,11 @@ mpfam706	[Königliches Matis-Symbol]
 
 // HASH_VALUE 2B38A798A5E4AB8A
 // INDEX 4520
-mpfam707	[Imperales Fyros-Symbol]
+mpfam707	[Imperiales Fyros-Symbol]
 
 // HASH_VALUE 677857586645DB59
 // INDEX 4521
-mpfam708	[Dynastisches Zoraï Symbol]
+mpfam708	[Dynastisches Zoraï-Symbol]
 
 // HASH_VALUE AAE8BF99DAE2AFA3
 // INDEX 4522
@@ -18917,7 +18917,7 @@ mpfam738	[veredeltes Almati-Holz]
 
 // HASH_VALUE A9B9DC504768FC70
 // INDEX 4552
-mpfam739	[veredeltes kristallisiertes Sap]
+mpfam739	[veredelter kristallisierter Sap]
 
 // HASH_VALUE E738D44F020AB06C
 // INDEX 4553
@@ -20132,7 +20132,7 @@ uiAppear_Infos_Fyros	[DIE FYROS-ZIVILISATION\n
 	Zoraï: Über die Jahre haben die Zoraï wiederholt ihre Loyalität und Freundschaft zu unserem Volk unter Beweis gestellt. Darüber hinaus haben wir beide die Kami ins Herz geschlossen und teilen eine tiefe Abneigung gegen den Karavan.\n
 	Tryker: Wir haben mehrmals versucht, die Tryker unter unsere schützenden Fittiche zu nehmen, doch sie haben sich als zu chaotisch und unbeständig für eine anhaltende Freundschaft erwiesen. Heutzutage müssen wir uns vor den kleinen, wankelmütigen Homins in Acht nehmen, denn sie sind mehr denn je auf einer Linie mit den Matis in ihrer Verehrung der Karavan-Göttin Jena.\n
 	Matis: Die Matis sind unser Feind von Natur aus, dem nicht zu trauen ist. Wir lehnen die matisianische Interpretation von Gerechtigkeit ab, die sich um die Monarchie und die Gesetze Jenas anordnet. Selbst in diesen friedlichen Zeiten müssen wir auf der Hut sein, dass sie sich nicht gegen uns verbünden.\n
-	Zu den freundlichen Stämmen gehören: Die Unterwasserwurzel-Extrahierer, die Kitin-Jäger, die Feuermagierinnen, die Aufpasser, die Frahar-Jäger, die Wasserbrecher, die Ersten Deserteure, die Scharlachroten Söldner, die Brunnengräber und der Stamm 'Heiliges Sap'.\n
+	Zu den freundlichen Stämmen gehören: Die Unterwasserwurzel-Extrahierer, die Kitin-Jäger, die Feuermagierinnen, die Aufpasser, die Frahar-Jäger, die Wasserbrecher, die Ersten Deserteure, die Scharlachroten Söldner, die Brunnengräber und der Stamm 'Heiliger Sap'.\n
 	\n
 	Wer sind unsere Feinde ?\n
 	- Die Karavan: Sie sind dagegen, dass wir auf der Suche nach der Wahrheit hinuntergraben. Ihnen ist nicht zu trauen.\n
@@ -20212,7 +20212,7 @@ uiAppear_Infos_Matis	[DIE MATIS-ZIVILISATION\n
 	Tryker: Die Vergangenheit hat uns gelehrt, dass die Tryker nicht zu bändigen sind und dass sie den Dämonen ihre Seele verkaufen würden, nur um ihren Lebensstil zu warhen. Wie dem auch sei: Im Namen Jenas haben wir gelernt, als nachsichtige Freunde zusammenzuleben, anstatt sie sich auf die Seite der Ungläubigen schlagen zu lassen. Dank Jena ist unsere Freundschaft besser denn je, auch wenn ihr religiöser Eifer manchmal noch viel zu wünschen übrig lässt.\n
 	Zoraï: Die Zoraï sind Ungläubige und ihr Heidentum ist zu kontrollieren, auch wenn Zoraï waren, die den Vater unseres heutigen König retteten und ihm flüchtige Zuflucht gewährten. Bei allem Respekt grollen viele von uns über diese 'Schuld' gegenüber den Zoraï, da sie unsere Glaubwürdigkeit in den Augen des Karavan beeinträchtigt. Es wäre am besten, wenn so etwas nicht wieder vorkommt.\n
 	Fyros: Die Fyros sind unsere natürlichen Feinde, die über die letzten Jahrzehnte den bösartigen Kamis immer näher gekommen sind. Wir dürfen nie vergessen, dass es ihnen in der Vergangenheit gelungen ist, die Tryker zu drängen, mit ihnen gegen uns Stellung zu beziehen. Doch die Fyros verbünden sich jetzt lieber mit den Zoraï, deren Zuneigung zu den dämonischen Kamis sie teilen. Wir müssen trotzdem aufpassen, damit sie nicht versuchen, die Tryker mit ihrem gotteslästerlichern Geschwätz zu konvertieren.\n
-	Freundlich gesinnte Stämme sind: die Rindengräber, die Frahar-Jäger, die Lehmbildhauer, die Abtrünnigen, die Sklaventreiber, die Ikonenschnitzer, die Matis-Amazonen Hamazans, die Grünen Samen, die Sapsklaven, die Dörre Matis, die Matiagoo Verdorrendes Sap und natürlich die Kuilde.\n
+	Freundlich gesinnte Stämme sind: die Rindengräber, die Frahar-Jäger, die Lehmbildhauer, die Abtrünnigen, die Sklaventreiber, die Ikonenschnitzer, die Matis-Amazonen Hamazans, die Grünen Samen, die Sapsklaven, die Dörre Matis, die Matiagoo (verdunkelnder Sap) und natürlich die Kuilde.\n
 	\n
 	Wer sind unsere Feinde ?\n
 	- Die Kamis: Sie sind dagegen, dass wir Jenas Ländern Ordnung und Schönheit bescheren. Sie sind ein bösartiges Übel und sollten ausgerottet werden.\n
@@ -20293,7 +20293,7 @@ uiAppear_Infos_Tryker	[DIE TRYKER-ZIVILISATION\n
 	- Die Kamis: Sie sind ein böses Verderbnis; sie versuchen, deinen Geist mit ihrer Magie in Besitz zu nehmen, nur um dich zu beherrschen. Sie gehören ausgerottet.\n
 	- Die Kitins: Diese riesigen Insekten haben viele Tausende von Trykern umgebracht und unsere wundervollen schwimmenden Städte in den alten Ländern von Trykoth zerstört.\n
 	- Der Drache: Er wurde zwar noch nie gesehen, doch wir wissen, dass er irgendwo im tiefsten Inneren von Atys lauert. Es gibt jedoch nicht viel, das wir deswegen tun können, am besten behalten wir es im Hinterkopf.\n
-	- Zu den feindlichen Stämmen gehören: die Sapsammler, die Chlorogoos, die Gesetzlosen, die Lagunenbrüder, die Sklaventreiber, die Tutoren, die Alten Dryaden, die Wüstenplünderer, die Matiagoo (verdunkelndes Sap).\n
+	- Zu den feindlichen Stämmen gehören: die Sapsammler, die Chlorogoos, die Gesetzlosen, die Lagunenbrüder, die Sklaventreiber, die Tutoren, die Alten Dryaden, die Wüstenplünderer, die Matiagoo (verdunkelnder Sap).\n
 	- Banditen: Gib Acht auf Gesetzlose, Diebe und Halsabschneider, sie lauern überall.\n
 	- Raubtiere: Es gibt eine Menge richtig gemeingefährlicher Raubtiere auf Atys. Pass auf, wohin du gehst, wenn du nicht als ihr Abendessen enden willst!\n
 	\n
@@ -20364,7 +20364,7 @@ uiAppear_Infos_Zorai	[DIE ZORAÏ-ZIVILISATION\n
 	Fyros: Die Fyros sind unverfrorene, aber beherzte Krieger, die sich in jüngerer Zeit als vertrauenswürdig erwiesen haben. Sie haben gute Fortschritte in ihrer spirituellen Entwicklung gemacht und haben sich eindeutig für den Weg der Kami entschieden.\n
 	Tryker: Der Geist der Tryker ist noch nicht weit genug entwickelt, um die Kami-Erleuchtung zu akzeptieren. Sie sind daher von geringerem spirituellen Wert. Nicht nur sollen sie die Kamis in der Vergangenheit mit Frivolität behandelt haben, sondern sie verehren auch den Karavan, der den Kamis feindlich gesinnt ist.\n
 	Matis: Wir müssen versuchen, die Matis vom Einfluss der Karavan zu befreien und sie von der Lebensart der Kamis zu überzeugen. Deshalb wurde Yrkanis, dem Vater des jetzigen Matis-König im Jahr 2509 in Zora Zuflucht gewährt und geholfen, eine Armee auszuheben, um den Karavan- extremistischen Monarchen Jinovitch zu stürzen und eine tolerantere Regierung an die Macht zu bringen. Das war der erste Schritt, um die Matis in die Kami-Welt zu locken.\n
-	Freundlich gesinnte Stämme beinhalten: die Rindengräber, die Dünenreiter, die Gischtläufer, die Ikonenschnitzer, die Tutoren, die Matis-Amazonen (Hamazans der Toten Samen), die Ökokrieger, die Brunnengräber, Heiliges Sap und die Geschwister der Pflanzen.\n
+	Freundlich gesinnte Stämme beinhalten: die Rindengräber, die Dünenreiter, die Gischtläufer, die Ikonenschnitzer, die Tutoren, die Matis-Amazonen (Hamazans der Toten Samen), die Ökokrieger, die Brunnengräber, Heiliger Sap und die Geschwister der Pflanzen.\n
 	\n
 	Wer sind unsere Feinde?\n
 	- Die Karavan: Sie sind feindselig zu den Kami und haben schwächeren Seelen blinde Anhängerschaft zu ihrer Göttin Jena aufgezwungen. Unseren Vorfahren, und vor etwas kürzerem auch den Fyros, ist es gelungen, sich aus ihrem Griff zu lösen. Wir müssen den anderen Völkern helfen, das gleichfalls zu schaffen.\n
@@ -21319,7 +21319,7 @@ uiEulaAccept	[ICH AKZEPTIERE]
 // INDEX 5069
 uiEulaDecline	[ABLEHNEN]
 
-// HASH_VALUE 53D27B9DDD3610E2
+// HASH_VALUE 540891315EF2921F
 // INDEX 5070
 uiEulaContent	[RYZOM-LIZENZVEREINBARUNG\n
 	\n
@@ -21341,7 +21341,7 @@ uiEulaContent	[RYZOM-LIZENZVEREINBARUNG\n
 	\n
 	8. LIZENZ FÜR DIE NUTZUNG VON RYZOM. Dieser Vertrag gibt Ihnen, dem Benutzer, ein limitiertes, nicht exklusives und widerrufbares Recht auf Zugang zu einem Spielserver mittels eines gültigen Accounts, um das Spiel in der dafür vorgesehenen Art und Weise entsprechend den Bedingungen dieses Vertrages zu nutzen, unter Ausschluss jeglicher anderer Berechtigungen. Dieser Vertrag autorisiert Sie zur Installation und Nutzung einer kostenlosen Kopie der Software. Insofern die Bedingungen dieses Vertrags anerkannt werden, überreicht Winch Gate Ihnen, dem Benutzer, eine nicht exklusive und widerrufliche Lizenz zur Nutzung des Spiels mit dem alleinigem Zweck, Ryzom und/oder Ryzom Arkitect Werkzeuge unter legitimen Voraussetzungen und mittels eines autorisierten kostenlosen oder voll bezahlten Accounts zu nutzen. Alle anderen Verwendungen des Accounts oder des Spieles sind verboten. Insbesondere dürfen die Programme, aus denen das Spiel besteht, unter keinen Umständen verändert, dekompiliert, rückentwickelt oder zerlegt werden. Sie dürfen weder das ganze Spiel noch Teile der Software einer anderen Person übermitteln. Sie dürfen das Spiel weder vermieten, verleihen oder verkaufen, ebenso wenig wie irgendwelche Elemente, Objekte, Designs oder sonstige Inhalte, die unter Verwendung der Ryzom Arkitect Werkzeuge oder irgendwelchen anderen Werkzeuge für Ryzom erstellt wurden. Alle dem Benutzer durch diesen Vertrag nicht ausdrücklich zugesicherten Rechte sind Winch Gate vorbehalten.\n
 	\n
-	9. GNU/GPL LIZENZ. Einige Programmbestandteile der Ryzom Clientsoftware (Teile der Software auf dem Computer des Benutzers) wurden von Winch Gate unter einer speziellen "GNU General Public License" veröffentlicht, deren Text unter der folgenden Adresse einsehbar ist: http://www.gnu.org/licenses/gpl-2.0.html. Die Benutzung dieser Programmbestandteile ist ebenfalls den Bedingungen dieser Lizenz unterworfen. Die angesprochenen Programmbestandteile (Sources) werden unter der Winch Gate Webseite  http://www.ryzomcore.org im weiteren spezifiziert.\n
+	9. GNU AGPL-LIZENZ. Der Quellcode der Ryzom-Clientsoftware (Teile des Programms auf dem Computer des Benutzers) wurden von Winch Gate unter einer speziellen "GNU Affero General Public License" veröffentlicht, deren Text unter der folgenden Adresse einsehbar ist: https://www.gnu.org/licenses/agpl-3.0.de.html. Dessen Benutzung ist ebenfalls den Bedingungen dieser Lizenz unterworfen. Dieser Client-Quellcode kann von der Webseite https://bitbucket.org/ryzom/ryzomcore/ heruntergeladen werden.\n
 	\n
 	10. SPÄTERE VERSIONSVERBESSERUNGEN. Weder dieser Vertrag noch Ihr Account verleiht Ihnen ein Recht auf spätere Versionen oder Erweiterungen von Ryzom und/oder Ryzom Arkitect Werkzeuge. Winch Gate kann das Spiel erweitern oder verbessern, ist aber nicht verpflichtet, Ihnen diese Erweiterungen oder Verbesserungen zur Verfügung zu stellen. Die kostenlose Bereitstellung eines Updates, einer Erweiterung, oder einer Verbesserung verleiht Ihnen nicht das Recht auf spätere Updates, Erweiterungen oder Verbesserungen.\n
 	\n
@@ -27348,4 +27348,8 @@ uimwAppZone	[APP-ZONE]
 // HASH_VALUE 27273D41B0FA7DD2
 // INDEX 6491
 uiPlayedTime	[Du hast diesen Charakter %time lang gespielt.]
+
+// HASH_VALUE EB1A8C8F22674C92
+// INDEX 6492
+uiPlaylistRefresh	[Aktualisieren]
 

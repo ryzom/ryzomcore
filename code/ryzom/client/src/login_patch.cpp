@@ -143,7 +143,8 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	CheckThread = NULL;
 	InstallThread = NULL;
 	ScanDataThread = NULL;
-	thread = NULL;
+	DownloadThread = NULL;
+	Thread = NULL;
 
 	LogSeparator = "\n";
 	ValidDescFile = false;
@@ -364,7 +365,7 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -375,9 +376,9 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 	CheckThread = new CCheckThread(includeBackgroundPatch);
 	nlassert (CheckThread != NULL);
 
-	thread = IThread::create (CheckThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (CheckThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -402,11 +403,11 @@ bool CPatchManager::isCheckThreadEnded(bool &ok)
 // ****************************************************************************
 void CPatchManager::stopCheckThread()
 {
-	if(CheckThread && thread)
+	if(CheckThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete CheckThread;
 		CheckThread = NULL;
 	}
@@ -534,7 +535,7 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -622,9 +623,9 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 	}
 
 	// Launch the thread
-	thread = IThread::create (PatchThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (PatchThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -685,11 +686,11 @@ bool CPatchManager::getThreadState (ucstring &stateOut, vector<ucstring> &stateL
 // ****************************************************************************
 void CPatchManager::stopPatchThread()
 {
-	if(PatchThread && thread)
+	if(PatchThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete PatchThread;
 		PatchThread = NULL;
 	}
@@ -897,10 +898,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set SHARDID=%7\n";
 #else
 		contentPrefix += "#!/bin/sh\n";
-		contentPrefix += "export RYZOM_CLIENT=$1\n";
-		contentPrefix += "export UNPACKPATH=$2\n";
-		contentPrefix += "export ROOTPATH=$3\n";
-		contentPrefix += "export STARTUPPATH=$4\n";
+		contentPrefix += "export RYZOM_CLIENT=\"$1\"\n";
+		contentPrefix += "export UNPACKPATH=\"$2\"\n";
+		contentPrefix += "export ROOTPATH=\"$3\"\n";
+		contentPrefix += "export STARTUPPATH=\"$4\"\n";
 		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
 		contentPrefix += "LOGIN=$5\n";
@@ -933,7 +934,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// wait until client not in memory anymore
-			contentSuffix += toString("until ! pgrep %s > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
+			contentSuffix += toString("until ! pgrep -x \"%s\" > /dev/null; do sleep 1; done\n", CFile::getFilename(RyzomFilename).c_str());
 		}
 
 		// launch upgrade script if present (it'll execute additional steps like moving or deleting files)
@@ -948,7 +949,12 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			contentSuffix += "cd \"$STARTUPPATH\"\n\n";
 
 			// launch new client
-			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+#ifdef NL_OS_MAC
+			// use exec command under OS X
+			contentSuffix += toString("exec \"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+#else
+			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID &\n", additionalParams.c_str());
+#endif
 		}
 #endif
 
@@ -1221,7 +1227,7 @@ void CPatchManager::readDescFile(sint32 nVersion)
 
 #if defined(NL_OS_WIN64)
 	platformPatchCategory = "main_exedll_win64";
-#elif defined(NL_OS_WIN32)
+#elif defined(NL_OS_WINDOWS)
 	platformPatchCategory = "main_exedll_win32";
 #elif defined(NL_OS_MAC)
 	platformPatchCategory = "main_exedll_osx";
@@ -1411,6 +1417,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			// file not found, delete local file
 			throw Exception ("curl init failed");
 		}
+
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, downloadProgressFunc);
 		curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, (void *) progress);
@@ -1422,12 +1429,15 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 			setRWAccess(dest, false);
 			NLMISC::CFile::deleteFile(dest.c_str());
 		}
+
 		FILE *fp = nlfopen (dest, "wb");
+
 		if (fp == NULL)
 		{
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
 			throw Exception ("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str (), errno, strerror(errno));
 		}
+
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
 
@@ -1888,7 +1898,7 @@ int CPatchManager::downloadProgressFunc(void *foo, double t, double d, double ul
 	if (d != t)
 	{
 		// In the case of progress = 1, don't update because, this will be called in case of error to signal the end of the download, though
-		// no download actually occured. Instead, we set progress to 1.f at the end of downloadWithCurl if everything went fine
+		// no download actually occurred. Instead, we set progress to 1.f at the end of downloadWithCurl if everything went fine
 		return validateProgress(foo, t, d, ultotal, ulnow);
 	}
 	return 0;
@@ -1935,7 +1945,7 @@ void CPatchManager::startScanDataThread()
 		nlwarning ("scan data thread is already running");
 		return;
 	}
-	if (thread != NULL)
+	if (Thread != NULL)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -1953,9 +1963,9 @@ void CPatchManager::startScanDataThread()
 	ScanDataThread = new CScanDataThread();
 	nlassert (ScanDataThread != NULL);
 
-	thread = IThread::create (ScanDataThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	Thread = IThread::create (ScanDataThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 // ****************************************************************************
@@ -1980,11 +1990,11 @@ bool CPatchManager::isScanDataThreadEnded(bool &ok)
 // ****************************************************************************
 void CPatchManager::stopScanDataThread()
 {
-	if(ScanDataThread && thread)
+	if(ScanDataThread && Thread)
 	{
-		thread->wait();
-		delete thread;
-		thread = NULL;
+		Thread->wait();
+		delete Thread;
+		Thread = NULL;
 		delete ScanDataThread;
 		ScanDataThread = NULL;
 	}
@@ -3035,18 +3045,18 @@ IAsyncDownloader* CPatchManager::getAsyncDownloader() const
 // ****************************************************************************
 void CPatchManager::startInstallThread(const std::vector<CInstallThreadEntry>& entries)
 {
-	CInstallThread* installThread = new CInstallThread(entries);
-	thread = IThread::create (installThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	InstallThread = new CInstallThread(entries);
+	Thread = IThread::create (InstallThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 void CPatchManager::startDownloadThread(const std::vector<CInstallThreadEntry>& entries)
 {
-	CDownloadThread* downloadThread = new CDownloadThread(entries);
-	thread = IThread::create (downloadThread);
-	nlassert (thread != NULL);
-	thread->start ();
+	DownloadThread = new CDownloadThread(entries);
+	Thread = IThread::create (DownloadThread);
+	nlassert (Thread != NULL);
+	Thread->start ();
 }
 
 

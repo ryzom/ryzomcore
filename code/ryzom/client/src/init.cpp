@@ -257,7 +257,10 @@ static INT_PTR CALLBACK ExitClientErrorDialogProc(HWND hwndDlg, UINT uMsg, WPARA
 		{
 			if (CI18N::hasTranslation("TheSagaOfRyzom"))
 			{
-				SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ());
+				if (!SetWindowTextW(hwndDlg, (WCHAR*)CI18N::get ("TheSagaOfRyzom").c_str ()))
+				{
+					nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+				}
 			}
 			SetDlgItemTextW(hwndDlg, IDC_ERROR_MSG_TEXT, (WCHAR*) CurrentErrorMessage.c_str ());
 			if (CI18N::hasTranslation("uiRyzomErrorMsgBoxExit"))
@@ -367,7 +370,7 @@ void selectTipsOfTheDay (uint /* tips */)
 	TipsOfTheDay = title+CI18N::get ("uiTips"+toString (tips));*/
 	// todo tips of the day remove
 	//trap TipsOfTheDay = CI18N::get ("uiMessageOfTheDay");
-	TipsOfTheDay = ""; //trap
+	TipsOfTheDay.clear(); //trap
 }
 
 // ***************************************************************************
@@ -1148,6 +1151,7 @@ void prelogInit()
 			Driver->setSwapVBLInterval(0);
 
 		// initialize system utils class
+		CSystemUtils::init();
 		CSystemUtils::setWindow(Driver->getDisplay());
 
 		CLoginProgressPostThread::getInstance().step(CLoginStep(LoginStep_VideoModeSetupHighColor, "login_step_video_mode_setup_high_color"));
@@ -1209,6 +1213,12 @@ void prelogInit()
 				// if found, skip other directories for this icon size
 				if (addRyzomIconBitmap(directory, bitmaps)) break;
 			}
+		}
+
+		if (bitmaps.empty())
+		{
+			// check if an icon is present in same directory as executable
+			addRyzomIconBitmap(Args.getProgramPath(), bitmaps);
 		}
 
 		if (bitmaps.empty())
@@ -1638,7 +1648,7 @@ void postlogInit()
 		else
 		{
 			// To have the same number of newMessage in client light
-			nmsg = "";
+			nmsg.clear();
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);
 			ProgressBar.newMessage (nmsg);

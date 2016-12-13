@@ -242,11 +242,11 @@ void CPortal::serial (NLMISC::IStream& f)
 		{
 			std::string occName = CStringMapper::unmap(_OcclusionModelId);
 			if (occName == "no occlusion")
-				occName = "";
+				occName.clear();
 			f.serial(occName);
 			occName = CStringMapper::unmap(_OpenOcclusionModelId);
 			if (occName == "no occlusion")
-				occName = "";
+				occName.clear();
 			f.serial(occName);
 		}
 	}

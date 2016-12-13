@@ -141,7 +141,7 @@ bool CCmdArgs::needAdditionalArg() const
 		const TArg &arg = _Args[i];
 
 		// they don't have any short or long name, but need a name in help
-		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.required)
+		if (arg.shortName.empty() && arg.longName.empty() && !arg.helpName.empty() && arg.required && !arg.found)
 			return true;
 	}
 
@@ -363,7 +363,7 @@ bool CCmdArgs::parse(const std::vector<std::string> &argv)
 	}
 
 	// process help if requested or if required arguments are missing
-	if (haveLongArg("help") || (needAdditionalArg() && !haveAdditionalArg()))
+	if (haveLongArg("help") || needAdditionalArg())
 	{
 		displayHelp();
 		return false;
@@ -418,7 +418,7 @@ void CCmdArgs::displayHelp()
 
 	if (!_Description.empty())
 	{
-		printf("\n%s", _Description.c_str());
+		printf("\n%s\n", _Description.c_str());
 	}
 
 	printf("\nWhere options are:\n");
@@ -443,7 +443,6 @@ void CCmdArgs::displayHelp()
 			if (!arg.helpName.empty())
 			{
 				syntaxes.push_back(toString("-%s <%s>", arg.shortName.c_str(), arg.helpName.c_str()));
-				syntaxes.push_back(toString("-%s<%s>", arg.shortName.c_str(), arg.helpName.c_str()));
 			}
 			else
 			{
@@ -458,12 +457,6 @@ void CCmdArgs::displayHelp()
 			{
 				// display first syntax for long argument, --arg <value>
 				syntaxes.push_back(toString("--%s <%s>", arg.longName.c_str(), arg.helpName.c_str()));
-			}
-
-			if (!arg.helpName.empty())
-			{
-				// display second syntax for long argument, --arg=<value>
-				syntaxes.push_back(toString("--%s=<%s>", arg.longName.c_str(), arg.helpName.c_str()));
 			}
 			else
 			{

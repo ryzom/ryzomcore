@@ -616,7 +616,7 @@ bool CActionStringVector::doAction (CGeorgesEditDoc &doc, bool redo, bool &modif
 
 					modified = true;
 				}
-				catch (Exception &e)
+				catch (const Exception &e)
 				{
 					ok = false;
 					char message[512];

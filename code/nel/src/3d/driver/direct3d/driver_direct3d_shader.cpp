@@ -62,7 +62,7 @@ void CD3DShaderFX::setName (const char *name)
 
 bool CD3DShaderFX::loadShaderFile (const char *filename)
 {
-	_Text = "";
+	_Text.clear();
 	// Lookup
 	string _filename = NLMISC::CPath::lookup(filename, false, true, true);
 	if (!_filename.empty())

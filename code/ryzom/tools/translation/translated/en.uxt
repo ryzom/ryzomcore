@@ -21303,7 +21303,7 @@ uiEulaAccept	[I ACCEPT]
 // INDEX 5069
 uiEulaDecline	[DECLINE]
 
-// HASH_VALUE 53D27B9DDD3610E2
+// HASH_VALUE 540891315EF2921F
 // INDEX 5070
 uiEulaContent	[RYZOM LICENSE\n
 	\n
@@ -21325,7 +21325,7 @@ uiEulaContent	[RYZOM LICENSE\n
 	\n
 	8. LICENSE TO USE RYZOM. This Contract gives you, the User, a limited, non-exclusive and revocable right of access, via a valid account, to the Game server, to use the Game as designed and in accordance with the terms of this Contract, to the exclusion of any other entitlement. This Contract authorizes you to install and use a free copy of the Software. Subject to the restrictions agreed in this Contract, Winch Gate gives you, the User, a non-exclusive and revocable license to use the Game for the sole purpose of playing Ryzom and/or using Ryzom Arkitect tools under legitimate conditions via an authorized, free or fully-paid account. All other uses of  the account or of the Game are forbidden. In particular, you may under no circumstances reverse engineer, decompile or disassemble the software program(s) of which the Game consists. You may not transfer all or part of the Game to another person. You may not hire out, lend or sell the Game or any elements, object, design or any content created using the Ryzom Arkitect tools or any other tools. All rights not expressly granted to the User by this Contract are reserved to Winch Gate.\n
 	\n
-	9. GNU/GPL LICENSE. Some sources of the Ryzom client software (part of the software on the User's computer) have been published by Winch Gate under a specific "GNU General Public License", the text of which is accessible at the following URL: http://www.gnu.org/licenses/gpl-2.0.html. Their use is subject to the terms of that license. The sources concerned are identified on the Winch Gate website at http://www.ryzomcore.org/.\n
+	9. GNU AGPL LICENSE. The source code of the Ryzom client software (part of the software on the User's computer) has been published by Winch Gate under a specific "GNU Affero General Public License", the text of which is accessible at the following URL: https://www.gnu.org/licenses/agpl-3.0.en.html. Its use is subject to the terms of that license. It can be downloaded at https://bitbucket.org/ryzom/ryzomcore/.\n
 	\n
 	10. LATER VERSIONS' IMPROVEMENTS. Neither this Contract nor your account entitles you to any later version or extension of Ryzom and/or Ryzom Arkitect tools. Winch Gate may update or improve the Game, but is under no obligation to provide you with this update or improvement. Provision by Winch Gate of an update or improvement free of charge gives you no entitlement to later updates or improvements.\n
 	\n

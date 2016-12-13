@@ -24,6 +24,94 @@
 
 const CServer NoServer;
 
+void CServer::loadFromSettings(const QSettings &settings)
+{
+	id = settings.value("id").toString();
+	name = settings.value("name").toString();
+	displayUrl = settings.value("display_url").toString();
+	filesListUrl = settings.value("files_list_url").toString();
+	dataDownloadUrl = settings.value("data_download_url").toString();
+	dataDownloadFilename = settings.value("data_download_filename").toString();
+	dataCompressedSize = settings.value("data_compressed_size").toULongLong();
+	dataUncompressedSize = settings.value("data_uncompressed_size").toULongLong();
+	clientDownloadUrl = settings.value("client_download_url").toString();
+	clientDownloadFilename = settings.value("client_download_filename").toString();
+#if defined(Q_OS_WIN)
+	clientFilename = settings.value("client_filename_windows").toString();
+	clientFilenameOld = settings.value("client_filename_old_windows").toString();
+	configurationFilename = settings.value("configuration_filename_windows").toString();
+#elif defined(Q_OS_MAC)
+	clientFilename = settings.value("client_filename_osx").toString();
+	clientFilenameOld = settings.value("client_filename_old_osx").toString();
+	configurationFilename = settings.value("configuration_filename_osx").toString();
+#else
+	clientFilename = settings.value("client_filename_linux").toString();
+	clientFilenameOld = settings.value("client_filename_old_linux").toString();
+	configurationFilename = settings.value("configuration_filename_linux").toString();
+#endif
+	comments = settings.value("comments").toString();
+}
+
+void CServer::loadFromServers(const CServers &servers)
+{
+	foreach(const CServer &server, servers)
+	{
+		if (server.id == id)
+		{
+			// found the same server
+			loadFromServer(server);
+			break;
+		}
+	}
+}
+
+void CServer::loadFromServer(const CServer &server)
+{
+	// copy all members
+	id = server.id;
+	name = server.name;
+	displayUrl = server.displayUrl;
+	filesListUrl = server.filesListUrl;
+	dataDownloadUrl = server.dataDownloadUrl;
+	dataDownloadFilename = server.dataDownloadFilename;
+	dataCompressedSize = server.dataCompressedSize;
+	dataUncompressedSize = server.dataUncompressedSize;
+	clientDownloadUrl = server.clientDownloadUrl;
+	clientDownloadFilename = server.clientDownloadFilename;
+	clientFilename = server.clientFilename;
+	clientFilenameOld = server.clientFilenameOld;
+	configurationFilename = server.configurationFilename;
+	comments = server.comments;
+}
+
+void CServer::saveToSettings(QSettings &settings) const
+{
+	settings.setValue("id", id);
+	settings.setValue("name", name);
+	settings.setValue("display_url", displayUrl);
+	settings.setValue("files_list_url", filesListUrl);
+	settings.setValue("data_download_url", dataDownloadUrl);
+	settings.setValue("data_download_filename", dataDownloadFilename);
+	settings.setValue("data_compressed_size", dataCompressedSize);
+	settings.setValue("data_uncompressed_size", dataUncompressedSize);
+	settings.setValue("client_download_url", clientDownloadUrl);
+	settings.setValue("client_download_filename", clientDownloadFilename);
+#if defined(Q_OS_WIN)
+	settings.setValue("client_filename_windows", clientFilename);
+	settings.setValue("client_filename_old_windows", clientFilenameOld);
+	settings.setValue("configuration_filename_windows", configurationFilename);
+#elif defined(Q_OS_MAC)
+	settings.setValue("client_filename_osx", clientFilename);
+	settings.setValue("client_filename_old_osx", clientFilenameOld);
+	settings.setValue("configuration_filename_osx", configurationFilename);
+#else
+	settings.setValue("client_filename_linux", clientFilename);
+	settings.setValue("client_filename_old_linux", clientFilenameOld);
+	settings.setValue("configuration_filename_linux", configurationFilename);
+#endif
+	settings.setValue("comments", comments);
+}
+
 QString CServer::getDirectory() const
 {
 	return CConfigFile::getInstance()->getInstallationDirectory() + "/" + id;

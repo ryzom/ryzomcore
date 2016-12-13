@@ -32,6 +32,9 @@ using namespace NLNET;
 using namespace NLGEORGES;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 NLMISC::CMemDisplayer *TmpDebugDisplayer = NULL;
 //NLMISC::CLog		  *TmpDebugLogger = NULL;
@@ -1418,7 +1421,7 @@ void storeDatasetPtToQuickArray( uint16 bitIndex, CMirroredDataSet *dataSet )
 const char *getBlankChars( const string& leftstr )
 {
 	static string blank;
-	blank = "";
+	blank.clear();
 	for ( sint i=0; i!=max((sint32)(19-leftstr.size()),(sint32)0)+1; ++i )
 	{
 		blank += " ";

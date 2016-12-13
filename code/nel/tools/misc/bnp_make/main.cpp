@@ -85,14 +85,14 @@ bool i_comp(const string &s0, const string &s1)
 	return nlstricmp (CFile::getFilename(s0).c_str(), CFile::getFilename(s1).c_str()) < 0;
 }
 
-void packSubRecurse(const std::string &srcDirectory)
+bool packSubRecurse(const std::string &srcDirectory)
 {
 	vector<string>	pathContent;
 
 	printf ("Treating directory: %s\n", srcDirectory.c_str());
 	CPath::getPathContent(srcDirectory, true, false, true, pathContent);
 
-	if (pathContent.empty()) return;
+	if (pathContent.empty()) return true;
 
 	// Sort filename
 	sort (pathContent.begin(), pathContent.end(), i_comp);
@@ -102,8 +102,8 @@ void packSubRecurse(const std::string &srcDirectory)
 	{
 		if (toLower(CFile::getFilename(pathContent[i-1])) == toLower(CFile::getFilename(pathContent[i])))
 		{
-			nlerror("File %s is not unique in BNP!", CFile::getFilename(pathContent[i]).c_str());
-			return;
+			nlwarning("File %s is not unique in BNP!", CFile::getFilename(pathContent[i]).c_str());
+			return false;
 		}
 	}
 
@@ -121,6 +121,8 @@ void packSubRecurse(const std::string &srcDirectory)
 			}
 		}
 	}
+
+	return true;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +196,8 @@ int main(int argc, char **argv)
 
 		CFile::deleteFile(gBNPHeader.BigFileName);
 
-		packSubRecurse(srcDirectory);
+		if (!packSubRecurse(srcDirectory)) return 1;
+
 		return gBNPHeader.appendHeader() ? 0:-1;
 	}
 

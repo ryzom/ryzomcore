@@ -11,7 +11,7 @@
 !define RegistryKey "Software\${Company}\${GenericProduct}"
 !define Executable "ryzom_installer_qt_r.exe"
 !define SrcDir "RyzomInstaller"
-!define Installer "ryzom_installer.exe"
+!define Installer "ryzom_installer_windows.exe"
 
 ;Properly display all languages (Installer will not work on Windows 95, 98 or ME!)
 ;Unicode true

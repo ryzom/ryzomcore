@@ -282,7 +282,7 @@ inline float CPSAttribMakerBinOp<float>::getMaxValue(void) const
 template <class T>
 inline CPSAttribMakerBinOp<T>::CPSAttribMakerBinOp(const CPSAttribMakerBinOp &other) : CPSAttribMaker<T>(other) // parent copy ctor
 {
-	std::auto_ptr<CPSAttribMaker<T> > a0(NLMISC::safe_cast<CPSAttribMaker<T> *>(other._Arg[0]->clone()))
+	CUniquePtr<CPSAttribMaker<T> > a0(NLMISC::safe_cast<CPSAttribMaker<T> *>(other._Arg[0]->clone()))
 									, a1(NLMISC::safe_cast<CPSAttribMaker<T> *>(other._Arg[1]->clone()));
 	this->_Op =		other._Op;
 	this->_Size =   other._Size;

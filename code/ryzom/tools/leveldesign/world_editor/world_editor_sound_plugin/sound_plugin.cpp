@@ -195,7 +195,7 @@ void CSoundPlugin::ReInit()
 	}
 	catch(...)
 	{
-		MessageBox(NULL, "Error while initializing audio mixer.\n", "ERROR", MB_ICONERROR);
+		MessageBox(NULL, _T("Error while initializing audio mixer.\n"), _T("ERROR"), MB_ICONERROR);
 		exit(1);
 	}
 	

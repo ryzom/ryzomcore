@@ -35,6 +35,7 @@ public:
 
 private slots:
 	void onShowAdvancedParameters(int state);
+	void onDestinationDefaultButtonClicked();
 	void onDestinationBrowseButtonClicked();
 
 	void accept();

@@ -200,7 +200,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #if defined (NL_COMP_MINGW)
 		dllName = "libnel_drv_xaudio2_win";
 #elif defined (NL_OS_WINDOWS)
-		dllName = "nel_drv_xaudio2_win";
+		dllName = "nel_drv_fmod_win";
 #elif defined (NL_OS_UNIX)
 		dllName = "nel_drv_openal";
 #else
@@ -225,10 +225,10 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	 *  MTR: Is there a way with NLMISC to replace SearchFile() ? Until then, no info for Linux.
 	 */
 #ifdef NL_OS_WINDOWS
-	char buffer[1024], *ptr;
-	uint len = SearchPath (NULL, dllName.c_str(), NULL, 1023, buffer, &ptr);
+	wchar_t buffer[1024], *ptr;
+	uint len = SearchPathW (NULL, utf8ToWide(dllName), NULL, 1023, buffer, &ptr);
 	if( len )
-		nlinfo ("Using the library '%s' that is in the directory: '%s'", dllName.c_str(), buffer);
+		nlinfo ("Using the library '%s' that is in the directory: '%s'", dllName.c_str(), wideToUtf8(buffer).c_str());
 #endif
 
 	createSoundDriver = (ISDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);

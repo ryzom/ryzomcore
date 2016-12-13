@@ -98,7 +98,7 @@ void SelectionTerritoire::OnAddTerritoire()
 		CListBox *list=(CListBox*)GetDlgItem(IDC_LIST_TERRITOIRE);
 		if (list->FindStringExact(0,GetStr.name)!=LB_ERR)
 		{
-			MessageBox("Ce nom existe deja","Error",MB_ICONERROR);
+			MessageBox(_T("Ce nom existe deja","Error"), MB_ICONERROR);
 		}
 		else
 		{
@@ -163,7 +163,7 @@ void SelectionTerritoire::OnEditTerritoire()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Error",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Error"), MB_ICONERROR);
 	}
 }
 
@@ -179,7 +179,7 @@ void SelectionTerritoire::OnRemoveTerritoire()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Chcrois kca va pas etreuu possibleuuu",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Chcrois kca va pas etreuu possibleuuu"), MB_ICONERROR);
 	}
 }
 
@@ -197,7 +197,7 @@ void SelectionTerritoire::OnAddTileSet()
 		CListBox *list=(CListBox*)GetDlgItem(IDC_TILE_SET);
 		if (list->FindStringExact(0,GetStr.name)!=LB_ERR)
 		{
-			MessageBox("Ce nom existe deja","Error",MB_ICONERROR);
+			MessageBox(_T("Ce nom existe deja") , _T("Error"), MB_ICONERROR);
 		}
 		else
 		{
@@ -268,7 +268,7 @@ void SelectionTerritoire::OnEditTileSet()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Error",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Error"), MB_ICONERROR);
 	}
 }
 
@@ -284,7 +284,7 @@ void SelectionTerritoire::OnRemoveTileSet()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Chcrois kca va pas etreuu possibleuuu",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Chcrois kca va pas etreuu possibleuuu"), MB_ICONERROR);
 	}
 }
 
@@ -315,7 +315,7 @@ void SelectionTerritoire::OnMonter()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Chcrois kca va pas etreuu possibleuuu",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Chcrois kca va pas etreuu possibleuuu"), MB_ICONERROR);
 	}
 }
 
@@ -346,7 +346,7 @@ void SelectionTerritoire::OnDescendre()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Chcrois kca va pas etreuu possibleuuu",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Chcrois kca va pas etreuu possibleuuu"), MB_ICONERROR);
 	}
 }
 
@@ -355,18 +355,17 @@ void SelectionTerritoire::OnSelect()
 	// TODO: Add your control notification handler code here
 	CListBox *list=(CListBox*)GetDlgItem(IDC_LIST_TERRITOIRE);
 	CListBox *list2=(CListBox*)GetDlgItem(IDC_TILE_SET);
-	static char BASED_CODE szFilter[] = 
-		"NeL tile bank files (*.bank)|*.bank|All Files (*.*)|*.*||";
- 	CFileDialog sFile(true, "bank", "main.bank",0, szFilter, this);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL tile bank files (*.bank)|*.bank|All Files (*.*)|*.*||");
+ 	CFileDialog sFile(true, _T("bank"), _T("main.bank"), 0, szFilter, this);
 	if (sFile.DoModal()==IDOK)
 	{
 		POSITION p = sFile.GetStartPosition();
 		CString str = sFile.GetNextPathName(p);
-		char *temp = str.GetBuffer(256);
-		if (temp)
+		std::string temp = tStrToUtf8(str);
+		if (!temp.empty())
 		{
 			CIFile stream;
-			if (stream.open ((const char*)str))
+			if (stream.open (temp))
 			{
 				list->ResetContent ();
 				list2->ResetContent ();
@@ -378,21 +377,17 @@ void SelectionTerritoire::OnSelect()
 			for (i=0; i<tileBank.getLandCount(); i++)
 			{
 				// Add to the list
-				list->AddString(tileBank.getLand(i)->getName().c_str());
+				list->AddString(utf8ToTStr(tileBank.getLand(i)->getName()));
 			}
 
 			for (i=0; i<tileBank.getTileSetCount(); i++)
 			{
 				// Add to the list
-				list2->AddString(tileBank.getTileSet(i)->getName().c_str());
+				list2->AddString(utf8ToTStr(tileBank.getTileSet(i)->getName()));
 			}
 
-			char drive[256],name[256],path[256],ext[256];
-			_splitpath(temp,drive,path,name,ext);
-			MainFileName = name;
-			MainFileName += ext;
-			DefautPath = drive;
-			DefautPath += path;
+			MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
+			DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
 			
 			MainFileOk = 1;
 			CButton *button = (CButton*)GetDlgItem(IDC_ADD_TERRITOIRE);
@@ -405,7 +400,7 @@ void SelectionTerritoire::OnSelect()
 			button->EnableWindow(true);
 
 			// Change the bouton text path
-			GetDlgItem (IDC_PATH)->SetWindowText (tileBank.getAbsPath().c_str());
+			GetDlgItem (IDC_PATH)->SetWindowText (utf8ToTStr(tileBank.getAbsPath()));
 		}
 	}
 
@@ -425,7 +420,7 @@ LRESULT SelectionTerritoire::WindowProc(UINT message, WPARAM wParam, LPARAM lPar
 void SelectionTerritoire::OnOK() 
 {
 	// TODO: Add extra validation here
-	if (::MessageBox (NULL, "Are you sure you want to quit?", "Quit", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+	if (::MessageBox (NULL, _T("Are you sure you want to quit?"), _T("Quit"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 	{
 			CDialog::OnOK();
 	}
@@ -453,9 +448,8 @@ void SelectionTerritoire::Save(const char* path, CTileBank &toSave)
 void SelectionTerritoire::OnSaveAs()
 {
 	// TODO: Add your control notification handler code here
-	static char BASED_CODE szFilter[] = 
-		"NeL tile bank files (*.bank)|*.bank|All Files (*.*)|*.*||";
- 	CFileDialog sFile(false, "bank", DefautPath+MainFileName, 0, szFilter, this);
+	static TCHAR BASED_CODE szFilter[] = _T("NeL tile bank files (*.bank)|*.bank|All Files (*.*)|*.*||");
+ 	CFileDialog sFile(false, _T("bank"), DefautPath+MainFileName, 0, szFilter, this);
 	if (sFile.DoModal()==IDOK)
 	{
 		Save (sFile.GetPathName(), tileBank);
@@ -470,19 +464,17 @@ void SelectionTerritoire::OnSaveAs()
 		button->EnableWindow(true);
 
 		// Create a file name
-		char drive[256],name[256],path[256],ext[256];
-		_splitpath(sFile.GetPathName(), drive, path, name, ext);
-		MainFileName = name;
-		MainFileName += ext;
-		DefautPath = drive;
-		DefautPath += path;
+		std::string temp = tStrToUtf8(sFile.GetPathName());
+	
+		MainFileName = CString(utf8ToTStr(NLMISC::CFile::getFilename(temp)));
+		DefautPath = CString(utf8ToTStr(NLMISC::CFile::getPath(temp)));
 	}
 }
 
 void SelectionTerritoire::OnCancel() 
 {
 	// TODO: Add extra cleanup here
-	if (::MessageBox (NULL, "Are you sure you want to quit?", "Quit", MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
+	if (::MessageBox (NULL, _T("Are you sure you want to quit?"), _T("Quit"), MB_OK|MB_ICONQUESTION|MB_YESNO)==IDYES)
 	{
 		CDialog::OnCancel();
 	}
@@ -543,7 +535,7 @@ void SelectionTerritoire::OnPath()
 		// Last check
 		char msg[512];
 		sprintf (msg, "Do you really want to set %s as base path of the bank ?", path);
-		if (MessageBox (msg, "TileEdit", MB_YESNO|MB_ICONQUESTION)==IDYES)
+		if (MessageBox (msg, _T("TileEdit"), MB_YESNO|MB_ICONQUESTION)==IDYES)
 		{
 			// Set as default path..
 
@@ -579,7 +571,7 @@ void SelectionTerritoire::OnPath()
 							const std::string& bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 							// not empty ?
-							if (bitmapPath!="")
+							if (!bitmapPath.empty())
 							{
 								// Check the path
 								if (CheckPath (bitmapPath, path)==false)
@@ -591,7 +583,7 @@ void SelectionTerritoire::OnPath()
 									sprintf (msg, "Path '%s' can't be found in bitmap '%s'. Continue ?", path, bitmapPath.c_str());
 
 									// Message
-									if (MessageBox (msg, "TileEdit", MB_YESNO|MB_ICONQUESTION)==IDNO)
+									if (MessageBox (msg, _T("TileEdit"), MB_YESNO|MB_ICONQUESTION)==IDNO)
 										break;
 								}
 							}
@@ -620,7 +612,7 @@ void SelectionTerritoire::OnPath()
 							sprintf (msg, "Path '%s' can't be found in bitmap '%s'. Continue ?", path, bitmapPath);
 
 							// Message
-							if (MessageBox (msg, "TileEdit", MB_YESNO|MB_ICONQUESTION)==IDNO)
+							if (MessageBox (msg, _T("TileEdit"), MB_YESNO|MB_ICONQUESTION)==IDNO)
 								break;
 						}
 					}
@@ -650,7 +642,7 @@ void SelectionTerritoire::OnPath()
 								std::string bitmapPath=tileBank.getTile(tiles)->getRelativeFileName ((CTile::TBitmap)type);
 
 								// not empty ?
-								if (bitmapPath!="")
+								if (!bitmapPath.empty())
 								{
 									// Remove the absolute path
 									bool res=RemovePath (bitmapPath, path);
@@ -670,7 +662,7 @@ void SelectionTerritoire::OnPath()
 						std::string bitmapPath=tileBank.getDisplacementMap (noise);
 
 						// not empty ?
-						if (bitmapPath!="")
+						if (!bitmapPath.empty())
 						{
 							// Remove the absolute path
 							bool res=RemovePath (bitmapPath, path);
@@ -683,7 +675,7 @@ void SelectionTerritoire::OnPath()
 				}
 				else
 					// Info message
-					MessageBox ("Can't set the path.", "TileEdit", MB_OK|MB_ICONINFORMATION);
+					MessageBox (_T("Can't set the path."), _T("TileEdit"), MB_OK|MB_ICONINFORMATION);
 			}
 
 
@@ -706,9 +698,9 @@ void SelectionTerritoire::OnPath()
 void SelectionTerritoire::OnExport() 
 {
 	// TODO: Add your control notification handler code here
-	static char BASED_CODE szFilter[] = 
-		"NeL tile bank files (*.smallbank)|*.smallbank|All Files (*.*)|*.*||";
- 	CFileDialog sFile(false, "*.smallbank", DefautPath+"*.smallbank", 0, szFilter, this);
+	static TCHAR BASED_CODE szFilter[] = 
+		_T("NeL tile bank files (*.smallbank)|*.smallbank|All Files (*.*)|*.*||");
+ 	CFileDialog sFile(false, _T("*.smallbank"), DefautPath+ _T("*.smallbank"), 0, szFilter, this);
 	if (sFile.DoModal()==IDOK)
 	{
 		// Copy the bank
@@ -737,7 +729,7 @@ void SelectionTerritoire::OnChooseVeget()
 	}
 	else
 	{
-		MessageBox("No tilesset selected","Error",MB_ICONERROR);
+		MessageBox(_T("No tilesset selected"), _T("Error"), MB_ICONERROR);
 	}
 }
 

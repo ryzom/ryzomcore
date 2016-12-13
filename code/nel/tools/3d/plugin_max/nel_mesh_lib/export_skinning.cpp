@@ -114,7 +114,7 @@ INode *CExportNel::getNELScaleReferenceNode(INode &node)
 		{
 			std::string	boneScaleName= getName(node) + boneScaleNameExt;
 			// Get the reference node
-			referenceNode= _Ip->GetINodeByName(boneScaleName.c_str());
+			referenceNode= _Ip->GetINodeByName(utf8ToTStr(boneScaleName));
 		}
 	}
 
@@ -455,7 +455,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 		nlassert ((uint)ite->second<buildMesh.BonesNames.size());
 
 		// Names
-		buildMesh.BonesNames[ite->second] = ite->first->GetName();
+		buildMesh.BonesNames[ite->second] = tStrToUtf8(ite->first->GetName());
 
 		// Next
 		ite++;
@@ -724,7 +724,7 @@ uint CExportNel::buildSkinning (CMesh::CMeshBuild& buildMesh, const TInodePtrInt
 									nlassert (node);
 
 									// Insert in the map
-									weightMap.insert (std::map<float, INode*>::value_type (1, node));
+									weightMap.insert (std::map<float, INode*>::value_type (1.f, node));
 								}
 							}
 
@@ -1171,8 +1171,8 @@ void CExportNel::addSkeletonBindPos (INode& skinedNode, mapBoneBindPos& boneBind
 
 									if (res != MATRIX_RETURNED)
 									{
-										nlwarning("res != MATRIX_RETURNED; res = %i; boneIndex = %i / %i", res, boneIndex, count);
-										nlwarning("bone = %i", (uint32)(void *)bone);
+										nlwarning("res != MATRIX_RETURNED; res = %d; boneIndex = %u / %u", res, boneIndex, count);
+										nlwarning("bone = %p", bone);
 										std::string boneName = getName (*bone);
 										nlwarning("boneName = %s", boneName.c_str());
 										nlassert(false);
@@ -1306,7 +1306,7 @@ static sint	getBoneSide(INode *bone, std::string &mirrorName)
 {
 	sint	side= 0;
 	sint	pos;
-	mirrorName= bone->GetName();
+	mirrorName = tStrToUtf8(bone->GetName());
 
 	if((pos= mirrorName.find(" R "))!=std::string::npos)
 	{
@@ -1335,7 +1335,7 @@ static INode *getMirrorBone(const std::vector<INode*>	&skeletonNodes, INode *bon
 		// find
 		for(uint i=0;i<skeletonNodes.size();i++)
 		{
-			if(mirrorName == skeletonNodes[i]->GetName())
+			if(mirrorName == tStrToUtf8(skeletonNodes[i]->GetName()))
 				return skeletonNodes[i];
 		}
 	}

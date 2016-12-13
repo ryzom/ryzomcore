@@ -130,7 +130,7 @@ bool CDataBase::init (const string &Path, CZoneBank &zb)
 	string sDirBackup = NLMISC::CPath::getCurrentPath();
 
 	// "Path" can be relative to the doc path so we have to be first in the doc path
-	string s2 = NLMISC::CFile::getPath ((LPCTSTR)getMainFrame()->getDocument()->GetPathName());
+	string s2 = NLMISC::CFile::getPath (tStrToUtf8(getMainFrame()->getDocument()->GetPathName()));
 	NLMISC::CPath::setCurrentPath(s2.c_str());
 	string ss = NLMISC::CPath::getFullPath(Path);
 	NLMISC::CPath::setCurrentPath (ss.c_str());
@@ -355,7 +355,7 @@ NLMISC::CBitmap *CDataBase::loadBitmap (const std::string &fileName)
 			nlwarning ("Bitmap not found : %s", fileName.c_str());
 		}
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
 		pBitmap->makeDummy();
 		theApp.errorMessage ("Error while loading bitmap %s : %s", fileName.c_str(), e.what());
@@ -428,10 +428,10 @@ void CBuilderZone::calcMask()
 CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 {
 	// Set Current Filter
-	_FilterType1 = STRING_UNUSED; _FilterValue1 = "";
-	_FilterType2 = STRING_UNUSED; _FilterValue2 = "";
-	_FilterType3 = STRING_UNUSED; _FilterValue3 = "";
-	_FilterType4 = STRING_UNUSED; _FilterValue4 = "";
+	_FilterType1 = STRING_UNUSED;
+	_FilterType2 = STRING_UNUSED;
+	_FilterType3 = STRING_UNUSED;
+	_FilterType4 = STRING_UNUSED;
 	_FilterOperator2 = 0;
 	_FilterOperator3 = 0;
 	_FilterOperator4 = 0;
@@ -450,7 +450,6 @@ CBuilderZone::CBuilderZone (uint bitmapSize) : _DataBase (bitmapSize)
 	_ApplyCycleSelection = 0;
 	_NotPropagate = false;
 	_Force = false;
-	_LastPathName = "";
 	_ToolsZone = NULL;
 }
 
@@ -610,8 +609,7 @@ bool CBuilderZone::refresh ()
 								if ((sZone != STRING_UNUSED)&&(sZone != STRING_OUT_OF_BOUND))
 								{
 									unload (_ZoneRegionSelected);
-									MessageBox (NULL, "Cannot add this zone because it overlaps existing ones", 
-												"Error", MB_ICONERROR|MB_OK);
+									MessageBox (NULL, _T("Cannot add this zone because it overlaps existing ones"), _T("Error"), MB_ICONERROR|MB_OK);
 									return false;
 								}
 							}
@@ -624,8 +622,8 @@ bool CBuilderZone::refresh ()
 			if (!_ZoneRegions[_ZoneRegionSelected]->init (&_ZoneBank, this, error))
 			{
 				unload (_ZoneRegionSelected);
-				MessageBox (NULL, ("Cannot add this zone :\n"+error).c_str(), 
-							"Error", MB_ICONERROR|MB_OK);
+				std::string msg = NLMISC::toString("Cannot add this zone :\n%s", error.c_str());
+				MessageBox (NULL, utf8ToTStr(msg), _T("Error"), MB_ICONERROR|MB_OK);
 				return false;
 			}
 
@@ -700,7 +698,7 @@ uint32 CBuilderZone::countZones ()
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshot (const std::string &fileName, uint sizeSource, bool grayscale)
 {
 	const CZoneRegion *pBZR = &(getDocument ()->getZoneRegion (_ZoneRegionSelected));
 	sint32 nMinX = pBZR->getMinX();
@@ -714,7 +712,7 @@ void CBuilderZone::snapshot (const char *fileName, uint sizeSource, bool graysca
 }
 
 // ---------------------------------------------------------------------------
-void CBuilderZone::snapshotCustom (const char *fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
+void CBuilderZone::snapshotCustom (const std::string &fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
 {
 	if (_ZoneRegions.size() == 0)
 		return;
@@ -1600,20 +1598,21 @@ void CBuilderZone::del (const CVector &worldPos)
 // ---------------------------------------------------------------------------
 bool CBuilderZone::initZoneBank (const string &sPathName)
 {
-	char sDirBackup[512];
+	// TODO: replace by NeL methods
+	TCHAR sDirBackup[512];
 	GetCurrentDirectory (512, sDirBackup);
-	SetCurrentDirectory (sPathName.c_str());
+	SetCurrentDirectory (utf8ToTStr(sPathName));
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
-	hFind = FindFirstFile ("*.ligozone", &findData);
+	hFind = FindFirstFile (_T("*.ligozone"), &findData);
 	
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		// If the name of the file is not . or .. then its a valid entry in the DataBase
-		if (!((strcmp (findData.cFileName, ".") == 0) || (strcmp (findData.cFileName, "..") == 0)))
+		if (!((_tcscmp (findData.cFileName, _T(".")) == 0) || (_tcscmp (findData.cFileName, _T("..")) == 0)))
 		{
 			string error;
-			if (!_ZoneBank.addElement (findData.cFileName, error))
+			if (!_ZoneBank.addElement (tStrToUtf8(findData.cFileName), error))
 				theApp.errorMessage (error.c_str());
 		}
 		if (FindNextFile (hFind, &findData) == 0)
@@ -1647,7 +1646,7 @@ string CBuilderZone::getZoneName (sint32 x, sint32 y)
 			return sRet;
 		}
 	}
-	sRet = "";
+	sRet.clear();
 	return sRet;
 }
 

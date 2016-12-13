@@ -137,6 +137,9 @@ using namespace std;
 using namespace MBEHAV;
 using namespace CLFECOMMON;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // EXTERN //
@@ -183,7 +186,7 @@ extern UCamera					MainCam;
 ////////////
 // STATIC //
 ////////////
-const std::string CCharacterCL::_EmptyString = "";
+const std::string CCharacterCL::_EmptyString;
 const uint8	 CCharacterCL::_BadHairIndex = 0xFF;
 
 H_AUTO_DECL ( RZ_Client_Character_CL_Update_Pos_Combat_Float )
@@ -8852,7 +8855,7 @@ void CCharacterCL::animIndex(TAnimationType channel, CAnimation::TAnimId index)
 	else
 	{
 		// Check the AnimSet needed to get the animation Id.
-		CHECK(_CurrentAnimSet[channel]);
+		CHECK(_CurrentAnimSet[channel] != NULL);
 		// Get the Pointer on the animation state, if Null, return empty
 		const CAnimationState *animStatePtr = _CurrentAnimSet[channel]->getAnimationState( (animState(channel)==CAnimationStateSheet::Emote)?_SubStateKey:animState(channel));
 		if(animStatePtr == 0)

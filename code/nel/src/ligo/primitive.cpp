@@ -28,6 +28,10 @@ using namespace std;
 
 const uint32 NLLIGO_PRIMITIVE_VERSION = 1;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLLIGO
 {
 
@@ -38,7 +42,7 @@ CPrimitiveContext	*CPrimitiveContext::_Instance = NULL;
 // XML helpers
 // ***************************************************************************
 
-void Error (const char *filename, const char *format, ...)
+void Error (const std::string &filename, const char *format, ...)
 {
 	va_list args;
 	va_start( args, format );
@@ -46,12 +50,12 @@ void Error (const char *filename, const char *format, ...)
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	nlwarning ("In File (%s) %s", filename, buffer);
+	nlwarning ("In File (%s) %s", filename.c_str(), buffer);
 }
 
 // ***************************************************************************
 
-void XMLError (xmlNodePtr xmlNode, const char *filename, const char *format, ... )
+void XMLError (xmlNodePtr xmlNode, const std::string &filename, const char *format, ... )
 {
 	va_list args;
 	va_start( args, format );
@@ -59,32 +63,32 @@ void XMLError (xmlNodePtr xmlNode, const char *filename, const char *format, ...
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	Error (filename, "node (%s), line (%p) : %s", xmlNode->name, xmlNode->content, buffer);
+	Error (filename, "node (%s), line (%d) : %s", xmlNode->name, xmlNode->line, buffer);
 }
 
 
 // ***************************************************************************
 
-xmlNodePtr GetFirstChildNode (xmlNodePtr xmlNode, const char *filename, const char *childName)
+xmlNodePtr GetFirstChildNode (xmlNodePtr xmlNode, const std::string &filename, const std::string &childName)
 {
 	// Call the CIXml version
 	xmlNodePtr result = CIXml::getFirstChildNode (xmlNode, childName);
 	if (result) return result;
 
 	// Output a formated error
-	XMLError (xmlNode, filename, "Can't find XML node named (%s)", childName);
+	XMLError (xmlNode, filename.c_str(), "Can't find XML node named (%s)", childName.c_str());
 	return NULL;
 }
 
 // ***************************************************************************
 
-bool GetPropertyString (string &result, const char *filename, xmlNodePtr xmlNode, const char *propName)
+bool GetPropertyString (string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &propName)
 {
 	// Call the CIXml version
 	if (!CIXml::getPropertyString (result, xmlNode, propName))
 	{
 		// Output a formated error
-		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName);
+		XMLError (xmlNode, filename, "Can't find XML node property (%s)", propName.c_str());
 		return false;
 	}
 	return true;
@@ -92,7 +96,7 @@ bool GetPropertyString (string &result, const char *filename, xmlNodePtr xmlNode
 
 // ***************************************************************************
 
-bool ReadInt (const char *propName, int &result, const char *filename, xmlNodePtr xmlNode)
+bool ReadInt (const std::string &propName, int &result, const std::string &filename, xmlNodePtr xmlNode)
 {
 	string value;
 	if (GetPropertyString (value, filename, xmlNode, propName))
@@ -105,15 +109,15 @@ bool ReadInt (const char *propName, int &result, const char *filename, xmlNodePt
 
 // ***************************************************************************
 
-void WriteInt (const char *propName, int value, xmlNodePtr xmlNode)
+void WriteInt (const std::string &propName, int value, xmlNodePtr xmlNode)
 {
 	// Set properties
-	xmlSetProp (xmlNode, (const xmlChar*)propName, (const xmlChar*)(toString (value).c_str ()));
+	xmlSetProp (xmlNode, (const xmlChar*)propName.c_str(), (const xmlChar*)(toString (value).c_str ()));
 }
 
 // ***************************************************************************
 
-bool ReadUInt (const char *propName, uint &result, const char *filename, xmlNodePtr xmlNode)
+bool ReadUInt (const std::string &propName, uint &result, const std::string &filename, xmlNodePtr xmlNode)
 {
 	string value;
 	if (GetPropertyString (value, filename, xmlNode, propName))
@@ -126,15 +130,15 @@ bool ReadUInt (const char *propName, uint &result, const char *filename, xmlNode
 
 // ***************************************************************************
 
-void WriteUInt (const char *propName, uint value, xmlNodePtr xmlNode)
+void WriteUInt (const std::string &propName, uint value, xmlNodePtr xmlNode)
 {
 	// Set properties
-	xmlSetProp (xmlNode, (const xmlChar*)propName, (const xmlChar*)(toString (value).c_str ()));
+	xmlSetProp (xmlNode, (const xmlChar*)propName.c_str(), (const xmlChar*)(toString (value).c_str ()));
 }
 
 // ***************************************************************************
 
-bool ReadFloat (const char *propName, float &result, const char *filename, xmlNodePtr xmlNode)
+bool ReadFloat (const std::string &propName, float &result, const std::string &filename, xmlNodePtr xmlNode)
 {
 	string value;
 	if (GetPropertyString (value, filename, xmlNode, propName))
@@ -147,15 +151,15 @@ bool ReadFloat (const char *propName, float &result, const char *filename, xmlNo
 
 // ***************************************************************************
 
-void WriteFloat (const char *propName, float value, xmlNodePtr xmlNode)
+void WriteFloat (const std::string &propName, float value, xmlNodePtr xmlNode)
 {
 	// Set properties
-	xmlSetProp (xmlNode, (const xmlChar*)propName, (const xmlChar*)(toString (value).c_str ()));
+	xmlSetProp (xmlNode, (const xmlChar*)propName.c_str(), (const xmlChar*)(toString (value).c_str ()));
 }
 
 // ***************************************************************************
 
-bool ReadVector (CPrimVector &point, const char *filename, xmlNodePtr xmlNode)
+bool ReadVector (CPrimVector &point, const std::string &filename, xmlNodePtr xmlNode)
 {
 	CPrimVector pos;
 	if (ReadFloat ("X", pos.x, filename, xmlNode))
@@ -194,20 +198,20 @@ void WriteVector (const CPrimVector &point, xmlNodePtr xmlNode)
 
 // ***************************************************************************
 
-bool GetNodeString (string &result, const char *filename, xmlNodePtr xmlNode, const char *nodeName)
+bool GetNodeString (string &result, const std::string &filename, xmlNodePtr xmlNode, const std::string &nodeName)
 {
 	// Look for the node
 	xmlNodePtr node = CIXml::getFirstChildNode (xmlNode, nodeName);
 	if (!node)
 	{
-		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find XML node named (%s)", nodeName.c_str());
 		return false;
 	}
 
 	// Get the node string
 	if (!CIXml::getContentString (result, node))
 	{
-		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName);
+		XMLError (xmlNode, filename, "Can't find any text in the node named (%s)", nodeName.c_str());
 		return false;
 	}
 
@@ -216,7 +220,7 @@ bool GetNodeString (string &result, const char *filename, xmlNodePtr xmlNode, co
 
 // ***************************************************************************
 
-bool GetContentString (string &result, const char *filename, xmlNodePtr xmlNode)
+bool GetContentString (string &result, const std::string &filename, xmlNodePtr xmlNode)
 {
 	// Get the node string
 	if (!CIXml::getContentString (result, xmlNode))
@@ -232,11 +236,6 @@ bool GetContentString (string &result, const char *filename, xmlNodePtr xmlNode)
 // CPropertyString
 // ***************************************************************************
 
-CPropertyString::CPropertyString (const char *str)
-{
-	String = str;
-}
-
 CPropertyString::CPropertyString (const std::string &str)
 {
 	String = str;
@@ -244,7 +243,7 @@ CPropertyString::CPropertyString (const std::string &str)
 
 // ***************************************************************************
 
-CPropertyString::CPropertyString (const char *str, bool _default)
+CPropertyString::CPropertyString (const std::string &str, bool _default)
 {
 	String = str;
 	Default = _default;
@@ -386,7 +385,7 @@ bool CPrimZone::contains (const NLMISC::CVector &v, const std::vector<NLMISC::CV
 // CPrimNode
 // ***************************************************************************
 
-bool CPrimNode::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimNode::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	return IPrimitive::read (xmlNode, filename, version, config);
 }
@@ -484,7 +483,7 @@ NLLIGO::IPrimitive *CPrimPoint::copy () const
 
 // ***************************************************************************
 
-bool CPrimPoint::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimPoint::read(xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	// Read points
 	xmlNodePtr ptNode = GetFirstChildNode (xmlNode, filename, "PT");
@@ -514,7 +513,7 @@ bool CPrimPoint::read (xmlNodePtr xmlNode, const char *filename, uint version, C
 
 // ***************************************************************************
 
-void CPrimPoint::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimPoint::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Save the point
 	xmlNodePtr ptNode = xmlNewChild ( xmlNode, NULL, (const xmlChar*)"PT", NULL);
@@ -566,7 +565,7 @@ CPrimVector	*CPrimPath::getPrimVector ()
 
 // ***************************************************************************
 
-bool CPrimPath::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimPath::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	// Read points
 	VPoints.clear ();
@@ -591,7 +590,7 @@ bool CPrimPath::read (xmlNodePtr xmlNode, const char *filename, uint version, CL
 
 // ***************************************************************************
 
-void CPrimPath::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimPath::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Save the points
 	for (uint i=0; i<VPoints.size (); i++)
@@ -638,7 +637,7 @@ CPrimVector	*CPrimZone::getPrimVector ()
 
 // ***************************************************************************
 
-bool CPrimZone::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimZone::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	// Read points
 	VPoints.clear ();
@@ -663,7 +662,7 @@ bool CPrimZone::read (xmlNodePtr xmlNode, const char *filename, uint version, CL
 
 // ***************************************************************************
 
-void CPrimZone::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimZone::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Save the points
 	for (uint i=0; i<VPoints.size (); i++)
@@ -1240,7 +1239,7 @@ const	IPrimitive	*IPrimitive::getPrimitive	(const	std::string	&absoluteOrRelativ
 		if (indexStr==string::npos)
 		{
 			childName=path;
-			path="";
+			path.clear();
 		}
 		else
 		{
@@ -1283,7 +1282,7 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, const IPro
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
@@ -1304,13 +1303,13 @@ bool IPrimitive::getProperty (uint index, std::string &property_name, IProperty 
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::getProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, const IProperty *&result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, const IProperty *&result) const
 {
 	// Look for the property
 	std::map<std::string, IProperty*>::const_iterator ite = _Properties.find (property_name);
@@ -1324,7 +1323,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, const IProperty *
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, IProperty *&result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, IProperty *&result) const
 {
 	// Look for the property
 	std::map<std::string, IProperty*>::const_iterator ite = _Properties.find (property_name);
@@ -1338,7 +1337,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, IProperty *&resul
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, std::string *&result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, std::string *&result) const
 {
 	// Get the property
 	IProperty *prop;
@@ -1352,7 +1351,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::string *&res
 		}
 		else
 		{
-			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name);
+			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name.c_str());
 		}
 	}
 	return false;
@@ -1360,7 +1359,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::string *&res
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, std::string &result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, std::string &result) const
 {
 	// Get the property
 	const IProperty *prop;
@@ -1374,7 +1373,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::string &resu
 		}
 		else
 		{
-			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name);
+			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name.c_str());
 		}
 	}
 	return false;
@@ -1382,7 +1381,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::string &resu
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, std::vector<std::string> *&result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, std::vector<std::string> *&result) const
 {
 	// Get the property
 	IProperty *prop;
@@ -1396,7 +1395,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::vector<std::
 		}
 		else
 		{
-			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name);
+			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name.c_str());
 		}
 	}
 	return false;
@@ -1404,7 +1403,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, std::vector<std::
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, const std::vector<std::string> *&result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, const std::vector<std::string> *&result) const
 {
 	// Get the property
 	IProperty *prop;
@@ -1418,7 +1417,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, const std::vector
 		}
 		else
 		{
-			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name);
+			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a string.", property_name.c_str());
 		}
 	}
 	return false;
@@ -1426,7 +1425,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, const std::vector
 
 // ***************************************************************************
 
-bool IPrimitive::getPropertyByName (const char *property_name, NLMISC::CRGBA &result) const
+bool IPrimitive::getPropertyByName (const std::string &property_name, NLMISC::CRGBA &result) const
 {
 	// Get the property
 	IProperty *prop;
@@ -1440,7 +1439,7 @@ bool IPrimitive::getPropertyByName (const char *property_name, NLMISC::CRGBA &re
 		}
 		else
 		{
-			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a color.", property_name);
+			nlwarning ("NLLIGO::IPrimitive::getPropertyByName : property (%s) in not a color.", property_name.c_str());
 		}
 	}
 	return false;
@@ -1462,13 +1461,13 @@ bool IPrimitive::removeProperty (uint index)
 		index--;
 		ite ++;
 	}
-	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %d, size : %d).", index, _Properties.size ());
+	nlwarning ("NLLIGO::IPrimitive::removeProperty : invalid index (index : %u, size : %u).", index, (uint)_Properties.size ());
 	return false;
 }
 
 // ***************************************************************************
 
-bool IPrimitive::removePropertyByName (const char *property_name)
+bool IPrimitive::removePropertyByName (const std::string &property_name)
 {
 	// Look for the property
 	std::map<std::string, IProperty*>::iterator ite = _Properties.find (property_name);
@@ -1504,7 +1503,7 @@ bool IPrimitive::getChild (const IPrimitive *&result, uint childId) const
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1520,7 +1519,7 @@ bool IPrimitive::getChild (IPrimitive *&result, uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::getChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1554,7 +1553,7 @@ bool IPrimitive::removeChild (uint childId)
 	}
 	else
 	{
-		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %d, size %d).", childId, _Children.size ());
+		nlwarning ("NLLIGO::IPrimitive::removeChild : invalid index (index : %u, size %u).", childId, (uint)_Children.size ());
 	}
 	return false;
 }
@@ -1642,7 +1641,7 @@ bool IPrimitive::checkProperty(const std::string &property_name) const
 
 // ***************************************************************************
 
-bool IPrimitive::addPropertyByName (const char *property_name, IProperty *result)
+bool IPrimitive::addPropertyByName (const std::string &property_name, IProperty *result)
 {
 	bool inserted = _Properties.insert (std::map<std::string, IProperty*>::value_type (property_name, result)).second;
 	if (inserted)
@@ -1654,7 +1653,7 @@ bool IPrimitive::addPropertyByName (const char *property_name, IProperty *result
 
 // ***************************************************************************
 
-bool IPrimitive::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool IPrimitive::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	// Erase old properties
 	_Properties.clear ();
@@ -1664,7 +1663,7 @@ bool IPrimitive::read (xmlNodePtr xmlNode, const char *filename, uint version, C
 	if (commentNode)
 	{
 		 if (!CIXml::getContentString(_UnparsedProperties, commentNode))
-			_UnparsedProperties = "";
+			_UnparsedProperties.clear();
 	}
 
 	// Read the expanded flag
@@ -1915,7 +1914,7 @@ void IPrimitive::initDefaultValues (CLigoConfig &config)
 
 // ***************************************************************************
 
-void IPrimitive::write (xmlNodePtr xmlNode, const char *filename) const
+void IPrimitive::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Save the expanded flag
 //	if (!Expanded)
@@ -2112,7 +2111,7 @@ void CPrimAlias::regenAlias()
 
 
 // Read the primitive
-bool CPrimAlias::read (xmlNodePtr xmlNode, const char *filename, uint version, CLigoConfig &config)
+bool CPrimAlias::read (xmlNodePtr xmlNode, const std::string &filename, uint version, CLigoConfig &config)
 {
 	// Read alias
 	xmlNodePtr ptNode = CIXml::getFirstChildNode (xmlNode, "ALIAS");
@@ -2146,7 +2145,7 @@ bool CPrimAlias::read (xmlNodePtr xmlNode, const char *filename, uint version, C
 	return IPrimitive::read (xmlNode, filename, version, config);
 }
 // Write the primitive
-void CPrimAlias::write (xmlNodePtr xmlNode, const char *filename) const
+void CPrimAlias::write (xmlNodePtr xmlNode, const std::string &filename) const
 {
 	// Write alias
 	xmlNodePtr ptNode = xmlNewChild(xmlNode, NULL, (const xmlChar*)"ALIAS", NULL);
@@ -2458,7 +2457,7 @@ CPrimitives& CPrimitives::operator= (const CPrimitives &other)
 
 // ***************************************************************************
 
-bool CPrimitives::read (xmlNodePtr xmlNode, const char *filename, CLigoConfig &config)
+bool CPrimitives::read (xmlNodePtr xmlNode, const std::string &filename, CLigoConfig &config)
 {
 	nlassert (xmlNode);
 
@@ -2511,7 +2510,7 @@ bool CPrimitives::read (xmlNodePtr xmlNode, const char *filename, CLigoConfig &c
 			}
 			else
 			{
-				Error (filename, "CPrimitives::read : Unknown file version (%d)", version);
+				Error (filename, "CPrimitives::read : Unknown file version (%u)", version);
 				return false;
 			}
 		}
@@ -2531,7 +2530,7 @@ bool CPrimitives::read (xmlNodePtr xmlNode, const char *filename, CLigoConfig &c
 
 // ***************************************************************************
 
-void CPrimitives::write (xmlDocPtr doc, const char *filename) const
+void CPrimitives::write (xmlDocPtr doc, const std::string &filename) const
 {
 	nlassert (doc);
 
@@ -2544,7 +2543,7 @@ void CPrimitives::write (xmlDocPtr doc, const char *filename) const
 
 // ***************************************************************************
 
-void CPrimitives::write (xmlNodePtr root, const char *filename) const
+void CPrimitives::write (xmlNodePtr root, const std::string &filename) const
 {
 	nlassert (root);
 

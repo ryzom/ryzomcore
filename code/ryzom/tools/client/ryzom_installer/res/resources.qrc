@@ -4,9 +4,14 @@
     </qresource>
     <qresource prefix="/icons">
         <file>ryzom.ico</file>
+        <file>ryzom.png</file>
+        <file>ryzom.icns</file>
     </qresource>
     <qresource prefix="/templates">
         <file>template.desktop</file>
         <file>ryzom_installer.ini</file>
+        <file>Info.plist</file>
+        <file>PkgInfo</file>
+        <file>shortcut.sh</file>
     </qresource>
 </RCC>

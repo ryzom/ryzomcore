@@ -537,14 +537,14 @@ void	CCDBSynchronised::pushDelta( CBitMemStream& s, CCDBStructNodeLeaf *node, ui
 			s.serialAndLog2( value, 32 );
 			bitsize += 32;
 			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+				nldebug( "CDB: Pushing value %" NL_I64 "d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{
 			s.serialAndLog2( value, (uint)node->type() );
 			bitsize += (uint32)node->type();
 			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing value %"NL_I64"d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+				nldebug( "CDB: Pushing value %" NL_I64 "d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
 		}
 	}
 	else
@@ -571,14 +571,14 @@ void	CCDBSynchronised::pushDeltaPermanent( NLMISC::CBitMemStream& s, CCDBStructN
 			s.serialAndLog2( value, 32 );
 			bitsize += 32;
 			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing permanent value %"NL_I64"d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
+				nldebug( "CDB: Pushing permanent value %" NL_I64 "d (TEXT-32) for index %d prop %s", (sint64)value, index, node->buildTextId().toString().c_str() );
 		}
 		else
 		{
 			s.serialAndLog2( value, (uint)node->type() );
 			bitsize += (uint32)node->type();
 			if ( VerboseDatabase )
-				nldebug( "CDB: Pushing permanent value %"NL_I64"d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
+				nldebug( "CDB: Pushing permanent value %" NL_I64 "d (%u bits) for index %d prop %s", (sint64)value, (uint32)node->type(), index, node->buildTextId().toString().c_str() );
 		}
 	}
 	else
@@ -806,7 +806,7 @@ bool CCDBSynchronised::x_setProp( ICDBStructNode * node, sint64 value, bool forc
 				{
 					std::string const* pname = node->getName();
 					std::string name = pname?*pname:"'Unknown'";
-					nlinfo( "CDB: Set new value %"NL_I64"d for prop %s in atom %s", value, name.c_str(), groupNodeFinder->getParent()?groupNodeFinder->getName()->c_str():"(root)" );
+					nlinfo( "CDB: Set new value %" NL_I64 "d for prop %s in atom %s", value, name.c_str(), groupNodeFinder->getParent()?groupNodeFinder->getName()->c_str():"(root)" );
 				}
 			}
 #endif
@@ -825,7 +825,7 @@ bool CCDBSynchronised::x_setProp( ICDBStructNode * node, sint64 value, bool forc
 				{
 					std::string const* pname = node->getName();
 					std::string name = pname?*pname:"'Unknown'";
-					nlinfo( "CDB: Set new value %"NL_I64"d for prop %s", value, name.c_str() );
+					nlinfo( "CDB: Set new value %" NL_I64 "d for prop %s", value, name.c_str() );
 				}
 #endif
 			}
@@ -874,7 +874,7 @@ bool CCDBSynchronised::x_setPropButDontSend( const std::string& name, sint64 val
 
 #ifdef TRACE_SET_VALUE
 	if ( VerboseDatabase )
-		nlinfo("Set value %"NL_I64"d for Prop %s, no change flag", value, name.c_str() );
+		nlinfo("Set value %" NL_I64 "d for Prop %s, no change flag", value, name.c_str() );
 #endif
 
 	// Set the property.

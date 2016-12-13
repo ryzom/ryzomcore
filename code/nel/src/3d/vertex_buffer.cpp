@@ -885,7 +885,7 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 		if(f.isReading())
 		{
 			_PreferredMemory = RAMPreferred;
-			_Name = "";
+			_Name.clear();
 		}
 	}
 }

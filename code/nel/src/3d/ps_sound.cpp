@@ -21,6 +21,8 @@
 #include "nel/3d/u_ps_sound_interface.h"
 #include "nel/3d/ps_attrib_maker.h"
 
+using namespace NLMISC;
+
 namespace NL3D
 {
 

@@ -62,8 +62,8 @@ SCharacter3DSetup::SCharacter3DSetup ()
 	Parts[Char3DPart_Face].Name = "TR_HOM_visage.shape";
 	Parts[Char3DPart_Head].Name = "FY_HOM_cheveux_medium01.shape";
 	Parts[Char3DPart_Hands].Name = "TR_HOM_underwear_hand.shape";
-	Parts[Char3DPart_HandRightItem].Name = "";
-	Parts[Char3DPart_HandLeftItem].Name = "";
+	Parts[Char3DPart_HandRightItem].Name.clear();
+	Parts[Char3DPart_HandLeftItem].Name.clear();
 	for (uint32 i = 0; i < NB_CHARACTER3D_PARTS; ++i)
 	{
 		Parts[i].Color = 0;
@@ -609,11 +609,11 @@ CCharacter3D::CCharacter3D()
 	_PlayList = NULL;
 	_FacePlayList = NULL;
 	// Clear the cache to make it work with 1st init
-	_CurrentSetup.Skeleton = "";
+	_CurrentSetup.Skeleton.clear();
 	_CurrentSetup.AnimPlayed = -1;
 	for (uint32 i = 0; i < NB_CHARACTER3D_PARTS; ++i)
 	{
-		_CurrentSetup.Parts[i].Name = "";
+		_CurrentSetup.Parts[i].Name.clear();
 		_CurrentSetup.Parts[i].Color = -1;
 		_CurrentSetup.Parts[i].Quality = -1;
 	}

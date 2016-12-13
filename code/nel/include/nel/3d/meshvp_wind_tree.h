@@ -124,7 +124,7 @@ private:
 	double		_LastSceneTime;
 
 	// maximum amplitude vector for each level. Stored in mesh because same for all instances.
-	CVector		_MaxDeltaPos[HrcDepth];
+	NLMISC::CVector		_MaxDeltaPos[HrcDepth];
 	float		_MaxVertexMove;
 
 	// MBR Cache

@@ -51,7 +51,7 @@ public:
 	 *	The usage of this matrix is for UV projection: XYZ= WorldProjectionMatrix * UVW.
 	 *	NB: Vj (ie for W) is mapped such that Vp means NearClip of the shadow and Vp+Vj means FarClip of the shadow
 	 */
-	CMatrix					LocalProjectionMatrix;
+	NLMISC::CMatrix			LocalProjectionMatrix;
 
 	/** Computed at shadow casting time. They are clipping planes used to clip receivers (mirror of the OBB).
 	 *	Receivers may use them to clip sub received parts (as they which)
@@ -63,7 +63,7 @@ public:
 	/** Computed at shadow casting time. This is the LocalPos Bouding Box containing the shadow (AxisAligned).
 	 *	\see generateClipInfoFromMatrix()
 	 */
-	CAABBox					LocalBoundingBox;
+	NLMISC::CAABBox			LocalBoundingBox;
 
 
 	// Filled by ShadowMapManager. This is the Last Frame Id we had update the texture.
@@ -114,13 +114,13 @@ public:
 	 *		driver->setupModelMatrix(localPosMatrix);
 	 *	Then render his mesh.
 	 */
-	void			buildCasterCameraMatrix(const CVector &lightDir, const CMatrix &localPosMatrix, const CAABBox &bbShape, CMatrix &cameraMatrix);
+	void			buildCasterCameraMatrix(const NLMISC::CVector &lightDir, const NLMISC::CMatrix &localPosMatrix, const NLMISC::CAABBox &bbShape, NLMISC::CMatrix &cameraMatrix);
 
 	/** From the Camera matrix computed with buildCasterCameraMatrix, compute the LocalProjectionMatrix, which modify the
 	 *	J axis according to backPoint and Shadow Depth.
 	 *	NB: automatically calls the buildClipInfoFromMatrix() method
 	 */
-	void			buildProjectionInfos(const CMatrix &cameraMatrix, const CVector &backPoint, float shadowMaxDepth);
+	void			buildProjectionInfos(const NLMISC::CMatrix &cameraMatrix, const NLMISC::CVector &backPoint, float shadowMaxDepth);
 
 	/** The ShadowMap Caster can call this method after setting LocalProjectionMatrix. It computes auto the
 	 *	LocalClipPlanes and LocalBoundingBox from it. NB: don't use it if you use buildProjectionInfos().
@@ -158,13 +158,13 @@ class CShadowMapProjector
 {
 public:
 	CShadowMapProjector();
-	void	setWorldSpaceTextMat(const CMatrix &ws);
-	void	applyToMaterial(const CMatrix &receiverWorldMatrix, CMaterial &material);
+	void	setWorldSpaceTextMat(const NLMISC::CMatrix &ws);
+	void	applyToMaterial(const NLMISC::CMatrix &receiverWorldMatrix, CMaterial &material);
 
 private:
-	CMatrix			_WsTextMat;
-	CMatrix			_XYZToUWVMatrix;
-	CMatrix			_XYZToWUVMatrix;
+	NLMISC::CMatrix			_WsTextMat;
+	NLMISC::CMatrix			_XYZToUWVMatrix;
+	NLMISC::CMatrix			_XYZToWUVMatrix;
 };
 
 

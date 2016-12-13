@@ -20,6 +20,10 @@
 #include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_text.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	class EBDPrivate

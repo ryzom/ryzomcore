@@ -2530,7 +2530,7 @@ void		CTessFace::refreshTesselationGeometry()
 // ***************************************************************************
 bool		CTessFace::updateBindEdge(CTessFace	*&edgeFace, bool &splitWanted)
 {
-	// Return true, when the bind should be Ok, or if a split has occured.
+	// Return true, when the bind should be Ok, or if a split has occurred.
 	// Return false only if pointers are updated, without splits.
 
 	if(edgeFace==NULL)

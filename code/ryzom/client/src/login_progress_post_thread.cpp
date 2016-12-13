@@ -99,7 +99,7 @@ static uint64 getVideoDriverVersion()
 {
 	static std::string ret;
 	uint64 version=0;
-	ret = "";
+	ret.clear();
 	bool ok = CSystemInfo::getVideoInfo(ret, version);
 	if (ok)
 	{

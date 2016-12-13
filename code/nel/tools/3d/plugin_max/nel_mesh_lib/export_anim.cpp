@@ -34,6 +34,10 @@
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 static Class_ID DefNoteTrackClassID(NOTETRACK_CLASS_ID, 0);
 
 #define BOOL_CONTROL_CLASS_ID 0x984b8d27
@@ -185,7 +189,7 @@ void CExportNel::addSSSTrack(CSSSBuild	&ssBuilder, INode& node)
             if(note)
             {
 				CSSSBuild::CKey		ks;
-				ks.Value = std::string(note->note);
+				ks.Value = note->note.ToUTF8();
 				ks.Time= CExportNel::convertTime (note->time);
 				bs.Track.push_back(ks);
             }
@@ -224,7 +228,7 @@ NL3D::CTrackKeyFramerConstString*		CExportNel::buildFromNoteTrack(INode& node)
 				{
 					firstDate = CExportNel::convertTime (note->time);
 				}				
-				ks.Value = std::string(note->note);
+				ks.Value = note->note.ToUTF8();
 				lastDate = CExportNel::convertTime (note->time);
 				st->addKey(ks , lastDate );
 				
@@ -605,7 +609,7 @@ void CExportNel::addMorphTracks (NL3D::CAnimation& animation, INode& node, const
 		if (pNode == NULL)
 			continue;
 		std::string name = parentName;
-		name += pNode->GetName();
+		name += tStrToUtf8(pNode->GetName());
 		name += "MorphFactor";
 		
 		IParamBlock *pb = (IParamBlock*)(pMorphMod->SubAnim (i+1));
@@ -1761,7 +1765,7 @@ ITrack* CExportNel::buildATrack (CAnimation& animation, Control& c, TNelValueTyp
 			}
 			else
 			{
-				MessageBox (NULL, "Warning: no pos track exported!", "Tmp NEL", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, _T("Warning: no pos track exported!"), _T("Tmp NEL"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}

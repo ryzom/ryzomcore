@@ -290,7 +290,7 @@ static void readPrivileges(NLMISC::CBitMemStream &impulse)
 	catch(const EStreamOverflow &)
 	{
 		nlwarning("User privileges not serialised, assuming none");
-		UserPrivileges = "";
+		UserPrivileges.clear();
 	}
 }
 
@@ -507,7 +507,7 @@ void impulseShardId(NLMISC::CBitMemStream &impulse)
 
 	string	webHost;
 	impulse.serial(webHost);
-	if (webHost != "")
+	if (!webHost.empty())
 	{
 		WebServer = webHost;
 	}
@@ -850,7 +850,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 						}
 					}
 				}
-				finalString = "";
+				finalString.clear();
 			}
 			else
 			{
@@ -1049,7 +1049,7 @@ string getInterfaceNameFromId (sint botType, sint interfaceId)
 	case BOTCHATTYPE::NeutralMainPage: interfaceName += "neutral_main"; break;
 	case BOTCHATTYPE::NastyMainPage: interfaceName += "nasty_main"; break;
 	case BOTCHATTYPE::MoreNewsPage: interfaceName += "more_news"; break;
-	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName = ""; break;
+	case BOTCHATTYPE::Done: nlinfo ("end of bot chat"); interfaceName.clear(); break;
 	}
 	return interfaceName;
 }
@@ -3285,7 +3285,7 @@ private:
 			}
 			else
 			{
-				contentStr = "";
+				contentStr.clear();
 				i = digitStart;
 			}
 		}

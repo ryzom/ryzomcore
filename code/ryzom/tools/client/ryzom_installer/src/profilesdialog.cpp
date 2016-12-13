@@ -56,6 +56,21 @@ void CProfilesDialog::accept()
 {
 	saveProfile(m_currentProfileIndex);
 
+	const CProfiles &profiles = m_model->getProfiles();
+
+	// check if profiles are valid
+	foreach(const CProfile &profile, profiles)
+	{
+		QString error;
+
+		if (!profile.isValid(error))
+		{
+			// display an error message
+			QMessageBox::critical(this, tr("Error"), error);
+			return;
+		}
+	}
+
 	m_model->save();
 
 	QDialog::accept();
@@ -79,7 +94,7 @@ void CProfilesDialog::onDeleteProfile()
 
 void CProfilesDialog::onProfileClicked(const QModelIndex &index)
 {
-	qDebug() << "clicked on" << index;
+	nlwarning("Clicked on profile %d", index.row());
 
 	displayProfile(index.row());
 }
@@ -211,20 +226,21 @@ void CProfilesDialog::updateExecutableVersion(int index)
 	if (index < 0) return;
 
 	const CProfile &profile = m_model->getProfiles()[index];
+	const CServer &server = CConfigFile::getInstance()->getServer(profile.server);
 
 	QString executable = profile.executable;
 
 	// file empty, use default one
 	if (executable.isEmpty())
 	{
-		executable += CConfigFile::getInstance()->getServer(profile.server).getClientFullPath();
+		executable = server.getClientFullPath();
 	}
 
 	// file doesn't exist
 	if (executable.isEmpty() || !QFile::exists(executable)) return;
 
 	// convert output to string
-	QString versionString = getVersionFromExecutable(executable);
+	QString versionString = getVersionFromExecutable(executable, server.getDirectory());
 
 	if (!versionString.isEmpty())
 	{
@@ -254,7 +270,18 @@ void CProfilesDialog::onExecutableBrowseClicked()
 
 	if (executable.isEmpty()) executable = defaultExecutable;
 
-	executable = QFileDialog::getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, tr("Executables (*.exe)"));
+	QString filter;
+
+#ifdef Q_OS_WIN32
+	filter = tr("Executables (*.exe)");
+#else
+	filter = tr("Executables (*)");
+#endif
+
+	QFileDialog open;
+	open.setFilter(QDir::Executable | QDir::NoDotAndDotDot | QDir::Files);
+
+	executable = open.getOpenFileName(this, tr("Please choose Ryzom client executable to launch"), executable, filter);
 
 	if (executable.isEmpty()) return;
 

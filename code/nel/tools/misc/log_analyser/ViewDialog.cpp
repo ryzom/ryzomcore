@@ -483,7 +483,7 @@ void		CViewDialog::loadFileOrSeries( const vector<int>& bookmarksAbsoluteLines )
 	if ( LogSessionStartDate.IsEmpty() )
 		actualFilenames += ":\r\n";
 	else
-		actualFilenames += " for Session of " + LogSessionStartDate + ":\r\n";
+		actualFilenames += " for Session of " + tStrToUtf8(LogSessionStartDate) + ":\r\n";
 	bool corruptionDetectionEnabled = (((CButton*)(((CLog_analyserDlg*)GetParent())->GetDlgItem( IDC_DetectCorruptedLines )))->GetCheck() == 1);
 	HasCorruptedLines = false;
 	vector<unsigned int> corruptedLines;

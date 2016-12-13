@@ -204,7 +204,7 @@ void CEventsListener::operator()(const CEvent& event)
 			// updateFreeLookPos is called in updateMouseSmoothing per frame
 
 			// Center cursor
-			if (outsideBounds && !s_MouseFreeLookWaitCenter)
+			if (outsideBounds && !s_MouseFreeLookWaitCenter && !ClientCfg.FreeLookTablet)
 			{
 				s_MouseFreeLookWaitCenter = true;
 				Driver->setMousePos(0.5f, 0.5f);

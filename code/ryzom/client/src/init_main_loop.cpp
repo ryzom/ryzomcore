@@ -1191,7 +1191,7 @@ void initMainLoop()
 	}
 	else
 	{
-		nmsg = "";
+		nmsg.clear();
 		ProgressBar.newMessage (nmsg);
 		ProgressBar.newMessage (nmsg);
 	}
@@ -1619,6 +1619,7 @@ void initBloomConfigUI()
 	bool supportBloom = Driver->supportBloomEffect();
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
 	CCtrlBaseButton* button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:bloom:c"));
 	if(button)
 	{
@@ -1627,6 +1628,12 @@ void initBloomConfigUI()
 
 	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:bloom_gr:square_bloom:c"));
 	if(button)
+	{
+		button->setFrozen(!supportBloom);
+	}
+
+	button = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:game_config:content:fx:fxaa:c"));
+	if (button)
 	{
 		button->setFrozen(!supportBloom);
 	}

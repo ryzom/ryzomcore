@@ -18,6 +18,10 @@
 #include "stdpch.h"
 #include "nel/gui/group_container_base.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 

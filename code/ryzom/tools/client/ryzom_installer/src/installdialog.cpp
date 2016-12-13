@@ -21,6 +21,7 @@
 
 #include "nel/misc/system_info.h"
 #include "nel/misc/common.h"
+#include "nel/misc/debug.h"
 
 #ifdef DEBUG_NEW
 	#define new DEBUG_NEW
@@ -32,45 +33,54 @@ CInstallDialog::CInstallDialog():QDialog()
 
 	setupUi(this);
 
-	oldDirectoryRadioButton->setVisible(false);
+	// update default destination
+	onDestinationDefaultButtonClicked();
 
-	// enable download radio button by default
-	internetRadioButton->setChecked(true);
-
-	m_oldDirectory = CConfigFile::getInstance()->getOldInstallationDirectory();
-
-	// found a previous installation
-	if (CConfigFile::getInstance()->areRyzomDataInstalledIn(m_oldDirectory))
-	{
-		oldDirectoryRadioButton->setText(tr("Old installation: %1").arg(m_oldDirectory));
-		oldDirectoryRadioButton->setVisible(true);
-		oldDirectoryRadioButton->setChecked(true);
-	}
-
-	updateAnotherLocationText();
-
-	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
-
-	updateDestinationText();
+#ifdef Q_OS_MAC
+	// only 64 bits for OS X
+	clientArchGroupBox->setVisible(false);
+	clientArch64RadioButton->setChecked(true);
+	clientArch32RadioButton->setChecked(false);
+#elif defined(Q_OS_WIN32)
+	// both 32 and 64 bits are working under Windows 64 bits
 
 	// check whether OS architecture is 32 or 64 bits
 	if (CConfigFile::has64bitsOS())
 	{
+		// 64 bits enbabled by default
 		clientArchGroupBox->setVisible(true);
 		clientArch64RadioButton->setChecked(true);
+		clientArch32RadioButton->setChecked(false);
 	}
 	else
 	{
+		// only 32 bits is available
 		clientArchGroupBox->setVisible(false);
+		clientArch64RadioButton->setChecked(false);
 		clientArch32RadioButton->setChecked(true);
 	}
+#else
+	// only use the current architecture for Linux
+
+	clientArchGroupBox->setVisible(false);
+
+#ifdef _LP64
+	// only 64 bits is available
+	clientArch64RadioButton->setChecked(true);
+	clientArch32RadioButton->setChecked(false);
+#else
+	// only 32 bits is available
+	clientArch64RadioButton->setChecked(false);
+	clientArch32RadioButton->setChecked(true);
+#endif
+
+#endif
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
-	internetRadioButton->setText(tr("Internet (%1 to download)").arg(qBytesToHumanReadable(server.dataCompressedSize)));
 	destinationGroupBox->setTitle(tr("Files will be installed to (requires %1):").arg(qBytesToHumanReadable(server.dataUncompressedSize)));
 
-	connect(anotherLocationBrowseButton, SIGNAL(clicked()), SLOT(onAnotherLocationBrowseButtonClicked()));
+	connect(destinationDefaultButton, SIGNAL(clicked()), SLOT(onDestinationDefaultButtonClicked()));
 	connect(destinationBrowseButton, SIGNAL(clicked()), SLOT(onDestinationBrowseButtonClicked()));
 
 	// TODO: if found a folder with initial data, get its total size and check if at least that size is free on the disk
@@ -94,43 +104,22 @@ void CInstallDialog::onShowAdvancedParameters(int state)
 	adjustSize();
 }
 
-void CInstallDialog::onAnotherLocationBrowseButtonClicked()
+void CInstallDialog::onDestinationDefaultButtonClicked()
 {
-	QString directory;
-	
-	for(;;)
-	{
-		directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory where Ryzom is currently installed."));
+	m_dstDirectory = CConfigFile::getNewInstallationDirectory();
 
-		if (directory.isEmpty()) return;
-
-		if (CConfigFile::getInstance()->isRyzomInstalledIn(directory)) break;
-
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to find Ryzom"), tr("Unable to find Ryzom in selected directory. Please choose another one or cancel."));
-	}
-
-	m_anotherDirectory = directory;
-
-	// if we browse to a Ryzom installation, we want to use it
-	anotherLocationRadioButton->setChecked(true);
-
-	updateAnotherLocationText();
+	updateDestinationText();
 }
 
 void CInstallDialog::onDestinationBrowseButtonClicked()
 {
-	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"));
+	QString directory = QFileDialog::getExistingDirectory(this, tr("Please choose directory to install Ryzom in"), m_dstDirectory);
 
 	if (directory.isEmpty()) return;
 
 	m_dstDirectory = directory;
 
 	updateDestinationText();
-}
-
-void CInstallDialog::updateAnotherLocationText()
-{
-	anotherLocationRadioButton->setText(tr("Another location: %1").arg(m_anotherDirectory.isEmpty() ? tr("Undefined"):m_anotherDirectory));
 }
 
 void CInstallDialog::updateDestinationText()
@@ -141,28 +130,56 @@ void CInstallDialog::updateDestinationText()
 void CInstallDialog::accept()
 {
 	// check free disk space
-	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
+	qint64 freeSpace = CConfigFile::getInstance()->ignoreFreeDiskSpaceChecks() ? 0:NLMISC::CSystemInfo::availableHDSpace(m_dstDirectory.toUtf8().constData());
+
+	// shouldn't happen
+	if (freeSpace == 0)
+	{
+		int error = NLMISC::getLastError();
+
+		nlwarning("Error '%s' (%d) occurred when trying to check free disk space on %s, continue anyway", NLMISC::formatErrorMessage(error).c_str(), error, Q2C(m_dstDirectory));
+	}
 
 	const CServer &server = CConfigFile::getInstance()->getServer();
 
-	if (freeSpace < server.dataUncompressedSize)
+	// compare with exact size of current directory
+	if (freeSpace && freeSpace < server.dataUncompressedSize)
 	{
-	    QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Not enough free disk space"), tr("You don't have enough free space on this disk, please make more space or choose a directory on another disk."));
 		return;
 	}
 
-	if (oldDirectoryRadioButton->isChecked())
+	// create directory if doesn't exist
+	bool succeedsToWrite = QDir().mkpath(m_dstDirectory);
+
+	// if unable to create directory, don't expect to write a file in it
+	if (succeedsToWrite)
 	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_oldDirectory);
+		// check if directory is writable by current user
+		if (!isDirectoryWritable(m_dstDirectory))
+		{
+			succeedsToWrite = false;
+		}
 	}
-	else if (anotherLocationRadioButton->isChecked())
+
+	if (!succeedsToWrite)
 	{
-		CConfigFile::getInstance()->setSrcServerDirectory(m_anotherDirectory);
+		QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Unable to write in directory"), tr("You don't have the permission to write in this directory with your current user account, please choose another directory."));
+		return;
 	}
-	else
+
+	// if reinstalling in same directory, don't check if directory is empty
+	if (m_dstDirectory != CConfigFile::getInstance()->getNewInstallationDirectory())
 	{
-		CConfigFile::getInstance()->setSrcServerDirectory("");
+		if (!isDirectoryEmpty(m_dstDirectory, true))
+		{
+			QMessageBox::StandardButton res = QMessageBox::warning(this, tr("Directory not empty"), tr("This directory is not empty, please choose another one."));
+			return;
+		}
 	}
+
+	// always download data
+	CConfigFile::getInstance()->setSrcServerDirectory("");
 
 	CConfigFile::getInstance()->setInstallationDirectory(m_dstDirectory);
 	CConfigFile::getInstance()->setUse64BitsClient(clientArch64RadioButton->isChecked());

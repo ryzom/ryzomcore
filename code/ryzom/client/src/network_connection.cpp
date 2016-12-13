@@ -2030,7 +2030,7 @@ void	CNetworkConnection::sendNormalMessage()
 	uint			numPacked = 0;
 
 	// pack each block
-	TGameCycle						lastPackedCycle = 0;
+//	TGameCycle						lastPackedCycle = 0;
 	list<CActionBlock>::iterator	itblock;
 
 	//nldebug("CNET[%p]: sending message %d", this, _CurrentSendNumber);
@@ -2052,7 +2052,7 @@ void	CNetworkConnection::sendNormalMessage()
 
 		//nlassertex((*itblock).Cycle > lastPackedCycle, ("(*itblock).Cycle=%d lastPackedCycle=%d", (*itblock).Cycle, lastPackedCycle));
 
-		lastPackedCycle = block.Cycle;
+//		lastPackedCycle = block.Cycle;
 
 		block.serial(message);
 		++numPacked;
@@ -2756,7 +2756,16 @@ void	CNetworkConnection::sendSystemDisconnection()
 	uint32	length = message.length();
 
 	if (_Connection.connected())
-		_Connection.send (message.buffer(), length);
+	{
+		try
+		{
+			_Connection.send(message.buffer(), length);
+		}
+		catch (const ESocket &e)
+		{
+			nlwarning("Socket exception: %s", e.what());
+		}
+	}
 	//sendUDP (&(_Connection), message.buffer(), length);
 	statsSend(length);
 

@@ -128,7 +128,7 @@ void CViewBitmapFaberMp::draw ()
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 
-		if (pIS->getIconBack() != "")
+		if (!pIS->getIconBack().empty())
 		{
 			if (_AccIconBackString != pIS->getIconBack())
 			{
@@ -140,7 +140,7 @@ void CViewBitmapFaberMp::draw ()
 							_AccIconBackId);
 		}
 
-		if (pIS->getIconMain() != "")
+		if (!pIS->getIconMain().empty())
 		{
 			if (_AccIconMainString != pIS->getIconMain())
 			{
@@ -152,7 +152,7 @@ void CViewBitmapFaberMp::draw ()
 							_AccIconMainId);
 		}
 
-		if (pIS->getIconOver() != "")
+		if (!pIS->getIconOver().empty())
 		{
 			if (_AccIconOverString != pIS->getIconOver())
 			{

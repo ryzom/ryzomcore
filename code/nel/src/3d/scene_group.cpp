@@ -451,7 +451,6 @@ void CInstanceGroup::serial (NLMISC::IStream& f)
 		_PointLightArray.clear();
 	}
 
-
 	if (version >= 2)
 		f.serial(_GlobalPos);
 
@@ -574,10 +573,11 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 				else
 				{
 					_Instances[i] = scene.createInstance (shapeName);
-				}
-				if( _Instances[i] == NULL )
-				{
-					nlwarning("Not found '%s' file", shapeName.c_str());
+
+					if (_Instances[i] == NULL)
+					{
+						nlwarning("Not found '%s' file", shapeName.c_str());
+					}
 				}
 			}
 		}
@@ -1121,7 +1121,7 @@ void CInstanceGroup::setClusterSystemForInstances(CInstanceGroup *pIG)
 void CInstanceGroup::getDynamicPortals (std::vector<std::string> &names)
 {
 	for (uint32 i = 0; i < _Portals.size(); ++i)
-		if (_Portals[i].getName() != "")
+		if (!_Portals[i].getName().empty())
 			names.push_back (_Portals[i].getName());
 }
 

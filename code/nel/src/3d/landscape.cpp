@@ -1831,9 +1831,9 @@ void			CLandscape::loadTile(uint16 tileId)
 	if(tile)
 		textName= tile->getRelativeFileName(CTile::additive);
 	else
-		textName= "";
+		textName.clear();
 	// If no additive for this tile, rdrpass is NULL.
-	if(textName=="")
+	if(textName.empty())
 		tileInfo->AdditiveRdrPass= NULL;
 	else
 	{
@@ -1844,7 +1844,7 @@ void			CLandscape::loadTile(uint16 tileId)
 
 		// We may have an alpha part for additive.
 		textName= tile->getRelativeFileName (CTile::alpha);
-		if(textName!="")
+		if(!textName.empty())
 			// Must Use clamp for alpha (although NVidia drivers are buggy), because the texture doesn't tile at all
 			pass.TextureAlpha= findTileTexture(TileBank.getAbsPath()+textName, true);
 
@@ -1866,7 +1866,7 @@ void			CLandscape::loadTile(uint16 tileId)
 	if(tile)
 	{
 		textName= tile->getRelativeFileName(CTile::diffuse);
-		if(textName!="")
+		if(!textName.empty())
 			// Avoid using Clamp for diffuse, because of recent NVidia GL drivers Bugs in 77.72
 			pass.TextureDiffuse= findTileTexture(TileBank.getAbsPath()+textName, false);
 		else
@@ -1880,7 +1880,7 @@ void			CLandscape::loadTile(uint16 tileId)
 	if(tile)
 	{
 		textName= tile->getRelativeFileName (CTile::alpha);
-		if(textName!="")
+		if(!textName.empty())
 			// Must Use clamp for alpha (although NVidia drivers are buggy), because the texture doesn't tile at all
 			pass.TextureAlpha= findTileTexture(TileBank.getAbsPath()+textName, true);
 	}
@@ -3216,37 +3216,37 @@ void				CLandscape::deleteTessFace(CTessFace *f)
 	// for refine() mgt, must remove from refine priority list, or from the temp rootTessFaceToUpdate list.
 	f->unlinkInPList();
 
-	TessFaceAllocator.free(f);
+	TessFaceAllocator.freeBlock(f);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessVertex(CTessVertex *v)
 {
-	TessVertexAllocator.free(v);
+	TessVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessNearVertex(CTessNearVertex *v)
 {
-	TessNearVertexAllocator.free(v);
+	TessNearVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTessFarVertex(CTessFarVertex *v)
 {
-	TessFarVertexAllocator.free(v);
+	TessFarVertexAllocator.freeBlock(v);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTileMaterial(CTileMaterial *tm)
 {
-	TileMaterialAllocator.free(tm);
+	TileMaterialAllocator.freeBlock(tm);
 }
 
 // ***************************************************************************
 void				CLandscape::deleteTileFace(CTileFace *tf)
 {
-	TileFaceAllocator.free(tf);
+	TileFaceAllocator.freeBlock(tf);
 }
 
 

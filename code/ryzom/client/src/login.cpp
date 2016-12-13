@@ -71,6 +71,10 @@ using namespace NLNET;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 
 extern bool SetMousePosFirstTime;
@@ -2661,7 +2665,7 @@ class CAHOnCreateAccountSubmit : public IActionHandler
 					for(uint i=0; i<errors.size(); i++)
 					{
 						string comment = parseCommentError(res, errors[i]);
-						if(comment!="")
+						if(!comment.empty())
 							error += "- " + comment + "\n";
 					}
 

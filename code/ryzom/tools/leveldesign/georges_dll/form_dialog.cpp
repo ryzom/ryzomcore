@@ -770,7 +770,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 					colorEdit->Edit.GetWindowText (str);
 
 					sint r, g, b;
-					if (sscanf (str, "%d,%d,%d", &r, &g, &b) == 3)
+					if (_stscanf (str, _T("%d,%d,%d"), &r, &g, &b) == 3)
 					{
 						clamp (r, 0, 255);
 						clamp (g, 0, 255);
@@ -864,12 +864,8 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 						CGeorgesEditDoc *doc = View->GetDocument ();
 						if (doc)
 						{
-							// Build the filter string
-							char filter[512];
-							smprintf (filter, 512, "Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|");
-
 							// Open the dialog
-							CFileDialog dlgFile (TRUE, "*.dfn", "*.dfn", OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, theApp.m_pMainWnd);
+							CFileDialog dlgFile (TRUE, _T("*.dfn"), _T("*.dfn"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("Dfn Files (*.dfn)|*.dfn|All Files(*.*)|*.*|"), theApp.m_pMainWnd);
 							if (dlgFile.DoModal () == IDOK)
 							{
 								combo->Combo.UpdateData ();
@@ -1177,12 +1173,10 @@ void CFormDialog::getDfnName (string &result) const
 	{
 		// Get the DFN filename
 		CString str = doc->GetPathName ();
-		char extension[512];
-		_splitpath (str, NULL, NULL, NULL, extension);
-		result = (*extension == '.') ? extension+1 : extension;
+		result NLMISC::CFile::getExtension(tStrToUtf8(str));
 	}
 	else
-		result = "";
+		result.clear();
 }
 
 // ***************************************************************************
@@ -1358,18 +1352,18 @@ void IFormWidget::updateLabel ()
 						if (node->getForm () == doc->getFormPtr ())
 						{
 							// The node exist
-							Label.SetWindowText (SavedLabel.c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel));
 						}
 						else
 						{
 							// The node exist in the parent form
-							Label.SetWindowText ((SavedLabel+" (in parent form)").c_str());
+							Label.SetWindowText (utf8ToTStr(SavedLabel + " (in parent form)"));
 						}
 					}	
 					else
 					{
 						// The node is empty
-						Label.SetWindowText ((SavedLabel+" (undefined)").c_str());
+						Label.SetWindowText (utf8ToTStr(SavedLabel + " (undefined)"));
 					}
 				}
 
@@ -1515,10 +1509,10 @@ void IFormWidget::onOpenSelected ()
 	string str;
 	getValue (str);
 
-	std::string str2=CPath::lookup (str.c_str (), false, false);
+	std::string str2 = CPath::lookup (str, false, false);
 	if (str2.empty())
-		str2 = str.c_str ();
-	theApp.OpenDocumentFile (str2.c_str ());
+		str2 = str;
+	theApp.OpenDocumentFile (utf8ToTStr(str2));
 }
 
 // ***************************************************************************
@@ -2350,7 +2344,7 @@ void CColorEdit::getValue (std::string &result)
 	}
 	else
 	{
-		result = "";
+		result.clear();
 	}
 }
 
@@ -2807,7 +2801,7 @@ void CIconWidget::onOk ()
 
 void CIconWidget::getValue (std::string &result)
 {
-	result = "";
+	result.clear();
 }
 
 // ***************************************************************************

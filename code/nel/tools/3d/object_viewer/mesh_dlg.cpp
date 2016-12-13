@@ -90,34 +90,31 @@ void CMeshDlg::touchPSState()
 void CMeshDlg::OnBrowseShape() 
 {
 	
-	CFileDialog fd(TRUE, ".shape", "*.shape", 0, NULL, this);
+	CFileDialog fd(TRUE, _T(".shape"), _T("*.shape"), 0, NULL, this);
 	if (fd.DoModal() == IDOK)
 	{
 		// Add to the path
-		char drive[256];
-		char dir[256];
-		char path[256];
-		char fname[256];
-		char ext[256];
-
+		std::string fullPath = tStrToUtf8(fd.GetPathName());
+		std::string fname = NLMISC::CFile::getFilenameWithoutExtension(fullPath);
+		std::string ext = NLMISC::CFile::getExtension(fullPath);
 
 		// Add search path for the texture
-		_splitpath (fd.GetPathName(), drive, dir, fname, ext);
-		_makepath (path, drive, dir, NULL, NULL);
-		NLMISC::CPath::addSearchPath (path);
+		NLMISC::CPath::addSearchPath (NLMISC::CFile::getPath(fullPath));
 
 		try
 		{		
-			_ShapeParticle->setShape(std::string(fname) + ext);		
-			m_ShapeName = (std::string(fname) + ext).c_str();
+			_ShapeParticle->setShape(fname + "." + ext);		
+			m_ShapeName = utf8ToTStr(fname + "." + ext);
 			touchPSState();			
 		}
-		catch (NLMISC::Exception &e)
+		catch (const NLMISC::Exception &e)
 		{
-			MessageBox(e.what(), "shape loading error");
+			MessageBox(utf8ToTStr(e.what()), _T("shape loading error"));
 		}		
+
 		updateMeshErrorString();
 	}
+
 	UpdateData(FALSE);
 }
 
@@ -162,11 +159,11 @@ void CMeshDlg::updateForMorph()
 		GetDlgItem(IDC_SHAPE_NAME)->EnableWindow(!enable);
 		if (!enable)
 		{
-			m_ShapeName = cm->getShape().c_str();
+			m_ShapeName = utf8ToTStr(cm->getShape());
 		}
 		else
 		{
-			m_ShapeName = "";
+			m_ShapeName.Empty();
 		}
 	}
 	updateMeshErrorString();
@@ -238,7 +235,7 @@ BOOL CMeshDlg::EnableWindow( BOOL bEnable)
 ///==================================================================
 void CMeshDlg::updateMeshErrorString()
 {
-	GetDlgItem(IDC_MESH_ERROR)->SetWindowText("");
+	GetDlgItem(IDC_MESH_ERROR)->SetWindowText(_T(""));
 	NL3D::CPSConstraintMesh *cm = dynamic_cast<NL3D::CPSConstraintMesh *>(_ShapeParticle);
 	if (!cm) return;
 	std::vector<sint> numVerts;

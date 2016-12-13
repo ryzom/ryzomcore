@@ -109,7 +109,7 @@ void dumpWriteMask(uint mask, std::string &out)
 	H_AUTO_D3D(dumpWriteMask)
 	if (mask == 0xf)
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";
@@ -126,7 +126,7 @@ void dumpSwizzle(const CVPSwizzle &swz, std::string &out)
 	H_AUTO_D3D(dumpSwizzle)
 	if (swz.isIdentity())
 	{
-		out = "";
+		out.clear();
 		return;
 	}
 	out = ".";

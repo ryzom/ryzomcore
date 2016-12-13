@@ -120,11 +120,11 @@ public:
 
 	/** Get the first child node pointer named childName. NULL if no node named childName.
 	  */
-	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, const char *childName);
+	static xmlNodePtr getFirstChildNode (xmlNodePtr parent, const std::string &childName);
 
 	/** Get the next child node pointer name childName, brother of previous. NULL if no node named childName.
 	  */
-	static xmlNodePtr getNextChildNode (xmlNodePtr last, const char *childName);
+	static xmlNodePtr getNextChildNode (xmlNodePtr last, const std::string &childName);
 
 	/** Get the first child node pointer of type. NULL if no node of type.
 	  */
@@ -136,7 +136,7 @@ public:
 
 	/** Count number of sub node named with a given name for a given node.
 	  */
-	static uint		countChildren (xmlNodePtr node, const char *childName);
+	static uint		countChildren (xmlNodePtr node, const std::string &childName);
 
 	/** Count number of sub node of type for a given node.
 	  */
@@ -147,22 +147,22 @@ public:
 	  *
 	  * Returns true and the result if the property has been found, else false.
 	  */
-	static bool		getPropertyString (std::string &result, xmlNodePtr node, const char *property);
+	static bool		getPropertyString (std::string &result, xmlNodePtr node, const std::string &property);
 
 	/**
 	  *	Read an integer property - if the property is not found the default value is returned
 	  */
-	static int		getIntProperty(xmlNodePtr node, const char *property, int defaultValue);
+	static int		getIntProperty(xmlNodePtr node, const std::string &property, int defaultValue);
 
 	/**
 	  *	Read a floating point property - if the property is not found the default value is returned
 	  */
-	static double	getFloatProperty(xmlNodePtr node, const char *property, float defaultValue);
+	static double	getFloatProperty(xmlNodePtr node, const std::string &property, float defaultValue);
 
 	/**
 	  *	Read a string property - if the property is not found the default value is returned
 	  */
-	static std::string getStringProperty(xmlNodePtr node, const char *property, const std::string& defaultValue);
+	static std::string getStringProperty(xmlNodePtr node, const std::string &property, const std::string& defaultValue);
 
 	/**
 	  * Read the content of the node as a string
@@ -170,6 +170,11 @@ public:
 	  * Returns true and the result if some text has been found, else false.
 	  */
 	static bool		getContentString (std::string &result, xmlNodePtr node);
+
+	/**
+	  * Release meory used by libxml2, to only call before exit.
+	  */
+	static void		releaseLibXml();
 
 private:
 
@@ -193,12 +198,12 @@ private:
 	virtual void	serialBuffer(uint8 *buf, uint len);
 	virtual void	serialBit(bool &bit);
 
-	virtual bool	xmlPushBeginInternal (const char *nodeName);
+	virtual bool	xmlPushBeginInternal (const std::string &nodeName);
 	virtual bool	xmlPushEndInternal ();
 	virtual bool	xmlPopInternal ();
-	virtual bool	xmlSetAttribInternal (const char *attribName);
+	virtual bool	xmlSetAttribInternal (const std::string &attribName);
 	virtual bool	xmlBreakLineInternal ();
-	virtual bool	xmlCommentInternal (const char *comment);
+	virtual bool	xmlCommentInternal (const std::string &comment);
 
 	// Internal functions
 	void			serialSeparatedBufferIn ( std::string &value, bool checkSeparator = true );

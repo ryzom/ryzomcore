@@ -563,15 +563,15 @@ void CSoundDriverDSound::initDevice(const std::string &device, ISoundDriver::TSo
 		switch (hr)
 		{
 		case DSERR_BUFFERLOST:
-			throw ESoundDriver("Failed to lock the DirectSound primary buffer : DSERR_BUFFERLOST");
+			throw ESoundDriver("Failed to lock the DirectSound primary buffer: DSERR_BUFFERLOST");
 		case DSERR_INVALIDCALL:
-			throw ESoundDriver("Failed to lock the DirectSound primary buffer : DSERR_INVALIDCALL");
+			throw ESoundDriver("Failed to lock the DirectSound primary buffer: DSERR_INVALIDCALL");
 		case DSERR_INVALIDPARAM:
-			throw ESoundDriver("Failed to lock the DirectSound primary buffer : DSERR_INVALIDPARAM");
+			throw ESoundDriver("Failed to lock the DirectSound primary buffer: DSERR_INVALIDPARAM");
 		case DSERR_PRIOLEVELNEEDED:
-			throw ESoundDriver("Failed to lock the DirectSound primary buffer : DSERR_PRIOLEVELNEEDED");
+			throw ESoundDriver("Failed to lock the DirectSound primary buffer: DSERR_PRIOLEVELNEEDED");
 		default:
-			throw ESoundDriver("Failed to lock the DirectSound primary buffer : unkown error");
+			throw ESoundDriver("Failed to lock the DirectSound primary buffer: unknown error");
 
 		}
 	}

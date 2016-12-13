@@ -91,6 +91,8 @@
 
 bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 {
+	if (filename.isEmpty()) return false;
+
 	bool attrReadOnly = (fileAttributes & FILE_ATTRIBUTE_READONLY) != 0;
 	bool attrHidden = (fileAttributes & FILE_ATTRIBUTE_HIDDEN) != 0;
 	bool attrSystem = (fileAttributes & FILE_ATTRIBUTE_SYSTEM) != 0;
@@ -114,7 +116,7 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 #ifdef Q_OS_WIN
 	SetFileAttributesW((wchar_t*)filename.utf16(), windowsAttributes);
 #else
-	const char *name = filename.toUtf8().constData();
+	std::string name = filename.toUtf8().constData();
 
 	mode_t current_umask = umask(0); // get and set the umask
 	umask(current_umask); // restore the umask
@@ -122,9 +124,9 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 
 	struct stat stat_info;
 
-	if (lstat(name, &stat_info) != 0)
+	if (lstat(name.c_str(), &stat_info) != 0)
 	{
-		nlwarning("Unable to get file attributes for %s", name);
+		nlwarning("Unable to get file attributes for %s", name.c_str());
 		return false;
 	}
 
@@ -137,13 +139,13 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		{
 			if (S_ISREG(stat_info.st_mode))
 			{
-				chmod(name, stat_info.st_mode & mask);
+				chmod(name.c_str(), stat_info.st_mode & mask);
 			}
 			else if (S_ISDIR(stat_info.st_mode))
 			{
 				// user/7za must be able to create files in this directory
 				stat_info.st_mode |= (S_IRUSR | S_IWUSR | S_IXUSR);
-				chmod(name, stat_info.st_mode & mask);
+				chmod(name.c_str(), stat_info.st_mode & mask);
 			}
 		}
 	}
@@ -156,7 +158,7 @@ bool Set7zFileAttrib(const QString &filename, uint32 fileAttributes)
 		// octal!, clear write permission bits
 		stat_info.st_mode &= ~0222;
 
-		chmod(name, stat_info.st_mode & mask);
+		chmod(name.c_str(), stat_info.st_mode & mask);
 	}
 #endif
 
@@ -287,8 +289,28 @@ bool CFilesExtractor::exec()
 		return extractBnp();
 	}
 
-	qDebug() << "Unsupported format";
+	nlwarning("Unsupported format for file %s", Q2C(m_sourceFile));
 	return false;
+}
+
+static uint32 convertWindowsFileTimeToUnixTimestamp(const CNtfsFileTime &nt)
+{
+	// first, convert it into second since jan1, 1601
+	uint64 t = nt.Low | (uint64(nt.High) << 32);
+
+	// offset to convert Windows file times to UNIX timestamp
+	uint64 offset = UINT64_CONSTANT(116444736000000000);
+
+	// adjust time base to unix epoch base
+	t -= offset;
+
+	// convert the resulting time into seconds
+	t /= 10;	// microsec
+	t /= 1000;	// millisec
+	t /= 1000;	// sec
+
+	// return the resulting time
+	return uint32(t);
 }
 
 bool CFilesExtractor::extract7z()
@@ -297,6 +319,8 @@ bool CFilesExtractor::extract7z()
 
 	if (!inFile.open())
 	{
+		nlwarning("Unable to open %s", Q2C(m_sourceFile));
+
 		if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(m_sourceFile));
 		return false;
 	}
@@ -386,54 +410,109 @@ bool CFilesExtractor::extract7z()
 			QString path = QString::fromUtf16(temp);
 			QString filename = QFileInfo(path).fileName();
 
-			if (!isDir)
-			{
-				if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
-
-				res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
-					&offset, &outSizeProcessed, &allocImp, &allocTempImp);
-
-				if (res != SZ_OK) break;
-			}
-
 			QString destPath = m_destinationDirectory + '/' + path;
 
-			QDir dir;
+			// get uncompressed size
+			quint64 uncompressedSize = SzArEx_GetFileSize(&db, i);
+
+			// get modification time
+			quint32 modificationTime = 0;
+
+			if (SzBitWithVals_Check(&db.MTime, i))
+			{
+				modificationTime = convertWindowsFileTimeToUnixTimestamp(db.MTime.Vals[i]);
+			}
 
 			if (isDir)
 			{
-				dir.mkpath(destPath);
+				QDir().mkpath(destPath);
 				continue;
 			}
 
-			dir.mkpath(QFileInfo(destPath).absolutePath());
-
-			QFile outFile(destPath);
-
-			if (!outFile.open(QFile::WriteOnly))
+			// check if file exists
+			if (QFile::exists(destPath))
 			{
-				error = QApplication::tr("Unable to open output file");
-				res = SZ_ERROR_FAIL;
-				break;
+				QFileInfo currentFileInfo(destPath);
+
+				// skip file if same size and same modification date
+				if (currentFileInfo.lastModified().toTime_t() == modificationTime && currentFileInfo.size() == uncompressedSize)
+				{
+					// update progress
+					totalUncompressed += uncompressedSize;
+
+					if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
+
+					continue;
+				}
 			}
-
-			size_t processedSize = outFile.write((const char*)(outBuffer + offset), outSizeProcessed);
-
-			if (processedSize != outSizeProcessed)
-			{
-				error = QApplication::tr("Unable to write output file");
-				res = SZ_ERROR_FAIL;
-				break;
-			}
-
-			outFile.close();
-
-			totalUncompressed += SzArEx_GetFileSize(&db, i);
 
 			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
 
+			res = SzArEx_Extract(&db, &lookStream.s, i, &blockIndex, &outBuffer, &outBufferSize,
+				&offset, &outSizeProcessed, &allocImp, &allocTempImp);
+
+			if (res != SZ_OK) break;
+
+			QString destSubPath = QFileInfo(destPath).absolutePath();
+
+			// create file directory
+			if (!QDir().mkpath(destSubPath))
+			{
+				nlwarning("Unable to create directory %s", Q2C(destSubPath));
+			}
+
+			// create file
+			QSaveFile outFile(destPath);
+
+			if (!outFile.open(QFile::WriteOnly))
+			{
+				nlwarning("Unable to open file %s", Q2C(destPath));
+
+				error = QApplication::tr("Unable to open output file %1").arg(destPath);
+				res = SZ_ERROR_FAIL;
+				break;
+			}
+
+			qint64 currentSizeToProcess = outSizeProcessed;
+			
+			do
+			{
+				qint64 currentProcessedSize = outFile.write((const char*)(outBuffer + offset), currentSizeToProcess);
+
+				// errors only occur when returned size is -1
+				if (currentProcessedSize < 0) break;
+
+				offset += currentProcessedSize;
+				currentSizeToProcess -= currentProcessedSize;
+			}
+			while (currentSizeToProcess > 0);
+
+			if (offset != outSizeProcessed)
+			{
+				nlwarning("Unable to write output file %s (%u bytes written but expecting %u bytes)", Q2C(destPath), (uint32)offset, (uint32)outSizeProcessed);
+
+				error = QApplication::tr("Unable to write output file %1 (%2 bytes written but expecting %3 bytes)").arg(destPath).arg(offset).arg(outSizeProcessed);
+				res = SZ_ERROR_FAIL;
+				break;
+			}
+
+			outFile.commit();
+
+			totalUncompressed += uncompressedSize;
+
+			if (m_listener) m_listener->operationProgress(totalUncompressed, filename);
+
+			// set attributes
 			if (SzBitWithVals_Check(&db.Attribs, i))
+			{
 				Set7zFileAttrib(destPath, db.Attribs.Vals[i]);
+			}
+
+			// set modification time
+			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(destPath), modificationTime))
+			{
+				nlwarning("Unable to change date of %s", Q2C(destPath));
+			}
 		}
 
 		IAlloc_Free(&allocImp, outBuffer);
@@ -465,6 +544,10 @@ bool CFilesExtractor::extract7z()
 
 		case SZ_ERROR_CRC:
 		error = QApplication::tr("7zip decoder doesn't support this archive");
+		break;
+
+		case SZ_ERROR_INPUT_EOF:
+		error = QApplication::tr("File %1 is corrupted, unable to uncompress it").arg(m_sourceFile);
 		break;
 
 		case SZ_ERROR_FAIL:
@@ -499,12 +582,16 @@ bool CFilesExtractor::extractZip()
 
 			if (!baseDir.mkpath(fi.filePath))
 			{
-				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to create directory %1").arg(absPath));
+				nlwarning("Unable to create directory %s", Q2C(fi.filePath));
+
+				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to create directory %1").arg(fi.filePath));
 				return false;
 			}
 
 			if (!QFile::setPermissions(absPath, fi.permissions))
 			{
+				nlwarning("Unable to change permissions of %s", Q2C(absPath));
+
 				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to set permissions of %1").arg(absPath));
 				return false;
 			}
@@ -533,18 +620,30 @@ bool CFilesExtractor::extractZip()
 				return true;
 			}
 
-			QFile f(absPath);
+			QSaveFile f(absPath);
 
 			if (!f.open(QIODevice::WriteOnly))
 			{
+				nlwarning("Unable to open %s", Q2C(absPath));
+
 				if (m_listener) m_listener->operationFail(QApplication::tr("Unable to open %1").arg(absPath));
 				return false;
 			}
 
 			currentSize += f.write(reader.fileData(fi.filePath));
 
-			f.setPermissions(fi.permissions);
-			f.close();
+			if (!f.setPermissions(fi.permissions))
+			{
+				nlwarning("Unable to change permissions of %s", Q2C(absPath));
+			}
+
+			f.commit();
+
+			// set the right modification date
+			if (!NLMISC::CFile::setFileModificationDate(qToUtf8(absPath), fi.lastModified.toTime_t()))
+			{
+				nlwarning("Unable to change date of %s", Q2C(absPath));
+			}
 
 			if (m_listener) m_listener->operationProgress(currentSize, QFileInfo(absPath).fileName());
 		}
@@ -614,18 +713,26 @@ bool CFilesExtractor::extractBnp()
 	}
 	catch(const NLMISC::EDiskFullError &e)
 	{
+		nlwarning("Disk full when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("disk full");
 	}
 	catch(const NLMISC::EWriteError &e)
 	{
+		nlwarning("Write error when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("unable to write %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const NLMISC::EReadError &e)
 	{
+		nlwarning("Read error when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("unable to read %1").arg(qFromUtf8(e.Filename));
 	}
 	catch(const std::exception &e)
 	{
+		nlwarning("Unknown exception when extracting %s to %s", Q2C(m_sourceFile), Q2C(m_destinationDirectory));
+
 		error = QApplication::tr("failed (%1)").arg(qFromUtf8(e.what()));
 	}
 

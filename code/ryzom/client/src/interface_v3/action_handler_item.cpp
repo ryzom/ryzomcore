@@ -50,6 +50,10 @@ extern NLMISC::CLog	g_log;
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 CInterfaceItemEdition *CInterfaceItemEdition::_Instance = NULL;
 
 // ********************************************************************************************
@@ -329,7 +333,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 		// remove infos waiter (if not already canceled)
 		getInventory().removeItemInfoWaiter(this);
 		_CurrItemSheet = NULL;
-		WindowName = "";
+		WindowName.clear();
 
 		// hide the dialog
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -425,8 +429,6 @@ static	CDBCtrlSheet	*CurrentStackDst= NULL;
 static	TStackMode		CurrentStackMode;
 
 
-static void putStackableInventoryItemToExchange(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
-static void putStackableExchangedItemToInventory(CDBCtrlSheet *src, CDBCtrlSheet *dest, uint quantity);
 static void validateStackItem(CDBCtrlSheet *src, CDBCtrlSheet *dest, sint32 quantity, TStackMode stackMode);
 
 

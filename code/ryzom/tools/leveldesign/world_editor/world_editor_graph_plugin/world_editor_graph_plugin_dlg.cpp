@@ -582,7 +582,7 @@ void CWorldEditorGraphPluginDlg::OnLButtonDown(UINT nFlags, CPoint point)
 				tok.top=atoi(strRes2.at(1).c_str());
 				tok.right=atoi(strRes3.at(0).c_str());
 				tok.bottom=atoi(strRes3.at(1).c_str());
-				}catch (exception e) {return;}
+				}catch (const exception &e) {return;}
 
 				
 				

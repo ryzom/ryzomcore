@@ -194,7 +194,7 @@ void addPacsPrim(const std::string &fileName)
 		nlwarning(("Pacs primitive " + ppName + " already has been inserted").c_str());
 		return;
 	}
-	std::auto_ptr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(fileName));
+	CUniquePtr<NLPACS::UPrimitiveBlock> pb(NLPACS::UPrimitiveBlock::createPrimitiveBlockFromFile(fileName));
 	PacsPrims[ppName] = pb.release();
 }
 

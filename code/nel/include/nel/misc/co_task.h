@@ -201,7 +201,9 @@ namespace NLMISC
 		 */
 		void sleep(uint milliseconds);
 
-
+		/** Release internal instance.
+		 */
+		static void releaseInstance();
 	};
 
 

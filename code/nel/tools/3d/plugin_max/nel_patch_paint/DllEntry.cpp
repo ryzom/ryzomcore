@@ -11,6 +11,10 @@ int controlsInit = FALSE;
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 /** public functions **/
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved) 
 {
@@ -64,7 +68,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 __declspec( dllexport ) const TCHAR *
 LibDescription() 
 { 
-	return "NeL patch painter"; 
+	return _T("NeL patch painter");
 }
 
 

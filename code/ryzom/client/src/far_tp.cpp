@@ -395,7 +395,7 @@ void CLoginStateMachine::run()
 			}
 			else
 			{
-				// return to login menu if an error occured
+				// return to login menu if an error occurred
 				_CurrentState = st_login;
 			}
 

@@ -858,7 +858,7 @@ bool	CCommandEventManager::CScript::run()
 	CScriptNode::EState	state = Root->execute(Environment);
 	if (state == CScriptNode::Error)
 	{
-		nlwarning("[%s] An error occured in script, script ended", Name.c_str());
+		nlwarning("[%s] An error occurred in script, script ended", Name.c_str());
 		return false;
 	}
 	else if (state == CScriptNode::Ok)

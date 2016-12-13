@@ -31,50 +31,50 @@ using namespace NLMISC;
 // Which dialog tab is the VerytexProgram one?
 #define TAB_VP_ID	5
 
-char *_EnvironmentNames[] =
+TCHAR *_EnvironmentNames[] =
 {
-	"",
-	"no fx",
-    "GENERIC",
-    "PADDEDCELL",
-    "ROOM",
-    "BATHROOM",
-    "LIVINGROOM",
-    "STONEROOM",
-    "AUDITORIUM",
-    "CONCERTHALL",
-    "CAVE",
-    "ARENA",
-    "HANGAR",
-    "CARPETEDHALLWAY",
-    "HALLWAY",
-    "STONECORRIDOR",
-    "ALLEY",
-    "FOREST",
-    "CITY",
-    "MOUNTAINS",
-    "QUARRY",
-    "PLAIN",
-    "PARKINGLOT",
-    "SEWERPIPE",
-    "UNDERWATER",
-    "DRUGGED",
-    "DIZZY",
-    "PSYCHOTIC",
+	_T(""),
+	_T("no fx"),
+	_T("GENERIC"),
+	_T("PADDEDCELL"),
+	_T("ROOM"),
+	_T("BATHROOM"),
+	_T("LIVINGROOM"),
+	_T("STONEROOM"),
+	_T("AUDITORIUM"),
+	_T("CONCERTHALL"),
+	_T("CAVE"),
+	_T("ARENA"),
+	_T("HANGAR"),
+	_T("CARPETEDHALLWAY"),
+	_T("HALLWAY"),
+	_T("STONECORRIDOR"),
+	_T("ALLEY"),
+	_T("FOREST"),
+	_T("CITY"),
+	_T("MOUNTAINS"),
+	_T("QUARRY"),
+	_T("PLAIN"),
+	_T("PARKINGLOT"),
+	_T("SEWERPIPE"),
+	_T("UNDERWATER"),
+	_T("DRUGGED"),
+	_T("DIZZY"),
+	_T("PSYCHOTIC"),
 	NULL
 };
-char *_MaterialNames[] = 
+TCHAR *_MaterialNames[] = 
 {
-	"",
-	"no occlusion",
-	"SINGLEWINDOW",
-	"DOUBLEWINDOW",
-	"THINDOOR",
-	"THICKDOOR",
-	"WOODWALL",
-	"BRICKWALL",
-	"STONEWALL",
-	"CURTAIN",
+	_T(""),
+	_T("no occlusion"),
+	_T("SINGLEWINDOW"),
+	_T("DOUBLEWINDOW"),
+	_T("THINDOOR"),
+	_T("THICKDOOR"),
+	_T("WOODWALL"),
+	_T("BRICKWALL"),
+	_T("STONEWALL"),
+	_T("CURTAIN"),
 	NULL
 };
 
@@ -90,13 +90,13 @@ class addSubLodNodeHitCallBack : public HitByNameDlgCallback
 public:
 	INodeTab	NodeTab;
 private:
-	virtual TCHAR *dialogTitle()
+	virtual const MCHAR *dialogTitle()
 	{
-		return "Select sub lod objects to add";
+		return _M("Select sub lod objects to add");
 	}
-	virtual TCHAR *buttonText()
+	virtual const MCHAR *buttonText()
 	{
-		return "Add";
+		return _M("Add");
 	}
 	virtual BOOL singleSelect()
 	{
@@ -319,7 +319,7 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (HWND hwndDlg, UINT uMsg, WPARAM wP
 INT_PTR CALLBACK MiscDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK AnimationDialogCallback (HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-const char				*SubText[TAB_COUNT]	= {"LOD & MRM", "Accelerator", "Instance", "Lighting", "LMC", "Vegetable", "VertexProgram", "Misc", "Animation"};
+const TCHAR				*SubText[TAB_COUNT]	= { _T("LOD & MRM"), _T("Accelerator"), _T("Instance"), _T("Lighting"), _T("LMC"), _T("Vegetable"), _T("VertexProgram"), _T("Misc"), _T("Animation")};
 const int				SubTab[TAB_COUNT]	= {IDD_LOD, IDD_ACCEL, IDD_INSTANCE, IDD_LIGHTMAP, IDD_LIGHTMAP2, IDD_VEGETABLE, IDD_VERTEX_PROGRAM, IDD_MISC, IDD_ANIM};
 DLGPROC					SubProc[TAB_COUNT]	= {MRMDialogCallback, AccelDialogCallback, InstanceDialogCallback, LightmapDialogCallback, Lightmap2DialogCallback, VegetableDialogCallback, VertexProgramDialogCallBack, MiscDialogCallback, AnimationDialogCallback};
 
@@ -508,37 +508,37 @@ INT_PTR CALLBACK AccelDialogCallback (
 			{
 				for (uint i=0; _MaterialNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LONG)(_MaterialNames[i]));
-					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LONG)(_MaterialNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
 				}
 			}
 			{
 				for (uint i =0; _EnvironmentNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LONG)(_EnvironmentNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LPARAM)(_EnvironmentNames[i]));
 				}
 			}
 			{
 				std::set<std::string>::iterator first(_KnownSoundGroups.begin()), last(_KnownSoundGroups.end());
 				for (; first != last; ++first)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LONG)(first->c_str()));
+					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LPARAM)(first->c_str()));
 				}
 			}
 			// set the combo and edit box
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LONG)(currentParam->OcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OcclusionModel.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LONG)(currentParam->OpenOcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OpenOcclusionModel.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LONG)(currentParam->EnvironmentFX.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LPARAM)(currentParam->EnvironmentFX.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LONG)(currentParam->SoundGroup.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LPARAM)(currentParam->SoundGroup.c_str())) == CB_ERR)
 			{
 //				nlassert(false);
 			}
@@ -581,16 +581,16 @@ INT_PTR CALLBACK AccelDialogCallback (
 							currentParam->AudibleFromFather=SendMessage (GetDlgItem (hwndDlg, IDC_AUDIBLE_FROM_FATHER), BM_GETCHECK, 0, 0);
 
 							// get the strings params
-							char tmp[256];
-							SendMessage (GetDlgItem(hwndDlg, IDC_OCC_MODEL), WM_GETTEXT, 256, (LONG)tmp);
-							currentParam->OcclusionModel = tmp;
-							SendMessage (GetDlgItem(hwndDlg, IDC_OPEN_OCC_MODEL), WM_GETTEXT, 256, (LONG)tmp);
-							currentParam->OpenOcclusionModel = tmp;
-							SendMessage (GetDlgItem(hwndDlg, IDC_SOUND_GROUP), WM_GETTEXT, 256, (LONG)tmp);
-							currentParam->SoundGroup = tmp;
-							_KnownSoundGroups.insert(tmp);
-							SendMessage (GetDlgItem(hwndDlg, IDC_ENV_FX), WM_GETTEXT, 256, (LONG)tmp);
-							currentParam->EnvironmentFX = tmp;
+							TCHAR tmp[256];
+							SendMessage (GetDlgItem(hwndDlg, IDC_OCC_MODEL), WM_GETTEXT, 256, (LPARAM)tmp);
+							currentParam->OcclusionModel = tStrToUtf8(tmp);
+							SendMessage (GetDlgItem(hwndDlg, IDC_OPEN_OCC_MODEL), WM_GETTEXT, 256, (LPARAM)tmp);
+							currentParam->OpenOcclusionModel = tStrToUtf8(tmp);
+							SendMessage (GetDlgItem(hwndDlg, IDC_SOUND_GROUP), WM_GETTEXT, 256, (LPARAM)tmp);
+							currentParam->SoundGroup = tStrToUtf8(tmp);
+							_KnownSoundGroups.insert(currentParam->SoundGroup);
+							SendMessage (GetDlgItem(hwndDlg, IDC_ENV_FX), WM_GETTEXT, 256, (LPARAM)tmp);
+							currentParam->EnvironmentFX = tStrToUtf8(tmp);
 
 							// Quit
 							EndDialog(hwndDlg, IDOK);
@@ -653,9 +653,9 @@ INT_PTR CALLBACK MRMDialogCallback (
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Window text
-			std::string winName=(*(currentParam->ListNode->begin()))->GetName();
+			std::string winName= tStrToUtf8((*(currentParam->ListNode->begin()))->GetName());
 			winName="Node properties ("+winName+((currentParam->ListNode->size()>1)?" ...)":")");
-			SetWindowText (hwndDlg, winName.c_str());
+			SetWindowText (hwndDlg, utf8ToTStr(winName));
 
 			// Set default state
 			SendMessage (GetDlgItem (hwndDlg, IDC_BLEND_IN), BM_SETCHECK, currentParam->BlendIn, 0);
@@ -669,8 +669,8 @@ INT_PTR CALLBACK MRMDialogCallback (
 			EnableWindow (GetDlgItem (hwndDlg, IDC_UP), currentParam->ListActived);
 			EnableWindow (GetDlgItem (hwndDlg, IDC_DOWN), currentParam->ListActived);
 			
-			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MAX), currentParam->DistMax.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_BLEND_LENGTH), currentParam->BlendLength.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MAX), utf8ToTStr(currentParam->DistMax));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_BLEND_LENGTH), utf8ToTStr(currentParam->BlendLength));
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_ACTIVE_MRM), BM_SETCHECK, currentParam->MRM, 0);
 			CoarseStateChanged (hwndDlg);
@@ -678,12 +678,12 @@ INT_PTR CALLBACK MRMDialogCallback (
 			if (currentParam->SkinReduction!=-1)
 				CheckRadioButton (hwndDlg, IDC_SKIN_REDUCTION_MIN, IDC_SKIN_REDUCTION_BEST, IDC_SKIN_REDUCTION_MIN+currentParam->SkinReduction);
 
-			SetWindowText (GetDlgItem (hwndDlg, IDC_NB_LOD), currentParam->NbLod.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_DIVISOR), currentParam->Divisor.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_FINEST), currentParam->DistanceFinest.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MIDDLE), currentParam->DistanceMiddle.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_COARSEST), currentParam->DistanceCoarsest.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_BONE_LOD_DISTANCE), currentParam->BoneLodDistance.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_NB_LOD), utf8ToTStr(currentParam->NbLod));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_DIVISOR), utf8ToTStr(currentParam->Divisor));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_FINEST), utf8ToTStr(currentParam->DistanceFinest));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MIDDLE), utf8ToTStr(currentParam->DistanceMiddle));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_COARSEST), utf8ToTStr(currentParam->DistanceCoarsest));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_BONE_LOD_DISTANCE), utf8ToTStr(currentParam->BoneLodDistance));
 
 			// Iterate list
 			HWND hwndList=GetDlgItem (hwndDlg, IDC_LIST1);
@@ -717,11 +717,11 @@ INT_PTR CALLBACK MRMDialogCallback (
 							currentParam->CoarseMesh=SendMessage (GetDlgItem (hwndDlg, IDC_COARSE_MESH), BM_GETCHECK, 0, 0);
 							currentParam->DynamicMesh=SendMessage (GetDlgItem (hwndDlg, IDC_DYNAMIC_MESH), BM_GETCHECK, 0, 0);
 							
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MAX), tmp, 512);
-							currentParam->DistMax=tmp;
+							currentParam->DistMax = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_BLEND_LENGTH), tmp, 512);
-							currentParam->BlendLength=tmp;
+							currentParam->BlendLength = tStrToUtf8(tmp);
 
 							currentParam->MRM=SendMessage (GetDlgItem (hwndDlg, IDC_ACTIVE_MRM), BM_GETCHECK, 0, 0);
 
@@ -734,17 +734,17 @@ INT_PTR CALLBACK MRMDialogCallback (
 								currentParam->SkinReduction=2;
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_NB_LOD), tmp, 512);
-							currentParam->NbLod=tmp;
+							currentParam->NbLod = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIVISOR), tmp, 512);
-							currentParam->Divisor=tmp;
+							currentParam->Divisor = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIST_FINEST), tmp, 512);
-							currentParam->DistanceFinest=tmp;
+							currentParam->DistanceFinest = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MIDDLE), tmp, 512);
-							currentParam->DistanceMiddle=tmp;
+							currentParam->DistanceMiddle = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIST_COARSEST), tmp, 512);
-							currentParam->DistanceCoarsest=tmp;
+							currentParam->DistanceCoarsest = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_BONE_LOD_DISTANCE), tmp, 512);
-							currentParam->BoneLodDistance=tmp;
+							currentParam->BoneLodDistance = tStrToUtf8(tmp);
 
 							// Iterate list
 							HWND hwndList=GetDlgItem (hwndDlg, IDC_LIST1);
@@ -758,7 +758,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 								SendMessage (hwndList, LB_GETTEXT, item, (LPARAM) tmp);
 
 								// Push it back
-								currentParam->ListLodName.push_back (tmp);
+								currentParam->ListLodName.push_back (tStrToUtf8(tmp));
 							}
 
 							// default LodCharacter
@@ -875,7 +875,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 				if (wID!=LB_ERR)
 				{
 					// Get the node name
-					char name[512];
+					TCHAR name[512];
 					SendMessage (GetDlgItem (hwndDlg, IDC_LIST1), LB_GETTEXT, wID, (LPARAM) (LPCTSTR) name);
 
 					// Find the node
@@ -920,8 +920,8 @@ INT_PTR CALLBACK InstanceDialogCallback (
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_SHAPE), currentParam->InstanceShape.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_NAME), currentParam->InstanceName.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_SHAPE), utf8ToTStr(currentParam->InstanceShape));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_NAME), utf8ToTStr(currentParam->InstanceName));
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_DONT_ADD_TO_SCENE), BM_SETCHECK, currentParam->DontAddToScene, 0);
 
@@ -930,7 +930,7 @@ INT_PTR CALLBACK InstanceDialogCallback (
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_CHECK_COLLISION), BM_SETCHECK, currentParam->Collision, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_CHECK_COLLISION_EXTERIOR), BM_SETCHECK, currentParam->CollisionExterior, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_NAME), currentParam->InstanceGroupName.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_NAME), utf8ToTStr(currentParam->InstanceGroupName));
 
 			bool colOk = currentParam->CollisionMeshGeneration>=0 && currentParam->CollisionMeshGeneration<4;
 			CheckRadioButton (hwndDlg, IDC_CAMERA_COL_RADIO1, IDC_CAMERA_COL_RADIO4, colOk?(IDC_CAMERA_COL_RADIO1+(currentParam->CollisionMeshGeneration)):0);
@@ -950,16 +950,16 @@ INT_PTR CALLBACK InstanceDialogCallback (
 					break;
 					case IDOK:
 						{
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_SHAPE), tmp, 512);
-							currentParam->InstanceShape=tmp;
+							currentParam->InstanceShape = tStrToUtf8(tmp);
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_NAME), tmp, 512);
-							currentParam->InstanceName=tmp;
+							currentParam->InstanceName = tStrToUtf8(tmp);
 							
 							currentParam->DontAddToScene=SendMessage (GetDlgItem (hwndDlg, IDC_DONT_ADD_TO_SCENE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_NAME), tmp, 512);
-							currentParam->InstanceGroupName=tmp;							
+							currentParam->InstanceGroupName = tStrToUtf8(tmp);
 
 							currentParam->DontExport=SendMessage (GetDlgItem (hwndDlg, IDC_DONT_EXPORT), BM_GETCHECK, 0, 0);
 
@@ -1036,9 +1036,9 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_LUMELSIZEMUL), currentParam->LumelSizeMul.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_RADIUS), currentParam->SoftShadowRadius.c_str());
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_CONELENGTH), currentParam->SoftShadowConeLength.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_LUMELSIZEMUL), utf8ToTStr(currentParam->LumelSizeMul));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_RADIUS), utf8ToTStr(currentParam->SoftShadowRadius));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_CONELENGTH), utf8ToTStr(currentParam->SoftShadowConeLength));
 
 			// Lighting
 			SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_REALTIME_LIGHT), BM_SETCHECK, currentParam->ExportRealTimeLight, 0);
@@ -1048,7 +1048,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			SendMessage (GetDlgItem (hwndDlg, IDC_USE_LIGHT_LOCAL_ATTENUATION), BM_SETCHECK, currentParam->UseLightingLocalAttenuation, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_LIGHT_DONT_CAST_SHADOW_INTERIOR), BM_SETCHECK, currentParam->LightDontCastShadowInterior, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_LIGHT_DONT_CAST_SHADOW_EXTERIOR), BM_SETCHECK, currentParam->LightDontCastShadowExterior, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), currentParam->ExportLightMapName.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), utf8ToTStr(currentParam->ExportLightMapName));
 			SendMessage (GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN), BM_SETCHECK, currentParam->RealTimeAmbientLightAddSun, 0);
 			
 			// Set enable disable
@@ -1065,7 +1065,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 				switch (LOWORD(wParam)) 
 				{
 					case IDC_RESET_NAME:
-						SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), "GlobalLight");
+						SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), _T("GlobalLight"));
 					break;
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -1073,13 +1073,13 @@ INT_PTR CALLBACK LightmapDialogCallback (
 					case IDOK:
 						{
 							// Set default state
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_LUMELSIZEMUL), tmp, 512);
-							currentParam->LumelSizeMul = tmp;
+							currentParam->LumelSizeMul = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_RADIUS), tmp, 512);
-							currentParam->SoftShadowRadius = tmp;
+							currentParam->SoftShadowRadius = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_SOFTSHADOW_CONELENGTH), tmp, 512);
-							currentParam->SoftShadowConeLength = tmp;
+							currentParam->SoftShadowConeLength = tStrToUtf8(tmp);
 
 							// RealTime light
 							currentParam->ExportRealTimeLight = SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_REALTIME_LIGHT), BM_GETCHECK, 0, 0);
@@ -1090,7 +1090,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 							currentParam->LightDontCastShadowExterior = SendMessage (GetDlgItem (hwndDlg, IDC_LIGHT_DONT_CAST_SHADOW_EXTERIOR), BM_GETCHECK, 0, 0);
 							currentParam->ExportLightMapAnimated = SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_ANIMATED), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), tmp, 512);
-							currentParam->ExportLightMapName = tmp;
+							currentParam->ExportLightMapName = tStrToUtf8(tmp);
 							currentParam->RealTimeAmbientLightAddSun= SendMessage (GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN), BM_GETCHECK, 0, 0);
 								
 							// Get the acceleration type
@@ -1132,7 +1132,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 				if (wID!=LB_ERR)
 				{
 					// Get the node name
-					char name[512];
+					TCHAR name[512];
 					SendMessage (GetDlgItem (hwndDlg, IDC_LIST1), LB_GETTEXT, wID, (LPARAM) (LPCTSTR) name);
 
 					// Find the node
@@ -1432,7 +1432,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 				lmcParam->SelectionDone= true;
 
 				// Get the node name
-				char name[512];
+				TCHAR name[512];
 				SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_LIST), LB_GETTEXT, wID, (LPARAM) (LPCTSTR) name);
 				
 				// Find the node
@@ -1497,7 +1497,7 @@ void	lmcCopyFrom(CLodDialogBoxParam *currentParam, HWND parentDlg)
 
 	// **** launch the choosing dialog
 	paramLMCFrom.reset();
-	if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_LMC_CHOOSE_FROM), parentDlg, LMCCopyFromDialogCallback, (long)&paramLMCFrom)==IDOK
+	if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_LMC_CHOOSE_FROM), parentDlg, LMCCopyFromDialogCallback, (LPARAM)&paramLMCFrom)==IDOK
 		&& paramLMCFrom.SelectionDone)
 	{
 		// **** Apply to the current setup
@@ -1679,7 +1679,7 @@ INT_PTR CALLBACK VegetableDialogCallback (
 			
 			CheckRadioButton(hwndDlg, IDC_CENTER_NULL, IDC_CENTER_Z, IDC_CENTER_NULL+currentParam->VegetableBendCenter);
 
-			SetWindowText (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), currentParam->VegetableBendFactor.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), utf8ToTStr(currentParam->VegetableBendFactor));
 
 			VegetableStateChanged (hwndDlg);
 		}
@@ -1732,9 +1732,9 @@ INT_PTR CALLBACK VegetableDialogCallback (
 							else 
 								currentParam->VegetableBendCenter = -1;
 							
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), tmp, 512);
-							currentParam->VegetableBendFactor = tmp;
+							currentParam->VegetableBendFactor = tStrToUtf8(tmp);
 						}
 					break;
 					case IDC_VEGETABLE:
@@ -1930,7 +1930,7 @@ static	int	VPWTBiasStaticId[CVPWindTreeAppData::HrcDepth]=
 void	updateVPWTStatic(HWND hwndDlg, uint type, uint depth, const CVPWindTreeAppData &vpwt)
 {
 	int		sliderValue;
-	char	stmp[256];
+	TCHAR	stmp[256];
 	float	nticks= CVPWindTreeAppData::NumTicks;
 	float	scale;
 	
@@ -1953,29 +1953,29 @@ void	updateVPWTStatic(HWND hwndDlg, uint type, uint depth, const CVPWindTreeAppD
 	{
 	case 0:	
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTFreqSliderId[depth], TBM_GETPOS, 0, 0);
-		_stprintf(stmp, "%.2f", scale * float(sliderValue)/nticks);
+		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTFreqStaticId[depth]), stmp );
 		break;
 	case 1:	
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTFreqWDSliderId[depth], TBM_GETPOS, 0, 0);
-		_stprintf(stmp, "%.2f", scale * float(sliderValue)/nticks);
+		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTFreqWDStaticId[depth]), stmp );
 		break;
 	case 2:	
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTDistXYSliderId[depth], TBM_GETPOS, 0, 0);
-		_stprintf(stmp, "%.2f", scale * float(sliderValue)/nticks);
+		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTDistXYStaticId[depth]), stmp );
 		break;
 	case 3:	
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTDistZSliderId[depth], TBM_GETPOS, 0, 0);
-		_stprintf(stmp, "%.2f", scale * float(sliderValue)/nticks);
+		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTDistZStaticId[depth]), stmp );
 		break;
 	case 4:	
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTBiasSliderId[depth], TBM_GETPOS, 0, 0);
 		// expand to -2 to 2.
 		float	biasVal= 4 * float(sliderValue)/nticks - 2;
-		_stprintf(stmp, "%.2f", biasVal);
+		_stprintf(stmp, _T("%.2f"), biasVal);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTBiasStaticId[depth]), stmp );
 		break;
 	}
@@ -1987,14 +1987,14 @@ static	void concatEdit2Lines(HWND edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	*(WORD*)tmp0= lineLen;
 	*(WORD*)tmp1= lineLen;
-	n= SendMessage(edit, EM_GETLINE, 0, (LONG)tmp0); tmp0[n]= 0;
-	n= SendMessage(edit, EM_GETLINE, 1, (LONG)tmp1); tmp1[n]= 0;
+	n= SendMessage(edit, EM_GETLINE, 0, (LPARAM)tmp0); tmp0[n]= 0;
+	n= SendMessage(edit, EM_GETLINE, 1, (LPARAM)tmp1); tmp1[n]= 0;
 	// concat and update the CEdit.
-	SetWindowText(edit, strcat(tmp0, tmp1));
+	SetWindowText(edit, _tcscat(tmp0, tmp1));
 }
 
 
@@ -2055,10 +2055,10 @@ INT_PTR CALLBACK VPWindTreeCallback (
 
 
 			// Init Global. editBox
-			char		stmp[256];
-			_stprintf(stmp, "%.2f", vpwt.FreqScale);
+			TCHAR		stmp[256];
+			_stprintf(stmp, _T("%.2f"), vpwt.FreqScale);
 			SetWindowText( GetDlgItem(hwndDlg, IDC_EDIT_VPWT_FREQ_SCALE), stmp );
-			_stprintf(stmp, "%.2f", vpwt.DistScale);
+			_stprintf(stmp, _T("%.2f"), vpwt.DistScale);
 			SetWindowText( GetDlgItem(hwndDlg, IDC_EDIT_VPWT_DIST_SCALE), stmp );
 			SendDlgItemMessage(hwndDlg, IDC_CHECK_VP_SPECLIGHT, BM_SETCHECK, vpwt.SpecularLighting, 0);
 
@@ -2102,7 +2102,7 @@ INT_PTR CALLBACK VPWindTreeCallback (
 		{
 			CVPWindTreeAppData		&vpwt= currentParam->VertexProgramWindTree;
 			int	nticks= CVPWindTreeAppData::NumTicks;
-			char		stmp[256];
+			TCHAR		stmp[256];
 			float		val;
 
 			if( HIWORD(wParam) == BN_CLICKED )
@@ -2195,7 +2195,7 @@ INT_PTR CALLBACK VPWindTreeCallback (
 							}
 						}
 						// Update Scale Edit text.
-						_stprintf(stmp, "%.2f", vpwt.FreqScale);
+						_stprintf(stmp, _T("%.2f"), vpwt.FreqScale);
 						SetWindowText( GetDlgItem(hwndDlg, IDC_EDIT_VPWT_FREQ_SCALE), stmp );
 					}
 					break;
@@ -2216,7 +2216,7 @@ INT_PTR CALLBACK VPWindTreeCallback (
 							}
 						}
 						// Update Scale Edit text.
-						_stprintf(stmp, "%.2f", vpwt.DistScale);
+						_stprintf(stmp, _T("%.2f"), vpwt.DistScale);
 						SetWindowText( GetDlgItem(hwndDlg, IDC_EDIT_VPWT_DIST_SCALE), stmp );
 					}
 					break;
@@ -2290,34 +2290,34 @@ INT_PTR CALLBACK MiscDialogCallback (
 
 			// Ligoscape
 			SendMessage (GetDlgItem (hwndDlg, IDC_LIGO_SYMMETRY), BM_SETCHECK, currentParam->LigoSymmetry, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), currentParam->LigoRotate.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), utf8ToTStr(currentParam->LigoRotate));
 
 			// SWT
 			SendMessage (GetDlgItem (hwndDlg, IDC_SWT), BM_SETCHECK, currentParam->SWT, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_SWT_WEIGHT), currentParam->SWTWeight.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_SWT_WEIGHT), utf8ToTStr(currentParam->SWTWeight));
 
 			// Radial normals
 			for (uint smoothGroup=0; smoothGroup<NEL3D_RADIAL_NORMAL_COUNT; smoothGroup++)
-				SetWindowText (GetDlgItem (hwndDlg, IDC_RADIAL_NORMAL_29+smoothGroup), currentParam->RadialNormals[smoothGroup].c_str());
+				SetWindowText (GetDlgItem (hwndDlg, IDC_RADIAL_NORMAL_29+smoothGroup), utf8ToTStr(currentParam->RadialNormals[smoothGroup]));
 
 			// Mesh interfaces
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_FILE), currentParam->InterfaceFileName.c_str());			
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_FILE), utf8ToTStr(currentParam->InterfaceFileName));
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD), 
-							currentParam->InterfaceThreshold != -1.f ? toStringMax(currentParam->InterfaceThreshold).c_str()
-																	 : ""
+							currentParam->InterfaceThreshold != -1.f ? utf8ToTStr(toStringMax(currentParam->InterfaceThreshold))
+																	 : _T("")
 						  );
 			SendMessage(GetDlgItem(hwndDlg, IDC_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS), BM_SETCHECK, currentParam->GetInterfaceNormalsFromSceneObjects, 0);
 			
 			// Skeleton Scale
 			SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_SETCHECK, currentParam->ExportBoneScale, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), currentParam->ExportBoneScaleNameExt.c_str());
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), utf8ToTStr(currentParam->ExportBoneScaleNameExt));
 
 			// Remanence
 			SendMessage (GetDlgItem (hwndDlg, IDC_USE_REMANENCE), BM_SETCHECK, currentParam->UseRemanence, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_REMANENCE_SHIFTING_TEXTURE), BM_SETCHECK, currentParam->RemanenceShiftingTexture, 0);
-			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SLICE_NUMBER), currentParam->RemanenceSliceNumber != - 1 ? toStringMax(currentParam->RemanenceSliceNumber).c_str() : "");
-			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SAMPLING_PERIOD), currentParam->RemanenceSamplingPeriod != -1 ? toStringMax(currentParam->RemanenceSamplingPeriod).c_str() : "");
-			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_ROLLUP_RATIO), currentParam->RemanenceRollupRatio != -1 ? toStringMax(currentParam->RemanenceRollupRatio).c_str() : "");
+			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SLICE_NUMBER), currentParam->RemanenceSliceNumber != - 1 ? utf8ToTStr(toStringMax(currentParam->RemanenceSliceNumber)) : _T(""));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SAMPLING_PERIOD), currentParam->RemanenceSamplingPeriod != -1 ? utf8ToTStr(toStringMax(currentParam->RemanenceSamplingPeriod)) : _T(""));
+			SetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_ROLLUP_RATIO), currentParam->RemanenceRollupRatio != -1 ? utf8ToTStr(toStringMax(currentParam->RemanenceRollupRatio)) : _T(""));
 		}
 		break;
 
@@ -2332,32 +2332,32 @@ INT_PTR CALLBACK MiscDialogCallback (
 					break;
 					case IDOK:
 						{
-							currentParam->FloatingObject=SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
+							currentParam->FloatingObject = SendMessage (GetDlgItem (hwndDlg, IDC_FLOATING_OBJECT), BM_GETCHECK, 0, 0);
 
 							// Ligoscape
 							currentParam->LigoSymmetry = SendMessage (GetDlgItem (hwndDlg, IDC_LIGO_SYMMETRY), BM_GETCHECK, 0, 0);
-							char tmp[512];
+							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_LIGO_ROTATE), tmp, 512);
-							currentParam->LigoRotate = tmp;
+							currentParam->LigoRotate = tStrToUtf8(tmp);
 
 							// SWT
 							currentParam->SWT = SendMessage (GetDlgItem (hwndDlg, IDC_SWT), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_SWT_WEIGHT), tmp, 512);
-							currentParam->SWTWeight = tmp;
+							currentParam->SWTWeight = tStrToUtf8(tmp);
 
 							// Radial normals
 							for (uint smoothGroup=0; smoothGroup<NEL3D_RADIAL_NORMAL_COUNT; smoothGroup++)
 							{
 								HWND edit = GetDlgItem (hwndDlg, IDC_RADIAL_NORMAL_29+smoothGroup);
 								GetWindowText (edit, tmp, 512);
-								currentParam->RadialNormals[smoothGroup]=tmp;
+								currentParam->RadialNormals[smoothGroup] = tStrToUtf8(tmp);
 							}
 
 							// mesh interfaces
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_FILE), tmp, 512);
-							currentParam->InterfaceFileName=tmp;
+							currentParam->InterfaceFileName = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD), tmp, 512);
-							if (strlen(tmp) != 0)
+							if (_tcslen(tmp) != 0)
 								currentParam->InterfaceThreshold = toFloatMax(tmp);							
 							currentParam->GetInterfaceNormalsFromSceneObjects = SendMessage (GetDlgItem (hwndDlg, IDC_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS), BM_GETCHECK, 0, 0);
 														
@@ -2365,18 +2365,20 @@ INT_PTR CALLBACK MiscDialogCallback (
 							// Skeleton Scale
 							currentParam->ExportBoneScale= SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), tmp, 512);
-							currentParam->ExportBoneScaleNameExt= tmp;
+							currentParam->ExportBoneScaleNameExt = tStrToUtf8(tmp);
 
 							// remanence
 							currentParam->UseRemanence = SendMessage (GetDlgItem (hwndDlg, IDC_USE_REMANENCE), BM_GETCHECK, 0, 0);
 							currentParam->RemanenceShiftingTexture = SendMessage (GetDlgItem (hwndDlg, IDC_REMANENCE_SHIFTING_TEXTURE), BM_GETCHECK, 0, 0);
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SLICE_NUMBER), tmp, 512);
+
 							uint rsn;
-							if (sscanf(tmp, "%d", &rsn) == 1)
+							if (NLMISC::fromString(tStrToUtf8(tmp), rsn))
 							{
 								currentParam->RemanenceSliceNumber = rsn;
 							}
+
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_SAMPLING_PERIOD), tmp, 512);
 							toFloatMax(tmp, currentParam->RemanenceSamplingPeriod);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_REMANENCE_ROLLUP_RATIO), tmp, 512);
@@ -2490,9 +2492,9 @@ INT_PTR CALLBACK LodDialogCallback (
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			// Window text
-			std::string winName=(*(currentParam->ListNode->begin()))->GetName();
+			std::string winName = tStrToUtf8((*(currentParam->ListNode->begin()))->GetName());
 			winName="Node properties ("+winName+((currentParam->ListNode->size()>1)?" ...)":")");
-			SetWindowText (hwndDlg, winName.c_str());
+			SetWindowText (hwndDlg, utf8ToTStr(winName));
 
 			// Move dialog
 			RECT windowRect, desktopRect;
@@ -2520,7 +2522,7 @@ INT_PTR CALLBACK LodDialogCallback (
 				// Insert a tab
 				TCITEM tabItem;
 				tabItem.mask = TCIF_TEXT;
-				tabItem.pszText = (char*)SubText[tab];
+				tabItem.pszText = (LPTSTR)SubText[tab];
 				SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_INSERTITEM, SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_GETITEMCOUNT, 0, 0), (LPARAM)&tabItem);
 
 				// Create the dialog
@@ -2650,7 +2652,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 		{
 			// Get a string
 			std::string nameLod=CExportNel::getScriptAppData (node, NEL3D_APPDATA_LOD_NAME+name, "");
-			if (nameLod!="")
+			if (!nameLod.empty())
 			{
 				param.ListLodName.push_back (nameLod);
 			}
@@ -2854,7 +2856,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				param.SoundGroup = DIFFERENT_VALUE_STRING;
 			if (CExportNel::getScriptAppData(node, NEL3D_APPDATA_ENV_FX, "no fx") != param.EnvironmentFX)
 			{
-				param.EnvironmentFX = "";
+				param.EnvironmentFX.clear();
 			}
 
 			if ( param.LightGroup != CExportNel::getScriptAppData (node, NEL3D_APPDATA_LM_LIGHT_GROUP, 0) )
@@ -2871,7 +2873,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_IGNAME, "")!=param.InstanceGroupName)
 				param.InstanceGroupName = DIFFERENT_VALUE_STRING;
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_INTERFACE_FILE, "")!=param.InterfaceFileName)
-				param.InterfaceFileName = "";
+				param.InterfaceFileName.clear();
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_INTERFACE_THRESHOLD, 0.1f)!=param.InterfaceThreshold)
 				param.InterfaceThreshold = -1;
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS, 0)!=param.GetInterfaceNormalsFromSceneObjects)
@@ -2942,7 +2944,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			{
 				// Get a string
 				std::string nameLod=CExportNel::getScriptAppData (node, NEL3D_APPDATA_LOD_NAME+name, "");
-				if (nameLod!="")
+				if (!nameLod.empty())
 				{
 					tmplist.push_back (nameLod);
 				}
@@ -3048,7 +3050,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			ite++;
 		}
 
-		if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_NODE_PROPERTIES), _Ip->GetMAXHWnd(), LodDialogCallback, (long)&param)==IDOK)
+		if (DialogBoxParam (hInstance, MAKEINTRESOURCE(IDD_NODE_PROPERTIES), _Ip->GetMAXHWnd(), LodDialogCallback, (LPARAM)&param)==IDOK)
 		{
 			// Next node
 			ite=listNode.begin();

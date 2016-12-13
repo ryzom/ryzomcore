@@ -1463,7 +1463,7 @@ public:
 	CPSAttribMakerMemoryBase(const CPSAttribMakerMemoryBase &src) : CPSAttribMaker<T>(src) // parent copy ctor
 	{
 		nlassert(src._Scheme);
-		std::auto_ptr<CPSAttribMaker<T> > s(NLMISC::safe_cast<CPSAttribMaker<T> *>(src._Scheme->clone()));
+		CUniquePtr<CPSAttribMaker<T> > s(NLMISC::safe_cast<CPSAttribMaker<T> *>(src._Scheme->clone()));
 		this->_T = src._T;
 		this->_DefaultValue = src._DefaultValue;
 		this->_Scheme = s.release();

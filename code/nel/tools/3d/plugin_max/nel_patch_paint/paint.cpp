@@ -47,7 +47,7 @@ using namespace NLLIGO;
 
 #define DEPTH_SEARCH_MAX 8
 
-#define REGKEY_EDIT_PATCH "Software\\Nevrax\\Ryzom\\edit_patch"
+#define REGKEY_EDIT_PATCH _T("Software\\Nevrax\\Ryzom\\edit_patch")
 
 // Bank bitmaps
 CBankCont*	bankCont;
@@ -77,8 +77,7 @@ void WarningInvalidTileSet ()
 	if (!bWarningInvalidTileSet)
 	{
 		bWarningInvalidTileSet=true;
-		MessageBox (NULL, "The tile bank is not compatible with your zone.\nPlease use the good bank or erase and repaint the zone.", 
-			"Tile paint", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, _T("The tile bank is not compatible with your zone.\nPlease use the good bank or erase and repaint the zone."), _T("Tile paint"), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -105,13 +104,13 @@ void enterPainter (CTileBank& banktoLoad)
 	{
 		DWORD len=4;
 		DWORD type;
-		RegQueryValueEx (hKey, "Background", 0, &type, (LPBYTE)&backGround, &len);
-		RegQueryValueEx (hKey, "Color1", 0, &type, (LPBYTE)&color1, &len);
-		RegQueryValueEx (hKey, "Color2", 0, &type, (LPBYTE)&color2, &len);
-		RegQueryValueEx (hKey, "Opa1", 0, &type, (LPBYTE)&opa1, &len);
-		RegQueryValueEx (hKey, "Opa2", 0, &type, (LPBYTE)&opa2, &len);
-		RegQueryValueEx (hKey, "Hard1", 0, &type, (LPBYTE)&hard1, &len);
-		RegQueryValueEx (hKey, "Hard2", 0, &type, (LPBYTE)&hard2, &len);
+		RegQueryValueEx (hKey, _T("Background"), 0, &type, (LPBYTE)&backGround, &len);
+		RegQueryValueEx (hKey, _T("Color1"), 0, &type, (LPBYTE)&color1, &len);
+		RegQueryValueEx (hKey, _T("Color2"), 0, &type, (LPBYTE)&color2, &len);
+		RegQueryValueEx (hKey, _T("Opa1"), 0, &type, (LPBYTE)&opa1, &len);
+		RegQueryValueEx (hKey, _T("Opa2"), 0, &type, (LPBYTE)&opa2, &len);
+		RegQueryValueEx (hKey, _T("Hard1"), 0, &type, (LPBYTE)&hard1, &len);
+		RegQueryValueEx (hKey, _T("Hard2"), 0, &type, (LPBYTE)&hard2, &len);
 		RegCloseKey (hKey);
 	}
 }
@@ -126,13 +125,13 @@ void exitPainter ()
 	HKEY hKey;
 	if (RegCreateKey(HKEY_CURRENT_USER, REGKEY_EDIT_PATCH, &hKey)==ERROR_SUCCESS)
 	{
-		RegSetValueEx(hKey, "Background", 0, REG_DWORD, (LPBYTE)&backGround, 4);
-		RegSetValueEx(hKey, "Color1", 0, REG_DWORD, (LPBYTE)&color1, 4);
-		RegSetValueEx(hKey, "Color2", 0, REG_DWORD, (LPBYTE)&color2, 4);
-		RegSetValueEx(hKey, "Opa1", 0, REG_DWORD, (LPBYTE)&opa1, 4);
-		RegSetValueEx(hKey, "Opa2", 0, REG_DWORD, (LPBYTE)&opa2, 4);
-		RegSetValueEx(hKey, "Hard1", 0, REG_DWORD, (LPBYTE)&hard1, 4);
-		RegSetValueEx(hKey, "Hard2", 0, REG_DWORD, (LPBYTE)&hard2, 4);
+		RegSetValueEx(hKey, _T("Background"), 0, REG_DWORD, (LPBYTE)&backGround, 4);
+		RegSetValueEx(hKey, _T("Color1"), 0, REG_DWORD, (LPBYTE)&color1, 4);
+		RegSetValueEx(hKey, _T("Color2"), 0, REG_DWORD, (LPBYTE)&color2, 4);
+		RegSetValueEx(hKey, _T("Opa1"), 0, REG_DWORD, (LPBYTE)&opa1, 4);
+		RegSetValueEx(hKey, _T("Opa2"), 0, REG_DWORD, (LPBYTE)&opa2, 4);
+		RegSetValueEx(hKey, _T("Hard1"), 0, REG_DWORD, (LPBYTE)&hard1, 4);
+		RegSetValueEx(hKey, _T("Hard2"), 0, REG_DWORD, (LPBYTE)&hard2, 4);
 		RegCloseKey (hKey);
 	}
 }
@@ -2816,12 +2815,12 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 	if (AsyncListener.isKeyPushed ((TKey)PainterKeys[SelectColorBrush]))
 	{
 		// Create a dialog filter
-		static char szFilter[] = 
-			"Targa Files (*.tga)\0*.tga\0"
-			"All Files (*.*)\0*.*\0\0";
+		static TCHAR szFilter[] = 
+			_T("Targa Files (*.tga)\0*.tga\0")
+			_T("All Files (*.*)\0*.*\0\0");
 
 		// Filename buffer
-		char buffer[65535];
+		TCHAR buffer[65535];
 		buffer[0]=0;
 
 		// Fill the (big) struct
@@ -2834,13 +2833,13 @@ void	mainproc(CScene& scene, CEventListenerAsync& AsyncListener, CEvent3dMouseLi
 		openFile.lpstrFile = buffer;
 		openFile.nMaxFile = 65535;
 		openFile.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ENABLESIZING|OFN_EXPLORER;
-		openFile.lpstrDefExt = "*.tga";
+		openFile.lpstrDefExt = _T("*.tga");
 
 		// Open the dialog
 		if (GetOpenFileName(&openFile))
 		{		
 			// Load the file
-			paintColor.loadBrush (buffer);
+			paintColor.loadBrush (tStrToUtf8(buffer));
 			paintColor.setBrushMode (true);
 		}
 	}
@@ -3721,7 +3720,7 @@ void EPM_PaintCMode::DoPaint ()
 					{
 					 	std::string error = NLMISC::toString("Invalid edge '%i' with value '%i' in patch '%i' in PatchMesh", p, mYedge, e);
 					 	nlwarning(error.c_str());
-					 	MessageBox(NULL, error.c_str(), "NeL Patch Painter", MB_OK | MB_ICONSTOP);
+					 	MessageBox(NULL, utf8ToTStr(error), _T("NeL Patch Painter"), MB_OK | MB_ICONSTOP);
 					 	return;
 					}
 #if (MAX_RELEASE < 4000)
@@ -3884,8 +3883,8 @@ void EPM_PaintCMode::DoPaint ()
 					}
 					if (patchVoisin.patch!=-1)
 					{
-						std::string first = vectMesh[i].Node->GetName();
-						std::string second = vectMesh[patchVoisin.Mesh].Node->GetName();
+						std::string first = tStrToUtf8(vectMesh[i].Node->GetName());
+						std::string second = tStrToUtf8(vectMesh[patchVoisin.Mesh].Node->GetName());
 						int rot = (2-((vectMesh[i].Symmetry)?(2-e):e)+((vectMesh[patchVoisin.Mesh].Symmetry)?(2-edgeVoisin):edgeVoisin))&3;
 						int nU = 1 << rpatch->getUIPatch (p).NbTilesU;
 						int nV = 1 << rpatch->getUIPatch (p).NbTilesV;
@@ -3979,7 +3978,7 @@ void EPM_PaintCMode::DoPaint ()
 
 
 		std::string sName=GetBankPathName ();
-		if (sName!="")
+		if (!sName.empty())
 		{
 			CIFile file;
 			if (file.open (sName))
@@ -3990,9 +3989,9 @@ void EPM_PaintCMode::DoPaint ()
 					bank.serial (file);
 					bank.computeXRef ();
 				}
-				catch (EStream& stream)
+				catch (const EStream& stream)
 				{
-					MessageBox (NULL, stream.what(), "Error", MB_OK|MB_ICONEXCLAMATION);
+					MessageBox (NULL, utf8ToTStr(stream.what()), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 		}
@@ -4035,7 +4034,7 @@ void EPM_PaintCMode::DoPaint ()
 			patchData->SetFlag(EPD_BEENDONE, TRUE);
 		}
 
-		theHold.Accept("Patch change");
+		theHold.Accept(_M("Patch change"));
 
 		nodes.DisposeTemporary();
 		pobj->ClearPatchDataFlag(mcList, EPD_BEENDONE);
@@ -4058,29 +4057,25 @@ bool loadLigoConfigFile (CLigoConfig& config, Interface& it)
 	if (hModule)
 	{
 		// Get the path
-		char sModulePath[256];
+		TCHAR sModulePath[256];
 		int res=GetModuleFileName(hModule, sModulePath, 256);
 		// Success ?
 		if (res)
 		{
 			// Path
-			char sDrive[256];
-			char sDir[256];
-			_splitpath (sModulePath, sDrive, sDir, NULL, NULL);
-			_makepath (sModulePath, sDrive, sDir, "ligoscape", ".cfg");
+			std::string modulePath = NLMISC::CFile::getPath(tStrToUtf8(sModulePath));
+
 			try
 			{
 				// Load the config file
-				config.readConfigFile (sModulePath, false);
+				config.readConfigFile (modulePath, false);
 				// ok
 				return true;
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
 				// Print an error message
-				char msg[512];
-				smprintf (msg, 512, "Error loading the config file ligoscape.cfg: %s", e.what());
-				nlwarning (msg);
+				nlwarning("Error loading the config file ligoscape.cfg: %s", e.what());
 			}
 		}
 	}
@@ -4100,10 +4095,13 @@ DWORD WINAPI myThread (LPVOID vData)
 		nlassert (pData->eproc->ip);
 
 		// Viewport parameters
-		ViewExp*	vp;
 		Matrix3		affineTM;
 		float		minx,maxx,miny,maxy;
-		vp=pData->eproc->ip->GetActiveViewport();
+#if MAX_VERSION_MAJOR >= 19
+		ViewExp *vp = &pData->eproc->ip->GetActiveViewExp();
+#else
+		ViewExp *vp = pData->eproc->ip->GetActiveViewport();
+#endif
 		vp->GetAffineTM(affineTM);
 		if ( vp->IsPerspView() )
 		{
@@ -4261,9 +4259,8 @@ DWORD WINAPI myThread (LPVOID vData)
 				}
 				else
 				{
-					char message[512];
-					smprintf (message, 512, "Can't build the zone named %s", pData->VectMesh[i].Node->GetName());
-					MessageBox (pData->eproc->ip->GetMAXHWnd(), message, "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+					std::string message = toString("Can't build the zone named %s", tStrToUtf8(pData->VectMesh[i].Node->GetName()).c_str());
+					MessageBox (pData->eproc->ip->GetMAXHWnd(), utf8ToTStr(message), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 				}
 			}
 
@@ -4363,16 +4360,16 @@ DWORD WINAPI myThread (LPVOID vData)
 			//========
 			CNELU::release();
 		}
-		catch (EDru& druExcept)
+		catch (const EDru& druExcept)
 		{
-			MessageBox (NULL, druExcept.what(), "NeL driver utility", MB_OK|MB_ICONEXCLAMATION);
+			MessageBox (NULL, utf8ToTStr(druExcept.what()), _T("NeL driver utility"), MB_OK|MB_ICONEXCLAMATION);
 		}
 
 		delete pData;
 	}
-	catch (Exception& e)
+	catch (const Exception& e)
 	{
-		MessageBox (NULL, e.what(), "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, utf8ToTStr(e.what()), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 0;
@@ -4590,7 +4587,11 @@ int EPM_PaintMouseProc::proc(
 			int flags, 
 			IPoint2 m)
 {
-	ViewExp *vpt = ip->GetViewport(hwnd);	
+#if MAX_VERSION_MAJOR >= 19
+	ViewExp *vpt = &ip->GetViewExp(hwnd);
+#else
+	ViewExp *vpt = ip->GetViewport(hwnd);
+#endif
 	int res = TRUE;
 	static PatchMesh *shape1 = NULL;
 	static int poly1, tile1, tile2, mesh1, mesh2, seg1;
@@ -4619,8 +4620,10 @@ int EPM_PaintMouseProc::proc(
 			break;
 	}
 
+#if MAX_VERSION_MAJOR < 19
 	if (vpt)
 		ip->ReleaseViewport(vpt);
+#endif
 
 	return res;
 }

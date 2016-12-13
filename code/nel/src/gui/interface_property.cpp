@@ -24,8 +24,18 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
+	// helper to convert double <> sint64
+	union C64BitsParts
+	{
+		sint64 i64;
+		double d;
+	};
 
 	bool CInterfaceProperty::link( CCDBNodeLeaf *dbNode )
 	{
@@ -66,6 +76,20 @@ namespace NLGUI
 	}
 
 
+	void CInterfaceProperty::setDouble(double value)
+	{
+		C64BitsParts parts;
+		parts.d = value;
+		setSInt64(parts.i64);
+	}
+
+	double CInterfaceProperty::getDouble() const
+	{
+		C64BitsParts parts;
+		parts.i64 = getSInt64();
+		return parts.d;
+	}
+
 	// *****************
 	// sint64 operations
 	// *****************
@@ -104,10 +128,9 @@ namespace NLGUI
 		if ( isdigit(*ptr) || *ptr=='-')
 		{
 			_VolatileValue = NLGUI::CDBManager::getInstance()->getDbProp(id);
-			double buf;
-			fromString(ptr, buf);
-			sint64 i = *(sint64*)&buf;
-			_VolatileValue->setValue64( i );
+			C64BitsParts buf;
+			fromString(ptr, buf.d);
+			_VolatileValue->setValue64(buf.i64);
 		}
 		else
 		{

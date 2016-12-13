@@ -140,7 +140,7 @@ public:
 
 private:
 	void	clearTile (CTile::TBitmap type);
-	void	free ()
+	void	freeBlock ()
 	{
 		nlassert ((_Flags&=NL3D_CTILE_FREE_FLAG)==0);
 		_Flags|=NL3D_CTILE_FREE_FLAG;
@@ -320,7 +320,7 @@ public:
 	// For edition: change the tileVegetableDesc. NB: only the TileVegetableDescFileName is serialised.
 	void setTileVegetableDesc (const CTileVegetableDesc	&tvd);
 	/** try to load the vegetable tile desc associated with the fileName (nlinfo() if can't)
-	 *	lookup into CPath. no-op if string=="".
+	 *	lookup into CPath. no-op if string empty
 	 */
 	void loadTileVegetableDesc();
 

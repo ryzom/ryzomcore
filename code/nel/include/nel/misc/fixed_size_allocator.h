@@ -45,7 +45,7 @@ public:
 	/// alloc a block
 	void *alloc();
 	/// destroy and dealloc a block
-	void free(void *block);
+	void freeBlock(void *block);
 	//
 	uint getNumBytesPerBlock() const { return _NumBytesPerBlock; }
 	uint getNumBlockPerChunk() const { return _NumBlockPerChunk; }

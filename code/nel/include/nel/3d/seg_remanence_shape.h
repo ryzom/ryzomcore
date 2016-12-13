@@ -22,7 +22,7 @@
 #include "nel/misc/smart_ptr.h"
 #include "nel/misc/vector.h"
 #include "nel/misc/aabbox.h"
-
+#include "nel/misc/class_id.h"
 
 #include "nel/3d/texture.h"
 #include "nel/3d/shape.h"

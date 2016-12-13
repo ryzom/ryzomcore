@@ -20,7 +20,7 @@
 
 #include <set>
 #include <vector>
-
+#include <iterator>
 
 #include "nel/misc/line.h"
 #include "nel/misc/polygon.h"
@@ -316,7 +316,7 @@ static void AddNodeToQuadGrid(const NLMISC::CAABBox &delimiter, TNodeFaceQG &des
 	{
 		if (delimiter.intersect(nodeBBox))
 		{
-			nldebug((std::string("Adding ") + node.GetName() + std::string(" to mesh interface quad grid")).c_str());
+			nldebug("Adding %s to mesh interface quad grid", tStrToUtf8(node.GetName()).c_str());
 			// add this node tris
 			ObjectState os = node.EvalWorldState(time);
 			Object *obj = os.obj;	
@@ -579,9 +579,9 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	{
 		// Rename the material
 		string newName = "NelAutoMergeRenamedTmp" + toString (i);
-		string originalName = (*lib)[i]->GetName ();
+		string originalName = (*lib)[i]->GetName ().ToUTF8();
 		renameMap.insert (map<string, string>::value_type (newName, originalName));
-		(*lib)[i]->SetName (newName.c_str ());
+		(*lib)[i]->SetName (utf8ToTStr(newName));
 	}
 
 	// Merge the interface project
@@ -604,7 +604,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name in the map ?
-		string key = (*lib)[i]->GetName ();
+		string key = (*lib)[i]->GetName ().ToUTF8();
 		map<string, string>::iterator ite = renameMap.find (key);
 
 		// Not found ? This is a merged material
@@ -612,9 +612,9 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 		{
 			// Rename the material
 			string newName = "NelAutoMergeRenamed" + toString (i);
-			string originalName = (*lib)[i]->GetName ();
+			string originalName = (*lib)[i]->GetName ().ToUTF8();
 			renameMap.insert (map<string, string>::value_type (newName, originalName));
-			(*lib)[i]->SetName (newName.c_str ());
+			(*lib)[i]->SetName (utf8ToTStr(newName));
 		}
 	}
 
@@ -622,12 +622,12 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 	for (i=0; i<size; i++)
 	{
 		// Find the name
-		string key = (*lib)[i]->GetName ();
+		string key = (*lib)[i]->GetName ().ToUTF8();
 		map<string, string>::iterator ite = renameMap.find (key);
 		if (ite != renameMap.end ())
 		{
 			// Rename the material with its original name
-			(*lib)[i]->SetName (ite->second.c_str ());
+			(*lib)[i]->SetName (utf8ToTStr(ite->second));
 		}
 	}
 

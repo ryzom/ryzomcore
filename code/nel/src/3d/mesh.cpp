@@ -1101,7 +1101,11 @@ bool	CMeshGeom::retrieveTriangles(std::vector<uint32> &indices) const
 			else
 			{
 				// std::copy will convert from 16 bits index to 32 bit index
-				std::copy((uint16 *) iba.getPtr(), ((uint16 *) iba.getPtr()) +  pb.getNumIndexes(), &indices[triIdx*3]);
+#ifdef NL_COMP_VC14
+				std::copy((uint16 *)iba.getPtr(), ((uint16 *)iba.getPtr()) + pb.getNumIndexes(), stdext::make_checked_array_iterator(&indices[triIdx * 3], indices.size() - triIdx * 3));
+#else
+				std::copy((uint16 *)iba.getPtr(), ((uint16 *)iba.getPtr()) + pb.getNumIndexes(), &indices[triIdx * 3]);
+#endif
 			}
 			// next
 			triIdx+= pb.getNumIndexes()/3;

@@ -54,12 +54,12 @@ inline void untagVar(std::string &var)
 	if (!var.empty())
 	{
 		if (var[0] != '$')
-			var = "";
+			var.clear();
 		else
 		{
 			var = var.substr(1);
 			if (var[var.size()-1] != '$')
-				var = "";
+				var.clear();
 			else
 				var = var.substr(0, var.size()-1);
 		}
@@ -447,7 +447,7 @@ public:
 	bool publishFiles(const std::string &serverPathPrim, const std::string &serverPathText, const std::string &localPathText);
 
 	/// Search for text in the file : add it if it's not in
-	bool includeText(const std::string filename, const std::string text);
+	bool includeText(const std::string &filename, const std::string &text);
 	
 	/// Parse the pre requisite node of a mission.
 	bool parsePreRequisite(CMissionData &md, NLLIGO::IPrimitive *preReq);

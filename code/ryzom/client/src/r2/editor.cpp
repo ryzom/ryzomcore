@@ -168,7 +168,7 @@ bool ReloadUIFlag = true; // by default, CEditor loads its own UI
 bool ResetScenarioWanted = false;
 bool ReloadScenarioWanted = false;
 bool ConnectionWanted = false;
-std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation="";
+std::string CEditor::_ScenarioToLoadWhenEntreringIntoAnimation;
 bool CEditor::_IsStartingScenario=false;
 
 // *********************************************************************************************************
@@ -2425,7 +2425,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "GoingToDM");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = false;
 			::initContextualCursor();
 			nlassert(CDisplayerBase::ObjCount == 0);
@@ -2437,7 +2437,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "BackToEditing");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2449,7 +2449,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "AnimationModeLoading");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 //			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2461,7 +2461,7 @@ void CEditor::setMode(TMode mode)
 			// set new mode in lua
 			_Env.setValue("Mode", "AnimationModeWaitingForLoading");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 //			::IgnoreEntityDbUpdates = true;
 			::initContextualCursor();
 			resetPlotItems();
@@ -2513,7 +2513,7 @@ void CEditor::setMode(TMode mode)
 			//set new mode in lua
 			_Env.setValue("Mode", "AnimationModeGoingToDM");
 			setUIMode(3);
-			connexionMsg(_ConnexionMsg); // update connexion window
+			connectionMsg(_ConnectionMsg); // update connection window
 			::IgnoreEntityDbUpdates = false;
 			::initContextualCursor();
 			resetPlotItems();
@@ -6408,11 +6408,11 @@ NLMISC::CAABBox CEditor::getSelectBox(CEntityCL &entity) const
 }
 
 // *********************************************************************************************************
-void CEditor::connexionMsg(const std::string &stringId)
+void CEditor::connectionMsg(const std::string &stringId)
 {
-	//H_AUTO(R2_CEditor_connexionMsg)
+	//H_AUTO(R2_CEditor_connectionMsg)
 	CHECK_EDITOR
-	getEditor()._ConnexionMsg = stringId;
+	getEditor()._ConnectionMsg = stringId;
 	// ignore if current ui desktop is not the third
 	if (getUI().getMode() != 3) return;
 	// show the connection window
@@ -6489,7 +6489,7 @@ void CEditor::connect()
 			{
 				R2::getEditor().setMode(CEditor::GoingToEditionMode);
 			}
-			CEditor::connexionMsg("uimR2EDGoToEditingMode");
+			CEditor::connectionMsg("uimR2EDGoToEditingMode");
 		}
 		catch (const std::exception& e)
 		{

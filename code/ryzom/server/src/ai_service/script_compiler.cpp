@@ -1666,7 +1666,7 @@ void CSubRuleTracer::removeInvalidTracers()
 
 CSmartPtr<CSubRuleTracer> CSubRuleTracer::codifyTree()
 {
-	if (getHigherParent()==this) // an error occured.
+	if (getHigherParent()==this) // an error occurred.
 	{
 		bool errorAppened=false;
 		// Check.

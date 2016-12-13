@@ -27,6 +27,10 @@
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NLGUI
 {
 	std::map< std::string, std::map< std::string, std::string > > CCtrlBase::AHCache;

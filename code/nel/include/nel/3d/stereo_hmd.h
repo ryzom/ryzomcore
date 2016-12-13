@@ -54,7 +54,7 @@ public:
 	virtual NLMISC::CQuat getOrientation() const = 0;
 
 	/// Set the GUI reference
-	virtual void setInterfaceMatrix(const NL3D::CMatrix &matrix) = 0;
+	virtual void setInterfaceMatrix(const NLMISC::CMatrix &matrix) = 0;
 
 	/// Get GUI center (1 = width, 1 = height, 0 = center)
 	virtual void getInterface2DShift(uint cid, float &x, float &y, float distance) const = 0;

@@ -213,7 +213,7 @@ void CBGDownloaderAccess::resumeBackgroundDownload()
 //=====================================================
 void CBGDownloaderAccess::CDownloadCoTask::run()
 {
-	Parent->_ErrorMsg = "";
+	Parent->_ErrorMsg.clear();
 	try
 	{
 		// don't restart downloader before
@@ -385,7 +385,7 @@ bool CBGDownloaderAccess::CDownloadCoTask::isDownloaderProcessRunning()
 {
 	// the downloader creates a system-wide mutex, so if present, assume that the downloader is running
 	//
-	HANDLE mutex = CreateMutex (NULL, FALSE, BGDownloader::DownloaderMutexName);
+	HANDLE mutex = CreateMutexW (NULL, FALSE, BGDownloader::DownloaderMutexName);
 	if (mutex)
 	{
 		if (GetLastError() == ERROR_ALREADY_EXISTS)

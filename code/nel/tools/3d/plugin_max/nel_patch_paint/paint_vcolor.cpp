@@ -378,7 +378,7 @@ void CPaintColor::setVertexColor (int mesh, int patch, int s, int t, const CRGBA
 
 /*-------------------------------------------------------------------*/
 
-bool CPaintColor::loadBrush (const char *brushFileName)
+bool CPaintColor::loadBrush (const std::string &brushFileName)
 {
 	// Open the file
 	try
@@ -401,18 +401,17 @@ bool CPaintColor::loadBrush (const char *brushFileName)
 		else
 		{
 			// Error message
-			char msg[512];
-			smprintf (msg, 512, "Can't open the file %s.", brushFileName);
-			MessageBox ((HWND)CNELU::Driver->getDisplay(), msg, "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+			std::string msg = toString("Can't open the file %s.", brushFileName.c_str());
+			MessageBox ((HWND)CNELU::Driver->getDisplay(), utf8ToTStr(msg), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 
 			// Return false
 			return false;
 		}
 	}
-	catch (Exception &e)
+	catch (const Exception &e)
 	{
 		// Error message
-		MessageBox ((HWND)CNELU::Driver->getDisplay(), e.what(), "NeL Painter", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox ((HWND)CNELU::Driver->getDisplay(), utf8ToTStr(e.what()), _T("NeL Painter"), MB_OK|MB_ICONEXCLAMATION);
 
 		// Return false
 		return false;

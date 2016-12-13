@@ -33,6 +33,9 @@ using namespace std;
 using namespace NLMISC;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NLGUI
 {
@@ -1768,7 +1771,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupEditBox::clearAllEditBox()
 	{
-		_InputString = "";
+		_InputString.clear();
 		_CursorPos = 0;
 		_CursorAtPreviousLineEnd = false;
 		if (!_ViewText) return;

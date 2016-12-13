@@ -2381,7 +2381,7 @@ void CPlayerManager::broadcastMessageUpdate()
 		else if( _Stall == true )
 		{
 			forceDisconnectUserWithoutPrivileges();
-			broadcastMessage( 2, 0, 5, "Technical problem occured on the server,");
+			broadcastMessage( 2, 0, 5, "Technical problem occurred on the server,");
 			broadcastMessage( 2, 0, 5, "All non administrator accounts are disconnected immediately.");
 			broadcastMessage( 2, 0, 5, "Customer Support is already working on it.");
 			broadcastMessage( 2, 0, 5, "Sorry for any inconveniences.");

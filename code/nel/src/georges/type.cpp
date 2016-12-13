@@ -185,7 +185,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Default = "";
+		Default.clear();
 
 	// Read Min
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Min");
@@ -197,7 +197,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Min = "";
+		Min.clear();
 
 	// Read Max
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Max");
@@ -209,7 +209,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Max = "";
+		Max.clear();
 
 	// Read Increment
 	value = (const char*)xmlGetProp (root, (xmlChar*)"Increment");
@@ -221,7 +221,7 @@ void CType::read (xmlNodePtr root)
 		xmlFree ((void*)value);
 	}
 	else
-		Increment = "";
+		Increment.clear();
 
 	// Read the definitions
 	uint childrenCount = CIXml::countChildren (root, "DEFINITION");
@@ -465,7 +465,7 @@ uint getNextToken (const char *startString, string &token, uint &offset)
 		offset += 9;
 		return NL_TOKEN_NAME;
 	}
-	token = "";
+	token.clear();
 	while (startString[offset])
 	{
 		if (startString[offset] == '\\')

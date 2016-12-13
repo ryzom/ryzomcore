@@ -101,6 +101,10 @@
 using namespace NL3D;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ////////////
 // EXTERN //
 ////////////
@@ -556,6 +560,7 @@ void release()
 
 	// restore screensaver state
 	CSystemUtils::enableScreensaver(LastScreenSaverEnabled);
+	CSystemUtils::uninit();
 
 	// release PACS primitives
 	deletePrimitiveBlocks();
@@ -564,13 +569,13 @@ void release()
 	releaseCommands();
 
 	// Exit config file stuff
-	ClientCfg.release ();
+	ClientCfg.release();
 
 	// Disconnect the client from the server.
 	NetMngr.disconnect();
 
 	// delete the sound manager
-	if(SoundMngr)
+	if (SoundMngr)
 	{
 		delete SoundMngr;
 		SoundMngr = NULL;
@@ -578,16 +583,16 @@ void release()
 
 	// Release the Entities Animation Manager
 	CEntityAnimationManager::delInstance();
-	EAM= NULL;
+	EAM = NULL;
 
 	nldebug("VR [C]: VR Shutting down");
 	releaseStereoDisplayDevice();
 
 	// Delete the driver.
-	if(Driver)
+	if (Driver)
 	{
 		// Release the prim
-		PrimFiles.release (*Driver);
+		PrimFiles.release(*Driver);
 
 		if (TextContext != NULL)
 			Driver->deleteTextContext(TextContext);
@@ -602,7 +607,7 @@ void release()
 
 		// Delete the driver.
 		delete Driver;
-		Driver = 0;
+		Driver = NULL;
 	}
 
 	NetMngr.getConnection().close();
@@ -612,13 +617,13 @@ void release()
 	EventsListener.removeFromServer(CInputHandlerManager::getInstance()->FilteredEventServer);
 
 	IDisplayer *clientLogDisplayer = ErrorLog->getDisplayer("CLIENT.LOG");
-	if( clientLogDisplayer )
+	if (clientLogDisplayer)
 	{
-		DebugLog->removeDisplayer (clientLogDisplayer);
-		InfoLog->removeDisplayer (clientLogDisplayer);
-		WarningLog->removeDisplayer (clientLogDisplayer);
-		ErrorLog->removeDisplayer (clientLogDisplayer);
-		AssertLog->removeDisplayer (clientLogDisplayer);
+		DebugLog->removeDisplayer(clientLogDisplayer);
+		InfoLog->removeDisplayer(clientLogDisplayer);
+		WarningLog->removeDisplayer(clientLogDisplayer);
+		ErrorLog->removeDisplayer(clientLogDisplayer);
+		AssertLog->removeDisplayer(clientLogDisplayer);
 		delete clientLogDisplayer;
 	}
 
@@ -662,9 +667,8 @@ void release()
 	CLuaManager::releaseInstance();
 	NLGUI::CDBManager::release();
 	CWidgetManager::release();
-
-
-
+	CViewRenderer::release();
+	CIXml::releaseLibXml();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

@@ -578,7 +578,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -638,7 +638,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1230,7 +1230,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1288,7 +1288,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -1992,7 +1992,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -2082,7 +2082,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -3940,7 +3940,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -4092,7 +4092,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -5435,7 +5435,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6105,7 +6105,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6155,7 +6155,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6748,7 +6748,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -6808,7 +6808,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -7378,7 +7378,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -7965,7 +7965,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8637,7 +8637,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -8687,7 +8687,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -9909,7 +9909,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		for (uint i=0; i<result->getNumRows(); ++i)
 		{
@@ -10453,7 +10453,7 @@ namespace RSMGR
 			return false;
 		}
 
-		std::auto_ptr<MSW::CStoreResult> result = connection.storeResult();
+		CUniquePtr<MSW::CStoreResult> result(connection.storeResult());
 
 		// check that the data description is consistent with database content
 		nlassert(result->getNumRows() <= 1);

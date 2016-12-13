@@ -32,6 +32,9 @@
 using namespace NLMISC;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace
 {
@@ -266,7 +269,7 @@ namespace NLGUI
 			else
 			if (stricmp((char*)cur->name, "action") == 0)
 			{
-				string		strId,  strAh,  strParams,  strCond, strTexture="";
+				string		strId,  strAh,  strParams,  strCond, strTexture;
 				ucstring	ucstrName;
 
 				if (id)		strId = (const char*)id;
@@ -1093,7 +1096,7 @@ namespace NLGUI
 				for (uint32 i = 0; i < pCurGSM->_Lines.size(); ++i)
 					if (sRest == pCurGSM->_Lines[i].Id)
 						return pCurGSM->_Lines[i].ViewText;
-				sRest = "";
+				sRest.clear();
 			}
 			else // no a lot of token left
 			{

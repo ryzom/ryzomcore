@@ -25,6 +25,53 @@
 
 const CProfile NoProfile;
 
+void CProfile::loadFromSettings(const QSettings &settings)
+{
+	id = settings.value("id").toString();
+	name = settings.value("name").toString();
+	server = settings.value("server").toString();
+	executable = settings.value("executable").toString();
+	arguments = settings.value("arguments").toString();
+	comments = settings.value("comments").toString();
+	desktopShortcut = settings.value("desktop_shortcut").toBool();
+	menuShortcut = settings.value("menu_shortcut").toBool();
+}
+
+void CProfile::saveToSettings(QSettings &settings) const
+{
+	settings.setValue("id", id);
+	settings.setValue("name", name);
+	settings.setValue("server", server);
+	settings.setValue("executable", executable);
+	settings.setValue("arguments", arguments);
+	settings.setValue("comments", comments);
+	settings.setValue("desktop_shortcut", desktopShortcut);
+	settings.setValue("menu_shortcut", menuShortcut);
+}
+
+bool CProfile::isValid(QString &error) const
+{
+	QRegExp idReg("^[0-9a-z_]+$");
+
+	if (!idReg.exactMatch(id))
+	{
+		error = QApplication::tr("Profile ID %1 is using invalid characters (only lowercase letters, numbers and underscore are allowed)").arg(id);
+		return false;
+	}
+
+	QRegExp nameReg("[/\\\\<>?*:.%|\"]");
+
+	int pos = nameReg.indexIn(name);
+
+	if (pos > -1)
+	{
+		error = QApplication::tr("Profile name %1 is using invalid character %2 at position %3").arg(name).arg(name[pos]).arg(pos);
+		return false;
+	}
+
+	return true;
+}
+
 QString CProfile::getDirectory() const
 {
 	return CConfigFile::getInstance()->getProfileDirectory() + "/" + id;
@@ -41,24 +88,12 @@ QString CProfile::getClientFullPath() const
 
 QString CProfile::getClientDesktopShortcutFullPath() const
 {
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name + ".desktop";
-#endif
+	return CConfigFile::getInstance()->getDesktopDirectory() + "/" + name;
 }
 
 QString CProfile::getClientMenuShortcutFullPath() const
 {
-#ifdef Q_OS_WIN32
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".lnk";
-#elif defined(Q_OS_MAC)
-	return "";
-#else
-	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name + ".desktop";
-#endif
+	return CConfigFile::getInstance()->getMenuDirectory() + "/" + name;
 }
 
 void CProfile::createShortcuts() const
@@ -87,30 +122,38 @@ void CProfile::createShortcuts() const
 	{
 		QString shortcut = getClientDesktopShortcutFullPath();
 
+		// make sure directory exists
+		QDir().mkpath(CConfigFile::getInstance()->getDesktopDirectory());
+
 		// create desktop shortcut
-		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
+		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
+		{
+			nlwarning("Unable to create desktop shortcut");
+		}
 	}
 
 	if (menuShortcut)
 	{
 		QString shortcut = getClientMenuShortcutFullPath();
 
+		// make sure directory exists
+		QDir().mkpath(CConfigFile::getInstance()->getMenuDirectory());
+
 		// create menu shortcut
-		createLink(shortcut, name, exe, profileArguments, icon, workingDir);
+		if (!createShortcut(shortcut, name, exe, profileArguments, icon, workingDir))
+		{
+			nlwarning("Unable to create shortcut for client in menu");
+		}
 	}
 }
 
 void CProfile::deleteShortcuts() const
 {
 	// delete desktop shortcut
-	QString link = getClientDesktopShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
+	removeShortcut(getClientDesktopShortcutFullPath());
 
 	// delete menu shortcut
-	link = getClientMenuShortcutFullPath();
-
-	if (QFile::exists(link)) QFile::remove(link);
+	removeShortcut(getClientMenuShortcutFullPath());
 }
 
 void CProfile::updateShortcuts() const
@@ -124,6 +167,9 @@ bool CProfile::createClientConfig() const
 	// where to search and put client.cfg
 	QString directory = getDirectory();
 	QString filename = directory + "/client.cfg";
+
+	// create directory
+	QDir().mkpath(directory);
 
 	const CServer &s = CConfigFile::getInstance()->getServer(server);
 

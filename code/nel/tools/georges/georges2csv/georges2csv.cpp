@@ -179,7 +179,7 @@ void setOutputFile(const CSString &filename)
 {
 	if (Outf!=NULL)
 		fclose(Outf);
-	Outf=fopen(filename.c_str(), "wt");
+	Outf = nlfopen(filename.c_str(), "wt");
 	if (Outf == NULL)
 	{
 		fprintf(stderr, "Can't open output file '%s' ! aborting.", filename.c_str());
@@ -550,7 +550,7 @@ void executeScriptBuf(const string &text)
 void executeScriptFile(const string &filename)
 {
 	ucstring	temp;
-	CI18N::readTextFile(filename, temp, false, false, false);
+	CI18N::readTextFile(filename, temp, false, false);
 
 	if (temp.empty())
 	{
@@ -933,7 +933,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						if ( idm==dirmapDirs.end() )
 						{
 							nlinfo( "Directory mapping not found for %s (index %u)", filebase.c_str(), letterIndex );
-							dirbase = ""; // put into root
+							dirbase.clear(); // put into root
 						}
 					}
 					else
@@ -953,7 +953,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 		{
 
 			// Load sheet (skip if failed)
-			dirbase = "";
+			dirbase.clear();
 			filename = (*it).second; // whole path
 			form = (CForm*)formLoader->loadForm( filename.c_str() );
 			if (form == NULL)

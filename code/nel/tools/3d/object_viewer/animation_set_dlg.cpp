@@ -81,12 +81,12 @@ void CAnimationSetDlg::OnAddAnimation ()
 	if (instance != 0xffffffff)
 	{
 		// Create a dialog
-		static char BASED_CODE szFilter[] = 
-			"NeL Animation Files (*.anim)\0*.anim\0"
-			"All Files (*.*)\0*.*\0\0";
+		static TCHAR BASED_CODE szFilter[] = 
+			_T("NeL Animation Files (*.anim)\0*.anim\0")
+			_T("All Files (*.*)\0*.*\0\0");
 
 		// Filename buffer
-		char buffer[65535];
+		TCHAR buffer[65535];
 		buffer[0]=0;
 
 		OPENFILENAME openFile;
@@ -98,7 +98,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 		openFile.lpstrFile = buffer;
 		openFile.nMaxFile = 65535;
 		openFile.Flags = OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_ALLOWMULTISELECT|OFN_ENABLESIZING|OFN_EXPLORER;
-		openFile.lpstrDefExt = "*.anim";
+		openFile.lpstrDefExt = _T("*.anim");
 		
 
 		if (GetOpenFileName(&openFile))
@@ -107,7 +107,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 			try
 			{
 				// Filename pointer
-				char *c=buffer;
+				TCHAR *c=buffer;
 
 				// Read the path
 				CString path = buffer;
@@ -117,7 +117,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 					c[path.GetLength()+1]=0;
 
 					// Path is empty
-					path = "";
+					path.Empty();
 				}
 				else
 				{
@@ -132,8 +132,8 @@ void CAnimationSetDlg::OnAddAnimation ()
 				while (*c)
 				{
 					// File name
-					char filename[256];
-					char *ptr=filename;
+					TCHAR filename[256];
+					TCHAR *ptr=filename;
 
 					// Read a file name
 					while (*c)
@@ -147,7 +147,7 @@ void CAnimationSetDlg::OnAddAnimation ()
 					CString name = path + filename;
 
 					// Load the animation
-					_ObjView->loadAnimation (name, instance);
+					_ObjView->loadAnimation (tStrToUtf8(name), instance);
 
 					// Touch the channel mixer
 					_ObjView->reinitChannels ();
@@ -156,9 +156,9 @@ void CAnimationSetDlg::OnAddAnimation ()
 					refresh (TRUE);
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -173,8 +173,8 @@ void CAnimationSetDlg::OnAddSkelWt()
 	if (instance != CB_ERR)
 	{
 		// TODO: Add your control notification handler code here
-		static char BASED_CODE szFilter[] = "NeL Skeleton Weight Template Files (*.swt)|*.swt|All Files (*.*)|*.*||";
-		CFileDialog fileDlg( TRUE, ".swt", "*.swt", OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
+		static TCHAR BASED_CODE szFilter[] = _T("NeL Skeleton Weight Template Files (*.swt)|*.swt|All Files (*.*)|*.*||");
+		CFileDialog fileDlg( TRUE, _T(".swt"), _T("*.swt"), OFN_ALLOWMULTISELECT|OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT, szFilter);
 		if (fileDlg.DoModal()==IDOK)
 		{
 			// Open the file
@@ -188,7 +188,7 @@ void CAnimationSetDlg::OnAddSkelWt()
 					CString filename=fileDlg.GetNextPathName(pos);
 
 					// Load the animation
-					_ObjView->loadSWT (filename, instance);
+					_ObjView->loadSWT (tStrToUtf8(filename), instance);
 
 					// Touch the channel mixer
 					_ObjView->reinitChannels  ();
@@ -197,9 +197,9 @@ void CAnimationSetDlg::OnAddSkelWt()
 					refresh (TRUE);
 				}
 			}
-			catch (Exception& e)
+			catch (const Exception& e)
 			{
-				MessageBox (e.what(), "NeL object viewer", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (utf8ToTStr(e.what()), _T("NeL object viewer"), MB_OK|MB_ICONEXCLAMATION);
 			}
 		}
 	}
@@ -233,9 +233,8 @@ void CAnimationSetDlg::refresh (BOOL update)
 		uint i;
 		for (i=0; i<_ObjView->getNumInstance (); i++)
 		{
-			char name[512];
-			_splitpath (_ObjView->getInstance (i)->Saved.ShapeFilename.c_str(), NULL, NULL, name, NULL);
-			EditedObject.InsertString (-1, name);
+			std::string name = NLMISC::CFile::getFilenameWithoutExtension(_ObjView->getInstance(i)->Saved.ShapeFilename);
+			EditedObject.InsertString (-1, utf8ToTStr(name));
 		}
 
 		// Get edited object
@@ -263,14 +262,13 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.AnimationFileName.size(); i++)
 			{
 				// Get the animation name
-				char name[512];
-				_splitpath (object->Saved.AnimationFileName[i].c_str(), NULL, NULL, name, NULL);
+				std::string name = NLMISC::CFile::getFilenameWithoutExtension(object->Saved.AnimationFileName[i]);
 
 				// Get the animation pointer
 				CAnimation *anim = object->AnimationSet.getAnimation (object->AnimationSet.getAnimationIdByName (name));
 
 				// Insert an intem
-				HTREEITEM item=Tree.InsertItem (name);
+				HTREEITEM item=Tree.InsertItem(utf8ToTStr(name));
 				Tree.SetItemData (item, i);
 				nlassert (item!=NULL);
 
@@ -281,7 +279,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 				while (ite!=setString.end())
 				{
 					// Add this string
-					HTREEITEM newItem = Tree.InsertItem (ite->c_str(), item);
+					HTREEITEM newItem = Tree.InsertItem (utf8ToTStr(*ite), item);
 					Tree.SetItemData (newItem, 0xffffffff);
 
 					// Get the track
@@ -289,6 +287,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 
 					// Keyframer ?
 					UTrackKeyframer *keyTrack=dynamic_cast<UTrackKeyframer *>(track);
+
 					if (keyTrack)
 					{
 						// Get number of keys
@@ -296,19 +295,16 @@ void CAnimationSetDlg::refresh (BOOL update)
 						keyTrack->getKeysInRange (track->getBeginTime ()-1, track->getEndTime ()+1, keys);
 
 						// Print track info
-						char name[512];
-						_snprintf (name, 512, "%s (%f - %f) %d keys", typeid(*track).name(), track->getBeginTime (), track->getEndTime (), keys.size());
-						HTREEITEM keyItem = Tree.InsertItem (name, newItem);
-						Tree.SetItemData (keyItem, 0xffffffff);
+						name = toString("%s (%f - %f) %u keys", typeid(*track).name(), track->getBeginTime(), track->getEndTime(), (uint32)keys.size());
 					}
 					else
 					{
 						// Print track info
-						char name[512];
-						_snprintf (name, 512, "%s (%f - %f)", typeid(*track).name(), track->getBeginTime (), track->getEndTime ());
-						HTREEITEM keyItem = Tree.InsertItem (name, newItem);
-						Tree.SetItemData (keyItem, 0xffffffff);
+						name = toString("%s (%f - %f)", typeid(*track).name(), track->getBeginTime(), track->getEndTime());
 					}
+
+					HTREEITEM keyItem = Tree.InsertItem(utf8ToTStr(name), newItem);
+					Tree.SetItemData(keyItem, 0xffffffff);
 
 					ite++;
 				}
@@ -318,14 +314,13 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.SWTFileName.size(); i++)
 			{
 				// Get the animation name
-				char name[512];
-				_splitpath (object->Saved.SWTFileName[i].c_str(), NULL, NULL, name, NULL);
+				std::string name = NLMISC::CFile::getFilenameWithoutExtension(object->Saved.SWTFileName[i]);
 
 				// Get the animation pointer
-				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight (object->AnimationSet.getSkeletonWeightIdByName (name));
+				CSkeletonWeight *swt = object->AnimationSet.getSkeletonWeight(object->AnimationSet.getSkeletonWeightIdByName(name));
 
 				// Insert an intem
-				HTREEITEM item=SkelTree.InsertItem (name);
+				HTREEITEM item=SkelTree.InsertItem(utf8ToTStr(name));
 				nlassert (item!=NULL);
 
 				// Get number of node in this skeleton weight
@@ -334,11 +329,10 @@ void CAnimationSetDlg::refresh (BOOL update)
 				// Add the nodein the tree
 				for (uint n=0; n<numNode; n++)
 				{
-					char percent[512];
-					sprintf (percent, "%s (%f%%)", swt->getNodeName (n).c_str(), swt->getNodeWeight(n)*100);
+					std::string percent = toString("%s (%f%%)", swt->getNodeName(n).c_str(), swt->getNodeWeight(n)*100);
 
 					// Add this string
-					SkelTree.InsertItem (percent, item);
+					SkelTree.InsertItem (utf8ToTStr(percent), item);
 				}
 			}
 
@@ -346,7 +340,7 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.PlayList.size(); i++)
 			{
 				// Insert an intem
-				int item=PlayList.InsertString (-1, object->Saved.PlayList[i].c_str());
+				int item=PlayList.InsertString (-1, utf8ToTStr(object->Saved.PlayList[i]));
 				nlassert (item!=LB_ERR);
 			}
 		}
@@ -372,9 +366,9 @@ void CAnimationSetDlg::refresh (BOOL update)
 			for (i=0; i<object->Saved.PlayList.size(); i++)
 			{
 				// Insert an intem
-				char text[512];
+				TCHAR text[512];
 				PlayList.GetText( i, text);
-				object->Saved.PlayList[i] = text;
+				object->Saved.PlayList[i] = tStrToUtf8(text);
 			}
 
 			CDialog::UpdateData (update);

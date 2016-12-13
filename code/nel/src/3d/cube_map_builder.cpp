@@ -89,8 +89,8 @@ static uint8 *BuildCubeMapTexLuminance(const NLMISC::CVector &start,
 
 CTextureCube *BuildCubeMap(sint mapSize, ICubeMapFunctor &f, bool luminanceOnly /* = false*/, const std::string &shareName /* = "" */)
 {
-	std::auto_ptr<CTextureCube> cubeMap(new CTextureCube);
-	std::auto_ptr<CTextureMem> faces[6];
+	CUniquePtr<CTextureCube> cubeMap(new CTextureCube);
+	CUniquePtr<CTextureMem> faces[6];
 
 	/// this gives the start (unormalized normal for each face for u,v = 0, 0)
 	static const NLMISC::CVector start[] =

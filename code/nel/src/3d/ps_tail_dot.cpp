@@ -33,7 +33,7 @@ static NLMISC::CRGBA GradientB2W[] = {NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(2
 static ITexture *CreateGradientTexture()
 {
 	NL_PS_FUNC(CreateGradientTexture)
-	std::auto_ptr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
+	CUniquePtr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
 												   sizeof(GradientB2W),
 												   false, /* dont delete */
 												   false, /* not a file */

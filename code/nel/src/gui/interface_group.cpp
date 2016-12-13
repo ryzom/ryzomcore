@@ -32,6 +32,10 @@
 using namespace std;
 using namespace NL3D;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define IG_UNIQUE_ID(this) ((void*)&((this)->_GroupSizeRef)) // NB nico : use some pointer *inside* CInterfaceGroup as a unique id for lua registry (any field but
 														     // the first), instead of using 'this'. 'this' is already used by
 		                                                     //  CLuaIHM::pushReflectableOnStack as unique id to CInterfaceElement's ref pointers
@@ -1031,12 +1035,12 @@ namespace NLGUI
 			if (posid > 0)
 				idTmp = idTmp.substr (0, posid);
 			else
-				idTmp = "";
+				idTmp.clear();
 
 			if (poslid > 0)
 				lidTmp = lidTmp.substr (0, poslid);
 			else
-				lidTmp = "";
+				lidTmp.clear();
 		}
 		return true;
 	}

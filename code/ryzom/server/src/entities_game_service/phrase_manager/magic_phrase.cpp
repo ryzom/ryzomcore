@@ -1566,9 +1566,9 @@ bool CMagicPhrase::launch()
 	// add post cast latency, only for non instant cast
 	const NLMISC::TGameCycle time = CTickEventHandler::getGameCycle();
 	if (_DivineInterventionOccured||_ShootAgainOccured?_BaseCastingTime:_CastingTime)
-		_LatencyEndDate = time + PostCastLatency + _PostCastTime;
+		_LatencyEndDate = (double)time + PostCastLatency + _PostCastTime;
 	else
-		_LatencyEndDate = 0 + _PostCastTime;
+		_LatencyEndDate = 0.0 + _PostCastTime;
 
 	// compute the apply date
 	if ( !_Targets.empty()  && _ActorRowId != _Targets[0].getId())
@@ -1898,7 +1898,7 @@ void CMagicPhrase::enchantPhrase(CCharacter * user,float successFactor)
 
 	_Targets.resize(1);
 //	user->setActionFlag( RYZOMACTIONFLAGS::Attacks, true );
-	_LatencyEndDate = 0;//time + _HitRateModifier + weapon.LatencyInTicks + ammo.SpeedInTicks ;
+	_LatencyEndDate = 0.0;//time + _HitRateModifier + weapon.LatencyInTicks + ammo.SpeedInTicks ;
 	// _BeingProcessed = false;
 
 } // enchantPhrase //

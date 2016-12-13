@@ -109,7 +109,7 @@ CMySQLResult::CMySQLResult(MYSQL_RES* res)
 
 /// Constructor
 CMySQLResult::CMySQLResult(MYSQL* database)
-{ 
+{
 	_Result = mysql_store_result(database);
 }
 /// Destructor
@@ -174,7 +174,7 @@ MYSQL_ROW		CMySQLResult::fetchRow()
 /* ***************************************************************************
 	Doc :
 
-	When an entity is added in the service mirror, the service checks if its name is in the name cache. If 
+	When an entity is added in the service mirror, the service checks if its name is in the name cache. If
 	the string ID is not known, the server ask the IOS for the string.
 
 	When the IOS sends back a string, the server broadcasts this string to the connected clients.
@@ -275,7 +275,7 @@ void clientWantsToConnect ( TSockId from, void *arg )
 	nlinfo ("Add client %d", Clients.size());
 	Clients.push_back (new CMonitorClient(from));
 
-	
+
 	CMonitorService  &ms = getMonitorService();
 
 	// send params about this sever the client
@@ -284,7 +284,7 @@ void clientWantsToConnect ( TSockId from, void *arg )
 	uint32 version = 0;
 	msgout.serial(version);
 	msgout.serial(ms.LoginRequired);
-	Server->send(msgout, from);	
+	Server->send(msgout, from);
 	Clients.back()->Authentificated = !ms.LoginRequired;
 
 
@@ -333,7 +333,7 @@ void clientSetWindow (CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	for (uint i = 0; i < Clients.size(); ++i)
 	{
 		if (Clients[i]->getSock() == from && Clients[i]->Authentificated)
-		{			
+		{
 			nlinfo ("Client %d sets window (%.0f,%.0f) (%.0f,%.0f)", i, xmin, ymin, xmax, ymax);
 			Clients[i]->setWindow(xmin,ymin,xmax,ymax);
 			Clients[i]->resetVision();
@@ -377,17 +377,21 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 	{
 		if (!Clients[i]->Authentificated && Clients[i]->getSock() == from)
 		{
-			if (!Clients[i]->BadLogin) // don't allow new login attempt while thisflag is set
+			if (!Clients[i]->BadLogin) // don't allow new login attempt while this flag is set
 			{
+				// escape login
+				char escapedLogin[100];
+				size_t len = mysql_real_escape_string(DatabaseConnection, escapedLogin, login.c_str(), login.length());
+
 				// make a db request to to db to see if password is valid
-				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", login.c_str());
+				std::string queryStr = toString("SELECT Password FROM user where Login='%s'", escapedLogin);
 				int result = mysql_query(DatabaseConnection, queryStr.c_str());
 				if (result == 0)
 				{
 					CMySQLResult sqlResult(DatabaseConnection);
 					if (sqlResult.success() && sqlResult.numRows() == 1)
 					{
-						MYSQL_ROW row =  sqlResult.fetchRow();	
+						MYSQL_ROW row =  sqlResult.fetchRow();
 						if (sqlResult.numFields() == 1)
 						{
 							if (strlen(row[0]) > 2)
@@ -407,19 +411,19 @@ void clientAuthentication(CMessage &msgin, TSockId from, CCallbackNetBase &netba
 									Clients[i]->Authentificated = true;
 									// password is  good
 									CMessage msgout;
-									msgout.setType("AUTHENT_VALID");							
+									msgout.setType("AUTHENT_VALID");
 									Server->send(msgout, from);
 									return;
 								}
 							}
-						}				
+						}
 					}
 				}
 				// fail the authentication
 				// Do not send result immediatly to avoid a potential hacker
 				// to try a dictionnary or that dort of things
 				BadLoginClients.insert(std::pair<NLMISC::TTime, NLMISC::CRefPtr<CMonitorClient> >(
-					NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS, 
+					NLMISC::CTime::getLocalTime() + LOGIN_RETRY_DELAY_IN_MILLISECONDS,
 					(NLMISC::CRefPtr<CMonitorClient>)Clients[i]));
 				Clients[i]->BadLogin =true;
 				return;
@@ -527,9 +531,9 @@ void CMonitorService::init ()
 
 // ***************************************************************************
 
-void CMonitorService::release ()	
+void CMonitorService::release ()
 {
-	disconnectFromDatabase();	
+	disconnectFromDatabase();
 	// release sub systems
 	// CMessages::release();
 	CMirrors::release();
@@ -568,7 +572,7 @@ bool CMonitorService::update ()
 			client.update();
 		}
 	}
-	
+
 	// Sent bad login msg to clients at the right time
 	NLMISC::TTime currentTime = NLMISC::CTime::getLocalTime();
 	while (!BadLoginClients.empty() && BadLoginClients.begin()->first <= currentTime)
@@ -577,9 +581,9 @@ bool CMonitorService::update ()
 		if (client != NULL)
 		{
 			CMessage msgout;
-			msgout.setType("AUTHENT_INVALID");		
+			msgout.setType("AUTHENT_INVALID");
 			Server->send(msgout, client->getSock());
-			client->BadLogin = false; // allow to accept login again for that client			
+			client->BadLogin = false; // allow to accept login again for that client
 		}
 		BadLoginClients.erase(BadLoginClients.begin());
 	}

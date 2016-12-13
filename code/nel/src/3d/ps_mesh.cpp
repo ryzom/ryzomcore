@@ -29,11 +29,10 @@
 #include "nel/3d/particle_system_shape.h"
 #include "nel/3d/particle_system_model.h"
 #include "nel/3d/ps_iterator.h"
+#include "nel/3d/debug_vb.h"
+
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
-
-
-
 
 namespace NL3D
 {
@@ -1113,10 +1112,12 @@ void	CPSConstraintMesh::getShapesNames(std::string *shapesNames) const
 	{
 		const_cast<CPSConstraintMesh *>(this)->update();
 	}
+#ifdef NL_COMP_VC14
+	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), stdext::make_unchecked_array_iterator(shapesNames));
+#else
 	std::copy(_MeshShapeFileName.begin(), _MeshShapeFileName.end(), shapesNames);
+#endif
 }
-
-
 
 //====================================================================================
 void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
@@ -1127,7 +1128,6 @@ void		CPSConstraintMesh::setShape(uint index, const std::string &shapeName)
 	_Touched = 1;
 	_ValidBuild = 0;
 }
-
 
 //====================================================================================
 const std::string          &CPSConstraintMesh::getShape(uint index) const
@@ -1533,7 +1533,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 			{
 				PGlobalTexAnims newPtr(new CGlobalTexAnims); // create new
 				//std::swap(_GlobalTexAnims, newPtr);			 // replace old
-				_GlobalTexAnims = newPtr;
+				_GlobalTexAnims = CUniquePtrMove(newPtr);
 				f.serial(*_GlobalTexAnims);
 			}
 
@@ -2352,7 +2352,7 @@ void  CPSConstraintMesh::setTexAnimType(TTexAnimType type)
 		{
 			PGlobalTexAnims newPtr(new CGlobalTexAnims);
 			//std::swap(_GlobalTexAnims, newPtr);
-			_GlobalTexAnims = newPtr;
+			_GlobalTexAnims = CUniquePtrMove(newPtr);
 			_GlobalAnimationEnabled = 1;
 		}
 		break;

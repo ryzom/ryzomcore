@@ -13493,3 +13493,5 @@ uimwAppZone [AppZone]
 // message displayed when player type /playedTime
 uiPlayedTime [You played with this character for %time.]
 uiPlaylistRefresh [Refresh]
+uiFreeViewTablet [Tablet or touch screen]
+

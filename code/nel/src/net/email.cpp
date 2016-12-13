@@ -196,15 +196,8 @@ bool sendEmail (const string &smtpServer, const string &from, const string &to, 
 		// we must skip the first line
 		formatedBody = "\r\n";
 
-		// replace \n with \r\n
-		for (i = 0; i < body.size(); i++)
-		{
-			if (body[i] == '\n' && i > 0 && body[i-1] != '\r')
-			{
-				formatedBody += '\r';
-			}
-			formatedBody += body[i];
-		}
+		// replace \n by \r\n
+		formatedBody += addSlashR(body);
 
 		// add attachment if any
 		if (!attachedFile.empty())

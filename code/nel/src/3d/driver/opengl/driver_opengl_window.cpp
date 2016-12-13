@@ -44,6 +44,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 #ifdef NL_STATIC
@@ -343,8 +347,13 @@ bool CDriverGL::init (uintptr_t windowIcon, emptyProc exitFunc)
 	retrieveATIDriverVersion();
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
 	nlunreferenced(windowIcon);
+
+	// autorelease pool for memory management
+	_autoreleasePool = [[NSAutoreleasePool alloc] init];
+
+	// init the application object
+	[NSApplication sharedApplication];
 
 #elif defined (NL_OS_UNIX)
 
@@ -468,32 +477,35 @@ bool CDriverGL::unInit()
 	// Restore monitor color parameters
 	if (_NeedToRestoreGammaRamp)
 	{
-		HDC dc = CreateDCA ("DISPLAY", NULL, NULL, NULL);
+		HDC dc = CreateDCA("DISPLAY", NULL, NULL, NULL);
 		if (dc)
 		{
-			if (!SetDeviceGammaRamp (dc, _GammaRampBackuped))
-				nlwarning ("(CDriverGL::release): SetDeviceGammaRamp failed");
+			if (!SetDeviceGammaRamp(dc, _GammaRampBackuped))
+				nlwarning("(CDriverGL::release): SetDeviceGammaRamp failed");
 
 			// Release the DC
-			ReleaseDC (NULL, dc);
+			ReleaseDC(NULL, dc);
 		}
 		else
 		{
-			nlwarning ("(CDriverGL::release): can't create DC");
+			nlwarning("(CDriverGL::release): can't create DC");
 		}
 	}
 
 #elif defined(NL_OS_MAC)
 
-	// nothing to do
+	[_autoreleasePool release];
 
 #elif defined (NL_OS_UNIX)
 
 	// restore default X errors handler
 	XSetErrorHandler(NULL);
 
-	XCloseDisplay(_dpy);
-	_dpy = NULL;
+	if (_dpy)
+	{
+		XCloseDisplay(_dpy);
+		_dpy = NULL;
+	}
 
 #endif // NL_OS_UNIX
 
@@ -1454,7 +1466,7 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 		pos = 0;
 		hwndParent = NULL;
 	}
-	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle, 
+	window = CreateWindowW(L"NLClass", L"NeL Window", dwStyle,
 		pos, pos, mode.Width, mode.Height, hwndParent, NULL, GetModuleHandle(NULL), NULL);
 
 	if (window == EmptyWindow)
@@ -1465,6 +1477,12 @@ bool CDriverGL::createWindow(const GfxMode &mode)
 	}
 
 #elif defined(NL_OS_MAC)
+
+	// create the menu in the top screen bar
+	setupApplicationMenu();
+
+	// finish the application launching
+	[NSApp finishLaunching];
 
 	// describe how the window should look like and behave
 	unsigned int styleMask = NSTitledWindowMask | NSClosableWindowMask |
@@ -1642,6 +1660,7 @@ bool CDriverGL::destroyWindow()
 	}
 
 #elif defined(NL_OS_MAC)
+
 #elif defined(NL_OS_UNIX)
 
 	if (_DestroyWindow && _ctx) // FIXME: _DestroyWindow may need to be removed here as well
@@ -2299,7 +2318,10 @@ void CDriverGL::setWindowTitle(const ucstring &title)
 
 #ifdef NL_OS_WINDOWS
 
-	SetWindowTextW(_win, (WCHAR*)title.c_str());
+	if (!SetWindowTextW(_win, (WCHAR*)title.c_str()))
+	{
+		nlwarning("SetWindowText failed: %s", formatErrorMessage(getLastError()).c_str());
+	}
 
 #elif defined(NL_OS_MAC)
 
@@ -2732,7 +2754,7 @@ void CDriverGL::setWindowSize(uint32 width, uint32 height)
 		setWindowStyle(EWSFullscreen);
 
 		// set the back buffer manually to match the desired rendering resolution
-		GLint dim[2]   = { width, height };
+		GLint dim[2]   = { (GLint)width, (GLint)height };
 		CGLError error = CGLSetParameter(
 			(CGLContextObj)[_ctx CGLContextObj],
 			kCGLCPSurfaceBackingSize, dim);

@@ -578,7 +578,7 @@ BOOL CLogic_editorDoc::OnSaveDocument( LPCTSTR fileName )
 		// Close the file
 		file.close ();
 	}
- 	catch (Exception &)
+ 	catch (const Exception &)
 	{
 	}
 
@@ -646,7 +646,7 @@ BOOL CLogic_editorDoc::load( LPCTSTR fileName )
 		// Close the file
 		file.close ();
 	}
- 	catch (Exception &)
+ 	catch (const Exception &)
 	{
 	}
 	

@@ -3122,8 +3122,8 @@ static void setRyzomDebugDate(CRyzomDate &rd)
 NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 {
 	if (args.size() != 1) return false;	
-	int hour;
-	if (sscanf(args[0].c_str(), "%d", &hour) != 1) return false;
+	sint hour;
+	if (!fromString(args[0], hour)) return false;
 	CRyzomDate rd;
 	getRyzomDebugDate(rd);
 	rd.Time = fmodf(rd.Time, 1.f) + (float) hour;
@@ -3134,8 +3134,8 @@ NLMISC_COMMAND(setDebugHour, "set the current debug hour", "<hour>")
 NLMISC_COMMAND(setDebugDayOfYear, "set the current debug day of year (first day has index 1)", "<day>")
 {
 	if (args.size() != 1) return false;	
-	int day;
-	if (sscanf(args[0].c_str(), "%d", &day) != 1) return false;
+	sint day;
+	if (!fromString(args[0], day)) return false;
 	CRyzomDate rd;	
 	getRyzomDebugDate(rd);
 	rd.Day = day - 1; // for the user, days start at '1'

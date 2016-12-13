@@ -146,7 +146,7 @@ private:
 	static void	rawDebugInfo(const std::string &dbg);
 	// Dump callstack in the console
 	// Additionnally, if ClientCfg.LuaDebugInfoGotoButtonEnabled is set, then
-	// buttons will be created in fonr of eahc line to allow to goto the lua line that issued the message
+	// buttons will be created in front of each line to allow to go to the lua line that issued the message
 	// by using an external editor
 
 	static void	getCallStackAsString(int startStackLevel, std::string &result);

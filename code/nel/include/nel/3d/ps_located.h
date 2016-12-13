@@ -66,14 +66,14 @@ class CParticleSystem;
 
 
 /// This structure helps to perform the collision step, by telling which collisionner is the nearest if there are several candidate
-/// a distance of -1 indicates that no collisions occured
+/// a distance of -1 indicates that no collisions occurred
 struct CPSCollisionInfo
 {
 	CPSCollisionInfo *Next;
-	float			  Dist;			  // Distance to the nearest collider, or -1 if not collision occured
+	float			  Dist;			  // Distance to the nearest collider, or -1 if not collision occurred
 	NLMISC::CVector   NewPos;
-	NLMISC::CVector   NewSpeed;	      // The speed of particle after a collision occured. After the updated of collision it is swapped with the post-collision speed
-	CPSZone			  *CollisionZone; // The zone on which the bounce occured, can be useful to check the behaviour in case of collision
+	NLMISC::CVector   NewSpeed;	      // The speed of particle after a collision occurred. After the updated of collision it is swapped with the post-collision speed
+	CPSZone			  *CollisionZone; // The zone on which the bounce occurred, can be useful to check the behaviour in case of collision
 	uint32			  Index;
 	CPSCollisionInfo()
 	{
@@ -906,10 +906,10 @@ protected:
 	 */
 	virtual void resize(uint32 size) = 0;
 
-	/** a bounce occured, so some action could be done. The default behaviour does nothing
+	/** a bounce occurred, so some action could be done. The default behaviour does nothing
 	 *  \param index the index of the element that bounced
 	 */
-	virtual void bounceOccured(uint32 /* index */, TAnimationTime /* timeToNextsimStep */) {}
+	virtual void bounceOccurred(uint32 /* index */, TAnimationTime /* timeToNextsimStep */) {}
 
 	/** show an drawing to represent the object, and in red if it is selected
 	 *  \param tab : a table of 2 * nbSeg vector. only the x and y coordinates are used

@@ -30,6 +30,10 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 NLMISC_REGISTER_OBJECT(CViewBase, CGroupList, std::string, "list");
 
 namespace NLGUI
@@ -363,7 +367,7 @@ namespace NLGUI
 			uint32 i;
 			if( fromString( value, i ) )
 				_TextId = i;
-			_HardText = "";
+			_HardText.clear();
 			onTextChanged();
 			return;
 		}

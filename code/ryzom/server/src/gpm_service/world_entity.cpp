@@ -328,7 +328,7 @@ void CWorldEntity::createPrimitive(NLPACS::UMoveContainer *pMoveContainer, uint8
 		return;
 	}
 	primitive->UserData = ((uint64)(Index.getIndex()) << 16);
-	//nldebug("Set entity E%u to %"NL_I64"d", Index.getIndex(), primitive->UserData);
+	//nldebug("Set entity E%u to %" NL_I64 "d", Index.getIndex(), primitive->UserData);
 	primitive->setPrimitiveType( UMovePrimitive::_2DOrientedCylinder );
 	primitive->setReactionType( UMovePrimitive::Slide );
 	primitive->setTriggerType( UMovePrimitive::NotATrigger );

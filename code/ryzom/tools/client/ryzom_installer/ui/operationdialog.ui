@@ -9,23 +9,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>505</width>
     <height>106</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
   <property name="minimumSize">
-   <size>
-    <width>400</width>
-    <height>106</height>
-   </size>
-  </property>
-  <property name="maximumSize">
    <size>
     <width>400</width>
     <height>106</height>
@@ -56,6 +50,9 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+     <property name="format">
+      <string notr="true">%p%</string>
      </property>
     </widget>
    </item>

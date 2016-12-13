@@ -67,7 +67,6 @@ CIXml::CIXml () : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = false;
 	_BinaryStream = NULL;
 }
@@ -82,7 +81,6 @@ CIXml::CIXml (bool tryBinaryMode) : IStream (true /* Input mode */)
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
 	_TryBinaryMode = tryBinaryMode;
 	_BinaryStream = NULL;
 }
@@ -105,18 +103,16 @@ void CIXml::release ()
 		// Free it
 		xmlClearParserCtxt (_Parser);
 		xmlFreeParserCtxt (_Parser);
-		// commented due to the bug #857 xmlCleanupParser ();
 
 		_Parser = NULL;
 	}
 
 	// Not initialized
-	_Parser = NULL;
 	_CurrentElement = NULL;
 	_CurrentNode = NULL;
 	_PushBegin = false;
 	_AttribPresent = false;
-	_ErrorString = "";
+	_ErrorString.clear();
 
 	resetPtrTable();
 }
@@ -195,7 +191,7 @@ bool CIXml::init (IStream &stream)
 		}
 
 		// Set error handler
-		_ErrorString = "";
+		_ErrorString.clear();
 		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncRead);
 
 		// Ask to get debug info
@@ -319,7 +315,7 @@ void CIXml::serialSeparatedBufferIn ( string &value, bool checkSeparator )
 						// If no more node, empty string
 						if (_CurrentNode == NULL)
 						{
-							value = "";
+							value.clear();
 							_ContentStringIndex = 0;
 							_ContentString.erase ();
 							return;
@@ -719,7 +715,7 @@ void CIXml::serialBuffer(uint8 *buf, uint len)
 
 // ***************************************************************************
 
-bool CIXml::xmlPushBeginInternal (const char *nodeName)
+bool CIXml::xmlPushBeginInternal (const std::string &nodeName)
 {
 	nlassert( isReading() );
 
@@ -748,12 +744,12 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 						nlassert (_CurrentNode->name);
 
 						// Node element with the good name ?
-						if ( (_CurrentNode->type != XML_ELEMENT_NODE) || ( (const char*)_CurrentNode->name != string(nodeName)) )
+						if ( (_CurrentNode->type != XML_ELEMENT_NODE) || ( (const char*)_CurrentNode->name != nodeName) )
 						{
 							// Make an error message
 							char tmp[512];
 							smprintf (tmp, 512, "NeL XML Syntax error : root node has the wrong name : \"%s\" should have \"%s\"",
-								_CurrentNode->name, nodeName);
+								_CurrentNode->name, nodeName.c_str());
 							throw EXmlParsingError (tmp);
 						}
 					}
@@ -773,7 +769,7 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 					nlassert (_CurrentNode->name);
 
 					// Node with the good name
-					if ( (_CurrentNode->type == XML_ELEMENT_NODE) && ( (const char*)_CurrentNode->name == string(nodeName)) )
+					if ( (_CurrentNode->type == XML_ELEMENT_NODE) && ( (const char*)_CurrentNode->name == nodeName) )
 					{
 						// Save current element
 						_CurrentElement = _CurrentNode;
@@ -793,7 +789,7 @@ bool CIXml::xmlPushBeginInternal (const char *nodeName)
 					// Make an error message
 					char tmp[512];
 					smprintf (tmp, 512, "NeL XML Syntax error in block line %d \nCan't open the node named %s in node named %s",
-						(int)_CurrentElement->line, nodeName, _CurrentElement->name);
+						(int)_CurrentElement->line, nodeName.c_str(), _CurrentElement->name);
 					throw EXmlParsingError (tmp);
 				}
 
@@ -906,7 +902,7 @@ bool CIXml::xmlPopInternal ()
 
 // ***************************************************************************
 
-bool CIXml::xmlSetAttribInternal (const char *attribName)
+bool CIXml::xmlSetAttribInternal (const std::string &attribName)
 {
 	nlassert( isReading() );
 
@@ -955,7 +951,7 @@ bool CIXml::xmlBreakLineInternal ()
 
 // ***************************************************************************
 
-bool CIXml::xmlCommentInternal (const char * /* comment */)
+bool CIXml::xmlCommentInternal (const std::string &/* comment */)
 {
 	// Ok
 	return true;
@@ -963,12 +959,12 @@ bool CIXml::xmlCommentInternal (const char * /* comment */)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const char *childName)
+xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const std::string &childName)
 {
 	xmlNodePtr child = parent->children;
 	while (child)
 	{
-		if (strcmp ((const char*)child->name, childName) == 0)
+		if (childName == (const char*)child->name)
 			return child;
 		child = child->next;
 	}
@@ -977,12 +973,12 @@ xmlNodePtr CIXml::getFirstChildNode (xmlNodePtr parent, const char *childName)
 
 // ***************************************************************************
 
-xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const char *childName)
+xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, const std::string &childName)
 {
 	last = last->next;
 	while (last)
 	{
-		if (strcmp ((const char*)last->name, childName) == 0)
+		if (childName == (const char*)last->name)
 			return last;
 		last = last->next;
 	}
@@ -1019,7 +1015,7 @@ xmlNodePtr CIXml::getNextChildNode (xmlNodePtr last, sint /* xmlElementType */ t
 
 // ***************************************************************************
 
-uint CIXml::countChildren (xmlNodePtr node, const char *childName)
+uint CIXml::countChildren (xmlNodePtr node, const std::string &childName)
 {
 	uint count=0;
 	xmlNodePtr child = getFirstChildNode (node, childName);
@@ -1057,10 +1053,10 @@ xmlNodePtr CIXml::getRootNode () const
 
 // ***************************************************************************
 
-bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const char *property)
+bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const std::string &property)
 {
 	// Get the value
-	const char *value = (const char*)xmlGetProp (node, (xmlChar*)property);
+	const char *value = (const char*)xmlGetProp (node, (xmlChar*)property.c_str());
 	if (value)
 	{
 		// Active value
@@ -1077,7 +1073,7 @@ bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const char 
 
 // ***************************************************************************
 
-int CIXml::getIntProperty(xmlNodePtr node, const char *property, int defaultValue)
+int CIXml::getIntProperty(xmlNodePtr node, const std::string &property, int defaultValue)
 {
 	CSString s;
 	bool b;
@@ -1099,7 +1095,7 @@ int CIXml::getIntProperty(xmlNodePtr node, const char *property, int defaultValu
 
 // ***************************************************************************
 
-double CIXml::getFloatProperty(xmlNodePtr node, const char *property, float defaultValue)
+double CIXml::getFloatProperty(xmlNodePtr node, const std::string &property, float defaultValue)
 {
 	CSString s;
 	bool b;
@@ -1113,7 +1109,7 @@ double CIXml::getFloatProperty(xmlNodePtr node, const char *property, float defa
 
 // ***************************************************************************
 
-std::string CIXml::getStringProperty(xmlNodePtr node, const char *property, const std::string& defaultValue)
+std::string CIXml::getStringProperty(xmlNodePtr node, const std::string &property, const std::string& defaultValue)
 {
 	std::string s;
 	bool b;
@@ -1144,6 +1140,11 @@ bool CIXml::getContentString (std::string &result, xmlNodePtr node)
 }
 
 // ***************************************************************************
+
+void CIXml::releaseLibXml()
+{
+	xmlCleanupParser();
+}
 
 } // NLMISC
 

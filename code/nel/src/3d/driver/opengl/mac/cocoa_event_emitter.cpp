@@ -153,9 +153,9 @@ bool CCocoaEventEmitter::pasteTextFromClipboard(ucstring &text)
 	NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 	NSArray *classArray = [NSArray arrayWithObject:[NSString class]];
 	NSDictionary *options = [NSDictionary dictionary];
-	
+
 	BOOL ok = [pasteboard canReadObjectForClasses:classArray options:options];
-	if (ok) 
+	if (ok)
 	{
 		NSArray *objectsToPaste = [pasteboard readObjectsForClasses:classArray options:options];
 		NSString *nstext = [objectsToPaste objectAtIndex:0];
@@ -264,8 +264,8 @@ bool CCocoaEventEmitter::processMessage(NSEvent* event, CEventServer* server)
 	mousePos.y /= (float)viewRect.size.height;
 
 	// if the mouse event was placed outside the view, don't tell NeL :)
-	if((mousePos.x < 0.0 || mousePos.x > 1.0 || 
-		mousePos.y < 0.0 || mousePos.y > 1.0) && 
+	if((mousePos.x < 0.0 || mousePos.x > 1.0 ||
+		mousePos.y < 0.0 || mousePos.y > 1.0) &&
 		event.type != NSKeyDown && event.type != NSKeyUp)
 	{
 		return false;
@@ -415,7 +415,7 @@ typedef bool (*cocoaProc)(NL3D::IDriver*, const void* e);
 
 void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 {
-	// break if there was no event to handle 
+	// break if there was no event to handle
 	// if running embedded in e.g. qt, _eventLoop will be false
 	while(_eventLoop)
 	{
@@ -442,8 +442,15 @@ void CCocoaEventEmitter::submitEvents(CEventServer& server, bool /* allWins */)
 			processMessage(event, &server);
 		}
 
-		// forward the event to the cocoa application
-		[NSApp sendEvent:event];
+		@try
+		{
+			// forward the event to the cocoa application
+			[NSApp sendEvent:event];
+		}
+		@catch(NSException *e)
+		{
+			nlwarning("Exception when sending event: %s", [[e reason] UTF8String]);
+		}
 	}
 
 	_server = &server;

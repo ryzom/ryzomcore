@@ -1004,7 +1004,7 @@ void CPSLocated::postNewElement(const NLMISC::CVector &pos,
 		const CPSCollisionInfo &ci = _Collisions[indexInEmitter];
 		if (ci.Dist != -1.f)
 		{
-			// a collision occured, check time from collision to next time step
+			// a collision occurred, check time from collision to next time step
 			if ((emitterLocated.getPos()[indexInEmitter] - ci.NewPos) * (pos - ci.NewPos) > 0.f) return; // discard emit that are farther than the collision
 		}
 	}
@@ -1839,10 +1839,10 @@ void CPSLocated::updateCollisions()
 		{
 			_Pos[currCollision->Index] = currCollision->NewPos;
 			std::swap(_Speed[currCollision->Index], currCollision->NewSpeed); // keep speed because may be needed when removing particles
-			// notify each located bindable that a bounce occured ...
+			// notify each located bindable that a bounce occurred ...
 			for (TLocatedBoundCont::iterator it = _LocatedBoundCont.begin(); it != _LocatedBoundCont.end(); ++it)
 			{
-				(*it)->bounceOccured(currCollision->Index, computeDateFromCollisionToNextSimStep(currCollision->Index, getAgeInSeconds(currCollision->Index)));
+				(*it)->bounceOccurred(currCollision->Index, computeDateFromCollisionToNextSimStep(currCollision->Index, getAgeInSeconds(currCollision->Index)));
 			}
 			if (currCollision->CollisionZone->getCollisionBehaviour() == CPSZone::destroy)
 			{
@@ -1878,13 +1878,13 @@ void CPSLocated::updateCollisions()
 			// if particle is too old, check whether it died before the collision
 			_Pos[currCollision->Index] = currCollision->NewPos;
 			std::swap(_Speed[currCollision->Index], currCollision->NewSpeed);
-			// notify each located bindable that a bounce occured ...
+			// notify each located bindable that a bounce occurred ...
 			if (!_LocatedBoundCont.empty())
 			{
 				TAnimationTime timeFromcollisionToNextSimStep = computeDateFromCollisionToNextSimStep(currCollision->Index, getAgeInSeconds(currCollision->Index));
 				for (TLocatedBoundCont::iterator it = _LocatedBoundCont.begin(); it != _LocatedBoundCont.end(); ++it)
 				{
-					(*it)->bounceOccured(currCollision->Index, timeFromcollisionToNextSimStep);
+					(*it)->bounceOccurred(currCollision->Index, timeFromcollisionToNextSimStep);
 				}
 			}
 			if (currCollision->CollisionZone->getCollisionBehaviour() == CPSZone::destroy)
@@ -2190,7 +2190,7 @@ void CPSLocated::removeOldParticles()
 			TAnimationTime timeUntilNextSimStep;
 			if (_Collisions[*it].Dist == -1.f)
 			{
-				// no collision occured
+				// no collision occurred
 				if (_Time[*it] > 1.f)
 				{
 
@@ -2213,18 +2213,18 @@ void CPSLocated::removeOldParticles()
 			}
 			else
 			{
-				// a collision occured before particle died, so pos is already good
+				// a collision occurred before particle died, so pos is already good
 				if (_LifeScheme)
 				{
 					timeUntilNextSimStep = computeDateFromCollisionToNextSimStep(*it, _Time[*it] / _TimeIncrement[*it]);
-					// compute age of particle when collision occured
+					// compute age of particle when collision occurred
 					_Time[*it] -= timeUntilNextSimStep * _TimeIncrement[*it];
 					NLMISC::clamp(_Time[*it], 0.f, 1.f); // avoid imprecisions
 				}
 				else
 				{
 					timeUntilNextSimStep = computeDateFromCollisionToNextSimStep(*it, _Time[*it] * _InitialLife);
-					// compute age of particle when collision occured
+					// compute age of particle when collision occurred
 					_Time[*it] -= timeUntilNextSimStep / (_InitialLife == 0.f ? 1.f : _InitialLife);
 					NLMISC::clamp(_Time[*it], 0.f, 1.f); // avoid imprecisions
 				}

@@ -121,7 +121,7 @@ BOOL CMissionCompilerFeApp::InitInstance()
 			mc.installCompiledMission(dlg.LigoConfig, fileName);
 			nbMission += mc.getMissionsCount();
 		}
-		catch(EParseException e)
+		catch(const EParseException &e)
 		{
 			string msg;
 			msg + "\r\n";

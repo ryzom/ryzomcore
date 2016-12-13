@@ -120,7 +120,7 @@ protected:
 	/**
 	 * This set speed of a located so that it looks like bouncing on a surface
 	 * \param locatedIndex the index
-	 * \param bouncePoint the position where the collision occured
+	 * \param bouncePoint the position where the collision occurred
 	 * \param surfNormal  the normal of the surface at the collision point (this must be a unit vector)
 	 * \elasticity  1 = full bounce, 0 = no bounce (contact)
 	 * \ellapsedTime the time ellapsed

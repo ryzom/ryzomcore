@@ -350,6 +350,7 @@ CClientConfig::CClientConfig()
 	FreeLookAcceleration    = 0;					// Default FreeLookAcceleration
 	FreeLookSmoothingPeriod = 0.f;                  // when in absolute mode, free look factor is used instead of speed, the mouse gives the absolute angle
 	FreeLookInverted		= false;
+	FreeLookTablet			= false;                // Mouse reports absolute coordinates, so avoid mouse recentering
 	AutomaticCamera			= true;
 	DblClickMode			= true;					// when in dbl click mode, a double click is needed to execute default contextual action
 	AutoEquipTool			= true;					// when true player will auto-equip last used weapon or forage tool when doing an action
@@ -855,6 +856,7 @@ void CClientConfig::setValues()
 	READ_INT_FV(FreeLookAcceleration)
 	READ_FLOAT_FV(FreeLookSmoothingPeriod)
 	READ_BOOL_FV(FreeLookInverted)
+	READ_BOOL_FV(FreeLookTablet)
 	READ_BOOL_FV(AutomaticCamera)
 	READ_BOOL_FV(DblClickMode)
 	READ_BOOL_FV(AutoEquipTool)

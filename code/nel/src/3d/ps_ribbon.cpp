@@ -36,7 +36,7 @@ CPSRibbon::TVBMap CPSRibbon::_VBMaps[16];
 static ITexture *CreateGradientTexture()
 {
 	NL_PS_FUNC(CreateGradientTexture)
-	std::auto_ptr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
+	CUniquePtr<CTextureMem> tex(new CTextureMem((uint8 *) &GradientB2W,
 												   sizeof(GradientB2W),
 												   false, /* dont delete */
 												   false, /* not a file */
@@ -1463,8 +1463,13 @@ void CPSRibbon::setShape(const CVector *shape, uint32 nbPointsInShape, bool brac
 ///==================================================================================================================
 void CPSRibbon::getShape(CVector *shape) const
 {
-	NL_PS_FUNC(CPSRibbon_getShape)
+	NL_PS_FUNC(CPSRibbon_getShape);
+
+#ifdef NL_COMP_VC14
+	std::copy(_Shape.begin(), _Shape.end(), stdext::make_unchecked_array_iterator(shape));
+#else
 	std::copy(_Shape.begin(), _Shape.end(), shape);
+#endif
 }
 
 ///==================================================================================================================

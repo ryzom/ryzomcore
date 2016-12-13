@@ -26,6 +26,9 @@
 #include <X11/XKBlib.h>
 #include "nel/misc/debug.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
 
@@ -626,7 +629,7 @@ bool CUnixEventEmitter::processMessage (XEvent &event, CEventServer *server)
 	}
 	case SelectionClear:
 		_SelectionOwned = false;
-		_CopiedString = "";
+		_CopiedString.clear();
 		break;
 	case SelectionNotify:
 	{

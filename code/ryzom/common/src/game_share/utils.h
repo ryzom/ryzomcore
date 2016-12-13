@@ -76,7 +76,7 @@ inline ucstring capitalize(const ucstring & s)
 #define MACRO_CONCAT2(a,b) CONCAT(a,b)
 #define MACRO_TOTXT(a) #a
 #define MACRO_TOTXT2(a) TOTXT(a)
-#define __FILE_LINE__ __FILE__ ":"TOTXT2(__LINE__)":"
+#define __FILE_LINE__ __FILE__ ":" TOTXT2(__LINE__) ":"
 
 
 //-------------------------------------------------------------------------------------------------
@@ -320,7 +320,7 @@ inline ucstring capitalize(const ucstring & s)
 	public:\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d",__LINE__);\
+			log.displayNL(">>" __FILE__ ":%d", __LINE__);\
 		}\
 	}\
 	__callStackEntry##__LINE__;
@@ -331,7 +331,7 @@ inline ucstring capitalize(const ucstring & s)
 	public:\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s",__LINE__,msg);\
+			log.displayNL(">>" __FILE__ ":%d: %s", __LINE__,msg);\
 		}\
 	}\
 	__callStackEntry##__LINE__;
@@ -345,7 +345,7 @@ inline ucstring capitalize(const ucstring & s)
 		}\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s=[%s]",__LINE__,#var,NLMISC::toString(_Val).c_str());\
+			log.displayNL(">>" __FILE__ ":%d: %s=[%s]", __LINE__, #var, NLMISC::toString(_Val).c_str());\
 		}\
 		const type _Val;\
 	}\
@@ -360,7 +360,7 @@ inline ucstring capitalize(const ucstring & s)
 		}\
 		virtual void displayEntry(NLMISC::CLog& log) const\
 		{\
-			log.displayNL(">>"__FILE__":%d: %s=>[%s]",__LINE__,#var,NLMISC::toString(_Var).c_str());\
+			log.displayNL(">>" __FILE__ ":%d: %s=>[%s]", __LINE__, #var, NLMISC::toString(_Var).c_str());\
 		}\
 		const type& _Var;\
 	}\

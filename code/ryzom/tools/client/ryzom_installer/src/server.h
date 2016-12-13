@@ -19,6 +19,10 @@
 
 #include "operation.h"
 
+class CServer;
+
+typedef QVector<CServer> CServers;
+
 class CServer
 {
 public:
@@ -31,6 +35,7 @@ public:
 	QString id;
 	QString name;
 	QString displayUrl;
+	QString filesListUrl;
 	QString dataDownloadUrl;
 	QString dataDownloadFilename;
 	qint64 dataCompressedSize;
@@ -40,8 +45,12 @@ public:
 	QString clientFilename;
 	QString clientFilenameOld;
 	QString configurationFilename;
-	QString installerFilename;
 	QString comments;
+
+	void loadFromSettings(const QSettings &settings);
+	void loadFromServers(const CServers &servers);
+	void loadFromServer(const CServer &server);
+	void saveToSettings(QSettings &settings) const;
 
 	// helpers
 	QString getDirectory() const;
@@ -51,7 +60,5 @@ public:
 };
 
 extern const CServer NoServer;
-
-typedef QVector<CServer> CServers;
 
 #endif

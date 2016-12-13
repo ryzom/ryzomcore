@@ -101,7 +101,7 @@ static bool loadPic(const string &path, std::vector<NLMISC::CBGRA> &tampon, uint
 			return true;
 		}
 	}
-	catch (NLMISC::Exception& ) { }
+	catch (const NLMISC::Exception& ) { }
 	return false;
 }
 
@@ -417,9 +417,8 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, "Load error", MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
+		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -432,20 +431,20 @@ int TileList::setDisplacement (int tile, const std::string& name)
 	if (RemovePath (troncated, tileBank2.getAbsPath ().c_str()))
 	{
 		// load it
-		if (troncated!="")
+		if (!troncated.empty())
 		{
 			// not loaded
 			theListDisplacement[tile].loaded=0;
 
 			if (!_LoadBitmap(tileBank2.getAbsPath() + troncated, &theListDisplacement[tile].BmpInfo, theListDisplacement[tile].Bits, NULL, 0))
-				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), "Can't load file", MB_OK|MB_ICONEXCLAMATION);
+				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
 			else
 			{
 				// Check the size
 				if ((theListDisplacement[tile].BmpInfo.bmiHeader.biWidth!=32)||(-theListDisplacement[tile].BmpInfo.bmiHeader.biHeight!=32))
 				{
 					// Error message
-					MessageBox (NULL, "Invalid size: displacement map must be 32x32 8 bits.", troncated.c_str(),
+					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), troncated.c_str(),
 						MB_OK|MB_ICONEXCLAMATION);
 
 					// Free the bitmap
@@ -467,7 +466,7 @@ int TileList::setDisplacement (int tile, const std::string& name)
 		// Error: bitmap not in the absolute path..
 		char msg[512];
 		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, "Load error", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, msg, _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -537,7 +536,7 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 		// Error: bitmap not in the absolute path..
 		char msg[512];
 		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, "Load error", MB_OK|MB_ICONEXCLAMATION);
+		MessageBox (NULL, msg, _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -670,7 +669,7 @@ const std::string& TileInfo::getRelativeFileName (CTile::TBitmap type, int index
 bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 {
 	bool bRes=true;
-	if (!loaded && getRelativeFileName (CTile::diffuse, index)!="")
+	if (!loaded && !getRelativeFileName (CTile::diffuse, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::diffuse, index), &BmpInfo, Bits, Alpha, 0))
 		{
@@ -680,7 +679,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			loaded=1;
 	}
-	if (!nightLoaded && getRelativeFileName (CTile::additive, index)!="")
+	if (!nightLoaded && !getRelativeFileName (CTile::additive, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::additive, index), &nightBmpInfo, nightBits, Alpha, 0))
 		{
@@ -690,7 +689,7 @@ bool TileInfo::Load (int index, std::vector<NLMISC::CBGRA>* Alpha)
 		else
 			nightLoaded=1;
 	}
-	if (!alphaLoaded && getRelativeFileName (CTile::alpha, index)!="")
+	if (!alphaLoaded && !getRelativeFileName (CTile::alpha, index).empty())
 	{
 		if (!_LoadBitmap(tileBank2.getAbsPath() + getRelativeFileName (CTile::alpha, index), &alphaBmpInfo, alphaBits, NULL, 
 			tileBank2.getTile (index)->getRotAlpha ()))
@@ -754,7 +753,7 @@ void CTView::Init(int _land, int n)
 	pImList = new CImageList;
 	pImList->Create(sizetile_x,sizetile_y,ILC_COLOR24,0,1);
 	pImList->Add(bmp,(CBitmap*)NULL);
-	char *defautpath = ((SelectionTerritoire*)GetParent()->GetParent())->DefautPath.GetBuffer(256);
+	TCHAR *defautpath = ((SelectionTerritoire*)GetParent()->GetParent())->DefautPath.GetBuffer(256);
 	count_=1;
 }
 
@@ -1124,8 +1123,8 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 	if (!lockInsertion)
 	{
 		Browse *parent = (Browse*)this->GetParent();
-		char FileName[256];
-		int count=DragQueryFile(hDropInfo,0xffffffff,FileName,256); //count = files number in drop queue
+		TCHAR FileName[256];
+		int count=DragQueryFile(hDropInfo, 0xffffffff, FileName, 256); //count = files number in drop queue
 		
 
 		POINT pos;
@@ -1139,7 +1138,7 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 			case 0:
 				{
 					int index=InfoList.addTile128 ();
-					if (InfoList.setTile128 (index, FileName, Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
+					if (InfoList.setTile128 (index, tStrToUtf8(FileName), Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
 					{
 						tilelist::iterator it = InfoList.GetLast(parent->m_128x128);
 						it--;
@@ -1153,7 +1152,7 @@ void CTView::OnDropFiles(HDROP hDropInfo)
 			case 1:
 				{
 					int index=InfoList.addTile256 ();
-					if (InfoList.setTile256 (index, FileName, Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
+					if (InfoList.setTile256 (index, tStrToUtf8(FileName), Texture==1?CTile::diffuse:(Texture==2?CTile::additive:CTile::alpha)))
 					{
 						tilelist::iterator it = InfoList.GetLast(parent->m_128x128);
 						it--;
@@ -1205,7 +1204,7 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 			if (index!=-1)
 				pth = i->getRelativeFileName ((CTile::TBitmap)(Texture-1), index);
 			else
-				pth = "";
+				pth.clear();
 		}
 		break;
 	case 3:
@@ -1284,11 +1283,10 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 			&*bits->begin(),bmpinf,DIB_RGB_COLORS,SRCCOPY);
 	}
 			
-	char temp[100];
-	char Name[256]; Name[0] = 0;
+	std::string Name;
 	if (InfoTexte==2)
 	{
-		_splitpath(pth.c_str(),temp,temp,Name,temp);		
+		Name = NLMISC::CFile::getFilenameWithoutExtension(pth);
 	}
 	else if (InfoTexte==3)
 	{
@@ -1296,12 +1294,21 @@ void CTView::DrawTile(tilelist::iterator i,CDC *pDC,int clear, int n)
 	}
 	else if (InfoTexte==1)
 	{
-		sprintf(Name,"%d",i->id);
+		Name = NLMISC::toString("%d", i->id);
 	}
+
 	rect_txt.top = pt.y + sizetile_y + spacing_tile_text;
 	rect_txt.bottom += rect_txt.top + sizetext_y;
 	rect_txt.left -= spacing_x;
-	pDC->DrawText(Name,(int)strlen(Name),&rect_txt,DT_CENTER | DT_SINGLELINE);
+
+#ifdef _UNICODE
+	ucstring tmp;
+	tmp.fromUtf8(Name);
+#else
+	std::string tmp = Name;
+#endif
+
+	pDC->DrawText((LPCTSTR)tmp.c_str(), (int)tmp.length(), &rect_txt,DT_CENTER | DT_SINGLELINE);
 
 	// Restore the device context
 	pDC->SetBkColor( clrBk );
@@ -1520,9 +1527,8 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		else if ((id==ID_MENU_ADD)||(id==ID_MENU_REPLACE))
 		{
 			_chdir (LastPath.c_str());
-			CFileDialog load(true, NULL, LastPath.c_str(), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT,
-				"PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||",NULL);
-			load.m_ofn.lpstrFile = new char[10000]; // buffer contains filenames list
+			CFileDialog load(true, NULL, utf8ToTStr(LastPath), OFN_ENABLESIZING | OFN_ALLOWMULTISELECT, _T("PNG Bitmap (*.png)|*.png|Targa bitmap (*.tga)|*.tga|All files (*.*)|*.*||"), NULL);
+			load.m_ofn.lpstrFile = new TCHAR[10000]; // buffer contains filenames list
 			load.m_ofn.lpstrFile[0] = 0;
 			// with 10 KB we should be large enough...
 			// if all files are exceeding 10000 characters, insert would be skipped
@@ -1538,15 +1544,12 @@ LRESULT CTView::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					CString str = load.GetNextPathName(p);
 
-					char sDrive[256];
-					char sPath[256];
-					_splitpath (str, sDrive, sPath, NULL, NULL);
-					LastPath=string (sDrive)+string (sPath);
+					LastPath = NLMISC::CFile::getPath(tStrToUtf8(str));
 
-					if (str!=CString(""))
+					if (!str.IsEmpty())
 					{
 						int index=0;
-						const char *pathname = (LPCTSTR)str;
+						std::string pathname = tStrToUtf8(str);
 
 						// Add mode, to the end of the list
 						if (id==ID_MENU_ADD)
@@ -1680,10 +1683,10 @@ void CTView::OnRButtonDown(UINT nFlags, CPoint point)
 				
 		if (!ViewTileMode)
 		{
-			popup.AppendMenu(parent->m_128x128<2 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_ADD,"Add...");
-			popup.AppendMenu(c>0 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_REPLACE, "Replace...");
-			popup.AppendMenu(c>0 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_SUPR_BITMAP, "Del bitmap");
-			popup.AppendMenu((c>0 && parent->m_128x128<2) ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_SUPR_TILE, "Del tile");
+			popup.AppendMenu(parent->m_128x128<2 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_ADD, _T("Add..."));
+			popup.AppendMenu(c>0 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_REPLACE, _T("Replace..."));
+			popup.AppendMenu(c>0 ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_SUPR_BITMAP, _T("Del bitmap"));
+			popup.AppendMenu((c>0 && parent->m_128x128<2) ? MF_STRING : MF_STRING | MF_GRAYED, ID_MENU_SUPR_TILE, _T("Del tile"));
 		}
 		else
 		{

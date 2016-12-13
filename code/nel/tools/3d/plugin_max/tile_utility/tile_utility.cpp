@@ -29,7 +29,7 @@ extern HINSTANCE hInstance;
 using namespace NLMISC;
 using namespace NL3D;
 
-class Tile_utility : public UtilityObj 
+class Tile_utility : public UtilityObj
 {
 public:
 		HWND			hPanel;
@@ -44,8 +44,8 @@ public:
 
 		void Init(HWND hWnd);
 		void Destroy(HWND hWnd);
-		
-		void DeleteThis() { }		
+
+		void DeleteThis() { }
 
 		void Load (const std::string& path);
 		void SetLand (sint land);
@@ -55,7 +55,7 @@ public:
 
 		//Constructor/Destructor
 		Tile_utility();
-		~Tile_utility();		
+		~Tile_utility();
 };
 
 CTileBank	Tile_utility::Bank;
@@ -64,19 +64,19 @@ std::string		Tile_utility::Path;
 
 static Tile_utility theTile_utility;
 
-class Tile_utilityClassDesc:public ClassDesc2 
+class Tile_utilityClassDesc:public ClassDesc2
 {
 	public:
 	int 			IsPublic() {return 1;}
-	void *			Create(BOOL loading = FALSE) 
+	void *			Create(BOOL loading = FALSE)
 	{
 		return &theTile_utility;
 	}
-	const TCHAR *	ClassName() {return "NeL Tile Bank";}
+	const TCHAR *	ClassName() {return _T("NeL Tile Bank");}
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return TILE_UTILITY_CLASS_ID;}
-	const TCHAR* 	Category() {return _T("NeL Tools");}
-	const TCHAR*	InternalName() { return _T("NeL tile bank utility"); }	// returns fixed parsable name (scripter-visible name)
+	const MCHAR* 	Category() {return _M("NeL Tools");}
+	const MCHAR*	InternalName() { return _M("NeL tile bank utility"); }	// returns fixed parsable name (scripter-visible name)
 	HINSTANCE		HInstance() { return hInstance; }				// returns owning module handle
 };
 
@@ -85,7 +85,7 @@ ClassDesc2* GetTile_utilityDesc() {return &Tile_utilityDesc;}
 
 static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (msg) 
+	switch (msg)
 	{
 	case WM_INITDIALOG:
 		{
@@ -96,7 +96,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 			if (hModule)
 			{
 				// Get module file name
-				char moduldeFileName[512];
+				TCHAR moduldeFileName[512];
 				if (GetModuleFileName (hModule, moduldeFileName, 512))
 				{
 					// Get version info size
@@ -112,41 +112,41 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 						{
 							uint *versionTab;
 							uint versionSize;
-							if (VerQueryValue (buffer, "\\", (void**)&versionTab,  &versionSize))
+							if (VerQueryValue (buffer, _T("\\"), (void**)&versionTab,  &versionSize))
 							{
 								// Get the pointer on the structure
 								VS_FIXEDFILEINFO *info=(VS_FIXEDFILEINFO*)versionTab;
 								if (info)
 								{
  									// Setup version number
-									char version[512];
-									sprintf (version, "Version %d.%d.%d.%d", 
-										info->dwFileVersionMS>>16, 
-										info->dwFileVersionMS&0xffff, 
-										info->dwFileVersionLS>>16,  
+									TCHAR version[512];
+									_stprintf (version, _T("Version %d.%d.%d.%d"),
+										info->dwFileVersionMS>>16,
+										info->dwFileVersionMS&0xffff,
+										info->dwFileVersionLS>>16,
 										info->dwFileVersionLS&0xffff);
 									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), version);
 								}
 								else
-									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VS_FIXEDFILEINFO * is NULL");
+									SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VS_FIXEDFILEINFO * is NULL"));
 							}
 							else
-								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "VerQueryValue failed");
+								SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("VerQueryValue failed"));
 						}
 						else
-							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfo failed");
+							SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfo failed"));
 
 						// Free the buffer
 						delete [] buffer;
 					}
 					else
-						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetFileVersionInfoSize failed");
+						SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetFileVersionInfoSize failed"));
 				}
 				else
-					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "GetModuleFileName failed");
+					SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("GetModuleFileName failed"));
 			}
 			else
-				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), "hInstance NULL");
+				SetWindowText (GetDlgItem (hWnd, IDC_VERSION), _T("hInstance NULL"));
 
 
 			theTile_utility.Init(hWnd);
@@ -159,16 +159,16 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 	case WM_LBUTTONDOWN:
 	case WM_LBUTTONUP:
 	case WM_MOUSEMOVE:
-		theTile_utility.ip->RollupMouseMessage(hWnd,msg,wParam,lParam); 
+		theTile_utility.ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
 		break;
 	case WM_COMMAND:
 		{
 			int id = LOWORD(wParam);
-			switch (id) 
+			switch (id)
 			{
 				case IDC_BANK_PATH:
 					{
-						static char sPath[256];
+						static TCHAR sPath[256];
 						static bool bFirst=false;
 						if (!bFirst)
 						{
@@ -178,7 +178,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
  						OPENFILENAME ofn;
 						ofn.lStructSize=sizeof (ofn);
 						ofn.hwndOwner=NULL;
-						ofn.lpstrFilter="Rykol bank files (*.bank)\0*.bank\0All Files (*.*)\0*.*\0";
+						ofn.lpstrFilter = _T("Rykol bank files (*.bank)\0*.bank\0All Files (*.*)\0*.*\0");
 						ofn.lpstrCustomFilter=NULL;
 						ofn.nMaxCustFilter=0;
 						ofn.nFilterIndex=0;
@@ -187,7 +187,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 						ofn.lpstrFileTitle=NULL;
 						ofn.nMaxFileTitle=NULL;
 						ofn.lpstrInitialDir=NULL;
-						ofn.lpstrTitle="Choose a bank file";
+						ofn.lpstrTitle = _T("Choose a bank file");
 						ofn.Flags=OFN_ENABLESIZING|OFN_FILEMUSTEXIST;
 						ofn.nFileOffset=0;
 						ofn.nFileExtension=0;
@@ -197,7 +197,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 						ofn.lpTemplateName=0;
 						if (GetOpenFileName(&ofn))
 						{
-							theTile_utility.Load (sPath);
+							theTile_utility.Load (tStrToUtf8(sPath));
 							theTile_utility.SetLand (theTile_utility.Land);
 							theTile_utility.SetupUI ();
 						}
@@ -223,7 +223,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 				case IDC_SETUP:
 					{
 						if (!theTile_utility.SetupMaterial ())
-							MessageBox (NULL, "Select some nel patch object..", "Rykol tile", MB_OK|MB_ICONEXCLAMATION);
+							MessageBox (NULL, _T("Select some nel patch object.."), _T("Rykol tile"), MB_OK|MB_ICONEXCLAMATION);
 					}
 			}
 		}
@@ -240,7 +240,7 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 Tile_utility::Tile_utility()
 {
 	iu = NULL;
-	ip = NULL;	
+	ip = NULL;
 	hPanel = NULL;
 	Bank.clear();
 	Land=0;
@@ -252,7 +252,7 @@ Tile_utility::~Tile_utility()
 
 }
 
-void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu) 
+void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = iu;
 	this->ip = ip;
@@ -264,8 +264,8 @@ void Tile_utility::BeginEditParams(Interface *ip,IUtil *iu)
 		0);
 	SetupUI ();
 }
-	
-void Tile_utility::EndEditParams(Interface *ip,IUtil *iu) 
+
+void Tile_utility::EndEditParams(Interface *ip,IUtil *iu)
 {
 	this->iu = NULL;
 	this->ip = NULL;
@@ -291,9 +291,8 @@ void Tile_utility::Load (const std::string& path)
 		CIFile file;
 		if (!file.open (path))
 		{
-			char tmp[1024];
-			sprintf (tmp, "File not found: %s", path);
-			MessageBox (NULL, tmp, "Error..", MB_OK|MB_ICONEXCLAMATION);
+			std::string tmp = toString("File not found: %s", path.c_str());
+			MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 		}
 		else
 		{
@@ -302,11 +301,10 @@ void Tile_utility::Load (const std::string& path)
 			SetBankPathName (path);
 		}
 	}
-	catch (EStream stream)
+	catch (const EStream &stream)
 	{
-		char tmp[1024];
-		sprintf (tmp, "Error while loading %s:\n\n%s", path, stream.what());
-		MessageBox (NULL, tmp, "Error..", MB_OK|MB_ICONEXCLAMATION);
+		std::string tmp = toString("Error while loading %s:\n\n%s", path.c_str(), stream.what());
+		MessageBox (NULL, utf8ToTStr(tmp), _T("Error.."), MB_OK|MB_ICONEXCLAMATION);
 	}
 }
 
@@ -321,7 +319,7 @@ void Tile_utility::SetLand (sint land)
 		Land=0;
 	SetBankTileSetSet (Land);
 }
-	
+
 void Tile_utility::SetupUI ()
 {
 	// Clear combo box
@@ -335,7 +333,7 @@ void Tile_utility::SetupUI ()
 		// Enable combo box
 		if (Bank.getLandCount())
 			EnableWindow (hCombo, TRUE);
-		else 
+		else
 			EnableWindow (hCombo, FALSE);
 	}
 
@@ -368,32 +366,29 @@ void Tile_utility::SetupUI ()
 		if (Bank.getLandCount())
 		{
 			// Button text
-			char sName[256];
-			_splitpath (Path.c_str(), NULL, NULL, sName, NULL);
-			char *sName2=sName;
-			if (*sName2)
-				*sName2=toupper (*sName2);
-			sName2++;
-			while (*sName2)
+			std::string name = toLower(NLMISC::CFile::getFilenameWithoutExtension(Path));
+
+			if (!name.empty())
 			{
-				*sName2=tolower (*sName2);
-				sName2++;
+				std::string upName = toUpper(name);
+				name[0] = upName[0];
 			}
-			SetWindowText (hwnd, sName);
+
+			SetWindowText (hwnd, utf8ToTStr(name));
 
 			// Static text
-			char sTmp[256];
-			sprintf (sTmp, "%d diffuse tiles.", Bank.getNumBitmap (CTile::diffuse));
+			TCHAR sTmp[256];
+			_stprintf (sTmp, _T("%d diffuse tiles."), Bank.getNumBitmap (CTile::diffuse));
 			SetWindowText (hwndStatic1, sTmp);
-			sprintf (sTmp, "%d additive tiles.", Bank.getNumBitmap (CTile::additive));
+			_stprintf (sTmp, _T("%d additive tiles."), Bank.getNumBitmap (CTile::additive));
 			SetWindowText (hwndStatic2, sTmp);
 		}
 		else
 		{
-			SetWindowText (hwnd, "Click to choose a bank..");
-			SetWindowText (hwndStatic1, "");
-			SetWindowText (hwndStatic2, "");
-			SetWindowText (hwndStatic3, "");
+			SetWindowText (hwnd, _T("Click to choose a bank.."));
+			SetWindowText (hwndStatic1, _T(""));
+			SetWindowText (hwndStatic2, _T(""));
+			SetWindowText (hwndStatic3, _T(""));
 		}
 	}
 }
@@ -412,7 +407,7 @@ bool Tile_utility::SetupMaterial () const
 	// Multi
 	MultiMtl* multi=NewDefaultMultiMtl();
 	multi->SetNumSubMtls (Bank.getTileCount()+1);
-	multi->SetName ("Rykol Bank");
+	multi->SetName (_T("Rykol Bank"));
 
 	// Default mtl
 	Mtl* firstMtl=multi->GetSubMtl (0);
@@ -420,7 +415,7 @@ bool Tile_utility::SetupMaterial () const
 	// Mtl param
 	firstMtl->SetDiffuse (Color (0.5f,0.5f,0.5f), t);
 	firstMtl->SetAmbient (Color (0,0,0), t);
-	firstMtl->SetName ("Rykol Tile Default");
+	firstMtl->SetName (_T("Rykol Tile Default"));
 	firstMtl->SetShininess (0.0, t);
 	firstMtl->SetSpecular (Color (0,0,0), t);
 
@@ -439,11 +434,11 @@ bool Tile_utility::SetupMaterial () const
 			// Mtl param
 			mtl->SetDiffuse (Color (1.f,1.f,1.f), t);
 			mtl->SetAmbient (Color (0,0,0), t);
-			mtl->SetName ("Rykol Tile");
+			mtl->SetName (_T("Rykol Tile"));
 			mtl->SetShininess (0.0, t);
 			mtl->SetSpecular (Color (0,0,0), t);
 
-			if ((tile->getRelativeFileName(CTile::diffuse)!="")||(tile->getRelativeFileName(CTile::additive)!=""))
+			if (!tile->getRelativeFileName(CTile::diffuse).empty() || !tile->getRelativeFileName(CTile::additive).empty())
 			{
 				bActive=true;
 				Texmap* rgb=(Texmap*)GetRGBAddDesc()->Create (FALSE);
@@ -452,7 +447,7 @@ bool Tile_utility::SetupMaterial () const
 				mtl->SetSubTexmap (ID_DI, rgb);
 				mtl->SubTexmapOn (ID_DI);
 
-				if (tile->getRelativeFileName(CTile::diffuse)!="")
+				if (!tile->getRelativeFileName(CTile::diffuse).empty())
 				{
 					// New BitmapTex
 					BitmapTex* tex=NewDefaultBitmapTex();
@@ -461,7 +456,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (const_cast<char*>((Bank.getAbsPath()+tile->getRelativeFileName(CTile::diffuse)).c_str()));
+					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::diffuse)));
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (0, tex);
@@ -472,7 +467,7 @@ bool Tile_utility::SetupMaterial () const
 					mtl->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 				}
 
-				if (tile->getRelativeFileName(CTile::additive)!="")
+				if (!tile->getRelativeFileName(CTile::additive).empty())
 				{
 					// New BitmapTex
 					BitmapTex* tex=NewDefaultBitmapTex();
@@ -481,7 +476,7 @@ bool Tile_utility::SetupMaterial () const
 					tex->SetAlphaSource (ALPHA_NONE);
 					tex->SetAlphaAsMono (FALSE);
 					tex->SetAlphaAsRGB (FALSE);
-					tex->SetMapName (const_cast<char*>((Bank.getAbsPath()+tile->getRelativeFileName(CTile::additive)).c_str()));
+					tex->SetMapName (utf8ToTStr(Bank.getAbsPath() + tile->getRelativeFileName(CTile::additive)));
 
 					// Assign BitmapTex
 					rgb->SetSubTexmap (1, tex);

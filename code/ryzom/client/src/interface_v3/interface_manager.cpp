@@ -795,8 +795,8 @@ void CInterfaceManager::uninitOutGame()
 
 	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
 
-	NLMISC::TTime initStart;
-	initStart = ryzomGetLocalTime ();
+//	NLMISC::TTime initStart;
+//	initStart = ryzomGetLocalTime ();
 	if (SoundMngr != NULL)
 	{
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
@@ -804,23 +804,23 @@ void CInterfaceManager::uninitOutGame()
 	}
 	//nlinfo ("%d seconds for uninitOutGame", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", false);
 
 	CInterfaceParser *parser = dynamic_cast< CInterfaceParser* >( CWidgetManager::getInstance()->getParser() );
 	//nlinfo ("%d seconds for activateMasterGroup", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	parser->removeAll();
 	//nlinfo ("%d seconds for removeAll", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	reset();
 	//nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	// reset the mouse pointer to avoid invalid pointer access
 	CWidgetManager::getInstance()->setPointer( NULL );
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	CInterfaceLink::removeAllLinks();
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
-	initStart = ryzomGetLocalTime ();
+//	initStart = ryzomGetLocalTime ();
 	ICDBNode::CTextId textId("UI");
 	NLGUI::CDBManager::getInstance()->getDB()->removeNode(textId);
 	//nlinfo ("%d seconds for removeNode", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
@@ -828,7 +828,7 @@ void CInterfaceManager::uninitOutGame()
 	// Init the action manager
 	{
 
-		initStart = ryzomGetLocalTime ();
+//		initStart = ryzomGetLocalTime ();
 		uninitActions();
 	//	nlinfo ("%d seconds for uninitActions", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	}

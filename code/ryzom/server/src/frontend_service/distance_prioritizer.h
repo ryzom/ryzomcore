@@ -589,7 +589,7 @@ public:
 	{
 		if (entry.HasValue)
 		{
-			//nldebug( "History for C%hu - slot %hu - prop %hu: %"NL_I64"u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
+			//nldebug( "History for C%hu - slot %hu - prop %hu: %" NL_I64 "u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
 			return (currentValue().getIndex() != *((TDataSetIndex*)&(entry.LastSent)));
 		}
 		else
@@ -621,7 +621,7 @@ public:
 
 		if (entry.HasValue)
 		{
-			//nldebug( "History for C%hu - slot %hu - prop %hu: %"NL_I64"u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
+			//nldebug( "History for C%hu - slot %hu - prop %hu: %" NL_I64 "u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
 			CMirrorPropValueRO<T> currentValue( TheDataset, TVPNodeServer::PrioContext.EntityIndex, dsPropertyIndex );
 
 #ifdef NL_DEBUG
@@ -661,7 +661,7 @@ public:
 
 		if (entry.HasValue)
 		{
-			//nldebug( "History for C%hu - slot %hu - prop %hu: %"NL_I64"u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
+			//nldebug( "History for C%hu - slot %hu - prop %hu: %" NL_I64 "u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
 			CMirrorPropValueRO<TEntityIndex> currentValue( TheDataset, TVPNodeServer::PrioContext.EntityIndex, dsPropertyIndex );
 
 			return (currentValue().getIndex() != *((TDataSetIndex*)&(entry.LastSent)));
@@ -688,7 +688,7 @@ public:
 
 		if (entry.HasValue)
 		{
-			//nldebug( "History for C%hu - slot %hu - prop %hu: %"NL_I64"u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
+			//nldebug( "History for C%hu - slot %hu - prop %hu: %" NL_I64 "u", TVPNodeServer::PrioContext.ClientHost->clientId(), (uint16)TVPNodeServer::PrioContext.Slot, propIndex, lastsent_value );
 			NLMISC::TGameCycle	mirrorCycle = TheDataset.getChangeTimestamp( dsPropertyIndex, TVPNodeServer::PrioContext.EntityIndex );
 
 			return (mirrorCycle != entry.LastSent);

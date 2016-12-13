@@ -255,8 +255,19 @@ MACRO(USE_CURRENT_WINSDK)
         SET(WINSDK_VERSION "6.0A")
       ENDIF()
     ELSEIF(MSVC80)
-      IF(NOT MSVC_EXPRESS)
-        # TODO: fix this version
+      SET(WINSDK_MSVC80_COMPATIBLES "7.1" "7.1A" "7.0" "7.0A" "6.1" "6.0" "6.0A" "5.2A")
+
+      # look for each Windows SDK supported by VC++ 2005 (7.1 is the latest)
+      FOREACH(_VERSION ${WINSDK_DETECTED_VERSIONS})
+        # look if this version of Windows SDK is installed
+        LIST(FIND WINSDK_MSVC80_COMPATIBLES ${_VERSION} _FOUND)
+        IF(NOT _FOUND EQUAL -1)
+          SET(WINSDK_VERSION "${_VERSION}")
+          BREAK()
+        ENDIF()
+      ENDFOREACH()
+
+      IF(NOT MSVC_EXPRESS AND NOT WINSDK_VERSION)
         SET(WINSDK_VERSION "5.2A")
       ENDIF()
     ELSE()
@@ -441,8 +452,8 @@ IF(WINSDK_INCLUDE_DIR)
 
   SET(CMAKE_LIBRARY_PATH ${WINSDK_LIBRARY_DIR} ${CMAKE_LIBRARY_PATH})
 
-  # Fix for using Windows SDK 7.1 with Visual C++ 2012
-  IF(WINSDK_VERSION STREQUAL "7.1" AND MSVC11)
+  # Fix for using Windows SDK 7.1 with Visual C++ 2012, 2013 and 2015
+  IF(WINSDK_VERSION STREQUAL "7.1" AND (MSVC11 OR MSVC12 OR MSVC14))
     ADD_DEFINITIONS(-D_USING_V110_SDK71_)
   ENDIF()
 ELSE()

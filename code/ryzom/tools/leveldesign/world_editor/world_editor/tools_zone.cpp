@@ -105,7 +105,7 @@ void CToolsZoneList::reset()
 void CToolsZoneList::addItem (const string &itemName)
 {
 	_ItemNames.push_back (itemName);
-	InsertString (-1, itemName.c_str());
+	InsertString (-1, utf8ToTStr(itemName));
 }
 
 // ---------------------------------------------------------------------------
@@ -168,7 +168,7 @@ void CToolsZoneList::DrawItem (LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 
 	// Draw the text.
-	dc.DrawText (lpszText, strlen(lpszText), &rectLeft, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
+	dc.DrawText (lpszText, _tcslen(lpszText), &rectLeft, DT_CENTER|DT_SINGLELINE|DT_VCENTER);
 
 	// Reset the background color and the text color back to their original values.
 	dc.SetTextColor (crOldTextColor);
@@ -261,13 +261,13 @@ void CToolsZone::addToAllCatTypeCB (const string &Name)
 {
 	CComboBox* pCB;
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE1);
-	pCB->AddString (Name.c_str());
+	pCB->AddString (utf8ToTStr(Name));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE2);
-	pCB->AddString (Name.c_str());
+	pCB->AddString (utf8ToTStr(Name));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE3);
-	pCB->AddString (Name.c_str());
+	pCB->AddString (utf8ToTStr(Name));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE4);
-	pCB->AddString (Name.c_str());
+	pCB->AddString (utf8ToTStr(Name));
 }
 
 // ---------------------------------------------------------------------------
@@ -285,26 +285,26 @@ void CToolsZone::init (CMainFrame *pMF)
 	// Select right category types
 	CComboBox* pCB;
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE1);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterType1.c_str());	
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterType1));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE2);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterType2.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterType2));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE3);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterType3.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterType3));
 	pCB = (CComboBox*)GetDlgItem (IDC_CATTYPE4);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterType4.c_str());	
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterType4));
 
 	updateComboPairAndFilter (IDC_CATTYPE1, IDC_CATVALUE1, &_MainFrame->_ZoneBuilder->_FilterType1);
 	pCB = (CComboBox*)GetDlgItem (IDC_CATVALUE1);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterValue1.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterValue1));
 	updateComboPairAndFilter (IDC_CATTYPE2, IDC_CATVALUE2, &_MainFrame->_ZoneBuilder->_FilterType2);
 	pCB = (CComboBox*)GetDlgItem (IDC_CATVALUE2);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterValue2.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterValue2));
 	updateComboPairAndFilter (IDC_CATTYPE3, IDC_CATVALUE3, &_MainFrame->_ZoneBuilder->_FilterType3);
 	pCB = (CComboBox*)GetDlgItem (IDC_CATVALUE3);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterValue3.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterValue3));
 	updateComboPairAndFilter (IDC_CATTYPE4, IDC_CATVALUE4, &_MainFrame->_ZoneBuilder->_FilterType4);
 	pCB = (CComboBox*)GetDlgItem (IDC_CATVALUE4);
-	pCB->SelectString (-1, _MainFrame->_ZoneBuilder->_FilterValue4.c_str());
+	pCB->SelectString (-1, utf8ToTStr(_MainFrame->_ZoneBuilder->_FilterValue4));
 
 	// Select right operators
 	CButton *pButAnd, *pButOr;
@@ -432,11 +432,11 @@ void CToolsZone::OnPaint()
 void CToolsZone::updateComboPairAndFilter (int CatTypeId, int CatValueId, string *pFilterType)
 {
 	uint32 i;
-	char sTmp[256];
+	TCHAR sTmp[256];
 	CComboBox *pCBType, *pCBValue;
 	pCBType = (CComboBox*)GetDlgItem (CatTypeId);
 	pCBType->GetLBText (pCBType->GetCurSel(), sTmp);
-	*pFilterType = sTmp;
+	*pFilterType = tStrToUtf8(sTmp);
 	pCBValue = (CComboBox*)GetDlgItem (CatValueId);
 	pCBValue->ResetContent ();
 
@@ -446,7 +446,7 @@ void CToolsZone::updateComboPairAndFilter (int CatTypeId, int CatValueId, string
 	vector<string> allCategoryValues;
 	_MainFrame->_ZoneBuilder->getZoneBank().getCategoryValues (*pFilterType, allCategoryValues);
 	for(i = 0; i < allCategoryValues.size(); ++i)
-		pCBValue->AddString (allCategoryValues[i].c_str());
+		pCBValue->AddString (utf8ToTStr(allCategoryValues[i]));
 	pCBValue->SetCurSel (0);
 }
 
@@ -485,40 +485,40 @@ void CToolsZone::OnSelectCatType4 ()
 // ---------------------------------------------------------------------------
 void CToolsZone::OnSelectCatValue1()
 {
-	char sTmp[256];
+	TCHAR sTmp[256];
 	CComboBox *pCBValue = (CComboBox*)GetDlgItem (IDC_CATVALUE1);
 	pCBValue->GetLBText (pCBValue->GetCurSel(), sTmp);
-	_MainFrame->_ZoneBuilder->_FilterValue1 = sTmp;
+	_MainFrame->_ZoneBuilder->_FilterValue1 = tStrToUtf8(sTmp);
 	_MainFrame->_ZoneBuilder->updateToolsZone ();
 }
 
 // ---------------------------------------------------------------------------
 void CToolsZone::OnSelectCatValue2()
 {
-	char sTmp[256];
+	TCHAR sTmp[256];
 	CComboBox *pCBValue = (CComboBox*)GetDlgItem (IDC_CATVALUE2);
 	pCBValue->GetLBText (pCBValue->GetCurSel(), sTmp);
-	_MainFrame->_ZoneBuilder->_FilterValue2 = sTmp;
+	_MainFrame->_ZoneBuilder->_FilterValue2 = tStrToUtf8(sTmp);
 	_MainFrame->_ZoneBuilder->updateToolsZone ();
 }
 
 // ---------------------------------------------------------------------------
 void CToolsZone::OnSelectCatValue3()
 {
-	char sTmp[256];
+	TCHAR sTmp[256];
 	CComboBox *pCBValue = (CComboBox*)GetDlgItem (IDC_CATVALUE3);
 	pCBValue->GetLBText (pCBValue->GetCurSel(), sTmp);
-	_MainFrame->_ZoneBuilder->_FilterValue3 = sTmp;
+	_MainFrame->_ZoneBuilder->_FilterValue3 = tStrToUtf8(sTmp);
 	_MainFrame->_ZoneBuilder->updateToolsZone ();
 }
 
 // ---------------------------------------------------------------------------
 void CToolsZone::OnSelectCatValue4()
 {
-	char sTmp[256];
+	TCHAR sTmp[256];
 	CComboBox *pCBValue = (CComboBox*)GetDlgItem (IDC_CATVALUE4);
 	pCBValue->GetLBText (pCBValue->GetCurSel(), sTmp);
-	_MainFrame->_ZoneBuilder->_FilterValue4 = sTmp;
+	_MainFrame->_ZoneBuilder->_FilterValue4 = tStrToUtf8(sTmp);
 	_MainFrame->_ZoneBuilder->updateToolsZone ();
 }
 

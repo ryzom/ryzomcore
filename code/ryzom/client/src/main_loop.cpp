@@ -159,6 +159,9 @@ using namespace NLPACS;
 using namespace NLNET;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 
@@ -829,7 +832,7 @@ void	updateGameQuitting()
 	// if want quiting, and if server stalled, quit now
 	if(game_exit_request)
 	{
-		// abort until 10 seconds if connexion lost
+		// abort until 10 seconds if connection lost
 		if(!NetMngr.getConnectionQuality())
 		{
 			if(!firstTimeLostConnection)
@@ -840,7 +843,7 @@ void	updateGameQuitting()
 			firstTimeLostConnection= 0;
 		}
 
-		// if connexion lost until 10 seconds
+		// if connection lost until 10 seconds
 		if(firstTimeLostConnection && T1-firstTimeLostConnection > 10000)
 		{
 			game_exit= true;

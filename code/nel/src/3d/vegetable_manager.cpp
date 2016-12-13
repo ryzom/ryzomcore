@@ -35,6 +35,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
@@ -747,7 +750,7 @@ void						CVegetableManager::deleteClipBlock(CVegetableClipBlock *clipBlock)
 	_EmptyClipBlockList.remove(clipBlock);
 
 	// delete
-	_ClipBlockMemory.free(clipBlock);
+	_ClipBlockMemory.freeBlock(clipBlock);
 }
 
 
@@ -782,7 +785,7 @@ void						CVegetableManager::deleteSortBlock(CVegetableSortBlock *sortBlock)
 	sortBlock->_Owner->_SortBlockList.remove(sortBlock);
 
 	// delete
-	_SortBlockMemory.free(sortBlock);
+	_SortBlockMemory.freeBlock(sortBlock);
 }
 
 
@@ -878,7 +881,7 @@ void						CVegetableManager::deleteIg(CVegetableInstanceGroup *ig)
 
 	// unlink from sortBlock, and delete.
 	sortBlock->_InstanceGroupList.remove(ig);
-	_InstanceGroupMemory.free(ig);
+	_InstanceGroupMemory.freeBlock(ig);
 
 
 	// decRef the clipBlock

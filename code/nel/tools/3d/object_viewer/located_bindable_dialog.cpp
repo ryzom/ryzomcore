@@ -42,7 +42,7 @@
 #include "ribbon_dlg.h"
 
 
-using NL3D::CPSLocatedBindable; 
+using NL3D::CPSLocatedBindable;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ CLocatedBindableDialog::CLocatedBindableDialog(CParticleWorkspace::CNode *ownerN
 {
 	//{{AFX_DATA_INIT(CLocatedBindableDialog)
 	m_IndependantSizes = FALSE;
-	//}}AFX_DATA_INIT	
+	//}}AFX_DATA_INIT
 }
 
 /// dtor
@@ -78,7 +78,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 
 	NL3D::CParticleSystem *ps = _Bindable->getOwner()->getOwner();
 	if (ps->isSharingEnabled())
-	{	
+	{
 		GetDlgItem(IDC_NO_AUTO_LOD)->ShowWindow(TRUE);
 		if (ps->isAutoLODEnabled() == false)
 		{
@@ -111,10 +111,10 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		NL3D::CPSMaterial *material = dynamic_cast<NL3D::CPSMaterial *>(_Bindable);
 		// blending mode
 		m_BlendingMode.SetCurSel((uint) material->getBlendingMode() );
-		// z-test		
+		// z-test
 		((CButton *) GetDlgItem(IDC_ZTEST))->SetCheck(material->isZTestEnabled() ? BST_CHECKED : BST_UNCHECKED);
 		// z-bias
-		GetDlgItem(IDC_ZBIAS)->SetWindowText(NLMISC::toString("%.2f", -material->getZBias()).c_str());						
+		GetDlgItem(IDC_ZBIAS)->SetWindowText(utf8ToTStr(NLMISC::toString("%.2f", -material->getZBias())));
 	}
 	else
 	{
@@ -126,7 +126,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 	}
 	GetDlgItem(IDC_ALIGN_ON_MOTION)->ShowWindow(SW_HIDE);
 	GetDlgItem(IDC_ZALIGN)->ShowWindow(SW_HIDE);
-	// enable disable z-test	
+	// enable disable z-test
 	//
 	if (dynamic_cast<NL3D::CPSParticle *>(_Bindable))
 	{
@@ -147,12 +147,12 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		// check support for color
 		if (dynamic_cast<NL3D::CPSColoredParticle *>(_Bindable))
 		{
-			
+
 			CAttribDlgRGBA *ad = new CAttribDlgRGBA("PARTICLE_COLOR", _Node);
 			pushWnd(ad);
 
-			_ColorWrapper.S = dynamic_cast<NL3D::CPSColoredParticle *>(_Bindable);		
-			ad->setWrapper(&_ColorWrapper);			
+			_ColorWrapper.S = dynamic_cast<NL3D::CPSColoredParticle *>(_Bindable);
+			ad->setWrapper(&_ColorWrapper);
 			ad->setSchemeWrapper(&_ColorWrapper);
 
 			HBITMAP bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_PARTICLE_COLOR));
@@ -169,13 +169,13 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		// check support for angle 2D
 		if (dynamic_cast<NL3D::CPSRotated2DParticle *>(_Bindable))
 		{
-			
+
 			CAttribDlgFloat *ad = new CAttribDlgFloat("PARTICLE_ANGLE2D", _Node, 0.f, 256.f);
 			pushWnd(ad);
 
 			_Angle2DWrapper.S = dynamic_cast<NL3D::CPSRotated2DParticle *>(_Bindable);
-			ad->setWrapper(&_Angle2DWrapper);						
-			ad->setSchemeWrapper(&_Angle2DWrapper);	
+			ad->setWrapper(&_Angle2DWrapper);
+			ad->setSchemeWrapper(&_Angle2DWrapper);
 
 			HBITMAP bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_PARTICLE_ANGLE));
 			ad->init(bmh, xPos, yPos, this);
@@ -183,7 +183,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			yPos += rect.bottom + 3;
 		}
 
-		
+
 
 		CAttribDlgPlaneBasis *pb = NULL;
 
@@ -199,7 +199,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			pb->init(bmh, xPos, yPos, this);
 			pb->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
-		
+
 		}
 
 		// check support for precomputed rotations
@@ -225,8 +225,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			CStatic *s = new CStatic;
 			pushWnd(s);
 			_MotionBlurWnd.push_back(s);
-			s->Create("Fake motion blur coeff.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Fake motion blur coeff."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			mbc->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -236,14 +236,14 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			_MotionBlurThresholdWrapper.P = fla;
 			mbc->setWrapper(&_MotionBlurThresholdWrapper);
 			mbc->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
 			_MotionBlurWnd.push_back(s);
-			s->Create("Fake motion blur threshold.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fake motion blur threshold."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			mbc->GetClientRect(&rect);
-			yPos += rect.bottom + 3;				
+			yPos += rect.bottom + 3;
 			GetDlgItem(IDC_ALIGN_ON_MOTION)->ShowWindow(SW_SHOW);
 			GetDlgItem(IDC_ZALIGN)->ShowWindow(SW_SHOW);
 			((CButton *) GetDlgItem(IDC_ALIGN_ON_MOTION))->SetCheck(fla->getAlignOnMotion());
@@ -256,14 +256,14 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		{
 			NL3D::CPSShockWave *sw = static_cast<NL3D::CPSShockWave *>(_Bindable);
 			CEditableRangeFloat *rc = new CEditableRangeFloat(std::string("RADIUS CUT"), _Node, 0, 1);
-			pushWnd(rc);			
+			pushWnd(rc);
 			_RadiusCutWrapper.S = sw;
 			rc->setWrapper(&_RadiusCutWrapper);
 			rc->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Radius cut.", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Radius cut."), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 
 
@@ -277,9 +277,9 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			snbs->setWrapper(&_ShockWaveNbSegWrapper);
 			snbs->init(xPos + 140, yPos, this);
 
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb segs", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Nb segs"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			snbs->GetClientRect(&rect);
@@ -291,13 +291,13 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			_ShockWaveUFactorWrapper.S = sw;
 			uvd->setWrapper(&_ShockWaveUFactorWrapper);
 			uvd->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture U factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Texture U factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
-			yPos += rect.bottom + 3;	
-			
+			yPos += rect.bottom + 3;
+
 		}
 
 		// fanlight
@@ -312,8 +312,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			nbf->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb fan lights :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Nb fan lights :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -325,35 +325,35 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			_FanLightSmoothnessWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			nbf->setWrapper(&_FanLightSmoothnessWrapper);
 			nbf->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Phase smoothnes:", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Phase smoothnes:"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 
 			CEditableRangeFloat *nbfp = new CEditableRangeFloat(std::string("FAN_LIGHT_PHASE"), _Node, 0, 4.f);
-			pushWnd(nbfp);			
+			pushWnd(nbfp);
 			_FanLightPhaseWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			nbfp->setWrapper(&_FanLightPhaseWrapper);
 			nbfp->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Fan light speed :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fan light speed :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 
 			nbfp = new CEditableRangeFloat(std::string("FAN_LIGHT_INTENSITY"), _Node, 0, 4.f);
-			pushWnd(nbfp);			
+			pushWnd(nbfp);
 			_FanLightIntensityWrapper.P = static_cast<NL3D::CPSFanLight *>(_Bindable);
 			nbfp->setWrapper(&_FanLightIntensityWrapper);
 			nbfp->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Fan light intensity:", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Fan light intensity:"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->ShowWindow(SW_SHOW);
 
 			nbf->GetClientRect(&rect);
@@ -383,24 +383,24 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			{
 				nbs->enableUpperBound(256, true);
 			}
-			
-			
+
+
 			_TailParticleWrapper.P = dynamic_cast<NL3D::CPSTailParticle *>(_Bindable);
 			nbs->setWrapper(&_TailParticleWrapper);
 			nbs->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Nb segs :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
-			s->ShowWindow(SW_SHOW);	
-			
+			s->Create(_T("Nb segs :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
+			s->ShowWindow(SW_SHOW);
+
 			nbs->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 
 			CTailParticleDlg *tpd = new CTailParticleDlg(_Node, dynamic_cast<NL3D::CPSTailParticle *>(_Bindable));
 			pushWnd(tpd);
 			tpd->init(this, xPos, yPos);
-				
+
 			tpd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 		}
@@ -429,7 +429,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			cmtd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 			pushWnd(cmd);
-			pushWnd(cmtd);			
+			pushWnd(cmtd);
 		}
 
 
@@ -440,9 +440,9 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			CTextureAnimDlg *td = new CTextureAnimDlg(_Node,
 													  dynamic_cast<NL3D::CPSTexturedParticle *>(_Bindable),
 													  dynamic_cast<NL3D::CPSMultiTexturedParticle *>(_Bindable)
-													 );			
+													 );
 			pushWnd(td);
-						
+
 			td->init(xPos, yPos, this);
 			td->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -453,7 +453,7 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 		{
 			NL3D::CPSTexturedParticleNoAnim *tp = dynamic_cast<NL3D::CPSTexturedParticleNoAnim *>(_Bindable);
 			_TextureNoAnimWrapper.TP = tp;
-			CTextureChooser *tc = new CTextureChooser(dynamic_cast<NL3D::CPSMultiTexturedParticle *>(_Bindable), _Node);			
+			CTextureChooser *tc = new CTextureChooser(dynamic_cast<NL3D::CPSMultiTexturedParticle *>(_Bindable), _Node);
 			tc->enableRemoveButton();
 			tc->setWrapper(&_TextureNoAnimWrapper);
 			pushWnd(tc);
@@ -465,8 +465,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 
 		// ribbon texture (doesn't support texture animation for now)
 		if (dynamic_cast<NL3D::CPSRibbon *>(_Bindable))
-		{									
-		
+		{
+
 			// add dialog for uv tuning with ribbon
 			CEditableRangeFloat *uvd = new CEditableRangeFloat(std::string("RIBBON UFACTOR"), _Node, 0, 5);
 			pushWnd(uvd);
@@ -475,8 +475,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			uvd->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture U factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Texture U factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
@@ -486,19 +486,19 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			_RibbonVFactorWrapper.R = static_cast<NL3D::CPSRibbon *>(_Bindable);
 			uvd->setWrapper(&_RibbonVFactorWrapper);
 			uvd->init(xPos + 140, yPos, this);
-			s = new CStatic;			
+			s = new CStatic;
 			pushWnd(s);
-			s->Create("Texture V factor :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->Create(_T("Texture V factor :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
 			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			uvd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 
-		}		
+		}
 
 		if (dynamic_cast<NL3D::CPSRibbonBase *>(_Bindable))
-		{									
-		
+		{
+
 			// add dialog for uv tuning with ribbon
 			CEditableRangeFloat *sd = new CEditableRangeFloat(std::string("SEGMENT DURATION"), _Node, 0.05f, 0.5f);
 			sd->enableLowerBound(0, true);
@@ -508,19 +508,19 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			sd->init(xPos + 140, yPos, this);
 			CStatic *s = new CStatic;
 			pushWnd(s);
-			s->Create("Seg Duration :", SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
-			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));			
+			s->Create(_T("Seg Duration :"), SS_LEFT, CRect(xPos, yPos + 16, xPos + 139, yPos + 48), this);
+			s->SetFont(CFont::FromHandle((HFONT) GetStockObject(DEFAULT_GUI_FONT)));
 			s->ShowWindow(SW_SHOW);
 			sd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
 		}
-	
+
 		// 'look at' independant sizes
-		bool isLookAt = dynamic_cast<NL3D::CPSFaceLookAt *>(_Bindable) != NULL;		
+		bool isLookAt = dynamic_cast<NL3D::CPSFaceLookAt *>(_Bindable) != NULL;
 		GetDlgItem(IDC_INDE_SIZES)->ShowWindow(isLookAt ? SW_SHOW : SW_HIDE);
 		GetDlgItem(IDC_SIZE_WIDTH)->ShowWindow(isLookAt ? SW_SHOW : SW_HIDE);
 		GetDlgItem(IDC_SIZE_HEIGHT)->ShowWindow(isLookAt ? SW_SHOW : SW_HIDE);
-		GetDlgItem(IDC_WIDTH_HEIGHT_BOX)->ShowWindow(isLookAt ? SW_SHOW : SW_HIDE);		
+		GetDlgItem(IDC_WIDTH_HEIGHT_BOX)->ShowWindow(isLookAt ? SW_SHOW : SW_HIDE);
 		((CButton *) GetDlgItem(IDC_SIZE_WIDTH))->SetCheck(1);
 		if (isLookAt)
 		{
@@ -539,8 +539,8 @@ void CLocatedBindableDialog::init(CParticleDlg* pParent)
 			pushWnd(rd);
 			rd->GetClientRect(&rect);
 			yPos += rect.bottom + 3;
-		}		
-	}	
+		}
+	}
 	UpdateData();
 }
 
@@ -580,7 +580,7 @@ END_MESSAGE_MAP()
 void CLocatedBindableDialog::touchPSState()
 {
 	if (_Node && _Node->getPSModel())
-	{	
+	{
 		_Node->getPSModel()->touchTransparencyState();
 		_Node->getPSModel()->touchLightableState();
 	}
@@ -588,19 +588,19 @@ void CLocatedBindableDialog::touchPSState()
 
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnSelchangeBlendingMode() 
+void CLocatedBindableDialog::OnSelchangeBlendingMode()
 {
 	UpdateData();
 	NL3D::CPSMaterial *m = dynamic_cast<NL3D::CPSMaterial *>(_Bindable);
 	nlassert(m);
-	m->setBlendingMode( (NL3D::CPSMaterial::TBlendingMode) m_BlendingMode.GetCurSel());	
-	touchPSState();	
+	m->setBlendingMode( (NL3D::CPSMaterial::TBlendingMode) m_BlendingMode.GetCurSel());
+	touchPSState();
 	updateModifiedFlag();
 }
 
 
 //***********************************************************************************
-void CLocatedBindableDialog::updateIndependantSizes() 
+void CLocatedBindableDialog::updateIndependantSizes()
 {
 	UpdateData();
 	// make sure we are dealing with 'LookAt' for now
@@ -613,7 +613,7 @@ void CLocatedBindableDialog::updateIndependantSizes()
 
 //***********************************************************************************
 // user asked for independant sizes
-void CLocatedBindableDialog::OnIndeSizes() 
+void CLocatedBindableDialog::OnIndeSizes()
 {
 	UpdateData();
 	// make sure we are dealing with 'LookAt' for now
@@ -621,13 +621,13 @@ void CLocatedBindableDialog::OnIndeSizes()
 	NL3D::CPSFaceLookAt *la = static_cast<NL3D::CPSFaceLookAt *>(_Bindable);
 	la->setIndependantSizes(m_IndependantSizes ? true : false /* VCC warning*/);
 	updateIndependantSizes();
-	updateSizeControl();	
+	updateSizeControl();
 	updateModifiedFlag();
 }
 
 //***********************************************************************************
 uint CLocatedBindableDialog::updateSizeControl()
-{	
+{
 	HBITMAP bmh;
 	if (!dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable)) return 0;
 	// if a previous control was there, remove it
@@ -645,7 +645,7 @@ uint CLocatedBindableDialog::updateSizeControl()
 		int editWidth = (((CButton *) GetDlgItem(IDC_SIZE_WIDTH))->GetCheck());
 		_SizeCtrl = new CAttribDlgFloat(editWidth ? "PARTICLE_WIDTH" : "PARTICLE_HEIGHT", _Node, 0.f, 1.f);
 
-		
+
 		if (editWidth) // wrap to the wanted size
 		{
 			_SizeWrapper.S = fla;
@@ -656,8 +656,8 @@ uint CLocatedBindableDialog::updateSizeControl()
 		}
 		_SizeCtrl->setWrapper(&_SizeWrapper);
 		_SizeCtrl->setSchemeWrapper(&_SizeWrapper);
-				
-		bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(editWidth ? IDB_PARTICLE_WIDTH : IDB_PARTICLE_HEIGHT));	
+
+		bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(editWidth ? IDB_PARTICLE_WIDTH : IDB_PARTICLE_HEIGHT));
 	}
 	else // general case. Wrap to the size interface and the appropriate dialog
 	{
@@ -666,29 +666,29 @@ uint CLocatedBindableDialog::updateSizeControl()
 		_SizeWrapper.S = dynamic_cast<NL3D::CPSSizedParticle *>(_Bindable);
 		_SizeCtrl->setWrapper(&_SizeWrapper);
 		_SizeCtrl->setSchemeWrapper(&_SizeWrapper);
-				
-		bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_PARTICLE_SIZE));		
+
+		bmh = LoadBitmap(::AfxGetInstanceHandle(), MAKEINTRESOURCE(IDB_PARTICLE_SIZE));
 	}
 	RECT rect;
 	_SizeCtrl->init(bmh, _SizeCtrlX, _SizeCtrlY, this);
 	_SizeCtrl->GetClientRect(&rect);
-	return rect.bottom + 3;		
+	return rect.bottom + 3;
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnSizeWidth() 
+void CLocatedBindableDialog::OnSizeWidth()
 {
-	updateSizeControl();	
+	updateSizeControl();
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnSizeHeight() 
+void CLocatedBindableDialog::OnSizeHeight()
 {
-	updateSizeControl();	
+	updateSizeControl();
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnNoAutoLod() 
+void CLocatedBindableDialog::OnNoAutoLod()
 {
 	NL3D::CPSParticle *p = NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable);
 	p->disableAutoLOD(((CButton *) GetDlgItem(IDC_NO_AUTO_LOD))->GetCheck() != 0);
@@ -696,8 +696,8 @@ void CLocatedBindableDialog::OnNoAutoLod()
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnGlobalColorLighting() 
-{	
+void CLocatedBindableDialog::OnGlobalColorLighting()
+{
 	NL3D::CPSParticle *p = NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable);
 	p->enableGlobalColorLighting(((CButton *) GetDlgItem(ID_GLOBAL_COLOR_LIGHTING))->GetCheck() == 1);
 	touchPSState();
@@ -705,12 +705,12 @@ void CLocatedBindableDialog::OnGlobalColorLighting()
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnAlignOnMotion() 
+void CLocatedBindableDialog::OnAlignOnMotion()
 {
 	bool align = ((CButton *) GetDlgItem(IDC_ALIGN_ON_MOTION))->GetCheck() != 0;
 	NL3D::CPSFaceLookAt *fla = NLMISC::safe_cast<NL3D::CPSFaceLookAt *>(_Bindable);
 	fla->setAlignOnMotion(align);
-	updateValidWndForAlignOnMotion(align);	
+	updateValidWndForAlignOnMotion(align);
 	updateModifiedFlag();
 }
 
@@ -723,10 +723,10 @@ void CLocatedBindableDialog::updateValidWndForAlignOnMotion(bool align)
 		CEditAttribDlg *ead = dynamic_cast<CEditAttribDlg *>(_MotionBlurWnd[k]);
 		if (ead)
 		{
-			ead->EnableWindow(enable); // enable window not virtual in CWnd ... 
+			ead->EnableWindow(enable); // enable window not virtual in CWnd ...
 		}
 		else
-		{		
+		{
 			_MotionBlurWnd[k]->EnableWindow(enable);
 		}
 	}
@@ -734,7 +734,7 @@ void CLocatedBindableDialog::updateValidWndForAlignOnMotion(bool align)
 }
 
 //***********************************************************************************
-void CLocatedBindableDialog::OnZtest() 
+void CLocatedBindableDialog::OnZtest()
 {
 	UpdateData();
 	NL3D::CPSMaterial *mat = dynamic_cast<NL3D::CPSMaterial *>(_Bindable);
@@ -749,12 +749,12 @@ static	void concatEdit2Lines(CEdit &edit)
 	const	uint lineLen= 1000;
 	uint	n;
 	// retrieve the 2 lines.
-	char	tmp0[2*lineLen];
-	char	tmp1[lineLen];
+	TCHAR	tmp0[2*lineLen];
+	TCHAR	tmp1[lineLen];
 	n= edit.GetLine(0, tmp0, lineLen);	tmp0[n]= 0;
 	n= edit.GetLine(1, tmp1, lineLen);	tmp1[n]= 0;
 	// concat and update the CEdit.
-	edit.SetWindowText(strcat(tmp0, tmp1));
+	edit.SetWindowText(_tcscat(tmp0, tmp1));
 }
 
 //***************************************************************************************************************************
@@ -762,9 +762,9 @@ void CLocatedBindableDialog::updateZBias()
 {
 	CString value;
 	m_ZBias.GetWindowText(value);
-	float zbias = 0.f;		
+	float zbias = 0.f;
 	int dummy; // to test if end of string as no not wanted extra characters
-	if (sscanf((LPCTSTR) (value + "\n0"), "%f\n%d", &zbias, &dummy) == 2)
+	if (_stscanf((LPCTSTR)(value + _T("\n0")), _T("%f\n%d"), &zbias, &dummy) == 2)
 	{
 		NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable)->setZBias(-zbias);
 	}
@@ -773,8 +773,8 @@ void CLocatedBindableDialog::updateZBias()
 		CString caption;
 		CString mess;
 		caption.LoadString(IDS_CAPTION_ERROR);
-		mess.LoadString(IDS_BAD_ZBIAS);				
-		m_ZBias.SetWindowText("0.00");
+		mess.LoadString(IDS_BAD_ZBIAS);
+		m_ZBias.SetWindowText(_T("0.00"));
 		MessageBox((LPCTSTR) mess, (LPCTSTR) caption, MB_ICONERROR);
 		NLMISC::safe_cast<NL3D::CPSParticle *>(_Bindable)->setZBias(0);
 		updateModifiedFlag();
@@ -782,28 +782,28 @@ void CLocatedBindableDialog::updateZBias()
 }
 
 //***************************************************************************************************************************
-void CLocatedBindableDialog::OnChangeZbias() 
+void CLocatedBindableDialog::OnChangeZbias()
 {
-	UpdateData();	
+	UpdateData();
 	// Trick to track "Enter" keypress: CEdit are multiline. If GetLineCount()>1, then
 	// user has press enter.
 	if(m_ZBias.GetLineCount()>1)
 	{
 		// must ccat 2 lines of the CEdit.
-		concatEdit2Lines(m_ZBias);		
-		updateZBias();		
+		concatEdit2Lines(m_ZBias);
+		updateZBias();
 	}
 }
 
 //***************************************************************************************************************************
-void CLocatedBindableDialog::OnKillfocusZbias() 
+void CLocatedBindableDialog::OnKillfocusZbias()
 {
-	updateZBias();	
+	updateZBias();
 }
 
 //***************************************************************************************************************************
-void CLocatedBindableDialog::OnZalign() 
-{	
+void CLocatedBindableDialog::OnZalign()
+{
 	bool align = ((CButton *) GetDlgItem(IDC_ZALIGN))->GetCheck() != 0;
 	NL3D::CPSFaceLookAt *fla = NLMISC::safe_cast<NL3D::CPSFaceLookAt *>(_Bindable);
 	fla->setAlignOnZAxis(align);

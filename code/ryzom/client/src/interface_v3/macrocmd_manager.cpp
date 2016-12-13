@@ -365,7 +365,6 @@ void CMacroCmdManager::addActionManagerEntries()
 
 	CBaseAction::CParameter p;
 	p.Type = CBaseAction::CParameter::Constant;
-	p.Name = "";
 	p.LocalizedName = "uiMacroName";
 
 	uint i;

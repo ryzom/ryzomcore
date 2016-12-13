@@ -39,7 +39,7 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupHTMLCS, std::string, "cs_html");
 CGroupHTMLCS::CGroupHTMLCS(const TCtorParam &param)
 : CGroupHTML(param)
 {
-	Home = "";
+	Home.clear();
 }
 
 // ***************************************************************************

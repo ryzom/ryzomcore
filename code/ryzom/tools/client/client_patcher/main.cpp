@@ -16,6 +16,22 @@
 using namespace NLMISC;
 using namespace std;
 
+// simplified implementation to not depend on client_cfg.cpp
+CClientConfig::CClientConfig()
+{
+}
+
+void CClientConfig::serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream)
+{
+}
+
+bool CClientConfig::getDefaultConfigLocation(std::string&/* p_name */) const
+{
+	return false;
+}
+
+CClientConfig ClientCfg;
+
 // stuff which is defined as extern in other .cpp files
 void quitCrashReport()
 {
@@ -126,7 +142,7 @@ void printDownload(const std::string &str)
 	fflush(stdout);
 }
 
-// hardcoded english translations to not depends on external files
+// hardcoded english translations to not depend on external files
 struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 {
 	virtual void loadStringFile(const std::string &filename, ucstring &text)
@@ -174,6 +190,8 @@ struct CClientPatcherTranslations : public NLMISC::CI18N::ILoadProxy
 	}
 };
 
+// hardcoded URL to not depend on external files
+static const std::string PatchUrl = "http://dl.ryzom.com/patch_live";
 
 int main(int argc, char *argv[])
 {
@@ -182,7 +200,6 @@ int main(int argc, char *argv[])
 
 	Args.setVersion(getDisplayVersion());
 	Args.setDescription("Ryzom client");
-	Args.addArg("c", "config", "id", "Use this configuration to determine what directory to use by default");
 
 	if (!Args.parse(argc, argv)) return 1;
 
@@ -193,28 +210,6 @@ int main(int argc, char *argv[])
 	INelContext::getInstance().getDebugLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getInfoLog()->removeDisplayer("DEFAULT_SD");
 	INelContext::getInstance().getWarningLog()->removeDisplayer("DEFAULT_SD");
-
-	std::string config = "client.cfg";
-
-	// if client.cfg is not in current directory, use client.cfg from user directory
-	if (!CFile::isExists(config))
-		config = CPath::getApplicationDirectory("Ryzom") + config;
-
-	// if client.cfg is not in current directory, use client_default.cfg
-	if (!CFile::isExists(config))
-		config = "client_default.cfg";
-
-#ifdef RYZOM_ETC_PREFIX
-	// if client_default.cfg is not in current directory, use application default directory
-	if (!CFile::isExists(config))
-		config = CPath::standardizePath(RYZOM_ETC_PREFIX) + config;
-#endif
-
-	if (!CFile::isExists(config))
-	{
-		printError(config + " not found, aborting patch.");
-		return 1;
-	}
 
 	// check if console supports colors
 	std::string term = toLower(std::string(getenv("TERM") ? getenv("TERM"):""));
@@ -233,16 +228,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	// load client.cfg or client_default.cfg
-	ClientCfg.init(config);
-
-	// check if PatchUrl is defined
-	if (ClientCfg.PatchUrl.empty())
-	{
-		printError("PatchUrl not defined in " + config);
-		return 1;
-	}
-
 	// allocate translations proxy
 	CClientPatcherTranslations *trans = new CClientPatcherTranslations();
 
@@ -255,6 +240,8 @@ int main(int argc, char *argv[])
 	// now translations are read, we don't need it anymore
 	delete trans;
 
+	Args.displayVersion();
+	printf("\n");
 	printf("Checking %s files to patch...\n", convert(CI18N::get("TheSagaOfRyzom")).c_str());
 
 	// initialize patch manager and set the ryzom full path, before it's used
@@ -262,7 +249,7 @@ int main(int argc, char *argv[])
 
 	// use PatchUrl
 	vector<string> patchURLs;
-	pPM->init(patchURLs, ClientCfg.PatchUrl, ClientCfg.PatchVersion);
+	pPM->init(patchURLs, PatchUrl, "");
 	pPM->startCheckThread(true /* include background patchs */);
 
 	ucstring state;

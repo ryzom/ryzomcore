@@ -5236,7 +5236,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 	{
 		// Build the final string
 		static string finalArgs;
-		finalArgs = "";
+		finalArgs.clear();
 		uint i;
 		uint index = 0;
 		const vector<string> &keywords = mode->Keywords;

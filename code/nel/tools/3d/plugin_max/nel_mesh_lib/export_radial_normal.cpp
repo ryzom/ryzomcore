@@ -62,7 +62,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			_SmoothingGroupMask |= (1<<app);
 
 			// Get the node by name
-			INode *pivotNode = ip.GetINodeByName(pivotName.c_str());
+			INode *pivotNode = ip.GetINodeByName(utf8ToTStr(pivotName));
 			if (pivotNode)
 			{
 				// Get the world Pivot point
