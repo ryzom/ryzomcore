@@ -115,7 +115,7 @@ encode = function(val, stack)
 end
 
 
-function json.encode(val)
+function Json.encode(val)
   return ( encode(val) )
 end
 
