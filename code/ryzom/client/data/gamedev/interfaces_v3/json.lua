@@ -7,7 +7,7 @@
 -- under the terms of the MIT license. See LICENSE for details.
 --
 
-local json = { _version = "0.1.0" }
+Json = { _version = "0.1.0" }
 
 -------------------------------------------------------------------------------
 -- Encode
@@ -368,12 +368,9 @@ parse = function(str, idx)
 end
 
 
-function json.decode(str)
+function Json.decode(str)
   if type(str) ~= "string" then
     error("expected argument of type string, got " .. type(str))
   end
   return ( parse(str, next_char(str, 1, space_chars, true)) )
 end
-
-
-return json
