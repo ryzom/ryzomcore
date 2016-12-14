@@ -1,5 +1,3 @@
-json = dofile("user/json.lua")
-
 --- Parse interface of ark_scene_editor_edit_menu ---
 local script = [[<interface_config>
 <root id="interface" x="0" y="0" w="800" h="600" active="true"/>
@@ -375,7 +373,7 @@ function SceneEditor:editGroup(group)
 end
 
 function SceneEditor:addFromDb(group, db_id, json_shape)
-	shape = json.decode(json_shape)
+	shape = Json.decode(json_shape)
 	shape.db_id = db_id
 
 	shape.group = group
@@ -563,7 +561,7 @@ function SceneEditor:get_html(message, message_bg)
 								 text_color = "55aa55"
 							end
 						end
-						shapes_html = shapes_html .. "<tr bgcolor='#"..color.."'><td height='20px'>&nbsp;<input type='hidden' name='shape[]', value='"..SceneEditor:enc64((shape.db_id or '')..":"..json.encode(shape)).."' />"..'#'..(shape.db_id or '0').." <a href='ah:lua:SceneEditor:launch_menu("..tostring(shape_id)..")'><font color='#"..text_color.."'>"..shape.file.."</font></a></td>\
+						shapes_html = shapes_html .. "<tr bgcolor='#"..color.."'><td height='20px'>&nbsp;<input type='hidden' name='shape[]', value='"..SceneEditor:enc64((shape.db_id or '')..":"..Json.encode(shape)).."' />"..'#'..(shape.db_id or '0').." <a href='ah:lua:SceneEditor:launch_menu("..tostring(shape_id)..")'><font color='#"..text_color.."'>"..shape.file.."</font></a></td>\
 						<td width='16px'><a href='ah:lua:SceneEditor:removeShape("..tostring(shape_id)..")'><img src='"..self.iconsUrl.."/16/cross.png' /></a></td>\
 						</tr>"
 					end
