@@ -1060,7 +1060,6 @@ void CMovementMagnet::update(uint32 waitTime, uint32 ticksSinceLastUpdate, bool 
 		BeginMove:
 			_State=Movement_Move;
 			getNewDestination	(_BotFauna.wpos(), _denyFlags);	// drop through to Move
-			_Speed=_BotFauna.walkSpeed();
 
 		case Movement_Move:
 		{
