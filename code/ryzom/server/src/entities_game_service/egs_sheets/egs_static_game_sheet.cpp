@@ -688,7 +688,7 @@ void CStaticCreatures::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 		for( i = 0; i < SLOT_EQUIPMENT::NB_SLOT_EQUIPMENT; ++i )
 		{
 			root.getValueByName( sheetName, (string("Basics.Equipment.") + SLOT_EQUIPMENT::toString( (SLOT_EQUIPMENT::TSlotEquipment) i ) + string(".Item" )).c_str() );
-			if( sheetName != string("") && sheetName.find(".item") != std::string::npos )
+			if( !sheetName.empty() && sheetName.find(".item") != std::string::npos )
 			{
 				sheet = CSheetId( sheetName );
 				_Items[ i ].IdSheet = sheet.asInt();
@@ -1790,7 +1790,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 /*		for( i = 0; i < NB_SHEATH; ++i )
 		{
 			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "LeftHand.Item" );
-			if( sheetName != string("") )
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Left.IdSheet = sheet.asInt();
@@ -1803,7 +1803,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 			}
 
 			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "RightHand.Item" );
-			if( sheetName != string("") )
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Right.IdSheet = sheet.asInt();
@@ -1816,7 +1816,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 			}
 		
 			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo0.Item" );
-			if( sheetName != string("") )
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo0.IdSheet = sheet.asInt();
@@ -1829,7 +1829,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 			}
 		
 			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo1.Item" );
-			if( sheetName != string("") )
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo1.IdSheet = sheet.asInt();
@@ -1842,7 +1842,7 @@ void CStaticCharacters::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &
 			}
 		
 			root.getValueByName( sheetName, "Basics.Equipment.Sheath" + toString( i ) + "Ammo2.Item" );
-			if( sheetName != string("") )
+			if( !sheetName.empty() )
 			{
 				sheet = CSheetId( sheetName );
 				Sheaths[ i ].Ammo2.IdSheet = sheet.asInt();
