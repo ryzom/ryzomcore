@@ -234,10 +234,10 @@ void readStringArray(const std::string &filename, NLGEORGES::UFormLoader *formLo
 							if(elmt->getArrayValue(stringName, i))
 								container.insert(make_pair(nodeName, stringName));
 							else
-								nlwarning("readStringArray: no string associated to the node '%d(%s)'.", i, nodeName.c_str());
+								nlwarning("readStringArray: no string associated to the node '%u(%s)'.", i, nodeName.c_str());
 						}
 						else
-							nlwarning("readStringArray: node '%d', index valid.", i);
+							nlwarning("readStringArray: node '%u', index valid.", i);
 					}
 				}
 			}
