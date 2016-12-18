@@ -226,7 +226,7 @@ void CRaceStatsSheet::buildGroundFXs(const NLGEORGES::UFormElm &item, const std:
 {
 	// ground fxs
 	const NLGEORGES::UFormElm *elm;
-	if(item.getNodeByName(&elm, name.c_str()) && elm)
+	if(item.getNodeByName(&elm, name) && elm)
 	{
 		// Check array.
 		if(elm->isArray())

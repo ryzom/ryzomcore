@@ -1754,10 +1754,10 @@ void CStaticBrick::loadFaber( const UFormElm &root, const CSheetId &sheetId )
 	for (uint i = 1 ; i <= 5 ; ++i)
 	{
 		propName = "faber.Create.MP "+toString(i);
-		if (root.getValueByName( value, propName.c_str() ) && !value.empty() )
+		if (root.getValueByName( value, propName ) && !value.empty() )
 		{			
 			propName = "faber.Create.Quantity "+toString(i);
-			if ( root.getValueByName( quantity, propName.c_str() ) && quantity > 0)
+			if ( root.getValueByName( quantity, propName ) && quantity > 0)
 			{
 				CFaber::TRawMaterial mp;
 				mp.MpType = RM_FABER_TYPE::toFaberType( value );

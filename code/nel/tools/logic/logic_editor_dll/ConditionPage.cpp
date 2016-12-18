@@ -272,7 +272,7 @@ void CConditionPage::addCondition( CLogic_editorDoc *pDoc, CCondition * conditio
 	CCondition *pCondition;
 	if (pDoc->m_conditions.Lookup( condition->m_sName, (void*&)pCondition))
 	{
-		AfxMessageBox("A condition with this name already exist...");
+		AfxMessageBox(_T("A condition with this name already exist..."));
 		return;
 	}
 	

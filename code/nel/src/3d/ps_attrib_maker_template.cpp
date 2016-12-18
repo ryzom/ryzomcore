@@ -18,6 +18,9 @@
 #include "nel/3d/ps_attrib_maker_template.h"
 #include "nel/misc/system_info.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

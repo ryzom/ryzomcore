@@ -75,7 +75,7 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 			// Get Mps sheets
 			const UFormElm *pMp;
 			uint32 i = 0;
-			while (pDriller->getNodeByName(&pMp, ("mp" + NLMISC::toString(i)).c_str()) && pMp)
+			while (pDriller->getNodeByName(&pMp, "mp" + NLMISC::toString(i)) && pMp)
 			{
 				string sTmp;
 				pMp->getValueByName(sTmp, "name");

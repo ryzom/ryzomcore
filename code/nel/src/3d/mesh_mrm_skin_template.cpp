@@ -20,6 +20,10 @@
 
 #include "std3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ace: before including this, #define this define to use it
 //      the goal is to be able to compile every .cpp file with no
 //      special case (GNU/Linux needs)

@@ -56,7 +56,7 @@ void CFormDfn::removeEntry( uint idx )
 
 // ***************************************************************************
 
-void CFormDfn::write (xmlDocPtr doc, const char *filename)
+void CFormDfn::write (xmlDocPtr doc, const std::string &filename)
 {
 	// Save filename
 	_Filename = CFile::getFilename (filename);
@@ -121,7 +121,7 @@ void CFormDfn::write (xmlDocPtr doc, const char *filename)
 
 // ***************************************************************************
 
-void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const char *filename)
+void CFormDfn::read (xmlNodePtr root, CFormLoader &loader, bool forceLoad, const std::string &filename)
 {
 	// Save filename
 	_Filename = CFile::getFilename (filename);
@@ -459,9 +459,9 @@ void CFormDfn::setNumParent (uint size)
 
 // ***************************************************************************
 
-void CFormDfn::setParent (uint parent, CFormLoader &loader, const char *filename)
+void CFormDfn::setParent (uint parent, CFormLoader &loader, const std::string &filename)
 {
-	if (strcmp (filename, "")==0)
+	if (filename.empty())
 		Parents[parent].Parent = NULL;
 	else
 		Parents[parent].Parent = loader.loadFormDfn (filename, false);
@@ -470,7 +470,7 @@ void CFormDfn::setParent (uint parent, CFormLoader &loader, const char *filename
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setType (CFormLoader &loader, const char *filename)
+void CFormDfn::CEntry::setType (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryType;
 	Dfn = NULL;
@@ -485,7 +485,7 @@ void CFormDfn::CEntry::setType( TEntryType type )
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setDfn (CFormLoader &loader, const char *filename)
+void CFormDfn::CEntry::setDfn (CFormLoader &loader, const std::string &filename)
 {
 	TypeElement = EntryDfn;
 	Filename = filename;
@@ -512,7 +512,7 @@ const std::string &CFormDfn::CEntry::getName () const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setName (const char *name)
+void CFormDfn::CEntry::setName (const std::string &name)
 {
 	Name = name;
 }
@@ -526,7 +526,7 @@ const std::string &CFormDfn::CEntry::getDefault () const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setDefault (const char *def)
+void CFormDfn::CEntry::setDefault (const std::string &def)
 {
 	Default = def;
 }
@@ -561,7 +561,7 @@ const std::string &CFormDfn::CEntry::getFilename() const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setFilename (const char *def)
+void CFormDfn::CEntry::setFilename (const std::string &def)
 {
 	Filename = def;
 }
@@ -849,14 +849,14 @@ const std::string &CFormDfn::CEntry::getFilenameExt() const
 
 // ***************************************************************************
 
-void CFormDfn::CEntry::setFilenameExt (const char *ext)
+void CFormDfn::CEntry::setFilenameExt (const std::string &ext)
 {
 	FilenameExt = ext;
 }
 
 // ***************************************************************************
 
-void CFormDfn::warning (bool exception, const char *function, const char *format, ... ) const
+void CFormDfn::warning (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -866,7 +866,7 @@ void CFormDfn::warning (bool exception, const char *function, const char *format
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CFormDfn::%s) in form DFN (%s) : %s", function, _Filename.c_str (), buffer);
+	NLGEORGES::warning (exception, "(CFormDfn::%s) in form DFN (%s) : %s", function.c_str(), _Filename.c_str (), buffer);
 }
 
 // ***************************************************************************

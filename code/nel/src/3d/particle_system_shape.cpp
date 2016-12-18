@@ -33,6 +33,10 @@
 #include "nel/3d/ps_face_look_at.h"
 #include "nel/3d/ps_force.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 

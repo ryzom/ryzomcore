@@ -1977,7 +1977,7 @@ class CAHOpenURL : public IActionHandler
 				url += LoginCustomParameters;
 		}
 
-		openURL(url.c_str());
+		openURL(url);
 
 		nlinfo("openURL %s", url.c_str());
 	}

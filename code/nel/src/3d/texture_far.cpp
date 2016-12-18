@@ -29,6 +29,10 @@ using namespace NLMISC;
 using namespace NL3D;
 using namespace std;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 CRGBA CTextureFar::_LightmapExpanded[NL_NUM_PIXELS_ON_FAR_TILE_EDGE*NL_MAX_TILES_BY_PATCH_EDGE*NL_NUM_PIXELS_ON_FAR_TILE_EDGE*NL_MAX_TILES_BY_PATCH_EDGE];

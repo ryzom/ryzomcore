@@ -60,10 +60,10 @@ CFormLoader::~CFormLoader()
 {
 }
 
-CType *CFormLoader::loadType (const char *filename)
+CType *CFormLoader::loadType (const std::string &filename)
 {
 	// Lower string filename
-	string lowerStr = toLower((string)filename);
+	string lowerStr = toLower(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -98,7 +98,7 @@ CType *CFormLoader::loadType (const char *filename)
 			else
 			{
 				// Output error
-				warning (false, "loadType", "Can't open the form file (%s).", filename);
+				warning (false, "loadType", "Can't open the form file (%s).", filename.c_str());
 
 				// Delete the type
 				delete type;
@@ -108,7 +108,7 @@ CType *CFormLoader::loadType (const char *filename)
 		catch (const Exception &e)
 		{
 			// Output error
-			warning (false, "loadType", "Error while loading the form (%s): %s", filename, e.what());
+			warning (false, "loadType", "Error while loading the form (%s): %s", filename.c_str(), e.what());
 
 			// Delete the type
 			delete type;
@@ -130,10 +130,10 @@ CType *CFormLoader::loadType (const char *filename)
 
 // ***************************************************************************
 
-CFormDfn *CFormLoader::loadFormDfn (const char *filename, bool forceLoad)
+CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 {
 	// Lower string filename
-	string lowerStr = toLower((string)filename);
+	string lowerStr = toLower(filename);
 	lowerStr = CFile::getFilename (lowerStr);
 
 	// Already in the map ?
@@ -196,7 +196,7 @@ CFormDfn *CFormLoader::loadFormDfn (const char *filename, bool forceLoad)
 
 // ***************************************************************************
 
-UForm *CFormLoader::loadForm (const char *filename)
+UForm *CFormLoader::loadForm (const std::string &filename)
 {
 	// Lower string filename
 	string lowerStr = toLower((string)filename);
@@ -237,7 +237,7 @@ UForm *CFormLoader::loadForm (const char *filename)
 			name += ".dfn";
 
 			// Load the dfn
-			CFormDfn	*dfn = loadFormDfn (name.c_str (), false);
+			CFormDfn	*dfn = loadFormDfn (name, false);
 			if (dfn)
 			{
 				// Open the file
@@ -293,21 +293,21 @@ UForm *CFormLoader::loadForm (const char *filename)
 
 // ***************************************************************************
 
-UFormDfn *CFormLoader::loadFormDfn (const char *filename)
+UFormDfn *CFormLoader::loadFormDfn (const std::string &filename)
 {
 	return loadFormDfn (filename, false);
 }
 
 // ***************************************************************************
 
-UType *CFormLoader::loadFormType (const char *filename)
+UType *CFormLoader::loadFormType (const std::string &filename)
 {
 	return loadType (filename);
 }
 
 // ***************************************************************************
 
-void CFormLoader::warning (bool exception, const char *function, const char *format, ... ) const
+void CFormLoader::warning (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;

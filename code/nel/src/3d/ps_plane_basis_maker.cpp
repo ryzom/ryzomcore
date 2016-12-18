@@ -20,6 +20,10 @@
 #include "nel/3d/ps_plane_basis_maker.h"
 #include "nel/3d/ps_register_plane_basis_attribs.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

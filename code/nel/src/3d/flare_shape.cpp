@@ -24,6 +24,9 @@
 #include "nel/3d/shape_bank.h"
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D {
 

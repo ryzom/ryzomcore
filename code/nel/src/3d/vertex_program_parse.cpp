@@ -17,6 +17,10 @@
 #include "std3d.h"
 #include "nel/3d/vertex_program_parse.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 enum TArguments
 {
 #ifdef NL_LITTLE_ENDIAN

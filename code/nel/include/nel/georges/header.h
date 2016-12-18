@@ -44,10 +44,10 @@ public:
 	};
 
 	/// Add a log
-	void				addLog (const char *log);
+	void				addLog(const std::string &log);
 
 	/// Set the comment
-	void				setComments (const char *comments);
+	void				setComments (const std::string &comments);
 
 	/// Major version number
 	uint32				MajorVersion;
@@ -72,7 +72,7 @@ public:
 	static const char	*getStateString (TState state);
 
 	// Error handling
-	void				warning (bool exception, const char *function, const char *format, ... ) const;
+	void				warning (bool exception, const std::string &function, const char *format, ... ) const;
 };
 
 } // NLGEORGES

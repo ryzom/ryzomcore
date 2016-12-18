@@ -20,6 +20,10 @@
 #include "nel/3d/ps_register_float_attribs.h"
 #include "nel/misc/fast_floor.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 

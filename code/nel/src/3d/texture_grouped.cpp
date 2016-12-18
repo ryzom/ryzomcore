@@ -23,6 +23,10 @@
 
 #include <algorithm>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 std::map<std::string, uint> CTextureGrouped::_NameToSize;

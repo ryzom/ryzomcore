@@ -34,6 +34,10 @@
 #include "nel/misc/stream.h"
 #include "nel/misc/path.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

@@ -22,6 +22,9 @@
 #include "nel/3d/water_model.h"
 #include "nel/3d/driver_user.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

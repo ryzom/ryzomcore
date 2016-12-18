@@ -44,7 +44,7 @@ IAction::IAction (TTypeAction type, uint selId, uint slot)
 
 // ***************************************************************************
 
-void IAction::setLabel (const char *logLabel, CGeorgesEditDoc &doc)
+void IAction::setLabel (const std::string &logLabel, CGeorgesEditDoc &doc)
 {
 	_LogLabel = logLabel;
 
@@ -75,7 +75,7 @@ bool IAction::doAction (CGeorgesEditDoc &doc, bool redo, bool &modified, bool fi
 
 // ***************************************************************************
 
-void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeorgesEditDoc &doc, const char *_FormName)
+void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeorgesEditDoc &doc, const std::string &_FormName)
 {
 	// Right and left view
 	CGeorgesEditView *rightView = doc.getRightView ();
@@ -129,7 +129,7 @@ void IAction::update (bool updateLeftView, TUpdateRightView rightViewFlag, CGeor
 
 // ***************************************************************************
 
-CActionString::CActionString (IAction::TTypeAction type, const char *newValue, CGeorgesEditDoc &doc, const char *formName, const char *userData, uint selId, uint slot) : IAction (type, selId, slot)
+CActionString::CActionString (IAction::TTypeAction type, const std::string &newValue, CGeorgesEditDoc &doc, const std::string &formName, const std::string &userData, uint selId, uint slot) : IAction (type, selId, slot)
 {
 	// Set the new value
 	_NewValue = newValue;
@@ -145,7 +145,9 @@ CActionString::CActionString (IAction::TTypeAction type, const char *newValue, C
 			CType *type = doc.getTypePtr ();
 			_OldValue = toString ((int)(type->Type));
 			setLabel ("Type Type", doc);
-			_Log[1] = type->getTypeName ((UType::TType)atoi (newValue));
+			uint ttype;
+			fromString(newValue, ttype);
+			_Log[1] = type->getTypeName ((UType::TType)ttype);
 		}
 		break;
 	case TypeUI:
@@ -153,7 +155,9 @@ CActionString::CActionString (IAction::TTypeAction type, const char *newValue, C
 			CType *type = doc.getTypePtr ();
 			_OldValue = toString ((int)(type->UIType));
 			setLabel ("Type UI", doc);
-			_Log[1] = type->getUIName ((CType::TUI)atoi (newValue));
+			uint ttype;
+			fromString(newValue, ttype);
+			_Log[1] = type->getUIName ((CType::TUI)ttype);
 		}
 		break;
 	case TypeDefault:

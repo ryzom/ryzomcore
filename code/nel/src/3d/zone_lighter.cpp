@@ -51,6 +51,10 @@ using namespace std;
 // Define this to render the zbuffers into a bitmap zbuffer and save it into a jpeg
 // #define SAVE_ZBUFFER "c:/temp"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 #define DEFAULT_JITTER 0.4f
 #define DEFAULT_ZBUFFER_LANDSCAPE_SIZE 32768
 #define DEFAULT_ZBUFFER_OBJECT_SIZE (32768*3)

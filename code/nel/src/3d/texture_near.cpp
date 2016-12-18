@@ -15,10 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "std3d.h"
-
-
 #include "nel/3d/texture_near.h"
+
 using namespace NLMISC;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

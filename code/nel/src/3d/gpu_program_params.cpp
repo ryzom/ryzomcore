@@ -41,6 +41,10 @@
 using namespace std;
 // using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 const size_t CGPUProgramParams::s_End = -1;
