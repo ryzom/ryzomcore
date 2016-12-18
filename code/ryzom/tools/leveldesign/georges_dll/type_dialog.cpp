@@ -517,9 +517,9 @@ void CTypeDialog::setPredefToDocument ()
 
 			// Add the label and value
 			str = Predef.ListCtrl.GetItemText (predef, 0);
-			stringVector[predef][0] = (const char*)str;
+			stringVector[predef][0] = tStrToUtf8(str);
 			str = Predef.ListCtrl.GetItemText (predef, 1);
-			stringVector[predef][1] = (const char*)str;
+			stringVector[predef][1] = tStrToUtf8(str);
 		}
 
 		doc->modify (new CActionStringVectorVector (IAction::TypePredef, stringVector, *doc, 

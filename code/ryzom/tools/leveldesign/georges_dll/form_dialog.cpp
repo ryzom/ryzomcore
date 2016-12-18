@@ -1691,7 +1691,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName, UFormElm::NoEval, NULL))
 		{
 			Combo.UpdateData ();
-			Combo.SetWindowText (result.c_str());
+			Combo.SetWindowText (utf8ToTStr(result));
 			Combo.UpdateData (FALSE);
 			updateLabel ();
 		}

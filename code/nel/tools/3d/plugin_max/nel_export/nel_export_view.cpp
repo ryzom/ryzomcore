@@ -106,7 +106,7 @@ void regsiterOVPath ()
 //#elif defined (NL_RELEASE_DEBUG)
 //	HMODULE hModule = GetModuleHandle("object_viewer_dll_rd.dll");
 #else
-	HMODULE hModule = GetModuleHandle("object_viewer_dll_r.dll");
+	HMODULE hModule = GetModuleHandle(_T("object_viewer_dll_r.dll"));
 #endif
 	if (!hModule) { ::MessageBox(NULL, _T("'hModule' failed at '") __FUNCTION__ _T("' in file '") __FILE__ _T(" on line ") NL_MACRO_TO_STR(__LINE__), _T("NeL Export"), MB_OK | MB_ICONERROR); return; }
 	TCHAR sModulePath[256];
