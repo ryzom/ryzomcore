@@ -25,6 +25,10 @@
 #include "nel/misc/matrix.h"
 #include "nel/misc/vector.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

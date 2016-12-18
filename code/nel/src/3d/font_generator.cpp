@@ -58,6 +58,10 @@ const char*  err_msg;
 
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 FT_Library	CFontGenerator::_Library = NULL;

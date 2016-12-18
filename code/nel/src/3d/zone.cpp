@@ -30,6 +30,9 @@ using namespace std;
 // define it only for debug bind.
 //#define	NL3D_DEBUG_DONT_BIND_PATCH
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

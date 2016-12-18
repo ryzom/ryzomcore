@@ -17,6 +17,10 @@
 #include "std3d.h"
 #include "nel/3d/ps_attrib_maker_helper.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

@@ -19,6 +19,9 @@
 #include "nel/3d/animation_set_user.h"
 #include "nel/3d/driver_user.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

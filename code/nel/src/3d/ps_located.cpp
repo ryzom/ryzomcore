@@ -48,6 +48,10 @@
 	#define CHECK_PS_INTEGRITY
 #endif
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 

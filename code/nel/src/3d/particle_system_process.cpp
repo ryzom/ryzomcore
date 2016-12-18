@@ -19,6 +19,10 @@
 #include "nel/3d/particle_system_process.h"
 #include "nel/3d/particle_system.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 uint PSEnterLeaveDepth = 0;
 uint PSEnterLeaveMaxDepth = 1;
 std::string PSCurrName;

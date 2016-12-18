@@ -20,6 +20,10 @@
 
 #include "std3d.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // ***************************************************************************
 // ***************************************************************************
 // Raw "Vertex/Normal only" ApplySkin methods.

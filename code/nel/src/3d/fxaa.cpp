@@ -49,10 +49,16 @@ using namespace std;
 namespace NL3D {
 
 namespace {
-
 #include "fxaa_program.h"
-
 } /* anonymous namespace */
+
+}
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
+namespace NL3D {
 
 CFXAA::CFXAA(NL3D::UDriver *driver) : m_Driver(driver), m_VP(NULL), m_PP(NULL), m_Width(~0), m_Height(~0)
 {

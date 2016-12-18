@@ -20,6 +20,9 @@
 #include "nel/3d/patch_rdr_pass.h"
 #include "nel/3d/landscape_face_vector_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

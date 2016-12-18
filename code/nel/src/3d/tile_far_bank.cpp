@@ -23,6 +23,10 @@ using namespace NLMISC;
 // Define this to force white far texture (debug)
 // #define NEL_FORCE_WHITE_FAR_TEXTURE
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D {
 
 

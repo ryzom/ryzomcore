@@ -26,6 +26,9 @@
 using namespace std;
 using namespace NLMISC;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 // TestYoyo. external debug flag
 bool	TESTYOYO_VCM_RedShadow= false;

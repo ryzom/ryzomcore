@@ -25,6 +25,10 @@
 
 #include <memory>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 static NLMISC::CRGBA GradientB2W[] = {NLMISC::CRGBA(0, 0, 0, 0), NLMISC::CRGBA(255, 255, 255, 255) };

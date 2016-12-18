@@ -20,6 +20,9 @@
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/landscapevb_allocator.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {

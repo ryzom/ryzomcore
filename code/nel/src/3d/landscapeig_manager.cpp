@@ -36,6 +36,10 @@ H_AUTO_DECL ( NL3D_Unload_Zone_IG )
 #define	NL3D_HAUTO_LAND_MNGR_LOAD_ZONEIG	H_AUTO_USE( NL3D_Load_Zone_IG )
 #define	NL3D_HAUTO_LAND_MNGR_UNLOAD_ZONEIG	H_AUTO_USE( NL3D_Unload_Zone_IG )
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace NL3D
 {
 

@@ -19,6 +19,9 @@
 #include "nel/3d/text_context_user.h"
 #include "nel/misc/hierarchical_timer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 namespace NL3D
 {
