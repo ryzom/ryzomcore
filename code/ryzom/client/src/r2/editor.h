@@ -893,6 +893,7 @@ public:
 	static NLMISC::CCDBNodeLeaf	   *getPlotItemSheetDBLeaf(uint index);
 	static bool				getIsStartingScenario() { return _IsStartingScenario; }
 	bool				isClearingContent() const { return _ClearingContent; }
+	void			   registerLuaFunc();
 
 private:
 	void				initPlotItems();
@@ -925,7 +926,7 @@ private:
 	void			   initObjectProjectionMetatable();
 	void               registerDisplayers();
 	void               registerTools();
-	void			   registerLuaFunc();
+
 	// add a C++ method in the environement
 	void			   registerEnvMethod(const char *name, TLuaWrappedFunction func);
 	void			   registerEnvFunction(const char *name, TLuaWrappedFunction func);

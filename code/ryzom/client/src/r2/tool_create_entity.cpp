@@ -596,7 +596,7 @@ void CToolCreateEntity::updateBeforeRender()
 	}
 	CGroupMap *worldMap = getWorldMap();
 	if (worldMap) worldMap->setSelectionAxis(_ValidArray);
-	setMouseCursor(_ValidArray ? _CursValid.c_str() : _CursInvalid.c_str());
+	setMouseCursor(_ValidArray ? _CursValid : _CursInvalid);
 }
 
 // ***************************************************************

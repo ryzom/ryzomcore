@@ -2418,6 +2418,7 @@ class CAHTarget : public IActionHandler
 		ucstring entityName;
 		entityName.fromUtf8 (getParam (Params, "entity"));
 		bool preferCompleteMatch = (getParam (Params, "prefer_complete_match") != "0");
+		bool quiet = (getParam (Params, "quiet") == "true");
 
 		if (!entityName.empty())
 		{
@@ -2432,6 +2433,12 @@ class CAHTarget : public IActionHandler
 			{
 				// Get the entity with a partial match
 				entity = EntitiesMngr.getEntityByName (entityName, false, false);
+			}
+
+			if (entity == NULL)
+			{
+				//Get the entity with a sheetName
+				entity = EntitiesMngr.getEntityBySheetName(entityName.toUtf8());
 			}
 			
 			if (entity)
@@ -2457,7 +2464,8 @@ class CAHTarget : public IActionHandler
 					// to avoid campfire selection exploit #316
 					nldebug("is not prop selectable");
 					CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+					if(!quiet)
+						pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 					return;
 				}
 
@@ -2467,7 +2475,8 @@ class CAHTarget : public IActionHandler
 			else
 			{
 				CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-				pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
+				if(!quiet)
+					pIM->displaySystemInfo(CI18N::get("uiTargetErrorCmd"));
 			}
 		}
 	}
@@ -2528,7 +2537,6 @@ class CAHAddShape : public IActionHandler
 		}
 
 		bool have_shapes = true;
-		bool first_shape = true;
 		while(have_shapes)
 		{
 			string shape;
@@ -2545,8 +2553,8 @@ class CAHAddShape : public IActionHandler
 				have_shapes = false;
 			}
 
-
-			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, first_shape);
+			sint32 idx;
+			CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector((float)x, (float)y, (float)z), c, u, false, idx);
 			UInstance instance = instref.Instance;
 
 			if(!instance.empty())
@@ -2566,7 +2574,7 @@ class CAHAddShape : public IActionHandler
 						instance.getMaterial(j).setShininess( 1000.0f );
 					}
 
-					if (!texture_name.empty() && first_shape)
+					if (!texture_name.empty())
 					{
 						sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
 						for(sint l = 0; l < numStages; l++)
@@ -2578,8 +2586,6 @@ class CAHAddShape : public IActionHandler
 						}
 					}
 				}
-
-				first_shape = false;
 
 				if (transparency.empty())
 					::makeInstanceTransparent(instance, 255, false);
@@ -2613,6 +2619,9 @@ class CAHAddShape : public IActionHandler
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
 				}
+				
+				instance.setTransformMode(UTransformable::RotEuler);
+				
 				// if the shape is a particle system, additionnal parameters are user params
 				UParticleSystemInstance psi;
 				psi.cast (instance);

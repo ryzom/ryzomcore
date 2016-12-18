@@ -274,6 +274,7 @@ CTimedFXManager::TDebugDisplayMode	ShowTimedFXMode = CTimedFXManager::NoText;
 
 // DEBUG
 bool				PACSBorders = false;
+bool				ARKPACSBorders = false;
 bool				DebugClusters = false;
 CVector				LastDebugClusterCameraThirdPersonStart= CVector::Null;
 CVector				LastDebugClusterCameraThirdPersonEnd= CVector::Null;
@@ -1796,6 +1797,12 @@ bool mainLoop()
 						displayPACSPrimitive();
 					}
 
+					// Display PACS borders only (for ARK).
+					if (ARKPACSBorders)
+					{
+						displayPACSPrimitive();
+					}
+					
 					// display Sound box
 					if (SoundBox)
 					{
@@ -2505,6 +2512,8 @@ bool mainLoop()
 
 			// R2ED enabled ?
 			R2::getEditor().autoConfigInit(IsInRingSession);
+			if (!IsInRingSession)
+				R2::getEditor().registerLuaFunc();
 
 			CurrSeason = computeCurrSeason();
 

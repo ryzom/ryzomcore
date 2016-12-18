@@ -166,6 +166,47 @@ void CTool::getMousePos(sint32 &x, sint32 &y)
 }
 
 // ***************************************************************
+void CTool::getMouseDown(bool &down, sint32 &x, sint32 &y)
+{
+	down = false;
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerDown(x, y);
+}
+
+// ***************************************************************
+void CTool::getMouseMiddleDown(bool &down, sint32 &x, sint32 &y)
+{
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerMiddleDown(x, y);
+}
+
+// ***************************************************************
+void CTool::getMouseRightDown(bool &down, sint32 &x, sint32 &y)
+{
+	//H_AUTO(R2_CTool_getMousePos)
+	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+	if(cursor == NULL)
+	{
+		x = y = -1;
+		return;
+	}
+	down = cursor->getPointerRightDown(x, y);
+}
+
+
+// ***************************************************************
 sint32 CTool::getMouseX()
 {
 	//H_AUTO(R2_CTool_getMouseX)
@@ -446,13 +487,16 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 
 	sint mapX = (sint) (x - islandDesc->XMin);
 	sint mapY = (sint) (y - islandDesc->YMin);
+
 	if (mapX < 0 || mapY < 0 || mapX >= (islandDesc->XMax - islandDesc->XMin) || mapY >= (islandDesc->YMax - islandDesc->YMin)) return false;
 	sint hmZ = heightMap(mapX, mapY);
 	if (hmZ >= 0x7ffe) return false; // not an accessible pos
+
 	if (!isIslandValidPos(heightMap, *islandDesc, x + 0.5f, y) ||
 		!isIslandValidPos(heightMap, *islandDesc, x - 0.5f, y) ||
 		!isIslandValidPos(heightMap, *islandDesc, x, y + 0.5f) ||
 		!isIslandValidPos(heightMap, *islandDesc, x, y - 0.5f)) return false;
+	
 	float z = 1.f + 2.f * hmZ;
 	// this is a possibly valid position
 	// compute nearest surface from here, and see if not far from the intersection
@@ -471,6 +515,7 @@ bool CTool::computeNearestValidSurfaceFromHeightMap(float x, float y, NLMISC::CV
 	inter1Found = inter1Found && normal1.z >= minAngleSin;
 	inter2Found = inter2Found && normal2.z >= minAngleSin;
 	if (!inter1Found && !inter2Found) return false;
+
 	if (inter1Found && inter2Found)
 	{
 		// because z in heightmap in usually a 'ceil' of real height, tends to favor surface below
@@ -752,7 +797,7 @@ bool CTool::isMouseCaptured()
 }
 
 // *********************************************************************************************************
-void CTool::setMouseCursor(const char *cursorTexture)
+void CTool::setMouseCursor(const std::string &cursorTexture)
 {
 	//H_AUTO(R2_CTool_setMouseCursor)
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
@@ -900,6 +945,5 @@ NLMISC::CRGBA CTool::getInvalidPosColor()
 				 0.5f + 0.5f * (float) cos(NLMISC::Pi * fmod((double) T1, duration) / duration));
 
 }
-
 
 } // R2
