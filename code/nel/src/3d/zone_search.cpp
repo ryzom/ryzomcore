@@ -61,8 +61,6 @@ CZoneSearch::CZoneSearch()
 */
 pair<string, uint32> CZoneSearch::getZoneName(uint x, uint y, uint cx, uint cy)
 {
-	char name[13];
-
 	uint zoneY = y / _SizeZoneY + 1;
 	uint zoneX = x / _SizeZoneX;
 
@@ -74,9 +72,7 @@ pair<string, uint32> CZoneSearch::getZoneName(uint x, uint y, uint cx, uint cy)
 	char firstLetter = zoneX / 26 + 'A';
 	char secondLetter = zoneX % 26 + 'A';
 
-	sprintf(name, "%d_%c%c.zonel", zoneY, firstLetter, secondLetter);
-
-	return std::pair<string, uint32>(string(name), distance);
+	return std::pair<string, uint32>(NLMISC::toString("%u_%c%c.zonel", zoneY, firstLetter, secondLetter), distance);
 }
 
 
@@ -214,12 +210,9 @@ void CZoneSearch::getListZoneId (uint x, uint y, uint sizeArea, vector<uint16> &
 
 std::string CZoneSearch::getZoneNameFromId (uint16 zoneid)
 {
-	char name[16];
-
 	sint	x = zoneid & 255;
 	sint	y = zoneid >> 8;
-	sprintf (name, "%d_%c%c.zonel", y+1, (char)('A'+(x/26)), (char)('A'+(x%26)));
-	return string(name);
+	return NLMISC::toString("%d_%c%c.zonel", y + 1, (char)('A' + (x / 26)), (char)('A' + (x % 26)));
 }
 
 
