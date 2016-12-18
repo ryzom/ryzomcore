@@ -289,7 +289,7 @@ bool CForm::insertParent (uint before, const std::string &filename, CForm *paren
 	else
 	{
 		// Output an error
-		warning (false, "insertParent", "Can't insert parent form (%s) that has not the same DFN.", filename);
+		warning (false, "insertParent", "Can't insert parent form (%s) that has not the same DFN.", filename.c_str());
 	}
 
 	return false;

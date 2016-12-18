@@ -171,7 +171,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 			else
 			{
 				// Output error
-				warning (false, "loadFormDfn", "Can't open the form file (%s).", filename);
+				warning (false, "loadFormDfn", "Can't open the form file (%s).", filename.c_str());
 
 				// Delete the formDfn
 				delete formDfn;
@@ -182,7 +182,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 		catch (const Exception &e)
 		{
 			// Output error
-			warning (false, "loadFormDfn", "Error while loading the form (%s): %s", filename, e.what());
+			warning (false, "loadFormDfn", "Error while loading the form (%s): %s", filename.c_str(), e.what());
 
 			// Delete the formDfn
 			delete formDfn;
@@ -257,7 +257,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 				else
 				{
 					// Output error
-					warning (false, "loadForm", "Can't open the form file (%s).", filename);
+					warning (false, "loadForm", "Can't open the form file (%s).", filename.c_str());
 
 					// Delete the form
 					delete form;
@@ -279,7 +279,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 		catch (const Exception &e)
 		{
 			// Output error
-			warning (false, "loadForm", "Error while loading the form (%s): %s", filename, e.what());
+			warning (false, "loadForm", "Error while loading the form (%s): %s", filename.c_str(), e.what());
 
 			// Delete the form
 			delete form;
@@ -317,7 +317,7 @@ void CFormLoader::warning (bool exception, const std::string &function, const ch
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CFormLoader::%s) : %s", function, buffer);
+	NLGEORGES::warning (exception, "(CFormLoader::%s) : %s", function.c_str(), buffer);
 }
 
 // ***************************************************************************
