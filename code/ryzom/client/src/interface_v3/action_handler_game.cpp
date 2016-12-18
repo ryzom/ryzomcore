@@ -2586,7 +2586,7 @@ class CAHAddShape : public IActionHandler
 						}
 					}
 				}
-				
+
 				if (transparency.empty())
 					::makeInstanceTransparent(instance, 255, false);
 				else
@@ -2653,7 +2653,6 @@ class CAHAddShape : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHAddShape, "add_shape");
-
 
 class CAHRemoveShapes : public IActionHandler
 {

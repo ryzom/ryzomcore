@@ -100,8 +100,8 @@ namespace NLGUI
 			_PointerMiddleDownY = _PointerY;
 		}
 	}
-	
-		// --------------------------------------------------------------------------------------------------------------------
+
+	// --------------------------------------------------------------------------------------------------------------------
 	void CViewPointerBase::setPointerRightDown (bool pd)
 	{
 		_PointerRightDown = pd;
@@ -147,7 +147,7 @@ namespace NLGUI
 	{
 		x = _PointerDownX;
 		y = _PointerDownY;
-		
+
 		return _PointerDown;
 	}
 
@@ -156,7 +156,7 @@ namespace NLGUI
 	{
 		x = _PointerMiddleDownX;
 		y = _PointerMiddleDownY;
-		
+
 		return _PointerMiddleDown;
 	}
 
@@ -165,7 +165,7 @@ namespace NLGUI
 	{
 		x = _PointerRightDownX;
 		y = _PointerRightDownY;
-		
+
 		return _PointerRightDown;
 	}
 

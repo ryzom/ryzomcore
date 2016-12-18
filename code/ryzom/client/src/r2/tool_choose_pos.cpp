@@ -414,21 +414,21 @@ void CToolChoosePos::updateBeforeRender()
 		{
 			if (_MultiPos && isShiftDown() && !_MultiPosLocked)
 			{
-				setMouseCursor(_CursValidMulti.c_str());
+				setMouseCursor(_CursValidMulti);
 			}
 			else
 			{
-				setMouseCursor(_CursValid.c_str());
+				setMouseCursor(_CursValid);
 			}
 		}
 		else
 		{
-			setMouseCursor(_CursInvalid.c_str());
+			setMouseCursor(_CursInvalid);
 		}
 	}
 	else
 	{
-		setMouseCursor(_CursValid.c_str());
+		setMouseCursor(_CursValid);
 	}
 }
 

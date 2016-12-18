@@ -1800,7 +1800,7 @@ namespace NLGUI
 		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4));
 		return 0;
 	}
-	
+
 		// ------------------------------------------------------------------------------------------------
 	int CGroupSubMenu::luaAddIconLine(CLuaState &ls)
 	{
@@ -1816,7 +1816,7 @@ namespace NLGUI
 		addLine(arg1, ls.toString(2), ls.toString(3), ls.toString(4), string(), ls.toString(5));
 		return 0;
 	}
- 
+
 	// ------------------------------------------------------------------------------------------------
 	int CGroupSubMenu::luaAddLineAtIndex(CLuaState &ls)
 	{

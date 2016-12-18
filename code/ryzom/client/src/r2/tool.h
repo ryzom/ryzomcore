@@ -224,8 +224,7 @@ public:
 	// Get mouse y position
 	static sint32 getMouseY();
 	// Set the current mouse cursor
-	static void  setMouseCursor(const char *cursorTexture);
-	static void  setMouseCursor(const std::string &cursorTexture) { setMouseCursor(cursorTexture.c_str()); }
+	static void  setMouseCursor(const std::string &cursorTexture);
 	/** Compute a view vector (with its direction z set to 1) from coordinate of the mouse on screen
 	  * If the mouse is on the island map, then a vector looking down from heights will be returned
 	  */

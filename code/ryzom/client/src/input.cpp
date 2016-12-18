@@ -271,7 +271,7 @@ void HandleSystemCursorCapture(const CEvent &event)
 	{
 		CEventMouseDown &em = (CEventMouseDown &) event;
 		DownMouseButtons |= em.Button & (leftButton | middleButton | rightButton);
-		
+
 		CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
 		if (cursor)
 		{
@@ -279,7 +279,7 @@ void HandleSystemCursorCapture(const CEvent &event)
 				cursor->setPointerMiddleDown(em.Button == middleButton);
 				cursor->setPointerRightDown(em.Button == rightButton);
 		}
-		
+
 		Driver->setCapture(true);
 	}
 

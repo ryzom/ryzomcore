@@ -536,11 +536,11 @@ CShapeInstanceReference CEntityManager::createInstance(const string& shape, cons
 	if (!Scene) return nullinstref;
 
 	UInstance instance = Scene->createInstance(shape);
-	
+
 	if(!instance.empty())
 	{
 		UMovePrimitive *primitive = NULL;
-		
+
 		if (PACS && haveCollisions)
 		{
 			primitive = PACS->addCollisionablePrimitive(dynamicWI, 1);
@@ -732,9 +732,8 @@ bool CEntityManager::instancesRemoved()
 	return instRemoved;
 }
 
-
-
-bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values) {
+bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values)
+{
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
 		return false;
 	
@@ -881,6 +880,8 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			primitive->setObstacle(active);
 		}
 	}
+
+	return true;
 }
 
 
@@ -920,7 +921,7 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 				_ShapeInstances[i].Instance.getShapeAABBox(bbox);
 				CVector bbox_min;
 				CVector bbox_max;
-				
+
 				if (bbox.getCenter() == CVector::Null)
 				{
 					bbox_min = CVector(-0.5f, -0.5f, -0.5f);
@@ -931,9 +932,9 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 					bbox_min = bbox.getMin();
 					bbox_max = bbox.getMax();
 				}
-				
+
 				bbox.setMinMax((bbox_min*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox_max*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
-				
+
 				if(bbox.intersect(pos, pos+dir*100.0f))
 				{
 					float dist = (bbox.getCenter()-pos).norm();

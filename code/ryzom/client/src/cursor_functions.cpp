@@ -559,7 +559,7 @@ void checkUnderCursor()
 						selectedInstance.getMaterial(j).setShininess( 1000.0f );
 					}
 				}
-				
+
 				selectedInstanceURL = instref.ContextURL;
 				if (instref.ContextText.empty())
 				{
