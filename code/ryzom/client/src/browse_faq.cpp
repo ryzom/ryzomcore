@@ -60,6 +60,6 @@ void browseFAQ(NLMISC::CConfigFile &cf)
 	}
 	else
 	{
-		openURL(url.c_str());
+		openURL(url);
 	}
 }

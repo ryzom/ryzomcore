@@ -142,12 +142,12 @@ void CStaticOutpostBuilding::CDriller::readGeorges (const NLGEORGES::UFormElm *p
 	TotalMP = 0.0f;
 	for (uint i = 0; i < 20; ++i)
 	{
-		string namePath = NLMISC::toString("mp%d.name", i);
-		string quantityPath = NLMISC::toString("mp%d.quantity", i);
+		string namePath = NLMISC::toString("mp%u.name", i);
+		string quantityPath = NLMISC::toString("mp%u.quantity", i);
 		string	name;
 		float	quantity;
-		pElt->getValueByName (name, namePath.c_str());
-		pElt->getValueByName (quantity, quantityPath.c_str());
+		pElt->getValueByName (name, namePath);
+		pElt->getValueByName (quantity, quantityPath);
 		if(!name.empty() && quantity>0.f)
 		{
 			CSheetId mpSheetId = CSheetId(name);

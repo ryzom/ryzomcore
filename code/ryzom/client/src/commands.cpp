@@ -3910,7 +3910,7 @@ NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
 	if (args.size () != 1)
 		return false;
 
-	return openURL(args[0].c_str());
+	return openURL(args[0]);
 }
 
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")

@@ -48,7 +48,7 @@ void CSkyObjectSheet::CColorGradientInfoSheet::build(const NLGEORGES::UFormElm &
 {
 	item.getValueByName(TargetTextureStage, (prefix + "TargetTextureStage").c_str());
 	const NLGEORGES::UFormElm *elm = NULL;
-	if(item.getNodeByName (&elm, (prefix + "WeatherToGradient").c_str()) && elm)
+	if(item.getNodeByName (&elm, prefix + "WeatherToGradient") && elm)
 	{
 		uint numBitmaps;
 		nlverify (elm->getArraySize (numBitmaps));

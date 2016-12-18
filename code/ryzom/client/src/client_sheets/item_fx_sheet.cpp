@@ -54,7 +54,7 @@ void CItemFXSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 	item.getValueByName(AttackFXRot.z,    (prefix + "AttackFXRot.Z").c_str());
 	item.getValueByName(ImpactFXDelay,    (prefix + "ImpactFXDelay").c_str());
 	const NLGEORGES::UFormElm *array = NULL;
-	if (item.getNodeByName(&array, (prefix + "StaticFXs").c_str()) && array)
+	if (item.getNodeByName(&array, prefix + "StaticFXs") && array)
 	{
 		uint count;
 		nlverify(array->getArraySize(count));

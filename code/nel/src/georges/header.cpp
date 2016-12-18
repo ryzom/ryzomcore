@@ -76,7 +76,7 @@ void CFileHeader::write (xmlNodePtr node) const
 
 // ***************************************************************************
 
-void CFileHeader::addLog (const char *log)
+void CFileHeader::addLog (const std::string &log)
 {
 	time_t t;
 	time (&t);
@@ -92,7 +92,7 @@ void CFileHeader::addLog (const char *log)
 
 // ***************************************************************************
 
-void CFileHeader::setComments (const char *comments)
+void CFileHeader::setComments (const std::string &comments)
 {
 	Comments = comments;
 }
@@ -215,7 +215,7 @@ const char *CFileHeader::getStateString (TState state)
 
 // ***************************************************************************
 
-void CFileHeader::warning (bool exception, const char *function, const char *format, ... ) const
+void CFileHeader::warning (bool exception, const std::string &function, const char *format, ... ) const
 {
 	// Make a buffer string
 	va_list args;
@@ -225,7 +225,7 @@ void CFileHeader::warning (bool exception, const char *function, const char *for
 	va_end( args );
 
 	// Set the warning
-	NLGEORGES::warning (exception, "(CFileHeader::%s) : %s", function, buffer);
+	NLGEORGES::warning (exception, "(CFileHeader::%s) : %s", function.c_str(), buffer);
 }
 
 // ***************************************************************************

@@ -1292,14 +1292,14 @@ void IFormWidget::updateLabel ()
 					UFormElm::TWhereIsValue where;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify (elm->getValueByName (result, FormName.c_str (), UFormElm::NoEval, &where));
+					nlverify (elm->getValueByName (result, FormName, UFormElm::NoEval, &where));
 
 					// Get the value evaluated
 					std::string resultEvaluated;
 #ifdef TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Formula, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Formula, &where);
 #else // TEST_EVAL_FORMULA
-					bool error = !elm->getValueByName (resultEvaluated, FormName.c_str (), UFormElm::Eval, &where);
+					bool error = !elm->getValueByName (resultEvaluated, FormName, UFormElm::Eval, &where);
 #endif // TEST_EVAL_FORMULA
 
 					// Complete the array ?
@@ -1688,7 +1688,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 	if ((SrcType == TypeForm) || (SrcType == TypeType))
 	{
 		string result;
-		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName.c_str(), UFormElm::NoEval, NULL))
+		if (doc->getRootNode(getSlot ())->getValueByName (result, FormName, UFormElm::NoEval, NULL))
 		{
 			Combo.UpdateData ();
 			Combo.SetWindowText (result.c_str());

@@ -1911,7 +1911,7 @@ class CAHOpenURL : public IActionHandler
 		else
 			url += "?";
 		url += "language=" + ClientCfg.LanguageCode;
-		openURL(url.c_str());
+		openURL(url);
 
 		nlinfo("openURL %s", url.c_str());
 	}

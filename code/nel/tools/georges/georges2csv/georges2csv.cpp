@@ -405,7 +405,7 @@ void scanFiles(const CSString &filespec)
 					}
 					else
 					{
-						if	(form->getRootNode ().getValueByName(valueString,fields[i]._name.c_str(),fields[i]._evaluated,&where))	//fieldForm->getValue(valueString,fields[i]._evaluated))
+						if	(form->getRootNode ().getValueByName(valueString,fields[i]._name, fields[i]._evaluated, &where))	//fieldForm->getValue(valueString,fields[i]._evaluated))
 							;//addQuotesRoundString	(valueString);
 						else
 							setErrorString	(valueString, fields[i]._evaluated, where);
@@ -422,7 +422,7 @@ void scanFiles(const CSString &filespec)
 				
 //				UFormElm::TWhereIsValue where;
 //
-//				bool result=form->getRootNode ().getValueByName(s,fields[i]._name.c_str(),fields[i]._evaluated,&where);
+//				bool result=form->getRootNode ().getValueByName(s,fields[i]._name, fields[i]._evaluated,&where);
 //				if (!result)
 //				{
 //					if (fields[i]._evaluated)
@@ -1122,8 +1122,8 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						}
 						//nldebug( "%s: %s '%s'", args[0].c_str(), var.c_str(), memberVal.c_str() );
 						// need to put the value at the correct index.
-						const	std::string	fieldName=NLMISC::toString("%s[%d]", var.c_str(), currentMemberIndex).c_str();
-						const_cast<UFormElm&>(rootForm).setValueByName(memberVal.c_str(), fieldName.c_str());
+						const	std::string	fieldName=NLMISC::toString("%s[%u]", var.c_str(), currentMemberIndex).c_str();
+						const_cast<UFormElm&>(rootForm).setValueByName(memberVal, fieldName);
 						isModified=true;
 						displayed = true;
 					}
@@ -1132,7 +1132,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 						if	(!isNewSheet)
 						{
 							string	test;
-							if	(	rootForm.getValueByName(test,var.c_str())
+							if	(	rootForm.getValueByName(test, var)
 								&&	test==memberVal	)
 							{
 								continue;
@@ -1140,7 +1140,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 							
 						}					
 						//nldebug( "%s: %s '%s'", args[0].c_str(), var.c_str(), memberVal.c_str() );
-						const_cast<UFormElm&>(rootForm).setValueByName(memberVal.c_str(), var.c_str());
+						const_cast<UFormElm&>(rootForm).setValueByName(memberVal, var);
 						isModified=true;
 						displayed = true;
 					}
