@@ -159,7 +159,7 @@ void CEditableRange::OnUpdateValue()
 
 void CEditableRange::emptyDialog(void)
 {
-	m_Value = CString("");
+	m_Value.Empty();
 	m_SliderPos = 0;
 	UpdateData(FALSE);
 }

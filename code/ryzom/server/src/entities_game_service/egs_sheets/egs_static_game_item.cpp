@@ -249,7 +249,7 @@ void CStaticItem::init(bool doDelete)
 	CraftingToolType = TOOL_TYPE::Unknown;
 
 	Origin			= ITEM_ORIGIN::UNKNOWN;
-	Sack			= std::string("");
+	Sack.clear();
 	Stackable		= 1;
 	Color			= -2;
 	SlotCount		= 0;
