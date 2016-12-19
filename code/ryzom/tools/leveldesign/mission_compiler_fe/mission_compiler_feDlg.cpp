@@ -370,7 +370,7 @@ bool CMissionCompilerFeDlg::readConfigFile()
 	{
 		if ((pathsPrim->size() != names->size()) || (pathsText->size() != names->size()))
 		{
-			AfxMessageBox("Config file : ServerPathPrim, ServerPathText and ServerName are different in size !", MB_OK);
+			AfxMessageBox(_T("Config file : ServerPathPrim, ServerPathText and ServerName are different in size !"), MB_OK);
 			PostQuitMessage(-1);
 			return false;
 		}
