@@ -356,7 +356,7 @@ namespace NLGUI
 	{
 		if (!args.empty())
 		{
-			ucstring res("");
+			ucstring res;
 			for (uint32 i = 0; i < args.size(); ++i)
 			{
 				args[i].toString();
