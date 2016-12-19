@@ -461,7 +461,7 @@ public:
 	static CPlayerInfos	*create()				{ return _PlayerAllocator.allocate(); }
 
 	/// Removes an entity (delete equivalent).
-	static void remove(CPlayerInfos *player)	{ _PlayerAllocator.free(player); }
+	static void remove(CPlayerInfos *player)	{ _PlayerAllocator.freeBlock(player); }
 
 private:
 

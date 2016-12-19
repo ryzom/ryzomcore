@@ -5489,7 +5489,7 @@ NLMISC_COMMAND (webExecCommand, "Execute a web command", "<user id> <web_app_url
 		if (command_args.size() > 8)
 		{
 			if (command_args[8] != "*") {
-				NLMISC::fromString(command_args[7], z);
+				NLMISC::fromString(command_args[8], z);
 			}
 		}
 
