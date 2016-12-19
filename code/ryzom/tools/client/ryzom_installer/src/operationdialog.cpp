@@ -70,7 +70,7 @@ COperationDialog::COperationDialog(QWidget *parent):QDialog(parent), m_aborting(
 	connect(this, SIGNAL(progress(qint64, QString)), SLOT(onProgressProgress(qint64, QString)));
 	connect(this, SIGNAL(success(qint64)), SLOT(onProgressSuccess(qint64)));
 	connect(this, SIGNAL(fail(QString)), SLOT(onProgressFail(QString)));
-	connect(this, SIGNAL(done()), SLOT(onDone()));
+	connect(this, SIGNAL(operationDone()), SLOT(onDone()));
 
 	adjustSize();
 
@@ -446,7 +446,7 @@ void COperationDialog::onDownloadDone()
 {
 	renamePartFile();
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::onProgressPrepare()
@@ -558,7 +558,7 @@ void COperationDialog::extractDownloadedData()
 
 	if (!extractor.exec()) return;
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::downloadClient()
@@ -590,7 +590,7 @@ void COperationDialog::extractDownloadedClient()
 
 	launchUpgradeScript(destinationDirectory, server.clientFilename);
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::copyDataFiles()
@@ -616,7 +616,7 @@ void COperationDialog::copyDataFiles()
 
 	if (!copier.exec()) return;
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::copyProfileFiles()
@@ -649,7 +649,7 @@ void COperationDialog::copyProfileFiles()
 	// correct path to client_default.cfg
 	profile.createClientConfig();
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::extractBnpClient()
@@ -671,7 +671,7 @@ void COperationDialog::extractBnpClient()
 
 	launchUpgradeScript(destinationDirectory, server.clientFilename);
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::launchUpgradeScript(const QString &directory, const QString &executable)
@@ -796,7 +796,7 @@ void COperationDialog::copyInstaller()
 		config->setInstallerCopied(true);
 	}
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::uninstallOldClient()
@@ -842,7 +842,7 @@ void COperationDialog::uninstallOldClient()
 	}
 #endif
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::cleanFiles()
@@ -858,7 +858,7 @@ void COperationDialog::cleanFiles()
 	cleaner.setDirectory(server.getDirectory());
 	cleaner.exec();
 
-	emit done();
+	emit operationDone();
 }
 
 bool COperationDialog::createDefaultProfile()
@@ -915,7 +915,7 @@ bool COperationDialog::createDefaultProfile()
 	config->addProfile(profile);
 	config->save();
 
-	emit done();
+	emit operationDone();
 
 	return true;
 }
@@ -930,7 +930,7 @@ bool COperationDialog::createProfileShortcuts(const QString &profileId)
 
 	profile.createShortcuts();
 
-	emit done();
+	emit operationDone();
 
 	return true;
 }
@@ -968,7 +968,7 @@ bool COperationDialog::createAddRemoveEntry()
 
 	updateAddRemoveEntry();
 
-	emit done();
+	emit operationDone();
 
 	return true;
 }
@@ -1067,7 +1067,7 @@ void COperationDialog::deleteComponentsServers()
 	// delete Ryzom directory if all files have been deleted
 	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::addComponentsProfiles()
@@ -1087,7 +1087,7 @@ void COperationDialog::addComponentsProfiles()
 	// clear list of all servers to uninstall
 	m_addComponents.profiles.clear();
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::deleteComponentsProfiles()
@@ -1140,7 +1140,7 @@ void COperationDialog::deleteComponentsProfiles()
 	// delete profiles directory if all files have been deleted
 	if (isDirectoryEmpty(config->getProfileDirectory(), true)) QDir(config->getProfileDirectory()).removeRecursively();
 
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::deleteComponentsInstaller()
@@ -1192,7 +1192,7 @@ void COperationDialog::deleteComponentsInstaller()
 	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
 
 	emit success(1);
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::deleteComponentsDownloadedFiles()
@@ -1230,7 +1230,7 @@ void COperationDialog::deleteComponentsDownloadedFiles()
 	if (isDirectoryEmpty(config->getInstallationDirectory(), true)) QDir(config->getInstallationDirectory()).removeRecursively();
 
 	emit success(1);
-	emit done();
+	emit operationDone();
 }
 
 void COperationDialog::operationPrepare()
@@ -1270,7 +1270,7 @@ void COperationDialog::operationFail(const QString &error)
 
 void COperationDialog::operationContinue()
 {
-	emit done();
+	emit operationDone();
 }
 
 bool COperationDialog::operationShouldStop()

@@ -80,7 +80,7 @@ signals:
 	void fail(const QString &error);
 
 	// emitted when done and should process next step
-	void done();
+	void operationDone();
 
 protected:
 	void showEvent(QShowEvent *e);
