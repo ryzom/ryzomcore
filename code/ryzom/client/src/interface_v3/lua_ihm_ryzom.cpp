@@ -2046,7 +2046,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 	
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 	float scale = 1.0f;
-	string context,url,skeleton,texture = "";
+	string context, url, skeleton, texture;
 	bool highlight, transparency, collision = false;
 	
 	if (ls.getTop() >= 2)
@@ -2068,7 +2068,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 	}
 
 
-	if (x == 0 && y == 0)
+	if (x == 0.f && y == 0.f)
 	{
 		x = UserEntity->pos().x;
 		y = UserEntity->pos().y;
