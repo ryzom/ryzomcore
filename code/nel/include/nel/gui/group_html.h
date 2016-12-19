@@ -321,7 +321,7 @@ namespace NLGUI
 		// \name internal methods
 
 		// Add a group in the current parent group
-		void addGroup (CInterfaceGroup *group, uint beginSpace);
+		void addHtmlGroup (CInterfaceGroup *group, uint beginSpace);
 
 		// Get the current parent group
 		CInterfaceGroup *getCurrentGroup();

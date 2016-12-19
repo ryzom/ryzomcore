@@ -1965,7 +1965,7 @@ namespace NLGUI
 
 					// Table must fit the container size
 
-					addGroup (table, 0);
+					addHtmlGroup (table, 0);
 
 					_Tables.push_back(table);
 
@@ -3759,7 +3759,7 @@ namespace NLGUI
 		newParagraph->setIndent(_Indent);
 
 		// Add to the group
-		addGroup (newParagraph, beginSpace);
+		addHtmlGroup (newParagraph, beginSpace);
 		_Paragraph = newParagraph;
 
 		paragraphChange ();
@@ -4545,7 +4545,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addGroup (CInterfaceGroup *group, uint beginSpace)
+	void CGroupHTML::addHtmlGroup (CInterfaceGroup *group, uint beginSpace)
 	{
 		if (!group)
 			return;
