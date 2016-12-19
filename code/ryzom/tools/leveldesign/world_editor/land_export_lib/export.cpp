@@ -1234,7 +1234,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 
 	zeZone.retrieve (PatchInfos, BorderVertices);
 
-	nlassert (BorderVertices.size() == 0);
+	nlassert (BorderVertices.empty());
 
 	CMatrix Transfo;
 	Transfo.setRot (CQuat(CVector::K, (float)(nRot * Pi / 2.0f)));
@@ -1445,7 +1445,7 @@ void CExport::transformZone (CZone &zeZone, sint32 nPosX, sint32 nPosY, uint8 nR
 
 	zeZone.retrieve (PatchInfos, BorderVertices);
 
-	nlassert (BorderVertices.size() == 0);
+	nlassert (BorderVertices.empty());
 
 	CMatrix Transfo;
 	Transfo.setRot (CQuat(CVector::K, (float)(nRot * Pi / 2.0f)));

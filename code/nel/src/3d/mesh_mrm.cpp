@@ -938,7 +938,7 @@ void	CMeshMRMGeom::render(IDriver *drv, CTransformShape *trans, float polygonCou
 	skeleton = mi->getSkeletonModel();
 	// The mesh must not be skinned for render()
 	nlassert(!(_Skinned && mi->isSkinned() && skeleton));
-	bool bMorphApplied = _MeshMorpher.BlendShapes.size() > 0;
+	bool bMorphApplied = !_MeshMorpher.BlendShapes.empty();
 	bool useTangentSpace = _MeshVertexProgram && _MeshVertexProgram->needTangentSpace();
 
 
@@ -1146,7 +1146,7 @@ void	CMeshMRMGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	skeleton = mi->getSkeletonModel();
 	// must be skinned for renderSkin()
 	nlassert(_Skinned && mi->isSkinned() && skeleton);
-	bool bMorphApplied = _MeshMorpher.BlendShapes.size() > 0;
+	bool bMorphApplied = !_MeshMorpher.BlendShapes.empty();
 	bool useNormal= (_VBufferFinal.getVertexFormat() & CVertexBuffer::NormalFlag)!=0;
 	bool useTangentSpace = _MeshVertexProgram && _MeshVertexProgram->needTangentSpace();
 
@@ -1312,7 +1312,7 @@ sint	CMeshMRMGeom::renderSkinGroupGeom(CMeshMRMInstance	*mi, float alphaMRM, uin
 	skeleton = mi->getSkeletonModel();
 	// must be skinned for renderSkin()
 	nlassert(_Skinned && mi->isSkinned() && skeleton);
-	bool bMorphApplied = _MeshMorpher.BlendShapes.size() > 0;
+	bool bMorphApplied = !_MeshMorpher.BlendShapes.empty();
 	bool useNormal= (_VBufferFinal.getVertexFormat() & CVertexBuffer::NormalFlag)!=0;
 	nlassert(useNormal);
 

@@ -1358,7 +1358,7 @@ retry:
 		vector<string> parts;
 		NLMISC::explode(*first, string("@"), parts, false);
 		
-		if (parts.size() > 0)
+		if (!parts.empty())
 			name = parts[0];
 		if (parts.size() > 1)
 			param = parts[1];

@@ -1504,7 +1504,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 {
 	uint nbLines;
 
-	if (args.size() == 0) nbLines = 100;
+	if (args.empty()) nbLines = 100;
 	else if (args.size() == 1) NLMISC::fromString(args[0], nbLines);
 	else return false;
 
@@ -1528,7 +1528,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displayMemlog, "displays the last N line of the 
 
 NLMISC_CATEGORISED_COMMAND(nel, resetFilters, "disable all filters on Nel loggers", "[debug|info|warning|error|assert]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 	{
 		DebugLog->resetFilters();
 		InfoLog->resetFilters();
@@ -1568,7 +1568,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterDebug, "add a negative filter o
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterDebug, "remove a filter on DebugLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		DebugLog->removeFilter();
 	else if(args.size() == 1)
 		DebugLog->removeFilter( args[0].c_str() );
@@ -1578,7 +1578,7 @@ NLMISC_CATEGORISED_COMMAND(nel, removeFilterDebug, "remove a filter on DebugLog"
 
 NLMISC_CATEGORISED_COMMAND(nel, displayFilterDebug, "display filter on DebugLog", "")
 {
-	if(args.size() != 0) return false;
+	if(!args.empty()) return false;
 	DebugLog->displayFilter(log);
 	return true;
 }
@@ -1599,7 +1599,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterInfo, "add a negative filter on
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterInfo, "remove a filter on InfoLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		InfoLog->removeFilter();
 	else if(args.size() == 1)
 		InfoLog->removeFilter( args[0].c_str() );
@@ -1646,7 +1646,7 @@ NLMISC_CATEGORISED_COMMAND(nel, addNegativeFilterWarning, "add a negative filter
 
 NLMISC_CATEGORISED_COMMAND(nel, removeFilterWarning, "remove a filter on WarningLog", "[<filterstr>]")
 {
-	if(args.size() == 0)
+	if(args.empty())
 		WarningLog->removeFilter();
 	else if(args.size() == 1)
 		WarningLog->removeFilter( args[0].c_str() );
@@ -1656,7 +1656,7 @@ NLMISC_CATEGORISED_COMMAND(nel, removeFilterWarning, "remove a filter on Warning
 
 NLMISC_CATEGORISED_COMMAND(nel, displayFilterWarning, "display filter on WarningLog", "")
 {
-	if(args.size() != 0) return false;
+	if(!args.empty()) return false;
 	WarningLog->displayFilter(log);
 	return true;
 }

@@ -45,7 +45,7 @@ CStringMapper *CStringMapper::createLocalMapper()
 // ****************************************************************************
 TStringId CStringMapper::localMap(const std::string &str)
 {
-	if (str.size() == 0)
+	if (str.empty())
 		return 0;
 
 	CAutoFastMutex	automutex(&_Mutex);

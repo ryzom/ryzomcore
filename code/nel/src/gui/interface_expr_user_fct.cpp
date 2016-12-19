@@ -210,7 +210,7 @@ namespace NLGUI
 
 	static DECLARE_INTERFACE_USER_FCT(userFctIdentity)
 	{
-		if (args.size() > 0)
+		if (!args.empty())
 		{
 			result = args[0];
 			return true;
@@ -354,9 +354,9 @@ namespace NLGUI
 
 	static DECLARE_INTERFACE_USER_FCT(userFctStr)
 	{
-		if (args.size() > 0)
+		if (!args.empty())
 		{
-			ucstring res("");
+			ucstring res;
 			for (uint32 i = 0; i < args.size(); ++i)
 			{
 				args[i].toString();

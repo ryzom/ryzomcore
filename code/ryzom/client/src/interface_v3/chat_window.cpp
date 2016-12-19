@@ -1265,7 +1265,7 @@ public:
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 

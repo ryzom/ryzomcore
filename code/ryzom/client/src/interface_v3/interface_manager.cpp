@@ -3169,7 +3169,7 @@ void CInterfaceManager::uninitEmotes()
 
 	// reset the emotes menu
 	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet*>(SheetMngr.get(CSheetId("list.text_emotes")));
-	if (pTELS != NULL && pTELS->TextEmotList.size() > 0)
+	if (pTELS != NULL && !pTELS->TextEmotList.empty())
 	{
 		// get the emotes menu id
 		string sPath = pTELS->TextEmotList[0].Path;
@@ -3211,7 +3211,7 @@ void CInterfaceManager::updateEmotes()
 bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandString */, const vector<string> &args, CLog &/* log */, bool /* quiet */, bool /* human */)
 {
 	string customPhrase;
-	if( args.size() > 0 )
+	if (!args.empty())
 	{
 		customPhrase = args[0];
 	}
@@ -3817,7 +3817,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		vector<ucstring> token_vector;
 		vector<ucstring> param_vector;
 		splitUCString(token_string, ucstring("."), token_vector);
-		if (token_vector.size() == 0)
+		if (token_vector.empty())
 		{
 			// Wrong formatting; give up on this one.
 			start_pos = end_pos;
@@ -3827,7 +3827,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 		if (token_vector.size() == 1)
 		{
 			splitUCString(token_subject, ucstring("/"), param_vector);
-			token_subject = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
+			token_subject = !param_vector.empty() ? param_vector[0] : ucstring("");
 			token_param = ucstring("name");
 		}
 		else if (token_vector.size() > 1)
@@ -3836,7 +3836,7 @@ bool CInterfaceManager::parseTokens(ucstring& ucstr)
 			if (token_param.luabind_substr(0, 3) != ucstring("gs("))
 			{
 				splitUCString(token_vector[1], ucstring("/"), param_vector);
-				token_param = (param_vector.size() > 0) ? param_vector[0] : ucstring("");
+				token_param = !param_vector.empty() ? param_vector[0] : ucstring("");
 			}
 		}
 

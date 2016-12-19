@@ -313,7 +313,7 @@ void	NLPACS::CGlobalRetriever::getBorders(const CAABBox &sbox, std::vector<std::
 					chainType = 3;
 			}
 
-			if (retriever.getFullOrderedChains().size() > 0)
+			if (!retriever.getFullOrderedChains().empty())
 			{
 				const COrderedChain3f	&ochain = retriever.getFullOrderedChain(entry.OChainId);
 

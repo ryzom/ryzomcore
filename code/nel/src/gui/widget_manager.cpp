@@ -3334,7 +3334,7 @@ namespace NLGUI
 		{
 			const CProcAction &action = proc.Actions[i];
 			// test if the condition for the action is valid
-			if( action.CondBlocks.size() > 0 )
+			if (!action.CondBlocks.empty())
 			{
 				CInterfaceExprValue result;
 				result.setBool( false );

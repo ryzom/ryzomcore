@@ -1003,7 +1003,7 @@ namespace NLGUI
 	{
 		string idTmp = id, lidTmp = lid;
 	//	bool isFound = true;
-		while (idTmp.size() > 0)
+		while (!idTmp.empty())
 		{
 			string tokid, toklid;
 
@@ -1782,7 +1782,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getViewsUnder (x, y, clipX, clipY, clipW, clipH, vVB);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1837,7 +1837,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getCtrlsUnder (x, y, clipX, clipY, clipW, clipH, vICL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}
@@ -1893,7 +1893,7 @@ namespace NLGUI
 			{
 	//		bool bUnder = 
 				pChild->getGroupsUnder (x, y, clipX, clipY, clipW, clipH, vIGL);
-	//			if (bUnder && (vICL.size() > 0))
+	//			if (bUnder && !vICL.empty())
 	//				return true;
 			}
 		}

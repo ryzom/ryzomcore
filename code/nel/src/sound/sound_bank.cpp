@@ -277,7 +277,7 @@ void CSoundBank::load(const std::string &packedSheetDir, bool packedSheetUpdate)
 					maxShortId = first->second.Sound->getName().getShortId();
 		}
 		++maxShortId; // inc for size = last idx + 1
-		if (container.size() == 0)
+		if (container.empty())
 		{
 			nlwarning("NLSOUND: No sound sheets have been loaded, missing sound sheet directory or packed sound sheets file");
 		}

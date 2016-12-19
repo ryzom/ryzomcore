@@ -589,10 +589,7 @@ void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 
 bool CShapeBank::isShapeWaiting ()
 {
-	if (WaitingShapes.size() == 0)
-		return false;
-	else
-		return true;
+	return !WaitingShapes.empty();
 }
 
 // ***************************************************************************

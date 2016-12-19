@@ -473,7 +473,7 @@ void CGroupInSceneBubbleManager::update ()
 
 CGroupInSceneBubble *CGroupInSceneBubbleManager::newBubble (const ucstring &text)
 {
-	if (!text.empty() && _Bubbles.size ())
+	if (!text.empty() && !_Bubbles.empty())
 	{
 		// Get a bubble
 		CGroupInSceneBubble *bubble = _Bubbles[_CurrentBubble];

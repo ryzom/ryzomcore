@@ -4325,7 +4325,7 @@ void CMainFrame::OnMissionCompiler()
 	}
 	
 	// write filenames to a temp file for the mission compiler
-	if (files.size() > 0)
+	if (!files.empty())
 	{
 		// use system temp directory
 		TCHAR tmpPath[MAX_PATH];

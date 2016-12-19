@@ -2851,7 +2851,7 @@ bool CZoneLighter::isLightableShape(IShape &shape)
 void CZoneLighter::lightShapes(uint zoneID, const CLightDesc& description)
 {
 	/// compute light for the lightable shapes in the given zone
-	if (_LightableShapes.size() == 0) return;
+	if (_LightableShapes.empty()) return;
 
 	uint numShapePerThread = 1 + ((uint)_LightableShapes.size() / _ProcessCount);
 	uint currShapeIndex = 0;
@@ -3785,7 +3785,7 @@ uint CZoneLighter::getAPatch (uint process)
 
 	nlassert(index < _PatchInfo.size());
 
-	if (access.value().size() == 0)
+	if (access.value().empty())
 		// no more patches
 		return 0xffffffff;
 

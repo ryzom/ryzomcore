@@ -409,7 +409,7 @@ void CGuildManager::update()
 			}
 
 			// Search for UserEntity to find our own grade
-			if ((UserEntity != NULL) && (_GuildMembers.size() > 0))
+			if ((UserEntity != NULL) && (!_GuildMembers.empty()))
 			{
 				uint i;
 				_Grade = EGSPD::CGuildGrade::Member;

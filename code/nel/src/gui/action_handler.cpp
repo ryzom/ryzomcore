@@ -69,7 +69,7 @@ namespace NLGUI
 		string allparam = Params;
 		skipBlankAtStart (allparam);
 		string param = toLower (ParamName);
-		while (allparam.size() > 0)
+		while (!allparam.empty())
 		{
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;
@@ -95,7 +95,7 @@ namespace NLGUI
 	{
 		string allparam = Params;
 		skipBlankAtStart (allparam);
-		while (allparam.size() > 0)
+		while (!allparam.empty())
 		{
 			std::string::size_type e = allparam.find('=');
 			if (e == std::string::npos || e == 0) break;

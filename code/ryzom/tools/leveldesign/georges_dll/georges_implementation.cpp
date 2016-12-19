@@ -248,7 +248,7 @@ void CGeorgesImpl::PutGroupText (const std::vector<std::string>& _vText, bool ap
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ((type == UFormDfn::EntryType) && array)
@@ -314,7 +314,7 @@ void CGeorgesImpl::PutText (const std::string& _sText)
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// It is an array ?
 			if (array&&(type == UFormDfn::EntryType))
@@ -374,7 +374,7 @@ void CGeorgesImpl::LineUp ()
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ( (type == UFormDfn::EntryType) && !array )
@@ -417,7 +417,7 @@ void CGeorgesImpl::LineDown ()
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (subDoc->getSlot ());
-			nlverify ( elm->getNodeByName (subDoc->getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (subDoc->getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Is a type entry ?
 			if ( (type == UFormDfn::EntryType) && !array )

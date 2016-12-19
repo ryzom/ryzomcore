@@ -181,8 +181,8 @@ void CVarPath::decode ()
 
 bool CVarPath::isFinal ()
 {
-	if(Destination.size() == 0) return true;
-	if(Destination[0].second.size() == 0) return true;
+	if(Destination.empty()) return true;
+	if(Destination[0].second.empty()) return true;
 	return false;
 }
 

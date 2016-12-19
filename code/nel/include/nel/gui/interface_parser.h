@@ -208,7 +208,7 @@ namespace NLGUI
 		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, const std::pair<std::string, std::string> *templateParams, uint numParams, bool updateLinks = true);
 		CInterfaceGroup *createGroupInstance(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
 		{
-			if (templateParams.size() > 0)
+			if (!templateParams.empty())
 				return createGroupInstance(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 			else
 				return createGroupInstance(templateName, parentID, NULL, 0, updateLinks);
@@ -222,7 +222,7 @@ namespace NLGUI
 		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, const std::pair<std::string,std::string> *templateParams, uint numParams, bool updateLinks /* = true */);
 		CInterfaceElement *createUIElement(const std::string &templateName, const std::string &parentID, std::vector<std::pair<std::string, std::string> > &templateParams, bool updateLinks = true)
 		{
-			if (templateParams.size() > 0)
+			if (!templateParams.empty())
 				return createUIElement(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 			else
 				return createUIElement(templateName, parentID, NULL, 0, updateLinks);

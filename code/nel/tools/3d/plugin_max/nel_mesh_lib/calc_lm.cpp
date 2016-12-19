@@ -2063,7 +2063,7 @@ void sans_majuscule_au_debut_LinkToObjectAround (CMesh::CMeshBuild *pMB, CMeshBa
 				}
 			}
 			
-			if (ivert.size() > 0)
+			if (!ivert.empty())
 			{
 				// Get all faces that contains at least one shared vertex
 				for (k = 0; k < wrt.vMB[i]->Faces.size(); ++k)
@@ -2258,7 +2258,7 @@ bool CExportNel::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::CMeshB
 
 		// Bubble sort pointer to the faces (Material sorting)
 		ClearFaceWithNoLM( pMB, pMBB, AllFaces );
-		if( AllFaces.size() == 0 )
+		if( AllFaces.empty() )
 		{
 			if (InfoLog)
 				InfoLog->display("CalculateLM : %d ms\n", timeGetTime()-t);

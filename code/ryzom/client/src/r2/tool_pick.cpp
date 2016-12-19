@@ -48,7 +48,7 @@ void CToolPick::setIgnoreInstances(const std::string & ignoreInstances)
 {
 	//H_AUTO(R2_CToolPick_setIgnoreInstances)
 	string allKind = ignoreInstances;
-	while (allKind.size() > 0)
+	while (!allKind.empty())
 	{
 		std::string::size_type e = allKind.find(',');
 		string tmp;

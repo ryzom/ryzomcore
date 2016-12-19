@@ -1063,7 +1063,7 @@ namespace NLGUI
 		{
 			// update the list size
 			sint32 newH = _H + child->getH();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newH += _Space;
 			_H = newH;
 
@@ -1077,7 +1077,7 @@ namespace NLGUI
 		{
 			// Update the list coords
 			sint32 newW = _W + child->getW();
-			if (_Elements.size() > 0)
+			if (!_Elements.empty())
 				newW += _Space;
 			_W = newW;
 
@@ -1412,7 +1412,7 @@ namespace NLGUI
 
 	void CGroupList::onTextChanged()
 	{
-		if( _Elements.size() == 0 )
+		if( _Elements.empty() )
 			return;
 
 		CElementInfo &e = _Elements[ 0 ];

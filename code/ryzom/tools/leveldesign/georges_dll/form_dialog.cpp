@@ -548,7 +548,7 @@ void CFormDialog::setToDocument (uint widget)
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (Widgets[widget]->getSlot ());
-			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName ().c_str (), &parentDfn, indexDfn, 
+			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName (), &parentDfn, indexDfn, 
 				&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Must create array or virtual dfn ?
@@ -811,7 +811,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 							bool parentVDfnArray;
 							CForm *form=doc->getFormPtr ();
 							CFormElm *elm = doc->getRootNode (Widgets[widgetId]->getSlot ());
-							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName ().c_str (), &parentDfn, indexDfn, 
+							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName (), &parentDfn, indexDfn, 
 								&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 							nlassert (parentDfn);
 
@@ -943,7 +943,7 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 							// Search for the node
 							nlverify ((const CFormElm*)(doc->getRootNode (Widgets[i]->getSlot ()))->getNodeByName 
-								(Widgets[i]->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
+								(Widgets[i]->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
 								&node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 							// Todo: multiply here by the spinner precision
@@ -954,8 +954,8 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							value -= (float)(lpnmud->iDelta) * increment;
 
 							// Print the result
-							char result[512];
-							sprintf (result, "%g", value);
+							TCHAR result[512];
+							_stprintf (result, _T("%g"), value);
 							
 							// Set the windnow text
 							combo->Combo.SetWindowText (result);
@@ -1097,7 +1097,7 @@ void CFormDialog::getFromDocument ()
 		UFormDfn::TEntryType type;
 
 		// Search for the node
-		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 		// Should have a parent DFN, else it is the root element
 		if (parentDfn)
@@ -1342,7 +1342,7 @@ void IFormWidget::updateLabel ()
 					bool parentVDfnArray;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+					nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 						&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 					// Does the node exist ?
@@ -1401,7 +1401,7 @@ bool IFormWidget::getNode (const CFormDfn **parentDfn, uint &lastElement, const 
 		bool parentVDfnArray;
 		CForm *form=doc->getFormPtr ();
 		CFormElm *elm = doc->getRootNode (getSlot ());
-		return (elm->getNodeByName (FormName.c_str (), parentDfn, 
+		return (elm->getNodeByName (FormName, parentDfn, 
 			lastElement, nodeDfn, nodeType, node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 	}
 	return false;
@@ -1558,7 +1558,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	bool parentVDfnArray;
 	CForm *form=doc->getFormPtr ();
 	CFormElm *elm = doc->getRootNode (getSlot ());
-	nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+	nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 		&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 	FirstId = dialog_index;
@@ -1710,7 +1710,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (array);
 
 		// Node exist ?
@@ -1723,13 +1723,13 @@ void CFormMemCombo::getFromDocument (CForm &form)
 			Combo.SetWindowText (label);
 
 			if (arrayNode->getForm () == &form)
-				Label.SetWindowText ("Array size:");
+				Label.SetWindowText (_T("Array size:"));
 			else
-				Label.SetWindowText ("Array size: (in parent form)");
+				Label.SetWindowText (_T("Array size: (in parent form)"));
 		}
 		else
 		{
-			Combo.SetWindowText ("0");
+			Combo.SetWindowText (_T("0"));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -1743,7 +1743,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (!array);
 
 		// Node exist ?
@@ -1751,11 +1751,11 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (node)
 		{
 			CFormElmVirtualStruct *virtualNode = safe_cast<CFormElmVirtualStruct*> (node);
-			Combo.SetWindowText (virtualNode->DfnFilename.c_str());
+			Combo.SetWindowText (utf8ToTStr(virtualNode->DfnFilename));
 		}
 		else
 		{
-			Combo.SetWindowText ("");
+			Combo.SetWindowText (_T(""));
 		}
 		Combo.UpdateData (FALSE);
 	}

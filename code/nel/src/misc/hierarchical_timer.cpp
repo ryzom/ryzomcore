@@ -521,7 +521,7 @@ void		CHTimer::displayByExecutionPath(CLog *log, TSortCriterion criterion, bool 
 				std::copy(currTimer->_Name, currTimer->_Name + (endIndex - startIndex), resultName.begin() + startIndex);
 			}
 			TNodeVect &execNodes = nodeMap[currTimer];
-			if (execNodes.size() > 0)
+			if (!execNodes.empty())
 			{
 				currNodeStats.buildFromNodes(&execNodes[0], (uint)execNodes.size(), _MsPerTick);
 				currNodeStats.getStats(resultStats, displayEx, rootStats.TotalTime, _WantStandardDeviation);

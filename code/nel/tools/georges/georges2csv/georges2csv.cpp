@@ -382,7 +382,7 @@ void scanFiles(const CSString &filespec)
 				UFormElm	*fieldForm=NULL;
 				std::string	valueString;
 				
-				form->getRootNode ().getNodeByName(&fieldForm, fields[i]._name.c_str());
+				form->getRootNode ().getNodeByName(&fieldForm, fields[i]._name);
 
 				if	(fieldForm)
 				{
@@ -1026,7 +1026,7 @@ void	convertCsvFile( const string &file, bool generate, const string& sheetType 
 
 			const	UFormElm	*fieldForm=NULL;
 						
-			if	(rootForm.getNodeByName(&fieldForm, var.c_str()))
+			if	(rootForm.getNodeByName(&fieldForm, var))
 			{
 				UFormDfn	*dfnForm=const_cast<UFormElm&>(rootForm).getStructDfn();
 				nlassert(dfnForm);

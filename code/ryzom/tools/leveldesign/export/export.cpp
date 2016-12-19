@@ -110,7 +110,7 @@ void CExport::delAllIGZoneUnderPoint (float fCellSize, CPrimPoint *pPoint, const
 void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const string &sIGOutputDir)
 {
 	if (pPath == NULL) return;
-	if (pPath->VPoints.size() == 0) return;
+	if (pPath->VPoints.empty()) return;
 	uint32 i, j;
 	CVector vMin, vMax;
 
@@ -195,7 +195,7 @@ void CExport::delAllIGZoneUnderPath (float fCellSize, CPrimPath *pPath, const st
 void CExport::delAllIGZoneUnderPatat (float fCellSize, CPrimZone *pPatat, const string &sIGOutputDir)
 {
 	if (pPatat == NULL) return;
-	if (pPatat->VPoints.size() == 0) return;
+	if (pPatat->VPoints.empty()) return;
 	uint32 i, j;
 	CVector vMin, vMax;
 
@@ -294,7 +294,7 @@ bool CExport::isPatatNeedUpdate (float fCellSize, CPrimZone *pPatat, const strin
 	CVector vMin, vMax;
 
 	CTools::chdir (sIGOutputDir);
-	if (pPatat->VPoints.size() == 0)
+	if (pPatat->VPoints.empty())
 		return false;
 	vMin = vMax = pPatat->VPoints[0];
 	for (i = 0; i < pPatat->VPoints.size(); ++i)
@@ -394,7 +394,7 @@ bool CExport::isPathNeedUpdate (float fCellSize, CPrimPath *pPath, const string 
 	CVector vMin, vMax;
 
 	CTools::chdir (sIGOutputDir);
-	if (pPath->VPoints.size() == 0)
+	if (pPath->VPoints.empty())
 		return false;
 	vMin = vMax = pPath->VPoints[0];
 	for (i = 0; i < pPath->VPoints.size(); ++i)
@@ -1245,7 +1245,7 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 	_ExportCB = expCB;
 
 	// Does we have something to export
-	if ((selection != NULL) && (selection->size() == 0))
+	if ((selection != NULL) && (selection->empty()))
 	{
 		if (_ExportCB)
 			_ExportCB->dispInfo ("Nothing to export");
@@ -1983,7 +1983,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 {
 	sint32 i, j, k;
 
-	if (_FloraInsts.size() == 0)
+	if (_FloraInsts.empty())
 		return;
 
 	CZoneRegion zoneRegion;

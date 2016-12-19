@@ -512,7 +512,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 		return ApplyResult_UnsupportedXDeltaFormat;
 	}
 
-	if (_Ctrl.SourceInfo.size() == 0)
+	if (_Ctrl.SourceInfo.empty())
 	{
 		errorMsg = "no source info";
 		return ApplyResult_Error;
@@ -527,7 +527,7 @@ CXDeltaPatch::TApplyResult CXDeltaPatch::apply(const std::string &sFileToPatch, 
 	SXDeltaCtrl::SSourceInfo *pFromSource = NULL;
 //	SXDeltaCtrl::SSourceInfo *pDataSource = NULL;
 
-	if (_Ctrl.SourceInfo.size() > 0)
+	if (!_Ctrl.SourceInfo.empty())
     {
 		SXDeltaCtrl::SSourceInfo &rInfo = _Ctrl.SourceInfo[0];
 

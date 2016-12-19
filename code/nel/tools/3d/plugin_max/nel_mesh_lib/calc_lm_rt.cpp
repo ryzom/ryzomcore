@@ -246,7 +246,7 @@ CRGBAF CRTWorld::raytrace (NLMISC::CVector &vVertex, sint32 nLightNb, uint8& rtV
 
 			RayOfLight.clip (t);
 
-			if (RayOfLight.Shapes.size() == 0)
+			if (RayOfLight.Shapes.empty())
 				return CRGBAF(0.0f, 0.0f, 0.0f, 0.0f);
 			
 			// Next selected element

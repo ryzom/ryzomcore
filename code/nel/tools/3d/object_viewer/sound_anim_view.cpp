@@ -298,7 +298,7 @@ void CSoundAnimView::refresh(BOOL update)
 	CInstanceInfo *instanceInfo = _ObjView->getInstance(selected);
 
 	// Some animation in the list ?
-	if (instanceInfo->Saved.PlayList.size() > 0)
+	if (!instanceInfo->Saved.PlayList.empty())
 	{
 		// Accumul time
 		float startTime = 0;

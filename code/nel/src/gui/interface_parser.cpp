@@ -673,7 +673,7 @@ namespace NLGUI
 				string NewProp;
 				string RepProp;
 
-				while (LastProp.size() > 0)
+				while (!LastProp.empty())
 				{
 					string::size_type diesPos = LastProp.find("#");
 					if (diesPos != string::npos)

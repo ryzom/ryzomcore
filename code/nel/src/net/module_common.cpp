@@ -195,7 +195,7 @@ namespace NLNET
 		vector<string>	parts;
 		NLMISC::explode(name, string("."), parts);
 
-		if (name.size() > 0)
+		if (!name.empty())
 		{
 			// at least one part in the name
 			// check if sub ojbcct exist
@@ -208,7 +208,7 @@ namespace NLNET
 				sub = SubParams.back();
 			}
 
-			if (name.size() > 0)
+			if (!name.empty())
 			{
 				// name is more deep, need to resurse
 				parts.erase(parts.begin());

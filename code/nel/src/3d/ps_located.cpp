@@ -239,7 +239,7 @@ void CPSLocated::releaseAllRef()
 										 // If this happen, you can register with the registerDTorObserver
 										 // (observer pattern)
 										 // and override notifyTargetRemove to call releaseCollisionInfo
-	nlassert(_IntegrableForces.size() == 0);
+	nlassert(_IntegrableForces.empty());
 	nlassert(_NonIntegrableForceNbRefs == 0);
 	CHECK_PS_INTEGRITY
 }
@@ -839,7 +839,7 @@ CPSLocated::~CPSLocated()
 										 // If this happen, you can register with the registerDTorObserver
 										 // (observer pattern)
 										 // and override notifyTargetRemove to call releaseCollisionInfo
-	nlassert(_IntegrableForces.size() == 0);
+	nlassert(_IntegrableForces.empty());
 	nlassert(_NonIntegrableForceNbRefs == 0);
 
 	// delete all bindable

@@ -713,7 +713,7 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 						// Get the nodes
 						std::vector<INode*> vectNode;
 						theCNelExport.getSelectedNode (vectNode);
-						if (vectNode.size() == 0)
+						if (vectNode.empty())
 						{
 							::MessageBox(hWnd, _T("No nodes selected"), _T("Error"), MB_OK|MB_ICONEXCLAMATION);
 							return ret;

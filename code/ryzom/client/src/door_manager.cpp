@@ -233,7 +233,7 @@ void CDoorManager::SDoor::checkToClose()
 		}
 	}
 
-	if (Entities.size() == 0)
+	if (Entities.empty())
 		close();
 	else
 		open();

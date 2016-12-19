@@ -302,9 +302,9 @@ void initCatDisplay()
 	// Check is good now ask the player if he wants to apply the patch
 	pPM->getInfoToDisp(InfoOnPatch);
 
-	if ((InfoOnPatch.NonOptCat.size() > 0) ||
-		(InfoOnPatch.OptCat.size() > 0) ||
-		(InfoOnPatch.ReqCat.size() > 0))
+	if ((!InfoOnPatch.NonOptCat.empty()) ||
+		(!InfoOnPatch.OptCat.empty()) ||
+		(!InfoOnPatch.ReqCat.empty()))
 	{
 		createOptionalCatUI();
 		NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:SCREEN")->setValue32(UI_VARIABLES_SCREEN_CATDISP);
@@ -529,9 +529,9 @@ void loginMainLoop()
 
 						AvailablePatchs = InfoOnPatch.getAvailablePatchsBitfield();
 
-						if ((InfoOnPatch.NonOptCat.size() > 0) ||
-							(InfoOnPatch.OptCat.size() > 0) ||
-							(InfoOnPatch.ReqCat.size() > 0))
+						if ((!InfoOnPatch.NonOptCat.empty()) ||
+							(!InfoOnPatch.OptCat.empty()) ||
+							(!InfoOnPatch.ReqCat.empty()))
 						{
 							LoginSM.pushEvent(CLoginStateMachine::ev_patch_needed);
 							//	createOptionalCatUI();

@@ -62,7 +62,7 @@ void CMissionSheet::build(const NLGEORGES::UFormElm &item)
 	{
 		const UFormElm * stepStruct;
 		string varName = string("step") + NLMISC::toString(i);
-		item.getNodeByName (&stepStruct, varName.c_str());
+		item.getNodeByName (&stepStruct, varName);
 
 		if (stepStruct)
 		{

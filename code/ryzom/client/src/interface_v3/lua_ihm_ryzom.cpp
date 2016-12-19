@@ -365,7 +365,7 @@ void CLuaIHMRyzom::createLuaEnumTable(CLuaState &ls, const std::string &str)
 	// Create table recursively (ex: 'game.TPVPClan' will check/create the table 'game' and 'game.TPVPClan')
 	p = s.splitTo('.', true);
 
-	while (p.size() > 0)
+	while (!p.empty())
 	{
 		if (path.empty())
 			path = p;
@@ -2917,7 +2917,7 @@ ucstring CLuaIHMRyzom::replacePvpEffectParam(const ucstring &str, sint32 paramet
 	// Locate parameter and store it
 	p = s.splitTo('%', true);
 
-	while (p.size() > 0 && s.size() > 0)
+	while (!p.empty() && !s.empty())
 	{
 		if (s[0] == 'p' || s[0] == 'n' || s[0] == 'r')
 		{

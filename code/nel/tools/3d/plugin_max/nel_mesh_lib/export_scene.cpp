@@ -501,8 +501,8 @@ CInstanceGroup*	CExportNel::buildInstanceGroup(const vector<INode*>& vectNode, v
 				}
 				
 				// debug purpose : to remove
-				if (vClusters.size() > 0)
-				if (aIGArray[nNumIG].Clusters.size() == 0)
+				if (!vClusters.empty())
+				if (aIGArray[nNumIG].Clusters.empty())
 				{
 					nlwarning("ERROR: Object %s is not attached to any cluster\nbut his flag clusterize is set", tStrToUtf8(pNode->GetName()).c_str());
 				}

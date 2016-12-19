@@ -1520,7 +1520,7 @@ namespace NLGUI
 		CSString s = str;
 		// Create table recursively (ex: 'game.TPVPClan' will check/create the table 'game' and 'game.TPVPClan')
 		p = s.splitTo('.', true);
-		while (p.size() > 0)
+		while (!p.empty())
 		{
 			if (path.empty() )
 				path = p;
