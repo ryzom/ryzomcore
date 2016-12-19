@@ -51,14 +51,14 @@ public:
 	//@}
 
 	/// Return this bindable type
-	uint32							getType(void) const { return PSEmitter; }
+	uint32							getType() const { return PSEmitter; }
 
 
 	/// Return priority for emitters
-	virtual uint32					getPriority(void) const { return 500; }
+	virtual uint32					getPriority() const { return 500; }
 
 	/// Return true if this located bindable derived class holds alive emitters
-	virtual bool					hasEmitters(void) { nlassert(_Owner); return _Owner->getSize() != 0; }
+	virtual bool					hasEmitters() const { nlassert(_Owner); return _Owner->getSize() != 0; }
 
 
 	virtual void					step(TPSProcessPass pass);
@@ -76,7 +76,7 @@ public:
 
 
 	/// Display the emitter in edition mode
-	virtual void					showTool(void);
+	virtual void					showTool();
 
 	/** Set the type of located to be emitted. The default is NULL which mean that no emission will occur
 	  * \return true if the operation could be performed. It can fail when this cause the system the system to last forever,
@@ -90,9 +90,9 @@ public:
 	virtual void					notifyTargetRemoved(CPSLocated *ptr);
 
 	/// Get emitted type.
-	CPSLocated						*getEmittedType(void) { return _EmittedType; }
+	CPSLocated						*getEmittedType() { return _EmittedType; }
 	/// Get const ptr on emitted type
-	const CPSLocated				*getEmittedType(void) const { return _EmittedType; }
+	const CPSLocated				*getEmittedType() const { return _EmittedType; }
 
 
 	/** The type of emission.

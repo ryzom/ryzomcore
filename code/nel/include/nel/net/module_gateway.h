@@ -264,7 +264,7 @@ namespace NLNET
 
 		/** Send a message to a module.
 		 */
-		virtual void sendModuleMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message) =0;
+		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message) =0;
 
 		/** Send a message to the module plugged in this gateway.
 		 *	You can override this method to change the dispatching, add filtering,

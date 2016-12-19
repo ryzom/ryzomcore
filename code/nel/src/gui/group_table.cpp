@@ -340,7 +340,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	bool CGroupCell::parse(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
+	bool CGroupCell::parseCell(xmlNodePtr cur, CInterfaceGroup * parentGroup, uint columnIndex, uint rowIndex)
 	{
 		CXMLAutoPtr ptr;
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"id");
@@ -1562,7 +1562,7 @@ namespace NLGUI
 					if (strcmp((char*)currCol->name,"TD") == 0)
 					{
 						CGroupCell *cell = new CGroupCell(CViewBase::TCtorParam());
-						if (cell->parse(currCol, this, column, row))
+						if (cell->parseCell(currCol, this, column, row))
 						{
 							cell->NewLine = newLine;
 							newLine = false;

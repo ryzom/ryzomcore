@@ -163,10 +163,10 @@ class CParticleSystemProcess : public NLMISC::IStreamable
 		virtual void			setMatrixMode(TPSMatrixMode matrixMode);
 
 		/// tells whether there are alive entities / particles in the system
-		virtual bool			hasParticles(void) const { return false ; }
+		virtual bool			hasParticles() const { return false ; }
 
 		/// tells whether there are alive emitters / particles in the system
-		virtual bool			hasEmitters(void) const { return false ; }
+		virtual bool			hasEmitters() const { return false ; }
 
 
 		/// max number of faces wanted by this process (for load balancing)

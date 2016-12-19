@@ -320,7 +320,7 @@ void CParticleSystem::setViewMat(const NLMISC::CMatrix &m)
 }
 
 ///=======================================================================================
-bool CParticleSystem::hasEmitters(void) const
+bool CParticleSystem::hasEmitters() const
 {
 	NL_PS_FUNC_MAIN(CParticleSystem_hasEmitters)
 	for (TProcessVect::const_iterator it = _ProcessVect.begin(); it != _ProcessVect.end(); ++it)

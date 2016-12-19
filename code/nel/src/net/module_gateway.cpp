@@ -627,7 +627,7 @@ namespace NLNET
 			if (from->NextMessageType != CModuleMessageHeaderCodec::mt_invalid)
 			{
 				// this message must be dispatched to a module
-				onReceiveModuleMessage(from, msgin);
+				onReceiveModuleMessageFromGateway(from, msgin);
 			}
 			// Not a module message, dispatch the gateway message
 			else if (msgin.getName() == "MOD_OP")
@@ -813,7 +813,7 @@ namespace NLNET
 		/***********************************/
 
 		/** A gateway receive module operation */
-		void onReceiveModuleMessage(CGatewayRoute *from, const CMessage &msgin)
+		void onReceiveModuleMessageFromGateway(CGatewayRoute *from, const CMessage &msgin)
 		{
 			H_AUTO(CModuleGetaway_onReceiveModuleMessage);
 			// clean the message type now, any return path will be safe
@@ -843,7 +843,7 @@ namespace NLNET
 			addresseeProxy = it->second;
 
 			// give the message to the gateway (either for local dispatch or for forwarding)
-			sendModuleMessage(senderProxy, addresseeProxy, msgin);
+			sendModuleProxyMessage(senderProxy, addresseeProxy, msgin);
 		}
 
 		// A gateway receive a module message header
@@ -1293,7 +1293,7 @@ namespace NLNET
 		}
 
 
-		virtual void sendModuleMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message)
+		virtual void sendModuleProxyMessage(IModuleProxy *senderProxy, IModuleProxy *addresseeProxy, const NLNET::CMessage &message)
 		{
 			H_AUTO(CModuleGetaway_sendModuleMessage);
 			// manage firewall
@@ -1581,7 +1581,7 @@ namespace NLNET
 			IModuleProxy *destProx = it2->second;
 
 
-			sendModuleMessage(senderProx, destProx, message);
+			sendModuleProxyMessage(senderProx, destProx, message);
 		}
 
 		virtual void _broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)

@@ -480,7 +480,7 @@ uint CPSLocated::querryMaxWantedNumFaces(void)
 
 /// ***************************************************************************************
 /// tells whether there are alive entities / particles in the system
-bool CPSLocated::hasParticles(void) const
+bool CPSLocated::hasParticles() const
 {
 	NL_PS_FUNC(CPSLocated_hasParticles)
 	CHECK_PS_INTEGRITY
@@ -494,7 +494,7 @@ bool CPSLocated::hasParticles(void) const
 
 /// ***************************************************************************************
 /// tells whether there are alive emitters
-bool CPSLocated::hasEmitters(void) const
+bool CPSLocated::hasEmitters() const
 {
 	NL_PS_FUNC(CPSLocated_hasEmitters)
 	CHECK_PS_INTEGRITY
