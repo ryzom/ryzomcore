@@ -188,8 +188,8 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 	if ( ((const char*)node->name == NULL) || (strcmp ((const char*)node->name, "FORM") != 0) )
 	{
 		// Make an error message
-		warning (true, "read", "XML Syntax error in block line %p, node (%s) should be FORM.",
-			node->content, node->name);
+		warning (true, "read", "XML Syntax error in block line %d, node (%s) should be FORM.",
+			(sint)node->line, node->name);
 	}
 
 	// Get first struct node
@@ -197,8 +197,8 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 	if (child == NULL)
 	{
 		// Throw exception
-		warning (true, "read", "Syntax error in block line %p, node (%s) should have a STRUCT child node.",
-			node->content, node->name);
+		warning (true, "read", "Syntax error in block line %d, node (%s) should have a STRUCT child node.",
+			(sint)node->line, node->name);
 	}
 
 	// Read the struct
