@@ -838,6 +838,7 @@ namespace NLGUI
 		result.R = 255 * hueToRgb(m1, m2, h + 1.0f/3.0f);
 		result.G = 255 * hueToRgb(m1, m2, h);
 		result.B = 255 * hueToRgb(m1, m2, h - 1.0f/3.0f);
+		result.A = 255;
 	}
 
 	class CNameToCol

@@ -530,7 +530,7 @@ void CLigoConfig::syntaxError (const std::string &filename, xmlNodePtr xmlNode, 
 	vsnprintf( buffer, 1024, format, args );
 	va_end( args );
 
-	errorMessage ("(%s), node (%s), line (%p) :\n%s", filename.c_str(), xmlNode->name, xmlNode->content, buffer);
+	errorMessage ("(%s), node (%s), line (%d) :\n%s", filename.c_str(), xmlNode->name, (sint)xmlNode->line, buffer);
 }
 
 // ***************************************************************************

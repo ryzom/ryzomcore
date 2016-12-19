@@ -1652,7 +1652,11 @@ void CClientEditionModule::saveUserComponentFile(const std::string& filename, bo
 				FILE* output = nlfopen(uncompressedName, "wb");
 				if (output)
 				{
-					fwrite(component->UncompressedData, sizeof(char) , component->UncompressedDataLength, output);
+					if (fwrite(component->UncompressedData, sizeof(char), component->UncompressedDataLength, output) != component->UncompressedDataLength)
+					{
+						nlwarning("Unable to write %s", component->UncompressedData);
+					}
+
 					fclose(output);
 				}
 			}

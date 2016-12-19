@@ -495,15 +495,30 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		if (_NeedHeader)
 		{
 			const char *hs = HeaderString();
-			fwrite (hs, strlen (hs), 1, _FilePointer);
+
+			if (fwrite(hs, strlen(hs), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write header: %s\n", hs);
+			}
+
 			_NeedHeader = false;
 		}
 
-		if(!str.empty())
-			fwrite (str.c_str(), str.size(), 1, _FilePointer);
+		if (!str.empty())
+		{
+			if (fwrite(str.c_str(), str.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write string: %s\n", str.c_str());
+			}
+		}
 
-		if(!args.CallstackAndLog.empty())
-			fwrite (args.CallstackAndLog.c_str(), args.CallstackAndLog.size (), 1, _FilePointer);
+		if (!args.CallstackAndLog.empty())
+		{
+			if (fwrite(args.CallstackAndLog.c_str(), args.CallstackAndLog.size(), 1, _FilePointer) != 1)
+			{
+				printf("Unable to write call stack: %s\n", args.CallstackAndLog.c_str());
+			}
+		}
 
 		fflush (_FilePointer);
 	}

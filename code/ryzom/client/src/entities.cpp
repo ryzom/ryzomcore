@@ -2584,8 +2584,16 @@ void	CEntityManager::logPropertyChange(CLFECOMMON::TCLEntityId who, const CStage
 			// Orientation
 			else if(propLoged[i]==CLFECOMMON::PROPERTY_ORIENTATION)
 			{
-				float	rot= *(float*)(&value);
-				valStr= toString("%d", sint32(rot*180/Pi));
+				union C64BitsRot
+				{
+					sint64 i64;
+					float f;
+				};
+
+				C64BitsRot rot;
+				rot.i64 = value;
+
+				valStr= toString("%d", sint32(rot.f*180/Pi));
 			}
 
 

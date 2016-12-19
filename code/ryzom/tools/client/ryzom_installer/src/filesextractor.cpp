@@ -213,7 +213,7 @@ public:
 	static SRes seekFunc(void *object, Int64 *pos, ESzSeek origin)
 	{
 		Q7zFile *me = (Q7zFile*)object;
-		qint64 newPos;
+		qint64 newPos = 0;
 
 		switch(origin)
 		{

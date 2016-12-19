@@ -836,7 +836,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 	bool inArrayIndex = false;
 
 	// Index in the array
-	uint arrayIndex;
+	uint arrayIndex = 0;
 
 	// Bool next token must be an array index
 	bool wantArrayIndex = false;
@@ -1653,7 +1653,7 @@ bool CFormElm::setValueByName (NLMISC::CRGBA value, const std::string &name, boo
 {
 	char tmp[512];
 	smprintf (tmp, 512, "%d,%d,%d", value.R, value.G, value.B);
-	return setValueByName (tmp, name, created);
+	return setValueByName(std::string(tmp), name, created);
 }
 
 // ***************************************************************************

@@ -2041,17 +2041,21 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 		if(node)
 		{
-			float dir = (float)atan2(UserEntity->front().y, UserEntity->front().x);
-			prop = (sint64 *)(&dir);
-			node->setValue64(*prop);
+			union C64BitsRot
+			{
+				sint64 i64;
+				float f;
+			};
+
+			C64BitsRot rot;
+			rot.f = (float)atan2(UserEntity->front().y, UserEntity->front().x);
+			node->setValue64(rot.i64);
 		}
 		// Set Mode
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 		if(node)
 		{
-			MBEHAV::EMode m = MBEHAV::NORMAL;
-			prop = (sint64 *)&m;
-			node->setValue64(*prop);
+			node->setValue64((sint64)MBEHAV::NORMAL);
 			EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_MODE);
 		}
 		// Set Visual Properties
@@ -2842,8 +2846,17 @@ NLMISC_COMMAND(orient, "Orient an entity", "Slot: [1-254] orient(degree) [dt(tic
 			fromString(args[2], dt);
 		// Write the position in the DB.
 		float	fRot= (float)(rot*Pi/180.f);
-		uint64	val= *(uint32*)(&fRot);
-		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), val);
+
+		union C64BitsRot
+		{
+			sint64 i64;
+			float f;
+		};
+
+		C64BitsRot r;
+		r.f = fRot;
+
+		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), r.i64);
 		// Update the position.
 		EntitiesMngr.updateVisualProperty(NetMngr.getCurrentServerTick()+dt, slot, CLFECOMMON::PROPERTY_ORIENTATION);
 	}
@@ -3756,7 +3769,7 @@ NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>
 	fromString(args[0], entityId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring text = "test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n";
+	ucstring text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
 	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	CEntityCL *entity = EntitiesMngr.entity(entityId);
