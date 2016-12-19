@@ -836,7 +836,7 @@ bool CFormElm::getInternalNodeByName (CForm *form, const std::string &name, cons
 	bool inArrayIndex = false;
 
 	// Index in the array
-	uint arrayIndex;
+	uint arrayIndex = 0;
 
 	// Bool next token must be an array index
 	bool wantArrayIndex = false;
