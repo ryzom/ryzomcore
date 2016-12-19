@@ -449,14 +449,14 @@ public:
 	void setName(const std::string &name) { _Name = name; }
 
 	/// get the located bindable name (edition purpose)
-	std::string getName(void) const { return _Name; }
+	std::string getName() const { return _Name; }
 
 
 	/// tells whether there are alive entities / particles in the system
-	virtual bool hasParticles(void) const;
+	virtual bool hasParticles() const;
 
 	/// tells whether there are alive emitters / particles in the system
-	virtual bool hasEmitters(void) const;
+	virtual bool hasEmitters() const;
 
 	/** Enable the to force LOD degradation. This will suppress instances immediately, (during the motion pass)  so that
 	  * there won't be more than maxNbInstance * dist / maxDist instances. This may not be desirable
@@ -468,7 +468,7 @@ public:
 	/** Test whether LOD degradation was activated
 	  * \see forceLODDegradation()
 	  */
-	bool hasLODDegradation(void) const { return _LODDegradation; }
+	bool hasLODDegradation() const { return _LODDegradation; }
 
 
 	/// for the CPSLocated to reevaluate the max number of faces it may need
@@ -853,11 +853,11 @@ public:
 	  */
 	void					setLOD(TPSLod lod) { _LOD = lod; }
 	/// get the valid lods for that object
-	TPSLod					getLOD(void) const { return _LOD; }
+	TPSLod					getLOD() const { return _LOD; }
 	/// tells whether there are alive entities / particles
-	virtual bool			hasParticles(void) const { return false; }
+	virtual bool			hasParticles() const { return false; }
 	/// tells whether there are alive emitters
-	virtual bool			hasEmitters(void) const { return false; }
+	virtual bool			hasEmitters() const { return false; }
 	/** set the extern ID of this located bindable. 0 means no extern access. The map of ID-locatedBindable. Is in th
 	  * particle system, so this located bindable must have been attached to a particle system, otherwise an assertion is raised
 	  */

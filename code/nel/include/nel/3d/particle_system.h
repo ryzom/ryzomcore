@@ -841,7 +841,7 @@ public:
 
 
 		/// return true when there are still emitters in the system
-		bool				hasEmitters(void) const;
+		bool				hasEmitters() const;
 
 		/// return true when there are still particles
 		bool				hasParticles() const;

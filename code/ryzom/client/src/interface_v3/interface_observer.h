@@ -45,7 +45,7 @@ public:
 	/**
 	 * observer update
 	 */
-	virtual void update (NLMISC::CCDBNodeLeaf* leaf)=0;
+	virtual void update (NLMISC::ICDBNode* leaf)=0;
 
 
 };

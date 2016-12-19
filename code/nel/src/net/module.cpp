@@ -879,7 +879,7 @@ namespace NLNET
 			throw EModuleNotReachable();
 		}
 
-		_Gateway->sendModuleMessage(senderProx, this, message);
+		_Gateway->sendModuleProxyMessage(senderProx, this, message);
 	}
 
 	const TSecurityData *CModuleProxy::findSecurityData(uint8 dataTag) const
