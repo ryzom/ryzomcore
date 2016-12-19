@@ -3749,6 +3749,23 @@ NLMISC_COMMAND(test, "", "")
 	return true;
 }
 
+NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>")
+{
+	if (args.size() != 1) return false;
+	uint entityId;
+	fromString(args[0], entityId);
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	ucstring text = "test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n";
+	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
+
+	CEntityCL *entity = EntitiesMngr.entity(entityId);
+	if (entity)
+		InSceneBubbleManager.chatOpen(entity->dataSetId(), text, duration);
+
+	return true;
+}
+
 
 //-----------------------------------------------
 /// Macro to set the new dist to front(back or side) for a given sheet.
