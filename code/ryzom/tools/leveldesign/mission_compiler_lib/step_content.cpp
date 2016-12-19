@@ -3446,7 +3446,7 @@ public:
 		{
 			// crash : ai_instance_1 : ai_instance_2 : ...
 			ret += "crash";
-			nlassert(_AIInstances.size() > 0);
+			nlassert(!_AIInstances.empty());
 			for (i = 0; i < _AIInstances.size(); ++i)
 				ret += " : " + _AIInstances[i];
 			ret += NL;
@@ -3548,14 +3548,14 @@ public:
 		uint32 i;
 		string ret;
 
-		if (_GroupsToSpawn.size() > 0)
+		if (!_GroupsToSpawn.empty())
 		{
 			for (i = 0; i < _GroupsToSpawn.size(); ++i)
 				ret += "handle_release : " + _GroupsToSpawn[i] + NL;
 			ret += NL;
 		}
 		
-		if (_AIInstances.size() > 0)
+		if (!_AIInstances.empty())
 		{
 			ret += "crash";
 			for (i = 0; i < _AIInstances.size(); ++i)

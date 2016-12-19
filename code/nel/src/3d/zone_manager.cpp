@@ -214,7 +214,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 // ------------------------------------------------------------------------------------------------
 void CZoneManager::clear()
 {
-	nlassert(_LoadingZones.size() == 0);
+	nlassert(_LoadingZones.empty());
 	_LoadedZones.clear();
 	_RemovingZone = false;
 }

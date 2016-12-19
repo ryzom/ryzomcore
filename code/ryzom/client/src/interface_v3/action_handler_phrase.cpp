@@ -1656,7 +1656,7 @@ DECLARE_INTERFACE_CONSTANT(getPhraseBrickSelectionMax, CDBGroupBuildPhrase::MaxS
 // Get the UC name of a phraseId
 static DECLARE_INTERFACE_USER_FCT(getSPhraseName)
 {
-	if (args.size() > 0)
+	if (!args.empty())
 	{
 		if(!args[0].toInteger())
 			return false;

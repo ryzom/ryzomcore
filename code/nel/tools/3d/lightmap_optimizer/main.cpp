@@ -644,7 +644,7 @@ int main(int nNbArg, char **ppArgs)
 			}
 		}
 		
-		if (AllLightmapNames.size() == 0)
+		if (AllLightmapNames.empty())
 			continue;
 		
 		// Load all the lightmaps

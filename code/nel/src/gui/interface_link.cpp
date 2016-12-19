@@ -668,7 +668,7 @@ namespace NLGUI
 		{
 			std::vector<CTargetInfo> vTargets;
 			splitLinkTargets(Target, pIG, vTargets);
-			if ((vTargets.size() > 0) && (vTargets[0].Elem))
+			if (!vTargets.empty() && (vTargets[0].Elem))
 			{
 				vTargets[0].affect(val);
 			}

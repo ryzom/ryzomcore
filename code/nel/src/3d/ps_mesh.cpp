@@ -1234,7 +1234,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 	uint   numVerts = 0;
 	uint8  uvRouting[CVertexBuffer::MaxStage];
 
-	if (_MeshShapeFileName.size() == 0)
+	if (_MeshShapeFileName.empty())
 	{
 		_MeshShapeFileName.resize(1);
 		_MeshShapeFileName[0] = DummyShapeName;
@@ -1386,7 +1386,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 	_GlobalAnimDate = _Owner->getOwner()->getSystemDate();
 	_Touched = 0;
 	_ValidBuild = ok ? 1 : 0;
-	nlassert(_Meshes.size() > 0);
+	nlassert(!_Meshes.empty());
 
 	return ok;
 
@@ -1491,7 +1491,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	{
 		if (!f.isReading())
 		{
-			if (_MeshShapeFileName.size() > 0)
+			if (!_MeshShapeFileName.empty())
 			{
 				f.serial(_MeshShapeFileName[0]);
 			}
@@ -1751,7 +1751,7 @@ void CPSConstraintMesh::draw(bool opaque)
 	_Owner->incrementNbDrawnParticles(numToProcess); // for benchmark purpose
 
 
-	if (_PrecompBasis.size() == 0) /// do we deal with prerotated meshs ?
+	if (_PrecompBasis.empty()) /// do we deal with prerotated meshs ?
 	{
 		if (step == (1 << 16))
 		{

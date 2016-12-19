@@ -653,7 +653,7 @@ bool CBigFile::getFileInternal (const std::string &sFileName, BNP *&zeBnp, BNPFi
 	}
 
 	BNP &rbnp = _BNPs.find (zeBigFileName)->second;
-	if (rbnp.Files.size() == 0)
+	if (rbnp.Files.empty())
 	{
 		return false;
 	}
@@ -746,7 +746,7 @@ char *CBigFile::getFileNamePtr(const std::string &sFileName, const std::string &
 	{
 		BNP &rbnp = _BNPs.find (bigfilenamealone)->second;
 		vector<BNPFile>::iterator itNBPFile;
-		if (rbnp.Files.size() == 0)
+		if (rbnp.Files.empty())
 			return NULL;
 		string lwrFileName = toLower(sFileName);
 

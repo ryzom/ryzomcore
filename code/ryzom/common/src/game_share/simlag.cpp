@@ -159,7 +159,7 @@ void sendUDP (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CI
 			CBufferizedPacket *bp = new CBufferizedPacket (client, packet, packetSize, lag, addr);
 
 			// duplicate the packet
-			if ((float)rand()/(float)(RAND_MAX)*100.0f < PacketDisordering && BufferizedPackets.size() > 0)
+			if ((float)rand()/(float)(RAND_MAX)*100.0f < PacketDisordering && !BufferizedPackets.empty())
 			{
 				CBufferizedPacket *bp2 = BufferizedPackets.back();
 

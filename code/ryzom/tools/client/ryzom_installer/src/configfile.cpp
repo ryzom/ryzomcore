@@ -370,7 +370,7 @@ void CConfigFile::setDefaultProfileIndex(int index)
 
 bool CConfigFile::isRyzomInstallerConfigured() const
 {
-	return m_profiles.size() > 0;
+	return !m_profiles.isEmpty();
 }
 
 QString CConfigFile::getInstallationDirectory() const

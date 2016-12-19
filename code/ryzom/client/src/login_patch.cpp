@@ -1315,7 +1315,7 @@ void CPatchManager::getServerFile (const std::string &name, bool bZipped, const 
 		std::string	serverPath;
 		std::string	serverDisplayPath;
 
-		if (UsedServer >= 0 && PatchServers.size() > 0)
+		if (UsedServer >= 0 && !PatchServers.empty())
 		{
 			// first use main patch servers
 			serverPath = PatchServers[UsedServer].ServerPath;
@@ -2202,7 +2202,7 @@ void CCheckThread::run ()
 			nlwarning(rDescFiles.getFile(i).getFileName().c_str());
 			pPM->getPatchFromDesc(ftp, rDescFiles.getFile(i), false);
 			// add the file if there are some patches to apply, or if an already patched version was found in the unpack directory
-			if (ftp.Patches.size() > 0 || (IncludeBackgroundPatch && !ftp.SrcFileName.empty()))
+			if (!ftp.Patches.empty() || (IncludeBackgroundPatch && !ftp.SrcFileName.empty()))
 			{
 				pPM->FilesToPatch.push_back(ftp);
 				sTranslate = CI18N::get("uiNeededPatches") + " " + toString (ftp.Patches.size());

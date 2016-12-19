@@ -1503,7 +1503,7 @@ void CCharacterCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycl
 
 		// Retrieve the right sheet for clothes.
 		_ClothesSheet = _Sheet;
-		if(_Sheet->IdAlternativeClothes.size() > 0)
+		if(!_Sheet->IdAlternativeClothes.empty())
 		{
 			sint32 num = rnd.rand()%(_Sheet->IdAlternativeClothes.size()+1);
 			if(num > 0)
@@ -1531,7 +1531,7 @@ void CCharacterCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycl
 		else
 			_HairColor = (sint8)altLookProp.Element.ColorHair%SheetMngr.nbHairColor();
 		// Hair Index
-		if(_Sheet->HairItemList.size() > 0)
+		if(!_Sheet->HairItemList.empty())
 		{
 			sint32 num = rnd.rand()%_Sheet->HairItemList.size();
 			if(num>=0 && num <_BadHairIndex)
@@ -10279,7 +10279,7 @@ NLMISC_COMMAND(pvpMode, "modify pvp mode", "[<pvp mode> <state>]")
 	if (!playerTarget)
 		return false;
 
-	if( args.size() == 0 )
+	if (args.empty())
 	{
 		uint16 pvpMode = playerTarget->getPvpMode();
 		string str;

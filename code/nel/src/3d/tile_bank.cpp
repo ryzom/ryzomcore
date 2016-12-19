@@ -441,7 +441,7 @@ void CTileBank::cleanUnusedData ()
 // ***************************************************************************
 CTileNoiseMap *CTileBank::getTileNoiseMap (uint tileNumber, uint tileSubNoise)
 {
-	if (_DisplacementMap.size() == 0)
+	if (_DisplacementMap.empty())
 	{
 		// it happens when serial a tile bank with version < 4
 		return NULL;

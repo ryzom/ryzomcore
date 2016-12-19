@@ -105,7 +105,7 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 
 	if (_VBOri == NULL)
 		return;
-	if (BlendShapes.size() == 0)
+	if (BlendShapes.empty())
 		return;
 
 	if (_VBOri->getNumVertices() != _VBDst->getNumVertices())
@@ -164,21 +164,21 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 			// Modify Pos/Norm/TgSpace.
 			//------------
 			if (_VBDst->getVertexFormat() & CVertexBuffer::PositionFlag)
-			if (rBS.deltaPos.size() > 0)
+			if (!rBS.deltaPos.empty())
 			{
 				CVector *pV = dstvba.getVertexCoordPointer (vp);
 				*pV += rBS.deltaPos[j] * rFactor;
 			}
 
 			if (_VBDst->getVertexFormat() & CVertexBuffer::NormalFlag)
-			if (rBS.deltaNorm.size() > 0)
+			if (!rBS.deltaNorm.empty())
 			{
 				CVector *pV = dstvba.getNormalCoordPointer (vp);
 				*pV += rBS.deltaNorm[j] * rFactor;
 			}
 
 			if (_UseTgSpace)
-			if (rBS.deltaTgSpace.size() > 0)
+			if (!rBS.deltaTgSpace.empty())
 			{
 				CVector *pV = (CVector*)dstvba.getTexCoordPointer (vp, tgSpaceStage);
 				*pV += rBS.deltaTgSpace[j] * rFactor;
@@ -187,14 +187,14 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 			// Modify UV0 / Color
 			//------------
 			if (_VBDst->getVertexFormat() & CVertexBuffer::TexCoord0Flag)
-			if (rBS.deltaUV.size() > 0)
+			if (!rBS.deltaUV.empty())
 			{
 				CUV *pUV = dstvba.getTexCoordPointer (vp);
 				*pUV += rBS.deltaUV[j] * rFactor;
 			}
 
 			if (_VBDst->getVertexFormat() & CVertexBuffer::PrimaryColorFlag)
-			if (rBS.deltaCol.size() > 0)
+			if (!rBS.deltaCol.empty())
 			{
 				// todo hulud d3d vertex color RGBA / BGRA
 				CRGBA *pRGBA = (CRGBA*)dstvba.getColorPointer (vp);
@@ -224,7 +224,7 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 
 	if (_VBOri == NULL)
 		return;
-	if (BlendShapes.size() == 0)
+	if (BlendShapes.empty())
 		return;
 
 	if (_VBOri->getNumVertices() != _VBDst->getNumVertices())
@@ -292,21 +292,21 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 			// Modify Pos/Norm/TgSpace.
 			//------------
 			if (_Vertices != NULL)
-			if (rBS.deltaPos.size() > 0)
+			if (!rBS.deltaPos.empty())
 			{
 				CVector *pV = &(_Vertices->operator[](vp));
 				*pV += rBS.deltaPos[j] * rFactor;
 			}
 
 			if (_Normals != NULL)
-			if (rBS.deltaNorm.size() > 0)
+			if (!rBS.deltaNorm.empty())
 			{
 				CVector *pV = &(_Normals->operator[](vp));
 				*pV += rBS.deltaNorm[j] * rFactor;
 			}
 
 			if (_UseTgSpace && _TgSpace != NULL)
-			if (rBS.deltaTgSpace.size() > 0)
+			if (!rBS.deltaTgSpace.empty())
 			{
 				CVector *pV = &((*_TgSpace)[vp]);
 				*pV += rBS.deltaTgSpace[j] * rFactor;
@@ -315,14 +315,14 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 			// Modify UV0 / Color
 			//------------
 			if (_VBDst->getVertexFormat() & CVertexBuffer::TexCoord0Flag)
-			if (rBS.deltaUV.size() > 0)
+			if (!rBS.deltaUV.empty())
 			{
 				CUV *pUV = dstvba.getTexCoordPointer (vp);
 				*pUV += rBS.deltaUV[j] * rFactor;
 			}
 
 			if (_VBDst->getVertexFormat() & CVertexBuffer::PrimaryColorFlag)
-			if (rBS.deltaCol.size() > 0)
+			if (!rBS.deltaCol.empty())
 			{
 				// todo hulud d3d vertex color RGBA / BGRA
 				CRGBA *pRGBA = (CRGBA*)dstvba.getColorPointer (vp);
@@ -371,7 +371,7 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 
 	if (vbOri == NULL)
 		return;
-	if (BlendShapes.size() == 0)
+	if (BlendShapes.empty())
 		return;
 
 	nlassert(vbOri->getVertexFormat() == (CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag |CVertexBuffer::TexCoord0Flag) );

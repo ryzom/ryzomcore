@@ -133,7 +133,7 @@ bool CClipTrav::fullSearch (vector<CCluster*>& vCluster, const CVector& pos)
 		if (pIG->_ClusterInstances[i]->isIn(pos))
 			vCluster.push_back (pIG->_ClusterInstances[i]);
 	}
-	if (vCluster.size() > 0)
+	if (!vCluster.empty())
 		return true;*/
 
 	return true;

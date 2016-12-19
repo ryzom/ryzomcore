@@ -210,7 +210,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 	}
 	else
 	{
-		if ( _Nodes.size() > 0 )
+		if (!_Nodes.empty())
 			for ( _IdBits=1; _Nodes.size() > unsigned(1<<_IdBits) ; _IdBits++ ) {}
 		else
 			_IdBits = 0;

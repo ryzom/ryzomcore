@@ -43,7 +43,7 @@ bool CNelExport::exportCollision (const std::string &sPath, std::vector<INode *>
 //	ULONG SelectDir(HWND Parent, char* Title, char* Path);
 
 	std::string	path = std::string(sPath);
-	if (path.size() == 0 || path[path.size()-1] != '\\' && path[path.size()-1] != '/')
+	if (path.empty() || path[path.size()-1] != '\\' && path[path.size()-1] != '/')
 		path.insert(path.end(), '/');
 
 	if (meshBuildList.empty()) return true;

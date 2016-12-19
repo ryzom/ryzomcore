@@ -323,7 +323,7 @@ bool CInterface3DScene::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	}
 
 	// If no camera create the default one
-	if (_Cameras.size() == 0)
+	if (_Cameras.empty())
 	{
 		CInterface3DCamera *pCam = new CInterface3DCamera;
 		_Cameras.push_back(pCam);
@@ -494,7 +494,7 @@ void CInterface3DScene::draw ()
 	cam.lookAt (pos, pI3DCam->getTarget(), pI3DCam->getRoll() * (float) (NLMISC::Pi / 180));
 
 	uint i;
-	if (_IGs.size() > 0)
+	if (!_IGs.empty())
 	{
 		for (i = 0; i < _Characters.size(); ++i)
 			_Characters[i]->setClusterSystem (_IGs[_CurrentCS]->getIG());

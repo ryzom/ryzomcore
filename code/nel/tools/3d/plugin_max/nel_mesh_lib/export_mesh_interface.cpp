@@ -648,7 +648,7 @@ static bool BuildMeshInterfaces(const char *cMaxFileName, std::vector<CMeshInter
 						std::inserter(mergedNodes, mergedNodes.begin())
 					   );
 
-	if (mergedNodes.size() == 0)
+	if (mergedNodes.empty())
 	{
 		nlwarning("Couldn't find interface : %s", maxFileName.c_str());
 	}

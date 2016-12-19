@@ -780,7 +780,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sSkillsNeeded = CI18N::get("uiTitleSkillHeader");
-			if (pTU->SkillsNeeded.size() == 0 || reservedTitle)
+			if (pTU->SkillsNeeded.empty() || reservedTitle)
 			{
 				sSkillsNeeded += CI18N::get("uiTitleSkillNoNeed");
 			}
@@ -821,7 +821,7 @@ class CHandlerOpenTitleHelp : public IActionHandler
 		if (pTU != NULL)
 		{
 			sBricksNeeded = CI18N::get("uiTitleBrickHeader");
-			if (pTU->BricksNeeded.size() == 0 || reservedTitle)
+			if (pTU->BricksNeeded.empty() || reservedTitle)
 			{
 				sBricksNeeded += CI18N::get("uiTitleBrickNoNeed");
 			}

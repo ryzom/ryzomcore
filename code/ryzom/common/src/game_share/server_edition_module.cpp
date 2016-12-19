@@ -728,12 +728,12 @@ void CEditionSession::swap(CEditionSession& other)
 void CEditionSession::update(uint32 currentTime)
 {
 
-	if (getCurrentChars().size() == 0 && DateSinceNoPlayer == 0 )
+	if (getCurrentChars().empty() && DateSinceNoPlayer == 0 )
 	{
 		DateSinceNoPlayer = currentTime;
 	}
 
-	if (getCurrentChars().size() != 0 && DateSinceNoPlayer != 0 )
+	if (!getCurrentChars().empty() && DateSinceNoPlayer != 0 )
 	{
 		DateSinceNoPlayer = 0;
 	}
@@ -1096,7 +1096,7 @@ public:
 			}
 			else
 			{
-				if (tokens.size() == 0)
+				if (tokens.empty())
 				{
 
 				}

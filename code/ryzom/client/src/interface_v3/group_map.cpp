@@ -1231,13 +1231,13 @@ void CGroupMap::checkCoords()
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:RESPAWN_PT")->setValue32(_RespawnSelected);
 			else if (_MapMode == MapMode_SpawnSquad)
 				NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_RESPAWN_PT")->setValue32(_RespawnSelected);
-			if (_RespawnLM.size() > 0)
+			if (!_RespawnLM.empty())
 				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
 		else
 		{
 			_RespawnSelected = getRespawnSelected();
-			if (_RespawnLM.size() > 0)
+			if (!_RespawnLM.empty())
 				_RespawnSelectedBitmap->setParentPos(_RespawnLM[_RespawnSelected]);
 		}
 	}
@@ -3030,7 +3030,7 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 
 	// Choose the good map ! (select the first respawn point and check for first matching bounding box map
 	if (_MapMode != MapMode_Death) return;
-	if (_RespawnPos.size() == 0) return;
+	if (_RespawnPos.empty()) return;
 
 	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
 	if (pWS == NULL) return;
@@ -3113,7 +3113,7 @@ sint32 CGroupMap::getRespawnSelected() const
 //=========================================================================================================
 void CGroupMap::setRespawnSelected(sint32 nSpawnPointIndex)
 {
-	if (_RespawnPos.size() == 0) return;
+	if (_RespawnPos.empty()) return;
 	if (nSpawnPointIndex < 0) return;
 	if ((uint32)nSpawnPointIndex >= _RespawnPos.size()) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();

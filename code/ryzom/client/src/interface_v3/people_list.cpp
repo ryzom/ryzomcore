@@ -871,7 +871,7 @@ class CHandlerContactEntry : public IActionHandler
 		if (pEB == NULL) return;
 		ucstring text = pEB->getInputString();
 		// If the line is empty, do nothing
-		if(text.size() == 0)
+		if(text.empty())
 			return;
 
 		// Parse any tokens in the text

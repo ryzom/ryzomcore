@@ -2583,7 +2583,7 @@ void CObjectViewer::evalSoundTrack (float lastTime, float currentTime)
 	for (uint i = 0; i < _ListInstance.size(); i++)
 	{
 		// Some animation in the list ?
-		if (_ListInstance[i]->Saved.PlayList.size() > 0)
+		if (!_ListInstance[i]->Saved.PlayList.empty())
 		{
 			// Accumul time
 			float startTime = 0;

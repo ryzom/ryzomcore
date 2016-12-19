@@ -190,7 +190,7 @@ struct CWebigNotificationThread : public NLMISC::IRunnable
 		// Update the mail notification icon
 
 		uint32 nbmail = 0;
-		if(notifs.size() > 0 && fromString(notifs[0], nbmail))
+		if(!notifs.empty() && fromString(notifs[0], nbmail))
 		{
 			//nlinfo("nb mail is a number %d", nbmail);
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();

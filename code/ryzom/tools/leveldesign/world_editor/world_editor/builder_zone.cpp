@@ -380,7 +380,7 @@ void CBuilderZone::calcMask()
 	_MinY = _MinX = 1000000;
 	_MaxY = _MaxX = -1000000;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	CWorldEditorDoc *doc = getDocument ();
@@ -555,7 +555,7 @@ void CBuilderZone::updateToolsZone ()
 		_ToolsZone->getListCtrl()->addItem (pElt->getName());
 	}
 	_ToolsZone->getListCtrl()->setImages (vIL);
-	if (_CurrentSelection.size() > 0)
+	if (!_CurrentSelection.empty())
 	{
 		_ToolsZone->getListCtrl()->SetCurSel (0);
 		_CurSelectedZone = 0;
@@ -667,7 +667,7 @@ void CBuilderZone::newZone (bool bDisplay)
 void CBuilderZone::unload (uint32 pos)
 {
 	uint32 i = 0;
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	delete _ZoneRegions[pos];
@@ -684,7 +684,7 @@ void CBuilderZone::unload (uint32 pos)
 // ---------------------------------------------------------------------------
 void CBuilderZone::move (sint32 x, sint32 y)
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 	_ZoneRegions[_ZoneRegionSelected]->move(x, y);
 }
@@ -692,7 +692,7 @@ void CBuilderZone::move (sint32 x, sint32 y)
 // ---------------------------------------------------------------------------
 uint32 CBuilderZone::countZones ()
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return 0;
 	return _ZoneRegions[_ZoneRegionSelected]->countZones ();
 }
@@ -714,7 +714,7 @@ void CBuilderZone::snapshot (const std::string &fileName, uint sizeSource, bool 
 // ---------------------------------------------------------------------------
 void CBuilderZone::snapshotCustom (const std::string &fileName, uint width, uint height, bool keepRatio, uint sizeSource, bool grayscale)
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	// Some bitmaps
@@ -1434,12 +1434,12 @@ void CBuilderZone::add (const CVector &worldPos)
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 	uint8 rot, flip;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	if (_RandomSelection)
 	{
-		if (_CurrentSelection.size() > 0)
+		if (!_CurrentSelection.empty())
 		{
 			uint32 nSel = (uint32)(NLMISC::frand (1.0) * _CurrentSelection.size());
 			NLMISC::clamp (nSel, (uint32)0, (uint32)(_CurrentSelection.size()-1));
@@ -1515,7 +1515,7 @@ void CBuilderZone::addTransition (const NLMISC::CVector &worldPos)
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 	sint32 k;
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	// Detect if we are in a transition square to switch
@@ -1586,7 +1586,7 @@ void CBuilderZone::del (const CVector &worldPos)
 	sint32 x = (sint32)floor (worldPos.x / _Display->_CellSize);
 	sint32 y = (sint32)floor (worldPos.y / _Display->_CellSize);
 
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return;
 
 	CBuilderZoneRegion *pBZR = _ZoneRegions[_ZoneRegionSelected];
@@ -1693,7 +1693,7 @@ uint8 CBuilderZone::getFlip (sint32 x, sint32 y)
 // ---------------------------------------------------------------------------
 CBuilderZoneRegion*	CBuilderZone::getPtrCurZoneRegion ()
 {
-	if (_ZoneRegions.size() == 0)
+	if (_ZoneRegions.empty())
 		return NULL;
 	return _ZoneRegions[_ZoneRegionSelected];
 }

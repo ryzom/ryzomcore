@@ -523,7 +523,7 @@ std::string timestampToHumanReadable(uint32 timestamp)
 
 uint32 fromHumanReadable (const std::string &str)
 {
-	if (str.size() == 0)
+	if (str.empty())
 		return 0;
 
 	uint32 val;

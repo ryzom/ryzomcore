@@ -96,7 +96,7 @@ void			CPointLightNamedArray::build(const std::vector<CPointLightNamed> &pointLi
 	// Regroup.
 	// ---------
 	_PointLightGroupMap.clear();
-	if(_PointLights.size() > 0 )
+	if (!_PointLights.empty())
 	{
 		bool	first= true;
 		string	precName;
