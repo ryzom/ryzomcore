@@ -954,8 +954,8 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 							value -= (float)(lpnmud->iDelta) * increment;
 
 							// Print the result
-							char result[512];
-							sprintf (result, "%g", value);
+							TCHAR result[512];
+							_stprintf (result, _T("%g"), value);
 							
 							// Set the windnow text
 							combo->Combo.SetWindowText (result);
@@ -1723,13 +1723,13 @@ void CFormMemCombo::getFromDocument (CForm &form)
 			Combo.SetWindowText (label);
 
 			if (arrayNode->getForm () == &form)
-				Label.SetWindowText ("Array size:");
+				Label.SetWindowText (_T("Array size:"));
 			else
-				Label.SetWindowText ("Array size: (in parent form)");
+				Label.SetWindowText (_T("Array size: (in parent form)"));
 		}
 		else
 		{
-			Combo.SetWindowText ("0");
+			Combo.SetWindowText (_T("0"));
 		}
 		Combo.UpdateData (FALSE);
 	}
@@ -1751,11 +1751,11 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		if (node)
 		{
 			CFormElmVirtualStruct *virtualNode = safe_cast<CFormElmVirtualStruct*> (node);
-			Combo.SetWindowText (virtualNode->DfnFilename.c_str());
+			Combo.SetWindowText (utf8ToTStr(virtualNode->DfnFilename));
 		}
 		else
 		{
-			Combo.SetWindowText ("");
+			Combo.SetWindowText (_T(""));
 		}
 		Combo.UpdateData (FALSE);
 	}
