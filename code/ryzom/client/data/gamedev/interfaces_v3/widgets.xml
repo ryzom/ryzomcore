@@ -1029,7 +1029,7 @@
 <template name="3dbulle_R" id="" >
         <group id="#id" type="container" header_active="false" options="no_bordure" openable="false" savable="false" resizer="true" movable="false" right_button="false" opened="true" child_resize_w="true" w="0" max_w="256" min_w="48" h="48" >
 
-                <group id="header_opened" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" max_w="256" min_w="48" max_h="256" min_h="48" posref="TL TL" >
+                <group id="header_opened" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" max_w="256" min_w="48" max_h="512" min_h="48" posref="TL TL" >
 
                         <group id="window" x="0" y="0" child_resize_w="true" w="0" child_resize_h="true" h="0" posref="TL TL" >
                                 <view type="bitmap" id="win_M" posref="MM MM" scale="true" sizeref="wh" w="-10" h="-10" texture="Bulle_M.tga" global_color="false"/>
@@ -1090,7 +1090,7 @@
              h="0"
              max_w="512"
              min_w="48"
-             max_h="256"
+             max_h="512"
              min_h="48"
              posref="TL TL">
         <group id="window"
@@ -1314,7 +1314,7 @@
              h="0"
              max_w="512"
              min_w="48"
-             max_h="256"
+             max_h="512"
              min_h="48"
              posref="TL TL">
         <group id="window"
