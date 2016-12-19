@@ -150,6 +150,7 @@ void CRenderTargetManager::cleanup()
 				desc->TextureUser = NULL;
 				desc->TextureInterface = NULL; // CSmartPtr
 				m_RenderTargets.erase(m_RenderTargets.begin() + i);
+				delete desc;
 				--i;
 			}
 			else
