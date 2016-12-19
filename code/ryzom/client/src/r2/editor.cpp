@@ -4905,11 +4905,10 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
 	if(node)
 	{
-		MBEHAV::EMode m = MBEHAV::NORMAL;
-		prop = (sint64 *)&m;
-		node->setValue64(*prop);
+		node->setValue64((sint64)MBEHAV::NORMAL);
 		EntitiesMngr.updateVisualProperty(0, slot, CLFECOMMON::PROPERTY_MODE);
 	}
+
 	// Set Visual Properties
 	SPropVisualA visualA;
 	//visualA.PropertySubData.LTrail = 1;
