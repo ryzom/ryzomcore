@@ -67,7 +67,7 @@ void			CWorldEntity::remove(CWorldEntity* entity)
 	{
 		CWorldPositionManager::_PrimitivedList.erase(entity->PrimIterator);
 	}
-	_EntityAllocator.free(entity);
+	_EntityAllocator.freeBlock(entity);
 }
 
 

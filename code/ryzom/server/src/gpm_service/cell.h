@@ -191,7 +191,7 @@ public:
 	static CCell	*create()				{ return _CellAllocator.allocate(); }
 
 	/// Removes an entity (delete equivalent).
-	static void		remove(CCell *cell)		{ _CellAllocator.free(cell); }
+	static void		remove(CCell *cell)		{ _CellAllocator.freeBlock(cell); }
 
 private:
 
