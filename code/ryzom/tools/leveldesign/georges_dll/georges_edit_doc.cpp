@@ -355,7 +355,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 							{
 								// Get the node by name
 								UFormElm *uNode;
-								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 								{
 									nextArray = safe_cast<CFormElmArray*> (uNode);
 								}
@@ -382,7 +382,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 							{
 								// Get the node by name
 								UFormElm *uNode;
-								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+								if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 								{
 									nextForm = safe_cast<CFormElmStruct*> (uNode);
 								}
@@ -414,7 +414,7 @@ CGeorgesEditDocSub *CGeorgesEditDoc::addStruct (CGeorgesEditDocSub *parent, CFor
 						{
 							// Get the node by name
 							UFormElm *uNode;
-							if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName.c_str(), NULL, false) && uNode)
+							if (formPtr->getParent (parent)->getRootNode ().getNodeByName (&uNode, entryName, NULL, false) && uNode)
 							{
 								nextArray = safe_cast<CFormElmArray*> (uNode);
 							}
@@ -1546,7 +1546,7 @@ int CGeorgesEditDocSub::getItemImage (CGeorgesEditDoc *doc) const
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (getSlot ());
-			nlverify ( elm->getNodeByName (getFormName ().c_str (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
+			nlverify ( elm->getNodeByName (getFormName (), &parentDfn, indexDfn, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 			
 			if (array)
 			{

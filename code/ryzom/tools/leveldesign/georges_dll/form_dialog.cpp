@@ -548,7 +548,7 @@ void CFormDialog::setToDocument (uint widget)
 			bool parentVDfnArray;
 			CForm *form=doc->getFormPtr ();
 			CFormElm *elm = doc->getRootNode (Widgets[widget]->getSlot ());
-			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName ().c_str (), &parentDfn, indexDfn, 
+			nlverify ( elm->getNodeByName (Widgets[widget]->getFormName (), &parentDfn, indexDfn, 
 				&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 			// Must create array or virtual dfn ?
@@ -811,7 +811,7 @@ BOOL CFormDialog::OnCommand(WPARAM wParam, LPARAM lParam)
 							bool parentVDfnArray;
 							CForm *form=doc->getFormPtr ();
 							CFormElm *elm = doc->getRootNode (Widgets[widgetId]->getSlot ());
-							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName ().c_str (), &parentDfn, indexDfn, 
+							nlverify ( elm->getNodeByName (Widgets[widgetId]->getFormName (), &parentDfn, indexDfn, 
 								&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 							nlassert (parentDfn);
 
@@ -943,7 +943,7 @@ BOOL CFormDialog::OnNotify(WPARAM wParam, LPARAM lParam, LRESULT* pResult)
 
 							// Search for the node
 							nlverify ((const CFormElm*)(doc->getRootNode (Widgets[i]->getSlot ()))->getNodeByName 
-								(Widgets[i]->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
+								(Widgets[i]->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, 
 								&node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 							// Todo: multiply here by the spinner precision
@@ -1097,7 +1097,7 @@ void CFormDialog::getFromDocument ()
 		UFormDfn::TEntryType type;
 
 		// Search for the node
-		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName ().c_str (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)(doc->getRootNode (subObject->getSlot ())))->getNodeByName (subObject->getFormName (), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 
 		// Should have a parent DFN, else it is the root element
 		if (parentDfn)
@@ -1342,7 +1342,7 @@ void IFormWidget::updateLabel ()
 					bool parentVDfnArray;
 					CForm *form=doc->getFormPtr ();
 					CFormElm *elm = doc->getRootNode (getSlot ());
-					nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+					nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 						&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 					// Does the node exist ?
@@ -1401,7 +1401,7 @@ bool IFormWidget::getNode (const CFormDfn **parentDfn, uint &lastElement, const 
 		bool parentVDfnArray;
 		CForm *form=doc->getFormPtr ();
 		CFormElm *elm = doc->getRootNode (getSlot ());
-		return (elm->getNodeByName (FormName.c_str (), parentDfn, 
+		return (elm->getNodeByName (FormName, parentDfn, 
 			lastElement, nodeDfn, nodeType, node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 	}
 	return false;
@@ -1558,7 +1558,7 @@ void CFormMemCombo::create (DWORD wStyle, RECT &currentPos, CFormDialog *parent,
 	bool parentVDfnArray;
 	CForm *form=doc->getFormPtr ();
 	CFormElm *elm = doc->getRootNode (getSlot ());
-	nlverify ( elm->getNodeByName (FormName.c_str (), &parentDfn, indexDfn, 
+	nlverify ( elm->getNodeByName (FormName, &parentDfn, indexDfn, 
 		&nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND) );
 
 	FirstId = dialog_index;
@@ -1710,7 +1710,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode(getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (array);
 
 		// Node exist ?
@@ -1743,7 +1743,7 @@ void CFormMemCombo::getFromDocument (CForm &form)
 		UFormDfn::TEntryType type;
 		bool array;
 		bool parentVDfnArray;
-		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName.c_str(), &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
+		nlverify (((const CFormElm*)doc->getRootNode (getSlot ()))->getNodeByName (FormName, &parentDfn, lastElement, &nodeDfn, &nodeType, &node, type, array, parentVDfnArray, true, NLGEORGES_FIRST_ROUND));
 		nlassert (!array);
 
 		// Node exist ?

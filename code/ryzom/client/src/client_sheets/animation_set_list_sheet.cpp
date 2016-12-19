@@ -541,7 +541,7 @@ void CAnimationSetSheet::build(const NLGEORGES::UFormElm &rootElmt)
 					nlinfo("%2d state '%s' :", i, stateName.c_str());
 
 			const UFormElm *elmt = 0;
-			if(rootElmt.getNodeByName(&elmt, stateName.c_str()))
+			if(rootElmt.getNodeByName(&elmt, stateName))
 			{
 				bool animPresent = false;
 				if(elmt)
