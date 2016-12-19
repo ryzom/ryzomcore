@@ -1236,7 +1236,7 @@ void CChatManager::chatParamInGroup( TGroupId& grpId, const std::string & phrase
 			CMirrorPropValueRO<uint32> instanceId( TheDataset, *itM, DSPropertyAI_INSTANCE );
 
 			// check the ai instance for region chat
-			if (chatGrp.Type != CChatGroup::region 
+			if (chatGrp.Type != CChatGroup::region
 				|| instanceId == senderInstanceId)
 			{
 				const CEntityId &eid = TheDataset.getEntityId(*itM);
@@ -1816,7 +1816,7 @@ void CChatManager::tell2( const TDataSetRow& sender, const TDataSetRow& receiver
 
 				bms.serial( senderInfos->NameIndex );
 				bms.serial( id);
-		
+
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				CUnifiedNetwork::getInstance()->send(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
 			}
