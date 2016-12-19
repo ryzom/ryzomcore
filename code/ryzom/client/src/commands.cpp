@@ -3769,7 +3769,7 @@ NLMISC_COMMAND(testLongBubble, "To display a bubble with a long text", "<entity>
 	fromString(args[0], entityId);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	ucstring text = "test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n";
+	ucstring text("test\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n");
 	uint duration = CWidgetManager::getInstance()->getSystemOption(CWidgetManager::OptionTimeoutBubbles).getValSInt32();
 
 	CEntityCL *entity = EntitiesMngr.entity(entityId);
