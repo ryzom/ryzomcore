@@ -134,9 +134,9 @@ int main(int argc, char *argv[])
 	{
 		Test::Suite ts;
 
-		ts.add(CUniquePtr<Test::Suite>(new CUTMisc));
-		ts.add(CUniquePtr<Test::Suite>(new CUTNet));
-		ts.add(CUniquePtr<Test::Suite>(new CUTLigo));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTMisc));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTNet));
+		ts.add(std::auto_ptr<Test::Suite>(new CUTLigo));
 		// Add a line here when adding a new test MODULE
 
 		CUniquePtr<Test::Output> output(cmdline(argc, argv));
