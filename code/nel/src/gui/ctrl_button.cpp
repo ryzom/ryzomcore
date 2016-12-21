@@ -446,10 +446,7 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32	CCtrlButton::getMaxUsedW() const
 	{
-		sint32 txw, txh;
-		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		rVR.getTextureSizeFromId (_TextureIdNormal, txw, txh);
-		return txw;
+		return _W;
 	}
 
 	// ***************************************************************************

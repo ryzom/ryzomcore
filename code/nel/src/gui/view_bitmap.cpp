@@ -511,10 +511,7 @@ namespace NLGUI
 	// ***************************************************************************
 	sint32	CViewBitmap::getMaxUsedW() const
 	{
-		sint32 txw, txh;
-		CViewRenderer &rVR = *CViewRenderer::getInstance();
-		rVR.getTextureSizeFromId (_TextureId, txw, txh);
-		return txw;
+		return _W;
 	}
 
 	// ***************************************************************************
