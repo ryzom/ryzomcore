@@ -80,6 +80,7 @@ void CAdminProperties::updateCSRJournal( CCharacter * user, CMission * mission,u
 
 CMission* CAdminProperties::getMission(uint indexInJournal) const
 {
+/*
 	if (!_Data) return NULL;
 
 	CCharacter *user = PlayerManager.getChar(_Data->MissionUser);
@@ -90,7 +91,7 @@ CMission* CAdminProperties::getMission(uint indexInJournal) const
 	if (indexInJournal < user->getMissions().size())
 		return (CMission*)user->getMissions()[indexInJournal];
 
-/*
+
 	indexInJournal -= MaxSoloMissionCount;
 	CTeam * team = TeamManager.getTeam( user->getTeamId() );
 	if (team)
