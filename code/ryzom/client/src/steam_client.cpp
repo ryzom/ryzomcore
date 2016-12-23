@@ -29,11 +29,9 @@
 // prototypes definitions for Steam API functions we'll call
 typedef bool			(__cdecl *SteamAPI_InitFuncPtr)();
 typedef void			(__cdecl *SteamAPI_ShutdownFuncPtr)();
-typedef ISteamApps*		(__cdecl *SteamAppsFuncPtr)();
-typedef ISteamClient*	(__cdecl *SteamClientFuncPtr)();
-typedef ISteamFriends*	(__cdecl *SteamFriendsFuncPtr)();
-typedef ISteamUser*		(__cdecl *SteamUserFuncPtr)();
-typedef ISteamUtils*	(__cdecl *SteamUtilsFuncPtr)();
+typedef HSteamUser		(__cdecl *SteamAPI_GetHSteamUserFuncPtr)();
+typedef HSteamPipe		(__cdecl *SteamAPI_GetHSteamPipeFuncPtr)();
+typedef void*			(__cdecl *SteamInternal_CreateInterfaceFuncPtr)(const char *ver);
 typedef void			(__cdecl *SteamAPI_RegisterCallbackFuncPtr)(class CCallbackBase *pCallback, int iCallback);
 typedef void			(__cdecl *SteamAPI_UnregisterCallbackFuncPtr)(class CCallbackBase *pCallback);
 typedef void			(__cdecl *SteamAPI_RunCallbacksFuncPtr)();
@@ -46,14 +44,21 @@ if (nl##symbol == NULL) return false
 
 NL_DECLARE_SYMBOL(SteamAPI_Init);
 NL_DECLARE_SYMBOL(SteamAPI_Shutdown);
-NL_DECLARE_SYMBOL(SteamApps);
-NL_DECLARE_SYMBOL(SteamClient);
-NL_DECLARE_SYMBOL(SteamFriends);
-NL_DECLARE_SYMBOL(SteamUser);
-NL_DECLARE_SYMBOL(SteamUtils);
+
+NL_DECLARE_SYMBOL(SteamAPI_GetHSteamUser);
+NL_DECLARE_SYMBOL(SteamAPI_GetHSteamPipe);
+NL_DECLARE_SYMBOL(SteamInternal_CreateInterface);
+
 NL_DECLARE_SYMBOL(SteamAPI_RegisterCallback);
 NL_DECLARE_SYMBOL(SteamAPI_UnregisterCallback);
 NL_DECLARE_SYMBOL(SteamAPI_RunCallbacks);
+
+// instances of classes
+static ISteamClient *s_SteamClient = NULL;
+static ISteamUser *s_SteamUser = NULL;
+static ISteamApps *s_SteamApps = NULL;
+static ISteamFriends *s_SteamFriends = NULL;
+static ISteamUtils *s_SteamUtils = NULL;
 
 // taken from steam_api.h, we needed to change it to use our dynamically loaded functions
 
@@ -172,7 +177,7 @@ public:
 	bool waitTicket(uint32 ms)
 	{
 		// call Steam method
-		_AuthSessionTicketHandle = nlSteamUser()->GetAuthSessionTicket(_AuthSessionTicketData, sizeof(_AuthSessionTicketData), &_AuthSessionTicketSize);
+		_AuthSessionTicketHandle = s_SteamUser->GetAuthSessionTicket(_AuthSessionTicketData, sizeof(_AuthSessionTicketData), &_AuthSessionTicketSize);
 
 		nldebug("GetAuthSessionTicket returned %u bytes, handle %u", _AuthSessionTicketSize, _AuthSessionTicketHandle);
 
@@ -338,24 +343,56 @@ bool CSteamClient::init()
 	_Initialized = true;
 
 	// load more Steam functions
-	NL_LOAD_SYMBOL(SteamApps);
-	NL_LOAD_SYMBOL(SteamClient);
-	NL_LOAD_SYMBOL(SteamFriends);
-	NL_LOAD_SYMBOL(SteamUser);
-	NL_LOAD_SYMBOL(SteamUtils);
+	NL_LOAD_SYMBOL(SteamAPI_GetHSteamUser);
+	NL_LOAD_SYMBOL(SteamAPI_GetHSteamPipe);
+	NL_LOAD_SYMBOL(SteamInternal_CreateInterface);
+
+	HSteamUser hSteamUser = nlSteamAPI_GetHSteamUser();
+	HSteamPipe hSteamPipe = nlSteamAPI_GetHSteamPipe();
+
+	if (!hSteamPipe)
+	{
+		nlwarning("Unable to get Steam pipe");
+		return false;
+	}
+
+	// instanciate all used Steam classes
+	s_SteamClient = (ISteamClient*)nlSteamInternal_CreateInterface(STEAMCLIENT_INTERFACE_VERSION);
+	if (!s_SteamClient)
+		return false;
+
+	s_SteamUser = s_SteamClient->GetISteamUser(hSteamUser, hSteamPipe, STEAMUSER_INTERFACE_VERSION);
+	if (!s_SteamUser)
+		return false;
+
+	s_SteamApps = s_SteamClient->GetISteamApps(hSteamUser, hSteamPipe, STEAMAPPS_INTERFACE_VERSION);
+	if (!s_SteamApps)
+		return false;
+
+	s_SteamFriends = s_SteamClient->GetISteamFriends(hSteamUser, hSteamPipe, STEAMFRIENDS_INTERFACE_VERSION);
+	if (!s_SteamFriends)
+		return false;
+
+	s_SteamUtils = s_SteamClient->GetISteamUtils(hSteamPipe, STEAMUTILS_INTERFACE_VERSION);
+	if (!s_SteamUtils)
+		return false;
 
 	// set warning messages hook
-	nlSteamClient()->SetWarningMessageHook(SteamWarningMessageHook);
+	s_SteamClient->SetWarningMessageHook(SteamWarningMessageHook);
 
-	bool loggedOn = nlSteamUser()->BLoggedOn();
-	const char *lang = nlSteamApps()->GetCurrentGameLanguage();
+	bool loggedOn = s_SteamUser->BLoggedOn();
 
-	nlinfo("Steam AppID: %u", nlSteamUtils()->GetAppID());
-	nlinfo("Steam login: %s", nlSteamFriends()->GetPersonaName());
+	nlinfo("Steam AppID: %u", s_SteamUtils->GetAppID());
+	nlinfo("Steam login: %s", s_SteamFriends->GetPersonaName());
 	nlinfo("Steam user logged: %s", loggedOn ? "yes":"no");
-	nlinfo("Steam language: %s", lang);
 
-	NLMISC::CI18N::setSystemLanguageCode(lang);
+	const char *lang = s_SteamApps->GetCurrentGameLanguage();
+
+	if (lang && strlen(lang) > 0)
+	{
+		nlinfo("Steam language: %s", lang);
+		NLMISC::CI18N::setSystemLanguageCode(lang);
+	}
 
 	// don't need to continue, if not connected
 	if (!loggedOn) return false;
