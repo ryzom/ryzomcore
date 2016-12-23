@@ -60,12 +60,12 @@ IF(Mercurial_HG_EXECUTABLE)
   EXECUTE_PROCESS(COMMAND ${Mercurial_HG_EXECUTABLE} --version
     OUTPUT_VARIABLE Mercurial_VERSION_HG
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-	
+
   STRING(REGEX REPLACE ".*version ([\\.0-9]+).*"
     "\\1" Mercurial_VERSION_HG "${Mercurial_VERSION_HG}")
 
   MACRO(Mercurial_WC_INFO dir prefix)
-    EXECUTE_PROCESS(COMMAND ${Mercurial_HG_EXECUTABLE} tip --template "{rev};{node};{tags};{author}"
+    EXECUTE_PROCESS(COMMAND ${Mercurial_HG_EXECUTABLE} log -r . --template "{rev};{node};{tags};{author}"
       WORKING_DIRECTORY ${dir}
       OUTPUT_VARIABLE ${prefix}_WC_INFO
       ERROR_VARIABLE Mercurial_hg_info_error
@@ -73,7 +73,7 @@ IF(Mercurial_HG_EXECUTABLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE)
 
     IF(NOT ${Mercurial_hg_info_result} EQUAL 0)
-      MESSAGE(SEND_ERROR "Command \"${Mercurial_HG_EXECUTABLE} tip\" failed with output:\n${Mercurial_hg_info_error}")
+      MESSAGE(SEND_ERROR "Command \"${Mercurial_HG_EXECUTABLE} log\" failed with output:\n${Mercurial_hg_info_error}")
     ELSE()
       LIST(LENGTH ${prefix}_WC_INFO _COUNT)
       IF(_COUNT EQUAL 4)
