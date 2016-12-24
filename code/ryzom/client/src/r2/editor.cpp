@@ -2081,10 +2081,6 @@ void CEditor::registerLuaFunc()
 	registerEnvMethod("teleportToCharacter", luaTeleportToCharacter);
 	registerEnvMethod("enumInstances", luaEnumInstances);
 	registerEnvMethod("isClearingContent", luaIsClearingContent);
-
-
-
-
 }
 
 /*
