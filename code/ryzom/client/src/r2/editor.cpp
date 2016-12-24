@@ -4893,13 +4893,10 @@ CEntityCL *CEditor::createEntity(uint slot, const NLMISC::CSheetId &sheetId, con
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 	if(node)
 	{
-		union
-		{
-			uint64 heading64;
-			float  headingFloat;
-		};
-		headingFloat = heading;
-		node->setValue64(heading64);
+		C64BitsParts parts;
+		parts.f[0] = heading;
+		parts.f[1] = 0.f;
+		node->setValue64(parts.i64[0]);
 	}
 	// Set Mode
 	node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);

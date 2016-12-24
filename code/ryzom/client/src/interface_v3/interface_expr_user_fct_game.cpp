@@ -146,19 +146,12 @@ static DECLARE_INTERFACE_USER_FCT(getCompassText)
 		return false;
 	}
 
-	// helper
-	union C64BitsParts
-	{
-		sint64 i64;
-		double d;
-	};
-
 	//get the direction
 	// sint64 in the databae.
 	C64BitsParts angle;
-	angle.i64 = args[0].getInteger();
+	angle.i64[0] = args[0].getInteger();
 	// cast as double now.
-	sint direction =(sint) floor( 0.5 + ( 8.0 * (angle.d + NLMISC::Pi)/(NLMISC::Pi) ) );
+	sint direction =(sint) floor( 0.5 + ( 8.0 * (angle.d[0] + NLMISC::Pi)/(NLMISC::Pi) ) );
 	direction = ((direction%16)+16)%16;
 	static const string txts[]=
 	{
