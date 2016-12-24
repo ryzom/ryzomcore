@@ -1309,8 +1309,9 @@ void CCharacterCL::updateVisualPropertyMode(const NLMISC::TGameCycle &gameCycle,
 			nlwarning("CH::updtVPMode:%d: Cannot find the property 'PROPERTY_ORIENTATION(%d)'.", _Slot, CLFECOMMON::PROPERTY_ORIENTATION);
 			return;
 		}
-		const sint64 &ori = nodeOri->getValue64();
-		float angleZ = *(float *)(&ori);
+		C64BitsParts parts;
+		parts.i64[0] = nodeOri->getValue64();
+		float angleZ = parts.f[0];
 		// server forces the entity orientation even if it cannot turn
 		front(CVector((float)cos(angleZ), (float)sin(angleZ), 0.f), true, true, true);
 		dir(front(), false, false);
@@ -5228,7 +5229,9 @@ bool CCharacterCL::applyStage(CStage &stage)
 	pair<bool, sint64> resultTeta = stage.property(PROPERTY_ORIENTATION);
 	if(resultTeta.first)
 	{
-		float angleZ = *(float *)(&resultTeta.second);
+		C64BitsParts parts;
+		parts.i64[0] = resultTeta.second;
+		float angleZ = parts.f[0];
 		// server forces the entity orientation even if it cannot turn
 		front(CVector((float)cos(angleZ), (float)sin(angleZ), 0.f), true, true, true);
 
@@ -5242,7 +5245,9 @@ bool CCharacterCL::applyStage(CStage &stage)
 	if(resultMode.first)
 	{
 		// Get the mode from stage.
-		uint8 mo = *(uint8 *)(&resultMode.second);
+		C64BitsParts parts;
+		parts.i64[0] = resultMode.second;
+		uint8 mo = parts.u8[0];
 		// If the mode wanted is not the same, change the mode wanted.
 		if(mo != _ModeWanted)
 		{

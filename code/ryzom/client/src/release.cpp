@@ -551,7 +551,6 @@ void release()
 
 	ProgressBar.release();
 
-	R2::getEditor().release();
 	R2::CEditor::releaseInstance();
 
 	// flush the server string cache

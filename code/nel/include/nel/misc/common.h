@@ -714,6 +714,25 @@ inline T		iavoid0(T x)
 	return x;
 }
 
+// Helper to convert in memory between types of different sizes
+union C64BitsParts
+{
+	// unsigned
+	uint64 u64[1];
+	uint32 u32[2];
+	uint16 u16[4];
+	uint8 u8[8];
+
+	// signed
+	sint64 i64[1];
+	sint32 i32[2];
+	sint16 i16[4];
+	sint8 i8[8];
+
+	// floats
+	double d[1];
+	float f[2];
+};
 
 } // NLMISC
 

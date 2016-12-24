@@ -2041,15 +2041,10 @@ NLMISC_COMMAND(entity, "Create an entity on the user or just remove it if Form n
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_ORIENTATION), false);
 		if(node)
 		{
-			union C64BitsRot
-			{
-				sint64 i64;
-				float f;
-			};
-
-			C64BitsRot rot;
-			rot.f = (float)atan2(UserEntity->front().y, UserEntity->front().x);
-			node->setValue64(rot.i64);
+			C64BitsParts rot;
+			rot.f[0] = (float)atan2(UserEntity->front().y, UserEntity->front().x);
+			rot.f[1] = 0.f; // to be sure 64 bits value is initialized
+			node->setValue64(rot.i64[0]);
 		}
 		// Set Mode
 		node = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString("%d", slot)+":P"+toString("%d", CLFECOMMON::PROPERTY_MODE), false);
@@ -2847,16 +2842,11 @@ NLMISC_COMMAND(orient, "Orient an entity", "Slot: [1-254] orient(degree) [dt(tic
 		// Write the position in the DB.
 		float	fRot= (float)(rot*Pi/180.f);
 
-		union C64BitsRot
-		{
-			sint64 i64;
-			float f;
-		};
+		C64BitsParts r;
+		r.f[0] = fRot;
+		r.f[1] = 0.f; // to be sure 64 bits value is initialized
 
-		C64BitsRot r;
-		r.f = fRot;
-
-		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), r.i64);
+		IngameDbMngr.setProp("Entities:E" + toString(slot) + ":P"+toString(CLFECOMMON::PROPERTY_ORIENTATION), r.u32[0]);
 		// Update the position.
 		EntitiesMngr.updateVisualProperty(NetMngr.getCurrentServerTick()+dt, slot, CLFECOMMON::PROPERTY_ORIENTATION);
 	}
