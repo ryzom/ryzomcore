@@ -2512,8 +2512,10 @@ bool mainLoop()
 
 			// R2ED enabled ?
 			R2::getEditor().autoConfigInit(IsInRingSession);
-			if (!IsInRingSession)
-				R2::getEditor().registerLuaFunc();
+
+//			TODO: temporary commented, CEditor must be initialized before to call next lines
+//			if (!IsInRingSession)
+//				R2::getEditor().registerLuaFunc();
 
 			CurrSeason = computeCurrSeason();
 
