@@ -36,6 +36,7 @@ IF(WITH_NEL_TOOLS)
     build_interface
     get_neighbors
     textures_optimizer
+    textures_tool
     tga_cut
     tga_resize)
 ENDIF()
