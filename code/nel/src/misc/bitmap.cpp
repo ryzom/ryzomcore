@@ -136,7 +136,8 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	}
 
 #ifdef USE_JPEG
-	if (fileType == JPG_HEADER)
+	// only compare fist word
+	if (memcmp(&fileType, &JPG_HEADER, 2) == 0)
 	{
 #ifdef NEL_ALL_BITMAP_WHITE
 		uint8 result = readJPG(f);
