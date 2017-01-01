@@ -553,7 +553,7 @@ public:
 
 		// parse ai instance list
 		vector<string> vs = md.getPropertyArray(prim, "ai_instances", true, false);
-/*		if (vs..empty())
+/*		if (vs.empty())
 		{
 			string err = toString("crash block need at least one ai instance !");
 			throw EParseException(prim, err.c_str());
