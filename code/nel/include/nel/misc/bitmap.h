@@ -636,11 +636,17 @@ public:
 
 
 
-	/** Get the pixel at the given coorrdinate.
+	/** Get the pixel at the given coordinate.
 	  * Works in RGBA and DXTC modes.
 	  * Outside of the bitmap it returns Black (or if mipmap is not found)
 	  */
 	CRGBA  getPixelColor(sint x, sint y, uint32 numMipMap = 0) const;
+
+	/** Set the pixel at the given coordinate.
+	* Works in RGBA mode only.
+	*/
+	void  setPixelColor(sint x, sint y, CRGBA c, uint32 numMipMap = 0);
+
 	/**
 	 * Horizontal flip (all the columns are flipped)
 	 * Works only with RGBA, and DXTC formats (only if w/h is a power of 2)

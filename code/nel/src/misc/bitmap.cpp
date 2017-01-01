@@ -4510,6 +4510,20 @@ CRGBA CBitmap::getPixelColor(sint x, sint y, uint32 numMipMap /*=0*/) const
 	return CRGBA::Black;
 }
 
+//-----------------------------------------------
+void  CBitmap::setPixelColor(sint x, sint y, CRGBA c, uint32 numMipMap)
+{
+	nlassert(PixelFormat == RGBA);
+
+	uint w = getWidth(numMipMap);
+	uint h = getHeight(numMipMap);
+
+	if (w == 0 || x < 0 || y < 0 || x >= (sint)w || y >= (sint)h) return;
+
+	uint8 *pix = &getPixels(numMipMap)[(x + y * w) << 2];
+
+	memcpy(pix, &c, sizeof(CRGBA));
+}
 
 //-----------------------------------------------
 void CBitmap::swap(CBitmap &other)
