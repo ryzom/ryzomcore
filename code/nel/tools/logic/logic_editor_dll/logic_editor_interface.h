@@ -54,10 +54,10 @@ public:
 	virtual void*getMainFrame ()=0;
 
 	// load a logic file
-	virtual void loadFile( const char * fileName ) = 0;
+	virtual void loadFile( const TCHAR * fileName ) = 0;
 
 	// create a default file
-	virtual void createDefaultFile( const char * filename = "logic.logic ") = 0;
+	virtual void createDefaultFile( const TCHAR * filename = _T("logic.logic ")) = 0;
 	
 	// Get instance
 	static LOGIC_EDITOR_EXPORT ILogicEditor * getInterface( int version = LOGIC_EDITOR_VERSION );

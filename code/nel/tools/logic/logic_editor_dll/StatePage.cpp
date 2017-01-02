@@ -251,7 +251,7 @@ void CStatePage::OnButtonAddState()
 	
 	if (m_sStateName.IsEmpty())
 	{
-		AfxMessageBox("State name cannot be empty, please enter a valid name");
+		AfxMessageBox(_T("State name cannot be empty, please enter a valid name"));
 		return;
 	}
 
@@ -366,7 +366,7 @@ void CStatePage::OnButtonStateRemove()
 	// get selected state 
 	if (m_pSelectedState != NULL)
 	{
-		if (AfxMessageBox("Your are about to permanently delete this state.\nDoing so will invalidate all references to this state.\nDo you want to continue anyway ?" ,MB_OKCANCEL|MB_DEFBUTTON2) == IDOK)
+		if (AfxMessageBox(_T("Your are about to permanently delete this state.\nDoing so will invalidate all references to this state.\nDo you want to continue anyway ?") ,MB_OKCANCEL|MB_DEFBUTTON2) == IDOK)
 		{
 			CMainFrame *pFrame = (CMainFrame*)AfxGetApp()->m_pMainWnd;
 			CChildFrame *pChild = (CChildFrame *) pFrame->GetActiveFrame();
@@ -384,7 +384,7 @@ void CStatePage::OnButtonStateRemove()
 	}
 	else
 	{
-		AfxMessageBox( "No state selected ! Choose a state first" );
+		AfxMessageBox(_T("No state selected ! Choose a state first"));
 	}
 }
 
@@ -399,11 +399,11 @@ void CStatePage::OnButtonStateApply()
 	{
 		if (m_sStateName.IsEmpty())
 		{
-			AfxMessageBox("State name cannot be empty, please enter a valid name");
+			AfxMessageBox(_T("State name cannot be empty, please enter a valid name"));
 			return;
 		}
 
-		if (AfxMessageBox("Your are about to change this state name.\nDoing so will change all occurence of the old name to the new one.\nDo you want to continue anyway ?" ,MB_OKCANCEL|MB_DEFBUTTON2) == IDOK)
+		if (AfxMessageBox(_T("Your are about to change this state name.\nDoing so will change all occurence of the old name to the new one.\nDo you want to continue anyway ?") ,MB_OKCANCEL|MB_DEFBUTTON2) == IDOK)
 		{
 			CMainFrame *pFrame = (CMainFrame*)AfxGetApp()->m_pMainWnd;
 			CChildFrame *pChild = (CChildFrame *) pFrame->GetActiveFrame();
@@ -418,14 +418,14 @@ void CStatePage::OnButtonStateApply()
 	}
 	else
 	{
-		AfxMessageBox( "No state selected ! Choose a state first" );
+		AfxMessageBox(_T("No state selected ! Choose a state first"));
 	}
 }
 
 void CStatePage::OnButtonEventApply() 
 {
 	// TODO: Add your control notification handler code here
-	AfxMessageBox( "Features not implemented" );
+	AfxMessageBox(_T("Features not implemented"));
 }
 
 void CStatePage::OnButtonEventRemove() 
@@ -447,6 +447,6 @@ void CStatePage::OnButtonEventRemove()
 	}
 	else
 	{
-		AfxMessageBox( "No event selected ! Choose a event first" );
+		AfxMessageBox(_T("No event selected ! Choose a event first"));
 	}
 }

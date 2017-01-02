@@ -620,7 +620,7 @@ void CLog_analyserDlg::getLogSeries( const CString& filenameStr, std::vector<CSt
 {
 	if ( isLogSeriesEnabled() )
 	{
-		string filename = filenameStr;
+		string filename = tStrToUtf8(filenameStr);
 		unsigned int dotpos = filename.find_last_of ('.');
 		if ( dotpos != string::npos )
 		{
@@ -1012,13 +1012,13 @@ void CLog_analyserDlg::OnAnalyse()
 	{
 		if ( Views.empty() )
 		{
-			AfxMessageBox( "This plug-in needs to be applied on the first open view" );
+			AfxMessageBox(_T("This plug-in needs to be applied on the first open view"));
 			return;
 		}
 
 		if ( ! PlugInSelectorDialog.AnalyseFunc )
 		{
-			AfxMessageBox( "Could not load function doAnalyse in dll" );
+			AfxMessageBox(_T("Could not load function doAnalyse in dll"));
 			return;
 		}
 
@@ -1028,7 +1028,7 @@ void CLog_analyserDlg::OnAnalyse()
 		if ( ! logstr.empty() )
 		{
 			vector<CString> pl;
-			pl.push_back( "Analyse log" );
+			pl.push_back(_T("Analyse log"));
 			onAddCommon( pl );
 			Views.back()->addText( logstr.c_str() );
 			Views.back()->commitAddedLines();
@@ -1041,7 +1041,7 @@ void CLog_analyserDlg::OnAnalyse()
 		if ( nEndChar != (int)resstr.size() )
 		{
 			CString s;
-			s.Format( "Error: plug-in returned %u characters, only %d displayed", resstr.size(), nEndChar+1 );
+			s.Format(_T("Error: plug-in returned %u characters, only %d displayed"), (uint)resstr.size(), nEndChar+1 );
 			AfxMessageBox( s );
 		}
 	}
