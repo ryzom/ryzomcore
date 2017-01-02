@@ -452,7 +452,7 @@ void SelectionTerritoire::OnSaveAs()
  	CFileDialog sFile(false, _T("bank"), DefautPath+MainFileName, 0, szFilter, this);
 	if (sFile.DoModal()==IDOK)
 	{
-		Save (sFile.GetPathName(), tileBank);
+		Save (tStrToUtf8(sFile.GetPathName()).c_str(), tileBank);
 		MainFileOk = 1;
 		CButton *button = (CButton*)GetDlgItem(IDC_ADD_TERRITOIRE);
 		button->EnableWindow(true);

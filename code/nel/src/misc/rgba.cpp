@@ -748,6 +748,17 @@ CRGBA CRGBA::stringToRGBA( const char *ptr )
 	
 			return CRGBA( r,g,b,a );
 		}
+
+		// we need at least 3 hexadecimal values to consider string is valid
+		if (sscanf(ptr, "#%02x%02x%02x%02x", &r, &g, &b, &a) >= 3)
+		{
+			clamp(r, 0, 255);
+			clamp(g, 0, 255);
+			clamp(b, 0, 255);
+			clamp(a, 0, 255);
+
+			return CRGBA(r, g, b, a);
+		}
 	}
 
 	return NLMISC::CRGBA::White;
