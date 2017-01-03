@@ -312,7 +312,8 @@ int main(int argc, char **argv)
 					NLMISC::fromString(tokens[1], u);
 					NLMISC::fromString(tokens[2], v);
 
-					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, v * (float)TextureSize));
+					// V coordinates are inverted
+					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, (1.f - v) * (float)TextureSize));
 				}
 				else
 				{
@@ -377,12 +378,20 @@ int main(int argc, char **argv)
 			NLMISC::CUV uv1 = verticeTextureCoords[face.indices[1]];
 			NLMISC::CUV uv2 = verticeTextureCoords[face.indices[2]];
 
-			std::vector<std::pair<sint, sint> > pixels;
+			std::vector<std::pair<sint, sint> > pixels, temp;
 
 			// draw the triangle with vertices UV coordinates
-			NLMISC::drawLine(uv0.U, uv0.V, uv1.U, uv1.V, pixels);
-			NLMISC::drawLine(uv1.U, uv1.V, uv2.U, uv2.V, pixels);
-			NLMISC::drawLine(uv2.U, uv2.V, uv0.U, uv0.V, pixels);
+			NLMISC::drawFullLine(uv0.U, uv0.V, uv1.U, uv1.V, pixels);
+
+			// append pixels
+			NLMISC::drawFullLine(uv1.U, uv1.V, uv2.U, uv2.V, temp);
+			pixels.reserve(pixels.size() + temp.size());
+			pixels.insert(pixels.end(), temp.begin(), temp.end());
+
+			// append pixels
+			NLMISC::drawFullLine(uv2.U, uv2.V, uv0.U, uv0.V, temp);
+			pixels.reserve(pixels.size() + temp.size());
+			pixels.insert(pixels.end(), temp.begin(), temp.end());
 
 			// for each pixels, set them to black
 			for (uint j = 0, jlen = pixels.size(); j < jlen; ++j)
