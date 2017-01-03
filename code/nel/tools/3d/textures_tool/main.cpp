@@ -21,6 +21,8 @@
 #include "nel/misc/path.h"
 #include "nel/misc/cmd_args.h"
 #include "nel/misc/vector_2d.h"
+#include "nel/misc/uv.h"
+#include "nel/misc/algo.h"
 
 struct CPoint
 {
@@ -42,10 +44,18 @@ const CPoint Down(0, 1);
 const CPoint Left(-1, 0);
 const CPoint Right(1, 0);
 
+const uint TextureSize = 4096;
+
 const NLMISC::CRGBA DiscardColor = NLMISC::CRGBA::Red;
 const NLMISC::CRGBA KeepColor = NLMISC::CRGBA::Blue;
 
 typedef std::vector<CPoint> CPoints;
+
+struct CFace
+{
+	static const uint INDICES_COUNT = 3;
+	uint indices[INDICES_COUNT];
+};
 
 bool fillPoint(NLMISC::CBitmap &bitmap, sint width, CPoints &points)
 {
@@ -101,6 +111,7 @@ int main(int argc, char **argv)
 	args.setDescription("Textures tool");
 	args.addArg("c", "colorize", "color", "Colorize textures using a color (in HTML hexdecimal format like #rrggbb)");
 	args.addArg("f", "fill", "color or image", "Fill background part with color or image");
+	args.addArg("u", "uvmap", "", "Generate a UV Map texture from OBJ file");
 	args.addArg("w", "width", "width of border", "Width of the border to fill (default 0)");
 	args.addArg("b", "background", "background color", "Color to use to fill background");
 	args.addArg("o", "output", "filename", "Output filename");
@@ -253,6 +264,130 @@ int main(int argc, char **argv)
 					// put a background color
 					outBitmap.setPixelColor(x, y, backgroundColor);
 				}
+			}
+		}
+
+		// save output bitmap
+		NLMISC::COFile outFile;
+
+		if (outFile.open(output))
+		{
+			outBitmap.writePNG(outFile, 24);
+		}
+	}
+
+	if (args.haveArg("u"))
+	{
+		std::vector<NLMISC::CUV> verticeTextureCoords;
+		std::vector<CFace> faces;
+
+		NLMISC::CIFile objFile;
+
+		if (!objFile.open(filename))
+		{
+			nlwarning("Unable to open %s", filename.c_str());
+			return 1;
+		}
+
+		char buffer[1024];
+
+		while (!objFile.eof())
+		{
+			objFile.getline(buffer, 1024);
+			buffer[1023] = '\0';
+
+			std::string line(buffer);
+
+			if (line.size() < 3) continue;
+
+			// texture coordinate
+			if (line.substr(0, 3) == "vt ")
+			{
+				std::vector<std::string> tokens;
+				NLMISC::explode(line, std::string(" "), tokens);
+
+				if (tokens.size() == 3)
+				{
+					float u, v;
+					NLMISC::fromString(tokens[1], u);
+					NLMISC::fromString(tokens[2], v);
+
+					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, v * (float)TextureSize));
+				}
+				else
+				{
+					nlwarning("Not 3 arguments for VT");
+				}
+			}
+			else if (line.substr(0, 2) == "f ")
+			{
+				std::vector<std::string> tokens;
+				NLMISC::explode(line, std::string(" "), tokens);
+
+				if (tokens.size() == 4)
+				{
+					CFace face;
+
+					for (uint i = 1; i < 4; ++i)
+					{
+						std::vector<std::string> tokens2;
+						NLMISC::explode(tokens[i], std::string("/"), tokens2);
+
+						if (tokens2.size() == 3)
+						{
+							NLMISC::fromString(tokens2[1], face.indices[i - 1]);
+
+							// we want indices start from 0 instead of 1
+							--face.indices[i - 1];
+						}
+						else
+						{
+							nlwarning("Not 3 arguments for indices");
+						}
+					}
+
+					faces.push_back(face);
+				}
+				else
+				{
+					nlwarning("Not 4 arguments for F");
+				}
+			}
+		}
+
+		nlinfo("OBJ file processed with %u vertices and %u faces", (uint)verticeTextureCoords.size(), (uint)faces.size());
+
+		objFile.close();
+
+		// draw UV Map
+		// create a new bitmap for output
+		NLMISC::CBitmap outBitmap;
+		outBitmap.resize(TextureSize, TextureSize);
+
+		// white background
+		memset(&outBitmap.getPixels()[0], 255, TextureSize * TextureSize * 4);
+
+		// process all faces
+		for (uint i = 0, len = faces.size(); i < len; ++i)
+		{
+			const CFace &face = faces[i];
+
+			// the 3 pixels of a vertice
+			NLMISC::CUV uv0 = verticeTextureCoords[face.indices[0]];
+			NLMISC::CUV uv1 = verticeTextureCoords[face.indices[1]];
+			NLMISC::CUV uv2 = verticeTextureCoords[face.indices[2]];
+
+			std::vector<std::pair<sint, sint> > pixels;
+
+			// draw the triangle with vertices UV coordinates
+			NLMISC::drawLine(uv0.U, uv0.V, uv1.U, uv1.V, pixels);
+			NLMISC::drawLine(uv1.U, uv1.V, uv2.U, uv2.V, pixels);
+			NLMISC::drawLine(uv2.U, uv2.V, uv0.U, uv0.V, pixels);
+
+			// for each pixels, set them to black
+			for (uint j = 0, jlen = pixels.size(); j < jlen; ++j)
+			{
+				outBitmap.setPixelColor(pixels[j].first, pixels[j].second, NLMISC::CRGBA::Black);
 			}
 		}
 
