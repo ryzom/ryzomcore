@@ -312,7 +312,8 @@ int main(int argc, char **argv)
 					NLMISC::fromString(tokens[1], u);
 					NLMISC::fromString(tokens[2], v);
 
-					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, v * (float)TextureSize));
+					// V coordinates are inverted
+					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, (1.f - v) * (float)TextureSize));
 				}
 				else
 				{
