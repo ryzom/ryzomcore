@@ -332,6 +332,12 @@ int main(int argc, char **argv)
 
 			std::string line(buffer);
 
+			if (line.size() > 1022)
+			{
+				nlwarning("More than 1022 bytes on a line!");
+				return 1;
+			}
+
 			if (line.size() < 3) continue;
 
 			// texture coordinate
