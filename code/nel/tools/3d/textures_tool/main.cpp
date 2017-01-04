@@ -53,8 +53,19 @@ typedef std::vector<CPoint> CPoints;
 
 struct CFace
 {
-	static const uint INDICES_COUNT = 3;
-	uint indices[INDICES_COUNT];
+	std::vector<uint> indices;
+};
+
+struct CObject
+{
+	std::string name;
+	std::vector<NLMISC::CUV> textureCoords;
+	std::vector<CFace> faces;
+
+	void display()
+	{
+		nlinfo("Object %s processed with %u vertices and %u faces", name.c_str(), (uint)textureCoords.size(), (uint)faces.size());
+	}
 };
 
 bool fillPoint(NLMISC::CBitmap &bitmap, sint width, CPoints &points)
@@ -98,6 +109,23 @@ bool fillPoint(NLMISC::CBitmap &bitmap, sint width, CPoints &points)
 	}
 
 	return true;
+}
+
+void drawEdge(NLMISC::CBitmap &bitmap, const CObject &object, const CFace &face, uint index0, uint index1)
+{
+	NLMISC::CUV uv0 = object.textureCoords[face.indices[index0]];
+	NLMISC::CUV uv1 = object.textureCoords[face.indices[index1]];
+
+	std::vector<std::pair<sint, sint> > pixels;
+
+	// draw the triangle with vertices UV coordinates
+	NLMISC::drawFullLine(uv0.U, uv0.V, uv1.U, uv1.V, pixels);
+
+	// for each pixels, set them to black
+	for (uint j = 0, jlen = pixels.size(); j < jlen; ++j)
+	{
+		bitmap.setPixelColor(pixels[j].first, pixels[j].second, NLMISC::CRGBA::Black);
+	}
 }
 
 int main(int argc, char **argv)
@@ -285,9 +313,6 @@ int main(int argc, char **argv)
 
 	if (args.haveArg("u"))
 	{
-		std::vector<NLMISC::CUV> verticeTextureCoords;
-		std::vector<CFace> faces;
-
 		NLMISC::CIFile objFile;
 
 		if (!objFile.open(filename))
@@ -295,6 +320,8 @@ int main(int argc, char **argv)
 			nlwarning("Unable to open %s", filename.c_str());
 			return 1;
 		}
+
+		CObject object;
 
 		char buffer[1024];
 
@@ -310,6 +337,7 @@ int main(int argc, char **argv)
 			// texture coordinate
 			if (line.substr(0, 3) == "vt ")
 			{
+				// vertex texture
 				std::vector<std::string> tokens;
 				NLMISC::explode(line, std::string(" "), tokens);
 
@@ -320,7 +348,7 @@ int main(int argc, char **argv)
 					NLMISC::fromString(tokens[2], v);
 
 					// V coordinates are inverted
-					verticeTextureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, (1.f - v) * (float)TextureSize));
+					object.textureCoords.push_back(NLMISC::CUV(u * (float)TextureSize, (1.f - v) * (float)TextureSize));
 				}
 				else
 				{
@@ -329,41 +357,49 @@ int main(int argc, char **argv)
 			}
 			else if (line.substr(0, 2) == "f ")
 			{
+				// face
 				std::vector<std::string> tokens;
 				NLMISC::explode(line, std::string(" "), tokens);
 
-				if (tokens.size() == 4)
+				CFace face;
+				face.indices.resize(tokens.size()-1);
+
+				bool faceValid = true;
+
+				for (uint i = 1, ilen = tokens.size(); i < ilen; ++i)
 				{
-					CFace face;
+					std::vector<std::string> tokens2;
+					NLMISC::explode(tokens[i], std::string("/"), tokens2);
 
-					for (uint i = 1; i < 4; ++i)
+					if (tokens2.size() == 3)
 					{
-						std::vector<std::string> tokens2;
-						NLMISC::explode(tokens[i], std::string("/"), tokens2);
-
-						if (tokens2.size() == 3)
+						if (NLMISC::fromString(tokens2[1], face.indices[i - 1]))
 						{
-							NLMISC::fromString(tokens2[1], face.indices[i - 1]);
-
 							// we want indices start from 0 instead of 1
 							--face.indices[i - 1];
 						}
 						else
 						{
-							nlwarning("Not 3 arguments for indices");
+							faceValid = false;
 						}
 					}
+					else
+					{
+						nlwarning("Not 3 arguments for indices");
+					}
+				}
 
-					faces.push_back(face);
-				}
-				else
-				{
-					nlwarning("Not 4 arguments for F");
-				}
+				if (faceValid) object.faces.push_back(face);
+			}
+			else if (line.substr(0, 2) == "o ")
+			{
+				// object
+				object.name = line.substr(2);
+				object.display();
 			}
 		}
 
-		nlinfo("OBJ file processed with %u vertices and %u faces", (uint)verticeTextureCoords.size(), (uint)faces.size());
+		object.display();
 
 		objFile.close();
 
@@ -376,35 +412,18 @@ int main(int argc, char **argv)
 		memset(&outBitmap.getPixels()[0], 255, TextureSize * TextureSize * 4);
 
 		// process all faces
-		for (uint i = 0, len = faces.size(); i < len; ++i)
+		for (uint i = 0, ilen = object.faces.size(); i < ilen; ++i)
 		{
-			const CFace &face = faces[i];
+			const CFace &face = object.faces[i];
 
-			// the 3 pixels of a vertice
-			NLMISC::CUV uv0 = verticeTextureCoords[face.indices[0]];
-			NLMISC::CUV uv1 = verticeTextureCoords[face.indices[1]];
-			NLMISC::CUV uv2 = verticeTextureCoords[face.indices[2]];
-
-			std::vector<std::pair<sint, sint> > pixels, temp;
-
-			// draw the triangle with vertices UV coordinates
-			NLMISC::drawFullLine(uv0.U, uv0.V, uv1.U, uv1.V, pixels);
-
-			// append pixels
-			NLMISC::drawFullLine(uv1.U, uv1.V, uv2.U, uv2.V, temp);
-			pixels.reserve(pixels.size() + temp.size());
-			pixels.insert(pixels.end(), temp.begin(), temp.end());
-
-			// append pixels
-			NLMISC::drawFullLine(uv2.U, uv2.V, uv0.U, uv0.V, temp);
-			pixels.reserve(pixels.size() + temp.size());
-			pixels.insert(pixels.end(), temp.begin(), temp.end());
-
-			// for each pixels, set them to black
-			for (uint j = 0, jlen = pixels.size(); j < jlen; ++j)
+			// pixels of a face
+			for (uint k = 1, klen = face.indices.size(); k < klen; ++k)
 			{
-				outBitmap.setPixelColor(pixels[j].first, pixels[j].second, NLMISC::CRGBA::Black);
+				drawEdge(outBitmap, object, face, k - 1, k);
 			}
+
+			// link last and fist pixels
+			drawEdge(outBitmap, object, face, face.indices.size()-1, 0);
 		}
 
 		// save output bitmap
