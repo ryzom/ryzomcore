@@ -44,7 +44,7 @@ const CPoint Down(0, 1);
 const CPoint Left(-1, 0);
 const CPoint Right(1, 0);
 
-const uint TextureSize = 4096;
+uint TextureSize = 4096;
 
 const NLMISC::CRGBA DiscardColor = NLMISC::CRGBA::Red;
 const NLMISC::CRGBA KeepColor = NLMISC::CRGBA::Blue;
@@ -113,6 +113,7 @@ int main(int argc, char **argv)
 	args.addArg("f", "fill", "color or image", "Fill background part with color or image");
 	args.addArg("u", "uvmap", "", "Generate a UV Map texture from OBJ file");
 	args.addArg("w", "width", "width of border", "Width of the border to fill (default 0)");
+	args.addArg("s", "size", "size of output bitmap", "Width and height of generated bitmap (default 4096)");
 	args.addArg("b", "background", "background color", "Color to use to fill background");
 	args.addArg("o", "output", "filename", "Output filename");
 	args.addAdditionalArg("filename", "File to process", true, true);
@@ -122,6 +123,12 @@ int main(int argc, char **argv)
 	std::string filename = args.getAdditionalArg("filename").front();
 
 	std::string output = args.haveArg("o") ? args.getArg("o").front() : "";
+
+	if (args.haveArg("s"))
+	{
+		// size of generated bitmap
+		NLMISC::fromString(args.getArg("s").front(), TextureSize);
+	}
 
 	if (args.haveArg("c"))
 	{
