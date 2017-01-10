@@ -703,6 +703,57 @@ double CEntityManager::getInstanceColOrient(uint32 idx)
 	return primitive->getOrientation(dynamicWI);
 }
 
+CVector CEntityManager::getInstanceBBoxMin(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if (instance.empty())
+		return  CVector(0,0,0);
+		
+	NLMISC::CAABBox bbox;
+	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
+	
+	CVector bbox_min;
+	
+	if (bbox.getCenter() == CVector::Null)
+		bbox_min = CVector(-0.5f, -0.5f, -0.5f);
+	else
+		bbox_min = bbox.getMin();
+	
+	bbox_min.x *= _ShapeInstances[idx].Instance.getScale().x;
+	bbox_min.y *= _ShapeInstances[idx].Instance.getScale().y;
+	bbox_min.z *= _ShapeInstances[idx].Instance.getScale().z;
+	
+	return bbox_min+_ShapeInstances[idx].Instance.getPos();
+}
+
+CVector CEntityManager::getInstanceBBoxMax(uint32 idx)
+{
+	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
+		return CVector(0,0,0);
+
+	UInstance instance = _ShapeInstances[idx].Instance;
+	if(instance.empty())
+		return  CVector(0,0,0);
+	
+	NLMISC::CAABBox bbox;
+	_ShapeInstances[idx].Instance.getShapeAABBox(bbox);
+	
+	CVector bbox_max;
+	
+	if (bbox.getCenter() == CVector::Null)
+		bbox_max = CVector(-0.5f, -0.5f, -0.5f);
+	else
+		bbox_max = bbox.getMax();
+	
+	bbox_max.x *= _ShapeInstances[idx].Instance.getScale().x;
+	bbox_max.y *= _ShapeInstances[idx].Instance.getScale().y;
+	bbox_max.z *= _ShapeInstances[idx].Instance.getScale().z;
+	
+	return bbox_max+_ShapeInstances[idx].Instance.getPos();
+}
 
 bool CEntityManager::removeInstances()
 {
@@ -756,14 +807,28 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "colorize")
 		{
-			CRGBA c;
-			if( fromString( values[i], c ) )
+			if (values[i] == "0")
 			{
 				for(uint j=0;j<instance.getNumMaterials();j++)
 				{
-					instance.getMaterial(j).setShininess( 1000.0f );
-					instance.getMaterial(j).setEmissive(c);
-					instance.getMaterial(j).setDiffuse(c);
+					instance.getMaterial(j).setShininess( 10.0f );
+					instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+					instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
+					instance.getMaterial(j).setDiffuse(CRGBA(255,255,255,255));
+				}
+			}
+			else
+			{
+				CRGBA c;
+				if( fromString( values[i], c ) )
+				{
+					for(uint j=0;j<instance.getNumMaterials();j++)
+					{
+						instance.getMaterial(j).setShininess( 1000.0f );
+						instance.getMaterial(j).setEmissive(c);
+						instance.getMaterial(j).setAmbient(c);
+						instance.getMaterial(j).setDiffuse(c);
+					}
 				}
 			}
 		}
@@ -781,6 +846,43 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 					}
 				}
 			}
+		}
+		else if (param == "skeleton")
+		{
+			// TODO
+		}
+		else if (param == "context")
+		{
+			_ShapeInstances[idx].ContextText = values[i];
+		}
+		else if (param == "url")
+		{
+			_ShapeInstances[idx].ContextURL = values[i];
+		}
+		else if (param == "move x" || param == "move y" || param == "move z")
+		{
+			float v;
+			CVector pos = getInstancePos(idx);
+			
+			if( getRelativeFloatFromString( values[i], v ) ) {
+				updateVector(param, pos, v, true);
+			} else {
+				updateVector(param, pos, v, false);
+			}
+			setInstancePos(idx, pos);
+		}
+		else if (param == "rot x" || param == "rot y" || param == "rot z")
+		{
+			
+			float v;
+			CVector rot = getInstanceRot(idx);
+			
+			if( getRelativeFloatFromString( values[i], v ) ) {
+				updateVector(param, rot, v, true);
+			} else {
+				updateVector(param, rot, v, false);
+			}
+			setInstanceRot(idx, rot);
 		}
 		else if (param == "scale x" || param == "scale y" || param == "scale z")
 		{
@@ -879,6 +981,10 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			fromString(values[i], active);
 			primitive->setObstacle(active);
 		}
+		else if (param == "col obstacle")
+		{
+			
+		}
 	}
 
 	return true;
@@ -933,7 +1039,16 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 					bbox_max = bbox.getMax();
 				}
 
-				bbox.setMinMax((bbox_min*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos(), (bbox_max*_ShapeInstances[i].Instance.getScale().x)+_ShapeInstances[i].Instance.getPos());
+				bbox_min.x *= _ShapeInstances[i].Instance.getScale().x;
+				bbox_min.y *= _ShapeInstances[i].Instance.getScale().y;
+				bbox_min.z *= _ShapeInstances[i].Instance.getScale().z;
+
+				bbox_max.x *= _ShapeInstances[i].Instance.getScale().x;
+				bbox_max.y *= _ShapeInstances[i].Instance.getScale().y;
+				bbox_max.z *= _ShapeInstances[i].Instance.getScale().z;
+
+
+				bbox.setMinMax(bbox_min+_ShapeInstances[i].Instance.getPos(), bbox_max+_ShapeInstances[i].Instance.getPos());
 
 				if(bbox.intersect(pos, pos+dir*100.0f))
 				{

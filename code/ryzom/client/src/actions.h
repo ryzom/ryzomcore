@@ -281,16 +281,16 @@ public:
 // HashMapTraits for NLMISC::TKey
 struct CTKeyHashMapTraits
 {
-	enum { bucket_size = 4, min_buckets = 8, };
-	CTKeyHashMapTraits() { }
+	//enum { bucket_size = 4, min_buckets = 8, };
+	//CTKeyHashMapTraits() { }
 	size_t operator() (NLMISC::TKey key) const
 	{
-		return (size_t)key;
+		return static_cast<std::size_t>(key);
 	}
-	bool operator() (NLMISC::TKey key1, NLMISC::TKey key2) const
+	/*bool operator() (NLMISC::TKey key1, NLMISC::TKey key2) const
 	{
 		return key1 < key2;
-	}
+	}*/
 };
 
 /**
