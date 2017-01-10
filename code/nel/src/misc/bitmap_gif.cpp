@@ -65,7 +65,7 @@ static int readGIFData(GifFileType *gif, GifByteType *data, int length)
 	}
 	catch(...)
 	{
-		nlwarning("error while reading JPEG image");
+		nlwarning("error while reading GIF image");
 
 		return 0;
 	}
