@@ -588,11 +588,25 @@ namespace NLGUI
 									// second instance deletes first tmpfile and creates new file for itself.
 									if (CFile::getFileSize(tmpfile) > 0)
 									{
-										CFile::moveFile(it->dest, tmpfile);
-										for(uint i = 0; i < it->imgs.size(); i++)
+										try
 										{
-											setImage(it->imgs[i].Image, it->dest);
-											setImageSize(it->imgs[i].Image, it->imgs[i].Style);
+											// verify that image is not corrupted
+											uint32 w, h;
+											CBitmap::loadSize(tmpfile, w, h);
+											if (w != 0 && h != 0)
+											{
+												CFile::moveFile(it->dest, tmpfile);
+												for(uint i = 0; i < it->imgs.size(); i++)
+												{
+													setImage(it->imgs[i].Image, it->dest);
+													setImageSize(it->imgs[i].Image, it->imgs[i].Style);
+												}
+											}
+										}
+										catch(const NLMISC::Exception &e)
+										{
+											// exception message has .tmp file name, so keep it for further analysis
+											nlwarning("Invalid image (%s): %s", it->url.c_str(), e.what());
 										}
 									}
 								}
@@ -4177,10 +4191,18 @@ namespace NLGUI
 			if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
 			{
 				// don't display image that are not power of 2
-				uint32 w, h;
-				CBitmap::loadSize (image, w, h);
-				if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+				try
+				{
+					uint32 w, h;
+					CBitmap::loadSize (image, w, h);
+					if (w == 0 || h == 0 || ((!NLMISC::isPowerOf2(w) || !NLMISC::isPowerOf2(h)) && !NL3D::CTextureFile::supportNonPowerOfTwoTextures()))
+						image = "web_del.tga";
+				}
+				catch(const NLMISC::Exception &e)
+				{
+					nlwarning(e.what());
 					image = "web_del.tga";
+				}
 			}
 			else
 			{
@@ -4376,10 +4398,18 @@ namespace NLGUI
 				}
 				else
 				{
-					uint32 w, h;
-					CBitmap::loadSize(normal, w, h);
-					if (w == 0 || h == 0)
+					try
+					{
+						uint32 w, h;
+						CBitmap::loadSize(normal, w, h);
+						if (w == 0 || h == 0)
+							normal = "web_del.tga";
+					}
+					catch(const NLMISC::Exception &e)
+					{
+						nlwarning(e.what());
 						normal = "web_del.tga";
+					}
 				}
 			}
 		}
