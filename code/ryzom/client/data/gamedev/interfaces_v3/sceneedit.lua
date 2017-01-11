@@ -32,13 +32,15 @@ function SceneEditor:init(scene_id, form_url, translations, icons_url)
 	self.T = translations
 end
 
-function SceneEditor:reset()
+function SceneEditor:reset(no_get_html)
 	self.Shapes = {}
 	self.Groups = {}
 	self.LastEditedGroup = nil
 	self.HaveUpdate = nil
 	runAH(nil, "remove_shapes", "")
-	self:get_html("Reseted")
+	if no_get_html == true then
+		self:get_html("Reseted")
+	end
 end
 
 function SceneEditor:show_menu()
@@ -364,24 +366,24 @@ end
 
 function SceneEditor:editGroup(group)
 	if self.LastEditedGroup then
-		self:removeGroup(self.LastEditedGroup)
+		self:removeGroup(self.LastEditedGroup, true)
 		self:addGroup(self.LastEditedGroup, 0, true, false)
 	end
-	self:removeGroup(group);
+	self:removeGroup(group, true);
 	self:addGroup(group, 0, true, true)
 	self.LastEditedGroup = group
 end
 
-function SceneEditor:addFromDb(group, db_id, json_shape)
+function SceneEditor:addFromDb(group, db_id, json_shape, edit)
 	shape = Json.decode(json_shape)
 	shape.db_id = db_id
 
 	shape.group = group
 	shape.modified = ""
-	if hide then
-		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, false, "", "")
-	else
+	if edit then
 		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, "", "SceneEditor:show_menu()")
+	else
+		shape_id = addShape(shape.file, shape.pos[1], shape.pos[2], shape.pos[3], "user", 1, true, "", "")
 	end
 	rotateShape(shape_id, tostring(shape.rot[1]), tostring(shape.rot[2]), tostring(shape.rot[3]))
 	setupShape(shape_id, shape.setup)
@@ -393,7 +395,7 @@ function SceneEditor:addFromDb(group, db_id, json_shape)
 end
 
 
-function SceneEditor:removeGroup(group)
+function SceneEditor:removeGroup(group, no_get_html)
 	if self.Groups[group] == nil then
 		return
 	end
@@ -404,6 +406,7 @@ function SceneEditor:removeGroup(group)
 			deleteShape(shape_id)
 		end
 	end
+	
 	self.Groups[group] = nil
 	if self.LastEditedGroup == group then
 		self.LastEditedGroup = nil
@@ -412,7 +415,9 @@ function SceneEditor:removeGroup(group)
 			ui.active=false
 		end
 	end
-	self:get_html("Group Removed")
+	if no_get_html == nil then
+		self:get_html("Group Removed")
+	end
 end
 
 function SceneEditor:enc64(data)
@@ -479,20 +484,7 @@ function SceneEditor:show_shape_list()
 		end
 end
 
-
-function SceneEditor:get_html_section(message, color)
-	return '<table width="100%" cellspacing="0" cellpadding="0"><tr bgcolor="'..color..'"><td align="center" valign="middle"><font color="#FFFFFF" size="12">'..message..'</font></td></tr></table>'
-end
-
-function SceneEditor:get_html(message, message_bg)
-	local new_group = '&nbsp;&nbsp;<a class="ryzom-ui-button" href="'..self.baseUrl..'_AddGroup&amp;add_new_group=1&amp;scene_id='..self.sceneId..'"><img src="'..self.iconsUrl..'/32/chart_organisation_add.png" alt="'..self.T["add_new_group"]..'" /></a>'
-	local show_hide_cols = '&nbsp;&nbsp;<a class="ryzom-ui-button" href="ah:ark_pacs_borders"><img src="'..self.iconsUrl..'/32/show_hide_cols.png" alt="'..self.T["show_hide_cols"]..'" /></a>'
-	local reset_scene = '</td><td align="center" bgcolor="#502020" width="40px"><a class="ryzom-ui-button" href="'..self.baseUrl..'_SaveShapes&amp;reset_scene=1&amp;scene_id='..self.sceneId..'"><img src="'..self.iconsUrl..'/32/bin.png" alt="'..self.T["reset_scene"]..'" /></a>'
-
-	local html = '<header><title>'..self.T["sceno_editor"]..'</title></header>'..self:get_html_section(message..'</td><td bgcolor="#202020" align="center" height="40px" width="140px" valign="middle">'..new_group..show_hide_cols..reset_scene, (message_bg or SceneEditor:get_random_color()))
-
-	html = html .. '<form action="'..self.baseUrl..'_SaveShapes" method="POST"><input type="hidden" name="group" value="'..(self.LastEditedGroup or "")..'" /><input type="hidden" name="scene_id" value="'..self.sceneId..'" />\
-	<table width="100%" cellspacing="0" cellpadding="0">'
+function SceneEditor:getShapesByGroups()
 	local groups = {}
 	for shape_id, shape in pairs(self.Shapes) do
 		if shape.group == nil then
@@ -504,13 +496,35 @@ function SceneEditor:get_html(message, message_bg)
 		end
 		table.insert(groups[shape.group], shape_id)
 	end
+	return groups
+end
+
+
+function SceneEditor:get_html_section(message, color)
+	return '<table width="100%" cellspacing="0" cellpadding="0"><tr bgcolor="'..color..'"><td align="center" valign="middle"><font color="#FFFFFF" size="12">'..message..'</font></td></tr></table>'
+end
+
+function SceneEditor:get_html(message, message_bg)
+	debug("get_html :"..message)
+	local new_group = '&nbsp;&nbsp;<a class="ryzom-ui-button" href="'..self.baseUrl..'_AddGroup&amp;add_new_group=1&amp;scene_id='..self.sceneId..'"><img src="'..self.iconsUrl..'/32/chart_organisation_add.png" alt="'..self.T["add_new_group"]..'" /></a>'
+	local show_hide_cols = '&nbsp;&nbsp;<a class="ryzom-ui-button" href="ah:ark_pacs_borders"><img src="'..self.iconsUrl..'/32/show_hide_cols.png" alt="'..self.T["show_hide_cols"]..'" /></a>'
+	local reset_scene = '</td><td align="center" bgcolor="#502020" width="40px"><a class="ryzom-ui-button" href="'..self.baseUrl..'_SaveShapes&amp;reset_scene=1&amp;scene_id='..self.sceneId..'"><img src="'..self.iconsUrl..'/32/bin.png" alt="'..self.T["reset_scene"]..'" /></a>'
+
+	local html = '<header><title>'..self.T["sceno_editor"]..'</title></header>'..self:get_html_section(message..'</td><td bgcolor="#202020" align="center" height="40px" width="140px" valign="middle">'..new_group..show_hide_cols..reset_scene, (message_bg or SceneEditor:get_random_color()))
+
+	html = html .. '<form action="'..self.baseUrl..'_SaveShapes" method="POST"><input type="hidden" name="group" value="'..(self.LastEditedGroup or "")..'" /><input type="hidden" name="scene_id" value="'..self.sceneId..'" />\
+	<table width="100%" cellspacing="0" cellpadding="0">'
+	
+	local groups = self:getShapesByGroups()
 	
 	for group, shapes in pairsByKeys(self.Groups) do
+		debug("Group : "..group)
 		local groupname = group
 		html = html .. '<tr bgcolor="#444444"><td height="20px"><table width="100%"><tr><td>&nbsp;'..groupname..' ('..(self.Groups[group].props.count or '0')..') </td><td align="right"><input type="hidden" name="shape[]", value="#"/>'
 		
 		
 		if self.Groups[group].props.show then
+			debug("Group : show")
 			if self.Groups[group].props.edit then
 				html = html .. '<a href="ah:lua:SceneEditor:show_shape_list()"><img src="'..self.iconsUrl..'/16/box_add.png" alt="'..self.T["add_shape"]..'"/></a></td><td align="right">'
 				if self.HaveUpdate then
