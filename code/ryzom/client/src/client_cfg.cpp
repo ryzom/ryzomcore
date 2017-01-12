@@ -2043,13 +2043,9 @@ void CClientConfig::release ()
 				// Are we in window mode ?
 				if (ClientCfg.Windowed /* && !isWindowMaximized() */)
 				{
-					// Save windows position
+					// Save windows position. width/height are saved when leaving ingame.
 					writeInt("PositionX", x);
 					writeInt("PositionY", y);
-
-					// Save windows size
-					writeInt("Width", std::max((sint)width, 800));
-					writeInt("Height", std::max((sint)height, 600));
 				}
 			}
 

@@ -133,6 +133,19 @@ extern void selectTipsOfTheDay (uint tips);
 ///////////////
 
 // ***************************************************************************
+// Saving ingame resolution when in windowed mode
+static void saveIngameResolution()
+{
+	if (ClientCfg.Windowed)
+	{
+		uint32 width, height;
+		Driver->getWindowSize(width, height);
+		ClientCfg.writeInt("Width", std::max((sint)width, 800));
+		ClientCfg.writeInt("Height", std::max((sint)height, 600));
+	}
+}
+
+// ***************************************************************************
 // 3D element release, called from both releaseMainLoopReselect() and releaseMainLoop()
 static void releaseMainLoopScenes()
 {
@@ -208,6 +221,8 @@ volatile bool TempResetShapeBankOnRetCharSelect = false;
 void	releaseMainLoopReselect()
 {
 	ProgressBar.release();
+
+	saveIngameResolution();
 
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -363,6 +378,8 @@ void	releaseMainLoopReselect()
 void releaseMainLoop(bool closeConnection)
 {
 	ProgressBar.release();
+
+	saveIngameResolution();
 
 	// Release R2 editor if applicable
 	R2::getEditor().autoConfigRelease(IsInRingSession);
