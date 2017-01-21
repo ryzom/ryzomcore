@@ -740,13 +740,11 @@ namespace NLGUI
 
 		CInterfaceGroup::updateCoords();
 
-		sint32 nCurrentX = 0; // Current offset of an element
-
 		EAlign addElt = _AddElt;
 		if ((addElt == Top) || (addElt == Bottom))
 		{
 			// Calculate size
-			sint32 newH = 0,   newW = 0;
+			sint32 newH = 0;
 			bool bFirst = true;
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
@@ -756,10 +754,7 @@ namespace NLGUI
 				if (!bFirst)
 					newH += _Space;
 				bFirst = false;
-				nCurrentX += _Elements[i].Element->getX();
-				newW = max (newW,   _Elements[i].Element->getW()+(sint32)abs(nCurrentX));
 			}
-			_W = max(newW,   _MinW);
 			_H = max(newH,   _MinH);
 			if (_DynamicDisplaySize)
 			{
@@ -767,10 +762,13 @@ namespace NLGUI
 				_MaxH = _H;
 			}
 			if (_H < _MaxH) setOfsY(0);
+
+			// if width is not from parent, then ensure minimum size
+			if ((_SizeRef & 1) == 0) _W = max(_W, _MinW);
 		}
 		else
 		{
-			sint32 newW = 0,   newH = 0;
+			sint32 newW = 0;
 			bool bFirst = true;
 
 			for (uint32 i = 0; i < _Elements.size(); ++i)
@@ -780,16 +778,17 @@ namespace NLGUI
 				if (!bFirst)
 					newW += _Space;
 				bFirst = false;
-				newH = max (newH,   _Elements[i].Element->getH());
 			}
 			_W = max(newW,   _MinW);
-			_H = max(newH,   _MinH);
 			if (_DynamicDisplaySize)
 			{
 				_MaxW = _W;
 				_MaxH = _H;
 			}
 			if (_W < _MaxW) setOfsX(0);
+
+			// if height is not from parent, then ensure minimum size
+			if ((_SizeRef & 2) == 0) _H = max(_H, _MinH);
 		}
 
 		CInterfaceElement::updateCoords();
