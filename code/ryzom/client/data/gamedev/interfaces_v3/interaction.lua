@@ -537,3 +537,17 @@ function game:openWebIGBrowserHeader()
 		ui.w = ui_webig_browser_w;
 	end
 end
+
+------------------------------------------------------------------------------------------------------------
+local SavedUrl = "";
+function game:chatUrl(url)
+	SavedUrl = url
+	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu");
+end
+function game:chatUrlCopy()
+	runAH(nil, "copy_to_clipboard", SavedUrl)
+end
+function game:chatUrlBrowse()
+	runAH(nil, "browse", "name=ui:interface:webig:content:html|url=" .. SavedUrl)
+end
+
