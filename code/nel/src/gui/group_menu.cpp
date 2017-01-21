@@ -240,6 +240,7 @@ namespace NLGUI
 			_GroupList->setY (4);
 			_GroupList->setSpace (_GroupMenu->_Space);
 			_GroupList->setSerializable( false );
+			_GroupList->setResizeFromChildW(true);
 			addGroup (_GroupList);
 		}
 	}
