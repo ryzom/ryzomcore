@@ -3773,7 +3773,6 @@ namespace NLGUI
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
 		newParagraph->setResizeFromChildH(true);
 
-		newParagraph->setBrowseGroup (this);
 		newParagraph->setIndent(_Indent);
 
 		// Add to the group
@@ -4127,6 +4126,9 @@ namespace NLGUI
 						if (!newLink->Link.empty())
 						{
 							newLink->setHTMLView (this);
+
+							newLink->setActionOnLeftClick("browse");
+							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
 						}
 					}
 					newLink->setText(tmpStr);
