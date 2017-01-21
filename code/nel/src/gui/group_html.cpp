@@ -497,7 +497,11 @@ namespace NLGUI
 
 						if (res != CURLE_OK)
 						{
-							browseError(string("Connection failed with curl error " + string(curl_easy_strerror(res))).c_str());
+							std::string err;
+							err = "Connection failed with cURL error: ";
+							err += curl_easy_strerror(res);
+							err += "\nURL '" + _CurlWWW->Url + "'";
+							browseError(err.c_str());
 						}
 						else
 						if ((code >= 301 && code <= 303) || code == 307 || code == 308)
@@ -541,7 +545,7 @@ namespace NLGUI
 
 							if ( (code < 200 || code >= 300) )
 							{
-								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString((sint32)code) + ") : " + _CurlWWW->Url).c_str());
+								browseError(string("Connection failed (curl code " + toString((sint32)res) + ")\nhttp code " + toString((sint32)code) + ")\nURL '" + _CurlWWW->Url + "'").c_str());
 							}
 							else
 							{
