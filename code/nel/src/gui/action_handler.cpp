@@ -23,6 +23,7 @@
 #include "nel/gui/db_manager.h"
 #include "nel/gui/interface_link.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/view_renderer.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -742,4 +743,14 @@ namespace NLGUI
 	};
 	REGISTER_ACTION_HANDLER (CAHUnlockAllContainer, "unlock_all_container");
 
+	// ------------------------------------------------------------------------------------------------
+	class CAHCopyToClipboard : public IActionHandler
+	{
+		virtual void execute (CCtrlBase *pCaller, const std::string &params)
+		{
+			if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(params))
+				nlwarning("Copy to clipboard failed: '%s'", params.c_str());
+		}
+	};
+	REGISTER_ACTION_HANDLER(CAHCopyToClipboard, "copy_to_clipboard");
 }
