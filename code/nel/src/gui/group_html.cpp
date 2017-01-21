@@ -5220,6 +5220,11 @@ namespace NLGUI
 
 	void CGroupHTML::doBrowseAnchor(const std::string &anchor)
 	{
+		if (_Anchors.count(anchor) == 0)
+		{
+			return;
+		}
+
 		CInterfaceElement *pIE = _Anchors.find(anchor)->second;
 		if (pIE)
 		{
