@@ -786,7 +786,13 @@ static bool	setupNVTextureEnvCombine4(const char	*glext)
 {
 	H_AUTO_OGL(setupNVTextureEnvCombine4);
 	CHECK_EXT("GL_NV_texture_env_combine4");
+#ifdef DEBUG_OGL_COMBINE43_DISABLE
+	// issue 310: disable extension to debug bug around CDriverGL::setupSpecularPass()
+	nlwarning("GL_NV_texture_env_combine4 disabled by request (DEBUG_OGL_COMBINE43_DISABLE)");
+	return false;
+#else
 	return true;
+#endif
 }
 
 // *********************************
@@ -802,7 +808,13 @@ static bool	setupATITextureEnvCombine3(const char	*glext)
 // #endif
 
 	CHECK_EXT("GL_ATI_texture_env_combine3");
+#ifdef DEBUG_OGL_COMBINE43_DISABLE
+	// issue 310: disable extension to debug bug around CDriverGL::setupSpecularPass()
+	nlwarning("GL_ATI_texture_env_combine3 disabled by request (DEBUG_OGL_COMBINE43_DISABLE)");
+	return false;
+#else
 	return true;
+#endif
 }
 
 // *********************************
