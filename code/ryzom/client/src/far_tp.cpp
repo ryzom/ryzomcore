@@ -44,7 +44,7 @@
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
-
+#include "item_group_manager.h"
 using namespace NLMISC;
 using namespace NLNET;
 using namespace NL3D;
@@ -1248,6 +1248,8 @@ void CFarTP::sendReady()
 			// Instead of doing it in disconnectFromPreviousShard(), we do it here, only when it's needed
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			pIM->uninitInGame0();
+			CItemGroupManager::getInstance()->uninit();
+
 			ClientCfg.R2EDEnabled = ! ClientCfg.R2EDEnabled;
 			ActionsContext.removeAllCombos();
 

@@ -100,7 +100,7 @@
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
 #include "user_agent.h"
-
+#include "item_group_manager.h"
 
 //
 // Only the define FINAL_VERSION can be defined on the project, not in this file
@@ -206,6 +206,51 @@ NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, ch
 	}
 	out.serial(opt);
 	NetMngr.push(out);
+	return true;
+}
+
+
+NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
+{
+	if(args.empty()) return false;
+	return CItemGroupManager::getInstance()->equipGroup(args[0]);
+}
+
+NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
+{
+	if(args.empty() || args.size() < 2) return false;
+
+	return CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1]));
+}
+
+NLMISC_COMMAND(createGroup, "create group <name>", "name")
+{
+	if(args.empty()) return false;
+	return CItemGroupManager::getInstance()->createGroup(args[0]);
+}
+
+NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
+{
+	if(args.empty()) return false;
+	return CItemGroupManager::getInstance()->deleteGroup(args[0]);
+}
+
+NLMISC_COMMAND(naked, "get naked !", "")
+{
+	std::string handPath = "LOCAL:INVENTORY:HAND:";
+	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	uint32 i;
+	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
+	}
+
+
+	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
+
+	}
 	return true;
 }
 

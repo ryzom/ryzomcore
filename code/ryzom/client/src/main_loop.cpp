@@ -121,7 +121,7 @@
 #include "bg_downloader_access.h"
 #include "login_progress_post_thread.h"
 #include "npc_icon.h"
-
+#include "item_group_manager.h"
 // R2ED
 #include "r2/editor.h"
 
@@ -2566,6 +2566,7 @@ bool mainLoop()
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+		CItemGroupManager::getInstance()->uninit();
 
 		/////////////////////////////////
 		// Display the end background. //

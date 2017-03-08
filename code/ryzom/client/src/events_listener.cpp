@@ -29,7 +29,7 @@
 #include "input.h"
 #include "interface_v3/interface_manager.h"
 #include "global.h"
-
+#include "item_group_manager.h"
 
 using namespace NLMISC;
 
@@ -131,6 +131,8 @@ void CEventsListener::operator()(const CEvent& event)
 	{
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
+		CItemGroupManager::getInstance()->uninit();
+
 
 		/* YOYO:
 			quitting safely sometimes crash in CContinentMngr::select()
