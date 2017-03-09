@@ -70,9 +70,6 @@ void CItemGroup::writeTo(xmlNodePtr node)
 		xmlSetProp (itemNode, (const xmlChar*)"color", (const xmlChar*)NLMISC::toString(item.color).c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"usePrice", (const xmlChar*)NLMISC::toString(item.usePrice).c_str());
-
-
 	}
 }
 
@@ -102,9 +99,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.minPrice);
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"usePrice");
-			if (ptrName) NLMISC::fromString((const char*)ptrName, item.usePrice);
-
+			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
 			_Items.push_back(item);
 		}
 		curNode = curNode->next;
