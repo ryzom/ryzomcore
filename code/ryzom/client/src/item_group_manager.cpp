@@ -37,8 +37,9 @@ CItemGroup::CItemGroup()
 
 bool CItemGroup::contains(CDBCtrlSheet *other)
 {
-	for(auto &item : _Items)
+	for(int i=0;i<_Items.size();i++)
 	{
+		CItem item = _Items[i];
 		NLMISC::CSheetId sheet = NLMISC::CSheetId(other->getSheetId());
 		if (sheet.toString()  == item.sheetName  && other->getQuality()   == item.quality &&
 				other->getItemWeight() == item.weight     && other->getItemColor() == item.color &&
@@ -61,8 +62,9 @@ void CItemGroup::writeTo(xmlNodePtr node)
 {
 	xmlNodePtr groupNode = xmlNewChild (node, NULL, (const xmlChar*)"group", NULL );
 	xmlSetProp(groupNode, (const xmlChar*)"name", (const xmlChar*)name.c_str());
-	for(auto &item: _Items)
+	for(int i=0;i<_Items.size();i++)
 	{
+		CItem item = _Items[i];
 		xmlNodePtr itemNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"item", NULL);
 		xmlSetProp (itemNode, (const xmlChar*)"sheetName", (const xmlChar*)item.sheetName.c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"quality", (const xmlChar*)NLMISC::toString(item.quality).c_str());
@@ -184,8 +186,9 @@ void CItemGroupManager::saveGroups()
 			xmlDocPtr doc = xmlStream.getDocument ();
 			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"item_groups", NULL);
 			xmlDocSetRootElement (doc, node);
-			for(auto &group: _Groups)
+			for(int i=0;i<_Groups.size();i++)
 			{
+				CItemGroup group = _Groups[i];
 				group.writeTo(node);
 			}
 			xmlStream.flush();
@@ -264,8 +267,10 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 		INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 		if (inventory != dst && pIM->isInventoryAvailable(inventory))
 		{
-			for(auto &item : matchingItems(group, inventory))
+			std::vector<CInventoryItem> items = matchingItems(group, inventory);
+			for(int i=0;i<items.size();i++)
 			{
+				CInventoryItem item = items[i];
 				//If an item is currently equipped, don't move it (or else crash !!)
 				if(pIM->isBagItemWeared(item.indexInBag)) continue;
 				CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
@@ -299,9 +304,10 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		{ITEM_TYPE::DAGGER, false},
 	};
 	std::vector<CInventoryItem> duals;
-
-	for(auto &item: matchingItems(group, INVENTORIES::TInventory::bag))
+	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::TInventory::bag);
+	for(int i=0;i<items.size(); i++)
 	{
+		CInventoryItem item = items[i];
 		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
 		// If the item can be weared 2 times, don't automatically equip the second one
 		// Or else it will simply replace the first. We'll deal with them later
@@ -318,8 +324,9 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		CInventoryManager::getInstance()->autoEquip(item.indexInBag, true);
 	}
 	// Manually equip dual items
-	for(auto &item : duals)
+	for(int i=0;i<duals.size();i++)
 	{
+		CInventoryItem item = duals[i];
 		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
 		std::string dstPath = string(LOCAL_INVENTORY);
 		switch(ItemType)
@@ -381,8 +388,9 @@ bool CItemGroupManager::createGroup(std::string name)
 bool CItemGroupManager::deleteGroup(std::string name)
 {
 	std::vector<CItemGroup> tmp;
-	for(auto &group: _Groups)
+	for(int i=0;i<_Groups.size();i++)
 	{
+		CItemGroup group = _Groups[i];
 		if(group.name == name) continue;
 		tmp.push_back(group);
 	}
@@ -395,8 +403,9 @@ bool CItemGroupManager::deleteGroup(std::string name)
 void CItemGroupManager::listGroup()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	for(auto &group: _Groups)
+	for(int i=0;i<_Groups.size();i++)
 	{
+		CItemGroup group = _Groups[i];
 		pIM->displaySystemInfo(ucstring(group.name));
 	}
 }
@@ -405,8 +414,9 @@ void CItemGroupManager::listGroup()
 
 std::string CItemGroupManager::getGroupName(CDBCtrlSheet* pCS)
 {
-	for(auto &group: _Groups)
+	for(int i=0;i<_Groups.size();i++)
 	{
+		CItemGroup group = _Groups[i];
 		if(group.contains(pCS))
 			return group.name;
 
@@ -417,8 +427,9 @@ std::string CItemGroupManager::getGroupName(CDBCtrlSheet* pCS)
 //Private methods
 CItemGroup* CItemGroupManager::findGroup(std::string name)
 {
-	for(auto &group: _Groups)
+	for(int i=0;i<_Groups.size();i++)
 	{
+		CItemGroup group = _Groups[i];
 		if (group.name == name) return &group;
 	}
 	return NULL;
