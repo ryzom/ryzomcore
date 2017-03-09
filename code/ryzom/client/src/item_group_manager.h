@@ -22,21 +22,6 @@
 #include "interface_v3/dbctrl_sheet.h"
 #include "game_share/inventories.h"
 
-/*
- *
- * Il me faut une fonction à la build() pour le chrgt XML, et un save pour le save
- * ou stream.h en XML mode, todo
- * TODO list :
- * * DONE bool usePrice support
- * * DONE Sauvegarde / Chargement .xml
- * * DONE Singleton manager
- * * DONE Commandes de test : loadXML, savexML, equip, move
- * * Init au bon moment (où ?)
- * * DONE Création de /saveGroup (stuff équipé -> groupe)
- * *
- * ********* premier commit
- * * interface clic droit
- * */
 struct CInventoryItem {
 public:
 	CDBCtrlSheet* pCS;
@@ -95,9 +80,10 @@ public:
 	//Return NULL if no group was found
 	//Return false if no group was found
 	bool moveGroup(std::string name, INVENTORIES::TInventory dst);
-	bool equipGroup(std::string name, bool pullBefore=false);
+	bool equipGroup(std::string name, bool pullBefore=true);
 	bool createGroup(std::string name);
 	bool deleteGroup(std::string name);
+	std::string getGroupName(CDBCtrlSheet *pCS);
 
 private:
 	CItemGroup* findGroup(std::string name);

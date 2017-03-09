@@ -251,9 +251,6 @@ bool CItemGroupManager::loadGroups()
 	return true;
 }
 
-
-
-
 //move a group from all available inventory to dst
 bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 {
@@ -283,7 +280,6 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 	return true;
 
 }
-
 
 bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 {
@@ -400,6 +396,20 @@ bool CItemGroupManager::deleteGroup(std::string name)
 	return true;
 }
 
+//Used by AH
+
+std::string CItemGroupManager::getGroupName(CDBCtrlSheet* pCS)
+{
+	for(auto &group: _Groups)
+	{
+		if(group.contains(pCS))
+			return group.name;
+
+	}
+	return "";
+}
+
+//Private methods
 CItemGroup* CItemGroupManager::findGroup(std::string name)
 {
 	for(auto &group: _Groups)

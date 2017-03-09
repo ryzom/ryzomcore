@@ -43,7 +43,7 @@
 #include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
 #include "nel/gui/view_bitmap.h"
-
+#include "../item_group_manager.h"
 extern CSheetManager SheetMngr;
 extern NLMISC::CLog	g_log;
 
@@ -1758,12 +1758,18 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild"));
 		CViewTextMenu	*pMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("room"));
 		CViewTextMenu	*pMoveToPa[MAX_INVENTORY_ANIMAL];
+		CViewTextMenu   *pGroupSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_group"));
+		CViewTextMenu   *pGroupMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_bag"));
+		CViewTextMenu   *pGroupName = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_name"));
+		CViewTextMenu   *pGroupMoveToPa[MAX_INVENTORY_ANIMAL];
 
 		bool bIsLockedByOwner = pCS->getLockedByOwner();
 
 		for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 		{
 			pMoveToPa[i]= dynamic_cast<CViewTextMenu*>(pMenu->getView(toString("pa%d", i)));
+			pGroupMoveToPa[i]= dynamic_cast<CViewTextMenu*>(pMenu->getView(toString("group_pa%d", i)));
+
 		}
 		CViewTextMenu	*pItemInfos = dynamic_cast<CViewTextMenu*>(pMenu->getView("infos"));
 		CViewTextMenu	*pItemTextDisplay = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_text_display"));
@@ -1780,6 +1786,13 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pItemTextDisplay) pItemTextDisplay->setActive(false);
 		if(pItemTextEdition) pItemTextEdition->setActive(false);
 
+		//Item GROUP logic
+		if(pGroupSubMenu && pGroupName)
+		{
+			std::string groupName = CItemGroupManager::getInstance()->getGroupName(pCS);
+			pGroupSubMenu->setActive(groupName != "");
+			pGroupName->setHardText(groupName);
+		}
 		if(pLockUnlock) pLockUnlock->setActive(true);
 
 		const CItemSheet *pIS = pCS->asItemSheet();
@@ -1859,8 +1872,13 @@ class CHandlerItemMenuCheck : public IActionHandler
 		{
 			// cannot move to other animals! :)
 			if(pMoveToBag)		pMoveToBag->setActive(false);
+			if(pGroupMoveToBag) pGroupMoveToBag->setActive(false);
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
+			{
 				if(pMoveToPa[i]) pMoveToPa[i]->setActive(false);
+				if(pGroupMoveToPa[i]) pGroupMoveToPa[i]->setActive(false);
+			}
+
 
 			// additionnaly, cannot drop/destroy/lock an animal item.
 			if(pDrop)			pDrop->setActive(false);
@@ -1875,11 +1893,19 @@ class CHandlerItemMenuCheck : public IActionHandler
 				pMoveToBag->setActive(	invId!=INVENTORIES::bag &&
 										invMngr.isInventoryPresent(INVENTORIES::bag) &&
 										(invId!=INVENTORIES::guild || invMngr.isInventoryPresent(INVENTORIES::guild)) );
+			if(pGroupMoveToBag)
+				pGroupMoveToBag->setActive(	invId!=INVENTORIES::bag &&
+										invMngr.isInventoryPresent(INVENTORIES::bag) &&
+										(invId!=INVENTORIES::guild || invMngr.isInventoryPresent(INVENTORIES::guild)) );
 
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if (pMoveToPa[i])
 					pMoveToPa[i]->setActive(invId!=INVENTORIES::guild &&
+											(uint)invId!=INVENTORIES::pet_animal+i &&
+											 invMngr.isInventoryPresent((INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)) );
+				if (pGroupMoveToPa[i])
+					pGroupMoveToPa[i]->setActive(invId!=INVENTORIES::guild &&
 											(uint)invId!=INVENTORIES::pet_animal+i &&
 											 invMngr.isInventoryPresent((INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)) );
 			}
@@ -1901,9 +1927,13 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pMoveSubMenu)
 		{
 			if(pMoveToBag)		someMovePossible= someMovePossible || pMoveToBag->getActive();
+			if(pGroupMoveToBag)		someMovePossible= someMovePossible || pGroupMoveToBag->getActive();
+
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i]) someMovePossible= someMovePossible || pMoveToPa[i]->getActive();
+				if(pGroupMoveToPa[i]) someMovePossible= someMovePossible || pGroupMoveToPa[i]->getActive();
+
 			}
 			if(pMoveToGuild)	someMovePossible= someMovePossible || pMoveToGuild->getActive();
 			if(pMoveToRoom)		someMovePossible= someMovePossible || pMoveToRoom->getActive();
@@ -1986,9 +2016,12 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pLockUnlock)		pLockUnlock->setGrayed(true);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(true);
 			if(pMoveToBag)		pMoveToBag->setGrayed(true);
+			if(pGroupMoveToBag)		pGroupMoveToBag->setGrayed(true);
+
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i])	pMoveToPa[i]->setGrayed(true);
+				if(pGroupMoveToPa[i]) pGroupMoveToPa[i]->setGrayed(true);
 			}
 		}
 		// Gray Text entries according to Availables Destinations
@@ -2007,9 +2040,13 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 			// check each inventory dest if available
 			if(pMoveToBag)		pMoveToBag->setGrayed(!invMngr.isInventoryAvailable(INVENTORIES::bag));
+			if(pGroupMoveToBag)		pGroupMoveToBag->setGrayed(!invMngr.isInventoryAvailable(INVENTORIES::bag));
+
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i])	pMoveToPa[i]->setGrayed(!invMngr.isInventoryAvailable(
+					(INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)));
+				if(pGroupMoveToPa[i])	pGroupMoveToPa[i]->setGrayed(!invMngr.isInventoryAvailable(
 					(INVENTORIES::TInventory)(INVENTORIES::pet_animal+i)));
 			}
 		}
@@ -2247,4 +2284,48 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
 
+// ***************************************************************************
+// item groups
+class CHandlerItemGroupMove : public IActionHandler
+{
+	void execute (CCtrlBase *caller, const std::string &sParams)
+	{
+		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
+		if(!pCS)
+		{
+			nlinfo("Wrong cast");
+			return;
+		}
+		std::string groupName = CItemGroupManager::getInstance()->getGroupName(pCS);
+		if(groupName.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
+		CItemGroupManager::getInstance()->moveGroup(groupName, INVENTORIES::toInventory(sParams));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
 
+
+// ***************************************************************************
+class CHandlerItemGroupEquip : public IActionHandler
+{
+	void execute (CCtrlBase *caller, const std::string &/* sParams */)
+	{
+		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
+		if(!pCS)
+		{
+			nlinfo("Wrong cast");
+			return;
+		}
+		std::string groupName = CItemGroupManager::getInstance()->getGroupName(pCS);
+		if(groupName.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
+		CItemGroupManager::getInstance()->equipGroup(groupName);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");

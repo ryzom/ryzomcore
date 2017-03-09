@@ -1819,6 +1819,37 @@
             name="uimItemTextEdit"
             handler="item_text_edition"
             params="ui:interface:edit_custom" />
+    <action id="item_group"
+    		name="uiGroup">
+    		<action id="group_name" />
+    		<action id="group_equip"
+    		name="uimEquip"
+    		handler="item_group_equip"/>
+    		<action id="group_move"
+    		name="uimMoveTo">
+    		<action id="group_bag"
+    			name="uimMtBag"
+    			handler="item_group_move"
+    			params="bag" />
+    		   <action id="group_pa0"
+    			name="uimMtPaMount0"
+    			handler="item_group_move"
+    			params="pet_animal1" /> <!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    			  <action id="group_pa1"
+    			name="uimMtPaMount1"
+    			handler="item_group_move"
+    			params="pet_animal2" />
+    			<action id="group_pa2"
+    			name="uimMtPaMount2"
+    			handler="item_group_move"
+    			params="pet_animal3" /> 
+    			<action id="group_pa3"
+    			name="uimMtPaMount3"
+    			handler="item_group_move"
+    			params="pet_animal4" />
+    		</action> <!-- move !-->
+    </action> <!-- item_group !-->
+
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
   <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
@@ -1829,6 +1860,15 @@
         target="ui:interface:item_menu_in_bag:move:pa2:hardtext" />
   <link expr="switch(@%pa_beast3:TYPE, 'uimMtPaMount3', 'uimMtPaMount3', 'uimMtPaPacker3', 'uimMtPaDemon3')"
         target="ui:interface:item_menu_in_bag:move:pa3:hardtext" />
+  <!-- Item group submenu -->
+  <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
+        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa0:hardtext" />
+  <link expr="switch(@%pa_beast1:TYPE, 'uimMtPaMount1', 'uimMtPaMount1', 'uimMtPaPacker1', 'uimMtPaDemon1')"
+        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa1:hardtext" />
+  <link expr="switch(@%pa_beast2:TYPE, 'uimMtPaMount2', 'uimMtPaMount2', 'uimMtPaPacker2', 'uimMtPaDemon2')"
+        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa2:hardtext" />
+  <link expr="switch(@%pa_beast3:TYPE, 'uimMtPaMount3', 'uimMtPaMount3', 'uimMtPaPacker3', 'uimMtPaDemon3')"
+        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa3:hardtext" />  
   <!-- item menu when we are in self -->
   <group type="menu"
          id="item_menu_in_self"
