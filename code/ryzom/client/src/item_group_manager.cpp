@@ -264,9 +264,10 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 		INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 		if (inventory != dst && pIM->isInventoryAvailable(inventory))
 		{
-
 			for(auto &item : matchingItems(group, inventory))
 			{
+				//If an item is currently equipped, don't move it (or else crash !!)
+				if(pIM->isBagItemWeared(item.indexInBag)) continue;
 				CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
 			}
 
