@@ -1847,7 +1847,17 @@
     			name="uimMtPaMount3"
     			handler="item_group_move"
     			params="pet_animal4" />
-    		</action> <!-- move !-->
+    			<action id="group_room"
+              	name="uimMtRoom"
+              	handler="item_group_move"
+              	params="player_room" />
+    			<action id="group_guild"
+              	name="uimMtGuild"
+    			handler="item_group_move"
+    			params="guild" />
+
+    		</action> 
+    		<!-- move !-->
     </action> <!-- item_group !-->
 
   </group>

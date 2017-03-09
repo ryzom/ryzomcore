@@ -1759,8 +1759,12 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("room"));
 		CViewTextMenu	*pMoveToPa[MAX_INVENTORY_ANIMAL];
 		CViewTextMenu   *pGroupSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_group"));
-		CViewTextMenu   *pGroupMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_bag"));
 		CViewTextMenu   *pGroupName = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_name"));
+		CViewTextMenu   *pGroupMoveSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_move"));
+		CViewTextMenu   *pGroupMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_bag"));
+		CViewTextMenu	*pGroupMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_guild"));
+		CViewTextMenu	*pGroupMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("group_room"));
+
 		CViewTextMenu   *pGroupMoveToPa[MAX_INVENTORY_ANIMAL];
 
 		bool bIsLockedByOwner = pCS->getLockedByOwner();
@@ -1912,10 +1916,12 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 			if (pMoveToGuild)
 				pMoveToGuild->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::guild));
-
+			if (pGroupMoveToGuild)
+				pGroupMoveToGuild->setActive(ClientCfg.ItemGroupAllowGuild && invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::guild));
 			if (pMoveToRoom)
 				pMoveToRoom->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::player_room));
-
+			if (pGroupMoveToRoom)
+				pGroupMoveToRoom->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::player_room));
 			// std case: can drop / destroy
 			if(pDrop)		pDrop->setActive(invId!=INVENTORIES::guild);
 			if(pDestroy)	pDestroy->setActive(invId!=INVENTORIES::guild);
@@ -1924,20 +1930,24 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 		// hide the move entry completely?
 		bool	someMovePossible= false;
-		if(pMoveSubMenu)
+		bool    someGroupMovePossible = false;
+		if(pMoveSubMenu && pGroupMoveSubMenu)
 		{
 			if(pMoveToBag)		someMovePossible= someMovePossible || pMoveToBag->getActive();
-			if(pGroupMoveToBag)		someMovePossible= someMovePossible || pGroupMoveToBag->getActive();
+			if(pGroupMoveToBag)		someGroupMovePossible= someGroupMovePossible || pGroupMoveToBag->getActive();
 
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i]) someMovePossible= someMovePossible || pMoveToPa[i]->getActive();
-				if(pGroupMoveToPa[i]) someMovePossible= someMovePossible || pGroupMoveToPa[i]->getActive();
+				if(pGroupMoveToPa[i]) someGroupMovePossible= someGroupMovePossible || pGroupMoveToPa[i]->getActive();
 
 			}
 			if(pMoveToGuild)	someMovePossible= someMovePossible || pMoveToGuild->getActive();
 			if(pMoveToRoom)		someMovePossible= someMovePossible || pMoveToRoom->getActive();
+			if(pGroupMoveToGuild)	someGroupMovePossible= someGroupMovePossible || pGroupMoveToGuild->getActive();
+			if(pGroupMoveToRoom)		someGroupMovePossible= someGroupMovePossible || (ClientCfg.ItemGroupAllowGuild && pGroupMoveToRoom->getActive());
 			pMoveSubMenu->setActive(someMovePossible);
+			pGroupMoveSubMenu->setActive(someGroupMovePossible);
 		}
 
 		// Equip

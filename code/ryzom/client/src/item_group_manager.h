@@ -83,6 +83,7 @@ public:
 	bool equipGroup(std::string name, bool pullBefore=true);
 	bool createGroup(std::string name);
 	bool deleteGroup(std::string name);
+	void listGroup();
 	std::string getGroupName(CDBCtrlSheet *pCS);
 
 private:

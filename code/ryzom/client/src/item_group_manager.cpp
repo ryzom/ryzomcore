@@ -27,7 +27,7 @@
 #include "net_manager.h"
 #include "connection.h" // Used to access PlayerSelectedFileName for xml filename
 #include "nel/gui/db_manager.h"
-
+#include "interface_v3/interface_manager.h"
 CItemGroupManager *CItemGroupManager::_Instance = NULL;
 
 CItemGroup::CItemGroup()
@@ -391,6 +391,15 @@ bool CItemGroupManager::deleteGroup(std::string name)
 	return true;
 }
 
+void CItemGroupManager::listGroup()
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	for(auto &group: _Groups)
+	{
+		pIM->displaySystemInfo(ucstring(group.name));
+	}
+}
+
 //Used by AH
 
 std::string CItemGroupManager::getGroupName(CDBCtrlSheet* pCS)
@@ -428,6 +437,10 @@ std::string CItemGroupManager::toDbPath(INVENTORIES::TInventory inventory)
 		return LIST_PA2_TEXT; break;
 	case INVENTORIES::TInventory::pet_animal4:
 		return LIST_PA3_TEXT; break;
+	case INVENTORIES::TInventory::player_room:
+		return LIST_ROOM_TEXT;break;
+	case INVENTORIES::TInventory::guild:
+		return ClientCfg.ItemGroupAllowGuild ? LIST_GUILD_TEXT : ""; break;
 	default:
 		return "";
 	}

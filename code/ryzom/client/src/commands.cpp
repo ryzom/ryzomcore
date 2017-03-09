@@ -209,6 +209,11 @@ NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, ch
 	return true;
 }
 
+NLMISC_COMMAND(listGroup, "list all available group", "")
+{
+	CItemGroupManager::getInstance()->listGroup();
+	return true;
+}
 
 NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 {
@@ -225,14 +230,38 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 
 NLMISC_COMMAND(createGroup, "create group <name>", "name")
 {
-	if(args.empty()) return false;
-	return CItemGroupManager::getInstance()->createGroup(args[0]);
+	if(args.empty())
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		pIM->displaySystemInfo(ucstring("Cannot create a group without name."));
+		return false;
+	}
+	if(!CItemGroupManager::getInstance()->createGroup(args[0]))
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		std::string msg = "A group named " + args[0] + "already exist, cannot create one with the same name.";
+		pIM->displaySystemInfo(ucstring(msg));
+		return false;
+	}
+	return true;
 }
 
 NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 {
-	if(args.empty()) return false;
-	return CItemGroupManager::getInstance()->deleteGroup(args[0]);
+	if(args.empty())
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		pIM->displaySystemInfo(ucstring("Cannot delete a group without name."));
+		return false;
+	}
+	if(!CItemGroupManager::getInstance()->deleteGroup(args[0]))
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+		std::string msg = "Cannot delete group " + args[0] + " : no group with this name found.";
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+	return true;
 }
 
 NLMISC_COMMAND(naked, "get naked !", "")
