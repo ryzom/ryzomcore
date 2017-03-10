@@ -429,8 +429,7 @@ CItemGroup* CItemGroupManager::findGroup(std::string name)
 {
 	for(int i=0;i<_Groups.size();i++)
 	{
-		CItemGroup group = _Groups[i];
-		if (group.name == name) return &group;
+		if (_Groups[i].name == name) return &_Groups[i];
 	}
 	return NULL;
 }
