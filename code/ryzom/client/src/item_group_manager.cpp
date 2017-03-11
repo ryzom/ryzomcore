@@ -413,16 +413,17 @@ void CItemGroupManager::listGroup()
 
 //Used by AH
 
-std::string CItemGroupManager::getGroupName(CDBCtrlSheet* pCS)
+std::vector<std::string> CItemGroupManager::getGroupNames(CDBCtrlSheet* pCS)
 {
+	std::vector<std::string> out;
 	for(int i=0;i<_Groups.size();i++)
 	{
 		CItemGroup group = _Groups[i];
 		if(group.contains(pCS))
-			return group.name;
+			out.push_back(group.name);
 
 	}
-	return "";
+	return out;
 }
 
 //Private methods

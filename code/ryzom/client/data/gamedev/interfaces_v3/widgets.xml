@@ -1819,46 +1819,196 @@
             name="uimItemTextEdit"
             handler="item_text_edition"
             params="ui:interface:edit_custom" />
+    <!-- TODO glorf : ugly because i haven't found a way to do template with actions inside ... -->
     <action id="item_group"
     		name="uiGroup">
-    		<action id="group_name" />
-    		<action id="group_equip"
-    		name="uimEquip"
-    		handler="item_group_equip"/>
-    		<action id="group_move"
-    		name="uimMoveTo">
-    		<action id="group_bag"
-    			name="uimMtBag"
-    			handler="item_group_move"
-    			params="bag" />
-    		   <action id="group_pa0"
-    			name="uimMtPaMount0"
-    			handler="item_group_move"
-    			params="pet_animal1" /> <!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
-    			  <action id="group_pa1"
-    			name="uimMtPaMount1"
-    			handler="item_group_move"
-    			params="pet_animal2" />
-    			<action id="group_pa2"
-    			name="uimMtPaMount2"
-    			handler="item_group_move"
-    			params="pet_animal3" /> 
-    			<action id="group_pa3"
-    			name="uimMtPaMount3"
-    			handler="item_group_move"
-    			params="pet_animal4" />
-    			<action id="group_room"
-              	name="uimMtRoom"
-              	handler="item_group_move"
-              	params="player_room" />
-    			<action id="group_guild"
-              	name="uimMtGuild"
-    			handler="item_group_move"
-    			params="guild" />
-
-    		</action> 
-    		<!-- move !-->
-    </action> <!-- item_group !-->
+    		<action id="group0_name"
+    				name="you should not see this ingame">
+    				<action id="group0_equip"
+    					name="uimEquip"
+    					handler="item_group_equip"
+    					params="groupIndex=0" />
+    				<action id="group0_move"
+    					name="uimMoveTo">
+    					<action id="group0_bag"
+    					name="uimMtBag"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=bag" />
+    					<action id="group0_pa0"
+    					name="uimMtPaMount0"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=pet_animal1" /><!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    					<action id="group0_pa1"
+    					name="uimMtPaMount1"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=pet_animal2" />    					
+    					<action id="group0_pa2"
+    					name="uimMtPaMount2"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=pet_animal3" />
+    					<action id="group0_pa3"
+    					name="uimMtPaMount3"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=pet_animal4" />
+    					<action id="group0_room"
+    					name="uimMtRoom"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=player_room" />
+    					<action id="group0_guild"
+    					name="uimMtGuild"
+    					handler="item_group_move"
+    					params="groupIndex=0|destination=guild" />    		    		    					</action> <!-- MOVE -->
+    		</action> <!--group0 -->
+    		<action id="group1_name"
+    				name="you should not see this ingame">
+    				<action id="group1_equip"
+    					name="uimEquip"
+    					handler="item_group_equip"
+    					params="groupIndex=1" />
+    				<action id="group1_move"
+    					name="uimMoveTo">
+    					<action id="group1_bag"
+    					name="uimMtBag"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=bag" />
+    					<action id="group1_pa0"
+    					name="uimMtPaMount0"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=pet_animal1" /><!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    					<action id="group1_pa1"
+    					name="uimMtPaMount1"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=pet_animal2" />    					
+    					<action id="group1_pa2"
+    					name="uimMtPaMount2"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=pet_animal3" />
+    					<action id="group1_pa3"
+    					name="uimMtPaMount3"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=pet_animal4" />
+    					<action id="group1_room"
+    					name="uimMtRoom"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=player_room" />
+    					<action id="group1_guild"
+    					name="uimMtGuild"
+    					handler="item_group_move"
+    					params="groupIndex=1|destination=guild" />    		    		    					</action> <!-- MOVE -->
+    		</action> <!-- group1 -->    
+    		<action id="group2_name"
+    				name="you should not see this ingame">
+    				<action id="group2_equip"
+    					name="uimEquip"
+    					handler="item_group_equip"
+    					params="groupIndex=2" />
+    				<action id="group2_move"
+    					name="uimMoveTo">
+    					<action id="group2_bag"
+    					name="uimMtBag"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=bag" />
+    					<action id="group2_pa0"
+    					name="uimMtPaMount0"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=pet_animal1" /><!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    					<action id="group2_pa1"
+    					name="uimMtPaMount1"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=pet_animal2" />    					
+    					<action id="group2_pa2"
+    					name="uimMtPaMount2"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=pet_animal3" />
+    					<action id="group2_pa3"
+    					name="uimMtPaMount3"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=pet_animal4" />
+    					<action id="group2_room"
+    					name="uimMtRoom"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=player_room" />
+    					<action id="group2_guild"
+    					name="uimMtGuild"
+    					handler="item_group_move"
+    					params="groupIndex=2|destination=guild" />    		    		    					</action> <!-- MOVE -->
+    		</action> <!-- group2 -->    
+    		<action id="group3_name"
+    				name="you should not see this ingame">
+    				<action id="group3_equip"
+    					name="uimEquip"
+    					handler="item_group_equip"
+    					params="groupIndex=3" />
+    				<action id="group3_move"
+    					name="uimMoveTo">
+    					<action id="group3_bag"
+    					name="uimMtBag"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=bag" />
+    					<action id="group3_pa0"
+    					name="uimMtPaMount0"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=pet_animal1" /><!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    					<action id="group3_pa1"
+    					name="uimMtPaMount1"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=pet_animal2" />    					
+    					<action id="group3_pa2"
+    					name="uimMtPaMount2"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=pet_animal3" />
+    					<action id="group3_pa3"
+    					name="uimMtPaMount3"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=pet_animal4" />
+    					<action id="group3_room"
+    					name="uimMtRoom"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=player_room" />
+    					<action id="group3_guild"
+    					name="uimMtGuild"
+    					handler="item_group_move"
+    					params="groupIndex=3|destination=guild" />    		    		    					</action> <!-- MOVE -->
+    		</action> <!-- group3 -->    
+    		<action id="group4_name"
+    				name="you should not see this ingame">
+    				<action id="group4_equip"
+    					name="uimEquip"
+    					handler="item_group_equip"
+    					params="groupIndex=4" />
+    				<action id="group4_move"
+    					name="uimMoveTo">
+    					<action id="group4_bag"
+    					name="uimMtBag"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=bag" />
+    					<!-- name is correctly set in code based on corresponding regular move -->
+    					<action id="group4_pa0"
+    					name="uimMtPaMount0"  
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=pet_animal1" /><!-- Offset because they are named petanimal1/2/3/4 in Inventories::TEnumType -->
+    					<action id="group4_pa1"
+    					name="uimMtPaMount1"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=pet_animal2" />    					
+    					<action id="group4_pa2"
+    					name="uimMtPaMount2"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=pet_animal3" />
+    					<action id="group4_pa3"
+    					name="uimMtPaMount3"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=pet_animal4" />
+    					<action id="group4_room"
+    					name="uimMtRoom"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=player_room" />
+    					<action id="group4_guild"
+    					name="uimMtGuild"
+    					handler="item_group_move"
+    					params="groupIndex=4|destination=guild" />    		    		    					</action> <!-- MOVE -->
+    		</action> <!-- group4 -->					
+    	</action> <!-- item_group -->
 
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
@@ -1870,15 +2020,6 @@
         target="ui:interface:item_menu_in_bag:move:pa2:hardtext" />
   <link expr="switch(@%pa_beast3:TYPE, 'uimMtPaMount3', 'uimMtPaMount3', 'uimMtPaPacker3', 'uimMtPaDemon3')"
         target="ui:interface:item_menu_in_bag:move:pa3:hardtext" />
-  <!-- Item group submenu -->
-  <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
-        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa0:hardtext" />
-  <link expr="switch(@%pa_beast1:TYPE, 'uimMtPaMount1', 'uimMtPaMount1', 'uimMtPaPacker1', 'uimMtPaDemon1')"
-        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa1:hardtext" />
-  <link expr="switch(@%pa_beast2:TYPE, 'uimMtPaMount2', 'uimMtPaMount2', 'uimMtPaPacker2', 'uimMtPaDemon2')"
-        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa2:hardtext" />
-  <link expr="switch(@%pa_beast3:TYPE, 'uimMtPaMount3', 'uimMtPaMount3', 'uimMtPaPacker3', 'uimMtPaDemon3')"
-        target="ui:interface:item_menu_in_bag:item_group:group_move:group_pa3:hardtext" />  
   <!-- item menu when we are in self -->
   <group type="menu"
          id="item_menu_in_self"
