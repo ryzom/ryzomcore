@@ -382,6 +382,7 @@ bool CItemGroupManager::createGroup(std::string name)
 	}
 
 	_Groups.push_back(group);
+	return true;
 
 
 }
