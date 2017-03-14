@@ -50,6 +50,24 @@
 	<command name="re" action="talk" params="mode=11|text=+" ctrlchar="false" />
 	<command name="r" action="talk" params="mode=11|text=+" ctrlchar="false" />
 
+	<command name="0" action="enter_talk" params="mode=12|channel=0" />
+	<command name="1" action="enter_talk" params="mode=12|channel=1" />
+	<command name="2" action="enter_talk" params="mode=12|channel=2" />
+	<command name="3" action="enter_talk" params="mode=12|channel=3" />
+	<command name="4" action="enter_talk" params="mode=12|channel=4" />
+	<command name="5" action="enter_talk" params="mode=12|channel=5" />
+	<command name="6" action="enter_talk" params="mode=12|channel=6" />
+	<command name="7" action="enter_talk" params="mode=12|channel=7" />
+
+	<command name="0" action="talk" params="mode=12|channel=0|text=+" ctrlchar="false" />
+	<command name="1" action="talk" params="mode=12|channel=1|text=+" ctrlchar="false" />
+	<command name="2" action="talk" params="mode=12|channel=2|text=+" ctrlchar="false" />
+	<command name="3" action="talk" params="mode=12|channel=3|text=+" ctrlchar="false" />
+	<command name="4" action="talk" params="mode=12|channel=4|text=+" ctrlchar="false" />
+	<command name="5" action="talk" params="mode=12|channel=5|text=+" ctrlchar="false" />
+	<command name="6" action="talk" params="mode=12|channel=6|text=+" ctrlchar="false" />
+	<command name="7" action="talk" params="mode=12|channel=7|text=+" ctrlchar="false" />
+
 	<command name="guild" action="enter_talk" params="mode=3" />
 	<command name="gu" action="enter_talk" params="mode=3" />
 	<command name="g" action="enter_talk" params="mode=3" />

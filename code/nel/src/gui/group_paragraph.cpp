@@ -59,7 +59,6 @@ namespace NLGUI
 		_TopSpace = 0;
 		_Indent = 0;
 		_FirstViewIndentView = false;
-		_BrowseGroup = NULL;
 		_TextId = 0;
 	}
 
@@ -868,11 +867,8 @@ namespace NLGUI
 								ctrl->setParentPosRef (Hotspot_TL);
 								ctrl->setPosRef (Hotspot_TL);
 								ctrl->setActive(true);
-								if (_BrowseGroup)
-								{
-									ctrl->setActionOnLeftClick("browse");
-									ctrl->setParamsOnLeftClick("name="+_BrowseGroup->getId()+"|url="+link.Link->Link);
-								}
+								ctrl->setActionOnLeftClick(link.Link->getActionOnLeftClick());
+								ctrl->setParamsOnLeftClick(link.Link->getParamsOnLeftClick());
 								ctrl->setScale(true);
 								addCtrl(ctrl);
 							}

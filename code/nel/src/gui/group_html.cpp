@@ -497,7 +497,11 @@ namespace NLGUI
 
 						if (res != CURLE_OK)
 						{
-							browseError(string("Connection failed with curl error " + string(curl_easy_strerror(res))).c_str());
+							std::string err;
+							err = "Connection failed with cURL error: ";
+							err += curl_easy_strerror(res);
+							err += "\nURL '" + _CurlWWW->Url + "'";
+							browseError(err.c_str());
 						}
 						else
 						if ((code >= 301 && code <= 303) || code == 307 || code == 308)
@@ -541,7 +545,7 @@ namespace NLGUI
 
 							if ( (code < 200 || code >= 300) )
 							{
-								browseError(string("Connection failed (curl code " + toString((sint32)res) + "), http code " + toString((sint32)code) + ") : " + _CurlWWW->Url).c_str());
+								browseError(string("Connection failed (curl code " + toString((sint32)res) + ")\nhttp code " + toString((sint32)code) + ")\nURL '" + _CurlWWW->Url + "'").c_str());
 							}
 							else
 							{
@@ -3769,7 +3773,6 @@ namespace NLGUI
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
 		newParagraph->setResizeFromChildH(true);
 
-		newParagraph->setBrowseGroup (this);
 		newParagraph->setIndent(_Indent);
 
 		// Add to the group
@@ -4123,6 +4126,9 @@ namespace NLGUI
 						if (!newLink->Link.empty())
 						{
 							newLink->setHTMLView (this);
+
+							newLink->setActionOnLeftClick("browse");
+							newLink->setParamsOnLeftClick("name=" + getId() + "|url=" + newLink->Link);
 						}
 					}
 					newLink->setText(tmpStr);
@@ -5216,6 +5222,11 @@ namespace NLGUI
 
 	void CGroupHTML::doBrowseAnchor(const std::string &anchor)
 	{
+		if (_Anchors.count(anchor) == 0)
+		{
+			return;
+		}
+
 		CInterfaceElement *pIE = _Anchors.find(anchor)->second;
 		if (pIE)
 		{

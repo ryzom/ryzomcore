@@ -3127,4 +3127,19 @@
     <action handler="set"
             params="dblink=UI:SAVE:ISDETACHED:DYNAMIC_CHAT@0|value=0" />
   </proc>
+
+  <!-- there seems to be no way to pass url to menu, use lua script for middleman -->
+  <group type="menu"
+         id="chat_uri_action_menu"
+         extends="base_menu">
+    <action id="copy"
+	    name="uiCopy"
+	    handler="lua"
+	    params="game:chatUrlCopy()" />
+    <action id="openig"
+            name="uiBrowse"
+            handler="lua"
+            params="game:chatUrlBrowse()" />
+  </group>
+
 </interface_config>
