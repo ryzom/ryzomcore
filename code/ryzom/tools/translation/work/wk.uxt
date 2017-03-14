@@ -13495,3 +13495,7 @@ uiPlayedTime [You played with this character for %time.]
 uiPlaylistRefresh [Refresh]
 uiFreeViewTablet [Tablet or touch screen]
 
+// chat popup menu for url
+uiCopy [Copy]
+uiBrowse [Browse]
+
