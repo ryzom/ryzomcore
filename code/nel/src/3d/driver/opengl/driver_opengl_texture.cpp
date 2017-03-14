@@ -100,7 +100,7 @@ CTextureDrvInfosGL::~CTextureDrvInfosGL()
 
 CDepthStencilFBO::CDepthStencilFBO(CDriverGL *driver, uint width, uint height)
 {
-	nldebug("3D: Init shared FBO");
+	//nldebug("3D: Init shared FBO");
 
 	m_Driver = driver;
 	Width = width;
@@ -142,7 +142,7 @@ CDepthStencilFBO::~CDepthStencilFBO()
 
 	if (DepthFBOId)
 	{
-		nldebug("3D: Release shared FBO");
+		//nldebug("3D: Release shared FBO");
 		nglDeleteRenderbuffersEXT(1, &DepthFBOId);
 		if (StencilFBOId == DepthFBOId)
 			StencilFBOId = 0;
@@ -191,10 +191,10 @@ bool CTextureDrvInfosGL::initFrameBufferObject(ITexture * tex)
 			}
 			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->DepthFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+			//nldebug("3D: glFramebufferRenderbufferExt(depth:24) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 			nglFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT,
 										 GL_RENDERBUFFER_EXT, DepthStencilFBO->StencilFBOId);
-			nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+			//nldebug("3D: glFramebufferRenderbufferExt(stencil:8) = %X", nglCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
 		}
 
 		// check status
