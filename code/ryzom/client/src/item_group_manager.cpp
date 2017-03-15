@@ -86,7 +86,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 	xmlNodePtr curNode = node->children;
 	while(curNode)
 	{
-		if (NLMISC::stricmp((char*)curNode->name, "item") == 0)
+		if (strcmp((char*)curNode->name, "item") == 0)
 		{
 
 			CItem item;
@@ -248,7 +248,7 @@ bool CItemGroupManager::loadGroups()
 	xmlNodePtr curNode = globalEnclosing->children;
 	while (curNode)
 	{
-		if (NLMISC::stricmp((char*)curNode->name, "group") == 0)
+		if (strcmp((char*)curNode->name, "group") == 0)
 		{
 			CItemGroup group;
 			group.readFrom(curNode);
