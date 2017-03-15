@@ -22,8 +22,6 @@
 #include "interface_v3/dbctrl_sheet.h"
 #include "game_share/inventories.h"
 
-#define MAX_DIFFERENT_ITEM_GROUPS 5 //How many differents item grousp can a single item be part of
-// If you change this, remember to modify widgets.xml accordingly
 struct CInventoryItem {
 public:
 	CDBCtrlSheet* pCS;

@@ -28,6 +28,7 @@
 #include "connection.h" // Used to access PlayerSelectedFileName for xml filename
 #include "nel/gui/db_manager.h"
 #include "interface_v3/interface_manager.h"
+#include "nel/gui/group_menu.h"
 CItemGroupManager *CItemGroupManager::_Instance = NULL;
 
 CItemGroup::CItemGroup()
@@ -164,6 +165,17 @@ CItemGroupManager::CItemGroupManager()
 void CItemGroupManager::init()
 {
 	loadGroups();
+	//attach item group subgroup to right-click in bag group
+	CWidgetManager* pWM = CWidgetManager::getInstance();
+	CGroupMenu   *pRootMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag"));
+	CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
+	//get item subgroup
+	CGroupMenu   *pGroupMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
+	CGroupSubMenu *pGroupSubMenu = pGroupMenu->getRootMenu();
+	if(pMenu && pGroupSubMenu)
+		pMenu->setSubMenu(pMenu->getNumLine() - 1, pGroupSubMenu);
+	else
+		nlinfo("Couldn't update yet, maybe wait a little bit ?");
 }
 
 void CItemGroupManager::uninit()

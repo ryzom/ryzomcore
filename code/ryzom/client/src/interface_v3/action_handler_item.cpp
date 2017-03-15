@@ -2020,48 +2020,68 @@ class CHandlerItemMenuCheck : public IActionHandler
 		}
 
 		//Item GROUP logic
-		// We go the lazy way here : group move have the same name/active/grayed state as regular move, just copy them.
-		CViewTextMenu   *pGroupSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_group"));
-		std::vector<std::string> groupNames = CItemGroupManager::getInstance()->getGroupNames(pCS);
-		if(pGroupSubMenu)
+		CGroupMenu   *pGroupRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
+		if(pGroupRootMenu)
 		{
-			pGroupSubMenu->setActive(!groupNames.empty());
-		}
-
-		for(int i=0;i< MAX_DIFFERENT_ITEM_GROUPS; i++)
-		{
-			//Disable the submenu if no matching group
-
-			std::string prefix = toString("group%d", i);
-			CViewTextMenu *pGroupName = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix +"_name"));
-			if(groupNames.size() <= i)
+			CGroupSubMenu *pGroupMenu = pGroupRootMenu->getRootMenu();
+			std::vector<std::string> groupNames = CItemGroupManager::getInstance()->getGroupNames(pCS);
+			CViewText *pGroup = dynamic_cast<CViewText*>(pMenu->getView("item_group"));
+			//First, hide/show the menu if pertinent (we need to hide the action due to it beeing a submenu)
+			if(pGroup)
 			{
-				pGroupName->setActive(false);
-				continue;
+				if(groupNames.empty())
+				{
+					pGroup->setActive(false);
+				}
+				else
+				{
+					pGroup->setActive(true);
+				}
 			}
-			CViewTextMenu *pGroupMoveSubMenu = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix + "_move"));
-			CViewTextMenu *pGroupMoveToBag = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix + "_bag"));
-			CViewTextMenu *pGroupMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix + "_guild"));
-			CViewTextMenu *pGroupMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix + "_room"));
-			for(int j=0; j< MAX_INVENTORY_ANIMAL;j++)
+			//Reset everything and recreate the submenu for current item
+			// We do it the lazy way : active/gray options matching regular options (when you do things on a single item)
+			// Same for translated name of interface
+			pGroupMenu->reset();
+			for(i=0; i<groupNames.size(); i++)
 			{
-				CViewTextMenu *pGroupMoveToPa = dynamic_cast<CViewTextMenu*>(pMenu->getView(prefix + toString("_pa%d", j)));
-				if(pGroupMoveToPa && pMoveToPa[j]) pGroupMoveToPa->setActive(pMoveToPa[j]->getActive());
-				if(pGroupMoveToPa && pMoveToPa[j]) pGroupMoveToPa->setGrayed(pMoveToPa[j]->getGrayed());
-				if(pGroupMoveToPa && pMoveToPa[j]) pGroupMoveToPa->setName(pMoveToPa[j]->getName());
+				std::string name = groupNames[i];
+				std::string ahParams = "name=" + name;
+				pGroupMenu->addLine(ucstring(name), "", "", name);
+				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
+				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
+				if(pNewSubMenu)
+				{
+					if(pEquip)
+						pNewSubMenu->addLine(pEquip->getHardText(), "item_group_equip", ahParams, name + "_equip");
+					if(pMoveToBag && pMoveToBag->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToBag->getHardText(),"item_group_move",  "destination=bag|" + ahParams, name + "_bag");
+						if(tmp) tmp->setGrayed(pMoveToBag->getGrayed());
+					}
+					for(int j=0;j< MAX_INVENTORY_ANIMAL; j++)
+					{
+						if(pMoveToPa[j] && pMoveToPa[j]->getActive())
+						{
+							//there is an offset of 1 because TInventory names are pet_animal1/2/3/4
+							std::string dst = toString("destination=pet_animal%d|", j + 1);
+							CViewTextMenu* tmp = pNewSubMenu->addLine(ucstring(pMoveToPa[j]->getHardText()),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
+							if(tmp) tmp->setGrayed(pMoveToPa[j]->getGrayed());
+						}
+					}
+					if(pMoveToRoom && pMoveToRoom->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToRoom->getHardText(), "item_group_move",  "destination=player_room|" + ahParams, name + "_room");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+					if(pMoveToGuild && pMoveToGuild->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild->getHardText(),"item_group_move",  "destination=guild|" + ahParams, name + "_guild");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+				}
 			}
-			if(pGroupName) pGroupName->setHardText(groupNames[i]);
-			if(pMoveSubMenu && pGroupMoveSubMenu) pGroupMoveSubMenu->setActive(pMoveSubMenu->getActive());
-			if(pMoveToBag && pGroupMoveToBag) pGroupMoveToBag->setActive(pMoveToBag->getActive());
-			if(pMoveToGuild && pGroupMoveToGuild) pGroupMoveToGuild->setActive(pMoveToGuild->getActive());
-			if(pMoveToRoom && pGroupMoveToRoom) pGroupMoveToRoom->setActive(pMoveToRoom->getActive());
-			if(pMoveSubMenu && pGroupMoveSubMenu) pGroupMoveSubMenu->setGrayed(pMoveSubMenu->getGrayed());
-			if(pMoveToBag && pGroupMoveToBag) pGroupMoveToBag->setGrayed(pMoveToBag->getGrayed());
-			if(pMoveToGuild && pGroupMoveToGuild) pGroupMoveToGuild->setGrayed(pMoveToGuild->getGrayed());
-			if(pMoveToRoom && pGroupMoveToRoom) pGroupMoveToRoom->setGrayed(pMoveToRoom->getGrayed());
+
 		}
-
-
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemMenuCheck, "item_menu_check" );
@@ -2307,21 +2327,15 @@ class CHandlerItemGroupMove : public IActionHandler
 			nlinfo("Wrong cast");
 			return;
 		}
-		uint32 groupIndex;
-		fromString(getParam(sParams, "groupIndex"), groupIndex);
 		std::string destination = getParam(sParams, "destination");
-		std::vector<std::string> possibleGroups = CItemGroupManager::getInstance()->getGroupNames(pCS);
-		if(possibleGroups.empty())
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
 		{
 			nlinfo("Trying to move a group with a caller not part of any group");
 			return;
 		}
-		if(possibleGroups.size() <= groupIndex)
-		{
-			nlwarning("groupIndex > possiblesGroups, shouldn't happen");
-			return;
-		}
-		CItemGroupManager::getInstance()->moveGroup(possibleGroups[groupIndex], INVENTORIES::toInventory(destination));
+
+		CItemGroupManager::getInstance()->moveGroup(name, INVENTORIES::toInventory(destination));
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
@@ -2338,20 +2352,14 @@ class CHandlerItemGroupEquip : public IActionHandler
 			nlinfo("Wrong cast");
 			return;
 		}
-		uint32 groupIndex;
-		fromString(getParam(sParams, "groupIndex"), groupIndex);
-		std::vector<std::string> possibleGroups = CItemGroupManager::getInstance()->getGroupNames(pCS);
-		if(possibleGroups.empty())
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
 		{
 			nlinfo("Trying to move a group with a caller not part of any group");
 			return;
 		}
-		if(possibleGroups.size() <= groupIndex)
-		{
-			nlwarning("groupIndex > possiblesGroups, shouldn't happen");
-			return;
-		}
-		CItemGroupManager::getInstance()->equipGroup(possibleGroups[groupIndex]);
+
+		CItemGroupManager::getInstance()->equipGroup(name);
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
