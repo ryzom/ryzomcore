@@ -21,7 +21,7 @@
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/dbctrl_sheet.h"
 #include "game_share/inventories.h"
-#include "game_share/slot_types.h"
+#include "game_share/slot_equipment.h"
 
 struct CInventoryItem {
 public:
@@ -62,7 +62,7 @@ public:
 
 	std::string name;
 	std::vector<CItem> Items;
-	std::vector<SLOTTYPE::TSlotType> removeBeforeEquip;
+	std::vector<SLOT_EQUIPMENT::TSlotEquipment> removeBeforeEquip;
 };
 
 class CItemGroupManager {

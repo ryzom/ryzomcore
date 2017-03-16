@@ -118,8 +118,8 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
 			slot = NLMISC::toUpper(slot);
-			if(SLOTTYPE::stringToSlotType(slot) != SLOTTYPE::UNDEFINED)
-				removeBeforeEquip.push_back(SLOTTYPE::stringToSlotType(slot));
+			if(SLOT_EQUIPMENT::stringToSlotEquipment(slot) != SLOT_EQUIPMENT::UNDEFINED)
+				removeBeforeEquip.push_back(SLOT_EQUIPMENT::stringToSlotEquipment(slot));
 		}
 
 		curNode = curNode->next;
@@ -338,14 +338,13 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	//Start by unequipping all slot that user wants to unequip
 	for(int i=0; i < group->removeBeforeEquip.size(); i++)
 	{
-		SLOTTYPE::TSlotType slot = group->removeBeforeEquip[i];
+		SLOT_EQUIPMENT::TSlotEquipment slot = group->removeBeforeEquip[i];
 		std::string dbPath;
-		if(slot > SLOTTYPE::RIGHT_HAND)
+		if(slot == SLOT_EQUIPMENT::HANDL || slot == SLOT_EQUIPMENT::HANDR)
 			dbPath = "LOCAL:INVENTORY:HAND:";
 		else
 			dbPath = "LOCAL:INVENTORY:EQUIP:";
-		//offset by 1 : TSlotType begins at 1 for actual items (because of UNDEFINED), whereas dbPath start at 0
-		dbPath += NLMISC::toString((uint8)slot - 1);
+		dbPath += NLMISC::toString((uint8)slot);
 		CInventoryManager::getInstance()->unequip(dbPath);
 	}
 
