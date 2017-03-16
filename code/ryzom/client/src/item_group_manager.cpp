@@ -74,6 +74,11 @@ void CItemGroup::writeTo(xmlNodePtr node)
 		xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
 	}
+	for(int i=0;i<removeBeforeEquip.size();i++)
+	{
+		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"remove", NULL);
+		xmlSetProp(removeNode, (const xmlChar*)"slot", (const xmlChar*)removeBeforeEquip[i]);
+	}
 }
 
 
@@ -107,6 +112,16 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			if(item.sheetName != "unknown.unknown")
 				Items.push_back(item);
 		}
+		if (strcmp((char*)curNode->name, "remove") == 0)
+		{
+			std::string slot;
+			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
+			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
+			nlinfo("Got a slot %s", slot.c_str());
+			if(SLOTTYPE::stringToSlotType(slot) != SLOTTYPE::UNDEFINED)
+				removeBeforeEquip.push_back(SLOTTYPE::stringToSlotType(slot));
+		}
+
 		curNode = curNode->next;
 	}
 
@@ -320,6 +335,21 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	}
 
 	if(pullBefore) moveGroup(name, INVENTORIES::TInventory::bag);
+	//Start by unequipping all slot that user wants to unequip
+	for(int i=0; i < group->removeBeforeEquip.size(); i++)
+	{
+		SLOTTYPE::TSlotType slot = group->removeBeforeEquip[i];
+		nlinfo("removing slot %d", slot);
+		std::string dbPath;
+		if(slot > SLOTTYPE::RIGHT_HAND)
+			dbPath = "LOCAL:INVENTORY:HAND:";
+		else
+			dbPath = "LOCAL:INVENTORY:EQUIP:";
+		//offset by 1 : TSlotType begins at 1 for actual items (because of UNDEFINED), whereas dbPath start at 0
+		dbPath += NLMISC::toString((uint8)slot - 1);
+		nlinfo("Removing path %s", dbPath.c_str());
+		CInventoryManager::getInstance()->unequip(dbPath);
+	}
 
 	uint32 maxEquipTime = 0;
 
@@ -333,7 +363,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	};
 	std::vector<CInventoryItem> duals;
 	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::TInventory::bag);
-	for(int i=0;i<items.size(); i++)
+	for(int i=0; i < items.size(); i++)
 	{
 		CInventoryItem item = items[i];
 		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
@@ -352,7 +382,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		CInventoryManager::getInstance()->autoEquip(item.indexInBag, true);
 	}
 	// Manually equip dual items
-	for(int i=0;i<duals.size();i++)
+	for(int i=0;i < duals.size();i++)
 	{
 		CInventoryItem item = duals[i];
 		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
