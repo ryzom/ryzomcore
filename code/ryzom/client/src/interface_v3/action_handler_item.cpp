@@ -2053,6 +2053,14 @@ class CHandlerItemMenuCheck : public IActionHandler
 				{
 					if(pEquip)
 						pNewSubMenu->addLine(pEquip->getHardText(), "item_group_equip", ahParams, name + "_equip");
+					// Add move sub menu
+					if (pMoveSubMenu)
+					{
+						pNewSubMenu->addLine(pMoveSubMenu->getHardText(), "", "", name + "_move");
+						CGroupSubMenu* tmp = new CGroupSubMenu(CViewBase::TCtorParam());
+						pNewSubMenu->setSubMenu(pNewSubMenu->getNumLine() - 1, tmp);
+						pNewSubMenu = tmp;
+					}
 					if(pMoveToBag && pMoveToBag->getActive())
 					{
 						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToBag->getHardText(),"item_group_move",  "destination=bag|" + ahParams, name + "_bag");
@@ -2073,7 +2081,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToRoom->getHardText(), "item_group_move",  "destination=player_room|" + ahParams, name + "_room");
 						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
 					}
-					if(pMoveToGuild && pMoveToGuild->getActive())
+					if(pMoveToGuild && pMoveToGuild->getActive() && ClientCfg.ItemGroupAllowGuild)
 					{
 						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild->getHardText(),"item_group_move",  "destination=guild|" + ahParams, name + "_guild");
 						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
