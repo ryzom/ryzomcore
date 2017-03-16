@@ -38,9 +38,9 @@ CItemGroup::CItemGroup()
 
 bool CItemGroup::contains(CDBCtrlSheet *other)
 {
-	for(int i=0;i<_Items.size();i++)
+	for(int i=0;i<Items.size();i++)
 	{
-		CItem item = _Items[i];
+		CItem item = Items[i];
 		NLMISC::CSheetId sheet = NLMISC::CSheetId(other->getSheetId());
 		if (sheet.toString()  == item.sheetName  && other->getQuality()   == item.quality &&
 				other->getItemWeight() == item.weight     && other->getItemColor() == item.color &&
@@ -56,16 +56,16 @@ bool CItemGroup::contains(CDBCtrlSheet *other)
 
 void CItemGroup::addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color)
 {
-	_Items.push_back(CItem(sheetName, quality, weight, color));
+	Items.push_back(CItem(sheetName, quality, weight, color));
 }
 
 void CItemGroup::writeTo(xmlNodePtr node)
 {
 	xmlNodePtr groupNode = xmlNewChild (node, NULL, (const xmlChar*)"group", NULL );
 	xmlSetProp(groupNode, (const xmlChar*)"name", (const xmlChar*)name.c_str());
-	for(int i=0;i<_Items.size();i++)
+	for(int i=0;i<Items.size();i++)
 	{
-		CItem item = _Items[i];
+		CItem item = Items[i];
 		xmlNodePtr itemNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"item", NULL);
 		xmlSetProp (itemNode, (const xmlChar*)"sheetName", (const xmlChar*)item.sheetName.c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"quality", (const xmlChar*)NLMISC::toString(item.quality).c_str());
@@ -103,7 +103,9 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
 			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
-			_Items.push_back(item);
+			//Old version of groups.xml could save unknown sheets, remove them for clarity
+			if(item.sheetName != "unknown.unknown")
+				Items.push_back(item);
 		}
 		curNode = curNode->next;
 	}
@@ -165,6 +167,11 @@ CItemGroupManager::CItemGroupManager()
 void CItemGroupManager::init()
 {
 	loadGroups();
+	linkInterface();
+}
+
+void CItemGroupManager::linkInterface()
+{
 	//attach item group subgroup to right-click in bag group
 	CWidgetManager* pWM = CWidgetManager::getInstance();
 	CGroupMenu   *pRootMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag"));
@@ -175,19 +182,23 @@ void CItemGroupManager::init()
 	if(pMenu && pGroupSubMenu)
 		pMenu->setSubMenu(pMenu->getNumLine() - 1, pGroupSubMenu);
 	else
-		nlinfo("Couldn't update yet, maybe wait a little bit ?");
+		nlwarning("Couldn't link group action to group menu, interface isn't initialize yet ?");
 }
 
 void CItemGroupManager::uninit()
 {
 	saveGroups();
-
 }
 
 // Inspired from macro parsing
 void CItemGroupManager::saveGroups()
 {
 	std::string userGroupFileName = "save/groups_" + PlayerSelectedFileName + ".xml";
+	if(PlayerSelectedFileName.empty())
+	{
+		nlwarning("Trying to save group with an empty PlayerSelectedFileName, aborting");
+		return;
+	}
 	try {
 		NLMISC::COFile f;
 		if(f.open(userGroupFileName, false, false, true))
@@ -222,6 +233,11 @@ bool CItemGroupManager::loadGroups()
 {
 
 	std::string userGroupFileName = "save/groups_" + PlayerSelectedFileName + ".xml";
+	if(PlayerSelectedFileName.empty())
+	{
+		nlwarning("Trying to load group with an empty PlayerSelectedFileName, aborting");
+		return false;
+	}
 	if (!NLMISC::CFile::fileExists(userGroupFileName) || NLMISC::CFile::getFileSize(userGroupFileName) == 0)
 	{
 		nlinfo("No item groups file found !");
@@ -380,6 +396,7 @@ bool CItemGroupManager::createGroup(std::string name)
 	{
 		pCS = CInventoryManager::getInstance()->getHandSheet(i);
 		if(!pCS) continue;
+		if(!pCS->isSheetValid()) continue;
 		NLMISC::CSheetId sheet(pCS->getSheetId());
 		group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor());
 	}
@@ -389,6 +406,7 @@ bool CItemGroupManager::createGroup(std::string name)
 	{
 		pCS = CInventoryManager::getInstance()->getEquipSheet(i);
 		if(!pCS) continue;
+		if(!pCS->isSheetValid()) continue;
 		NLMISC::CSheetId sheet(pCS->getSheetId());
 		group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor());
 	}
@@ -416,10 +434,12 @@ bool CItemGroupManager::deleteGroup(std::string name)
 void CItemGroupManager::listGroup()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	pIM->displaySystemInfo(ucstring("Available item groups :"));
 	for(int i=0;i<_Groups.size();i++)
 	{
 		CItemGroup group = _Groups[i];
-		pIM->displaySystemInfo(ucstring(group.name));
+		ucstring msg = "* " + ucstring(group.name) + ucstring(NLMISC::toString(" with %d items inside.", group.Items.size()));
+		pIM->displaySystemInfo(msg);
 	}
 }
 
@@ -447,7 +467,6 @@ CItemGroup* CItemGroupManager::findGroup(std::string name)
 	}
 	return NULL;
 }
-// Note : Guild & room aren't supported because missing price might cause issue
 std::string CItemGroupManager::toDbPath(INVENTORIES::TInventory inventory)
 {
 	switch(inventory)

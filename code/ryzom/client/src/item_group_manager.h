@@ -60,9 +60,7 @@ public:
 	void readFrom(xmlNodePtr node);
 
 	std::string name;
-
-private:
-	std::vector<CItem> _Items;
+	std::vector<CItem> Items;
 };
 
 class CItemGroupManager {
@@ -77,6 +75,7 @@ public:
 	void uninit();
 	void saveGroups();
 	bool loadGroups();
+	void linkInterface();
 	//Return NULL if no group was found
 	//Return false if no group was found
 	bool moveGroup(std::string name, INVENTORIES::TInventory dst);
