@@ -77,7 +77,7 @@ void CItemGroup::writeTo(xmlNodePtr node)
 	for(int i=0;i<removeBeforeEquip.size();i++)
 	{
 		xmlNodePtr removeNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"remove", NULL);
-		xmlSetProp(removeNode, (const xmlChar*)"slot", (const xmlChar*)removeBeforeEquip[i]);
+		xmlSetProp(removeNode, (const xmlChar*)"slot", (xmlChar*)SLOT_EQUIPMENT::toString(removeBeforeEquip[i]).c_str());
 	}
 }
 
@@ -203,6 +203,18 @@ void CItemGroupManager::linkInterface()
 void CItemGroupManager::uninit()
 {
 	saveGroups();
+	unlinkInterface();
+	_Groups.clear();
+}
+
+void CItemGroupManager::unlinkInterface()
+{
+	// We need to unlink our menu to avoid crash on interface release
+	CWidgetManager* pWM = CWidgetManager::getInstance();
+	CGroupMenu   *pGroupMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
+	CGroupSubMenu *pGroupSubMenu = pGroupMenu->getRootMenu();
+	pGroupMenu->reset();
+	pGroupMenu->delGroup(pGroupSubMenu, true);
 }
 
 // Inspired from macro parsing

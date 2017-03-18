@@ -78,6 +78,7 @@ public:
 	void saveGroups();
 	bool loadGroups();
 	void linkInterface();
+	void unlinkInterface();
 	//Return NULL if no group was found
 	//Return false if no group was found
 	bool moveGroup(std::string name, INVENTORIES::TInventory dst);
