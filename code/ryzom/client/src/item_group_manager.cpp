@@ -35,9 +35,14 @@ CItemGroup::CItemGroup()
 {
 }
 
-
 bool CItemGroup::contains(CDBCtrlSheet *other)
 {
+	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED;
+	return contains(other, slot);
+}
+bool CItemGroup::contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &slot)
+{
+	slot = SLOT_EQUIPMENT::UNDEFINED;
 	for(int i=0;i<Items.size();i++)
 	{
 		CItem item = Items[i];
@@ -47,6 +52,7 @@ bool CItemGroup::contains(CDBCtrlSheet *other)
 				(!item.usePrice || (other->getItemPrice()  >= item.minPrice && other->getItemPrice() <= item.maxPrice))
 				)
 		{
+			slot = item.slot;
 			return true;
 		}
 	}
@@ -54,9 +60,9 @@ bool CItemGroup::contains(CDBCtrlSheet *other)
 	return false;
 }
 
-void CItemGroup::addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color)
+void CItemGroup::addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color, SLOT_EQUIPMENT::TSlotEquipment slot)
 {
-	Items.push_back(CItem(sheetName, quality, weight, color));
+	Items.push_back(CItem(sheetName, quality, weight, color, slot));
 }
 
 void CItemGroup::addRemove(std::string slotName)
@@ -85,6 +91,9 @@ void CItemGroup::writeTo(xmlNodePtr node)
 		xmlSetProp (itemNode, (const xmlChar*)"color", (const xmlChar*)NLMISC::toString(item.color).c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
 		xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
+		// We need to save slot only if it's useful for clarity
+		if(item.slot == SLOT_EQUIPMENT::HANDL || item.slot == SLOT_EQUIPMENT::HANDR)
+			xmlSetProp(itemNode, (const xmlChar*)"slot", (const xmlChar*)SLOT_EQUIPMENT::toString(item.slot).c_str());
 	}
 	for(int i=0;i<removeBeforeEquip.size();i++)
 	{
@@ -120,6 +129,10 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
 			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
+			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
+			std::string slot;
+			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
+			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slot));
 			//Old version of groups.xml could save unknown sheets, remove them for clarity
 			if(item.sheetName != "unknown.unknown")
 				Items.push_back(item);
@@ -393,6 +406,14 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	{
 		CInventoryItem item = items[i];
 		ITEM_TYPE::TItemType itemType = item.pCS->asItemSheet()->ItemType;
+		// Special case for dagger (and all other items that can be equipped both right AND left hand, currently it's only dagger)
+		// We don't equip the one intended for left hand right away (it will be done in duals items later), let right hand be normally equipped
+		if(itemType == ITEM_TYPE::DAGGER && item.slot == SLOT_EQUIPMENT::HANDL)
+		{
+			duals.push_back(item);
+			continue;
+		}
+
 		// If the item can be weared 2 times, don't automatically equip the second one
 		// Or else it will simply replace the first. We'll deal with them later
 		if(possiblyDual.find(itemType) != possiblyDual.end())
@@ -404,6 +425,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 			}
 			possiblyDual[itemType] = true;
 		}
+
 		maxEquipTime = std::max(maxEquipTime, item.pCS->asItemSheet()->EquipTime);
 		CInventoryManager::getInstance()->autoEquip(item.indexInBag, true);
 	}
@@ -460,8 +482,8 @@ bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 		if(!pCS) continue;
 		if(pCS->isSheetValid())
 		{
-		NLMISC::CSheetId sheet(pCS->getSheetId());
-		group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor());
+			NLMISC::CSheetId sheet(pCS->getSheetId());
+			group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor(), slot);
 		}
 		else if(removeUnequiped)
 		{
@@ -512,7 +534,6 @@ std::vector<std::string> CItemGroupManager::getGroupNames(CDBCtrlSheet* pCS)
 		CItemGroup group = _Groups[i];
 		if(group.contains(pCS))
 			out.push_back(group.name);
-
 	}
 	return out;
 }
@@ -564,10 +585,10 @@ std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, 
 	for(uint i=0; i < MAX_BAGINV_ENTRIES; i++)
 	{
 		CDBCtrlSheet *pCS = pList->getSheet(i);
-		if(group->contains(pCS))
+		SLOT_EQUIPMENT::TSlotEquipment slot;
+		if(group->contains(pCS, slot))
 		{
-
-			out.push_back(CInventoryItem(pCS, inventory, i));
+			out.push_back(CInventoryItem(pCS, inventory, i, slot));
 		}
 	}
 

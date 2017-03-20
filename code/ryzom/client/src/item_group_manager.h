@@ -28,7 +28,9 @@ public:
 	CDBCtrlSheet* pCS;
 	INVENTORIES::TInventory origin;
 	uint32 indexInBag;
-	CInventoryItem(CDBCtrlSheet *pCS, INVENTORIES::TInventory origin, uint32 indexInBag) : pCS(pCS), origin(origin), indexInBag(indexInBag) {}
+	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
+	CInventoryItem(CDBCtrlSheet *pCS, INVENTORIES::TInventory origin, uint32 indexInBag, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
+		pCS(pCS), origin(origin), indexInBag(indexInBag), slot(slot) {}
 
 };
 
@@ -39,24 +41,22 @@ public:
 	uint16 quality;
 	uint32 weight;
 	uint8 color;
+	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
 	uint32 minPrice;
 	uint32 maxPrice;
 	bool usePrice;
-	CItem() : sheetName(""), quality(0), color(0), weight(0), minPrice(0), maxPrice(std::numeric_limits<uint32>::max()), usePrice(false) {}
-	CItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color, uint32 minPrice, uint32 maxPrice, bool usePrice) :
-		sheetName(sheetName), quality(quality), weight(weight), color(color), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
-	CItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color) :
-		sheetName(sheetName), quality(quality), weight(weight), color(color), minPrice(0), maxPrice(std::numeric_limits<uint32>::max()), usePrice(false) {}
+	CItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
+		sheetName(sheetName), quality(quality), weight(weight), color(color), slot(slot), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
 
-
-	};
+};
 
 public:
 	CItemGroup();
 
-	// return true if any item in the group match the parameter
-	bool contains(CDBCtrlSheet* other);
-	void addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color);
+	// return true if any item in the group match the parameter ; slot is UNDEFINED unless the item has been found in the group
+	bool contains(CDBCtrlSheet *other);
+	bool contains(CDBCtrlSheet* other, SLOT_EQUIPMENT::TSlotEquipment &slot);
+	void addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color, SLOT_EQUIPMENT::TSlotEquipment slot);
 	void addRemove(std::string slotName);
 	void addRemove(SLOT_EQUIPMENT::TSlotEquipment slot);
 	void writeTo(xmlNodePtr node);
