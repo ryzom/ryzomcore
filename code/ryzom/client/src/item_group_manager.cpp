@@ -323,6 +323,11 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 		nlinfo("group %s not found", name.c_str());
 		return false;
 	}
+	if(dst == INVENTORIES::UNDEFINED)
+	{
+		nlinfo("Destination inventory not found");
+		return false;
+	}
 	CInventoryManager* pIM = CInventoryManager::getInstance();
 
 	std::string moveParams = "to=lists|nblist=1|listsheet0=" + toDbPath(dst);
