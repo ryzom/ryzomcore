@@ -57,6 +57,8 @@ public:
 	// return true if any item in the group match the parameter
 	bool contains(CDBCtrlSheet* other);
 	void addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color);
+	void addRemove(std::string slotName);
+	void addRemove(SLOT_EQUIPMENT::TSlotEquipment slot);
 	void writeTo(xmlNodePtr node);
 	void readFrom(xmlNodePtr node);
 
@@ -83,7 +85,7 @@ public:
 	//Return false if no group was found
 	bool moveGroup(std::string name, INVENTORIES::TInventory dst);
 	bool equipGroup(std::string name, bool pullBefore=true);
-	bool createGroup(std::string name);
+	bool createGroup(std::string name, bool removeUnequiped=false);
 	bool deleteGroup(std::string name);
 	void listGroup();
 	std::vector<std::string> getGroupNames(CDBCtrlSheet *pCS);

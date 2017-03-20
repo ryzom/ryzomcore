@@ -228,7 +228,7 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	return CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1]));
 }
 
-NLMISC_COMMAND(createGroup, "create group <name>", "name")
+NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for every unequiped item)", "name [removeUnequiped]")
 {
 	if(args.empty())
 	{
@@ -236,7 +236,10 @@ NLMISC_COMMAND(createGroup, "create group <name>", "name")
 		pIM->displaySystemInfo(ucstring("Cannot create a group without name."));
 		return false;
 	}
-	if(!CItemGroupManager::getInstance()->createGroup(args[0]))
+	bool removeUnequiped = false;
+	if(args.size() > 1)
+		removeUnequiped = !args[1].empty();
+	if(!CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		std::string msg = "A group named " + args[0] + "already exist, cannot create one with the same name.";

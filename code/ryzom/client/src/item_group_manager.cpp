@@ -59,6 +59,18 @@ void CItemGroup::addItem(std::string sheetName, uint16 quality, uint32 weight, u
 	Items.push_back(CItem(sheetName, quality, weight, color));
 }
 
+void CItemGroup::addRemove(std::string slotName)
+{
+	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slotName));
+	if(slot)
+		removeBeforeEquip.push_back(slot);
+}
+
+void CItemGroup::addRemove(SLOT_EQUIPMENT::TSlotEquipment slot)
+{
+	removeBeforeEquip.push_back(slot);
+}
+
 void CItemGroup::writeTo(xmlNodePtr node)
 {
 	xmlNodePtr groupNode = xmlNewChild (node, NULL, (const xmlChar*)"group", NULL );
@@ -117,9 +129,7 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			std::string slot;
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
-			slot = NLMISC::toUpper(slot);
-			if(SLOT_EQUIPMENT::stringToSlotEquipment(slot) != SLOT_EQUIPMENT::UNDEFINED)
-				removeBeforeEquip.push_back(SLOT_EQUIPMENT::stringToSlotEquipment(slot));
+			addRemove(slot);
 		}
 
 		curNode = curNode->next;
@@ -352,11 +362,11 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	{
 		SLOT_EQUIPMENT::TSlotEquipment slot = group->removeBeforeEquip[i];
 		std::string dbPath;
+		// For hands equip, dbPath obviously starts at 0, we need to offset correctly
 		if(slot == SLOT_EQUIPMENT::HANDL || slot == SLOT_EQUIPMENT::HANDR)
-			dbPath = "LOCAL:INVENTORY:HAND:";
+			dbPath = "LOCAL:INVENTORY:HAND:" + NLMISC::toString((uint32)slot - SLOT_EQUIPMENT::HANDL);
 		else
-			dbPath = "LOCAL:INVENTORY:EQUIP:";
-		dbPath += NLMISC::toString((uint8)slot);
+			dbPath = "LOCAL:INVENTORY:EQUIP:" + NLMISC::toString((uint32)slot);
 		CInventoryManager::getInstance()->unequip(dbPath);
 	}
 
@@ -375,17 +385,17 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	for(int i=0; i < items.size(); i++)
 	{
 		CInventoryItem item = items[i];
-		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
+		ITEM_TYPE::TItemType itemType = item.pCS->asItemSheet()->ItemType;
 		// If the item can be weared 2 times, don't automatically equip the second one
 		// Or else it will simply replace the first. We'll deal with them later
-		if(possiblyDual.find(ItemType) != possiblyDual.end())
+		if(possiblyDual.find(itemType) != possiblyDual.end())
 		{
-			if (possiblyDual[ItemType])
+			if (possiblyDual[itemType])
 			{
 				duals.push_back(item);
 				continue;
 			}
-			possiblyDual[ItemType] = true;
+			possiblyDual[itemType] = true;
 		}
 		maxEquipTime = std::max(maxEquipTime, item.pCS->asItemSheet()->EquipTime);
 		CInventoryManager::getInstance()->autoEquip(item.indexInBag, true);
@@ -394,9 +404,9 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	for(int i=0;i < duals.size();i++)
 	{
 		CInventoryItem item = duals[i];
-		ITEM_TYPE::TItemType ItemType = item.pCS->asItemSheet()->ItemType;
+		ITEM_TYPE::TItemType itemType = item.pCS->asItemSheet()->ItemType;
 		std::string dstPath = string(LOCAL_INVENTORY);
-		switch(ItemType)
+		switch(itemType)
 		{
 		case ITEM_TYPE::ANKLET:
 			dstPath += ":EQUIP:" + NLMISC::toString((int)SLOT_EQUIPMENT::ANKLER); break;
@@ -407,10 +417,11 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		case ITEM_TYPE::RING:
 			dstPath += ":EQUIP:" + NLMISC::toString((int)SLOT_EQUIPMENT::FINGERR);;break;
 		case ITEM_TYPE::DAGGER:
-			dstPath += "HAND:1"; break;
+			dstPath += ":HAND:1"; break;
 		default:
 			break;
 		}
+
 		std::string srcPath = item.pCS->getSheet();
 		maxEquipTime = std::max(maxEquipTime, item.pCS->asItemSheet()->EquipTime);
 		CInventoryManager::getInstance()->equip(srcPath, dstPath);
@@ -424,30 +435,32 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 
 }
 
-bool CItemGroupManager::createGroup(std::string name)
+bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 {
 	if(findGroup(name)) return false;
 	CItemGroup group = CItemGroup();
 	group.name = name;
 	uint i;
 	CDBCtrlSheet* pCS;
-	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
-	{
-		pCS = CInventoryManager::getInstance()->getHandSheet(i);
-		if(!pCS) continue;
-		if(!pCS->isSheetValid()) continue;
-		NLMISC::CSheetId sheet(pCS->getSheetId());
-		group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor());
-	}
-
-
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
-		pCS = CInventoryManager::getInstance()->getEquipSheet(i);
+		SLOT_EQUIPMENT::TSlotEquipment slot = (SLOT_EQUIPMENT::TSlotEquipment)i;
+		//Instead of doing two separate for, just be a bit tricky for hand equipment
+		if(slot == SLOT_EQUIPMENT::HANDR || slot == SLOT_EQUIPMENT::HANDL)
+			pCS = CInventoryManager::getInstance()->getHandSheet((uint32)(slot -  SLOT_EQUIPMENT::HANDL));
+		else
+			pCS = CInventoryManager::getInstance()->getEquipSheet(i);
 		if(!pCS) continue;
-		if(!pCS->isSheetValid()) continue;
+		if(pCS->isSheetValid())
+		{
 		NLMISC::CSheetId sheet(pCS->getSheetId());
 		group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor());
+		}
+		else if(removeUnequiped)
+		{
+			if(slot != SLOT_EQUIPMENT::UNDEFINED && slot != SLOT_EQUIPMENT::FACE)
+				group.addRemove(slot);
+		}
 	}
 
 	_Groups.push_back(group);
