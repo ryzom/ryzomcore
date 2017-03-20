@@ -13499,3 +13499,37 @@ uiFreeViewTablet [Tablet or touch screen]
 uiCopy [Copy]
 uiBrowse [Browse]
 
+//Item group commands
+
+
+//createGroup
+cmdCreateGroupUsage1 [createGroup command usage :]
+cmdCreateGroupUsage2 [/createGroup group_name : create a group named group_nam with all your equipped items]
+cmdCreateGroupUsage3 [/createGroup group_name true : create a group named group_nam with all your equipped items, and create a remove command for every empty slot]
+cmdCreateGroupError [A group named %name already exist, cannot create one with the same name.]
+cmdCreateGroupSuccess1 [Group %name successfully created.]
+cmdCreateGroupSuccess2 [Group %name successfully created with removal for all unequiped items.]
+
+//equipGroup
+cmdEquipGroupUsage1 [equipGroup command usage :]
+cmdEquipGroupUsage2 [/equipGroup group_name : Pull the items from the group group_name from available inventory and equip them.]
+cmdEquipGroupError [Could not equip group %name because no group named like this was found.]
+cmdEquipGroupSuccess [Group %name successfully equipped.]
+
+
+//deleteGroup
+cmdDeleteGroupUsage1 [deleteGroup command usage :]
+cmdDeleteGroupUsage2 [/deleteGroup group_name : Remove the group named group_name if it exists.]
+cmdDeleteGroupError [Cannot delete group %name : no group with this name found.]
+cmdDeleteGroupSuccess [Group %name successfully deleted.]
+
+//moveGroup
+cmdMoveGroupUsage1 [moveGroup command usage :]
+cmdMoveGroupUsage2 [/moveGroup group_name destination : move items from all available inventories to destination]
+cmdMoveGroupUsage3 [destination can be either bag, player_room, guild, pet_animal1, pet_animal2, pet_animal3, pet_animal4]
+cmdMoveGroupError [Could not move group %name to %inventory because no group named like this was found, and/or it wasn't a valid inventory.]
+cmdMoveGroupSuccess [Group %name successfully moved to %inventory.]
+
+//listGroup
+cmdListGroupHeader [Available item groups :]
+cmdListGroupLine [* %name, with %size items inside.]
