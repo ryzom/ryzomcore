@@ -203,11 +203,12 @@ void CItemGroupManager::linkInterface()
 	CGroupSubMenu *pMenu = pRootMenu->getRootMenu();
 	//get item subgroup
 	CGroupMenu   *pGroupMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
-	CGroupSubMenu *pGroupSubMenu = pGroupMenu->getRootMenu();
-	if(pMenu && pGroupSubMenu)
+	CGroupSubMenu *pGroupSubMenu = NULL;
+	if (pGroupMenu) pGroupSubMenu = pGroupMenu->getRootMenu();
+	if (pMenu && pGroupSubMenu)
 		pMenu->setSubMenu(pMenu->getNumLine() - 1, pGroupSubMenu);
 	else
-		nlwarning("Couldn't link group action to group menu, interface isn't initialize yet ?");
+		nlwarning("Couldn't link group submenu to item_menu_in_bag, check your widgets.xml file");
 }
 
 void CItemGroupManager::uninit()
@@ -222,9 +223,10 @@ void CItemGroupManager::unlinkInterface()
 	// We need to unlink our menu to avoid crash on interface release
 	CWidgetManager* pWM = CWidgetManager::getInstance();
 	CGroupMenu   *pGroupMenu = dynamic_cast<CGroupMenu*>(pWM->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
-	CGroupSubMenu *pGroupSubMenu = pGroupMenu->getRootMenu();
-	pGroupMenu->reset();
-	pGroupMenu->delGroup(pGroupSubMenu, true);
+	CGroupSubMenu *pGroupSubMenu = NULL;
+	if (pGroupMenu) pGroupSubMenu = pGroupMenu->getRootMenu();
+	if (pGroupMenu) pGroupMenu->reset();
+	if (pGroupMenu && pGroupSubMenu) pGroupMenu->delGroup(pGroupSubMenu, true);
 }
 
 // Inspired from macro parsing
