@@ -209,6 +209,11 @@ NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, ch
 	return true;
 }
 
+/***********************************************************************
+GROUP COMMANDS
+***********************************************************************/
+
+
 NLMISC_COMMAND(listGroup, "list all available group", "")
 {
 	CItemGroupManager::getInstance()->listGroup();
@@ -221,18 +226,22 @@ NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 
 	if(args.empty())
 	{
-		pIM->displaySystemInfo(ucstring("equipGroup command usage :"));
-		pIM->displaySystemInfo(ucstring("/equipGroup group_name : Pull the items from the group group_name from available inventory and equip them."));
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage2"));
 		return false;
 	}
 	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
 	{
-		pIM->displaySystemInfo(ucstring(toString("Group %s successfully equipped.", args[0].c_str())));
+		ucstring msg = CI18N::get("cmdEquipGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
-		pIM->displaySystemInfo(ucstring(toString("Could not equip group %s because no group named like this was found.", args[0].c_str())));
+		ucstring msg = CI18N::get("cmdEquipGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
 		return false;
 	}
 }
@@ -243,65 +252,90 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 
 	if(args.empty() || args.size() < 2)
 	{
-		pIM->displaySystemInfo(ucstring("moveGroup command usage :"));
-		pIM->displaySystemInfo(ucstring("/moveGroup group_name destination : move items from all available inventories to destination"));
-		pIM->displaySystemInfo(ucstring("destination can be either bag, player_room, guild, pet_animal1, pet_animal2, pet_animal3, pet_animal4"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage3"));
 		return false;
 	}
 
 	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
 	{
-		pIM->displaySystemInfo(ucstring(toString("Group %s successfully moved to %s.", args[0].c_str(), args[1].c_str())));
+		ucstring msg = CI18N::get("cmdMoveGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
-		pIM->displaySystemInfo(ucstring(toString("Could not move group %s to %s because no group named like this was found, and/or it wasn't a valid inventory.",
-												 args[0].c_str(), args[1].c_str())));
-		return true;
+		ucstring msg = CI18N::get("cmdMoveGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
+		return false;
 	}
 }
+
 
 NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for every unequiped item)", "name [removeUnequiped]")
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if(args.empty())
 	{
-		pIM->displaySystemInfo(ucstring("createGroup command usage :"));
-		pIM->displaySystemInfo(ucstring("/createGroup group_name : create a group named group_nam with all your equipped items"));
-		pIM->displaySystemInfo(ucstring("/createGroup group_name true : create a group named group_nam with all your equipped items, and create a remove command for every empty slot"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage3"));
 		return false;
 	}
 	bool removeUnequiped = false;
 	if(args.size() > 1)
 		removeUnequiped = !args[1].empty();
-	if(!CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
+	if(CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
 	{
-		std::string msg = toString("A group named %s already exist, cannot create one with the same name.", args[0].c_str());
-		pIM->displaySystemInfo(ucstring(msg));
+		ucstring msg;
+		if(removeUnequiped)
+			msg = CI18N::get("cmdCreateGroupSuccess2");
+		else
+			msg = CI18N::get("cmdCreateGroupSuccess1");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdCreateGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
 		return false;
 	}
-	pIM->displaySystemInfo(ucstring(toString("Group %s successfully created.", args[0].c_str())));
-	return true;
+
 }
+
+
 
 NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	if(args.empty())
 	{
-		pIM->displaySystemInfo(ucstring("deleteGroup command usage :"));
-		pIM->displaySystemInfo(ucstring("/deleteGroup group_name : Remove the group named group_name if it exists."));
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage2"));
 		return false;
 	}
-	if(!CItemGroupManager::getInstance()->deleteGroup(args[0]))
+	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
 	{
-		std::string msg = toString("Cannot delete group %s : no group with this name found.", args[0].c_str());
+		ucstring msg = CI18N::get("cmdDeleteGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdDeleteGroupError");
+		strFindReplace(msg, "%name", args[0]);
 		pIM->displaySystemInfo(msg);
 		return false;
 	}
-	pIM->displaySystemInfo(ucstring(toString("Group %s successfully deleted.", args[0].c_str())));
-	return true;
 }
 
 NLMISC_COMMAND(naked, "get naked !", "")

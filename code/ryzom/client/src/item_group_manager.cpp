@@ -29,6 +29,8 @@
 #include "nel/gui/db_manager.h"
 #include "interface_v3/interface_manager.h"
 #include "nel/gui/group_menu.h"
+#include "nel/misc/i18n.h"
+#include "nel/misc/algo.h"
 CItemGroupManager *CItemGroupManager::_Instance = NULL;
 
 CItemGroup::CItemGroup()
@@ -515,11 +517,13 @@ bool CItemGroupManager::deleteGroup(std::string name)
 void CItemGroupManager::listGroup()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	pIM->displaySystemInfo(ucstring("Available item groups :"));
+	pIM->displaySystemInfo(NLMISC::CI18N::get("cmdListGroupHeader"));
 	for(int i=0;i<_Groups.size();i++)
 	{
 		CItemGroup group = _Groups[i];
-		ucstring msg = "* " + ucstring(group.name) + ucstring(NLMISC::toString(" with %d items inside.", group.Items.size()));
+		ucstring msg = NLMISC::CI18N::get("cmdListGroupLine");
+		NLMISC::strFindReplace(msg, "%name", group.name);
+		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));
 		pIM->displaySystemInfo(msg);
 	}
 }
