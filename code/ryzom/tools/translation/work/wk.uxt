@@ -13533,3 +13533,6 @@ cmdMoveGroupSuccess [Group %name successfully moved to %inventory.]
 //listGroup
 cmdListGroupHeader [Available item groups :]
 cmdListGroupLine [* %name, with %size items inside.]
+
+//interface
+uimGroup [Groups]
