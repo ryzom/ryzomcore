@@ -2997,6 +2997,7 @@ void CInterfaceManager::initEmotes()
 		uint32 nEmoteNb = (*it).EmoteId;
 		string sState = (*it).Anim;
 		string sName = (*it).Path;
+
 		// Check that the emote can be added to UI
 		// ---------------------------------------
 		if( (*it).UsableFromClientUI == false )

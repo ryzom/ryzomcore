@@ -1758,16 +1758,17 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pMoveToGuild = dynamic_cast<CViewTextMenu*>(pMenu->getView("guild"));
 		CViewTextMenu	*pMoveToRoom = dynamic_cast<CViewTextMenu*>(pMenu->getView("room"));
 		CViewTextMenu	*pMoveToPa[MAX_INVENTORY_ANIMAL];
+
 		bool bIsLockedByOwner = pCS->getLockedByOwner();
 
 		for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 		{
 			pMoveToPa[i]= dynamic_cast<CViewTextMenu*>(pMenu->getView(toString("pa%d", i)));
-
 		}
 		CViewTextMenu	*pItemInfos = dynamic_cast<CViewTextMenu*>(pMenu->getView("infos"));
 		CViewTextMenu	*pItemTextDisplay = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_text_display"));
 		CViewTextMenu	*pItemTextEdition = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_text_edition"));
+
 
 		// **** Active Entries
 		// Active Enchant / Reload for a subset of items
@@ -1778,7 +1779,6 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pXpCatalyserUse) pXpCatalyserUse->setActive(false);
 		if(pItemTextDisplay) pItemTextDisplay->setActive(false);
 		if(pItemTextEdition) pItemTextEdition->setActive(false);
-
 
 		if(pLockUnlock) pLockUnlock->setActive(true);
 
@@ -1860,10 +1860,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			// cannot move to other animals! :)
 			if(pMoveToBag)		pMoveToBag->setActive(false);
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
-			{
 				if(pMoveToPa[i]) pMoveToPa[i]->setActive(false);
-			}
-
 
 			// additionnaly, cannot drop/destroy/lock an animal item.
 			if(pDrop)			pDrop->setActive(false);
@@ -1889,8 +1886,10 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 			if (pMoveToGuild)
 				pMoveToGuild->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::guild));
+
 			if (pMoveToRoom)
 				pMoveToRoom->setActive(invId==INVENTORIES::bag && invMngr.isInventoryPresent(INVENTORIES::player_room));
+
 			// std case: can drop / destroy
 			if(pDrop)		pDrop->setActive(invId!=INVENTORIES::guild);
 			if(pDestroy)	pDestroy->setActive(invId!=INVENTORIES::guild);
@@ -1902,11 +1901,9 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pMoveSubMenu)
 		{
 			if(pMoveToBag)		someMovePossible= someMovePossible || pMoveToBag->getActive();
-
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i]) someMovePossible= someMovePossible || pMoveToPa[i]->getActive();
-
 			}
 			if(pMoveToGuild)	someMovePossible= someMovePossible || pMoveToGuild->getActive();
 			if(pMoveToRoom)		someMovePossible= someMovePossible || pMoveToRoom->getActive();
@@ -1989,7 +1986,6 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pLockUnlock)		pLockUnlock->setGrayed(true);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(true);
 			if(pMoveToBag)		pMoveToBag->setGrayed(true);
-
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i])	pMoveToPa[i]->setGrayed(true);
@@ -2011,7 +2007,6 @@ class CHandlerItemMenuCheck : public IActionHandler
 
 			// check each inventory dest if available
 			if(pMoveToBag)		pMoveToBag->setGrayed(!invMngr.isInventoryAvailable(INVENTORIES::bag));
-
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				if(pMoveToPa[i])	pMoveToPa[i]->setGrayed(!invMngr.isInventoryAvailable(
