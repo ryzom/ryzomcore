@@ -571,6 +571,9 @@ struct CClientConfig
 	/// Makes entities transparent if they are under cursor
 	bool			TransparentUnderCursor;
 
+	/// Allow item group to move from / to guild room
+	bool			ItemGroupAllowGuild;
+
 
 	/////////////////
 	// PREFERENCES //

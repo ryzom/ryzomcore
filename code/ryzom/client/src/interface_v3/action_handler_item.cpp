@@ -43,7 +43,7 @@
 #include "nel/gui/ctrl_base_button.h"
 #include "../connection.h"
 #include "nel/gui/view_bitmap.h"
-
+#include "../item_group_manager.h"
 extern CSheetManager SheetMngr;
 extern NLMISC::CLog	g_log;
 
@@ -2014,6 +2014,77 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 		}
 
+		//Item GROUP logic
+		CGroupMenu   *pGroupRootMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag:item_group_menu"));
+		if(pGroupRootMenu)
+		{
+			CGroupSubMenu *pGroupMenu = pGroupRootMenu->getRootMenu();
+			std::vector<std::string> groupNames = CItemGroupManager::getInstance()->getGroupNames(pCS);
+			CViewText *pGroup = dynamic_cast<CViewText*>(pMenu->getView("item_group"));
+			//First, hide/show the menu if pertinent (we need to hide the action due to it beeing a submenu)
+			if(pGroup)
+			{
+				if(groupNames.empty())
+				{
+					pGroup->setActive(false);
+				}
+				else
+				{
+					pGroup->setActive(true);
+				}
+			}
+			//Reset everything and recreate the submenu for current item
+			// We do it the lazy way : active/gray options matching regular options (when you do things on a single item)
+			// Same for translated name of interface
+			pGroupMenu->reset();
+			for(i=0; i<groupNames.size(); i++)
+			{
+				std::string name = groupNames[i];
+				std::string ahParams = "name=" + name;
+				pGroupMenu->addLine(ucstring(name), "", "", name);
+				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
+				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
+				if(pNewSubMenu)
+				{
+					if(pEquip)
+						pNewSubMenu->addLine(pEquip->getHardText(), "item_group_equip", ahParams, name + "_equip");
+					// Add move sub menu
+					if (pMoveSubMenu)
+					{
+						pNewSubMenu->addLine(pMoveSubMenu->getHardText(), "", "", name + "_move");
+						CGroupSubMenu* tmp = new CGroupSubMenu(CViewBase::TCtorParam());
+						pNewSubMenu->setSubMenu(pNewSubMenu->getNumLine() - 1, tmp);
+						pNewSubMenu = tmp;
+					}
+					if(pMoveToBag && pMoveToBag->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToBag->getHardText(),"item_group_move",  "destination=bag|" + ahParams, name + "_bag");
+						if(tmp) tmp->setGrayed(pMoveToBag->getGrayed());
+					}
+					for(int j=0;j< MAX_INVENTORY_ANIMAL; j++)
+					{
+						if(pMoveToPa[j] && pMoveToPa[j]->getActive())
+						{
+							//there is an offset of 1 because TInventory names are pet_animal1/2/3/4
+							std::string dst = toString("destination=pet_animal%d|", j + 1);
+							CViewTextMenu* tmp = pNewSubMenu->addLine(ucstring(pMoveToPa[j]->getHardText()),"item_group_move",  dst + ahParams, name + toString("_pa%d", j + 1));
+							if(tmp) tmp->setGrayed(pMoveToPa[j]->getGrayed());
+						}
+					}
+					if(pMoveToRoom && pMoveToRoom->getActive())
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToRoom->getHardText(), "item_group_move",  "destination=player_room|" + ahParams, name + "_room");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+					if(pMoveToGuild && pMoveToGuild->getActive() && ClientCfg.ItemGroupAllowGuild)
+					{
+						CViewTextMenu* tmp = pNewSubMenu->addLine(pMoveToGuild->getHardText(),"item_group_move",  "destination=guild|" + ahParams, name + "_guild");
+						if(tmp) tmp->setGrayed(pMoveToRoom->getGrayed());
+					}
+				}
+			}
+
+		}
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerItemMenuCheck, "item_menu_check" );
@@ -2247,4 +2318,51 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
 
+// ***************************************************************************
+// item groups
+class CHandlerItemGroupMove : public IActionHandler
+{
+	void execute (CCtrlBase *caller, const std::string &sParams)
+	{
+		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
+		if(!pCS)
+		{
+			nlinfo("Wrong cast");
+			return;
+		}
+		std::string destination = getParam(sParams, "destination");
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
 
+		CItemGroupManager::getInstance()->moveGroup(name, INVENTORIES::toInventory(destination));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
+
+
+// ***************************************************************************
+class CHandlerItemGroupEquip : public IActionHandler
+{
+	void execute (CCtrlBase *caller, const std::string & sParams)
+	{
+		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
+		if(!pCS)
+		{
+			nlinfo("Wrong cast");
+			return;
+		}
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			nlinfo("Trying to move a group with a caller not part of any group");
+			return;
+		}
+
+		CItemGroupManager::getInstance()->equipGroup(name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");

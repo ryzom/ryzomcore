@@ -85,7 +85,7 @@
 #include "teleport.h"
 #include "movie_shooter.h"
 #include "interface_v3/input_handler_manager.h"
-
+#include "item_group_manager.h"
 #include "time_client.h"
 #include "auto_anim.h"
 #include "release.h"
@@ -692,7 +692,7 @@ void initMainLoop()
 		ProgressBar.newMessage ( ClientCfg.buildLoadingString(nmsg) );
 		//nlinfo("****** InGame Interface Parsing and Init START ******");
 		pIM->initInGame(); // must be called after waitForUserCharReceived() because Ring information is used by initInGame()
-
+		CItemGroupManager::getInstance()->init(); // Init at the same time keys.xml is loaded
 		initLast = initCurrent;
 		initCurrent = ryzomGetLocalTime();
 		//nlinfo ("PROFILE: %d seconds (%d total) for Initializing ingame", (uint32)(initCurrent-initLast)/1000, (uint32)(initCurrent-initStart)/1000);

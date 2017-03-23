@@ -130,6 +130,7 @@ using namespace NLGUI;
 
 #include "../global.h"
 #include "user_agent.h"
+#include "../item_group_manager.h"
 
 using namespace NLMISC;
 
@@ -1541,6 +1542,8 @@ void CInterfaceManager::updateFrameEvents()
 	CLuaManager::getInstance().getLuaState()->handleGC();
 
 	CBGDownloaderAccess::getInstance().update();
+
+	CItemGroupManager::getInstance()->update();
 
 }
 

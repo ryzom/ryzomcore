@@ -589,7 +589,7 @@ CClientConfig::CClientConfig()
 	FollowOnAtk			= true;
 	AtkOnSelect			= false;
 	TransparentUnderCursor = false;
-
+	ItemGroupAllowGuild = false;
 	// PREFERENCES
 	FPV					= false;
 	CameraHeight		= 2.5f;
@@ -1440,6 +1440,8 @@ void CClientConfig::setValues()
 	READ_BOOL_FV(FollowOnAtk);
 	READ_BOOL_FV(AtkOnSelect);
 	READ_BOOL_DEV(TransparentUnderCursor);
+	//
+	READ_BOOL_FV(ItemGroupAllowGuild);
 
 
 	/////////////////

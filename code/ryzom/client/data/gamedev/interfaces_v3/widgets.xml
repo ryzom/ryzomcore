@@ -1819,6 +1819,14 @@
             name="uimItemTextEdit"
             handler="item_text_edition"
             params="ui:interface:edit_custom" />
+    <action id="item_group"
+            name="uimGroup" />
+	<!-- Will be activated and populated in code -->
+	<group type="menu"
+	                id="item_group_menu"
+			extends="base_menu">
+	</group>
+
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
   <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
