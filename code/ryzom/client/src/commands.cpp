@@ -100,7 +100,7 @@
 #include "zone_util.h"
 #include "nel/gui/lua_manager.h"
 #include "user_agent.h"
-
+#include "item_group_manager.h"
 
 //
 // Only the define FINAL_VERSION can be defined on the project, not in this file
@@ -206,6 +206,154 @@ NLMISC_COMMAND(who, "Display all players currently in region","[<options (GM, ch
 	}
 	out.serial(opt);
 	NetMngr.push(out);
+	return true;
+}
+
+/***********************************************************************
+GROUP COMMANDS
+***********************************************************************/
+
+
+NLMISC_COMMAND(listGroup, "list all available group", "")
+{
+	CItemGroupManager::getInstance()->listGroup();
+	return true;
+}
+
+NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdEquipGroupUsage2"));
+		return false;
+	}
+	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
+	{
+		ucstring msg = CI18N::get("cmdEquipGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdEquipGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+	if(args.empty() || args.size() < 2)
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdMoveGroupUsage3"));
+		return false;
+	}
+
+	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
+	{
+		ucstring msg = CI18N::get("cmdMoveGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdMoveGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		strFindReplace(msg, "%inventory", args[1]);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+
+NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for every unequiped item)", "name [removeUnequiped]")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage2"));
+		pIM->displaySystemInfo(CI18N::get("cmdCreateGroupUsage3"));
+		return false;
+	}
+	bool removeUnequiped = false;
+	if(args.size() > 1)
+		removeUnequiped = !args[1].empty();
+	if(CItemGroupManager::getInstance()->createGroup(args[0], removeUnequiped))
+	{
+		ucstring msg;
+		if(removeUnequiped)
+			msg = CI18N::get("cmdCreateGroupSuccess2");
+		else
+			msg = CI18N::get("cmdCreateGroupSuccess1");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdCreateGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+
+}
+
+
+
+NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if(args.empty())
+	{
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage1"));
+		pIM->displaySystemInfo(CI18N::get("cmdDeleteGroupUsage2"));
+		return false;
+	}
+	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
+	{
+		ucstring msg = CI18N::get("cmdDeleteGroupSuccess");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return true;
+	}
+	else
+	{
+		ucstring msg = CI18N::get("cmdDeleteGroupError");
+		strFindReplace(msg, "%name", args[0]);
+		pIM->displaySystemInfo(msg);
+		return false;
+	}
+}
+
+NLMISC_COMMAND(naked, "get naked !", "")
+{
+	std::string handPath = "LOCAL:INVENTORY:HAND:";
+	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	uint32 i;
+	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
+	}
+
+
+	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
+
+	}
 	return true;
 }
 

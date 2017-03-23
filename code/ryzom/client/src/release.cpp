@@ -93,6 +93,7 @@
 #include "interface_v3/interface_ddx.h"
 #include "bg_downloader_access.h"
 #include "nel/gui/lua_manager.h"
+#include "item_group_manager.h"
 
 
 ///////////
@@ -228,6 +229,7 @@ void	releaseMainLoopReselect()
 
 	// save keys loaded and interface cfg (not done in releaseMainLoop() because done at end of mainLoop()...)
 	pIM->uninitInGame0();
+	CItemGroupManager::getInstance()->uninit();
 
 	// alredy called from farTPMainLoop()
 	// --R2::getEditor().autoConfigRelease(IsInRingSession);
