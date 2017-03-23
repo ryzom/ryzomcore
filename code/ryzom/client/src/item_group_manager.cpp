@@ -152,56 +152,10 @@ void CItemGroup::readFrom(xmlNodePtr node)
 
 }
 
-void CFakeEquipTime::invalidActions()
-{
-	NLGUI::CDBManager *pDB = NLGUI::CDBManager::getInstance();
-	NLMISC::CCDBNodeLeaf *node;
-	// This are the db update server sends when an user equip an item, see egs/player_manager/gear_latency.cpp CGearLatency::setSlot
-	node = pDB->getDbProp("SERVER:USER:ACT_TSTART", false);
-	if (node) node->setValue64(NetMngr.getCurrentServerTick());
-
-	node = pDB->getDbProp("SERVER:USER:ACT_TEND", false);
-	if(node) node->setValue64(NetMngr.getCurrentServerTick() + time);
-
-	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:SHEET", false);
-	static NLMISC::CSheetId equipSheet("big_equip_item.sbrick");
-	if(node) node->setValue64((sint64)equipSheet.asInt());
-
-
-	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:PHRASE", false);
-	if(node) node->setValue64(0);
-
-}
-
-void CFakeEquipTime::validActions()
-{
-	NLGUI::CDBManager *pDB = NLGUI::CDBManager::getInstance();
-	NLMISC::CCDBNodeLeaf *node;
-	node = pDB->getDbProp("SERVER:USER:ACT_TSTART", false);
-	if (node) node->setValue64(0);
-
-	node = pDB->getDbProp("SERVER:USER:ACT_TEND", false);
-	if(node) node->setValue64(0);
-
-	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:SHEET", false);
-	if(node) node->setValue32(0);
-
-	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:PHRASE", false);
-	if(node) node->setValue32(0);
-}
-void CFakeEquipTime::run()
-{
-	//We wait a bit before invalidating actions, or server will override us
-	//Might not be accurate for everyone, but if it's wrong at worst you'll still get the timer
-	// Just with a blank icon instead of a "equipping item" red cross
-	NLMISC::nlSleep(600);
-	invalidActions();
-	NLMISC::nlSleep((time-6) * 100); // time is in ticks, sleep takes ms
-	validActions();
-}
-
 CItemGroupManager::CItemGroupManager()
 {
+	_EndInvalidAction = 0;
+	_StartInvalidAction = 0;
 }
 
 void CItemGroupManager::init()
@@ -329,6 +283,66 @@ bool CItemGroupManager::loadGroups()
 	f.close();
 
 	return true;
+}
+
+void CItemGroupManager::update()
+{
+	if(_StartInvalidAction != 0 && _StartInvalidAction <= NetMngr.getCurrentServerTick())
+	{
+		invalidActions(_StartInvalidAction, _EndInvalidAction);
+		_StartInvalidAction = 0;
+	}
+	if(_EndInvalidAction != 0 && _EndInvalidAction <= NetMngr.getCurrentServerTick())
+	{
+		_EndInvalidAction = 0;
+		validActions();
+	}
+}
+
+void CItemGroupManager::fakeInvalidActions(NLMISC::TGameCycle time)
+{
+	// We cannot directly ivnalidate action or our invalidate will be overriden by the server
+	// (and that means we won't actually have one because it's buggy with multiple equip in a short time)
+	// So we wait a bit (currently 6 ticks is enough) to do it
+	_StartInvalidAction = NetMngr.getCurrentServerTick() + 6;
+	_EndInvalidAction = NetMngr.getCurrentServerTick() + time;
+	invalidActions(NetMngr.getCurrentServerTick(), _EndInvalidAction);
+}
+
+void CItemGroupManager::invalidActions(NLMISC::TGameCycle begin, NLMISC::TGameCycle end)
+{
+	NLGUI::CDBManager *pDB = NLGUI::CDBManager::getInstance();
+	NLMISC::CCDBNodeLeaf *node;
+	// This are the db update server sends when an user equip an item, see egs/player_manager/gear_latency.cpp CGearLatency::setSlot
+	node = pDB->getDbProp("SERVER:USER:ACT_TSTART", false);
+	if (node) node->setValue64(begin);
+
+	node = pDB->getDbProp("SERVER:USER:ACT_TEND", false);
+	if(node) node->setValue64(end);
+
+	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:SHEET", false);
+	static NLMISC::CSheetId equipSheet("big_equip_item.sbrick");
+	if(node) node->setValue64((sint64)equipSheet.asInt());
+
+	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:PHRASE", false);
+	if(node) node->setValue64(0);
+}
+
+void CItemGroupManager::validActions()
+{
+	NLGUI::CDBManager *pDB = NLGUI::CDBManager::getInstance();
+	NLMISC::CCDBNodeLeaf *node;
+	node = pDB->getDbProp("SERVER:USER:ACT_TSTART", false);
+	if (node) node->setValue64(0);
+
+	node = pDB->getDbProp("SERVER:USER:ACT_TEND", false);
+	if(node) node->setValue64(0);
+
+	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:SHEET", false);
+	if(node) node->setValue32(0);
+
+	node = pDB->getDbProp("SERVER:EXECUTE_PHRASE:PHRASE", false);
+	if(node) node->setValue32(0);
 }
 
 //move a group from all available inventory to dst
@@ -459,9 +473,7 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	}
 	// For some reason, there is no (visual) invalidation (server still blocks any action), force one
 	// Unfortunately, there is no clean way to do this, so we'll simulate one
-	NLMISC::IRunnable *runnable = (NLMISC::IRunnable *)(new CFakeEquipTime((NLMISC::TGameCycle)maxEquipTime));
-	NLMISC::IThread *thread = NLMISC::IThread::create(runnable);
-	thread->start();
+	fakeInvalidActions((NLMISC::TGameCycle)maxEquipTime);
 	return true;
 
 }

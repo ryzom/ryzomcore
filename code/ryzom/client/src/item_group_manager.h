@@ -89,6 +89,8 @@ public:
 	bool deleteGroup(std::string name);
 	void listGroup();
 	std::vector<std::string> getGroupNames(CDBCtrlSheet *pCS);
+	//Used to fake invalid actions
+	void update();
 
 private:
 	CItemGroup* findGroup(std::string name);
@@ -98,17 +100,13 @@ private:
 	std::string toDbPath(INVENTORIES::TInventory inventory);
 	// Singleton's instance
 	static CItemGroupManager *_Instance;
-};
-
-
-class CFakeEquipTime : public NLMISC::IRunnable
-{
-public:
-	CFakeEquipTime(NLMISC::TGameCycle time) : time(time) {}
-	void invalidActions();
+	//
+	void fakeInvalidActions(NLMISC::TGameCycle time);
+	void invalidActions(NLMISC::TGameCycle begin, NLMISC::TGameCycle end);
 	void validActions();
-	void run();
-	NLMISC::TGameCycle time;
+	NLMISC::TGameCycle _EndInvalidAction;
+	NLMISC::TGameCycle _StartInvalidAction;
+
 };
 
 #endif // RY_ITEM_GROUP_MANAGER_H
