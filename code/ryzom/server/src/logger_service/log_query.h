@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <iterator>
+#include <limits>
 
 #include "nel/misc/common.h"
 
@@ -61,7 +62,7 @@ struct TTimeSlice
 	uint32		EndDate;	
 };
 
-const TTimeSlice FullTimeSlice = {0, ~0};
+const TTimeSlice FullTimeSlice = {0, std::numeric_limits<uint32>::max()};
 
 /// Defile the complete selected time line
 typedef std::vector<TTimeSlice>	TTimeLine;
