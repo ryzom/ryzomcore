@@ -485,6 +485,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 
 		{
 			H_AUTO(InitRZWorldPacs)
+
 			releasePACS();
 			// Init PACS
 			std::string pacsRBankPath = CPath::lookup(PacsRBank, false);
@@ -930,6 +931,10 @@ void CContinent::unselect()
 
 	// Remove the primitive for all entitites (new PACS coming soon and need new primitives).
 	EntitiesMngr.removeCollision();
+
+	// Remove the instances (shapes).
+	EntitiesMngr.removeInstances();
+
 
 	// release collision primitives
 	if (IGCallbacks)
