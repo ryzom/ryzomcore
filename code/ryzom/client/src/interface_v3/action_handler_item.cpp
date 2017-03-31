@@ -2322,14 +2322,8 @@ REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop
 // item groups
 class CHandlerItemGroupMove : public IActionHandler
 {
-	void execute (CCtrlBase *caller, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
-		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
-		if(!pCS)
-		{
-			nlinfo("Wrong cast");
-			return;
-		}
 		std::string destination = getParam(sParams, "destination");
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
@@ -2347,14 +2341,8 @@ REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
 // ***************************************************************************
 class CHandlerItemGroupEquip : public IActionHandler
 {
-	void execute (CCtrlBase *caller, const std::string & sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
 	{
-		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
-		if(!pCS)
-		{
-			nlinfo("Wrong cast");
-			return;
-		}
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
 		{
