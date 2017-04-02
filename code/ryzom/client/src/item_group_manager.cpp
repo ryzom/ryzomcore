@@ -476,7 +476,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	}
 	// For some reason, there is no (visual) invalidation (server still blocks any action), force one
 	// Unfortunately, there is no clean way to do this, so we'll simulate one
-	fakeInvalidActions((NLMISC::TGameCycle)maxEquipTime);
+	if(maxEquipTime > 0)
+		fakeInvalidActions((NLMISC::TGameCycle)maxEquipTime);
 	return true;
 
 }
