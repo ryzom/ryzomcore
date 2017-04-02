@@ -233,14 +233,20 @@ NLMISC_COMMAND(equipGroup, "equip group <name>", "name")
 	if(CItemGroupManager::getInstance()->equipGroup(args[0]))
 	{
 		ucstring msg = CI18N::get("cmdEquipGroupSuccess");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
 		ucstring msg = CI18N::get("cmdEquipGroupError");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
 	}
@@ -261,7 +267,10 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	if(CItemGroupManager::getInstance()->moveGroup(args[0], INVENTORIES::toInventory(args[1])))
 	{
 		ucstring msg = CI18N::get("cmdMoveGroupSuccess");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
 		pIM->displaySystemInfo(msg);
 		return true;
@@ -269,7 +278,10 @@ NLMISC_COMMAND(moveGroup, "move group <name> to <dst>", "name dst")
 	else
 	{
 		ucstring msg = CI18N::get("cmdMoveGroupError");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		strFindReplace(msg, "%inventory", args[1]);
 		pIM->displaySystemInfo(msg);
 		return false;
@@ -297,14 +309,20 @@ NLMISC_COMMAND(createGroup, "create group <name> [true](create a <remove> for ev
 			msg = CI18N::get("cmdCreateGroupSuccess2");
 		else
 			msg = CI18N::get("cmdCreateGroupSuccess1");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
 		ucstring msg = CI18N::get("cmdCreateGroupError");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
 	}
@@ -325,14 +343,20 @@ NLMISC_COMMAND(deleteGroup, "delete group <name>", "name")
 	if(CItemGroupManager::getInstance()->deleteGroup(args[0]))
 	{
 		ucstring msg = CI18N::get("cmdDeleteGroupSuccess");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return true;
 	}
 	else
 	{
 		ucstring msg = CI18N::get("cmdDeleteGroupError");
-		strFindReplace(msg, "%name", args[0]);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(args[0]);
+		strFindReplace(msg, "%name", nameUC);
 		pIM->displaySystemInfo(msg);
 		return false;
 	}

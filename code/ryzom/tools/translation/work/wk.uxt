@@ -13536,3 +13536,8 @@ cmdListGroupLine [* %name, with %size items inside.]
 
 //interface
 uimGroup [Groups]
+//Macro edition
+uiMacroItemGroupEquip [Equip an item group]
+uiMacroItemGroupName  [Item group name]
+uiMacroItemGroupMove  [Move an item group]
+uiMacroItemGroupDestination [Item group destination]
