@@ -112,6 +112,17 @@ namespace INVENTORIES
 			return _RawId < other._RawId;
 		}
 
+		uint32 getCreateTime() const
+		{
+			return _CreateTime;
+		}
+
+		uint32 getSerialNumber() const
+		{
+			return _SerialNumber;
+		}
+
+
 	private:
 		union
 		{
@@ -255,6 +266,8 @@ namespace INVENTORIES
 			Quality,
 			Quantity,
 			UserColor,
+			CreateTime,
+			Serial,
 			Locked,
 			Weight,
 			NameId,
@@ -354,8 +367,8 @@ namespace INVENTORIES
 			bms.serial( _SlotIndex, CInventoryCategoryTemplate::SlotBitSize );
 
 			uint i;
-			// SHEET, QUALITY, QUANTITY and USER_COLOR never require compression
-			for (i = 0; i < 4; ++i)
+			// SHEET, QUALITY, QUANTITY, USER_COLOR, CREATE_TIME and SERIAL never require compression
+			for (i = 0; i < 6; ++i)
 				bms.serial((uint32&)_ItemProp[i], DataBitSize[i]);
 
 			// For all other the compression is simple the first bit indicates if the value is zero
@@ -412,18 +425,13 @@ private:
 
 	struct COneProp
 	{
-		union
-		{
-			TItemPropId				ItemPropId;
-			uint32					ItemPropIdUint32;
-		};
-
+		TItemPropId				ItemPropId;
 		sint32					ItemPropValue;
 
 		void serial( NLMISC::CBitMemStream& bms )
 		{
-			bms.serial((uint32&)ItemPropIdUint32, NbBitsForItemPropId);
-			bms.serial((uint32&)ItemPropValue, CItemSlot::DataBitSize[ItemPropId]);
+			bms.serial( (uint32&)ItemPropId, NbBitsForItemPropId );
+			bms.serial( (uint32&)ItemPropValue, CItemSlot::DataBitSize[ItemPropId] );
 		}
 	};
 
