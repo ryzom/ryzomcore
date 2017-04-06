@@ -37,6 +37,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -79,6 +83,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -130,6 +138,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <!-- No LOCKED state -->
@@ -168,6 +180,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="WEIGHT"
@@ -223,6 +239,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <leaf name="LOCKED"
@@ -278,6 +298,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
@@ -309,6 +333,10 @@
               type="I10" />
         <leaf name="QUANTITY"
               type="I10" />
+        <leaf name="CREATE_TIME"
+              type="I32" />
+        <leaf name="SERIAL"
+              type="I32" />
         <leaf name="USER_COLOR"
               type="I3" />
         <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
@@ -352,6 +380,10 @@
             type="I10" />
       <leaf name="QUANTITY"
             type="I10" />
+      <leaf name="CREATE_TIME"
+              type="I32" />
+      <leaf name="SERIAL"
+              type="I32" />
       <!-- No LOCKED state -->
       <leaf name="USER_COLOR"
             type="I3" />
