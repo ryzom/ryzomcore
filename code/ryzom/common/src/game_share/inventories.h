@@ -425,13 +425,17 @@ private:
 
 	struct COneProp
 	{
-		TItemPropId				ItemPropId;
+		union
+		{
+			TItemPropId				ItemPropId;
+			uint32					ItemPropIdUint32;
+		};
 		sint32					ItemPropValue;
 
 		void serial( NLMISC::CBitMemStream& bms )
 		{
-			bms.serial( (uint32&)ItemPropId, NbBitsForItemPropId );
-			bms.serial( (uint32&)ItemPropValue, CItemSlot::DataBitSize[ItemPropId] );
+			bms.serial((uint32&)ItemPropIdUint32, NbBitsForItemPropId);
+			bms.serial((uint32&)ItemPropValue, CItemSlot::DataBitSize[ItemPropId]);
 		}
 	};
 
