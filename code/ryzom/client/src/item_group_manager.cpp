@@ -530,7 +530,6 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		{ITEM_TYPE::BRACELET, false},
 		{ITEM_TYPE::EARING, false},
 		{ITEM_TYPE::RING, false},
-		{ITEM_TYPE::DAGGER, false},
 	};
 	std::vector<CInventoryItem> duals;
 	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::TInventory::bag);
@@ -538,9 +537,10 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	{
 		CInventoryItem item = items[i];
 		ITEM_TYPE::TItemType itemType = item.pCS->asItemSheet()->ItemType;
-		// Special case for dagger (and all other items that can be equipped both right AND left hand, currently it's only dagger)
-		// We don't equip the one intended for left hand right away (it will be done in duals items later), let right hand be normally equipped
-		if(itemType == ITEM_TYPE::DAGGER && item.slot == SLOT_EQUIPMENT::HANDL)
+		// We'll equip items in left hand later (the right hand will be normally equipped)
+		// This way, if we switch from 2 hands to 2 * 1 hands, both hands will be equipped correctly (first right, which will remove the 2 hands, then left)
+		// If we don't, we might try to equip the left hand first, which will do nothing because we have a 2 hands equipped
+		if(item.slot == SLOT_EQUIPMENT::HANDL)
 		{
 			duals.push_back(item);
 			continue;
@@ -578,6 +578,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		case ITEM_TYPE::RING:
 			dstPath += ":EQUIP:" + NLMISC::toString((int)SLOT_EQUIPMENT::FINGERR);;break;
 		case ITEM_TYPE::DAGGER:
+		case ITEM_TYPE::BUCKLER:
+		case ITEM_TYPE::SHIELD:
 			dstPath += ":HAND:1"; break;
 		default:
 			break;
