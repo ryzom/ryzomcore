@@ -2041,7 +2041,10 @@ class CHandlerItemMenuCheck : public IActionHandler
 			{
 				std::string name = groupNames[i];
 				std::string ahParams = "name=" + name;
-				pGroupMenu->addLine(ucstring(name), "", "", name);
+				//Use ucstring because group name can contain accentued characters (and stuff like that)
+				ucstring nameUC;
+				nameUC.fromUtf8(name);
+				pGroupMenu->addLine(nameUC, "", "", name);
 				CGroupSubMenu* pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 				pGroupMenu->setSubMenu(pGroupMenu->getNumLine()-1, pNewSubMenu);
 				if(pNewSubMenu)
@@ -2322,14 +2325,8 @@ REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop
 // item groups
 class CHandlerItemGroupMove : public IActionHandler
 {
-	void execute (CCtrlBase *caller, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
 	{
-		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
-		if(!pCS)
-		{
-			nlinfo("Wrong cast");
-			return;
-		}
 		std::string destination = getParam(sParams, "destination");
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
@@ -2347,14 +2344,8 @@ REGISTER_ACTION_HANDLER(CHandlerItemGroupMove, "item_group_move");
 // ***************************************************************************
 class CHandlerItemGroupEquip : public IActionHandler
 {
-	void execute (CCtrlBase *caller, const std::string & sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
 	{
-		CDBCtrlSheet* pCS = dynamic_cast<CDBCtrlSheet*>(caller);
-		if(!pCS)
-		{
-			nlinfo("Wrong cast");
-			return;
-		}
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
 		{

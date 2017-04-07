@@ -353,6 +353,11 @@ public:
 					continue;
 				}
 
+				if (!CFile::fileExists(filenames[i])) {
+					nlwarning("Ignore non-existing file '%s'", filenames[i].c_str());
+					continue;
+				}
+
 				CMusicPlayer::CSongs song;
 				song.Filename = filenames[i];
 				SoundMngr->getMixer()->getSongTitle(filenames[i], song.Title, song.Length);

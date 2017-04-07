@@ -13,6 +13,9 @@
 //
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#include "stdpch.h"
+
 #include "item_group_manager.h"
 #include "interface_v3/inventory_manager.h"
 #include "nel/gui/widget_manager.h"
@@ -473,7 +476,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	}
 	// For some reason, there is no (visual) invalidation (server still blocks any action), force one
 	// Unfortunately, there is no clean way to do this, so we'll simulate one
-	fakeInvalidActions((NLMISC::TGameCycle)maxEquipTime);
+	if(maxEquipTime > 0)
+		fakeInvalidActions((NLMISC::TGameCycle)maxEquipTime);
 	return true;
 
 }
@@ -489,8 +493,10 @@ bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 	{
 		SLOT_EQUIPMENT::TSlotEquipment slot = (SLOT_EQUIPMENT::TSlotEquipment)i;
 		//Instead of doing two separate for, just be a bit tricky for hand equipment
-		if(slot == SLOT_EQUIPMENT::HANDR || slot == SLOT_EQUIPMENT::HANDL)
-			pCS = CInventoryManager::getInstance()->getHandSheet((uint32)(slot -  SLOT_EQUIPMENT::HANDL));
+		if(slot == SLOT_EQUIPMENT::HANDR)
+			pCS = CInventoryManager::getInstance()->getHandSheet(0);
+		else if(slot == SLOT_EQUIPMENT::HANDL)
+			pCS = CInventoryManager::getInstance()->getHandSheet(1);
 		else
 			pCS = CInventoryManager::getInstance()->getEquipSheet(i);
 		if(!pCS) continue;
@@ -534,7 +540,10 @@ void CItemGroupManager::listGroup()
 	{
 		CItemGroup group = _Groups[i];
 		ucstring msg = NLMISC::CI18N::get("cmdListGroupLine");
-		NLMISC::strFindReplace(msg, "%name", group.name);
+		//Use ucstring because group name can contain accentued characters (and stuff like that)
+		ucstring nameUC;
+		nameUC.fromUtf8(group.name);
+		NLMISC::strFindReplace(msg, "%name", nameUC);
 		NLMISC::strFindReplace(msg, "%size", NLMISC::toString(group.Items.size()));
 		pIM->displaySystemInfo(msg);
 	}
@@ -604,7 +613,14 @@ std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, 
 		SLOT_EQUIPMENT::TSlotEquipment slot;
 		if(group->contains(pCS, slot))
 		{
-			out.push_back(CInventoryItem(pCS, inventory, i, slot));
+			//Sometimes, index in the list differ from the index in DB, and we need the index in DB, not the one from the list
+			std::string dbPath = pCS->getSheet();
+			std::size_t found = dbPath.find_last_of(":");
+			std::string indexS = dbPath.substr(found+1);
+			uint32 index;
+			NLMISC::fromString(indexS, index);
+			if(i != index) nldebug("Index from list is %d, where index from DB is %d", i, index);
+			out.push_back(CInventoryItem(pCS, inventory, index, slot));
 		}
 	}
 

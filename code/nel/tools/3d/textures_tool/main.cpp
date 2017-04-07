@@ -180,8 +180,8 @@ int main(int argc, char **argv)
 
 				for (uint j = 0; j < size; ++j)
 				{
-					// TODO: find what computation do
-//					*(pRGBA++)-> = color;
+					pRGBA->modulateFromColorRGBOnly(*pRGBA, color);
+					++pRGBA;
 				}
 
 				NLMISC::COFile out;

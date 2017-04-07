@@ -200,7 +200,7 @@
 		</group>
 		<group id="header_opened" x="0" y="0"  h="20" posref="TL TL" >
 		</group>
-		<group id="content" type="list" x="0" y="0" over="true" posref="TL TL" >
+		<group id="content" type="list" x="0" y="0" sizeref="w" over="true" posref="TL TL" >
 		</group>
 	</group>
 </template>
