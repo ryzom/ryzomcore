@@ -28,7 +28,7 @@ public:
 	CDBCtrlSheet* pCS;
 	INVENTORIES::TInventory origin;
 	uint32 indexInBag;
-	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
+	SLOT_EQUIPMENT::TSlotEquipment slot; // Used to differentiate right/left hands, and for clarity in the xml file
 	CInventoryItem(CDBCtrlSheet *pCS, INVENTORIES::TInventory origin, uint32 indexInBag, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
 		pCS(pCS), origin(origin), indexInBag(indexInBag), slot(slot) {}
 
@@ -37,17 +37,24 @@ public:
 class CItemGroup {
 public:
 	struct CItem {
+	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
+	sint32 createTime;
+	sint32 serial;
+	// Old variables, present for compatibility reasons
 	std::string sheetName;
 	uint16 quality;
 	uint32 weight;
 	uint8 color;
-	SLOT_EQUIPMENT::TSlotEquipment slot; // Used only for dagger (right/left hand slot)
 	uint32 minPrice;
 	uint32 maxPrice;
 	bool usePrice;
-	CItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
-		sheetName(sheetName), quality(quality), weight(weight), color(color), slot(slot), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
-
+	CItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED) :
+		createTime(createTime), serial(serial), slot(slot) {}
+	//Old constructor, present for compatibility reasons
+	CItem(std::string sheetName = "", uint16 quality = 0, uint32 weight = 0, uint8 color = 0, sint32 createTime = 0, sint32 serial = 0, SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED, uint32 minPrice = 0, uint32 maxPrice = std::numeric_limits<uint32>::max(), bool usePrice = false) :
+		sheetName(sheetName), quality(quality), weight(weight), color(color), createTime(createTime), serial(serial), slot(slot), minPrice(minPrice), maxPrice(maxPrice), usePrice(usePrice) {}
+	//present for compatibility reasons
+	bool useCreateTime() const { return createTime != 0 && serial != 0;}
 };
 
 public:
@@ -56,12 +63,14 @@ public:
 	// return true if any item in the group match the parameter ; slot is UNDEFINED unless the item has been found in the group
 	bool contains(CDBCtrlSheet *other);
 	bool contains(CDBCtrlSheet* other, SLOT_EQUIPMENT::TSlotEquipment &slot);
-	void addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color, SLOT_EQUIPMENT::TSlotEquipment slot);
+	void addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot);
 	void addRemove(std::string slotName);
 	void addRemove(SLOT_EQUIPMENT::TSlotEquipment slot);
 	void writeTo(xmlNodePtr node);
 	void readFrom(xmlNodePtr node);
 
+	// return true if no item inside
+	bool empty() const { return Items.size() == 0;}
 	std::string name;
 	std::vector<CItem> Items;
 	std::vector<SLOT_EQUIPMENT::TSlotEquipment> removeBeforeEquip;
@@ -107,6 +116,11 @@ private:
 	NLMISC::TGameCycle _EndInvalidAction;
 	NLMISC::TGameCycle _StartInvalidAction;
 
+	//Used to migrate old groups ; keep for compatibility purpose
+	bool migrateGroups();
+	//Return a new group who uses create time and serial (param group isn't modified)
+	CItemGroup migrateGroup(CItemGroup group);
+	bool _MigrationDone;
 };
 
 #endif // RY_ITEM_GROUP_MANAGER_H
