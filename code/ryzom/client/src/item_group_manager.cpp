@@ -51,6 +51,12 @@ bool CItemGroup::contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &s
 	for(int i=0;i<Items.size();i++)
 	{
 		CItem item = Items[i];
+		if(item.useCreateTime() && item.createTime == other->getItemCreateTime() && item.serial == other->getItemSerial())
+		{
+			slot = item.slot;
+			return true;
+		}
+		// Present for compatibility reasons
 		NLMISC::CSheetId sheet = NLMISC::CSheetId(other->getSheetId());
 		if (sheet.toString()  == item.sheetName  && other->getQuality()   == item.quality &&
 				other->getItemWeight() == item.weight     && other->getItemColor() == item.color &&
@@ -65,9 +71,9 @@ bool CItemGroup::contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &s
 	return false;
 }
 
-void CItemGroup::addItem(std::string sheetName, uint16 quality, uint32 weight, uint8 color, SLOT_EQUIPMENT::TSlotEquipment slot)
+void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot)
 {
-	Items.push_back(CItem(sheetName, quality, weight, color, slot));
+	Items.push_back(CItem(createTime, serial, slot));
 }
 
 void CItemGroup::addRemove(std::string slotName)
@@ -90,15 +96,24 @@ void CItemGroup::writeTo(xmlNodePtr node)
 	{
 		CItem item = Items[i];
 		xmlNodePtr itemNode = xmlNewChild(groupNode, NULL, (const xmlChar*)"item", NULL);
-		xmlSetProp (itemNode, (const xmlChar*)"sheetName", (const xmlChar*)item.sheetName.c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"quality", (const xmlChar*)NLMISC::toString(item.quality).c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"weight", (const xmlChar*)NLMISC::toString(item.weight).c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"color", (const xmlChar*)NLMISC::toString(item.color).c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
-		xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
+		if(item.useCreateTime())
+		{
+			xmlSetProp (itemNode, (const xmlChar*)"createTime", (const xmlChar*)NLMISC::toString(item.createTime).c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"serial", (const xmlChar*)NLMISC::toString(item.serial).c_str());
+		}
+		// Present for compatibility reasons
+		else
+		{
+			xmlSetProp (itemNode, (const xmlChar*)"sheetName", (const xmlChar*)item.sheetName.c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"quality", (const xmlChar*)NLMISC::toString(item.quality).c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"weight", (const xmlChar*)NLMISC::toString(item.weight).c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"color", (const xmlChar*)NLMISC::toString(item.color).c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"minPrice", (const xmlChar*)NLMISC::toString(item.minPrice).c_str());
+			xmlSetProp (itemNode, (const xmlChar*)"maxPrice", (const xmlChar*)NLMISC::toString(item.maxPrice).c_str());
+		}
 		// We need to save slot only if it's useful for clarity
-		if(item.slot == SLOT_EQUIPMENT::HANDL || item.slot == SLOT_EQUIPMENT::HANDR)
-			xmlSetProp(itemNode, (const xmlChar*)"slot", (const xmlChar*)SLOT_EQUIPMENT::toString(item.slot).c_str());
+		//if(item.slot == SLOT_EQUIPMENT::HANDL || item.slot == SLOT_EQUIPMENT::HANDR)
+		xmlSetProp(itemNode, (const xmlChar*)"slot", (const xmlChar*)SLOT_EQUIPMENT::toString(item.slot).c_str());
 	}
 	for(int i=0;i<removeBeforeEquip.size();i++)
 	{
@@ -121,6 +136,15 @@ void CItemGroup::readFrom(xmlNodePtr node)
 		{
 
 			CItem item;
+			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"createTime");
+			if (ptrName) NLMISC::fromString((const char*)ptrName, item.createTime);
+			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"serial");
+			if (ptrName) NLMISC::fromString((const char*)ptrName, item.serial);
+			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
+			std::string slot;
+			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
+			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slot));
+			// Old read, keep for compatibility reasons
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"sheetName");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.sheetName);
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"quality");
@@ -134,13 +158,8 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
 			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
-			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"slot");
-			std::string slot;
-			if (ptrName) NLMISC::fromString((const char*)ptrName, slot);
-			item.slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slot));
-			//Old version of groups.xml could save unknown sheets, remove them for clarity
-			if(item.sheetName != "unknown.unknown")
-				Items.push_back(item);
+
+			Items.push_back(item);
 		}
 		if (strcmp((char*)curNode->name, "remove") == 0)
 		{
@@ -159,10 +178,12 @@ CItemGroupManager::CItemGroupManager()
 {
 	_EndInvalidAction = 0;
 	_StartInvalidAction = 0;
+	_MigrationDone = false;
 }
 
 void CItemGroupManager::init()
 {
+	_MigrationDone = false;
 	loadGroups();
 	linkInterface();
 }
@@ -300,6 +321,98 @@ void CItemGroupManager::update()
 		_EndInvalidAction = 0;
 		validActions();
 	}
+	//Migration code, present for compatibility reasons
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if(!_MigrationDone && pIM)
+	{
+		NLMISC::CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:CDB_INIT_IN_PROGRESS");
+		if(node)
+		{
+			if(!node->getValueBool())
+			{
+				nlinfo("Starting migration");
+				migrateGroups();
+				_MigrationDone = true;
+				nlinfo("Item group migration from old system to new system is done !");
+			}
+		}
+	}
+
+}
+
+bool CItemGroupManager::migrateGroups()
+{
+	std::vector<CItemGroup> newGroups;
+	//This is not very optimised, but this will be executed only once (and removed in the near future)
+	for(int i=0; i < _Groups.size(); i++)
+	{
+		CItemGroup group = _Groups[i];
+		//Migrate the group only if there is items inside, and the first one hasn't been migrated
+		bool needMigration = group.Items.size() > 0 && !group.Items[0].useCreateTime();
+		if(!needMigration)
+		{
+			newGroups.push_back(group);
+			continue;
+		}
+		//If we are here, migrate the group
+		newGroups.push_back(migrateGroup(group));
+	}
+	_Groups.clear();
+	_Groups = newGroups;
+	return true;
+}
+
+CItemGroup CItemGroupManager::migrateGroup(CItemGroup group)
+{
+	//Get all matching items from all inventory
+	CItemGroup out;
+	out.name = group.name;
+	for (int i=0; i < INVENTORIES::TInventory::NUM_ALL_INVENTORY; i++)
+	{
+		INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
+		std::vector<CInventoryItem> items = matchingItems(&group, inventory);
+		for(int j = 0; j < items.size(); j++)
+		{
+			SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::UNDEFINED;
+			//slot might be undefined here, but we want it for clarity purpose in the xml (to easily find lines)
+			if(items[j].slot != SLOT_EQUIPMENT::UNDEFINED)
+				slot = items[j].slot;
+			// We can't get a perfect match (can't know if it's a right/left jewel for example), but it's good enough
+			else
+			{
+
+				//jewels
+				const CItemSheet* sheet = items[j].pCS->asItemSheet();
+				if(!sheet)
+				{
+					nlinfo("Could not get as itemSheet, strange");
+				}
+
+				else if (sheet->hasSlot(SLOTTYPE::HEADDRESS)) slot = SLOT_EQUIPMENT::HEADDRESS;
+				else if (sheet->hasSlot(SLOTTYPE::NECKLACE))  slot = SLOT_EQUIPMENT::NECKLACE;
+				else if (sheet->hasSlot(SLOTTYPE::FINGERS))   slot = SLOT_EQUIPMENT::FINGERL;
+				else if (sheet->hasSlot(SLOTTYPE::ANKLE))     slot = SLOT_EQUIPMENT::ANKLEL;
+				else if (sheet->hasSlot(SLOTTYPE::WRIST))     slot = SLOT_EQUIPMENT::WRISTL;
+				else if (sheet->hasSlot(SLOTTYPE::EARS))      slot = SLOT_EQUIPMENT::EARL;
+				//Armor
+				//Helmet
+				else if (sheet->hasSlot(SLOTTYPE::HEAD)) slot = SLOT_EQUIPMENT::HEAD;
+				//Gloves
+				else if (sheet->hasSlot(SLOTTYPE::HANDS)) slot = SLOT_EQUIPMENT::HANDS;
+				//Sleeves
+				else if (sheet->hasSlot(SLOTTYPE::ARMS)) slot = SLOT_EQUIPMENT::ARMS;
+				//Vest
+				else if (sheet->hasSlot(SLOTTYPE::CHEST)) slot = SLOT_EQUIPMENT::CHEST;
+				//Boots
+				else if (sheet->hasSlot(SLOTTYPE::FEET)) slot = SLOT_EQUIPMENT::FEET;
+				// pants
+				else if (sheet->hasSlot(SLOTTYPE::LEGS)) slot = SLOT_EQUIPMENT::LEGS;
+				else slot = SLOT_EQUIPMENT::UNDEFINED;
+			}
+			out.addItem(items[j].pCS->getItemCreateTime(), items[j].pCS->getItemSerial(), slot);
+		}
+	}
+	return out;
 }
 
 void CItemGroupManager::fakeInvalidActions(NLMISC::TGameCycle time)
@@ -417,7 +530,6 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		{ITEM_TYPE::BRACELET, false},
 		{ITEM_TYPE::EARING, false},
 		{ITEM_TYPE::RING, false},
-		{ITEM_TYPE::DAGGER, false},
 	};
 	std::vector<CInventoryItem> duals;
 	std::vector<CInventoryItem> items = matchingItems(group, INVENTORIES::TInventory::bag);
@@ -425,9 +537,10 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 	{
 		CInventoryItem item = items[i];
 		ITEM_TYPE::TItemType itemType = item.pCS->asItemSheet()->ItemType;
-		// Special case for dagger (and all other items that can be equipped both right AND left hand, currently it's only dagger)
-		// We don't equip the one intended for left hand right away (it will be done in duals items later), let right hand be normally equipped
-		if(itemType == ITEM_TYPE::DAGGER && item.slot == SLOT_EQUIPMENT::HANDL)
+		// We'll equip items in left hand later (the right hand will be normally equipped)
+		// This way, if we switch from 2 hands to 2 * 1 hands, both hands will be equipped correctly (first right, which will remove the 2 hands, then left)
+		// If we don't, we might try to equip the left hand first, which will do nothing because we have a 2 hands equipped
+		if(item.slot == SLOT_EQUIPMENT::HANDL)
 		{
 			duals.push_back(item);
 			continue;
@@ -465,6 +578,8 @@ bool CItemGroupManager::equipGroup(std::string name, bool pullBefore)
 		case ITEM_TYPE::RING:
 			dstPath += ":EQUIP:" + NLMISC::toString((int)SLOT_EQUIPMENT::FINGERR);;break;
 		case ITEM_TYPE::DAGGER:
+		case ITEM_TYPE::BUCKLER:
+		case ITEM_TYPE::SHIELD:
 			dstPath += ":HAND:1"; break;
 		default:
 			break;
@@ -502,8 +617,7 @@ bool CItemGroupManager::createGroup(std::string name, bool removeUnequiped)
 		if(!pCS) continue;
 		if(pCS->isSheetValid())
 		{
-			NLMISC::CSheetId sheet(pCS->getSheetId());
-			group.addItem(sheet.toString(), pCS->getQuality(), pCS->getItemWeight(), pCS->getItemColor(), slot);
+			group.addItem(pCS->getItemCreateTime(), pCS->getItemSerial(), slot);
 		}
 		else if(removeUnequiped)
 		{

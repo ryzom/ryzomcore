@@ -133,9 +133,6 @@ public:
 
 };
 
-const uint	STANDARD_NUM_USER_LANDMARKS = 256; // not counting bonus landmarks
-
-
 /**
  * Class to manage the fog of war over a continent
  * \author Matthieu 'Trap' Besson

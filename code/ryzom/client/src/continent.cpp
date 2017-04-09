@@ -1389,10 +1389,3 @@ void CContinent::releaseSky()
 	CurrentSky.release();
 }
 
-
-//=========================================================================
-/*static*/ uint CContinent::getMaxNbUserLandMarks()
-{
-	uint nbBonusLandmarks = (uint)IngameDbMngr.getProp( "INTERFACES:NB_BONUS_LANDMARKS" );
-	return STANDARD_NUM_USER_LANDMARKS + nbBonusLandmarks;
-}

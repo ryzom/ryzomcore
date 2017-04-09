@@ -2391,9 +2391,8 @@ void CGroupMap::createContinentLandMarks()
 
 	// Continent Landmarks
 	createLMWidgets(_CurContinent->ContLandMarks);
-	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
 	// User Landmarks
-	for(k = 0; k < nbUserLandMarks; ++k)
+	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -2431,8 +2430,7 @@ void CGroupMap::updateUserLandMarks()
 	removeLandMarks(_UserLM);
 
 	// Re create User Landmarks
-	uint nbUserLandMarks = std::min( uint(_CurContinent->UserLandMarks.size()), CContinent::getMaxNbUserLandMarks());
-	for(k = 0; k < nbUserLandMarks; ++k)
+	for(k = 0; k < _CurContinent->UserLandMarks.size(); ++k)
 	{
 		NLMISC::CVector2f mapPos;
 		worldToMap(mapPos, _CurContinent->UserLandMarks[k].Pos);
@@ -3263,12 +3261,6 @@ void createUserLandMark(CCtrlBase * /* pCaller */, const string &/* params */)
 	// pop the rename dialog
 	LastClickedMap = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 	if (LastClickedMap->isInDeathMode()) return;
-	if (LastClickedMap->getNumUserLandMarks() >= CContinent::getMaxNbUserLandMarks() )
-	{
-		// too many landmark, can't create
-		im->displaySystemInfo(CI18N::get("uiNoMoreLandMarks"), "CHK");
-		return;
-	}
 	LastSelectedLandMark = NULL;
 	popupLandMarkNameDialog();
 }
