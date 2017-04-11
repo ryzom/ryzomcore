@@ -17,7 +17,7 @@ IF(DEFINED CMAKE_CROSSCOMPILING)
   RETURN()
 ENDIF()
 
-# Force the compilers to Clang for iOS
+# Force the compilers to Clang for OS X
 SET(CMAKE_C_COMPILER x86_64-apple-darwin15-clang)
 SET(CMAKE_CXX_COMPILER x86_64-apple-darwin15-clang++)
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
@@ -86,7 +86,7 @@ set(CMAKE_SYSTEM_PROCESSOR "x86_64")
 SET(UNIX ON)
 SET(APPLE ON)
 
-# Set the find root to the iOS developer roots and to user defined paths
+# Set the find root to the OS X developer roots and to user defined paths
 SET(CMAKE_FIND_ROOT_PATH ${CMAKE_OSX_TOOLCHAIN_ROOT} ${CMAKE_OSX_SYSROOT} ${CMAKE_PREFIX_PATH} ${CMAKE_INSTALL_PREFIX} ${MACPORTS_ROOT_DIR} ${EXTERNAL_OSX_PATH} $ENV{EXTERNAL_OSX_PATH} CACHE STRING "OS X find search path root")
 
 # default to searching for frameworks first
@@ -99,7 +99,7 @@ SET(CMAKE_SYSTEM_FRAMEWORK_PATH
   ${CMAKE_OSX_SYSROOT}/Developer/Library/Frameworks
 )
 
-# only search the iOS sdks, not the remainder of the host filesystem
+# only search the OS X sdks, not the remainder of the host filesystem
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
