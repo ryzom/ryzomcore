@@ -199,6 +199,7 @@ struct CDepositState {
 	uint32 alias;
 	float currentQuantity;
 	uint32 nextRespawnDay;
+	CDepositState() : alias(0), currentQuantity(0.f), nextRespawnDay(0) {}
 	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 	{
 		if(f.isXML())
