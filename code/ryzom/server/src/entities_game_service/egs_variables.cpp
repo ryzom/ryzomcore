@@ -329,6 +329,10 @@ CVariable<float>			DodgeFactorForForageSkills("egs","DodgeFactorForForageSkills"
 CVariable<float> ForageExtractionTimeMinGC( "egs", "ForageExtractionTimeMinGC", "Minimum time of extraction in ticks", 230.0f, 0, true );
 CVariable<float> ForageExtractionTimeSlopeGC( "egs", "ForageExtractionTimeSlopeGC", "Slope of base extraction time curve", 2.0f, 0, true );
 
+CVariable<bool> RefillDepositOnStartup("egs", "RefillDepositOnStartup", "Ignore saved CurrentQuantity / NextRespawnDay in deposits", false, 0, true);
+CVariable<uint32> DepositSaveInterval("egs", "DepositSaveInterval", "time *in tick* between two saves of a deposit", 10 * 60 * 10, 0, true);
+CVariable<bool> DepositStateUseXml("egs", "DepositStateUseXml", "Use xml instead of binary file to save deposit state", true, 0, true);
+
 
 CVariable<float> ForageQuantityBaseRate( "egs", "ForageQuantityBaseRate", "Base of extraction rate", 0.23f, 0, true ); // 0.23 doubles the previous minimum setting
 

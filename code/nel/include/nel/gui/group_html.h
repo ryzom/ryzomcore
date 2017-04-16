@@ -820,7 +820,8 @@ namespace NLGUI
 		struct CDataDownload
 		{
 		public:
-			CDataDownload(CURL *c, const std::string &u, const std::string &d, FILE *f, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams()) : curl(c), url(u), dest(d), luaScript(s), md5sum(m), type(t), fp(f)
+			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams())
+				: curl(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m)
 			{
 				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style));
 			}
@@ -839,6 +840,8 @@ namespace NLGUI
 		std::vector<CDataDownload> Curls;
 		CURLM *MultiCurl;
 		int RunningCurls;
+
+		bool startCurlDownload(CDataDownload &download);
 
 		void initImageDownload();
 		void checkImageDownload();

@@ -265,6 +265,61 @@ namespace NLGUI
 		return dest;
 	}
 
+	// Add url to MultiCurl queue and return cURL handle
+	bool CGroupHTML::startCurlDownload(CDataDownload &download)
+	{
+		if (!MultiCurl)
+		{
+			nlwarning("Invalid MultiCurl handle, unable to download '%s'", download.url.c_str());
+			return false;
+		}
+
+		string tmpdest = download.dest + ".tmp";
+
+		// erase the tmp file if exists
+		if (CFile::fileExists(tmpdest))
+			CFile::deleteFile(tmpdest);
+
+		FILE *fp = nlfopen (tmpdest, "wb");
+		if (fp == NULL)
+		{
+			nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
+			return false;
+		}
+
+		CURL *curl = curl_easy_init();
+		if (!curl)
+		{
+			fclose(fp);
+			CFile::deleteFile(tmpdest);
+
+			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
+			return false;
+		}
+
+		download.curl = curl;
+		download.fp = fp;
+
+		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
+		curl_easy_setopt(curl, CURLOPT_URL, download.url.c_str());
+
+		// limit curl to HTTP and HTTPS protocols only
+		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+		std::string userAgent = options.appName + "/" + options.appVersion;
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
+
+		sendCookies(curl, _DocumentDomain, _TrustedDomain);
+
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
+
+		curl_multi_add_handle(MultiCurl, curl);
+
+		return true;
+	}
+
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style)
 	{
@@ -285,55 +340,29 @@ namespace NLGUI
 
 		// use requested url for local name
 		string dest = localImageName(url);
-		string tmpdest = localImageName(url)+".tmp";
 	#ifdef LOG_DL
 		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 	#endif
 
-		// erase the tmp file if exists
-		if (NLMISC::CFile::fileExists(tmpdest))
-			NLMISC::CFile::deleteFile(tmpdest);
-
 		if (!NLMISC::CFile::fileExists(dest))
 		{
-			if (!MultiCurl)
-			{
-				nlwarning("Invalid MultiCurl handle, unable to download '%s'", finalUrl.c_str());
-				return;
-			}
+			Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style));
+			if (Curls.size() < options.curlMaxConnections) {
+				if (!startCurlDownload(Curls.back()))
+				{
+					Curls.pop_back();
+					return;
+				}
 
-			CURL *curl = curl_easy_init();
-			if (!curl)
-			{
-				nlwarning("Creating cURL handle failed, unable to download '%s'", finalUrl.c_str());
-				return;
-			}
-
-			FILE *fp = nlfopen(tmpdest, "wb");
-			if (fp == NULL)
-			{
-				curl_easy_cleanup(curl);
-
-				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
-				return;
-			}
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-			curl_easy_setopt(curl, CURLOPT_URL, finalUrl.c_str());
-
-			std::string userAgent = options.appName + "/" + options.appVersion;
-			curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
-
-			sendCookies(curl, _DocumentDomain, _TrustedDomain);
-
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-
-			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, finalUrl, dest, fp, ImgType, img, "", "", style));
+				RunningCurls++;
 		#ifdef LOG_DL
-			nlwarning("adding handle %x, %d curls", curl, Curls.size());
+				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+			}
+			else
+			{
+				nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
 		#endif
-			RunningCurls++;
+			}
 		}
 		else
 		{
@@ -378,14 +407,9 @@ namespace NLGUI
 		}
 
 		string dest = localBnpName(url);
-		string tmpdest = localBnpName(url)+".tmp";
 	#ifdef LOG_DL
 		nlwarning("add to download '%s' dest '%s'", url.c_str(), dest.c_str());
 	#endif
-		
-		// erase the tmp file if exists
-		if (NLMISC::CFile::fileExists(tmpdest))
-			NLMISC::CFile::deleteFile(tmpdest);
 
 		// create/delete the local file
 		if (NLMISC::CFile::fileExists(dest))
@@ -402,39 +426,23 @@ namespace NLGUI
 		}
 		if (action != "delete")
 		{
-			if (!MultiCurl)
+			Curls.push_back(CDataDownload(url, dest, BnpType, NULL, script, md5sum));
+			if (Curls.size() < options.curlMaxConnections)
 			{
-				nlwarning("Invalid MultiCurl handle, unable to download '%s'", url.c_str());
-				return false;
-			}
-
-			CURL *curl = curl_easy_init();
-			if (!curl)
-			{
-				nlwarning("Creating cURL handle failed, unable to download '%s'", url.c_str());
-				return false;
-			}
-
-			FILE *fp = nlfopen (tmpdest, "wb");
-			if (fp == NULL)
-			{
-				curl_easy_cleanup(curl);
-				nlwarning("Can't open file '%s' for writing: code=%d '%s'", tmpdest.c_str (), errno, strerror(errno));
-				return false;
-			}
-
-			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
-			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-
-			curl_multi_add_handle(MultiCurl, curl);
-			Curls.push_back(CDataDownload(curl, url, dest, fp, BnpType, NULL, script, md5sum));
+				if (!startCurlDownload(Curls.back()))
+				{
+					Curls.pop_back();
+					return false;
+				}
+				RunningCurls++;
 	#ifdef LOG_DL
-			nlwarning("adding handle %x, %d curls", curl, Curls.size());
+				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+			}
+			else
+			{
+				nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
 	#endif
-			RunningCurls++;
+			}
 		}
 		else
 			return true;
@@ -631,7 +639,30 @@ namespace NLGUI
 				}
 			}
 		}
+
 		RunningCurls = NewRunningCurls;
+
+		if (RunningCurls < options.curlMaxConnections)
+		{
+			for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
+			{
+				if (it->curl == NULL) {
+	#ifdef LOG_DL
+					nlwarning("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
+	#endif
+					if (!startCurlDownload(*it))
+					{
+						Curls.erase(it);
+						break;
+					}
+
+					RunningCurls++;
+					if (RunningCurls >= options.curlMaxConnections)
+						break;
+				}
+			}
+		}
+
 	#ifdef LOG_DL
 		if (RunningCurls > 0 || !Curls.empty())
 			nlwarning("(%s) RunningCurls %d, _Curls %d", _Id.c_str(), RunningCurls, Curls.size());
@@ -4531,6 +4562,18 @@ namespace NLGUI
 			Curls[i].imgs.clear();
 		}
 
+		// remove download that are still queued
+		for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); )
+		{
+			if (it->curl == NULL) {
+	#ifdef LOG_DL
+		nlwarning("Remove waiting curl download (%s)", it->url.c_str());
+	#endif
+				it = Curls.erase(it);
+			} else {
+				++it;
+			}
+		}
 	}
 
 	// ***************************************************************************
@@ -4985,7 +5028,7 @@ namespace NLGUI
 		}
 
 	#if LOG_DL
-		nlwarning("(%s) browse local file '%s'", filename.c_str());
+		nlwarning("browse local file '%s'", filename.c_str());
 	#endif
 
 		_TrustedDomain = true;
