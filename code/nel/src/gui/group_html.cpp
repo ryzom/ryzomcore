@@ -4985,7 +4985,7 @@ namespace NLGUI
 		}
 
 	#if LOG_DL
-		nlwarning("(%s) browse local file '%s'", filename.c_str());
+		nlwarning("browse local file '%s'", filename.c_str());
 	#endif
 
 		_TrustedDomain = true;
