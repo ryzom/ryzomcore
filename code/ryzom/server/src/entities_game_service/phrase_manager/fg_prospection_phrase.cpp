@@ -15,7 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+#include <functional>
 #include "stdpch.h"
 #include "fg_prospection_phrase.h"
 #include "nel/misc/common.h"
