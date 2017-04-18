@@ -1,56 +1,50 @@
-ryzom-core (0.8.2802~precise1) precise; urgency=low
+ryzom-core (0.8.2802~raring1) raring; urgency=low
 
   * New upstream release (revision 2802)
 
- -- Cédric OCHS <kervala@gmail.com>  Sun, 09 Dec 2012 14:19:29 +0100
+ -- Cédric OCHS <kervala@gmail.com>  Mon, 10 Dec 2012 11:12:17 +0100
 
-ryzom-core (0.8.2801~precise1) precise; urgency=low
-
-  * New upstream release (revision 2801)
-
- -- Cédric OCHS <kervala@gmail.com>  Sat, 08 Dec 2012 14:08:35 +0100
-
-ryzom-core (0.8.2786~precise1) precise; urgency=low
+ryzom-core (0.8.2786~raring1) raring; urgency=low
 
   * New upstream release (revision 2786)
 
- -- Cédric OCHS <kervala@gmail.com>  Fri, 07 Dec 2012 17:18:02 +0100
+ -- Cédric OCHS <kervala@gmail.com>  Fri, 07 Dec 2012 16:33:15 +0100
 
-ryzom-core (0.8.2691~precise1) precise; urgency=low
+ryzom-core (0.8.2691~quantal1) quantal; urgency=low
 
   * New upstream release (revision 2691)
 
- -- Cédric OCHS <kervala@gmail.com>  Sun, 07 Oct 2012 10:00:31 +0200
+ -- Cédric OCHS <kervala@gmail.com>  Sun, 07 Oct 2012 09:46:56 +0200
 
-ryzom-core (0.8.2683~precise2) precise; urgency=low
-
-  * New upstream release (revision 2683)
-
- -- Cédric OCHS <kervala@gmail.com>  Thu, 04 Oct 2012 10:11:23 +0200
-
-ryzom-core (0.8.2683~precise1) precise; urgency=low
-
-  * New upstream release (revision 2683)
-
- -- Cédric OCHS <kervala@gmail.com>  Wed, 03 Oct 2012 22:37:14 +0200
-
-ryzom-core (0.8.2682~precise1) precise; urgency=low
+ryzom-core (0.8.2682~quantal1) quantal; urgency=low
 
   * New upstream release (revision 2682)
 
- -- Cédric OCHS <kervala@gmail.com>  Wed, 03 Oct 2012 19:02:23 +0200
+ -- Cédric OCHS <kervala@gmail.com>  Wed, 03 Oct 2012 15:59:54 +0200
 
-ryzom-core (0.8.2681~precise2) precise; urgency=low
-
-  * New upstream release (revision 2681)
-
- -- Cédric OCHS <kervala@gmail.com>  Tue, 02 Oct 2012 23:06:36 +0200
-
-ryzom-core (0.8.2681~precise1) precise; urgency=low
+ryzom-core (0.8.2681~quantal2) quantal; urgency=low
 
   * New upstream release (revision 2681)
 
- -- Cédric OCHS <kervala@gmail.com>  Tue, 02 Oct 2012 17:19:25 +0200
+ -- Cédric OCHS <kervala@gmail.com>  Tue, 02 Oct 2012 17:42:23 +0200
+
+ryzom-core (0.8.2681~quantal1) quantal; urgency=low
+
+  * New upstream release (revision 2681)
+
+ -- Cédric OCHS <kervala@gmail.com>  Tue, 02 Oct 2012 17:13:57 +0200
+
+ryzom-core (0.8.2650~quantal2) quantal; urgency=low
+
+  * New upstream release (revision 2650)
+
+ -- Cédric OCHS <kervala@gmail.com>  Mon, 24 Sep 2012 22:06:37 +0200
+
+ryzom-core (0.8.2650~quantal1) quantal; urgency=low
+
+  * New upstream release (revision 2650)
+
+ -- Cédric OCHS <kervala@gmail.com>  Mon, 24 Sep 2012 20:55:19 +0200
 
 ryzom-core (0.8.2025~precise1) precise; urgency=low
 
