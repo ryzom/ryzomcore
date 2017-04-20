@@ -82,6 +82,31 @@ extern "C" long _ftol2( double dblSource ) { return _ftol( dblSource ); }
 
 #if defined(NL_HAS_SSE2) && !defined(NL_CPU_X86_64)
 
+#ifdef NL_NO_EXCEPTION_SPECS
+void *operator new(size_t size)
+{
+	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
+	if (p == NULL) throw std::bad_alloc();
+	return p;
+}
+
+void *operator new[](size_t size)
+{
+	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
+	if (p == NULL) throw std::bad_alloc();
+	return p;
+}
+
+void operator delete(void *p) noexcept
+{
+	aligned_free(p);
+}
+
+void operator delete[](void *p) noexcept
+{
+	aligned_free(p);
+}
+#else
 void *operator new(size_t size) throw(std::bad_alloc)
 {
 	void *p = aligned_malloc(size, NL_DEFAULT_MEMORY_ALIGNMENT);
@@ -105,6 +130,7 @@ void operator delete[](void *p) throw()
 {
 	aligned_free(p);
 }
+#endif
 
 #endif /* NL_HAS_SSE2 */
 

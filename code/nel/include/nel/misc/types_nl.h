@@ -166,6 +166,10 @@
 #	define NL_ISO_CPP0X_AVAILABLE
 #endif
 
+#if defined(NL_COMP_GCC) && (__cplusplus >= 201103L)
+#	define NL_NO_EXCEPTION_SPECS
+#endif
+
 // gcc 3.4 introduced ISO C++ with tough template rules
 //
 // NL_ISO_SYNTAX can be used using #if NL_ISO_SYNTAX or #if !NL_ISO_SYNTAX
@@ -407,10 +411,19 @@ typedef	unsigned	int			uint;			// at least 32bits (depend of processor)
 
 #ifndef NL_CPU_X86_64
 // on x86_64, new and delete are already aligned on 16 bytes
+
+#ifdef NL_NO_EXCEPTION_SPECS
+extern void *operator new(size_t size);
+extern void *operator new[](size_t size);
+extern void operator delete(void *p) noexcept;
+extern void operator delete[](void *p) noexcept;
+#else
 extern void *operator new(size_t size) throw(std::bad_alloc);
 extern void *operator new[](size_t size) throw(std::bad_alloc);
 extern void operator delete(void *p) throw();
 extern void operator delete[](void *p) throw();
+#endif
+
 #endif
 
 #else /* NL_HAS_SSE2 */
