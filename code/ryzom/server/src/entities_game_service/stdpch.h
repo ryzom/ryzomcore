@@ -37,6 +37,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <functional>
 
 // NeL georges
 #include "nel/georges/load_form.h"
