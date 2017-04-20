@@ -2,8 +2,8 @@ Source: ryzom-core
 Priority: extra
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
 Uploaders: Luboš Novák <alvinx12@centrum.cz>, Cédric OCHS <kervala@gmail.com>
-Build-Depends: debhelper (>= 9), cmake(>= 2.6), libxml2-dev,
- libgl1-mesa-dev, libjpeg8-dev | libjpeg62-dev, libpng12-dev, libopenal-dev,
+Build-Depends: debhelper (>= 9), cmake (>= 2.6), libxml2-dev,
+ libgl1-mesa-dev, libjpeg8-dev, libpng-dev, libopenal-dev,
  libfreetype6-dev, libxxf86vm-dev, libxrandr-dev, libxrender-dev,
  libvorbis-dev, libsquish-dev, libcurl4-openssl-dev, libluabind-dev,
  libboost-dev, libmysqlclient-dev,
