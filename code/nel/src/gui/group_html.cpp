@@ -274,6 +274,21 @@ namespace NLGUI
 			return false;
 		}
 
+		// TODO: replace with expire and etag headers
+		if (CFile::fileExists(download.dest))
+		{
+			time_t currentTime;
+			time(&currentTime);
+			uint32 mtime = CFile::getFileModificationDate(download.dest);
+			if (mtime + 3600 > currentTime)
+			{
+	#ifdef LOG_DL
+				nlwarning("Cache for (%s) is not expired (%s, age:%d)", download.url.c_str(), download.dest.c_str(), currentTime - mtime);
+	#endif
+				return false;
+			}
+		}
+
 		string tmpdest = download.dest + ".tmp";
 
 		// erase the tmp file if exists
@@ -344,30 +359,22 @@ namespace NLGUI
 		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 	#endif
 
-		if (!NLMISC::CFile::fileExists(dest))
-		{
-			Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style));
-			if (Curls.size() < options.curlMaxConnections) {
-				if (!startCurlDownload(Curls.back()))
-				{
-					Curls.pop_back();
-					return;
-				}
-
-				RunningCurls++;
-		#ifdef LOG_DL
-				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
-			}
-			else
+		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style));
+		if (Curls.size() < options.curlMaxConnections) {
+			if (!startCurlDownload(Curls.back()))
 			{
-				nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
-		#endif
+				Curls.pop_back();
+				return;
 			}
+
+			RunningCurls++;
+	#ifdef LOG_DL
+			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
 		}
 		else
 		{
-			setImage(img, dest);
-			setImageSize(img, style);
+			nlwarning("(%s) download queued, %d curls", _Id.c_str(), Curls.size());
+	#endif
 		}
 	}
 
@@ -607,6 +614,9 @@ namespace NLGUI
 											CBitmap::loadSize(tmpfile, w, h);
 											if (w != 0 && h != 0)
 											{
+												if (CFile::fileExists(it->dest))
+													CFile::deleteFile(it->dest);
+
 												CFile::moveFile(it->dest, tmpfile);
 												for(uint i = 0; i < it->imgs.size(); i++)
 												{
@@ -1572,7 +1582,7 @@ namespace NLGUI
 						{
 							// Get the option to reload (class==reload)
 							bool reloadImg = false;
-							
+
 							string styleString;
 							if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
 								styleString = value[MY_HTML_IMG_STYLE];
@@ -1586,7 +1596,7 @@ namespace NLGUI
 								if (it != styles.end() && (*it).second == "1")
 									reloadImg = true;
 							}
-							
+
 							addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg, style);
 						}
 					}
@@ -4225,7 +4235,11 @@ namespace NLGUI
 			// 2/ if it doesn't work, try to load the image in cache
 			//
 			image = localImageName(img);
-			if (!reloadImg && lookupLocalFile (finalUrl, image.c_str(), false))
+
+			if (reloadImg && CFile::fileExists(image))
+				CFile::deleteFile(image);
+
+			if (lookupLocalFile (finalUrl, image.c_str(), false))
 			{
 				// don't display image that are not power of 2
 				try
@@ -4243,22 +4257,18 @@ namespace NLGUI
 			}
 			else
 			{
-				//
-				// 3/ if it doesn't work, display a placeholder and ask to dl the image into the cache
-				//
-				if (reloadImg && CFile::fileExists(image))
-					CFile::deleteFile(image);
-
+				// no image in cache
 				image = "web_del.tga";
-				addImageDownload(img, newImage, style);
 			}
+
+			addImageDownload(img, newImage, style);
 		}
 		newImage->setTexture (image);
 		newImage->setModulateGlobalColor(globalColor);
 
-		getParagraph()->addChild(newImage);	
+		getParagraph()->addChild(newImage);
 		paragraphChange ();
-		
+
 		setImageSize(newImage, style);
 	}
 
