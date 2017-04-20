@@ -94,7 +94,7 @@
 #include "bg_downloader_access.h"
 #include "nel/gui/lua_manager.h"
 #include "item_group_manager.h"
-
+#include "nel/gui/http_cache.h"
 
 ///////////
 // USING //
@@ -687,6 +687,7 @@ void release()
 	CWidgetManager::release();
 	CViewRenderer::release();
 	CIXml::releaseLibXml();
+	CHttpCache::release();
 
 #if FINAL_VERSION
 	// openURL ("http://www.ryzomcore.org/exit/");
