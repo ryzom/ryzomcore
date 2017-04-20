@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 9), cmake(>= 2.6), libxml2-dev,
  libgl1-mesa-dev, libjpeg8-dev, libpng-dev, libopenal-dev,
  libfreetype6-dev, libxxf86vm-dev, libxrandr-dev, libxrender-dev,
  libvorbis-dev, libsquish-dev, libcurl4-openssl-dev, libluabind-dev,
- libboost-dev, libmysqlclient-dev,
+ libboost-dev, libmysqlclient-dev, libssl-dev,
  libcpptest-dev, libqt4-dev, libqt4-opengl-dev
 Standards-Version: 3.9.5
 Section: games
