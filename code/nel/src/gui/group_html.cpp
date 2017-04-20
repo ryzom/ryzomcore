@@ -312,7 +312,7 @@ namespace NLGUI
 			return false;
 		}
 
-		download.curl = curl;
+		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
 
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
@@ -321,6 +321,10 @@ namespace NLGUI
 		// limit curl to HTTP and HTTPS protocols only
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+		// catch headers
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download.data);
 
 		std::string userAgent = options.appName + "/" + options.appVersion;
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
@@ -369,7 +373,7 @@ namespace NLGUI
 
 			RunningCurls++;
 	#ifdef LOG_DL
-			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
 		}
 		else
 		{
@@ -443,7 +447,7 @@ namespace NLGUI
 				}
 				RunningCurls++;
 	#ifdef LOG_DL
-				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
 			}
 			else
 			{
@@ -580,18 +584,18 @@ namespace NLGUI
 
 					for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 					{
-						if(msg->easy_handle == it->curl)
+						if(it->data && it->data->Request == msg->easy_handle)
 						{
 							CURLcode res = msg->data.result;
 							long r;
-							curl_easy_getinfo(it->curl, CURLINFO_RESPONSE_CODE, &r);
+							curl_easy_getinfo(it->data->Request, CURLINFO_RESPONSE_CODE, &r);
 							fclose(it->fp);
 
+							receiveCookies(it->data->Request, _DocumentDomain, _TrustedDomain);
 	#ifdef LOG_DL
-							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->curl, res, r, it->url.size(), it->url.c_str());
+							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->data->Request, res, r, it->url.size(), it->url.c_str());
 	#endif
-							curl_multi_remove_handle(MultiCurl, it->curl);
-							curl_easy_cleanup(it->curl);
+							curl_multi_remove_handle(MultiCurl, it->data->Request);
 
 							string tmpfile = it->dest + ".tmp";
 							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
@@ -642,6 +646,9 @@ namespace NLGUI
 								}
 							}
 
+							// release CCurlWWWData
+							delete it->data;
+
 							Curls.erase(it);
 							break;
 						}
@@ -656,7 +663,7 @@ namespace NLGUI
 		{
 			for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 			{
-				if (it->curl == NULL) {
+				if (it->data == NULL) {
 	#ifdef LOG_DL
 					nlwarning("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
 	#endif
@@ -4575,7 +4582,7 @@ namespace NLGUI
 		// remove download that are still queued
 		for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); )
 		{
-			if (it->curl == NULL) {
+			if (it->data == NULL) {
 	#ifdef LOG_DL
 		nlwarning("Remove waiting curl download (%s)", it->url.c_str());
 	#endif
