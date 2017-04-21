@@ -1,7 +1,7 @@
 # Define OSX_SDK to force a specific version such as : -DOSX_SDK=10.11
 #
 # Example:
-# cmake .. -DCMAKE_TOOLCHAIN_FILE=../CMakeModules/OSXToolChain.cmake -DWITH_NEL_TESTS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_LUA51=OFF -DWITH_LUA53=ON -DCMAKE_BUILD_TYPE=Release -DWITH_RYZOM_INSTALLER=OFF -DWITH_RYZOM_PATCH=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_TOOLS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_WARNINGS=OFF -DWITH_QT5=OFF -DWITH_STATIC=ON -DWITH_STATIC_DRIVERS=ON -DWITH_STATIC_EXTERNAL=ON -DWITH_UNIX_STRUCTURE=OFF -DWITH_INSTALL_LIBRARIES=OFF -DWITH_RYZOM_SANDBOX=OFF -DOSX_SDK=10.11
+# cmake ../code -DCMAKE_TOOLCHAIN_FILE=../code/CMakeModules/OSXToolChain.cmake -DWITH_SYMBOLS=ON -DWITH_NEL_TESTS=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_NEL_TOOLS=OFF -DWITH_RYZOM_TOOLS=OFF -DWITH_LUA51=OFF -DWITH_LUA53=ON -DCMAKE_BUILD_TYPE=Release -DWITH_RYZOM_INSTALLER=OFF -DWITH_RYZOM_PATCH=ON -DWITH_NEL_TESTS=OFF -DWITH_NEL_TOOLS=OFF -DWITH_TOOLS=OFF -DWITH_NEL_SAMPLES=OFF -DWITH_WARNINGS=OFF -DWITH_QT5=OFF -DWITH_STATIC=ON -DWITH_STATIC_DRIVERS=ON -DWITH_STATIC_EXTERNAL=ON -DWITH_UNIX_STRUCTURE=OFF -DWITH_INSTALL_LIBRARIES=OFF -DWITH_RYZOM_SANDBOX=OFF -DOSX_SDK=10.11
 
 # Don't forget to define environment variables:
 #
@@ -9,8 +9,14 @@
 # export OSXCROSS_GCC_NO_STATIC_RUNTIME=1
 # export PATH=$PATH:/home/src/osxcross/target/bin
 #
+# ln -s /usr/bin/hg /home/src/osxcross/target/bin/hg
+#
 # To install all dependencies:
-# ./osxcross-macports install libxml2 jpeg curl libogg libvorbis freetype boost openssl zlib lua-5.3
+# ./osxcross-macports install libxml2 jpeg curl libogg libvorbis freetype boost openssl zlib lua-5.3 giflib
+
+# to compile Luabind
+# export CMAKE_MODULE_PATH=$HOME/shard/tools/external/cmake/modules
+# cmake .. -DCMAKE_TOOLCHAIN_FILE=$HOME/ryzomcore/code/CMakeModules/OSXToolChain.cmake -DWITH_SHARED=OFF -DWITH_STATIC=ON -DWITH_LUA51=OFF -DWITH_LUA53=ON -DCMAKE_INSTALL_PREFIX=$HOME/osxcross/target/external
 
 IF(DEFINED CMAKE_CROSSCOMPILING)
   # subsequent toolchain loading is not really needed

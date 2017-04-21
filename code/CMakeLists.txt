@@ -168,25 +168,30 @@ IF(WITH_SSE2)
   ENDIF()
 ENDIF()
 
-IF(APPLE_CERTIFICATE)
-  # Find codesign_allocate
+IF(APPLE)
+  FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
+  FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
 
-  # Xcode 7.0 and later versions
-  SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
+  IF(APPLE_CERTIFICATE)
+    # Find codesign_allocate
 
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    # Xcode 6.4 and previous versions
-    SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
-  ENDIF()
+    # Xcode 7.0 and later versions
+    SET(CODESIGN_ALLOCATE ${OSX_DEVELOPER_ROOT}/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate)
 
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    # System path
-    SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
-  ENDIF()
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      # Xcode 6.4 and previous versions
+      SET(CODESIGN_ALLOCATE ${CMAKE_OSX_SYSROOT}/usr/bin/codesign_allocate)
+    ENDIF()
 
-  IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
-    MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
-    SET(CODESIGN_ALLOCATE)
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      # System path
+      SET(CODESIGN_ALLOCATE /usr/bin/codesign_allocate)
+    ENDIF()
+
+    IF(NOT EXISTS "${CODESIGN_ALLOCATE}")
+      MESSAGE(WARNING "Unable to find codesign_allocate in standard directories")
+      SET(CODESIGN_ALLOCATE)
+    ENDIF()
   ENDIF()
 ENDIF()
 
@@ -382,8 +387,6 @@ IF(WITH_QT5)
       IF(APPLE)
         FIND_LIBRARY(PCRE_LIBRARY pcre16 pcre)
 
-        FIND_LIBRARY(FOUNDATION_FRAMEWORK Foundation)
-        FIND_LIBRARY(CARBON_FRAMEWORK Carbon)
         FIND_LIBRARY(SECURITY_FRAMEWORK Security)
 
         SET(QT_LIBRARIES ${QT_LIBRARIES}
