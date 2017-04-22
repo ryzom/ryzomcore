@@ -17,6 +17,7 @@
 #include "stdmisc.h"
 
 #include "nel/misc/o_xml.h"
+#include "nel/misc/i_xml.h"
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
@@ -142,27 +143,15 @@ COXml::COXml () : IStream (false /* Output mode */)
 
 // ***************************************************************************
 
-void xmlGenericErrorFuncWrite (void *ctx, const char *msg, ...)
-{
-	// Get the error string
-	string str;
-	NLMISC_CONVERT_VARGS (str, msg, NLMISC::MaxCStringSize);
-	((COXml*)ctx)->_ErrorString += str;
-}
-
-// ***************************************************************************
-
 bool COXml::init (IStream *stream, const std::string &version)
 {
 	resetPtrTable();
 
+	CIXml::initLibXml();
+
 	// Output stream ?
 	if (!stream->isReading())
 	{
-		// Set error handler
-		_ErrorString.clear();
-		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncWrite);
-
 		// Set XML mode
 		setXMLMode (true);
 
@@ -673,9 +662,10 @@ bool COXml::isStringValidForProperties (const std::string &str)
 
 // ***************************************************************************
 
-const char *COXml::getErrorString () const
+std::string COXml::getErrorString()
 {
-	return _ErrorString.c_str ();
+	// error string is managed by CIXml
+	return CIXml::getErrorString();
 }
 
 } // NLMISC

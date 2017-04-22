@@ -17,7 +17,6 @@
 #include "stdmisc.h"
 
 #include "nel/misc/i_xml.h"
-#include "nel/misc/sstring.h"
 
 #ifndef NL_DONT_USE_EXTERNAL_CODE
 
@@ -38,6 +37,10 @@ namespace NLMISC
 // *********************************************************
 
 const char SEPARATOR = ' ';
+
+std::string CIXml::_ErrorString;
+
+bool CIXml::_LibXmlIntialized = false;
 
 // ***************************************************************************
 
@@ -124,7 +127,7 @@ void xmlGenericErrorFuncRead (void *ctx, const char *msg, ...)
 	// Get the error string
 	string str;
 	NLMISC_CONVERT_VARGS (str, msg, NLMISC::MaxCStringSize);
-	((CIXml*)ctx)->_ErrorString += str;
+	CIXml::_ErrorString += str;
 }
 
 // ***************************************************************************
@@ -134,7 +137,7 @@ bool CIXml::init (IStream &stream)
 	// Release
 	release ();
 
-	xmlInitParser();
+	initLibXml();
 
 	// Default : XML mode
 	_BinaryStream = NULL;
@@ -190,12 +193,7 @@ bool CIXml::init (IStream &stream)
 			}
 		}
 
-		// Set error handler
 		_ErrorString.clear();
-		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncRead);
-
-		// Ask to get debug info
-		xmlLineNumbersDefault(1);
 
 		// The parser context
         _Parser = xmlCreatePushParserCtxt(NULL, NULL, buffer, 4, NULL);
@@ -1068,6 +1066,7 @@ bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const std::
 		// Found
 		return true;
 	}
+
 	return false;
 }
 
@@ -1075,18 +1074,21 @@ bool CIXml::getPropertyString (std::string &result, xmlNodePtr node, const std::
 
 int CIXml::getIntProperty(xmlNodePtr node, const std::string &property, int defaultValue)
 {
-	CSString s;
-	bool b;
+	std::string s;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
-	s=s.strip();
-	sint val=s.atoi();
-	if (val==0 && s!="0")
+	// remove leading and trailing spaces
+	s = trim(s);
+
+	sint val;
+	
+	if (!fromString(s, val) || (val == 0 && s != "0"))
 	{
-		nlwarning("bad integer value: %s",s.c_str());
+		nlwarning("Bad integer value: %s",s.c_str());
 		return defaultValue;
 	}
 
@@ -1097,14 +1099,25 @@ int CIXml::getIntProperty(xmlNodePtr node, const std::string &property, int defa
 
 double CIXml::getFloatProperty(xmlNodePtr node, const std::string &property, float defaultValue)
 {
-	CSString s;
-	bool b;
+	std::string s;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
-	return s.strip().atof();
+	// remove leading and trailing spaces
+	s = trim(s);
+
+	float val;
+
+	if (!fromString(s, val))
+	{
+		nlwarning("Bad float value: %s", s.c_str());
+		return defaultValue;
+	}
+
+	return val;
 }
 
 // ***************************************************************************
@@ -1112,10 +1125,10 @@ double CIXml::getFloatProperty(xmlNodePtr node, const std::string &property, flo
 std::string CIXml::getStringProperty(xmlNodePtr node, const std::string &property, const std::string& defaultValue)
 {
 	std::string s;
-	bool b;
 
-	b=getPropertyString(s,node,property);
-	if (b==false)
+	bool b = getPropertyString(s, node, property);
+
+	if (!b)
 		return defaultValue;
 
 	return s;
@@ -1141,9 +1154,43 @@ bool CIXml::getContentString (std::string &result, xmlNodePtr node)
 
 // ***************************************************************************
 
+void CIXml::initLibXml()
+{
+	if (_LibXmlIntialized) return;
+
+	_ErrorString.clear();
+	
+	// Set error handler
+	xmlSetGenericErrorFunc	(NULL, xmlGenericErrorFuncRead);
+
+	LIBXML_TEST_VERSION
+	
+	// an error occured during initialization
+	if (!_ErrorString.empty())
+	{
+		throw EXmlParsingError (_ErrorString);
+	}
+
+	// Ask to get debug info
+	xmlLineNumbersDefault(1);
+
+	_LibXmlIntialized = true;
+}
+
+// ***************************************************************************
+
 void CIXml::releaseLibXml()
 {
+	if (!_LibXmlIntialized) return;
+
 	xmlCleanupParser();
+
+	_LibXmlIntialized = false;
+}
+
+std::string CIXml::getErrorString()
+{
+	return _ErrorString;
 }
 
 } // NLMISC
