@@ -110,6 +110,11 @@ public:
 	  */
 	bool			init (IStream &stream);
 
+	/** Return the error string.
+	 * if not empty, something wrong appends
+	 */
+	static std::string getErrorString();
+
 	/** Release the resources used by the stream.
 	  */
 	void			release ();
@@ -172,7 +177,12 @@ public:
 	static bool		getContentString (std::string &result, xmlNodePtr node);
 
 	/**
-	  * Release meory used by libxml2, to only call before exit.
+	  * Init all structures used by libxml2, to only call once.
+	  */
+	static void		initLibXml();
+
+	/**
+	  * Release memory used by libxml2, to only call before exit.
 	  */
 	static void		releaseLibXml();
 
@@ -234,13 +244,16 @@ private:
 	uint			_ContentStringIndex;
 
 	// Error message
-	std::string		_ErrorString;
+	static std::string	_ErrorString;
 
 	// Try binary mode
 	bool			_TryBinaryMode;
 
 	// If not NULL, binary mode detected, use this stream in serials
 	IStream			*_BinaryStream;
+	
+	// LibXml has been initialized
+	static bool		_LibXmlIntialized;
 };
 
 

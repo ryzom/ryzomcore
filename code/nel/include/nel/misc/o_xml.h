@@ -80,7 +80,6 @@ class COXml : public IStream
 {
 	friend int xmlOutputWriteCallbackForNeL ( void *context, const char *buffer, int len );
 	friend int xmlOutputCloseCallbackForNeL ( void *context );
-	friend void xmlGenericErrorFuncWrite (void *ctx, const char *msg, ...);
 public:
 
 	/** Stream ctor
@@ -100,7 +99,7 @@ public:
 	/** Return the error string.
 	  * if not empty, something wrong appends
 	  */
-	const char *getErrorString () const;
+	static std::string getErrorString ();
 
 	/** Default dstor
 	  *
@@ -178,9 +177,6 @@ private:
 
 	// Current content string
 	std::string		_ContentString;
-
-	// Error message
-	std::string		_ErrorString;
 };
 
 

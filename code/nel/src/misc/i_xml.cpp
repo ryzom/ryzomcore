@@ -39,6 +39,10 @@ namespace NLMISC
 
 const char SEPARATOR = ' ';
 
+std::string CIXml::_ErrorString;
+
+bool CIXml::_LibXmlIntialized = false;
+
 // ***************************************************************************
 
 #define readnumber(dest,digits) \
@@ -124,7 +128,7 @@ void xmlGenericErrorFuncRead (void *ctx, const char *msg, ...)
 	// Get the error string
 	string str;
 	NLMISC_CONVERT_VARGS (str, msg, NLMISC::MaxCStringSize);
-	((CIXml*)ctx)->_ErrorString += str;
+	CIXml::_ErrorString += str;
 }
 
 // ***************************************************************************
@@ -134,7 +138,7 @@ bool CIXml::init (IStream &stream)
 	// Release
 	release ();
 
-	xmlInitParser();
+	initLibXml();
 
 	// Default : XML mode
 	_BinaryStream = NULL;
@@ -190,12 +194,7 @@ bool CIXml::init (IStream &stream)
 			}
 		}
 
-		// Set error handler
 		_ErrorString.clear();
-		xmlSetGenericErrorFunc	(this, xmlGenericErrorFuncRead);
-
-		// Ask to get debug info
-		xmlLineNumbersDefault(1);
 
 		// The parser context
         _Parser = xmlCreatePushParserCtxt(NULL, NULL, buffer, 4, NULL);
@@ -1141,9 +1140,43 @@ bool CIXml::getContentString (std::string &result, xmlNodePtr node)
 
 // ***************************************************************************
 
+void CIXml::initLibXml()
+{
+	if (_LibXmlIntialized) return;
+
+	_ErrorString.clear();
+	
+	// Set error handler
+	xmlSetGenericErrorFunc	(NULL, xmlGenericErrorFuncRead);
+
+	LIBXML_TEST_VERSION
+	
+	// an error occured during initialization
+	if (!_ErrorString.empty())
+	{
+		throw EXmlParsingError (_ErrorString);
+	}
+
+	// Ask to get debug info
+	xmlLineNumbersDefault(1);
+
+	_LibXmlIntialized = true;
+}
+
+// ***************************************************************************
+
 void CIXml::releaseLibXml()
 {
+	if (!_LibXmlIntialized) return;
+
 	xmlCleanupParser();
+
+	_LibXmlIntialized = false;
+}
+
+std::string CIXml::getErrorString()
+{
+	return _ErrorString;
 }
 
 } // NLMISC
