@@ -26,6 +26,7 @@
 
 #include <string>
 #include <limits>
+#include <ctime>
 
 #include "nel/misc/types_nl.h"
 #include "nel/misc/algo.h"

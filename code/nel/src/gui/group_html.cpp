@@ -45,6 +45,7 @@
 #include "nel/3d/texture_file.h"
 #include "nel/misc/big_file.h"
 #include "nel/gui/url_parser.h"
+#include "nel/gui/http_cache.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -87,6 +88,15 @@ namespace NLGUI
 					curl_slist_free_all(HeadersSent);
 			}
 
+			void sendHeaders(const std::vector<std::string> headers)
+			{
+				for(uint i = 0; i < headers.size(); ++i)
+				{
+					HeadersSent = curl_slist_append(HeadersSent, headers[i].c_str());
+				}
+				curl_easy_setopt(Request, CURLOPT_HTTPHEADER, HeadersSent);
+			}
+
 			void setRecvHeader(const std::string &header)
 			{
 				size_t pos = header.find(": ");
@@ -110,12 +120,42 @@ namespace NLGUI
 				return "";
 			}
 
+			const uint32 getExpires()
+			{
+				time_t ret = 0;
+				if (HeadersRecv.count("expires") > 0)
+					ret = curl_getdate(HeadersRecv["expires"].c_str(), NULL);
+
+				return ret > -1 ? ret : 0;
+			}
+
+			const std::string getLastModified()
+			{
+				if (HeadersRecv.count("last-modified") > 0)
+				{
+					return HeadersRecv["last-modified"];
+				}
+
+				return "";
+			}
+
+			const std::string getEtag()
+			{
+				if (HeadersRecv.count("etag") > 0)
+				{
+					return HeadersRecv["etag"];
+				}
+
+				return "";
+			}
+
 		public:
 			CURL *Request;
 
 			std::string Url;
 			std::string Content;
 
+		private:
 			// headers sent with curl request, must be released after transfer
 			curl_slist * HeadersSent;
 
@@ -274,19 +314,16 @@ namespace NLGUI
 			return false;
 		}
 
-		// TODO: replace with expire and etag headers
-		if (CFile::fileExists(download.dest))
+		time_t currentTime;
+		time(&currentTime);
+
+		CHttpCacheObject cache = CHttpCache::getInstance()->lookup(download.dest);
+		if (cache.Expires > currentTime)
 		{
-			time_t currentTime;
-			time(&currentTime);
-			uint32 mtime = CFile::getFileModificationDate(download.dest);
-			if (mtime + 3600 > currentTime)
-			{
 	#ifdef LOG_DL
-				nlwarning("Cache for (%s) is not expired (%s, age:%d)", download.url.c_str(), download.dest.c_str(), currentTime - mtime);
+			nlwarning("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
 	#endif
-				return false;
-			}
+			return false;
 		}
 
 		string tmpdest = download.dest + ".tmp";
@@ -312,7 +349,7 @@ namespace NLGUI
 			return false;
 		}
 
-		download.curl = curl;
+		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
 
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, true);
@@ -321,6 +358,20 @@ namespace NLGUI
 		// limit curl to HTTP and HTTPS protocols only
 		curl_easy_setopt(curl, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
 		curl_easy_setopt(curl, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+
+		std::vector<std::string> headers;
+		if (!cache.Etag.empty())
+			headers.push_back("If-None-Match: " + cache.Etag);
+
+		if (!cache.LastModified.empty())
+			headers.push_back("If-Modified-Since: " + cache.LastModified);
+
+		if (headers.size() > 0)
+			download.data->sendHeaders(headers);
+
+		// catch headers
+		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEHEADER, download.data);
 
 		std::string userAgent = options.appName + "/" + options.appVersion;
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
@@ -369,7 +420,7 @@ namespace NLGUI
 
 			RunningCurls++;
 	#ifdef LOG_DL
-			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+			nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
 		}
 		else
 		{
@@ -443,7 +494,7 @@ namespace NLGUI
 				}
 				RunningCurls++;
 	#ifdef LOG_DL
-				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().curl, Curls.size());
+				nlwarning("(%s) adding handle %x, %d curls", _Id.c_str(), Curls.back().data->Request, Curls.size());
 			}
 			else
 			{
@@ -580,26 +631,44 @@ namespace NLGUI
 
 					for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 					{
-						if(msg->easy_handle == it->curl)
+						if(it->data && it->data->Request == msg->easy_handle)
 						{
 							CURLcode res = msg->data.result;
 							long r;
-							curl_easy_getinfo(it->curl, CURLINFO_RESPONSE_CODE, &r);
+							curl_easy_getinfo(it->data->Request, CURLINFO_RESPONSE_CODE, &r);
 							fclose(it->fp);
 
+							receiveCookies(it->data->Request, _DocumentDomain, _TrustedDomain);
 	#ifdef LOG_DL
-							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->curl, res, r, it->url.size(), it->url.c_str());
+							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->data->Request, res, r, it->url.size(), it->url.c_str());
 	#endif
-							curl_multi_remove_handle(MultiCurl, it->curl);
-							curl_easy_cleanup(it->curl);
+							curl_multi_remove_handle(MultiCurl, it->data->Request);
 
 							string tmpfile = it->dest + ".tmp";
 							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
 							{
 								NLMISC::CFile::deleteFile(tmpfile.c_str());
+
+								// 304 Not Modified
+								if (res == CURLE_OK && r == 304)
+								{
+									CHttpCacheObject obj;
+									obj.Expires = it->data->getExpires();
+									obj.Etag = it->data->getEtag();
+									obj.LastModified = it->data->getLastModified();
+
+									CHttpCache::getInstance()->store(it->dest, obj);
+								}
 							}
 							else
 							{
+								CHttpCacheObject obj;
+								obj.Expires = it->data->getExpires();
+								obj.Etag = it->data->getEtag();
+								obj.LastModified = it->data->getLastModified();
+
+								CHttpCache::getInstance()->store(it->dest, obj);
+
 								string finalUrl;
 								if (it->type == ImgType)
 								{
@@ -642,6 +711,9 @@ namespace NLGUI
 								}
 							}
 
+							// release CCurlWWWData
+							delete it->data;
+
 							Curls.erase(it);
 							break;
 						}
@@ -656,7 +728,7 @@ namespace NLGUI
 		{
 			for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
 			{
-				if (it->curl == NULL) {
+				if (it->data == NULL) {
 	#ifdef LOG_DL
 					nlwarning("(%s) starting new download '%s'", _Id.c_str(), it->url.c_str());
 	#endif
@@ -4575,7 +4647,7 @@ namespace NLGUI
 		// remove download that are still queued
 		for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); )
 		{
-			if (it->curl == NULL) {
+			if (it->data == NULL) {
 	#ifdef LOG_DL
 		nlwarning("Remove waiting curl download (%s)", it->url.c_str());
 	#endif
@@ -5172,11 +5244,7 @@ namespace NLGUI
 		std::vector<std::string> headers;
 		headers.push_back("Accept-Language: "+options.languageCode);
 		headers.push_back("Accept-Charset: utf-8");
-		for(uint i=0; i< headers.size(); ++i)
-		{
-			_CurlWWW->HeadersSent = curl_slist_append(_CurlWWW->HeadersSent, headers[i].c_str());
-		}
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, _CurlWWW->HeadersSent);
+		_CurlWWW->sendHeaders(headers);
 
 		// catch headers for redirect
 		curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, curlHeaderCallback);
