@@ -1517,7 +1517,14 @@ namespace NLGUI
 			}
 				break;
 			case HTML_BR:
-				addString(ucstring ("\n"));
+			{
+				endParagraph();
+
+				// insert zero-width-space (0x200B) to prevent removal of empty lines
+				ucstring tmp;
+				tmp.fromUtf8("\xe2\x80\x8b");
+				addString(tmp);
+			}
 				break;
 			case HTML_BODY:
 				{
