@@ -1209,6 +1209,13 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	sint32	CGroupTable::getMaxUsedW() const
 	{
+		// Return table width if its requested by user.
+		// Need to do this because width of long line of text in here is calculated
+		// differently than final cell width in updateCoords()
+		// This will break tables with too narrow width set by user.
+		if (ForceWidthMin > 0)
+			return ForceWidthMin;
+
 		uint i;
 		uint column = 0;
 		vector<sint32> columns;
