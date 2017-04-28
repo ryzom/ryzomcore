@@ -2201,9 +2201,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CSessionPtr nil;
+		static CSessionPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -2252,9 +2252,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CSessionParticipantPtr nil;
+		static CSessionParticipantPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -2303,9 +2303,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CKnownUserPtr nil;
+		static CKnownUserPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -2354,9 +2354,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CPlayerRatingPtr nil;
+		static CPlayerRatingPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -3016,9 +3016,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CKnownUserPtr nil;
+		static CKnownUserPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -3054,8 +3054,8 @@ namespace RSMGR
 		if (it == _Characters->end())
 		{
 			// no object with this id, return a null pointer
-			static CCharacterPtr nil;
-			return nil;
+			static CCharacterPtr nilPtr;
+			return nilPtr;
 		}
 
 		return const_cast< CCharacterPtr & >(it->second);
@@ -3107,9 +3107,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CFolderPtr nil;
+		static CFolderPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -3158,9 +3158,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CFolderAccessPtr nil;
+		static CFolderAccessPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -4273,9 +4273,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CSessionParticipantPtr nil;
+		static CSessionParticipantPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -4324,9 +4324,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CGuildInvitePtr nil;
+		static CGuildInvitePtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -4375,9 +4375,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CJournalEntryPtr nil;
+		static CJournalEntryPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -4891,8 +4891,8 @@ namespace RSMGR
 		if (it == _Guilds->end())
 		{
 			// no object with this id, return a null pointer
-			static CGuildPtr nil;
-			return nil;
+			static CGuildPtr nilPtr;
+			return nilPtr;
 		}
 
 		return const_cast< CGuildPtr & >(it->second);
@@ -5514,9 +5514,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CCharacterPtr nil;
+		static CCharacterPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -5565,9 +5565,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CGuildInvitePtr nil;
+		static CGuildInvitePtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -8046,9 +8046,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CFolderAccessPtr nil;
+		static CFolderAccessPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -8097,9 +8097,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CSessionPtr nil;
+		static CSessionPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -9312,9 +9312,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CSessionLogPtr nil;
+		static CSessionLogPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	
@@ -9363,9 +9363,9 @@ namespace RSMGR
 		}
 
 		// no object with this id, return a null pointer
-		static CPlayerRatingPtr nil;
+		static CPlayerRatingPtr nilPtr;
 
-		return nil;
+		return nilPtr;
 	}
 
 	

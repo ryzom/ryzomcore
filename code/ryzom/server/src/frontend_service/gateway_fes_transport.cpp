@@ -48,19 +48,19 @@ public:
 			SerialNumber(0)
 	{
 		// warn the client that the transport is open
-		CMessage nil;
-		sendRawMessage("MODULE_GATEWAY:FEOPEN", nil);
+		CMessage msg;
+		sendRawMessage("MODULE_GATEWAY:FEOPEN", msg);
 	}
 
 	~CFEServerRoute()
 	{
 		// warn the client that the transport is closed
-		CMessage nil;
+		CMessage msg;
 
 		// check special case when application close
 		if (!CActionFactory::isInstanceAllocated())
 			return;
-		sendRawMessage("MODULE_GATEWAY:FECLOSE", nil);
+		sendRawMessage("MODULE_GATEWAY:FECLOSE", msg);
 	}
 
 

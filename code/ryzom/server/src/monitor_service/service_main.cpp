@@ -36,6 +36,10 @@
 typedef unsigned long ulong;
 #endif // NL_OS_WINDOWS
 
+#ifdef NL_OS_MAC
+typedef unsigned long ulong;
+#endif
+
 #include <mysql.h>
 
 using namespace NLMISC;

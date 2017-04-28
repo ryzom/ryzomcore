@@ -179,7 +179,7 @@ void	CMailForumService::checkFile(const std::string& file)
 		++pt;
 
 	// file contents "$$$$" -> end of file marker, file is complete, can be deleted
-	if (pt != '\0')
+	if (*pt != '\0')
 	{
 		CFile::deleteFile(file);
 
