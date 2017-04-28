@@ -6620,28 +6620,28 @@ _AF185AE2A6838ADF	system_mp_choice_purple	Materia Prima Genérica de Selección 
 _A2D446911624AAAA	system_mp_choice_red	Materia Prima Genérica de Selección (Roja)	una	la	Materias Primas Genéricas de Selección (Roja)		las	
 _B8B8571E85ED0678	system_mp_choice_turquoise	Materia Prima Genérico de Selección (Turquesa)	una	la	Materias Primas Genéricos de Selección (Turquesa)		las	
 _8CC20ED2220D0CBF	system_mp_choice_white	Materia Prima Genérica de Selección (Blanco)	una	la	Materias Primas Genéricas de Selección (Blanco)		las	
-_5DE61E37F3CBA55B	event_barrel_of_beer	Barril de Cerveza de los Lagos						
-_1B43B328A70EB35E	event_barrel_of_shooki_liquor	Barril de Licor de Shooki 						
-_A0E7216432632983	event_barrel_of_water	Barril de Agua del Lago						
-_9E382CA8E216A4A5	event_blood	Sangre 						
-_E0F717AFACB8CF88	event_goo	Goo						
-_14274BC59443367E	event_incandescent_wood	Madera Encandecen						
-_792CE5D929D954E7	event_lakes_beer	Cerveza de los Lagos						
-_59C19ABB12420E87	event_magnetized_amber	Ámbar Magnetizado						
-_96A0931AAF1EFB43	event_magnetized_amber_sphere	Esfera de Ámbar Magnetizado						
-_E266D4B065043C86	event_meat	Carne						
-_B1794393DBE7FFA7	event_missive	Misiva						
-_7F46C694FF5C09F9	event_missive_fyros	Misiva Fyros 						
-_7FFC8597421B95DC	event_missive_kami	Misiva Kami 						
-_7FFC6594831B95DC	event_missive_kara	Misiva Karavan						
-_7F469698F33C09F9	event_missive_matis	Misiva Matis						
-_E0969A6A015B7D6B	event_missive_tryker	Misiva Tryker						
-_7F045694F9DE09F9	event_missive_zorai	Misiva Zoraï						
-_3CFB6D87866D85E1	event_purified_sap	Savia Purificada						
-_F966A6927B7E71ED	event_shooki_liquor	Licor de Shooki						
-_28A936CF1C4C4AD2	event_taliari_pearl_black	Perla Taliari Negra						
-_373663ADD6C976A8	event_taliari_pearl_blue	Perla Taliari Azul						
-_F3F7E35CF15927BF	event_taliari_pearl_violet	Perla Taliari Violeta						
+_8F941DA2C74C90F6	event_barrel_of_beer	Barril de Cerveza de los Lagos						
+_CEDF5E74EB06158C	event_barrel_of_shooki_liquor	Barril de Licor de Shooki 						
+_8797D1B6F8D32524	event_barrel_of_water	Barril de Agua del Lago						
+_9D681018DEB96CB0	event_blood	Sangre 						
+_A0F838BC6AF78CCC	event_goo	Goo						
+_4A0809AB7AC24C97	event_incandescent_wood	Madera Encandecen						
+_97B7824B500FC57F	event_lakes_beer	Cerveza de los Lagos						
+_8F9D1CE8B4EE400B	event_magnetized_amber	Ámbar Magnetizado						
+_94208A4E6EF63202	event_magnetized_amber_sphere	Esfera de Ámbar Magnetizado						
+_27360CA7E5B924AE	event_meat	Carne						
+_87D181F46B485C08	event_missive	Misiva						
+_71D8B6A365ACBBF2	event_missive_fyros	Misiva Fyros 						
+_F5484BE38CDD6E9F	event_missive_kami	Misiva Kami 						
+_F83843593C7B1FB6	event_missive_kara	Misiva Karavan						
+_33D89EA5DEDC63E1	event_missive_matis	Misiva Matis						
+_39179880BF0CCB91	event_missive_tryker	Misiva Tryker						
+_76377E1F7E0D93FC	event_missive_zorai	Misiva Zoraï						
+_B6E66FE36225CADD	event_purified_sap	Savia Purificada						
+_F2B92263341A72E5	event_shooki_liquor	Licor de Shooki						
+_29A7A5D7D67F5FA5	event_taliari_pearl_black	Perla Taliari Negra						
+_2410D9A90BF29D15	event_taliari_pearl_blue	Perla Taliari Azul						
+_015AA2E3EE8B6DE7	event_taliari_pearl_violet	Perla Taliari Violeta						
 _EBB88CB1AA47389B	winch	Cabrestante	un	el	Cabrestantes		los	
 _6598E09CD4E5BC94	winch_2	Cabrestante	un	el	Cabrestantes		los	
 _6598E09C14F5BC94	winch_3	Cabrestante	un	el	Cabrestantes		los	

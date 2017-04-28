@@ -6620,28 +6620,28 @@ _AF185AE2A6838ADF	system_mp_choice_purple	Matière Première Générique de Choi
 _A2D446911624AAAA	system_mp_choice_red	Matière Première Générique de Choix (Rouge)	une	la	Matières Premières Génériques de Choix	des	les	
 _B8B8571E85ED0678	system_mp_choice_turquoise	Matière Première Générique de Choix (Turquoise)	une	la	Matières Premières Génériques de Choix	des	les	
 _8CC20ED2220D0CBF	system_mp_choice_white	Matière Première Générique de Choix (Blanche)	une	la	Matières Premières Génériques de Choix	des	les	
-_5DE61E37F3CBA55B	event_barrel_of_beer	<GEN>event_barrel_of_beer						
-_1B43B328A70EB35E	event_barrel_of_shooki_liquor	<GEN>event_barrel_of_shooki_liquor						
-_A0E7216432632983	event_barrel_of_water	<GEN>event_barrel_of_water						
-_9E382CA8E216A4A5	event_blood	<GEN>event_blood						
-_E0F717AFACB8CF88	event_goo	<GEN>event_goo						
-_14274BC59443367E	event_incandescent_wood	<GEN>event_incandescent_wood						
-_792CE5D929D954E7	event_lakes_beer	<GEN>event_lakes_beer						
-_59C19ABB12420E87	event_magnetized_amber	<GEN>event_magnetized_amber						
-_96A0931AAF1EFB43	event_magnetized_amber_sphere	<GEN>event_magnetized_amber_sphere						
-_E266D4B065043C86	event_meat	<GEN>event_meat						
-_B1794393DBE7FFA7	event_missive	<GEN>event_missive						
-_7F46C694FF5C09F9	event_missive_fyros	<GEN>event_missive_fyros						
-_7FFC8597421B95DC	event_missive_kami	<GEN>event_missive_kami						
-_7FFC6594831B95DC	event_missive_kara	<GEN>event_missive_kara						
-_7F469698F33C09F9	event_missive_matis	<GEN>event_missive_matis						
-_E0969A6A015B7D6B	event_missive_tryker	<GEN>event_missive_tryker						
-_7F045694F9DE09F9	event_missive_zorai	<GEN>event_missive_zorai						
-_3CFB6D87866D85E1	event_purified_sap	<GEN>event_purified_sap						
-_F966A6927B7E71ED	event_shooki_liquor	<GEN>event_shooki_liquor						
-_28A936CF1C4C4AD2	event_taliari_pearl_black	<GEN>event_taliari_pearl_black						
-_373663ADD6C976A8	event_taliari_pearl_blue	<GEN>event_taliari_pearl_blue						
-_F3F7E35CF15927BF	event_taliari_pearl_violet	<GEN>event_taliari_pearl_violet						
+_8F941DA2C74C90F6	event_barrel_of_beer	Barrel of Lakes Beer	a	the	Barrels of Lakes Beer	\d	the	
+_CEDF5E74EB06158C	event_barrel_of_shooki_liquor	Barrel of Shooki Liquor	a	the	Barrels of Shooki Liquor	\d	the	
+_8797D1B6F8D32524	event_barrel_of_water	Barrel of Lake Water	a	the	Barrels of Lake Water	\d	the	
+_9D681018DEB96CB0	event_blood	Blood	some	the	Blood	\d	the	
+_A0F838BC6AF78CCC	event_goo	Goo	some	the	Goo	\d	the	
+_4A0809AB7AC24C97	event_incandescent_wood	Incandescent Wood	some	the	Incandescent Wood	\d	the	
+_97B7824B500FC57F	event_lakes_beer	Lakes Beer	some	the	Lakes Beer	\d	the	
+_8F9D1CE8B4EE400B	event_magnetized_amber	Magnetized Amber	a	the	Magnetized Amber	\d	the	
+_94208A4E6EF63202	event_magnetized_amber_sphere	Sphere Magnetized Amber	a	the	Sphere Magnetized Amber	\d	the	
+_27360CA7E5B924AE	event_meat	Meat	some	the	Meats	\d	the	
+_87D181F46B485C08	event_missive	Missive	a	the	Missives	\d	the	
+_71D8B6A365ACBBF2	event_missive_fyros	Fyros Missive	a	the	Fyros Missives	\d	the	
+_F5484BE38CDD6E9F	event_missive_kami	Kami Missive	a	the	Kami Missives	\d	the	
+_F83843593C7B1FB6	event_missive_kara	Karavan Missive	a	the	Karavan Missives	\d	the	
+_33D89EA5DEDC63E1	event_missive_matis	Matis Missive	a	the	Matis Missives	\d	the	
+_39179880BF0CCB91	event_missive_tryker	Tryker Missive	a	the	Tryker Missives	\d	the	
+_76377E1F7E0D93FC	event_missive_zorai	Zoraï Missive	a	the	Zoraï Missives	\d	the	
+_B6E66FE36225CADD	event_purified_sap	Purified Sap	some	the	Purified Sap	\d	the	
+_F2B92263341A72E5	event_shooki_liquor	Shooki Liquor	some	the	Shooki Liquor	\d	the	
+_29A7A5D7D67F5FA5	event_taliari_pearl_black	Black Taliari Pearl	a	the	Black Taliari Pearls	\d	the	
+_2410D9A90BF29D15	event_taliari_pearl_blue	Blue Taliari Pearl	a	the	Blue Taliari Pearls	\d	the	
+_015AA2E3EE8B6DE7	event_taliari_pearl_violet	Violet Taliari Pearl	a	the	Violet Taliari Pearls	\d	the	
 _EBB88CB1AA47389B	winch	Winch	a	the	Winchs		the	
 _6598E09CD4E5BC94	winch_2	Winch	a	the	Winchs		the	
 _6598E09C14F5BC94	winch_3	Winch	a	the	Winchs		the	
@@ -6888,3 +6888,5 @@ _29B958CBA68A90A0	web_transaction	Transaction
 _2015701C2C98F49B	rpjobloot_casket	Mysterious Casket 						
 _2E488BD22789DCAB	rpjobloot_event	Mysterious Purse						
 _02C0AA7F32FA1A42	marauder_teleport_crystal	Marauder Teleport Crystal	a	the	Marauder Teleport Crystals		the	
+_30284704CC2117ED	xmas_gingeryubo	Gingerbread Yubo	a	the	Gingerbread Yubo		the	
+_992D57D25430CAB2	xmas_gingerbread	Gingerbread Man	a	the	Gingerbread Man		the	

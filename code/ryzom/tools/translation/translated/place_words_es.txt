@@ -770,7 +770,7 @@ _8B05117DBECCE27B	place_forage_start	Zona de Prospección 	the
 _D32CB2D7CF615792	place_forage_zun	Zona de Prospección Zun	la
 _65DD63BF98F5768D	place_forage_shat	Zona de Prospección Múltiple	la
 _651E2A3B082B51E9	place_forage_chloro	Manchas de Goo	las
-_1ADAA4AC1A147076	gerder_food	Callejón de Gerder 	el
+_A4C578AF23F6B7A0	gerder_food	Callejón de Gerder 	el
 _0B9FC534BF35F140	rpjob_magnecarto_1_a	Medida de la zona A de magnetismo	
 _4B9FC934BF35F140	rpjob_magnecarto_1_b	Medida de la zona B de magnetismo	
 _8B9FCD34BF35F140	rpjob_magnecarto_1_c	Medida de la zona C de magnetismo	

@@ -19570,19 +19570,19 @@ uiAnimalTooFar	[Votre animal est trop loin.]
 
 // HASH_VALUE 48D0144030082414
 // INDEX 4721
-uimMtPaPacker0	[Mekboub 1]
+uimMtPaPacker0	[Mektoub 1]
 
 // HASH_VALUE 48D0144030082414
 // INDEX 4722
-uimMtPaPacker1	[Mekboub 2]
+uimMtPaPacker1	[Mektoub 2]
 
 // HASH_VALUE 48D0144030082414
 // INDEX 4723
-uimMtPaPacker2	[Mekboub 3]
+uimMtPaPacker2	[Mektoub 3]
 
 // HASH_VALUE 48D0144034082414
 // INDEX 4724
-uimMtPaPacker3	[Mekboub 4]
+uimMtPaPacker3	[Mektoub 4]
 
 // HASH_VALUE FC801C3F0E30B6F2
 // INDEX 4725
@@ -27312,4 +27312,120 @@ uiPlayedTime	[Vous avez joué avec ce personnage pendant %time.]
 // HASH_VALUE EB1A8C8F22674C92
 // INDEX 6492
 uiPlaylistRefresh	[Rafraîchir]
+
+// HASH_VALUE 570A63956CA078B7
+// INDEX 6493
+uiFreeViewTablet	[Tablette ou écran tactile]
+
+// HASH_VALUE 781CF40C781CF40C
+// INDEX 6494
+uiCopy	[Copier]
+
+// HASH_VALUE AF4704666E75D097
+// INDEX 6495
+uiBrowse	[Atteindre]
+
+// HASH_VALUE 4046D798ED76B4BE
+// INDEX 6496
+cmdCreateGroupUsage1	[Syntaxe de la commande createGroup :]
+
+// HASH_VALUE 6B318968D9E78D3D
+// INDEX 6497
+cmdCreateGroupUsage2	[/createGroup nom_groupe : crée un groupe nom_groupe avec tous vos objets équippés]
+
+// HASH_VALUE 52388538C8AFF916
+// INDEX 6498
+cmdCreateGroupUsage3	[/createGroup nom_groupe true : crée un groupe nom_groupe avec tous vos objets équippés, et crée une commande de suppression pour chaque emplacement vide]
+
+// HASH_VALUE 87A04D4E0C663745
+// INDEX 6499
+cmdCreateGroupError	[Le groupe %name existe déjà, impossible d'en créer un autre avec le même nom.]
+
+// HASH_VALUE 57AAD85BEAA4D7B9
+// INDEX 6500
+cmdCreateGroupSuccess1	[Le groupe %name a été créé avec succès.]
+
+// HASH_VALUE 9C6A88FAC1CEA4DC
+// INDEX 6501
+cmdCreateGroupSuccess2	[Le groupe %name a été créé avec succès avec la suppression de tous les objets non équipés.]
+
+// HASH_VALUE EBB1FF685D7AFCC7
+// INDEX 6502
+cmdEquipGroupUsage1	[Syntaxe de la commande equipGroup :]
+
+// HASH_VALUE 0FDFE7D6741FF8C5
+// INDEX 6503
+cmdEquipGroupUsage2	[/equipGroup nom_groupe : Prend les objets du groupe nom_groupe à partir de l'inventaire et les équipe.]
+
+// HASH_VALUE 5434105FEEDBCB30
+// INDEX 6504
+cmdEquipGroupError	[Impossible d'équiper le groupe %name parce qu'il est introuvable.]
+
+// HASH_VALUE 5B9A98912A55C7C1
+// INDEX 6505
+cmdEquipGroupSuccess	[Le groupe %name a été équipé avec succès.]
+
+// HASH_VALUE 82B6A399EDB6D0B1
+// INDEX 6506
+cmdDeleteGroupUsage1	[Syntaxe de la commande deleteGroup :]
+
+// HASH_VALUE 2022F308D2F5591B
+// INDEX 6507
+cmdDeleteGroupUsage2	[/deleteGroup nom_groupe : Supprimer le groupe nom_groupe s'il existe.]
+
+// HASH_VALUE 06DA351B3C7F2E56
+// INDEX 6508
+cmdDeleteGroupError	[Impossible de supprimer le groupe %name : aucun groupe ne correspond à ce nom.]
+
+// HASH_VALUE 19D9DC5BEAA4D7BD
+// INDEX 6509
+cmdDeleteGroupSuccess	[Le groupe %name a été supprimé avec succès.]
+
+// HASH_VALUE ADEA727BDB89387A
+// INDEX 6510
+cmdMoveGroupUsage1	[Syntaxe de la commande moveGroup :]
+
+// HASH_VALUE 9AF23A3F90C2A5A1
+// INDEX 6511
+cmdMoveGroupUsage2	[/moveGroup nom_groupe destination : déplace les objets de tous les inventaires vers la destination.]
+
+// HASH_VALUE 5BE3F613CFC022DC
+// INDEX 6512
+cmdMoveGroupUsage3	[destination peut être : bag, player_room, guild, pet_animal1, pet_animal2, pet_animal3, pet_animal4]
+
+// HASH_VALUE 063AAC84DBD18975
+// INDEX 6513
+cmdMoveGroupError	[Impossible de déplacer le groupe %name vers %inventory parce qu'aucun groupe correspondant n'a été trouvé et/ou l'inventaire n'était pas valide.]
+
+// HASH_VALUE 53F23D1089A67059
+// INDEX 6514
+cmdMoveGroupSuccess	[Le groupe %name a été déplacé vers %inventory avec succès.]
+
+// HASH_VALUE AE999B8E9D9143A5
+// INDEX 6515
+cmdListGroupHeader	[Groupes d'objets disponibles :]
+
+// HASH_VALUE 5BD4C6549B44ABA5
+// INDEX 6516
+cmdListGroupLine	[* %name, contenant %size objets.]
+
+// HASH_VALUE 3267346D71E53896
+// INDEX 6517
+uimGroup	[Groupes]
+
+// HASH_VALUE 0C8BC4F4AE78A6B7
+// INDEX 6518
+uiMacroItemGroupEquip	[Équiper un groupe d'objets]
+
+// HASH_VALUE 5614A7A2A707B055
+// INDEX 6519
+uiMacroItemGroupName	[Nom du groupe d'objets]
+
+// HASH_VALUE AC27CF9914116C1B
+// INDEX 6520
+uiMacroItemGroupMove	[Déplacer un groupe d'objets]
+
+// HASH_VALUE A7A1CC916E59E066
+// INDEX 6521
+uiMacroItemGroupDestination	[Destination du groupe d'objets]
 

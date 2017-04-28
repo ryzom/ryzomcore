@@ -27339,3 +27339,119 @@ uiPlayedTime	[You played with this character for %time.]
 // INDEX 6492
 uiPlaylistRefresh	[Refresh]
 
+// HASH_VALUE 570A63956CA078B7
+// INDEX 6493
+uiFreeViewTablet	[Tablet or touchscreen]
+
+// HASH_VALUE 781CF40C781CF40C
+// INDEX 6494
+uiCopy	[Copy]
+
+// HASH_VALUE AF4704666E75D097
+// INDEX 6495
+uiBrowse	[Browse]
+
+// HASH_VALUE 4046D798ED76B4BE
+// INDEX 6496
+cmdCreateGroupUsage1	[createGroup command usage:]
+
+// HASH_VALUE 6B318968D9E78D3D
+// INDEX 6497
+cmdCreateGroupUsage2	[/createGroup group_name: create a group named group_nam with all your equipped items]
+
+// HASH_VALUE 52388538C8AFF916
+// INDEX 6498
+cmdCreateGroupUsage3	[/createGroup group_name true: create a group named group_nam with all your equipped items, and create a remove command for every empty slot]
+
+// HASH_VALUE 87A04D4E0C663745
+// INDEX 6499
+cmdCreateGroupError	[A group named %name already exists, cannot create one with the same name.]
+
+// HASH_VALUE 57AAD85BEAA4D7B9
+// INDEX 6500
+cmdCreateGroupSuccess1	[Group %name successfully created.]
+
+// HASH_VALUE 9C6A88FAC1CEA4DC
+// INDEX 6501
+cmdCreateGroupSuccess2	[Group %name successfully created with removal for all unequiped items.]
+
+// HASH_VALUE EBB1FF685D7AFCC7
+// INDEX 6502
+cmdEquipGroupUsage1	[equipGroup command usage:]
+
+// HASH_VALUE 0FDFE7D6741FF8C5
+// INDEX 6503
+cmdEquipGroupUsage2	[/equipGroup group_name: Pull the items from the group group_name from available inventory and equip them.]
+
+// HASH_VALUE 5434105FEEDBCB30
+// INDEX 6504
+cmdEquipGroupError	[Could not equip group %name because no group named like this was found.]
+
+// HASH_VALUE 5B9A98912A55C7C1
+// INDEX 6505
+cmdEquipGroupSuccess	[Group %name successfully equipped.]
+
+// HASH_VALUE 82B6A399EDB6D0B1
+// INDEX 6506
+cmdDeleteGroupUsage1	[deleteGroup command usage:]
+
+// HASH_VALUE 2022F308D2F5591B
+// INDEX 6507
+cmdDeleteGroupUsage2	[/deleteGroup group_name: Remove the group named group_name if it exists.]
+
+// HASH_VALUE 06DA351B3C7F2E56
+// INDEX 6508
+cmdDeleteGroupError	[Cannot delete group %name: no group with this name found.]
+
+// HASH_VALUE 19D9DC5BEAA4D7BD
+// INDEX 6509
+cmdDeleteGroupSuccess	[Group %name successfully deleted.]
+
+// HASH_VALUE ADEA727BDB89387A
+// INDEX 6510
+cmdMoveGroupUsage1	[moveGroup command usage:]
+
+// HASH_VALUE 9AF23A3F90C2A5A1
+// INDEX 6511
+cmdMoveGroupUsage2	[/moveGroup group_name destination: move items from all available inventories to destination]
+
+// HASH_VALUE 5BE3F613CFC022DC
+// INDEX 6512
+cmdMoveGroupUsage3	[destination can be either bag, player_room, guild, pet_animal1, pet_animal2, pet_animal3, pet_animal4]
+
+// HASH_VALUE 063AAC84DBD18975
+// INDEX 6513
+cmdMoveGroupError	[Could not move group %name to %inventory because no group named like this was found, and/or it wasn't a valid inventory.]
+
+// HASH_VALUE 53F23D1089A67059
+// INDEX 6514
+cmdMoveGroupSuccess	[Group %name successfully moved to %inventory.]
+
+// HASH_VALUE AE999B8E9D9143A5
+// INDEX 6515
+cmdListGroupHeader	[Available item groups:]
+
+// HASH_VALUE 5BD4C6549B44ABA5
+// INDEX 6516
+cmdListGroupLine	[* %name, with %size items inside.]
+
+// HASH_VALUE 3267346D71E53896
+// INDEX 6517
+uimGroup	[Groups]
+
+// HASH_VALUE 0C8BC4F4AE78A6B7
+// INDEX 6518
+uiMacroItemGroupEquip	[Equip an item group]
+
+// HASH_VALUE 5614A7A2A707B055
+// INDEX 6519
+uiMacroItemGroupName	[Item group name]
+
+// HASH_VALUE AC27CF9914116C1B
+// INDEX 6520
+uiMacroItemGroupMove	[Move an item group]
+
+// HASH_VALUE A7A1CC916E59E066
+// INDEX 6521
+uiMacroItemGroupDestination	[Item group destination]
+
