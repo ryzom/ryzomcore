@@ -1,3 +1,6 @@
+IF(APPLE)
+	add_definitions("-ftemplate-depth=100")
+ENDIF()
 FILE(GLOB SRC *.cpp *.h)
 
 LIST(REMOVE_ITEM SRC
