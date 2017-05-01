@@ -55,7 +55,7 @@ namespace RY_PDS
  * 0 is remapped to the new object value that appears in stream and so on (reallocations are done
  * circularly through key values). Mask value is for test purposes only, not to be changed!
  */
-template<typename Key, typename Object, int Mask = 0xffffffff, typename TBackMap = std::map<Object, Key> >
+template<typename Key, typename Object, uint32 Mask = 0xffffffff, typename TBackMap = std::map<Object, Key> >
 class CObjCircMapper
 {
 public:

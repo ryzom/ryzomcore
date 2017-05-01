@@ -30,6 +30,9 @@
 # include <Windows.h>
 typedef unsigned long ulong;
 #endif
+#ifdef NL_OS_MAC
+typedef unsigned long ulong;
+#endif
 
 #include <mysql.h>
 #include <time.h>
