@@ -1504,6 +1504,15 @@ void CInterfaceManager::updateFrameEvents()
 			if (pVT != NULL)
 				pVT->setText(str);
 
+			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
+			if (pTooltip != NULL)
+			{
+				ucstring tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
+								" - " + CI18N::get("uiHumidity") + " " +
+								toString("%d", (uint)(roundWeatherValue(WeatherManager.getNextWeatherValue()) * 100.f)) + "%";
+				pTooltip->setDefaultContextHelp(tt);
+			}
+
 			// The date feature is temporarily disabled
 			str.clear();
 
