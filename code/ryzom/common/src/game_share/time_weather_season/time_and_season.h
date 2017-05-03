@@ -23,6 +23,7 @@
 
 const uint		RYZOM_HOURS_IN_TICKS	= 1800;
 const uint		RYZOM_DAY_IN_HOUR		= 24;
+const uint		RYZOM_HOUR_IN_MINUTES	= 60;
 const uint		RYZOM_DAY_IN_TICKS		= RYZOM_HOURS_IN_TICKS * RYZOM_DAY_IN_HOUR;
 const uint		RYZOM_SEASON_IN_DAY		= 90;
 const uint		RYZOM_MONTH_IN_DAY		= 30;

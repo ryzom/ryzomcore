@@ -1471,8 +1471,8 @@ void CInterfaceManager::updateFrameEvents()
 		// Update string if some waiting
 		CEncyclopediaManager::getInstance()->updateAllFrame();
 
-		// Setup the weather setup in the player's map
-		if ((T0 - _UpdateWeatherTime) > (1 * 5 * 1000))
+		// Setup the weather setup in the player's map every 3 sec (1 ingame minute)
+		if ((T0 - _UpdateWeatherTime) > (1 * 3 * 1000))
 		{
 			_UpdateWeatherTime = T0;
 			ucstring str =	CI18N::get ("uiTheSeasonIs") +
@@ -1498,7 +1498,8 @@ void CInterfaceManager::updateFrameEvents()
 
 			// literal version
 			// str = CI18N::get("uiDate");
-			str += toString("%02d", (sint)RT.getRyzomTime()) + CI18N::get("uiMissionTimerHour") + " - ";
+			uint minutes = ((RT.getRyzomTime() - (sint)RT.getRyzomTime()) * (float) RYZOM_HOUR_IN_MINUTES);
+			str += toString("%02d:%02d", (sint)RT.getRyzomTime(), minutes) + " - ";
 			str += CI18N::get("ui"+WEEKDAY::toString( (WEEKDAY::EWeekDay)RT.getRyzomDayOfWeek() )) + ", ";
 			str += CI18N::get("ui"+MONTH::toString( (MONTH::EMonth)RT.getRyzomMonthInCurrentCycle() )) + " ";
 			str += toString("%02d", RT.getRyzomDayOfMonth()+1) + ", ";
