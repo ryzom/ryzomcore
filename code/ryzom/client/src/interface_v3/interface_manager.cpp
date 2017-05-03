@@ -1434,6 +1434,23 @@ void CInterfaceManager::flushDebugWindow()
 }
 
 // ------------------------------------------------------------------------------------------------
+// Make sure 0.166 is displayed as 16% and 0.167 as 17%
+// because they belong to different weather conditions
+static float roundWeatherValue(float weatherValue)
+{
+	// Number of possible weather setups in server
+	const static uint NB_WEATHER_SETUPS = 6;
+	float floorValue = floorf(weatherValue * 100.f) / 100.f;
+	uint weatherIndex = min((uint)(weatherValue * NB_WEATHER_SETUPS), NB_WEATHER_SETUPS - 1);
+	uint floorIndex = min((uint)(floorValue * NB_WEATHER_SETUPS), NB_WEATHER_SETUPS - 1);
+
+	if (weatherIndex > floorIndex)
+		return ceilf(weatherValue * 100.f) / 100.f;
+
+	return weatherValue;
+}
+
+// ------------------------------------------------------------------------------------------------
 void CInterfaceManager::updateFrameEvents()
 {
 
@@ -1478,7 +1495,9 @@ void CInterfaceManager::updateFrameEvents()
 			ucstring str =	CI18N::get ("uiTheSeasonIs") +
 							CI18N::get ("uiSeason"+toStringEnum(computeCurrSeason())) +
 							CI18N::get ("uiAndTheWeatherIs") +
-							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName);
+							CI18N::get (WeatherManager.getCurrWeatherState().LocalizedName) +
+							toString(", %d", (uint)(roundWeatherValue(WeatherManager.getWeatherValue()) * 100.f)) + "% " +CI18N::get("uiHumidity");
+
 
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
