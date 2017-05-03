@@ -76,6 +76,10 @@ public:
 	void				 update(uint64 day, float hour, const CWeatherContext &wc, const NLMISC::CMatrix &camMat, const class CContinent &continent);
 	/// Get the current weather value. Updated after each call to 'update'
 	float				 getWeatherValue() const { return _WeatherValue; }
+	/// Get the weather value for next cycle
+	float				 getNextWeatherValue() const { return _NextWeatherValue; }
+	/// Get the hour for next weather cycle
+	uint32				 getNextWeatherHour() const { return _NextWeatherHour; }
 	/** Does the same than 'update', but let the user choose the weather value.	The weather value ranges from 0 to 1.
 	  * The day and hour are needed only to manage phenomena like thunder (need a clock to know when there are thunder strikes)
 	  * Small update, only to update current weather state
@@ -123,6 +127,8 @@ private:
 	float						  _LastEvalHour;
 	uint64                        _LastEvalDay;
 	float						  _LocalPrecipitationFactor;
+	uint32						  _NextWeatherHour;
+	float						  _NextWeatherValue;
 private:
 	void	initPrecipitationFXs();
 	void    setupFXs(const NLMISC::CMatrix &camMat, NLPACS::UGlobalRetriever *gr, const class CContinent &continent);
