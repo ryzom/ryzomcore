@@ -376,7 +376,9 @@ namespace NLGUI
 		std::string userAgent = options.appName + "/" + options.appVersion;
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, userAgent.c_str());
 
-		sendCookies(curl, _DocumentDomain, _TrustedDomain);
+		CUrlParser uri(download.url);
+		if (!uri.host.empty())
+			sendCookies(curl, uri.host, isTrustedDomain(uri.host));
 
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
@@ -638,7 +640,9 @@ namespace NLGUI
 							curl_easy_getinfo(it->data->Request, CURLINFO_RESPONSE_CODE, &r);
 							fclose(it->fp);
 
-							receiveCookies(it->data->Request, _DocumentDomain, _TrustedDomain);
+							CUrlParser uri(it->url);
+							if (!uri.host.empty())
+								receiveCookies(it->data->Request, uri.host, isTrustedDomain(uri.host));
 	#ifdef LOG_DL
 							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->data->Request, res, r, it->url.size(), it->url.c_str());
 	#endif
