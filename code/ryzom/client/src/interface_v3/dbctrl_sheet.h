@@ -27,7 +27,6 @@
 #include "nel/gui/ctrl_draggable.h"
 #include "nel/gui/interface_expr.h"
 #include "nel/gui/action_handler.h"
-#include "nel/gui/view_text.h"
 #include "sphrase_manager.h"
 // game share
 #include "game_share/brick_types.h"
@@ -51,7 +50,6 @@ class COutpostBuildingSheet;
 namespace NLGUI
 {
 	class CViewRenderer;
-	class CViewText;
 }
 
 
@@ -591,10 +589,8 @@ protected:
 	// setup icon from phrases
 	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const ucstring &phraseName);
 
-	//
-	sint32 drawQuality(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value);
-	sint32 drawQuantity(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value);
-	sint32 drawSap(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value);
+	// draw a number and returns the width of the drawn number
+	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);
 
 
 protected:
@@ -707,15 +703,13 @@ protected:
 
 	NLMISC::CCDBNodeLeaf		*_GrayedLink;
 
-	//
-	CViewText			*_SheetText;
-	CViewText			*_QualityText;
-	CViewText			*_QuantityText;
-	CViewText			*_SapText;
-	// cached values for faster comparing
-	sint32				_QualityTextValue;
-	sint32				_QuantityTextValue;
-	sint32				_SapTextValue;
+	// Macro or sentence String compiled as texture Ids and positions, from the _OptString.
+	struct	CCharBitmap
+	{
+		sint32	X,Y;
+		sint32	Id;
+	};
+	std::vector<CCharBitmap> _CharBitmaps;
 
 	// Macro Id
 	sint32				_MacroID;
@@ -758,8 +752,6 @@ private:
 	void		updateIconSize();
 	void		resetAllTexIDs();
 	void		setupInit();
-
-	CViewText	*createViewText(const std::string &id, sint fontSize);
 
 	void		setupCharBitmaps(sint32 maxW, sint32 maxLine, sint32 maxWChar= 1000, bool topDown= false);
 	void		resetCharBitmaps();
