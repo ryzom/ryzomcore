@@ -201,13 +201,10 @@ int main(int nNbArg, char **ppArgs)
 		outString ("ERROR : Wrong number of arguments\n");
 		outString ("USAGE : build_interface [-s<existing_uv_txt_name>] <out_tga_name> <path_maps1> [path_maps2] [path_maps3] ....\n");
 		outString ("   -s : build a subset of an existing interface definition while preserving the existing texture ids,");
-		outString ("   -b : border duplication to enable bi-linear filtering");
 		outString (" to support freeing up VRAM by switching to the subset without rebuilding the entire interface\n");
 		return -1;
 	}
-
-	uint borderSize = 0;
-
+	
 	// build as a subset of existing interface
 	bool buildSubset = false;
 	string existingUVfilename;
@@ -218,10 +215,6 @@ int main(int nNbArg, char **ppArgs)
 		{
 			switch ( ppArgs[i][1] )
 			{
-			case 'B':
-			case 'b':
-				borderSize = 1;
-				break;
 			case 'S':
 			case 's':
 				buildSubset = true;
@@ -281,19 +274,6 @@ int main(int nNbArg, char **ppArgs)
 				pBtmp->convertToType(CBitmap::RGBA);
 			}
 
-			// duplicate bitmap border to enable bilinear filtering
-			{
-				NLMISC::CBitmap *tmp = new NLMISC::CBitmap;
-				tmp->resize(pBtmp->getWidth(), pBtmp->getHeight());
-				tmp->blit(pBtmp, 0, 0);
-				// upscale image to get borders
-				tmp->resample(tmp->getWidth()+borderSize*2, tmp->getHeight()+borderSize*2);
-				// copy original
-				tmp->blit(pBtmp, borderSize, borderSize);
-				delete pBtmp;
-				pBtmp = tmp;
-			}
-
 			AllMaps[i] = pBtmp;
 		}
 		catch (const NLMISC::Exception &e)
@@ -345,10 +325,10 @@ int main(int nNbArg, char **ppArgs)
 		}
 		putIn (AllMaps[i], &GlobalTexture, x, y);
 		putIn (AllMaps[i], &GlobalMask, x, y, false);
-		UVMin[i].U = (float)x+borderSize;
-		UVMin[i].V = (float)y+borderSize;
-		UVMax[i].U = (float)x+borderSize+AllMaps[i]->getWidth()-borderSize*2;
-		UVMax[i].V = (float)y+borderSize+AllMaps[i]->getHeight()-borderSize*2;
+		UVMin[i].U = (float)x;
+		UVMin[i].V = (float)y;
+		UVMax[i].U = (float)x+AllMaps[i]->getWidth();
+		UVMax[i].V = (float)y+AllMaps[i]->getHeight();
 
 		/* // Do not remove this is useful for debugging
 		{
