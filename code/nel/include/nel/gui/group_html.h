@@ -821,7 +821,7 @@ namespace NLGUI
 		{
 		public:
 			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams())
-				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m)
+				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0)
 			{
 				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style));
 			}
@@ -833,6 +833,7 @@ namespace NLGUI
 			std::string luaScript;
 			std::string md5sum;
 			TDataType type;
+			uint32 redirects;
 			FILE *fp;
 			std::vector<CDataImageDownload> imgs;
 		};
