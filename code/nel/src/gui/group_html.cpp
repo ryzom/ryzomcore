@@ -651,17 +651,52 @@ namespace NLGUI
 							string tmpfile = it->dest + ".tmp";
 							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
 							{
-								NLMISC::CFile::deleteFile(tmpfile.c_str());
-
-								// 304 Not Modified
-								if (res == CURLE_OK && r == 304)
+								if (it->redirects < DEFAULT_RYZOM_REDIRECT_LIMIT && ((r >= 301 && r <= 303) || r == 307 || r == 308))
 								{
-									CHttpCacheObject obj;
-									obj.Expires = it->data->getExpires();
-									obj.Etag = it->data->getEtag();
-									obj.LastModified = it->data->getLastModified();
+									std::string location(it->data->getLocationHeader());
+									if (!location.empty())
+									{
+										CUrlParser uri(location);
+										if (!uri.isAbsolute())
+										{
+											uri.inherit(it->url);
+											location = uri.toString();
+										}
 
-									CHttpCache::getInstance()->store(it->dest, obj);
+										it->url = location;
+										it->fp = NULL;
+
+										// release CCurlWWWData
+										delete it->data;
+										it->data = NULL;
+
+										it->redirects++;
+	#ifdef LOG_DL
+										nlwarning("Redirect '%s'", location.c_str());
+	#endif
+										// keep the request in queue
+										continue;
+									}
+									else
+										nlwarning("Redirected to empty url '%s'", it->url.c_str());
+								}
+								else
+								{
+									if (it->redirects >= DEFAULT_RYZOM_REDIRECT_LIMIT)
+										nlwarning("Redirect limit reached for '%s'", it->url.c_str());
+
+									NLMISC::CFile::deleteFile(tmpfile.c_str());
+
+									// 304 Not Modified
+									if (res == CURLE_OK && r == 304)
+									{
+										CHttpCacheObject obj;
+										obj.Expires = it->data->getExpires();
+										obj.Etag = it->data->getEtag();
+										obj.LastModified = it->data->getLastModified();
+
+										CHttpCache::getInstance()->store(it->dest, obj);
+									}
 								}
 							}
 							else
