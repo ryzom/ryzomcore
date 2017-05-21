@@ -115,6 +115,10 @@ private:
 	void validActions();
 	NLMISC::TGameCycle _EndInvalidAction;
 	NLMISC::TGameCycle _StartInvalidAction;
+	//Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
+	//Because of a synchronisation error between client and server
+	bool isItemReallyEquipped(CDBCtrlSheet *item);
+
 
 	//Used to migrate old groups ; keep for compatibility purpose
 	bool migrateGroups();
