@@ -226,6 +226,17 @@ class CAHToggleCamera : public IActionHandler
 REGISTER_ACTION_HANDLER (CAHToggleCamera, "toggle_camera");
 
 // ------------------------------------------------------------------------------------------------
+class CAHToggleForceFP : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// Change the camera view to first person
+		UserEntity->forceCamareaFirstPerson();
+	}
+};
+REGISTER_ACTION_HANDLER (CAHToggleForceFP, "force_camera_fp");
+
+// ------------------------------------------------------------------------------------------------
 class CAHToggleNames : public IActionHandler
 {
 public:
@@ -446,4 +457,3 @@ class CAHToggleDodgeParry : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CAHToggleDodgeParry, "toggle_dodge_parry");
-

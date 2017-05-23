@@ -3213,6 +3213,23 @@ void CUserEntity::toggleCamera()
 	}
 }// toggleCamera //
 
+//-----------------------------------------------
+// forceCamareaFirstPerson :
+// Force Camera to First Person View
+//-----------------------------------------------
+void CUserEntity::forceCamareaFirstPerson()
+{
+	// You cannot change the camera view when dead.
+	if(isDead())
+		return;
+	// Only if not inside a building.
+	if(!UserEntity->forceIndoorFPV())
+	{
+		//Enter the 1st Person View Mode
+		UserEntity->viewMode(CUserEntity::FirstPV);
+	}
+}// forceCamareaFirstPerson //
+
 //---------------------------------------------------
 // getScale :
 // Return the entity scale. (return 1.0 if there is any problem).

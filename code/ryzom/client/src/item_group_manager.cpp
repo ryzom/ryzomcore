@@ -488,8 +488,9 @@ bool CItemGroupManager::moveGroup(std::string name, INVENTORIES::TInventory dst)
 			for(int i=0;i<items.size();i++)
 			{
 				CInventoryItem item = items[i];
-				//If an item is currently equipped, don't move it (or else crash !!)
-				if(pIM->isBagItemWeared(item.indexInBag)) continue;
+				//Workaround: sometimes item are marked as equipped by pIM->isBagItemWeared() even tho they aren't really
+				//Because of a synchronisation error between client and server
+				if(isItemReallyEquipped(item.pCS)) continue;
 				CAHManager::getInstance()->runActionHandler("move_item", item.pCS, moveParams);
 			}
 
@@ -707,6 +708,33 @@ std::string CItemGroupManager::toDbPath(INVENTORIES::TInventory inventory)
 	default:
 		return "";
 	}
+}
+
+bool CItemGroupManager::isItemReallyEquipped(CDBCtrlSheet* item)
+{
+	CDBCtrlSheet* pCS;
+	for (uint32 i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+	{
+		SLOT_EQUIPMENT::TSlotEquipment slot = (SLOT_EQUIPMENT::TSlotEquipment)i;
+		//Instead of doing two separate for, just be a bit tricky for hand equipment
+		if(slot == SLOT_EQUIPMENT::HANDR)
+			pCS = CInventoryManager::getInstance()->getHandSheet(0);
+		else if(slot == SLOT_EQUIPMENT::HANDL)
+			pCS = CInventoryManager::getInstance()->getHandSheet(1);
+		else
+			pCS = CInventoryManager::getInstance()->getEquipSheet(i);
+		if(!pCS) continue;
+		//Can't directly compare ID (as pCS is like "ui:interface:inv_equip:content:equip:armors:feet" and item is like "ui:interface:inv_pa3:content:iil:bag_list:list:sheet57")
+		//Instead check inventory + slot
+		if((pCS->getInventoryIndex() == item->getInventoryIndex())
+		&& (pCS->getIndexInDB() == item->getIndexInDB()))
+		{
+			return true;
+		}
+
+	}
+
+	return false;
 }
 
 std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, INVENTORIES::TInventory inventory)
