@@ -231,7 +231,7 @@ class CAHTForceFP : public IActionHandler
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		// Change the camera view to first person
-		UserEntity->forceCamareaFirstPerson();
+		UserEntity->forceCameraFirstPerson();
 	}
 };
 REGISTER_ACTION_HANDLER (CAHTForceFP, "force_camera_fp");

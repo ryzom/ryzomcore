@@ -370,7 +370,7 @@ public:
 	/// Toggle Camera (First/Third Person)
 	void toggleCamera();
 	/// Force Camera First Person View
-	void forceCamareaFirstPerson();
+	void forceCameraFirstPerson();
 	//@}
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
