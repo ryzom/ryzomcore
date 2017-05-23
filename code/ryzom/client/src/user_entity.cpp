@@ -3225,8 +3225,11 @@ void CUserEntity::forceCamareaFirstPerson()
 	// Only if not inside a building.
 	if(!UserEntity->forceIndoorFPV())
 	{
-		//Enter the 1st Person View Mode
-		UserEntity->viewMode(CUserEntity::FirstPV);
+		if (UserEntity->viewMode() != CUserEntity::FirstPV)
+		{
+			//Enter the 1st Person View Mode
+			UserEntity->viewMode(CUserEntity::FirstPV);
+		}
 	}
 }// forceCamareaFirstPerson //
 

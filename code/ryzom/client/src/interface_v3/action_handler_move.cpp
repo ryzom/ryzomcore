@@ -226,7 +226,7 @@ class CAHToggleCamera : public IActionHandler
 REGISTER_ACTION_HANDLER (CAHToggleCamera, "toggle_camera");
 
 // ------------------------------------------------------------------------------------------------
-class CAHToggleForceFP : public IActionHandler
+class CAHTForceFP : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
@@ -234,7 +234,7 @@ class CAHToggleForceFP : public IActionHandler
 		UserEntity->forceCamareaFirstPerson();
 	}
 };
-REGISTER_ACTION_HANDLER (CAHToggleForceFP, "force_camera_fp");
+REGISTER_ACTION_HANDLER (CAHTForceFP, "force_camera_fp");
 
 // ------------------------------------------------------------------------------------------------
 class CAHToggleNames : public IActionHandler
