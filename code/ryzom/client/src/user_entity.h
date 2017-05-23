@@ -369,6 +369,8 @@ public:
 	TView viewMode() const {return _ViewMode;}
 	/// Toggle Camera (First/Third Person)
 	void toggleCamera();
+	/// Force Camera First Person View
+	void forceCamareaFirstPerson();
 	//@}
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
