@@ -233,14 +233,13 @@ CGameItemPtr CGameItemManager::createItem( const CSheetId& sheetId, uint16 quali
 //				nlerror("<CGameItemManager::createItem> Can't find the owner item %s",owner.toString().c_str());
 //			}
 //		}
+		log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 	}
 	else
 	{
 //		nlwarning("<CGameItemManager::createItem> Can't create the item %s with invalid sheet '%s'", id.toString().c_str(), sheetId.toString().c_str());
 		nlwarning("<CGameItemManager::createItem> Can't create an item with invalid sheet '%s'", sheetId.toString().c_str());
 	}
-
-	log_Item_Create(item->getItemId(), item->getSheetId(), item->getStackSize(), item->quality());
 
 	return item;
 
