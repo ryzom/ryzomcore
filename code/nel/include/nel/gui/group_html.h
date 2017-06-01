@@ -84,6 +84,7 @@ namespace NLGUI
 				FontOblique=false;
 				Underlined=false;
 				StrikeThrough=false;
+				GlobalColor=false;
 				Width=-1;
 				Height=-1;
 				MaxWidth=-1;
@@ -94,6 +95,7 @@ namespace NLGUI
 			bool FontOblique;
 			std::string FontFamily;
 			NLMISC::CRGBA TextColor;
+			bool GlobalColor;
 			bool Underlined;
 			bool StrikeThrough;
 			sint32 Width;
@@ -339,7 +341,7 @@ namespace NLGUI
 		void addString(const ucstring &str);
 
 		// Add an image in the current paragraph
-		void addImage(const char *image, bool globalColor, bool reloadImg=false, const CStyleParams &style = CStyleParams());
+		void addImage(const char *image, bool reloadImg=false, const CStyleParams &style = CStyleParams());
 
 		// Add a text area in the current paragraph
 		CInterfaceGroup *addTextArea (const std::string &templateName, const char *name, uint rows, uint cols, bool multiLine, const ucstring &content, uint maxlength);
@@ -350,7 +352,7 @@ namespace NLGUI
 
 		// Add a button in the current paragraph. actionHandler, actionHandlerParams and tooltip can be NULL.
 		CCtrlButton *addButton(CCtrlButton::EType type, const std::string &name, const std::string &normalBitmap, const std::string &pushedBitmap,
-			const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
+			const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams, const char *tooltip,
 			const CStyleParams &style = CStyleParams());
 
 		// Set the background color

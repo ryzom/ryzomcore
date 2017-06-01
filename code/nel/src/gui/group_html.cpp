@@ -1397,6 +1397,7 @@ namespace NLGUI
 				style.TextColor = LinkColor;
 				style.Underlined = true;
 				style.StrikeThrough = getFontStrikeThrough();
+				style.GlobalColor = LinkColorGlobalColor;
 
 				if (present[HTML_A_STYLE] && value[HTML_A_STYLE])
 					getStyleParams(value[HTML_A_STYLE], style);
@@ -1406,7 +1407,7 @@ namespace NLGUI
 				_TextColor.push_back(style.TextColor);
 				_FontUnderlined.push_back(style.Underlined);
 				_FontStrikeThrough.push_back(style.StrikeThrough);
-				_GlobalColor.push_back(LinkColorGlobalColor);
+				_GlobalColor.push_back(style.GlobalColor);
 				_A.push_back(true);
 				_Link.push_back ("");
 				_LinkTitle.push_back("");
@@ -1676,14 +1677,14 @@ namespace NLGUI
 							getPercentage(style.Width, tmpf, value[MY_HTML_IMG_WIDTH]);
 						if (present[MY_HTML_IMG_HEIGHT] && value[MY_HTML_IMG_HEIGHT])
 							getPercentage(style.Height, tmpf, value[MY_HTML_IMG_HEIGHT]);
+
+						// Get the global color name
+						if (present[MY_HTML_IMG_GLOBAL_COLOR])
+							style.GlobalColor = true;
+
 						// width, height from inline css
 						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
 							getStyleParams(value[MY_HTML_IMG_STYLE], style);
-						
-						// Get the global color name
-						bool globalColor = false;
-						if (present[MY_HTML_IMG_GLOBAL_COLOR])
-							globalColor = true;
 
 						if (getA() && getParent () && getParent ()->getParent())
 						{
@@ -1694,7 +1695,7 @@ namespace NLGUI
 
 							string params = "name=" + getId() + "|url=" + getLink ();
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								"", globalColor, "browse", params.c_str(), tooltip, style);
+								"", "browse", params.c_str(), tooltip, style);
 						}
 						else
 						{
@@ -1715,7 +1716,7 @@ namespace NLGUI
 									reloadImg = true;
 							}
 
-							addImage (value[MY_HTML_IMG_SRC], globalColor, reloadImg, style);
+							addImage (value[MY_HTML_IMG_SRC], reloadImg, style);
 						}
 					}
 				}
@@ -1741,22 +1742,21 @@ namespace NLGUI
 					// Get the type
 					if (present[MY_HTML_INPUT_TYPE] && value[MY_HTML_INPUT_TYPE])
 					{
-						// Global color flag
-						bool globalColor = false;
-						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
-							globalColor = true;
-
-						// Tooltip
-						const char *tooltip = NULL;
-						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
-							tooltip = value[MY_HTML_INPUT_ALT];
-
 						// by default not inherited, font family defaults to system font
 						CStyleParams style;
 						style.TextColor = TextColor;
 						style.FontSize = TextFontSize;
 						style.FontWeight = FONT_WEIGHT_NORMAL;
 						style.FontOblique = false;
+
+						// Global color flag
+						if (present[MY_HTML_INPUT_GLOBAL_COLOR])
+							style.GlobalColor = true;
+
+						// Tooltip
+						const char *tooltip = NULL;
+						if (present[MY_HTML_INPUT_ALT] && value[MY_HTML_INPUT_ALT])
+							tooltip = value[MY_HTML_INPUT_ALT];
 
 						if (present[MY_HTML_INPUT_STYLE] && value[MY_HTML_INPUT_STYLE])
 							getStyleParams(value[MY_HTML_INPUT_STYLE], style);
@@ -1785,7 +1785,7 @@ namespace NLGUI
 
 							// Add the ctrl button
 							addButton (CCtrlButton::PushButton, name, normal, pushed.empty()?normal:pushed, over,
-								globalColor, "html_submit_form", param.c_str(), tooltip, style);
+								"html_submit_form", param.c_str(), tooltip, style);
 						}
 						if (type == "button" || type == "submit")
 						{
@@ -1840,7 +1840,7 @@ namespace NLGUI
 								if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
 								if (ctrlButton)
 								{
-									ctrlButton->setModulateGlobalColorAll (globalColor);
+									ctrlButton->setModulateGlobalColorAll (style.GlobalColor);
 
 									// Translate the tooltip
 									if (tooltip)
@@ -1923,8 +1923,7 @@ namespace NLGUI
 							checked = (present[MY_HTML_INPUT_CHECKED] && value[MY_HTML_INPUT_CHECKED]);
 
 							// Add the ctrl button
-							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over,
-								globalColor, "", "", tooltip);
+							CCtrlButton *checkbox = addButton (btnType, name, normal, pushed, over, "", "", tooltip, style);
 							if (checkbox)
 							{
 								if (btnType == CCtrlButton::RadioButton)
@@ -2349,6 +2348,7 @@ namespace NLGUI
 					style.FontOblique = getFontOblique();
 					style.Underlined = getFontUnderlined();
 					style.StrikeThrough = getFontStrikeThrough();
+					style.GlobalColor = getGlobalColor();
 
 					if (present[MY_HTML_SPAN_STYLE] && value[MY_HTML_SPAN_STYLE])
 						getStyleParams(value[MY_HTML_SPAN_STYLE], style);
@@ -2360,6 +2360,7 @@ namespace NLGUI
 					_FontOblique.push_back(style.FontOblique);
 					_FontUnderlined.push_back(style.Underlined);
 					_FontStrikeThrough.push_back(style.StrikeThrough);
+					_GlobalColor.push_back(style.GlobalColor);
 				}
 				break;
 			case HTML_DEL:
@@ -2763,6 +2764,7 @@ namespace NLGUI
 				popIfNotEmpty (_TextColor);
 				popIfNotEmpty (_FontUnderlined);
 				popIfNotEmpty (_FontStrikeThrough);
+				popIfNotEmpty (_GlobalColor);
 				break;
 			case HTML_DEL:
 				popIfNotEmpty (_FontStrikeThrough);
@@ -4321,7 +4323,7 @@ namespace NLGUI
 
 	// ***************************************************************************
 
-	void CGroupHTML::addImage(const char *img, bool globalColor, bool reloadImg, const CStyleParams &style)
+	void CGroupHTML::addImage(const char *img, bool reloadImg, const CStyleParams &style)
 	{
 		// In a paragraph ?
 		if (!_Paragraph)
@@ -4382,7 +4384,7 @@ namespace NLGUI
 			addImageDownload(img, newImage, style);
 		}
 		newImage->setTexture (image);
-		newImage->setModulateGlobalColor(globalColor);
+		newImage->setModulateGlobalColor(style.GlobalColor);
 
 		getParagraph()->addChild(newImage);
 		paragraphChange ();
@@ -4530,7 +4532,7 @@ namespace NLGUI
 	// ***************************************************************************
 
 	CCtrlButton *CGroupHTML::addButton(CCtrlButton::EType type, const std::string &/* name */, const std::string &normalBitmap, const std::string &pushedBitmap,
-									  const std::string &overBitmap, bool useGlobalColor, const char *actionHandler, const char *actionHandlerParams,
+									  const std::string &overBitmap, const char *actionHandler, const char *actionHandlerParams,
 									  const char *tooltip, const CStyleParams &style)
 	{
 		// In a paragraph ?
@@ -4602,7 +4604,7 @@ namespace NLGUI
 			ctrlButton->setTexturePushed (pushed);
 		if (!over.empty())
 			ctrlButton->setTextureOver (over);
-		ctrlButton->setModulateGlobalColorAll (useGlobalColor);
+		ctrlButton->setModulateGlobalColorAll (style.GlobalColor);
 		ctrlButton->setActionOnLeftClick (actionHandler);
 		ctrlButton->setParamsOnLeftClick (actionHandlerParams);
 
@@ -5767,16 +5769,20 @@ namespace NLGUI
 			newParagraph(0);
 			paragraphChange();
 		}
+
+		CStyleParams style;
+		style.GlobalColor = ls.toBoolean(2);
+
 		string url = getLink();
 		if (!url.empty())
 		{
 			string params = "name=" + getId() + "|url=" + getLink ();
 			addButton(CCtrlButton::PushButton, ls.toString(1), ls.toString(1), ls.toString(1),
-								"", ls.toBoolean(2), "browse", params.c_str(), "");
+								"", "browse", params.c_str(), "", style);
 		}
 		else
 		{
-			addImage(ls.toString(1), ls.toBoolean(2));
+			addImage(ls.toString(1), false, style);
 		}
 
 
@@ -6085,6 +6091,16 @@ namespace NLGUI
 			else
 			if (it->first == "max-height")
 				getPercentage(style.MaxHeight, tmpf, it->second.c_str());
+			else
+			if (it->first == "-ryzom-modulate-color")
+			{
+				bool b;
+				if (it->second == "inherit")
+					style.GlobalColor = getGlobalColor();
+				else
+				if (fromString(it->second, b))
+					style.GlobalColor = b;
+			}
 		}
 		if (inherit)
 		{
