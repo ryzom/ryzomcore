@@ -1686,16 +1686,26 @@ namespace NLGUI
 						if (present[MY_HTML_IMG_STYLE] && value[MY_HTML_IMG_STYLE])
 							getStyleParams(value[MY_HTML_IMG_STYLE], style);
 
+						// Tooltip
+						const char *tooltip = NULL;
+						// keep "alt" attribute for backward compatibility
+						if (present[MY_HTML_IMG_ALT] && value[MY_HTML_IMG_ALT])
+							tooltip = value[MY_HTML_IMG_ALT];
+						// tooltip
+						if (present[MY_HTML_IMG_TITLE] && value[MY_HTML_IMG_TITLE])
+							tooltip = value[MY_HTML_IMG_TITLE];
+
 						if (getA() && getParent () && getParent ()->getParent())
 						{
-							// Tooltip
-							const char *tooltip = NULL;
-							if (present[MY_HTML_IMG_ALT] && value[MY_HTML_IMG_ALT])
-								tooltip = value[MY_HTML_IMG_ALT];
-
 							string params = "name=" + getId() + "|url=" + getLink ();
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
 								"", "browse", params.c_str(), tooltip, style);
+						}
+						else
+						if (tooltip)
+						{
+							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
+								"", "", "", tooltip, style);
 						}
 						else
 						{
