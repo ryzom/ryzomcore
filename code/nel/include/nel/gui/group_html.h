@@ -807,25 +807,27 @@ namespace NLGUI
 
 		// ImageDownload system
 		enum TDataType {ImgType= 0, BnpType};
+		enum TImageType {NormalImage=0, OverImage};
 		
 		struct CDataImageDownload
 		{
 		public:
-			CDataImageDownload(CViewBase *img, CStyleParams style): Image(img), Style(style)
+			CDataImageDownload(CViewBase *img, CStyleParams style, TImageType type): Image(img), Style(style), Type(type)
 			{
 			}
 		public:
 			CViewBase * Image;
 			CStyleParams Style;
+			TImageType Type;
 		};
 
 		struct CDataDownload
 		{
 		public:
-			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams())
+			CDataDownload(const std::string &u, const std::string &d, TDataType t, CViewBase *i, const std::string &s, const std::string &m, const CStyleParams &style = CStyleParams(), const TImageType imagetype = NormalImage)
 				: data(NULL), fp(NULL), url(u), dest(d), type(t), luaScript(s), md5sum(m), redirects(0)
 			{
-				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style));
+				if (t == ImgType) imgs.push_back(CDataImageDownload(i, style, imagetype));
 			}
 
 		public:
@@ -848,12 +850,12 @@ namespace NLGUI
 
 		void initImageDownload();
 		void checkImageDownload();
-		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams());
+		void addImageDownload(const std::string &url, CViewBase *img, const CStyleParams &style = CStyleParams(), const TImageType type = NormalImage);
 		std::string localImageName(const std::string &url);
 		std::string getAbsoluteUrl(const std::string &url);
 
 		bool isTrustedDomain(const std::string &domain);
-		void setImage(CViewBase *view, const std::string &file);
+		void setImage(CViewBase *view, const std::string &file, const TImageType type);
 		void setImageSize(CViewBase *view, const CStyleParams &style = CStyleParams());
 
 		// BnpDownload system

@@ -172,18 +172,25 @@ namespace NLGUI
 	}
 
 	// Update view after download has finished
-	void CGroupHTML::setImage(CViewBase * view, const string &file)
+	void CGroupHTML::setImage(CViewBase * view, const string &file, const TImageType type)
 	{
 		CCtrlButton *btn = dynamic_cast<CCtrlButton*>(view);
 		if(btn)
 		{
-			btn->setTexture (file);
-			btn->setTexturePushed(file);
-			btn->invalidateCoords();
-			btn->invalidateContent();
-			btn->resetInvalidCoords();
-			btn->updateCoords();
-			paragraphChange();
+			if (type == NormalImage)
+			{
+				btn->setTexture (file);
+				btn->setTexturePushed(file);
+				btn->invalidateCoords();
+				btn->invalidateContent();
+				btn->resetInvalidCoords();
+				btn->updateCoords();
+				paragraphChange();
+			}
+			else
+			{
+				btn->setTextureOver(file);
+			}
 		}
 		else
 		{
@@ -389,7 +396,7 @@ namespace NLGUI
 	}
 
 	// Add a image download request in the multi_curl
-	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style)
+	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
 	{
 		string finalUrl = getAbsoluteUrl(url);
 
@@ -401,7 +408,7 @@ namespace NLGUI
 	#ifdef LOG_DL
 				nlwarning("already downloading '%s' img %p", finalUrl.c_str(), img);
 	#endif
-				Curls[i].imgs.push_back(CDataImageDownload(img, style));
+				Curls[i].imgs.push_back(CDataImageDownload(img, style, type));
 				return;
 			}
 		}
@@ -412,7 +419,7 @@ namespace NLGUI
 		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
 	#endif
 
-		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style));
+		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style, type));
 		if (Curls.size() < options.curlMaxConnections) {
 			if (!startCurlDownload(Curls.back()))
 			{
@@ -728,7 +735,7 @@ namespace NLGUI
 												CFile::moveFile(it->dest, tmpfile);
 												for(uint i = 0; i < it->imgs.size(); i++)
 												{
-													setImage(it->imgs[i].Image, it->dest);
+													setImage(it->imgs[i].Image, it->dest, it->imgs[i].Type);
 													setImageSize(it->imgs[i].Image, it->imgs[i].Style);
 												}
 											}
@@ -1695,17 +1702,25 @@ namespace NLGUI
 						if (present[MY_HTML_IMG_TITLE] && value[MY_HTML_IMG_TITLE])
 							tooltip = value[MY_HTML_IMG_TITLE];
 
+						// Mouse over image
+						const char *overSrc = value[MY_HTML_IMG_SRC];
+						if (present[MY_HTML_IMG_DATA_OVER_SRC] && value[MY_HTML_IMG_DATA_OVER_SRC])
+						{
+							overSrc = value[MY_HTML_IMG_DATA_OVER_SRC];
+						}
+
+
 						if (getA() && getParent () && getParent ()->getParent())
 						{
 							string params = "name=" + getId() + "|url=" + getLink ();
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								"", "browse", params.c_str(), tooltip, style);
+								overSrc, "browse", params.c_str(), tooltip, style);
 						}
 						else
-						if (tooltip)
+						if (tooltip || overSrc)
 						{
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
-								"", "", "", tooltip, style);
+								overSrc, "", "", tooltip, style);
 						}
 						else
 						{
@@ -4606,6 +4621,18 @@ namespace NLGUI
 		}
 
 		string over = overBitmap.empty()?"":CFile::getPath(overBitmap) + CFile::getFilenameWithoutExtension(overBitmap) + ".tga";
+		// schedule mouseover bitmap for download if its different from normal
+		if (!over.empty() && !CPath::exists(over))
+		{
+			if (overBitmap != normalBitmap)
+			{
+				over = localImageName(overBitmap);
+				if (!CFile::fileExists(over))
+				{
+					addImageDownload(overBitmap, ctrlButton, style, TImageType::OverImage);
+				}
+			}
+		}
 
 		ctrlButton->setType (type);
 		if (!normal.empty())
