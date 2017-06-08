@@ -325,7 +325,7 @@ namespace NLGUI
 		time(&currentTime);
 
 		CHttpCacheObject cache = CHttpCache::getInstance()->lookup(download.dest);
-		if (cache.Expires > currentTime)
+		if (CFile::fileExists(download.dest) && cache.Expires > currentTime)
 		{
 	#ifdef LOG_DL
 			nlwarning("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
