@@ -742,18 +742,21 @@ std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, 
 	//Not very clean, but no choice, it's ugly time
 	std::vector<CInventoryItem> out;
 	std::string dbPath = toDbPath(inventory);
-	if(dbPath.empty())
+
+	if (dbPath.empty())
 	{
 		nldebug("Inventory type %s not supported", INVENTORIES::toString(inventory).c_str());
 		return out;
 	}
 
 	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(dbPath));
+
 	for(uint i=0; i < MAX_BAGINV_ENTRIES; i++)
 	{
 		CDBCtrlSheet *pCS = pList->getSheet(i);
 		SLOT_EQUIPMENT::TSlotEquipment slot;
-		if(group->contains(pCS, slot))
+
+		if (group->contains(pCS, slot))
 		{
 			//Sometimes, index in the list differ from the index in DB, and we need the index in DB, not the one from the list
 			std::string dbPath = pCS->getSheet();
@@ -761,7 +764,12 @@ std::vector<CInventoryItem> CItemGroupManager::matchingItems(CItemGroup *group, 
 			std::string indexS = dbPath.substr(found+1);
 			uint32 index;
 			NLMISC::fromString(indexS, index);
-			if(i != index) nldebug("Index from list is %d, where index from DB is %d", i, index);
+
+			if (i != index)
+			{
+				nldebug("Index from list is %d, where index from DB is %d", i, index);
+			}
+
 			out.push_back(CInventoryItem(pCS, inventory, index, slot));
 		}
 	}
