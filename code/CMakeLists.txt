@@ -337,7 +337,7 @@ IF(WITH_QT5)
       ENDIF()
 
       # freetype is needed since Qt 5.5
-      FIND_PACKAGE(FreeType)
+      FIND_PACKAGE(Freetype)
 
       IF(FREETYPE_FOUND)
         SET(QT_LIBRARIES ${QT_LIBRARIES} ${FREETYPE_LIBRARIES})
