@@ -165,9 +165,16 @@ namespace NLGUI
 
 		// if we over object limit, then start removing expired objects
 		// this does not guarantee that max limit is reached
-		for (THttpCacheMap::iterator it = _List.begin(); it != _List.end();) {
-			if (it->second.Expires <= currentTime) {
+		for (THttpCacheMap::iterator it = _List.begin(); it != _List.end();)
+		{
+			if (it->second.Expires <= currentTime)
+			{
+#ifdef NL_ISO_CPP0X_AVAILABLE
 				it = _List.erase(it);
+#else
+				THttpCacheMap::iterator itToErase = it++;
+				_List.erase(itToErase);
+#endif
 
 				--mustDrop;
 				if (mustDrop == 0)
