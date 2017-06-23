@@ -24,6 +24,11 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+#if defined(GCC_VERSION) && !defined(CLANG_VERSION) && defined(NL_ISO_CPP0X_AVAILABLE) && (GCC_VERSION <= 40804)
+// hack to fix std::map::erase wrong return type (void instead of iterator in C++11) in GCC 4.8.4
+#undef NL_ISO_CPP0X_AVAILABLE
+#endif
+
 namespace NLGUI
 {
 	CHttpCache* CHttpCache::instance = NULL;
