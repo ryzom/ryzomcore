@@ -283,7 +283,7 @@ function game:updateTargetConsiderUI()
 		else
 			if level == 1 then -- Locked by another team
 				wgLock.active = true
-				wgLock.active = "250 50 50 255"
+				wgLock.color = "250 50 50 255"
 			end
 		end
 	end
