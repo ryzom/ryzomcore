@@ -47,6 +47,16 @@
 #include "nel/gui/url_parser.h"
 #include "nel/gui/http_cache.h"
 
+#if defined(NL_OS_WINDOWS)
+#include <curl/curl.h>
+#include <openssl/x509.h>
+#include <openssl/ssl.h>
+
+#pragma comment(lib, "crypt32.lib")
+#pragma comment(lib, "cryptui.lib")
+#endif
+
+
 using namespace std;
 using namespace NLMISC;
 
@@ -70,6 +80,83 @@ namespace NLGUI
 
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
+#if defined(NL_OS_WINDOWS)
+	class SX509Certificates {
+	public:
+		SX509Certificates()
+		{
+			curl_version_info_data *data;
+			data = curl_version_info(CURLVERSION_NOW);
+			if (!(data && data->features & CURL_VERSION_SSPI))
+			{
+				addCertificatesFrom("CA");
+				addCertificatesFrom("AuthRoot");
+				addCertificatesFrom("ROOT");
+			}
+		}
+
+		~SX509Certificates()
+		{
+			for (uint i = 0; i < List.size(); ++i)
+			{
+				X509_free(List[i]);
+			}
+
+			List.clear();
+		}
+
+		void addCertificatesFrom(LPCSTR root)
+		{
+			HCERTSTORE hStore;
+			PCCERT_CONTEXT pContext = NULL;
+			X509 *x509;
+			hStore = CertOpenSystemStore(NULL, root);
+			if (hStore)
+			{
+				while (pContext = CertEnumCertificatesInStore(hStore, pContext))
+				{
+					x509 = NULL;
+					x509 = d2i_X509(NULL, (const unsigned char **)&pContext->pbCertEncoded, pContext->cbCertEncoded);
+					if (x509)
+					{
+						List.push_back(x509);
+					}
+				}
+				CertFreeCertificateContext(pContext);
+				CertCloseStore(hStore, 0);
+			}
+
+			// this is called before debug context is set and log ends up in log.log
+			//nlinfo("Loaded %d certificates from '%s' certificate store", List.size(), root);
+		}
+	public:
+		std::vector<X509 *> List;
+	};
+
+	/// this will be initialized on startup and cleared on exit
+	static SX509Certificates x509CertList;
+
+	static CURLcode ssl_ctx_function(CURL *curl, void *sslctx, void *parm)
+	{
+		if (x509CertList.List.size() > 0)
+		{
+			SSL_CTX *ctx = (SSL_CTX*)sslctx;
+			X509_STORE *x509store = SSL_CTX_get_cert_store(ctx);
+			if (x509store)
+			{
+				for (uint i = 0; i < x509CertList.List.size(); ++i)
+				{
+					X509_STORE_add_cert(x509store, x509CertList.List[i]);
+				}
+			}
+			else
+			{
+				nlwarning("SSL_CTX_get_cert_store returned NULL");
+			}
+		}
+		return CURLE_OK;
+	}
+#endif
 
 	// Active cURL www transfer
 	class CCurlWWWData
@@ -355,6 +442,14 @@ namespace NLGUI
 			nlwarning("Creating cURL handle failed, unable to download '%s'", download.url.c_str());
 			return false;
 		}
+
+#if defined(NL_OS_WINDOWS)
+		// https://
+		if (toLower(download.url.substr(0, 8)) == "https://")
+		{
+			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &ssl_ctx_function);
+		}
+#endif
 
 		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
@@ -5263,6 +5358,14 @@ namespace NLGUI
 			browseError(string("Failed to create cURL handle : " + url).c_str());
 			return;
 		}
+
+#if defined(NL_OS_WINDOWS)
+		// https://
+		if (toLower(url.substr(0, 8)) == "https://")
+		{
+			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &ssl_ctx_function);
+		}
+#endif
 
 		// do not follow redirects, we have own handler
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
