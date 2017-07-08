@@ -73,6 +73,21 @@ bool CItemGroup::contains(CDBCtrlSheet *other, SLOT_EQUIPMENT::TSlotEquipment &s
 
 void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlotEquipment slot)
 {
+	//Don't add an item if it already exists, this could cause issue
+	// It's happening either if we are creating a group with a 2 hands items (and the item is found both in handR and handL)
+	// Or if an user incorrectly edit his group file
+	for(int i=0; i<Items.size(); i++)
+	{
+		if( Items[i].createTime == createTime &&  Items[i].serial == serial)
+		{
+			nldebug("Not adding duplicate item, createTime: %d, serial: %d", createTime, serial);
+			//In this case, we are adding the duplicate item for a 2 hands item
+			//If it's saved as a left hand item, save it as a right hand item instead (so we have only 1 correct item)
+			if(Items[i].slot == SLOT_EQUIPMENT::TSlotEquipment::HANDL && slot == SLOT_EQUIPMENT::TSlotEquipment::HANDR)
+				Items[i].slot = SLOT_EQUIPMENT::TSlotEquipment::HANDR;
+			return;
+		}
+	}
 	Items.push_back(CItem(createTime, serial, slot));
 }
 
@@ -158,8 +173,15 @@ void CItemGroup::readFrom(xmlNodePtr node)
 			ptrName = (char*) xmlGetProp(curNode, (xmlChar*)"maxPrice");
 			if (ptrName) NLMISC::fromString((const char*)ptrName, item.maxPrice);
 			item.usePrice = (item.minPrice != 0 || item.maxPrice != std::numeric_limits<uint32>::max());
-
-			Items.push_back(item);
+			if(item.createTime != 0)
+			{
+				addItem(item.createTime, item.serial, item.slot);
+			}
+			// Old load : keep for compatibility / migration reasons
+			else
+			{
+				Items.push_back(item);
+			}
 		}
 		if (strcmp((char*)curNode->name, "remove") == 0)
 		{
