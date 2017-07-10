@@ -94,8 +94,8 @@ void CItemGroup::addItem(sint32 createTime, sint32 serial, SLOT_EQUIPMENT::TSlot
 void CItemGroup::addRemove(std::string slotName)
 {
 	SLOT_EQUIPMENT::TSlotEquipment slot = SLOT_EQUIPMENT::stringToSlotEquipment(NLMISC::toUpper(slotName));
-	if(slot)
-		removeBeforeEquip.push_back(slot);
+	if(slot != SLOT_EQUIPMENT::UNDEFINED)
+		addRemove(slot);
 }
 
 void CItemGroup::addRemove(SLOT_EQUIPMENT::TSlotEquipment slot)
