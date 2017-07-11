@@ -793,7 +793,7 @@ namespace NLGUI
 		void doBrowseLocalFile(const std::string &filename);
 
 		// load remote content using either GET or POST
-		void doBrowseRemoteUrl(const std::string &url, const std::string &referer, bool doPost = false, const SFormFields &formfields = SFormFields());
+		void doBrowseRemoteUrl(std::string url, const std::string &referer, bool doPost = false, const SFormFields &formfields = SFormFields());
 
 		// render html string as new browser page
 		bool renderHtmlString(const std::string &html);
@@ -861,7 +861,7 @@ namespace NLGUI
 		// BnpDownload system
 		void initBnpDownload();
 		void checkBnpDownload();
-		bool addBnpDownload(const std::string &url, const std::string &action, const std::string &script, const std::string &md5sum);
+		bool addBnpDownload(std::string url, const std::string &action, const std::string &script, const std::string &md5sum);
 		std::string localBnpName(const std::string &url);
 
 		void releaseDownloads();
