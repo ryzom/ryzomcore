@@ -95,6 +95,7 @@
 #include "nel/gui/lua_manager.h"
 #include "item_group_manager.h"
 #include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
 
 ///////////
 // USING //
@@ -688,6 +689,7 @@ void release()
 	CViewRenderer::release();
 	CIXml::releaseLibXml();
 	CHttpCache::release();
+	CStrictTransportSecurity::release();
 
 #if FINAL_VERSION
 	// openURL ("http://ryzom.com/exit/");

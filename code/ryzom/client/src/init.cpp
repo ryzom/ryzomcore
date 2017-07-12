@@ -69,6 +69,7 @@
 #include "interface_v3/sbrick_manager.h"
 #include "nel/gui/widget_manager.h"
 #include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
 //
 #include "gabarit.h"
 #include "hair_set.h"
@@ -1369,6 +1370,8 @@ void prelogInit()
 		// Initialize HTTP cache
 		CHttpCache::getInstance()->setCacheIndex("cache/cache.index");
 		CHttpCache::getInstance()->init();
+
+		CStrictTransportSecurity::getInstance()->init("save/hsts-list.save");
 
 		// Register the reflected classes
 		registerInterfaceElements();

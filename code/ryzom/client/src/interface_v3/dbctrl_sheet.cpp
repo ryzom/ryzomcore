@@ -2960,6 +2960,8 @@ void	CDBCtrlSheet::swapSheet(CDBCtrlSheet *other)
 		swapDBProps(getItemRMClassTypePtr(), other->getItemRMClassTypePtr());
 		swapDBProps(getItemRMFaberStatTypePtr(), other->getItemRMFaberStatTypePtr());
 		swapDBProps(getItemPrerequisitValidPtr(), other->getItemPrerequisitValidPtr());
+		swapDBProps(getItemSerialPtr(), other->getItemSerialPtr());
+		swapDBProps(getItemCreateTimePtr(), other->getItemCreateTimePtr());
 	}
 }
 
@@ -3539,6 +3541,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		dest->setItemRMFaberStatType(getItemRMFaberStatType());
 		// copy prerequisit valid flag
 		dest->setItemPrerequisitValid(getItemPrerequisitValid());
+		// copy item serial
+		dest->setItemSerial(getItemSerial());
+		// copy item create time
+		dest->setItemCreateTime(getItemCreateTime());
 	}
 	// if brick, sphrase or sphraseId
 	if(isSBrick() || isSPhrase() || isSPhraseId())

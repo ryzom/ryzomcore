@@ -46,6 +46,8 @@
 #include "nel/misc/big_file.h"
 #include "nel/gui/url_parser.h"
 #include "nel/gui/http_cache.h"
+#include "nel/gui/http_hsts.h"
+#include "nel/gui/curl_certificates.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -70,6 +72,25 @@ namespace NLGUI
 
 	CGroupHTML::SWebOptions CGroupHTML::options;
 
+	// Return URL with https is host is in HSTS list
+	static std::string upgradeInsecureUrl(const std::string &url)
+	{
+		if (toLower(url.substr(0, 7)) != "http://") {
+			return url;
+		}
+
+		CUrlParser uri(url);
+		if (!CStrictTransportSecurity::getInstance()->isSecureHost(uri.host)){
+			return url;
+		}
+
+	#ifdef LOG_DL
+		nlwarning("HSTS url : '%s', using https", url.c_str());
+	#endif
+		uri.scheme = "https";
+
+		return uri.toString();
+	}
 
 	// Active cURL www transfer
 	class CCurlWWWData
@@ -144,6 +165,27 @@ namespace NLGUI
 				if (HeadersRecv.count("etag") > 0)
 				{
 					return HeadersRecv["etag"];
+				}
+
+				return "";
+			}
+
+			bool hasHSTSHeader()
+			{
+				// ignore header if not secure connection
+				if (toLower(Url.substr(0, 8)) != "https://")
+				{
+					return false;
+				}
+
+				return HeadersRecv.count("strict-transport-security") > 0;
+			}
+
+			const std::string getHSTSHeader()
+			{
+				if (hasHSTSHeader())
+				{
+					return HeadersRecv["strict-transport-security"];
 				}
 
 				return "";
@@ -356,6 +398,14 @@ namespace NLGUI
 			return false;
 		}
 
+#if defined(NL_OS_WINDOWS)
+		// https://
+		if (toLower(download.url.substr(0, 8)) == "https://")
+		{
+			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
+		}
+#endif
+
 		download.data = new CCurlWWWData(curl, download.url);
 		download.fp = fp;
 
@@ -398,7 +448,7 @@ namespace NLGUI
 	// Add a image download request in the multi_curl
 	void CGroupHTML::addImageDownload(const string &url, CViewBase *img, const CStyleParams &style, TImageType type)
 	{
-		string finalUrl = getAbsoluteUrl(url);
+		string finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
 		// Search if we are not already downloading this url.
 		for(uint i = 0; i < Curls.size(); i++)
@@ -413,7 +463,7 @@ namespace NLGUI
 			}
 		}
 
-		// use requested url for local name
+		// use requested url for local name (cache)
 		string dest = localImageName(url);
 	#ifdef LOG_DL
 		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
@@ -459,8 +509,10 @@ namespace NLGUI
 	}
 
 	// Add a bnp download request in the multi_curl, return true if already downloaded
-	bool CGroupHTML::addBnpDownload(const string &url, const string &action, const string &script, const string &md5sum)
+	bool CGroupHTML::addBnpDownload(string url, const string &action, const string &script, const string &md5sum)
 	{
+		url = upgradeInsecureUrl(getAbsoluteUrl(url));
+
 		// Search if we are not already downloading this url.
 		for(uint i = 0; i < Curls.size(); i++)
 		{
@@ -569,6 +621,12 @@ namespace NLGUI
 	#ifdef LOG_DL
 						nlwarning("(%s) web transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), _CurlWWW->Request, res, code, _CurlWWW->Url.size(), _CurlWWW->Url.c_str());
 	#endif
+						// save HSTS header from all requests regardless of HTTP code
+						if (res == CURLE_OK && _CurlWWW->hasHSTSHeader())
+						{
+							CUrlParser uri(_CurlWWW->Url);
+							CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, _CurlWWW->getHSTSHeader());
+						}
 
 						if (res != CURLE_OK)
 						{
@@ -654,6 +712,12 @@ namespace NLGUI
 							nlwarning("(%s) transfer '%p' completed with status %d, http %d, url (len %d) '%s'", _Id.c_str(), it->data->Request, res, r, it->url.size(), it->url.c_str());
 	#endif
 							curl_multi_remove_handle(MultiCurl, it->data->Request);
+
+							// save HSTS header from all requests regardless of HTTP code
+							if (res == CURLE_OK && it->data->hasHSTSHeader())
+							{
+								CStrictTransportSecurity::getInstance()->setFromHeader(uri.host, it->data->getHSTSHeader());
+							}
 
 							string tmpfile = it->dest + ".tmp";
 							if(res != CURLE_OK || r < 200 || r >= 300 || (!it->md5sum.empty() && (it->md5sum != getMD5(tmpfile).toString())))
@@ -5231,7 +5295,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CGroupHTML::doBrowseRemoteUrl(const std::string &url, const std::string &referer, bool doPost, const SFormFields &formfields)
+	void CGroupHTML::doBrowseRemoteUrl(std::string url, const std::string &referer, bool doPost, const SFormFields &formfields)
 	{
 		// Stop previous request and remove content
 		stopBrowse ();
@@ -5244,6 +5308,8 @@ namespace NLGUI
 			setTitle (CI18N::get("uiPleaseWait"));
 		else
 			setTitle (_TitlePrefix + " - " + CI18N::get("uiPleaseWait"));
+
+		url = upgradeInsecureUrl(url);
 
 	#if LOG_DL
 		nlwarning("(%s) browse url (trusted=%s) '%s', referer='%s', post='%s', nb form values %d",
@@ -5263,6 +5329,14 @@ namespace NLGUI
 			browseError(string("Failed to create cURL handle : " + url).c_str());
 			return;
 		}
+
+#if defined(NL_OS_WINDOWS)
+		// https://
+		if (toLower(url.substr(0, 8)) == "https://")
+		{
+			curl_easy_setopt(curl, CURLOPT_SSL_CTX_FUNCTION, &CCurlCertificates::sslCtxFunction);
+		}
+#endif
 
 		// do not follow redirects, we have own handler
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);

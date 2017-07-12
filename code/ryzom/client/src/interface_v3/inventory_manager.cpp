@@ -39,6 +39,7 @@
 
 // For handlers
 #include "nel/gui/action_handler.h"
+#include "nel/gui/group_editbox.h"
 #include "dbctrl_sheet.h"
 
 #include "../sheet_manager.h"
@@ -2011,6 +2012,18 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 }
 
 // ***************************************************************************
+void SBagOptions::setSearchFilter(const ucstring &s)
+{
+	SearchFilter.clear();
+	SearchFilterChanged = true;
+
+	if (!s.empty())
+	{
+		splitUCString(toLower(s), ucstring(" "), SearchFilter);
+	}
+}
+
+// ***************************************************************************
 bool SBagOptions::isSomethingChanged()
 {
 	bool bRet = false;
@@ -2057,6 +2070,12 @@ bool SBagOptions::isSomethingChanged()
 			LastDbFilterTP = (DbFilterTP->getValue8() != 0);
 		}
 
+	if (SearchFilterChanged)
+	{
+		bRet = true;
+		SearchFilterChanged = false;
+	}
+
 	return bRet;
 }
 
@@ -2075,6 +2094,26 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	const CItemSheet *pIS = pCS->asItemSheet();
 	if (pIS != NULL)
 	{
+		if (SearchFilter.size() > 0)
+		{
+			bool match = true;
+			ucstring lcName = toLower(pCS->getItemActualName());
+
+			// add item quality as a keyword to match
+			if (pCS->getQuality() > 1)
+			{
+				lcName += ucstring(" " + toString(pCS->getQuality()));
+			}
+
+			for (uint i = 0; i< SearchFilter.size(); ++i)
+			{
+				if (lcName.find(SearchFilter[i]) == ucstring::npos)
+				{
+					return false;
+				}
+			}
+		}
+
 		// Armor
 		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
 			(pIS->Family == ITEMFAMILY::JEWELRY))
@@ -2454,6 +2493,30 @@ class CHandlerInvDrag : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvDrag, "inv_drag" );
+
+// **********************************************************************************************************
+class CHandlerInvSetSearch : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	{
+		if (!pCaller) return;
+
+		CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pCaller);
+		if (!eb) return;
+
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		// ui:interface:inventory:content:bag:iil:inv_query_eb:eb
+		string invId = pCaller->getParent()->getParent()->getId();
+
+		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_list"));
+		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+
+		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(invId + ":bag_icons"));
+		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
 
 // ***************************************************************************
 // COMMON INVENTORIES Test if we can drop an item to a slot or a list
