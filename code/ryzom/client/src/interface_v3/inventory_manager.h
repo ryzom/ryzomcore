@@ -521,6 +521,8 @@ struct SBagOptions
 	bool LastDbFilterTP;
 
 	bool SearchFilterChanged;
+	uint16 SearchQualityMin;
+	uint16 SearchQualityMax;
 	std::vector<ucstring> SearchFilter;
 
 	// -----------------------
@@ -530,6 +532,8 @@ struct SBagOptions
 		DbFilterArmor = DbFilterWeapon = DbFilterTool = DbFilterMP = DbFilterMissMP = DbFilterTP = NULL;
 		LastDbFilterArmor = LastDbFilterWeapon = LastDbFilterTool = LastDbFilterMP = LastDbFilterMissMP = LastDbFilterTP = false;
 		SearchFilterChanged = false;
+		SearchQualityMin = 0;
+		SearchQualityMax = 999;
 	}
 
 	bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);

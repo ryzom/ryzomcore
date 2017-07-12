@@ -2014,12 +2014,38 @@ bool SBagOptions::parse(xmlNodePtr cur, CInterfaceGroup * /* parentGroup */)
 // ***************************************************************************
 void SBagOptions::setSearchFilter(const ucstring &s)
 {
+	SearchQualityMin = 0;
+	SearchQualityMax = 999;
 	SearchFilter.clear();
 	SearchFilterChanged = true;
 
 	if (!s.empty())
 	{
-		splitUCString(toLower(s), ucstring(" "), SearchFilter);
+		std::vector<ucstring> words;
+		splitUCString(toLower(s), ucstring(" "), words);
+
+		size_t pos;
+		for(int i = 0; i<words.size(); ++i)
+		{
+			std::string kw = words[i].toUtf8();
+
+			pos = kw.find("-");
+			if (pos != std::string::npos)
+			{
+				uint16 first;
+				uint16 last;
+				if (fromString(kw.substr(0, pos), first))
+					SearchQualityMin = first;
+
+				if (fromString(kw.substr(pos+1), last))
+					SearchQualityMax = last;
+
+				if (first == 0 && last == 0)
+					SearchFilter.push_back(words[i]);
+			}
+			else
+				SearchFilter.push_back(words[i]);
+		}
 	}
 }
 
@@ -2113,6 +2139,10 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 				}
 			}
 		}
+
+		// Quality range
+		if (SearchQualityMin > pCS->getQuality() || SearchQualityMax < pCS->getQuality())
+			return false;
 
 		// Armor
 		if ((pIS->Family == ITEMFAMILY::ARMOR) || 
