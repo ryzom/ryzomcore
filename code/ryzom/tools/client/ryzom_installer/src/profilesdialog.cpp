@@ -83,7 +83,7 @@ void CProfilesDialog::onAddProfile()
 
 void CProfilesDialog::onDeleteProfile()
 {
-	QMessageBox::StandardButton res = QMessageBox::question(this, tr("Confirmation"), tr("You're going to delete a profile, files won't be deleted and you'll have to do that manually.\nAre you sure to delete this profile?"));
+	QMessageBox::StandardButton res = QMessageBox::question(this, tr("Confirmation"), tr("You're going to delete a profile, all files that belong to it (configuration, saves, logs, screenshots, etc...) will be deleted.\nAre you sure to delete this profile?"));
 
 	if (res != QMessageBox::Yes) return;
 
