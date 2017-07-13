@@ -166,8 +166,9 @@ bool CCurlHttpClient::verifyServer(bool verify)
 	{
 		nlwarning("Unable to support CURLOPT_SSL_CTX_FUNCTION, curl not compiled with OpenSSL ?");
 	}
-	// don't use that anymore, because CA can't be loaded from BNP and doesn't support UTF-8 under Windows
-	// curl_easy_setopt(_Curl, CURLOPT_CAINFO, path.c_str());
+
+	// set both CURLOPT_CAINFO and CURLOPT_CAPATH to NULL to be sure we won't use default values (these files can be missing and generate errors)
+	curl_easy_setopt(_Curl, CURLOPT_CAINFO, NULL);
 	curl_easy_setopt(_Curl, CURLOPT_CAPATH, NULL);
 	return true;
 }
