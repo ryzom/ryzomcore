@@ -1390,7 +1390,7 @@ uint64 CSystemInfo::availableHDSpace (const string &filename)
 	struct statfs stfs;
 	if (::statfs(path.c_str(), &stfs) != 0) return 0;
 
-	return (uint64)(stfs.f_bavail * stfs.f_bsize);
+	return (uint64)stfs.f_bavail * (uint64)stfs.f_bsize;
 #else
 	ULARGE_INTEGER freeSpace = {0};
 	BOOL bRes = ::GetDiskFreeSpaceExW(utf8ToWide(path), &freeSpace, NULL, NULL);
