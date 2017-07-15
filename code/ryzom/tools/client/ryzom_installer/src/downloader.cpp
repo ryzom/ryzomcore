@@ -180,9 +180,10 @@ void CDownloader::getFileHead()
 
 void CDownloader::downloadFile()
 {
-	qint64 freeSpace = CConfigFile::getInstance()->ignoreFreeDiskSpaceChecks() ? 0:NLMISC::CSystemInfo::availableHDSpace(m_fullPath.toUtf8().constData());
+	bool ignoreFreeDiskSpaceChecks =  CConfigFile::getInstance()->ignoreFreeDiskSpaceChecks();
+	qint64 freeSpace = NLMISC::CSystemInfo::availableHDSpace(m_fullPath.toUtf8().constData());
 
-	if (freeSpace == 0)
+	if (!ignoreFreeDiskSpaceChecks && freeSpace == 0)
 	{
 		if (m_listener)
 		{
@@ -192,7 +193,7 @@ void CDownloader::downloadFile()
 		return;
 	}
 
-	if (freeSpace < m_size - m_offset)
+	if (!ignoreFreeDiskSpaceChecks && freeSpace < m_size - m_offset)
 	{
 		// we have not enough free disk space to continue download
 		if (m_listener) m_listener->operationFail(tr("You only have %1 bytes left on the device, but %2 bytes are needed.").arg(freeSpace).arg(m_size - m_offset));
