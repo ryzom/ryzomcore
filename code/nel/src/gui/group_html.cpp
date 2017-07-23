@@ -366,8 +366,11 @@ namespace NLGUI
 		time_t currentTime;
 		time(&currentTime);
 
-		CHttpCacheObject cache = CHttpCache::getInstance()->lookup(download.dest);
-		if (CFile::fileExists(download.dest) && cache.Expires > currentTime)
+		CHttpCacheObject cache;
+		if (CFile::fileExists(download.dest))
+			cache = CHttpCache::getInstance()->lookup(download.dest);
+
+		if (cache.Expires > currentTime)
 		{
 	#ifdef LOG_DL
 			nlwarning("Cache for (%s) is not expired (%s, expires:%d)", download.url.c_str(), download.dest.c_str(), cache.Expires - currentTime);
@@ -450,6 +453,19 @@ namespace NLGUI
 	{
 		string finalUrl = upgradeInsecureUrl(getAbsoluteUrl(url));
 
+		// use requested url for local name (cache)
+		string dest = localImageName(url);
+	#ifdef LOG_DL
+		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
+	#endif
+
+		// Display cached image while downloading new
+		if (type != TImageType::OverImage && CFile::fileExists(dest))
+		{
+			setImage(img, dest, type);
+			setImageSize(img, style);
+		}
+
 		// Search if we are not already downloading this url.
 		for(uint i = 0; i < Curls.size(); i++)
 		{
@@ -462,12 +478,6 @@ namespace NLGUI
 				return;
 			}
 		}
-
-		// use requested url for local name (cache)
-		string dest = localImageName(url);
-	#ifdef LOG_DL
-		nlwarning("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
-	#endif
 
 		Curls.push_back(CDataDownload(finalUrl, dest, ImgType, img, "", "", style, type));
 		if (Curls.size() < options.curlMaxConnections) {
@@ -1767,7 +1777,7 @@ namespace NLGUI
 							tooltip = value[MY_HTML_IMG_TITLE];
 
 						// Mouse over image
-						const char *overSrc = value[MY_HTML_IMG_SRC];
+						string overSrc;
 						if (present[MY_HTML_IMG_DATA_OVER_SRC] && value[MY_HTML_IMG_DATA_OVER_SRC])
 						{
 							overSrc = value[MY_HTML_IMG_DATA_OVER_SRC];
@@ -1781,7 +1791,7 @@ namespace NLGUI
 								overSrc, "browse", params.c_str(), tooltip, style);
 						}
 						else
-						if (tooltip || overSrc)
+						if (tooltip || !overSrc.empty())
 						{
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
 								overSrc, "", "", tooltip, style);
