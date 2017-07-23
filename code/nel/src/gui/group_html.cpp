@@ -1774,7 +1774,7 @@ namespace NLGUI
 							tooltip = value[MY_HTML_IMG_TITLE];
 
 						// Mouse over image
-						const char *overSrc = value[MY_HTML_IMG_SRC];
+						string overSrc;
 						if (present[MY_HTML_IMG_DATA_OVER_SRC] && value[MY_HTML_IMG_DATA_OVER_SRC])
 						{
 							overSrc = value[MY_HTML_IMG_DATA_OVER_SRC];
@@ -1788,7 +1788,7 @@ namespace NLGUI
 								overSrc, "browse", params.c_str(), tooltip, style);
 						}
 						else
-						if (tooltip || overSrc)
+						if (tooltip || !overSrc.empty())
 						{
 							addButton(CCtrlButton::PushButton, value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC], value[MY_HTML_IMG_SRC],
 								overSrc, "", "", tooltip, style);
