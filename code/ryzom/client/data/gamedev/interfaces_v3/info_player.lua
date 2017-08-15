@@ -1431,6 +1431,8 @@ function game:onInGameDbInitialized()
 	end
 
 	game:setInfoPlayerCharacterRace()
+
+	runAH(nil, "sort_tribefame", "")
 end
 
 function game:onWebIgReady()

@@ -20,6 +20,7 @@
 #include "stdpch.h"
 
 #include <sstream>
+#include <locale>
 
 // Interface includes
 #include "interface_manager.h"
@@ -4511,3 +4512,63 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerEmote, "emote");
+
+//=================================================================================================================
+class CHandlerSortTribeFame : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CGroupList * list = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:fame:content:tribes:list"));
+		if (list && list->getNumChildren() > 1)
+		{
+			uint nbChilds = list->getNumChildren();
+
+			// std::collate does not work with ucchar
+			std::vector<string> names;
+
+			for (uint i = 0; i < nbChilds; ++i)
+			{
+				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(list->getChild(i));
+				if (!pIG) break;
+
+				CViewText *pVT = dynamic_cast<CViewText *>(pIG->getView("t"));
+				if (!pVT) break;
+
+				names.push_back(toUpper(pVT->getText().toUtf8()));
+			}
+
+			if (names.size() != nbChilds)
+			{
+				nlwarning("Failed to sort tribe fame list");
+				return;
+			}
+
+			std::locale loc("");
+			const std::collate<char>& coll = std::use_facet<std::collate<char> >(loc);
+
+			for(uint i = 0; i < nbChilds - 1; ++i)
+			{
+				uint imin = i;
+				for(uint j = i; j < nbChilds; j++)
+				{
+					// simple comparison fails with accented letters
+					if (coll.compare(names[j].c_str(), names[j].c_str() + names[j].size(),
+							names[imin].c_str(), names[imin].c_str() + names[imin].size()) < 0)
+					{
+						imin = j;
+					}
+				}
+				if (imin != i)
+				{
+					list->swapChildren(i, imin);
+					std::swap(names[i], names[imin]);
+				}
+			}
+
+			list->invalidateCoords();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerSortTribeFame, "sort_tribefame");
+
