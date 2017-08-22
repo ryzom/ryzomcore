@@ -169,6 +169,7 @@ private:
 	static void	unpauseBGDownloader();
 	static void	requestBGDownloaderPriority(uint priority);
 	static sint	getBGDownloaderPriority();
+	static void	loadBackground(const std::string &bg);
 	static ucstring	getPatchLastErrorMessage();
 	static bool	isInGame();
 	static uint32 getPlayerSelectedSlot();

@@ -1464,8 +1464,8 @@ void loadBackgroundBitmap (TBackground background)
 	case EndBackground:
 		filename = ClientCfg.End_BG;
 		break;
-	case IntroNevrax:
-		filename = ClientCfg.IntroNevrax_BG;
+	case CustomBackground: // SpecialCase
+		filename = LoadingBackgroundBG;
 		break;
 	case IntroNVidia:
 		filename = ClientCfg.IntroNVidia_BG;
@@ -1535,7 +1535,15 @@ void loadBackgroundBitmap (TBackground background)
 void beginLoading (TBackground background)
 {
 	LoadingContinent = NULL;
-	loadBackgroundBitmap (background);
+	if (!LoadingBackgroundBG.empty())
+	{
+		loadBackgroundBitmap(CustomBackground);
+		LoadingBackgroundBG = "";
+	}
+	else
+	{
+		loadBackgroundBitmap (background);
+	}
 }
 
 // ***************************************************************************
