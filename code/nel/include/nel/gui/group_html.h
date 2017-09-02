@@ -714,7 +714,12 @@ namespace NLGUI
 		std::vector<CCellParams>	_CellParams;
 
 		// Indentation
-		uint	_Indent;
+		std::vector<uint>	_Indent;
+		inline uint getIndent() const {
+			if (_Indent.empty())
+				return 0;
+			return _Indent.back();
+		}
 
 		// Current node is a title
 		bool			_Title;

@@ -2494,7 +2494,7 @@ namespace NLGUI
 	}
 
 	// ***************************************************************************
-	void CViewText::setFirstLineX(uint firstLineX)
+	void CViewText::setFirstLineX(sint firstLineX)
 	{
 		_FirstLineX = firstLineX;
 	}
