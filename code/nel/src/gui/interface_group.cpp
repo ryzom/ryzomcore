@@ -1457,7 +1457,7 @@ namespace NLGUI
 		}
 
 		CViewBase::updateCoords();
-		_XReal += _OffsetX;
+		_XReal += _OffsetX + _MarginLeft;
 		_YReal += _OffsetY;
 
 		//update all children elements
@@ -1468,7 +1468,7 @@ namespace NLGUI
 			pIE->updateCoords();
 		}
 
-		_XReal -= _OffsetX;
+		_XReal -= _OffsetX - _MarginLeft;
 		_YReal -= _OffsetY;
 	}
 
@@ -1958,9 +1958,9 @@ namespace NLGUI
 			newSciH = newSciH - ((newSciY+newSciH)-(oldSciY+oldSciH));
 		}
 
-		newSciXDest = newSciX;
+		newSciXDest = newSciX - _MarginLeft;
 		newSciYDest = newSciY;
-		newSciWDest = newSciW;
+		newSciWDest = newSciW + _MarginLeft;
 		newSciHDest = newSciH;
 
 	}

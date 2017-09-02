@@ -225,8 +225,6 @@ namespace NLGUI
 				btn->setTexturePushed(file);
 				btn->invalidateCoords();
 				btn->invalidateContent();
-				btn->resetInvalidCoords();
-				btn->updateCoords();
 				paragraphChange();
 			}
 			else
@@ -242,8 +240,6 @@ namespace NLGUI
 				btm->setTexture (file);
 				btm->invalidateCoords();
 				btm->invalidateContent();
-				btm->resetInvalidCoords();
-				btm->updateCoords();
 				paragraphChange();
 			}
 			else
@@ -254,14 +250,12 @@ namespace NLGUI
 					btgc->setTexture (file);
 					btgc->invalidateCoords();
 					btgc->invalidateContent();
-					btgc->resetInvalidCoords();
-					btgc->updateCoords();
 					paragraphChange();
 				}
 			}
 		}
 	}
-	
+
 	// Force image width, height
 	void CGroupHTML::setImageSize(CViewBase *view, const CStyleParams &style)
 	{
@@ -2181,8 +2175,9 @@ namespace NLGUI
 					sint32 indent = LIIndent;
 					// list-style-type: outside
 					if (_CurrentViewLink)
-						indent -= _CurrentViewLink->getMaxUsedW();
-					getParagraph()->setFirstViewIndent(indent);
+					{
+						getParagraph()->setFirstViewIndent(-_CurrentViewLink->getMaxUsedW());
+					}
 
 					flushString ();
 
@@ -2238,8 +2233,7 @@ namespace NLGUI
 					if (present[MY_HTML_TABLE_CELLPADDING] && value[MY_HTML_TABLE_CELLPADDING])
 						fromString(value[MY_HTML_TABLE_CELLPADDING], table->CellPadding);
 
-					// Table must fit the container size
-
+					table->setMarginLeft(getIndent());
 					addHtmlGroup (table, 0);
 
 					_Tables.push_back(table);
@@ -2247,6 +2241,7 @@ namespace NLGUI
 					// Add a cell pointer
 					_Cells.push_back(NULL);
 					_TR.push_back(false);
+					_Indent.push_back(0);
 				}
 				break;
 			case HTML_TH:
@@ -2328,7 +2323,12 @@ namespace NLGUI
 
 							_Cells.back()->NewLine = getTR();
 							table->addChild (_Cells.back());
+
+							// reusing indent pushed by table
+							_Indent.back() = 0;
+
 							newParagraph(TDBeginSpace);
+							// indent is already 0, getParagraph()->setMarginLeft(0); // maybe setIndent(0) if LI is using one
 
 							// Reset TR flag
 							if (!_TR.empty())
@@ -2418,7 +2418,7 @@ namespace NLGUI
 					_UL.push_back(HTMLOListElement(1, "square"));
 				// if LI is already present
 				_LI = _UL.size() > 1 || _DL.size() > 1;
-				_Indent += ULIndent;
+				_Indent.push_back(getIndent() + ULIndent);
 				endParagraph();
 				break;
 			case HTML_OBJECT:
@@ -2489,6 +2489,13 @@ namespace NLGUI
 			case HTML_DT:
 				if (!_DL.empty())
 				{
+					// close DT if still open
+					if (_DL.back().DD)
+					{
+						_DL.back().DD = false;
+						popIfNotEmpty(_Indent);
+					}
+
 					// see if this is the first <dt>, closing tag not required
 					if (!_DL.back().DT)
 					{
@@ -2519,8 +2526,8 @@ namespace NLGUI
 
 					if (!_DL.back().DD)
 					{
-						_Indent += ULIndent;
 						_DL.back().DD = true;
+						_Indent.push_back(getIndent() + ULIndent);
 					}
 
 					if (!_LI)
@@ -2547,7 +2554,7 @@ namespace NLGUI
 					_UL.push_back(HTMLOListElement(start, type));
 					// if LI is already present
 					_LI = _UL.size() > 1 || _DL.size() > 1;
-					_Indent += ULIndent;
+					_Indent.push_back(getIndent() + ULIndent);
 					endParagraph();
 				}
 				break;
@@ -2659,6 +2666,7 @@ namespace NLGUI
 				popIfNotEmpty (_TR);
 				popIfNotEmpty (_Cells);
 				popIfNotEmpty (_Tables);
+				popIfNotEmpty (_Indent);
 				endParagraph();
 				// Add a cell
 				break;
@@ -2801,13 +2809,9 @@ namespace NLGUI
 			case HTML_UL:
 				if (!_UL.empty())
 				{
-					if (_Indent > ULIndent)
-						_Indent = _Indent - ULIndent;
-					else
-						_Indent = 0;
-
 					endParagraph();
 					popIfNotEmpty(_UL);
+					popIfNotEmpty(_Indent);
 				}
 				break;
 			case HTML_DL:
@@ -2824,10 +2828,7 @@ namespace NLGUI
 					// unclosed DD
 					if (_DL.back().DD)
 					{
-						if (_Indent > ULIndent)
-							_Indent = _Indent - ULIndent;
-						else
-							_Indent = 0;
+						popIfNotEmpty(_Indent);
 					}
 
 					popIfNotEmpty (_DL);
@@ -2846,12 +2847,8 @@ namespace NLGUI
 					// parser will process two DD in a row as nested when first DD is not closed
 					if (_DL.back().DD)
 					{
-						if (_Indent > ULIndent)
-							_Indent = _Indent - ULIndent;
-						else
-							_Indent = 0;
-
 						_DL.back().DD = false;
+						popIfNotEmpty(_Indent);
 					}
 				}
 				break;
@@ -2964,7 +2961,7 @@ namespace NLGUI
 		_Connecting = false;
 		_CurrentViewLink = NULL;
 		_CurrentViewImage = NULL;
-		_Indent = 0;
+		_Indent.clear();
 		_LI = false;
 		_SelectOption = false;
 		_GroupListAdaptor = NULL;
@@ -4033,7 +4030,7 @@ namespace NLGUI
 		CGroupParagraph *newParagraph = new CGroupParagraph(CViewBase::TCtorParam());
 		newParagraph->setResizeFromChildH(true);
 
-		newParagraph->setIndent(_Indent);
+		newParagraph->setMarginLeft(getIndent());
 
 		// Add to the group
 		addHtmlGroup (newParagraph, beginSpace);
@@ -4767,7 +4764,7 @@ namespace NLGUI
 		_FontOblique.clear();
 		_FontUnderlined.clear();
 		_FontStrikeThrough.clear();
-		_Indent = 0;
+		_Indent.clear();
 		_LI = false;
 		_UL.clear();
 		_DL.clear();
