@@ -689,7 +689,7 @@ namespace NLGUI
 								char *ch;
 								std::string contentType;
 								res = curl_easy_getinfo(_CurlWWW->Request, CURLINFO_CONTENT_TYPE, &ch);
-								if (res == CURLE_OK)
+								if (res == CURLE_OK && ch != NULL)
 								{
 									contentType = ch;
 								}
