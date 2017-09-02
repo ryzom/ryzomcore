@@ -225,8 +225,6 @@ namespace NLGUI
 				btn->setTexturePushed(file);
 				btn->invalidateCoords();
 				btn->invalidateContent();
-				btn->resetInvalidCoords();
-				btn->updateCoords();
 				paragraphChange();
 			}
 			else
@@ -242,8 +240,6 @@ namespace NLGUI
 				btm->setTexture (file);
 				btm->invalidateCoords();
 				btm->invalidateContent();
-				btm->resetInvalidCoords();
-				btm->updateCoords();
 				paragraphChange();
 			}
 			else
@@ -254,14 +250,12 @@ namespace NLGUI
 					btgc->setTexture (file);
 					btgc->invalidateCoords();
 					btgc->invalidateContent();
-					btgc->resetInvalidCoords();
-					btgc->updateCoords();
 					paragraphChange();
 				}
 			}
 		}
 	}
-	
+
 	// Force image width, height
 	void CGroupHTML::setImageSize(CViewBase *view, const CStyleParams &style)
 	{
