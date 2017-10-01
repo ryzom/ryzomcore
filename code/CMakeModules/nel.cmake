@@ -565,11 +565,18 @@ MACRO(NL_SETUP_BUILD)
     ADD_PLATFORM_FLAGS("/X")
 
     IF(MSVC14)
-      ADD_PLATFORM_FLAGS("/Gy- /MP")
-      # /Ox is working with VC++ 2015, but custom optimizations don't exist
+      ADD_PLATFORM_FLAGS("/Gy-")
+      # /Ox is working with VC++ 2015 and 2017, but custom optimizations don't exist
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
+
+      # Special cases for VC++ 2017
+      IF(MSVC_VERSION EQUAL "1911")
+        SET(MSVC1411 ON)
+      ELSEIF(MSVC_VERSION EQUAL "1910")
+        SET(MSVC1410 ON)
+      ENDIF()
     ELSEIF(MSVC12)
       ADD_PLATFORM_FLAGS("/Gy-")
       # /Ox is working with VC++ 2013, but custom optimizations don't exist
@@ -657,6 +664,8 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     IF(APPLE)
+      SET(OBJC_FLAGS -fobjc-abi-version=2 -fobjc-legacy-dispatch -fobjc-weak)
+    
       IF(NOT XCODE)
         IF(CMAKE_OSX_ARCHITECTURES)
           SET(TARGETS_COUNT 0)
@@ -1160,6 +1169,7 @@ MACRO(SETUP_EXTERNAL)
 
     IF(APPLE)
       IF(WITH_STATIC_EXTERNAL)
+        # Look only for static libraries because systems libraries are using Frameworks
         SET(CMAKE_FIND_LIBRARY_SUFFIXES .a)
       ELSE()
         SET(CMAKE_FIND_LIBRARY_SUFFIXES .dylib .so .a)
@@ -1173,12 +1183,13 @@ MACRO(SETUP_EXTERNAL)
     ENDIF()
   ENDIF()
 
-  # Android and iOS have pthread
-  IF(ANDROID OR IOS)
+  # Android, iOS and Mac OS X have pthread, but no need to link to libpthread
+  IF(ANDROID OR APPLE)
     SET(CMAKE_USE_PTHREADS_INIT 1)
     SET(Threads_FOUND TRUE)
   ELSE()
-    FIND_PACKAGE(Threads REQUIRED)
+    SET(THREADS_HAVE_PTHREAD_ARG ON)
+    FIND_PACKAGE(Threads)
     # TODO: replace all -l<lib> by absolute path to <lib> in CMAKE_THREAD_LIBS_INIT
   ENDIF()
 

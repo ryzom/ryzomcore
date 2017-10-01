@@ -22,6 +22,10 @@
 #include "events_listener.h"
 #include "interface_v3/interface_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

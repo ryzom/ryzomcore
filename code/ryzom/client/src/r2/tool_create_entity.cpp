@@ -41,6 +41,10 @@
 #include "game_share/player_visual_properties.h"
 #include "game_share/visual_slot_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLPACS;
 using namespace NLMISC;
 using namespace std;

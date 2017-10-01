@@ -22,6 +22,10 @@
 
 #include "nel/georges/header.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 namespace NLGEORGES

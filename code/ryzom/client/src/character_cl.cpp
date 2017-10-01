@@ -111,6 +111,9 @@
 #include "game_share/range_weapon_type.h"
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ////////////
 // DEFINE //
@@ -136,10 +139,6 @@ using namespace NLSOUND;
 using namespace std;
 using namespace MBEHAV;
 using namespace CLFECOMMON;
-
-#ifdef DEBUG_NEW
-#define new DEBUG_NEW
-#endif
 
 ////////////
 // EXTERN //

@@ -29,6 +29,9 @@
 #include "nel/gui/view_renderer.h"
 #include "../interface_v3/group_map.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NL3D;
 using namespace NLMISC;

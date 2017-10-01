@@ -26,6 +26,10 @@
 #include "effect_xaudio2.h"
 #include "source_xaudio2.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

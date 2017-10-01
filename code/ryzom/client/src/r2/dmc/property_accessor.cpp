@@ -21,6 +21,11 @@
 #include "game_share/object.h"
 
 #include <assert.h>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace R2;
 
 

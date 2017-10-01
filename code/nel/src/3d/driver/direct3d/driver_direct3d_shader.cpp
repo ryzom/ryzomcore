@@ -20,6 +20,10 @@
 #include "nel/misc/path.h"
 #include "nel/misc/file.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

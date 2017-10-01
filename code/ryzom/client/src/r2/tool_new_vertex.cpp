@@ -23,6 +23,10 @@
 //
 #include "nel/misc/i18n.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 
 namespace R2

@@ -5,6 +5,24 @@
 #  VC_LIBRARY_DIR  - where to find libraries
 #  VC_FOUND        - True if MSVC found.
 
+MACRO(ADD_TRAILING_SLASH _FILENAME_VAR)
+  # put content in a new variable
+  SET(_FILENAME ${${_FILENAME_VAR}})
+  # get length of the string
+  STRING(LENGTH ${_FILENAME} _LEN)
+  # convert length to last pos
+  MATH(EXPR _POS "${_LEN}-1")
+  # get last character of the string
+  STRING(SUBSTRING ${_FILENAME} ${_POS} 1 _FILENAME_END)
+  # compare it with a slash
+  IF(NOT _FILENAME_END STREQUAL "/")
+    # not a slash, append it
+    SET(${_FILENAME_VAR} "${_FILENAME}/")
+  ELSE()
+    # already a slash
+  ENDIF()
+ENDMACRO()
+
 MACRO(DETECT_VC_VERSION_HELPER _ROOT _VERSION)
   # Software/Wow6432Node/...
   GET_FILENAME_COMPONENT(VC${_VERSION}_DIR "[${_ROOT}\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;${_VERSION}]" ABSOLUTE)
@@ -12,7 +30,11 @@ MACRO(DETECT_VC_VERSION_HELPER _ROOT _VERSION)
   IF(VC${_VERSION}_DIR AND VC${_VERSION}_DIR STREQUAL "/registry")
     SET(VC${_VERSION}_DIR)
     GET_FILENAME_COMPONENT(VC${_VERSION}_DIR "[${_ROOT}\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VS7;${_VERSION}]" ABSOLUTE)
+
     IF(VC${_VERSION}_DIR AND NOT VC${_VERSION}_DIR STREQUAL "/registry")
+      # be sure it's finishing by a /
+      ADD_TRAILING_SLASH(VC${_VERSION}_DIR)
+
       SET(VC${_VERSION}_DIR "${VC${_VERSION}_DIR}VC/")
     ENDIF()
   ENDIF()
@@ -55,7 +77,34 @@ MACRO(DETECT_EXPRESS_VERSION _VERSION)
   ENDIF()
 ENDMACRO()
 
-IF(MSVC14)
+IF(MSVC1411 OR MSVC1410)
+  DETECT_VC_VERSION("15.0")
+  SET(MSVC_TOOLSET "140")
+
+  SET(VC_DIR "${VC_DIR}Tools/MSVC")
+
+  FILE(GLOB MSVC_TOOLCHAIN_VERSIONS RELATIVE ${VC_DIR} "${VC_DIR}/*")
+
+  IF(MSVC_TOOLCHAIN_VERSIONS)
+    LIST(SORT MSVC_TOOLCHAIN_VERSIONS)
+    LIST(REVERSE MSVC_TOOLCHAIN_VERSIONS)
+  ENDIF()
+
+  IF(NOT MSVC_TOOLCHAIN_VERSIONS)
+    MESSAGE(FATAL_ERROR "No MSVC version found in default search path ${VC_DIR}")
+  ENDIF()
+
+  LIST(GET MSVC_TOOLCHAIN_VERSIONS 0 MSVC_TOOLCHAIN_VERSION)
+
+  SET(VC_DIR "${VC_DIR}/${MSVC_TOOLCHAIN_VERSION}")
+  SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+
+  IF(NOT MSVC14_REDIST_DIR)
+    # If you have VC++ 2017 Express, put x64/Microsoft.VC141.CRT/*.dll in ${EXTERNAL_PATH}/redist
+    # original files whould be in ${VC_DIR}/Redist/MSVC/14.11.25325/x64/Microsoft.VC141.CRT
+    SET(MSVC14_REDIST_DIR "${EXTERNAL_PATH}/redist")
+  ENDIF()
+ELSEIF(MSVC14)
   DETECT_VC_VERSION("14.0")
   SET(MSVC_TOOLSET "140")
 
@@ -109,6 +158,11 @@ IF(NOT VC_DIR)
   STRING(REGEX REPLACE "/(bin|BIN|Bin)/.+" "" VC_DIR ${_COMPILER})
 ENDIF()
 
-SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+IF(NOT VC_INCLUDE_DIR)
+  SET(VC_INCLUDE_DIR "${VC_DIR}/include")
+ENDIF()
+
+MESSAGE(STATUS "Using headers from ${VC_INCLUDE_DIR}")
+
 SET(VC_INCLUDE_DIRS ${VC_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${VC_INCLUDE_DIR})

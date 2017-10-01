@@ -42,6 +42,10 @@
 //
 #include "nel/3d/packed_world.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern NLPACS::UGlobalRetriever	*GR;
 
 

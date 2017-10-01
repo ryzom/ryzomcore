@@ -28,10 +28,6 @@ IF(COMMAND cmake_policy)
   # have absolute paths (e.g. -lpthread)
   cmake_policy(SET CMP0003 NEW)
 
-  # Works around warnings about escaped quotes in ADD_DEFINITIONS
-  # statements
-  cmake_policy(SET CMP0005 OLD)
-
   # allow to link to qtmain automatically under Windows
   IF(POLICY CMP0020)
     CMAKE_POLICY(SET CMP0020 NEW)
@@ -451,6 +447,8 @@ IF(WITH_NEL)
             SET(CURL_LIBRARIES ${CURL_LIBRARIES} ${INTL_LIBRARY})
           ENDIF()
         ENDIF()
+      ELSEIF(WIN32)
+        SET(CURL_LIBRARIES ${CURL_LIBRARIES} Crypt32.lib)
       ENDIF()
     ENDIF()
   ENDIF()

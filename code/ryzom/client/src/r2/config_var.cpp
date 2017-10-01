@@ -17,6 +17,9 @@
 #include "stdpch.h"
 #include "config_var.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 namespace R2

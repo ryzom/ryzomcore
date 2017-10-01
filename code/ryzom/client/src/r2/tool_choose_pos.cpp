@@ -35,6 +35,10 @@
 #include "dmc/idmc.h"
 #include "r2_config.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLPACS;
 using namespace NLMISC;
 

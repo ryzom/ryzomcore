@@ -1071,9 +1071,9 @@ void CCharacterInvView::updateClientSlot(uint32 slot, const CGameItemPtr item)
 		{
 			resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
 		}
-		
+
 		const INVENTORIES::TItemId &itemId = item->getItemId();
-		
+
 		INVENTORIES::CItemSlot itemSlot( slot );
 		itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
 		itemSlot.setItemProp( INVENTORIES::Quality, item->quality() );

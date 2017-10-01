@@ -47,7 +47,6 @@
 #include "editor.h"
 //
 #include "nel/gui/lua_helper.h"
-using namespace NLGUI;
 #include "nel/gui/group_tree.h"
 #include "../interface_v3/interface_manager.h"
 #include "../contextual_cursor.h"
@@ -115,11 +114,14 @@ using namespace NLGUI;
 #include "../far_tp.h"
 #include "nel/gui/lua_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 using namespace NLNET;
 using namespace NL3D;
-
+using namespace NLGUI;
 
 extern CEventsListener EventsListener;
 extern CLog	g_log;
@@ -1628,7 +1630,16 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	mt.setValue("__gc", CLuaObject(ls));
 	//
 	void *newIter = ls.newUserData(sizeof(CInstanceEnumerator));
+
+#ifdef new
+#undef new
+#endif
+
 	CInstanceEnumerator *ie = new (newIter) CInstanceEnumerator;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 	ie->InstMap = &getEditor()._InstancesByDispName[classIndex];
 	ie->Current = ie->InstMap->begin();

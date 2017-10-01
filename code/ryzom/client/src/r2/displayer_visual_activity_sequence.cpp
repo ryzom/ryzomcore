@@ -23,6 +23,9 @@
 #include "../interface_v3/interface_manager.h"
 #include "nel/gui/view_renderer.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 

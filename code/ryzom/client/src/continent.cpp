@@ -935,7 +935,6 @@ void CContinent::unselect()
 	// Remove the instances (shapes).
 	EntitiesMngr.removeInstances();
 
-
 	// release collision primitives
 	if (IGCallbacks)
 	{
