@@ -570,6 +570,13 @@ MACRO(NL_SETUP_BUILD)
       SET(RELEASE_CFLAGS "/Ox /GF /GS- ${RELEASE_CFLAGS}")
       # without inlining it's unusable, use custom optimizations again
       SET(DEBUG_CFLAGS "/Od /Ob1 /GF- ${DEBUG_CFLAGS}")
+
+      # Special cases for VC++ 2017
+      IF(MSVC_VERSION EQUAL "1911")
+        SET(MSVC1411 ON)
+      ELSEIF(MSVC_VERSION EQUAL "1910")
+        SET(MSVC1410 ON)
+      ENDIF()
     ELSEIF(MSVC12)
       ADD_PLATFORM_FLAGS("/Gy-")
       # /Ox is working with VC++ 2013, but custom optimizations don't exist
