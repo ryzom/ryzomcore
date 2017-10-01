@@ -2048,7 +2048,8 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 	float x = 0.0f, y = 0.0f, z = 0.0f;
 	float scale = 1.0f;
 	string context, url, skeleton, texture;
-	bool highlight, transparency = false;
+	bool highlight = false;
+	bool transparency = false;
 	bool collision = true;
 	
 	if (ls.getTop() >= 2)
@@ -2150,14 +2151,14 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 			if (!highlight)
 			{
 				instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
-				instance.getMaterial(j).setShininess( 10.0f );
 				instance.getMaterial(j).setEmissive(CRGBA(255,255,255,255));
+				instance.getMaterial(j).setShininess(10.0f);
 			}
 			else
 			{
 				instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
 				instance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
-				instance.getMaterial(j).setShininess( 1000.0f );
+				instance.getMaterial(j).setShininess(1000.0f);
 			}
 
 			if (!texture.empty())

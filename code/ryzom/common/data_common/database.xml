@@ -1551,7 +1551,8 @@
       <leaf name="DESPAWN"
             type="I7" />
       <leaf name="NAME"
-            type="I32" />
+            type="I32"
+            is_true="1" />
     </branch>
   </branch>
   <branch name="DEBUG_INFO"

@@ -96,9 +96,14 @@ REGISTER_ACTION_HANDLER (CAHDisplayInfos, "display_infos");
 // ------------------------------------------------------------------------------------------------
 class CAHToggleARKPACSBorders : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
-		ARKPACSBorders = !ARKPACSBorders;
+		if (!getParam(Params, "on").empty())
+			ARKPACSBorders = true;
+		else if (!getParam(Params, "off").empty())
+			ARKPACSBorders = false;
+		else ARKPACSBorders = !ARKPACSBorders;
+
 	}
 };
 REGISTER_ACTION_HANDLER (CAHToggleARKPACSBorders, "ark_pacs_borders");

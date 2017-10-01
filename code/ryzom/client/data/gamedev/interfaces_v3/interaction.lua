@@ -217,7 +217,7 @@ end
 -- Is its level known (not too high ...)
 -- Boss/Mini-bosses/Names colored ring
 function game:updateTargetConsiderUI()
-	--debugInfo("Updating consider widget")
+	-- debugInfo("Updating consider widget")
 
 	local targetWindow = getUI("ui:interface:target")
 	--
@@ -228,12 +228,14 @@ function game:updateTargetConsiderUI()
 	local wgToolTip     = targetWindow:find("target_tooltip")
 	local wgPvPTag      = targetWindow:find("pvp_tags")
 	local wgHeader      = targetWindow:find("header_opened")
+	local wgLock        = targetWindow:find("lock")
 
 	wgTargetSlotForce.active = true
 	wgImpossible.active = true
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
+		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
 		wgImpossible.active = false
@@ -254,20 +256,36 @@ function game:updateTargetConsiderUI()
 	wgPvPTag.active = false
 	wgHeader.h = 34;
 
+
+-- /luaScript getUI("ui:interface:target:header_opened:lock").active=true
+
 	-- if the selection is a player, then both the local & targeted player must be in PVP mode for the level to be displayed
 	if (twIsTargetPlayer()) then
 		-- don't display anything ...
+		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
 		wgImpossible.active = false
 		wgSlotRing.active  = false
 		wgToolTip.tooltip = ""
 		if twIsTargetInPVPMode() then
-			debugInfo("target in pvp")
 			wgPvPTag.active = true
 			wgHeader.h = 56;
 		end
 		return
+	else
+		wgLock.active = false
+		local level = getDbProp(getDefine("target_player_level"))
+
+		if level == 2 then -- Locked by team of player
+			wgLock.active = true
+			wgLock.color = "50 250 250 255"
+		else
+			if level == 1 then -- Locked by another team
+				wgLock.active = true
+				wgLock.color = "250 50 50 255"
+			end
+		end
 	end
 
 	-- depending on the number of people in the group, set the max diff for visibility between player level

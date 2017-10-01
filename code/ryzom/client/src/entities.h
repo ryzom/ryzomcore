@@ -236,6 +236,8 @@ public:
 	CVector getInstanceColPos(uint32 idx);
 	CVector getInstanceColScale(uint32 idx);
 	double getInstanceColOrient(uint32 idx);
+	CVector getInstanceBBoxMin(uint32 idx);
+	CVector getInstanceBBoxMax(uint32 idx);
 	bool setInstanceRot(uint32 idx, CVector pos);
 	bool instancesRemoved();
 	bool setupInstance(uint32 idx, const std::vector<std::string> &keys, const std::vector<std::string> &values);
