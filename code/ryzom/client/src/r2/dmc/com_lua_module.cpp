@@ -58,6 +58,9 @@ using namespace NLGUI;
 using namespace NLMISC;
 using namespace R2;
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 
 std::map<lua_State*, CComLuaModule*> CComLuaModule::_Instance;

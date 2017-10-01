@@ -18,6 +18,10 @@
 #include "music_channel_fmod.h"
 #include "sound_driver_fmod.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

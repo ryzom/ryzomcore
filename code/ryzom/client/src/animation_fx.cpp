@@ -27,6 +27,10 @@
 #include "nel/3d/u_scene.h"
 #include "client_sheets/animation_fx_set_sheet.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern NL3D::UScene *Scene;
 
 

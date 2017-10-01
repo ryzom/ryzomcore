@@ -45,6 +45,9 @@
 #include <assert.h>
 
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLNET;
 using namespace NLMISC;

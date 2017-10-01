@@ -24,6 +24,10 @@
 #include "nel/georges/form_loader.h"
 #include "nel/georges/form_elm.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NLMISC;
 using namespace std;
 

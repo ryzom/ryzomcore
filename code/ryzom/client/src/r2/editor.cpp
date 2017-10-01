@@ -115,6 +115,9 @@ using namespace NLGUI;
 #include "../far_tp.h"
 #include "nel/gui/lua_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 using namespace NLNET;
@@ -1628,7 +1631,16 @@ int CEditor::luaEnumInstances(CLuaState &ls)
 	mt.setValue("__gc", CLuaObject(ls));
 	//
 	void *newIter = ls.newUserData(sizeof(CInstanceEnumerator));
+
+#ifdef new
+#undef new
+#endif
+
 	CInstanceEnumerator *ie = new (newIter) CInstanceEnumerator;
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 	ie->InstMap = &getEditor()._InstancesByDispName[classIndex];
 	ie->Current = ie->InstMap->begin();

@@ -27,6 +27,10 @@
 #include "time_client.h"
 #include "fx_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern NL3D::UScene *Scene;
 
 

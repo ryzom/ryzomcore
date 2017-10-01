@@ -33,6 +33,9 @@
 #include "nel/3d/u_visual_collision_manager.h"
 #include "nel/3d/u_visual_collision_entity.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 using namespace NLMISC;
 

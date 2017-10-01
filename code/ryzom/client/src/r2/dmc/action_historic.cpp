@@ -21,6 +21,10 @@
 #include "../editor.h"
 #include "nel/gui/lua_ihm.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 namespace R2
 {
 

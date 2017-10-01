@@ -22,6 +22,10 @@
 #include "source_al.h"
 #include "ext_al.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // #define NLSOUND_DEBUG_GAIN
 
 using namespace std;

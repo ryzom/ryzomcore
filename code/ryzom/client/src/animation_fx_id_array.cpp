@@ -23,6 +23,10 @@
 //
 #include "nel/3d/u_scene.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern NL3D::UScene *Scene;
 
 // *********************************************************************

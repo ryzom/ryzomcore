@@ -31,6 +31,10 @@
 
 #include "nel/misc/win_thread.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace BGDownloader;
 using namespace NLMISC;
 

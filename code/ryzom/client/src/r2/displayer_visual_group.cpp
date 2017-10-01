@@ -38,6 +38,10 @@
 #include "../time_client.h"
 //
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 class CGroupMap;
 
 using namespace R2;
