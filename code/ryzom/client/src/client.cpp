@@ -54,6 +54,10 @@
 #include "far_tp.h"
 #include "user_agent.h"
 
+#ifdef RZ_USE_STEAM
+#include "steam_client.h"
+#endif
+
 ///////////
 // USING //
 ///////////
@@ -193,13 +197,17 @@ int main(int argc, char **argv)
 	// no shard id in ring mode
 	std::string sLoginShardId;
 
-	if (Args.haveAdditionalArg("login") && Args.haveAdditionalArg("password"))
+	if (Args.haveAdditionalArg("login"))
 	{
 		LoginLogin = Args.getAdditionalArg("login").front();
-		LoginPassword = Args.getAdditionalArg("password").front();
 
-		if (Args.haveAdditionalArg("shard_id"))
-			sLoginShardId = Args.getAdditionalArg("shard_id").front();
+		if (Args.haveAdditionalArg("password"))
+		{
+			LoginPassword = Args.getAdditionalArg("password").front();
+
+			if (Args.haveAdditionalArg("shard_id"))
+				sLoginShardId = Args.getAdditionalArg("shard_id").front();
+		}
 	}
 
 	if (sLoginShardId.empty() || !fromString(sLoginShardId, LoginShardId))
@@ -282,6 +290,12 @@ int main(int argc, char **argv)
 	// initialize log
 	initLog();
 
+#ifdef RZ_USE_STEAM
+	CSteamClient steamClient;
+
+	if (steamClient.init())
+		LoginCustomParameters = "&steam_auth_session_ticket=" + steamClient.getAuthSessionTicket();
+#endif
 
 	// initialize patch manager and set the ryzom full path, before it's used
 	CPatchManager *pPM = CPatchManager::getInstance();

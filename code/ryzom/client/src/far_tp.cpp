@@ -189,7 +189,7 @@ const std::string& CLoginStateMachine::toString(CLoginStateMachine::TEvent event
 			break;						\
 		}								\
 
-extern std::string LoginLogin, LoginPassword;
+extern std::string LoginLogin, LoginPassword, LoginCustomParameters;
 extern bool noUserChar;
 extern bool userChar;
 extern bool serverReceivedReady;
@@ -246,14 +246,26 @@ void CLoginStateMachine::run()
 
 			if (!ClientCfg.TestBrowser)
 			{
-				if (LoginLogin.empty())
+				if (LoginPassword.empty())
 				{
-					// standard procedure
-					SM_BEGIN_EVENT_TABLE
-						SM_EVENT(ev_init_done, st_login);
-						SM_EVENT(ev_skip_all_login, st_ingame);
-						SM_EVENT(ev_quit, st_end);
-					SM_END_EVENT_TABLE
+					if (!LoginCustomParameters.empty() && LoginLogin.empty())
+					{
+						// alternate login procedure
+						SM_BEGIN_EVENT_TABLE
+							SM_EVENT(ev_init_done, st_alt_login);
+							SM_EVENT(ev_skip_all_login, st_ingame);
+							SM_EVENT(ev_quit, st_end);
+						SM_END_EVENT_TABLE
+					}
+					else
+					{
+						// standard procedure
+						SM_BEGIN_EVENT_TABLE
+							SM_EVENT(ev_init_done, st_login);
+							SM_EVENT(ev_skip_all_login, st_ingame);
+							SM_EVENT(ev_quit, st_end);
+						SM_END_EVENT_TABLE
+					}
 				}
 				else
 				{
@@ -314,6 +326,27 @@ void CLoginStateMachine::run()
 			{
 				// r2 mode
 				SM_BEGIN_EVENT_TABLE
+					SM_EVENT(ev_login_ok, st_check_patch);
+					SM_EVENT(ev_quit, st_end);
+				SM_END_EVENT_TABLE
+			}
+//				else
+//				{
+//					// legacy mode
+//					SM_BEGIN_EVENT_TABLE
+//						SM_EVENT(ev_login_ok, st_check_patch);
+//						SM_EVENT(ev_quit, st_end);
+//					SM_END_EVENT_TABLE
+//				}
+			break;
+		case st_alt_login:
+			initAltLogin();
+
+//				if (ClientCfg.R2Mode)
+			{
+				// r2 mode
+				SM_BEGIN_EVENT_TABLE
+					SM_EVENT(ev_login_not_alt, st_login);
 					SM_EVENT(ev_login_ok, st_check_patch);
 					SM_EVENT(ev_quit, st_end);
 				SM_END_EVENT_TABLE
