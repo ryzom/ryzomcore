@@ -272,6 +272,14 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	void CGroupTree::SNode::openAll()
+	{
+		Opened = true;
+		for (uint i = 0; i < Children.size(); ++i)
+			Children[i]->openAll();
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupTree::SNode::closeAll()
 	{
 		Opened = false;
@@ -1082,7 +1090,9 @@ namespace NLGUI
 				}
 			}
 
-			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
+			bool toggleOne = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown);
+			bool toggleAll = (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown);
+			if (toggleOne || toggleAll)
 			{
 				// line selection
 				if (bText)
@@ -1118,6 +1128,13 @@ namespace NLGUI
 						{
 							// open/close the node
 							changedNode->Opened = !changedNode->Opened;
+							if (toggleAll)
+							{
+								if (changedNode->Opened)
+									changedNode->openAll();
+								else
+									changedNode->closeAll();
+							}
 						}
 						// else must close all necessary nodes.
 						else
