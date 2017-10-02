@@ -177,6 +177,7 @@ IF(WITH_RYZOM_CLIENT)
               ${LUA_LIBRARIES}
               ${LUABIND_LIBRARIES}
               ${CURL_LIBRARIES}
+              ${OPENSSL_LIBRARIES}
   )
 
   IF(NOT APPLE AND NOT WIN32)
