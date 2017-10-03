@@ -17,6 +17,8 @@
 #ifndef LOGIC_EDITOR_INTERFACE
 #define LOGIC_EDITOR_INTERFACE
 
+#include <tchar.h>
+
 #ifndef LOGIC_EDITOR_EXPORT
 #define LOGIC_EDITOR_EXPORT __declspec( dllimport ) 
 #endif // LOGIC_EDITOR_EXPORT
