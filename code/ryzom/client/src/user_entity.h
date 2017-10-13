@@ -297,6 +297,8 @@ public:
 	// get the velocity vector of the entity
 	NLMISC::CVector getVelocity() const;
 
+	inline void setSpeedServerAdjust(float speed) {_SpeedServerAdjust = speed;}
+
 	/// Check if the mount is able to run, and force walking mode if not
 	void checkMountAbleToRun();
 
@@ -423,6 +425,7 @@ public:
 	void tp(const NLMISC::CVectorD &dest);
 	/// Teleport the player to correct his position.
 	void correctPos(const NLMISC::CVectorD &dest);
+	
 	/// Skill Up
 	void skillUp();
 	/// get the level of the player (max of all skills)
@@ -545,6 +548,8 @@ protected:
 	/// Velocity : Front and Lateral
 	float						_FrontVelocity;
 	float						_LateralVelocity;
+	/// Speed adjustement from gpms
+	float						_SpeedServerAdjust;
 	/// Head Pitch
 	double						_HeadPitch;
 	/// Height of the eyes (camera).

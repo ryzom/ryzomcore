@@ -1218,6 +1218,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 		// don't increase speed
 		clamp(modif, 0.0, 1.0);
 		speed *= modif;
+		speed *= _SpeedServerAdjust;
 		// Move
 		_HasMoved = true;
 		_Primitive->move(speed, dynamicWI);
@@ -1227,6 +1228,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	// Third Person View
 	else
 	{
+		speed *= _SpeedServerAdjust;
 		speed += pos();
 		sint64 x = (sint64)((sint32)(speed.x * 1000.0));
 		sint64 y = (sint64)((sint32)(speed.y * 1000.0));
@@ -1243,6 +1245,9 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			mount->_Stages.addStage(NetMngr.getCurrentClientTick()+time, CLFECOMMON::PROPERTY_POSZ, z);
 		}
 	}
+
+	_SpeedServerAdjust += 0.05;
+	clamp(_SpeedServerAdjust, 0.8, 1.0);
 }// applyMotion //
 
 
