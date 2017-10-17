@@ -55,7 +55,7 @@ namespace NLGUI {
 			time_t currentTime;
 			time(&currentTime);
 
-			return (hsts.Expires < currentTime);
+			return (hsts.Expires > currentTime);
 		}
 
 		return false;
