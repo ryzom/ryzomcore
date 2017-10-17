@@ -4657,7 +4657,6 @@ namespace NLGUI
 				if(!CFile::fileExists(normal))
 				{
 					normal = "web_del.tga";
-					addImageDownload(normalBitmap, ctrlButton, style);
 				}
 				else
 				{
@@ -4674,6 +4673,8 @@ namespace NLGUI
 						normal = "web_del.tga";
 					}
 				}
+
+				addImageDownload(normalBitmap, ctrlButton, style);
 			}
 		}
 
@@ -4698,10 +4699,7 @@ namespace NLGUI
 			if (overBitmap != normalBitmap)
 			{
 				over = localImageName(overBitmap);
-				if (!CFile::fileExists(over))
-				{
-					addImageDownload(overBitmap, ctrlButton, style, TImageType::OverImage);
-				}
+				addImageDownload(overBitmap, ctrlButton, style, TImageType::OverImage);
 			}
 		}
 
