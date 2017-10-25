@@ -144,6 +144,8 @@ CUserEntity::CUserEntity()
 	_FrontVelocity		= 0.0f;
 	_LateralVelocity	= 0.0f;
 
+	_SpeedServerAdjust  = 1.0f;
+	
 	// \todo GUIGUI : do it more generic.
 	_First_Pos = false;
 
@@ -1205,7 +1207,11 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			speed = CVectorD::Null;
 	}
 	else
+	{
 		speed = getVelocity()*_SpeedFactor.getValue();
+		_SpeedFactor.addFactorValue(0.005f);
+	}
+	
 	// SPEED VECTOR NULL -> NO MOVE
 	if(speed == CVectorD::Null)
 		return;
@@ -1218,7 +1224,6 @@ void CUserEntity::applyMotion(CEntityCL *target)
 		// don't increase speed
 		clamp(modif, 0.0, 1.0);
 		speed *= modif;
-		speed *= _SpeedServerAdjust;
 		// Move
 		_HasMoved = true;
 		_Primitive->move(speed, dynamicWI);
@@ -1228,7 +1233,9 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	// Third Person View
 	else
 	{
-		speed *= _SpeedServerAdjust;
+		double modif = (100.0f/(float)NetMngr.getMsPerTick());
+		clamp(modif, 0.0, 1.0);
+		speed *= modif;
 		speed += pos();
 		sint64 x = (sint64)((sint32)(speed.x * 1000.0));
 		sint64 y = (sint64)((sint32)(speed.y * 1000.0));
@@ -1246,8 +1253,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 		}
 	}
 
-	_SpeedServerAdjust += 0.05;
-	clamp(_SpeedServerAdjust, 0.8, 1.0);
+
 }// applyMotion //
 
 
@@ -3484,6 +3490,7 @@ void CUserEntity::light()
 void CUserEntity::CSpeedFactor::init()
 {
 	_Value = 1.0f; // Default speed factor is 1.
+	_ServerFactor = 1.0f;
 	CInterfaceManager *IM = CInterfaceManager::getInstance ();
 	CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 	if(pNodeLeaf)

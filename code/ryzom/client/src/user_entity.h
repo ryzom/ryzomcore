@@ -297,7 +297,7 @@ public:
 	// get the velocity vector of the entity
 	NLMISC::CVector getVelocity() const;
 
-	inline void setSpeedServerAdjust(float speed) {_SpeedServerAdjust = speed;}
+	inline void setSpeedServerAdjust(float speed) {_SpeedFactor.addFactorValue(speed);}
 
 	/// Check if the mount is able to run, and force walking mode if not
 	void checkMountAbleToRun();
@@ -499,13 +499,23 @@ protected:
 		/// Release
 		void release();
 		/// Return the speed factor.
-		float getValue() const {return _Value;}
+		float getValue() const 	{ return _Value * _ServerFactor; }
+		void setFactorValue(float value) {_ServerFactor = value;}
+		void addFactorValue(float value) {
+			_ServerFactor += value;
+			if (_ServerFactor > 1.0)
+				_ServerFactor = 1.0;
+			if (_ServerFactor < 0.1)
+				_ServerFactor = 0.1;
+		}
+
 		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) {f.serial(_Value);}
 	protected:
 		/// Method called when the ping message is back.
 		virtual void update(NLMISC::ICDBNode* leaf);
 	private:
 		float _Value;
+		float _ServerFactor;
 	};
 
 	class CMountHunger

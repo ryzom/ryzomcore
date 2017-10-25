@@ -1406,7 +1406,7 @@ void impulseCorrectPos(NLMISC::CBitMemStream &impulse)
 	{
 		if (x == 0) // Get SpeedAdjustement
 		{
-			UserEntity->setSpeedServerAdjust((float)y/1000.0f);
+			UserEntity->setSpeedServerAdjust(-0.2f);
 		}
 		else
 		{
