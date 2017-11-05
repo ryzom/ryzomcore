@@ -2976,7 +2976,15 @@ void	CNetworkConnection::reinit()
 
 	// Reuse the udp socket
 	_Connection.~CUdpSimSock();
+
+#ifdef new
+#undef new
+#endif
 	new (&_Connection) CUdpSimSock();
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 }
 
 // sends system sync acknowledge
