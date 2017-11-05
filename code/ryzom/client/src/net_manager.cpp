@@ -1407,12 +1407,19 @@ void impulseCorrectPos(NLMISC::CBitMemStream &impulse)
 
 	if(UserEntity->mode() != MBEHAV::COMBAT_FLOAT)
 	{
-		// Compute the destination.
-		CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
-		// Update the position for the vision.
-		NetMngr.setReferencePosition(dest);
-		// Change the user poisition.
-		UserEntity->correctPos(dest);
+		if (x == 0) // Get SpeedAdjustement
+		{
+			UserEntity->setSpeedServerAdjust(-0.2f);
+		}
+		else
+		{
+			// Compute the destination.
+			CVectorD dest = CVectorD((float)x/1000.0f, (float)y/1000.0f, (float)z/1000.0f);
+			// Update the position for the vision.
+			NetMngr.setReferencePosition(dest);
+			// Change the user poisition.
+			UserEntity->correctPos(dest);
+		}
 	}
 }// impulseCorrectPos //
 
