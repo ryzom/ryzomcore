@@ -394,6 +394,9 @@ std::string expandEnvironmentVariables(const std::string &s);
 bool explodeArguments(const std::string &str, std::vector<std::string> &args);
 std::string joinArguments(const std::vector<std::string> &args);
 
+/// Escape an argument to not evaluate environment variables or special cases
+std::string escapeArgument(const std::string &arg);
+
 /// This function kills a program using his pid (on unix, it uses the kill() POSIX function)
 bool killProgram(uint32 pid);
 

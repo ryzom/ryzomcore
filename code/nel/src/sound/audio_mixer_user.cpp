@@ -56,6 +56,10 @@
 #include "nel/sound/containers.h"
 #include "nel/sound/audio_decoder.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 

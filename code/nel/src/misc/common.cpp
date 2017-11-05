@@ -894,8 +894,8 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{
@@ -1000,8 +1000,8 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{
@@ -1245,6 +1245,41 @@ std::string joinArguments(const std::vector<std::string> &args)
 	}
 
 	return res;
+}
+
+std::string escapeArgument(const std::string &arg)
+{
+#ifdef NL_OS_WINDOWS
+	// we can't escape %VARIABLE% on command-line under Windows
+	return arg;
+#else
+	// characters to escapce, only " and $ (to prevent a $something replaced by an environment variable)
+	static const char s_charsToEscape[] = "\"$";
+
+	std::string res;
+	std::string::size_type pos = 0, lastPos = 0;
+
+	// to avoid reallocations
+	res.reserve(arg.size() * 2);
+
+	while ((pos = arg.find_first_of(s_charsToEscape, lastPos)) != std::string::npos)
+	{
+		// add previous part
+		res += arg.substr(lastPos, pos - lastPos);
+		
+		// not already escaped
+		if (!pos || arg[pos - 1] != '\\') res += '\\';
+
+		// add escaped character
+		res += arg[pos];
+
+		lastPos = pos+1;
+	}
+
+	res += arg.substr(lastPos);
+
+	return res;
+#endif
 }
 
 /*

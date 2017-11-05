@@ -40,6 +40,9 @@
 // Game Share
 #include "game_share/visual_slot_manager.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //

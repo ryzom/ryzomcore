@@ -114,6 +114,10 @@ extern HWND SlashScreen;
 
 #include <new>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ///////////
 // USING //
 ///////////

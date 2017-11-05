@@ -764,7 +764,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					{
 						// don't check result, because it's possible the olk file doesn't exist
 						CFile::deleteFile(fullDstPath + FileName);
-						
+
 						// try to move it, if fails move it later in a script
 						if (CFile::moveFile(fullDstPath + FileName, ClientPatchPath + FileName))
 							succeeded = true;
@@ -881,6 +881,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", batchFilename.c_str(), errno, strerror(errno));
 			throw Exception (err);
 		}
+		else
+		{
+			nlinfo("Creating %s...", batchFilename.c_str());
+		}
 
 		string contentPrefix;
 
@@ -893,9 +897,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "set STARTUPPATH=%~4\n";
 		contentPrefix += toString("set UPGRADE_FILE=%%ROOTPATH%%\\%s\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
-		contentPrefix += "set LOGIN=%5\n";
-		contentPrefix += "set PASSWORD=%6\n";
-		contentPrefix += "set SHARDID=%7\n";
+		contentPrefix += "set LOGIN=%~5\n";
+		contentPrefix += "set PASSWORD=%~6\n";
+		contentPrefix += "set SHARDID=%~7\n";
 #else
 		contentPrefix += "#!/bin/sh\n";
 		contentPrefix += "export RYZOM_CLIENT=\"$1\"\n";
@@ -904,9 +908,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		contentPrefix += "export STARTUPPATH=\"$4\"\n";
 		contentPrefix += toString("export UPGRADE_FILE=$ROOTPATH/%s\n", UpgradeBatchFilename.c_str());
 		contentPrefix += "\n";
-		contentPrefix += "LOGIN=$5\n";
-		contentPrefix += "PASSWORD=$6\n";
-		contentPrefix += "SHARDID=$7\n";
+		contentPrefix += "LOGIN=\"$5\"\n";
+		contentPrefix += "PASSWORD=\"$6\"\n";
+		contentPrefix += "SHARDID=\"$7\"\n";
 #endif
 
 		contentPrefix += "\n";
@@ -928,7 +932,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// client shouldn't be in memory anymore else it couldn't be overwritten
-			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s %%LOGIN%% %%PASSWORD%% %%SHARDID%%\n", additionalParams.c_str());
+			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s \"%%LOGIN%%\ \"%%PASSWORD%%\" \"%%SHARDID%%\"\n", additionalParams.c_str());
 		}
 #else
 		if (wantRyzomRestart)
@@ -951,9 +955,9 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			// launch new client
 #ifdef NL_OS_MAC
 			// use exec command under OS X
-			contentSuffix += toString("exec \"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID\n", additionalParams.c_str());
+			contentSuffix += toString("exec \"$RYZOM_CLIENT\" %s \"$LOGIN\" \"$PASSWORD\" \"$SHARDID\"\n", additionalParams.c_str());
 #else
-			contentSuffix += toString("\"$RYZOM_CLIENT\" %s $LOGIN $PASSWORD $SHARDID &\n", additionalParams.c_str());
+			contentSuffix += toString("\"$RYZOM_CLIENT\" %s \"$LOGIN\" \"$PASSWORD\" \"$SHARDID\" &\n", additionalParams.c_str());
 #endif
 		}
 #endif
@@ -993,7 +997,7 @@ void CPatchManager::executeBatchFile()
 	std::string batchFilename;
 
 	std::vector<std::string> arguments;
-	
+
 	std::string startupPath = Args.getStartupPath();
 
 	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path

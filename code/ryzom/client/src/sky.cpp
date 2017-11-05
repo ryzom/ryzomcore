@@ -19,6 +19,10 @@
 #include "sky.h"
 #include "client_sheets/sky_sheet.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace NL3D;
 using namespace NLMISC;
 
