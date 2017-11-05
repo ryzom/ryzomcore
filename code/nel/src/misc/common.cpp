@@ -894,8 +894,8 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{
@@ -1000,8 +1000,8 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
-	/// WARNING : NO MORE INSTRUCTION AFTER VFORK !
-	/// READ VFORK manual
+	// WARNING : NO MORE INSTRUCTION AFTER VFORK !
+	// READ VFORK manual
 	/////////////////////////////////////////////////////////
 	if (status == -1)
 	{

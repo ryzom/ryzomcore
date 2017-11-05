@@ -764,7 +764,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 					{
 						// don't check result, because it's possible the olk file doesn't exist
 						CFile::deleteFile(fullDstPath + FileName);
-						
+
 						// try to move it, if fails move it later in a script
 						if (CFile::moveFile(fullDstPath + FileName, ClientPatchPath + FileName))
 							succeeded = true;
@@ -993,7 +993,7 @@ void CPatchManager::executeBatchFile()
 	std::string batchFilename;
 
 	std::vector<std::string> arguments;
-	
+
 	std::string startupPath = Args.getStartupPath();
 
 	// 3 first parameters are Ryzom client full path, patch directory full path and client root directory full path

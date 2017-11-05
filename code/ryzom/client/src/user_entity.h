@@ -423,6 +423,7 @@ public:
 	void tp(const NLMISC::CVectorD &dest);
 	/// Teleport the player to correct his position.
 	void correctPos(const NLMISC::CVectorD &dest);
+
 	/// Skill Up
 	void skillUp();
 	/// get the level of the player (max of all skills)
