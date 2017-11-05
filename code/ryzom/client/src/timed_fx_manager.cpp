@@ -32,8 +32,8 @@
 #include "nel/misc/check_fpu.h"
 
 
-#if defined(NL_DEBUG) && defined(NL_OS_WINDOWS)
-	#include <crtdbg.h>
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
 #endif
 
 using namespace std::rel_ops;

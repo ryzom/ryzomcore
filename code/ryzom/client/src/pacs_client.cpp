@@ -27,6 +27,10 @@
 #include "ig_callback.h"
 #include "ig_client.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 ///////////
 // USING //
 ///////////

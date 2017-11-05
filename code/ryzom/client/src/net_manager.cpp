@@ -89,6 +89,9 @@
 // Std.
 #include <vector>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define OLD_STRING_SYSTEM
 #define BAR_STEP_TP 2

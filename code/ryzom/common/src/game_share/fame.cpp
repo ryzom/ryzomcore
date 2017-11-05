@@ -24,6 +24,10 @@
 //#include "../entities_game_service/egs_variables.h"
 //#include "pvp_clan.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 using namespace std;
 using namespace NLMISC;
 using namespace STRING_MANAGER;

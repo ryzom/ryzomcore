@@ -98,6 +98,11 @@ using namespace CLFECOMMON;
 #include <nel/misc/path.h>
 #include <nel/misc/time_nl.h>
 #include <nel/misc/command.h>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 // Stat: array of vectors of cycles when a pos is received, indexed by TCLEntityId
 struct TRDateState
 {
@@ -214,6 +219,12 @@ NLMISC_COMMAND( displayReceiveLog, "Flush the receive log into ReceiveLog.log", 
 	displayReceiveLog();
 	return true;
 }
+
+#else
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #endif // MEASURE_RECEIVE_DATES
 

@@ -45,6 +45,12 @@
 #include "login_progress_post_thread.h"
 #include "interface_v3/action_handler_base.h"
 #include "item_group_manager.h"
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
+
 using namespace NLMISC;
 using namespace NLNET;
 using namespace NL3D;

@@ -77,6 +77,9 @@
 #include "stdpch.h"
 #include "persistent_data_tree.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 //-----------------------------------------------------------------------------
 // Namespaces

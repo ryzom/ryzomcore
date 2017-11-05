@@ -24,6 +24,9 @@
 #include "stage.h"
 #include "game_share/entity_types.h"
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 ///////////
 // USING //

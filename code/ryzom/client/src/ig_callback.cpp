@@ -45,6 +45,9 @@
 #include "client_sheets/plant_sheet.h"
 #include <memory>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 #define RZ_PRIM_ZEXT_BLOCK_AVOIDANCE	2.0f
 
