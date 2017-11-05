@@ -61,6 +61,10 @@
 
 #include <list>
 
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
+
 extern CContinentManager ContinentMngr;
 extern NL3D::UDriver *Driver;
 extern NL3D::UScene *Scene;
