@@ -1817,9 +1817,7 @@ namespace NLGUI
 	ucstring		CLuaIHM::findReplaceAll(const ucstring &str,   const ucstring &search,   const ucstring &replace)
 	{
 		//H_AUTO(Lua_CLuaIHM_findReplaceAll)
-		ucstring	ret= str;
-		while(strFindReplace(ret,   search,   replace));
-		return ret;
+		return strFindReplaceAll(str, search, replace);
 	}
 
 	// ***************************************************************************
