@@ -881,6 +881,10 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", batchFilename.c_str(), errno, strerror(errno));
 			throw Exception (err);
 		}
+		else
+		{
+			nlinfo("Creating %s...", batchFilename.c_str());
+		}
 
 		string contentPrefix;
 
