@@ -1195,11 +1195,11 @@ sint CDriverGL::getTotalVideoMemory() const
 
 	if (_Extensions.ATIMeminfo)
 	{
-		GLint memoryInKiB = 0;
-		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &memoryInKiB);
+		GLint params[4];
+		glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, params);
 
-		nlinfo("3D: GL_TEXTURE_FREE_MEMORY_ATI returned %d KiB", memoryInKiB);
-		return memoryInKiB;
+		nlinfo("3D: GL_TEXTURE_FREE_MEMORY_ATI returned %d KiB", params[0]);
+		return params[0];
 	}
 
 #if defined(NL_OS_WINDOWS)
