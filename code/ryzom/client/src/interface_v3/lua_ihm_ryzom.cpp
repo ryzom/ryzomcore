@@ -2024,7 +2024,7 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 // ***************************************************************************
 //
-// addShape("shape", x, y, z, "angle", scale, collision?)
+// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton")
 //
 //********
 int CLuaIHMRyzom::addShape(CLuaState &ls)
