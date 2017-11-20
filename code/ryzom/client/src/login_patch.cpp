@@ -932,7 +932,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		if (wantRyzomRestart)
 		{
 			// client shouldn't be in memory anymore else it couldn't be overwritten
-			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s \"%%LOGIN%%\ \"%%PASSWORD%%\" \"%%SHARDID%%\"\n", additionalParams.c_str());
+			contentSuffix += toString("start \"\" /D \"%%STARTUPPATH%%\" \"%%RYZOM_CLIENT%%\" %s \"%%LOGIN%%\" \"%%PASSWORD%%\" \"%%SHARDID%%\"\n", additionalParams.c_str());
 		}
 #else
 		if (wantRyzomRestart)
