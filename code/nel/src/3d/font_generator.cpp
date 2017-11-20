@@ -271,7 +271,14 @@ void CFontGenerator::getSizes (ucchar c, uint32 size, uint32 &width, uint32 &hei
 	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+		// use fallback for glyph/character errors (composite char limit for example)
+		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+
+		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		if (error)
+		{
+			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
+		}
 	}
 
 	// convert 24.6 fixed point into integer
@@ -302,7 +309,14 @@ uint8 *CFontGenerator::getBitmap (ucchar c, uint32 size, bool embolden, bool obl
 	error = FT_Load_Glyph (_Face, glyph_index, FT_LOAD_DEFAULT);
 	if (error)
 	{
-		nlerror ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+		// use fallback for glyph/character errors (composite char limit for example)
+		nlwarning ("FT_Load_Glyph() failed: %s", getFT2Error(error));
+
+		error = FT_Load_Glyph (_Face, 0, FT_LOAD_DEFAULT);
+		if (error)
+		{
+			nlerror("FT_Load_Glyph() fallback failed: %s", getFT2Error(error));
+		}
 	}
 
 	if (size == 0)
