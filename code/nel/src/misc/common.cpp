@@ -633,7 +633,7 @@ void toLower(char *str)
 	}
 }
 
-std::string	toUpper(const std::string &str)
+std::string toUpper(const std::string &str)
 {
 	string res;
 	res.reserve(str.size());
@@ -647,7 +647,7 @@ std::string	toUpper(const std::string &str)
 	return res;
 }
 
-void		toUpper(char *str)
+void toUpper(char *str)
 {
 	if (str == 0)
 		return;
@@ -1356,7 +1356,7 @@ std::string escapeArgument(const std::string &arg)
 	// we can't escape %VARIABLE% on command-line under Windows
 	return arg;
 #else
-	// characters to escapce, only " and $ (to prevent a $something replaced by an environment variable)
+	// characters to escape, only " and $ (to prevent a $something replaced by an environment variable)
 	static const char s_charsToEscape[] = "\"$";
 
 	std::string res;

@@ -46,7 +46,7 @@ public:
 	double				getSamplingPeriod() const { return _SamplingPeriod; }
 	// Reset smoother. The next returned position will be the exact position of mouse (no smoothing with previous position is done)
 	void				reset();
-	// \return trueif no sampling has occurred since last resetor construction
+	// \return true if no sampling has occurred since last resetor construction
 	bool				isReseted() const { return !_Init; }
 	// Sample pos, and return smoothed position
 	CVector2f			samplePos(const CVector2f &wantedPos, double date);

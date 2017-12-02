@@ -53,7 +53,7 @@ public:
 	uint getNumAllocatedBlocks() const { return _NumAlloc; }
 private:
 	class CChunk;
-	
+
 	class NL_ALIGN(NL_DEFAULT_MEMORY_ALIGNMENT) CNode
 	{
 	public:

@@ -828,7 +828,6 @@ void	CUnifiedNetwork::addService(const string &name, const vector<CInetAddress> 
 	for (uint i = 0; i < addr.size(); i++)
 	{
 		// first we have to look if we have a network that can established the connection
-
 		uint j = 0;
 
 		// it's loopback ip address, it's ok
