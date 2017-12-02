@@ -25,6 +25,11 @@
 #include "nel/misc/cmd_args.h"
 
 #include <steam_api.h>
+#include <isteamutils.h>
+
+#ifdef DEBUG_NEW
+#define new DEBUG_NEW
+#endif
 
 // prototypes definitions for Steam API functions we'll call
 typedef bool			(__cdecl *SteamAPI_InitFuncPtr)();
@@ -222,18 +227,8 @@ public:
 		// if expired or error, ticket is not available
 		if (!_AuthSessionTicketCallbackCalled || _AuthSessionTicketCallbackError || _AuthSessionTicketCallbackTimeout) return "";
 
-		std::string authSessionTicket;
-
-		// optimize string by allocating the final string size
-		authSessionTicket.reserve(_AuthSessionTicketSize*2);
-
 		// convert buffer to hexadecimal string
-		for (uint32 i = 0; i < _AuthSessionTicketSize; ++i)
-		{
-			authSessionTicket += NLMISC::toString("%02x", _AuthSessionTicketData[i]);
-		}
-
-		return authSessionTicket;
+		return NLMISC::toHexa(_AuthSessionTicketData, _AuthSessionTicketSize);
 	}
 
 private:

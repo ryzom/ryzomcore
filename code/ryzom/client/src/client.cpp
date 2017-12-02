@@ -205,6 +205,19 @@ int main(int argc, char **argv)
 		{
 			LoginPassword = Args.getAdditionalArg("password").front();
 
+			// password in hexadecimal
+			if (LoginPassword.compare(0, 2, "0x") == 0)
+			{
+				std::string decodedPassword;
+
+				// decode password
+				if (fromHexa(LoginPassword.substr(2), decodedPassword))
+				{
+					// only use it if real hexadecimal
+					LoginPassword = decodedPassword;
+				}
+			}
+
 			if (Args.haveAdditionalArg("shard_id"))
 				sLoginShardId = Args.getAdditionalArg("shard_id").front();
 		}

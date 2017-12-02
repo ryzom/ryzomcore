@@ -633,7 +633,7 @@ void toLower(char *str)
 	}
 }
 
-std::string	toUpper(const std::string &str)
+std::string toUpper(const std::string &str)
 {
 	string res;
 	res.reserve(str.size());
@@ -647,7 +647,7 @@ std::string	toUpper(const std::string &str)
 	return res;
 }
 
-void		toUpper(char *str)
+void toUpper(char *str)
 {
 	if (str == 0)
 		return;
@@ -660,6 +660,109 @@ void		toUpper(char *str)
 		}
 		str++;
 	}
+}
+
+std::string toHexa(const uint8 &b)
+{
+	return toString("%02hhx", b);
+}
+
+std::string toHexa(const uint8 *data, uint size)
+{
+	std::string res;
+
+	// hexadecimal string will be always twice the original size
+	res.reserve(size * 2);
+
+	// process each byte
+	for (uint i = 0; i < size; ++i)
+	{
+		res += toHexa(data[i]);
+	}
+
+	return res;
+}
+
+std::string toHexa(const std::string &str)
+{
+	return toHexa((uint8*)str.c_str(), (uint)str.length());
+}
+
+std::string toHexa(const char *str)
+{
+	return toHexa((uint8*)str, (uint)strlen(str));
+}
+
+bool fromHexa(const std::string &hexa, uint8 &b)
+{
+	return fromHexa(hexa.c_str(), b);
+}
+
+bool fromHexa(const std::string &hexa, uint8 *data)
+{
+	return fromHexa(hexa.c_str(), data);
+}
+
+bool fromHexa(const std::string &hexa, std::string &str)
+{
+	return fromHexa(hexa.c_str(), str);
+}
+
+bool fromHexa(const char *hexa, uint8 &b)
+{
+	char c1 = *hexa;
+	char c2 = *(hexa+1);
+	uint8 x1, x2;
+	if (!fromHexa(c1, x1)) return false;
+	if (!fromHexa(c2, x2)) return false;
+	
+	b = (x1 << 4) | x2;
+
+	return true;
+}
+
+bool fromHexa(const char *hexa, uint8 *data)
+{
+	// length of the string
+	uint len = strlen(hexa);
+
+	// process each byte
+	for (uint i = 0; i < len; i += 2)
+	{
+		if (!fromHexa(hexa + i, *(data++))) return false;
+	}
+
+	return true;
+}
+
+bool fromHexa(const char *hexa, std::string &str)
+{
+	str.resize(strlen(hexa) * 2);
+
+	return fromHexa(hexa, (uint8*)str.c_str());
+}
+
+bool fromHexa(const char hexa, uint8 &b)
+{
+	if (hexa >= '0' && hexa <= '9')
+	{
+		b = hexa - '0';
+		return true;
+	}
+	
+	if (hexa >= 'A' && hexa <= 'F')
+	{
+		b = hexa - 'A' + 10;
+		return true;
+	}
+	
+	if (hexa >= 'a' && hexa <= 'f')
+	{
+		b = hexa - 'a' + 10;
+		return true;
+	}
+
+	return false;
 }
 
 std::string formatThousands(const std::string& s)
@@ -1253,7 +1356,7 @@ std::string escapeArgument(const std::string &arg)
 	// we can't escape %VARIABLE% on command-line under Windows
 	return arg;
 #else
-	// characters to escapce, only " and $ (to prevent a $something replaced by an environment variable)
+	// characters to escape, only " and $ (to prevent a $something replaced by an environment variable)
 	static const char s_charsToEscape[] = "\"$";
 
 	std::string res;

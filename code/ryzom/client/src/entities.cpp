@@ -800,7 +800,8 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		if (param == "transparency")
 		{
 			uint t;
-			if( fromString( values[i], t ) ) {
+			if (fromString(values[i], t))
+			{
 				t = max(0, min((int)t, 255));
 				makeInstanceTransparent(instance, t, t == 255);
 			}
@@ -864,9 +865,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			float v;
 			CVector pos = getInstancePos(idx);
 			
-			if( getRelativeFloatFromString( values[i], v ) ) {
+			if (getRelativeFloatFromString(values[i], v))
+			{
 				updateVector(param, pos, v, true);
-			} else {
+			}
+			else
+			{
 				updateVector(param, pos, v, false);
 			}
 			setInstancePos(idx, pos);
@@ -877,9 +881,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			float v;
 			CVector rot = getInstanceRot(idx);
 			
-			if( getRelativeFloatFromString( values[i], v ) ) {
+			if (getRelativeFloatFromString(values[i], v))
+			{
 				updateVector(param, rot, v, true);
-			} else {
+			}
+			else
+			{
 				updateVector(param, rot, v, false);
 			}
 			setInstanceRot(idx, rot);
@@ -889,9 +896,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			float v;
 			CVector scale = instance.getScale();
 			
-			if( getRelativeFloatFromString( values[i], v ) ) {
+			if (getRelativeFloatFromString(values[i], v))
+			{
 				updateVector(param, scale, v, true);
-			} else {
+			}
+			else
+			{
 				updateVector(param, scale, v, false);
 			}
 			instance.setScale(scale);
@@ -909,9 +919,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			
 			CVector size = CVector(width, depth, height);
 			float v;
-			if( getRelativeFloatFromString( values[i], v ) ) {
+			if (getRelativeFloatFromString(values[i], v))
+			{
 				updateVector(param, size, v, true);
-			} else {
+			}
+			else
+			{
 				updateVector(param, size, v, false);
 			}
 			primitive->setSize(size.x, size.y);
@@ -922,9 +935,12 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 			CVector pos = instance.getPos();
 			float v;
 			
-			if( getRelativeFloatFromString( values[i], v ) ) {
+			if (getRelativeFloatFromString(values[i], v))
+			{
 				updateVector(param, _ShapeInstances[idx].PrimRelativePos, v, false);
-			} else {
+			}
+			else
+			{
 				if (param == "col pos x")
 					_ShapeInstances[idx].PrimRelativePos.x = v - pos.x;
 				if (param == "col pos y")
@@ -1023,7 +1039,8 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 			// if intersect the bbox
 			NLMISC::CAABBox bbox;
 			//= _ShapeInstances[i].SelectionBox;
-			if(!_ShapeInstances[i].Instance.empty()) {
+			if(!_ShapeInstances[i].Instance.empty())
+			{
 				_ShapeInstances[i].Instance.getShapeAABBox(bbox);
 				CVector bbox_min;
 				CVector bbox_max;

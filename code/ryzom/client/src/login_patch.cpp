@@ -1033,10 +1033,11 @@ void CPatchManager::executeBatchFile()
 	if (!LoginLogin.empty())
 	{
 		arguments.push_back(LoginLogin);
-	
+
 		if (!LoginPassword.empty())
 		{
-			arguments.push_back(LoginPassword);
+			// encode password in hexadecimal to avoid invalid characters on command-line
+			arguments.push_back("0x" + toHexa(LoginPassword));
 
 			if (!r2Mode)
 			{
