@@ -233,6 +233,26 @@ char		toLower ( const char ch );	// convert only one character
 std::string	toUpper ( const std::string &str);
 void		toUpper ( char *str);
 
+
+/**
+ *  Convert to an hexadecimal std::string
+ */
+std::string toHexa(const uint8 &b);
+std::string toHexa(const uint8 *data, uint size);
+std::string toHexa(const std::string &str);
+std::string toHexa(const char *str);
+
+/**
+*  Convert from an hexadecimal std::string
+*/
+bool fromHexa(const std::string &hexa, uint8 &b);
+bool fromHexa(const std::string &hexa, uint8 *data);
+bool fromHexa(const std::string &hexa, std::string &str);
+bool fromHexa(const char *hexa, uint8 &b);
+bool fromHexa(const char *hexa, uint8 *data);
+bool fromHexa(const char *hexa, std::string &str);
+bool fromHexa(const char hexa, uint8 &b);
+
 // Remove all the characters <= 32 (tab, space, new line, return, vertical tab etc..) at the beginning and at the end of a string
 template <class T> T trim (const T &str)
 {
