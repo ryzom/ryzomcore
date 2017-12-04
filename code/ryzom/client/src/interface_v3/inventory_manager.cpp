@@ -2993,6 +2993,9 @@ class CHandlerInvTempAll : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
+		if (!CTempInvManager::getInstance()->isOpened()) return;
+		if (NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP_INV:ALL_EMPTY")->getValue32() != 0) return;
+
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInventoryManager *pInv = CInventoryManager::getInstance();
 
