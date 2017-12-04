@@ -235,6 +235,7 @@
 			<value value="guild"	   hardtext="uimMtGuild" />
 		</parameter>
 	</action>
+	<action name="inv_temp_all" hardtext="uittTakeAll" contexts="game" />
 </action_category>
 
 <action_category name="chat" hardtext="uiChat" contexts="game, r2ed, r2ed_anim_test"> <!-- not available in r2ed for now -->
