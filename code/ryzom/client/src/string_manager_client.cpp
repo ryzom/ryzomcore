@@ -1411,8 +1411,7 @@ const ucchar * CStringManagerClient::getSpecialWord(const std::string &label, bo
 	if (label[0] == '#')
 	{
 		static ucstring	rawString;
-		rawString = label.substr(1, label.size()-1);
-		return rawString.c_str();
+		return getLocalizedName(label.substr(1, label.size()-1));
 	}
 
 	// avoid case problems
@@ -1615,14 +1614,41 @@ const ucchar *CStringManagerClient::getSPhraseLocalizedDescription(NLMISC::CShee
 const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleId, bool women)
 {
 	vector<ucstring> listInfos = getTitleInfos(titleId, women);
-
 	if (!listInfos.empty())
 	{
 		_TitleWords.push_back(listInfos[0]);
-		return _TitleWords.back().c_str();
+		return getLocalizedName(_TitleWords.back());
 	}
 	
-	return titleId.c_str();
+	return getLocalizedName(titleId);
+}
+
+const ucchar *CStringManagerClient::getLocalizedName(const ucstring &text)
+{
+	if (text[0] == '%')
+	{
+		vector<ucstring> textLocalizations;
+		ucstring defaultText = ucstring("");
+		splitUCString(text.substr(1), ucstring("["), textLocalizations);
+		if (!textLocalizations.empty())
+		{
+			for(uint i = 0; i<textLocalizations.size(); i++)
+			{
+			if (textLocalizations[i].substr(0, 3) == ucstring(CI18N::getCurrentLanguageCode()+"]"))
+				{
+					return textLocalizations[i].substr(3).c_str();
+				}
+				else if (textLocalizations[i].substr(0, 3) == ucstring("wk]"))
+				{
+					defaultText = textLocalizations[i].substr(3).c_str();
+				}
+			}
+		}
+		if (!defaultText.empty()) {
+			return defaultText.c_str();
+		}
+	}
+	return text.c_str();
 }
 
 // ***************************************************************************
