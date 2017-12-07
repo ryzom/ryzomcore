@@ -1625,7 +1625,7 @@ const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleI
 
 const ucchar *CStringManagerClient::getLocalizedName(const ucstring &text)
 {
-	if (text[0] == '%')
+	if (text[0] == '[')
 	{
 		vector<ucstring> textLocalizations;
 		ucstring defaultText = ucstring("");
