@@ -2327,6 +2327,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const ucstring &value)
 					_HasReservedTitle = true;
 			}
 		}
+		else
+		{
+			_EntityName = STRING_MANAGER::CStringManagerClient::getLocalizedName(_EntityName);
+		}
 	}
 
 	// Is the first title or a new title ?

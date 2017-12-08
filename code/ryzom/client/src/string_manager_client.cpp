@@ -716,6 +716,12 @@ restartLoop:
 						if (!getString(param.StringId, str))
 							return false;
 
+						ucstring::size_type p1 = str.find('[');
+						if (p1 != ucstring::npos)
+						{
+							str = str.substr(0, p1)+STRING_MANAGER::CStringManagerClient::getLocalizedName(str.substr(p1));
+						}
+
 						// If the string is a player name, we may have to remove the shard name (if the string looks like a player name)
 						if(!str.empty() && !PlayerSelectedHomeShardNameWithParenthesis.empty())
 						{
@@ -1623,24 +1629,27 @@ const ucchar *CStringManagerClient::getTitleLocalizedName(const ucstring &titleI
 	return getLocalizedName(titleId);
 }
 
-const ucchar *CStringManagerClient::getLocalizedName(const ucstring &text)
+
+const ucchar *CStringManagerClient::getLocalizedName(const ucstring &uctext)
 {
+	string text = uctext.toUtf8();
 	if (text[0] == '[')
 	{
-		vector<ucstring> textLocalizations;
-		ucstring defaultText = ucstring("");
-		splitUCString(text.substr(1), ucstring("["), textLocalizations);
+		vector<string> textLocalizations;
+		static ucstring defaultText;
+		splitString(text.substr(1), "[", textLocalizations);
 		if (!textLocalizations.empty())
 		{
 			for(uint i = 0; i<textLocalizations.size(); i++)
 			{
-			if (textLocalizations[i].substr(0, 3) == ucstring(CI18N::getCurrentLanguageCode()+"]"))
+				if (textLocalizations[i].substr(0, 3) == CI18N::getCurrentLanguageCode()+"]")
 				{
-					return textLocalizations[i].substr(3).c_str();
+					defaultText.fromUtf8(textLocalizations[i].substr(3));
+					return defaultText.c_str();
 				}
-				else if (textLocalizations[i].substr(0, 3) == ucstring("wk]"))
+				else if (textLocalizations[i].substr(0, 3) == "wk]")
 				{
-					defaultText = textLocalizations[i].substr(3).c_str();
+					defaultText.fromUtf8(textLocalizations[i].substr(3));
 				}
 			}
 		}
@@ -1648,7 +1657,7 @@ const ucchar *CStringManagerClient::getLocalizedName(const ucstring &text)
 			return defaultText.c_str();
 		}
 	}
-	return text.c_str();
+	return uctext.c_str();
 }
 
 // ***************************************************************************

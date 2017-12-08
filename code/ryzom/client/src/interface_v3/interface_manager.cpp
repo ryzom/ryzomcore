@@ -2356,6 +2356,7 @@ void CInterfaceManager::processServerIDString()
 
 			if (bValid)
 			{
+				ucstrToAffect = STRING_MANAGER::CStringManagerClient::getLocalizedName(ucstrToAffect);
 				val.setUCString (ucstrToAffect);
 				CInterfaceLink::setTargetProperty (pISW->Target, val);
 			}
