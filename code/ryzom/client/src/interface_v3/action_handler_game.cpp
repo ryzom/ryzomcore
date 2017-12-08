@@ -2065,6 +2065,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 			}
 			// Set to target
 			CInterfaceExprValue evUCStr;
+			TargetName = STRING_MANAGER::CStringManagerClient::getLocalizedName(TargetName);
 			evUCStr.setUCString(TargetName);
 			CInterfaceLink::setTargetProperty(sNameTarget, evUCStr);
 			evUCStr.setUCString(TargetTitle);
