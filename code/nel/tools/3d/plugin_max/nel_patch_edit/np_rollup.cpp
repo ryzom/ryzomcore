@@ -132,14 +132,8 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			ep->ip->ClearPickMode();
 			CancelEditPatchModes(ep->ip);
 			return FALSE;
-		
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND: 
+
+		case WM_COMMAND:
 			{
 			BOOL needRedraw = FALSE;
 			switch (LOWORD(wParam))
@@ -645,13 +639,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 				}
 			break;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{				
 				// Subdivision

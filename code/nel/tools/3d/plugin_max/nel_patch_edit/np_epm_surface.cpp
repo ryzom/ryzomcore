@@ -231,13 +231,7 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 			return FALSE;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			/*switch (LOWORD(wParam))
 			{
 			}*/
@@ -298,13 +292,7 @@ INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 			return FALSE;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{				
 				case IDC_NO_SMOOTH:
@@ -446,13 +434,7 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 			return FALSE;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			if (LOWORD(wParam) >= IDC_SMOOTH_GRP1 &&
 				LOWORD(wParam) <= IDC_SMOOTH_GRP32)
 			{

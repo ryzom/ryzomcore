@@ -110,12 +110,6 @@ BOOL CALLBACK DefaultSOTProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			SetWindowLongPtr(hWnd,GWLP_USERDATA,lParam);
 			break;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:
-			if (ip) ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
-			return FALSE;
-
 		default:
 			return FALSE;
 	}
