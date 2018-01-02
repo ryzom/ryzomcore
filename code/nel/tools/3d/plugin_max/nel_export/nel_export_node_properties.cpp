@@ -1823,7 +1823,7 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (
 			for (uint vpId=0; vpId<VP_COUNT; vpId++)
 			{
 				// Create the dialog
-				currentParam->SubVPDlg[vpId] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubVPTab[vpId]), hwndDlg, SubVPProc[vpId], (LONG)lParam);
+				currentParam->SubVPDlg[vpId] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubVPTab[vpId]), hwndDlg, SubVPProc[vpId], lParam);
 
 				// To client coord
 				RECT client = tabRect;
@@ -2526,7 +2526,7 @@ INT_PTR CALLBACK LodDialogCallback (
 				SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_INSERTITEM, SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_GETITEMCOUNT, 0, 0), (LPARAM)&tabItem);
 
 				// Create the dialog
-				currentParam->SubDlg[tab] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubTab[tab]), GetDlgItem (hwndDlg, IDC_TAB), SubProc[tab], (LONG)lParam);
+				currentParam->SubDlg[tab] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubTab[tab]), GetDlgItem (hwndDlg, IDC_TAB), SubProc[tab], lParam);
 
 				// To client coord
 				RECT client = tabRect;
