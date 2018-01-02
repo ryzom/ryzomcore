@@ -1098,7 +1098,7 @@ static std::string OldDecimalSeparatorLocale;
 static void setDecimalSeparatorAsPoint()
 {				
 	OldDecimalSeparatorLocale = ::setlocale(LC_NUMERIC, NULL);
-	::setlocale(LC_NUMERIC, "English");	
+	::setlocale(LC_NUMERIC, "C");
 }
 
 static void restoreDecimalSeparator()

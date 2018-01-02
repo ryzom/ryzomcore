@@ -3522,7 +3522,7 @@ void EPM_PaintCMode::DoPaint ()
 	static float best = 10000.f;
 
 	// Set local to english
-	setlocale (LC_NUMERIC, "English");
+	setlocale (LC_NUMERIC, "C");
 
 	if (pobj->hOpsPanel)
 	{

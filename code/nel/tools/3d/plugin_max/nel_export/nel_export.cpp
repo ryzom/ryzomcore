@@ -243,7 +243,7 @@ extern HINSTANCE hInstance;
 static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	// Set locale to english
-	setlocale (LC_NUMERIC, "English");
+	setlocale (LC_NUMERIC, "C");
 
 	BOOL ret = TRUE;
 	switch (msg)
