@@ -156,11 +156,6 @@ static INT_PTR CALLBACK Tile_utilityDlgProc(HWND hWnd, UINT msg, WPARAM wParam, 
 		//  load the sampler dropdown
 		theTile_utility.Destroy(hWnd);
 		break;
-	case WM_LBUTTONDOWN:
-	case WM_LBUTTONUP:
-	case WM_MOUSEMOVE:
-		theTile_utility.ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
-		break;
 	case WM_COMMAND:
 		{
 			int id = LOWORD(wParam);

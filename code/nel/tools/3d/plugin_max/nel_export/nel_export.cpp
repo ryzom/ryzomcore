@@ -744,11 +744,6 @@ static INT_PTR CALLBACK CNelExportDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LP
 			}
 
 			break;
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:
-			theCNelExport._Ip->RollupMouseMessage(hWnd,msg,wParam,lParam);
-			break;
 
 		default:
 			ret = FALSE;

@@ -14,7 +14,7 @@
 #define PROMPT_TIME	2000
 
 extern AdvParams sParams;
-INT_PTR CALLBACK AdvParametersDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam); 
+INT_PTR CALLBACK AdvParametersDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -56,7 +56,7 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 	{
 		CheckDlgButton(hDlg, IDC_TILE_MODE, TRUE);
 	}
-	else 
+	else
 	{
 		CheckDlgButton(hDlg, IDC_TILE_MODE, FALSE);
 	}
@@ -66,7 +66,7 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 	EnableWindow (GetDlgItem (hDlg, IDC_STEPSSPINNER), !bCheck);
 	EnableWindow (GetDlgItem (hDlg, IDC_STEPS_RENDER), !bCheck);
 	EnableWindow (GetDlgItem (hDlg, IDC_STEPSRENDERSPINNER), !bCheck);
-	
+
 	// New
 	EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPS), bCheck);
 	EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPSSPINNER), bCheck);
@@ -76,7 +76,7 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 
 	if (keepMapping)
 		CheckDlgButton(hDlg, IDC_KEEP_MAPPING, TRUE);
-	else 
+	else
 		CheckDlgButton(hDlg, IDC_KEEP_MAPPING, FALSE);
 
 	switch (tess->type)
@@ -166,13 +166,13 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 			EnableWindow(GetDlgItem(hDlg, IDC_TESS_NORMALS), !GetViewTessWeld());
 			EnableWindow(GetDlgItem(hDlg, IDC_WELDTESS), tess->merge > 0.0f);
 		}
-	} else 
+	} else
 	{
 		if (settingDisp)
 		{
 			ShowWindow(GetDlgItem(hDlg, IDC_MESH), SW_SHOW);
 			ShowWindow(GetDlgItem(hDlg, IDC_DISP), SW_SHOW);
-		} else 
+		} else
 		{
 			if (tess->type != TESS_SET)
 			{
@@ -202,7 +202,7 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 		CheckDlgButton(hDlg, IDC_TESS_RENDERER, FALSE);
 		CheckDlgButton(hDlg, IDC_TESS_NORMALS, GetViewTessNormals());
 		CheckDlgButton(hDlg, IDC_WELDTESS, GetViewTessWeld());
-	} else 
+	} else
 	{
 		CheckDlgButton(hDlg, IDC_TESS_VIEW, FALSE);
 		CheckDlgButton(hDlg, IDC_TESS_RENDERER, TRUE);
@@ -213,28 +213,28 @@ void EditPatchMod::SetTessUI(HWND hDlg, TessApprox *tess)
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
-	
+
 BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
-	
+
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 			{
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSurfPanel = hDlg;
-			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			if (!ep->settingViewportTess  && ep->settingDisp && ep->GetProdTess().type == TESS_SET)
 				ep->settingDisp = FALSE;
 			TessApprox t;
 			if (ep->settingViewportTess)
 			{
 				t = ep->GetViewTess();
-			} else 
+			} else
 			{
 				if (ep->settingDisp)
 					t = ep->GetDispTess();
@@ -286,14 +286,14 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				ep->mergeSpin = NULL;
 				}
 			return FALSE;
-		
-		case CC_SPINNER_BUTTONUP: 
+
+		case CC_SPINNER_BUTTONUP:
 			{
 			TessApprox tess;
 			if (ep->settingViewportTess)
 			{
 				tess = ep->GetViewTess();
-			} else 
+			} else
 			{
 				if (ep->settingDisp)
 					tess = ep->GetDispTess();
@@ -304,7 +304,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 			break;
 
-		case CC_SPINNER_CHANGE:	
+		case CC_SPINNER_CHANGE:
 			switch (LOWORD(wParam))
 			{
 				case IDC_TESS_U_SPINNER:
@@ -318,7 +318,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					if (ep->settingViewportTess)
 					{
 						tess = ep->GetViewTess();
-					} else 
+					} else
 					{
 						if (ep->settingDisp)
 							tess = ep->GetDispTess();
@@ -349,7 +349,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					if (ep->settingViewportTess)
 					{
 						ep->SetViewTess(tess);
-					} else 
+					} else
 					{
 						if (ep->settingDisp)
 							ep->SetDispTess(tess);
@@ -363,17 +363,11 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				}
 			break;
 
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MOUSEMOVE:   			
-   			ep->ip->RollupMouseMessage(hDlg, message, wParam, lParam);
-			return FALSE;		
-		
-		case WM_COMMAND:			
+		case WM_COMMAND:
 			switch (LOWORD(wParam))
-			{				
+			{
 				// Tessellation
-				case IDC_TESS_VIEW:	
+				case IDC_TESS_VIEW:
 					{
 					ep->settingViewportTess = TRUE;
 					TessApprox t = ep->GetViewTess();
@@ -381,14 +375,14 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					EnableWindow(GetDlgItem(hDlg, IDC_TESS_VIEW_DEP), FALSE); // always off here
 					break;
 					}
-				case IDC_TESS_RENDERER: 
+				case IDC_TESS_RENDERER:
 					{
 					ep->settingViewportTess = FALSE;
 					if (ep->settingDisp)
 					{
 						TessApprox t = ep->GetDispTess();
 						ep->SetTessUI(hDlg, &t);
-					} else 
+					} else
 					{
 						TessApprox t = ep->GetProdTess();
 						ep->SetTessUI(hDlg, &t);
@@ -407,13 +401,13 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					{
 						BOOL bCheck=(IsDlgButtonChecked(hDlg, IDC_TILE_MODE)==BST_CHECKED);
 						ep->SetTileMode (bCheck!=0);
-						
+
 						// Old
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPS), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPSSPINNER), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPS_RENDER), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPSRENDERSPINNER), !bCheck);
-						
+
 						// New
 						EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPS), bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPSSPINNER), bCheck);
@@ -441,7 +435,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					if (ep->settingViewportTess)
 					{
 						tess = ep->GetViewTess();
-					} else 
+					} else
 					{
 						if (ep->settingDisp)
 							tess = ep->GetDispTess();
@@ -482,7 +476,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					if (ep->settingViewportTess)
 					{
 						ep->SetViewTess(tess);
-					} else 
+					} else
 					{
 						if (ep->settingDisp)
 							ep->SetDispTess(tess);
@@ -492,7 +486,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					ep->SetTessUI(hDlg, &tess);
 					}
 					break;
-				case IDC_TESS_VIEW_DEP: 
+				case IDC_TESS_VIEW_DEP:
 					{
 					TessApprox tess;
 					tess = ep->GetProdTess();
@@ -508,7 +502,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					{
 						ep->SetViewTessNormals(IsDlgButtonChecked(hDlg, IDC_TESS_NORMALS));
 						ep->SetTessUI(hDlg, &ep->GetViewTess());
-					} else 
+					} else
 					{
 						ep->SetProdTessNormals(IsDlgButtonChecked(hDlg, IDC_TESS_NORMALS));
 						if (ep->settingDisp)
@@ -522,7 +516,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					{
 						ep->SetViewTessWeld(IsDlgButtonChecked(hDlg, IDC_WELDTESS));
 						ep->SetTessUI(hDlg, &ep->GetViewTess());
-					} else 
+					} else
 					{
 						ep->SetProdTessWeld(IsDlgButtonChecked(hDlg, IDC_WELDTESS));
 						if (ep->settingDisp)
@@ -531,13 +525,13 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 							ep->SetTessUI(hDlg, &ep->GetProdTess());
 					}
 					break;
-				case IDC_ADVANCED_PARAMETERS: 
+				case IDC_ADVANCED_PARAMETERS:
 					{
 					TessApprox tess;
 					if (ep->settingViewportTess)
 					{
 						tess = ep->GetViewTess();
-					} else 
+					} else
 					{
 						if (ep->settingDisp)
 							tess = ep->GetDispTess();
@@ -563,7 +557,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 							if (MessageBox(hDlg, warning, title,
 								MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES)
 								confirm = TRUE;
- 
+
 						} else
 							confirm = TRUE;
 						if (confirm)
@@ -576,7 +570,7 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 							if (ep->settingViewportTess)
 							{
 								ep->SetViewTess(tess);
-							} else 
+							} else
 							{
 								if (ep->settingDisp)
 									ep->SetDispTess(tess);
@@ -590,8 +584,8 @@ BOOL CALLBACK PatchObjSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				}
 			break;
 		}
-	
-	return FALSE;
+
+		return FALSE;
 	}
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -608,7 +602,7 @@ AdvParametersDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
 	{
-    case WM_INITDIALOG: 
+    case WM_INITDIALOG:
 		{
 		initing = TRUE;
         CenterWindow(hDlg, GetCOREInterface()->GetMAXHWnd());
@@ -634,7 +628,7 @@ AdvParametersDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			CheckDlgButton(hDlg, IDC_DELAUNAY, TRUE);
 			break;
 		}
-		break; 
+		break;
 		}
 
     case WM_COMMAND:
@@ -712,27 +706,27 @@ AdvParametersDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetViewTess(TessApprox &tess) 
+void EditPatchMod::SetViewTess(TessApprox &tess)
 {
 	viewTess = tess;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetViewTess(tess);
 		patchData->viewTess = tess;
 		//rpatch->rTess = rTess;
@@ -748,27 +742,27 @@ void EditPatchMod::SetViewTess(TessApprox &tess)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetProdTess(TessApprox &tess) 
+void EditPatchMod::SetProdTess(TessApprox &tess)
 {
 	prodTess = tess;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetProdTess(tess);
 		patchData->prodTess = tess;
 		if (patchData->tempData)
@@ -783,27 +777,27 @@ void EditPatchMod::SetProdTess(TessApprox &tess)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetDispTess(TessApprox &tess) 
+void EditPatchMod::SetDispTess(TessApprox &tess)
 {
 	dispTess = tess;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetDispTess(tess);
 		patchData->dispTess = tess;
 		if (patchData->tempData)
@@ -818,27 +812,27 @@ void EditPatchMod::SetDispTess(TessApprox &tess)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetViewTessNormals(BOOL use) 
+void EditPatchMod::SetViewTessNormals(BOOL use)
 {
 	mViewTessNormals = use;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetViewTessNormals(use);
 		patchData->mViewTessNormals = use;
 		if (patchData->tempData)
@@ -853,27 +847,27 @@ void EditPatchMod::SetViewTessNormals(BOOL use)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetProdTessNormals(BOOL use) 
+void EditPatchMod::SetProdTessNormals(BOOL use)
 {
 	mProdTessNormals = use;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetProdTessNormals(use);
 		patchData->mProdTessNormals = use;
 		if (patchData->tempData)
@@ -888,27 +882,27 @@ void EditPatchMod::SetProdTessNormals(BOOL use)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetViewTessWeld(BOOL weld) 
+void EditPatchMod::SetViewTessWeld(BOOL weld)
 {
 	mViewTessWeld = weld;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetViewTessWeld(weld);
 		patchData->mViewTessWeld = weld;
 		if (patchData->tempData)
@@ -923,27 +917,27 @@ void EditPatchMod::SetViewTessWeld(BOOL weld)
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetProdTessWeld(BOOL weld) 
+void EditPatchMod::SetProdTessWeld(BOOL weld)
 {
 	mProdTessWeld = weld;
 	ModContextList mcList;
 	INodeTab nodes;
-	
+
 	if (!ip)
-		return;	
-	
+		return;
+
 	ip->GetModContexts(mcList, nodes);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
 		if (!patchData)
-			continue;		
+			continue;
 		RPatchMesh *rpatch;
 		PatchMesh *patch = patchData->TempData(this)->GetPatch(ip->GetTime(),rpatch);
 		if (!patch)
 			continue;
-		
+
 		patch->SetProdTessWeld(weld);
 		patchData->mProdTessWeld = weld;
 		if (patchData->tempData)
