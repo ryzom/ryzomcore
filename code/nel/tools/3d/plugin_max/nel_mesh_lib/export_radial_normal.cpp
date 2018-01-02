@@ -56,7 +56,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 		string pivotName = CExportNel::getScriptAppData (_NodePtr, NEL3D_APPDATA_RADIAL_NORMAL_SM+app-NEL3D_RADIAL_FIRST_SM, "");
 
 		// Active ?
-		if (pivotName != "")
+		if (!pivotName.empty())
 		{
 			// Add the mask
 			_SmoothingGroupMask |= (1<<app);
@@ -79,7 +79,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			{
 				// Output error message
 				char msg[512];
-				smprintf (msg, 512, "Can't find pivot node named %s", pivotName);
+				smprintf (msg, 512, "Can't find pivot node named '%s'", pivotName.c_str());
 				nelExport.outputErrorMessage (msg);
 			}
 		}
