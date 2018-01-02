@@ -22,7 +22,7 @@ BOOL filterVerts = TRUE;
 static BOOL filterVecs = TRUE;
 
 
-static void SetVertFilter() 
+static void SetVertFilter()
 {
 	patchHitLevel[EP_VERTEX] =(filterVerts ? SUBHIT_PATCH_VERTS : 0) |(filterVecs ? SUBHIT_PATCH_VECS : 0);
 }
@@ -40,10 +40,10 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 	ICustToolbar *iToolbar;
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
-	
+
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 		{
 			// Get the module path
 			HMODULE hModule = hInstance;
@@ -75,9 +75,9 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
  									// Setup version number
 									TCHAR version[512];
 									_stprintf(version, _T("Version %d.%d.%d.%d"),
-										info->dwFileVersionMS>>16, 
-										info->dwFileVersionMS&0xffff, 
-										info->dwFileVersionLS>>16,  
+										info->dwFileVersionMS>>16,
+										info->dwFileVersionMS&0xffff,
+										info->dwFileVersionLS>>16,
 										info->dwFileVersionLS&0xffff);
 									SetWindowText (GetDlgItem (hDlg, IDC_VERSION), version);
 								}
@@ -104,7 +104,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hSelectPanel = hDlg;
-			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			// Set up the editing level selector
 			LoadImages();
 			iToolbar = GetICustToolbar(GetDlgItem(hDlg, IDC_SELTYPE));
@@ -137,7 +137,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			{
 			BOOL needRedraw = FALSE;
 			switch (LOWORD(wParam))
-			{				
+			{
 				case EP_VERTEX:
 					if (ep->GetSubobjectLevel() == EP_VERTEX)
 						ep->ip->SetSubObjectLevel(PO_OBJECT);
@@ -205,7 +205,7 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			if (((LPNMHDR)lParam)->code == TTN_NEEDTEXT)
 			{
 				LPTOOLTIPTEXT lpttt;
-				lpttt =(LPTOOLTIPTEXT)lParam;				
+				lpttt =(LPTOOLTIPTEXT)lParam;
 				switch (lpttt->hdr.idFrom)
 				{
 				case EP_VERTEX:
@@ -225,19 +225,19 @@ INT_PTR CALLBACK PatchSelectDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPAR
 			break;
 
 		}
-	
+
 	return FALSE;
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetOpsDlgEnables() 
+void EditPatchMod::SetOpsDlgEnables()
 {
 	if (!hOpsPanel)
 		return;
-	
+
 	nlassert(ip);
-	
+
 	// Disconnect right-click and delete mechanisms
 	ip->GetRightClickMenuManager()->Unregister(&pMenu);
 	ip->UnRegisterDeleteUser(&pDel);
@@ -333,7 +333,7 @@ void EditPatchMod::SetOpsDlgEnables()
 
 	// Enable/disable right-click and delete mechanisms
 	if (!oType)
-	{			
+	{
 		pMenu.SetMod(this);
 		ip->GetRightClickMenuManager()->Register(&pMenu);
 		pDel.SetMod(this);
@@ -349,19 +349,19 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
 
-	
+
 	ISpinnerControl *spin;
 	ICustButton *ebut;
 
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 			{
 		 	ep =(EditPatchMod *)lParam;
 		 	ep->hOpsPanel = hDlg;
 			for (int i = IDC_SMOOTH_GRP1; i < IDC_SMOOTH_GRP1 + 32; i++)
 				SendMessage(GetDlgItem(hDlg, i), CC_COMMAND, CC_CMD_SET_TYPE, CBT_CHECK);
-			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
+			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
 			ICustButton *but = GetICustButton(GetDlgItem(hDlg, IDC_ATTACH));
 			but->SetHighlightColor(GREEN_WASH);
 			but->SetType(CBT_CHECK);
@@ -401,12 +401,12 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			EnableWindow (GetDlgItem (hDlg, IDC_STEPSSPINNER), !IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
 			EnableWindow (GetDlgItem (hDlg, IDC_STEPS_RENDER), !IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
 			EnableWindow (GetDlgItem (hDlg, IDC_STEPSRENDERSPINNER), !IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
-			
+
 			// New
 			EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPS), IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
 			EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPSSPINNER), IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
 			EnableWindow (GetDlgItem (hDlg, IDC_KEEP_MAPPING), IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
-			
+
 			// New
 			EnableWindow (GetDlgItem (hDlg, IDC_TRANSITION), IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
 			EnableWindow (GetDlgItem (hDlg, IDC_TRANSITIONSPINNER), IsDlgButtonChecked(hDlg, IDC_TILE_MODE));
@@ -494,7 +494,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			ep->ip->UnRegisterDeleteUser(&pDel);
 			ep->ip->GetRightClickMenuManager()->Unregister(&pMenu);
 			return FALSE;
-		
+
 		case CC_SPINNER_CHANGE:
 			switch (LOWORD(wParam))
 			{
@@ -544,7 +544,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 							}
 
 						ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_END);
-						} else 
+						} else
 					{
 						ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_INTERACTIVE);
 						}
@@ -562,18 +562,18 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 					int sm =0;
 					int sm2 = 0;
 					if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH))
-						sm = 0;					
+						sm = 0;
 					else if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH2))
-						sm = 1;					
+						sm = 1;
 					else if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH3))
-						sm = 2;					
+						sm = 2;
 
 					if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH4))
-						sm2 = 0;					
+						sm2 = 0;
 					else if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH5))
-						sm2 = 1;					
+						sm2 = 1;
 					else if (IsDlgButtonChecked(hDlg, IDC_EP_SM_SMOOTH6))
-						sm2 = 2;					
+						sm2 = 2;
 
 					spin = GetISpinner(GetDlgItem(hDlg, IDC_EP_OUTLINESPINNER));
 					ep->Bevel(ep->ip->GetTime(), spin->GetFVal(), sm, sm2);
@@ -588,7 +588,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 							}
 
 						ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_END);
-						} else 
+						} else
 					{
 						ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_INTERACTIVE);
 						}
@@ -641,7 +641,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
-			{				
+			{
 				// Subdivision
 // watje 3-18-99
 				case IDC_SHOW_INTERIOR_FACES:
@@ -654,18 +654,18 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 					{
 						BOOL bCheck=(IsDlgButtonChecked(hDlg, IDC_TILE_MODE)==BST_CHECKED);
 						ep->SetTileMode (bCheck!=0);
-						
+
 						// Old
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPS), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPSSPINNER), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPS_RENDER), !bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_STEPSRENDERSPINNER), !bCheck);
-						
+
 						// New
 						EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPS), bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_TILESTEPSSPINNER), bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_KEEP_MAPPING), bCheck);
-						
+
 						// New
 						EnableWindow (GetDlgItem (hDlg, IDC_TRANSITION), bCheck);
 						EnableWindow (GetDlgItem (hDlg, IDC_TRANSITIONSPINNER), bCheck);
@@ -731,7 +731,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 						ep->ip->SetStdCommandMode(CID_OBJMOVE);
 					else ep->ip->SetCommandMode(ep->bevelMode);
 					break;
-				
+
 				case IDC_TURN:
 					nlassert (ep->GetSubobjectLevel()==PO_PATCH);
 					ep->DoPatchTurn(true);
@@ -772,7 +772,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 				case IDC_DETACHREORIENT:
 					patchDetachReorient = IsDlgButtonChecked(hDlg, IDC_DETACHREORIENT);
 					break;
-				case IDC_ATTACH: 
+				case IDC_ATTACH:
 					{
 					ModContextList mcList;
 					INodeTab nodes;
@@ -798,7 +798,7 @@ INT_PTR CALLBACK PatchOpsDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 				}
 			break;
 		}
-	
+
 	return FALSE;
 }
 

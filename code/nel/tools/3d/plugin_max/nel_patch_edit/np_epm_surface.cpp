@@ -33,13 +33,13 @@ INT_PTR CALLBACK SelectByMatDlgProc(
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
-				case IDOK: 
+				case IDOK:
 					{
 					ISpinnerControl *spin = GetISpinner(GetDlgItem(hWnd, IDC_MAT_IDSPIN));
 					param[0] = spin->GetIVal();
 					param[1] = IsDlgButtonChecked(hWnd, IDC_CLEARSELECTION);
 					ReleaseISpinner(spin);
-					EndDialog(hWnd, 1);					
+					EndDialog(hWnd, 1);
 					break;
 					}
 
@@ -57,7 +57,7 @@ INT_PTR CALLBACK SelectByMatDlgProc(
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void SetSmoothButtonState(HWND hWnd, DWORD bits, DWORD invalid, DWORD unused = 0) 
+void SetSmoothButtonState(HWND hWnd, DWORD bits, DWORD invalid, DWORD unused = 0)
 {
 	for (int i = IDC_SMOOTH_GRP1; i < IDC_SMOOTH_GRP1 + 32; i++)
 	{
@@ -71,7 +71,7 @@ void SetSmoothButtonState(HWND hWnd, DWORD bits, DWORD invalid, DWORD unused = 0
 		{
 			SetWindowText(GetDlgItem(hWnd, i), NULL);
 			SendMessage(GetDlgItem(hWnd, i), CC_COMMAND, CC_CMD_SET_STATE, FALSE);
-		} else 
+		} else
 		{
 			TSTR buf;
 			buf.printf(_T("%d"), i - IDC_SMOOTH_GRP1 + 1);
@@ -84,7 +84,7 @@ void SetSmoothButtonState(HWND hWnd, DWORD bits, DWORD invalid, DWORD unused = 0
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-INT_PTR CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
+INT_PTR CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	static DWORD *param;
 	switch (msg)
@@ -99,19 +99,19 @@ INT_PTR CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		CenterWindow(hWnd, GetParent(hWnd));
 		break;
 
-	case WM_COMMAND: 
+	case WM_COMMAND:
 		if (LOWORD(wParam) >= IDC_SMOOTH_GRP1 &&
 			LOWORD(wParam) <= IDC_SMOOTH_GRP32)
 		{
-			ICustButton *iBut = GetICustButton(GetDlgItem(hWnd, LOWORD(wParam)));				
-			int shift = LOWORD(wParam) - IDC_SMOOTH_GRP1;				
+			ICustButton *iBut = GetICustButton(GetDlgItem(hWnd, LOWORD(wParam)));
+			int shift = LOWORD(wParam) - IDC_SMOOTH_GRP1;
 			if (iBut->IsChecked())
 			{
 				param[0] |= 1 << shift;
-			} else 
+			} else
 			{
 				param[0] &= ~(1 << shift);
-			}				
+			}
 			ReleaseICustButton(iBut);
 			break;
 		}
@@ -119,15 +119,15 @@ INT_PTR CALLBACK SelectBySmoothDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		switch (LOWORD(wParam))
 		{
 		case IDOK:
-			param[1] = IsDlgButtonChecked(hWnd, IDC_CLEARSELECTION);					
-			EndDialog(hWnd, 1);					
-			break;					
+			param[1] = IsDlgButtonChecked(hWnd, IDC_CLEARSELECTION);
+			EndDialog(hWnd, 1);
+			break;
 
 		case IDCANCEL:
 			EndDialog(hWnd, 0);
 			break;
 		}
-		break;			
+		break;
 
 	default:
 		return FALSE;
@@ -142,10 +142,10 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
-	
+
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 			{
 
 		 	ep =(EditPatchMod *)lParam;
@@ -169,16 +169,16 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				ep->tileRot = NULL;
 			}
 			return FALSE;
-		
+
 		case CC_SPINNER_CHANGE:
 			/*switch (LOWORD(wParam))
 			{
-				case IDC_TILE_MAT_SPIN: 
+				case IDC_TILE_MAT_SPIN:
 					if (HIWORD(wParam))
 						break;		// No interactive action
 					ep->SetTileNum (ep->tileNum->GetIVal());
 					break;
-				case IDC_TILE_ROT_SPIN: 
+				case IDC_TILE_ROT_SPIN:
 					if (HIWORD(wParam))
 						break;		// No interactive action
 					ep->SetTileRot (ep->tileRot->GetIVal());
@@ -208,8 +208,8 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				if (u == 0xffffffff)
 				{
 					ep->tileNum->SetIndeterminate(TRUE);
-				} 
-				else 
+				}
+				else
 				{
 					ep->tileNum->SetIndeterminate(FALSE);
 					ep->tileNum->SetValue((int)u, FALSE);
@@ -220,13 +220,13 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				if (v == -1)
 				{
 					ep->tileRot->SetIndeterminate(TRUE);
-				} 
-				else 
+				}
+				else
 				{
 					ep->tileRot->SetIndeterminate(FALSE);
 					ep->tileRot->SetValue(v, FALSE);
 				}*/
-			
+
 				ep->patchUIValid = TRUE;
 			}
 			return FALSE;
@@ -237,7 +237,7 @@ INT_PTR CALLBACK PatchTileDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}*/
 			break;
 		}
-	
+
 	return FALSE;
 }
 
@@ -248,10 +248,10 @@ INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
-	
+
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 			{
 
 		 	ep =(EditPatchMod *)lParam;
@@ -263,7 +263,7 @@ INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		case WM_DESTROY:
 			return FALSE;
-		
+
 		case WM_PAINT:
 			if (!ep->edgeUIValid)
 			{
@@ -294,7 +294,7 @@ INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
-			{				
+			{
 				case IDC_NO_SMOOTH:
 					// 3 states management
 					if (IsDlgButtonChecked(hDlg, IDC_NO_SMOOTH)==BST_INDETERMINATE)
@@ -306,7 +306,7 @@ INT_PTR CALLBACK PatchEdgeDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 			break;
 		}
-	
+
 	return FALSE;
 }
 
@@ -317,21 +317,21 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	EditPatchMod *ep =(EditPatchMod *)GetWindowLongPtr(hDlg, GWLP_USERDATA);
 	if (!ep && message != WM_INITDIALOG)
 		return FALSE;
-	
+
 	switch (message)
 	{
-		case WM_INITDIALOG: 
+		case WM_INITDIALOG:
 			{
 			ep = (EditPatchMod *)lParam;
 		 	ep->hSurfPanel = hDlg;
 
 			for (int i = IDC_SMOOTH_GRP1; i < IDC_SMOOTH_GRP1 + 32; i++)
  				SendMessage(GetDlgItem(hDlg, i), CC_COMMAND, CC_CMD_SET_TYPE, CBT_CHECK);
- 			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);		 	
+ 			SetWindowLongPtr(hDlg, GWLP_USERDATA, (LONG_PTR)ep);
  			ep->matSpin = SetupIntSpinner(hDlg, IDC_MAT_IDSPIN, IDC_MAT_ID, 1, MAX_MATID, 0);
  			ep->tessUSpin = SetupIntSpinner(hDlg, IDC_TESS_U_SPIN, IDC_TESS_U2, 1, 4, RPO_DEFAULT_TESSEL);
  			ep->tessVSpin = SetupIntSpinner(hDlg, IDC_TESS_V_SPIN, IDC_TESS_V2, 1, 4, RPO_DEFAULT_TESSEL);
-		 	
+
 			ep->SetSurfDlgEnables();
 
 			return TRUE;
@@ -354,17 +354,17 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				ep->tessVSpin = NULL;
 			}
 			return FALSE;
-		
+
 		case CC_SPINNER_CHANGE:
 			switch (LOWORD(wParam))
 			{
-				case IDC_MAT_IDSPIN: 
+				case IDC_MAT_IDSPIN:
 					if (HIWORD(wParam))
 						break;		// No interactive action
 					ep->SetSelMatIndex(ep->matSpin->GetIVal() - 1);
 					break;
-				case IDC_TESS_U_SPIN: 
-				case IDC_TESS_V_SPIN: 
+				case IDC_TESS_U_SPIN:
+				case IDC_TESS_V_SPIN:
 					if (HIWORD(wParam))
 						break;		// No interactive action
 					ep->SetSelTess(ep->tessUSpin->GetIVal(), ep->tessVSpin->GetIVal());
@@ -379,8 +379,8 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 					ep->SetSelMatIndex(ep->matSpin->GetIVal() - 1);
 					ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_END);
 					break;
-				case IDC_TESS_U_SPIN: 
-				case IDC_TESS_V_SPIN: 
+				case IDC_TESS_U_SPIN:
+				case IDC_TESS_V_SPIN:
 					ep->SetSelTess(ep->tessUSpin->GetIVal(), ep->tessVSpin->GetIVal());
 					ep->ip->RedrawViews(ep->ip->GetTime(), REDRAW_END);
 					break;
@@ -395,8 +395,8 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				if (mat == -1)
 				{
 					ep->matSpin->SetIndeterminate(TRUE);
-				} 
-				else 
+				}
+				else
 				{
 					ep->matSpin->SetIndeterminate(FALSE);
 					ep->matSpin->SetValue(mat + 1, FALSE);
@@ -411,8 +411,8 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				if (u == -1)
 				{
 					ep->tessUSpin->SetIndeterminate(TRUE);
-				} 
-				else 
+				}
+				else
 				{
 					ep->tessUSpin->SetIndeterminate(FALSE);
 					ep->tessUSpin->SetValue(u, FALSE);
@@ -423,8 +423,8 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				if (v == -1)
 				{
 					ep->tessVSpin->SetIndeterminate(TRUE);
-				} 
-				else 
+				}
+				else
 				{
 					ep->tessVSpin->SetIndeterminate(FALSE);
 					ep->tessVSpin->SetValue(v, FALSE);
@@ -446,25 +446,25 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				break;
 			}
 			switch (LOWORD(wParam))
-			{				
+			{
 				// Material
-				case IDC_SELECT_BYID: 
-					{										
+				case IDC_SELECT_BYID:
+					{
 					if (DialogBoxParam(
-						hInstance, 
+						hInstance,
 						MAKEINTRESOURCE(IDD_SELECTBYMAT),
-						ep->ip->GetMAXHWnd(), 
+						ep->ip->GetMAXHWnd(),
 						SelectByMatDlgProc,
 						(LPARAM)sbmParams))
 					{
-					
+
 						ep->SelectByMat(sbmParams[0] - 1/*index*/, sbmParams[1]/*clear*/);
 					}
 					break;
 					}
 				// Smoothing groups
-				case IDC_SELECTBYSMOOTH: 
-					{										
+				case IDC_SELECTBYSMOOTH:
+					{
 					sbsParams[2] = ~ep->GetUsedSmoothBits();
 					if (DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_EM_SELECTBYSMOOTH),
 								ep->ip->GetMAXHWnd(), SelectBySmoothDlgProc, (LPARAM)sbsParams))
@@ -486,19 +486,19 @@ INT_PTR CALLBACK PatchSurfDlgProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				}
 			break;
 		}
-	
+
 	return FALSE;
 }
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetSurfDlgEnables() 
+void EditPatchMod::SetSurfDlgEnables()
 {
 	if (!hSurfPanel)
 		return;
-	
+
 	nlassert(ip);
-	
+
 	BOOL oType =(GetSubobjectLevel() == EP_OBJECT) ? TRUE : FALSE;
 	BOOL pType =(GetSubobjectLevel() == EP_PATCH) ? TRUE : FALSE;
 
@@ -532,13 +532,13 @@ void EditPatchMod::SetSurfDlgEnables()
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetTileDlgEnables() 
+void EditPatchMod::SetTileDlgEnables()
 {
 	if (!hTilePanel)
 		return;
-	
+
 	nlassert(ip);
-	
+
 	BOOL oType =(GetSubobjectLevel() == EP_OBJECT) ? TRUE : FALSE;
 	BOOL pType =(GetSubobjectLevel() == EP_TILE) ? TRUE : FALSE;
 
@@ -550,13 +550,13 @@ void EditPatchMod::SetTileDlgEnables()
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
-void EditPatchMod::SetEdgeDlgEnables() 
+void EditPatchMod::SetEdgeDlgEnables()
 {
 	if (!hEdgePanel)
 		return;
-	
+
 	nlassert(ip);
-	
+
 	BOOL oType =(GetSubobjectLevel() == EP_OBJECT) ? TRUE : FALSE;
 	BOOL pType =(GetSubobjectLevel() == EP_TILE) ? TRUE : FALSE;
 
@@ -573,14 +573,14 @@ DWORD EditPatchMod::GetSelSmoothBits(DWORD &invalid)
 	BOOL first = 1;
 	DWORD bits = 0;
 	invalid = 0;
-	ModContextList mcList;	
+	ModContextList mcList;
 	INodeTab nodes;
 
 	if (!ip)
 		return 0;
 	ip->GetModContexts(mcList, nodes);
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
@@ -601,8 +601,8 @@ DWORD EditPatchMod::GetSelSmoothBits(DWORD &invalid)
 				if (first)
 				{
 					first = FALSE;
-					bits  = patch->patches[j].smGroup;					
-				} else 
+					bits  = patch->patches[j].smGroup;
+				} else
 				{
 					if (patch->patches[j].smGroup != bits)
 					{
@@ -614,7 +614,7 @@ DWORD EditPatchMod::GetSelSmoothBits(DWORD &invalid)
 
 		patchData->SetFlag(EPD_BEENDONE, TRUE);
 		}
-		
+
 	nodes.DisposeTemporary();
 	return bits;
 	}
@@ -622,16 +622,16 @@ DWORD EditPatchMod::GetSelSmoothBits(DWORD &invalid)
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 DWORD EditPatchMod::GetUsedSmoothBits()
-	{	
+	{
 	DWORD bits = 0;
-	ModContextList mcList;	
+	ModContextList mcList;
 	INodeTab nodes;
 
 	if (!ip)
 		return 0;
 	ip->GetModContexts(mcList, nodes);
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
-	
+
 	for (int i = 0; i < mcList.Count(); i++)
 	{
 		EditPatchData *patchData =(EditPatchData*)mcList[i]->localData;
@@ -648,11 +648,11 @@ DWORD EditPatchMod::GetUsedSmoothBits()
 		for (int j = 0; j < patch->getNumPatches(); j++)
 		{
 			bits |= patch->patches[j].smGroup;
-			}		
+			}
 
 		patchData->SetFlag(EPD_BEENDONE, TRUE);
 		}
-		
+
 	nodes.DisposeTemporary();
 	return bits;
 	}
@@ -661,14 +661,14 @@ DWORD EditPatchMod::GetUsedSmoothBits()
 
 void EditPatchMod::SelectBySmoothGroup(DWORD bits, BOOL clear)
 	{
-	ModContextList mcList;	
+	ModContextList mcList;
 	INodeTab nodes;
 
 	if (!ip)
 		return;
 	ip->GetModContexts(mcList, nodes);
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
-	
+
 	theHold.Begin();
 
 	for (int i = 0; i < mcList.Count(); i++)
@@ -689,25 +689,25 @@ void EditPatchMod::SelectBySmoothGroup(DWORD bits, BOOL clear)
 		{
 			theHold.Put(new PatchSelRestore(patchData, this, patch));
 			}
-		
+
 		if (clear)
-			patch->patchSel.ClearAll();			
+			patch->patchSel.ClearAll();
 		for (int j = 0; j < patch->getNumPatches(); j++)
-		{			
+		{
 			if (patch->patches[j].smGroup & bits)
 			{
-				patch->patchSel.Set(j);			
+				patch->patchSel.Set(j);
 				}
 			}
-		
+
 		patchData->UpdateChanges(patch, rpatch, FALSE);
 		patchData->SetFlag(EPD_BEENDONE, TRUE);
 		patchData->TempData(this)->Invalidate(PART_SELECT);
 		}
-		
+
 	PatchSelChanged();
 	theHold.Accept(GetString(IDS_RB_SELECTBYSMOOTH));
-	
+
 	nodes.DisposeTemporary();
 	NotifyDependents(FOREVER, PART_SELECT, REFMSG_CHANGE);
 	ip->RedrawViews(ip->GetTime());
@@ -717,14 +717,14 @@ void EditPatchMod::SelectBySmoothGroup(DWORD bits, BOOL clear)
 
 void EditPatchMod::SetSelSmoothBits(DWORD bits, DWORD which)
 	{
-	ModContextList mcList;	
+	ModContextList mcList;
 	INodeTab nodes;
 
 	if (!ip)
 		return;
 	ip->GetModContexts(mcList, nodes);
 	ClearPatchDataFlag(mcList, EPD_BEENDONE);
-	
+
 	theHold.Begin();
 
 	for (int i = 0; i < mcList.Count(); i++)
@@ -745,24 +745,24 @@ void EditPatchMod::SetSelSmoothBits(DWORD bits, DWORD which)
 		{
 			theHold.Put(new PatchSelRestore(patchData, this, patch));
 			}
-		
+
 		for (int j = 0; j < patch->getNumPatches(); j++)
-		{			
+		{
 			if (patch->patchSel[j])
 			{
 				patch->patches[j].smGroup &= ~which;
-				patch->patches[j].smGroup |= bits&which;			
+				patch->patches[j].smGroup |= bits&which;
 				}
 			}
-		
+
 		patchData->UpdateChanges(patch, rpatch, FALSE);
 		patchData->SetFlag(EPD_BEENDONE, TRUE);
 		patchData->TempData(this)->Invalidate(PART_SELECT);
 		}
-		
+
 	PatchSelChanged();
 	theHold.Accept(GetString(IDS_RB_SETSMOOTHGROUP));
-	
+
 	nodes.DisposeTemporary();
 	NotifyDependents(FOREVER, PART_TOPO, REFMSG_CHANGE);
 	InvalidateSurfaceUI();

@@ -26,7 +26,7 @@ int controlsInit = FALSE;
 using namespace NLMISC;
 
 /** public functions **/
-BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved) 
+BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
@@ -40,11 +40,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 	{
 		hInstance = hinstDLL;
 		DisableThreadLibraryCalls(hInstance);
-		
-		if (!controlsInit) 
+
+		if (!controlsInit)
 		{
 			controlsInit = TRUE;
-			
+
 			// jaguar controls
 #if MAX_VERSION_MAJOR < 14
 			InitCustomControls(hInstance);
@@ -55,12 +55,12 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 			Ctl3dRegister(hinstDLL);
 			Ctl3dAutoSubclass(hinstDLL);
 #endif
-			
+
 			// initialize Chicago controls
 			InitCommonControls();
 		}
 	}
-	
+
 	return TRUE;
 }
 
@@ -68,20 +68,20 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 //------------------------------------------------------
 // This is the interface to Jaguar:
 //------------------------------------------------------
-__declspec( dllexport ) const TCHAR *LibDescription() 
-{ 
+__declspec( dllexport ) const TCHAR *LibDescription()
+{
 	return _T("NeL Patch Edit");
 }
 
 /// MUST CHANGE THIS NUMBER WHEN ADD NEW CLASS
 __declspec( dllexport ) int LibNumberClasses()
-{ 
+{
 	return 1;
 }
 
-__declspec( dllexport ) ClassDesc *LibClassDesc(int i) 
+__declspec( dllexport ) ClassDesc *LibClassDesc(int i)
 {
-	switch(i) 
+	switch(i)
 	{
 		case 0: return GetEditPatchModDesc();
 		default: return NULL;
@@ -90,7 +90,7 @@ __declspec( dllexport ) ClassDesc *LibClassDesc(int i)
 
 // Return version so can detect obsolete DLLs
 __declspec( dllexport ) ULONG LibVersion()
-{ 
+{
 	return VERSION_3DSMAX;
 }
 

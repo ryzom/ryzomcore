@@ -16,7 +16,7 @@ using namespace NLMISC;
 #endif
 
 /** public functions **/
-BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved) 
+BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 {
 	// initialize nel context
 	if (!NLMISC::INelContext::isContextInitialised())
@@ -25,13 +25,13 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		nldebug("NeL Patch Paint: DllMain");
 		NLMISC::CSheetId::initWithoutSheet();
 	}
-			
+
 	hInstance = hinstDLL;
 
-	if ( !controlsInit ) 
+	if ( !controlsInit )
 	{
 		controlsInit = TRUE;
-		
+
 		// jaguar controls
 #if MAX_VERSION_MAJOR < 14
 		InitCustomControls(hInstance);
@@ -42,7 +42,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 		Ctl3dRegister(hinstDLL);
 		Ctl3dAutoSubclass(hinstDLL);
 #endif
-		
+
 		// initialize Chicago controls
 		InitCommonControls();
 		}
@@ -66,8 +66,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 //------------------------------------------------------
 
 __declspec( dllexport ) const TCHAR *
-LibDescription() 
-{ 
+LibDescription()
+{
 	return _T("NeL patch painter");
 }
 
@@ -109,7 +109,7 @@ LibClassDesc(int i) {
 
 
 // Return version so can detect obsolete DLLs
-__declspec( dllexport ) ULONG 
+__declspec( dllexport ) ULONG
 LibVersion() { return VERSION_3DSMAX; }
 
 // Let the plug-in register itself for deferred loading
