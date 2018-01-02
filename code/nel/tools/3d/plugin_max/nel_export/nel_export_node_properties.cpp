@@ -63,7 +63,7 @@ TCHAR *_EnvironmentNames[] =
 	_T("PSYCHOTIC"),
 	NULL
 };
-TCHAR *_MaterialNames[] = 
+TCHAR *_MaterialNames[] =
 {
 	_T(""),
 	_T("no occlusion"),
@@ -85,7 +85,7 @@ const std::set<INode*> *listNodeCallBack;
 
 // ***************************************************************************
 
-class addSubLodNodeHitCallBack : public HitByNameDlgCallback 
+class addSubLodNodeHitCallBack : public HitByNameDlgCallback
 {
 public:
 	INodeTab	NodeTab;
@@ -154,7 +154,7 @@ public:
 		((CRGBA*)this)->operator= (col);
 		return *this;
 	}
-	
+
 	void setDifferentValuesMode()
 	{
 		DifferentValues= true;
@@ -174,7 +174,7 @@ public:
 			SubDlg[i] = NULL;
 		for (i=0; i<VP_COUNT; i++)
 			SubVPDlg[i] = NULL;
-		InterfaceThreshold = 0.1f;		
+		InterfaceThreshold = 0.1f;
 		GetInterfaceNormalsFromSceneObjects = 0;
 		LMCEnabled= 0;
 	}
@@ -224,7 +224,7 @@ public:
 	std::string				InterfaceFileName;
 	int					    GetInterfaceNormalsFromSceneObjects;
 	float					InterfaceThreshold;
-	int						DontAddToScene;	
+	int						DontAddToScene;
 	int						DontExport;
 
 	// Lighting
@@ -235,7 +235,7 @@ public:
 
 	// VertexProgram.
 	int						VertexProgramId;
-	bool					VertexProgramBypassed;	
+	bool					VertexProgramBypassed;
 	// WindTree VertexProgram.
 	CVPWindTreeAppData		VertexProgramWindTree;
 
@@ -258,8 +258,8 @@ public:
 	// Compression term for 8Bits LightMap Compression
 	CRGBAProp				LMCAmbient[NumLightGroup];
 	CRGBAProp				LMCDiffuse[NumLightGroup];
-	
-	
+
+
 	// Misc
 	int						FloatingObject;
 	int						SWT;
@@ -360,7 +360,7 @@ void LightingStateChanged (HWND hwndDlg, CLodDialogBoxParam *currentParam)
 	EnableWindow(GetDlgItem (hwndDlg, IDC_USE_LIGHT_LOCAL_ATTENUATION), currentParam->VertexProgramBypassed ? FALSE : TRUE);
 
 	// Enable AmbientAddSun for realTime Ambient only
-	EnableWindow(GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN), 
+	EnableWindow(GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN),
 		SendMessage (GetDlgItem (hwndDlg, IDC_EXPORT_REALTIME_LIGHT), BM_GETCHECK, 0, 0)!=BST_UNCHECKED);
 }
 
@@ -382,14 +382,14 @@ void VegetableStateChanged (HWND hwndDlg)
 {
 	// Vegetable ?
 	bool enable = ( SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE), BM_GETCHECK, 0, 0)!=BST_UNCHECKED );
-	
+
 	// Enable alpha blend button
 	EnableWindow (GetDlgItem (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_ON), enable);
 	EnableWindow (GetDlgItem (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_OFF), enable);
 	EnableWindow (GetDlgItem (hwndDlg, IDC_CENTER_Z), enable);
 	EnableWindow (GetDlgItem (hwndDlg, IDC_CENTER_NULL), enable);
 	EnableWindow (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), enable);
-	
+
 	// Alpha blend ?
 	bool alphaBlend = IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_ON)!=BST_UNCHECKED;
 
@@ -407,7 +407,7 @@ void VegetableStateChanged (HWND hwndDlg)
 		precomputed= IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_ON_LIGHTED_PRECOMPUTED)!=BST_UNCHECKED;
 	else
 		precomputed= IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_OFF_LIGHTED_PRECOMPUTED)!=BST_UNCHECKED;
-	
+
 	// Force Best Sided Lighting only if precomputed
 	EnableWindow (GetDlgItem (hwndDlg, IDC_VEGETABLE_FORCE_BEST_SIDED_LIGHTING), enable && precomputed);
 
@@ -456,7 +456,7 @@ void exploreNode(INode *node)
 
 	if (soundGroup != "no sound")
 		_KnownSoundGroups.insert(soundGroup);
-	
+
 	for (int i= 0; i<node->NumChildren(); ++i)
 	{
 		exploreNode(node->GetChildNode(i));
@@ -473,7 +473,7 @@ INT_PTR CALLBACK AccelDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -543,7 +543,7 @@ INT_PTR CALLBACK AccelDialogCallback (
 //				nlassert(false);
 			}
 //			SendMessage(GetDlgItem(hwndDlg, IDC_SOUND_GROUP), WM_SETTEXT, 0, (LONG)(currentParam->SoundGroup.c_str()));
-	
+
 			bool accelerator = (currentParam->AcceleratorType != -1);
 			CheckRadioButton (hwndDlg, IDC_RADIOACCELNO, IDC_RADIOACCELCLUSTER, accelerator?(IDC_RADIOACCELNO+(currentParam->AcceleratorType&NEL3D_APPDATA_ACCEL_TYPE)):0);
 			AccelStateChanged (hwndDlg);
@@ -554,7 +554,7 @@ INT_PTR CALLBACK AccelDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -644,7 +644,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -668,7 +668,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 			EnableWindow (GetDlgItem (hwndDlg, IDC_REMOVE), currentParam->ListActived);
 			EnableWindow (GetDlgItem (hwndDlg, IDC_UP), currentParam->ListActived);
 			EnableWindow (GetDlgItem (hwndDlg, IDC_DOWN), currentParam->ListActived);
-			
+
 			SetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MAX), utf8ToTStr(currentParam->DistMax));
 			SetWindowText (GetDlgItem (hwndDlg, IDC_BLEND_LENGTH), utf8ToTStr(currentParam->BlendLength));
 
@@ -704,7 +704,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -716,7 +716,7 @@ INT_PTR CALLBACK MRMDialogCallback (
 							currentParam->BlendOut=SendMessage (GetDlgItem (hwndDlg, IDC_BLEND_OUT), BM_GETCHECK, 0, 0);
 							currentParam->CoarseMesh=SendMessage (GetDlgItem (hwndDlg, IDC_COARSE_MESH), BM_GETCHECK, 0, 0);
 							currentParam->DynamicMesh=SendMessage (GetDlgItem (hwndDlg, IDC_DYNAMIC_MESH), BM_GETCHECK, 0, 0);
-							
+
 							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_DIST_MAX), tmp, 512);
 							currentParam->DistMax = tStrToUtf8(tmp);
@@ -912,7 +912,7 @@ INT_PTR CALLBACK InstanceDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -934,7 +934,7 @@ INT_PTR CALLBACK InstanceDialogCallback (
 
 			bool colOk = currentParam->CollisionMeshGeneration>=0 && currentParam->CollisionMeshGeneration<4;
 			CheckRadioButton (hwndDlg, IDC_CAMERA_COL_RADIO1, IDC_CAMERA_COL_RADIO4, colOk?(IDC_CAMERA_COL_RADIO1+(currentParam->CollisionMeshGeneration)):0);
-			
+
 			InstanceStateChanged(hwndDlg);
 		}
 		break;
@@ -943,7 +943,7 @@ INT_PTR CALLBACK InstanceDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -956,7 +956,7 @@ INT_PTR CALLBACK InstanceDialogCallback (
 
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_NAME), tmp, 512);
 							currentParam->InstanceName = tStrToUtf8(tmp);
-							
+
 							currentParam->DontAddToScene=SendMessage (GetDlgItem (hwndDlg, IDC_DONT_ADD_TO_SCENE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INSTANCE_GROUP_NAME), tmp, 512);
 							currentParam->InstanceGroupName = tStrToUtf8(tmp);
@@ -1028,7 +1028,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -1050,7 +1050,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			SendMessage (GetDlgItem (hwndDlg, IDC_LIGHT_DONT_CAST_SHADOW_EXTERIOR), BM_SETCHECK, currentParam->LightDontCastShadowExterior, 0);
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), utf8ToTStr(currentParam->ExportLightMapName));
 			SendMessage (GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN), BM_SETCHECK, currentParam->RealTimeAmbientLightAddSun, 0);
-			
+
 			// Set enable disable
 			LightingStateChanged (hwndDlg, currentParam);
 
@@ -1062,7 +1062,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDC_RESET_NAME:
 						SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), _T("GlobalLight"));
@@ -1092,7 +1092,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_LIGHTMAP_NAME), tmp, 512);
 							currentParam->ExportLightMapName = tStrToUtf8(tmp);
 							currentParam->RealTimeAmbientLightAddSun= SendMessage (GetDlgItem (hwndDlg, IDC_REALTIME_LIGHT_AMBIENT_ADD_SUN), BM_GETCHECK, 0, 0);
-								
+
 							// Get the acceleration type
 							if (IsDlgButtonChecked (hwndDlg, IDC_LIGHT_GROUP_ALWAYS) == BST_CHECKED)
 								currentParam->LightGroup = 0;
@@ -1154,7 +1154,7 @@ INT_PTR CALLBACK LightmapDialogCallback (
 			EndDialog(hwndDlg,1);
 		break;
 
-		case WM_DESTROY:						
+		case WM_DESTROY:
 		break;
 
 
@@ -1180,7 +1180,7 @@ void	Lightmap2StateChanged (HWND hwndDlg, CLodDialogBoxParam *currentParam)
 	EnableWindow (GetDlgItem(hwndDlg, IDC_LMC_AUTO_SETUP), enabled);
 	EnableWindow (GetDlgItem(hwndDlg, IDC_LMC_AUTO_SETUP_VISIBLEONLY), enabled);
 	EnableWindow (GetDlgItem(hwndDlg, IDC_LMC_COPY_FROM), enabled);
-	
+
 	// MAX enable/disable
 	uint i;
 	for(i=0;i<CLodDialogBoxParam::NumLightGroup;i++)
@@ -1190,14 +1190,14 @@ void	Lightmap2StateChanged (HWND hwndDlg, CLodDialogBoxParam *currentParam)
 	}
 
 	// Static Enable / Disable
-	uint	staticItems[]= {IDC_LMC_STATIC0, IDC_LMC_STATIC1, IDC_LMC_STATIC2, IDC_LMC_STATIC3, 
+	uint	staticItems[]= {IDC_LMC_STATIC0, IDC_LMC_STATIC1, IDC_LMC_STATIC2, IDC_LMC_STATIC3,
 		IDC_LMC_STATIC4, IDC_LMC_STATIC5, IDC_LMC_STATIC6, IDC_LMC_STATIC7, IDC_LMC_STATIC8, };
 	uint	numStaticItems= sizeof(staticItems) / sizeof(staticItems[0]);
 	for(i=0;i<numStaticItems;i++)
 	{
 		EnableWindow (GetDlgItem(hwndDlg, staticItems[i]), enabled);
 	}
-		
+
 }
 
 // ***************************************************************************
@@ -1208,7 +1208,7 @@ void	lmcAutoSetup(CLodDialogBoxParam *currentParam, bool visibleOnly)
 	// get all lightmap lights
 	std::vector<SLightBuild>		lights;
 	getLightmapLightBuilds(lights, theCNelExport._Ip->GetTime(), *theCNelExport._Ip, visibleOnly);
-	
+
 	// mean all light, by lightgroup
 	CRGBAF		sumAmbient[CLodDialogBoxParam::NumLightGroup];
 	CRGBAF		sumDiffuse[CLodDialogBoxParam::NumLightGroup];
@@ -1258,7 +1258,7 @@ void	lmcAutoSetup(CLodDialogBoxParam *currentParam, bool visibleOnly)
 			sumDiffuse[i]/= float(countDiffuse[i]);
 			diff= sumDiffuse[i];
 		}
-		
+
 		// change the control and value
 		currentParam->LMCAmbient[i]= amb;
 		currentParam->LMCAmbient[i].Ctrl->SetColor(RGB(amb.R, amb.G, amb.B));
@@ -1269,7 +1269,7 @@ void	lmcAutoSetup(CLodDialogBoxParam *currentParam, bool visibleOnly)
 
 
 // ***************************************************************************
-struct CLMCParamFrom 
+struct CLMCParamFrom
 {
 	bool		AmbFilter[CLodDialogBoxParam::NumLightGroup];
 	bool		DiffFilter[CLodDialogBoxParam::NumLightGroup];
@@ -1278,7 +1278,7 @@ struct CLMCParamFrom
 	std::vector<INode*>		Nodes;
 	// true if the user has clicked at least one item
 	bool		SelectionDone;
-	
+
 	CLMCParamFrom()
 	{
 		SelectionDone= false;
@@ -1311,8 +1311,8 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 {
 	CLMCParamFrom *lmcParam=(CLMCParamFrom *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 	uint	i;
-	
-	switch (uMsg) 
+
+	switch (uMsg)
 	{
 	case WM_INITDIALOG:
 		{
@@ -1336,7 +1336,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 				lmcParam->AmbValue[i].Ctrl->SetColor(RGB(a.R, a.G, a.B));
 				lmcParam->DiffValue[i].Ctrl->SetColor(RGB(d.R, d.G, d.B));
 			}
-			
+
 			// init the filters.
 			nlctassert(CLodDialogBoxParam::NumLightGroup==3);
 			SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_ALWAYS_AMBIENT_FILTER), BM_SETCHECK, lmcParam->AmbFilter[0]?BST_CHECKED:BST_UNCHECKED, 0);
@@ -1345,7 +1345,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 			SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_ALWAYS_DIFFUSE_FILTER), BM_SETCHECK, lmcParam->DiffFilter[0]?BST_CHECKED:BST_UNCHECKED, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_SUN_DIFFUSE_FILTER), BM_SETCHECK, lmcParam->DiffFilter[1]?BST_CHECKED:BST_UNCHECKED, 0);
 			SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_NIGHT_DIFFUSE_FILTER), BM_SETCHECK, lmcParam->DiffFilter[2]?BST_CHECKED:BST_UNCHECKED, 0);
-			
+
 			// init the list
 			HWND hwndList=GetDlgItem (hwndDlg, IDC_LMC_COPY_LIST);
 			for(i=0;i<lmcParam->Nodes.size();i++)
@@ -1355,7 +1355,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 				// Insert string
 				SendMessage (hwndList, LB_ADDSTRING, 0, (LPARAM) str.c_str());
 			}
-		
+
 			// gray the OK button
 			EnableWindow( GetDlgItem(hwndDlg, IDOK), FALSE);
 		}
@@ -1365,7 +1365,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 		if( HIWORD(wParam) == BN_CLICKED )
 		{
 			HWND hwndButton = (HWND) lParam;
-			switch (LOWORD(wParam)) 
+			switch (LOWORD(wParam))
 			{
 			case IDCANCEL:
 				EndDialog(hwndDlg, IDCANCEL);
@@ -1380,7 +1380,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 					lmcParam->DiffFilter[0]= SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_ALWAYS_DIFFUSE_FILTER), BM_GETCHECK, 0, 0) == BST_CHECKED;
 					lmcParam->DiffFilter[1]= SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_SUN_DIFFUSE_FILTER), BM_GETCHECK, 0, 0) == BST_CHECKED;
 					lmcParam->DiffFilter[2]= SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_NIGHT_DIFFUSE_FILTER), BM_GETCHECK, 0, 0) == BST_CHECKED;
-					
+
 					// get colors
 					for(i=0;i<CLodDialogBoxParam::NumLightGroup;i++)
 					{
@@ -1434,7 +1434,7 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 				// Get the node name
 				TCHAR name[512];
 				SendMessage (GetDlgItem (hwndDlg, IDC_LMC_COPY_LIST), LB_GETTEXT, wID, (LPARAM) (LPCTSTR) name);
-				
+
 				// Find the node
 				INode *nodeClk=theCNelExport._Ip->GetINodeByName(name);
 				if (nodeClk)
@@ -1454,17 +1454,17 @@ INT_PTR CALLBACK LMCCopyFromDialogCallback(
 				// ungray the OK button
 				EnableWindow( GetDlgItem(hwndDlg, IDOK), TRUE);
 			}
-					
+
 		}
 		break;
-		
+
 	case WM_CLOSE:
 		EndDialog(hwndDlg,IDCANCEL);
 		break;
-		
-	case WM_DESTROY:						
+
+	case WM_DESTROY:
 		break;
-		
+
 	default:
 		return FALSE;
 	}
@@ -1479,7 +1479,7 @@ void	lmcCopyFrom(CLodDialogBoxParam *currentParam, HWND parentDlg)
 
 	// static to save filter between calls
 	static CLMCParamFrom		paramLMCFrom;
-	
+
 	// **** get all nodes
 	// get all nodes
 	std::vector<INode*>	nodes;
@@ -1532,7 +1532,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -1540,7 +1540,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-			// retrieve the color choosing Ctrl 
+			// retrieve the color choosing Ctrl
 			nlctassert(CLodDialogBoxParam::NumLightGroup==3);
 			nlverify(currentParam->LMCAmbient[0].Ctrl= GetIColorSwatch(GetDlgItem(hwndDlg, IDC_LM_ALWAYS_AMBIENT)));
 			nlverify(currentParam->LMCAmbient[1].Ctrl= GetIColorSwatch(GetDlgItem(hwndDlg, IDC_LM_DAY_AMBIENT)));
@@ -1548,7 +1548,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 			nlverify(currentParam->LMCDiffuse[0].Ctrl= GetIColorSwatch(GetDlgItem(hwndDlg, IDC_LM_ALWAYS_DIFFUSE)));
 			nlverify(currentParam->LMCDiffuse[1].Ctrl= GetIColorSwatch(GetDlgItem(hwndDlg, IDC_LM_DAY_DIFFUSE)));
 			nlverify(currentParam->LMCDiffuse[2].Ctrl= GetIColorSwatch(GetDlgItem(hwndDlg, IDC_LM_NIGHT_DIFFUSE)));
-			
+
 			// set color, and color state
 			for(uint i=0;i<CLodDialogBoxParam::NumLightGroup;i++)
 			{
@@ -1560,7 +1560,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 
 			// the enable button
 			SendMessage (GetDlgItem (hwndDlg, IDC_LM_COMPRESS_8BIT), BM_SETCHECK, currentParam->LMCEnabled, 0);
-			
+
 			// Set enable disable
 			Lightmap2StateChanged (hwndDlg, currentParam);
 		}
@@ -1570,7 +1570,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -1616,7 +1616,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 			{
 				nlctassert(CLodDialogBoxParam::NumLightGroup==3);
 				CRGBAProp		*propEdited;
-				switch(LOWORD(wParam)) 
+				switch(LOWORD(wParam))
 				{
 				case IDC_LM_ALWAYS_AMBIENT:	propEdited= &currentParam->LMCAmbient[0]; break;
 				case IDC_LM_DAY_AMBIENT:	propEdited= &currentParam->LMCAmbient[1]; break;
@@ -1635,7 +1635,7 @@ INT_PTR CALLBACK Lightmap2DialogCallback (
 			EndDialog(hwndDlg,1);
 		break;
 
-		case WM_DESTROY:						
+		case WM_DESTROY:
 		break;
 
 		default:
@@ -1655,7 +1655,7 @@ INT_PTR CALLBACK VegetableDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -1664,19 +1664,19 @@ INT_PTR CALLBACK VegetableDialogCallback (
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE), BM_SETCHECK, currentParam->Vegetable, 0);
-			
+
 			// Yoyo: enable like this. Crappy CheckRadioButton method...
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_ON), BM_SETCHECK, currentParam->VegetableAlphaBlend==0, 0 );
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_OFF), BM_SETCHECK, currentParam->VegetableAlphaBlend==1, 0 );
-			
+
 			CheckRadioButton(hwndDlg, IDC_VEGETABLE_AB_ON_LIGHTED_PRECOMPUTED, IDC_VEGETABLE_AB_ON_UNLIGHTED, IDC_VEGETABLE_AB_ON_LIGHTED_PRECOMPUTED+currentParam->VegetableAlphaBlendOnLighted);
-			
+
 			CheckRadioButton(hwndDlg, IDC_VEGETABLE_AB_OFF_LIGHTED_PRECOMPUTED, IDC_VEGETABLE_AB_OFF_UNLIGHTED, IDC_VEGETABLE_AB_OFF_LIGHTED_PRECOMPUTED+currentParam->VegetableAlphaBlendOffLighted);
-			
+
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_AB_OFF_DOUBLE_SIDED), BM_SETCHECK, currentParam->VegetableAlphaBlendOffDoubleSided, 0);
 
 			SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_FORCE_BEST_SIDED_LIGHTING), BM_SETCHECK, currentParam->VegetableForceBestSidedLighting, 0);
-			
+
 			CheckRadioButton(hwndDlg, IDC_CENTER_NULL, IDC_CENTER_Z, IDC_CENTER_NULL+currentParam->VegetableBendCenter);
 
 			SetWindowText (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), utf8ToTStr(currentParam->VegetableBendFactor));
@@ -1689,7 +1689,7 @@ INT_PTR CALLBACK VegetableDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -1702,25 +1702,25 @@ INT_PTR CALLBACK VegetableDialogCallback (
 								currentParam->VegetableAlphaBlend = 0;
 							else if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_ALPHA_BLEND_OFF) == BST_CHECKED)
 								currentParam->VegetableAlphaBlend = 1;
-							else 
+							else
 								currentParam->VegetableAlphaBlend = -1;
-							
+
 							if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_ON_LIGHTED_PRECOMPUTED) == BST_CHECKED)
 								currentParam->VegetableAlphaBlendOnLighted = 0;
 							else if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_ON_UNLIGHTED) == BST_CHECKED)
 								currentParam->VegetableAlphaBlendOnLighted = 1;
-							else 
+							else
 								currentParam->VegetableAlphaBlendOnLighted = -1;
-							
+
 							if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_OFF_LIGHTED_PRECOMPUTED) == BST_CHECKED)
 								currentParam->VegetableAlphaBlendOffLighted = 0;
 							else if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_OFF_LIGHTED_DYNAMIC) == BST_CHECKED)
 								currentParam->VegetableAlphaBlendOffLighted = 1;
 							else if (IsDlgButtonChecked (hwndDlg, IDC_VEGETABLE_AB_OFF_UNLIGHTED) == BST_CHECKED)
 								currentParam->VegetableAlphaBlendOffLighted = 2;
-							else 
+							else
 								currentParam->VegetableAlphaBlendOffLighted = -1;
-							
+
 							currentParam->VegetableAlphaBlendOffDoubleSided = SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_AB_OFF_DOUBLE_SIDED), BM_GETCHECK, 0, 0);
 
 							currentParam->VegetableForceBestSidedLighting= SendMessage (GetDlgItem (hwndDlg, IDC_VEGETABLE_FORCE_BEST_SIDED_LIGHTING), BM_GETCHECK, 0, 0);
@@ -1729,9 +1729,9 @@ INT_PTR CALLBACK VegetableDialogCallback (
 								currentParam->VegetableBendCenter = 0;
 							else if (IsDlgButtonChecked (hwndDlg, IDC_CENTER_Z) == BST_CHECKED)
 								currentParam->VegetableBendCenter = 1;
-							else 
+							else
 								currentParam->VegetableBendCenter = -1;
-							
+
 							TCHAR tmp[512];
 							GetWindowText (GetDlgItem (hwndDlg, IDC_VEGETABLE_BEND_FACTOR), tmp, 512);
 							currentParam->VegetableBendFactor = tStrToUtf8(tmp);
@@ -1775,7 +1775,7 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -1823,7 +1823,7 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (
 			for (uint vpId=0; vpId<VP_COUNT; vpId++)
 			{
 				// Create the dialog
-				currentParam->SubVPDlg[vpId] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubVPTab[vpId]), hwndDlg, SubVPProc[vpId], (LONG)lParam);
+				currentParam->SubVPDlg[vpId] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubVPTab[vpId]), hwndDlg, SubVPProc[vpId], lParam);
 
 				// To client coord
 				RECT client = tabRect;
@@ -1847,7 +1847,7 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -1933,7 +1933,7 @@ void	updateVPWTStatic(HWND hwndDlg, uint type, uint depth, const CVPWindTreeAppD
 	TCHAR	stmp[256];
 	float	nticks= CVPWindTreeAppData::NumTicks;
 	float	scale;
-	
+
 	// which scale??
 	switch(type)
 	{
@@ -1951,27 +1951,27 @@ void	updateVPWTStatic(HWND hwndDlg, uint type, uint depth, const CVPWindTreeAppD
 	// update static according to type.
 	switch(type)
 	{
-	case 0:	
+	case 0:
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTFreqSliderId[depth], TBM_GETPOS, 0, 0);
 		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTFreqStaticId[depth]), stmp );
 		break;
-	case 1:	
+	case 1:
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTFreqWDSliderId[depth], TBM_GETPOS, 0, 0);
 		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTFreqWDStaticId[depth]), stmp );
 		break;
-	case 2:	
+	case 2:
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTDistXYSliderId[depth], TBM_GETPOS, 0, 0);
 		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTDistXYStaticId[depth]), stmp );
 		break;
-	case 3:	
+	case 3:
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTDistZSliderId[depth], TBM_GETPOS, 0, 0);
 		_stprintf(stmp, _T("%.2f"), scale * float(sliderValue)/nticks);
 		SetWindowText( GetDlgItem(hwndDlg, VPWTDistZStaticId[depth]), stmp );
 		break;
-	case 4:	
+	case 4:
 		sliderValue= SendDlgItemMessage(hwndDlg, VPWTBiasSliderId[depth], TBM_GETPOS, 0, 0);
 		// expand to -2 to 2.
 		float	biasVal= 4 * float(sliderValue)/nticks - 2;
@@ -2041,10 +2041,10 @@ INT_PTR CALLBACK VPWindTreeCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
-		{ 
+		{
 			// Param pointers
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -2108,7 +2108,7 @@ INT_PTR CALLBACK VPWindTreeCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -2175,9 +2175,9 @@ INT_PTR CALLBACK VPWindTreeCallback (
 
 			// EditBox change: ...
 			if( HIWORD(wParam) == EN_KILLFOCUS || EnChangeReturn)
-			{				
-				switch (LOWORD(wParam)) 
-				{					
+			{
+				switch (LOWORD(wParam))
+				{
 					case IDC_EDIT_VPWT_FREQ_SCALE:
 					{
 						// Read FreqScale
@@ -2220,7 +2220,7 @@ INT_PTR CALLBACK VPWindTreeCallback (
 						SetWindowText( GetDlgItem(hwndDlg, IDC_EDIT_VPWT_DIST_SCALE), stmp );
 					}
 					break;
-				}				
+				}
 			}
 		}
 		break;
@@ -2279,10 +2279,10 @@ INT_PTR CALLBACK MiscDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
-		{ 			
+		{
 			// Param pointers
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -2302,12 +2302,12 @@ INT_PTR CALLBACK MiscDialogCallback (
 
 			// Mesh interfaces
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_FILE), utf8ToTStr(currentParam->InterfaceFileName));
-			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD), 
+			SetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD),
 							currentParam->InterfaceThreshold != -1.f ? utf8ToTStr(toStringMax(currentParam->InterfaceThreshold))
 																	 : _T("")
 						  );
 			SendMessage(GetDlgItem(hwndDlg, IDC_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS), BM_SETCHECK, currentParam->GetInterfaceNormalsFromSceneObjects, 0);
-			
+
 			// Skeleton Scale
 			SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_SETCHECK, currentParam->ExportBoneScale, 0);
 			SetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), utf8ToTStr(currentParam->ExportBoneScaleNameExt));
@@ -2325,7 +2325,7 @@ INT_PTR CALLBACK MiscDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -2358,10 +2358,10 @@ INT_PTR CALLBACK MiscDialogCallback (
 							currentParam->InterfaceFileName = tStrToUtf8(tmp);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EDIT_INTERFACE_THRESHOLD), tmp, 512);
 							if (_tcslen(tmp) != 0)
-								currentParam->InterfaceThreshold = toFloatMax(tmp);							
+								currentParam->InterfaceThreshold = toFloatMax(tmp);
 							currentParam->GetInterfaceNormalsFromSceneObjects = SendMessage (GetDlgItem (hwndDlg, IDC_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS), BM_GETCHECK, 0, 0);
-														
-							
+
+
 							// Skeleton Scale
 							currentParam->ExportBoneScale= SendMessage( GetDlgItem(hwndDlg, IDC_EXPORT_BONE_SCALE), BM_GETCHECK, 0, 0);
 							GetWindowText (GetDlgItem (hwndDlg, IDC_EXPORT_BONE_SCALE_NAME_EXT), tmp, 512);
@@ -2414,10 +2414,10 @@ INT_PTR CALLBACK AnimationDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
-		{ 			
+		{
 			// Param pointers
 			LONG_PTR res = SetWindowLongPtr(hwndDlg, GWLP_USERDATA, (LONG_PTR)lParam);
 			currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
@@ -2434,7 +2434,7 @@ INT_PTR CALLBACK AnimationDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -2483,7 +2483,7 @@ INT_PTR CALLBACK LodDialogCallback (
 {
 	CLodDialogBoxParam *currentParam=(CLodDialogBoxParam *)GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 
-	switch (uMsg) 
+	switch (uMsg)
 	{
 		case WM_INITDIALOG:
 		{
@@ -2526,7 +2526,7 @@ INT_PTR CALLBACK LodDialogCallback (
 				SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_INSERTITEM, SendMessage (GetDlgItem (hwndDlg, IDC_TAB), TCM_GETITEMCOUNT, 0, 0), (LPARAM)&tabItem);
 
 				// Create the dialog
-				currentParam->SubDlg[tab] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubTab[tab]), GetDlgItem (hwndDlg, IDC_TAB), SubProc[tab], (LONG)lParam);
+				currentParam->SubDlg[tab] = CreateDialogParam (hInstance, MAKEINTRESOURCE(SubTab[tab]), GetDlgItem (hwndDlg, IDC_TAB), SubProc[tab], lParam);
 
 				// To client coord
 				RECT client = tabRect;
@@ -2551,7 +2551,7 @@ INT_PTR CALLBACK LodDialogCallback (
 				{
 				case TCN_SELCHANGE:
 					{
-						
+
 						uint curSel=SendMessage (pnmh->hwndFrom, TCM_GETCURSEL, 0, 0);
 						for (uint tab=0; tab<TAB_COUNT; tab++)
 						{
@@ -2568,7 +2568,7 @@ INT_PTR CALLBACK LodDialogCallback (
 			if( HIWORD(wParam) == BN_CLICKED )
 			{
 				HWND hwndButton = (HWND) lParam;
-				switch (LOWORD(wParam)) 
+				switch (LOWORD(wParam))
 				{
 					case IDCANCEL:
 						EndDialog(hwndDlg, IDCANCEL);
@@ -2593,9 +2593,9 @@ INT_PTR CALLBACK LodDialogCallback (
 			EndDialog(hwndDlg,1);
 		break;
 
-		case WM_DESTROY:						
+		case WM_DESTROY:
 		break;
-	
+
 		default:
 		return FALSE;
 	}
@@ -2607,7 +2607,7 @@ INT_PTR CALLBACK LodDialogCallback (
 void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 {
 
-	// Get 
+	// Get
 	uint nNumSelNode=(uint)listNode.size();
 
 	if (nNumSelNode)
@@ -2780,13 +2780,13 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			param.LMCAmbient[i]= CExportNel::getScriptAppData (node, NEL3D_APPDATA_EXPORT_LMC_AMBIENT_START+i, CRGBA::Black);
 			param.LMCDiffuse[i]= CExportNel::getScriptAppData (node, NEL3D_APPDATA_EXPORT_LMC_DIFFUSE_START+i, CRGBA::White);
 		}
-		
+
 		// CollisionMeshGeneration
 		param.CollisionMeshGeneration=CExportNel::getScriptAppData (node, NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION, 0);
-		
+
 		// RealTimeAmbientLightAddSun
 		param.RealTimeAmbientLightAddSun= CExportNel::getScriptAppData (node, NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN, BST_UNCHECKED);
-		
+
 		// Something selected ?
 		std::set<INode*>::const_iterator ite=listNode.begin();
 		ite++;
@@ -2902,7 +2902,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				param.RemanenceRollupRatio = -1.f;
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_REMANENCE_SLICE_NUMBER, 64)!=param.RemanenceSliceNumber)
 				param.RemanenceSliceNumber = -1;
-			
+
 
 			// Radial normals
 			for (uint smoothGroup=0; smoothGroup<NEL3D_RADIAL_NORMAL_COUNT; smoothGroup++)
@@ -3004,9 +3004,9 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_EXTERIOR, BST_UNCHECKED) != param.LightDontCastShadowExterior)
 				param.LightDontCastShadowExterior= BST_INDETERMINATE;
 
-			
+
 			// VertexProgram
-			// simply disable VertexProgram edition of multiple selection... 
+			// simply disable VertexProgram edition of multiple selection...
 			param.VertexProgramId= -1;
 
 			// Collision
@@ -3037,15 +3037,15 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				if(CExportNel::getScriptAppData (node, NEL3D_APPDATA_EXPORT_LMC_DIFFUSE_START+i, CRGBA::White) != param.LMCDiffuse[i])
 					param.LMCDiffuse[i].setDifferentValuesMode();
 			}
-			
+
 			// CollisionMeshGeneration
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION, 0)!=param.CollisionMeshGeneration)
 				param.CollisionMeshGeneration = -1;
-			
+
 			// RealTimeAmbientLightAddSun
 			if (CExportNel::getScriptAppData (node, NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN, BST_UNCHECKED) != param.RealTimeAmbientLightAddSun)
 				param.RealTimeAmbientLightAddSun= BST_INDETERMINATE;
-			
+
 			// Next sel
 			ite++;
 		}
@@ -3154,22 +3154,22 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				}
 
 				if ( (param.InstanceShape != DIFFERENT_VALUE_STRING) || (listNode.size()==1))
-					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INSTANCE_SHAPE, param.InstanceShape);				
+					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INSTANCE_SHAPE, param.InstanceShape);
 				if (param.InstanceName != DIFFERENT_VALUE_STRING)
-					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INSTANCE_NAME, param.InstanceName);				
+					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INSTANCE_NAME, param.InstanceName);
 				if (param.DontAddToScene != BST_INDETERMINATE)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_DONT_ADD_TO_SCENE, param.DontAddToScene);
 				if (param.AutomaticAnimation != BST_INDETERMINATE)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_AUTOMATIC_ANIMATION, param.AutomaticAnimation);
 				if (param.InstanceGroupName != DIFFERENT_VALUE_STRING)
-					CExportNel::setScriptAppData (node, NEL3D_APPDATA_IGNAME, param.InstanceGroupName);				
+					CExportNel::setScriptAppData (node, NEL3D_APPDATA_IGNAME, param.InstanceGroupName);
 				if (param.InterfaceFileName != "")
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INTERFACE_FILE, param.InterfaceFileName);
 				if (param.InterfaceThreshold != -1)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_INTERFACE_THRESHOLD, param.InterfaceThreshold);
 				if (param.GetInterfaceNormalsFromSceneObjects != BST_INDETERMINATE)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_GET_INTERFACE_NORMAL_FROM_SCENE_OBJECTS, param.GetInterfaceNormalsFromSceneObjects);
-		
+
 				if (param.LightGroup != -1)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_LM_LIGHT_GROUP, param.LightGroup);
 
@@ -3195,7 +3195,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 						CExportNel::setScriptAppData (node, NEL3D_APPDATA_RADIAL_NORMAL_SM+smoothGroup, param.RadialNormals[smoothGroup]);
 				}
 
-				
+
 				if (param.LumelSizeMul != DIFFERENT_VALUE_STRING)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_LUMELSIZEMUL, param.LumelSizeMul);
 				if (param.SoftShadowRadius != DIFFERENT_VALUE_STRING)
@@ -3228,7 +3228,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 					// Write size of the list
 					uint sizeList=std::min ((uint)param.ListLodName.size(), (uint)NEL3D_APPDATA_LOD_NAME_COUNT_MAX);
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_LOD_NAME_COUNT, (int)sizeList);
-				
+
 					// Write the strings
 					uint stringIndex=0;
 					std::list<std::string>::iterator ite=param.ListLodName.begin();
@@ -3289,7 +3289,7 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 				if (param.VertexProgramId!=-1)
 				{
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_VERTEXPROGRAM_ID, param.VertexProgramId);
-					// according to VertexProgram, change setup 
+					// according to VertexProgram, change setup
 					if(param.VertexProgramId==1)
 					{
 						CExportNel::setScriptAppDataVPWT(node, param.VertexProgramWindTree);
@@ -3346,15 +3346,15 @@ void CNelExport::OnNodeProperties (const std::set<INode*> &listNode)
 						CExportNel::setScriptAppData (node, NEL3D_APPDATA_EXPORT_LMC_DIFFUSE_START+i, col);
 					}
 				}
-				
+
 				// CollisionMeshGeneration
 				if (param.CollisionMeshGeneration != -1)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION, param.CollisionMeshGeneration);
-				
+
 				// RealTimeAmbientLightAddSun.
 				if (param.RealTimeAmbientLightAddSun != BST_INDETERMINATE)
 					CExportNel::setScriptAppData (node, NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN, param.RealTimeAmbientLightAddSun);
-				
+
 				// Next node
 				ite++;
 			}
