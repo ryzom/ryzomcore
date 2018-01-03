@@ -79,7 +79,7 @@ void CRadialVertices::init (INode *node, Mesh *mesh, TimeValue time, Interface &
 			{
 				// Output error message
 				char msg[512];
-				smprintf (msg, 512, "Can't find pivot node named '%s'", pivotName.c_str());
+				smprintf (msg, 512, "Can't find pivot node named '%s' of length %u", pivotName.c_str(), (uint)pivotName.length());
 				nelExport.outputErrorMessage (msg);
 			}
 		}
