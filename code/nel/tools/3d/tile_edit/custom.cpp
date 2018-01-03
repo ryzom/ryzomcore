@@ -97,7 +97,7 @@ LRESULT Custom::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			CString str;
 			clist->GetLBText(i+2,str);
-			buttonList[i].Create((LPCSTR)str,BS_CHECKBOX,button,this,i+10);
+			buttonList[i].Create(str,BS_CHECKBOX,button,this,i+10);
 			buttonList[i].SetFont(&font,1);
 			buttonList[i].ModifyStyle(0,WS_VISIBLE);
 /*			RECT st = button; st.left+=20; st.right = client.right - 90; st.top -= 3;
