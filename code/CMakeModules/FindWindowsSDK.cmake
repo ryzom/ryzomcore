@@ -240,7 +240,7 @@ MACRO(USE_CURRENT_WINSDK)
 
   IF(NOT WINSDK_DIR)
     # Use Windows SDK versions installed with VC++ when possible
-    IF(MSVC1411 OR MSVC1410)
+    IF(MSVC_VERSION GREATER 1909)
       # Special case, use Kits for SDK
       SET(WINSDK_VERSION "10.0")
       SET(WINSDK_DIR ${WINSDK_UCRT_DIR})
@@ -484,7 +484,7 @@ IF(WINSDK_INCLUDE_DIR)
 
   SET(CMAKE_LIBRARY_PATH ${WINSDK_LIBRARY_DIR} ${CMAKE_LIBRARY_PATH})
 
-  # Fix for using Windows SDK 7.1 with Visual C++ 2012, 2013 and 2015
+  # Fix for using Windows SDK 7.1 with Visual C++ 2012, 2013, 2015 and 2017
   IF(WINSDK_VERSION STREQUAL "7.1" AND (MSVC11 OR MSVC12 OR MSVC14))
     ADD_DEFINITIONS(-D_USING_V110_SDK71_)
   ENDIF()
