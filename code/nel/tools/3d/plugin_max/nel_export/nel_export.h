@@ -49,7 +49,7 @@ public:
 
 	CNelExport ();
 
-	~CNelExport();
+	virtual ~CNelExport();
 
 	void init (bool view, bool errorInDialog, Interface	*ip, bool loadStruct);
 
