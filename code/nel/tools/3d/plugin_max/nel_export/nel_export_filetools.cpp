@@ -91,7 +91,7 @@ ULONG CNelExport::SelectDir(HWND Parent, TCHAR* Title, std::string &Path)
 	bi.lParam=0;
 	bi.iImage=0;
 
-	ITEMIDLIST*	pidl = SHBrowseForFolder(&bi);
+	PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);
 
 	if (!SHGetPathFromIDList(pidl,str) ) 
 	{

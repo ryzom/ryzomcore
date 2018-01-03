@@ -517,8 +517,8 @@ void SelectionTerritoire::OnPath()
 	info.ulFlags=BIF_RETURNONLYFSDIRS;
 
 	// Select the path
-	LPITEMIDLIST list;
-	if (list=SHBrowseForFolder (&info))
+	PIDLIST_ABSOLUTE list = SHBrowseForFolder(&info);
+	if (list)
 	{
 		// Convert item into path string
 		BOOL bRet=SHGetPathFromIDList(list, path);

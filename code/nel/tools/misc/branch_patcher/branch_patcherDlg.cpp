@@ -208,7 +208,6 @@ int CDirDialog::DoBrowse()
 	}
 
 	BROWSEINFO bInfo;
-	LPITEMIDLIST pidl;
 	ZeroMemory((PVOID)&bInfo, sizeof(BROWSEINFO));
 
 	if (!m_strInitDir.IsEmpty())
@@ -258,10 +257,8 @@ int CDirDialog::DoBrowse()
 	bInfo.lpszTitle = (m_strTitle.IsEmpty()) ? "Open" : m_strTitle;
 	bInfo.ulFlags = BIF_RETURNFSANCESTORS | BIF_RETURNONLYFSDIRS;
 
-	if ((pidl = ::SHBrowseForFolder(&bInfo)) == NULL)
-	{
-		return 0;
-	}
+	PIDLIST_ABSOLUTE pidl = ::SHBrowseForFolder(&bInfo);
+	if (!pidl) return 0;
 
 	m_strPath.ReleaseBuffer();
 	m_iImageIndex = bInfo.iImage;
