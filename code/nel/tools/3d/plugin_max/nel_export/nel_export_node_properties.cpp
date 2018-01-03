@@ -508,41 +508,41 @@ INT_PTR CALLBACK AccelDialogCallback (
 			{
 				for (uint i=0; _MaterialNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
-					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)(_MaterialNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)_MaterialNames[i]);
+					SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_ADDSTRING, 0, (LPARAM)_MaterialNames[i]);
 				}
 			}
 			{
 				for (uint i =0; _EnvironmentNames[i] != 0; ++i)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LPARAM)(_EnvironmentNames[i]));
+					SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_ADDSTRING, 0, (LPARAM)_EnvironmentNames[i]);
 				}
 			}
 			{
 				std::set<std::string>::iterator first(_KnownSoundGroups.begin()), last(_KnownSoundGroups.end());
 				for (; first != last; ++first)
 				{
-					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LPARAM)(first->c_str()));
+					SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_ADDSTRING, 0, (LPARAM)utf8ToTStr(*first));
 				}
 			}
 			// set the combo and edit box
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)utf8ToTStr(currentParam->OcclusionModel)) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)(currentParam->OpenOcclusionModel.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_OPEN_OCC_MODEL), CB_SELECTSTRING, -1, (LPARAM)utf8ToTStr(currentParam->OpenOcclusionModel)) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LPARAM)(currentParam->EnvironmentFX.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_ENV_FX), CB_SELECTSTRING, -1, (LPARAM)utf8ToTStr(currentParam->EnvironmentFX)) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LPARAM)(currentParam->SoundGroup.c_str())) == CB_ERR)
+			if (SendMessage (GetDlgItem (hwndDlg, IDC_SOUND_GROUP), CB_SELECTSTRING, -1, (LPARAM)utf8ToTStr(currentParam->SoundGroup)) == CB_ERR)
 			{
 //				nlassert(false);
 			}
-//			SendMessage(GetDlgItem(hwndDlg, IDC_SOUND_GROUP), WM_SETTEXT, 0, (LONG)(currentParam->SoundGroup.c_str()));
+//			SendMessage(GetDlgItem(hwndDlg, IDC_SOUND_GROUP), WM_SETTEXT, 0, (LPARAM)utf8ToTStr(currentParam->SoundGroup));
 
 			bool accelerator = (currentParam->AcceleratorType != -1);
 			CheckRadioButton (hwndDlg, IDC_RADIOACCELNO, IDC_RADIOACCELCLUSTER, accelerator?(IDC_RADIOACCELNO+(currentParam->AcceleratorType&NEL3D_APPDATA_ACCEL_TYPE)):0);
@@ -1789,8 +1789,8 @@ INT_PTR CALLBACK VertexProgramDialogCallBack (
 				if(currentParam->VertexProgramId>=0)
 				{
 					// Init DropList.
-					SendDlgItemMessage(hwndDlg, IDC_COMBO_VP, CB_ADDSTRING, 0, (LPARAM)"Disable");
-					SendDlgItemMessage(hwndDlg, IDC_COMBO_VP, CB_ADDSTRING, 0, (LPARAM)"Wind Tree");
+					SendDlgItemMessage(hwndDlg, IDC_COMBO_VP, CB_ADDSTRING, 0, (LPARAM)_T("Disable"));
+					SendDlgItemMessage(hwndDlg, IDC_COMBO_VP, CB_ADDSTRING, 0, (LPARAM)_T("Wind Tree"));
 					SendDlgItemMessage(hwndDlg, IDC_COMBO_VP, CB_SETCURSEL, currentParam->VertexProgramId, 0);
 					EnableWindow( GetDlgItem(hwndDlg, IDC_COMBO_VP), TRUE);
 				}

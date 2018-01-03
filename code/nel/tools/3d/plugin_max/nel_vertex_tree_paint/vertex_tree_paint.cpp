@@ -119,9 +119,9 @@ static INT_PTR CALLBACK VertexPaintDlgProc(HWND hWnd, UINT msg, WPARAM wParam, L
 
 
 		// Init comboBox
-		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)"Tree Weight");
-		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)"Phase Level 1");
-		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)"Phase Level 2");
+		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)_T("Tree Weight"));
+		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)_T("Phase Level 1"));
+		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_ADDSTRING, 0, (LPARAM)_T("Phase Level 2"));
 		SendDlgItemMessage(hWnd, IDC_COMBO_TYPE, CB_SETCURSEL, mod->getEditionType(), 0);
 
 		// If paint mode at last edit.

@@ -337,7 +337,7 @@ void Tile_utility::SetupUI ()
 		std::string name=Bank.getLand(nLand)->getName();
 		if (hCombo)
 		{
-			SendMessage (hCombo, CB_INSERTSTRING, -1, (LPARAM) name.c_str());
+			SendMessage (hCombo, CB_INSERTSTRING, -1, (LPARAM)utf8ToTStr(name));
 		}
 	}
 

@@ -502,7 +502,7 @@ void CWinDisplayer::clear ()
 	SendMessageW (_HEdit, EM_SETSEL, 0, nIndex);
 
 	// clear all the text
-	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+	SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 	SendMessageW(_HEdit,EM_SETMODIFY,(WPARAM)TRUE,(LPARAM)0);
 
@@ -575,7 +575,7 @@ void CWinDisplayer::display_main ()
 						LRESULT oldIndex2 = SendMessageW (_HEdit, EM_LINEINDEX, nblineremove, 0);
 						//nlassert (oldIndex2 != -1);
 						SendMessageW (_HEdit, EM_SETSEL, oldIndex1, oldIndex2);
-						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) "");
+						SendMessageW (_HEdit, EM_REPLACESEL, FALSE, (LPARAM) L"");
 
 						// update the selection due to the erasing
 						sint dt = (sint)(oldIndex2 - oldIndex1);
