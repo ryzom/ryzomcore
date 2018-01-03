@@ -265,7 +265,7 @@ bool CNelExport::exportAnim (const std::string &sPath, std::vector<INode*>& vect
 			{
 				// try to get the prefix from the appData if present. If not, takes it from the node name
 				nodeName = CExportNel::getScriptAppData (vectNode[n], NEL3D_APPDATA_INSTANCE_NAME, "");
-				if (nodeName == "") // not found ?
+				if (nodeName.empty()) // not found ?
 				{
 					nodeName=CExportNel::getName (*vectNode[n]);
 				}
