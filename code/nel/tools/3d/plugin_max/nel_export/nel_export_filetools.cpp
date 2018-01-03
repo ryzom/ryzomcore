@@ -26,7 +26,7 @@
 
 //--------------------------------------------------------------------------------------------------------------
 
-ULONG CNelExport::SelectFileForSave(HWND Parent, TCHAR* Title, const TCHAR* Mask, std::string &FileName)
+ULONG CNelExport::SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR* Mask, std::string &FileName)
 {
 	TCHAR curdir[MAX_PATH];
 	TCHAR fname[MAX_PATH];
@@ -76,7 +76,7 @@ ULONG CNelExport::SelectFileForSave(HWND Parent, TCHAR* Title, const TCHAR* Mask
 
 //--------------------------------------------------------------------------------------------------------------
 
-ULONG CNelExport::SelectDir(HWND Parent, TCHAR* Title, std::string &Path)
+ULONG CNelExport::SelectDir(HWND Parent, const TCHAR* Title, std::string &Path)
 {
 	TCHAR str[MAX_PATH];
 	_tcscpy_s(str, MAX_PATH, utf8ToTStr(Path));
