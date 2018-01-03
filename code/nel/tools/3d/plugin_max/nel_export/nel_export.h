@@ -49,7 +49,7 @@ public:
 
 	CNelExport ();
 
-	~CNelExport();
+	virtual ~CNelExport();
 
 	void init (bool view, bool errorInDialog, Interface	*ip, bool loadStruct);
 
@@ -81,8 +81,8 @@ public:
 	static void deleteLM(INode& ZeNode); // the export scene struct MUST be initialized before calling this fn
 	void			OnNodeProperties (const std::set<INode*> &listNode);
 
-	ULONG SelectFileForSave(HWND Parent, TCHAR* Title, const TCHAR* Mask, std::string &FileName);
-	ULONG SelectDir(HWND Parent, TCHAR* Title, std::string &Path);
+	ULONG SelectFileForSave(HWND Parent, const TCHAR* Title, const TCHAR* Mask, std::string &FileName);
+	ULONG SelectDir(HWND Parent, const TCHAR* Title, std::string &Path);
 
 	// The nel export objtect
 	CExportNel		*_ExportNel;

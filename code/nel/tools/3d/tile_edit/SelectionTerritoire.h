@@ -86,7 +86,7 @@ protected:
 	afx_msg void OnSelchangeTileSet();
 	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
-	void Save(const char* path, NL3D::CTileBank &toSave);
+	void Save(const TCHAR* path, NL3D::CTileBank &toSave);
 
 	DECLARE_MESSAGE_MAP()
 };

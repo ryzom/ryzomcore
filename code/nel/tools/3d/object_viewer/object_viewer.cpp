@@ -3897,7 +3897,7 @@ bool browseFolder(const CString &caption, CString &destFolder, HWND parent)
 	bi.lpfn = NULL;
 	bi.lParam = NULL;
 	bi.iImage = 0;
-	LPITEMIDLIST result = SHBrowseForFolder(&bi);
+	PIDLIST_ABSOLUTE result = SHBrowseForFolder(&bi);
 	if (result != NULL && SHGetPathFromIDList(result, chosenPath))
 	{
 		destFolder = chosenPath;

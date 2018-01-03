@@ -227,7 +227,7 @@ int TileList::addTile256 ()
 	return index;
 }
 
-bool RemovePath (std::string& path, const char* absolutePathToRemplace);
+bool RemovePath (std::string& path, const std::string &absolutePathToRemplace);
 
 int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitmap type)
 {
@@ -240,7 +240,9 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 		uint Height;
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
+
+			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
 		else
 		{
@@ -256,10 +258,10 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 				error=tileBank2.getTileSet(_tileSet)->checkTile128 (type, border, pixel, composante);
 			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
 			{
-				char sTmp[512];
 				static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
-				sprintf (sTmp, "%s\nPixel: %d (%s)", CTileSet::getErrorMessage (error), pixel, comp[composante]);
-				return (int)(MessageBox (NULL, (std::string(sTmp)+"\nContinue ?").c_str(), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage (error), pixel, comp[composante]);
+
+				return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 			}
 			else
 			{
@@ -286,9 +288,8 @@ int TileList::setTile128 (int tile, const std::string& name, NL3D::CTile::TBitma
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		return (int)(MessageBox (NULL, (std::string (msg)+"\nContinue ?").c_str(), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.\nContinue ?", name.c_str(), tileBank2.getAbsPath ().c_str());
+		return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 	}
 
 	return 1;
@@ -305,7 +306,8 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 		uint Height;
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
+			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
 		else
 		{
@@ -322,10 +324,9 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 				error=tileBank2.getTileSet(_tileSet)->checkTile256 (type, border, pixel, composante);
 			if ((error!=CTileSet::ok)&&!zouille())
 			{
-				char sTmp[512];
-				static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
-				sprintf (sTmp, "%s\nPixel: %d (%s)", CTileSet::getErrorMessage (error), pixel, comp[composante]);
-				return (int)(MessageBox (NULL, (std::string(sTmp)+"\nContinue ?").c_str(), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+				static const char* comp[] = { "Red", "Green", "Blue", "Alpha", "" };
+				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage (error), pixel, comp[composante]);
+				return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 			}
 			else
 			{
@@ -349,9 +350,8 @@ int TileList::setTile256 (int tile, const std::string& name, NL3D::CTile::TBitma
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		return (int)(MessageBox (NULL, (std::string (msg)+"\nContinue ?").c_str(), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.\nContinue ?", name.c_str(), tileBank2.getAbsPath ().c_str());
+		return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 	}
 
 	return 1;
@@ -371,7 +371,8 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 		uint Height;
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return (int)(MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
+			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
+			return (int)(MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES);
 		}
 		else
 		{
@@ -387,10 +388,9 @@ int TileList::setTileTransition (int tile, const std::string& name, NL3D::CTile:
 				error=tileBank2.getTileSet(_tileSet)->checkTile128 (type, border, pixel, composante);
 			if ((error!=CTileSet::ok)&&(error!=CTileSet::addFirstA128128)&&!zouille ())
 			{
-				char sTmp[512];
 				static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
-				sprintf (sTmp, "%s\nPixel: %d (%s)", CTileSet::getErrorMessage (error), pixel, comp[composante]);
-				return MessageBox (NULL, (std::string(sTmp)+"\nContinue ?").c_str(), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+				std::string msg = NLMISC::toString("%s\nPixel: %d (%s)\nContinue ?", CTileSet::getErrorMessage(error), pixel, comp[composante]);
+				return MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
 			}
 			else
 			{
@@ -437,14 +437,17 @@ int TileList::setDisplacement (int tile, const std::string& name)
 			theListDisplacement[tile].loaded=0;
 
 			if (!_LoadBitmap(tileBank2.getAbsPath() + troncated, &theListDisplacement[tile].BmpInfo, theListDisplacement[tile].Bits, NULL, 0))
-				MessageBox (NULL, (tileBank2.getAbsPath() + troncated).c_str(), _T("Can't load file"), MB_OK|MB_ICONEXCLAMATION);
+			{
+				std::string msg = tileBank2.getAbsPath() + troncated;
+				MessageBox(NULL, utf8ToTStr(msg), _T("Can't load file"), MB_OK | MB_ICONEXCLAMATION);
+			}
 			else
 			{
 				// Check the size
 				if ((theListDisplacement[tile].BmpInfo.bmiHeader.biWidth!=32)||(-theListDisplacement[tile].BmpInfo.bmiHeader.biHeight!=32))
 				{
 					// Error message
-					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), troncated.c_str(),
+					MessageBox (NULL, _T("Invalid size: displacement map must be 32x32 8 bits."), utf8ToTStr(troncated),
 						MB_OK|MB_ICONEXCLAMATION);
 
 					// Free the bitmap
@@ -464,9 +467,8 @@ int TileList::setDisplacement (int tile, const std::string& name)
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
-		MessageBox (NULL, msg, _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
+		std::string msg = NLMISC::toString("The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
+		MessageBox (NULL, utf8ToTStr(msg), _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
 	return 1;
@@ -483,7 +485,8 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 		uint Height;
 		if (!loadPic(tileBank2.getAbsPath ()+troncated, tampon, Width, Height))
 		{
-			return MessageBox (NULL, ((tileBank2.getAbsPath ()+troncated)+"\nContinue ?").c_str(), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+			std::string msg = tileBank2.getAbsPath() + troncated + "\nContinue ?";
+			return MessageBox (NULL, utf8ToTStr(msg), _T("Can't load bitmap."), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
 		}
 		else
 		{
@@ -505,23 +508,27 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 			if (((error=tileBank2.getTileSet(_tileSet)->checkTileTransition ((CTileSet::TTransition)tile, CTile::alpha, border, indexError,
 				pixel, composante))!=CTileSet::ok)&&!zouille ())
 			{
-				char sMsg[512];
+				std::string msg;
 				if ((error==CTileSet::topInterfaceProblem)||(error==CTileSet::bottomInterfaceProblem)||(error==CTileSet::leftInterfaceProblem)
 					||(error==CTileSet::rightInterfaceProblem)||(error==CTileSet::topBottomNotTheSame)||(error==CTileSet::rightLeftNotTheSame)
 					||(error==CTileSet::topInterfaceProblem))
 				{
 					static const char* comp[]={"Red", "Green", "Blue", "Alpha", ""};
 					if (indexError!=-1)
-						sprintf (sMsg, "%s\nIncompatible with tile nb %d\nPixel: %d (%s)", CTileSet::getErrorMessage (error), indexError,
+						msg = NLMISC::toString("%s\nIncompatible with tile nb %d\nPixel: %d (%s)", CTileSet::getErrorMessage (error), indexError,
 							pixel, comp[composante]);
 					else
-						sprintf (sMsg, "%s\nIncompatible with the 128x128 tile\nPixel: %d (%s)", CTileSet::getErrorMessage (error),
+						msg = NLMISC::toString("%s\nIncompatible with the 128x128 tile\nPixel: %d (%s)", CTileSet::getErrorMessage (error),
 							pixel, comp[composante]);
 				}
 				else
-					sprintf (sMsg, "%s\nIncompatible filled tile", CTileSet::getErrorMessage (error));
+				{
+					msg = NLMISC::toString("%s\nIncompatible filled tile", CTileSet::getErrorMessage(error));
+				}
+
+				msg += "\nContinue ?";
 				
-				return MessageBox (NULL, (std::string(sMsg)+"\nContinue ?").c_str(), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
+				return MessageBox (NULL, utf8ToTStr(msg), _T("Can't add tile"), MB_YESNO|MB_ICONEXCLAMATION)==IDYES;
 			}
 			else
 			{
@@ -534,8 +541,8 @@ int TileList::setTileTransitionAlpha (int tile, const std::string& name, int rot
 	else
 	{
 		// Error: bitmap not in the absolute path..
-		char msg[512];
-		sprintf (msg, "The bitmap %s is not in the absolute path %s.", name.c_str(), tileBank2.getAbsPath ().c_str());
+		TCHAR msg[512];
+		_stprintf(msg, _T("The bitmap %s is not in the absolute path %s."), utf8ToTStr(name), utf8ToTStr(tileBank2.getAbsPath ()));
 		MessageBox (NULL, msg, _T("Load error"), MB_OK|MB_ICONEXCLAMATION);
 	}
 
