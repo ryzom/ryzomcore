@@ -152,27 +152,35 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						// Select all the text for easier selection
 						editBoxShort->setSelectionAll();
 					}
+					group->setActive(true);
 				}
 				else
 				{
+					ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 					if (itemInfo.CustomText.empty())
-						display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+						display->setTextFormatTaged(localDesc);
 					else
 					{
 						ucstring text = itemInfo.CustomText;
-						string::size_type delimiter = text.find(' ');
-						if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+						if (text.size() > 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B' && text[4]==' ')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
-								pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
-							if (delimiter == string::npos)
-								group->setActive(false);
-							else
-								text = text.substr(delimiter, text.size()-delimiter);
+								pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+							text = localDesc;
 						}
-						
-						display->setTextFormatTaged(text);		
+						else if (text.size() > 4 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A' && text[4]==' ')
+						{
+							string code = text.substr(4, text.size()-4).toString();
+							if (!code.empty())
+								CLuaManager::getInstance().executeLuaScript(code);
+							text = localDesc;
+						}
+						if (!text.empty())
+						{
+							display->setTextFormatTaged(text);
+							group->setActive(true);
+						}
 					}
 				}
 			}
@@ -283,7 +291,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					display->setActive(true);
 					editButtons->setActive(false);
 					closeButton->setActive(true);
-					group->setActive(true);
+					group->setActive(false);
 
 					editBoxShort->setInputString(ucstring());
 					editBoxLarge->setInputString(ucstring());
@@ -292,24 +300,28 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 					// Finish the display or add the waiter
 					if (getInventory().isItemInfoUpToDate(ItemSlotId))
 					{
-						// If we already have item info
+						ucstring localDesc = ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id));
 						if (itemInfo.CustomText.empty())
-							display->setTextFormatTaged(ucstring(STRING_MANAGER::CStringManagerClient::getItemLocalizedDescription(pIS->Id)));
+							display->setTextFormatTaged(localDesc);
 						else
 						{
 							ucstring text = itemInfo.CustomText;
-							string::size_type delimiter = text.find(' ');
-							if(text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
+							if (text.size() > 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B' && text[4]==' ')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
-									pGH->browse(ucstring(text.substr(4, delimiter-4)).toString().c_str());
-								if (delimiter == string::npos)
-									group->setActive(false);
-								else
-									text = text.substr(delimiter, text.size()-delimiter);
+									pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+								text = localDesc;
 							}
-							display->setTextFormatTaged(text);
+							else if (text.size() > 4 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A' && text[4]==' ')
+							{
+								string code = text.substr(4, text.size()-4).toString();
+								if (!code.empty())
+									CLuaManager::getInstance().executeLuaScript(code);
+								text = localDesc;
+							}
+							if (!text.empty())
+								display->setTextFormatTaged(text);
 						}
 					}
 					else
