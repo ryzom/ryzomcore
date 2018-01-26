@@ -635,7 +635,7 @@ bool CDriverGL::renderRawQuads(CMaterial& mat, uint32 startIndex, uint32 numQuad
 				nlerror("not available in OpenGL ES 1.0, only use 16 bits indices");
 #else
 				// indices fits on 32 bits
-				GLint indices[QUAD_BATCH_SIZE];
+				GLint indices[QUAD_BATCH_SIZE * 6];
 				GLint *curr = indices;
 				GLint *end = indices + 6 * numQuadsToDraw;
 				uint32 vertexIndex = currIndex;
