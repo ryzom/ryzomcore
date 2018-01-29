@@ -93,9 +93,9 @@
  
  <!-- //////////// TEMPLATE : webig_frame_borderless /////////// -->	
 	<template name="webig_frame_borderless" keep="true" w="200" h="200" x="0" y="0" movable="true">
-		<group id="content" w="#w" h="#h" x="#x" y="#y" posref="MM MM" >
+		<group title="" id="content" type="container" posref="MM MM" movable="#movable" pop_max_h="#h" pop_min_h="#h" pop_min_w="#w" pop_max_w="#w" opened="false" openable="false" options="compass" header_active="true" right_button="false">
 			<group id="html" type="html" posref="TL TL" url="" title_prefix="uiQuickhelpTitle" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
-				<group id="black" posref="BR BR" sizeref="hw" w="-16" h="-12" inherit_gc_alpha="true"/>
+				<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true"/>
 				<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
 				<group type="list" id="text_list" fontsize="9" posref="TL TL" posparent="black" x="2" y="-2" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000"/>
 				<ctrl style="skin_scroll" id="scroll_bar" />
