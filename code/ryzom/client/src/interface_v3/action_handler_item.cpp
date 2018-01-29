@@ -162,7 +162,7 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 					else
 					{
 						ucstring text = itemInfo.CustomText;
-						if (text.size() > 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B' && text[4]==' ')
+						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
