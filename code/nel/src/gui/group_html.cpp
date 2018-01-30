@@ -4615,6 +4615,11 @@ namespace NLGUI
 		browse(url.c_str());
 	}
 
+	void CGroupHTML::setHTML(const std::string &html)
+	{
+		renderHtmlString(html);
+	}
+
 	// ***************************************************************************
 	void CGroupHTML::parseStylesheetFile(const std::string &fname)
 	{

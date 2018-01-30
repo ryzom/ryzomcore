@@ -209,6 +209,8 @@ namespace NLGUI
 
 		// Browser home
 		std::string		Home;
+		// Get Home URL
+		virtual std::string	home();
 
 		// Undo browse: Browse the precedent url browsed. no op if none
 		void browseUndo ();
@@ -223,6 +225,8 @@ namespace NLGUI
 		std::string getURL() const { return _URL; }
 		void		setURL(const std::string &url);
 
+		std::string getHTML() const { return _DocumentHtml; }
+		void		setHTML(const std::string &html);
 
 		int luaClearRefresh(CLuaState &ls);
 		int luaClearUndoRedo(CLuaState &ls);
@@ -249,6 +253,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
 			REFLECT_STRING("url", getURL, setURL)
+			REFLECT_STRING("html", getHTML, setHTML)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 			REFLECT_STRING("title", getTitle, setTitle)
 		REFLECT_EXPORT_END
@@ -277,9 +282,6 @@ namespace NLGUI
 
 		// Add POST params to the libwww list
 		virtual void addHTTPPostParams (SFormFields &formfields, bool trustedDomain);
-
-		// Get Home URL
-		virtual std::string	home();
 
 		// parse dom node and all child nodes recursively
 		void renderDOM(CHtmlElement &elm);
@@ -353,7 +355,7 @@ namespace NLGUI
 		// Current URL
 		std::string		_DocumentUrl;
 		std::string		_DocumentDomain;
-        std::string		_DocumentHtml; // not updated, only set by first render
+		std::string		_DocumentHtml; // not updated only set by first render
 		// If true, then render _DocumentHtml on next update (replaces content)
 		bool			_RenderNextTime;
 		// true if renderer is waiting for css files to finish downloading (link rel=stylesheet)
