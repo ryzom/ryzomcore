@@ -244,6 +244,8 @@ namespace NLGUI
 		std::string getURL() const { return _URL; }
 		void		setURL(const std::string &url);
 
+		std::string getHTML() const { return _DocumentHtml; }
+		void		setHTML(const std::string &html);
 
 		int luaBrowse(CLuaState &ls);
 		int luaRefresh(CLuaState &ls);
@@ -270,6 +272,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("parseHtml", luaParseHtml)
 			REFLECT_LUA_METHOD("renderHtml", luaRenderHtml)
 			REFLECT_STRING("url", getURL, setURL)
+			REFLECT_STRING("html", getHTML, setHTML)
 			REFLECT_FLOAT("timeout", getTimeout, setTimeout)
 		REFLECT_EXPORT_END
 
@@ -378,6 +381,8 @@ namespace NLGUI
 		// Current URL
 		std::string		_DocumentUrl;
 		std::string		_DocumentDomain;
+		std::string		_DocumentHtml; // not updated only set by first render
+		
 		// Valid base href was found
 		bool            _IgnoreBaseUrlTag;
 		// Fragment from loading url

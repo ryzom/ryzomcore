@@ -335,6 +335,8 @@ namespace NLGUI
 		}
 
 		htmlFreeParserCtxt(parser);
+		if (success)
+			_DocumentHtml = htmlString;
 		return success;
 	}
 

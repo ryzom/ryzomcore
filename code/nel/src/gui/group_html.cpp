@@ -6000,6 +6000,12 @@ namespace NLGUI
 		browse(url.c_str());
 	}
 
+	void CGroupHTML::setHTML(const std::string &html)
+	{
+		renderHtmlString(html);
+	}
+
+
 	// ***************************************************************************
 	inline bool isDigit(ucchar c, uint base = 16)
 	{
