@@ -76,7 +76,7 @@ NLMISC::CRGBA CPSColorMemory::getDefaultValue(void) const
 }
 
 ///======================================================================================
-void CPSColorMemory::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSColorMemory::serial(NLMISC::IStream &f)
 {
 	setColorType(CVertexBuffer::TRGBA);
 	CPSAttribMakerMemory<NLMISC::CRGBA>::serial(f);
@@ -90,7 +90,7 @@ void CPSColorBinOp::setColorType(CVertexBuffer::TVertexColorType colorType)
 }
 
 ///======================================================================================
-void CPSColorBinOp::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSColorBinOp::serial(NLMISC::IStream &f)
 {
 	setColorType(CVertexBuffer::TRGBA);
 	CPSAttribMakerBinOp<NLMISC::CRGBA>::serial(f);

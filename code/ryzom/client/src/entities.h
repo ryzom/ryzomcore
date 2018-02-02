@@ -369,7 +369,7 @@ public:
 	sint64 getLogStageChangeStartLocalTime() const;
 
 	/// Serialize entities.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	// remove all attached fx of all entities (so that they can be reloaded)
 	virtual void removeAllAttachedFX();

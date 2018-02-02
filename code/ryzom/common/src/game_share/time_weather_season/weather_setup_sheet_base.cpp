@@ -108,7 +108,7 @@ void CWeatherStateSheet::build(const NLGEORGES::UFormElm &item)
 
 
 //==================================================================================
-void CWeatherStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(BestSetupName);
 	f.serial(FogRatio);
@@ -163,7 +163,7 @@ void CCloudStateSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //==================================================================================
-void CCloudStateSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCloudStateSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(AmbientDay);
 	f.serial(DiffuseDay);
@@ -196,7 +196,7 @@ void CWeatherSetupSheetBase::build(const NLGEORGES::UFormElm &item)
 }
 
 //==================================================================================
-void CWeatherSetupSheetBase::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherSetupSheetBase::serial(NLMISC::IStream &f)
 {
 	f.serial(WeatherState, CloudState);
 	if (f.isReading())

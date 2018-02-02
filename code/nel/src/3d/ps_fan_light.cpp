@@ -393,7 +393,7 @@ void CPSFanLight::draw(bool opaque)
 }
 
 ///====================================================================================
-void CPSFanLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFanLight::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSFanLight_serial)
 	sint ver = f.serialVersion(2);

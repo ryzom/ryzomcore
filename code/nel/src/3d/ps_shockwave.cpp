@@ -262,7 +262,7 @@ void	CPSShockWave::setUFactor(float value)
 }
 
 ///=================================================================================
-void CPSShockWave::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSShockWave::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSShockWave_serial)
 	sint ver  = f.serialVersion(2);

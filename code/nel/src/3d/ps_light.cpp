@@ -72,7 +72,7 @@ CPSLight::~CPSLight()
 }
 
 // ***************************************************************************************************************
-void CPSLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSLight::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSLight_serial)
 	CPSLocatedBindable::serial(f);

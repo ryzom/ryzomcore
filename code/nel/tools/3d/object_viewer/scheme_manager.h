@@ -40,7 +40,7 @@ public:
 	// get all the schemes with the given type
 	void getSchemes(const std::string &type, std::vector<TSchemeInfo> &dest);
 	// serial this collection
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// swap this collection with another one
 	void	swap(CSchemeManager &other);
 	// remove a scheme from the bank, given a pointer on it

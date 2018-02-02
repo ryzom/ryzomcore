@@ -261,7 +261,7 @@ void	CPSSound::setPitchScheme(CPSAttribMaker<float> *pitch)
 }
 
 // ***************************************************************************************************
-void			CPSSound::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void			CPSSound::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSound_serial)
 	CPSLocatedBindable::serial(f);

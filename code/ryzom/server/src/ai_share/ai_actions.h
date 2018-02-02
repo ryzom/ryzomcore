@@ -105,7 +105,7 @@ public:
 			return "<Invalid Argument Type>";
 		}
 
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum(_type);
 			switch(_type)

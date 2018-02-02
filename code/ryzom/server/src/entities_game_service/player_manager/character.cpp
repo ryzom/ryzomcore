@@ -2613,7 +2613,7 @@ void CCharacter::compassDatabaseUpdate()
 // serial: reading off-mirror, writing from mirror
 //
 //---------------------------------------------------
-void CCharacter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCharacter::serial(NLMISC::IStream &f)
 {
 	nlerror("Serial method no longer exists!");
 
@@ -18638,7 +18638,7 @@ void CPetAnimal::clear()
 }
 
 //-----------------------------------------------------------------------------
-void CPetAnimal::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPetAnimal::serial(NLMISC::IStream &f)
 {
 	// ensure we won't save in this format anymore
 	nlassertex( f.isReading(), ("<CPetAnimal::serial> you should not save in old format anymore!!!") );

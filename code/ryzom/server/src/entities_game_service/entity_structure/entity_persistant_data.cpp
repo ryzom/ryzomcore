@@ -30,14 +30,14 @@ using namespace NLMISC;
 //---------------------------------------------------
 // serial: serial persistant part of CEntityBase for player character
 //---------------------------------------------------
-void CEntityBasePersistantData::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityBasePersistantData::serial(NLMISC::IStream &f)
 {
 }
 
 //---------------------------------------------------
 // serialXml: serial persistant part of CEntityBase for player character
 //---------------------------------------------------
-void CEntityBasePersistantData::serialXml(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityBasePersistantData::serialXml(NLMISC::IStream &f)
 {
 	f.xmlPush("CEntityBasePart");
 	f.xmlPush("CEntityBasePartVersion");

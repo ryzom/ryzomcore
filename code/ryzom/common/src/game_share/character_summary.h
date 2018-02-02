@@ -77,7 +77,7 @@ struct CCharacterSummary
 	bool InNewbieland;
 
 	/// serialisation coming from a stream (net message)
-	void serial(class NLMISC::IStream &f) throw (NLMISC::EStream);
+	void serial(NLMISC::IStream &f) throw (NLMISC::EStream);
 };
 
 #endif

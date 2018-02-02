@@ -91,7 +91,7 @@ void CEmotListSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize a CAutomatonStateSheet.
 //-----------------------------------------------
-void CEmotListSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEmotListSheet::serial(NLMISC::IStream &f)
 {
 	uint32 size;
 	if (f.isReading ())

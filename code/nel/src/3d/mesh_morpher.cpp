@@ -32,7 +32,7 @@ namespace NL3D
 {
 
 // ***************************************************************************
-void CBlendShape::serial (NLMISC::IStream &f) throw(NLMISC::EStream)
+void CBlendShape::serial (NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -345,7 +345,7 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 }
 
 // ***************************************************************************
-void CMeshMorpher::serial (NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMeshMorpher::serial (NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

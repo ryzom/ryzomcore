@@ -509,7 +509,7 @@ protected:
 				_ServerFactor = 0.1;
 		}
 
-		virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream) {f.serial(_Value);}
+		virtual void serial(NLMISC::IStream &f) {f.serial(_Value);}
 	protected:
 		/// Method called when the ping message is back.
 		virtual void update(NLMISC::ICDBNode* leaf);
@@ -527,7 +527,7 @@ protected:
 		void release();
 		/// Return true if the mount can run. Precondition: UserEntity->isRiding().
 		bool canRun() const;
-		virtual void serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream) {}
+		virtual void serial(NLMISC::IStream &/* f */) {}
 	};
 
 	class CMountSpeeds : public NLMISC::ICDBNode::IPropertyObserver
@@ -686,7 +686,7 @@ protected:
 	virtual double getMaxSpeed() const;
 
 	/// Read/Write Variables from/to the stream.
-	virtual void readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void readWrite(NLMISC::IStream &f);
 	/// To call after a read from a stream to re-initialize the entity.
 	virtual void load();
 

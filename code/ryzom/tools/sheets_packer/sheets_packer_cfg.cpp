@@ -221,7 +221,7 @@ void setValues()
 // serial :
 // Serialize CFG.
 //-----------------------------------------------
-void CClientConfig::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CClientConfig::serial(NLMISC::IStream &f)
 {
 	// Start the opening of a new node named ClientCFG.
 	f.xmlPush("ClientCFG");

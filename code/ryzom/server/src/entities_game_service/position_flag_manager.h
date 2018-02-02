@@ -51,7 +51,7 @@ public:
 	bool flagExists(const std::string & flagName) const;
 
 	/// serial flags and their positions
-	void serial(NLMISC::IStream & f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream & f);
 
 	/// save flags to the given file
 	void saveToFile(const std::string & fileName);

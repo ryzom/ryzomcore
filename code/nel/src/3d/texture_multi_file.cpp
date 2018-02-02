@@ -82,7 +82,7 @@ void CTextureMultiFile::doGenerate(bool async)
 }
 
 ///===========================================================
-void	CTextureMultiFile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureMultiFile::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 

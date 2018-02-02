@@ -861,7 +861,7 @@ void	CMeshGeom::renderSimpleWithMaterial(IDriver *drv, const CMatrix &worldMatri
 
 
 // ***************************************************************************
-void	CMeshGeom::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshGeom::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance
@@ -2389,7 +2389,7 @@ CMesh::CCorner::CCorner()
 
 
 // ***************************************************************************
-void CMesh::CCorner::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CCorner::serial(NLMISC::IStream &f)
 {
 	nlassert(0); // not used
 	f.serial(Vertex);
@@ -2400,7 +2400,7 @@ void CMesh::CCorner::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 // ***************************************************************************
-void CMesh::CFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CFace::serial(NLMISC::IStream &f)
 {
 	for(int i=0;i<3;++i)
 		f.serial(Corner[i]);
@@ -2409,7 +2409,7 @@ void CMesh::CFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 // ***************************************************************************
-void CMesh::CSkinWeight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CSkinWeight::serial(NLMISC::IStream &f)
 {
 	for(int i=0;i<NL3D_MESH_SKINNING_MAX_MATRIX;++i)
 	{
@@ -2420,7 +2420,7 @@ void CMesh::CSkinWeight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 // ***************************************************************************
 /* Serialization is not used.
-void CMesh::CMeshBuild::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMesh::CMeshBuild::serial(NLMISC::IStream &f)
 {
 	sint	ver= f.serialVersion(0);
 
@@ -2604,7 +2604,7 @@ void	CMesh::render(IDriver *drv, CTransformShape *trans, bool passOpaque)
 
 
 // ***************************************************************************
-void	CMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMesh::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

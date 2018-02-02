@@ -207,7 +207,7 @@ struct CSabrinaBrickCraftInfo
 		// Quantity of this Mp needed
 		uint8	Quantity;
 		
-		void serial(class NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum( MpFamily );
 			f.serialEnum( MpType );
@@ -223,7 +223,7 @@ struct CSabrinaBrickCraftInfo
 		NbItemsPerUnit = 1;
 	}
 	
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialEnum( Skill );
 		f.serialEnum( ToolType );
@@ -382,7 +382,7 @@ public:
 	virtual ~CStaticBrick();
 	
 	/// Serialisation
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

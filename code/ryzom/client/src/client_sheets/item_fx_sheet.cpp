@@ -73,7 +73,7 @@ void CItemFXSheet::build(const NLGEORGES::UFormElm &item, const std::string &pre
 }
 
 // *******************************************************************************************
-void CItemFXSheet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CItemFXSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(TrailMinSliceTime);
 	f.serial(TrailMaxSliceTime);
@@ -119,7 +119,7 @@ void CItemFXSheet::CStaticFX::build(const NLGEORGES::UFormElm &item)
 }
 
 // *******************************************************************************************
-void CItemFXSheet::CStaticFX::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CItemFXSheet::CStaticFX::serial(NLMISC::IStream &f)
 {
 	ClientSheetsStrings.serial(f, Name);
 	ClientSheetsStrings.serial(f, Bone);

@@ -84,7 +84,7 @@ public:
 			/// dtor
 			virtual ~CParticleSystem();
 			/// serialize this particle system
-			void serial(NLMISC::IStream &f)  throw(NLMISC::EStream);
+			void serial(NLMISC::IStream &f);
 			/** Merge this system with a system instanciated from the given shape
 			  * NB : This is for edition purpose, this is slow
 			  * \return true if the operation could be performed. It can fail when this cause the system the system to last forever,

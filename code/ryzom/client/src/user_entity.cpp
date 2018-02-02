@@ -3710,7 +3710,7 @@ bool CUserEntity::isVisible() const	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CUserEntity::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CUserEntity::readWrite(NLMISC::IStream &f)
 {
 	CPlayerCL::readWrite(f);
 

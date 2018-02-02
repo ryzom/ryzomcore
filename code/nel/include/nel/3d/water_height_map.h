@@ -168,7 +168,7 @@ public:
 	sint64					Date;
 
 	/// serial the pools data's
-	void					serial(NLMISC::IStream &f)  throw(NLMISC::EStream);
+	void					serial(NLMISC::IStream &f);
 
 	/// Set this pool name.
 	void					setName(const std::string &name) { _Name = name; }

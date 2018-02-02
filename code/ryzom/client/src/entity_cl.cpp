@@ -2176,7 +2176,7 @@ void CEntityCL::displayDebugPropertyStages(float /* x */, float &y, float /* lin
 // serial :
 // Serialize entity.
 //-----------------------------------------------
-void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityCL::serial(NLMISC::IStream &f)
 {
 	readWrite(f);
 	if(f.isReading())
@@ -2187,7 +2187,7 @@ void CEntityCL::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 // readWrite :
 // Read/Write Variables from/to the stream.
 //-----------------------------------------------
-void CEntityCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)	// virtual
+void CEntityCL::readWrite(NLMISC::IStream &f)	// virtual
 {
 	f.serialVersion(4);
 

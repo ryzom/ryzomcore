@@ -195,7 +195,7 @@ void CStaticGameBrick::readGeorges( const CSmartPtr<UForm> &form, const CSheetId
 // serial CStaticGameBrick
 //
 //-----------------------------------------------
-void CStaticGameBrick::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CStaticGameBrick::serial( NLMISC::IStream &f )
 {
 	f.serial( FamilyId );
 	f.serial( IndexInFamily );
@@ -325,7 +325,7 @@ void CStaticXpStagesTable::readGeorges( const CSmartPtr<UForm> &form, const CShe
 }
 
 // Serial SXpStage structure
-void CStaticXpStagesTable::SXpStage::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::SXpStage::serial(NLMISC::IStream &f)
 {
 	f.serial( SkillLevel );
 	f.serial( XpForPointSkill );
@@ -333,13 +333,13 @@ void CStaticXpStagesTable::SXpStage::serial(class NLMISC::IStream &f) throw(NLMI
 }
 
 // Serial SStageTable structure
-void CStaticXpStagesTable::SStageTable::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::SStageTable::serial(NLMISC::IStream &f)
 {
 	f.serialCont( StageTable );
 }
 
 // Serial XpStagesTables structure
-void CStaticXpStagesTable::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CStaticXpStagesTable::serial(NLMISC::IStream &f)
 {
 	f.serialCont( XpStagesTables );
 }
@@ -910,7 +910,7 @@ uint CStaticCreatures::getVersion()
 }
 
 ///////////////////////////////////////////////////////////////////////////
-void CStaticCreatures::serial(class NLMISC::IStream &f) throw(NLMISC::EStream) 
+void CStaticCreatures::serial(NLMISC::IStream &f) 
 {
 	CStaticHarvestable::serial(f);
 	

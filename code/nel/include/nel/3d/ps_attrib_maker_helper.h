@@ -96,7 +96,7 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 
 
 		/// serialization of the object
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		virtual void serial(NLMISC::IStream &f)
 		{
 			sint ver = f.serialVersion(2);
 			CPSAttribMaker<T>::serial(f);
@@ -1624,7 +1624,7 @@ public:
 	}
 
 	/// serialisation of the object. Derivers MUST call this, (if they use the attribute of this class at least)
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	virtual void serial(NLMISC::IStream &f)
 	{
 
 		f.serialVersion(1);
@@ -1744,7 +1744,7 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 	virtual uint32 getMinValue(void) const { return _MinValue; }
 	virtual uint32 getMaxValue(void) const { return _MaxValue; }
 	virtual void newElement(const CPSEmitterInfo &info);
@@ -1767,7 +1767,7 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 	virtual sint32 getMinValue(void) const { return _MinValue; }
 	virtual sint32 getMaxValue(void) const { return _MaxValue; }
 	virtual void newElement(const CPSEmitterInfo &info);
@@ -1790,7 +1790,7 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 	virtual float getMinValue(void) const { return _MinValue; }
 	virtual float getMaxValue(void) const { return _MaxValue; }
 	virtual void newElement(const CPSEmitterInfo &info);

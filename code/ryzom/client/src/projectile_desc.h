@@ -39,7 +39,7 @@ public:
 	/// Build the fx from an external script.
 	void build(const NLGEORGES::UFormElm &item);
 	/// Serialize a CAnimationFXSheet.
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	// build tracks for fxs, loading animation as necessary using the given animation set
 	void buildTrack(NL3D::UAnimationSet *as);
 };

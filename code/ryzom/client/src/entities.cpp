@@ -2165,7 +2165,7 @@ void CEntityManager::writeEntities()
 // serial
 // Serialize entities.
 //-----------------------------------------------
-void CEntityManager::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityManager::serial(NLMISC::IStream &f)
 {
 	// Get nb max entities possible.
 	f.serial(_NbMaxEntity);

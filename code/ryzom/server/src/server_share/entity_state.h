@@ -97,7 +97,7 @@ public:
 	/**
 	 * Serial (read to temp storage, or write from mirror)
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		X.serialRTWM( f );
 		Y.serialRTWM( f );

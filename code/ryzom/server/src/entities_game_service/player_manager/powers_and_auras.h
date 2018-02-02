@@ -43,7 +43,7 @@ struct CPowerActivationDate
 	CPowerActivationDate(POWERS::TPowerType type, uint16 consumableFamilyId, NLMISC::TGameCycle dateOff, NLMISC::TGameCycle dateOn) : PowerType(type), ConsumableFamilyId(consumableFamilyId), DeactivationDate(dateOff), ActivationDate(dateOn)
 	{}
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 /**
@@ -70,7 +70,7 @@ struct CPowerActivationDateVector
 	/// remove only consumable entries
 	void clearConsumable();
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// remove entries for which date has been reached
 	void cleanVector();
@@ -110,7 +110,7 @@ public:
 
 	void disableAura(POWERS::TPowerType type, NLMISC::TGameCycle startDate, NLMISC::TGameCycle endDate, const NLMISC::CEntityId &userId);
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// remove entries for which date has been reached
 	void cleanVector();

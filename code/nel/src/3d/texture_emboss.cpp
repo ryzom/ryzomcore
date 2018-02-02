@@ -47,7 +47,7 @@ void CTextureEmboss::setHeightMap(ITexture *heightMap)
 }
 
 // ***********************************************************************************************************
-void CTextureEmboss::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTextureEmboss::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	ITexture::serial(f);

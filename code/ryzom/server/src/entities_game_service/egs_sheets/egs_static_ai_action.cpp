@@ -206,7 +206,7 @@ namespace DURATION_TYPE
 //--------------------------------------------------------------
 //					CCombatParams::serial
 //--------------------------------------------------------------
-void CCombatParams::serial(class NLMISC::IStream &f)
+void CCombatParams::serial(NLMISC::IStream &f)
 {
 	f.serial(Melee);
 	f.serial(SpeedFactor);
@@ -325,7 +325,7 @@ void CCombatParams::readForm (const UFormElm &root, const NLMISC::CSheetId &shee
 //--------------------------------------------------------------
 //					CSpellParams::serial
 //--------------------------------------------------------------
-void CSpellParams::serial(class NLMISC::IStream &f)
+void CSpellParams::serial(NLMISC::IStream &f)
 {
 	f.serial(CastingTime);
 	f.serial(PostActionTime);
@@ -454,7 +454,7 @@ void COTSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetId &she
 //--------------------------------------------------------------
 //					CEffectSpellParams::serial
 //--------------------------------------------------------------
-void CEffectSpellParams::serial(class NLMISC::IStream &f)
+void CEffectSpellParams::serial(NLMISC::IStream &f)
 {
 	CSpellParams::serial(f);
 
@@ -500,7 +500,7 @@ void CEffectSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetId 
 //--------------------------------------------------------------
 //					COTEffectSpellParams::serial
 //--------------------------------------------------------------
-void COTEffectSpellParams::serial(class NLMISC::IStream &f)
+void COTEffectSpellParams::serial(NLMISC::IStream &f)
 {
 	COTSpellParams::serial(f);
 		
@@ -534,7 +534,7 @@ void COTEffectSpellParams::readForm (const UFormElm &root, const NLMISC::CSheetI
 //--------------------------------------------------------------
 //				TAiArea::serial
 //--------------------------------------------------------------
-void TAiArea::serial(class NLMISC::IStream &f)
+void TAiArea::serial(NLMISC::IStream &f)
 {		
 	if (f.isReading() )
 	{
@@ -674,7 +674,7 @@ void CStaticAiAction::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &fo
 //--------------------------------------------------------------
 //					CStaticAiAction::readGeorges
 //--------------------------------------------------------------
-void CStaticAiAction::serial(class NLMISC::IStream &f)
+void CStaticAiAction::serial(NLMISC::IStream &f)
 {
 	f.serial(_SheetId);
 	

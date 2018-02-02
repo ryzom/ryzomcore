@@ -136,7 +136,7 @@ void COutpostBuildingSheet::build(const NLGEORGES::UFormElm &root)
 }
 
 // ****************************************************************************
-void COutpostBuildingSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void COutpostBuildingSheet::serial(NLMISC::IStream &f)
 {
 	f.serialEnum(OBType);
 	f.serial(CostDapper);

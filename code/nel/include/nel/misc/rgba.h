@@ -86,7 +86,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial (class NLMISC::IStream &f);
+	void    serial (NLMISC::IStream &f);
 
 	/**
 	 * Blend two colors.
@@ -451,7 +451,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial(class NLMISC::IStream &f);
+	void    serial(NLMISC::IStream &f);
 
 	/**
 	 * Blend two colors.
@@ -676,7 +676,7 @@ public:
 	 * Serialisation.
 	 * \param f Stream used for serialisation.
 	 */
-	void    serial(class NLMISC::IStream &f);
+	void    serial(NLMISC::IStream &f);
 
 	/**
 	 * Set colors.

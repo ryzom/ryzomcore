@@ -1411,7 +1411,7 @@ void CPSLocated::resize(uint32 newSize)
 class CDummyCollision
 {
 public:
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		NL_PS_FUNC(CDummyCollision_serial)
 		f.serialVersion(1);
@@ -1422,7 +1422,7 @@ public:
 };
 
 /// ***************************************************************************************
-void CPSLocated::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSLocated::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSLocated_serial)
 
@@ -2710,7 +2710,7 @@ void CPSLocatedBindable::notifyTargetRemoved(CPSLocated *ptr)
 }
 
 /// ***************************************************************************************
-void CPSLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSLocatedBindable::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSLocatedBindable_IStream )
 	sint ver = f.serialVersion(4);
@@ -2902,7 +2902,7 @@ void CPSLocatedBindable::releaseAllRef()
 /////////////////////////////////////////////
 
 /// ***************************************************************************************
-void CPSTargetLocatedBindable::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSTargetLocatedBindable::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSTargetLocatedBindable_serial)
 	(void)f.serialVersion(1);

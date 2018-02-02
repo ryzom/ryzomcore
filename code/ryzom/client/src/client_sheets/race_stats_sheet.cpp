@@ -130,7 +130,7 @@ void CGenderInfo::build(const NLGEORGES::UFormElm &item, const std::string &pref
 }
 
 //===============================================================
-void CGenderInfo::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CGenderInfo::serial(NLMISC::IStream &f)
 {
 	// serial used slots
 	for(uint k = 0; k < NumUsedVisualSlots; ++k)
@@ -285,7 +285,7 @@ void CRaceStatsSheet::buildGroundFXs(const NLGEORGES::UFormElm &item, const std:
 }
 
 //===============================================================
-void CRaceStatsSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CRaceStatsSheet::serial(NLMISC::IStream &f)
 {
 	for(uint k = 0; k < CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
 	{

@@ -171,7 +171,7 @@ public:
 	const CPSAttribMaker<uint32>	*getGenNbScheme(void) const  { return _GenNbScheme; }
 
 	/// Serialization
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	///\name Speed vector options
 	//@{
@@ -424,7 +424,7 @@ class CPSModulatedEmitter
 		bool useEmitteeSpeedScheme(void) const { return _EmitteeSpeedScheme != NULL; }
 
 		/// serialization
-		void serialEmitteeSpeedScheme(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serialEmitteeSpeedScheme(NLMISC::IStream &f);
 
 	protected:
 
@@ -470,7 +470,7 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 	virtual	void serial(NLMISC::IStream &f);
 
 
 	NLMISC_DECLARE_CLASS(CPSEmitterDirectionnal);
@@ -506,7 +506,7 @@ class CPSRadialEmitter : public CPSEmitterDirectionnal
 		if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("RadialEmitter");
 	}
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 	virtual	void serial(NLMISC::IStream &f);
 	NLMISC_DECLARE_CLASS(CPSRadialEmitter);
 	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
 };
@@ -527,7 +527,7 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 	virtual	void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSEmitterOmni);
 
@@ -561,7 +561,7 @@ class CPSEmitterRectangle : public CPSEmitter, public CPSModulatedEmitter, publi
 		}
 
 		/// Serialisation
- 		virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 		virtual	void serial(NLMISC::IStream &f);
 
 		NLMISC_DECLARE_CLASS(CPSEmitterRectangle);
 
@@ -636,7 +636,7 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 	virtual	void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSEmitterConic);
 
@@ -675,7 +675,7 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+ 	virtual	void serial(NLMISC::IStream &f);
 
 	NLMISC_DECLARE_CLASS(CPSSphericalEmitter);
 

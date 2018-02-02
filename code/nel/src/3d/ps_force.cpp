@@ -45,7 +45,7 @@ CPSForce::CPSForce()
 
 
 
-void CPSForce::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSForce::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSForce_serial)
 	f.serialVersion(1);
@@ -189,7 +189,7 @@ void CPSForceIntensity::setIntensityScheme(CPSAttribMaker<float> *scheme)
 	if (getForceIntensityOwner() && scheme->hasMemory()) scheme->resize(getForceIntensityOwner()->getMaxSize(), getForceIntensityOwner()->getSize());
 }
 
-void CPSForceIntensity::serialForceIntensity(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSForceIntensity::serialForceIntensity(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSForceIntensity_IStream )
 	f.serialVersion(1);
@@ -229,7 +229,7 @@ void CPSForceIntensity::serialForceIntensity(NLMISC::IStream &f) throw(NLMISC::E
 ////////////////////////////////////////
 
 
-void CPSForceIntensityHelper::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSForceIntensityHelper::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSForceIntensityHelper_serial)
 	f.serialVersion(1);
@@ -320,7 +320,7 @@ void CPSDirectionnalForce::show()
 	}
 }
 
-void CPSDirectionnalForce::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSDirectionnalForce::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSDirectionnalForce_serial)
 	// Version 2 : added link to a global vector value
@@ -488,7 +488,7 @@ void CPSGravity::show()
 
 }
 
-void CPSGravity::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSGravity::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSGravity_IStream )
 	f.serialVersion(1);
@@ -747,7 +747,7 @@ void CPSCentralGravity::show()
 	displayIcon2d(tab, tabSize, sSize);
 }
 
-void CPSCentralGravity::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSCentralGravity::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSCentralGravity_IStream )
 	f.serialVersion(1);
@@ -785,7 +785,7 @@ void CPSSpring::computeForces(CPSLocated &target)
 }
 
 
-void CPSSpring::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSSpring::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSpring_serial)
 	f.serialVersion(1);
@@ -921,7 +921,7 @@ CMatrix CPSCylindricVortex::getMatrix(uint32 index) const
 }
 
 
-void CPSCylindricVortex::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSCylindricVortex::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSCylindricVortex_IStream )
 	f.serialVersion(1);
@@ -960,7 +960,7 @@ void CPSCylindricVortex::resize(uint32 size)
  *  a magnetic field that has the given direction
  */
 
-void CPSMagneticForce::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSMagneticForce::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSMagneticForce_serial)
 	f.serialVersion(1);
@@ -1369,7 +1369,7 @@ void CPSBrownianForce::computeForces(CPSLocated &target)
 }
 
 ///=======================================================================
-void CPSBrownianForce::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSBrownianForce::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSBrownianForce_serial)
 	sint ver = f.serialVersion(3);

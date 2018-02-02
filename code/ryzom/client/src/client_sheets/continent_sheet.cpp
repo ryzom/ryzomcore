@@ -334,7 +334,7 @@ void CContinentParameters::buildFogMapBuild(const NLGEORGES::UFormElm &item)
 
 
 //=========================================================================
-void CContinentParameters::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CContinentParameters::serial(NLMISC::IStream &f)
 {
 	f.serial(Name);
 	f.serial(PacsRBank);
@@ -397,7 +397,7 @@ void CContinentParameters::serial(class NLMISC::IStream &f) throw(NLMISC::EStrea
 
 //=========================================================================
 
-void CContinentParameters::CZC::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CContinentParameters::CZC::serial(NLMISC::IStream &f)
 {
 	f.serial (Name);
 	f.serial (ForceLoadDist);
@@ -456,7 +456,7 @@ void CContinentSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //=========================================================================
-void CContinentSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CContinentSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Continent);
 	f.serialCont(Villages);
@@ -475,7 +475,7 @@ void CContinentSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 //=========================================================================
-void CLandMark::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CLandMark::serial(NLMISC::IStream &f)
 {
 	f.serial(Pos, TitleTextID);
 }

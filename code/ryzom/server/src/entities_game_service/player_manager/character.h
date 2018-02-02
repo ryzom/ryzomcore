@@ -183,7 +183,7 @@ struct SGameCoordinate
 	sint32	Cell;
 	uint8 Continent;
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( X );
 		f.serial( Y );
@@ -304,7 +304,7 @@ struct CPetAnimal
 	CPetAnimal();
 
 	void clear();
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// init found ticket item pointer with slot
 	uint32 initLinkAnimalToTicket( CCharacter * c, uint8 index);
@@ -660,7 +660,7 @@ public:
 	/**
 	 * Serial: reading off-mirror, writing from mirror
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// set player position to default respawn point of continent
 	void setPositionToDefaultRespawnPoint();

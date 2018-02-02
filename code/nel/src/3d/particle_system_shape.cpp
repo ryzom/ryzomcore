@@ -117,7 +117,7 @@ CParticleSystemShape::CParticleSystemShape() : _MaxViewDist(100.f),
 }
 
 ///===========================================================================
-void	CParticleSystemShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CParticleSystemShape::serial(NLMISC::IStream &f)
 {
 	/* ***********************************************
 	 *	WARNING: This Class/Method must be thread-safe (ctor/dtor/serial): no static access for instance

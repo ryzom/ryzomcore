@@ -59,7 +59,7 @@ public:
 		NLMISC::CSheetId	SheetId;
 
 		/// Load/Save the values using the serial system
-		void serial(class NLMISC::IStream &s) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &s)
 		{
 			s.serial(Index);
 			s.serial(SheetId);
@@ -76,7 +76,7 @@ public:
 		SheetIdToIndexMapType SheetIdToIndexMap;
 
 		/// Load/Save the values using the serial system
-		void serial(class NLMISC::IStream &s) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &s)
 		{
 			s.serialCont(Element);
 		}

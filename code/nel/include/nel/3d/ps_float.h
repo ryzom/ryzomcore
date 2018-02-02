@@ -104,7 +104,7 @@ class CPSFloatCurveFunctor
 			CCtrlPoint(float date, float value) : Date(date), Value(value) { nlassert(Date >= 0 && Date <= 1); }
 			float Date;
 			float Value;
-			void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+			void serial(NLMISC::IStream &f)
 			{
 				f.serial(Date, Value);
 			}
@@ -166,7 +166,7 @@ class CPSFloatCurveFunctor
 		float							getValue(float date) const;
 
 		/// serialization
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void serial(NLMISC::IStream &f);
 
 		float	getMinValue() const { return _MinValue; }
 		float	getMaxValue() const { return _MaxValue; }

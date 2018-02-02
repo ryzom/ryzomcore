@@ -120,7 +120,7 @@ CEquipmentSlots::CEquipmentSlots()
 // serial CEquipmentSlots properties:
 //
 //-----------------------------------------------
-void CEquipmentSlots::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CEquipmentSlots::serial( NLMISC::IStream &f )
 {
 	f.serial( Headdress );
 	f.serial( Head );
@@ -1450,7 +1450,7 @@ void CEntityBase::setBehaviour( MBEHAV::CBehaviour behaviour, bool forceUpdate )
 //---------------------------------------------------
 // serial: reading off-mirror, writing from mirror
 //---------------------------------------------------
-void CEntityBase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CEntityBase::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("CEntityBasePart");
 	f.xmlPush("CEntityBasePartVersion");

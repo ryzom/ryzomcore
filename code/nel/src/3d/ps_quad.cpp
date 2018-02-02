@@ -382,7 +382,7 @@ void CPSQuad::updateMatAndVbForColor(void)
 }
 
 //==============================================================
-void CPSQuad::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSQuad::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSQuad_serial)
 	sint ver = f.serialVersion(2);

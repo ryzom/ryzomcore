@@ -77,7 +77,7 @@ public:
 	{
 		return (_Flags&NL3D_CTILE_FREE_FLAG)!=0;
 	}
-	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void    serial(NLMISC::IStream &f);
 	void setFileName (TBitmap bitmapType, const std::string& name)
 	{
 		// not free
@@ -180,7 +180,7 @@ public:
 
 	void clear(){ _TileSet.clear(); }
 
-	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void    serial(NLMISC::IStream &f);
 private:
 
 	// internal use
@@ -210,7 +210,7 @@ public:
 	{
 		return _Tile;
 	}
-	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void    serial(NLMISC::IStream &f);
 
 private:
 	sint32	_Tile;
@@ -236,7 +236,7 @@ public:
 	void doubleSize ();
 	bool operator== (const CTileBorder& border) const;
 	void operator= (const CTileBorder& border);
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 	bool isSet() const
 	{
 		return _Set;
@@ -416,7 +416,7 @@ public:
 	{
 		return _ChildName.find(name)!=_ChildName.end();
 	}
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 private:
 	static TFlagBorder getComplementaryBorder (TFlagBorder border);
 
@@ -629,7 +629,7 @@ public:
 	/// Postfix tile vegetable desc
 	void	postfixTileVegetableDesc (const char *filename);
 
-	void    serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	void    serial(NLMISC::IStream &f);
 private:
 	sint	createTile ();
 	void	freeTile (int tileIndex);

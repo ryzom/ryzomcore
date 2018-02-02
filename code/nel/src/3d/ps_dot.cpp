@@ -290,7 +290,7 @@ void CPSDot::resize(uint32 size)
 }
 
 ///===================================================================
-void CPSDot::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSDot::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSDot_IStream )
 

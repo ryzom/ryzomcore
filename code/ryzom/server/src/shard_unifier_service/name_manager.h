@@ -177,7 +177,7 @@ public:
 			return ((UserId < charSlot.UserId) || (UserId == charSlot.UserId && CharIndex < charSlot.CharIndex));
 		}
 
-		void serial(NLMISC::IStream & f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream & f)
 		{
 			f.serial( UserId );
 			f.serial( CharIndex );
@@ -209,7 +209,7 @@ private:
 			return ShardId < other.ShardId;
 		}
 	
-		void serial(NLMISC::IStream & f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream & f)
 		{
 			f.serial( GuildId );
 			f.serial( ShardId );

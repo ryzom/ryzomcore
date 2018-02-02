@@ -61,7 +61,7 @@ CPSRibbonLookAt::~CPSRibbonLookAt()
 }
 
 //=======================================================
-void CPSRibbonLookAt::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRibbonLookAt::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRibbonLookAt_serial)
 	/** Version 4 : added CPSRibbonBase has a base class instead of CPSParticle
