@@ -59,7 +59,7 @@ void CMissionIconSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CMissionIconSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMissionIconSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(MainIconBg);
 	f.serial(MainIconFg);

@@ -113,7 +113,7 @@ void			CPolygon::clip(const std::vector<CPlane> &planes)
 
 
 // ***************************************************************************
-void CPolygon::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPolygon::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	f.serialCont(Vertices);
@@ -1011,7 +1011,7 @@ void		CPolygon2D::buildConvexHull(CPolygon2D &dest) const
 // ***************************************************************************
 
 
-void CPolygon2D::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPolygon2D::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 	f.serialCont(Vertices);

@@ -1604,7 +1604,7 @@ void	CMeshMRMGeom::updateShiftedTriangleCache(CMeshMRMInstance *mi, sint curLodI
 
 
 // ***************************************************************************
-void	CMeshMRMGeom::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshMRMGeom::serial(NLMISC::IStream &f)
 {
 	// because of complexity, serial is separated in save / load.
 
@@ -1618,7 +1618,7 @@ void	CMeshMRMGeom::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 
 // ***************************************************************************
-sint	CMeshMRMGeom::loadHeader(NLMISC::IStream &f) throw(NLMISC::EStream)
+sint	CMeshMRMGeom::loadHeader(NLMISC::IStream &f)
 {
 	/*
 	Version 5:
@@ -1748,7 +1748,7 @@ sint	CMeshMRMGeom::loadHeader(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 
 // ***************************************************************************
-void	CMeshMRMGeom::load(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshMRMGeom::load(NLMISC::IStream &f)
 {
 	// Load the header of the stream.
 	// ==================
@@ -1778,7 +1778,7 @@ void	CMeshMRMGeom::load(NLMISC::IStream &f) throw(NLMISC::EStream)
 
 
 // ***************************************************************************
-void	CMeshMRMGeom::save(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshMRMGeom::save(NLMISC::IStream &f)
 {
 	/*
 	Version 5:
@@ -2968,7 +2968,7 @@ void	CMeshMRM::render(IDriver *drv, CTransformShape *trans, bool passOpaque)
 
 
 // ***************************************************************************
-void	CMeshMRM::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshMRM::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 0:

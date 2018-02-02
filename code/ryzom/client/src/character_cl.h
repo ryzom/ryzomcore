@@ -949,7 +949,7 @@ protected:
 
 
 	// Read/Write Variables from/to the stream.
-	virtual void readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void readWrite(NLMISC::IStream &f);
 	// To call after a read from a stream to re-initialize the entity.
 	virtual void load();
 

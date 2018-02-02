@@ -214,7 +214,7 @@ void	CWaterPoolManager::removePool(uint32 ID)
 }
 
 //===============================================================================================
-void CWaterPoolManager::serial(NLMISC::IStream &f)  throw(NLMISC::EStream)
+void CWaterPoolManager::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("WaterPoolManager");
 	(void)f.serialVersion(0);

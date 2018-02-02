@@ -573,7 +573,7 @@ void	CMeshVPPerPixelLight::end(IDriver *drv)
 
 
 //=================================================================================
-void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPPerPixelLight::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 	f.serial(SpecularLighting);

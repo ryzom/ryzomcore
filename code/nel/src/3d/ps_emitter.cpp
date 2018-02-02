@@ -1917,7 +1917,7 @@ void CPSEmitter::bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep)
 }
 
 ///==========================================================================
-void CPSEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitter_serial)
 	/// version 6  : the flag _EmitDirBasis no longer exist, it has been replaced by _UserMatrixModeForEmissionDirection
@@ -2184,7 +2184,7 @@ bool CPSEmitter::testEmitForever() const
 // implementation of CPSModulatedEmitter  //
 ////////////////////////////////////////////
 
-void CPSModulatedEmitter::serialEmitteeSpeedScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSModulatedEmitter::serialEmitteeSpeedScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSModulatedEmitter_IStream )
 	bool useScheme;
@@ -2228,7 +2228,7 @@ void CPSEmitterOmni::emit(const NLMISC::CVector &srcPos, uint32 index, CVector &
 }
 
 ///==========================================================================
-void CPSEmitterOmni::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterOmni::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterOmni_serial)
 	f.serialVersion(1);
@@ -2332,7 +2332,7 @@ void CPSEmitterDirectionnal::resize(uint32 capacity)
 }
 
 ///==========================================================================
-void CPSEmitterDirectionnal::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterDirectionnal::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterDirectionnal_IStream )
 	f.serialVersion(1);
@@ -2346,7 +2346,7 @@ void CPSEmitterDirectionnal::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
 ////////////////////////////////////////////
 
 ///==========================================================================
-void CPSEmitterRectangle::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterRectangle::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterRectangle_IStream )
 	f.serialVersion(1);
@@ -2506,7 +2506,7 @@ void CPSEmitterRectangle::showTool(void)
 ////////////////////////////////////
 
 ///==========================================================================
-void CPSEmitterConic::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSEmitterConic::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSEmitterConic_serial)
 	f.serialVersion(1);
@@ -2611,7 +2611,7 @@ CMatrix CPSSphericalEmitter::getMatrix(uint32 index) const
 }
 
 ///==========================================================================
-void CPSSphericalEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSSphericalEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSphericalEmitter_serial)
 	f.serialVersion(1);
@@ -2668,7 +2668,7 @@ void CPSSphericalEmitter::resize(uint32 size)
 /////////////////////////////////////
 
 ///==========================================================================
-void CPSRadialEmitter::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRadialEmitter::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRadialEmitter_serial)
 	f.serialVersion(1);

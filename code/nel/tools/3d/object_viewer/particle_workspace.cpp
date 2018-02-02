@@ -260,7 +260,7 @@ void CParticleWorkspace::CNode::savePS()
 
 
 //***********************************************************************************************
-void CParticleWorkspace::CNode::savePSAs(const std::string &fullPath) throw(NLMISC::EStream)
+void CParticleWorkspace::CNode::savePSAs(const std::string &fullPath)
 {
 	nlassert(_WS);
 	if (!_PS) return;	
@@ -415,7 +415,7 @@ void CParticleWorkspace::removeNode(CNode *ptr)
 }
 
 //***********************************************************************************************
-void CParticleWorkspace::save() throw(NLMISC::EStream)
+void CParticleWorkspace::save()
 {
 	NLMISC::COFile stream;
 	stream.open(_Filename);
@@ -437,7 +437,7 @@ void CParticleWorkspace::load()
 }
 
 //***********************************************************************************************
-void CParticleWorkspace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleWorkspace::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("PARTICLE_WORKSPACE");
 	f.serialVersion(0);

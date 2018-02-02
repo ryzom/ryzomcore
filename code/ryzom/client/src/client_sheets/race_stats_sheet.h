@@ -70,7 +70,7 @@ struct CGenderInfo
 	/// Build
 	void build(const NLGEORGES::UFormElm &form, const std::string &prefix);
 	/// Serialize
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// Get the item name for a given slot.
 	const std::string &getItemName(SLOTTYPE::EVisualSlot slot) const;
@@ -104,7 +104,7 @@ public:
 	//
 	virtual void build(const NLGEORGES::UFormElm &item);
 	/// Serialize rce_stats sheet into binary data file.
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 private:
 	void buildGroundFXs(const NLGEORGES::UFormElm &item, const std::string &name, std::vector<CGroundFXSheet> &dest);
 };

@@ -752,7 +752,7 @@ void CParticleSystem::step(TPass pass, TAnimationTime ellapsedTime, CParticleSys
 
 
 ///=======================================================================================
-void CParticleSystem::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleSystem::serial(NLMISC::IStream &f)
 {
 	CHECK_INTEGRITY
 	NL_PS_FUNC_MAIN(CParticleSystem_serial)

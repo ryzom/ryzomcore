@@ -116,7 +116,7 @@ IShape*	CShapeStream::getShapePointer () const
 
 
 // ***************************************************************************
-void CShapeStream::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CShapeStream::serial(NLMISC::IStream &f)
 {
 	// First, serial an header or checking if it is correct
 	f.serialCheck (NELID("PAHS"));

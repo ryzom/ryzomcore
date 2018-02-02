@@ -102,7 +102,7 @@ class CParticleSystemProcess : public NLMISC::IStreamable
 			* Everything is saved, except for the fontManager and the fontGenerator.
 			* They must be set again if the PSToolRender pass is used.
 			*/
-			virtual void			serial(NLMISC::IStream &f) throw(NLMISC::EStream) ;
+			virtual void			serial(NLMISC::IStream &f);
 		/// @}
 
 

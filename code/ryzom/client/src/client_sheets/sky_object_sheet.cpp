@@ -33,7 +33,7 @@ void CSkyObjectSheet::CColorInfoSheet::build(const NLGEORGES::UFormElm &item, co
 }
 
 // *****************************************************************************************************
-void CSkyObjectSheet::CColorInfoSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSkyObjectSheet::CColorInfoSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(MapName);
 	f.serialEnum(Mode);
@@ -62,7 +62,7 @@ void CSkyObjectSheet::CColorGradientInfoSheet::build(const NLGEORGES::UFormElm &
 }
 
 // *****************************************************************************************************
-void CSkyObjectSheet::CColorGradientInfoSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSkyObjectSheet::CColorGradientInfoSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(TargetTextureStage);
 	f.serialCont(WeatherToGradient);
@@ -104,7 +104,7 @@ void CSkyObjectSheet::CVersionSheet::build(const NLGEORGES::UFormElm &item, cons
 }
 
 // *****************************************************************************************************
-void CSkyObjectSheet::CVersionSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSkyObjectSheet::CVersionSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(ShapeName);
 	f.serial(TransparencyPriority);
@@ -145,7 +145,7 @@ void CSkyObjectSheet::build(const NLGEORGES::UFormElm &item, const std::string &
 }
 
 // *****************************************************************************************************
-void CSkyObjectSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSkyObjectSheet::serial(NLMISC::IStream &f)
 {
 	f.serial(Std);
 	f.serial(FallbackPass[0]);

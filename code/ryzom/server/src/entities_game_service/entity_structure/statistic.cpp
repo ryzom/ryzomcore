@@ -100,7 +100,7 @@ SCharacteristicsAndScores::~SCharacteristicsAndScores()
 //-----------------------------------------------
 // SCharacteristicsAndScores serial
 //-----------------------------------------------
-void SCharacteristicsAndScores::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void SCharacteristicsAndScores::serial(NLMISC::IStream &f)
 {
 	f.serial( Base );
 	f.serial( Max );
@@ -139,7 +139,7 @@ void CPhysicalCharacteristics::clear()
 //-----------------------------------------------
 // serial :
 //-----------------------------------------------
-void CPhysicalCharacteristics::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CPhysicalCharacteristics::serial( NLMISC::IStream &f )
 {
 	for(int i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 	{
@@ -180,7 +180,7 @@ void CPhysicalScores::clear()
 //-----------------------------------------------
 // serial :
 //-----------------------------------------------
-void CPhysicalScores::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CPhysicalScores::serial( NLMISC::IStream &f )
 {
 	for( int i = 0; i < SCORES::NUM_SCORES; ++i )
 	{
@@ -267,7 +267,7 @@ void CSkills::clear()
 // serial :
 //
 //-----------------------------------------------
-void CSkills::serial( NLMISC::IStream &f ) throw(NLMISC::EStream)
+void CSkills::serial( NLMISC::IStream &f )
 {
 	uint32 size = SKILLS::NUM_SKILLS;
 	f.serial( size );

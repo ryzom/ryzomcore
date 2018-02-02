@@ -750,7 +750,7 @@ void CPSRibbonBase::initDateVect()
 
 
 //=======================================================
-void CPSRibbonBase::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRibbonBase::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRibbonBase_serial)
 	CPSParticle::serial(f);

@@ -129,7 +129,7 @@ const CFontManager *CParticleSystemProcess::getFontManager(void) const
 
 
 // ***********************************************************************************************************
-void CParticleSystemProcess::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleSystemProcess::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CParticleSystemProcess_serial)
 	// version 2 : added matrix mode (just not fx world matrix or identity)

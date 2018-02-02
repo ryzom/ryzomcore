@@ -47,7 +47,7 @@ namespace	NL3D
 // ***************************************************************************
 const sint CTileLand::_Version=0;
 // ***************************************************************************
-void CTileLand::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileLand::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(_Version);
 
@@ -91,7 +91,7 @@ CTileBank::CTileBank ()
 	_DisplacementMap[0].setEmpty ();
 }
 // ***************************************************************************
-void    CTileBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void    CTileBank::serial(NLMISC::IStream &f)
 {
 	f.serialCheck (std::string ("BANK"));
 
@@ -753,7 +753,7 @@ void	CTileBank::postfixTileVegetableDesc (const char *postfix)
 // ***************************************************************************
 const sint CTile::_Version=4;
 // ***************************************************************************
-void CTile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTile::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 
@@ -916,7 +916,7 @@ const std::string& CTileSet::getName () const
 	return _Name;
 }
 // ***************************************************************************
-void CTileSet::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileSet::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 
@@ -1595,7 +1595,7 @@ void CTileSet::loadTileVegetableDesc()
 // ***************************************************************************
 const sint CTileBorder::_Version=0;
 // ***************************************************************************
-void CTileBorder::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileBorder::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(_Version);
 
@@ -1824,7 +1824,7 @@ void CTileBorder::rotate()
 // ***************************************************************************
 const sint CTileSetTransition::_Version=1;
 // ***************************************************************************
-void CTileSetTransition::serial(class NLMISC::IStream &f) throw(EStream)
+void CTileSetTransition::serial(NLMISC::IStream &f)
 {
 	sint streamver = f.serialVersion(_Version);
 

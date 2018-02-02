@@ -104,7 +104,7 @@ public:
 		// Quantity of this Mp needed
 		uint16	Quantity;
 		
-		void serial(class NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialEnum( MpType );
 			f.serial( Quantity );
@@ -118,7 +118,7 @@ public:
 		// Quantity of this Mp needed
 		uint16	Quantity;
 		
-		void serial(class NLMISC::IStream &f)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serial( MpType );
 			f.serial( Quantity );
@@ -176,7 +176,7 @@ public:
 		AllowPartialSuccess= true;
 	}
 	
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( CraftedItem );
 		f.serial( NbItemsPerUnit );
@@ -428,7 +428,7 @@ public:
 	virtual ~CStaticBrick();
 	
 	/// Serialisation
-	virtual void serial(class NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// read georges sheet
 	void readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId);

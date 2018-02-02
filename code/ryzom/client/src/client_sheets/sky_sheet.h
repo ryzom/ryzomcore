@@ -47,7 +47,7 @@ public:
 	/// From CEntitySheet
 	virtual void build(const NLGEORGES::UFormElm &item);
 	/// From CEntitySheet  : serialize sheet into binary data file.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 };
 
 

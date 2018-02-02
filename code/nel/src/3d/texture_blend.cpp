@@ -112,7 +112,7 @@ void CTextureBlend::doGenerate(bool async)
 
 
 // ************************************************************************
-void	CTextureBlend::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureBlend::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	ITexture::serial(f);

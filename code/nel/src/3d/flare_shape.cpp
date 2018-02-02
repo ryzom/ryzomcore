@@ -63,7 +63,7 @@ CFlareShape::CFlareShape()  : _Color(NLMISC::CRGBA::White),
 
 
 // ***************************************************************************************************************
-void CFlareShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFlareShape::serial(NLMISC::IStream &f)
 {
 	// Version 4 : - added occlusion test mesh, size reduction, angle modification when object is occluded
 	//             - added lookat mode for first flare

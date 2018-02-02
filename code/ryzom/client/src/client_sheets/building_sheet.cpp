@@ -69,7 +69,7 @@ void CBuildingSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CBuildingSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CBuildingSheet::serial(NLMISC::IStream &f)
 {
 	// Serialize class components.
 	f.serial(BuildedIg);

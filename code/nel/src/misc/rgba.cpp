@@ -50,7 +50,7 @@ const CRGBA CRGBA::Cyan(0, 255, 255) ;
 const CRGBA CRGBA::White(255, 255, 255) ;
 
 // ***************************************************************************
-void CRGBA::serial(class NLMISC::IStream &f)
+void CRGBA::serial(NLMISC::IStream &f)
 {
 	f.serial (R);
 	f.serial (G);
@@ -581,7 +581,7 @@ void CRGBA::subtractColors(CRGBA *dest, const CRGBA *src1, const CRGBA *src2, ui
 
 
 // ***************************************************************************
-void CBGRA::serial(class NLMISC::IStream &f)
+void CBGRA::serial(NLMISC::IStream &f)
 {
 	f.serial (B);
 	f.serial (G);
@@ -792,7 +792,7 @@ bool CRGBA::fromString( const std::string &s )
 
 
 // ***************************************************************************
-void CRGBAF::serial(class NLMISC::IStream &f)
+void CRGBAF::serial(NLMISC::IStream &f)
 {
 	f.serial (R);
 	f.serial (G);

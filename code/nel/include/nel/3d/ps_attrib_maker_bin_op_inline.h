@@ -729,7 +729,7 @@ inline void CPSAttribMakerBinOp<T>::makeN(CPSLocated *loc,
 
 //=================================================================================================================
 template <class T>
-inline void    CPSAttribMakerBinOp<T>::serial		  (NLMISC::IStream &f) throw(NLMISC::EStream)
+inline void    CPSAttribMakerBinOp<T>::serial		  (NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{

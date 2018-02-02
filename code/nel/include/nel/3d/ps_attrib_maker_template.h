@@ -93,7 +93,7 @@ public:
 		CPSValueBlendFunc() {}
 
 		/// serialization
-		void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+		void serial(NLMISC::IStream &f)
 		{
 			f.serialVersion(1);
 			f.serial(_StartValue, _EndValue);
@@ -228,7 +228,7 @@ public:
 	CPSValueBlendSampleFunc() {}
 
 	/// serialization
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialVersion(1);
 		if (f.isReading())
@@ -353,7 +353,7 @@ public:
 	}
 
 	/// serialization
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 	T getMaxValue(void) const
@@ -493,7 +493,7 @@ void CPSValueGradientFunc<T>::setValuesUnpacked(const T *valueTab, uint32 numVal
 
 
 template <typename T>
-void CPSValueGradientFunc<T>::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSValueGradientFunc<T>::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(1);
 	f.serial(_NbStages);

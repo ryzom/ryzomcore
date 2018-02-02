@@ -356,7 +356,7 @@ public:
 	void resize(uint32 newSize);
 
 	/// serialization
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/// Shortcut to get an instance of the 3d driver
 	IDriver *getDriver() const;
@@ -730,7 +730,7 @@ public:
 		/// ctor
 		CPSLocatedBindable();
 		/// serialization
-		virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void		serial(NLMISC::IStream &f);
 		/** this should be called before to delete any bindable inserted in a system, but this is done
 		  * by the system, so you should never need calling it. This has been introduced because calls in dtor are not polymorphic
 		  * to derived class (which are already destroyed anyway), and some infos are needed in some dtor. The default behaviour does nothing
@@ -1010,7 +1010,7 @@ public:
 	 */
 	virtual void		releaseTargetRsc(CPSLocated * /* target */) {}
 	/// Seralization, must be called by derivers
-	void				serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void				serial(NLMISC::IStream &f);
 	/// Finalize this object : the default is to call releaseTargetRsc on targets
 	virtual void		finalize(void);
 	virtual				~CPSTargetLocatedBindable();

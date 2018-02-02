@@ -90,7 +90,7 @@ CStaticBrick::~CStaticBrick()
 //--------------------------------------------------------------
 //					serial()  
 //--------------------------------------------------------------
-void CStaticBrick::serial(class NLMISC::IStream &f)
+void CStaticBrick::serial(NLMISC::IStream &f)
 {
 	f.serial( Name );
 	f.serial( SheetId );

@@ -158,7 +158,7 @@ static CMesh *CreateDummyMesh(void)
 
 
 //====================================================================================
-void CPSMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSMesh::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSMesh_IStream )
 	(void)f.serialVersion(3);
@@ -1448,7 +1448,7 @@ void CPSConstraintMesh::fillIndexesInPrecompBasis(void)
 
 //====================================================================================
 /// serialisation. Derivers must override this, and call their parent version
-void CPSConstraintMesh::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSConstraintMesh::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSConstraintMesh_IStream )
 
@@ -2267,7 +2267,7 @@ CPSConstraintMesh::CGlobalTexAnim::CGlobalTexAnim() : TransOffset(NLMISC::CVecto
 }
 
 //=====================================================================================
-void	CPSConstraintMesh::CGlobalTexAnim::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CPSConstraintMesh::CGlobalTexAnim::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CGlobalTexAnim_IStream )
 	// version 1 : added offset
@@ -2365,7 +2365,7 @@ void  CPSConstraintMesh::setTexAnimType(TTexAnimType type)
 }
 
 //=====================================================================================
-void	CPSConstraintMesh::CGlobalTexAnims::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CPSConstraintMesh::CGlobalTexAnims::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CGlobalTexAnims_IStream )
 	f.serialVersion(0);

@@ -136,7 +136,7 @@ ITextureDrvInfos::~ITextureDrvInfos()
 
 
 // ***************************************************************************
-void	ITexture::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	ITexture::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 1:

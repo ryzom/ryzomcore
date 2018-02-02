@@ -831,7 +831,7 @@ public:
 	static void setValuesOnFileChange ();	// called when cfg modified
 
 	/// Serialize CFG.
-	virtual void serial(class NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	/// End process
 	void release ();

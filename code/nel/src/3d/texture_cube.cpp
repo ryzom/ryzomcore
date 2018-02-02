@@ -147,7 +147,7 @@ void	CTextureCube::release()
 }
 
 // ***************************************************************************
-void	CTextureCube::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureCube::serial(NLMISC::IStream &f)
 {
 	sint	ver= f.serialVersion(2);
 

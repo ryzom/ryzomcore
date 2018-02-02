@@ -162,7 +162,7 @@ void CTextureBump::setHeightMap(ITexture *heightMap)
 
 
 ///==============================================================================================
-void CTextureBump::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTextureBump::serial(NLMISC::IStream &f)
 {
 	/// version 2 : normalization flag
 	sint ver = f.serialVersion(3);

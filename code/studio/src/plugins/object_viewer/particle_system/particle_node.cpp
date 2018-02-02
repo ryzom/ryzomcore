@@ -240,12 +240,12 @@ void CWorkspaceNode::serial(NLMISC::IStream &f)
 	f.xmlPop();
 }
 
-void CWorkspaceNode::savePS() throw(NLMISC::EStream)
+void CWorkspaceNode::savePS()
 {
 	savePSAs(getFullPath());
 }
 
-void CWorkspaceNode::savePSAs(const std::string &fullPath) throw(NLMISC::EStream)
+void CWorkspaceNode::savePSAs(const std::string &fullPath)
 {
 	nlassert(_WS);
 	if (!_PS) return;
@@ -263,7 +263,7 @@ std::string CWorkspaceNode::getFullPath() const
 	return _WS->getPath() + _RelativePath.c_str();
 }
 
-bool CWorkspaceNode::loadPS() throw(NLMISC::EStream)
+bool CWorkspaceNode::loadPS()
 {
 	nlassert(_WS);
 	// manually load the PS shape (so that we can deal with exceptions)
@@ -390,7 +390,7 @@ void CParticleWorkspace::removeNode(CWorkspaceNode *ptr)
 	removeNode((uint) index);
 }
 
-void CParticleWorkspace::save() throw(NLMISC::EStream)
+void CParticleWorkspace::save()
 {
 	NLMISC::COFile stream;
 	stream.open(_Filename);
@@ -400,7 +400,7 @@ void CParticleWorkspace::save() throw(NLMISC::EStream)
 	clearModifiedFlag();
 }
 
-void CParticleWorkspace::load() throw(NLMISC::EStream)
+void CParticleWorkspace::load()
 {
 	NLMISC::CIFile stream;
 	stream.open(_Filename);
@@ -410,7 +410,7 @@ void CParticleWorkspace::load() throw(NLMISC::EStream)
 	clearModifiedFlag();
 }
 
-void CParticleWorkspace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CParticleWorkspace::serial(NLMISC::IStream &f)
 {
 	f.xmlPush("PARTICLE_WORKSPACE");
 	f.serialVersion(0);

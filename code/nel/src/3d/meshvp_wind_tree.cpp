@@ -194,7 +194,7 @@ CMeshVPWindTree::~CMeshVPWindTree()
 
 
 // ***************************************************************************
-void	CMeshVPWindTree::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CMeshVPWindTree::serial(NLMISC::IStream &f)
 {
 	(void)f.serialVersion(0);
 

@@ -20,7 +20,7 @@
 #include "fog_map_build.h"
 
 //===================================================================
-void CFogMapBuild::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CFogMapBuild::serial(NLMISC::IStream &f)
 {
 	for(uint k = 0; k < NumMap; ++k)
 	{

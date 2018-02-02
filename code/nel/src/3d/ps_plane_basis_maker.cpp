@@ -320,7 +320,7 @@ uint32 CSpinnerFunctor::getNumSamples(void) const
 }
 
 ///============================================================================
-void CSpinnerFunctor::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSpinnerFunctor::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(1);
 	f.serial(_Axis, _NbSamples);

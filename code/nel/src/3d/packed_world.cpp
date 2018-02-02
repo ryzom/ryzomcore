@@ -153,7 +153,7 @@ void CPackedWorld::getZones(std::vector<TPackedZoneBaseSPtr> &zones)
 }
 
 // *************************************************************************************************
-void CPackedWorld::serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPackedWorld::serialZoneNames(NLMISC::IStream &f)
 {
 	f.serialVersion(1);
 	f.serialCheck(NELID("OWPA"));
@@ -161,7 +161,7 @@ void CPackedWorld::serialZoneNames(NLMISC::IStream &f) throw(NLMISC::EStream)
 }
 
 // *************************************************************************************************
-void CPackedWorld::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPackedWorld::serial(NLMISC::IStream &f)
 {
 	serialZoneNames(f);
 	f.serialCont(_Zones);

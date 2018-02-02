@@ -174,7 +174,7 @@ namespace MBEHAV
 			return modeToString( (EMode)Mode ); // TODO: param
 		}
 
-		inline void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+		inline void serial (NLMISC::IStream &f)
 		{
 			f.serial( RawModeAndParam );
 		}
@@ -522,7 +522,7 @@ namespace MBEHAV
 		inline bool operator != ( const CBehaviour& p ) const
 		{ return (Behaviour != (EBehaviour)p.Behaviour || Data != p.Data || Data2 != p.Data2 || DeltaHP != p.DeltaHP); }
 
-		inline void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+		inline void serial (NLMISC::IStream &f)
 		{
 			if (f.isReading() )
 			{

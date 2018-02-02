@@ -233,7 +233,7 @@ struct CItemCraftParameters
 	static inline uint32 getCurrentVersion() { return 4; }
 
 	/// serial validated point for a character
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	// operator !=
 	bool operator!=(const CItemCraftParameters &p) const;

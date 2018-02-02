@@ -80,7 +80,7 @@ void CMissionSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CMissionSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CMissionSheet::serial(NLMISC::IStream &f)
 {
 	// Serialize class components.
 	f.serial(Name);

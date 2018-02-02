@@ -1246,7 +1246,7 @@ void CPlayerCL::displayDebug(float x, float &y, float lineStep)	// virtual
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CPlayerCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPlayerCL::readWrite(NLMISC::IStream &f)
 {
 	CCharacterCL::readWrite(f);
 

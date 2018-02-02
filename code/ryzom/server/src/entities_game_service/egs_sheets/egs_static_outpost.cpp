@@ -165,7 +165,7 @@ void CStaticOutpostBuilding::CDriller::readGeorges (const NLGEORGES::UFormElm *p
 }
 
 //----------------------------------------------------------------------------
-void CStaticOutpostBuilding::CDriller::serial(class NLMISC::IStream &f)
+void CStaticOutpostBuilding::CDriller::serial(NLMISC::IStream &f)
 {
 	for (uint i = 0; i < DRILLER_NB_LEVEL; ++i)
 		f.serial(QualityFactor[i]);

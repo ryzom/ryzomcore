@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-void CPowerActivationDate::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPowerActivationDate::serial(NLMISC::IStream &f)
 {
 	f.serial( DeactivationDate );
 	f.serial( ActivationDate );
@@ -69,7 +69,7 @@ void CPowerActivationDateVector::clearConsumable()
 }
 
 //-----------------------------------------------------------------------------
-void CPowerActivationDateVector::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPowerActivationDateVector::serial(NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{
@@ -200,7 +200,7 @@ void CAuraActivationDateVector::disableAura(POWERS::TPowerType type, NLMISC::TGa
 }
 
 //-----------------------------------------------------------------------------
-void CAuraActivationDateVector::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CAuraActivationDateVector::serial(NLMISC::IStream &f)
 {
 	if (f.isReading())
 	{

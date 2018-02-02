@@ -98,7 +98,7 @@ struct CEquipmentSlots
 	/**
 	 * Serial
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 };
 
 
@@ -387,7 +387,7 @@ public:
 	/**
 	 * Serial: reading off-mirror, writing from mirror
 	 */
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	void serial(NLMISC::IStream &f);
 
 	/**
 	 * Load George Sheet

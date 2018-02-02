@@ -996,7 +996,7 @@ void CPSFaceLookAt::resize(uint32 capacity)
 
 
 ///===========================================================================================
-void CPSFaceLookAt::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFaceLookAt::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSFaceLookAt_serial)
 	// version 4 : added 'align on z-axis' flag

@@ -8481,7 +8481,7 @@ void CCharacterCL::displayDebugPropertyStages(float x, float &y, float lineStep)
 // readWrite :
 // Read/Write Variables from/to the stream.
 //---------------------------------------------------
-void CCharacterCL::readWrite(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCharacterCL::readWrite(NLMISC::IStream &f)
 {
 	CEntityCL::readWrite(f);
 

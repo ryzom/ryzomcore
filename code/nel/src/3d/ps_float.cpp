@@ -151,7 +151,7 @@ void CPSFloatCurveFunctor::updateTab(void)
 }
 
 ///=======================================================================================
-void CPSFloatCurveFunctor::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFloatCurveFunctor::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(1);
 	f.serial(_NumSamples, _Smoothing);

@@ -136,7 +136,7 @@ struct CDummy2DAngle : CPSRotated2DParticle
 };
 
 ///==================================================================================================================
-void CPSRibbon::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRibbon::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRibbon_serial)
 	// Version 3 : - added brace mode

@@ -240,7 +240,7 @@ void CTextureFile::doGenerate(bool async)
 
 
 // ***************************************************************************
-void	CTextureFile::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CTextureFile::serial(NLMISC::IStream &f)
 {
 	/*
 	Version 1:

@@ -82,7 +82,7 @@ public:
 	std::string getShape(void) const { return _Shape; }
 
 		/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 	virtual ~CPSMesh();
 
@@ -271,7 +271,7 @@ public:
 
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void		serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void		serial(NLMISC::IStream &f);
 
 
 	NLMISC_DECLARE_CLASS(CPSConstraintMesh);
@@ -334,7 +334,7 @@ public:
 			float			  WRotSpeed;  /* = 0 */
 			float			  WRotAccel;  /* = 0 */
 			CGlobalTexAnim();
-			void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+			void	serial(NLMISC::IStream &f);
 			/// Build a texture matrix from a date and this obj.
 			void    buildMatrix(TAnimationTime date, NLMISC::CMatrix &dest);
 		};
@@ -587,7 +587,7 @@ protected:
 	struct CGlobalTexAnims
 	{
 		CGlobalTexAnim		Anims[IDRV_MAT_MAXTEXTURES];
-		void	serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		void	serial(NLMISC::IStream &f);
 	};
 
 	typedef CUniquePtr<CGlobalTexAnims> PGlobalTexAnims;

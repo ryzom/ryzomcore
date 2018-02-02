@@ -40,7 +40,7 @@ using namespace NL3D;
   * TODO maybe this could be used elsewhere ?    
   */
 template <class TSerializePolicy, typename T>
-static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
+static T	*DupSerializable(const T *in)
 {
 	NLMISC::CMemStream ms;	
 	nlassert(!ms.isReading());
@@ -62,7 +62,7 @@ static T	*DupSerializable(const T *in) throw(NLMISC::EStream)
 struct CDupObjPolicy
 {
 	template <typename T>
-	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
+	static void serial(T *&obj, NLMISC::IStream &dest)
 	{ 	
 		dest.serialPtr(obj);
 		/*if (dest.isReading())
@@ -84,7 +84,7 @@ struct CDupObjPolicy
 struct CDupPolymorphicObjPolicy
 {
 	template <typename T>
-	static void serial(T *&obj, NLMISC::IStream &dest)  throw(NLMISC::EStream)
+	static void serial(T *&obj, NLMISC::IStream &dest)
 	{ 	
 		dest.serialPolyPtr(obj);		
 	}

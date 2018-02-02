@@ -152,7 +152,7 @@ CPSColoredParticle::~CPSColoredParticle()
 }
 
 //=======================================
-void CPSColoredParticle::serialColorScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSColoredParticle::serialColorScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSColoredParticle_IStream )
 	f.serialVersion(1);
@@ -213,7 +213,7 @@ CPSSizedParticle::~CPSSizedParticle()
 }
 
 //=======================================
-void CPSSizedParticle::serialSizeScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSSizedParticle::serialSizeScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSSizedParticle_serialSizeScheme)
 	f.serialVersion(1);
@@ -277,7 +277,7 @@ CPSRotated2DParticle::~CPSRotated2DParticle()
 }
 
 ///===================================================================================
-void CPSRotated2DParticle::serialAngle2DScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRotated2DParticle::serialAngle2DScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRotated2DParticle_serialAngle2DScheme)
 	f.serialVersion(1);
@@ -387,7 +387,7 @@ CPSTexturedParticle::~CPSTexturedParticle()
 }
 
 ///===================================================================================
-void CPSTexturedParticle::serialTextureScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSTexturedParticle::serialTextureScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSTexturedParticle_serialTextureScheme)
 	f.serialVersion(1);
@@ -489,7 +489,7 @@ CPSRotated3DPlaneParticle::~CPSRotated3DPlaneParticle()
 }
 
 ///===================================================================================
-void CPSRotated3DPlaneParticle::serialPlaneBasisScheme(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSRotated3DPlaneParticle::serialPlaneBasisScheme(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSRotated3DPlaneParticle_serialPlaneBasisScheme)
 	f.serialVersion(1);
@@ -515,7 +515,7 @@ CPSMaterial::CPSMaterial()
 }
 
 ///===================================================================================
-void CPSMaterial::serialMaterial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSMaterial::serialMaterial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSMaterial_IStream )
 	// version 3 : added zbias
@@ -726,7 +726,7 @@ void	CPSMultiTexturedParticle::enableAlternateTex(bool enabled /*= true*/)
 }
 
 //=======================================
-void	CPSMultiTexturedParticle::serialMultiTex(NLMISC::IStream &f) throw(NLMISC::EStream)
+void	CPSMultiTexturedParticle::serialMultiTex(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSMultiTexturedParticle_serialMultiTex)
 	/// version 1 : bump factor

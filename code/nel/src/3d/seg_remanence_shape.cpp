@@ -47,7 +47,7 @@ CSegRemanenceShape::CSegRemanenceShape() : _GeomTouched(true),
 }
 
 //===========================================================
-void CSegRemanenceShape::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CSegRemanenceShape::serial(NLMISC::IStream &f)
 {
 	// version 2 : added default tracks
 	// version 1 : rollup ratio

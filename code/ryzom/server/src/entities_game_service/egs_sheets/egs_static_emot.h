@@ -40,7 +40,7 @@ public:
 	/// Return the version of this class, increments this value when the content of this class has changed
 	inline static uint getVersion () { return 1; }
 	/// Serial
-	void serial(class NLMISC::IStream &f)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serialCont( _Anims );
 		if (f.isReading())

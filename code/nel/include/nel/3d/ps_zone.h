@@ -82,7 +82,7 @@ public:
 
 
 	/// serialization, DERIVER must override this, and call the parent version
-	virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+	virtual void serial(NLMISC::IStream &f);
 
 
 	/** Inherited from CPSTargetLocatedBindable. It's called when one of the targets has been detroyed or detached
@@ -155,7 +155,7 @@ class CPSZonePlane : public CPSZone, public IPSMover
 		virtual NLMISC::CVector getNormal(uint32 index);
 		virtual void setNormal(uint32 index, NLMISC::CVector n);
 
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 
 	protected:
 		TPSAttribVector _Normal;
@@ -176,7 +176,7 @@ struct CRadiusPair
 {
 	// the adius, and the square radius
 	float R, R2;
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(R, R2);
 	}
@@ -205,7 +205,7 @@ class CPSZoneSphere : public CPSZone, public IPSMover
 
 
 
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 
 
 		// inherited from IPSMover
@@ -257,7 +257,7 @@ class CPSZoneDisc : public CPSZone, public IPSMover
 		virtual NLMISC::CVector getNormal(uint32 index);
 		virtual void setNormal(uint32 index, NLMISC::CVector n);
 
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 
 
 
@@ -303,7 +303,7 @@ class CPSZoneCylinder : public CPSZone, public IPSMover
 		virtual NLMISC::CVector getScale(uint32 k) const;
 
 		// serialization
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 
 
 
@@ -350,7 +350,7 @@ class CPSZoneRectangle : public CPSZone, public IPSMover
 
 
 		// serialization
-		virtual void serial(NLMISC::IStream &f) throw(NLMISC::EStream);
+		virtual void serial(NLMISC::IStream &f);
 
 		// inherited from IPSMover
 		virtual bool supportUniformScaling(void) const { return true; }

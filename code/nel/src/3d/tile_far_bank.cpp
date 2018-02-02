@@ -39,7 +39,7 @@ namespace NL3D {
 // ***************************************************************************
 const sint CTileFarBank::CTileFar::_Version=0x0;
 // ***************************************************************************
-void CTileFarBank::CTileFar::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileFarBank::CTileFar::serial(NLMISC::IStream &f)
 {
 	// Serial version
 	(void)f.serialVersion(_Version);
@@ -105,7 +105,7 @@ CTileFarBank::CTileFarBank()
 // ***************************************************************************
 const sint CTileFarBank::_Version=0x0;
 // ***************************************************************************
-void CTileFarBank::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CTileFarBank::serial(NLMISC::IStream &f)
 {
 	// Write/Check "FAR_BANK" in header of the stream
 	f.serialCheck (NELID("_RAF"));

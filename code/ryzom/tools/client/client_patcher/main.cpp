@@ -21,7 +21,7 @@ CClientConfig::CClientConfig()
 {
 }
 
-void CClientConfig::serial(class NLMISC::IStream &/* f */) throw(NLMISC::EStream)
+void CClientConfig::serial(NLMISC::IStream &/* f */)
 {
 }
 

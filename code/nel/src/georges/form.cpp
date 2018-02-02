@@ -263,7 +263,7 @@ const std::string &CForm::getComment () const
 
 // ***************************************************************************
 
-void CForm::write (class NLMISC::IStream &stream)
+void CForm::write (NLMISC::IStream &stream)
 {
 	// Xml stream
 	COXml xmlStream;

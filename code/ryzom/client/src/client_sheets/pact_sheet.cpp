@@ -87,7 +87,7 @@ void CPactSheet::build(const NLGEORGES::UFormElm &root)
 
 
 //=================================================================================
-void CPactSheet::serial(class NLMISC::IStream &f)	throw(NLMISC::EStream)
+void CPactSheet::serial(NLMISC::IStream &f)
 {
 	f.serialCont(PactLose);
 	f.serial(Icon);

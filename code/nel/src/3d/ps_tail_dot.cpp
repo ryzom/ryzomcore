@@ -79,7 +79,7 @@ CPSTailDot::~CPSTailDot()
 }
 
 //=======================================================
-void CPSTailDot::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSTailDot::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSTailDot_serial)
 

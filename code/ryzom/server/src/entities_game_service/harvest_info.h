@@ -36,7 +36,7 @@ struct CHarvestInfos
 	CHarvestInfos() : EndCherchingTime(0xffffffff), DepositIndex(0xffffffff), DepositIndexContent(0), Quantity(0),MinQuality(0),MaxQuality(0)
 	{}
 
-	void serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial( EndCherchingTime );
 		f.serial( Sheet );

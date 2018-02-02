@@ -146,8 +146,8 @@ public :
 	/**
 	 *	Serial
 	 */
-	void serial(NLMISC::IStream	&f) throw(NLMISC::EStream);
-	void serialString(NLMISC::IStream &f, const std::string &defaultType = "") throw(NLMISC::EStream);
+	void serial(NLMISC::IStream	&f);
+	void serialString(NLMISC::IStream &f, const std::string &defaultType = "");
 
 	/**
 	 *  Display the list of valid sheet ids with their associated file names

@@ -34,7 +34,7 @@ void CWeatherSetupSheet::build(const NLGEORGES::UFormElm &item)
 }
 
 //==================================================================================
-void CWeatherSetupSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CWeatherSetupSheet::serial(NLMISC::IStream &f)
 {
 	CWeatherSetupSheetBase::serial(f);
 }

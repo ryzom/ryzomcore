@@ -139,7 +139,7 @@ public:
 	}
 
 	// Dummy serial...
-	virtual void	serial(NLMISC::IStream &/* f */)  throw(NLMISC::EStream) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) { nlstop; }
 	NLMISC_DECLARE_CLASS(CTextureCross);
 };
 

@@ -126,7 +126,7 @@ public:
 	/// Get user landmark color
 	NLMISC::CRGBA	getColor () const;
 
-	void serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+	void serial(NLMISC::IStream &f)
 	{
 		f.serial(Pos, Title, Type);
 	}

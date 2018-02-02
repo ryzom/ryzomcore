@@ -658,7 +658,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 // serial :
 // Serialize character sheet into binary data file.
 //-----------------------------------------------
-void CCharacterSheet::serial(class NLMISC::IStream &f) throw(NLMISC::EStream)
+void CCharacterSheet::serial(NLMISC::IStream &f)
 {
 	// Serialize class components.
 //	ClientSheetsStrings.serial(f, IdFirstName);

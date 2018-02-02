@@ -293,7 +293,7 @@ void CPSFace::step(TPSProcessPass pass)
 
 
 ///======================================================================================
-void CPSFace::serial(NLMISC::IStream &f) throw(NLMISC::EStream)
+void CPSFace::serial(NLMISC::IStream &f)
 {
 	NL_PS_FUNC(CPSFace_IStream )
 	f.serialVersion(1);
