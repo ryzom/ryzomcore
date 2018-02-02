@@ -202,7 +202,7 @@ public:
 	void setAllFlags() { _Properties.properties = 0xffff; }
 
 	/// serial
-	void serial (NLMISC::IStream &f) throw (NLMISC::EStream)
+	void serial (NLMISC::IStream &f)
 	{
 		f.serial( _Properties.properties );
 	}
