@@ -166,12 +166,12 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 							if (pGH)
-								pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+								pGH->browse(text.substr(3, text.size()-3).toString().c_str());
 							text = localDesc;
 						}
-						else if (text.size() > 4 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A' && text[4]==' ')
+						else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 						{
-							string code = text.substr(4, text.size()-4).toString();
+							string code = text.substr(3, text.size()-3).toString();
 							if (!code.empty())
 								CLuaManager::getInstance().executeLuaScript(code);
 							text = localDesc;
@@ -306,16 +306,16 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						else
 						{
 							ucstring text = itemInfo.CustomText;
-							if (text.size() > 4 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B' && text[4]==' ')
+							if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
 								if (pGH)
-									pGH->browse(text.substr(4, text.size()-4).toString().c_str());
+									pGH->browse(text.substr(3, text.size()-3).toString().c_str());
 								text = localDesc;
 							}
-							else if (text.size() > 4 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A' && text[4]==' ')
+							else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 							{
-								string code = text.substr(4, text.size()-4).toString();
+								string code = text.substr(3, text.size()-3).toString();
 								if (!code.empty())
 									CLuaManager::getInstance().executeLuaScript(code);
 								text = localDesc;
