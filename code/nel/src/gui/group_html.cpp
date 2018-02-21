@@ -4509,6 +4509,23 @@ namespace NLGUI
 		return 0;
 	}
 
+// ***************************************************************************
+	int CGroupHTML::luaSetBackground(CLuaState &ls)
+	{
+		const char *funcName = "renderHtml";
+		CLuaIHM::checkArgCount(ls, funcName, 3);
+		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
+		CLuaIHM::checkArgType(ls, funcName, 3, LUA_TBOOLEAN);
+		std::string image = ls.toString(1);
+		bool scale = ls.toBoolean(2);
+		bool repeat = ls.toBoolean(3);
+
+		setBackground(image, scale, repeat);
+
+		return 0;
+	}
+
 	// ***************************************************************************
 	int CGroupHTML::luaInsertText(CLuaState &ls)	
 	{
