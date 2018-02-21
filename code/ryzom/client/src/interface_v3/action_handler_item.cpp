@@ -313,7 +313,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 									pGH->browse(text.substr(4, text.size()-4).toString().c_str());
 								text = localDesc;
 							}
-							else if (text.size() > 4 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
+							else if (text.size() > 3 && text[0]=='@' && text[1]=='L' && text[2]=='U' && text[3]=='A')
 							{
 								string code = text.substr(4, text.size()-4).toString();
 								if (!code.empty())
