@@ -4346,18 +4346,19 @@ namespace NLGUI
 					string buttonTemplate = DefaultButtonGroup;
 					// Action handler parameters : "name=group_html_id|form=id_of_the_form|submit_button=button_name"
 					string param = "name=" + this->_Id + "|url=" + getLink();
-
+					string name = "";
+					if (!_AnchorName.empty())
+						name = _AnchorName.back();
 					typedef pair<string, string> TTmplParam;
 					vector<TTmplParam> tmplParams;
 					tmplParams.push_back(TTmplParam("id", ""));
 					tmplParams.push_back(TTmplParam("onclick", "browse"));
 					tmplParams.push_back(TTmplParam("onclick_param", param));
 					tmplParams.push_back(TTmplParam("active", "true"));
-					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
+					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, getId()+":"+name, tmplParams);
 					if (buttonGroup)
 					{
-						if (!_AnchorName.empty())
-							buttonGroup->setId(_AnchorName.back());
+						buttonGroup->setId(getId()+":"+name);
 						// Add the ctrl button
 						CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
 						if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
