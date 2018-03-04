@@ -63,7 +63,7 @@ extern bool g_hidden;
 ///max botchat distance
 #define MAX_BOTCHAT_DISTANCE_SQUARE 25
 
-#define MAX_NUM_MODES 4
+#define MAX_NUM_MODES 6
 
 #define RZ_CATEGORY_EDIT "edit"
 
