@@ -996,5 +996,27 @@ namespace NLGUI
 		return 0;
 	}
 
+		// ***************************************************************************
+	void CCtrlBaseButton::runRightClickAction()
+	{
+		if(_AHOnRightClick != NULL)
+		{
+
+			CAHManager::getInstance()->submitEvent( "button_click:" + getId() );
+			CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
+		}
+	}
+
+	// ***************************************************************************
+	int CCtrlBaseButton::luaRunRightClickAction(CLuaState &ls)
+	{
+		const char *funcName = "onRightClick";
+		CLuaIHM::checkArgCount(ls, funcName, 0);
+
+		runRightClickAction();
+
+		return 0;
+	}
+
 }
 

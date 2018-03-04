@@ -2759,7 +2759,8 @@ namespace NLGUI
 					CInterfaceGroup *buttonGroup = CWidgetManager::getInstance()->getParser()->createGroupInstance(buttonTemplate, _Paragraph->getId(), tmplParams);
 					if (buttonGroup)
 					{
-
+						if (!_AnchorName.empty())
+							buttonGroup->setId(_AnchorName.back());
 						// Add the ctrl button
 						CCtrlTextButton *ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("button"));
 						if (!ctrlButton) ctrlButton = dynamic_cast<CCtrlTextButton*>(buttonGroup->getCtrl("b"));
@@ -4512,7 +4513,7 @@ namespace NLGUI
 // ***************************************************************************
 	int CGroupHTML::luaSetBackground(CLuaState &ls)
 	{
-		const char *funcName = "renderHtml";
+		const char *funcName = "setBackground";
 		CLuaIHM::checkArgCount(ls, funcName, 3);
 		CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 		CLuaIHM::checkArgType(ls, funcName, 2, LUA_TBOOLEAN);
