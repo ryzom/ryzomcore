@@ -4028,15 +4028,6 @@ NLMISC_COMMAND(displayActionCounter, "display the action counters", "")
 	return true;
 }
 
-
-NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
-{
-	if (args.size () != 1)
-		return false;
-
-	return openURL(args[0]);
-}
-
 NLMISC_COMMAND( reconnect, "Reconnect to the same shard (self Far TP)", "")
 {
 	// If the server is up, the egs will begin the quit sequence (shortened only if we are in edition or animation mode).
@@ -5851,6 +5842,14 @@ NLMISC_COMMAND(failMission, "clear the content of a mission", "<mission index>")
 
 // ***************************************************************************
 
+
+NLMISC_COMMAND (url, "launch a browser to the specified url", "<url>")
+{
+	if (args.size () != 1)
+		return false;
+
+	return openURL(args[0]);
+}
 
 
 NLMISC_COMMAND(em, "emote command", "<emote phrase>")
