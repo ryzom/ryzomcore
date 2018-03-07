@@ -37,8 +37,16 @@ namespace NLMISC
 static void readPNGData(png_structp png_ptr, png_bytep data, png_size_t length)
 {
 	IStream *stream = static_cast<IStream*>(png_get_io_ptr(png_ptr));
-	if (stream)
-		stream->serialBuffer((uint8*)data, (uint)length);
+
+	try
+	{
+		if (stream)
+			stream->serialBuffer((uint8*)data, (uint)length);
+	}
+	catch (...)
+	{
+		png_error(png_ptr, "Read error while decoding PNG file");
+	}
 }
 
 static void writePNGData(png_structp png_ptr, png_bytep data, png_size_t length)
