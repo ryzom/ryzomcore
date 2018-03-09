@@ -3487,7 +3487,7 @@ string CLuaIHMRyzom::getRegionByAlias(uint32 alias)
 	return ContinentMngr.getRegionNameByAlias(alias);
 }
 
-sint32 CLuaIHMRyzom::getGroundZ(uint32 x, sint32 y)
+float CLuaIHMRyzom::getGroundZ(float x, float y)
 {
 	CVector vect = UserEntity->pos();
 	vect.x = x;
