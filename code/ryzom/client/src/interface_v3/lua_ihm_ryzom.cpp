@@ -93,6 +93,7 @@
 #include "../zone_util.h"
 #include "../motion/user_controls.h"
 #include "group_html_cs.h"
+#include "group_map.h"
 #include "bonus_malus.h"
 #include "nel/gui/group_editbox.h"
 #include "../entities.h"
@@ -482,7 +483,13 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getShapeColOrient",  getShapeColOrient);
 	ls.registerFunc("deleteShape",  deleteShape);
 	ls.registerFunc("setupShape",  setupShape);
-	
+	ls.registerFunc("removeLandMarks",  removeLandMarks);
+	ls.registerFunc("addLandMark",  addLandMark);
+	ls.registerFunc("updateUserLandMarks",  updateUserLandMarks);
+	ls.registerFunc("delArkPoints",  delArkPoints);
+	ls.registerFunc("addRespawnPoint",  addRespawnPoint);
+	ls.registerFunc("setArkPowoOptions",  setArkPowoOptions);
+
 	lua_State *L = ls.getStatePointer();
 
 	LUABIND_ENUM(PVP_CLAN::TPVPClan, "game.TPVPClan", PVP_CLAN::NbClans, PVP_CLAN::toString);
@@ -3772,6 +3779,101 @@ bool CLuaIHMRyzom::isTargetInPVPMode()
 	if (!target) return false;
 
 	return (target->getPvpMode() & PVP_MODE::PvpFaction || target->getPvpMode() & PVP_MODE::PvpFactionFlagged || target->getPvpMode() & PVP_MODE::PvpZoneFaction)  != 0;
+}
+
+
+// ***************************************************************************
+int CLuaIHMRyzom::removeLandMarks(CLuaState &ls)
+{
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->removeUserLandMarks();
+	return 0;
+}
+
+// ***************************************************************************
+// addLandMark(10000, -4000, "Hello Atys!", "ico_over_homin.tga","","","","")
+int CLuaIHMRyzom::addLandMark(CLuaState &ls)
+{
+	const char* funcName = "addLandMark";
+	CLuaIHM::checkArgMin(ls, funcName, 4);
+	CLuaIHM::checkArgMax(ls, funcName, 9);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TNUMBER); // x
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TNUMBER); // y
+	CLuaIHM::checkArgType(ls, funcName, 3, LUA_TSTRING); // title
+	CLuaIHM::checkArgType(ls, funcName, 4, LUA_TSTRING); // texture
+	CLuaIHM::checkArgType(ls, funcName, 5, LUA_TSTRING); // left click action
+	CLuaIHM::checkArgType(ls, funcName, 6, LUA_TSTRING); // left click param
+	CLuaIHM::checkArgType(ls, funcName, 7, LUA_TSTRING); // right click action
+	CLuaIHM::checkArgType(ls, funcName, 8, LUA_TSTRING); // right click params
+
+	CArkPoint point;
+	point.x = (sint32)(ls.toNumber(1)*1000.f);
+	point.y = (sint32)(ls.toNumber(2)*1000.f);
+	point.Title = ls.toString(3);
+	point.Texture = ls.toString(4);
+	point.LeftClickAction = ls.toString(5);
+	point.LeftClickParam = ls.toString(6);
+	point.RightClickAction = ls.toString(7);
+	point.RightClickParam = ls.toString(8);
+	
+	point.Color = CRGBA(255,255,255,255);
+
+	if (ls.getTop() >= 9)
+		CLuaIHM::pop(ls, point.Color);
+	
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->addArkPoint(point);
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::delArkPoints(CLuaState &ls)
+{
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->delArkPoints();
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::addRespawnPoint(CLuaState &ls)
+{
+	const char* funcName = "addRespawnPoint";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	float x = (float) ls.toNumber(1);
+	float y = (float) ls.toNumber(2);
+	CVector2f pos(x, y);
+
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->addUserRespawnPoint(pos);
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::updateUserLandMarks(CLuaState &ls)
+{
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL)
+		pMap->updateUserLandMarks();
+	return 0;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::setArkPowoOptions(CLuaState &ls)
+{
+	const char* funcName = "setArkPowoOptions";
+	CLuaIHM::checkArgMin(ls, funcName, 2);
+	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
+	CLuaIHM::checkArgType(ls, funcName, 2, LUA_TSTRING);
+	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+	if (pMap != NULL) {
+		pMap->setArkPowoMode(ls.toString(1));
+		pMap->setArkPowoMapMenu(ls.toString(2));
+	}
+	return 0;
 }
 
 // ***************************************************************************
