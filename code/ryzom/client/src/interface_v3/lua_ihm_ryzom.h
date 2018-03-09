@@ -212,7 +212,7 @@ private:
 	static sint getCharacterSheetRegionForce(const std::string &sheet);
 	static sint	getCharacterSheetRegionLevel(const std::string &sheet);
 	static std::string getRegionByAlias(uint32 alias);
-	static sint getGroundZ(uint32 x, sint32 y);
+	static float getGroundZ(float x, float y);
 	static int getGroundAtMouse(CLuaState &ls);
 	static int getMousePos(CLuaState &ls);
 	static int getMouseDown(CLuaState &ls);
