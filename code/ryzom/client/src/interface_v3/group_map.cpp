@@ -1207,41 +1207,76 @@ void CGroupMap::checkCoords()
 
 	// **** retrieve pos of respawn and update it, or hide it if there's no target
 	uint i;
-	if (_RespawnPos.size() < _RespawnLM.size())
+
+
+	if (_ArkPoints.empty()) // Ark points replace Respawn Points
 	{
-		for (i = (uint)_RespawnPos.size(); i < _RespawnLM.size(); i++)
+		if (_RespawnPos.size() < _RespawnLM.size())
 		{
-			delCtrl(_RespawnLM[i]);
-			_RespawnLM[i] = NULL;
-		}
-	}
-	_RespawnLM.resize(_RespawnPos.size(), NULL);
-	for(i = 0; i < _RespawnPos.size(); ++i)
-	{
-		if (_RespawnLM[i] == NULL)
-		{
-			_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
-			_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
-			_RespawnLM[i]->setParent(this);
-			if (_MapMode == MapMode_SpawnSquad)
-				_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
-			else
+			for (i = (uint)_RespawnPos.size(); i < _RespawnLM.size(); i++)
 			{
-				if (isIsland())
-				{
-					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
-				}
+				delCtrl(_RespawnLM[i]);
+				_RespawnLM[i] = NULL;
+			}
+		}
+	
+		_RespawnLM.resize(_RespawnPos.size(), NULL);
+		for(i = 0; i < _RespawnPos.size(); ++i)
+		{
+			if (_RespawnLM[i] == NULL)
+			{
+				_RespawnLM[i] = createLandMarkButton(_RespawnLMOptions);
+				_RespawnLM[i]->setId(this->getId() + ":rplm_" + NLMISC::toString(i));
+				_RespawnLM[i]->setParent(this);
+				if (_MapMode == MapMode_SpawnSquad)
+					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiSquadSpawnPoint") + NLMISC::toString(" %u", i+1));
 				else
 				{
-					_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
+					if (isIsland())
+					{
+						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiR2EntryPoint"));
+					}
+					else
+					{
+						_RespawnLM[i]->setDefaultContextHelp(NLMISC::CI18N::get("uiRespawnPoint"));
+					}
+					_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
 				}
-				_RespawnLM[i]->HandleEvents = R2::getEditor().getMode() != R2::CEditor::EditionMode;
+				addCtrl(_RespawnLM[i]);
 			}
-			addCtrl(_RespawnLM[i]);
+			if (_RespawnLM[i])
+				updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[i].x, _RespawnPos[i].y);
 		}
-		if (_RespawnLM[i])
-			updateLMPosFromDBPos(_RespawnLM[i], _RespawnPos[i].x, _RespawnPos[i].y);
 	}
+	else
+	{
+		if (_ArkPoints.size() < _RespawnLM.size())
+		{
+			for (i = (uint)_ArkPoints.size(); i < _RespawnLM.size(); i++)
+			{
+				delCtrl(_RespawnLM[i]);
+				_RespawnLM[i] = NULL;
+			}
+		}
+		
+		_RespawnLM.resize(_ArkPoints.size(), NULL);
+		for(i = 0; i < _ArkPoints.size(); i++)
+		{
+			if (_RespawnLM[i] == NULL)
+			{
+				_RespawnLM[i] = createArkPointButton(_ArkPoints[i]);
+				_RespawnLM[i]->setId(this->getId() + ":arklm_" + NLMISC::toString(i));
+				_RespawnLM[i]->setParent(this);
+				ucstring title;
+				title.fromUtf8(_ArkPoints[i].Title);
+				_RespawnLM[i]->setDefaultContextHelp(title);
+				_RespawnLM[i]->HandleEvents = true;
+				addCtrl(_RespawnLM[i]);
+				updateLMPosFromDBPos(_RespawnLM[i], _ArkPoints[i].x, _ArkPoints[i].y);
+			}
+		}
+	}
+	
 	if ((_MapMode == MapMode_Death) || (_MapMode == MapMode_SpawnSquad))
 	{
 		if (_RespawnPosReseted)
@@ -1599,7 +1634,7 @@ void CGroupMap::draw()
 
 	if (_FrustumView)
 	{
-		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			static volatile bool wantFrustum = true;
 			if (wantFrustum)
@@ -1647,7 +1682,7 @@ void CGroupMap::draw()
 
 	Driver->setScissor(newScissor);
 
-	if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
+	if (getArkPowoMode() == "editor" || R2::getEditor().getMode() != R2::CEditor::EditionMode)
 	{
 		// Draw the player TODO : replace with a CViewQuad
 		if (!_PlayerPosLoadFailure)
@@ -1688,7 +1723,7 @@ void CGroupMap::draw()
 	// draw border of frustum
 	if (_FrustumView)
 	{
-		if (R2::getEditor().getMode() == R2::CEditor::EditionMode)
+		if (getArkPowoMode() == "editor" || R2::getEditor().getMode() == R2::CEditor::EditionMode)
 		{
 			if (_FrustumMaterial.empty())
 			{
@@ -2448,6 +2483,14 @@ void CGroupMap::removeLandMarks(TLandMarkButtonVect &lm)
 	lm.clear();
 }
 
+
+//============================================================================================================
+void CGroupMap::removeUserLandMarks()
+{
+	removeLandMarks(_UserLM);
+}
+
+
 //============================================================================================================
 void CGroupMap::createLMWidgets(const std::vector<CContLandMark> &lms)
 {
@@ -2658,6 +2701,30 @@ CGroupMap::CLandMarkButton *CGroupMap::createLandMarkButton(const CLandMarkOptio
 	lmb->setPosRef(Hotspot_MM);
 	return lmb;
 }
+
+//============================================================================================================
+CGroupMap::CLandMarkButton *CGroupMap::createArkPointButton(const CArkPoint &point)
+{
+ 	CLandMarkButton *lmb = new CLandMarkButton(CViewBase::TCtorParam());
+	static int statFool = 0;
+	lmb->setId(this->getId()+":lm"+toString(statFool++));
+	lmb->setTexture(point.Texture);
+	lmb->setTextureOver(point.Texture);
+	lmb->setTexturePushed(point.Texture);
+	lmb->setType(CCtrlButton::PushButton);
+	lmb->setActionOnLeftClick(point.LeftClickAction);
+	lmb->setParamsOnLeftClick(point.LeftClickParam);
+	lmb->setActionOnRightClick(point.RightClickAction);
+	lmb->setParamsOnRightClick(point.RightClickParam);
+	lmb->setColor(point.Color);
+	lmb->setColorOver(point.Color);
+	lmb->setColorPushed(point.Color);
+	lmb->setModulateGlobalColorAll(false);
+	
+	lmb->setPosRef(Hotspot_MM);
+	return lmb;
+}
+
 //============================================================================================================
 void CGroupMap::updateLandMarkButton(CLandMarkButton *lmb, const CLandMarkOptions &options)
 {
@@ -2697,6 +2764,50 @@ void CGroupMap::addLandMark(TLandMarkButtonVect &destList, const NLMISC::CVector
 	destList.push_back(lmb);
 	addCtrl(lmb);
 }
+
+//============================================================================================================
+void CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, NLMISC::CRGBA color)
+{
+	if (_CurContinent == NULL) return;
+	
+	CUserLandMark ulm;
+	mapToWorld(ulm.Pos, pos);
+	ulm.Title = title;
+	ulm.Type = 5;
+	_CurContinent->UserLandMarks.push_back(ulm);
+	
+	CLandMarkOptions options(_UserLMOptions);
+	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
+	// create a new button and add it to the list
+	CLandMarkButton *lmb = createLandMarkButton(options);
+	lmb->setParent(this);
+	lmb->Pos = pos;
+	lmb->setDefaultContextHelp(title);
+	_UserLM.push_back(lmb);
+	addCtrl(lmb);
+	invalidateCoords();
+}
+
+//============================================================================================================
+void CGroupMap::delArkPoints()
+{
+	for (uint i = 0; i < _RespawnLM.size(); i++)
+	{
+		delCtrl(_RespawnLM[i]);
+		_RespawnLM[i] = NULL;
+	}
+	_ArkPoints.clear();
+}
+
+//============================================================================================================
+void CGroupMap::addUserRespawnPoint(const NLMISC::CVector2f &pos)
+{
+	CRespawnPointsMsg rpm;
+	rpm.NeedToReset = false;
+	rpm.RespawnPoints.push_back(CRespawnPointsMsg::SRespawnPoint(pos.x*1000,pos.y*1000));
+	addRespawnPoints(rpm);
+}
+
 
 //============================================================================================================
 CCtrlButton *CGroupMap::addUserLandMark(const NLMISC::CVector2f &pos, const ucstring &title, const CUserLandMark::EUserLandMarkType lmType)
@@ -3280,6 +3391,38 @@ void CGroupMap::addRespawnPoints(const CRespawnPointsMsg &rpm)
 }
 
 //=========================================================================================================
+void CGroupMap::addArkPoint(const CArkPoint &point) {
+	_ArkPoints.push_back(point);
+
+	if (_MapMode != MapMode_Death) return;
+	if (_ArkPoints.empty()) return;
+
+	CWorldSheet *pWS = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
+	if (pWS == NULL) return;
+
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	if (pIM == NULL) return;
+
+	NLMISC::CVector2f rpWorldPos(point.x * 0.001f, point.y * 0.001f);
+
+	for (uint32 i = 0; i < pWS->Maps.size(); ++i)
+	{
+		SMap &rMap = pWS->Maps[i];
+		if (rMap.ContinentName.empty()) continue;
+
+		if ((rpWorldPos.x >= rMap.MinX) &&
+			(rpWorldPos.x <= rMap.MaxX) &&
+			(rpWorldPos.y >= rMap.MinY) &&
+			(rpWorldPos.y <= rMap.MaxY))
+		{
+			setMap(rMap.Name);
+			break;
+		}
+	}
+}
+
+
+//=========================================================================================================
 void CGroupMap::serialConfig(NLMISC::IStream &f)
 {
 	sint ver = f.serialVersion(3);
@@ -3726,7 +3869,10 @@ class CAHWorldMapRightClick : public IActionHandler
 		}
 		else
 		{
-			CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
+			if (gm->getArkPowoMode() == "editor")
+				CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu="+gm->getArkPowoMapMenu());
+			else
+				CAHManager::getInstance()->runActionHandler("active_menu", pCaller, "menu=ui:interface:map_menu_island");
 		}
 	}
 };

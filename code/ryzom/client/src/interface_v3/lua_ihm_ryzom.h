@@ -223,6 +223,15 @@ private:
 	static int getShapeIdAt(CLuaState &ls);
 	static int setupShape(CLuaState &ls);
 	static void setMouseCursor(const std::string &texture);
+
+	static int removeLandMarks(CLuaState &ls);
+	static int addLandMark(CLuaState &ls);
+	static int updateUserLandMarks(CLuaState &ls);
+	static int addRespawnPoint(CLuaState &ls);
+	static int delArkPoints(CLuaState &ls);
+	static int setArkPowoOptions(CLuaState &ls);
+	
+
 	// open the window to do a tell to 'player', if 'msg' is not empty, then the message will be sent immediatly
     // else, current command of the chat window will be replaced with tell 'player'
 	static void	tell(const ucstring &player, const ucstring &msg);
