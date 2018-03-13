@@ -83,8 +83,6 @@ void CUnixEventEmitter::createIM()
 {
 #ifdef X_HAVE_UTF8_STRING
 
-	XModifierKeymap *g_mod_map = XGetModifierMapping(_dpy);
-
 	_im = XOpenIM(_dpy, NULL, NULL, NULL);
 
 	if (_im == NULL)

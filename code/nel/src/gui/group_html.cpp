@@ -698,6 +698,8 @@ namespace NLGUI
 							}
 							requestTerminated();
 						}
+
+						continue;
 					}
 
 					for (vector<CDataDownload>::iterator it=Curls.begin(); it<Curls.end(); it++)
@@ -871,8 +873,20 @@ namespace NLGUI
 	#ifdef LOG_DL
 		nlwarning("Release Downloads");
 	#endif
-		if(MultiCurl)
-			curl_multi_cleanup(MultiCurl);
+
+		// remove all queued and already started downloads
+		for (uint i = 0; i < Curls.size(); ++i)
+		{
+			if (Curls[i].data)
+			{
+				if (MultiCurl)
+					curl_multi_remove_handle(MultiCurl, Curls[i].data->Request);
+
+				// release CCurlWWWData
+				delete Curls[i].data;
+			}
+		}
+		Curls.clear();
 	}
 
 	class CGroupListAdaptor : public CInterfaceGroup
@@ -3059,8 +3073,13 @@ namespace NLGUI
 					   //     this is why the call to 'updateRefreshButton' has been removed from stopBrowse
 
 		clearContext();
+		releaseDownloads();
+
 		if (_CurlWWW)
 			delete _CurlWWW;
+
+		if(MultiCurl)
+			curl_multi_cleanup(MultiCurl);
 	}
 
 	std::string CGroupHTML::getProperty( const std::string &name ) const
