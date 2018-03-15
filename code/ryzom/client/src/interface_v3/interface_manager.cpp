@@ -502,6 +502,7 @@ CInterfaceManager::CInterfaceManager()
 	CViewRenderer::getInstance()->init();
 
 	_CurrentMode = 0;
+	_Modes.resize(MAX_NUM_MODES);
 
 	setInGame( false );
 
@@ -1700,6 +1701,11 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		f.serialCheck(NELID("GFCI"));
 		f.serial(nNbMode);
 		f.serial(_CurrentMode);
+		if (_CurrentMode > nNbMode)
+		{
+			_CurrentMode = 0;
+		}
+
 		if(ver>=10)
 		{
 			f.serial(_LastInGameScreenW);
@@ -1707,10 +1713,16 @@ bool CInterfaceManager::loadConfig (const string &filename)
 			lastInGameScreenResLoaded= true;
 		}
 
+		// Initialize at least number of modes that are saved in stream
+		_Modes.resize(std::max((uint32)MAX_NUM_MODES, nNbMode));
+		for (uint32 i = 0; i < _Modes.size(); ++i)
+		{
+			NLMISC::contReset(_Modes[i]);
+		}
+
 		// Load All Window configuration of all Modes
 		for (uint32 i = 0; i < nNbMode; ++i)
 		{
-			NLMISC::contReset(_Modes[i]);
 			// must create a tmp mem stream because desktop image expect its datas to occupy the whole stream
 			// This is because of old system that manipulated desktop image direclty as a mem stream
 			CMemStream ms;
@@ -1890,7 +1902,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 
 	// cleanup all desktops
-	for(uint k = 0; k < MAX_NUM_MODES; ++k)
+	for(uint k = 0; k < _Modes.size(); ++k)
 	{
 		quitVisitor.Desktop = k;
 		setMode(k);
@@ -1919,7 +1931,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 
 	uint32 i;
 
-	i = MAX_NUM_MODES;
+	i = _Modes.size();
 	try
 	{
 		f.serialVersion(ICFG_STREAM_VERSION);
@@ -1941,7 +1953,7 @@ bool CInterfaceManager::saveConfig (const string &filename)
 		f.serial(_LastInGameScreenH);
 
 		// Save All Window configuration of all Modes
-		for (i = 0; i < MAX_NUM_MODES; ++i)
+		for (i = 0; i < _Modes.size(); ++i)
 		{
 			// must create a tmp mem stream because desktop image expect its datas to occupy the whole stream
 			// This is because of old system that manipulated desktop image direclty as a mem stream
@@ -2065,7 +2077,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 void CInterfaceManager::updateDesktops( uint32 newScreenW, uint32 newScreenH )
 {
 	// *** Do it for All Backuped Desktops
-	for(uint md=0;md<MAX_NUM_MODES;md++)
+	for(uint md=0; md<_Modes.size(); md++)
 	{
 		CInterfaceConfig::CDesktopImage		&mode= _Modes[md];
 		// For all containers of this mode
@@ -2413,7 +2425,7 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 // ***************************************************************************
 void CInterfaceManager::updateGroupContainerImage(CGroupContainer &gc, uint8 mode)
 {
-	if (mode >= MAX_NUM_MODES)
+	if (mode >= _Modes.size())
 	{
 		nlwarning("wrong desktop");
 		return;
@@ -2424,7 +2436,7 @@ void CInterfaceManager::updateGroupContainerImage(CGroupContainer &gc, uint8 mod
 // ***************************************************************************
 void CInterfaceManager::removeGroupContainerImage(const std::string &groupName, uint8 mode)
 {
-	if (mode >= MAX_NUM_MODES)
+	if (mode >= _Modes.size())
 	{
 		nlwarning("wrong desktop");
 		return;
@@ -2434,9 +2446,18 @@ void CInterfaceManager::removeGroupContainerImage(const std::string &groupName, 
 }
 
 // ***************************************************************************
+void CInterfaceManager::removeGroupContainerImageFromDesktops(const std::string &groupName)
+{
+	for (uint i = 0; i < _Modes.size(); i++)
+	{
+		_Modes[i].removeGroupContainerImage(groupName);
+	}
+}
+
+// ***************************************************************************
 void	CInterfaceManager::setMode(uint8 newMode)
 {
-	if (newMode >= MAX_NUM_MODES)
+	if (newMode >= _Modes.size())
 		return;
 
 	if (newMode == _CurrentMode)
@@ -2501,7 +2522,7 @@ void	CInterfaceManager::setMode(uint8 newMode)
 // ***************************************************************************
 void	CInterfaceManager::resetMode(uint8 newMode)
 {
-	if (newMode >= MAX_NUM_MODES)
+	if (newMode >= _Modes.size())
 		return;
 	NLMISC::contReset(_Modes[newMode]);
 }
