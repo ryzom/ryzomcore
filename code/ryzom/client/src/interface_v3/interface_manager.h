@@ -316,6 +316,8 @@ public:
 	// Remove a group container from a virtual desktop image
 	// \param mode Index of the virtual desktop
 	void	removeGroupContainerImage(const std::string &groupName, uint8 mode);
+	// Remove group container from all virtual desktops
+	void	removeGroupContainerImageFromDesktops(const std::string &groupName);
 
 
 
@@ -583,7 +585,7 @@ private:
 	sint32			_LastInGameScreenW, _LastInGameScreenH; // Resolution used for last InGame interface
 
 	// Modes
-	CInterfaceConfig::CDesktopImage	_Modes[MAX_NUM_MODES];
+	std::vector<CInterfaceConfig::CDesktopImage> _Modes;
 	uint8				_CurrentMode;
 
 	// true when interface manager is running 'ingame' content
