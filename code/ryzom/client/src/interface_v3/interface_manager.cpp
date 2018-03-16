@@ -2038,8 +2038,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		_CurrentPlayerCharac[i] = node ? node->getValue32() : 0;
 	}
 
-	// update value change from ingame config window
-	// must update it here, right before widget manager checks it
+	// scale must be updated right before widget manager checks it
 	if (_InterfaceScaleChanged)
 	{
 		CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
@@ -2915,7 +2914,6 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 
 	return result;
 }
-
 
 // ***************************************************************************
 void CInterfaceManager::displayWebWindow(const string & name, const string & url)

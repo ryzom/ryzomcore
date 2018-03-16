@@ -46,6 +46,9 @@ using NLMISC::CVector;
 using NLMISC::CRGBA;
 using std::string;
 
+// limits for UI scale
+const float MIN_INTERFACE_SCALE = 0.8;
+const float MAX_INTERFACE_SCALE = 2.0;
 
 //---------------------------------------------------
 // CClientConfig :

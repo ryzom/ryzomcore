@@ -839,8 +839,7 @@ void CClientConfig::setValues()
 	READ_FLOAT_FV(Gamma)
 	// UI scaling
 	READ_FLOAT_FV(InterfaceScale);
-	// 50% smaller / 2x bigger
-	clamp(ClientCfg.InterfaceScale, 0.5f, 2.0f);
+	clamp(ClientCfg.InterfaceScale, MIN_INTERFACE_SCALE, MAX_INTERFACE_SCALE);
 	READ_BOOL_FV(BilinearUI);
 	// 3D Driver
 	varPtr = ClientCfg.ConfigFile.getVarPtr ("Driver3D");

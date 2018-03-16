@@ -3732,6 +3732,34 @@ class CHandlerGameConfigChangeScreenRatioCustom : public IActionHandler
 };
 REGISTER_ACTION_HANDLER (CHandlerGameConfigChangeScreenRatioCustom, "game_config_change_screen_ratio_custom");
 
+// ***************************************************************************
+class CHandlerSetInterfaceScale : public IActionHandler
+{
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	{
+		std::string s;
+		s = getParam(Params, "scale");
+		if (!s.empty()) {
+			float scale;
+			if (fromString(s, scale))
+			{
+				if (scale >= MIN_INTERFACE_SCALE && scale <= MAX_INTERFACE_SCALE)
+				{
+					ClientCfg.InterfaceScale = scale;
+					ClientCfg.writeDouble("InterfaceScale", ClientCfg.InterfaceScale);
+
+					ClientCfg.IsInvalidated = true;
+					return;
+				}
+			}
+		}
+
+		ucstring help("/setuiscale "+toString("%.1f .. %.1f", MIN_INTERFACE_SCALE, MAX_INTERFACE_SCALE));
+		CInterfaceManager::getInstance()->displaySystemInfo(help);
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerSetInterfaceScale, "set_ui_scale");
+
 
 // ***************************************************************************
 class CHandlerGameMissionAbandon : public IActionHandler
